@@ -303,7 +303,7 @@ describe('audit follow-up', () => {
       engageSec: 0, line: 'front' } as Mob];
     s.player.esIdleSec = 0;
     if (activeHeal) s.healUp = { pctPerSec: 1, secLeft: 2 };
-    tick(s, {}, { autoSkills: false });
+    tick(s, { autoSkills: false });
     expect(s.phase).toBe('camp');
     expect(s.player.hp).toBe(0);
   });

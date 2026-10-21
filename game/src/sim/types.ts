@@ -144,10 +144,14 @@ export interface Player {
   autoSpend: boolean;
   /** Banked passive-tree points. */
   treePoints: number;
+  /** Quest-granted passive-tree points banked beyond the level curve. */
+  questTreePointsEarned?: number;
   /** The attainment points a keystone is paid in (D2). */
   attainmentPoints?: number;
   /** Bought ranks, keyed by node id (`impact.1` … `control.21`) — 0-3 each, `engine/tree.ts` owns the nodes. */
   treeRanks?: Record<string, number>;
+  /** Passive tree spec version this allocation was bought under. */
+  passiveTreeVersion?: number;
   hp: number;
   mana: number;
   es: number;
@@ -193,6 +197,8 @@ import type { MobStatusStore } from './mobStatus';
 import type { CurseStore } from './curse';
 import type { DungeonRun } from './dungeon';
 import type { FieldworkState } from './fieldwork';
+import type { Statuses } from './combat';
+import type { KeystoneRuntimeState } from '../../../engine/keystones.ts';
 
 export interface HealBuff {
   secLeft: number;
@@ -214,6 +220,8 @@ export interface TaskSlot {
   alt?: { stone: 'reroll_value' | 'tier' | 'remove'; count: number };
   claimed: boolean;
   offeredAt: number;
+  /** Quest-granted passive-tree points frozen at offer time. */
+  treePoints?: number;
 }
 
 export interface TownState {
@@ -401,6 +409,13 @@ export interface GameState {
   curses: CurseStore;
   /** Burn · poison · chill · shock · mark · bleed we have put on a mob (`status.mob_side`). */
   mobStatus: MobStatusStore;
+  /**
+   * The statuses ON the character — canonical saved state (§7.7). This is the one store: the client
+   * holds no local copy, a load never clears it, and the aggregate views read through `sim/playerStatus.ts`.
+   */
+  playerStatuses: Statuses;
+  /** The keystone runtime queues and counters (§7.7), persisted with the character. */
+  keystoneRuntime: KeystoneRuntimeState;
   /** Why a snapshot is owed right now (`save.md` item 5), or null when none is pending. */
   pendingSnapshot: SnapshotReason | null;
   /** The next timer snapshot; a written snapshot pushes it out by `save.snapshot_interval_min`. */

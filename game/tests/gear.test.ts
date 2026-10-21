@@ -126,7 +126,7 @@ describe('equipping from the bag', () => {
     const atStart = equippedCount(s);
     // hunt until the loop has actually banked a piece, so the reading is taken on a live bag rather
     // than after a guessed window (a time premise · AGENTS.md)
-    for (let i = 0; i < 40000 && s.bag.length === 0; i++) tick(s, {}, { online: true });
+    for (let i = 0; i < 40000 && s.bag.length === 0; i++) tick(s, { online: true });
     // a bag full of kept pieces is the design working, not a bug to fix here
     expect(s.bag.length).toBeGreaterThan(0);
     expect(equippedCount(s)).toBe(atStart);

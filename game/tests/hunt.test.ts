@@ -51,10 +51,10 @@ describe('safe town', () => {
   it('a walk that ends on wild ground starts the fight by itself', () => {
     // the owner's rule: only a settlement is safe ground. One step out of town is the enemy's country, and
     // arriving there is the same order the hunt button gives — no dead minute standing on a wild hex
-    const s = newGame();
-    setLevel(s, 60);
-    const home = settlementCell(road.nodes[0].id)!;
-    const side = road.neighbours(home).find((h: any) => road.cellRank(h) === 1)!;
+  const s = newGame(1);
+  setLevel(s, 60);
+  const home = settlementCell(road.nodes[0].id)!;
+  const side = road.neighbours(home).find((h: any) => road.cellRank(h) === 1)!;
     arrive(s, {
       from: home, to: side, node: road.nodes[0].id, kind: 'sub', sub: null, wild: null,
       blocksTotal: 1, blocksLeft: 0, secLeft: 0, blocksWalked: 1,

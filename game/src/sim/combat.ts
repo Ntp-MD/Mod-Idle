@@ -1,10 +1,14 @@
 import { eng, E, sm, BASES } from '../engine/client';
-import type { Character } from './player';
-import type { Mob } from './types';
-import type { CurseMods } from './curse';
-import { NO_CURSE, accMult, takenMult, psMult } from './curse';
+import { PLAYER_STATUS_FAMILIES, ambushCritChance, bundleOf, deferredHit, elementalInfusionExtras, emberheartConvert, enduringCoreHpDamage, headsmanExecutes, inevitableElementMult, radiantFaithCut, thornboundRetaliation, turtleCut, unerringEyeActive } from '../../../engine/keystones.ts';
+import { directFlags, emptyParts, validateDamagePacket } from '../../../engine/damage-provenance.ts';
+import type { DamagePacket } from '../../../engine/damage-provenance.ts';
+import type { Character } from './player.ts';
+import type { Mob } from './types.ts';
+import type { CurseMods } from './curse.ts';
+import { NO_CURSE, accMult, takenMult, psMult } from './curse.ts';
 
-export type StatusName = 'burn' | 'chill' | 'shock' | 'poison' | 'bleed' | 'mark' | 'crippled';
+/** The families one side of the field can carry — the engine's list, so the save schema and this file never drift. */
+export type StatusName = (typeof PLAYER_STATUS_FAMILIES)[number];
 export interface StatusLine {
   stacks: number;
   secLeft: number;
@@ -55,14 +59,22 @@ export interface HitReport {
    * hardest rather than as a second number the sim has to price.
    */
   element?: string | null;
+  /**
+   * The §7.2 provenance of a landed swing: the raw parts in the order the pipeline read them.
+   * The damage figure never comes from this packet in D1 — it is the same swing described twice,
+   * so a keystone can read one pool without anything re-pricing the other.
+   */
+  packet?: DamagePacket;
+  /** 21 Delayed Demolition: damage withheld from this Hit that lands after its delay. */
+  deferred?: number;
 }
 
 /**
  * One player swing, in combat.md §2 outgoing order:
  * hit roll → mob dodge (opposed) → crit (physical half only)
  * → the mob's own Armour and Elemental resistance → damage_taken → subtract from mob HP.
- * No Element counters another: the Element pools answer the Species' own-Element resistance on their own
- * lines, and a Species' non-own Elements meet no resistance at all.
+ * No Element counters another: the Element pools answer the Species' authored resistance line on its
+ * own Element, and every other Element meets no resistance at all.
  */
 export function playerSwing(
   rng: () => number,
@@ -70,16 +82,26 @@ export function playerSwing(
   mob: Mob,
   weaponElement: string | null,
   curse: CurseMods = NO_CURSE,
+  /** absolute µs on the simulation clock the packet stamps (§7.2); null until the combat clock exists */
+  timeUs: number | null = null,
+  /** 42 Crushing Rhythm's single action multiplier on the basic swing (excess cadence → damage) */
+  actionMult = 1,
 ): HitReport {
+  // 13 Unerring Eye: the Accuracy/Evasion miss is skipped, Dodge is still its own opposed roll, and
+  // the hit can never crit (§5.13).
+  const unerring = unerringEyeActive(c.keystones);
   const hit = eng.hitChance(c.accuracy, mob.evasion);
-  if (rng() > hit) return { landed: false, crit: false, damage: 0, why: 'miss' };
+  if (!unerring && rng() > hit) return { landed: false, crit: false, damage: 0, why: 'miss' };
   if (rng() * 100 < eng.dodgeChance(mob.dodgeRate, c.accuracy)) return { landed: false, crit: false, damage: 0, why: 'dodge' };
 
   // formula-offense §3: dmg_per_hit = phys + magic + elem × elem_align/100
   // physical is answered by Armour and the Elements by resistance, never by each other. A cursed
   // target still takes more of the whole hit (Expose). The pools are kept split so the Species'
-  // own-Element res (X54) answers its Element on its own line and every other pool lands unresisted.
+  // authored resistance (X54) answers its Element on its own line and every other pool lands unresisted.
   const elemByElement: Record<string, number> = {};
+  // the packet's own two elemental lanes — the pools the build carried, and what conversion routed
+  const nativeParts: Record<string, number> = {};
+  const convertedParts: Record<string, number> = {};
   let elemDamage = 0;
   const pools = Object.entries(c.elemByElement);
   const elemTaken = 1 + (curse.elemTakenPct || 0) / 100;
@@ -87,21 +109,46 @@ export function playerSwing(
     for (const [el, pool] of pools) {
       const dmg = pool * (c.alignment / 100) * elemTaken;
       elemByElement[el] = dmg;
+      nativeParts[el] = dmg;
       elemDamage += dmg;
     }
   } else {
     elemDamage = c.elem * (c.alignment / 100) * elemTaken;
-    if (elemDamage > 0 && mob.innate.length) elemByElement[mob.innate[0]] = elemDamage;
+    if (elemDamage > 0 && mob.innate.length) {
+      elemByElement[mob.innate[0]] = elemDamage;
+      nativeParts[mob.innate[0]] = elemDamage;
+    }
   }
   let nonElement = c.phys + c.magic;
 
   let crit = false;
   let physShare = c.phys;
-  if (c.phys > 0 && rng() * 100 < c.critChance + curse.critChance) {
+  // the physical as the pipeline holds it after each step — the packet's crit-eligible pool
+  let physicalPart = c.phys;
+  // 19 Ambush: a target at full HP always crits; every other target has its chance halved.
+  const ambush = bundleOf(c.keystones, 'ambush');
+  const critChance = ambush
+    ? ambushCritChance(mob.hp >= mob.hpMax, c.critChance + curse.critChance, ambush.params as Record<string, number>)
+    : c.critChance + curse.critChance;
+  if (c.phys > 0 && !unerring && rng() * 100 < critChance) {
     // crit multiplies the physical half only: magic and the 5 Elements never crit 
     physShare = c.phys * (c.critDmg / 100);
     nonElement = nonElement - c.phys + physShare;
+    physicalPart = physShare;
     crit = true;
+  }
+  // 05 Emberheart: the crit-finished Physical share is routed into Fire 1:1 before mitigation. The
+  // native Element pools stay where they were, and the base stays the pre-conversion Physical pool.
+  const emberheart = bundleOf(c.keystones, 'emberheart');
+  if (emberheart) {
+    const routed = emberheartConvert(physicalPart, emberheart.params as Record<string, number>);
+    physicalPart = routed.physical;
+    physShare = routed.physical;
+    nonElement = c.magic + routed.physical;
+    const fire = routed.fire * elemTaken;
+    elemByElement.fire = (elemByElement.fire || 0) + fire;
+    convertedParts.fire = (convertedParts.fire || 0) + fire;
+    elemDamage += fire;
   }
   // conversion (`draft/convert-damage.md`): a percent of the finished physical share is routed into
   // its named Element here — after crit, before mitigation — so the converted half answers Elemental
@@ -111,25 +158,61 @@ export function playerSwing(
   if (c.conversion && Object.keys(c.conversion).length) {
     const conv = eng.convertDamageOf(physShare, c.conversion) as { physical: number; byElement: Record<string, number> };
     nonElement = c.magic + conv.physical;
+    physicalPart = conv.physical;
     // the converted share goes into the SAME per-Element map the pools use, so it meets resistance on
     // its own line. A hit whose element was carried as one number (no named pool) has to be keyed
     // first, or flipping to the map path would silently drop it — `''` reads the mob's headline `res`,
     // exactly what the number path did.
-    if (!Object.keys(elemByElement).length && elemDamage > 0) { elemByElement[''] = elemDamage; elemDamage = 0; }
+    if (!Object.keys(elemByElement).length && elemDamage > 0) {
+      elemByElement[''] = elemDamage;
+      nativeParts[''] = elemDamage;
+      elemDamage = 0;
+    }
     for (const [el, amount] of Object.entries(conv.byElement)) {
       if (!(amount > 0)) continue;
       const dmg = amount * elemTaken;
       elemByElement[el] = (elemByElement[el] || 0) + dmg;
+      convertedParts[el] = (convertedParts[el] || 0) + dmg;
       elemDamage += dmg;
     }
   }
   // the damage bucket (owner ruling): a swing rides the `Attack damage %` ladder, except a magic
   // weapon's bolt, which rides `Spell damage %`. The Element pools stay outside it — the swing's
   // Element is not the attack — and the pair never crosses.
-  nonElement = nonElement * eng.ladderMult(
+  const ladderM = eng.ladderMult(
     eng.basicAttackOf(BASES, c.weaponName) === 'bolt' ? 'magic' : 'phys',
     c.attackDamage, c.spellDamage);
+  nonElement = nonElement * ladderM;
 
+  // §7.2.8 · 65 Elemental Infusion: as-extra totaling 30% of the pre-crit, pre-conversion Physical
+  // pool, split by the raw Flat Elemental lines that exist. The Physical pool stays whole, and the
+  // bonus never feeds back into F or P.
+  const infusion = bundleOf(c.keystones, 'elemental-infusion');
+  const extraParts: Record<string, number> = {};
+  if (infusion) {
+    const flatBy: Record<string, number> = {};
+    for (const [el, row] of Object.entries((c.lines?.elemBy || {}) as Record<string, { flat?: number }>))
+      flatBy[el] = Math.max(0, row.flat || 0);
+    const extras = elementalInfusionExtras(c.phys, flatBy, infusion.params as Record<string, number>, Object.keys(E.elements.status_of));
+    for (const [el, amount] of Object.entries(extras)) {
+      if (!(amount > 0)) continue;
+      extraParts[el] = amount;
+      elemByElement[el] = (elemByElement[el] || 0) + amount;
+      elemDamage += amount;
+    }
+  }
+  // 31 Inevitable Judgement: a crit's Elemental part skips resistance; a non-crit Elemental Hit loses
+  // 20% of its Elemental damage. The Physical half is unaffected.
+  const inevitable = bundleOf(c.keystones, 'inevitable-judgement');
+  if (inevitable && elemDamage > 0) {
+    const mult = inevitableElementMult(crit, inevitable.params as Record<string, number>);
+    let scale = mult;
+    if (crit && mob.res > 0 && mob.res < 100) scale = 1 / (1 - mob.res / 100);
+    if (scale !== 1) {
+      for (const el of Object.keys(elemByElement)) elemByElement[el] *= scale;
+      elemDamage *= scale;
+    }
+  }
   // step 5-6 (B8): the mob answers each half with the line written against it — its own
   // Armour on everything that is not Element, its own Elemental resistance on the Element half.
   // A crossbow's `Armour penetration %` line joins the same cut a curse writes, so the two
@@ -143,7 +226,26 @@ export function playerSwing(
   // §14c: a magic weapon has no swing — it flicks a bolt, worth the attack ladder's floor
   if (eng.basicAttackOf(BASES, c.weaponName) === 'bolt') damage *= sm.ladderFloorPct() / 100;
   damage *= E.global.damage_mult;
+  // 53 Thornbound: the owner's own direct damage is halved; secondary retaliation is unaffected.
+  const thorn = bundleOf(c.keystones, 'thornbound');
+  if (thorn) damage *= Number(thorn.params.ownDirectDamageMult);
+  // 42 Crushing Rhythm's single action multiplier lands on the finished Hit, before HP is paid
+  damage *= actionMult;
+  // 21 Delayed Demolition withholds its share of the post-mitigation Hit
+  const demolition = bundleOf(c.keystones, 'delayed-demolition');
+  let deferred = 0;
+  if (demolition) {
+    const split = deferredHit(damage, demolition.params as Record<string, number>);
+    damage = split.immediate;
+    deferred = split.deferred;
+  }
   mob.hp -= damage;
+  // 08 Headsman: a surviving target below the threshold is executed; the residual is kill-only.
+  const headsman = bundleOf(c.keystones, 'headsman');
+  if (headsman && mob.hp > 0) {
+    const bossUnique = String(mob.kind).startsWith('Boss') || String(mob.kind).startsWith('Unique');
+    if (headsmanExecutes(mob.hp, mob.hpMax, bossUnique, headsman.params as Record<string, number>)) mob.hp = 0;
+  }
   // Leech is a share of just-dealt damage, never a flat drip: the mark on the target pays it
   // (`elements.md`) and Berserker pays it from our own sheet, so the two add.
   const leechPct = c.leechPct + curse.leechPct;
@@ -157,7 +259,29 @@ export function playerSwing(
     if ((pool || 0) > best) { best = pool; element = el || null; }
   }
   if (elemDamage <= nonElement) element = null;
-  return { landed: true, crit, damage, leech, element };
+  // §7.2 provenance: the same swing, part by part. The pools are what mitigation actually answered,
+  // so rebuilding the hit from this packet reproduces the damage exactly — no second math.
+  const parts = emptyParts();
+  parts.physicalCritEligible = physicalPart * ladderM;
+  parts.magic = c.magic * ladderM;
+  if (Object.keys(elemByElement).length) {
+    for (const [el, v] of Object.entries(nativeParts)) parts.nativeElement[el] = v;
+    for (const [el, v] of Object.entries(convertedParts)) parts.convertedElement[el] = v;
+    for (const [el, v] of Object.entries(extraParts)) parts.extraElement[el] = v;
+  } else if (elemDamage > 0) {
+    parts.nativeElement[''] = elemDamage;
+  }
+  // 42: the single action multiplier lands once, on the finished Hit
+  const packet = validateDamagePacket({
+    sourceActionId: 'swing',
+    actorId: 'player',
+    targetId: mob.id,
+    timeUs,
+    nominalRate: c.hitsPerSec,
+    flags: directFlags(c.phys > 0, true, (c.leechPct + curse.leechPct) > 0),
+    parts,
+  });
+  return { landed: true, crit, damage, leech, element, packet, ...(deferred > 0 ? { deferred } : {}) };
 }
 
 /**
@@ -178,6 +302,8 @@ export function mobSwing(
   absorbPct = 0,
   /** Earth Wall: a block charge is standing, so this swing is answered by the block layer either way */
   blockCharge = false,
+  /** the HP the character stands on right now — 51 Enduring Core reads it for the threshold part */
+  currentHp: number = c.maxHp,
 ): { blocked: string | null; toHp: number; toEs: number; absorbed: number; raw: number; leech?: number; blockChargeSpent: boolean } {
   if (curse.stopped) return { blocked: 'shocked', toHp: 0, toEs: 0, absorbed: 0, raw: 0, blockChargeSpent: false };
   if (rng() * 100 < c.perfectDodge) return { blocked: 'perfect dodge', toHp: 0, toEs: 0, absorbed: 0, raw: 0, blockChargeSpent: false };
@@ -196,7 +322,8 @@ export function mobSwing(
   // a mob's swing is sized by its priced damage per second, at its own clock rate
   const rawHit = (mob.ps * psMult(curse)) / mob.hitsPerSec;
   const [physShare, elemShare] = eng.damageSplit(mob.damage);
-  const rolled = physShare > 0 && c.block > 0 && rng() * 100 < c.block ? 'block' : null;
+  const turtle = bundleOf(c.keystones, 'turtle-doctrine');
+  const rolled = !turtle && physShare > 0 && c.block > 0 && rng() * 100 < c.block ? 'block' : null;
   // An Earth Wall charge forces the same cut when the shield's own roll misses — one charge a hit. A
   // hit already removed above (a dodge, Evasion) never reaches here, so a charge is never spent on
   // nothing, and the answer names itself on screen so the charge reads apart from the shield.
@@ -217,11 +344,30 @@ export function mobSwing(
   // a blocked PHYSICAL hit is cut by a flat `armour / 10` (owner ruling, provisional); the cut can
   // never take more than the physical half, so an Element-heavy swing is not thinned by a shield
   if (blockedBy) physFinal = Math.max(0, physFinal - Math.min(c.armour / E.caps.block_divisor, physFinal));
+  // 44 Turtle Doctrine: no roll and no Block event — every physical Hit takes the expected cut the
+  // Block used to produce (§7.3.3).
+  if (turtle) physFinal = Math.max(0, physFinal - turtleCut(c.block, c.armour, E.caps.block_divisor, physFinal));
   physFinal = physFinal * hardened;
-  const elementalFinal = elemental * hardened;
+  let elementalFinal = elemental * hardened;
+  // 55 Chaos Inoculation: a Chaos hit is negated in full. This is damage immunity, not status
+  // immunity — Mark still lands through the normal status rules (§7.3.1).
+  if (bundleOf(c.keystones, 'chaos-inoculation') && mob.innate.includes('chaos')) elementalFinal = 0;
   const marked = statuses.mark && statuses.mark.secLeft > 0 ? statuses.mark : null;
   const markMult = marked ? 1 + marked.stacks * E.status.mark.k_dmg : 1;
   let damage = (physFinal + elementalFinal) * markMult;
+  // 35 Radiant Faith: a flat cut equal to 10% of the reserved HP, capped at 30% of the Hit. It lands
+  // after mitigation and before the ES route, and is prorated across the two parts (§7.3.4).
+  const faith = bundleOf(c.keystones, 'radiant-faith');
+  if (faith && damage > 0) {
+    const reservedHp = c.maxHp * (faith.params.reserveHpPct as number) / 100;
+    const cut = radiantFaithCut(reservedHp, damage, faith.params as Record<string, number>);
+    if (cut > 0) {
+      const keep = Math.max(0, damage - cut) / damage;
+      physFinal *= keep;
+      elementalFinal *= keep;
+      damage -= cut;
+    }
+  }
 
   // Energy Absorb converts a share of the hit into Energy Shield and negates that share outright,
   // whether or not the shield has room — a press on a full shield is still a real defence 
@@ -235,8 +381,21 @@ export function mobSwing(
   // Energy Absorb fills the live shield before the rest of this hit reaches it. Using the old pool
   // would send damage to HP, then leave the absorbed ES standing after the same hit.
   const pool = Math.max(0, Math.min(liveEs + absorbed, c.es));
-  const toEs = Math.min(esEligible, pool);
-  const toHp = remaining - toEs;
+  // The ES route is one place with three shapes: the default (everything enters ES), 47 Aegis (the
+  // Elemental part enters ES at its reduced value while Physical bypasses it), and the data's Chaos rule.
+  const aegis = bundleOf(c.keystones, 'elemental-aegis');
+  let toEs = Math.min(esEligible, pool);
+  let toHp = remaining - toEs;
+  if (aegis) {
+    const physLanded = physFinal * markMult * (1 - absorbRatio);
+    const elemLanded = elementalFinal * markMult * (1 - absorbRatio) * (aegis.params.elementHitTakenMult as number);
+    toEs = Math.min(elemLanded, pool);
+    toHp = physLanded + (elemLanded - toEs);
+  }
+  // 51 Enduring Core: only the HP part below the threshold is cut; a Hit that crosses the line keeps
+  // its upper part at full value (§7.3.9). Its sheet fold removes ES, so toEs is already 0.
+  const enduring = bundleOf(c.keystones, 'enduring-core');
+  if (enduring) toHp = enduringCoreHpDamage(toHp, currentHp, c.maxHp, enduring.params as Record<string, number>);
   const leechPct = marked ? marked.stacks * E.status.mark.k_leech * 100 : 0;
   return {
     blocked: blockedBy, toHp, toEs, absorbed, raw: rawHit,

@@ -526,10 +526,11 @@ page({
       esc(s.name + ' Dungeon'), wrap(n0(s.zone)), esc(s.band),
       `${n0(E.dungeon.mob_cap)} mobs · groups of ${n0(E.dungeon.group_cap)}`,
     ])), `Clear: receive escrowed loot. Retreat: keep ${n0(E.dungeon.retreat_keep_min)}–${n0(E.dungeon.retreat_keep_max)} random legal stacks; forfeit the rest. Push: forfeit all escrow. Cooldown: ${n0(E.dungeon.cooldown_sec / 60)} min.`),
-    block('Species', table(['Species', 'Race', 'Zones', 'Body classes', 'Default damage', 'Element', 'What its body does', 'Health line'], (E.mob.species || []).map((sp: any) => [
+    block('Species', table(['Species', 'Race', 'Zones', 'Body classes', 'Default damage', 'Attack Element', 'Resists', 'Weak to', 'What its body does', 'Health line'], (E.mob.species || []).map((sp: any) => [
       esc(sp.name), esc(sp.race), list(sp.zones), list(sp.sizes), esc(sp.damage), esc((sp as any).element),
+      `${esc(sp.resistance.element)} ${n0(sp.resistance.pct)}%`, `${esc(sp.weakness.element)} +${n0(sp.weakness.taken_pct)}%`,
       list(eng.mechanicWordsOf((sp as any).mechanics)) || 'an ordinary body', esc(sp.trait || ''),
-    ])), `<code>Species resistance(Element) = mob.species_res_pct</code> for its own Element, else <code>0</code>. Race adds no combat modifier.`),
+    ])), `Each Species attacks with one Element and authors one <code>resistance</code> line and one <code>weakness</code>; the two Elements never match. Bosses and Uniques inherit the Species profile. Race adds no combat modifier.`),
   ],
 });
 
@@ -582,7 +583,9 @@ page({
       const facts = [
         ['Sizes', list(sp.sizes)],
         ['Default damage', esc(sp.damage)],
-        ['Element', esc(sp.element)],
+        ['Attack Element', esc(sp.element)],
+        ['Resists', `${esc(sp.resistance.element)} ${n0(sp.resistance.pct)}%`],
+        ['Weak to', `${esc(sp.weakness.element)} +${n0(sp.weakness.taken_pct)}%`],
         ['Zones', list(sp.zones)],
         ['Fixed levels', list(Object.entries(sp.zone_levels || {}).map(([zone, level]: [string, any]) => `Z${zone} · L${n0(level)}`))],
       ].map(([label, value]) => `<div><b>${esc(label)}</b><span>${value || '—'}</span></div>`).join('');
@@ -605,7 +608,7 @@ page({
       block('Shared drop rates', table(['Zone band', 'Gear', 'Herbs', 'Junk by rarity', 'Potion · eligible Species'], bandRows),
         `<code>gear chance = base_drop_chance × (1 + LCK × K_LCK_DROP)</code> before mastery and loot leans. Junk item outcomes split the rarity chance equally across the Variant item and its Species alternative.`),
       block('Race → Species → Variant', `<div class="race-roster">${raceSections}</div>`,
-        `<code>Species power = power_base + K_MOB_PS_STAT × (wPhys × STR + wMagic × INT)</code>; damage type selects the weights, and Variant may override it. Potion eligibility is a Species flag.`),
+        `<code>Species power = power_base + K_MOB_PS_STAT × (wPhys × STR + wMagic × INT)</code>; damage type selects the weights, and Variant may override it. Potion eligibility is a Species flag. Bosses and Uniques inherit their Species resistance and weakness.`),
     ];
   })(),
 });
@@ -886,11 +889,13 @@ page({
   file: 'elements.html',
   nav: 'Elements',
   title: 'Elements',
-  lead: 'Every Element names the status its hits leave. A Species resists its own Element; no Element counters another. An Element declared ahead of its content reads a dash until its status and its skill rows land.',
+  lead: 'Every Element names the status its hits leave. A Species attacks with one Element and authors a separate resistance and weakness; no Element counters another. An Element declared ahead of its content reads a dash until its status and its skill rows land.',
   body: [
-    block('Where an Element is resisted', table(['Element', 'Species that own it'], E.elements.order.map((el: string) => [
-      esc(el), list((E.mob.species || []).filter((sp: any) => (sp as any).element === el).map((sp: any) => sp.name)) || '—',
-    ])), `<code>resistance(Element) = min(resistanceCap, rawResistance × multiplier)</code>. A Species' own Element uses <code>mob.species_res_pct</code>; other Elements use 0.`),
+    block('Where an Element is resisted', table(['Element', 'Resisted by', 'Weak to'], E.elements.order.map((el: string) => [
+      esc(el),
+      list((E.mob.species || []).filter((sp: any) => sp.resistance.element === el).map((sp: any) => `${sp.name} ${n0(sp.resistance.pct)}%`)) || '—',
+      list((E.mob.species || []).filter((sp: any) => sp.weakness.element === el).map((sp: any) => `${sp.name} +${n0(sp.weakness.taken_pct)}%`)) || '—',
+    ])), `<code>resistance(Element) = min(resistanceCap, authored pct)</code>; a weakness multiplies that Element's damage taken by <code>1 + taken_pct / 100</code>. Every other Element meets 0% resistance. Bosses and Uniques inherit their Species profile.`),
     block('What each Element leaves behind', table(['Element', 'Its mark'], E.elements.order.map((e: string) => [
       esc(e), esc(E.elements.status_of?.[e]?.name || E.elements.status_of?.[e] || '—'),
     ])), '<code>status outcome = configured status effect</code>; resistance is applied to the Element damage before its status roll.'),

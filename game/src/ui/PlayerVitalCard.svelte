@@ -3,6 +3,7 @@
     import { characterIcon, elementIcon, skillIcon } from "../icon";
     import { ownsSkill } from "../sim/skills";
     import { statusLabel } from "../sim/mobStatus";
+    import { statusViews } from "../sim/playerStatus";
     import { bar } from "./field";
     import { plateGesture } from "./plate";
     import { fxOut } from "./motion";
@@ -123,14 +124,16 @@
     });
     const debuffMarks = $derived.by(() => {
         void s.clockSec;
-        return (Object.entries(statuses) as [StatusName, { stacks: number; secLeft: number }][])
-            .filter(([, status]) => status && status.secLeft > 0)
-            .map(([name, status]) => ({
-                name,
-                label: statusLabel(name),
-                icon: elementIcon(STATUS_ELEMENT[name]),
-                stacks: status.stacks,
-                secs: Math.ceil(status.secLeft),
+        // the aggregate views come through the one status adapter (`sim/playerStatus.ts`), never a
+        // second read of the raw line
+        return statusViews(statuses)
+            .filter((v) => v.secLeft > 0)
+            .map((v) => ({
+                name: v.family,
+                label: statusLabel(v.family),
+                icon: elementIcon(STATUS_ELEMENT[v.family]),
+                stacks: v.stacks,
+                secs: Math.ceil(v.secLeft),
             }));
     });
 </script>

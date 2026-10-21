@@ -8,6 +8,10 @@ import type { LifeSkillBonus } from '../../../engine/life-skills.ts';
 // The sheet's line tables live apart (`sim/lines.ts`) so the passive-tree cage can check that every
 // node grants a line the character sheet actually acts on.
 import { PCT_LINE, FLAT_LINE } from './lines.ts';
+import {
+  arcaneBatteryEs, bundleOf, chaosInoculationMaxHp, ironwallSheet, oneFlameResistances,
+  type KeystoneBundle,
+} from '../../../engine/keystones.ts';
 
 export const SLOT_COUNT = E.stat.item_slots as number;
 
@@ -22,7 +26,7 @@ export function emptyGear(): (Item | null)[] {
   return new Array(SLOT_COUNT).fill(null);
 }
 
-export function sumLines(gear: (Item | null)[], extra?: { id: string; value: number; stat?: string }[]): Lines {
+export function sumLines(gear: (Item | null)[], extra?: { id: string; value: number; stat?: string; element?: string }[]): Lines {
   const acc: Lines = { statBy: {} } as Lines;
   for (const key of Object.values(PCT_LINE)) acc[key] = 0;
   for (const key of Object.values(FLAT_LINE)) acc[key] = 0;
@@ -33,12 +37,24 @@ export function sumLines(gear: (Item | null)[], extra?: { id: string; value: num
   // so a bought rank moves the same number the piece would have
   for (const part of extra || []) {
     if (part.id === 'all_stat_flat') for (const k of STAT_KEYS) acc.statBy[k].flat += part.value;
-    // a piece carries the stat it rolled at drop; a tree line carries none, so it feeds every Core
-    // attribute — the tree cannot pick one, and a stat line that did nothing would be a silent no-op
     else if (part.id === 'stat_mod_flat') {
+      // the piece carries the stat its roll named, and so can a tree grant; a line that names no stat
+      // feeds every Core attribute — the all-stats reading
       if (part.stat) acc.statBy[part.stat as StatKey].flat += part.value;
       else for (const k of STAT_KEYS) acc.statBy[k].flat += part.value;
     }
+    // a line that NAMES an Element joins that Element's pool and nothing else — it never rides the
+    // shared bucket, which the elemental power formula reads as the weapon's own Element
+    else if (part.id === 'elemental_power_flat' && part.element) {
+      const bucket = acc.elemBy[part.element] || (acc.elemBy[part.element] = { flat: 0, pct: 0 });
+      bucket.flat += part.value;
+    }
+    else if (part.id === 'elemental_power' && part.element) {
+      const bucket = acc.elemBy[part.element] || (acc.elemBy[part.element] = { flat: 0, pct: 0 });
+      bucket.pct += part.value;
+    }
+    // a resistance line that names its Element hardens that Element alone (owner ruling)
+    else if (part.id === 'elemental_resistance' && part.element) acc.resBy[part.element] = (acc.resBy[part.element] || 0) + part.value;
     else if (PCT_LINE[part.id]) acc[PCT_LINE[part.id]] += part.value;
     else if (FLAT_LINE[part.id]) acc[FLAT_LINE[part.id]] += part.value;
   }
@@ -141,6 +157,8 @@ export interface Character {
   statusResist: number;
   /** % of just-dealt damage recovered on a landed hit; 0 unless a skill grants it. */
   leechPct: number;
+  /** The bought keystone bundles this sheet was folded with (Packet E onward). */
+  keystones: KeystoneBundle[];
   cdr: number;
   weightCap: number;
   weightUsed: number;
@@ -243,6 +261,7 @@ export function buildCharacter(
   points?: Record<StatKey, number>,
   treeRanks?: Record<string, number>,
   life: LifeSkillBonus = {},
+  bundles: KeystoneBundle[] = tree ? tree.keystoneBundles(treeRanks) : [],
 ): Character {
   const mainHand = gear.find((g) => g && !g.broken && g.slot === 'main hand') || null;
   // the tree's own lines: the bought ranks' grants and the lines its threshold clusters have earned
@@ -313,6 +332,39 @@ export function buildCharacter(
   // Alignment gates the mob-side status and feeds the mace's stun chance, so it is computed once
   const alignment = eng.alignmentOf(core.dex, lines.alignPct + a(effects, 'elemental_alignment'), m(effects, 'elemental_alignment'));
 
+  // Packet E static folds, all on the finished sheet lines. 01 turns the Evasion Rating into Armour
+  // (1:1) and removes the Evasion layer; 06 re-balances the raw resistance bases around Fire's bonus;
+  // 51 removes ES; 55 pins Max HP at its param and forbids Low Life; Perfect Dodge is untouched.
+  let armourValue = (eng.armourOf(core.str) + lines.armourFlat + a(effects, 'armour')) * m(effects, 'armour')
+    * (1 + (lines.armourPct + (life.armour_pct || 0)) / 100);
+  let evasionValue = eng.evasionRating(core.agi, lines.evasionFlat, lines.evasionPct + (life.evasion_pct || 0)) + a(effects, 'evasion');
+  if (bundleOf(bundles, 'ironwall')) {
+    const folded = ironwallSheet(armourValue, evasionValue);
+    armourValue = folded.armour;
+    evasionValue = folded.evasion;
+  }
+  const resistanceValue = eng.resistanceOf(lines.resPct + lines.allResPct, m(effects, 'elemental_resistance'), lines.resCapPct);
+  const oneFlame = bundleOf(bundles, 'one-flame');
+  if (oneFlame) {
+    const fire = resistanceValue + (resByElement.fire || 0);
+    const raw = oneFlameResistances(fire, resistanceValue + (resByElement.cold || 0),
+      resistanceValue + (resByElement.lightning || 0), oneFlame.params as Record<string, number>);
+    resByElement.cold = raw.cold - resistanceValue;
+    resByElement.lightning = raw.lightning - resistanceValue;
+  }
+  const aegisCore = bundleOf(bundles, 'enduring-core');
+  const ci = bundleOf(bundles, 'chaos-inoculation');
+  const maxManaValue = eng.maxManaOf(core.int, level, lines.manaPct, lines.manaFlat);
+  // 34 Arcane Battery adds its ES after the base ES percent: the fixed Mana reservation buys
+  // `esPerMana × reserved Mana`, never multiplied by an ES line a second time (§7.5.3).
+  const battery = bundleOf(bundles, 'arcane-battery');
+  const esValue = aegisCore ? 0
+    : eng.maxEsOf(lines.esFlat + a(effects, 'energy_shield'), lines.esPct, core.wis)
+      + (battery ? arcaneBatteryEs(maxManaValue, battery.params as Record<string, number>) : 0);
+  const maxHpValue = ci
+    ? chaosInoculationMaxHp(ci.params as Record<string, number>)
+    : eng.maxHpOf(core.vit, level, lines.hpPct, lines.hpFlat);
+
   return {
     level,
     core,
@@ -331,22 +383,19 @@ export function buildCharacter(
     /** Per-Element conversion percent, from the conversion aura rows (empty when none is up). */
     conversion,
     accuracy: eng.playerAccuracy(core.dex, lines.accPct + (life.accuracy_pct || 0)),
-    evasion: eng.evasionRating(core.agi, lines.evasionFlat, lines.evasionPct + (life.evasion_pct || 0)) + a(effects, 'evasion'),
-    evasionChance: eng.evasionChance(
-      eng.evasionRating(core.agi, lines.evasionFlat, lines.evasionPct + (life.evasion_pct || 0)) + a(effects, 'evasion'),
-      eng.refAttackerAcc(level),
-    ),
-    armour: (eng.armourOf(core.str) + lines.armourFlat + a(effects, 'armour')) * m(effects, 'armour')
-      * (1 + (lines.armourPct + (life.armour_pct || 0)) / 100),
-    es: eng.maxEsOf(lines.esFlat + a(effects, 'energy_shield'), lines.esPct, core.wis),
+    evasion: evasionValue,
+    evasionChance: eng.evasionChance(evasionValue, eng.refAttackerAcc(level)),
+    armour: armourValue,
+    es: esValue,
     // ES regen is `regen_pct`% of the max pool per second; a Mod line or an `es_regen` skill/passive
     // amplifies it, both feeding the one `ampPct` argument the engine already carries.
-    esRegen: eng.esRegenOf(eng.maxEsOf(lines.esFlat + a(effects, 'energy_shield'), lines.esPct, core.wis), lines.esRegenPct + a(effects, 'es_regen')),
-    maxHp: eng.maxHpOf(core.vit, level, lines.hpPct, lines.hpFlat),
+    esRegen: aegisCore ? 0
+      : eng.esRegenOf(eng.maxEsOf(lines.esFlat + a(effects, 'energy_shield'), lines.esPct, core.wis), lines.esRegenPct + a(effects, 'es_regen')),
+    maxHp: maxHpValue,
     // the regen lines multiply the stat's own regen — the engine already carries the % argument, so
     // a buff and a Mod line feed the same formula rather than each doing their own arithmetic
     hpRegen: eng.hpRegenOf(core.vit, lines.hpRegenPct + a(effects, 'hp_regen') + (life.hp_regen_pct || 0), lines.hpRegenFlat),
-    maxMana: eng.maxManaOf(core.int, level, lines.manaPct, lines.manaFlat),
+    maxMana: maxManaValue,
     manaRegen: eng.manaRegenOf(core.int, lines.manaRegenPct + a(effects, 'mana_regen') + (life.mana_regen_pct || 0), lines.manaRegenFlat),
     critPool,
     critChance: eng.critChanceOf(critPool),
@@ -359,7 +408,7 @@ export function buildCharacter(
     alignment,
     // All Resistance lifts every Element at once, so it joins the same line the per-Element Mods feed
     // and the one Cap still binds the total — unless the tree bought the unlock, which raises that Cap
-    resistance: eng.resistanceOf(lines.resPct + lines.allResPct, m(effects, 'elemental_resistance'), lines.resCapPct),
+    resistance: resistanceValue,
     resCap: eng.elemResCapOf(lines.resCapPct),
     stunRecovery: eng.stunRecoveryOf(core.vit),
     /** Extra resistance against one named Element, from an aura that names it. */
@@ -381,6 +430,7 @@ export function buildCharacter(
     weightUsed: used,
     encumbrance: burden,
     weaponMastery: heldMasteryLevel,
+    keystones: bundles,
     lines,
   };
 }

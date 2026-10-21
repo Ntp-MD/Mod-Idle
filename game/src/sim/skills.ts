@@ -1,4 +1,10 @@
 import { eng, E, SKILLS, sm } from '../engine/client';
+import {
+  auraResonance, auraScaledValue, bloodPriceHp, bundleOf, manaDebtFloor,
+  type KeystoneBundle,
+} from '../../../engine/keystones.ts';
+import { directFlags, emptyParts, validateDamagePacket } from '../../../engine/damage-provenance.ts';
+import type { DamagePacket } from '../../../engine/damage-provenance.ts';
 import { mastery } from './mastery';
 import { setStacks, setErosion, stopMob, placeStatus, modsOn as mobModsOn, targetMods, applyWeaponRiders, holdsCondition, CONDITION_OF, type MobStatusName } from './mobStatus';
 import { lineValue, applyCurse } from './curse';
@@ -33,6 +39,8 @@ export interface SkillState {
    * named ones in `SkillConditions`.
    */
   conditions: Record<string, SkillConditions>;
+  /** 54 Blood Covenant: the pool each aura pays its reservation from. Absent means Mana. */
+  auraPool?: Record<string, 'hp' | 'mana'>;
 }
 
 export type SkillMode = 'always' | 'conditional' | 'never';
@@ -77,7 +85,7 @@ export const ACTIVE_SLOTS = SKILLS.meta.active_slots;
 export function newSkillState(): SkillState {
   return {
     owned: {}, list: new Array(ACTIVE_SLOTS).fill(null), buffs: {}, auras: {}, xp: {}, cd: {}, buffUp: {},
-    mode: {}, conditions: {},
+    mode: {}, conditions: {}, auraPool: {},
   };
 }
 
@@ -169,14 +177,58 @@ export function skillCd(s: SkillState, id: string, cdrPct: number): number {
   return sm.effCd(skill.cd ?? 0, cdrPct, ladderOf(s, id));
 }
 
-/** Auras reserve a % of Max Mana; the set may not reserve the whole pool. */
-export function reservedPct(s: SkillState): number {
+/** Auras reserve a % of their chosen pool; the set may not reserve the whole Mana pool. Packet F:
+ *  `64` discounts every aura reservation by `bR`, `34` adds its own fixed 40%, and `54` routes an
+ *  aura's reservation to HP without changing Max HP. */
+export function reservedPct(s: SkillState, bundles: readonly KeystoneBundle[] = []): number {
+  const { bR } = auraResonanceOf(s, bundles);
   let total = 0;
   for (const [id, on] of Object.entries(s.auras)) {
     if (!on || !ownsSkill(s, id)) continue;
-    total += sm.reservePct(sm.byId[id]?.reserve ?? '');
+    if (auraPoolOf(s, id) === 'hp') continue;
+    total += sm.reservePct(sm.byId[id]?.reserve ?? '') * (1 - bR);
   }
+  const battery = bundleOf(bundles, 'arcane-battery');
+  // fixed reserves are not aura reservations: 64 never discounts them (§7.5.3)
+  if (battery) total += Number(battery.params.reserveManaPct);
   return total;
+}
+
+/** The share of Full Max HP held back by reservations: 35 plus every 54 aura assigned to HP. */
+export function hpReservedPct(s: SkillState, bundles: readonly KeystoneBundle[] = []): number {
+  let total = 0;
+  for (const [id, on] of Object.entries(s.auras)) {
+    if (!on || !ownsSkill(s, id)) continue;
+    if (auraPoolOf(s, id) === 'hp') total += sm.reservePct(sm.byId[id]?.reserve ?? '');
+  }
+  const faith = bundleOf(bundles, 'radiant-faith');
+  if (faith) total += Number(faith.params.reserveHpPct);
+  return total;
+}
+
+/** The pool one aura pays from, defaulting to Mana (`54`). */
+export const auraPoolOf = (s: SkillState, id: string): 'hp' | 'mana' =>
+  s.auraPool?.[id] === 'hp' ? 'hp' : 'mana';
+
+/** 54: choose an aura's pool. Refused without the keystone; a pool change is a candidate transaction
+ *  at the caller, which validates the new set before committing it. */
+export function setAuraPool(s: SkillState, id: string, pool: 'hp' | 'mana', bundles: readonly KeystoneBundle[] = []): { ok: boolean; why?: string } {
+  if (!bundleOf(bundles, 'blood-covenant')) return { ok: false, why: 'only Blood Covenant lets an aura pay from HP' };
+  if (!ownsSkill(s, id) || sm.byId[id]?.type !== 'aura') return { ok: false, why: 'that row is not an aura you own' };
+  s.auraPool ||= {};
+  s.auraPool[id] = pool;
+  return { ok: true };
+}
+
+/** The 64 shares: the aura count and each side's capped stretch. */
+export function auraResonanceOf(s: SkillState, bundles: readonly KeystoneBundle[]): { count: number; bR: number; bE: number } {
+  let count = 0;
+  for (const [id, on] of Object.entries(s.auras)) if (on && ownsSkill(s, id) && sm.byId[id]?.type === 'aura') count++;
+  const bundle = bundleOf(bundles, 'aura-resonance');
+  if (!bundle) return { count, bR: 0, bE: 0 };
+  const params = bundle.params as Record<string, number>;
+  const share = auraResonance(count, params);
+  return { count, bR: share.b, bE: share.effectMult - 1 };
 }
 
 /** The words a stat key reads as on a row the player can act on. */
@@ -234,14 +286,16 @@ export function esAbsorbPct(sk: SkillState): number {
  * Flip one toggle-track skill. An aura can only go on while the pool has the room for its
  * reservation (`skill-pool.md` · the block the S9 gate prints), and taking one off is always free.
  */
-export function toggleTrack(s: SkillState, id: string): { ok: boolean; why?: string } {
+export function toggleTrack(s: SkillState, id: string, bundles: readonly KeystoneBundle[] = []): { ok: boolean; why?: string } {
   const skill = sm.byId[id];
   if (!skill) return { ok: false, why: 'not in the collection' };
   if (!ownsSkill(s, id)) return { ok: false, why: 'skill not owned' };
   if (skill.type === 'aura') {
     const turning = !s.auras[id];
     if (turning) {
-      const next = reservedPct(s) + sm.reservePct(skill.reserve ?? '');
+      // only a Mana-paid reservation can crowd the usable Mana pool; a 54 HP aura pays from HP
+      const next = reservedPct(s, bundles) + (auraPoolOf(s, id) === 'hp' ? 0
+        : sm.reservePct(skill.reserve ?? '') * (1 - auraResonanceOf(s, bundles).bR));
       // reserving the whole pool would leave no mana to cast with, so the block is exclusive
       // (`skill-pool.md`: an aura set that may not reserve all of it)
       if (next >= sm.RESERVATION_LIMIT) {
@@ -287,17 +341,30 @@ export function triggerAuras(s: SkillState): { crit: TriggerAura | null; taken: 
 }
 
 export function usableMana(c: Character, s: SkillState): number {
-  return c.maxMana * (1 - reservedPct(s) / 100);
+  return Math.max(0, c.maxMana * (1 - reservedPct(s, c.keystones) / 100));
 }
 
 /** The units the auras hold back: a share of Max Mana that stays in the bar but never leaves it. */
 export function reservedMana(c: Character, s: SkillState): number {
-  return c.maxMana * (reservedPct(s) / 100);
+  return c.maxMana * (reservedPct(s, c.keystones) / 100);
 }
 
-/** What the rotation may spend right now: the pool minus the slice the auras hold back. */
+/** The HP that reservations hold back (`35`, and any `54` aura assigned to HP). */
+export function hpReserved(c: Character, s: SkillState): number {
+  return c.maxHp * (hpReservedPct(s, c.keystones) / 100);
+}
+
+/** The HP a heal may reach: Full Max HP less the reserved share, never below 1 (§7.5). */
+export function usableHp(c: Character, s: SkillState): number {
+  return Math.max(1, c.maxHp - hpReserved(c, s));
+}
+
+/** What the rotation may spend right now: the pool minus the slice the auras hold back. With 52 the
+ *  answer may stand negative, down to the debt floor. */
 export function spendableMana(c: Character, s: SkillState, currentMana: number): number {
-  return Math.max(0, currentMana - reservedMana(c, s));
+  const debt = bundleOf(c.keystones, 'mana-debt');
+  const floor = debt ? manaDebtFloor(usableMana(c, s), debt.params as Record<string, number>) : 0;
+  return Math.max(-floor, currentMana - reservedMana(c, s));
 }
 
 /**
@@ -376,6 +443,8 @@ export interface CastEnv {
    * and a triggered one cannot stack the same row twice through the cooldown.
    */
   trigger?: { manaMult?: number; damageMult?: number };
+  /** Absolute µs the damage packets stamp (§7.2); null until the combat clock (D2) provides it. */
+  timeUs?: number | null;
 }
 
 export interface CastReport {
@@ -399,7 +468,7 @@ export interface CastReport {
    *  these, and a press that hurt nobody carries an empty list — so the client can put each number on the
    *  plate it belongs to instead of splitting a total it was never asked to share. Named for what it is
    *  keyed by, because `hits` already means this row's repeat count. */
-  byMob: { id: string; amount: number }[];
+  byMob: { id: string; amount: number; packet?: DamagePacket }[];
   /** Ghost Dance: perfect-dodge charges this press grants, from its own level ramp. */
   charges?: number;
   /** Earth Wall: block charges this press grants, from its own level ramp. */
@@ -428,9 +497,18 @@ function healOf(skill: any): { heal?: { secLeft: number; pctPerSec: number }; in
  * What the skills that are up right now do to the character: every reserved aura plus each toggled
  * buff still on its clock, folded by the shared `aggregateEffects`.
  */
-export function effectsActive(sk: SkillState) {
+export function effectsActive(sk: SkillState, bundles: readonly KeystoneBundle[] = []) {
+  const { bE } = auraResonanceOf(sk, bundles);
   const rows: any[] = [];
-  for (const [id, on] of Object.entries(sk.auras)) if (on && ownsSkill(sk, id) && sm.byId[id]?.type === 'aura') rows.push(sm.byId[id]);
+  for (const [id, on] of Object.entries(sk.auras)) {
+    if (!on || !ownsSkill(sk, id) || sm.byId[id]?.type !== 'aura') continue;
+    const row = sm.byId[id];
+    // 64 Aura Resonance stretches the aura's effects once (never 1.05^N), skipping its identity
+    // fields — trigger clocks, cast cost and cast damage (§7.5.6).
+    rows.push(bE > 0
+      ? { ...row, effects: (row.effects || []).map((e: any) => ({ ...e, value: auraScaledValue(e.op, e.value, bE, e.stat) })) }
+      : row);
+  }
   for (const [id, left] of Object.entries(sk.buffUp)) if (left > 0 && ownsSkill(sk, id) && sm.byId[id]) rows.push(sm.byId[id]);
   return sm.aggregateEffects(rows, (r: any) => skillLevel(sk, r.id));
 }
@@ -490,9 +568,23 @@ export function castOnce(
       skillLevel: skillLevel(s, id), aoe,
     });
     const manaCost = (cost.resource === 'mana' ? cost.amount : 0) * (env.trigger?.manaMult ?? 1);
-    const hpCost = cost.resource === 'hp' ? cost.amount : 0;
+    let hpCost = cost.resource === 'hp' ? cost.amount : 0;
     const currentHp = env.currentHp ?? c.maxHp;
-    if (manaCost > mana || (hpCost > 0 && hpCost >= currentHp)) continue;
+    // 37 Blood Price: the Mana part of a skill cost is paid in HP 1:1. Auras and reservations are
+    // not part of this conversion (§7.4.11).
+    let paidMana = manaCost;
+    const blood = bundleOf(c.keystones, 'blood-price');
+    if (blood && paidMana > 0) {
+      hpCost += bloodPriceHp(paidMana, blood.params as Record<string, number>);
+      paidMana = 0;
+    }
+    // 52 Mana Debt: a positive-cost press may start only from a non-negative pool, and may end at the
+    // borrow floor; once in debt, positive costs are refused until the pool returns to zero.
+    const debt = bundleOf(c.keystones, 'mana-debt');
+    const debtFloor = debt ? -manaDebtFloor(usableMana(c, s), debt.params as Record<string, number>) : 0;
+    if (paidMana > 0 && (mana < 0 || mana - paidMana < debtFloor)) continue;
+    // HP payment is atomic and must leave at least 1 HP
+    if (hpCost > 0 && hpCost >= currentHp) continue;
     // the mana floor is the rotation's one act of restraint: a row that would drop the usable pool under
     // the share the player named stands down, and the tick goes to whatever else is ready
     if (cond.manaFloorPct > 0 && mana - manaCost < pool * (cond.manaFloorPct / 100)) continue;
@@ -500,7 +592,7 @@ export function castOnce(
     // a triggered press runs on the trigger's own clock (`trigger_cd_sec`), so the skill's cooldown is
     // spent by an ordinary cast only — a trigger can fire the same row again without eating its cd
     if (!env.trigger) s.cd[id] = skillCd(s, id, c.cdr);
-    const spent = Math.min(mana, manaCost);
+    const spent = paidMana;
 
     if (skill.type === 'heal') {
       const h = healOf(skill);
@@ -610,7 +702,10 @@ export function castOnce(
     const dodges = !hasRule(skill, 'ignores_dodge');
     let landed = 0;
     let dealt = 0;
-    const struck: { id: string; amount: number }[] = [];
+    const struck: { id: string; amount: number; packet?: DamagePacket }[] = [];
+    // §7.2: a press's nominal rate is one over its effective cooldown in world seconds — the DoT
+    // budget basis, never the number of targets the press split across
+    const nominalRate = 1 / Math.max(1, Math.ceil(skillCd(s, id, c.cdr) / Math.max(1e-9, c.globalSpeed || 1)));
     // the Element share of a magic-basis press is the part the mob's resistance answers, and a
     // row that names a pierce removes that share of the mob's own line for this press only
     const magicBasis = skill.basis === 'magic' ? c.magic + c.elem * (c.alignment / 100) : 0;
@@ -661,10 +756,11 @@ export function castOnce(
       // physical share into the named Element before mitigation, through the same `convertDamageOf`
       // the swing uses; a magic-basis press never converts.
       let nonElementPart = share - elemPart;
+      let convertedParts: Record<string, number> = {};
       if (skill.basis === 'phys' && c.conversion && Object.keys(c.conversion).length) {
         const conv = eng.convertDamageOf(nonElementPart, c.conversion) as { physical: number; byElement: Record<string, number> };
         nonElementPart = conv.physical;
-        if (Object.keys(conv.byElement).length) elemArg = conv.byElement;
+        if (Object.keys(conv.byElement).length) { elemArg = conv.byElement; convertedParts = { ...conv.byElement }; }
       }
       const mitigated0 = eng.mitigateMobHit(t, nonElementPart, elemArg, cut, stripped + pierced);
       // §12: a PHYSICAL press is the weapon arguing with a body too, so it carries the size ladder;
@@ -675,7 +771,32 @@ export function castOnce(
       t.hp -= mitigated;
       dealt += mitigated;
       landed++;
-      struck.push({ id: t.id, amount: mitigated });
+      // §7.2 provenance per target: the same press's parts, labelled. The pool term (Earth Splitter)
+      // was added after the crit roll, so it claims the non-crit physical share first and the rest of
+      // the non-elemental part rides its basis' pool — the split never goes negative and sums back
+      // to exactly what mitigation answered.
+      const parts = emptyParts();
+      const poolShare = Math.min(poolTerm, nonElementPart);
+      parts.physicalNonCrit = poolShare;
+      const restOfNonElement = nonElementPart - poolShare;
+      if (skill.basis === 'phys') parts.physicalCritEligible = restOfNonElement;
+      else parts.magic = restOfNonElement;
+      if (Object.keys(convertedParts).length) {
+        for (const [el, v] of Object.entries(convertedParts)) parts.convertedElement[el] = v;
+      } else if (typeof elemArg === 'object') {
+        for (const [el, v] of Object.entries(elemArg)) parts.nativeElement[el] = v;
+      } else if (elemPart > 0) {
+        parts.nativeElement[''] = elemPart;
+      }
+      struck.push({
+        id: t.id, amount: mitigated,
+        packet: validateDamagePacket({
+          sourceActionId: id, actorId: 'player', targetId: t.id,
+          timeUs: env.timeUs ?? null, nominalRate,
+          flags: directFlags(sm.critsOnBasis(skill), true, true),
+          parts,
+        }),
+      });
       // §14: a landing attack press carries the swing's own riders — the weapon Element status
       // proc, its bleed chance and the mace's stun — so a rotation does not silently stop applying
       // status the moment the bar fills

@@ -24,12 +24,15 @@ const MODS = readJson(path.join(import.meta.dirname, 'data', 'mods.json'));
 
 /** The keys a node may carry. Anything else is a number the engine never reads. */
 const READ_KEYS = ['id', 'wing', 'kind', 'needs', 'grants', 'name', 'weapon', 'rule', 'group'];
-/** The keys a grant may carry. */
-const GRANT_KEYS = ['id', 'values'];
+/** The keys a grant may carry: the line, its ladder, and the stat or Element the sheet reads it against. */
+const GRANT_KEYS = ['id', 'values', 'stat', 'element'];
+/** The canonical Elements the engine.json declares — a grant's Element is checked against these.
+ *  `status_of` is optional in the data interface, so the keys are read with that declared. */
+const ELEMENTS = Object.keys((E.elements as { status_of: Record<string, string> }).status_of);
 /** The keys the spec's own top level may carry. */
 const SPEC_KEYS = [
   'version', 'meta', 'points', 'node_kinds', 'keystone_groups', 'clusters',
-  'rank_tiers', 'shallow_nodes', 'layout', 'nodes',
+  'rank_tiers', 'shallow_nodes', 'layout', 'nodes', 'mechanics',
 ];
 
 export function checks(source?: any): G.GateRow[] {
@@ -44,7 +47,7 @@ export function checks(source?: any): G.GateRow[] {
   // The engine is the one reader, so the cage gates what the client spends.
   let model: any = null;
   let buildError = '';
-  try { model = createTree(spec as TreeSpec, MODS); } catch (e: any) { buildError = String(e?.message || e); }
+  try { model = createTree(spec as TreeSpec, MODS, ELEMENTS); } catch (e: any) { buildError = String(e?.message || e); }
   add('TR1', !buildError, buildError ? `the spec does not build: ${buildError}`
     : `the spec builds: ${model.nodes.length} nodes across ${model.branches.length} wings, ${model.cost} point a rank`);
   if (!model) return rows();
@@ -225,7 +228,7 @@ export function checks(source?: any): G.GateRow[] {
 
   // TR13 — the layout is derived, deterministic, and nothing sits on top of anything else.
   {
-    const again = createTree(spec as TreeSpec, MODS);
+    const again = createTree(spec as TreeSpec, MODS, ELEMENTS);
     const stable = again.nodes.every((n: any, i: number) => n.x === nodes[i].x && n.y === nodes[i].y);
     let closest = Infinity;
     let pair = '';

@@ -103,6 +103,15 @@
 .sheet svg .cell { stroke: var(--map-tile-edge); stroke-width: 1.15; stroke-linejoin: round; transition: fill var(--motion-fast) var(--ease-linear); }
 .sheet svg .cell { cursor: pointer; }
 .sheet svg .cell:hover { fill-opacity: .82; }
+/* Hover light: the twin hexagons behind the art grow past the tile's edge, so their scoped fill lights
+ * the grout between tiles — hovering a hex reads as light rising out of the gap. */
+.sheet svg .cell-glow {
+  fill: var(--gold); stroke: none;
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--motion-fast) var(--ease-linear);
+}
+.sheet svg .cell:hover + .cell-glow { opacity: .62; }
+}
 
 .sheet svg .cell.site-dungeon { stroke: color-mix(in srgb, var(--curse) 40%, #c7b783); stroke-width: 1.1; }
 .sheet svg .cell.site-mine { stroke: color-mix(in srgb, var(--es-lit) 40%, #c7b783); stroke-width: 1.1; }

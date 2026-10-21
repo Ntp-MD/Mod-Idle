@@ -57,8 +57,9 @@ export const eng = createEngine(ENGINE_DATA);
 export const dungeon = createDungeon(ENGINE_DATA);
 export const loot = createLoot(ENGINE_DATA, MODS_DATA);
 export const sm = createSkillModel(SKILLS_DATA, ENGINE_DATA);
-/** The passive tree, derived once from its spec — the same object the tree cage gates. */
-export const tree = createTree(TREE_DATA, MODS_DATA);
+/** The passive tree, derived once from its spec — the same object the tree cage gates. The canonical
+ *  Elements ride in as the caller's context, the engine owning no data of its own. */
+export const tree = createTree(TREE_DATA, MODS_DATA, Object.keys(E.elements.status_of));
 /** The walk and the farm, instantiated once here: the sim, the map views and the player wiki all read
  *  the same two objects, so a block count or a growth time cannot differ between the game and a page.
  *  `any` because the factory's return is a bag of reads the engine's data interface deliberately does
@@ -71,8 +72,10 @@ export const trade = createTrade(ENGINE_DATA, TOWN.trade as TradeCfg);
 export const delivery = createDelivery(ENGINE_DATA, TOWN.delivery as DeliveryCfg, trade, eng);
 export const blackMarket = createBlackMarket(ENGINE_DATA as any, (TOWN as any).black_market as BlackMarketCfg, trade, sm);
 
-export const STAT_KEYS = ['str', 'int', 'vit', 'agi', 'dex', 'wis', 'lck'] as const;
-export type StatKey = (typeof STAT_KEYS)[number];
+/** The Core keys live in the engine (`core-attributes.ts`), so a grant, a save and a stat line are
+ *  checked against one list — re-exported here in the published order, unchanged. */
+export { STAT_KEYS } from '../../../engine/core-attributes.ts';
+export type { StatKey } from '../../../engine/core-attributes.ts';
 
 // Name → row indexes, built once. `sumLines`, `weaponByName` and `spawnMob` otherwise linear-scan
 // these on every tick (and every tick again through the offline catch-up), so the Maps keep those

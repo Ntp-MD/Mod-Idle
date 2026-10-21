@@ -34,9 +34,9 @@ describe('map journal and trail sites', () => {
     const s = newGame(), feet = currentCell(s), dest = { q: feet.q + 2, r: feet.r, sub: null, wild: null };
     expect(startWalk(s, dest).ok).toBe(true);
     const before = structuredClone(s.mapJournal);
-    tick(s, {}, { online: false });
+    tick(s, { online: false });
     expect(s.mapJournal).toEqual(before);
-    tick(s, {}, { online: true });
+    tick(s, { online: true });
     expect(s.mapJournal!.visited).toContain(hexKey(currentCell(s)));
     expect(s.mapJournal!.visited.length).toBeGreaterThan(before!.visited.length);
   });

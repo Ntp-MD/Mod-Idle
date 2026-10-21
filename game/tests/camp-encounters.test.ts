@@ -80,10 +80,10 @@ describe('Camp encounter lifecycle', () => {
     state.fieldwork.campEncounters.streamState = seedFor(1);
     state.phase = 'camp';
     state.campSec = 1;
-    tick(state, {}, { online: true });
+    tick(state, { online: true });
     expect(state.phase).not.toBe('camp');
     expect(state.fieldwork.campEncounters.active).toBeNull();
-    tick(state, {}, { online: true });
+    tick(state, { online: true });
     expect(state.fieldwork.campEncounters.active?.kind).toBe('prowler');
   });
 
@@ -104,7 +104,7 @@ describe('Camp encounter lifecycle', () => {
   it('runs encounter generation after the ordinary world tick', () => {
     const state = atCamp();
     state.fieldwork.campEncounters.streamState = seedFor(1);
-    tick(state, {}, { online: true });
+    tick(state, { online: true });
     expect(state.fieldwork.campEncounters.active?.kind).toBe('prowler');
     expect(state.fieldwork.campEncounters.active?.stage).toBe('warning');
   });

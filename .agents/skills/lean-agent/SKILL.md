@@ -5,29 +5,43 @@ description: Use as a simplification lens for repository implementation, fixes, 
 
 # Lean Agent
 
-Use when simplifying repository work can help. This is task guidance, not a persistent voice or a rule for unrelated requests. User intent and repository instructions take precedence.
+Task guidance for simplifying repository work. Not a persistent voice. User intent and `AGENTS.md` take precedence; tool, verification and scope policy live there — point to it rather than restating it.
 
 ## Priorities
 
-- Preserve correctness, behavior, data, security and accessibility before optimizing effort or code size.
-- Complete the requested scope. Do not ship a reduced version and ask afterward whether the user wanted the full task.
-- Simplify only when the result remains clear, maintainable and equivalent.
+1. Correctness, behavior, data, security and accessibility before effort or code size.
+2. Complete the requested scope. Never ship a reduced version and ask afterward whether the full task was wanted.
+3. Simplify only when the result stays clear, maintainable and equivalent.
 
-## Implementation
+## Loop
 
-- Read relevant sources, documentation and callers before editing. Trace shared behavior and fix its cause once.
-- Reuse existing code and platform features. Prefer the simplest correct option; avoid speculative abstractions, dependencies and scaffolding.
-- Keep validation and error handling where they prevent incorrect or lossy outcomes.
-- A shortcut is acceptable only when it cannot produce a wrong, lossy or insecure result. Explain material tradeoffs; add a code comment only when future maintainers need it to understand a real limitation.
+1. **Understand** — read the relevant source, docs and callers; state the expected behavior.
+2. **Find the cause** — trace shared behavior; fix it once at its source, not at each symptom.
+3. **Change the least** — reuse existing code and platform features; no speculative abstractions, dependencies or scaffolding.
+4. **Check narrowly** — run the focused check for the changed behavior first.
+5. **Stop** — when acceptance criteria pass. Do not refactor adjacent code, and do not repeat passing checks without a relevant change.
 
-## Verification
+## Do not cut
 
-- Follow the repository's required checks. Choose focused checks first, then expand for shared or cross-layer changes.
-- Let risk and project policy determine tool calls and tests. There is no fixed call or test budget, and required verification is never skipped to save effort.
-- Do not repeat unchanged passing checks.
+A shortcut is valid only when it cannot produce a wrong, lossy or insecure result. Even under time pressure, keep:
+
+- Validation and error handling at system boundaries (user input, external data, files, saves).
+- Save and migration compatibility, including old-save load and round-trip.
+- Every check `AGENTS.md` requires; never skip verification to save effort.
+- Accessibility semantics and keyboard access.
+
+Drop instead: defensive handling for inputs internal code already guarantees.
 
 ## Communication
 
-- Lead with the result. Be concise while keeping exact identifiers, numbers, caveats and evidence.
-- Give fuller explanations for documentation, reports, complex work or when the user asks for them.
-- Finish the authorized task before suggesting optional additions. Ask only when a missing decision blocks safe, correct work.
+- Lead with the result: what changed, exact identifiers and numbers, caveats, evidence.
+- Fuller explanation for documentation, reports and complex work, or when the user asks.
+- Finish the authorized task before suggesting optional additions; ask only when a missing decision blocks correct work.
+
+## Illustrative example
+
+Task: "fix a duplicate-drop bug in the loot roll."
+
+- **Lean-correct:** read the roll, find the shared `rng` consumed twice, fix that one ordering, run the loot cage.
+- **Over-lean:** rewrite the roll API and re-run the whole suite "while here."
+- **Wrong minimalism:** delete the boundary validation that rejects a malformed drop so the failing test passes.

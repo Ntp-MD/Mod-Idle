@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Town economy source data — the only place a town number is written by hand",
-    "unit": "gold — the Counterhand mints it, the stalls take it; a price is charged at the band of the place that sells it",
+    "title": "Town economy source data â€” the only place a town number is written by hand",
+    "unit": "gold â€” the Counterhand mints it, the stalls take it; a price is charged at the band of the place that sells it",
     "derived_fields": [
       "gold price",
       "junk per kill",
@@ -41,7 +41,7 @@
       "id": "armourer",
       "name": "Armourer",
       "kind": "time",
-      "rule": "capitals + Ironrow · Bonegate · Frosthold (Siege Armourer)"
+      "rule": "capitals + Ironrow Â· Bonegate Â· Frosthold (Siege Armourer)"
     },
     {
       "id": "waypoint_keeper",
@@ -53,7 +53,7 @@
       "id": "collector",
       "name": "Collector",
       "kind": "space/appearance",
-      "rule": "the three set towns: Ashfall · Bonegate · Vermolch"
+      "rule": "the three set towns: Ashfall Â· Bonegate Â· Vermolch"
     },
     {
       "id": "curio_pedlar",
@@ -302,7 +302,7 @@
         "poison",
         "chaos"
       ],
-      "base_bias_flavor": "heavy · cloth (glass endgame)",
+      "base_bias_flavor": "heavy Â· cloth (glass endgame)",
       "budget_note": "22.0 hr of zone 9 inside the high band + 26.0 hr of the level 91-100 push, which also farms zone 9",
       "npcs": [
         "counterhand",
@@ -528,7 +528,7 @@
         "settlement": "eastgate",
         "m": 30
       },
-      "note": "no Bag Cap exists, so tabs organise · at Eastgate the first tab is sold at the 24 gold teaching price",
+      "note": "no Bag Cap exists, so tabs organise Â· at Eastgate the first tab is sold at the 24 gold teaching price",
       "required_standing_tier": 1
     },
     {
@@ -627,7 +627,7 @@
       "qty": 3,
       "ladder": null,
       "display_only": true,
-      "note": "display and sorting only · sells no stone, no gear",
+      "note": "display and sorting only Â· sells no stone, no gear",
       "required_standing_tier": 0
     },
     {
@@ -651,12 +651,12 @@
       "charge_band": "high",
       "qty": 1,
       "ladder": "plot_deed",
-      "note": "5th plot · the most expensive non-cosmetic line",
+      "note": "5th plot Â· the most expensive non-cosmetic line",
       "required_standing_tier": 1
     },
     {
       "id": "house_ashfall",
-      "item": "House · Ashfall",
+      "item": "House Â· Ashfall",
       "npc": "steward",
       "kind": "space",
       "m": 120,
@@ -668,7 +668,7 @@
     },
     {
       "id": "house_highspire",
-      "item": "House · Highspire",
+      "item": "House Â· Highspire",
       "npc": "steward",
       "kind": "space",
       "m": 240,
@@ -680,7 +680,7 @@
     },
     {
       "id": "house_vermolch",
-      "item": "House · Vermolch",
+      "item": "House Â· Vermolch",
       "npc": "steward",
       "kind": "space",
       "m": 360,
@@ -713,7 +713,7 @@
       "qty": 1,
       "ladder": null,
       "display_only": true,
-      "note": "display only · the carrier pays the weight tax in formula.md section 11 · sells no potion",
+      "note": "display only Â· the carrier pays the weight tax in formula.md section 11 Â· sells no potion",
       "required_standing_tier": 0
     }
   ],
@@ -726,7 +726,7 @@
       "m": 8,
       "charge_band": "high",
       "per_day_cap": 3,
-      "note": "1 per task slot per day on top of the free skip in tasks.md · 3/day = 31 gold/day",
+      "note": "1 per task slot per day on top of the free skip in tasks.md Â· 3/day = 31 gold/day",
       "required_standing_tier": 0
     },
     {
@@ -736,7 +736,7 @@
       "kind": "time",
       "m": 16,
       "charge_band": "high",
-      "note": "must stay above the elite time that earns 1 Tier stone · re-check at F9",
+      "note": "must stay above the elite time that earns 1 Tier stone Â· re-check at F9",
       "required_standing_tier": 0
     },
     {
@@ -746,19 +746,19 @@
       "kind": "time",
       "m": 14,
       "charge_band": "high",
-      "note": "the armourer town discount, and only there · still above the tier-stone floor",
+      "note": "the armourer town discount, and only there Â· still above the tier-stone floor",
       "required_standing_tier": 0
     },
     {
       "id": "pedlar_rotation",
-      "item": "Curio pedlar stock: banner · Base tint · title",
+      "item": "Curio pedlar stock: banner Â· Base tint Â· title",
       "npc": "curio_pedlar",
       "kind": "appearance",
       "m_min": 30,
       "m_max": 120,
       "charge_band": "high",
       "per_day_cap": 3,
-      "note": "3 slots per real day · appearance only",
+      "note": "3 slots per real day Â· appearance only",
       "required_standing_tier": 3
     },
     {
@@ -778,7 +778,7 @@
       "kind": "appearance",
       "m": 90,
       "charge_band": "mid",
-      "note": "one per settlement · Wolf Cross only",
+      "note": "one per settlement Â· Wolf Cross only",
       "required_standing_tier": 3
     },
     {
@@ -788,7 +788,7 @@
       "kind": "appearance",
       "m": 45,
       "charge_band": "high",
-      "note": "stocked only by the Siege Armourer at Frosthold · appearance only",
+      "note": "stocked only by the Siege Armourer at Frosthold Â· appearance only",
       "required_standing_tier": 3
     },
     {
@@ -798,7 +798,7 @@
       "kind": "information",
       "m": 15,
       "charge_band": "high",
-      "note": "information only · pays no item and sells no piece",
+      "note": "information only Â· pays no item and sells no piece",
       "required_standing_tier": 0
     },
     {
@@ -915,8 +915,8 @@
     "decision": "ship even-weighted (checks.md T15)",
     "column_meaning": "which Base school a zone's mobs flavour. This is permanent flavour: the owner ruled to SHIP EVEN-WEIGHTED, so no per-settlement frame weight is ever added and there is no keep-rate re-sim to wait for. The column may never carry a number a player can buy.",
     "checks": [
-      "Ruled even-weighted: loot.md section 1 step 2 stays \"equal roll among all frames of that slot\" — no Base weight column is added, and the tools/loot.ts frame_weight path stays a what-if only.",
-      "The three item-base.md paths (cloth 248 / balanced 390 / armored 657 weight) remain all reachable — even weighting means no settlement can make a school unobtainable, so the geographic-unlock worry never arises.",
+      "Ruled even-weighted: loot.md section 1 step 2 stays \"equal roll among all frames of that slot\" â€” no Base weight column is added, and the tools/loot.ts frame_weight path stays a what-if only.",
+      "The three item-base.md paths (cloth 248 / balanced 390 / armored 657 weight) remain all reachable â€” even weighting means no settlement can make a school unobtainable, so the geographic-unlock worry never arises.",
       "No build must travel for a frame: frames roll equally everywhere, so Base bias is never a progression gate and world.md \"unlock by level\" is untouched."
     ],
     "forbidden_until_closed": [
@@ -925,12 +925,12 @@
       "any gold price that buys frame odds"
     ],
     "closed_checks": [
-      "Re-run the keep-rate simulation: tools/loot.ts measured it, and the Base-bias table inside the generated section 3 block shows the measured cost of a weight (armored x2.5 / cloth x0.4 moves the high-band keep-rate from 0.81% to 0.72%) — the owner chose NOT to pay that cost and to ship even.",
+      "Re-run the keep-rate simulation: tools/loot.ts measured it, and the Base-bias table inside the generated section 3 block shows the measured cost of a weight (armored x2.5 / cloth x0.4 moves the high-band keep-rate from 0.81% to 0.72%) â€” the owner chose NOT to pay that cost and to ship even.",
       "F3 drops/hour is unmoved by construction: a frame weight redistributes rolls inside one slot, and drops/hour comes from base_drop_chance x Lck, so no weight can change drop count."
     ]
   },
   "task_sizing": {
-    "status": "provisional · owner-veto-able · ",
+    "status": "provisional Â· owner-veto-able Â· ",
     "why": "tasks.md names the keys and never the value, but the client needs a number to run on, so the sizing lives here as data instead of being typed into code",
     "elite_n": 3,
     "elite_n_rule": "the count the rebalance pass sizes; the client runs on this number and the board never types it twice",
@@ -956,7 +956,7 @@
   "pending": [
     {
       "number": "Task rewards derive through eng.taskPayout using task_sizing",
-      "breaks": "the income bound is now gated (T19) and holds at the daily refill cadence; the owner's remaining call is only sizing taste — elite_n, reward_minutes_of_band_income and the split between Elite and Expedition offers",
+      "breaks": "the income bound is now gated (T19) and holds at the daily refill cadence; the owner's remaining call is only sizing taste â€” elite_n, reward_minutes_of_band_income and the split between Elite and Expedition offers",
       "status": "open"
     },
     {
@@ -1042,7 +1042,9 @@
         "human",
         "lizardman",
         "elf",
-        "golem"
+        "golem",
+        "slaggolem",
+        "drownedknight"
       ],
       "trophies": [
         "wolf",
@@ -1054,20 +1056,32 @@
         "dragon",
         "wyvern",
         "shark",
-        "siren"
+        "siren",
+        "harpy",
+        "barghest",
+        "glassserpent",
+        "mirehydra",
+        "wyrmling",
+        "bogtitan"
       ],
       "relics": [
         "skeleton",
         "mummy",
         "vampire",
         "wraith",
-        "archon"
+        "archon",
+        "bonehound",
+        "revenant",
+        "stormherald"
       ],
       "botanicals": [
         "dryad",
         "treant",
         "slime",
-        "ooze"
+        "ooze",
+        "briarling",
+        "miretoad",
+        "thornstalker"
       ],
       "curios": [
         "demon",
@@ -1078,7 +1092,11 @@
         "mist",
         "salamander",
         "wisp",
-        "crab"
+        "crab",
+        "palemoth",
+        "moorhag",
+        "rivernymph",
+        "ashphoenix"
       ]
     },
     "towns": {
@@ -1568,5 +1586,9 @@
         "price_gold": 25000
       }
     ]
+  },
+  "quest_tree_bonus": {
+    "chance": 0.1,
+    "amount": 1
   }
 }

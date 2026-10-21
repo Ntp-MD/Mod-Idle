@@ -191,9 +191,7 @@ export function createEngine(E: EngineData) {
     hasMechanic(sp, 'fast_clock') ? (TRAIT.fast_clock?.clock_mult ?? 1) : 1;
   /** The Element this body flinches from, with the percent more of that Element's hit it takes. */
   const mobWeakOf = (sp: any): { element: string; taken_pct: number } | null =>
-    hasMechanic(sp, 'element_weak')
-      ? { element: String(sp.mechanics.element_weak), taken_pct: TRAIT.element_weak?.taken_pct ?? 0 }
-      : null;
+    sp?.weakness ? { element: String(sp.weakness.element), taken_pct: Number(sp.weakness.taken_pct) || 0 } : null;
   /** What the body pays when it dies: a poison line worth this share of its own output. */
   const mobBurstOf = (sp: any): { ps_pct: number } | null =>
     hasMechanic(sp, 'poison_burst') ? { ps_pct: TRAIT.poison_burst?.ps_pct ?? 0 } : null;
@@ -297,13 +295,13 @@ export function createEngine(E: EngineData) {
    * zero, so a −20 on a mob sitting at 9.5% opens it fully rather than amplifying damage.
    *
    * `element` is the Element half of the hit. A number uses the mob's headline `res`; a per-Element
-   * map uses `mob.resByElement` (the Species' flat own-Element line, X54) so the Species' own Element is
+   * map uses `mob.resByElement` (the Species' authored resistance line, X54), so that Element is
    * answered on its own line and every other Element lands unresisted.
    */
   function mitigateMobHit(mob: any, nonElement: number, element: number | Record<string, number>, armourCutFraction = 0, resOffset = 0) {
     const non = nonElement * (1 - mobArmourCut(mob.armour, nonElement, armourCutFraction));
-    // a trait weakness (`mob.trait_mechanics.element_weak`) answers one named Element with more
-    // damage taken; it is not a res line, so the Species' own-Element res map stays exactly as X54 states
+    // a Species weakness (`mob.species[].weakness`) answers one named Element with more damage taken;
+    // it is not a res line, so the resistance map stays exactly as X54 states
     const weak = mob.weak || null;
     const weakMult = (name: string) => (weak && weak.element === name ? 1 + weak.taken_pct / 100 : 1);
     if (typeof element === 'number') {
@@ -494,14 +492,17 @@ export function createEngine(E: EngineData) {
     return sp ? speciesPsMultOf(zoneId, sp, override, damageTag) : 1;
   };
 
-  // ---- Species resistance: a Species owns one Element (`mob.species[].element`) and answers it at the flat
-  // `mob.species_res_pct` in every zone; no Element counters another and no profile tilts the Vit line,
-  // so every other Element meets no res at all (X54). The same Cap the player obeys holds the line.
-  /** Per-Element res: the Species' own Element at the flat rate, every other Element at zero. */
+  // ---- Species resistance: each species authors one resistance Element/percent and one separate
+  // weakness Element/percent. The attack Element is its own line; no Element counters another and no
+  // profile tilts the Vit line, so every other Element meets no res at all (X54). The same Cap the
+  // player obeys holds the resistance line.
+  /** Per-Element res: the Species' authored resistance line, every other Element at zero. */
   const mobResByElementOf = (sp: any, zoneId: number = REF_ZONE) => {
+    const profile = sp?.resistance;
+    const cut = Math.min(CAP.elem_res, Math.max(0, Number(profile?.pct) || 0));
     const out: Record<string, number> = {};
     for (const el of E.elements.order) {
-      out[el] = el === (sp as any).element ? E.mob.species_res_pct : 0;
+      out[el] = profile && el === profile.element ? cut : 0;
     }
     return out;
   };

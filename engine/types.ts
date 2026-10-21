@@ -301,6 +301,18 @@ export interface MobCore {
 
 export type MobDamageType = 'physical' | 'magic' | 'mixed';
 
+/** One authored resistance line: the Element and the percent it cuts. */
+export interface MobResistance {
+  element: string;
+  pct: number;
+}
+
+/** One authored weakness: the Element and the percent more it lands for. */
+export interface MobWeakness {
+  element: string;
+  taken_pct: number;
+}
+
 export interface MobSpecies {
   id: string;
   name: string;
@@ -312,8 +324,12 @@ export interface MobSpecies {
   /** The regions this species may live in — its `zones` must be a subset (X52). */
   habitat: string[];
   sizes: string[];
-  /** The one Element the Species owns: its attacks, its weakness keys and its flat resistance read it. */
+  /** The one Element the Species attacks with and carries as its innate status; resistance is authored separately. */
   element: string;
+  /** The one Element line this body cuts. */
+  resistance: MobResistance;
+  /** The one Element line this body takes more of. */
+  weakness: MobWeakness;
   carries_weapon: boolean;
   accuracy_mult: number;
   /** Authored fixed spawn level for each zone this Species inhabits; never derived from player level. */
@@ -324,9 +340,8 @@ export interface MobSpecies {
   potion_source?: boolean;
   trait?: string;
   /**
-   * The trait read as a mechanic: keys from the closed set `mob.trait_mechanics.set`, each with the
-   * argument it needs (`element_weak` names an Element; the rest are flags). Absent means an ordinary
-   * body. None of them moves mob_HP, mob PS, the drop line or the stone funnel (X74).
+   * The trait read as a mechanic: flag keys from the closed set `mob.trait_mechanics.set`. Absent
+   * means an ordinary body. None of them moves mob_HP, mob PS, the drop line or the stone funnel (X74).
    */
   mechanics?: Record<string, string | boolean>;
   /** The line the species holds in a mob group's formation (`mob.reach`). */
@@ -454,6 +469,12 @@ export interface MobStatCfg {
   note: string;
 }
 
+/** The authored Core-spend guide: one Dex ceiling per Variant band. */
+export interface MobCoreSpendCfg {
+  note: string;
+  dex_cap: number[];
+}
+
 /** One named field form for a lineage in one ten-level zone band. */
 export interface MobForm {
   name: string;
@@ -494,6 +515,8 @@ export interface MobCfg {
   /** Closed taxonomy registry. Races are descriptive, not automatic gameplay rules. */
   races: MobRacesCfg;
   stat: MobStatCfg;
+  /** The band ceilings that keep a Variant's Core spend from collapsing into Dex (X79). */
+  core_spend: MobCoreSpendCfg;
   /** Highest mob level that receives authored field forms. Later zones reuse the latest form label. */
   form_level_cap: number;
   /** Optional field labels keyed by zone id, then Species id. Missing rows inherit the prior label. */
@@ -519,8 +542,6 @@ export interface MobCfg {
   curve: CurveCfg;
   spawn_weights: Record<string, number>;
   damage_split: Record<string, [number, number]>;
-  /** The flat res a species answers its own Element with, in every zone (X54). */
-  species_res_pct: number;
   /** Mobs carry no skills in the current build; X27 fails if a species gains one while this is false. */
   skills_enabled: boolean;
   /** Formation bands: the melee/reach/standoff distances a group places its mobs at. */

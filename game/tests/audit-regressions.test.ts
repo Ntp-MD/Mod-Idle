@@ -133,9 +133,9 @@ describe('the reservation the UI promises is the one the rotation obeys', () => 
     const c = buildCharacter(s.player.level, s.gear, carried(s), 0, undefined, s.player.points, s.player.treeRanks);
     const floor = reservedMana(c, s.skills);
     s.player.mana = c.maxMana;
-    for (let i = 0; i < 200 && s.group.length === 0; i++) tick(s, {}, { online: true });
+    for (let i = 0; i < 200 && s.group.length === 0; i++) tick(s, { online: true });
     for (let i = 0; i < 40; i++) {
-      tick(s, {}, { online: true });
+      tick(s, { online: true });
       expect(s.player.mana).toBeGreaterThanOrEqual(floor - 1e-6);
     }
   });
@@ -173,10 +173,11 @@ describe('damage taken interrupts the shield’s recharge, whatever pool it land
   it('a poison tick that reaches HP resets the recharge delay like a direct hit does', () => {
     const s = newGame(34);
     huntZone(s, s.zone);
-    for (let i = 0; i < 400 && s.group.length === 0; i++) tick(s, {}, { online: true });
+    for (let i = 0; i < 400 && s.group.length === 0; i++) tick(s, { online: true });
     s.player.esIdleSec = E.energy_shield.delay_sec - 1;
-    const statuses: Statuses = { poison: { stacks: 1, secLeft: 5, perSec: 5, alignedSec: 100 } };
-    tick(s, statuses, { online: true });
+    // the saved state holds the character's own statuses (§7.7)
+    s.playerStatuses.poison = { stacks: 1, secLeft: 5, perSec: 5, alignedSec: 100 };
+    tick(s, { online: true });
     // the tick's own counter runs after the reset, so a damaging tick ends the second at 1 —
     // the pre-fix code let it climb to delay_sec and recharged through the poison
     expect(s.player.esIdleSec).toBe(1);
@@ -187,12 +188,12 @@ describe('a Push is a clean rest', () => {
   it('clears the statuses the fight had on the character', () => {
     const s = newGame(35);
     huntZone(s, s.zone);
-    for (let i = 0; i < 400 && s.group.length === 0; i++) tick(s, {}, { online: true });
-    const statuses: Statuses = { burn: { stacks: 3, secLeft: 5, perSec: 50, alignedSec: 100 } };
+    for (let i = 0; i < 400 && s.group.length === 0; i++) tick(s, { online: true });
+    s.playerStatuses.burn = { stacks: 3, secLeft: 5, perSec: 50, alignedSec: 100 };
     s.player.hp = 0; // the next tick reads it as a Push
-    tick(s, statuses, { online: true });
+    tick(s, { online: true });
     expect(s.phase).toBe('camp');
-    expect(Object.keys(statuses)).toHaveLength(0);
+    expect(Object.keys(s.playerStatuses)).toHaveLength(0);
   });
 });
 
@@ -207,7 +208,7 @@ describe('progression holds the curve it is priced on', () => {
     setLevel(s, 60);
     expect(enterDungeon(s).ok).toBe(true);
     s.dungeon!.left = 1; // the last mob falls early in the away window
-    catchUp(s, {}, 600);
+    catchUp(s, 600);
     expect(s.dungeon).toBe(null);
     // the cooldown begins at the return second: away time never accrues toward it
     expect(cooldownLeft(s)).toBe(E.dungeon.cooldown_sec);

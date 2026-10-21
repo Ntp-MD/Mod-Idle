@@ -16,6 +16,7 @@ import { newGoal } from '../sim/goal';
 import { buildCharacter } from '../sim/player';
 import { newCurses } from '../sim/curse';
 import { newMobStatusStore } from '../sim/mobStatus';
+import { newKeystoneRuntimeState, validateKeystoneRuntime, validatePlayerStatuses } from '../../../engine/keystones.ts';
 import { reason as snapshotReason, arm as armSnapshot, SAVE_CFG } from '../sim/snapshot';
 import { E, TOWN, BASES, eng, loot, sm, tree, STAT_KEYS, type StatKey } from '../engine/client';
 import { road } from '../sim/road';
@@ -38,10 +39,13 @@ import { road } from '../sim/road';
 // v13 adds the persistent field Camp, field-skill tracks, materials, meals and active meal timer.
 // v14 adds Hunger, Auto Eat, ten carried food types and persistent trail-event provisions. v15 adds
 // the Alchemy ledger. v16 adds optional Patrol and Auto-Return settings with an empty-route default.
+// v18 moves the statuses ON the character and the keystone runtime into the saved state (§7.7): a
+// pre-v18 save carried neither, so it backfills empty ones; a save claiming v18 must hold both
+// whole — the reader refuses a missing or impossible field by name rather than default-filling it.
 const DB_NAME = 'modworld';
 const STORE = 'saves';
 const ACCOUNT_KEY = 'account';
-export const SCHEMA_VERSION = 17;
+export const SCHEMA_VERSION = 18;
 
 const SLOTS = ['slot1', 'slot2', 'slot3'] as const;
 export type SlotName = (typeof SLOTS)[number];
@@ -658,6 +662,16 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (!s.goal) s.goal = newGoal();
   if (!s.curses) s.curses = newCurses();
   if (!s.mobStatus) s.mobStatus = newMobStatusStore();
+  // v18 · the statuses on the character and the keystone runtime became saved state (§7.7). A save
+  // claiming the current format must hold both whole — a missing or impossible field is refused by
+  // name, never default-filled to make a load pass; a pre-v18 save predates them and backfills empty.
+  if (fromVersion < 18) {
+    s.playerStatuses = {};
+    s.keystoneRuntime = newKeystoneRuntimeState();
+  } else {
+    s.playerStatuses = validatePlayerStatuses(s.playerStatuses);
+    s.keystoneRuntime = validateKeystoneRuntime(s.keystoneRuntime);
+  }
   if (s.pendingSnapshot === undefined) s.pendingSnapshot = null;
   if (!s.nextSnapshotAt && s.nextSnapshotAt !== 0) s.nextSnapshotAt = 0;
   // An imported or hand-edited file must not be an impossible state: the numbers below are clamped
@@ -673,7 +687,8 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
       s.player.level = lv;
       s.player.xp = Math.max(0, finite(s.player.xp, 0));
       s.player.hp = Math.max(0, finite(s.player.hp, 1));
-      s.player.mana = Math.max(0, finite(s.player.mana, 0));
+      s.player.mana = (tree?.keystoneBundles(s.player.treeRanks) || []).some((b) => b.key === 'mana-debt')
+        ? finite(s.player.mana, 0) : Math.max(0, finite(s.player.mana, 0));
       s.player.es = Math.max(0, finite(s.player.es, 0));
       // points in hand cannot exceed what the level curve has paid out in total
       s.player.statPoints = Math.max(0, Math.min(eng.pointsAt(lv), Math.floor(finite(s.player.statPoints, 0))));
@@ -693,15 +708,18 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
       }
       // the tree's points in hand are what the level has paid out MINUS what the ranks have spent, so a
       // save written under an older rate is recomputed rather than clamped (D8)
-      s.player.attainmentPoints = Math.max(0, Math.floor(finite(s.player.attainmentPoints, 0)));
-      const treeBudget = tree.pointsAt(lv, E.stat.level_cap);
-      const treeSpent = tree.pointsSpent(ranks);
-      if (treeSpent > treeBudget) {
-        for (const id of Object.keys(ranks)) delete ranks[id];
-        s.player.treePoints = treeBudget;
-      } else {
-        s.player.treePoints = treeBudget - treeSpent;
-      }
+       s.player.attainmentPoints = Math.max(0, Math.floor(finite(s.player.attainmentPoints, 0)));
+       s.player.questTreePointsEarned = Math.max(0, Math.floor(finite(s.player.questTreePointsEarned, 0)));
+       const treeBudget = tree.pointsAt(lv, E.stat.level_cap);
+       const spentByCurrency = tree.pointsSpentByCurrency(ranks);
+       const treeSpent = spentByCurrency.tree ?? 0;
+       const qEarned = s.player.questTreePointsEarned ?? 0;
+       if (treeSpent > treeBudget + qEarned) {
+         for (const id of Object.keys(ranks)) delete ranks[id];
+         s.player.treePoints = treeBudget + qEarned;
+       } else {
+         s.player.treePoints = treeBudget + qEarned - treeSpent;
+       }
       const fixUpgrade = (item: any) => {
         if (!item || item.upgrade_lv == null) return;
         item.upgrade_lv = Math.max(0, Math.min(E.craft.upgrade_cap, Math.floor(finite(item.upgrade_lv, 0))));
@@ -711,9 +729,11 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
       for (const item of s.bag || []) fixUpgrade(item);
       for (const tab of s.stash || []) for (const item of tab) fixUpgrade(item);
       // an imported character's pools cannot exceed what its gear and allocations support
-      const c = buildCharacter(lv, Array.isArray(s.gear) ? s.gear : [], {}, 0, effectsActive(s.skills), s.player.points, ranks);
+      const bundles = tree ? tree.keystoneBundles(ranks) : [];
+      const c = buildCharacter(lv, Array.isArray(s.gear) ? s.gear : [], {}, 0, effectsActive(s.skills, bundles), s.player.points, ranks, {}, bundles);
       s.player.hp = Math.min(Math.max(0, s.player.hp), c.maxHp);
-      s.player.mana = Math.min(Math.max(0, s.player.mana), c.maxMana);
+      s.player.mana = bundles.some((b) => b.key === 'mana-debt')
+        ? Math.min(s.player.mana, c.maxMana) : Math.min(Math.max(0, s.player.mana), c.maxMana);
       s.player.es = Math.min(Math.max(0, s.player.es), c.es);
     }
     if (!eng.ZONES.some((z: any) => z.id === s.zone)) s.zone = eng.ZONES[0].id;
@@ -738,7 +758,7 @@ export function exportJson(state: GameState): string {
 export function importJson(text: string): GameState {
   const parsed = JSON.parse(text);
   const version = parsed.version == null ? 'none' : parsed.version;
-  if (parsed.version !== SCHEMA_VERSION && parsed.version !== 16 && parsed.version !== 15 && parsed.version !== 14) {
+  if (parsed.version !== SCHEMA_VERSION && parsed.version !== 17 && parsed.version !== 16 && parsed.version !== 15 && parsed.version !== 14) {
     throw new Error(`schema version ${version} ≠ ${SCHEMA_VERSION}`);
   }
   const state = parsed.state as GameState;

@@ -95,7 +95,7 @@ describe('offline time is AFK, not a second play session', () => {
     const s = newGame(41);
     huntZone(s, s.zone);
     setLevel(s, 60);
-    const r = catchUp(s, {}, 3600 * 3);
+    const r = catchUp(s, 3600 * 3);
     expect(r.simulated).toBe(10800);
     expect(s.log.some((l) => /Boss spawn/.test(l.text))).toBe(false);
     expect(s.counters.kills).toBeGreaterThan(0);
@@ -109,7 +109,7 @@ describe('offline time is AFK, not a second play session', () => {
     setLevel(s, 60);
     s.bossDueAt = s.clockSec + 1000;
     const remainingBefore = s.bossDueAt - s.clockSec;
-    catchUp(s, {}, 3600 * 3);
+    catchUp(s, 3600 * 3);
     expect(s.clockSec).toBeGreaterThan(0);
     expect(s.bossDueAt! - s.clockSec).toBe(remainingBefore);
   });
@@ -137,7 +137,7 @@ describe('offline time is AFK, not a second play session', () => {
     // level-80 in zone 9 lands about twenty kills in four thousand ticks, so a fixed window made this
     // a coin flip on the 8% roll — and a fixed window is a time premise, which no test here may carry
     // (owner ruling · `AGENTS.md`). The cap below is a hang guard, never the measurement.
-    for (let i = 0; i < 200000 && s.bag.length === 0; i++) tick(s, {}, { online: false });
+    for (let i = 0; i < 200000 && s.bag.length === 0; i++) tick(s, { online: false });
     expect(s.bag.length).toBeGreaterThan(0);
     // the away window pins the piece to the floor level of its band exactly. Listing the band's own
     // levels here as well would make the assertion vacuous — the floor of a high band is the mid band's
@@ -157,7 +157,7 @@ describe('offline time is AFK, not a second play session', () => {
     // tick until a piece above the floor level lands, not for a guessed window: a fixed window makes
     // this a coin flip on the drop roll (a time premise · AGENTS.md).
     const floorLevel = eng.floorLevelOf('high');
-    for (let i = 0; i < 200000 && !s.bag.some((item) => item.ilvl > floorLevel); i++) tick(s, {}, { online: true });
+    for (let i = 0; i < 200000 && !s.bag.some((item) => item.ilvl > floorLevel); i++) tick(s, { online: true });
     expect(s.bag.some((item) => item.ilvl > floorLevel)).toBe(true);
   });
 });
@@ -212,13 +212,13 @@ describe('the save schema and the account', () => {
   it('rejects a future local schema before migration touches its state', () => {
     const future = structuredClone(newGame(520));
     const before = structuredClone(future);
-    expect(() => migrate(future, SCHEMA_VERSION + 1)).toThrow(/schema version 18/);
+    expect(() => migrate(future, SCHEMA_VERSION + 1)).toThrow(/schema version 19/);
     expect(future).toEqual(before);
   });
 
   it('fills subsystems a older save never had', () => {
     const bare = { player: { level: 1 }, counters: { kills: 0 } } as any;
-    const m = migrate(bare);
+    const m = migrate(bare, 17);
     expect(m.presets.length).toBe(E.presets.sets);
     expect(m.grants.stash_tabs).toBe(0);
     expect(m.pedlar.minutes).toEqual([]);
@@ -234,7 +234,7 @@ describe('the save schema and the account', () => {
       policy: 'avoid', streamState: (541 ^ 0x43414d50) >>> 0, serial: 0, active: null,
     });
     expect(restored.town.helpCredit).toEqual({});
-    expect(SCHEMA_VERSION).toBe(17);
+    expect(SCHEMA_VERSION).toBe(18);
   });
 
   it('round-trips active Camp encounter state and aid credit', () => {
@@ -329,7 +329,7 @@ describe('the save schema and the account', () => {
   it('grants two tree points a level, so a level-cap character holds 381', () => {
     // D8: the level curve pays two tree points a level, and the tree's budget lives in its own spec
     expect(tree.currency('tree').per_level).toBe(2);
-    expect(tree.pointsAt(E.stat.level_cap, E.stat.level_cap)).toBe(381);
+    expect(tree.pointsAt(E.stat.level_cap, E.stat.level_cap)).toBe(390);
   });
 
   it('raises an old save\'s tree points to the new rate, less what it spent', () => {
@@ -346,11 +346,11 @@ describe('the save schema and the account', () => {
   it('still wipes a build whose ranks outrun the level it is loaded at', () => {
     // the overflow rule is unchanged: a rank count the level cannot pay for is not a build
     const old = newGame(60);
-    setLevel(old, 2);
+    setLevel(old, 1);
     old.player.treeRanks = { 'impact.1': 3, 'impact.2': 3 };
     const m = migrate(JSON.parse(JSON.stringify(old)));
     expect(m.player.treeRanks).toEqual({});
-    expect(m.player.treePoints).toBe(tree.pointsAt(2, E.stat.level_cap));
+    expect(m.player.treePoints).toBe(tree.pointsAt(1, E.stat.level_cap));
   });
 
   it('moves a shared condition list onto the rows that were reading it', () => {
@@ -424,7 +424,7 @@ describe('an imported file cannot be an impossible state', () => {
     expect(m.presets[1].list).not.toContain('attack.nope');
     // and the restored state still runs a live hunting tick
     huntZone(m, m.zone);
-    expect(() => tick(m, {}, { online: true })).not.toThrow();
+    expect(() => tick(m, { online: true })).not.toThrow();
   });
 
   it('turns auras off until the set obeys the reservation limit again', () => {

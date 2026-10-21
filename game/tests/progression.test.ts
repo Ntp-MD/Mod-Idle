@@ -123,10 +123,10 @@ describe('the passive tree', () => {
     expect(treeLines(s).length).toBeGreaterThan(0);
 
     const refunded = respecTree(s);
-    expect(refunded).toEqual({ ok: true, refunded: tree.cost });
+    expect(refunded).toEqual({ ok: true, refundedTree: tree.cost, refundedAttainment: 0 });
     expect(s.player.treeRanks).toEqual({});
     expect(treeLines(s).length).toBe(0);
-    expect(respecTree(s)).toEqual({ ok: false, refunded: 0 });
+    expect(respecTree(s)).toEqual({ ok: false, refundedTree: 0, refundedAttainment: 0 });
   });
 });
 
@@ -141,7 +141,7 @@ describe('settlement respec', () => {
     if (place === 'missing-cell') s.cell = null;
     const before = structuredClone(s.player);
     expect(respecStats(s)).toEqual({ ok: false, refunded: 0 });
-    expect(respecTree(s)).toEqual({ ok: false, refunded: 0 });
+    expect(respecTree(s)).toEqual({ ok: false, refundedTree: 0, refundedAttainment: 0 });
     expect(s.player).toEqual(before);
   });
 

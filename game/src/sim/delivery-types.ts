@@ -5,6 +5,8 @@ export interface DeliveryReward {
   gold: number; stone: StoneReward; skill: string | null; fallback: StoneReward;
   /** The attainment point the contract pays on completion (D2) — frozen at offer time. */
   attainment: number;
+  /** Quest-granted passive-tree points frozen at offer time. */
+  treePoints: number;
   quoteGold: number; premium: number;
 }
 export interface DeliveryContract {
@@ -12,7 +14,7 @@ export interface DeliveryContract {
   acquisition: Acquisition; derivationVersion: number; reward: DeliveryReward;
   triggeredAtClockSec: number; dueAtDeliverySec: number; status: 'open' | 'completed' | 'expired';
   terminalAt: number | null; baseGold: number; lastQuantity: number; lastGold: number;
-  paidBonus: { gold: number; stones: StoneReward[]; skill: string | null; fallback: boolean } | null;
+  paidBonus: { gold: number; stones: StoneReward[]; skill: string | null; fallback: boolean; treePoints?: number } | null;
   recapAcknowledged: boolean; announced: boolean;
 }
 export interface DeliverySummary {

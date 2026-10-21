@@ -203,7 +203,7 @@ describe('Black Market refresh and migration', () => {
     const { state, town } = fixture('stone');
     state.town.blackMarket[town].refreshRemainingSec = 1;
     const asyncState = structuredClone(state), before = structuredClone(state.town.blackMarket);
-    const syncResult = catchUp(state, {}, 37), asyncResult = await catchUpAsync(asyncState, {}, 37);
+    const syncResult = catchUp(state, 37), asyncResult = await catchUpAsync(asyncState, 37);
     expect(syncResult).toEqual(asyncResult);
     expect(asyncState.town.blackMarket).toEqual(state.town.blackMarket);
     expect(state.town.blackMarket).toEqual(before);

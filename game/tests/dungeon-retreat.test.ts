@@ -179,8 +179,8 @@ describe('Dungeon Retreat cooldown and Push regression', () => {
     for (let i = 0; i < 3; i++) tick(state, {});
     const remaining = cooldownLeft(state);
     const sync = structuredClone(state), asyncState = structuredClone(state);
-    const syncResult = catchUp(sync, {}, 2001);
-    const asyncResult = await catchUpAsync(asyncState, {}, 2001);
+    const syncResult = catchUp(sync, 2001);
+    const asyncResult = await catchUpAsync(asyncState, 2001);
     expect(asyncResult).toEqual(syncResult);
     expect(asyncState).toEqual(sync);
     expect(cooldownLeft(sync)).toBe(remaining);

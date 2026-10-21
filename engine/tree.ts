@@ -15,6 +15,17 @@ export interface TreeGrant {
   id: string;
   /** What each rank grants. Never zero, never falling. */
   values: number[];
+  /**
+   * The one Core attribute a `stat_mod_flat` grant feeds — the targeted grant a normal node's profile
+   * carries. Absent, the line feeds every Core attribute as before.
+   */
+  stat?: StatKey;
+  /**
+   * The Element a per-Element grant names (`elemental_power_flat`, `elemental_power`,
+   * `elemental_resistance`, `elemental_resistance_cap_pct`) — a named Element joins its own pool, and
+   * never rides the weapon's Element or the shared bucket instead.
+   */
+  element?: string;
 }
 
 export interface TreeRule {
@@ -38,9 +49,16 @@ export interface TreeNodeKind {
   currency: string;
 }
 
+export interface TreeCurrencyLevelRange {
+  from: number;
+  to: number;
+  per: number;
+}
+
 export interface TreeCurrency {
   base: number;
   per_level?: number;
+  level_ranges?: TreeCurrencyLevelRange[];
   sources?: { id: string; per: number }[];
 }
 
@@ -70,6 +88,57 @@ export interface TreeSpecNode {
   weapon?: string;
   rule?: TreeRule;
   group?: string;
+  /** The v3 keystone bundle: `{ kind: 'keystone', key, params }`, resolved through the registry. */
+  effects?: { kind: string; key: string; params?: Record<string, number | string> }[];
+}
+
+/**
+ * The global mechanics line of the keystone plan (§6): the cross-system constants that belong to the
+ * tree's data and must not be re-typed in the sim. Optional on an older spec; a present section is
+ * complete or the build refuses by key.
+ */
+export interface TreeMechanics {
+  low_life_pct: number;
+  hp_cost_floor: number;
+  combat_time_units_per_sec: number;
+  periodic_payment_sec: number;
+  control_bucket_capacity_sec: number;
+  camp_min_hp_per_sec: number;
+}
+
+/** The mechanics keys and what each one means when it is checked. */
+const MECHANIC_KEYS: Record<keyof TreeMechanics, 'pct' | 'positive-int' | 'positive'> = {
+  low_life_pct: 'pct',
+  hp_cost_floor: 'positive',
+  combat_time_units_per_sec: 'positive-int',
+  periodic_payment_sec: 'positive',
+  control_bucket_capacity_sec: 'positive',
+  camp_min_hp_per_sec: 'positive',
+};
+
+function readMechanics(raw: unknown): TreeMechanics | null {
+  if (raw === undefined) return null;
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw))
+    throw new Error('tree spec: mechanics must be an object');
+  const m = raw as Record<string, unknown>;
+  for (const key of Object.keys(m))
+    if (!Object.hasOwn(MECHANIC_KEYS, key)) throw new Error(`tree spec: mechanics carries the unknown key "${key}"`);
+  const check = (key: string, kind: 'pct' | 'positive-int' | 'positive') => {
+    const v = m[key];
+    if (typeof v !== 'number' || !Number.isFinite(v))
+      throw new Error(`tree spec: mechanics.${key} must be a finite number`);
+    if (kind === 'pct' && !(v >= 0 && v <= 100))
+      throw new Error(`tree spec: mechanics.${key} = ${v} is outside 0..100`);
+    if (kind === 'positive' && !(v > 0))
+      throw new Error(`tree spec: mechanics.${key} = ${v} must be above zero`);
+    if (kind === 'positive-int' && !(Number.isSafeInteger(v) && v > 0))
+      throw new Error(`tree spec: mechanics.${key} = ${v} must be a positive safe integer`);
+  };
+  for (const [key, kind] of Object.entries(MECHANIC_KEYS)) {
+    if (!Object.hasOwn(m, key)) throw new Error(`tree spec: mechanics is missing "${key}"`);
+    check(key, kind);
+  }
+  return m as unknown as TreeMechanics;
 }
 
 export interface TreeSpec {
@@ -85,6 +154,8 @@ export interface TreeSpec {
   shallow_nodes: number;
   layout: TreeLayoutCfg;
   nodes: TreeSpecNode[];
+  /** The §6 global mechanics line; absent on a spec older than the keystone plan. */
+  mechanics?: TreeMechanics;
 }
 
 export interface TreeNode {
@@ -99,6 +170,8 @@ export interface TreeNode {
   grants: TreeGrant[];
   rule?: TreeRule;
   group?: string;
+  /** The v3 bundle a keystone node carries; grantless nodes are legal in v3 (Packet M). */
+  effects?: { kind: string; key: string; params?: Record<string, number | string> }[];
   /**
    * The first grant's line and values, and that line's own maximum. The single-line shape the board
    * reads today; a node with several grants lists them all in `grants`.
@@ -144,8 +217,46 @@ function readSpec(spec: TreeSpec): { shallowNodes: number; ranks: number } {
   return { shallowNodes, ranks: shallow.length };
 }
 
-export function createTree(spec: TreeSpec, mods: any) {
+import { STAT_KEYS, type StatKey } from './core-attributes.ts';
+
+/** The lines the sheet can express — the buckets `sumLines` holds before the per-Element ones. */
+export interface TreeLine {
+  id: string;
+  value: number;
+  /** The Core attribute a targeted stat grant feeds. */
+  stat?: StatKey;
+  /** The Element a per-Element grant names. */
+  element?: string;
+}
+
+export function createTree(spec: TreeSpec, mods: any, elements: readonly string[] = []) {
   const { shallowNodes, ranks } = readSpec(spec);
+  const mechanics = readMechanics(spec.mechanics);
+
+  /** The one line whose grant may name a stat, and the lines whose grants may name an Element. */
+  const STAT_GRANT_LINES = new Set(['stat_mod_flat']);
+  const ELEMENT_GRANT_LINES = new Set([
+    'elemental_power_flat', 'elemental_power', 'elemental_resistance', 'elemental_resistance_cap_pct',
+  ]);
+  /**
+   * A grant's metadata is checked against what the sheet can hold, at build time: a stat on a line
+   * that does not take one, an Element on a shared line, or a target nothing names would be a bought
+   * rank that quietly does the wrong thing — or nothing. Each refusal names the node that carries it.
+   */
+  const checkGrant = (nodeId: string, grant: TreeGrant) => {
+    if (grant.stat !== undefined) {
+      if (!STAT_GRANT_LINES.has(grant.id))
+        throw new Error(`tree spec: node ${nodeId} grants ${grant.id} with a stat — only stat_mod_flat takes one`);
+      if (!STAT_KEYS.includes(grant.stat))
+        throw new Error(`tree spec: node ${nodeId} grants the unknown stat "${grant.stat}"`);
+    }
+    if (grant.element !== undefined) {
+      if (!ELEMENT_GRANT_LINES.has(grant.id))
+        throw new Error(`tree spec: node ${nodeId} grants ${grant.id} with an element — only the per-Element lines take one`);
+      if (!elements.includes(grant.element))
+        throw new Error(`tree spec: node ${nodeId} grants the unknown element "${grant.element}"`);
+    }
+  };
   const maxOf = (id: string) => Number((mods.mods.find((m: any) => m.id === id) || {}).max ?? 0);
   const layout = spec.layout;
   const cost = spec.node_kinds.line?.cost ?? 1;
@@ -162,6 +273,7 @@ export function createTree(spec: TreeSpec, mods: any) {
     }
     if (!spec.node_kinds[node.kind]) throw new Error(`tree spec: node ${node.id} has the unknown kind ${node.kind}`);
     if (!node.grants || !node.grants.length) throw new Error(`tree spec: node ${node.id} grants no line`);
+    for (const grant of node.grants) checkGrant(node.id, grant);
     if (node.rule && !RULE_KINDS.includes(node.rule.kind as (typeof RULE_KINDS)[number])) {
       throw new Error(`tree spec: node ${node.id} has the rule "${node.rule.kind}", which is not one of ${RULE_KINDS.join(' · ')}`);
     }
@@ -186,6 +298,9 @@ export function createTree(spec: TreeSpec, mods: any) {
     condition: { kind: string; scope: string; target: string; per: number };
     grants: TreeGrant[];
   }[];
+  for (const cluster of clusters) {
+    for (const grant of cluster.grants || []) checkGrant(`cluster ${cluster.id}`, grant);
+  }
 
   // ---- the layout (D6): the topology in `needs` decides each node's depth and lane, and the layout
   // block decides the geometry. The same spec always gives the same coordinates.
@@ -276,6 +391,7 @@ export function createTree(spec: TreeSpec, mods: any) {
       grants: specNode.grants,
       ...(specNode.rule ? { rule: specNode.rule } : {}),
       ...(specNode.group ? { group: specNode.group } : {}),
+      ...(specNode.effects ? { effects: specNode.effects } : {}),
       line: first.id,
       values: first.values,
       max: maxOf(first.id),
@@ -301,15 +417,20 @@ export function createTree(spec: TreeSpec, mods: any) {
     return { x, y, width: Math.max(...xs) + r - x, height: Math.max(...ys) + r - y };
   })();
 
-  /** The lines the bought ranks grant, in the shape `sumLines` accumulates — one entry per grant. */
-  function linesOf(ranks: Record<string, number> | undefined, weaponName = ''): { id: string; value: number }[] {
-    const out: { id: string; value: number }[] = [];
+  /** The lines the bought ranks grant, in the shape `sumLines` accumulates — one entry per grant,
+   *  carrying the grant's own stat/Element so a targeted rank feeds its target alone. */
+  function linesOf(ranks: Record<string, number> | undefined, weaponName = ''): TreeLine[] {
+    const out: TreeLine[] = [];
     for (const [id, rank] of Object.entries(ranks || {})) {
       const node = byId[id];
       if (!node) continue;
       if (node.weapon && node.weapon !== weaponName) continue;
       const r = Math.max(0, Math.min(node.ranks, Math.floor(rank)));
-      if (r > 0) for (const grant of node.grants) out.push({ id: grant.id, value: grant.values[r - 1] ?? 0 });
+      if (r > 0) for (const grant of node.grants) out.push({
+        id: grant.id, value: grant.values[r - 1] ?? 0,
+        ...(grant.stat !== undefined ? { stat: grant.stat } : {}),
+        ...(grant.element !== undefined ? { element: grant.element } : {}),
+      });
     }
     return out;
   }
@@ -425,7 +546,7 @@ export function createTree(spec: TreeSpec, mods: any) {
   /** The steps every cluster has earned, and the lines those steps grant. */
   const clusterState = (ranks: Record<string, number> | undefined) => {
     const steps: Record<string, number> = {};
-    const grants: { id: string; value: number }[] = [];
+    const grants: TreeLine[] = [];
     for (const cluster of clusters) {
       const per = Math.max(1, cluster.condition?.per ?? 1);
       const earned = Math.floor(pointsInScope(cluster.condition?.scope ?? 'wing', cluster.condition?.target ?? '', ranks) / per);
@@ -434,7 +555,11 @@ export function createTree(spec: TreeSpec, mods: any) {
         for (const grant of cluster.grants || []) {
           const values = grant.values || [];
           if (!values.length) continue;
-          grants.push({ id: grant.id, value: values[Math.min(step, values.length - 1)] });
+          grants.push({
+            id: grant.id, value: values[Math.min(step, values.length - 1)],
+            ...(grant.stat !== undefined ? { stat: grant.stat } : {}),
+            ...(grant.element !== undefined ? { element: grant.element } : {}),
+          });
         }
       }
     }
@@ -448,10 +573,41 @@ export function createTree(spec: TreeSpec, mods: any) {
   const currency = (id: string): TreeCurrency => spec.points.currencies[id] || { base: 0 };
   const pointsAt = (level: number, levelCap = Number.POSITIVE_INFINITY) => {
     const c = currency('tree');
+    const L = Math.max(1, Math.min(level, levelCap));
+    if (Array.isArray(c.level_ranges) && c.level_ranges.length) {
+      let total = c.base ?? 0;
+      for (const r of c.level_ranges) {
+        const from = Math.max(2, r.from);
+        const to = Math.min(r.to, levelCap);
+        const hi = Math.min(L, to);
+        const count = Math.max(0, hi - from + 1);
+        total += count * (r.per ?? 0);
+      }
+      return total;
+    }
     return (c.base ?? 0) + Math.max(0, Math.min(level, levelCap) - 1) * (c.per_level ?? 0);
   };
 
-  return {
+  /**
+   * The bought keystone bundles, in allocation order — the route from ranks to runtime effects.
+   * A grantless keystone is still a node with a bundle (v3), so this never reads `grants`.
+   */
+  function keystoneBundles(ranks: Record<string, number> | undefined): { key: string; params: Record<string, number | string> }[] {
+    const out: { key: string; params: Record<string, number | string> }[] = [];
+    for (const [id, rank] of Object.entries(ranks || {})) {
+      if (Math.floor(rank) <= 0) continue;
+      const node = byId[id];
+      if (!node || node.kind !== 'keystone') continue;
+      for (const e of node.effects || [])
+        if (e.kind === 'keystone' && e.key) out.push({ key: e.key, params: e.params || {} });
+    }
+    return out;
+  }
+
+   return {
+    version: spec.version,
+    /** The §6 global mechanics line, validated and read once — the sim never copies these numbers. */
+    mechanics,
     nodes, byId, branches, cost,
     /** The rank count an ordinary line node holds — its kind's own. */
     ranks: spec.node_kinds.line?.ranks ?? ranks,
@@ -477,5 +633,6 @@ export function createTree(spec: TreeSpec, mods: any) {
     groups: spec.keystone_groups || [],
     clusters: spec.clusters || [],
     linesOf, pointsSpent,
+    keystoneBundles,
   };
 }

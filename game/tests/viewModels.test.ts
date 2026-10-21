@@ -183,9 +183,8 @@ describe('the field HUD reads (hud.ts)', () => {
     expect(mechanicWords({ mechanics: null })).toEqual([]);
     expect(mechanicWords({ mechanics: { bleed_immune: true } }))
       .toEqual([(E.mob as any).trait_mechanics.bleed_immune.word]);
-    // a key with an argument reads as the word plus the thing it names
-    expect(mechanicWords({ mechanics: { element_weak: 'fire' } })[0])
-      .toContain((E.mob as any).trait_mechanics.element_weak.word);
+    expect(mechanicWords({ mechanics: { fast_clock: true } }))
+      .toEqual([(E.mob as any).trait_mechanics.fast_clock.word]);
   });
 
   it('says what standing on one side rolls', () => {

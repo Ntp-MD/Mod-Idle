@@ -16,7 +16,7 @@ function piece() {
   huntZone(s, s.zone);
   setLevel(s, 60);
   let guard = 0;
-  while (s.bag.length === 0 && guard++ < 40000) tick(s, {}, { online: true });
+  while (s.bag.length === 0 && guard++ < 40000) tick(s, { online: true });
   return { s, item: s.bag[0] };
 }
 
@@ -25,7 +25,7 @@ describe('imprint stone', () => {
     const { s } = piece();
     let guard = 0;
     while (guard++ < 60000 && !Object.keys(s.counters.stones).some((k) => k.startsWith('imprint_'))) {
-      tick(s, {}, { online: true });
+      tick(s, { online: true });
     }
     const keys = Object.keys(s.counters.stones).filter((k) => k.startsWith('imprint_'));
     expect(keys.length).toBeGreaterThan(0);
@@ -41,7 +41,7 @@ describe('imprint stone', () => {
     let bag = -1, line = -1, target = '';
     let guard = 0;
     while (guard++ < 200000 && !target) {
-      tick(s, {}, { online: true });
+      tick(s, { online: true });
       for (let i = 0; i < s.bag.length && !target; i++) {
         const item: any = s.bag[i];
         const untouchable = item.lines.findIndex((_: any, j: number) => j >= craft.UNTOUCHABLE);
@@ -80,7 +80,7 @@ describe('imprint stone', () => {
     // find a dropped piece the Add bench itself still has room on (count and pool)
     let idx = -1, guard = 0;
     while (guard++ < 200000) {
-      tick(s, {}, { online: true });
+      tick(s, { online: true });
       for (let i = 0; i < s.bag.length; i++) {
         if (craft.add(s.bag[i], poolOf(s.bag[i]), seed(21)).ok) { idx = i; break; }
       }

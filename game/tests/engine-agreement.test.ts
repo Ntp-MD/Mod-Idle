@@ -114,7 +114,7 @@ describe('the tick loop', () => {
 
   it('caps offline catch-up at the published limit', () => {
     const s = newGame();
-    const r = catchUp(s, {}, 24 * 3600);
+    const r = catchUp(s, 24 * 3600);
     expect(r.simulated).toBe(E.inventory.offline_cap_hr * 3600);
     expect(r.capped).toBe(true);
   }, 120000); // the capped hours are real ticks, and the suite runs them beside the long measurements

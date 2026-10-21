@@ -1,5 +1,14 @@
 {
   "version": 2,
+  "mechanics": {
+    "low_life_pct": 50,
+    "hp_cost_floor": 1,
+    "combat_time_units_per_sec": 1000000,
+    "periodic_payment_sec": 1,
+    "control_bucket_capacity_sec": 1,
+    "camp_min_hp_per_sec": 1
+  },
+
   "meta": {
     "note": "There are 306 nodes and 564 ranks in twelve wings: impact (offence), control (defence) and stream (sustain/Core attributes), with might, fleet, ward, aim, lore, vital, fortune, hex and edge joining them. A free centre start connects the first node of every wing, and the 7th depth rings the wings to one another, so owned paths can branch and reconnect. Node ids stay wing.index, so an existing allocation keeps its meaning. Every node grants one or more lines and the values are written out here, so the tree's own numbers no longer move when a loot line's maximum moves. A node's kind sets its rank count, its cost and the currency it is paid in: a keystone is paid in attainment points and carries a drawback, and a node is bought when it is connected to a path the character already owns - there is no attribute requirement on any node. The wings sit on a pitch around the centre and the layout is derived from the topology rather than hand-placed. One point buys one rank.",
     "node_columns": [
@@ -17,7 +26,19 @@
     "currencies": {
       "tree": {
         "base": 3,
-        "per_level": 2
+        "per_level": 2,
+        "level_ranges": [
+          {
+            "from": 2,
+            "to": 100,
+            "per": 3
+          },
+          {
+            "from": 101,
+            "to": 190,
+            "per": 1
+          }
+        ]
       },
       "attainment": {
         "base": 0,

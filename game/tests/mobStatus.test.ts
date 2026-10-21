@@ -153,7 +153,8 @@ describe('damage spends Energy Shield before Health', () => {
     expect(parts.burn).toBeGreaterThan(0);
     expect(parts.poison).toBeGreaterThan(0);
     expect(parts.bleed).toBeGreaterThan(0);
-    tick(s, statuses, { autoSkills: false });
+    s.playerStatuses = statuses;
+    tick(s, { autoSkills: false });
     const toEs = Math.min(parts.burn, es);
     const burnCut = Math.min(S.burn.regen_cut_max, S.burn.regen_cut_per_stack);
     expect(s.player.es).toBeCloseTo(es - toEs);
@@ -182,8 +183,8 @@ describe('control is bounded, never a lockout', () => {
       s.group = [target];
       const c = buildCharacter(s.player.level, s.gear);
       s.player.atkTimer = Math.max(0, 1 - c.hitsPerSec * 0.5 + 0.01);
-      const statuses: Statuses = { shock: { stacks: 1, secLeft: shockSec, perSec: 0 } };
-      tick(s, statuses);
+      s.playerStatuses = { shock: { stacks: 1, secLeft: shockSec, perSec: 0 } };
+      tick(s);
       return target.hp;
     };
 
@@ -201,10 +202,9 @@ describe('control is bounded, never a lockout', () => {
       const striker = mob({ id: 'stunner', ps: 100, acc: 1e9, damage: 'physical', innate: ['lightning'], hitsPerSec: 1 });
       s.group = [striker];
       const c = buildCharacter(s.player.level, s.gear);
-      const statuses: Statuses = {};
-      tick(s, statuses);
-      if (statuses.shock) {
-        appliedSec = statuses.shock.secLeft;
+      tick(s);
+      if (s.playerStatuses.shock) {
+        appliedSec = s.playerStatuses.shock.secLeft;
         expectedSec = eng.stunStopSec(c.core.vit, S.shock.stop_sec);
       }
     }

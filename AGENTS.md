@@ -11,6 +11,7 @@ Single-player, browser-only idle RPG; no server. This is the shared entry point 
 | `docs/glossary.md` | Short definitions of game terms | A term is ambiguous, new or renamed |
 | `docs/game-rules.md` | Current gameplay intent and non-obvious behavior constraints | Changing the relevant game system |
 | `docs/map-art.md` | Map terrain artwork contract and the projected ground footprint | Producing or placing terrain hex art |
+| `art-reference/` | Portable map art reference kit, concept images and map calibration snapshots | Generating, measuring or QC-ing map art; refresh with `art-reference/map/refresh.ps1` |
 | `tools/data/*.json` | Numbers, tuning, catalogues and content | Changing or tracing those values |
 | `engine/`, `game/src/` | Implementation, interfaces and UI appearance | Working on the affected code |
 | `game/src/wiki/pages.ts` | Player-facing wiki source | Changing what the wiki explains |

@@ -101,6 +101,8 @@ One hit runs perfect dodge → Evasion → block → Armour → resistance → d
 3. Read fixed spawn level from `species.zone_levels[zoneId]`, within the displayed zone range. Derive base HP, Mana and Accuracy through the shared engine. Elite multiplies complete HP and replaces the Large-body DPS factor with its rank factor. Boss and wild-unique use their own Core profile and the Boss-body DPS factor; neither adds a separate HP multiplier.
 4. Elite keeps the selected Variant Core and level. A zone Boss uses its authored zone profile and species level. A wild Unique uses its authored profile at the zone's upper level and replaces a normal spawn.
 
+Variant Core is authored under `mob.core_spend`: Dex is capped at 22 / 25 / 28 / 31 / 34 by Variant band, and the cap bends down for a body whose Agi is below 18. Every live stat carries points, Wis is 0 and physical Int is 0; a magic profile keeps Int above Str. Boss and Unique profiles keep their own Core and the source Species Vit.
+
 ```text
 mobCore[k] = selectedVariant.core[k]
 mobDamageType = selectedVariant.damage ?? species.damage
@@ -112,6 +114,8 @@ bossHP = baseMobHP(level, bossProfile.core)
 uniqueHP = baseMobHP(zoneTopLevel, uniqueProfile.core)
 mobMana(level) = mana_base + mana_per_level × (level - 1) + mobInt × K_INT_MP
 mobAccuracy = mobDex × K_DEX_ACC × accuracy_mult
+mobResistance(Element) = Element === species.resistance.element ? min(caps.elem_res, species.resistance.pct) : 0
+mobWeakness(Element) = Element === species.weakness.element ? 1 + species.weakness.taken_pct / 100 : 1
 speciesPower(profile, damageType) = profile.power_base + K_MOB_PS_STAT × (wPhys × profile.str + wMagic × profile.int), where [wPhys, wMagic] = damage_split[damageType]
 speciesPsMult(profile, damageType) = speciesPower(profile, damageType) / zoneMeanSpeciesPower
 bodyDPS(level, bodyPS, speciesPsMult) = mobPsAt(level) × bodyPS / zoneBodyFactor × speciesPsMult

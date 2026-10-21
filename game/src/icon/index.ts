@@ -118,6 +118,24 @@ const MOD_ART: Record<string, string> = {
 const MOB_BY_SPECIES: Record<string, string> = {
   ogre: 'minotaur-2',
   human: 'player',
+  briarling: 'thorny-vine',
+  harpy: 'harpy',
+  barghest: 'animal-skull',
+  miretoad: 'frog',
+  glassserpent: 'sea-serpent',
+  palemoth: 'butterfly',
+  drownedknight: 'knight-helmet',
+  bonehound: 'bone',
+  revenant: 'ghost-1',
+  mirehydra: 'hydra-1',
+  moorhag: 'spell-book',
+  thornstalker: 'thorny-tentacle',
+  slaggolem: 'boulder',
+  rivernymph: 'wave',
+  wyrmling: 'dragon-head-1',
+  ashphoenix: 'burning-meteor',
+  stormherald: 'storm-cloud',
+  bogtitan: 'giant2',
 };
 
 const pick = (...names: (string | undefined)[]): string => art(...names) ?? icon(ANCHOR);

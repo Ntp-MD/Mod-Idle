@@ -18,7 +18,7 @@ import { atSettlement } from './craft';
 export interface TreeVerdict { ok: boolean; why?: string }
 
 /** Points the character has spent in the tree — what a respec hands back. */
-export const treePointsSpent = (state: GameState): number => tree.pointsSpent(state.player.treeRanks);
+export const treePointsSpent = (state: GameState): number => tree.pointsSpentByCurrency(state.player.treeRanks ?? {}).tree ?? 0;
 
 /** Points banked and unspent, in the currency a node is paid in. */
 export const treePointsFree = (state: GameState, currency = 'tree'): number => {
@@ -60,13 +60,16 @@ export function spendTreePoint(state: GameState, nodeId: string, model = tree): 
 }
 
 /** Hand every spent point back. Free, and it touches nothing else. */
-export function respecTree(state: GameState): { ok: boolean; refunded: number } {
-  if (!atSettlement(state)) return { ok: false, refunded: 0 };
-  const spent = treePointsSpent(state);
-  if (!spent) return { ok: false, refunded: 0 };
+export function respecTree(state: GameState): { ok: boolean; refundedTree: number; refundedAttainment: number } {
+  if (!atSettlement(state)) return { ok: false, refundedTree: 0, refundedAttainment: 0 };
+  const spentByCurrency = tree.pointsSpentByCurrency(state.player.treeRanks ?? {});
+  const treeSpent = spentByCurrency.tree ?? 0;
+  const attainmentSpent = spentByCurrency.attainment ?? 0;
+  if (!treeSpent && !attainmentSpent) return { ok: false, refundedTree: 0, refundedAttainment: 0 };
   state.player.treeRanks = {};
-  state.player.treePoints += spent;
-  return { ok: true, refunded: spent };
+  state.player.treePoints += treeSpent;
+  state.player.attainmentPoints = (state.player.attainmentPoints ?? 0) + attainmentSpent;
+  return { ok: true, refundedTree: treeSpent, refundedAttainment: attainmentSpent };
 }
 
 /**

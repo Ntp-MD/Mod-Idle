@@ -100,6 +100,28 @@ function featherFieldEdge(cells: SVGPolygonElement[]) {
   });
 }
 
+/** Hover light: each cell gets a twin hexagon slightly grown around it, directly behind the art. The
+ * art hides the twin's face; the grown rim sits in the grout between tiles, so hovering a hex reads
+ * as light rising out of the gap. */
+function plantCellGlow(cells: SVGPolygonElement[]) {
+  for (const cell of cells) {
+    if (cell.nextElementSibling instanceof Element && cell.nextElementSibling.classList.contains('cell-glow')) continue;
+    const glow = cell.cloneNode(false) as SVGPolygonElement;
+    for (const attr of Array.from(glow.attributes)) {
+      if (attr.name !== 'points' && attr.name !== 'class') glow.removeAttribute(attr.name);
+    }
+    const pts = (glow.getAttribute('points') || '').trim().split(/\s+/).map((p) => p.split(',').map(Number));
+    if (pts.length >= 6) {
+      const cx = pts.reduce((n, p) => n + p[0], 0) / pts.length;
+      const cy = pts.reduce((n, p) => n + p[1], 0) / pts.length;
+      glow.setAttribute('transform', `translate(${cx.toFixed(3)} ${cy.toFixed(3)}) scale(1.08) translate(${(-cx).toFixed(3)} ${(-cy).toFixed(3)})`);
+    }
+    glow.setAttribute('class', 'cell-glow');
+    glow.setAttribute('aria-hidden', 'true');
+    cell.after(glow);
+  }
+}
+
 /**
  * The sheet is repainted after every `{@html}` rebuild: the fills follow the view, the walk graph
  * and the cell ids show or hide, and the plotted route lights up one cell per block — the cells
@@ -120,6 +142,7 @@ export function paintSheet(root: HTMLElement, opts: PaintOpts) {
   });
   const cells = Array.from(root.querySelectorAll<SVGPolygonElement>('polygon.cell'));
   featherFieldEdge(cells);
+  plantCellGlow(cells);
   for (const p of cells) {
     p.classList.remove('locked');
     p.classList.remove('site-dungeon', 'site-mine', 'site-grove', 'field-camp');

@@ -81,7 +81,7 @@ describe('town demand and cargo', () => {
     sellGoods(live, 'material:copper-ore', 100);
     const away = structuredClone(live);
     const before = quoteSale(live, 'eastgate', 'material:copper-ore', 1)!.gold;
-    for (let i = 0; i < 60; i++) { tick(live, {}, { online: true }); tick(away, {}, { online: false }); }
+    for (let i = 0; i < 60; i++) { tick(live, { online: true }); tick(away, { online: false }); }
     expect(quoteSale(live, 'eastgate', 'material:copper-ore', 1)).toEqual(quoteSale(away, 'eastgate', 'material:copper-ore', 1));
     expect(quoteSale(live, 'eastgate', 'material:copper-ore', 1)!.gold).toBeGreaterThan(before);
     live.clockSec += TOWN.trade.recovery_sec;

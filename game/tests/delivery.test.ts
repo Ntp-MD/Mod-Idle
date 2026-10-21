@@ -313,7 +313,7 @@ describe('delivery clocks, retention and saves', () => {
     expect(state.town.deliveryClockSec).toBe(1);
     const rng = vi.fn(() => 0);
     unchanged(state, () => tickDeliveries(state, rng, true, false, readonly));
-    unchanged(state, () => tick(state, {}, { writer: false }));
+    unchanged(state, () => tick(state, { writer: false }));
     expect(rng).not.toHaveBeenCalled();
   });
 

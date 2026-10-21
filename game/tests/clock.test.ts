@@ -34,8 +34,8 @@ describe('the away clock: one loop, two schedules', () => {
     const secs = 5000;
     const a = busy(71, 30);
     const b = busy(71, 30);
-    const ra = catchUp(a, {}, secs);
-    const rb = await catchUpAsync(b, {}, secs);
+    const ra = catchUp(a, secs);
+    const rb = await catchUpAsync(b, secs);
     expect(rb).toEqual(ra);
     expect(shot(b)).toBe(shot(a));
     expect(a.counters.kills).toBeGreaterThan(0); // the claim is about a run that did something
@@ -45,22 +45,20 @@ describe('the away clock: one loop, two schedules', () => {
     const secs = 2500;
     const a = busy(72, 20);
     const b = busy(72, 20);
-    catchUp(a, {}, secs);
-    // one statuses store for the whole window, the way `runTicks` holds it and the live scheduler holds
-    // it: a fresh `{}` each tick would wipe every mark a mob put on the character before it could tick
-    // down, which is a different fight, not the same seconds
-    const statuses = {};
-    for (let i = 0; i < secs; i++) tick(b, statuses, { online: false });
+    catchUp(a, secs);
+    // the statuses ride in the saved state (`s.playerStatuses`) for the whole window, the way the
+    // live scheduler holds them: §7.7
+    for (let i = 0; i < secs; i++) tick(b, { online: false });
     expect(shot(b)).toBe(shot(a));
   });
 
   it('is reproducible from the seed on both paths, so neither can reroll an absence', async () => {
     const a = busy(73, 25);
     const b = busy(73, 25);
-    await catchUpAsync(a, {}, 3000);
-    catchUp(b, {}, 3000);
+    await catchUpAsync(a, 3000);
+    catchUp(b, 3000);
     const c = busy(73, 25);
-    catchUp(c, {}, 3000);
+    catchUp(c, 3000);
     expect(shot(c)).toBe(shot(a));
     expect(shot(c)).toBe(shot(b));
   });
@@ -128,8 +126,8 @@ describe('the away window is capped by the save rule', () => {
     const a = busy(74, 10);
     const b = busy(74, 10);
     const away = CAP + 3600;
-    const ra = catchUp(a, {}, away);
-    const rb = await catchUpAsync(b, {}, away);
+    const ra = catchUp(a, away);
+    const rb = await catchUpAsync(b, away);
     expect(ra.simulated).toBe(CAP);
     expect(rb.simulated).toBe(CAP);
     expect(ra.capped).toBe(true);
@@ -147,8 +145,8 @@ describe('the online clocks do not accrue while away', () => {
     }
     const start = a.clockSec;
     const secs = 4000;
-    catchUp(a, {}, secs);
-    await catchUpAsync(b, {}, secs);
+    catchUp(a, secs);
+    await catchUpAsync(b, secs);
     // the away ticks did advance clockSec, so the due times had to move with it: what is left of the
     // gate is measured in ONLINE seconds and is exactly what it was when the player left
     expect(a.clockSec).toBe(start + secs);

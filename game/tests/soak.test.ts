@@ -15,7 +15,7 @@ describe('a long live hunt stays sane', () => {
     huntZone(s, s.zone);
     const sheet = () => buildCharacter(s.player.level, s.gear, carried(s), 0, undefined, s.player.points, s.player.treeRanks);
     for (let i = 0; i < 12000; i++) {
-      tick(s, {}, { online: true });
+      tick(s, { online: true });
       if (i % 500 === 0) {
         const c = sheet();
         expect(s.player.level).toBeGreaterThan(0);

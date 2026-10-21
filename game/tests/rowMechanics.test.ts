@@ -205,9 +205,9 @@ describe('the support rows that change the character', () => {
     s.player.mana = c0.maxMana;
     let guard = 0;
     while (!s.group.length && guard++ < 30) tick(s, {});
-    // the tick loop carries the statuses object, so put one on the character and cleanse it off.
+    // the saved state holds the character's statuses (§7.7), so put one on the character and cleanse it off.
     // chill, not shock: a shock would stun the player and block the very cast being tested.
-    const statuses: any = { chill: { secLeft: 99 } };
+    s.playerStatuses.chill = { stacks: 0, secLeft: 99, perSec: 0 };
     s.skills.owned['heal.cleanse'] = 0;
     s.skills.xp['heal.cleanse'] = 8000;
     s.skills.list[0] = 'heal.cleanse'; s.skills.owned['heal.cleanse'] ??= 0;
@@ -215,7 +215,7 @@ describe('the support rows that change the character', () => {
     let cleansed = false;
     while (guard++ < 30 && !cleansed) {
       s.player.mana = c0.maxMana;
-      tick(s, statuses);
+      tick(s);
       if (s.log.some((l) => /clears/.test(l.text))) cleansed = true;
     }
     expect(cleansed).toBe(true);

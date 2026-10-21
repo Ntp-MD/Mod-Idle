@@ -107,7 +107,7 @@ describe('Forward travel', () => {
     state.travel = 'forward';
     setLevel(state, 11);
 
-    tick(state, {}, { online: true, autoSkills: false });
+    tick(state, { online: true, autoSkills: false });
     expect(state.walk).not.toBeNull();
     expect(state.walk!.blocksWalked).toBe(1);
     expect(state.zone).toBe(1);

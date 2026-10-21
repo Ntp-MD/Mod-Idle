@@ -194,7 +194,7 @@
       <div class="grant-list" aria-label="The lines this node grants">
         {#each selected.grants as grant (grant.id)}
           <div class="grant">
-            <span class="grant-line">{lineLabel(grant.id)}</span>
+            <span class="grant-line">{lineLabel(grant.id)}{grant.stat ? ` · ${grant.stat}` : ''}{grant.element ? ` · ${grant.element}` : ''}</span>
             <span class="grant-ranks">
               {#each grant.values as value, index (index)}
                 <span class:owned-rank={rank >= index + 1}>

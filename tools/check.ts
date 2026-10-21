@@ -389,20 +389,15 @@ function runChecks() {
       else if (!TM[key].word) tp.push(`${key}: no word for the card, the travel panel and the wiki to print`);
       else if (key === 'fast_clock' && !(TM[key].clock_mult > 1)) tp.push('fast_clock: clock_mult must speed the swing (>1)');
       else if (key === 'poison_burst' && !(TM[key].ps_pct > 0)) tp.push('poison_burst: ps_pct must be a real share (>0)');
-      else if (key === 'element_weak' && !(TM[key].taken_pct > 0)) tp.push('element_weak: taken_pct must be a real share (>0)');
       else if (key === 'bleed_immune' && !(TM[key].statuses || []).includes('bleed')) tp.push('bleed_immune: it must name the status it refuses');
     }
-    const elements = new Set(E.elements.order as string[]);
     const mechanicCount: Record<string, number> = {};
     for (const sp of E.mob.species) {
       const mech = (sp as any).mechanics || {};
       for (const [key, arg] of Object.entries(mech) as [string, any][]) {
         if (!set.includes(key)) tp.push(`${sp.id}: ${key} is not in mob.trait_mechanics.set`);
         mechanicCount[key] = (mechanicCount[key] || 0) + 1;
-        if (key === 'element_weak') {
-          if (!elements.has(String(arg))) tp.push(`${sp.id}: weak to ${arg}, which is not a declared Element`);
-          else if (arg === (sp as any).element) tp.push(`${sp.id}: weak to its own Element, which its flat res already answers`);
-        } else if (arg !== true) tp.push(`${sp.id}: ${key} takes no argument but carries ${JSON.stringify(arg)}`);
+        if (arg !== true) tp.push(`${sp.id}: ${key} takes no argument but carries ${JSON.stringify(arg)}`);
       }
       // a fast clock is the one mechanic that moves a swing rate, and the mob clock is the same ceiling
       // the player obeys — the published PS is divided by it, so the damage per second never moves
@@ -509,6 +504,55 @@ function runChecks() {
   }
   add('X78', formDropProblems.length === 0, formDropProblems.length ? formDropProblems.join(' · ')
     : `every authored Variant has an integer Core and complete item/rarity/lean row`);
+
+  // The Core spend audit: every body spends whole points on live stats only, and Dex follows
+  // the band ceilings in `mob.core_spend` instead of swallowing a level band's whole growth.
+  const spendProblems: string[] = [];
+  const coreSpend = (E.mob as any).core_spend || {};
+  const dexCap = coreSpend.dex_cap as number[] | undefined;
+  const spendCaps = Array.isArray(dexCap) ? dexCap.join(' / ') : 'missing';
+  if (!Array.isArray(dexCap) || dexCap.length !== 5 || dexCap.some((n) => !Number.isInteger(n) || n <= 0)) {
+    spendProblems.push('mob.core_spend.dex_cap must hold five positive whole band ceilings');
+  } else {
+    const variantBand = (levels: [number, number]) => Math.min(4, Math.max(0, Math.floor((levels[0] - 1) / 20)));
+    const zoneBand = (zone: number) => Math.min(4, Math.max(0, Math.floor((zone - 1) / 2)));
+    const liveKeys = (damage: string) => damage === 'physical'
+      ? ['str', 'agi', 'vit', 'dex', 'lck']
+      : ['str', 'agi', 'vit', 'dex', 'int', 'lck'];
+    const audit = (label: string, core: any, damage: string, cap: number) => {
+      for (const key of STAT_KEYS) {
+        if (!Number.isInteger(core?.[key]) || core[key] < 0) spendProblems.push(`${label}: ${key} must be a whole non-negative stat`);
+      }
+      if (core?.wis !== 0) spendProblems.push(`${label}: Wis ${core?.wis} is dead on a mob and must be 0`);
+      if (damage === 'physical' && core?.int !== 0) spendProblems.push(`${label}: physical Int ${core?.int} is dead and must be 0`);
+      for (const key of liveKeys(damage)) {
+        if (!(core?.[key] > 0)) spendProblems.push(`${label}: live ${key} has no authored points`);
+      }
+      if (core?.dex > cap) spendProblems.push(`${label}: Dex ${core.dex} is over the ${cap} band ceiling`);
+    };
+    const variants = ((E.mob as any).variants || {}) as Record<string, any[]>;
+    for (const sp of E.mob.species) {
+      audit(`species ${sp.id}`, sp.core, sp.damage, dexCap[0]);
+      for (const v of variants[sp.id] || []) audit(`${sp.id}/${v.name}`, v.core, v.damage ?? sp.damage, dexCap[variantBand(v.levels)]);
+    }
+    for (const [zoneId, forms] of Object.entries(((E.mob as any).forms || {}) as Record<string, Record<string, any>>)) {
+      for (const [speciesId, form] of Object.entries(forms)) {
+        const sp = E.mob.species.find((s) => s.id === speciesId);
+        if (!sp) {
+          spendProblems.push(`form z${zoneId}/${speciesId}: no Species`);
+          continue;
+        }
+        audit(`form z${zoneId}/${speciesId}`, form.core, sp.damage, dexCap[zoneBand(Number(zoneId))]);
+      }
+    }
+    for (const boss of E.mob.bosses as any[]) audit(`boss ${boss.name}`, boss.core, boss.damage, dexCap[4]);
+    for (const unique of (((E.mob as any).uniques || []) as any[])) audit(`unique ${unique.name}`, unique.core, unique.damage, dexCap[4]);
+  }
+  const variantCount = Object.values(((E.mob as any).variants || {}) as Record<string, any[]>).reduce((n, rows) => n + rows.length, 0);
+  const formCount = Object.values(((E.mob as any).forms || {}) as Record<string, Record<string, any>>).reduce((n, rows) => n + Object.keys(rows).length, 0);
+  const uniqueCount = (((E.mob as any).uniques || []) as any[]).length;
+  add('X79', spendProblems.length === 0, spendProblems.slice(0, 8).join(' · ')
+    || `${variantCount} Variants · ${formCount} forms · ${E.mob.species.length} Species · ${E.mob.bosses.length} Bosses · ${uniqueCount} Uniques — every body spends whole live points, Wis is 0, physical Int is 0, and Dex stays within ${spendCaps} by band`);
 
   // X15 reads the maxima out of `mods.json` — the file that owns them. It used to parse the
   // "Total" column back out of mod-pool.md and compare, which made the DOC a second source of a
@@ -697,23 +741,33 @@ function runChecks() {
   add('X25', esProblems.length === 0, esProblems.length ? esProblems.join(' · ')
     : `Energy Shield is Wis plus gear (owner ruling): Wis ${f0(eng.statAt(S.level_cap))} × ${K.K_WIS_ES} and ${M.energy_shield_flat_t1} flat, × (1 + ${M.max_energy_shield_pct}%) = ${f0(DERIVED.es_pool)} at the ceiling, and regen is ${ES.regen_pct}% of the pool per sec — ${f1(DERIVED.es_regen)}/sec after ${ES.delay_sec} sec without a hit, so the base rate alone returns the whole pool in ${f1(DERIVED.es_recover_sec)} sec · an \`es_regen\` skill, Mod or passive amplifies the rate · ${f1(DERIVED.es_share_of_hp * 100)}% of a caster build's ${f0(DERIVED.es_cast_hp)} HP · positive recharge delay and **player-only** so mob_HP stays the single survivability anchor`);
 
-  // Species resistance: each Species owns one Element and answers it at the flat species res; no Element
-  // counters another, so every other Element meets no res at all (mob.resist_rules · X54)
+  // Species resistance: each Species authors one resistance line and one weakness line. The attack
+  // Element is separate; no Element counters another and no profile tilts the Vit line (X54).
   {
     const order = E.elements.order as string[];
+    const valid = new Set(order);
     const rp: string[] = [];
-    for (const sp of E.mob.species) {
-      if ((sp as any).resist) rp.push(`${sp.id} still carries a resist profile — the advantage between Elements is cancelled`);
-      for (const z of sp.zones) {
-        const map = eng.mobResByElementOf(sp, z);
-        for (const el of order) {
-          const want = el === (sp as any).element ? E.mob.species_res_pct : 0;
-          if (Math.abs(map[el] - want) > 1e-9) rp.push(`${sp.id} in zone ${z} resists ${el} at ${f1(map[el])} — not the ${f1(want)} the Species rule states`);
-        }
+    const resPcts: number[] = [];
+    const weakPcts: number[] = [];
+    for (const sp of E.mob.species as any[]) {
+      const r = sp.resistance;
+      const w = sp.weakness;
+      if (!r || !valid.has(r.element)) rp.push(`${sp.id}: resistance Element missing or unknown`);
+      else if (!(r.pct > 0 && r.pct <= E.caps.elem_res)) rp.push(`${sp.id}: resistance ${r.pct}% is outside 0..${E.caps.elem_res}`);
+      else resPcts.push(r.pct);
+      if (!w || !valid.has(w.element)) rp.push(`${sp.id}: weakness Element missing or unknown`);
+      else if (!(w.taken_pct > 0 && w.taken_pct < 100)) rp.push(`${sp.id}: weakness ${w.taken_pct}% is outside 0..100`);
+      else weakPcts.push(w.taken_pct);
+      if (r && w && r.element === w.element) rp.push(`${sp.id}: resistance and weakness name the same Element`);
+      const map = eng.mobResByElementOf(sp);
+      for (const el of order) {
+        const want = r && el === r.element ? Math.min(E.caps.elem_res, r.pct || 0) : 0;
+        if (Math.abs(map[el] - want) > 1e-9) rp.push(`${sp.id}: ${el} resists ${f1(map[el])} — not the ${f1(want)} its profile states`);
       }
     }
+    const range = (values: number[]) => values.length ? `${Math.min(...values)}-${Math.max(...values)}%` : '—';
     add('X54', rp.length === 0, rp.length ? rp.join(' · ')
-      : `every Species owns one Element (\`mob.species[].element\`) and answers it at a flat \`mob.species_res_pct\` in every zone it lives in · no Element counters another: the other four meet no res at all, and no profile tilts the Vit line`);
+      : `${E.mob.species.length} Species carry one resistance (${range(resPcts)}) and one weakness (${range(weakPcts)}); the attack Element is a separate line, all other Elements meet no res, and Bosses/Uniques inherit their Species profile`);
   }
 
   // Mobs carry no skills until the skill/mechanics system lands (mob.skills_note)
@@ -864,9 +918,19 @@ function runChecks() {
       magicCoreProblems.push(`${sp.id}/${variant.name}: magic damage needs Int above Str`);
     }
   }
+  for (const boss of E.mob.bosses as any[]) {
+    if (boss.damage === 'magic' && boss.core.int <= boss.core.str) {
+      magicCoreProblems.push(`boss ${boss.name}: magic damage needs Int above Str`);
+    }
+  }
+  for (const unique of ((E.mob as any).uniques || []) as any[]) {
+    if (unique.damage === 'magic' && unique.core.int <= unique.core.str) {
+      magicCoreProblems.push(`unique ${unique.name}: magic damage needs Int above Str`);
+    }
+  }
   const damageProfileProblems = [...damageProblems, ...magicCoreProblems];
   add('X31', damageProfileProblems.length === 0, damageProfileProblems.join(' · ')
-    || 'Species defaults and Variant overrides resolve to real splits; magic damage Variants put Int above Str');
+    || 'Species defaults and Variant overrides resolve to real splits; magic damage Variants, Bosses and Uniques put Int above Str');
 
   // With a mob's level STATIC per variant (`mob.variants[].levels`; the legacy per-species zone
   // table `mob.species[].zone_levels` answers only past the form cap), the zone average no longer

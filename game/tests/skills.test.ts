@@ -62,7 +62,7 @@ describe('the casting rule', () => {
     const s = newSkillState();
     s.owned['attack.cleave'] = 0;
     s.list[0] = 'attack.cleave'; s.owned['attack.cleave'] ??= 0;
-    const mob = { hp: 1e9, evasion: 0, dodgeRate: 0 } as any;
+    const mob = { id: 'test-mob', hp: 1e9, evasion: 0, dodgeRate: 0 } as any;
     const rng = mulberry32(7);
     const cast = castOnce(s, c, c.maxMana, [mob], {}, rng);
     expect(cast?.name).toBe(sm.byId['attack.cleave'].name);
@@ -126,7 +126,7 @@ describe('one mana price, typed in units ', () => {
   const flat = { id: 'test.flat', type: 'attack', mana: '14 flat', cd: 6 } as any;
   const cap = E.skill_xp.level_cap;
   const c = { ...buildCharacter(100, emptyGear()), weaponName: 'one-handed axe' };
-  const mob = () => ({ hp: 1e9, hpMax: 1e9, evasion: 0, dodgeRate: 0 }) as any;
+  const mob = (id = 'test-mob') => ({ id, hp: 1e9, hpMax: 1e9, evasion: 0, dodgeRate: 0 }) as any;
 
   it('a typed row is never free, and a cost without its unit is loud', () => {
     expect(sm.manaSpec(flat)).toBe(14);
@@ -241,7 +241,7 @@ describe('a press can open its own timed window (Reap)', () => {
     const s = newSkillState();
     s.owned['attack.reap'] = 0;
     s.list[0] = 'attack.reap'; s.owned['attack.reap'] ??= 0;
-    const mob = { hp: 1e9, evasion: 0, dodgeRate: 0 } as any;
+    const mob = { id: 'test-mob', hp: 1e9, evasion: 0, dodgeRate: 0 } as any;
     const rng = mulberry32(5);
     const before = effectsActive(s);
     expect(before.add.leech || 0).toBe(0);
@@ -262,7 +262,7 @@ describe('a press can open its own timed window (Reap)', () => {
     const s = newSkillState();
     s.owned['attack.cleave'] = 0;
     s.list[0] = 'attack.cleave'; s.owned['attack.cleave'] ??= 0;
-    castOnce(s, c, c.maxMana, [{ hp: 1e9, evasion: 0, dodgeRate: 0 } as any], {}, mulberry32(5));
+    castOnce(s, c, c.maxMana, [{ id: 'test-mob', hp: 1e9, hpMax: 1e9, evasion: 0, dodgeRate: 0 } as any], {}, mulberry32(5));
     expect(s.buffUp['attack.cleave']).toBeUndefined();
   });
 });

@@ -174,14 +174,17 @@ export function rollTask(rng: () => number, state: GameState): TaskSlot {
   const band = eng.zoneById(zone).quality.startsWith('high') ? 'high' : eng.zoneById(zone).quality.startsWith('mid') ? 'mid' : 'low';
   const n = kind === 'boss' ? TS.boss_n : TS.elite_n;
   const reward = taskReward(kind, band);
-  const task: TaskSlot = { kind, zone, n, progress: 0, stone: reward.stone as any, count: reward.count, claimed: false, offeredAt: state.clockSec };
-  if (kind === 'expedition' && targetSpecies != null && subzone != null) {
-    task.targetSpecies = targetSpecies;
-    task.subzone = subzone;
-  }
-  // the Boss hunt's second payout rides on the slot so the claim can pay either (tasks.md)
-  if (kind === 'boss') task.alt = { stone: 'tier', count: TS.boss_reward.reroll_tier } as any;
-  return task;
+   const task: TaskSlot = { kind, zone, n, progress: 0, stone: reward.stone as any, count: reward.count, claimed: false, offeredAt: state.clockSec };
+   if (kind === 'expedition' && targetSpecies != null && subzone != null) {
+     task.targetSpecies = targetSpecies;
+     task.subzone = subzone;
+   }
+   // the Boss hunt's second payout rides on the slot so the claim can pay either (tasks.md)
+   if (kind === 'boss') task.alt = { stone: 'tier', count: TS.boss_reward.reroll_tier } as any;
+   // quest tree bonus: frozen draw at the end of the offer's RNG sequence
+   const qtb = (TOWN as any).quest_tree_bonus || { chance: 0, amount: 0 };
+   task.treePoints = rng() < (qtb.chance ?? 0) ? (qtb.amount ?? 0) : 0;
+   return task;
 }
 
 /** No Bag Cap exists, so stash tabs are organisation rather than space (`loot.md` §4 · towns.md). */
@@ -271,12 +274,17 @@ export function claimTask(state: GameState, index: number, choice?: string): boo
   if (task.kind === 'boss' && choice && task.alt && (choice === task.alt.stone || choice === task.stone)) {
     if (choice === task.alt.stone) { stone = task.alt.stone; count = task.alt.count; }
   }
-  if (!fits(state, state.counters.stones, stone, 'stone', count)) return false;
-  addTo(state, state.counters.stones, stone, 'stone', count);
-  task.claimed = true;
-  state.town.refillAt[index] = state.clockSec + TS.refill_sec;
-  state.town.tasks[index] = null;
-  return true;
+   if (!fits(state, state.counters.stones, stone, 'stone', count)) return false;
+   addTo(state, state.counters.stones, stone, 'stone', count);
+   const bonus = task.treePoints ?? 0;
+   if (bonus > 0) {
+     state.player.questTreePointsEarned = (state.player.questTreePointsEarned ?? 0) + bonus;
+     state.player.treePoints = (state.player.treePoints ?? 0) + bonus;
+   }
+   task.claimed = true;
+   state.town.refillAt[index] = state.clockSec + TS.refill_sec;
+   state.town.tasks[index] = null;
+   return true;
 }
 
 /** task_sizing owns refill delay and daily skip allowances. */

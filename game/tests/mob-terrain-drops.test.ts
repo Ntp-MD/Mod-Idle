@@ -129,12 +129,13 @@ describe('mob, terrain and drop data', () => {
   });
 
   it('lets a caster Variant use magic damage without changing its Species siblings or zone power', () => {
+    const casterCore = engineData.mob.variants.goblin.find((variant: any) => variant.name === 'Shaman Goblin').core;
+    const casterInt = casterCore.int;
     const beforeData = structuredClone(engineData);
     const oldCaster = beforeData.mob.variants.goblin.find((variant: any) => variant.name === 'Shaman Goblin');
     delete oldCaster.damage;
-    oldCaster.core.str = 20;
+    oldCaster.core.str = casterInt;
     oldCaster.core.int = 4;
-    const oldPhysicalCore = oldCaster.core.str;
     const before = createEngine(beforeData).spawnAt(5, 'medium', 'goblin');
     const data = structuredClone(engineData);
     const caster = data.mob.variants.goblin.find((variant: any) => variant.name === 'Shaman Goblin');
@@ -145,7 +146,7 @@ describe('mob, terrain and drop data', () => {
     const sneak = testEngine.spawnAt(1, 'medium', 'goblin');
 
     expect(shaman.damage).toBe('magic');
-    expect(shaman.core.int).toBe(oldPhysicalCore);
+    expect(shaman.core.int).toBe(casterInt);
     expect(shaman.core.int).toBeGreaterThan(shaman.core.str);
     expect(shaman.ps).toBeCloseTo(before.ps, 10);
     expect(testEngine.damageSplit(shaman.damage)).toEqual([0, 1]);
@@ -269,9 +270,8 @@ describe('mob, terrain and drop data', () => {
         expect(huntZone(s, zoneId).ok).toBe(true);
         s.hunting = true;
         s.spawnIn = 0;
-        const statuses = newMobStatusStore();
         for (let step = 0; step < 250 && seen.length < 6; step++) {
-          tick(s, statuses, { online: true });
+          tick(s, { online: true });
           const mob = s.group.find((candidate) => candidate.speciesId != null
             && ladders[candidate.speciesId]?.some((variant) => variant.name === candidate.variant));
           if (mob) {
@@ -382,7 +382,7 @@ describe('mob, terrain and drop data', () => {
     state.bossDueAt = state.clockSec + 0.1;
     state.spawnIn = 0;
     state.player.atkTimer = -10000;
-    tick(state, {}, { autoSkills: false });
+    tick(state, { autoSkills: false });
 
     const boss = state.group[0];
     const profile = E.mob.bosses.find((entry: any) => entry.zone === state.zone) as any;
@@ -414,13 +414,12 @@ const spawnOf = (id: string, body?: string) => {
 
 describe('the species trait read as a mechanic', () => {
   it('writes the closed set onto the spawn', () => {
-    expect((E.mob as any).trait_mechanics.set).toEqual(['bleed_immune', 'poison_burst', 'fast_clock', 'element_weak']);
+    expect((E.mob as any).trait_mechanics.set).toEqual(['bleed_immune', 'poison_burst', 'fast_clock']);
     for (const sp of E.mob.species as any[]) {
       const base = spawnOf(sp.id);
       expect(base.immune).toEqual((sp.mechanics?.bleed_immune ? (E.mob as any).trait_mechanics.bleed_immune.statuses : []));
       expect(base.clock_mult).toBe(sp.mechanics?.fast_clock ? (E.mob as any).trait_mechanics.fast_clock.clock_mult : 1);
-      expect(base.weak).toEqual(sp.mechanics?.element_weak
-        ? { element: sp.mechanics.element_weak, taken_pct: (E.mob as any).trait_mechanics.element_weak.taken_pct } : null);
+      expect(base.weak).toEqual({ element: sp.weakness.element, taken_pct: sp.weakness.taken_pct });
       expect(base.burst).toEqual(sp.mechanics?.poison_burst
         ? { ps_pct: (E.mob as any).trait_mechanics.poison_burst.ps_pct } : null);
     }
@@ -450,7 +449,7 @@ describe('the species trait read as a mechanic', () => {
     huntZone(s, 1);
     s.hunting = true;
     let guard = 0;
-    while (guard++ < 20000 && !s.group.some((m: any) => m.speciesId === 'wolf')) tick(s, {}, { online: true });
+    while (guard++ < 20000 && !s.group.some((m: any) => m.speciesId === 'wolf')) tick(s, { online: true });
     const live = s.group.find((m: any) => m.speciesId === 'wolf') as any;
     expect(live).toBeDefined();
     expect(live.hitsPerSec).toBeCloseTo(Math.min(1 * clockMult, 1 / E.caps.attack_interval_sec), 10);
@@ -469,10 +468,11 @@ describe('the species trait read as a mechanic', () => {
     expect(treant.weak?.element).toBe('fire');
     const hit = (base: any, element: string) => eng.mitigateMobHit(
       { armour: 0, res: base.res, resByElement: base.resByElement, weak: base.weak }, 0, { [element]: 100 });
-    expect(hit(treant, 'fire')).toBeCloseTo(100 * (1 + (E.mob as any).trait_mechanics.element_weak.taken_pct / 100), 6);
+    const treantWeakness = (E.mob.species as any[]).find((sp) => sp.id === 'treant').weakness.taken_pct;
+    expect(hit(treant, 'fire')).toBeCloseTo(100 * (1 + treantWeakness / 100), 6);
     expect(hit(treant, 'lightning')).toBeCloseTo(100, 6);
     expect(hit(golem, 'fire')).toBeCloseTo(100, 6);
-    expect(hit(golem, 'cold')).toBeGreaterThan(hit(golem, 'fire'));
+    expect(hit(golem, golem.weak!.element)).toBeGreaterThan(hit(golem, 'fire'));
   });
 
   it('pays its poison burst as it dies', () => {
@@ -482,18 +482,17 @@ describe('the species trait read as a mechanic', () => {
     s.zone = 3;
     s.hunting = true;
     s.spawnIn = 0;
-    const statuses: any = {};
     let guard = 0;
-    while (guard++ < 40000 && !s.group.some((m: any) => m.burst?.ps_pct)) tick(s, statuses, { online: true });
+    while (guard++ < 40000 && !s.group.some((m: any) => m.burst?.ps_pct)) tick(s, { online: true });
     const burst = s.group.find((m: any) => m.burst?.ps_pct) as any;
     expect(burst).toBeDefined();
     // the kill is the whole application: no proc roll, and the line is a share of the body's own output
     const perSec = burst.ps * burst.burst.ps_pct / 100;
     s.group = [burst];
     burst.hp = 0.5;
-    tick(s, statuses, { online: true });
-    expect(statuses.poison?.stacks).toBeGreaterThanOrEqual(1);
-    expect(statuses.poison?.perSec).toBeCloseTo(perSec, 6);
+    tick(s, { online: true });
+    expect(s.playerStatuses.poison?.stacks).toBeGreaterThanOrEqual(1);
+    expect(s.playerStatuses.poison?.perSec).toBeCloseTo(perSec, 6);
   });
 });
 
@@ -528,7 +527,7 @@ describe('the side the feet stand on', () => {
     for (let i = 0; i < 400000 && groups < want; i++) {
       s.hunting = true;
       s.player.hp = 1e9;
-      tick(s, {}, { online: true });
+      tick(s, { online: true });
       if (!s.group.length) continue;
       groups++;
       if (s.group[0].kind === 'Elite') { s.group = []; s.spawnIn = 0; continue; }

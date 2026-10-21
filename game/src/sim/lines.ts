@@ -56,8 +56,9 @@ export const FLAT_LINE: Record<string, string> = {
 /** The one line the sheet folds outside the two tables: it feeds every Core attribute at once. */
 export const ALL_STAT_LINE = 'all_stat_flat';
 /**
- * The baked-stat line. A piece carries the stat it rolled at drop; the tree cannot roll one, so a tree
- * line of this kind feeds every Core attribute - the same reading as the all-stat line.
+ * The baked-stat line. A piece carries the stat it rolled at drop; a tree grant may name a stat of its
+ * own (the targeted grant), and one that names none feeds every Core attribute — the same reading as
+ * the all-stat line.
  */
 export const STAT_MOD_LINE = 'stat_mod_flat';
 

@@ -125,6 +125,15 @@ export function validateEngineData<K extends EngineData['K']>(raw: { K: K }): En
       refuse(`mob.damage_split.${tag}`, 'must be a pair of finite numbers');
   }
 
+  const coreSpend = mob.core_spend as Record<string, unknown>;
+  if (!isObject(coreSpend)) refuse('mob.core_spend', 'must be an object');
+  if (typeof coreSpend.note !== 'string' || !coreSpend.note) refuse('mob.core_spend.note', 'must be a non-empty string');
+  const dexCap = coreSpend.dex_cap as unknown;
+  if (!Array.isArray(dexCap) || dexCap.length !== 5) refuse('mob.core_spend.dex_cap', 'must hold one ceiling per Variant band');
+  dexCap.forEach((value, i) => {
+    if (!Number.isInteger(value) || (value as number) <= 0) refuse(`mob.core_spend.dex_cap[${i}]`, 'must be a positive whole number');
+  });
+
   const zones = mob.zones as unknown;
   if (!Array.isArray(zones)) refuse('mob.zones', 'must be an array of zones');
   const zoneIds = new Set<number>();
@@ -151,6 +160,14 @@ export function validateEngineData<K extends EngineData['K']>(raw: { K: K }): En
     const core = sp.core as Record<string, unknown>;
     if (!isObject(core)) refuse(`${path}.core`, 'must be an object');
     for (const key of CORE_STATS) numberAt(core, key, `${path}.core`);
+    const resistance = sp.resistance as Record<string, unknown>;
+    if (!isObject(resistance)) refuse(`${path}.resistance`, 'must be an object');
+    if (typeof resistance.element !== 'string' || !resistance.element) refuse(`${path}.resistance.element`, 'must be a non-empty Element name');
+    numberAt(resistance, 'pct', `${path}.resistance`);
+    const weakness = sp.weakness as Record<string, unknown>;
+    if (!isObject(weakness)) refuse(`${path}.weakness`, 'must be an object');
+    if (typeof weakness.element !== 'string' || !weakness.element) refuse(`${path}.weakness.element`, 'must be a non-empty Element name');
+    numberAt(weakness, 'taken_pct', `${path}.weakness`);
   });
 
   const sizes = mob.sizes as unknown;

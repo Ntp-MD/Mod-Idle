@@ -106,7 +106,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   import mapOverlayRaw from './icon/map/map-overlay.svg?raw';
   import type { GameState, Item, Cell, Mob, FxEvent } from './sim/types';
   import type { StatKey } from './engine/client';
-  import type { Statuses } from './sim/combat';
   import type { SkillConditions } from './sim/skills';
 
   const STATS: StatKey[] = ['str', 'int', 'vit', 'agi', 'dex', 'wis', 'lck'];
@@ -131,7 +130,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     sample.fieldwork.foods['river-fish'] = 5;
     sample.junk[(E.mob.variant_drops as Record<string, { item: string }>)[E.mob.variants.goblin[0].name].item] = 20;
     sample.hunting = true;
-    tick(sample, {}, { online: false, autoSkills: false });
+    tick(sample, { online: false, autoSkills: false });
     const starter = sample.gear.find((piece): piece is Item => piece !== null);
     if (starter) {
       const carriedSample = structuredClone(starter);
@@ -350,7 +349,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   // `gameState`, not `state`: a top-level `state` binding makes svelte2tsx read `$state` as a store
   // subscription and type the whole panel `any` (sveltejs/svelte#13715).
   let gameState = $state<GameState>(showcaseMode ? showcaseGame() : newGame());
-  let statuses = $state<Statuses>({});
   let running = $state(!showcaseMode);
   /** Held while a load or a snapshot rewind swaps the character: a live tick landing on the new state
    *  mid-catch-up would sim the away window twice. The interval drains its accumulator and stands down. */
@@ -804,7 +802,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     // invalidate every `$derived` (bag sorts, character rebuild) once a second on an idle tick.
     const dropsBefore = gameState.counters.drops;
     const wasDungeon = !!gameState.dungeon;
-    tick(gameState, statuses, { autoSkills: settings.autoSkills !== false });
+    tick(gameState, { autoSkills: settings.autoSkills !== false });
     // Dungeon gear waits in escrow until payout; otherwise equip after each new gear roll.
     if (settings.autoEquip !== false && !gameState.dungeon && (gameState.counters.drops > dropsBefore || wasDungeon)) {
       equipCarriedBest();
@@ -874,7 +872,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       // file still catches up on the capped window instead of being skipped for being too old
       if (away > 5 && canWriteAccount) {
         const before = snapCounters(gameState);
-        const r = await catchUpAsync(gameState, statuses, away, { autoSkills: settings.autoSkills !== false });
+        const r = await catchUpAsync(gameState, away, { autoSkills: settings.autoSkills !== false });
         awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped, gameState) : null;
         push(gameState, `Away ${Math.round(away / 60)} min — ${r.simulated} sec simulated${r.capped ? ' (capped at the offline limit)' : ''}`);
         gameState = { ...gameState };
@@ -1185,7 +1183,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     try {
       const s = await restoreSnapshot(snapSlot, index);
       if (!s) { snapNote = 'That backup is gone'; return; }
-      statuses = {};
       gameState = s;
       const what = describeSnap(snaps[index]);
       await loadSnaps();
@@ -1207,11 +1204,11 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     try {
       const s = await readSave(slot);
       if (!s) { saveNote = `${slot} is empty`; return false; }
-      statuses = {};
       gameState = { ...s };
       const away = (Date.now() - (s.lastSavedAt || Date.now())) / 1000;
       const before = snapCounters(gameState);
-      const r = canWriteAccount ? await catchUpAsync(gameState, statuses, away, { autoSkills: settings.autoSkills !== false }) : { simulated: 0, capped: false };
+      // a load never clears the statuses the save just carried in (§7.7)
+      const r = canWriteAccount ? await catchUpAsync(gameState, away, { autoSkills: settings.autoSkills !== false }) : { simulated: 0, capped: false };
       if (canWriteAccount && settings.autoEquip !== false) equipCarriedBest();
       awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped, gameState) : null;
       // this slot becomes the autosave home, and the away window is spent (a reload must not recount it)
@@ -1278,7 +1275,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     if (!file) return;
     try {
       gameState = importJson(await file.text());
-      statuses = {};
       saveNote = 'Imported';
       gameState = { ...gameState };
     } catch (e) {
@@ -1289,7 +1285,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   function reset() {
     if (!canWriteAccount) return;
     gameState = newGame();
-    statuses = {};
     saveNote = '';
   }
 
@@ -2358,7 +2353,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         showcaseSample = event.currentTarget.value; gameState = showcaseGame(showcaseSample);
         travelScene = false;
         running = false;
-        statuses = showcaseSample === 'combat-fx' ? {
+        gameState.playerStatuses = showcaseSample === 'combat-fx' ? {
           burn: { stacks: 1, secLeft: 8, perSec: 12 },
           chill: { stacks: 1, secLeft: 10, perSec: 0 },
           bleed: { stacks: 1, secLeft: 6, perSec: 8 },
@@ -2706,7 +2701,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
          style:grid-area={gridAreaCss({ ...hudLayout.field.area, columnStart: 1, columnEnd: 15 }, true)}
          style:width={`${(hudLayout.field.area.columnEnd - hudLayout.field.area.columnStart + 1) / 15 * 100}%`}>
       <FieldPlates s={gameState} ring={ring} plates={plates} zone={zone} town={town} townLive={townLive} c={c}
-                 vitals={{ hp: shownHp, es: shownEs, mana: shownMana }} statuses={statuses} reserved={reserved}
+                 vitals={{ hp: shownHp, es: shownEs, mana: shownMana }} statuses={gameState.playerStatuses} reserved={reserved}
                  onSheet={() => { sheetTab = 'stats'; sheetOpen = true; }} fmtNum={fmtNum}
                  plateMotion={plateMotion} fxOutMs={fxOutMs} selfFx={selfFx} />
     </div>
