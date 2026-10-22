@@ -32,11 +32,22 @@ describe('passive tree presentation', () => {
     }
   });
 
-  it('keeps backbone nodes and junctions in the canonical positions', () => {
+  it('lays every spine out along a gently curved region ray, ordered outward from the origin', () => {
     const view = buildPassiveTreeView(tree.nodes, tree.graph.start);
-    for (const node of tree.nodes.filter((item) => item.placement?.role === 'spine' || item.placement?.role === 'junction')) {
-      expect(view.byId[node.id].x).toBe(node.x);
-      expect(view.byId[node.id].y).toBe(node.y);
+    const rays = new Map<string, { first: number; radii: { index: number; radius: number }[] }>();
+    for (const node of tree.nodes.filter((item) => item.placement?.role === 'spine')) {
+      const point = view.byId[node.id];
+      const dx = point.x - tree.graph.start.x, dy = point.y - tree.graph.start.y;
+      const angle = Math.atan2(dy, dx);
+      const ray = rays.get(node.wing) ?? { first: angle, radii: [] };
+      expect(Math.abs(angle - ray.first)).toBeLessThan(0.08);
+      ray.radii.push({ index: (node.placement as { index: number }).index, radius: Math.hypot(dx, dy) });
+      rays.set(node.wing, ray);
+    }
+    expect(rays.size).toBe(7);
+    for (const ray of rays.values()) {
+      const ordered = [...ray.radii].sort((a, b) => a.index - b.index);
+      for (let i = 1; i < ordered.length; i++) expect(ordered[i].radius).toBeGreaterThan(ordered[i - 1].radius);
     }
   });
 
