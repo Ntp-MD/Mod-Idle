@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { BASES, E, eng, loot, sm, tree } from '../src/engine/client';
+import { BASES, E, eng, loot, MODS, sm } from '../src/engine/client';
 import { createMastery } from '../../engine/mastery';
+import { createTree, type TreeSpec } from '../../engine/tree';
 import { rollDrop } from '../src/sim/drop';
 import { itemName } from '../src/sim/item-name';
 import { buildCharacter, emptyGear } from '../src/sim/player';
@@ -101,16 +102,28 @@ describe('weapon identity', () => {
   });
 
   it('activates weapon-specific passive nodes only while their weapon is held', () => {
-    const axeNode = (tree.nodes as any[]).find((node) => node.weapon === 'one-handed axe');
-    expect(axeNode?.name).toBeTruthy();
-    expect(tree.linesOf({ [axeNode.id]: 3 }, 'one-handed axe')).toEqual([{ id: axeNode.line, value: axeNode.values[2] }]);
-    expect(tree.linesOf({ [axeNode.id]: 3 }, 'one-handed sword')).toEqual([]);
-    const ranks = { [axeNode.id]: 3 };
-    const bare = buildCharacter(1, emptyGear(), {}, 0, { add: {}, mult: {} }, undefined, ranks);
-    const held = emptyGear();
-    held[loot.SLOTS.indexOf('main hand')] = { slot: 'main hand', base: 'one-handed axe', ilvl: 1, quality: 'low', tier: 'T1', lines: [], weight: 0 } as any;
-    const equipped = buildCharacter(1, held, {}, 0, { add: {}, mult: {} }, undefined, ranks);
-    expect(bare.lines.bleedChancePct).toBe(0);
-    expect(equipped.lines.bleedChancePct).toBe(axeNode.values[2]);
+    // the v3 tree carries no weapon-specific nodes; the engine still supports the v2 shape, so the
+    // rule is proved on a fixture rather than on shipped content
+    const spec: TreeSpec = {
+      version: 2,
+      meta: { note: 'weapons' },
+      points: { currencies: { tree: { base: 0, per_level: 1 } } },
+      node_kinds: { line: { ranks: 3, cost: 1, currency: 'tree' } },
+      keystone_groups: [],
+      clusters: [],
+      rank_tiers: { shallow: [0.1, 0.2, 0.3], deep: [0.1, 0.2, 0.3] },
+      shallow_nodes: 0,
+      layout: {
+        algorithm: 'radial-topology', start: { x: 0, y: 0 }, wing_anchor_deg: { test: 0 },
+        nodes_per_ring: 7, ring_gap: 14, arc_span_deg: 60, wing_clearance_deg: 6, node_radius: 4,
+      },
+      nodes: [{
+        id: 'test.1', wing: 'test', kind: 'line', needs: ['start'], name: 'Axe',
+        weapon: 'one-handed axe', grants: [{ id: 'attack_speed', values: [1, 2, 3] }],
+      }],
+    };
+    const model = createTree(spec, MODS);
+    expect(model.linesOf({ 'test.1': 3 }, 'one-handed axe')).toEqual([{ id: 'attack_speed', value: 3 }]);
+    expect(model.linesOf({ 'test.1': 3 }, 'one-handed sword')).toEqual([]);
   });
 });

@@ -65,26 +65,72 @@ export interface TreeCurrency {
 export interface TreeLayoutCfg {
   algorithm: string;
   start: { x: number; y: number };
-  /** The angle each wing's middle sits at, in degrees. */
-  wing_anchor_deg: Record<string, number>;
-  nodes_per_ring: number;
+  /** The angle each wing's middle sits at, in degrees — the v2 radial layout. */
+  wing_anchor_deg?: Record<string, number>;
+  nodes_per_ring?: number;
   /** The distance between two depths. */
-  ring_gap: number;
+  ring_gap?: number;
   /** The widest an arc of lanes may spread, before the wing's own pitch narrows it. */
-  arc_span_deg: number;
+  arc_span_deg?: number;
   /** The gap left between two neighbouring wings, so their arcs never meet. */
-  wing_clearance_deg: number;
-  /** The radius a node occupies; two nodes may not sit closer than twice it. */
-  node_radius: number;
+  wing_clearance_deg?: number;
+  /** The radius a node occupies; two nodes may not sit closer than twice it (v2). */
+  node_radius?: number;
+  /** v3: the seven regions, in the clockwise order their spokes are laid out. */
+  regions?: string[];
+  /** v3: distance between two neighbouring spine nodes. */
+  spine_step?: number;
+  /** v3: distance between two neighbouring branch steps. */
+  branch_step?: number;
+  /** v3: a cluster's Notable sits this far off its branch line. */
+  notable_offset?: number;
+  /** v3: a cluster's Keystone sits this far off its branch line. */
+  keystone_offset?: number;
+  /** v3: how far a junction Notable sits from the centre. */
+  junction_radius?: number;
+  /** v3: each node kind's own drawn radius. */
+  radii?: Record<string, number>;
+  /** v3: empty world margin around the outermost node. */
+  padding?: number;
 }
+
+/** v3: a drawn connection the authoring `needs` graph does not express (the region rings). */
+export interface TreeLink {
+  a: string;
+  b: string;
+  shape: 'line' | 'arc';
+}
+
+/** v3: two keystones that may not be held together. The pair is unordered. */
+export interface TreeIncompatibility {
+  a: string;
+  b: string;
+}
+
+/** v3: where a node sits in the seven-spoke recipe. Coordinates are derived, never stored. */
+export type TreePlacement =
+  | { role: 'spine'; index: number }
+  | { role: 'branch'; cluster: number; step: number }
+  | { role: 'notable'; cluster: number }
+  | { role: 'keystone'; cluster: number }
+  | { role: 'junction'; a: string; b: string };
 
 export interface TreeSpecNode {
   id: string;
   wing: string;
   kind: string;
   needs: string[];
-  grants: TreeGrant[];
+  /** v2: the lines a node grants. v3 normal/notable nodes name a profile instead; a keystone's is empty. */
+  grants?: TreeGrant[];
+  /** v3: the profile whose grants this node resolves to. */
+  profile?: string;
+  /** v3: the recipe placement the engine turns into x/y. */
+  placement?: TreePlacement;
+  /** v3: the catalogue number this keystone was drafted from, for traceability only. */
+  draft_ref?: number;
   name?: string;
+  /** What a keystone does, in the words the board and the wiki show the player. */
+  description?: string;
   weapon?: string;
   rule?: TreeRule;
   group?: string;
@@ -146,12 +192,19 @@ export interface TreeSpec {
   meta: { note: string; node_columns?: string[] };
   points: { currencies: Record<string, TreeCurrency>; budget_pct?: number };
   node_kinds: Record<string, TreeNodeKind>;
+  /** v2 one-of families. v3 uses `incompatibilities` pairs instead and writes this empty. */
   keystone_groups: { id: string; name: string; members: string[] }[];
   clusters: unknown[];
-  /** The drafting aid for a line node whose values are not written out yet. */
-  rank_tiers: { shallow: number[]; deep: number[] };
-  /** How many of a wing's nodes are the shallow tier. */
-  shallow_nodes: number;
+  /** The v3 grant profiles: a core profile per region, and one per Notable. */
+  profiles?: Record<string, TreeGrant[]>;
+  /** v3 drawn connections that are not authoring parents. */
+  links?: TreeLink[];
+  /** v3 unordered pairs of keystones that may not be held together. */
+  incompatibilities?: TreeIncompatibility[];
+  /** The drafting aid for a line node whose values are not written out yet (v2). */
+  rank_tiers?: { shallow: number[]; deep: number[] };
+  /** How many of a wing's nodes are the shallow tier (v2). */
+  shallow_nodes?: number;
   layout: TreeLayoutCfg;
   nodes: TreeSpecNode[];
   /** The §6 global mechanics line; absent on a spec older than the keystone plan. */
@@ -164,12 +217,21 @@ export interface TreeNode {
   kind: string;
   /** The node's place in its wing, one-based — the id's own number. */
   index: number;
-  tier: 'shallow' | 'deep';
+  /** v2's shallow/deep band; v3 has no tiers and leaves it absent. */
+  tier?: 'shallow' | 'deep';
   name?: string;
+  /** A keystone's effect, written for the player rather than the runtime. */
+  description?: string;
   weapon?: string;
   grants: TreeGrant[];
   rule?: TreeRule;
   group?: string;
+  /** The v3 profile a normal/notable node resolved its grants from. */
+  profile?: string;
+  /** The v3 recipe placement, kept for the cage and the board. */
+  placement?: TreePlacement;
+  /** The v3 catalogue number, for traceability only. */
+  draft_ref?: number;
   /** The v3 bundle a keystone node carries; grantless nodes are legal in v3 (Packet M). */
   effects?: { kind: string; key: string; params?: Record<string, number | string> }[];
   /**
@@ -195,29 +257,65 @@ export interface TreeNode {
  * The spec's own shape, read before a node is built: the drafting tables, the shallow boundary, the
  * node kinds and the layout come from the data, so a spec that lost a key would otherwise build a
  * tree nobody asked for. Each refusal names the key that is wrong.
+ *
+ * A v3 spec has no drafting tables: every node is one rank with its grants or bundle written out, and
+ * the schema is checked against the locked seven-spoke recipe instead.
  */
-function readSpec(spec: TreeSpec): { shallowNodes: number; ranks: number } {
-  const shallow = spec?.rank_tiers?.shallow;
-  const deep = spec?.rank_tiers?.deep;
+function readSpec(spec: TreeSpec): { shallowNodes: number; ranks: number; v3: boolean } {
+  if (!Array.isArray(spec.nodes) || spec.nodes.length === 0)
+    throw new Error('tree spec: nodes must be a nonempty array');
+  if (!spec.node_kinds || !Object.keys(spec.node_kinds).length)
+    throw new Error('tree spec: node_kinds must name at least one kind');
+  if (!spec.layout) throw new Error('tree spec: layout must be present');
+  if (!spec.points || !spec.points.currencies || !Object.keys(spec.points.currencies).length)
+    throw new Error('tree spec: points.currencies must name at least one currency');
+
+  const v3 = spec.version >= 3;
+  if (v3) {
+    const kinds = Object.keys(spec.node_kinds);
+    const unknown = kinds.filter((k) => !['normal', 'notable', 'keystone'].includes(k));
+    if (unknown.length)
+      throw new Error(`tree spec: v3 node_kinds carries ${unknown.join(', ')} — only normal, notable and keystone exist`);
+    for (const [id, ranks, cost, currency] of [
+      ['normal', 1, 1, 'tree'], ['notable', 1, 3, 'tree'], ['keystone', 1, 1, 'attainment'],
+    ] as const) {
+      const kind = spec.node_kinds[id];
+      if (!kind) throw new Error(`tree spec: v3 node_kinds is missing "${id}"`);
+      if (kind.ranks !== ranks || kind.cost !== cost || kind.currency !== currency)
+        throw new Error(`tree spec: v3 kind ${id} must be ranks ${ranks}, cost ${cost}, ${currency}`);
+    }
+    if (!spec.profiles || typeof spec.profiles !== 'object')
+      throw new Error('tree spec: v3 requires profiles');
+    if (!spec.layout.regions?.length)
+      throw new Error('tree spec: v3 layout requires regions');
+    if (spec.layout.algorithm !== 'seven-spoke-v3')
+      throw new Error(`tree spec: v3 layout algorithm must be seven-spoke-v3, got ${spec.layout.algorithm}`);
+    return { shallowNodes: 0, ranks: 1, v3: true };
+  }
+
+  const shallow = spec.rank_tiers?.shallow;
+  const deep = spec.rank_tiers?.deep;
   if (!Array.isArray(shallow) || !Array.isArray(deep) || shallow.length === 0 || deep.length === 0)
     throw new Error('tree spec: rank_tiers.shallow and rank_tiers.deep must both be nonempty arrays');
   if (shallow.length !== deep.length)
     throw new Error(`tree spec: rank_tiers.shallow (${shallow.length}) and rank_tiers.deep (${deep.length}) must have the same length`);
   const shallowNodes = spec.shallow_nodes;
-  if (!Number.isInteger(shallowNodes) || shallowNodes < 0)
+  if (!Number.isInteger(shallowNodes) || (shallowNodes as number) < 0)
     throw new Error('tree spec: shallow_nodes must be a whole number of nodes, zero or more');
-  if (!Array.isArray(spec.nodes) || spec.nodes.length === 0)
-    throw new Error('tree spec: nodes must be a nonempty array');
-  if (!spec.node_kinds || !Object.keys(spec.node_kinds).length)
-    throw new Error('tree spec: node_kinds must name at least one kind');
-  if (!spec.layout || !spec.layout.wing_anchor_deg)
+  if (!spec.layout.wing_anchor_deg)
     throw new Error('tree spec: layout must carry wing_anchor_deg');
-  if (!spec.points || !spec.points.currencies || !Object.keys(spec.points.currencies).length)
-    throw new Error('tree spec: points.currencies must name at least one currency');
-  return { shallowNodes, ranks: shallow.length };
+  return { shallowNodes: shallowNodes as number, ranks: shallow.length, v3: false };
 }
 
 import { STAT_KEYS, type StatKey } from './core-attributes.ts';
+import { validateKeystoneParams } from './keystones.ts';
+
+/** What the builder of the tree must supply beyond the data: the canonical Elements, and the real
+ *  handler table that decides whether a keystone bundle is purchasable (§6). */
+export interface TreeBuildContext {
+  elements?: readonly string[];
+  keystoneSupported?: (key: string) => boolean;
+}
 
 /** The lines the sheet can express — the buckets `sumLines` holds before the per-Element ones. */
 export interface TreeLine {
@@ -229,9 +327,22 @@ export interface TreeLine {
   element?: string;
 }
 
-export function createTree(spec: TreeSpec, mods: any, elements: readonly string[] = []) {
-  const { shallowNodes, ranks } = readSpec(spec);
+/** What a path costs, split by the wallet each step draws from — never added together. */
+export interface TreePrice {
+  tree: number;
+  attainment: number;
+}
+
+export function createTree(
+  spec: TreeSpec,
+  mods: any,
+  elements: readonly string[] = [],
+  context: TreeBuildContext = {},
+) {
+  const { shallowNodes, ranks, v3 } = readSpec(spec);
   const mechanics = readMechanics(spec.mechanics);
+  if (v3 && typeof context.keystoneSupported !== 'function')
+    throw new Error('tree spec: v3 needs the real keystone handler table to validate its bundles');
 
   /** The one line whose grant may name a stat, and the lines whose grants may name an Element. */
   const STAT_GRANT_LINES = new Set(['stat_mod_flat']);
@@ -259,24 +370,145 @@ export function createTree(spec: TreeSpec, mods: any, elements: readonly string[
   };
   const maxOf = (id: string) => Number((mods.mods.find((m: any) => m.id === id) || {}).max ?? 0);
   const layout = spec.layout;
-  const cost = spec.node_kinds.line?.cost ?? 1;
+  const cost = (v3 ? spec.node_kinds.normal : spec.node_kinds.line)?.cost ?? 1;
 
   const specById = new Map<string, TreeSpecNode>();
   for (const node of spec.nodes) {
     if (specById.has(node.id)) throw new Error(`tree spec: node id ${node.id} is used twice`);
     specById.set(node.id, node);
   }
+
+  /** v3: a node's written grants come from its profile; a normal's profile is its region's Core. */
+  const profiles = spec.profiles || {};
+  const profileGrants = new Map<string, TreeGrant[]>();
+  const profilesUsed = new Set<string>();
+  const keystoneKeys = new Set<string>();
+  const resolveProfile = (node: TreeSpecNode): TreeGrant[] => {
+    const key = node.profile;
+    if (!key) throw new Error(`tree spec: node ${node.id} names no profile`);
+    const grants = profiles[key];
+    if (!Array.isArray(grants) || !grants.length)
+      throw new Error(`tree spec: node ${node.id} names the profile ${key}, which grants nothing`);
+    profilesUsed.add(key);
+    for (const grant of grants) checkGrant(node.id, grant);
+    if (node.kind === 'normal') {
+      if (key !== `core.${node.wing}`)
+        throw new Error(`tree spec: the normal node ${node.id} must use core.${node.wing}, not ${key}`);
+      const grant = grants[0];
+      if (grants.length !== 1 || grant.id !== 'stat_mod_flat' || grant.stat !== node.wing || grant.values.length !== 1 || grant.values[0] !== 1)
+        throw new Error(`tree spec: the normal node ${node.id} must grant exactly +1 ${node.wing} through stat_mod_flat`);
+    }
+    return grants;
+  };
+
   for (const node of spec.nodes) {
     for (const parent of node.needs) {
+      if (parent === node.id) throw new Error(`tree spec: node ${node.id} needs itself`);
       if (parent !== 'start' && !specById.has(parent))
         throw new Error(`tree spec: node ${node.id} needs ${parent}, which is not a node`);
     }
     if (!spec.node_kinds[node.kind]) throw new Error(`tree spec: node ${node.id} has the unknown kind ${node.kind}`);
+    if (v3) {
+      if (node.rule)
+        throw new Error(`tree spec: node ${node.id} carries a rule — v3 keystones use bundles only`);
+      const placement = node.placement;
+      if (!placement) throw new Error(`tree spec: the v3 node ${node.id} has no placement`);
+      const expected = placement.role === 'spine' || placement.role === 'branch' ? 'normal'
+        : placement.role === 'notable' || placement.role === 'junction' ? 'notable'
+        : placement.role === 'keystone' ? 'keystone'
+        : null;
+      if (!expected) throw new Error(`tree spec: node ${node.id} has the unknown placement role "${(placement as { role: string }).role}"`);
+      if (node.kind !== expected)
+        throw new Error(`tree spec: the ${node.kind} node ${node.id} sits at a ${placement.role} placement`);
+      if (node.kind === 'keystone') {
+        if (node.profile) throw new Error(`tree spec: the keystone ${node.id} carries a profile — it carries a bundle`);
+        if (node.grants && node.grants.length)
+          throw new Error(`tree spec: the keystone ${node.id} grants a stat line — v3 keystones are grantless`);
+        if (!node.effects || node.effects.length !== 1)
+          throw new Error(`tree spec: the keystone ${node.id} must carry exactly one bundle`);
+        const effect = node.effects[0];
+        if (effect.kind !== 'keystone')
+          throw new Error(`tree spec: the keystone ${node.id} carries the effect kind "${effect.kind}"`);
+        if (effect.key !== node.id.replace(/^keystone\./, ''))
+          throw new Error(`tree spec: the keystone ${node.id} names the bundle "${effect.key}"`);
+        if (keystoneKeys.has(effect.key)) throw new Error(`tree spec: the keystone bundle "${effect.key}" is used twice`);
+        keystoneKeys.add(effect.key);
+        validateKeystoneParams(effect.key, effect.params ?? {}, elements);
+        if (!context.keystoneSupported!(effect.key))
+          throw new Error(`tree spec: the keystone "${effect.key}" has no complete handler in the runtime table`);
+      } else {
+        if (node.effects && node.effects.length)
+          throw new Error(`tree spec: the ${node.kind} node ${node.id} carries a keystone bundle`);
+        if (node.grants && node.grants.length)
+          throw new Error(`tree spec: the ${node.kind} node ${node.id} writes grants — v3 uses a profile`);
+        profileGrants.set(node.id, resolveProfile(node));
+      }
+      continue;
+    }
     if (!node.grants || !node.grants.length) throw new Error(`tree spec: node ${node.id} grants no line`);
     for (const grant of node.grants) checkGrant(node.id, grant);
     if (node.rule && !RULE_KINDS.includes(node.rule.kind as (typeof RULE_KINDS)[number])) {
       throw new Error(`tree spec: node ${node.id} has the rule "${node.rule.kind}", which is not one of ${RULE_KINDS.join(' · ')}`);
     }
+  }
+
+  // ---- the authoring parents are a DAG: a cycle would make a node need itself, directly or through
+  // the chain, and no purchase path could ever enter it.
+  {
+    const state = new Map<string, 1 | 2>();
+    const visit = (id: string) => {
+      if (state.get(id) === 1) throw new Error(`tree spec: the needs chain through ${id} forms a cycle`);
+      if (state.get(id) === 2) return;
+      state.set(id, 1);
+      for (const parent of specById.get(id)!.needs) if (parent !== 'start') visit(parent);
+      state.set(id, 2);
+    };
+    for (const node of spec.nodes) visit(node.id);
+  }
+
+  // ---- v3 graph edges: the authoring `needs` plus the drawn `links` form one undirected graph. The
+  // links are what rings two regions together, so they are edges a purchase may cross as well (§3).
+  const keyOf = (a: string, b: string) => (a < b ? `${a}\u0000${b}` : `${b}\u0000${a}`);
+  const links = v3 ? (spec.links || []) : [];
+  const edgeKeys = new Set<string>();
+  for (const node of spec.nodes) for (const parent of node.needs) {
+    if (parent === 'start') continue;
+    const key = keyOf(node.id, parent);
+    if (edgeKeys.has(key)) throw new Error(`tree spec: node ${node.id} needs ${parent} twice`);
+    edgeKeys.add(key);
+  }
+  const linkKeys = new Set<string>();
+  for (const link of links) {
+    if (!specById.has(link.a) || !specById.has(link.b))
+      throw new Error(`tree spec: the link ${link.a} – ${link.b} names a node that does not exist`);
+    if (link.a === link.b) throw new Error(`tree spec: the link ${link.a} joins a node to itself`);
+    if (link.shape !== 'line' && link.shape !== 'arc')
+      throw new Error(`tree spec: the link ${link.a} – ${link.b} has the unknown shape "${link.shape}"`);
+    const key = keyOf(link.a, link.b);
+    if (linkKeys.has(key)) throw new Error(`tree spec: the link ${link.a} – ${link.b} is written twice`);
+    if (edgeKeys.has(key)) throw new Error(`tree spec: the link ${link.a} – ${link.b} repeats a needs edge`);
+    linkKeys.add(key);
+  }
+
+  // ---- v3 pairwise incompatibilities: an unordered pair of keystones. Only the listed pairs are
+  // banned — there is no transitive closure, and a pair not in the file may be held together (§3).
+  const incompatibilities = v3 ? (spec.incompatibilities || []) : [];
+  const pairKeys = new Set<string>();
+  const pairMap = new Map<string, Set<string>>();
+  for (const pair of incompatibilities) {
+    const a = specById.get(pair.a);
+    const b = specById.get(pair.b);
+    if (!a || !b) throw new Error(`tree spec: the incompatibility ${pair.a} – ${pair.b} names a node that does not exist`);
+    if (pair.a === pair.b) throw new Error(`tree spec: the keystone ${pair.a} is incompatible with itself`);
+    if (a.kind !== 'keystone' || b.kind !== 'keystone')
+      throw new Error(`tree spec: the incompatibility ${pair.a} – ${pair.b} must join two keystones`);
+    const key = keyOf(pair.a, pair.b);
+    if (pairKeys.has(key)) throw new Error(`tree spec: the incompatibility ${pair.a} – ${pair.b} is written twice`);
+    pairKeys.add(key);
+    if (!pairMap.has(pair.a)) pairMap.set(pair.a, new Set());
+    if (!pairMap.has(pair.b)) pairMap.set(pair.b, new Set());
+    pairMap.get(pair.a)!.add(pair.b);
+    pairMap.get(pair.b)!.add(pair.a);
   }
 
   // ---- the keystone groups (D1): a group is a one-of family, and holding a member blocks its
@@ -302,101 +534,183 @@ export function createTree(spec: TreeSpec, mods: any, elements: readonly string[
     for (const grant of cluster.grants || []) checkGrant(`cluster ${cluster.id}`, grant);
   }
 
-  // ---- the layout (D6): the topology in `needs` decides each node's depth and lane, and the layout
-  // block decides the geometry. The same spec always gives the same coordinates.
-  const wings = [...new Set(spec.nodes.map((n) => n.wing))];
-  for (const wing of wings) {
-    if (layout.wing_anchor_deg[wing] === undefined)
-      throw new Error(`tree spec: the wing ${wing} has no anchor in layout.wing_anchor_deg`);
-  }
+  // ---- the layout: v2 derives depth/lane from the topology; v3 reads the locked seven-spoke
+  // placement and derives every coordinate from the region's angle. The same spec always gives the
+  // same coordinates.
+  const wings = v3 ? (layout.regions as string[]) : [...new Set(spec.nodes.map((n) => n.wing))];
   const pitch = 360 / wings.length;
-  const arcSpan = Math.min(layout.arc_span_deg, pitch - layout.wing_clearance_deg);
+  const arcSpan = v3 ? 0 : Math.min(layout.arc_span_deg!, pitch - layout.wing_clearance_deg!);
+  const coord = new Map<string, { x: number; y: number }>();
+  let crosslinkDepths: number[] = [];
 
-  const depth = new Map<string, number>();
-  const depthOf = (id: string): number => {
-    const known = depth.get(id);
-    if (known !== undefined) return known;
-    const node = specById.get(id)!;
-    let d = 1;
-    for (const parent of node.needs) {
-      if (parent === 'start') continue;
-      const p = specById.get(parent);
-      // a parent in another wing is a cross-link: it connects the wings but does not deepen this one
-      if (!p || p.wing !== node.wing) continue;
-      d = Math.max(d, depthOf(parent) + 1);
-    }
-    depth.set(id, d);
-    return d;
-  };
-
-  // A lane is a chain inside a wing. A node inherits its first in-wing parent's lane; where two
-  // nodes at the same depth would share one, the later takes the next free lane.
-  const lane = new Map<string, number>();
-  for (const wing of wings) {
-    const list = spec.nodes.filter((n) => n.wing === wing);
-    const byDepth = new Map<number, TreeSpecNode[]>();
-    for (const node of list) {
-      const d = depthOf(node.id);
-      const at = byDepth.get(d);
-      if (at) at.push(node); else byDepth.set(d, [node]);
-    }
-    for (const d of [...byDepth.keys()].sort((a, b) => a - b)) {
-      const used = new Set<number>();
-      for (const node of byDepth.get(d)!) {
-        const first = node.needs.find((p) => p !== 'start' && specById.get(p)?.wing === wing);
-        let l = first ? (lane.get(first) ?? 0) : 0;
-        while (used.has(l)) l++;
-        used.add(l);
-        lane.set(node.id, l);
-      }
-    }
-  }
-  const laneCountOf = (wing: string) =>
-    Math.max(0, ...spec.nodes.filter((n) => n.wing === wing).map((n) => (lane.get(n.id) ?? 0) + 1));
-
-  /** The depths at which a wing is ringed to its neighbour — the cross-links, read off the topology. */
-  const crosslinkDepths = (() => {
-    const depths = new Set<number>();
+  if (v3) {
+    const start = layout.start;
+    const spineStep = layout.spine_step ?? 25;
+    const branchStep = layout.branch_step ?? 12;
+    const notableOffset = layout.notable_offset ?? 72;
+    const keystoneOffset = layout.keystone_offset ?? 90;
+    const junctionRadius = layout.junction_radius ?? 125 * Math.cos(Math.PI / 7);
+    const regionIndex = new Map(wings.map((r, i) => [r, i]));
+    const axesOf = (region: string) => {
+      const i = regionIndex.get(region);
+      if (i === undefined) throw new Error(`tree spec: the region ${region} is not in layout.regions`);
+      const a = (-90 + i * 360 / wings.length) * Math.PI / 180;
+      return { ux: Math.cos(a), uy: Math.sin(a), vx: -Math.sin(a), vy: Math.cos(a) };
+    };
+    /** A cluster's base point and the perpendicular its branch line runs along. */
+    const clusterAxes = (region: string, cluster: number) => {
+      if (!Number.isInteger(cluster) || cluster < 1 || cluster > 12)
+        throw new Error(`tree spec: a cluster index must run 1..12, got ${cluster}`);
+      const { ux, uy, vx, vy } = axesOf(region);
+      const distance = spineStep * (cluster + 7);
+      const sign = cluster % 2 === 1 ? 1 : -1;
+      return { bx: distance * ux, by: distance * uy, sx: sign * vx, sy: sign * vy };
+    };
     for (const node of spec.nodes) {
-      const d = depthOf(node.id);
+      const p = node.placement;
+      if (!p) throw new Error(`tree spec: the v3 node ${node.id} has no placement`);
+      let x = 0;
+      let y = 0;
+      if (p.role === 'spine') {
+        if (!Number.isInteger(p.index) || p.index < 1 || p.index > 20)
+          throw new Error(`tree spec: the spine node ${node.id} has index ${p.index}`);
+        const { ux, uy } = axesOf(node.wing);
+        x = spineStep * p.index * ux;
+        y = spineStep * p.index * uy;
+      } else if (p.role === 'branch') {
+        if (!Number.isInteger(p.step) || p.step < 1 || p.step > 5)
+          throw new Error(`tree spec: the branch node ${node.id} has step ${p.step}`);
+        const { bx, by, sx, sy } = clusterAxes(node.wing, p.cluster);
+        x = bx + sx * branchStep * p.step;
+        y = by + sy * branchStep * p.step;
+      } else if (p.role === 'notable' || p.role === 'keystone') {
+        const { bx, by, sx, sy } = clusterAxes(node.wing, p.cluster);
+        const offset = p.role === 'notable' ? notableOffset : keystoneOffset;
+        x = bx + sx * offset;
+        y = by + sy * offset;
+      } else {
+        const ia = regionIndex.get(p.a);
+        const ib = regionIndex.get(p.b);
+        if (ia === undefined || ib === undefined || ia === ib)
+          throw new Error(`tree spec: the junction ${node.id} must name two different regions`);
+        // the short way round: the last-to-first pair passes through the top, never the long arc
+        let span = ib - ia;
+        if (span < 0) span += wings.length;
+        const mid = (-90 + (ia + span / 2) * 360 / wings.length) * Math.PI / 180;
+        x = junctionRadius * Math.cos(mid);
+        y = junctionRadius * Math.sin(mid);
+      }
+      coord.set(node.id, { x: start.x + x, y: start.y + y });
+    }
+  } else {
+    for (const wing of wings) {
+      if (layout.wing_anchor_deg![wing] === undefined)
+        throw new Error(`tree spec: the wing ${wing} has no anchor in layout.wing_anchor_deg`);
+    }
+    const depth = new Map<string, number>();
+    const depthOf = (id: string): number => {
+      const known = depth.get(id);
+      if (known !== undefined) return known;
+      const node = specById.get(id)!;
+      let d = 1;
       for (const parent of node.needs) {
         if (parent === 'start') continue;
         const p = specById.get(parent);
-        if (p && p.wing !== node.wing) depths.add(d);
+        // a parent in another wing is a cross-link: it connects the wings but does not deepen this one
+        if (!p || p.wing !== node.wing) continue;
+        d = Math.max(d, depthOf(parent) + 1);
+      }
+      depth.set(id, d);
+      return d;
+    };
+
+    // A lane is a chain inside a wing. A node inherits its first in-wing parent's lane; where two
+    // nodes at the same depth would share one, the later takes the next free lane.
+    const lane = new Map<string, number>();
+    for (const wing of wings) {
+      const list = spec.nodes.filter((n) => n.wing === wing);
+      const byDepth = new Map<number, TreeSpecNode[]>();
+      for (const node of list) {
+        const d = depthOf(node.id);
+        const at = byDepth.get(d);
+        if (at) at.push(node); else byDepth.set(d, [node]);
+      }
+      for (const d of [...byDepth.keys()].sort((a, b) => a - b)) {
+        const used = new Set<number>();
+        for (const node of byDepth.get(d)!) {
+          const first = node.needs.find((p) => p !== 'start' && specById.get(p)?.wing === wing);
+          let l = first ? (lane.get(first) ?? 0) : 0;
+          while (used.has(l)) l++;
+          used.add(l);
+          lane.set(node.id, l);
+        }
       }
     }
-    return [...depths].sort((a, b) => a - b);
-  })();
+    const laneCountOf = (wing: string) =>
+      Math.max(0, ...spec.nodes.filter((n) => n.wing === wing).map((n) => (lane.get(n.id) ?? 0) + 1));
+
+    /** The depths at which a wing is ringed to its neighbour — the cross-links, read off the topology. */
+    crosslinkDepths = (() => {
+      const depths = new Set<number>();
+      for (const node of spec.nodes) {
+        const d = depthOf(node.id);
+        for (const parent of node.needs) {
+          if (parent === 'start') continue;
+          const p = specById.get(parent);
+          if (p && p.wing !== node.wing) depths.add(d);
+        }
+      }
+      return [...depths].sort((a, b) => a - b);
+    })();
+
+    for (const specNode of spec.nodes) {
+      const wing = specNode.wing;
+      const d = depthOf(specNode.id);
+      const l = lane.get(specNode.id) ?? 0;
+      const laneCount = laneCountOf(wing);
+      const laneSpan = arcSpan / Math.max(1, laneCount - 1);
+      const anchor = (layout.wing_anchor_deg![wing] + (l - (laneCount - 1) / 2) * laneSpan) * Math.PI / 180;
+      const radius = layout.ring_gap! * d;
+      coord.set(specNode.id, {
+        x: layout.start.x + Math.cos(anchor) * radius,
+        y: layout.start.y + Math.sin(anchor) * radius,
+      });
+    }
+  }
+
+  const radiusOf = (kind: string): number =>
+    v3 ? Number(layout.radii?.[kind] ?? (kind === 'keystone' ? 9 : kind === 'notable' ? 7 : 3.5))
+      : Number(layout.node_radius ?? 0);
 
   const nodes: TreeNode[] = [];
   for (const specNode of spec.nodes) {
     const kind = spec.node_kinds[specNode.kind];
     const wing = specNode.wing;
-    const d = depthOf(specNode.id);
-    const l = lane.get(specNode.id) ?? 0;
-    const laneCount = laneCountOf(wing);
-    const laneSpan = arcSpan / Math.max(1, laneCount - 1);
-    const anchor = (layout.wing_anchor_deg[wing] + (l - (laneCount - 1) / 2) * laneSpan) * Math.PI / 180;
-    const radius = layout.ring_gap * d;
     const wingIndex = spec.nodes.filter((n) => n.wing === wing).findIndex((n) => n.id === specNode.id) + 1;
-    const first = specNode.grants[0];
+    const grants = v3 ? (profileGrants.get(specNode.id) ?? []) : specNode.grants!;
+    const first = grants[0];
+    const at = coord.get(specNode.id)!;
     nodes.push({
       id: specNode.id,
       wing,
       kind: specNode.kind,
       index: wingIndex,
-      tier: wingIndex <= shallowNodes ? 'shallow' : 'deep',
+      ...(v3 ? {} : { tier: wingIndex <= shallowNodes ? 'shallow' as const : 'deep' as const }),
       ...(specNode.name ? { name: specNode.name } : {}),
+      ...(specNode.description ? { description: specNode.description } : {}),
       ...(specNode.weapon ? { weapon: specNode.weapon } : {}),
-      grants: specNode.grants,
+      grants,
       ...(specNode.rule ? { rule: specNode.rule } : {}),
       ...(specNode.group ? { group: specNode.group } : {}),
+      ...(specNode.profile ? { profile: specNode.profile } : {}),
+      ...(specNode.placement ? { placement: specNode.placement } : {}),
+      ...(specNode.draft_ref !== undefined ? { draft_ref: specNode.draft_ref } : {}),
       ...(specNode.effects ? { effects: specNode.effects } : {}),
-      line: first.id,
-      values: first.values,
-      max: maxOf(first.id),
-      x: layout.start.x + Math.cos(anchor) * radius,
-      y: layout.start.y + Math.sin(anchor) * radius,
+      line: first?.id ?? '',
+      values: first?.values ?? [],
+      max: first ? maxOf(first.id) : 0,
+      x: at.x,
+      y: at.y,
       needs: specNode.needs,
       ranks: kind.ranks,
       points: kind.ranks * kind.cost,
@@ -407,14 +721,40 @@ export function createTree(spec: TreeSpec, mods: any, elements: readonly string[
   const byId: Record<string, TreeNode> = Object.fromEntries(nodes.map((n) => [n.id, n]));
   const branches = wings;
 
-  /** The world the board pans over: every node's box. */
+  // ---- the runtime graph: `needs` and `links` are one undirected adjacency. Start is not a node, so
+  // a root is any node whose needs name it. Both the region rings (links) and the authoring parents
+  // are edges a purchase may cross (§3).
+  const adjacency = new Map<string, Set<string>>(nodes.map((n) => [n.id, new Set<string>()]));
+  const connect = (a: string, b: string) => {
+    adjacency.get(a)!.add(b);
+    adjacency.get(b)!.add(a);
+  };
+  for (const node of nodes)
+    for (const parent of node.needs) if (parent !== 'start') connect(node.id, parent);
+  for (const link of links) connect(link.a, link.b);
+
+  const rankOf = (id: string, ranks: Record<string, number> | undefined) => {
+    const node = byId[id];
+    if (!node) return 0;
+    return Math.max(0, Math.min(node.ranks, Math.floor(ranks?.[id] ?? 0)));
+  };
+  const ownedSet = (ranks: Record<string, number> | undefined) => {
+    const out = new Set<string>();
+    for (const id of Object.keys(ranks ?? {})) if (rankOf(id, ranks) > 0) out.add(id);
+    return out;
+  };
+  const adjacentTo = (id: string): string[] => [...(adjacency.get(id) ?? [])];
+
+  /** The world the board pans over: every node's box, plus the v3 margin. */
   const world = (() => {
-    const r = layout.node_radius;
-    const xs = nodes.map((n) => n.x);
-    const ys = nodes.map((n) => n.y);
-    const x = Math.min(...xs) - r;
-    const y = Math.min(...ys) - r;
-    return { x, y, width: Math.max(...xs) + r - x, height: Math.max(...ys) + r - y };
+    const padding = v3 ? (layout.padding ?? 16) : 0;
+    const x = Math.min(...nodes.map((n) => n.x - radiusOf(n.kind))) - padding;
+    const y = Math.min(...nodes.map((n) => n.y - radiusOf(n.kind))) - padding;
+    return {
+      x, y,
+      width: Math.max(...nodes.map((n) => n.x + radiusOf(n.kind))) + padding - x,
+      height: Math.max(...nodes.map((n) => n.y + radiusOf(n.kind))) + padding - y,
+    };
   })();
 
   /** The lines the bought ranks grant, in the shape `sumLines` accumulates — one entry per grant,
@@ -455,25 +795,73 @@ export function createTree(spec: TreeSpec, mods: any, elements: readonly string[
   };
 
   /**
-   * The nodes a point can open right now: the ones whose parents include an owned path and which are
-   * not already at their kind's rank cap. `needs` is an OR, so one owned parent opens the node.
+   * The nodes a point can open right now: the ones with an owned node across any graph edge and not
+   * already at their kind's rank cap. `needs` is an OR, and a `link` counts as an edge too, so a
+   * region ring opens a node from the neighbouring region just like a parent does.
    */
   const reachableFrom = (ranks: Record<string, number> | undefined) => {
-    const owned = new Set(Object.entries(ranks || {}).filter(([, r]) => r > 0).map(([id]) => id));
+    const owned = ownedSet(ranks);
     const out = new Set<string>();
     for (const node of nodes) {
-      const rank = Math.max(0, Math.min(node.ranks, Math.floor(ranks?.[node.id] ?? 0)));
-      if (rank >= node.ranks) continue;
-      if (node.needs.includes('start') || node.needs.some((p) => owned.has(p))) out.add(node.id);
+      if (rankOf(node.id, ranks) >= node.ranks) continue;
+      if (node.needs.includes('start') || adjacentTo(node.id).some((id) => owned.has(id))) out.add(node.id);
     }
     return out;
   };
 
+  /** Is a node adjacent to an owned node (or the free start)? Ownership is the only unlock (D3). */
+  const connected = (nodeId: string, ranks: Record<string, number> | undefined) => {
+    const node = byId[nodeId];
+    if (!node) return false;
+    if (node.needs.includes('start')) return true;
+    const owned = ownedSet(ranks);
+    return adjacentTo(nodeId).some((id) => owned.has(id));
+  };
+
+  /** The owned keystone that bans this one, if any. Only the file's pairs count — no transitive
+   *  closure, so a keystone outside every listed pair stays free (§3). */
+  const pairHolder = (nodeId: string, ranks: Record<string, number> | undefined) => {
+    for (const other of pairMap.get(nodeId) ?? []) if (rankOf(other, ranks) > 0) return other;
+    return null;
+  };
+
+  /** Is a keystone free of every listed pair? v2 has no pairs, so it is always free. */
+  const pairOk = (nodeId: string, ranks: Record<string, number> | undefined) =>
+    pairHolder(nodeId, ranks) === null;
+
+  /** The first listed pair an allocation holds together — what an import validator refuses. */
+  const conflictsIn = (ranks: Record<string, number> | undefined) => {
+    for (const pair of incompatibilities)
+      if (rankOf(pair.a, ranks) > 0 && rankOf(pair.b, ranks) > 0) return pair;
+    return null;
+  };
+
+  /** Can the node be bought on connectivity, cap and pairs alone? The wallet is the sim's call. */
+  const canOpen = (nodeId: string, ranks: Record<string, number> | undefined) => {
+    const node = byId[nodeId];
+    if (!node || rankOf(nodeId, ranks) >= node.ranks) return false;
+    if (v3 && !pairOk(nodeId, ranks)) return false;
+    return connected(nodeId, ranks);
+  };
+
+  /** What a purchase sequence costs, split by wallet — the two currencies are never added together. */
+  const priceOf = (ids: readonly string[]): TreePrice => {
+    let tree = 0;
+    let attainment = 0;
+    for (const id of ids) {
+      const node = byId[id];
+      if (!node) continue;
+      if (node.currency === 'tree') tree += node.cost;
+      else attainment += node.cost;
+    }
+    return { tree, attainment };
+  };
+
   /**
-   * The nodes on the path from the owned frontier to a node: the node itself and every node it
-   * needs that is not owned yet, deepest parent first, so the path can be bought in that order (D7).
+   * v2's path: the node itself and every node it needs that is not owned yet, deepest parent first,
+   * so the caller can buy it in reverse (D7).
    */
-  const pathTo = (nodeId: string, ranks: Record<string, number> | undefined) => {
+  const legacyPathTo = (nodeId: string, ranks: Record<string, number> | undefined) => {
     const wanted: string[] = [];
     const seen = new Set<string>();
     const walk = (id: string) => {
@@ -481,7 +869,7 @@ export function createTree(spec: TreeSpec, mods: any, elements: readonly string[
       seen.add(id);
       const node = byId[id];
       if (!node) return;
-      if ((ranks?.[id] ?? 0) > 0) return;   // an owned node is the frontier: its own path is spent
+      if (rankOf(id, ranks) > 0) return;   // an owned node is the frontier: its own path is spent
       wanted.push(id);
       for (const parent of node.needs) if (parent !== 'start') walk(parent);
     };
@@ -489,11 +877,102 @@ export function createTree(spec: TreeSpec, mods: any, elements: readonly string[
     return wanted;
   };
 
-  /** The points the path to a node would cost. */
-  const pathCost = (nodeId: string, ranks: Record<string, number> | undefined) =>
-    pathTo(nodeId, ranks).reduce((sum, id) => sum + (byId[id] ? byId[id].cost : 0), 0);
+  const cmpSequence = (a: string[], b: string[]) => {
+    const n = Math.min(a.length, b.length);
+    for (let i = 0; i < n; i++) if (a[i] !== b[i]) return a[i] < b[i] ? -1 : 1;
+    return a.length - b.length;
+  };
 
-  /** Is a node's keystone group free? Holding one member of a group blocks its siblings (D1). */
+  /**
+   * v3's path (D7): the cheapest purchase sequence from the owned frontier to a node over the
+   * undirected graph. Every owned node is a zero-cost root, a normal costs 1, a Notable costs 3, and a
+   * Keystone target costs 1 attainment instead of Tree Points and may not be walked through before it
+   * is owned. Ties go to the lexically smallest purchase-ID sequence; the returned order is the order
+   * in which the path is bought (frontier first, target last).
+   */
+  const graphPathTo = (nodeId: string, ranks: Record<string, number> | undefined) => {
+    const target = byId[nodeId];
+    if (!target || rankOf(nodeId, ranks) > 0) return [];
+    const weightOf = (node: TreeNode) => (node.currency === 'tree' ? node.cost : 0);
+
+    // Dijkstra, seeded with every owned node and every root. A linear scan is plenty for ~700 nodes.
+    const dist = new Map<string, number>();
+    const settled = new Set<string>();
+    for (const node of nodes) {
+      if (rankOf(node.id, ranks) > 0) dist.set(node.id, 0);
+      else if (node.needs.includes('start')) dist.set(node.id, weightOf(node));
+    }
+    for (;;) {
+      let u: string | null = null;
+      let best = Number.POSITIVE_INFINITY;
+      for (const [id, d] of dist) {
+        if (settled.has(id) || d >= best) continue;
+        best = d;
+        u = id;
+      }
+      if (u === null) break;
+      settled.add(u);
+      // an unpurchased Keystone is a target, never a corridor
+      if (rankOf(u, ranks) === 0 && byId[u].kind === 'keystone') continue;
+      for (const v of adjacentTo(u)) {
+        if (rankOf(v, ranks) > 0 || settled.has(v)) continue;
+        const node = byId[v];
+        if (node.kind === 'keystone' && v !== nodeId) continue;
+        const next = best + weightOf(node);
+        if (next < (dist.get(v) ?? Number.POSITIVE_INFINITY)) dist.set(v, next);
+      }
+    }
+    if (!dist.has(nodeId)) return [];
+
+    // Among the shortest paths, pick the lexically smallest purchase sequence. Distances rise along
+    // every entered normal/notable, so the shortest-path graph can be walked in distance order.
+    const sequence = new Map<string, string[]>();
+    const ordered = [...dist.keys()]
+      .filter((id) => byId[id] && rankOf(id, ranks) === 0 && byId[id].kind !== 'keystone')
+      .sort((a, b) => (dist.get(a)! - dist.get(b)!) || (a < b ? -1 : a > b ? 1 : 0));
+    for (const id of ordered) {
+      const node = byId[id];
+      const entry = weightOf(node);
+      let bestSeq: string[] | null = null;
+      const offer = (prefix: readonly string[]) => {
+        const candidate = [...prefix, id];
+        if (bestSeq === null || cmpSequence(candidate, bestSeq) < 0) bestSeq = candidate;
+      };
+      if (node.needs.includes('start') && dist.get(id) === entry) offer([]);
+      for (const u of adjacentTo(id)) {
+        if (rankOf(u, ranks) > 0) {
+          if (dist.get(id) === entry) offer([]);
+          continue;
+        }
+        const prefix = sequence.get(u);
+        if (prefix && dist.get(u)! + entry === dist.get(id)) offer(prefix);
+      }
+      if (bestSeq) sequence.set(id, bestSeq);
+    }
+
+    if (target.kind !== 'keystone') return sequence.get(nodeId) ?? [];
+    let bestSeq: string[] | null = null;
+    for (const u of adjacentTo(nodeId)) {
+      let candidate: string[] | null = null;
+      if (rankOf(u, ranks) > 0) candidate = [nodeId];
+      else {
+        const prefix = sequence.get(u);
+        if (prefix && dist.get(u)! === dist.get(nodeId)) candidate = [...prefix, nodeId];
+      }
+      if (candidate && (bestSeq === null || cmpSequence(candidate, bestSeq) < 0)) bestSeq = candidate;
+    }
+    return bestSeq ?? [];
+  };
+
+  /** The nodes to buy, in purchase order. v2 keeps its authoring-parent walk; v3 uses the graph. */
+  const pathTo = (nodeId: string, ranks: Record<string, number> | undefined) =>
+    v3 ? graphPathTo(nodeId, ranks) : legacyPathTo(nodeId, ranks);
+
+  /** The path's price, split by wallet. An owned or unknown target costs nothing. */
+  const pathCost = (nodeId: string, ranks: Record<string, number> | undefined): TreePrice =>
+    priceOf(pathTo(nodeId, ranks));
+
+  /** Is a node's keystone group free? Holding one member of a group blocks its siblings (D1, v2). */
   const groupOk = (nodeId: string, ranks: Record<string, number> | undefined) => {
     const node = byId[nodeId];
     if (!node?.group) return true;
@@ -501,12 +980,12 @@ export function createTree(spec: TreeSpec, mods: any, elements: readonly string[
     if (!group) return true;
     for (const member of group.members) {
       if (member === nodeId) continue;
-      if ((ranks?.[member] ?? 0) > 0) return false;
+      if (rankOf(member, ranks) > 0) return false;
     }
     return true;
   };
 
-  /** The sibling that already holds a node's keystone group, if one does (D1). */
+  /** The sibling that already holds a node's keystone group, if one does (D1, v2). */
   const groupHolder = (nodeId: string, ranks: Record<string, number> | undefined) => {
     const node = byId[nodeId];
     if (!node?.group) return null;
@@ -514,7 +993,7 @@ export function createTree(spec: TreeSpec, mods: any, elements: readonly string[
     if (!group) return null;
     for (const member of group.members) {
       if (member === nodeId) continue;
-      if ((ranks?.[member] ?? 0) > 0) return member;
+      if (rankOf(member, ranks) > 0) return member;
     }
     return null;
   };
@@ -616,7 +1095,14 @@ export function createTree(spec: TreeSpec, mods: any, elements: readonly string[
     shallowNodes,
     /** The start marker the board draws, and the layout it draws over. */
     graph: { start: layout.start },
-    layout: { ...world, nodeRadius: layout.node_radius, ringGap: layout.ring_gap, arcSpan, pitch },
+    layout: {
+      ...world,
+      nodeRadius: layout.node_radius ?? layout.radii?.normal ?? 3.5,
+      ringGap: layout.ring_gap,
+      arcSpan,
+      pitch,
+      ...(v3 ? { regions: wings, radii: layout.radii ?? {} } : {}),
+    },
     currencies: spec.points.currencies,
     kinds: spec.node_kinds,
     crosslinkDepths,
@@ -624,6 +1110,14 @@ export function createTree(spec: TreeSpec, mods: any, elements: readonly string[
     pointsAt,
     pointsSpentByCurrency,
     reachableFrom,
+    /** The undirected graph `needs` + `links` builds, and the reads that walk it. */
+    adjacentTo,
+    connected,
+    canOpen,
+    /** v3 pairwise bans; v2's one-of families stay in the group helpers. */
+    pairOk,
+    pairHolder,
+    conflictsIn,
     groupOk,
     groupHolder,
     pathTo,
@@ -632,6 +1126,11 @@ export function createTree(spec: TreeSpec, mods: any, elements: readonly string[
     clusterState,
     groups: spec.keystone_groups || [],
     clusters: spec.clusters || [],
+    /** v3 data the cage and the board read: drawn edges, banned pairs, and the resolved profiles. */
+    links,
+    incompatibilities,
+    profiles,
+    profilesUsed: [...profilesUsed],
     linesOf, pointsSpent,
     keystoneBundles,
   };

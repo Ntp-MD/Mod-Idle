@@ -120,6 +120,7 @@ function fold(summary: DeliverySummary, contract: DeliveryContract) {
     summary.paidGold += contract.paidBonus.gold;
     for (const stone of contract.paidBonus.stones) add(summary.paidStones, stone);
     if (contract.paidBonus.skill) summary.paidSkills[contract.paidBonus.skill] = (summary.paidSkills[contract.paidBonus.skill] || 0) + 1;
+    summary.paidTreePoints = (summary.paidTreePoints ?? 0) + (contract.paidBonus.treePoints ?? 0);
   } else {
     summary.forfeitedGold += contract.reward.gold; add(summary.forfeitedStones, contract.reward.stone);
     if (contract.reward.skill) {
@@ -279,6 +280,7 @@ export function normalizeDeliveries(state: GameState) {
   for (const [id, remaining] of Object.entries(town.contractTriggerRemainingSec)) if (!townById(id) || !safe(remaining)) fail('invalid trigger');
   for (const [id, summary] of Object.entries(town.deliverySummaries)) {
     if (!townById(id) || !safe(summary.unread) || !safe(summary.completed) || !safe(summary.expired) || !amount(summary.paidGold) || !amount(summary.forfeitedGold)) fail('invalid recap summary');
+    if (summary.paidTreePoints !== undefined && !safe(summary.paidTreePoints)) fail('invalid summarized tree point reward');
     for (const [good, row] of Object.entries(summary.goods)) if (!trade.byId[good] || !safe(row.quantity) || !amount(row.gold)) fail('invalid summarized proceeds');
     for (const bucket of [summary.paidStones, summary.forfeitedStones, summary.forfeitedFallback]) {
       if (!bucket || typeof bucket !== 'object') fail('invalid summarized stones');

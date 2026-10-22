@@ -32,10 +32,11 @@ import { mark as markSnapshot } from './snapshot';
 import { newGoal, onSpawn as goalSpawn, onKill as goalKill, watch as goalWatch } from './goal';
 import { newCurses, modsOn, applyCurse, tickCurses, combineMods, lineValue, modsFromAuraFold, spreadOnDeath } from './curse';
 import { newMobStatusStore, applyWeaponRiders, stepMobParts, holdPoison, stopMob, forgetDead as forgetMobStatus,
+  placeKeystoneDoT, transferStatus, carriesTransferable,
   modsOn as statusModsOn, targetMods, holdsCondition,
 } from './mobStatus';
 import { newKeystoneRuntimeState } from '../../../engine/keystones.ts';
-import { armourBreak, autoCleanseReady, belowLowLife, borrowedRecoup, bundleOf, capacitiveEs, crushingRhythm, disruptingStop, endlessHungerBank, escapeBurst, ghostDanceRecovery, instrumentsMult, manaDebtFloor, manaRegenWhileNegative, mindOverMatter, parasiticLeech, redlineDamageMult, shieldGateHolds, staggeringSplit, timeOfNeedHeal, worthyFoe } from '../../../engine/keystones.ts';
+import { armourBreak, autoCleanseReady, belowLowLife, borrowedRecoup, bundleOf, capacitiveEs, crushingRhythm, disruptingStop, demolitionBlast, endlessHungerBank, escapeBurst, equilibriumResistance, ghostDanceRecovery, instrumentsMult, manaDebtFloor, manaRegenWhileNegative, mindOverMatter, painforgedBank, parasiticLeech, redlineDamageMult, shieldGateHolds, staggeringSplit, thornboundRetaliation, timeOfNeedHeal, worthyFoe } from '../../../engine/keystones.ts';
 import { KEYSTONE_HANDLERS, registerStaticKeystoneHandlers } from './keystone-runtime';
 import { tickCampEncounters, campEncounterEligible } from './camp-encounters';
 import {
@@ -566,8 +567,68 @@ export function adjudicateDrop(s: GameState, item: Item): void {
   }
 }
 
-function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof buildCharacter>, statuses: Statuses = {}) {
+/** The Element that carried the most of a finished Hit, ties broken by the canonical order (§7.6). */
+export function dominantElement(parts: { nativeElement: Record<string, number>; convertedElement: Record<string, number>; extraElement: Record<string, number> }): string | null {
+  const sum: Record<string, number> = {};
+  for (const lane of [parts.nativeElement, parts.convertedElement, parts.extraElement])
+    for (const [el, v] of Object.entries(lane)) if (el && v > 0) sum[el] = (sum[el] || 0) + v;
+  let best: string | null = null;
+  for (const el of Object.keys(E.elements.status_of) as string[])
+    if ((sum[el] || 0) > (best ? sum[best] || 0 : 0)) best = el;
+  return best;
+}
+
+/**
+ * `30` Elemental Equilibrium: the target resists the Element that just hit it harder by the bundle's
+ * points and everything else softer by its own, for its own seconds. A fresh application is written
+ * over the shift it replaces, so the debuff never walks a resistance off the sheet it started on.
+ */
+export function applyEquilibrium(mob: Mob, element: string, params: Record<string, number>, nowSec: number): void {
+  const standing = mob.resShift || { res: mob.res, resByElement: { ...(mob.resByElement || {}) } };
+  const next: Record<string, number> = {};
+  for (const el of Object.keys(E.elements.status_of) as string[]) {
+    const base = standing.resByElement[el] !== undefined ? standing.resByElement[el] : standing.res;
+    const moved = equilibriumResistance(base, base, params);
+    next[el] = el === element ? moved.own : moved.other;
+  }
+  mob.resByElement = next;
+  mob.resShift = { expiresAtSec: nowSec + Number(params.durationSec), res: standing.res, resByElement: standing.resByElement };
+}
+
+/** The shift is spawn state: when its own seconds run out the body reads its authored lines again. */
+export function revertEquilibrium(mob: Mob, nowSec: number): void {
+  const shift = mob.resShift;
+  if (!shift || nowSec < shift.expiresAtSec) return;
+  mob.res = shift.res;
+  mob.resByElement = shift.resByElement;
+  delete mob.resShift;
+}
+
+function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof buildCharacter>, statuses: Statuses = {}, bloomChain = true) {
   const online = s.online !== false;
+  // `27` Profane Bloom: a body that dies carrying your curse pays its own Max HP as Chaos to the rest
+  // of the group. The blast is secondary damage — no crit, no status, no leech, no hit counter — and it
+  // never sets a second body off, because that would turn one kill into a chain reaction (§7.2).
+  const bloom = bundleOf(c.keystones, 'profane-bloom');
+  if (bloom && bloomChain && Object.keys(s.curses[mob.id] || {}).length) {
+    const element = String(bloom.params.element);
+    const promised = mob.hpMax * Number(bloom.params.victimMaxHpPct) / 100;
+    let burst = 0;
+    for (const other of s.group) {
+      if (other === mob || other.hp <= 0) continue;
+      const dealt = eng.mitigateMobHit(other, 0, { [element]: promised });
+      if (!(dealt > 0)) continue;
+      other.hp -= dealt;
+      burst += dealt;
+      credit(s, 'swing', dealt);
+      fx(s, { kind: 'hit', side: 'field', mobId: other.id, via: 'swing', text: eng.fmt(dealt), value: dealt, colour: hitColour(element) });
+    }
+    if (burst > 0) push(s, `Profane Bloom — ${mob.species} bursts for ${eng.fmt(burst)}`);
+    while (s.group.some((m) => m.hp <= 0)) {
+      const dead = s.group.splice(s.group.findIndex((m) => m.hp <= 0), 1)[0];
+      onKill(s, rng, dead, c, statuses, false);
+    }
+  }
   // the lines this mob was carrying jump to the neighbours its row names 
   const caught = spreadOnDeath(s.curses, mob.id, s.group.map((m) => m.id));
   if (caught) push(s, `the curse spreads to ${caught} nearby`);
@@ -1016,6 +1077,15 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
       delete rkH.icdsUs[`ab:last:${m.id}`];
     }
   }
+  // `22` Demolition Sequence counts one body: whatever left the field takes its count and its summed
+  // HP loss with it, so a fifth Hit can never be paid against a target that is no longer there (§7.2).
+  for (const key of Object.keys(rkH.counters)) {
+    if (!key.startsWith('ds:hits:')) continue;
+    const gone = key.slice('ds:hits:'.length);
+    if (s.group.some((m) => m.id === gone)) continue;
+    delete rkH.counters[key];
+    delete rkH.targetCounters[`ds:loss:${gone}`];
+  }
   // 57 Shield Gate rearms only after ES is full and its 8s cooldown has passed
   const gateH = bundleOf(c.keystones, 'shield-gate');
   if (gateH && !(rkH.flags.shieldGateArmed ?? true)
@@ -1292,11 +1362,13 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
     if (cast.damage && !cast.targets) push(s, `${cast.name} was dodged`);
     credit(s, 'cast', cast.dealt || 0);
     if (cast.curseOn) {
-      const sec = applyCurse(s.curses, cast.curseOn, sm.byId[cast.id]);
+      const sec = applyCurse(s.curses, cast.curseOn, sm.byId[cast.id], c.keystones);
       // a curse line that names a status clock (Venom Bind) is spent on the status store, not the
-      // curse store, because it changes how another line decays rather than adding a multiplier
+      // curse store, because it changes how another line decays rather than adding a multiplier — and
+      // it is read back off the line the curse actually wrote, so `28` Malediction stretches it once
       for (const e of (sm.byId[cast.id].effects || [])) {
-        if (e.subject === 'target' && e.stat === 'poison_hold_sec') holdPoison(s.mobStatus, cast.curseOn, e.value);
+        if (e.subject === 'target' && e.stat === 'poison_hold_sec')
+          holdPoison(s.mobStatus, cast.curseOn, lineValue(s.curses, cast.curseOn, 'poison_hold_sec') || e.value);
       }
       push(s, `${cast.name} lands for ${sec} sec`);
     }
@@ -1354,8 +1426,13 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
         * (redline ? redlineDamageMult(redline.params as Record<string, number>, rk.stacks.redline || 0) : 1)
         * worthyNow.dealtMult
         * (instruments ? instrumentsMult(rk.lastAction, 'attack', instruments.params as Record<string, number>) : 1);
-      const r = playerSwing(rng, attackCharacter, target, c.weaponElement, tm, atUs, hitMult);
+      // `10` Painforged spends its bank on this Hit as flat Physical, before the crit roll (§7.2.2)
+      const forged = bundleOf(c.keystones, 'painforged');
+      const hpBefore = target.hp;
+      const r = playerSwing(rng, attackCharacter, target, c.weaponElement, tm, atUs, hitMult,
+        forged ? rk.stacks.painforged || 0 : 0);
       if (r.landed) {
+        if (forged) rk.stacks.painforged = 0;
         if (worthy) {
           for (const id of Object.keys(rk.counters)) if (id !== target.id) delete rk.counters[id];
           rk.counters[target.id] = (rk.counters[target.id] || 0) + 1;
@@ -1365,9 +1442,34 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
           rk.lastHitAtUs = atUs;
         }
         if (instruments) rk.lastAction = 'attack';
+        // `66` Elemental Conduit: the as-extra lane this Hit carried gets its own separate status
+        // attempt per Element — the same gate, proc and immunity every other status answer.
+        const conduit = bundleOf(c.keystones, 'elemental-conduit');
+        const extraLane = conduit ? r.packet?.parts.extraElement || {} : {};
         // the weapon's own riders — Element status, bleed and stun — on the swing's own hit, and on a
         // landing press too (§14), through one function so the two cannot drift
-        applyWeaponRiders(rng, c, s.mobStatus, target.id, lineValue(s.curses, target.id, 'bleed_chance') > 0, 0, 0, target.immune || []);
+        applyWeaponRiders(rng, c, s.mobStatus, target.id, lineValue(s.curses, target.id, 'bleed_chance') > 0, 0, 0, target.immune || [], extraLane);
+        // `09` Crimson Pact and `20` Toxic Execution: the physical this Hit withheld is not lost, it is
+        // written on the target's own status clock — no Alignment gate and no proc roll, because the
+        // bundle already decided the application. Immunity is the only thing that answers it.
+        if (r.bleed) placeKeystoneDoT(s.mobStatus, target.id, 'bleed', r.bleed.perSec, r.bleed.sec, 0, target.immune || []);
+        if (r.poison) placeKeystoneDoT(s.mobStatus, target.id, 'poison', r.poison.perSec, r.poison.sec, r.poison.budgetDps, target.immune || []);
+        // `30` Elemental Equilibrium: the Element that carried this Hit decides which line the target
+        // resists harder from here, and which it stops resisting (its own seconds, then it lapses).
+        const eq = bundleOf(c.keystones, 'elemental-equilibrium');
+        if (eq && r.packet) {
+          const dominant = dominantElement(r.packet.parts);
+          if (dominant) applyEquilibrium(target, dominant, eq.params as Record<string, number>, s.clockSec);
+        }
+        // `60` Plague Courier: a crit sends one Burn, Poison or Bleed off a neighbour and onto the body
+        // the crit landed on, with the damage and the life it had left. A transfer that immunity
+        // refuses costs nothing, so the ICD waits for the next crit (§7.6).
+        const plague = bundleOf(c.keystones, 'plague-courier');
+        if (plague && r.crit && clock.nowUs >= (rk.icdsUs.plagueCourier ?? 0)) {
+          const carrier = s.group.find((m) => m !== target && carriesTransferable(s.mobStatus, m.id));
+          if (carrier && transferStatus(s.mobStatus, carrier.id, target.id, target.immune || []))
+            rk.icdsUs.plagueCourier = clock.nowUs + Number(plague.params.icdSec) * units;
+        }
         // a swing that gives back HP is two events, not one: the blow the mob sees and the return the
         // character feels, each on its own half of the field
         if (r.leech) {
@@ -1379,9 +1481,8 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
             const bank = bundleOf(c.keystones, 'endless-hunger');
             const excess = r.leech - (s.player.es - before);
             if (bank && excess > 0) {
-              const cap = c.es * Number(bank.params.bankCapPct) / 100;
               const held = s.keystoneRuntime.bank.filter((b) => b.pool === 'es').reduce((a, b) => a + b.amount, 0);
-              const amount = Math.min(excess, Math.max(0, cap - held));
+              const amount = endlessHungerBank(held, excess, c.es, bank.params as Record<string, number>) - held;
               if (amount > 0) s.keystoneRuntime.bank.push({
                 pool: 'es', amount, expiresAtUs: atUs + Number(bank.params.expirySec) * units,
               });
@@ -1393,9 +1494,8 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
             const bank = bundleOf(c.keystones, 'endless-hunger');
             const excess = r.leech - (s.player.hp - before);
             if (bank && excess > 0) {
-              const cap = c.maxHp * Number(bank.params.bankCapPct) / 100;
               const held = s.keystoneRuntime.bank.filter((b) => b.pool === 'hp').reduce((a, b) => a + b.amount, 0);
-              const amount = Math.min(excess, Math.max(0, cap - held));
+              const amount = endlessHungerBank(held, excess, c.maxHp, bank.params as Record<string, number>) - held;
               if (amount > 0) s.keystoneRuntime.bank.push({
                 pool: 'hp', amount, expiresAtUs: atUs + Number(bank.params.expirySec) * units,
               });
@@ -1411,6 +1511,44 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
             dueAtUs: atUs + Number(dd.params.delaySec) * units, amount: r.deferred,
             sourceId: 'player', targetId: target.id,
           });
+        }
+        // `22` Demolition Sequence: five landed Hits that actually took Health off this one body sum
+        // their loss, and the fifth spends it — a blast worth a share of that sum on the body itself
+        // and the weakest neighbour still standing. DoT, deferred damage and this blast count for
+        // nothing, and changing the target before the fifth Hit clears the sum (§7.2).
+        const seq = bundleOf(c.keystones, 'demolition-sequence');
+        const realLoss = Math.max(0, hpBefore - target.hp);
+        if (seq && realLoss > 0) {
+          const hitsKey = `ds:hits:${target.id}`;
+          const lossKey = `ds:loss:${target.id}`;
+          const hits = (rk.counters[hitsKey] || 0) + 1;
+          const summed = (rk.targetCounters[lossKey] || 0) + realLoss;
+          if (hits >= Number(seq.params.hits)) {
+            rk.counters[hitsKey] = 0;
+            rk.targetCounters[lossKey] = 0;
+            const promised = demolitionBlast(summed, seq.params as Record<string, number>);
+            const element = String(seq.params.element);
+            const neighbours = s.group.filter((m) => m !== target && m.hp > 0)
+              .sort((a, b) => a.hp - b.hp || (a.id < b.id ? -1 : 1))
+              .slice(0, Number(seq.params.extraTargets));
+            for (const hit of [target, ...neighbours]) {
+              const dealt = eng.mitigateMobHit(hit, 0, { [element]: promised });
+              if (!(dealt > 0)) continue;
+              hit.hp -= dealt;
+              credit(s, 'swing', dealt);
+              fx(s, { kind: 'hit', side: 'field', mobId: hit.id, via: 'swing', text: eng.fmt(dealt), value: dealt, colour: hitColour(element) });
+            }
+            push(s, `Demolition Sequence detonates for ${eng.fmt(promised)}`);
+            while (s.group.some((m) => m.hp <= 0)) {
+              const dead = s.group.splice(s.group.findIndex((m) => m.hp <= 0), 1)[0];
+              delete rk.counters[`ds:hits:${dead.id}`];
+              delete rk.targetCounters[`ds:loss:${dead.id}`];
+              onKill(s, rng, dead, c, statuses);
+            }
+          } else {
+            rk.counters[hitsKey] = hits;
+            rk.targetCounters[lossKey] = summed;
+          }
         }
         // 43 Armourbreaker: each landed Physical Hit breaks 5% of the target's initial Armour
         const breaker = bundleOf(c.keystones, 'armourbreaker');
@@ -1439,8 +1577,11 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
           queueTrigger(trig.crit, target.id);
         }
         if (target.hp <= 0) {
-          onKill(s, rng, target, c, statuses);
-          s.group.shift();
+          // a Detonation above may already have taken this body off the field, and a kill credits once
+          if (s.group.includes(target)) {
+            s.group.splice(s.group.indexOf(target), 1);
+            onKill(s, rng, target, c, statuses);
+          }
           s.player.atkTimer = 0;
           swingsStopped = true;
         }
@@ -1501,6 +1642,9 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
   clock.schedule(tickStartUs, EVENT_PRIORITY.pendingDamage, 'player', 'group', () => {
     let dotDealt = 0;
     for (const mob of s.group) {
+      // `30` Elemental Equilibrium is the target's own seconds: the shift lapses on this beat, before
+      // the body's next status tick, so a resistance line never stays bent past its duration
+      revertEquilibrium(mob, s.clockSec);
       const dot = stepMobParts(s.mobStatus, mob.id);
       if (dot.total > 0) {
         mob.hp -= dot.total;
@@ -1566,6 +1710,14 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
         const r = mobSwing(rng, takenChar, mob, statuses, tm, s.player.es, absorbPct, (s.player.blockCharges || 0) > 0, s.player.hp);
         // an Earth Wall charge answered the swing: it is spent whether the shield rolled or not
         if (r.blockChargeSpent) s.player.blockCharges!--;
+        // `10` Painforged: what a Block actually took off this Hit is banked, up to its share of Max HP,
+        // and the next swing spends the whole of it as flat Physical. Turtle Doctrine's expected cut is
+        // not a Block event, so it feeds the bank nothing (§7.3.3).
+        const forgedIn = bundleOf(c.keystones, 'painforged');
+        if (forgedIn && r.blockCut) {
+          rkH.stacks.painforged = painforgedBank(rkH.stacks.painforged || 0, r.blockCut, c.maxHp,
+            forgedIn.params as Record<string, number>);
+        }
         if (r.leech && r.leech > 0) mob.hp = Math.min(mob.hpMax, mob.hp + r.leech);
         // 11 Fortify cuts every later Hit by its stacks; 16 Bark spends one charge on a Hit that lands
         const fortNow = bundleOf(c.keystones, 'fortress-under-siege');
@@ -1648,6 +1800,25 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
           rkH.lastLossAtUs = clock.nowUs;
           if (fortNow) rkH.stacks.fortress = Math.min(Number(fortNow.params.maxStacks), (rkH.stacks.fortress || 0) + 1);
           if (barkNow) rkH.icdsUs.bark = clock.nowUs + Number(barkNow.params.regenEverySec) * units;
+          // `53` Thornbound: the body that took something off us is answered by a share of our Armour,
+          // once on its own clock. It is secondary damage — no crit, no status, no leech, no hit counter,
+          // and it never answers a different body because this one died first (§7.2).
+          const thornH = bundleOf(c.keystones, 'thornbound');
+          if (thornH && clock.nowUs >= (rkH.icdsUs.thornbound ?? 0)) {
+            const promised = thornboundRetaliation(c.armour, thornH.params as Record<string, number>) * berserkDealt;
+            const dealt = eng.mitigateMobHit(mob, promised, 0);
+            if (dealt > 0) {
+              mob.hp -= dealt;
+              rkH.icdsUs.thornbound = clock.nowUs + Number(thornH.params.icdSec) * units;
+              credit(s, 'swing', dealt);
+              fx(s, { kind: 'hit', side: 'field', mobId: mob.id, via: 'swing', text: eng.fmt(dealt), value: dealt, colour: hitColour(null) });
+              push(s, `Thornbound answers ${mob.species} for ${eng.fmt(dealt)}`);
+              if (mob.hp <= 0 && s.group.includes(mob)) {
+                s.group.splice(s.group.indexOf(mob), 1);
+                onKill(s, rng, mob, c, statuses);
+              }
+            }
+          }
         }
         // A shield block deflects the status, including an Earth Wall charge. Evasion and perfect dodge
         // return raw=0; a hit absorbed by ES still landed and can apply its status.
@@ -1700,6 +1871,13 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
   if (s.player.hp > 0) for (const p of [...qL.recoup]) {
     if (p.dueAtUs > tickEndUs) continue;
     qL.recoup.splice(qL.recoup.indexOf(p), 1);
+    s.player.hp = Math.min(usableHp(c, s.skills), s.player.hp + p.amount);
+  }
+  // `17` Master Surgeon: the draught's Health arrives a second at a time. A payment that finds the
+  // pool full is lost, but the stream keeps running to its last second (§7.4).
+  if (s.player.hp > 0) for (const p of [...qL.potion]) {
+    if (p.dueAtUs > tickEndUs) continue;
+    qL.potion.splice(qL.potion.indexOf(p), 1);
     s.player.hp = Math.min(usableHp(c, s.skills), s.player.hp + p.amount);
   }
   // 24 Escape Artist replaces natural recharge with a 50% Max ES burst every 3s
@@ -1826,6 +2004,16 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
     // the rest is a clean one: whatever the fight had on the character ends at the Push — the
     // statuses are the fight's, and the camp neither ticks nor banks them
     for (const key of Object.keys(statuses) as (keyof Statuses)[]) delete statuses[key];
+    // The fight's own Keystone state ends with the fight: committed debt, deferred damage, a potion
+    // stream, the leech bank and every per-target counter never follow the character back to camp
+    // (§7.2's Death/Push cleanup, §7.3.10's "stops at a Push").
+    s.keystoneRuntime.queues = { deferred: [], dot: [], hpDebt: [], recoup: [], potion: [] };
+    s.keystoneRuntime.bank = [];
+    s.keystoneRuntime.stacks = {};
+    s.keystoneRuntime.counters = {};
+    s.keystoneRuntime.targetCounters = {};
+    s.keystoneRuntime.dotInstances = [];
+    s.keystoneRuntime.targetRefs = {};
     // a Push in a dungeon ends the run at once and the escrow is forfeited, never paid
     if (s.dungeon) push(s, abandonRun(s, 'Pushed'));
     s.group = [];

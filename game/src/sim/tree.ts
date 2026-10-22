@@ -1,4 +1,5 @@
 import { tree } from '../engine/client';
+import { newKeystoneRuntimeState } from '../../../engine/keystones.ts';
 import type { GameState } from './types';
 import { atSettlement } from './craft';
 
@@ -38,10 +39,19 @@ export function canSpendTree(state: GameState, nodeId: string, model = tree): Tr
   }
   const rank = state.player.treeRanks?.[nodeId] || 0;
   if (rank >= node.ranks) return { ok: false, why: `${node.id} is already at rank ${node.ranks}` };
-  // a keystone group is a one-of family (D1): holding one member blocks its siblings
-  const holder = model.groupHolder(nodeId, state.player.treeRanks);
-  if (holder) return { ok: false, why: `${holder} already holds this keystone group` };
-  if (!node.needs.includes('start') && !node.needs.some((parent) => (state.player.treeRanks?.[parent] || 0) > 0)) {
+  // v2's one-of group or v3's listed keystone pair: holding the other member blocks this one
+  const holder = model.version >= 3
+    ? model.pairHolder(nodeId, state.player.treeRanks)
+    : model.groupHolder(nodeId, state.player.treeRanks);
+  if (holder) {
+    return {
+      ok: false,
+      why: model.version >= 3
+        ? `${holder} is incompatible with this keystone`
+        : `${holder} already holds this keystone group`,
+    };
+  }
+  if (!model.connected(nodeId, state.player.treeRanks)) {
     return { ok: false, why: 'connect this node to an owned path first' };
   }
   return { ok: true };
@@ -69,35 +79,59 @@ export function respecTree(state: GameState): { ok: boolean; refundedTree: numbe
   state.player.treeRanks = {};
   state.player.treePoints += treeSpent;
   state.player.attainmentPoints = (state.player.attainmentPoints ?? 0) + attainmentSpent;
+  // §7.5.9: the sold keystones take their combat state with them, and an aura's pool choice is only
+  // something Blood Covenant can offer. Ownership, the rotation and running cooldowns stay.
+  state.keystoneRuntime = newKeystoneRuntimeState();
+  state.skills.auraPool = {};
+  for (const id of Object.keys(state.skills.auras)) state.skills.auras[id] = false;
   return { ok: true, refundedTree: treeSpent, refundedAttainment: attainmentSpent };
 }
 
 /**
- * The path a shift-click would buy (D7): the nodes from the owned frontier to a node, and what it
- * costs. The board shows the number before the click lands.
+ * The path a shift-click would buy (D7): the nodes from the owned frontier to a node, in purchase
+ * order, and what each wallet pays. The board shows the price before the click lands.
  */
 export const treePath = (state: GameState, nodeId: string, model = tree) => {
-  const nodes = model.pathTo(nodeId, state.player.treeRanks);
-  return { nodes, cost: nodes.reduce((sum, id) => sum + (model.byId[id]?.cost ?? 0), 0) };
+  const raw = model.pathTo(nodeId, state.player.treeRanks);
+  // v2 walks parents from the target back out; v3's Dijkstra already returns the purchase order
+  const nodes = model.version >= 3 ? raw : [...raw].reverse();
+  return { nodes, cost: model.pathCost(nodeId, state.player.treeRanks) };
 };
 
 /**
- * Buy the whole path to a node at once. The nodes are bought deepest parent first, so every step of
- * the path is legal when it is bought, and the whole thing is refused if it cannot be afforded.
+ * Buy the whole path to a node at once. Every step is checked against the allocation the earlier
+ * steps would leave behind, and the whole path is refused before anything is spent — a path is never
+ * bought halfway.
  */
 export function allocateTreePath(state: GameState, nodeId: string, model = tree): TreeVerdict & { spent?: number } {
   const path = treePath(state, nodeId, model);
   if (!path.nodes.length) return { ok: false, why: 'that path is already bought' };
-  const treeCost = path.nodes.reduce((sum, id) => sum + (model.byId[id]?.currency === 'attainment' ? 0 : (model.byId[id]?.cost ?? 0)), 0);
-  const attainmentCost = path.nodes.reduce((sum, id) => sum + (model.byId[id]?.currency === 'attainment' ? (model.byId[id]?.cost ?? 0) : 0), 0);
+  const { tree: treeCost, attainment: attainmentCost } = path.cost;
   if (treePointsFree(state, 'tree') < treeCost) return { ok: false, why: `needs ${treeCost} banked point` };
   if (treePointsFree(state, 'attainment') < attainmentCost) return { ok: false, why: `needs ${attainmentCost} attainment point` };
-  for (const id of [...path.nodes].reverse()) {
-    const verdict = canSpendTree(state, id, model);
-    if (!verdict.ok) return { ok: false, why: verdict.why };
-    spendTreePoint(state, id, model);
+
+  const simulated: Record<string, number> = { ...(state.player.treeRanks ?? {}) };
+  for (const id of path.nodes) {
+    const node = model.byId[id];
+    if (!node) return { ok: false, why: 'no such node' };
+    const rank = simulated[id] ?? 0;
+    if (rank >= node.ranks) return { ok: false, why: `${node.id} is already at rank ${node.ranks}` };
+    const holder = model.version >= 3
+      ? model.pairHolder(id, simulated)
+      : model.groupHolder(id, simulated);
+    if (holder) return { ok: false, why: `${holder} is incompatible with ${id}` };
+    if (!model.connected(id, simulated)) return { ok: false, why: 'connect this node to an owned path first' };
+    simulated[id] = rank + 1;
   }
-  return { ok: true, spent: path.cost };
+
+  state.player.treeRanks ??= {};
+  for (const id of path.nodes) {
+    const node = model.byId[id];
+    state.player.treeRanks[id] = (state.player.treeRanks[id] || 0) + 1;
+    if (node.currency === 'tree') state.player.treePoints -= node.cost;
+    else state.player.attainmentPoints = (state.player.attainmentPoints ?? 0) - node.cost;
+  }
+  return { ok: true, spent: treeCost };
 }
 
 /** The lines the bought ranks grant — what the character sheet adds to its gear. */

@@ -1,4 +1,5 @@
-import { farm, fieldwork } from '../engine/client';
+import { farm, fieldwork, tree } from '../engine/client';
+import { bundleOf, surgeonStream } from '../../../engine/keystones.ts';
 import type { GameState } from './types';
 import type { Character } from './player';
 import { addTo, fits } from './slots';
@@ -155,6 +156,10 @@ const bottleWorth = (state: GameState, name: string) =>
   (state.farm.condensed[name] || 0) * farm.P.condensed.effect_mult + (state.farm.potions[name] || 0);
 
 /** Drink one bottle: a condensed dose counts as ten, and a `both` draught fills both pools. */
+/** Is a `17` Master Surgeon stream still paying? A second HP draught cannot stack on it. */
+export const potionStreamRunning = (state: GameState): boolean =>
+  (state.keystoneRuntime?.queues?.potion?.length ?? 0) > 0;
+
 function applyPotion(state: GameState, c: Character, potion: any): { hp: number; mana: number } {
   const condensed = (state.farm.condensed[potion.name] || 0) > 0;
   if (condensed) state.farm.condensed[potion.name] -= 1;
@@ -162,7 +167,18 @@ function applyPotion(state: GameState, c: Character, potion: any): { hp: number;
   const mult = condensed ? farm.P.condensed.effect_mult : 1;
   const hp = (c.maxHp * farm.potionPct(potion, 'hp') * mult) / 100;
   const mana = (c.maxMana * farm.potionPct(potion, 'mana') * mult) / 100;
-  if (hp) state.player.hp = Math.min(c.maxHp, state.player.hp + hp);
+  // `17` Master Surgeon: the Health half of the draught stops being one number and becomes a stream —
+  // 1.5× the nominal heal paid out a second for its own seconds. Overflow at a full pool is lost while
+  // the remaining payments still run; Mana is never touched by it, and a hybrid pays its Mana at once.
+  const surgeon = bundleOf(c.keystones, 'master-surgeon');
+  if (surgeon && hp > 0) {
+    const stream = surgeonStream(hp, surgeon.params as Record<string, number>);
+    const units = tree.mechanics?.combat_time_units_per_sec ?? 1;
+    for (let i = 1; i <= Number(surgeon.params.durationSec); i++)
+      state.keystoneRuntime.queues.potion.push({
+        dueAtUs: (state.clockSec + i) * units, amount: stream.perSec, sourceId: 'potion', targetId: 'player',
+      });
+  } else if (hp) state.player.hp = Math.min(c.maxHp, state.player.hp + hp);
   if (mana) state.player.mana = Math.min(c.maxMana, state.player.mana + mana);
   state.farm.lastDrinkAt = state.clockSec;
   state.farm.usesThisFight++;
@@ -178,6 +194,9 @@ export function drink(state: GameState, c: Character, name: string, mobIsBoss: b
   if (mobIsBoss && lim.bossSuppressed) return { ok: false, why: 'suppressed on a boss' };
   if (state.farm.usesThisFight >= lim.maxUsesPerFight) return { ok: false, why: 'no uses left this fight' };
   if (state.clockSec - state.farm.lastDrinkAt < lim.sharedCooldownSec) return { ok: false, why: 'on cooldown' };
+  // an already-running stream is a refusal raised BEFORE the bottle is spent or the cooldown taken
+  if (bundleOf(c.keystones, 'master-surgeon') && farm.potionPct(potion, 'hp') > 0 && potionStreamRunning(state))
+    return { ok: false, why: 'the last draught is still being absorbed' };
   applyPotion(state, c, potion);
   return { ok: true };
 }
@@ -214,6 +233,8 @@ export function maybeDrink(state: GameState, c: Character, mobIsBoss: boolean): 
   const candidates = farm.P.list.filter((p: any) => (p.pool === pool || p.pool === 'both') && bottleWorth(state, p.name) > 0);
   if (!candidates.length) return null;
   const potion = candidates.sort((a: any, b: any) => farm.potionEffect(b) - farm.potionEffect(a))[0];
+  // `17`: the automation never overwrites its own stream — it waits, bottle unspent
+  if (bundleOf(c.keystones, 'master-surgeon') && farm.potionPct(potion, 'hp') > 0 && potionStreamRunning(state)) return null;
   const { hp, mana } = applyPotion(state, c, potion);
   return { name: potion.name, pool, amount: pool === 'hp' ? hp : mana };
 }

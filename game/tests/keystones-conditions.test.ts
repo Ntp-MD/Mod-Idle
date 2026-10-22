@@ -54,7 +54,7 @@ describe('Packet H — conditions, stacks and action history', () => {
     expect(instrumentsMult(null, 'attack', { alternateMult: 1.35 })).toBe(1);
   });
 
-  it('registers the twenty-six Packet E–H keys', () => {
+  it('opens all fifty-two catalogue keys', () => {
     expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toHaveLength(52);
   });
 });

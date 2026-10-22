@@ -490,10 +490,14 @@ export function crimsonPactSplit(physical: number, params: Record<string, number
   return { direct, bleedTotal, bleedDps: bleedTotal / params.durationSec };
 }
 
-/** 20 Toxic Execution: the crit bonus alone is paid as Poison over the duration, no Element needed. */
+/**
+ * 20 Toxic Execution: the crit bonus alone is paid as Poison over the duration, no Element needed.
+ * The whole of it arrives — `dps` is the bonus spread across the seconds the bundle states — while
+ * `budgetDps` is the per-second figure the shared DoT cap measures the lane against.
+ */
 export function toxicExecution(critBonus: number, nominalRate: number, params: Record<string, number>): { budgetDps: number; dps: number } {
-  const budgetDps = Math.max(0, critBonus) * nominalRate;
-  return { budgetDps, dps: budgetDps / params.durationSec };
+  const bonus = Math.max(0, critBonus);
+  return { budgetDps: bonus * nominalRate, dps: bonus / params.durationSec };
 }
 
 /** 43 Armourbreaker: each landed Physical Hit breaks 5% of the initial Armour, capped. */

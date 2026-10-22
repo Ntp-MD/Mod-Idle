@@ -9,6 +9,7 @@
    * row instead of doing nothing.
    */
   import { KEYBINDS, KEYGROUP_LABEL, DEFAULT_BINDS, formatKey, isModifierKey, tokenOf, conflicts, type KeyGroup } from './keybinds';
+  import Tabs from './Tabs.svelte';
 
   let { binds, onset, onreset, onclear }: {
     binds: Record<string, string>;
@@ -52,11 +53,12 @@
     </p>
   {/if}
 
-  <div class="group-tabs" role="tablist" aria-label="Key binding groups">
-    {#each groups as g (g)}
-      <button role="tab" class="btn btn-quiet" class:toggled={activeGroup === g} aria-selected={activeGroup === g} onclick={() => (activeGroup = g)}>{KEYGROUP_LABEL[g]}</button>
-    {/each}
-  </div>
+  <Tabs
+    label="Key binding groups"
+    tabs={groups.map((g) => ({ id: g, label: KEYGROUP_LABEL[g] }))}
+    active={activeGroup}
+    onpick={(id) => (activeGroup = id as KeyGroup)}
+  />
 
   <section class="grp" aria-label={KEYGROUP_LABEL[activeGroup]}>
     <h4>{KEYGROUP_LABEL[activeGroup]}</h4>
@@ -104,7 +106,6 @@
     background: color-mix(in srgb, var(--gold) 10%, transparent); border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent); color: var(--gold-lit);
   }
   .clash b { font-family: var(--num); color: var(--gold); }
-  .group-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); }
   .grp { min-height: 0; display: grid; grid-template-rows: auto 1fr; gap: var(--spacing-xs); }
   .key-value { display: flex; align-items: center; gap: var(--spacing-xs); }
   .kb td { border-bottom-color: var(--line); padding-bottom: 0; }

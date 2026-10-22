@@ -1,6 +1,6 @@
 # Map terrain artwork contract
 
-The ground projection is owned by `game/src/ui/map-projection.ts`. Run `npm run map -- --write` to regenerate the map and the matching templates in `game/public/map/terrain/templates/`.
+The ground projection is owned by `game/src/ui/map-projection.ts`. Run `npm run map -- --write` to regenerate the map and the matching templates in `art-reference/map/geometry/`.
 
 The portable [map art reference kit](../art-reference/map/README.md) contains shape references, role-labelled style references, agent briefs and prompts. Its refresh script derives geometry directly from the projection without rebuilding or modifying the live map.
 
@@ -8,7 +8,7 @@ The portable [map art reference kit](../art-reference/map/README.md) contains sh
 
 Public map assets have three top-level folders: `terrain/` for natural ground/scenery and its `templates/`, `landmark/` for settlements, ruins, camps and event scenery, and `characters/` for the player and species. Keep originals alongside numbered versions in their category. Registration is selected by footprint metadata, not by a special directory name. The original-image coverage list is owned by `art-reference/map/source-assets.json`.
 
-Use `terrain-hex.png` or `terrain-hex.svg` as the shape reference. Exact canvas-space vertices and projection matrix are in `terrain-hex.json`; do not transcribe rounded coordinates into renderer code. The reference canvas is 1024 × 625, with its centre at (512, 312.5). It maps to the projected ground bounding rectangle, without alpha cropping or a second camera rotation. Artwork can have a different raster resolution when the same normalized footprint is retained.
+Use `hex-mask.png` or `hex-mask.svg` as the shape reference. Exact canvas-space vertices and projection matrix are in `terrain-hex.json` in the same folder; do not transcribe rounded coordinates into renderer code. The reference canvas is 1024 × 625, with its centre at (512, 312.5). It maps to the projected ground bounding rectangle, without alpha cropping or a second camera rotation. Artwork can have a different raster resolution when the same normalized footprint is retained.
 
 The descriptive camera is orthographic, elevation 38° above ground and board yaw −16° in renderer coordinates. Upright vegetation must already depict that view. Keep it inside the footprint for terrain tiles; separate objects can extend above their ground footprint.
 
@@ -16,7 +16,7 @@ The terrain catalogue is `game/src/ui/map-terrain.ts`. Preserve originals and us
 
 `TERRAIN_ART` holds the tile a biome shows by default. `TERRAIN_VARIANTS` holds the other tiles that same biome may show; the map generator picks one of them per hex, stably, so a stretch of one biome reads as ground instead of one repeated picture. A variant needs its own measured footprint before it may be listed, and the biome's own art is never repeated in its variant list.
 
-Settlements select their art through `LANDMARK_ART` in `tools/map.ts`, whose default town image comes from `TERRAIN_ART.town`. The selected image then uses the same full-hex registration as other terrain. A future landmark variant must be selected there as well as having its asset/footprint available. M15 checks art placement on settlement cells too.
+Settlements select their art through `LANDMARK_ART` in `tools/map.ts`, whose default town image comes from `TERRAIN_ART.town`. Full-hex landmark ground uses the same registration as terrain. A separate landmark diorama may omit its own tile base: the renderer places it over a registered ground hex and aligns it using the painted-bounds anchor in `game/src/ui/map-sprite-bounds.json`. An optional seventh value scales a sprite slightly past its ground footprint to let roofs or walls cross into adjacent hexes. A landmark variant must be selected through `LANDMARK_ART` and have its asset/bounds available. M15 checks centring, bottom anchoring and the registered spill limit on settlement cells too.
 
 Generated images may approximate the requested polygon. Measure the six ground vertices before activation with the measurement tool, which reads the tile's own silhouette and stores measured pixel coordinates, source dimensions and an opaque ground fill in `game/src/ui/map-terrain-footprints.json`:
 
@@ -32,6 +32,6 @@ Use the development-only **Hex alignment** checkbox under Map tools → Controls
 
 ## Forest version 1 generation brief
 
-Built-in image generation; shape reference: `game/public/map/terrain/templates/terrain-hex.png`; style reference: the original `game/public/map/terrain/forest-relief.png`.
+Built-in image generation; shape reference: `art-reference/map/geometry/hex-mask.png`; style reference: the original `game/public/map/terrain/forest-relief.png`.
 
 > One painterly fantasy tabletop forest tile. Match the shape reference's complete projected hex footprint and framing. Orthographic elevation 38°, board yaw −16°. Opaque moss/grass/earth to all six edges, transparent outside. Three small pine trees inside the central area with 8% clearance from the silhouette. Muted greens, top-left lighting. No platform thickness, outer shadow, border, path, buildings, characters or text. Preserve transparent alpha. Requested reference canvas: 1024 × 625; measure the actual output dimensions and footprint before placement.

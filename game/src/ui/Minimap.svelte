@@ -69,8 +69,8 @@
     font-family: var(--num); font-size: var(--font-xs); color: var(--sheet-ink);
     text-shadow: 0 1px 2px rgba(0, 0, 0, .95); pointer-events: none; font-variant-numeric: tabular-nums;
   }
-  .mini-map :global(.mcell) { stroke: rgba(0, 0, 0, .35); stroke-width: 1.4; }
-  .mini-map :global(.mdot) { fill: var(--sheet-place); stroke: rgba(0, 0, 0, .6); stroke-width: 1.4; }
+  .mini-map :global(.mcell) { stroke: var(--map-hairline); stroke-width: 1.4; }
+  .mini-map :global(.mdot) { fill: var(--sheet-place); stroke: var(--map-hairline-strong); stroke-width: 1.4; }
   .mini-map :global(.you-ring) { fill: none; stroke: var(--gold); stroke-width: 3; opacity: .85; }
   .mini-map :global(.you-dot) { fill: var(--gold); }
   .mini-map:hover { border-color: var(--gold); box-shadow: var(--shadow-raised), 0 0 14px color-mix(in srgb, var(--gold) 30%, transparent); }

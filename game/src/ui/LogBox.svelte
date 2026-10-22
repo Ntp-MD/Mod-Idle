@@ -21,7 +21,7 @@
   <!-- One stream with combat, loot and system filters. -->
   <div class="chattabs tab-strip" role="group" aria-label="Chronicle filters">
     {#each tabs as [id, label] (id)}
-      <button type="button" class="tab-rail" class:active={active === id} aria-pressed={active === id} onclick={() => onTab(id)}>{label}</button>
+      <button type="button" class="tab-rail" class:picked={active === id} aria-pressed={active === id} onclick={() => onTab(id)}>{label}</button>
     {/each}
   </div>
   <div class="feed-body" role="log" aria-label="Event feed" aria-live="polite" aria-relevant="additions">

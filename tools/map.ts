@@ -28,7 +28,7 @@ import * as G from './lib/gates.ts';
 import { createRoad } from '../engine/road.ts';
 import { MAP_CAMERA_TRANSFORM, projectMapPoint, mapUprightAt, mapUprightAround, projectMapBounds, projectedHex, footprintShapeError } from '../game/src/ui/map-projection.ts';
 import { TERRAIN_ART, TERRAIN_VARIANTS } from '../game/src/ui/map-terrain.ts';
-import { mapSpriteWidth } from '../game/src/ui/map-sprites.ts';
+import { mapSpriteWidth, mapSpriteWidthScale } from '../game/src/ui/map-sprites.ts';
 import footprints from '../game/src/ui/map-terrain-footprints.json' with { type: 'json' };
 import type { EngineData, MobZone } from '../engine/types.ts';
 
@@ -771,7 +771,7 @@ function write() {
   const draft = OUT + '.tmp';
   fs.writeFileSync(draft, svg);
   fs.renameSync(draft, OUT);
-  const templateDir = path.join(ROOT, 'game/public/map/terrain/templates');
+  const templateDir = path.join(ROOT, 'art-reference/map/geometry');
   fs.mkdirSync(templateDir, { recursive: true });
   const width = 1024, height = 625;
   const vertices = PROJ_HEX.points.map(p => [
@@ -935,24 +935,30 @@ function checks() {
     const figures = svg.split('<g class="diorama-figure"').slice(1);
     let pieces = 0;
     for (const figure of figures) {
-      const href = /data-art-href="([^"]+)"/.exec(figure)?.[1] ?? /href="([^"]+)"/.exec(figure)?.[1] ?? '';
-      if (!href) { problems.push('terrain piece has no art reference'); continue; }
+      const hrefs = [...figure.matchAll(/data-art-href="([^"]+)"|<image\b[^>]*\bhref="([^"]+)"/g)]
+        .map((m) => m[1] ?? m[2]).filter((href): href is string => !!href && href.startsWith('/map/'));
+      if (!hrefs.length) { problems.push('terrain piece has no art reference'); continue; }
       pieces++;
-      if (!fs.existsSync(path.join(ROOT, 'game/public', href.slice(1)))) problems.push(`terrain piece ${href} is missing`);
-      if (!figure.includes('<g class="diorama-art">')) problems.push(`terrain piece ${href} is not wrapped as one diorama art group`);
-      if (figure.includes('clip-path=')) problems.push(`terrain piece ${href} is still clipped`);
-      if (href in footprints) {
-        if (!figure.includes(hexArtwork(href)) || !svg.includes(registeredDefinitions.get(href)!)) problems.push(`terrain piece ${href} does not match its measured footprint registration`);
-        continue;
+      if (!figure.includes('<g class="diorama-art">')) problems.push(`terrain piece ${hrefs[0]} is not wrapped as one diorama art group`);
+      if (figure.includes('clip-path=')) problems.push(`terrain piece ${hrefs[0]} is still clipped`);
+      for (const href of hrefs) {
+        if (!fs.existsSync(path.join(ROOT, 'game/public', href.slice(1)))) problems.push(`terrain piece ${href} is missing`);
+        if (href in footprints) {
+          if (!figure.includes(hexArtwork(href)) || !svg.includes(registeredDefinitions.get(href)!)) problems.push(`terrain piece ${href} does not match its measured footprint registration`);
+          continue;
+        }
+        // Sprite bounds anchor transparent landmark overlays to the cell independently of the base hex.
+        const escaped = href.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const m = new RegExp(`<svg class="" x="([^"]+)" y="([^"]+)" width="([^"]+)" height="([^"]+)"[^>]*><image href="${escaped}"` ).exec(figure)
+          || new RegExp(`<image class="[^"]*" href="${escaped}" x="([^"]+)" y="([^"]+)" width="([^"]+)" height="([^"]+)"`).exec(figure);
+        if (!m) { problems.push(`terrain piece ${href} is not one measured sprite`); continue; }
+        const [x, y, w, h] = m.slice(1).map(Number);
+        const expectedWidth = TERRAIN_PIECE.width * mapSpriteWidthScale(href);
+        if (Math.abs(w - expectedWidth) > .01) problems.push(`terrain piece ${href} is ${w} wide, not its registered painted width`);
+        if (mapSpriteWidthScale(href) < 1 || mapSpriteWidthScale(href) > 1.1) problems.push(`terrain piece ${href} has an unsupported spill scale`);
+        if (Math.abs(x + w / 2) > .01) problems.push(`terrain piece ${href} is not centred on its cell`);
+        if (Math.abs(y + h - TERRAIN_PIECE.bottom) > .01) problems.push(`terrain piece ${href} does not stand on the projected lower edge`);
       }
-      // Unregistered legacy scenery retains its painted-bounds anchor.
-      const m = /<svg class="" x="([^"]+)" y="([^"]+)" width="([^"]+)" height="([^"]+)"/.exec(figure)
-        || /<image class="[^"]*" href="[^"]+" x="([^"]+)" y="([^"]+)" width="([^"]+)" height="([^"]+)"/.exec(figure);
-      if (!m) { problems.push(`terrain piece ${href} is not one measured sprite`); continue; }
-      const [x, y, w, h] = m.slice(1).map(Number);
-      if (Math.abs(w - TERRAIN_PIECE.width) > .01) problems.push(`terrain piece ${href} is ${w} wide, not the projected hex width`);
-      if (Math.abs(x + w / 2) > .01) problems.push(`terrain piece ${href} is not centred on its cell`);
-      if (Math.abs(y + h - TERRAIN_PIECE.bottom) > .01) problems.push(`terrain piece ${href} does not stand on the projected lower edge`);
     }
     const expected = F.hexes;
     if (pieces !== expected) problems.push(`sheet carries ${pieces} terrain pieces for ${expected} cells`);
@@ -980,7 +986,7 @@ if (args.includes('--checks')) {
   claim('M11', /sub-zone cells for|no wild cell|not the name printed/, `one named sub-zone cell per sub-zone (${subs}) and a wild side left for every town (${wild})`);
   claim('M13', /no click there|two owners|printed as|bare ground yet|carries no axial key|carries a sub\/wild index|prints zone|standing rule read/, `every cell a click can land on resolves to the settlement that owns it, by distance alone (${M13NOTE})`);
   claim('M14', /settlement landmark assignment|landmark art file/, `all ${MAP.cells.length} settlements use known, present landmark art files`);
-  claim('M15', /terrain piece|sheet not written/, `full-hex canvases match projected bounds; legacy scenery is centred and bottom-anchored (artwork silhouettes are not certified)`);
+  claim('M15', /terrain piece|sheet not written/, `full-hex art matches projected bounds; landmark sprite spill stays measured, centred and bottom-anchored`);
   G.report(g.rows());
 } else if (args.includes('--write')) {
   write();

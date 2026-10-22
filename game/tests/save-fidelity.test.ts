@@ -301,8 +301,8 @@ describe('the save schema and the account', () => {
   it('carries the passive-tree ranks through an export and a load', () => {
     const s = newGame(56);
     setLevel(s, 40);
-    expect(spendTreePoint(s, 'impact.1').ok).toBe(true);
-    expect(spendTreePoint(s, 'impact.2').ok).toBe(true);
+    expect(spendTreePoint(s, 'normal.str.s01').ok).toBe(true);
+    expect(spendTreePoint(s, 'normal.str.s02').ok).toBe(true);
     const ranks = { ...s.player.treeRanks! };
     const points = s.player.treePoints;
     const lines = treeLines(s);
@@ -326,9 +326,13 @@ describe('the save schema and the account', () => {
     expect(m.player.treePoints).toBe(tree.pointsAt(30, E.stat.level_cap));
   });
 
-  it('grants two tree points a level, so a level-cap character holds 381', () => {
-    // D8: the level curve pays two tree points a level, and the tree's budget lives in its own spec
-    expect(tree.currency('tree').per_level).toBe(2);
+  it('pays the tree its own level ranges, so a level-cap character holds 390', () => {
+    // v3's curve is the spec's rows, not a single rate: 3 base, 3 a level to 100, 1 a level to the cap
+    expect(tree.currency('tree').per_level).toBeUndefined();
+    expect(tree.currency('tree').level_ranges).toEqual([{ from: 2, to: 100, per: 3 }, { from: 101, to: 190, per: 1 }]);
+    expect(tree.pointsAt(1, E.stat.level_cap)).toBe(3);
+    expect(tree.pointsAt(100, E.stat.level_cap)).toBe(300);
+    expect(tree.pointsAt(101, E.stat.level_cap)).toBe(301);
     expect(tree.pointsAt(E.stat.level_cap, E.stat.level_cap)).toBe(390);
   });
 
@@ -337,7 +341,7 @@ describe('the save schema and the account', () => {
     // recomputes it from the level the character actually holds
     const old = newGame(59);
     setLevel(old, 40);
-    expect(spendTreePoint(old, 'impact.1').ok).toBe(true);
+    expect(spendTreePoint(old, 'normal.str.s01').ok).toBe(true);
     old.player.treePoints = 3;
     const m = migrate(JSON.parse(JSON.stringify(old)));
     expect(m.player.treePoints).toBe(tree.pointsAt(40, E.stat.level_cap) - treePointsSpent(m));
@@ -347,7 +351,9 @@ describe('the save schema and the account', () => {
     // the overflow rule is unchanged: a rank count the level cannot pay for is not a build
     const old = newGame(60);
     setLevel(old, 1);
-    old.player.treeRanks = { 'impact.1': 3, 'impact.2': 3 };
+    old.player.treeRanks = {
+      'normal.str.s01': 1, 'normal.str.s02': 1, 'normal.str.s03': 1, 'normal.str.s04': 1,
+    };
     const m = migrate(JSON.parse(JSON.stringify(old)));
     expect(m.player.treeRanks).toEqual({});
     expect(m.player.treePoints).toBe(tree.pointsAt(1, E.stat.level_cap));
@@ -405,7 +411,7 @@ describe('an imported file cannot be an impossible state', () => {
     s.player.hp = 'abc';
     s.player.statPoints = 99999;
     s.player.treePoints = 99999;
-    s.player.treeRanks['wing.nope'] = 3;
+    s.player.treeRanks['normal.str.s01'] = 1;
     s.fieldwork.hunger = 'abc';
     s.skills.list[0] = 'attack.nope';
     s.skills.owned['attack.nope'] = 0;
@@ -416,7 +422,7 @@ describe('an imported file cannot be an impossible state', () => {
     expect(Number.isFinite(m.player.hp)).toBe(true);
     expect(m.player.statPoints).toBeLessThanOrEqual(eng.pointsAt(m.player.level));
     expect(m.player.treePoints).toBeLessThanOrEqual(tree.pointsAt(m.player.level, E.stat.level_cap));
-    expect(m.player.treeRanks!['wing.nope']).toBeUndefined();
+    expect(m.player.treeRanks!['normal.str.s01']).toBe(1);
     expect(Number.isFinite(m.fieldwork.hunger)).toBe(true);
     expect(m.skills.list).not.toContain('attack.nope');
     expect(m.skills.owned['attack.nope']).toBeUndefined();
@@ -425,6 +431,27 @@ describe('an imported file cannot be an impossible state', () => {
     // and the restored state still runs a live hunting tick
     huntZone(m, m.zone);
     expect(() => tick(m, { online: true })).not.toThrow();
+  });
+
+  it('refuses a tree rank the version does not know, by name', () => {
+    const s: any = JSON.parse(JSON.stringify(newGame(63)));
+    s.player.treeRanks['wing.nope'] = 1;
+    expect(() => importJson(JSON.stringify({ version: SCHEMA_VERSION, state: s }))).toThrow(/wing\.nope/);
+  });
+
+  it('refuses an allocation holding both keystones of a listed pair', () => {
+    const s: any = JSON.parse(JSON.stringify(newGame(64)));
+    const pair = (tree as any).incompatibilities[0] as { a: string; b: string };
+    s.player.treeRanks = { [pair.a]: 1, [pair.b]: 1 };
+    expect(() => importJson(JSON.stringify({ version: SCHEMA_VERSION, state: s }))).toThrow(/incompatible/);
+  });
+
+  it('refuses a character built on another passive-tree version before migrating it', () => {
+    const s: any = JSON.parse(JSON.stringify(newGame(65)));
+    s.player.passiveTreeVersion = 2;
+    const before = JSON.stringify(s);
+    expect(() => importJson(JSON.stringify({ version: SCHEMA_VERSION, state: s }))).toThrow(/รุ่นเก่า/);
+    expect(JSON.stringify(s)).toBe(before);
   });
 
   it('turns auras off until the set obeys the reservation limit again', () => {

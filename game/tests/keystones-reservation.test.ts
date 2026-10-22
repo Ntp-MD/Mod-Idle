@@ -135,7 +135,7 @@ describe('Packet F — reservation and costs', () => {
     }
   });
 
-  it('registers the thirteen Packet E+F keys and still refuses the rest', () => {
+  it('opens the reservation keys inside the full fifty-two', () => {
     expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toHaveLength(52);
     for (const key of ['arcane-battery', 'radiant-faith', 'blood-price', 'mana-debt', 'blood-covenant', 'aura-resonance']) {
       expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toContain(key);

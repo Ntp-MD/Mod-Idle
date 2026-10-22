@@ -33,7 +33,7 @@
       <article class="want">
         <header><div><h3>{good.name}</h3><small>{townName(contract.town)}</small></div><strong class="text-value">{contract.delivered} / {contract.target}</strong></header>
         <p class="text-accent">{time(deliveryTimeLeft(gameState, contract))} left{pause ? ` · paused: ${pause}` : ''}</p>
-        <p><b>Completion bonus</b> {gold(contract.reward.gold)} gold + {contract.reward.stone.count} {stoneName(contract.reward.stone.key)}</p>
+        <p><b>Completion bonus</b> {gold(contract.reward.gold)} gold + {contract.reward.stone.count} {stoneName(contract.reward.stone.key)}{contract.reward.treePoints ? ` + ${contract.reward.treePoints} tree point${contract.reward.treePoints === 1 ? '' : 's'}` : ''}</p>
         {#if contract.reward.skill}<p><b>Skill</b> {sm.byId[contract.reward.skill]?.name} — or {contract.reward.fallback.count} {stoneName(contract.reward.fallback.key)} if no useful duplicate remains.</p>{/if}
         <p class="carried text-dim">{carried} carried · {remaining} still wanted · {gold(contract.baseGold)} market gold already paid</p>
         <div class="actions">
@@ -41,7 +41,7 @@
           <button disabled={!preview.ok} title={preview.ok ? `Receive ${gold(preview.quote.gold)} market gold${preview.complete ? ' and the completion bonus' : ''}` : preview.why} onclick={() => ondeliver(contract.id, count)}>Deliver {count || 'goods'}</button>
           <button disabled={!writer} aria-pressed={gameState.town.trackedContractIds.includes(contract.id)} onclick={() => ontrack(contract.id, !gameState.town.trackedContractIds.includes(contract.id))}>{gameState.town.trackedContractIds.includes(contract.id) ? 'Untrack' : 'Track'}</button>
         </div>
-        {#if !preview.ok}<small class="text-alarm">{preview.why}</small>{:else}<small>Hand-in pays {gold(preview.quote.gold)} market gold now{preview.complete ? ' plus the stored completion bonus' : '; the bonus waits for the full count'}.</small>{/if}
+        {#if !preview.ok}<small class="text-alarm">{preview.why}</small>{:else}<small>Hand-in pays {gold(preview.quote.gold)} market gold now{preview.complete ? ` plus the stored completion bonus${preview.treePoints ? ` (${preview.treePoints} tree point${preview.treePoints === 1 ? '' : 's'})` : ''}` : '; the bonus waits for the full count'}.</small>{/if}
         {#if !contract.recapAcknowledged && contract.lastQuantity}<p class="recap text-good" role="status">Last delivery: {contract.lastQuantity} · {gold(contract.lastGold)} market gold paid. Total {contract.delivered} delivered.</p><button class="ack" disabled={!writer} onclick={() => onack(contract.id)}>Acknowledge delivery</button>{/if}
       </article>
     {:else}<p class="empty text-dim">No open want here. Visited towns get independent online opportunities; opening this page does not roll an offer.</p>{/each}
@@ -54,7 +54,7 @@
   </section>
   {#if summary?.unread}
     <section class="summary" aria-label="Earlier unread delivery recaps"><h3>{summary.unread} earlier recaps</h3>
-      <p>{summary.completed} completed · {summary.expired} expired. Actual completion gold paid: {gold(summary.paidGold)}. Promised gold forfeited: {gold(summary.forfeitedGold)}.</p>
+      <p>{summary.completed} completed · {summary.expired} expired. Actual completion gold paid: {gold(summary.paidGold)}. Promised gold forfeited: {gold(summary.forfeitedGold)}.{summary.paidTreePoints ? ` Bonus tree points paid: ${summary.paidTreePoints}.` : ''}</p>
       {#each Object.entries(summary.goods) as [id, row]}<p>{trade.byId[id].name}: {row.quantity} delivered · {gold(row.gold)} market gold paid</p>{/each}
       {#each Object.entries(summary.paidStones) as [id, count]}<p>Paid: {count} {stoneName(id)}</p>{/each}
       {#each Object.entries(summary.paidSkills) as [id, count]}<p>Paid: {sm.byId[id]?.name} ×{count}</p>{/each}
@@ -68,7 +68,7 @@
     {#each history as contract (contract.id)}
       <details open={!contract.recapAcknowledged}><summary>{trade.byId[contract.good].name} · {contract.status} · {contract.delivered}/{contract.target}</summary>
         <p>{gold(contract.baseGold)} market gold was paid and kept.</p>
-        {#if contract.paidBonus}<p class="paid text-good">Bonus earned: {gold(contract.paidBonus.gold)} gold{#each contract.paidBonus.stones as stone} + {stone.count} {stoneName(stone.key)}{/each}{contract.paidBonus.skill ? ` + ${sm.byId[contract.paidBonus.skill]?.name}` : ''}{contract.paidBonus.fallback ? ' (stored skill fallback)' : ''}</p>
+        {#if contract.paidBonus}<p class="paid text-good">Bonus earned: {gold(contract.paidBonus.gold)} gold{#each contract.paidBonus.stones as stone} + {stone.count} {stoneName(stone.key)}{/each}{contract.paidBonus.skill ? ` + ${sm.byId[contract.paidBonus.skill]?.name}` : ''}{contract.paidBonus.treePoints ? ` + ${contract.paidBonus.treePoints} tree point${contract.paidBonus.treePoints === 1 ? '' : 's'}` : ''}{contract.paidBonus.fallback ? ' (stored skill fallback)' : ''}</p>
         {:else}<p class="text-alarm">Bonus forfeited: {gold(contract.reward.gold)} gold + {contract.reward.stone.count} {stoneName(contract.reward.stone.key)}{contract.reward.skill ? ` + the conditional ${sm.byId[contract.reward.skill]?.name} / fallback promise` : ''}.</p>{/if}
         {#if !contract.recapAcknowledged}<button disabled={!writer} onclick={() => onack(contract.id)}>Acknowledge recap</button>{/if}
       </details>

@@ -1,10 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { createTree, type TreeSpec } from '../../engine/tree.ts';
 import { MODS, tree } from '../src/engine/client';
-import { buildCharacter, emptyGear, sumLines, applyTreeRules, conversionOf } from '../src/sim/player';
+import { emptyGear, sumLines, applyTreeRules, conversionOf } from '../src/sim/player';
 import { canSpendTree, spendTreePoint } from '../src/sim/tree';
 import { newGame } from '../src/sim/game';
-import type { Item } from '../src/sim/types';
 
 /**
  * The bounded rule vocabulary (a keystone may carry a drawback), the threshold clusters, and the
@@ -137,22 +136,24 @@ describe('a keystone group is a one-of family (D1)', () => {
 });
 
 describe('the tree the game ships', () => {
-  it('carries a keystone whose drawback takes a line away', () => {
+  it('carries grantless keystones whose bundle is a real runtime key', () => {
     const keystone = Object.values(tree.byId).find((n: any) => n.kind === 'keystone')!;
-    expect(keystone.rule).toBeTruthy();
-    expect(keystone.rule?.kind).toBe('remove');
-    // the keystone is paid in attainment points, so the tree points alone cannot buy it
+    expect(keystone.grants).toEqual([]);
     expect(keystone.currency).toBe('attainment');
+    expect(keystone.effects).toHaveLength(1);
+    const effect = keystone.effects![0];
+    expect(effect.kind).toBe('keystone');
+    expect(effect.key).toBe(keystone.id.replace(/^keystone\./, ''));
+    expect(tree.keystoneBundles({ [keystone.id]: 1 })).toEqual([{ key: effect.key, params: effect.params ?? {} }]);
   });
 
-  it('takes the named line away from the sheet when the keystone is held', () => {
-    const keystone = Object.values(tree.byId).find((n: any) => n.kind === 'keystone' && n.rule?.target === 'max_hp_flat')!;
-    const hp: Item = {
-      slot: 'chest', base: 'Hood', ilvl: 1, quality: 'low', tier: 'T1', q: 0,
-      lines: [{ id: 'max_hp_flat', value: 100 }],
-    } as unknown as Item;
-    const without = buildCharacter(10, [hp], {}, 0, { add: {}, mult: {} });
-    const with_ = buildCharacter(10, [hp], {}, 0, { add: {}, mult: {} }, undefined, { [keystone.id]: 1 });
-    expect(without.maxHp).toBe(with_.maxHp + 100);
+  it('refuses the second keystone of a listed pair, in either order', () => {
+    const pair = (tree as any).incompatibilities[0] as { a: string; b: string };
+    const s = newGame(23);
+    s.player.attainmentPoints = 10;
+    s.player.treeRanks = { [pair.a]: 1 };
+    expect(canSpendTree(s, pair.b).why).toMatch(/incompatible/);
+    s.player.treeRanks = { [pair.b]: 1 };
+    expect(canSpendTree(s, pair.a).why).toMatch(/incompatible/);
   });
 });

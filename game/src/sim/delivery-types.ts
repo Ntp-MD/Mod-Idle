@@ -21,6 +21,8 @@ export interface DeliverySummary {
   unread: number; completed: number; expired: number;
   goods: Record<string, { quantity: number; gold: number }>;
   paidGold: number; paidStones: Record<string, number>; paidSkills: Record<string, number>;
+  /** Quest-granted passive-tree points actually paid, not the ones promised. */
+  paidTreePoints?: number;
   forfeitedGold: number; forfeitedStones: Record<string, number>;
   forfeitedSkills: Record<string, number>; forfeitedFallback: Record<string, number>;
 }

@@ -159,7 +159,7 @@ describe('the parameter schema', () => {
 describe('the capability gate — real handlers only', () => {
   const fn = () => 0;
 
-  it('opens only packet-registered keys: Packet E+F bind thirteen, everything else stays refused', () => {
+  it('binds every catalogue key to real handlers, so nothing on the tree is a no-op', () => {
     const opened = supportedKeystoneKeys(KEYSTONE_HANDLERS);
     expect(opened.sort()).toEqual([...KEYSTONE_KEYS].sort());
     for (const key of KEYSTONE_KEYS.filter((k) => !opened.includes(k))) {

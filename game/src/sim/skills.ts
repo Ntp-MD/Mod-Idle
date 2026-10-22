@@ -806,7 +806,7 @@ export function castOnce(
       if (everyTarget || i === 0) spendOn(t);
       // a row's TARGET lines are a curse it writes on the hit: the same store a curse skill fills, so
       // `accuracy`, `damage_dealt` and a resistance strip read off a press exactly as they do off a curse
-      if (env.curses) applyCurse(env.curses, t.id, skill);
+      if (env.curses) applyCurse(env.curses, t.id, skill, c.keystones);
     }
     void statuses;
     // a press that opens a self window (Reap) folds the row onto the character sheet for its own

@@ -13,7 +13,7 @@ import { buyBlackMarket } from './sim/black-market';
   import { previewScrapAlchemy, transmuteScrap, alchemyTierProgress } from './sim/alchemy';
   import { newGame, tick, push, fx, hitColour, catchUpAsync, schedulerBatch, WAKE_SEC, carried, heldWeaponName, huntZone, huntHere, salvageBag, retreatDungeon, runFilterNow, isBossKind } from './sim/game';
   import { rollDrop } from './sim/drop';
-  import { reservedPct, usableMana, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, costNow, modeOf, condOf, appliedStatusOf, appliedCurseOf, moveSlot } from './sim/skills';
+  import { reservedPct, hpReservedPct, auraResonanceOf, auraPoolOf, setAuraPool, hpReserved, usableHp, usableMana, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, costNow, modeOf, condOf, appliedStatusOf, appliedCurseOf, moveSlot } from './sim/skills';
   import { modsOn, psMult, curableRows } from './sim/curse';
   import { statusLabel } from './sim/mobStatus';
   import { slotsUsed, slotsAvailable, slotsFree, pouchSlots, bagStacks } from './sim/slots';
@@ -38,6 +38,7 @@ import { buyBlackMarket } from './sim/black-market';
   import KeybindTable from './ui/KeybindTable.svelte';
   import Minimap from './ui/Minimap.svelte';
   import CollapseToggle from './ui/CollapseToggle.svelte';
+  import Tabs from './ui/Tabs.svelte';
   import { KEYBINDS, bindTable, actionFor, tokenOf, isModifierKey, isTypingTarget, formatKey } from './ui/keybinds';
   import { gearEntry, stackEntry, sortEntries, type SlotEntry, type SortKey } from './ui/bag';
   import type { MenuItem } from './ui/menu';
@@ -58,7 +59,7 @@ import { buyBlackMarket } from './sim/black-market';
   import { doCraft, stoneName, atSettlement, replaceChoices, type CraftOp, type Where } from './sim/craft';
 import { farm, farmLevel, farmMasteryLevel, plotCount, plant, harvest, craftPotion, condense, drink, cycleQuickbar } from './sim/farm';
   import { stashTabCount, STASH_TAB_CAP, deposit, withdraw, depositMany, withdrawMany } from './sim/town';
-import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpent } from './sim/tree';
+import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsFree } from './sim/tree';
   import { respecStats } from './sim/respec';
   import { road, startWalk, walkNote, walkBlocks, warpTo, warpCost, warpRow, cellBlocks, cellSec, currentCell, settlementCell, ownerOf } from './sim/road';
   import { clearPatrolStops, startPatrol as startPatrolRun, stopPatrol as stopPatrolRun, togglePatrolStop } from './sim/exploration';
@@ -397,8 +398,10 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     layoutEditorOpen = false;
   }
   const openLayoutEditor = () => { layoutEditorOpen = true; more = false; };
-  let selectedTreeNodeId = $state('impact.1');
+  let selectedTreeNodeId = $state('normal.str.s01');
   const selectedTreeVerdict = $derived(canSpendTree(gameState, selectedTreeNodeId));
+  /** What a respec hands back, split by the wallet each rank was paid from. */
+  const treeSpent = $derived(tree.pointsSpentByCurrency(gameState.player.treeRanks ?? {}));
   let sheetOpen = $state(false);
   /** the sheet's own tabs: the final values, and the life-skill reference read */
   let sheetTab = $state<'stats' | 'life'>('stats');
@@ -406,12 +409,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     armour_pct: 'Armour', evasion_pct: 'Evasion rating', accuracy_pct: 'Accuracy',
     hp_regen_pct: 'HP regeneration', mana_regen_pct: 'Mana regeneration', armour_pen: 'Armour penetration',
   };
-  function sheetTabKeydown(event: KeyboardEvent) {
-    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
-    event.preventDefault();
-    sheetTab = event.key === 'Home' ? 'stats' : event.key === 'End' ? 'life' : sheetTab === 'stats' ? 'life' : 'stats';
-    document.getElementById(`sheet-tab-${sheetTab}`)?.focus();
-  }
   let saveNote = $state('');
   type AccountWriterState = 'checking' | 'owner' | 'readonly' | 'waiting' | 'unsupported';
   let accountWriterState = $state<AccountWriterState>('checking');
@@ -503,23 +500,6 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     return () => query.removeEventListener('change', update);
   });
 
-  function inventoryTabKeydown(event: KeyboardEvent) {
-    const tab = (event.target as HTMLElement).closest<HTMLButtonElement>('[role="tab"]');
-    const tabs = Array.from((event.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>('[role="tab"]:not(:disabled)'));
-    const index = tab ? tabs.indexOf(tab) : -1;
-    if (index < 0 || !tabs.length) return;
-
-    let next = index;
-    if (event.key === 'ArrowDown' || event.key === 'ArrowRight') next = (index + 1) % tabs.length;
-    else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
-    else if (event.key === 'Home') next = 0;
-    else if (event.key === 'End') next = tabs.length - 1;
-    else return;
-
-    event.preventDefault();
-    tabs[next].focus();
-    tabs[next].click();
-  }
 
   const VIEW_ORDER: ('terrain' | 'band' | 'gate')[] = ['terrain', 'band', 'gate'];
 
@@ -664,6 +644,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   let c = $derived(withHunger(withMeal(buildCharacter(gameState.player.level, gameState.gear, carried(gameState), masteryLevel(gameState, heldWeaponName(gameState) || ''), effectsActive(gameState.skills), gameState.player.points, gameState.player.treeRanks, lifeSkillBonuses(gameState)), gameState), gameState));
   const hpFill = $derived(c.maxHp > 0 ? Math.max(0, Math.min(1, shownHp / c.maxHp)) : 0);
+  /** The HP a reservation holds back and the HP a heal may reach; Max stays the Full Max (`35`, `54`). */
+  const hpBanked = $derived(hpReserved(c, gameState.skills));
+  const hpUsable = $derived(usableHp(c, gameState.skills));
   const esFill = $derived(c.es > 0 ? Math.max(0, Math.min(1, shownEs / c.es)) : 0);
   const manaFill = $derived(c.maxMana > 0 ? Math.max(0, Math.min(1, shownMana / c.maxMana)) : 0);
   /** The shield breaking. ES is a pool rather than a body, so the sim raises no event for it going down:
@@ -784,6 +767,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   function doSpendTree(nodeId: string) {
     const r = spendTreePoint(gameState, nodeId);
     if (r.ok) gameState = { ...gameState };
+    return r;
+  }
+  function doAllocateTreePath(nodeId: string) {
+    const r = allocateTreePath(gameState, nodeId);
+    if (r.ok) { gameState = { ...gameState }; saveNote = ''; }
+    else saveNote = `Cannot buy that path: ${r.why}`;
     return r;
   }
   function doRespecTree() {
@@ -1223,7 +1212,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     } catch (error) {
       // a save that fails migration validation (removed content, illegal transitions) must say so —
       // an unhandled rejection leaves the player staring at the slot they just clicked
-      saveNote = `Cannot load ${slot}: ${error instanceof Error ? error.message : 'the save failed validation'}`;
+      saveNote = `Cannot load ${slot}: ${error instanceof Error ? error.message : 'the save failed validation'} — the slot is unchanged. Start a new character to play the current tree.`;
       return false;
     } finally {
       paused = false;
@@ -1278,7 +1267,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       saveNote = 'Imported';
       gameState = { ...gameState };
     } catch (e) {
-      saveNote = `Import failed: ${(e as Error).message}`;
+      saveNote = `Import failed: ${(e as Error).message} — your current slot was not changed. Start a new character to play the current tree.`;
     }
   }
 
@@ -1855,7 +1844,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     const t = gameState.town.tasks[i];
     if (t && claimTask(gameState, i, choice)) {
       const paid = t.alt && choice === t.alt.stone ? t.alt : { stone: t.stone, count: t.count };
-      push(gameState, `Task paid: ${paid.count} ${paid.stone} stone(s)`);
+      push(gameState, `Task paid: ${paid.count} ${paid.stone} stone(s)${t.treePoints ? ` + ${t.treePoints} tree point${t.treePoints === 1 ? '' : 's'}` : ''}`);
     } else if (t && t.progress >= t.n && !t.claimed) {
       push(gameState, atSettlement(gameState)
         ? 'Task reward is waiting — make room in the bag, then claim again'
@@ -2215,7 +2204,12 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   const ownedActives = $derived(sm.all().filter((k: any) => ['attack', 'curse', 'heal'].includes(k.type) && gameState.skills.owned[k.id] != null));
   const ownedBuffs = $derived(sm.of('buff').filter((k: any) => gameState.skills.owned[k.id] != null));
   const ownedAuras = $derived(sm.of('aura').filter((k: any) => gameState.skills.owned[k.id] != null));
-  const reserved = $derived(reservedPct(gameState.skills));
+  /** The reservation reads go through `c.keystones`: 54 moves an aura to HP and 64 discounts each one. */
+  const reserved = $derived(reservedPct(gameState.skills, c.keystones));
+  const hpReservedShare = $derived(hpReservedPct(gameState.skills, c.keystones));
+  const resonance = $derived(auraResonanceOf(gameState.skills, c.keystones));
+  const hasBloodCovenant = $derived(c.keystones.some((k) => k.key === 'blood-covenant'));
+  const hasResonance = $derived(c.keystones.some((k) => k.key === 'aura-resonance'));
 
   function setSlot(i: number, id: string) {
     const at = gameState.skills.list.indexOf(id);
@@ -2333,8 +2327,23 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
   function toggle(id: string) {
     // the reservation rule and the buff switch both live in sim/skills.ts, so no sum is repeated here
-    const r = toggleTrack(gameState.skills, id);
+    const r = toggleTrack(gameState.skills, id, c.keystones);
     saveNote = r.ok ? '' : r.why || 'cannot';
+    gameState = { ...gameState };
+  }
+
+  /** 54: an aura pays from HP or Mana. The switch is refused without the keystone and the caller
+   *  re-reads the reservation split before the next tick. */
+  function chooseAuraPool(id: string, pool: 'hp' | 'mana') {
+    const r = setAuraPool(gameState.skills, id, pool, c.keystones);
+    saveNote = r.ok ? '' : r.why || 'cannot';
+    if (r.ok) gameState = { ...gameState };
+  }
+
+  /** The way out of a reservation set that no longer fits: turn every aura off in one step. */
+  function disableAllAuras() {
+    for (const k of ownedAuras) gameState.skills.auras[k.id] = false;
+    saveNote = 'All auras off';
     gameState = { ...gameState };
   }
 </script>
@@ -2607,7 +2616,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     <div class="action-cluster">
       <div class="vital-stack">
         <div class="vital-orb life-orb" style={`--shield-strength:${esFill.toFixed(3)}`}
-             role="img" aria-label={`HP ${fmtNum(gameState.player.hp)} of ${fmtNum(c.maxHp)}${c.es > 0 ? `, ES ${fmtNum(gameState.player.es)} of ${fmtNum(c.es)}` : ''}`}>
+             role="img" aria-label={`HP ${fmtNum(gameState.player.hp)} of ${fmtNum(c.maxHp)}${hpBanked > 0 ? `, ${fmtNum(hpUsable)} usable and ${fmtNum(hpBanked)} reserved` : ''}${c.es > 0 ? `, ES ${fmtNum(gameState.player.es)} of ${fmtNum(c.es)}` : ''}`}>
           <div class="orb-well">
             <i class="orb-fill" style={`--fill:${hpFill.toFixed(3)}`} aria-hidden="true"><span class="orb-ink"><i class="orb-energy"></i></span></i>
             <span class="orb-gloss" aria-hidden="true"></span>
@@ -2625,6 +2634,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
             {/if}
           </div>
           <span class="orb-readout"><span><strong>{fmtNum(shownHp)}</strong>/{fmtNum(c.maxHp)} HP</span>
+            {#if hpBanked > 0}<span class="orb-reserved">{fmtNum(hpUsable)} usable · {fmtNum(hpBanked)} reserved</span>{/if}
             {#if c.es > 0}<span class="orb-shield"><strong>{fmtNum(shownEs)}</strong>/{fmtNum(c.es)} ES</span>{/if}
           </span>
         </div>
@@ -2672,7 +2682,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       </div>
       <div class="vital-stack">
         <div class="vital-orb mana-orb" class:reserved={reserved > 0} style={`--reserved:${reserved}%`}
-             role="img" aria-label={`Mana ${fmtNum(gameState.player.mana)} of ${fmtNum(c.maxMana)}${reserved > 0 ? `, ${reserved}% reserved by auras` : ''}`}>
+             role="img" aria-label={`Mana ${fmtNum(gameState.player.mana)} of ${fmtNum(c.maxMana)}${reserved > 0 ? `, ${reserved.toFixed(1)}% reserved by auras` : ''}`}>
           <div class="orb-well">
             <i class="orb-fill" style={`--fill:${manaFill.toFixed(3)}`} aria-hidden="true"><span class="orb-ink"><i class="orb-energy"></i></span></i>
             <span class="orb-gloss" aria-hidden="true"></span>
@@ -2683,7 +2693,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
             {/if}
           </div>
           <span class="orb-readout"><span><strong>{fmtNum(shownMana)}</strong>/{fmtNum(c.maxMana)} Mana</span>
-            {#if reserved > 0}<span class="orb-reserved">RES {reserved}%</span>{/if}
+            {#if reserved > 0}<span class="orb-reserved">RES {reserved.toFixed(1)}%</span>{/if}
           </span>
         </div>
       </div>
@@ -2879,12 +2889,15 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
     onclose={() => (sheetOpen = false)}
   >
     <div class="sheet-tools">
-    <div class="sides" role="tablist" aria-label="Character sheet views" tabindex="-1" onkeydown={sheetTabKeydown}>
-      <button id="sheet-tab-stats" role="tab" class="btn btn-quiet" class:picked={sheetTab === 'stats'} aria-selected={sheetTab === 'stats'} aria-controls="sheet-body" tabindex={sheetTab === 'stats' ? 0 : -1}
-              onclick={() => (sheetTab = 'stats')}>Stats</button>
-      <button id="sheet-tab-life" role="tab" class="btn btn-quiet" class:picked={sheetTab === 'life'} aria-selected={sheetTab === 'life'} aria-controls="sheet-body" tabindex={sheetTab === 'life' ? 0 : -1}
-              onclick={() => (sheetTab = 'life')}>Life skills</button>
-    </div>
+    <Tabs
+      label="Character sheet views"
+      prefix="sheet-tab"
+      controls="sheet-body"
+      class="frame sheet-sides"
+      tabs={[{ id: 'stats', label: 'Stats' }, { id: 'life', label: 'Life skills' }]}
+      active={sheetTab}
+      onpick={(id) => (sheetTab = id as typeof sheetTab)}
+    />
       <button class="sheet-new-character btn btn-ghost" type="button" disabled={showcaseMode || !canWriteAccount} title="Start a new character"
               aria-label="New character" onclick={() => { if (confirm('Start a new character?')) reset(); }}>
         <img src={newCharacterMark} alt="" aria-hidden="true" />
@@ -2976,9 +2989,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           <section class="sheet-stat-group">
             <h3 class="text-accent">Defence</h3>
             <table class="stats table-metrics"><tbody>
-              <tr><td>Health</td><td>{fmtNum(shownHp)} / {fmtNum(c.maxHp)}<small class="text-note">+{c.hpRegen.toFixed(1)}/sec</small></td></tr>
+              <tr><td>Health</td><td>{fmtNum(shownHp)} / {fmtNum(c.maxHp)}<small class="text-note">+{c.hpRegen.toFixed(1)}/sec{hpBanked > 0 ? ` · ${fmtNum(hpUsable)} usable · ${fmtNum(hpBanked)} reserved` : ''}</small></td></tr>
               <tr><td>Energy Shield</td><td>{fmtNum(shownEs)} / {fmtNum(c.es)}<small class="text-note">+{c.esRegen.toFixed(1)}/sec · {E.energy_shield.delay_sec}s delay</small></td></tr>
-              <tr><td>Mana</td><td>{fmtNum(shownMana)} / {fmtNum(c.maxMana)}<small class="text-note">+{c.manaRegen.toFixed(1)}/sec · {reservedPct(gameState.skills)}% reserved</small></td></tr>
+              <tr><td>Mana</td><td>{fmtNum(shownMana)} / {fmtNum(c.maxMana)}<small class="text-note">+{c.manaRegen.toFixed(1)}/sec · {reserved.toFixed(1)}% reserved · {fmtNum(usableMana(c, gameState.skills))} usable</small></td></tr>
               <tr><td>Armour</td><td>{Math.round(c.armour)}</td></tr>
               <tr><td>Evasion</td><td>{c.evasionChance.toFixed(1)}%<small class="text-note">{Math.round(c.evasion)} rating · Cap {E.caps.evasion}%</small></td></tr>
               <tr><td>Perfect dodge</td><td>{c.perfectDodge.toFixed(1)}%</td></tr>
@@ -3018,38 +3031,41 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   <Panel title="Inventory" width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <!-- Inventory and warehouse share this window; Forge and Craft open from their own More menu entries. -->
     <div class="inventory-layout">
-    <div class="inventory-tabs" role="tablist" aria-label="Inventory sections" aria-orientation={compactInventoryTabs ? 'horizontal' : 'vertical'} tabindex="-1" onkeydown={inventoryTabKeydown}>
-      <button id="inventory-tab-bag" role="tab" aria-controls="inventory-content" tabindex={invTab === 'inv' && bagCat === 'all' ? 0 : -1}
-              class="btn btn-quiet inventory-tab" class:picked={invTab === 'inv' && bagCat === 'all'} aria-selected={invTab === 'inv' && bagCat === 'all'}
-              onclick={() => { invTab = 'inv'; bagCat = 'all'; }}>
-        <span class="inventory-tab-label">
-          <img class="inventory-tab-art" src={hubIcon('bags', bagMark)} alt="" aria-hidden="true" />
-          Bag
-        </span>
-        <small class="text-note">{gameState.bag.length} piece{gameState.bag.length === 1 ? '' : 's'} · {slotsUsed(gameState)} / {slotsAvailable(gameState)} slots</small>
-      </button>
-      <button id="inventory-tab-stash" role="tab" aria-controls="inventory-content" tabindex={invTab === 'stash' ? 0 : -1}
-              class="btn btn-quiet inventory-tab" class:picked={invTab === 'stash'} aria-selected={invTab === 'stash'} disabled={!townLive}
-              onclick={() => (invTab = 'stash')}
-              title={townLive ? `The warehouse the same record opens in every settlement · ${keyFor('screen.stash')}` : 'A settlement service — walk or warp into one first'}>
-        <span class="inventory-tab-label">
-          <img class="inventory-tab-art" src={stashMark} alt="" aria-hidden="true" />
-          Stash
-        </span>
-        <small class="text-note">{tabs} tab{tabs === 1 ? '' : 's'}{townLive ? '' : ' · not here'}</small>
-      </button>
-      {#each BAG_TABS as t (t.id)}
-        <button id={`inventory-tab-${t.id}`} role="tab" aria-controls="inventory-content" tabindex={invTab === 'inv' && bagCat === t.id ? 0 : -1}
-                class="btn btn-quiet inventory-tab" class:picked={invTab === 'inv' && bagCat === t.id} aria-selected={invTab === 'inv' && bagCat === t.id}
-                onclick={() => { invTab = 'inv'; bagCat = t.id; }}>
+    <Tabs
+      label="Inventory sections"
+      orientation={compactInventoryTabs ? 'horizontal' : 'vertical'}
+      prefix="inventory-tab"
+      controls="inventory-content"
+      tabClass="inventory-tab"
+      tabs={[{ id: 'bag', label: 'Bag' },
+             { id: 'stash', label: 'Stash', disabled: !townLive,
+               title: townLive ? `The warehouse the same record opens in every settlement · ${keyFor('screen.stash')}` : 'A settlement service — walk or warp into one first' },
+             ...BAG_TABS.map((t) => ({ id: t.id, label: t.label }))]}
+      active={invTab === 'stash' ? 'stash' : bagCat}
+      onpick={(id) => { if (id === 'stash') invTab = 'stash'; else { invTab = 'inv'; bagCat = id as typeof bagCat; } }}
+    >
+      {#snippet item(t)}
+        {#if t.id === 'bag'}
           <span class="inventory-tab-label">
-            <img class="inventory-tab-art" src={icon(t.art)} alt="" aria-hidden="true" />
-            {t.label}
+            <img class="inventory-tab-art" src={hubIcon('bags', bagMark)} alt="" aria-hidden="true" />
+            Bag
           </span>
-          <small class="text-note">{bagCount(t.id)}</small>
-        </button>
-      {/each}
-    </div>
+          <small class="text-note">{gameState.bag.length} piece{gameState.bag.length === 1 ? '' : 's'} · {slotsUsed(gameState)} / {slotsAvailable(gameState)} slots</small>
+        {:else if t.id === 'stash'}
+          <span class="inventory-tab-label">
+            <img class="inventory-tab-art" src={stashMark} alt="" aria-hidden="true" />
+            Stash
+          </span>
+          <small class="text-note">{tabs} tab{tabs === 1 ? '' : 's'}{townLive ? '' : ' · not here'}</small>
+        {:else}
+          <span class="inventory-tab-label">
+            <img class="inventory-tab-art" src={icon(BAG_TABS.find((b) => b.id === t.id)!.art)} alt="" aria-hidden="true" />
+            {BAG_TABS.find((b) => b.id === t.id)!.label}
+          </span>
+          <small class="text-note">{bagCount(t.id as BagCat)}</small>
+        {/if}
+      {/snippet}
+    </Tabs>
     <!-- Both grids render all slots; the panel body scrolls when the full inventory is taller than the viewport. -->
     <div class="invbody" id="inventory-content" role="tabpanel" aria-labelledby={invTabLabelId} tabindex="0">
     {#if invTab === 'inv'}
@@ -3208,18 +3224,14 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 {#if panel === 'skills' || showcaseMode}
   <Panel title="Skills" subtitle={`${ACTIVE_SLOTS} slots, cast top-down`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <div class="skills-panel">
-    <div class="skill-tabs" role="tablist" aria-label="Skill sections">
-      <button role="tab" class="btn btn-quiet" class:toggled={skillTab === 'loadout'} aria-selected={skillTab === 'loadout'} onclick={() => (skillTab = 'loadout')}>Loadout</button>
-      <button role="tab" class="btn btn-quiet" class:toggled={skillTab === 'owned'} aria-selected={skillTab === 'owned'} onclick={() => (skillTab = 'owned')}>Owned skills</button>
-      <button role="tab" class="btn btn-quiet" class:toggled={skillTab === 'effects'} aria-selected={skillTab === 'effects'} onclick={() => (skillTab = 'effects')}>Buffs & auras</button>
-      <button role="tab" class="btn btn-quiet" class:toggled={skillTab === 'mastery'} aria-selected={skillTab === 'mastery'} onclick={() => (skillTab = 'mastery')}>Mastery & curses</button>
-    </div>
+    <Tabs label="Skill sections" active={skillTab} onpick={(id) => (skillTab = id as typeof skillTab)}
+          tabs={[{ id: 'loadout', label: 'Loadout' }, { id: 'owned', label: 'Owned skills' }, { id: 'effects', label: 'Buffs & auras' }, { id: 'mastery', label: 'Mastery & curses' }]} />
     {#if skillNote}<p class="skill-note" role="status">{skillNote}</p>{/if}
     {#if skillTab === 'loadout'}
     <div class="skill-view">
     <div class="presets">
       {#each gameState.presets as p, i}
-        <button class:active={i === gameState.activePreset} onclick={() => doSwitchPreset(i)}>
+        <button class:picked={i === gameState.activePreset} aria-pressed={i === gameState.activePreset} onclick={() => doSwitchPreset(i)}>
           {p.name}{p.zones.length ? ` · ${p.zones.length} zone${p.zones.length > 1 ? 's' : ''}` : ''}
         </button>
       {/each}
@@ -3321,14 +3333,28 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           {:else}<small>None owned.</small>{/each}
         </div>
       </section>
-      <p class="reserve-note"><small>Reserved {reservedPct(gameState.skills)}% of Max Mana · cap {sm.RESERVATION_LIMIT}%. Active: {describeFold(effectsActive(gameState.skills)) || 'none'}.</small></p>
+      <p class="reserve-note"><small>Reserved {reserved.toFixed(1)}% of Max Mana{hpReservedShare > 0 ? ` · ${hpReservedShare.toFixed(1)}% of Max HP` : ''} · cap {sm.RESERVATION_LIMIT}%. Active: {describeFold(effectsActive(gameState.skills)) || 'none'}.</small></p>
+      {#if hasResonance}
+        <p class="reserve-note"><small>Aura Resonance · {resonance.count} active aura{resonance.count === 1 ? '' : 's'} (trigger auras count): −{(resonance.bR * 100).toFixed(1)}% reservation, +{(resonance.bE * 100).toFixed(1)}% aura effect.</small></p>
+      {/if}
       <section>
-        <h3>Auras · reserve Max Mana</h3>
+        <h3>Auras · reserve Max {hasBloodCovenant ? 'Mana or HP' : 'Mana'}</h3>
         <div class="skill-effect-grid">
           {#each ownedAuras as k}
-            <label title={`${k.reserve} · ${sm.reservePct(k.reserve ?? '')}% · ${effectLine(k) || k.effect}`}><input type="checkbox" checked={gameState.skills.auras[k.id]} onchange={() => toggle(k.id)} /><span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span></label>
+            {@const pool = auraPoolOf(gameState.skills, k.id)}
+            {@const share = pool === 'hp' ? sm.reservePct(k.reserve ?? '') : sm.reservePct(k.reserve ?? '') * (1 - resonance.bR)}
+            <div class="aura-row">
+              <label title={`${k.reserve} · ${share.toFixed(1)}% of Max ${pool === 'hp' ? 'HP' : 'Mana'} · ${effectLine(k) || k.effect}`}><input type="checkbox" checked={gameState.skills.auras[k.id]} onchange={() => toggle(k.id)} /><span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span></label>
+              {#if hasBloodCovenant}
+                <select aria-label={`${k.name} reservation pool`} value={pool} onchange={(event) => chooseAuraPool(k.id, event.currentTarget.value === 'hp' ? 'hp' : 'mana')}>
+                  <option value="mana">Mana</option>
+                  <option value="hp">HP</option>
+                </select>
+              {/if}
+            </div>
           {:else}<small>None owned.</small>{/each}
         </div>
+        <button class="btn btn-flat" type="button" onclick={disableAllAuras} disabled={!ownedAuras.some((k) => gameState.skills.auras[k.id])}>Turn all auras off</button>
       </section>
     </div>
     {:else}
@@ -3365,7 +3391,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 {/if}
 
 {#if panel === 'tree' || showcaseMode}
-  <Panel title="Passive tree" subtitle={`${treePointsFree(gameState)} banked · ${treePointsSpent(gameState)} spent`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
+  <Panel title="Passive tree" subtitle={`${treePointsFree(gameState)} tree · ${treePointsFree(gameState, 'attainment')} attainment banked · ${treeSpent.tree ?? 0} tree / ${treeSpent.attainment ?? 0} attainment spent`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <PassiveTreeBoard
       nodes={tree.nodes}
       graph={tree.graph}
@@ -3375,6 +3401,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       verdict={selectedTreeVerdict}
       onselect={(id) => (selectedTreeNodeId = id)}
       onbuy={() => doSpendTree(selectedTreeNodeId)}
+      onpath={doAllocateTreePath}
     />
   </Panel>
 {/if}
@@ -3435,11 +3462,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   <Panel title="Farm" subtitle={farmSub} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <div class="farm-panel">
     <p><small>{gameState.farm.xp} Farm XP · {farm.xpPerHarvest} per harvest · {farm.F.growth_hours} h base cycle · tier Mastery XP low {gameState.farm.mastery.low} (Lv {farmMasteryLevel(gameState, 'low')}), mid {gameState.farm.mastery.mid} (Lv {farmMasteryLevel(gameState, 'mid')}), high {gameState.farm.mastery.high} (Lv {farmMasteryLevel(gameState, 'high')}) · at most 10% future growth-time reduction; ready times already set are unchanged · {farm.plotsMax} plots at most ({plots} yours).</small></p>
-    <div class="farm-tabs" role="tablist" aria-label="Farm sections">
-      <button role="tab" class="btn btn-quiet" class:toggled={farmTab === 'plots'} aria-selected={farmTab === 'plots'} onclick={() => (farmTab = 'plots')}>Plots & herbs</button>
-      <button role="tab" class="btn btn-quiet" class:toggled={farmTab === 'alchemy'} aria-selected={farmTab === 'alchemy'} onclick={() => (farmTab = 'alchemy')}>Alchemy</button>
-      <button role="tab" class="btn btn-quiet" class:toggled={farmTab === 'automation'} aria-selected={farmTab === 'automation'} onclick={() => (farmTab = 'automation')}>Auto use</button>
-    </div>
+    <Tabs label="Farm sections" active={farmTab} onpick={(id) => (farmTab = id as typeof farmTab)}
+          tabs={[{ id: 'plots', label: 'Plots & herbs' }, { id: 'alchemy', label: 'Alchemy' }, { id: 'automation', label: 'Auto use' }]} />
 
     {#if farmTab === 'plots'}
     <h3>Plots</h3>
@@ -3520,13 +3544,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 {#if panel === 'desk' || showcaseMode}
   <Panel title="Settlement" subtitle={deskSub} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <div class="desk-panel">
-    <div class="desk-tabs" role="tablist" aria-label="Settlement sections">
-      <button role="tab" class="btn btn-quiet" class:toggled={deskTab === 'services'} aria-selected={deskTab === 'services'} onclick={() => (deskTab = 'services')}>Services</button>
-      <button role="tab" class="btn btn-quiet" class:toggled={deskTab === 'stall'} aria-selected={deskTab === 'stall'} onclick={() => (deskTab = 'stall')}>Stall</button>
-      <button role="tab" class="btn btn-quiet" class:toggled={deskTab === 'guild'} aria-selected={deskTab === 'guild'} onclick={() => (deskTab = 'guild')}>Guild & Collector</button>
-      <button role="tab" class="btn btn-quiet" class:toggled={deskTab === 'hunt'} aria-selected={deskTab === 'hunt'} onclick={() => (deskTab = 'hunt')}>Hunt</button>
-      <button role="tab" class="btn btn-quiet" class:toggled={deskTab === 'walk'} aria-selected={deskTab === 'walk'} onclick={() => (deskTab = 'walk')}>Walk</button>
-    </div>
+    <Tabs label="Settlement sections" active={deskTab} onpick={(id) => (deskTab = id as typeof deskTab)}
+          tabs={[{ id: 'services', label: 'Services' }, { id: 'stall', label: 'Stall' }, { id: 'guild', label: 'Guild & Collector' }, { id: 'hunt', label: 'Hunt' }, { id: 'walk', label: 'Walk' }]} />
     <div class="desk-content">
 
     {#if viewTown}
@@ -3546,7 +3565,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
       <h4>Respec · free</h4>
       <p><small>Free · only in a settlement.</small></p>
       <button onclick={respec} disabled={!townLive || !viewHere || !STATS.some((k) => gameState.player.points[k])}>Respec — refund all stat points</button>
-      <button onclick={doRespecTree} disabled={!townLive || !viewHere || !treePointsSpent(gameState)}>Respec the tree — refund {treePointsSpent(gameState)} point{treePointsSpent(gameState) === 1 ? '' : 's'}</button>
+      <button onclick={doRespecTree} disabled={!townLive || !viewHere || (!treeSpent.tree && !treeSpent.attainment)}>Respec the tree — refund {treeSpent.tree ?? 0} tree and {treeSpent.attainment ?? 0} attainment point{treeSpent.attainment === 1 ? '' : 's'}</button>
 
       <h4>Standing</h4>
       <p>Tier {viewStanding.tier} / {TOWN.standing.tiers.length} · {(viewStanding.share * 100).toFixed(1)}% of zone {viewTown.zone}'s kill budget · {viewStanding.kills.toLocaleString('en-US')} kills + {viewStanding.helpCredit.toLocaleString('en-US')} Camp aid = {viewStanding.progress.toLocaleString('en-US')} progress · {viewStanding.budget > 0 ? viewStanding.next ? `${viewStanding.next.remaining.toLocaleString('en-US')} more to Tier ${viewStanding.next.name} (${viewStanding.next.requiredProgress.toLocaleString('en-US')} progress)` : 'all Standing tiers reached' : 'Standing unavailable'}. Standing unlocks town services, Collector slots and appearance purchases; it never grants a stat, a Mod, a stone or anything mob_HP reads.</p>
@@ -3590,7 +3609,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
                   : 'refills in ' + (() => { const s = Math.max(0, gameState.town.refillAt[i] - gameState.clockSec); return s >= 3600 ? (s / 3600).toFixed(1) + 'h' : s >= 60 ? Math.round(s / 60) + 'm' : Math.round(s) + 's'; })()}</td>
                 <td>{t ? eng.zoneById(t.zone).name : ''}</td>
                 <td>{t ? `${t.progress} / ${t.n}` : ''}</td>
-                <td>{t ? (t.alt ? `${t.count} ${t.stone} or ${t.alt.count} ${t.alt.stone}` : `${t.count} ${t.stone} stone`) : ''}</td>
+                <td>{t ? (t.alt ? `${t.count} ${t.stone} or ${t.alt.count} ${t.alt.stone}` : `${t.count} ${t.stone} stone`) + (t.treePoints ? ` + ${t.treePoints} tree point${t.treePoints === 1 ? '' : 's'}` : '') : ''}</td>
                 <td>{#if t}
                   {#if t.kind === 'expedition'}
                     <button class="btn btn-quiet" onclick={() => goToTask(t)}>Map target</button>
@@ -3654,7 +3673,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
         {#each E.mob.zones as z}
           {@const home = settlementOfZone(z.id)?.id}
           {@const opened = !!home && gameState.town.visited.includes(home)}
-          <tr class:picked={!!home && picked === home} onclick={() => home && select(home)}>
+          <tr class:picked={!!home && picked === home} tabindex="0"
+              onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); home && select(home); } }}
+              onclick={() => home && select(home)}>
             <td>{z.id} · {z.name}</td>
             <td>{z.levels.join('-')}</td>
             <td class="mob-hp">{z.hp.map((hp: number) => fmtNum(hp)).join(' → ')}</td>
@@ -3681,7 +3702,9 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
           {@const dest = settlementCell(s.id)}
           {@const blocks = dest ? cellBlocks(gameState, dest) : walkBlocks(townId, s.id)}
           {@const fare = warpPrice(s.id)}
-          <tr class:picked={picked === s.id} onclick={() => select(s.id)}>
+          <tr class:picked={picked === s.id} tabindex="0"
+              onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(s.id); } }}
+              onclick={() => select(s.id)}>
             <td>{s.name}</td><td>{s.zone}</td>
             <td>{blocks}</td>
             <td>{dest ? cellSec(gameState, dest) : road.secBetween(townId, s.id)}s</td>
@@ -3703,11 +3726,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 {#if panel === 'save' || showcaseMode}
   <Panel title="Save" subtitle="local only" width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <div class="save-panel">
-    <div class="save-tabs" role="tablist" aria-label="Save sections">
-      <button role="tab" class="btn btn-quiet" class:toggled={saveTab === 'slots'} aria-selected={saveTab === 'slots'} onclick={() => (saveTab = 'slots')}>Slots</button>
-      <button role="tab" class="btn btn-quiet" class:toggled={saveTab === 'backups'} aria-selected={saveTab === 'backups'} onclick={() => { saveTab = 'backups'; loadSnaps(); }}>Backups</button>
-      <button role="tab" class="btn btn-quiet" class:toggled={saveTab === 'settings'} aria-selected={saveTab === 'settings'} onclick={() => (saveTab = 'settings')}>Settings</button>
-    </div>
+    <Tabs label="Save sections" active={saveTab} onpick={(id) => { saveTab = id as typeof saveTab; if (id === 'backups') loadSnaps(); }}
+          tabs={[{ id: 'slots', label: 'Slots' }, { id: 'backups', label: 'Backups' }, { id: 'settings', label: 'Settings' }]} />
     {#if showcaseMode}<p class="showcase-note">Save, load, backup, import, and export are disabled here. This page never reads or writes a player save.</p>{/if}
     {#if !showcaseMode}
       <div class="account-writer" class:owner={accountWriterState === 'owner'} role="status" aria-live="polite">
@@ -3781,7 +3801,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 <style>
   :global(.hex-calibration) { display: none; }
   .hex-calibrating :global(.hex-calibration) { display: inline; }
-  button.active { border-color: var(--gold); color: var(--gold); }
+  button.picked { border-color: var(--gold); color: var(--gold); }
 
   :global(body.ui-showcase) { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: auto; }
   .showcase-frame { display: contents; }
@@ -3907,6 +3927,7 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   }
   .mapcard :global(.dest) { flex: none; }
   .picklist tr { cursor: pointer; }
+  .picklist tr:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
   .picklist tr.picked { background: var(--panel); }
   .desk-content .picklist .mob-hp { white-space: nowrap; }
 
@@ -4017,6 +4038,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
 
     --slot-face: rgba(12, 16, 22, .82);
     --slot-edge: rgba(255, 255, 255, .5);
+    --gate-line: rgba(255, 255, 255, .45);
+    --gate-line-soft: rgba(255, 255, 255, .18);
   }
   .action-xp {
     position: fixed; inset-inline: 0; bottom: 0; z-index: var(--z-underlay);
@@ -4216,8 +4239,8 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .cast img { width: var(--icon-hub-img); height: var(--icon-hub-img); object-fit: contain; }
 
   .cast.silent { opacity: .4; }
-  .cast.gated { border-style: dashed; border-color: rgba(255, 255, 255, .45); }
-  .cast.filler { border-color: rgba(255, 255, 255, .18); }
+  .cast.gated { border-style: dashed; border-color: var(--gate-line); }
+  .cast.filler { border-color: var(--gate-line-soft); }
   .cast small {
     position: absolute; inset: 0; display: grid; place-items: center; border-radius: var(--radius-card);
     background: none; font-size: clamp(var(--font-xs), calc(var(--slot-skill-size) * .3), var(--font-md)); color: var(--gold-lit);
@@ -4396,19 +4419,21 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .invbody > section { min-height: 0; overflow: visible; }
 
   .inventory-layout { display: grid; grid-template-columns: minmax(max-content, 1fr) minmax(0, 4fr); align-items: start; gap: var(--spacing-md); min-width: 0; min-height: 0; }
-  .inventory-tabs { display: grid; align-content: start; gap: var(--spacing-xs); min-width: 0; border-right: 1px solid var(--line); padding-right: var(--spacing-md); }
   .inventory-tab { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: var(--spacing-xs); width: 100%; min-width: 0; text-align: left; }
   .inventory-tab-label { display: inline-flex; align-items: center; gap: var(--spacing-xs); min-width: 0; }
   .inventory-tab-art { width: var(--icon-label); height: var(--icon-label); object-fit: contain; flex: none; }
-  .inventory-tab small { text-align: right; }
+  /* the tab buttons live in Tabs.svelte's scope, so their face styles reach them globally */
+  :global(.inventory-tab) small { text-align: right; }
 
   @media (max-width: 1200px) {
     .inventory-layout { grid-template-columns: minmax(0, 1fr); }
-    .inventory-tabs { display: flex; flex-direction: row; flex-wrap: wrap; border-right: 0; padding-right: 0; border-bottom: 1px solid var(--line); padding-bottom: var(--spacing-sm); }
+  }
+  @media (max-width: 1200px) {
     .inventory-tab { flex: 1 1 auto; align-items: center; width: auto; text-align: center; }
   }
 
-  .sides { display: flex; gap: var(--spacing-xs); border-bottom: 1px solid var(--line); padding-bottom: var(--spacing-sm); }
+  .sheet-sides { flex: none; }
+
 
   .bagshell { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--spacing-sm); align-items: start; min-width: 0; }
   .sheet-tools { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); }
@@ -4493,20 +4518,17 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .account-writer.owner p { color: var(--good-lit); }
   .account-writer label { display: inline-flex; align-items: center; gap: var(--spacing-xs); color: var(--dim); font-size: var(--font-xs); }
   .account-writer select, .account-writer button { font-size: var(--font-xs); border-radius: var(--radius-card); }
-  .save-tabs, .farm-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); flex: none; }
   .save-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; }
   .save-panel h2 { margin: 0; font-size: var(--font-md); }
   .save-panel p { margin: 0; }
   .save-panel table { font-size: var(--font-xs); }
   .save-note-inline { color: var(--good); font-size: var(--font-xs); }
   .desk-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: var(--spacing-xs); }
-  .desk-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); flex: none; }
   .desk-content { display: flex; flex-direction: column; gap: var(--spacing-xs); flex: 1; min-height: 0; overflow: auto; }
   .desk-content p { font-size: var(--font-xs); }
   .desk-content .picklist th, .desk-content .picklist td { padding: var(--spacing-xs) var(--spacing-xs); line-height: 1.1; font-size: var(--font-xs); }
   .desk-content .picklist button { font-size: var(--font-xs); }
   .skills-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: var(--spacing-xs); }
-  .skill-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); flex: none; }
   .skill-note { margin: 0; color: var(--good); font-size: var(--font-xs); }
   .skill-view { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: var(--spacing-xs); }
   .skill-view h3 { margin: 0; }
@@ -4531,11 +4553,13 @@ import { canSpendTree, respecTree, spendTreePoint, treePointsFree, treePointsSpe
   .skill-effect-grid .skill-label { min-width: 0; overflow: hidden; }
   .skill-effect-grid .skill-label img { flex: none; }
   .skill-effect-grid .skill-label { white-space: nowrap; text-overflow: ellipsis; }
+  .skill-effect-grid .aura-row { display: flex; align-items: center; gap: var(--spacing-xs); min-width: 0; border-bottom: 1px solid var(--line); }
+  .skill-effect-grid .aura-row label { flex: 1; border-bottom: 0; }
+  .skill-effect-grid .aura-row select { flex: none; }
   .skill-effect-grid > small { grid-column: 1 / -1; color: var(--dim); }
   .reserve-note { margin: 0; color: var(--dim); font-size: var(--font-xs); }
   .farm-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: var(--spacing-xs); }
   .farm-panel > p { margin: 0; font-size: var(--font-xs); }
-  .farm-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); flex: none; }
   .farm-note { color: var(--good); }
   .filter { display: grid; align-content: start; gap: var(--spacing-xs); }
   .filter summary { cursor: pointer; color: var(--dim); font-size: var(--font-xs); }

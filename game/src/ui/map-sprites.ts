@@ -12,6 +12,12 @@ export function mapSprite(href: string, x: number, y: number, width: number, hei
  *  painted bottom lands exactly on `y` and the ground stays centred on the cell. */
 export function mapSpriteWidth(href: string, x: number, y: number, width: number, cls = ''): string {
   const box = (bounds as Record<string, number[]>)[href];
-  const height = box ? width * box[5] / box[4] : width;
-  return mapSprite(href, x - width / 2, y - height, width, height, cls);
+  const paintedWidth = width * mapSpriteWidthScale(href);
+  const height = box ? paintedWidth * box[5] / box[4] : paintedWidth;
+  return mapSprite(href, x - paintedWidth / 2, y - height, paintedWidth, height, cls);
+}
+
+/** Small per-art overhangs let a landmark cross its hex edge while keeping its measured base centred. */
+export function mapSpriteWidthScale(href: string): number {
+  return (bounds as Record<string, number[]>)[href]?.[6] ?? 1;
 }

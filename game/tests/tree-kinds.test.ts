@@ -111,20 +111,21 @@ describe('a node may grant several lines', () => {
 });
 
 describe('the tree the game ships', () => {
-  it('holds a notable, and it grants several lines', () => {
-    const notable = Object.values(tree.byId).find((n: any) => n.kind === 'notable');
+  it('holds a notable that resolves its profile to several lines', () => {
+    const notable = Object.values(tree.byId).find((n: any) => n.kind === 'notable' && n.grants.length > 1);
     expect(notable).toBeTruthy();
-    expect(notable!.grants.length).toBeGreaterThan(1);
+    expect(notable!.profile).toBe(notable!.id);
   });
 
-  it('spends a notable in tree points, at one rank', () => {
+  it('spends a notable in tree points, at three points for its one rank', () => {
     const notable = Object.values(tree.byId).find((n: any) => n.kind === 'notable')!;
     const s = newGame(14);
     s.player.treePoints = 100;
     s.player.treeRanks = { [notable.needs[0]]: 1 };
+    expect(notable.cost).toBe(3);
     expect(canSpendTree(s, notable.id).ok).toBe(true);
     expect(spendTreePoint(s, notable.id).ok).toBe(true);
-    expect(s.player.treePoints).toBe(99);
+    expect(s.player.treePoints).toBe(97);
     // the notable's own grants are all granted, and it holds a single rank
     const granted = treeLines(s).map((l) => l.id);
     for (const g of notable.grants) expect(granted).toContain(g.id);
@@ -139,23 +140,27 @@ describe('the tree the game ships', () => {
 });
 
 describe('the tree the game ships', () => {
-  it('holds twelve wings and a keystone in each', () => {
+  it('holds the seven regions and the catalogue\u2019s keystones', () => {
     const wings = new Set(Object.values(tree.byId).map((n: any) => n.wing));
-    expect(wings.size).toBe(12);
+    expect(wings.size).toBe(7);
     const keystones = Object.values(tree.byId).filter((n: any) => n.kind === 'keystone');
-    expect(keystones.length).toBe(12);
-    for (const k of keystones) expect(k.currency).toBe('attainment');
+    expect(keystones.length).toBe(52);
+    for (const k of keystones) {
+      expect(k.currency).toBe('attainment');
+      expect(k.grants).toEqual([]);
+      expect(k.effects).toHaveLength(1);
+    }
   });
 
-  it('holds the one-of keystone groups, and every member is a keystone', () => {
-    const groups = (tree as any).groups as { id: string; members: string[] }[];
-    expect(groups.length).toBe(6);
-    for (const group of groups) {
-      expect(group.members.length).toBe(2);
-      for (const member of group.members) {
-        expect((tree as any).byId[member]?.kind).toBe('keystone');
-        expect((tree as any).byId[member]?.group).toBe(group.id);
-      }
+  it('bans the listed keystone pairs, in either order', () => {
+    expect((tree as any).groups).toEqual([]);
+    const pairs = (tree as any).incompatibilities as { a: string; b: string }[];
+    expect(pairs.length).toBeGreaterThan(0);
+    for (const pair of pairs) {
+      expect((tree as any).byId[pair.a].kind).toBe('keystone');
+      expect((tree as any).byId[pair.b].kind).toBe('keystone');
+      expect(tree.pairHolder(pair.a, { [pair.b]: 1 })).toBe(pair.b);
+      expect(tree.pairHolder(pair.b, { [pair.a]: 1 })).toBe(pair.a);
     }
   });
 });

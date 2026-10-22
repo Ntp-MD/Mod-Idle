@@ -18,6 +18,11 @@ export interface MobLine {
   secLeft: number;
   /** Absolute damage per second this line is dealing, already scaled by the dealer's Element. */
   perSec: number;
+  /**
+   * A line a Keystone wrote with its own stated lifetime: it pays `secLeft` seconds and never
+   * stack-decays on the family's own clock, because the Keystone already decided the total.
+   */
+  fixedSec?: boolean;
 }
 
 export interface MobMark {
@@ -218,6 +223,76 @@ function mark(store: MobStatusStore, mobId: string): MobMark {
 }
 
 /**
+ * A DoT line a Keystone owns. The bundle states the damage per second and the seconds it runs, so
+ * nothing is rolled here: no Alignment gate and no proc chance, because the row is the application —
+ * `20` Toxic Execution's crit bonus and `09` Crimson Pact's withheld physical. Status immunity is the
+ * only answer, and the DoT budget the family already obeys still binds the payment.
+ */
+export function placeKeystoneDoT(
+  store: MobStatusStore,
+  mobId: string,
+  name: 'poison' | 'bleed',
+  perSec: number,
+  sec: number,
+  alignedPerSec: number,
+  immune: string[] = [],
+): boolean {
+  if (!(perSec > 0) || !(sec > 0) || immune.includes(name)) return false;
+  const m = mark(store, mobId);
+  m.alignedPerSec = Math.max(m.alignedPerSec, alignedPerSec);
+  const l = line(m, name);
+  // a Poison the build already proc'd runs on its own stack clock; the Keystone's damage rides that
+  // clock at the stronger rate instead of converting a stacking line into a timed one
+  if (name === 'poison' && l.stacks > 0 && !l.fixedSec) {
+    l.perSec = Math.max(l.perSec, perSec);
+    return true;
+  }
+  l.stacks = Math.max(1, l.stacks);
+  l.perSec = Math.max(l.perSec, perSec);
+  l.secLeft = Math.max(l.secLeft, sec);
+  l.fixedSec = true;
+  return true;
+}
+
+/** Does this body carry a Burn, Poison or Bleed a `60` Plague Courier could move off it? */
+export function carriesTransferable(store: MobStatusStore, mobId: string): boolean {
+  const l = store[mobId]?.statuses;
+  if (!l) return false;
+  return (['burn', 'poison', 'bleed'] as MobStatusName[])
+    .some((f) => { const line = l[f]; return !!line && (line.stacks > 0 || line.secLeft > 0); });
+}
+
+/**
+ * `60` Plague Courier: one Burn, Poison or Bleed walks off a body and onto another, whole — the
+ * remaining damage per second and the remaining life come with it and no clock restarts. The first
+ * family the source carries is the one that moves, in that order; a body that cannot answer the
+ * family simply does not catch it, and the source keeps what it had.
+ */
+export function transferStatus(
+  store: MobStatusStore,
+  fromId: string,
+  toId: string,
+  immune: string[] = [],
+): MobStatusName | null {
+  const src = store[fromId];
+  if (!src || fromId === toId) return null;
+  const name = (['burn', 'poison', 'bleed'] as MobStatusName[])
+    .find((f) => { const l = src.statuses[f]; return !!l && (l.stacks > 0 || l.secLeft > 0); });
+  if (!name) return null;
+  if (immune.includes(name)) return null;
+  const moving = src.statuses[name]!;
+  delete src.statuses[name];
+  // the transfer keeps what it carried — the damage the line is dealing and the life it has left —
+  // and starts no new clock of its own
+  const dst = line(mark(store, toId), name);
+  dst.stacks = Math.max(dst.stacks, moving.stacks);
+  dst.perSec = Math.max(dst.perSec, moving.perSec);
+  dst.secLeft = Math.max(dst.secLeft, moving.secLeft);
+  if (moving.fixedSec) dst.fixedSec = true;
+  return name;
+}
+
+/**
  * The earth line a row leaves behind (Sand Storm): its own damage a second, and its own seconds — both
  * typed by the row, not by the element — so a lingering cloud counts INSIDE the shared DoT budget the
  * cap already runs on. `alignedPerHit` only raises the budget the cap is measured against, exactly as an
@@ -294,6 +369,14 @@ export function stepMobParts(store: MobStatusStore, mobId: string): DotTick {
   let erosionDot = 0;
   for (const [name, l] of Object.entries(m.statuses) as [MobStatusName, MobLine][]) {
     if (name === 'poison') {
+      if (l.fixedSec) {
+        // a Keystone's own poison pays the seconds its row states and then goes: its total is fixed, so
+        // the stack clock that eats a proc'd poison never touches it
+        poisonDot += l.stacks * l.perSec;
+        l.secLeft--;
+        if (l.secLeft <= 0) delete m.statuses.poison;
+        continue;
+      }
       // the hold covers the next `sec` of this mob's own clock, so the last held second is inclusive
       const held = (m.poisonHeldUntil || 0) >= m.elapsedSec;
       if (!held && m.elapsedSec % S.poison.decay_sec === 0 && l.stacks > 0) l.stacks--;
@@ -395,10 +478,18 @@ export function applyWeaponRiders(
   bonusStunPct = 0,
   /** the statuses this body cannot answer (`Mob.immune`) — neither an Element proc nor a bleed lands */
   immune: string[] = [],
+  /** `66` Elemental Conduit: the as-extra pools this Hit carried, one separate attempt each */
+  extraByElement: Record<string, number> = {},
 ): void {
   const alignedPerSec = c.elem * (c.alignment / 100) * c.hitsPerSec;
   for (const el of Object.keys(c.elemByElement)) {
     if (el && (c.elemByElement as any)[el] > 0) applyElement(rng, store, mobId, el, c, alignedPerSec, immune);
+  }
+  // §7.2.11 · 66: a hit that carried as-extra Elemental damage gets its own separate attempt for that
+  // Element — the same Alignment gate, the same proc chance, the same immunity and stack rules, and the
+  // same control budget, because the lane is a second roll, not a second mechanic.
+  for (const [el, amount] of Object.entries(extraByElement)) {
+    if (el && amount > 0) applyElement(rng, store, mobId, el, c, alignedPerSec, immune);
   }
   // a row of its own may add a bleed chance on the target it lands on (Puncture guarantees it), so the
   // press's own sentence reaches the same roll the gear and a granting curse feed

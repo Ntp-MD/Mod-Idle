@@ -20,33 +20,39 @@ The reference line splits evenly (`pointsAt(L) / 7`); players use actual allocat
 
 The tree's own numbers live in `tools/data/tree.json` and its formulas in `engine/tree.ts`. The tree never changes a published figure: `mobHP` excludes it, and the reference build allocates no tree at all.
 
-**The shape.** Twelve wings on a pitch around a centre start. A node grants one or more lines, and the values it grants are written out in the file — the tree's numbers are the tree's own and do not move when a loot line's maximum moves. The geometry is derived from the topology: a node's depth and lane come from its parents, and the `layout` block turns those into positions. A node id is a save key, so it keeps its meaning for ever.
+**The shape.** Seven regions — Str, Agi, Dex, Int, Wis, Vit, Lck — laid out clockwise on seven spokes from a free centre Start: 20 spine nodes and 12 branch clusters per region (five nodes and one Notable each), plus four junction Notables and 52 Keystones. Every node has one rank. Geometry is derived from the locked `seven-spoke-v3` recipe (`node.placement` stores role and index, never coordinates); `needs` is the authoring parent graph, and `links` adds the drawn region rings, which are real purchase edges too. A node id is a save key, so it keeps its meaning for ever. A v3 id is new: an older character is refused with its own message rather than migrated or silently filtered.
 
-**The kinds.** A kind sets a node's rank count, its cost and the currency it is paid in.
+**The kinds.** A kind sets a node's cost, the currency it is paid in, and what it grants.
 
 | Kind | Ranks | Cost | Currency | Grants |
 |---|---|---|---|---|
-| `line` | 3 | 1 | tree | one line, three rising values |
-| `mark` | 1 | 1 | tree | one line, one value |
-| `notable` | 1 | 1 | tree | three lines at once |
-| `keystone` | 1 | 1 | attainment | one line and a drawback |
-| `capstone` | 1 | 1 | tree | three lines at once |
+| `normal` | 1 | 1 | tree | exactly +1 of its region's Core attribute, through `stat_mod_flat` with `stat` named |
+| `notable` | 1 | 3 | tree | a resolved `profile`: two or three flat / percent lines, some naming an Element |
+| `keystone` | 1 | 1 | attainment | one bundle `{kind:'keystone', key, params}`; it may be grantless |
 
-**The points.** Tree points come from the level curve — the level curve in `engine.json` owns the stat points, and the tree's own budget and rate live in the tree's spec (`points.currencies.tree`). A keystone is paid in **attainment** points, which a completed Delivery contract pays: the roll is made at offer time, last in the offer's roll order, and frozen into the contract before the player sees it.
+A profile and `grants` are alternatives, not both. A keystone's number is its own: it changes a mechanic, it does not add a stat line, and there is no global keystone limit.
 
-**The rules.** A keystone may carry exactly one drawback, from a bounded vocabulary. There are no others: a rule outside this set is refused by name, so a node is never bought and quietly does nothing.
+**The points.** Tree points are `tree base + the level ranges + quest bonuses − what the ranks spent`, and each half stays in its own wallet:
 
-| Rule | Meaning |
-|---|---|
-| `remove` | the character no longer receives the named line — the drawback, applied after the gear and the tree have both folded, so the line is gone from the whole sheet |
-| `cap_unlock` | raises a named Cap, through the same line the sheet already reads |
-| `convert` | routes a percent of the physical share into a named Element, the route a conversion aura takes |
+```
+treePoints       = pointsAt(level) + questTreePointsEarned − spent('tree')
+pointsAt(L)      = 3 + 3 × min(L − 1, 99) + max(0, L − 100)      // 3 / 300 / 301 / 390 at L 1 / 100 / 101 / 190
+attainmentPoints = earned − spent('attainment')
+```
 
-**The groups.** A keystone group is a one-of family: holding one member blocks its siblings, and it is the only exclusivity in the tree. There is no unlock condition on any node — a node is bought when it is connected to a path the character already owns.
+`questTreePointsEarned` rises only when a Town task or Delivery claim actually pays its stored bonus. A keystone is paid in **attainment** points, which a completed Delivery contract pays: the roll is made at offer time — one extra draw after the offer's existing draws, even when it comes up zero — and frozen into the contract before the player sees it. A respec hands back both wallets at their spec prices; there is no per-node refund.
 
-**The budget.** A line has a budget, and the tree never hands out more of a line than its budget: the total across the whole tree is capped at 130% of that line's `mods.json` maximum. The values are derived from that budget, not typed; a rank never grants nothing and never grants less than the rank below it, so a line with many nodes can sit a little over its share, and a line that cannot carry a fraction gives one.
+**The purchase graph.** Buying walks the undirected union of `needs` and `links`. There is no attribute requirement on any node (D3). An unpurchased Keystone is never a through-route; a path may end on one but not pass through it. The path search is multi-source Dijkstra from Start and the owned component, with a lexical id tie-break, and the whole path is validated (connectivity, currency, pair conflicts, bundle handler) before it is spent — never halfway.
 
-**Why the tree is shaped this way.** The wings are open to every character — the commitment lives in the keystone groups, not in a gate — and there is no attribute requirement on any node: the reference build splits its points evenly, so any absolute threshold would be passed by everybody or by nobody, and connectivity is a rule a player already understands. A keystone is paid in its own currency so it never competes with the ordinary nodes for the same point, and it may carry a drawback so the choice is a shape and not only a number. The budget exists because a value ladder would make the far nodes of a wing several times more point-efficient than the near ones, and a budget has no such preference: the worth of a point depends on the line, not on where the node sits.
+**The rules.** A v3 keystone carries no `rule` drawback; its whole effect is its bundle. The bundle registry (`engine/keystones.ts`) owns each key's parameter names, units and ranges and the hooks its handler must answer; a key is purchasable only while the runtime table supplies every required hook.
+
+**The conflicts.** Exclusivity is pairwise only, from `incompatibilities`: the 26 unordered pairs of the keystone table. There are no one-of groups and no transitive closure — a pair that is not listed may be held together.
+
+**The mechanics line.** Cross-system constants live in `tree.mechanics`: Low Life at `low_life_pct` (50% of **Full Max HP**; a Keystone that reduces usable HP does not lower it, and Chaos Inoculation is never Low Life), the HP-cost floor, the combat clock's `combat_time_units_per_sec`, periodic payments, the control bucket, and the Camp minimum HP per second.
+
+**Reservations.** Full Max HP and Full Max Mana are the final pools before reservation; auras, 34's fixed 40% Mana reserve and 35's fixed 25% HP reserve only reduce the **usable** share. Healing clamps to usable, never to a reduced Max, and the HUD shows Max, usable and reserved separately. Energy Shield is spent before Health, and the Chaos Inoculation hit path takes the damage its HP cannot through ES first.
+
+**Why the tree is shaped this way.** Every region opens from Start — the commitment lives in the keystone pairs, not in gate — and there is no attribute requirement, because the reference build splits its points evenly and any absolute threshold would be passed by everybody or by nobody. A keystone is paid in its own currency so it never competes with the ordinary nodes, and each one is a change of rule rather than a bigger number.
 
 ### Derived stats
 

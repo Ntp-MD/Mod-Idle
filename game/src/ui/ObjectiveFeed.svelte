@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import CollapseToggle from './CollapseToggle.svelte';
+  import Pager from './Pager.svelte';
   let { goal, deliveries, onSheet, onDelivery }: {
     goal: string;
     deliveries: { id: string; title: string; progress: string; clock: string; paused: string | null }[];
@@ -46,13 +47,15 @@
       </button>
     {/each}
     </div>
-    {#if deliveries.length > pageSize}
-      <nav class="objective-pages" aria-label="Tracked delivery pages">
-        <button class="btn-quiet" type="button" disabled={start === 0} onclick={() => start = Math.max(0, start - pageSize)} aria-label="Previous objectives">Previous</button>
-        <small class="text-dim" role="status">{start + 1}–{Math.min(start + pageSize, deliveries.length)} / {deliveries.length}</small>
-        <button class="btn-quiet" type="button" disabled={start + pageSize >= deliveries.length} onclick={() => start += pageSize} aria-label="Next objectives">Next</button>
-      </nav>
-    {/if}
+    <Pager
+      group="Tracked delivery pages"
+      pages={Math.ceil(deliveries.length / pageSize)}
+      page={Math.floor(start / pageSize)}
+      onturn={(p) => (start = p * pageSize)}
+      text={`${start + 1}–${Math.min(start + pageSize, deliveries.length)} / ${deliveries.length}`}
+      buttonClass="btn-quiet"
+      announce
+    />
     <button class="btn-flat objective-sheet text-note" type="button" onclick={onSheet}>Life-skill rungs · Sheet</button>
   </div>
 </section>
@@ -63,7 +66,6 @@
   .objective-content[hidden] { display: none; }
   .delivery-list { display: grid; gap: var(--spacing-sm); }
   .delivery-list:empty { display: none; }
-  .objective-pages { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xs); }
   .objective-goal { margin: 0; font-size: var(--font-xs); line-height: 1.4; overflow-wrap: anywhere; }
   .objective-entry { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--spacing-xs) var(--spacing-sm); width: 100%; text-align: left; font-size: var(--font-xs); }
   .objective-entry strong { font-weight: 600; }

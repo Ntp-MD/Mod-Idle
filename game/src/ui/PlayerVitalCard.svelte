@@ -1,7 +1,7 @@
 <script lang="ts">
     import { eng, sm } from "../engine/client";
     import { characterIcon, elementIcon, skillIcon } from "../icon";
-    import { ownsSkill } from "../sim/skills";
+    import { ownsSkill, hpReserved, usableHp } from "../sim/skills";
     import { statusLabel } from "../sim/mobStatus";
     import { statusViews } from "../sim/playerStatus";
     import { bar } from "./field";
@@ -56,6 +56,9 @@
     }
 
     const latestTaken = $derived(ring.find((e) => e.side === "self" && e.kind === "taken") || null);
+    /** Full Max stays on the bar; a reservation only names the share a heal may not reach (`35`, `54`). */
+    const hpHeld = $derived(hpReserved(c, s.skills));
+    const hpReach = $derived(usableHp(c, s.skills));
     const latestLand = $derived(ring.find((e) => e.side === "field" && e.kind === "hit" && (e.via === "swing" || e.via === "cast")) || null);
     const selfArt = $derived(plateGesture(latestTaken, latestLand));
     /** The blow taken is the louder fact; a strictly newer swing of the character's own is ignored here —
@@ -172,9 +175,13 @@
                         </div>
                     </div>
                     <div class="meters">
-                        <span class="meter track track-meter hp" role="img" aria-label={`HP ${fmtNum(Math.max(0, Math.round(vitals.hp)))} of ${fmtNum(c.maxHp)}`}>
+                        <span class="meter track track-meter hp" role="img" aria-label={`HP ${fmtNum(Math.max(0, Math.round(vitals.hp)))} of ${fmtNum(c.maxHp)}${hpHeld > 0 ? `, ${fmtNum(hpReach)} usable, ${fmtNum(hpHeld)} reserved` : ""}`}
+                            title={hpHeld > 0 ? `${fmtNum(hpReach)} usable · ${fmtNum(hpHeld)} reserved` : undefined}>
                             <i style={bar(vitals.hp, c.maxHp)}></i><b>{fmtNum(Math.max(0, Math.round(vitals.hp)))} / {fmtNum(c.maxHp)}</b>
                         </span>
+                        {#if hpHeld > 0}
+                            <small class="meter-note">{fmtNum(hpReach)} usable · {fmtNum(hpHeld)} reserved</small>
+                        {/if}
                         {#if c.es > 0}
                             <span class="meter track track-meter es" role="img" aria-label={`Energy Shield ${fmtNum(Math.max(0, Math.round(vitals.es)))} of ${fmtNum(c.es)}`}>
                                 <i style={bar(vitals.es, c.es)}></i><b>{fmtNum(Math.max(0, Math.round(vitals.es)))} / {fmtNum(c.es)}</b>
@@ -223,8 +230,10 @@
 </div>
 
 <style>
-    /* the root keeps the slot and anchors the unclipped figures; the body carries the paint and, in a
-     cramped migrated layout, the internal scroll — never a clip on the combat feedback above */
+    /* One style set: this card only ever mounts inside the combat scene, so the former
+       generic + .combat duplicates collapse into single rules. Any figure the card raises
+       is anchored inside its own box — nothing paints outside the card. */
+
     .player-card {
         position: relative;
         width: 100%;
@@ -232,75 +241,9 @@
         min-height: 0;
     }
 
-    .player-card.combat .card-body {
+    .card-body {
         display: grid;
         grid-template-columns: minmax(0, 1fr);
-        height: 100%;
-        overflow-y: auto;
-    }
-    .player-card.combat .vitals {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        min-height: 0;
-        gap: var(--spacing-sm);
-    }
-    .player-card.combat .cardface {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: stretch;
-        height: 100%;
-        min-height: 0;
-        gap: var(--spacing-sm);
-        width: 100%;
-    }
-    .player-card.combat .identity {
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: var(--spacing-sm);
-        text-align: center;
-    }
-    .player-card.combat .identity > div {
-        display: grid;
-        justify-items: center;
-        min-width: 0;
-    }
-    .player-card.combat .meters {
-        display: grid;
-        gap: var(--spacing-sm);
-        width: 100%;
-        min-width: 0;
-    }
-    .player-card.combat .rails {
-        position: absolute;
-        inset: 0;
-        z-index: var(--z-floater);
-        pointer-events: none;
-    }
-    .player-card.combat .rail {
-        position: absolute;
-        top: 0;
-        display: flex;
-        flex-direction: column;
-        flex-wrap: nowrap;
-        gap: var(--spacing-sm);
-        min-width: max-content;
-    }
-    .player-card.combat .rail.buffs {
-        left: calc(100% + var(--spacing-sm));
-        align-items: flex-start;
-    }
-    .player-card.combat .rail.debuffs {
-        right: calc(100% + var(--spacing-sm));
-        align-items: flex-end;
-    }
-
-    .card-body {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-sm);
         height: 100%;
         min-height: 0;
         overflow-y: auto;
@@ -311,8 +254,77 @@
         position: relative;
         display: flex;
         flex-direction: column;
-        gap: var(--spacing-sm);
+        height: 100%;
         min-height: 0;
+        gap: var(--spacing-sm);
+    }
+
+    .cardface {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: stretch;
+        height: 100%;
+        min-height: 0;
+        gap: var(--spacing-sm);
+        width: 100%;
+    }
+    .cardface.knock {
+        animation: card-knock var(--motion-ui) cubic-bezier(0.2, 0.8, 0.3, 1);
+    }
+
+    .identity {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: var(--spacing-sm);
+        min-width: 0;
+        text-align: center;
+    }
+    .identity > div {
+        display: grid;
+        justify-items: center;
+        min-width: 0;
+    }
+
+    .portrait {
+        width: calc(var(--icon-card) * 4 / 5);
+        height: calc(var(--icon-card) * 4 / 5);
+        flex: none;
+        object-fit: contain;
+        padding: var(--spacing-sm);
+    }
+
+    .meters {
+        display: grid;
+        gap: var(--spacing-sm);
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* effect badges live inside the card's top corners, where the portrait leaves room */
+    .rails {
+        position: absolute;
+        inset: 0;
+        z-index: var(--z-floater);
+        pointer-events: none;
+    }
+    .rail {
+        position: absolute;
+        top: var(--spacing-sm);
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        min-width: max-content;
+        pointer-events: none;
+    }
+    .rail.buffs {
+        right: var(--spacing-sm);
+        align-items: flex-end;
+    }
+    .rail.debuffs {
+        left: var(--spacing-sm);
+        align-items: flex-start;
     }
 
     /* the struck beat: a coloured rim stamped once per event over the vitals subtree */
@@ -333,33 +345,17 @@
         z-index: var(--z-label);
         pointer-events: none;
     }
-    .pop {
+    .pops .pop {
         position: absolute;
-        left: calc(100% + var(--spacing-xs) + (var(--lane, 0) * var(--spacing-xs)));
+        left: 50%;
         top: 50%;
-        translate: 50% 0;
         white-space: nowrap;
         padding: var(--spacing-sm);
     }
-    .pop-word {
+    .pops .pop-word {
         top: calc(50% + var(--font-md));
     }
 
-    .rails {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-    }
-    .rail {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-sm);
-        min-width: max-content;
-        pointer-events: none;
-    }
-    .rail.debuffs {
-        align-items: flex-end;
-    }
     .badge {
         position: relative;
         display: grid;
@@ -383,32 +379,6 @@
         line-height: 1;
     }
 
-    .cardface {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-sm);
-    }
-    .cardface.knock {
-        animation: card-knock var(--motion-ui) cubic-bezier(0.2, 0.8, 0.3, 1);
-    }
-
-    .identity {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        min-width: 0;
-    }
-    .portrait {
-        width: var(--icon-card);
-        height: var(--icon-card);
-        flex: none;
-        object-fit: contain;
-        padding: var(--spacing-sm);
-    }
-    .player-card.combat .portrait {
-        width: calc(var(--icon-card) * 4 / 5);
-        height: calc(var(--icon-card) * 4 / 5);
-    }
     .name {
         margin: 0;
         min-width: 0;
@@ -435,6 +405,11 @@
         display: block;
         height: 100%;
         width: 100%;
+    }
+    .meter-note {
+        color: var(--dim);
+        font-size: var(--font-xs);
+        font-variant-numeric: tabular-nums;
     }
     /* the figure alone, on the bar's centre line: the bar's colour is what names it */
     .meter b {
@@ -479,7 +454,7 @@
     }
     @media (prefers-reduced-motion: reduce) {
         .flash,
-        .pop,
+        .pops .pop,
         .cardface.knock {
             animation: none;
         }

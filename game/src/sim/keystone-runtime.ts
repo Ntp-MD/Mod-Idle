@@ -63,7 +63,7 @@ import {
 } from '../../../engine/keystones.ts';
 import type { KeystoneHook } from '../../../engine/keystones.ts';
 import type { DamagePacket } from '../../../engine/damage-provenance.ts';
-import type { Statuses } from './combat.ts';
+import type { Statuses } from './status-types.ts';
 
 /** One real handler function a hook slot may hold. The signature is the packet that fills it (§6). */
 export type KeystoneHandlerFn = (...args: never[]) => unknown;
@@ -121,6 +121,19 @@ export function supportedKeystoneKeys(table: KeystoneHandlerTable): string[] {
       return false;
     }
   });
+}
+
+/**
+ * The build context `createTree` asks for: the canonical Elements and the same real handler table the
+ * client runs. The client and every cage build through this one function, so a key is never gated
+ * against a second "supported" list that has no handler behind it.
+ */
+export function keystoneBuildContext(elements: readonly string[]) {
+  registerStaticKeystoneHandlers(KEYSTONE_HANDLERS, elements);
+  return {
+    elements,
+    keystoneSupported: (key: string) => isKeystoneSupported(key, KEYSTONE_HANDLERS[key]),
+  };
 }
 
 /** The purchase/import/cage gate: refuse an unsupported key by name and hook before anything is spent. */

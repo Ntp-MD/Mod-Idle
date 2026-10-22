@@ -96,7 +96,7 @@
         <h4>Buyers for this quantity</h4>
         <div class="buyer-list">
           {#each buyers as buyer (buyer.town.id)}
-            <div class="buyer" class:chosen={buyer.town.id === market.id}>
+            <div class="buyer" class:selected={buyer.town.id === market.id}>
               <button class="buyer-name" onclick={() => marketId = buyer.town.id}>{buyer.town.name}</button>
               <span class="text-value">{gold(buyer.quote.gold)} gold</span>
               <small>{buyer.blocks} blocks · {buyer.fare == null ? 'Waypoint unopened' : `warp ${gold(buyer.fare)} gold · net ${gold(buyer.quote.gold - buyer.fare)}`}</small>
@@ -167,7 +167,7 @@
   .sale-line input { width: clamp(55px, 4.36vw, 90px); }
   .buyer-list { display: grid; max-height: clamp(220px, 26vw, 520px); overflow: auto; }
   .buyer { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.6fr) auto; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm); border-bottom: 1px solid var(--line); }
-  .buyer.chosen { background: var(--surface-selected); }
+  .buyer.selected { background: var(--surface-selected); }
   .buyer > span { font-variant-numeric: tabular-nums; font-size: var(--font-sm); }
   .buyer-name { text-align: left; border: 0; background: transparent; }
   .footnote { line-height: 1.5; }

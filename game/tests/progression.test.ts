@@ -3,7 +3,8 @@ import { E, BASES, SKILLS, MODS, TREE_SPEC, eng, tree } from '../src/engine/clie
 import { createTree } from '../../engine/tree';
 import { newGame } from '../src/sim/game';
 import { mastery, masteryLevel, dropMultiplier, weaponSkillBonusPct } from '../src/sim/mastery';
-import { canSpendTree, spendTreePoint, respecTree, treePointsSpent, treeLines } from '../src/sim/tree';
+import { canSpendTree, spendTreePoint, respecTree, treePointsSpent, treeLines, treePath, allocateTreePath } from '../src/sim/tree';
+import { keystoneBuildContext } from '../src/sim/keystone-runtime';
 import { newGoal, target, onSpawn, onKill, watch } from '../src/sim/goal';
 import type { GameState, Mob } from '../src/sim/types';
 import { respecStats } from '../src/sim/respec';
@@ -47,37 +48,43 @@ describe('weapon Mastery', () => {
 describe('the passive tree', () => {
   const spent = (s: GameState) => treePointsSpent(s);
   const firstWithNeeds = () => Object.values(tree.byId as Record<string, any>).find((n: any) => n.needs.length && !n.needs.includes('start')) as any;
+  const ELEMENTS = Object.keys((E as any).elements.status_of);
+  const build = (spec: any) => createTree(spec, MODS, ELEMENTS, keystoneBuildContext(ELEMENTS));
+  const cloneSpec = () => JSON.parse(JSON.stringify(TREE_SPEC));
 
-  it('reads the shallow boundary and the rank count from the tree spec', () => {
-    const spec = structuredClone(TREE_SPEC) as any;
-    spec.shallow_nodes = 1;
-    const model = createTree(spec, MODS);
-    expect(model.shallowNodes).toBe(1);
-    expect(model.nodes[0].tier).toBe('shallow');
-    expect(model.nodes[1].tier).toBe('deep');
-    // a node's rank count comes from its kind, and its values are the ones the file carries: the
-    // drafting tables are an aid, not a rule the live tree follows (D5)
-    const line = model.nodes.filter((node) => node.kind === 'line');
-    const notable = model.nodes.filter((node) => node.kind === 'notable');
-    expect(line.every((node) => node.ranks === 3)).toBe(true);
-    expect(notable.every((node) => node.ranks === 1)).toBe(true);
-    expect(model.nodes[0].values.length).toBe(3);
-    expect(model.nodes[0].values[0]).toBeGreaterThan(0);
+  it('reads the three v3 kinds and the rank each one holds', () => {
+    const nodes = Object.values(tree.byId as Record<string, any>);
+    for (const node of nodes.filter((n) => n.kind === 'normal')) {
+      expect(node.ranks).toBe(1);
+      expect(node.cost).toBe(1);
+      expect(node.currency).toBe('tree');
+      expect(node.profile).toBe(`core.${node.wing}`);
+    }
+    for (const node of nodes.filter((n) => n.kind === 'notable')) {
+      expect(node.ranks).toBe(1);
+      expect(node.cost).toBe(3);
+      expect(node.currency).toBe('tree');
+    }
+    for (const node of nodes.filter((n) => n.kind === 'keystone')) {
+      expect(node.ranks).toBe(1);
+      expect(node.cost).toBe(1);
+      expect(node.currency).toBe('attainment');
+      expect(node.grants).toEqual([]);
+    }
   });
 
-  it('refuses a tree spec it cannot build, and names the key that is wrong', () => {
-    const spec = structuredClone(TREE_SPEC) as any;
-    const noBoundary = structuredClone(spec);
-    delete noBoundary.shallow_nodes;
-    expect(() => createTree(noBoundary, MODS)).toThrow(/shallow_nodes/);
+  it('refuses a v3 tree spec it cannot build, and names the key that is wrong', () => {
+    const noKind = cloneSpec();
+    delete noKind.node_kinds.keystone;
+    expect(() => build(noKind)).toThrow(/keystone/);
 
-    const noTiers = structuredClone(spec);
-    noTiers.rank_tiers.shallow = [];
-    expect(() => createTree(noTiers, MODS)).toThrow(/rank_tiers/);
+    const noProfiles = cloneSpec();
+    delete noProfiles.profiles;
+    expect(() => build(noProfiles)).toThrow(/profiles/);
 
-    const raggedTiers = structuredClone(spec);
-    raggedTiers.rank_tiers.deep = [0.2, 0.4];
-    expect(() => createTree(raggedTiers, MODS)).toThrow(/same length/);
+    const wrongLayout = cloneSpec();
+    wrongLayout.layout.algorithm = 'radial-topology';
+    expect(() => build(wrongLayout)).toThrow(/seven-spoke-v3/);
   });
 
 
@@ -105,13 +112,20 @@ describe('the passive tree', () => {
     expect(canSpendTree(s, node.id).ok).toBe(true);
   });
 
-  it('opens a cross-linked branch from a neighbouring owned path', () => {
+  it('opens a cross-linked branch from a neighbouring owned region', () => {
     const s = newGame();
     s.player.treePoints = 1000;
-    for (let rank = 1; rank <= 7; rank++) expect(spendTreePoint(s, `impact.${rank}`).ok).toBe(true);
-    expect(canSpendTree(s, 'control.7').ok).toBe(true);
-    expect(spendTreePoint(s, 'control.7').ok).toBe(true);
-    expect(canSpendTree(s, 'control.8').ok).toBe(true);
+    for (let index = 1; index <= 6; index++) expect(spendTreePoint(s, `normal.str.s${String(index).padStart(2, '0')}`).ok).toBe(true);
+    expect(canSpendTree(s, 'normal.agi.s06').ok).toBe(true);
+    expect(spendTreePoint(s, 'normal.agi.s06').ok).toBe(true);
+    expect(canSpendTree(s, 'normal.agi.s07').ok).toBe(true);
+
+    // and the ring works the other way round
+    const back = newGame();
+    back.player.treePoints = 1000;
+    for (let index = 1; index <= 6; index++) expect(spendTreePoint(back, `normal.agi.s${String(index).padStart(2, '0')}`).ok).toBe(true);
+    expect(canSpendTree(back, 'normal.str.s06').ok).toBe(true);
+    expect(spendTreePoint(back, 'normal.str.s06').ok).toBe(true);
   });
 
   it('hands every spent point back, free, and grants the lines its ranks buy', () => {
@@ -127,6 +141,75 @@ describe('the passive tree', () => {
     expect(s.player.treeRanks).toEqual({});
     expect(treeLines(s).length).toBe(0);
     expect(respecTree(s)).toEqual({ ok: false, refundedTree: 0, refundedAttainment: 0 });
+  });
+
+  it('breaks a shortest-path tie by the lexically smallest purchase sequence', () => {
+    const spec: any = {
+      version: 3,
+      meta: { note: 'a tie' },
+      points: { currencies: { tree: { base: 0, per_level: 2 }, attainment: { base: 0 } } },
+      node_kinds: {
+        normal: { ranks: 1, cost: 1, currency: 'tree' },
+        notable: { ranks: 1, cost: 3, currency: 'tree' },
+        keystone: { ranks: 1, cost: 1, currency: 'attainment' },
+      },
+      keystone_groups: [],
+      clusters: [],
+      profiles: {
+        'core.str': [{ id: 'stat_mod_flat', values: [1], stat: 'str' }],
+        'core.agi': [{ id: 'stat_mod_flat', values: [1], stat: 'agi' }],
+      },
+      incompatibilities: [],
+      layout: {
+        algorithm: 'seven-spoke-v3', start: { x: 0, y: 0 }, regions: ['str', 'agi'],
+        spine_step: 25, branch_step: 12, notable_offset: 72, keystone_offset: 90,
+        junction_radius: 100, radii: { normal: 3.5, notable: 7, keystone: 9, start: 8 }, padding: 16,
+      },
+      links: [],
+      nodes: [
+        { id: 'normal.str.s01', wing: 'str', kind: 'normal', needs: ['start'], profile: 'core.str', placement: { role: 'spine', index: 1 } },
+        { id: 'normal.str.s02', wing: 'str', kind: 'normal', needs: ['normal.str.s01'], profile: 'core.str', placement: { role: 'spine', index: 2 } },
+        { id: 'normal.agi.s01', wing: 'agi', kind: 'normal', needs: ['start'], profile: 'core.agi', placement: { role: 'spine', index: 1 } },
+        { id: 'normal.agi.s02', wing: 'agi', kind: 'normal', needs: ['normal.agi.s01'], profile: 'core.agi', placement: { role: 'spine', index: 2 } },
+        // two equal-cost routes reach it; the id order decides, not insertion order
+        { id: 'normal.str.s03', wing: 'str', kind: 'normal', needs: ['normal.str.s02', 'normal.agi.s02'], profile: 'core.str', placement: { role: 'spine', index: 3 } },
+      ],
+    };
+    const model = build(spec);
+    expect(model.pathTo('normal.str.s03', {})).toEqual(['normal.agi.s01', 'normal.agi.s02', 'normal.str.s03']);
+    expect(model.pathCost('normal.str.s03', {})).toEqual({ tree: 3, attainment: 0 });
+  });
+
+  it('buys a mixed-wallet path whole, then refunds both currencies', () => {
+    const s = newGame();
+    s.player.treePoints = 1000;
+    s.player.attainmentPoints = 0;
+    s.player.treeRanks = {};
+    const keystone = Object.values(tree.byId).find((n: any) => n.kind === 'keystone')!;
+    const before = structuredClone(s.player.treeRanks);
+
+    // the tree points are plentiful but the attainment wallet is empty: nothing is bought, not even
+    // the ordinary prefix
+    expect(allocateTreePath(s, keystone.id).ok).toBe(false);
+    expect(s.player.treeRanks).toEqual(before);
+    expect(s.player.treePoints).toBe(1000);
+    expect(s.player.attainmentPoints).toBe(0);
+
+    s.player.attainmentPoints = 1;
+    const path = treePath(s, keystone.id);
+    expect(path.cost.attainment).toBe(1);
+    expect(path.nodes[path.nodes.length - 1]).toBe(keystone.id);
+    expect(allocateTreePath(s, keystone.id).ok).toBe(true);
+    expect(s.player.treePoints).toBe(1000 - path.cost.tree);
+    expect(s.player.attainmentPoints).toBe(0);
+    expect(Object.keys(s.player.treeRanks!).length).toBe(path.nodes.length);
+    // the path is bought: a second click spends nothing
+    expect(allocateTreePath(s, keystone.id).ok).toBe(false);
+    expect(s.player.treePoints).toBe(1000 - path.cost.tree);
+
+    expect(respecTree(s)).toEqual({ ok: true, refundedTree: path.cost.tree, refundedAttainment: 1 });
+    expect(s.player.treePoints).toBe(1000);
+    expect(s.player.attainmentPoints).toBe(1);
   });
 });
 
@@ -158,7 +241,7 @@ describe('settlement respec', () => {
 });
 
 describe('resistance ceiling', () => {
-  it('caps at the data’s own ceiling normally and lets only passive ranks extend it', () => {
+  it('caps at the data’s own ceiling and never above its maximum', () => {
     const s = newGame();
     s.gear = openingGear();
     const item = s.gear.find((g) => g)!;
@@ -169,12 +252,6 @@ describe('resistance ceiling', () => {
     const base = buildCharacter(s.player.level, [item]);
     expect(base.resCap).toBe(E.caps.elem_res);
     expect(base.resistance).toBe(E.caps.elem_res);
-    const node = Object.values(tree.byId).find((n) => n.line === 'elemental_resistance_cap_pct')!;
-    for (let rank = 1; rank <= node.ranks; rank++) {
-      const c = buildCharacter(s.player.level, [item], {}, 0, undefined, undefined, { [node.id]: rank });
-      expect(c.resCap).toBe(Math.min(E.caps.elem_res_max, E.caps.elem_res + node.values[rank - 1]));
-      expect(c.resistance).toBe(c.resCap);
-    }
     expect(eng.elemResCapOf(1000)).toBe(E.caps.elem_res_max);
   });
 });

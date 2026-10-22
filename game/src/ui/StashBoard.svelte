@@ -17,6 +17,7 @@
   import { itemName } from '../sim/item-name';
   import { gearEntry, sortEntries, rankTone, SORT_LABELS, type SortKey } from './bag';
   import ItemDetail from './ItemDetail.svelte';
+  import Tabs from './Tabs.svelte';
   import { setDrag, readDrag } from './drag';
   import type { GameState, Item } from '../sim/types';
 
@@ -82,14 +83,18 @@
 <div class="board">
   <div class="shead">
     <div class="tabbar">
-      <div class="tabs" role="tablist" aria-label="Stash tabs">
-        {#each Array(tabs) as _, t (t)}
-          <button role="tab" class="tb btn btn-quiet" class:picked={t === tab} aria-selected={t === tab} aria-label={tabLabel(t)}
-                  onclick={() => { ontab(t); pick('stash', -1); }}>
-            <span>Tab {t + 1}</span><b>{(game.stash[t] || []).length}</b>
-          </button>
-        {/each}
-      </div>
+      <Tabs
+        label="Stash tabs"
+        tabs={Array.from({ length: tabs }, (_, t) => ({ id: String(t), label: tabLabel(t) }))}
+        active={String(tab)}
+        onpick={(id) => { ontab(Number(id)); pick('stash', -1); }}
+        tabindex={tabs > 1}
+        tabClass="tb"
+      >
+        {#snippet item(t)}
+          <span>Tab {Number(t.id) + 1}</span><b>{(game.stash[Number(t.id)] || []).length}</b>
+        {/snippet}
+      </Tabs>
       <button class="add btn btn-quiet" disabled={!addtab?.can}
               title={addtab ? `${addtab.label} — ${addtab.price} gold at this settlement's stall` : 'No line this settlement stocks adds a tab'}
               onclick={() => addtab && onaddtab?.(addtab.rowId)}>
@@ -190,15 +195,14 @@
   .board { display: grid; gap: var(--spacing-sm); }
   .shead { display: grid; gap: var(--spacing-xs); }
   .tabbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs); padding-bottom: var(--spacing-xs); border-bottom: 1px solid var(--line); }
-  .tabs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs); }
-  .tb { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
+  /* the tab buttons live in Tabs.svelte's scope, so their face styles reach them globally */
+  .tabbar :global(.tb) { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
+  .tabbar :global(.tb b) { font-family: var(--num); color: var(--dim); font-weight: 500; }
+  .tabbar :global(.tb.picked b) { color: var(--gold); }
   .add { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
   .add img { width: var(--icon-label); height: var(--icon-label); object-fit: contain; }
   .add b { font-family: var(--num); color: var(--gold); font-weight: 500; }
   .note { flex: 1 1 auto; min-width: 0; margin: 0; color: var(--dim); font-size: var(--font-xs); }
-
-  .tb b { font-family: var(--num); color: var(--dim); font-weight: 500; }
-  .tb.picked b { color: var(--gold); }
 
   .grids { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); align-items: start; }
   .shelf { display: grid; gap: var(--spacing-xs); align-content: start; min-width: 0; }

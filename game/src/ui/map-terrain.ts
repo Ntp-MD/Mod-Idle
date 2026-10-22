@@ -10,7 +10,7 @@ export const TERRAIN_ART: Record<string, string> = {
   salt: '/map/terrain/salt-1.png',
   waste: '/map/terrain/waste-1.png',
   ash: '/map/terrain/ash-1.png',
-  village: '/map/landmark/village.png',
+  village: '/map/landmark/town-1.png',
   camp: '/map/landmark/camp.png',
   town: '/map/landmark/town-1.png',
   dungeon: '/map/landmark/encounter-ruins.png',

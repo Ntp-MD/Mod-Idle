@@ -281,7 +281,9 @@ export async function restoreSnapshot(slot: SlotName, index: number): Promise<Ga
   const shot = (await readSnapshots(slot))[index];
   if (!shot) return null;
   // the record inside the backup is the truth at that moment; the shared half is rebuilt after
-  const state = migrate(JSON.parse(JSON.stringify(shot.state)) as GameState, shot.version ?? 0);
+  const raw = JSON.parse(JSON.stringify(shot.state)) as GameState;
+  assertPassiveTreeVersion(raw);
+  const state = migrate(raw, shot.version ?? 0);
   state.pendingSnapshot = null;
   await put(slot, JSON.stringify({ version: SCHEMA_VERSION, state }));
   await put(ACCOUNT_KEY, JSON.stringify(await rebuildAccount()));
@@ -314,11 +316,22 @@ export async function readAccount(): Promise<Account> {
   }
 }
 
+/**
+ * The passive tree is new-character-only: an allocation bought under another tree version has no
+ * mapping into v3, so the character is refused by name. The slot is never deleted, rewritten or
+ * refunded — a later build that understands its version is the only thing allowed to touch it.
+ */
+export function assertPassiveTreeVersion(state: GameState): void {
+  if (state?.player?.passiveTreeVersion !== tree.version)
+    throw new Error('ตัวละครนี้ใช้ passive tree รุ่นเก่า กรุณาสร้างตัวละครใหม่');
+}
+
 export async function readSave(slot: SlotName): Promise<GameState | null> {
   const raw = await get(slot);
   if (!raw) return null;
   const parsed = JSON.parse(raw);
   const state = (parsed.state || parsed) as GameState;
+  assertPassiveTreeVersion(state);
   return applyAccount(await readAccount(), migrate(state, parsed.version ?? 0));
 }
 
@@ -700,12 +713,16 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
         spent = 0;
       }
       s.player.statPoints = Math.min(s.player.statPoints, eng.pointsAt(lv) - spent);
-      // a rank on a node the tree no longer carries is not an allocation
+      // a rank on a node the tree does not carry is refused by name, never deleted: the allocation
+      // belongs to a different tree, and this reader must not quietly turn it into a refund
       const ranks = s.player.treeRanks || (s.player.treeRanks = {});
       for (const id of Object.keys(ranks)) {
-        if (!tree.byId[id]) delete ranks[id];
-        else ranks[id] = Math.max(0, Math.min(tree.byId[id].ranks, Math.floor(finite(ranks[id], 0))));
+        if (!tree.byId[id]) throw new Error(`tree rank ${id} is not a node in tree version ${tree.version}`);
+        ranks[id] = Math.max(0, Math.min(tree.byId[id].ranks, Math.floor(finite(ranks[id], 0))));
       }
+      const conflict = tree.conflictsIn(ranks);
+      if (conflict)
+        throw new Error(`tree allocation holds the incompatible keystones ${conflict.a} and ${conflict.b}`);
       // the tree's points in hand are what the level has paid out MINUS what the ranks have spent, so a
       // save written under an older rate is recomputed rather than clamped (D8)
        s.player.attainmentPoints = Math.max(0, Math.floor(finite(s.player.attainmentPoints, 0)));
@@ -763,6 +780,7 @@ export function importJson(text: string): GameState {
   }
   const state = parsed.state as GameState;
   if (!state.player || !state.counters) throw new Error('not a ModWorld save');
+  assertPassiveTreeVersion(state);
   return migrate(state, parsed.version);
 }
 

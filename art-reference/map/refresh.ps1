@@ -14,7 +14,7 @@ function Write-JsonFile($filePath, $value) {
 $geometryCode = @'
 import fs from 'node:fs';
 import { projectedHex, MAP_CAMERA, MAP_CAMERA_TRANSFORM } from './game/src/ui/map-projection.ts';
-const {width,height} = JSON.parse(fs.readFileSync('game/public/map/terrain/templates/terrain-hex.json','utf8'));
+const {width,height} = JSON.parse(fs.readFileSync('art-reference/map/geometry/terrain-hex.json','utf8'));
 const h = projectedHex(1);
 const elevation = Math.asin(Math.hypot(MAP_CAMERA.b, MAP_CAMERA.d)) * 180 / Math.PI;
 const yaw = Math.atan2(-MAP_CAMERA.c, MAP_CAMERA.a) * 180 / Math.PI;
@@ -72,7 +72,7 @@ $references = @(
     @{ source = 'game/public/map/terrain/forest-relief-1.png'; file = 'forest-relief-1.png'; role = 'Composition and style example. Raw generated footprint is approximate; renderer registration is required. Not a certified camera reference.' },
     @{ source = 'game/public/map/terrain/mountain-relief-1.png'; file = 'mountain-relief-1.png'; role = 'User-approved mountain composition and scale in the actual map. Raw footprint requires registration. Not a certified 3D camera reference.' }
 )
-$sourcePaths = @('game/src/ui/map-projection.ts', 'game/public/map/terrain/templates/terrain-hex.json', 'tools/map.ts', 'game/src/ui/map-terrain.ts', 'game/src/ui/map-terrain-footprints.json', 'art-reference/map/source-assets.json', 'docs/map-art.md')
+$sourcePaths = @('game/src/ui/map-projection.ts', 'art-reference/map/geometry/terrain-hex.json', 'tools/map.ts', 'game/src/ui/map-terrain.ts', 'game/src/ui/map-terrain-footprints.json', 'art-reference/map/source-assets.json', 'docs/map-art.md')
 foreach ($reference in $references) {
     $source = Join-Path $repoRoot $reference.source
     Copy-Item -LiteralPath $source -Destination (Join-Path $referenceDir $reference.file) -Force

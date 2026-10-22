@@ -116,6 +116,11 @@ export interface Mob {
   res: number;
   /** Per-Element resistance from the Species profile (X54); the Element half of a swing or skill press reads this. */
   resByElement?: Record<string, number>;
+  /**
+   * `30` Elemental Equilibrium: the resistance this instance had before the shift, and the second its
+   * own duration lapses. Spawn state, never saved — the debuff outlives no fight.
+   */
+  resShift?: { expiresAtSec: number; res: number; resByElement: Record<string, number> };
   damage: 'physical' | 'magic' | 'mixed';
   innate: string[];
   xp: number;

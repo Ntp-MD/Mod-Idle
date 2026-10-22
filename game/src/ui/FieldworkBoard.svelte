@@ -3,6 +3,7 @@
   import { activeMeal, canCook, fieldActionProblem, fieldHarvestAmount, fieldMasteryLevel, fieldSkillLevel } from '../sim/fieldwork';
   import type { GameState } from '../sim/types';
   import { stackIcon, icon } from '../icon';
+  import Tabs from './Tabs.svelte';
 
   /**
    * The Field Camp, read as a place and not as a form. A meadow band holds the scene: a tree line on
@@ -284,14 +285,17 @@
             : 'No meal cooking · a dish restores Hunger and carries its buff into the field'}</small>
         </div>
       </header>
-      <div class="recipe-tabs" role="tablist" aria-label="Recipe menus">
-        {#each recipeMenus as menu (menu.id)}
-          <button role="tab" class="btn btn-quiet" class:picked={recipeMenu === menu.id} aria-selected={recipeMenu === menu.id}
-                  onclick={() => (recipeMenu = menu.id)}>
-            {menu.label}<small>{recipesInMenu(menu.id)}</small>
-          </button>
-        {/each}
-      </div>
+      <Tabs
+        label="Recipe menus"
+        tabs={recipeMenus.map((m) => ({ id: m.id, label: m.label }))}
+        active={recipeMenu}
+        onpick={(id) => (recipeMenu = id as typeof recipeMenu)}
+        columns={2}
+      >
+        {#snippet item(m)}
+          <span>{m.label}</span><small class="text-note">{recipesInMenu(m.id)}</small>
+        {/snippet}
+      </Tabs>
       <div class="recipes">
         {#each visibleRecipes as recipe (recipe.id)}
           {@const verdict = canCook(gameState, recipe.id)}
@@ -414,9 +418,9 @@
   .medallion { position: relative; display: grid; place-items: center; flex: none; width: calc(var(--icon-label) * 1.5 + var(--spacing-xl)); height: calc(var(--icon-label) * 1.5 + var(--spacing-xl)); }
   .medallion img { width: calc(var(--icon-label) * 1.5); height: calc(var(--icon-label) * 1.5); object-fit: contain; }
   .medallion .count { position: absolute; right: var(--spacing-xs); bottom: var(--spacing-xs); line-height: 1; }
-  .recipe-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs); }
-  .recipe-tabs button { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-xs); }
-  .recipe-tabs small { font-family: var(--num); }
+  /* the tab buttons live in Tabs.svelte's scope, so their face styles reach them globally */
+  .kitchen-card :global(.tabs .btn-quiet) { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-xs); }
+  .kitchen-card :global(.tabs .btn-quiet small) { font-family: var(--num); }
   .recipes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: var(--spacing-sm); min-height: 0; overflow: auto; }
   .recipe { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--spacing-xs); padding: var(--spacing-sm); min-width: 0; }
   .recipe-mark { display: grid; place-items: center; width: calc(var(--icon-label) * 1.5 + var(--spacing-md)); height: calc(var(--icon-label) * 1.5 + var(--spacing-md)); }

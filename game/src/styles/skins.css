@@ -366,14 +366,15 @@
 .gauge-hunger em { background: var(--gold); }
 .gauge-hunger.empty em { background: var(--alarm); }
 
-/* tab-rail: one press in a segmented filter strip. The strip frames; the press keeps its divider. */
+/* tab-rail: one press in a segmented filter strip. The strip frames; the press keeps its divider.
+   The chosen press is `picked`, like every other chosen press. */
 .tab-rail {
     background: none;
     border: 0;
     border-right: 1px solid var(--edge);
     color: var(--dim);
 }
-.tab-rail.active {
+.tab-rail.picked {
     color: var(--gold-lit);
     background: color-mix(in srgb, var(--gold) 12%, transparent);
     box-shadow: inset 0 -1px 0 var(--gold);

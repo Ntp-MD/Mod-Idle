@@ -7,6 +7,15 @@ Current intent and non-obvious behavior constraints. These can change with the o
 - The final zone's boss is the win target: defeat it in one spawn without a Push. Optional activities and tracked wants do not change that goal.
 - A Push costs recovery/travel time, not character death. Core-attribute and passive-tree respecs are free at a settlement.
 
+## The passive tree
+
+- Seven regions open from one free Start. Normal, Notable and Keystone nodes each hold one rank; connectivity is the only gate and no node carries an attribute requirement.
+- A Normal node grants exactly +1 of its region's Core attribute for 1 tree point. A Notable grants its profile of flat / percent lines for 3 tree points. A Keystone changes a mechanic for 1 attainment point, never spends tree points, has no global limit, and may be incompatible with another Keystone only through the listed pair.
+- Tree points are the base plus the level ranges plus claimed quest bonuses minus what the ranks spent; keystones draw attainment earned from completed Deliveries. Respec at a settlement refunds both wallets at their spec prices, with no per-node refund.
+- A path purchase is atomic: it may end on an unowned Keystone but never pass through one as a shortcut. A refusal changes nothing.
+- A new character is required for the current tree specification. An older character is refused with its own message and its slot is left untouched; starting a new character never deletes or overwrites a slot by itself.
+- Low Life is current HP at or below half of Full Max HP. Reservations lower usable HP or Mana, never Max; Chaos Inoculation is never Low Life and routes what HP cannot take through Energy Shield first.
+
 ## Mobs and content
 
 - Race > Species > Variant. The Race registry in `mob.races` is closed; empty Races are allowed. Race membership grants no mechanic or drop eligibility. Potion sources are explicit per Species.
@@ -47,7 +56,7 @@ Current intent and non-obvious behavior constraints. These can change with the o
 
 ## Delivery contracts
 
-- Wants are per-town offers with no Accept step. Only visited towns roll online opportunities; offline time never queues offers. Targets, counts, deadlines, gold, stones and optional skills are shown at offer time. Tracking is informational and never changes the final-boss `GoalState`.
+- Wants are per-town offers with no Accept step. Only visited towns roll online opportunities; offline time never queues offers. Targets, counts, deadlines, gold, stones, an optional skill and an optional quest tree-point bonus are shown at offer time. Tracking is informational and never changes the final-boss `GoalState`.
 - Gold and reward bundles freeze at offer time; demand, travel, later tuning and Haggling level changes never re-price the stored bonus. Stones use the task-board funnel, not an extra faucet. `town.json.income_bound_pct` is sizing guidance, not a ceiling or a balance gate.
 - Partial hand-ins pay live market value immediately. Completion pays the frozen bonus once; expiry forfeits only the unearned bonus. A useful promised skill grants ownership or a duplicate through the shared path; otherwise pay the promised fallback, never both.
 - Deadlines advance through credited online/offline time within the catch-up cap and pause in configured Camp/dungeon states. Snapshot pause at tick start; finalize offer draws after the successful tick's existing draws, including early returns.

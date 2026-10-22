@@ -20,6 +20,7 @@ import { createTrade, type TradeCfg } from '../../../engine/trade.ts';
 import { createDelivery, type DeliveryCfg } from '../../../engine/delivery.ts';
 import { createSkillModel } from '../../../engine/skills.ts';
 import { createTree } from '../../../engine/tree.ts';
+import { keystoneBuildContext } from '../sim/keystone-runtime.ts';
 import { validateEngineData } from '../../../engine/validate.ts';
 import type { EngineData, ModsData, SkillsData } from '../../../engine/types.ts';
 // Each export keeps the type TypeScript infers from its own JSON file. A hand-written interface would be
@@ -46,7 +47,9 @@ export const TREE_SPEC = treeJson;
 const ENGINE_DATA: EngineData = validateEngineData(engineJson);
 const MODS_DATA: ModsData = modsJson;
 const SKILLS_DATA: SkillsData = skillsJson;
-const TREE_DATA: Parameters<typeof createTree>[0] = treeJson;
+// a JSON import cannot infer a union such as `TreeGrant.stat`; the engine validates every grant it
+// reads, so the seam narrows to its own declared shape here rather than re-typing the data
+const TREE_DATA = treeJson as unknown as Parameters<typeof createTree>[0];
 /** The typed views the sim modules pass into the shared factories, where the raw JSON's inferred
  *  shape (a `levels: number[]` where the engine declares a pair) would not satisfy the seam. */
 export const ED = ENGINE_DATA;
@@ -58,8 +61,10 @@ export const dungeon = createDungeon(ENGINE_DATA);
 export const loot = createLoot(ENGINE_DATA, MODS_DATA);
 export const sm = createSkillModel(SKILLS_DATA, ENGINE_DATA);
 /** The passive tree, derived once from its spec — the same object the tree cage gates. The canonical
- *  Elements ride in as the caller's context, the engine owning no data of its own. */
-export const tree = createTree(TREE_DATA, MODS_DATA, Object.keys(E.elements.status_of));
+ *  Elements and the real keystone handler table ride in as the caller's context: a v3 keystone is
+ *  purchasable only when the runtime table can actually run its bundle. */
+const ELEMENTS = Object.keys(E.elements.status_of);
+export const tree = createTree(TREE_DATA, MODS_DATA, ELEMENTS, keystoneBuildContext(ELEMENTS));
 /** The walk and the farm, instantiated once here: the sim, the map views and the player wiki all read
  *  the same two objects, so a block count or a growth time cannot differ between the game and a page.
  *  `any` because the factory's return is a bag of reads the engine's data interface deliberately does

@@ -99,18 +99,19 @@ Calculation order: [DECISIONS.md](DECISIONS.md#combat-order).
 
 | Term | Meaning |
 |---|---|
-| **Wing** | One of the tree's twelve branches — a theme of lines, each radiating from the centre start. |
-| **Node** | One thing the tree grants: a line, or several at once, with a value per rank. |
-| **Rank** | One step of a node. A three-rank node holds three rising values; a one-rank node holds one. |
-| **Line node** | A node that grants one line. |
-| **Mark** | A one-rank line node — a single point on the tree. |
-| **Notable** | A one-rank node that grants several lines at once: the payoff at the end of a lane. |
-| **Keystone** | A node paid in **attainment** points. It may carry a drawback, and it belongs to a group. |
-| **Capstone** | The node at the top of a wing, granting several lines at once. |
+| **Region** | One of the tree's seven spokes — Str, Agi, Dex, Int, Wis, Vit, Lck. Every region opens from the centre Start. |
+| **Node** | One thing the tree grants: a Core attribute, a Notable profile, or a Keystone mechanic. Every node has one rank. |
+| **Rank** | One step of a node; a rank is bought at the node's own cost and the tree's current nodes each hold one. |
+| **Normal** | A node that grants exactly +1 of its region's Core attribute, for 1 tree point. |
+| **Notable** | A node that grants a profile of two or three flat / percent lines, for 3 tree points. |
+| **Junction** | A Notable that bridges two neighbouring regions. |
+| **Keystone** | A node that changes a mechanic, for 1 attainment point. It is grantless unless its effect adds a stat, and it may be incompatible with another Keystone. |
+| **Incompatibility** | A listed pair of Keystones that may not be held together. Exclusivity is pairwise only; there are no groups. |
 | **Attainment point** | The tree's second currency. A completed Delivery contract pays one; keystones are bought with them. |
-| **Keystone group** | A one-of family: holding one member blocks its siblings. The tree's only exclusivity. |
-| **Line budget** | The share of a line the tree may hand out in total — 130% of that line's maximum. A rank never grants nothing, so a line with many nodes can sit a little over its share. |
-| **Tree point** | The ordinary tree currency. The level curve pays two a level, and one buys one rank. |
+| **Tree point** | The ordinary tree currency: a base plus the level curve, plus Town/Delivery quest bonuses, less what the ranks spent. |
+| **Quest tree bonus** | An extra tree point stored in a Town task or Delivery offer at generation; it is paid once, when the reward is actually claimed. |
+| **Low Life** | Current HP at or below half of **Full Max HP**. A reservation that lowers usable HP does not cause it; Chaos Inoculation is never Low Life. |
+| **Full Max / usable** | Full Max is the pool before reservation; usable is what healing and spending may reach. Reservations lower usable only. |
 
 # Crafting
 

@@ -132,23 +132,30 @@ const stone = (key: string, n: any): string => `${n0(n)} ${STONE_NAME[key]}${Num
 const pressOf = (op: string): string => PRESS_NAME[op] || op;
 
 /**
- * The tree shape the data holds: the wings and the nodes on them. Counting is therefore a read, not a
- * second copy of "63".
+ * The tree shape the data holds: the seven regions, their three kinds of node, and the keystone
+ * bundles. Counting is a read of the built model, not a second copy of a catalogue number.
  */
-const treeNodes = () => ({
-  branches: ((tree as any).branches || []).length,
-  count: ((tree as any).nodes || []).length,
-  perBranch: (name: string) => ((tree as any).nodes || []).filter((n: any) => n.wing === name).length,
-  /** The ranks a wing holds, and the points they cost — the kinds' own numbers. */
-  ranksOf: (name: string) => ((tree as any).nodes || [])
-    .filter((n: any) => n.wing === name)
-    .reduce((s: number, n: any) => s + (n.ranks || 0), 0),
-  costOf: (name: string) => ((tree as any).nodes || [])
-    .filter((n: any) => n.wing === name)
-    .reduce((s: number, n: any) => s + (n.cost || 0) * (n.ranks || 0), 0),
-  /** The depth at which the wings are ringed to one another, read off the topology. */
-  crosslinks: ((tree as any).crosslinkDepths || []) as number[],
-});
+const treeNodes = () => {
+  const nodes = ((tree as any).nodes || []) as any[];
+  const regions = ((tree as any).layout?.regions || (tree as any).branches || []) as string[];
+  const ofRegion = (name: string, kind?: string) => nodes.filter((n) => n.wing === name && (!kind || n.kind === kind));
+  const keystones = nodes.filter((n) => n.kind === 'keystone');
+  return {
+    count: nodes.length,
+    regions,
+    countsIn: (name: string, kind: string) => ofRegion(name, kind).length,
+    /** What every rank on a region costs in tree points — Normal and Notable both pay tree. */
+    costOf: (name: string) => ofRegion(name).reduce((s, n) => s + (n.currency === 'tree' ? (n.cost || 0) : 0), 0),
+    keystones,
+    pairs: (((tree as any).incompatibilities || []) as { a: string; b: string }[]),
+  };
+};
+/** A keystone by its node id, in the name the board shows. */
+const keystoneName = (id: string): string => ((tree.byId[id] as any)?.name || id.replace(/^keystone\./, ''));
+const TREE_CURRENCY = (tree as any).currencies?.tree || {};
+const QUEST_TREE_BONUS = (TOWN_DATA as any).quest_tree_bonus || {};
+const TREE_POINT_CURVE = `base ${wrap(n0(TREE_CURRENCY.base ?? 0))}` + ((TREE_CURRENCY.level_ranges || []) as any[])
+  .map((r: any) => ` + ${wrap(n0(r.per))} a level from ${wrap(n0(r.from))}–${wrap(n0(r.to))}`).join('');
 const TREE_CFG = TREE_SPEC as any;
 const weaponFrameCounts = (BASES.weapons || []).map((weapon: any) => ((BASES.weapon_frames as any)?.[weapon.name] || []).length);
 const weaponFrameSummary = weaponFrameCounts.every((count: number) => count === weaponFrameCounts[0])
@@ -185,7 +192,7 @@ page({
       ['Elements', wrap(n0(E.elements.order.length)), list(E.elements.order)],
       ['Settlements', wrap(n0(TOWN.settlements.length)), 'shops, storage, tasks and crafting'],
       ['Dungeons', wrap(n0(TOWN.settlements.length)), 'one per settlement — escrowed loot, forfeited on a Push'],
-      ['Passive tree', wrap(n0(treeNodes().count)), `${treeNodes().branches} wings · a centre start, the wings ringed at depth ${list(treeNodes().crosslinks)} · ${n0(((tree as any).kinds?.line?.cost ?? 1))} point a rank`],
+      ['Passive tree', wrap(n0(treeNodes().count)), `${treeNodes().regions.length} regions around one free Start · a Normal grants +1 of its region's Core attribute for 1 tree point, a Notable 3 tree points, a Keystone 1 attainment · ${n0(((tree as any).kinds?.keystone?.ranks ?? 1))} rank a node`],
     ])),
   ],
 });
@@ -495,8 +502,8 @@ page({
       ['Max Mana', wrap(`+${n0(E.level_gain.mp_per_level)}`), wrap(n0(E.level_gain.mana_base))],
       ['Carry weight', '—', wrap(n0(E.level_gain.weight_base))],
       ['Attribute points', `${wrap(n0(E.stat.points_per_level))} · ${wrap(n0(E.stat.paragon_points_per_level))} past level ${wrap(n0(E.stat.paragon_from))}`, 'spent by hand'],
-      ['Tree points', wrap(n0((tree as any).currencies?.tree?.per_level ?? 0)), wrap(n0((tree as any).currencies?.tree?.base ?? 0))],
-    ]), `<code>pointsAt(L) = points_per_level × (min(L, paragon_from − 1) − 1) + paragon_points_per_level × max(0, min(L, level_cap) − (paragon_from − 1))</code>.`),
+      ['Tree points', wrap(((TREE_CURRENCY.level_ranges || []) as any[]).map((r: any) => `+${n0(r.per)} a level ${n0(r.from)}–${n0(r.to)}`).join(' · ') || `+${n0(TREE_CURRENCY.per_level ?? 0)} a level`), wrap(n0(TREE_CURRENCY.base ?? 0))],
+    ]), `<code>pointsAt(L) = points_per_level × (min(L, paragon_from − 1) − 1) + paragon_points_per_level × max(0, min(L, level_cap) − (paragon_from − 1))</code> for attribute points; the tree reads its own rows: <code>treePoints = base + the level ranges + claimed quest bonuses − what the ranks spent</code>.`),
     block('Caps', table(['Line', 'Cap', 'What that means'], Object.entries(E.caps as Record<string, any>)
       .filter(([k, v]) => (typeof v === 'number' || v === null) && k !== 'elem_res_max')
       .map(([k, v]) => [esc(CAP_LABEL[k] || k), v === null ? 'no cap' : wrap(v < 1 ? n2(v) : n0(v)),
@@ -879,9 +886,25 @@ page({
       ['Account-wide', `+${pts((BASES.mastery as any).drop_bonus_per_type_pct)} drop rate per weapon type once that type reaches Mastery ${n0((BASES.mastery as any).drop_bonus_level_required)}`, `across ${n0((BASES.weapons || []).length)} types — <code>mastery.dropMultiplier</code>`],
       ['The ladder', `${n0((BASES.mastery as any).xp_per_kill)} Mastery XP a kill, the same curve shape as the herb farm, capped at ${n0((BASES.mastery as any).level_cap)}`, '<code>engine/mastery.ts</code>'],
     ]), `<code>MasteryLevel = min(cap, floor(sqrt(XP / divisor)) + 1)</code>; <code>weightDiscount = min(cap, level × perLevel)</code>. Matching skills get full skill bonus; other skills get <code>full × offTypeMultiplier</code>.`),
-    block('The passive tree', table(['Wing', 'Nodes', 'Ranks', 'Points'], ((tree as any).branches || []).map((name: string) => [
-      esc(name), wrap(n0(treeNodes().perBranch(name))), wrap(n0(treeNodes().ranksOf(name))), wrap(n0(treeNodes().costOf(name))),
-    ])), `<code>treePoints(L) = tree base + (L - 1) x tree per level</code>; <code>a node grants the lines the spec writes out, one value per rank</code>. The wings are ringed at depth ${list(treeNodes().crosslinks)}. Weapon lines apply only while that weapon is held.`),
+    block('The passive tree', table(['Region', 'Normal', 'Notable', 'Keystone', 'Tree points'], treeNodes().regions.map((name: string) => [
+      esc(name), wrap(n0(treeNodes().countsIn(name, 'normal'))), wrap(n0(treeNodes().countsIn(name, 'notable'))),
+      wrap(n0(treeNodes().countsIn(name, 'keystone'))), wrap(n0(treeNodes().costOf(name))),
+    ])), `Every node holds one rank and opens from any owned neighbour; Start is free and every region opens from it. A Normal grants exactly +1 of its region's Core attribute for 1 tree point. A Notable grants its written profile of flat and percent lines for 3 tree points. A Keystone changes a mechanic for 1 attainment point and never spends tree points. <code>treePoints = ${TREE_POINT_CURVE} + claimed quest bonuses − spent tree</code>; a Town task or Delivery offer carries a ${pts((QUEST_TREE_BONUS.chance ?? 0) * 100)} chance of +${n0(QUEST_TREE_BONUS.amount ?? 0)} tree point, rolled into the stored reward and paid only when the reward is actually claimed. Respec at a settlement is free and hands both wallets back at the prices the spec charged. The tree is a new character's: an older character is refused with its own message rather than rewritten.`),
+    block('The Keystones', tabbedTable('tree-keystones', ['Keystone', 'Region', 'What it changes'], treeNodes().regions.map((region: string) => ({
+      key: region,
+      label: region,
+      rows: treeNodes().keystones.filter((node: any) => node.wing === region)
+        .map((node: any) => [esc(node.name || node.id), esc(node.wing), esc(node.description || '')]),
+    }))), 'Each Keystone is bought with attainment and may be held with any other except the pairs below. The same text is on the board when a node is selected.'),
+    block('Keystone pairs that cannot be held together', tabbedTable('tree-conflicts', ['Keystone', 'May not be held with'], (() => {
+      const bySide = new Map<string, string[]>();
+      for (const pair of treeNodes().pairs) {
+        const rows = bySide.get(pair.a) || [];
+        rows.push(pair.b);
+        bySide.set(pair.a, rows);
+      }
+      return [{ key: 'pairs', label: 'Pairs', rows: [...bySide].map(([a, bs]) => [esc(keystoneName(a)), list(bs.map(keystoneName))]) }];
+    })()), 'Exclusivity is pairwise only: a pair that is not listed may be held together, and there is no transitive chain — holding the middle Keystone does not block both ends.'),
   ],
 });
 
@@ -934,12 +957,20 @@ page({
       row('Armour', '<code>cut = Armour / (Armour + armour_divisor × rawPhysical)</code>',
         '<span class="hy">no Cap on the rating</span>', `${n0(DV.armour_ceil)} — <code>armourOf</code> — removing ${pc1(DV.armour_vs_zone9_boss)} of a boss-priced hit and ${pc1(DV.armour_vs_zone9_trash)} of a trash-priced one (<code>armour_vs_zone9_boss</code>, <code>armour_vs_zone9_trash</code>)`),
       row('Elemental resistance', '<code>cut = min(resistanceCap, rawResistance × multiplier) / 100</code>',
-        `${wrap(n0(E.caps.elem_res))} <span class="hy">or</span> ${wrap(n0(E.caps.elem_res_max))}`, `${pts(DV.res_three)} raw from three pieces, which <code>resistanceOf</code> then holds at the Cap — and <code>res_raw</code> is ${n0(DV.res_raw)}, because no Core attribute feeds it: it is a gear line alone. This is the one Cap with an unlock: the control wing’s last node raises it to ${n0(E.caps.elem_res_max)} — <code>elemResCapOf</code>`),
+        `${wrap(n0(E.caps.elem_res))} <span class="hy">or</span> ${wrap(n0(E.caps.elem_res_max))}`, `${pts(DV.res_three)} raw from three pieces, which <code>resistanceOf</code> then holds at the Cap — and <code>res_raw</code> is ${n0(DV.res_raw)}, because no Core attribute feeds it: it is a gear line alone. The current tree grants no Cap unlock, so the base Cap is the live one — <code>elemResCapOf</code>`),
       row('Energy Shield', '<code>MaxES = (Wis × K_WIS_ES + flat) × (1 + pct / 100)</code>; regen waits for the no-hit delay',
         '<span class="hy">no Cap</span>', `${n0(DV.es_pool)} pool, ${n1(DV.es_regen)} a second, a full pool back in ${n0(DV.es_recover_sec)} sec, worth ${pc1(DV.es_share_of_hp)} of your Health — <code>maxEsOf</code>, <code>esRegenOf</code>`),
       row('Health', '<code>MaxHP = (base + Vit × K_VIT_HP + hp_per_level × (L − 1) + flat) × (1 + pct / 100)</code>',
         '<span class="hy">no Cap</span>', `${n0(DV.hp)} — <code>DERIVED.hp</code>`),
     ]), '<code>Hit order: Perfect dodge → Evasion → Block → Armour → resistance → ES → HP</code>. Poison and bleed DoT bypass ES.'),
+    block('Pools, reservations and Low Life', table(['', 'The rule', 'Read from'], [
+      ['Full Max and usable', 'reservations lower the share healing and spending may reach, never the Max shown on the bar', `aura stakes, <code>35</code> at 25% Full HP and <code>34</code> at 40% Full Mana are fixed; the rest scale`],
+      ['Low Life', `current HP at or below ${wrap(n0((tree as any).mechanics?.low_life_pct ?? 50))}% of Full Max HP; a reservation that lowers usable HP does not cause it`, '<code>tree.mechanics.low_life_pct</code>'],
+      ['Chaos Inoculation', 'Max HP is 1 and chaos damage is fully prevented; damage the HP cannot take goes through Energy Shield, and the overflow to HP; HP cannot be reserved or paid', 'keystone <code>55</code> — never Low Life'],
+      ['An aura&rsquo;s pool', 'each aura reserves Full Mana by default; with <code>54</code> an aura may reserve HP instead, which lowers usable HP only', 'reservation % of the aura&rsquo;s row'],
+      ['Aura Resonance', 'with <code>64</code>, N active auras (trigger auras count) give <code>b = min(cap, per × N)</code>: each reserve ×<code>(1 − b)</code> and each aura effect ×<code>(1 + b)</code>', 'the discount and the effect are separate caps'],
+      ['The combat clock', `progress is stored in ${wrap(n0((tree as any).mechanics?.combat_time_units_per_sec ?? 1))} units a second; a rate change never adds or rewinds a hit already accumulated`, '<code>tree.mechanics.combat_time_units_per_sec</code>'],
+    ]), 'A reservation that would leave no usable pool is refused whole; turning every aura off is always available.'),
     block('Hit chance, both directions', table(['', 'The engine’s own names', 'The reference figure'], [
       ['You hitting a mob', '<code>hitChance = Accuracy / (Accuracy + MobEvasion)</code>',
         `${pc1(DV.hit_chance)} against the mean Species on a Medium body, which holds ${n1(DV.mob_evasion_ref)} Evasion`],

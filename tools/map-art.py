@@ -25,7 +25,7 @@ from PIL import Image
 root = Path(__file__).resolve().parent.parent
 public = root / 'game/public'
 footprint_file = root / 'game/src/ui/map-terrain-footprints.json'
-template_file = public / 'map/terrain/templates/terrain-hex.json'
+template_file = root / 'art-reference/map/geometry/terrain-hex.json'
 
 
 def hull(points):

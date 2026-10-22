@@ -255,8 +255,8 @@
 <div class="layout-editor">
   <aside class="layout-palette" aria-label="Layout components">
     <div class="layer-switch" role="tablist" aria-label="Layout layer">
-      <button role="tab" aria-selected={layer === 'hud'} class:active={layer === 'hud'} onclick={() => { layer = 'hud'; selected = 'objectives'; notice = ''; }}>HUD</button>
-      <button role="tab" aria-selected={layer === 'modal'} class:active={layer === 'modal'} onclick={() => { layer = 'modal'; selected = 'panel'; notice = ''; }}>Modal</button>
+      <button role="tab" aria-selected={layer === 'hud'} class:picked={layer === 'hud'} onclick={() => { layer = 'hud'; selected = 'objectives'; notice = ''; }}>HUD</button>
+      <button role="tab" aria-selected={layer === 'modal'} class:picked={layer === 'modal'} onclick={() => { layer = 'modal'; selected = 'panel'; notice = ''; }}>Modal</button>
     </div>
     <h3>{layer === 'hud' ? 'Components' : 'Modal surfaces'}</h3>
     <div class="component-list">
@@ -296,7 +296,7 @@
          ondragover={(event) => event.preventDefault()} ondrop={(event) => dropAt(event)}>
       {#each CELLS as cell (`${cell.row}:${cell.column}`)}
         {@const owner = regionAt(cell.row, cell.column)}
-        <button class="grid-cell" class:occupied={!!owner} class:chosen={owner === selected}
+        <button class="grid-cell" class:occupied={!!owner} class:selected={owner === selected}
                 style={`grid-row:${cell.row};grid-column:${cell.column}${owner ? `;--region-tone:${TONES[owner]}` : ''}`}
                 data-grid-cell={`${cell.row}:${cell.column}`}
                 tabindex={focusedCell.row === cell.row && focusedCell.column === cell.column ? 0 : -1}
@@ -409,7 +409,7 @@
   h3 { margin: 0; font-size: var(--font-xs); }
   .layer-switch { display: flex; gap: var(--spacing-xs); }
   .layer-switch button { flex: 1; font-size: var(--font-xs); }
-  .layer-switch .active { color: var(--gold-lit); border-color: var(--gold); }
+  .layer-switch .picked { color: var(--gold-lit); border-color: var(--gold); }
   .component-list { display: grid; flex: 1; align-content: start; gap: var(--spacing-xs); min-height: 0; }
   .component {
     display: grid; grid-template-columns: var(--icon-detail) minmax(0, 1fr) auto; align-items: center; gap: var(--spacing-xs);
@@ -454,7 +454,7 @@
   .component .abs-tag { font-style: normal; font-size: var(--font-xs); color: var(--dim); }
   .abs-list { margin: 0; color: var(--dim); font-size: var(--font-xs); line-height: 1.35; }
   .abs-list strong { color: var(--text); }
-  .grid-cell.chosen { box-shadow: inset 0 0 0 1px var(--gold); background: color-mix(in srgb, var(--gold) 20%, var(--region-tone)); }
+  .grid-cell.selected { box-shadow: inset 0 0 0 1px var(--gold); background: color-mix(in srgb, var(--gold) 20%, var(--region-tone)); }
   .grid-cell:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; z-index: var(--z-underlay); }
   .coordinates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs); }
   .layout-inspector label { display: grid; gap: var(--spacing-xs); color: var(--dim); font-size: var(--font-xs); }

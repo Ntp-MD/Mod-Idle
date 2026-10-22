@@ -1,25 +1,14 @@
 import { eng, E, sm, BASES } from '../engine/client';
-import { PLAYER_STATUS_FAMILIES, ambushCritChance, bundleOf, deferredHit, elementalInfusionExtras, emberheartConvert, enduringCoreHpDamage, headsmanExecutes, inevitableElementMult, radiantFaithCut, thornboundRetaliation, turtleCut, unerringEyeActive } from '../../../engine/keystones.ts';
+import { ambushCritChance, bundleOf, crimsonPactSplit, deferredHit, elementalAegisSplit, elementalInfusionExtras, emberheartConvert, enduringCoreHpDamage, headsmanExecutes, inevitableElementMult, radiantFaithCut, toxicExecution, turtleCut, unerringEyeActive } from '../../../engine/keystones.ts';
 import { directFlags, emptyParts, validateDamagePacket } from '../../../engine/damage-provenance.ts';
 import type { DamagePacket } from '../../../engine/damage-provenance.ts';
 import type { Character } from './player.ts';
 import type { Mob } from './types.ts';
 import type { CurseMods } from './curse.ts';
 import { NO_CURSE, accMult, takenMult, psMult } from './curse.ts';
+import type { StatusLine, StatusName, Statuses } from './status-types.ts';
 
-/** The families one side of the field can carry — the engine's list, so the save schema and this file never drift. */
-export type StatusName = (typeof PLAYER_STATUS_FAMILIES)[number];
-export interface StatusLine {
-  stacks: number;
-  secLeft: number;
-  perSec: number;
-  /** The dealer's aligned Elemental DPS at apply time, the mirror of the mob record's `alignedPerSec`:
-   *  the DoT budget is priced off the dealer, never off the character taking the damage. */
-  alignedSec?: number;
-  /** Per-stack snapshots for DoTs applied by multiple mobs with different damage. */
-  stackPerSec?: number[];
-}
-export type Statuses = Partial<Record<StatusName, StatusLine>>;
+export type { StatusLine, StatusName, Statuses } from './status-types.ts';
 
 function addStack(s: StatusLine, cap: number, perSec?: number): void {
   if (perSec !== undefined) {
@@ -67,6 +56,10 @@ export interface HitReport {
   packet?: DamagePacket;
   /** 21 Delayed Demolition: damage withheld from this Hit that lands after its delay. */
   deferred?: number;
+  /** `09` Crimson Pact: the physical it withheld, as the Bleed the target now carries. */
+  bleed?: { perSec: number; sec: number };
+  /** `20` Toxic Execution: the crit bonus, paid as Poison instead of in the Hit. */
+  poison?: { perSec: number; sec: number; budgetDps: number };
 }
 
 /**
@@ -86,7 +79,10 @@ export function playerSwing(
   timeUs: number | null = null,
   /** 42 Crushing Rhythm's single action multiplier on the basic swing (excess cadence → damage) */
   actionMult = 1,
+  /** `10` Painforged: the blocked damage spent as flat Physical on this Hit, before the crit roll */
+  bankedPhysical = 0,
 ): HitReport {
+  const physPool = c.phys + Math.max(0, bankedPhysical);
   // 13 Unerring Eye: the Accuracy/Evasion miss is skipped, Dodge is still its own opposed roll, and
   // the hit can never crit (§5.13).
   const unerring = unerringEyeActive(c.keystones);
@@ -119,23 +115,49 @@ export function playerSwing(
       nativeParts[mob.innate[0]] = elemDamage;
     }
   }
-  let nonElement = c.phys + c.magic;
+  let nonElement = physPool + c.magic;
 
   let crit = false;
-  let physShare = c.phys;
+  let physShare = physPool;
   // the physical as the pipeline holds it after each step — the packet's crit-eligible pool
-  let physicalPart = c.phys;
+  let physicalPart = physPool;
   // 19 Ambush: a target at full HP always crits; every other target has its chance halved.
   const ambush = bundleOf(c.keystones, 'ambush');
   const critChance = ambush
     ? ambushCritChance(mob.hp >= mob.hpMax, c.critChance + curse.critChance, ambush.params as Record<string, number>)
     : c.critChance + curse.critChance;
-  if (c.phys > 0 && !unerring && rng() * 100 < critChance) {
+  if (physPool > 0 && !unerring && rng() * 100 < critChance) {
     // crit multiplies the physical half only: magic and the 5 Elements never crit 
-    physShare = c.phys * (c.critDmg / 100);
-    nonElement = nonElement - c.phys + physShare;
+    physShare = physPool * (c.critDmg / 100);
+    nonElement = nonElement - physPool + physShare;
     physicalPart = physShare;
     crit = true;
+  }
+  // 20 Toxic Execution: the crit lands, and the bonus it added does not — that part of the number is
+  // paid away as Poison over its own seconds, so a crit build's damage moves from one beat to four
+  // (§7.2.6). It rolls no proc and needs no Elemental power; the target's own immunity still answers it.
+  const toxic = bundleOf(c.keystones, 'toxic-execution');
+  let toxicPoison: { perSec: number; sec: number; budgetDps: number } | null = null;
+  if (toxic && crit) {
+    const critBonus = physShare - physPool;
+    const p = toxicExecution(critBonus, c.hitsPerSec, toxic.params as Record<string, number>);
+    toxicPoison = { perSec: p.dps, sec: Number(toxic.params.durationSec), budgetDps: p.budgetDps };
+    nonElement = c.magic + physPool;
+    physShare = physPool;
+    physicalPart = physPool;
+  }
+  // 09 Crimson Pact: half the Physical the Hit carried lands now and the whole of it comes back as
+  // Bleed over its own seconds (§7.2.7). No Alignment gate and no bleed chance answer the split — the
+  // physical is already spent — but the target's own bleed immunity does.
+  const pact = bundleOf(c.keystones, 'crimson-pact');
+  let pactBleed: { perSec: number; sec: number } | null = null;
+  if (pact && physicalPart > 0) {
+    const split = crimsonPactSplit(physicalPart, pact.params as Record<string, number>);
+    const withheld = physicalPart - split.direct;
+    nonElement = nonElement - withheld;
+    physicalPart = split.direct;
+    physShare = split.direct;
+    pactBleed = { perSec: split.bleedDps, sec: Number(pact.params.durationSec) };
   }
   // 05 Emberheart: the crit-finished Physical share is routed into Fire 1:1 before mitigation. The
   // native Element pools stay where they were, and the base stays the pre-conversion Physical pool.
@@ -193,7 +215,7 @@ export function playerSwing(
     const flatBy: Record<string, number> = {};
     for (const [el, row] of Object.entries((c.lines?.elemBy || {}) as Record<string, { flat?: number }>))
       flatBy[el] = Math.max(0, row.flat || 0);
-    const extras = elementalInfusionExtras(c.phys, flatBy, infusion.params as Record<string, number>, Object.keys(E.elements.status_of));
+    const extras = elementalInfusionExtras(physPool, flatBy, infusion.params as Record<string, number>, Object.keys(E.elements.status_of));
     for (const [el, amount] of Object.entries(extras)) {
       if (!(amount > 0)) continue;
       extraParts[el] = amount;
@@ -278,10 +300,15 @@ export function playerSwing(
     targetId: mob.id,
     timeUs,
     nominalRate: c.hitsPerSec,
-    flags: directFlags(c.phys > 0, true, (c.leechPct + curse.leechPct) > 0),
+    flags: directFlags(physPool > 0, true, (c.leechPct + curse.leechPct) > 0),
     parts,
   });
-  return { landed: true, crit, damage, leech, element, packet, ...(deferred > 0 ? { deferred } : {}) };
+  return {
+    landed: true, crit, damage, leech, element, packet,
+    ...(deferred > 0 ? { deferred } : {}),
+    ...(pactBleed ? { bleed: pactBleed } : {}),
+    ...(toxicPoison ? { poison: toxicPoison } : {}),
+  };
 }
 
 /**
@@ -304,7 +331,7 @@ export function mobSwing(
   blockCharge = false,
   /** the HP the character stands on right now — 51 Enduring Core reads it for the threshold part */
   currentHp: number = c.maxHp,
-): { blocked: string | null; toHp: number; toEs: number; absorbed: number; raw: number; leech?: number; blockChargeSpent: boolean } {
+): { blocked: string | null; toHp: number; toEs: number; absorbed: number; raw: number; leech?: number; blockChargeSpent: boolean; blockCut?: number } {
   if (curse.stopped) return { blocked: 'shocked', toHp: 0, toEs: 0, absorbed: 0, raw: 0, blockChargeSpent: false };
   if (rng() * 100 < c.perfectDodge) return { blocked: 'perfect dodge', toHp: 0, toEs: 0, absorbed: 0, raw: 0, blockChargeSpent: false };
   const acc = mob.acc * accMult(curse);
@@ -341,9 +368,16 @@ export function mobSwing(
   // every mitigation layer, the glossary's own order.
   const hardened = E.global.defend_mult * (c.damageTaken ?? 1);
   let physFinal = physical;
+  // `10` Painforged banks what a real Block took off this Hit — the flat cut, before damage_taken.
+  // Turtle Doctrine's expected cut is not a Block event, so it feeds the bank nothing (§7.3.3).
+  let blockCut = 0;
   // a blocked PHYSICAL hit is cut by a flat `armour / 10` (owner ruling, provisional); the cut can
   // never take more than the physical half, so an Element-heavy swing is not thinned by a shield
-  if (blockedBy) physFinal = Math.max(0, physFinal - Math.min(c.armour / E.caps.block_divisor, physFinal));
+  if (blockedBy) {
+    const before = physFinal;
+    physFinal = Math.max(0, physFinal - Math.min(c.armour / E.caps.block_divisor, physFinal));
+    blockCut = before - physFinal;
+  }
   // 44 Turtle Doctrine: no roll and no Block event — every physical Hit takes the expected cut the
   // Block used to produce (§7.3.3).
   if (turtle) physFinal = Math.max(0, physFinal - turtleCut(c.block, c.armour, E.caps.block_divisor, physFinal));
@@ -388,9 +422,10 @@ export function mobSwing(
   let toHp = remaining - toEs;
   if (aegis) {
     const physLanded = physFinal * markMult * (1 - absorbRatio);
-    const elemLanded = elementalFinal * markMult * (1 - absorbRatio) * (aegis.params.elementHitTakenMult as number);
-    toEs = Math.min(elemLanded, pool);
-    toHp = physLanded + (elemLanded - toEs);
+    const elemLanded = elementalFinal * markMult * (1 - absorbRatio);
+    const split = elementalAegisSplit(physLanded, elemLanded, pool, aegis.params as Record<string, number>);
+    toEs = split.toEs;
+    toHp = split.physicalToHp + split.elementToHp;
   }
   // 51 Enduring Core: only the HP part below the threshold is cut; a Hit that crosses the line keeps
   // its upper part at full value (§7.3.9). Its sheet fold removes ES, so toEs is already 0.
@@ -398,7 +433,7 @@ export function mobSwing(
   if (enduring) toHp = enduringCoreHpDamage(toHp, currentHp, c.maxHp, enduring.params as Record<string, number>);
   const leechPct = marked ? marked.stacks * E.status.mark.k_leech * 100 : 0;
   return {
-    blocked: blockedBy, toHp, toEs, absorbed, raw: rawHit,
+    blocked: blockedBy, toHp, toEs, absorbed, raw: rawHit, blockCut,
     leech: (toHp + toEs) * leechPct / 100,
     blockChargeSpent: rawHit > 0 && physShare > 0 && blockCharge,
   };

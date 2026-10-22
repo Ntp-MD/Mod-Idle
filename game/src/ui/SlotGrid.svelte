@@ -6,6 +6,7 @@
   import { popPlace } from './pop';
   import ItemDetail from './ItemDetail.svelte';
   import SlotMenu from './SlotMenu.svelte';
+  import Pager from './Pager.svelte';
   import type { MenuItem } from './menu';
   import type { Item } from '../sim/types';
   import type { Snippet } from 'svelte';
@@ -264,11 +265,7 @@
 
 {#if pages > 1}
   <!-- the fold: pages instead of a scrollbar, so the grid never grows past its page -->
-  <div class="pager" role="group" aria-label="Grid pages">
-    <button disabled={at === 0} onclick={() => (page = at - 1)} aria-label="Previous page">‹</button>
-    <span>{at + 1} / {pages}</span>
-    <button disabled={at === pages - 1} onclick={() => (page = at + 1)} aria-label="Next page">›</button>
-  </div>
+  <Pager group="Grid pages" pages={pages} page={at} onturn={(p) => (page = p)} text={`${at + 1} / ${pages}`} />
 {/if}
 </div>
 
@@ -370,9 +367,6 @@
   .plus { left: var(--spacing-xs); bottom: var(--spacing-xs); }
 
   .list td, .list th { font-size: var(--font-xs); }
-  .pager { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
-  .pager button { font-size: var(--font-xs); }
-  .pager button:disabled { opacity: .4; }
   .list-title { display: inline-flex; align-items: center; gap: var(--spacing-xs); color: var(--rar, var(--text)); }
   .list-title img { width: var(--icon-label); height: var(--icon-label); object-fit: contain; }
   .dim { color: var(--dim); }

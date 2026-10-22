@@ -4,6 +4,7 @@ import { readJson } from './lib/json.ts';
 import * as G from './lib/gates.ts';
 import { createTree, type TreeSpec } from '../engine/tree.ts';
 import { SHEET_LINES } from '../game/src/sim/lines.ts';
+import { keystoneBuildContext } from '../game/src/sim/keystone-runtime.ts';
 import { E } from './lib/engine.ts';
 
 /**
@@ -22,18 +23,173 @@ import { E } from './lib/engine.ts';
 const OUT = path.join(import.meta.dirname, 'data', 'tree.json');
 const MODS = readJson(path.join(import.meta.dirname, 'data', 'mods.json'));
 
+/** The four bridge Notables of the recipe; each joins spine04 of two regions. */
+const JUNCTIONS: [string, string][] = [['str', 'agi'], ['dex', 'int'], ['wis', 'vit'], ['lck', 'str']];
+
+const pad2 = (n: number) => String(n).padStart(2, '0');
+
+/**
+ * Rebuild the v3 node list and its drawn links from the recipe (§3.1), keeping everything the file
+ * authors: profiles, keystone bundles and their numbers, pairs and layout. The generated order is
+ * region → spine → cluster (branch, Notable, Keystone) → junctions, so a second run is byte-identical.
+ */
+export function buildSpec(source: any): any {
+  if (source?.version !== 3) throw new Error('tree build: the spec is not version 3');
+  const regions: string[] = source.layout?.regions ?? [];
+  if (!regions.length) throw new Error('tree build: layout.regions is empty');
+  for (const region of regions)
+    if (!source.profiles?.[`core.${region}`]) throw new Error(`tree build: profile core.${region} is missing`);
+
+  const keystones = new Map<string, any>();
+  for (const node of source.nodes ?? []) {
+    if (node.kind !== 'keystone') continue;
+    const cluster = node.placement?.cluster;
+    if (!Number.isInteger(cluster) || cluster < 1 || cluster > 12)
+      throw new Error(`tree build: keystone ${node.id} has no cluster placement`);
+    if (!regions.includes(node.wing)) throw new Error(`tree build: keystone ${node.id} is in the unknown region ${node.wing}`);
+    if (!node.effects?.length) throw new Error(`tree build: keystone ${node.id} carries no bundle`);
+    const key = `${node.wing}.${cluster}`;
+    if (keystones.has(key)) throw new Error(`tree build: two keystones sit on ${node.wing} cluster ${cluster}`);
+    keystones.set(key, node);
+  }
+
+  const nodes: any[] = [];
+  for (const region of regions) {
+    for (let i = 1; i <= 20; i++) {
+      nodes.push({
+        id: `normal.${region}.s${pad2(i)}`,
+        wing: region,
+        kind: 'normal',
+        needs: [i === 1 ? 'start' : `normal.${region}.s${pad2(i - 1)}`],
+        profile: `core.${region}`,
+        placement: { role: 'spine', index: i },
+      });
+    }
+    for (let j = 1; j <= 12; j++) {
+      for (let k = 1; k <= 5; k++) {
+        nodes.push({
+          id: `normal.${region}.c${pad2(j)}.${pad2(k)}`,
+          wing: region,
+          kind: 'normal',
+          needs: [k === 1 ? `normal.${region}.s${pad2(j + 6)}` : `normal.${region}.c${pad2(j)}.${pad2(k - 1)}`],
+          profile: `core.${region}`,
+          placement: { role: 'branch', cluster: j, step: k },
+        });
+      }
+      const notable = `notable.${region}.${pad2(j)}`;
+      const notableProfile = source.profiles?.[notable];
+      if (!Array.isArray(notableProfile) || !notableProfile.length)
+        throw new Error(`tree build: profile ${notable} is missing`);
+      nodes.push({
+        id: notable,
+        wing: region,
+        kind: 'notable',
+        needs: [`normal.${region}.c${pad2(j)}.${pad2(5)}`],
+        profile: notable,
+        placement: { role: 'notable', cluster: j },
+        name: `${region.toUpperCase()} Focus ${pad2(j)}`,
+      });
+      const keystone = keystones.get(`${region}.${j}`);
+      if (keystone) nodes.push({
+        id: keystone.id,
+        wing: region,
+        kind: 'keystone',
+        needs: [notable],
+        grants: [],
+        ...(keystone.name ? { name: keystone.name } : {}),
+        ...(keystone.description ? { description: keystone.description } : {}),
+        ...(keystone.draft_ref !== undefined ? { draft_ref: keystone.draft_ref } : {}),
+        placement: { role: 'keystone', cluster: j },
+        effects: keystone.effects,
+      });
+    }
+  }
+
+  for (const [a, b] of JUNCTIONS) {
+    const id = `notable.junction.${a}-${b}`;
+    if (!regions.includes(a) || !regions.includes(b))
+      throw new Error(`tree build: the junction ${id} names a region the layout does not hold`);
+    if (!source.profiles?.[id]) throw new Error(`tree build: profile ${id} is missing`);
+    nodes.push({
+      id,
+      wing: a,
+      kind: 'notable',
+      needs: [`normal.${a}.s04`, `normal.${b}.s04`],
+      profile: id,
+      placement: { role: 'junction', a, b },
+      name: `${a.toUpperCase()}–${b.toUpperCase()} Link`,
+    });
+  }
+
+  // The ring: each pair of neighbouring regions is joined at spine06 and spine20 (lck wraps to str).
+  const links: any[] = [];
+  for (let i = 0; i < regions.length; i++) {
+    const a = regions[i];
+    const b = regions[(i + 1) % regions.length];
+    links.push({ a: `normal.${a}.s06`, b: `normal.${b}.s06`, shape: 'arc' });
+    links.push({ a: `normal.${a}.s20`, b: `normal.${b}.s20`, shape: 'arc' });
+  }
+
+  return {
+    version: 3,
+    mechanics: source.mechanics,
+    meta: {
+      note: 'There are 700 nodes and 700 ranks in seven regions: str, agi, dex, int, wis, vit and lck. '
+        + 'Each region is a spine of twenty Normal nodes with twelve clusters of five Normal nodes and a Notable, '
+        + 'and a Keystone leaf on the clusters the catalogue assigns. A free centre start connects the first spine '
+        + 'node of every region; spine06 and spine20 are ringed to the neighbouring region, and four junction '
+        + 'Notables bridge spine04 of str–agi, dex-int, wis–vit and lck–str. Normal nodes grant +1 to their own '
+        + 'Core attribute, Notables grant their profile, and Keystones are grantless bundles paid in attainment. '
+        + 'Every node has one rank; the layout is derived from the seven-spoke placement, never hand-placed.',
+      node_columns: ['Node', 'Region', 'Kind', 'Profile', 'Effects', 'Placement', 'Connections'],
+    },
+    points: source.points,
+    node_kinds: {
+      normal: { ranks: 1, cost: 1, currency: 'tree' },
+      notable: { ranks: 1, cost: 3, currency: 'tree' },
+      keystone: { ranks: 1, cost: 1, currency: 'attainment' },
+    },
+    keystone_groups: [],
+    clusters: [],
+    profiles: source.profiles,
+    incompatibilities: source.incompatibilities ?? [],
+    layout: source.layout,
+    links,
+    nodes,
+  };
+}
+
 /** The keys a node may carry. Anything else is a number the engine never reads. */
-const READ_KEYS = ['id', 'wing', 'kind', 'needs', 'grants', 'name', 'weapon', 'rule', 'group'];
+const READ_KEYS = [
+  'id', 'wing', 'kind', 'needs', 'grants', 'name', 'description', 'weapon', 'rule', 'group',
+  'profile', 'placement', 'effects', 'draft_ref',
+];
 /** The keys a grant may carry: the line, its ladder, and the stat or Element the sheet reads it against. */
 const GRANT_KEYS = ['id', 'values', 'stat', 'element'];
+/** The keys a keystone bundle may carry; `params` is the schema-checked map the registry reads. */
+const EFFECT_KEYS = ['kind', 'key', 'params'];
+/** The keys each placement role may carry — the recipe fields the engine turns into coordinates. */
+const PLACEMENT_KEYS: Record<string, string[]> = {
+  spine: ['role', 'index'],
+  branch: ['role', 'cluster', 'step'],
+  notable: ['role', 'cluster'],
+  keystone: ['role', 'cluster'],
+  junction: ['role', 'a', 'b'],
+};
 /** The canonical Elements the engine.json declares — a grant's Element is checked against these.
  *  `status_of` is optional in the data interface, so the keys are read with that declared. */
 const ELEMENTS = Object.keys((E.elements as { status_of: Record<string, string> }).status_of);
 /** The keys the spec's own top level may carry. */
 const SPEC_KEYS = [
-  'version', 'meta', 'points', 'node_kinds', 'keystone_groups', 'clusters',
-  'rank_tiers', 'shallow_nodes', 'layout', 'nodes', 'mechanics',
+  'version', 'meta', 'points', 'node_kinds', 'keystone_groups', 'clusters', 'profiles',
+  'links', 'incompatibilities', 'rank_tiers', 'shallow_nodes', 'layout', 'nodes', 'mechanics',
 ];
+/** The keys a drawn link and an incompatibility pair may carry. */
+const LINK_KEYS = ['a', 'b', 'shape'];
+const PAIR_KEYS = ['a', 'b'];
+
+/** The same real handler table the client builds with, so a bundle is gated against functions. */
+const context = () => keystoneBuildContext(ELEMENTS);
 
 export function checks(source?: any): G.GateRow[] {
   const { add, watch, rows } = G.gates();
@@ -47,7 +203,7 @@ export function checks(source?: any): G.GateRow[] {
   // The engine is the one reader, so the cage gates what the client spends.
   let model: any = null;
   let buildError = '';
-  try { model = createTree(spec as TreeSpec, MODS, ELEMENTS); } catch (e: any) { buildError = String(e?.message || e); }
+  try { model = createTree(spec as TreeSpec, MODS, ELEMENTS, context()); } catch (e: any) { buildError = String(e?.message || e); }
   add('TR1', !buildError, buildError ? `the spec does not build: ${buildError}`
     : `the spec builds: ${model.nodes.length} nodes across ${model.branches.length} wings, ${model.cost} point a rank`);
   if (!model) return rows();
@@ -66,16 +222,20 @@ export function checks(source?: any): G.GateRow[] {
       : `every node names only real parents or the start marker (${nodes.length} nodes, ${nodes.reduce((s, n) => s + n.needs.length, 0)} parent links)`);
   }
 
-  // TR3 — every node is reachable from the start. The cross-links are MUTUAL rings by design, so
-  // reachability is a flood and never an acyclicity test.
+  // TR3 — every node is reachable from the start over the same undirected graph a purchase walks
+  // (`needs` + v3 `links`). The cross-links are MUTUAL rings by design, so reachability is a flood
+  // and never an acyclicity test.
   {
     const reached = new Set<string>();
     const queue = nodes.filter((n) => n.needs.includes('start')).map((n) => n.id);
+    for (const id of queue) reached.add(id);
     while (queue.length) {
       const id = queue.shift()!;
-      if (reached.has(id)) continue;
-      reached.add(id);
-      for (const n of nodes) if (n.needs.includes(id)) queue.push(n.id);
+      for (const next of model.adjacentTo(id)) {
+        if (reached.has(next)) continue;
+        reached.add(next);
+        queue.push(next);
+      }
     }
     const orphans = nodes.filter((n) => !reached.has(n.id)).map((n) => n.id);
     add('TR3', orphans.length === 0, orphans.length ? `unreachable: ${orphans.join(', ')}`
@@ -138,57 +298,106 @@ export function checks(source?: any): G.GateRow[] {
       : `all ${nodes.length} node ids are unique (${ids[0]} … ${ids[ids.length - 1]})`);
   }
 
-  // TR9 — the legacy ids in each wing are numbered in order. The id is the save key, so a renumbered
-  // wing silently re-points every bought rank at a different line. A node of a newer family (a notable,
-  // a keystone) carries its own name and is not numbered this way.
+  // TR9 — the id names the node's own region and place in the recipe. The id is the save key, so an
+  // id that disagrees with its placement would re-point every bought rank at a different node.
   {
     const bad: string[] = [];
-    for (const w of wings) {
-      const list = nodes.filter((n) => n.wing === w && /^\w+\.\d+$/.test(n.id));
-      list.forEach((n, i) => { if (n.id !== `${w}.${i + 1}`) bad.push(`${w} node ${i + 1} is ${n.id}`); });
+    if (model.version >= 3) {
+      for (const n of nodes) {
+        const p = n.placement;
+        if (!p) { bad.push(`${n.id} carries no placement`); continue; }
+        let expected = '';
+        if (p.role === 'spine') expected = `normal.${n.wing}.s${pad2(p.index)}`;
+        else if (p.role === 'branch') expected = `normal.${n.wing}.c${pad2(p.cluster)}.${pad2(p.step)}`;
+        else if (p.role === 'notable') expected = `notable.${n.wing}.${pad2(p.cluster)}`;
+        else if (p.role === 'keystone') expected = `keystone.${n.effects?.[0]?.key ?? ''}`;
+        else expected = `notable.junction.${p.a}-${p.b}`;
+        if (n.id !== expected) bad.push(`${n.id} sits at a ${p.role} placement, which names ${expected}`);
+        if (p.role === 'junction' && n.wing !== p.a && n.wing !== p.b)
+          bad.push(`${n.id} is in ${n.wing}, which is neither junction region ${p.a} or ${p.b}`);
+      }
+    } else {
+      for (const w of wings) {
+        const list = nodes.filter((n) => n.wing === w && /^\w+\.\d+$/.test(n.id));
+        list.forEach((n, i) => { if (n.id !== `${w}.${i + 1}`) bad.push(`${w} node ${i + 1} is ${n.id}`); });
+      }
     }
     add('TR9', bad.length === 0, bad.length ? bad.join(' · ')
-      : `every wing numbers its legacy nodes <wing>.1 … <wing>.${wings.map((w) => nodes.filter((n) => n.wing === w && /^\w+\.\d+$/.test(n.id)).length).join('/')} in order`);
+      : model.version >= 3
+        ? `every one of the ${nodes.length} ids names its region and placement`
+        : `every wing numbers its legacy nodes <wing>.1 … <wing>.${wings.map((w) => nodes.filter((n) => n.wing === w && /^\w+\.\d+$/.test(n.id)).length).join('/')} in order`);
   }
 
-  // TR10 — the wings are ringed: a node at the cross-link depth is connected to its neighbour's, so
-  // a path bought in one wing can be continued in the next.
+  // TR10 — the regions are one ring: a path bought in one can be continued in the next. v2 reads this
+  // off the cross-link depths; v3 reads the drawn `links` and the junction Notables that bridge two
+  // regions. The check is the property, never a count of links or regions.
   {
-    const anchors = spec.layout?.wing_anchor_deg || {};
     const bad: string[] = [];
-    const byDepth = new Map<number, any[]>();
-    for (const n of nodes) {
-      const d = n.needs.includes('start') ? 1 : 0;
-      void d;
-    }
-    // the ring is read off the topology: each wing's node at a cross-link depth needs a node of the
-    // neighbouring wing at the same depth
-    const depthOf = (id: string): number => {
-      const node = byId[id];
-      if (!node) return 0;
-      let d = 1;
-      for (const p of node.needs) {
-        if (p === 'start') continue;
-        const parent = byId[p];
-        if (!parent || parent.wing !== node.wing) continue;
-        d = Math.max(d, depthOf(p) + 1);
+    if (model.version >= 3) {
+      for (const link of model.links) {
+        const a = byId[link.a];
+        const b = byId[link.b];
+        if (!a || !b) { bad.push(`${link.a} – ${link.b} names a node that does not exist`); continue; }
+        if (a.wing === b.wing) bad.push(`${link.a} – ${link.b} joins two nodes of one region, not a ring`);
       }
-      return d;
-    };
-    const ring = [7, 14, 21].filter((d) => wings.some((w) => nodes.some((n) => n.wing === w && depthOf(n.id) === d)));
-    for (const d of ring) {
-      for (const w of wings) {
-        const at = nodes.find((n) => n.wing === w && depthOf(n.id) === d);
-        if (!at) continue;
-        const others = at.needs.filter((p: string) => p !== 'start' && byId[p] && byId[p].wing !== w);
-        if (!others.length) bad.push(`${at.id} at depth ${d} is not cross-linked to another wing`);
+      // the region graph: any drawn link or cross-region parent joins two regions
+      const regionEdges = new Map<string, Set<string>>(wings.map((w) => [w, new Set<string>()]));
+      const join = (a: string, b: string) => {
+        if (a === b) return;
+        regionEdges.get(a)?.add(b);
+        regionEdges.get(b)?.add(a);
+      };
+      for (const link of model.links) if (byId[link.a] && byId[link.b]) join(byId[link.a].wing, byId[link.b].wing);
+      for (const n of nodes) for (const parent of n.needs)
+        if (parent !== 'start' && byId[parent]) join(n.wing, byId[parent].wing);
+      const seen = new Set<string>();
+      const queue = wings.length ? [wings[0]] : [];
+      for (const w of queue) seen.add(w);
+      while (queue.length) {
+        for (const next of regionEdges.get(queue.shift()!)!) if (!seen.has(next)) { seen.add(next); queue.push(next); }
       }
+      const apart = wings.filter((w) => !seen.has(w));
+      if (apart.length) bad.push(`the regions ${apart.join(', ')} are not ringed to the rest`);
+      for (const n of nodes.filter((n) => n.placement?.role === 'junction')) {
+        const p = n.placement as { a: string; b: string };
+        if (p.a === p.b) bad.push(`${n.id} bridges ${p.a} to itself`);
+        const reaches = new Set(n.needs.map((id: string) => byId[id]?.wing));
+        if (!reaches.has(p.a) || !reaches.has(p.b))
+          bad.push(`${n.id} does not need a node of both ${p.a} and ${p.b}`);
+      }
+      add('TR10', bad.length === 0, bad.length ? bad.join(' · ')
+        : `the ${model.links.length} links ring the regions and every one of the ${wings.length} regions reaches the others, with the junction Notables bridging two regions each`);
+    } else {
+      const anchors = spec.layout?.wing_anchor_deg || {};
+      // the ring is read off the topology: each wing's node at a cross-link depth needs a node of the
+      // neighbouring wing at the same depth
+      const depthOf = (id: string): number => {
+        const node = byId[id];
+        if (!node) return 0;
+        let d = 1;
+        for (const p of node.needs) {
+          if (p === 'start') continue;
+          const parent = byId[p];
+          if (!parent || parent.wing !== node.wing) continue;
+          d = Math.max(d, depthOf(p) + 1);
+        }
+        return d;
+      };
+      const ring = [7, 14, 21].filter((d) => wings.some((w) => nodes.some((n) => n.wing === w && depthOf(n.id) === d)));
+      for (const d of ring) {
+        for (const w of wings) {
+          const at = nodes.find((n) => n.wing === w && depthOf(n.id) === d);
+          if (!at) continue;
+          const others = at.needs.filter((p: string) => p !== 'start' && byId[p] && byId[p].wing !== w);
+          if (!others.length) bad.push(`${at.id} at depth ${d} is not cross-linked to another wing`);
+        }
+      }
+      const angles = Object.values(anchors) as number[];
+      add('TR10', bad.length === 0 && new Set(angles).size === angles.length,
+        bad.length ? bad.join(' · ')
+          : new Set(angles).size !== angles.length ? 'two wings share an anchor, so they overlap'
+            : `the wings are ringed at depth ${ring.join(', ')}, and each of the ${wings.length} wings has its own anchor (${angles.join('°, ')}°)`);
     }
-    const angles = Object.values(anchors) as number[];
-    add('TR10', bad.length === 0 && new Set(angles).size === angles.length,
-      bad.length ? bad.join(' · ')
-        : new Set(angles).size !== angles.length ? 'two wings share an anchor, so they overlap'
-          : `the wings are ringed at depth ${ring.join(', ')}, and each of the ${wings.length} wings has its own anchor (${angles.join('°, ')}°)`);
   }
 
   // TR11 — the spec carries only what the engine reads. A node's numbers are written out here, so a
@@ -201,6 +410,25 @@ export function checks(source?: any): G.GateRow[] {
       for (const grant of node.grants || []) {
         for (const key of Object.keys(grant)) if (!GRANT_KEYS.includes(key)) unread.push(`${node.id} grants an unread "${key}"`);
       }
+      for (const effect of node.effects || []) {
+        for (const key of Object.keys(effect)) if (!EFFECT_KEYS.includes(key)) unread.push(`${node.id} carries an unread effect "${key}"`);
+      }
+      const placement = node.placement;
+      if (placement) {
+        const allowed = PLACEMENT_KEYS[placement.role] || [];
+        for (const key of Object.keys(placement)) if (!allowed.includes(key)) unread.push(`${node.id} carries an unread placement "${key}"`);
+      }
+    }
+    for (const [profile, grants] of Object.entries(spec.profiles || {})) {
+      for (const grant of grants as any[]) {
+        for (const key of Object.keys(grant)) if (!GRANT_KEYS.includes(key)) unread.push(`profile ${profile} carries an unread grant "${key}"`);
+      }
+    }
+    for (const link of spec.links || []) {
+      for (const key of Object.keys(link)) if (!LINK_KEYS.includes(key)) unread.push(`the link ${link.a} – ${link.b} carries an unread "${key}"`);
+    }
+    for (const pair of spec.incompatibilities || []) {
+      for (const key of Object.keys(pair)) if (!PAIR_KEYS.includes(key)) unread.push(`the pair ${pair.a} – ${pair.b} carries an unread "${key}"`);
     }
     add('TR11', unread.length === 0, unread.length ? unread.join(' · ')
       : `the spec carries only what the engine reads (${SPEC_KEYS.length} top-level keys · ${READ_KEYS.join(' · ')})`);
@@ -226,10 +454,14 @@ export function checks(source?: any): G.GateRow[] {
     }
   }
 
-  // TR13 — the layout is derived, deterministic, and nothing sits on top of anything else.
+  // TR13 — the layout is derived, deterministic, and nothing sits on top of anything else. The world
+  // bounds carry every node at that node's own radius, the start marker, and the spec's padding.
   {
-    const again = createTree(spec as TreeSpec, MODS, ELEMENTS);
+    const again = createTree(spec as TreeSpec, MODS, ELEMENTS, context());
     const stable = again.nodes.every((n: any, i: number) => n.x === nodes[i].x && n.y === nodes[i].y);
+    const radiusOf = (n: any) => Number(spec.layout?.radii?.[n.kind] ?? spec.layout?.node_radius ?? 0);
+    const startRadius = Number(spec.layout?.radii?.start ?? spec.layout?.node_radius ?? 0);
+    const start = model.graph.start;
     let closest = Infinity;
     let pair = '';
     for (let i = 0; i < nodes.length; i++) {
@@ -238,21 +470,93 @@ export function checks(source?: any): G.GateRow[] {
         if (d < closest) { closest = d; pair = `${nodes[i].id} / ${nodes[j].id}`; }
       }
     }
-    const radius = Number(spec.layout?.node_radius ?? 0);
-    add('TR13', stable && closest >= 2 * radius,
+    // the nearest pair's own two radii are the clearance that pair must keep
+    const closestPair = closest < Infinity
+      ? nodes.filter((n) => pair.split(' / ').includes(n.id)).reduce((s: number, n: any) => s + radiusOf(n), 0)
+      : 0;
+    const world = model.layout;
+    const outside = nodes.filter((n) => n.x - radiusOf(n) < world.x || n.y - radiusOf(n) < world.y
+      || n.x + radiusOf(n) > world.x + world.width || n.y + radiusOf(n) > world.y + world.height);
+    const startInside = start.x - startRadius >= world.x && start.y - startRadius >= world.y
+      && start.x + startRadius <= world.x + world.width && start.y + startRadius <= world.y + world.height;
+    const padding = Number(spec.layout?.padding ?? 0);
+    add('TR13', stable && closest >= closestPair && !outside.length && startInside && padding >= 0,
       !stable ? 'the layout generator is not deterministic — two runs over the same spec disagree'
-        : `the closest two nodes sit ${closest.toFixed(1)} units apart (${pair}), inside the ${2 * radius} a node of radius ${radius} needs`);
+        : outside.length ? `the world bounds cut off ${outside.map((n) => n.id).join(', ')}`
+          : !startInside ? 'the world bounds cut off the start marker'
+            : padding < 0 ? `the layout padding is negative (${padding})`
+              : `the closest two nodes sit ${closest.toFixed(1)} units apart (${pair}), inside the ${closestPair.toFixed(1)} their radii need`);
+  }
+
+  // TR14 — the checked file is the build's own output. A hand-added or hand-moved node is a node the
+  // next `--build` would erase, so the file has to be a fixed point of the recipe.
+  {
+    const canonical = (value: any): string => JSON.stringify(value, (_key, v) =>
+      v && typeof v === 'object' && !Array.isArray(v)
+        ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, v[k]]))
+        : v);
+    let built = '';
+    let buildAgain = '';
+    let reason = '';
+    try {
+      built = canonical(buildSpec(spec));
+      buildAgain = canonical(buildSpec(JSON.parse(built)));
+    } catch (e: any) { reason = String(e?.message || e); }
+    const same = buildAgain === built;
+    const current = canonical(spec);
+    const ok = !reason && same && current === built;
+    add('TR14', ok,
+      ok ? 'the checked file is the recipe\'s own output'
+        : reason ? `the build refuses the spec: ${reason}`
+          : !same ? 'the build is not idempotent — a second run over its own output differs'
+            : 'the checked file differs from the recipe\'s output — run node tools/tree.ts --build');
+  }
+
+  // TR15 — every declared profile is reachable from a node, and a Notable names its own profile. A
+  // profile nobody reads is a set of numbers that can drift without a node ever showing it.
+  {
+    const declared = Object.keys(spec.profiles || {});
+    const used = new Set<string>(model.profilesUsed);
+    const unused = declared.filter((key) => !used.has(key));
+    const renamed = nodes.filter((n) => n.kind === 'notable' && n.profile !== n.id);
+    add('TR15', unused.length === 0 && renamed.length === 0,
+      unused.length ? `unused profiles: ${unused.join(', ')}`
+        : renamed.length ? renamed.map((n) => `${n.id} reads ${n.profile}`).join(' · ')
+          : `all ${declared.length} profiles are read, and every Notable resolves its own`);
+  }
+
+  // TR16 — the pairwise bans are exactly the file's pairs, in both orders and with no transitive
+  // closure. Only a listed pair may refuse a second keystone.
+  {
+    const keystones = nodes.filter((n) => n.kind === 'keystone');
+    const keyOf = (a: string, b: string) => (a < b ? `${a}\u0000${b}` : `${b}\u0000${a}`);
+    const listed = new Set(model.incompatibilities.map((p: any) => keyOf(p.a, p.b)));
+    const wrong: string[] = [];
+    for (let i = 0; i < keystones.length; i++) {
+      for (let j = i + 1; j < keystones.length; j++) {
+        const a = keystones[i].id;
+        const b = keystones[j].id;
+        const banned = !model.pairOk(a, { [b]: 1 }) || !model.pairOk(b, { [a]: 1 });
+        if (banned !== listed.has(keyOf(a, b))) wrong.push(`${a} – ${b} is ${banned ? 'banned but not listed' : 'listed but allowed'}`);
+      }
+    }
+    for (const pair of model.incompatibilities) {
+      if (!model.conflictsIn({ [pair.a]: 1, [pair.b]: 1 })) wrong.push(`${pair.a} – ${pair.b} is not refused when held together`);
+    }
+    add('TR16', wrong.length === 0, wrong.length ? wrong.join(' · ')
+      : `the file's ${listed.size} pairs are exactly the pairs the engine bans, in both orders, with no transitive closure`);
   }
 
   // A watch, not a gate: the tree is wider than the level cap grants. That is a figure, read by eye
   // — the tree is meant to be PoE-shaped, and the published rates are the empty-tree baseline.
   {
-    const currency = model.currencies?.tree || { base: 0, per_level: 0 };
-    const budget = (currency.base ?? 0) + Math.max(0, E.stat.level_cap - 1) * (currency.per_level ?? 0);
+    const budget = model.pointsAt(E.stat.level_cap, E.stat.level_cap);
     const totalRanks = nodes.reduce((s, n) => s + n.ranks, 0);
-    watch('TRW1', totalRanks <= budget,
-      `the tree offers ${totalRanks} ranks against a ${budget}-point budget at the level cap (${wings.map((w) => `${w} ${nodes.filter((n) => n.wing === w).length}`).join(' · ')}) — read by eye, never enforced`,
-      `the tree offers ${totalRanks} ranks against a ${budget}-point budget at the level cap`);
+    const treeCost = nodes.filter((n) => n.currency === 'tree').reduce((s, n) => s + n.points, 0);
+    const attainmentCost = nodes.filter((n) => n.currency !== 'tree').reduce((s, n) => s + n.points, 0);
+    watch('TRW1', treeCost <= budget,
+      `the tree costs ${treeCost} tree points and ${attainmentCost} attainment against a ${budget}-point budget at the level cap (${wings.map((w) => `${w} ${nodes.filter((n) => n.wing === w).length}`).join(' · ')}) — read by eye, never enforced`,
+      `the tree costs ${treeCost} tree points and ${attainmentCost} attainment against a ${budget}-point budget at the level cap, across ${totalRanks} ranks`);
   }
 
   // A watch, not a gate: the line budget (D9). The tree never hands out more of a line than its
@@ -289,9 +593,13 @@ function report(): void {
 const isEntry = process.argv[1] ? path.resolve(process.argv[1]) === path.resolve(import.meta.filename) : false;
 
 if (isEntry) {
-  if (process.argv.includes('--checks')) {
+  if (process.argv.includes('--build')) {
+    const source = JSON.parse(fs.readFileSync(OUT, 'utf8'));
+    fs.writeFileSync(OUT, `${JSON.stringify(buildSpec(source), null, 2)}\n`);
+    console.log('Tree build — wrote the seven-spoke node list and links to tools/data/tree.json');
+  } else if (process.argv.includes('--checks')) {
     report();
   } else {
-    console.log('Tree cage — tools/data/tree.json is the spec\n\n  node tools/tree.ts --checks   gate the passive tree\n');
+    console.log('Tree cage — tools/data/tree.json is the spec\n\n  node tools/tree.ts --build    rebuild the node list and links from the recipe\n  node tools/tree.ts --checks   gate the passive tree\n');
   }
 }

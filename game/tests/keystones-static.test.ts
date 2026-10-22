@@ -108,7 +108,7 @@ describe('Packet E — static keystones', () => {
     expect(handler.reservation('mana')).toBe(true);
   });
 
-  it('registers the thirteen Packet E+F keys and refuses a handler missing a required hook', () => {
+  it('registers the whole table and refuses a handler missing a required hook', () => {
     expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toHaveLength(52);
     for (const key of ['ironwall', 'emberheart', 'one-flame', 'unerring-eye', 'elemental-aegis', 'enduring-core', 'chaos-inoculation']) {
       expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toContain(key);

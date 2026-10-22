@@ -1,4 +1,6 @@
 import { sm } from '../engine/client';
+import { bundleOf, maledictionValue } from '../../../engine/keystones.ts';
+import type { KeystoneBundle } from '../../../engine/keystones.ts';
 
 /**
  * The target side of a curse.
@@ -74,13 +76,35 @@ export function combineMods(a: CurseMods, b: Partial<CurseMods>): CurseMods {
 export const lineKey = (e: { stat: string; condition?: string }) =>
   (e.condition ? `${e.stat}#${e.condition}` : e.stat);
 
-/** Lay a curse's target-side lines on a mob. Returns how many seconds they will last. */
-export function applyCurse(store: CurseStore, mobId: string, skill: any): number {
+/**
+ * Lay a curse's target-side lines on a mob. Returns how many seconds they will last.
+ *
+ * `28` Malediction changes both halves of the transaction: a victim carries one curse TYPE at a time,
+ * so laying a different one lifts every line the old type wrote; and every number the standing curse
+ * carries is stretched by the bundle's own multiplier. The duration, the Caps and the control budget
+ * are not numbers a curse line states, so they are never stretched.
+ */
+export function applyCurse(
+  store: CurseStore,
+  mobId: string,
+  skill: any,
+  bundles: readonly KeystoneBundle[] = [],
+): number {
   const lines = ((skill?.effects || []) as any[]).filter((e) => e.subject === 'target');
   if (!lines.length) return 0;
   const sec = Number(String(skill.duration).match(/\d+/)?.[0] || 0);
   const mine = store[mobId] || (store[mobId] = {});
-  for (const e of lines) mine[lineKey(e)] = { stat: e.stat, value: e.value, secLeft: sec, condition: e.condition, from: skill.id };
+  const malediction = bundleOf(bundles, 'malediction');
+  if (malediction) {
+    for (const [key, line] of Object.entries(mine))
+      if (line.from !== skill.id) delete mine[key];
+  }
+  for (const e of lines) {
+    const value = malediction
+      ? maledictionValue(e.op === 'mult' ? 'mult' : 'add', e.value, malediction.params as Record<string, number>)
+      : e.value;
+    mine[lineKey(e)] = { stat: e.stat, value, secLeft: sec, condition: e.condition, from: skill.id };
+  }
   return sec;
 }
 

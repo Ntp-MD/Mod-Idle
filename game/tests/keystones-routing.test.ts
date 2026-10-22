@@ -89,7 +89,7 @@ describe('Packet G — routing, cadence, recovery', () => {
     expect(eng).toBeDefined();
   });
 
-  it('registers the nineteen Packet E+F+G keys', () => {
+  it('opens all fifty-two catalogue keys', () => {
     expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toHaveLength(52);
     for (const key of ['mind-over-matter', 'crushing-rhythm', 'turtle-doctrine', 'dark-siphon', 'capacitive-casting', 'elemental-infusion']) {
       expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toContain(key);

@@ -66,6 +66,8 @@
     --bar-h: 14px;
 
     --minimap-size: clamp(100px, 7.74vw, 216px);
+    --map-hairline: rgba(0, 0, 0, 0.35);
+    --map-hairline-strong: rgba(0, 0, 0, 0.6);
     --objectives-w: clamp(170px, 11.96vw, 300px);
 
     --elite: #6c5199;

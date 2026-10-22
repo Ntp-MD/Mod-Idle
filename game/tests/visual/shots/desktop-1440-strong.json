@@ -1,0 +1,1052 @@
+{
+ "version": 12,
+ "state": {
+  "seed": 20260101,
+  "rngState": 20260138,
+  "player": {
+   "level": 1,
+   "xp": 40,
+   "points": {
+    "str": 0,
+    "int": 0,
+    "vit": 0,
+    "agi": 0,
+    "dex": 0,
+    "wis": 0,
+    "lck": 0
+   },
+   "statPoints": 0,
+   "autoSpend": true,
+   "treePoints": 0,
+   "treeRanks": {},
+   "hp": 532.7611412732366,
+   "mana": 148,
+   "es": 108,
+   "esIdleSec": 1,
+   "atkTimer": 0.2400000000000002
+  },
+  "gear": [
+   {
+    "slot": "helmet",
+    "base": "Circlet",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "energy_shield_flat",
+      "value": 12,
+      "slice": 0,
+      "element": null
+     }
+    ],
+    "weight": 2
+   },
+   {
+    "slot": "chest",
+    "base": "Vestment",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "energy_shield_flat",
+      "value": 12,
+      "slice": 0,
+      "element": null
+     }
+    ],
+    "weight": 4
+   },
+   {
+    "slot": "pant",
+    "base": "Legwraps",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "energy_shield_flat",
+      "value": 12,
+      "slice": 0,
+      "element": null
+     }
+    ],
+    "weight": 3.4
+   },
+   {
+    "slot": "boots",
+    "base": "Silk Slippers",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "energy_shield_flat",
+      "value": 12,
+      "slice": 0,
+      "element": null
+     }
+    ],
+    "weight": 4.4
+   },
+   {
+    "slot": "belt",
+    "base": "Silk Sash",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "max_hp_flat",
+      "value": 40,
+      "slice": 0,
+      "element": null
+     }
+    ],
+    "weight": 2.4
+   },
+   {
+    "slot": "gloves",
+    "base": "Silk Wraps",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "energy_shield_flat",
+      "value": 12,
+      "slice": 0,
+      "element": null
+     }
+    ],
+    "weight": 2.4
+   },
+   {
+    "slot": "ring",
+    "base": "Iron Band",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "elemental_alignment",
+      "value": 1,
+      "slice": 0,
+      "element": null
+     }
+    ],
+    "weight": 0.5
+   },
+   {
+    "slot": "ring",
+    "base": "Iron Band",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "elemental_alignment",
+      "value": 1,
+      "slice": 0,
+      "element": null
+     }
+    ],
+    "weight": 0.5
+   },
+   {
+    "slot": "amulet",
+    "base": "Jade Amulet",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "elemental_alignment",
+      "value": 1,
+      "slice": 0,
+      "element": null
+     }
+    ],
+    "weight": 0.9
+   },
+   {
+    "slot": "cape",
+    "base": "Traveler's Cloak",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "evasion_flat",
+      "value": 6,
+      "slice": 0,
+      "element": null
+     }
+    ],
+    "weight": 2.4
+   },
+   {
+    "slot": "main hand",
+    "base": "one-handed sword",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "physical_power_flat",
+      "value": 11,
+      "slice": 0,
+      "element": null,
+      "extra": [
+       {
+        "id": "attack_speed",
+        "value": 4
+       }
+      ]
+     }
+    ],
+    "weight": 5.3
+   },
+   {
+    "slot": "off hand",
+    "base": "Buckler",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "block_chance",
+      "value": 10,
+      "slice": 0,
+      "element": null
+     }
+    ],
+    "weight": 3.4
+   },
+   {
+    "slot": "earring",
+    "base": "Silver Hoop",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "elemental_alignment",
+      "value": 1,
+      "slice": 0,
+      "element": null
+     }
+    ],
+    "weight": 0.9
+   }
+  ],
+  "bag": [
+   {
+    "slot": "helmet",
+    "base": "Circlet",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "energy_shield_flat",
+      "value": 72,
+      "slice": 0,
+      "element": null
+     }
+    ],
+    "weight": 2
+   },
+   {
+    "slot": "chest",
+    "base": "Vestment",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "energy_shield_flat",
+      "value": 72,
+      "slice": 0,
+      "element": null
+     }
+    ],
+    "weight": 4
+   },
+   {
+    "slot": "pant",
+    "base": "Legwraps",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "energy_shield_flat",
+      "value": 72,
+      "slice": 0,
+      "element": null
+     }
+    ],
+    "weight": 3.4
+   },
+   {
+    "slot": "boots",
+    "base": "Silk Slippers",
+    "ilvl": 1,
+    "quality": "low",
+    "tier": "T3",
+    "lines": [
+     {
+      "id": "energy_shield_flat",
+      "value": 72,
+      "slice": 0,
+      "element": null
+     }
+    ],
+    "weight": 4.4
+   }
+  ],
+  "stash": [],
+  "walk": {
+   "from": {
+    "q": 0,
+    "r": 0
+   },
+   "to": {
+    "q": 2,
+    "r": -1
+   },
+   "node": "eastgate",
+   "kind": "bare",
+   "sub": null,
+   "wild": null,
+   "blocksTotal": 2,
+   "blocksLeft": 1,
+   "secLeft": -12,
+   "blocksWalked": 1
+  },
+  "cell": {
+   "q": 0,
+   "r": 0,
+   "sub": null,
+   "wild": null
+  },
+  "skills": {
+   "owned": {},
+   "list": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "buffs": {},
+   "auras": {},
+   "xp": {},
+   "cd": {},
+   "buffUp": {},
+   "mode": {},
+   "conditions": {}
+  },
+  "healUp": null,
+  "junk": {},
+  "mastery": {
+   "one-handed sword": 4
+  },
+  "presets": [
+   {
+    "name": "Main",
+    "list": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "buffs": {},
+    "auras": {},
+    "mode": {},
+    "conditions": {},
+    "zones": []
+   },
+   {
+    "name": "Set 2",
+    "list": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "buffs": {},
+    "auras": {},
+    "mode": {},
+    "conditions": {},
+    "zones": []
+   },
+   {
+    "name": "Set 3",
+    "list": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "buffs": {},
+    "auras": {},
+    "mode": {},
+    "conditions": {},
+    "zones": []
+   },
+   {
+    "name": "Set 4",
+    "list": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "buffs": {},
+    "auras": {},
+    "mode": {},
+    "conditions": {},
+    "zones": []
+   },
+   {
+    "name": "Set 5",
+    "list": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "buffs": {},
+    "auras": {},
+    "mode": {},
+    "conditions": {},
+    "zones": []
+   },
+   {
+    "name": "Set 6",
+    "list": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "buffs": {},
+    "auras": {},
+    "mode": {},
+    "conditions": {},
+    "zones": []
+   }
+  ],
+  "activePreset": 0,
+  "collector": {
+   "done": {},
+   "hints": {}
+  },
+  "grants": {
+   "filter_presets": 0,
+   "stash_tabs": 0,
+   "titles": [],
+   "banners": []
+  },
+  "pedlar": {
+   "day": 0,
+   "bought": 0,
+   "minutes": [
+    53,
+    83,
+    102
+   ]
+  },
+  "filter": {
+   "bySlot": {
+    "helmet": {
+     "enabled": false,
+     "margin_pct": 10,
+     "keep_missing_element": true
+    },
+    "chest": {
+     "enabled": false,
+     "margin_pct": 10,
+     "keep_missing_element": true
+    },
+    "pant": {
+     "enabled": false,
+     "margin_pct": 10,
+     "keep_missing_element": true
+    },
+    "boots": {
+     "enabled": false,
+     "margin_pct": 10,
+     "keep_missing_element": true
+    },
+    "belt": {
+     "enabled": false,
+     "margin_pct": 10,
+     "keep_missing_element": true
+    },
+    "gloves": {
+     "enabled": false,
+     "margin_pct": 10,
+     "keep_missing_element": true
+    },
+    "ring": {
+     "enabled": false,
+     "margin_pct": 10,
+     "keep_missing_element": true
+    },
+    "amulet": {
+     "enabled": false,
+     "margin_pct": 10,
+     "keep_missing_element": true
+    },
+    "cape": {
+     "enabled": false,
+     "margin_pct": 10,
+     "keep_missing_element": true
+    },
+    "main hand": {
+     "enabled": false,
+     "margin_pct": 10,
+     "keep_missing_element": true
+    },
+    "off hand": {
+     "enabled": false,
+     "margin_pct": 10,
+     "keep_missing_element": true
+    },
+    "earring": {
+     "enabled": false,
+     "margin_pct": 10,
+     "keep_missing_element": true
+    }
+   },
+   "missing": {
+    "elements": [
+     "fire",
+     "cold",
+     "lightning",
+     "poison",
+     "chaos"
+    ],
+    "slots": []
+   }
+  },
+  "travel": "stay",
+  "hunting": false,
+  "autoDissolveLevel": 0,
+  "goal": {
+   "spawnId": null,
+   "pushesAtSpawn": 0,
+   "attempts": 0,
+   "done": null
+  },
+  "curses": {},
+  "mobStatus": {},
+  "pendingSnapshot": null,
+  "nextSnapshotAt": 0,
+  "town": {
+   "visited": [
+    "eastgate"
+   ],
+   "owned": [],
+   "waypoint": "eastgate",
+   "tasks": [
+    {
+     "kind": "elite",
+     "zone": 1,
+     "n": 3,
+     "progress": 0,
+     "stone": "tier",
+     "count": 4,
+     "claimed": false,
+     "offeredAt": 0
+    },
+    {
+     "kind": "elite",
+     "zone": 1,
+     "n": 3,
+     "progress": 0,
+     "stone": "tier",
+     "count": 4,
+     "claimed": false,
+     "offeredAt": 1
+    },
+    {
+     "kind": "elite",
+     "zone": 1,
+     "n": 3,
+     "progress": 0,
+     "stone": "tier",
+     "count": 4,
+     "claimed": false,
+     "offeredAt": 1
+    }
+   ],
+   "refillAt": [
+    0,
+    0,
+    0
+   ],
+   "skipsToday": 0,
+   "skipDay": 0
+  },
+  "farm": {
+   "plots": [
+    {
+     "tier": null,
+     "plantedAt": 0,
+     "readyAt": 0
+    },
+    {
+     "tier": null,
+     "plantedAt": 0,
+     "readyAt": 0
+    },
+    {
+     "tier": null,
+     "plantedAt": 0,
+     "readyAt": 0
+    }
+   ],
+   "xp": 0,
+   "herbs": {
+    "low": 0,
+    "mid": 0,
+    "high": 0
+   },
+   "potions": {
+    "Red Draught": 0,
+    "Yellow Draught": 0,
+    "White Draught": 0,
+    "Sky Draught": 0,
+    "Blue Draught": 0,
+    "Deep Blue Draught": 0
+   },
+   "condensed": {
+    "Red Draught": 0,
+    "Yellow Draught": 0,
+    "White Draught": 0,
+    "Sky Draught": 0,
+    "Blue Draught": 0,
+    "Deep Blue Draught": 0
+   },
+   "autoUse": {
+    "hp": true,
+    "mana": true
+   },
+   "threshold": {
+    "hp": 30,
+    "mana": 25
+   },
+   "lastDrinkAt": -9999,
+   "usesThisFight": 0,
+   "autoFarm": {
+    "plant": false,
+    "harvest": false,
+    "brew": false
+   },
+   "lastAutoFarmAt": -9999
+  },
+  "zone": 1,
+  "group": [
+   {
+    "id": "1_human_small_786663795",
+    "species": "Human",
+    "speciesId": "human",
+    "variant": "Ranger",
+    "kind": "Small",
+    "zone": 1,
+    "level": 1,
+    "hp": 514.0865550119904,
+    "hpMax": 639.6666666666666,
+    "ps": 7.856087447512739,
+    "subzone": "Village Outskirts",
+    "readsAs": "small",
+    "acc": 22.5,
+    "evasion": 12,
+    "dodgeRate": 2.6999999999999997,
+    "armour": 40,
+    "res": 4,
+    "resByElement": {
+     "fire": 0,
+     "cold": 0,
+     "lightning": 0,
+     "poison": 0,
+     "chaos": 20
+    },
+    "damage": "physical",
+    "innate": [
+     "chaos"
+    ],
+    "xp": 40,
+    "line": "front",
+    "hitsPerSec": 1,
+    "atkTimer": 0,
+    "engageSec": 0
+   }
+  ],
+  "phase": "fighting",
+  "campSec": 0,
+  "spawnIn": -23,
+  "dungeon": null,
+  "counters": {
+   "kills": 1,
+   "zoneKills": {
+    "1": 1
+   },
+   "pushes": 0,
+   "drops": 1,
+   "junk": 0,
+   "gold": 0,
+   "stones": {},
+   "playSec": 37,
+   "damage": 879.0607815827337,
+   "damageBy": {
+    "swing": 879.0607815827337,
+    "cast": 0,
+    "dot": 0
+   }
+  },
+  "log": [
+   {
+    "sec": 32,
+    "text": "Human inflicts mark"
+   },
+   {
+    "sec": 32,
+    "text": "Drop kept (filter off): level 1 low T3 Jade Amulet (amulet)"
+   },
+   {
+    "sec": 32,
+    "text": "+40 XP"
+   },
+   {
+    "sec": 30,
+    "text": "Human inflicts mark"
+   },
+   {
+    "sec": 25,
+    "text": "Human inflicts mark"
+   },
+   {
+    "sec": 24,
+    "text": "Ambushed on block 2 of 2 · 2 in Eastgate"
+   }
+  ],
+  "fx": [
+   {
+    "id": 47,
+    "sec": 37,
+    "kind": "taken",
+    "side": "self",
+    "byId": "1_human_small_786663795",
+    "text": "5",
+    "value": 4.87655527341481,
+    "colour": "#a970d8"
+   },
+   {
+    "id": 46,
+    "sec": 37,
+    "kind": "block",
+    "side": "field",
+    "mobId": "1_human_small_786663795",
+    "text": "miss",
+    "colour": "#cfd6e0"
+   },
+   {
+    "id": 45,
+    "sec": 37,
+    "kind": "block",
+    "side": "field",
+    "mobId": "1_human_small_786663795",
+    "text": "miss",
+    "colour": "#cfd6e0"
+   },
+   {
+    "id": 44,
+    "sec": 36,
+    "kind": "taken",
+    "side": "self",
+    "byId": "1_human_small_786663795",
+    "text": "2",
+    "value": 2.4765552734148097,
+    "colour": "#a970d8"
+   },
+   {
+    "id": 43,
+    "sec": 36,
+    "kind": "block",
+    "side": "self",
+    "byId": "1_human_small_786663795",
+    "text": "block",
+    "colour": "#cfd6e0"
+   },
+   {
+    "id": 42,
+    "sec": 36,
+    "kind": "hit",
+    "side": "field",
+    "mobId": "1_human_small_786663795",
+    "crit": false,
+    "via": "swing",
+    "text": "126",
+    "value": 125.58011165467626,
+    "colour": "#cfd6e0"
+   },
+   {
+    "id": 41,
+    "sec": 35,
+    "kind": "taken",
+    "side": "self",
+    "byId": "1_human_small_786663795",
+    "text": "5",
+    "value": 4.87655527341481,
+    "colour": "#a970d8"
+   },
+   {
+    "id": 40,
+    "sec": 35,
+    "kind": "block",
+    "side": "field",
+    "mobId": "1_human_small_786663795",
+    "text": "miss",
+    "colour": "#cfd6e0"
+   },
+   {
+    "id": 39,
+    "sec": 34,
+    "kind": "taken",
+    "side": "self",
+    "byId": "1_human_small_786663795",
+    "text": "5",
+    "value": 4.87655527341481,
+    "colour": "#a970d8"
+   },
+   {
+    "id": 38,
+    "sec": 34,
+    "kind": "block",
+    "side": "field",
+    "mobId": "1_human_small_786663795",
+    "text": "miss",
+    "colour": "#cfd6e0"
+   },
+   {
+    "id": 37,
+    "sec": 33,
+    "kind": "block",
+    "side": "self",
+    "byId": "1_human_small_786663795",
+    "text": "evasion",
+    "colour": "#cfd6e0"
+   },
+   {
+    "id": 36,
+    "sec": 33,
+    "kind": "block",
+    "side": "field",
+    "mobId": "1_human_small_786663795",
+    "text": "dodge",
+    "colour": "#cfd6e0"
+   },
+   {
+    "id": 35,
+    "sec": 32,
+    "kind": "proc",
+    "side": "self",
+    "text": "mark",
+    "colour": "#a970d8"
+   },
+   {
+    "id": 34,
+    "sec": 32,
+    "kind": "taken",
+    "side": "self",
+    "byId": "1_human_small_786663795",
+    "text": "5",
+    "value": 4.87655527341481,
+    "colour": "#a970d8"
+   },
+   {
+    "id": 33,
+    "sec": 32,
+    "kind": "taken",
+    "side": "self",
+    "byId": "1_human_medium_174008923",
+    "text": "8",
+    "value": 7.860916648492091,
+    "colour": "#a970d8"
+   },
+   {
+    "id": 32,
+    "sec": 32,
+    "kind": "drop",
+    "side": "field",
+    "text": "drop",
+    "colour": "#cfd6e0"
+   },
+   {
+    "id": 31,
+    "sec": 32,
+    "kind": "kill",
+    "side": "field",
+    "mobId": "1_human_medium_174008923",
+    "text": "Human",
+    "colour": "#a970d8"
+   },
+   {
+    "id": 30,
+    "sec": 32,
+    "kind": "hit",
+    "side": "field",
+    "mobId": "1_human_medium_174008923",
+    "crit": false,
+    "via": "swing",
+    "text": "126",
+    "value": 125.58011165467626,
+    "colour": "#cfd6e0"
+   },
+   {
+    "id": 29,
+    "sec": 31,
+    "kind": "block",
+    "side": "self",
+    "byId": "1_human_small_786663795",
+    "text": "evasion",
+    "colour": "#cfd6e0"
+   },
+   {
+    "id": 28,
+    "sec": 31,
+    "kind": "block",
+    "side": "self",
+    "byId": "1_human_medium_174008923",
+    "text": "evasion",
+    "colour": "#cfd6e0"
+   },
+   {
+    "id": 27,
+    "sec": 31,
+    "kind": "hit",
+    "side": "field",
+    "mobId": "1_human_medium_174008923",
+    "crit": false,
+    "via": "swing",
+    "text": "126",
+    "value": 125.58011165467626,
+    "colour": "#cfd6e0"
+   },
+   {
+    "id": 26,
+    "sec": 30,
+    "kind": "block",
+    "side": "self",
+    "byId": "1_human_small_786663795",
+    "text": "evasion",
+    "colour": "#cfd6e0"
+   },
+   {
+    "id": 25,
+    "sec": 30,
+    "kind": "proc",
+    "side": "self",
+    "text": "mark",
+    "colour": "#a970d8"
+   },
+   {
+    "id": 24,
+    "sec": 30,
+    "kind": "taken",
+    "side": "self",
+    "byId": "1_human_medium_174008923",
+    "text": "8",
+    "value": 7.860916648492091,
+    "colour": "#a970d8"
+   }
+  ],
+  "fxSeq": 47,
+  "clockSec": 37,
+  "lastSavedAt": 1791723846575,
+  "online": true,
+  "lastAutoZone": 1
+ }
+}

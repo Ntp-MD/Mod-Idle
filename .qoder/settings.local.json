@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"C:/Users/disda/Desktop/Mod-Idle/art-reference/map\" && echo \"===GEOMETRY===\" && ls -la geometry && echo \"===PROMPTS===\" && ls -la prompts && echo \"===EXAMPLES===\" && ls -la examples && echo \"===REFERENCES===\" && ls -la references && echo \"===REVIEW===\" && ls -la review && echo \"===OUTPUTS===\" && ls -la outputs)",
+      "Bash(cd \"C:/Users/disda/Desktop/Mod-Idle\" && echo \"===public/map===\" && ls -R game/public/map | head -60 && echo \"===footprints===\" && cat game/src/ui/map-terrain-footprints.json | head -40)",
+      "Bash(cd \"C:/Users/disda/Desktop/Mod-Idle\" && echo \"===calibration===\" && ls -la art-reference/map-calibration && echo \"===registration.json===\" && cat art-reference/map-calibration/registration.json 2>/dev/null | head -40 && echo \"===npm scripts===\" && cat package.json | head -40)",
+      "Bash(cd \"C:/Users/disda/Desktop/Mod-Idle\" && echo \"===terrain files===\" && ls game/public/map/terrain && echo \"===footprint keys===\" && grep -o '\"/map/[^\"]*\"' game/src/ui/map-terrain-footprints.json && echo \"===sprite bounds===\" && cat game/src/ui/map-sprite-bounds.json)"
+    ]
+  }
+}

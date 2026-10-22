@@ -9,6 +9,8 @@
   import { shelfStones, stoneIcon, stoneQuality, STONE_MIME } from './stones';
   import { modesForStone, stoneUseReason } from './craft-use';
   import SlotGrid from './SlotGrid.svelte';
+  import Tabs from './Tabs.svelte';
+  import Pager from './Pager.svelte';
   import type { GameState, Item } from '../sim/types';
 
   let { game, item, where = null, index = -1, onpick, onclear, onrun, wornOf, note = '',
@@ -233,13 +235,14 @@
       {/each}
       {#if !shownStones.length}<p class="text-note">No matching stone.</p>{/if}
     </div>
-    {#if stonePages > 1}
-      <nav class="currency-pages" aria-label="Stone pages">
-        <button class="btn-quiet" disabled={stoneAt === 0} onclick={() => stonePage = stoneAt - 1} aria-label="Previous stones">Previous</button>
-        <small>{stoneAt + 1} / {stonePages}</small>
-        <button class="btn-quiet" disabled={stoneAt + 1 === stonePages} onclick={() => stonePage = stoneAt + 1} aria-label="Next stones">Next</button>
-      </nav>
-    {/if}
+    <Pager
+      group="Stone pages"
+      pages={stonePages}
+      page={stoneAt}
+      onturn={(p) => (stonePage = p)}
+      text={`${stoneAt + 1} / ${stonePages}`}
+      buttonClass="btn-quiet"
+    />
     {#if selectedStone && mode}
       <section class="stone-inspector surface-hud" aria-label="Selected stone">
         <header><strong>{selectedStone.name}</strong><span class="chip chip-tag" class:toggled={armed}>{armed ? 'Ready to use' : 'Selected'}</span></header>
@@ -325,17 +328,18 @@
       <h3>Equipment</h3>
       <span>{sourceTab === 'inventory' ? `Bag · ${game.bag.length} piece${game.bag.length === 1 ? '' : 's'}` : sourceTab === 'equipped' ? `${wornEntries.length} worn` : `Stash · ${stashTotal} stored`}</span>
     </header>
-    <div class="source-tabs" role="tablist" aria-label="Gear sources for the bench">
-      <button role="tab" class="btn btn-quiet" class:toggled={sourceTab === 'equipped'} aria-selected={sourceTab === 'equipped'} onclick={() => (sourceTab = 'equipped')}>
-        Equipped · {wornEntries.length}
-      </button>
-      <button role="tab" class="btn btn-quiet" class:toggled={sourceTab === 'inventory'} aria-selected={sourceTab === 'inventory'} onclick={() => { sourceTab = 'inventory'; stashPicked = -1; }}>
-        Bag · {game.bag.length}
-      </button>
-      <button role="tab" class="btn btn-quiet" class:toggled={sourceTab === 'stash'} aria-selected={sourceTab === 'stash'} onclick={() => { if (sourceTab !== 'stash') stashQuery = ''; sourceTab = 'stash'; stashPicked = -1; }}>
-        Stash · {stashTabs} tab{stashTabs === 1 ? '' : 's'}
-      </button>
-    </div>
+    <Tabs
+      label="Gear sources for the bench"
+      active={sourceTab}
+      onpick={(id) => {
+        if (id === 'inventory' || id === 'stash') stashPicked = -1;
+        if (id === 'stash' && sourceTab !== 'stash') stashQuery = '';
+        sourceTab = id as typeof sourceTab;
+      }}
+      tabs={[{ id: 'equipped', label: `Equipped · ${wornEntries.length}` },
+             { id: 'inventory', label: `Bag · ${game.bag.length}` },
+             { id: 'stash', label: `Stash · ${stashTabs} tab${stashTabs === 1 ? '' : 's'}` }]}
+    />
     {#if sourceTab === 'equipped'}
       <div class="source-grid" use:fitSource>
         <SlotGrid entries={wornEntries} capacity={E.stat.item_slots} fixed layout="grid" {wornOf}
@@ -357,14 +361,17 @@
     {:else}
       {#if stashTabs > 0}
         <div class="stash-head">
-          <div class="stash-tabs" role="tablist" aria-label="Stash tabs for crafting">
-            {#each Array(stashTabs) as _, tabIndex (tabIndex)}
-              <button role="tab" class="btn btn-quiet" class:toggled={tabIndex === stashTab} aria-selected={tabIndex === stashTab}
-                      onclick={() => { onStashTab(tabIndex); stashPicked = -1; stashQuery = ''; }}>
-                Tab {tabIndex + 1}<b>{` ${(game.stash[tabIndex] || []).length}`}</b>
-              </button>
-            {/each}
-          </div>
+          <Tabs
+            label="Stash tabs for crafting"
+            tabs={Array.from({ length: stashTabs }, (_, tIndex) => ({ id: String(tIndex), label: `Tab ${tIndex + 1}` }))}
+            active={String(stashTab)}
+            onpick={(id) => { onStashTab(Number(id)); stashPicked = -1; stashQuery = ''; }}
+            tabindex={stashTabs > 1}
+          >
+            {#snippet item(t)}
+              <span>Tab {Number(t.id) + 1}</span><b>{(game.stash[Number(t.id)] || []).length}</b>
+            {/snippet}
+          </Tabs>
         </div>
         {#if stashItems.length}
           <div class="source-body">
@@ -408,7 +415,6 @@
   .currency-art { position: relative; display: block; width: var(--slot-item); height: var(--slot-item); flex: none; }
   .currency-art img { width: 100%; height: 100%; object-fit: contain; }
   .currency-art b { position: absolute; right: calc(var(--spacing-xs) * -1); bottom: 0; }
-  .currency-pages { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xs); }
   .stone-inspector { display: grid; gap: var(--spacing-sm); padding: var(--spacing-sm); }
   .stone-inspector header { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs); }
   .stone-inspector strong { font-size: var(--font-sm); }
@@ -447,7 +453,6 @@
   .enhancement-info { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--spacing-xs) var(--spacing-sm); padding: var(--spacing-sm); font-size: var(--font-xs); }
   .enhancement-info small { flex-basis: 100%; }
   .warning { font-size: var(--font-xs); margin: 0; }
-  .source-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
   .source-body { display: flex; flex: 1; flex-direction: column; gap: var(--spacing-sm); min-height: 0; }
   .source-grid { flex: 1; min-height: 0; min-width: 0; }
   .source-grid :global(.slot-grid-stack) { display: flex; flex-direction: column; height: 100%; gap: var(--spacing-sm); }
@@ -455,7 +460,8 @@
   .source-grid :global(.bar) { display: none; }
   .source-grid :global(.slot .delta) { display: none; }
   .stash-head { display: grid; gap: var(--spacing-xs); }
-  .stash-tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
+  .stash-head :global(.tabs .btn-quiet b) { font-family: var(--num); color: var(--dim); font-weight: 500; padding-left: var(--spacing-2xs); }
+  .stash-head :global(.tabs .btn-quiet.picked b) { color: var(--gold); }
   .source-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); }
   .source-empty { font-size: var(--font-xs); }
   .stone-cursor { position: fixed; z-index: var(--z-toast); pointer-events: none; display: flex; align-items: flex-end; gap: var(--spacing-xs); transform: translate(var(--spacing-md), var(--spacing-md)); }

@@ -27,13 +27,13 @@ describe('the tree cage gates the structure of the spec it reads', () => {
 
   it('fails when the spec cannot build', () => {
     const broken = readTree();
-    broken.rank_tiers.shallow = [];
+    delete broken.node_kinds.keystone;
     expect(verdict(checks(broken), 'TR1')).toBe('FAIL');
   });
 
   it('fails when a node grants a line that is not a real Mod', () => {
     const broken = readTree();
-    broken.nodes[0].grants[0].id = 'no_such_line';
+    broken.profiles['notable.str.01'][0].id = 'no_such_line';
     expect(verdict(checks(broken), 'TR4')).toBe('FAIL');
   });
 
@@ -41,7 +41,7 @@ describe('the tree cage gates the structure of the spec it reads', () => {
     const broken = readTree();
     // every Mod row the sheet knows is a bucket, so a line that is neither a Mod nor a sheet bucket is
     // the shape this gate exists for: the node is bought and nothing moves
-    broken.nodes[0].grants[0].id = 'no_such_line';
+    broken.profiles['notable.str.01'][0].id = 'no_such_line';
     expect(verdict(checks(broken), 'TR5')).toBe('FAIL');
     expect(verdict(checks(broken), 'TR4')).toBe('FAIL');
   });
@@ -64,16 +64,46 @@ describe('the tree cage gates the structure of the spec it reads', () => {
     expect(verdict(checks(broken), 'TR11')).toBe('FAIL');
   });
 
+  it('fails when a keystone bundle carries a key the registry does not read', () => {
+    const broken = readTree();
+    broken.nodes.find((n: any) => n.kind === 'keystone').effects[0].power = 1;
+    expect(verdict(checks(broken), 'TR11')).toBe('FAIL');
+  });
+
   it('fails when a granted value sits above the line it grants', () => {
     const broken = readTree();
-    broken.nodes[0].grants[0].values = [9999];
+    broken.profiles['notable.str.01'][0].values = [9999];
     expect(verdict(checks(broken), 'TR7')).toBe('FAIL');
   });
 
   it('fails when two nodes sit on top of one another', () => {
     const broken = readTree();
-    broken.layout.node_radius = 1000;
+    broken.layout.radii = { normal: 1000, notable: 1000, keystone: 1000, start: 1000 };
     expect(verdict(checks(broken), 'TR13')).toBe('FAIL');
+  });
+
+  it('fails when a node id disagrees with its placement', () => {
+    const broken = readTree();
+    broken.nodes[0].placement = { role: 'spine', index: 2 };
+    expect(verdict(checks(broken), 'TR9')).toBe('FAIL');
+  });
+
+  it('fails when the regions are not ringed together', () => {
+    const broken = readTree();
+    broken.links = [];
+    expect(verdict(checks(broken), 'TR10')).toBe('FAIL');
+  });
+
+  it('fails when the file is not the recipe\'s own output', () => {
+    const broken = readTree();
+    broken.nodes[0].name = 'Hand edit';
+    expect(verdict(checks(broken), 'TR14')).toBe('FAIL');
+  });
+
+  it('fails when a profile nobody reads is left in the file', () => {
+    const broken = readTree();
+    broken.profiles['notable.unused'] = [{ id: 'armour_flat', values: [1] }];
+    expect(verdict(checks(broken), 'TR15')).toBe('FAIL');
   });
 
   it('leaves the file it was given untouched', () => {

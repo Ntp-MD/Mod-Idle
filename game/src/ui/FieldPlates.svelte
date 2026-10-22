@@ -175,13 +175,11 @@
            the flinch instead of looping it -->
       <div class="art" class:knock={!!beat}>
         <div class="mob-head">
-          <div class="identity">
-            <img class="portrait card-portrait" src={mobIcon(m.species)} alt="" aria-hidden="true" />
-            <div class="identity-text">
+            <div class="identity">
+              <img class="portrait card-portrait" src={mobIcon(m.species)} alt="" aria-hidden="true" />
               <p class="mob-name card-name" class:elite={m.kind === 'Elite'} class:boss={m.kind.startsWith('Boss')}>{fieldLabel(m)}{#if m.kind.startsWith('Boss')}<img class="tier-mark" src={bossMark} alt="" aria-hidden="true" />{/if}</p>
               <small class="mob-level">Level {m.level}</small>
             </div>
-          </div>
           {#if m.innate.length}
             <div class="innate-rail">
               {#each m.innate as element}
@@ -232,129 +230,79 @@
 </div>
 
 <style>
+  /* ===== the combat slot: the player card sits centred at the bottom, the plate row shrinks around it =====
+     Every combat read is contained in its card's own box: no lateral pop, rail or badge renders outside a
+     card, so a narrow region shrinks the cards instead of spilling content into its neighbours. */
 
-  .clear-field span{ font-size: var(--font-xs); }
-
-  /* player's combat feedback sits just right of the card, clear of its identity and vitals */
-  .combat-player-slot .self-side {
-    position: absolute; left: calc(100% + var(--card-w) + var(--spacing-xs)); bottom: 0;
-    display: flex; flex-direction: column-reverse; align-items: flex-start; gap: var(--spacing-xs);
-  }
-  .combat-player-slot .self-side .fx { translate: var(--rail) 0; }
+  .clear-field b { color: var(--text); font-weight: 600; }
 
   .combat-player-slot {
     position: absolute; left: 50%; bottom: 0; z-index: var(--z-content);
-    width: min(var(--card-w), calc(100% - var(--pad-area) * 2)); aspect-ratio: 5 / 7;
+    width: min(var(--card-w), 100%); aspect-ratio: 5 / 7;
     transform: translateX(-50%); pointer-events: auto;
   }
 
-  /* the charge wrapper wears the whole card face, so an attack run moves the card and not just what is
-     drawn inside it. The shell above keeps the slot: size, place in the row and the reads pinned to it. */
-  .mob .charge{
-    width: 100%; height: 100%; min-height: 0; display: flex; flex-direction: column; padding: var(--spacing-md);
-  }
+  /* loot and system chips rise to the card's right and back onto it, tracking the drift the
+     shared `fx-rise` keyframes carry: the anchor is pushed out by `--rail` and the drift pulls
+     it back by about the same distance, so the column reads beside the card */
+  .combat-player-slot .self-side { left: calc(100% + var(--spacing-xs) + var(--rail)); bottom: 0; align-items: flex-start; }
+  .combat-player-slot .self-side .fx { translate: var(--rail) 0; }
+  .float-side .pop-loot { padding: var(--spacing-xs); }
 
-  /* the body fills the card face top to bottom, the way a playing card reads: portrait up top, the
-     fight numbers in the middle, the status line pinned to the foot */
-  .mob .art{ display: flex; flex-direction: column; justify-content: space-between; align-items: stretch; flex: 1; min-width: 0; gap: var(--spacing-xs); padding-bottom: var(--spacing-xs); }
+  /* the group is one centred row, never a wrap: the largest authored group is five bodies, and
+     `flex-shrink` plus `min-width: 0` turns a narrow region into smaller cards, not overflow */
+  .plate-row { display: flex; flex-wrap: nowrap; justify-content: center; align-items: flex-start; gap: var(--spacing-md); width: 100%; }
+  .mob { position: relative; flex: 0 1 var(--card-w); min-width: 0; aspect-ratio: 5 / 7; text-align: left; pointer-events: auto; }
 
-  /* the group is one centred row, never a wrap: the largest authored group is five bodies and the row
-     holds them all, so a plate never changes neighbour because the region's width moved */
-  .plate-row {
-    display: flex; flex-wrap: nowrap; justify-content: center; align-items: flex-start;
-    gap: var(--spacing-md); width: 100%;
-  }
+  /* the shell above keeps the slot's size, place in the row and the reads pinned to it */
+  .mob .charge { width: 100%; height: 100%; min-height: 0; display: flex; flex-direction: column; padding: var(--spacing-md); }
+  .mob .art { display: flex; flex-direction: column; justify-content: space-between; align-items: stretch; flex: 1; min-width: 0; gap: var(--spacing-xs); padding-bottom: var(--spacing-xs); }
 
-  .mob { position: relative; width: var(--card-w); aspect-ratio: 5 / 7; text-align: left; pointer-events: auto; }
-
-  /* the fight numbers hug the foot of the card: everything from the first bar down sits on the bottom,
-     the portrait and the name keep the head, and the face padding is the breathing room */
-
-  /* the body the next swing waits on carries a pair of crop marks, steady while it stands in front; the gold
-     edge that goes with them is the `front` state of `card-combat`. The marks are the read that survives an
-     elite or a boss border, which out-ranks the edge colour on the same plate. */
-  .mob.front .charge::before, .mob.front .charge::after{
+  /* the body the next swing waits on carries a pair of crop marks inside its own corners, so the
+     front state survives without the marks bleeding past the card edge */
+  .mob.front .charge::before, .mob.front .charge::after {
     content: ''; position: absolute; width: var(--icon-label); height: var(--icon-label); pointer-events: none;
     border: 2.5px solid color-mix(in srgb, var(--text) 90%, transparent);
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .85));
   }
+  .mob.front .charge::before { top: var(--spacing-xs); left: var(--spacing-xs); border-right: 0; border-bottom: 0; border-top-left-radius: var(--radius-card); }
+  .mob.front .charge::after { bottom: var(--spacing-xs); right: var(--spacing-xs); border-left: 0; border-top: 0; border-bottom-right-radius: var(--radius-card); }
 
-  .mob.front .charge::before{ top: var(--x-pull-scale); left: var(--x-pull-scale); border-right: 0; border-bottom: 0; border-top-left-radius: var(--radius-card); }
-
-  .mob.front .charge::after{ bottom: var(--x-pull-scale); right: var(--x-pull-scale); border-left: 0; border-top: 0; border-bottom-right-radius: var(--radius-card); }
-
-  /* the head holds the identity alone: the innate Element mark rides the corner out of the flow, so the
-     portrait, the name and the level centre on the card the way the player's own card centres */
+  /* the head holds the identity alone: the innate Element mark rides the corner out of the flow */
   .mob-head { position: relative; width: 100%; min-width: 0; }
   .innate-rail { position: absolute; top: 0; right: 0; display: flex; flex-direction: column; gap: var(--spacing-xs); }
   .innate-mark { display: grid; place-items: center; width: calc(var(--icon-label) * 1.5); height: calc(var(--icon-label) * 1.5); border: 1px solid var(--hud-edge); border-radius: var(--radius-round); background: var(--glass); box-shadow: 0 2px 8px rgba(0, 0, 0, .45); }
   .innate-mark img { width: var(--icon-label); height: var(--icon-label); object-fit: contain; }
 
-  /* the card head is a column: the body's own portrait on top and centred, its name under it. A mob
-     is recognised by its shape before its words, so the face leads rather than sitting beside the
-     text it labels. */
-  .identity{ display: flex; flex-direction: column; align-items: center; justify-items: center; gap: var(--spacing-sm); min-width: 0; text-align: center; }
-  .identity-text{ display: grid; justify-items: center; min-width: 0; }
-  .mob .portrait{ width: calc(var(--icon-card) * 4 / 5); height: calc(var(--icon-card) * 4 / 5); flex: none; object-fit: contain; padding: var(--spacing-sm); }
-
-  .mob-name .tier-mark{ width: var(--icon-label); height: var(--icon-label); }
-
+  /* the card head is a column: portrait on top and centred, the name under it */
+  .identity { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-sm); min-width: 0; text-align: center; }
+  .mob .portrait { width: calc(var(--icon-card) * 4 / 5); height: calc(var(--icon-card) * 4 / 5); flex: none; object-fit: contain; padding: var(--spacing-sm); }
+  .mob-name { display: flex; align-items: center; justify-content: center; gap: var(--spacing-xs); max-width: 100%; margin: 0; overflow-wrap: anywhere; font-size: var(--font-sm); line-height: 1.15; }
+  .mob-name .tier-mark { width: var(--icon-label); height: var(--icon-label); }
   .mob-level { color: var(--dim); font-size: var(--font-xs); line-height: 1.15; }
 
-  .mob-name { display: flex; align-items: center; justify-content: center; gap: var(--spacing-xs); max-width: 100%; margin: 0; overflow-wrap: anywhere; font-size: var(--font-sm); line-height: 1.15; }
-
   .mobbar { display: block; position: relative; width: 100%; height: max(var(--spacing-sm), var(--font-xs)); overflow: hidden; }
-
-  /* the figure sits in the bar the way the dock's own gauges read: centred, tabular, stroked off the fill */
   .mobbar b {
     position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
     max-width: 100%; overflow: hidden; white-space: nowrap; font-size: var(--font-xs); line-height: 1; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
     text-shadow: 0 1px 2px rgba(0, 0, 0, .95); pointer-events: none;
   }
+  .mobbar i { display: block; height: 100%; width: 100%; transition: transform var(--motion-travel) var(--ease-glide); }
 
-  .clear-field b { color: var(--text); font-weight: 600; }
+  /* debuff badges stack inside the card's top-left corner, mirroring the innate mark at top-right */
   .mob-debuff-rail {
-    position: absolute; top: 0; right: calc(100% + var(--spacing-xs)); z-index: var(--z-floater);
+    position: absolute; top: 0; left: 0; z-index: var(--z-floater);
     display: flex; flex-direction: column; gap: var(--spacing-xs); pointer-events: none;
   }
-  .mob-status-badge {
-    position: relative; display: grid; place-items: center; width: calc(var(--icon-label) * 1.5); height: calc(var(--icon-label) * 1.5);
-    pointer-events: auto;
-  }
+  .mob-status-badge { position: relative; display: grid; place-items: center; width: calc(var(--icon-label) * 1.5); height: calc(var(--icon-label) * 1.5); pointer-events: auto; }
   .mob-status-badge img { width: var(--icon-label); height: var(--icon-label); object-fit: contain; }
-  .mob-status-badge small {
-    position: absolute; right: 0; bottom: 0; max-width: 100%; overflow: hidden;
-    font-size: var(--font-xs); line-height: 1;
-  }
+  .mob-status-badge small { position: absolute; right: 0; bottom: 0; max-width: 100%; overflow: hidden; font-size: var(--font-xs); line-height: 1; }
 
-  /* The ramp is stretched over the whole track instead of squeezed into the fill: `--w` is the fraction the
-     bar reached, so a body's last health shows the hot end of its own colour. Across a group of plates that
-     is one red signal read before any digit is looked at. The slide is the sim's own step carried between
-     the two seconds it lands in — damage reads as travel, not as a strobe, and it stays here because a plate
-     rides the sim's own step while the HUD's meters arrive already eased. */
-  .mobbar i{ display: block; height: 100%; width: 100%; transition: transform var(--motion-travel) var(--ease-glide); }
-
-  /* The numbers never ride the card face: they mount at the card's right edge and climb the open air in
-     lanes a little staggered apart — the column hangs beside the plate instead of over its words and art.
-     `--lane` is each event's own slot, so two blows travel as two columns spaced a step across, roughly
-     keeping the previous layer compromise in floating text terms. The pop-word column rides the same seam. */
-  .mob .plate-fx{
-    position: absolute; inset: 0; z-index: var(--z-label); pointer-events: none;
-  }
-
-  .plate-fx .pop{
-    position: absolute; left: calc(100% + (var(--lane, 0) * var(--spacing-xs))); top: 58%;
-    /* the shared keyframes centre the column on its anchor (`translate(-50%, …)`); this `translate: 50% 0`
-       cancels that, so the number's LEFT edge sits at the card's right edge — the whole figure floats
-       outside the card, never over the art or the words */
-    translate: 50% 0;
-    white-space: nowrap;
-    padding: var(--spacing-xs);
-  }
-  .float-side .pop-loot { padding: var(--spacing-xs); }
-  .plate-fx .pop-word {
-    top: calc(-1 * var(--spacing-xl));
-  }
+  /* every landed blow rises from the card's centre line and clears its face by the shared rise
+     keyframes; staying inside the card means the row never paints over a neighbour */
+  .mob .plate-fx { position: absolute; inset: 0; z-index: var(--z-label); pointer-events: none; }
+  .plate-fx .pop { position: absolute; left: 50%; top: 58%; white-space: nowrap; padding: var(--spacing-xs); }
+  .plate-fx .pop-word { top: 24%; }
 
   .mob .art.knock { animation: plate-mob-knock var(--motion-ui) cubic-bezier(.2, .8, .3, 1); }
   .mob .charge.lunge { --reach: clamp(63px, 4.84vw, 135px); animation: plate-mob-charge .45s cubic-bezier(.3, .7, .3, 1); }
@@ -384,7 +332,7 @@
 
   /* a swing draws the shelf's crossed swords across the body it cut, turned through the strike. A mask
      contributes only alpha, so the Element that carried the hit paints the blade. */
-  .mob .arc{
+  .mob .arc {
     position: absolute; left: calc(50% + var(--x-pull-arc)); top: calc(clamp(24px, 1.84vw, 51px) + var(--x-pull-arc)); z-index: var(--z-highlight); pointer-events: none;
     width: calc(var(--icon-card) * 1.4); height: calc(var(--icon-card) * 1.4);
     background: var(--fx, var(--text));
@@ -394,7 +342,7 @@
   }
 
   /* a press lands as a burst and not a cut, so the two halves of a build read apart before a number is read */
-  .mob .burst{
+  .mob .burst {
     position: absolute; left: calc(50% + var(--x-pull-burst)); top: calc(clamp(24px, 1.84vw, 51px) + var(--x-pull-burst)); z-index: var(--z-highlight); pointer-events: none;
     width: var(--icon-card); height: var(--icon-card);
     border: 2px solid var(--fx, var(--text)); border-radius: var(--radius-round);
@@ -411,5 +359,4 @@
     25% { opacity: .9; }
     100% { opacity: 0; transform: scale(1.55); }
   }
-
 </style>
