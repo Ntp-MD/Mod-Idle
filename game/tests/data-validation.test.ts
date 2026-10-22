@@ -68,6 +68,18 @@ describe('the canonical data is checked before anything reads it', () => {
     expect(() => validateEngineData(data)).toThrow(/mob\.species\[0\]\.core\.lck must be a finite number/);
   });
 
+  it('names a forge grade outside the three published bands', () => {
+    const data = copy();
+    data.forge.materials['iron-ore'].grade = 4;
+    expect(() => validateEngineData(data)).toThrow(/forge\.materials\.iron-ore\.grade must be a whole number from 1 to 3/);
+  });
+
+  it('names a forge pattern without a positive material count', () => {
+    const data = copy();
+    data.forge.armour.chest.count = 0;
+    expect(() => validateEngineData(data)).toThrow(/forge\.armour\.chest\.count must be a positive whole number/);
+  });
+
   it('leaves the file it was given untouched', () => {
     const data = copy();
     const before = JSON.stringify(data);

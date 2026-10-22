@@ -6,7 +6,7 @@ The portable [map art reference kit](../art-reference/map/README.md) contains sh
 
 ## Full-hex artwork
 
-Public map assets have three top-level folders: `terrain/` for natural ground/scenery and its `templates/`, `landmark/` for settlements, ruins, camps and event scenery, and `characters/` for the player and species. Keep originals alongside numbered versions in their category. Registration is selected by footprint metadata, not by a special directory name. The original-image coverage list is owned by `art-reference/map/source-assets.json`.
+Public map assets have three top-level folders: `terrain/` for natural ground/scenery and its `templates/`, `landmark/` for settlements, ruins, camps and event scenery, and `characters/` for figures. `characters/player/` holds the traveller; `characters/species/<species>/` holds that species' approved figures, with originals alongside numbered versions (`kobold.png`, `kobold-v2.png`). Generated candidates stay under `art-reference/` until approved, then copy into the matching species folder; do not mix raw, cutout or rejected files into public assets. Registration is selected by footprint metadata, not by a special directory name. The original-image coverage list is owned by `art-reference/map/source-assets.json`.
 
 Use `hex-mask.png` or `hex-mask.svg` as the shape reference. Exact canvas-space vertices and projection matrix are in `terrain-hex.json` in the same folder; do not transcribe rounded coordinates into renderer code. The reference canvas is 1024 × 625, with its centre at (512, 312.5). It maps to the projected ground bounding rectangle, without alpha cropping or a second camera rotation. Artwork can have a different raster resolution when the same normalized footprint is retained.
 

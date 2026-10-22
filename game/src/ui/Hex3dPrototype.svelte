@@ -107,8 +107,8 @@
         scene.add(figure); draw();
       }, undefined, () => { if (live) problem = `Could not load figure ${src}`; });
     };
-    addFigure('/map/characters/traveler-piece.png', -.85, .82, .86, 1.35);
-    addFigure('/map/characters/wolf.png', 1.08, .72, 1.03, 1.15);
+    addFigure('/map/characters/player/traveler-piece.png', -.85, .82, .86, 1.35);
+    addFigure('/map/characters/species/wolf/wolf.png', 1.08, .72, 1.03, 1.15);
 
     const draw = () => renderer.render(scene, camera);
     const resize = new ResizeObserver(([entry]) => {

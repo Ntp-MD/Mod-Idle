@@ -1,13 +1,15 @@
 <script lang="ts">
   import { E, eng, sm } from '../engine/client';
-  import { fxByMob as bucketFx, plateBeat, plateStrike } from './plate';
+  import { castForHit, fxByMob as bucketFx, plateBeat, plateStrike, windupOf } from './plate';
   import { fieldLabel } from './hud';
   import { bar } from './field';
   import { fxOut } from './motion';
   import { elementIcon, mobIcon, skillIcon } from '../icon';
   import { bossMark } from '../icon';
+  import Icon from './Icon.svelte';
   import PlayerVitalCard from './PlayerVitalCard.svelte';
   import { statusLabel, type MobStatusName } from '../sim/mobStatus';
+  import { mobSkillById } from '../sim/mobSkills';
   import type { GameState, Mob, FxEvent } from '../sim/types';
   import type { Character } from '../sim/player';
   import type { Statuses } from '../sim/combat';
@@ -99,6 +101,13 @@
        halfway instead of the attacker running the whole way down -->
   {@const clash = strike && beat && strike.sec === beat.sec}
   {@const mobDebuffs = mobDebuffMarks(m.id)}
+  {@const castHit = (fxByMob.get(m.id) || []).find((e) => e.kind === 'hit' && e.via === 'cast')}
+  {@const castEvent = castForHit(ring, castHit)}
+  {@const castSkill = castEvent?.skillId ? sm.byId[castEvent.skillId] : null}
+  {@const casting = !!castSkill && !!castHit && s.clockSec - castHit.sec <= 1}
+  {@const mobCast = (fxByMob.get(m.id) || []).find((e) => e.kind === 'cast')}
+  {@const auraNames = (m.auraSources || []).map((aura) => mobSkillById(aura.id)?.name).filter((name): name is string => !!name)}
+  {@const windup = windupOf(m)}
   <!-- one keyed plate per living body: a death destroys this block at once, no outro kept. A body that
        leaves for any other reason (the zone changed under the walk) sinks out of
        the frame instead, and the row below it slides into its place -->
@@ -143,14 +152,20 @@
       {#each (fxByMob.get(m.id) || []).filter((e) => e.kind === 'block').slice(0, 2) as e (e.id)}
         <span class="fx pop pop-word" out:fxOut={{ ms: fxOutMs }} style={`--fx:${defenseColour(e.text)}; --lane:${e.id % 4}`}>{e.text}</span>
       {/each}
+      {#if mobCast}
+        <span class="fx pop pop-word mob-cast-word" out:fxOut={{ ms: fxOutMs }} style={`--fx:${mobCast.colour}; --lane:0`}>{mobCast.text}</span>
+      {/if}
     </div>
+    {#if auraNames.length}
+      <span class="mob-aura" title={auraNames.join(' · ')} aria-label={`Aura: ${auraNames.join(', ')}`}>{auraNames[0]}{auraNames.length > 1 ? ` +${auraNames.length - 1}` : ''}</span>
+    {/if}
     {#if mobDebuffs.length}
       <div class="mob-debuff-rail" role="list" aria-label={`${fieldLabel(m)} debuffs`}>
         {#each mobDebuffs as mark (mark.id)}
           <span class="mob-status-badge badge badge-status debuff" role="listitem"
                 aria-label={`${mark.label}${mark.stacks > 1 ? `, ${mark.stacks} stacks` : ''}${mark.secs != null ? `, ${Math.ceil(mark.secs)} seconds left` : ''}`}
                 title={`${mark.label}${mark.stacks > 1 ? ` ×${mark.stacks}` : ''}${mark.secs != null ? ` · ${Math.ceil(mark.secs)}s left` : ''}`}>
-            <img src={mark.icon} alt="" aria-hidden="true" />
+            <Icon src={mark.icon} />
             {#if mark.stacks > 1}<small>×{mark.stacks}</small>{:else if mark.secs != null}<small>{shortTime(mark.secs)}</small>{/if}
           </span>
         {/each}
@@ -184,13 +199,22 @@
             <div class="innate-rail">
               {#each m.innate as element}
                 <span class="innate-mark" role="img" aria-label={`Innate Element: ${element}`} title={`Innate · ${element}`}>
-                  <img src={elementIcon(element)} alt="" aria-hidden="true" />
+                  <Icon src={elementIcon(element)} />
                 </span>
               {/each}
             </div>
           {/if}
         </div>
         <span class="mobbar track track-meter hp"><i style={bar(m.hp, m.hpMax)}></i><b>{Math.max(0, Math.round(m.hp))} / {Math.round(m.hpMax)}</b></span>
+        {#if casting}
+          <span class="mob-cast" title={`Cast · ${castSkill.name || castEvent?.text || ''}`}>
+            <Icon src={skillIcon(castSkill.id, castSkill.type || 'attack')} />
+            {castSkill.name || castEvent?.text || ''}
+          </span>
+        {/if}
+        <span class="mob-windup" role="progressbar" aria-label="Next swing" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(windup * 100)} title="Next swing">
+          <i style={`--windup:${windup}`}></i>
+        </span>
       </div>
     {/key}
       </div>
@@ -272,7 +296,6 @@
   .mob-head { position: relative; width: 100%; min-width: 0; }
   .innate-rail { position: absolute; top: 0; right: 0; display: flex; flex-direction: column; gap: var(--spacing-xs); }
   .innate-mark { display: grid; place-items: center; width: calc(var(--icon-label) * 1.5); height: calc(var(--icon-label) * 1.5); border: 1px solid var(--hud-edge); border-radius: var(--radius-round); background: var(--glass); box-shadow: 0 2px 8px rgba(0, 0, 0, .45); }
-  .innate-mark img { width: var(--icon-label); height: var(--icon-label); object-fit: contain; }
 
   /* the card head is a column: portrait on top and centred, the name under it */
   .identity { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-sm); min-width: 0; text-align: center; }
@@ -288,6 +311,17 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, .95); pointer-events: none;
   }
   .mobbar i { display: block; height: 100%; width: 100%; transition: transform var(--motion-travel) var(--ease-glide); }
+  .mob-cast { display: inline-flex; align-items: center; gap: var(--spacing-xs); max-width: 100%; overflow: hidden; color: var(--gold-lit); font-size: var(--font-xs); white-space: nowrap; text-overflow: ellipsis; }
+  .mob-aura {
+    position: absolute; right: var(--spacing-sm); bottom: var(--spacing-sm); z-index: var(--z-floater);
+    max-width: calc(100% - 2 * var(--spacing-sm)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    padding: 1px var(--spacing-sm); border: 1px solid color-mix(in srgb, var(--gold-lit) 34%, transparent);
+    border-radius: var(--radius-card); background: color-mix(in srgb, var(--bg) 82%, transparent);
+    color: var(--gold-lit); font-size: var(--font-xs); font-weight: 600; line-height: 1.5;
+    letter-spacing: .04em;
+  }
+  .mob-windup { display: block; width: 100%; height: 2px; overflow: hidden; border-radius: var(--radius-card); background: var(--bar); }
+  .mob-windup i { display: block; width: 100%; height: 100%; background: var(--gold-lit); transform: scaleX(var(--windup)); transform-origin: left center; transition: transform var(--motion-fast) linear; }
 
   /* debuff badges stack inside the card's top-left corner, mirroring the innate mark at top-right */
   .mob-debuff-rail {
@@ -295,7 +329,6 @@
     display: flex; flex-direction: column; gap: var(--spacing-xs); pointer-events: none;
   }
   .mob-status-badge { position: relative; display: grid; place-items: center; width: calc(var(--icon-label) * 1.5); height: calc(var(--icon-label) * 1.5); pointer-events: auto; }
-  .mob-status-badge img { width: var(--icon-label); height: var(--icon-label); object-fit: contain; }
   .mob-status-badge small { position: absolute; right: 0; bottom: 0; max-width: 100%; overflow: hidden; font-size: var(--font-xs); line-height: 1; }
 
   /* every landed blow rises from the card's centre line and clears its face by the shared rise
@@ -303,6 +336,20 @@
   .mob .plate-fx { position: absolute; inset: 0; z-index: var(--z-label); pointer-events: none; }
   .plate-fx .pop { position: absolute; left: 50%; top: 58%; white-space: nowrap; padding: var(--spacing-xs); }
   .plate-fx .pop-word { top: 24%; }
+  /* the cast is a telegraph, not a damage pop: it sits above the card so it never crosses the name,
+     and stays put instead of rising through the portrait */
+  .plate-fx .pop.mob-cast-word {
+    top: calc(-1 * (var(--spacing-lg) + var(--spacing-sm)));
+    padding: 2px var(--spacing-sm);
+    border: 1px solid color-mix(in srgb, var(--gold-lit) 34%, transparent);
+    border-radius: var(--radius-card);
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    color: var(--gold-lit);
+    font-size: var(--font-sm);
+    letter-spacing: .06em;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .35);
+    animation: mob-cast-note 1.3s ease both;
+  }
 
   .mob .art.knock { animation: plate-mob-knock var(--motion-ui) cubic-bezier(.2, .8, .3, 1); }
   .mob .charge.lunge { --reach: clamp(63px, 4.84vw, 135px); animation: plate-mob-charge .45s cubic-bezier(.3, .7, .3, 1); }
@@ -336,8 +383,8 @@
     position: absolute; left: calc(50% + var(--x-pull-arc)); top: calc(clamp(24px, 1.84vw, 51px) + var(--x-pull-arc)); z-index: var(--z-highlight); pointer-events: none;
     width: calc(var(--icon-card) * 1.4); height: calc(var(--icon-card) * 1.4);
     background: var(--fx, var(--text));
-    -webkit-mask: url('../icon/gear/crossed-swords-1.png') center / contain no-repeat;
-            mask: url('../icon/gear/crossed-swords-1.png') center / contain no-repeat;
+    -webkit-mask: url('../icon/gear/weapon/crossed-swords-1.png') center / contain no-repeat;
+            mask: url('../icon/gear/weapon/crossed-swords-1.png') center / contain no-repeat;
     animation: plate-arc .26s ease-out forwards;
   }
 
@@ -358,5 +405,11 @@
     0% { opacity: 0; transform: scale(.35); }
     25% { opacity: .9; }
     100% { opacity: 0; transform: scale(1.55); }
+  }
+  @keyframes mob-cast-note {
+    0% { opacity: 0; transform: translate(-50%, var(--spacing-xs)) scale(.96); }
+    14% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    72% { opacity: 1; transform: translate(-50%, calc(-1 * var(--spacing-xs))) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, calc(-1 * var(--spacing-sm))) scale(.98); }
   }
 </style>

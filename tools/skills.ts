@@ -14,7 +14,7 @@ import { model as M } from './lib/skillmodel.ts';
 import { eng } from './lib/engine.ts';
 import * as G from './lib/gates.ts';
 
-const { byType, fmt, TYPES } = R;
+const { activeByType, fmt, TYPES } = R;
 
 function calc() {
   const flags: Record<string, any> = {};
@@ -37,7 +37,7 @@ function calc() {
   console.log(`# the beat = the attack clock at the reference line (${beatRate.toFixed(2)}/sec) — a row with no timer of its own fires on it`);
   console.log('');
   const head = ['Skill', 'basis', 'cd', 'eff cd', 'press/s', 'cost', 'cost/s', 'dmg/press'];
-  const rows = byType('attack').map((s: any) => {
+  const rows = activeByType('attack').map((s: any) => {
     const r = M.row(s, { ...ref, cdrPct, ladderPct, level });
     const cost = M.costOf(s, { skillLevel: level, aoe: (Number(String(s.targets || '1').split('/')[0]) || 1) > 1 });
     // a row with no timer of its own has no cooldown-derived rate: its beat is the attack clock
@@ -64,7 +64,7 @@ function list(which: string) {
   const types = which === 'all' ? TYPES : TYPES.filter((t: string) => t === which);
   if (!types.length) { console.log(`no type "${which}" - try ${TYPES.join(' | ')} | all`); return; }
   for (const t of types) {
-    const rows = byType(t);
+    const rows = activeByType(t);
     console.log('');
     console.log(`# ${t} - ${rows.length} row(s)`);
     const head = ['id', 'name', 'cd', 'cost', 'duration', 'group', 'targets', 'reserve', 'basis (flat / eff%)'];
@@ -91,7 +91,7 @@ function list(which: string) {
  */
 function levels(which: string) {
   const L = eng.E.skill_xp.level_cap;
-  const rows = which === 'all' ? byType('attack') : byType('attack').filter((s: any) => s.id === which || s.name.toLowerCase() === which.toLowerCase());
+  const rows = which === 'all' ? activeByType('attack') : activeByType('attack').filter((s: any) => s.id === which || s.name.toLowerCase() === which.toLowerCase());
   if (!rows.length) { console.log(`no attack row matches "${which}" — try a skill id, a name, or all`); return; }
   for (const s of rows) {
     console.log(`

@@ -203,6 +203,22 @@
     color: var(--alarm);
 }
 
+/* icon-label: the small token-sized icon beside a label or table cell. */
+.icon-label {
+    width: var(--icon-label);
+    height: var(--icon-label);
+    object-fit: contain;
+    flex: none;
+}
+
+/* scroll-pane: the one explicit scroll area inside a fixed panel or HUD region. */
+.scroll-pane {
+    overflow: auto;
+    min-height: 0;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
 /* selectable: a row or tab that can be chosen; the chosen one wears the gold edge. */
 .selectable.selected {
     border-color: var(--gold);

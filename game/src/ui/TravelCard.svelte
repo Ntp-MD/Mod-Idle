@@ -111,7 +111,7 @@
       <p class="text-note">{intel && !intel.known && dest.kind !== 'town' ? 'Unscouted block' : `${typeName} · Lv ${zone.levels[0]}–${zone.levels[1]}`}</p>
     </div>
     <button class="btn btn-flat btn-icon dest-close" type="button" onclick={onclear} aria-label="Close selection" title="Close selection · Esc">
-      <svg class="icon-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8m0-8-8 8" /></svg>
+      <svg class="icon-label icon-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8m0-8-8 8" /></svg>
     </button>
   </header>
   <p class="text-note">{intel && !intel.known && dest.kind !== 'town' ? `Cell ${dest.key} · details hidden until scouted` : `${settlement.name} · Zone ${settlement.zone} · ${settlement.band} band · Cell ${dest.key}`}</p>
@@ -173,7 +173,7 @@
   {/if}
 
   <details class="dest-section" name="map-destination-sections">
-    <summary><span>Details</span><svg class="icon-chevron dest-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></summary>
+    <summary><span>Details</span><svg class="icon-label icon-chevron dest-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></summary>
     <div class="dest-section-body">
       <p class="text-note">{intel && !intel.known ? intel.purpose : ground}</p>
       {#if settlement.capital && (!intel || intel.known || dest.kind === 'town')}<p class="text-note">{settlement.capital} capital</p>{/if}
@@ -204,7 +204,7 @@
   </details>
 
   <details class="dest-section" name="map-destination-sections" open={patrol.stops.length > 0 || dest.kind === 'sub'}>
-    <summary><span>Route{patrol.stops.length ? ` · ${patrol.stops.length}/${maxPatrolStops} stops` : ''}</span><svg class="icon-chevron dest-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></summary>
+    <summary><span>Route{patrol.stops.length ? ` · ${patrol.stops.length}/${maxPatrolStops} stops` : ''}</span><svg class="icon-label icon-chevron dest-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></summary>
     <div class="dest-section-body">
       {#if patrolNames.length}<p>{patrolNames.join(' → ')}</p>{/if}
       {#if patrol.active}<p class="text-note">{patrolHere} · {patrol.groupsCleared}/{groupsPerStop} groups</p>{/if}
@@ -241,7 +241,6 @@
   .dest-identity { display: grid; gap: var(--spacing-xs); min-width: 0; }
   .dest-head h2 { margin: 0; font-size: var(--font-sm); overflow-wrap: anywhere; }
   .dest-close { display: grid; place-items: center; flex: none; padding: var(--spacing-xs); }
-  .dest-close svg, .dest-chevron { width: var(--icon-label); height: var(--icon-label); flex: none; }
   .dest-trip, .dest-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs) var(--spacing-sm); }
   .dest-actions button { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-sm); font-size: var(--font-xs); }
   .dest-section { min-width: 0; }

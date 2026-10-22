@@ -1,5 +1,5 @@
 {
-  "/map/characters/archon-v2.png": [
+  "/map/characters/species/archon/archon-v2.png": [
     1385,
     1136,
     51,
@@ -7,7 +7,7 @@
     1310,
     1055
   ],
-  "/map/characters/beetle-v2.png": [
+  "/map/characters/species/beetle/beetle-v2.png": [
     1385,
     1136,
     101,
@@ -15,7 +15,7 @@
     1201,
     952
   ],
-  "/map/characters/crab-v2.png": [
+  "/map/characters/species/crab/crab-v2.png": [
     1385,
     1136,
     49,
@@ -23,7 +23,7 @@
     1307,
     961
   ],
-  "/map/characters/demon.png": [
+  "/map/characters/species/demon/demon.png": [
     1385,
     1136,
     176,
@@ -31,7 +31,7 @@
     1125,
     1073
   ],
-  "/map/characters/dragon.png": [
+  "/map/characters/species/dragon/dragon.png": [
     1385,
     1136,
     125,
@@ -39,7 +39,7 @@
     1141,
     1120
   ],
-  "/map/characters/dryad.png": [
+  "/map/characters/species/dryad/dryad.png": [
     1329,
     1183,
     255,
@@ -47,7 +47,7 @@
     932,
     1177
   ],
-  "/map/characters/elf-v2.png": [
+  "/map/characters/species/elf/elf-v2.png": [
     1385,
     1136,
     119,
@@ -55,7 +55,7 @@
     1218,
     1091
   ],
-  "/map/characters/giant.png": [
+  "/map/characters/species/giant/giant.png": [
     1385,
     1136,
     11,
@@ -63,7 +63,7 @@
     1355,
     1115
   ],
-  "/map/characters/goblin.png": [
+  "/map/characters/species/goblin/goblin.png": [
     1385,
     1136,
     176,
@@ -71,7 +71,7 @@
     1020,
     894
   ],
-  "/map/characters/golem.png": [
+  "/map/characters/species/golem/golem.png": [
     1385,
     1136,
     134,
@@ -79,7 +79,7 @@
     1140,
     1008
   ],
-  "/map/characters/hornet.png": [
+  "/map/characters/species/hornet/hornet.png": [
     1385,
     1136,
     79,
@@ -87,7 +87,7 @@
     1286,
     1094
   ],
-  "/map/characters/human.png": [
+  "/map/characters/species/human/human.png": [
     1385,
     1136,
     59,
@@ -95,7 +95,7 @@
     1242,
     1078
   ],
-  "/map/characters/imp.png": [
+  "/map/characters/species/imp/imp.png": [
     1385,
     1136,
     201,
@@ -103,7 +103,7 @@
     1115,
     1077
   ],
-  "/map/characters/kobold.png": [
+  "/map/characters/species/kobold/kobold.png": [
     1385,
     1136,
     74,
@@ -111,7 +111,7 @@
     1245,
     1001
   ],
-  "/map/characters/lizardman.png": [
+  "/map/characters/species/lizardman/lizardman.png": [
     1385,
     1136,
     59,
@@ -119,7 +119,7 @@
     1292,
     1103
   ],
-  "/map/characters/minotaur.png": [
+  "/map/characters/species/minotaur/minotaur.png": [
     1385,
     1136,
     45,
@@ -127,7 +127,7 @@
     1318,
     1056
   ],
-  "/map/characters/mist.png": [
+  "/map/characters/species/mist/mist.png": [
     1385,
     1136,
     57,
@@ -135,7 +135,7 @@
     1324,
     1091
   ],
-  "/map/characters/mummy.png": [
+  "/map/characters/species/mummy/mummy.png": [
     1385,
     1136,
     89,
@@ -143,7 +143,7 @@
     1216,
     959
   ],
-  "/map/characters/ogre.png": [
+  "/map/characters/species/ogre/ogre.png": [
     1385,
     1136,
     41,
@@ -151,7 +151,7 @@
     1321,
     1047
   ],
-  "/map/characters/ooze.png": [
+  "/map/characters/species/ooze/ooze.png": [
     1385,
     1136,
     30,
@@ -159,7 +159,7 @@
     1335,
     882
   ],
-  "/map/characters/orc.png": [
+  "/map/characters/species/orc/orc.png": [
     1385,
     1136,
     87,
@@ -167,7 +167,7 @@
     1195,
     1076
   ],
-  "/map/characters/salamander.png": [
+  "/map/characters/species/salamander/salamander.png": [
     1254,
     1254,
     42,
@@ -175,7 +175,7 @@
     1193,
     1212
   ],
-  "/map/characters/shark.png": [
+  "/map/characters/species/shark/shark.png": [
     1254,
     1254,
     15,
@@ -183,7 +183,7 @@
     1235,
     1229
   ],
-  "/map/characters/siren.png": [
+  "/map/characters/species/siren/siren.png": [
     1329,
     1183,
     34,
@@ -191,7 +191,7 @@
     1288,
     1166
   ],
-  "/map/characters/skeleton.png": [
+  "/map/characters/species/skeleton/skeleton.png": [
     1385,
     1136,
     93,
@@ -199,7 +199,7 @@
     1186,
     941
   ],
-  "/map/characters/slime.png": [
+  "/map/characters/species/slime/slime.png": [
     1385,
     1136,
     110,
@@ -207,7 +207,7 @@
     1196,
     983
   ],
-  "/map/characters/spider.png": [
+  "/map/characters/species/spider/spider.png": [
     1385,
     1136,
     80,
@@ -215,7 +215,7 @@
     1263,
     1028
   ],
-  "/map/characters/traveler-piece.png": [
+  "/map/characters/player/traveler-piece.png": [
     1293,
     1217,
     319,
@@ -223,7 +223,7 @@
     602,
     909
   ],
-  "/map/characters/treant-v2.png": [
+  "/map/characters/species/treant/treant-v2.png": [
     1385,
     1136,
     46,
@@ -231,7 +231,7 @@
     1319,
     1106
   ],
-  "/map/characters/troll.png": [
+  "/map/characters/species/troll/troll.png": [
     1385,
     1136,
     70,
@@ -239,7 +239,7 @@
     1240,
     1019
   ],
-  "/map/characters/vampire-v2.png": [
+  "/map/characters/species/vampire/vampire-v2.png": [
     1385,
     1136,
     379,
@@ -247,7 +247,7 @@
     982,
     1096
   ],
-  "/map/characters/werewolf.png": [
+  "/map/characters/species/werewolf/werewolf.png": [
     1385,
     1136,
     73,
@@ -255,7 +255,7 @@
     1304,
     1102
   ],
-  "/map/characters/wisp.png": [
+  "/map/characters/species/wisp/wisp.png": [
     1254,
     1254,
     107,
@@ -263,7 +263,7 @@
     1037,
     1166
   ],
-  "/map/characters/wolf.png": [
+  "/map/characters/species/wolf/wolf.png": [
     1385,
     1136,
     184,
@@ -271,7 +271,7 @@
     1192,
     1028
   ],
-  "/map/characters/wraith.png": [
+  "/map/characters/species/wraith/wraith.png": [
     1329,
     1183,
     83,
@@ -279,7 +279,7 @@
     1215,
     1144
   ],
-  "/map/characters/wyvern.png": [
+  "/map/characters/species/wyvern/wyvern.png": [
     1385,
     1136,
     7,

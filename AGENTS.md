@@ -11,9 +11,10 @@ Single-player, browser-only idle RPG; no server. This is the shared entry point 
 | `docs/glossary.md` | Short definitions of game terms | A term is ambiguous, new or renamed |
 | `docs/game-rules.md` | Current gameplay intent and non-obvious behavior constraints | Changing the relevant game system |
 | `docs/map-art.md` | Map terrain artwork contract and the projected ground footprint | Producing or placing terrain hex art |
-| `art-reference/` | Portable map art reference kit, concept images and map calibration snapshots | Generating, measuring or QC-ing map art; refresh with `art-reference/map/refresh.ps1` |
+| `art-reference/` | Portable map art reference kit, generated-image holding area awaiting approval, concept images and map calibration snapshots | Generating, measuring or QC-ing map art; generated files are not game-ready until approved and copied into game assets; refresh with `art-reference/map/refresh.ps1` |
 | `tools/data/*.json` | Numbers, tuning, catalogues and content | Changing or tracing those values |
 | `engine/`, `game/src/` | Implementation, interfaces and UI appearance | Working on the affected code |
+| `game/src/icon/` | Art shelf for item, skill, mob and UI images; folders group by subject and resolvers key on the file name | Adding or sorting artwork |
 | `game/src/wiki/pages.ts` | Player-facing wiki source | Changing what the wiki explains |
 
 Each fact has one owner. Link to it rather than copying it. Provider entry files import or point here; they carry no separate project rules.
@@ -62,6 +63,7 @@ For repository implementation, fixes, reviews and investigation, apply [lean-age
 | `tools/data/mods.json` | Mod ranges, quality bands and drop weights |
 | `tools/data/town.json` | Town stock/prices, Standing, Collector, tasks, trade, Haggling, Delivery and Black Market |
 | `tools/data/skills.json` | Skill roster, reserve tiers and skill configuration |
+| `tools/data/mob-skills.json` | Mob-only skill library and the Unique/Boss/Variant/Species override kits |
 | `tools/data/tree.json` | Passive-tree specification |
 | `tools/data/bases.json` | Hand-maintained frames, slots and Mod pools; never generate by parsing docs |
 | `tools/data/map.json` | Presentation map layout, terrain and colours; never import in `engine/` or `game/src/` |
@@ -86,9 +88,10 @@ Gameplay numbers live in data JSON, formulas in `engine/`; do not duplicate eith
 
 Windows + PowerShell; forward slashes in code paths. Run commands from the applicable root or `game/` package.
 
-- Development: `npm install`, `npm run dev`; **port 5173 only**. Check `Get-NetTCPConnection -LocalPort 5173` first. Reuse an existing server; never start a second or kill one to reclaim the port.
+- Development: `npm install`, `npm run dev`; **port 5173 only**. Check `Get-NetTCPConnection -LocalPort 5173` first. Reuse an existing server; never start a second or kill one to reclaim the port. `npm run lint` runs the conservative Biome baseline.
 - Gameplay/data: relevant cages/tests and `npm run typecheck`; broaden checks when shared behavior changes. `npm run verify` runs all cages; `npm test` runs `game/tests/`.
-- UI: typecheck, focused tests for changed behavior, and integrated-browser interaction/appearance checks for behavior/layout changes.
+- UI: typecheck, `npm --prefix game run check` (warnings fail), focused tests for changed behavior, `npm --prefix game run build` for the production bundle, and integrated-browser interaction/appearance checks for behavior/layout changes.
+- Coverage (optional report): `npm --prefix game run test:coverage`; no threshold is enforced yet.
 - Docs/comments only: inspect the edited files and local links; no gameplay suite or browser check.
 - Wiki: `npm run wiki` when wiki source, displayed data/formulas or player-facing behavior changes. `docs/wiki/*.html` is generated; never hand-edit. UI-only changes do not trigger wiki rebuilds.
 - Other generators: `npm run skills`, `npm run gallery`, or the relevant `tools/` entry point when its input changes.

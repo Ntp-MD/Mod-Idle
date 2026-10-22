@@ -9,7 +9,8 @@ import {
  *
  * Every figure under this folder is art, discovered by file name. Semantic item, skill, and character
  * associations live in registry.ts and use stable IDs where available. Resolvers try ordered candidates
- * and category fallbacks, so missing bespoke art never leaves a broken image in the UI.
+ * and category fallbacks, so missing bespoke art never leaves a broken image in the UI. Nested folders
+ * only group the shelf by subject; lookup is keyed by the file name, not its path.
  */
 const shelfAssets = import.meta.glob<string>('./**/*.png', {
   eager: true,

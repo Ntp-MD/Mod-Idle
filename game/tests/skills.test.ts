@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { eng, E, sm } from '../src/engine/client';
+import { eng, E, sm, SKILLS } from '../src/engine/client';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { newGame, tick, huntZone } from '../src/sim/game';
 import {
@@ -12,6 +12,21 @@ import { model as cageModel } from '../../tools/lib/skillmodel.ts';
 
 const REF = { ...cageModel.referenceBases().glass, level: 20 };
 const RAMP = sm.damagePct(REF.level) / 100;   // read off the level table, never a second copy of the ramp
+
+describe('the retired roster', () => {
+  it('keeps retired ids resolvable while removing them from the live pool', () => {
+    const retired = (SKILLS.skills as any[]).filter((row) => row.retired);
+    expect(retired.length).toBeGreaterThan(0);
+    const live = new Set(sm.all().map((row: any) => row.id));
+    for (const row of retired) {
+      expect(sm.byId[row.id]).toBe(row);
+      expect(row.retired_to).toBeTruthy();
+      expect(sm.byId[row.retired_to]).toBeTruthy();
+      expect(sm.byId[row.retired_to].retired).not.toBe(true);
+      expect(live.has(row.id)).toBe(false);
+    }
+  });
+});
 
 describe('the client skill calculator is the cage skill calculator', () => {
   it('per-press and effective cooldown match tools/skills.ts --calc', () => {

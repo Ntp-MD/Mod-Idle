@@ -5,7 +5,19 @@ export const ICON_REGISTRY = {
     byBase: {} as Record<string, string>,
   },
   item: {
-    byId: {} as Record<string, string>,
+    byId: {
+      'material:chitin-plate': 'scales',
+      'material:feather-plume': 'feather-pluck',
+      'material:ember-heart': 'burning-embers',
+      'material:chaos-ichor': 'chaos',
+      'material:funerary-linen': 'clothes',
+      'material:thick-pelt': 'animal-hide',
+      'material:reptile-scale': 'dragon-shield',
+      'material:venom-gland': 'poison',
+      'material:coin-clasp': 'ring-2',
+      'material:river-pearl': 'gem-pendant',
+      'material:grave-bone': 'bone',
+    } as Record<string, string>,
     fallbackByGroup: {
       stones: ['crystal-cluster-1'],
       herbs: ['herb-bundle', 'leaf'],

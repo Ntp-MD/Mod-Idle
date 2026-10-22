@@ -6,7 +6,7 @@ import {
 import { directFlags, emptyParts, validateDamagePacket } from '../../../engine/damage-provenance.ts';
 import type { DamagePacket } from '../../../engine/damage-provenance.ts';
 import { mastery } from './mastery';
-import { setStacks, setErosion, stopMob, placeStatus, modsOn as mobModsOn, targetMods, applyWeaponRiders, holdsCondition, CONDITION_OF, type MobStatusName } from './mobStatus';
+import { setStacks, setErosion, stopMob, placeStatus, modsOn as mobModsOn, targetMods, applyWeaponRiders, holdsCondition, CONDITION_OF, consumeStatus, copyStatus, type MobStatusName } from './mobStatus';
 import { lineValue, applyCurse } from './curse';
 import type { Character } from './player';
 import type { Mob } from './types';
@@ -53,7 +53,7 @@ export interface SkillConditions {
   /**
    * One flag per Element status a row can apply (the `elements.status_of` names): the row fires
    * while the target is MISSING a status it applies. Read off the roster, not typed per
-   * skill — `appliedStatusOf` derives which one a row carries from its own `element`.
+   * skill — `appliedStatusOf` derives which one a row actually writes from its own effects.
    */
   statusMissing: string[];
   /** One OR leg: fire it when the group is at least this wide (0 = off) — the AoE row's own argument. */
@@ -61,10 +61,20 @@ export interface SkillConditions {
   /** Not a leg of the OR but a restraint on the press: never spend what would drop the pool under this
       share (0 = off). It can only ever hold a row back, never release one. */
   manaFloorPct: number;
+  /** A payoff row waits until the status it exploits is present on the target. The status comes from
+      the row's own `bonus_vs_status` / `consume_status` effect, never a second list on the slot. */
+  statusPresent: boolean;
+  /** The minimum stack count the payoff row waits for; 0 means "any live stack". */
+  statusStacksAtLeast: number;
+  /** A cleanse-style row waits until the character itself carries a status. */
+  selfDebuffed: boolean;
 }
 
 /** Every leg off — the list an `always` or `never` row is read against, so no leg can hold it back. */
-export const NO_COND: SkillConditions = { boss: false, hpBelowPct: 0, statusMissing: [], minTargets: 0, manaFloorPct: 0 };
+export const NO_COND: SkillConditions = {
+  boss: false, hpBelowPct: 0, statusMissing: [], minTargets: 0, manaFloorPct: 0,
+  statusPresent: false, statusStacksAtLeast: 0, selfDebuffed: false,
+};
 
 /**
  * Move one row of the cast order to another place. The list is the whole rotation, so a move is a splice
@@ -102,24 +112,46 @@ export function clearUnownedTracks(s: SkillState): void {
   for (const id of Object.keys(s.xp || {})) if (!ownsSkill(s, id)) delete s.xp[id];
 }
 
-export function clampAuraReservations(s: SkillState): void {
-  let held = 0;
+export function clampAuraReservations(s: SkillState, bundles: readonly KeystoneBundle[] = []): void {
+  if (!bundleOf(bundles, 'blood-covenant')) s.auraPool = {};
   for (const [id, on] of Object.entries(s.auras)) {
     const row = sm.byId[id];
     if (!on || !ownsSkill(s, id) || row?.type !== 'aura') { delete s.auras[id]; continue; }
-    const next = held + sm.reservePct(row.reserve ?? '');
-    if (next >= sm.RESERVATION_LIMIT) s.auras[id] = false;
-    else held = next;
+  }
+  // Keep a valid complete set intact: Resonance prices the resulting aura count, not a prefix.
+  if (reservedPct(s, bundles) < sm.RESERVATION_LIMIT) return;
+  const kept = { ...s, auras: {} as Record<string, boolean> };
+  for (const id of Object.keys(s.auras)) {
+    kept.auras[id] = true;
+    if (reservedPct(kept, bundles) >= sm.RESERVATION_LIMIT) {
+      delete kept.auras[id];
+      s.auras[id] = false;
+    }
   }
 }
 
 export const modeOf = (s: SkillState, id: string): SkillMode => s.mode[id] || 'always';
 
-/** The Element status a row applies, read out of `elements.status_of` and the row's own `element`. */
+/**
+ * The status a row actually applies. An Element name alone is not an application: a payoff row can
+ * carry `fire` while it reads a burn, and a row whose sentence names no status never writes one.
+ * The declaration-first order matches the cast pipeline: a typed stack/count, then a direct stop or
+ * bleed, then the row's own guaranteed Element status.
+ */
 export function appliedStatusOf(skill: any): string | null {
-  const el = skill?.element;
+  if (!skill) return null;
+  // a payoff row's status is the one it reads, not a rider it happens to carry; its slot gets the
+  // `statusPresent` leg instead of a maintenance leg
+  if (sm.exploitedStatusOf(skill)) return null;
+  const targetHas = (stat: string) => (skill.effects || []).some((e: any) => e.subject === 'target' && e.stat === stat);
+  if (targetHas('burn_stacks')) return 'burn';
+  if (targetHas('poison_stacks')) return 'poison';
+  if (targetHas('mark_stacks')) return 'mark';
+  if (targetHas('bleed_chance')) return 'bleed';
+  if (targetHas('stop_sec') || targetHas('stun_chance')) return 'shock';
+  if (!((skill.rules || []) as string[]).includes('guaranteed_status')) return null;
   const map = ((E.elements || {}) as any).status_of || {};
-  return el && map[el] ? map[el] : null;
+  return skill.element && map[skill.element] ? map[skill.element] : null;
 }
 
 /** The curse a row writes, as the flag the player ticks — a curse row's own id. */
@@ -157,6 +189,33 @@ function appliesMissingStatus(cond: SkillConditions, skill: any, env: CastEnv, m
     if (!lines.some((l) => l.from === curse)) return true;
   }
   return false;
+}
+
+/** The live line of one status on a mob, in the same shape the status store uses. */
+function statusLineOf(env: CastEnv, mob: any, status: string): any {
+  const l = env.mobStatus?.[mob?.id]?.statuses?.[status];
+  if (!l) return null;
+  return (status === 'poison' || status === 'mark' ? l.stacks > 0 : l.secLeft > 0) ? l : null;
+}
+
+/**
+ * The payoff leg: this row waits until the status it exploits is on the target. The status is read
+ * from the row's own effect (`sm.exploitedStatusOf`), so the player sees one flag per row rather than
+ * a list of every status in the game. A stack threshold is the same leg with a number on it.
+ */
+function appliesPresentStatus(cond: SkillConditions, skill: any, env: CastEnv, mob: any): boolean {
+  if (!cond.statusPresent) return false;
+  const status = sm.exploitedStatusOf(skill);
+  if (!status) return false;
+  const l = statusLineOf(env, mob, status);
+  if (!l) return false;
+  return cond.statusStacksAtLeast <= 0 || l.stacks >= cond.statusStacksAtLeast;
+}
+
+/** A cleanse row waits for any status on the character, not for a particular Element. */
+function selfDebuffedHolds(cond: SkillConditions, statuses: Statuses): boolean {
+  if (!cond.selfDebuffed) return false;
+  return Object.values(statuses || {}).some((l) => !!l && (l.secLeft > 0 || l.stacks > 0));
 }
 
 export const skillLevel = (s: SkillState, id: string) => sm.skillLevel(s.xp[id] || 0);
@@ -210,13 +269,14 @@ export function hpReservedPct(s: SkillState, bundles: readonly KeystoneBundle[] 
 export const auraPoolOf = (s: SkillState, id: string): 'hp' | 'mana' =>
   s.auraPool?.[id] === 'hp' ? 'hp' : 'mana';
 
-/** 54: choose an aura's pool. Refused without the keystone; a pool change is a candidate transaction
- *  at the caller, which validates the new set before committing it. */
+/** 54: choose an aura's pool. Require the keystone and validate the resulting set before committing. */
 export function setAuraPool(s: SkillState, id: string, pool: 'hp' | 'mana', bundles: readonly KeystoneBundle[] = []): { ok: boolean; why?: string } {
   if (!bundleOf(bundles, 'blood-covenant')) return { ok: false, why: 'only Blood Covenant lets an aura pay from HP' };
   if (!ownsSkill(s, id) || sm.byId[id]?.type !== 'aura') return { ok: false, why: 'that row is not an aura you own' };
-  s.auraPool ||= {};
-  s.auraPool[id] = pool;
+  const auraPool = { ...s.auraPool, [id]: pool };
+  if (reservedPct({ ...s, auraPool }, bundles) >= sm.RESERVATION_LIMIT)
+    return { ok: false, why: 'that would reserve the whole Mana pool; leave some usable' };
+  s.auraPool = auraPool;
   return { ok: true };
 }
 
@@ -240,6 +300,8 @@ export const EFFECT_LABEL: Record<string, string> = {
   es_absorb_pct: 'damage absorbed to Energy Shield', es_absorb_cap: 'damage absorbed to Energy Shield (Cap)',
   // the target-side lines a curse writes
   damage_dealt: 'damage dealt', accuracy: 'accuracy', crit_chance: 'crit chance',
+  // setup → payoff
+  bonus_vs_status: 'damage vs', consume_status: 'damage per consumed', spread_status: 'spread',
 };
 
 /** Say a folded effect set the same way a row's label is said, in words rather than stat keys. */
@@ -255,7 +317,7 @@ export function describeFold(e: { add: Record<string, number>; mult: Record<stri
 export function effectLine(skill: any): string {
   const list = (skill?.effects || []) as any[];
   return list
-    .map((e) => `${EFFECT_LABEL[e.stat] || e.stat}${e.op === 'mult' ? ` ×${e.value}` : e.op === 'add_flat' ? ` +${e.value} flat` : ` +${e.value}%`}`)
+    .map((e) => `${EFFECT_LABEL[e.stat] || e.stat}${e.status ? ` ${e.status}` : ''}${e.op === 'mult' ? ` ×${e.value}` : e.op === 'add_flat' ? ` +${e.value} flat` : ` +${e.value}%`}`)
     .join(' · ');
 }
 
@@ -293,9 +355,7 @@ export function toggleTrack(s: SkillState, id: string, bundles: readonly Keyston
   if (skill.type === 'aura') {
     const turning = !s.auras[id];
     if (turning) {
-      // only a Mana-paid reservation can crowd the usable Mana pool; a 54 HP aura pays from HP
-      const next = reservedPct(s, bundles) + (auraPoolOf(s, id) === 'hp' ? 0
-        : sm.reservePct(skill.reserve ?? '') * (1 - auraResonanceOf(s, bundles).bR));
+      const next = reservedPct({ ...s, auras: { ...s.auras, [id]: true } }, bundles);
       // reserving the whole pool would leave no mana to cast with, so the block is exclusive
       // (`skill-pool.md`: an aura set that may not reserve all of it)
       if (next >= sm.RESERVATION_LIMIT) {
@@ -469,6 +529,10 @@ export interface CastReport {
    *  plate it belongs to instead of splitting a total it was never asked to share. Named for what it is
    *  keyed by, because `hits` already means this row's repeat count. */
   byMob: { id: string; amount: number; packet?: DamagePacket }[];
+  /** Setup → payoff: the stacks this press spent, per status, for the log and the plates. */
+  consumed?: { status: string; stacks: number }[];
+  /** The bodies a payoff row copied its status onto after the hit. */
+  spread?: { status: string; to: string[] }[];
   /** Ghost Dance: perfect-dodge charges this press grants, from its own level ramp. */
   charges?: number;
   /** Earth Wall: block charges this press grants, from its own level ramp. */
@@ -560,7 +624,10 @@ export function castOnce(
     const skill = sm.byId[id];
     const cond = slotMode === 'conditional' ? condOf(s, id) : NO_COND;
     if (slotMode === 'conditional') {
-      const holds = conditionsHold(cond, condBoss, condMissingHp, group.length) || appliesMissingStatus(cond, skill, env, group[0]);
+      const holds = conditionsHold(cond, condBoss, condMissingHp, group.length)
+        || appliesMissingStatus(cond, skill, env, group[0])
+        || appliesPresentStatus(cond, skill, env, group[0])
+        || selfDebuffedHolds(cond, statuses);
       if (!holds) continue;
     }
     const aoe = targetCount(skill, group) > 1;
@@ -728,6 +795,12 @@ export function castOnce(
     const rowStunPct = effects
       .filter((e) => e.stat === 'stun_chance' && (e.subject || 'self') === 'target')
       .reduce((s, e) => s + e.value, 0);
+    // setup → payoff: the row names the status it reads (bonus), spends (consume), or copies (spread)
+    const statusBonus = effects.find((e) => e.stat === 'bonus_vs_status');
+    const statusConsume = effects.find((e) => e.stat === 'consume_status');
+    const statusSpread = effects.find((e) => e.stat === 'spread_status');
+    const consumed: { status: string; stacks: number }[] = [];
+    const spread: { status: string; to: string[] }[] = [];
     for (let i = 0; i < n; i++) {
       const t = group[i];
       if (rng() > eng.hitChance(c.accuracy, t.evasion)) continue;
@@ -737,7 +810,18 @@ export function castOnce(
       const poolTerm = pctPool > 0
         ? t.hpMax * (pctPool / 100) * ((t.kind.startsWith('Boss') || t.kind.startsWith('Unique')) ? (E.max_hp_press.boss_pct / 100) : 1)
         : 0;
-      const share = (i === 0 ? dmg : dmg * AOE_PCT_PER_EXTRA_TARGET) + poolTerm;
+      // the payoff is read off the target's live line before this press writes anything new, so a
+      // setup and its payoff can share a slot order without the payoff eating its own application
+      const bonusLine = statusBonus ? statusLineOf(env, t, statusBonus.status) : null;
+      const consumeLine = statusConsume ? statusLineOf(env, t, statusConsume.status) : null;
+      const consumeAvailable = consumeLine
+        ? (statusConsume!.status === 'poison' || statusConsume!.status === 'mark' ? consumeLine.stacks : (consumeLine.stacks || 1))
+        : 0;
+      const consumeCap = statusConsume && Number.isFinite(statusConsume.cap) ? statusConsume.cap : consumeAvailable;
+      const consumeStacks = Math.max(0, Math.min(consumeAvailable, consumeCap));
+      let share = (i === 0 ? dmg : dmg * AOE_PCT_PER_EXTRA_TARGET) + poolTerm;
+      if (bonusLine) share *= 1 + statusBonus.value / 100;
+      if (consumeStacks > 0) share *= 1 + (consumeStacks * statusConsume.value) / 100;
       const elemPart = magicBasis > 0 ? share * ((c.elem * (c.alignment / 100)) / magicBasis) : 0;
       const cut = env.mobStatus ? (targetMods(mobModsOn(env.mobStatus, t.id)).armourCut || 0) : 0;
       const stripped = env.curses ? lineValue(env.curses, t.id, 'mob_elemental_resistance_pct') : 0;
@@ -802,13 +886,31 @@ export function castOnce(
       // status the moment the bar fills
       if (env.mobStatus) {
         applyWeaponRiders(rng, c, env.mobStatus, t.id, env.curses ? lineValue(env.curses, t.id, 'bleed_chance') > 0 : false, rowBleedPct, rowStunPct, t.immune || []);
+        // copy the live line to the other bodies first, then spend it on the source: Catalyst reads
+        // the poison it is about to consume, not the empty line left behind
+        if (statusSpread && (everyTarget || i === 0)) {
+          let left = Math.max(0, Math.floor(statusSpread.value));
+          const to: string[] = [];
+          for (const other of group) {
+            if (left <= 0) break;
+            if (other.id === t.id) continue;
+            if (copyStatus(env.mobStatus, t.id, other.id, statusSpread.status as MobStatusName, (other as any).immune || [])) {
+              to.push(other.id);
+              left--;
+            }
+          }
+          if (to.length) spread.push({ status: statusSpread.status, to });
+        }
+        if (consumeStacks > 0) {
+          const took = consumeStatus(env.mobStatus, t.id, statusConsume!.status as MobStatusName, consumeStacks);
+          if (took > 0) consumed.push({ status: statusConsume!.status, stacks: took });
+        }
       }
       if (everyTarget || i === 0) spendOn(t);
       // a row's TARGET lines are a curse it writes on the hit: the same store a curse skill fills, so
       // `accuracy`, `damage_dealt` and a resistance strip read off a press exactly as they do off a curse
       if (env.curses) applyCurse(env.curses, t.id, skill, c.keystones);
     }
-    void statuses;
     // a press that opens a self window (Reap) folds the row onto the character sheet for its own
     // duration, on the same `buffUp` clock a toggled buff runs on — the window is the row's own
     // `duration`, and the rule word is what keeps an ordinary press from opening one
@@ -817,6 +919,8 @@ export function castOnce(
     }
     return {
       id, name: skill.name ?? '', damage: dmg, manaCost: spent, hpCost, targets: landed, crit, dealt, byMob: struck,
+      ...(consumed.length ? { consumed } : {}),
+      ...(spread.length ? { spread } : {}),
     };
   }
   return null;

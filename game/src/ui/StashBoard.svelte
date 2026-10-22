@@ -18,6 +18,7 @@
   import { gearEntry, sortEntries, rankTone, SORT_LABELS, type SortKey } from './bag';
   import ItemDetail from './ItemDetail.svelte';
   import Tabs from './Tabs.svelte';
+  import CountBadge from './CountBadge.svelte';
   import { setDrag, readDrag } from './drag';
   import type { GameState, Item } from '../sim/types';
 
@@ -98,7 +99,7 @@
       <button class="add btn btn-quiet" disabled={!addtab?.can}
               title={addtab ? `${addtab.label} — ${addtab.price} gold at this settlement's stall` : 'No line this settlement stocks adds a tab'}
               onclick={() => addtab && onaddtab?.(addtab.rowId)}>
-        <img src={crateArt} alt="" aria-hidden="true" />
+        <img class="icon-label" src={crateArt} alt="" aria-hidden="true" />
         <span>Add a tab</span>
         {#if addtab}<b>{addtab.price} gold</b>{/if}
       </button>
@@ -123,10 +124,10 @@
                   ondragstart={(ev) => dragFrom('bag', e.index, ev)}
                   onclick={() => pick('bag', k)} aria-label={e.title}>
             <img class="slot-icon" src={e.icon} alt="" aria-hidden="true" />
-            {#if (e.item?.upgrade_lv || 0) > 0}<b class="badge badge-count xp plus">+{e.item?.upgrade_lv}</b>{/if}
+            {#if (e.item?.upgrade_lv || 0) > 0}<CountBadge value={`+${e.item?.upgrade_lv}`} tag="b" tone="xp plus" placement="bottom-left" />{/if}
           </button>
         {:else}
-          <p class="dim">The bag holds no piece right now.</p>
+          <p class="text-dim">The bag holds no piece right now.</p>
         {/each}
       </div>
       <div class="bulk">
@@ -153,17 +154,17 @@
                     ondragstart={(ev) => dragFrom('stash', k, ev)}
                     onclick={() => pick('stash', k)} aria-label={itemName(it)}>
               <img class="slot-icon" src={gearIcon(it)} alt="" aria-hidden="true" />
-              {#if (it.upgrade_lv || 0) > 0}<b class="badge badge-count xp plus">+{it.upgrade_lv}</b>{/if}
+              {#if (it.upgrade_lv || 0) > 0}<CountBadge value={`+${it.upgrade_lv}`} tag="b" tone="xp plus" placement="bottom-left" />{/if}
             </button>
           {:else}
-            <p class="dim">This tab is empty.</p>
+            <p class="text-dim">This tab is empty.</p>
           {/each}
         </div>
         <div class="bulk">
           <button disabled={!stored.length || full} onclick={() => act(onwithdrawAll, 'stash')}>Take back every unlocked piece</button>
         </div>
       {:else}
-        <p class="dim">Buy a tab on a settlement stall.</p>
+        <p class="text-dim">Buy a tab on a settlement stall.</p>
       {/if}
     </section>
   </div>
@@ -200,7 +201,6 @@
   .tabbar :global(.tb b) { font-family: var(--num); color: var(--dim); font-weight: 500; }
   .tabbar :global(.tb.picked b) { color: var(--gold); }
   .add { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
-  .add img { width: var(--icon-label); height: var(--icon-label); object-fit: contain; }
   .add b { font-family: var(--num); color: var(--gold); font-weight: 500; }
   .note { flex: 1 1 auto; min-width: 0; margin: 0; color: var(--dim); font-size: var(--font-xs); }
 
@@ -222,7 +222,6 @@
     position: relative; aspect-ratio: 1 / 1; display: grid; place-items: center;
   }
   .cell img { width: calc(var(--icon-label) * 1.5); height: calc(var(--icon-label) * 1.5); object-fit: contain; pointer-events: none; }
-  .cell .plus { position: absolute; left: clamp(2px, 0.10vw, 3px); bottom: clamp(1px, 0.05vw, 1px); }
 
   .bulk { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; }
   .bulk select, .bulk button { font-size: var(--font-xs); }

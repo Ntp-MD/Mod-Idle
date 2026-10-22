@@ -7,6 +7,7 @@
   import ItemDetail from './ItemDetail.svelte';
   import SlotMenu from './SlotMenu.svelte';
   import Pager from './Pager.svelte';
+  import CountBadge from './CountBadge.svelte';
   import type { MenuItem } from './menu';
   import type { Item } from '../sim/types';
   import type { Snippet } from 'svelte';
@@ -162,7 +163,7 @@
 <div class="bar">
   {#if lead}{@render lead()}{/if}
   {#if onsort}
-    <span class="lab">Order</span>
+    <span class="text-note">Order</span>
     {#each Object.keys(SORT_LABELS) as k}
       <button class={sort === k ? 'active' : ''} onclick={() => onsort(k as SortKey)}>{SORT_LABELS[k as SortKey]}</button>
     {/each}
@@ -212,8 +213,8 @@
           {#if layout === 'equipment'}
             <span class="equipment-label"><small class="text-note">{cell.entry.slot}</small><span>{cell.entry.title}</span></span>
           {/if}
-          {#if cell.entry.count}<span class="badge badge-count count">{cell.entry.count}</span>{/if}
-          {#if cell.entry.item && (cell.entry.item.upgrade_lv || 0) > 0}<span class="badge badge-count xp plus">+{cell.entry.item.upgrade_lv}</span>{/if}
+          {#if cell.entry.count}<CountBadge value={cell.entry.count} tone="count" placement="bottom-right" underlay />{/if}
+          {#if cell.entry.item && (cell.entry.item.upgrade_lv || 0) > 0}<CountBadge value={`+${cell.entry.item.upgrade_lv}`} tone="xp plus" placement="bottom-left" underlay />{/if}
           {#if cell.entry.item && cell.entry.kind !== 'worn'}
             <!-- the comparison the list mode already prints, on the square itself: whether this piece
                  beats what the slot wears, before the pointer ever lands on it -->
@@ -248,16 +249,16 @@
         <tr>
           <td>{entry.slot || entry.stack?.group || '—'}</td>
           <td>
-            <b class="list-title" style:--rar={entry.item ? rankTone(entry.item) : null}><img src={entry.icon} alt="" aria-hidden="true" />{entry.title}</b>
-            {#if entry.count !== undefined}<span class="dim"> ×{entry.count}</span>{/if}
-            <br /><small class="dim">{entry.sub}</small>
+            <b class="list-title" style:--rar={entry.item ? rankTone(entry.item) : null}><img class="icon-label" src={entry.icon} alt="" aria-hidden="true" />{entry.title}</b>
+            {#if entry.count !== undefined}<span class="text-dim"> ×{entry.count}</span>{/if}
+            <br /><small class="text-dim">{entry.sub}</small>
           </td>
           <td>{lineSummary(entry)}</td>
           <td>{entry.kind === 'gear' ? Math.round(entry.score) : '—'}</td>
           <td>{#if onequip && entry.item}<button onclick={() => onequip(entry.index)}>Equip</button>{/if}</td>
         </tr>
       {:else}
-        <tr><td colspan="5" class="dim">{empty}</td></tr>
+        <tr><td colspan="5" class="text-dim">{empty}</td></tr>
       {/each}
     </tbody>
   </table>
@@ -310,7 +311,6 @@
   .slot-grid-stack > .grid { align-content: start; min-height: 0; }
   .slot-grid-stack > .doll { align-self: center; }
   .bar { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; }
-  .lab { color: var(--dim); font-size: var(--font-xs); }
   .spacer { flex: 1; }
   .views { display: flex; align-items: center; gap: var(--spacing-sm); flex: none; }
   .bar button { font-size: var(--font-xs); }
@@ -362,14 +362,9 @@
     object-fit: contain;
     pointer-events: none;
   }
-  .count, .plus { position: absolute; z-index: var(--z-underlay); line-height: 1; }
-  .count { right: var(--spacing-xs); bottom: var(--spacing-xs); }
-  .plus { left: var(--spacing-xs); bottom: var(--spacing-xs); }
 
   .list td, .list th { font-size: var(--font-xs); }
   .list-title { display: inline-flex; align-items: center; gap: var(--spacing-xs); color: var(--rar, var(--text)); }
-  .list-title img { width: var(--icon-label); height: var(--icon-label); object-fit: contain; }
-  .dim { color: var(--dim); }
 
   /* capped to the frame and self-scrolling; `blind` is the first frame only — unmeasured, unseen */
   .pop {

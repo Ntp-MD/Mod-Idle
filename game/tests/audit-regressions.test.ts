@@ -195,6 +195,26 @@ describe('a Push is a clean rest', () => {
     expect(s.phase).toBe('camp');
     expect(Object.keys(s.playerStatuses)).toHaveLength(0);
   });
+
+  it('camps for a finite time, heals, and the rest ends', () => {
+    const s = newGame(38);
+    huntZone(s, s.zone);
+    for (let i = 0; i < 400 && s.group.length === 0; i++) tick(s, { online: true });
+    s.player.hp = 0; // the next tick reads it as a Push
+    tick(s, { online: true });
+    expect(s.phase).toBe('camp');
+    // the camp is a finite rest: its length is a number, not an endless one
+    expect(Number.isFinite(s.campSec)).toBe(true);
+    expect(s.campSec).toBeGreaterThan(0);
+    // it heals, and it ends: the character is back in play with life in hand
+    let rested = false;
+    for (let i = 0; i < 400 && !rested; i++) {
+      tick(s, { online: true });
+      rested = s.phase !== 'camp';
+    }
+    expect(rested).toBe(true);
+    expect(s.player.hp).toBeGreaterThan(0);
+  });
 });
 
 describe('progression holds the curve it is priced on', () => {

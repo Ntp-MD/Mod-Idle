@@ -2,6 +2,7 @@ import { tree } from '../engine/client';
 import { newKeystoneRuntimeState } from '../../../engine/keystones.ts';
 import type { GameState } from './types';
 import { atSettlement } from './craft';
+import { clampAuraReservations } from './skills';
 
 /**
  * Spending the passive tree (`engine/tree.ts`).
@@ -30,6 +31,9 @@ export const treePointsFree = (state: GameState, currency = 'tree'): number => {
 /** The currency's own name, for the refusal a player reads. */
 const currencyName = (currency: string): string => (currency === 'tree' ? 'banked point' : `${currency} point`);
 
+/** A node's name for a refusal the player reads: the keystone's own name, the id when it has none. */
+const nodeName = (model: typeof tree, id: string): string => model.byId[id]?.name || id;
+
 /** Can this rank be bought right now? */
 export function canSpendTree(state: GameState, nodeId: string, model = tree): TreeVerdict {
   const node = model.byId[nodeId];
@@ -38,7 +42,7 @@ export function canSpendTree(state: GameState, nodeId: string, model = tree): Tr
     return { ok: false, why: `needs ${node.cost} ${currencyName(node.currency)}` };
   }
   const rank = state.player.treeRanks?.[nodeId] || 0;
-  if (rank >= node.ranks) return { ok: false, why: `${node.id} is already at rank ${node.ranks}` };
+  if (rank >= node.ranks) return { ok: false, why: `${nodeName(model, node.id)} is already at rank ${node.ranks}` };
   // v2's one-of group or v3's listed keystone pair: holding the other member blocks this one
   const holder = model.version >= 3
     ? model.pairHolder(nodeId, state.player.treeRanks)
@@ -47,8 +51,8 @@ export function canSpendTree(state: GameState, nodeId: string, model = tree): Tr
     return {
       ok: false,
       why: model.version >= 3
-        ? `${holder} is incompatible with this keystone`
-        : `${holder} already holds this keystone group`,
+        ? `${nodeName(model, holder)} is incompatible with this keystone`
+        : `${nodeName(model, holder)} already holds this keystone group`,
     };
   }
   if (!model.connected(nodeId, state.player.treeRanks)) {
@@ -66,6 +70,7 @@ export function spendTreePoint(state: GameState, nodeId: string, model = tree): 
   state.player.treeRanks[nodeId] = (state.player.treeRanks[nodeId] || 0) + 1;
   if (node.currency === 'tree') state.player.treePoints -= node.cost;
   else state.player.attainmentPoints = (state.player.attainmentPoints ?? 0) - node.cost;
+  clampAuraReservations(state.skills, model.keystoneBundles(state.player.treeRanks));
   return { ok: true };
 }
 
@@ -115,11 +120,11 @@ export function allocateTreePath(state: GameState, nodeId: string, model = tree)
     const node = model.byId[id];
     if (!node) return { ok: false, why: 'no such node' };
     const rank = simulated[id] ?? 0;
-    if (rank >= node.ranks) return { ok: false, why: `${node.id} is already at rank ${node.ranks}` };
+    if (rank >= node.ranks) return { ok: false, why: `${nodeName(model, node.id)} is already at rank ${node.ranks}` };
     const holder = model.version >= 3
       ? model.pairHolder(id, simulated)
       : model.groupHolder(id, simulated);
-    if (holder) return { ok: false, why: `${holder} is incompatible with ${id}` };
+    if (holder) return { ok: false, why: `${nodeName(model, holder)} is incompatible with ${nodeName(model, id)}` };
     if (!model.connected(id, simulated)) return { ok: false, why: 'connect this node to an owned path first' };
     simulated[id] = rank + 1;
   }
@@ -131,6 +136,7 @@ export function allocateTreePath(state: GameState, nodeId: string, model = tree)
     if (node.currency === 'tree') state.player.treePoints -= node.cost;
     else state.player.attainmentPoints = (state.player.attainmentPoints ?? 0) - node.cost;
   }
+  clampAuraReservations(state.skills, model.keystoneBundles(state.player.treeRanks));
   return { ok: true, spent: treeCost };
 }
 

@@ -53,7 +53,7 @@ const REQUIRED_SECTIONS = [
   'stat', 'K', 'status', 'mob', 'bleed', 'level_gain', 'xp', 'mod_max', 'mod_weights',
   'energy_shield', 'evasion_roll', 'caps', 'weapons', 'herbs', 'farm', 'fieldwork', 'potions',
   'presets', 'skill_xp', 'loot', 'road', 'dungeon', 'inventory', 'item_level', 'salvage', 'junk',
-  'aoe', 'max_hp_press', 'craft', 'town_shared', 'elements', 'f_rows_carried', 'build', 'global',
+  'aoe', 'max_hp_press', 'craft', 'forge', 'town_shared', 'elements', 'f_rows_carried', 'build', 'global',
   'save', 'opening', 'skill_drop',
 ] as const;
 
@@ -84,6 +84,13 @@ export function validateEngineData<K extends EngineData['K']>(raw: { K: K }): En
 
   for (const section of REQUIRED_SECTIONS) {
     if (!(section in data)) refuse(section, 'is missing');
+  }
+  for (const [section, key] of [['inventory', 'offline_cap_hr'], ['farm', 'offline_cap_hours']] as const) {
+    const row = data[section] as Record<string, unknown>;
+    if (!isObject(row)) refuse(section, 'must be an object');
+    const hours = row[key];
+    if (hours !== null && (typeof hours !== 'number' || !Number.isFinite(hours) || hours < 0))
+      refuse(`${section}.${key}`, 'must be null (unlimited) or finite nonnegative hours');
   }
 
   // The named constants: every one the engine reads must be a finite number.
@@ -168,6 +175,15 @@ export function validateEngineData<K extends EngineData['K']>(raw: { K: K }): En
     if (!isObject(weakness)) refuse(`${path}.weakness`, 'must be an object');
     if (typeof weakness.element !== 'string' || !weakness.element) refuse(`${path}.weakness.element`, 'must be a non-empty Element name');
     numberAt(weakness, 'taken_pct', `${path}.weakness`);
+    const bonus = sp.bonus_material as Record<string, unknown>;
+    if (!isObject(bonus)) refuse(`${path}.bonus_material`, 'must be an object');
+    if (typeof bonus.resource !== 'string' || !bonus.resource) refuse(`${path}.bonus_material.resource`, 'must be a non-empty material id');
+    const chance = numberAt(bonus, 'chance', `${path}.bonus_material`);
+    if (!(chance > 0 && chance <= 1)) refuse(`${path}.bonus_material.chance`, 'must be above 0 and at most 1');
+    const min = numberAt(bonus, 'min', `${path}.bonus_material`);
+    const max = numberAt(bonus, 'max', `${path}.bonus_material`);
+    if (!Number.isInteger(min) || min <= 0) refuse(`${path}.bonus_material.min`, 'must be a positive whole number');
+    if (!Number.isInteger(max) || max < min) refuse(`${path}.bonus_material.max`, 'must be a whole number at least min');
   });
 
   const sizes = mob.sizes as unknown;
@@ -181,6 +197,53 @@ export function validateEngineData<K extends EngineData['K']>(raw: { K: K }): En
     sizeIds.add(size.id);
     numberAt(size, 'ps', path);
   });
+
+  // The forge: material families/grades, pattern costs and the two grade-indexed ladders.
+  const forge = data.forge as Record<string, unknown>;
+  const forgeMaterials = forge.materials as Record<string, unknown>;
+  if (!isObject(forgeMaterials) || !Object.keys(forgeMaterials).length) refuse('forge.materials', 'must be a non-empty object');
+  for (const [id, row] of Object.entries(forgeMaterials)) {
+    const path = `forge.materials.${id}`;
+    if (!isObject(row)) refuse(path, 'must be an object');
+    if (typeof row.family !== 'string' || !row.family) refuse(`${path}.family`, 'must be a non-empty family id');
+    const grade = numberAt(row, 'grade', path);
+    if (!Number.isInteger(grade) || grade < 1 || grade > 3) refuse(`${path}.grade`, 'must be a whole number from 1 to 3');
+  }
+  const forgeFamilies = forge.families as Record<string, unknown>;
+  if (!isObject(forgeFamilies) || !Object.keys(forgeFamilies).length) refuse('forge.families', 'must be a non-empty object');
+  for (const [id, row] of Object.entries(forgeFamilies)) {
+    const path = `forge.families.${id}`;
+    if (!isObject(row)) refuse(path, 'must be an object');
+    if (typeof row.name !== 'string' || !row.name) refuse(`${path}.name`, 'must be a non-empty name');
+    const bases = row.bases as Record<string, unknown>;
+    if (!isObject(bases)) refuse(`${path}.bases`, 'must be an object');
+    for (const [slot, base] of Object.entries(bases)) {
+      if (typeof base !== 'string' || !base) refuse(`${path}.bases.${slot}`, 'must be a non-empty Base name');
+    }
+  }
+  for (const key of ['armour', 'weapons'] as const) {
+    const rows = forge[key] as Record<string, unknown>;
+    if (!isObject(rows) || !Object.keys(rows).length) refuse(`forge.${key}`, 'must be a non-empty object');
+    for (const [id, row] of Object.entries(rows)) {
+      const path = `forge.${key}.${id}`;
+      if (!isObject(row)) refuse(path, 'must be an object');
+      if (typeof row.name !== 'string' || !row.name) refuse(`${path}.name`, 'must be a non-empty name');
+      const count = numberAt(row, 'count', path);
+      if (!Number.isInteger(count) || count <= 0) refuse(`${path}.count`, 'must be a positive whole number');
+      if (key === 'weapons') {
+        if (typeof row.family !== 'string' || !row.family) refuse(`${path}.family`, 'must be a non-empty family id');
+        if (typeof row.frame !== 'string' || !row.frame) refuse(`${path}.frame`, 'must be a non-empty Frame name');
+      }
+    }
+  }
+  for (const key of ['smithing_level', 'xp_per_grade'] as const) {
+    const row = forge[key];
+    if (!Array.isArray(row) || row.length !== 3) refuse(`forge.${key}`, 'must be three numbers, one per grade');
+    row.forEach((n, i) => {
+      if (typeof n !== 'number' || !Number.isFinite(n) || n <= 0) refuse(`forge.${key}[${i}]`, 'must be a positive finite number');
+      if (i > 0 && n < (row[i - 1] as number)) refuse(`forge.${key}[${i}]`, 'must not fall below the previous grade');
+    });
+  }
 
   return raw as unknown as EngineData;
 }

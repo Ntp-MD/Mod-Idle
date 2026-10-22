@@ -124,7 +124,8 @@
         "pedlar_rotation",
         "stash_tab_1",
         "repair",
-        "filter_preset"
+        "filter_preset",
+        "skip_token"
       ]
     },
     {
@@ -193,7 +194,8 @@
       "stock": [
         "bag_slot",
         "stash_tab_1",
-        "filter_preset"
+        "filter_preset",
+        "skip_token"
       ]
     },
     {
@@ -219,7 +221,8 @@
       "stock": [
         "bag_slot",
         "stash_tab_1",
-        "filter_preset"
+        "filter_preset",
+        "skip_token"
       ],
       "budget_note": "The last settlement also carries the push band past the spawn cap (levels 181-190), which is where the pre-18-zone world put those hours on Vermolch."
     },
@@ -323,7 +326,8 @@
         "pedlar_rotation",
         "stash_tab_1",
         "repair",
-        "filter_preset"
+        "filter_preset",
+        "skip_token"
       ]
     },
     {
@@ -371,7 +375,8 @@
       "stock": [
         "bag_slot",
         "stash_tab_1",
-        "filter_preset"
+        "filter_preset",
+        "skip_token"
       ]
     },
     {
@@ -466,7 +471,8 @@
         "collector_hint",
         "stash_tab_1",
         "repair",
-        "filter_preset"
+        "filter_preset",
+        "skip_token"
       ]
     },
     {
@@ -664,6 +670,7 @@
       "qty": 1,
       "ladder": "house",
       "note": "2 stash tabs + 1 farm plot, no combat effect",
+      "plot_grant": 1,
       "required_standing_tier": 1
     },
     {
@@ -935,7 +942,7 @@
     "elite_n": 3,
     "elite_n_rule": "the count the rebalance pass sizes; the client runs on this number and the board never types it twice",
     "reward_minutes_of_band_income": 15,
-    "reward_rule": "Elite and Expedition hunts pay Tier stones sized at reward_minutes_of_band_income of that band's own stone income (engine.stonesForMinutes); a Boss hunt pays its own Remove stone. Expeditions require target Species Elites at a named subzone, so the location objective replaces the old plain kill-count task and the board still pays no Value stones.",
+    "reward_rule": "Elite hunts pay fixed Tier stones sized at reward_minutes_of_band_income of the band's own stone income. Expeditions require target Species Elites at a named subzone and offer those stones or a frozen named useful skill, with the same stones as its fallback. Boss hunts offer their configured Remove-or-Tier choice. First Expedition milestones grant the separate quest_rewards Tree Point once per zone.",
     "boss_reward": {
       "remove": 1,
       "reroll_tier": 4
@@ -1032,7 +1039,18 @@
       "pine-wood": 0.5,
       "hardwood": 0.9,
       "willow-wood": 0.6,
-      "cedar-wood": 1.1
+      "cedar-wood": 1.1,
+      "chitin-plate": 1,
+      "feather-plume": 1.5,
+      "ember-heart": 3,
+      "chaos-ichor": 3.5,
+      "funerary-linen": 1,
+      "thick-pelt": 1.2,
+      "reptile-scale": 2,
+      "venom-gland": 2,
+      "coin-clasp": 0.8,
+      "river-pearl": 2.5,
+      "grave-bone": 0.8
     },
     "junk_groups": {
       "salvage": [
@@ -1326,6 +1344,8 @@
     "production_allowance": 1.75,
     "deadline_allowance_sec": 600,
     "reward_minutes": 5,
+    "reward_modes": ["fixed", "choice"],
+    "choice_reward_mult": 2,
     "fallback_minutes": 3,
     "minimum_stones": 1,
     "premium_base": 1.5,
@@ -1475,45 +1495,26 @@
     ],
     "skill_weights": {
       "attack.fireball": 1,
-      "attack.flame_bolt": 1,
       "attack.firestorm": 1,
-      "attack.meteor": 1,
-      "attack.flame_wisp": 1,
-      "attack.frost_bolt": 1,
-      "attack.ice_shard": 1,
       "attack.ice_lance": 1,
       "attack.blizzard": 1,
-      "attack.frozen_orb": 1,
       "attack.frostbite": 1,
       "attack.chain_lightning": 1,
-      "attack.lightning_bolt": 1,
       "attack.spark": 1,
       "attack.thunder_strike": 1,
-      "attack.storm_call": 1,
-      "attack.static_field": 1,
       "attack.poison_bolt": 1,
       "attack.venom_spray": 1,
       "attack.acid_arrow": 1,
-      "attack.toxic_cloud": 1,
       "attack.chaos_bolt": 1,
       "attack.void_blast": 1,
       "attack.sand_storm": 1,
       "attack.earth_splitter": 1,
-      "attack.fan_of_knives": 1,
       "attack.backstab": 1,
-      "attack.poisoned_edge": 1,
       "attack.sidestep": 1,
-      "attack.nerve_strike": 1,
       "attack.impale": 1,
-      "attack.skewer_line": 1,
-      "attack.reach_thrust": 1,
-      "attack.low_sweep": 1,
       "attack.skull_crack": 1,
       "attack.ground_slam": 1,
       "attack.bone_breaker": 1,
-      "attack.iron_toll": 1,
-      "attack.wide_swing": 1,
-      "attack.whirlaxe": 1,
       "attack.carnage": 1,
       "attack.cleave_down": 1,
       "attack.cleave": 1,
@@ -1527,6 +1528,12 @@
       "attack.headshot": 1,
       "attack.pierce_the_veil": 1,
       "attack.earth_shock": 1,
+      "attack.detonate": 1,
+      "attack.shatter": 1,
+      "attack.overload": 1,
+      "attack.catalyst": 1,
+      "attack.ruin": 1,
+      "attack.aftershock": 1,
       "buff.warcry": 1,
       "buff.berserker": 1,
       "buff.iron_will": 1,
@@ -1587,8 +1594,63 @@
       }
     ]
   },
-  "quest_tree_bonus": {
-    "chance": 0.1,
-    "amount": 1
+  "economy": {
+    "step_sec": 3600,
+    "cities": [
+      {
+        "id": "highspire",
+        "stock": { "material:copper-ore": 18, "material:iron-ore": 10, "material:timber": 2, "food:raw_game_meat": 4 },
+        "capacity": { "material:copper-ore": 60, "material:iron-ore": 40, "material:timber": 25, "food:raw_game_meat": 30, "material:copper-fittings": 10, "material:iron-tools": 10 },
+        "target": { "material:copper-ore": 30, "material:iron-ore": 20, "material:timber": 12, "food:raw_game_meat": 10, "material:copper-fittings": 4, "material:iron-tools": 2 },
+        "production": { "material:copper-ore": 6, "material:iron-ore": 3 },
+        "consumption": { "material:timber": 1, "food:raw_game_meat": 2 },
+        "budget": 90,
+        "budget_cap": 220,
+        "budget_refill": 10
+      },
+      {
+        "id": "millbrook",
+        "stock": { "material:timber": 32, "material:pine-wood": 14, "food:raw_game_meat": 10, "material:copper-fittings": 1, "material:iron-tools": 1 },
+        "capacity": { "material:timber": 80, "material:pine-wood": 40, "food:raw_game_meat": 40, "material:copper-fittings": 12, "material:iron-tools": 12 },
+        "target": { "material:timber": 45, "material:pine-wood": 20, "food:raw_game_meat": 12, "material:copper-fittings": 6, "material:iron-tools": 3 },
+        "production": { "material:timber": 5, "material:pine-wood": 2, "food:raw_game_meat": 5 },
+        "consumption": { "material:copper-fittings": 1, "material:iron-tools": 1, "food:raw_game_meat": 1 },
+        "budget": 80,
+        "budget_cap": 200,
+        "budget_refill": 8
+      },
+      {
+        "id": "emberhold",
+        "stock": { "material:copper-ore": 14, "material:iron-ore": 10, "material:timber": 6, "material:copper-fittings": 4, "material:iron-tools": 2, "food:raw_game_meat": 3 },
+        "capacity": { "material:copper-ore": 60, "material:iron-ore": 50, "material:timber": 30, "material:copper-fittings": 20, "material:iron-tools": 15, "food:raw_game_meat": 25 },
+        "target": { "material:copper-ore": 26, "material:iron-ore": 22, "material:timber": 16, "material:copper-fittings": 9, "material:iron-tools": 5, "food:raw_game_meat": 8 },
+        "production": { "material:copper-fittings": 3, "material:iron-tools": 2 },
+        "consumption": { "material:copper-ore": 3, "material:iron-ore": 2, "material:timber": 1, "food:raw_game_meat": 1 },
+        "budget": 130,
+        "budget_cap": 320,
+        "budget_refill": 12
+      }
+    ],
+    "routes": [
+      { "id": "mine-copper-craft", "from": "highspire", "to": "emberhold", "good": "material:copper-ore", "per_step": 4 },
+      { "id": "mine-iron-craft", "from": "highspire", "to": "emberhold", "good": "material:iron-ore", "per_step": 2 },
+      { "id": "forest-timber-mine", "from": "millbrook", "to": "highspire", "good": "material:timber", "per_step": 3 },
+      { "id": "forest-timber-craft", "from": "millbrook", "to": "emberhold", "good": "material:timber", "per_step": 2 },
+      { "id": "forest-pine-craft", "from": "millbrook", "to": "emberhold", "good": "material:pine-wood", "per_step": 1 },
+      { "id": "forest-food-mine", "from": "millbrook", "to": "highspire", "good": "food:raw_game_meat", "per_step": 2 },
+      { "id": "forest-food-craft", "from": "millbrook", "to": "emberhold", "good": "food:raw_game_meat", "per_step": 1 },
+      { "id": "craft-fittings-mine", "from": "emberhold", "to": "highspire", "good": "material:copper-fittings", "per_step": 2 },
+      { "id": "craft-fittings-forest", "from": "emberhold", "to": "millbrook", "good": "material:copper-fittings", "per_step": 1 },
+      { "id": "craft-tools-forest", "from": "emberhold", "to": "millbrook", "good": "material:iron-tools", "per_step": 1 }
+    ],
+    "events": [
+      { "id": "mine-road-repair", "city": "highspire", "good": "material:timber", "extra_demand": 8, "budget": 60, "startsAtSec": 0, "endsAtSec": 14400 },
+      { "id": "craft-festival", "city": "emberhold", "good": "food:raw_game_meat", "extra_demand": 6, "budget": 50, "startsAtSec": 7200, "endsAtSec": 21600 }
+    ]
+  },
+  "quest_rewards": {
+    "milestone_tree_points": 1,
+    "milestone_rule": "First milestone Expedition claim per zone and first milestone Delivery completion per town each pay the displayed Tree Point once per character. Old stored random bonuses remain payable. Permanent points are outside reward choices.",
+    "expedition_skill_choice": true
   }
 }

@@ -1,14 +1,103 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { E, eng, sm, tree } from '../src/engine/client';
 import { newGame, tick, catchUp, setLevel, huntZone } from '../src/sim/game';
 import { buildCharacter, emptyGear, openingGear } from '../src/sim/player';
 import { craft } from '../src/sim/craft';
 import { rollDrop } from '../src/sim/drop';
 import { setRule } from '../src/sim/filter';
-import { exportJson, importJson, migrate, newAccount, mergeMastery, applyAccount, SCHEMA_VERSION } from '../src/state/save';
+import { exportJson, importJson, listSnapshots, migrate, newAccount, mergeMastery, applyAccount, readSave, restoreSnapshot, SCHEMA_VERSION, writeSave, writeSaveSync } from '../src/state/save';
+import { requestAccountWriterLock } from '../src/state/accountWriterLock';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { spendTreePoint, treeLines, treePointsSpent } from '../src/sim/tree';
 import { startWalk, road, settlementCell } from '../src/sim/road';
+
+describe('storage recovery boundaries', () => {
+  const mirror = new Map<string, string>();
+  beforeEach(() => {
+    mirror.clear();
+    vi.stubGlobal('indexedDB', undefined);
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => mirror.get(key) ?? null,
+      setItem: (key: string, value: string) => { mirror.set(key, value); },
+      removeItem: (key: string) => { mirror.delete(key); },
+    });
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('round-trips each slot through the mirror when IndexedDB is unavailable', async () => {
+    for (const [index, slot] of (['slot1', 'slot2', 'slot3'] as const).entries()) {
+      const state = newGame(index + 1);
+      state.counters.kills = index + 10;
+      await writeSave(slot, state);
+      expect((await readSave(slot))?.counters.kills).toBe(index + 10);
+    }
+  });
+
+  it('restores a prior snapshot without keeping its later rewards', async () => {
+    const state = newGame(55);
+    state.counters.gold = 4;
+    writeSaveSync('slot1', state);
+    state.clockSec++;
+    state.counters.gold = 9;
+    state.pendingSnapshot = 'level';
+    await writeSave('slot1', state);
+    expect(await listSnapshots('slot1')).toHaveLength(2);
+    expect((await restoreSnapshot('slot1', 1))?.counters.gold).toBe(4);
+    expect((await readSave('slot1'))?.counters.gold).toBe(4);
+  });
+
+  it.each(['null', '{}', '"corrupt"', '[null]'])('treats malformed backup storage %s as no usable snapshots', async (raw) => {
+    mirror.set('modworld:snap:slot1', raw);
+    expect(await listSnapshots('slot1')).toEqual([]);
+    expect(await restoreSnapshot('slot1', 0)).toBeNull();
+    const state = newGame(55);
+    writeSaveSync('slot1', state);
+    expect(await listSnapshots('slot1')).toHaveLength(1);
+  });
+
+  it('keeps valid backups beside malformed entries without rewriting inspection reads', async () => {
+    writeSaveSync('slot1', newGame(55));
+    const [good] = await listSnapshots('slot1');
+    const raw = JSON.stringify([null, {}, good]);
+    mirror.set('modworld:snap:slot1', raw);
+    expect(await listSnapshots('slot1')).toEqual([good]);
+    expect(mirror.get('modworld:snap:slot1')).toBe(raw);
+  });
+
+  it('disables saving when Web Locks are absent', async () => {
+    vi.stubGlobal('navigator', {});
+    expect(await requestAccountWriterLock()).toEqual({ status: 'unsupported' });
+  });
+
+  it('rejects a failed save, preserves older copies and leaves the pending snapshot due', async () => {
+    const state = newGame(56);
+    state.counters.kills = 42;
+    await writeSave('slot1', state);
+    const oldSlot = mirror.get('modworld:slot1');
+    const oldBackups = mirror.get('modworld:snap:slot1');
+    const stamp = state.lastSavedAt;
+    state.counters.kills++;
+    state.pendingSnapshot = 'level';
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => mirror.get(key) ?? null,
+      setItem: () => { throw new Error('QuotaExceededError'); },
+      removeItem: (key: string) => { mirror.delete(key); },
+    });
+    await expect(writeSave('slot1', state)).rejects.toThrow(/storage could not save/);
+    expect(mirror.get('modworld:slot1')).toBe(oldSlot);
+    expect(mirror.get('modworld:snap:slot1')).toBe(oldBackups);
+    expect(state.lastSavedAt).toBe(stamp);
+    expect(state.pendingSnapshot).toBe('level');
+    expect(() => writeSaveSync('slot1', state)).toThrow(/emergency browser save failed/);
+    expect(mirror.get('modworld:slot1')).toBe(oldSlot);
+    expect(state.pendingSnapshot).toBe('level');
+  });
+
+  it('rejects a save when neither storage API is available', async () => {
+    vi.stubGlobal('localStorage', undefined);
+    await expect(writeSave('slot1', newGame(57))).rejects.toThrow(/Export JSON/);
+  });
+});
 
 describe('skill toggles on a restored character', () => {
   it('removes effects with no owned skill while preserving a player-owned aura', () => {
@@ -212,7 +301,7 @@ describe('the save schema and the account', () => {
   it('rejects a future local schema before migration touches its state', () => {
     const future = structuredClone(newGame(520));
     const before = structuredClone(future);
-    expect(() => migrate(future, SCHEMA_VERSION + 1)).toThrow(/schema version 19/);
+    expect(() => migrate(future, SCHEMA_VERSION + 1)).toThrow(new RegExp(`schema version ${SCHEMA_VERSION + 1}`));
     expect(future).toEqual(before);
   });
 
@@ -225,7 +314,7 @@ describe('the save schema and the account', () => {
     expect(m.collector.done).toEqual({});
   });
 
-  it('backfills Camp encounter and help Standing state without changing the save schema', () => {
+  it('backfills Camp encounter and help Standing state', () => {
     const old = newGame(541);
     delete (old.fieldwork as any).campEncounters;
     delete (old.town as any).helpCredit;
@@ -234,7 +323,6 @@ describe('the save schema and the account', () => {
       policy: 'avoid', streamState: (541 ^ 0x43414d50) >>> 0, serial: 0, active: null,
     });
     expect(restored.town.helpCredit).toEqual({});
-    expect(SCHEMA_VERSION).toBe(18);
   });
 
   it('round-trips active Camp encounter state and aid credit', () => {
@@ -370,7 +458,8 @@ describe('the save schema and the account', () => {
     s.skills.conditions = { boss: true, hpBelowPct: 40, statusMissing: ['burn'] };
     const m = migrate(s);
     expect(m.skills.conditions['attack.cleave'])
-      .toEqual({ boss: true, hpBelowPct: 40, statusMissing: ['burn'], minTargets: 0, manaFloorPct: 0 });
+      .toEqual({ boss: true, hpBelowPct: 40, statusMissing: ['burn'], minTargets: 0, manaFloorPct: 0,
+        statusPresent: false, statusStacksAtLeast: 0, selfDebuffed: false });
     expect(m.skills.conditions['attack.fireball']).toBeUndefined();
     // and a save already on the per-row shape is left exactly as it was
     const kept = migrate(JSON.parse(JSON.stringify(m)));

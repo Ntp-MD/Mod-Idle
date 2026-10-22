@@ -229,7 +229,7 @@ export function playerSwing(
   if (inevitable && elemDamage > 0) {
     const mult = inevitableElementMult(crit, inevitable.params as Record<string, number>);
     let scale = mult;
-    if (crit && mob.res > 0 && mob.res < 100) scale = 1 / (1 - mob.res / 100);
+    if (crit && (mob.effRes ?? mob.res) > 0 && (mob.effRes ?? mob.res) < 100) scale = 1 / (1 - (mob.effRes ?? mob.res) / 100);
     if (scale !== 1) {
       for (const el of Object.keys(elemByElement)) elemByElement[el] *= scale;
       elemDamage *= scale;
@@ -347,7 +347,7 @@ export function mobSwing(
   // physical half alone, capped by it (applied below).
 
   // a mob's swing is sized by its priced damage per second, at its own clock rate
-  const rawHit = (mob.ps * psMult(curse)) / mob.hitsPerSec;
+  const rawHit = (mob.ps * psMult(curse) * (mob.auraDamageMult ?? 1)) / mob.hitsPerSec;
   const [physShare, elemShare] = eng.damageSplit(mob.damage);
   const turtle = bundleOf(c.keystones, 'turtle-doctrine');
   const rolled = !turtle && physShare > 0 && c.block > 0 && rng() * 100 < c.block ? 'block' : null;
@@ -461,8 +461,30 @@ export function rollStatus(
   if (rng() >= proc) return null;
   const name = (E.elements.status_of as Record<string, string | undefined>)[el] as StatusName;
   if (!name) return null;
+  return writeStatus(name, elemHalf, statuses, alignedSec, stunRecovery);
+}
+
+/** A forced status from a mob skill: the same writer a proc uses, without the innate proc roll. */
+export function applyStatus(
+  statuses: Statuses,
+  name: string,
+  elemHalf: number,
+  alignedSec = 0,
+  stunRecovery = 0,
+): StatusName | null {
+  return writeStatus(name as StatusName, elemHalf, statuses, alignedSec, stunRecovery);
+}
+
+function writeStatus(
+  name: StatusName,
+  elemHalf: number,
+  statuses: Statuses,
+  alignedSec: number,
+  stunRecovery: number,
+): StatusName | null {
   const s = statuses[name] || (statuses[name] = { stacks: 0, secLeft: 0, perSec: 0 });
   const cfg = (E.status as any)[name];
+  if (!cfg) return null;
   if (name === 'burn') {
     addStack(s, cfg.stack_max, elemHalf * cfg.k_dps);
     s.secLeft = cfg.time_sec;

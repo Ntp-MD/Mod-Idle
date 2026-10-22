@@ -9,7 +9,8 @@ import type { EngineData, ModsData, SkillsData } from '../engine/types.ts';
 
 const root = path.resolve(import.meta.dirname, '..');
 const E = readJson<EngineData>(path.join(root, 'tools/data/engine.json'));
-const T = readJson<{ delivery: DeliveryCfg; trade: TradeCfg; settlements: { id: string; zone: number }[] }>(path.join(root, 'tools/data/town.json'));
+const T = readJson<{ delivery: DeliveryCfg; trade: TradeCfg; settlements: { id: string; zone: number }[];
+  quest_rewards: { milestone_tree_points: number; expedition_skill_choice: boolean } }>(path.join(root, 'tools/data/town.json'));
 const M = readJson<ModsData>(path.join(root, 'tools/data/mods.json'));
 const S = readJson<SkillsData>(path.join(root, 'tools/data/skills.json'));
 const C = T.delivery;
@@ -104,6 +105,9 @@ const incomeKeys = new Set(['tier', 'reroll_value', 'add']);
 const stoneExists = (key: string) => typeof key === 'string' && (key !== 'imprint' && Object.hasOwn(STONE_NAME, key)
   || key.startsWith('imprint_') && M.mods.some((mod) => mod.id === key.slice('imprint_'.length)));
 if (!incomeKeys.has(C.fallback_stone) || !stoneExists(C.fallback_stone)) rewards.push('invalid fallback stone or income source');
+if (!Array.isArray(C.reward_modes) || !C.reward_modes.length || C.reward_modes.some((mode) => !['fixed', 'choice'].includes(mode))) rewards.push('reward_modes must contain supported offer modes');
+if (!positive(C.choice_reward_mult)) rewards.push('choice_reward_mult must be finite and positive');
+if (!whole(T.quest_rewards?.milestone_tree_points, 1) || typeof T.quest_rewards?.expedition_skill_choice !== 'boolean') rewards.push('quest milestone and skill-choice configuration is invalid');
 if (!C.stones.some((stone) => positive(stone.weight))) rewards.push('stone selection has no positive weight');
 for (const stone of C.stones) {
   if (!stoneExists(stone.key) || !incomeKeys.has(stone.income) || !nonnegative(stone.weight)) rewards.push(`invalid stone reward ${stone.key}`);

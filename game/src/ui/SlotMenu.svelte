@@ -99,6 +99,5 @@
   .menu button:disabled { opacity: .42; }
   .menu button.danger:hover:not(:disabled) { border-color: var(--hp); }
   .menu button.danger span { color: var(--hp); }
-  .menu small { color: var(--dim); font-size: var(--font-xs); }
   .none { margin: 0; padding: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); }
 </style>

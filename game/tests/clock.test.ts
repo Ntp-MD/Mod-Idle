@@ -111,28 +111,55 @@ describe('the live wake turns wall time into whole seconds', () => {
   });
 });
 
-describe('the away window is capped by the save rule', () => {
-  const CAP = E.inventory.offline_cap_hr * 3600;
+describe('the away window has no time limit', () => {
 
-  it('simulates exactly the cap and reports the cut, for either path', () => {
-    expect(catchUpPlan(CAP + 7200)).toEqual({ secs: CAP, capped: true });
+  it('keeps every whole second even across days or months', () => {
+    expect(E.inventory.offline_cap_hr).toBeNull();
+    expect(catchUpPlan(365 * 86400)).toEqual({ secs: 365 * 86400, capped: false });
     expect(catchUpPlan(600)).toEqual({ secs: 600, capped: false });
     // a clock that runs backwards or a fractional second is no time at all
     expect(catchUpPlan(-500)).toEqual({ secs: 0, capped: false });
     expect(catchUpPlan(59.9).secs).toBe(59);
+    expect(catchUpPlan(NaN).secs).toBe(0);
+    expect(catchUpPlan(Infinity).secs).toBe(0);
   });
 
-  it('credits no more than the cap on either path, and both agree', async () => {
+  it('credits the complete span beyond the old limit, identically on both paths', async () => {
     const a = busy(74, 10);
     const b = busy(74, 10);
-    const away = CAP + 3600;
+    const away = 12 * 3600 + 1;
     const ra = catchUp(a, away);
     const rb = await catchUpAsync(b, away);
-    expect(ra.simulated).toBe(CAP);
-    expect(rb.simulated).toBe(CAP);
-    expect(ra.capped).toBe(true);
+    expect(ra.simulated).toBe(away);
+    expect(rb.simulated).toBe(away);
+    expect(ra.capped).toBe(false);
     expect(shot(b)).toBe(shot(a));
-  }, 120000); // the capped hours are 43,200 ticks on each path, the same window the save rule promises
+  }, 120000);
+
+  it('can cancel between slices and keeps the simulated portion deterministic', async () => {
+    const a = busy(76, 20), b = busy(76, 20);
+    a.bossDueAt = b.bossDueAt = 900;
+    const controller = new AbortController();
+    const progress: number[] = [];
+    const result = await catchUpAsync(a, 5000, { signal: controller.signal, onProgress: (done) => {
+      progress.push(done);
+      if (done > 0) controller.abort();
+    } });
+    expect(result.cancelled).toBe(true);
+    expect(result.simulated).toBeGreaterThan(0);
+    expect(result.simulated).toBeLessThan(5000);
+    expect(progress.at(-1)).toBe(result.simulated);
+    catchUp(b, result.simulated);
+    expect(shot(a)).toBe(shot(b));
+  });
+
+  it('does not mutate a character when cancelled before catching up', async () => {
+    const s = busy(77, 20);
+    const before = shot(s);
+    const controller = new AbortController(); controller.abort();
+    expect(await catchUpAsync(s, 86400, { signal: controller.signal })).toEqual({ simulated: 0, capped: false, cancelled: true });
+    expect(shot(s)).toBe(before);
+  });
 });
 
 describe('the online clocks do not accrue while away', () => {

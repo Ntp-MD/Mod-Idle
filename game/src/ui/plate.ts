@@ -76,6 +76,17 @@ export function platePark(by: Map<string, FxEvent[]>, id: string): Parked | null
   return parked(hits(by, id));
 }
 
+/** The row that fired the cast: the cast event shares the hit's second and names its skill. */
+export function castForHit(ring: FxEvent[], hit: FxEvent | null | undefined): FxEvent | null {
+  if (!hit || hit.via !== 'cast') return null;
+  return ring.find((e) => e.kind === 'cast' && e.side === 'self' && !!e.skillId && e.sec === hit.sec) || null;
+}
+
+/** Accumulated attack progress, clamped to the span the plate can draw. */
+export function windupOf(mob: Pick<Mob, 'atkTimer'>): number {
+  return Math.max(0, Math.min(1, Number(mob.atkTimer) || 0));
+}
+
 /**
  * The body's own strike: the newest blow it carried against the character. A blocked swing is still a swing,
  * so both halves of a defence name their striker, and the plate that swung is the one that leans.

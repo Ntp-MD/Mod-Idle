@@ -1,17 +1,21 @@
 <script lang="ts">
+  import QuestBonusPicker from './ui/QuestBonusPicker.svelte';
+  import type { TaskSlot } from './sim/types';
+  import { taskBonuses, resolveQuestBonus } from './sim/quest-rewards';
+  import { questBonusText } from './ui/quest-rewards';
+  import { rollTask } from './sim/town';
   import { onMount } from 'svelte';
   import { cubicOut, linear } from 'svelte/easing';
   import { prefersReducedMotion, Tween } from 'svelte/motion';
   import { eng, E, sm, TOWN, tree, loot, fieldwork, trade } from './engine/client';
-  import { buildCharacter } from './sim/player';
-import { withMeal, withHunger, fieldSite, campHere as atFieldCamp, establishCamp, leaveCamp, returnToCamp, startFieldAction, stopFieldAction, cookMeal, eatMeal, lifeSkillBonuses } from './sim/fieldwork';
+import { fieldSite, campHere as atFieldCamp, establishCamp, leaveCamp, returnToCamp, startFieldAction, stopFieldAction, cookMeal, eatMeal } from './sim/fieldwork';
 import { cancelCampEncounter, chooseCampEncounter, setCampEncounterPolicy, type CampEncounterAction, type CampEncounterPolicy } from './sim/camp-encounters';
   import { sellGoods, processMaterials, tradeBucket } from './sim/trade';
 import { offerDelivery, deliver, trackDelivery, acknowledgeDelivery, announceDelivery, tickDeliveries, contractById, deliveryTimeLeft, deliveryPauseReason } from './sim/delivery';
 import { buyBlackMarket } from './sim/black-market';
   import DeliveryNotice from './ui/DeliveryNotice.svelte';
   import { previewScrapAlchemy, transmuteScrap, alchemyTierProgress } from './sim/alchemy';
-  import { newGame, tick, push, fx, hitColour, catchUpAsync, schedulerBatch, WAKE_SEC, carried, heldWeaponName, huntZone, huntHere, salvageBag, retreatDungeon, runFilterNow, isBossKind } from './sim/game';
+  import { newGame, setLevel, tick, push, fx, hitColour, catchUpAsync, schedulerBatch, WAKE_SEC, characterSheet, heldWeaponName, huntZone, huntHere, salvageBag, retreatDungeon, runFilterNow, isBossKind } from './sim/game';
   import { rollDrop } from './sim/drop';
   import { reservedPct, hpReservedPct, auraResonanceOf, auraPoolOf, setAuraPool, hpReserved, usableHp, usableMana, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, costNow, modeOf, condOf, appliedStatusOf, appliedCurseOf, moveSlot } from './sim/skills';
   import { modsOn, psMult, curableRows } from './sim/curse';
@@ -32,6 +36,7 @@ import { buyBlackMarket } from './sim/black-market';
   import TownHub from './ui/TownHub.svelte';
   import Market from './ui/Market.svelte';
   import CraftWorkshop from './ui/CraftWorkshop.svelte';
+  import Forge from './ui/Forge.svelte';
   import FieldworkBoard from './ui/FieldworkBoard.svelte';
   import PassiveTreeBoard from './ui/PassiveTreeBoard.svelte';
   import StashBoard from './ui/StashBoard.svelte';
@@ -54,13 +59,16 @@ import { buyBlackMarket } from './sim/black-market';
   import { feedEventsAfter } from './ui/logbox';
   import {
     settlementById, settlementOfZone, stockOf, priceGold, priceMinutes, canBuy, buy, sellJunk,
-    standingProgress, canTravel, claimTask, npcOf,
+    standingProgress, canTravel, claimTask, npcOf, repairGear, skipTask, skipVerdict,
   } from './sim/town';
   import { doCraft, stoneName, atSettlement, replaceChoices, type CraftOp, type Where } from './sim/craft';
+  import { forgeGear } from './sim/forge';
+  import type { ForgeKind } from '../../engine/forge.ts';
 import { farm, farmLevel, farmMasteryLevel, plotCount, plant, harvest, craftPotion, condense, drink, cycleQuickbar } from './sim/farm';
   import { stashTabCount, STASH_TAB_CAP, deposit, withdraw, depositMany, withdrawMany } from './sim/town';
 import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsFree } from './sim/tree';
-  import { respecStats } from './sim/respec';
+  import { allocateStats, respecStats } from './sim/respec';
+  import { CharacterSaveSession } from './state/saveSession';
   import { road, startWalk, walkNote, walkBlocks, warpTo, warpCost, warpRow, cellBlocks, cellSec, currentCell, settlementCell, ownerOf } from './sim/road';
   import { clearPatrolStops, startPatrol as startPatrolRun, stopPatrol as stopPatrolRun, togglePatrolStop } from './sim/exploration';
   import { enterDungeon, cooldownLeft } from './sim/dungeon';
@@ -68,7 +76,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   import { storePreset, switchPreset, bindZone } from './sim/presets';
   import { col, setUnlocked, heldCount, turnIn } from './sim/collector';
   import { mulberry32 } from './engine/client-helpers';
-  import { writeSave, writeSaveSync, readSave, exportJson, importJson, saveSlots, listSnapshots, restoreSnapshot, readSettings, writeSettings, DEFAULT_SETTINGS, type SlotName, type Snapshot, type ClientSettings } from './state/save';
+  import { writeSaveSync, readSave, exportJson, importJson, saveSlots, listSnapshots, restoreSnapshot, readSettings, writeSettings, DEFAULT_SETTINGS, type SlotName, type Snapshot, type ClientSettings } from './state/save';
   import { requestAccountWriterLock, type AccountWriterLockResult } from './state/accountWriterLock';
   import { FILTER_SLOTS, ruleFor, setRule, describeRule, presetSlots, savePreset, loadPreset, clearPreset } from './sim/filter';
   import { equipFromBag, autoEquip, unequip } from './sim/gear';
@@ -113,11 +121,18 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const showcaseMode = import.meta.env.DEV && window.location.pathname.replace(/\/+$/, '') === '/__showcase';
   let showcaseSample = $state('delivery');
   let hex3dPrototypeView = $state<any>(null);
+  let economyLabView = $state<any>(null);
   $effect(() => {
     if (!showcaseMode || showcaseSample !== 'map-hex-3d') return;
     let current = true;
     import('./ui/Hex3dPrototype.svelte').then(module => { if (current) hex3dPrototypeView = module.default; });
     return () => { current = false; hex3dPrototypeView = null; };
+  });
+  $effect(() => {
+    if (!showcaseMode || showcaseSample !== 'economy-lab') return;
+    let current = true;
+    import('./ui/EconomyLab.svelte').then(module => { if (current) economyLabView = module.default; });
+    return () => { current = false; economyLabView = null; };
   });
 
   function showcaseGame(scenario = 'delivery'): GameState {
@@ -132,6 +147,21 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     sample.junk[(E.mob.variant_drops as Record<string, { item: string }>)[E.mob.variants.goblin[0].name].item] = 20;
     sample.hunting = true;
     tick(sample, { online: false, autoSkills: false });
+    if (scenario === 'offline-progress') return sample;
+    if (scenario === 'core-field' || scenario === 'core-town') {
+      sample.player.autoSpend = false;
+      setLevel(sample, 10);
+      respecStats(sample);
+      allocateStats(sample, 'str', 5);
+      if (scenario === 'core-field') sample.cell = { ...sample.cell!, q: sample.cell!.q + 1 };
+      sample.hunting = false;
+      sample.group = [];
+      const sheet = characterSheet(sample);
+      sample.player.hp = Math.min(sample.player.hp, sheet.maxHp);
+      sample.player.mana = Math.min(sample.player.mana, sheet.maxMana);
+      sample.player.es = Math.min(sample.player.es, sheet.es);
+      return sample;
+    }
     const starter = sample.gear.find((piece): piece is Item => piece !== null);
     if (starter) {
       const carriedSample = structuredClone(starter);
@@ -170,16 +200,15 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       sample.skills.list[0] = activeSkill.id;
     }
     if (scenario === 'expedition') {
-      const seedTask = sample.town.tasks[0]!;
-      sample.town.tasks[1] = {
-        ...structuredClone(seedTask),
-        kind: 'expedition', zone: 1,
-        targetSpecies: E.mob.zones[0].subzones?.[0]?.species?.[0] || 'goblin',
-        subzone: 0, progress: 1,
-      };
+      sample.town.tasks[1] = null;
+      const draws = [0, 0.6, 0, 0.25];
+      const task = rollTask(() => draws.shift() ?? 0, sample);
+      task.progress = task.n;
+      sample.town.tasks[1] = task;
     } else if (scenario !== 'field' && scenario !== 'craft-stash' && scenario !== 'map-mine'
       && scenario !== 'map-adventure' && !campEventExamples.has(scenario)) {
       const draws = [0, 0.99, 0, 0, 0];
+      if (scenario === 'choice') sample.town.contractSerial = 1;
       const contract = offerDelivery(sample, sample.town.waypoint, () => draws.shift() ?? 0, { writer: true });
       if (contract) {
         const good = trade.byId[contract.good];
@@ -438,7 +467,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   let settings = $state<ClientSettings>({ ...DEFAULT_SETTINGS });
   function setSetting<K extends keyof ClientSettings>(k: K, v: ClientSettings[K]) {
     settings[k] = v;
-    if (!showcaseMode) void writeSettings(settings);
+    if (!showcaseMode) void writeSettings(settings).catch((error) => {
+      persistenceError = `Settings were not saved: ${error instanceof Error ? error.message : 'browser storage failed'}`;
+      saveNote = persistenceError;
+    });
   }
   const SPEEDS: (1 | 2 | 4)[] = [1, 2, 4];
   function setSpeed(m: 1 | 2 | 4) {
@@ -452,6 +484,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   /** Escape uncovers the field: map focus drops, the dock overlays go with it, and a pick that was
       never travelled to is dropped rather than left ringing under the HUD. A desk screen closes itself. */
   function onfieldKey(ev: KeyboardEvent) {
+    if (offlineProgress !== null) return;
     if (showcaseMode) return;
     // Native control activation owns Enter/Space; folding a HUD group must not also pause the game.
     if ((ev.key === 'Enter' || ev.key === ' ') && (ev.target as HTMLElement | null)?.closest('button, summary, a[href]')) return;
@@ -559,7 +592,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     }
     if (p === 'stash') { invTab = 'stash'; panel = panel === 'bag' ? null : 'bag'; return; }
     if (p === 'bag') invTab = 'inv';
-    if (p === 'forge') p = 'craft';
     panel = panel === p ? null : p;
   }
   const closePanel = () => (panel = null);
@@ -590,7 +622,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
    * remember the blow that ended it.
    */
   const ring = $derived(gameState.fx || []);
-  const fieldFx = $derived(ring.filter((e) => e.side === 'field' && !(e.kind === 'hit' && e.mobId) && !(e.kind === 'block' && e.mobId)).slice(0, 9));
+  const fieldFx = $derived(ring.filter((e) => e.side === 'field' && !(e.kind === 'hit' && e.mobId) && !(e.kind === 'block' && e.mobId) && !(e.kind === 'cast' && e.mobId)).slice(0, 9));
   // the character's own answers live on its own corner now (taken blows pop like damage, block
   // words and status procs beside them), so the shared column keeps only what names no body — and a
   // walk floats nothing, so the word on the field is the whole of its read
@@ -642,7 +674,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   // the away report's own reads live in `ui/hud.ts`, where a test can reach them
 
-  let c = $derived(withHunger(withMeal(buildCharacter(gameState.player.level, gameState.gear, carried(gameState), masteryLevel(gameState, heldWeaponName(gameState) || ''), effectsActive(gameState.skills), gameState.player.points, gameState.player.treeRanks, lifeSkillBonuses(gameState)), gameState), gameState));
+  let c = $derived(characterSheet(gameState));
   const hpFill = $derived(c.maxHp > 0 ? Math.max(0, Math.min(1, shownHp / c.maxHp)) : 0);
   /** The HP a reservation holds back and the HP a heal may reach; Max stays the Full Max (`35`, `54`). */
   const hpBanked = $derived(hpReserved(c, gameState.skills));
@@ -752,17 +784,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function allocate(k: StatKey, delta: number) {
-    const p = gameState.player;
-    if (delta > 0) {
-      const n = Math.min(delta, p.statPoints);
-      if (n <= 0) return;
-      p.points[k] += n; p.statPoints -= n;
-    } else {
-      const n = Math.min(-delta, p.points[k]);
-      if (n <= 0) return;
-      p.points[k] -= n; p.statPoints += n;
-    }
-    gameState = { ...gameState };
+    const result = allocateStats(gameState, k, delta, { writer: transactionWriter });
+    if (result.ok) gameState = { ...gameState };
+    else saveNote = result.why || 'Cannot allocate Core points';
   }
   function doSpendTree(nodeId: string) {
     const r = spendTreePoint(gameState, nodeId);
@@ -832,10 +856,17 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     // The unload flush must be synchronous: IndexedDB commits asynchronously and the page can be gone
     // first, so `writeSaveSync` writes the mirror in one turn. It refreshes the away stamp too, so a
     // reload right after cannot count the same absence twice.
-    const flushSync = () => {
-      if (!canWriteAccount || !lastSlot) return;
-      gameState.lastSavedAt = Date.now();
-      writeSaveSync(lastSlot, gameState);
+    const flushSync = (event?: Event) => {
+      if (!canWriteAccount || !saveSession.slot) return;
+      try { writeSaveSync(saveSession.slot, gameState); persistenceError = null; }
+      catch (error) {
+        persistenceError = error instanceof Error ? error.message : 'Emergency save failed; export JSON before closing.';
+        saveNote = persistenceError;
+        if (event?.type === 'beforeunload') {
+          event.preventDefault();
+          (event as BeforeUnloadEvent).returnValue = '';
+        }
+      }
     };
     const onHide = () => { if (document.visibilityState === 'hidden') flushSync(); };
     (async () => {
@@ -854,16 +885,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       }
       settings = await readSettings();
       speed = settings.speed || 1;
-      // monotonic clock: catch up on the time between sessions, capped by the save rule. The catch-up
-      // yields between slices so a long absence cannot block first paint.
+      // Catch-up yields between slices and pays all valid elapsed time.
       const away = (Date.now() - (gameState.lastSavedAt || Date.now())) / 1000;
-      // no upper bound: the window itself is capped by the save rule (`offline_cap_hr`), so an old
-      // file still catches up on the capped window instead of being skipped for being too old
       if (away > 5 && canWriteAccount) {
         const before = snapCounters(gameState);
         const r = await catchUpAsync(gameState, away, { autoSkills: settings.autoSkills !== false });
         awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped, gameState) : null;
-        push(gameState, `Away ${Math.round(away / 60)} min — ${r.simulated} sec simulated${r.capped ? ' (capped at the offline limit)' : ''}`);
+        push(gameState, `Away ${Math.round(away / 60)} min — ${r.simulated} sec simulated`);
         gameState = { ...gameState };
       }
       if (settings.autoEquip !== false) equipCarriedBest();
@@ -891,7 +919,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
           if (batch.ticks > 0) cooldownStepMs = (batch.ticks / speed) * 1000;
           for (let i = 0; i < batch.ticks; i++) step();
         }, WAKE_SEC * 1000);
-        autosaveTimer = setInterval(() => { if (canWriteAccount && lastSlot) void doSave(lastSlot, true); }, AUTOSAVE_SEC * 1000);
+        autosaveTimer = setInterval(() => { if (canWriteAccount && saveSession.slot) void doSave(saveSession.slot, true); }, AUTOSAVE_SEC * 1000);
         document.addEventListener('visibilitychange', onHide);
         window.addEventListener('beforeunload', flushSync);
       }
@@ -903,7 +931,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       document.removeEventListener('visibilitychange', onHide);
       window.removeEventListener('beforeunload', flushSync);
       takeoverController?.abort();
-      accountWriterLease?.release();
+      loadController?.abort();
+      const lease = accountWriterLease;
+      void saveSession.flush().then(() => lease?.release());
       accountWriterLease = null;
     };
   });
@@ -1139,20 +1169,32 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   /** The slot the player last saved or loaded. Null until they choose, so a fresh in-memory game
    *  never silently autosaves over an existing file. */
-  let lastSlot = $state<SlotName | null>(null);
+  const saveSession = new CharacterSaveSession();
+  let persistenceError = $state<string | null>(null);
+  let loadController = $state.raw<AbortController | null>(null);
+  let offlineProgress = $state<{ done: number; total: number } | null>(null);
+  function cancelOfflineLoad() {
+    loadController?.abort();
+    if (showcaseMode) { offlineProgress = null; loadController = null; }
+  }
 
   async function doSave(slot: SlotName, quiet = false) {
     if (showcaseMode) return;
     if (!canWriteAccount) { saveNote = 'This tab does not control account saves.'; return; }
-    // stamp the wall clock before the write, so the next session's away window starts here (and a
-    // reload before the next save cannot count the same absence twice)
-    gameState.lastSavedAt = Date.now();
-    await writeSave(slot, gameState); // one write may also take a snapshot and arm the next timer
-    lastSlot = slot;
-    if (!quiet) {
-      gameState = { ...gameState };
-      saveNote = `Saved to ${slot}`;
-      if (slot === snapSlot) await loadSnaps();
+    const epoch = saveSession.checkpoint();
+    try {
+      if (!await saveSession.save(slot, gameState)) return;
+      persistenceError = null;
+      if (!quiet) {
+        gameState = { ...gameState };
+        saveNote = `Saved to ${slot}`;
+        if (slot === snapSlot) await loadSnaps();
+      }
+    } catch (error) {
+      if (saveSession.isCurrent(epoch)) {
+        persistenceError = `Save failed: ${error instanceof Error ? error.message : 'browser storage failed'}`;
+        saveNote = persistenceError;
+      }
     }
   }
 
@@ -1169,16 +1211,25 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   async function restore(index: number) {
     if (showcaseMode || !canWriteAccount) return;
+    const targetSlot = snapSlot;
+    const previousSlot = saveSession.slot;
+    const epoch = saveSession.detach();
+    paused = true;
     try {
-      const s = await restoreSnapshot(snapSlot, index);
-      if (!s) { snapNote = 'That backup is gone'; return; }
+      const s = await saveSession.run(() => restoreSnapshot(targetSlot, index));
+      if (!saveSession.isCurrent(epoch)) return;
+      if (!s) { if (previousSlot) saveSession.attach(previousSlot, epoch); snapNote = 'That backup is gone'; return; }
       gameState = s;
+      saveSession.attach(targetSlot, epoch);
       const what = describeSnap(snaps[index]);
       await loadSnaps();
-      snapNote = `Rewound ${snapSlot} to the backup taken ${what} — the character went back whole, stones and craft counts with it`;
+      snapNote = `Rewound ${targetSlot} to the backup taken ${what} — the character went back whole, stones and craft counts with it`;
     } catch (error) {
-      snapNote = `Cannot rewind: ${error instanceof Error ? error.message : 'the backup failed validation'}`;
-    }
+      if (saveSession.isCurrent(epoch)) {
+        if (previousSlot) saveSession.attach(previousSlot, epoch);
+        snapNote = `Cannot rewind: ${error instanceof Error ? error.message : 'the backup failed validation'}`;
+      }
+    } finally { if (saveSession.isCurrent(epoch)) paused = false; }
   }
 
 
@@ -1189,19 +1240,42 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   async function doLoad(slot: SlotName) {
     if (showcaseMode) return;
+    loadController?.abort();
+    const controller = new AbortController();
+    loadController = controller;
+    const previous = gameState;
+    const previousSlot = saveSession.slot;
+    const epoch = saveSession.detach();
+    offlineProgress = { done: 0, total: 0 };
     paused = true;
     try {
+      await saveSession.flush();
       const s = await readSave(slot);
-      if (!s) { saveNote = `${slot} is empty`; return false; }
+      if (!saveSession.isCurrent(epoch)) return false;
+      if (!s || controller.signal.aborted) {
+        if (previousSlot) saveSession.attach(previousSlot, epoch);
+        saveNote = controller.signal.aborted ? 'Load cancelled; your character and saved slot were kept.' : `${slot} is empty`;
+        return false;
+      }
       gameState = { ...s };
       const away = (Date.now() - (s.lastSavedAt || Date.now())) / 1000;
       const before = snapCounters(gameState);
       // a load never clears the statuses the save just carried in (§7.7)
-      const r = canWriteAccount ? await catchUpAsync(gameState, away, { autoSkills: settings.autoSkills !== false }) : { simulated: 0, capped: false };
+      const r = canWriteAccount ? await catchUpAsync(gameState, away, {
+        autoSkills: settings.autoSkills !== false, signal: controller.signal,
+        onProgress: (done, total) => { if (saveSession.isCurrent(epoch)) offlineProgress = { done, total }; },
+      }) : { simulated: 0, capped: false, cancelled: false };
+      if (!saveSession.isCurrent(epoch)) return false;
+      if (r.cancelled) {
+        gameState = previous;
+        if (previousSlot) saveSession.attach(previousSlot, epoch);
+        saveNote = 'Load cancelled; your character and saved slot were kept.';
+        return false;
+      }
       if (canWriteAccount && settings.autoEquip !== false) equipCarriedBest();
       awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped, gameState) : null;
       // this slot becomes the autosave home, and the away window is spent (a reload must not recount it)
-      lastSlot = slot;
+      saveSession.attach(slot, epoch);
       takeoverSlot = slot;
       if (canWriteAccount) gameState.lastSavedAt = Date.now();
       saveNote = canWriteAccount
@@ -1212,10 +1286,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     } catch (error) {
       // a save that fails migration validation (removed content, illegal transitions) must say so —
       // an unhandled rejection leaves the player staring at the slot they just clicked
-      saveNote = `Cannot load ${slot}: ${error instanceof Error ? error.message : 'the save failed validation'} — the slot is unchanged. Start a new character to play the current tree.`;
+      if (saveSession.isCurrent(epoch)) {
+        gameState = previous;
+        if (previousSlot) saveSession.attach(previousSlot, epoch);
+        saveNote = `Cannot load ${slot}: ${error instanceof Error ? error.message : 'the save failed validation'} — your character and slot were kept.`;
+      }
       return false;
     } finally {
-      paused = false;
+      if (saveSession.isCurrent(epoch)) { paused = false; offlineProgress = null; loadController = null; }
     }
   }
 
@@ -1262,9 +1340,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     if (showcaseMode || !canWriteAccount) return;
     const file = (ev.target as HTMLInputElement).files?.[0];
     if (!file) return;
+    const epoch = saveSession.checkpoint();
     try {
-      gameState = importJson(await file.text());
-      saveNote = 'Imported';
+      const imported = importJson(await file.text());
+      if (!saveSession.isCurrent(epoch)) return;
+      saveSession.detach();
+      gameState = imported;
+      awayReport = null;
+      saveNote = 'Imported in memory. Choose a save slot to keep this character.';
       gameState = { ...gameState };
     } catch (e) {
       saveNote = `Import failed: ${(e as Error).message} — your current slot was not changed. Start a new character to play the current tree.`;
@@ -1273,8 +1356,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   function reset() {
     if (!canWriteAccount) return;
+    loadController?.abort();
+    saveSession.detach();
+    offlineProgress = null;
+    paused = false;
     gameState = newGame();
-    saveNote = '';
+    awayReport = null;
+    saveNote = 'New character is not saved yet. Choose a save slot; existing slots were kept.';
   }
 
   // the panel follows the zone the character is actually hunting, so an auto-travel step cannot
@@ -1733,9 +1821,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
    */
   const viewTown = $derived(pickedSettlement ?? town);
   const viewHere = $derived(!!viewTown && viewTown.id === townId);
-  const viewStock = $derived(stockOf(viewTown?.id ?? ''));
+  const viewStock = $derived(stockOf(viewTown?.id ?? '', gameState));
   const viewStanding = $derived(standingProgress(gameState, viewTown?.id ?? ''));
   const viewColSet = $derived(col.setAt(viewTown?.id));
+  const viewColHinted = $derived(!!viewColSet && !!gameState.collector.hints?.[viewColSet.id]);
   /**
    * The sheet's own key, read off the tones it carries: one entry per terrain, in the order the field
    * prints them. A cell with no zone is the nearest settlement's terrain faded by distance, so its
@@ -1759,7 +1848,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const firstBand = $derived(E.mob.zones[0].levels);
   const lastBand = $derived(E.mob.zones[E.mob.zones.length - 1].levels);
   const liveBands = $derived(E.mob.zones.filter((z: any) => z.levels[0] <= gateLevel).length);
-  const townStock = $derived(stockOf(town?.id ?? ''));
+  const townStock = $derived(stockOf(town?.id ?? '', gameState));
+  const skipTokens = $derived(gameState.town.owned.filter((id) => id === 'skip_token').length);
+  const freeSkipsLeft = $derived(Math.max(0, (Number(TOWN.task_sizing.free_skip_per_day) || 0) - (gameState.town.freeSkipsToday || 0)));
+  const repairPrice = $derived.by(() => {
+    if (!town) return 0;
+    const row = townStock.find((entry) => entry.id === 'repair_ironrow' || entry.id === 'repair');
+    return row ? priceGold(row, town.id, gameState) : 0;
+  });
   const junkTotal = $derived(Object.values(gameState.junk).reduce((a: number, b: number) => a + b, 0));
   const junkLines = $derived(Object.entries(gameState.junk)
     .filter(([, n]) => n > 0)
@@ -1779,7 +1875,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   function doTrade(id: string, count: number) {
     if (!transactionWriter) { saveNote = 'This tab is read-only.'; return; }
     const result = sellGoods(gameState, id, count);
-    saveNote = result.ok ? `Sold ${count} for ${result.gold.toFixed(TOWN.trade.currency_decimals)} gold` : `Cannot sell: ${result.why}`;
+    saveNote = result.ok
+      ? `Sold ${count} for ${result.gold.toFixed(TOWN.trade.currency_decimals)} gold${result.cityUnits != null ? ` — city took ${result.cityUnits}${result.basicUnits ? `, floor took ${result.basicUnits}` : ''}` : ''}`
+      : `Cannot sell: ${result.why}`;
     if (result.ok) push(gameState, saveNote);
     gameState = { ...gameState };
   }
@@ -1800,12 +1898,26 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   function doBuy(rowId: string, settlementId = town!.id) {
     if (!transactionWriter) { saveNote = 'This tab is read-only.'; return; }
     const r = buy(gameState, settlementId, rowId);
-    saveNote = r.ok ? `Bought ${r.row.item}` : `Cannot buy: ${r.why}`;
+    saveNote = r.ok ? (r.repaired ? `Repaired ${r.repaired} · ${r.gold} gold` : `Bought ${r.row.item}`) : `Cannot buy: ${r.why}`;
     gameState = { ...gameState };
   }
 
-  function doDelivery(id: string, count: number) {
-    const result = deliver(gameState, id, count, { writer: transactionWriter });
+  function doSkipTask(i: number) {
+    const r = skipTask(gameState, i, { writer: transactionWriter });
+    push(gameState, r.ok ? `Task skipped · ${r.free ? 'free skip' : 'skip token spent'}` : `Cannot skip: ${r.why}`);
+    gameState = { ...gameState };
+  }
+
+  function doRepairGear(where: Where, index: number) {
+    const r = repairGear(gameState, town?.id ?? '', where, index);
+    benchNote = r.ok ? `Armourer repaired ${r.repaired} · ${r.gold} gold` : `Cannot repair: ${r.why}`;
+    if (r.ok) push(gameState, benchNote);
+    gameState = { ...gameState };
+    return r.ok;
+  }
+
+  function doDelivery(id: string, count: number, choice?: string) {
+    const result = deliver(gameState, id, count, { writer: transactionWriter }, choice);
     saveNote = result.ok ? `Delivery ${result.completed ? 'completed' : 'recorded'} · ${result.gold!.toFixed(TOWN.trade.currency_decimals)} gold paid` : `Cannot deliver: ${result.why}`;
     if (result.ok) push(gameState, saveNote);
     gameState = { ...gameState };
@@ -1840,11 +1952,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     if (showcaseMode) document.getElementById('panel-market')?.scrollIntoView();
   }
 
+  let taskChoices = $state<Record<number, { task: TaskSlot; choice: string }>>({});
   function doClaim(i: number, choice?: string) {
     const t = gameState.town.tasks[i];
-    if (t && claimTask(gameState, i, choice)) {
-      const paid = t.alt && choice === t.alt.stone ? t.alt : { stone: t.stone, count: t.count };
-      push(gameState, `Task paid: ${paid.count} ${paid.stone} stone(s)${t.treePoints ? ` + ${t.treePoints} tree point${t.treePoints === 1 ? '' : 's'}` : ''}`);
+    const selected = t && taskBonuses(t).find((option) => option.id === (choice ?? t.stone));
+    const paid = selected && resolveQuestBonus(gameState, selected);
+    if (t && claimTask(gameState, i, choice, { writer: transactionWriter })) {
+      push(gameState, `Task paid: ${questBonusText({ ...selected!, ...paid! })}${t.treePoints ? ` + ${t.treePoints} Tree Point` : ''}`);
     } else if (t && t.progress >= t.n && !t.claimed) {
       push(gameState, atSettlement(gameState)
         ? 'Task reward is waiting — make room in the bag, then claim again'
@@ -1984,6 +2098,21 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   let bench = $state<{ where: Where; index: number } | null>(null);
   let benchNote = $state('');
   const benchItem = $derived(bench ? (bench.where === 'gear' ? gameState.gear[bench.index] : gameState.bag[bench.index]) : null);
+
+  let forgeNote = $state('');
+
+  function runForge(kind: ForgeKind, id: string, materialId: string) {
+    if (!transactionWriter) { forgeNote = 'This tab is read-only.'; return false; }
+    const rng = mulberry32(gameState.rngState);
+    const r = forgeGear(gameState, kind, id, materialId, rng);
+    if (!r.ok) { forgeNote = r.why || 'the forge refused'; return false; }
+    gameState.rngState += 1;
+    forgeNote = r.note || 'forged';
+    push(gameState, `Forge · ${forgeNote}`);
+    fx(gameState, { kind: 'craft', side: 'self', text: forgeNote, colour: E.elements.crit_colour || 'var(--gold)' });
+    gameState = { ...gameState };
+    return true;
+  }
 
   function runCraft(op: CraftOp, lineIndex: number, pick?: string) {
     if (!bench) return false;
@@ -2230,6 +2359,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     const next = { ...condOf(gameState.skills, id), ...patch };
     const flag = rowFlag(id);
     next.statusMissing = flag && next.statusMissing.includes(flag.key) ? [flag.key] : [];
+    const exploit = rowExploitFlag(id);
+    if (!exploit) { next.statusPresent = false; next.statusStacksAtLeast = 0; }
+    if (!next.statusPresent) next.statusStacksAtLeast = 0;
     gameState.skills.conditions[id] = next;
     gameState = { ...gameState };
   }
@@ -2256,6 +2388,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     if (status) return { key: status, label: status };
     return appliedCurseOf(skill) ? { key: skill!.id, label: skill!.name ?? '' } : null;
   }
+  /** The status a payoff row reads, named once on its own effect — the same source the sim reads. */
+  function rowExploitFlag(id: string | null): { key: string; label: string } | null {
+    const skill = id ? sm.byId[id] : null;
+    const status = sm.exploitedStatusOf(skill);
+    return status ? { key: status, label: status } : null;
+  }
   function toggleStatusMissing(id: string, name: string) {
     const now = condOf(gameState.skills, id).statusMissing;
     setCond(id, { statusMissing: now.includes(name) ? now.filter((n) => n !== name) : [...now, name] });
@@ -2274,6 +2412,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     if (cond.manaFloorPct > 0) legs.push(`keep ${cond.manaFloorPct}% of the pool`);
     const flag = rowFlag(id);
     if (flag && cond.statusMissing.includes(flag.key)) legs.push(`no ${flag.label}`);
+    const exploit = rowExploitFlag(id);
+    if (cond.statusPresent && exploit) legs.push(`it has ${exploit.label}`);
+    if (cond.statusStacksAtLeast > 0 && exploit) legs.push(`${cond.statusStacksAtLeast}+ ${exploit.label} stacks`);
+    if (cond.selfDebuffed) legs.push('we are debuffed');
     return legs.join(' · ');
   }
 
@@ -2352,7 +2494,15 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
 <svelte:head><title>{showcaseMode ? 'ModWorld UI Showcase' : 'ModWorld'}</title></svelte:head>
 
-<div class="showcase-frame" class:active={showcaseMode}>
+{#if offlineProgress}
+  <Panel title="Loading offline progress" subtitle="All elapsed time is credited · no offline time limit" gridArea={modalGridArea} onclose={cancelOfflineLoad}>
+    <p>{offlineProgress.total ? `${offlineProgress.done.toLocaleString()} / ${offlineProgress.total.toLocaleString()} seconds simulated` : 'Reading your saved character…'}</p>
+    <progress aria-label="Offline seconds simulated" value={offlineProgress.done} max={Math.max(1, offlineProgress.total)}></progress>
+    <p>Long absences are processed in order. Cancelling leaves the saved slot untouched.</p>
+    <button onclick={cancelOfflineLoad}>Cancel loading</button>
+  </Panel>
+{/if}
+<div class="showcase-frame" class:active={showcaseMode} class:economy-lab-sample={showcaseMode && showcaseSample === 'economy-lab'} inert={offlineProgress !== null}>
 {#if showcaseMode}
   <header class="showcase-banner">
     <div>
@@ -2370,9 +2520,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         bench = null; benchNote = ''; picked = null; pickedCell = null;
         panel = showcaseSample === 'expedition' ? 'desk' : showcaseSample === 'craft-stash' ? 'craft' : showcaseSample === 'map-mine' || showcaseSample === 'map-adventure' || showcaseSample === 'map-hex-3d' || showcaseSample.startsWith('map-camp-') ? 'map' : null;
         if (showcaseSample === 'expedition') deskTab = 'guild'; marketView = 'deliveries'; marketTownId = '';
+        if (showcaseSample === 'offline-progress') {
+          loadController = new AbortController();
+          offlineProgress = { done: 43200, total: 86400 };
+        }
       }}>
-        <option value="field">Field baseline</option><option value="delivery">Delivery want</option><option value="full-bag">Delivery reward bag full</option>
-        <option value="fallback">Delivery skill fallback</option><option value="expired">Expired partial delivery</option><option value="read-only">Read-only transactions</option>
+        <option value="field">Field baseline</option><option value="core-field">Core allocation · field</option><option value="core-town">Core allocation · town</option><option value="offline-progress">Offline catch-up · preview</option><option value="delivery">Delivery want · Fixed</option><option value="choice">Delivery want · Choice</option><option value="full-bag">Delivery reward bag full</option>
+        <option value="fallback">Delivery skill fallback</option><option value="expired">Expired partial delivery</option><option value="read-only">Read-only transactions</option><option value="economy-lab">Economy lab · Phase B</option>
         <option value="expedition">Expedition task</option><option value="craft-stash">Crafting · Stash workbench</option><option value="combat-fx">Combat FX · all labels</option><option value="map-mine">Map · Mine & Camp</option><option value="map-adventure">Map · Adventure board</option><option value="map-hex-3d">Map · Three.js hex prototype</option>
         <option value="map-camp-sounds">Map · Camp sounds</option><option value="map-camp-prowler">Map · Camp prowler</option><option value="map-camp-traveler">Map · Camp traveler</option><option value="map-camp-nest">Map · Camp nest</option><option value="map-camp-herd">Map · Camp herd</option><option value="map-camp-injured">Map · Camp aid</option><option value="map-camp-discovered">Map · Camp discovered</option><option value="map-camp-combat">Map · Camp combat</option><option value="map-camp-timeout">Map · Camp timeout</option><option value="map-camp-full-bag">Map · Camp full bag</option><option value="map-camp-readonly">Map · Camp read only</option>
       </select></label>
@@ -2389,6 +2543,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <a href="#panel-passive-tree">Tree</a>
     <a href="#panel-town">Town</a>
     <a href="#panel-market">Market</a>
+    <a href="#showcase-economy-lab">Economy lab</a>
     <a href="#panel-delivery-notice">Delivery notice</a>
     <a href="#panel-keyboard">Keys</a>
     <a href="#panel-field-camp">Camp</a>
@@ -2396,6 +2551,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <a href="#panel-settlement">Desk</a>
     <a href="#panel-save">Save</a>
   </nav>
+  {#if showcaseMode && showcaseSample === 'economy-lab' && economyLabView}
+    {@const EconomyLab = economyLabView}
+    <div id="showcase-economy-lab" class="showcase-economy-lab"><EconomyLab /></div>
+  {/if}
 {/if}
 
 <!-- desktop-only surface: below the floor the corner reads stop being placeable, so it says so -->
@@ -2444,10 +2603,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       <Minimap markup={mapMarkup} cell={gameState.cell} onopen={() => togglePanel('map')} />
     </div>
     <div class="zone-tag" class:traveling={Boolean(gameState.walk)}>
-      <img class="zone-emblem" src={waypointMark} alt="" aria-hidden="true" />
+      <img class="icon-label zone-emblem" src={waypointMark} alt="" aria-hidden="true" />
       <div class="zone-copy">
         <CollapseToggle label={zone.name} controls="location-map location-status" bind:expanded={locationExpanded} />
-        {#if showPlaceRead && locationExpanded}<span>{placeRead}</span>{/if}
+        {#if showPlaceRead && locationExpanded}<span class="text-note">{placeRead}</span>{/if}
       </div>
       {#if locationExpanded}
         <b class="zone-level">Lv {zone.levels[0]}–{zone.levels[1]}</b>
@@ -2455,6 +2614,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         <button class="btn-quiet" type="button" aria-label="Open the map" onclick={() => togglePanel('map')}>Map</button>
       {/if}
     </div>
+    {#if persistenceError}
+      <div class="account-hold" role="alert"><span class="text-alarm">Storage error · progress may not be saved</span><button type="button" onclick={() => openPanel('save')}>Open Save</button></div>
+    {/if}
     {#if !showcaseMode && accountWriterState !== 'owner' && accountWriterState !== 'checking'}
       {@const accountHoldLabel = accountWriterState === 'readonly'
         ? 'Read-only · another tab controls progress'
@@ -2484,7 +2646,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
        style={place(mapHelpOpen ? 'panels' : 'travel', '100%', mapHelpOpen ? '100%' : '')}>
       <div class="map-guide" class:open={mapHelpOpen} class:surface-popover={mapHelpOpen}>
         <CollapseToggle label="Map tools" controls="map-tools-content" bind:expanded={mapHelpOpen} />
-        <div id="map-tools-content" class="map-tools-content hub-collapsible" hidden={!mapHelpOpen}>
+        <div id="map-tools-content" class="map-tools-content hub-collapsible scroll-pane" hidden={!mapHelpOpen}>
           <MapJourney state={gameState} writable={transactionWriter} onSelect={locateMapHex}
             onStart={doStartPatrol} onStop={doStopPatrol} onClear={doClearPatrol} onMove={reorderPatrol}
             onEncounter={doCampEncounter} onPolicy={doCampPolicy} />
@@ -2544,7 +2706,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <div class="toast notice-toast">
       <button class="quit btn btn-flat" onclick={() => (awayReport = null)} aria-label="Dismiss">✕</button>
       <strong>Welcome back</strong>
-      <span>away {awayReport.mins} min · {awayReport.secs} sec simulated{awayReport.capped ? ' (capped at the offline limit)' : ''}</span>
+      <span>away {awayReport.mins} min · {awayReport.secs} sec simulated</span>
       <span>+{fmtNum(awayReport.kills)} kills · {fmtNum(awayReport.drops)} items · {fmtNum(awayReport.stones)} stones · {fmtNum(awayReport.junk)} junk · {fmtNum(awayReport.gold)} gold{awayReport.levels ? ` · +${awayReport.levels} level${awayReport.levels > 1 ? 's' : ''}` : ''} · quality floor {awayReport.quality}</span>
     </div>
   {/if}
@@ -2935,7 +3097,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
           <SlotGrid entries={wornEntries} capacity={E.stat.item_slots} wornOf={wornOf} fixed layout="equipment"
                     actions={wornActions} />
         </section>
-        <StatAllocator stats={STATS} core={c.core} points={gameState.player.points}
+        <StatAllocator stats={STATS} core={c.core} points={gameState.player.points} canRefund={townLive} writer={transactionWriter}
                        statPoints={gameState.player.statPoints} treePoints={gameState.player.treePoints}
                        autoSpend={gameState.player.autoSpend} level={gameState.player.level}
                        onallocate={allocate}
@@ -3047,19 +3209,19 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       {#snippet item(t)}
         {#if t.id === 'bag'}
           <span class="inventory-tab-label">
-            <img class="inventory-tab-art" src={hubIcon('bags', bagMark)} alt="" aria-hidden="true" />
+            <img class="icon-label inventory-tab-art" src={hubIcon('bags', bagMark)} alt="" aria-hidden="true" />
             Bag
           </span>
           <small class="text-note">{gameState.bag.length} piece{gameState.bag.length === 1 ? '' : 's'} · {slotsUsed(gameState)} / {slotsAvailable(gameState)} slots</small>
         {:else if t.id === 'stash'}
           <span class="inventory-tab-label">
-            <img class="inventory-tab-art" src={stashMark} alt="" aria-hidden="true" />
+            <img class="icon-label inventory-tab-art" src={stashMark} alt="" aria-hidden="true" />
             Stash
           </span>
           <small class="text-note">{tabs} tab{tabs === 1 ? '' : 's'}{townLive ? '' : ' · not here'}</small>
         {:else}
           <span class="inventory-tab-label">
-            <img class="inventory-tab-art" src={icon(BAG_TABS.find((b) => b.id === t.id)!.art)} alt="" aria-hidden="true" />
+            <img class="icon-label inventory-tab-art" src={icon(BAG_TABS.find((b) => b.id === t.id)!.art)} alt="" aria-hidden="true" />
             {BAG_TABS.find((b) => b.id === t.id)!.label}
           </span>
           <small class="text-note">{bagCount(t.id as BagCat)}</small>
@@ -3105,10 +3267,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       </div>
       <!-- overflow left behind and held-for-others, read beside the numbers -->
       {#if (gameState.counters.overflow || 0) > 0 || (gameState.counters.stopped || 0) > 0}
-        <p class="bagmeta"><small class="dim">{gameState.counters.overflow || 0} overflow · {gameState.counters.stopped || 0} refused</small></p>
+        <p class="bagmeta"><small class="text-dim">{gameState.counters.overflow || 0} overflow · {gameState.counters.stopped || 0} refused</small></p>
       {/if}
       {#if heldSummary}
-        <p class="bagmeta"><small class="dim">Held: {heldSummary}</small></p>
+        <p class="bagmeta"><small class="text-dim">Held: {heldSummary}</small></p>
       {/if}
       <!-- one bag: kept pieces and carried stacks share the same slots and the same count -->
       <div class="bagshell">
@@ -3125,7 +3287,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
               </select>
             </label>
             <span class="grow"></span>
-            <small class="dim">{bagShown.length} shown</small>
+            <small class="text-dim">{bagShown.length} shown</small>
           </div>
         {/snippet}
         <div class="bagmain">
@@ -3167,17 +3329,17 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         <!-- the rules a whole bag lives by are read with the table they answer to -->
         <div class="filterpresets">
           <p class="filterpresets-head"><b>Filter presets</b>
-            <small class="dim">· {presetSlots(gameState)}</small></p>
+            <small class="text-dim">· {presetSlots(gameState)}</small></p>
           <ul class="presetrow">
             {#each { length: presetSlots(gameState) } as _, i (i)}
               <li>
                 <span>Preset {i + 1}</span>
                 {#if gameState.filterPresets[i]}
-                  <small class="dim">stored</small>
+                  <small class="text-dim">stored</small>
                   <button onclick={() => doLoadFilterPreset(i)}>Load</button>
                   <button onclick={() => doClearFilterPreset(i)}>Clear</button>
                 {:else}
-                  <small class="dim">empty</small>
+                  <small class="text-dim">empty</small>
                   <button onclick={() => doSaveFilterPreset(i)}>Save</button>
                 {/if}
               </li>
@@ -3209,6 +3371,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   </Panel>
 {/if}
 
+{#if panel === 'forge'}
+  <Panel title="Forge" subtitle="Materials in · a new piece out" width="wide" fixed topmost gridArea={modalGridArea} onclose={closePanel}>
+    <Forge game={gameState} writer={transactionWriter} note={forgeNote} onforge={runForge} />
+  </Panel>
+{/if}
+
 {#if panel === 'craft' || showcaseMode}
   <Panel title="Craft" subtitle="Right-click a stone · click to apply · Shift-click to repeat" width="wide" fixed topmost showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <CraftWorkshop game={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
@@ -3216,6 +3384,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
                    onclear={() => { bench = null; benchNote = ''; }}
                    onrun={(op, line, pick) => runCraft(op, line ?? 0, pick)} {wornOf} note={benchNote}
                    stashTabs={tabs} stashTab={stashTab} writer={transactionWriter}
+                   repairPrice={repairPrice} onrepair={doRepairGear}
                    onStashTab={(tab) => { stashTab = tab; }}
                    onTakeStash={takeStashForCraft} onStore={storeCraftPiece} />
   </Panel>
@@ -3252,7 +3421,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
           <tr>
             <td>{i + 1}</td>
             <td>
-              {#if k}<span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}{#if !sm.weaponFits(k, heldWeaponName(gameState) || '')}<span class="chip chip-tag locked" title={`${k.name} fires only while a ${k.weapon === 'bow' ? 'bow or crossbow' : k.weapon} is held — you hold ${heldWeaponName(gameState) || 'nothing'}`}>needs {k.weapon === 'bow' ? 'bow/crossbow' : k.weapon}</span>{/if}</span>{:else}—{/if}
+              {#if k}<span class="skill-label"><img class="icon-label" src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}{#if !sm.weaponFits(k, heldWeaponName(gameState) || '')}<span class="chip chip-tag locked" title={`${k.name} fires only while a ${k.weapon === 'bow' ? 'bow or crossbow' : k.weapon} is held — you hold ${heldWeaponName(gameState) || 'nothing'}`}>needs {k.weapon === 'bow' ? 'bow/crossbow' : k.weapon}</span>{/if}</span>{:else}—{/if}
             </td>
             <td>{k && id ? (k.base_flat != null ? pressText(k) : k.type) : ''}</td>
             <td>{id ? `${skillLevel(gameState.skills, id)} / ${E.skill_xp.level_cap}` : ''}</td>
@@ -3284,9 +3453,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
             </td>
           </tr>
           {#if id && gateOpen === id && modeOf(gameState.skills, id) === 'conditional'}
-            <!-- the legs are the fixed five the sim reads; a needed number opens at its data default -->
+            <!-- the legs are the fixed set the sim reads; a needed number opens at its data default -->
             {@const cond = condOf(gameState.skills, id)}
             {@const flag = rowFlag(id)}
+            {@const exploit = rowExploitFlag(id)}
             <tr class="gate-editor">
               <td></td>
               <td colspan="9">
@@ -3298,8 +3468,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
                 <label><input type="checkbox" checked={cond.manaFloorPct > 0} onchange={(e) => setCond(id, { manaFloorPct: (e.target as HTMLInputElement).checked ? MANA_FLOOR_DEFAULT : 0 })} /> never spend below</label>
                 <input type="number" min="0" max="100" value={cond.manaFloorPct} onchange={(e) => setCond(id, { manaFloorPct: Number((e.target as HTMLInputElement).value) })} />% of the usable pool ·
                 {#if flag}<label><input type="checkbox" checked={cond.statusMissing.includes(flag.key)} onchange={() => toggleStatusMissing(id, flag.key)} /> while {flag.label} is not on it</label>{/if}
+                {#if exploit}
+                  <label><input type="checkbox" checked={cond.statusPresent} onchange={(e) => setCond(id, { statusPresent: (e.target as HTMLInputElement).checked })} /> while it has {exploit.label}</label>
+                  <span>at least</span>
+                  <input type="number" min="1" value={cond.statusStacksAtLeast} onchange={(e) => setCond(id, { statusStacksAtLeast: Math.max(0, Math.floor(Number((e.target as HTMLInputElement).value))) })} /> {exploit.label} stacks ·
+                {/if}
+                <label><input type="checkbox" checked={cond.selfDebuffed} onchange={(e) => setCond(id, { selfDebuffed: (e.target as HTMLInputElement).checked })} /> while we are debuffed</label> ·
                 <button onclick={() => copyGate(id)}>copy to every conditional row</button>
-                <button onclick={() => setCond(id, { boss: false, hpBelowPct: 0, statusMissing: [], minTargets: 0, manaFloorPct: 0 })}>clear</button>
+                <button onclick={() => setCond(id, { boss: false, hpBelowPct: 0, statusMissing: [], minTargets: 0, manaFloorPct: 0, statusPresent: false, statusStacksAtLeast: 0, selfDebuffed: false })}>clear</button>
               </td>
             </tr>
           {/if}
@@ -3314,7 +3490,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       {#each Object.keys(gameState.skills.owned) as id}
         {@const k = sm.byId[id]}
         <div class="skill-owned" title={`${k.name} · ${k.type} · ${k.effect || (k.base_flat != null ? `${Math.round(k.base_flat)} + ${k.eff}% of its ${k.basis} power` : k.reserve) || ''}`}>
-          <span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" /><b>{k.name}</b></span>
+          <span class="skill-label"><img class="icon-label" src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" /><b>{k.name}</b></span>
           <small>{gameState.skills.owned[id] + 1} owned · {gameState.skills.owned[id]} duplicates · {ladderOf(gameState.skills, id)}% cd</small>
         </div>
       {:else}
@@ -3329,11 +3505,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         <h3>Buff track · re-presses itself and takes no slot</h3>
         <div class="skill-effect-grid">
           {#each ownedBuffs as k}
-            <label title={`${k.duration}s on · ${k.cd}s cooldown · ${costNow(gameState.skills, k.id)} · ${effectLine(k) || k.effect}`}><input type="checkbox" checked={gameState.skills.buffs[k.id]} onchange={() => toggle(k.id)} /><span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span></label>
+            <label title={`${k.duration}s on · ${k.cd}s cooldown · ${costNow(gameState.skills, k.id)} · ${effectLine(k) || k.effect}`}><input type="checkbox" checked={gameState.skills.buffs[k.id]} onchange={() => toggle(k.id)} /><span class="skill-label"><img class="icon-label" src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span></label>
           {:else}<small>None owned.</small>{/each}
         </div>
       </section>
-      <p class="reserve-note"><small>Reserved {reserved.toFixed(1)}% of Max Mana{hpReservedShare > 0 ? ` · ${hpReservedShare.toFixed(1)}% of Max HP` : ''} · cap {sm.RESERVATION_LIMIT}%. Active: {describeFold(effectsActive(gameState.skills)) || 'none'}.</small></p>
+      <p class="reserve-note"><small>Reserved {reserved.toFixed(1)}% of Max Mana{hpReservedShare > 0 ? ` · ${hpReservedShare.toFixed(1)}% of Max HP` : ''} · cap {sm.RESERVATION_LIMIT}%. Active: {describeFold(effectsActive(gameState.skills, c.keystones)) || 'none'}.</small></p>
       {#if hasResonance}
         <p class="reserve-note"><small>Aura Resonance · {resonance.count} active aura{resonance.count === 1 ? '' : 's'} (trigger auras count): −{(resonance.bR * 100).toFixed(1)}% reservation, +{(resonance.bE * 100).toFixed(1)}% aura effect.</small></p>
       {/if}
@@ -3344,7 +3520,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
             {@const pool = auraPoolOf(gameState.skills, k.id)}
             {@const share = pool === 'hp' ? sm.reservePct(k.reserve ?? '') : sm.reservePct(k.reserve ?? '') * (1 - resonance.bR)}
             <div class="aura-row">
-              <label title={`${k.reserve} · ${share.toFixed(1)}% of Max ${pool === 'hp' ? 'HP' : 'Mana'} · ${effectLine(k) || k.effect}`}><input type="checkbox" checked={gameState.skills.auras[k.id]} onchange={() => toggle(k.id)} /><span class="skill-label"><img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span></label>
+              <label title={`${k.reserve} · ${share.toFixed(1)}% of Max ${pool === 'hp' ? 'HP' : 'Mana'} · ${effectLine(k) || k.effect}`}><input type="checkbox" checked={gameState.skills.auras[k.id]} onchange={() => toggle(k.id)} /><span class="skill-label"><img class="icon-label" src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span></label>
               {#if hasBloodCovenant}
                 <select aria-label={`${k.name} reservation pool`} value={pool} onchange={(event) => chooseAuraPool(k.id, event.currentTarget.value === 'hp' ? 'hp' : 'mana')}>
                   <option value="mana">Mana</option>
@@ -3546,7 +3722,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <div class="desk-panel">
     <Tabs label="Settlement sections" active={deskTab} onpick={(id) => (deskTab = id as typeof deskTab)}
           tabs={[{ id: 'services', label: 'Services' }, { id: 'stall', label: 'Stall' }, { id: 'guild', label: 'Guild & Collector' }, { id: 'hunt', label: 'Hunt' }, { id: 'walk', label: 'Walk' }]} />
-    <div class="desk-content">
+    <div class="desk-content scroll-pane">
 
     {#if viewTown}
       <h3>{viewTown.name} · settlement{viewHere ? '' : ' — read only, you are standing in ' + (town ? town.name : 'the field')}</h3>
@@ -3584,7 +3760,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
               <td>{row.kind}</td>
               <td>{priceMinutes(row, viewTown.id, gameState)} m{row.charge_band ? ` @ ${row.charge_band}` : ''}</td>
               <td>{priceGold(row, viewTown.id, gameState)}</td>
-              <td>{#if !check.ok}<small>{check.why}</small>{/if}{#if viewHere}<button onclick={() => doBuy(row.id)} disabled={!check.ok}>buy</button>{:else}<span class="dim">elsewhere</span>{/if}</td>
+              <td>{#if !check.ok}<small>{check.why}</small>{/if}{#if viewHere}<button onclick={() => doBuy(row.id)} disabled={!check.ok}>buy</button>{:else}<span class="text-dim">elsewhere</span>{/if}</td>
             </tr>
           {/each}
         </tbody>
@@ -3596,11 +3772,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
       {#if deskTab === 'guild'}
       {#if viewHere}
-        <h4>Guild board · {gameState.town.tasks.length} slots</h4>
+        <h4>Guild board · {gameState.town.tasks.length} slots · {freeSkipsLeft} free skip{freeSkipsLeft === 1 ? '' : 's'} · {skipTokens} token{skipTokens === 1 ? '' : 's'}</h4>
         <table>
           <thead><tr><th>#</th><th>Task</th><th>Zone</th><th>Progress</th><th>Reward</th><th></th></tr></thead>
           <tbody>
             {#each gameState.town.tasks as t, i}
+              {@const skip = skipVerdict(gameState, i)}
+              {@const options = t ? taskBonuses(t) : []}
+              {@const choice = t && taskChoices[i]?.task === t ? taskChoices[i].choice : undefined}
               <tr>
                 <td>{i + 1}</td>
                 <td>{t ? t.kind === 'expedition'
@@ -3609,27 +3788,30 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
                   : 'refills in ' + (() => { const s = Math.max(0, gameState.town.refillAt[i] - gameState.clockSec); return s >= 3600 ? (s / 3600).toFixed(1) + 'h' : s >= 60 ? Math.round(s / 60) + 'm' : Math.round(s) + 's'; })()}</td>
                 <td>{t ? eng.zoneById(t.zone).name : ''}</td>
                 <td>{t ? `${t.progress} / ${t.n}` : ''}</td>
-                <td>{t ? (t.alt ? `${t.count} ${t.stone} or ${t.alt.count} ${t.alt.stone}` : `${t.count} ${t.stone} stone`) + (t.treePoints ? ` + ${t.treePoints} tree point${t.treePoints === 1 ? '' : 's'}` : '') : ''}</td>
+                <td>{#if t}
+                  <QuestBonusPicker state={gameState} {options} name={`hunt-reward-${i}`} {choice} writer={transactionWriter} onchoose={(choice) => { taskChoices[i] = { task: t, choice }; }} />
+                  {#if t.treePoints}<p class="text-good">+{t.treePoints} Tree Point{t.milestone ? ' · first Expedition milestone in this zone' : ' · stored quest bonus'}{options.length > 1 ? ' · either reward' : ''}</p>{/if}
+                {/if}</td>
                 <td>{#if t}
                   {#if t.kind === 'expedition'}
                     <button class="btn btn-quiet" onclick={() => goToTask(t)}>Map target</button>
                   {/if}
-                  {#if t.alt}
-                    <button disabled={t.progress < t.n} onclick={() => doClaim(i, t.stone)}>{t.stone}</button>
-                    <button disabled={t.progress < t.n} onclick={() => doClaim(i, t.alt!.stone)}>{t.alt.stone}</button>
-                  {:else}
-                    <button disabled={t.progress < t.n} onclick={() => doClaim(i)}>claim</button>
-                  {/if}
+                  <button class="btn btn-quiet" disabled={!transactionWriter || !skip.ok}
+                          title={skip.why || (skip.free ? 'Use the free task skip' : 'Spend one Task skip token')}
+                          onclick={() => doSkipTask(i)}>{skip.free ? 'skip · free' : skip.token ? 'skip · token' : 'skip'}</button>
+                  <button disabled={!transactionWriter || t.progress < t.n || options.length > 1 && !choice}
+                    title={options.length > 1 && !choice ? 'Choose one reward before claiming' : 'Receive the displayed reward'}
+                    onclick={() => doClaim(i, choice)}>Claim reward</button>
                 {/if}</td>
               </tr>
             {/each}
           </tbody>
         </table>
-        <p><small>Payouts: stones only · {TOWN.task_sizing.reward_minutes_of_band_income} min of band income.</small></p>
+        <p><small>Elite hunts pay fixed stones. Expeditions offer stones or a named useful skill; Boss hunts offer Remove or Tier stones. First Expedition milestone per zone: +{TOWN.quest_rewards.milestone_tree_points} Tree Point, separate from the choice.</small></p>
       {/if}
 
       {#if viewColSet}
-        <h4>Collector · {viewColSet.name} ({viewColSet.school} school)</h4>
+        <h4>Collector · {viewColSet.name} ({viewColHinted || gameState.collector.done[viewColSet.id] ? `${viewColSet.school} school` : 'school hidden'})</h4>
         <p><small>{gameState.collector.done[viewColSet.id]
           ? 'Turned in · the pieces are gone and the reward is yours.'
           : setUnlocked(gameState, viewColSet)
@@ -3648,7 +3830,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
           </tbody>
         </table>
         {#if !gameState.collector.done[viewColSet.id]}
-          <p><small>Still hunting: {viewColSet.parsed.filter((p: any) => heldCount(gameState, viewColSet.id, p.name) === 0).map((p: any) => `${p.name} (${p.slot})`).join(' · ') || 'every piece is in hand — turn it in.'} Frames roll even-weighted across the whole world, so the target is the {viewColSet.quality} quality and the {viewColSet.school} school, not one zone.</small></p>
+          <p><small>Still hunting: {viewColSet.parsed.filter((p: any) => heldCount(gameState, viewColSet.id, p.name) === 0).map((p: any) => `${p.name} (${p.slot})`).join(' · ') || 'every piece is in hand — turn it in.'} Frames roll even-weighted across the whole world, so the target is the {viewColSet.quality} quality{viewColHinted ? ` and the ${viewColSet.school} school` : ' — buy the Collector hint to reveal its school'}, not one zone.</small></p>
         {/if}
         {#if viewHere}
           <button onclick={doTurnIn} disabled={!setUnlocked(gameState, viewColSet) || gameState.collector.done[viewColSet.id]}>turn in the set</button>
@@ -3743,7 +3925,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       </div>
     {/if}
     {#if saveTab === 'slots'}
-    <p>Three local character slots · away time catches up to {E.inventory.offline_cap_hr} hours.</p>
+    {#if persistenceError}<div role="alert"><p class="text-alarm">{persistenceError}</p><button onclick={download}>Export recovery JSON</button></div>{/if}
+    <p>Three local character slots · offline progress has no time limit. Autosave starts after you save or load a slot; a new or imported character needs its own slot choice.</p>
     <div class="save-actions">
     {#each saveSlots as slot}
       <button disabled={showcaseMode || !canWriteAccount} onclick={() => doSave(slot)}>Save {slot}</button>
@@ -3819,6 +4002,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .showcase-index { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--screen-pad); border-bottom: 1px solid var(--line); background: var(--inset); }
   .showcase-index a { padding: var(--spacing-xs) var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-card); color: var(--dim); font-size: var(--font-xs); text-decoration: none; white-space: nowrap; }
   .showcase-index a:hover, .showcase-index a:focus-visible { border-color: var(--gold); color: var(--gold-lit); }
+  .showcase-economy-lab { min-height: 0; overflow-y: auto; padding: var(--spacing-md); }
+  .showcase-economy-lab > :global(.economy-lab) { max-width: 1600px; margin: 0 auto; }
+  .showcase-frame.active.economy-lab-sample .stage { display: none; }
   .showcase-note { padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); color: var(--dim); background: var(--inset); font-size: var(--font-xs); }
 
 
@@ -3896,7 +4082,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .map-reference :global(.mini-map) { flex: none; }
   .map-guide { position: relative; z-index: var(--z-content); display: grid; align-content: start; gap: var(--spacing-xs); width: fit-content; max-width: 100%; min-width: 0; }
   .map-guide.open { width: 100%; padding: var(--spacing-sm); display: flex; flex-direction: column; min-height: 0; max-height: 100%; }
-  .map-guide.open .map-tools-content { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+  .map-guide.open .map-tools-content { min-height: 0; }
   .map-tools-content, .map-tools { display: grid; gap: var(--spacing-sm); min-width: 0; font-size: var(--font-xs); }
   .map-tools-section { min-width: 0; }
   .map-tools-section summary { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); padding-block: var(--spacing-xs); cursor: pointer; }
@@ -4322,12 +4508,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, .06);
     color: var(--text);
   }
-  .zone-emblem { flex: none; width: var(--icon-label); height: var(--icon-label); object-fit: contain; opacity: .9; }
+  .zone-emblem { opacity: .9; }
   .zone-copy { display: grid; gap: var(--spacing-xs); min-width: 0; flex: 1; }
   .zone-copy span { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .zone-tag.traveling { align-items: flex-start; }
   .zone-tag.traveling .zone-copy span { overflow: visible; white-space: normal; }
-  .zone-copy span { color: var(--dim); font-size: var(--font-xs); }
   .zone-level { flex: none; padding-left: var(--spacing-xs); border-left: 1px solid var(--edge); color: var(--gold-lit); font-size: var(--font-xs); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .zone-emblem { padding: var(--spacing-xs); border: 1px solid var(--hud-edge); border-radius: var(--radius-round); background: var(--hud-face); box-sizing: border-box; }
   .targetbar {
@@ -4421,7 +4606,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .inventory-layout { display: grid; grid-template-columns: minmax(max-content, 1fr) minmax(0, 4fr); align-items: start; gap: var(--spacing-md); min-width: 0; min-height: 0; }
   .inventory-tab { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: var(--spacing-xs); width: 100%; min-width: 0; text-align: left; }
   .inventory-tab-label { display: inline-flex; align-items: center; gap: var(--spacing-xs); min-width: 0; }
-  .inventory-tab-art { width: var(--icon-label); height: var(--icon-label); object-fit: contain; flex: none; }
   /* the tab buttons live in Tabs.svelte's scope, so their face styles reach them globally */
   :global(.inventory-tab) small { text-align: right; }
 
@@ -4497,7 +4681,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .autodissolve input { width: var(--input-narrow); }
   .skill-label { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
   .skill-label .chip { padding-inline: var(--spacing-xs); }
-  .skill-label img { width: var(--icon-label); height: var(--icon-label); object-fit: contain; flex: none; }
 
   .gate {
     padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); color: var(--gold); cursor: pointer;
@@ -4524,7 +4707,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .save-panel table { font-size: var(--font-xs); }
   .save-note-inline { color: var(--good); font-size: var(--font-xs); }
   .desk-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: var(--spacing-xs); }
-  .desk-content { display: flex; flex-direction: column; gap: var(--spacing-xs); flex: 1; min-height: 0; overflow: auto; }
+  .desk-content { display: flex; flex-direction: column; gap: var(--spacing-xs); flex: 1; min-height: 0; }
   .desk-content p { font-size: var(--font-xs); }
   .desk-content .picklist th, .desk-content .picklist td { padding: var(--spacing-xs) var(--spacing-xs); line-height: 1.1; font-size: var(--font-xs); }
   .desk-content .picklist button { font-size: var(--font-xs); }
@@ -4551,7 +4734,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .effects-view h3 { margin: 0; }
   .skill-effect-grid label { display: flex; align-items: center; gap: var(--spacing-xs); min-width: 0; margin: 0; padding: var(--spacing-xs) var(--spacing-xs); border-bottom: 1px solid var(--line); }
   .skill-effect-grid .skill-label { min-width: 0; overflow: hidden; }
-  .skill-effect-grid .skill-label img { flex: none; }
   .skill-effect-grid .skill-label { white-space: nowrap; text-overflow: ellipsis; }
   .skill-effect-grid .aura-row { display: flex; align-items: center; gap: var(--spacing-xs); min-width: 0; border-bottom: 1px solid var(--line); }
   .skill-effect-grid .aura-row label { flex: 1; border-bottom: 0; }
@@ -4806,6 +4988,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     gap: var(--spacing-xs);
   }
   .action-cluster { max-width: 100%; gap: var(--spacing-xs); }
+  @media (max-width: 1500px) { .vital-stack { --orb-size: clamp(84px, 6.4vw, 96px); } }
   .field-feed {
     grid-area: feed;
     width: 100%;

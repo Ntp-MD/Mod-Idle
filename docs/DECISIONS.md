@@ -88,6 +88,16 @@ attainmentPoints = earned − spent('attainment')
 
 Armour penetration, status resistance, attack/spell damage, bleed chance, leech, damage taken, global speed, damage conversion: summed line/effect values, with their configured cap or multiplier.
 
+## Skill presses and status payoffs
+
+A row may name one status it exploits (`bonus_vs_status`, `consume_status` or `spread_status`). The status is read from that effect, so the row and its condition never hold two copies of the same fact.
+
+- `bonus_vs_status`: while the target holds that status, `press_target = press × (1 + bonus_pct / 100)`.
+- `consume_status`: `stacks = min(live_stacks, cap)`; `press_target = press × (1 + stacks × per_stack_pct / 100)`; the stacks are removed after the hit.
+- `spread_status`: before the consume, the live line is copied to up to `value` other targets the row reaches. The copy keeps stacks, remaining seconds and `perSec`; it starts no new clock and never overwrites a stronger line.
+- The auto-cast condition legs `statusPresent` and `statusStacksAtLeast` read the same exploited status. `selfDebuffed` reads the character's own live statuses. Like the other legs they are an OR list.
+- A retired row keeps its id resolvable in `byId` for old saves, but it is excluded from drops, named rewards and the live roster. `retired_to` names the active row that carries its role; no save migration is required.
+
 ## Combat order
 
 One hit runs perfect dodge → Evasion → block → Armour → resistance → damage taken → ES → HP.
@@ -120,6 +130,7 @@ bossHP = baseMobHP(level, bossProfile.core)
 uniqueHP = baseMobHP(zoneTopLevel, uniqueProfile.core)
 mobMana(level) = mana_base + mana_per_level × (level - 1) + mobInt × K_INT_MP
 mobAccuracy = mobDex × K_DEX_ACC × accuracy_mult
+bonusMaterialChance = budget / (average quantity × material value), budget = 5% of the live junk gold/kill
 mobResistance(Element) = Element === species.resistance.element ? min(caps.elem_res, species.resistance.pct) : 0
 mobWeakness(Element) = Element === species.weakness.element ? 1 + species.weakness.taken_pct / 100 : 1
 speciesPower(profile, damageType) = profile.power_base + K_MOB_PS_STAT × (wPhys × profile.str + wMagic × profile.int), where [wPhys, wMagic] = damage_split[damageType]
@@ -193,6 +204,12 @@ deadline = max(deadline_min_sec, ceil(productionSec × production_allowance + tr
 
 Intrinsic band, rarity and processing are independent of the chosen route and carried goods. Carried goods reduce missing production. Offer candidates must fit `deadline_max_sec`. Distance changes the deadline only. Partial hand-ins use the live sale formula; the frozen completion bonus pays once.
 
+## Quest reward choices and milestones
+
+`town.json delivery.reward_modes` selects an offer's mode by `(savedSerial - 1) % sequence.length`. Fixed uses the ordinary stored bonus. Choice gold is `floorCurrency(rawQuoteGold × (premium(difficulty, offerHagglingXP) - 1) × choice_reward_mult)`; its stone and skill-fallback alternatives call the existing `stoneBundle` with `difficulty × choice_reward_mult`. These calculations live in `engine/delivery.ts`. No additional loot draws are consumed: the former random Tree Point draw is retained, and Expedition reuses its former draw to select a useful named skill.
+
+`town.json quest_rewards.milestone_tree_points` is promised once per `expedition:<zone>` or `delivery:<town>` objective. Open promises reserve their milestone; only successful final payout marks the saved ledger. These points never compete with consumable alternatives. Legacy saved random bonuses remain frozen; importing or backfilling grants nothing.
+
 ## Black Market prices
 
 `engine/black-market.ts` snapshots prices from `town.json.black_market`.
@@ -204,3 +221,22 @@ skillXpAfterPurchase = max(existingXp, skillXpForLevel(offeredLevel))
 ```
 
 Stones and named Skill XP Level offers use their authored price.
+
+## Forge
+
+`engine/forge.ts` resolves a pattern and the chosen material; `tools/data/engine.json` `forge` owns the material families/grades, the pattern costs and both grade ladders. The client then rolls the piece with `loot.buildLines`, exactly the drop skeleton. `tools/forge.ts --checks` proves every material, Base and weapon Frame reference.
+
+```text
+grade = forge.materials[material].grade          // 1..3
+q = grade - 1
+span = item_level.spans[q]
+band = span.band
+ilvl = clamp(character level, span.from, span.to)
+character gate: character level >= span.from
+smithing gate:  smithing level >= forge.smithing_level[q]
+count = forge.armour[slot].count             // armour pattern
+      = forge.weapons[weaponType].count      // weapon pattern
+xp = forge.xp_per_grade[q]
+```
+
+An armour pattern takes any family that names a Base for the slot; a weapon pattern has one family. The material's family picks the Base/Frame, and its grade picks the band. A forged piece carries the same line skeleton as a drop (line 1 + Bound pair + 2–5 Unbound lines), enters the bag unfiltered and then answers the same Craft bench verbs. There is no gold fee and no forge-specific saved state. Fancier Base variants remain drop-only.

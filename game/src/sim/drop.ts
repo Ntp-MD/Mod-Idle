@@ -29,22 +29,13 @@ export const weaponWeightOf = (name: string, slot = 'main hand'): number =>
  * carries: both live in `engine/loot.ts`, which the loot cage runs too, so a drop the game rolls and
  * a drop the simulation scores come off one builder.
  */
-export function rollDrop(rng: () => number, band: string, ilvl: number, _weaponAspd?: number, carriesWeapon = true): Item {
-  const slots = carriesWeapon ? loot.SLOTS : loot.SLOTS.filter((slot: string) => slot !== 'main hand' && slot !== 'off hand');
-  const slot = loot.pick(rng, slots);
-  const chosen = loot.rollBase(rng, BASES, slot);
-  const frame = chosen.frame || null;
-  const weapon = chosen.weapon || null;
-  // the band is what the drop source declares — the weight half and the label; the level is what the
-  // window's floor and ceiling are read at (`item-level.md`)
-  const q = eng.qualityIndexOf(band);
+export function itemFromFrame(rng: () => number, slot: string, frame: any, weapon: any, ilvl: number, q: number): Item {
   const { lines, u } = loot.buildLines(BASES, { slot, frame, weapon, ilvl, q }, rng);
-
-  const baseWeight = weapon ? weaponWeightOf(weapon.name, slot) : frame!.weight;
+  const baseWeight = weapon ? weaponWeightOf(weapon.name, slot) : frame.weight;
 
   return {
     slot,
-    base: weapon ? String(weapon.name) : frame!.name,
+    base: weapon ? String(weapon.name) : frame.name,
     ilvl,
     weaponAspd: slot === 'main hand' && weapon ? E.weapons.find((row: any) => row.name === weapon.name)?.weapon_aspd : undefined,
     quality: loot.BAND_LABEL[q],
@@ -57,6 +48,16 @@ export function rollDrop(rng: () => number, band: string, ilvl: number, _weaponA
   };
 }
 
-export const modName = (id: string) => loot.NAME_OF[id] || id;
+export function rollDrop(rng: () => number, band: string, ilvl: number, _weaponAspd?: number, carriesWeapon = true): Item {
+  const slots = carriesWeapon ? loot.SLOTS : loot.SLOTS.filter((slot: string) => slot !== 'main hand' && slot !== 'off hand');
+  const slot = loot.pick(rng, slots);
+  const chosen = loot.rollBase(rng, BASES, slot);
+  const frame = chosen.frame || null;
+  const weapon = chosen.weapon || null;
+  // the band is what the drop source declares — the weight half and the label; the level is what the
+  // window's floor and ceiling are read at (`item-level.md`)
+  const q = eng.qualityIndexOf(band);
+  return itemFromFrame(rng, slot, frame, weapon, ilvl, q);
+}
 
-void E;
+export const modName = (id: string) => loot.NAME_OF[id] || id;

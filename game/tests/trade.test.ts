@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { E, TOWN, fieldwork, trade } from '../src/engine/client';
 import { newGame, tick } from '../src/sim/game';
-import { sellGoods, quoteSale, processMaterials, canProcess, marketDestinations } from '../src/sim/trade';
+import { sellGoods, quoteSale, processMaterials, canProcess, marketDestinations, type MarketQuote } from '../src/sim/trade';
 import { sellJunk, priceGold, stockOf, buy } from '../src/sim/town';
 import { settlementCell, startWalk, arrive } from '../src/sim/road';
 import { cookMeal, eatMeal, tickFieldwork } from '../src/sim/fieldwork';
@@ -39,8 +39,8 @@ describe('town demand and cargo', () => {
     expect(initial).toBeGreaterThan(remote);
     expect(sellGoods(state, 'material:copper-ore', 100).ok).toBe(true);
     expect(quoteSale(state, 'eastgate', 'material:copper-ore', 1)!.gold).toBeLessThan(initial);
-    expect(quoteSale(state, 'eastgate', 'material:iron-ore', 1)!.demand).toBeLessThan(1);
-    expect(quoteSale(state, 'highspire', 'material:copper-ore', 1)!.demand).toBe(1);
+    expect((quoteSale(state, 'eastgate', 'material:iron-ore', 1)! as MarketQuote).demand).toBeLessThan(1);
+    expect(quoteSale(state, 'highspire', 'material:copper-ore', 1)).toMatchObject({ ok: true, cityUnits: 1 });
     expect(state.town.market.highspire).toBeUndefined();
     state.cell = settlementCell('highspire')!;
     state.fieldwork.materials['iron-ore'] = 1;
@@ -85,7 +85,7 @@ describe('town demand and cargo', () => {
     expect(quoteSale(live, 'eastgate', 'material:copper-ore', 1)).toEqual(quoteSale(away, 'eastgate', 'material:copper-ore', 1));
     expect(quoteSale(live, 'eastgate', 'material:copper-ore', 1)!.gold).toBeGreaterThan(before);
     live.clockSec += TOWN.trade.recovery_sec;
-    expect(quoteSale(live, 'eastgate', 'material:copper-ore', 1)!.demand).toBe(1);
+    expect((quoteSale(live, 'eastgate', 'material:copper-ore', 1)! as MarketQuote).demand).toBe(1);
   });
 
   it('refuses bad quantities, absent stock and field sales without spending anything', () => {

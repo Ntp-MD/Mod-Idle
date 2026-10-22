@@ -68,6 +68,11 @@ Calculation order: [DECISIONS.md](DECISIONS.md#combat-order).
 | **No death** | The standing rule: defensive value comes from time not lost, not from survival. |
 | **DoT** | Damage over time, ticking once a second. |
 | **Leech** | HP returned as a percentage of damage just dealt. |
+| **Setup / payoff** | A setup row applies a status; a payoff row reads or spends that same status for its own effect. |
+| **Status present** | An auto-cast leg that holds a payoff row until the target carries the status the row exploits; `statusStacksAtLeast` adds a stack floor. |
+| **Consume** | Spending a status's stacks for extra damage. The press removes only the stacks it spends, after the hit. |
+| **Spread** | Copying a live status line to another target. The copy keeps its stacks and remaining life and starts no new clock. |
+| **Retired skill** | A legacy row kept resolvable for old saves but excluded from drops, named rewards and the live roster. |
 | **Perfect dodge** | Removes the hit outright, and it is not contested. |
 | **Reach** | How far a build can act **in a fight**: near and far are a queue, not a range band. |
 | **Foe** | The **Field of Enemies** — every mob the character is fighting at once. |
@@ -145,6 +150,10 @@ Calculation order: [DECISIONS.md](DECISIONS.md#combat-order).
 | **field material** | A carried stack produced by Mine, Rare Grove, Smithing or hunting activity. |
 | **Fishing** | A timed gathering activity at a Field Camp in a zone with an authored fishing source. |
 | **Smithing** | Settlement recipes that process ore and timber into metal or components; it does not craft gear. |
+| **Forge** | A settlement service that turns one material into a chosen weapon or armour piece. The material's family picks the Base or weapon Frame; its grade sets the item band. |
+| **Pattern** | One Forge output shape: an armour slot or a weapon type. Its material family and count come from `engine.json` `forge`. |
+| **Material grade** | The 1–3 tier of a Forge material. It selects the item band and the character/smithing gates; higher grades need higher levels. |
+| **Material family** | The Forge grouping that selects a Base school or weapon frame set: metal, wood, organic or essence. |
 | **meal** | A cooked food item; eating one replaces the active timed combat buff. |
 | **Hunger** | The character's food/provision meter. |
 | **Auto Eat** | Automatic consumption of carried provisions to restore Hunger. |
@@ -160,6 +169,8 @@ Calculation order: [DECISIONS.md](DECISIONS.md#combat-order).
 | **Workshop** | A settlement service that consumes gathered materials to make finished trade goods and grants the recipe's field skill XP. |
 | **variant** | One named form of a Species (`mob.variants`): it owns a level band, authored Core allocation, may override the Species' default damage type, and selects its junk row. A Species may author any number of Variants. |
 | **unique** | A named wild boss belonging to a Species (`mob.uniques`): an optional rare upgrade of a normal spawn. A Species can have none or several. |
+| **mob kit** | The optional list of mob skills one spawn resolves from `tools/data/mob-skills.json`, capped at 4. Resolution is an override, never a merge: Unique > Boss > Variant > Species. A Species without a kit keeps its basic swing. |
+| **aura scope** | Where a mob aura applies: `engaged` affects the front three bodies of the group; `line` affects only bodies on the source's own formation line. Strongest wins and copies do not stack. |
 
 # Town and Economy
 

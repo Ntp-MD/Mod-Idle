@@ -1,6 +1,5 @@
 /**
- * Typed damage-packet provenance — the outgoing contract of
- * `docs/passive-tree-keystones-draft.md` §7.2. Pure: no imports beyond itself, no RNG, no globals.
+ * Typed damage-packet provenance — the outgoing contract. Pure: no imports beyond itself, no RNG, no globals.
  *
  * A damage packet describes ONE damage event against ONE target: which pool each raw part came from
  * (crit-eligible physical, physical that never takes crit, magic, and the three elemental lanes),

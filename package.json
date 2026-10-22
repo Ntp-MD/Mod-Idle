@@ -5,11 +5,14 @@
   "description": "ModWorld: design specs and cages in the root, the playable client in game/, the shared math in engine/.",
   "scripts": {
     "verify": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/verify.ts",
+    "economy:baseline": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/economy-baseline.ts",
     "wiki": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/wiki.ts build",
     "skills": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/skills.ts",
     "map": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/map.ts",
     "map:check": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/map.ts --checks",
     "gallery": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/gallery.ts",
+    "css:audit": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/css-audit.ts",
+    "lint": "biome lint --max-diagnostics=50",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "dev": "npm --prefix game run dev",
     "build": "npm --prefix game run build",
@@ -17,6 +20,7 @@
     "check": "npm run typecheck && npm --prefix game run check"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.6.2",
     "@types/node": "^22.20.5",
     "typescript": "^5.7.3"
   },

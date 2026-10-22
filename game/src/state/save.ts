@@ -4,6 +4,7 @@ import { normalizeBlackMarket } from '../sim/black-market';
 import { ACTIVE_SLOTS, clampAuraReservations, clearUnownedTracks, effectsActive, newSkillState } from '../sim/skills';
 import { newTown } from '../sim/town';
 import { normalizeDeliveries } from '../sim/delivery';
+import { normalizeQuestRewards } from '../sim/quest-rewards';
 import { normalizeExplorationState } from '../sim/exploration';
 import { normalizeMapJournal } from '../sim/map-exploration';
 import { newFarm, QUICKBAR_SLOTS } from '../sim/farm';
@@ -20,6 +21,7 @@ import { newKeystoneRuntimeState, validateKeystoneRuntime, validatePlayerStatuse
 import { reason as snapshotReason, arm as armSnapshot, SAVE_CFG } from '../sim/snapshot';
 import { E, TOWN, BASES, eng, loot, sm, tree, STAT_KEYS, type StatKey } from '../engine/client';
 import { road } from '../sim/road';
+import { newEconomyState, validateEconomy } from '../sim/economy';
 
 // save.md: local only, three slots, IndexedDB with a localStorage fallback, JSON export/import.
 // The town layer is a schema bump, and an import at a different version is rejected rather than
@@ -42,10 +44,12 @@ import { road } from '../sim/road';
 // v18 moves the statuses ON the character and the keystone runtime into the saved state (§7.7): a
 // pre-v18 save carried neither, so it backfills empty ones; a save claiming v18 must hold both
 // whole — the reader refuses a missing or impossible field by name rather than default-filling it.
+// v20 adds the city ledger (`town.json → economy`): an older save replays its own clock in whole
+// steps so the city world it meets is the one its play time implies.
 const DB_NAME = 'modworld';
 const STORE = 'saves';
 const ACCOUNT_KEY = 'account';
-export const SCHEMA_VERSION = 18;
+export const SCHEMA_VERSION = 20;
 
 const SLOTS = ['slot1', 'slot2', 'slot3'] as const;
 export type SlotName = (typeof SLOTS)[number];
@@ -67,14 +71,14 @@ let dbPromise: Promise<IDBDatabase> | null = null;
 function openDb(): Promise<IDBDatabase> {
   if (typeof indexedDB === 'undefined') return Promise.reject(new Error('IndexedDB unavailable'));
   if (!dbPromise) {
-    dbPromise = new Promise((resolve, reject) => {
+    dbPromise = new Promise<IDBDatabase>((resolve, reject) => {
       const req = indexedDB.open(DB_NAME, 1);
       req.onupgradeneeded = () => {
         if (!req.result.objectStoreNames.contains(STORE)) req.result.createObjectStore(STORE);
       };
       req.onsuccess = () => resolve(req.result);
       req.onerror = () => reject(req.error);
-    });
+    }).catch((error) => { dbPromise = null; throw error; });
   }
   return dbPromise;
 }
@@ -84,13 +88,13 @@ const lsKey = (key: string) => `modworld:${key}`;
 /**
  * The localStorage mirror is written synchronously, so a `beforeunload` flush survives: an IndexedDB
  * write is async and the page can be gone before its transaction commits, while the same bytes hit
- * localStorage before the handler returns. A quota failure deletes the mirror rather than leaving a
- * stale copy behind — `get` reads the mirror first, so a shadowed older record would win forever.
+ * localStorage before the handler returns. Keep an older mirror on failure until the database has
+ * confirmed its replacement; otherwise both failures could destroy the only recoverable copy.
  */
-function lsWrite(key: string, payload: string): void {
-  if (typeof localStorage === 'undefined') return;
-  try { localStorage.setItem(lsKey(key), payload); }
-  catch { try { localStorage.removeItem(lsKey(key)); } catch { /* the DB copy is the only one left */ } }
+function lsWrite(key: string, payload: string): boolean {
+  if (typeof localStorage === 'undefined') return false;
+  try { localStorage.setItem(lsKey(key), payload); return true; }
+  catch { return lsRead(key) === payload; }
 }
 
 function lsRead(key: string): string | null {
@@ -99,7 +103,8 @@ function lsRead(key: string): string | null {
 }
 
 async function put(key: string, payload: string): Promise<void> {
-  lsWrite(key, payload);
+  const previousMirror = lsRead(key);
+  const mirrored = lsWrite(key, payload);
   try {
     const db = await openDb();
     await new Promise<void>((resolve, reject) => {
@@ -107,9 +112,17 @@ async function put(key: string, payload: string): Promise<void> {
       tx.objectStore(STORE).put(payload, key);
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error || new Error('Save transaction aborted'));
     });
   } catch {
-    // the mirror already holds it; a browser without IndexedDB loses nothing
+    if (!mirrored) throw new Error('Browser storage could not save your progress. Export JSON before closing, then free storage or allow browser storage and try again.');
+    return;
+  }
+  // A synchronous unload flush can replace the mirror while this transaction awaits its commit.
+  // Remove only the stale copy this write actually encountered, never a newer emergency save.
+  if (!mirrored && previousMirror !== null && previousMirror !== payload && lsRead(key) === previousMirror) {
+    try { localStorage.removeItem(lsKey(key)); } catch { /* Report the stale mirror below. */ }
+    if (lsRead(key) !== null) throw new Error('The database saved, but an older browser copy could not be replaced. Export JSON before closing and repair browser storage.');
   }
 }
 
@@ -185,21 +198,37 @@ export function applyAccount(account: Account, state: GameState): GameState {
   return state;
 }
 
+const emergencySaveRevision: Partial<Record<SlotName, number>> = {};
+
 /**
  * Write the slot, and take a snapshot first when one is owed (`save.md` item 5). The snapshot is
  * stored outside the slot record it protects — a copy inside the file it guards would be lost
  * with it.
  */
 export async function writeSave(slot: SlotName, state: GameState): Promise<void> {
-  const account = mergeMastery(await readAccount(), state, slot);
-  await put(ACCOUNT_KEY, JSON.stringify(account));
-  const why = snapshotReason(state);
+  const revision = emergencySaveRevision[slot];
+  const current = () => emergencySaveRevision[slot] === revision;
+  const beforeStamp = state.lastSavedAt;
+  const saved = JSON.parse(JSON.stringify({ ...state, lastSavedAt: Date.now() })) as GameState;
+  const pending = saved.pendingSnapshot;
+  const account = await readAccount();
+  if (!current()) return;
+  await put(ACCOUNT_KEY, JSON.stringify(mergeMastery(account, saved, slot)));
+  if (!current()) return;
+  const why = snapshotReason(saved);
   const shot = why
-    ? { version: SCHEMA_VERSION, reason: why, clockSec: state.clockSec, takenAt: Date.now(), state: JSON.parse(JSON.stringify({ ...state, pendingSnapshot: null })) }
+    ? { version: SCHEMA_VERSION, reason: why, clockSec: saved.clockSec, takenAt: Date.now(), state: { ...saved, pendingSnapshot: null } }
     : null;
-  if (why) armSnapshot(state);
-  await put(slot, JSON.stringify({ version: SCHEMA_VERSION, state: { ...state, fx: [] } }));
-  if (shot) await pushSnapshot(slot, shot);
+  if (shot) await pushSnapshot(slot, shot, current);
+  if (!current()) return;
+  if (why) armSnapshot(saved);
+  await put(slot, JSON.stringify({ version: SCHEMA_VERSION, state: { ...saved, fx: [] } }));
+  if (!current()) return;
+  if (state.lastSavedAt === beforeStamp) state.lastSavedAt = saved.lastSavedAt;
+  if (why && state.pendingSnapshot === pending && state.clockSec === saved.clockSec) {
+    state.pendingSnapshot = saved.pendingSnapshot;
+    state.nextSnapshotAt = saved.nextSnapshotAt;
+  }
 }
 
 /** The account record as the mirror holds it — the synchronous twin of `readAccount`, for the unload path. */
@@ -213,14 +242,20 @@ function readAccountSync(): Account {
   }
 }
 
-function readSnapshotsSync(slot: SlotName): Snapshot[] {
-  const raw = lsRead(snapKey(slot));
+function parseSnapshots(raw: string | null): Snapshot[] {
   if (!raw) return [];
   try {
-    return JSON.parse(raw) as Snapshot[];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed)
+      ? parsed.filter((shot) => shot?.state?.player && shot.state.counters && typeof shot.reason === 'string')
+      : [];
   } catch {
     return [];
   }
+}
+
+function readSnapshotsSync(slot: SlotName): Snapshot[] {
+  return parseSnapshots(lsRead(snapKey(slot)));
 }
 
 /**
@@ -229,17 +264,27 @@ function readSnapshotsSync(slot: SlotName): Snapshot[] {
  * any owed snapshot straight to the localStorage mirror in one turn, so closing the tab loses nothing.
  */
 export function writeSaveSync(slot: SlotName, state: GameState): void {
-  lsWrite(ACCOUNT_KEY, JSON.stringify(mergeMastery(readAccountSync(), state, slot)));
-  const why = snapshotReason(state);
+  const saved = JSON.parse(JSON.stringify({ ...state, lastSavedAt: Date.now() })) as GameState;
+  const accountOk = lsWrite(ACCOUNT_KEY, JSON.stringify(mergeMastery(readAccountSync(), saved, slot)));
+  const why = snapshotReason(saved);
+  let snapshotOk = true;
   if (why) {
     const shot: Snapshot = {
-      version: SCHEMA_VERSION, reason: why, clockSec: state.clockSec, takenAt: Date.now(),
-      state: JSON.parse(JSON.stringify({ ...state, pendingSnapshot: null })),
+      version: SCHEMA_VERSION, reason: why, clockSec: saved.clockSec, takenAt: Date.now(),
+      state: { ...saved, pendingSnapshot: null },
     };
-    armSnapshot(state);
-    lsWrite(snapKey(slot), JSON.stringify([shot, ...readSnapshotsSync(slot)].slice(0, SAVE_CFG.snapshot_slots)));
+    snapshotOk = lsWrite(snapKey(slot), JSON.stringify([shot, ...readSnapshotsSync(slot)].slice(0, SAVE_CFG.snapshot_slots)));
+    if (snapshotOk) armSnapshot(saved);
   }
-  lsWrite(slot, JSON.stringify({ version: SCHEMA_VERSION, state: { ...state, fx: [] } }));
+  const slotOk = lsWrite(slot, JSON.stringify({ version: SCHEMA_VERSION, state: { ...saved, fx: [] } }));
+  // A confirmed visibility/unload save supersedes the async queue's older frozen state.
+  // If the slot could not be written, let that queue finish its database recovery instead.
+  if (slotOk) emergencySaveRevision[slot] = (emergencySaveRevision[slot] ?? 0) + 1;
+  if (!accountOk || !snapshotOk || !slotOk)
+    throw new Error('The emergency browser save failed. Export JSON before closing and retry a normal save. Your older saved copies were kept.');
+  state.lastSavedAt = saved.lastSavedAt;
+  state.pendingSnapshot = saved.pendingSnapshot;
+  state.nextSnapshotAt = saved.nextSnapshotAt;
 }
 
 export interface Snapshot {
@@ -253,18 +298,13 @@ export interface Snapshot {
 const snapKey = (slot: SlotName) => `snap:${slot}`;
 
 async function readSnapshots(slot: SlotName): Promise<Snapshot[]> {
-  const raw = await get(snapKey(slot));
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw) as Snapshot[];
-  } catch {
-    return [];
-  }
+  return parseSnapshots(await get(snapKey(slot)));
 }
 
 /** Walking snapshots: newest first, `save.snapshot_slots` of them, then the oldest is overwritten. */
-async function pushSnapshot(slot: SlotName, shot: Snapshot): Promise<void> {
+async function pushSnapshot(slot: SlotName, shot: Snapshot, current: () => boolean): Promise<void> {
   const list = [shot, ...(await readSnapshots(slot))].slice(0, SAVE_CFG.snapshot_slots);
+  if (!current()) return;
   await put(snapKey(slot), JSON.stringify(list));
 }
 
@@ -528,12 +568,20 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
           statusMissing: Array.isArray(sharedCond.statusMissing) ? [...sharedCond.statusMissing] : [],
           minTargets: 0,
           manaFloorPct: 0,
+          statusPresent: false,
+          statusStacksAtLeast: 0,
+          selfDebuffed: false,
         };
       }
     }
     s.skills.conditions = perSlot;
   }
-  for (const cond of Object.values(s.skills.conditions)) if (!Array.isArray(cond.statusMissing)) cond.statusMissing = [];
+  for (const cond of Object.values(s.skills.conditions)) {
+    if (!Array.isArray(cond.statusMissing)) cond.statusMissing = [];
+    if (typeof cond.statusPresent !== 'boolean') cond.statusPresent = false;
+    if (!Number.isFinite(cond.statusStacksAtLeast)) cond.statusStacksAtLeast = 0;
+    if (typeof cond.selfDebuffed !== 'boolean') cond.selfDebuffed = false;
+  }
   // the rotation reads every id raw (`castOnce`), so a dead id here would throw on the first
   // hunting tick, and an unowned one would cast without ownership — dropped, not kept
   s.skills.list = s.skills.list.map((id) => (id && sm.byId[id] && Object.hasOwn(s.skills.owned, id) ? id : null));
@@ -571,6 +619,11 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   const settlements = new Set((TOWN.settlements as { id: string }[]).map(row => row.id));
   for (const [id, amount] of Object.entries(s.town.helpCredit))
     if (!settlements.has(id) || !Number.isSafeInteger(amount) || amount < 0) delete s.town.helpCredit[id];
+  // Additive task-skip state: an older save has used no free skips today.
+  s.town.freeSkipsToday ??= 0;
+  if (!Number.isSafeInteger(s.town.freeSkipsToday) || s.town.freeSkipsToday < 0) s.town.freeSkipsToday = 0;
+  if (!Number.isSafeInteger(s.town.skipsToday) || s.town.skipsToday < 0) s.town.skipsToday = 0;
+  if (!Number.isSafeInteger(s.town.skipDay) || s.town.skipDay < 0) s.town.skipDay = 0;
   // v16 · optional saved Patrol and Auto-Return backfill to an empty, disabled route; existing
   // inventory, task progress and location are preserved.
   normalizeExplorationState(s);
@@ -617,6 +670,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   normalizeBlackMarket(s);
   if (s.dungeon) s.dungeon.escrow.materials ||= {};
   normalizeDeliveries(s);
+  normalizeQuestRewards(s);
   // a farm saved before the automation block existed gets it off; the player opts in
   if (s.farm && !s.farm.autoFarm) { s.farm.autoFarm = { plant: false, harvest: false, brew: false }; s.farm.lastAutoFarmAt = -9999; }
   // an older character auto-allocates its points (the idle default); manual is the opt-out 
@@ -649,9 +703,9 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
       return id && sm.byId[id] ? id : null;
     });
   }
-  clampAuraReservations(s.skills);
   if (s.activePreset == null) s.activePreset = 0;
   if (!s.collector) s.collector = newCollector();
+  s.collector.hints ||= {};
   if (!s.grants) s.grants = newGrants();
   if (!s.pedlar) s.pedlar = { day: 0, minutes: [], bought: 0 };
   if (!s.filter) s.filter = newFilter();
@@ -685,6 +739,10 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     s.playerStatuses = validatePlayerStatuses(s.playerStatuses);
     s.keystoneRuntime = validateKeystoneRuntime(s.keystoneRuntime);
   }
+  // v20 · the city ledger. A save claiming the current format must hold a whole, in-range ledger;
+  // an older one replays the steps its play time implies, so the cities are never a blank slate.
+  if (fromVersion < 20) s.economy = newEconomyState(s.clockSec);
+  else s.economy = validateEconomy(s.economy);
   if (s.pendingSnapshot === undefined) s.pendingSnapshot = null;
   if (!s.nextSnapshotAt && s.nextSnapshotAt !== 0) s.nextSnapshotAt = 0;
   // An imported or hand-edited file must not be an impossible state: the numbers below are clamped
@@ -747,6 +805,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
       for (const tab of s.stash || []) for (const item of tab) fixUpgrade(item);
       // an imported character's pools cannot exceed what its gear and allocations support
       const bundles = tree ? tree.keystoneBundles(ranks) : [];
+      clampAuraReservations(s.skills, bundles);
       const c = buildCharacter(lv, Array.isArray(s.gear) ? s.gear : [], {}, 0, effectsActive(s.skills, bundles), s.player.points, ranks, {}, bundles);
       s.player.hp = Math.min(Math.max(0, s.player.hp), c.maxHp);
       s.player.mana = bundles.some((b) => b.key === 'mana-debt')
@@ -775,7 +834,7 @@ export function exportJson(state: GameState): string {
 export function importJson(text: string): GameState {
   const parsed = JSON.parse(text);
   const version = parsed.version == null ? 'none' : parsed.version;
-  if (parsed.version !== SCHEMA_VERSION && parsed.version !== 17 && parsed.version !== 16 && parsed.version !== 15 && parsed.version !== 14) {
+  if (parsed.version !== SCHEMA_VERSION && parsed.version !== 18 && parsed.version !== 17 && parsed.version !== 16 && parsed.version !== 15 && parsed.version !== 14) {
     throw new Error(`schema version ${version} ≠ ${SCHEMA_VERSION}`);
   }
   const state = parsed.state as GameState;

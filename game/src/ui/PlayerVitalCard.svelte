@@ -4,9 +4,10 @@
     import { ownsSkill, hpReserved, usableHp } from "../sim/skills";
     import { statusLabel } from "../sim/mobStatus";
     import { statusViews } from "../sim/playerStatus";
-    import { bar } from "./field";
     import { plateGesture } from "./plate";
     import { fxOut } from "./motion";
+    import Meter from "./Meter.svelte";
+    import Icon from "./Icon.svelte";
     import type { GameState, FxEvent } from "../sim/types";
     import type { Character } from "../sim/player";
     import type { Statuses, StatusName } from "../sim/combat";
@@ -175,26 +176,34 @@
                         </div>
                     </div>
                     <div class="meters">
-                        <span class="meter track track-meter hp" role="img" aria-label={`HP ${fmtNum(Math.max(0, Math.round(vitals.hp)))} of ${fmtNum(c.maxHp)}${hpHeld > 0 ? `, ${fmtNum(hpReach)} usable, ${fmtNum(hpHeld)} reserved` : ""}`}
-                            title={hpHeld > 0 ? `${fmtNum(hpReach)} usable · ${fmtNum(hpHeld)} reserved` : undefined}>
-                            <i style={bar(vitals.hp, c.maxHp)}></i><b>{fmtNum(Math.max(0, Math.round(vitals.hp)))} / {fmtNum(c.maxHp)}</b>
-                        </span>
+                        <Meter
+                            value={vitals.hp}
+                            max={c.maxHp}
+                            tone="hp"
+                            label={`HP ${fmtNum(Math.max(0, Math.round(vitals.hp)))} of ${fmtNum(c.maxHp)}${hpHeld > 0 ? `, ${fmtNum(hpReach)} usable, ${fmtNum(hpHeld)} reserved` : ""}`}
+                            title={hpHeld > 0 ? `${fmtNum(hpReach)} usable · ${fmtNum(hpHeld)} reserved` : undefined}
+                            valueText={`${fmtNum(Math.max(0, Math.round(vitals.hp)))} / ${fmtNum(c.maxHp)}`}
+                        />
                         {#if hpHeld > 0}
                             <small class="meter-note">{fmtNum(hpReach)} usable · {fmtNum(hpHeld)} reserved</small>
                         {/if}
                         {#if c.es > 0}
-                            <span class="meter track track-meter es" role="img" aria-label={`Energy Shield ${fmtNum(Math.max(0, Math.round(vitals.es)))} of ${fmtNum(c.es)}`}>
-                                <i style={bar(vitals.es, c.es)}></i><b>{fmtNum(Math.max(0, Math.round(vitals.es)))} / {fmtNum(c.es)}</b>
-                            </span>
+                            <Meter
+                                value={vitals.es}
+                                max={c.es}
+                                tone="es"
+                                label={`Energy Shield ${fmtNum(Math.max(0, Math.round(vitals.es)))} of ${fmtNum(c.es)}`}
+                                valueText={`${fmtNum(Math.max(0, Math.round(vitals.es)))} / ${fmtNum(c.es)}`}
+                            />
                         {/if}
-                        <span
-                            class="meter track track-meter mana"
-                            role="img"
-                            aria-label={`Mana ${fmtNum(Math.max(0, Math.round(vitals.mana)))} of ${fmtNum(c.maxMana)}${reserved > 0 ? `, ${reserved}% reserved by auras` : ""}`}
-                        >
-                             <i style={bar(vitals.mana, c.maxMana)}></i><b>{fmtNum(Math.max(0, Math.round(vitals.mana)))} / {fmtNum(c.maxMana)}</b>
-                         </span>
-                     </div>
+                        <Meter
+                            value={vitals.mana}
+                            max={c.maxMana}
+                            tone="mana"
+                            label={`Mana ${fmtNum(Math.max(0, Math.round(vitals.mana)))} of ${fmtNum(c.maxMana)}${reserved > 0 ? `, ${reserved}% reserved by auras` : ""}`}
+                            valueText={`${fmtNum(Math.max(0, Math.round(vitals.mana)))} / ${fmtNum(c.maxMana)}`}
+                        />
+                    </div>
                 </div>
             {/key}
         </div>
@@ -208,7 +217,7 @@
                     aria-label={`${mark.label}${mark.secs != null ? `, ${mark.secs} seconds left` : ", aura active"}`}
                     title={`${mark.label}${mark.secs != null ? ` · ${mark.secs}s left` : " · aura active"}`}
                 >
-                    <img src={mark.icon} alt="" aria-hidden="true" />
+                    <Icon src={mark.icon} />
                     {#if mark.secs != null}<small>{shortTime(mark.secs)}</small>{/if}
                 </span>
             {/each}
@@ -221,7 +230,7 @@
                     aria-label={`${mark.label}${mark.stacks > 1 ? `, ${mark.stacks} stacks` : ""}, ${mark.secs} seconds left`}
                     title={`${mark.label}${mark.stacks > 1 ? ` ×${mark.stacks}` : ""} · ${mark.secs}s left`}
                 >
-                    <img src={mark.icon} alt="" aria-hidden="true" />
+                    <Icon src={mark.icon} />
                     <small>{shortTime(mark.secs)}</small>
                 </span>
             {/each}
@@ -364,11 +373,6 @@
         height: calc(var(--icon-label) * 1.5);
         pointer-events: auto;
     }
-    .badge img {
-        width: var(--icon-label);
-        height: var(--icon-label);
-        object-fit: contain;
-    }
     .badge small {
         position: absolute;
         right: 0;
@@ -393,42 +397,10 @@
         text-align: center;
     }
 
-    .meter {
-        display: block;
-        position: relative;
-        width: 100%;
-        height: max(var(--spacing-sm), var(--font-xs));
-        overflow: hidden;
-    }
-    /* the HUD hands these meters already-eased values, so the keyed flinch cannot snap them */
-    .meter i {
-        display: block;
-        height: 100%;
-        width: 100%;
-    }
     .meter-note {
         color: var(--dim);
         font-size: var(--font-xs);
         font-variant-numeric: tabular-nums;
-    }
-    /* the figure alone, on the bar's centre line: the bar's colour is what names it */
-    .meter b {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        max-width: 100%;
-        overflow: hidden;
-        white-space: nowrap;
-        text-align: center;
-        font-size: var(--font-xs);
-        line-height: 1;
-        font-weight: 600;
-        color: var(--text);
-        font-variant-numeric: tabular-nums;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
-        pointer-events: none;
     }
 
     @keyframes card-flash {

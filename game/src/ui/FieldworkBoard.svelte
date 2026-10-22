@@ -4,6 +4,7 @@
   import type { GameState } from '../sim/types';
   import { stackIcon, icon } from '../icon';
   import Tabs from './Tabs.svelte';
+  import CountBadge from './CountBadge.svelte';
 
   /**
    * The Field Camp, read as a place and not as a form. A meadow band holds the scene: a tree line on
@@ -201,17 +202,17 @@
       </div>
       <div class="camp-facts">
         <span class="card-tile fact" title={campSet ? (campHere ? 'Camp standing on this hex' : 'Camp set on another hex') : 'No Camp set'}>
-          <img src={tentIcon} alt="" aria-hidden="true" />
+          <img class="icon-label" src={tentIcon} alt="" aria-hidden="true" />
           <small class="text-note">Camp</small>
           <b>{campSet ? (campHere ? 'Standing' : 'Set') : 'Packed'}</b>
         </span>
         <span class="card-tile fact" title={fireFood ? `${foodName(fireFood)} ready at the fire` : 'No field food in the bag'}>
-          <img src={fireIcon} alt="" aria-hidden="true" />
+          <img class="icon-label" src={fireIcon} alt="" aria-hidden="true" />
           <small class="text-note">Fire</small>
           <b>{fireFood ? foodName(fireFood) : 'Cold'}</b>
         </span>
         <span class="card-tile fact" title={active ? `${active.name} · ${remaining} left` : potMeal ? `${foodName(potMeal)} ready at the pot` : 'No cooked dish in the bag'}>
-          <img src={potIcon} alt="" aria-hidden="true" />
+          <img class="icon-label" src={potIcon} alt="" aria-hidden="true" />
           <small class="text-note">Pot</small>
           <b>{active ? active.name : potMeal ? foodName(potMeal) : 'Empty'}</b>
         </span>
@@ -254,7 +255,7 @@
         </select>
         <label title="Allow raw food before Hunger reaches zero"><input type="checkbox" checked={gameState.fieldwork.autoEat.allowRaw} disabled={!gameState.fieldwork.autoEat.enabled} onchange={(event) => onauto({ allowRaw: (event.currentTarget as HTMLInputElement).checked })} /> Raw early</label>
       </div>
-      <div class="roster" aria-label="Food bag">
+      <div class="roster scroll-pane" aria-label="Food bag">
         {#if foodStock.length === 0}
           <small class="text-note">Bag empty · gather, fish or cook first</small>
         {:else}
@@ -262,12 +263,12 @@
             {#if food.edible}
               <button class="medallion plate-medallion" aria-label="Eat {food.name}" title="Eat {food.name} · +{food.hunger_restore} Hunger" onclick={() => oneat(food.id)}>
                 <img src={stackIcon('food', food.name, `food:${food.id}`)} alt="" aria-hidden="true" />
-                <span class="badge badge-count count">{gameState.fieldwork.foods[food.id]}</span>
+                <CountBadge value={gameState.fieldwork.foods[food.id]} tone="count" placement="bottom-right" />
               </button>
             {:else}
               <span class="medallion plate-medallion off" role="img" aria-label="{food.name}, ingredient, {gameState.fieldwork.foods[food.id]} carried" title="{food.name} · ingredient">
                 <img src={stackIcon('food', food.name, `food:${food.id}`)} alt="" aria-hidden="true" />
-                <span class="badge badge-count count">{gameState.fieldwork.foods[food.id]}</span>
+                <CountBadge value={gameState.fieldwork.foods[food.id]} tone="count" placement="bottom-right" />
               </span>
             {/if}
           {/each}
@@ -296,13 +297,13 @@
           <span>{m.label}</span><small class="text-note">{recipesInMenu(m.id)}</small>
         {/snippet}
       </Tabs>
-      <div class="recipes">
+      <div class="recipes scroll-pane">
         {#each visibleRecipes as recipe (recipe.id)}
           {@const verdict = canCook(gameState, recipe.id)}
           <article class="card-tile recipe" class:locked={fieldSkillLevel(gameState, 'cooking') < recipe.level}>
             <span class="recipe-mark plate-mark" aria-hidden="true"><img src={stackIcon('food', recipe.name, `food:${recipe.id}`)} alt="" /></span>
             <div class="recipe-copy">
-              <div class="recipe-head"><b>{recipe.name}</b><span class="badge badge-count">{gameState.fieldwork.foods[recipe.id] || 0}</span></div>
+              <div class="recipe-head"><b>{recipe.name}</b><CountBadge value={gameState.fieldwork.foods[recipe.id] || 0} /></div>
               <small class="text-note">{recipeCost(recipe)}</small>
               <small class="text-note" title={`+${recipe.hunger_restore} Hunger · Lv ${recipe.level} · ${recipe.duration_sec / 60} min · +${recipe.damage_pct}% damage · +${recipe.hp_regen_pct}% HP regen`}>+{recipe.hunger_restore} Hunger · Lv {recipe.level} · +{recipe.damage_pct}% dmg</small>
             </div>
@@ -331,7 +332,7 @@
               <span class="bag-entry" role="img" aria-label="{resource.name}, {gameState.fieldwork.materials[resource.id] || 0}" title="{resource.name} · {gameState.fieldwork.materials[resource.id] || 0}">
                 <span class="medallion plate-medallion" aria-hidden="true">
                   <img src={resource.icon} alt="" />
-                  <span class="badge badge-count count">{gameState.fieldwork.materials[resource.id] || 0}</span>
+                  <CountBadge value={gameState.fieldwork.materials[resource.id] || 0} tone="count" placement="bottom-right" />
                 </span>
                 <span class="bag-entry-name" aria-hidden="true">{resource.name}</span>
               </span>
@@ -339,7 +340,7 @@
             <span class="bag-entry" role="img" aria-label="Herbs, {herbs}" title="Herbs · {herbs}">
               <span class="medallion plate-medallion" aria-hidden="true">
                 <img src={herbIcon} alt="" />
-                <span class="badge badge-count count">{herbs}</span>
+                <CountBadge value={herbs} tone="count" placement="bottom-right" />
               </span>
               <span class="bag-entry-name" aria-hidden="true">Herbs</span>
             </span>
@@ -352,7 +353,7 @@
               <span class="bag-entry" role="img" aria-label="{name} level {fieldSkillLevel(gameState, id)}" title="{name} · Lv {fieldSkillLevel(gameState, id)}">
                 <span class="medallion plate-medallion" aria-hidden="true">
                   <img src={skillMarks[id]} alt="" />
-                  <span class="badge badge-count count">{fieldSkillLevel(gameState, id)}</span>
+                  <CountBadge value={fieldSkillLevel(gameState, id)} tone="count" placement="bottom-right" />
                 </span>
                 <span class="bag-entry-name" aria-hidden="true">{name}</span>
               </span>
@@ -401,7 +402,7 @@
   .work-title { font-size: var(--font-md); }
   .camp-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--spacing-sm); }
   .fact { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-sm); }
-  .fact img { grid-row: 1 / -1; width: var(--icon-label); height: var(--icon-label); object-fit: contain; }
+  .fact img { grid-row: 1 / -1; }
   .fact b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .card-actions { display: grid; gap: var(--spacing-xs); }
   .hunger-meter > i { display: block; height: 4px; overflow: hidden; border-radius: var(--radius-card); }
@@ -409,7 +410,7 @@
   .auto-eat { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--spacing-sm); }
   .auto-eat label { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
   .auto-eat select { max-width: clamp(63px, 4.84vw, 135px); }
-  .roster { display: flex; flex-wrap: wrap; align-content: flex-start; gap: var(--spacing-sm); flex: 1; min-height: 0; overflow: auto; }
+  .roster { display: flex; flex-wrap: wrap; align-content: flex-start; gap: var(--spacing-sm); flex: 1; min-height: 0; }
   .roster.bag-roster { display: grid; grid-template-columns: repeat(auto-fit, minmax(calc(var(--icon-card) * 1.4 + var(--spacing-lg) + var(--spacing-lg) + var(--spacing-lg)), 1fr)); align-content: start; gap: var(--spacing-xs); }
   .bag-entry { display: grid; grid-template-columns: calc(var(--icon-label) + var(--spacing-lg)) minmax(0, 1fr); align-items: center; gap: var(--spacing-xs); min-width: 0; }
   .bag-entry .medallion { width: calc(var(--icon-label) + var(--spacing-lg)); height: calc(var(--icon-label) + var(--spacing-lg)); }
@@ -417,11 +418,10 @@
   .bag-entry-name { min-width: 0; font-size: var(--font-xs); line-height: 1.15; overflow-wrap: anywhere; }
   .medallion { position: relative; display: grid; place-items: center; flex: none; width: calc(var(--icon-label) * 1.5 + var(--spacing-xl)); height: calc(var(--icon-label) * 1.5 + var(--spacing-xl)); }
   .medallion img { width: calc(var(--icon-label) * 1.5); height: calc(var(--icon-label) * 1.5); object-fit: contain; }
-  .medallion .count { position: absolute; right: var(--spacing-xs); bottom: var(--spacing-xs); line-height: 1; }
   /* the tab buttons live in Tabs.svelte's scope, so their face styles reach them globally */
   .kitchen-card :global(.tabs .btn-quiet) { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-xs); }
   .kitchen-card :global(.tabs .btn-quiet small) { font-family: var(--num); }
-  .recipes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: var(--spacing-sm); min-height: 0; overflow: auto; }
+  .recipes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: var(--spacing-sm); min-height: 0; }
   .recipe { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--spacing-xs); padding: var(--spacing-sm); min-width: 0; }
   .recipe-mark { display: grid; place-items: center; width: calc(var(--icon-label) * 1.5 + var(--spacing-md)); height: calc(var(--icon-label) * 1.5 + var(--spacing-md)); }
   .recipe-mark img { width: calc(var(--icon-label) * 1.5); height: calc(var(--icon-label) * 1.5); object-fit: contain; }

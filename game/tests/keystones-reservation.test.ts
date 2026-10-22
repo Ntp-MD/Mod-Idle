@@ -5,6 +5,7 @@ import { mobSwing } from '../src/sim/combat';
 import {
   auraResonanceOf, castOnce, effectsActive, hpReservedPct, newSkillState, reservedPct,
   setAuraPool, spendableMana, usableHp, usableMana,
+  toggleTrack,
 } from '../src/sim/skills';
 import { KEYSTONE_HANDLERS, registerStaticKeystoneHandlers, supportedKeystoneKeys } from '../src/sim/keystone-runtime';
 import {
@@ -12,6 +13,10 @@ import {
   validateKeystoneRuntime, type KeystoneBundle,
 } from '../../engine/keystones.ts';
 import type { Mob } from '../src/sim/types';
+import { characterSheet, newGame, setLevel, tick } from '../src/sim/game';
+import { allocateTreePath, spendTreePoint } from '../src/sim/tree';
+import { switchPreset } from '../src/sim/presets';
+import { exportJson, importJson } from '../src/state/save';
 
 registerStaticKeystoneHandlers(KEYSTONE_HANDLERS, Object.keys(E.elements.status_of));
 
@@ -29,6 +34,97 @@ function dumbMob(over: Partial<Mob> = {}): Mob {
 const noHit = () => 0.99;
 
 describe('Packet F — reservation and costs', () => {
+  it.each(['node', 'path'] as const)('keeps reservations below the limit when buying Arcane Battery by %s', (path) => {
+    const state = newGame(34);
+    setLevel(state, E.stat.level_cap);
+    state.player.attainmentPoints = 1;
+    const id = 'keystone.arcane-battery';
+    if (path === 'node') expect(allocateTreePath(state, tree.byId[id].needs[0]).ok).toBe(true);
+    for (const aura of (sm.all() as any[]).filter((r) => r.type === 'aura').slice(0, 6)) {
+      state.skills.owned[aura.id] = 0; state.skills.auras[aura.id] = true;
+    }
+    expect((path === 'node' ? spendTreePoint(state, id) : allocateTreePath(state, id)).ok).toBe(true);
+    expect(reservedPct(state.skills, tree.keystoneBundles(state.player.treeRanks))).toBeLessThan(sm.RESERVATION_LIMIT);
+  });
+
+  it('preserves HP-paid auras on reload only while Blood Covenant is owned', () => {
+    const state = newGame(54);
+    state.player.treeRanks = { 'keystone.blood-covenant': 1 };
+    const ids = ['aura.haste', 'aura.herald_of_ash', 'aura.herald_of_frost', 'aura.herald_of_lightning', 'aura.cast_on_crit', 'aura.cast_on_damage_taken', 'aura.vitality'];
+    for (const id of ids) { state.skills.owned[id] = 0; state.skills.auras[id] = true; }
+    state.skills.auraPool = { 'aura.vitality': 'hp' };
+    const restored = importJson(exportJson(state));
+    expect(ids.every((id) => restored.skills.auras[id])).toBe(true);
+    expect(hpReservedPct(restored.skills, tree.keystoneBundles(restored.player.treeRanks))).toBe(sm.reservePct('mid'));
+    state.player.treeRanks = {};
+    const without = importJson(exportJson(state));
+    expect(hpReservedPct(without.skills)).toBe(0);
+    expect(reservedPct(without.skills)).toBeLessThan(sm.RESERVATION_LIMIT);
+  });
+
+  it.each(['reload', 'preset'] as const)('preserves a valid discounted aura set through %s', (path) => {
+    let state = newGame(64);
+    state.player.treeRanks = { 'keystone.aura-resonance': 1 };
+    const ids = (sm.all() as any[]).filter((r) => r.type === 'aura').slice(0, 8).map((r) => r.id);
+    for (const id of ids) { state.skills.owned[id] = 0; state.skills.auras[id] = true; }
+    const before = reservedPct(state.skills, tree.keystoneBundles(state.player.treeRanks));
+    expect(before).toBeLessThan(sm.RESERVATION_LIMIT);
+    expect(reservedPct(state.skills)).toBeGreaterThanOrEqual(sm.RESERVATION_LIMIT);
+    if (path === 'reload') state = importJson(exportJson(state));
+    else { state.presets[1].auras = { ...state.skills.auras }; expect(switchPreset(state, 1)).toBe(true); }
+    expect(ids.every((id) => state.skills.auras[id])).toBe(true);
+    expect(reservedPct(state.skills, tree.keystoneBundles(state.player.treeRanks))).toBe(before);
+  });
+
+  it.each(['reload', 'preset'] as const)('includes Arcane Battery when validating %s reservations', (path) => {
+    let state = newGame(34);
+    state.player.treeRanks = { 'keystone.arcane-battery': 1 };
+    const ids = (sm.all() as any[]).filter((r) => r.type === 'aura').slice(0, 6).map((r) => r.id);
+    for (const id of ids) { state.skills.owned[id] = 0; state.skills.auras[id] = true; }
+    if (path === 'reload') state = importJson(exportJson(state));
+    else { state.presets[1].auras = { ...state.skills.auras }; expect(switchPreset(state, 1)).toBe(true); }
+    expect(reservedPct(state.skills, tree.keystoneBundles(state.player.treeRanks))).toBeLessThan(sm.RESERVATION_LIMIT);
+  });
+
+  it('prices a newly enabled aura with the resulting Resonance count', () => {
+    const state = newGame(64);
+    state.player.treeRanks = { 'keystone.aura-resonance': 1, 'keystone.arcane-battery': 1 };
+    const bundles = tree.keystoneBundles(state.player.treeRanks);
+    for (const id of ['aura.haste', 'aura.herald_of_ash', 'aura.herald_of_frost', 'aura.herald_of_lightning', 'aura.vitality']) {
+      state.skills.owned[id] = 0;
+      expect(toggleTrack(state.skills, id, bundles).ok).toBe(true);
+    }
+    expect(reservedPct(state.skills, bundles)).toBeLessThan(sm.RESERVATION_LIMIT);
+  });
+
+  it('refuses an HP-to-Mana aura move that would reserve the whole pool without mutation', () => {
+    const state = newGame(54);
+    const bundles = tree.keystoneBundles({ 'keystone.blood-covenant': 1 });
+    const ids = ['aura.haste', 'aura.herald_of_ash', 'aura.herald_of_frost', 'aura.herald_of_lightning', 'aura.cast_on_crit', 'aura.cast_on_damage_taken', 'aura.vitality'];
+    for (const id of ids) { state.skills.owned[id] = 0; state.skills.auras[id] = true; }
+    expect(setAuraPool(state.skills, 'aura.vitality', 'hp', bundles).ok).toBe(true);
+    expect(reservedPct(state.skills, bundles)).toBeLessThan(sm.RESERVATION_LIMIT);
+    const before = JSON.stringify(state.skills);
+    expect(setAuraPool(state.skills, 'aura.vitality', 'mana', bundles).ok).toBe(false);
+    expect(JSON.stringify(state.skills)).toBe(before);
+  });
+
+  it('shows the same Aura Resonance regeneration that the live tick pays', () => {
+    const state = newGame(64);
+    state.player.treeRanks = { 'keystone.aura-resonance': 1 };
+    state.skills.owned['aura.clarity'] = 0;
+    state.skills.auras['aura.clarity'] = true;
+    state.farm.autoUse.mana = false;
+    state.player.mana = 0;
+    const shown = characterSheet(state);
+    const withoutResonance = structuredClone(state);
+    withoutResonance.player.treeRanks = {};
+    expect(shown.manaRegen).toBeGreaterThan(characterSheet(withoutResonance).manaRegen);
+    tick(state, { online: true });
+    expect(state.player.mana).toBeCloseTo(shown.manaRegen, 10);
+    expect(state.player.mana).toBeGreaterThan(0);
+  });
+
   it('34 Arcane Battery adds 2× the fixed 40% Mana reserve to final ES and stays outside 64', () => {
     const control = sheet([]);
     const battery = sheet([bundle('arcane-battery', { reserveManaPct: 40, esPerMana: 2 })]);

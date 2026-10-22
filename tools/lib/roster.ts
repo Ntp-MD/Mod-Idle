@@ -23,9 +23,14 @@ const RESERVE = DATA.reserve_tiers;
 const DEPRECATED = DATA.deprecated || {};
 const RENAMES = DATA.renames || {};
 
+const ACTIVE = SKILLS.filter((s: any) => !s.retired);
 const byType = (t: string): any[] => SKILLS.filter((s) => s.type === t);
+const activeByType = (t: string): any[] => ACTIVE.filter((s) => s.type === t);
 const count = (t: string): number => byType(t).length;
+const activeCount = (t: string): number => activeByType(t).length;
 const total = (): number => SKILLS.length;
+const activeTotal = (): number => ACTIVE.length;
+const retiredTotal = (): number => SKILLS.length - ACTIVE.length;
 const nameMap = (): Map<string, any> => new Map(SKILLS.map((s) => [s.name, s]));
 const idMap = (): Map<string, any> => new Map(SKILLS.map((s) => [s.id, s]));
 const allNames = (): string[] => SKILLS.map((s) => s.name);
@@ -57,16 +62,16 @@ function gates(): G.GateRow[] {
   // An Element declared AHEAD of its content (engine.json `elements.pending`) is a real member of the
   // order without pretending its rows exist yet — declaring earth must not itself demand an earth attack.
   const PENDING_ELEMENTS: string[] = Object.keys(((EN.E.elements as any).pending || {}) as Record<string, string>);
-  const missingElement = ELEMENTS.filter((el: string) => !PENDING_ELEMENTS.includes(el) && !byType('attack').some((s) => s.element === el));
+  const missingElement = ELEMENTS.filter((el: string) => !PENDING_ELEMENTS.includes(el) && !activeByType('attack').some((s) => s.element === el));
   add('S5', missingElement.length === 0, `every Element has an attack skill (${ELEMENTS.join(' · ')})${PENDING_ELEMENTS.length ? ` · declared pending: ${PENDING_ELEMENTS.join(', ')}` : ''}${missingElement.length ? ' · MISSING: ' + missingElement.join(', ') : ''}`);
 
   const forbidden = SKILLS.filter((s) => /\b(mob|target|enemy)s?\s+armou?r\b|\b(mob|enemy)s?\s+mana\b/i.test(s.effect || '')).map((s) => s.id);
   add('S7', forbidden.length === 0, `no skill effect references mob armour or mob mana${forbidden.length ? ' · BAD: ' + forbidden.join(', ') : ''}`);
 
-  const badReserve = byType('aura').filter((s) => s.reserve !== null && !(s.reserve in RESERVE)).map((s) => s.id);
+  const badReserve = activeByType('aura').filter((s) => s.reserve !== null && !(s.reserve in RESERVE)).map((s) => s.id);
   add('S8', badReserve.length === 0, `every aura reserve is a known tier or null (TBD)${badReserve.length ? ' · BAD: ' + badReserve.join(', ') : ''}`);
 
-  const totalReserve = byType('aura').reduce((s, a) => s + (a.reserve ? RESERVE[a.reserve].pct : 0), 0);
+  const totalReserve = activeByType('aura').reduce((s, a) => s + (a.reserve ? RESERVE[a.reserve].pct : 0), 0);
   const block = (DATA.meta.reservation && DATA.meta.reservation.max_pct) || 100;
   soft('S9', totalReserve > block, `the full aura set reserves ${totalReserve}% of the pool against the ${block}% block — more than the pool holds, so the set can never all run at once and the player must choose`);
 
@@ -113,6 +118,14 @@ function gates(): G.GateRow[] {
       if (!SM.EFFECT_SUBJECTS.includes(e.subject || 'self')) badStat.push(`${s.id}:subject ${e.subject}`);
       if (e.condition && !SM.EFFECT_CONDITIONS.includes(e.condition)) badStat.push(`${s.id}:condition ${e.condition}`);
       if (e.element && !EN.E.elements.order.includes(e.element)) badStat.push(`${s.id}:element ${e.element}`);
+      // the payoff effects read one named mob status; the status is data, never inferred from the row's Element
+      if (SM.STATUS_EFFECTS.includes(e.stat)) {
+        if (!SM.EFFECT_STATUSES.includes(e.status)) badStat.push(`${s.id}:status ${e.status}`);
+        if ((e.subject || 'self') !== 'target') badStat.push(`${s.id}:${e.stat} subject ${e.subject || 'self'}`);
+        const wantOp = e.stat === 'spread_status' ? 'add_flat' : 'add_pct';
+        if (e.op !== wantOp) badStat.push(`${s.id}:${e.stat} op ${e.op}`);
+        if (e.cap != null && (!Number.isInteger(e.cap) || e.cap <= 0)) badStat.push(`${s.id}:${e.stat} cap ${e.cap}`);
+      } else if (e.status) badStat.push(`${s.id}:status on ${e.stat}`);
       // a minus written as a real minus sign (−12%) is the same number as -12 in the data
       const text = String(s.effect || '').replace(/−/g, '-');
       if (!text.includes(String(e.value))) badValue.push(`${s.id}:${e.value}`);
@@ -209,10 +222,49 @@ function gates(): G.GateRow[] {
     `caster Max HP damage is a positive percentage on attack rows with a complete press formula` +
     `${badMaxHpBasis.length ? ' · INVALID: ' + badMaxHpBasis.join(', ') : ''}`);
 
+  // Retiring is a live-roster operation, not a deletion: an old save still resolves the id, while
+  // drops, named rewards and the owned/active lists read ACTIVE only. A retired row must hand its
+  // role to a live row, and a live row must never point at itself or at another retired row.
+  const activeIds = new Set(ACTIVE.map((s: any) => s.id));
+  const badRetired = SKILLS.filter((s: any) => s.retired && (!s.retired_to || !activeIds.has(s.retired_to) || s.retired_to === s.id))
+    .map((s: any) => `${s.id}→${s.retired_to || 'missing'}`);
+  const badLive = ACTIVE.filter((s: any) => s.retired_to).map((s: any) => s.id);
+  soft('S21', badRetired.length === 0 && badLive.length === 0,
+    `${retiredTotal()} retired row(s) leave the live roster while keeping their ids resolvable; ${activeTotal()} active row(s) carry the live roles` +
+    `${badRetired.length ? ' · BAD RETIRED TARGET: ' + badRetired.join(', ') : ''}` +
+    `${badLive.length ? ' · ACTIVE ROW CARRIES retired_to: ' + badLive.join(', ') : ''}`);
+
+  // A payoff row that reads a status no live row can write is a dead row. This is the data-level twin
+  // of the runtime `appliedStatusOf`: stacks/counts, a direct stop or stun, and the row's own
+  // guaranteed Element status are the only ways a player press writes a mob status.
+  const statusOfElement = ((EN.E.elements as any).status_of || {}) as Record<string, string>;
+  const appliedStatuses = new Set<string>();
+  const exploitedStatuses = new Set<string>();
+  for (const s of ACTIVE) {
+    for (const e of (s.effects || [])) {
+      if (e.stat === 'bonus_vs_status' || e.stat === 'consume_status' || e.stat === 'spread_status') {
+        if (e.status) exploitedStatuses.add(e.status);
+      }
+      if (e.subject !== 'target') continue;
+      if (e.stat === 'burn_stacks') appliedStatuses.add('burn');
+      if (e.stat === 'poison_stacks') appliedStatuses.add('poison');
+      if (e.stat === 'mark_stacks') appliedStatuses.add('mark');
+      if (e.stat === 'bleed_chance') appliedStatuses.add('bleed');
+      if (e.stat === 'stop_sec' || e.stat === 'stun_chance') appliedStatuses.add('shock');
+    }
+    if (((s.rules || []) as string[]).includes('guaranteed_status') && statusOfElement[s.element]) {
+      appliedStatuses.add(statusOfElement[s.element]);
+    }
+  }
+  const deadPayoffs = [...exploitedStatuses].filter((status) => !appliedStatuses.has(status));
+  soft('S22', deadPayoffs.length === 0,
+    `${exploitedStatuses.size} exploited status(es) each have a live writer: ${[...exploitedStatuses].sort().join(' · ')}` +
+    `${deadPayoffs.length ? ' · NO LIVE WRITER: ' + deadPayoffs.join(', ') : ''}`);
+
   return g.rows();
 }
 
 export {
-  DATA, SKILLS, TYPES, TYPE_META, WEAPON_GROUPS, ELEMENTS, RESERVE, DEPRECATED, RENAMES,
-  byType, count, total, nameMap, idMap, allNames, fmt, gates,
+  DATA, SKILLS, ACTIVE, TYPES, TYPE_META, WEAPON_GROUPS, ELEMENTS, RESERVE, DEPRECATED, RENAMES,
+  byType, activeByType, count, activeCount, total, activeTotal, retiredTotal, nameMap, idMap, allNames, fmt, gates,
 };

@@ -6,12 +6,12 @@
   import { tree } from '../engine/client';
   import { treePath } from '../sim/tree';
   import { buildPassiveTreeView, treeOrbitPath } from './passive-tree-view';
-  import swords from '../icon/gear/crossed-swords-1.png';
-  import boots from '../icon/gear/winged-boots.png';
-  import bow from '../icon/gear/bow-arrow.png';
-  import staff from '../icon/gear/staff.png';
-  import shield from '../icon/gear/shield-crest.png';
-  import pendant from '../icon/gear/gem-pendant.png';
+  import swords from '../icon/gear/weapon/crossed-swords-1.png';
+  import boots from '../icon/gear/armour/winged-boots.png';
+  import bow from '../icon/gear/weapon/bow-arrow.png';
+  import staff from '../icon/gear/weapon/staff.png';
+  import shield from '../icon/gear/offhand/shield-crest.png';
+  import pendant from '../icon/gear/accessory/gem-pendant.png';
   import heart from '../icon/skill/heart-beats.png';
   import flame from '../icon/skill/fireball.png';
   import eye from '../icon/skill/eye.png';
@@ -263,8 +263,8 @@
   .search-results button { width: 100%; display: flex; align-items: center; gap: 10px; padding: 9px 12px; text-align: left; background: transparent; border: 0; border-radius: 0; color: var(--text); }
   .search-results button:hover { background: var(--surface-selected); }
   .search-results img { width: 26px; height: 26px; object-fit: contain; }
-  .search-results small { display: block; color: var(--tree-muted); font-size: 12px; margin-top: 3px; }
-  .search-results p { margin: 12px; font-size: 14px; color: var(--tree-muted); }
+  .search-results small { display: block; color: var(--tree-muted); font-size: 12px; padding-top: 3px; }
+  .search-results p { padding: 12px; font-size: 14px; color: var(--tree-muted); }
   .tree-purse { display: flex; align-items: center; gap: 23px; font-size: 13px; color: var(--tree-muted); font-variant-numeric: tabular-nums; }
   .tree-purse span { display: flex; align-items: baseline; gap: 8px; white-space: nowrap; }
   .tree-purse strong { color: var(--gold-lit); font-size: 23px; font-weight: 500; }
@@ -316,21 +316,24 @@
   .tree-node.keystone.owned .keystone-corners { stroke: var(--gold-lit); }
   .tree-tooltip { position: absolute; width: 250px; padding: 12px 14px; pointer-events: none; z-index: 2; background: #101410; border: 1px solid var(--tree-bronze); box-shadow: var(--shadow-raised); color: var(--text); }
   .tree-tooltip strong { display: block; font: 18px Georgia, serif; color: var(--gold-lit); text-transform: capitalize; }
-  .tree-tooltip > span, .tree-tooltip small { display: block; color: var(--tree-muted); margin-top: 5px; font-size: 12px; }
-  .tree-tooltip p { margin: 10px 0; font-size: 13px; line-height: 1.45; max-height: 5em; overflow: hidden; }
+  .tree-tooltip > span { display: block; color: var(--tree-muted); padding-top: 5px; font-size: 12px; }
+  .tree-tooltip small { display: block; color: var(--tree-muted); padding-top: 10px; font-size: 12px; }
+  .tree-tooltip p { padding: 10px 0 0; font-size: 13px; line-height: 1.45; max-height: calc(5em + 10px); overflow: hidden; }
   .tree-tools { position: absolute; right: 14px; bottom: 14px; display: flex; align-items: center; gap: 3px; padding: 3px; background: var(--inset); border: 1px solid var(--tree-bronze); }
   .tree-tools button { padding: 6px 8px; min-width: 30px; height: 32px; border: 0; border-radius: 0; background: transparent; color: var(--tree-muted); font-size: 12px; }
   .tree-tools button:hover { color: var(--gold-lit); background: var(--surface-selected); }
   .tree-tools svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; }
   .tree-tools > span { min-width: 38px; text-align: center; color: var(--tree-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
   .tree-legend { position: absolute; bottom: 20px; left: 18px; display: flex; flex-wrap: wrap; gap: 15px; color: var(--tree-muted); font-size: 11px; pointer-events: none; }
-  .tree-legend span::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border: 1px solid var(--tree-bronze); border-radius: 50%; }
+  .tree-legend span { display: flex; align-items: center; gap: 6px; }
+  .tree-legend span::before { content: ''; display: inline-block; width: 6px; height: 6px; border: 1px solid var(--tree-bronze); border-radius: 50%; }
   .legend-owned::before { background: var(--gold); border-color: var(--gold); }
   .legend-ready::before { border-color: var(--gold-lit); }
   .legend-route::before { border-color: var(--gold); border-style: dashed; }
   .tree-detail { display: flex; flex-direction: column; gap: 18px; min-width: 0; min-height: 0; overflow: auto; padding: 23px 21px; border-left: 1px solid var(--tree-bronze); background: var(--inset); color: var(--tree-muted); font-size: 13px; line-height: 1.6; scrollbar-color: var(--tree-bronze) var(--inset); scrollbar-width: thin; }
   .detail-title { display: flex; align-items: center; gap: 13px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
-  .detail-title h3 { margin: 0 0 5px; color: var(--gold-lit); font: 24px/1.2 Georgia, serif; text-transform: capitalize; }
+  .detail-title > div:last-child { display: flex; flex-direction: column; gap: 5px; }
+  .detail-title h3 { margin: 0; color: var(--gold-lit); font: 24px/1.2 Georgia, serif; text-transform: capitalize; }
   .detail-title p { margin: 0; font-size: 12px; color: var(--tree-muted); }
   .detail-medallion { display: grid; place-items: center; width: 52px; height: 52px; flex: none; border: 2px solid var(--tree-bronze); border-radius: 50%; background: #1d2118; }
   .detail-medallion.keystone { outline: 1px solid var(--gold); outline-offset: 3px; }
@@ -347,14 +350,15 @@
   .allocate-button:hover:not(:disabled), .path-button:hover:not(:disabled) { background: #453a24; border-color: var(--gold); }
   .allocate-button:disabled, .path-button:disabled { opacity: .48; cursor: not-allowed; } .path-button { background: transparent; }
   .allocation-reason { margin: 0; font-size: 12px; color: var(--tree-muted); }
-  .route-summary { margin-top: 13px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .route-summary { position: relative; padding-top: 30px; }
+  .route-summary::before { content: ''; position: absolute; inset-inline: 0; top: 13px; border-top: 1px solid var(--line); }
   .route-summary > span { display: block; color: var(--tree-muted); font-size: 12px; }
   .route-summary strong { color: var(--text); font-size: 15px; font-weight: 500; }
-  .route-summary p { margin: 2px 0 4px; color: var(--gold-lit); font-variant-numeric: tabular-nums; }
+  .route-summary p { padding: 2px 0 4px; color: var(--gold-lit); font-variant-numeric: tabular-nums; }
   .path-detail { font-size: 12px; } .path-detail summary { color: var(--tree-muted); cursor: pointer; }
-  .path-detail ol { padding-left: 19px; margin: 8px 0; } .path-detail li { padding: 2px 0; }
+  .path-detail ol { padding: 8px 0 8px 19px; } .path-detail li { padding: 2px 0; }
   .tree-help { margin-top: auto; padding-top: 23px; border-top: 1px solid var(--line); font-size: 12px; color: var(--tree-muted); }
-  .tree-help h4 { color: var(--text); font-size: 13px; font-weight: 500; margin: 0 0 7px; } .tree-help p { margin: 0 0 12px; } .tree-help small { color: var(--tree-muted); font-size: 11px; }
+  .tree-help h4 { color: var(--text); font-size: 13px; font-weight: 500; margin: 0; padding-bottom: 7px; } .tree-help p { margin: 0; padding-bottom: 12px; } .tree-help small { color: var(--tree-muted); font-size: 11px; }
   .tree-board button:focus-visible, .tree-board summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
   .tree-board ::selection { background: var(--sel); color: var(--text); }
   @media (max-width: 1150px) { .tree-workspace { grid-template-columns: minmax(0, 1fr) 260px; } .tree-regions { padding: 0 5px; } .tree-regions button { padding: 9px 8px; font-size: 12px; } .tree-purse { gap: 12px; } .tree-purse small { display: none; } .tree-detail { padding: 18px 16px; } .tree-legend { bottom: 60px; gap: 10px; } }

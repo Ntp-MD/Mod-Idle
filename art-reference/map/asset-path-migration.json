@@ -197,9 +197,9 @@
   },
   {
     "old": "objects/traveler-piece.png",
-    "new": "characters/traveler-piece.png",
+    "new": "characters/player/traveler-piece.png",
     "oldUrl": "/map/objects/traveler-piece.png",
-    "newUrl": "/map/characters/traveler-piece.png",
+    "newUrl": "/map/characters/player/traveler-piece.png",
     "sha256": "b5b439388acf531c16d81e5bd1eb2b435a4f2cb989f07d979ce46785b6a1f461"
   },
   {
@@ -218,289 +218,289 @@
   },
   {
     "old": "objects/species/archon-v2.png",
-    "new": "characters/archon-v2.png",
+    "new": "characters/species/archon/archon-v2.png",
     "oldUrl": "/map/objects/species/archon-v2.png",
-    "newUrl": "/map/characters/archon-v2.png",
+    "newUrl": "/map/characters/species/archon/archon-v2.png",
     "sha256": "748a1dd0a62fb572d82787ea97432e01fb995ebb305f3b91a34e2a46d5a3e333"
   },
   {
     "old": "objects/species/archon.png",
-    "new": "characters/archon.png",
+    "new": "characters/species/archon/archon.png",
     "oldUrl": "/map/objects/species/archon.png",
-    "newUrl": "/map/characters/archon.png",
+    "newUrl": "/map/characters/species/archon/archon.png",
     "sha256": "c3f0f2b272d8f0048d046f7ef82daa750bdadfcc5d4416629ce74e5b199682b7"
   },
   {
     "old": "objects/species/beetle-v2.png",
-    "new": "characters/beetle-v2.png",
+    "new": "characters/species/beetle/beetle-v2.png",
     "oldUrl": "/map/objects/species/beetle-v2.png",
-    "newUrl": "/map/characters/beetle-v2.png",
+    "newUrl": "/map/characters/species/beetle/beetle-v2.png",
     "sha256": "241dbcfeb81d7d9d3b5e98badbe00125175a195e64c32cbcb337c519ad7f1678"
   },
   {
     "old": "objects/species/beetle.png",
-    "new": "characters/beetle.png",
+    "new": "characters/species/beetle/beetle.png",
     "oldUrl": "/map/objects/species/beetle.png",
-    "newUrl": "/map/characters/beetle.png",
+    "newUrl": "/map/characters/species/beetle/beetle.png",
     "sha256": "0a7a76b0ddd7c7204d5c3373af402c6860c6b27b5ef1ad3d93d0aa853dc5340e"
   },
   {
     "old": "objects/species/crab-v2.png",
-    "new": "characters/crab-v2.png",
+    "new": "characters/species/crab/crab-v2.png",
     "oldUrl": "/map/objects/species/crab-v2.png",
-    "newUrl": "/map/characters/crab-v2.png",
+    "newUrl": "/map/characters/species/crab/crab-v2.png",
     "sha256": "e4d4655fb3dc1e84addac13c3ee4a35d1ab71a755fd2391795b3418e3bc96be5"
   },
   {
     "old": "objects/species/crab.png",
-    "new": "characters/crab.png",
+    "new": "characters/species/crab/crab.png",
     "oldUrl": "/map/objects/species/crab.png",
-    "newUrl": "/map/characters/crab.png",
+    "newUrl": "/map/characters/species/crab/crab.png",
     "sha256": "059649a136446d16cac2ce695d0b695a6424bc6e13aa22584714e5911e9f48c8"
   },
   {
     "old": "objects/species/demon.png",
-    "new": "characters/demon.png",
+    "new": "characters/species/demon/demon.png",
     "oldUrl": "/map/objects/species/demon.png",
-    "newUrl": "/map/characters/demon.png",
+    "newUrl": "/map/characters/species/demon/demon.png",
     "sha256": "f25208742385f39b6b627ddf5a3f652f3c8e6cc6951a8b337846ee2fbe6a373b"
   },
   {
     "old": "objects/species/dragon.png",
-    "new": "characters/dragon.png",
+    "new": "characters/species/dragon/dragon.png",
     "oldUrl": "/map/objects/species/dragon.png",
-    "newUrl": "/map/characters/dragon.png",
+    "newUrl": "/map/characters/species/dragon/dragon.png",
     "sha256": "2b378f1421e360dc4d460db721cdd56b08eca5d951bd34b5c7b367b592d00f3a"
   },
   {
     "old": "objects/species/dryad.png",
-    "new": "characters/dryad.png",
+    "new": "characters/species/dryad/dryad.png",
     "oldUrl": "/map/objects/species/dryad.png",
-    "newUrl": "/map/characters/dryad.png",
+    "newUrl": "/map/characters/species/dryad/dryad.png",
     "sha256": "15b810a85640e409a4b5a7137f67eee5e75736ef5eb052ed8395656a32cb0a5d"
   },
   {
     "old": "objects/species/elf-v2.png",
-    "new": "characters/elf-v2.png",
+    "new": "characters/species/elf/elf-v2.png",
     "oldUrl": "/map/objects/species/elf-v2.png",
-    "newUrl": "/map/characters/elf-v2.png",
+    "newUrl": "/map/characters/species/elf/elf-v2.png",
     "sha256": "3f084d11d2dca6101364aa143caa22107dd23fed5fb040d003100d38cbfade31"
   },
   {
     "old": "objects/species/elf.png",
-    "new": "characters/elf.png",
+    "new": "characters/species/elf/elf.png",
     "oldUrl": "/map/objects/species/elf.png",
-    "newUrl": "/map/characters/elf.png",
+    "newUrl": "/map/characters/species/elf/elf.png",
     "sha256": "919698fe7e4486d852532fca7121ec38de4b1603d9cafb3d3bba63aa26783870"
   },
   {
     "old": "objects/species/giant.png",
-    "new": "characters/giant.png",
+    "new": "characters/species/giant/giant.png",
     "oldUrl": "/map/objects/species/giant.png",
-    "newUrl": "/map/characters/giant.png",
+    "newUrl": "/map/characters/species/giant/giant.png",
     "sha256": "ed92c8fe17d9f543517a31adc02da81ed79c7d3c99b0ed61f1fe9ea94e64b7dd"
   },
   {
     "old": "objects/species/goblin.png",
-    "new": "characters/goblin.png",
+    "new": "characters/species/goblin/goblin.png",
     "oldUrl": "/map/objects/species/goblin.png",
-    "newUrl": "/map/characters/goblin.png",
+    "newUrl": "/map/characters/species/goblin/goblin.png",
     "sha256": "0a440289c8434fb1746a1ef728d02366ea22b6812a3786c9fc048107c0e57f44"
   },
   {
     "old": "objects/species/golem.png",
-    "new": "characters/golem.png",
+    "new": "characters/species/golem/golem.png",
     "oldUrl": "/map/objects/species/golem.png",
-    "newUrl": "/map/characters/golem.png",
+    "newUrl": "/map/characters/species/golem/golem.png",
     "sha256": "f8d3b885009f0cc19a5da79ab326c187df8e43ffe286c6619faecc1b532efb3c"
   },
   {
     "old": "objects/species/hornet.png",
-    "new": "characters/hornet.png",
+    "new": "characters/species/hornet/hornet.png",
     "oldUrl": "/map/objects/species/hornet.png",
-    "newUrl": "/map/characters/hornet.png",
+    "newUrl": "/map/characters/species/hornet/hornet.png",
     "sha256": "c0c885e950558e145bb7a37c87b6ad98931aead5d10cae96ca75d100c443c7b8"
   },
   {
     "old": "objects/species/human.png",
-    "new": "characters/human.png",
+    "new": "characters/species/human/human.png",
     "oldUrl": "/map/objects/species/human.png",
-    "newUrl": "/map/characters/human.png",
+    "newUrl": "/map/characters/species/human/human.png",
     "sha256": "19c594bd1f8b39b257ed6aae14091f09779c9e745951b5c9e030e5a761e4000d"
   },
   {
     "old": "objects/species/imp.png",
-    "new": "characters/imp.png",
+    "new": "characters/species/imp/imp.png",
     "oldUrl": "/map/objects/species/imp.png",
-    "newUrl": "/map/characters/imp.png",
+    "newUrl": "/map/characters/species/imp/imp.png",
     "sha256": "85f9a67a7b18ec76653293dc4edcf8ebfcf500cb29959f04ff8e34078b3d2a2c"
   },
   {
     "old": "objects/species/kobold.png",
-    "new": "characters/kobold.png",
+    "new": "characters/species/kobold/kobold.png",
     "oldUrl": "/map/objects/species/kobold.png",
-    "newUrl": "/map/characters/kobold.png",
+    "newUrl": "/map/characters/species/kobold/kobold.png",
     "sha256": "44bb30320b36cdc70006014d17fd7245816904dc0a5d58a07a41222dc279d64c"
   },
   {
     "old": "objects/species/lizardman.png",
-    "new": "characters/lizardman.png",
+    "new": "characters/species/lizardman/lizardman.png",
     "oldUrl": "/map/objects/species/lizardman.png",
-    "newUrl": "/map/characters/lizardman.png",
+    "newUrl": "/map/characters/species/lizardman/lizardman.png",
     "sha256": "9249ba282d36dd7378fb6bde9494b9569b26f329edc92a91fceca4cc826a227b"
   },
   {
     "old": "objects/species/minotaur.png",
-    "new": "characters/minotaur.png",
+    "new": "characters/species/minotaur/minotaur.png",
     "oldUrl": "/map/objects/species/minotaur.png",
-    "newUrl": "/map/characters/minotaur.png",
+    "newUrl": "/map/characters/species/minotaur/minotaur.png",
     "sha256": "d693bc4d737285c3148d9cf15f3db0b11eb6c6e889e1f8d6791c83a5e598c401"
   },
   {
     "old": "objects/species/mist.png",
-    "new": "characters/mist.png",
+    "new": "characters/species/mist/mist.png",
     "oldUrl": "/map/objects/species/mist.png",
-    "newUrl": "/map/characters/mist.png",
+    "newUrl": "/map/characters/species/mist/mist.png",
     "sha256": "70764b5a55e9dc67b54170abae6cc03483d5e8907139e2e337c835ec48031db6"
   },
   {
     "old": "objects/species/mummy.png",
-    "new": "characters/mummy.png",
+    "new": "characters/species/mummy/mummy.png",
     "oldUrl": "/map/objects/species/mummy.png",
-    "newUrl": "/map/characters/mummy.png",
+    "newUrl": "/map/characters/species/mummy/mummy.png",
     "sha256": "632e187fd4c2d1e795a74578d4e83fc2963e30c0a66791632ee8c466054fe45c"
   },
   {
     "old": "objects/species/ogre.png",
-    "new": "characters/ogre.png",
+    "new": "characters/species/ogre/ogre.png",
     "oldUrl": "/map/objects/species/ogre.png",
-    "newUrl": "/map/characters/ogre.png",
+    "newUrl": "/map/characters/species/ogre/ogre.png",
     "sha256": "66a9c49f63194c19da0452c24a422969f60838f34adc1558e89ecb00e54183ed"
   },
   {
     "old": "objects/species/ooze.png",
-    "new": "characters/ooze.png",
+    "new": "characters/species/ooze/ooze.png",
     "oldUrl": "/map/objects/species/ooze.png",
-    "newUrl": "/map/characters/ooze.png",
+    "newUrl": "/map/characters/species/ooze/ooze.png",
     "sha256": "75cae80485e18faf5a983f2c1de351e322e69958c6c3cc725f97a9df9740572e"
   },
   {
     "old": "objects/species/orc.png",
-    "new": "characters/orc.png",
+    "new": "characters/species/orc/orc.png",
     "oldUrl": "/map/objects/species/orc.png",
-    "newUrl": "/map/characters/orc.png",
+    "newUrl": "/map/characters/species/orc/orc.png",
     "sha256": "d710b69a23953175d401e2596e6e026a906456a082485919af4e75f3799d35c5"
   },
   {
     "old": "objects/species/salamander.png",
-    "new": "characters/salamander.png",
+    "new": "characters/species/salamander/salamander.png",
     "oldUrl": "/map/objects/species/salamander.png",
-    "newUrl": "/map/characters/salamander.png",
+    "newUrl": "/map/characters/species/salamander/salamander.png",
     "sha256": "dbe6eb7361b48446815669a9f4db249966e125cc9fe35ee60d7dbcb15a91cf4a"
   },
   {
     "old": "objects/species/shark.png",
-    "new": "characters/shark.png",
+    "new": "characters/species/shark/shark.png",
     "oldUrl": "/map/objects/species/shark.png",
-    "newUrl": "/map/characters/shark.png",
+    "newUrl": "/map/characters/species/shark/shark.png",
     "sha256": "f1d02d3d089c20b0ba7dbea7b98bac86efd139f5314c07329178a499c0766cb1"
   },
   {
     "old": "objects/species/siren.png",
-    "new": "characters/siren.png",
+    "new": "characters/species/siren/siren.png",
     "oldUrl": "/map/objects/species/siren.png",
-    "newUrl": "/map/characters/siren.png",
+    "newUrl": "/map/characters/species/siren/siren.png",
     "sha256": "d69d210db10c384d9aa7327d4a7685fbfc128beb62f3c0e9164785ced36f039e"
   },
   {
     "old": "objects/species/skeleton.png",
-    "new": "characters/skeleton.png",
+    "new": "characters/species/skeleton/skeleton.png",
     "oldUrl": "/map/objects/species/skeleton.png",
-    "newUrl": "/map/characters/skeleton.png",
+    "newUrl": "/map/characters/species/skeleton/skeleton.png",
     "sha256": "7c49a586e99195102d18bb1f98b794663063bbe62562391b811651af7646fbda"
   },
   {
     "old": "objects/species/slime.png",
-    "new": "characters/slime.png",
+    "new": "characters/species/slime/slime.png",
     "oldUrl": "/map/objects/species/slime.png",
-    "newUrl": "/map/characters/slime.png",
+    "newUrl": "/map/characters/species/slime/slime.png",
     "sha256": "917aa24406062d1d88a2eec8c3b2d2439f91b1d6924abf84139eb6d4c0fc327a"
   },
   {
     "old": "objects/species/spider.png",
-    "new": "characters/spider.png",
+    "new": "characters/species/spider/spider.png",
     "oldUrl": "/map/objects/species/spider.png",
-    "newUrl": "/map/characters/spider.png",
+    "newUrl": "/map/characters/species/spider/spider.png",
     "sha256": "f9e4c9f6c054a67357a46d7be36a3272cab7bb6f2109a1a8a5a492dc86f2d277"
   },
   {
     "old": "objects/species/treant-v2.png",
-    "new": "characters/treant-v2.png",
+    "new": "characters/species/treant/treant-v2.png",
     "oldUrl": "/map/objects/species/treant-v2.png",
-    "newUrl": "/map/characters/treant-v2.png",
+    "newUrl": "/map/characters/species/treant/treant-v2.png",
     "sha256": "ad70ade4b1479da5b5ee70d6c09dabc6b5e685410b77a1293ace643fa9f20a4a"
   },
   {
     "old": "objects/species/treant.png",
-    "new": "characters/treant.png",
+    "new": "characters/species/treant/treant.png",
     "oldUrl": "/map/objects/species/treant.png",
-    "newUrl": "/map/characters/treant.png",
+    "newUrl": "/map/characters/species/treant/treant.png",
     "sha256": "6d69fa3aee9adda740d05f436b78dc9638139b9d1ffeee84572bc64bc8ef275a"
   },
   {
     "old": "objects/species/troll.png",
-    "new": "characters/troll.png",
+    "new": "characters/species/troll/troll.png",
     "oldUrl": "/map/objects/species/troll.png",
-    "newUrl": "/map/characters/troll.png",
+    "newUrl": "/map/characters/species/troll/troll.png",
     "sha256": "877cc9abd31824456a72b20e5564489007d7477fe3cc5053925e23bd151507c7"
   },
   {
     "old": "objects/species/vampire-v2.png",
-    "new": "characters/vampire-v2.png",
+    "new": "characters/species/vampire/vampire-v2.png",
     "oldUrl": "/map/objects/species/vampire-v2.png",
-    "newUrl": "/map/characters/vampire-v2.png",
+    "newUrl": "/map/characters/species/vampire/vampire-v2.png",
     "sha256": "c5c50da459775b67f2ebb9d35675c6754ec23ac07824a1278f1ebf8e2f3e4611"
   },
   {
     "old": "objects/species/vampire.png",
-    "new": "characters/vampire.png",
+    "new": "characters/species/vampire/vampire.png",
     "oldUrl": "/map/objects/species/vampire.png",
-    "newUrl": "/map/characters/vampire.png",
+    "newUrl": "/map/characters/species/vampire/vampire.png",
     "sha256": "2391472ca622473d9a8a38c3422b152c1b7a952a2eb5ea89d447aded65ae96a0"
   },
   {
     "old": "objects/species/werewolf.png",
-    "new": "characters/werewolf.png",
+    "new": "characters/species/werewolf/werewolf.png",
     "oldUrl": "/map/objects/species/werewolf.png",
-    "newUrl": "/map/characters/werewolf.png",
+    "newUrl": "/map/characters/species/werewolf/werewolf.png",
     "sha256": "f031fe819e987c3c36be96aea588bf22eaa60a1996d9411c001aa049afbaba6a"
   },
   {
     "old": "objects/species/wisp.png",
-    "new": "characters/wisp.png",
+    "new": "characters/species/wisp/wisp.png",
     "oldUrl": "/map/objects/species/wisp.png",
-    "newUrl": "/map/characters/wisp.png",
+    "newUrl": "/map/characters/species/wisp/wisp.png",
     "sha256": "23c32cbc3754341f629a4b8b465db0bc629d71c3e004c9ae946e1f72051bccdc"
   },
   {
     "old": "objects/species/wolf.png",
-    "new": "characters/wolf.png",
+    "new": "characters/species/wolf/wolf.png",
     "oldUrl": "/map/objects/species/wolf.png",
-    "newUrl": "/map/characters/wolf.png",
+    "newUrl": "/map/characters/species/wolf/wolf.png",
     "sha256": "45fc37e5286ee9f5b3b59f114974150ab8f4f2c9ddf17229e98484ad6b471482"
   },
   {
     "old": "objects/species/wraith.png",
-    "new": "characters/wraith.png",
+    "new": "characters/species/wraith/wraith.png",
     "oldUrl": "/map/objects/species/wraith.png",
-    "newUrl": "/map/characters/wraith.png",
+    "newUrl": "/map/characters/species/wraith/wraith.png",
     "sha256": "35e69ef4a41dbf119f839408ba7400b00f74648a00fc53fd3585553ef14942c5"
   },
   {
     "old": "objects/species/wyvern.png",
-    "new": "characters/wyvern.png",
+    "new": "characters/species/wyvern/wyvern.png",
     "oldUrl": "/map/objects/species/wyvern.png",
-    "newUrl": "/map/characters/wyvern.png",
+    "newUrl": "/map/characters/species/wyvern/wyvern.png",
     "sha256": "36fd6480ac95066998c2ed28f187ad8e18d26a2b475f4d0da956aca2c8307af3"
   },
   {

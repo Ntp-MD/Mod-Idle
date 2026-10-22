@@ -20,7 +20,7 @@
 
 // The wiki reads the engine, and only the engine: this is the same seam the client uses, so a page,
 // a cage and the game all resolve to one module and one data file.
-import { E as ENGINE, MODS as MODS_DATA, TOWN as TOWN_DATA, BASES as BASES_DATA, TREE_SPEC as TREE_DATA, SKILLS as SKILLS_DATA, eng, loot, sm, tree, road, farm, fieldwork, trade } from '../engine/client.ts';
+import { E as ENGINE, MODS as MODS_DATA, TOWN as TOWN_DATA, BASES as BASES_DATA, TREE_SPEC as TREE_DATA, SKILLS as SKILLS_DATA, MOB_SKILLS as MOB_SKILLS_DATA, eng, loot, sm, tree, road, farm, fieldwork, trade } from '../engine/client.ts';
 import { STONE_NAME, PRESS_NAME } from '../../../engine/craft.ts';
 
 /**
@@ -153,7 +153,7 @@ const treeNodes = () => {
 /** A keystone by its node id, in the name the board shows. */
 const keystoneName = (id: string): string => ((tree.byId[id] as any)?.name || id.replace(/^keystone\./, ''));
 const TREE_CURRENCY = (tree as any).currencies?.tree || {};
-const QUEST_TREE_BONUS = (TOWN_DATA as any).quest_tree_bonus || {};
+const QUEST_REWARDS = TOWN_DATA.quest_rewards;
 const TREE_POINT_CURVE = `base ${wrap(n0(TREE_CURRENCY.base ?? 0))}` + ((TREE_CURRENCY.level_ranges || []) as any[])
   .map((r: any) => ` + ${wrap(n0(r.per))} a level from ${wrap(n0(r.from))}–${wrap(n0(r.to))}`).join('');
 const TREE_CFG = TREE_SPEC as any;
@@ -241,7 +241,7 @@ const fxEndCell = (s: any, level: number): string => {
   if (s.type !== 'attack' && !fx.length) return '<span class="hy">—</span>';
   const at = sm.effectsAt(s, level);
   const items = fx.map((e: any, i: number) =>
-    `<li><span class="fk">${esc(e.stat)}${e.element ? `:${esc(e.element)}` : ''}${e.condition ? ` <em>if ${esc(e.condition)}</em>` : ''}</span>` +
+    `<li><span class="fk">${esc(e.stat)}${e.element ? `:${esc(e.element)}` : ''}${e.status ? `:${esc(e.status)}` : ''}${e.condition ? ` <em>if ${esc(e.condition)}</em>` : ''}</span>` +
     `<span class="fs">${sideOf(s, e)}</span><span class="fv">${fxVal(e, at[i].value)}</span></li>`);
   if (s.type === 'attack') items.unshift(`<li><span class="fk">press</span><span class="fs">mob</span><span class="fv">${press(s, 'glass', level)}</span></li>`);
   return `<ul class="fx">${items.join('')}</ul>`;
@@ -282,6 +282,21 @@ page({
     return block('The roster', tabbedTable('skillkind', head, groups),
       `Press damage = level-1 damage × <code>damagePct(L) / 100</code>; the table shows L=1 and L=${n0(E.skill_xp.level_cap)}. Additive effect = <code>base × effectPct(L) / 100</code>; a multiplier scales its distance from 1. Buff/Aura additive values round to whole numbers.`);
   })(),
+    block('When a skill fires', table(['Leg', 'Holds when', 'Reads'], [
+      ['boss', 'the front target is a Boss or Unique', 'target kind'],
+      ['hpBelowPct', 'our missing HP share reaches the number', 'character pool'],
+      ['statusMissing', 'the target lacks the status or curse this row applies', 'row + status store'],
+      ['minTargets', 'the fight holds at least this many bodies', 'group width'],
+      ['manaFloorPct', 'the press would leave at least this share of usable Mana', 'pool after cost'],
+      ['statusPresent', 'the target holds the status this row exploits', 'row effect + status store'],
+      ['statusStacksAtLeast', 'that status holds at least this many stacks', 'row effect + status store'],
+      ['selfDebuffed', 'the character carries any live status', 'character statuses'],
+    ]), 'Every enabled leg is an OR; a row may wait on more than one fact. Each slot is <code>always</code>, <code>never</code> or <code>conditional</code>.'),
+    block('Setup → payoff', table(['Effect', 'How the press reads it', 'What it spends'], [
+      ['bonus_vs_status', '<code>press × (1 + bonus% / 100)</code> while the target holds the named status', 'nothing'],
+      ['consume_status', '<code>stacks = min(live, cap)</code>; <code>press × (1 + stacks × per-stack% / 100)</code>', 'the stacks it spends, after the hit'],
+      ['spread_status', 'copies the live line to up to N other targets the row reaches', 'nothing; the copy keeps stacks and remaining seconds'],
+    ]), 'The new payoff rows are <strong>Detonate</strong> (burn), <strong>Shatter</strong> (chill), <strong>Overload</strong> (shock), <strong>Catalyst</strong> (poison), <strong>Ruin</strong> (mark) and <strong>Aftershock</strong> (cripple). A payoff row names its status once, in its own effect.'),
     block('Cost and Max HP terms', table(['Rule', 'How the press reads it', 'Data term'], [
       ['Mana cost', '<code>flat × (1 + max(0, L − 1) × costStep / 100) × AoE multiplier</code>', '<code>mana</code> · <code>aoe</code>'],
       ['HP cost', '<code>cost = flat × (1 + max(0, L − 1) × costStep / 100)</code>; use only if currentHP − cost ≥ 1', '<code>hp_cost</code>'],
@@ -300,10 +315,10 @@ page({
           `attack speed −${pts(ST.chill.aspd_pct)} · accuracy −${pts(ST.chill.acc_pct)} · Armour −${pc0(ST.chill.armour_cut)}`,
           `attack speed −${pts(ST.chill.aspd_cap)} · accuracy −${pts(ST.chill.acc_cap)}`,
           `${n0(ST.chill.time_sec)} sec`],
-        ['shock', 'Stops the mob clock and cuts its speed — and cuts <em>our</em> Alignment against it',
+        ['shock', 'Stops the mob clock for a moment and slows its swing — and cuts <em>our</em> Alignment against it',
           `clock stopped ${n1(ST.shock.stop_sec)} sec · attack speed −${pts(ST.shock.aspd_pct)} · Alignment −${pc0(ST.shock.align_cut)}`,
           `no stacks — one at a time · attack speed −${pts(ST.shock.aspd_cap)}`,
-          `${n1(ST.shock.stop_sec)} sec`],
+          `${n1(ST.shock.time_sec ?? ST.shock.stop_sec)} sec debuff · ${n1(ST.shock.stop_sec)} sec stop`],
         ['poison', 'Elemental damage a second that outlives a weapon swap',
           `×${n2(ST.poison.k_dps)} aligned dps`,
           `${n0(ST.poison.stack_max)} stacks — ×${n1(ST.poison.k_dps * ST.poison.stack_max)} aligned dps`,
@@ -593,6 +608,7 @@ page({
         ['Attack Element', esc(sp.element)],
         ['Resists', `${esc(sp.resistance.element)} ${n0(sp.resistance.pct)}%`],
         ['Weak to', `${esc(sp.weakness.element)} +${n0(sp.weakness.taken_pct)}%`],
+        ['Material', `${esc(fieldwork.materialById[sp.bonus_material.resource]?.name || sp.bonus_material.resource)} ${n2(sp.bonus_material.chance * 100)}%`],
         ['Zones', list(sp.zones)],
         ['Fixed levels', list(Object.entries(sp.zone_levels || {}).map(([zone, level]: [string, any]) => `Z${zone} · L${n0(level)}`))],
       ].map(([label, value]) => `<div><b>${esc(label)}</b><span>${value || '—'}</span></div>`).join('');
@@ -614,6 +630,45 @@ page({
     return [
       block('Shared drop rates', table(['Zone band', 'Gear', 'Herbs', 'Junk by rarity', 'Potion · eligible Species'], bandRows),
         `<code>gear chance = base_drop_chance × (1 + LCK × K_LCK_DROP)</code> before mastery and loot leans. Junk item outcomes split the rarity chance equally across the Variant item and its Species alternative.`),
+      ...(() => {
+        const rows = MOB_SKILLS_DATA.skills as any[];
+        const nameOf = (id: string) => rows.find((row) => row.id === id)?.name || id;
+        const skillLine = (id: string) => {
+          const row = rows.find((r) => r.id === id);
+          if (!row) return id;
+          if (row.mode === 'aura') {
+            const effects = Object.entries(row.effects || {}).map(([stat, value]) => `${stat.replace('_pct', '')} +${n0(Number(value))}%`).join(' · ');
+            return `${esc(row.name)} (aura · ${esc(row.scope)} · ${effects})`;
+          }
+          return `${esc(row.name)}${row.status ? ` · ${esc(row.status)}` : ''}`;
+        };
+        const speciesKitRows = Object.entries(MOB_SKILLS_DATA.kits.species as Record<string, string[]>).map(([id, ids]) => {
+          const sp = (E.mob.species || []).find((row: any) => row.id === id);
+          return [esc(sp?.name || id), list(ids.map(skillLine))];
+        });
+        const bossKitRows = [
+          ...Object.entries(MOB_SKILLS_DATA.kits.bosses as Record<string, string[]>).map(([name, ids]) => [`Boss · ${esc(name)}`, list(ids.map(skillLine))]),
+          ...Object.entries(MOB_SKILLS_DATA.kits.uniques as Record<string, string[]>).map(([name, ids]) => [`Unique · ${esc(name)}`, list(ids.map(skillLine))]),
+        ];
+        return [
+          block('Mob skill library', table(['Skill', 'Mode', 'Element', 'Status', 'Cooldown', 'Cast', 'Role', 'Aura'], rows.map((row) => [
+            esc(row.name),
+            esc(row.mode),
+            esc(row.element || 'physical'),
+            row.status ? esc(row.status) : '—',
+            row.cd ? `${n0(row.cd)} sec` : '—',
+            row.cast_sec != null ? `${n1(row.cast_sec)} sec` : '—',
+            esc(row.role || 'any'),
+            row.mode === 'aura'
+              ? `${esc(row.scope)} · ${Object.entries(row.effects || {}).map(([stat, value]) => `${esc(stat.replace('_pct', ''))} +${n0(Number(value))}%`).join(' · ')}`
+              : '—',
+          ])), `The full library (${n0(rows.length)} rows). A strike replaces the next basic swing and carries the mob's own damage; auras are passive, defensive and strongest-wins. Kits above choose which rows a spawn resolves.`),
+          block('Species signatures', table(['Species', 'Skill kit'], speciesKitRows),
+            `A Species kit is optional and carries at most ${n0(MOB_SKILLS_DATA.meta.max_kit)} skills; species without a row keep their basic swing. A Variant may replace its Species kit, and a Boss or Unique may replace either.`),
+          block('Boss and Unique kits', table(['Mob', 'Skill kit'], bossKitRows),
+            `A strike replaces the next basic swing and deals that swing's damage, so a kit never raises the published mob DPS. Auras are passive defensive group effects: <code>engaged</code> covers the front three bodies, <code>line</code> covers the source's own formation line. Strongest wins; copies do not stack.`),
+        ];
+      })(),
       block('Race → Species → Variant', `<div class="race-roster">${raceSections}</div>`,
         `<code>Species power = power_base + K_MOB_PS_STAT × (wPhys × STR + wMagic × INT)</code>; damage type selects the weights, and Variant may override it. Potion eligibility is a Species flag. Bosses and Uniques inherit their Species resistance and weakness.`),
     ];
@@ -665,7 +720,9 @@ page({
         ['An Expedition asks for', `${n0(TS.elite_n)} target Species Elites in one named subzone`, '<code>task_sizing.elite_n</code> · <code>mob.zones[].subzones</code>'],
         ['Elite / Expedition share', `${pc1(TS.offer_weight_elite)} / ${pc1(TS.offer_weight_expedition)}`, 'same total Tier-stone offer share as before'],
         ['What it pays', `a slice of that band’s own stone income: ${n0(TS.reward_minutes_of_band_income)} minutes of it`, '<code>task_sizing.reward_minutes_of_band_income</code>'],
-        ['A Boss hunt pays', Object.entries(TS.boss_reward || {}).map(([k, v]: any) => `${n0(v)} ${esc(String(k).replace(/_/g, ' '))}`).join(' + '), 'winner’s choice, exactly as the board writes it'],
+        ['Expedition choice', 'Tier stones or a named useful skill; stored stone fallback if the skill later becomes unhelpful', '<code>quest_rewards.expedition_skill_choice</code>'],
+        ['First Expedition milestone per zone', `+${n0(QUEST_REWARDS.milestone_tree_points)} Tree Point with either reward`, '<code>quest_rewards.milestone_tree_points</code>'],
+        ['A Boss hunt pays', `${n0(TS.boss_reward.remove)} Remove Stone or ${n0(TS.boss_reward.reroll_tier)} Tier Stones`, 'winner’s choice, exactly as the board writes it'],
       ]), `${(() => {
         const pay = (b: string) => {
           const p: any = eng.taskPayout(b, TS.reward_minutes_of_band_income);
@@ -676,16 +733,16 @@ page({
       block('One-time lines', table(['Item', 'Sold by', 'Buys', 'Costs, in gold at that band', 'Note'], (TOWN.one_time || []).map((l: any) => [
         esc(l.item), esc(NPC[l.npc]?.name || l.npc || ''), esc(l.kind), price(l),
         `<span class="hy">${[extra(l), l.discount ? `at ${esc((TOWN.settlements || []).find((s: any) => s.id === l.discount.settlement)?.name || l.discount.settlement)} it costs ${goldAt(l.discount.m, (TOWN.settlements || []).find((s: any) => s.id === l.discount.settlement)?.band || l.charge_band)}` : ''].filter(Boolean).join(' · ')}</span>`,
-      ])), '<code>Gold price = roundConfigured(listed minutes × goldPerMinute(charge_band))</code>; one-time lines cannot be bought again.'),
+      ])), '<code>Gold price = roundConfigured(listed minutes × goldPerMinute(charge_band))</code>; one-time lines cannot be bought again. A vendor’s ladder advances to its next authored rung once the current one is owned; a rung authored at another settlement stays there.'),
       block('Repeatable lines', table(['Item', 'Sold by', 'Buys', 'Costs, in gold at that band', 'Note'], (TOWN.repeatable || []).map((l: any) => [
         esc(l.item), esc(NPC[l.npc]?.name || 'no vendor — see note'), esc(l.kind), price(l),
         `<span class="hy">${extra(l)}</span>`,
-      ])), '<code>Gold price = roundConfigured(listed minutes × goldPerMinute(charge_band))</code>; repeat and daily limits are shown per line.'),
+      ])), '<code>Gold price = roundConfigured(listed minutes × goldPerMinute(charge_band))</code>; repeat and daily limits are shown per line. Task skip tokens are spent from the Guild board.'),
       block('The Collector', table(['Set', 'At', 'School', 'Pieces it wants', 'Quality', 'Pays'], (TOWN.collector_sets || []).map((c: any) => [
         esc(c.name || c.id), esc((TOWN.settlements || []).find((s: any) => s.id === c.settlement)?.name || c.settlement),
         esc(c.school), list(c.pieces || []), esc(c.quality || 'any'),
         `<span class="hy">${esc(c.reward || '')}${c.pays_gold === false ? ' · never gold, never a Mod' : ''}</span>`,
-      ])), 'Collector sets reserve requested pieces before the filter runs. Rewards are data-authored.'),
+      ])), 'Collector sets reserve requested pieces before the filter runs. Rewards are data-authored. In game, the set’s school stays hidden until its Collector hint is bought.'),
     ];
   })(),
 });
@@ -708,12 +765,13 @@ page({
       const words = (entries: string[]) => entries.map((id) => trade.byId[id]?.name || id.replace('junk:', '')).join(' · ');
       return [esc(town.name), esc(words(profile.imports)), esc(words(profile.exports)), esc(profile.needs)];
     })), `<code>quote = volume × floorMult + ((remaining² − max(0, remaining − volume)²) / (2 × capacity)) × (peak − floorMult)</code>; <code>volume = count × baseValue</code>. Peak is import/export/neutral by town; remaining demand recovers by <code>elapsed × capacity / recoverySec</code>.`),
+    block('City ledger sales', `<p>Three settlements carry a live city ledger. One sale there is read once and split: units the city actually wants — <code>target − stock, + open event demand</code>, capped by its free storage and gold budget — are bought out of the city's own budget at the market quote, and the rest earns the basic floor price <code>floorCurrency(floorUnits × value × floorMult)</code>. Haggling applies once to the combined price.</p>`),
     block('Haggling', `<p><code>level = min(cap, floor(sqrt(XP / levelDivisor)) + 1)</code>; <code>progress = (level − 1) / (cap − 1)</code>.</p><p><code>saleMult = 1 + progress × saleBonusMax / 100</code>; <code>deliveryMult = 1 + progress × deliveryBonusMax / 100</code>; <code>serviceMult = 1 − progress × serviceDiscountMax / 100</code>. A completed Delivery pays XP once.</p>`),
     block('Regional gathering', table(['Town field', 'Mine bonus', 'Grove bonus', 'Grove forage'], TOWN.settlements.map((town: any) => {
       const source = (E.fieldwork as any).regional_sources[town.zone];
       return [esc(town.name), esc(fieldwork.materialById[source.mine].name), esc(fieldwork.materialById[source.grove].name), esc(fieldwork.foodById[source.food].name)];
     })), `<code>harvestBonus = reachedMilestones × bonusPerMilestone</code>; <code>dropChance = min(1, baseChance × (1 + min(cap, (max(0, skill − 1) × skillRate + max(0, mastery − 1) × masteryRate)) / 100))</code>. Regional source selects Mine, Grove and forage goods by zone.`),
-    block('Delivery wants', `<p><code>offer roll = trigger_chance</code> at each online interval for each visited town. The displayed reward and deadline are fixed when offered; each hand-in pays the live market quote, and the completion bonus pays once at the full count.</p><p>Deadlines use credited game time and pause during Camp recovery or dungeon runs. Offline time creates no offers. A full bag refuses the final hand-in without spending goods or progress.</p>`),
+    block('Delivery wants', `<p><code>offer roll = trigger_chance</code> at each online interval for each visited town. Rewards and deadlines freeze when offered. The saved offer serial follows the configured mode sequence (${TOWN.delivery.reward_modes.map(esc).join(' → ')}): Fixed pays its displayed bundle; Choice lets you take a gold bounty or stones plus any named skill, each scaled by the configured ×${xOf(TOWN.delivery.choice_reward_mult)} concentration. Only one alternative pays; select it before the final hand-in. Every hand-in still pays its live market quote.</p><p>Completion grants Haggling XP and any displayed Attainment independently of that choice. The first milestone Delivery per town also pays +${n0(QUEST_REWARDS.milestone_tree_points)} Tree Point. Partial hand-ins and expired offers consume no milestone. Already stored legacy rewards remain unchanged.</p><p>Deadlines use credited game time and pause during Camp recovery or dungeon runs. Offline time creates no offers. If the chosen reward cannot fit, the final hand-in refuses without spending goods or progress. Recaps distinguish actual paid rewards from expired mutually exclusive alternatives.</p>`),
     block('Black Market', table(['Rule', 'The number'], [
       ['Offers per settlement', `${n0(TOWN.black_market.offers_per_refresh)} at a time`],
       ['Refresh', `every ${n0(TOWN.black_market.refresh_interval_sec / 60)} online minutes, per visited town`],
@@ -752,7 +810,25 @@ page({
       <li>Hover a gear piece to inspect its full item detail and current Mod lines.</li>
       <li>Drag a stone from the stack onto the selected piece. Direct presses apply on drop; presses that need a line or Mod choice prepare the action for review and confirmation.</li>
       <li>Hover the gear again after the press to read its updated Mod lines.</li>
-    </ol>`, 'Gear crafting is a Settlement service. Camp cooking is the field exception; it does not craft gear.'),
+    </ol><p>The Stones pane opens on <strong>Basic</strong>, which keeps the common presses together. Switch to <strong>Advanced</strong> for whole-piece and rare stones: Polish, Reforge, Rebirth, Corrupt, Imprint and the bulk presses.</p>`, 'Gear crafting is a Settlement service. Camp cooking is the field exception; it does not craft gear.'),
+    block('Forge a new piece', (() => {
+      const F = E.forge;
+      const bands = E.item_level.spans.map((s: any) => `${esc(s.band)} ${n0(s.from)}–${n0(s.to)}`).join(' · ');
+      const families = Object.entries(F.families)
+        .map(([, row]: any) => `${esc(row.name)}${Object.keys(row.bases).length ? `: ${Object.keys(row.bases).map((slot) => esc(slot)).join(', ')}` : ': weapon frames only'}`)
+        .join(' · ');
+      const materials = Object.entries(F.materials)
+        .map(([id, row]: any) => `${esc(fieldwork.materialById[id]?.name || id)} (${esc(F.families[row.family]?.name || row.family)}, grade ${n0(row.grade)})`)
+        .join(' · ');
+      const armour = Object.entries(F.armour).map(([, row]: any) => `${esc(row.name)} ${n0(row.count)}`).join(' · ');
+      const weapons = Object.entries(F.weapons).map(([, row]: any) => `${esc(row.name)} ${n0(row.count)} · ${esc(row.frame)}`).join(' · ');
+      return `<p>At a settlement Forge choose a pattern and one material. The material's family picks the Base or weapon Frame; its grade sets the band (${bands}). The piece rolls with the drop skeleton: line 1, the Bound pair and 2–${n0(E.item_level.unbound_slots.max)} Unbound lines.</p>
+        <p><b>Families</b> ${families}.</p>
+        <p><b>Materials</b> ${materials}.</p>
+        <p><b>Armour patterns</b> ${armour}.</p>
+        <p><b>Weapon patterns</b> ${weapons}.</p>
+        <p>The selected material also prints how many are missing and a <strong>Where to farm</strong> list — Mine or Grove zone, hunting Species, the Workshop/Smithing recipe, or Salvage.</p>`;
+    })(), `<code>character level ≥ band floor · smithing ≥ ${E.forge.smithing_level.map((n: number) => n0(n)).join(' / ')} by grade · cost = pattern count · XP = ${E.forge.xp_per_grade.map((n: number) => n0(n)).join(' / ')} by grade</code>. No gold fee; fancy Base variants stay drop-only.`),
     block('The stones, one by one', (() => {
       /** one heading per stone, then the presses that stone buys — a press is never a stone */
       const perStone = (key: string, presses: any[][]): string =>
@@ -889,7 +965,7 @@ page({
     block('The passive tree', table(['Region', 'Normal', 'Notable', 'Keystone', 'Tree points'], treeNodes().regions.map((name: string) => [
       esc(name), wrap(n0(treeNodes().countsIn(name, 'normal'))), wrap(n0(treeNodes().countsIn(name, 'notable'))),
       wrap(n0(treeNodes().countsIn(name, 'keystone'))), wrap(n0(treeNodes().costOf(name))),
-    ])), `Every node holds one rank and opens from any owned neighbour; Start is free and every region opens from it. A Normal grants exactly +1 of its region's Core attribute for 1 tree point. A Notable grants its written profile of flat and percent lines for 3 tree points. A Keystone changes a mechanic for 1 attainment point and never spends tree points. <code>treePoints = ${TREE_POINT_CURVE} + claimed quest bonuses − spent tree</code>; a Town task or Delivery offer carries a ${pts((QUEST_TREE_BONUS.chance ?? 0) * 100)} chance of +${n0(QUEST_TREE_BONUS.amount ?? 0)} tree point, rolled into the stored reward and paid only when the reward is actually claimed. Respec at a settlement is free and hands both wallets back at the prices the spec charged. The tree is a new character's: an older character is refused with its own message rather than rewritten.`),
+    ])), `Every node holds one rank and opens from any owned neighbour; Start is free and every region opens from it. A Normal grants exactly +1 of its region's Core attribute for 1 tree point. A Notable grants its written profile of flat and percent lines for 3 tree points. A Keystone changes a mechanic for 1 attainment point and never spends tree points. <code>treePoints = ${TREE_POINT_CURVE} + claimed quest bonuses − spent tree</code>. The first milestone Expedition claim per zone and first milestone Delivery completion per town guarantee +${n0(QUEST_REWARDS.milestone_tree_points)} Tree Point, outside the consumable reward choice. The point pays once on completion; skipping or expiry leaves the milestone available. Legacy saved random Tree Point promises remain payable. Respec at a settlement is free and hands both wallets back at the prices the spec charged. The tree is a new character's: an older character is refused with its own message rather than rewritten.`),
     block('The Keystones', tabbedTable('tree-keystones', ['Keystone', 'Region', 'What it changes'], treeNodes().regions.map((region: string) => ({
       key: region,
       label: region,
@@ -1049,6 +1125,7 @@ page({
       <li><span class="fk">There is no death.</span><span class="fs">rule</span><span class="fv">a fight you lose rests you at camp and costs time only</span></li>
       <li><span class="fk">A Push on the walk is the ordinary Push.</span><span class="fs">rule</span><span class="fv">with a Field Camp in this zone, recovery returns there and ends the walk; otherwise the route resumes at its ambush block (<code>road.push_rule</code>)</span></li>
       <li><span class="fk">A dungeon run forfeits its escrow.</span><span class="fs">rule</span><span class="fv">the one place a Push costs loot — <a href="world.html">World</a></span></li>
+      <li><span class="fk">The log leaves a Push report.</span><span class="fs">readout</span><span class="fv">the threat's kind, level, damage type and Element, your resistance and HP/ES, plus the one change worth making before the next attempt</span></li>
       <li><span class="fk">Your preset goes back to the main one.</span><span class="fs">rule</span><span class="fv">and a cooldown already counting keeps counting (<code>presets.cooldowns_persist_on_push</code>)</span></li>
       <li><span class="fk">A broken piece contributes nothing.</span><span class="fs">rule</span><span class="fv">the Armourer clears it and refills protection — <a href="crafting.html">Crafting</a></span></li>
     </ul>`),
@@ -1091,11 +1168,21 @@ page({
       '<code>Expected provision per kill = chance × average(quantity range)</code>. Each lineage roll is separate from the raw-meat roll.'),
     block('Ore and timber from kills', table(['Lineage', 'Material', 'Chance', 'Quantity'],
       ((E.fieldwork as any).hunt.material_drops || []).map((drop: any) => [
-        esc(drop.species.join(' · ')),
-        esc(drop.resource),
+        esc(drop.species.map((id: string) => (E.mob.species as any[]).find((sp: any) => sp.id === id)?.name || id).join(' · ')),
+        esc(fieldwork.materialById[drop.resource]?.name || drop.resource),
         pc1(drop.chance), `${n0(drop.min)}–${n0(drop.max)}`,
       ])),
-      '<code>Expected material per kill = chance × average(quantity range)</code>. Mine and Grove actions use their own harvest formulas.'),
+      '<code>Expected material per kill = chance × average(quantity range)</code>. These rows are the extra Hunting-skill roll; Mine and Grove actions use their own harvest formulas.'),
+    block('Species bonus materials', table(['Material', 'Species', 'Chance'],
+      [...new Set((E.mob.species as any[]).map((sp: any) => sp.bonus_material.resource))].map((resource: string) => {
+        const members = (E.mob.species as any[]).filter((sp: any) => sp.bonus_material.resource === resource);
+        return [
+          esc(fieldwork.materialById[resource]?.name || resource),
+          list(members.map((sp: any) => sp.name)),
+          `${n2(members[0].bonus_material.chance * 100)}%`,
+        ];
+      })),
+      '<code>Expected material per kill = chance × average(quantity range)</code>. This roll is independent of Hunting and applies to every rank, including dungeon and ambush kills.'),
     block('Hunger and provisions', table(['Food', 'Kind', 'Hunger restored', 'Source'],
       fieldwork.foods.map((food: any) => [
         esc(food.name), esc(food.kind), food.edible ? `+${n0(food.hunger_restore)}` : 'cooking ingredient', esc(food.source || '—'),
@@ -1129,7 +1216,7 @@ page({
       ['Plots', `${n0((E.farm as any).plots.base)} to start, ${n0((E.farm as any).plots.shop_deeds)} bought, ${n0(farm.plotsMax)} at most`, '<code>farm.plots</code>'],
       ['A grow', `${n1(farm.growthSec / 3600)} hours, then ${n0((E.farm as any).yield_per_harvest)} herbs`, '<code>farm.growth_hours</code> · <code>farm.yield_per_harvest</code>'],
       ['A replant', `${n0(farm.seedCostHerbs)} herb of the harvest goes back into the ground`, '<code>farm.seed_cost_herbs</code>'],
-      ['A day', `${n0((E.farm as any).taps_per_day)} taps, and up to ${n1(farm.offlineCapSec / 3600)} hours of growth are paid while you are away`, '<code>farm.taps_per_day</code> · <code>farm.offline_cap_hours</code>'],
+      ['A day', `${n0((E.farm as any).taps_per_day)} taps; ${Number.isFinite(farm.offlineCapSec) ? `up to ${n1(farm.offlineCapSec / 3600)} hours of away growth` : 'away growth has no time limit'}`, '<code>farm.taps_per_day</code> · <code>farm.offline_cap_hours</code>'],
       ['A level', `cap ${n0((E.farm as any).level_cap)} · ${n0((E.farm as any).xp_per_harvest)} XP a harvest · the same curve as Weapon Mastery`, '<code>farm.level_*</code>'],
       ['Which draughts open', `low from ${n0((E.farm as any).tier_unlock_level.low)} · mid from ${n0((E.farm as any).tier_unlock_level.mid)} · high from ${n0((E.farm as any).tier_unlock_level.high)}`, '<code>farm.tier_unlock_level</code>'],
     ]), `<code>farmLevel = min(cap, floor(sqrt(XP / level_divisor)) + 1)</code>; <code>XP for level L = (L − 1)² × level_divisor</code>.`),
@@ -1145,11 +1232,11 @@ page({
   file: 'idle.html',
   nav: 'Away & bag',
   title: 'Away, and what you can carry',
-  lead: `Away time paid = min(elapsed away, ${n0((E.inventory as any).offline_cap_hr)} hours). Away gear uses the band’s floor Item level; loot is not auto-converted.`,
+  lead: `${E.inventory.offline_cap_hr == null ? 'Every whole elapsed second is credited, with no offline time limit.' : `Away time paid = min(elapsed away, ${n0(E.inventory.offline_cap_hr)} hours).`} Away gear uses the band’s floor Item level; loot is not auto-converted.`,
   body: [
     block('While the window is shut', table(['', 'The number', 'Read from'], [
-      ['How long it keeps paying', wrap(n0((E.inventory as any).offline_cap_hr)) + ' hours', '<code>inventory.offline_cap_hr</code>'],
-      ['The farm while away', wrap(n1(farm.offlineCapSec / 3600)) + ' hours', '<code>farm.offline_cap_hours</code>'],
+      ['How long it keeps paying', E.inventory.offline_cap_hr == null ? 'Unlimited' : wrap(n0(E.inventory.offline_cap_hr)) + ' hours', '<code>inventory.offline_cap_hr</code>'],
+      ['The farm while away', Number.isFinite(farm.offlineCapSec) ? wrap(n1(farm.offlineCapSec / 3600)) + ' hours' : 'Unlimited', '<code>farm.offline_cap_hours</code>'],
       ['Snapshots', `${n0((E.save as any).snapshot_slots)} walking copies, one every ${n0((E.save as any).snapshot_interval_min)} minutes`, '<code>save.snapshot_*</code>'],
       ['What else writes one', list((E.save as any).snapshot_triggers || []), '<code>save.snapshot_triggers</code> — a level up, and a successful Ascend or Refine'],
     ]), `<code>snapshot count = snapshot_slots</code>; periodic interval = <code>snapshot_interval_min</code>. Restore rolls the whole account back to that snapshot.`),

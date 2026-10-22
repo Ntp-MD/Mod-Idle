@@ -134,7 +134,7 @@
           </span>
         </li>
       {:else}
-        <li class="dim">no rolled lines</li>
+        <li class="text-dim">no rolled lines</li>
       {/each}
     </ul>
   </section>
@@ -163,7 +163,7 @@
         <img src={modIcon(gear.stat)} alt="" aria-hidden="true" />
         <strong>{gear.value > 0 ? `${modValue(gear.stat, gear.value)} ${plainName(gear.stat)}` : plainName(gear.stat)}</strong>
       </div>
-      <p class="gear-note">+{craft.C.gear_mod_per_level} per Quality stone</p>
+      <p class="text-note">+{craft.C.gear_mod_per_level} per Quality stone</p>
     </section>
   {/if}
 
@@ -194,7 +194,6 @@
   h4 { margin: 0; font-size: var(--font-sm); color: var(--rar, var(--text)); }
   .item-meta { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; color: var(--dim); font-size: var(--font-xs); }
   .chip { padding: 0 var(--spacing-xs); }
-  .dim { color: var(--dim); }
   .meta-note { color: var(--dim); }
   .tag.up { margin: 0; color: var(--xp); font-size: var(--font-xs); }
   .detail section { display: grid; gap: var(--spacing-xs); }
@@ -244,7 +243,6 @@
   .gear { display: grid; gap: var(--spacing-xs); padding-top: var(--spacing-xs); border-top: 1px solid var(--line); }
   .gear-row { display: flex; align-items: center; gap: var(--spacing-xs); color: var(--text); font-variant-numeric: tabular-nums; }
   .gear-row strong { font-size: var(--font-xs); }
-  .gear-note { color: var(--dim); font-size: var(--font-xs); }
   .summary { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: var(--spacing-sm); padding-top: var(--spacing-xs); border-top: 1px solid var(--line); }
   .weight { display: flex; align-items: baseline; gap: var(--spacing-xs); margin: 0; color: var(--dim); font-size: var(--font-xs); }
   .weight strong { color: var(--text); font-variant-numeric: tabular-nums; }

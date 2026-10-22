@@ -5,8 +5,9 @@ import { newDeliverySummary } from './delivery-types';
 import type { GameState } from './types';
 import { atSettlement, craft } from './craft';
 import { quoteSale, sellGoods, tradeBucket, tradeInventory } from './trade';
-import { fitsTransaction, addTo } from './slots';
-import { grantNamedSkill, usefulSkillDuplicate } from './skills';
+import { fitsTransaction } from './slots';
+import { usefulSkillDuplicate } from './skills';
+import { deliveryBonuses, milestoneAvailable, payQuestBonus, recordQuestMilestone, resolveQuestBonus, validQuestBonus } from './quest-rewards';
 import { fieldSkillLevel, fieldSite } from './fieldwork';
 import { farmLevel, plotCount } from './farm';
 import { cellSec, settlementCell } from './road';
@@ -90,18 +91,23 @@ export function offerDelivery(state: GameState, town: string, rng: () => number,
    const attainmentChance = deliveryConfig.attainment_chance
      * (deliveryConfig.attainment_band_weights[route.band as keyof typeof deliveryConfig.attainment_band_weights] || 0);
    const attainment = rng() < attainmentChance ? 1 : 0;
-   const qtb = (TOWN as any).quest_tree_bonus || { chance: 0, amount: 0 };
-   const treePoints = rng() < (qtb.chance ?? 0) ? (qtb.amount ?? 0) : 0;
+   rng(); // Retain the former tree-bonus draw; milestones do not consume extra gameplay draws.
+   const milestone = `delivery:${town}`;
+   const treePoints = milestoneAvailable(state, milestone) ? TOWN.quest_rewards.milestone_tree_points : 0;
   const rawQuote = trade.quote(town, target.good, count, state.town.market[town]?.[target.good.group], state.clockSec);
   const premium = delivery.premium(route.difficulty, state.town.hagglingXp);
   const serial = state.town.contractSerial + 1;
   if (!Number.isSafeInteger(serial)) return null;
+  const choice = delivery.rewardMode(serial) === 'choice';
+  const mult = choice ? deliveryConfig.choice_reward_mult : 1;
   const contract: DeliveryContract = {
     id: `delivery:${town}:${serial}`, serial, town, good: target.good.id, target: count, delivered: 0,
     acquisition: route, derivationVersion: deliveryConfig.derivation_version,
-     reward: { gold: trade.floorCurrency(rawQuote.gold * (premium - 1)), stone: delivery.stoneBundle(route.band, route.difficulty, stone.key, stone.income), skill,
-       fallback: delivery.stoneBundle(route.band, route.difficulty, deliveryConfig.fallback_stone, deliveryConfig.fallback_stone, true), quoteGold: rawQuote.gold, premium,
-       attainment, treePoints },
+     reward: { gold: choice ? 0 : delivery.bonusGold(rawQuote.gold, route.difficulty, state.town.hagglingXp),
+       stone: delivery.stoneBundle(route.band, route.difficulty * mult, stone.key, stone.income), skill,
+       fallback: delivery.stoneBundle(route.band, route.difficulty * mult, deliveryConfig.fallback_stone, deliveryConfig.fallback_stone, true), quoteGold: rawQuote.gold, premium,
+       attainment, treePoints, ...(treePoints ? { milestone } : {}),
+       ...(choice ? { alternative: { id: 'gold', label: 'Gold bounty', gold: delivery.bonusGold(rawQuote.gold, route.difficulty, state.town.hagglingXp, mult), stones: [], skill: null, fallback: null } } : {}) },
     triggeredAtClockSec: state.clockSec, dueAtDeliverySec: state.town.deliveryClockSec + delivery.deadline(route), status: 'open', terminalAt: null,
     baseGold: 0, lastQuantity: 0, lastGold: 0, paidBonus: null, recapAcknowledged: true, announced: false,
   };
@@ -121,11 +127,25 @@ function fold(summary: DeliverySummary, contract: DeliveryContract) {
     for (const stone of contract.paidBonus.stones) add(summary.paidStones, stone);
     if (contract.paidBonus.skill) summary.paidSkills[contract.paidBonus.skill] = (summary.paidSkills[contract.paidBonus.skill] || 0) + 1;
     summary.paidTreePoints = (summary.paidTreePoints ?? 0) + (contract.paidBonus.treePoints ?? 0);
+    summary.paidAttainment = (summary.paidAttainment ?? 0) + (contract.paidBonus.attainment ?? 0);
   } else {
-    summary.forfeitedGold += contract.reward.gold; add(summary.forfeitedStones, contract.reward.stone);
-    if (contract.reward.skill) {
-      summary.forfeitedSkills[contract.reward.skill] = (summary.forfeitedSkills[contract.reward.skill] || 0) + 1;
-      add(summary.forfeitedFallback, contract.reward.fallback);
+    summary.forfeitedTreePoints = (summary.forfeitedTreePoints ?? 0) + contract.reward.treePoints;
+    summary.forfeitedAttainment = (summary.forfeitedAttainment ?? 0) + contract.reward.attainment;
+    if (contract.reward.alternative) {
+      const choices = summary.forfeitedChoices ||= { count: 0, gold: 0, stones: {}, skills: {}, fallback: {} };
+      choices.count++;
+      for (const option of deliveryBonuses(contract.reward)) {
+        choices.gold += option.gold;
+        for (const stone of option.stones) add(choices.stones, stone);
+        if (option.skill) choices.skills[option.skill] = (choices.skills[option.skill] || 0) + 1;
+        if (option.skill && option.fallback) add(choices.fallback, option.fallback);
+      }
+    } else {
+      summary.forfeitedGold += contract.reward.gold; add(summary.forfeitedStones, contract.reward.stone);
+      if (contract.reward.skill) {
+        summary.forfeitedSkills[contract.reward.skill] = (summary.forfeitedSkills[contract.reward.skill] || 0) + 1;
+        add(summary.forfeitedFallback, contract.reward.fallback);
+      }
     }
   }
 }
@@ -164,7 +184,7 @@ export function tickDeliveries(state: GameState, rng: () => number, online: bool
   pruneDeliveries(state);
 }
 
-export function previewDelivery(state: GameState, id: string, count: number, access: WriterAccess) {
+export function previewDelivery(state: GameState, id: string, count: number, access: WriterAccess, choice?: string) {
   const refuse = (why: string) => ({ ok: false as const, why });
   if (!access.writer) return refuse('this tab is read-only');
   const contract = contractById(state, id);
@@ -179,26 +199,29 @@ export function previewDelivery(state: GameState, id: string, count: number, acc
   const quote = quoteSale(state, contract.town, good.id, count);
   if (!quote) return refuse('this buyer is unavailable');
   const complete = count === contract.target - contract.delivered;
-  const skill = complete && contract.reward.skill && usefulSkillDuplicate(state.skills, contract.reward.skill) ? contract.reward.skill : null;
-  const fallback = complete && !!contract.reward.skill && !skill;
-  const stones = complete ? [contract.reward.stone, ...(fallback ? [contract.reward.fallback] : [])] : [];
+  const options = deliveryBonuses(contract.reward);
+  if (choice !== undefined && !options.some((option) => option.id === choice)) return refuse('choose one of the displayed rewards');
+  if (complete && contract.reward.alternative && !choice) return refuse('choose one completion reward');
+  if (contract.reward.milestone && state.town.questMilestones?.[contract.reward.milestone]) return refuse('this milestone was already paid');
+  const selected = options.find((option) => option.id === (choice ?? 'supplies'))!;
+  const bonus = complete ? resolveQuestBonus(state, selected) : { gold: 0, stones: [], skill: null, fallback: false, choice: selected?.id };
+  const { skill, fallback, stones } = bonus;
    const attainment = complete ? (contract.reward.attainment ?? 0) : 0;
    const treePoints = complete ? (contract.reward.treePoints ?? 0) : 0;
   const capKind = good.bucket === 'junk' ? 'stone' : good.bucket;
   if (!fitsTransaction(state, [{ bucket, key: good.key, capKind, amount: count }], stones.map((stone) => ({ bucket: state.counters.stones, key: stone.key, capKind: 'stone', amount: stone.count })))) return refuse('make bag room for the complete reward bundle');
-   return { ok: true as const, contract, good, count, quote, complete, skill, fallback, stones, attainment, treePoints };
+   return { ok: true as const, contract, good, count, quote, complete, skill, fallback, stones, attainment, treePoints, bonus };
 }
 
-export function deliver(state: GameState, id: string, count: number, access: WriterAccess): { ok: boolean; why?: string; gold?: number; completed?: boolean } {
-  const preview = previewDelivery(state, id, count, access);
+export function deliver(state: GameState, id: string, count: number, access: WriterAccess, choice?: string): { ok: boolean; why?: string; gold?: number; completed?: boolean } {
+  const preview = previewDelivery(state, id, count, access, choice);
   if (!preview.ok) return preview;
   const result = sellGoods(state, preview.good.id, count);
   if (!result.ok) return result;
   const contract = preview.contract;
   contract.delivered += count; contract.baseGold += result.gold; contract.lastQuantity = count; contract.lastGold = result.gold; contract.recapAcknowledged = false;
   if (preview.complete) {
-    for (const stone of preview.stones) addTo(state, state.counters.stones, stone.key, 'stone', stone.count);
-    if (preview.skill) grantNamedSkill(state.skills, preview.skill);
+    payQuestBonus(state, preview.bonus);
     // the attainment point is paid on completion, next to the skill (D2): it is the rare half of the
     // contract's reward, and it was frozen into the offer before the player saw it
      state.player.attainmentPoints = (state.player.attainmentPoints ?? 0) + (preview.attainment ?? 0);
@@ -207,13 +230,13 @@ export function deliver(state: GameState, id: string, count: number, access: Wri
        state.player.questTreePointsEarned = (state.player.questTreePointsEarned ?? 0) + bonusTree;
        state.player.treePoints = (state.player.treePoints ?? 0) + bonusTree;
      }
-     state.counters.gold += contract.reward.gold;
-     contract.paidBonus = { gold: contract.reward.gold, stones: preview.stones.map((stone) => ({ ...stone })), skill: preview.skill, fallback: preview.fallback, treePoints: bonusTree };
+     contract.paidBonus = { ...preview.bonus, stones: preview.stones.map((stone) => ({ ...stone })), treePoints: bonusTree, attainment: preview.attainment };
+     recordQuestMilestone(state, contract.reward.milestone);
     contract.status = 'completed'; contract.terminalAt = state.town.deliveryClockSec;
     state.town.hagglingXp += trade.hagglingXp(contract.acquisition.difficulty);
   }
   pruneDeliveries(state);
-  return { ok: true, gold: result.gold + (preview.complete ? contract.reward.gold : 0), completed: preview.complete };
+  return { ok: true, gold: result.gold + preview.bonus.gold, completed: preview.complete };
 }
 
 export function trackDelivery(state: GameState, id: string, tracked: boolean, access: WriterAccess): boolean {
@@ -256,6 +279,11 @@ export function normalizeDeliveries(state: GameState) {
   for (const [townId, rows] of Object.entries(town.contracts)) {
     if (!townById(townId) || !Array.isArray(rows)) fail('unknown town or malformed contract list');
     for (const contract of rows) {
+      // Earlier schemas did not promise these points; backfill absence without adding a reward.
+      if (contract.reward) {
+        if (contract.reward.attainment === undefined) contract.reward.attainment = 0;
+        if (contract.reward.treePoints === undefined) contract.reward.treePoints = 0;
+      }
       if (contract.town !== townId || contract.id !== `delivery:${townId}:${contract.serial}` || ids.has(contract.id) || serials.has(contract.serial) || !safe(contract.serial) || contract.serial < 1 || contract.serial > town.contractSerial) fail('invalid or repeated contract identity');
       ids.add(contract.id); serials.add(contract.serial);
       if (!trade.byId[contract.good] || !safe(contract.target) || contract.target < 1 || !safe(contract.delivered) || contract.delivered > contract.target) fail('unknown target or invalid progress');
@@ -267,13 +295,16 @@ export function normalizeDeliveries(state: GameState) {
       for (const step of route.steps) if (!trade.byId[step.good] || !E.mob.zones.some((zone) => zone.id === step.zone)
         || !safe(step.quantity) || !step.quantity || !amount(step.seconds) || !['mine', 'grove', 'hunt', 'farm', 'cook', 'workshop', 'trail', 'fish', 'salvage'].includes(step.kind)) fail('acquisition references need a migration');
        if (!contract.reward || !amount(contract.reward.gold) || !amount(contract.reward.quoteGold) || !amount(contract.reward.premium) || !stoneValid(contract.reward.stone) || !stoneValid(contract.reward.fallback) || contract.reward.skill && !sm.byId[contract.reward.skill]) fail('reward references need a migration');
+       if (contract.reward.alternative && (!validQuestBonus(contract.reward.alternative) || contract.reward.alternative.id === 'supplies')) fail('invalid reward alternative');
        if (!safe(contract.reward.attainment) || contract.reward.attainment < 0 || contract.reward.attainment > 1) fail('invalid attainment reward');
-       if (!safe(contract.reward.treePoints) || contract.reward.treePoints < 0 || contract.reward.treePoints > 1) fail('invalid tree point reward');
+       if (!safe(contract.reward.treePoints)) fail('invalid tree point reward');
       if (!['open', 'completed', 'expired'].includes(contract.status) || contract.status === 'open' && (contract.terminalAt !== null || contract.paidBonus || contract.delivered === contract.target)
         || contract.status !== 'open' && !safe(contract.terminalAt!) || contract.status === 'completed' && (contract.delivered !== contract.target || !contract.paidBonus)
         || contract.status === 'expired' && (contract.paidBonus || contract.delivered === contract.target)) fail('illegal terminal state');
        if (contract.paidBonus && (!amount(contract.paidBonus.gold) || !contract.paidBonus.stones.every(stoneValid) || contract.paidBonus.skill && !sm.byId[contract.paidBonus.skill])) fail('invalid recorded reward');
-       if (contract.paidBonus?.treePoints != null && (!safe(contract.paidBonus.treePoints) || contract.paidBonus.treePoints < 0 || contract.paidBonus.treePoints > 1)) fail('invalid recorded tree point reward');
+       if (contract.paidBonus?.treePoints != null && !safe(contract.paidBonus.treePoints)) fail('invalid recorded tree point reward');
+       if (contract.paidBonus?.attainment != null && (!safe(contract.paidBonus.attainment) || contract.paidBonus.attainment > 1)) fail('invalid recorded attainment reward');
+       if (contract.paidBonus?.choice != null && !deliveryBonuses(contract.reward).some((option) => option.id === contract.paidBonus!.choice)) fail('unknown recorded reward choice');
       contract.announced ??= false; contract.recapAcknowledged ??= false;
     }
   }
@@ -281,6 +312,14 @@ export function normalizeDeliveries(state: GameState) {
   for (const [id, summary] of Object.entries(town.deliverySummaries)) {
     if (!townById(id) || !safe(summary.unread) || !safe(summary.completed) || !safe(summary.expired) || !amount(summary.paidGold) || !amount(summary.forfeitedGold)) fail('invalid recap summary');
     if (summary.paidTreePoints !== undefined && !safe(summary.paidTreePoints)) fail('invalid summarized tree point reward');
+    for (const key of ['paidAttainment', 'forfeitedTreePoints', 'forfeitedAttainment'] as const)
+      if (summary[key] !== undefined && !safe(summary[key]!)) fail('invalid summarized permanent points');
+    if (summary.forfeitedChoices) {
+      const row = summary.forfeitedChoices;
+      if (!safe(row.count) || !amount(row.gold) || !row.stones || !row.skills || !row.fallback) fail('invalid unchosen reward summary');
+      for (const bucket of [row.stones, row.fallback]) for (const [key, count] of Object.entries(bucket)) if (!stoneValid({ key, count })) fail('invalid summarized reward alternative');
+      for (const [key, count] of Object.entries(row.skills)) if (!sm.byId[key] || !safe(count) || !count) fail('invalid summarized skill alternative');
+    }
     for (const [good, row] of Object.entries(summary.goods)) if (!trade.byId[good] || !safe(row.quantity) || !amount(row.gold)) fail('invalid summarized proceeds');
     for (const bucket of [summary.paidStones, summary.forfeitedStones, summary.forfeitedFallback]) {
       if (!bucket || typeof bucket !== 'object') fail('invalid summarized stones');

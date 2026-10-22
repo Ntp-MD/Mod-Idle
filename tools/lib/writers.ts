@@ -14,10 +14,12 @@ export const CAGES: { label: string; script: string; args: string[] }[] = [
   { label: 'skills cage', script: 'tools/skills.ts', args: ['--checks'] },
   { label: 'loot cage', script: 'tools/loot.ts', args: ['--checks'] },
   { label: 'bases cage', script: 'tools/bases.ts', args: ['--checks'] },
+  { label: 'forge cage', script: 'tools/forge.ts', args: ['--checks'] },
   { label: 'tree cage', script: 'tools/tree.ts', args: ['--checks'] },
   { label: 'imprint cage', script: 'tools/imprint.ts', args: ['--checks'] },
   { label: 'map cage', script: 'tools/map.ts', args: ['--checks'] },
   { label: 'trade cage', script: 'tools/trade.ts', args: ['--checks'] },
   { label: 'delivery cage', script: 'tools/delivery.ts', args: ['--checks'] },
+  { label: 'catalog cage', script: 'tools/catalog.ts', args: ['--checks'] },
   { label: 'icon cage', script: 'tools/icons.ts', args: ['--checks'] },
 ];

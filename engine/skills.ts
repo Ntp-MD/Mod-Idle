@@ -104,6 +104,9 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
 
   const byId: Record<string, SkillRow> = {};
   for (const s of SKILLS.skills) byId[s.id] = s;
+  /** The live roster: retired rows stay in `byId` so an old save still resolves them, but they
+   *  never drop, get offered as a reward, or appear in the owned/active lists again. */
+  const ACTIVE = SKILLS.skills.filter((s) => !s.retired);
 
   /**
    * The price is a typed number of mana units and the unit word is part of the number: `21 flat`
@@ -312,7 +315,14 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     // Earth Splitter's share of the target's own maximum pool
     'dot_dps', 'dot_sec', 'max_hp_pct_damage',
     // Energy Absorb: the share of an incoming hit converted to Energy Shield, base and Cap
-    'es_absorb_pct', 'es_absorb_cap'];
+    'es_absorb_pct', 'es_absorb_cap',
+    // setup → payoff: a press that reads a status already on the body, spends its stacks, or copies
+    // it to the other bodies the row reaches
+    'bonus_vs_status', 'consume_status', 'spread_status'];
+  /** The row effects whose magnitude is read against one named mob status. */
+  const STATUS_EFFECTS = ['bonus_vs_status', 'consume_status', 'spread_status'];
+  /** The status names a status effect may name (the mob status store's own families). */
+  const EFFECT_STATUSES = ['burn', 'chill', 'shock', 'poison', 'mark', 'crippled', 'bleed'];
   const EFFECT_OPS = ['add_pct', 'add_flat', 'mult'];
   const EFFECT_SUBJECTS = ['self', 'target'];
   /**
@@ -333,17 +343,30 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
    */
   const EFFECT_CONDITIONS = ['chilled'];
 
+  /**
+   * The status a payoff row reads. A row names it once on the effect that spends it, so the
+   * condition editor and the runtime do not keep a second copy of "which status is this row about".
+   */
+  const exploitedStatusOf = (skill: SkillRow | null | undefined): string | null => {
+    for (const stat of STATUS_EFFECTS) {
+      const e = (skill?.effects || []).find((x) => x.stat === stat);
+      if (e?.status) return String(e.status);
+    }
+    return null;
+  };
+
   return {
     SKILLS, byId, LEVEL_STEP, CAST_REF, LADDER, CONVERSION, WEAPON_GROUPS,
     LEVEL_ROWS, LEVEL_CAP, damagePct, effectPct, buffEffectPct, effectsAt,
     COST_LEVEL_STEP, MANA_LEVEL_STEP, MANA_REF_POOL,
     aggregateEffects, EFFECT_STATS, EFFECT_OPS, EFFECT_SUBJECTS, EFFECT_CONDITIONS, EFFECT_RULES, MODELLED_BY,
+    STATUS_EFFECTS, EFFECT_STATUSES, exploitedStatusOf,
     PRESETS, presetCount, mainPreset,
     LADDER_MAX_DUPLICATES, RESERVATION_LIMIT, GROUP_BONUS,
     manaSpec, manaCostOf, hpCostSpec, hpCostOf, costOf, basisOf, perPress, critsOnBasis, effCd, ladderPct, ladderCostToStep, skillLevel, skillXpForLevel,
     weaponGroupOf, groupBonus, weaponFits, weaponMatches, row, reservePct,
-    all: () => SKILLS.skills,
-    of: (type: string) => SKILLS.skills.filter((s) => s.type === type),
+    all: () => ACTIVE,
+    of: (type: string) => ACTIVE.filter((s) => s.type === type),
     /**
      * The attack ladder's floor: what a magic weapon's `bolt` is worth, as a share of the finished
      * hit. A caster's filler is a press on the attack clock with no mana and no cooldown, so this is

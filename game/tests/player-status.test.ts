@@ -125,7 +125,7 @@ describe('save round-trip of the new state (§7.7)', () => {
     const old = JSON.parse(JSON.stringify(s));
     delete old.playerStatuses;
     delete old.keystoneRuntime;
-    const migrated = migrate(old as any, SCHEMA_VERSION - 1);
+    const migrated = migrate(old as any, 17);
     expect(migrated.playerStatuses).toEqual({});
     expect(migrated.keystoneRuntime).toEqual(newKeystoneRuntimeState());
     expect(migrated.counters.kills).toBe(5);

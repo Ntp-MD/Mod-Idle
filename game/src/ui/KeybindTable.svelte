@@ -85,7 +85,7 @@
                 <button class="mini" onclick={() => onset(b.id, DEFAULT_BINDS[b.id])}>default</button>
                 <button class="mini" onclick={() => onclear(b.id)}>clear</button>
               {:else}
-                <span class="dim">as shipped</span>
+                <span class="text-dim">as shipped</span>
               {/if}
             </td>
           </tr>

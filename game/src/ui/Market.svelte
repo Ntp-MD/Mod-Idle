@@ -7,12 +7,14 @@
   import type { GameState } from '../sim/types';
   import DeliveryBoard from './DeliveryBoard.svelte';
   import BlackMarketBoard from './BlackMarketBoard.svelte';
+  import CountBadge from './CountBadge.svelte';
+  import EmptyNote from './EmptyNote.svelte';
 
   let { state: gameState, town, here, onbuy, onsell, ontrade, onprocess, onroute, writer, ondeliver, ontrack, onack, onblackmarketbuy, view = $bindable('trade'), marketId = $bindable('') }: {
     state: GameState; town: any; here: boolean;
     onbuy: (rowId: string, settlementId?: string) => void; onsell: () => void;
     ontrade: (id: string, count: number) => void; onprocess: (id: string) => void; onroute: (id: string) => void;
-    writer: boolean; ondeliver: (id: string, count: number) => void; ontrack: (id: string, tracked: boolean) => void; onack: (id: string) => void;
+    writer: boolean; ondeliver: (id: string, count: number, choice?: string) => void; ontrack: (id: string, tracked: boolean) => void; onack: (id: string) => void;
     onblackmarketbuy: (townId: string, offerId: string) => void;
     view?: 'trade' | 'workshop' | 'stall' | 'deliveries' | 'black-market'; marketId?: string;
   } = $props();
@@ -29,7 +31,8 @@
   const buyers = $derived(marketDestinations(gameState, selected.id, amount));
   const visibleCargo = $derived(cargo.filter((row) => filter === 'all' || row.good.bucket === filter));
   const profile = $derived(TOWN.trade.towns[market.id as keyof typeof TOWN.trade.towns]);
-  const stock = $derived(stockOf(market.id));
+  const stock = $derived(stockOf(market.id, gameState));
+  const hasBroken = $derived(gameState.gear.some((item) => item?.broken) || gameState.bag.some((item) => item?.broken));
   const sourceNames = $derived(selected.sourceZones.map((zone) => TOWN.settlements.find((entry) => entry.zone === zone)?.name).filter(Boolean).join(', '));
   const gold = (value: number) => value.toFixed(TOWN.trade.currency_decimals);
   const costText = (costs: Record<string, number>) => Object.entries(costs).map(([id, n]) => `${n} ${fieldwork.materialById[id]?.name || id}`).join(' · ');
@@ -52,10 +55,10 @@
   <p class="text-note">Haggling Lv {haggling.level}/{TOWN.trade.haggling.level_cap} · {gameState.town.hagglingXp.toFixed(1)} XP{haggling.nextXp !== null ? ` / ${haggling.nextXp} for next level` : ' · max level'} · sales +{((haggling.saleMult - 1) * 100).toFixed(1)}% · new delivery bonuses +{((haggling.deliveryMult - 1) * 100).toFixed(1)}% · town services −{((1 - haggling.serviceMult) * 100).toFixed(1)}%. Complete deliveries to earn XP.</p>
   <nav class="market-tabs" aria-label="Market sections">
     <button class="selectable" class:selected={view === 'trade'} onclick={() => view = 'trade'}>Sell goods & routes</button>
-    <button class="selectable" class:selected={view === 'deliveries'} onclick={() => view = 'deliveries'}>Delivery wants{#if openWants + unreadRecaps}<b class="badge badge-count tab-count" title={`${openWants} open · ${unreadRecaps} unread recap${unreadRecaps === 1 ? '' : 's'}`}>{openWants + unreadRecaps}</b>{/if}</button>
+    <button class="selectable" class:selected={view === 'deliveries'} onclick={() => view = 'deliveries'}>Delivery wants{#if openWants + unreadRecaps}<CountBadge value={openWants + unreadRecaps} tag="b" spaced title={`${openWants} open · ${unreadRecaps} unread recap${unreadRecaps === 1 ? '' : 's'}`} />{/if}</button>
     <button class="selectable" class:selected={view === 'workshop'} onclick={() => view = 'workshop'}>Workshop</button>
     <button class="selectable" class:selected={view === 'stall'} onclick={() => view = 'stall'}>Town stall</button>
-    <button class="selectable" class:selected={view === 'black-market'} onclick={() => view = 'black-market'}>Black Market{#if blackMarketStock}<b class="badge badge-count tab-count" title={`${blackMarketStock} offer${blackMarketStock === 1 ? '' : 's'} in stock`}>{blackMarketStock}</b>{/if}</button>
+    <button class="selectable" class:selected={view === 'black-market'} onclick={() => view = 'black-market'}>Black Market{#if blackMarketStock}<CountBadge value={blackMarketStock} tag="b" spaced title={`${blackMarketStock} offer${blackMarketStock === 1 ? '' : 's'} in stock`} />{/if}</button>
   </nav>
   {#if view === 'trade'}
     <p class="market-note text-note">{profile.needs} Supplying a category lowers its price.</p>
@@ -64,14 +67,14 @@
         <header><h3>Your cargo</h3><select aria-label="Filter cargo" bind:value={filter}>
           <option value="all">All goods</option><option value="junk">Junk</option><option value="material">Materials</option><option value="food">Provisions</option><option value="herb">Herbs</option>
         </select></header>
-        <div class="cargo-list">
+        <div class="cargo-list scroll-pane">
           {#each visibleCargo as { good, count } (good.id)}
             <button class="cargo-row selectable" class:selected={selected.id === good.id} onclick={() => { selectedId = good.id; quantity = count; }} aria-pressed={selected.id === good.id}>
               <span><b>{good.name}</b><small>{good.group.replace('junk:', '')} · ×{count}</small></span>
               <strong class="text-value">{gold(quoteSale(gameState, market.id, good.id, count)!.gold)}<small>gold / stack</small></strong>
             </button>
           {:else}
-            <p class="empty text-note">No carried goods in this category. Mines, Groves, hunts and the Farm supply goods for town markets.</p>
+            <EmptyNote text="No carried goods in this category. Mines, Groves, hunts and the Farm supply goods for town markets." tone="note" />
           {/each}
         </div>
         <button disabled={!writer || !local || !cargo.some((row) => row.good.bucket === 'junk')} onclick={onsell}>Sell all junk here</button>
@@ -92,9 +95,15 @@
             <button class="sell btn-gold" disabled={!writer || !local || amount > carried} onclick={() => ontrade(selected.id, amount)}>Sell {amount} here</button>
           </div>
         </div>
-        <p class="demand text-note">{market.name} · {Math.round(quote.demand * 100)}% demand for {selected.group.replace('junk:', '')} · {local ? 'quote includes the price drop across this sale' : 'walk here to sell'}</p>
+        {#if quote && 'cityUnits' in quote}
+          <p class="demand text-note">{market.name} · keeps {quote.cityUnits} of these (events {quote.eventUnits}) and pays floor price for {quote.basicUnits} more · {local ? 'one sale, both channels' : 'walk here to sell'}</p>
+        {:else if quote && 'demand' in quote}
+          <p class="demand text-note">{market.name} · {Math.round(quote.demand * 100)}% demand for {selected.group.replace('junk:', '')} · {local ? 'quote includes the price drop across this sale' : 'walk here to sell'}</p>
+        {:else}
+          <p class="demand text-note">{market.name} · quote unavailable for this buyer</p>
+        {/if}
         <h4>Buyers for this quantity</h4>
-        <div class="buyer-list">
+        <div class="buyer-list scroll-pane">
           {#each buyers as buyer (buyer.town.id)}
             <div class="buyer" class:selected={buyer.town.id === market.id}>
               <button class="buyer-name" onclick={() => marketId = buyer.town.id}>{buyer.town.name}</button>
@@ -130,9 +139,11 @@
       {#each stock as row (row.id)}
         {@const price = priceGold(row, market.id, gameState)}
         {@const verdict = canBuy(gameState, market.id, row.id)}
+        {@const repair = row.id === 'repair' || row.id === 'repair_ironrow'}
         <article class="ware"><h3>{row.item}</h3><p class="text-note">{row.kind} · {npcOf(row.npc)?.name || row.npc}</p><strong class="text-value">{gold(price)} gold</strong>
+          {#if repair}<small class="text-note">{hasBroken ? 'Repairs the first Broken piece; worn gear first.' : 'No Broken piece to repair.'}</small>{/if}
           {#if !verdict.ok}<small class="text-note">{verdict.why}</small>{/if}
-          <button disabled={!writer || !local || !verdict.ok} title={verdict.why || 'Buy this town service'} onclick={() => onbuy(row.id, market.id)}>Buy</button>
+          <button disabled={!writer || !local || !verdict.ok || (repair && !hasBroken)} title={verdict.why || (repair ? (hasBroken ? 'Repair a Broken piece' : 'No Broken piece to repair') : 'Buy this town service')} onclick={() => onbuy(row.id, market.id)}>{repair ? 'Repair' : 'Buy'}</button>
         </article>
       {:else}<p>No stall lines at this settlement.</p>{/each}
     </div>
@@ -145,16 +156,14 @@
   .market-head { justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: var(--spacing-sm); }
   .market h3, .market h4, .market p { margin: 0; }
   .market h4 { font-size: var(--font-sm); }
-  .market small { font-size: var(--font-xs); }
   .purse b { font-family: var(--num); font-size: var(--font-xl); }
   .market label { display: inline-flex; gap: var(--spacing-sm); align-items: center; font-size: var(--font-xs); }
   .market-tabs { gap: var(--spacing-sm); }
   .market-tabs button { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
-    .tab-count { padding-inline: var(--spacing-xs); }
-  .trade-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--spacing-lg); min-height: 0; }
+    .trade-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--spacing-lg); min-height: 0; }
   .cargo, .offer { display: grid; align-content: start; gap: var(--spacing-md); min-width: 0; min-height: 0; }
   .cargo > header, .item-heading { justify-content: space-between; }
-  .cargo-list { overflow: auto; max-height: clamp(180px, 20vw, 420px); display: grid; gap: var(--spacing-xs); }
+  .cargo-list { max-height: clamp(180px, 20vw, 420px); display: grid; gap: var(--spacing-xs); }
   .cargo-row { display: flex; justify-content: space-between; gap: var(--spacing-md); text-align: left; }
   .cargo-row span, .cargo-row strong { display: grid; gap: var(--spacing-xs); }
   .cargo-row strong { font-variant-numeric: tabular-nums; text-align: right; }
@@ -165,7 +174,7 @@
   .sale-line { justify-content: space-between; padding: var(--spacing-md); background: var(--inset); border-radius: var(--radius-card); gap: var(--spacing-sm); }
   .sale-actions { display: flex; align-items: center; gap: var(--spacing-sm); }
   .sale-line input { width: clamp(55px, 4.36vw, 90px); }
-  .buyer-list { display: grid; max-height: clamp(220px, 26vw, 520px); overflow: auto; }
+  .buyer-list { display: grid; max-height: clamp(220px, 26vw, 520px); }
   .buyer { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.6fr) auto; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm); border-bottom: 1px solid var(--line); }
   .buyer.selected { background: var(--surface-selected); }
   .buyer > span { font-variant-numeric: tabular-nums; font-size: var(--font-sm); }

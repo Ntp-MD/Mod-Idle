@@ -31,6 +31,8 @@ export interface MobMark {
   alignedPerSec: number;
   /** Seconds of clock this spawn has already had stopped, against the rolling control budget. */
   stoppedSec: number;
+  /** Absolute second this spawn's current stop ends; the shock debuff has its own `secLeft`. */
+  stoppedUntil?: number;
   elapsedSec: number;
   /** Until this second, poison on the target does not decay (`curse.venom_bind`). */
   poisonHeldUntil?: number;
@@ -128,7 +130,8 @@ export function placeStatus(
     if (m.stoppedSec + cfg.stop_sec > CONTROL_BOUND * m.elapsedSec && m.stoppedSec > 0) return name;
     l.stacks = 1;
     l.perSec = 0;
-    l.secLeft = 1;
+    l.secLeft = cfg.time_sec ?? 1;
+    m.stoppedUntil = Math.max(m.stoppedUntil ?? 0, m.elapsedSec + cfg.stop_sec);
     m.stoppedSec += cfg.stop_sec;
   }
   return name;
@@ -144,6 +147,7 @@ export function stopMob(store: MobStatusStore, mobId: string, sec: number, bypas
   l.stacks = 1;
   l.perSec = 0;
   l.secLeft = Math.max(l.secLeft, sec);
+  m.stoppedUntil = Math.max(m.stoppedUntil ?? 0, m.elapsedSec + sec);
   if (!bypassBudget) m.stoppedSec += sec;
 }
 
@@ -160,7 +164,8 @@ export function stunMob(rng: () => number, store: MobStatusStore, mobId: string,
   const l = line(m, 'shock');
   l.stacks = 1;
   l.perSec = 0;
-  l.secLeft = Math.max(l.secLeft, cfg.stop_sec);
+  l.secLeft = Math.max(l.secLeft, cfg.time_sec ?? cfg.stop_sec);
+  m.stoppedUntil = Math.max(m.stoppedUntil ?? 0, m.elapsedSec + cfg.stop_sec);
   m.stoppedSec += cfg.stop_sec;
   return true;
 }
@@ -293,6 +298,52 @@ export function transferStatus(
 }
 
 /**
+ * A payoff press spends stacks the setup press already wrote. The caller names the status and the
+ * maximum it may take; the function returns what actually left the body. A one-application status
+ * (chill, shock, crippled, bleed) is still a stack of one, so a consume row can name it too.
+ */
+export function consumeStatus(
+  store: MobStatusStore,
+  mobId: string,
+  name: MobStatusName,
+  maxStacks: number,
+): number {
+  const l = store[mobId]?.statuses?.[name];
+  if (!l) return 0;
+  const available = name === 'poison' || name === 'mark' ? l.stacks : (l.stacks || 1);
+  const take = Math.max(0, Math.min(Math.max(0, maxStacks), available));
+  if (take <= 0) return 0;
+  l.stacks -= take;
+  if (l.stacks <= 0) delete store[mobId]!.statuses[name];
+  return take;
+}
+
+/**
+ * A payoff row may copy the status it consumed (or the status it read) to the other bodies it
+ * reaches. The copy keeps the stacks and the remaining life; it starts no new clock and never
+ * overwrites a stronger line already on the receiving body.
+ */
+export function copyStatus(
+  store: MobStatusStore,
+  fromId: string,
+  toId: string,
+  name: MobStatusName,
+  immune: string[] = [],
+): boolean {
+  if (fromId === toId || immune.includes(name)) return false;
+  const src = store[fromId]?.statuses?.[name];
+  if (!src || (src.stacks <= 0 && src.secLeft <= 0)) return false;
+  const dstMark = mark(store, toId);
+  dstMark.alignedPerSec = Math.max(dstMark.alignedPerSec, store[fromId]!.alignedPerSec || 0);
+  const dst = line(dstMark, name);
+  dst.stacks = Math.max(dst.stacks, src.stacks);
+  dst.perSec = Math.max(dst.perSec, src.perSec);
+  dst.secLeft = Math.max(dst.secLeft, src.secLeft);
+  if (src.fixedSec) dst.fixedSec = true;
+  return true;
+}
+
+/**
  * The earth line a row leaves behind (Sand Storm): its own damage a second, and its own seconds — both
  * typed by the row, not by the element — so a lingering cloud counts INSIDE the shared DoT budget the
  * cap already runs on. `alignedPerHit` only raises the budget the cap is measured against, exactly as an
@@ -335,7 +386,8 @@ export function modsOn(store: MobStatusStore, mobId: string): MobStatusMods {
   if (shock && shock.secLeft > 0) {
     // the stronger cut wins: shock's own aspd_cap is the floor the merge takes, chill or not
     out.aspdPct = Math.min(out.aspdPct, -S.shock.aspd_cap);
-    out.stopped = true;
+    // the stop is its own absolute window; the slower-swing/Alignment cut runs on the status clock
+    out.stopped = m.stoppedUntil == null || m.stoppedUntil > m.elapsedSec;
   }
   const mk = m.statuses.mark;
   if (mk && mk.secLeft > 0) {

@@ -42,6 +42,9 @@ jobs:
       - name: Typecheck the engine and the tools
         run: npm run typecheck
 
+      - name: Lint
+        run: npm run lint
+
       - name: Typecheck the client
         run: npm --prefix game run check
 
@@ -50,6 +53,9 @@ jobs:
 
       - name: Run the test suite
         run: npm test
+
+      - name: Build the client
+        run: npm --prefix game run build
 
       # The wiki is generated from the same source the game reads, so a stale page is a defect:
       # rebuilding must leave the committed pages exactly as they are.

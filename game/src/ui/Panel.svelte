@@ -133,11 +133,15 @@
   .body.fixed.showcase { display: block; height: auto; max-height: none; }
   .panel-head {
     display: flex;
-    align-items: baseline;
-    gap: var(--spacing-sm);
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs) var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm);
     flex: none;
   }
+  .panel-head h2 { min-width: 0; overflow-wrap: anywhere; }
+  .panel-head .sub { flex: 1 1 12ch; min-width: 0; }
+  .panel-head .quit { margin-left: auto; }
   /* A square icon control centres its glyph itself: the tag's own padding is uneven (xs down, md across),
      so a ✕ left to text layout sits off-centre in its token-sized box. */
   .quit {

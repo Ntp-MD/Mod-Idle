@@ -20,6 +20,7 @@ import { createLoot, leanReweight, leanReweightMany } from '../engine/loot.ts';
 
 const { E, S, K, M, LG, BAND, BANDS, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL, DERIVED, ES, WEAPONS, STONE, LCK_BOUND, L, C, TS } = eng;
 const MODS = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/data/mods.json'), 'utf8'));
+const MOB_SKILLS = readJson(path.join(import.meta.dirname, 'data/mob-skills.json'));
 const BASES_JSON = readJson(path.join(import.meta.dirname, 'data/bases.json'));
 const f0 = (x: number) => Math.round(x).toLocaleString('en-US');
 const f1 = (x: number) => x.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -554,6 +555,50 @@ function runChecks() {
   add('X79', spendProblems.length === 0, spendProblems.slice(0, 8).join(' · ')
     || `${variantCount} Variants · ${formCount} forms · ${E.mob.species.length} Species · ${E.mob.bosses.length} Bosses · ${uniqueCount} Uniques — every body spends whole live points, Wis is 0, physical Int is 0, and Dex stays within ${spendCaps} by band`);
 
+  // X80/X81: every Species owns one thematic material. The shape and the catalogue reference are
+  // hard; the 5%-of-junk-line budget is a watch because it is a tuning figure, not a structural rule.
+  {
+    const townData = readJson(path.join(ROOT, 'tools/data/town.json'));
+    const materialValues = (townData.trade && townData.trade.material_values) || {};
+    const materialById = new Map((E.fieldwork.materials as any[]).map((material) => [material.id, material]));
+    const allowedGroups = new Set(['ore', 'wood', 'craft']);
+    const structure: string[] = [];
+    const rows: { species: string; resource: string; newPct: number; combinedPct: number }[] = [];
+    const junkLine = BAND.high.junk_per_hr / BAND.high.kills_derived;
+    for (const sp of E.mob.species as any[]) {
+      const bonus = sp.bonus_material;
+      if (!bonus || typeof bonus !== 'object') { structure.push(`${sp.id}: no bonus_material`); continue; }
+      const material = materialById.get(bonus.resource);
+      if (!material) structure.push(`${sp.id}: unknown material ${bonus.resource}`);
+      else if (!allowedGroups.has(material.group)) structure.push(`${sp.id}: material ${bonus.resource} is in an unbudgeted group ${material.group}`);
+      const value = Number(materialValues[bonus.resource]);
+      if (!(Number.isFinite(value) && value > 0)) structure.push(`${sp.id}: material ${bonus.resource} has no positive trade value`);
+      if (bonus.resource === 'scrap') structure.push(`${sp.id}: scrap is salvage/Alchemy-only`);
+      if (!(Number.isFinite(bonus.chance) && bonus.chance > 0 && bonus.chance <= 1)) structure.push(`${sp.id}: bonus chance must be above 0 and at most 1`);
+      if (!Number.isInteger(bonus.min) || bonus.min <= 0 || !Number.isInteger(bonus.max) || bonus.max < bonus.min)
+        structure.push(`${sp.id}: bonus min/max must be positive whole numbers with min <= max`);
+      const newGold = bonus.chance * ((bonus.min + bonus.max) / 2) * (Number.isFinite(value) ? value : 0);
+      let legacyGold = 0;
+      for (const row of ((E.fieldwork.hunt as any).material_drops || []) as any[]) {
+        if (!row.species.includes(sp.id)) continue;
+        const legacyValue = Number(materialValues[row.resource]);
+        if (Number.isFinite(legacyValue)) legacyGold += row.chance * ((row.min + row.max) / 2) * legacyValue;
+      }
+      rows.push({ species: sp.id, resource: bonus.resource, newPct: (newGold / junkLine) * 100, combinedPct: ((newGold + legacyGold) / junkLine) * 100 });
+    }
+    add('X80', structure.length === 0, structure.slice(0, 8).join(' · ')
+      || `${rows.length} Species carry one themed bonus material · every resource resolves to a positive trade good in ore/wood/craft · scrap excluded · chance/min/max valid`);
+    const budget = 5;
+    const over = rows.filter((row) => row.newPct > budget);
+    const combinedOver = rows.filter((row) => row.combinedPct > budget);
+    const maxNew = rows.reduce((n, row) => Math.max(n, row.newPct), 0);
+    const maxCombined = rows.reduce((n, row) => Math.max(n, row.combinedPct), 0);
+    soft('X81', over.length === 0,
+      over.length
+        ? `${over.length} Species over the ${budget}% incremental budget: ${over.slice(0, 8).map((row) => `${row.species} ${row.newPct.toFixed(2)}%`).join(' · ')} · max ${maxNew.toFixed(2)}% · combined max ${maxCombined.toFixed(2)}%`
+        : `${rows.length} Species · new material ${maxNew.toFixed(2)}% of the junk line (budget ${budget}%) · ${combinedOver.length} legacy combined row(s) over ${budget}% by design (max ${maxCombined.toFixed(2)}%)`);
+  }
+
   // X15 reads the maxima out of `mods.json` — the file that owns them. It used to parse the
   // "Total" column back out of mod-pool.md and compare, which made the DOC a second source of a
   // number the engine already had: the two could disagree and the doc would win. Now the
@@ -770,13 +815,104 @@ function runChecks() {
       : `${E.mob.species.length} Species carry one resistance (${range(resPcts)}) and one weakness (${range(weakPcts)}); the attack Element is a separate line, all other Elements meet no res, and Bosses/Uniques inherit their Species profile`);
   }
 
-  // Mobs carry no skills until the skill/mechanics system lands (mob.skills_note)
+  // X55: mob skills are an optional kit on a separate library. A strike replaces one basic swing, so
+  // direct damage stays exactly mob PS; auras are defensive only, so neither can raise the DPS budget.
   {
     const sk: string[] = [];
-    if (E.mob.skills_enabled) sk.push('skills_enabled is true but the mob skill system is not built');
-    for (const sp of E.mob.species) if ((sp as any).skills) sk.push(`${sp.id} carries a skill field while skills_enabled is false`);
+    const lib = MOB_SKILLS.skills as any[];
+    const byId = new Map<string, any>(lib.map((row) => [row.id, row]));
+    const elements = Object.keys(E.elements.status_of || {});
+    const allowedStatus = new Set(MOB_SKILLS.meta.statuses as string[]);
+    const allowedAura = new Set(MOB_SKILLS.meta.aura_stats as string[]);
+    const allowedScope = new Set(MOB_SKILLS.meta.scopes as string[]);
+    const maxKit = Number(MOB_SKILLS.meta.max_kit);
+    if (!E.mob.skills_enabled) sk.push('skills_enabled is false while tools/data/mob-skills.json exists');
+    if (!(lib.length >= 40 && lib.length <= 60)) sk.push(`library carries ${lib.length} skills, outside 40..60`);
+    if (byId.size !== lib.length) sk.push('skill ids are not unique');
+    const coverage = new Map<string, { strike: number; aura: number }>();
+    for (const row of lib) {
+      if (!row.id?.startsWith('mob.')) sk.push(`${row.id}: id must start with mob.`);
+      if (!row.name) sk.push(`${row.id}: missing name`);
+      if (!['strike', 'aura'].includes(row.mode)) sk.push(`${row.id}: mode is not strike/aura`);
+      if (row.element != null && !elements.includes(row.element)) sk.push(`${row.id}: unknown element ${row.element}`);
+      if (row.status != null && !allowedStatus.has(row.status)) sk.push(`${row.id}: status ${row.status} is not a control status`);
+      if (!['front', 'stand-off', 'any'].includes(row.role)) sk.push(`${row.id}: role is not front/stand-off/any`);
+      if (row.mode === 'strike') {
+        if (!(row.cd > 0)) sk.push(`${row.id}: a strike needs a positive cooldown`);
+        if (!(row.cast_sec >= 0 && row.cast_sec <= 2)) sk.push(`${row.id}: cast_sec is outside 0..2`);
+        if (row.effects || row.scope) sk.push(`${row.id}: a strike cannot carry aura fields`);
+        const c = coverage.get(row.element || 'physical') || { strike: 0, aura: 0 };
+        c.strike++;
+        coverage.set(row.element || 'physical', c);
+      } else {
+        if (!allowedScope.has(row.scope)) sk.push(`${row.id}: aura scope is not engaged/line`);
+        const stats = Object.keys(row.effects || {});
+        if (!stats.length) sk.push(`${row.id}: aura carries no effects`);
+        for (const [stat, value] of Object.entries(row.effects || {})) {
+          if (!allowedAura.has(stat)) sk.push(`${row.id}: aura stat ${stat} is outside the defensive set`);
+          if (!(Number(value) > 0)) sk.push(`${row.id}: aura ${stat} must be positive`);
+        }
+        if (row.cd != null || row.cast_sec != null) sk.push(`${row.id}: an aura has no cast/cooldown`);
+        const c = coverage.get(row.element || 'physical') || { strike: 0, aura: 0 };
+        c.aura++;
+        coverage.set(row.element || 'physical', c);
+      }
+    }
+    for (const el of elements) {
+      const c = coverage.get(el) || { strike: 0, aura: 0 };
+      if (c.strike < 1) sk.push(`${el}: no strike`);
+      if (c.aura < 1) sk.push(`${el}: no aura`);
+    }
+    if (!lib.some((row) => row.mode === 'strike' && row.role === 'front')) sk.push('no front-line strike');
+    if (!lib.some((row) => row.mode === 'strike' && row.role === 'stand-off')) sk.push('no stand-off strike');
+
+    const speciesIds = new Set(E.mob.species.map((sp) => sp.id));
+    const variantNames = new Set(Object.values(((E.mob as any).variants || {}) as Record<string, any[]>).flatMap((rows) => rows.map((r) => r.name)));
+    const bossNames = new Set((E.mob.bosses as any[]).map((b) => b.name));
+    const uniqueNames = new Set(((E.mob as any).uniques || []).map((u: any) => u.name));
+    const checkKit = (label: string, ids: string[], max: number) => {
+      if (!Array.isArray(ids) || ids.length < 1) sk.push(`${label}: empty kit`);
+      if (ids.length > max) sk.push(`${label}: ${ids.length} skills exceeds ${max}`);
+      if (new Set(ids).size !== ids.length) sk.push(`${label}: duplicate skill id`);
+      for (const id of ids) if (!byId.has(id)) sk.push(`${label}: unknown skill ${id}`);
+    };
+    const kits = MOB_SKILLS.kits;
+    const speciesSigs = new Map<string, string>();
+    const kitDamages = new Set<string>();
+    let speciesWithKit = 0;
+    for (const [id, ids] of Object.entries(kits.species || {}) as [string, string[]][]) {
+      if (!speciesIds.has(id)) sk.push(`species kit ${id}: unknown species`);
+      const species = E.mob.species.find((sp) => sp.id === id);
+      if (species) kitDamages.add(species.damage);
+      checkKit(`species ${id}`, ids, 2);
+      if (ids.length) speciesWithKit++;
+      const sig = [...ids].sort().join('|');
+      if (speciesSigs.has(sig)) sk.push(`species ${id}: resolved kit duplicates ${speciesSigs.get(sig)}`);
+      else speciesSigs.set(sig, id);
+    }
+    for (const damage of ['physical', 'magic', 'mixed']) {
+      if (!kitDamages.has(damage)) sk.push(`no species kit covers ${damage} damage`);
+    }
+    if (speciesWithKit === 0) sk.push('no species carries a kit');
+    if (speciesWithKit >= speciesIds.size) sk.push('every species carries a kit; at least one should stay basic-only');
+    for (const [name, ids] of Object.entries(kits.variants || {}) as [string, string[]][]) {
+      if (!variantNames.has(name)) sk.push(`variant kit ${name}: unknown variant`);
+      checkKit(`variant ${name}`, ids, maxKit);
+    }
+    for (const [name, ids] of Object.entries(kits.bosses || {}) as [string, string[]][]) {
+      if (!bossNames.has(name)) sk.push(`boss kit ${name}: unknown boss`);
+      checkKit(`boss ${name}`, ids, maxKit);
+    }
+    for (const [name, ids] of Object.entries(kits.uniques || {}) as [string, string[]][]) {
+      if (!uniqueNames.has(name)) sk.push(`unique kit ${name}: unknown unique`);
+      checkKit(`unique ${name}`, ids, maxKit);
+    }
+    if (!Object.keys(kits.variants || {}).length) sk.push('no variant override exists');
+    if (!Object.keys(kits.bosses || {}).length) sk.push('no boss kit exists');
+    if (!Object.keys(kits.uniques || {}).length) sk.push('no unique override exists');
+
     add('X55', sk.length === 0, sk.length ? sk.join(' · ')
-      : `mobs carry no skills — their Species/Variant damage type, Species Element and trait mechanics (X74) define behaviour; ${E.mob.species.length} species checked, none carries a skill field while skills_enabled is false`);
+      : `${lib.length} mob skills over ${coverage.size} element lanes (${elements.length} Elements + physical) · ${speciesWithKit}/${speciesIds.size} species carry 1-2 across ${[...kitDamages].sort().join('/')} damage, the rest stay basic-only · ${Object.keys(kits.bosses || {}).length} boss and ${Object.keys(kits.uniques || {}).length} unique kits · every kit ≤${maxKit}, no layer merge, no duplicate species kit · strikes are swing-neutral and auras are defensive only`);
   }
 
   // Zone identity lives in `mob.zones` alone. Bands repeat every three zones, so each band owns

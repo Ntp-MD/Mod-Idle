@@ -1,6 +1,8 @@
 import type { StatKey } from '../engine/client';
 import type { Hex } from '../../../engine/road.ts';
 import type { AlchemyLedger } from '../../../engine/alchemy.ts';
+import type { EconomyRestore } from '../../../engine/economy.ts';
+import type { QuestBonus } from './quest-rewards';
 
 export interface ModExtra {
   id: string;
@@ -128,6 +130,18 @@ export interface Mob {
   hitsPerSec: number;
   atkTimer: number;
   engageSec: number;
+  /** Resolved mob skill kit, in priority order (max 4). Runtime-only; a spawn rebuilds it. */
+  skillIds?: string[];
+  /** Absolute µs each skill becomes ready again. Runtime-only; absent means ready. */
+  skillReadyAtUs?: Record<string, number>;
+  /** Aura-adjusted combat reads, recomputed every tick from living engaged sources. */
+  auraDamageMult?: number;
+  auraSpeedMult?: number;
+  effArmour?: number;
+  effRes?: number;
+  effResByElement?: Record<string, number>;
+  /** The aura rows currently affecting this body and the source that carried each one. */
+  auraSources?: { id: string; sourceId: string }[];
 }
 
 export type Phase = 'fighting' | 'pushed' | 'camp';
@@ -227,9 +241,12 @@ export interface TaskSlot {
   offeredAt: number;
   /** Quest-granted passive-tree points frozen at offer time. */
   treePoints?: number;
+  alternative?: QuestBonus;
+  milestone?: string;
 }
 
 export interface TownState {
+  questMilestones: Record<string, true>;
   deliveryClockSec: number;
   contractTriggerRemainingSec: Record<string, number>;
   contractSerial: number;
@@ -249,7 +266,10 @@ export interface TownState {
   waypoint: string;
   tasks: (TaskSlot | null)[];
   refillAt: number[];
+  /** Paid Task skip tokens bought today, capped by `task_sizing`'s daily allowance. */
   skipsToday: number;
+  /** Free task skips already used on `skipDay`. */
+  freeSkipsToday: number;
   skipDay: number;
 }
 
@@ -353,6 +373,11 @@ export interface FxEvent {
   value?: number;
 }
 
+/** The city ledger's saved state: the engine's own restore shape plus whole seconds toward its next step. */
+export interface GameEconomy extends EconomyRestore {
+  accumSec: number;
+}
+
 export interface GameState {
   seed: number;
   rngState: number;
@@ -445,6 +470,8 @@ export interface GameState {
   /** The next ring id. Stored so a restored save cannot replay an old animation key. */
   fxSeq: number;
   clockSec: number;
+  /** The city ledger (`town.json → economy`), stepped on the world clock. */
+  economy: GameEconomy;
   lastSavedAt: number;
   /** When the next boss is due, per character. It does not accrue offline (`save.md`). */
   bossDueAt?: number;

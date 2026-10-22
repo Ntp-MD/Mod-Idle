@@ -79,6 +79,6 @@ export function createFarm(E: EngineData) {
     /** A seed is one herb of the tier being planted (farm.md's own cycle). */
     seedCostHerbs: F.seed_cost_herbs,
     xpPerHarvest: F.xp_per_harvest,
-    offlineCapSec: F.offline_cap_hours * 3600,
+    offlineCapSec: F.offline_cap_hours == null ? Infinity : F.offline_cap_hours * 3600,
   };
 }

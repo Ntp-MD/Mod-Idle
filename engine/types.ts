@@ -244,6 +244,19 @@ export interface CraftCfg {
   corrupt_outcomes: { kind: string; weight: number; steps?: number }[];
 }
 
+/** Material-driven gear creation (`engine.json` `forge`) — pattern + material grade. */
+export interface ForgeCfg {
+  note?: string;
+  /** Smithing level required per material grade (index 0 = grade 1). */
+  smithing_level: number[];
+  /** Smithing XP awarded per material grade (index 0 = grade 1). */
+  xp_per_grade: number[];
+  materials: Record<string, { family: string; grade: number }>;
+  families: Record<string, { name: string; bases: Record<string, string> }>;
+  armour: Record<string, { name: string; count: number }>;
+  weapons: Record<string, { name: string; family: string; frame: string; count: number }>;
+}
+
 export interface TownShared {
   gold_per_junk_piece: number;
   round_rate_to_decimals: number;
@@ -313,6 +326,14 @@ export interface MobWeakness {
   taken_pct: number;
 }
 
+/** One thematic material the body can yield on any kill. */
+export interface MobBonusMaterial {
+  resource: string;
+  chance: number;
+  min: number;
+  max: number;
+}
+
 export interface MobSpecies {
   id: string;
   name: string;
@@ -330,6 +351,8 @@ export interface MobSpecies {
   resistance: MobResistance;
   /** The one Element line this body takes more of. */
   weakness: MobWeakness;
+  /** The one material this body can yield on any kill, independent of Hunting. */
+  bonus_material: MobBonusMaterial;
   carries_weapon: boolean;
   accuracy_mult: number;
   /** Authored fixed spawn level for each zone this Species inhabits; never derived from player level. */
@@ -463,6 +486,44 @@ export interface MobElite {
   hp: number;
   ps: number;
   evasion_pct: number;
+}
+
+/** One mob-only skill row. A strike replaces the next basic swing; an aura is a passive group buff. */
+export interface MobSkillRow {
+  id: string;
+  name: string;
+  mode: 'strike' | 'aura';
+  /** The skill's visual Element; damage still comes from the mob's own damage type and innate Element. */
+  element: string | null;
+  /** A forced control status. Damaging statuses are deliberately absent from the MVP. */
+  status?: string | null;
+  /** Seconds between casts; absent or zero means always ready. */
+  cd?: number;
+  /** Display lead-in for the cast beat; it never moves the action clock. */
+  cast_sec?: number;
+  role?: 'front' | 'stand-off' | 'any';
+  /** Auras affect the engaged group (max 3), or only that source's own line. */
+  scope?: 'engaged' | 'line';
+  /** Aura effects are defensive so a group buff cannot double the mob DPS budget. */
+  effects?: Partial<Record<'armour_pct' | 'resist_pct', number>>;
+}
+
+/** `tools/data/mob-skills.json`: the optional library and its override kits. */
+export interface MobSkillsData {
+  meta: {
+    note?: string;
+    max_kit: number;
+    statuses: string[];
+    aura_stats: string[];
+    scopes: string[];
+  };
+  skills: MobSkillRow[];
+  kits: {
+    species: Record<string, string[]>;
+    variants: Record<string, string[]>;
+    bosses: Record<string, string[]>;
+    uniques: Record<string, string[]>;
+  };
 }
 
 export interface MobStatCfg {
@@ -662,7 +723,7 @@ export interface FarmCfg {
   yield_per_harvest: number;
   seed_cost_herbs: number;
   xp_per_harvest: number;
-  offline_cap_hours: number;
+  offline_cap_hours: number | null;
 }
 
 export interface FieldworkCfg {
@@ -767,7 +828,7 @@ export interface InventoryCfg {
   stack_size: Record<string, number>;
   unit_weight: Record<string, number>;
   gold_uses_slot: boolean;
-  offline_cap_hr: number;
+  offline_cap_hr: number | null;
   overflow: string;
   note: string;
 }
@@ -818,6 +879,7 @@ export interface EngineData {
   aoe: any;
   max_hp_press: MaxHpPressCfg;
   craft: CraftCfg;
+  forge: ForgeCfg;
   town_shared: TownShared;
   f_rows_carried: any[];
   elements: ElementsCfg;
@@ -854,7 +916,11 @@ export interface SkillRow {
   duration?: string;
   /** The reserve tier name this aura draws from (`reserve_tiers`). */
   reserve?: string;
-  effects?: { stat: string; element?: string; op: string; value: number; subject?: string; condition?: string; cap?: number }[];
+  effects?: { stat: string; element?: string; status?: string; op: string; value: number; subject?: string; condition?: string; cap?: number }[];
+  /** A legacy row kept resolvable for old saves, but excluded from drops, rewards and the active UI. */
+  retired?: boolean;
+  /** The active row that carries this retired row's role. */
+  retired_to?: string;
 }
 
 export interface SkillsData {
@@ -903,6 +969,13 @@ export interface BaseRow {
 export interface BasesData {
   bases: BaseRow[];
   weapons?: { name: string; weight: number; damage?: string; group?: string; size_mult?: { small: number; medium: number; large: number } }[];
+  weapon_frames?: Record<string, {
+    name: string;
+    frame_mod: string[];
+    legacy_frame_mod?: string[];
+    drop_weight?: number;
+    value_bias?: number;
+  }[]>;
   dual_wield_weight_mult?: number;
   mastery: Record<string, number>;
 }

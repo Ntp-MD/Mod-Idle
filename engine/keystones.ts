@@ -1,5 +1,5 @@
 /**
- * The keystone bundle registry, shared and pure — `docs/passive-tree-keystones-draft.md` §6.
+ * The keystone bundle registry, shared and pure — `docs/DECISIONS.md`, the passive tree.
  *
  * `tools/data/tree.json` writes each keystone node's `effects[].params` from the bundle table; this
  * module owns the PARAMETER SCHEMA (names, units, ranges), the REQUIRED HOOKS each key needs, and the

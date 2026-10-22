@@ -5,6 +5,7 @@ import { atSettlement } from './craft';
 import { currentCell, ownerOf, cellBlocks, settlementCell, warpCost } from './road';
 import { addTo, fits, fitsTransaction } from './slots';
 import { fieldMasteryLevel, fieldSkillLevel } from './fieldwork';
+import { economyCity, economyOffer } from './economy';
 
 export { trade };
 export type { TradeGood };
@@ -15,15 +16,38 @@ export function tradeBucket(state: GameState, good: TradeGood): Record<string, n
 export const tradeInventory = (state: GameState) => trade.goods
   .map((good) => ({ good, count: tradeBucket(state, good)[good.key] || 0 })).filter((row) => row.count > 0);
 
-export function quoteSale(state: GameState, town: string, id: string, count: number) {
+/** The one price a sale earns: city and floor units at raw, times Haggling, settled against credit. */
+const settledSale = (state: GameState, cityGold: number, basicGold: number) => trade.settleCurrency(
+  (cityGold + basicGold) * trade.haggling(state.town.hagglingXp).saleMult,
+  state.town.marketCredit || 0,
+);
+
+const plainSaleQuote = (state: GameState, town: string, good: TradeGood, count: number) =>
+  trade.quote(town, good, count, state.town.market?.[town]?.[good.group], state.clockSec);
+
+/** The plain-market product: one category quote, Haggling applied, settled against credit. */
+const plainSale = (state: GameState, town: string, good: TradeGood, count: number): MarketQuote => {
+  const quote = plainSaleQuote(state, town, good, count);
+  return { ...quote, ...trade.settleCurrency(quote.gold * trade.haggling(state.town.hagglingXp).saleMult, state.town.marketCredit || 0) };
+};
+
+export interface MarketQuote { gold: number; credit: number; count: number; used: number; atSec: number; demand: number }
+export interface LedgerQuote { ok: boolean; why?: string; gold: number; credit: number; count: number; normalDemand: number; eventDemand: number; capacityFree: number; cityUnits: number; eventUnits: number; basicUnits: number; cityGold: number; basicGold: number }
+
+/** A market quote: the plain category price, or the ledger city's two-channel split. */
+export function quoteSale(state: GameState, town: string, id: string, count: number): MarketQuote | LedgerQuote | null {
   const good = trade.byId[id];
   if (!good || !TOWN.trade.towns[town as keyof typeof TOWN.trade.towns]) return null;
-  const quote = trade.quote(town, good, count, state.town.market?.[town]?.[good.group], state.clockSec);
-  return { ...quote, ...trade.settleCurrency(quote.gold * trade.haggling(state.town.hagglingXp).saleMult, state.town.marketCredit || 0) };
+  if (!economyCity(town) || !state.economy) return plainSale(state, town, good, count);
+  const offer = economyOffer(state, town, id, count, true);
+  if (!offer.ok || !offer.preview) return { ok: false, why: offer.why, count: 0, ...trade.settleCurrency(0, state.town.marketCredit || 0),
+    normalDemand: 0, eventDemand: 0, capacityFree: 0, cityUnits: 0, eventUnits: 0, basicUnits: 0, cityGold: 0, basicGold: 0 };
+  return { ...offer.preview, ...settledSale(state, offer.preview.cityGold, offer.preview.basicGold) };
 }
 
-/** Supply is shared by category at a town. Quotes are reads; only a successful sale spends demand. */
-export function sellGoods(state: GameState, id: string, count: number): { ok: boolean; why?: string; pieces: number; gold: number } {
+/** Supply is shared by category at a town. Quotes are reads; only a successful sale spends demand.
+ *  In a ledger city the sale splits into the city channel and the basic floor. */
+export function sellGoods(state: GameState, id: string, count: number): { ok: boolean; why?: string; pieces: number; gold: number; cityUnits?: number; eventUnits?: number; basicUnits?: number; cityGold?: number; basicGold?: number } {
   const refused = (why: string) => ({ ok: false, why, pieces: 0, gold: 0 });
   if (!atSettlement(state)) return refused('stand in a settlement to sell');
   const good = trade.byId[id];
@@ -32,15 +56,24 @@ export function sellGoods(state: GameState, id: string, count: number): { ok: bo
   const bucket = tradeBucket(state, good);
   if ((bucket[good.key] || 0) < count) return refused('not enough carried');
   const town = ownerOf(currentCell(state)).id;
-  const quote = quoteSale(state, town, id, count);
-  if (!quote) return refused('this settlement has no market');
+  if (!TOWN.trade.towns[town as keyof typeof TOWN.trade.towns]) return refused('this settlement has no market');
+  const ledgerOffer = state.economy && economyCity(town) ? economyOffer(state, town, id, count) : null;
+  if (ledgerOffer && !ledgerOffer.ok) return refused(ledgerOffer.why || 'the city ledger refuses this sale');
+  const plainQuote = ledgerOffer ? null : plainSale(state, town, good, count);
   bucket[good.key] -= count;
+  if (ledgerOffer) {
+    const done = ledgerOffer.sell!();
+    const settled = settledSale(state, done.cityGold, done.basicGold);
+    state.town.marketCredit = settled.credit;
+    state.counters.gold += settled.gold;
+    return { ok: true, pieces: count, gold: settled.gold, cityUnits: done.cityUnits, eventUnits: done.eventUnits, basicUnits: done.basicUnits, cityGold: done.cityGold, basicGold: done.basicGold };
+  }
   state.town.market ||= {};
   state.town.market[town] ||= {};
-  state.town.market[town][good.group] = { used: quote.used, atSec: quote.atSec };
-  state.town.marketCredit = quote.credit;
-  state.counters.gold += quote.gold;
-  return { ok: true, pieces: count, gold: quote.gold };
+  state.town.market[town][good.group] = { used: plainQuote!.used, atSec: plainQuote!.atSec };
+  state.town.marketCredit = plainQuote!.credit;
+  state.counters.gold += plainQuote!.gold;
+  return { ok: true, pieces: count, gold: plainQuote!.gold };
 }
 
 export function marketDestinations(state: GameState, id: string, count: number) {

@@ -3,7 +3,7 @@
 
   /** The level's points, spent where the level is read: this is the only place a point is added,
    *  and Respec stays a settlement service so a field refund cannot serve a build switch mid-fight. */
-  let { stats, core, points, statPoints, treePoints, autoSpend, level, onallocate, ontoggleauto }: {
+  let { stats, core, points, statPoints, treePoints, autoSpend, level, canRefund, writer = true, onallocate, ontoggleauto }: {
     stats: StatKey[];
     core: Record<StatKey, number>;
     points: Record<StatKey, number>;
@@ -11,6 +11,8 @@
     treePoints: number;
     autoSpend: boolean;
     level: number;
+    canRefund: boolean;
+    writer?: boolean;
     onallocate: (k: StatKey, delta: number) => void;
     ontoggleauto: () => void;
   } = $props();
@@ -23,7 +25,7 @@
 
 <div class="stat-allocator">
   <header><h3 class="text-accent">Core attributes</h3><strong class="text-value" aria-live="polite">{statPoints} unspent</strong></header>
-  <label class="allocator-auto text-note"><input type="checkbox" checked={autoSpend} onchange={ontoggleauto} /> Auto-allocate evenly</label>
+  <label class="allocator-auto text-note"><input type="checkbox" disabled={!writer} checked={autoSpend} onchange={ontoggleauto} /> Auto-allocate evenly</label>
   <table class="stats"><tbody>
     {#each stats as k (k)}
       <tr>
@@ -31,11 +33,12 @@
         <td><div class="allocator-value">{core[k].toFixed(1)}<small class="text-note">{points[k]} pts</small></div></td>
         <td>
           <div class="allocator-actions" role="group" aria-label={`${FULL_NAME[k]} points`}>
-          <button class="btn btn-quiet" type="button" onclick={() => onallocate(k, -1)} disabled={autoSpend || !points[k]}
+          <button class="btn btn-quiet" type="button" onclick={() => onallocate(k, -1)} disabled={!writer || !canRefund || autoSpend || !points[k]}
+                  title={canRefund ? 'Return one Core point' : 'Visit a settlement to return Core points'}
                   aria-label={`Decrease ${FULL_NAME[k]}`}>−</button>
-          <button class="btn btn-quiet" type="button" onclick={() => onallocate(k, 1)} disabled={autoSpend || statPoints <= 0}
+          <button class="btn btn-quiet" type="button" onclick={() => onallocate(k, 1)} disabled={!writer || autoSpend || statPoints <= 0}
                   aria-label={`Increase ${FULL_NAME[k]}`}>+</button>
-          <button class="btn btn-quiet" type="button" onclick={() => onallocate(k, statPoints)} disabled={autoSpend || statPoints <= 0}
+          <button class="btn btn-quiet" type="button" onclick={() => onallocate(k, statPoints)} disabled={!writer || autoSpend || statPoints <= 0}
                   aria-label={`Allocate all available points to ${FULL_NAME[k]}`}>Max</button>
           </div>
         </td>

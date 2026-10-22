@@ -11,9 +11,8 @@
    * Every number is read from the sim modules the cages already test; nothing here restates a rule.
    */
   import { E, eng } from '../engine/client';
-  import { canBuy, stockOf, settlementById, standingProgress } from '../sim/town';
+  import { canBuy, stockOf, settlementById, standingProgress, rowById } from '../sim/town';
   import { slotsAvailable, slotsUsed } from '../sim/slots';
-  import { craft } from '../sim/craft';
   import type { GameState } from '../sim/types';
   import { icon } from '../icon';
   const marketMark = icon('currency-strongbox');
@@ -41,7 +40,7 @@
   const pieces = $derived(state.bag.length);
   const stored = $derived(state.stash.reduce((n, t) => n + t.length, 0));
   const junk = $derived(Object.values(state.junk).reduce((a, b) => a + (b as number), 0));
-  const stock = $derived(stockOf(town.id));
+  const stock = $derived(stockOf(town.id, state));
   const buys = $derived(here ? stock.filter((r: any) => canBuy(state, town.id, r.id).ok).length : 0);
   const ready = $derived(state.town.tasks.filter((t) => t && t.progress >= t.n).length);
   const standing = $derived(standingProgress(state, town.id));
@@ -49,13 +48,22 @@
   /** the piece the forge would take on next, if there is one worth naming */
   const worn = $derived(state.gear.filter(Boolean) as any[]);
   const wornCount = $derived(worn.length);
-  const lowest = $derived(worn.length ? worn.reduce((a, b) => ((b.upgrade_lv || 0) < (a.upgrade_lv || 0) ? b : a)) : null);
   const opened = $derived(state.town.visited.filter((v) => v !== town.id).map(settlementById).filter((s): s is NonNullable<ReturnType<typeof settlementById>> => Boolean(s)));
+  const LOOK_IDS = new Set(['prestige_title', 'banner_coldres', 'tint_heavy', 'pedlar_rotation']);
+  const looks = $derived.by(() => {
+    const counts = new Map<string, number>();
+    for (const id of state.town.owned) {
+      if (!LOOK_IDS.has(id)) continue;
+      const label = String(rowById(id)?.item || id);
+      counts.set(label, (counts.get(label) || 0) + 1);
+    }
+    return [...counts].map(([label, count]) => count > 1 ? `${label} ×${count}` : label);
+  });
   const services = $derived([
     { id: 'market', name: 'Market', icon: marketMark, by: 'the Counterhand and the workshop', say: 'Sell gathered goods, compare town demand, process materials and plan trade routes', live: buys ? `${buys} stall line${buys === 1 ? '' : 's'} your purse covers` : junk ? `${junk} junk to sell` : 'Compare buyers and regional supplies' },
     { id: 'black-market', name: 'Black Market', icon: marketMark, by: 'the back-alley broker', say: 'Buy rare materials, craft stones and named skill XP Levels; max level offers are in the stock pool', live: state.town.blackMarket[town.id] ? `${state.town.blackMarket[town.id].offers.filter((offer) => offer.remaining > 0).length} offers in stock` : 'Stock arrives on the next online settlement tick' },
-    { id: 'forge', name: 'Forge', icon: forgeMark, by: 'the Armourer', say: 'Enhance a piece up the + ladder, repair a Broken one, or take the one Corrupt gamble', live: lowest ? `${lowest.slot} is the least forged · +${lowest.upgrade_lv || 0} of +${craft.C.upgrade_cap}` : 'nothing worn yet' },
-    { id: 'craft', name: 'Craft house', icon: craftMark, by: 'the Armourer and the Herbalist', say: 'Move a mod line inside its Tier, push it a Tier up, add or remove a mod, ascend the piece', live: stones ? `${stones} stones in the purse` : 'no stones — Salvage supplies Scrap for Alchemy' },
+    { id: 'forge', name: 'Forge', icon: forgeMark, by: 'the Armourer', say: 'Turn gathered materials into a chosen weapon or armour piece; the material grade sets the item band', live: `${Object.keys(state.fieldwork.materials).filter((id) => (state.fieldwork.materials[id] || 0) > 0).length} material kinds carried` },
+    { id: 'craft', name: 'Craft house', icon: craftMark, by: 'the Armourer and the Herbalist', say: 'Enhance a piece up the + ladder, repair a Broken one, or move, add or remove its Mod lines', live: stones ? `${stones} stones in the purse` : 'no stones — Salvage supplies Scrap for Alchemy' },
     { id: 'stash', name: 'Stash', icon: stashMark, by: 'the Porter', say: 'The warehouse the same record opens in every settlement', live: tabs ? `${stored} stored · ${tabs} tab${tabs === 1 ? '' : 's'}` : 'no tab bought yet' },
     { id: 'desk', name: 'Desk', icon: deskMark, by: 'the Guild clerk and the Collector', say: 'Standing, the board, a set turn-in, the hunt and walk tables', live: ready ? `${ready} task${ready === 1 ? '' : 's'} ready to claim` : `${state.town.tasks.filter(Boolean).length} of ${state.town.tasks.length} board slots filled` },
     { id: 'farm', name: 'Farm', icon: farmMark, by: 'the Herbalist', say: 'Herb plots, brewing and condensing', live: `${state.farm.plots.filter((p: any) => p?.tier).length} plot(s) sown` },
@@ -74,7 +82,7 @@
   <div class="lead">
     <div>
       <h3>{town.name}</h3>
-      <p class="sub">
+      <p class="text-note">
         zone {town.zone} · {eng.zoneById(town.zone).name} · Innate Element {town.innate.join(' / ')} ·
         standing Tier {standing.tier} ({(standing.share * 100).toFixed(1)}% of zone budget) ·
         {standing.kills.toLocaleString()} zone kills + {standing.helpCredit.toLocaleString()} Camp aid = {standing.progress.toLocaleString()} Standing progress ·
@@ -134,7 +142,18 @@
           {#each opened as s (s.id)}
             <button class="chip chip-tag btn btn-quiet" onclick={() => onwarp(s.id)} title="Warp to {s.name}, free and instant">{s.name}</button>
           {:else}
-            <span class="dim">No other Waypoint opened yet.</span>
+            <span class="text-dim">No other Waypoint opened yet.</span>
+          {/each}
+        </div>
+      </section>
+
+      <section class="ways">
+        <h4>Owned appearance</h4>
+        <div class="chips">
+          {#each looks as look}
+            <span class="chip chip-tag">{look}</span>
+          {:else}
+            <span class="text-dim">No appearance purchases yet.</span>
           {/each}
         </div>
       </section>
@@ -150,7 +169,6 @@
   }
   .lead { display: flex; flex-wrap: wrap; gap: var(--spacing-md); align-items: baseline; justify-content: space-between; }
   .lead h3 { margin: 0; font-size: var(--font-md); }
-  .sub { color: var(--dim); font-size: var(--font-xs); }
   .purse { display: flex; gap: var(--spacing-md); font-size: var(--font-xs); color: var(--dim); }
   .purse b { font-family: var(--num); color: var(--gold); font-size: var(--font-sm); }
 

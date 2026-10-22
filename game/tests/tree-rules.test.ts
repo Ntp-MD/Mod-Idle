@@ -156,4 +156,14 @@ describe('the tree the game ships', () => {
     s.player.treeRanks = { [pair.b]: 1 };
     expect(canSpendTree(s, pair.a).why).toMatch(/incompatible/);
   });
+
+  it('names the keystone it refuses, not its internal id', () => {
+    const pair = (tree as any).incompatibilities[0] as { a: string; b: string };
+    const s = newGame(24);
+    s.player.attainmentPoints = 10;
+    s.player.treeRanks = { [pair.a]: 1 };
+    const why = canSpendTree(s, pair.b).why!;
+    expect(why).not.toContain(pair.a);
+    expect(why).toContain(tree.byId[pair.a].name);
+  });
 });

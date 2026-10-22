@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { newGame as newGameForHud } from '../src/sim/game';
 import { E, loot } from '../src/engine/client';
 import { pieceRank, rankTone, gearEntry, stackEntry, sortEntries, vsWorn, compareLines } from '../src/ui/bag';
-import { fxByMob, plateBeat, platePark, plateStrike, plateGesture, graveIds, parked } from '../src/ui/plate';
+import { castForHit, fxByMob, plateBeat, platePark, plateStrike, plateGesture, graveIds, parked, windupOf } from '../src/ui/plate';
 import { ramp } from '../src/ui/map';
 import { snapCounters, buildAwayReport, fieldLabel, describeSnap, mechanicWords, sideSpawnWords } from '../src/ui/hud';
 import { bar, curseWords, statusWords } from '../src/ui/field';
@@ -136,6 +136,16 @@ describe('the plate view model (plate.ts)', () => {
     expect(graveIds(kills, group, 40)).toEqual(['dead']);
     expect(graveIds(kills, group, 42)).toEqual([]);   // a grave lives one sim second
     expect(platePark(fxByMob([fx({ mobId: 'a', value: 3 })]), 'a')!.sum).toBe(3);
+  });
+
+  it('finds the cast that owns a hit and clamps the next-swing read', () => {
+    const hit = fx({ id: 2, sec: 7, via: 'cast', mobId: 'm1' });
+    const cast = fx({ id: 3, sec: 7, kind: 'cast', side: 'self', skillId: 'attack.fireball' });
+    expect(castForHit([cast, hit], hit)?.skillId).toBe('attack.fireball');
+    expect(castForHit([cast], fx({ via: 'swing' }))).toBeNull();
+    expect(windupOf({ atkTimer: .42 } as Mob)).toBeCloseTo(.42);
+    expect(windupOf({ atkTimer: 2 } as Mob)).toBe(1);
+    expect(windupOf({ atkTimer: -1 } as Mob)).toBe(0);
   });
 });
 

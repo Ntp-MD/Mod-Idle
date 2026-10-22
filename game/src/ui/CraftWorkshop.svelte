@@ -7,27 +7,32 @@
   import { slotsFree } from '../sim/slots';
   import { gearEntry, pieceRank, type SlotEntry } from './bag';
   import { shelfStones, stoneIcon, stoneQuality, STONE_MIME } from './stones';
-  import { modesForStone, stoneUseReason } from './craft-use';
+  import { modesForStone, isAdvancedStone, stoneUseReason } from './craft-use';
   import SlotGrid from './SlotGrid.svelte';
   import Tabs from './Tabs.svelte';
+  import CountBadge from './CountBadge.svelte';
+  import Icon from './Icon.svelte';
   import Pager from './Pager.svelte';
   import type { GameState, Item } from '../sim/types';
 
   let { game, item, where = null, index = -1, onpick, onclear, onrun, wornOf, note = '',
     stashTabs = 0, stashTab = 0, writer = true, onStashTab = () => {}, onTakeStash = () => false, onStore = () => false,
+    repairPrice = 0, onrepair = () => false,
   }: {
     game: GameState; item: Item | null; where?: Where | null; index?: number;
     onpick: (where: Where, index: number) => void; onclear: () => void;
     onrun: (op: CraftOp, line?: number, pick?: string) => boolean;
     wornOf: (slot: string) => Item | null; note?: string; stashTabs?: number; stashTab?: number; writer?: boolean;
     onStashTab?: (tab: number) => void; onTakeStash?: (tab: number, index: number) => boolean; onStore?: (index: number, tab: number) => boolean;
+    repairPrice?: number; onrepair?: (where: Where, index: number) => boolean;
   } = $props();
 
   const MIME = 'application/x-modworld-gear';
   const FRAME = craft.PIECE_FLOOR as number;
   const UNT = craft.UNTOUCHABLE as number;
   const held = $derived(game.counters.stones || {});
-  const stones = $derived(shelfStones(held, true));
+  let advanced = $state(false);
+  const stones = $derived(shelfStones(held, true).filter((stone) => advanced || !isAdvancedStone(stone.key)));
   let stoneQuery = $state('');
   let stonePage = $state(0);
   let stoneCapacity = $state(1);
@@ -48,7 +53,7 @@
   let resultKind = $state<CraftOp | null>(null);
   let targetLine = $state<number | null>(null);
   const selectedStone = $derived(stones.find(s => s.key === selectedKey));
-  const modes = $derived(modesForStone(selectedKey));
+  const modes = $derived(modesForStone(selectedKey, advanced));
   const mode = $derived(modes.find(m => m.op === modeOp) || modes[0]);
   const pickValue = $derived(selectedKey.startsWith('imprint_') ? selectedKey.slice('imprint_'.length) : chosenMod);
   const choices = $derived(item && where != null && index >= 0 ? replaceChoices(game, where, index) : []);
@@ -98,6 +103,18 @@
     return { destroy: () => observer.disconnect() };
   }
   function cancelStone() { armed = false; pointer = null; }
+  function setAdvanced(next: boolean) {
+    if (advanced === next) return;
+    advanced = next;
+    if (!next && selectedKey && isAdvancedStone(selectedKey)) {
+      selectedKey = '';
+      cancelStone();
+      message = 'Basic view shows the common presses. Switch to Advanced for whole-piece and rare stones.';
+      return;
+    }
+    const nextModes = modesForStone(selectedKey, next);
+    if (!nextModes.some((entry) => entry.op === modeOp)) modeOp = nextModes[0]?.op || 'reroll_random';
+  }
   onMount(() => {
     const cancelKey = (event: KeyboardEvent) => {
       if (armed && event.key === 'Escape') { event.preventDefault(); event.stopImmediatePropagation(); cancelStone(); }
@@ -114,7 +131,8 @@
     if (busy) return;
     message = '';
     targetLine = null;
-    if (selectedKey !== key) { modeOp = modesForStone(key)[0]?.op || 'reroll_random'; chosenMod = ''; }
+    if (!advanced && isAdvancedStone(key)) { message = 'Switch to Advanced for whole-piece and rare stones.'; cancelStone(); return; }
+    if (selectedKey !== key) { modeOp = modesForStone(key, advanced)[0]?.op || 'reroll_random'; chosenMod = ''; }
     selectedKey = key;
     if (!writer) { message = 'Read-only. Take account control before using a stone.'; cancelStone(); return; }
     if (!(held[key] > 0)) { message = `No ${stoneName(key)} left.`; cancelStone(); return; }
@@ -220,6 +238,10 @@
      onpointerleave={() => (pointer = null)} ondragend={() => (dropReady = false)}>
   <aside class="pane currency-pane" aria-label="Crafting stones">
     <header class="pane-head"><h3>Stones</h3><span>{stones.filter(s => s.count > 0).length} kinds held</span></header>
+    <div class="craft-level" role="group" aria-label="Crafting detail">
+      <button type="button" class:selected={!advanced} aria-pressed={!advanced} onclick={() => setAdvanced(false)}>Basic</button>
+      <button type="button" class:selected={advanced} aria-pressed={advanced} onclick={() => setAdvanced(true)}>Advanced</button>
+    </div>
     <input type="search" placeholder="Find a stone…" aria-label="Find crafting stones" bind:value={stoneQuery} oninput={() => (stonePage = 0)} />
     <div class="currency-grid" use:fitCurrency>
       {#each shownStones as stone (stone.key)}
@@ -229,7 +251,7 @@
                 draggable={stone.count > 0} ondragstart={(event) => dragStone(stone.key, event)}
                 oncontextmenu={(event) => { event.preventDefault(); event.stopPropagation(); if (armed && selectedKey === stone.key) cancelStone(); else armStone(stone.key, event); }}
                 onclick={(event) => armStone(stone.key, event)}>
-          <span class="currency-art"><img src={stone.icon} alt="" /><b class="badge badge-count">{stone.count}</b></span>
+          <span class="currency-art"><img src={stone.icon} alt="" /><CountBadge value={stone.count} tag="b" /></span>
           <span>{stone.name.replace(/^Imprint — /, '').replace(/ Stone$/, '')}</span>
         </button>
       {/each}
@@ -258,7 +280,7 @@
           </select></label>
         {/if}
         <div class="stone-costs" aria-label="Cost per use">
-          {#each costs as cost (cost.key)}<span class="cost" class:text-alarm={cost.owned < cost.amount}><img src={stoneIcon(cost.key)} alt="" />{cost.amount} <small>/ {cost.owned} held</small></span>{/each}
+          {#each costs as cost (cost.key)}<span class="cost" class:text-alarm={cost.owned < cost.amount}><img class="icon-label" src={stoneIcon(cost.key)} alt="" />{cost.amount} <small>/ {cost.owned} held</small></span>{/each}
         </div>
         <p class="text-note">{selectedStone.detail}</p>
         <p class="text-note">{targetHint()}</p>
@@ -269,7 +291,7 @@
         {#if selectedKey === 'corrupt' && item}<p class="warning text-alarm">One irreversible use. May change an Element, lower quality or break this item.</p>{/if}
         <button class="btn-quiet" type="button" onclick={() => armed ? cancelStone() : armStone(selectedKey)}>{armed ? 'Cancel · Esc' : 'Use this stone'}</button>
       </section>
-    {:else}<p class="stone-guide text-note">Right-click a stone, then click your item. Hold Shift to keep using it.</p>{/if}
+    {:else}<p class="stone-guide text-note">Right-click a stone, then click your item. Hold Shift to keep using it. Basic shows the common presses; Advanced adds whole-piece and rare stones.</p>{/if}
   </aside>
 
   <section class="pane bench-pane surface-hud" aria-label="Crafting bench item" style:--rar={rank?.tone ?? null}
@@ -289,6 +311,11 @@
         </span>
       </button>
       {/if}
+      {#if item?.broken && where != null && index >= 0}
+        <button class="btn btn-gold bench-repair" type="button" disabled={!writer || busy || !repairPrice}
+                title={repairPrice ? `Clears Broken and refills protection to ${craft.C.protection_start} for ${repairPrice} gold` : 'No Armourer repair is stocked here'}
+                onclick={() => onrepair(where, index)}>Repair at Armourer · {repairPrice} gold</button>
+      {/if}
       {#if item}
         <div class="mod-heading"><span>Mod</span><span>Value · Tier</span></div>
         <ul class="item-lines" aria-label="Item Mod lines">
@@ -302,7 +329,7 @@
                       title={armed && mode?.target === 'line' ? reason(i) || 'Click to use · Shift-click to repeat' : `${kind} Mod · ${lineName(line.id)}`}
                       onclick={(event) => { if (armed && mode?.target === 'line') applyStone(i, event.shiftKey); }}>
                 <small class="line-kind">{kind}</small>
-                <span class="line-name"><img src={modIcon(line.id, line.stat, line.element)} alt="" /><span>{modLabel(line)}{craftedMark(line)}{#each line.extra || [] as extra}<small class="line-extra">+ {modLabel(extra)} {extra.value}</small>{/each}</span></span>
+                <span class="line-name"><Icon src={modIcon(line.id, line.stat, line.element)} /><span>{modLabel(line)}{craftedMark(line)}{#each line.extra || [] as extra}<small class="line-extra">+ {modLabel(extra)} {extra.value}</small>{/each}</span></span>
                 <span class="line-value">{#if lineChanged(i) && before?.lines[i]?.id === line.id}<small class="previous-value">{before.lines[i].value} → </small>{/if}<b>{line.value}</b> <small>{lineTier(line)}</small></span>
               </button>
             </li>
@@ -400,7 +427,7 @@
 </div>
 
 {#if armed && selectedStone && pointer}
-  <div class="stone-cursor" style:left={`clamp(0px, ${pointer.x}px, calc(100vw - var(--slot-item) - var(--spacing-xl)))`} style:top={`clamp(0px, ${pointer.y}px, calc(100vh - var(--slot-item) - var(--spacing-xl)))`} aria-hidden="true"><img src={selectedStone.icon} alt="" /><span class="badge badge-count">{held[selectedKey] || 0}</span></div>
+  <div class="stone-cursor" style:left={`clamp(0px, ${pointer.x}px, calc(100vw - var(--slot-item) - var(--spacing-xl)))`} style:top={`clamp(0px, ${pointer.y}px, calc(100vh - var(--slot-item) - var(--spacing-xl)))`} aria-hidden="true"><img src={selectedStone.icon} alt="" /><CountBadge value={held[selectedKey] || 0} /></div>
 {/if}
 
 <style>
@@ -409,6 +436,9 @@
   .pane { display: flex; flex-direction: column; gap: var(--spacing-sm); min-width: 0; min-height: 0; }
   .pane-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--spacing-sm); }
   .pane-head span { font-size: var(--font-xs); }
+  .craft-level { display: flex; gap: var(--spacing-xs); }
+  .craft-level button { flex: 1; padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--line); background: var(--panel); font-size: var(--font-xs); }
+  .craft-level button.selected { border-color: var(--gold); background: var(--surface-selected); color: var(--gold); }
   .pane input { width: 100%; min-width: 0; }
   .currency-grid { --currency-row: calc(var(--slot-item) + var(--font-xs) * 2.4 + var(--spacing-xs) * 3); display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(var(--slot-item) * 2), 1fr)); grid-auto-rows: var(--currency-row); align-content: start; gap: var(--spacing-xs); min-height: 0; flex: 1; }
   .currency-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-xs); min-width: 0; padding: var(--spacing-xs); font-size: var(--font-xs); line-height: 1.2; }
@@ -423,7 +453,6 @@
   .stone-inspector p, .stone-guide { margin: 0; font-size: var(--font-xs); }
   .stone-costs { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); }
   .cost { display: inline-flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-sm); }
-  .cost img { width: var(--icon-label); height: var(--icon-label); object-fit: contain; }
   .bench-pane { padding: var(--spacing-md); }
   .bench-body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--spacing-sm); }
   .item-target { display: flex; align-items: center; gap: var(--spacing-md); width: 100%; padding: var(--spacing-md); text-align: left; }
@@ -438,9 +467,9 @@
   .line-kind { font-size: var(--font-xs); }
   .line-name { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); min-width: 0; overflow-wrap: anywhere; }
   .line-extra { display: block; font-size: var(--font-xs); }
-  .line-name img { width: var(--icon-label); height: var(--icon-label); flex: none; object-fit: contain; }
   .line-value { text-align: right; font-size: var(--font-sm); font-variant-numeric: tabular-nums; }
   .line-value small { font-size: var(--font-xs); }
+  .bench-repair { justify-self: start; }
   .bench-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--spacing-xs); }
   .bench-tools > div { display: flex; gap: var(--spacing-xs); }
   .bench-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-sm); text-align: center; }

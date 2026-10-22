@@ -8,6 +8,7 @@ export interface DeliveryCfg {
   history_limit: number; count_min: number; count_max: number; stack_share: number;
   deadline_min_sec: number; deadline_max_sec: number; production_allowance: number; deadline_allowance_sec: number;
   reward_minutes: number; fallback_minutes: number; minimum_stones: number;
+  reward_modes: ('fixed' | 'choice')[]; choice_reward_mult: number;
   premium_base: number; premium_per_difficulty: number; processing_weight: number; count_exponent: number;
   band_weights: Record<string, number>; rarity_weights: Record<string, number>; target_weights: Record<string, number>;
   default_target_weight: number; skill_chance: number; default_skill_weight: number;
@@ -218,5 +219,8 @@ export function createDelivery(E: EngineData, C: DeliveryCfg, trade: ReturnType<
   const stoneBundle = (band: string, difficulty: number, key: string, income: 'tier' | 'reroll_value' | 'add', fallback = false) => ({
     key, count: Math.max(C.minimum_stones, eng.taskPayout(band, (fallback ? C.fallback_minutes : C.reward_minutes) * difficulty)[income]),
   });
-  return { C, sources, acquisition, capFor, deadline, targetWeight, premium, stoneBundle, band };
+  const rewardMode = (serial: number) => C.reward_modes[(serial - 1) % C.reward_modes.length];
+  const bonusGold = (quoteGold: number, difficulty: number, xp: number, mult = 1) =>
+    trade.floorCurrency(quoteGold * (premium(difficulty, xp) - 1) * mult);
+  return { C, sources, acquisition, capFor, deadline, targetWeight, premium, stoneBundle, rewardMode, bonusGold, band };
 }

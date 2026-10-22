@@ -208,7 +208,8 @@
           "block_charges_per_levels",
           "block_charges_cap",
           "dot_sec",
-          "max_hp_pct_damage"
+          "max_hp_pct_damage",
+          "spread_status"
         ]
       }
     }
@@ -256,6 +257,8 @@
     },
     {
       "id": "attack.flame_bolt",
+      "retired": true,
+      "retired_to": "attack.fireball",
       "name": "Flame Bolt",
       "type": "attack",
       "group": "magic",
@@ -303,6 +306,8 @@
     },
     {
       "id": "attack.meteor",
+      "retired": true,
+      "retired_to": "attack.firestorm",
       "name": "Meteor",
       "type": "attack",
       "group": "magic",
@@ -328,6 +333,8 @@
     },
     {
       "id": "attack.flame_wisp",
+      "retired": true,
+      "retired_to": "attack.fireball",
       "name": "Flame Wisp",
       "type": "attack",
       "group": "magic",
@@ -350,6 +357,8 @@
     },
     {
       "id": "attack.frost_bolt",
+      "retired": true,
+      "retired_to": "attack.ice_lance",
       "name": "Frost Bolt",
       "type": "attack",
       "group": "magic",
@@ -367,6 +376,8 @@
     },
     {
       "id": "attack.ice_shard",
+      "retired": true,
+      "retired_to": "attack.ice_lance",
       "name": "Ice Shard",
       "type": "attack",
       "group": "magic",
@@ -433,6 +444,8 @@
     },
     {
       "id": "attack.frozen_orb",
+      "retired": true,
+      "retired_to": "attack.blizzard",
       "name": "Frozen Orb",
       "type": "attack",
       "group": "magic",
@@ -493,6 +506,8 @@
     },
     {
       "id": "attack.lightning_bolt",
+      "retired": true,
+      "retired_to": "attack.spark",
       "name": "Lightning Bolt",
       "type": "attack",
       "group": "magic",
@@ -544,6 +559,8 @@
     },
     {
       "id": "attack.storm_call",
+      "retired": true,
+      "retired_to": "attack.chain_lightning",
       "name": "Storm Call",
       "type": "attack",
       "group": "magic",
@@ -562,6 +579,8 @@
     },
     {
       "id": "attack.static_field",
+      "retired": true,
+      "retired_to": "attack.chain_lightning",
       "name": "Static Field",
       "type": "attack",
       "group": "magic",
@@ -649,6 +668,8 @@
     },
     {
       "id": "attack.toxic_cloud",
+      "retired": true,
+      "retired_to": "attack.venom_spray",
       "name": "Toxic Cloud",
       "type": "attack",
       "group": "magic",
@@ -780,6 +801,8 @@
     },
     {
       "id": "attack.fan_of_knives",
+      "retired": true,
+      "retired_to": "attack.whirlwind",
       "name": "Fan of Knives",
       "type": "attack",
       "group": "melee",
@@ -827,6 +850,8 @@
     },
     {
       "id": "attack.poisoned_edge",
+      "retired": true,
+      "retired_to": "attack.poison_bolt",
       "name": "Poisoned Edge",
       "type": "attack",
       "group": "melee",
@@ -871,6 +896,8 @@
     },
     {
       "id": "attack.nerve_strike",
+      "retired": true,
+      "retired_to": "curse.weaken",
       "name": "Nerve Strike",
       "type": "attack",
       "group": "melee",
@@ -915,6 +942,8 @@
     },
     {
       "id": "attack.skewer_line",
+      "retired": true,
+      "retired_to": "attack.whirlwind",
       "name": "Skewer Line",
       "type": "attack",
       "group": "melee",
@@ -940,6 +969,8 @@
     },
     {
       "id": "attack.reach_thrust",
+      "retired": true,
+      "retired_to": "attack.bone_breaker",
       "name": "Reach Thrust",
       "type": "attack",
       "group": "melee",
@@ -955,6 +986,8 @@
     },
     {
       "id": "attack.low_sweep",
+      "retired": true,
+      "retired_to": "curse.cripple",
       "name": "Low Sweep",
       "type": "attack",
       "group": "melee",
@@ -1046,6 +1079,8 @@
     },
     {
       "id": "attack.iron_toll",
+      "retired": true,
+      "retired_to": "curse.weaken",
       "name": "Iron Toll",
       "type": "attack",
       "group": "melee",
@@ -1068,6 +1103,8 @@
     },
     {
       "id": "attack.wide_swing",
+      "retired": true,
+      "retired_to": "attack.cleave",
       "name": "Wide Swing",
       "type": "attack",
       "group": "melee",
@@ -1086,6 +1123,8 @@
     },
     {
       "id": "attack.whirlaxe",
+      "retired": true,
+      "retired_to": "attack.whirlwind",
       "name": "Whirlaxe",
       "type": "attack",
       "group": "melee",
@@ -1399,20 +1438,193 @@
       "mana": "19 flat (AoE ×1.5)",
       "basis": "magic",
       "targets": "3/1",
-      "effect": "AoE earthshock · attack speed −20% on every target it hits",
+      "effect": "AoE earthshock · cripples every target it hits",
+      "rules": [
+        "guaranteed_status",
+        "every_target"
+      ],
+      "base_flat": 922.9,
+      "eff": 108.77
+    },
+    {
+      "id": "attack.detonate",
+      "name": "Detonate",
+      "type": "attack",
+      "group": "magic",
+      "element": "fire",
+      "cd": 10,
+      "mana": "24 flat",
+      "basis": "magic",
+      "targets": "1/1",
+      "effect": "Consumes up to 5 burn stacks · +15% damage per stack",
       "effects": [
         {
-          "stat": "attack_speed",
+          "stat": "consume_status",
+          "status": "burn",
           "op": "add_pct",
-          "value": -20,
+          "value": 15,
+          "cap": 5,
           "subject": "target"
+        }
+      ],
+      "base_flat": 600,
+      "eff": 70
+    },
+    {
+      "id": "attack.shatter",
+      "name": "Shatter",
+      "type": "attack",
+      "group": "magic",
+      "element": "cold",
+      "cd": 13,
+      "mana": "22 flat (AoE ×1.5)",
+      "basis": "magic",
+      "targets": "3/1",
+      "effect": "Bonus +30% against chilled targets · stops them 1 sec",
+      "effects": [
+        {
+          "stat": "bonus_vs_status",
+          "status": "chill",
+          "op": "add_pct",
+          "value": 30,
+          "subject": "target"
+        },
+        {
+          "stat": "stop_sec",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 900,
+      "eff": 110
+    },
+    {
+      "id": "attack.overload",
+      "name": "Overload",
+      "type": "attack",
+      "group": "magic",
+      "element": "lightning",
+      "cd": 12,
+      "mana": "24 flat (AoE ×1.5)",
+      "basis": "magic",
+      "targets": "3/1",
+      "effect": "Bonus +30% against shocked targets · 2 hits at 50% each",
+      "effects": [
+        {
+          "stat": "bonus_vs_status",
+          "status": "shock",
+          "op": "add_pct",
+          "value": 30,
+          "subject": "target"
+        },
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "self"
+        },
+        {
+          "stat": "hit_pct",
+          "op": "add_pct",
+          "value": 50,
+          "subject": "self"
         }
       ],
       "rules": [
         "every_target"
       ],
-      "base_flat": 922.9,
-      "eff": 108.77
+      "base_flat": 850,
+      "eff": 105
+    },
+    {
+      "id": "attack.catalyst",
+      "name": "Catalyst",
+      "type": "attack",
+      "group": "magic",
+      "element": "poison",
+      "cd": 11,
+      "mana": "22 flat",
+      "basis": "magic",
+      "targets": "1/1",
+      "effect": "Consumes up to 5 poison stacks · +12% damage per stack · spreads poison to 2 others",
+      "effects": [
+        {
+          "stat": "consume_status",
+          "status": "poison",
+          "op": "add_pct",
+          "value": 12,
+          "cap": 5,
+          "subject": "target"
+        },
+        {
+          "stat": "spread_status",
+          "status": "poison",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 900,
+      "eff": 90
+    },
+    {
+      "id": "attack.ruin",
+      "name": "Ruin",
+      "type": "attack",
+      "group": "magic",
+      "element": "chaos",
+      "cd": 14,
+      "mana": "26 flat",
+      "basis": "magic",
+      "targets": "1/1",
+      "effect": "Consumes up to 10 mark stacks · +8% damage per stack",
+      "effects": [
+        {
+          "stat": "consume_status",
+          "status": "mark",
+          "op": "add_pct",
+          "value": 8,
+          "cap": 10,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 1300,
+      "eff": 105
+    },
+    {
+      "id": "attack.aftershock",
+      "name": "Aftershock",
+      "type": "attack",
+      "group": "magic",
+      "element": "earth",
+      "cd": 12,
+      "mana": "22 flat (AoE ×1.5)",
+      "basis": "magic",
+      "targets": "3/1",
+      "effect": "Bonus +25% against crippled targets · Armour +20% for 6 sec",
+      "duration": "6 sec",
+      "effects": [
+        {
+          "stat": "bonus_vs_status",
+          "status": "crippled",
+          "op": "add_pct",
+          "value": 25,
+          "subject": "target"
+        },
+        {
+          "stat": "armour",
+          "op": "add_pct",
+          "value": 20,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "every_target",
+        "self_window"
+      ],
+      "base_flat": 850,
+      "eff": 100
     },
     {
       "id": "buff.warcry",

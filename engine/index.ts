@@ -299,18 +299,19 @@ export function createEngine(E: EngineData) {
    * answered on its own line and every other Element lands unresisted.
    */
   function mitigateMobHit(mob: any, nonElement: number, element: number | Record<string, number>, armourCutFraction = 0, resOffset = 0) {
-    const non = nonElement * (1 - mobArmourCut(mob.armour, nonElement, armourCutFraction));
+    const non = nonElement * (1 - mobArmourCut(mob.effArmour ?? mob.armour, nonElement, armourCutFraction));
     // a Species weakness (`mob.species[].weakness`) answers one named Element with more damage taken;
     // it is not a res line, so the resistance map stays exactly as X54 states
     const weak = mob.weak || null;
     const weakMult = (name: string) => (weak && weak.element === name ? 1 + weak.taken_pct / 100 : 1);
     if (typeof element === 'number') {
-      const res = Math.max(0, (mob.res || 0) + resOffset);
+      const res = Math.max(0, (mob.effRes ?? mob.res ?? 0) + resOffset);
       return non + element * (1 - mobResCut(res));
     }
     let el = 0;
     for (const [name, dmg] of Object.entries(element)) {
-      const base = (mob.resByElement && mob.resByElement[name] != null) ? mob.resByElement[name] : (mob.res || 0);
+      const authored = mob.effResByElement?.[name] ?? mob.resByElement?.[name];
+      const base = authored != null ? authored : (mob.effRes ?? mob.res ?? 0);
       el += dmg * (1 - mobResCut(Math.max(0, base + resOffset))) * weakMult(name);
     }
     return non + el;

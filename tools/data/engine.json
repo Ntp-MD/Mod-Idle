@@ -74,6 +74,7 @@
       "aspd_pct": 20,
       "aspd_cap": 20,
       "stop_sec": 1,
+      "time_sec": 2,
       "align_cut": 0.2,
       "stacks": false
     },
@@ -2912,6 +2913,12 @@
         "weakness": {
           "element": "fire",
           "taken_pct": 15
+        },
+        "bonus_material": {
+          "resource": "coin-clasp",
+          "chance": 0.0084,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -2987,6 +2994,12 @@
         "weakness": {
           "element": "cold",
           "taken_pct": 15
+        },
+        "bonus_material": {
+          "resource": "iron-ore",
+          "min": 1,
+          "max": 1,
+          "chance": 0.0061
         }
       },
       {
@@ -3064,7 +3077,13 @@
         "mechanics": {
           "fast_clock": true
         },
-        "potion_source": true
+        "potion_source": true,
+        "bonus_material": {
+          "resource": "coin-clasp",
+          "chance": 0.0084,
+          "min": 1,
+          "max": 1
+        }
       },
       {
         "id": "ogre",
@@ -3141,6 +3160,12 @@
         "weakness": {
           "element": "lightning",
           "taken_pct": 15
+        },
+        "bonus_material": {
+          "resource": "iron-ore",
+          "min": 1,
+          "max": 1,
+          "chance": 0.0061
         }
       },
       {
@@ -3217,6 +3242,12 @@
         "weakness": {
           "element": "fire",
           "taken_pct": 20
+        },
+        "bonus_material": {
+          "resource": "thick-pelt",
+          "chance": 0.0056,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -3291,6 +3322,12 @@
         "weakness": {
           "element": "cold",
           "taken_pct": 15
+        },
+        "bonus_material": {
+          "resource": "thick-pelt",
+          "chance": 0.0056,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -3375,6 +3412,12 @@
         },
         "mechanics": {
           "bleed_immune": true
+        },
+        "bonus_material": {
+          "resource": "grave-bone",
+          "chance": 0.0084,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -3452,6 +3495,12 @@
         },
         "mechanics": {
           "bleed_immune": true
+        },
+        "bonus_material": {
+          "resource": "funerary-linen",
+          "chance": 0.0067,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -3535,6 +3584,12 @@
         },
         "mechanics": {
           "bleed_immune": true
+        },
+        "bonus_material": {
+          "resource": "chaos-ichor",
+          "chance": 0.0019,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -3618,6 +3673,12 @@
         "weakness": {
           "element": "cold",
           "taken_pct": 15
+        },
+        "bonus_material": {
+          "resource": "chaos-ichor",
+          "chance": 0.0019,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -3701,6 +3762,12 @@
         },
         "mechanics": {
           "poison_burst": true
+        },
+        "bonus_material": {
+          "resource": "venom-gland",
+          "chance": 0.0033,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -3784,6 +3851,12 @@
         },
         "mechanics": {
           "poison_burst": true
+        },
+        "bonus_material": {
+          "resource": "chitin-plate",
+          "chance": 0.0067,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -3866,6 +3939,12 @@
         },
         "mechanics": {
           "fast_clock": true
+        },
+        "bonus_material": {
+          "resource": "thick-pelt",
+          "chance": 0.0056,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -3943,6 +4022,12 @@
         "weakness": {
           "element": "lightning",
           "taken_pct": 15
+        },
+        "bonus_material": {
+          "resource": "iron-ore",
+          "min": 1,
+          "max": 1,
+          "chance": 0.0061
         }
       },
       {
@@ -4019,6 +4104,12 @@
         "weakness": {
           "element": "cold",
           "taken_pct": 15
+        },
+        "bonus_material": {
+          "resource": "reptile-scale",
+          "chance": 0.0033,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -4099,6 +4190,12 @@
         "weakness": {
           "element": "fire",
           "taken_pct": 20
+        },
+        "bonus_material": {
+          "resource": "hardwood",
+          "min": 1,
+          "max": 1,
+          "chance": 0.0075
         }
       },
       {
@@ -4178,6 +4275,12 @@
         "weakness": {
           "element": "poison",
           "taken_pct": 10
+        },
+        "bonus_material": {
+          "resource": "coin-clasp",
+          "chance": 0.0084,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -4257,7 +4360,13 @@
           "element": "cold",
           "taken_pct": 15
         },
-        "potion_source": true
+        "potion_source": true,
+        "bonus_material": {
+          "resource": "reptile-scale",
+          "chance": 0.0033,
+          "min": 1,
+          "max": 1
+        }
       },
       {
         "id": "elf",
@@ -4338,6 +4447,12 @@
         "weakness": {
           "element": "fire",
           "taken_pct": 15
+        },
+        "bonus_material": {
+          "resource": "rarewood",
+          "min": 1,
+          "max": 1,
+          "chance": 0.0045
         }
       },
       {
@@ -4385,7 +4500,7 @@
         ],
         "trait": "heavy frontliner - never Small; its normal bodies are Medium and its Elites are Large",
         "core": {
-          "str": 27,
+          "str": 24,
           "agi": 14,
           "vit": 24,
           "dex": 13,
@@ -4414,6 +4529,12 @@
         "weakness": {
           "element": "lightning",
           "taken_pct": 15
+        },
+        "bonus_material": {
+          "resource": "iron-ore",
+          "min": 1,
+          "max": 1,
+          "chance": 0.0061
         }
       },
       {
@@ -4503,6 +4624,12 @@
         },
         "mechanics": {
           "fast_clock": true
+        },
+        "bonus_material": {
+          "resource": "thick-pelt",
+          "chance": 0.0056,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -4582,6 +4709,12 @@
         "weakness": {
           "element": "fire",
           "taken_pct": 20
+        },
+        "bonus_material": {
+          "resource": "rarewood",
+          "min": 1,
+          "max": 1,
+          "chance": 0.0045
         }
       },
       {
@@ -4649,6 +4782,12 @@
           "14": 132,
           "15": 146,
           "17": 163
+        },
+        "bonus_material": {
+          "resource": "willow-wood",
+          "min": 1,
+          "max": 1,
+          "chance": 0.0113
         }
       },
       {
@@ -4722,6 +4861,12 @@
           "12": 117,
           "16": 155,
           "17": 165
+        },
+        "bonus_material": {
+          "resource": "chaos-ichor",
+          "chance": 0.0019,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -4781,6 +4926,12 @@
           "5": 46,
           "6": 56,
           "13": 126
+        },
+        "bonus_material": {
+          "resource": "ember-heart",
+          "chance": 0.0022,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -4837,6 +4988,12 @@
           "9": 86,
           "15": 146,
           "16": 156
+        },
+        "bonus_material": {
+          "resource": "reptile-scale",
+          "chance": 0.0033,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -4893,6 +5050,12 @@
           "4": 36,
           "11": 106,
           "12": 116
+        },
+        "bonus_material": {
+          "resource": "chitin-plate",
+          "chance": 0.0067,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -4951,6 +5114,12 @@
           "6": 56,
           "10": 96,
           "14": 136
+        },
+        "bonus_material": {
+          "resource": "chitin-plate",
+          "chance": 0.0067,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -5010,6 +5179,12 @@
           "10": 96,
           "12": 116,
           "18": 176
+        },
+        "bonus_material": {
+          "resource": "venom-gland",
+          "chance": 0.0033,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -5065,6 +5240,12 @@
           "11": 106,
           "14": 136,
           "18": 176
+        },
+        "bonus_material": {
+          "resource": "chaos-ichor",
+          "chance": 0.0019,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -5121,6 +5302,12 @@
           "9": 86,
           "12": 116,
           "13": 126
+        },
+        "bonus_material": {
+          "resource": "ember-heart",
+          "chance": 0.0022,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -5180,6 +5367,12 @@
           "11": 106,
           "16": 156,
           "17": 166
+        },
+        "bonus_material": {
+          "resource": "chaos-ichor",
+          "chance": 0.0019,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -5236,6 +5429,12 @@
           "7": 66,
           "15": 146,
           "18": 176
+        },
+        "bonus_material": {
+          "resource": "thick-pelt",
+          "chance": 0.0056,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -5289,6 +5488,12 @@
           "4": 36,
           "5": 46,
           "15": 146
+        },
+        "bonus_material": {
+          "resource": "rock-salt",
+          "min": 1,
+          "max": 1,
+          "chance": 0.0135
         }
       },
       {
@@ -5348,6 +5553,12 @@
           "11": 106,
           "16": 156,
           "17": 166
+        },
+        "bonus_material": {
+          "resource": "silver-ore",
+          "min": 1,
+          "max": 1,
+          "chance": 0.0037
         }
       },
       {
@@ -5397,6 +5608,12 @@
         },
         "zone_levels": {
           "1": 6
+        },
+        "bonus_material": {
+          "resource": "venom-gland",
+          "chance": 0.0033,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -5449,6 +5666,12 @@
         },
         "mechanics": {
           "fast_clock": true
+        },
+        "bonus_material": {
+          "resource": "feather-plume",
+          "chance": 0.0045,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -5498,6 +5721,12 @@
         },
         "zone_levels": {
           "3": 26
+        },
+        "bonus_material": {
+          "resource": "thick-pelt",
+          "chance": 0.0056,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -5550,6 +5779,12 @@
         },
         "mechanics": {
           "poison_burst": true
+        },
+        "bonus_material": {
+          "resource": "venom-gland",
+          "chance": 0.0033,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -5599,6 +5834,12 @@
         },
         "zone_levels": {
           "5": 46
+        },
+        "bonus_material": {
+          "resource": "reptile-scale",
+          "chance": 0.0033,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -5651,6 +5892,12 @@
         },
         "mechanics": {
           "fast_clock": true
+        },
+        "bonus_material": {
+          "resource": "chitin-plate",
+          "chance": 0.0067,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -5703,6 +5950,12 @@
         },
         "mechanics": {
           "bleed_immune": true
+        },
+        "bonus_material": {
+          "resource": "iron-ore",
+          "min": 1,
+          "max": 1,
+          "chance": 0.0061
         }
       },
       {
@@ -5755,6 +6008,12 @@
         },
         "mechanics": {
           "fast_clock": true
+        },
+        "bonus_material": {
+          "resource": "grave-bone",
+          "chance": 0.0084,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -5807,6 +6066,12 @@
         },
         "mechanics": {
           "bleed_immune": true
+        },
+        "bonus_material": {
+          "resource": "grave-bone",
+          "chance": 0.0084,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -5859,6 +6124,12 @@
         },
         "mechanics": {
           "poison_burst": true
+        },
+        "bonus_material": {
+          "resource": "venom-gland",
+          "chance": 0.0033,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -5908,6 +6179,12 @@
         },
         "zone_levels": {
           "11": 106
+        },
+        "bonus_material": {
+          "resource": "chaos-ichor",
+          "chance": 0.0019,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -5960,6 +6237,12 @@
         },
         "mechanics": {
           "fast_clock": true
+        },
+        "bonus_material": {
+          "resource": "hardwood",
+          "min": 1,
+          "max": 1,
+          "chance": 0.0075
         }
       },
       {
@@ -6009,6 +6292,12 @@
         },
         "zone_levels": {
           "13": 126
+        },
+        "bonus_material": {
+          "resource": "iron-ore",
+          "min": 1,
+          "max": 1,
+          "chance": 0.0061
         }
       },
       {
@@ -6058,6 +6347,12 @@
         },
         "zone_levels": {
           "14": 136
+        },
+        "bonus_material": {
+          "resource": "river-pearl",
+          "chance": 0.0027,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -6107,6 +6402,12 @@
         },
         "zone_levels": {
           "15": 146
+        },
+        "bonus_material": {
+          "resource": "reptile-scale",
+          "chance": 0.0033,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -6156,6 +6457,12 @@
         },
         "zone_levels": {
           "16": 156
+        },
+        "bonus_material": {
+          "resource": "ember-heart",
+          "chance": 0.0022,
+          "min": 1,
+          "max": 1
         }
       },
       {
@@ -6205,6 +6512,12 @@
         },
         "zone_levels": {
           "17": 166
+        },
+        "bonus_material": {
+          "resource": "silver-ore",
+          "min": 1,
+          "max": 1,
+          "chance": 0.0037
         }
       },
       {
@@ -6257,6 +6570,12 @@
         },
         "mechanics": {
           "poison_burst": true
+        },
+        "bonus_material": {
+          "resource": "thick-pelt",
+          "chance": 0.0056,
+          "min": 1,
+          "max": 1
         }
       }
     ],
@@ -7873,7 +8192,7 @@
             20
           ],
           "core": {
-            "str": 30,
+            "str": 27,
             "agi": 13,
             "vit": 26,
             "dex": 14,
@@ -7889,7 +8208,7 @@
             40
           ],
           "core": {
-            "str": 30,
+            "str": 27,
             "agi": 13,
             "vit": 26,
             "dex": 22,
@@ -7905,7 +8224,7 @@
             60
           ],
           "core": {
-            "str": 26,
+            "str": 23,
             "agi": 15,
             "vit": 24,
             "dex": 26,
@@ -7921,7 +8240,7 @@
             80
           ],
           "core": {
-            "str": 29,
+            "str": 26,
             "agi": 14,
             "vit": 31,
             "dex": 27,
@@ -7937,7 +8256,7 @@
             100
           ],
           "core": {
-            "str": 31,
+            "str": 28,
             "agi": 17,
             "vit": 30,
             "dex": 31,
@@ -14995,8 +15314,8 @@
       }
     },
     "resist_rules": "Each Species authors one resistance line (`mob.species[].resistance`) and one weakness (`mob.species[].weakness`); its attack Element is a separate line. No Element counters another and no profile tilts the Vit line. Every other Element meets no resistance, and a weakness is a damage amplifier, never a resistance line. Bosses and Uniques inherit their Species profile. X54 checks one line each, declared Elements, a non-identical weak Element and the player Cap.",
-    "skills_enabled": false,
-    "skills_note": "Mobs carry NO skills in the current build. What a mob does is its selected Variant damage type (or its Species default), the Element its Species owns, and the trait mechanics named in `mob.species[].mechanics` (X74) — no Species entry carries a skill field, and X55 fails if one appears while skills_enabled is false.",
+    "skills_enabled": true,
+    "skills_note": "Mob skills are an optional kit from `tools/data/mob-skills.json`. Most species carry 0-2; bosses and uniques may carry up to 4. Resolution is override-only: unique > boss > variant > species, never a merge. A strike replaces the mob's next basic swing and deals exactly that swing's damage, so mob PS remains the sole DPS budget. Auras are passive, group-scoped defensive effects (engaged group, or the source's own line) and never add damage or speed. X55 validates the library, kits, refs, cap, element/status coverage and uniqueness.",
     "trait_mechanics": {
       "note": "A species' trait is read as a mechanic, not as a sentence. The set is closed: every key is a rule the client runs, and `mob.species[].mechanics` names which ones a lineage carries. None of them touches mob_HP, mob PS, the drop line or the stone funnel - the published anchors stay as they are. What changes is what a fight reads like: a body that cannot bleed, a body that bursts, or a body that swings faster.",
       "set": [
@@ -15717,7 +16036,7 @@
       "mid": 6,
       "high": 11
     },
-    "offline_cap_hours": 12,
+    "offline_cap_hours": null,
     "taps_per_day": 2,
     "mastery_divisor": 25
   },
@@ -16896,6 +17215,61 @@
         "id": "iron-brackets",
         "name": "Iron Brackets",
         "group": "craft"
+      },
+      {
+        "id": "chitin-plate",
+        "name": "Chitin Plate",
+        "group": "craft"
+      },
+      {
+        "id": "feather-plume",
+        "name": "Feather Plume",
+        "group": "craft"
+      },
+      {
+        "id": "ember-heart",
+        "name": "Ember Heart",
+        "group": "craft"
+      },
+      {
+        "id": "chaos-ichor",
+        "name": "Chaos Ichor",
+        "group": "craft"
+      },
+      {
+        "id": "funerary-linen",
+        "name": "Funerary Linen",
+        "group": "craft"
+      },
+      {
+        "id": "thick-pelt",
+        "name": "Thick Pelt",
+        "group": "craft"
+      },
+      {
+        "id": "reptile-scale",
+        "name": "Reptile Scale",
+        "group": "craft"
+      },
+      {
+        "id": "venom-gland",
+        "name": "Venom Gland",
+        "group": "craft"
+      },
+      {
+        "id": "coin-clasp",
+        "name": "Coin Clasp",
+        "group": "craft"
+      },
+      {
+        "id": "river-pearl",
+        "name": "River Pearl",
+        "group": "craft"
+      },
+      {
+        "id": "grave-bone",
+        "name": "Grave Bone",
+        "group": "craft"
       }
     ],
     "regional_drop_chance": 0.22,
@@ -17494,7 +17868,7 @@
       "food": 0.1
     },
     "gold_uses_slot": false,
-    "offline_cap_hr": 12,
+    "offline_cap_hr": null,
     "overflow": "stop_pickup",
     "note": "One bag = 300 slots. A kept gear piece takes one slot and a consumable stack takes one, and both are counted against the same 300. Stones and junk stack 999/slot and are weightless; herbs, potions, materials and provisions stack 100/slot and weigh 0.1/unit; gold takes no slot. Full = pickups pause: nothing auto-converts and nothing is deleted. Weight capacity is Str x K_STR_WEIGHT over everything carried, so a full bag can cut aspd up to -50% (formula.md section 11). Gear crafting and Stash are Settlement-only; Camp cooking is the field exception. The Stash is one warehouse on the character and every settlement's counter opens the same one, never a second chest per town. Every drop enters the bag by default; only a slot whose filter is armed dissolves a piece, which is what replaced the auto-convert buffer - kept gear fills at the measured upgrade rate (F4), not at the junk flow."
   },
@@ -17674,6 +18048,124 @@
     "gear_mod_note": "One Upgrade step adds this to the piece's Gear Mod, whose school is set by its Base and not rolled (item-base.md). The bound is the published line ceiling: `tools/loot.ts` rolls that same line off `mod_max`, so a full +15 ladder may not pass the smallest of the three school ceilings — `evasion_flat_t1` 30 ÷ `craft.upgrade_cap` 15 = 2. At +15 a light piece therefore reaches its whole T1 Evasion line, a heavy piece three quarters of the Armour 40 line and a cloth piece half of Energy Shield 60. checks.md H1 pays for the uplift against the boss now that measured `mob_HP` is already inside the pacing (it moves nothing there).",
     "corrupt_note": "crafting.md's own Vaal table, copied: 25% nothing · 20% reroll values inside the current Tiers · 15% +1 Mod (crafted max and Core slot cap respected) · 15% remove one non-bound Mod · 10% reroll Element (the only Element change in the game) · 10% Gear Mod +2 · 5% one Item quality step down. One use per piece, and a corrupted piece accepts no further stones of any kind.",
     "upgrade_note": "crafting.md's ladder, copied: +1 to +4 safe · +5 to +10 90% down to 45% and a fail drops one level with its Gear Mod points · +11 to +15 40% down to 10% and a fail breaks the piece · protection 5 per piece from birth, each would-be break spends one and drops a level · Repair stone revives one upgrade level below the pre-break level and refills protection · costs 1/2/3/4/5 then 7/9/11/13/15 then 18/21/24/27/30 Quality stones · online only"
+  },
+  "forge": {
+    "note": "Material-driven gear creation. A pattern names the slot or weapon type; the chosen material's family picks the Base/Frame and its grade sets the item band. The output is rolled with the drop skeleton (line 1 + Bound pair + Unbound lines), then behaves like any other piece. No gold fee; pattern.count is the material cost. Fancier Base variants stay drop-only.",
+    "smithing_level": [
+      1,
+      4,
+      10
+    ],
+    "xp_per_grade": [
+      60,
+      200,
+      500
+    ],
+    "materials": {
+      "ore": { "family": "metal", "grade": 1 },
+      "copper-ore": { "family": "metal", "grade": 1 },
+      "copper-fittings": { "family": "metal", "grade": 1 },
+      "iron-ore": { "family": "metal", "grade": 2 },
+      "iron-bar": { "family": "metal", "grade": 2 },
+      "silver-ore": { "family": "metal", "grade": 3 },
+      "silver-inlay": { "family": "metal", "grade": 3 },
+      "pine-wood": { "family": "wood", "grade": 1 },
+      "timber": { "family": "wood", "grade": 1 },
+      "willow-wood": { "family": "wood", "grade": 1 },
+      "hardwood": { "family": "wood", "grade": 2 },
+      "cedar-wood": { "family": "wood", "grade": 2 },
+      "seasoned-planks": { "family": "wood", "grade": 2 },
+      "rarewood": { "family": "wood", "grade": 3 },
+      "grave-bone": { "family": "organic", "grade": 1 },
+      "thick-pelt": { "family": "organic", "grade": 2 },
+      "feather-plume": { "family": "organic", "grade": 2 },
+      "reptile-scale": { "family": "organic", "grade": 3 },
+      "chitin-plate": { "family": "organic", "grade": 3 },
+      "venom-gland": { "family": "essence", "grade": 2 },
+      "funerary-linen": { "family": "essence", "grade": 2 },
+      "ember-heart": { "family": "essence", "grade": 3 },
+      "chaos-ichor": { "family": "essence", "grade": 3 },
+      "river-pearl": { "family": "essence", "grade": 3 }
+    },
+    "families": {
+      "metal": {
+        "name": "Metal",
+        "bases": {
+          "helmet": "Sallet",
+          "chest": "Plate Vest",
+          "pant": "Cuisses",
+          "boots": "Plated Greaves",
+          "belt": "War Belt",
+          "gloves": "Iron Gauntlets",
+          "ring": "Iron Band",
+          "amulet": "Onyx Talisman",
+          "earring": "Silver Hoop",
+          "cape": "Heavy Mantle",
+          "off hand": "Buckler"
+        }
+      },
+      "organic": {
+        "name": "Hide & Bone",
+        "bases": {
+          "helmet": "Hood",
+          "chest": "Ring Mail",
+          "pant": "Breeches",
+          "boots": "Strapped Boots",
+          "belt": "Chain Clasp",
+          "gloves": "Nimble Mitts",
+          "ring": "Moonstone Signet",
+          "amulet": "Jade Amulet",
+          "earring": "Jade Stud",
+          "cape": "Traveler's Cloak"
+        }
+      },
+      "essence": {
+        "name": "Essence",
+        "bases": {
+          "helmet": "Circlet",
+          "chest": "Vestment",
+          "pant": "Legwraps",
+          "boots": "Silk Slippers",
+          "belt": "Silk Sash",
+          "gloves": "Silk Wraps",
+          "ring": "Moonstone Signet",
+          "amulet": "Onyx Talisman",
+          "earring": "Onyx Drop",
+          "cape": "Silk Drape",
+          "off hand": "Grimoire"
+        }
+      },
+      "wood": {
+        "name": "Wood",
+        "bases": {}
+      }
+    },
+    "armour": {
+      "helmet": { "name": "Helmet", "count": 2 },
+      "chest": { "name": "Chest", "count": 4 },
+      "pant": { "name": "Legs", "count": 3 },
+      "boots": { "name": "Boots", "count": 2 },
+      "belt": { "name": "Belt", "count": 1 },
+      "gloves": { "name": "Gloves", "count": 2 },
+      "ring": { "name": "Ring", "count": 1 },
+      "amulet": { "name": "Amulet", "count": 1 },
+      "earring": { "name": "Earring", "count": 1 },
+      "cape": { "name": "Cape", "count": 2 },
+      "off hand": { "name": "Off hand", "count": 2 }
+    },
+    "weapons": {
+      "one-handed sword": { "name": "One-handed sword", "family": "metal", "frame": "Longsword", "count": 3 },
+      "one-handed axe": { "name": "One-handed axe", "family": "metal", "frame": "Cleaver", "count": 3 },
+      "dagger": { "name": "Dagger", "family": "metal", "frame": "Wraithknife", "count": 2 },
+      "mace": { "name": "Mace", "family": "metal", "frame": "Duskmaul", "count": 3 },
+      "wand": { "name": "Wand", "family": "wood", "frame": "Crystal Wand", "count": 2 },
+      "staff": { "name": "Staff", "family": "wood", "frame": "Runed Staff", "count": 4 },
+      "spear": { "name": "Spear", "family": "metal", "frame": "Gale Spear", "count": 4 },
+      "two-handed sword": { "name": "Two-handed sword", "family": "metal", "frame": "Flamberge", "count": 4 },
+      "two-handed axe": { "name": "Two-handed axe", "family": "metal", "frame": "Halberd", "count": 4 },
+      "bow": { "name": "Bow", "family": "wood", "frame": "Recurve Bow", "count": 3 },
+      "crossbow": { "name": "Crossbow", "family": "metal", "frame": "Runelock Crossbow", "count": 4 }
+    }
   },
   "town_shared": {
     "gold_per_junk_piece": 1,

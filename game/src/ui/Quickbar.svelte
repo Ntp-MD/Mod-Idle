@@ -2,6 +2,7 @@
   import { farm } from '../engine/client';
   import { stackIcon } from '../icon';
   import { setPotionDrag, readPotionDrag } from './drag';
+  import EmptyNote from './EmptyNote.svelte';
 
   /**
    * The item shortcuts above the cast bar: a pouch of carried draughts and seven squares, each holding
@@ -45,11 +46,11 @@
                 title={`${pname} · ${held(pname)} held — drag to a square`}
                 ondragstart={(e) => setPotionDrag(e, pname)}
                 onclick={() => place(pname)}>
-          <img src={stackIcon('draughts', pname)} alt="" aria-hidden="true" />
+          <img class="icon-label" src={stackIcon('draughts', pname)} alt="" aria-hidden="true" />
           <small>{pname} · {held(pname)}</small>
         </button>
       {:else}
-        <p class="pouch-empty">Nothing carried — brew or loot a draught first.</p>
+        <EmptyNote text="Nothing carried — brew or loot a draught first." tone="xs" />
       {/each}
     </div>
   {/if}
@@ -85,6 +86,4 @@
     padding: var(--spacing-xs) var(--spacing-sm);
   }
   .pouch-item { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); cursor: grab; background: none; border: 0; padding: 2px; text-align: left; border-radius: var(--radius-card); }
-  .pouch-item img { width: var(--icon-label); height: var(--icon-label); object-fit: contain; }
-  .pouch-empty { margin: 0; color: var(--dim); font-size: var(--font-xs); }
 </style>

@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { E, eng, TOWN, fieldwork } from '../src/engine/client';
-import { newGame, setLevel, tick } from '../src/sim/game';
+import { catchUp, catchUpAsync, newGame, setLevel, tick } from '../src/sim/game';
+import { exportJson, importJson } from '../src/state/save';
 import { openingGear } from '../src/sim/player';
 import { depositMany } from '../src/sim/town';
-import { road, settlementCell, zoneOf, rankOf } from '../src/sim/road';
+import { road, settlementCell, startWalk, zoneOf, rankOf } from '../src/sim/road';
 import { resolveTravelEvent } from '../src/sim/fieldwork';
 import {
   autoReturnThreshold, driveAutoReturn, finishAutoReturnDeposit, maybeStartAutoReturn,
@@ -100,6 +101,38 @@ describe('regional trail events', () => {
 });
 
 describe('Forward travel', () => {
+  it.each(['sync', 'async'] as const)('keeps Forward at the current hunt during %s catch-up and starts walking on return', async (mode) => {
+    const state = newGame(87);
+    const next = TOWN.settlements.find((entry: any) => entry.zone === 2)!;
+    state.town.visited.push(next.id);
+    state.travel = 'forward';
+    setLevel(state, 11);
+    const cell = structuredClone(state.cell);
+    if (mode === 'sync') catchUp(state, 10);
+    else await catchUpAsync(state, 10);
+    expect(state.walk).toBeNull();
+    expect(state.cell).toEqual(cell);
+    expect(state.zone).toBe(1);
+
+    const restored = importJson(exportJson(state));
+    tick(restored, { online: true, autoSkills: false });
+    expect(restored.walk?.node).toBe(next.id);
+  });
+
+  it.each(['sync', 'async'] as const)('preserves an in-flight block timer through %s catch-up and reload', async (mode) => {
+    const state = newGame(88);
+    const next = TOWN.settlements.find((entry: any) => entry.zone === 2)!;
+    expect(startWalk(state, settlementCell(next.id)!).ok).toBe(true);
+    const walk = structuredClone(state.walk);
+    if (mode === 'sync') catchUp(state, 10);
+    else await catchUpAsync(state, 10);
+    expect(state.walk).toEqual(walk);
+    const restored = importJson(exportJson(state));
+    expect(restored.walk).toEqual(walk);
+    tick(restored, { online: true, autoSkills: false });
+    expect(restored.walk?.blocksWalked).toBe(1);
+  });
+
   it('walks to the next opened settlement instead of moving the character instantly', () => {
     const state = newGame(87);
     const next = TOWN.settlements.find((entry: any) => entry.zone === 2)!;

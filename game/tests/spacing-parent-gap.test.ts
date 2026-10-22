@@ -40,7 +40,10 @@ describe('UI spacing ownership', () => {
       const clean = css.replace(/\/\*[\s\S]*?\*\//g, '');
       return Array.from(clean.matchAll(/(?:^|[;{])\s*margin(?:-(?:top|right|bottom|left|inline|block)(?:-(?:start|end))?)?\s*:\s*([^;}]+)/gim))
         .map((match) => ({ file, line: clean.slice(0, match.index).split('\n').length, value: match[1].trim().replace(/\s*!important$/i, '') }))
-        .filter(({ value }) => !value.split(/\s+/).every((token) => /^0(?:px|rem|em|%)?$/i.test(token)));
+        // `auto` is alignment, not spacing: it pushes a flex child to the free space (the panel head's
+        // close button, a help block pinned to the bottom) and has no parent-gap equivalent, so it is
+        // not what this rule owns.
+        .filter(({ value }) => !value.split(/\s+/).every((token) => /^0(?:px|rem|em|%)?$/i.test(token) || /^auto$/i.test(token)));
     });
 
     expect(findings).toEqual([]);

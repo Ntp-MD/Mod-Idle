@@ -18,8 +18,16 @@ export const STONE_MODES: Record<string, StoneMode[]> = {
   rebirth: [{ op: 'rebirth', target: 'piece' }],
 };
 
-export const modesForStone = (key: string): StoneMode[] => key.startsWith('imprint_')
-  ? [{ op: 'imprint', target: 'line' }] : STONE_MODES[key] || [];
+/** The whole-piece/rare presses are one click away, never the first thing a new player meets. */
+export const ADVANCED_OPS = new Set<CraftOp>(['reroll_mod_all', 'replace_all', 'ascend', 'imprint', 'polish', 'reforge', 'rebirth', 'corrupt']);
+export const ADVANCED_STONES = new Set(['corrupt', 'polish', 'reforge', 'rebirth']);
+export const isAdvancedStone = (key: string): boolean => key.startsWith('imprint_') || ADVANCED_STONES.has(key);
+
+export const modesForStone = (key: string, advanced = false): StoneMode[] => {
+  const modes = key.startsWith('imprint_')
+    ? [{ op: 'imprint', target: 'line' } as StoneMode] : STONE_MODES[key] || [];
+  return advanced ? modes : modes.filter((mode) => !ADVANCED_OPS.has(mode.op));
+};
 
 export function stoneUseReason(
   game: GameState, item: Item | null, where: Where | null, index: number,

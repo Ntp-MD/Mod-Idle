@@ -129,7 +129,7 @@ export function adventureView(state: GameState, cells: AdventureCell[]): Adventu
     const isTracks = encounter.kind === 'herd' || encounter.kind === 'sounds' && encounter.stage === 'warning';
     const mark = isTracks ? `<g transform="translate(14 12) scale(.6)">${tracks}</g>`
       : encounter.kind === 'traveler' ? `<g transform="translate(12 8) scale(.65)">${cart}</g>`
-        : encounter.kind === 'injured' ? mapSprite('/map/characters/human.png', 5, -6, 13, 18)
+        : encounter.kind === 'injured' ? mapSprite('/map/characters/species/human/human.png', 5, -6, 13, 18)
           : creature && encounter.stage !== 'combat' ? mapSprite(creature, 5, -8, 17, 20)
             : '<path class="map-threat-pennant" d="M23 8V-3l7 3-7 3"/>';
     placements.push({ ax: hexKey(encounter.origin), cls: `map-camp-encounter is-${encounter.stage}`,

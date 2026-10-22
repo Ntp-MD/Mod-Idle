@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { E, sm } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { buildCharacter, emptyGear } from '../src/sim/player';
-import { castOnce, newSkillState, condOf, NO_COND } from '../src/sim/skills';
-import { newMobStatusStore, setStacks } from '../src/sim/mobStatus';
+import { castOnce, newSkillState, condOf, NO_COND, appliedStatusOf } from '../src/sim/skills';
+import { newMobStatusStore, setStacks, placeStatus, stepMob } from '../src/sim/mobStatus';
 import { newCurses, applyCurse } from '../src/sim/curse';
 import type { Mob } from '../src/sim/types';
 import { mobFixture } from './mobFixture';
@@ -14,8 +14,9 @@ import { mobFixture } from './mobFixture';
  * A slotted skill fires when its cooldown is ready and its mana fits — that is `always`, and it stays
  * the default so nothing a player already owns changes behaviour. `never` silences a row, and
  * `conditional` gates it on the list that row carries: `boss`, `hpBelowPct`, `statusMissing`,
- * `minTargets` and `manaFloorPct`. The list is per row, so one rotation can hold a burst row for a boss
- * and a finisher for low pool at the same time; the legs are the five named ones, never free text.
+ * `minTargets`, `manaFloorPct`, `statusPresent`, `statusStacksAtLeast` and `selfDebuffed`. The list is
+ * per row, so one rotation can hold a burst row for a boss and a finisher for low pool at the same time;
+ * the legs are the named ones, never free text.
  */
 
   const mob = (kind = 'Medium', id = 'm1'): Mob => mobFixture({ id, kind, level: 90, ps: 600, acc: 900 });
@@ -41,12 +42,13 @@ function casts(
   kind = 'Medium',
   env: any = {},
   groupSize = 1,
+  statuses: any = {},
 ) {
   // this file gates the MODE, not the cooldown: every call starts ready, or a successful cast in an
   // earlier leg would silence the next one and the assertion would pass for the wrong reason
   s.cd = {};
   const group = Array.from({ length: groupSize }, (_, i) => mob(kind, `m${i + 1}`));
-  const cast = castOnce(s, c, c.maxMana, group, {}, mulberry32(7), env);
+  const cast = castOnce(s, c, c.maxMana, group, statuses, mulberry32(7), env);
   return cast ? cast.id : null;
 }
 
@@ -173,5 +175,107 @@ describe('a slot picks when it may fire', () => {
     // the curse is up now: the row holds instead of re-pressing the same line every cooldown
     applyCurse(curses, 'm1', sm.byId[WEAKEN]);
     expect(casts(s, c, 'Medium', { curses })).toBeNull();
+  });
+
+  it('a payoff row is not offered a maintenance leg just because it carries an Element', () => {
+    expect(appliedStatusOf(sm.byId['attack.detonate'])).toBeNull();
+    expect(appliedStatusOf(sm.byId['attack.shatter'])).toBeNull();
+    expect(appliedStatusOf(sm.byId['attack.fireball'])).toBe('burn');
+  });
+
+  it('a payoff row waits for the status it exploits, at any stack or a named floor', () => {
+    const DETONATE = 'attack.detonate';
+    const s = newSkillState();
+    s.list[0] = DETONATE; s.owned[DETONATE] ??= 0;
+    s.xp[DETONATE] = 8000;
+    s.mode[DETONATE] = 'conditional';
+    s.conditions[DETONATE] = cond({ statusPresent: true });
+    expect(casts(s, c, 'Medium', { mobStatus: newMobStatusStore() })).toBeNull();
+    const anyBurn = newMobStatusStore();
+    setStacks(anyBurn, 'm1', 'burn', 1, 10);
+    expect(casts(s, c, 'Medium', { mobStatus: anyBurn })).toBe(DETONATE);
+    // the same leg with a number: one stack is not enough, three are
+    s.conditions[DETONATE] = cond({ statusPresent: true, statusStacksAtLeast: 3 });
+    expect(casts(s, c, 'Medium', { mobStatus: anyBurn })).toBeNull();
+    const threeBurn = newMobStatusStore();
+    setStacks(threeBurn, 'm1', 'burn', 3, 10);
+    expect(casts(s, c, 'Medium', { mobStatus: threeBurn })).toBe(DETONATE);
+  });
+
+  it('a cleanse row waits until the character itself carries a status', () => {
+    const s = armed('conditional', { selfDebuffed: true });
+    expect(casts(s, c, 'Medium', {}, 1, {})).toBeNull();
+    expect(casts(s, c, 'Medium', {}, 1, { poison: { stacks: 2, secLeft: 8, perSec: 1 } })).toBe(ATTACK);
+  });
+
+  it('a payoff press spends the stacks and a spread row copies them before spending', () => {
+    const DETONATE = 'attack.detonate';
+    const s = newSkillState();
+    s.list[0] = DETONATE; s.owned[DETONATE] ??= 0;
+    s.xp[DETONATE] = 8000;
+    const store = newMobStatusStore();
+    setStacks(store, 'm1', 'burn', 4, 10);
+    const cast = castOnce(s, c, c.maxMana, [mob()], {}, mulberry32(7), { mobStatus: store });
+    expect(cast?.consumed).toEqual([{ status: 'burn', stacks: 4 }]);
+    expect(store.m1.statuses.burn).toBeUndefined();
+
+    const CATALYST = 'attack.catalyst';
+    const spreadState = newSkillState();
+    spreadState.list[0] = CATALYST; spreadState.owned[CATALYST] ??= 0;
+    spreadState.xp[CATALYST] = 8000;
+    const spreadStore = newMobStatusStore();
+    setStacks(spreadStore, 'm1', 'poison', 3, 10);
+    const spread = castOnce(spreadState, c, c.maxMana, [mob('Medium', 'm1'), mob('Medium', 'm2'), mob('Medium', 'm3')], {}, mulberry32(7), { mobStatus: spreadStore });
+    expect(spread?.consumed).toEqual([{ status: 'poison', stacks: 3 }]);
+    expect(spreadStore.m2.statuses.poison?.stacks).toBe(3);
+    expect(spreadStore.m3.statuses.poison?.stacks).toBe(3);
+  });
+
+  it('a bonus-vs-status row hits a chilled target harder than a clear one', () => {
+    const SHATTER = 'attack.shatter';
+    const c2 = { ...c, weaponName: 'staff' };
+    const plain = newSkillState();
+    plain.list[0] = SHATTER; plain.owned[SHATTER] ??= 0; plain.xp[SHATTER] = 8000;
+    const plainCast = castOnce(plain, c2, c2.maxMana, [mob()], {}, mulberry32(7), { mobStatus: newMobStatusStore() });
+    const chilledStore = newMobStatusStore();
+    placeStatus(chilledStore, 'm1', 'chill', c2, 10);
+    const chilled = newSkillState();
+    chilled.list[0] = SHATTER; chilled.owned[SHATTER] ??= 0; chilled.xp[SHATTER] = 8000;
+    const chilledCast = castOnce(chilled, c2, c2.maxMana, [mob()], {}, mulberry32(7), { mobStatus: chilledStore });
+    expect(chilledCast!.byMob[0].amount).toBeGreaterThan(plainCast!.byMob[0].amount);
+  });
+
+  it('shock survives one world tick, so Overload can read the setup press', () => {
+    const c2 = { ...c, weaponName: 'staff' };
+    const store = newMobStatusStore();
+    const setup = newSkillState();
+    setup.list[0] = 'attack.chain_lightning'; setup.owned['attack.chain_lightning'] ??= 0; setup.xp['attack.chain_lightning'] = 8000;
+    castOnce(setup, c2, c2.maxMana, [mob()], {}, mulberry32(7), { mobStatus: store });
+    expect(store.m1.statuses.shock?.secLeft).toBeGreaterThan(1);
+    stepMob(store, 'm1');
+    const OVERLOAD = 'attack.overload';
+    const payoff = newSkillState();
+    payoff.list[0] = OVERLOAD; payoff.owned[OVERLOAD] ??= 0; payoff.xp[OVERLOAD] = 8000;
+    payoff.mode[OVERLOAD] = 'conditional';
+    payoff.conditions[OVERLOAD] = cond({ statusPresent: true });
+    const cast = castOnce(payoff, c2, c2.maxMana, [mob()], {}, mulberry32(7), { mobStatus: store });
+    expect(cast?.id).toBe(OVERLOAD);
+  });
+
+  it('Earth Shock writes the crippled status Aftershock reads', () => {
+    const c2 = { ...c, weaponName: 'staff' };
+    const store = newMobStatusStore();
+    const shock = newSkillState();
+    shock.list[0] = 'attack.earth_shock'; shock.owned['attack.earth_shock'] ??= 0; shock.xp['attack.earth_shock'] = 8000;
+    castOnce(shock, c2, c2.maxMana, [mob()], {}, mulberry32(7), { mobStatus: store });
+    expect(store.m1.statuses.crippled?.secLeft).toBeGreaterThan(0);
+    const AFTERSHOCK = 'attack.aftershock';
+    const plain = newSkillState();
+    plain.list[0] = AFTERSHOCK; plain.owned[AFTERSHOCK] ??= 0; plain.xp[AFTERSHOCK] = 8000;
+    const plainCast = castOnce(plain, c2, c2.maxMana, [mob()], {}, mulberry32(7), { mobStatus: newMobStatusStore() });
+    const payoff = newSkillState();
+    payoff.list[0] = AFTERSHOCK; payoff.owned[AFTERSHOCK] ??= 0; payoff.xp[AFTERSHOCK] = 8000;
+    const payoffCast = castOnce(payoff, c2, c2.maxMana, [mob()], {}, mulberry32(7), { mobStatus: store });
+    expect(payoffCast!.byMob[0].amount).toBeGreaterThan(plainCast!.byMob[0].amount);
   });
 });

@@ -1,4 +1,4 @@
-import { farm, fieldwork, tree } from '../engine/client';
+import { farm, fieldwork, tree, TOWN } from '../engine/client';
 import { bundleOf, surgeonStream } from '../../../engine/keystones.ts';
 import type { GameState } from './types';
 import type { Character } from './player';
@@ -50,8 +50,11 @@ export function newFarm(): FarmState {
 
 /** Plots come from the Steward's deed lines, and the track is capped at 5 (`farm.plots`). */
 export function plotCount(state: GameState): number {
-  const deeds = (state.town?.owned || []).filter((id: string) => id === 'plot_deed_4' || id === 'plot_deed_5').length;
-  return Math.min(farm.plotsMax, farm.F.plots.base + deeds);
+  const owned = state.town?.owned || [];
+  const deeds = owned.filter((id: string) => id === 'plot_deed_4' || id === 'plot_deed_5').length;
+  const granted = owned.reduce((total: number, id: string) =>
+    total + Number((TOWN.one_time as any[]).find((row: any) => row.id === id)?.plot_grant || 0), 0);
+  return Math.min(farm.plotsMax, farm.F.plots.base + deeds + granted);
 }
 
 /**

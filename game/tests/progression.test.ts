@@ -1,13 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { E, BASES, SKILLS, MODS, TREE_SPEC, eng, tree } from '../src/engine/client';
 import { createTree } from '../../engine/tree';
-import { newGame } from '../src/sim/game';
+import { newGame, setLevel, tick } from '../src/sim/game';
+import { exportJson, importJson } from '../src/state/save';
 import { mastery, masteryLevel, dropMultiplier, weaponSkillBonusPct } from '../src/sim/mastery';
 import { canSpendTree, spendTreePoint, respecTree, treePointsSpent, treeLines, treePath, allocateTreePath } from '../src/sim/tree';
 import { keystoneBuildContext } from '../src/sim/keystone-runtime';
 import { newGoal, target, onSpawn, onKill, watch } from '../src/sim/goal';
 import type { GameState, Mob } from '../src/sim/types';
-import { respecStats } from '../src/sim/respec';
+import { allocateStats, respecStats } from '../src/sim/respec';
 import { buildCharacter, openingGear } from '../src/sim/player';
 import { mobFixture } from './mobFixture';
 
@@ -214,6 +215,46 @@ describe('the passive tree', () => {
 });
 
 describe('settlement respec', () => {
+  it.each(['field', 'camp', 'walking', 'missing-cell'])('refuses individual point refunds in %s', (place) => {
+    const s = newGame();
+    s.player.autoSpend = false;
+    setLevel(s, 10);
+    respecStats(s);
+    expect(allocateStats(s, 'str', 5).ok).toBe(true);
+    if (place === 'field') s.cell = { ...s.cell!, q: s.cell!.q + 1 };
+    if (place === 'camp') s.phase = 'camp';
+    if (place === 'walking') s.walk = {} as GameState['walk'];
+    if (place === 'missing-cell') s.cell = null;
+    const before = structuredClone(s.player);
+    expect(allocateStats(s, 'str', -5).ok).toBe(false);
+    expect(s.player).toEqual(before);
+  });
+
+  it('allows field spending and town refunds without changing the total point budget', () => {
+    const s = newGame();
+    s.player.autoSpend = false;
+    setLevel(s, 10);
+    respecStats(s);
+    const bank = s.player.statPoints;
+    const town = s.cell;
+    s.cell = { ...s.cell!, q: s.cell!.q + 1 };
+    expect(allocateStats(s, 'str', 5).ok).toBe(true);
+    expect(s.player.statPoints).toBe(bank - 5);
+    s.cell = town;
+    expect(allocateStats(s, 'str', -5).ok).toBe(true);
+    expect(s.player.statPoints).toBe(bank);
+    expect(s.player.points.str).toBe(0);
+    expect(allocateStats(s, 'str', -1).ok).toBe(false);
+  });
+
+  it('refuses read-only and invalid manual allocations without mutation', () => {
+    const s = newGame();
+    const before = structuredClone(s.player);
+    for (const delta of [NaN, Infinity, 0.5, 0]) expect(allocateStats(s, 'str', delta).ok).toBe(false);
+    expect(allocateStats(s, 'str', 1, { writer: false }).ok).toBe(false);
+    expect(s.player).toEqual(before);
+  });
+
   it.each(['field', 'camp', 'walking', 'missing-cell'])('refuses both refunds in %s without changing points', (place) => {
     const s = newGame();
     s.player.points.str = 5;
@@ -257,6 +298,34 @@ describe('resistance ceiling', () => {
 });
 
 describe('the win gate', () => {
+  it('records the real final boss once through combat, a mid-fight reload and a completed reload', () => {
+    const s = newGame(171);
+    setLevel(s, E.stat.level_cap);
+    s.zone = target().zone;
+    s.hunting = true;
+    s.bossDueAt = s.clockSec + 1;
+    tick(s, { online: true });
+    const boss = s.group.find((m) => m.kind.startsWith('Boss'))!;
+    expect(boss).toBeDefined();
+    expect(s.goal.spawnId).toBe(boss.id);
+    expect(s.goal.attempts).toBe(1);
+    // A near-defeated, non-attacking boss isolates completion from build balance.
+    boss.hp = 1; boss.ps = 0; boss.evasion = 0; boss.dodgeRate = 0;
+    s.player.atkTimer = 1;
+    const restored = importJson(exportJson(s));
+    const kills = restored.counters.kills;
+    tick(restored, { online: true, autoSkills: false });
+    expect(restored.counters.kills).toBe(kills + 1);
+    expect(restored.goal.done).toMatchObject({ level: restored.player.level, hp: boss.hpMax });
+    expect(restored.goal.spawnId).toBeNull();
+    const completed = importJson(exportJson(restored));
+    expect(completed.goal).toEqual(restored.goal);
+    completed.hunting = false;
+    tick(completed, { online: true });
+    expect(completed.counters.kills).toBe(kills + 1);
+    expect(completed.goal).toEqual(restored.goal);
+  });
+
     const bossOf = (zone: number, id = 'b1'): Mob => mobFixture({
       id, species: 'Slime', kind: 'Boss', zone, hp: 1e6, hpMax: 1e6, ps: 100, acc: 100, innate: [],
     });

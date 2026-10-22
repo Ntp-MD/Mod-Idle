@@ -224,7 +224,7 @@ export function paintSheet(root: HTMLElement, opts: PaintOpts) {
     if (you.parentNode !== actors) actors.append(you);
     const own = actors.querySelector<SVGGElement>(`[data-actor-ax="${feet.q},${feet.r}"]`);
     if (own && own.parentNode === actors && own.nextElementSibling !== you) actors.insertBefore(you, own.nextElementSibling);
-    paintFigureArt(you, mapSprite('/map/characters/traveler-piece.png', -24, -28, 21, 32, 'mark'));
+    paintFigureArt(you, mapSprite('/map/characters/player/traveler-piece.png', -24, -28, 21, 32, 'mark'));
     const position = `${feet.q},${feet.r}`;
     const previous = you.getAttribute('data-position');
     if (previous && previous !== position) {

@@ -1,5 +1,5 @@
 /**
- * Combat events inside the one-second world tick — `docs/passive-tree-keystones-draft.md` §7.1.
+ * Combat events inside the one-second world tick.
  *
  * The world still advances in fixed seconds; what this module adds is a monotone, absolute integer
  * microsecond clock for the events inside that second, so a half-second ICD, a two-second deferred

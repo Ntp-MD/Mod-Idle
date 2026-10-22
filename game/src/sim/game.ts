@@ -1,7 +1,7 @@
 import { eng, E, sm, loot, TOWN, tree, dungeon as DG } from '../engine/client';
 import { buildCharacter, emptyGear, SLOT_COUNT } from './player';
 import { itemName } from './item-name';
-import { playerSwing, mobSwing, rollStatus, poisonBurst, dotDamageParts, decayStatusStack, type Statuses, type StatusName } from './combat';
+import { playerSwing, mobSwing, rollStatus, applyStatus, poisonBurst, dotDamageParts, decayStatusStack, type Statuses, type StatusName } from './combat';
 import { CombatClock, EVENT_PRIORITY, planAttacks } from './combat-clock';
 import { rollDrop } from './drop';
 import { abandonRun, payoutStacks } from './dungeon';
@@ -9,12 +9,14 @@ import { selectDungeonRescue, type DungeonRescueEntry } from '../../../engine/du
 import { newAlchemyLedger } from '../../../engine/alchemy.ts';
 import { canDissolve, dissolve } from './salvage';
 import { depositMany, newTown, progressTasks, stashTabCount, tickTown, taskReward } from './town';
+import { advanceEconomy, newEconomyState } from './economy';
 import { deliveryPauseReason, tickDeliveries } from './delivery';
 import { tickBlackMarket } from './black-market';
 import { STAT_KEYS, type StatKey } from '../engine/client';
 import { chooseJunkItem, leanReweightMany } from '../../../engine/loot.ts';
 import { newFarm, rollHerbs, rollPotion, maybeDrink, maybeFarm, farm, QUICKBAR_SLOTS } from './farm';
 import { newFieldwork, tickFieldwork, tickHunger, resolveTravelEvent, recordHuntKill, withMeal, withHunger, pushToFieldCamp, finishPushAtCamp, lifeSkillBonuses } from './fieldwork';
+import { buildPushReport, pushReportLines } from './push-report';
 import { road, walkZonesHex, arrive, ownerOf, zoneOf, startWalk, currentCell as currentCellForJournal } from './road';
 import { normalizeMapJournal, recordMapDiscovery } from './map-exploration';
 import {
@@ -25,9 +27,10 @@ import { weaponByName, masteryLevel, payMastery, dropMultiplier } from './master
 import { newPresets, switchPreset, autoSelect } from './presets';
 import { newCollector, newGrants, wants, col } from './collector';
 import { newFilter, ruleFor, coveredElements, refresh as refreshFilter } from './filter';
-import { addTo, slotsFree } from './slots';
+import { addTo, fits, slotsFree } from './slots';
 import { settlementOfZone, settlementById } from './town';
 import { effectsActive, esAbsorbPct } from './skills';
+import { applyMobAuras, markMobSkillUsed, planMobSkills, resolveMobKit } from './mobSkills';
 import { mark as markSnapshot } from './snapshot';
 import { newGoal, onSpawn as goalSpawn, onKill as goalKill, watch as goalWatch } from './goal';
 import { newCurses, modsOn, applyCurse, tickCurses, combineMods, lineValue, modsFromAuraFold, spreadOnDeath } from './curse';
@@ -79,6 +82,12 @@ export function carried(s: GameState) {
   // the kept pieces ride on the back: each weighs what its Base says, against the same capacity
   const bagWeight = s.bag.reduce((t, g) => t + (g?.weight || 0), 0);
   return { potions: bottles, condensed, herbs, materials, food, bagWeight };
+}
+
+/** The current character used by the HUD and live combat, including active skill effects. */
+export function characterSheet(s: GameState, effects = effectsActive(s.skills, tree.keystoneBundles(s.player.treeRanks))) {
+  return withHunger(withMeal(buildCharacter(s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)),
+    effects, s.player.points, s.player.treeRanks, lifeSkillBonuses(s)), s), s);
 }
 
 /** A fresh character has spent no points: the sheet starts empty and grants on level-up. */
@@ -200,6 +209,7 @@ export function newGame(seed = 20260101): GameState {
     fx: [],
     fxSeq: 0,
     clockSec: 0,
+    economy: newEconomyState(0),
     lastSavedAt: Date.now(),
   };
   // minute one's instruction is the data's own first task (`engine.json` opening.first_rule`): an
@@ -253,6 +263,35 @@ const uniquesInSpecies = (speciesId: string): any[] => {
 function variantDrop(mob: any): { item: string; rarity: string; lean: 'gear' | 'herb' | 'junk' | 'none' } | null {
   if (!mob || !mob.variant) return null;
   return (((E.mob as any).variant_drops || {})[mob.variant]) || null;
+}
+
+/** The Species' one thematic material, rolled on its own seeded stream so the shared loot RNG
+ *  keeps the exact sequence it had before this drop existed. */
+export function rollBonusMaterial(s: GameState, mob: Mob): { resource: string; amount: number } | null {
+  const species = (E.mob.species as any[]).find((sp) => sp.id === mob.speciesId);
+  const bonus = species?.bonus_material;
+  if (!bonus) return null;
+  const stream = mulberry32((s.seed ^ Math.imul(s.counters.kills, 0x9e3779b9)) >>> 0);
+  if (!(stream() < bonus.chance)) return null;
+  return { resource: String(bonus.resource), amount: intBetween(stream, bonus.min, bonus.max) };
+}
+
+/** Pays the rolled material through the ordinary pickup rule: field kills fill the carried stack,
+ *  dungeon kills ride the escrow. A full bag refuses the grant rather than announcing it. */
+export function grantBonusMaterial(s: GameState, mob: Mob, online = true): { resource: string; amount: number; granted: number } | null {
+  const drop = rollBonusMaterial(s, mob);
+  if (!drop) return null;
+  const label = (E.fieldwork.materials as any[]).find((m) => m.id === drop.resource)?.name || drop.resource;
+  if (s.dungeon) {
+    if (!fits(s, s.fieldwork.materials, drop.resource, 'material', drop.amount)) return { ...drop, granted: 0 };
+    const escrow = s.dungeon.escrow.materials;
+    escrow[drop.resource] = (escrow[drop.resource] || 0) + drop.amount;
+    if (online) push(s, `Material · ${label} ×${drop.amount}`);
+    return { ...drop, granted: drop.amount };
+  }
+  const granted = addTo(s, s.fieldwork.materials, drop.resource, 'material', drop.amount);
+  if (granted > 0 && online) push(s, `Material · ${label} ×${granted}`);
+  return { ...drop, granted };
 }
 
 /**
@@ -382,6 +421,8 @@ export function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'el
     hitsPerSec: mobClock(rank, base.clock_mult),
     atkTimer: 0,
     engageSec: 0,
+    skillIds: resolveMobKit(rank, species.id, variantName, fixedName),
+    skillReadyAtUs: {},
   };
 }
 
@@ -784,6 +825,7 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
   }
   const fieldDrop = recordHuntKill(s, mob.speciesId || '', rng);
   if (fieldDrop) push(s, `Hunting · ${fieldDrop}`);
+  grantBonusMaterial(s, mob, online);
   // the run ends on its last mob: the escrow pays out and the dungeon cools down
   if (s.dungeon) {
     s.dungeon.left--;
@@ -810,7 +852,7 @@ function completeDungeonRun(s: GameState): void {
     gear++;
   }
   s.dungeonClearedAt = s.clockSec;
-  push(s, `Dungeon cleared — ${run.total} mobs · escrow paid: ${gear} gear, ${paid.junk} junk, ${paid.stones} stones, ${paid.herbs} herbs, ${paid.potions} potions · cooling down ${E.dungeon.cooldown_sec}s`);
+  push(s, `Dungeon cleared — ${run.total} mobs · escrow paid: ${gear} gear, ${paid.junk} junk, ${paid.stones} stones, ${paid.herbs} herbs, ${paid.potions} potions, ${paid.materials} materials · cooling down ${E.dungeon.cooldown_sec}s`);
 }
 
 /** Retreat selects saved loot once, then uses the same pickup/filter rules as a clear. */
@@ -839,7 +881,7 @@ export function retreatDungeon(s: GameState, access: { writer: boolean } = { wri
   s.spawnIn = 0;
   s.hunting = false;
   s.dungeonClearedAt = s.clockSec;
-  let received = 0, total = 0;
+  let received = 0, receivedMaterials = 0, total = 0;
   for (const entry of selected) {
     total += entry.count;
     if (entry.bucket === 'items') {
@@ -850,11 +892,12 @@ export function retreatDungeon(s: GameState, access: { writer: boolean } = { wri
       const bucket = entry.bucket === 'junk' ? s.junk : entry.bucket === 'stones' ? s.counters.stones : entry.bucket === 'herbs' ? s.farm.herbs : entry.bucket === 'materials' ? s.fieldwork.materials : s.farm.potions;
       const got = addTo(s, bucket, entry.key, entry.bucket === 'junk' || entry.bucket === 'stones' ? 'stone' : entry.bucket === 'herbs' ? 'herb' : entry.bucket === 'materials' ? 'material' : 'potion', entry.count);
       if (entry.bucket === 'junk') s.counters.junk += got;
+      if (entry.bucket === 'materials') receivedMaterials += got;
       received += got;
     }
   }
   const rejected = total - received;
-  push(s, `Dungeon Retreat — selected ${selected.length} stacks (${total} units), received ${received}, capacity-rejected ${rejected}; the rest forfeited · cooling down ${E.dungeon.cooldown_sec}s`);
+  push(s, `Dungeon Retreat — selected ${selected.length} stacks (${total} units), received ${received}, ${receivedMaterials} materials, capacity-rejected ${rejected}; the rest forfeited · cooling down ${E.dungeon.cooldown_sec}s`);
   return { ok: true, selected: total, received, rejected };
 }
 
@@ -1033,6 +1076,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
   const timeUs: number | null = unitsPerSec === undefined ? null : tickStartUs;
   s.online = online;
   s.clockSec++;
+  advanceEconomy(s);
   s.counters.playSec++;
   const foodNote = tickHunger(s, online);
   if (foodNote) push(s, foodNote);
@@ -1042,7 +1086,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
   // pool is read against already includes them; manual players bank and spend by hand.
   if (s.player.autoSpend && s.player.statPoints > 0) spendReference(s);
   const effects = effectsActive(s.skills, tree.keystoneBundles(s.player.treeRanks));
-  const c = withHunger(withMeal(buildCharacter(s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)), effects, s.player.points, s.player.treeRanks, lifeSkillBonuses(s)), s), s);
+  const c = characterSheet(s, effects);
   const debt52 = bundleOf(c.keystones, 'mana-debt');
   // Packet H upkeep: 04 Rage's idle reset and per-second HP drain, 11 Fortify's idle reset, 16 Bark's
   // charge accumulation. All three read the absolute µs clock, never a mutable tick count.
@@ -1119,7 +1163,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
   // Forward Mode follows the opened chapter ladder on foot. A newly discovered settlement still
   // needs the player's first walk; known chapters become an online walk when the current band is behind.
   // A Push returns to the last zone held and blocks re-entry until a level is gained against it.
-  if (s.travel === 'forward' && !s.dungeon && !s.walk && !s.patrol.active && s.autoReturn.phase === 'idle') {
+  if (online && s.travel === 'forward' && !s.dungeon && !s.walk && !s.patrol.active && s.autoReturn.phase === 'idle') {
     const here = eng.zoneById(s.zone);
     if (s.player.level > here.levels[1]) {
       const next = eng.ZONES.find((z: any) => z.id > here.id
@@ -1162,10 +1206,10 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
   // While walking, the character crosses one block per `block_sec`. No ambient zone group appears:
   // a walk is its own minute-to-minute activity — and it is ONLINE only, so an away period never
   // crosses a block and never opens a Waypoint it did not earn online.
-  if (s.walk) {
+  if (online && s.walk) {
     const walk = s.walk;
     walk.secLeft--;
-    if (online && walk.secLeft <= 0 && !s.group.length) {
+    if (walk.secLeft <= 0 && !s.group.length) {
       // the block is crossed: one encounter chance, then the next block starts
       walk.blocksLeft--;
       walk.blocksWalked++;
@@ -1248,6 +1292,9 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
 
   // field rule 1: at most 3 mobs engage at once; the queue behind them waits
   const engaging = s.group.slice(0, 3);
+  // Auras are read from the living engaged bodies before either side's events are scheduled, so the
+  // player's damage and the mob clock in this tick answer the same effective modifiers.
+  applyMobAuras(s.group, engaging);
   const front = s.group[0];
 
   /** Everything one mob carries: curse lines (conditional ones only while their status holds),
@@ -1359,6 +1406,8 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
       });
     }
     if (cast.name) fx(s, { kind: 'cast', side: 'self', skillId: cast.id, text: cast.name, colour: hitColour(castElement) });
+    if (cast.consumed?.length) push(s, `${cast.name} consumes ${cast.consumed.map((c) => `${c.stacks} ${c.status}`).join(', ')}`);
+    if (cast.spread?.length) push(s, `${cast.name} spreads ${cast.spread.map((c) => c.status).join(', ')}`);
     if (cast.damage && !cast.targets) push(s, `${cast.name} was dodged`);
     credit(s, 'cast', cast.dealt || 0);
     if (cast.curseOn) {
@@ -1686,10 +1735,22 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
   for (const mob of engaging) {
     if (mob.hp <= 0 || !s.group.includes(mob)) continue;
     const tm = mobMods(mob.id);
-    const rate = mob.hitsPerSec * Math.max(0, 1 + tm.attackSpeed / 100) * Math.max(0, 1 - (tm.clockPct || 0) / 100);
+    const rate = mob.hitsPerSec * (mob.auraSpeedMult ?? 1) * Math.max(0, 1 + tm.attackSpeed / 100) * Math.max(0, 1 - (tm.clockPct || 0) / 100);
     const plan = planAttacks(tickStartUs, mob.atkTimer, rate, units);
     mob.atkTimer = plan.progressAtEnd;
+    const skillPlan = planMobSkills(mob, plan.times, units);
     for (const atUs of plan.times) {
+      const plannedSkill = skillPlan.get(atUs);
+      if (plannedSkill) {
+        // The cast beat is placed before the action, clamped to this window; the swing itself still
+        // lands on the planned action time, so the telegraph never changes the DPS clock.
+        const castAt = Math.max(tickStartUs, atUs - Math.max(0, plannedSkill.cast_sec || 0) * units);
+        clock.schedule(castAt, EVENT_PRIORITY.mobAction, mob.id, 'player', () => {
+          if (mob.hp <= 0 || !s.group.includes(mob)) return;
+          fx(s, { kind: 'cast', side: 'field', mobId: mob.id, text: plannedSkill.name, colour: hitColour(plannedSkill.element) });
+          if (online) push(s, `${mob.species} begins ${plannedSkill.name}`);
+        });
+      }
       clock.schedule(atUs, EVENT_PRIORITY.mobAction, mob.id, 'player', () => {
         if (mob.hp <= 0 || !s.group.includes(mob)) return;
         let hurt = false;
@@ -1707,7 +1768,12 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
           damageTaken: (c.damageTaken ?? 1)
             * (berserk ? Number(berserk.params.takenMult) : 1) * duel.takenMult,
         };
+        const mobSkill = plannedSkill;
         const r = mobSwing(rng, takenChar, mob, statuses, tm, s.player.es, absorbPct, (s.player.blockCharges || 0) > 0, s.player.hp);
+        if (mobSkill) {
+          markMobSkillUsed(mob, mobSkill, atUs, units);
+          if (online) push(s, `${mob.species} uses ${mobSkill.name}`);
+        }
         // an Earth Wall charge answered the swing: it is spent whether the shield rolled or not
         if (r.blockChargeSpent) s.player.blockCharges!--;
         // `10` Painforged: what a Block actually took off this Hit is banked, up to its share of Max HP,
@@ -1827,7 +1893,8 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
           // Element output under its own Alignment multiplier — is both the per-second DoT basis and
           // the budget's basis, exactly what our statuses on a mob are priced from
           const alignedElemDps = mob.ps * eng.damageSplit(mob.damage)[1] * (((mob as any).align ?? 100) / 100);
-          const st = immune ? null : rollStatus(rng, mob, alignedElemDps, statuses, c.statusResist, c.stunRecovery, alignedElemDps);
+          const forced = mobSkill?.status && !immune ? applyStatus(statuses, mobSkill.status, alignedElemDps) : null;
+          const st = forced ?? (immune ? null : rollStatus(rng, mob, alignedElemDps, statuses, c.statusResist, c.stunRecovery, alignedElemDps));
           if (st) {
             statusesAppliedThisTick.add(st);
             push(s, `${mob.species} inflicts ${st}`);
@@ -1997,6 +2064,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
   if (s.player.hp <= 0) {
     // HP reaches 0 → Push, never death (combat.md §4)
     const pushedZone = s.group[0]?.zone ?? s.zone;
+    const pushReport = buildPushReport(s, c, s.group);
     s.player.hp = 0;
     s.phase = 'camp';
     s.campSec = Math.max(1, Math.ceil(c.maxHp / (c.hpRegen * 8)));
@@ -2029,6 +2097,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
       push(s, `Pushed on the walk · the walk keeps its ${s.walk.blocksLeft} block${s.walk.blocksLeft === 1 ? '' : 's'} and resumes from this one`);
     }
     push(s, `Pushed — ${s.campSec} sec at camp (${eng.fmt(c.maxHp)} HP ÷ ${eng.fmt(c.hpRegen * 8)}/sec)`);
+    for (const line of pushReportLines(pushReport)) push(s, line);
     // Forward Mode's fallback: a Push in a zone above the floor means this chapter is not survivable
     // yet, so the walk drops back to the last zone held and refuses to climb back until one level is
     // gained (owner ask). No new number: the gate is a level, the zone is `forwardSafe`.
@@ -2054,7 +2123,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean 
  * Int — so the bar is bounded again here, otherwise it reads above what the character now holds.
  */
 function clampPools(s: GameState): void {
-  const c = withHunger(withMeal(buildCharacter(s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)), effectsActive(s.skills, tree.keystoneBundles(s.player.treeRanks)), s.player.points, s.player.treeRanks, lifeSkillBonuses(s)), s), s);
+  const c = characterSheet(s);
   const debt52 = bundleOf(c.keystones, 'mana-debt');
   s.player.mana = Math.min(debt52 ? s.player.mana : Math.max(0, s.player.mana), c.maxMana);
   s.player.es = Math.min(Math.max(0, s.player.es), c.es);
@@ -2087,12 +2156,14 @@ export function schedulerBatch(acc: number, speed: number, elapsedSec: number = 
   return { ticks, acc: total - ticks };
 }
 
-/** Offline catch-up: run the same tick over the elapsed seconds, capped by the save rule. */
+/** A null configured limit pays every valid whole elapsed second. */
 export function catchUpPlan(elapsedSec: number) {
   // an away period never walks: a walk is online only, so the catch-up never crosses a block
-  const cap = E.inventory.offline_cap_hr * 3600;
-  const secs = Math.max(0, Math.min(Math.floor(elapsedSec), cap));
-  return { secs, capped: elapsedSec > cap };
+  const configured: number | null = E.inventory.offline_cap_hr;
+  const cap = configured == null ? Infinity : configured * 3600;
+  const whole = Math.floor(elapsedSec);
+  const elapsed = Number.isSafeInteger(whole) ? Math.max(0, whole) : 0;
+  return { secs: Math.min(elapsed, cap), capped: elapsed > cap };
 }
 
 /** The tick loop both catch-up paths share — one order of ticks, so the numbers cannot diverge. */
@@ -2134,21 +2205,30 @@ export function catchUp(s: GameState, elapsedSec: number, opts: { autoSkills?: b
 }
 
 /**
- * The UI's catch-up: the same ticks in the same order, yielded in slices so a save left for a day
- * (up to 43,200 ticks) cannot freeze first paint. The numbers are identical to `catchUp`.
+ * The UI's catch-up uses the same ticks, yielding by time and tick count without dropping elapsed time.
+ * Cancelling returns a valid partial state; abandoning a load leaves its original slot untouched.
  */
-export async function catchUpAsync(s: GameState, elapsedSec: number, opts: { autoSkills?: boolean } = {}) {
+export async function catchUpAsync(s: GameState, elapsedSec: number, opts: {
+  autoSkills?: boolean; signal?: AbortSignal; onProgress?: (done: number, total: number) => void;
+} = {}) {
   const { secs, capped } = catchUpPlan(elapsedSec);
   const startClock = s.clockSec;
   const SLICE = 2000;
-  for (let i = 0; i < secs; i += SLICE) {
-    const end = Math.min(i + SLICE, secs);
-    runTicks(s, i, end, opts.autoSkills !== false);
-    if (end < secs) await new Promise((r) => setTimeout(r, 0));
+  let done = 0;
+  opts.onProgress?.(done, secs);
+  while (done < secs && !opts.signal?.aborted) {
+    const end = Math.min(done + SLICE, secs);
+    const started = performance.now();
+    do {
+      tick(s, { online: false, autoSkills: opts.autoSkills !== false });
+      done++;
+    } while (done < end && !opts.signal?.aborted && performance.now() - started < 16);
+    opts.onProgress?.(done, secs);
+    if (done < secs && !opts.signal?.aborted) await new Promise((r) => setTimeout(r, 0));
   }
-  pauseBossClock(s, secs);
-  settleDungeonClock(s, startClock, secs);
-  return { simulated: secs, capped };
+  pauseBossClock(s, done);
+  settleDungeonClock(s, startClock, done);
+  return { simulated: done, capped, ...(opts.signal?.aborted ? { cancelled: true } : {}) };
 }
 
 export const equippedCount = (s: GameState) => s.gear.filter(Boolean).length;

@@ -102,6 +102,16 @@ export function addTo(
 /** Would a grant of this size fit? Used by producers that must not consume a cost they can't bank. */
 export interface BagCost { bucket: Record<string, number>; key: string; capKind: string; amount: number }
 
+/** Slots that consuming these costs would free — the last unit of a stack releases its slot. */
+export function slotsFreedBy(costs: BagCost[]): number {
+  return costs.reduce((freed, cost) => {
+    const count = cost.bucket[cost.key] || 0;
+    const cap = INV.stack_size[cost.capKind];
+    if (!Number.isSafeInteger(cap) || cap <= 0 || cost.amount < 0 || count < cost.amount) return freed;
+    return freed + slotsFor(count, cap) - slotsFor(count - cost.amount, cap);
+  }, 0);
+}
+
 /** Preview the complete bag exchange without consuming costs or granting outputs. */
 export function fitsTransaction(state: GameState, costs: BagCost[], grants: BagCost[]): boolean {
   const canonical = new Map(BUCKETS.map((entry) => [entry.read(state), entry.cap]));
