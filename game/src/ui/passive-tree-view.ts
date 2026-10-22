@@ -8,63 +8,102 @@ export interface TreeViewCluster {
   radius: number;
 }
 
-/** Presentation only: arrange each existing branch chain around an open orbit.
+const TAU = Math.PI * 2;
+const SPINE_BASE = 100;
+const SPINE_STEP = 19;
+const CLUSTER_BASE = 240;
+const CLUSTER_STEP = 116;
+const CLUSTER_RADIUS = 21;
+const CLUSTER_SLOTS = [-0.36, -0.18, 0.18, 0.36];
+const KEYSTONE_REACH = 2;
+const JUNCTION_RADIUS = 165;
+const RIM_RADIUS = 532;
+const hash = (value: number) => { const x = Math.sin(value * 127.1) * 43758.5453; return x - Math.floor(x); };
+
+/** Presentation only: lay the seven regions out as one PoE-style disc — a spine ray per region and
+ * twelve small cluster rings beside it, with junctions bridging neighbouring regions.
  * IDs, grants, costs and connections remain the canonical engine nodes. */
 export function buildPassiveTreeView(nodes: TreeNode[], start: { x: number; y: number }) {
   const byId = Object.fromEntries(nodes.map((node) => [node.id, { ...node }]));
-  const groups = new Map<string, TreeNode[]>();
-  const clusterOf = new Map<string, TreeViewCluster>();
-  const clusters: TreeViewCluster[] = [];
+  const wings = [...new Set(nodes.map((node) => node.wing))];
+  const angleOf = (index: number) => -Math.PI / 2 + index * TAU / wings.length;
+  const bendOf = (index: number) => (index % 2 ? 0.055 : -0.055);
+  const spineAngle = (wing: number, step: number) => angleOf(wing) + bendOf(wing) * Math.min(1, Math.max(0, (step - 1) / 19));
+  const at = (angle: number, radius: number) => ({ x: start.x + Math.cos(angle) * radius, y: start.y + Math.sin(angle) * radius });
+
   for (const node of nodes) {
-    const p = node.placement;
-    if (!p || !('cluster' in p)) continue;
-    const id = node.wing + ':' + p.cluster;
+    const placement = node.placement;
+    if (placement?.role !== 'spine') continue;
+    const point = at(spineAngle(wings.indexOf(node.wing), placement.index), SPINE_BASE + (placement.index - 1) * SPINE_STEP);
+    byId[node.id].x = point.x;
+    byId[node.id].y = point.y;
+  }
+
+  const groups = new Map<string, TreeNode[]>();
+  for (const node of nodes) {
+    const placement = node.placement;
+    if (!placement || placement.role === 'spine' || placement.role === 'junction') continue;
+    const id = node.wing + ':' + placement.cluster;
     const members = groups.get(id) ?? [];
     members.push(node);
     groups.set(id, members);
   }
+
+  const clusterOf = new Map<string, TreeViewCluster>();
+  const clusters: TreeViewCluster[] = [];
   for (const [id, members] of groups) {
     const branch = members.filter((node) => node.placement?.role === 'branch')
       .sort((a, b) => (a.placement as { step: number }).step - (b.placement as { step: number }).step);
-    const first = branch[0];
-    const spine = first && nodes.find((node) => node.wing === first.wing && node.placement?.role === 'spine');
-    if (!first || !spine) continue;
-    const distance = Math.hypot(spine.x - start.x, spine.y - start.y);
-    if (!distance) continue;
-    const ux = (spine.x - start.x) / distance, uy = (spine.y - start.y) / distance;
-    const along = (first.x - start.x) * ux + (first.y - start.y) * uy;
-    const root = { x: start.x + ux * along, y: start.y + uy * along };
-    const step = Math.hypot(first.x - root.x, first.y - root.y);
-    if (!step) continue;
-    const ox = (first.x - root.x) / step, oy = (first.y - root.y) / step;
-    const cluster = { id, wing: first.wing, x: root.x + ox * step * 3.35, y: root.y + oy * step * 3.35, radius: step * 1.75 };
-    clusters.push(cluster);
     const notable = members.find((node) => node.placement?.role === 'notable');
-    const chain = notable ? [...branch, notable] : branch;
-    chain.forEach((node, index) => {
-      const angle = Math.PI + (index / Math.max(1, chain.length - 1)) * Math.PI * 7 / 6;
-      byId[node.id].x = cluster.x + cluster.radius * (ox * Math.cos(angle) + ux * Math.sin(angle));
-      byId[node.id].y = cluster.y + cluster.radius * (oy * Math.cos(angle) + uy * Math.sin(angle));
+    if (!branch.length || !notable) continue;
+    const wing = branch[0].wing;
+    const wingIndex = wings.indexOf(wing);
+    const clusterIndex = (branch[0].placement as { cluster: number }).cluster;
+    const band = Math.floor((clusterIndex - 1) / CLUSTER_SLOTS.length);
+    const slot = (clusterIndex - 1) % CLUSTER_SLOTS.length;
+    const seed = wingIndex * 97 + clusterIndex * 31;
+    const angle = spineAngle(wingIndex, 6 + band * 5) + CLUSTER_SLOTS[slot] + (hash(seed) - 0.5) * 0.04;
+    const center = at(angle, CLUSTER_BASE + band * CLUSTER_STEP + (hash(seed + 1) - 0.5) * 20);
+    const facing = angle + CLUSTER_SLOTS[slot] * 0.5;
+    const cluster = { id, wing, x: center.x, y: center.y, radius: CLUSTER_RADIUS };
+    clusters.push(cluster);
+    const ringMembers = [...branch, notable];
+    ringMembers.forEach((node, index) => {
+      const memberAngle = facing + (index / ringMembers.length) * TAU;
+      byId[node.id].x = center.x + Math.cos(memberAngle) * cluster.radius;
+      byId[node.id].y = center.y + Math.sin(memberAngle) * cluster.radius;
       clusterOf.set(node.id, cluster);
     });
-    for (const node of members.filter((item) => item.placement?.role === 'keystone')) {
-      const anchor = notable ? byId[notable.id] : byId[branch[branch.length - 1].id];
-      byId[node.id].x = anchor.x + ox * step * 2.75;
-      byId[node.id].y = anchor.y + oy * step * 2.75;
-    }
+    const keystones = members.filter((node) => node.placement?.role === 'keystone');
+    keystones.forEach((node, index) => {
+      const keystoneAngle = facing + (index - (keystones.length - 1) / 2) * 0.35;
+      const point = { x: center.x + Math.cos(keystoneAngle) * cluster.radius * KEYSTONE_REACH, y: center.y + Math.sin(keystoneAngle) * cluster.radius * KEYSTONE_REACH };
+      byId[node.id].x = point.x;
+      byId[node.id].y = point.y;
+    });
   }
+
+  for (const node of nodes) {
+    const placement = node.placement;
+    if (placement?.role !== 'junction') continue;
+    const from = wings.indexOf(placement.a);
+    const to = wings.indexOf(placement.b);
+    let span = to - from;
+    if (span < 0) span += wings.length;
+    const point = at(angleOf(from) + (span / 2) * TAU / wings.length, JUNCTION_RADIUS);
+    byId[node.id].x = point.x;
+    byId[node.id].y = point.y;
+  }
+
   const placed = nodes.map((node) => byId[node.id]);
-  const regions = [...new Set(nodes.map((node) => node.wing))].map((id) => {
-    const spine = nodes.filter((node) => node.wing === id && node.placement?.role === 'spine');
-    const last = spine.reduce<TreeNode | undefined>((best, node) =>
-      !best || Math.hypot(node.x - start.x, node.y - start.y) > Math.hypot(best.x - start.x, best.y - start.y) ? node : best, undefined);
-    return { id, x: start.x + ((last?.x ?? start.x) - start.x) * 1.09, y: start.y + ((last?.y ?? start.y) - start.y) * 1.09 };
-  });
+  const regions = wings.map((id, index) => ({ id, ...at(angleOf(index), RIM_RADIUS) }));
   const xs = [...placed.map((node) => node.x), ...regions.map((region) => region.x)];
   const ys = [...placed.map((node) => node.y), ...regions.map((region) => region.y)];
-  const x = Math.min(start.x, ...xs) - 70, y = Math.min(start.y, ...ys) - 50;
-  return { nodes: placed, byId, clusters, clusterOf, regions,
-    bounds: { x, y, width: Math.max(start.x, ...xs) + 70 - x, height: Math.max(start.y, ...ys) + 50 - y } };
+  const x = Math.min(start.x, ...xs) - 70, y = Math.min(start.y, ...ys) - 60;
+  return {
+    nodes: placed, byId, clusters, clusterOf, regions,
+    bounds: { x, y, width: Math.max(start.x, ...xs) + 70 - x, height: Math.max(start.y, ...ys) + 60 - y },
+  };
 }
 
 /** SVG's circular arc takes the short route between the actual graph endpoints. */

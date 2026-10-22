@@ -34,7 +34,7 @@
   const selected = $derived(model.byId[selectedId] || model.nodes[0]);
   const ownedRank = (id: string) => id === 'start' ? 1 : game.player.treeRanks?.[id] || 0;
   const connected = (node: TreeNode) => tree.connected(node.id, game.player.treeRanks);
-  const sizeOf = (node: TreeNode) => (layout.radii?.[node.kind] ?? layout.nodeRadius) * 1.3;
+  const sizeOf = (node: TreeNode) => (layout.radii?.[node.kind] ?? layout.nodeRadius) * (node.kind === 'keystone' ? 1.55 : node.kind === 'notable' ? 1.25 : 1.45);
   const lineLabel = (id: string) => lineName(id).replace(/_/g, ' ');
   const grantLabel = (grant: TreeNode['grants'][number]) => grant.stat ? regionNames[grant.stat] || grant.stat : (grant.element ? grant.element + ' ' : '') + lineLabel(grant.id);
   const titleOf = (node: TreeNode) => {
@@ -98,7 +98,7 @@
   const scale = $derived(baseScale * camera.zoom);
   const viewBox = $derived({ x: camera.x - viewportWidth / scale / 2, y: camera.y - viewportHeight / scale / 2, width: viewportWidth / scale, height: viewportHeight / scale });
   const clamp = (v: number, low: number, high: number) => Math.max(low, Math.min(high, v));
-  onMount(() => { camera = { x: graph.start.x, y: graph.start.y, zoom: 1.7 }; });
+  onMount(() => { overview(); });
   function zoomBy(factor: number, at?: { x: number; y: number }) {
     const zoom = clamp(camera.zoom * factor, .65, 5), point = at || camera, ratio = camera.zoom / zoom;
     camera = { x: point.x - (point.x - camera.x) * ratio, y: point.y - (point.y - camera.y) * ratio, zoom };
@@ -188,14 +188,14 @@
           <radialGradient id="tree-cluster-face"><stop stop-color="#b89c60" stop-opacity=".08" /><stop offset="1" stop-color="#b89c60" stop-opacity="0" /></radialGradient>
           <clipPath id="tree-icon-clip" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5" /></clipPath>
         </defs>
-        <g class="tree-clusters" aria-hidden="true">{#each model.clusters as cluster (cluster.id)}<circle cx={cluster.x} cy={cluster.y} r={cluster.radius * 1.5} fill="url(#tree-cluster-face)" />{/each}</g>
+        <g class="tree-clusters" aria-hidden="true">{#each model.clusters as cluster (cluster.id)}<circle cx={cluster.x} cy={cluster.y} r={cluster.radius * 1.9} fill="url(#tree-cluster-face)" />{/each}</g>
         <g class="tree-region-labels" class:region-focused={!!focusedRegion} aria-hidden="true">
           {#each model.regions as region (region.id)}<g class={region.id} transform={'translate(' + region.x + ' ' + region.y + ')'}><text class="region-code" text-anchor="middle">{region.id.toUpperCase()}</text><text class="region-name" text-anchor="middle" y="17">{regionNames[region.id] || region.id}</text></g>{/each}
         </g>
         <g class="tree-links" aria-hidden="true">
           {#each links as link, index (index)}<path d={link.path} class:active={ownedRank(link.a) > 0 && ownedRank(link.b) > 0} class:frontier={(ownedRank(link.a) > 0) !== (ownedRank(link.b) > 0)} class:route={routeLink(link.a, link.b)} />{/each}
         </g>
-        <g class="tree-start" transform={'translate(' + graph.start.x + ' ' + graph.start.y + ')'} aria-label="Starting point"><circle class="origin-ornament" r="34" /><circle class="origin-rim" r="19" /><circle class="origin-face" r="15" /><image href={treeMark} x="-12" y="-12" width="24" height="24" /><text text-anchor="middle" y="48">ORIGIN</text></g>
+        <g class="tree-start" transform={'translate(' + graph.start.x + ' ' + graph.start.y + ')'} aria-label="Starting point"><circle class="origin-ornament" r="56" /><circle class="origin-rim" r="30" /><circle class="origin-face" r="24" /><image href={treeMark} x="-19" y="-19" width="38" height="38" /><text text-anchor="middle" y="78">ORIGIN</text></g>
         {#each model.nodes as node (node.id)}
           {@const rank = ownedRank(node.id)}{@const radius = sizeOf(node)}
           <g class={'tree-node ' + node.wing + ' ' + node.kind} class:selected={selectedId === node.id} class:owned={rank > 0} class:ready={!rank && connected(node)} class:on-path={pathNodes.has(node.id)} class:dimmed={!matches(node)} class:search-match={!!query.trim() && matches(node)}
@@ -276,35 +276,39 @@
   .tree-regions button.active { color: var(--gold-lit); border-bottom-color: var(--gold); background: var(--surface-selected); }
   .tree-regions img { width: 21px; height: 21px; object-fit: contain; }
   .tree-workspace { display: grid; grid-template-columns: minmax(0, 1fr) 300px; min-height: 0; overflow: hidden; }
-  .tree-map { position: relative; overflow: hidden; min-width: 0; min-height: 0; touch-action: none; cursor: grab; background: radial-gradient(ellipse at 48% 45%, #20231c 0, #131812 42%, #090d0d 85%); }
+  .tree-map { position: relative; overflow: hidden; min-width: 0; min-height: 0; touch-action: none; cursor: grab; background: radial-gradient(ellipse at 50% 46%, #2b1d16 0, #1a110d 46%, #0a0705 92%); }
   .tree-map.dragging { cursor: grabbing; }
   .tree-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; min-height: 0; user-select: none; }
   :global(.panel-showcase) .tree-board { height: min(780px, calc(100vh - 130px)); }
-  .tree-links path { fill: none; stroke: #786b50; stroke-width: 1.15; opacity: .63; }
-  .tree-links path.frontier { stroke: #aa976b; opacity: .85; }
-  .tree-links path.active { stroke: var(--gold); stroke-width: 2.4; opacity: 1; }
+  .tree-guides circle { fill: none; stroke: #c3b184; stroke-opacity: .045; }
+  .tree-links path { fill: none; stroke: #6d5a41; stroke-width: 1.05; opacity: .55; }
+  .tree-links path.frontier { stroke: #c6ae74; opacity: .8; }
+  .tree-links path.active { stroke: var(--gold); stroke-width: 2.3; opacity: 1; filter: drop-shadow(0 0 2px rgba(232, 193, 105, .55)); }
   .tree-links path.route { stroke: var(--gold-lit); stroke-width: 1.8; opacity: 1; stroke-dasharray: 3 2; }
   .tree-links path.active.route { stroke-dasharray: none; }
-  .origin-ornament { fill: none; stroke: var(--tree-bronze); stroke-width: .65; stroke-dasharray: 1 7; }
-  .origin-rim { fill: #171b15; stroke: var(--gold); stroke-width: 1.6; }
-  .origin-face { fill: #0c100e; stroke: var(--tree-bronze); stroke-width: 1; }
-  .tree-start text { fill: var(--gold-lit); font-size: 9px; letter-spacing: 2px; }
-  .region-code { fill: var(--tree-muted); font: 17px Georgia, serif; letter-spacing: 3px; }
-  .region-name { fill: var(--tree-muted); opacity: .75; font: 10px var(--ui); }
+  .origin-ornament { fill: none; stroke: var(--tree-bronze); stroke-width: .8; stroke-dasharray: 1 8; }
+  .origin-rim { fill: #171b15; stroke: var(--gold); stroke-width: 1.8; }
+  .origin-face { fill: #0c100e; stroke: var(--tree-bronze); stroke-width: 1.1; }
+  .tree-start text { fill: var(--gold-lit); font-size: 10px; letter-spacing: 3px; }
+  .region-code { fill: var(--tree-muted); opacity: .8; font: 20px Georgia, serif; letter-spacing: 3px; }
+  .region-name { fill: var(--tree-muted); opacity: .5; font: 11px var(--ui); }
   .tree-region-labels.region-focused { display: none; }
   .tree-node { --node-colour: var(--gold); cursor: pointer; outline: none; transition: opacity 140ms ease; }
   .str { --node-colour: var(--hp-lit); } .agi { --node-colour: var(--good-lit); } .dex { --node-colour: var(--gold-lit); }
   .int { --node-colour: var(--mana-lit); } .wis { --node-colour: var(--es-lit); } .vit { --node-colour: var(--hot); } .lck { --node-colour: var(--curse); }
   .node-hit { fill: transparent; stroke: none; }
-  .node-face { stroke: var(--tree-bronze); stroke-width: 1.2; }
+  .node-face { stroke: var(--tree-bronze); stroke-width: 1.15; }
+  .tree-node.normal .node-face { stroke: color-mix(in srgb, var(--node-colour) 45%, #6b5c3e); }
   .node-core { fill: var(--node-colour); opacity: .65; }
-  .node-icon { opacity: .77; pointer-events: none; }
+  .node-icon { opacity: .78; pointer-events: none; filter: grayscale(.5) sepia(.3) saturate(.85) brightness(.95); }
+  .tree-node.notable .node-icon { opacity: .85; }
+  .tree-node.keystone .node-icon { opacity: .95; }
   .node-rim { fill: #191d17; stroke: #967e50; stroke-width: .9; }
   .node-halo { fill: none; stroke: transparent; stroke-width: 1; pointer-events: none; }
   .tree-node.ready .node-face { stroke: var(--gold-lit); stroke-width: 1.35; }
-  .tree-node.owned .node-face { fill: #5e4c20; stroke: #ffdd8a; stroke-width: 1.8; }
+  .tree-node.owned .node-face { fill: #6a5122; stroke: #ffe0a0; stroke-width: 1.9; }
   .tree-node.owned .node-rim { stroke: var(--gold-lit); stroke-width: 1.6; }
-  .tree-node.owned .node-icon { opacity: 1; }
+  .tree-node.owned .node-icon { opacity: 1; filter: sepia(.2) saturate(1) brightness(1.3); }
   .tree-node.on-path .node-halo { stroke: var(--gold); stroke-dasharray: 2 2; }
   .tree-node.selected .node-halo, .tree-node:focus-visible .node-halo { stroke: var(--focus); stroke-width: 1.6; stroke-dasharray: none; }
   .tree-node.search-match .node-halo { stroke: var(--focus); stroke-width: 2; }
