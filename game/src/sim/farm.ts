@@ -229,17 +229,18 @@ export function maybeDrink(state: GameState, c: Character, mobIsBoss: boolean): 
   if (state.clockSec - state.farm.lastDrinkAt < lim.sharedCooldownSec) return null;
   const hpPct = (state.player.hp / c.maxHp) * 100;
   const manaPct = (state.player.mana / c.maxMana) * 100;
-  const pool = state.farm.autoUse.hp && hpPct < state.farm.threshold.hp ? 'hp'
-    : state.farm.autoUse.mana && manaPct < state.farm.threshold.mana ? 'mana'
-      : null;
-  if (!pool) return null;
-  const candidates = farm.P.list.filter((p: any) => (p.pool === pool || p.pool === 'both') && bottleWorth(state, p.name) > 0);
-  if (!candidates.length) return null;
-  const potion = candidates.sort((a: any, b: any) => farm.potionEffect(b) - farm.potionEffect(a))[0];
-  // `17`: the automation never overwrites its own stream — it waits, bottle unspent
-  if (bundleOf(c.keystones, 'master-surgeon') && farm.potionPct(potion, 'hp') > 0 && potionStreamRunning(state)) return null;
-  const { hp, mana } = applyPotion(state, c, potion);
-  return { name: potion.name, pool, amount: pool === 'hp' ? hp : mana };
+  const hpStream = !!bundleOf(c.keystones, 'master-surgeon') && potionStreamRunning(state);
+  for (const pool of ['hp', 'mana'] as const) {
+    const pct = pool === 'hp' ? hpPct : manaPct;
+    if (!state.farm.autoUse[pool] || !(pct < state.farm.threshold[pool])) continue;
+    const candidates = farm.P.list.filter((p: any) => (p.pool === pool || p.pool === 'both')
+      && bottleWorth(state, p.name) > 0 && !(hpStream && farm.potionPct(p, 'hp') > 0));
+    const potion = candidates.sort((a: any, b: any) => farm.potionEffect(b) - farm.potionEffect(a))[0];
+    if (!potion) continue;
+    const { hp, mana } = applyPotion(state, c, potion);
+    return { name: potion.name, pool, amount: pool === 'hp' ? hp : mana };
+  }
+  return null;
 }
 
 /** Client-side brew cadence: a potion at most once every this many seconds while auto-brew is on. */

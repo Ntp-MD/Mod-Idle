@@ -14,7 +14,7 @@ Single-player, browser-only idle RPG; no server. This is the shared entry point 
 | `art-reference/` | Portable map art reference kit, generated-image holding area awaiting approval, concept images and map calibration snapshots | Generating, measuring or QC-ing map art; generated files are not game-ready until approved and copied into game assets; refresh with `art-reference/map/refresh.ps1` |
 | `tools/data/*.json` | Numbers, tuning, catalogues and content | Changing or tracing those values |
 | `engine/`, `game/src/` | Implementation, interfaces and UI appearance | Working on the affected code |
-| `game/src/icon/` | Art shelf for item, skill, mob and UI images; folders group by subject and resolvers key on the file name | Adding or sorting artwork |
+| `game/src/icon/` | Art shelf for item, skill, mob, UI and map-glyph images; folders group by subject and resolvers key on the file name | Adding or sorting artwork |
 | `game/src/wiki/pages.ts` | Player-facing wiki source | Changing what the wiki explains |
 
 Each fact has one owner. Link to it rather than copying it. Provider entry files import or point here; they carry no separate project rules.
@@ -65,6 +65,7 @@ For repository implementation, fixes, reviews and investigation, apply [lean-age
 | `tools/data/skills.json` | Skill roster, reserve tiers and skill configuration |
 | `tools/data/mob-skills.json` | Mob-only skill library and the Unique/Boss/Variant/Species override kits |
 | `tools/data/tree.json` | Passive-tree specification |
+| `tools/data/tree-retired-baseline.json` | Frozen legacy retired node ids; update only for an intentional save migration |
 | `tools/data/bases.json` | Hand-maintained frames, slots and Mod pools; never generate by parsing docs |
 | `tools/data/map.json` | Presentation map layout, terrain and colours; never import in `engine/` or `game/src/` |
 | `tools/` | Cages, reports and shared readers; `tools/map.ts` generates the overlay |
@@ -75,9 +76,21 @@ For repository implementation, fixes, reviews and investigation, apply [lean-age
 
 Gameplay numbers live in data JSON, formulas in `engine/`; do not duplicate either in the client. New game-content filenames use lowercase hyphens. `skill.md`, `skills.md`, `SKILL.md` and `.opencode/skills/` are reserved for agent skills, not game content. Gate output is the run record; do not create transcript files.
 
+## Passive-tree node generation
+
+Plan the route before adding the node. For every new or moved node, state its purpose — route, two-anchor loop, junction, or leaf — and the anchors it serves. A count ("15 per wing", "five per cluster") is an output of the design, never the reason to add a node.
+
+- A live leaf must be a Notable or a Keystone. An ordinary node with one connection is filler; the build retires it and `TR17` fails the tree.
+- Every live Normal must sit on a route between two anchors (Start, Notable, Keystone, Junction). A loop or run hanging off a single point with no anchor inside it is filler, even when every node has two connections.
+- A Keystone is a leaf off exactly one Notable; it is never a through-route. A second Keystone may share that Notable's pocket, but never a route.
+- Never add a node for the build to retire. The retired ids in `tools/data/tree-retired-baseline.json` are frozen save keys; a new retired id fails `TR18`.
+- Run `node tools/tree.ts --checks` after the build; `TR17`–`TR19` are the purpose, retirement and keystone-leaf gates.
+
 ## UI integration
 
 - Shared tokens: `game/src/styles/variables.css`; tag defaults: `base.css`; reusable appearance: `skins.css`; layout: component `<style>`. Read relevant tokens and the existing component. Keep static appearance in classes; inline bindings are for runtime values and HudLayout placement.
+- UI icons use PNG shelf art drawn through `.icon-mask` so they keep `currentColor`; map glyphs use PNG shelf art inside the map SVG. Inline SVG remains for structural graphics (tree/map geometry, marker frames/leaders, charts, effects), not standalone UI icons.
+- Map markers are a shelf PNG glyph in a circular medallion on a vertical leader from the hex centre; frame and leader use the hover-hex blue (`--es`). Never repaint terrain for marker work.
 - Current shell: fixed 15 × 15 Hub Grid, shared `HudLayout` regions and one scroll owner per region. Added/moved regions update `HudRegionId`, `HUD_REGION_META`, `DEFAULT_HUD_LAYOUT` in `game/src/ui/hud-layout.ts` and matching `App.svelte` wiring; backfill old saved layouts. Appearance inside regions follows the requested design.
 - New panels connect through `PANELS`, `RAIL`, icon/label maps and keyboard actions in `App.svelte`. Reuse existing shared controls such as `CollapseToggle.svelte` where appropriate; choose Grid/Flex and composition for the task.
 - Keep native semantics, labels, keyboard access and visible focus. Map arrows select adjacent Blocks; Enter walks or uses a known Waypoint, with selection announcements.

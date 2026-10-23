@@ -25,7 +25,7 @@ const tokens = (): string =>
   extractTokens(fs.readFileSync(path.join(ROOT, 'game', 'src', 'styles', 'variables.css'), 'utf8'));
 
 /**
- * The icon gallery, from the shelf rather than a browser: the folder is the truth, so a sheet dropped on
+ * The icon gallery, from the PNG shelf rather than a browser: the folder is the truth, so a PNG dropped on
  * `game/src/icon/` lands on the page at the next build. The entries are named by the same `iconEntry` the
  * live wiki calls, and the paths stay relative to `docs/wiki/`, so the page opens straight from the disk.
  */
@@ -37,7 +37,7 @@ const gallery = (page: string): string => {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       const full = path.join(dir, entry.name);
       if (entry.isDirectory()) walk(full, `${base}${entry.name}/`);
-      else if (/\.(svg|png)$/i.test(entry.name)) rels.push(base + entry.name);
+      else if (/\.png$/i.test(entry.name)) rels.push(base + entry.name);
     }
   };
   walk(ICONS, '');

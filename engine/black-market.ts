@@ -36,7 +36,11 @@ export function createBlackMarket(
   }
   const price = (candidate: Candidate, count: number) => {
     const decimals = trade.C.currency_decimals, unit = 10 ** -decimals;
-    return trade.floorCurrency(candidate.priceEach * count + unit);
+    // the smallest-unit cover belongs to the computed material quote; stones and skill offers are
+    // authored at their price and must be charged exactly (DECISIONS, Black Market prices)
+    return candidate.kind === 'material'
+      ? trade.floorCurrency(candidate.priceEach * count + unit)
+      : trade.floorCurrency(candidate.priceEach * count);
   };
   const roll = (town: string, serial: number, rng: () => number): BlackMarketOffer[] => {
     const pool = candidates.filter((candidate) => candidate.weight > 0).map((candidate) => ({ ...candidate }));

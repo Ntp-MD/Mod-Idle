@@ -4,8 +4,10 @@
     moveGridArea, rectFromArea, validGridArea, validRect, validateHudLayout,
     type GridAlign, type GridArea, type HudPlacement, type HudLayout, type HudRegionId, type RegionRect,
   } from './hud-layout';
+  import Tabs from './Tabs.svelte';
 
   type Layer = 'hud' | 'modal';
+  const LAYER_TABS = [{ id: 'hud', label: 'HUD' }, { id: 'modal', label: 'Modal' }];
   type RegionId = HudRegionId | 'panel';
   type Coordinate = 'rowStart' | 'rowEnd' | 'columnStart' | 'columnEnd';
   const CELLS = Array.from({ length: 225 }, (_, index) => ({
@@ -14,7 +16,7 @@
   }));
   const TONES: Record<RegionId, string> = {
     tasks: 'var(--gold-lit)', objectives: 'var(--focus)', target: 'var(--hot)', menu: 'var(--gold)', field: 'var(--good-lit)',
-    travel: 'var(--focus)', panels: 'var(--gold-lit)', commands: 'var(--good-lit)', feed: 'var(--dim)',
+    commands: 'var(--good-lit)', feed: 'var(--dim)',
     actionbar: 'var(--mana-lit)', panel: 'var(--gold)',
   };
   const ALIGNMENTS: [GridAlign, string][] = [
@@ -49,6 +51,12 @@
     ? HUD_REGION_META.find(({ id }) => id === selected)?.description ?? ''
     : 'A shared position for every screen panel shown in the Showcase and game.');
 
+  function pickLayer(id: string) {
+    layer = id as Layer;
+    selected = layer === 'hud' ? 'objectives' : 'panel';
+    notice = '';
+  }
+
   function regionAt(row: number, column: number): RegionId | null {
     if (layer === 'modal') {
       const a = modalDraft;
@@ -68,7 +76,7 @@
 
   function shortLabel(id: RegionId): string {
     const labels: Record<RegionId, string> = {
-      tasks: 'GOALS', objectives: 'MAP', target: 'MOB', menu: 'MENU', travel: 'TRAVEL', field: 'FIELD', panels: 'PANELS', commands: 'CMD',
+      tasks: 'GOALS', objectives: 'JOURNEY', target: 'MOB', menu: 'MENU', field: 'FIELD', commands: 'CMD',
       feed: 'LOG', actionbar: 'VITALS', panel: 'PANEL',
     };
     return labels[id];
@@ -254,22 +262,19 @@
 
 <div class="layout-editor">
   <aside class="layout-palette" aria-label="Layout components">
-    <div class="layer-switch" role="tablist" aria-label="Layout layer">
-      <button role="tab" aria-selected={layer === 'hud'} class:picked={layer === 'hud'} onclick={() => { layer = 'hud'; selected = 'objectives'; notice = ''; }}>HUD</button>
-      <button role="tab" aria-selected={layer === 'modal'} class:picked={layer === 'modal'} onclick={() => { layer = 'modal'; selected = 'panel'; notice = ''; }}>Modal</button>
-    </div>
+    <Tabs tabs={LAYER_TABS} active={layer} onpick={pickLayer} label="Layout layer" class="layer-switch" tabClass="layer-tab" />
     <h3>{layer === 'hud' ? 'Components' : 'Modal surfaces'}</h3>
     <div class="component-list">
       {#if layer === 'hud'}
         {#each HUD_REGION_META as region (region.id)}
-            <button class="component" class:selected={selected === region.id} draggable="true" title={region.description}
+            <button class="component selectable" class:selected={selected === region.id} draggable="true" title={region.description}
                   ondragstart={(event) => dragStart(event, region.id)} onclick={() => chooseRegion(region.id)}>
             <i style={`--region-tone:${TONES[region.id]}`}></i><span>{region.label}</span>
             {#if region.id === 'field' || hudDraft[region.id].mode === 'absolute'}<em class="abs-tag">ABS</em>{/if}
           </button>
         {/each}
       {:else}
-        <button class="component" class:selected={selected === 'panel'} draggable="true"
+        <button class="component selectable" class:selected={selected === 'panel'} draggable="true"
                 ondragstart={(event) => dragStart(event, 'panel')} onclick={() => chooseRegion('panel')}>
           <i style={`--region-tone:${TONES.panel}`}></i><span>Main panel canvas</span>
         </button>
@@ -407,9 +412,7 @@
   .layout-palette, .layout-workspace, .layout-inspector { min-width: 0; min-height: 0; }
   .layout-palette, .layout-inspector { display: flex; flex-direction: column; gap: var(--spacing-xs); }
   h3 { margin: 0; font-size: var(--font-xs); }
-  .layer-switch { display: flex; gap: var(--spacing-xs); }
-  .layer-switch button { flex: 1; font-size: var(--font-xs); }
-  .layer-switch .picked { color: var(--gold-lit); border-color: var(--gold); }
+  :global(.layer-tab) { flex: 1; font-size: var(--font-xs); }
   .component-list { display: grid; flex: 1; align-content: start; gap: var(--spacing-xs); min-height: 0; }
   .component {
     display: grid; grid-template-columns: var(--icon-detail) minmax(0, 1fr) auto; align-items: center; gap: var(--spacing-xs);
@@ -417,7 +420,6 @@
   }
   .component i { width: var(--icon-detail); height: var(--icon-detail); border: 1px solid var(--region-tone); background: color-mix(in srgb, var(--region-tone) 22%, transparent); }
   .component span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .component.selected { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 10%, var(--panel)); }
   .editor-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs); min-width: 0; }
   .editor-actions button { min-width: 0; }
   .editor-actions .layout-import { grid-column: 1 / -1; }

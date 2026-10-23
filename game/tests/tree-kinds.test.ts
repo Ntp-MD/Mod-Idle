@@ -144,7 +144,7 @@ describe('the tree the game ships', () => {
     const wings = new Set(Object.values(tree.byId).map((n: any) => n.wing));
     expect(wings.size).toBe(7);
     const keystones = Object.values(tree.byId).filter((n: any) => n.kind === 'keystone');
-    expect(keystones.length).toBe(52);
+    expect(keystones.length).toBe(105);
     for (const k of keystones) {
       expect(k.currency).toBe('attainment');
       expect(k.grants).toEqual([]);

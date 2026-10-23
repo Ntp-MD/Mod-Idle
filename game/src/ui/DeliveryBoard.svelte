@@ -6,12 +6,18 @@
   import type { GameState } from '../sim/types';
   import type { DeliveryContract } from '../sim/delivery-types';
   import { deliveryBonuses } from '../sim/quest-rewards';
+  import { acquisitionSources, ACTIVITY_GUIDE } from '../sim/guidance';
   import QuestBonusPicker from './QuestBonusPicker.svelte';
   import EmptyNote from './EmptyNote.svelte';
   import { questBonusText } from './quest-rewards';
-  let { state: gameState, townId, writer, ondeliver, ontrack, onack }: {
+  let { state: gameState, townId, writer, ondeliver, ontrack, onack, onpinzone = () => {}, ontrackgoal = () => {},
+    ontrackshortage = () => {}, goalId = null }: {
     state: GameState; townId: string; writer: boolean;
     ondeliver: (id: string, count: number, choice?: string) => void; ontrack: (id: string, tracked: boolean) => void; onack: (id: string) => void;
+    onpinzone?: (zone: number) => void;
+    ontrackgoal?: (id: string) => void;
+    ontrackshortage?: (good: string, want: number, origin: { kind: 'delivery'; id: string }) => void;
+    goalId?: string | null;
   } = $props();
   let quantities = $state<Record<string, number>>({});
   let choices = $state<Record<string, { contract: DeliveryContract; choice: string }>>({});
@@ -27,7 +33,7 @@
 </script>
 
 <section class="deliveries" aria-label="Delivery contracts">
-  <p class="explanation text-dim">Hand-ins pay market value now · complete the count before the deadline for the bonus.</p>
+  <p class="explanation text-dim">Hand-ins pay market value now · complete the count before the deadline for the bonus. Optional · {ACTIVITY_GUIDE.delivery.when} {ACTIVITY_GUIDE.delivery.helps}</p>
   {#if !writer}<p class="text-alarm" role="status">This tab is read-only. Deliveries, tracking and recap acknowledgement are disabled.</p>{/if}
   <div class="wants">
     {#each open as contract (contract.id)}
@@ -37,17 +43,34 @@
       {@const count = quantities[contract.id] ?? Math.max(1, Math.min(carried || remaining, remaining))}
       {@const choice = choices[contract.id]?.contract === contract ? choices[contract.id].choice : undefined}
       {@const preview = previewDelivery(gameState, contract.id, count, { writer }, choice)}
-      <article class="want">
+      {@const sources = acquisitionSources(contract.acquisition)}
+      <article class="want card-read">
         <header><div><h3>{good.name}</h3><small>{townName(contract.town)}</small></div><strong class="text-value">{contract.delivered} / {contract.target}</strong></header>
         <p class="text-accent">{time(deliveryTimeLeft(gameState, contract))} left{pause ? ` · paused: ${pause}` : ''}</p>
         <QuestBonusPicker state={gameState} options={deliveryBonuses(contract.reward)} name={`reward-${contract.id}`} {choice} {writer} onchoose={(choice) => { choices[contract.id] = { contract, choice }; }} />
         <p class="text-dim">Every completion earns Haggling XP{contract.reward.attainment ? ` + ${contract.reward.attainment} Attainment Point` : ''}{contract.reward.treePoints ? ` + ${contract.reward.treePoints} Tree Point` : ''}.</p>
         {#if contract.reward.milestone}<p class="text-good">First Delivery milestone in {townName(contract.town)} · the Tree Point is guaranteed with either reward.</p>{/if}
         <p class="carried text-dim">{carried} carried · {remaining} still wanted · {gold(contract.baseGold)} market gold already paid</p>
+        {#if carried < remaining}
+          <div class="where card-tile" role="group" aria-label={`Where to find ${good.name}`}>
+            <strong>Short {remaining - carried} {good.name}</strong>
+            <ul>
+              {#each sources as source (`${source.label}:${source.detail}`)}
+                <li><span>{source.label} · {source.detail}</span>
+                  {#each source.pins as pin (pin.zone)}
+                    <button type="button" class="pin" onclick={() => onpinzone(pin.zone)} aria-label={`Pin ${pin.label} on the map`}>Pin {pin.label}</button>
+                  {/each}
+                </li>
+              {/each}
+            </ul>
+            <button type="button" disabled={!writer} onclick={() => ontrackshortage(contract.good, remaining, { kind: 'delivery', id: contract.id })}>Track the missing as a goal</button>
+          </div>
+        {/if}
         <div class="actions">
           <label>Quantity <input type="number" min="1" max={remaining} step="1" aria-label={`Delivery quantity for ${good.name} at ${townName(contract.town)}`} value={count} oninput={(event) => quantities[contract.id] = event.currentTarget.valueAsNumber} /></label>
           <button disabled={!preview.ok} title={preview.ok ? `Receive ${gold(preview.quote.gold)} market gold${preview.complete ? ' and the completion bonus' : ''}` : preview.why} onclick={() => ondeliver(contract.id, count, choice)}>Deliver {count || 'goods'}</button>
           <button disabled={!writer} aria-pressed={gameState.town.trackedContractIds.includes(contract.id)} onclick={() => ontrack(contract.id, !gameState.town.trackedContractIds.includes(contract.id))}>{gameState.town.trackedContractIds.includes(contract.id) ? 'Untrack' : 'Track'}</button>
+          <button disabled={!writer} aria-pressed={goalId === contract.id} onclick={() => ontrackgoal(contract.id)}>{goalId === contract.id ? 'Goal pinned' : 'Pin as next goal'}</button>
         </div>
         {#if !preview.ok}<small class="text-alarm">{preview.why}</small>{:else}<small>Hand-in pays {gold(preview.quote.gold)} market gold now{preview.complete ? ` plus the stored completion bonus${preview.treePoints ? ` (${preview.treePoints} tree point${preview.treePoints === 1 ? '' : 's'})` : ''}` : '; the bonus waits for the full count'}.</small>{/if}
         {#if !contract.recapAcknowledged && contract.lastQuantity}<p class="recap text-good" role="status">Last delivery: {contract.lastQuantity} · {gold(contract.lastGold)} market gold paid. Total {contract.delivered} delivered.</p><button class="ack" disabled={!writer} onclick={() => onack(contract.id)}>Acknowledge delivery</button>{/if}
@@ -96,12 +119,17 @@
   .deliveries { font-size: var(--font-sm); }
   .deliveries p, .deliveries h3 { margin: 0; }
   .explanation { line-height: 1.5; }
-  .want { padding: var(--spacing-md); border: 1px solid var(--edge); border-radius: var(--radius-card); background: var(--inset); }
+  .want { padding: var(--spacing-md); }
   .want header, .actions { display: flex; align-items: center; gap: var(--spacing-md); flex-wrap: wrap; }
   .want header { justify-content: space-between; }
   .want header div { display: grid; gap: var(--spacing-xs); }
   .want header strong { font-family: var(--num); font-variant-numeric: tabular-nums; }
   .deliveries small { font-size: var(--font-xs); }
+  .where { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm); border-style: dashed; font-size: var(--font-xs); }
+  .where ul { display: grid; gap: var(--spacing-xs); margin: 0; padding-inline-start: var(--spacing-md); }
+  .where li { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--spacing-xs); }
+  .where button, .pin { font-size: var(--font-xs); padding: 0 var(--spacing-xs); }
+  .where > button { justify-self: start; }
   .actions label { display: flex; align-items: center; gap: var(--spacing-sm); }
   .actions input { width: clamp(55px, 4.36vw, 90px); }
   .ack { justify-self: start; }

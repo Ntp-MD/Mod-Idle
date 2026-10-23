@@ -193,7 +193,6 @@
   .item-heading { display: grid; gap: var(--spacing-xs); }
   h4 { margin: 0; font-size: var(--font-sm); color: var(--rar, var(--text)); }
   .item-meta { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; color: var(--dim); font-size: var(--font-xs); }
-  .chip { padding: 0 var(--spacing-xs); }
   .meta-note { color: var(--dim); }
   .tag.up { margin: 0; color: var(--xp); font-size: var(--font-xs); }
   .detail section { display: grid; gap: var(--spacing-xs); }

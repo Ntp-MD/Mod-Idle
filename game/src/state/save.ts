@@ -14,6 +14,7 @@ import { newPresets } from '../sim/presets';
 import { newCollector, newGrants } from '../sim/collector';
 import { newFilter, refresh as refreshFilter } from '../sim/filter';
 import { newGoal } from '../sim/goal';
+import { newGuidance, normalizeGuidance } from '../sim/guidance';
 import { buildCharacter } from '../sim/player';
 import { newCurses } from '../sim/curse';
 import { newMobStatusStore } from '../sim/mobStatus';
@@ -45,11 +46,13 @@ import { newEconomyState, validateEconomy } from '../sim/economy';
 // pre-v18 save carried neither, so it backfills empty ones; a save claiming v18 must hold both
 // whole — the reader refuses a missing or impossible field by name rather than default-filling it.
 // v20 adds the city ledger (`town.json → economy`): an older save replays its own clock in whole
-// steps so the city world it meets is the one its play time implies.
+// steps so the city world it meets is the one its play time implies. v21 adds the per-character
+// next-step pin (`guidance`); an older character backfills it with no pin, so it keeps following the
+// read-only automatic suggestion until the player chooses one.
 const DB_NAME = 'modworld';
 const STORE = 'saves';
 const ACCOUNT_KEY = 'account';
-export const SCHEMA_VERSION = 20;
+export const SCHEMA_VERSION = 21;
 
 const SLOTS = ['slot1', 'slot2', 'slot3'] as const;
 export type SlotName = (typeof SLOTS)[number];
@@ -163,10 +166,14 @@ export interface ClientSettings {
   autoSkills?: boolean;
   /** whether better gear found in the carried bag is equipped automatically */
   autoEquip?: boolean;
+  /** show an automatic next-goal suggestion when the player has pinned none */
+  autoGoal?: boolean;
+  /** show the map as coloured hexes with artwork and scenery hidden */
+  cleanMap?: boolean;
   /** the hub's drag offset from its docked corner, in px — wheel and satellites move as one */
   hub?: { x: number; y: number };
 }
-export const DEFAULT_SETTINGS: ClientSettings = { numberFormat: 'plain', offlineReport: true, keybinds: {}, equipMargin: 0, autoSkills: true, autoEquip: true };
+export const DEFAULT_SETTINGS: ClientSettings = { numberFormat: 'plain', offlineReport: true, keybinds: {}, equipMargin: 0, autoSkills: true, autoEquip: true, autoGoal: true, cleanMap: false };
 export async function readSettings(): Promise<ClientSettings> {
   const raw = await get('settings');
   if (!raw) return { ...DEFAULT_SETTINGS };
@@ -217,7 +224,7 @@ export async function writeSave(slot: SlotName, state: GameState): Promise<void>
   if (!current()) return;
   const why = snapshotReason(saved);
   const shot = why
-    ? { version: SCHEMA_VERSION, reason: why, clockSec: saved.clockSec, takenAt: Date.now(), state: { ...saved, pendingSnapshot: null } }
+    ? { version: SCHEMA_VERSION, reason: why, clockSec: saved.clockSec, takenAt: Date.now(), state: { ...saved, fx: [], pendingSnapshot: null } }
     : null;
   if (shot) await pushSnapshot(slot, shot, current);
   if (!current()) return;
@@ -271,7 +278,7 @@ export function writeSaveSync(slot: SlotName, state: GameState): void {
   if (why) {
     const shot: Snapshot = {
       version: SCHEMA_VERSION, reason: why, clockSec: saved.clockSec, takenAt: Date.now(),
-      state: { ...saved, pendingSnapshot: null },
+      state: { ...saved, fx: [], pendingSnapshot: null },
     };
     snapshotOk = lsWrite(snapKey(slot), JSON.stringify([shot, ...readSnapshotsSync(slot)].slice(0, SAVE_CFG.snapshot_slots)));
     if (snapshotOk) armSnapshot(saved);
@@ -320,8 +327,10 @@ export async function listSnapshots(slot: SlotName): Promise<Snapshot[]> {
 export async function restoreSnapshot(slot: SlotName, index: number): Promise<GameState | null> {
   const shot = (await readSnapshots(slot))[index];
   if (!shot) return null;
-  // the record inside the backup is the truth at that moment; the shared half is rebuilt after
+  // the record inside the backup is the truth at that moment; the shared half is rebuilt after.
+  // `fx` is a HUD ring, never saved state — an older backup may still carry one, so drop it here.
   const raw = JSON.parse(JSON.stringify(shot.state)) as GameState;
+  raw.fx = [];
   assertPassiveTreeVersion(raw);
   const state = migrate(raw, shot.version ?? 0);
   state.pendingSnapshot = null;
@@ -727,6 +736,10 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   });
   if (s.travel !== 'forward') s.travel = 'stay';
   if (!s.goal) s.goal = newGoal();
+  // v21 · the next-step pin is the only saved guidance; automatic suggestions are derived. An older
+  // save starts with no pin, and a malformed pin is dropped rather than sending the player elsewhere.
+  if (fromVersion < 21 || !s.guidance) s.guidance = newGuidance();
+  else s.guidance = normalizeGuidance(s.guidance);
   if (!s.curses) s.curses = newCurses();
   if (!s.mobStatus) s.mobStatus = newMobStatusStore();
   // v18 · the statuses on the character and the keystone runtime became saved state (§7.7). A save
@@ -771,10 +784,11 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
         spent = 0;
       }
       s.player.statPoints = Math.min(s.player.statPoints, eng.pointsAt(lv) - spent);
-      // a rank on a node the tree does not carry is refused by name, never deleted: the allocation
-      // belongs to a different tree, and this reader must not quietly turn it into a refund
+      // a retired node is refunded; an unknown rank still belongs to a different tree and is refused
+      // by name, never quietly turned into a refund
       const ranks = s.player.treeRanks || (s.player.treeRanks = {});
       for (const id of Object.keys(ranks)) {
+        if (tree.retired.has(id)) { delete ranks[id]; continue; }
         if (!tree.byId[id]) throw new Error(`tree rank ${id} is not a node in tree version ${tree.version}`);
         ranks[id] = Math.max(0, Math.min(tree.byId[id].ranks, Math.floor(finite(ranks[id], 0))));
       }
@@ -834,7 +848,7 @@ export function exportJson(state: GameState): string {
 export function importJson(text: string): GameState {
   const parsed = JSON.parse(text);
   const version = parsed.version == null ? 'none' : parsed.version;
-  if (parsed.version !== SCHEMA_VERSION && parsed.version !== 18 && parsed.version !== 17 && parsed.version !== 16 && parsed.version !== 15 && parsed.version !== 14) {
+  if (parsed.version !== SCHEMA_VERSION && parsed.version !== 20 && parsed.version !== 19 && parsed.version !== 18 && parsed.version !== 17 && parsed.version !== 16 && parsed.version !== 15 && parsed.version !== 14) {
     throw new Error(`schema version ${version} ≠ ${SCHEMA_VERSION}`);
   }
   const state = parsed.state as GameState;

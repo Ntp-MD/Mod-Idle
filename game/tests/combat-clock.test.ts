@@ -74,6 +74,19 @@ describe('combat clock (§7.1)', () => {
     expect(firings).toEqual([100_000, 700_000]);
   });
 
+  it('delays only pending events of the chosen actor, including events crossing the tick boundary', () => {
+    const clock = new CombatClock(0, units);
+    const seen: string[] = [];
+    clock.schedule(100_000, EVENT_PRIORITY.playerAction, 'player', 'm', () => clock.delayActor('m', 500_000));
+    clock.schedule(200_000, EVENT_PRIORITY.mobAction, 'other', 'player', () => seen.push('other'));
+    clock.schedule(300_000, EVENT_PRIORITY.pendingDamage, 'm', 'player', () => seen.push('committed debt'));
+    clock.schedule(400_000, EVENT_PRIORITY.mobAction, 'm', 'player', () => seen.push('delayed'));
+    clock.schedule(800_000, EVENT_PRIORITY.mobAction, 'm', 'player', () => seen.push('next tick'));
+    clock.runUntil();
+    expect(seen).toEqual(['other', 'committed debt', 'delayed']);
+    expect(clock.nowUs).toBe(units);
+  });
+
   it('the world tick still equals one second of attack progress', () => {
     const s = newGame(7);
     setLevel(s, 10);

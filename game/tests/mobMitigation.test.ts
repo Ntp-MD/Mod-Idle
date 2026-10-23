@@ -3,7 +3,7 @@ import { E, eng, sm } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { poolGear } from './sheetFixture';
-import { playerSwing } from '../src/sim/combat';
+import { mobSwing, playerSwing } from '../src/sim/combat';
 import { newMobStatusStore, stepMob, applyBleed, modsOn, targetMods } from '../src/sim/mobStatus';
 import { NO_CURSE, applyCurse, newCurses, modsFromAuraFold, modsOn as curseModsOn } from '../src/sim/curse';
 import { castOnce, newSkillState, effectsActive } from '../src/sim/skills';
@@ -147,5 +147,16 @@ describe('a strip of the mob\'s resistance is spent on the Element half', () => 
     expect(withAuras.resistance).toBe(bare.resistance);
     expect(withAuras.aspd).toBeCloseTo(bare.aspd, 10);
     expect(modsFromAuraFold(effectsActive(sk2).target || {}).attackSpeed).toBe(valueOf('aura.rimbo_form', 'attack_speed'));
+  });
+
+  it('spends an Earth Wall charge only when the shield roll misses', () => {
+    const always = () => 0;
+    const base = { ...C(), block: 100, perfectDodge: 0, evasion: 0 };
+    const rolled = mobSwing(always, base, mob(), {}, NO_CURSE, 0, 0, true);
+    expect(rolled.blocked).toBe('block');
+    expect(rolled.blockChargeSpent).toBe(false);
+    const charged = mobSwing(always, { ...base, block: 0 }, mob(), {}, NO_CURSE, 0, 0, true);
+    expect(charged.blocked).toBe('block charge');
+    expect(charged.blockChargeSpent).toBe(true);
   });
 });

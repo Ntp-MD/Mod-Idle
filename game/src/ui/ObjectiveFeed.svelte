@@ -2,8 +2,7 @@
   import { onMount } from 'svelte';
   import CollapseToggle from './CollapseToggle.svelte';
   import Pager from './Pager.svelte';
-  let { goal, deliveries, onSheet, onDelivery }: {
-    goal: string;
+  let { deliveries, onSheet, onDelivery }: {
     deliveries: { id: string; title: string; progress: string; clock: string; paused: string | null }[];
     onSheet: () => void;
     onDelivery: (id: string) => void;
@@ -37,7 +36,6 @@
 <section bind:this={surface} class="objective-feed surface-hud" aria-label="Objectives">
   <CollapseToggle label={`Objectives ${deliveries.length + 1}`} controls="objective-content" bind:expanded />
   <div id="objective-content" hidden={!expanded} class="objective-content">
-    <p class="objective-goal text-value">{goal}</p>
     <div class="delivery-list" bind:this={list}>
     {#each page as delivery (delivery.id)}
       <button type="button" class="objective-entry btn-quiet" onclick={() => onDelivery(delivery.id)} title="Open the Market delivery board">
@@ -61,12 +59,11 @@
 </section>
 
 <style>
-  .objective-feed { width: 100%; min-width: 0; display: grid; gap: var(--spacing-sm); padding: var(--spacing-sm); }
+  .objective-feed { width: 100%; min-width: 0; height: 100%; align-content: start; display: grid; gap: var(--spacing-sm); padding: var(--spacing-sm); }
   .objective-content { display: grid; gap: var(--spacing-sm); min-width: 0; }
   .objective-content[hidden] { display: none; }
   .delivery-list { display: grid; gap: var(--spacing-sm); }
   .delivery-list:empty { display: none; }
-  .objective-goal { margin: 0; font-size: var(--font-xs); line-height: 1.4; overflow-wrap: anywhere; }
   .objective-entry { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--spacing-xs) var(--spacing-sm); width: 100%; text-align: left; font-size: var(--font-xs); }
   .objective-entry strong { font-weight: 600; }
   .objective-entry small { flex-basis: 100%; }

@@ -239,8 +239,8 @@
   <aside class="pane currency-pane" aria-label="Crafting stones">
     <header class="pane-head"><h3>Stones</h3><span>{stones.filter(s => s.count > 0).length} kinds held</span></header>
     <div class="craft-level" role="group" aria-label="Crafting detail">
-      <button type="button" class:selected={!advanced} aria-pressed={!advanced} onclick={() => setAdvanced(false)}>Basic</button>
-      <button type="button" class:selected={advanced} aria-pressed={advanced} onclick={() => setAdvanced(true)}>Advanced</button>
+      <button type="button" class="btn btn-quiet" class:picked={!advanced} aria-pressed={!advanced} onclick={() => setAdvanced(false)}>Basic</button>
+      <button type="button" class="btn btn-quiet" class:picked={advanced} aria-pressed={advanced} onclick={() => setAdvanced(true)}>Advanced</button>
     </div>
     <input type="search" placeholder="Find a stone…" aria-label="Find crafting stones" bind:value={stoneQuery} oninput={() => (stonePage = 0)} />
     <div class="currency-grid" use:fitCurrency>
@@ -347,6 +347,8 @@
       {#if message}<p class="text-alarm" role="status">{message}</p>
       {:else if resultOp && note}<div class="craft-result" role="status"><strong>{resultOp}</strong><p title={note}>{['rebirth', 'reroll_mod_all', 'replace_all'].includes(resultKind || '') ? note.replace(/^[a-z_]+:\s*/, '').split(' · ')[0] : note.replace(/^[a-z_]+:\s*/, '')}</p></div>
       {:else if armed}<p class="text-value" role="status">{reason(null) || 'Ready · click the item to apply.'}</p>
+      {:else if selectedStone && mode}
+        <p class="text-note" role="status">{reason(null) || `Ready · right-click the item to apply ${selectedStone.name}.`}</p>
       {:else}<p class="text-note">Right-click to select · click to apply · Shift-click to repeat · Esc to cancel</p>{/if}
     </footer>
   </section>
@@ -437,8 +439,7 @@
   .pane-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--spacing-sm); }
   .pane-head span { font-size: var(--font-xs); }
   .craft-level { display: flex; gap: var(--spacing-xs); }
-  .craft-level button { flex: 1; padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--line); background: var(--panel); font-size: var(--font-xs); }
-  .craft-level button.selected { border-color: var(--gold); background: var(--surface-selected); color: var(--gold); }
+  .craft-level button { flex: 1; padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-xs); }
   .pane input { width: 100%; min-width: 0; }
   .currency-grid { --currency-row: calc(var(--slot-item) + var(--font-xs) * 2.4 + var(--spacing-xs) * 3); display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(var(--slot-item) * 2), 1fr)); grid-auto-rows: var(--currency-row); align-content: start; gap: var(--spacing-xs); min-height: 0; flex: 1; }
   .currency-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-xs); min-width: 0; padding: var(--spacing-xs); font-size: var(--font-xs); line-height: 1.2; }

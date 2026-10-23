@@ -85,7 +85,7 @@ describe('the passive tree', () => {
 
     const wrongLayout = cloneSpec();
     wrongLayout.layout.algorithm = 'radial-topology';
-    expect(() => build(wrongLayout)).toThrow(/seven-spoke-v3/);
+    expect(() => build(wrongLayout)).toThrow(/unsupported v3 layout algorithm radial-topology/);
   });
 
 
@@ -113,20 +113,16 @@ describe('the passive tree', () => {
     expect(canSpendTree(s, node.id).ok).toBe(true);
   });
 
-  it('opens a cross-linked branch from a neighbouring owned region', () => {
-    const s = newGame();
-    s.player.treePoints = 1000;
-    for (let index = 1; index <= 6; index++) expect(spendTreePoint(s, `normal.str.s${String(index).padStart(2, '0')}`).ok).toBe(true);
-    expect(canSpendTree(s, 'normal.agi.s06').ok).toBe(true);
-    expect(spendTreePoint(s, 'normal.agi.s06').ok).toBe(true);
-    expect(canSpendTree(s, 'normal.agi.s07').ok).toBe(true);
-
-    // and the ring works the other way round
-    const back = newGame();
-    back.player.treePoints = 1000;
-    for (let index = 1; index <= 6; index++) expect(spendTreePoint(back, `normal.agi.s${String(index).padStart(2, '0')}`).ok).toBe(true);
-    expect(canSpendTree(back, 'normal.str.s06').ok).toBe(true);
-    expect(spendTreePoint(back, 'normal.str.s06').ok).toBe(true);
+  it('continues a cross-region road from either owned frontier', () => {
+    const link = tree.links.find((l) => tree.byId[l.a].kind === 'normal' && tree.byId[l.b].kind === 'normal' && tree.byId[l.a].wing !== tree.byId[l.b].wing)!;
+    for (const [from, to] of [[link.a, link.b], [link.b, link.a]]) {
+      const s = newGame();
+      s.player.treePoints = 1000;
+      s.player.treeRanks = { [from]: 1 };
+      expect(canSpendTree(s, to).ok).toBe(true);
+      expect(spendTreePoint(s, to).ok).toBe(true);
+      expect(s.player.treeRanks[to]).toBe(1);
+    }
   });
 
   it('hands every spent point back, free, and grants the lines its ranks buy', () => {

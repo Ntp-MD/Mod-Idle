@@ -76,9 +76,9 @@ describe('the tree cage gates the structure of the spec it reads', () => {
     expect(verdict(checks(broken), 'TR7')).toBe('FAIL');
   });
 
-  it('fails when two nodes sit on top of one another', () => {
+  it('fails when the Start marker overlaps the tree nodes', () => {
     const broken = readTree();
-    broken.layout.radii = { normal: 1000, notable: 1000, keystone: 1000, start: 1000 };
+    broken.layout.radii.start = 1000;
     expect(verdict(checks(broken), 'TR13')).toBe('FAIL');
   });
 
@@ -91,6 +91,13 @@ describe('the tree cage gates the structure of the spec it reads', () => {
   it('fails when the regions are not ringed together', () => {
     const broken = readTree();
     broken.links = [];
+    expect(verdict(checks(broken), 'TR10')).toBe('FAIL');
+  });
+
+  it('fails when connecting the roads would require a Notable or Keystone', () => {
+    const broken = readTree();
+    const kinds = new Map(broken.nodes.map((n: any) => [n.id, n.kind]));
+    broken.links = broken.links.filter((link: any) => kinds.get(link.a) !== 'normal' || kinds.get(link.b) !== 'normal');
     expect(verdict(checks(broken), 'TR10')).toBe('FAIL');
   });
 
@@ -111,5 +118,21 @@ describe('the tree cage gates the structure of the spec it reads', () => {
     const before = JSON.stringify(doc);
     checks(doc);
     expect(JSON.stringify(doc)).toBe(before);
+  });
+
+  it('fails when two Keystones use the same immediate Notable', () => {
+    const broken = readTree();
+    const second = broken.nodes.find((node: any) => node.kind === 'keystone' && node.placement?.slot === 2);
+    const first = broken.nodes.find((node: any) => node.kind === 'keystone' && node.wing === second.wing
+      && node.placement?.cluster === second.placement.cluster && node.id !== second.id);
+    second.needs = [...first.needs];
+    expect(verdict(checks(broken), 'TR19')).toBe('FAIL');
+  });
+
+  it('fails when a Keystone entrance requires buying the other branch Notable first', () => {
+    const broken = readTree();
+    const gate = broken.nodes.find((node: any) => node.kind === 'notable' && node.placement?.slot === 2);
+    gate.needs = [gate.id.slice(0, -3)];
+    expect(verdict(checks(broken), 'TR19')).toBe('FAIL');
   });
 });

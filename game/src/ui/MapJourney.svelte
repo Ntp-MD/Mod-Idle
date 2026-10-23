@@ -5,15 +5,20 @@
   import { settlementById } from '../sim/town';
   import { mapKnowledge, trailSites, trailSiteKind } from '../sim/map-exploration';
   import type { CampEncounterAction, CampEncounterPolicy } from '../sim/camp-encounters';
-  let { state, writable, onSelect, onStart, onStop, onClear, onMove, onEncounter, onPolicy } : {
+  import chevronUp from '../icon/ui/chevron-up.png';
+  import chevronDown from '../icon/ui/chevron-down.png';
+  let { state, writable, expanded = $bindable(false), onSelect, onStart, onStop, onClear, onMove, onEncounter, onPolicy, onRepeat, onAutoReturn } : {
     state: GameState; writable: boolean;
+    expanded?: boolean;
     onSelect: (hex: { q: number; r: number }) => void;
     onStart: () => void; onStop: () => void; onClear: () => void;
     onMove: (index: number, direction: -1 | 1) => void;
     onEncounter: (id: number, action: CampEncounterAction) => void;
     onPolicy: (policy: CampEncounterPolicy) => void;
+    onRepeat: (repeat: boolean) => void;
+    onAutoReturn: (enabled: boolean) => void;
   } = $props();
-  const sites = $derived(trailSites.filter(site => mapKnowledge(state, site) !== 'unknown'));
+  const sites = $derived(trailSites(state).filter(site => mapKnowledge(state, site) !== 'unknown'));
   const known = $derived(new Set([...(state.mapJournal?.scouted || []), ...(state.mapJournal?.visited || [])]).size);
   const activityName = (kind?: string) => kind ? ({ mine: 'Mining', grove: 'Woodcutting', fish: 'Fishing' } as Record<string, string>)[kind] || kind : '';
   const encounter = $derived(state.fieldwork.campEncounters.active);
@@ -47,10 +52,11 @@
   });
 </script>
 
-<details class="map-tools-section" name="map-tools-sections" open>
-  <summary>Journey · {state.patrol.stops.length ? `${state.patrol.stops.length} stops` : `${known} known blocks`}</summary>
+<details class="map-tools-section" bind:open={expanded}>
+  <summary>Journey tools · {state.patrol.stops.length ? `${state.patrol.stops.length} stops` : `${known} known blocks`}</summary>
   <div class="map-journey">
     <p class="text-note">{state.mapJournal?.visited.length || 0} explored · {known} known. Approach landmarks to scout their roster and supplies.</p>
+    <p class="text-note">The loop: hunt for drops and materials → deliver or sell at a settlement → improve gear and tree → continue from the pinned goal or Patrol.</p>
     {#if state.fieldwork.camp}
       <button class="btn btn-quiet" type="button" onclick={() => onSelect(state.fieldwork.camp!.cell)}>Locate Field Camp{state.fieldwork.action ? ` · ${activityName(state.fieldwork.action.kind)}` : ''}</button>
       <label class="camp-policy">When Camp is threatened
@@ -61,7 +67,7 @@
       </label>
     {/if}
     {#if encounter}
-      <section class="camp-encounter" aria-label="Camp encounter" aria-live="polite">
+      <section class="camp-encounter card-read" aria-label="Camp encounter" aria-live="polite">
         <h3>{encounterName}</h3>
         <p>{encounter.stage === 'warning' ? `Warning · ${encounter.warningSec}s · ${state.fieldwork.campEncounters.policy} policy`
           : encounter.stage === 'choice' ? `Choose before the threat reaches Camp · ${encounter.choiceSec}s`
@@ -92,8 +98,8 @@
               {#if state.patrol.active && state.patrol.index === i}<small>{state.patrol.groupsCleared}/{E.road.patrol.groups_per_stop} groups</small>{/if}
             </span>
           </button>
-          <button class="btn btn-flat stop-move" type="button" aria-label={`Move stop ${i + 1} earlier`} disabled={!writable || state.patrol.active || !!state.walk || i === 0} onclick={() => onMove(i, -1)}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 10 4-4 4 4" /></svg></button>
-          <button class="btn btn-flat stop-move" type="button" aria-label={`Move stop ${i + 1} later`} disabled={!writable || state.patrol.active || !!state.walk || i === state.patrol.stops.length - 1} onclick={() => onMove(i, 1)}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></button>
+          <button class="btn btn-flat stop-move" type="button" aria-label={`Move stop ${i + 1} earlier`} disabled={!writable || state.patrol.active || !!state.walk || i === 0} onclick={() => onMove(i, -1)}><span class="icon-mask" style={`--glyph:url(${chevronUp})`} aria-hidden="true"></span></button>
+          <button class="btn btn-flat stop-move" type="button" aria-label={`Move stop ${i + 1} later`} disabled={!writable || state.patrol.active || !!state.walk || i === state.patrol.stops.length - 1} onclick={() => onMove(i, 1)}><span class="icon-mask" style={`--glyph:url(${chevronDown})`} aria-hidden="true"></span></button>
         </li>
       {/each}
     </ol>
@@ -104,12 +110,17 @@
       <button class="btn btn-gold" type="button" onclick={onStart} disabled={!writable || !!state.walk || state.phase === 'camp' || state.patrol.stops.length < E.road.patrol.min_stops}>Start Patrol</button>
       <button class="btn btn-quiet" type="button" onclick={onClear} disabled={!writable || !!state.walk}>Clear itinerary</button>
     {/if}
+    <label class="journey-setting"><input type="checkbox" checked={state.patrol.repeat} disabled={!writable || state.patrol.active}
+      onchange={(event) => onRepeat(event.currentTarget.checked)} /> Repeat Patrol</label>
+    <label class="journey-setting"><input type="checkbox" checked={state.autoReturn.enabled} disabled={!writable}
+      onchange={(event) => onAutoReturn(event.currentTarget.checked)} /> Auto-Return at {E.road.patrol.auto_return_threshold_pct}% bag</label>
+    <p class="text-note">Auto-Return stashes unlocked gear, then resumes Patrol.</p>
     <p class="text-note">Walking and route changes run online. Offline hunting stays at the current stop.</p>
     {#if sites.length}
       <details>
         <summary>Discovered trail sites · {sites.length}</summary>
         <div class="journey-sites">
-          {#each sites as site}<button class="btn btn-flat" type="button" onclick={() => onSelect(site)}>{trailSiteKind(site).name} · {settlementById(ownerOf(site).id)?.name}{state.mapJournal?.claimedSites.includes(site.id) ? ' · explored' : ''}</button>{/each}
+          {#each sites as site}<button class="btn btn-flat" type="button" onclick={() => onSelect(site)}>{trailSiteKind(site).name} · {settlementById(ownerOf(site).id)?.name} · {Math.ceil(site.remainingSec / 60)}m left{state.mapJournal?.claimedSites.includes(site.id) ? ' · explored' : ''}</button>{/each}
         </div>
       </details>
     {/if}
@@ -117,10 +128,12 @@
 </details>
 
 <style>
+  .map-tools-section { min-width: 0; border-top: 1px solid var(--edge); }
+  .map-tools-section > summary { padding-block: var(--spacing-sm); cursor: pointer; font-size: var(--font-xs); font-weight: 600; }
   .map-journey, .journey-sites, .journey-stops { display: flex; flex-direction: column; gap: var(--spacing-xs); }
   .map-journey { padding-block: var(--spacing-sm); }
 .camp-policy { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); }
-.camp-encounter { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm); border: 1px solid var(--edge); border-radius: var(--radius-card); background: var(--inset); }
+.camp-encounter { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm); }
 .camp-encounter h3, .camp-encounter p { margin: 0; }
 .camp-encounter-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
   .map-journey p { margin: 0; line-height: 1.4; }
@@ -129,6 +142,6 @@
   .stop-name { display: flex; align-items: center; text-align: left; gap: var(--spacing-sm); flex: 1; min-width: 0; }
   .stop-name span { display: flex; flex-direction: column; overflow-wrap: anywhere; }
   .active .stop-name { color: var(--gold); }
-  .stop-move svg { width: var(--icon-label); height: var(--icon-label); fill: none; stroke: currentColor; stroke-width: 1.5; }
   .journey-sites button { text-align: left; }
+  .journey-setting { display: flex; align-items: flex-start; gap: var(--spacing-xs); }
 </style>

@@ -1,17 +1,82 @@
-import { eng } from '../engine/client';
-import { E, fieldwork } from '../engine/client';
+import { E, eng, fieldwork } from '../engine/client';
 import { settlementById } from '../sim/town';
 import { rankOf, currentCell, walkedCells, trailCells, cellsTo } from '../sim/road';
-import { mapUprightAt, projectMapPoint } from './map-projection';
-import { lowerLeftEdge, mapLevelBand, mapNameLines, mapSlantDeg, placeMapNames, type MapNameBox } from './map-labels';
-import { nearbyMapEncounters, type MapEncounterSite } from './map-encounters';
-import { mobIcon } from '../icon';
-import { mapSpeciesArt } from './map-species-art';
-import { paintMapAdventure, uniqueTraceSpecies } from './map-adventure';
-import { mapSprite } from './map-sprites';
-import { trailSiteAt, trailSiteKind } from '../sim/map-exploration';
+import { mapUprightAt, projectedHex, projectMapPoint } from './map-projection';
+import { mapScreenLabelMatrix } from './map-camera';
+import { mapSceneProjection, paintMapScene } from './map-scene';
+import { mapLevelBand, mapNameLines, mapNamePointer, mapNamePosition, placeMapNames, type MapNameBox } from './map-labels';
+import { paintMapAdventure } from './map-adventure';
+import { mapMarker } from './map-markers';
+import { MAP_EXPLORATION, type TrailSite } from '../sim/map-exploration';
 
 const figureArt = new WeakMap<Element, string>();
+type SheetIndex = {
+  svg: SVGSVGElement;
+  cells: SVGPolygonElement[];
+  cellByAx: Map<string, SVGPolygonElement>;
+  cellByDataCell: Map<string, SVGPolygonElement>;
+  towns: Map<string, SVGPolygonElement[]>;
+  initialized: boolean;
+  lastPaintKey: string | null;
+};
+const sheetIndexes = new WeakMap<HTMLElement, SheetIndex>();
+
+function sheetIndex(root: HTMLElement): SheetIndex | null {
+  const svg = root.querySelector('svg');
+  if (!svg) return null;
+  const previous = sheetIndexes.get(root);
+  if (previous?.svg === svg) return previous;
+  const cells = Array.from(svg.querySelectorAll<SVGPolygonElement>('polygon.cell'));
+  const cellByAx = new Map<string, SVGPolygonElement>();
+  const cellByDataCell = new Map<string, SVGPolygonElement>();
+  const towns = new Map<string, SVGPolygonElement[]>();
+  for (const cell of cells) {
+    const ax = cell.getAttribute('data-ax');
+    const dataCell = cell.getAttribute('data-cell');
+    const townId = cell.getAttribute('data-node');
+    if (ax) cellByAx.set(ax, cell);
+    if (dataCell) cellByDataCell.set(dataCell, cell);
+    if (townId) {
+      const owned = towns.get(townId) || [];
+      owned.push(cell);
+      towns.set(townId, owned);
+    }
+  }
+  const index: SheetIndex = { svg, cells, cellByAx, cellByDataCell, towns, initialized: false, lastPaintKey: null };
+  sheetIndexes.set(root, index);
+  return index;
+}
+
+function mapPaintKey(opts: PaintOpts): string {
+  const state = opts.gameState;
+  const feet = currentCell(state);
+  const walk = state.walk;
+  const camp = state.fieldwork?.camp;
+  const encounter = state.fieldwork?.campEncounters?.active;
+  const journal = state.mapJournal;
+  const event = journal?.lastEvent;
+  const patrol = state.patrol;
+  const expeditionTasks = (state.town?.tasks || []).filter((task: any) => task?.kind === 'expedition')
+    .map((task: any) => [task.zone, task.subzone, task.progress, task.n, task.claimed]);
+  return JSON.stringify([
+    opts.view, opts.gateLevel, opts.showIds, opts.showWalk, opts.pickedCell?.key || null, opts.townId,
+    [feet.q, feet.r], walk ? [walk.from.q, walk.from.r, walk.to.q, walk.to.r, walk.node, walk.kind, walk.sub, walk.wild, walk.blocksWalked] : null,
+    state.group.map((mob: { species: string; kind: string }) => [mob.species, mob.kind]), state.autoReturn.phase,
+    camp ? [camp.cell.q, camp.cell.r] : null, state.fieldwork?.action?.kind || '',
+    encounter ? [encounter.id, encounter.kind, encounter.stage, encounter.origin.q, encounter.origin.r,
+      encounter.payload?.species || '', encounter.preparedGroup?.[0]?.speciesId || ''] : null,
+    [journal?.visited || [], journal?.scouted || [], journal?.claimedSites || [], journal?.trail?.sites.map((site: TrailSite) => [site.id, site.q, site.r, site.kind]) || [], event || null,
+      !!event && state.clockSec - event.atSec <= MAP_EXPLORATION.event_display_sec],
+    state.town.visited, state.counters.zoneKills, state.town.helpCredit, expeditionTasks,
+    [patrol.active, patrol.index, patrol.groupsCleared,
+      patrol.stops.map((stop: any) => [stop.cell.q, stop.cell.r, stop.zone, stop.subzone])],
+  ]);
+}
+
+function setAttributeIfChanged(element: Element, name: string, value: string) {
+  if (element.getAttribute(name) !== value) element.setAttribute(name, value);
+}
+
 function paintFigureArt(element: Element, markup: string) {
   if (figureArt.get(element) === markup) return;
   element.innerHTML = markup; figureArt.set(element, markup);
@@ -123,84 +188,84 @@ function plantCellGlow(cells: SVGPolygonElement[]) {
 }
 
 /**
- * The sheet is repainted after every `{@html}` rebuild: the fills follow the view, the walk graph
- * and the cell ids show or hide, and the plotted route lights up one cell per block — the cells
- * already crossed in a darker tone. It matches the engine's own cell keys against the labels the
- * generated sheet carries, so no position table is ever read (X33 · M7 · M10). The hex the feet are
- * on is marked where it lies, and a character mark is built once and then moved cell to cell, so a
- * walk reads as a walk rather than a jump.
+ * The SVG index is built once and the sheet only repaints for map-relevant state changes. Cached cell
+ * keys keep route, terrain and marker updates on the generated board without repeated DOM searches.
  */
 export function paintSheet(root: HTMLElement, opts: PaintOpts) {
+  const index = sheetIndex(root);
+  if (!index) return;
+  const paintKey = mapPaintKey(opts);
+  if (index.lastPaintKey === paintKey) return;
   const { view: v, gateLevel: lv, showIds: ids, showWalk: hops, pickedCell, gameState } = opts;
   const walk = gameState.walk;
-  const selectedTown = pickedCell && root.querySelector(`polygon.cell[data-ax="${pickedCell.q},${pickedCell.r}"]`)?.getAttribute('data-node');
+  const { svg, cells } = index;
+  const feet = currentCell(gameState);
+  const feetKey = feet.q + ',' + feet.r;
+  const pickedKey = pickedCell ? pickedCell.q + ',' + pickedCell.r : null;
+  const selectedTown = pickedKey ? index.cellByAx.get(pickedKey)?.getAttribute('data-node') : null;
   root.querySelectorAll('.node').forEach(node => node.classList.toggle('picked', node.getAttribute('data-node') === selectedTown));
   // The pin layer is retired: position reads off the hex edge itself (see `pin-here` / `pin-target`
   // on the cell polygon), so no circle ever covers the terrain, icon or mob art mid-cell.
   root.querySelectorAll('.pin').forEach(pin => {
     pin.classList.remove('here', 'target');
   });
-  const cells = Array.from(root.querySelectorAll<SVGPolygonElement>('polygon.cell'));
-  featherFieldEdge(cells);
-  plantCellGlow(cells);
+  if (!index.initialized) {
+    featherFieldEdge(cells);
+    plantCellGlow(cells);
+    index.initialized = true;
+  }
+  const campCell = gameState.fieldwork?.camp?.cell || null;
+  const routeKeys = new Set<string>(walk ? trailCells(gameState)
+    : pickedCell ? cellsTo(gameState, { q: pickedCell.q, r: pickedCell.r }) : []);
+  const walked = new Set(walk ? walkedCells(gameState) : []);
+  const hereTown = !walk && rankOf(feet) === 0 ? opts.townId : null;
+  const targetTown = walk && walk.kind === 'town' ? walk.node : null;
+  const townCell = (id: string | null) => {
+    if (!id) return null;
+    const owned = index.towns.get(id) || [];
+    return owned.find(cell => !cell.hasAttribute('data-sub') && !cell.hasAttribute('data-wild')) || owned[0] || null;
+  };
+  const pinHereAx = townCell(hereTown)?.getAttribute('data-ax') || null;
+  const pinTargetAx = townCell(targetTown)?.getAttribute('data-ax') || null;
   for (const p of cells) {
-    p.classList.remove('locked');
-    p.classList.remove('site-dungeon', 'site-mine', 'site-grove', 'field-camp');
+    const ax = p.getAttribute('data-ax') || '';
     const wildIndex = p.getAttribute('data-wild');
     const site = wildIndex == null ? null : fieldwork.siteAt(Number(wildIndex));
-    if (site) p.classList.add(`site-${site}`);
-    const camp = gameState.fieldwork?.camp;
-    if (camp && camp.cell.q === Number(p.getAttribute('data-ax')?.split(',')[0]) && camp.cell.r === Number(p.getAttribute('data-ax')?.split(',')[1])) p.classList.add('field-camp');
-    if (v === 'terrain') p.setAttribute('fill', p.getAttribute('data-tone') || 'none');
-    else if (!p.hasAttribute('data-lo')) p.setAttribute('fill', 'none');
-    else {
-      p.setAttribute('fill', ramp(Number(p.getAttribute('data-band'))));
-      // the gate holds the fill as a state the stylesheet paints (`--ground`), not a second colour here
-      if (v !== 'band' && lv < Number(p.getAttribute('data-lo'))) p.classList.add('locked');
-    }
+    p.classList.toggle('site-dungeon', site === 'dungeon');
+    p.classList.toggle('site-mine', site === 'mine');
+    p.classList.toggle('site-grove', site === 'grove');
+    p.classList.toggle('field-camp', !!campCell && ax === campCell.q + ',' + campCell.r);
+    const hasLevel = p.hasAttribute('data-lo');
+    p.classList.toggle('locked', v !== 'terrain' && v !== 'band' && hasLevel && lv < Number(p.getAttribute('data-lo')));
+    const fill = v === 'terrain' ? p.getAttribute('data-tone') || 'none'
+      : !hasLevel ? 'none' : ramp(Number(p.getAttribute('data-band')));
+    setAttributeIfChanged(p, 'fill', fill);
+    p.style.setProperty('--map-cell-fill', fill);
     const edgeOpacity = v === 'terrain' ? p.getAttribute('data-edge-opacity') || '1' : '1';
-    p.setAttribute('fill-opacity', edgeOpacity);
-    p.setAttribute('stroke-opacity', edgeOpacity);
-    p.classList.remove('route', 'walked', 'picked', 'standing', 'pin-here', 'pin-target');
-  }
-  // Position reads off the hex edge, not a circle mid-cell: the settlement cell itself carries the
-  // state, so terrain, icons and mob art stay uncovered. A settlement polygon carries `data-node`
-  // with no `data-sub`/`data-wild`; sides carry one of those, so excluding them lands on the town.
-  const hereTown = !walk && rankOf(currentCell(gameState)) === 0 ? opts.townId : null;
-  const targetTown = walk && walk.kind === 'town' ? walk.node : null;
-  if (hereTown || targetTown) {
-    const townCell = (id: string | null) => {
-      if (!id) return null;
-      const cells = Array.from(root.querySelectorAll(`polygon.cell[data-node="${id}"]`));
-      return cells.find(cell => !cell.hasAttribute('data-sub') && !cell.hasAttribute('data-wild')) || cells[0] || null;
-    };
-    const here = hereTown && townCell(hereTown);
-    if (here) (here as Element).classList.add('pin-here');
-    const target = targetTown && townCell(targetTown);
-    if (target) (target as Element).classList.add('pin-target');
+    setAttributeIfChanged(p, 'fill-opacity', edgeOpacity);
+    setAttributeIfChanged(p, 'stroke-opacity', edgeOpacity);
+    const isRoute = routeKeys.has(ax);
+    const isWalked = isRoute && walked.has(ax);
+    p.classList.toggle('route', isRoute && !isWalked);
+    p.classList.toggle('walked', isWalked);
+    p.classList.toggle('picked', ax === pickedKey);
+    p.classList.toggle('standing', ax === feetKey);
+    p.classList.toggle('pin-here', ax === pinHereAx);
+    p.classList.toggle('pin-target', ax === pinTargetAx);
   }
   const toggle = (id: string, on: boolean) => {
-    const g = root.querySelector('#' + id) as HTMLElement | null;
-    if (g) g.style.display = on ? '' : 'none';
+    const g = svg.querySelector('#' + id) as HTMLElement | null;
+    const display = on ? '' : 'none';
+    if (g && g.style.display !== display) g.style.display = display;
   };
   toggle('ids', ids);
   toggle('walk', hops);
-  const regions = root.querySelector('#regions') as HTMLElement | null;
-  if (regions) regions.style.opacity = v === 'terrain' ? '1' : '0';
-  if (pickedCell || walk) {
-    const crossed = new Set(walkedCells(gameState));
-    const keys = walk ? trailCells(gameState) : cellsTo(gameState, { q: pickedCell!.q, r: pickedCell!.r });
-    keys.forEach((k: string) => {
-      const cell = root.querySelector(`polygon.cell[data-ax="${k}"]`);
-      if (cell) cell.classList.add(crossed.has(k) ? 'walked' : 'route');
-    });
-    if (pickedCell) root.querySelector(`polygon.cell[data-ax="${pickedCell.q},${pickedCell.r}"]`)?.classList.add('picked');
-  }
+  const regions = svg.querySelector('#regions') as HTMLElement | null;
+  const regionOpacity = v === 'terrain' ? '1' : '0';
+  if (regions && regions.style.opacity !== regionOpacity) regions.style.opacity = regionOpacity;
   // the hex the feet are on is marked where it lies, so standing is read off the ground itself
-  const feet = currentCell(gameState);
-  const at = root.querySelector(`polygon.cell[data-ax="${feet.q},${feet.r}"]`);
-  at?.classList.add('standing');
-  root.querySelectorAll('.zonelabel').forEach(label => {
+  const at = index.cellByAx.get(feetKey) || null;
+  svg.querySelectorAll('.zonelabel').forEach(label => {
     const id = label.getAttribute('data-cell');
     label.classList.toggle('active', id === pickedCell?.key || id === at?.getAttribute('data-cell'));
   });
@@ -208,9 +273,8 @@ export function paintSheet(root: HTMLElement, opts: PaintOpts) {
   // a mark at its centre, both read off the geometry the sheet already carries (X33 · M7). Every cell is
   // the same hexagon translated, so the mark is built once and then *moved* — the sheet slides it to the
   // next cell, and a walk reads as a walk rather than as a jump.
-  const svg = root.querySelector('svg');
-  svg?.setAttribute('data-view', v);
-  if (svg && at) {
+  setAttributeIfChanged(svg, 'data-view', v);
+  if (at) {
     let you = svg.querySelector('g.you');
     const pts = (at.getAttribute('points') || '').trim().split(/\s+/).map((p: string) => p.split(',').map(Number));
     const cx = pts.reduce((n: number, p: number[]) => n + p[0], 0) / pts.length;
@@ -222,9 +286,9 @@ export function paintSheet(root: HTMLElement, opts: PaintOpts) {
     }
     const actors = svg.querySelector<SVGGElement>('#actors') || svg.querySelector<SVGGElement>('#projected-board') || svg;
     if (you.parentNode !== actors) actors.append(you);
-    const own = actors.querySelector<SVGGElement>(`[data-actor-ax="${feet.q},${feet.r}"]`);
-    if (own && own.parentNode === actors && own.nextElementSibling !== you) actors.insertBefore(you, own.nextElementSibling);
-    paintFigureArt(you, mapSprite('/map/characters/player/traveler-piece.png', -24, -28, 21, 32, 'mark'));
+    paintFigureArt(you, '<title>Your position</title><g class="mark" transform="translate(-12 3)">' + mapMarker('player', 'compass', { scale: .55 }) + '</g>');
+    setAttributeIfChanged(you, 'role', 'img');
+    setAttributeIfChanged(you, 'aria-label', 'Your position · block ' + (at.getAttribute('data-cell') || feetKey));
     const position = `${feet.q},${feet.r}`;
     const previous = you.getAttribute('data-position');
     if (previous && previous !== position) {
@@ -232,178 +296,196 @@ export function paintSheet(root: HTMLElement, opts: PaintOpts) {
       you.getBoundingClientRect();
       you.classList.add('stepping');
     }
-    you.setAttribute('data-position', position);
-    you.setAttribute('transform', mapUprightAt(cx, cy));
+    setAttributeIfChanged(you, 'data-position', position);
+    setAttributeIfChanged(you, 'transform', mapUprightAt(cx, cy, mapSceneProjection(root)));
     you.classList.toggle('walking', !!walk);
     you.classList.toggle('returning', gameState.autoReturn.phase !== 'idle');
   }
-  const board = svg?.querySelector('#projected-board');
+  const board = svg.querySelector('#projected-board');
   if (!board) return;
-  const sites: MapEncounterSite[] = cells.flatMap(cell => {
-    const townId = cell.getAttribute('data-node'), sub = cell.getAttribute('data-sub');
-    if (!townId || sub == null) return [];
-    const town = settlementById(townId);
-    const species = town && eng.zoneById(town.zone).subzones?.[Number(sub)]?.species || [];
-    const id = uniqueTraceSpecies(species) || species[0];
-    if (!id) return [];
-    const [q, r] = (cell.getAttribute('data-ax') || '').split(',').map(Number);
-    return [{ key: cell.getAttribute('data-cell')!, q, r, species: eng.speciesById(id)?.name || id }];
-  });
-  const activeSpecies = gameState.group[0]?.species || '';
-  if (activeSpecies && rankOf(feet) > 0 && !sites.some(site => site.q === feet.q && site.r === feet.r)) {
-    sites.push({ key: at!.getAttribute('data-cell')!, q: feet.q, r: feet.r, species: activeSpecies });
-  }
-  const campCell = gameState.fieldwork.camp?.cell;
-  const nearby = v === 'terrain' ? nearbyMapEncounters(sites, feet, activeSpecies).filter(site => {
-    const activeHere = activeSpecies && site.q === feet.q && site.r === feet.r;
-    const campHere = campCell && site.q === campCell.q && site.r === campCell.r;
-    return activeHere || !campHere && !trailSiteAt(site);
-  }) : [];
-  const visible = new Set(nearby.map(site => site.key));
-  board.querySelectorAll<SVGGElement>('.map-mob').forEach(marker => {
-    if (!visible.has(marker.getAttribute('data-cell') || '')) marker.remove();
-  });
-  const NS = 'http://www.w3.org/2000/svg';
-  for (const site of nearby) {
-    const cell = root.querySelector<SVGPolygonElement>(`polygon.cell[data-cell="${site.key}"]`)!;
-    const box = cell.getBBox();
-    const pocket = board.querySelector<SVGGElement>(`[data-actor-ax="${site.q},${site.r}"] .actor-slot`);
-    const parent = pocket || board.querySelector('#actors') || board;
-    let marker = board.querySelector<SVGGElement>(`.map-mob[data-cell="${site.key}"]`);
-    if (!marker) {
-      marker = document.createElementNS(NS, 'g');
-      marker.setAttribute('class', 'map-mob'); marker.setAttribute('data-cell', site.key);
-      marker.setAttribute('role', 'img');
-      parent.append(marker);
-    }
-    if (marker.parentNode !== parent) parent.append(marker);
-    marker.setAttribute('data-species', site.species);
-    marker.setAttribute('aria-label', `${site.species} nearby on block ${site.key}`);
-    const art = mapSpeciesArt(site.species) || mobIcon(site.species);
-    paintFigureArt(marker, '<ellipse class="map-mob-shadow" cx="7" cy="3" rx="7" ry="2"/>'
-      + mapSprite(art, -7, -27, 28, 30, 'map-mob-body'));
-    marker.setAttribute('transform', mapUprightAt(box.x + box.width / 2, box.y + box.height / 2));
-  }
   paintMapAdventure(root, gameState, v === 'terrain');
+  paintMapScene(root);
+  index.lastPaintKey = paintKey;
 }
 
-/** Upright screen-sized labels are separate from the board's camera projection. */
-export function paintMapNames(root: HTMLElement, opts: { show: boolean; hovered: string | null; picked: string | null }) {
-  const svg = root.querySelector('svg');
-  const matrix = svg?.getScreenCTM();
-  if (!svg || !matrix) return;
+type MapNamePlate = {
+  group: SVGGElement; rect: SVGRectElement; text: SVGGElement;
+  pointer: SVGPathElement; stem: SVGPathElement; anchor: SVGCircleElement;
+  signature: string; width: number; height: number;
+};
+const mapNameLayers = new WeakMap<SVGSVGElement, { layer: SVGGElement; plates: Map<string, MapNamePlate> }>();
+const mapNameGeometry = new WeakMap<SVGPolygonElement, { x: number; y: number; radius: number }>();
+function nameGeometry(cell: SVGPolygonElement) {
+  let geometry = mapNameGeometry.get(cell);
+  if (!geometry) {
+    const box = cell.getBBox();
+    geometry = { x: box.x + box.width / 2, y: box.y + box.height / 2, radius: box.height / 2 };
+    mapNameGeometry.set(cell, geometry);
+  }
+  return geometry;
+}
+
+/** Retained screen-facing nameplates with a pin back to the projected hex centre. */
+export function paintMapNames(root: HTMLElement, opts: { show: boolean; hovered: string | null; picked: string | null; measure?: number }) {
+  const index = sheetIndex(root), svg = index?.svg, matrix = svg?.getScreenCTM();
+  if (!index || !svg || !matrix) return;
   const scale = Math.hypot(matrix.a, matrix.b);
   if (!scale) return;
-  const NS = 'http://www.w3.org/2000/svg';
-  let layer = svg.querySelector<SVGGElement>('#map-names');
-  if (!layer) { layer = document.createElementNS(NS, 'g'); layer.id = 'map-names'; svg.append(layer); }
-  layer.replaceChildren();
-  const cells = Array.from(svg.querySelectorAll<SVGPolygonElement>('polygon.cell'));
-  const cellW = cells[0]?.getBoundingClientRect().width || 0;
-  const overview = cellW < 115;
-  // Mid zoom shows towns only; subs join once cells are large enough to breathe. Wild sides
-  // (mine/grove/dungeon) stay hover/pick-only so they never carpet the board.
-  const close = cellW >= 190;
-  const frame = root.getBoundingClientRect();
-  const candidates: MapNameBox[] = [];
-  const groups = new Map<string, SVGGElement>();
-  const slant = mapSlantDeg();
-  const add = (key: string, name: string, x: number, y: number, cls: string, level: string, forced: boolean, priority: number, slanted: false | { angleDeg: number } = false) => {
+  const camera = mapSceneProjection(root), NS = 'http://www.w3.org/2000/svg';
+  let retained = mapNameLayers.get(svg);
+  if (!retained) {
+    let layer = svg.querySelector<SVGGElement>('#map-names');
+    if (!layer) { layer = document.createElementNS(NS, 'g'); layer.id = 'map-names'; svg.append(layer); }
+    layer.replaceChildren();
+    retained = { layer, plates: new Map() };
+    mapNameLayers.set(svg, retained);
+  }
+  const { layer, plates } = retained;
+  const first = index.cells[0];
+  const cellW = first ? projectedHex(nameGeometry(first).radius, camera).width * scale : 0;
+  const overview = cellW < 115, close = cellW >= 190;
+  const bounds = root.getBoundingClientRect();
+  const frame = { left: bounds.left, right: bounds.right, top: bounds.top, bottom: Math.min(bounds.bottom, innerHeight) };
+  const candidates: MapNameBox[] = [], anchors = new Map<string, { x: number; y: number }>();
+  const add = (key: string, name: string, x: number, y: number, cls: string, level: string, forced: boolean, priority: number) => {
     const anchor = new DOMPoint(x, y).matrixTransform(matrix);
-    if (anchor.x < frame.left - 180 || anchor.x > frame.right + 180 || anchor.y < frame.top || anchor.y > frame.bottom) return;
-    const group = document.createElementNS(NS, 'g');
-    group.setAttribute('class', `map-name${cls ? ` ${cls}` : ''}${forced ? ' important-name' : ''}${slanted ? ' map-name-slanted' : ''}`);
-    group.setAttribute('data-name-key', key);
-    group.setAttribute('aria-hidden', 'true');
-    layer!.append(group);
-    // Every label sits along its own lower edge: single line, slanted to match, with the zone's
-    // level band riding in the same line so nothing ever needs a second row.
-    const title = slanted && level ? `${name} · ${level}` : name;
-    const lines = slanted ? [title] : mapNameLines(name);
-    const texts = lines.map((line, i) => {
-      const text = document.createElementNS(NS, 'text');
-      text.setAttribute('class', 'map-name-title'); text.setAttribute('y', String(13 + i * 18));
-      text.textContent = line; group.append(text); return text;
-    });
-    if (level && !slanted) {
-      const text = document.createElementNS(NS, 'text'); text.setAttribute('class', 'map-name-level');
-      text.setAttribute('y', String(13 + lines.length * 18)); text.textContent = level; group.append(text); texts.push(text);
+    if (anchor.x < frame.left || anchor.x > frame.right || anchor.y < frame.top || anchor.y > frame.bottom) return;
+    let plate = plates.get(key);
+    if (!plate) {
+      const group = document.createElementNS(NS, 'g');
+      group.setAttribute('data-name-key', key); group.setAttribute('aria-hidden', 'true');
+      const stem = document.createElementNS(NS, 'path'); stem.setAttribute('class', 'map-name-stem');
+      const pointer = document.createElementNS(NS, 'path'); pointer.setAttribute('class', 'map-name-pointer');
+      const dot = document.createElementNS(NS, 'circle'); dot.setAttribute('class', 'map-name-anchor'); dot.setAttribute('r', '2.5');
+      const rect = document.createElementNS(NS, 'rect'); rect.setAttribute('rx', '4');
+      const text = document.createElementNS(NS, 'g');
+      group.append(stem, pointer, dot, rect, text); layer.append(group);
+      plate = { group, rect, text, pointer, stem, anchor: dot, signature: '', width: 0, height: 0 };
+      plates.set(key, plate);
     }
-    const width = Math.ceil(Math.max(...texts.map(t => t.getComputedTextLength()))) + 18;
-    const height = 10 + lines.length * 18 + (level && !slanted ? 16 : 0);
-    texts.forEach(text => text.setAttribute('x', String(width / 2)));
-    if (forced || !cls.includes('map-name-bare')) {
-      const rect = document.createElementNS(NS, 'rect');
-      rect.setAttribute('width', String(width)); rect.setAttribute('height', String(height)); rect.setAttribute('rx', '4');
-      group.prepend(rect);
+    setAttributeIfChanged(plate.group, 'class', 'map-name ' + cls + (forced ? ' important-name' : ''));
+    const signature = JSON.stringify([name, level, cls, opts.measure || 0]);
+    if (plate.signature !== signature) {
+      plate.group.removeAttribute('display');
+      plate.text.replaceChildren();
+      const lines = mapNameLines(name), texts: SVGTextElement[] = [];
+      lines.forEach((line, i) => {
+        const text = document.createElementNS(NS, 'text');
+        text.setAttribute('class', 'map-name-title'); text.setAttribute('y', String(14 + i * 17));
+        text.textContent = line; plate!.text.append(text); texts.push(text);
+      });
+      if (level) {
+        const text = document.createElementNS(NS, 'text');
+        text.setAttribute('class', 'map-name-level'); text.setAttribute('y', String(14 + lines.length * 17));
+        text.textContent = level; plate.text.append(text); texts.push(text);
+      }
+      plate.width = Math.ceil(Math.max(...texts.map(text => text.getComputedTextLength()))) + 22;
+      plate.height = 11 + lines.length * 17 + (level ? 16 : 0);
+      texts.forEach(text => text.setAttribute('x', String(plate!.width / 2)));
+      plate.rect.setAttribute('width', String(plate.width)); plate.rect.setAttribute('height', String(plate.height));
+      plate.signature = signature;
     }
-    candidates.push({ key, left: Math.max(frame.left + 6, Math.min(frame.right - width - 6, anchor.x - width / 2)),
-      top: Math.max(frame.top + 6, Math.min(Math.min(frame.bottom, innerHeight) - height - 6, anchor.y)),
-      width, height, priority, forced, slanted: !!slanted, angleDeg: slanted ? slanted.angleDeg : undefined });
-    groups.set(key, group);
+    const position = mapNamePosition(anchor, plate.width, plate.height, frame);
+    candidates.push({ key, ...position, width: plate.width, height: plate.height, priority, forced, anchor });
+    anchors.set(key, anchor);
   };
-  for (const cell of cells) {
-    const key = cell.getAttribute('data-cell')!;
-    const forced = key === opts.hovered || key === opts.picked;
+  for (const cell of index.cells) {
+    const key = cell.getAttribute('data-cell')!, forced = key === opts.hovered || key === opts.picked;
     if (!forced && (!opts.show || overview || !cell.hasAttribute('data-node'))) continue;
-    const label = cellLabel(cell), box = cell.getBBox();
+    const label = cellLabel(cell);
     if (!forced && label.kind !== 'town' && cell.getAttribute('data-discovery') === 'unknown') continue;
-    // Zoom tiers: towns always, subs only when close, wild sides only on hover/pick.
-    if (!forced && label.kind === 'sub' && !close) continue;
-    if (!forced && label.kind === 'wild') continue;
-    // Every label rides one line: name + zone band together, so nothing ever needs a second row.
-    // `data-lo/hi` sits on every zoned cell, so towns, subs and wild sides all carry their band.
+    if (!forced && (label.kind === 'wild' || label.kind === 'sub' && !close)) continue;
+    const centre = nameGeometry(cell), point = projectMapPoint(centre.x, centre.y, camera);
     const level = mapLevelBand(cell.getAttribute('data-discovery'), cell.getAttribute('data-lo'), cell.getAttribute('data-hi'));
-    const cls = label.kind === 'town' ? 'town-name' : label.kind === 'sub' ? 'map-name-bare sub-name' : 'map-name-bare wild-name';
-    const priority = key === opts.hovered ? 4 : key === opts.picked ? 3
-      : cell.classList.contains('standing') ? 2 : label.kind === 'town' ? 1 : 0;
-    // Every label — idle, hovered or picked — hugs its own lower-left edge (edge 4), read off the
-    // polygon itself in screen space, then lifted just above it along the inward normal.
-    // Hovered/picked only gains the gold frame; the shape never changes.
-    const pts = (cell.getAttribute('points') || '').trim().split(/\s+/).map(p => {
-      const [px, py] = p.split(',').map(Number);
-      return { x: px, y: py };
-    });
-    const toScreen = (px: number, py: number) => {
-      const world = projectMapPoint(px, py);
-      const s = new DOMPoint(world.x, world.y).matrixTransform(matrix);
-      return { x: s.x, y: s.y };
-    };
-    const edge = pts.length >= 6 && pts.every(p => Number.isFinite(p.x) && Number.isFinite(p.y))
-      ? lowerLeftEdge(pts, toScreen)
-      : (() => {
-        const world = projectMapPoint(box.x + box.width / 2, box.y + box.height * .72);
-        const s = new DOMPoint(world.x, world.y).matrixTransform(matrix);
-        return { mx: s.x, my: s.y, angleDeg: slant, nx: 0, ny: -1 };
-      })();
-    const lift = 30; // text baseline sits this many screen px above the edge line (inward normal)
-    // Nudge every place ribbon 10 screen px left so the plate clears the hex's right rim.
-    const sx = edge.mx + edge.nx * lift - 10, sy = edge.my + edge.ny * lift;
-    // `add` expects world coords and applies the screen matrix itself — convert back once.
-    const inv = matrix.inverse();
-    const worldAnchor = new DOMPoint(sx, sy).matrixTransform(inv);
-    const trailSite = trailSiteAt(label);
+    const cls = label.kind === 'town' ? 'town-name' : label.kind === 'sub' ? 'sub-name' : 'wild-name';
+    const priority = key === opts.hovered ? 4 : key === opts.picked ? 3 : cell.classList.contains('standing') ? 2 : label.kind === 'town' ? 1 : 0;
+    const siteName = cell.getAttribute('data-trail-name');
     const name = label.kind !== 'town' && cell.getAttribute('data-discovery') === 'unknown' ? 'Unexplored ground'
-      : trailSite ? `${trailSiteKind(trailSite).name}${cell.getAttribute('data-trail-claimed') === 'true' ? ' · explored' : ''}` : label.label;
-    add(key, name, worldAnchor.x, worldAnchor.y, cls, level, forced,
-      priority, { angleDeg: edge.angleDeg });
+      : siteName ? siteName + (cell.getAttribute('data-trail-claimed') === 'true' ? ' ? explored' : '') : label.label;
+    add(key, name, point.x, point.y, cls, level, forced, priority);
   }
   if (overview && opts.show) svg.querySelectorAll<SVGTextElement>('#regions .region').forEach((text, i) => {
-    const point = projectMapPoint(Number(text.getAttribute('x')), Number(text.getAttribute('y')));
-    add(`region-${i}`, text.textContent || '', point.x, point.y, 'town-name', '', false, 1);
+    const point = projectMapPoint(Number(text.getAttribute('x')), Number(text.getAttribute('y')), camera);
+    add('region-' + i, text.textContent || '', point.x, point.y, 'town-name', '', false, 1);
   });
-  const visible = new Set<string>();
-  const placedByKey = new Map(placeMapNames(candidates).map(box => [box.key, box]));
-  const inverse = matrix.inverse();
-  for (const [key, group] of groups) {
-    const box = placedByKey.get(key);
-    if (!box) { group.remove(); continue; }
-    visible.add(box.key);
-    const point = new DOMPoint(box.left, box.top).matrixTransform(inverse);
-    // A slanted ribbon pivots on its own text baseline, at its own edge angle — the anchor
-    // already sits on that edge, so the plate hugs it instead of orbiting its box centre.
-    const tilt = box.slanted
-      ? ` translate(${box.width / 2} 13) rotate(${(box.angleDeg ?? slant).toFixed(2)}) translate(${-box.width / 2} -13)` : '';
-    groups.get(box.key)!.setAttribute('transform', `translate(${point.x} ${point.y}) scale(${1 / scale})${tilt}`);
+  const placed = new Map(placeMapNames(candidates, frame).map(box => [box.key, box]));
+  for (const [key, plate] of plates) {
+    const box = placed.get(key), anchor = anchors.get(key);
+    setAttributeIfChanged(plate.group, 'display', box ? '' : 'none');
+    if (!box || !anchor) continue;
+    const facing = mapScreenLabelMatrix(matrix, { x: box.left, y: box.top }), pin = mapNamePointer(box, anchor);
+    setAttributeIfChanged(plate.group, 'transform', 'matrix(' + [facing.a, facing.b, facing.c, facing.d, facing.e, facing.f].join(' ') + ')');
+    setAttributeIfChanged(plate.pointer, 'd', pin.triangle); setAttributeIfChanged(plate.stem, 'd', pin.stem);
+    setAttributeIfChanged(plate.anchor, 'cx', String(pin.x)); setAttributeIfChanged(plate.anchor, 'cy', String(pin.y));
   }
+}
+
+type HoverBarrier = {
+  layer: SVGGElement;
+  faces: { group: SVGGElement; wall: SVGPathElement; flows: SVGPathElement[] }[];
+  rims: SVGPathElement[];
+  signature: string;
+};
+const hoverBarriers = new WeakMap<SVGSVGElement, HoverBarrier>();
+
+/** A single upright curtain follows the hovered hex's exact projected ground edges. */
+export function paintMapHover(root: HTMLElement, key: string | null) {
+  const index = sheetIndex(root);
+  if (!index) return;
+  const { svg } = index, cell = key ? index.cellByDataCell.get(key) : null;
+  let barrier = hoverBarriers.get(svg);
+  if (!cell) {
+    if (barrier) setAttributeIfChanged(barrier.layer, 'data-active', 'false');
+    return;
+  }
+  if (!barrier) {
+    const layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    layer.setAttribute('class', 'map-aurora');
+    layer.setAttribute('aria-hidden', 'true');
+    layer.setAttribute('pointer-events', 'none');
+    layer.innerHTML = `<defs><linearGradient id="map-aurora-gradient" x1="0" y1="1" x2="0" y2="0">
+      <stop class="map-aurora-stop-base" offset="0"/>
+      <stop class="map-aurora-stop-middle" offset=".42"/>
+      <stop class="map-aurora-stop-top" offset="1"/>
+    </linearGradient></defs>`
+      + Array.from({ length: 6 }, () => '<g class="map-aurora-face"><path class="map-aurora-wall" fill="url(#map-aurora-gradient)"/>'
+        + '<path class="map-aurora-flow" stroke="url(#map-aurora-gradient)" vector-effect="non-scaling-stroke"/>'.repeat(6) + '</g>').join('')
+      + '<path class="map-aurora-rim-haze" vector-effect="non-scaling-stroke"/><path class="map-aurora-rim" vector-effect="non-scaling-stroke"/>';
+    svg.insertBefore(layer, svg.querySelector('#map-names'));
+    barrier = {
+      layer, signature: '',
+      faces: Array.from(layer.querySelectorAll<SVGGElement>('.map-aurora-face')).map(group => ({
+        group, wall: group.querySelector<SVGPathElement>('.map-aurora-wall')!,
+        flows: Array.from(group.querySelectorAll<SVGPathElement>('.map-aurora-flow')),
+      })),
+      rims: Array.from(layer.querySelectorAll<SVGPathElement>('.map-aurora-rim, .map-aurora-rim-haze')),
+    };
+    hoverBarriers.set(svg, barrier);
+  }
+  setAttributeIfChanged(barrier.layer, 'data-active', 'true');
+  setAttributeIfChanged(barrier.layer, 'data-cell', key!);
+  const camera = mapSceneProjection(root), signature = [key, camera.a, camera.b, camera.c, camera.d].join(':');
+  if (barrier.signature === signature) return;
+  const ground = (cell.getAttribute('points') || '').trim().split(/\s+/).map(point => {
+    const [x, y] = point.split(',').map(Number);
+    return projectMapPoint(x, y, camera);
+  });
+  const height = nameGeometry(cell).radius * 1.05;
+  const centreY = ground.reduce((sum, point) => sum + point.y, 0) / ground.length;
+  const tops = ground.map((point, i) => ({ x: point.x, y: point.y - height * (.9 + .1 * Math.sin(i * 1.9)) }));
+  const between = (a: { x: number; y: number }, b: { x: number; y: number }, t: number) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
+  barrier.faces.forEach((face, i) => {
+    const a = ground[i], b = ground[(i + 1) % ground.length], ta = tops[i], tb = tops[(i + 1) % ground.length];
+    const c1 = between(tb, ta, 1 / 3), c2 = between(tb, ta, 2 / 3);
+    face.group.classList.toggle('is-rear', (a.y + b.y) / 2 < centreY);
+    setAttributeIfChanged(face.wall, 'd', `M${a.x} ${a.y} L${b.x} ${b.y} L${tb.x} ${tb.y} C${c1.x} ${c1.y - height * .16} ${c2.x} ${c2.y + height * .12} ${ta.x} ${ta.y} Z`);
+    face.flows.forEach((flow, j) => {
+      const base = between(a, b, (j + 1) / (face.flows.length + 1));
+      const rise = height * (.65 + .25 * Math.sin(j * 1.7 + i) ** 2), drift = height * .08 * Math.sin(j * 1.3 + i);
+      setAttributeIfChanged(flow, 'd', `M${base.x} ${base.y} Q${base.x - drift * .5} ${base.y - rise * .5} ${base.x + drift} ${base.y - rise}`);
+    });
+  });
+  const outline = ground.map((point, i) => `${i ? 'L' : 'M'}${point.x} ${point.y}`).join(' ') + ' Z';
+  barrier.rims.forEach(rim => setAttributeIfChanged(rim, 'd', outline));
+  barrier.signature = signature;
 }

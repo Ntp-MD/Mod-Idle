@@ -1,4 +1,6 @@
 <script lang="ts">
+  import chevronDown from '../icon/ui/chevron-down.png';
+
   let { label, controls, direction = 'down', expanded = $bindable(true) }: {
     label: string;
     controls: string;
@@ -10,13 +12,13 @@
 <button class="disclosure-toggle btn-flat" type="button" aria-expanded={expanded}
         aria-controls={controls} onclick={() => (expanded = !expanded)}>
   <strong>{label}</strong>
-  <svg class="icon-label icon-chevron" class:expanded class:sideways={direction === 'right'} viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg>
+  <span class="icon-mask disclosure-chevron" class:expanded class:sideways={direction === 'right'} style={`--glyph:url(${chevronDown})`} aria-hidden="true"></span>
 </button>
 
 <style>
   .disclosure-toggle { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); width: 100%; text-align: left; pointer-events: auto; }
   strong { font-size: var(--font-sm); }
-  svg.expanded { transform: rotate(180deg); }
-  svg.sideways { transform: rotate(90deg); }
-  svg.sideways.expanded { transform: rotate(-90deg); }
+  .disclosure-chevron.expanded { transform: rotate(180deg); }
+  .disclosure-chevron.sideways { transform: rotate(90deg); }
+  .disclosure-chevron.sideways.expanded { transform: rotate(-90deg); }
 </style>

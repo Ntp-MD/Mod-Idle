@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { TOWN, eng } from '../src/engine/client';
 import { newGame } from '../src/sim/game';
-import { buy, canBuy, skipTask, skipVerdict, stockOf, stashTabCount } from '../src/sim/town';
+import { buy, canBuy, priceGold, skipTask, skipVerdict, stockOf, stashTabCount } from '../src/sim/town';
 import { plotCount } from '../src/sim/farm';
 import { settlementCell } from '../src/sim/road';
 import { openingGear } from '../src/sim/player';
@@ -37,6 +37,20 @@ describe('town sinks', () => {
     expect(stockOf('millbrook', millbrook).map((row: any) => row.id)).toContain('herb_pouch_ii');
     millbrook.town.owned.push('herb_pouch_ii');
     expect(stockOf('millbrook', millbrook).map((row: any) => row.id)).toContain('herb_pouch_iii');
+  });
+
+  it('charges the Eastgate stash tab at its authored 24-gold teaching price', () => {
+    // the row's note and the wiki promise 30 discounted minutes at Eastgate's own low band
+    const row = (TOWN.one_time as any[]).find((l) => l.id === 'stash_tab_1');
+    expect(priceGold(row, 'eastgate', inTown('eastgate'))).toBe(24);
+  });
+
+  it('prices a Waypoint warp at the destination band, as its note and the wiki state', () => {
+    const row = (TOWN.repeatable as any[]).find((l) => l.id === 'waypoint_warp');
+    const dest = (TOWN.settlements as any[]).find((s) => s.id !== 'eastgate' && s.band !== 'mid');
+    const blocks = 7;
+    const expected = Math.round(row.m_per_block * blocks * eng.goldPerMinute(dest.band) * 100) / 100;
+    expect(priceGold(row, dest.id, inTown('eastgate'), blocks)).toBe(expected);
   });
 
   it('skips a task once free, then spends a bought token', () => {

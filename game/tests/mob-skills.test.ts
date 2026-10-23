@@ -67,6 +67,10 @@ describe('mob skill kits', () => {
     s.group = [boss];
     for (let i = 0; i < 12; i++) tick(s, { online: true });
     expect(s.fx.some((e) => e.kind === 'cast' && !!e.mobId)).toBe(true);
+    const casts = s.fx.filter((event) => event.kind === 'cast' && event.mobId === boss.id);
+    expect(casts.every((event) => !!event.skillId && boss.skillIds?.includes(event.skillId))).toBe(true);
+    const skillHits = s.fx.filter((event) => event.byId === boss.id && !!event.skillId);
+    expect(skillHits.every((event) => !!mobSkillById(event.skillId!))).toBe(true);
   });
 
   it('leaves the basic swing identical whether or not a strike kit is attached', () => {

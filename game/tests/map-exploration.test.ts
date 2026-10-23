@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { newGame, tick } from '../src/sim/game';
-import { currentCell, ownerOf, rankOf, road, startWalk, zoneOf } from '../src/sim/road';
+import { currentCell, road, startWalk, zoneOf } from '../src/sim/road';
 import { exportJson, importJson, migrate } from '../src/state/save';
 import { slotsAvailable } from '../src/sim/slots';
 import { movePatrolStop } from '../src/sim/exploration';
@@ -11,12 +11,20 @@ import { campActivityArt, hasUniqueTrace, mapEventArt } from '../src/ui/map-adve
 import { E, eng, TOWN } from '../src/engine/client';
 import {
   hexKey, hexDistance, investigateTrailSite, mapKnowledge, normalizeMapJournal,
-  recordMapDiscovery, trailSiteKind, trailSites, MAP_EXPLORATION,
+  recordMapDiscovery, trailSiteKind, MAP_EXPLORATION,
 } from '../src/sim/map-exploration';
 
 const place = (s: ReturnType<typeof newGame>, h: { q: number; r: number }) => {
   s.cell = { ...h, sub: null, wild: null }; s.walk = null; s.zone = zoneOf(h)!;
   s.hunting = false; s.group = []; recordMapDiscovery(s);
+};
+
+
+const addSite = (s: ReturnType<typeof newGame>, kind: 'abandoned-camp' | 'provision-caravan') => {
+  const events = s.mapJournal!.trail!;
+  const site = { id: `trail-${++events.serial}`, q: 2, r: -2, kind, remainingSec: MAP_EXPLORATION.spawn.lifetime_sec };
+  events.sites.push(site);
+  return site;
 };
 
 describe('map journal and trail sites', () => {
@@ -48,7 +56,7 @@ describe('map journal and trail sites', () => {
     expect(loaded.counters.gold).toBe(gold);
     expect(loaded.fieldwork.foods).toEqual(foods);
     expect(loaded.rngState).toBe(rng);
-    const site = trailSites.find(row => row.kind === 'provision-caravan')!;
+    const site = addSite(loaded, 'provision-caravan');
     place(loaded, site);
     expect(investigateTrailSite(loaded, site.id).ok).toBe(true);
     const restored = importJson(exportJson(loaded));
@@ -58,7 +66,7 @@ describe('map journal and trail sites', () => {
     expect(restored.fieldwork.foods).toEqual(loaded.fieldwork.foods);
   });
   it('keeps a caravan available when the bundle does not fit, and pays only once', () => {
-    const s = newGame(), site = trailSites.find(row => row.kind === 'provision-caravan')!;
+    const s = newGame(), site = addSite(s, 'provision-caravan');
     place(s, site);
     s.bag = Array(slotsAvailable(s)).fill({}) as typeof s.bag;
     expect(investigateTrailSite(s, site.id).ok).toBe(false);
@@ -71,19 +79,16 @@ describe('map journal and trail sites', () => {
     expect(s.fieldwork.foods).toEqual(foods);
     expect(s.rngState).toBe(seed);
   });
-  it('rest restores the configured Hunger and tracking reveals its configured area', () => {
-    const s = newGame(), camp = trailSites.find(row => row.kind === 'abandoned-camp')!;
+  it('rest restores the configured Hunger', () => {
+    const s = newGame(), camp = addSite(s, 'abandoned-camp');
     place(s, camp); s.fieldwork.hunger = 0;
     expect(investigateTrailSite(s, camp.id).ok).toBe(true);
     const kind = trailSiteKind(camp);
     expect(s.fieldwork.hunger).toBe('hunger_restore' in kind ? kind.hunger_restore : -1);
-    const tracks = trailSites.find(row => row.kind === 'hunting-tracks')!;
-    place(s, tracks);
-    expect(investigateTrailSite(s, tracks.id).ok).toBe(true);
-    expect(mapKnowledge(s, { q: tracks.q + MAP_EXPLORATION.tracks_radius, r: tracks.r })).toBe('scouted');
+
   });
   it('refuses remote, busy and duplicate claims and normalizes malformed journal records', () => {
-    const s = newGame(), site = trailSites[0];
+    const s = newGame(), site = addSite(s, 'abandoned-camp');
     expect(investigateTrailSite(s, site.id).ok).toBe(false);
     place(s, site); s.phase = 'camp';
     expect(investigateTrailSite(s, site.id).ok).toBe(false);
@@ -92,20 +97,6 @@ describe('map journal and trail sites', () => {
     expect(s.mapJournal.visited.filter(key => key === '0,0')).toHaveLength(1);
     expect(s.mapJournal.visited).not.toContain('bad');
     expect(s.mapJournal.claimedSites).toEqual([]);
-  });
-  it('places each authored site on its own accessible field block', () => {
-    const seen = new Set<string>();
-    for (const site of trailSites) {
-      expect(rankOf(site)).toBeGreaterThan(1);
-      expect(zoneOf(site)).toBeTruthy();
-      expect(trailSiteKind(site)).toBeTruthy();
-      expect(seen.has(hexKey(site))).toBe(false);
-      seen.add(hexKey(site));
-      // The name carries the region a site belongs to, so a data edit cannot quietly move one
-      // into a neighbour's field and keep the label that tells the player where they are.
-      const slug = ownerOf(site).id.replace(/^the_/, '').replace(/_/g, '-');
-      expect(site.id.startsWith(`${slug}-trail`)).toBe(true);
-    }
   });
   it('reorders an idle itinerary but cannot reorder an active Patrol', () => {
     const s = newGame(), home = currentCell(s);
@@ -118,7 +109,7 @@ describe('map journal and trail sites', () => {
     expect(movePatrolStop(s, 0, 1)).toBe(false);
   });
   it('pauses automation when establishing a safe Camp or investigating a site', () => {
-    const s = newGame(), site = trailSites.find(row => row.kind === 'provision-caravan')!;
+    const s = newGame(), site = addSite(s, 'provision-caravan');
     place(s, site);
     s.patrol.active = true; s.autoReturn.phase = 'waiting';
     expect(establishCamp(s).ok).toBe(true);
@@ -156,10 +147,10 @@ describe('map journal and trail sites', () => {
     expect(unknown.levelNote).toBe('Levels unknown until scouted');
   });
   it('shows tools that match the active Camp activity', () => {
-    expect(campActivityArt('mine')).toContain('map-pickaxe');
-    expect(campActivityArt('grove')).toContain('map-axe');
-    expect(campActivityArt('fish')).toContain('map-fishing-rod');
-    expect(campActivityArt('cook')).toContain('map-pot-steam');
+    expect(campActivityArt('mine')).toContain('data-marker-glyph="mine"');
+    expect(campActivityArt('grove')).toContain('data-marker-glyph="grove"');
+    expect(campActivityArt('fish')).toContain('data-marker-glyph="fish"');
+    expect(campActivityArt('cook')).toContain('data-marker-glyph="cook"');
     expect(campActivityArt(null)).toBe('');
   });
   it('marks actual Unique rosters and gives recent road events their own board art', () => {
@@ -167,15 +158,14 @@ describe('map journal and trail sites', () => {
     const uniqueSpecies = [...ids].find(id => eng.uniquesOf(id).length > 0)!;
     expect(hasUniqueTrace([uniqueSpecies])).toBe(true);
     expect(hasUniqueTrace([])).toBe(false);
-    expect(mapEventArt('Found wild berries along the trail')).toContain('map-event-food');
-    expect(mapEventArt('A clear spring restores your strength · Hunger 20%')).toContain('map-event-spring');
-    expect(mapEventArt('Abandoned Camp · Hunger 30%')).toContain('map-event-fire');
-    expect(mapEventArt('Provision Caravan · Raw Game Meat ×2')).toContain('provision-caravan.png');
-    expect(mapEventArt('Hunting Tracks · surveyed nearby')).toContain('map-tracks');
-    expect(mapEventArt('Camp kitchen · Trail Stew ×1')).toContain('map-pot-steam');
+    expect(mapEventArt('Found wild berries along the trail')).toContain('data-marker-glyph="food"');
+    expect(mapEventArt('A clear spring restores your strength · Hunger 20%')).toContain('data-marker-glyph="rest"');
+    expect(mapEventArt('Abandoned Camp · Hunger 30%')).toContain('data-marker-glyph="fire"');
+    expect(mapEventArt('Provision Caravan · Raw Game Meat ×2')).toContain('data-marker-glyph="caravan"');
+    expect(mapEventArt('Camp kitchen · Trail Stew ×1')).toContain('data-marker-glyph="cook"');
   });
   it('refuses a trail-site reward during combat without erasing the current group', () => {
-    const s = newGame(), site = trailSites.find(row => row.kind === 'provision-caravan')!;
+    const s = newGame(), site = addSite(s, 'provision-caravan');
     place(s, site);
     s.hunting = true;
     s.group = [{ species: 'wolf' } as any];
@@ -185,7 +175,7 @@ describe('map journal and trail sites', () => {
     expect(s.mapJournal!.claimedSites).not.toContain(site.id);
   });
   it('uses the same primary action for investigating a reached site and keyboard Enter', () => {
-    const s = newGame(), site = trailSites.find(row => row.kind === 'provision-caravan')!;
+    const s = newGame(), site = addSite(s, 'provision-caravan');
     place(s, site);
     const dest = { key: 'site', kind: 'bare' as const, label: 'Trail site', node: null, sub: null, wild: null, self: true, walking: false, here: true, blocks: 0, sec: 0 };
     expect(destinationPrimary(s, dest).kind).toBe('investigate');
@@ -197,7 +187,7 @@ describe('map journal and trail sites', () => {
     expect(destinationPrimary(s, dest).kind).toBe('hunt');
   });
   it('states what an Investigate pauses, and keeps the Camp activity on the journal event', () => {
-    const s = newGame(), site = trailSites.find(row => row.kind === 'hunting-tracks')!;
+    const s = newGame(), site = addSite(s, 'abandoned-camp');
     place(s, site);
     const dest = { key: 'site', kind: 'bare' as const, label: 'Trail site', node: null, sub: null, wild: null, self: true, walking: false, here: true, blocks: 0, sec: 0 };
     s.patrol.active = true; s.hunting = true;

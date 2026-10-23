@@ -104,7 +104,7 @@ Calculation order: [DECISIONS.md](DECISIONS.md#combat-order).
 
 | Term | Meaning |
 |---|---|
-| **Region** | One of the tree's seven spokes — Str, Agi, Dex, Int, Wis, Vit, Lck. Every region opens from the centre Start. |
+| **Region** | One of the tree's seven attribute areas — Str, Agi, Dex, Int, Wis, Vit, Lck. Each opens from Start and connects to neighbouring regions through the shared network. |
 | **Node** | One thing the tree grants: a Core attribute, a Notable profile, or a Keystone mechanic. Every node has one rank. |
 | **Rank** | One step of a node; a rank is bought at the node's own cost and the tree's current nodes each hold one. |
 | **Normal** | A node that grants exactly +1 of its region's Core attribute, for 1 tree point. |

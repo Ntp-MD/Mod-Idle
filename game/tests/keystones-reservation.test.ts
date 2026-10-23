@@ -232,7 +232,7 @@ describe('Packet F — reservation and costs', () => {
   });
 
   it('opens the reservation keys inside the full fifty-two', () => {
-    expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toHaveLength(52);
+    expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toHaveLength(105);
     for (const key of ['arcane-battery', 'radiant-faith', 'blood-price', 'mana-debt', 'blood-covenant', 'aura-resonance']) {
       expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toContain(key);
     }

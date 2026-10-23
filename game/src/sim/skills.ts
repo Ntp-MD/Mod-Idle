@@ -6,7 +6,7 @@ import {
 import { directFlags, emptyParts, validateDamagePacket } from '../../../engine/damage-provenance.ts';
 import type { DamagePacket } from '../../../engine/damage-provenance.ts';
 import { mastery } from './mastery';
-import { setStacks, setErosion, stopMob, placeStatus, modsOn as mobModsOn, targetMods, applyWeaponRiders, holdsCondition, CONDITION_OF, consumeStatus, copyStatus, type MobStatusName } from './mobStatus';
+import { setStacks, setErosion, stopMob, placeStatus, modsOn as mobModsOn, targetMods, applyWeaponRiders, holdsCondition, CONDITION_OF, consumeStatus, copyStatus, keystoneBlocksStatus, keystoneTargetMods, type MobStatusName } from './mobStatus';
 import { lineValue, applyCurse } from './curse';
 import type { Character } from './player';
 import type { Mob } from './types';
@@ -241,10 +241,13 @@ export function skillCd(s: SkillState, id: string, cdrPct: number): number {
  *  aura's reservation to HP without changing Max HP. */
 export function reservedPct(s: SkillState, bundles: readonly KeystoneBundle[] = []): number {
   const { bR } = auraResonanceOf(s, bundles);
+  // Empty Vessel: an aura reserves no Mana at all; fixed reserves such as Arcane Battery still bind.
+  const empty = bundleOf(bundles, 'empty-vessel');
   let total = 0;
   for (const [id, on] of Object.entries(s.auras)) {
     if (!on || !ownsSkill(s, id)) continue;
     if (auraPoolOf(s, id) === 'hp') continue;
+    if (empty) continue;
     total += sm.reservePct(sm.byId[id]?.reserve ?? '') * (1 - bR);
   }
   const battery = bundleOf(bundles, 'arcane-battery');
@@ -255,10 +258,11 @@ export function reservedPct(s: SkillState, bundles: readonly KeystoneBundle[] = 
 
 /** The share of Full Max HP held back by reservations: 35 plus every 54 aura assigned to HP. */
 export function hpReservedPct(s: SkillState, bundles: readonly KeystoneBundle[] = []): number {
+  const empty = bundleOf(bundles, 'empty-vessel');
   let total = 0;
   for (const [id, on] of Object.entries(s.auras)) {
     if (!on || !ownsSkill(s, id)) continue;
-    if (auraPoolOf(s, id) === 'hp') total += sm.reservePct(sm.byId[id]?.reserve ?? '');
+    if (auraPoolOf(s, id) === 'hp') total += empty ? 0 : sm.reservePct(sm.byId[id]?.reserve ?? '');
   }
   const faith = bundleOf(bundles, 'radiant-faith');
   if (faith) total += Number(faith.params.reserveHpPct);
@@ -505,6 +509,12 @@ export interface CastEnv {
   trigger?: { manaMult?: number; damageMult?: number };
   /** Absolute µs the damage packets stamp (§7.2); null until the combat clock (D2) provides it. */
   timeUs?: number | null;
+  /** Mirror Strike: the next press is a guaranteed crit. */
+  forceCrit?: boolean;
+  /** Lucky Streak: crit damage bought by the current streak. */
+  critDamageBonusPct?: number;
+  /** Trance: this press is the free one in its cycle. */
+  freeCast?: boolean;
 }
 
 export interface CastReport {
@@ -563,15 +573,23 @@ function healOf(skill: any): { heal?: { secLeft: number; pctPerSec: number }; in
  */
 export function effectsActive(sk: SkillState, bundles: readonly KeystoneBundle[] = []) {
   const { bE } = auraResonanceOf(sk, bundles);
+  // Empty Vessel: the auras are free, but what they grant is halved (a mult keeps its distance
+  // from 1 scaled, an add is rounded).
+  const empty = bundleOf(bundles, 'empty-vessel');
+  const auraScale = empty ? 1 - Number(empty.params.auraEffectPct) / 100 : 1;
   const rows: any[] = [];
   for (const [id, on] of Object.entries(sk.auras)) {
     if (!on || !ownsSkill(sk, id) || sm.byId[id]?.type !== 'aura') continue;
     const row = sm.byId[id];
     // 64 Aura Resonance stretches the aura's effects once (never 1.05^N), skipping its identity
     // fields — trigger clocks, cast cost and cast damage (§7.5.6).
-    rows.push(bE > 0
-      ? { ...row, effects: (row.effects || []).map((e: any) => ({ ...e, value: auraScaledValue(e.op, e.value, bE, e.stat) })) }
-      : row);
+    const effects = (row.effects || []).map((e: any) => {
+      const scaled = bE > 0 ? auraScaledValue(e.op, e.value, bE, e.stat) : e.value;
+      return { ...e, value: auraScale === 1 ? scaled
+        : e.op === 'mult' ? 1 + (scaled - 1) * auraScale
+          : Math.round(scaled * auraScale) };
+    });
+    rows.push({ ...row, effects });
   }
   for (const [id, left] of Object.entries(sk.buffUp)) if (left > 0 && ownsSkill(sk, id) && sm.byId[id]) rows.push(sm.byId[id]);
   return sm.aggregateEffects(rows, (r: any) => skillLevel(sk, r.id));
@@ -588,6 +606,33 @@ const AOE_PCT_PER_EXTRA_TARGET = (E.aoe as any).per_target_pct / 100;
 function targetCount(skill: any, group: Mob[]): number {
   const cap = Number(String(skill.targets || '1').split('/')[0]) || 1;
   return Math.max(1, Math.min(cap, group.length));
+}
+
+/**
+ * What a buff grants when it comes up. The rotation cast and the live toggle recast both read this
+ * one function, so a charge pool or a cleanse cannot arrive on one path and be lost on the other.
+ */
+export function buffCastOutcome(s: SkillState, id: string): {
+  durationSec: number; charges?: number; blockCharges?: number; cleansesSelf: boolean;
+} | null {
+  const skill = sm.byId[id];
+  if (!skill || skill.type !== 'buff') return null;
+  // Ghost Dance counts its charges off its own ramp: base + 1 per N levels, to the Cap it names
+  const base = (skill.effects || []).find((e: any) => e.stat === 'dodge_charges');
+  const charges = base
+    ? Math.min(valueOf(skill, 'dodge_charges_cap', 0) || Infinity,
+      base.value + Math.floor(skillLevel(s, id) / valueOf(skill, 'dodge_charges_per_levels', 1)))
+    : undefined;
+  // Earth Wall is the same ramp on the block layer: a pool of cuts rather than of deletions
+  const bBase = (skill.effects || []).find((e: any) => e.stat === 'block_charges');
+  const blockCharges = bBase
+    ? Math.min(valueOf(skill, 'block_charges_cap', 0) || Infinity,
+      bBase.value + Math.floor(skillLevel(s, id) / valueOf(skill, 'block_charges_per_levels', 1)))
+    : undefined;
+  return {
+    durationSec: Number(String(skill.duration).match(/\d+/)?.[0] || 10),
+    charges, blockCharges, cleansesSelf: hasRule(skill, 'cleanses_on_cast'),
+  };
 }
 
 /**
@@ -630,12 +675,25 @@ export function castOnce(
         || selfDebuffedHolds(cond, statuses);
       if (!holds) continue;
     }
-    const aoe = targetCount(skill, group) > 1;
+    // Single Combat: the press reaches one body and pays no AoE price.
+    const single = bundleOf(c.keystones, 'single-combat');
+    const aoe = !single && targetCount(skill, group) > 1;
     const cost = sm.costOf(skill, {
       skillLevel: skillLevel(s, id), aoe,
     });
-    const manaCost = (cost.resource === 'mana' ? cost.amount : 0) * (env.trigger?.manaMult ?? 1);
+    let manaCost = (cost.resource === 'mana' ? cost.amount : 0) * (env.trigger?.manaMult ?? 1);
     let hpCost = cost.resource === 'hp' ? cost.amount : 0;
+    // Trance: every third cast is free; the rest pay 50% more.
+    const trance = bundleOf(c.keystones, 'trance');
+    if (trance) {
+      const mult = 1 + Number(trance.params.costPct) / 100;
+      manaCost *= mult;
+      hpCost *= mult;
+    }
+    if (env.freeCast) {
+      manaCost = 0;
+      hpCost = 0;
+    }
     const currentHp = env.currentHp ?? c.maxHp;
     // 37 Blood Price: the Mana part of a skill cost is paid in HP 1:1. Auras and reservations are
     // not part of this conversion (§7.4.11).
@@ -670,22 +728,11 @@ export function castOnce(
       };
     }
     if (skill.type === 'buff') {
-      s.buffUp[id] = Number(String(skill.duration).match(/\d+/)?.[0] || 10);
-      // Ghost Dance counts its charges off its own ramp: base + 1 per N levels, to the Cap it names
-      const base = (skill.effects || []).find((e: any) => e.stat === 'dodge_charges');
-      const charges = base
-        ? Math.min(valueOf(skill, 'dodge_charges_cap', 0) || Infinity,
-          base.value + Math.floor(skillLevel(s, id) / valueOf(skill, 'dodge_charges_per_levels', 1)))
-        : undefined;
-      // Earth Wall is the same ramp on the block layer: a pool of cuts rather than of deletions
-      const bBase = (skill.effects || []).find((e: any) => e.stat === 'block_charges');
-      const blockCharges = bBase
-        ? Math.min(valueOf(skill, 'block_charges_cap', 0) || Infinity,
-          bBase.value + Math.floor(skillLevel(s, id) / valueOf(skill, 'block_charges_per_levels', 1)))
-        : undefined;
+      const outcome = buffCastOutcome(s, id)!;
+      s.buffUp[id] = outcome.durationSec;
       return {
-        id, name: skill.name ?? '', damage: 0, manaCost: spent, hpCost, targets: 0, byMob: [], charges, blockCharges,
-        cleansesSelf: hasRule(skill, 'cleanses_on_cast'),
+        id, name: skill.name ?? '', damage: 0, manaCost: spent, hpCost, targets: 0, byMob: [],
+        charges: outcome.charges, blockCharges: outcome.blockCharges, cleansesSelf: outcome.cleansesSelf,
       };
     }
     if (skill.type === 'curse') {
@@ -707,8 +754,10 @@ export function castOnce(
     // A row that names extra crit chance on itself (Headshot) spends it on this press only.
     const ownCrit = effects.find((e: any) => e.stat === 'crit_chance' && e.subject !== 'target');
     let crit = false;
-    if (dmg > 0 && sm.critsOnBasis(skill) && rng() * 100 < c.critChance + (ownCrit ? ownCrit.value : 0)) {
-      dmg = (dmg * c.critDmg) / 100;
+    const forceCrit = Boolean(env.forceCrit) && dmg > 0 && sm.critsOnBasis(skill);
+    if (dmg > 0 && sm.critsOnBasis(skill)
+      && (forceCrit || rng() * 100 < c.critChance + (ownCrit ? ownCrit.value : 0))) {
+      dmg = (dmg * (c.critDmg + Number(env.critDamageBonusPct || 0))) / 100;
       crit = true;
     }
     // a row may press more than once: Whirlwind "3 rounds", Arrow Shower "3 arrows, 40% each"
@@ -727,7 +776,7 @@ export function castOnce(
       const missing = Math.min(atMissing.value, Math.max(0, env.missingHpPct || 0));
       dmg *= 1 + (missing / atMissing.value) * (atMax.value - 1);
     }
-    const n = targetCount(skill, group);
+    const n = single ? 1 : targetCount(skill, group);
     const front = group[0];
     // the Evasion and execute rows read the same row numbers the panel prints; see above for the Cap
     // the execute row's threshold, or the one a curse moved on this target
@@ -742,6 +791,21 @@ export function castOnce(
     if (env.trigger?.damageMult) dmg *= env.trigger.damageMult;
     // `E.global.damage_mult` reads the whole clock: a press rides the same bucket a swing does
     dmg *= E.global.damage_mult;
+    // Packet N — the press-side rules. Single Combat buys its one target; the element rules read the
+    // row's named Element; Hemorrhage's direct cut applies to a physical-basis press.
+    if (single) dmg *= 1 + Number(single.params.damagePct) / 100;
+    const fortuna = bundleOf(c.keystones, 'fortuna');
+    if (fortuna && dmg > 0) {
+      if (crit) {
+        if (rng() * 100 < Number(fortuna.params.doubleCritPct)) dmg *= 2;
+      } else dmg *= 1 - Number(fortuna.params.nonCritPct) / 100;
+    }
+    const ashen = bundleOf(c.keystones, 'ashen-crown');
+    if (ashen && skill.element === 'fire') dmg *= 1 - Number(ashen.params.directFirePct) / 100;
+    const mono = bundleOf(c.keystones, 'monochrome');
+    if (mono && (skill.element || skill.basis === 'magic')) dmg *= 1 + Number(mono.params.elementalPct) / 100;
+    const hemorrhage = bundleOf(c.keystones, 'hemorrhage');
+    if (hemorrhage && skill.basis === 'phys') dmg *= Number(hemorrhage.params.directPhysicalPct) / 100;
     const alignedPerSec = c.elem * (c.alignment / 100) * c.hitsPerSec;
     // the row's own lines are spent on each mob the skill actually reaches: a row that says "all in
     // range" reaches every target the AoE resolved, and a guaranteed status skips only the two rolls
@@ -753,8 +817,8 @@ export function castOnce(
       if (!env.mobStatus) return;
       for (const e of effects) {
         if (e.subject !== 'target') continue;
-        if (e.stat === 'poison_stacks') setStacks(env.mobStatus, t.id, 'poison', e.value, alignedPerSec);
-        if (e.stat === 'burn_stacks') setStacks(env.mobStatus, t.id, 'burn', e.value, alignedPerSec);
+        if (e.stat === 'poison_stacks' && !keystoneBlocksStatus(c, 'poison')) setStacks(env.mobStatus, t.id, 'poison', e.value, alignedPerSec);
+        if (e.stat === 'burn_stacks' && !keystoneBlocksStatus(c, 'burn')) setStacks(env.mobStatus, t.id, 'burn', e.value, alignedPerSec);
         if (e.stat === 'mark_stacks') setStacks(env.mobStatus, t.id, 'mark', e.value, alignedPerSec);
         // Sand Storm's own lingering line: the row types the damage a second and the seconds, and the
         // tick counts inside the shared DoT budget the cap already runs on
@@ -824,6 +888,9 @@ export function castOnce(
       if (consumeStacks > 0) share *= 1 + (consumeStacks * statusConsume.value) / 100;
       const elemPart = magicBasis > 0 ? share * ((c.elem * (c.alignment / 100)) / magicBasis) : 0;
       const cut = env.mobStatus ? (targetMods(mobModsOn(env.mobStatus, t.id)).armourCut || 0) : 0;
+      // Packet N's target-side rules (chilled/burning/crippled/shocked/statused) ride the same
+      // damage-taken bucket on a press that they do on a swing.
+      const keyTaken = env.mobStatus ? (keystoneTargetMods(env.mobStatus, t.id, c).damageTaken || 0) : 0;
       const stripped = env.curses ? lineValue(env.curses, t.id, 'mob_elemental_resistance_pct') : 0;
       const pierced = pierce ? -((t.res || 0) * (pierce.value / 100)) : 0;
       // the press's Element share meets the Species' per-Element resistance (X54) exactly as a swing's does:
@@ -835,6 +902,14 @@ export function castOnce(
         if (elemPoolTotal > 0) for (const [el, pool] of elemPools) byEl[el] = elemPart * (pool / elemPoolTotal);
         else if (t.innate && t.innate.length) byEl[t.innate[0]] = elemPart;
         if (Object.keys(byEl).length) elemArg = byEl;
+      }
+      // Monochrome: the press's Element answers Fire's resistance line, not the pools it was built
+      // from. A physical-basis conversion is already in `elemArg` by this point, so it converts too.
+      if (mono) {
+        const totalElem = typeof elemArg === 'object'
+          ? Object.values(elemArg).reduce((sum, value) => sum + value, 0)
+          : elemArg;
+        if (totalElem > 0) elemArg = { fire: totalElem };
       }
       // conversion (`draft/convert-damage.md`): a physical-basis press routes a percent of its own
       // physical share into the named Element before mitigation, through the same `convertDamageOf`
@@ -849,9 +924,9 @@ export function castOnce(
       const mitigated0 = eng.mitigateMobHit(t, nonElementPart, elemArg, cut, stripped + pierced);
       // §12: a PHYSICAL press is the weapon arguing with a body too, so it carries the size ladder;
       // a magic-damage press is exempt (the caster's spell is not the weapon's own swing).
-      const mitigated = skill.basis === 'phys'
+      const mitigated = (skill.basis === 'phys'
         ? eng.applySizeMult(mitigated0, 1, eng.sizeMultOf(E.weapon_size_mult?.ladder, c.weaponName, (t as any).readsAs || 'medium'))
-        : mitigated0;
+        : mitigated0) * (1 + keyTaken / 100);
       t.hp -= mitigated;
       dealt += mitigated;
       landed++;
@@ -886,9 +961,22 @@ export function castOnce(
       // status the moment the bar fills
       if (env.mobStatus) {
         applyWeaponRiders(rng, c, env.mobStatus, t.id, env.curses ? lineValue(env.curses, t.id, 'bleed_chance') > 0 : false, rowBleedPct, rowStunPct, t.immune || []);
+        // Conductive: the shock the press just wrote jumps to one more body, without its stop.
+        const cond = bundleOf(c.keystones, 'conductive');
+        if (cond) {
+          const shock = env.mobStatus[t.id]?.statuses.shock;
+          let left = shock && shock.secLeft > 0 ? Number(cond.params.spreadTargets) : 0;
+          for (const other of group) {
+            if (left <= 0) break;
+            if (other.id === t.id) continue;
+            if (copyStatus(env.mobStatus, t.id, other.id, 'shock', other.immune || [])) left--;
+          }
+        }
         // copy the live line to the other bodies first, then spend it on the source: Catalyst reads
         // the poison it is about to consume, not the empty line left behind
-        if (statusSpread && (everyTarget || i === 0)) {
+        // Single Combat forbids the press from reaching another body, so its status copy cannot
+        // travel either; the spread row waits until the keystone is refunded.
+        if (statusSpread && !single && (everyTarget || i === 0)) {
           let left = Math.max(0, Math.floor(statusSpread.value));
           const to: string[] = [];
           for (const other of group) {

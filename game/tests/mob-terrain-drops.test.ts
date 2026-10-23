@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { E, eng } from '../src/engine/client';
 import { createEngine } from '../../engine/index.ts';
-import { mobIcon } from '../src/icon/index';
+import { mobIcon, mobSpeciesArt } from '../src/icon/index';
 import { huntZone, newGame, setLevel, tick } from '../src/sim/game';
 import { buildCharacter } from '../src/sim/player';
 import { mobSwing } from '../src/sim/combat';
@@ -341,11 +341,12 @@ describe('mob, terrain and drop data', () => {
     }
   });
 
-  it('resolves a distinct Species icon for every Species', () => {
-    const icons = E.mob.species.map((species: any) => mobIcon(species.id));
+  it('resolves a distinct icon for every Species', () => {
+    const icons = E.mob.species.map((species: any) => mobSpeciesArt(species.id));
 
     expect(icons.every(Boolean)).toBe(true);
     expect(new Set(icons).size).toBe(E.mob.species.length);
+    expect(E.mob.species.map((species: any) => mobIcon(species.id))).toEqual(icons);
   });
 
   it('chooses the Variant junk item or the matching Species alternative', () => {

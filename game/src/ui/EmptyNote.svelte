@@ -13,6 +13,6 @@
 
 <style>
   .empty-note { margin: 0; }
-  .dense { color: var(--dim); font-size: 0.75rem; }
+  .dense { color: var(--dim); font-size: var(--font-2xs); }
   .xs { color: var(--dim); font-size: var(--font-xs); }
 </style>

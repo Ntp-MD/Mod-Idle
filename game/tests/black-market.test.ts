@@ -161,6 +161,15 @@ describe('Black Market stock and purchases', () => {
   });
 });
 
+describe('Black Market authored prices', () => {
+  it('charges stones and skill offers their authored price, with no material cover unit', () => {
+    for (const kind of ['stone', 'skill'] as const) {
+      const candidate = blackMarket.candidates.find((row) => row.kind === kind)!;
+      expect(blackMarket.price(candidate, candidate.countMin)).toBe(candidate.priceEach * candidate.countMin);
+    }
+  });
+});
+
 describe('Black Market refresh and migration', () => {
   it('refreshes once at the exact online boundary, pausing offline without queued refreshes', () => {
     const { state, town } = fixture('material');

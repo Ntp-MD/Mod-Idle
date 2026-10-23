@@ -101,6 +101,8 @@ export interface EquipSwap {
   instead: string | null;
   /** the percent the new piece is ahead by — Infinity is an empty cell, which is always worth filling */
   gains: number;
+  /** The Collector set a worn piece was reserved for; wearing it releases the reservation. */
+  heldFor?: string | null;
 }
 
 /**
@@ -154,9 +156,10 @@ export function autoEquip(s: GameState, marginPct = 0): EquipResult {
       .filter((p) => p.cell >= 0 && p.gains > marginPct)
       .sort((a, b) => b.gains - a.gains)[0];
     if (!best) break;
+    const reservation = best.item.heldFor || null;
     const wore = equipFromBag(s, best.bagIndex, true, true);
     if (!wore.ok) { refused = wore.why ?? 'refused'; break; }
-    swaps.push({ slot: best.item.slot, base: itemName(best.item), instead: best.worn ? itemName(best.worn) : null, gains: best.gains });
+    swaps.push({ slot: best.item.slot, base: itemName(best.item), instead: best.worn ? itemName(best.worn) : null, gains: best.gains, heldFor: reservation });
   }
   const spared = s.bag.reduce(
     (acc, item) => {

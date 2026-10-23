@@ -7,28 +7,26 @@ import {
 /**
  * The icon shelf.
  *
- * Every figure under this folder is art, discovered by file name. Semantic item, skill, and character
- * associations live in registry.ts and use stable IDs where available. Resolvers try ordered candidates
- * and category fallbacks, so missing bespoke art never leaves a broken image in the UI. Nested folders
- * only group the shelf by subject; lookup is keyed by the file name, not its path.
+ * Every PNG figure under this folder is shelf art, discovered by file name. Semantic item, skill, and
+ * character associations live in registry.ts and use stable IDs where available. Resolvers try ordered
+ * candidates and category fallbacks, so missing bespoke art never leaves a broken image in the UI. Mob art
+ * is the icon set under mob/icon/; the painted figures under mob/sprite/ and the map overlay SVG under
+ * map/ are map artwork, not shelf icons.
+ *
+ * UI icons and map glyphs are PNG art from this shelf. UI controls draw it through `.icon-mask` in
+ * skins.css; map markers draw it as SVG `<image>`. Inline SVG stays for structural graphics (tree/map
+ * geometry, marker frames/leaders, charts, effects), never a standalone UI glyph.
  */
-const shelfAssets = import.meta.glob<string>('./**/*.png', {
+const shelfAssets = import.meta.glob<string>(['./**/*.png', '!./mob/sprite/**'], {
   eager: true,
   query: '?url',
   import: 'default',
 });
 
-/** The per-item vector set: one file per item name, the same slug the bag prints. */
-const itemAssets = import.meta.glob<string>('./items/*.svg', {
-  eager: true,
-  query: '?url',
-  import: 'default',
-});
-
-const baseName = (path: string): string => path.slice(path.lastIndexOf('/') + 1).replace(/\.(png|svg)$/, '');
+const baseName = (path: string): string => path.slice(path.lastIndexOf('/') + 1).replace(/\.png$/, '');
 
 const shelf = new Map<string, string>(
-  [...Object.entries(shelfAssets), ...Object.entries(itemAssets)].map(([p, url]) => [baseName(p), url]),
+  Object.entries(shelfAssets).map(([p, url]) => [baseName(p), url]),
 );
 
 /** The first name the shelf carries art for. */
@@ -48,7 +46,7 @@ export function icon(name: string, fallback?: string): string {
   return art(name, fallback) ?? art(ANCHOR) ?? '';
 }
 
-/** The hub's art: the shelf figure where it carries one, the caller's vector mark where it does not.
+/** The hub's art: the shelf figure where it carries one, the caller's PNG fallback where it does not.
  *  The rail is ringed and small, so a named file is the whole contract — no code per tab. */
 export function hubIcon(name: string, fallback: string): string {
   return art(name) ?? fallback;
@@ -115,12 +113,12 @@ const MOD_ART: Record<string, string> = {
   armour_pen: 'layer-armour-penetration',
 };
 
-/** Only the species the shelf has no figure of its own needs a row here. */
+/** `old-<species>` covers most of the roster; only the species without such a mark need a row here. */
 const MOB_BY_SPECIES: Record<string, string> = {
   ogre: 'minotaur-2',
   human: 'player',
+  mist: 'spectre',
   briarling: 'thorny-vine',
-  harpy: 'harpy',
   barghest: 'animal-skull',
   miretoad: 'frog',
   glassserpent: 'sea-serpent',
@@ -155,9 +153,14 @@ export function stackIcon(group: string, name: string, stableId?: string): strin
   return art(...stackIconCandidates(group, name, stableId)) ?? icon(ANCHOR);
 }
 
+/** The species icon, shared by combat cards and map tokens. */
+export function mobSpeciesArt(species: string): string {
+  return mobIcon(species);
+}
+
 export function mobIcon(species: string): string {
   const key = species.toLowerCase();
-  return pick(key, MOB_BY_SPECIES[key], 'dread-skull');
+  return pick(`old-${key}`, MOB_BY_SPECIES[key], 'dread-skull');
 }
 
 /** The mark a boss field label carries (§11): the same dread-skull the junk stream uses. */

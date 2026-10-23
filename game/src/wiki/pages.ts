@@ -22,6 +22,9 @@
 // a cage and the game all resolve to one module and one data file.
 import { E as ENGINE, MODS as MODS_DATA, TOWN as TOWN_DATA, BASES as BASES_DATA, TREE_SPEC as TREE_DATA, SKILLS as SKILLS_DATA, MOB_SKILLS as MOB_SKILLS_DATA, eng, loot, sm, tree, road, farm, fieldwork, trade } from '../engine/client.ts';
 import { STONE_NAME, PRESS_NAME } from '../../../engine/craft.ts';
+import { keystoneDef } from '../../../engine/keystones.ts';
+import { buildPassiveTreeView, treeOrbitPath, treeViewNodeRadius } from '../ui/passive-tree-view.ts';
+import { WIKI_RUNTIME } from './runtime.ts';
 
 /**
  * A strict view of the data. A key that is not there throws instead of printing `0` or an em dash on a
@@ -83,6 +86,7 @@ const TYPES: string[] = SKILLS.meta.types;
 // ---------------------------------------------------------------- rendering
 
 const esc = (s: any): string => String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] as string));
+const escAttr = (s: any): string => esc(s).replace(/"/g, '&quot;');
 const n0 = (n: any): string => (Number.isFinite(Number(n)) ? Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 }) : '—');
 const n1 = (n: any): string => (Number.isFinite(Number(n)) ? Number(n).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '—');
 /** A published multiplier keeps its decimal: ×1.8 must never render as ×2. */
@@ -115,7 +119,8 @@ const QUAL_BANDS: string[] = (E.item_level.spans || []).map((sp: any) => sp.band
 /** A town price in gold: the engine's own `m` x the band's rate, the same call the town cage makes. */
 const goldAt = (m: any, band: string): string => wrap(n0(eng.goldPrice(Number(m), band)));
 
-type Page = { file: string; nav: string; title: string; lead: string; body: string[] };
+type ChapterId = 'start' | 'character' | 'combat' | 'world' | 'economy' | 'reference';
+type Page = { file: string; nav: string; title: string; lead: string; body: string[]; group?: ChapterId };
 const PAGES: Page[] = [];
 const page = (p: Page): void => { PAGES.push(p); };
 const wrap = (s: string) => `<span class="num">${s}</span>`;
@@ -152,11 +157,202 @@ const treeNodes = () => {
 };
 /** A keystone by its node id, in the name the board shows. */
 const keystoneName = (id: string): string => ((tree.byId[id] as any)?.name || id.replace(/^keystone\./, ''));
+const KEYSTONE_COST = Number((tree as any).kinds?.keystone?.cost ?? 1);
+/** The Notable a Keystone hangs off — the only entrance the tree allows. */
+const keystoneEntrance = (node: any): string => {
+  const id = (node.needs || []).find((n: string) => /^notable\./.test(n));
+  return id ? keystoneName(id) : '—';
+};
+/** The authored bundle parameters, with the unit the registry declares for each name. */
+const keystoneNumbers = (node: any): string => {
+  const effect = (node.effects || [])[0];
+  if (!effect || effect.kind !== 'keystone' || !effect.key) return '';
+  const def = keystoneDef(effect.key);
+  return Object.entries(effect.params || {}).map(([name, value]: [string, any]) => {
+    if (typeof value !== 'number') return `<code>${esc(name)} ${esc(value)}</code>`;
+    const kind = def.params[name];
+    const unit = kind === 'pct' || kind === 'pct-positive' ? '%' : kind === 'sec' ? ' sec' : kind === 'rate' ? '/sec' : kind === 'points' ? ' pts' : '';
+    return kind === 'mult' ? `<code>${esc(name)} ×${fig(value)}</code>` : `<code>${esc(name)} ${fig(value)}${unit}</code>`;
+  }).join(' ');
+};
 const TREE_CURRENCY = (tree as any).currencies?.tree || {};
 const QUEST_REWARDS = TOWN_DATA.quest_rewards;
 const TREE_POINT_CURVE = `base ${wrap(n0(TREE_CURRENCY.base ?? 0))}` + ((TREE_CURRENCY.level_ranges || []) as any[])
   .map((r: any) => ` + ${wrap(n0(r.per))} a level from ${wrap(n0(r.from))}–${wrap(n0(r.to))}`).join('');
 const TREE_CFG = TREE_SPEC as any;
+const TREE_REGION_NAMES: Record<string, string> = {
+  str: 'Strength', agi: 'Agility', dex: 'Dexterity', int: 'Intelligence',
+  wis: 'Wisdom', vit: 'Vitality', lck: 'Luck',
+};
+const treeKindLabel = (kind: string): string => kind === 'normal' ? 'Passive' : kind.charAt(0).toUpperCase() + kind.slice(1);
+/** A short, player-shaped line: `+1 str`, `+15 mana`, `+10% max hp`. */
+const TREE_LINE_NAMES: Record<string, string> = {
+  max_hp: 'max hp', hp: 'max hp', mana: 'mana', armour: 'armour', evasion: 'evasion',
+  accuracy: 'accuracy', attack_speed: 'attack speed', crit_chance: 'crit chance',
+  crit_damage: 'crit damage', crit_dmg: 'crit damage', physical_power: 'phys',
+  magic_power: 'magic', elemental_power: 'elemental', elemental_resistance: 'elemental res',
+  all_resistance: 'all res', hp_regen: 'hp regen', mana_regen: 'mana regen',
+  life_regen: 'hp regen', energy_shield: 'energy shield', es_regen: 'es regen',
+  leech: 'leech', life_leech: 'leech', block: 'block', perfect_dodge: 'perfect dodge',
+  stun_chance: 'stun', bleed_chance: 'bleed', armour_pen: 'armour pen',
+  res_cap: 'res cap', elemental_resistance_cap: 'res cap', cdr: 'cdr',
+  weight: 'weight', move_speed: 'move speed', damage: 'damage', damage_taken: 'damage taken',
+};
+const TREE_MOD_BY_ID = new Map(((MODS as any).mods || []).map((m: any) => [m.id, m]));
+const TREE_LINE_SHORT: Record<string, string> = {
+  ...TREE_LINE_NAMES,
+  all_resistance: 'all res', armour_pen: 'armour pen', attack_damage: 'attack damage',
+  attack_speed: 'attack speed', bleed_chance: 'bleed', block_chance: 'block', cooldown_reduction: 'cooldown',
+  critical_chance: 'crit chance', critical_damage: 'crit damage', elemental_alignment: 'alignment',
+  elemental_power: 'elemental', elemental_resistance: 'elemental res', energy_shield: 'energy shield',
+  energy_shield_regen: 'es regen', evasion: 'evasion', life_regen: 'hp regen', magic_power: 'magic',
+  mana_regen: 'mana regen', max_energy_shield: 'energy shield', max_hp: 'max hp', max_mana: 'mana',
+  perfect_dodge: 'perfect dodge', physical_power: 'phys', spell_damage: 'spell damage',
+  stat_mod: 'core stat', status_resistance: 'status res', stun_chance: 'stun',
+};
+const treeGrantText = (grant: any, value?: number): string => {
+  const v = value ?? (grant.values || [])[0] ?? 0;
+  if (grant.stat) return `+${fig(v)} ${grant.stat}`;
+  const id = String(grant.id || '');
+  const mod: any = TREE_MOD_BY_ID.get(id);
+  const modName = String(mod?.name || '');
+  const pct = mod ? / %$/.test(modName) : /_pct$/.test(id);
+  const base = id.replace(/_(?:flat|pct)$/, '');
+  const fallback = modName.replace(/\s+(?:%|flat)$/i, '').toLowerCase() || base.replace(/_/g, ' ');
+  const label = TREE_LINE_SHORT[base] || fallback;
+  return `+${fig(v)}${pct ? '%' : ''} ${label}`;
+};
+const treeGrantSummary = (grants: any[]): string =>
+  [...new Set((grants || []).map((g) => treeGrantText(g)))].join(' · ');
+const treeCurrencyLabel = (currency: string): string =>
+  currency === 'tree' ? 'tree point' : currency === 'attainment' ? 'attainment point' : String(currency || 'point');
+const treeKindCost = (kind: string): number =>
+  Number(((tree as any).kinds?.[kind]?.cost) ?? (kind === 'notable' ? 3 : 1));
+/** The name the board prints: a normal names its Core line, a named node its name, an unnamed
+ *  Notable the lines it grants. */
+const treeNodeTitle = (node: any): string => {
+  if (node.kind === 'normal' && node.grants?.[0]) return treeGrantText(node.grants[0]);
+  if (node.kind === 'notable') return treeGrantSummary(node.grants) || node.name || node.id;
+  if (node.name && !/^[A-Z]{3} Focus \d+$/.test(node.name)) return node.name;
+  return treeGrantSummary(node.grants) || node.name || node.id;
+};
+const treeNodeDetail = (node: any): string => node.kind === 'keystone' ? (node.description || '') : '';
+const treeNodeMeta = (node: any): string =>
+  `${treeKindLabel(node.kind)} · ${TREE_REGION_NAMES[node.wing] || node.wing} · ${n0(node.cost ?? treeKindCost(node.kind))} ${treeCurrencyLabel(node.currency)}${Number(node.cost) === 1 ? '' : 's'}`;
+
+const treeIconRoot = '../../game/src/icon';
+const treeWingIcons: Record<string, string> = {
+  str: `${treeIconRoot}/gear/weapon/crossed-swords-1.png`,
+  agi: `${treeIconRoot}/gear/armour/winged-boots.png`,
+  dex: `${treeIconRoot}/gear/weapon/bow-arrow.png`,
+  int: `${treeIconRoot}/gear/weapon/staff.png`,
+  wis: `${treeIconRoot}/skill/eye.png`,
+  vit: `${treeIconRoot}/skill/heart-beats.png`,
+  lck: `${treeIconRoot}/gear/accessory/gem-pendant.png`,
+};
+/** The same PNG the game's board puts in the node; normal nodes keep the core dot at overview scale. */
+const treeNodeIcon = (node: any): string => {
+  const wing = treeWingIcons[node.wing] || `${treeIconRoot}/gear/accessory/gem-pendant.png`;
+  if (node.kind === 'normal') return wing;
+  const text = [node.id, node.description, ...(node.grants || []).map((grant: any) => grant.id), ...(node.effects || []).map((effect: any) => effect.key)].join(' ').toLowerCase();
+  if (/armour|block|shield|resist/.test(text)) return `${treeIconRoot}/gear/offhand/shield-crest.png`;
+  if (/life|hp|regen|leech|blood/.test(text)) return `${treeIconRoot}/skill/heart-beats.png`;
+  if (/speed|move|evade|dodge/.test(text)) return `${treeIconRoot}/gear/armour/winged-boots.png`;
+  if (/fire|cold|lightning|element|burn/.test(text)) return `${treeIconRoot}/skill/fireball.png`;
+  if (/spell|mana|cast|aura/.test(text)) return `${treeIconRoot}/gear/weapon/staff.png`;
+  if (/crit|accuracy|projectile|bow/.test(text)) return `${treeIconRoot}/gear/weapon/bow-arrow.png`;
+  if (/attack|physical|weapon|melee|bleed/.test(text)) return `${treeIconRoot}/gear/weapon/crossed-swords-1.png`;
+  return wing;
+};
+
+/** The same canonical board the game draws: node positions, `needs` roads, cross-region links and
+ *  the seven region anchors. The runtime adds pan/zoom and the node detail panel. */
+const treeViewer = (): string => {
+  const layout: any = (tree as any).layout || { nodeRadius: 4 };
+  const graph: any = (tree as any).graph || { start: { x: 0, y: 0 } };
+  const model = buildPassiveTreeView((tree as any).nodes || [], graph.start);
+  const nodeRadius = (node: any): number => treeViewNodeRadius(node, layout);
+  const edgeMap = new Map<string, string>();
+  const draw = (aId: string, bId: string, shape = 'line'): void => {
+    const key = [aId, bId].sort().join('|');
+    if (edgeMap.has(key)) return;
+    const a = aId === 'start' ? graph.start : model.byId[aId];
+    const b = model.byId[bId];
+    if (!a || !b) return;
+    const aNode = model.byId[aId], bNode = model.byId[bId];
+    const cross = !!aNode && !!bNode && aNode.wing !== bNode.wing;
+    const path = shape === 'arc' ? treeOrbitPath(a, b, graph.start) : `M${a.x} ${a.y}L${b.x} ${b.y}`;
+    edgeMap.set(key, `<path class="tree-link${cross ? ' cross' : ''}" d="${path}"/>`);
+  };
+  for (const node of model.nodes) for (const parent of node.needs || []) draw(parent, node.id);
+  for (const link of ((tree as any).links || [])) draw(link.a, link.b, link.shape);
+  const nodes = model.nodes as any[];
+  const regionSvg = model.regions.map((region) =>
+    `<g class="tree-region ${region.id}" transform="translate(${region.x} ${region.y})">
+      <text class="region-code" text-anchor="middle">${esc(region.id.toUpperCase())}</text>
+      <text class="region-name" text-anchor="middle" y="17">${esc(TREE_REGION_NAMES[region.id] || region.id)}</text>
+    </g>`).join('');
+  const nodeSvg = nodes.map((node) => {
+    const r = nodeRadius(node);
+    const title = treeNodeTitle(node);
+    const detail = treeNodeDetail(node);
+    const meta = treeNodeMeta(node);
+    const corners = node.kind === 'keystone'
+      ? `<path class="tree-keystone-corners" d="M${-r - 4} -5v-9h9M${r + 4} -5v-9h-9M${-r - 4} 5v9h9M${r + 4} 5v9h-9"/>`
+      : '';
+    const iconSize = r * (node.kind === 'keystone' ? 1.02 : 1.32);
+    const face = node.kind === 'normal'
+      ? `<circle class="tree-node-core" r="${(r * 0.34).toFixed(1)}"/>`
+      : `<image class="tree-node-icon" href="${treeNodeIcon(node)}" x="${(-iconSize / 2).toFixed(1)}" y="${(-iconSize / 2).toFixed(1)}" width="${iconSize.toFixed(1)}" height="${iconSize.toFixed(1)}" clip-path="url(#wiki-tree-icon-clip)"/>`;
+    return `<g class="wiki-tree-node ${node.wing} ${node.kind}" data-node-id="${escAttr(node.id)}"
+        data-name="${escAttr(title)}" data-meta="${escAttr(meta)}" data-detail="${escAttr(detail)}"
+        data-x="${node.x}" data-y="${node.y}" transform="translate(${node.x} ${node.y})" role="img"
+        aria-label="${escAttr(`${title} — ${meta}`)}">
+      <circle class="tree-node-halo" r="${(r + 4).toFixed(1)}"/>
+      ${node.kind === 'normal' ? '' : `<circle class="tree-node-rim" r="${(r + 1.6).toFixed(1)}"/>`}
+      <circle class="tree-node-face" r="${r.toFixed(1)}"/>
+      ${face}
+      ${corners}
+      <circle class="tree-node-hit" r="${Math.max(r + 2, 8).toFixed(1)}"/>
+    </g>`;
+  }).join('');
+  const notables = nodes.filter((node) => node.kind === 'notable').length;
+  const keystones = nodes.filter((node) => node.kind === 'keystone').length;
+  return `<div class="wiki-tree-view" data-tree-view>
+    <div class="wiki-tree-bar">
+      <div class="wiki-tree-heading">
+        <p class="eyebrow">Interactive tree</p>
+        <strong>${n0(nodes.length)} nodes · ${n0(notables)} notables · ${n0(keystones)} keystones</strong>
+      </div>
+      <div class="wiki-tree-controls" role="group" aria-label="Tree view controls">
+        <button type="button" class="tree-tool" data-tree-fit aria-label="Fit the tree to the view"><span class="icon-mask tree-tool-icon" aria-hidden="true"></span></button>
+        <button type="button" class="tree-tool" data-tree-zoom="0.8" aria-label="Zoom out"><span class="icon-mask tree-tool-icon" aria-hidden="true"></span></button>
+        <span class="tree-zoom" data-tree-zoom-label aria-live="polite">100%</span>
+        <button type="button" class="tree-tool" data-tree-zoom="1.25" aria-label="Zoom in"><span class="icon-mask tree-tool-icon" aria-hidden="true"></span></button>
+      </div>
+    </div>
+    <div class="wiki-tree-chips" role="group" aria-label="Jump to a region">
+      ${model.regions.map((region) => `<button type="button" class="tree-chip ${region.id}" data-tree-region="${region.id}" aria-pressed="false" aria-label="Show the ${escAttr(TREE_REGION_NAMES[region.id] || region.id)} region">${esc(region.id.toUpperCase())}</button>`).join('')}
+    </div>
+    <div class="wiki-tree-stage" data-tree-stage tabindex="0" role="group" aria-label="Passive tree board. Drag or use the arrow keys to pan; plus and minus zoom; zero fits the tree.">
+      <svg class="wiki-tree-svg" data-tree-svg viewBox="${model.bounds.x} ${model.bounds.y} ${model.bounds.width} ${model.bounds.height}" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Passive skill tree and its roads">
+        <defs><clipPath id="wiki-tree-icon-clip" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath></defs>
+        <g class="tree-links">${[...edgeMap.values()].join('')}</g>
+        <g class="tree-regions">${regionSvg}</g>
+        <g class="tree-origin" transform="translate(${graph.start.x} ${graph.start.y})">
+          <circle class="origin-ornament" r="56"/><circle class="origin-rim" r="30"/><circle class="origin-face" r="24"/>
+          <image class="origin-mark" href="${treeIconRoot}/plant/oak.png" x="-19" y="-19" width="38" height="38"/><text class="origin-label" text-anchor="middle" y="78">ORIGIN</text>
+        </g>
+        <g class="tree-nodes">${nodeSvg}</g>
+      </svg>
+      <div class="wiki-tree-card" data-tree-card role="tooltip" hidden></div>
+      <p class="wiki-tree-hint">Drag to pan · Scroll to zoom · Pinch on touch</p>
+      <div class="wiki-tree-legend" aria-hidden="true">
+        <span class="l-normal">Passive</span><span class="l-notable">Notable</span><span class="l-keystone">Keystone</span><span class="l-cross">Cross-region road</span>
+      </div>
+    </div>
+  </div>`;
+};
 const weaponFrameCounts = (BASES.weapons || []).map((weapon: any) => ((BASES.weapon_frames as any)?.[weapon.name] || []).length);
 const weaponFrameSummary = weaponFrameCounts.every((count: number) => count === weaponFrameCounts[0])
   ? `${n0(weaponFrameCounts[0])} frames for each weapon type`
@@ -530,6 +726,21 @@ page({
 });
 
 page({
+  file: 'passive-tree.html',
+  nav: 'Passive tree',
+  title: 'Passive tree',
+  lead: `The ${n0((tree as any).nodes.length)}-node board the game draws, pannable here: drag to move, scroll to zoom, and jump by region. Every road, Notable and Keystone is the live tree data.`,
+  body: [
+    block('The board', treeViewer(), 'Drag to pan · Scroll or the buttons to zoom. Hover or tap a node for its rule; the complete Keystone table is on <a href="builds.html">Build plan</a>.'),
+    block('Reading the tree', table(['Node', 'Cost', 'What it is'], [
+      ['Normal', `${n0(treeKindCost('normal'))} tree point`, '+1 of its region’s Core attribute. It is the road: every purchase continues from an owned neighbour or the free Origin.'],
+      ['Notable', `${n0(treeKindCost('notable'))} tree points`, 'Its written profile of flat and percent lines; it is the entrance a Keystone hangs from.'],
+      ['Keystone', `${n0(treeKindCost('keystone'))} attainment point`, 'One rule change; it never spends tree points. Every effect is listed in the Keystone table on Build plan.'],
+    ]), 'Origin is free and every region opens from it. Respec is free at any settlement. The complete node and Keystone tables are on <a href="builds.html">Build plan</a>.'),
+  ],
+});
+
+page({
   file: 'world.html',
   nav: 'World',
   title: 'The world',
@@ -687,11 +898,14 @@ page({
     /** A stock id is a stall line, or the settlement’s own Collector set. */
     const stockName = (id: string): string => LINE[id]?.item || (SET[id] ? `${SET[id].name} (Collector set)` : id);
     const TS: any = TOWN.task_sizing || {};
-    const price = (l: any): string => (l.m_min != null
-      ? `${goldAt(l.m_min, l.charge_band)}–${goldAt(l.m_max, l.charge_band)}`
-      : l.charge === 'one_per_band'
-        ? QUAL_BANDS.map((b: string) => `${esc(b)} ${goldAt(l.m, b)}`).join(' · ')
-        : goldAt(l.m, l.charge_band));
+    const price = (l: any): string => (l.m_per_block != null
+      // a per-block line (the Waypoint warp) has no fixed band price; its fare is the table below
+      ? '—'
+      : l.m_min != null
+        ? `${goldAt(l.m_min, l.charge_band)}–${goldAt(l.m_max, l.charge_band)}`
+        : l.charge === 'one_per_band'
+          ? QUAL_BANDS.map((b: string) => `${esc(b)} ${goldAt(l.m, b)}`).join(' · ')
+          : goldAt(l.m, l.charge_band));
     const extra = (l: any): string => [
       l.qty && l.qty > 1 ? `${n0(l.qty)} a purchase` : '',
       l.ladder ? `one of the ${esc(l.ladder)} ladder` : '',
@@ -771,7 +985,7 @@ page({
       const source = (E.fieldwork as any).regional_sources[town.zone];
       return [esc(town.name), esc(fieldwork.materialById[source.mine].name), esc(fieldwork.materialById[source.grove].name), esc(fieldwork.foodById[source.food].name)];
     })), `<code>harvestBonus = reachedMilestones × bonusPerMilestone</code>; <code>dropChance = min(1, baseChance × (1 + min(cap, (max(0, skill − 1) × skillRate + max(0, mastery − 1) × masteryRate)) / 100))</code>. Regional source selects Mine, Grove and forage goods by zone.`),
-    block('Delivery wants', `<p><code>offer roll = trigger_chance</code> at each online interval for each visited town. Rewards and deadlines freeze when offered. The saved offer serial follows the configured mode sequence (${TOWN.delivery.reward_modes.map(esc).join(' → ')}): Fixed pays its displayed bundle; Choice lets you take a gold bounty or stones plus any named skill, each scaled by the configured ×${xOf(TOWN.delivery.choice_reward_mult)} concentration. Only one alternative pays; select it before the final hand-in. Every hand-in still pays its live market quote.</p><p>Completion grants Haggling XP and any displayed Attainment independently of that choice. The first milestone Delivery per town also pays +${n0(QUEST_REWARDS.milestone_tree_points)} Tree Point. Partial hand-ins and expired offers consume no milestone. Already stored legacy rewards remain unchanged.</p><p>Deadlines use credited game time and pause during Camp recovery or dungeon runs. Offline time creates no offers. If the chosen reward cannot fit, the final hand-in refuses without spending goods or progress. Recaps distinguish actual paid rewards from expired mutually exclusive alternatives.</p>`),
+    block('Delivery wants', `<p><code>offer roll = trigger_chance</code> at each online interval for each visited town. Rewards and deadlines freeze when offered. The saved offer serial follows the configured mode sequence (${TOWN.delivery.reward_modes.map(esc).join(' → ')}): Fixed pays its displayed bundle; Choice lets you take a gold bounty or stones plus any named skill, each scaled by the configured ×${xOf(TOWN.delivery.choice_reward_mult)} concentration. Only one alternative pays; select it before the final hand-in. Every hand-in still pays its live market quote.</p><p>Completion grants Haggling XP and any displayed Attainment independently of that choice. The first milestone Delivery per town also pays +${n0(QUEST_REWARDS.milestone_tree_points)} Tree Point. Partial hand-ins and expired offers consume no milestone. Already stored legacy rewards remain unchanged.</p><p>Deadlines use credited game time and pause during Camp recovery or dungeon runs. Offline time creates no offers. If the chosen reward cannot fit, the final hand-in refuses without spending goods or progress. Recaps distinguish actual paid rewards from expired mutually exclusive alternatives. A tracked want is also the Journey’s next goal while it stays open. Its shortfall lists the acquisition steps the offer already carries, with a Pin button per source settlement; pinning changes the map selection only. <em>Track the missing</em> pins the good as the goal and keeps a way back to this board.`),
     block('Black Market', table(['Rule', 'The number'], [
       ['Offers per settlement', `${n0(TOWN.black_market.offers_per_refresh)} at a time`],
       ['Refresh', `every ${n0(TOWN.black_market.refresh_interval_sec / 60)} online minutes, per visited town`],
@@ -962,25 +1176,7 @@ page({
       ['Account-wide', `+${pts((BASES.mastery as any).drop_bonus_per_type_pct)} drop rate per weapon type once that type reaches Mastery ${n0((BASES.mastery as any).drop_bonus_level_required)}`, `across ${n0((BASES.weapons || []).length)} types — <code>mastery.dropMultiplier</code>`],
       ['The ladder', `${n0((BASES.mastery as any).xp_per_kill)} Mastery XP a kill, the same curve shape as the herb farm, capped at ${n0((BASES.mastery as any).level_cap)}`, '<code>engine/mastery.ts</code>'],
     ]), `<code>MasteryLevel = min(cap, floor(sqrt(XP / divisor)) + 1)</code>; <code>weightDiscount = min(cap, level × perLevel)</code>. Matching skills get full skill bonus; other skills get <code>full × offTypeMultiplier</code>.`),
-    block('The passive tree', table(['Region', 'Normal', 'Notable', 'Keystone', 'Tree points'], treeNodes().regions.map((name: string) => [
-      esc(name), wrap(n0(treeNodes().countsIn(name, 'normal'))), wrap(n0(treeNodes().countsIn(name, 'notable'))),
-      wrap(n0(treeNodes().countsIn(name, 'keystone'))), wrap(n0(treeNodes().costOf(name))),
-    ])), `Every node holds one rank and opens from any owned neighbour; Start is free and every region opens from it. A Normal grants exactly +1 of its region's Core attribute for 1 tree point. A Notable grants its written profile of flat and percent lines for 3 tree points. A Keystone changes a mechanic for 1 attainment point and never spends tree points. <code>treePoints = ${TREE_POINT_CURVE} + claimed quest bonuses − spent tree</code>. The first milestone Expedition claim per zone and first milestone Delivery completion per town guarantee +${n0(QUEST_REWARDS.milestone_tree_points)} Tree Point, outside the consumable reward choice. The point pays once on completion; skipping or expiry leaves the milestone available. Legacy saved random Tree Point promises remain payable. Respec at a settlement is free and hands both wallets back at the prices the spec charged. The tree is a new character's: an older character is refused with its own message rather than rewritten.`),
-    block('The Keystones', tabbedTable('tree-keystones', ['Keystone', 'Region', 'What it changes'], treeNodes().regions.map((region: string) => ({
-      key: region,
-      label: region,
-      rows: treeNodes().keystones.filter((node: any) => node.wing === region)
-        .map((node: any) => [esc(node.name || node.id), esc(node.wing), esc(node.description || '')]),
-    }))), 'Each Keystone is bought with attainment and may be held with any other except the pairs below. The same text is on the board when a node is selected.'),
-    block('Keystone pairs that cannot be held together', tabbedTable('tree-conflicts', ['Keystone', 'May not be held with'], (() => {
-      const bySide = new Map<string, string[]>();
-      for (const pair of treeNodes().pairs) {
-        const rows = bySide.get(pair.a) || [];
-        rows.push(pair.b);
-        bySide.set(pair.a, rows);
-      }
-      return [{ key: 'pairs', label: 'Pairs', rows: [...bySide].map(([a, bs]) => [esc(keystoneName(a)), list(bs.map(keystoneName))]) }];
-    })()), 'Exclusivity is pairwise only: a pair that is not listed may be held together, and there is no transitive chain — holding the middle Keystone does not block both ends.'),
+    block('Passive points', `<p>Levels, quest milestones and first-time Expedition/Delivery milestones bank tree points; a Keystone is paid in attainment, not tree points. Respec is free at a settlement. The tree board is on <a href="passive-tree.html">Passive tree</a>; the plan and every Keystone's effect are on <a href="builds.html">Build plan</a>.</p>`, 'Progression banks the points; the Build plan spends them.'),
   ],
 });
 
@@ -1120,7 +1316,7 @@ page({
       ['Energy Shield', 'the caster’s second pool, spent before Health, and player-only', wrap(n0(DV.es_pool)),
         `${n1(DV.es_regen)} a second, but only once ${n0((E.energy_shield as any).delay_sec)} sec have passed without a hit — <code>esRegenOf</code>`],
     ]), `<code>MaxHP = (hp_base + Vit × K_VIT_HP + hp_per_level × (L − 1) + flat) × (1 + pct / 100)</code>; <code>MaxMana = (mana_base + Int × K_INT_MP + mp_per_level × (L − 1) + flat) × (1 + pct / 100)</code>; <code>MaxES = (Wis × K_WIS_ES + flat) × (1 + pct / 100)</code>.`),
-    block('Your combat readout', '<p>The You card shows HP, Energy Shield, Mana and combat feedback. Objectives shows the run target and tracked Delivery wants; Chronicle records combat and loot.</p>'),
+    block('Your combat readout', '<p>The You card shows HP, Energy Shield, Mana and combat feedback. Objectives shows the run target and tracked Delivery wants; Chronicle records combat and loot.</p><p>The Journey keeps one next goal in front of you: your own pin (a Forge recipe, a Delivery, a map destination, a missing material or a passive node) or, when nothing is pinned, a suggestion from what the run can act on now. A suggestion never outranks your pin; hiding suggestions leaves pins and Delivery tracking visible. Problems that stop progress — a storage failure, a read-only tab, a full bag or a Camp decision — are listed above the goal in that order, one row per condition rather than a new warning every tick.</p><p>A missing material or Delivery want shows its known sources with a Pin button. Pinning selects that settlement on the map; it never walks, buys or spends anything. <em>Gear care</em> in Journey gathers Auto Equip, the bag filter and Auto-Return in one place and previews the current bag without moving a piece: locked pieces and Collector-held pieces are called out, and the filter run and Auto-Return use the same rules as the field.</p>'),
     block('What a Push costs', `<ul class="fx">
       <li><span class="fk">There is no death.</span><span class="fs">rule</span><span class="fv">a fight you lose rests you at camp and costs time only</span></li>
       <li><span class="fk">A Push on the walk is the ordinary Push.</span><span class="fs">rule</span><span class="fv">with a Field Camp in this zone, recovery returns there and ends the walk; otherwise the route resumes at its ambush block (<code>road.push_rule</code>)</span></li>
@@ -1207,7 +1403,7 @@ page({
           : `${n0(farm.potionEffect(p))}% of the pool, instantly`),
         `<span class="hy">${n0((E.potions as any).craft[p.tier].herbs)} herbs + ${n0((E.potions as any).craft[p.tier].reroll_value_stones)} ${STONE_NAME.reroll_value}s</span>`,
       ])),
-      `<code>pool restored = MaxPool × potionPct / 100</code>. One shared ${n0((E.potions as any).shared_cooldown_sec)} sec cooldown; cap ${n0((E.potions as any).max_uses_per_fight)} uses per fight. Boss use: ${String((E.potions as any).boss_suppressed)}.`),
+      `<code>pool restored = MaxPool × potionPct / 100</code>. One shared ${n0((E.potions as any).shared_cooldown_sec)} sec cooldown; cap ${n0((E.potions as any).max_uses_per_fight)} uses per fight. Auto-use prioritizes HP, then checks Mana when no usable HP bottle is available. Boss use: ${String((E.potions as any).boss_suppressed)}.`),
     block('Condensed', table(['', 'What it takes', 'What it gives'], [
       ['A Condensed draught', `${n0((E.potions as any).condensed.cost_bottles)} bottles + ${n0((E.potions as any).condensed.cost_reroll_value_stones)} ${STONE_NAME.reroll_value}s`,
         `×${n0((E.potions as any).condensed.effect_mult)} effect, at ${n0((E.potions as any).condensed.weight)} weight (${n0((E.potions as any).condensed.weight_loose)} carried loose)`],
@@ -1276,7 +1472,7 @@ page({
       ['Keep a missing Element', 'keeps Elemental resistance of an Element you do not hold', yes((E.loot as any).filter.rules.default_keep_missing_element)],
       ['On by default', 'a fresh character keeps every drop and dissolves nothing', yes((E.loot as any).filter.rules.default_enabled)],
       ['Stored per slot', 'a player setting, so a raised threshold is never a second copy of the number', '<span class="hy"><code>loot.filter.rules</code></span>'],
-    ]), `<code>score(item) = Σ(weight(Mod) × value / Mod.max)</code>. Keep if <code>score &gt; wornScore × (1 + margin)</code> or it carries an uncovered Element; otherwise dissolve when filtering is enabled.`),
+    ]), `<code>score(item) = Σ(weight(Mod) × value / Mod.max)</code>. Keep if <code>score &gt; wornScore × (1 + margin)</code> or it carries an uncovered Element; otherwise dissolve when filtering is enabled. <em>Gear care</em> previews the same verdict on a copy of the run: Auto Equip is forecast with the same margin, the bag rows mark wear, keep, dissolve or protected, and a filter run is refused when the bag has no room for the salvage bundle. Changing a setting saves immediately; the preview moves nothing and rolls no RNG.`),
     block('Junk: reference values', table(['Junk kind', 'Base value', 'A kill pays it', 'Expected base gold a kill'],
       Object.entries((E.junk as any).rarities || {}).map(([r, v]: any) => [
         esc(r), wrap(`${n0(v.sell_gold)} gold`), pc1(v.drop_chance_per_kill), wrap(n2(v.sell_gold * v.drop_chance_per_kill)),
@@ -1300,9 +1496,9 @@ page({
       ['Losing one', 'a same-zone Field Camp receives you and ends the walk; without one, recover and resume at the ambush block', '<code>road.push_rule</code>'],
       ['Forward', 'walks to the next already-open settlement when the current zone’s level band is behind', '<code>travel = forward</code> · online only'],
       ['Patrol', `${n0(E.road.patrol.max_stops)} subzones · ${n0(E.road.patrol.groups_per_stop)} groups per stop`, 'choose the order; repeat or stop whenever you want'],
-      ['Auto-Return', `${n0(E.road.patrol.auto_return_threshold_pct)}% of the bag's slots used`, 'stashes unlocked gear at town and resumes Patrol if space was freed'],
+      ['Auto-Return', `${n0(E.road.patrol.auto_return_threshold_pct)}% of the bag's slots used`, 'stashes unlocked gear at town and resumes Patrol if space was freed; stopping Patrol finishes the return at town'],
     ]), '<code>blocks = hexDistance</code>; <code>walkSeconds = blocks × block_sec</code>; <code>P(at least one encounter) = 1 − (1 − chancePerBlock)^blocks</code>. Patrol changes the active subzone pool.'),
-    block('The map journal and trail sites', `<p>Approaching a block scouts its landmark, creatures and supplies. Standing on it records it as explored. The journal survives saving; offline time does not explore a route. Older saves retain their known settlements and current position.</p><p>Authored trail sites can be investigated once per character after walking there. Abandoned Camps restore Hunger, Provision Caravans offer the region's food, and Hunting Tracks survey nearby blocks. A full food bag leaves a caravan available. Investigation stops hunting and cannot run during travel, recovery, a dungeon or an active fight. Setting or relocating Field Camp also requires a clear field. Both actions pause Patrol without clearing its itinerary. Sites add no currency, stones, XP or loot-RNG draws.</p><p>Patrol still uses its existing stop and group rules. The map's numbered flags show the selected order; offline hunting stays at the current stop. Field Camp scenery follows the active gathering activity, while visited settlements display their earned Standing.</p>`),
+    block('The map journal and trail sites', `<p>Approaching a block scouts its landmark, creatures and supplies. Standing on it records it as explored. The journal survives saving; offline time does not explore a route. Older saves retain their known settlements and current position.</p><p>Abandoned Camps and Provision Caravans appear as temporary world events on previously walked bare blocks near you. While online, every ${E.fieldwork.map_exploration.spawn.check_interval_sec} seconds the world rolls a ${Math.round(E.fieldwork.map_exploration.spawn.chance_per_check * 100)}% chance to create a site within ${E.fieldwork.map_exploration.spawn.radius} blocks, up to ${E.fieldwork.map_exploration.spawn.max_active} active sites. Each lasts ${E.fieldwork.map_exploration.spawn.lifetime_sec / 60} minutes of online time; spawning and lifetimes pause offline. Camps restore Hunger and caravans offer regional food, once per occurrence. A full food bag leaves a caravan available until it expires. Investigation stops hunting and cannot run during travel, recovery, a dungeon or an active fight. Setting or relocating Field Camp also requires a clear field. Both actions pause Patrol without clearing its itinerary. Event positions, timers and the independent RNG stream survive saving; reloading does not reroll the board. Sites add no currency, stones, XP or loot-RNG draws.</p><p>Patrol still uses its existing stop and group rules. The map's numbered flags show the selected order; offline hunting stays at the current stop. Field Camp scenery follows the active gathering activity, while visited settlements display their earned Standing.</p>`),
     block('Every settlement, from the start', (() => {
       const start: any = (TOWN.settlements || []).find((s: any) => s.start) || (TOWN.settlements || [])[0];
       const warp: any = (TOWN.repeatable || []).find((l: any) => l.id === 'waypoint_warp') || { m_per_block: 0 };
@@ -1329,10 +1525,47 @@ page({
 
 page({
   file: 'builds.html',
-  nav: 'Builds',
-  title: 'Builds, skill pieces and the finish line',
-  lead: '<code>TTK = target HP / build DPS</code>. Skill duplicates, damage and effect levels use separate progress curves.',
+  nav: 'Build plan',
+  title: 'Build plan',
+  lead: 'A plan first: choose the regions your damage and defence scale on, walk one road to a Notable, and spend attainment on the Keystone that changes a rule. Skill pieces, presets and the finish line follow below.',
   body: [
+    block('Plan in four steps', `<ol>
+      <li><strong>Pick the regions</strong> your damage and defence scale on; the seven Core attributes are on <a href="stats.html">Stats & caps</a>.</li>
+      <li><strong>Walk one road</strong> from Start to the Notable you need; every Keystone hangs off a Notable entrance.</li>
+      <li><strong>Spend attainment on a rule</strong>, not a stat: a Keystone changes one mechanic and never spends tree points.</li>
+      <li><strong>Keep the plan free</strong>: respec is free at any settlement, so the tree follows the build.</li>
+    </ol>`, 'The board previews the route and the price before a point is spent. Open the <a href="passive-tree.html">interactive tree</a> while you plan.'),
+    block('The passive tree', table(['Region', 'Normal', 'Notable', 'Keystone', 'Node cost, tree points'], [
+      ...treeNodes().regions.map((name: string) => [
+        esc(name.toUpperCase()), wrap(n0(treeNodes().countsIn(name, 'normal'))), wrap(n0(treeNodes().countsIn(name, 'notable'))),
+        wrap(n0(treeNodes().countsIn(name, 'keystone'))), wrap(n0(treeNodes().costOf(name))),
+      ]),
+      (() => {
+        const count = (kind: string) => treeNodes().regions.reduce((sum: number, name: string) => sum + treeNodes().countsIn(name, kind), 0);
+        const cost = treeNodes().regions.reduce((sum: number, name: string) => sum + treeNodes().costOf(name), 0);
+        return ['Total', wrap(n0(count('normal'))), wrap(n0(count('notable'))), wrap(n0(count('keystone'))), wrap(n0(cost))];
+      })(),
+    ]), `Every node holds one rank and opens from any owned neighbour; Start is free and every region opens from it. Normal nodes form an irregular field of branching roads and local loops that cross region boundaries, and every playable route ends on a Notable or Keystone. Ordinary dead ends are retired: they keep only their layout position and cannot be bought. Notables sit on local loops or beside roads. Every Keystone has its own Notable entrance from Normal roads. You can choose either branch without buying the other branch Notable; earlier roads may join. A build can mix regions from its allocated frontier. Select a node to preview the route; Shift-click buys it when both wallets can pay. A Normal grants exactly +1 of its region's Core attribute for 1 tree point. A Notable grants its written profile of flat and percent lines for 3 tree points. A Keystone changes a mechanic for 1 attainment point and never spends tree points. <code>treePoints = ${TREE_POINT_CURVE} + claimed quest bonuses − spent tree</code>. The first milestone Expedition claim per zone and first milestone Delivery completion per town guarantee +${n0(QUEST_REWARDS.milestone_tree_points)} Tree Point, outside the consumable reward choice. The point pays once on completion; skipping or expiry leaves the milestone available. Legacy saved random Tree Point promises remain payable. Respec at a settlement is free and hands both wallets back at the prices the spec charged. The redesigned roads preserve existing v3 allocations on live nodes, node effects and wallets; a rank on a retired ordinary node is refunded on load, and every live owned node remains a usable frontier. Characters predating v3 are refused with their own message rather than rewritten. The Build goals lens reads what Notables and Keystones actually grant for staying alive, managing mana, supporting the skills you own, or supporting the held weapon. It quotes the same route and the same tree/attainment split the path purchase charges, marks a route you cannot afford yet and a keystone pair that cannot be held together, and describes a keystone’s trade-off. A recommendation never allocates a point and is not a claim that the build is best. <em>Track this node</em> only pins it in Journey; selection, search, route preview and path purchase stay yours.`),
+    block('The Keystones', tabbedTable('tree-keystones', ['Keystone', 'Notable entrance', 'What it changes'], treeNodes().regions.map((region: string) => ({
+      key: region,
+      label: region.toUpperCase(),
+      rows: treeNodes().keystones.filter((node: any) => node.wing === region)
+        .sort((a: any, b: any) => String(a.name || a.id).localeCompare(String(b.name || b.id)))
+        .map((node: any) => {
+          const numbers = keystoneNumbers(node);
+          return [esc(node.name || node.id), esc(keystoneEntrance(node)),
+            `${esc(node.description || '')}${numbers ? `<br><span class="hy">${numbers}</span>` : ''}`];
+        }),
+    }))), `Every Keystone costs ${wrap(n0(KEYSTONE_COST))} attainment point${KEYSTONE_COST === 1 ? '' : 's'} and never spends tree points. The numbers under a rule are its authored parameters from <code>tree.json</code>; the description is the rule the board shows when the node is selected. Pairwise exclusions are listed below.`),
+    block('Keystone pairs that cannot be held together', tabbedTable('tree-conflicts', ['Keystone', 'May not be held with'], (() => {
+      const bySide = new Map<string, string[]>();
+      for (const pair of treeNodes().pairs) {
+        const rows = bySide.get(pair.a) || [];
+        rows.push(pair.b);
+        bySide.set(pair.a, rows);
+      }
+      return [{ key: 'pairs', label: 'Pairs', rows: [...bySide].map(([a, bs]) => [esc(keystoneName(a)), list(bs.map(keystoneName))]) }];
+    })()), 'Exclusivity is pairwise only: a pair that is not listed may be held together, and there is no transitive chain — holding the middle Keystone does not block both ends.'),
     block('Finding a skill', table(['From', 'A skill piece a kill', 'What it means'], [
       ['A normal mob', pc1((E.skill_drop as any).normal), 'the slow path — a skill is a find, not a purchase'],
       ['An Elite', pc1((E.skill_drop as any).elite), `about ${n0(Math.round((E.skill_drop as any).elite / (E.skill_drop as any).normal))}× the normal rate`],
@@ -1382,7 +1615,7 @@ page({
   file: 'icons.html',
   nav: 'Icons',
   title: 'Icon Gallery',
-  lead: `Every SVG the game ships, in one place. Search by name, filter by category, star icons to find them again, or mark unwanted icons to hide them until you're ready to remove them in a batch.`,
+    lead: `Every icon the game ships, in one place. Search by name, filter by category, star icons to find them again, or mark unwanted icons to hide them until you're ready to remove them in a batch.`,
   body: ['<div id="icons-gallery"></div>'],
 });
 
@@ -1391,12 +1624,78 @@ page({
 /** The nav order: the reference first, then the two questions a fight raises, then the town. */
 const ORDER = [
   'index.html', 'combat.html', 'skills.html', 'items.html', 'weapons.html', 'equipment.html',
-  'stats.html', 'survival.html', 'idle.html', 'world.html', 'travel.html', 'mobs.html',
+  'stats.html', 'survival.html', 'passive-tree.html', 'idle.html', 'world.html', 'travel.html', 'mobs.html',
   'towns.html', 'economy.html', 'crafting.html', 'progression.html', 'builds.html', 'elements.html',
   'icons.html',
 ];
 PAGES.sort((a, b) => ((ORDER.indexOf(a.file) + 1) || 999) - ((ORDER.indexOf(b.file) + 1) || 999));
 
+// ---------------------------------------------------------------- chapters
+
+type Chapter = { id: ChapterId; label: string; numeral: string; blurb: string };
+const CHAPTERS: Chapter[] = [
+  { id: 'start', label: 'Start here', numeral: 'I', blurb: 'The run, the clock, and the loops that keep moving while you are away.' },
+  { id: 'character', label: 'Character', numeral: 'II', blurb: 'Core stats, skills, gear and the bench that changes what a piece is.' },
+  { id: 'combat', label: 'Combat', numeral: 'III', blurb: 'How a hit resolves, what each Element leaves behind, and who stands in the field.' },
+  { id: 'world', label: 'World', numeral: 'IV', blurb: 'Zones, travel, settlements and the Field Camp that keeps the hunt going.' },
+  { id: 'economy', label: 'Items & economy', numeral: 'V', blurb: 'Frames, Mods, gold, demand and the stones that move a piece up the ladder.' },
+  { id: 'reference', label: 'Reference', numeral: 'VI', blurb: 'The complete icon shelf and the live figures behind every page.' },
+];
+const CHAPTER_OF: Record<string, ChapterId> = {
+  index: 'start', progression: 'start', idle: 'start',
+  stats: 'character', skills: 'character', equipment: 'character', crafting: 'character', builds: 'character', survival: 'character', 'passive-tree': 'character',
+  combat: 'combat', elements: 'combat', mobs: 'combat',
+  world: 'world', travel: 'world', towns: 'world',
+  items: 'economy', weapons: 'economy', economy: 'economy',
+  icons: 'reference',
+};
+for (const p of PAGES) p.group = CHAPTER_OF[p.file.replace(/\.html$/, '')] ?? 'reference';
+/** The reading order inside a chapter — the nav, cards and Prev/Next all follow this, not the
+ *  global build order. */
+const CHAPTER_ORDER: Record<ChapterId, string[]> = {
+  start: ['index.html', 'progression.html', 'idle.html'],
+  character: ['stats.html', 'skills.html', 'equipment.html', 'crafting.html', 'survival.html', 'passive-tree.html', 'builds.html'],
+  combat: ['combat.html', 'elements.html', 'mobs.html'],
+  world: ['world.html', 'travel.html', 'towns.html'],
+  economy: ['items.html', 'weapons.html', 'economy.html'],
+  reference: ['icons.html'],
+};
+const chapterOf = (id?: ChapterId): Chapter => CHAPTERS.find((c) => c.id === id) ?? CHAPTERS[0];
+const pagesIn = (id: ChapterId): Page[] => CHAPTER_ORDER[id]
+  .map((file) => PAGES.find((p) => p.file === file))
+  .filter((p): p is Page => Boolean(p));
+const chapterPageOf = (p: Page) => {
+  const list = pagesIn(p.group ?? 'reference');
+  const at = list.findIndex((q) => q.file === p.file);
+  return { list, at, prev: at > 0 ? list[at - 1] : undefined, next: at >= 0 ? list[at + 1] : undefined };
+};
+const plain = (html: string): string => String(html ?? '')
+  .replace(/<[^>]+>/g, ' ')
+  .replace(/&nbsp;/g, ' ')
+  .replace(/&amp;/g, '&')
+  .replace(/&lt;/g, '<')
+  .replace(/&gt;/g, '>')
+  .replace(/&#39;/g, "'")
+  .replace(/&quot;/g, '"')
+  .replace(/\s+/g, ' ')
+  .trim();
+const summary = (p: Page): string => {
+  const text = plain(p.lead);
+  if (text.length <= 140) return text;
+  const cut = text.slice(0, 140);
+  return `${cut.slice(0, cut.lastIndexOf(' ')).trimEnd()}…`;
+};
+const sectionParts = (body: string): { html: string; titles: { id: string; html: string }[] } => {
+  const titles: { id: string; html: string }[] = [];
+  let n = 0;
+  const html = body.replace(/<h2>([\s\S]*?)<\/h2>/g, (_match, inner: string) => {
+    n += 1;
+    const id = `section-${n}`;
+    titles.push({ id, html: inner });
+    return `<h2 id="${id}">${inner}</h2>`;
+  });
+  return { html, titles };
+};
 
 // ---------------------------------------------------------------- shell (pure: the caller supplies the tokens)
 
@@ -1453,7 +1752,11 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs tbody { display: none; }
 .tabs input:checked:nth-of-type(1) ~ table tbody:nth-of-type(1),
 .tabs input:checked:nth-of-type(2) ~ table tbody:nth-of-type(2),
-.tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3) { display: table-row-group; }
+.tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3),
+.tabs input:checked:nth-of-type(4) ~ table tbody:nth-of-type(4),
+.tabs input:checked:nth-of-type(5) ~ table tbody:nth-of-type(5),
+.tabs input:checked:nth-of-type(6) ~ table tbody:nth-of-type(6),
+.tabs input:checked:nth-of-type(7) ~ table tbody:nth-of-type(7) { display: table-row-group; }
 .tabs table { flex: 1 0 100%; width: 100%; }
 .twrap { overflow: hidden; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
 .twrap table { width: 100%; min-width: 0; table-layout: fixed; }
@@ -1511,21 +1814,400 @@ td .sub { display: block; color: var(--dim); font-size: var(--font-xs); }
 .num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-card); padding: 0 .25rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; }
 ol { display: flex; flex-direction: column; gap: var(--spacing-xs); padding-left: 1.3rem; }`;
 
-/** Everything inside <body>: the theme, the nav and the page. */
-export const pageBody = (p: Page, active: string, tokens: string): string =>
-  `<style>${tokens}
-${LAYOUT}</style><div class="layout">
-<nav>${PAGES.map((q) => `<a class="${q.file === active ? 'on' : ''}" href="${q.file}">${esc(q.nav)}</a>`).join('')}</nav>
-<main><header class="page-head"><h1>${esc(p.title)}</h1><p class="lead">${p.lead}</p></header>
-<div class="page-content">${p.body.join('\n')}</div>
+/** The official shell: masthead, chapter sidebar, page chrome and home cards. Content rules above
+ *  still own the tables, tabs and rosters; this layer names tokens only. */
+export const SHELL = `:root { --wiki-max: 96rem; --wiki-display: "Palatino Linotype", "Book Antiqua", Georgia, serif; }
+body {
+  display: block; min-height: 100vh;
+  background:
+    radial-gradient(70rem 34rem at 8% -12%, color-mix(in srgb, var(--gold) 7%, transparent), transparent 62%),
+    radial-gradient(52rem 30rem at 104% 2%, color-mix(in srgb, var(--mana) 7%, transparent), transparent 58%),
+    var(--bg);
+}
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image: linear-gradient(color-mix(in srgb, var(--line) 22%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--line) 22%, transparent) 1px, transparent 1px);
+  background-size: 4.5rem 4.5rem; opacity: .28;
+}
+.skip {
+  position: fixed; top: 1rem; left: 1rem; z-index: var(--z-popover);
+  padding: .55rem .9rem; border: 1px solid var(--gold); border-radius: var(--radius-card);
+  background: var(--panel); color: var(--gold-lit); font: inherit; cursor: pointer;
+  transform: translateY(-200%);
+}
+.skip:focus-visible { transform: none; outline: 2px solid var(--focus); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.wiki-masthead {
+  position: relative; z-index: 2; display: flex; align-items: center; gap: var(--spacing-lg);
+  width: 100%; max-width: var(--wiki-max); padding: 1.35rem 2.5rem; margin-inline: auto;
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: .75rem; color: var(--text); flex: none; }
+.brand:hover { text-decoration: none; }
+.brand-mark {
+  display: grid; place-items: center; width: 2.35rem; height: 2.35rem; flex: none;
+  border: 1px solid color-mix(in srgb, var(--gold) 70%, var(--line)); border-radius: var(--radius-round);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--gold) 18%, transparent), var(--inset) 70%);
+  box-shadow: 0 0 1.2rem color-mix(in srgb, var(--gold) 16%, transparent);
+}
+.brand-mark::before { content: ""; width: .62rem; height: .62rem; transform: rotate(45deg); background: linear-gradient(140deg, var(--gold-lit), var(--gold)); }
+.brand-text b { display: block; font-family: var(--wiki-display); font-size: 1.05rem; font-weight: 600; letter-spacing: .2em; line-height: 1.1; }
+.brand-text small { display: block; color: var(--gold); font-size: .6rem; letter-spacing: .3em; text-transform: uppercase; }
+.masthead-tag { flex: 1; color: var(--dim); font-size: .72rem; letter-spacing: .06em; }
+.masthead-tools { display: flex; align-items: center; gap: .7rem; flex: none; }
+.search { position: relative; display: flex; align-items: center; color: var(--dim); }
+.search .search-glyph { position: absolute; left: .8rem; width: 1rem; height: 1rem; background: currentColor; -webkit-mask: url(../../game/src/icon/ui/search.png) center / contain no-repeat; mask: url(../../game/src/icon/ui/search.png) center / contain no-repeat; pointer-events: none; }
+.search input {
+  width: clamp(12rem, 19vw, 21rem); padding: .55rem 1rem .55rem 2.3rem;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--inset); color: var(--text);
+  font: inherit; font-size: .8rem;
+}
+.search input::placeholder { color: color-mix(in srgb, var(--dim) 75%, transparent); }
+.search input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
+.search-results {
+  position: absolute; top: calc(100% + .5rem); right: 0; z-index: var(--z-popover);
+  display: grid; gap: .15rem; width: min(26rem, 80vw); padding: .4rem;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow-soft);
+}
+.search-results[hidden] { display: none; }
+dl, dt, dd { margin: 0; }
+.search-hit { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: .5rem .6rem; border-radius: 6px; color: var(--text); font-size: .82rem; }
+.search-hit small { color: var(--dim); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.search-hit:hover, .search-hit:focus-visible { background: var(--surface-selected); text-decoration: none; }
+.search-none { padding: .5rem .6rem; color: var(--dim); font-size: .78rem; }
+.play-link { padding: .5rem .9rem; border: 1px solid color-mix(in srgb, var(--gold) 55%, var(--line)); border-radius: 999px; color: var(--gold-lit); font-size: .72rem; letter-spacing: .04em; white-space: nowrap; }
+.play-link:hover { background: color-mix(in srgb, var(--gold) 9%, transparent); text-decoration: none; }
+.menu-toggle { display: none; align-items: center; gap: .45rem; padding: .5rem .75rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); color: var(--text); font: inherit; font-size: .78rem; cursor: pointer; }
+.menu-toggle:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.wiki-shell { position: relative; z-index: 1; display: grid; grid-template-columns: 15.5rem minmax(0, 1fr); gap: 3.2rem; width: 100%; max-width: var(--wiki-max); padding: 2.3rem 2.5rem 4rem; margin-inline: auto; }
+.wiki-nav { position: sticky; top: 1.6rem; align-self: start; display: flex; flex-direction: column; gap: 1.45rem; max-height: calc(100vh - 3.2rem); overflow: auto; min-width: 0; padding-right: .65rem; border-right: 1px solid var(--line); }
+.nav-title { color: var(--dim); font-size: .62rem; letter-spacing: .24em; text-transform: uppercase; }
+.nav-group { display: grid; gap: .5rem; }
+.nav-group h2 { display: flex; align-items: baseline; gap: .45rem; padding: 0; border: 0; color: var(--dim); font-size: .64rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.nav-group h2 span { color: var(--gold); font-family: var(--num); font-weight: 500; }
+.nav-group h2 b { color: color-mix(in srgb, var(--dim) 65%, transparent); font-family: var(--num); font-weight: 500; }
+.nav-group ul { display: grid; gap: 1px; padding: 0; list-style: none; }
+.nav-group a { display: block; padding: .38rem .65rem; border-left: 2px solid transparent; border-radius: 0 6px 6px 0; color: var(--dim); font-size: .83rem; }
+.nav-group a:hover { color: var(--text); background: color-mix(in srgb, var(--text) 4%, transparent); text-decoration: none; }
+.nav-group a.on { color: var(--gold-lit); border-left-color: var(--gold); background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 11%, transparent), transparent); }
+.nav-foot { color: color-mix(in srgb, var(--dim) 70%, transparent); font-size: .66rem; letter-spacing: .06em; }
+.wiki-main { display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
+.wiki-main h1 { font-family: var(--wiki-display); font-size: clamp(2rem, 3.4vw, 3.2rem); font-weight: 500; line-height: 1.08; letter-spacing: .01em; }
+.page-head {
+  display: grid; gap: .85rem; padding: 1.55rem 1.75rem;
+  border: 1px solid var(--line); border-radius: var(--radius-card);
+  background: linear-gradient(155deg, color-mix(in srgb, var(--panel) 92%, var(--gold) 8%), var(--inset));
+  box-shadow: var(--shadow-soft);
+}
+.crumbs, .toc, .page-turn { position: static; min-width: 0; }
+.crumbs { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: .45rem; color: var(--dim); font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; }
+.crumbs a { color: var(--dim); } .crumbs a:hover { color: var(--gold); text-decoration: none; }
+.eyebrow { display: flex; align-items: center; gap: .55rem; color: var(--gold); font-size: .64rem; letter-spacing: .22em; text-transform: uppercase; }
+.eyebrow::before { content: ""; width: 1.5rem; height: 1px; background: var(--gold); }
+.page-head .lead { max-width: 62rem; color: var(--dim); font-size: 1rem; line-height: 1.6; }
+.page-meta { display: flex; flex-wrap: wrap; gap: .4rem; }
+.chip { padding: .22rem .6rem; border: 1px solid var(--line); border-radius: 999px; color: var(--dim); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+.covers { color: var(--dim); font-size: .78rem; }
+.covers span { color: var(--gold); font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; padding-right: .45rem; }
+.toc { display: grid; gap: .55rem; padding: .95rem 1.15rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); }
+.toc ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .15rem 1rem; padding: 0; list-style: none; }
+.toc button { display: block; width: 100%; padding: .32rem .15rem; border: 0; border-bottom: 1px dotted transparent; background: none; color: var(--dim); font: inherit; font-size: .8rem; text-align: left; cursor: pointer; }
+.toc button:hover, .toc button.on { color: var(--gold-lit); border-bottom-color: color-mix(in srgb, var(--gold) 40%, transparent); }
+.toc button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.page-content { display: grid; gap: 1.15rem; counter-reset: sec; }
+.page-content > section {
+  counter-increment: sec; display: grid; gap: .8rem; padding: 1.25rem 1.45rem;
+  border: 1px solid var(--line); border-radius: var(--radius-card);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 88%, transparent), color-mix(in srgb, var(--inset) 94%, transparent));
+  overflow-x: auto;
+}
+.page-content > section > h2 { display: flex; align-items: baseline; gap: .65rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); font-family: var(--wiki-display); font-size: 1.25rem; font-weight: 500; letter-spacing: .01em; }
+.page-content > section > h2::before { content: counter(sec, decimal-leading-zero); color: var(--gold); font-family: var(--num); font-size: .7rem; letter-spacing: .08em; }
+.page-content h3 { color: var(--gold); font-size: .68rem; letter-spacing: .14em; }
+.page-content p, .page-content li { color: color-mix(in srgb, var(--text) 88%, var(--dim)); }
+.page-content .note { padding: .55rem .8rem; border-left: 2px solid color-mix(in srgb, var(--gold) 45%, var(--line)); border-radius: 0 6px 6px 0; background: color-mix(in srgb, var(--gold) 4%, transparent); }
+.page-content code { padding: .05em .28em; border-radius: 4px; background: color-mix(in srgb, var(--gold) 7%, transparent); color: var(--gold-lit); font-family: var(--num); font-size: .86em; }
+.page-content thead th { background: var(--inset); color: var(--gold); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+.page-content td:first-child { white-space: normal; }
+.page-content tbody tr:nth-child(even) { background: color-mix(in srgb, var(--text) 2.5%, transparent); }
+.page-content tbody tr:hover { background: color-mix(in srgb, var(--gold) 5%, transparent); }
+.page-foot { display: grid; gap: 1rem; padding-top: 1.1rem; border-top: 1px solid var(--line); }
+.related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .65rem; }
+.related-grid a { display: grid; gap: .2rem; padding: .75rem .85rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); color: var(--text); }
+.related-grid a:hover { border-color: color-mix(in srgb, var(--gold) 40%, var(--line)); text-decoration: none; }
+.related-grid small { color: var(--dim); font-size: .75rem; }
+.page-turn { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+.page-turn a { display: grid; gap: .2rem; padding: .65rem .85rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); color: var(--text); }
+.page-turn a:hover { border-color: color-mix(in srgb, var(--gold) 40%, var(--line)); text-decoration: none; }
+.page-turn small { color: var(--dim); font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; }
+.page-turn .next { justify-self: end; text-align: right; }
+.home-hero {
+  display: grid; gap: 1.05rem; padding: 2.2rem 2.1rem;
+  border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--line)); border-radius: var(--radius-card);
+  background:
+    radial-gradient(38rem 18rem at 12% 0%, color-mix(in srgb, var(--gold) 13%, transparent), transparent 65%),
+    linear-gradient(160deg, color-mix(in srgb, var(--panel) 90%, var(--gold) 10%), var(--inset));
+  box-shadow: var(--shadow-soft);
+}
+.home-hero h1 { font-size: clamp(2.7rem, 5vw, 4.6rem); }
+.home-hero .lead { max-width: 56rem; color: var(--dim); font-size: 1.08rem; line-height: 1.6; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
+.btn { display: inline-flex; align-items: center; gap: .45rem; padding: .55rem .95rem; border: 1px solid var(--line); border-radius: 999px; background: var(--inset); color: var(--text); font: inherit; font-size: .78rem; cursor: pointer; }
+.btn:hover { border-color: var(--gold); text-decoration: none; }
+.btn.primary { border-color: var(--gold); background: linear-gradient(180deg, var(--gold-lit), var(--gold)); color: var(--bg); font-weight: 600; }
+.btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hero-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: 1px; padding: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--line); }
+.hero-stats div { display: grid; gap: .15rem; padding: .75rem .85rem; background: var(--inset); }
+.hero-stats dt { color: var(--dim); font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; }
+.hero-stats dd { color: var(--gold-lit); font-family: var(--num); font-size: 1.3rem; }
+.start-strip { display: grid; gap: .9rem; padding: 1.3rem 1.4rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); }
+.start-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: .8rem; }
+.start-grid article { display: grid; gap: .4rem; padding: .9rem 1rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
+.start-grid article > span { color: var(--gold); font-family: var(--num); font-size: .72rem; letter-spacing: .1em; }
+.start-grid h3 { color: var(--text); font-family: var(--wiki-display); font-size: 1.05rem; font-weight: 500; letter-spacing: 0; text-transform: none; }
+.start-grid p { color: var(--dim); font-size: .8rem; }
+.start-grid a { color: var(--gold-lit); font-size: .76rem; }
+.card-links { display: flex; flex-wrap: wrap; gap: .2rem .9rem; }
+.chapters { display: grid; gap: 1rem; }
+.chapter-head { display: flex; align-items: end; justify-content: space-between; gap: 1rem; padding-bottom: .55rem; border-bottom: 1px solid var(--line); }
+.chapter-head h2 { padding: 0; border: 0; font-family: var(--wiki-display); font-size: 1.55rem; font-weight: 500; }
+.chapter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: .9rem; }
+.chapter-card { display: grid; gap: .65rem; padding: 1.05rem 1.15rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
+.chapter-card header { display: flex; align-items: baseline; gap: .55rem; }
+.chapter-card h3 { flex: 1; color: var(--text); font-family: var(--wiki-display); font-size: 1.1rem; font-weight: 500; letter-spacing: 0; text-transform: none; }
+.chapter-card header small { color: var(--dim); font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; }
+.chapter-card > p { color: var(--dim); font-size: .78rem; }
+.chapter-card ul { display: grid; gap: .25rem; padding: 0; list-style: none; }
+.chapter-card li a { display: grid; gap: .12rem; padding: .4rem .5rem; border-radius: 6px; color: var(--text); }
+.chapter-card li a:hover { background: var(--surface-selected); text-decoration: none; }
+.chapter-card li b { font-size: .82rem; font-weight: 500; }
+.chapter-card li span { color: var(--dim); font-size: .72rem; }
+.wiki-foot { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .6rem 1.2rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--dim); font-size: .66rem; letter-spacing: .03em; }
+.wiki-foot a { color: var(--dim); }
+.wiki-tree-view { display: grid; grid-template-rows: auto auto minmax(0, 1fr); overflow: hidden; border: 1px solid color-mix(in srgb, var(--gold) 24%, var(--line)); border-radius: var(--radius-card); background: var(--ground); }
+.wiki-tree-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .75rem 1rem; border-bottom: 1px solid var(--line); background: var(--inset); }
+.wiki-tree-heading { display: grid; gap: .2rem; }
+.wiki-tree-heading strong { color: var(--text); font-size: .82rem; font-weight: 500; }
+.wiki-tree-controls { display: flex; align-items: center; gap: .35rem; }
+.icon-mask { display: inline-block; width: .9rem; height: .9rem; flex: none; background: currentColor; -webkit-mask: var(--glyph) center / contain no-repeat; mask: var(--glyph) center / contain no-repeat; }
+.tree-tool { display: inline-flex; align-items: center; justify-content: center; min-width: 1.75rem; padding: .32rem .45rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--text); font: inherit; font-size: .75rem; cursor: pointer; }
+.tree-tool[data-tree-fit] { --glyph: url(../../game/src/icon/ui/expand.png); }
+.tree-tool[data-tree-zoom="0.8"] { --glyph: url(../../game/src/icon/ui/remove-minus.png); }
+.tree-tool[data-tree-zoom="1.25"] { --glyph: url(../../game/src/icon/ui/add-plus.png); }
+.tree-tool:hover { border-color: var(--gold); }
+.tree-tool:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tree-zoom { min-width: 3rem; text-align: center; color: var(--dim); font-family: var(--num); font-size: .72rem; }
+.wiki-tree-chips { display: flex; flex-wrap: wrap; gap: .3rem; padding: .55rem 1rem; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 55%, var(--ground)); }
+.tree-chip { padding: .28rem .6rem; border: 1px solid color-mix(in srgb, var(--wing) 45%, var(--line)); border-radius: 999px; background: transparent; color: color-mix(in srgb, var(--wing) 70%, var(--dim)); font: inherit; font-size: .68rem; letter-spacing: .08em; cursor: pointer; }
+.tree-chip:hover, .tree-chip.on { background: color-mix(in srgb, var(--wing) 14%, transparent); color: var(--text); }
+.tree-chip:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.wiki-tree-stage { position: relative; height: clamp(22rem, 70vh, 48rem); overflow: hidden; background: radial-gradient(60% 60% at 50% 45%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 70%), linear-gradient(160deg, color-mix(in srgb, var(--ground) 92%, var(--gold) 8%), var(--bg)); cursor: grab; touch-action: none; }
+.wiki-tree-stage:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.wiki-tree-stage.dragging { cursor: grabbing; }
+.wiki-tree-svg { display: block; width: 100%; height: 100%; user-select: none; }
+.tree-link { fill: none; stroke: color-mix(in srgb, var(--gold) 28%, var(--line)); stroke-width: 1.4; }
+.tree-link.cross { stroke-dasharray: 3 5; stroke: color-mix(in srgb, var(--gold) 52%, var(--line)); opacity: .75; }
+.tree-region .region-code { font-family: var(--wiki-display); font-size: 26px; fill: color-mix(in srgb, var(--wing) 58%, var(--dim)); }
+.tree-region .region-name { font-size: 11px; fill: var(--dim); letter-spacing: .1em; text-transform: uppercase; }
+.tree-origin .origin-ornament { fill: none; stroke: color-mix(in srgb, var(--gold) 24%, var(--line)); stroke-dasharray: 3 5; }
+.tree-origin .origin-rim { fill: none; stroke: var(--gold); }
+.tree-origin .origin-face { fill: var(--inset); stroke: var(--gold-lit); }
+.tree-origin .origin-mark { pointer-events: none; }
+.tree-origin .origin-label { fill: var(--dim); font-size: 11px; letter-spacing: .22em; }
+.wiki-tree-node { cursor: pointer; }
+.wiki-tree-node .tree-node-face { fill: var(--ground); stroke: color-mix(in srgb, var(--wing) 72%, var(--line)); stroke-width: 1.2; }
+.wiki-tree-node .tree-node-halo { fill: none; stroke: color-mix(in srgb, var(--wing) 30%, transparent); stroke-width: 1; opacity: .55; }
+.wiki-tree-node .tree-node-core { fill: var(--wing); opacity: .85; }
+.wiki-tree-node .tree-node-icon { opacity: .9; pointer-events: none; filter: sepia(.2) saturate(.7); }
+.wiki-tree-node .tree-node-rim { fill: none; stroke: var(--wing); stroke-width: 1.6; opacity: .9; }
+.wiki-tree-node .tree-node-hit { fill: transparent; pointer-events: all; }
+.wiki-tree-node.notable .tree-node-rim { stroke-width: 2; }
+.wiki-tree-node.keystone .tree-node-face { fill: color-mix(in srgb, var(--gold) 14%, var(--ground)); stroke: var(--gold); }
+.wiki-tree-node.keystone .tree-node-rim { stroke: var(--gold-lit); stroke-width: 2; }
+.tree-keystone-corners { fill: none; stroke: var(--gold); stroke-width: 1.3; }
+.wiki-tree-node:hover .tree-node-face, .wiki-tree-node.picked .tree-node-face { filter: drop-shadow(0 0 4px var(--wing)); }
+.wiki-tree-node.picked .tree-node-rim { stroke: var(--gold-lit); stroke-width: 2.6; }
+.wiki-tree-hint { position: absolute; left: .8rem; bottom: .7rem; color: var(--dim); font-size: .66rem; letter-spacing: .04em; pointer-events: none; }
+.wiki-tree-legend { position: absolute; right: .8rem; bottom: .65rem; display: flex; flex-wrap: wrap; gap: .5rem; color: var(--dim); font-size: .6rem; letter-spacing: .05em; text-transform: uppercase; pointer-events: none; }
+.wiki-tree-legend span { display: inline-flex; align-items: center; gap: .25rem; }
+.wiki-tree-legend span::before { content: ""; width: .45rem; height: .45rem; border-radius: 50%; border: 1px solid var(--line); background: var(--ground); }
+.wiki-tree-legend .l-notable::before { border-color: var(--gold); }
+.wiki-tree-legend .l-keystone::before { border-color: var(--gold-lit); background: color-mix(in srgb, var(--gold) 25%, var(--ground)); }
+.wiki-tree-legend .l-cross::before { width: .9rem; height: 0; border: 0; border-top: 1px dashed var(--gold); border-radius: 0; background: none; }
+.wiki-tree-card { position: absolute; z-index: 3; display: grid; gap: .18rem; max-width: min(19rem, 72vw); padding: .7rem .85rem; border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line)); border-radius: var(--radius-card); background: color-mix(in srgb, var(--panel) 96%, transparent); box-shadow: var(--shadow-soft); pointer-events: none; }
+.wiki-tree-card[hidden] { display: none; }
+.wiki-tree-card strong { color: var(--gold-lit); font-family: var(--wiki-display); font-size: 1rem; font-weight: 500; }
+.wiki-tree-card .tree-card-meta { color: var(--dim); font-size: .66rem; letter-spacing: .05em; text-transform: uppercase; }
+.wiki-tree-card p { color: color-mix(in srgb, var(--text) 86%, var(--dim)); font-size: .78rem; }
+.wiki-tree-node.str, .tree-region.str, .tree-chip.str { --wing: var(--hp); }
+.wiki-tree-node.agi, .tree-region.agi, .tree-chip.agi { --wing: var(--good); }
+.wiki-tree-node.dex, .tree-region.dex, .tree-chip.dex { --wing: var(--xp); }
+.wiki-tree-node.int, .tree-region.int, .tree-chip.int { --wing: var(--mana); }
+.wiki-tree-node.wis, .tree-region.wis, .tree-chip.wis { --wing: var(--curse); }
+.wiki-tree-node.vit, .tree-region.vit, .tree-chip.vit { --wing: var(--hp-lit); }
+.wiki-tree-node.lck, .tree-region.lck, .tree-chip.lck { --wing: var(--gold); }
+@media (max-width: 46rem) {
+  .wiki-tree-stage { height: 60vh; }
+  .wiki-tree-legend { display: none; }
+  .wiki-tree-bar { flex-wrap: wrap; }
+  .wiki-tree-controls { flex: 1 0 100%; justify-content: flex-end; }
+}
+@media (max-width: 64rem) {
+  .wiki-masthead { flex-wrap: wrap; padding: 1.1rem 1.4rem; }
+  .masthead-tag { flex: 1 0 100%; order: 3; }
+  .masthead-tools { order: 2; }
+  .menu-toggle { display: inline-flex; order: 1; }
+  .brand { order: 0; }
+  .wiki-shell { grid-template-columns: 1fr; padding: 1.2rem 1.4rem 3rem; }
+  .wiki-nav { position: static; display: none; max-height: none; padding: 0 0 1rem; border-right: 0; border-bottom: 1px solid var(--line); }
+  .wiki-shell.nav-open .wiki-nav { display: flex; }
+}
+@media (max-width: 46rem) {
+  .search input { width: min(100%, 14rem); }
+  .masthead-tools { flex: 1 0 100%; }
+  .search { flex: 1; } .search input { width: 100%; }
+  .page-head, .home-hero { padding: 1.1rem 1.15rem; }
+  .page-content > section { padding: 1rem 1.05rem; }
+  .page-turn { grid-template-columns: 1fr; }
+  .page-turn .next { justify-self: start; text-align: left; }
+  .toc ol { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+@media print {
+  .wiki-masthead, .wiki-nav, .toc, .page-turn, .related-grid, .wiki-foot, .skip { display: none !important; }
+  .wiki-shell { display: block; max-width: none; padding: 0; }
+  body::before { display: none; }
+  .page-content > section { break-inside: avoid; }
+}`;
+
+const masthead = (): string => `<header class="wiki-masthead">
+  <a class="brand" href="index.html" aria-label="ModWorld Field Manual, home">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-text"><b>MODWORLD</b><small>Field Manual</small></span>
+  </a>
+  <p class="masthead-tag">Official player reference · live figures</p>
+  <div class="masthead-tools">
+    <div class="search" role="search">
+      <span class="search-glyph" aria-hidden="true"></span>
+      <label class="sr-only" for="wiki-search">Search the manual</label>
+      <input id="wiki-search" type="search" placeholder="Search the manual…" autocomplete="off" spellcheck="false" />
+      <div id="wiki-search-results" class="search-results" hidden></div>
+    </div>
+    <a class="play-link" href="/">Play the game</a>
+  </div>
+  <button class="menu-toggle" type="button" data-wiki-menu aria-controls="wiki-nav" aria-expanded="false"><span aria-hidden="true">☰</span> Chapters</button>
+</header>`;
+
+const chapterNav = (active: string): string => `<nav class="wiki-nav" id="wiki-nav" aria-label="Manual chapters">
+  <p class="nav-title">The manual</p>
+  ${CHAPTERS.map((c) => `<section class="nav-group" aria-labelledby="nav-${c.id}">
+    <h2 id="nav-${c.id}"><span>${c.numeral}</span>${esc(c.label)}<b>${pagesIn(c.id).length}</b></h2>
+    <ul>${pagesIn(c.id).map((p) => `<li><a href="${p.file}" data-page-link data-title="${escAttr(p.nav)}" data-group="${escAttr(c.label)}" data-search="${escAttr(`${p.nav} ${p.title} ${c.label} ${plain(p.lead)}`)}" class="${p.file === active ? 'on' : ''}"${p.file === active ? ' aria-current="page"' : ''}>${esc(p.nav)}</a></li>`).join('')}</ul>
+  </section>`).join('')}
+  <p class="nav-foot">${PAGES.length} chapters · live data</p>
+</nav>`;
+
+const homeStats = (): string => {
+  const rows: [string, number][] = [
+    ['Chapters', PAGES.length],
+    ['Zones', eng.ZONES.length],
+    ['Species', E.mob.species.length],
+    ['Skills', sm.all().length],
+    ['Keystones', treeNodes().keystones.length],
+  ];
+  return rows.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${wrap(n0(value))}</dd></div>`).join('');
+};
+
+const homeHero = (p: Page): string => `<header class="home-hero">
+  <p class="eyebrow">Official field manual · live figures</p>
+  <h1>ModWorld</h1>
+  <p class="lead">${p.lead}</p>
+  <div class="hero-actions">
+    <a class="btn primary" href="/">Play the game</a>
+    <a class="btn" href="combat.html">Read Combat first</a>
+    <button class="btn" type="button" data-scroll="chapters">Browse chapters</button>
+  </div>
+  <dl class="hero-stats">${homeStats()}</dl>
+</header>`;
+
+const startStrip = (): string => `<section class="start-strip" aria-labelledby="start-title">
+  <p class="eyebrow" id="start-title">Start here</p>
+  <div class="start-grid">
+    <article><span>01</span><h3>Open the field</h3><p>Pick a zone and let the character fight on the clock; every panel sits behind one field screen.</p><a href="/">Enter the game</a></article>
+    <article><span>02</span><h3>Learn one hit</h3><p>Avoidance, Armour, resistance and the pools resolve in a fixed order; knowing that order explains every defence.</p><a href="combat.html">Combat</a></article>
+    <article><span>03</span><h3>Set the loops</h3><p>Arrange skills, wear the right drop and plan a Patrol route; the run keeps working while you are away.</p><span class="card-links"><a href="skills.html">Skills</a><a href="travel.html">Travel</a></span></article>
+  </div>
+</section>`;
+
+const chaptersGrid = (): string => `<section class="chapters" id="chapters" aria-labelledby="chapters-title">
+  <div class="chapter-head"><div><p class="eyebrow">Contents</p><h2 id="chapters-title">Manual chapters</h2></div></div>
+  <div class="chapter-grid">
+    ${CHAPTERS.map((c) => {
+      const list = pagesIn(c.id).filter((p) => p.file !== 'index.html');
+      return `<article class="chapter-card">
+        <header><span class="chapter-num">${c.numeral}</span><h3>${esc(c.label)}</h3><small>${list.length} page${list.length === 1 ? '' : 's'}</small></header>
+        <p>${esc(c.blurb)}</p>
+        <ul>${list.map((p) => `<li><a href="${p.file}"><b>${esc(p.nav)}</b><span>${esc(summary(p))}</span></a></li>`).join('')}</ul>
+      </article>`;
+    }).join('')}
+  </div>
+</section>`;
+
+const pageHead = (p: Page, chapter: Chapter, titles: { id: string; html: string }[]): string => `<header class="page-head">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Field Manual</a>${chapter.label === p.nav ? '' : `<span aria-hidden="true">/</span><span>${esc(chapter.label)}</span>`}<span aria-hidden="true">/</span><span aria-current="page">${esc(p.nav)}</span></nav>
+  <p class="eyebrow">Chapter ${chapter.numeral} · ${esc(chapter.label)}</p>
+  <h1>${esc(p.title)}</h1>
+  <p class="lead">${p.lead}</p>
+  <div class="page-meta"><span class="chip">${titles.length} section${titles.length === 1 ? '' : 's'}</span><span class="chip">Live game data</span><span class="chip">${esc(chapter.label)}</span></div>
+  ${titles.length ? `<p class="covers"><span>Covers</span>${titles.slice(0, 6).map((t) => t.html).join(' · ')}</p>` : ''}
+</header>`;
+
+const tocBlock = (titles: { id: string; html: string }[]): string => titles.length ? `<nav class="toc" aria-label="On this page">
+  <p class="eyebrow">On this page</p>
+  <ol>${titles.map((t, i) => `<li><button type="button" class="${i === 0 ? 'on' : ''}" data-scroll="${t.id}" data-toc="${t.id}">${t.html}</button></li>`).join('')}</ol>
+</nav>` : '';
+
+const pageFoot = (p: Page): string => {
+  const { list, prev, next } = chapterPageOf(p);
+  const related = list.filter((q) => q.file !== p.file).slice(0, 3);
+  if (!related.length && !prev && !next) return '';
+  return `<footer class="page-foot">
+    ${related.length ? `<section class="related" aria-labelledby="related-title"><p class="eyebrow" id="related-title">Keep reading</p><div class="related-grid">${related.map((q) => `<a href="${q.file}"><b>${esc(q.nav)}</b><small>${esc(summary(q))}</small></a>`).join('')}</div></section>` : ''}
+    ${prev || next ? `<nav class="page-turn" aria-label="Chapter navigation">${prev ? `<a class="prev" href="${prev.file}"><small>Previous</small><b>${esc(prev.nav)}</b></a>` : '<span></span>'}${next ? `<a class="next" href="${next.file}"><small>Next</small><b>${esc(next.nav)}</b></a>` : ''}</nav>` : ''}
+  </footer>`;
+};
+
+/** Everything inside <body>: the theme, the chapter shell and the page. */
+export const pageBody = (p: Page, active: string, tokens: string): string => {
+  const { html, titles } = sectionParts(p.body.join('\n'));
+  const chapter = chapterOf(p.group);
+  const home = p.file === 'index.html';
+  const article = `<article class="page-content">${html}</article>`;
+  const main = home
+    ? `${homeHero(p)}${startStrip()}${article}${chaptersGrid()}`
+    : `${pageHead(p, chapter, titles)}${tocBlock(titles)}${article}${pageFoot(p)}`;
+  return `<style>${tokens}
+${LAYOUT}
+${SHELL}</style>
+<button class="skip" type="button" data-skip>Skip to content</button>
+${masthead()}
+<div class="wiki-shell">
+${chapterNav(active)}
+<main id="wiki-main" class="wiki-main" tabindex="-1">${main}
+<footer class="wiki-foot"><span>ModWorld Field Manual · official player reference</span><span>${PAGES.length} chapters · figures read live from the game</span><a href="index.html">Contents</a></footer>
 </main></div>`;
+};
 
 /** A whole document, for the static build. */
 export const renderDoc = (p: Page, active: string, tokens: string): string =>
   `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(p.title)}</title></head>
-<body>` + pageBody(p, active, tokens) + '</body></html>';
+<title>${esc(p.title)} · ModWorld Field Manual</title></head>
+<body>` + pageBody(p, active, tokens) + `
+<script>${WIKI_RUNTIME}</script></body></html>`;
 
 export { PAGES };
 export type { Page };

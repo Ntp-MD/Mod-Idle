@@ -2,7 +2,7 @@
   "source": "art-reference/map/source-assets.json",
   "originalCount": 14,
   "registeredReplacementCount": 11,
-  "selectedInCatalogueCount": 11,
+  "selectedInCatalogueCount": 0,
   "missing": [
     "camp.png",
     "encounter-ruins.png",
@@ -27,10 +27,10 @@
       "catalogue": [
         {
           "key": "ash",
-          "href": "/map/terrain/ash-1.png"
+          "href": "/map/terrain/ash.png"
         }
       ],
-      "selectedNewVersion": true,
+      "selectedNewVersion": false,
       "integrationNote": null
     },
     {
@@ -88,14 +88,14 @@
       "catalogue": [
         {
           "key": "forest",
-          "href": "/map/terrain/forest-relief-1.png"
+          "href": "/map/terrain/forest-relief.png"
         },
         {
           "key": "wild",
-          "href": "/map/terrain/forest-relief-1.png"
+          "href": "/map/terrain/forest-relief.png"
         }
       ],
-      "selectedNewVersion": true,
+      "selectedNewVersion": false,
       "integrationNote": null
     },
     {
@@ -115,10 +115,10 @@
       "catalogue": [
         {
           "key": "grass",
-          "href": "/map/terrain/grass-1.png"
+          "href": "/map/terrain/grass.png"
         }
       ],
-      "selectedNewVersion": true,
+      "selectedNewVersion": false,
       "integrationNote": null
     },
     {
@@ -138,10 +138,10 @@
       "catalogue": [
         {
           "key": "marsh",
-          "href": "/map/terrain/marsh-1.png"
+          "href": "/map/terrain/marsh.png"
         }
       ],
-      "selectedNewVersion": true,
+      "selectedNewVersion": false,
       "integrationNote": null
     },
     {
@@ -161,10 +161,10 @@
       "catalogue": [
         {
           "key": "moor",
-          "href": "/map/terrain/moor-1.png"
+          "href": "/map/terrain/moor.png"
         }
       ],
-      "selectedNewVersion": true,
+      "selectedNewVersion": false,
       "integrationNote": null
     },
     {
@@ -184,10 +184,10 @@
       "catalogue": [
         {
           "key": "rock",
-          "href": "/map/terrain/mountain-relief-1.png"
+          "href": "/map/terrain/mountain-relief.png"
         }
       ],
-      "selectedNewVersion": true,
+      "selectedNewVersion": false,
       "integrationNote": null
     },
     {
@@ -207,10 +207,10 @@
       "catalogue": [
         {
           "key": "salt",
-          "href": "/map/terrain/salt-1.png"
+          "href": "/map/terrain/salt.png"
         }
       ],
-      "selectedNewVersion": true,
+      "selectedNewVersion": false,
       "integrationNote": null
     },
     {
@@ -230,10 +230,10 @@
       "catalogue": [
         {
           "key": "snow",
-          "href": "/map/terrain/snow-1.png"
+          "href": "/map/terrain/snow.png"
         }
       ],
-      "selectedNewVersion": true,
+      "selectedNewVersion": false,
       "integrationNote": null
     },
     {
@@ -250,15 +250,11 @@
       ],
       "catalogue": [
         {
-          "key": "village",
-          "href": "/map/landmark/town-1.png"
-        },
-        {
           "key": "town",
-          "href": "/map/landmark/town-1.png"
+          "href": "/map/landmark/town.png"
         }
       ],
-      "selectedNewVersion": true,
+      "selectedNewVersion": false,
       "integrationNote": "Town rendering also uses LANDMARK_ART in tools/map.ts; inspect actual renderer routing, not only the terrain catalogue."
     },
     {
@@ -270,7 +266,12 @@
         "village.png"
       ],
       "registered": [],
-      "catalogue": [],
+      "catalogue": [
+        {
+          "key": "village",
+          "href": "/map/landmark/village.png"
+        }
+      ],
       "selectedNewVersion": false,
       "integrationNote": null
     },
@@ -291,10 +292,10 @@
       "catalogue": [
         {
           "key": "waste",
-          "href": "/map/terrain/waste-1.png"
+          "href": "/map/terrain/waste.png"
         }
       ],
-      "selectedNewVersion": true,
+      "selectedNewVersion": false,
       "integrationNote": null
     },
     {
@@ -314,10 +315,10 @@
       "catalogue": [
         {
           "key": "water",
-          "href": "/map/terrain/water-1.png"
+          "href": "/map/terrain/water.png"
         }
       ],
-      "selectedNewVersion": true,
+      "selectedNewVersion": false,
       "integrationNote": null
     }
   ]

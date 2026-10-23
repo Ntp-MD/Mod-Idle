@@ -1,5 +1,5 @@
 import { eng, E, sm, BASES } from '../engine/client';
-import { ambushCritChance, bundleOf, crimsonPactSplit, deferredHit, elementalAegisSplit, elementalInfusionExtras, emberheartConvert, enduringCoreHpDamage, headsmanExecutes, inevitableElementMult, radiantFaithCut, toxicExecution, turtleCut, unerringEyeActive } from '../../../engine/keystones.ts';
+import { ambushCritChance, bundleOf, crimsonPactSplit, deferredHit, elementalAegisSplit, elementalInfusionExtras, elementWardMult, emberheartConvert, enduringCoreHpDamage, headsmanExecutes, inevitableElementMult, radiantFaithCut, toxicExecution, tradeoffPct, turtleCut, unerringEyeActive } from '../../../engine/keystones.ts';
 import { directFlags, emptyParts, validateDamagePacket } from '../../../engine/damage-provenance.ts';
 import type { DamagePacket } from '../../../engine/damage-provenance.ts';
 import type { Character } from './player.ts';
@@ -81,6 +81,10 @@ export function playerSwing(
   actionMult = 1,
   /** `10` Painforged: the blocked damage spent as flat Physical on this Hit, before the crit roll */
   bankedPhysical = 0,
+  /** Mirror Strike: the evade banked a guaranteed crit for this Hit. */
+  forceCrit = false,
+  /** Lucky Streak: crit damage bought by the current streak. */
+  critDamageBonusPct = 0,
 ): HitReport {
   const physPool = c.phys + Math.max(0, bankedPhysical);
   // 13 Unerring Eye: the Accuracy/Evasion miss is skipped, Dodge is still its own opposed roll, and
@@ -126,9 +130,9 @@ export function playerSwing(
   const critChance = ambush
     ? ambushCritChance(mob.hp >= mob.hpMax, c.critChance + curse.critChance, ambush.params as Record<string, number>)
     : c.critChance + curse.critChance;
-  if (physPool > 0 && !unerring && rng() * 100 < critChance) {
+  if (physPool > 0 && !unerring && (forceCrit || rng() * 100 < critChance)) {
     // crit multiplies the physical half only: magic and the 5 Elements never crit 
-    physShare = physPool * (c.critDmg / 100);
+    physShare = physPool * ((c.critDmg + critDamageBonusPct) / 100);
     nonElement = nonElement - physPool + physShare;
     physicalPart = physShare;
     crit = true;
@@ -223,23 +227,118 @@ export function playerSwing(
       elemDamage += amount;
     }
   }
+  // Monochrome: every Elemental pool becomes the chosen Element, and that Element is 30% stronger.
+  // The packet records the converted pool under the chosen key, so a hit reads one Element.
+  const mono = bundleOf(c.keystones, 'monochrome');
+  if (mono) {
+    const chosen = String(mono.params.element);
+    let total = 0;
+    for (const v of Object.values(elemByElement)) total += v;
+    total *= 1 + Number(mono.params.elementalPct) / 100;
+    for (const key of Object.keys(elemByElement)) delete elemByElement[key];
+    for (const key of Object.keys(nativeParts)) delete nativeParts[key];
+    for (const key of Object.keys(convertedParts)) delete convertedParts[key];
+    for (const key of Object.keys(extraParts)) delete extraParts[key];
+    elemByElement[chosen] = total;
+    nativeParts[chosen] = total;
+    elemDamage = total;
+  }
+  // Ashen Crown: direct Fire is 20% lower. The burning target's +15% arrives through target mods.
+  const ashen = bundleOf(c.keystones, 'ashen-crown');
+  if (ashen && (elemByElement.fire || 0) > 0) {
+    const cut = 1 - Number(ashen.params.directFirePct) / 100;
+    elemDamage += elemByElement.fire * cut - elemByElement.fire;
+    elemByElement.fire *= cut;
+    if (nativeParts.fire) nativeParts.fire *= cut;
+    if (convertedParts.fire) convertedParts.fire *= cut;
+    if (extraParts.fire) extraParts.fire *= cut;
+  }
+  // Packet M — the expansion trade-offs. A conditional multiplier lands once on the finished pools,
+  // before mitigation; an Elemental split reads each half through its own scale.
+  const targetHpShare = mob.hpMax > 0 ? mob.hp / mob.hpMax : 0;
+  const bossUnique = String(mob.kind).startsWith('Boss') || String(mob.kind).startsWith('Unique');
+  let hitMult = 1;
+  let physicalMult = 1;
+  let elementalMult = 1;
+  const trade = (key: string, condition: boolean, whenTrue: string, whenFalse: string): void => {
+    const bundle = bundleOf(c.keystones, key);
+    if (bundle) hitMult *= tradeoffPct(condition, Number(bundle.params[whenTrue]), -Number(bundle.params[whenFalse]));
+  };
+  trade('executioner', targetHpShare * 100 < 30, 'lowHpDamagePct', 'otherDamagePct');
+  trade('opener', mob.hp >= mob.hpMax, 'fullHpDamagePct', 'otherDamagePct');
+  trade('giant-slayer', bossUnique, 'bossDamagePct', 'normalDamagePct');
+  trade('swarm-bane', !bossUnique, 'normalDamagePct', 'bossDamagePct');
+  trade('overkill', targetHpShare * 100 > 80, 'highHpDamagePct', 'otherDamagePct');
+  trade('sniper', crit, 'critDamagePct', 'nonCritDamagePct');
+  const single = bundleOf(c.keystones, 'single-combat');
+  if (single) hitMult *= 1 + Number(single.params.damagePct) / 100;
+  const elementalist = bundleOf(c.keystones, 'elementalist');
+  if (elementalist) {
+    elementalMult *= 1 + Number(elementalist.params.elementalPct) / 100;
+    physicalMult *= 1 - Number(elementalist.params.physicalPct) / 100;
+  }
+  const brute = bundleOf(c.keystones, 'brute');
+  if (brute) {
+    physicalMult *= 1 + Number(brute.params.physicalPct) / 100;
+    elementalMult *= 1 - Number(brute.params.elementalPct) / 100;
+  }
+  const puncture = bundleOf(c.keystones, 'puncturing');
+  let extraArmourCut = 0;
+  if (puncture) {
+    hitMult *= 1 - Number(puncture.params.damagePct) / 100;
+    extraArmourCut = Number(puncture.params.armourPenPct) / 100;
+  }
+  if (hitMult !== 1 || physicalMult !== 1 || elementalMult !== 1) {
+    nonElement *= hitMult * physicalMult;
+    elemDamage *= hitMult * elementalMult;
+    for (const el of Object.keys(elemByElement)) elemByElement[el] *= hitMult * elementalMult;
+  }
+  // Hemorrhage: direct Physical is 25% lower; the Bleed it leaves behind is not a direct Hit.
+  const hemorrhage = bundleOf(c.keystones, 'hemorrhage');
+  if (hemorrhage) {
+    const cut = Number(hemorrhage.params.directPhysicalPct) / 100;
+    // the direct share has already ridden the attack ladder and the trade multipliers; cut that
+    // scaled value, or every damage multiplier on the build dilutes the advertised 25% penalty
+    const lost = physicalPart * ladderM * hitMult * physicalMult * (1 - cut);
+    physicalPart *= cut;
+    physShare *= cut;
+    nonElement -= lost;
+  }
   // 31 Inevitable Judgement: a crit's Elemental part skips resistance; a non-crit Elemental Hit loses
   // 20% of its Elemental damage. The Physical half is unaffected.
   const inevitable = bundleOf(c.keystones, 'inevitable-judgement');
   if (inevitable && elemDamage > 0) {
     const mult = inevitableElementMult(crit, inevitable.params as Record<string, number>);
-    let scale = mult;
-    if (crit && (mob.effRes ?? mob.res) > 0 && (mob.effRes ?? mob.res) < 100) scale = 1 / (1 - (mob.effRes ?? mob.res) / 100);
-    if (scale !== 1) {
-      for (const el of Object.keys(elemByElement)) elemByElement[el] *= scale;
-      elemDamage *= scale;
+    if (crit) {
+      // a crit skips resistance, so undo the exact cut `mitigateMobHit` will apply. The per-Element
+      // path reads each Element's own line; the headline `res` is the roster mean, never a substitute.
+      const skipScale = (res: number): number => {
+        const cut = eng.mobResCut(Math.max(0, res));
+        return cut > 0 && cut < 1 ? 1 / (1 - cut) : 1;
+      };
+      if (Object.keys(elemByElement).length) {
+        let total = 0;
+        for (const el of Object.keys(elemByElement)) {
+          const authored = (mob as any).effResByElement?.[el] ?? (mob as any).resByElement?.[el];
+          const base = authored != null ? authored : (mob.effRes ?? mob.res ?? 0);
+          elemByElement[el] *= skipScale(base + curse.resistCut);
+          total += elemByElement[el];
+        }
+        elemDamage = total;
+      } else {
+        // the keyless single-number path is mitigated against the headline, so it compensates there
+        elemDamage *= skipScale((mob.effRes ?? mob.res ?? 0) + curse.resistCut);
+      }
+    } else if (mult !== 1) {
+      for (const el of Object.keys(elemByElement)) elemByElement[el] *= mult;
+      elemDamage *= mult;
     }
   }
   // step 5-6 (B8): the mob answers each half with the line written against it — its own
   // Armour on everything that is not Element, its own Elemental resistance on the Element half.
   // A crossbow's `Armour penetration %` line joins the same cut a curse writes, so the two
   // add and the ratio cannot fall below zero. Crit sizes the hit before the armour ratio.
-  let damage = eng.mitigateMobHit(mob, nonElement, Object.keys(elemByElement).length ? elemByElement : elemDamage, curse.armourCut + eng.armourPenCut(c.armourPen), curse.resistCut) * takenMult(curse);
+  let damage = eng.mitigateMobHit(mob, nonElement, Object.keys(elemByElement).length ? elemByElement : elemDamage, curse.armourCut + eng.armourPenCut(c.armourPen) + extraArmourCut, curse.resistCut) * takenMult(curse);
   // §12 weapon × body class: a SWING is the weapon's own argument with a body, so all 12 weapons
   // carry their `size_mult` row here — including a staff's, whose swing is magic damage. It lands
   // after mitigation so the ladder never scales the armour cut, and a magic-damage SKILL is exempt
@@ -253,6 +352,13 @@ export function playerSwing(
   if (thorn) damage *= Number(thorn.params.ownDirectDamageMult);
   // 42 Crushing Rhythm's single action multiplier lands on the finished Hit, before HP is paid
   damage *= actionMult;
+  // Fortuna: a crit sometimes doubles the landed Hit; a non-crit gives up 10%.
+  const fortuna = bundleOf(c.keystones, 'fortuna');
+  if (fortuna) {
+    if (crit) {
+      if (rng() * 100 < Number(fortuna.params.doubleCritPct)) damage *= 2;
+    } else damage *= 1 - Number(fortuna.params.nonCritPct) / 100;
+  }
   // 21 Delayed Demolition withholds its share of the post-mitigation Hit
   const demolition = bundleOf(c.keystones, 'delayed-demolition');
   let deferred = 0;
@@ -270,7 +376,7 @@ export function playerSwing(
   }
   // Leech is a share of just-dealt damage, never a flat drip: the mark on the target pays it
   // (`elements.md`) and Berserker pays it from our own sheet, so the two add.
-  const leechPct = c.leechPct + curse.leechPct;
+  const leechPct = bundleOf(c.keystones, 'parasitic-affliction') ? 0 : c.leechPct + curse.leechPct;
   const leech = leechPct > 0 ? (damage * leechPct) / 100 : 0;
   // The indicator's colour: which Element carried the bigger share of what actually landed. `null`
   // is the non-Element half (Physical power plus Magic power), which the HUD reads in one neutral
@@ -300,7 +406,7 @@ export function playerSwing(
     targetId: mob.id,
     timeUs,
     nominalRate: c.hitsPerSec,
-    flags: directFlags(physPool > 0, true, (c.leechPct + curse.leechPct) > 0),
+    flags: directFlags(physPool > 0, true, leechPct > 0),
     parts,
   });
   return {
@@ -362,12 +468,33 @@ export function mobSwing(
   const hitting = mob.innate[0];
   const res = Math.min(c.resCap, c.resistance + ((hitting && c.resByElement) ? (c.resByElement[hitting] || 0) : 0));
   const elemental = rawHit * elemShare * (1 - res / 100);
+  // Packet M — the incoming trade-offs. The Element wards answer their own Element and amplify the
+  // rest; Last Stand and Brawler read the current HP share. All of them land after resistance, with
+  // the damage_taken bucket, so they scale what the character actually feels.
+  const hpShare = currentHp / Math.max(1, c.maxHp);
+  const ward = (key: string): number => {
+    const bundle = bundleOf(c.keystones, key);
+    return bundle ? elementWardMult(hitting, String(bundle.params.element), Number(bundle.params.reductionPct), Number(bundle.params.otherElementPct)) : 1;
+  };
+  const elementWard = ward('firewalker') * ward('frostwalker')
+    * ward('stormwalker') * ward('earthward') * ward('plagueward');
+  let takenScale = 1;
+  const lastStand = bundleOf(c.keystones, 'last-stand');
+  if (lastStand) {
+    takenScale *= tradeoffPct(hpShare * 100 < Number(lastStand.params.hpThresholdPct),
+      -Number(lastStand.params.lowTakenPct), Number(lastStand.params.highTakenPct));
+  }
+  const brawler = bundleOf(c.keystones, 'brawler');
+  if (brawler) {
+    takenScale *= tradeoffPct(hpShare * 100 > Number(brawler.params.hpThresholdPct),
+      -Number(brawler.params.highReductionPct), Number(brawler.params.lowIncreasePct));
+  }
   // step 7 is the damage_taken bucket: the global one from `engine.json`, times whatever the
   // skills up right now add to it (Berserker takes more, Iron Will takes less). Block is a
-  // mitigation layer, so its flat cut lands BEFORE this multiplier — "damage taken" runs after
+  // mitigation layer, so its flat cut lands BEFORE this multiplier �?" "damage taken" runs after
   // every mitigation layer, the glossary's own order.
   const hardened = E.global.defend_mult * (c.damageTaken ?? 1);
-  let physFinal = physical;
+  let physFinal = physical * takenScale;
   // `10` Painforged banks what a real Block took off this Hit — the flat cut, before damage_taken.
   // Turtle Doctrine's expected cut is not a Block event, so it feeds the bank nothing (§7.3.3).
   let blockCut = 0;
@@ -382,7 +509,14 @@ export function mobSwing(
   // Block used to produce (§7.3.3).
   if (turtle) physFinal = Math.max(0, physFinal - turtleCut(c.block, c.armour, E.caps.block_divisor, physFinal));
   physFinal = physFinal * hardened;
-  let elementalFinal = elemental * hardened;
+  let elementalFinal = elemental * hardened * takenScale * elementWard;
+  // Anvil: Armour also mitigates a share of the Elemental half, before resistance's own line is
+  // read. This is the one new mitigation path the bundle buys; Evasion and Perfect Dodge are gone.
+  const anvil = bundleOf(c.keystones, 'anvil');
+  if (anvil && elementalFinal > 0) {
+    const cut = eng.armourReduce(c.armour, elementalFinal) * (Number(anvil.params.elementalArmourPct) / 100);
+    elementalFinal *= 1 - Math.max(0, Math.min(1, cut));
+  }
   // 55 Chaos Inoculation: a Chaos hit is negated in full. This is damage immunity, not status
   // immunity — Mark still lands through the normal status rules (§7.3.1).
   if (bundleOf(c.keystones, 'chaos-inoculation') && mob.innate.includes('chaos')) elementalFinal = 0;
@@ -401,6 +535,38 @@ export function mobSwing(
       elementalFinal *= keep;
       damage -= cut;
     }
+  }
+  // Unbreakable: small direct Hits are ignored; a Hit that crosses the threshold takes 15% more.
+  const unbreakable = bundleOf(c.keystones, 'unbreakable');
+  if (unbreakable && damage > 0) {
+    if (damage < c.maxHp * Number(unbreakable.params.ignoreBelowMaxHpPct) / 100) {
+      physFinal = 0;
+      elementalFinal = 0;
+      damage = 0;
+    } else {
+      const mult = 1 + Number(unbreakable.params.bigHitTakenPct) / 100;
+      physFinal *= mult;
+      elementalFinal *= mult;
+      damage *= mult;
+    }
+  }
+  // Grit: every direct Hit takes 15% more but no single Hit may remove more than 25% Max HP.
+  const grit = bundleOf(c.keystones, 'grit');
+  if (grit && damage > 0) {
+    const capped = Math.min(damage * (1 + Number(grit.params.otherHitPct) / 100),
+      c.maxHp * Number(grit.params.maxHitMaxHpPct) / 100);
+    const scale = capped / damage;
+    physFinal *= scale;
+    elementalFinal *= scale;
+    damage = capped;
+  }
+  // Sanctuary: the full shield is a real window; a Hit that empties it still gets the cut.
+  const sanctuary = bundleOf(c.keystones, 'sanctuary');
+  if (sanctuary && damage > 0 && c.es > 0 && liveEs >= c.es) {
+    const keep = 1 - Number(sanctuary.params.fullEsTakenPct) / 100;
+    physFinal *= keep;
+    elementalFinal *= keep;
+    damage *= keep;
   }
 
   // Energy Absorb converts a share of the hit into Energy Shield and negates that share outright,
@@ -435,7 +601,7 @@ export function mobSwing(
   return {
     blocked: blockedBy, toHp, toEs, absorbed, raw: rawHit, blockCut,
     leech: (toHp + toEs) * leechPct / 100,
-    blockChargeSpent: rawHit > 0 && physShare > 0 && blockCharge,
+    blockChargeSpent: !rolled && rawHit > 0 && physShare > 0 && blockCharge,
   };
 }
 

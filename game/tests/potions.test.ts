@@ -1,11 +1,29 @@
 import { describe, it, expect } from 'vitest';
 import { newGame } from '../src/sim/game';
 import { buildCharacter } from '../src/sim/player';
-import { drink, cycleQuickbar, ownedPotions } from '../src/sim/farm';
+import { drink, cycleQuickbar, ownedPotions, maybeDrink } from '../src/sim/farm';
 import { migrate } from '../src/state/save';
 import { farm } from '../src/engine/client';
 
 describe('potions', () => {
+  it('still auto-uses carried mana when HP is low but no HP bottle is available', () => {
+    const s = newGame(), c = buildCharacter(s.player.level, s.gear, {}, 0);
+    s.player.hp = s.player.mana = 1;
+    s.farm.potions['Red Draught'] = 0;
+    expect(maybeDrink(s, c, false)?.name).toBe('Sky Draught');
+    expect(s.player.mana).toBeGreaterThan(1);
+    expect(s.farm.potions['Sky Draught']).toBe(0);
+    expect(s.farm.usesThisFight).toBe(1);
+  });
+
+  it('does not fall back to mana when mana auto-use is disabled', () => {
+    const s = newGame(), c = buildCharacter(s.player.level, s.gear, {}, 0);
+    s.player.hp = s.player.mana = 1;
+    s.farm.potions['Red Draught'] = 0; s.farm.autoUse.mana = false;
+    const before = structuredClone(s);
+    expect(maybeDrink(s, c, false)).toBeNull();
+    expect(s).toEqual(before);
+  });
   it('opens with no worn gear and one HP + one mana draught', () => {
     const s = newGame();
     expect(s.gear.every((g) => g === null)).toBe(true);

@@ -64,11 +64,20 @@ export interface TreeCurrency {
 
 export interface TreeLayoutCfg {
   algorithm: string;
+  /** Irregular shared road field: its broad outer radius and nearest regular-cell spacing. */
+  field_radius?: number;
+  cell_spacing?: number;
+  /** Empty space around the free Start before the road field begins. */
+  root_clearance?: number;
+  /** Number of short Normal-to-Normal alternatives to add over the spanning road network. */
+  extra_routes?: number;
+  /** Stable seed for positions, region patches and route selection. */
+  seed?: number;
   start: { x: number; y: number };
   /** The angle each wing's middle sits at, in degrees — the v2 radial layout. */
   wing_anchor_deg?: Record<string, number>;
   nodes_per_ring?: number;
-  /** The distance between two depths. */
+  /** The distance between road rows, or legacy depths. */
   ring_gap?: number;
   /** The widest an arc of lanes may spread, before the wing's own pitch narrows it. */
   arc_span_deg?: number;
@@ -76,7 +85,7 @@ export interface TreeLayoutCfg {
   wing_clearance_deg?: number;
   /** The radius a node occupies; two nodes may not sit closer than twice it (v2). */
   node_radius?: number;
-  /** v3: the seven regions, in the clockwise order their spokes are laid out. */
+  /** v3: attribute regions in clockwise order. */
   regions?: string[];
   /** v3: distance between two neighbouring spine nodes. */
   spine_step?: number;
@@ -92,9 +101,37 @@ export interface TreeLayoutCfg {
   radii?: Record<string, number>;
   /** v3: empty world margin around the outermost node. */
   padding?: number;
+  /** Shared road anchors, local group silhouettes and leaf-pocket clearance. */
+  web?: {
+    sites: Record<string, { x: number; y: number; motif: number; turn: number }>;
+    gateways?: Record<string, { anchor: string; offset: number[] }>;
+    leaf_cluster_separation?: number;
+    roads: { a: string; b: string; via: string[] }[];
+    root_radius: number;
+    motifs: { road: number[][]; notable: number[]; anchor: number; notable_next?: number; loop: boolean; turn: number }[];
+    junction_offset: number;
+    start_clearance: number;
+    leaf_distances: number[];
+    leaf_directions: number;
+    leaf_clearance_preference: number;
+    leaf_length_penalty: number;
+  };
+  /** poe-radial-v5: the medallion lattice, tiers and rim highway. */
+  poe?: {
+    cluster_lanes: number;
+    cluster_bands: number[];
+    cluster_ring_radius: number;
+    keystone_lanes: number;
+    keystone_bands: number[];
+    spine_inner_count: number;
+    spine_inner_radius: number;
+    spine_outer_count: number;
+    spine_outer_radius: number;
+    junction_radius: number;
+  };
 }
 
-/** v3: a drawn connection the authoring `needs` graph does not express (the region rings). */
+/** A purchase connection outside the authoring `needs` spanning graph. */
 export interface TreeLink {
   a: string;
   b: string;
@@ -107,12 +144,12 @@ export interface TreeIncompatibility {
   b: string;
 }
 
-/** v3: where a node sits in the seven-spoke recipe. Coordinates are derived, never stored. */
+/** Stable v3 placement identities. The selected layout derives coordinates from these identities. */
 export type TreePlacement =
   | { role: 'spine'; index: number }
   | { role: 'branch'; cluster: number; step: number }
-  | { role: 'notable'; cluster: number }
-  | { role: 'keystone'; cluster: number }
+  | { role: 'notable'; cluster: number; slot?: number }
+  | { role: 'keystone'; cluster: number; slot?: number }
   | { role: 'junction'; a: string; b: string };
 
 export interface TreeSpecNode {
@@ -128,7 +165,9 @@ export interface TreeSpecNode {
   placement?: TreePlacement;
   /** v3: the catalogue number this keystone was drafted from, for traceability only. */
   draft_ref?: number;
+  weight?: number;
   name?: string;
+  retired?: boolean;
   /** What a keystone does, in the words the board and the wiki show the player. */
   description?: string;
   weapon?: string;
@@ -232,6 +271,7 @@ export interface TreeNode {
   placement?: TreePlacement;
   /** The v3 catalogue number, for traceability only. */
   draft_ref?: number;
+  weight?: number;
   /** The v3 bundle a keystone node carries; grantless nodes are legal in v3 (Packet M). */
   effects?: { kind: string; key: string; params?: Record<string, number | string> }[];
   /**
@@ -259,7 +299,7 @@ export interface TreeNode {
  * tree nobody asked for. Each refusal names the key that is wrong.
  *
  * A v3 spec has no drafting tables: every node is one rank with its grants or bundle written out, and
- * the schema is checked against the locked seven-spoke recipe instead.
+ * the schema is checked against the selected v3 layout recipe instead.
  */
 function readSpec(spec: TreeSpec): { shallowNodes: number; ranks: number; v3: boolean } {
   if (!Array.isArray(spec.nodes) || spec.nodes.length === 0)
@@ -288,8 +328,8 @@ function readSpec(spec: TreeSpec): { shallowNodes: number; ranks: number; v3: bo
       throw new Error('tree spec: v3 requires profiles');
     if (!spec.layout.regions?.length)
       throw new Error('tree spec: v3 layout requires regions');
-    if (spec.layout.algorithm !== 'seven-spoke-v3')
-      throw new Error(`tree spec: v3 layout algorithm must be seven-spoke-v3, got ${spec.layout.algorithm}`);
+    if (!['seven-spoke-v3', 'branch-weave-v4', 'poe-radial-v5', 'cluster-web-v6'].includes(spec.layout.algorithm))
+      throw new Error(`tree spec: unsupported v3 layout algorithm ${spec.layout.algorithm}`);
     return { shallowNodes: 0, ranks: 1, v3: true };
   }
 
@@ -308,6 +348,7 @@ function readSpec(spec: TreeSpec): { shallowNodes: number; ranks: number; v3: bo
 }
 
 import { STAT_KEYS, type StatKey } from './core-attributes.ts';
+import { buildTreeNetwork } from './tree-network.ts';
 import { validateKeystoneParams } from './keystones.ts';
 
 /** What the builder of the tree must supply beyond the data: the canonical Elements, and the real
@@ -371,9 +412,12 @@ export function createTree(
   const maxOf = (id: string) => Number((mods.mods.find((m: any) => m.id === id) || {}).max ?? 0);
   const layout = spec.layout;
   const cost = (v3 ? spec.node_kinds.normal : spec.node_kinds.line)?.cost ?? 1;
+  const allNodes = spec.nodes;
+  const liveNodes = allNodes.filter((node) => !node.retired);
+  const retired = new Set(allNodes.filter((node) => node.retired).map((node) => node.id));
 
   const specById = new Map<string, TreeSpecNode>();
-  for (const node of spec.nodes) {
+  for (const node of liveNodes) {
     if (specById.has(node.id)) throw new Error(`tree spec: node id ${node.id} is used twice`);
     specById.set(node.id, node);
   }
@@ -401,13 +445,15 @@ export function createTree(
     return grants;
   };
 
-  for (const node of spec.nodes) {
+  for (const node of liveNodes) {
     for (const parent of node.needs) {
       if (parent === node.id) throw new Error(`tree spec: node ${node.id} needs itself`);
       if (parent !== 'start' && !specById.has(parent))
         throw new Error(`tree spec: node ${node.id} needs ${parent}, which is not a node`);
     }
     if (!spec.node_kinds[node.kind]) throw new Error(`tree spec: node ${node.id} has the unknown kind ${node.kind}`);
+    if (node.weight !== undefined && (!Number.isSafeInteger(node.weight) || node.weight < 1 || node.weight > 5))
+      throw new Error(`tree spec: node ${node.id} has the weight ${node.weight}, outside 1..5`);
     if (v3) {
       if (node.rule)
         throw new Error(`tree spec: node ${node.id} carries a rule — v3 keystones use bundles only`);
@@ -463,7 +509,7 @@ export function createTree(
       for (const parent of specById.get(id)!.needs) if (parent !== 'start') visit(parent);
       state.set(id, 2);
     };
-    for (const node of spec.nodes) visit(node.id);
+    for (const node of liveNodes) visit(node.id);
   }
 
   // ---- v3 graph edges: the authoring `needs` plus the drawn `links` form one undirected graph. The
@@ -471,7 +517,7 @@ export function createTree(
   const keyOf = (a: string, b: string) => (a < b ? `${a}\u0000${b}` : `${b}\u0000${a}`);
   const links = v3 ? (spec.links || []) : [];
   const edgeKeys = new Set<string>();
-  for (const node of spec.nodes) for (const parent of node.needs) {
+  for (const node of liveNodes) for (const parent of node.needs) {
     if (parent === 'start') continue;
     const key = keyOf(node.id, parent);
     if (edgeKeys.has(key)) throw new Error(`tree spec: node ${node.id} needs ${parent} twice`);
@@ -534,16 +580,17 @@ export function createTree(
     for (const grant of cluster.grants || []) checkGrant(`cluster ${cluster.id}`, grant);
   }
 
-  // ---- the layout: v2 derives depth/lane from the topology; v3 reads the locked seven-spoke
-  // placement and derives every coordinate from the region's angle. The same spec always gives the
-  // same coordinates.
-  const wings = v3 ? (layout.regions as string[]) : [...new Set(spec.nodes.map((n) => n.wing))];
+  // ---- canonical geometry: legacy spokes or the distributed branch-and-loop road field.
+  // The same spec always gives the same coordinates and the board uses them directly.
+  const wings = v3 ? (layout.regions as string[]) : [...new Set(liveNodes.map((n) => n.wing))];
   const pitch = 360 / wings.length;
   const arcSpan = v3 ? 0 : Math.min(layout.arc_span_deg!, pitch - layout.wing_clearance_deg!);
   const coord = new Map<string, { x: number; y: number }>();
   let crosslinkDepths: number[] = [];
 
-  if (v3) {
+  if (v3 && ['branch-weave-v4', 'poe-radial-v5', 'cluster-web-v6'].includes(layout.algorithm)) {
+    for (const [id, point] of buildTreeNetwork(allNodes, layout).positions) coord.set(id, point);
+  } else if (v3) {
     const start = layout.start;
     const spineStep = layout.spine_step ?? 25;
     const branchStep = layout.branch_step ?? 12;
@@ -566,7 +613,7 @@ export function createTree(
       const sign = cluster % 2 === 1 ? 1 : -1;
       return { bx: distance * ux, by: distance * uy, sx: sign * vx, sy: sign * vy };
     };
-    for (const node of spec.nodes) {
+    for (const node of liveNodes) {
       const p = node.placement;
       if (!p) throw new Error(`tree spec: the v3 node ${node.id} has no placement`);
       let x = 0;
@@ -585,7 +632,8 @@ export function createTree(
         y = by + sy * branchStep * p.step;
       } else if (p.role === 'notable' || p.role === 'keystone') {
         const { bx, by, sx, sy } = clusterAxes(node.wing, p.cluster);
-        const offset = p.role === 'notable' ? notableOffset : keystoneOffset;
+        // Secondary gates retain a separate coordinate in the legacy spoke view as well.
+        const offset = (p.role === 'notable' ? notableOffset : keystoneOffset) * (p.slot === 2 ? 1.45 : 1);
         x = bx + sx * offset;
         y = by + sy * offset;
       } else {
@@ -628,7 +676,7 @@ export function createTree(
     // nodes at the same depth would share one, the later takes the next free lane.
     const lane = new Map<string, number>();
     for (const wing of wings) {
-      const list = spec.nodes.filter((n) => n.wing === wing);
+      const list = liveNodes.filter((n) => n.wing === wing);
       const byDepth = new Map<number, TreeSpecNode[]>();
       for (const node of list) {
         const d = depthOf(node.id);
@@ -647,12 +695,12 @@ export function createTree(
       }
     }
     const laneCountOf = (wing: string) =>
-      Math.max(0, ...spec.nodes.filter((n) => n.wing === wing).map((n) => (lane.get(n.id) ?? 0) + 1));
+      Math.max(0, ...liveNodes.filter((n) => n.wing === wing).map((n) => (lane.get(n.id) ?? 0) + 1));
 
     /** The depths at which a wing is ringed to its neighbour — the cross-links, read off the topology. */
     crosslinkDepths = (() => {
       const depths = new Set<number>();
-      for (const node of spec.nodes) {
+      for (const node of liveNodes) {
         const d = depthOf(node.id);
         for (const parent of node.needs) {
           if (parent === 'start') continue;
@@ -663,7 +711,7 @@ export function createTree(
       return [...depths].sort((a, b) => a - b);
     })();
 
-    for (const specNode of spec.nodes) {
+    for (const specNode of liveNodes) {
       const wing = specNode.wing;
       const d = depthOf(specNode.id);
       const l = lane.get(specNode.id) ?? 0;
@@ -683,10 +731,10 @@ export function createTree(
       : Number(layout.node_radius ?? 0);
 
   const nodes: TreeNode[] = [];
-  for (const specNode of spec.nodes) {
+  for (const specNode of liveNodes) {
     const kind = spec.node_kinds[specNode.kind];
     const wing = specNode.wing;
-    const wingIndex = spec.nodes.filter((n) => n.wing === wing).findIndex((n) => n.id === specNode.id) + 1;
+    const wingIndex = liveNodes.filter((n) => n.wing === wing).findIndex((n) => n.id === specNode.id) + 1;
     const grants = v3 ? (profileGrants.get(specNode.id) ?? []) : specNode.grants!;
     const first = grants[0];
     const at = coord.get(specNode.id)!;
@@ -705,6 +753,7 @@ export function createTree(
       ...(specNode.profile ? { profile: specNode.profile } : {}),
       ...(specNode.placement ? { placement: specNode.placement } : {}),
       ...(specNode.draft_ref !== undefined ? { draft_ref: specNode.draft_ref } : {}),
+      ...(specNode.weight !== undefined ? { weight: specNode.weight } : {}),
       ...(specNode.effects ? { effects: specNode.effects } : {}),
       line: first?.id ?? '',
       values: first?.values ?? [],
@@ -1087,7 +1136,7 @@ export function createTree(
     version: spec.version,
     /** The §6 global mechanics line, validated and read once — the sim never copies these numbers. */
     mechanics,
-    nodes, byId, branches, cost,
+    nodes, byId, branches, cost, retired,
     /** The rank count an ordinary line node holds — its kind's own. */
     ranks: spec.node_kinds.line?.ranks ?? ranks,
     /** The rank ladder in the drafting tables, which a written-out value need not follow. */

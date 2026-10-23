@@ -1,109 +1,64 @@
-import type { TreeNode } from '../../../engine/tree';
+import type { TreeNode } from '../../../engine/tree.ts';
 
-export interface TreeViewCluster {
-  id: string;
-  wing: string;
-  x: number;
-  y: number;
-  radius: number;
+export interface TreeViewBounds { x: number; y: number; width: number; height: number }
+
+function pointBounds(points: { x: number; y: number }[], paddingX: number, paddingY = paddingX): TreeViewBounds {
+  const xs = points.map((point) => point.x), ys = points.map((point) => point.y);
+  const x = Math.min(...xs) - paddingX, y = Math.min(...ys) - paddingY;
+  return { x, y, width: Math.max(...xs) + paddingX - x, height: Math.max(...ys) + paddingY - y };
 }
 
-const TAU = Math.PI * 2;
-const SPINE_BASE = 100;
-const SPINE_STEP = 19;
-const CLUSTER_BASE = 240;
-const CLUSTER_STEP = 116;
-const CLUSTER_RADIUS = 21;
-const CLUSTER_SLOTS = [-0.36, -0.18, 0.18, 0.36];
-const KEYSTONE_REACH = 2;
-const JUNCTION_RADIUS = 165;
-const RIM_RADIUS = 532;
-const hash = (value: number) => { const x = Math.sin(value * 127.1) * 43758.5453; return x - Math.floor(x); };
-
-/** Presentation only: lay the seven regions out as one PoE-style disc — a spine ray per region and
- * twelve small cluster rings beside it, with junctions bridging neighbouring regions.
- * IDs, grants, costs and connections remain the canonical engine nodes. */
+/** The board uses the canonical road positions, so every drawn step is a real purchase step. */
 export function buildPassiveTreeView(nodes: TreeNode[], start: { x: number; y: number }) {
-  const byId = Object.fromEntries(nodes.map((node) => [node.id, { ...node }]));
+  const placed = nodes.map((node) => ({ ...node }));
+  const byId = Object.fromEntries(placed.map((node) => [node.id, node]));
   const wings = [...new Set(nodes.map((node) => node.wing))];
-  const angleOf = (index: number) => -Math.PI / 2 + index * TAU / wings.length;
-  const bendOf = (index: number) => (index % 2 ? 0.055 : -0.055);
-  const spineAngle = (wing: number, step: number) => angleOf(wing) + bendOf(wing) * Math.min(1, Math.max(0, (step - 1) / 19));
-  const at = (angle: number, radius: number) => ({ x: start.x + Math.cos(angle) * radius, y: start.y + Math.sin(angle) * radius });
+  // Labels share this fixed margin instead of making the whole field smaller to fit a second ring.
+  const bounds = pointBounds([start, ...placed], 90, 75);
+  const regions = wings.map((id) => {
+    const members = placed.filter((node) => node.wing === id);
+    const centroid = {
+      x: members.reduce((sum, node) => sum + node.x, 0) / members.length,
+      y: members.reduce((sum, node) => sum + node.y, 0) / members.length,
+    };
+    const distance = Math.hypot(centroid.x - start.x, centroid.y - start.y);
+    const direction = distance ? { x: (centroid.x - start.x) / distance, y: (centroid.y - start.y) / distance } : { x: 0, y: -1 };
+    const edge = Math.max(...members.map((node) => (node.x - centroid.x) * direction.x + (node.y - centroid.y) * direction.y));
+    return {
+      id,
+      x: Math.max(bounds.x + 62, Math.min(bounds.x + bounds.width - 62, centroid.x + direction.x * (edge + 46))),
+      y: Math.max(bounds.y + 24, Math.min(bounds.y + bounds.height - 32, centroid.y + direction.y * (edge + 46))),
+      centroid,
+      bounds: pointBounds(members, 45),
+    };
+  });
+  return { nodes: placed, byId, regions, bounds };
+}
 
-  for (const node of nodes) {
-    const placement = node.placement;
-    if (placement?.role !== 'spine') continue;
-    const point = at(spineAngle(wings.indexOf(node.wing), placement.index), SPINE_BASE + (placement.index - 1) * SPINE_STEP);
-    byId[node.id].x = point.x;
-    byId[node.id].y = point.y;
-  }
-
-  const groups = new Map<string, TreeNode[]>();
-  for (const node of nodes) {
-    const placement = node.placement;
-    if (!placement || placement.role === 'spine' || placement.role === 'junction') continue;
-    const id = node.wing + ':' + placement.cluster;
-    const members = groups.get(id) ?? [];
-    members.push(node);
-    groups.set(id, members);
-  }
-
-  const clusterOf = new Map<string, TreeViewCluster>();
-  const clusters: TreeViewCluster[] = [];
-  for (const [id, members] of groups) {
-    const branch = members.filter((node) => node.placement?.role === 'branch')
-      .sort((a, b) => (a.placement as { step: number }).step - (b.placement as { step: number }).step);
-    const notable = members.find((node) => node.placement?.role === 'notable');
-    if (!branch.length || !notable) continue;
-    const wing = branch[0].wing;
-    const wingIndex = wings.indexOf(wing);
-    const clusterIndex = (branch[0].placement as { cluster: number }).cluster;
-    const band = Math.floor((clusterIndex - 1) / CLUSTER_SLOTS.length);
-    const slot = (clusterIndex - 1) % CLUSTER_SLOTS.length;
-    const seed = wingIndex * 97 + clusterIndex * 31;
-    const angle = spineAngle(wingIndex, 6 + band * 5) + CLUSTER_SLOTS[slot] + (hash(seed) - 0.5) * 0.04;
-    const center = at(angle, CLUSTER_BASE + band * CLUSTER_STEP + (hash(seed + 1) - 0.5) * 20);
-    const facing = angle + CLUSTER_SLOTS[slot] * 0.5;
-    const cluster = { id, wing, x: center.x, y: center.y, radius: CLUSTER_RADIUS };
-    clusters.push(cluster);
-    const ringMembers = [...branch, notable];
-    ringMembers.forEach((node, index) => {
-      const memberAngle = facing + (index / ringMembers.length) * TAU;
-      byId[node.id].x = center.x + Math.cos(memberAngle) * cluster.radius;
-      byId[node.id].y = center.y + Math.sin(memberAngle) * cluster.radius;
-      clusterOf.set(node.id, cluster);
-    });
-    const keystones = members.filter((node) => node.placement?.role === 'keystone');
-    keystones.forEach((node, index) => {
-      const keystoneAngle = facing + (index - (keystones.length - 1) / 2) * 0.35;
-      const point = { x: center.x + Math.cos(keystoneAngle) * cluster.radius * KEYSTONE_REACH, y: center.y + Math.sin(keystoneAngle) * cluster.radius * KEYSTONE_REACH };
-      byId[node.id].x = point.x;
-      byId[node.id].y = point.y;
-    });
-  }
-
-  for (const node of nodes) {
-    const placement = node.placement;
-    if (placement?.role !== 'junction') continue;
-    const from = wings.indexOf(placement.a);
-    const to = wings.indexOf(placement.b);
-    let span = to - from;
-    if (span < 0) span += wings.length;
-    const point = at(angleOf(from) + (span / 2) * TAU / wings.length, JUNCTION_RADIUS);
-    byId[node.id].x = point.x;
-    byId[node.id].y = point.y;
-  }
-
-  const placed = nodes.map((node) => byId[node.id]);
-  const regions = wings.map((id, index) => ({ id, ...at(angleOf(index), RIM_RADIUS) }));
-  const xs = [...placed.map((node) => node.x), ...regions.map((region) => region.x)];
-  const ys = [...placed.map((node) => node.y), ...regions.map((region) => region.y)];
-  const x = Math.min(start.x, ...xs) - 70, y = Math.min(start.y, ...ys) - 60;
-  return {
-    nodes: placed, byId, clusters, clusterOf, regions,
-    bounds: { x, y, width: Math.max(start.x, ...xs) + 70 - x, height: Math.max(start.y, ...ys) + 60 - y },
+/** Open on the player's purchased roads and their next steps; a fresh tree opens around Origin. */
+export function initialTreeCamera(
+  view: ReturnType<typeof buildPassiveTreeView>,
+  start: { x: number; y: number },
+  ranks: Record<string, number>,
+  viewport: { width: number; height: number },
+  links: { a: string; b: string }[] = [],
+) {
+  if (viewport.width <= 0 || viewport.height <= 0) return { ...start, zoom: 2.6 };
+  const owned = new Set(view.nodes.filter((node) => (ranks[node.id] || 0) > 0).map((node) => node.id));
+  if (!owned.size) return { ...start, zoom: 2.6 };
+  const visible = new Set(owned);
+  const includeFrontier = (a: string, b: string) => {
+    if (owned.has(a)) visible.add(b);
+    if (owned.has(b)) visible.add(a);
   };
+  for (const node of view.nodes) for (const parent of node.needs) includeFrontier(parent, node.id);
+  for (const link of links) includeFrontier(link.a, link.b);
+  const points: { x: number; y: number }[] = view.nodes.filter((node) => visible.has(node.id));
+  if (visible.has('start')) points.push(start);
+  const bounds = pointBounds(points, 80);
+  const baseScale = Math.min(viewport.width / view.bounds.width, viewport.height / view.bounds.height);
+  const zoom = Math.min(viewport.width / bounds.width, viewport.height / bounds.height) / baseScale;
+  return { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2, zoom: Math.max(.65, Math.min(4, zoom)) };
 }
 
 /** SVG's circular arc takes the short route between the actual graph endpoints. */
@@ -112,3 +67,20 @@ export function treeOrbitPath(a: { x: number; y: number }, b: { x: number; y: nu
   const cross = (a.x - center.x) * (b.y - center.y) - (a.y - center.y) * (b.x - center.x);
   return 'M' + a.x + ' ' + a.y + 'A' + radius + ' ' + radius + ' 0 0 ' + (cross > 0 ? 1 : 0) + ' ' + b.x + ' ' + b.y;
 }
+
+/** Match the board's drawn circles when checking spacing or rendering a node. */
+export function treeViewNodeRadius(node: Pick<TreeNode, 'kind'>, layout: { nodeRadius: number; radii?: Record<string, number> }) {
+  return (layout.radii?.[node.kind] ?? layout.nodeRadius) * (node.kind === 'keystone' ? 1.55 : node.kind === 'notable' ? 1.25 : 1.45);
+}
+
+/** Highlight the purchased route, not extra chords between nodes that happen to lie on it. */
+export function treeRouteEdges(path: string[], links: { a: string; b: string }[], owned: (id: string) => boolean) {
+  const key = (a: string, b: string) => [a, b].sort().join('|');
+  const edges = new Set(path.slice(1).map((id, i) => key(path[i], id)));
+  const first = path[0];
+  const entry = first && links.filter((link) => (link.a === first && owned(link.b)) || (link.b === first && owned(link.a)))
+    .map((link) => key(link.a, link.b)).sort()[0];
+  if (entry) edges.add(entry);
+  return edges;
+}
+

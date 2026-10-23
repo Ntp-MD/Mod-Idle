@@ -2,7 +2,7 @@
   import type { Snippet } from 'svelte';
 
   /**
-   * The one tab row for the client: a tablist of quiet buttons with the shared picked state,
+   * The one tablist for the client: a tablist of quiet buttons with the shared picked state,
    * the roving keyboard walk (arrows, Home, End) and a caller-owned face per tab.
    *
    * Every panel used to hand-write this row — its own `.x-tabs` class, its own picked/inverse

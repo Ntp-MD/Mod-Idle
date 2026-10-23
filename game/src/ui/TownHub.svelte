@@ -104,7 +104,7 @@
     <ul class="services" role="list">
       {#each services as s (s.id)}
         <li role="listitem">
-          <button class="row" disabled={!here} onclick={() => s.id === 'black-market' ? onblackmarket() : onopen(s.id)}>
+          <button class="row card-read" disabled={!here} onclick={() => s.id === 'black-market' ? onblackmarket() : onopen(s.id)}>
             <span class="service-name"><img src={s.icon} alt="" aria-hidden="true" /><span class="nm">{s.name}</span></span>
             <span class="by">{s.by}</span>
             <span class="say">{s.say}</span>
@@ -115,15 +115,17 @@
     </ul>
 
     <div class="aside">
-      <section class="qol">
+      <section class="qol card-read">
         <h4>Before you leave town</h4>
         <div class="qrow">
           <span>Bag · pieces to stash</span><b>{pieces} · {used} / {capacity} slots</b>
-          <button class="mini" disabled={!pieces || !tabs} onclick={onstashall}>Stash it all</button>
+          <button class="mini" disabled={!pieces || !tabs} onclick={onstashall} title={!tabs ? 'No stash tab yet — buy one at the Stall.' : !pieces ? 'No gear pieces in the bag.' : 'Stash every carried piece'}>Stash it all</button>
+          {#if !tabs}<small class="text-note">No stash tab yet — buy one at the Stall.</small>{:else if !pieces}<small class="text-note">No gear pieces in the bag.</small>{/if}
         </div>
         <div class="qrow">
           <span>Junk to sell</span><b>{junk}</b>
-          <button class="mini" disabled={!junk} onclick={onsellall}>Sell</button>
+          <button class="mini" disabled={!junk} onclick={onsellall} title={junk ? 'Sell all junk here' : 'No junk carried.'}>Sell</button>
+          {#if !junk}<small class="text-note">No junk carried.</small>{/if}
         </div>
         <div class="qrow">
           <span>Warehouse</span><b>{stored} pieces · {tabs} tabs</b>
@@ -135,19 +137,19 @@
         </div>
       </section>
 
-      <section class="ways">
+      <section class="ways card-read">
         <h4>Waypoint</h4>
         <div class="chips">
           <span class="chip chip-tag here">{town.name} · you are here</span>
           {#each opened as s (s.id)}
-            <button class="chip chip-tag btn btn-quiet" onclick={() => onwarp(s.id)} title="Warp to {s.name}, free and instant">{s.name}</button>
+            <button class="chip chip-tag btn btn-quiet" onclick={() => onwarp(s.id)} title="Warp to {s.name} · instant, paid in gold">{s.name}</button>
           {:else}
             <span class="text-dim">No other Waypoint opened yet.</span>
           {/each}
         </div>
       </section>
 
-      <section class="ways">
+      <section class="ways card-read">
         <h4>Owned appearance</h4>
         <div class="chips">
           {#each looks as look}
@@ -177,8 +179,7 @@
   .services { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--spacing-xs); }
   .services .row {
     display: grid; grid-template-columns: clamp(94px, 7.31vw, 202px) clamp(113px, 8.71vw, 243px) 1fr minmax(0, clamp(113px, 12.58vw, 351px)); gap: var(--spacing-sm); align-items: baseline;
-    width: 100%; text-align: left; border-radius: var(--radius-card);
-    background: var(--glass); border: 1px solid var(--edge);
+    width: 100%; text-align: left;
   }
   .services .nm { font-size: var(--font-sm); color: var(--gold); }
   .service-name { display: flex; align-items: center; gap: var(--spacing-xs); }
@@ -189,17 +190,17 @@
   .services .row:disabled { opacity: .5; cursor: not-allowed; }
 
   .aside { display: grid; gap: var(--spacing-sm); }
-  .qol, .ways { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm) var(--spacing-sm); border: 1px solid var(--edge); border-radius: var(--radius-card); }
+  .qol, .ways { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm) var(--spacing-sm); }
   .qol h4, .ways h4 { margin: 0; }
   /* one row, two columns: the thing and how much of it there is. The press takes the line below and
      stands on the right edge, so a long label never runs the row out of the aside */
   .qrow { display: grid; grid-template-columns: 1fr auto; gap: var(--spacing-xs) var(--spacing-sm); align-items: center; }
   .qrow button { grid-column: 1 / -1; justify-self: end; }
+  .qrow small { grid-column: 1 / -1; }
   .qrow span { font-size: var(--font-xs); color: var(--dim); }
   .qrow b { font-family: var(--num); font-size: var(--font-xs); text-align: right; }
   .qol { display: grid; gap: var(--spacing-xs); }
   .chips { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
-  .chips span.chip { padding: var(--spacing-xs) var(--spacing-xs); }
 
   @media (max-width: 1023px) {
     .cols { grid-template-columns: 1fr; }

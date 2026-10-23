@@ -9,7 +9,8 @@
    * one draught's name. Drag from the pouch or press to place; a square's own press drinks through the
    * caller's rules (cooldown, per-fight cap, boss suppression all live in the sim).
    */
-  let { quickbar, potions, condensed, bagIcon, keyFor, onuse, oncyc, onassign }: {
+  let { quickbar, potions, condensed, bagIcon, keyFor, onuse, oncyc, onassign, writable }: {
+    writable: boolean;
     quickbar: (string | null)[];
     potions: Record<string, number>;
     condensed: Record<string, number>;
@@ -27,6 +28,7 @@
   const owned = $derived(farm.P.list.filter((p: any) => held(p.name) > 0).map((p: any) => p.name));
 
   function place(name: string) {
+    if (!writable) return;
     const keep = quickbar.indexOf(name);
     const at = keep >= 0 ? keep : quickbar.findIndex((q) => !q);
     if (at >= 0) onassign(at, name);
@@ -40,9 +42,9 @@
     <img src={bagIcon} alt="" aria-hidden="true" />
   </button>
   {#if pouchOpen}
-    <div class="quick-pouch" aria-label="Carried draughts">
+    <div class="quick-pouch surface-popover" aria-label="Carried draughts">
       {#each owned as pname (pname)}
-        <button type="button" class="pouch-item" draggable="true"
+        <button type="button" class="pouch-item btn btn-flat" draggable={writable} disabled={!writable}
                 title={`${pname} · ${held(pname)} held — drag to a square`}
                 ondragstart={(e) => setPotionDrag(e, pname)}
                 onclick={() => place(pname)}>
@@ -57,11 +59,12 @@
   {#each quickbar as name, i (i)}
     <span class="quick" class:empty={!name} role="listitem">
       <button type="button" class="hud-slot"
+              disabled={!writable}
               title={`Item ${i + 1} · ${keyFor(i + 1)} · ${name ? `${name} · ${held(name)} held` : 'empty — drag from the pouch or right-click to cycle'}`}
               ondragover={(e) => e.preventDefault()}
-              ondrop={(e) => { const dn = readPotionDrag(e); if (dn) { pouchOpen = false; onassign(i, dn); } }}
+              ondrop={(e) => { if (!writable) return; const dn = readPotionDrag(e); if (dn) { pouchOpen = false; onassign(i, dn); } }}
               onclick={() => onuse(i)}
-              oncontextmenu={(e) => { e.preventDefault(); oncyc(i); }}>
+              oncontextmenu={(e) => { e.preventDefault(); if (writable) oncyc(i); }}>
         {#if name}<img src={stackIcon('draughts', name)} alt="" aria-hidden="true" />{/if}
         {#if name}<small class="quick-held">{held(name)}</small>{/if}
         <b>{i + 1}</b>
@@ -82,8 +85,7 @@
   .quick-pouch {
     position: absolute; bottom: calc(100% + var(--spacing-xs)); left: 0; z-index: var(--z-hud-control);
     display: flex; flex-direction: column; gap: 2px; min-width: 170px;
-    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-card);
     padding: var(--spacing-xs) var(--spacing-sm);
   }
-  .pouch-item { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); cursor: grab; background: none; border: 0; padding: 2px; text-align: left; border-radius: var(--radius-card); }
+  .pouch-item { display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); cursor: grab; padding: 2px; text-align: left; }
 </style>

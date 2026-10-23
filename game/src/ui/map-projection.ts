@@ -1,27 +1,30 @@
 /** World plane projection. Artwork stays upright while its foot follows this plane. */
-const yaw = -16 * Math.PI / 180;
-const elevation = 38 * Math.PI / 180;
-export const MAP_CAMERA = {
-  a: Math.cos(yaw), b: Math.sin(yaw) * Math.sin(elevation),
-  c: -Math.sin(yaw), d: Math.cos(yaw) * Math.sin(elevation),
-};
-const { a, b, c, d } = MAP_CAMERA;
-const determinant = a * d - b * c;
-const inverse = [d / determinant, -b / determinant, -c / determinant, a / determinant];
-export const MAP_CAMERA_TRANSFORM = `matrix(${a} ${b} ${c} ${d} 0 0)`;
-export const projectMapPoint = (x: number, y: number) => ({ x: a * x + c * y, y: b * x + d * y });
+export type MapProjection = { a: number; b: number; c: number; d: number };
+export const MAP_DEFAULT_ELEVATION = 38;
+export function createMapProjection(bearing = 0, elevation = MAP_DEFAULT_ELEVATION): MapProjection {
+  const yaw = (-16 + bearing) * Math.PI / 180, pitch = elevation * Math.PI / 180;
+  return { a: Math.cos(yaw), b: Math.sin(yaw) * Math.sin(pitch),
+    c: -Math.sin(yaw), d: Math.cos(yaw) * Math.sin(pitch) };
+}
+export const MAP_CAMERA = createMapProjection();
+export const mapProjectionTransform = ({ a, b, c, d }: MapProjection) => `matrix(${a} ${b} ${c} ${d} 0 0)`;
+export const MAP_CAMERA_TRANSFORM = mapProjectionTransform(MAP_CAMERA);
+export const projectMapPoint = (x: number, y: number, camera = MAP_CAMERA) => ({ x: camera.a * x + camera.c * y, y: camera.b * x + camera.d * y });
 /** Screen-space ground footprint, before adding any upright vegetation or buildings. */
-export function projectedHex(radius: number) {
+export function projectedHex(radius: number, camera = MAP_CAMERA) {
   const points = Array.from({ length: 6 }, (_, k) => {
     const angle = (60 * k - 30) * Math.PI / 180;
-    return projectMapPoint(radius * Math.cos(angle), radius * Math.sin(angle));
+    return projectMapPoint(radius * Math.cos(angle), radius * Math.sin(angle), camera);
   });
   const xs = points.map(p => p.x), ys = points.map(p => p.y);
   const x = Math.min(...xs), y = Math.min(...ys);
   return { points, x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
 }
-export const mapUprightAt = (x: number, y: number) => `translate(${x} ${y}) matrix(${inverse.join(' ')} 0 0)`;
-export const mapUprightAround = (x: number, y: number) => `${mapUprightAt(x, y)} translate(${-x} ${-y})`;
+export function mapUprightAt(x: number, y: number, camera = MAP_CAMERA) {
+  const { a, b, c, d } = camera, det = a * d - b * c;
+  return `translate(${x} ${y}) matrix(${d / det} ${-b / det} ${-c / det} ${a / det} 0 0)`;
+}
+export const mapUprightAround = (x: number, y: number, camera = MAP_CAMERA) => `${mapUprightAt(x, y, camera)} translate(${-x} ${-y})`;
 /**
  * How far a measured artwork footprint sits from the projected hex it is drawn to, as a
  * fraction of the artwork canvas. Both are compared in their own normalised frame, so the

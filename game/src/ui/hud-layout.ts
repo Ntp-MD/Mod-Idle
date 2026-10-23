@@ -1,4 +1,4 @@
-export type HudRegionId = 'objectives' | 'tasks' | 'target' | 'menu' | 'travel' | 'field' | 'panels' | 'commands' | 'feed' | 'actionbar';
+export type HudRegionId = 'objectives' | 'tasks' | 'target' | 'menu' | 'field' | 'commands' | 'feed' | 'actionbar';
 export type GridAlign = 'start' | 'center' | 'end' | 'stretch';
 export type HudPlacement = 'grid' | 'absolute';
 
@@ -27,23 +27,44 @@ export type HudRegion = {
 
 export type HudLayout = Record<HudRegionId, HudRegion>;
 
-export const HUD_LAYOUT_STORAGE_KEY = 'modworld.hud-layout.v11';
-export const HUD_LAYOUT_PREVIOUS_STORAGE_KEYS = ['modworld.hud-layout.v10', 'modworld.hud-layout.v9', 'modworld.hud-layout.v8', 'modworld.hud-layout.v7', 'modworld.hud-layout.v6', 'modworld.hud-layout.v5', 'modworld.hud-layout.v4', 'modworld.hud-layout.v3', 'modworld.hud-layout.v2', 'modworld.hud-layout.v1'] as const;
-export const HUD_LAYOUT_VERSION = 11;
+export const HUD_LAYOUT_STORAGE_KEY = 'modworld.hud-layout.v13';
+export const HUD_LAYOUT_PREVIOUS_STORAGE_KEYS = ['modworld.hud-layout.v12', 'modworld.hud-layout.v11', 'modworld.hud-layout.v10', 'modworld.hud-layout.v9', 'modworld.hud-layout.v8', 'modworld.hud-layout.v7', 'modworld.hud-layout.v6', 'modworld.hud-layout.v5', 'modworld.hud-layout.v4', 'modworld.hud-layout.v3', 'modworld.hud-layout.v2', 'modworld.hud-layout.v1'] as const;
+export const HUD_LAYOUT_VERSION = 13;
+
+type LegacyJourneyId = 'objectives' | 'panels' | 'travel';
+type LegacyRegionId = HudRegionId | LegacyJourneyId;
+const LEGACY_JOURNEY_AREAS: Record<LegacyJourneyId, GridArea[]> = {
+  objectives: [
+    { rowStart: 1, rowEnd: 3, columnStart: 1, columnEnd: 4 },
+    { rowStart: 1, rowEnd: 4, columnStart: 1, columnEnd: 3 },
+    { rowStart: 1, rowEnd: 5, columnStart: 1, columnEnd: 2 },
+  ],
+  panels: [
+    { rowStart: 6, rowEnd: 10, columnStart: 1, columnEnd: 4 },
+    { rowStart: 7, rowEnd: 10, columnStart: 1, columnEnd: 3 },
+    { rowStart: 7, rowEnd: 11, columnStart: 13, columnEnd: 15 },
+    { rowStart: 2, rowEnd: 6, columnStart: 13, columnEnd: 14 },
+  ],
+  travel: [
+    { rowStart: 4, rowEnd: 5, columnStart: 1, columnEnd: 4 },
+    { rowStart: 5, rowEnd: 6, columnStart: 1, columnEnd: 3 },
+    { rowStart: 7, rowEnd: 8, columnStart: 1, columnEnd: 1 },
+  ],
+};
 
 const HUD_LAYOUT_V9_STOCK_AREAS = {
   commands: { rowStart: 14, rowEnd: 15, columnStart: 12, columnEnd: 15 },
-} satisfies Partial<Record<HudRegionId, GridArea>>;
+} satisfies Partial<Record<LegacyRegionId, GridArea>>;
 
 const HUD_LAYOUT_V8_STOCK_AREAS = {
   field: { rowStart: 3, rowEnd: 10, columnStart: 4, columnEnd: 12 },
   actionbar: { rowStart: 12, rowEnd: 15, columnStart: 5, columnEnd: 11 },
-} satisfies Partial<Record<HudRegionId, GridArea>>;
+} satisfies Partial<Record<LegacyRegionId, GridArea>>;
 
 const HUD_LAYOUT_V7_STOCK_AREAS = {
   feed: { rowStart: 11, rowEnd: 15, columnStart: 1, columnEnd: 3 },
   field: { rowStart: 3, rowEnd: 11, columnStart: 4, columnEnd: 12 },
-} satisfies Partial<Record<HudRegionId, GridArea>>;
+} satisfies Partial<Record<LegacyRegionId, GridArea>>;
 
 const HUD_LAYOUT_V6_STOCK_AREAS = {
   objectives: { rowStart: 1, rowEnd: 5, columnStart: 1, columnEnd: 2 },
@@ -51,7 +72,7 @@ const HUD_LAYOUT_V6_STOCK_AREAS = {
   menu: { rowStart: 1, rowEnd: 1, columnStart: 10, columnEnd: 15 },
   travel: { rowStart: 7, rowEnd: 8, columnStart: 1, columnEnd: 1 },
   panels: { rowStart: 7, rowEnd: 11, columnStart: 13, columnEnd: 15 },
-} satisfies Partial<Record<HudRegionId, GridArea>>;
+} satisfies Partial<Record<LegacyRegionId, GridArea>>;
 
 const HUD_LAYOUT_V4_STOCK_AREAS: Record<'target' | 'menu' | 'panels', GridArea> = {
   target: { rowStart: 1, rowEnd: 2, columnStart: 6, columnEnd: 10 },
@@ -66,13 +87,11 @@ const HUD_LAYOUT_V5_STOCK_AREAS: Record<'target' | 'menu' | 'panels', GridArea> 
 };
 
 export const HUD_REGION_META: { id: HudRegionId; label: string; description: string }[] = [
-  { id: 'objectives', label: 'Minimap & location', description: 'Collapsible minimap and location details; the folded header keeps the place name and a Map shortcut. Critical warnings stay visible.' },
-  { id: 'tasks', label: 'Objectives', description: 'Collapsible run goal and tracked delivery progress at the upper right, columns 13–15. The header remains available when collapsed.' },
+  { id: 'objectives', label: 'Journey', description: 'Current location and status stay visible above one scrolling body for the selected hex, travel tools and map controls.' },
+  { id: 'tasks', label: 'Objectives', description: 'Run goal and tracked delivery progress at the upper right. The delivery header remains available when its list collapses.' },
   { id: 'target', label: 'Target bar', description: 'Current enemy name and health bar, centered over the combat field.' },
   { id: 'menu', label: 'Menu rail', description: 'Horizontal screen navigation slides into the right edge. The remaining header names the current screen and opens the same buttons again.' },
-  { id: 'travel', label: 'Map tools', description: 'Collapsed Map tools shortcut. Expanded Journey, Controls and Map key share the Field panels region with the destination card, with one scrollable body.' },
   { id: 'field', label: 'Combat field', description: 'Absolute combat overlay, always horizontally centered. Rows set vertical bounds; the column span sets width. It may overlap other HUD regions; the player card anchors to its bottom edge.' },
-  { id: 'panels', label: 'Field panels', description: 'Contextual field panels and the map destination card. Destination details scroll inside this region while the selected hex stays clear beside it.' },
   { id: 'commands', label: 'Game controls', description: 'Horizontal Stay Here / Forward, Auto Skills, Auto Equip, speed and Pause/Resume group in M12–M15 slides into the right edge. The remaining Game controls button reopens it; hover shows travel mode, speed, automation and running state.' },
   { id: 'feed', label: 'Chronicle', description: 'The combat, loot and system feed with its channel filters.' },
   { id: 'actionbar', label: 'Vitals & skills', description: 'Health and mana orbs, 7 item shortcuts over 16 skill slots (8 a row); the experience bar is pinned to the screen bottom edge.' },
@@ -81,13 +100,11 @@ export const HUD_REGION_META: { id: HudRegionId; label: string; description: str
 const STOCK_PLACEMENT = { mode: 'grid', rect: { x: 0, y: 0, w: 20, h: 20 }, z: 0 } as const;
 
 export const DEFAULT_HUD_LAYOUT: HudLayout = {
-  objectives: { ...STOCK_PLACEMENT, id: 'objectives', label: 'Minimap & location', area: { rowStart: 1, rowEnd: 4, columnStart: 1, columnEnd: 3 }, justify: 'start', align: 'start' },
+  objectives: { ...STOCK_PLACEMENT, id: 'objectives', label: 'Journey', area: { rowStart: 1, rowEnd: 10, columnStart: 1, columnEnd: 4 }, justify: 'stretch', align: 'stretch' },
   tasks: { ...STOCK_PLACEMENT, id: 'tasks', label: 'Objectives', area: { rowStart: 3, rowEnd: 8, columnStart: 13, columnEnd: 15 }, justify: 'stretch', align: 'start' },
   target: { ...STOCK_PLACEMENT, id: 'target', label: 'Target bar', area: { rowStart: 1, rowEnd: 2, columnStart: 6, columnEnd: 10 }, justify: 'center', align: 'center' },
   menu: { ...STOCK_PLACEMENT, id: 'menu', label: 'Menu rail', area: { rowStart: 1, rowEnd: 2, columnStart: 11, columnEnd: 15 }, justify: 'end', align: 'start' },
-  travel: { ...STOCK_PLACEMENT, id: 'travel', label: 'Map tools', area: { rowStart: 5, rowEnd: 6, columnStart: 1, columnEnd: 3 }, justify: 'start', align: 'start' },
   field: { ...STOCK_PLACEMENT, id: 'field', label: 'Combat field', area: { rowStart: 3, rowEnd: 11, columnStart: 4, columnEnd: 12 }, justify: 'stretch', align: 'stretch' },
-  panels: { ...STOCK_PLACEMENT, id: 'panels', label: 'Field panels', area: { rowStart: 7, rowEnd: 10, columnStart: 1, columnEnd: 3 }, justify: 'stretch', align: 'stretch' },
   commands: { ...STOCK_PLACEMENT, id: 'commands', label: 'Game controls', area: { rowStart: 13, rowEnd: 15, columnStart: 12, columnEnd: 15 }, justify: 'end', align: 'stretch' },
   feed: { ...STOCK_PLACEMENT, id: 'feed', label: 'Chronicle', area: { rowStart: 11, rowEnd: 15, columnStart: 1, columnEnd: 4 }, justify: 'stretch', align: 'stretch' },
   actionbar: { ...STOCK_PLACEMENT, id: 'actionbar', label: 'Vitals & skills', area: { rowStart: 13, rowEnd: 15, columnStart: 5, columnEnd: 11 }, justify: 'stretch', align: 'stretch' },
@@ -178,16 +195,16 @@ function sameArea(value: unknown, expected: GridArea): boolean {
 
 /** Reflow only unchanged stock regions; a player's edited HUD placement is theirs to keep. */
 function reflowStockRegions(hud: HudLayout, rawHud: any, version: number): boolean {
-  const previous: Partial<Record<HudRegionId, GridArea>> | null = version === 9 ? HUD_LAYOUT_V9_STOCK_AREAS : version === 8 ? HUD_LAYOUT_V8_STOCK_AREAS : version === 7 ? HUD_LAYOUT_V7_STOCK_AREAS : version === 6 ? HUD_LAYOUT_V6_STOCK_AREAS : version === 5 ? HUD_LAYOUT_V5_STOCK_AREAS : version < 5 ? HUD_LAYOUT_V4_STOCK_AREAS : null;
-  if (!previous) return false;
+  const previous: Partial<Record<LegacyRegionId, GridArea>> | null = version === 9 ? HUD_LAYOUT_V9_STOCK_AREAS : version === 8 ? HUD_LAYOUT_V8_STOCK_AREAS : version === 7 ? HUD_LAYOUT_V7_STOCK_AREAS : version === 6 ? HUD_LAYOUT_V6_STOCK_AREAS : version === 5 ? HUD_LAYOUT_V5_STOCK_AREAS : version < 5 ? HUD_LAYOUT_V4_STOCK_AREAS : null;
   let reflowed = false;
-  for (const id of Object.keys(previous) as HudRegionId[]) {
+  for (const id of regionIds) {
+    if (id === 'objectives' || !previous?.[id] || rawHud?.[id]?.mode === 'absolute') continue;
     if (!sameArea(rawHud?.[id]?.area, previous[id]!)) continue;
     if (sameArea(hud[id].area, DEFAULT_HUD_LAYOUT[id].area)) continue;
     hud[id].area = { ...DEFAULT_HUD_LAYOUT[id].area };
     reflowed = true;
   }
-  if (sameArea(rawHud?.actionbar?.area, HUD_LAYOUT_V8_STOCK_AREAS.actionbar)
+  if (previous && sameArea(rawHud?.actionbar?.area, HUD_LAYOUT_V8_STOCK_AREAS.actionbar)
       && !sameArea(hud.actionbar.area, DEFAULT_HUD_LAYOUT.actionbar.area)) {
     hud.actionbar.area = { ...DEFAULT_HUD_LAYOUT.actionbar.area };
     reflowed = true;
@@ -195,12 +212,64 @@ function reflowStockRegions(hud: HudLayout, rawHud: any, version: number): boole
   return reflowed;
 }
 
+const journeyAnchorOrder: LegacyJourneyId[] = ['objectives', 'panels', 'travel'];
+const JOURNEY_MIGRATION_NOTICE = 'Place, travel and destination details now share Journey. Its position follows your previous custom panel when available; other HUD placements were kept.';
+
+function legacyJourneyPlacements(rawHud: any): HudRegion[] {
+  return journeyAnchorOrder.flatMap((id) => {
+    const saved = rawHud?.[id];
+    if (!saved || !validGridArea(saved.area)
+        || !['start', 'center', 'end', 'stretch'].includes(saved.justify)
+        || !['start', 'center', 'end', 'stretch'].includes(saved.align)) return [];
+    return [{ ...DEFAULT_HUD_LAYOUT.objectives, ...saved, id: 'objectives' as const, label: 'Journey', area: { ...saved.area } }];
+  });
+}
+
+function mergeLegacyJourney(rawHud: any): HudRegion {
+  for (const id of journeyAnchorOrder) {
+    const saved = rawHud?.[id];
+    const placement = legacyJourneyPlacements({ [id]: saved })[0];
+    if (!placement) continue;
+    const alignment = id === 'panels' ? 'stretch' : 'start';
+    const stock = placement.mode !== 'absolute' && !placement.z
+      && ((saved.justify === alignment && saved.align === alignment
+        && LEGACY_JOURNEY_AREAS[id].some((a) => sameArea(saved.area, a)))
+        || (id === 'objectives' && sameArea(saved.area, DEFAULT_HUD_LAYOUT.objectives.area)
+          && saved.justify === 'stretch' && saved.align === 'stretch'));
+    if (!stock) return placement;
+  }
+  return copyHudLayout().objectives;
+}
+
+/** A wider Journey must not displace a custom neighbour from an older layout. */
+function fitLegacyJourney(hud: HudLayout, rawHud: any) {
+  if (!validateHudLayout(hud)) return;
+  const placements = legacyJourneyPlacements(rawHud);
+  const grid = placements.filter((p) => p.mode !== 'absolute');
+  const candidates = [...placements];
+  if (grid.length) candidates.unshift({
+    ...DEFAULT_HUD_LAYOUT.objectives,
+    area: {
+      rowStart: Math.min(...grid.map((p) => p.area.rowStart)),
+      rowEnd: Math.max(...grid.map((p) => p.area.rowEnd)),
+      columnStart: Math.min(...grid.map((p) => p.area.columnStart)),
+      columnEnd: Math.max(...grid.map((p) => p.area.columnEnd)),
+    },
+  });
+  for (const candidate of candidates) {
+    if (!validateHudLayout({ ...hud, objectives: candidate })) {
+      hud.objectives = candidate;
+      return;
+    }
+  }
+}
+
 export interface MigratedHudLayout { hud: HudLayout; modal: GridArea; notice: string | null; version: number }
 
 /** Parse exports and normalize layouts that placed vitals or controls in retired HUD regions. */
 export function migrateHudLayout(input: string | unknown): MigratedHudLayout {
   const parsed: any = typeof input === 'string' ? JSON.parse(input) : input;
-  if (!parsed || typeof parsed !== 'object' || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, HUD_LAYOUT_VERSION].includes(parsed.version)) throw new Error('Unsupported HUD layout version.');
+  if (!parsed || typeof parsed !== 'object' || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, HUD_LAYOUT_VERSION].includes(parsed.version)) throw new Error('Unsupported HUD layout version.');
   const rawHud = parsed.hud;
   if (!rawHud || typeof rawHud !== 'object') throw new Error('HUD layout is missing its region map.');
   if (!validGridArea(parsed.modal || DEFAULT_MODAL_AREA)) throw new Error('HUD layout has an invalid panel area.');
@@ -211,24 +280,16 @@ export function migrateHudLayout(input: string | unknown): MigratedHudLayout {
       hud[id] = { ...hud[id], ...saved, id, label: DEFAULT_HUD_LAYOUT[id].label, area: { ...saved.area } };
     }
   }
-  const reflowedDefaults = parsed.version < HUD_LAYOUT_VERSION && reflowStockRegions(hud, rawHud, parsed.version);
+  const legacy = parsed.version < HUD_LAYOUT_VERSION;
+  if (legacy) {
+    hud.objectives = mergeLegacyJourney(rawHud);
+    reflowStockRegions(hud, rawHud, parsed.version);
+    fitLegacyJourney(hud, rawHud);
+  }
   // normalize placements through the copy: a bad rect or z falls back instead of poisoning the load
   const normalized = copyHudLayout(hud);
   for (const id of regionIds) hud[id] = normalized[id];
-  let notice: string | null = typeof parsed.notice === 'string' ? parsed.notice : null;
-  if (parsed.version < HUD_LAYOUT_VERSION && (rawHud.controls || rawHud.player || rawHud.automation)) {
-    notice = `Automation moved from the menu rail to the bottom-right Game controls row with speed and Pause/Resume. You, Hunger and vitals stay in the combat scene; its Field region moves the card.${reflowedDefaults ? ' Stock HUD regions were moved to make room for the wrapped menu rail.' : ''}`;
-  } else if (reflowedDefaults && parsed.version === 9) {
-    notice = 'Stock Game controls now extend up through row M (M12–M15); other placements stay put.';
-  } else if (reflowedDefaults && parsed.version === 8) {
-    notice = 'Combat is now a centered absolute overlay at C4–K12; stock vitals use M5–O11. Custom placements stay put.';
-  } else if (reflowedDefaults && parsed.version === 7) {
-    notice = 'Chronicle uses four columns. Combat is a centered absolute overlay at C4–K12; stock vitals use M5–O11. Custom placements stay put.';
-  } else if (reflowedDefaults && parsed.version === 6) {
-    notice = 'Objectives now has its own collapsible feed. Automation joins the bottom-right game controls; custom placements stay put.';
-  } else if (reflowedDefaults) {
-    notice = 'Stock HUD regions were updated for the wrapped menu rail; custom placements stay put.';
-  }
+  const notice = legacy ? JOURNEY_MIGRATION_NOTICE : typeof parsed.notice === 'string' ? parsed.notice : null;
   const issue = validateHudLayout(hud);
   if (issue) throw new Error(`HUD layout cannot be migrated: ${issue}`);
   return { hud, modal: { ...(parsed.modal || DEFAULT_MODAL_AREA) }, notice, version: HUD_LAYOUT_VERSION };
@@ -244,10 +305,12 @@ export function salvageHudLayout(input: string | unknown): MigratedHudLayout {
   try { parsed = typeof input === 'string' ? JSON.parse(input) : input; } catch { parsed = null; }
   const hud = copyHudLayout(DEFAULT_HUD_LAYOUT);
   const rawHud = parsed && typeof parsed === 'object' && parsed.hud && typeof parsed.hud === 'object' ? parsed.hud : null;
+  const legacy = Number.isInteger(parsed?.version) && parsed.version >= 1 && parsed.version < HUD_LAYOUT_VERSION;
+  const currentHud = rawHud && legacy ? { ...rawHud, objectives: mergeLegacyJourney(rawHud) } : rawHud;
   let kept = 0;
-  if (rawHud) {
+  if (currentHud) {
     for (const { id } of HUD_REGION_META) {
-      const saved = rawHud[id];
+      const saved = currentHud[id];
       if (!saved || !validGridArea(saved.area)) continue;
       const candidate: HudRegion = { ...hud[id], ...saved, id, label: DEFAULT_HUD_LAYOUT[id].label, area: { ...saved.area } };
       if (validateHudLayout({ ...hud, [id]: candidate })) continue;
@@ -255,15 +318,16 @@ export function salvageHudLayout(input: string | unknown): MigratedHudLayout {
       kept++;
     }
   }
-  const reflowedDefaults = Number(parsed?.version) < HUD_LAYOUT_VERSION && reflowStockRegions(hud, rawHud, Number(parsed?.version));
+  if (legacy) {
+    reflowStockRegions(hud, rawHud, parsed.version);
+    fitLegacyJourney(hud, rawHud);
+  }
   const modal = parsed && validGridArea(parsed.modal) ? { ...parsed.modal } : { ...DEFAULT_MODAL_AREA };
   const defaulted = HUD_REGION_META.length - kept;
-  const hadRetiredPlacement = !!(rawHud?.controls || rawHud?.player || rawHud?.automation);
   return {
     hud, modal, version: HUD_LAYOUT_VERSION,
-    notice: defaulted > 0 ? `The saved HUD layout could not be read whole — ${kept} region${kept === 1 ? '' : 's'} kept, ${defaulted} reset to defaults. Rearrange them in Studio.`
-      : hadRetiredPlacement ? `Automation moved from the menu rail to the bottom-right Game controls row; the vital card stays in the combat scene.${reflowedDefaults ? ' Stock HUD regions were moved to make room for the wrapped menu rail.' : ''}`
-        : reflowedDefaults ? 'Stock HUD regions were updated for the wrapped menu rail; custom HUD placements stay put.' : null,
+    notice: defaulted > 0 ? `The saved HUD layout could not be read whole - ${kept} regions kept, ${defaulted} reset to defaults. Rearrange them in Studio.`
+      : legacy ? JOURNEY_MIGRATION_NOTICE : null,
   };
 }
 

@@ -3,6 +3,7 @@ import path from 'node:path';
 import { readJson } from './lib/json.ts';
 import * as G from './lib/gates.ts';
 import { createTree, type TreeSpec } from '../engine/tree.ts';
+import { buildTreeNetwork } from '../engine/tree-network.ts';
 import { SHEET_LINES } from '../game/src/sim/lines.ts';
 import { keystoneBuildContext } from '../game/src/sim/keystone-runtime.ts';
 import { E } from './lib/engine.ts';
@@ -23,7 +24,7 @@ import { E } from './lib/engine.ts';
 const OUT = path.join(import.meta.dirname, 'data', 'tree.json');
 const MODS = readJson(path.join(import.meta.dirname, 'data', 'mods.json'));
 
-/** The four bridge Notables of the recipe; each joins spine04 of two regions. */
+/** The four bridge Notables of the recipe; each joins the closest clear roads in two regions. */
 const JUNCTIONS: [string, string][] = [['str', 'agi'], ['dex', 'int'], ['wis', 'vit'], ['lck', 'str']];
 
 const pad2 = (n: number) => String(n).padStart(2, '0');
@@ -33,6 +34,78 @@ const pad2 = (n: number) => String(n).padStart(2, '0');
  * authors: profiles, keystone bundles and their numbers, pairs and layout. The generated order is
  * region → spine → cluster (branch, Notable, Keystone) → junctions, so a second run is byte-identical.
  */
+/** The live undirected graph: written parents, the network's own parents, and the drawn links. */
+function liveGraph(nodes: any[], network: { parents: Map<string, string[]>; links: any[] }, retired: Set<string>) {
+  const adj = new Map<string, Set<string>>();
+  for (const node of nodes) if (!retired.has(node.id)) adj.set(node.id, new Set());
+  adj.set('start', new Set());
+  const join = (a: string, b: string) => {
+    if (!adj.has(a) || !adj.has(b)) return;
+    adj.get(a)!.add(b);
+    adj.get(b)!.add(a);
+  };
+  for (const [id, parents] of network.parents) for (const parent of parents) join(id, parent);
+  for (const link of network.links) join(link.a, link.b);
+  return adj;
+}
+
+/** Every node a route may end on: the free centre, Notables, Keystones and bridges. */
+function anchorsOf(nodes: any[], retired: Set<string>) {
+  const anchors = new Set(['start']);
+  for (const node of nodes) if (!retired.has(node.id) && node.kind !== 'normal') anchors.add(node.id);
+  return anchors;
+}
+
+/**
+ * Ordinary nodes that live in a component with no anchor once the node above them is removed.
+ * Those are decorative loops and dead runs: they add neither a route nor a choice. The walk is
+ * repeated by the caller because retiring one appendage can expose another.
+ */
+function fillerNormals(adj: Map<string, Set<string>>, kindOf: (id: string) => string | undefined, anchors: Set<string>) {
+  const filler = new Set<string>();
+  for (const removed of adj.keys()) {
+    if (removed === 'start' || kindOf(removed) !== 'normal') continue;
+    const seen = new Set([removed]);
+    for (const first of adj.keys()) {
+      if (seen.has(first)) continue;
+      const queue = [first];
+      seen.add(first);
+      const component: string[] = [];
+      let hasAnchor = false;
+      while (queue.length) {
+        const id = queue.shift()!;
+        component.push(id);
+        if (anchors.has(id)) hasAnchor = true;
+        for (const next of adj.get(id) || []) {
+          if (seen.has(next)) continue;
+          seen.add(next);
+          queue.push(next);
+        }
+      }
+      if (!hasAnchor) for (const id of component) if (kindOf(id) === 'normal') filler.add(id);
+    }
+  }
+  return filler;
+}
+
+function trimNormalEnds(nodes: any[], layout: any) {
+  const network = buildTreeNetwork(nodes, layout);
+  const retired = new Set<string>();
+  const kind = new Map(nodes.map((node) => [node.id, node.kind]));
+  const kindOf = (id: string) => kind.get(id);
+  for (;;) {
+    const adj = liveGraph(nodes, network, retired);
+    const anchors = anchorsOf(nodes, retired);
+    const leaves = nodes
+      .filter((node) => !retired.has(node.id) && node.kind === 'normal' && (adj.get(node.id)?.size ?? 0) <= 1)
+      .map((node) => node.id);
+    const filler = fillerNormals(adj, kindOf, anchors);
+    const removed = new Set([...leaves, ...filler]);
+    if (!removed.size) return { network, retired };
+    for (const id of removed) retired.add(id);
+  }
+}
+
 export function buildSpec(source: any): any {
   if (source?.version !== 3) throw new Error('tree build: the spec is not version 3');
   const regions: string[] = source.layout?.regions ?? [];
@@ -40,17 +113,26 @@ export function buildSpec(source: any): any {
   for (const region of regions)
     if (!source.profiles?.[`core.${region}`]) throw new Error(`tree build: profile core.${region} is missing`);
 
-  const keystones = new Map<string, any>();
+  const keystones = new Map<string, any[]>();
   for (const node of source.nodes ?? []) {
     if (node.kind !== 'keystone') continue;
     const cluster = node.placement?.cluster;
     if (!Number.isInteger(cluster) || cluster < 1 || cluster > 12)
       throw new Error(`tree build: keystone ${node.id} has no cluster placement`);
     if (!regions.includes(node.wing)) throw new Error(`tree build: keystone ${node.id} is in the unknown region ${node.wing}`);
+    if (!Number.isSafeInteger(node.weight) || node.weight < 1 || node.weight > 5)
+      throw new Error(`tree build: keystone ${node.id} needs a weight 1..5`);
     if (!node.effects?.length) throw new Error(`tree build: keystone ${node.id} carries no bundle`);
+    const slot = node.placement?.slot ?? 1;
+    if (slot !== 1 && slot !== 2)
+      throw new Error(`tree build: keystone ${node.id} has slot ${slot}; a cluster holds at most two Keystones`);
     const key = `${node.wing}.${cluster}`;
-    if (keystones.has(key)) throw new Error(`tree build: two keystones sit on ${node.wing} cluster ${cluster}`);
-    keystones.set(key, node);
+    const list = keystones.get(key) ?? [];
+    if (list.length >= 2) throw new Error(`tree build: ${node.wing} cluster ${cluster} already holds two Keystones`);
+    if (list.some((other) => (other.placement?.slot ?? 1) === slot))
+      throw new Error(`tree build: two keystones sit in ${node.wing} cluster ${cluster} slot ${slot}`);
+    list.push(node);
+    keystones.set(key, list);
   }
 
   const nodes: any[] = [];
@@ -89,19 +171,34 @@ export function buildSpec(source: any): any {
         placement: { role: 'notable', cluster: j },
         name: `${region.toUpperCase()} Focus ${pad2(j)}`,
       });
-      const keystone = keystones.get(`${region}.${j}`);
-      if (keystone) nodes.push({
-        id: keystone.id,
-        wing: region,
-        kind: 'keystone',
-        needs: [notable],
-        grants: [],
-        ...(keystone.name ? { name: keystone.name } : {}),
-        ...(keystone.description ? { description: keystone.description } : {}),
-        ...(keystone.draft_ref !== undefined ? { draft_ref: keystone.draft_ref } : {}),
-        placement: { role: 'keystone', cluster: j },
-        effects: keystone.effects,
-      });
+      for (const keystone of keystones.get(`${region}.${j}`) ?? []) {
+        const gate = keystone.placement?.slot === 2 ? `${notable}.02` : notable;
+        if (gate !== notable && source.layout.algorithm === 'cluster-web-v6') {
+          if (!source.profiles?.[gate]?.length) throw new Error(`tree build: profile ${gate} is missing`);
+          const entrance = source.layout.web?.gateways?.[gate]?.anchor;
+          if (!entrance) throw new Error(`tree build: Normal entrance for ${gate} is missing`);
+          // A separate Normal -> Notable -> Keystone choice, preserving the existing node's identity.
+          nodes.push({ id: gate, wing: region, kind: 'notable', needs: [entrance], profile: gate,
+            placement: { role: 'notable', cluster: j, slot: 2 }, name: `${keystone.name || keystone.id} Approach` });
+        }
+        nodes.push({
+          id: keystone.id,
+          wing: region,
+          kind: 'keystone',
+          needs: [source.layout.algorithm === 'cluster-web-v6' ? gate : notable],
+          grants: [],
+          ...(keystone.name ? { name: keystone.name } : {}),
+          ...(keystone.description ? { description: keystone.description } : {}),
+          ...(keystone.draft_ref !== undefined ? { draft_ref: keystone.draft_ref } : {}),
+          weight: keystone.weight,
+          placement: {
+            role: 'keystone',
+            cluster: j,
+            ...(keystone.placement?.slot !== undefined ? { slot: keystone.placement.slot } : {}),
+          },
+          effects: keystone.effects,
+        });
+      }
     }
   }
 
@@ -130,17 +227,69 @@ export function buildSpec(source: any): any {
     links.push({ a: `normal.${a}.s20`, b: `normal.${b}.s20`, shape: 'arc' });
   }
 
+  // Preserve every existing path while opening each cluster into a two-way loop.
+  const branch = (region: string, cluster: number, step: number) => `normal.${region}.c${pad2(cluster)}.${pad2(step)}`;
+  for (const region of regions) {
+    for (let cluster = 1; cluster <= 12; cluster++) {
+      links.push({ a: `notable.${region}.${pad2(cluster)}`, b: branch(region, cluster, 1), shape: 'line' });
+      if (cluster <= 8) links.push({ a: branch(region, cluster, 4), b: branch(region, cluster + 4, 1), shape: 'line' });
+    }
+  }
+  // Each tier is one continuous circuit through all regions, with several radial exits.
+  for (let band = 0; band < 3; band++) {
+    const circuit = regions.flatMap((region) => Array.from({ length: 4 }, (_, lane) => ({ region, cluster: band * 4 + lane + 1 })));
+    for (let i = 0; i < circuit.length; i++) {
+      const a = circuit[i], b = circuit[(i + 1) % circuit.length];
+      links.push({ a: branch(a.region, a.cluster, 5), b: branch(b.region, b.cluster, 2), shape: 'line' });
+    }
+  }
+
+  if (['branch-weave-v4', 'poe-radial-v5', 'cluster-web-v6'].includes(source.layout.algorithm)) {
+    const trimmed = trimNormalEnds(nodes, source.layout);
+    for (const node of nodes) {
+      if (trimmed.retired.has(node.id)) node.retired = true;
+      node.needs = (trimmed.network.parents.get(node.id) ?? node.needs)
+        .filter((parent: string) => parent === 'start' || !trimmed.retired.has(parent));
+    }
+    links.splice(0, links.length, ...trimmed.network.links
+      .filter((link) => !trimmed.retired.has(link.a) && !trimmed.retired.has(link.b)));
+  }
+
+  const liveCount = nodes.filter((node) => !node.retired).length;
+
   return {
     version: 3,
     mechanics: source.mechanics,
     meta: {
-      note: 'There are 700 nodes and 700 ranks in seven regions: str, agi, dex, int, wis, vit and lck. '
+      note: source.layout.algorithm === 'cluster-web-v6'
+        ? `There are ${liveCount} nodes and ${liveCount} ranks in seven regions: str, agi, dex, int, wis, vit and lck. `
+          + 'Authored group sites and two-anchor roads form one shared field, crossing every region border '
+          + 'at different distances from Start. Local roads form varied arcs, elongated loops and forks '
+          + 'around their Notables. Every Normal serves a route between anchors, and every Keystone remains a leaf '
+          + 'of its own Notable gate, reachable directly from Normal roads without buying another Notable. '
+          + 'Stable IDs, grants, prices and existing allocations retain their meaning.'
+        : source.layout.algorithm === 'poe-radial-v5'
+        ? `There are ${liveCount} nodes and ${liveCount} ranks in seven regions: str, agi, dex, int, wis, vit and lck. `
+          + 'Each region is a polar lattice of twelve Notable medallions, each five ordinary nodes around its centre, '
+          + 'with fifteen Keystone slots on three outer tiers: a heavy Keystone takes the rim tier first. Four inner '
+          + 'spokes join Start to the medallion bands, and a sixteen-node highway rings each region and joins the next '
+          + 'through the four bridge Notables. Stable node IDs, grants and prices retain their meaning; the canonical '
+          + 'coordinates are derived from the PoE radial grammar, never hand-placed.'
+        : source.layout.algorithm === 'branch-weave-v4'
+        ? `There are ${liveCount} nodes and ${liveCount} ranks in seven regions: str, agi, dex, int, wis, vit and lck. `
+          + 'Normal nodes fill an irregular shared field of forks, short runs and local alternate routes. '
+          + 'The route graph crosses region boundaries throughout the field, and every route ends on a Notable or '
+          + 'Keystone. Notables sit beside ordinary roads and Keystones remain leaves. Stable node IDs, grants and prices retain their v3 meaning; old spine and '
+          + 'cluster labels identify saved nodes rather than restrict travel. Existing allocations remain valid frontiers.'
+        : `There are ${liveCount} nodes and ${liveCount} ranks in seven regions: str, agi, dex, int, wis, vit and lck. `
         + 'Each region is a spine of twenty Normal nodes with twelve clusters of five Normal nodes and a Notable, '
         + 'and a Keystone leaf on the clusters the catalogue assigns. A free centre start connects the first spine '
         + 'node of every region; spine06 and spine20 are ringed to the neighbouring region, and four junction '
         + 'Notables bridge spine04 of str–agi, dex-int, wis–vit and lck–str. Normal nodes grant +1 to their own '
         + 'Core attribute, Notables grant their profile, and Keystones are grantless bundles paid in attainment. '
-        + 'Every node has one rank; the layout is derived from the seven-spoke placement, never hand-placed.',
+        + 'Clusters also form two-way loops, three cross-region circuits and radial connections between tiers, '
+        + 'so a build can turn between specialisations without returning to Start. Every node has one rank; '
+        + 'the canonical layout is derived from the seven-spoke placement, never hand-placed.',
       node_columns: ['Node', 'Region', 'Kind', 'Profile', 'Effects', 'Placement', 'Connections'],
     },
     points: source.points,
@@ -162,7 +311,7 @@ export function buildSpec(source: any): any {
 /** The keys a node may carry. Anything else is a number the engine never reads. */
 const READ_KEYS = [
   'id', 'wing', 'kind', 'needs', 'grants', 'name', 'description', 'weapon', 'rule', 'group',
-  'profile', 'placement', 'effects', 'draft_ref',
+  'profile', 'placement', 'effects', 'draft_ref', 'weight', 'retired',
 ];
 /** The keys a grant may carry: the line, its ladder, and the stat or Element the sheet reads it against. */
 const GRANT_KEYS = ['id', 'values', 'stat', 'element'];
@@ -172,8 +321,8 @@ const EFFECT_KEYS = ['kind', 'key', 'params'];
 const PLACEMENT_KEYS: Record<string, string[]> = {
   spine: ['role', 'index'],
   branch: ['role', 'cluster', 'step'],
-  notable: ['role', 'cluster'],
-  keystone: ['role', 'cluster'],
+  notable: ['role', 'cluster', 'slot'],
+  keystone: ['role', 'cluster', 'slot'],
   junction: ['role', 'a', 'b'],
 };
 /** The canonical Elements the engine.json declares — a grant's Element is checked against these.
@@ -298,8 +447,8 @@ export function checks(source?: any): G.GateRow[] {
       : `all ${nodes.length} node ids are unique (${ids[0]} … ${ids[ids.length - 1]})`);
   }
 
-  // TR9 — the id names the node's own region and place in the recipe. The id is the save key, so an
-  // id that disagrees with its placement would re-point every bought rank at a different node.
+  // TR9 — stable placement identities keep an existing save key attached to the same grant.
+  // A road's position may change; the node's identity may not change underneath a bought rank.
   {
     const bad: string[] = [];
     if (model.version >= 3) {
@@ -309,7 +458,7 @@ export function checks(source?: any): G.GateRow[] {
         let expected = '';
         if (p.role === 'spine') expected = `normal.${n.wing}.s${pad2(p.index)}`;
         else if (p.role === 'branch') expected = `normal.${n.wing}.c${pad2(p.cluster)}.${pad2(p.step)}`;
-        else if (p.role === 'notable') expected = `notable.${n.wing}.${pad2(p.cluster)}`;
+        else if (p.role === 'notable') expected = `notable.${n.wing}.${pad2(p.cluster)}` + (p.slot === 2 ? '.02' : '');
         else if (p.role === 'keystone') expected = `keystone.${n.effects?.[0]?.key ?? ''}`;
         else expected = `notable.junction.${p.a}-${p.b}`;
         if (n.id !== expected) bad.push(`${n.id} sits at a ${p.role} placement, which names ${expected}`);
@@ -338,7 +487,6 @@ export function checks(source?: any): G.GateRow[] {
         const a = byId[link.a];
         const b = byId[link.b];
         if (!a || !b) { bad.push(`${link.a} – ${link.b} names a node that does not exist`); continue; }
-        if (a.wing === b.wing) bad.push(`${link.a} – ${link.b} joins two nodes of one region, not a ring`);
       }
       // the region graph: any drawn link or cross-region parent joins two regions
       const regionEdges = new Map<string, Set<string>>(wings.map((w) => [w, new Set<string>()]));
@@ -358,6 +506,18 @@ export function checks(source?: any): G.GateRow[] {
       }
       const apart = wings.filter((w) => !seen.has(w));
       if (apart.length) bad.push(`the regions ${apart.join(', ')} are not ringed to the rest`);
+      // Ordinary roads must connect without requiring a Notable or Keystone as a toll gate.
+      const clusterNodes = nodes.filter((n) => n.kind === 'normal');
+      const clusterIds = new Set(clusterNodes.map((n) => n.id));
+      const routed = new Set<string>();
+      const frontier = clusterNodes.length ? [clusterNodes[0].id] : [];
+      if (frontier[0]) routed.add(frontier[0]);
+      for (let i = 0; i < frontier.length; i++) {
+        for (const next of model.adjacentTo(frontier[i])) {
+          if (clusterIds.has(next) && !routed.has(next)) { routed.add(next); frontier.push(next); }
+        }
+      }
+      if (clusterNodes.some((n) => !routed.has(n.id))) bad.push('Normal roads cannot connect without a Notable or Keystone');
       for (const n of nodes.filter((n) => n.placement?.role === 'junction')) {
         const p = n.placement as { a: string; b: string };
         if (p.a === p.b) bad.push(`${n.id} bridges ${p.a} to itself`);
@@ -366,7 +526,7 @@ export function checks(source?: any): G.GateRow[] {
           bad.push(`${n.id} does not need a node of both ${p.a} and ${p.b}`);
       }
       add('TR10', bad.length === 0, bad.length ? bad.join(' · ')
-        : `the ${model.links.length} links ring the regions and every one of the ${wings.length} regions reaches the others, with the junction Notables bridging two regions each`);
+        : `the ${model.links.length} links connect the regions; all Normal roads connect without Notable or Keystone toll gates`);
     } else {
       const anchors = spec.layout?.wing_anchor_deg || {};
       // the ring is read off the topology: each wing's node at a cross-link depth needs a node of the
@@ -547,6 +707,74 @@ export function checks(source?: any): G.GateRow[] {
       : `the file's ${listed.size} pairs are exactly the pairs the engine bans, in both orders, with no transitive closure`);
   }
 
+  // TR17 — every live Normal sits on a route between two anchors. A live Normal leaf, or a loop
+  // hanging off a single point with no anchor inside it, is filler: it spends a point and opens no
+  // route. Start, Notables, Keystones and bridges are the anchors a route may end on.
+  {
+    const adj = new Map<string, Set<string>>(nodes.map((n) => [n.id, new Set<string>()]));
+    adj.set('start', new Set());
+    const join = (a: string, b: string) => {
+      if (!adj.has(a) || !adj.has(b)) return;
+      adj.get(a)!.add(b);
+      adj.get(b)!.add(a);
+    };
+    for (const node of nodes) {
+      for (const next of model.adjacentTo(node.id)) join(node.id, next);
+      if (node.needs.includes('start')) join(node.id, 'start');
+    }
+    const kindOf = (id: string) => byId[id]?.kind;
+    const anchors = new Set(['start', ...nodes.filter((n) => n.kind !== 'normal').map((n) => n.id)]);
+    const leaves = nodes
+      .filter((n) => n.kind === 'normal' && (adj.get(n.id)?.size ?? 0) < 2)
+      .map((n) => n.id);
+    const filler = fillerNormals(adj, kindOf, anchors);
+    const bad = [...new Set([...leaves, ...filler])].sort();
+    add('TR17', bad.length === 0, bad.length
+      ? `ordinary nodes with no route: ${bad.join(', ')}`
+      : `every one of the ${nodes.filter((n) => n.kind === 'normal').length} live Normals sits on a route between anchors, and none is a leaf`);
+  }
+
+  // TR18 — retirement is legacy-only. The retired ids are old save keys; a new one is a node the
+  // generator created and then threw away, which is exactly the filler this gate exists to stop.
+  {
+    const baselinePath = path.join(import.meta.dirname, 'data', 'tree-retired-baseline.json');
+    let baseline: string[] = [];
+    let reason = '';
+    try { baseline = JSON.parse(fs.readFileSync(baselinePath, 'utf8')).ids || []; }
+    catch (e: any) { reason = String(e?.message || e); }
+    const retiredIds = (spec.nodes || []).filter((n: any) => n.retired).map((n: any) => n.id);
+    const known = new Set(baseline);
+    const extra = retiredIds.filter((id: string) => !known.has(id));
+    const badKind = (spec.nodes || []).filter((n: any) => n.retired && n.kind !== 'normal').map((n: any) => n.id);
+    const missing = baseline.filter((id) => !retiredIds.includes(id));
+    add('TR18', !reason && extra.length === 0 && badKind.length === 0,
+      reason ? `the retired baseline cannot be read: ${reason}`
+        : extra.length ? `newly retired nodes (not legacy save keys): ${extra.join(', ')}`
+          : badKind.length ? `a Notable or Keystone is retired: ${badKind.join(', ')}`
+            : `all ${retiredIds.length} retired ids are the frozen legacy set; no node is generated only to be retired`);
+    if (missing.length) watch('TRW3', false,
+      `the frozen baseline lists ${missing.length} id(s) that are no longer retired (${missing.join(', ')}) — re-add them or update the baseline deliberately`,
+      'the frozen retired baseline is intact');
+  }
+
+  // TR19 — a Keystone is a leaf off its own unique Notable, never a through-route. The board and the purchase
+  // path both rely on that shape; a keystone with a second neighbour is a road wearing a medallion.
+  {
+    const keystones = nodes.filter((n) => n.kind === 'keystone');
+    const gateUses = new Map<string, number>();
+    for (const node of keystones) for (const id of node.needs) gateUses.set(id, (gateUses.get(id) ?? 0) + 1);
+    const bad = keystones.filter((n) => {
+      const adjacent = model.adjacentTo(n.id);
+      return adjacent.length !== 1 || n.needs.length !== 1 || byId[n.needs[0]]?.kind !== 'notable'
+        || gateUses.get(n.needs[0]) !== 1
+        || !model.adjacentTo(n.needs[0]).some((id: string) => byId[id]?.kind === 'normal')
+        || model.adjacentTo(n.needs[0]).some((id: string) => byId[id]?.kind === 'notable');
+    });
+    add('TR19', bad.length === 0, bad.length
+      ? `keystones without independent Notable entrances from Normal roads: ${bad.map((n) => n.id).join(', ')}`
+      : `all ${keystones.length} Keystones have independent Notable entrances from Normal roads`);
+  }
+
   // A watch, not a gate: the tree is wider than the level cap grants. That is a figure, read by eye
   // — the tree is meant to be PoE-shaped, and the published rates are the empty-tree baseline.
   {
@@ -596,7 +824,7 @@ if (isEntry) {
   if (process.argv.includes('--build')) {
     const source = JSON.parse(fs.readFileSync(OUT, 'utf8'));
     fs.writeFileSync(OUT, `${JSON.stringify(buildSpec(source), null, 2)}\n`);
-    console.log('Tree build — wrote the seven-spoke node list and links to tools/data/tree.json');
+    console.log('Tree build — wrote the node network and links to tools/data/tree.json');
   } else if (process.argv.includes('--checks')) {
     report();
   } else {

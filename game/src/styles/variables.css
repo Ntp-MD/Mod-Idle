@@ -65,10 +65,6 @@
     --pad-area: 20px;
     --bar-h: 14px;
 
-    --minimap-size: clamp(100px, 7.74vw, 216px);
-    --map-hairline: rgba(0, 0, 0, 0.35);
-    --map-hairline-strong: rgba(0, 0, 0, 0.6);
-    --objectives-w: clamp(170px, 11.96vw, 300px);
 
     --elite: #6c5199;
     --elite-ink: #b98cff;
@@ -123,7 +119,10 @@
     --sel: rgba(127, 212, 255, 0.26);
     --bar: #232b36;
     --radius-round: 50%;
+    --radius-pill: 999px;
     --radius-card: 8px;
+    --font-3xs: 11px;
+    --font-2xs: 12px;
     --font-xs: 14px;
     --font-sm: 16px;
     --font-md: clamp(17px, 1.28vw, 36px);
@@ -138,6 +137,7 @@
     --slot-item: 40px;
     --slot-skill-size: clamp(36px, 2.6vw, 50px);
     --field-card-size: clamp(125px, 8.63vw, 180px);
+    --spacing-2xs: 2px;
     --spacing-xs: 5px;
     --spacing-sm: 10px;
     --spacing-md: 15px;

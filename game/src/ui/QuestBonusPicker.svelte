@@ -16,7 +16,7 @@
   <legend>{choosing ? 'Choose one reward' : 'Fixed reward'}</legend>
   <div class="options">
     {#each options as option (option.id)}
-      <div class="option" class:selected={choosing && choice === option.id}>
+      <div class={`option${choosing ? ' card-tile selectable' : ''}`} class:selected={choosing && choice === option.id}>
         {#if choosing}
           <label><input type="radio" {name} value={option.id} aria-label={`${option.label}: ${questBonusText(option)}`} checked={choice === option.id} onchange={() => onchoose?.(option.id)} /><strong>{option.label}</strong></label>
         {/if}
@@ -36,8 +36,7 @@
   legend { padding: 0; padding-bottom: var(--spacing-sm); color: var(--gold); font-weight: 600; font-size: var(--font-sm); }
   .options { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); }
   .option { display: grid; align-content: start; gap: var(--spacing-xs); min-width: 0; flex: 1 1 12rem; }
-  .choosing .option { padding: var(--spacing-md); border: 1px solid var(--edge); background: var(--inset); border-radius: var(--radius-card); }
-  .choosing .selected { border-color: var(--gold); background: var(--surface-selected); }
+  .choosing .option { padding: var(--spacing-md); }
   label { display: flex; align-items: start; gap: var(--spacing-sm); cursor: pointer; }
   label input { flex: none; accent-color: var(--gold); }
   .reward { margin: 0; overflow-wrap: anywhere; line-height: 1.5; }

@@ -1,4 +1,4 @@
-import type { FieldworkCfg } from './types.ts';
+import type { FieldworkCfg, Rng } from './types.ts';
 
 /** Shared field-skill reads. Runtime resource counts stay in the game state; the formulas and unlocks
  *  are derived from engine.json so the client and any data cage use the same progression. */
@@ -29,5 +29,12 @@ export function createFieldwork(F: FieldworkCfg) {
     const sites = F.wild_site_index;
     return wild === sites.dungeon ? 'dungeon' : wild === sites.mine ? 'mine' : wild === sites.grove ? 'grove' : null;
   };
-  return { F, foods, skillLevel, masteryLevel, harvestBonus, dropChanceAt, recipeById, foodById, materialById, workshopById, workshopRecipes, siteAt };
+  const rollTrailSite = (cells: { q: number; r: number }[], rng: Rng) => {
+    if (!cells.length || rng() >= F.map_exploration.spawn.chance_per_check) return null;
+    const kinds = Object.entries(F.map_exploration.kinds);
+    let draw = rng() * kinds.reduce((sum, [, kind]) => sum + kind.weight, 0);
+    const kind = kinds.find(([, entry]) => (draw -= entry.weight) < 0)?.[0];
+    return kind ? { ...cells[Math.floor(rng() * cells.length)], kind } : null;
+  };
+  return { F, foods, skillLevel, masteryLevel, harvestBonus, dropChanceAt, recipeById, foodById, materialById, workshopById, workshopRecipes, siteAt, rollTrailSite };
 }

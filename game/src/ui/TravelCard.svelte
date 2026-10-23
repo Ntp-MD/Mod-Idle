@@ -3,29 +3,22 @@
   import { sideSpawnWords } from './hud';
   import { destinationSite, type MapDestination, type DestinationAction } from './destination';
   import type { MapIntel } from './map-intel';
+  import cancelClose from '../icon/ui/cancel-close.png';
+  import chevronDown from '../icon/ui/chevron-down.png';
 
-  /**
-   * The destination card: what a picked cell is, what it costs to get there, and the verbs that take
-   * you. It rises off the field's own map — the ground the HUD stands on — so a place is travelled to
-   * where it is seen, with no modal in between (X33 · M7 — the labels come off the sheet's own marks,
-   * never off a coordinate).
-   *
-   * Every cell is a place to stand (`road.standing_rule`), so the card speaks for one cell of any kind:
-   * a settlement, a named side of one, a wild side, or bare ground. A bare cell names the settlement
-   * whose field it is, because that is where its zone comes from.
-   */
+  /** Inline details for the selected hex, or the current hex when nothing is selected.
+   * Journey owns the surrounding surface and scroll area; this component owns its actions. */
   let {
-    dest, primary, writable = true, campHere = false, campHunting = false, fightActive = false, warpReason = '', notice = '',
+    dest, primary, selected = true, writable = true, campHere = false, campHunting = false, fightActive = false, warpReason = '', notice = '',
     settlement, busy = false, fare = 0, afford = true, dungeon = null, intel = null,
-    patrol = { stops: [], active: false, repeat: true, index: 0, groupsCleared: 0 }, autoReturnEnabled = false,
-    minPatrolStops = 2, maxPatrolStops = 3, groupsPerStop = 3, autoReturnPct = 90,
+    patrol = { stops: [], active: false, repeat: true, index: 0, groupsCleared: 0 }, maxPatrolStops = 3,
     onprimary, onwarp, onclear, onreturncamp = () => {}, oncampui = () => {}, onSetCamp = () => {},
-    onTogglePatrolStop = () => {}, onStartPatrol = () => {}, onStopPatrol = () => {}, onClearPatrol = () => {},
-    onPatrolRepeat = (_repeat: boolean) => {}, onAutoReturn = (_enabled: boolean) => {},
+    onTogglePatrolStop = () => {}, ontrack = () => {}, goalPinned = false,
   }: {
     /** the picked cell and everything the field knows about it */
     dest: MapDestination;
     primary: DestinationAction;
+    selected?: boolean;
     intel?: MapIntel | null;
     writable?: boolean;
     campHere?: boolean;
@@ -42,11 +35,7 @@
     /** the run the card speaks for: inside with a count, or outside with the cooldown left */
     dungeon?: { active: boolean; left: number; total: number; cooldown: number } | null;
     patrol?: { stops: { zone: number; subzone: number; cell: { q: number; r: number } }[]; active: boolean; repeat: boolean; index: number; groupsCleared: number };
-    autoReturnEnabled?: boolean;
-    minPatrolStops?: number;
     maxPatrolStops?: number;
-    groupsPerStop?: number;
-    autoReturnPct?: number;
     onprimary: () => void;
     onwarp: (id: string) => void;
     onclear: () => void;
@@ -54,11 +43,9 @@
     oncampui?: () => void;
     onSetCamp?: () => void;
     onTogglePatrolStop?: () => void;
-    onStartPatrol?: () => void;
-    onStopPatrol?: () => void;
-    onClearPatrol?: () => void;
-    onPatrolRepeat?: (repeat: boolean) => void;
-    onAutoReturn?: (enabled: boolean) => void;
+    /** Pin this destination as the Journey's next goal; navigation only, never travel. */
+    ontrack?: () => void;
+    goalPinned?: boolean;
   } = $props();
   const site = $derived(destinationSite(dest));
   const typeName = $derived(dest.kind === 'town' ? 'Settlement' : site === 'mine' ? 'Mine' : site === 'grove' ? 'Rare Grove' : site === 'dungeon' ? 'Dungeon entrance' : 'Hunting ground');
@@ -86,11 +73,8 @@
   const zoneBoss = $derived(E.mob.bosses.find((boss: any) => boss.zone === settlement.zone) ?? null);
   /** The side's own pack, Elite rate and body mix — what standing here rolls (`mob.spawn_packs`). */
   const sideWords = $derived(sideSpawnWords(subzone?.spawn));
-  const patrolNames = $derived(patrol.stops.map((stop) => eng.zoneById(stop.zone)?.subzones?.[stop.subzone]?.name || `Sub-zone ${stop.subzone + 1}`));
   const selectedPatrolStop = $derived(dest.kind === 'sub' && dest.sub != null
     && patrol.stops.some((stop) => stop.zone === settlement.zone && stop.subzone === dest.sub));
-  const patrolHere = $derived(patrol.stops[patrol.index]
-    ? eng.zoneById(patrol.stops[patrol.index].zone)?.subzones?.[patrol.stops[patrol.index].subzone]?.name || '' : '');
   /** The one line that says what standing here is good for. */
   const ground = $derived(({
     town: 'the settlement itself — safe ground, and a Waypoint',
@@ -103,22 +87,21 @@
   })[dest.kind]);
 </script>
 
-<div class="dest surface-popover" role="dialog" aria-modal="false" aria-label={`Destination: ${intel?.site?.name || (intel && !intel.known && dest.kind !== 'town' ? `Unexplored block ${dest.key}` : dest.label)}`} tabindex="-1"
-         onkeydown={(event) => { if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); onclear(); } }}>
+<section class="dest" aria-label={`${selected ? 'Selected destination' : 'Current hex'}: ${intel?.site?.name || (intel && !intel.known && dest.kind !== 'town' ? `Unexplored block ${dest.key}` : dest.label)}`}>
   <header class="dest-head">
     <div class="dest-identity">
-      <h2 class="text-accent">{intel && !intel.known && dest.kind !== 'town' ? `Unexplored block ${dest.key}` : intel?.site?.name || dest.label}</h2>
+      <h2 class="text-accent">{selected ? 'Destination' : 'Current hex'} · {intel && !intel.known && dest.kind !== 'town' ? `Unexplored block ${dest.key}` : intel?.site?.name || dest.label}</h2>
       <p class="text-note">{intel && !intel.known && dest.kind !== 'town' ? 'Unscouted block' : `${typeName} · Lv ${zone.levels[0]}–${zone.levels[1]}`}</p>
     </div>
-    <button class="btn btn-flat btn-icon dest-close" type="button" onclick={onclear} aria-label="Close selection" title="Close selection · Esc">
-      <svg class="icon-label icon-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8m0-8-8 8" /></svg>
-    </button>
+    {#if selected}<button class="btn btn-flat btn-icon dest-close" type="button" onclick={onclear} aria-label="Close selection" title="Close selection · Esc">
+      <span class="icon-mask" style={`--glyph:url(${cancelClose})`} aria-hidden="true"></span>
+    </button>{/if}
   </header>
   <p class="text-note">{intel && !intel.known && dest.kind !== 'town' ? `Cell ${dest.key} · details hidden until scouted` : `${settlement.name} · Zone ${settlement.zone} · ${settlement.band} band · Cell ${dest.key}`}</p>
   {#if intel}
     <p>{intel.purpose}</p>
   {/if}
-  {#if !dest.self}
+  {#if selected && !dest.self}
     <div class="dest-trip">
       <strong>{dest.blocks} {dest.blocks === 1 ? 'block' : 'blocks'} · {dest.sec}s</strong>
       <span class="text-note">Ambush {ambushChance}% / block</span>
@@ -136,6 +119,16 @@
     {#if dest.kind === 'town' && !dest.self && dest.here && dest.node}
       <button class="btn btn-quiet" type="button" onclick={() => onwarp(dest.node!)} disabled={!!warpBlocked}
               title={warpBlocked || `Warp for ${fare} gold`}>Waypoint · {fare} gold</button>
+    {/if}
+    {#if dest.kind === 'sub' && !patrol.active}
+      <button class="btn btn-quiet" type="button" onclick={onTogglePatrolStop}
+              disabled={!writable || busy || !dest.here || (patrol.stops.length >= maxPatrolStops && !selectedPatrolStop)}
+              title={!dest.here ? 'Visit the settlement first.' : ''}>{selectedPatrolStop ? 'Remove Patrol stop' : 'Add Patrol stop'}</button>
+    {/if}
+    {#if selected && !dest.self}
+      <button class="btn btn-quiet" type="button" onclick={ontrack} disabled={!writable}
+              aria-pressed={goalPinned}
+              title={goalPinned ? 'This destination is pinned as the next goal.' : 'Keep this destination in the Journey as the next goal.'}>{goalPinned ? 'Goal pinned' : 'Pin as next goal'}</button>
     {/if}
     {#if dest.self && dest.kind !== 'town'}
       {#if !campHere}<button class="btn btn-quiet" type="button" onclick={onSetCamp} disabled={!writable || busy || fightActive}
@@ -173,7 +166,7 @@
   {/if}
 
   <details class="dest-section" name="map-destination-sections">
-    <summary><span>Details</span><svg class="icon-label icon-chevron dest-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></summary>
+    <summary><span>Details</span><span class="icon-mask dest-chevron" style={`--glyph:url(${chevronDown})`} aria-hidden="true"></span></summary>
     <div class="dest-section-body">
       <p class="text-note">{intel && !intel.known ? intel.purpose : ground}</p>
       {#if settlement.capital && (!intel || intel.known || dest.kind === 'town')}<p class="text-note">{settlement.capital} capital</p>{/if}
@@ -203,38 +196,11 @@
     </div>
   </details>
 
-  <details class="dest-section" name="map-destination-sections" open={patrol.stops.length > 0 || dest.kind === 'sub'}>
-    <summary><span>Route{patrol.stops.length ? ` · ${patrol.stops.length}/${maxPatrolStops} stops` : ''}</span><svg class="icon-label icon-chevron dest-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></summary>
-    <div class="dest-section-body">
-      {#if patrolNames.length}<p>{patrolNames.join(' → ')}</p>{/if}
-      {#if patrol.active}<p class="text-note">{patrolHere} · {patrol.groupsCleared}/{groupsPerStop} groups</p>{/if}
-      <div class="dest-actions">
-        {#if dest.kind === 'sub' && !patrol.active}
-          <button class="btn btn-quiet" type="button" onclick={onTogglePatrolStop}
-                  disabled={!writable || busy || !dest.here || (patrol.stops.length >= maxPatrolStops && !selectedPatrolStop)}
-                  title={!dest.here ? 'Visit the settlement first.' : ''}>{selectedPatrolStop ? 'Remove Patrol stop' : 'Add Patrol stop'}</button>
-        {/if}
-        {#if patrol.active}
-          <button class="btn btn-quiet" type="button" onclick={onStopPatrol} disabled={!writable}>Stop Patrol</button>
-        {:else if patrol.stops.length >= minPatrolStops}
-          <button class="btn btn-gold" type="button" onclick={onStartPatrol} disabled={!writable || busy}>Start Patrol</button>
-        {/if}
-        {#if patrol.stops.length && !patrol.active}
-          <button class="btn btn-quiet" type="button" onclick={onClearPatrol} disabled={!writable || busy}>Clear route</button>
-        {/if}
-      </div>
-      <label class="dest-setting"><input type="checkbox" checked={patrol.repeat} onchange={(event) => onPatrolRepeat(event.currentTarget.checked)} disabled={!writable || patrol.active} /> Repeat Patrol</label>
-      <label class="dest-setting"><input type="checkbox" checked={autoReturnEnabled} onchange={(event) => onAutoReturn(event.currentTarget.checked)} disabled={!writable} /> Auto-Return at {autoReturnPct}% bag</label>
-      <p class="text-note">Auto-Return stashes unlocked gear, then resumes Patrol.</p>
-      {#if patrol.stops.length < minPatrolStops}
-        <p class="text-note">Choose at least {minPatrolStops} subzones in one visited zone. Patrol hunts each stop’s roster.</p>
-      {/if}
-    </div>
-  </details>
-</div>
+
+</section>
 
 <style>
-  .dest { display: grid; gap: var(--spacing-sm); min-width: 0; padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-xs); }
+  .dest { display: grid; gap: var(--spacing-sm); min-width: 0; font-size: var(--font-xs); }
   .dest p { margin: 0; line-height: 1.35; }
   .dest-intel { display: flex; flex-direction: column; gap: var(--spacing-xs); padding-block: var(--spacing-xs); }
   .dest-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--spacing-sm); min-width: 0; }
@@ -250,6 +216,5 @@
   .dest-section-body { padding-block: var(--spacing-xs); }
   .dest-mob-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs) var(--spacing-sm); margin: 0; padding: 0; list-style: none; }
   .dest-mob-list li { min-width: 0; overflow-wrap: anywhere; }
-  .dest-setting { display: flex; align-items: flex-start; gap: var(--spacing-xs); }
   .dest-roster summary { display: list-item; padding-block: var(--spacing-xs); }
 </style>

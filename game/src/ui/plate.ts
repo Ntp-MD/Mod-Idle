@@ -76,10 +76,18 @@ export function platePark(by: Map<string, FxEvent[]>, id: string): Parked | null
   return parked(hits(by, id));
 }
 
-/** The row that fired the cast: the cast event shares the hit's second and names its skill. */
+/** A cast follows its own hits in the ring's event order. Skill identity separates casts within one
+ *  second; the nearest following marker also separates repeated casts of the same skill. Untagged
+ *  presentation events may use a single unambiguous marker, never another row chosen by recency. */
 export function castForHit(ring: FxEvent[], hit: FxEvent | null | undefined): FxEvent | null {
   if (!hit || hit.via !== 'cast') return null;
-  return ring.find((e) => e.kind === 'cast' && e.side === 'self' && !!e.skillId && e.sec === hit.sec) || null;
+  const casts = ring.filter((e) => e.kind === 'cast' && e.side === 'self' && !!e.skillId && e.sec === hit.sec);
+  if (!hit.skillId) return casts.length === 1 && casts[0].id > hit.id ? casts[0] : null;
+  let match: FxEvent | null = null;
+  for (const cast of casts) {
+    if (cast.skillId === hit.skillId && cast.id > hit.id && (!match || cast.id < match.id)) match = cast;
+  }
+  return match;
 }
 
 /** Accumulated attack progress, clamped to the span the plate can draw. */

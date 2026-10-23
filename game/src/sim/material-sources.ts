@@ -11,6 +11,8 @@ export interface MaterialSource {
   kind: MaterialSourceKind;
   label: string;
   detail: string;
+  /** Zones this source lies in, for pinning its settlement on the map. Empty when the source is not regional. */
+  zones: number[];
 }
 
 const zoneName = (id: number): string =>
@@ -20,15 +22,15 @@ export function materialSources(id: string): MaterialSource[] {
   const out: MaterialSource[] = [];
   const sources = E.fieldwork.regional_sources as Record<string, { mine?: string; grove?: string }>;
 
-  const mines = Object.entries(sources)
+  const mineZones = Object.entries(sources)
     .filter(([, row]) => row.mine === id)
-    .map(([zone]) => zoneName(Number(zone)));
-  if (mines.length) out.push({ kind: 'mine', label: 'Mine', detail: mines.join(' · ') });
+    .map(([zone]) => Number(zone));
+  if (mineZones.length) out.push({ kind: 'mine', label: 'Mine', detail: mineZones.map(zoneName).join(' · '), zones: mineZones });
 
-  const groves = Object.entries(sources)
+  const groveZones = Object.entries(sources)
     .filter(([, row]) => row.grove === id)
-    .map(([zone]) => zoneName(Number(zone)));
-  if (groves.length) out.push({ kind: 'grove', label: 'Grove', detail: groves.join(' · ') });
+    .map(([zone]) => Number(zone));
+  if (groveZones.length) out.push({ kind: 'grove', label: 'Grove', detail: groveZones.map(zoneName).join(' · '), zones: groveZones });
 
   const species = (E.mob.species as any[]).filter((row) => row.bonus_material?.resource === id);
   const huntDrops = ((E.fieldwork.hunt as any)?.material_drops || []) as { species: string[]; resource: string }[];
@@ -38,14 +40,18 @@ export function materialSources(id: string): MaterialSource[] {
     for (const name of row.species) huntNames.add(name);
   }
   if (huntNames.size) {
+    const speciesRows = [...huntNames]
+      .map((name) => (E.mob.species as any[]).find((entry) => entry.name === name))
+      .filter(Boolean);
     const detail = [...huntNames]
       .map((name) => {
-        const row = (E.mob.species as any[]).find((entry) => entry.name === name);
+        const row = speciesRows.find((entry: any) => entry.name === name);
         const chance = row?.bonus_material?.resource === id ? ` (${Math.round((row.bonus_material.chance || 0) * 100)}%)` : '';
         return `${name}${chance}`;
       })
       .join(' · ');
-    out.push({ kind: 'hunt', label: 'Hunt', detail });
+    const zones = [...new Set<number>(speciesRows.flatMap((row: any) => row.zones || []))];
+    out.push({ kind: 'hunt', label: 'Hunt', detail, zones });
   }
 
   for (const [site, action] of Object.entries((E.fieldwork.actions || {}) as Record<string, { resource?: string; rare_resource?: string }>)) {
@@ -54,6 +60,7 @@ export function materialSources(id: string): MaterialSource[] {
       kind: site === 'mine' ? 'mine' : site === 'grove' ? 'grove' : 'hunt',
       label: `Field ${site}`,
       detail: 'Field site action',
+      zones: [],
     });
   }
 
@@ -66,11 +73,12 @@ export function materialSources(id: string): MaterialSource[] {
       kind: 'workshop',
       label: recipe.skill === 'smithing' ? 'Smithing' : 'Workshop',
       detail: `${recipe.name}${inputs ? ` · ${inputs}` : ''}`,
+      zones: [],
     });
   }
 
   if ((E.salvage.outputs as Record<string, number>)[id]) {
-    out.push({ kind: 'salvage', label: 'Salvage', detail: 'Dissolve gear at the Craft bench' });
+    out.push({ kind: 'salvage', label: 'Salvage', detail: 'Dissolve gear at the Craft bench', zones: [] });
   }
 
   return out;

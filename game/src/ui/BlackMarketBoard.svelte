@@ -36,7 +36,7 @@
     <div class="offers">
       {#each stock.offers as offer (offer.id)}
         {@const refusal = blackMarketOfferReason(state, townId, offer.id, writer)}
-        <article class="offer" class:sold={offer.remaining === 0}>
+        <article class="offer card-read" class:sold={offer.remaining === 0}>
           <div><img class="offer-icon" src={offerIcon(offer)} alt="" aria-hidden="true" />
             <span class="offer-text"><h3>{description(offer)}</h3><small>{offer.kind === 'skill' ? 'XP Level entitlement · no Duplicate Ladder increase' : offer.kind === 'material' ? 'Rare material' : 'Craft stone'} · stock {offer.remaining}</small></span>
           </div>
@@ -58,7 +58,7 @@
   .black-market { display: grid; gap: var(--spacing-md); align-content: start; }
   .black-market p { margin: 0; }
   .offers { display: grid; grid-template-columns: repeat(auto-fit, minmax(clamp(260px, 20vw, 360px), 1fr)); gap: var(--spacing-sm); }
-  .offer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--spacing-sm); align-items: center; border: 1px solid var(--line); border-radius: var(--radius-card); padding: var(--spacing-sm); background: var(--panel); }
+  .offer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--spacing-sm); align-items: center; padding: var(--spacing-sm); }
   .offer > div { display: flex; align-items: center; gap: var(--spacing-sm); min-width: 0; }
   .offer-icon { width: calc(var(--icon-label) * 1.5); height: calc(var(--icon-label) * 1.5); flex: none; object-fit: contain; }
   .offer-text { display: grid; gap: var(--spacing-xs); min-width: 0; }

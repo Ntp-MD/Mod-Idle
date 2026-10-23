@@ -6,6 +6,7 @@ import { TERRAIN_ART, TERRAIN_VARIANTS } from '../src/ui/map-terrain';
 
 const publicDir = fileURLToPath(new URL('../public', import.meta.url));
 const footprints = JSON.parse(readFileSync(fileURLToPath(new URL('../src/ui/map-terrain-footprints.json', import.meta.url)), 'utf8'));
+const bounds = JSON.parse(readFileSync(fileURLToPath(new URL('../src/ui/map-sprite-bounds.json', import.meta.url)), 'utf8'));
 
 describe('modular terrain art', () => {
   it('gives every terrain exactly one piece of art', () => {
@@ -25,14 +26,21 @@ describe('modular terrain art', () => {
     expect(TERRAIN_ART.wild).toBe(TERRAIN_ART.forest);
     expect(TERRAIN_ART.dungeon).not.toBe(TERRAIN_ART.ash);
   });
-  it('registers every variant tile before the map may place it', () => {
+  it('anchors every alternate diorama by its painted bounds', () => {
     for (const [terrain, variants] of Object.entries(TERRAIN_VARIANTS)) {
       expect(variants.length, terrain).toBeGreaterThan(0);
       for (const variant of variants) {
         expect(variant, terrain).toMatch(/^\/map\/(terrain|landmark)\/.+\.png$/);
         expect(existsSync(resolve(publicDir, variant.slice(1))), `${variant} should exist`).toBe(true);
-        expect(variant in footprints, `${variant} needs a measured footprint`).toBe(true);
+        expect(variant in bounds, `${variant} needs painted bounds`).toBe(true);
+        expect(variant in footprints, `${variant} must be a separate diorama`).toBe(false);
       }
+    }
+  });
+  it('selects upright dioramas rather than registered full-hex paintings for the active terrain', () => {
+    for (const [terrain, art] of Object.entries(TERRAIN_ART)) {
+      expect(art in bounds, terrain).toBe(true);
+      expect(art in footprints, terrain).toBe(false);
     }
   });
   it('keeps a biome own art out of its variant list', () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { lowerLeftEdge, mapLevelBand, mapNameLines, mapSlantDeg, placeMapNames, type MapNameBox } from '../src/ui/map-labels';
+import { mapLevelBand, mapNameLines, mapNamePointer, mapNamePosition, placeMapNames, type MapNameBox } from '../src/ui/map-labels';
 import { mapTravelPhase } from '../src/ui/map-travel';
 
 const box = (key: string, priority = 0, forced = false): MapNameBox =>
@@ -30,22 +30,29 @@ describe('map names', () => {
   it('keeps labels that already have independent space', () => {
     expect(placeMapNames([box('left'), { ...box('right'), left: 180 }])).toHaveLength(2);
   });
-  it('reads the lower-left edge off real hex points, leaning gently with an inward normal', () => {
-    // Real sheet order (hexPts): upper-right → right → lower-right → lower-left → upper-left → top.
-    const pts = [-30, 30, 90, 150, 210, 270].map(deg => {
-      const a = deg * Math.PI / 180;
-      return { x: 10 * Math.cos(a), y: 10 * Math.sin(a) };
-    });
-    const edge = lowerLeftEdge(pts, (x, y) => ({ x, y }));
-    // Bottom → lower-left runs up-right on screen: folds to a gentle +30° reading lean.
-    expect(edge.angleDeg).toBeCloseTo(30, 0);
-    expect(edge.mx).toBeCloseTo(-4.33, 0);
-    expect(edge.my).toBeCloseTo(7.5, 0); // below centre: the lower edge
-    // Inward normal points back toward the hex centre from the edge midpoint.
-    expect(edge.mx + edge.nx * 5).toBeCloseTo(edge.mx * 0.5, 0);
-    expect(edge.my + edge.ny * 5).toBeLessThan(edge.my);
-    expect(mapSlantDeg()).toBeGreaterThan(0); // same edge family through the camera
-    expect(mapSlantDeg()).toBeLessThan(30);
+  it('flips a pin label below the anchor near the top edge and clamps it horizontally', () => {
+    const frame = { left: 0, top: 0, right: 400, bottom: 300 };
+    expect(mapNamePosition({ x: 12, y: 20 }, 120, 44, frame)).toEqual({ left: 8, top: 48 });
+    expect(mapNamePosition({ x: 388, y: 220 }, 120, 44, frame)).toEqual({ left: 272, top: 148 });
+  });
+  it('keeps the stem on the actual hex after its nameplate moves to avoid a collision', () => {
+    const anchor = { x: 200, y: 220 };
+    for (const plate of [{ left: 140, top: 140, width: 120, height: 44 }, { left: 180, top: 248, width: 120, height: 44 }]) {
+      const pin = mapNamePointer(plate, anchor);
+      expect(plate.left + pin.x).toBe(anchor.x);
+      expect(plate.top + pin.y).toBe(anchor.y);
+      expect(pin.stem.endsWith('L' + pin.x + ' ' + pin.y)).toBe(true);
+      expect(pin.triangle).not.toContain('NaN');
+    }
+  });
+  it('places important names on a free row inside the viewport', () => {
+    const source = [{ ...box('selected', 3, true), top: 60, height: 30 },
+      { ...box('hovered', 4, true), top: 60, height: 30 }];
+    const result = placeMapNames(source, { top: 0, bottom: 140 });
+    expect(result).toHaveLength(2);
+    expect(result[0].top).toBe(60);
+    expect(result[1].top + result[1].height).toBeLessThan(result[0].top);
+    expect(result[1].top).toBeGreaterThanOrEqual(8);
   });
 });
 describe('board travel presentation', () => {

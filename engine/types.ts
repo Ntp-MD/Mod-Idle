@@ -727,6 +727,12 @@ export interface FarmCfg {
 }
 
 export interface FieldworkCfg {
+  map_exploration: {
+    reveal_radius: number; event_display_sec: number;
+    retired_site_ids: string[];
+    spawn: { check_interval_sec: number; chance_per_check: number; radius: number; max_active: number; lifetime_sec: number };
+    kinds: Record<string, { name: string; description: string; weight: number; food_count?: number; hunger_restore?: number }>;
+  };
   materials: { id: string; name: string; group: string }[];
   regional_drop_chance: number;
   regional_food_chance: number;

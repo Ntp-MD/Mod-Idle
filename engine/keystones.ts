@@ -37,7 +37,7 @@ export interface KeystoneBundleDef {
   requiredHooks: readonly KeystoneHook[];
 }
 
-/** The 52 bundle keys of §6 — params and required hooks exactly as the table states them. */
+/** The 105 bundle keys — §6's catalogue plus Packet N — params and required hooks exactly as the table states them. */
 const BUNDLES: KeystoneBundleDef[] = [
   { key: 'ironwall', params: { evasionToArmour: 'mult' }, requiredHooks: ['sheet'] },
   { key: 'unstoppable', params: { penaltyDamageMult: 'mult' }, requiredHooks: ['outgoing', 'timing'] },
@@ -91,6 +91,65 @@ const BUNDLES: KeystoneBundleDef[] = [
   { key: 'aura-resonance', params: { reservationPctPerAura: 'pct', reservationCapPct: 'pct', effectPctPerAura: 'pct', effectCapPct: 'pct' }, requiredHooks: ['sheet', 'reservation'] },
   { key: 'elemental-infusion', params: { extraTotalPct: 'pct' }, requiredHooks: ['outgoing'] },
   { key: 'elemental-conduit', params: {}, requiredHooks: ['outgoing', 'status'] },
+
+  // ---- Packet M — the expansion trade-offs. Each one buys a condition with a disadvantage on the
+  // other side of the same rule; none of them adds a grant line.
+  { key: 'titan-frame', params: { maxHpPct: 'pct', aspdPct: 'pct' }, requiredHooks: ['sheet'] },
+  { key: 'gale-form', params: { aspdPct: 'pct', maxHpPct: 'pct' }, requiredHooks: ['sheet'] },
+  { key: 'bulwark', params: { armourPct: 'pct', evasionPct: 'pct' }, requiredHooks: ['sheet'] },
+  { key: 'phantom-step', params: { evasionPct: 'pct', armourPct: 'pct' }, requiredHooks: ['sheet'] },
+  { key: 'deepwell', params: { maxManaPct: 'pct', maxHpPct: 'pct' }, requiredHooks: ['sheet'] },
+  { key: 'hollow-body', params: { maxEsPct: 'pct', maxHpPct: 'pct' }, requiredHooks: ['sheet'] },
+  { key: 'blood-engine', params: { maxHpPct: 'pct', maxManaPct: 'pct' }, requiredHooks: ['sheet'] },
+  { key: 'keen-edge', params: { critChancePct: 'pct', critDamagePct: 'pct' }, requiredHooks: ['sheet'] },
+  { key: 'brutal-force', params: { critDamagePct: 'pct', critChancePct: 'pct' }, requiredHooks: ['sheet'] },
+  { key: 'spellfocus', params: { magicPct: 'pct', physicalPct: 'pct' }, requiredHooks: ['sheet'] },
+  { key: 'executioner', params: { lowHpThresholdPct: 'pct', lowHpDamagePct: 'pct', otherDamagePct: 'pct' }, requiredHooks: ['outgoing'] },
+  { key: 'opener', params: { fullHpDamagePct: 'pct', otherDamagePct: 'pct' }, requiredHooks: ['outgoing'] },
+  { key: 'giant-slayer', params: { bossDamagePct: 'pct', normalDamagePct: 'pct' }, requiredHooks: ['outgoing'] },
+  { key: 'swarm-bane', params: { normalDamagePct: 'pct', bossDamagePct: 'pct' }, requiredHooks: ['outgoing'] },
+  { key: 'elementalist', params: { elementalPct: 'pct', physicalPct: 'pct' }, requiredHooks: ['outgoing'] },
+  { key: 'brute', params: { physicalPct: 'pct', elementalPct: 'pct' }, requiredHooks: ['outgoing'] },
+  { key: 'overkill', params: { highHpThresholdPct: 'pct', highHpDamagePct: 'pct', otherDamagePct: 'pct' }, requiredHooks: ['outgoing'] },
+  { key: 'sniper', params: { critDamagePct: 'pct', nonCritDamagePct: 'pct' }, requiredHooks: ['outgoing'] },
+  { key: 'puncturing', params: { armourPenPct: 'pct', damagePct: 'pct' }, requiredHooks: ['outgoing'] },
+  { key: 'firewalker', params: { element: 'element', reductionPct: 'pct', otherElementPct: 'pct' }, requiredHooks: ['incoming'] },
+  { key: 'frostwalker', params: { element: 'element', reductionPct: 'pct', otherElementPct: 'pct' }, requiredHooks: ['incoming'] },
+  { key: 'stormwalker', params: { element: 'element', reductionPct: 'pct', otherElementPct: 'pct' }, requiredHooks: ['incoming'] },
+  { key: 'earthward', params: { element: 'element', reductionPct: 'pct', otherElementPct: 'pct' }, requiredHooks: ['incoming'] },
+  { key: 'plagueward', params: { element: 'element', reductionPct: 'pct', otherElementPct: 'pct' }, requiredHooks: ['incoming'] },
+  { key: 'last-stand', params: { hpThresholdPct: 'pct', lowTakenPct: 'pct', highTakenPct: 'pct' }, requiredHooks: ['incoming'] },
+  { key: 'brawler', params: { hpThresholdPct: 'pct', highReductionPct: 'pct', lowIncreasePct: 'pct' }, requiredHooks: ['incoming'] },
+  { key: 'reaper', params: { healMaxHpPct: 'pct' }, requiredHooks: ['kill'] },
+  { key: 'soul-harvest', params: { restoreMaxManaPct: 'pct' }, requiredHooks: ['kill'] },
+  { key: 'trophy-hunter', params: { bossHealMaxHpPct: 'pct', bossRestoreMaxManaPct: 'pct', normalHealMaxHpPct: 'pct', normalRestoreMaxManaPct: 'pct' }, requiredHooks: ['kill'] },
+  { key: 'bloodfeast', params: { bleedingHealMaxHpPct: 'pct', otherHealMaxHpPct: 'pct' }, requiredHooks: ['kill'] },
+
+  // ---- Packet N — the 15-per-wing expansion. Every key states one rule and one cost; none adds a
+  // stat line beside its bundle.
+  { key: 'anvil', params: { elementalArmourPct: 'pct' }, requiredHooks: ['sheet', 'incoming'] },
+  { key: 'unbreakable', params: { ignoreBelowMaxHpPct: 'pct', bigHitTakenPct: 'pct' }, requiredHooks: ['incoming'] },
+  { key: 'concussive-blows', params: { stunSec: 'sec', stunnedTakenPct: 'pct' }, requiredHooks: ['outgoing', 'status', 'timing'] },
+  { key: 'riposte', params: { blockChanceMult: 'mult', reflectMult: 'mult', icdSec: 'sec' }, requiredHooks: ['sheet', 'incoming', 'timing'] },
+  { key: 'single-combat', params: { damagePct: 'pct' }, requiredHooks: ['outgoing'] },
+  { key: 'mirror-strike', params: { windowSec: 'sec' }, requiredHooks: ['incoming', 'outgoing', 'timing'] },
+  { key: 'crippling-strikes', params: { crippledTakenPct: 'pct' }, requiredHooks: ['status', 'outgoing'] },
+  { key: 'conductive', params: { spreadTargets: 'count', shockedTakenPct: 'pct' }, requiredHooks: ['status', 'outgoing'] },
+  { key: 'exploit-weakness', params: { statusDamagePct: 'pct', cleanDamagePct: 'pct' }, requiredHooks: ['outgoing', 'status'] },
+  { key: 'ashen-crown', params: { burningTakenPct: 'pct', directFirePct: 'pct' }, requiredHooks: ['outgoing', 'status'] },
+  { key: 'winters-grip', params: { chilledTakenPct: 'pct' }, requiredHooks: ['outgoing', 'status'] },
+  { key: 'monochrome', params: { element: 'element', elementalPct: 'pct' }, requiredHooks: ['outgoing', 'status'] },
+  { key: 'empty-vessel', params: { maxManaPct: 'pct', auraEffectPct: 'pct' }, requiredHooks: ['sheet', 'reservation'] },
+  { key: 'sanctuary', params: { fullEsTakenPct: 'pct', esRegenPct: 'pct' }, requiredHooks: ['sheet', 'incoming', 'timing'] },
+  { key: 'trance', params: { everyCasts: 'count', costPct: 'pct' }, requiredHooks: ['cost', 'timing'] },
+  { key: 'purist', params: {}, requiredHooks: ['sheet', 'incoming', 'status'] },
+  { key: 'bloodthirst', params: { leechPct: 'pct' }, requiredHooks: ['sheet'] },
+  { key: 'grit', params: { maxHitMaxHpPct: 'pct', otherHitPct: 'pct' }, requiredHooks: ['incoming'] },
+  { key: 'hemorrhage', params: { bleedDamagePct: 'pct', directPhysicalPct: 'pct' }, requiredHooks: ['outgoing', 'status'] },
+  { key: 'blur', params: { hitsPerDodge: 'count' }, requiredHooks: ['sheet', 'incoming', 'timing'] },
+  { key: 'fortuna', params: { doubleCritPct: 'pct', nonCritPct: 'pct' }, requiredHooks: ['outgoing'] },
+  { key: 'lucky-streak', params: { critDamagePctPerStack: 'pct', maxStacks: 'count' }, requiredHooks: ['outgoing', 'timing'] },
+  { key: 'gamblers-step', params: { perfectDodgeMult: 'mult' }, requiredHooks: ['sheet'] },
 ];
 
 const BY_KEY = new Map(BUNDLES.map((b) => [b.key, b]));
@@ -560,9 +619,29 @@ export function staggeringSplit(hpDamage: number, params: Record<string, number>
   return { immediate: hpDamage - deferred, perDebt: deferred / params.durationSec };
 }
 
-/** 61 Parasitic Affliction: the intrinsic Life Leech applies to actual DoT damage, never Hits. */
-export const parasiticLeech = (actualDotDamage: number, params: Record<string, number>): number =>
-  Math.max(0, actualDotDamage) * (params.baseLeechPct / 100);
+/** 61 Parasitic Affliction: total Life Leech applies to actual DoT damage, never Hits. */
+export const parasiticLeech = (actualDotDamage: number, params: Record<string, number>, totalLeechPct = params.baseLeechPct): number =>
+  Math.max(0, actualDotDamage) * (totalLeechPct / 100);
+
+// ---------------------------------------------------------------------------
+// Packet M — the expansion trade-offs. One condition, two percentages: the rule reads the condition
+// and returns the multiplier for the side that applies. An Element ward names its own Element and
+// amplifies every other Elemental hit, so a second ward is a real commitment rather than a free stack.
+
+/** The multiplier a two-sided condition buys: `whenTruePct` or `whenFalsePct`, as a percentage. */
+export const tradeoffPct = (condition: boolean, whenTruePct: number, whenFalsePct: number): number =>
+  1 + (condition ? whenTruePct : whenFalsePct) / 100;
+
+/** An Element ward: its named Element is cut, every other Elemental hit is amplified. */
+export function elementWardMult(
+  hitting: string | null | undefined,
+  element: string,
+  reductionPct: number,
+  otherElementPct: number,
+): number {
+  if (!hitting) return 1;
+  return hitting === element ? 1 - reductionPct / 100 : 1 + otherElementPct / 100;
+}
 
 
 

@@ -1,4 +1,5 @@
 import { E, eng } from '../engine/client';
+import { bundleOf } from '../../../engine/keystones.ts';
 import type { Character } from './player';
 import type { CurseMods } from './curse';
 
@@ -23,6 +24,8 @@ export interface MobLine {
    * stack-decays on the family's own clock, because the Keystone already decided the total.
    */
   fixedSec?: boolean;
+  /** Hemorrhage: the line pays every second and never ages off. */
+  permanent?: boolean;
 }
 
 export interface MobMark {
@@ -89,6 +92,26 @@ export function applyElement(
  */
 export const alignmentPass = (rng: () => number, alignment: number): boolean => rng() * 100 < alignment;
 
+const ELEMENT_STATUS = new Set(Object.values((E.elements as { status_of: Record<string, string> }).status_of));
+
+/**
+ * The statuses a bought rule removes: Winter's Grip forbids shock and burn, Crippling Strikes
+ * forbids chill and shock, and Monochrome allows only the chosen Element's status. A row that
+ * writes a status directly (setStacks) asks this same function, so a skill cannot sneak one past.
+ */
+export function keystoneBlocksStatus(c: Character, name: MobStatusName): boolean {
+  const winters = bundleOf(c.keystones, 'winters-grip');
+  if (winters && (name === 'shock' || name === 'burn')) return true;
+  const crippling = bundleOf(c.keystones, 'crippling-strikes');
+  if (crippling && (name === 'chill' || name === 'shock')) return true;
+  const mono = bundleOf(c.keystones, 'monochrome');
+  if (mono && ELEMENT_STATUS.has(name)) {
+    const chosen = (E.elements as { status_of: Record<string, string> }).status_of[String(mono.params.element)];
+    if (name !== chosen) return true;
+  }
+  return false;
+}
+
 /**
  * Write one status on the mob. Split out so a row that says the status lands ("Shocks all hit")
  * can skip the Alignment roll and the 20% proc without skipping anything else: the control budget
@@ -104,6 +127,7 @@ export function placeStatus(
   immune: string[] = [],
 ): MobStatusName | null {
   if (immune.includes(name)) return null;
+  if (keystoneBlocksStatus(c, name)) return null;
   const m = mark(store, mobId);
   m.alignedPerSec = Math.max(m.alignedPerSec, alignedPerHit);
   const l = line(m, name);
@@ -126,6 +150,13 @@ export function placeStatus(
     l.perSec = 0;
     l.secLeft = cfg.time_sec;
   } else {
+    // Conductive: the shock still cuts speed and Alignment, but it no longer stops the clock.
+    if (name === 'shock' && bundleOf(c.keystones, 'conductive')) {
+      l.stacks = 1;
+      l.perSec = 0;
+      l.secLeft = cfg.time_sec ?? 1;
+      return name;
+    }
     // shock: no stacks, and the stopped second is paid out of the control budget
     if (m.stoppedSec + cfg.stop_sec > CONTROL_BOUND * m.elapsedSec && m.stoppedSec > 0) return name;
     l.stacks = 1;
@@ -137,10 +168,15 @@ export function placeStatus(
   return name;
 }
 
-/**
- * A direct stop names its own length and no chance. It pays the shared rolling stop-time budget
- * unless its row explicitly sets `bypassBudget` (combat.md §5b).
- */
+/** Spend the same rolling allowance for an action delay as for a status-based stop. */
+export function spendControlBudget(store: MobStatusStore, mobId: string, sec: number): boolean {
+  const m = mark(store, mobId);
+  if (m.stoppedSec + sec > CONTROL_BOUND * m.elapsedSec && m.stoppedSec > 0) return false;
+  m.stoppedSec += sec;
+  return true;
+}
+
+/** A direct stop pays the shared budget unless the skill explicitly bypasses it. */
 export function stopMob(store: MobStatusStore, mobId: string, sec: number, bypassBudget = false): void {
   const m = mark(store, mobId);
   const l = line(m, 'shock');
@@ -212,14 +248,18 @@ export function applyBleed(
   physicalPerHit: number,
   chance: number,
   immune: string[] = [],
+  /** Hemorrhage: the bleed is stronger and never ages off. */
+  hemorrhage?: { damagePct: number; permanent: boolean },
 ): boolean {
   if (immune.includes('bleed')) return false;
   if (rng() >= chance) return false;
   const m = mark(store, mobId);
   const l = line(m, 'bleed');
   l.stacks = 1;
-  l.perSec = Math.max(l.perSec, (physicalPerHit * K.K_BLEED) / K.bleed_time_sec);
-  l.secLeft = K.bleed_time_sec;
+  l.perSec = Math.max(l.perSec, (physicalPerHit * K.K_BLEED) / K.bleed_time_sec
+    * (1 + (hemorrhage?.damagePct ?? 0) / 100));
+  l.secLeft = hemorrhage?.permanent ? Number.MAX_SAFE_INTEGER : K.bleed_time_sec;
+  if (hemorrhage?.permanent) l.permanent = true;
   return true;
 }
 
@@ -446,6 +486,7 @@ export function stepMobParts(store: MobStatusStore, mobId: string): DotTick {
     if (name === 'burn') burnDot += l.stacks * l.perSec;
     if (name === 'erosion') erosionDot += l.stacks * l.perSec;
     if (name === 'bleed') bleedDot += l.perSec;
+    if (l.permanent) continue;
     l.secLeft--;
     if (l.secLeft <= 0) { delete m.statuses[name]; continue; }
   }
@@ -489,6 +530,38 @@ export function targetMods(m: MobStatusMods): Partial<CurseMods> {
     stopped: m.stopped,
     clockPct: m.clockPct,
   };
+}
+
+/**
+ * The target-side damage-taken lines the expansion's rules write. They ride the same bucket a
+ * curse's `damage_taken` line does, so the swing's one `takenMult` reads them without a second
+ * multiplier in the combat path.
+ */
+export function keystoneTargetMods(store: MobStatusStore, mobId: string, c: Character): Partial<CurseMods> {
+  const m = store[mobId];
+  if (!m) return {};
+  const alive = (name: MobStatusName): boolean => {
+    const l = m.statuses[name];
+    return !!l && (l.stacks > 0 || l.secLeft > 0);
+  };
+  let taken = 0;
+  const winters = bundleOf(c.keystones, 'winters-grip');
+  if (winters && alive('chill')) taken += Number(winters.params.chilledTakenPct);
+  const ashen = bundleOf(c.keystones, 'ashen-crown');
+  if (ashen && alive('burn')) taken += Number(ashen.params.burningTakenPct);
+  const crippling = bundleOf(c.keystones, 'crippling-strikes');
+  if (crippling && alive('crippled')) taken += Number(crippling.params.crippledTakenPct);
+  const conductive = bundleOf(c.keystones, 'conductive');
+  if (conductive && alive('shock')) taken += Number(conductive.params.shockedTakenPct);
+  const concussive = bundleOf(c.keystones, 'concussive-blows');
+  if (concussive && m.statuses.shock && (m.stoppedUntil ?? 0) > m.elapsedSec)
+    taken += Number(concussive.params.stunnedTakenPct);
+  const exploit = bundleOf(c.keystones, 'exploit-weakness');
+  if (exploit) {
+    const any = Object.entries(m.statuses).some(([, l]) => l.stacks > 0 || l.secLeft > 0);
+    taken += any ? Number(exploit.params.statusDamagePct) : -Number(exploit.params.cleanDamagePct);
+  }
+  return taken ? { damageTaken: taken } : {};
 }
 
 export const statusLabel = (name: string): string =>
@@ -550,7 +623,17 @@ export function applyWeaponRiders(
   // hit — a build that cannot pass it inflicts neither, whatever its gear lines say
   const passed = alignmentPass(rng, c.alignment);
   const bleedPct = eng.bleedChanceFrom(bleedCurseUp, c.bleedChance + (bonusBleedPct || 0));
-  if (passed && c.phys > 0 && bleedPct > 0) applyBleed(rng, store, mobId, c.phys, bleedPct / 100, immune);
+  const hemorrhage = bundleOf(c.keystones, 'hemorrhage');
+  if (passed && c.phys > 0 && bleedPct > 0) applyBleed(rng, store, mobId, c.phys, bleedPct / 100, immune,
+    hemorrhage ? { damagePct: Number(hemorrhage.params.bleedDamagePct), permanent: true } : undefined);
   const stunPct = c.stunChance + (bonusStunPct || 0);
-  if (passed && stunPct > 0) stunMob(rng, store, mobId, stunPct);
+  // The mace's stun writes Shock, so a rule that forbids shock (Winter's Grip, Crippling Strikes,
+  // or Monochrome's chosen Element) refuses the stun rider too.
+  if (passed && stunPct > 0 && !keystoneBlocksStatus(c, 'shock')) stunMob(rng, store, mobId, stunPct);
+  // Concussive Blows: the stun is the row's own application, not a proc; the control budget
+  // still decides whether it can hold. 77 Crippling Strikes writes its own status the same way.
+  const concussive = bundleOf(c.keystones, 'concussive-blows');
+  if (concussive) stopMob(store, mobId, Number(concussive.params.stunSec));
+  const crippling = bundleOf(c.keystones, 'crippling-strikes');
+  if (crippling) placeStatus(store, mobId, 'crippled', c, alignedPerSec, immune);
 }

@@ -250,11 +250,15 @@ describe('the ring carries the beats an animation is made of', () => {
     s.skills.list[0] = 'attack.chain_lightning'; s.skills.owned['attack.chain_lightning'] ??= 0;
     s.player.mana = 1e6;
     s.fx = [];
-    for (let i = 0; i < 40 && !(s.fx || []).some((e) => e.kind === 'cast'); i++) tick(s, {});
+    // A cast may miss; wait for an actual hit before checking its source metadata.
+    for (let i = 0; i < 40 && !(s.fx || []).some((e) => e.kind === 'hit' && e.via === 'cast'); i++) tick(s, {});
     const cast = (s.fx || []).find((e) => e.kind === 'cast');
     expect(cast).toBeTruthy();
     expect(s.skills.list).toContain(cast!.skillId);
     expect(cast!.side).toBe('self');
+    const hits = (s.fx || []).filter((e) => e.kind === 'hit' && e.via === 'cast');
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits.every((e) => e.skillId === cast!.skillId)).toBe(true);
   });
 
   it('a buff coming up is raised on the character half, with its own row', () => {

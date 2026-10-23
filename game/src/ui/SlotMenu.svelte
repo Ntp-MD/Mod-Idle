@@ -60,7 +60,7 @@
 </script>
 
 <div class="backdrop" role="presentation" use:portal onclick={onclose} oncontextmenu={(e) => { e.preventDefault(); onclose(); }}></div>
-<div class="menu" role="menu" tabindex="-1" use:swallow use:portal
+<div class="menu surface-popover" role="menu" tabindex="-1" use:swallow use:portal
      style="left:{at.x}px; top:{at.y}px" bind:this={box}
      aria-label="Item actions">
   {#each items as it}
@@ -81,9 +81,6 @@
     max-width: clamp(188px, 14.52vw, 405px);
     display: flex; flex-direction: column;
     padding: var(--spacing-xs);
-    background: var(--panel);
-    border: 1px solid var(--line);
-    box-shadow: 0 0 22px rgba(0, 0, 0, .65);
     outline: none;
   }
   .menu button {

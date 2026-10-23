@@ -1,6 +1,6 @@
 # Map art reference kit
 
-เริ่มอ่านไฟล์นี้ก่อนส่งงานให้ agent เจนภาพ โฟลเดอร์นี้เป็นชุดอ้างอิงและ brief ไม่ใช่การฝึกโมเดลหรือระบบที่รับประกันความแม่นของภาพเจน
+เริ่มอ่านไฟล์นี้ก่อนส่งงานให้ agent เจนภาพ โฟลเดอร์นี้เป็นแม่แบบอ้างอิงชุดเดียวสำหรับรูปทรง มุมกล้อง วิธีสร้าง และการตรวจคุณภาพ ไม่ใช่การฝึกโมเดลหรือระบบที่รับประกันความแม่นของภาพเจน
 
 ภาพที่ generate ทุกไฟล์ (raw, cutout, outputs) เก็บไว้ใต้ `art-reference/` เพื่อรอ approve ก่อนนำไปใช้จริง ห้ามคัดลอกเข้า `game/public/` หรืออ้างในโค้ดจนกว่าจะอนุมัติ
 
@@ -8,9 +8,10 @@
 
 1. ส่ง [agent-brief.md](agent-brief.md) ให้ agent อ่านก่อน
 2. เลือกประเภทงาน: **terrain เต็ม hex**, **surface texture**, หรือ **object/figure แยกชิ้น** ห้ามใช้ prompt สลับประเภท
-3. งาน terrain เต็ม hex: แนบ [hex-mask.png](geometry/hex-mask.png) เป็น **shape reference** และเลือกภาพสไตล์จาก [reference index](references/index.json)
-4. ใช้ prompt ที่ตรงประเภทใน [prompts/](prompts/) และทำเพียงหนึ่งชิ้นก่อน
-5. วัดและตรวจตาม [checklist](review/checklist.md) แล้วทดลองวางในเกมก่อนทำประเภทถัดไป
+3. ใช้มุมกล้องและสัดส่วนจาก [geometry ที่ refresh จากโค้ดจริง](geometry/hex-spec.json); อย่ากำหนดองศาจาก screenshot หรือคัดลอกค่าด้วยมือ
+4. งาน terrain เต็ม hex: แนบ [hex-mask.png](geometry/hex-mask.png) เป็น **shape reference** และเลือกภาพสไตล์จาก [reference index](references/index.json)
+5. ใช้ prompt ที่ตรงประเภทใน [prompts/](prompts/) และทำเพียงหนึ่งชิ้นก่อน
+6. วัดและตรวจตาม [checklist](review/checklist.md) แล้วทดลองวางในเกมก่อนทำประเภทถัดไป
 
 ## มีอะไรอยู่ที่ไหน
 
@@ -20,12 +21,15 @@
 | `geometry/hex-mask.svg` | รูปร่างเดียวกันแบบ vector |
 | `geometry/hex-guide.svg` | ภาพอธิบายจุดยอด 1–6 และจุดกลาง; ไม่ใช่ art reference สำหรับเจน |
 | `geometry/hex-spec.json` | ค่ากล้อง สัดส่วน พิกัดจุดยอด และ matrix ที่คำนวณจากโค้ด |
+| `calibration/` | ผลวัด registration ของภาพตัวอย่างและ screenshot ตรวจแนว hex ในเกม; เป็นหลักฐานตรวจ ไม่ใช่ตัวแทน geometry หรือมุมกล้อง |
 | `references/` | ภาพตัวอย่างพร้อมบทบาทของแต่ละรูป ไม่ได้หมายความว่ามุมของทุกรูปถูกต้อง |
 | `prompts/` | Prompt ภาษาอังกฤษ แยกตามวิธี render |
 | `examples/footprint-format.json` | ตัวอย่าง metadata ของภาพป่า; ต้องวัดใหม่สำหรับภาพอื่น |
 | `outputs/` | ที่เก็บผลงานใหม่แบบมีเลขรุ่น; ยังไม่ใช่การนำเข้าเกม |
 | `manifest.json` | แหล่งที่มา hash ของสำเนา และข้อไม่ตรงกันที่พบตอน refresh |
 | `terrain-inventory.json` | เทียบภาพต้นฉบับทุกไฟล์กับรุ่นใหม่ metadata และ catalogue; แยกข้อควรตรวจของ renderer เมือง |
+
+ดู [calibration/README.md](calibration/README.md) เพื่อแยกมุมกล้องที่ใช้สร้างงานออกจากหลักฐานการวางแนวในเกมและผลวัดฐานภาพ
 
 ## อัปเดตจากโค้ดจริง
 

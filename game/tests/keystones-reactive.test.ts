@@ -24,6 +24,6 @@ describe('Packet J — reactive defenses', () => {
   });
 
   it('registers the thirty-six Packet E–J keys', () => {
-    expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toHaveLength(52);
+    expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toHaveLength(105);
   });
 });

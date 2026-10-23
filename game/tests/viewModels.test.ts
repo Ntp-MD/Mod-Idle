@@ -147,6 +147,34 @@ describe('the plate view model (plate.ts)', () => {
     expect(windupOf({ atkTimer: 2 } as Mob)).toBe(1);
     expect(windupOf({ atkTimer: -1 } as Mob)).toBe(0);
   });
+
+  it('keeps same-second hits with their own skill and repeated cast', () => {
+    const fireHit = fx({ id: 1, sec: 7, via: 'cast', skillId: 'attack.fireball' });
+    const fireCast = fx({ id: 2, sec: 7, kind: 'cast', side: 'self', skillId: 'attack.fireball' });
+    const lightningHit = fx({ id: 3, sec: 7, via: 'cast', skillId: 'attack.chain_lightning' });
+    const lightningCast = fx({ id: 4, sec: 7, kind: 'cast', side: 'self', skillId: 'attack.chain_lightning' });
+    const repeatHit = fx({ ...fireHit, id: 5 });
+    const repeatCast = fx({ ...fireCast, id: 6 });
+    const ring = [repeatCast, repeatHit, lightningCast, lightningHit, fireCast, fireHit];
+
+    expect(castForHit(ring, fireHit)?.id).toBe(fireCast.id);
+    expect(castForHit(ring, lightningHit)?.id).toBe(lightningCast.id);
+    expect(castForHit(ring, repeatHit)?.id).toBe(repeatCast.id);
+    expect(castForHit([lightningCast, fireHit], fireHit)).toBeNull();
+    expect(castForHit([fireCast], fx({ ...repeatHit, sec: 8 }))).toBeNull();
+  });
+
+  it('only resolves untagged cast hits when their marker is unambiguous', () => {
+    const hit = fx({ id: 1, sec: 7, via: 'cast' });
+    const cast = fx({ id: 2, sec: 7, kind: 'cast', side: 'self', skillId: 'attack.fireball' });
+    const otherCast = fx({ ...cast, id: 4, skillId: 'attack.chain_lightning' });
+
+    expect(castForHit([cast, hit], hit)).toBe(cast);
+    expect(castForHit([otherCast, cast, hit], hit)).toBeNull();
+    expect(castForHit([cast], fx({ ...hit, id: 3 }))).toBeNull();
+    expect(castForHit([fx({ ...cast, side: 'field' })], hit)).toBeNull();
+    expect(castForHit([cast], null)).toBeNull();
+  });
 });
 
 describe('the field ramp (map.ts)', () => {

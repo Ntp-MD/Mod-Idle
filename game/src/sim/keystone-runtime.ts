@@ -38,6 +38,7 @@ import {
   demolitionBlast,
   elementalAegisSplit,
   elementalInfusionExtras,
+  elementWardMult,
   emberheartConvert,
   ghostDanceRecovery,
   headsmanExecutes,
@@ -58,6 +59,7 @@ import {
   shieldGateHolds,
   thornboundRetaliation,
   turtleCut,
+  tradeoffPct,
   worthyFoe,
   validateKeystoneParams,
 } from '../../../engine/keystones.ts';
@@ -443,4 +445,222 @@ export function registerStaticKeystoneHandlers(table: KeystoneHandlerTable, elem
   registerKeystoneHandler(table, 'parasitic-affliction', {
     recovery: (dotDamage: number) => parasiticLeech(dotDamage, { baseLeechPct: 2 }),
   }, { baseLeechPct: 2 }, elements);
+
+  // ---- Packet M — the expansion trade-offs ----------------------------------------------------
+  registerKeystoneHandler(table, 'titan-frame', {
+    sheet: (sheet: { maxHp: number; aspd: number }) => ({ ...sheet, maxHp: sheet.maxHp * 1.25, aspd: sheet.aspd * 0.85 }),
+  }, { maxHpPct: 25, aspdPct: 15 }, elements);
+  registerKeystoneHandler(table, 'gale-form', {
+    sheet: (sheet: { maxHp: number; aspd: number }) => ({ ...sheet, maxHp: sheet.maxHp * 0.85, aspd: sheet.aspd * 1.20 }),
+  }, { aspdPct: 20, maxHpPct: 15 }, elements);
+  registerKeystoneHandler(table, 'bulwark', {
+    sheet: (sheet: { armour: number; evasion: number }) => ({ ...sheet, armour: sheet.armour * 1.40, evasion: sheet.evasion * 0.80 }),
+  }, { armourPct: 40, evasionPct: 20 }, elements);
+  registerKeystoneHandler(table, 'phantom-step', {
+    sheet: (sheet: { armour: number; evasion: number }) => ({ ...sheet, armour: sheet.armour * 0.80, evasion: sheet.evasion * 1.40 }),
+  }, { evasionPct: 40, armourPct: 20 }, elements);
+  registerKeystoneHandler(table, 'deepwell', {
+    sheet: (sheet: { maxMana: number; maxHp: number }) => ({ ...sheet, maxMana: sheet.maxMana * 1.40, maxHp: sheet.maxHp * 0.80 }),
+  }, { maxManaPct: 40, maxHpPct: 20 }, elements);
+  registerKeystoneHandler(table, 'hollow-body', {
+    sheet: (sheet: { es: number; maxHp: number }) => ({ ...sheet, es: sheet.es * 1.50, maxHp: sheet.maxHp * 0.75 }),
+  }, { maxEsPct: 50, maxHpPct: 25 }, elements);
+  registerKeystoneHandler(table, 'blood-engine', {
+    sheet: (sheet: { maxHp: number; maxMana: number }) => ({ ...sheet, maxHp: sheet.maxHp * 1.25, maxMana: sheet.maxMana * 0.75 }),
+  }, { maxHpPct: 25, maxManaPct: 25 }, elements);
+  registerKeystoneHandler(table, 'keen-edge', {
+    sheet: (sheet: { critChance: number; critDmg: number }) => ({ ...sheet, critChance: sheet.critChance + 25, critDmg: sheet.critDmg - 20 }),
+  }, { critChancePct: 25, critDamagePct: 20 }, elements);
+  registerKeystoneHandler(table, 'brutal-force', {
+    sheet: (sheet: { critChance: number; critDmg: number }) => ({ ...sheet, critChance: sheet.critChance - 10, critDmg: sheet.critDmg + 30 }),
+  }, { critDamagePct: 30, critChancePct: 10 }, elements);
+  registerKeystoneHandler(table, 'spellfocus', {
+    sheet: (sheet: { phys: number; magic: number }) => ({ ...sheet, phys: sheet.phys * 0.80, magic: sheet.magic * 1.30 }),
+  }, { magicPct: 30, physicalPct: 20 }, elements);
+
+  registerKeystoneHandler(table, 'executioner', {
+    outgoing: (hpShare: number) => tradeoffPct(hpShare * 100 < 30, 50, -15),
+  }, { lowHpThresholdPct: 30, lowHpDamagePct: 50, otherDamagePct: 15 }, elements);
+  registerKeystoneHandler(table, 'opener', {
+    outgoing: (fullHp: boolean) => tradeoffPct(fullHp, 40, -10),
+  }, { fullHpDamagePct: 40, otherDamagePct: 10 }, elements);
+  registerKeystoneHandler(table, 'giant-slayer', {
+    outgoing: (bossUnique: boolean) => tradeoffPct(bossUnique, 35, -10),
+  }, { bossDamagePct: 35, normalDamagePct: 10 }, elements);
+  registerKeystoneHandler(table, 'swarm-bane', {
+    outgoing: (bossUnique: boolean) => tradeoffPct(!bossUnique, 30, -10),
+  }, { normalDamagePct: 30, bossDamagePct: 10 }, elements);
+  registerKeystoneHandler(table, 'elementalist', {
+    outgoing: (elemental: boolean) => tradeoffPct(elemental, 30, -20),
+  }, { elementalPct: 30, physicalPct: 20 }, elements);
+  registerKeystoneHandler(table, 'brute', {
+    outgoing: (elemental: boolean) => tradeoffPct(!elemental, 25, -25),
+  }, { physicalPct: 25, elementalPct: 25 }, elements);
+  registerKeystoneHandler(table, 'overkill', {
+    outgoing: (hpShare: number) => tradeoffPct(hpShare * 100 > 80, 40, -15),
+  }, { highHpThresholdPct: 80, highHpDamagePct: 40, otherDamagePct: 15 }, elements);
+  registerKeystoneHandler(table, 'sniper', {
+    outgoing: (crit: boolean) => tradeoffPct(crit, 25, -10),
+  }, { critDamagePct: 25, nonCritDamagePct: 10 }, elements);
+  registerKeystoneHandler(table, 'puncturing', {
+    outgoing: (damage: number) => ({ damage: damage * 0.85, armourPenPct: 30 }),
+  }, { armourPenPct: 30, damagePct: 15 }, elements);
+
+  registerKeystoneHandler(table, 'firewalker', {
+    incoming: (hitting: string) => elementWardMult(hitting, 'fire', 50, 20),
+  }, { element: 'fire', reductionPct: 50, otherElementPct: 20 }, elements);
+  registerKeystoneHandler(table, 'frostwalker', {
+    incoming: (hitting: string) => elementWardMult(hitting, 'cold', 50, 20),
+  }, { element: 'cold', reductionPct: 50, otherElementPct: 20 }, elements);
+  registerKeystoneHandler(table, 'stormwalker', {
+    incoming: (hitting: string) => elementWardMult(hitting, 'lightning', 50, 20),
+  }, { element: 'lightning', reductionPct: 50, otherElementPct: 20 }, elements);
+  registerKeystoneHandler(table, 'earthward', {
+    incoming: (hitting: string) => elementWardMult(hitting, 'earth', 50, 20),
+  }, { element: 'earth', reductionPct: 50, otherElementPct: 20 }, elements);
+  registerKeystoneHandler(table, 'plagueward', {
+    incoming: (hitting: string) => elementWardMult(hitting, 'chaos', 50, 20),
+  }, { element: 'chaos', reductionPct: 50, otherElementPct: 20 }, elements);
+  registerKeystoneHandler(table, 'last-stand', {
+    incoming: (hpShare: number) => tradeoffPct(hpShare * 100 < 35, -25, 10),
+  }, { hpThresholdPct: 35, lowTakenPct: 25, highTakenPct: 10 }, elements);
+  registerKeystoneHandler(table, 'brawler', {
+    incoming: (hpShare: number) => tradeoffPct(hpShare * 100 > 50, -15, 15),
+  }, { hpThresholdPct: 50, highReductionPct: 15, lowIncreasePct: 15 }, elements);
+
+  registerKeystoneHandler(table, 'reaper', {
+    kill: (maxHp: number) => maxHp * 0.02,
+  }, { healMaxHpPct: 2 }, elements);
+  registerKeystoneHandler(table, 'soul-harvest', {
+    kill: (maxMana: number) => maxMana * 0.03,
+  }, { restoreMaxManaPct: 3 }, elements);
+  registerKeystoneHandler(table, 'trophy-hunter', {
+    kill: (maxHp: number, maxMana: number, bossUnique: boolean) =>
+      bossUnique ? { hp: maxHp * 0.15, mana: maxMana * 0.15 } : { hp: maxHp * 0.01, mana: maxMana * 0.01 },
+  }, { bossHealMaxHpPct: 15, bossRestoreMaxManaPct: 15, normalHealMaxHpPct: 1, normalRestoreMaxManaPct: 1 }, elements);
+  registerKeystoneHandler(table, 'bloodfeast', {
+    kill: (maxHp: number, bleeding: boolean) => maxHp * (bleeding ? 0.05 : 0.01),
+  }, { bleedingHealMaxHpPct: 5, otherHealMaxHpPct: 1 }, elements);
+  registerExpansionKeystoneHandlers(table, elements);
+}
+
+/**
+ * Packet N — the 15-per-wing expansion. These handlers are the purchase/import gate's real
+ * functions; the sim's combat paths read the same bundle params. A rule that cannot be paid is a
+ * registration error, not a silent no-op.
+ */
+export function registerExpansionKeystoneHandlers(table: KeystoneHandlerTable, elements: readonly string[]): void {
+  // STR
+  registerKeystoneHandler(table, 'anvil', {
+    sheet: (sheet: { armour: number; evasion: number; perfectDodge: number }) =>
+      ({ ...sheet, evasion: 0, perfectDodge: 0 }),
+    incoming: (hit: { elemental: number; armour: number }) =>
+      ({ ...hit, elemental: hit.elemental * (1 - Math.min(1, hit.armour / Math.max(1, hit.armour + hit.elemental * 10)) * 0.3) }),
+  }, { elementalArmourPct: 30 }, elements);
+  registerKeystoneHandler(table, 'unbreakable', {
+    incoming: (damage: number, maxHp: number) =>
+      damage < maxHp * 0.05 ? 0 : damage * 1.15,
+  }, { ignoreBelowMaxHpPct: 5, bigHitTakenPct: 15 }, elements);
+  registerKeystoneHandler(table, 'concussive-blows', {
+    outgoing: (damage: number, stunned: boolean) => stunned ? damage * 1.2 : damage,
+    status: (stunned: boolean) => stunned,
+    timing: (stopped: boolean) => stopped,
+  }, { stunSec: 0.5, stunnedTakenPct: 20 }, elements);
+  registerKeystoneHandler(table, 'riposte', {
+    sheet: (sheet: { block: number }) => ({ ...sheet, block: sheet.block * 0.5 }),
+    incoming: (cut: number) => cut * 2,
+    timing: (nowUs: number, icdUntilUs: number) => nowUs >= icdUntilUs,
+  }, { blockChanceMult: 0.5, reflectMult: 2, icdSec: 1 }, elements);
+  registerKeystoneHandler(table, 'hemorrhage', {
+    outgoing: (physical: number) => physical * 0.75,
+    status: (bleed: { perSec: number; sec: number }) =>
+      ({ perSec: bleed.perSec * 2, sec: bleed.sec, permanent: true }),
+  }, { bleedDamagePct: 100, directPhysicalPct: 75 }, elements);
+
+  // AGI
+  registerKeystoneHandler(table, 'single-combat', {
+    outgoing: (damage: number) => damage * 1.8,
+  }, { damagePct: 80 }, elements);
+  registerKeystoneHandler(table, 'mirror-strike', {
+    incoming: (evaded: boolean) => evaded,
+    outgoing: (crit: boolean) => crit,
+    timing: (nowUs: number, untilUs: number) => nowUs < untilUs,
+  }, { windowSec: 3 }, elements);
+  registerKeystoneHandler(table, 'blur', {
+    sheet: (sheet: { block: number }) => ({ ...sheet, block: 0 }),
+    incoming: (hitCount: number) => hitCount > 0 && hitCount % 3 === 0,
+    timing: (nowUs: number) => nowUs,
+  }, { hitsPerDodge: 3 }, elements);
+
+  // DEX
+  registerKeystoneHandler(table, 'crippling-strikes', {
+    status: (family: string) => family === 'crippled',
+    outgoing: (damage: number, crippled: boolean) => crippled ? damage * 1.1 : damage,
+  }, { crippledTakenPct: 10 }, elements);
+  registerKeystoneHandler(table, 'conductive', {
+    status: (family: string) => family === 'shock',
+    outgoing: (damage: number, shocked: boolean) => shocked ? damage * 1.1 : damage,
+  }, { spreadTargets: 1, shockedTakenPct: 10 }, elements);
+  registerKeystoneHandler(table, 'exploit-weakness', {
+    outgoing: (damage: number, statused: boolean) => damage * (statused ? 1.2 : 0.9),
+    status: (statused: boolean) => statused,
+  }, { statusDamagePct: 20, cleanDamagePct: 10 }, elements);
+
+  // INT
+  registerKeystoneHandler(table, 'ashen-crown', {
+    outgoing: (damage: number, burning: boolean) => damage * (burning ? 1.15 : 1),
+    status: (family: string) => family === 'burn',
+  }, { burningTakenPct: 15, directFirePct: 20 }, elements);
+  registerKeystoneHandler(table, 'winters-grip', {
+    outgoing: (damage: number, chilled: boolean) => damage * (chilled ? 1.25 : 1),
+    status: (family: string) => family === 'chill',
+  }, { chilledTakenPct: 25 }, elements);
+  registerKeystoneHandler(table, 'monochrome', {
+    outgoing: (element: string, chosen: string) => ({ element, chosen }),
+    status: (family: string, chosenStatus: string) => family === chosenStatus,
+  }, { element: 'fire', elementalPct: 30 }, elements);
+
+  // WIS
+  registerKeystoneHandler(table, 'empty-vessel', {
+    sheet: (sheet: { maxMana: number }) => ({ ...sheet, maxMana: sheet.maxMana * 1.2 }),
+    reservation: (pool: string) => pool !== 'none',
+  }, { maxManaPct: 20, auraEffectPct: 50 }, elements);
+  registerKeystoneHandler(table, 'sanctuary', {
+    sheet: (sheet: { esRegen: number }) => ({ ...sheet, esRegen: sheet.esRegen * 0.5 }),
+    incoming: (damage: number, esFull: boolean) => esFull ? damage * 0.8 : damage,
+    timing: (esFull: boolean) => esFull,
+  }, { fullEsTakenPct: 20, esRegenPct: 50 }, elements);
+  registerKeystoneHandler(table, 'trance', {
+    cost: (cost: number, casts: number) => casts % 3 === 2 ? 0 : cost * 1.5,
+    timing: (casts: number) => casts,
+  }, { everyCasts: 3, costPct: 50 }, elements);
+
+  // VIT
+  registerKeystoneHandler(table, 'purist', {
+    sheet: (sheet: { es: number; esRegen: number }) => ({ ...sheet, es: 0, esRegen: 0 }),
+    incoming: (family: string) => !['burn', 'poison', 'bleed'].includes(family),
+    status: (family: string) => family,
+  }, {}, elements);
+  registerKeystoneHandler(table, 'bloodthirst', {
+    sheet: (sheet: { leechPct: number; hpRegen: number }) =>
+      ({ ...sheet, leechPct: sheet.leechPct + 3, hpRegen: 0 }),
+  }, { leechPct: 3 }, elements);
+  registerKeystoneHandler(table, 'grit', {
+    incoming: (damage: number, maxHp: number) =>
+      Math.min(damage * 1.15, maxHp * 0.25),
+  }, { maxHitMaxHpPct: 25, otherHitPct: 15 }, elements);
+
+  // LCK
+  registerKeystoneHandler(table, 'fortuna', {
+    outgoing: (damage: number, crit: boolean, roll: number) =>
+      crit ? (roll < 25 ? damage * 2 : damage) : damage * 0.9,
+  }, { doubleCritPct: 25, nonCritPct: 10 }, elements);
+  registerKeystoneHandler(table, 'lucky-streak', {
+    outgoing: (damage: number, stacks: number) => damage * (1 + Math.min(10, stacks) * 0.03),
+    timing: (stacks: number, crit: boolean) => crit ? stacks + 1 : 0,
+  }, { critDamagePctPerStack: 3, maxStacks: 10 }, elements);
+  registerKeystoneHandler(table, 'gamblers-step', {
+    sheet: (sheet: { evasion: number; perfectDodge: number }) =>
+      ({ ...sheet, evasion: 0, perfectDodge: sheet.perfectDodge * 2 }),
+  }, { perfectDodgeMult: 2 }, elements);
 }

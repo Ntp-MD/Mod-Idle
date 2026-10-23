@@ -4,7 +4,7 @@
   import { taskBonuses, resolveQuestBonus } from './sim/quest-rewards';
   import { questBonusText } from './ui/quest-rewards';
   import { rollTask } from './sim/town';
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount, untrack } from 'svelte';
   import { cubicOut, linear } from 'svelte/easing';
   import { prefersReducedMotion, Tween } from 'svelte/motion';
   import { eng, E, sm, TOWN, tree, loot, fieldwork, trade } from './engine/client';
@@ -15,7 +15,8 @@ import { offerDelivery, deliver, trackDelivery, acknowledgeDelivery, announceDel
 import { buyBlackMarket } from './sim/black-market';
   import DeliveryNotice from './ui/DeliveryNotice.svelte';
   import { previewScrapAlchemy, transmuteScrap, alchemyTierProgress } from './sim/alchemy';
-  import { newGame, setLevel, tick, push, fx, hitColour, catchUpAsync, schedulerBatch, WAKE_SEC, characterSheet, heldWeaponName, huntZone, huntHere, salvageBag, retreatDungeon, runFilterNow, isBossKind } from './sim/game';
+  import { newGame, setLevel, tick, push, fx, hitColour, catchUpAsync, schedulerBatch, WAKE_SEC, characterSheet, heldWeaponName, huntZone, huntHere, salvageBag, retreatDungeon, runFilterNow, isBossKind, spawnMob } from './sim/game';
+  import { mobSkillById } from './sim/mobSkills';
   import { rollDrop } from './sim/drop';
   import { reservedPct, hpReservedPct, auraResonanceOf, auraPoolOf, setAuraPool, hpReserved, usableHp, usableMana, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, costNow, modeOf, condOf, appliedStatusOf, appliedCurseOf, moveSlot } from './sim/skills';
   import { modsOn, psMult, curableRows } from './sim/curse';
@@ -24,6 +25,7 @@ import { buyBlackMarket } from './sim/black-market';
   import SlotGrid from './ui/SlotGrid.svelte';
   import StatAllocator from './ui/StatAllocator.svelte';
   import Panel from './ui/Panel.svelte';
+  import CountBadge from './ui/CountBadge.svelte';
   import Quickbar from './ui/Quickbar.svelte';
   import HudLayoutEditor from './ui/HudLayoutEditor.svelte';
   import { copyHudLayout, DEFAULT_MODAL_AREA, gridAreaCss, hudGridTemplate, HUD_LAYOUT_STORAGE_KEY, HUD_LAYOUT_PREVIOUS_STORAGE_KEYS, HUD_LAYOUT_VERSION, migrateHudLayout, regionStyleCss, salvageHudLayout, validGridArea, validateHudLayout, type GridArea, type HudLayout, type HudRegionId } from './ui/hud-layout';
@@ -36,19 +38,24 @@ import { buyBlackMarket } from './sim/black-market';
   import TownHub from './ui/TownHub.svelte';
   import Market from './ui/Market.svelte';
   import CraftWorkshop from './ui/CraftWorkshop.svelte';
+  import GearCare from './ui/GearCare.svelte';
   import Forge from './ui/Forge.svelte';
   import FieldworkBoard from './ui/FieldworkBoard.svelte';
   import PassiveTreeBoard from './ui/PassiveTreeBoard.svelte';
   import StashBoard from './ui/StashBoard.svelte';
   import KeybindTable from './ui/KeybindTable.svelte';
-  import Minimap from './ui/Minimap.svelte';
   import CollapseToggle from './ui/CollapseToggle.svelte';
   import Tabs from './ui/Tabs.svelte';
   import { KEYBINDS, bindTable, actionFor, tokenOf, isModifierKey, isTypingTarget, formatKey } from './ui/keybinds';
   import { gearEntry, stackEntry, sortEntries, type SlotEntry, type SortKey } from './ui/bag';
   import type { MenuItem } from './ui/menu';
-  import { ramp, cellLabel, paintSheet, paintMapNames, type Picked } from './ui/map';
+  import { ramp, cellLabel, paintSheet, paintMapNames, paintMapHover, type Picked } from './ui/map';
   import { mapTravelPhase } from './ui/map-travel';
+  import { clampMapPan, composeMapMatrix, mapBearingDegrees, mapTurnTo, orbitMapPan, transformMapPoint } from './ui/map-camera';
+  import { createMapProjection } from './ui/map-projection';
+  import { paintMapScene } from './ui/map-scene';
+  import { adventureView, uniqueTraceSpecies, type AdventureCell } from './ui/map-adventure';
+  import { mapMarker } from './ui/map-markers';
   import { setCastDrag, readCastDrag } from './ui/drag';
   import { snapCounters, buildAwayReport, fieldLabel, describeSnap } from './ui/hud';
   import { bar } from './ui/field';
@@ -81,16 +88,21 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   import { FILTER_SLOTS, ruleFor, setRule, describeRule, presetSlots, savePreset, loadPreset, clearPreset } from './sim/filter';
   import { equipFromBag, autoEquip, unequip } from './sim/gear';
   import { SAVE_CFG } from './sim/snapshot';
-  import { describe as describeGoal, lifeSkillMilestones } from './sim/goal';
+  import { lifeSkillMilestones } from './sim/goal';
+  import { nextGoal, resolveGoal, setTrackedGoal, zoneDestination, guidanceNotices, ACTIVITY_GUIDE, type GoalRef, type GoalView, type GuidanceNotice, type ShortageOrigin } from './sim/guidance';
   import { hubIcon, icon, skillIcon } from './icon';
   import { bossMark } from './icon';
+  import chevronDownGlyph from './icon/ui/chevron-down.png';
+  import pauseGlyph from './icon/ui/pause.png';
+  import playGlyph from './icon/ui/play.png';
+  import gridGlyph from './icon/ui/grid.png';
   // The HUD's own marks, read off the same icon shelf the slots draw from by file name — no second asset set,
   // and no import to rewrite when a figure is redrawn, renamed or moved between category folders.
   const sheetMark = icon('knight-helmet');
   const bagMark = icon('adventure-bags');
   const fieldMark = icon('crossed-swords-1');
   const skillMark = icon('spell-book');
-  const treeMark = icon('tree');
+  const treeMark = icon('oak');
   const mapMark = icon('map');
   const stashMark = icon('treasure-chest');
   // Town and service marks use the thing the player visits or works with: a gate, journal, anvil, and press.
@@ -118,8 +130,149 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   import type { SkillConditions } from './sim/skills';
 
   const STATS: StatKey[] = ['str', 'int', 'vit', 'agi', 'dex', 'wis', 'lck'];
+  const MAP_MARKER_LEGEND = [
+    { kind: 'player', glyph: 'compass', label: 'Your position' },
+    { kind: 'mob', glyph: 'claw', label: 'Live group / Unique clue' },
+    { kind: 'boss', glyph: 'skull', label: 'Danger / combat' },
+    { kind: 'event', glyph: 'flag', label: 'Event' },
+    { kind: 'camp', glyph: 'fire', label: 'Camp' },
+    { kind: 'resource', glyph: 'mine', label: 'Resource site' },
+  ] as const;
   const showcaseMode = import.meta.env.DEV && window.location.pathname.replace(/\/+$/, '') === '/__showcase';
   let showcaseSample = $state('delivery');
+  type CombatFxPreview = 'swing' | 'critical' | 'fire' | 'lightning' | 'heal' | 'block' | 'lethal' | 'rapid'
+    | 'aoe' | 'exchange' | 'miss' | 'sizes' | 'boss';
+  type CombatFxBeat = Exclude<CombatFxPreview, 'rapid' | 'sizes' | 'boss'>;
+  let animateCombatFx = $state(false);
+  let combatFxPreview = $state<CombatFxPreview>('fire');
+  const combatFxTimers = new Set<ReturnType<typeof setTimeout>>();
+  const previewFire = sm.byId['attack.fireball'];
+  const previewLightning = sm.of('attack').find((skill: any) => skill.element === 'lightning' && !skill.retired);
+  const previewHeal = sm.of('heal').find((skill: any) => !skill.retired);
+  const previewArea = sm.byId['attack.firestorm'];
+
+  function clearCombatFxTimers() {
+    for (const timer of combatFxTimers) clearTimeout(timer);
+    combatFxTimers.clear();
+  }
+  onDestroy(clearCombatFxTimers);
+  $effect(() => {
+    if (!showcaseMode || showcaseSample !== 'combat-fx' || !animateCombatFx) clearCombatFxTimers();
+  });
+
+  function combatPreviewGroup(sample: GameState, preview: CombatFxPreview): Mob[] {
+    const rng = mulberry32(20261023);
+    if (preview === 'aoe') return ['small', 'medium', 'medium'].map((body) =>
+      spawnMob(rng, sample.zone, 'normal', body, undefined, { allowWildUnique: false }));
+    if (preview === 'sizes') return [
+      spawnMob(rng, sample.zone, 'normal', 'small', undefined, { allowWildUnique: false }),
+      spawnMob(rng, sample.zone, 'elite'),
+      spawnMob(rng, sample.zone, 'boss'),
+    ];
+    return preview === 'boss' ? [spawnMob(rng, sample.zone, 'boss')] : sample.group;
+  }
+
+  function combatPreviewEvents(preview: CombatFxBeat, mobs: Mob[]): Omit<FxEvent, 'id' | 'sec'>[] {
+    const mob = mobs[0];
+    if (!mob) return [];
+    if (preview === 'swing' || preview === 'critical') {
+      const crit = preview === 'critical';
+      return [{ kind: 'hit', side: 'field', mobId: mob.id, via: 'swing', text: crit ? '1,240!' : '248', value: crit ? 1240 : 248, crit, colour: hitColour('physical', crit) }];
+    }
+    if (preview === 'block') return [{ kind: 'block', side: 'self', byId: mob.id, text: 'Block', colour: hitColour(null) }];
+    if (preview === 'exchange') return [
+      { kind: 'hit', side: 'field', mobId: mob.id, via: 'swing', text: '248', value: 248, colour: hitColour('physical') },
+      { kind: 'taken', side: 'self', byId: mob.id, text: '142', value: 142, colour: hitColour(mob.innate[0]) },
+    ];
+    const skill = preview === 'heal' ? previewHeal : preview === 'lightning' ? previewLightning
+      : preview === 'aoe' ? previewArea : previewFire;
+    if (!skill) return [];
+    const colour = hitColour(skill.element || null);
+    const outcome: Omit<FxEvent, 'id' | 'sec'>[] = preview === 'heal'
+      ? [{ kind: 'heal', side: 'self', skillId: skill.id, text: '+86', value: 86, colour }]
+      : preview === 'miss'
+        ? [{ kind: 'block', side: 'field', mobId: mob.id, text: 'Miss', colour: hitColour(null) }]
+        : (preview === 'aoe' ? mobs : [mob]).map((target) => ({
+          kind: 'hit', side: 'field', mobId: target.id, via: 'cast', skillId: skill.id, text: '468', value: 468, colour,
+        }));
+    // Runtime publishes each outcome before its cast marker; plate.castForHit reads that order.
+    return [
+      ...outcome,
+      { kind: 'cast', side: 'self', skillId: skill.id, text: skill.name || skill.id, colour },
+    ];
+  }
+
+  function scheduleCombatFx(action: () => void, delay: number) {
+    const timer = setTimeout(() => { combatFxTimers.delete(timer); action(); }, delay);
+    combatFxTimers.add(timer);
+  }
+
+  function replayCombatFx() {
+    if (!showcaseMode || showcaseSample !== 'combat-fx') return;
+    clearCombatFxTimers();
+    panel = null;
+    travelScene = false;
+    animateCombatFx = true;
+    const preview = combatFxPreview;
+    const sample = showcaseGame('combat-fx');
+    gameState.group = combatPreviewGroup(sample, preview);
+    gameState.mobStatus = {};
+    gameState.fx = [];
+    const emit = (beat: CombatFxBeat) => {
+      const mob = gameState.group[0];
+      for (const event of combatPreviewEvents(beat, gameState.group)) fx(gameState, event);
+      if (mob && beat === 'lethal') {
+        fx(gameState, { kind: 'kill', side: 'field', mobId: mob.id, text: `${fieldLabel(mob)} defeated`, colour: hitColour('fire') });
+        gameState.group = [];
+      }
+    };
+    const strike = (mob: Mob, delay: number) => {
+      const skill = (mob.skillIds || []).map(mobSkillById).find((row) => row?.mode === 'strike');
+      const castMs = Math.max(0, skill?.cast_sec || 0) * 1000;
+      if (skill) scheduleCombatFx(() => {
+        mob.atkTimer = .85;
+        fx(gameState, { kind: 'cast', side: 'field', mobId: mob.id, skillId: skill.id, text: skill.name, colour: hitColour(skill.element) });
+      }, delay);
+      scheduleCombatFx(() => {
+        mob.atkTimer = 0;
+        fx(gameState, { kind: 'taken', side: 'self', byId: mob.id, skillId: skill?.id, text: '142', value: 142, colour: hitColour(skill?.element || mob.innate[0]) });
+      }, delay + castMs);
+      return delay + castMs;
+    };
+    // Give restored bodies one paint before effects capture their anchors, including after a kill.
+    let lastBeat = 60;
+    if (preview === 'boss') {
+      if (gameState.group[0]) lastBeat = strike(gameState.group[0], 60);
+    } else if (preview === 'sizes') {
+      gameState.group.forEach((mob, index) => { lastBeat = Math.max(lastBeat, strike(mob, 60 + index * 650)); });
+    } else {
+      const sequence: CombatFxBeat[] = preview === 'rapid'
+        ? ['swing', 'fire', 'lightning', 'critical', 'heal', 'block'] : [preview];
+      sequence.forEach((beat, index) => {
+        lastBeat = 60 + index * 140;
+        scheduleCombatFx(() => emit(beat), lastBeat);
+      });
+    }
+    scheduleCombatFx(() => { gameState.fx = []; }, lastBeat + 1800);
+  }
+
+  function showCombatFxLabels() {
+    clearCombatFxTimers();
+    panel = null;
+    travelScene = false;
+    animateCombatFx = false;
+    const sample = showcaseGame('combat-fx');
+    const originalTarget = sample.group[0]?.id;
+    const group = combatPreviewGroup(sample, combatFxPreview);
+    gameState.group = group;
+    gameState.mobStatus = group === sample.group ? sample.mobStatus : {};
+    gameState.fx = [];
+    for (const { id, sec, ...event } of [...sample.fx].reverse()) fx(gameState, {
+      ...event,
+      mobId: event.mobId === originalTarget ? gameState.group[0]?.id : event.mobId,
+      byId: event.byId === originalTarget ? gameState.group[0]?.id : event.byId,
+    });
+  }
   let hex3dPrototypeView = $state<any>(null);
   let economyLabView = $state<any>(null);
   $effect(() => {
@@ -251,14 +404,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         const sec = sample.clockSec;
         const events: Omit<FxEvent, 'id' | 'sec'>[] = [
           { kind: 'hit', side: 'field', mobId: mob.id, via: 'swing', text: '248', value: 248, colour: hitColour('physical') },
-          { kind: 'hit', side: 'field', mobId: mob.id, via: 'cast', text: '1,240!', value: 1240, crit: true, colour: hitColour('fire', true) },
+          { kind: 'hit', side: 'field', mobId: mob.id, via: 'cast', skillId: previewFire?.id, text: '1,240!', value: 1240, crit: true, colour: hitColour(previewFire?.element, true) },
           { kind: 'hit', side: 'field', mobId: mob.id, via: 'dot', text: '36', value: 36, colour: hitColour('fire') },
           { kind: 'block', side: 'field', mobId: mob.id, text: 'Dodge', colour: hitColour(null) },
           { kind: 'kill', side: 'field', mobId: mob.id, text: `${fieldLabel(mob)} defeated`, colour: hitColour(null) },
           { kind: 'drop', side: 'field', text: 'Fine gear', colour: hitColour(null) },
-          { kind: 'cast', side: 'self', text: 'Fireball', colour: hitColour('fire') },
-          { kind: 'buff', side: 'self', text: buff?.name || 'Battle Focus', colour: hitColour('lightning') },
-          { kind: 'heal', side: 'self', text: '+86', colour: E.elements.colour.poison },
+          { kind: 'cast', side: 'self', skillId: previewFire?.id, text: previewFire?.name || '', colour: hitColour(previewFire?.element) },
+          { kind: 'buff', side: 'self', skillId: buff?.id, text: buff?.name || 'Battle Focus', colour: hitColour(buff?.element) },
+          { kind: 'heal', side: 'self', skillId: previewHeal?.id, text: '+86', colour: hitColour(previewHeal?.element) },
           { kind: 'taken', side: 'self', byId: mob.id, text: '142', value: 142, colour: hitColour('chaos') },
           { kind: 'block', side: 'self', byId: mob.id, text: 'Block', colour: hitColour(null) },
           { kind: 'proc', side: 'self', text: 'Poison', colour: hitColour('poison') },
@@ -347,8 +500,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
    * The play screen is the field itself, laid out the way a phone game laid out on a monitor does: the
    * fight fills the frame and every read sits in a corner, so nothing the player has to watch can be
    * scrolled off. The map is the ground the field stands on, so it is worked where it is seen: the MAP
-   * tab brings the backdrop into focus — sharp, full colour, its views and its key floating below the
-   * menu rail — and a cell is picked, plotted and walked from there. Nothing about travelling a place ever
+   * tab brings the backdrop into focus; Journey presents the selected hex, travel tools and map controls,
+   * and a cell is picked, plotted and walked from there. Nothing about travelling a place ever
    * needed a modal. The desk is the one screen a settlement owns: the stall, the board, the counter and
    * the two tables, opened from the rail or from a place's card.
    */
@@ -378,21 +531,28 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   };
   // `gameState`, not `state`: a top-level `state` binding makes svelte2tsx read `$state` as a store
   // subscription and type the whole panel `any` (sveltejs/svelte#13715).
-  let gameState = $state<GameState>(showcaseMode ? showcaseGame() : newGame());
+  let gameState = $state<GameState>(showcaseMode ? showcaseGame() : newGame(undefined, crypto.getRandomValues(new Uint32Array(1))[0]));
   let running = $state(!showcaseMode);
   /** Held while a load or a snapshot rewind swaps the character: a live tick landing on the new state
    *  mid-catch-up would sim the away window twice. The interval drains its accumulator and stands down. */
   let paused = $state(false);
   let cooldownStepMs = $state(0);
   let speed = $state(1);
-  /** Smooth displayed vital changes over one fixed second; reduced-motion users get an instant update. */
-  const vitalTweenOptions = {
-    get duration() { return prefersReducedMotion.current ? 0 : 1000; },
-    easing: linear,
-  };
-  const hpVisual = Tween.of(() => gameState.player.hp, vitalTweenOptions);
-  const esVisual = Tween.of(() => gameState.player.es, vitalTweenOptions);
-  const manaVisual = Tween.of(() => gameState.player.mana, vitalTweenOptions);
+  /** A vital climbs over one smooth second, but a fall lands in one step so the drop reads on its tick
+   *  instead of draining. Reduced-motion users get an instant update either way. */
+  function vitalVisual(source: () => number) {
+    const tween = new Tween(source(), { easing: linear });
+    $effect(() => {
+      const next = source();
+      const from = untrack(() => tween.current);
+      if (next === from) return;
+      tween.set(next, { duration: prefersReducedMotion.current || next < from ? 0 : 1000 });
+    });
+    return tween;
+  }
+  const hpVisual = vitalVisual(() => gameState.player.hp);
+  const esVisual = vitalVisual(() => gameState.player.es);
+  const manaVisual = vitalVisual(() => gameState.player.mana);
   const shownHp = $derived(hpVisual.current);
   const shownEs = $derived(esVisual.current);
   const shownMana = $derived(manaVisual.current);
@@ -401,7 +561,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   let panel = $state<PanelId | null>(showcaseMode ? null : 'map');
   let travelScene = $state(false);
   let more = $state(false);
-  let locationExpanded = $state(true);
+  let journeyExpanded = $state(false);
+  let journeyBodyEl = $state<HTMLDivElement | null>(null);
+  let mapControlsOpen = $state(false);
+  $effect(() => {
+    journeyExpanded = panel === 'map';
+    if (panel !== 'map') mapControlsOpen = false;
+  });
   let controlsExpanded = $state(true);
   let menuExpanded = $state(true);
   $effect(() => { if (!menuExpanded) more = false; });
@@ -459,13 +625,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
           ? 'This browser cannot coordinate account saves. Saving is disabled to protect progress.'
           : 'Checking account save access…');
   function requireAccountWriter(action: string): boolean {
-    if (showcaseMode || canWriteAccount) return true;
+    if (transactionWriter) return true;
     saveNote = `${accountWriterMessage} Open Save and take over before ${action}.`;
     return false;
   }
 
   let settings = $state<ClientSettings>({ ...DEFAULT_SETTINGS });
   function setSetting<K extends keyof ClientSettings>(k: K, v: ClientSettings[K]) {
+    if (['autoSkills', 'autoEquip', 'equipMargin'].includes(k) && !requireAccountWriter('changing gameplay automation')) return;
     settings[k] = v;
     if (!showcaseMode) void writeSettings(settings).catch((error) => {
       persistenceError = `Settings were not saved: ${error instanceof Error ? error.message : 'browser storage failed'}`;
@@ -494,6 +661,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       if (document.querySelector('[role="dialog"]')) return;
       sheetOpen = false;
       more = false;
+      if (panel === 'map' && pickedCell) { clearMapSelection(); return; }
       if (panel === 'map') { panel = null; return; }
       picked = null;
       pickedCell = null;
@@ -567,6 +735,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       case 'map.zoom.in': mapZoomBy(1.25); break;
       case 'map.zoom.out': mapZoomBy(1 / 1.25); break;
       case 'map.zoom.reset': mapReset(); break;
+      case 'map.rotate.left': mapRotateBy(-15); break;
+      case 'map.rotate.right': mapRotateBy(15); break;
       case 'map.centre': mapCentre(); break;
       case 'map.view.next': view = VIEW_ORDER[(VIEW_ORDER.indexOf(view) + 1) % VIEW_ORDER.length]; break;
       case 'map.walk': showWalk = !showWalk; break;
@@ -626,7 +796,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   // the character's own answers live on its own corner now (taken blows pop like damage, block
   // words and status procs beside them), so the shared column keeps only what names no body — and a
   // walk floats nothing, so the word on the field is the whole of its read
-  const selfFx = $derived(ring.filter((e) => e.side === 'self' && e.kind !== 'travel' && e.kind !== 'level' && e.kind !== 'block' && e.kind !== 'proc' && e.kind !== 'taken').slice(0, 5));
+  const selfFx = $derived(ring.filter((e) => e.side === 'self' && e.kind !== 'travel' && e.kind !== 'level' && e.kind !== 'block' && e.kind !== 'proc' && e.kind !== 'taken' && e.kind !== 'cast' && e.kind !== 'buff').slice(0, 5));
   const latestTaken = $derived(ring.find((e) => e.side === 'self' && e.kind === 'taken') || null);
   const latestOrbHeal = $derived(ring.find((e) => e.side === 'self' && e.kind === 'heal') || null);
   const plates = $derived([...gameState.group]);
@@ -650,8 +820,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   /** which channel of the chronicle is showing: one stream, read one way at a time, the way a chat box
       splits what a kill said from what the world said */
   let chatTab = $state<ChatTab>('all');
-  const chatShown = $derived((chatTab === 'all' ? feed : feed.filter((l) => l.chan === chatTab)).slice(-8));
-  const objectivesRead = $derived({ goal: describeGoal() });
+  const chatShown = $derived(chatTab === 'all' ? feed : feed.filter((l) => l.chan === chatTab));
   $effect(() => {
     const fresh = ring.filter((e) =>
       (e.kind === 'kill' || e.kind === 'level' || e.kind === 'travel' || e.kind === 'buff' || e.kind === 'drop') && e.text);
@@ -707,6 +876,15 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     .filter((contract) => contract && contract.status === 'open'));
   const deliveryPause = $derived(deliveryPauseReason(gameState));
   const settlementName = (id: string) => TOWN.settlements.find((town) => town.id === id)?.name || id;
+  /** One next step, read from the character's pin or the fixed suggestion order in `sim/guidance.ts`. */
+  const journeyGoal = $derived.by(() => {
+    const next = nextGoal(gameState);
+    if (!next) return null;
+    if (next.source === 'recommended' && settings.autoGoal === false) return null;
+    return next;
+  });
+  let forgeFocus = $state<{ patternKind: ForgeKind; pattern: string; material: string; nonce: number } | null>(null);
+  let forgeFocusNonce = 0;
   const deliveryClock = (seconds: number) => `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
 
   // The bag the slot grid draws, in the shape the player chose. Order and mode are theirs; every value
@@ -789,27 +967,31 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     else saveNote = result.why || 'Cannot allocate Core points';
   }
   function doSpendTree(nodeId: string) {
+    if (!requireAccountWriter('spending Tree Points')) return { ok: false, why: 'This tab is read-only.' };
     const r = spendTreePoint(gameState, nodeId);
     if (r.ok) gameState = { ...gameState };
     return r;
   }
   function doAllocateTreePath(nodeId: string) {
+    if (!requireAccountWriter('allocating a tree path')) return { ok: false, why: 'This tab is read-only.' };
     const r = allocateTreePath(gameState, nodeId);
     if (r.ok) { gameState = { ...gameState }; saveNote = ''; }
     else saveNote = `Cannot buy that path: ${r.why}`;
     return r;
   }
   function doRespecTree() {
+    if (!requireAccountWriter('resetting the passive tree')) return;
     if (!viewHere) return;
     if (respecTree(gameState).ok) gameState = { ...gameState };
   }
   function respec() {
+    if (!requireAccountWriter('resetting Core points')) return;
     if (!viewHere) return;
     if (respecStats(gameState).ok) gameState = { ...gameState };
   }
 
   function step() {
-    if (!showcaseMode && !canWriteAccount) return;
+    if (!transactionWriter) return;
     // `tick` mutates the state in place. `gameState` is a deep `$state` proxy, so its fine-grained
     // signals fire on their own — no need to clone the whole root and reassign, which used to
     // invalidate every `$derived` (bag sorts, character rebuild) once a second on an idle tick.
@@ -939,6 +1121,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   });
 
   function equip(index: number) {
+    if (!requireAccountWriter('equipping gear')) return;
     // the rule lives in `sim/gear.ts`, where the tests can reach it too; this copy only makes the
     // panel re-read the gameState the verb mutated in place
     const r = equipFromBag(gameState, index);
@@ -947,6 +1130,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function doSalvage(index: number) {
+    if (!requireAccountWriter('salvaging gear')) return;
     const r = salvageBag(gameState, index);
     equipNote = r.ok ? 'That piece dissolved — Iron Ore and Scrap entered the resources' : `Cannot salvage: ${r.why}`;
     gameState = { ...gameState };
@@ -954,6 +1138,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   /** The one bulk press for the carried pieces: the same verdict a fresh drop gets, run over the bag. */
   function doRunFilter() {
+    if (!requireAccountWriter('running the bag filter')) return;
     const r = runFilterNow(gameState);
     equipNote = r.why ? `Filter run stopped: ${r.why}` : r.dissolved
       ? `Filter melted ${r.dissolved} piece${r.dissolved === 1 ? '' : 's'}${r.spared ? ` · ${r.spared} left alone` : ''}`
@@ -962,23 +1147,27 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function doSaveFilterPreset(i: number) {
+    if (!requireAccountWriter('saving a filter preset')) return;
     if (!savePreset(gameState, i)) { equipNote = `Preset ${i + 1} is not the character's to use — Collector sets pay the extra slots`; return; }
     equipNote = `Saved the bag filter to preset ${i + 1}`;
     gameState = { ...gameState };
   }
 
   function doLoadFilterPreset(i: number) {
+    if (!requireAccountWriter('loading a filter preset')) return;
     if (!loadPreset(gameState, i)) return;
     equipNote = `Loaded preset ${i + 1} — every slot's rule is the preset's now`;
     gameState = { ...gameState };
   }
 
   function doClearFilterPreset(i: number) {
+    if (!requireAccountWriter('clearing a filter preset')) return;
     clearPreset(gameState, i);
     gameState = { ...gameState };
   }
 
   function doUnequip(cell: number) {
+    if (!requireAccountWriter('taking gear off')) return;
     const r = unequip(gameState, cell);
     equipNote = r.ok ? 'That piece came off into the bag' : `Cannot take it off: ${r.why}`;
     gameState = { ...gameState };
@@ -1024,6 +1213,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
    * what came of it, in the numbers the player acts on.
    */
   function doBestEquip() {
+    if (!requireAccountWriter('equipping carried upgrades')) return;
     const r = autoEquip(gameState, settings.equipMargin || 0);
     gameState = { ...gameState };
     // the press just moved pieces out of the bag, so the bag is what the player needs to see now
@@ -1046,9 +1236,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function toggleAutoEquip() {
+    if (!requireAccountWriter(settings.autoEquip === false ? 'enabling Auto Equip' : 'disabling Auto Equip')) return;
     const enabled = settings.autoEquip === false;
     setSetting('autoEquip', enabled);
-    if (enabled) doBestEquip();
   }
 
   function goToZone(id: number) {
@@ -1109,12 +1299,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function doStartFieldAction(kind: 'mine' | 'grove' | 'fish') {
+    if (!requireAccountWriter('starting gathering')) return;
     const r = startFieldAction(gameState, kind);
     saveNote = r.ok ? (kind === 'mine' ? 'Mining started' : kind === 'grove' ? 'Woodcutting started' : 'Fishing started') : `Cannot gather: ${r.why}`;
     gameState = { ...gameState };
   }
 
   function doStopFieldAction() {
+    if (!requireAccountWriter('stopping gathering')) return;
     stopFieldAction(gameState);
     saveNote = 'Gathering stopped';
     gameState = { ...gameState };
@@ -1138,6 +1330,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function doCookMeal(id: string, count = 1) {
+    if (!requireAccountWriter('cooking')) return;
     const recipe = fieldwork.recipeById[id];
     const r = cookMeal(gameState, id, count);
     const made = r.made ?? (r.ok ? 1 : 0);
@@ -1152,6 +1345,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function doEatMeal(id: string) {
+    if (!requireAccountWriter('eating provisions')) return;
     const food = fieldwork.foodById[id];
     const recipe = fieldwork.recipeById[id];
     const r = eatMeal(gameState, id);
@@ -1163,7 +1357,38 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function updateAutoEat(patch: Partial<typeof gameState.fieldwork.autoEat>) {
+    if (!requireAccountWriter('changing Auto Eat')) return;
     gameState.fieldwork.autoEat = { ...gameState.fieldwork.autoEat, ...patch };
+    gameState = { ...gameState };
+  }
+
+  function setAutoPotion(pool: 'hp' | 'mana', enabled: boolean) {
+    if (!requireAccountWriter('changing potion auto-use')) return;
+    gameState.farm.autoUse[pool] = enabled;
+    gameState = { ...gameState };
+  }
+
+  function setPotionThreshold(pool: 'hp' | 'mana', value: number) {
+    if (!requireAccountWriter('changing potion thresholds') || !Number.isFinite(value)) return;
+    gameState.farm.threshold[pool] = Math.min(99, Math.max(1, value));
+    gameState = { ...gameState };
+  }
+
+  function setFarmAutomation(kind: 'plant' | 'harvest' | 'brew', enabled: boolean) {
+    if (!requireAccountWriter('changing Farm automation')) return;
+    gameState.farm.autoFarm[kind] = enabled;
+    gameState = { ...gameState };
+  }
+
+  function cycleQuickSlot(slot: number) {
+    if (!requireAccountWriter('changing a potion shortcut')) return;
+    cycleQuickbar(gameState, slot);
+    gameState = { ...gameState };
+  }
+
+  function assignQuickSlot(slot: number, name: string | null) {
+    if (!requireAccountWriter('assigning a potion shortcut')) return;
+    gameState.quickbar[slot] = name;
     gameState = { ...gameState };
   }
 
@@ -1171,6 +1396,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
    *  never silently autosaves over an existing file. */
   const saveSession = new CharacterSaveSession();
   let persistenceError = $state<string | null>(null);
+  /** One ordered list for Journey: save/writer first, then blockers, decisions and tracked work. */
+  const journeyNotices = $derived(guidanceNotices(gameState, {
+    storageError: !!persistenceError,
+    writerState: accountWriterState === 'unsupported' ? 'unavailable' : accountWriterState,
+  }));
   let loadController = $state.raw<AbortController | null>(null);
   let offlineProgress = $state<{ done: number; total: number } | null>(null);
   function cancelOfflineLoad() {
@@ -1234,8 +1464,21 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
 
   function editRule(slot: string, patch: Record<string, unknown>) {
+    if (!requireAccountWriter('changing the bag filter')) return;
     setRule(gameState.filter, slot, patch as any);
     gameState = { ...gameState };
+  }
+  function setAutoDissolve(value: number) {
+    if (!requireAccountWriter('changing auto-dissolve')) return;
+    gameState.autoDissolveLevel = Math.max(0, Number(value) || 0);
+    gameState = { ...gameState };
+  }
+  function openGearCare() {
+    panel = 'bag';
+    invTab = 'inv';
+    const gear = document.querySelector<HTMLDetailsElement>('.gear-care');
+    if (gear) gear.open = true;
+    requestAnimationFrame(() => gear?.scrollIntoView({ block: 'start' }));
   }
 
   async function doLoad(slot: SlotName) {
@@ -1360,7 +1603,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     saveSession.detach();
     offlineProgress = null;
     paused = false;
-    gameState = newGame();
+    gameState = newGame(undefined, crypto.getRandomValues(new Uint32Array(1))[0]);
     awayReport = null;
     saveNote = 'New character is not saved yet. Choose a save slot; existing slots were kept.';
   }
@@ -1373,6 +1616,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   let pickedCell = $state<Picked | null>(null);
   let deskTab = $state<'services' | 'stall' | 'guild' | 'hunt' | 'walk'>('services');
   let view = $state<'terrain' | 'band' | 'gate'>('terrain');
+  const cleanMap = $derived(settings.cleanMap === true);
   let gateLevel = $state(1);
   let showWalk = $state(false);
   let showIds = $state(false);
@@ -1389,7 +1633,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     showMapNames = show;
     try { localStorage.setItem(MAP_NAMES_KEY, show ? 'shown' : 'hidden'); } catch { /* UI preference can stay in memory. */ }
   }
-  let mapHelpOpen = $state(false);
+  let journeyToolsOpen = $state(false);
   let lastAutoOpenedCampEvent = '';
   $effect(() => {
     const event = gameState.fieldwork.campEncounters.active;
@@ -1398,11 +1642,19 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     if (key === lastAutoOpenedCampEvent) return;
     lastAutoOpenedCampEvent = key;
     panel = 'map';
-    mapHelpOpen = true;
+    journeyToolsOpen = true;
+    journeyExpanded = true;
+    journeyBodyEl?.scrollTo({ top: 0 });
   });
   /** the one copy of the generated sheet: the ground the field is drawn on, and the surface a place is
       pointed at. Map focus sharpens it; nothing else paints a second map */
   let sheet = $state<HTMLElement | null>(null);
+  const journeyCell = $derived.by(() => {
+    if (pickedCell) return pickedCell;
+    const feet = currentCell(gameState);
+    const cell = sheet?.querySelector(`polygon.cell[data-ax="${feet.q},${feet.r}"]`);
+    return cell ? cellLabel(cell) : null;
+  });
   const fieldCellKey = (cell: Cell | null) => {
     if (!cell) return 'field';
     const key = sheet?.querySelector(`polygon.cell[data-ax="${cell.q},${cell.r}"]`)?.getAttribute('data-cell');
@@ -1433,18 +1685,19 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   } as const;
   let zoom = $state(MAP_OPEN_ZOOM);
   let panX = $state(0);
-  let panY = $state(0);
   let dragging = $state(false);
+  let rotating = $state(false);
+  let mapBearing = $state(0);
+  let mapCameraTurning = $state(false);
+  const mapBearingReadout = $derived(mapBearingDegrees(mapBearing));
   // The map overlay with the travel pin toggled by id: the pin sits on the settlement you stand in,
   // the destination is marked while a walk runs, and the mark you have clicked is ringed. No
   // coordinate is read here — only settlement ids and cell keys the client already holds (X33 · M7).
   const mapMarkup = mapOverlayRaw.replace(/^<\?xml[^>]*\?>\s*/, '');
   const rampCss = $derived(E.mob.zones.map((_: any, i: number) => ramp(i)).join(','));
   /**
-   * The sheet is repainted after every `{@html}` rebuild — the fills, the walk graph, the cell ids, the
-   * plotted route and the character's own hex. The paint itself lives in `ui/map.ts` (the map cluster's
-   * reader); this effect only holds the reactive reads and hands them over, so a `gameState` change and a
-   * markup rebuild both drive one repaint.
+   * The painter owns the SVG diff and skips work when map-relevant state is unchanged. This effect
+   * keeps its reactive inputs connected to the sheet while the static SVG remains mounted.
    */
   $effect(() => {
     void mapMarkup;
@@ -1453,10 +1706,17 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     paintSheet(root, { view, gateLevel, showIds, showWalk, pickedCell, gameState, townId });
   });
   $effect(() => {
-    const root = sheet, show = showMapNames, hovered = hoveredMapCell, selected = pickedCell?.key || null;
-    void zoom; void panX; void panY; void mapNameMeasure; void travelFeet;
-    if (!root) return;
-    const frame = requestAnimationFrame(() => paintMapNames(root, { show, hovered, picked: selected }));
+    const root = sheet, show = showMapNames && !cleanMap, hovered = panel === 'map' ? hoveredMapCell : null, selected = pickedCell?.key || null;
+    const camera = { bearing: mapBearing }, measure = mapNameMeasure, turning = rotating;
+    void zoom; void panX; void travelFeet;
+    void gameState.mapJournal?.visited.length; void gameState.mapJournal?.scouted.length; void gameState.mapJournal?.claimedSites.length; void gameState.mapJournal?.trail?.sites.map(site => site.id).join(',');
+    if (!root) { mapCameraTurning = false; return; }
+    const frame = requestAnimationFrame(() => {
+      paintMapScene(root, camera);
+      paintMapHover(root, hovered);
+      paintMapNames(root, { show, hovered, picked: selected, measure });
+      mapCameraTurning = turning;
+    });
     return () => cancelAnimationFrame(frame);
   });
   /**
@@ -1483,13 +1743,19 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
   function pickMapCell(cell: Element) {
     const next = cellLabel(cell);
-    mapHelpOpen = false;
+    journeyExpanded = true;
+    journeyToolsOpen = false;
+    mapControlsOpen = false;
+    journeyBodyEl?.scrollTo({ top: 0 });
     saveNote = '';
     pickedCell = next;
     picked = next.kind === 'bare' ? null : cell.getAttribute('data-node') || null;
   }
   function select(id: string) {
-    mapHelpOpen = false;
+    journeyExpanded = true;
+    journeyToolsOpen = false;
+    mapControlsOpen = false;
+    journeyBodyEl?.scrollTo({ top: 0 });
     const cell = settlementCell(id);
     if (picked === id && pickedCell?.kind === 'town') { picked = null; pickedCell = null; return; }
     picked = id;
@@ -1523,7 +1789,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
   /** Enter invokes the same primary action displayed on the selected destination card. */
   function onMapKey(ev: KeyboardEvent) {
-    if (ev.altKey || ev.ctrlKey || ev.metaKey) return;
+    if (panel !== 'map' || ev.altKey || ev.ctrlKey || ev.metaKey) return;
+    const action = actionFor(binds, tokenOf(ev));
+    if (action === 'map.rotate.left' || action === 'map.rotate.right') {
+      ev.preventDefault(); ev.stopPropagation(); runAction(action); return;
+    }
     if (ev.key === 'Escape' && pickedCell) {
       ev.preventDefault(); ev.stopPropagation(); clearMapSelection(); return;
     }
@@ -1536,10 +1806,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       if (target) pickMapCell(target);
       return;
     }
-    if (ev.key === 'Enter' && pickedCell) {
+    if (ev.key === 'Enter' && journeyCell) {
       ev.preventDefault();
       ev.stopPropagation();
-      if (!ev.repeat) activatePickedDestination();
+      if (!ev.repeat) activateJourneyDestination();
     }
   }
   function mapOrigin() {
@@ -1553,40 +1823,51 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
    * rectangle, read off the element rather than typed here, so the ground can grow in the generator
    * and the limit grows with it. The frame itself never moves.
    */
+  function mapPlaneMatrix(bearing = mapBearing) {
+    const viewport = sheet?.querySelector('svg')?.getCTM();
+    if (!viewport || Math.abs(viewport.a * viewport.d - viewport.b * viewport.c) < 1e-12) return null;
+    return composeMapMatrix(viewport, { ...createMapProjection(bearing), e: 0, f: 0 });
+  }
   function mapClampPan(z: number) {
     const r = sheet?.getBoundingClientRect();
     const svg = sheet?.querySelector('svg') as SVGSVGElement | null;
     const paper = svg?.querySelector('rect.paper') as SVGRectElement | null;
     if (!r || !svg || !paper) return;
-    const bounds = paper.getBBox(), matrix = paper.getCTM();
-    if (!matrix) return;
-    const corners = [[bounds.x, bounds.y], [bounds.x + bounds.width, bounds.y],
-      [bounds.x, bounds.y + bounds.height], [bounds.x + bounds.width, bounds.y + bounds.height]]
-      .map(([x, y]) => new DOMPoint(x, y).matrixTransform(matrix));
-    const left = Math.min(...corners.map(p => p.x)), right = Math.max(...corners.map(p => p.x));
-    const top = Math.min(...corners.map(p => p.y)), bottom = Math.max(...corners.map(p => p.y));
-    const ox = r.width / 2, oy = r.height * .46;
-    // the stop is kept half a frame further out than the edge itself, so the edge is never on screen
-    const mx = r.width / 2, my = r.height / 2;
-    panX = Math.min(z * (ox - left) - ox - mx, Math.max(r.width + mx - ox - z * (right - ox), panX));
-    panY = Math.min(z * (oy - top) - oy - my, Math.max(r.height + my - oy - z * (bottom - oy), panY));
+    const bounds = paper.getBBox(), matrix = mapPlaneMatrix();
+    if (!matrix || !r.width || !r.height || Math.abs(matrix.a * matrix.d - matrix.b * matrix.c) < 1e-12) return;
+    const pan = clampMapPan({ x: panX, y: 0 }, r, bounds, matrix, z);
+    panX = pan.x;
   }
-  function mapZoomAt(cx: number, cy: number, k: number) {
+  function mapZoomAt(cx: number, k: number) {
     const o = mapOrigin();
     if (!o) return;
     const z = Math.min(MAP_MAX_ZOOM, Math.max(MAP_MIN_ZOOM, zoom * k));
     const f = z / zoom;
     panX = (cx - o.x) * (1 - f) + panX * f;
-    panY = (cy - o.y) * (1 - f) + panY * f;
     zoom = z;
     mapClampPan(z);
   }
   function mapZoomBy(k: number) {
     const o = mapOrigin();
-    if (o) mapZoomAt(o.x, o.y, k);
+    if (o) mapZoomAt(o.x, k);
+  }
+  function mapSetBearing(bearing: number) {
+    if (bearing === mapBearing) return;
+    const frame = sheet?.getBoundingClientRect(), previous = mapPlaneMatrix(), next = mapPlaneMatrix(bearing);
+    const panXNext = frame && previous && next
+      ? orbitMapPan({ x: panX, y: 0 }, { x: frame.width / 2, y: frame.height * .46 }, zoom, previous, next).x
+      : panX;
+    mapCameraTurning = true;
+    panX = panXNext;
+    mapBearing = bearing;
+    mapClampPan(zoom);
+  }
+  function mapRotateBy(degrees: number) {
+    mapSetBearing(mapBearing + degrees);
   }
   function mapReset() {
-    zoom = MAP_OPEN_ZOOM; panX = 0; panY = 0;
+    mapSetBearing(mapBearing + mapTurnTo(mapBearing, 0));
+    zoom = MAP_OPEN_ZOOM; panX = 0;
     requestAnimationFrame(mapCentre);
   }
   /**
@@ -1600,13 +1881,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     const feet = currentCell(gameState);
     const cell = sheet?.querySelector(`polygon.cell[data-ax="${feet.q},${feet.r}"]`) as SVGGraphicsElement | null;
     if (!r || !svg || !cell) return;
-    const b = cell.getBBox(), matrix = cell.getCTM();
+    const b = cell.getBBox(), matrix = mapPlaneMatrix();
     if (!matrix) return;
-    const point = new DOMPoint(b.x + b.width / 2, b.y + b.height / 2).matrixTransform(matrix);
+    const point = transformMapPoint(matrix, { x: b.x + b.width / 2, y: b.y + b.height / 2 });
     const cx = point.x - r.width / 2;
-    const cy = point.y - r.height * .46;
     panX = -zoom * cx;
-    panY = -zoom * cy;
     mapClampPan(zoom);
   }
   $effect(() => {
@@ -1641,26 +1920,32 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   /**
    * The handlers and the sheet reference are bound by an action rather than a directive: the field
    * arrives as inlined `{@html}` the compiler never sees, so there is no element for a binding to sit on.
-   * A drag pans the sheet and a wheel zooms it under the pointer, both only in map focus; a drag that
-   * passed the threshold is swallowed so it never lands as a cell pick.
+   * Horizontal drag pans; Ctrl + horizontal drag orbits the fixed-elevation camera.
+   * A completed gesture is swallowed so it never lands as a cell pick.
    */
   function mapField(node: HTMLElement) {
     sheet = node;
-    let down: { x: number; y: number; px: number; py: number } | null = null;
+    let down: { pointerId: number; x: number; y: number; px: number; bearing: number; turn: boolean } | null = null;
     let moved = false;
     const click = (ev: Event) => { if (moved) { moved = false; return; } onMapClick(ev as MouseEvent); };
     const key = (ev: Event) => onMapKey(ev as KeyboardEvent);
     const focus = () => panel === 'map';
     const onDown = (ev: PointerEvent) => {
-      if (!focus() || ev.button !== 0) return;
-      down = { x: ev.clientX, y: ev.clientY, px: panX, py: panY };
+      if (!focus() || ev.button !== 0 || !ev.isPrimary) return;
+      down = { pointerId: ev.pointerId, x: ev.clientX, y: ev.clientY, px: panX, bearing: mapBearing, turn: ev.ctrlKey };
       moved = false;
     };
     const onMove = (ev: PointerEvent) => {
       if (!down) {
-        if (ev.pointerType !== 'touch') hoveredMapCell = (ev.target as Element)?.closest('polygon.cell')?.getAttribute('data-cell') || null;
+        if (focus() && ev.pointerType !== 'touch') {
+          const hit = ev.target as Element, town = hit.closest('g[data-node]')?.getAttribute('data-node');
+          const cell = hit.closest('polygon.cell') || (town ? node.querySelector('polygon.cell.town[data-node="' + town + '"]') : null);
+          hoveredMapCell = cell?.getAttribute('data-cell') || null;
+        } else hoveredMapCell = null;
         return;
       }
+      if (ev.pointerId !== down.pointerId) return;
+      if (!focus()) { onUp(ev); return; }
       hoveredMapCell = null;
       const dx = ev.clientX - down.x, dy = ev.clientY - down.y;
       if (!moved && Math.hypot(dx, dy) < 4) return;
@@ -1668,18 +1953,25 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       // click to the sheet itself, and then no cell under the pointer is ever picked
       if (!moved) node.setPointerCapture(ev.pointerId);
       moved = true; dragging = true;
-      panX = down.px + dx; panY = down.py + dy;
-      mapClampPan(zoom);
+      if (down.turn) {
+        rotating = true;
+        mapSetBearing(down.bearing + dx * .4);
+      } else {
+        panX = down.px + dx;
+        mapClampPan(zoom);
+      }
     };
     const onUp = (ev: PointerEvent) => {
-      if (!down) return;
-      down = null; dragging = false;
+      if (!down || ev.pointerId !== down.pointerId) return;
+      if (down.turn) moved = true;
+      down = null; dragging = false; rotating = false;
+      if (moved) mapNameMeasure++;
       if (node.hasPointerCapture(ev.pointerId)) node.releasePointerCapture(ev.pointerId);
     };
     const onWheel = (ev: WheelEvent) => {
       if (!focus()) return;
       ev.preventDefault();
-      mapZoomAt(ev.clientX, ev.clientY, ev.deltaY < 0 ? 1.12 : 1 / 1.12);
+      mapZoomAt(ev.clientX, ev.deltaY < 0 ? 1.12 : 1 / 1.12);
     };
     const onLeave = () => { hoveredMapCell = null; };
     const onTransform = (ev: Event) => { if ((ev.target as Element).classList.contains('map-sheet')) mapNameMeasure++; };
@@ -1691,6 +1983,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     node.addEventListener('pointermove', onMove);
     node.addEventListener('pointerup', onUp);
     node.addEventListener('pointercancel', onUp);
+    node.addEventListener('lostpointercapture', onUp);
     node.addEventListener('wheel', onWheel, { passive: false });
     node.addEventListener('pointerleave', onLeave);
     node.addEventListener('transitionend', onTransform);
@@ -1699,24 +1992,18 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       node.removeEventListener('pointerleave', onLeave);
       node.removeEventListener('transitionend', onTransform);
       if (sheet === node) sheet = null;
+      dragging = false; rotating = false;
       node.removeEventListener('click', click);
       node.removeEventListener('keydown', key);
       node.removeEventListener('pointerdown', onDown);
       node.removeEventListener('pointermove', onMove);
       node.removeEventListener('pointerup', onUp);
       node.removeEventListener('pointercancel', onUp);
+      node.removeEventListener('lostpointercapture', onUp);
       node.removeEventListener('wheel', onWheel);
     } };
   }
-  const pickedSettlement = $derived(pickedCell ? settlementById(ownerOf({ q: pickedCell.q, r: pickedCell.r }).id) : null);
-  // The tools and destination share the left HUD space; selecting a destination folds the tools,
-  // and reopening the tools releases the selection rather than covering either set of controls.
-  $effect(() => {
-    if (panel === 'map' && mapHelpOpen && pickedCell) {
-      pickedCell = null;
-      picked = null;
-    }
-  });
+  const journeySettlement = $derived(journeyCell ? settlementById(ownerOf(journeyCell).id) : null);
   let automaticWalkKey = $state('');
   $effect(() => {
     const walk = gameState.walk;
@@ -1732,35 +2019,51 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
    * The card's whole subject: the picked cell, what stands on it, what it costs to reach from where the
    * feet are, and whether the feet are already there.
    */
-  const pickedDest = $derived.by(() => {
-    if (!pickedCell) return null;
-    const node = ownerOf({ q: pickedCell.q, r: pickedCell.r });
-    const self = pickedCell.q === currentCell(gameState).q && pickedCell.r === currentCell(gameState).r && !gameState.walk;
+  const journeyDest = $derived.by(() => {
+    if (!journeyCell) return null;
+    const node = ownerOf({ q: journeyCell.q, r: journeyCell.r });
+    const self = journeyCell.q === currentCell(gameState).q && journeyCell.r === currentCell(gameState).r && !gameState.walk;
     return {
-      key: pickedCell.key,
-      kind: pickedCell.kind,
-      label: pickedCell.label,
+      key: journeyCell.key,
+      q: journeyCell.q,
+      r: journeyCell.r,
+      kind: journeyCell.kind,
+      label: journeyCell.label,
       node: node.id,
-      sub: pickedCell.sub,
-      wild: pickedCell.wild,
+      sub: journeyCell.sub,
+      wild: journeyCell.wild,
       self,
-      walking: !!gameState.walk && gameState.walk.to.q === pickedCell.q && gameState.walk.to.r === pickedCell.r,
+      walking: !!gameState.walk && gameState.walk.to.q === journeyCell.q && gameState.walk.to.r === journeyCell.r,
       here: gameState.town.visited.includes(node.id),
-      blocks: self ? 0 : cellBlocks(gameState, { q: pickedCell.q, r: pickedCell.r }),
-      sec: self ? 0 : cellSec(gameState, { q: pickedCell.q, r: pickedCell.r }),
+      blocks: self ? 0 : cellBlocks(gameState, { q: journeyCell.q, r: journeyCell.r }),
+      sec: self ? 0 : cellSec(gameState, { q: journeyCell.q, r: journeyCell.r }),
     };
   });
-  const pickedPrimary = $derived(pickedDest ? destinationPrimary(gameState, pickedDest, transactionWriter) : null);
-  const pickedIntel = $derived(pickedCell && pickedDest?.node ? destinationIntel(gameState, pickedCell, pickedDest.node, pickedDest.blocks) : null);
+  const journeyPrimary = $derived(journeyDest ? destinationPrimary(gameState, journeyDest, transactionWriter) : null);
+  const journeyIntel = $derived(journeyCell && journeyDest?.node ? destinationIntel(gameState, journeyCell, journeyDest.node, journeyDest.blocks) : null);
+  const journeySignals = $derived.by(() => {
+    if (!journeyCell) return [];
+    const zone = journeySettlement?.zone;
+    const subzone = journeyCell.sub ?? undefined;
+    const roster = zone != null && subzone != null ? eng.zoneById(zone).subzones?.[subzone]?.species || [] : [];
+    const cell: AdventureCell = {
+      ax: journeyCell.q + ',' + journeyCell.r, q: journeyCell.q, r: journeyCell.r,
+      town: journeyCell.kind === 'town' ? journeySettlement?.id || null : null,
+      sub: journeyCell.kind === 'sub', zone, subzone, wild: journeyCell.wild ?? undefined,
+      uniqueSpecies: uniqueTraceSpecies(roster),
+    };
+    return adventureView(gameState, [cell]).placements.filter(placement => placement.ax === cell.ax);
+  });
 
   function doInvestigateTrailSite() {
-    if (!requireAccountWriter('investigating a trail site') || !pickedIntel?.site) return;
-    const result = investigateTrailSite(gameState, pickedIntel.site.id);
+    if (!requireAccountWriter('investigating a trail site') || !journeyIntel?.site) return;
+    const result = investigateTrailSite(gameState, journeyIntel.site.id);
     saveNote = result.ok ? result.message || 'Site explored' : result.why || 'Cannot investigate';
     if (result.ok) push(gameState, saveNote);
     gameState = { ...gameState };
   }
   function locateMapHex(hex: { q: number; r: number }) {
+    panel = 'map';
     const cell = sheet?.querySelector(`polygon.cell[data-ax="${hex.q},${hex.r}"]`);
     if (cell) pickMapCell(cell);
   }
@@ -1771,15 +2074,16 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   function clearMapSelection() {
     picked = null; pickedCell = null; saveNote = '';
+    journeyBodyEl?.scrollTo({ top: 0 });
     document.querySelector<HTMLElement>('.map-back')?.focus();
   }
 
-  function activatePickedDestination() {
-    const action = pickedPrimary;
-    if (!action || action.disabled || !pickedCell) return;
+  function activateJourneyDestination() {
+    const action = journeyPrimary;
+    if (!action || action.disabled || !journeyCell) return;
     if (action.kind !== 'town' && !requireAccountWriter('using this destination')) return;
     switch (action.kind) {
-      case 'walk': doWalk(pickedCell); break;
+      case 'walk': doWalk(journeyCell); break;
       case 'investigate': doInvestigateTrailSite(); break;
       case 'town': panel = 'desk'; break;
       case 'hunt': doHuntHere(); break;
@@ -1789,12 +2093,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       case 'stop-gather': doStopFieldAction(); break;
     }
   }
-  let mapcardEl = $state<HTMLDivElement | null>(null);
-  // The card owns the existing Panels HUD region. Move the scene only if a new selection
-  // would land underneath that region; expanding details never moves the card over the map.
+  let journeyPanelEl = $state<HTMLDivElement | null>(null);
+  // Keep a selected hex clear of the combined Journey panel, including after it expands.
   $effect(() => {
-    const selected = pickedCell, card = mapcardEl, field = sheet;
-    void hudLayout;
+    const selected = pickedCell, card = journeyPanelEl, field = sheet;
+    void hudLayout; void journeyExpanded;
     if (!selected || !card || !field || panel !== 'map') return;
     const frame = requestAnimationFrame(() => {
       const cell = field.querySelector(`polygon.cell[data-cell="${selected.key}"]`);
@@ -1819,7 +2122,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
    * is picked. Its counter, board, desk and set are read anywhere on the field, but worked only where
    * the character is — so `viewHere` gates every verb, and the map never sells a far purchase.
    */
-  const viewTown = $derived(pickedSettlement ?? town);
+  const viewTown = $derived(pickedCell ? journeySettlement ?? town : town);
   const viewHere = $derived(!!viewTown && viewTown.id === townId);
   const viewStock = $derived(stockOf(viewTown?.id ?? '', gameState));
   const viewStanding = $derived(standingProgress(gameState, viewTown?.id ?? ''));
@@ -1909,6 +2212,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function doRepairGear(where: Where, index: number) {
+    if (!requireAccountWriter('repairing gear')) return false;
     const r = repairGear(gameState, town?.id ?? '', where, index);
     benchNote = r.ok ? `Armourer repaired ${r.repaired} · ${r.gold} gold` : `Cannot repair: ${r.why}`;
     if (r.ok) push(gameState, benchNote);
@@ -1952,6 +2256,83 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     if (showcaseMode) document.getElementById('panel-market')?.scrollIntoView();
   }
 
+  /** The player's own pin outranks suggestions; clearing it hands the card back to `recommendGoal`. */
+  function doTrackGoal(ref: GoalRef | null) {
+    if (!requireAccountWriter(ref ? 'pinning a goal' : 'clearing a goal')) return;
+    setTrackedGoal(gameState, ref);
+    gameState = { ...gameState };
+    saveNote = ref ? 'Goal pinned to Journey · it stays ahead of suggestions' : 'Goal cleared · suggestions are back';
+  }
+  function doTrackShortage(good: string, want: number, origin: ShortageOrigin) {
+    doTrackGoal({ kind: 'shortage', good, want, origin });
+  }
+  /** A source pin selects its settlement on the map; it never walks, buys or spends anything. */
+  function pinZoneSource(zone: number) {
+    const target = zoneDestination(zone);
+    if (!target) {
+      saveNote = `No map settlement stands in zone ${zone}`;
+      return;
+    }
+    locateMapHex(target);
+    journeyExpanded = true;
+    saveNote = `Pinned ${target.label} on the map · source for the current goal`;
+  }
+  function openMapAtSettlement() {
+    const here = ownerOf(currentCell(gameState));
+    const cell = settlementCell(here.id);
+    panel = 'map';
+    journeyExpanded = true;
+    if (cell) locateMapHex(cell);
+  }
+  function pinJourneyDestination() {
+    if (!journeyDest) return;
+    doTrackGoal({ kind: 'destination', q: journeyDest.q, r: journeyDest.r, label: journeyDest.label });
+  }
+  function isJourneyPinned() {
+    const ref = journeyGoal?.source === 'tracked' ? journeyGoal.view.ref : null;
+    return !!ref && ref.kind === 'destination' && ref.q === journeyDest?.q && ref.r === journeyDest?.r;
+  }
+  /** Every goal action reuses the panel or sim verb that already owns it. */
+  function runGoalTarget(target: GoalRef) {
+    switch (target.kind) {
+      case 'delivery': openDeliveryWant(target.id); break;
+      case 'workshop':
+        marketView = 'workshop';
+        marketTownId = ownerOf(currentCell(gameState)).id;
+        panel = 'market';
+        break;
+      case 'forge':
+        forgeFocus = { patternKind: target.patternKind, pattern: target.pattern, material: target.material, nonce: ++forgeFocusNonce };
+        panel = 'forge';
+        break;
+      case 'destination':
+        locateMapHex({ q: target.q, r: target.r });
+        journeyExpanded = true;
+        break;
+      case 'passive':
+        selectedTreeNodeId = target.id;
+        panel = 'tree';
+        break;
+      case 'tree': panel = 'tree'; break;
+      case 'hunt':
+        if (gameState.hunting && gameState.zone === target.zone) panel = null;
+        else goToZone(target.zone);
+        break;
+      case 'shortage': runGoalTarget(target.origin as GoalRef); break;
+    }
+  }
+  function runGoalAction(view: GoalView) { runGoalTarget(view.target); }
+  function runNoticeAction(notice: GuidanceNotice) {
+    if (notice.id === 'storage-error' || notice.id === 'writer') { openPanel('save'); return; }
+    if (notice.id === 'camp-encounter') {
+      journeyExpanded = true;
+      journeyToolsOpen = true;
+      journeyBodyEl?.scrollTo({ top: 0 });
+      return;
+    }
+    if (notice.target) runGoalTarget(notice.target);
+  }
+
   let taskChoices = $state<Record<number, { task: TaskSlot; choice: string }>>({});
   function doClaim(i: number, choice?: string) {
     const t = gameState.town.tasks[i];
@@ -1977,20 +2358,20 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       : `polygon.cell.town[data-node="${settlement.id}"]`;
     const target = sheet.querySelector(selector);
     if (!target) { saveNote = 'This Expedition location is not on the current map'; return; }
-    panel = 'map'; mapHelpOpen = true; pickMapCell(target);
+    panel = 'map'; pickMapCell(target);
   }
 
-  function togglePickedPatrolStop() {
+  function toggleJourneyPatrolStop() {
     if (!requireAccountWriter('editing Patrol route')) return;
-    if (!pickedCell || !pickedSettlement || pickedCell.kind !== 'sub' || pickedCell.sub == null) return;
+    if (!journeyCell || !journeySettlement || journeyCell.kind !== 'sub' || journeyCell.sub == null) return;
     const result = togglePatrolStop(gameState, {
-      zone: pickedSettlement.zone,
-      subzone: pickedCell.sub,
-      cell: { q: pickedCell.q, r: pickedCell.r, sub: pickedCell.sub, wild: null },
+      zone: journeySettlement.zone,
+      subzone: journeyCell.sub,
+      cell: { q: journeyCell.q, r: journeyCell.r, sub: journeyCell.sub, wild: null },
     });
     if (!result.ok) saveNote = `Cannot change Patrol: ${result.why}`;
     else {
-      const name = eng.zoneById(pickedSettlement.zone).subzones?.[pickedCell.sub]?.name || 'Sub-zone';
+      const name = eng.zoneById(journeySettlement.zone).subzones?.[journeyCell.sub]?.name || 'Sub-zone';
       push(gameState, result.added ? `${name} added to Patrol` : `${name} removed from Patrol`);
       saveNote = '';
     }
@@ -2024,11 +2405,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function setPatrolRepeat(repeat: boolean) {
+    if (!requireAccountWriter('changing Patrol repeat')) return;
     gameState.patrol.repeat = repeat;
     gameState = { ...gameState };
   }
 
   function setAutoReturn(enabled: boolean) {
+    if (!requireAccountWriter('changing Auto-Return')) return;
     gameState.autoReturn.enabled = enabled;
     push(gameState, enabled ? `Auto-Return on · stash trip at ${E.road.patrol.auto_return_threshold_pct}% bag` : 'Auto-Return off');
     gameState = { ...gameState };
@@ -2115,6 +2498,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function runCraft(op: CraftOp, lineIndex: number, pick?: string) {
+    if (!requireAccountWriter('crafting')) return false;
     if (!bench) return false;
     const rng = mulberry32(gameState.rngState);
     gameState.rngState += 1;
@@ -2138,24 +2522,28 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const plots = $derived(plotCount(gameState));
 
   function doPlant(i: number, tier: string) {
+    if (!requireAccountWriter('planting')) return;
     const r = plant(gameState, i, tier);
     farmNote = r.ok ? `Plot ${i + 1}: ${tier} herb in the ground, ready in ${farm.F.growth_hours} h` : `Plot ${i + 1}: ${r.why}`;
     gameState = { ...gameState };
   }
 
   function doHarvest(i: number) {
+    if (!requireAccountWriter('harvesting')) return;
     const r = harvest(gameState, i);
     farmNote = r.ok ? `Plot ${i + 1}: +${r.herbs} herbs · +${r.xp} Farm XP` : `Plot ${i + 1}: ${r.why}`;
     gameState = { ...gameState };
   }
 
   function doBrew(name: string) {
+    if (!requireAccountWriter('brewing')) return;
     const r = craftPotion(gameState, name);
     farmNote = r.ok ? `Brewed ${name}` : `${name}: ${r.why}`;
     gameState = { ...gameState };
   }
 
   function doDrink(name: string) {
+    if (!requireAccountWriter('drinking a potion')) return;
     const r = drink(gameState, c, name, gameState.group.some((m) => isBossKind(String(m.kind))));
     farmNote = r.ok ? `Drank ${name}` : `${name}: ${r.why}`;
     gameState = { ...gameState };
@@ -2163,6 +2551,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   /** the quickbar's own press: the square's draught, through the same fight limits as the board */
   function useQuickSlot(i: number) {
+    if (!requireAccountWriter('using a potion shortcut')) return;
     const name = gameState.quickbar[i];
     if (!name) return;
     const r = drink(gameState, c, name, gameState.group.some((m) => isBossKind(String(m.kind))));
@@ -2171,6 +2560,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function doCondense(name: string) {
+    if (!requireAccountWriter('condensing potions')) return;
     const r = condense(gameState, name);
     farmNote = r.ok ? `Condensed ${name} · ${farm.P.condensed.effect_mult}× in one bottle` : `${name}: ${r.why}`;
     gameState = { ...gameState };
@@ -2204,12 +2594,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         : pickedCell ? `${pickedCell.key} · ${pickedCell.label}` : `${town?.name ?? 'the field'} · trade, board, hunt, walk`);
 
   function doDeposit(i: number, tab: number) {
+    if (!requireAccountWriter('depositing gear')) return;
     const r = deposit(gameState, i, tab);
     townNote = r.ok ? 'Deposited into the stash' : `Deposit refused: ${r.why}`;
     gameState = { ...gameState };
   }
 
   function doWithdraw(tab: number, i: number) {
+    if (!requireAccountWriter('withdrawing gear')) return;
     const r = withdraw(gameState, tab, i);
     townNote = r.ok ? 'Withdrawn into the bag' : `Withdrawal refused: ${r.why}`;
     gameState = { ...gameState };
@@ -2242,18 +2634,21 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function doDepositAll(tab: number) {
+    if (!requireAccountWriter('depositing carried gear')) return;
     const n = depositMany(gameState, gameState.bag.map((_, i) => i), tab);
     townNote = n ? `Deposited ${n} piece${n === 1 ? '' : 's'} into tab ${tab + 1}` : 'Nothing to deposit — every piece is locked or the bag is empty';
     gameState = { ...gameState };
   }
 
   function doWithdrawAll(tab: number) {
+    if (!requireAccountWriter('withdrawing stashed gear')) return;
     const n = withdrawMany(gameState, tab, (gameState.stash[tab] || []).map((_, i) => i));
     townNote = n ? `Withdrew ${n} piece${n === 1 ? '' : 's'} from tab ${tab + 1}` : 'Nothing to withdraw — every piece is locked';
     gameState = { ...gameState };
   }
 
   function toggleLock(item: Item) {
+    if (!requireAccountWriter('locking or unlocking gear')) return;
     item.locked = !item.locked;
     gameState = { ...gameState };
   }
@@ -2261,24 +2656,28 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
 
   function doSwitchPreset(i: number) {
+    if (!requireAccountWriter('switching skill presets')) return;
     switchPreset(gameState, i);
     skillNote = `Loaded ${gameState.presets[i].name}`;
     gameState = { ...gameState };
   }
 
   function doStorePreset() {
+    if (!requireAccountWriter('saving skill presets')) return;
     storePreset(gameState);
     skillNote = `Saved ${gameState.presets[gameState.activePreset].name}`;
     gameState = { ...gameState };
   }
 
   function doBind(i: number) {
+    if (!requireAccountWriter('binding a skill preset')) return;
     bindZone(gameState, i, gameState.zone);
     skillNote = `${gameState.presets[i].name} now ${gameState.presets[i].zones.includes(gameState.zone) ? 'binds' : 'unbinds'} ${eng.zoneById(gameState.zone).name}`;
     gameState = { ...gameState };
   }
 
   function doTurnIn() {
+    if (!requireAccountWriter('claiming Collector rewards')) return;
     const r = turnIn(gameState, town!.id);
     townNote = r.ok ? `Turned in the ${viewColSet.name} set · reward: ${r.reward}` : `Turn-in refused: ${r.why}`;
     gameState = { ...gameState };
@@ -2341,6 +2740,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const hasResonance = $derived(c.keystones.some((k) => k.key === 'aura-resonance'));
 
   function setSlot(i: number, id: string) {
+    if (!requireAccountWriter('assigning skills')) return;
     const at = gameState.skills.list.indexOf(id);
     if (at >= 0) gameState.skills.list[at] = null;
     gameState.skills.list[i] = id || null;
@@ -2348,6 +2748,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function setMode(id: string, mode: string) {
+    if (!requireAccountWriter('changing skill mode')) return;
     gameState.skills.mode[id] = mode as any;
     gameState = { ...gameState };
   }
@@ -2356,6 +2757,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       The status leg is trimmed to what the row can actually carry, so no screen can show a wait that the
       rotation would never answer. */
   function setCond(id: string, patch: Partial<SkillConditions>) {
+    if (!requireAccountWriter('changing skill conditions')) return;
     const next = { ...condOf(gameState.skills, id), ...patch };
     const flag = rowFlag(id);
     next.statusMissing = flag && next.statusMissing.includes(flag.key) ? [flag.key] : [];
@@ -2371,6 +2773,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function doMoveSlot(from: number, to: number) {
+    if (!requireAccountWriter('reordering skills')) return;
     moveSlot(gameState.skills, from, to);
     gameState = { ...gameState };
   }
@@ -2395,6 +2798,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     return status ? { key: status, label: status } : null;
   }
   function toggleStatusMissing(id: string, name: string) {
+    if (!requireAccountWriter('changing skill conditions')) return;
     const now = condOf(gameState.skills, id).statusMissing;
     setCond(id, { statusMissing: now.includes(name) ? now.filter((n) => n !== name) : [...now, name] });
   }
@@ -2468,6 +2872,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function toggle(id: string) {
+    if (!requireAccountWriter('toggling skills')) return;
     // the reservation rule and the buff switch both live in sim/skills.ts, so no sum is repeated here
     const r = toggleTrack(gameState.skills, id, c.keystones);
     saveNote = r.ok ? '' : r.why || 'cannot';
@@ -2477,6 +2882,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   /** 54: an aura pays from HP or Mana. The switch is refused without the keystone and the caller
    *  re-reads the reservation split before the next tick. */
   function chooseAuraPool(id: string, pool: 'hp' | 'mana') {
+    if (!requireAccountWriter('changing aura reservation')) return;
     const r = setAuraPool(gameState.skills, id, pool, c.keystones);
     saveNote = r.ok ? '' : r.why || 'cannot';
     if (r.ok) gameState = { ...gameState };
@@ -2484,6 +2890,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   /** The way out of a reservation set that no longer fits: turn every aura off in one step. */
   function disableAllAuras() {
+    if (!requireAccountWriter('disabling auras')) return;
     for (const k of ownedAuras) gameState.skills.auras[k.id] = false;
     saveNote = 'All auras off';
     gameState = { ...gameState };
@@ -2509,7 +2916,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       <h1>UI Showcase</h1>
       <p>Live game components · sample state · changes to source UI appear here through Vite HMR</p>
       <label>Gameplay sample <select aria-label="Gameplay sample" value={showcaseSample} onchange={(event) => {
+        clearCombatFxTimers();
+        animateCombatFx = false;
         showcaseSample = event.currentTarget.value; gameState = showcaseGame(showcaseSample);
+        feed = []; feedSeen = 0;
         travelScene = false;
         running = false;
         gameState.playerStatuses = showcaseSample === 'combat-fx' ? {
@@ -2533,6 +2943,33 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     </div>
     <a href="/">Return to the game</a>
   </header>
+  {#if showcaseSample === 'combat-fx'}
+    <div class="combat-fx-preview-controls">
+      <label><input type="checkbox" checked={animateCombatFx} onchange={(event) => {
+        if (event.currentTarget.checked) replayCombatFx(); else showCombatFxLabels();
+      }} /> Animate combat effects</label>
+      <label>Combat effect preview <select aria-label="Combat effect preview" value={combatFxPreview} onchange={(event) => {
+        combatFxPreview = event.currentTarget.value as CombatFxPreview;
+        if (animateCombatFx) replayCombatFx(); else showCombatFxLabels();
+      }}>
+        <option value="swing">Weapon swing</option>
+        <option value="critical">Critical hit</option>
+        <option value="fire">{previewFire?.name || 'Fire skill'}</option>
+        <option value="lightning">{previewLightning?.name || 'Lightning skill'}</option>
+        <option value="heal">{previewHeal?.name || 'Heal skill'}</option>
+        <option value="block">Block</option>
+        <option value="lethal">Killing blow</option>
+        <option value="rapid">Rapid sequence</option>
+        <option value="aoe">{previewArea?.name || 'Area skill'} · 3 targets</option>
+        <option value="exchange">Simultaneous exchange</option>
+        <option value="miss">Missed skill</option>
+        <option value="sizes">Small · Large · Boss</option>
+        <option value="boss">Boss skill windup</option>
+      </select></label>
+      <button onclick={replayCombatFx}>Replay combat effect</button>
+      <span>Sample effects only · game progress stays unchanged · replay restores the encounter</span>
+    </div>
+  {/if}
   <nav class="showcase-index" aria-label="Showcase sections">
     <a href="#showcase-field">Field HUD</a>
     <a href="#panel-hud-layout-studio">HUD Layout</a>
@@ -2564,7 +3001,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     they need the room. Widen the window, or set the browser zoom out.</p>
 </div>
 
-<div id={showcaseMode ? 'showcase-field' : undefined} class="stage" style={`grid-template-areas:${hudLayoutAreas};`} class:showcase={showcaseMode} class:combat-fx-sample={showcaseMode && showcaseSample === 'combat-fx'} class:fighting={inCombat} class:mapmode={panel === 'map'} class:veiled={!showcaseMode && ((panel !== null && panel !== 'map') || sheetOpen)} class:townmode={townLive && panel !== 'map'}>
+<div id={showcaseMode ? 'showcase-field' : undefined} class="stage" style={`grid-template-areas:${hudLayoutAreas};`} class:showcase={showcaseMode} class:combat-fx-sample={showcaseMode && showcaseSample === 'combat-fx'} class:combat-fx-live={showcaseMode && showcaseSample === 'combat-fx' && animateCombatFx} class:fighting={inCombat} class:mapmode={panel === 'map'} class:veiled={!showcaseMode && ((panel !== null && panel !== 'map') || sheetOpen)} class:townmode={townLive && panel !== 'map'}>
   {#if showcaseMode && showcaseSample === 'map-hex-3d' && hex3dPrototypeView}
     {@const Hex3dPrototype = hex3dPrototypeView}
     <Hex3dPrototype onClose={() => {
@@ -2575,16 +3012,21 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
   <div
     class="map-back sheet"
+    class:clean-map={cleanMap}
+    class:map-detail-far={zoom < 1.5}
+    class:map-detail-near={zoom >= 2.4}
     class:dragging
+    class:rotating
+    class:camera-turning={mapCameraTurning}
     role="application"
-    aria-label="World map. Use arrow keys to select an adjacent block; Enter performs the primary action shown on the destination card."
+    aria-label="World map. Drag horizontally to pan. Ctrl and drag horizontally to orbit the fixed perspective. Scroll to zoom. Arrow keys select adjacent blocks in the screen direction; Enter performs the destination's primary action."
     tabindex="0"
     use:mapField
   >
-    <div class="map-sheet" style:transform={`translate(${panX.toFixed(1)}px, ${panY.toFixed(1)}px) scale(${zoom.toFixed(4)})`}>
+    <div class="map-sheet" style:transform={`translate(${panX.toFixed(1)}px, 0px) scale(${zoom.toFixed(4)})`}>
       <div class="map-projection" class:hex-calibrating={showHexCalibration}>{@html mapMarkup}</div>
     </div>
-    <span class="aloud" aria-live="polite" aria-atomic="true">{pickedCell ? `Selected block ${pickedCell.key}: ${pickedCell.label}` : ''}</span>
+    <span class="aloud" aria-live="polite" aria-atomic="true">{pickedCell ? `Selected block ${pickedCell.key}: ${pickedCell.label}${journeySignals.length ? ' · ' + journeySignals.map(signal => signal.label).join(' · ') : ''}` : ''}</span>
   </div>
 
   {#if plates.length}
@@ -2598,67 +3040,87 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     </div>
   {/if}
 
-  <div class="topright" style={place('objectives', '100%', '')}>
-    <div id="location-map" class="map-reference hub-collapsible" hidden={!locationExpanded}>
-      <Minimap markup={mapMarkup} cell={gameState.cell} onopen={() => togglePanel('map')} />
-    </div>
-    <div class="zone-tag" class:traveling={Boolean(gameState.walk)}>
-      <img class="icon-label zone-emblem" src={waypointMark} alt="" aria-hidden="true" />
-      <div class="zone-copy">
-        <CollapseToggle label={zone.name} controls="location-map location-status" bind:expanded={locationExpanded} />
-        {#if showPlaceRead && locationExpanded}<span class="text-note">{placeRead}</span>{/if}
+  {#snippet journeyTools()}
+    <MapJourney state={gameState} bind:expanded={journeyToolsOpen} writable={transactionWriter} onSelect={locateMapHex}
+      onStart={doStartPatrol} onStop={doStopPatrol} onClear={doClearPatrol} onMove={reorderPatrol}
+      onEncounter={doCampEncounter} onPolicy={doCampPolicy} onRepeat={setPatrolRepeat} onAutoReturn={setAutoReturn} />
+  {/snippet}
+
+  <section class="journey-dock" data-hud-region="objectives" aria-label="Journey" style={place('objectives')}>
+    <div class="journey-panel surface-hud" class:expanded={journeyExpanded} bind:this={journeyPanelEl}>
+      <header class="journey-header">
+        <div class="journey-title">
+          <CollapseToggle label="Journey" controls="journey-body" bind:expanded={journeyExpanded} />
+          {#if panel === 'map'}
+            <button class="btn btn-quiet" type="button" aria-expanded={journeyExpanded && mapControlsOpen} aria-controls="journey-map-controls"
+                    onclick={() => { mapControlsOpen = !journeyExpanded || !mapControlsOpen; journeyExpanded = true; journeyBodyEl?.scrollTo({ top: 0 }); }}>Controls</button>
+          {:else}
+            <button class="btn btn-quiet" type="button" onclick={() => togglePanel('map')}>Map</button>
+          {/if}
+        </div>
+        <div class="journey-location">
+          <img class="icon-label" src={waypointMark} alt="" aria-hidden="true" />
+          <strong>{zone.name}</strong><span class="journey-level">Lv {zone.levels[0]}–{zone.levels[1]}</span>
+        </div>
+        {#if showPlaceRead}<p class="text-note journey-place">{placeRead}</p>{/if}
+        <p class="journey-status">{phaseRead}</p>
+        {#if gameState.walk}
+          <p class="text-note journey-place">{gameState.walk.blocksLeft} blocks left · {gameState.group.length ? 'Step paused during combat' : `next hex in ${Math.max(0, Math.ceil(gameState.walk.secLeft))}s`}</p>
+        {/if}
+      </header>
+      <div class="journey-alerts">
+        {#each journeyNotices as notice (notice.id)}
+          <div class="journey-notice card-tile" class:alarm={notice.kind === 'error' || notice.kind === 'blocked'}
+               role={notice.kind === 'error' ? 'alert' : undefined}>
+            <strong>{notice.title}</strong>
+            <small>{notice.detail}</small>
+            {#if notice.actionLabel && (notice.action || notice.id === 'storage-error' || notice.id === 'writer' || notice.id === 'camp-encounter')}
+              <button class="btn btn-quiet" type="button" onclick={() => runNoticeAction(notice)}>{notice.actionLabel}</button>
+            {/if}
+          </div>
+        {/each}
+        {#if gameState.patrol.active}
+          <button class="btn btn-quiet" type="button" onclick={doStopPatrol} disabled={!transactionWriter}>Stop Patrol</button>
+        {/if}
+        {#if gameState.dungeon}<button class="btn btn-quiet" type="button" onclick={doRetreat} disabled={!transactionWriter}>Retreat · rescue {E.dungeon.retreat_keep_min}–{E.dungeon.retreat_keep_max} random stacks</button>{/if}
       </div>
-      {#if locationExpanded}
-        <b class="zone-level">Lv {zone.levels[0]}–{zone.levels[1]}</b>
-      {:else}
-        <button class="btn-quiet" type="button" aria-label="Open the map" onclick={() => togglePanel('map')}>Map</button>
-      {/if}
-    </div>
-    {#if persistenceError}
-      <div class="account-hold" role="alert"><span class="text-alarm">Storage error · progress may not be saved</span><button type="button" onclick={() => openPanel('save')}>Open Save</button></div>
-    {/if}
-    {#if !showcaseMode && accountWriterState !== 'owner' && accountWriterState !== 'checking'}
-      {@const accountHoldLabel = accountWriterState === 'readonly'
-        ? 'Read-only · another tab controls progress'
-        : accountWriterState === 'waiting'
-          ? 'Waiting for account control'
-          : 'Progression paused · save control unavailable'}
-      <div class="account-hold" role="status" aria-live="polite">
-        <span class="chip chip-tag locked">{accountHoldLabel}</span>
-        <button class="btn btn-quiet" type="button" onclick={() => openPanel('save')}
-                title="Open Save to take over account control">Open Save</button>
-      </div>
-    {/if}
-    <div class="tracker">
-      <p id="location-status" class="phase hub-collapsible" hidden={!locationExpanded}>{phaseRead}</p>
-      {#if gameState.patrol.active}
-        <button class="btn btn-quiet" type="button" onclick={doStopPatrol} disabled={!transactionWriter}>Stop Patrol</button>
-      {/if}
-      {#if gameState.dungeon}<button onclick={doRetreat} disabled={!transactionWriter}>Retreat · rescue {E.dungeon.retreat_keep_min}–{E.dungeon.retreat_keep_max} random stacks</button>{/if}
-      {#if bagFull}
-        <p class="alarm-line">Bag full — the zone has stopped paying. Walk to a settlement and deposit.</p>
-      {/if}
-    </div>
-  </div>
-  {#if panel === 'map'}
-  <div class="field-travel-actions" aria-label="Map tools"
-       data-hud-region={mapHelpOpen ? 'panels' : 'travel'}
-       style={place(mapHelpOpen ? 'panels' : 'travel', '100%', mapHelpOpen ? '100%' : '')}>
-      <div class="map-guide" class:open={mapHelpOpen} class:surface-popover={mapHelpOpen}>
-        <CollapseToggle label="Map tools" controls="map-tools-content" bind:expanded={mapHelpOpen} />
-        <div id="map-tools-content" class="map-tools-content hub-collapsible scroll-pane" hidden={!mapHelpOpen}>
-          <MapJourney state={gameState} writable={transactionWriter} onSelect={locateMapHex}
-            onStart={doStartPatrol} onStop={doStopPatrol} onClear={doClearPatrol} onMove={reorderPatrol}
-            onEncounter={doCampEncounter} onPolicy={doCampPolicy} />
-          <details class="map-tools-section" name="map-tools-sections">
-            <summary><span>Controls</span><svg class="icon-chevron map-tools-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></summary>
+      <div id="journey-body" class="journey-body scroll-pane" hidden={!journeyExpanded} bind:this={journeyBodyEl}>
+        {#if journeySignals.length}
+          <details class="journey-map-signals">
+            <summary>Map signals · {journeySignals.length}</summary>
+            <ul>
+              {#each journeySignals as signal (signal.cls + signal.label)}
+                <li><svg viewBox="-11 -22 22 25" aria-hidden="true">{@html signal.art}</svg><span>{signal.label}</span></li>
+              {/each}
+            </ul>
+          </details>
+        {/if}
+        {#if gameState.fieldwork.campEncounters.active}{@render journeyTools()}{/if}
+        {#if panel === 'map'}
+          <section id="journey-map-controls" class="journey-map-controls" aria-label="Map controls" hidden={!mapControlsOpen}>
             <div class="map-tools">
+              <div class="map-display" role="group" aria-label="Map display settings">
+                <button class="btn btn-quiet map-clean-toggle" type="button" aria-pressed={cleanMap}
+                        onclick={() => setSetting('cleanMap', !cleanMap)} title="Show coloured hexes with terrain artwork and scenery hidden">Clean map</button>
+                <button class="btn btn-quiet" type="button" onclick={() => mapSetBearing(mapBearing + mapTurnTo(mapBearing, 0))}
+                        aria-label="Reset map camera angle" title="Restore the initial camera angle">Reset angle</button>
+              </div>
               <div role="group" aria-label="Map zoom" class="map-zoom">
                 <button class="btn btn-quiet btn-icon" type="button" onclick={() => mapZoomBy(1 / 1.25)} aria-label="Zoom out" title="Zoom out">−</button>
                 <output class="text-note" aria-label="Map zoom level" aria-live="polite">{Math.round((zoom / MAP_BASE_ZOOM) * 100)}%</output>
                 <button class="btn btn-quiet btn-icon" type="button" onclick={() => mapZoomBy(1.25)} aria-label="Zoom in" title="Zoom in">+</button>
                 <button class="btn btn-quiet" type="button" onclick={mapCentre} title="Centre on your current settlement">Centre</button>
-                <button class="btn btn-quiet" type="button" onclick={mapReset} title="Restore the default map position and zoom">Reset</button>
+                <button class="btn btn-quiet" type="button" onclick={mapReset} title="Restore the default map position, zoom and orientation">Reset</button>
+              </div>
+              <div role="group" aria-label="Map rotation" class="map-rotation-controls">
+                <button class="btn btn-quiet btn-icon" type="button" onclick={() => mapRotateBy(-15)} aria-label="Rotate map counterclockwise" title={`Rotate counterclockwise · ${keyFor('map.rotate.left')}`}>↶</button>
+                <label class="map-bearing-range"><span class="text-note">Rotation</span>
+                  <input type="range" min="0" max="359" step="1" aria-label="Map rotation angle" aria-valuetext={`${Math.round(mapBearingReadout) % 360} degrees clockwise`}
+                    value={Math.round(mapBearingReadout) % 360} oninput={event => mapSetBearing(Number(event.currentTarget.value))} />
+                </label>
+                <output class="text-note" aria-label="Map rotation angle">{Math.round(mapBearingReadout) % 360}°</output>
+                <button class="btn btn-quiet btn-icon" type="button" onclick={() => mapRotateBy(15)} aria-label="Rotate map clockwise" title={`Rotate clockwise · ${keyFor('map.rotate.right')}`}>↷</button>
+                <button class="btn btn-quiet" type="button" onclick={() => mapSetBearing(0)} title="Restore the initial map orientation">North ↑</button>
               </div>
               <div role="group" aria-label="Map display" class="map-views">
                 {#each VIEW_ORDER as v (v)}
@@ -2672,29 +3134,65 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
                 <label class="map-level text-note">Level <input aria-label="Map level gate" type="range" min={firstBand[0]} max={lastBand[1]} bind:value={gateLevel} /> <output>{gateLevel}</output></label>
               {/if}
               <div class="map-overlays" role="group" aria-label="Map overlays">
-                <label title="Show area names; towns always, subzones only when zoomed close, wild sides and levels on hover/select"><input type="checkbox" checked={showMapNames} onchange={event => setMapNames(event.currentTarget.checked)} /> Area names</label>
+                <label title="Show area names; towns always, subzones only when zoomed close, wild sides and levels on hover/select"><input type="checkbox" checked={showMapNames} disabled={cleanMap} aria-describedby={cleanMap ? 'clean-map-names-note' : undefined} onchange={event => setMapNames(event.currentTarget.checked)} /> Area names</label>
                 <label title="Show walking connections between settlements"><input type="checkbox" bind:checked={showWalk} /> Connections</label>
                 <label title="Show hex cell identifiers"><input type="checkbox" bind:checked={showIds} /> Cell IDs</label>
                 {#if import.meta.env.DEV}<label title="Compare artwork with the exact projected ground footprint"><input type="checkbox" bind:checked={showHexCalibration} /> Hex alignment</label>{/if}
               </div>
-              <p class="map-hint text-note">Select a hex · Drag to pan · Scroll to zoom</p>
+              {#if cleanMap}<p id="clean-map-names-note" class="map-hint text-note">Clean map shows names on hover or selection. Hex colours follow the selected map display.</p>{/if}
+              <p class="map-hint text-note">Select a hex · Drag horizontally to pan · Ctrl + drag horizontally to orbit · Scroll to zoom</p>
               {#if gameState.walk}
                 <p class="map-hint text-note">{gameState.group.length ? 'Ambushed en route to' : 'Traveling to'} <b>{walkNote(gameState)}</b>.</p>
               {/if}
             </div>
-          </details>
-          <details class="map-tools-section" name="map-tools-sections">
-            <summary><span>Map key</span><svg class="icon-chevron map-tools-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></summary>
-            <div class="map-legend text-note">
-              {#each legend as l (l.name)}<span class="swatch"><i class="swatch-color" style:background={l.tone} aria-hidden="true"></i><span>{l.label}</span></span>{/each}
-              <span class="swatch ramp"><i class="swatch-color" style:background={`linear-gradient(90deg,${rampCss})`} aria-hidden="true"></i><span>Lv {firstBand[0]}–{lastBand[1]}</span></span>
-              <p>Numbered flags mark Patrol stops. Green pennants mark your Expedition destinations. Creature figures show the local roster; an active fight moves the figure on your hex.</p>
-            </div>
-          </details>
-        </div>
+            <details class="map-tools-section" name="map-tools-sections">
+              <summary><span>Map key</span><span class="icon-mask map-tools-chevron" style={`--glyph:url(${chevronDownGlyph})`} aria-hidden="true"></span></summary>
+              <div class="map-legend text-note">
+                {#each legend as l (l.name)}<span class="swatch"><i class="swatch-color" style:background={l.tone} aria-hidden="true"></i><span>{l.label}</span></span>{/each}
+                <span class="swatch ramp"><i class="swatch-color" style:background={`linear-gradient(90deg,${rampCss})`} aria-hidden="true"></i><span>Lv {firstBand[0]}–{lastBand[1]}</span></span>
+                <div class="map-marker-legend">
+                  {#each MAP_MARKER_LEGEND as mark (mark.kind)}
+                    <span><svg viewBox="-15 -32 30 35" aria-hidden="true">{@html mapMarker(mark.kind, mark.glyph, { scale: 1 })}</svg>{mark.label}</span>
+                  {/each}
+                </div>
+                <p>One main crest marks each block. A small symbol and count show other signals. Dashed crests are unidentified tracks; numbered flags are Patrol stops. Select a block to read every known signal.</p>
+              </div>
+            </details>
+          </section>
+          {#if journeySettlement && journeyDest && journeyPrimary}
+            <TravelCard selected={!!pickedCell}
+              settlement={journeySettlement}
+              dest={journeyDest}
+              primary={journeyPrimary}
+              intel={journeyIntel}
+              onSetCamp={doEstablishCamp}
+              notice={saveNote}
+              writable={transactionWriter}
+              campHere={journeyDest.self && fieldCampHere}
+              campHunting={journeyDest.self && fieldCampHere && gameState.hunting}
+              busy={!!gameState.walk || gameState.phase === 'camp'}
+              fightActive={gameState.group.length > 0}
+              warpReason={journeyDest.node === gameState.town.waypoint ? 'This is your current Waypoint.' : ''}
+              patrol={gameState.patrol}
+              maxPatrolStops={E.road.patrol.max_stops}
+              fare={warpPrice(journeySettlement.id)}
+              afford={gameState.counters.gold >= warpPrice(journeySettlement.id)}
+              dungeon={dungeonView}
+              onprimary={activateJourneyDestination}
+              onwarp={travelTo}
+              onclear={clearMapSelection}
+              onreturncamp={doReturnCamp}
+              oncampui={() => (panel = 'camp')}
+              onTogglePatrolStop={toggleJourneyPatrolStop}
+              ontrack={pinJourneyDestination}
+              goalPinned={isJourneyPinned()}
+            />
+          {/if}
+        {/if}
+        {#if !gameState.fieldwork.campEncounters.active}{@render journeyTools()}{/if}
       </div>
-  </div>
-  {/if}
+    </div>
+  </section>
   {#if latestLevel}
     <!-- one-shot level rise: decoration to a reader, nothing to a keyboard -->
     {#key latestLevel.id}
@@ -2759,9 +3257,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
               aria-keyshortcuts={keyFor('game.pause')} disabled={!showcaseMode && !canWriteAccount}
               onclick={() => (running = !running)}>
         <span class="toggle-ring" class:here={!running}>
-          <svg viewBox="0 0 32 32" aria-hidden="true">
-            {#if running}<path d="M11 9v14M21 9v14" />{:else}<path d="m12 9 12 7-12 7z" />{/if}
-          </svg>
+          <span class="icon-mask" style={`--glyph:url(${running ? pauseGlyph : playGlyph})`} aria-hidden="true"></span>
         </span>
 
       <span class="cap">{running ? 'Pause' : 'Resume'}</span>
@@ -2769,8 +3265,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     </div>
   </div>
 
-  {#if saveNote && !(panel === 'map' && pickedDest)}
-    <span class="pill note save-note">{saveNote}</span>
+  {#if saveNote && !(panel === 'map' && journeyExpanded && journeyDest)}
+    <span class="toast notice-toast text-good save-note">{saveNote}</span>
   {/if}
 
   <!-- cast order, one orb per slot; read-only here — arranging is the Skills sub-screen's job -->
@@ -2802,11 +3298,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         </div>
       </div>
       <div class="cast-stack">
-      <Quickbar quickbar={gameState.quickbar} potions={gameState.farm.potions} condensed={gameState.farm.condensed}
+      <Quickbar quickbar={gameState.quickbar} potions={gameState.farm.potions} condensed={gameState.farm.condensed} writable={transactionWriter}
                 bagIcon={hubIcon('bags', bagMark)} keyFor={(n) => keyFor('item.' + n)}
                 onuse={useQuickSlot}
-                oncyc={(i) => { cycleQuickbar(gameState, i); gameState = { ...gameState }; }}
-                onassign={(i, name) => { gameState.quickbar[i] = name; gameState = { ...gameState }; }} />
+                oncyc={cycleQuickSlot}
+                onassign={assignQuickSlot} />
       <div class="casts" role="list" aria-label="Skill bar">
       {#each gameState.skills.list as id, i}
         {@const k = id ? sm.byId[id] : null}
@@ -2895,56 +3391,65 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     </div>
   {/if}
 
-  <!-- Destination details use the shared Panels HUD region beside the map scene. -->
-  {#if pickedSettlement && pickedDest && pickedPrimary && panel === 'map'}
-    <div class="mapcard" bind:this={mapcardEl} data-hud-region="panels" style={place('panels')}>
-      <TravelCard
-        settlement={pickedSettlement}
-        dest={pickedDest}
-        primary={pickedPrimary}
-        intel={pickedIntel}
-        onSetCamp={doEstablishCamp}
-        notice={saveNote}
-        writable={transactionWriter}
-        campHere={pickedDest.self && fieldCampHere}
-        campHunting={pickedDest.self && fieldCampHere && gameState.hunting}
-        busy={!!gameState.walk || gameState.phase === 'camp'}
-        fightActive={gameState.group.length > 0}
-        warpReason={pickedDest.node === gameState.town.waypoint ? 'This is your current Waypoint.' : ''}
-        patrol={gameState.patrol}
-        autoReturnEnabled={gameState.autoReturn.enabled}
-        minPatrolStops={E.road.patrol.min_stops}
-        maxPatrolStops={E.road.patrol.max_stops}
-        groupsPerStop={E.road.patrol.groups_per_stop}
-        autoReturnPct={E.road.patrol.auto_return_threshold_pct}
-        fare={warpPrice(pickedSettlement.id)}
-        afford={gameState.counters.gold >= warpPrice(pickedSettlement.id)}
-        dungeon={dungeonView}
-        onprimary={activatePickedDestination}
-        onwarp={travelTo}
-        onclear={clearMapSelection}
-        onreturncamp={doReturnCamp}
-        oncampui={() => (panel = 'camp')}
-        onTogglePatrolStop={togglePickedPatrolStop}
-        onStartPatrol={doStartPatrol}
-        onStopPatrol={doStopPatrol}
-        onClearPatrol={doClearPatrol}
-        onPatrolRepeat={(repeat) => { gameState.patrol.repeat = repeat; gameState = { ...gameState }; }}
-        onAutoReturn={setAutoReturn}
-      />
-    </div>
-  {/if}
-
   <div class="field-objectives" style={place('tasks')}>
-    <ObjectiveFeed goal={objectivesRead.goal}
-      deliveries={trackedDeliveries.map((contract) => ({
-        id: contract!.id,
-        title: `${settlementName(contract!.town)} · ${trade.byId[contract!.good]?.name || contract!.good}`,
-        progress: `${contract!.delivered}/${contract!.target}`,
-        clock: deliveryClock(deliveryTimeLeft(gameState, contract!)),
-        paused: deliveryPause || null,
-      }))}
-      onSheet={() => { sheetTab = 'life'; sheetOpen = true; }} onDelivery={openDeliveryWant} />
+    {#if journeyGoal}
+      {@const goal = journeyGoal.view}
+      <section class="objective-next-goal surface-hud" class:stale={goal.status !== 'active'} aria-label="Next goal">
+        <div class="objective-next-goal-head">
+          <span class="chip chip-tag">{goal.kindLabel}</span>
+          <span class="text-note">{journeyGoal.source === 'tracked' ? 'Pinned' : 'Suggested'}</span>
+        </div>
+        <h3 class="objective-next-goal-title">{goal.title}</h3>
+        {#if goal.progress}<p class="text-note objective-next-goal-progress">{goal.status === 'complete' ? 'Complete · ' : ''}{goal.progress}</p>{/if}
+        {#if goal.status === 'stale'}<p class="text-alarm">This goal can no longer be used. Clear it to return to suggestions.</p>{/if}
+        {#if goal.action && goal.status !== 'stale'}
+          <div class="objective-next-goal-actions">
+            <button class="btn btn-gold" type="button" onclick={() => runGoalAction(goal)}>{goal.actionLabel}</button>
+          </div>
+        {/if}
+        <details class="objective-next-goal-details">
+          <summary>{goal.sources.length ? 'Where & details' : 'Goal details'}</summary>
+          <div class="objective-next-goal-details-body">
+            <p class="objective-next-goal-reason">{goal.reason}</p>
+            {#if goal.sources.length}
+              <ul class="objective-next-goal-sources" aria-label="Where to find what the goal needs">
+                {#each goal.sources.slice(0, 3) as source (source.label + source.detail)}
+                  <li><b>{source.label}</b> <span>{source.detail}</span>
+                    {#each source.pins as pin (pin.zone)}
+                      <button class="btn btn-flat" type="button" onclick={() => pinZoneSource(pin.zone)} aria-label={`Pin ${pin.label} on the map`}>Pin {pin.label}</button>
+                    {/each}
+                  </li>
+                {/each}
+              </ul>
+            {/if}
+            <div class="objective-next-goal-actions">
+              {#if journeyGoal.source === 'tracked'}
+                <button class="btn btn-quiet" type="button" onclick={() => doTrackGoal(null)}>Clear goal</button>
+              {:else}
+                <button class="btn btn-quiet" type="button" onclick={() => doTrackGoal(goal.ref)}>Pin this goal</button>
+                <button class="btn btn-flat" type="button" onclick={() => setSetting('autoGoal', false)}>Hide suggestion</button>
+              {/if}
+            </div>
+          </div>
+        </details>
+      </section>
+    {:else if settings.autoGoal === false}
+      <div class="objective-next-goal suggestion-off surface-hud">
+        <p class="text-note">Automatic suggestions are hidden. Pinned goals and Delivery tracking still show here.</p>
+        <button class="btn btn-quiet" type="button" onclick={() => setSetting('autoGoal', true)}>Show suggested goal</button>
+      </div>
+    {/if}
+    <div class="objective-feed-slot">
+      <ObjectiveFeed
+        deliveries={trackedDeliveries.map((contract) => ({
+          id: contract!.id,
+          title: `${settlementName(contract!.town)} · ${trade.byId[contract!.good]?.name || contract!.good}`,
+          progress: `${contract!.delivered}/${contract!.target}`,
+          clock: deliveryClock(deliveryTimeLeft(gameState, contract!)),
+          paused: deliveryPause || null,
+        }))}
+        onSheet={() => { sheetTab = 'life'; sheetOpen = true; }} onDelivery={openDeliveryWant} />
+    </div>
   </div>
 
   <div class="field-feed" style={place('feed', '100%', 'auto')}>
@@ -2989,7 +3494,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       <span class="cap">More</span>
     </button>
     {#if more}
-      <div class="morebox">
+      <div class="morebox surface-popover">
         {#each MORE_RAIL as p}
           {@const label = RAIL_LABEL[p]}
           {@const far = TOWN_PANELS.includes(p) && !townLive}
@@ -2999,7 +3504,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
                   title={`${label} · ${keyFor(SCREEN_ACTION[p])}`}>
             <span class="toggle-ring" class:here={panel === p}><img src={RAIL_ICON[p]} alt="" aria-hidden="true" /></span>
             <span class="cap">{label}</span>
-            {#if badge > 0}<span class="badge badge-count urgent more-count">{badge}</span>{/if}
+            {#if badge > 0}
+              <CountBadge value={badge} tone="urgent" placement="top-right" title={`${badge} tree point${badge === 1 ? '' : 's'} available`} />
+            {/if}
           </button>
         {/each}
         <a class="hub-control wiki-link" href="/wiki.html" target="_blank" rel="noopener noreferrer"
@@ -3010,7 +3517,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
             <button type="button" class="hub-control"
                 onclick={() => (hudGridVisible = !hudGridVisible)} title="Toggle the viewport grid">
           <span class="toggle-ring" class:here={hudGridVisible}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v18M16 3v18M3 8h18M3 16h18" /></svg>
+            <span class="icon-mask" style={`--glyph:url(${gridGlyph})`} aria-hidden="true"></span>
           </span>
           <span class="cap">Grid</span>
         </button>
@@ -3101,7 +3608,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
                        statPoints={gameState.player.statPoints} treePoints={gameState.player.treePoints}
                        autoSpend={gameState.player.autoSpend} level={gameState.player.level}
                        onallocate={allocate}
-                       ontoggleauto={() => { gameState.player.autoSpend = !gameState.player.autoSpend; gameState = { ...gameState }; }} />
+                       ontoggleauto={() => { if (!requireAccountWriter('changing Core allocation')) return; gameState.player.autoSpend = !gameState.player.autoSpend; gameState = { ...gameState }; }} />
       </div>
       <div class="sheet-values" aria-label="Final character values">
         <div class="sheet-value-column">
@@ -3229,7 +3736,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       {/snippet}
     </Tabs>
     <!-- Both grids render all slots; the panel body scrolls when the full inventory is taller than the viewport. -->
-    <div class="invbody" id="inventory-content" role="tabpanel" aria-labelledby={invTabLabelId} tabindex="0">
+    <div class="invbody scroll-pane" id="inventory-content" role="tabpanel" aria-labelledby={invTabLabelId} tabindex="0">
     {#if invTab === 'inv'}
     <section class="bagblock">
       {#if bagFull}
@@ -3317,9 +3824,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
               {@const r = ruleFor(gameState.filter, slot)}
               <tr>
                 <td>{slot}</td>
-                <td><input type="checkbox" aria-label={`Enable bag filter for ${slot}`} checked={r.enabled} onchange={(e) => editRule(slot, { enabled: (e.target as HTMLInputElement).checked })} /></td>
-                <td><input type="number" aria-label={`Minimum improvement over worn ${slot}, percent`} min="0" step="1" value={r.margin_pct} disabled={!r.enabled} onchange={(e) => editRule(slot, { margin_pct: Number((e.target as HTMLInputElement).value) })} /> %</td>
-                <td><input type="checkbox" aria-label={`Keep ${slot} with Element resistance missing`} checked={r.keep_missing_element} disabled={!r.enabled} onchange={(e) => editRule(slot, { keep_missing_element: (e.target as HTMLInputElement).checked })} /></td>
+                <td><input type="checkbox" aria-label={`Enable bag filter for ${slot}`} checked={r.enabled} disabled={!transactionWriter} onchange={(e) => editRule(slot, { enabled: (e.target as HTMLInputElement).checked })} /></td>
+                <td><input type="number" aria-label={`Minimum improvement over worn ${slot}, percent`} min="0" step="1" value={r.margin_pct} disabled={!r.enabled || !transactionWriter} onchange={(e) => editRule(slot, { margin_pct: Number((e.target as HTMLInputElement).value) })} /> %</td>
+                <td><input type="checkbox" aria-label={`Keep ${slot} with Element resistance missing`} checked={r.keep_missing_element} disabled={!r.enabled || !transactionWriter} onchange={(e) => editRule(slot, { keep_missing_element: (e.target as HTMLInputElement).checked })} /></td>
                 <td>{describeRule(r)}</td>
               </tr>
             {/each}
@@ -3336,20 +3843,27 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
                 <span>Preset {i + 1}</span>
                 {#if gameState.filterPresets[i]}
                   <small class="text-dim">stored</small>
-                  <button onclick={() => doLoadFilterPreset(i)}>Load</button>
-                  <button onclick={() => doClearFilterPreset(i)}>Clear</button>
+                  <button onclick={() => doLoadFilterPreset(i)} disabled={!transactionWriter}>Load</button>
+                  <button onclick={() => doClearFilterPreset(i)} disabled={!transactionWriter}>Clear</button>
                 {:else}
                   <small class="text-dim">empty</small>
-                  <button onclick={() => doSaveFilterPreset(i)}>Save</button>
+                  <button onclick={() => doSaveFilterPreset(i)} disabled={!transactionWriter}>Save</button>
                 {/if}
               </li>
             {/each}
           </ul>
           <p class="autodissolve"><small>Auto-dissolve below item level
-              <input type="number" min="0" step="1" value={gameState.autoDissolveLevel ?? 0}
-                onchange={(e) => { gameState.autoDissolveLevel = Math.max(0, Number((e.target as HTMLInputElement).value) || 0); gameState = { ...gameState }; }} /></small></p>
+              <input type="number" min="0" step="1" value={gameState.autoDissolveLevel ?? 0} disabled={!transactionWriter}
+                onchange={(e) => setAutoDissolve(Number((e.target as HTMLInputElement).value))} /></small></p>
         </div>
+        <button class="btn btn-quiet" type="button" onclick={openGearCare}>Open gear care</button>
       </details>
+      <div class="gear-care-slot">
+        <GearCare state={gameState} writer={transactionWriter} autoEquipEnabled={settings.autoEquip !== false} marginPct={settings.equipMargin || 0}
+          onAutoEquip={(enabled) => setSetting('autoEquip', enabled)} onEquipNow={doBestEquip}
+          onMargin={(value) => setSetting('equipMargin', value)}
+          onAutoReturn={setAutoReturn} onRule={editRule} onRunFilter={doRunFilter} onOpenBag={() => openPanel('bag')} />
+      </div>
     </section>
     {:else}
     <section class="bagblock">
@@ -3373,12 +3887,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
 {#if panel === 'forge'}
   <Panel title="Forge" subtitle="Materials in · a new piece out" width="wide" fixed topmost gridArea={modalGridArea} onclose={closePanel}>
-    <Forge game={gameState} writer={transactionWriter} note={forgeNote} onforge={runForge} />
+    <Forge game={gameState} writer={transactionWriter} note={forgeNote} onforge={runForge} focus={forgeFocus}
+      ontrack={doTrackGoal} onshortage={doTrackShortage} onpinzone={pinZoneSource}
+      onmap={openMapAtSettlement} onbag={() => openPanel('bag')} />
   </Panel>
 {/if}
 
 {#if panel === 'craft' || showcaseMode}
-  <Panel title="Craft" subtitle="Right-click a stone · click to apply · Shift-click to repeat" width="wide" fixed topmost showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
+  <Panel title="Craft" subtitle={`Optional · ${ACTIVITY_GUIDE.craft.when} ${ACTIVITY_GUIDE.craft.helps} Right-click a stone · click to apply · Shift-click to repeat`} width="wide" fixed topmost showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <CraftWorkshop game={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
                    onpick={(where, index) => { bench = { where, index }; benchNote = ''; }}
                    onclear={() => { bench = null; benchNote = ''; }}
@@ -3578,6 +4094,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       onselect={(id) => (selectedTreeNodeId = id)}
       onbuy={() => doSpendTree(selectedTreeNodeId)}
       onpath={doAllocateTreePath}
+      ontrackgoal={(id) => doTrackGoal({ kind: 'passive', id })}
+      goalId={journeyGoal?.source === 'tracked' && journeyGoal.view.ref.kind === 'passive' ? journeyGoal.view.ref.id : null}
     />
   </Panel>
 {/if}
@@ -3595,7 +4113,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {#if panel === 'market' || showcaseMode}
   <Panel title="Market" subtitle={`${town?.name ?? ''} · demand, cargo and town services`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <Market state={gameState} town={town} here={townLive} writer={transactionWriter} onbuy={doBuy} onsell={doSell} ontrade={doTrade} onprocess={doProcess} onroute={showTradeRoute}
-            ondeliver={doDelivery} ontrack={doTrackDelivery} onack={doAcknowledgeDelivery} onblackmarketbuy={doBlackMarketBuy} bind:view={marketView} bind:marketId={marketTownId} />
+            ondeliver={doDelivery} ontrack={doTrackDelivery} onack={doAcknowledgeDelivery} onblackmarketbuy={doBlackMarketBuy}
+            onpinzone={pinZoneSource} ontrackgoal={(id) => doTrackGoal({ kind: 'delivery', id })} ontrackshortage={doTrackShortage}
+            goalId={journeyGoal?.source === 'tracked' && journeyGoal.view.ref.kind === 'delivery' ? journeyGoal.view.ref.id : null}
+            bind:view={marketView} bind:marketId={marketTownId} />
   </Panel>
 {/if}
 
@@ -3637,6 +4158,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {#if panel === 'farm' || showcaseMode}
   <Panel title="Farm" subtitle={farmSub} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <div class="farm-panel">
+    <p class="text-note"><b>Optional activity</b> {ACTIVITY_GUIDE.farm.when} {ACTIVITY_GUIDE.farm.helps}</p>
     <p><small>{gameState.farm.xp} Farm XP · {farm.xpPerHarvest} per harvest · {farm.F.growth_hours} h base cycle · tier Mastery XP low {gameState.farm.mastery.low} (Lv {farmMasteryLevel(gameState, 'low')}), mid {gameState.farm.mastery.mid} (Lv {farmMasteryLevel(gameState, 'mid')}), high {gameState.farm.mastery.high} (Lv {farmMasteryLevel(gameState, 'high')}) · at most 10% future growth-time reduction; ready times already set are unchanged · {farm.plotsMax} plots at most ({plots} yours).</small></p>
     <Tabs label="Farm sections" active={farmTab} onpick={(id) => (farmTab = id as typeof farmTab)}
           tabs={[{ id: 'plots', label: 'Plots & herbs' }, { id: 'alchemy', label: 'Alchemy' }, { id: 'automation', label: 'Auto use' }]} />
@@ -3700,16 +4222,16 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
     {#if farmTab === 'automation'}
     <h3>Auto-use</h3>
-    <label><input type="checkbox" checked={gameState.farm.autoUse.hp} onchange={() => { gameState.farm.autoUse.hp = !gameState.farm.autoUse.hp; gameState = { ...gameState }; }} /> HP line below
-      <input type="number" value={gameState.farm.threshold.hp} min="1" max="99" onchange={(e) => { gameState.farm.threshold.hp = Number((e.target as HTMLInputElement).value); gameState = { ...gameState }; }} />%
+    <label><input type="checkbox" checked={gameState.farm.autoUse.hp} disabled={!transactionWriter} onchange={(e) => setAutoPotion('hp', e.currentTarget.checked)} /> HP line below
+      <input type="number" value={gameState.farm.threshold.hp} min="1" max="99" disabled={!transactionWriter} onchange={(e) => setPotionThreshold('hp', e.currentTarget.valueAsNumber)} />%
     </label>
-    <label><input type="checkbox" checked={gameState.farm.autoUse.mana} onchange={() => { gameState.farm.autoUse.mana = !gameState.farm.autoUse.mana; gameState = { ...gameState }; }} /> Mana line below
-      <input type="number" value={gameState.farm.threshold.mana} min="1" max="99" onchange={(e) => { gameState.farm.threshold.mana = Number((e.target as HTMLInputElement).value); gameState = { ...gameState }; }} />%
+    <label><input type="checkbox" checked={gameState.farm.autoUse.mana} disabled={!transactionWriter} onchange={(e) => setAutoPotion('mana', e.currentTarget.checked)} /> Mana line below
+      <input type="number" value={gameState.farm.threshold.mana} min="1" max="99" disabled={!transactionWriter} onchange={(e) => setPotionThreshold('mana', e.currentTarget.valueAsNumber)} />%
     </label>
     <h3>Auto-farm</h3>
-    <label><input type="checkbox" checked={gameState.farm.autoFarm.harvest} onchange={() => { gameState.farm.autoFarm.harvest = !gameState.farm.autoFarm.harvest; gameState = { ...gameState }; }} /> Auto-harvest ready plots</label>
-    <label><input type="checkbox" checked={gameState.farm.autoFarm.plant} onchange={() => { gameState.farm.autoFarm.plant = !gameState.farm.autoFarm.plant; gameState = { ...gameState }; }} /> Auto-plant empty plots (uses one herb as the seed)</label>
-    <label><input type="checkbox" checked={gameState.farm.autoFarm.brew} onchange={() => { gameState.farm.autoFarm.brew = !gameState.farm.autoFarm.brew; gameState = { ...gameState }; }} /> Auto-brew affordable draughts</label>
+    <label><input type="checkbox" checked={gameState.farm.autoFarm.harvest} disabled={!transactionWriter} onchange={(e) => setFarmAutomation('harvest', e.currentTarget.checked)} /> Auto-harvest ready plots</label>
+    <label><input type="checkbox" checked={gameState.farm.autoFarm.plant} disabled={!transactionWriter} onchange={(e) => setFarmAutomation('plant', e.currentTarget.checked)} /> Auto-plant empty plots (uses one herb as the seed)</label>
+    <label><input type="checkbox" checked={gameState.farm.autoFarm.brew} disabled={!transactionWriter} onchange={(e) => setFarmAutomation('brew', e.currentTarget.checked)} /> Auto-brew affordable draughts</label>
     <p><small>Shared cooldown {farm.P.shared_cooldown_sec} sec · {farm.P.max_uses_per_fight} uses a fight · {farm.P.boss_suppressed ? 'suppressed entirely on bosses' : ''} · a condensed bottle is {farm.P.condensed.effect_mult}× and weighs {farm.P.condensed.weight} against {farm.P.weight} loose.</small></p>
     {/if}
     {#if farmNote}<p class="farm-note" role="status">{farmNote}</p>{/if}
@@ -3754,13 +4276,15 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         <tbody>
           {#each viewStock as row}
             {@const check = canBuy(gameState, viewTown.id, row.id)}
+            {@const repair = row.id === 'repair' || row.id === 'repair_ironrow'}
+            {@const noBroken = repair && !gameState.gear.some((it) => it?.broken) && !gameState.bag.some((it) => it?.broken)}
             <tr>
               <td>{row.item}</td>
               <td>{npcOf(row.npc)?.name ?? row.npc}</td>
               <td>{row.kind}</td>
               <td>{priceMinutes(row, viewTown.id, gameState)} m{row.charge_band ? ` @ ${row.charge_band}` : ''}</td>
               <td>{priceGold(row, viewTown.id, gameState)}</td>
-              <td>{#if !check.ok}<small>{check.why}</small>{/if}{#if viewHere}<button onclick={() => doBuy(row.id)} disabled={!check.ok}>buy</button>{:else}<span class="text-dim">elsewhere</span>{/if}</td>
+              <td>{#if !check.ok}<small>{check.why}</small>{:else if noBroken}<small>no Broken piece to repair</small>{/if}{#if viewHere}<button onclick={() => doBuy(row.id)} disabled={!check.ok || noBroken}>buy</button>{:else}<span class="text-dim">elsewhere</span>{/if}</td>
             </tr>
           {/each}
         </tbody>
@@ -3912,7 +4436,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
           tabs={[{ id: 'slots', label: 'Slots' }, { id: 'backups', label: 'Backups' }, { id: 'settings', label: 'Settings' }]} />
     {#if showcaseMode}<p class="showcase-note">Save, load, backup, import, and export are disabled here. This page never reads or writes a player save.</p>{/if}
     {#if !showcaseMode}
-      <div class="account-writer" class:owner={accountWriterState === 'owner'} role="status" aria-live="polite">
+      <div class="account-writer card-tile" class:owner={accountWriterState === 'owner'} role="status" aria-live="polite">
         <p>{accountWriterMessage}</p>
         {#if accountWriterState === 'readonly'}
           <label>Reload after takeover
@@ -3989,6 +4513,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   :global(body.ui-showcase) { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: auto; }
   .showcase-frame { display: contents; }
   .showcase-frame.active { display: grid; grid-template-rows: auto auto minmax(0, 1fr); height: 100vh; }
+  .showcase-frame.active:has(.combat-fx-preview-controls) { grid-template-rows: auto auto auto minmax(0, 1fr); }
   .showcase-banner {
     display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md);
     padding: var(--spacing-xs) var(--screen-pad); border-bottom: 1px solid var(--line);
@@ -3999,6 +4524,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .showcase-banner p { flex: 1; min-width: 0; margin: 0; color: var(--dim); font-size: var(--font-xs); }
   .showcase-banner label { flex: none; }
   .showcase-banner a { flex: none; padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); text-decoration: none; }
+  .combat-fx-preview-controls { display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-md); padding: var(--spacing-xs) var(--screen-pad); border-bottom: 1px solid var(--line); background: var(--inset); }
+  .combat-fx-preview-controls label { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
+  .combat-fx-preview-controls span { color: var(--dim); font-size: var(--font-xs); }
   .showcase-index { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--screen-pad); border-bottom: 1px solid var(--line); background: var(--inset); }
   .showcase-index a { padding: var(--spacing-xs) var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-card); color: var(--dim); font-size: var(--font-xs); text-decoration: none; white-space: nowrap; }
   .showcase-index a:hover, .showcase-index a:focus-visible { border-color: var(--gold); color: var(--gold-lit); }
@@ -4012,9 +4540,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     position: absolute; inset: 0; overflow: hidden; cursor: crosshair;
 
     --dof: var(--dof-rest);
-
-    --map-lift: .58;
-    --map-sat: .72;
 
     opacity: calc(1 - var(--dof) / 12);
 
@@ -4030,7 +4555,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .map-back::after {
     content: '';
     position: absolute; inset: 0; z-index: var(--z-underlay); pointer-events: none;
-    background: radial-gradient(ellipse 88% 80% at 50% 48%, transparent 74%,
+    background: linear-gradient(rgba(12, 16, 14, .36), rgba(12, 16, 14, .36)),
+      radial-gradient(ellipse 88% 80% at 50% 48%, transparent 74%,
       color-mix(in srgb, var(--ground) 58%, transparent) 88%,
       color-mix(in srgb, var(--ground) 98%, transparent) 100%);
   }
@@ -4044,23 +4570,23 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     transform-origin: 50% 46%;
     transition: transform var(--motion-fast) var(--ease-ui);
 
-    filter: blur(var(--dof)) brightness(var(--map-lift)) saturate(var(--map-sat));
-
-    will-change: transform;
+    filter: none;
+    will-change: auto;
   }
 
-  .map-back.dragging .map-sheet { transition: none; }
+  .map-back.dragging .map-sheet { transition: none; will-change: transform; }
+  .map-back.camera-turning .map-sheet { transition: none; }
+  .map-back.camera-turning :global(.you) { transition: none; }
+  .stage.mapmode .map-sheet { transition: none; }
 
-  .map-back:focus-visible { --dof: 1.5px; --map-lift: 1; --map-sat: .95; opacity: .92; }
+  .map-back:focus-visible { --dof: 1.5px; opacity: .92; }
 
   .map-back:focus-visible { --ring-offset: -2px; }
 
-  .stage.mapmode .map-back { --dof: 0px; --map-lift: 1; --map-sat: 1; opacity: 1; cursor: grab; }
-  /* in map focus the sheet's filter and layer hint come off: they force one rasterisation that the
-     zoom transform then upscales, smearing the hex labels */
-  .stage.mapmode .map-sheet { filter: none; will-change: auto; }
+  .stage.mapmode .map-back { --dof: 0px; opacity: 1; cursor: grab; }
 
   .map-back.dragging { cursor: grabbing; transition: opacity var(--motion-ui) var(--ease-ui), filter var(--motion-ui) var(--ease-ui); }
+  .stage.mapmode .map-back.rotating { cursor: move; }
   /* cards mount by state (`showCombatCards`); these rules only shape the fight-over-map overlap */
   .stage.mapmode .field { display: none; pointer-events: none; }
   :global(.stage.mapmode .field > :not(.combat-player-slot)) { display: none; }
@@ -4069,21 +4595,67 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   :global(.stage.mapmode .field .combat-player-slot .self-side) { display: none; }
   .stage.mapmode .floaters { display: none; }
 
-  .stage.mapmode .tracker { display: none; }
   .stage.mapmode .targetbar { display: none; }
 
   .stage.veiled { --dof: var(--dof-far); }
-  .stage.veiled .field, .stage.veiled .tracker, .stage.veiled .actionbar, .stage.veiled .targetbar {
+  .stage.veiled .field, .stage.veiled .actionbar, .stage.veiled .targetbar {
     filter: blur(2.5px); opacity: .5; transition: filter var(--motion-fast) var(--ease-ui), opacity var(--motion-fast) var(--ease-ui);
   }
   .stage.veiled .map-back { --dof: var(--dof-rest); }
 
-  .map-reference { position: relative; display: flex; justify-content: flex-start; width: 100%; }
-  .map-reference :global(.mini-map) { flex: none; }
-  .map-guide { position: relative; z-index: var(--z-content); display: grid; align-content: start; gap: var(--spacing-xs); width: fit-content; max-width: 100%; min-width: 0; }
-  .map-guide.open { width: 100%; padding: var(--spacing-sm); display: flex; flex-direction: column; min-height: 0; max-height: 100%; }
-  .map-guide.open .map-tools-content { min-height: 0; }
-  .map-tools-content, .map-tools { display: grid; gap: var(--spacing-sm); min-width: 0; font-size: var(--font-xs); }
+  .journey-dock {
+    grid-area: objectives; z-index: var(--z-hud-control);
+    width: 100%; height: 100%; min-width: 0; min-height: 0;
+    display: flex; flex-direction: column; align-items: stretch; pointer-events: none;
+  }
+  .journey-panel {
+    display: flex; flex-direction: column; min-width: 0; min-height: 0; max-height: 100%;
+    overflow: hidden; pointer-events: auto;
+  }
+  .journey-panel.expanded { flex: 1; }
+  .journey-header, .journey-alerts { flex: none; padding: var(--spacing-sm); }
+  .journey-header { display: grid; gap: var(--spacing-xs); }
+  .journey-title, .journey-location { display: flex; align-items: center; gap: var(--spacing-sm); min-width: 0; }
+  .journey-title { flex-wrap: wrap; }
+  .journey-title > :global(.disclosure-toggle) { flex: 1; min-width: 0; }
+  .journey-title > button { flex: none; font-size: var(--font-xs); }
+  .map-clean-toggle[aria-pressed="true"] { color: var(--gold-lit); border-color: var(--gold); background: var(--surface-selected); }
+  .journey-location strong { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: var(--font-sm); }
+  .journey-level { flex: none; color: var(--gold-lit); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
+  .journey-header p { margin: 0; overflow-wrap: anywhere; font-size: var(--font-xs); line-height: 1.4; }
+  .journey-status { color: var(--gold-lit); }
+  .objective-next-goal { display: grid; gap: var(--spacing-xs); flex: none; min-width: 0; padding: var(--spacing-sm); }
+  .objective-next-goal.stale { border-left: 2px solid var(--alarm); }
+  .objective-next-goal-head, .objective-next-goal-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs) var(--spacing-sm); }
+  .objective-next-goal-head { justify-content: space-between; }
+  .objective-next-goal-title { margin: 0; font-size: var(--font-sm); line-height: 1.3; overflow-wrap: anywhere; }
+  .objective-next-goal p { margin: 0; font-size: var(--font-xs); line-height: 1.4; overflow-wrap: anywhere; }
+  .objective-next-goal-progress { font-variant-numeric: tabular-nums; }
+  .objective-next-goal-sources { display: grid; gap: var(--spacing-xs); margin: 0; padding: 0; list-style: none; font-size: var(--font-xs); line-height: 1.35; }
+  .objective-next-goal-sources li { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--spacing-xs); overflow-wrap: anywhere; }
+  .objective-next-goal-sources button { font-size: var(--font-xs); padding: 0 var(--spacing-xs); }
+  .objective-next-goal-actions button { font-size: var(--font-xs); }
+  .objective-next-goal-details { border-top: 1px solid var(--edge); padding-top: var(--spacing-xs); }
+  .objective-next-goal-details > summary { cursor: pointer; color: var(--dim); font-size: var(--font-xs); font-weight: 600; }
+  .objective-next-goal-details-body { display: grid; gap: var(--spacing-xs); padding-top: var(--spacing-xs); }
+  .journey-alerts { display: grid; gap: var(--spacing-xs); padding-top: 0; }
+  .journey-alerts:empty { display: none; }
+  .journey-notice { display: grid; gap: var(--spacing-2xs); padding: var(--spacing-xs); font-size: var(--font-xs); line-height: 1.35; }
+  .journey-notice.alarm { border-color: color-mix(in srgb, var(--alarm) 50%, var(--edge)); }
+  .journey-notice strong { font-size: var(--font-xs); }
+  .journey-notice small { color: var(--dim); }
+  .journey-notice button { justify-self: start; font-size: var(--font-xs); }
+  .journey-body {
+    display: grid; align-content: start; gap: var(--spacing-md);
+    flex: 1;
+    padding: var(--spacing-sm); border-top: 1px solid var(--edge);
+  }
+  .journey-body[hidden], .journey-map-controls[hidden] { display: none; }
+  .journey-map-controls { display: grid; gap: var(--spacing-sm); padding-bottom: var(--spacing-sm); border-bottom: 1px solid var(--edge); }
+
+  .map-tools { display: grid; gap: var(--spacing-sm); min-width: 0; font-size: var(--font-xs); }
+  .map-display { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
+  .map-display button { font-size: var(--font-xs); }
   .map-tools-section { min-width: 0; }
   .map-tools-section summary { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); padding-block: var(--spacing-xs); cursor: pointer; }
   .map-tools-chevron { width: var(--icon-label); height: var(--icon-label); }
@@ -4099,6 +4671,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .map-zoom { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto; align-items: center; gap: var(--spacing-xs); }
   .map-zoom button { min-width: var(--icon-label); padding: var(--spacing-xs); line-height: 1.2; }
   .map-zoom output { text-align: center; font-variant-numeric: tabular-nums; }
+  .map-rotation-controls { display: grid; grid-template-columns: auto minmax(0, 1fr) 3.5em auto auto; align-items: center; gap: var(--spacing-xs); }
+  .map-bearing-range { display: flex; align-items: center; min-width: 0; gap: var(--spacing-xs); }
+  .map-bearing-range input { width: 100%; min-width: 0; }
+  .map-rotation-controls output { text-align: center; font-variant-numeric: tabular-nums; }
   .map-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs) var(--spacing-sm); padding-block: var(--spacing-xs); }
   .map-legend .swatch { display: flex; align-items: flex-start; gap: var(--spacing-xs); min-width: 0; line-height: 1.2; }
   .map-legend .swatch i { width: var(--icon-detail); height: var(--icon-detail); flex: none; }
@@ -4106,12 +4682,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .map-legend p { grid-column: 1 / -1; margin: 0; line-height: 1.4; }
   .map-legend .ramp i { flex: 1; width: auto; }
 
-  .mapcard {
-    grid-area: panels; position: relative; display: flex; flex-direction: column;
-    min-width: 0; min-height: 0; max-height: 100%;
-    z-index: var(--z-highlight); overflow-y: auto;
-  }
-  .mapcard :global(.dest) { flex: none; }
   .picklist tr { cursor: pointer; }
   .picklist tr:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
   .picklist tr.picked { background: var(--panel); }
@@ -4142,7 +4712,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     content: ''; position: absolute; inset: 0; z-index: var(--z-underlay); pointer-events: none;
     background: radial-gradient(115% 95% at 50% 48%, transparent 52%, rgba(0, 0, 0, .55));
   }
-  .tracker, .field { z-index: var(--z-content); }
+  .field { z-index: var(--z-content); }
 
   .stage:has(.toast) .field { grid-row-start: 5; }
   .stage:not(:has(.toast)) .save-note { top: var(--band-toast); }
@@ -4155,47 +4725,19 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
 
-  .pill {
-    display: inline-flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-card);
-    background: var(--glass); border: 1px solid var(--edge); font-size: var(--font-xs);
-    font-variant-numeric: tabular-nums; backdrop-filter: blur(6px);
-  }
-  .pill.note { color: var(--good); }
-
   .save-note {
     position: absolute; top: var(--band-note); left: 50%; transform: translateX(-50%); z-index: var(--z-label);
     max-width: min(clamp(425px, 32.91vw, 918px), 86%);
   }
 
 
-  .tracker {
-    width: var(--objectives-w); pointer-events: auto; z-index: var(--z-content);
-    display: grid; gap: var(--spacing-xs); align-content: start; justify-items: stretch;
-  }
-  .tracker .phase, .tracker .alarm-line {
-    margin: 0; padding: var(--spacing-xs) var(--spacing-xs); border-radius: var(--radius-card); font-size: var(--font-xs);
-    background: linear-gradient(90deg, rgba(0, 0, 0, .66), rgba(0, 0, 0, .38) 78%, transparent);
-  }
-  .account-hold { display: grid; justify-items: start; gap: var(--spacing-xs); }
-  .account-hold .chip { display: flex; max-width: 100%; padding: var(--spacing-xs) var(--spacing-xs); white-space: normal; line-height: 1.2; }
-  .tracker .phase {
-    color: var(--gold-lit); text-transform: uppercase;
-    letter-spacing: clamp(1px, 0.05vw, 2px);
-    box-shadow: inset 2px 0 0 var(--gold);
-    font-size: var(--font-sm); font-weight: 650; line-height: 1.25;
-  }
 
-  .tracker .phase, .tracker .alarm-line {
-    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical;
-  }
-  .alarm-line { color: var(--alarm); font-size: var(--font-sm); font-weight: 600; line-height: 1.25; }
 
 
   .field {
     min-width: 0; min-height: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: var(--spacing-md);
     overflow: visible;
-    padding-bottom: calc(var(--card-w) * 1.5 + var(--pad-area));
 
     --card-w: var(--field-card-size);
 
@@ -4448,13 +4990,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     width: var(--icon-hub); height: var(--icon-hub); padding: var(--spacing-xs);
     border: 1px solid var(--hud-edge); border-radius: var(--radius-round); background: var(--hud-face); box-sizing: border-box;
   }
-  .toggle-ring > img, .toggle-ring > svg {
+  .toggle-ring > img, .toggle-ring > .icon-mask {
     position: relative; z-index: var(--z-underlay);
     width: var(--icon-hub-img); height: var(--icon-hub-img); aspect-ratio: 1 / 1;
     padding: 0; border: 0; border-radius: var(--radius-card); background: none; box-sizing: border-box;
     object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .9));
   }
-  .toggle-ring > svg { fill: none; stroke: currentColor; stroke-width: 1.5; }
+  .toggle-ring > .icon-mask { background: currentColor; }
   .toggle-ring.here { border-color: color-mix(in srgb, var(--gold) 65%, var(--hud-edge)); background: var(--hud-face); }
   .toggle-ring.here::before, .toggle-ring.here::after {
     content: ''; position: absolute; inset: 0; border-radius: var(--radius-round);
@@ -4482,39 +5024,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     pointer-events: none;
   }
 
-  .topright {
-    z-index: var(--z-hud-control);
-    display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-xs);
-    pointer-events: none;
-  }
-  .topright > * { pointer-events: auto; }
   .command-row { display: flex; justify-content: flex-end; align-items: flex-start; gap: var(--spacing-xs); min-width: 0; }
   .commands-dock { z-index: var(--z-hud-control); display: flex; flex-direction: column; justify-content: center; gap: var(--spacing-xs); min-width: 0; max-width: 100%; pointer-events: none; }
   .commands-dock > * { pointer-events: auto; }
   .speed-mark { color: var(--dim); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
   .speed-mark.here { color: var(--gold-lit); }
-  .field-travel-actions {
-    grid-area: travel; z-index: var(--z-travel); width: 100%; min-width: 0; min-height: 0; max-height: 100%;
-    display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-xs);
-    pointer-events: none;
-  }
-  .field-travel-actions > * { pointer-events: auto; }
 
-  .zone-tag {
-    margin: 0; align-self: stretch; display: flex; align-items: center; gap: var(--spacing-xs); min-width: 0;
-    padding: var(--spacing-xs) var(--spacing-xs); border-radius: var(--radius-card);
-    background: var(--hud-face);
-    border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--edge));
-    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, .06);
-    color: var(--text);
-  }
-  .zone-emblem { opacity: .9; }
-  .zone-copy { display: grid; gap: var(--spacing-xs); min-width: 0; flex: 1; }
-  .zone-copy span { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .zone-tag.traveling { align-items: flex-start; }
-  .zone-tag.traveling .zone-copy span { overflow: visible; white-space: normal; }
-  .zone-level { flex: none; padding-left: var(--spacing-xs); border-left: 1px solid var(--edge); color: var(--gold-lit); font-size: var(--font-xs); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .zone-emblem { padding: var(--spacing-xs); border: 1px solid var(--hud-edge); border-radius: var(--radius-round); background: var(--hud-face); box-sizing: border-box; }
   .targetbar {
     z-index: var(--z-content);
     display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs);
@@ -4575,9 +5090,15 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   @media (prefers-reduced-motion: reduce) {
     .hud-slide-content, .hud-slide-content.collapsed { transform: none; transition: none; }
   }
-  .hub-collapsible[hidden] { display: none; }
-  .field-objectives { grid-area: tasks; height: 100%; min-width: 0; min-height: 0; padding: var(--pad-area); pointer-events: none; z-index: var(--z-control); }
+  .field-objectives {
+    grid-area: tasks; height: 100%; min-width: 0; min-height: 0;
+    display: flex; flex-direction: column; gap: var(--spacing-sm);
+    padding: var(--pad-area); overflow: hidden;
+    pointer-events: none; z-index: var(--z-control);
+  }
   .field-objectives > :global(*) { pointer-events: auto; }
+  .objective-feed-slot { flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden; }
+  .objective-feed-slot > :global(.objective-feed) { flex: 1 1 auto; min-height: 0; height: 100%; align-content: start; }
   .purse { display: inline-flex; align-items: center; gap: var(--spacing-xs); flex: none; font-variant-numeric: tabular-nums; }
   .purse img { width: var(--icon-label); height: var(--icon-label); padding: var(--spacing-xs); border: 1px solid var(--hud-edge); border-radius: var(--radius-round); background: var(--hud-face); box-sizing: border-box; object-fit: contain; }
   .purse b { font-size: var(--font-sm); font-weight: 700; color: var(--gold-lit); line-height: 1; }
@@ -4594,16 +5115,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     position: absolute; top: calc(100% + var(--spacing-xs)); right: 0;
     display: grid; grid-template-columns: repeat(8, minmax(var(--icon-card), 1fr)); gap: var(--spacing-sm);
     padding: var(--spacing-sm);
-    background: var(--glass); backdrop-filter: blur(6px);
-    border: 1px solid var(--edge); border-radius: var(--radius-card);
-    box-shadow: var(--shadow-soft);
   }
-  .more-count { position: absolute; top: 0; right: 0; }
 
-  .invbody { display: grid; align-content: start; gap: var(--spacing-sm); min-height: 0; overflow: visible; }
+  .invbody { display: grid; align-content: start; gap: var(--spacing-sm); min-height: 0; height: 100%; }
   .invbody > section { min-height: 0; overflow: visible; }
 
-  .inventory-layout { display: grid; grid-template-columns: minmax(max-content, 1fr) minmax(0, 4fr); align-items: start; gap: var(--spacing-md); min-width: 0; min-height: 0; }
+  .inventory-layout { display: grid; grid-template-columns: minmax(max-content, 1fr) minmax(0, 4fr); grid-template-rows: minmax(0, 1fr); align-items: start; gap: var(--spacing-md); min-width: 0; min-height: 0; height: 100%; }
   .inventory-tab { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: var(--spacing-xs); width: 100%; min-width: 0; text-align: left; }
   .inventory-tab-label { display: inline-flex; align-items: center; gap: var(--spacing-xs); min-width: 0; }
   /* the tab buttons live in Tabs.svelte's scope, so their face styles reach them globally */
@@ -4670,6 +5187,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .bagtools .best:hover { border-color: var(--good); }
   .equipnote { position: relative; top: var(--x-pull-note); font-size: var(--font-xs); color: var(--good); }
   .bagblock { display: grid; align-content: start; gap: var(--spacing-xs); border: 0; }
+  .gear-care-slot { border-top: 1px solid var(--line); padding-top: var(--spacing-sm); }
   .bagblock:has(.filter[open]) .bagshell { display: none; }
   .bagmeta { margin: 0; }
   .filterpresets { display: grid; gap: var(--spacing-xs); border-top: 1px solid var(--line); padding-top: var(--spacing-sm); }
@@ -4680,7 +5198,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .presetrow button, .presetrow small { font-size: var(--font-xs); }
   .autodissolve input { width: var(--input-narrow); }
   .skill-label { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
-  .skill-label .chip { padding-inline: var(--spacing-xs); }
 
   .gate {
     padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); color: var(--gold); cursor: pointer;
@@ -4695,7 +5212,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .stats td { font-size: var(--font-xs); padding: var(--spacing-xs) var(--spacing-xs); }
   .stats td:first-child { color: var(--dim); width: 45%; }
   .save-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; align-content: start; gap: var(--spacing-sm); }
-  .account-writer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); }
+  .account-writer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-xs); }
   .account-writer.owner { border-color: color-mix(in srgb, var(--good) 48%, var(--line)); }
   .account-writer p { flex: 1 1 clamp(150px, 11.62vw, 324px); min-width: 0; color: var(--dim); font-size: var(--font-xs); }
   .account-writer.owner p { color: var(--good-lit); }
@@ -4886,27 +5403,34 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     100% { opacity: 0; transform: scale(.9); }
   }
 
-  :global(.stage.combat-fx-sample .fx) { animation: none; opacity: 1; transform: none; }
-  :global(.stage.combat-fx-sample .pop) { animation: none; opacity: 1; transform: none; }
-  :global(.stage.combat-fx-sample .mob .plate-fx .pop) {
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .fx) { animation: none; opacity: 1; transform: none; }
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .pop) { animation: none; opacity: 1; transform: none; }
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .mob .plate-fx .pop) {
     top: calc(58% + (var(--lane, 0) * var(--icon-card)));
   }
-  :global(.stage.combat-fx-sample .mob .plate-fx .pop-word) {
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .mob .plate-fx .pop-word) {
     top: calc(58% + (var(--icon-card) * 4));
   }
-  :global(.stage.combat-fx-sample .player-card.combat .pops .pop) {
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .player-card.combat .pops .pop) {
     top: calc(50% + (var(--lane, 0) * var(--icon-label)));
   }
-  :global(.stage.combat-fx-sample .player-card.combat .pops .pop-word) {
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .player-card.combat .pops .pop-word) {
     top: calc(50% - (var(--icon-card) * 2) + (var(--lane, 0) * var(--spacing-lg)));
   }
-  :global(.stage.combat-fx-sample .flash) { animation: none; opacity: .75; }
-  :global(.stage.combat-fx-sample .mob .arc),
-  :global(.stage.combat-fx-sample .mob .burst) { animation: none; opacity: .75; transform: none; }
-  :global(.stage.combat-fx-sample .mob .art.knock),
-  :global(.stage.combat-fx-sample .mob .charge.lunge),
-  :global(.stage.combat-fx-sample .player-card.combat .cardface.knock) { animation: none; }
-  :global(.stage.combat-fx-sample .field-side) {
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .flash) { animation: none; opacity: .75; }
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .combat-scene-effects .impact),
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .skill-cast-cue) { animation: none; opacity: .85; transform: none; }
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .combat-scene-effects .impact-flash),
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .combat-scene-effects .flight-trail),
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .combat-scene-effects .flight-core),
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .combat-scene-effects .lightning-trail),
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .combat-scene-effects .lightning-core) { display: none; }
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .mob .art.knock),
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .mob .charge.lunge),
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .player-card.combat .cardface.knock) { animation: none; }
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .combat-actor),
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .combat-actor *) { animation: none !important; }
+  :global(.stage.combat-fx-sample:not(.combat-fx-live) .field-side) {
     right: calc(var(--controls-h) * 2 + var(--screen-pad));
     bottom: calc(var(--controls-h) * 2 + var(--screen-pad) + (var(--icon-card) * 2));
   }
@@ -4923,7 +5447,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
 
 
-  .townmode .field { opacity: .78; filter: saturate(.85); }
+  .townmode:not(.fighting) .field { opacity: .78; filter: saturate(.85); }
   .townmode .map-back { --dof: var(--dof-far); }
 
 
@@ -4933,14 +5457,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     grid-template-columns: var(--screen-pad) repeat(15, minmax(0, 1fr)) var(--screen-pad);
     grid-template-rows: var(--screen-pad) repeat(15, minmax(0, 1fr)) var(--screen-pad);
 
-  }
-  .topright {
-    grid-area: objectives;
-    width: 100%;
-    min-width: 0;
-    min-height: 0;
-    align-self: start;
-    display: grid; gap: var(--spacing-sm);
   }
   .targetbar {
     grid-area: target;
@@ -4996,15 +5512,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     min-height: 0;
     align-self: stretch;
   }
-  .stage :is(.topright, .targetbar, .field-travel-actions, .field, .commands-dock, .field-feed, .actionbar) {
+  .stage :is(.journey-dock, .targetbar, .field, .commands-dock, .field-feed, .actionbar) {
     padding: var(--pad-area);
   }
   .stage .rail { padding: 0 var(--spacing-xs); }
   .stage .commands-dock { padding-inline: var(--spacing-md); }
 
-  .stage .field { padding-bottom: calc(var(--card-w) * 1.5 + var(--pad-area)); }
+  .stage .field { padding-bottom: var(--pad-area); }
   .field-feed :global(.combatlog) { width: 100%; min-height: 0; }
-  .tracker { width: 100%; }
   .hud-grid-debug {
     position: fixed;
     inset: 0;
@@ -5026,4 +5541,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     font: var(--font-xs) / 1 var(--num);
     text-shadow: 0 1px 2px var(--bg);
   }
+  .map-marker-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs) var(--spacing-sm); width: 100%; }
+  .map-marker-legend > span { display: flex; align-items: center; gap: var(--spacing-xs); }
+  .map-marker-legend svg, .journey-map-signals svg { width: 24px; height: 28px; flex: none; }
+  .journey-map-signals { display: grid; gap: var(--spacing-sm); padding: var(--spacing-sm); border-top: 1px solid var(--line); }
+  .journey-map-signals summary { color: var(--text); font-size: var(--font-sm); font-weight: 600; cursor: pointer; }
+  .journey-map-signals ul { display: grid; gap: var(--spacing-xs); list-style: none; margin: 0; padding: 0; }
+  .journey-map-signals li { display: flex; align-items: center; gap: var(--spacing-sm); min-width: 0; }
+  .journey-map-signals li > span { color: var(--text); font-size: var(--font-xs); line-height: 1.4; overflow-wrap: anywhere; }
 </style>

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Progression</title></head>
+<title>Progression · ModWorld Field Manual</title></head>
 <body><style>:root {
     color-scheme: dark;
     --bg: #0f1217;
@@ -63,10 +63,6 @@
     --pad-area: 20px;
     --bar-h: 14px;
 
-    --minimap-size: clamp(100px, 7.74vw, 216px);
-    --map-hairline: rgba(0, 0, 0, 0.35);
-    --map-hairline-strong: rgba(0, 0, 0, 0.6);
-    --objectives-w: clamp(170px, 11.96vw, 300px);
 
     --elite: #6c5199;
     --elite-ink: #b98cff;
@@ -121,7 +117,10 @@
     --sel: rgba(127, 212, 255, 0.26);
     --bar: #232b36;
     --radius-round: 50%;
+    --radius-pill: 999px;
     --radius-card: 8px;
+    --font-3xs: 11px;
+    --font-2xs: 12px;
     --font-xs: 14px;
     --font-sm: 16px;
     --font-md: clamp(17px, 1.28vw, 36px);
@@ -136,6 +135,7 @@
     --slot-item: 40px;
     --slot-skill-size: clamp(36px, 2.6vw, 50px);
     --field-card-size: clamp(125px, 8.63vw, 180px);
+    --spacing-2xs: 2px;
     --spacing-xs: 5px;
     --spacing-sm: 10px;
     --spacing-md: 15px;
@@ -197,7 +197,11 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs tbody { display: none; }
 .tabs input:checked:nth-of-type(1) ~ table tbody:nth-of-type(1),
 .tabs input:checked:nth-of-type(2) ~ table tbody:nth-of-type(2),
-.tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3) { display: table-row-group; }
+.tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3),
+.tabs input:checked:nth-of-type(4) ~ table tbody:nth-of-type(4),
+.tabs input:checked:nth-of-type(5) ~ table tbody:nth-of-type(5),
+.tabs input:checked:nth-of-type(6) ~ table tbody:nth-of-type(6),
+.tabs input:checked:nth-of-type(7) ~ table tbody:nth-of-type(7) { display: table-row-group; }
 .tabs table { flex: 1 0 100%; width: 100%; }
 .twrap { overflow: hidden; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
 .twrap table { width: 100%; min-width: 0; table-layout: fixed; }
@@ -253,12 +257,637 @@ td .sub { display: block; color: var(--dim); font-size: var(--font-xs); }
 .legend { display: grid; gap: var(--spacing-xs); padding-left: 1.1rem; font-size: var(--font-xs); color: var(--dim); }
 .legend strong { color: var(--text); }
 .num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-card); padding: 0 .25rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; }
-ol { display: flex; flex-direction: column; gap: var(--spacing-xs); padding-left: 1.3rem; }</style><div class="layout">
-<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Bestiary</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="on" href="progression.html">Progression</a><a class="" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a><a class="" href="icons.html">Icons</a></nav>
-<main><header class="page-head"><h1>Progression</h1><p class="lead">XP to next level = kills at that level × XP per kill. Skill, field-skill and Mastery tracks use separate XP curves.</p></header>
-<div class="page-content"><section><h2>Level steps</h2><p class="note"><code>XP to next = killsToLevel(L) × per_kill × min(L, mob_level_cap)</code>; <code>kills at own level = XP to next / XP per kill</code>. At the plateau, XP is fixed and mob XP still follows the level cap.</p><table><thead><tr><th>Level</th><th>XP to next</th><th>Cumulative XP</th><th>Kills at your own level</th></tr></thead><tbody><tr><td><span class="num">1</span></td><td><span class="num">200</span></td><td><span class="num">200</span></td><td><span class="num">20</span></td></tr><tr><td><span class="num">2</span></td><td><span class="num">505</span></td><td><span class="num">705</span></td><td><span class="num">25</span></td></tr><tr><td><span class="num">3</span></td><td><span class="num">915</span></td><td><span class="num">1,620</span></td><td><span class="num">31</span></td></tr><tr><td><span class="num">4</span></td><td><span class="num">1,430</span></td><td><span class="num">3,050</span></td><td><span class="num">36</span></td></tr><tr><td><span class="num">5</span></td><td><span class="num">2,050</span></td><td><span class="num">5,100</span></td><td><span class="num">41</span></td></tr><tr><td><span class="num">6</span></td><td><span class="num">2,772</span></td><td><span class="num">7,872</span></td><td><span class="num">46</span></td></tr><tr><td><span class="num">7</span></td><td><span class="num">3,598</span></td><td><span class="num">11,470</span></td><td><span class="num">51</span></td></tr><tr><td><span class="num">8</span></td><td><span class="num">4,528</span></td><td><span class="num">15,998</span></td><td><span class="num">57</span></td></tr><tr><td><span class="num">9</span></td><td><span class="num">5,562</span></td><td><span class="num">21,560</span></td><td><span class="num">62</span></td></tr><tr><td><span class="num">10</span></td><td><span class="num">6,700</span></td><td><span class="num">28,260</span></td><td><span class="num">67</span></td></tr><tr><td><span class="num">11</span></td><td><span class="num">7,810</span></td><td><span class="num">36,070</span></td><td><span class="num">71</span></td></tr><tr><td><span class="num">12</span></td><td><span class="num">9,150</span></td><td><span class="num">45,220</span></td><td><span class="num">76</span></td></tr><tr><td><span class="num">13</span></td><td><span class="num">10,595</span></td><td><span class="num">55,815</span></td><td><span class="num">82</span></td></tr><tr><td><span class="num">14</span></td><td><span class="num">12,145</span></td><td><span class="num">67,960</span></td><td><span class="num">87</span></td></tr><tr><td><span class="num">15</span></td><td><span class="num">13,800</span></td><td><span class="num">81,760</span></td><td><span class="num">92</span></td></tr><tr><td><span class="num">16</span></td><td><span class="num">15,456</span></td><td><span class="num">97,216</span></td><td><span class="num">97</span></td></tr><tr><td><span class="num">17</span></td><td><span class="num">17,204</span></td><td><span class="num">114,420</span></td><td><span class="num">101</span></td></tr><tr><td><span class="num">18</span></td><td><span class="num">19,044</span></td><td><span class="num">133,464</span></td><td><span class="num">106</span></td></tr><tr><td><span class="num">19</span></td><td><span class="num">20,976</span></td><td><span class="num">154,440</span></td><td><span class="num">110</span></td></tr><tr><td><span class="num">20</span></td><td><span class="num">23,000</span></td><td><span class="num">177,440</span></td><td><span class="num">115</span></td></tr><tr><td><span class="num">21</span></td><td><span class="num">25,410</span></td><td><span class="num">202,850</span></td><td><span class="num">121</span></td></tr><tr><td><span class="num">22</span></td><td><span class="num">27,720</span></td><td><span class="num">230,570</span></td><td><span class="num">126</span></td></tr><tr><td><span class="num">23</span></td><td><span class="num">30,130</span></td><td><span class="num">260,700</span></td><td><span class="num">131</span></td></tr><tr><td><span class="num">24</span></td><td><span class="num">32,640</span></td><td><span class="num">293,340</span></td><td><span class="num">136</span></td></tr><tr><td><span class="num">25</span></td><td><span class="num">35,250</span></td><td><span class="num">328,590</span></td><td><span class="num">141</span></td></tr><tr><td><span class="num">26</span></td><td><span class="num">39,572</span></td><td><span class="num">368,162</span></td><td><span class="num">152</span></td></tr><tr><td><span class="num">27</span></td><td><span class="num">44,118</span></td><td><span class="num">412,280</span></td><td><span class="num">163</span></td></tr><tr><td><span class="num">28</span></td><td><span class="num">48,888</span></td><td><span class="num">461,168</span></td><td><span class="num">175</span></td></tr><tr><td><span class="num">29</span></td><td><span class="num">53,882</span></td><td><span class="num">515,050</span></td><td><span class="num">186</span></td></tr><tr><td><span class="num">30</span></td><td><span class="num">59,100</span></td><td><span class="num">574,150</span></td><td><span class="num">197</span></td></tr><tr><td><span class="num">31</span></td><td><span class="num">64,170</span></td><td><span class="num">638,320</span></td><td><span class="num">207</span></td></tr><tr><td><span class="num">32</span></td><td><span class="num">69,520</span></td><td><span class="num">707,840</span></td><td><span class="num">217</span></td></tr><tr><td><span class="num">33</span></td><td><span class="num">75,075</span></td><td><span class="num">782,915</span></td><td><span class="num">228</span></td></tr><tr><td><span class="num">34</span></td><td><span class="num">80,835</span></td><td><span class="num">863,750</span></td><td><span class="num">238</span></td></tr><tr><td><span class="num">35</span></td><td><span class="num">86,800</span></td><td><span class="num">950,550</span></td><td><span class="num">248</span></td></tr><tr><td><span class="num">36</span></td><td><span class="num">94,608</span></td><td><span class="num">1,045,158</span></td><td><span class="num">263</span></td></tr><tr><td><span class="num">37</span></td><td><span class="num">102,712</span></td><td><span class="num">1,147,870</span></td><td><span class="num">278</span></td></tr><tr><td><span class="num">38</span></td><td><span class="num">111,112</span></td><td><span class="num">1,258,982</span></td><td><span class="num">292</span></td></tr><tr><td><span class="num">39</span></td><td><span class="num">119,808</span></td><td><span class="num">1,378,790</span></td><td><span class="num">307</span></td></tr><tr><td><span class="num">40</span></td><td><span class="num">128,800</span></td><td><span class="num">1,507,590</span></td><td><span class="num">322</span></td></tr><tr><td><span class="num">41</span></td><td><span class="num">136,940</span></td><td><span class="num">1,644,530</span></td><td><span class="num">334</span></td></tr><tr><td><span class="num">42</span></td><td><span class="num">145,740</span></td><td><span class="num">1,790,270</span></td><td><span class="num">347</span></td></tr><tr><td><span class="num">43</span></td><td><span class="num">154,800</span></td><td><span class="num">1,945,070</span></td><td><span class="num">360</span></td></tr><tr><td><span class="num">44</span></td><td><span class="num">164,120</span></td><td><span class="num">2,109,190</span></td><td><span class="num">373</span></td></tr><tr><td><span class="num">45</span></td><td><span class="num">173,700</span></td><td><span class="num">2,282,890</span></td><td><span class="num">386</span></td></tr><tr><td><span class="num">46</span></td><td><span class="num">186,760</span></td><td><span class="num">2,469,650</span></td><td><span class="num">406</span></td></tr><tr><td><span class="num">47</span></td><td><span class="num">200,220</span></td><td><span class="num">2,669,870</span></td><td><span class="num">426</span></td></tr><tr><td><span class="num">48</span></td><td><span class="num">214,080</span></td><td><span class="num">2,883,950</span></td><td><span class="num">446</span></td></tr><tr><td><span class="num">49</span></td><td><span class="num">228,340</span></td><td><span class="num">3,112,290</span></td><td><span class="num">466</span></td></tr><tr><td><span class="num">50</span></td><td><span class="num">243,000</span></td><td><span class="num">3,355,290</span></td><td><span class="num">486</span></td></tr><tr><td><span class="num">51</span></td><td><span class="num">257,040</span></td><td><span class="num">3,612,330</span></td><td><span class="num">504</span></td></tr><tr><td><span class="num">52</span></td><td><span class="num">272,090</span></td><td><span class="num">3,884,420</span></td><td><span class="num">523</span></td></tr><tr><td><span class="num">53</span></td><td><span class="num">287,525</span></td><td><span class="num">4,171,945</span></td><td><span class="num">543</span></td></tr><tr><td><span class="num">54</span></td><td><span class="num">303,345</span></td><td><span class="num">4,475,290</span></td><td><span class="num">562</span></td></tr><tr><td><span class="num">55</span></td><td><span class="num">319,550</span></td><td><span class="num">4,794,840</span></td><td><span class="num">581</span></td></tr><tr><td><span class="num">56</span></td><td><span class="num">340,592</span></td><td><span class="num">5,135,432</span></td><td><span class="num">608</span></td></tr><tr><td><span class="num">57</span></td><td><span class="num">362,178</span></td><td><span class="num">5,497,610</span></td><td><span class="num">635</span></td></tr><tr><td><span class="num">58</span></td><td><span class="num">384,308</span></td><td><span class="num">5,881,918</span></td><td><span class="num">663</span></td></tr><tr><td><span class="num">59</span></td><td><span class="num">406,982</span></td><td><span class="num">6,288,900</span></td><td><span class="num">690</span></td></tr><tr><td><span class="num">60</span></td><td><span class="num">430,200</span></td><td><span class="num">6,719,100</span></td><td><span class="num">717</span></td></tr><tr><td><span class="num">61</span></td><td><span class="num">452,010</span></td><td><span class="num">7,171,110</span></td><td><span class="num">741</span></td></tr><tr><td><span class="num">62</span></td><td><span class="num">474,765</span></td><td><span class="num">7,645,875</span></td><td><span class="num">766</span></td></tr><tr><td><span class="num">63</span></td><td><span class="num">498,015</span></td><td><span class="num">8,143,890</span></td><td><span class="num">791</span></td></tr><tr><td><span class="num">64</span></td><td><span class="num">521,760</span></td><td><span class="num">8,665,650</span></td><td><span class="num">815</span></td></tr><tr><td><span class="num">65</span></td><td><span class="num">546,000</span></td><td><span class="num">9,211,650</span></td><td><span class="num">840</span></td></tr><tr><td><span class="num">66</span></td><td><span class="num">594,924</span></td><td><span class="num">9,806,574</span></td><td><span class="num">901</span></td></tr><tr><td><span class="num">67</span></td><td><span class="num">645,076</span></td><td><span class="num">10,451,650</span></td><td><span class="num">963</span></td></tr><tr><td><span class="num">68</span></td><td><span class="num">696,456</span></td><td><span class="num">11,148,106</span></td><td><span class="num">1,024</span></td></tr><tr><td><span class="num">69</span></td><td><span class="num">749,064</span></td><td><span class="num">11,897,170</span></td><td><span class="num">1,086</span></td></tr><tr><td><span class="num">70</span></td><td><span class="num">802,900</span></td><td><span class="num">12,700,070</span></td><td><span class="num">1,147</span></td></tr><tr><td><span class="num">71</span></td><td><span class="num">836,380</span></td><td><span class="num">13,536,450</span></td><td><span class="num">1,178</span></td></tr><tr><td><span class="num">72</span></td><td><span class="num">873,540</span></td><td><span class="num">14,409,990</span></td><td><span class="num">1,213</span></td></tr><tr><td><span class="num">73</span></td><td><span class="num">911,405</span></td><td><span class="num">15,321,395</span></td><td><span class="num">1,249</span></td></tr><tr><td><span class="num">74</span></td><td><span class="num">949,975</span></td><td><span class="num">16,271,370</span></td><td><span class="num">1,284</span></td></tr><tr><td><span class="num">75</span></td><td><span class="num">989,250</span></td><td><span class="num">17,260,620</span></td><td><span class="num">1,319</span></td></tr><tr><td><span class="num">76</span></td><td><span class="num">1,039,376</span></td><td><span class="num">18,299,996</span></td><td><span class="num">1,368</span></td></tr><tr><td><span class="num">77</span></td><td><span class="num">1,090,474</span></td><td><span class="num">19,390,470</span></td><td><span class="num">1,416</span></td></tr><tr><td><span class="num">78</span></td><td><span class="num">1,142,544</span></td><td><span class="num">20,533,014</span></td><td><span class="num">1,465</span></td></tr><tr><td><span class="num">79</span></td><td><span class="num">1,195,586</span></td><td><span class="num">21,728,600</span></td><td><span class="num">1,513</span></td></tr><tr><td><span class="num">80</span></td><td><span class="num">1,249,600</span></td><td><span class="num">22,978,200</span></td><td><span class="num">1,562</span></td></tr><tr><td><span class="num">81</span></td><td><span class="num">1,304,100</span></td><td><span class="num">24,282,300</span></td><td><span class="num">1,610</span></td></tr><tr><td><span class="num">82</span></td><td><span class="num">1,362,840</span></td><td><span class="num">25,645,140</span></td><td><span class="num">1,662</span></td></tr><tr><td><span class="num">83</span></td><td><span class="num">1,422,620</span></td><td><span class="num">27,067,760</span></td><td><span class="num">1,714</span></td></tr><tr><td><span class="num">84</span></td><td><span class="num">1,483,440</span></td><td><span class="num">28,551,200</span></td><td><span class="num">1,766</span></td></tr><tr><td><span class="num">85</span></td><td><span class="num">1,545,300</span></td><td><span class="num">30,096,500</span></td><td><span class="num">1,818</span></td></tr><tr><td><span class="num">86</span></td><td><span class="num">1,602,180</span></td><td><span class="num">31,698,680</span></td><td><span class="num">1,863</span></td></tr><tr><td><span class="num">87</span></td><td><span class="num">1,659,090</span></td><td><span class="num">33,357,770</span></td><td><span class="num">1,907</span></td></tr><tr><td><span class="num">88</span></td><td><span class="num">1,717,760</span></td><td><span class="num">35,075,530</span></td><td><span class="num">1,952</span></td></tr><tr><td><span class="num">89</span></td><td><span class="num">1,775,550</span></td><td><span class="num">36,851,080</span></td><td><span class="num">1,995</span></td></tr><tr><td><span class="num">90</span></td><td><span class="num">1,952,100</span></td><td><span class="num">38,803,180</span></td><td><span class="num">2,169</span></td></tr><tr><td><span class="num">91</span></td><td><span class="num">2,096,640</span></td><td><span class="num">40,899,820</span></td><td><span class="num">2,304</span></td></tr><tr><td><span class="num">92</span></td><td><span class="num">2,235,600</span></td><td><span class="num">43,135,420</span></td><td><span class="num">2,430</span></td></tr><tr><td><span class="num">93</span></td><td><span class="num">2,497,050</span></td><td><span class="num">45,632,470</span></td><td><span class="num">2,685</span></td></tr><tr><td><span class="num">94</span></td><td><span class="num">2,757,020</span></td><td><span class="num">48,389,490</span></td><td><span class="num">2,933</span></td></tr><tr><td><span class="num">95</span></td><td><span class="num">3,192,000</span></td><td><span class="num">51,581,490</span></td><td><span class="num">3,360</span></td></tr><tr><td><span class="num">96</span></td><td><span class="num">3,582,720</span></td><td><span class="num">55,164,210</span></td><td><span class="num">3,732</span></td></tr><tr><td><span class="num">97</span></td><td><span class="num">3,843,140</span></td><td><span class="num">59,007,350</span></td><td><span class="num">3,962</span></td></tr><tr><td><span class="num">98</span></td><td><span class="num">4,661,860</span></td><td><span class="num">63,669,210</span></td><td><span class="num">4,757</span></td></tr><tr><td><span class="num">99</span></td><td><span class="num">6,992,370</span></td><td><span class="num">70,661,580</span></td><td><span class="num">7,063</span></td></tr><tr><td><span class="num">100</span></td><td><span class="num">1,775,550</span></td><td><span class="num">72,437,130</span></td><td><span class="num">1,776</span></td></tr><tr><td><span class="num">101</span></td><td><span class="num">1,775,550</span></td><td><span class="num">74,212,680</span></td><td><span class="num">1,758</span></td></tr><tr><td><span class="num">102</span></td><td><span class="num">1,775,550</span></td><td><span class="num">75,988,230</span></td><td><span class="num">1,741</span></td></tr><tr><td><span class="num">103</span></td><td><span class="num">1,775,550</span></td><td><span class="num">77,763,780</span></td><td><span class="num">1,724</span></td></tr><tr><td><span class="num">104</span></td><td><span class="num">1,775,550</span></td><td><span class="num">79,539,330</span></td><td><span class="num">1,707</span></td></tr><tr><td><span class="num">105</span></td><td><span class="num">1,775,550</span></td><td><span class="num">81,314,880</span></td><td><span class="num">1,691</span></td></tr><tr><td><span class="num">106</span></td><td><span class="num">1,775,550</span></td><td><span class="num">83,090,430</span></td><td><span class="num">1,675</span></td></tr><tr><td><span class="num">107</span></td><td><span class="num">1,775,550</span></td><td><span class="num">84,865,980</span></td><td><span class="num">1,659</span></td></tr><tr><td><span class="num">108</span></td><td><span class="num">1,775,550</span></td><td><span class="num">86,641,530</span></td><td><span class="num">1,644</span></td></tr><tr><td><span class="num">109</span></td><td><span class="num">1,775,550</span></td><td><span class="num">88,417,080</span></td><td><span class="num">1,629</span></td></tr><tr><td><span class="num">110</span></td><td><span class="num">1,775,550</span></td><td><span class="num">90,192,630</span></td><td><span class="num">1,614</span></td></tr><tr><td><span class="num">111</span></td><td><span class="num">1,775,550</span></td><td><span class="num">91,968,180</span></td><td><span class="num">1,600</span></td></tr><tr><td><span class="num">112</span></td><td><span class="num">1,775,550</span></td><td><span class="num">93,743,730</span></td><td><span class="num">1,585</span></td></tr><tr><td><span class="num">113</span></td><td><span class="num">1,775,550</span></td><td><span class="num">95,519,280</span></td><td><span class="num">1,571</span></td></tr><tr><td><span class="num">114</span></td><td><span class="num">1,775,550</span></td><td><span class="num">97,294,830</span></td><td><span class="num">1,558</span></td></tr><tr><td><span class="num">115</span></td><td><span class="num">1,775,550</span></td><td><span class="num">99,070,380</span></td><td><span class="num">1,544</span></td></tr><tr><td><span class="num">116</span></td><td><span class="num">1,775,550</span></td><td><span class="num">100,845,930</span></td><td><span class="num">1,531</span></td></tr><tr><td><span class="num">117</span></td><td><span class="num">1,775,550</span></td><td><span class="num">102,621,480</span></td><td><span class="num">1,518</span></td></tr><tr><td><span class="num">118</span></td><td><span class="num">1,775,550</span></td><td><span class="num">104,397,030</span></td><td><span class="num">1,505</span></td></tr><tr><td><span class="num">119</span></td><td><span class="num">1,775,550</span></td><td><span class="num">106,172,580</span></td><td><span class="num">1,492</span></td></tr><tr><td><span class="num">120</span></td><td><span class="num">1,775,550</span></td><td><span class="num">107,948,130</span></td><td><span class="num">1,480</span></td></tr><tr><td><span class="num">121</span></td><td><span class="num">1,775,550</span></td><td><span class="num">109,723,680</span></td><td><span class="num">1,467</span></td></tr><tr><td><span class="num">122</span></td><td><span class="num">1,775,550</span></td><td><span class="num">111,499,230</span></td><td><span class="num">1,455</span></td></tr><tr><td><span class="num">123</span></td><td><span class="num">1,775,550</span></td><td><span class="num">113,274,780</span></td><td><span class="num">1,444</span></td></tr><tr><td><span class="num">124</span></td><td><span class="num">1,775,550</span></td><td><span class="num">115,050,330</span></td><td><span class="num">1,432</span></td></tr><tr><td><span class="num">125</span></td><td><span class="num">1,775,550</span></td><td><span class="num">116,825,880</span></td><td><span class="num">1,420</span></td></tr><tr><td><span class="num">126</span></td><td><span class="num">1,775,550</span></td><td><span class="num">118,601,430</span></td><td><span class="num">1,409</span></td></tr><tr><td><span class="num">127</span></td><td><span class="num">1,775,550</span></td><td><span class="num">120,376,980</span></td><td><span class="num">1,398</span></td></tr><tr><td><span class="num">128</span></td><td><span class="num">1,775,550</span></td><td><span class="num">122,152,530</span></td><td><span class="num">1,387</span></td></tr><tr><td><span class="num">129</span></td><td><span class="num">1,775,550</span></td><td><span class="num">123,928,080</span></td><td><span class="num">1,376</span></td></tr><tr><td><span class="num">130</span></td><td><span class="num">1,775,550</span></td><td><span class="num">125,703,630</span></td><td><span class="num">1,366</span></td></tr><tr><td><span class="num">131</span></td><td><span class="num">1,775,550</span></td><td><span class="num">127,479,180</span></td><td><span class="num">1,355</span></td></tr><tr><td><span class="num">132</span></td><td><span class="num">1,775,550</span></td><td><span class="num">129,254,730</span></td><td><span class="num">1,345</span></td></tr><tr><td><span class="num">133</span></td><td><span class="num">1,775,550</span></td><td><span class="num">131,030,280</span></td><td><span class="num">1,335</span></td></tr><tr><td><span class="num">134</span></td><td><span class="num">1,775,550</span></td><td><span class="num">132,805,830</span></td><td><span class="num">1,325</span></td></tr><tr><td><span class="num">135</span></td><td><span class="num">1,775,550</span></td><td><span class="num">134,581,380</span></td><td><span class="num">1,315</span></td></tr><tr><td><span class="num">136</span></td><td><span class="num">1,775,550</span></td><td><span class="num">136,356,930</span></td><td><span class="num">1,306</span></td></tr><tr><td><span class="num">137</span></td><td><span class="num">1,775,550</span></td><td><span class="num">138,132,480</span></td><td><span class="num">1,296</span></td></tr><tr><td><span class="num">138</span></td><td><span class="num">1,775,550</span></td><td><span class="num">139,908,030</span></td><td><span class="num">1,287</span></td></tr><tr><td><span class="num">139</span></td><td><span class="num">1,775,550</span></td><td><span class="num">141,683,580</span></td><td><span class="num">1,277</span></td></tr><tr><td><span class="num">140</span></td><td><span class="num">1,775,550</span></td><td><span class="num">143,459,130</span></td><td><span class="num">1,268</span></td></tr><tr><td><span class="num">141</span></td><td><span class="num">1,775,550</span></td><td><span class="num">145,234,680</span></td><td><span class="num">1,259</span></td></tr><tr><td><span class="num">142</span></td><td><span class="num">1,775,550</span></td><td><span class="num">147,010,230</span></td><td><span class="num">1,250</span></td></tr><tr><td><span class="num">143</span></td><td><span class="num">1,775,550</span></td><td><span class="num">148,785,780</span></td><td><span class="num">1,242</span></td></tr><tr><td><span class="num">144</span></td><td><span class="num">1,775,550</span></td><td><span class="num">150,561,330</span></td><td><span class="num">1,233</span></td></tr><tr><td><span class="num">145</span></td><td><span class="num">1,775,550</span></td><td><span class="num">152,336,880</span></td><td><span class="num">1,225</span></td></tr><tr><td><span class="num">146</span></td><td><span class="num">1,775,550</span></td><td><span class="num">154,112,430</span></td><td><span class="num">1,216</span></td></tr><tr><td><span class="num">147</span></td><td><span class="num">1,775,550</span></td><td><span class="num">155,887,980</span></td><td><span class="num">1,208</span></td></tr><tr><td><span class="num">148</span></td><td><span class="num">1,775,550</span></td><td><span class="num">157,663,530</span></td><td><span class="num">1,200</span></td></tr><tr><td><span class="num">149</span></td><td><span class="num">1,775,550</span></td><td><span class="num">159,439,080</span></td><td><span class="num">1,192</span></td></tr><tr><td><span class="num">150</span></td><td><span class="num">1,775,550</span></td><td><span class="num">161,214,630</span></td><td><span class="num">1,184</span></td></tr><tr><td><span class="num">151</span></td><td><span class="num">1,775,550</span></td><td><span class="num">162,990,180</span></td><td><span class="num">1,176</span></td></tr><tr><td><span class="num">152</span></td><td><span class="num">1,775,550</span></td><td><span class="num">164,765,730</span></td><td><span class="num">1,168</span></td></tr><tr><td><span class="num">153</span></td><td><span class="num">1,775,550</span></td><td><span class="num">166,541,280</span></td><td><span class="num">1,160</span></td></tr><tr><td><span class="num">154</span></td><td><span class="num">1,775,550</span></td><td><span class="num">168,316,830</span></td><td><span class="num">1,153</span></td></tr><tr><td><span class="num">155</span></td><td><span class="num">1,775,550</span></td><td><span class="num">170,092,380</span></td><td><span class="num">1,146</span></td></tr><tr><td><span class="num">156</span></td><td><span class="num">1,775,550</span></td><td><span class="num">171,867,930</span></td><td><span class="num">1,138</span></td></tr><tr><td><span class="num">157</span></td><td><span class="num">1,775,550</span></td><td><span class="num">173,643,480</span></td><td><span class="num">1,131</span></td></tr><tr><td><span class="num">158</span></td><td><span class="num">1,775,550</span></td><td><span class="num">175,419,030</span></td><td><span class="num">1,124</span></td></tr><tr><td><span class="num">159</span></td><td><span class="num">1,775,550</span></td><td><span class="num">177,194,580</span></td><td><span class="num">1,117</span></td></tr><tr><td><span class="num">160</span></td><td><span class="num">1,775,550</span></td><td><span class="num">178,970,130</span></td><td><span class="num">1,110</span></td></tr><tr><td><span class="num">161</span></td><td><span class="num">1,775,550</span></td><td><span class="num">180,745,680</span></td><td><span class="num">1,103</span></td></tr><tr><td><span class="num">162</span></td><td><span class="num">1,775,550</span></td><td><span class="num">182,521,230</span></td><td><span class="num">1,096</span></td></tr><tr><td><span class="num">163</span></td><td><span class="num">1,775,550</span></td><td><span class="num">184,296,780</span></td><td><span class="num">1,089</span></td></tr><tr><td><span class="num">164</span></td><td><span class="num">1,775,550</span></td><td><span class="num">186,072,330</span></td><td><span class="num">1,083</span></td></tr><tr><td><span class="num">165</span></td><td><span class="num">1,775,550</span></td><td><span class="num">187,847,880</span></td><td><span class="num">1,076</span></td></tr><tr><td><span class="num">166</span></td><td><span class="num">1,775,550</span></td><td><span class="num">189,623,430</span></td><td><span class="num">1,070</span></td></tr><tr><td><span class="num">167</span></td><td><span class="num">1,775,550</span></td><td><span class="num">191,398,980</span></td><td><span class="num">1,063</span></td></tr><tr><td><span class="num">168</span></td><td><span class="num">1,775,550</span></td><td><span class="num">193,174,530</span></td><td><span class="num">1,057</span></td></tr><tr><td><span class="num">169</span></td><td><span class="num">1,775,550</span></td><td><span class="num">194,950,080</span></td><td><span class="num">1,051</span></td></tr><tr><td><span class="num">170</span></td><td><span class="num">1,775,550</span></td><td><span class="num">196,725,630</span></td><td><span class="num">1,044</span></td></tr><tr><td><span class="num">171</span></td><td><span class="num">1,775,550</span></td><td><span class="num">198,501,180</span></td><td><span class="num">1,038</span></td></tr><tr><td><span class="num">172</span></td><td><span class="num">1,775,550</span></td><td><span class="num">200,276,730</span></td><td><span class="num">1,032</span></td></tr><tr><td><span class="num">173</span></td><td><span class="num">1,775,550</span></td><td><span class="num">202,052,280</span></td><td><span class="num">1,026</span></td></tr><tr><td><span class="num">174</span></td><td><span class="num">1,775,550</span></td><td><span class="num">203,827,830</span></td><td><span class="num">1,020</span></td></tr><tr><td><span class="num">175</span></td><td><span class="num">1,775,550</span></td><td><span class="num">205,603,380</span></td><td><span class="num">1,015</span></td></tr><tr><td><span class="num">176</span></td><td><span class="num">1,775,550</span></td><td><span class="num">207,378,930</span></td><td><span class="num">1,009</span></td></tr><tr><td><span class="num">177</span></td><td><span class="num">1,775,550</span></td><td><span class="num">209,154,480</span></td><td><span class="num">1,003</span></td></tr><tr><td><span class="num">178</span></td><td><span class="num">1,775,550</span></td><td><span class="num">210,930,030</span></td><td><span class="num">998</span></td></tr><tr><td><span class="num">179</span></td><td><span class="num">1,775,550</span></td><td><span class="num">212,705,580</span></td><td><span class="num">992</span></td></tr><tr><td><span class="num">180</span></td><td><span class="num">1,775,550</span></td><td><span class="num">214,481,130</span></td><td><span class="num">986</span></td></tr><tr><td><span class="num">181</span></td><td><span class="num">1,775,550</span></td><td><span class="num">216,256,680</span></td><td><span class="num">981</span></td></tr><tr><td><span class="num">182</span></td><td><span class="num">1,775,550</span></td><td><span class="num">218,032,230</span></td><td><span class="num">976</span></td></tr><tr><td><span class="num">183</span></td><td><span class="num">1,775,550</span></td><td><span class="num">219,807,780</span></td><td><span class="num">970</span></td></tr><tr><td><span class="num">184</span></td><td><span class="num">1,775,550</span></td><td><span class="num">221,583,330</span></td><td><span class="num">965</span></td></tr><tr><td><span class="num">185</span></td><td><span class="num">1,775,550</span></td><td><span class="num">223,358,880</span></td><td><span class="num">960</span></td></tr><tr><td><span class="num">186</span></td><td><span class="num">1,775,550</span></td><td><span class="num">225,134,430</span></td><td><span class="num">955</span></td></tr><tr><td><span class="num">187</span></td><td><span class="num">1,775,550</span></td><td><span class="num">226,909,980</span></td><td><span class="num">949</span></td></tr><tr><td><span class="num">188</span></td><td><span class="num">1,775,550</span></td><td><span class="num">228,685,530</span></td><td><span class="num">944</span></td></tr><tr><td><span class="num">189</span></td><td><span class="num">1,775,550</span></td><td><span class="num">230,461,080</span></td><td><span class="num">939</span></td></tr></tbody></table></section>
-<section><h2>Weapon Mastery</h2><p class="note"><code>MasteryLevel = min(cap, floor(sqrt(XP / divisor)) + 1)</code>; <code>weightDiscount = min(cap, level × perLevel)</code>. Matching skills get full skill bonus; other skills get <code>full × offTypeMultiplier</code>.</p><table><thead><tr><th>Bonus</th><th>What it gives</th><th>Where it stops</th></tr></thead><tbody><tr><td>While held</td><td>−1% weapon weight a level</td><td><code>weight_discount_cap_pct</code> 20%</td></tr><tr><td>Matching skill</td><td>+0.5% skill damage a level from Mastery level 5</td><td>full bonus · cap 8%</td></tr><tr><td>Other skill</td><td>half the held weapon’s skill damage bonus</td><td>cap 4%</td></tr><tr><td>Account-wide</td><td>+1% drop rate per weapon type once that type reaches Mastery 10</td><td>across 11 types — <code>mastery.dropMultiplier</code></td></tr><tr><td>The ladder</td><td>4 Mastery XP a kill, the same curve shape as the herb farm, capped at 20</td><td><code>engine/mastery.ts</code></td></tr></tbody></table></section>
-<section><h2>The passive tree</h2><p class="note">Every node holds one rank and opens from any owned neighbour; Start is free and every region opens from it. A Normal grants exactly +1 of its region's Core attribute for 1 tree point. A Notable grants its written profile of flat and percent lines for 3 tree points. A Keystone changes a mechanic for 1 attainment point and never spends tree points. <code>treePoints = base <span class="num">3</span> + <span class="num">3</span> a level from <span class="num">2</span>–<span class="num">100</span> + <span class="num">1</span> a level from <span class="num">101</span>–<span class="num">190</span> + claimed quest bonuses − spent tree</code>. The first milestone Expedition claim per zone and first milestone Delivery completion per town guarantee +1 Tree Point, outside the consumable reward choice. The point pays once on completion; skipping or expiry leaves the milestone available. Legacy saved random Tree Point promises remain payable. Respec at a settlement is free and hands both wallets back at the prices the spec charged. The tree is a new character's: an older character is refused with its own message rather than rewritten.</p><table><thead><tr><th>Region</th><th>Normal</th><th>Notable</th><th>Keystone</th><th>Tree points</th></tr></thead><tbody><tr><td>str</td><td><span class="num">80</span></td><td><span class="num">13</span></td><td><span class="num">8</span></td><td><span class="num">119</span></td></tr><tr><td>agi</td><td><span class="num">80</span></td><td><span class="num">12</span></td><td><span class="num">7</span></td><td><span class="num">116</span></td></tr><tr><td>dex</td><td><span class="num">80</span></td><td><span class="num">13</span></td><td><span class="num">7</span></td><td><span class="num">119</span></td></tr><tr><td>int</td><td><span class="num">80</span></td><td><span class="num">12</span></td><td><span class="num">7</span></td><td><span class="num">116</span></td></tr><tr><td>wis</td><td><span class="num">80</span></td><td><span class="num">13</span></td><td><span class="num">9</span></td><td><span class="num">119</span></td></tr><tr><td>vit</td><td><span class="num">80</span></td><td><span class="num">12</span></td><td><span class="num">11</span></td><td><span class="num">116</span></td></tr><tr><td>lck</td><td><span class="num">80</span></td><td><span class="num">13</span></td><td><span class="num">3</span></td><td><span class="num">119</span></td></tr></tbody></table></section>
-<section><h2>The Keystones</h2><p class="note">Each Keystone is bought with attainment and may be held with any other except the pairs below. The same text is on the board when a node is selected.</p><div class="tabs"><input type="radio" name="tree-keystones" id="tree-keystones-str" checked><label for="tree-keystones-str">str <b>8</b></label><input type="radio" name="tree-keystones" id="tree-keystones-agi"><label for="tree-keystones-agi">agi <b>7</b></label><input type="radio" name="tree-keystones" id="tree-keystones-dex"><label for="tree-keystones-dex">dex <b>7</b></label><input type="radio" name="tree-keystones" id="tree-keystones-int"><label for="tree-keystones-int">int <b>7</b></label><input type="radio" name="tree-keystones" id="tree-keystones-wis"><label for="tree-keystones-wis">wis <b>9</b></label><input type="radio" name="tree-keystones" id="tree-keystones-vit"><label for="tree-keystones-vit">vit <b>11</b></label><input type="radio" name="tree-keystones" id="tree-keystones-lck"><label for="tree-keystones-lck">lck <b>3</b></label><table><thead><tr><th>Keystone</th><th>Region</th><th>What it changes</th></tr></thead><tbody class="g-str"><tr><td>Ironwall</td><td>str</td><td>All Evasion Rating becomes Armour at 1:1. You can no longer evade.</td></tr><tr><td>Redline</td><td>str</td><td>Landed hits grant Rage, up to 10 stacks: +3% damage per stack, and you lose 0.5% of Max HP per second. Rage fades after 3 seconds without a landed hit.</td></tr><tr><td>Headsman</td><td>str</td><td>Hits that leave a normal enemy at 15% HP or less execute it; Bosses and Uniques execute at 5%.</td></tr><tr><td>Crimson Pact</td><td>str</td><td>Physical hits deal 50% immediately; the other 50% becomes Bleed over 4 seconds.</td></tr><tr><td>Painforged</td><td>str</td><td>Damage prevented by Block is banked, up to 20% of Max HP, and adds to your next Physical hit.</td></tr><tr><td>Crushing Rhythm</td><td>str</td><td>Basic attacks are capped at 1 per second; faster attack speed instead multiplies their damage.</td></tr><tr><td>Armourbreaker</td><td>str</td><td>Physical hits break 5% of the target starting Armour, up to 60%. It returns after 4 seconds without a Physical hit.</td></tr><tr><td>Thornbound</td><td>str</td><td>Taking a hit retaliates for 20% of Armour as Physical damage every 0.5 seconds. Your own direct damage is halved.</td></tr></tbody><tbody class="g-agi"><tr><td>Unstoppable</td><td>agi</td><td>Stun no longer stops you and Slow no longer slows your attacks; while either would apply, you deal 25% less damage.</td></tr><tr><td>Worthy Foe</td><td>agi</td><td>The third hit on one target starts a duel: +30% damage dealt to it and -20% damage taken from it. Hitting another target resets.</td></tr><tr><td>Barkskin</td><td>agi</td><td>Every 2 seconds without losing HP or ES grants a Bark charge, up to 5. An evaded hit that would damage you spends one charge to take 40% less damage.</td></tr><tr><td>Ghost Dance</td><td>agi</td><td>An evaded hit restores ES equal to 3% of Evasion Rating, capped at 10% of Max ES once per second. You cannot Block.</td></tr><tr><td>Instruments of Virtue</td><td>agi</td><td>Alternating Attack and Spell actions grants 35% more damage to the next action. Repeating a type grants nothing.</td></tr><tr><td>Disrupting Blows</td><td>agi</td><td>A hit that removes at least 5% of a target Max HP delays its next action by 0.5 seconds, within the shared control budget.</td></tr><tr><td>Shield Gate</td><td>agi</td><td>When ES breaks, the hit overflow does not reach HP. Rearms after ES refills and 8 seconds pass.</td></tr></tbody><tbody class="g-dex"><tr><td>Unerring Eye</td><td>dex</td><td>Your hits cannot miss from Accuracy or Evasion, but can no longer crit. Dodge and Block still apply.</td></tr><tr><td>Demolition Sequence</td><td>dex</td><td>Every 5 landed hits on one target detonate it and one nearby enemy for 20% of the HP lost to those hits.</td></tr><tr><td>Elemental Equilibrium</td><td>dex</td><td>After an Elemental hit, that Element resistance rises 10 points and the others fall 20 for 4 seconds.</td></tr><tr><td>Plague Courier</td><td>dex</td><td>On a critical hit, move one Burn, Poison or Bleed from you to the target, keeping its damage and remaining duration. 4-second cooldown.</td></tr><tr><td>Elemental Infusion</td><td>dex</td><td>Gain 30% of Physical damage as extra Elemental damage, split by your existing Flat Elemental damage.</td></tr><tr><td>Elemental Conduit</td><td>dex</td><td>Elemental damage gained as extra can apply its Element status through Alignment, once per Element per hit.</td></tr><tr><td>Auto Cleanse</td><td>dex</td><td>A newly applied abnormal status is removed at once, with a 6-second cooldown.</td></tr></tbody><tbody class="g-int"><tr><td>Emberheart</td><td>int</td><td>100% of Physical damage becomes Fire after crit, before resistance.</td></tr><tr><td>One Flame</td><td>int</td><td>50% of your Fire Resistance bonus also applies to Cold and Lightning; their own bonuses are half as effective.</td></tr><tr><td>Delayed Demolition</td><td>int</td><td>40% of hit damage is delayed 2 seconds, then dealt with 50% more damage. If the target dies first, it is lost.</td></tr><tr><td>Profane Bloom</td><td>int</td><td>Enemies that die cursed by you explode for 15% of their Max HP as Chaos damage. The blast cannot chain.</td></tr><tr><td>Malediction</td><td>int</td><td>Enemies hold one of your curses, with 75% stronger numeric effects. A new curse replaces the old one.</td></tr><tr><td>Inevitable Judgement</td><td>int</td><td>Elemental damage from critical hits ignores resistance, but non-critical Elemental damage is 20% lower.</td></tr><tr><td>Aura Resonance</td><td>int</td><td>Each active aura lowers every aura reservation by 5% and raises its effect by 5%, to a 30% cap each.</td></tr></tbody><tbody class="g-wis"><tr><td>Escape Artist</td><td>wis</td><td>After 3 seconds without losing HP or ES, restore 50% of Max ES, repeating every 3 seconds. No natural ES regeneration.</td></tr><tr><td>Mind over Matter</td><td>wis</td><td>30% of damage that would hit HP is paid from unreserved Mana at 1:1.</td></tr><tr><td>Arcane Battery</td><td>wis</td><td>Reserve 40% of Max Mana to gain twice that much Energy Shield. The reserved Mana cannot be spent.</td></tr><tr><td>Dark Siphon</td><td>wis</td><td>Life Leech and Mana Regeneration restore Energy Shield instead of HP and Mana.</td></tr><tr><td>Elemental Aegis</td><td>wis</td><td>Energy Shield takes 30% less Elemental damage, but Physical hits bypass it and strike HP directly.</td></tr><tr><td>Mana Debt</td><td>wis</td><td>Mana costs may borrow down to 50% of usable Max Mana. While in debt, Mana Regeneration is doubled but positive-cost skills are refused.</td></tr><tr><td>Blood Covenant</td><td>wis</td><td>Choose per aura whether it reserves HP or Mana. An HP reservation reduces usable HP, not Max HP.</td></tr><tr><td>Chaos Inoculation</td><td>wis</td><td>Max HP becomes 1 and you are immune to Chaos damage. Other damage, including Poison and Bleed, hits ES first. You are never on Low Life.</td></tr><tr><td>Capacitive Casting</td><td>wis</td><td>20% of Mana actually paid for a skill restores ES, but natural ES regeneration is halved.</td></tr></tbody><tbody class="g-vit"><tr><td>Berserk</td><td>vit</td><td>While on Low Life: 40% more damage and 25% more attack speed. You always take 15% more damage.</td></tr><tr><td>Endless Hunger</td><td>vit</td><td>Excess Life Leech is banked, up to 20% of the destination pool for 10 seconds, then refills you when you are missing pool. No HP regeneration.</td></tr><tr><td>Fortress Under Siege</td><td>vit</td><td>Taking a hit grants Fortify, up to 5 stacks; each stack reduces later hits by 5%. Stacks fade after 4 seconds without taking damage.</td></tr><tr><td>Master Surgeon</td><td>vit</td><td>HP potions heal over 4 seconds for 50% more total; a new HP potion is refused while one is still healing.</td></tr><tr><td>Radiant Faith</td><td>vit</td><td>Reserve 25% of Max HP; each hit is reduced by a flat 10% of that reserve, up to 30% of the hit.</td></tr><tr><td>Time of Need</td><td>vit</td><td>Every 5 seconds, clear Burn, Poison and Bleed and restore 15% of Max HP. No HP regeneration.</td></tr><tr><td>Blood Price</td><td>vit</td><td>Skill Mana costs are paid as HP at 1:1. A cast is refused if it would leave you below 1 HP.</td></tr><tr><td>Borrowed Time</td><td>vit</td><td>40% of HP lost to enemy hits is recovered over 6 seconds. You cannot Life Leech.</td></tr><tr><td>Enduring Core</td><td>vit</td><td>Damage that strikes HP below 30% of Max HP is halved. You have no Energy Shield.</td></tr><tr><td>Staggering Resolve</td><td>vit</td><td>40% of enemy hit damage that would strike HP is instead paid over 5 seconds. Cleansing does not remove it.</td></tr><tr><td>Parasitic Affliction</td><td>vit</td><td>Gain 2% Life Leech, and all Life Leech works on your damage over time instead of hits.</td></tr></tbody><tbody class="g-lck"><tr><td>Ambush</td><td>lck</td><td>A hit that could crit always crits a full-HP target; afterwards crit chance against that target is halved.</td></tr><tr><td>Toxic Execution</td><td>lck</td><td>Critical hits deal no extra damage themselves; the crit bonus becomes Poison over 4 seconds.</td></tr><tr><td>Turtle Doctrine</td><td>lck</td><td>Block becomes a flat Physical damage reduction equal to its average chance. Block events no longer occur.</td></tr></tbody></table></div></section>
-<section><h2>Keystone pairs that cannot be held together</h2><p class="note">Exclusivity is pairwise only: a pair that is not listed may be held together, and there is no transitive chain — holding the middle Keystone does not block both ends.</p><div class="tabs"><input type="radio" name="tree-conflicts" id="tree-conflicts-pairs" checked><label for="tree-conflicts-pairs">Pairs <b>18</b></label><table><thead><tr><th>Keystone</th><th>May not be held with</th></tr></thead><tbody class="g-pairs"><tr><td>Berserk</td><td>Chaos Inoculation</td></tr><tr><td>Redline</td><td>Chaos Inoculation</td></tr><tr><td>Radiant Faith</td><td>Chaos Inoculation</td></tr><tr><td>Blood Price</td><td>Chaos Inoculation</td></tr><tr><td>Elemental Aegis</td><td>Chaos Inoculation · Enduring Core</td></tr><tr><td>Enduring Core</td><td>Chaos Inoculation · Shield Gate · Capacitive Casting</td></tr><tr><td>Blood Covenant</td><td>Chaos Inoculation</td></tr><tr><td>Chaos Inoculation</td><td>Staggering Resolve</td></tr><tr><td>Ghost Dance</td><td>Enduring Core · Turtle Doctrine</td></tr><tr><td>Escape Artist</td><td>Enduring Core</td></tr><tr><td>Arcane Battery</td><td>Enduring Core</td></tr><tr><td>Dark Siphon</td><td>Enduring Core</td></tr><tr><td>Unerring Eye</td><td>Ambush · Toxic Execution · Inevitable Judgement · Plague Courier</td></tr><tr><td>Painforged</td><td>Ghost Dance · Turtle Doctrine</td></tr><tr><td>Endless Hunger</td><td>Borrowed Time</td></tr><tr><td>Borrowed Time</td><td>Parasitic Affliction</td></tr><tr><td>Emberheart</td><td>Crimson Pact</td></tr><tr><td>Ironwall</td><td>Ghost Dance</td></tr></tbody></table></div></section></div>
-</main></div></body></html>
+ol { display: flex; flex-direction: column; gap: var(--spacing-xs); padding-left: 1.3rem; }
+:root { --wiki-max: 96rem; --wiki-display: "Palatino Linotype", "Book Antiqua", Georgia, serif; }
+body {
+  display: block; min-height: 100vh;
+  background:
+    radial-gradient(70rem 34rem at 8% -12%, color-mix(in srgb, var(--gold) 7%, transparent), transparent 62%),
+    radial-gradient(52rem 30rem at 104% 2%, color-mix(in srgb, var(--mana) 7%, transparent), transparent 58%),
+    var(--bg);
+}
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image: linear-gradient(color-mix(in srgb, var(--line) 22%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--line) 22%, transparent) 1px, transparent 1px);
+  background-size: 4.5rem 4.5rem; opacity: .28;
+}
+.skip {
+  position: fixed; top: 1rem; left: 1rem; z-index: var(--z-popover);
+  padding: .55rem .9rem; border: 1px solid var(--gold); border-radius: var(--radius-card);
+  background: var(--panel); color: var(--gold-lit); font: inherit; cursor: pointer;
+  transform: translateY(-200%);
+}
+.skip:focus-visible { transform: none; outline: 2px solid var(--focus); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.wiki-masthead {
+  position: relative; z-index: 2; display: flex; align-items: center; gap: var(--spacing-lg);
+  width: 100%; max-width: var(--wiki-max); padding: 1.35rem 2.5rem; margin-inline: auto;
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: .75rem; color: var(--text); flex: none; }
+.brand:hover { text-decoration: none; }
+.brand-mark {
+  display: grid; place-items: center; width: 2.35rem; height: 2.35rem; flex: none;
+  border: 1px solid color-mix(in srgb, var(--gold) 70%, var(--line)); border-radius: var(--radius-round);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--gold) 18%, transparent), var(--inset) 70%);
+  box-shadow: 0 0 1.2rem color-mix(in srgb, var(--gold) 16%, transparent);
+}
+.brand-mark::before { content: ""; width: .62rem; height: .62rem; transform: rotate(45deg); background: linear-gradient(140deg, var(--gold-lit), var(--gold)); }
+.brand-text b { display: block; font-family: var(--wiki-display); font-size: 1.05rem; font-weight: 600; letter-spacing: .2em; line-height: 1.1; }
+.brand-text small { display: block; color: var(--gold); font-size: .6rem; letter-spacing: .3em; text-transform: uppercase; }
+.masthead-tag { flex: 1; color: var(--dim); font-size: .72rem; letter-spacing: .06em; }
+.masthead-tools { display: flex; align-items: center; gap: .7rem; flex: none; }
+.search { position: relative; display: flex; align-items: center; color: var(--dim); }
+.search .search-glyph { position: absolute; left: .8rem; width: 1rem; height: 1rem; background: currentColor; -webkit-mask: url(../../game/src/icon/ui/search.png) center / contain no-repeat; mask: url(../../game/src/icon/ui/search.png) center / contain no-repeat; pointer-events: none; }
+.search input {
+  width: clamp(12rem, 19vw, 21rem); padding: .55rem 1rem .55rem 2.3rem;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--inset); color: var(--text);
+  font: inherit; font-size: .8rem;
+}
+.search input::placeholder { color: color-mix(in srgb, var(--dim) 75%, transparent); }
+.search input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
+.search-results {
+  position: absolute; top: calc(100% + .5rem); right: 0; z-index: var(--z-popover);
+  display: grid; gap: .15rem; width: min(26rem, 80vw); padding: .4rem;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow-soft);
+}
+.search-results[hidden] { display: none; }
+dl, dt, dd { margin: 0; }
+.search-hit { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: .5rem .6rem; border-radius: 6px; color: var(--text); font-size: .82rem; }
+.search-hit small { color: var(--dim); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.search-hit:hover, .search-hit:focus-visible { background: var(--surface-selected); text-decoration: none; }
+.search-none { padding: .5rem .6rem; color: var(--dim); font-size: .78rem; }
+.play-link { padding: .5rem .9rem; border: 1px solid color-mix(in srgb, var(--gold) 55%, var(--line)); border-radius: 999px; color: var(--gold-lit); font-size: .72rem; letter-spacing: .04em; white-space: nowrap; }
+.play-link:hover { background: color-mix(in srgb, var(--gold) 9%, transparent); text-decoration: none; }
+.menu-toggle { display: none; align-items: center; gap: .45rem; padding: .5rem .75rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); color: var(--text); font: inherit; font-size: .78rem; cursor: pointer; }
+.menu-toggle:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.wiki-shell { position: relative; z-index: 1; display: grid; grid-template-columns: 15.5rem minmax(0, 1fr); gap: 3.2rem; width: 100%; max-width: var(--wiki-max); padding: 2.3rem 2.5rem 4rem; margin-inline: auto; }
+.wiki-nav { position: sticky; top: 1.6rem; align-self: start; display: flex; flex-direction: column; gap: 1.45rem; max-height: calc(100vh - 3.2rem); overflow: auto; min-width: 0; padding-right: .65rem; border-right: 1px solid var(--line); }
+.nav-title { color: var(--dim); font-size: .62rem; letter-spacing: .24em; text-transform: uppercase; }
+.nav-group { display: grid; gap: .5rem; }
+.nav-group h2 { display: flex; align-items: baseline; gap: .45rem; padding: 0; border: 0; color: var(--dim); font-size: .64rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.nav-group h2 span { color: var(--gold); font-family: var(--num); font-weight: 500; }
+.nav-group h2 b { color: color-mix(in srgb, var(--dim) 65%, transparent); font-family: var(--num); font-weight: 500; }
+.nav-group ul { display: grid; gap: 1px; padding: 0; list-style: none; }
+.nav-group a { display: block; padding: .38rem .65rem; border-left: 2px solid transparent; border-radius: 0 6px 6px 0; color: var(--dim); font-size: .83rem; }
+.nav-group a:hover { color: var(--text); background: color-mix(in srgb, var(--text) 4%, transparent); text-decoration: none; }
+.nav-group a.on { color: var(--gold-lit); border-left-color: var(--gold); background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 11%, transparent), transparent); }
+.nav-foot { color: color-mix(in srgb, var(--dim) 70%, transparent); font-size: .66rem; letter-spacing: .06em; }
+.wiki-main { display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
+.wiki-main h1 { font-family: var(--wiki-display); font-size: clamp(2rem, 3.4vw, 3.2rem); font-weight: 500; line-height: 1.08; letter-spacing: .01em; }
+.page-head {
+  display: grid; gap: .85rem; padding: 1.55rem 1.75rem;
+  border: 1px solid var(--line); border-radius: var(--radius-card);
+  background: linear-gradient(155deg, color-mix(in srgb, var(--panel) 92%, var(--gold) 8%), var(--inset));
+  box-shadow: var(--shadow-soft);
+}
+.crumbs, .toc, .page-turn { position: static; min-width: 0; }
+.crumbs { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: .45rem; color: var(--dim); font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; }
+.crumbs a { color: var(--dim); } .crumbs a:hover { color: var(--gold); text-decoration: none; }
+.eyebrow { display: flex; align-items: center; gap: .55rem; color: var(--gold); font-size: .64rem; letter-spacing: .22em; text-transform: uppercase; }
+.eyebrow::before { content: ""; width: 1.5rem; height: 1px; background: var(--gold); }
+.page-head .lead { max-width: 62rem; color: var(--dim); font-size: 1rem; line-height: 1.6; }
+.page-meta { display: flex; flex-wrap: wrap; gap: .4rem; }
+.chip { padding: .22rem .6rem; border: 1px solid var(--line); border-radius: 999px; color: var(--dim); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+.covers { color: var(--dim); font-size: .78rem; }
+.covers span { color: var(--gold); font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; padding-right: .45rem; }
+.toc { display: grid; gap: .55rem; padding: .95rem 1.15rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); }
+.toc ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .15rem 1rem; padding: 0; list-style: none; }
+.toc button { display: block; width: 100%; padding: .32rem .15rem; border: 0; border-bottom: 1px dotted transparent; background: none; color: var(--dim); font: inherit; font-size: .8rem; text-align: left; cursor: pointer; }
+.toc button:hover, .toc button.on { color: var(--gold-lit); border-bottom-color: color-mix(in srgb, var(--gold) 40%, transparent); }
+.toc button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.page-content { display: grid; gap: 1.15rem; counter-reset: sec; }
+.page-content > section {
+  counter-increment: sec; display: grid; gap: .8rem; padding: 1.25rem 1.45rem;
+  border: 1px solid var(--line); border-radius: var(--radius-card);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 88%, transparent), color-mix(in srgb, var(--inset) 94%, transparent));
+  overflow-x: auto;
+}
+.page-content > section > h2 { display: flex; align-items: baseline; gap: .65rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); font-family: var(--wiki-display); font-size: 1.25rem; font-weight: 500; letter-spacing: .01em; }
+.page-content > section > h2::before { content: counter(sec, decimal-leading-zero); color: var(--gold); font-family: var(--num); font-size: .7rem; letter-spacing: .08em; }
+.page-content h3 { color: var(--gold); font-size: .68rem; letter-spacing: .14em; }
+.page-content p, .page-content li { color: color-mix(in srgb, var(--text) 88%, var(--dim)); }
+.page-content .note { padding: .55rem .8rem; border-left: 2px solid color-mix(in srgb, var(--gold) 45%, var(--line)); border-radius: 0 6px 6px 0; background: color-mix(in srgb, var(--gold) 4%, transparent); }
+.page-content code { padding: .05em .28em; border-radius: 4px; background: color-mix(in srgb, var(--gold) 7%, transparent); color: var(--gold-lit); font-family: var(--num); font-size: .86em; }
+.page-content thead th { background: var(--inset); color: var(--gold); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+.page-content td:first-child { white-space: normal; }
+.page-content tbody tr:nth-child(even) { background: color-mix(in srgb, var(--text) 2.5%, transparent); }
+.page-content tbody tr:hover { background: color-mix(in srgb, var(--gold) 5%, transparent); }
+.page-foot { display: grid; gap: 1rem; padding-top: 1.1rem; border-top: 1px solid var(--line); }
+.related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .65rem; }
+.related-grid a { display: grid; gap: .2rem; padding: .75rem .85rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); color: var(--text); }
+.related-grid a:hover { border-color: color-mix(in srgb, var(--gold) 40%, var(--line)); text-decoration: none; }
+.related-grid small { color: var(--dim); font-size: .75rem; }
+.page-turn { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+.page-turn a { display: grid; gap: .2rem; padding: .65rem .85rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); color: var(--text); }
+.page-turn a:hover { border-color: color-mix(in srgb, var(--gold) 40%, var(--line)); text-decoration: none; }
+.page-turn small { color: var(--dim); font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; }
+.page-turn .next { justify-self: end; text-align: right; }
+.home-hero {
+  display: grid; gap: 1.05rem; padding: 2.2rem 2.1rem;
+  border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--line)); border-radius: var(--radius-card);
+  background:
+    radial-gradient(38rem 18rem at 12% 0%, color-mix(in srgb, var(--gold) 13%, transparent), transparent 65%),
+    linear-gradient(160deg, color-mix(in srgb, var(--panel) 90%, var(--gold) 10%), var(--inset));
+  box-shadow: var(--shadow-soft);
+}
+.home-hero h1 { font-size: clamp(2.7rem, 5vw, 4.6rem); }
+.home-hero .lead { max-width: 56rem; color: var(--dim); font-size: 1.08rem; line-height: 1.6; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
+.btn { display: inline-flex; align-items: center; gap: .45rem; padding: .55rem .95rem; border: 1px solid var(--line); border-radius: 999px; background: var(--inset); color: var(--text); font: inherit; font-size: .78rem; cursor: pointer; }
+.btn:hover { border-color: var(--gold); text-decoration: none; }
+.btn.primary { border-color: var(--gold); background: linear-gradient(180deg, var(--gold-lit), var(--gold)); color: var(--bg); font-weight: 600; }
+.btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hero-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: 1px; padding: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--line); }
+.hero-stats div { display: grid; gap: .15rem; padding: .75rem .85rem; background: var(--inset); }
+.hero-stats dt { color: var(--dim); font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; }
+.hero-stats dd { color: var(--gold-lit); font-family: var(--num); font-size: 1.3rem; }
+.start-strip { display: grid; gap: .9rem; padding: 1.3rem 1.4rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); }
+.start-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: .8rem; }
+.start-grid article { display: grid; gap: .4rem; padding: .9rem 1rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
+.start-grid article > span { color: var(--gold); font-family: var(--num); font-size: .72rem; letter-spacing: .1em; }
+.start-grid h3 { color: var(--text); font-family: var(--wiki-display); font-size: 1.05rem; font-weight: 500; letter-spacing: 0; text-transform: none; }
+.start-grid p { color: var(--dim); font-size: .8rem; }
+.start-grid a { color: var(--gold-lit); font-size: .76rem; }
+.card-links { display: flex; flex-wrap: wrap; gap: .2rem .9rem; }
+.chapters { display: grid; gap: 1rem; }
+.chapter-head { display: flex; align-items: end; justify-content: space-between; gap: 1rem; padding-bottom: .55rem; border-bottom: 1px solid var(--line); }
+.chapter-head h2 { padding: 0; border: 0; font-family: var(--wiki-display); font-size: 1.55rem; font-weight: 500; }
+.chapter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: .9rem; }
+.chapter-card { display: grid; gap: .65rem; padding: 1.05rem 1.15rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
+.chapter-card header { display: flex; align-items: baseline; gap: .55rem; }
+.chapter-card h3 { flex: 1; color: var(--text); font-family: var(--wiki-display); font-size: 1.1rem; font-weight: 500; letter-spacing: 0; text-transform: none; }
+.chapter-card header small { color: var(--dim); font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; }
+.chapter-card > p { color: var(--dim); font-size: .78rem; }
+.chapter-card ul { display: grid; gap: .25rem; padding: 0; list-style: none; }
+.chapter-card li a { display: grid; gap: .12rem; padding: .4rem .5rem; border-radius: 6px; color: var(--text); }
+.chapter-card li a:hover { background: var(--surface-selected); text-decoration: none; }
+.chapter-card li b { font-size: .82rem; font-weight: 500; }
+.chapter-card li span { color: var(--dim); font-size: .72rem; }
+.wiki-foot { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .6rem 1.2rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--dim); font-size: .66rem; letter-spacing: .03em; }
+.wiki-foot a { color: var(--dim); }
+.wiki-tree-view { display: grid; grid-template-rows: auto auto minmax(0, 1fr); overflow: hidden; border: 1px solid color-mix(in srgb, var(--gold) 24%, var(--line)); border-radius: var(--radius-card); background: var(--ground); }
+.wiki-tree-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .75rem 1rem; border-bottom: 1px solid var(--line); background: var(--inset); }
+.wiki-tree-heading { display: grid; gap: .2rem; }
+.wiki-tree-heading strong { color: var(--text); font-size: .82rem; font-weight: 500; }
+.wiki-tree-controls { display: flex; align-items: center; gap: .35rem; }
+.icon-mask { display: inline-block; width: .9rem; height: .9rem; flex: none; background: currentColor; -webkit-mask: var(--glyph) center / contain no-repeat; mask: var(--glyph) center / contain no-repeat; }
+.tree-tool { display: inline-flex; align-items: center; justify-content: center; min-width: 1.75rem; padding: .32rem .45rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--text); font: inherit; font-size: .75rem; cursor: pointer; }
+.tree-tool[data-tree-fit] { --glyph: url(../../game/src/icon/ui/expand.png); }
+.tree-tool[data-tree-zoom="0.8"] { --glyph: url(../../game/src/icon/ui/remove-minus.png); }
+.tree-tool[data-tree-zoom="1.25"] { --glyph: url(../../game/src/icon/ui/add-plus.png); }
+.tree-tool:hover { border-color: var(--gold); }
+.tree-tool:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tree-zoom { min-width: 3rem; text-align: center; color: var(--dim); font-family: var(--num); font-size: .72rem; }
+.wiki-tree-chips { display: flex; flex-wrap: wrap; gap: .3rem; padding: .55rem 1rem; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 55%, var(--ground)); }
+.tree-chip { padding: .28rem .6rem; border: 1px solid color-mix(in srgb, var(--wing) 45%, var(--line)); border-radius: 999px; background: transparent; color: color-mix(in srgb, var(--wing) 70%, var(--dim)); font: inherit; font-size: .68rem; letter-spacing: .08em; cursor: pointer; }
+.tree-chip:hover, .tree-chip.on { background: color-mix(in srgb, var(--wing) 14%, transparent); color: var(--text); }
+.tree-chip:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.wiki-tree-stage { position: relative; height: clamp(22rem, 70vh, 48rem); overflow: hidden; background: radial-gradient(60% 60% at 50% 45%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 70%), linear-gradient(160deg, color-mix(in srgb, var(--ground) 92%, var(--gold) 8%), var(--bg)); cursor: grab; touch-action: none; }
+.wiki-tree-stage:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.wiki-tree-stage.dragging { cursor: grabbing; }
+.wiki-tree-svg { display: block; width: 100%; height: 100%; user-select: none; }
+.tree-link { fill: none; stroke: color-mix(in srgb, var(--gold) 28%, var(--line)); stroke-width: 1.4; }
+.tree-link.cross { stroke-dasharray: 3 5; stroke: color-mix(in srgb, var(--gold) 52%, var(--line)); opacity: .75; }
+.tree-region .region-code { font-family: var(--wiki-display); font-size: 26px; fill: color-mix(in srgb, var(--wing) 58%, var(--dim)); }
+.tree-region .region-name { font-size: 11px; fill: var(--dim); letter-spacing: .1em; text-transform: uppercase; }
+.tree-origin .origin-ornament { fill: none; stroke: color-mix(in srgb, var(--gold) 24%, var(--line)); stroke-dasharray: 3 5; }
+.tree-origin .origin-rim { fill: none; stroke: var(--gold); }
+.tree-origin .origin-face { fill: var(--inset); stroke: var(--gold-lit); }
+.tree-origin .origin-mark { pointer-events: none; }
+.tree-origin .origin-label { fill: var(--dim); font-size: 11px; letter-spacing: .22em; }
+.wiki-tree-node { cursor: pointer; }
+.wiki-tree-node .tree-node-face { fill: var(--ground); stroke: color-mix(in srgb, var(--wing) 72%, var(--line)); stroke-width: 1.2; }
+.wiki-tree-node .tree-node-halo { fill: none; stroke: color-mix(in srgb, var(--wing) 30%, transparent); stroke-width: 1; opacity: .55; }
+.wiki-tree-node .tree-node-core { fill: var(--wing); opacity: .85; }
+.wiki-tree-node .tree-node-icon { opacity: .9; pointer-events: none; filter: sepia(.2) saturate(.7); }
+.wiki-tree-node .tree-node-rim { fill: none; stroke: var(--wing); stroke-width: 1.6; opacity: .9; }
+.wiki-tree-node .tree-node-hit { fill: transparent; pointer-events: all; }
+.wiki-tree-node.notable .tree-node-rim { stroke-width: 2; }
+.wiki-tree-node.keystone .tree-node-face { fill: color-mix(in srgb, var(--gold) 14%, var(--ground)); stroke: var(--gold); }
+.wiki-tree-node.keystone .tree-node-rim { stroke: var(--gold-lit); stroke-width: 2; }
+.tree-keystone-corners { fill: none; stroke: var(--gold); stroke-width: 1.3; }
+.wiki-tree-node:hover .tree-node-face, .wiki-tree-node.picked .tree-node-face { filter: drop-shadow(0 0 4px var(--wing)); }
+.wiki-tree-node.picked .tree-node-rim { stroke: var(--gold-lit); stroke-width: 2.6; }
+.wiki-tree-hint { position: absolute; left: .8rem; bottom: .7rem; color: var(--dim); font-size: .66rem; letter-spacing: .04em; pointer-events: none; }
+.wiki-tree-legend { position: absolute; right: .8rem; bottom: .65rem; display: flex; flex-wrap: wrap; gap: .5rem; color: var(--dim); font-size: .6rem; letter-spacing: .05em; text-transform: uppercase; pointer-events: none; }
+.wiki-tree-legend span { display: inline-flex; align-items: center; gap: .25rem; }
+.wiki-tree-legend span::before { content: ""; width: .45rem; height: .45rem; border-radius: 50%; border: 1px solid var(--line); background: var(--ground); }
+.wiki-tree-legend .l-notable::before { border-color: var(--gold); }
+.wiki-tree-legend .l-keystone::before { border-color: var(--gold-lit); background: color-mix(in srgb, var(--gold) 25%, var(--ground)); }
+.wiki-tree-legend .l-cross::before { width: .9rem; height: 0; border: 0; border-top: 1px dashed var(--gold); border-radius: 0; background: none; }
+.wiki-tree-card { position: absolute; z-index: 3; display: grid; gap: .18rem; max-width: min(19rem, 72vw); padding: .7rem .85rem; border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line)); border-radius: var(--radius-card); background: color-mix(in srgb, var(--panel) 96%, transparent); box-shadow: var(--shadow-soft); pointer-events: none; }
+.wiki-tree-card[hidden] { display: none; }
+.wiki-tree-card strong { color: var(--gold-lit); font-family: var(--wiki-display); font-size: 1rem; font-weight: 500; }
+.wiki-tree-card .tree-card-meta { color: var(--dim); font-size: .66rem; letter-spacing: .05em; text-transform: uppercase; }
+.wiki-tree-card p { color: color-mix(in srgb, var(--text) 86%, var(--dim)); font-size: .78rem; }
+.wiki-tree-node.str, .tree-region.str, .tree-chip.str { --wing: var(--hp); }
+.wiki-tree-node.agi, .tree-region.agi, .tree-chip.agi { --wing: var(--good); }
+.wiki-tree-node.dex, .tree-region.dex, .tree-chip.dex { --wing: var(--xp); }
+.wiki-tree-node.int, .tree-region.int, .tree-chip.int { --wing: var(--mana); }
+.wiki-tree-node.wis, .tree-region.wis, .tree-chip.wis { --wing: var(--curse); }
+.wiki-tree-node.vit, .tree-region.vit, .tree-chip.vit { --wing: var(--hp-lit); }
+.wiki-tree-node.lck, .tree-region.lck, .tree-chip.lck { --wing: var(--gold); }
+@media (max-width: 46rem) {
+  .wiki-tree-stage { height: 60vh; }
+  .wiki-tree-legend { display: none; }
+  .wiki-tree-bar { flex-wrap: wrap; }
+  .wiki-tree-controls { flex: 1 0 100%; justify-content: flex-end; }
+}
+@media (max-width: 64rem) {
+  .wiki-masthead { flex-wrap: wrap; padding: 1.1rem 1.4rem; }
+  .masthead-tag { flex: 1 0 100%; order: 3; }
+  .masthead-tools { order: 2; }
+  .menu-toggle { display: inline-flex; order: 1; }
+  .brand { order: 0; }
+  .wiki-shell { grid-template-columns: 1fr; padding: 1.2rem 1.4rem 3rem; }
+  .wiki-nav { position: static; display: none; max-height: none; padding: 0 0 1rem; border-right: 0; border-bottom: 1px solid var(--line); }
+  .wiki-shell.nav-open .wiki-nav { display: flex; }
+}
+@media (max-width: 46rem) {
+  .search input { width: min(100%, 14rem); }
+  .masthead-tools { flex: 1 0 100%; }
+  .search { flex: 1; } .search input { width: 100%; }
+  .page-head, .home-hero { padding: 1.1rem 1.15rem; }
+  .page-content > section { padding: 1rem 1.05rem; }
+  .page-turn { grid-template-columns: 1fr; }
+  .page-turn .next { justify-self: start; text-align: left; }
+  .toc ol { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+@media print {
+  .wiki-masthead, .wiki-nav, .toc, .page-turn, .related-grid, .wiki-foot, .skip { display: none !important; }
+  .wiki-shell { display: block; max-width: none; padding: 0; }
+  body::before { display: none; }
+  .page-content > section { break-inside: avoid; }
+}</style>
+<button class="skip" type="button" data-skip>Skip to content</button>
+<header class="wiki-masthead">
+  <a class="brand" href="index.html" aria-label="ModWorld Field Manual, home">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-text"><b>MODWORLD</b><small>Field Manual</small></span>
+  </a>
+  <p class="masthead-tag">Official player reference · live figures</p>
+  <div class="masthead-tools">
+    <div class="search" role="search">
+      <span class="search-glyph" aria-hidden="true"></span>
+      <label class="sr-only" for="wiki-search">Search the manual</label>
+      <input id="wiki-search" type="search" placeholder="Search the manual…" autocomplete="off" spellcheck="false" />
+      <div id="wiki-search-results" class="search-results" hidden></div>
+    </div>
+    <a class="play-link" href="/">Play the game</a>
+  </div>
+  <button class="menu-toggle" type="button" data-wiki-menu aria-controls="wiki-nav" aria-expanded="false"><span aria-hidden="true">☰</span> Chapters</button>
+</header>
+<div class="wiki-shell">
+<nav class="wiki-nav" id="wiki-nav" aria-label="Manual chapters">
+  <p class="nav-title">The manual</p>
+  <section class="nav-group" aria-labelledby="nav-start">
+    <h2 id="nav-start"><span>I</span>Start here<b>3</b></h2>
+    <ul><li><a href="index.html" data-page-link data-title="Start here" data-group="Start here" data-search="Start here ModWorld — how to play Start here An open-world idle RPG. Your character fights while the window is open and while it is shut." class="">Start here</a></li><li><a href="progression.html" data-page-link data-title="Progression" data-group="Start here" data-search="Progression Progression Start here XP to next level = kills at that level × XP per kill. Skill, field-skill and Mastery tracks use separate XP curves." class="on" aria-current="page">Progression</a></li><li><a href="idle.html" data-page-link data-title="Away &amp; bag" data-group="Start here" data-search="Away &amp; bag Away, and what you can carry Start here Every whole elapsed second is credited, with no offline time limit. Away gear uses the band’s floor Item level; loot is not auto-converted." class="">Away &amp; bag</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-character">
+    <h2 id="nav-character"><span>II</span>Character<b>7</b></h2>
+    <ul><li><a href="stats.html" data-page-link data-title="Stats &amp; caps" data-group="Character" data-search="Stats &amp; caps Stats and caps Character Seven Core attributes feed derived stats through the formulas and caps below." class="">Stats &amp; caps</a></li><li><a href="skills.html" data-page-link data-title="Skills" data-group="Character" data-search="Skills Skills Character Press damage = level-1 damage × damagePct(level) / 100 . Effects use effectPct ; Buffs and Auras use buffEffectPct . Special effects use their own ramp. Cap: 20." class="">Skills</a></li><li><a href="equipment.html" data-page-link data-title="Equipment" data-group="Character" data-search="Equipment Equipment Character Every slot that is not a main hand, frame by frame. The frame decides what it can roll; the roll decides what it is worth." class="">Equipment</a></li><li><a href="crafting.html" data-page-link data-title="Crafting" data-group="Character" data-search="Crafting Crafting Character Stones change what a piece is ; two of them also move how high it sits — Ascend the band, Upgrade the Gear line. At the settlement Craft bench, right-click a stone and click an equipped or carried item, or a highlighted Mod line for a targeted use. Hold Shift to keep using the stone; Esc or right-click cancels. Every price below is read, never typed." class="">Crafting</a></li><li><a href="survival.html" data-page-link data-title="Survival" data-group="Character" data-search="Survival Survival, field skills and provisions Character HP, Mana and Energy Shield use separate Core formulas. Fieldwork, Hunger and food use the rates below." class="">Survival</a></li><li><a href="passive-tree.html" data-page-link data-title="Passive tree" data-group="Character" data-search="Passive tree Passive tree Character The 775-node board the game draws, pannable here: drag to move, scroll to zoom, and jump by region. Every road, Notable and Keystone is the live tree data." class="">Passive tree</a></li><li><a href="builds.html" data-page-link data-title="Build plan" data-group="Character" data-search="Build plan Build plan Character A plan first: choose the regions your damage and defence scale on, walk one road to a Notable, and spend attainment on the Keystone that changes a rule. Skill pieces, presets and the finish line follow below." class="">Build plan</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-combat">
+    <h2 id="nav-combat"><span>III</span>Combat<b>3</b></h2>
+    <ul><li><a href="combat.html" data-page-link data-title="Combat" data-group="Combat" data-search="Combat Combat Combat One incoming hit resolves in a fixed order — avoidance, then Armour, then Elemental resistance, then a pool. Every number is the engine at the reference build (every point spent evenly across the seven Core attributes, level 190 ), so it is the line your own sheet is measured against, not a promise about it." class="">Combat</a></li><li><a href="elements.html" data-page-link data-title="Elements" data-group="Combat" data-search="Elements Elements Combat Every Element names the status its hits leave. A Species attacks with one Element and authors a separate resistance and weakness; no Element counters another. An Element declared ahead of its content reads a dash until its status and its skill rows land." class="">Elements</a></li><li><a href="mobs.html" data-page-link data-title="Bestiary" data-group="Combat" data-search="Bestiary Races, Species and Variants Combat 11 Races · 53 Species · 193 Variants · 53 Uniques. Counts describe the current world; Races and Species have no required roster size." class="">Bestiary</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-world">
+    <h2 id="nav-world"><span>IV</span>World<b>3</b></h2>
+    <ul><li><a href="world.html" data-page-link data-title="World" data-group="World" data-search="World The world World Zone Level drives HP/DPS curves; body class changes group size, evasion and DPS factor." class="">World</a></li><li><a href="travel.html" data-page-link data-title="Travel" data-group="World" data-search="Travel Travel and the Waypoint World blocks = (|Δq| + |Δr| + |Δq + Δr|) / 2 ; walk time = blocks × block_sec ." class="">Travel</a></li><li><a href="towns.html" data-page-link data-title="Towns" data-group="World" data-search="Towns Settlements World Stall price = listed income-minutes × the seller band’s gold-per-minute rate." class="">Towns</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-economy">
+    <h2 id="nav-economy"><span>V</span>Items &amp; economy<b>3</b></h2>
+    <ul><li><a href="items.html" data-page-link data-title="Items" data-group="Items &amp; economy" data-search="Items Items Items &amp; economy A piece of gear is a frame plus the Mods that rolled on it. The frame decides what it can roll; the roll decides what it is worth." class="">Items</a></li><li><a href="weapons.html" data-page-link data-title="Weapons" data-group="Items &amp; economy" data-search="Weapons Weapons Items &amp; economy 11 main-hand types. DPS index = attacksPerSecond × weaponMult / (sword attacksPerSecond × swordMult) × 100 . Frame windows use the mid band." class="">Weapons</a></li><li><a href="economy.html" data-page-link data-title="Economy" data-group="Items &amp; economy" data-search="Economy The two currencies Items &amp; economy Trade quote = item value integrated over the town’s demand curve. Stall prices use band income; Crafting lists stone costs." class="">Economy</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-reference">
+    <h2 id="nav-reference"><span>VI</span>Reference<b>1</b></h2>
+    <ul><li><a href="icons.html" data-page-link data-title="Icons" data-group="Reference" data-search="Icons Icon Gallery Reference Every icon the game ships, in one place. Search by name, filter by category, star icons to find them again, or mark unwanted icons to hide them until you're ready to remove them in a batch." class="">Icons</a></li></ul>
+  </section>
+  <p class="nav-foot">20 chapters · live data</p>
+</nav>
+<main id="wiki-main" class="wiki-main" tabindex="-1"><header class="page-head">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Field Manual</a><span aria-hidden="true">/</span><span>Start here</span><span aria-hidden="true">/</span><span aria-current="page">Progression</span></nav>
+  <p class="eyebrow">Chapter I · Start here</p>
+  <h1>Progression</h1>
+  <p class="lead">XP to next level = kills at that level × XP per kill. Skill, field-skill and Mastery tracks use separate XP curves.</p>
+  <div class="page-meta"><span class="chip">3 sections</span><span class="chip">Live game data</span><span class="chip">Start here</span></div>
+  <p class="covers"><span>Covers</span>Level steps · Weapon Mastery · Passive points</p>
+</header><nav class="toc" aria-label="On this page">
+  <p class="eyebrow">On this page</p>
+  <ol><li><button type="button" class="on" data-scroll="section-1" data-toc="section-1">Level steps</button></li><li><button type="button" class="" data-scroll="section-2" data-toc="section-2">Weapon Mastery</button></li><li><button type="button" class="" data-scroll="section-3" data-toc="section-3">Passive points</button></li></ol>
+</nav><article class="page-content"><section><h2 id="section-1">Level steps</h2><p class="note"><code>XP to next = killsToLevel(L) × per_kill × min(L, mob_level_cap)</code>; <code>kills at own level = XP to next / XP per kill</code>. At the plateau, XP is fixed and mob XP still follows the level cap.</p><table><thead><tr><th>Level</th><th>XP to next</th><th>Cumulative XP</th><th>Kills at your own level</th></tr></thead><tbody><tr><td><span class="num">1</span></td><td><span class="num">200</span></td><td><span class="num">200</span></td><td><span class="num">20</span></td></tr><tr><td><span class="num">2</span></td><td><span class="num">505</span></td><td><span class="num">705</span></td><td><span class="num">25</span></td></tr><tr><td><span class="num">3</span></td><td><span class="num">915</span></td><td><span class="num">1,620</span></td><td><span class="num">31</span></td></tr><tr><td><span class="num">4</span></td><td><span class="num">1,430</span></td><td><span class="num">3,050</span></td><td><span class="num">36</span></td></tr><tr><td><span class="num">5</span></td><td><span class="num">2,050</span></td><td><span class="num">5,100</span></td><td><span class="num">41</span></td></tr><tr><td><span class="num">6</span></td><td><span class="num">2,772</span></td><td><span class="num">7,872</span></td><td><span class="num">46</span></td></tr><tr><td><span class="num">7</span></td><td><span class="num">3,598</span></td><td><span class="num">11,470</span></td><td><span class="num">51</span></td></tr><tr><td><span class="num">8</span></td><td><span class="num">4,528</span></td><td><span class="num">15,998</span></td><td><span class="num">57</span></td></tr><tr><td><span class="num">9</span></td><td><span class="num">5,562</span></td><td><span class="num">21,560</span></td><td><span class="num">62</span></td></tr><tr><td><span class="num">10</span></td><td><span class="num">6,700</span></td><td><span class="num">28,260</span></td><td><span class="num">67</span></td></tr><tr><td><span class="num">11</span></td><td><span class="num">7,810</span></td><td><span class="num">36,070</span></td><td><span class="num">71</span></td></tr><tr><td><span class="num">12</span></td><td><span class="num">9,150</span></td><td><span class="num">45,220</span></td><td><span class="num">76</span></td></tr><tr><td><span class="num">13</span></td><td><span class="num">10,595</span></td><td><span class="num">55,815</span></td><td><span class="num">82</span></td></tr><tr><td><span class="num">14</span></td><td><span class="num">12,145</span></td><td><span class="num">67,960</span></td><td><span class="num">87</span></td></tr><tr><td><span class="num">15</span></td><td><span class="num">13,800</span></td><td><span class="num">81,760</span></td><td><span class="num">92</span></td></tr><tr><td><span class="num">16</span></td><td><span class="num">15,456</span></td><td><span class="num">97,216</span></td><td><span class="num">97</span></td></tr><tr><td><span class="num">17</span></td><td><span class="num">17,204</span></td><td><span class="num">114,420</span></td><td><span class="num">101</span></td></tr><tr><td><span class="num">18</span></td><td><span class="num">19,044</span></td><td><span class="num">133,464</span></td><td><span class="num">106</span></td></tr><tr><td><span class="num">19</span></td><td><span class="num">20,976</span></td><td><span class="num">154,440</span></td><td><span class="num">110</span></td></tr><tr><td><span class="num">20</span></td><td><span class="num">23,000</span></td><td><span class="num">177,440</span></td><td><span class="num">115</span></td></tr><tr><td><span class="num">21</span></td><td><span class="num">25,410</span></td><td><span class="num">202,850</span></td><td><span class="num">121</span></td></tr><tr><td><span class="num">22</span></td><td><span class="num">27,720</span></td><td><span class="num">230,570</span></td><td><span class="num">126</span></td></tr><tr><td><span class="num">23</span></td><td><span class="num">30,130</span></td><td><span class="num">260,700</span></td><td><span class="num">131</span></td></tr><tr><td><span class="num">24</span></td><td><span class="num">32,640</span></td><td><span class="num">293,340</span></td><td><span class="num">136</span></td></tr><tr><td><span class="num">25</span></td><td><span class="num">35,250</span></td><td><span class="num">328,590</span></td><td><span class="num">141</span></td></tr><tr><td><span class="num">26</span></td><td><span class="num">39,572</span></td><td><span class="num">368,162</span></td><td><span class="num">152</span></td></tr><tr><td><span class="num">27</span></td><td><span class="num">44,118</span></td><td><span class="num">412,280</span></td><td><span class="num">163</span></td></tr><tr><td><span class="num">28</span></td><td><span class="num">48,888</span></td><td><span class="num">461,168</span></td><td><span class="num">175</span></td></tr><tr><td><span class="num">29</span></td><td><span class="num">53,882</span></td><td><span class="num">515,050</span></td><td><span class="num">186</span></td></tr><tr><td><span class="num">30</span></td><td><span class="num">59,100</span></td><td><span class="num">574,150</span></td><td><span class="num">197</span></td></tr><tr><td><span class="num">31</span></td><td><span class="num">64,170</span></td><td><span class="num">638,320</span></td><td><span class="num">207</span></td></tr><tr><td><span class="num">32</span></td><td><span class="num">69,520</span></td><td><span class="num">707,840</span></td><td><span class="num">217</span></td></tr><tr><td><span class="num">33</span></td><td><span class="num">75,075</span></td><td><span class="num">782,915</span></td><td><span class="num">228</span></td></tr><tr><td><span class="num">34</span></td><td><span class="num">80,835</span></td><td><span class="num">863,750</span></td><td><span class="num">238</span></td></tr><tr><td><span class="num">35</span></td><td><span class="num">86,800</span></td><td><span class="num">950,550</span></td><td><span class="num">248</span></td></tr><tr><td><span class="num">36</span></td><td><span class="num">94,608</span></td><td><span class="num">1,045,158</span></td><td><span class="num">263</span></td></tr><tr><td><span class="num">37</span></td><td><span class="num">102,712</span></td><td><span class="num">1,147,870</span></td><td><span class="num">278</span></td></tr><tr><td><span class="num">38</span></td><td><span class="num">111,112</span></td><td><span class="num">1,258,982</span></td><td><span class="num">292</span></td></tr><tr><td><span class="num">39</span></td><td><span class="num">119,808</span></td><td><span class="num">1,378,790</span></td><td><span class="num">307</span></td></tr><tr><td><span class="num">40</span></td><td><span class="num">128,800</span></td><td><span class="num">1,507,590</span></td><td><span class="num">322</span></td></tr><tr><td><span class="num">41</span></td><td><span class="num">136,940</span></td><td><span class="num">1,644,530</span></td><td><span class="num">334</span></td></tr><tr><td><span class="num">42</span></td><td><span class="num">145,740</span></td><td><span class="num">1,790,270</span></td><td><span class="num">347</span></td></tr><tr><td><span class="num">43</span></td><td><span class="num">154,800</span></td><td><span class="num">1,945,070</span></td><td><span class="num">360</span></td></tr><tr><td><span class="num">44</span></td><td><span class="num">164,120</span></td><td><span class="num">2,109,190</span></td><td><span class="num">373</span></td></tr><tr><td><span class="num">45</span></td><td><span class="num">173,700</span></td><td><span class="num">2,282,890</span></td><td><span class="num">386</span></td></tr><tr><td><span class="num">46</span></td><td><span class="num">186,760</span></td><td><span class="num">2,469,650</span></td><td><span class="num">406</span></td></tr><tr><td><span class="num">47</span></td><td><span class="num">200,220</span></td><td><span class="num">2,669,870</span></td><td><span class="num">426</span></td></tr><tr><td><span class="num">48</span></td><td><span class="num">214,080</span></td><td><span class="num">2,883,950</span></td><td><span class="num">446</span></td></tr><tr><td><span class="num">49</span></td><td><span class="num">228,340</span></td><td><span class="num">3,112,290</span></td><td><span class="num">466</span></td></tr><tr><td><span class="num">50</span></td><td><span class="num">243,000</span></td><td><span class="num">3,355,290</span></td><td><span class="num">486</span></td></tr><tr><td><span class="num">51</span></td><td><span class="num">257,040</span></td><td><span class="num">3,612,330</span></td><td><span class="num">504</span></td></tr><tr><td><span class="num">52</span></td><td><span class="num">272,090</span></td><td><span class="num">3,884,420</span></td><td><span class="num">523</span></td></tr><tr><td><span class="num">53</span></td><td><span class="num">287,525</span></td><td><span class="num">4,171,945</span></td><td><span class="num">543</span></td></tr><tr><td><span class="num">54</span></td><td><span class="num">303,345</span></td><td><span class="num">4,475,290</span></td><td><span class="num">562</span></td></tr><tr><td><span class="num">55</span></td><td><span class="num">319,550</span></td><td><span class="num">4,794,840</span></td><td><span class="num">581</span></td></tr><tr><td><span class="num">56</span></td><td><span class="num">340,592</span></td><td><span class="num">5,135,432</span></td><td><span class="num">608</span></td></tr><tr><td><span class="num">57</span></td><td><span class="num">362,178</span></td><td><span class="num">5,497,610</span></td><td><span class="num">635</span></td></tr><tr><td><span class="num">58</span></td><td><span class="num">384,308</span></td><td><span class="num">5,881,918</span></td><td><span class="num">663</span></td></tr><tr><td><span class="num">59</span></td><td><span class="num">406,982</span></td><td><span class="num">6,288,900</span></td><td><span class="num">690</span></td></tr><tr><td><span class="num">60</span></td><td><span class="num">430,200</span></td><td><span class="num">6,719,100</span></td><td><span class="num">717</span></td></tr><tr><td><span class="num">61</span></td><td><span class="num">452,010</span></td><td><span class="num">7,171,110</span></td><td><span class="num">741</span></td></tr><tr><td><span class="num">62</span></td><td><span class="num">474,765</span></td><td><span class="num">7,645,875</span></td><td><span class="num">766</span></td></tr><tr><td><span class="num">63</span></td><td><span class="num">498,015</span></td><td><span class="num">8,143,890</span></td><td><span class="num">791</span></td></tr><tr><td><span class="num">64</span></td><td><span class="num">521,760</span></td><td><span class="num">8,665,650</span></td><td><span class="num">815</span></td></tr><tr><td><span class="num">65</span></td><td><span class="num">546,000</span></td><td><span class="num">9,211,650</span></td><td><span class="num">840</span></td></tr><tr><td><span class="num">66</span></td><td><span class="num">594,924</span></td><td><span class="num">9,806,574</span></td><td><span class="num">901</span></td></tr><tr><td><span class="num">67</span></td><td><span class="num">645,076</span></td><td><span class="num">10,451,650</span></td><td><span class="num">963</span></td></tr><tr><td><span class="num">68</span></td><td><span class="num">696,456</span></td><td><span class="num">11,148,106</span></td><td><span class="num">1,024</span></td></tr><tr><td><span class="num">69</span></td><td><span class="num">749,064</span></td><td><span class="num">11,897,170</span></td><td><span class="num">1,086</span></td></tr><tr><td><span class="num">70</span></td><td><span class="num">802,900</span></td><td><span class="num">12,700,070</span></td><td><span class="num">1,147</span></td></tr><tr><td><span class="num">71</span></td><td><span class="num">836,380</span></td><td><span class="num">13,536,450</span></td><td><span class="num">1,178</span></td></tr><tr><td><span class="num">72</span></td><td><span class="num">873,540</span></td><td><span class="num">14,409,990</span></td><td><span class="num">1,213</span></td></tr><tr><td><span class="num">73</span></td><td><span class="num">911,405</span></td><td><span class="num">15,321,395</span></td><td><span class="num">1,249</span></td></tr><tr><td><span class="num">74</span></td><td><span class="num">949,975</span></td><td><span class="num">16,271,370</span></td><td><span class="num">1,284</span></td></tr><tr><td><span class="num">75</span></td><td><span class="num">989,250</span></td><td><span class="num">17,260,620</span></td><td><span class="num">1,319</span></td></tr><tr><td><span class="num">76</span></td><td><span class="num">1,039,376</span></td><td><span class="num">18,299,996</span></td><td><span class="num">1,368</span></td></tr><tr><td><span class="num">77</span></td><td><span class="num">1,090,474</span></td><td><span class="num">19,390,470</span></td><td><span class="num">1,416</span></td></tr><tr><td><span class="num">78</span></td><td><span class="num">1,142,544</span></td><td><span class="num">20,533,014</span></td><td><span class="num">1,465</span></td></tr><tr><td><span class="num">79</span></td><td><span class="num">1,195,586</span></td><td><span class="num">21,728,600</span></td><td><span class="num">1,513</span></td></tr><tr><td><span class="num">80</span></td><td><span class="num">1,249,600</span></td><td><span class="num">22,978,200</span></td><td><span class="num">1,562</span></td></tr><tr><td><span class="num">81</span></td><td><span class="num">1,304,100</span></td><td><span class="num">24,282,300</span></td><td><span class="num">1,610</span></td></tr><tr><td><span class="num">82</span></td><td><span class="num">1,362,840</span></td><td><span class="num">25,645,140</span></td><td><span class="num">1,662</span></td></tr><tr><td><span class="num">83</span></td><td><span class="num">1,422,620</span></td><td><span class="num">27,067,760</span></td><td><span class="num">1,714</span></td></tr><tr><td><span class="num">84</span></td><td><span class="num">1,483,440</span></td><td><span class="num">28,551,200</span></td><td><span class="num">1,766</span></td></tr><tr><td><span class="num">85</span></td><td><span class="num">1,545,300</span></td><td><span class="num">30,096,500</span></td><td><span class="num">1,818</span></td></tr><tr><td><span class="num">86</span></td><td><span class="num">1,602,180</span></td><td><span class="num">31,698,680</span></td><td><span class="num">1,863</span></td></tr><tr><td><span class="num">87</span></td><td><span class="num">1,659,090</span></td><td><span class="num">33,357,770</span></td><td><span class="num">1,907</span></td></tr><tr><td><span class="num">88</span></td><td><span class="num">1,717,760</span></td><td><span class="num">35,075,530</span></td><td><span class="num">1,952</span></td></tr><tr><td><span class="num">89</span></td><td><span class="num">1,775,550</span></td><td><span class="num">36,851,080</span></td><td><span class="num">1,995</span></td></tr><tr><td><span class="num">90</span></td><td><span class="num">1,952,100</span></td><td><span class="num">38,803,180</span></td><td><span class="num">2,169</span></td></tr><tr><td><span class="num">91</span></td><td><span class="num">2,096,640</span></td><td><span class="num">40,899,820</span></td><td><span class="num">2,304</span></td></tr><tr><td><span class="num">92</span></td><td><span class="num">2,235,600</span></td><td><span class="num">43,135,420</span></td><td><span class="num">2,430</span></td></tr><tr><td><span class="num">93</span></td><td><span class="num">2,497,050</span></td><td><span class="num">45,632,470</span></td><td><span class="num">2,685</span></td></tr><tr><td><span class="num">94</span></td><td><span class="num">2,757,020</span></td><td><span class="num">48,389,490</span></td><td><span class="num">2,933</span></td></tr><tr><td><span class="num">95</span></td><td><span class="num">3,192,000</span></td><td><span class="num">51,581,490</span></td><td><span class="num">3,360</span></td></tr><tr><td><span class="num">96</span></td><td><span class="num">3,582,720</span></td><td><span class="num">55,164,210</span></td><td><span class="num">3,732</span></td></tr><tr><td><span class="num">97</span></td><td><span class="num">3,843,140</span></td><td><span class="num">59,007,350</span></td><td><span class="num">3,962</span></td></tr><tr><td><span class="num">98</span></td><td><span class="num">4,661,860</span></td><td><span class="num">63,669,210</span></td><td><span class="num">4,757</span></td></tr><tr><td><span class="num">99</span></td><td><span class="num">6,992,370</span></td><td><span class="num">70,661,580</span></td><td><span class="num">7,063</span></td></tr><tr><td><span class="num">100</span></td><td><span class="num">1,775,550</span></td><td><span class="num">72,437,130</span></td><td><span class="num">1,776</span></td></tr><tr><td><span class="num">101</span></td><td><span class="num">1,775,550</span></td><td><span class="num">74,212,680</span></td><td><span class="num">1,758</span></td></tr><tr><td><span class="num">102</span></td><td><span class="num">1,775,550</span></td><td><span class="num">75,988,230</span></td><td><span class="num">1,741</span></td></tr><tr><td><span class="num">103</span></td><td><span class="num">1,775,550</span></td><td><span class="num">77,763,780</span></td><td><span class="num">1,724</span></td></tr><tr><td><span class="num">104</span></td><td><span class="num">1,775,550</span></td><td><span class="num">79,539,330</span></td><td><span class="num">1,707</span></td></tr><tr><td><span class="num">105</span></td><td><span class="num">1,775,550</span></td><td><span class="num">81,314,880</span></td><td><span class="num">1,691</span></td></tr><tr><td><span class="num">106</span></td><td><span class="num">1,775,550</span></td><td><span class="num">83,090,430</span></td><td><span class="num">1,675</span></td></tr><tr><td><span class="num">107</span></td><td><span class="num">1,775,550</span></td><td><span class="num">84,865,980</span></td><td><span class="num">1,659</span></td></tr><tr><td><span class="num">108</span></td><td><span class="num">1,775,550</span></td><td><span class="num">86,641,530</span></td><td><span class="num">1,644</span></td></tr><tr><td><span class="num">109</span></td><td><span class="num">1,775,550</span></td><td><span class="num">88,417,080</span></td><td><span class="num">1,629</span></td></tr><tr><td><span class="num">110</span></td><td><span class="num">1,775,550</span></td><td><span class="num">90,192,630</span></td><td><span class="num">1,614</span></td></tr><tr><td><span class="num">111</span></td><td><span class="num">1,775,550</span></td><td><span class="num">91,968,180</span></td><td><span class="num">1,600</span></td></tr><tr><td><span class="num">112</span></td><td><span class="num">1,775,550</span></td><td><span class="num">93,743,730</span></td><td><span class="num">1,585</span></td></tr><tr><td><span class="num">113</span></td><td><span class="num">1,775,550</span></td><td><span class="num">95,519,280</span></td><td><span class="num">1,571</span></td></tr><tr><td><span class="num">114</span></td><td><span class="num">1,775,550</span></td><td><span class="num">97,294,830</span></td><td><span class="num">1,558</span></td></tr><tr><td><span class="num">115</span></td><td><span class="num">1,775,550</span></td><td><span class="num">99,070,380</span></td><td><span class="num">1,544</span></td></tr><tr><td><span class="num">116</span></td><td><span class="num">1,775,550</span></td><td><span class="num">100,845,930</span></td><td><span class="num">1,531</span></td></tr><tr><td><span class="num">117</span></td><td><span class="num">1,775,550</span></td><td><span class="num">102,621,480</span></td><td><span class="num">1,518</span></td></tr><tr><td><span class="num">118</span></td><td><span class="num">1,775,550</span></td><td><span class="num">104,397,030</span></td><td><span class="num">1,505</span></td></tr><tr><td><span class="num">119</span></td><td><span class="num">1,775,550</span></td><td><span class="num">106,172,580</span></td><td><span class="num">1,492</span></td></tr><tr><td><span class="num">120</span></td><td><span class="num">1,775,550</span></td><td><span class="num">107,948,130</span></td><td><span class="num">1,480</span></td></tr><tr><td><span class="num">121</span></td><td><span class="num">1,775,550</span></td><td><span class="num">109,723,680</span></td><td><span class="num">1,467</span></td></tr><tr><td><span class="num">122</span></td><td><span class="num">1,775,550</span></td><td><span class="num">111,499,230</span></td><td><span class="num">1,455</span></td></tr><tr><td><span class="num">123</span></td><td><span class="num">1,775,550</span></td><td><span class="num">113,274,780</span></td><td><span class="num">1,444</span></td></tr><tr><td><span class="num">124</span></td><td><span class="num">1,775,550</span></td><td><span class="num">115,050,330</span></td><td><span class="num">1,432</span></td></tr><tr><td><span class="num">125</span></td><td><span class="num">1,775,550</span></td><td><span class="num">116,825,880</span></td><td><span class="num">1,420</span></td></tr><tr><td><span class="num">126</span></td><td><span class="num">1,775,550</span></td><td><span class="num">118,601,430</span></td><td><span class="num">1,409</span></td></tr><tr><td><span class="num">127</span></td><td><span class="num">1,775,550</span></td><td><span class="num">120,376,980</span></td><td><span class="num">1,398</span></td></tr><tr><td><span class="num">128</span></td><td><span class="num">1,775,550</span></td><td><span class="num">122,152,530</span></td><td><span class="num">1,387</span></td></tr><tr><td><span class="num">129</span></td><td><span class="num">1,775,550</span></td><td><span class="num">123,928,080</span></td><td><span class="num">1,376</span></td></tr><tr><td><span class="num">130</span></td><td><span class="num">1,775,550</span></td><td><span class="num">125,703,630</span></td><td><span class="num">1,366</span></td></tr><tr><td><span class="num">131</span></td><td><span class="num">1,775,550</span></td><td><span class="num">127,479,180</span></td><td><span class="num">1,355</span></td></tr><tr><td><span class="num">132</span></td><td><span class="num">1,775,550</span></td><td><span class="num">129,254,730</span></td><td><span class="num">1,345</span></td></tr><tr><td><span class="num">133</span></td><td><span class="num">1,775,550</span></td><td><span class="num">131,030,280</span></td><td><span class="num">1,335</span></td></tr><tr><td><span class="num">134</span></td><td><span class="num">1,775,550</span></td><td><span class="num">132,805,830</span></td><td><span class="num">1,325</span></td></tr><tr><td><span class="num">135</span></td><td><span class="num">1,775,550</span></td><td><span class="num">134,581,380</span></td><td><span class="num">1,315</span></td></tr><tr><td><span class="num">136</span></td><td><span class="num">1,775,550</span></td><td><span class="num">136,356,930</span></td><td><span class="num">1,306</span></td></tr><tr><td><span class="num">137</span></td><td><span class="num">1,775,550</span></td><td><span class="num">138,132,480</span></td><td><span class="num">1,296</span></td></tr><tr><td><span class="num">138</span></td><td><span class="num">1,775,550</span></td><td><span class="num">139,908,030</span></td><td><span class="num">1,287</span></td></tr><tr><td><span class="num">139</span></td><td><span class="num">1,775,550</span></td><td><span class="num">141,683,580</span></td><td><span class="num">1,277</span></td></tr><tr><td><span class="num">140</span></td><td><span class="num">1,775,550</span></td><td><span class="num">143,459,130</span></td><td><span class="num">1,268</span></td></tr><tr><td><span class="num">141</span></td><td><span class="num">1,775,550</span></td><td><span class="num">145,234,680</span></td><td><span class="num">1,259</span></td></tr><tr><td><span class="num">142</span></td><td><span class="num">1,775,550</span></td><td><span class="num">147,010,230</span></td><td><span class="num">1,250</span></td></tr><tr><td><span class="num">143</span></td><td><span class="num">1,775,550</span></td><td><span class="num">148,785,780</span></td><td><span class="num">1,242</span></td></tr><tr><td><span class="num">144</span></td><td><span class="num">1,775,550</span></td><td><span class="num">150,561,330</span></td><td><span class="num">1,233</span></td></tr><tr><td><span class="num">145</span></td><td><span class="num">1,775,550</span></td><td><span class="num">152,336,880</span></td><td><span class="num">1,225</span></td></tr><tr><td><span class="num">146</span></td><td><span class="num">1,775,550</span></td><td><span class="num">154,112,430</span></td><td><span class="num">1,216</span></td></tr><tr><td><span class="num">147</span></td><td><span class="num">1,775,550</span></td><td><span class="num">155,887,980</span></td><td><span class="num">1,208</span></td></tr><tr><td><span class="num">148</span></td><td><span class="num">1,775,550</span></td><td><span class="num">157,663,530</span></td><td><span class="num">1,200</span></td></tr><tr><td><span class="num">149</span></td><td><span class="num">1,775,550</span></td><td><span class="num">159,439,080</span></td><td><span class="num">1,192</span></td></tr><tr><td><span class="num">150</span></td><td><span class="num">1,775,550</span></td><td><span class="num">161,214,630</span></td><td><span class="num">1,184</span></td></tr><tr><td><span class="num">151</span></td><td><span class="num">1,775,550</span></td><td><span class="num">162,990,180</span></td><td><span class="num">1,176</span></td></tr><tr><td><span class="num">152</span></td><td><span class="num">1,775,550</span></td><td><span class="num">164,765,730</span></td><td><span class="num">1,168</span></td></tr><tr><td><span class="num">153</span></td><td><span class="num">1,775,550</span></td><td><span class="num">166,541,280</span></td><td><span class="num">1,160</span></td></tr><tr><td><span class="num">154</span></td><td><span class="num">1,775,550</span></td><td><span class="num">168,316,830</span></td><td><span class="num">1,153</span></td></tr><tr><td><span class="num">155</span></td><td><span class="num">1,775,550</span></td><td><span class="num">170,092,380</span></td><td><span class="num">1,146</span></td></tr><tr><td><span class="num">156</span></td><td><span class="num">1,775,550</span></td><td><span class="num">171,867,930</span></td><td><span class="num">1,138</span></td></tr><tr><td><span class="num">157</span></td><td><span class="num">1,775,550</span></td><td><span class="num">173,643,480</span></td><td><span class="num">1,131</span></td></tr><tr><td><span class="num">158</span></td><td><span class="num">1,775,550</span></td><td><span class="num">175,419,030</span></td><td><span class="num">1,124</span></td></tr><tr><td><span class="num">159</span></td><td><span class="num">1,775,550</span></td><td><span class="num">177,194,580</span></td><td><span class="num">1,117</span></td></tr><tr><td><span class="num">160</span></td><td><span class="num">1,775,550</span></td><td><span class="num">178,970,130</span></td><td><span class="num">1,110</span></td></tr><tr><td><span class="num">161</span></td><td><span class="num">1,775,550</span></td><td><span class="num">180,745,680</span></td><td><span class="num">1,103</span></td></tr><tr><td><span class="num">162</span></td><td><span class="num">1,775,550</span></td><td><span class="num">182,521,230</span></td><td><span class="num">1,096</span></td></tr><tr><td><span class="num">163</span></td><td><span class="num">1,775,550</span></td><td><span class="num">184,296,780</span></td><td><span class="num">1,089</span></td></tr><tr><td><span class="num">164</span></td><td><span class="num">1,775,550</span></td><td><span class="num">186,072,330</span></td><td><span class="num">1,083</span></td></tr><tr><td><span class="num">165</span></td><td><span class="num">1,775,550</span></td><td><span class="num">187,847,880</span></td><td><span class="num">1,076</span></td></tr><tr><td><span class="num">166</span></td><td><span class="num">1,775,550</span></td><td><span class="num">189,623,430</span></td><td><span class="num">1,070</span></td></tr><tr><td><span class="num">167</span></td><td><span class="num">1,775,550</span></td><td><span class="num">191,398,980</span></td><td><span class="num">1,063</span></td></tr><tr><td><span class="num">168</span></td><td><span class="num">1,775,550</span></td><td><span class="num">193,174,530</span></td><td><span class="num">1,057</span></td></tr><tr><td><span class="num">169</span></td><td><span class="num">1,775,550</span></td><td><span class="num">194,950,080</span></td><td><span class="num">1,051</span></td></tr><tr><td><span class="num">170</span></td><td><span class="num">1,775,550</span></td><td><span class="num">196,725,630</span></td><td><span class="num">1,044</span></td></tr><tr><td><span class="num">171</span></td><td><span class="num">1,775,550</span></td><td><span class="num">198,501,180</span></td><td><span class="num">1,038</span></td></tr><tr><td><span class="num">172</span></td><td><span class="num">1,775,550</span></td><td><span class="num">200,276,730</span></td><td><span class="num">1,032</span></td></tr><tr><td><span class="num">173</span></td><td><span class="num">1,775,550</span></td><td><span class="num">202,052,280</span></td><td><span class="num">1,026</span></td></tr><tr><td><span class="num">174</span></td><td><span class="num">1,775,550</span></td><td><span class="num">203,827,830</span></td><td><span class="num">1,020</span></td></tr><tr><td><span class="num">175</span></td><td><span class="num">1,775,550</span></td><td><span class="num">205,603,380</span></td><td><span class="num">1,015</span></td></tr><tr><td><span class="num">176</span></td><td><span class="num">1,775,550</span></td><td><span class="num">207,378,930</span></td><td><span class="num">1,009</span></td></tr><tr><td><span class="num">177</span></td><td><span class="num">1,775,550</span></td><td><span class="num">209,154,480</span></td><td><span class="num">1,003</span></td></tr><tr><td><span class="num">178</span></td><td><span class="num">1,775,550</span></td><td><span class="num">210,930,030</span></td><td><span class="num">998</span></td></tr><tr><td><span class="num">179</span></td><td><span class="num">1,775,550</span></td><td><span class="num">212,705,580</span></td><td><span class="num">992</span></td></tr><tr><td><span class="num">180</span></td><td><span class="num">1,775,550</span></td><td><span class="num">214,481,130</span></td><td><span class="num">986</span></td></tr><tr><td><span class="num">181</span></td><td><span class="num">1,775,550</span></td><td><span class="num">216,256,680</span></td><td><span class="num">981</span></td></tr><tr><td><span class="num">182</span></td><td><span class="num">1,775,550</span></td><td><span class="num">218,032,230</span></td><td><span class="num">976</span></td></tr><tr><td><span class="num">183</span></td><td><span class="num">1,775,550</span></td><td><span class="num">219,807,780</span></td><td><span class="num">970</span></td></tr><tr><td><span class="num">184</span></td><td><span class="num">1,775,550</span></td><td><span class="num">221,583,330</span></td><td><span class="num">965</span></td></tr><tr><td><span class="num">185</span></td><td><span class="num">1,775,550</span></td><td><span class="num">223,358,880</span></td><td><span class="num">960</span></td></tr><tr><td><span class="num">186</span></td><td><span class="num">1,775,550</span></td><td><span class="num">225,134,430</span></td><td><span class="num">955</span></td></tr><tr><td><span class="num">187</span></td><td><span class="num">1,775,550</span></td><td><span class="num">226,909,980</span></td><td><span class="num">949</span></td></tr><tr><td><span class="num">188</span></td><td><span class="num">1,775,550</span></td><td><span class="num">228,685,530</span></td><td><span class="num">944</span></td></tr><tr><td><span class="num">189</span></td><td><span class="num">1,775,550</span></td><td><span class="num">230,461,080</span></td><td><span class="num">939</span></td></tr></tbody></table></section>
+<section><h2 id="section-2">Weapon Mastery</h2><p class="note"><code>MasteryLevel = min(cap, floor(sqrt(XP / divisor)) + 1)</code>; <code>weightDiscount = min(cap, level × perLevel)</code>. Matching skills get full skill bonus; other skills get <code>full × offTypeMultiplier</code>.</p><table><thead><tr><th>Bonus</th><th>What it gives</th><th>Where it stops</th></tr></thead><tbody><tr><td>While held</td><td>−1% weapon weight a level</td><td><code>weight_discount_cap_pct</code> 20%</td></tr><tr><td>Matching skill</td><td>+0.5% skill damage a level from Mastery level 5</td><td>full bonus · cap 8%</td></tr><tr><td>Other skill</td><td>half the held weapon’s skill damage bonus</td><td>cap 4%</td></tr><tr><td>Account-wide</td><td>+1% drop rate per weapon type once that type reaches Mastery 10</td><td>across 11 types — <code>mastery.dropMultiplier</code></td></tr><tr><td>The ladder</td><td>4 Mastery XP a kill, the same curve shape as the herb farm, capped at 20</td><td><code>engine/mastery.ts</code></td></tr></tbody></table></section>
+<section><h2 id="section-3">Passive points</h2><p class="note">Progression banks the points; the Build plan spends them.</p><p>Levels, quest milestones and first-time Expedition/Delivery milestones bank tree points; a Keystone is paid in attainment, not tree points. Respec is free at a settlement. The tree board is on <a href="passive-tree.html">Passive tree</a>; the plan and every Keystone's effect are on <a href="builds.html">Build plan</a>.</p></section></article><footer class="page-foot">
+    <section class="related" aria-labelledby="related-title"><p class="eyebrow" id="related-title">Keep reading</p><div class="related-grid"><a href="index.html"><b>Start here</b><small>An open-world idle RPG. Your character fights while the window is open and while it is shut.</small></a><a href="idle.html"><b>Away &amp; bag</b><small>Every whole elapsed second is credited, with no offline time limit. Away gear uses the band’s floor Item level; loot is not auto-converted.</small></a></div></section>
+    <nav class="page-turn" aria-label="Chapter navigation"><a class="prev" href="index.html"><small>Previous</small><b>Start here</b></a><a class="next" href="idle.html"><small>Next</small><b>Away &amp; bag</b></a></nav>
+  </footer>
+<footer class="wiki-foot"><span>ModWorld Field Manual · official player reference</span><span>20 chapters · figures read live from the game</span><a href="index.html">Contents</a></footer>
+</main></div>
+<script>
+(function () {
+  var shell = document.querySelector('.wiki-shell');
+  var menu = document.querySelector('[data-wiki-menu]');
+  if (menu && shell) {
+    menu.addEventListener('click', function () {
+      var open = shell.classList.toggle('nav-open');
+      menu.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  }
+  var skip = document.querySelector('[data-skip]');
+  if (skip) skip.addEventListener('click', function () {
+    var main = document.getElementById('wiki-main');
+    if (main) { main.focus(); main.scrollIntoView({ block: 'start' }); }
+  });
+  var input = document.getElementById('wiki-search');
+  var results = document.getElementById('wiki-search-results');
+  var links = Array.prototype.slice.call(document.querySelectorAll('[data-page-link]'));
+  var close = function () { if (results) { results.hidden = true; results.innerHTML = ''; } };
+  if (input && results) {
+    var render = function () {
+      var q = input.value.trim().toLowerCase();
+      if (!q) { close(); return; }
+      var hits = links.filter(function (a) {
+        return (a.getAttribute('data-search') || '').toLowerCase().indexOf(q) >= 0;
+      }).slice(0, 8);
+      results.innerHTML = '';
+      if (!hits.length) {
+        var none = document.createElement('p');
+        none.className = 'search-none';
+        none.textContent = 'No chapter matches.';
+        results.appendChild(none);
+      } else {
+        hits.forEach(function (a) {
+          var hit = document.createElement('a');
+          hit.className = 'search-hit';
+          hit.href = a.getAttribute('href');
+          var title = document.createElement('span');
+          title.textContent = a.getAttribute('data-title') || '';
+          var group = document.createElement('small');
+          group.textContent = a.getAttribute('data-group') || '';
+          hit.appendChild(title);
+          hit.appendChild(group);
+          results.appendChild(hit);
+        });
+      }
+      results.hidden = false;
+    };
+    input.addEventListener('input', render);
+    input.addEventListener('focus', render);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { input.value = ''; close(); input.blur(); }
+      if (e.key === 'Enter') {
+        var first = results.querySelector('a');
+        if (first) { e.preventDefault(); first.click(); }
+      }
+    });
+    if (!window.__wikiSearchOutside) {
+      window.__wikiSearchOutside = true;
+      document.addEventListener('click', function (e) {
+        var box = document.querySelector('.search');
+        if (box && !box.contains(e.target)) {
+          var r = document.getElementById('wiki-search-results');
+          if (r) { r.hidden = true; r.innerHTML = ''; }
+        }
+      });
+      document.addEventListener('keydown', function (e) {
+        var field = document.getElementById('wiki-search');
+        if (!field) return;
+        if (e.key === '/' && document.activeElement !== field && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) {
+          e.preventDefault(); field.focus();
+        }
+      });
+    }
+    var q = new URLSearchParams(window.location.search).get('q');
+    if (q) { input.value = q; render(); }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-scroll]'), function (b) {
+    b.addEventListener('click', function () {
+      var target = document.getElementById(b.getAttribute('data-scroll'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (shell) shell.classList.remove('nav-open');
+    });
+  });
+  var toc = Array.prototype.slice.call(document.querySelectorAll('[data-toc]'));
+  if (toc.length && 'IntersectionObserver' in window) {
+    var seen = {};
+    toc.forEach(function (a) { seen[a.getAttribute('data-toc')] = a; });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        toc.forEach(function (a) { a.classList.toggle('on', a === seen[en.target.id]); });
+      });
+    }, { rootMargin: '-15% 0px -70% 0px' });
+    Array.prototype.forEach.call(document.querySelectorAll('.page-content > section[id]'), function (s) { io.observe(s); });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.wiki-nav [data-page-link]'), function (a) {
+    a.addEventListener('click', function () { if (shell) shell.classList.remove('nav-open'); });
+  });
+
+  // The passive-tree board: a viewBox camera over the canonical SVG, with a node card that follows
+  // the hovered or pinned node exactly as the game's board does.
+  var treeView = document.querySelector('[data-tree-view]');
+  if (treeView) {
+    var treeSvg = treeView.querySelector('svg[data-tree-svg]');
+    var treeStage = treeView.querySelector('[data-tree-stage]');
+    if (treeSvg && treeStage) {
+      var treeCard = treeView.querySelector('[data-tree-card]');
+      var treeZoomLabel = treeView.querySelector('[data-tree-zoom-label]');
+      var readTreeBox = function () {
+        var v = (treeSvg.getAttribute('viewBox') || '').split(' ').map(Number);
+        return { x: v[0] || 0, y: v[1] || 0, w: v[2] || 1, h: v[3] || 1 };
+      };
+      var treeFit = readTreeBox();
+      var treeCamera = { x: treeFit.x, y: treeFit.y, w: treeFit.w, h: treeFit.h };
+      var treeClamp = function (v, lo, hi) { return Math.max(lo, Math.min(hi, v)); };
+      var applyTree = function () {
+        treeSvg.setAttribute('viewBox', [treeCamera.x, treeCamera.y, treeCamera.w, treeCamera.h].join(' '));
+        if (treeZoomLabel) treeZoomLabel.textContent = Math.round((treeFit.w / treeCamera.w) * 100) + '%';
+        if (treeHover || treePinned) placeTreeCard(treeHover || treePinned);
+      };
+      var zoomTree = function (factor, px, py) {
+        var nextW = treeClamp(treeCamera.w / factor, treeFit.w / 8, treeFit.w / 0.65);
+        var nextH = nextW * (treeFit.h / treeFit.w);
+        var wx = treeCamera.x + px * treeCamera.w;
+        var wy = treeCamera.y + py * treeCamera.h;
+        treeCamera.x = wx - px * nextW;
+        treeCamera.y = wy - py * nextH;
+        treeCamera.w = nextW;
+        treeCamera.h = nextH;
+        applyTree();
+      };
+      var zoomTreeCenter = function (factor) { zoomTree(factor, 0.5, 0.5); };
+      var treeChips = Array.prototype.slice.call(treeView.querySelectorAll('[data-tree-region]'));
+      var clearTreeChips = function () {
+        treeChips.forEach(function (chip) { chip.classList.remove('on'); chip.setAttribute('aria-pressed', 'false'); });
+      };
+      var fitTree = function () {
+        treeCamera = { x: treeFit.x, y: treeFit.y, w: treeFit.w, h: treeFit.h };
+        applyTree();
+        clearTreeChips();
+      };
+      var fitBtn = treeView.querySelector('[data-tree-fit]');
+      if (fitBtn) fitBtn.addEventListener('click', fitTree);
+      Array.prototype.forEach.call(treeView.querySelectorAll('[data-tree-zoom]'), function (b) {
+        b.addEventListener('click', function () { zoomTreeCenter(Number(b.getAttribute('data-tree-zoom')) || 1); });
+      });
+      treeChips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          var wing = chip.getAttribute('data-tree-region');
+          var list = treeView.querySelectorAll('.wiki-tree-node.' + wing);
+          var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+          Array.prototype.forEach.call(list, function (n) {
+            var x = Number(n.getAttribute('data-x'));
+            var y = Number(n.getAttribute('data-y'));
+            if (!isFinite(x) || !isFinite(y)) return;
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          });
+          if (!isFinite(minX) || !isFinite(minY)) return;
+          var pad = 70;
+          var w = Math.max(1, maxX - minX + pad * 2);
+          var h = Math.max(1, maxY - minY + pad * 2);
+          var ratio = treeFit.h / treeFit.w;
+          if (h / w < ratio) h = w * ratio;
+          else w = h / ratio;
+          treeCamera = { x: (minX + maxX) / 2 - w / 2, y: (minY + maxY) / 2 - h / 2, w: w, h: h };
+          applyTree();
+          clearTreeChips();
+          chip.classList.add('on');
+          chip.setAttribute('aria-pressed', 'true');
+        });
+      });
+      var treeDrag = null, treeMoved = false, treeHover = null, treePinned = null;
+      var placeTreeCard = function (node) {
+        if (!node || !treeCard || treeCard.hidden) return;
+        var nr = node.getBoundingClientRect();
+        var sr = treeStage.getBoundingClientRect();
+        var cw = treeCard.offsetWidth;
+        var ch = treeCard.offsetHeight;
+        var x = nr.left + nr.width / 2 - sr.left + 18;
+        if (x + cw > sr.width - 12) x = nr.left - sr.left - cw - 18;
+        x = Math.max(12, Math.min(sr.width - cw - 12, x));
+        var y = nr.top - sr.top + nr.height / 2 - ch / 2;
+        y = Math.max(12, Math.min(sr.height - ch - 12, y));
+        treeCard.style.left = x + 'px';
+        treeCard.style.top = y + 'px';
+      };
+      var hideTreeCard = function () { if (treeCard) treeCard.hidden = true; };
+      var showTreeCard = function (node) {
+        if (!treeCard) return;
+        var name = node.getAttribute('data-name') || 'Node';
+        var meta = node.getAttribute('data-meta') || '';
+        var text = node.getAttribute('data-detail') || '';
+        treeCard.innerHTML = '';
+        var title = document.createElement('strong');
+        title.textContent = name;
+        var line = document.createElement('span');
+        line.className = 'tree-card-meta';
+        line.textContent = meta;
+        treeCard.appendChild(title);
+        treeCard.appendChild(line);
+        if (text) {
+          var body = document.createElement('p');
+          body.textContent = text;
+          treeCard.appendChild(body);
+        }
+        treeCard.hidden = false;
+        placeTreeCard(node);
+      };
+      var pickTreeNode = function (node) {
+        Array.prototype.forEach.call(treeView.querySelectorAll('.wiki-tree-node.picked'), function (n) { n.classList.remove('picked'); });
+        node.classList.add('picked');
+      };
+      Array.prototype.forEach.call(treeView.querySelectorAll('.wiki-tree-node'), function (node) {
+        node.addEventListener('pointerenter', function () {
+          if (treeMoved) return;
+          treeHover = node;
+          showTreeCard(node);
+        });
+        node.addEventListener('pointerleave', function () {
+          treeHover = null;
+          if (treePinned) showTreeCard(treePinned);
+          else hideTreeCard();
+        });
+        node.addEventListener('click', function () {
+          if (treeMoved) return;
+          treePinned = node;
+          pickTreeNode(node);
+          showTreeCard(node);
+        });
+      });
+      treeStage.addEventListener('pointerleave', function () {
+        treeHover = null;
+        if (treePinned) showTreeCard(treePinned);
+        else hideTreeCard();
+      });
+      treeStage.addEventListener('click', function (e) {
+        if (treeMoved) return;
+        var target = e.target;
+        if (target && target.closest && target.closest('.wiki-tree-node')) return;
+        treePinned = null;
+        treeHover = null;
+        Array.prototype.forEach.call(treeView.querySelectorAll('.wiki-tree-node.picked'), function (n) { n.classList.remove('picked'); });
+        hideTreeCard();
+      });
+      treeStage.addEventListener('pointerdown', function (e) {
+        if (e.button != null && e.button !== 0) return;
+        treeDrag = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false };
+        treeMoved = false;
+        try { treeStage.setPointerCapture(e.pointerId); } catch (err) {}
+        treeStage.classList.add('dragging');
+      });
+      treeStage.addEventListener('pointermove', function (e) {
+        if (!treeDrag || e.pointerId !== treeDrag.id) return;
+        var rect = treeStage.getBoundingClientRect();
+        var dx = (e.clientX - treeDrag.x) * (treeCamera.w / Math.max(1, rect.width));
+        var dy = (e.clientY - treeDrag.y) * (treeCamera.h / Math.max(1, rect.height));
+        if (Math.abs(e.clientX - treeDrag.x) + Math.abs(e.clientY - treeDrag.y) > 2) {
+          treeDrag.moved = true;
+          treeMoved = true;
+        }
+        if (!treeDrag.moved) return;
+        treeCamera.x -= dx;
+        treeCamera.y -= dy;
+        treeDrag.x = e.clientX;
+        treeDrag.y = e.clientY;
+        applyTree();
+      });
+      var endTreeDrag = function (e) {
+        if (!treeDrag || (e.pointerId != null && e.pointerId !== treeDrag.id)) return;
+        try { if (treeStage.hasPointerCapture(treeDrag.id)) treeStage.releasePointerCapture(treeDrag.id); } catch (err) {}
+        treeDrag = null;
+        treeStage.classList.remove('dragging');
+        setTimeout(function () { treeMoved = false; }, 0);
+      };
+      treeStage.addEventListener('pointerup', endTreeDrag);
+      treeStage.addEventListener('pointercancel', endTreeDrag);
+      treeStage.addEventListener('wheel', function (e) {
+        e.preventDefault();
+        var rect = treeStage.getBoundingClientRect();
+        var px = (e.clientX - rect.left) / Math.max(1, rect.width);
+        var py = (e.clientY - rect.top) / Math.max(1, rect.height);
+        zoomTree(e.deltaY < 0 ? 1.18 : 1 / 1.18, px, py);
+      }, { passive: false });
+      treeStage.addEventListener('keydown', function (e) {
+        var step = 0.12;
+        var handled = true;
+        if (e.key === 'ArrowLeft') treeCamera.x -= treeCamera.w * step;
+        else if (e.key === 'ArrowRight') treeCamera.x += treeCamera.w * step;
+        else if (e.key === 'ArrowUp') treeCamera.y -= treeCamera.h * step;
+        else if (e.key === 'ArrowDown') treeCamera.y += treeCamera.h * step;
+        else if (e.key === '+' || e.key === '=') zoomTreeCenter(1.2);
+        else if (e.key === '-' || e.key === '_') zoomTreeCenter(0.83);
+        else if (e.key === '0') fitTree();
+        else handled = false;
+        if (!handled) return;
+        e.preventDefault();
+        if (e.key !== '+' && e.key !== '=' && e.key !== '-' && e.key !== '_' && e.key !== '0') applyTree();
+      });
+      applyTree();
+    }
+  }
+})();
+</script></body></html>

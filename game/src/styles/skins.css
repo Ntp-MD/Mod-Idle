@@ -211,6 +211,18 @@
     flex: none;
 }
 
+/* glyph: a PNG UI symbol drawn in the current ink. Icons and symbols are images; inline SVG is
+ * reserved for structural graphics (tree/map geometry, charts, effects), never a standalone glyph. */
+.icon-mask {
+    display: inline-block;
+    width: var(--icon-label);
+    height: var(--icon-label);
+    flex: none;
+    background: currentColor;
+    -webkit-mask: var(--glyph) center / contain no-repeat;
+    mask: var(--glyph) center / contain no-repeat;
+}
+
 /* scroll-pane: the one explicit scroll area inside a fixed panel or HUD region. */
 .scroll-pane {
     overflow: auto;
@@ -262,6 +274,59 @@
             transparent 0 var(--horizon, 58%),
             color-mix(in srgb, var(--ground-3) 85%, transparent) var(--horizon, 58%),
             color-mix(in srgb, var(--ground) 45%, transparent));
+}
+
+/* ---- passive tree ---------------------------------------------------------------
+ * A dense map surface with its own earth-and-bronze palette, measured type scale and
+ * display face. The theme lives here; the board and the detail pane place it.
+ */
+.surface-tree {
+    --tree-bronze: #807354;
+    --tree-muted: #b8baaa;
+    --tree-ink: #e2d9b9;
+    --tree-bg: #101814;
+    --tree-panel: #141d17;
+    --tree-deep: #0d1511;
+    --tree-strip: #101a14;
+    --tree-guide: #172019;
+    --tree-card: #101914;
+    --tree-tools: #111b14;
+    --tree-tooltip: #101a13;
+    --tree-legend: rgba(10, 19, 14, .94);
+    --tree-canvas-glow: #1e3024;
+    --tree-canvas-mid: #101c16;
+    --tree-canvas: #0b120f;
+    --tree-ink-stroke: #0c1510;
+    --tree-link: #798774;
+    --tree-link-cross: #a6b99b;
+    --tree-link-frontier: #d2d2b1;
+    --tree-node-edge: #a19573;
+    --tree-node-notable: #c2b487;
+    --tree-node-rim: #726c4e;
+    --tree-node-face: #171f16;
+    --tree-node-ready: #e2dec2;
+    --tree-node-owned: #66532a;
+    --tree-node-grad-top: #30302a;
+    --tree-node-grad-bottom: #111410;
+    --tree-normal-mix: #4d624d;
+    --tree-origin-rim: #263323;
+    --tree-origin-face: #111b13;
+    --tree-str: #c49d83;
+    --tree-agi: #a9c49c;
+    --tree-dex: #c9b588;
+    --tree-int: #96b7ae;
+    --tree-wis: #b1c1a5;
+    --tree-vit: #c2a08b;
+    --tree-lck: #b6a8c4;
+    --tree-display: Georgia, "Times New Roman", serif;
+    --tree-fs-2xs: 11px;
+    --tree-fs-xs: 12px;
+    --tree-fs-sm: 13px;
+    --tree-fs-md: 15px;
+    --tree-fs-lg: 18px;
+    --tree-fs-xl: 20px;
+    --tree-fs-2xl: 22px;
+    --tree-fs-3xl: 24px;
 }
 
 /* ---- panels --------------------------------------------------------------------
@@ -329,13 +394,6 @@
 .card-combat.elite { border-color: var(--elite); }
 .card-combat.boss { border-color: var(--boss); }
 
-/* portrait: the body's own face, ringed in gold — a card is known by its shape before its words. */
-.card-portrait {
-    border: 1px solid var(--gold);
-    border-radius: var(--radius-round);
-    background: var(--face-top);
-}
-
 /* name: the card's line, and the ink a body's kind changes. */
 .card-name { color: var(--gold-lit); font-weight: 700; }
 .card-name.elite { color: var(--elite-ink); }
@@ -371,6 +429,7 @@
     background-size: calc(100% / max(var(--w, 1), .001)) 100%;
     transform: scaleX(var(--fill));
     transform-origin: left center;
+    transition: transform var(--motion-travel) var(--ease-glide);
 }
 .track-meter.hp > i { background-image: linear-gradient(90deg, var(--hp-lit), var(--hp)); }
 .track-meter.es > i { background-image: linear-gradient(90deg, var(--es), var(--es-lit)); }
@@ -394,6 +453,25 @@
     color: var(--gold-lit);
     background: color-mix(in srgb, var(--gold) 12%, transparent);
     box-shadow: inset 0 -1px 0 var(--gold);
+}
+
+/* mark: the square a status icon rides in; the rail and its placement stay with the card. */
+.badge-mark {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: calc(var(--icon-label) * 1.5);
+    height: calc(var(--icon-label) * 1.5);
+    pointer-events: auto;
+}
+.badge-mark small {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    max-width: 100%;
+    overflow: hidden;
+    font-size: var(--font-xs);
+    line-height: 1;
 }
 
 /* status: a buff or debuff mark riding a card's rail, with the time left in its corner. */
@@ -431,6 +509,12 @@
 }
 .badge-count.xp { border-color: color-mix(in srgb, var(--xp) 55%, var(--edge)); color: var(--xp); }
 
+/* chip: the padding a tag needs; the tag owns the paint. */
+.chip {
+    padding: 0 var(--spacing-xs);
+    white-space: nowrap;
+}
+
 /* tag: a quiet label; picked, locked and semantic accents keep one shared shape. */
 .chip-tag {
     border: 1px solid var(--line);
@@ -445,6 +529,7 @@
     color: var(--gold);
 }
 .chip-tag.here { border-color: color-mix(in srgb, var(--good) 50%, var(--edge)); color: var(--good-lit); }
+.chip-tag.alarm { border-color: color-mix(in srgb, var(--alarm) 55%, var(--edge)); color: var(--alarm); }
 .chip-tag.locked { border-style: dashed; }
 .chip-tag.element { color: var(--es-lit); border-color: color-mix(in srgb, var(--es) 40%, transparent); }
 .chip-tag.xp { color: var(--xp); border-color: var(--xp); }
@@ -593,7 +678,6 @@
   box-shadow: var(--shadow-raised);
 }
 .swatch-color { border: 1px solid var(--edge); border-radius: var(--radius-card); }
-.icon-chevron { fill: none; stroke: currentColor; stroke-width: 1.5; }
 
 /* Shared Hub icon-and-caption control; geometry is owned by App's .hub-control. */
 .hub-control {

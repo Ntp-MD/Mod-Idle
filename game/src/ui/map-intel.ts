@@ -25,14 +25,14 @@ export function destinationIntel(state: GameState, cell: Picked, townId: string,
     const location = zone.subzones?.[task.subzone!]?.name || '';
     return [`Expedition · ${target?.name || task.targetSpecies} Elites · ${task.progress}/${task.n}${cell.kind === 'town' ? ` · ${location}` : ''}`];
   }) : [];
-  const site = known ? trailSiteAt(cell) : undefined;
+  const site = known ? trailSiteAt(state, cell) : undefined;
   const standing = cell.kind === 'town' ? standingProgress(state, townId) : null;
   const tier = standing && TOWN.standing.tiers[standing.tier - 1];
   const event = state.mapJournal?.lastEvent;
   return {
     knowledge, known, encounters, resources: [...new Set(resources.filter(Boolean))], objectives,
     purpose: !known ? 'Approach within one block to scout the landmark, creatures and supplies.'
-      : site ? trailSiteKind(site).description
+      : site ? `${trailSiteKind(site).description} Available for ${Math.ceil(site.remainingSec / 60)}m of online time.`
         : cell.kind === 'town' ? 'Town services, trading, storage and a known Waypoint.'
           : siteKind === 'mine' ? 'Set Camp to mine ore and regional minerals.'
             : siteKind === 'grove' ? 'Set Camp to gather timber and regional wood.'

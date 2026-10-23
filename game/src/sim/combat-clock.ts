@@ -90,6 +90,14 @@ export class CombatClock {
     });
   }
 
+  /** Move this actor's pending actions and telegraphs together; elapsed events stay spent. */
+  delayActor(actorId: string, delayUs: number): void {
+    for (const event of this.events) {
+      if (event.actorId === actorId && event.priority === EVENT_PRIORITY.mobAction)
+        event.atUs += Math.max(0, Math.ceil(delayUs));
+    }
+  }
+
   /** The earliest pending event, or null. Sorting is on demand: a tick holds a handful of events. */
   private next(): CombatEvent | null {
     let best: CombatEvent | null = null;

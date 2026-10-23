@@ -40,7 +40,7 @@ export function destinationPrimary(state: GameState, dest: MapDestination, writa
   if (!dest.self) return action('walk', dest.walking ? 'Walking…' : 'Walk here',
     state.walk ? 'Finish the current walk first.' : state.phase === 'camp' ? 'Recover at Camp before traveling.' : '');
   if (dest.kind === 'town') return action('town', 'Open town');
-  const trail = trailSiteAt(currentCell(state));
+  const trail = trailSiteAt(state, currentCell(state));
   if (trail && !state.mapJournal?.claimedSites.includes(trail.id)) {
     const paused = [state.patrol.active ? 'Patrol' : '', state.hunting ? 'hunting' : '',
       state.fieldwork.action ? 'gathering' : '', state.autoReturn.phase !== 'idle' ? 'Auto-Return' : ''].filter(Boolean);

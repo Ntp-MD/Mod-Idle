@@ -6,7 +6,7 @@ import { buildCharacter, emptyGear } from '../src/sim/player';
 import { mastery } from '../src/sim/mastery';
 import { poolGear } from './sheetFixture';
 import { mobSwing, playerSwing } from '../src/sim/combat';
-import { newSkillState, castOnce, effectsActive, hasRule, esAbsorbPct, triggerAuras } from '../src/sim/skills';
+import { newSkillState, castOnce, effectsActive, hasRule, esAbsorbPct, triggerAuras, toggleTrack } from '../src/sim/skills';
 import { newMobStatusStore, modsOn, holdsCondition, stepMob } from '../src/sim/mobStatus';
 import { newCurses, applyCurse, spreadOnDeath, lineValue } from '../src/sim/curse';
 import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
@@ -175,6 +175,37 @@ describe('the support rows that change the character', () => {
     const atOne = castOnce(fresh, c, c.maxMana, [mob()], {}, mulberry32(1));
     expect(atOne?.charges).toBe(valueOf('buff.ghost_dance', 'dodge_charges'));
     expect(atOne!.charges!).toBeLessThan(atCap!.charges!);
+  });
+
+  it('pays a buff recast with HP under Blood Price', () => {
+    const setup = (bloodPrice: boolean) => {
+      const s = newGame(104);
+      setLevel(s, 60);
+      s.skills.owned['buff.ghost_dance'] = 0;
+      if (bloodPrice) s.player.treeRanks = { 'keystone.blood-price': 1 };
+      s.player.mana = 0;
+      expect(toggleTrack(s.skills, 'buff.ghost_dance').ok).toBe(true);
+      tick(s, { online: true });
+      return s;
+    };
+    const cost = sm.costOf(sm.byId['buff.ghost_dance'], { skillLevel: 1, aoe: false });
+    expect(cost.resource).toBe('mana');
+    // the pool (plus one tick's regen) cannot fund the cost, so only Blood Price can bring it up
+    expect(setup(false).skills.buffUp['buff.ghost_dance'] ?? 0).toBe(0);
+    expect(setup(true).skills.buffUp['buff.ghost_dance']).toBeGreaterThan(0);
+  });
+
+  it('applies a toggled buff’s cast outcome on the live recast path', () => {
+    const s = newGame(103);
+    setLevel(s, 60);
+    for (const id of ['buff.ghost_dance', 'buff.earth_wall', 'buff.holy_veil']) s.skills.owned[id] = 0;
+    s.playerStatuses.burn = { stacks: 1, secLeft: 9, perSec: 1 };
+    for (const id of ['buff.ghost_dance', 'buff.earth_wall', 'buff.holy_veil'])
+      expect(toggleTrack(s.skills, id).ok).toBe(true);
+    tick(s, { online: true });
+    expect(s.player.charges).toBe(valueOf('buff.ghost_dance', 'dodge_charges'));
+    expect(s.player.blockCharges).toBe(valueOf('buff.earth_wall', 'block_charges'));
+    expect(s.playerStatuses.burn).toBeUndefined();
   });
 
   it('the sim spends a charge before the rolls, and Holy Veil keeps statuses off entirely', () => {

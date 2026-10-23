@@ -29,7 +29,7 @@ import {
 } from '../src/sim/keystone-runtime.ts';
 
 /**
- * Packet D1 — the bundle registry of `docs/DECISIONS.md` (the passive tree): the 52 keys, their
+ * Packet D1 — the bundle registry of `docs/DECISIONS.md` (the passive tree): the 82 keys, their
  * params, their required hooks, the capability gate that refuses a key without real handlers, and
  * the pure formulas the tables lock. The registry is gated as DATA here; no keystone effect runs.
  */
@@ -88,13 +88,67 @@ const TABLE: [string, Record<string, unknown>, readonly string[]][] = [
   ['aura-resonance', { reservationPctPerAura: 5, reservationCapPct: 30, effectPctPerAura: 5, effectCapPct: 30 }, ['sheet', 'reservation']],
   ['elemental-infusion', { extraTotalPct: 30 }, ['outgoing']],
   ['elemental-conduit', {}, ['outgoing', 'status']],
+  ['titan-frame', { maxHpPct: 25, aspdPct: 15 }, ['sheet']],
+  ['gale-form', { aspdPct: 20, maxHpPct: 15 }, ['sheet']],
+  ['bulwark', { armourPct: 40, evasionPct: 20 }, ['sheet']],
+  ['phantom-step', { evasionPct: 40, armourPct: 20 }, ['sheet']],
+  ['deepwell', { maxManaPct: 40, maxHpPct: 20 }, ['sheet']],
+  ['hollow-body', { maxEsPct: 50, maxHpPct: 25 }, ['sheet']],
+  ['blood-engine', { maxHpPct: 25, maxManaPct: 25 }, ['sheet']],
+  ['keen-edge', { critChancePct: 25, critDamagePct: 20 }, ['sheet']],
+  ['brutal-force', { critDamagePct: 30, critChancePct: 10 }, ['sheet']],
+  ['spellfocus', { magicPct: 30, physicalPct: 20 }, ['sheet']],
+  ['executioner', { lowHpThresholdPct: 30, lowHpDamagePct: 50, otherDamagePct: 15 }, ['outgoing']],
+  ['opener', { fullHpDamagePct: 40, otherDamagePct: 10 }, ['outgoing']],
+  ['giant-slayer', { bossDamagePct: 35, normalDamagePct: 10 }, ['outgoing']],
+  ['swarm-bane', { normalDamagePct: 30, bossDamagePct: 10 }, ['outgoing']],
+  ['elementalist', { elementalPct: 30, physicalPct: 20 }, ['outgoing']],
+  ['brute', { physicalPct: 25, elementalPct: 25 }, ['outgoing']],
+  ['overkill', { highHpThresholdPct: 80, highHpDamagePct: 40, otherDamagePct: 15 }, ['outgoing']],
+  ['sniper', { critDamagePct: 25, nonCritDamagePct: 10 }, ['outgoing']],
+  ['puncturing', { armourPenPct: 30, damagePct: 15 }, ['outgoing']],
+  ['firewalker', { element: 'fire', reductionPct: 50, otherElementPct: 20 }, ['incoming']],
+  ['frostwalker', { element: 'cold', reductionPct: 50, otherElementPct: 20 }, ['incoming']],
+  ['stormwalker', { element: 'lightning', reductionPct: 50, otherElementPct: 20 }, ['incoming']],
+  ['earthward', { element: 'earth', reductionPct: 50, otherElementPct: 20 }, ['incoming']],
+  ['plagueward', { element: 'chaos', reductionPct: 50, otherElementPct: 20 }, ['incoming']],
+  ['last-stand', { hpThresholdPct: 35, lowTakenPct: 25, highTakenPct: 10 }, ['incoming']],
+  ['brawler', { hpThresholdPct: 50, highReductionPct: 15, lowIncreasePct: 15 }, ['incoming']],
+  ['reaper', { healMaxHpPct: 2 }, ['kill']],
+  ['soul-harvest', { restoreMaxManaPct: 3 }, ['kill']],
+  ['trophy-hunter', { bossHealMaxHpPct: 15, bossRestoreMaxManaPct: 15, normalHealMaxHpPct: 1, normalRestoreMaxManaPct: 1 }, ['kill']],
+  ['bloodfeast', { bleedingHealMaxHpPct: 5, otherHealMaxHpPct: 1 }, ['kill']],
+  // Packet N — the 15-per-wing expansion.
+  ['anvil', { elementalArmourPct: 30 }, ['sheet', 'incoming']],
+  ['unbreakable', { ignoreBelowMaxHpPct: 5, bigHitTakenPct: 15 }, ['incoming']],
+  ['concussive-blows', { stunSec: 0.5, stunnedTakenPct: 20 }, ['outgoing', 'status', 'timing']],
+  ['riposte', { blockChanceMult: 0.5, reflectMult: 2, icdSec: 1 }, ['sheet', 'incoming', 'timing']],
+  ['single-combat', { damagePct: 80 }, ['outgoing']],
+  ['mirror-strike', { windowSec: 3 }, ['incoming', 'outgoing', 'timing']],
+  ['crippling-strikes', { crippledTakenPct: 10 }, ['status', 'outgoing']],
+  ['conductive', { spreadTargets: 1, shockedTakenPct: 10 }, ['status', 'outgoing']],
+  ['exploit-weakness', { statusDamagePct: 20, cleanDamagePct: 10 }, ['outgoing', 'status']],
+  ['ashen-crown', { burningTakenPct: 15, directFirePct: 20 }, ['outgoing', 'status']],
+  ['winters-grip', { chilledTakenPct: 25 }, ['outgoing', 'status']],
+  ['monochrome', { element: 'fire', elementalPct: 30 }, ['outgoing', 'status']],
+  ['empty-vessel', { maxManaPct: 20, auraEffectPct: 50 }, ['sheet', 'reservation']],
+  ['sanctuary', { fullEsTakenPct: 20, esRegenPct: 50 }, ['sheet', 'incoming', 'timing']],
+  ['trance', { everyCasts: 3, costPct: 50 }, ['cost', 'timing']],
+  ['purist', {}, ['sheet', 'incoming', 'status']],
+  ['bloodthirst', { leechPct: 3 }, ['sheet']],
+  ['grit', { maxHitMaxHpPct: 25, otherHitPct: 15 }, ['incoming']],
+  ['hemorrhage', { bleedDamagePct: 100, directPhysicalPct: 75 }, ['outgoing', 'status']],
+  ['blur', { hitsPerDodge: 3 }, ['sheet', 'incoming', 'timing']],
+  ['fortuna', { doubleCritPct: 25, nonCritPct: 10 }, ['outgoing']],
+  ['lucky-streak', { critDamagePctPerStack: 3, maxStacks: 10 }, ['outgoing', 'timing']],
+  ['gamblers-step', { perfectDodgeMult: 2 }, ['sheet']],
 ];
 
 const ELEMENTS = ['fire', 'cold', 'lightning', 'poison', 'chaos', 'earth'];
 
-describe('the 52 bundle keys of §6', () => {
+describe('the 105 bundle keys of §6', () => {
   it('lists exactly the catalogue', () => {
-    expect(KEYSTONE_KEYS.length).toBe(52);
+    expect(KEYSTONE_KEYS.length).toBe(105);
     expect([...KEYSTONE_KEYS].sort()).toEqual(TABLE.map(([k]) => k).sort());
   });
 

@@ -1,6 +1,6 @@
 /**
- * The live half of the icon gallery: every figure under `game/src/icon/` — vector or PNG — with the URL
- * Vite resolves.
+ * The live half of the icon gallery: every PNG shelf figure under `game/src/icon/`, with the URL Vite
+ * resolves.
  *
  * This sits apart from `icons-gallery.ts` on purpose, because `import.meta.glob` is a Vite feature:
  * `tools/wiki.ts` imports the shared runtime in Node, which has no glob, and the static build feeds that
@@ -10,7 +10,7 @@
 
 import { iconEntry, GALLERY_RUNTIME, type IconEntry } from './icons-gallery.ts';
 
-const modules = import.meta.glob<string>(['../icon/**/*.svg', '../icon/**/*.png'], {
+const modules = import.meta.glob<string>('../icon/**/*.png', {
   query: '?url',
   import: 'default',
   eager: true,

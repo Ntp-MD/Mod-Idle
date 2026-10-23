@@ -61,7 +61,10 @@ export function priceMinutes(row: any, settlementId: string, state?: GameState, 
 /** Gold = minutes of that band's full-sell junk income. */
 export function priceGold(row: any, settlementId: string, state?: GameState, blocks = 1): number {
   const s = settlementById(settlementId)!;
-  const band = row.charge_band || s.band;
+  // a teaching discount is priced at the settlement's own band, the price its note and the wiki state;
+  // every other line charges the band the row names
+  const discounted = row.discount && row.discount.settlement === s.id;
+  const band = discounted ? s.band : (row.charge_band || s.band);
   return Math.round(priceMinutes(row, settlementId, state, blocks) * eng.goldPerMinute(band)
     * trade.haggling(state?.town.hagglingXp ?? 0).serviceMult * 100) / 100;
 }

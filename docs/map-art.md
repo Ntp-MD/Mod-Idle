@@ -2,7 +2,7 @@
 
 The ground projection is owned by `game/src/ui/map-projection.ts`. Run `npm run map -- --write` to regenerate the map and the matching templates in `art-reference/map/geometry/`.
 
-The portable [map art reference kit](../art-reference/map/README.md) contains shape references, role-labelled style references, agent briefs and prompts. Its refresh script derives geometry directly from the projection without rebuilding or modifying the live map.
+The portable [map art reference kit](../art-reference/map/README.md) contains shape references, role-labelled style references, camera and alignment calibration, agent briefs and prompts. Its refresh script derives geometry directly from the projection without rebuilding or modifying the live map.
 
 ## Full-hex artwork
 
@@ -12,11 +12,13 @@ Use `hex-mask.png` or `hex-mask.svg` as the shape reference. Exact canvas-space 
 
 The descriptive camera is orthographic, elevation 38° above ground and board yaw −16° in renderer coordinates. Upright vegetation must already depict that view. Keep it inside the footprint for terrain tiles; separate objects can extend above their ground footprint.
 
+Those values are the artwork calibration and the runtime camera's default pose. `createMapProjection` also supplies the orbiting ground-plane projection. `game/src/ui/map-scene.ts` projects the coloured ground polygons, keeps each terrain diorama and actor upright with its inverse, and sorts scene cells by projected depth. The active catalogue uses one transparent diorama per hex, anchored by its painted bounds. Full-hex paintings and their registrations are retained outside the active catalogue. Orbiting a diorama does not generate unseen sides of its painted objects.
+
 The terrain catalogue is `game/src/ui/map-terrain.ts`. Preserve originals and use numbered sibling assets (`forest-relief-1.png`, `forest-relief-2.png`, etc.). Selecting a replacement is an explicit catalogue change; filename numbering does not automatically activate it.
 
-`TERRAIN_ART` holds the tile a biome shows by default. `TERRAIN_VARIANTS` holds the other tiles that same biome may show; the map generator picks one of them per hex, stably, so a stretch of one biome reads as ground instead of one repeated picture. A variant needs its own measured footprint before it may be listed, and the biome's own art is never repeated in its variant list.
+`TERRAIN_ART` selects the diorama a biome shows. `TERRAIN_VARIANTS` may list approved alternate dioramas; the map generator picks stably per hex. Each active diorama needs painted bounds in `game/src/ui/map-sprite-bounds.json`, and the biome's default is never repeated in its variant list. Full-hex assets require the separate footprint registration described below before intentional activation as ground artwork.
 
-Settlements select their art through `LANDMARK_ART` in `tools/map.ts`, whose default town image comes from `TERRAIN_ART.town`. Full-hex landmark ground uses the same registration as terrain. A separate landmark diorama may omit its own tile base: the renderer places it over a registered ground hex and aligns it using the painted-bounds anchor in `game/src/ui/map-sprite-bounds.json`. An optional seventh value scales a sprite slightly past its ground footprint to let roofs or walls cross into adjacent hexes. A landmark variant must be selected through `LANDMARK_ART` and have its asset/bounds available. M15 checks centring, bottom anchoring and the registered spill limit on settlement cells too.
+Settlements select their art through `LANDMARK_ART` in `tools/map.ts`, whose default town image comes from `TERRAIN_ART.town`. Full-hex landmark ground uses the same registration as terrain. A separate landmark diorama may omit its own tile base: the renderer places it over the coloured ground hex and aligns it using the painted-bounds anchor in `game/src/ui/map-sprite-bounds.json`. An optional seventh value scales a sprite slightly past its ground footprint to let roofs or walls cross into adjacent hexes. A landmark variant must be selected through `LANDMARK_ART` and have its asset/bounds available. M15 checks centring, bottom anchoring and the registered spill limit on settlement cells too.
 
 Generated images may approximate the requested polygon. Measure the six ground vertices before activation with the measurement tool, which reads the tile's own silhouette and stores measured pixel coordinates, source dimensions and an opaque ground fill in `game/src/ui/map-terrain-footprints.json`:
 
@@ -28,7 +30,7 @@ It takes the alpha ≥128 silhouette, reduces its convex hull to six corners and
 
 The generator registers six triangular sectors sharing the measured footprint centre, mapping all six vertices exactly onto the projected hex. An outer ground clip and the ground fill prevent painted edge irregularities and antialias seams from leaving gaps. Because each sector maps its own pair of corners exactly, that fit cannot see a footprint recorded in the wrong rotational order: the generator therefore also measures the footprint against the template hex and refuses a footprint that sits more than 12% of the canvas away, which is the margin between an approximate tile and a mis-ordered one. Keep trees inside the footprint: this registration is for complete terrain tiles, not tall objects that intentionally extend beyond the ground.
 
-Use the development-only **Hex alignment** checkbox under Map tools → Controls to compare the actual artwork with the projected ground outline and centre cross. M15 verifies placement metadata and generated markup, not painted-edge accuracy. Legacy scenery without footprint metadata is not certified by this contract.
+Use the development-only **Hex alignment** checkbox under Map tools → Controls to compare the actual artwork with the projected ground outline and centre cross. M15 verifies placement metadata and generated markup, not painted-edge accuracy. Dioramas use painted-bounds anchoring rather than six-sector ground registration.
 
 ## Forest version 1 generation brief
 

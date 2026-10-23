@@ -8,7 +8,7 @@ import { road, settlementCell, startWalk, zoneOf, rankOf } from '../src/sim/road
 import { resolveTravelEvent } from '../src/sim/fieldwork';
 import {
   autoReturnThreshold, driveAutoReturn, finishAutoReturnDeposit, maybeStartAutoReturn,
-  recordPatrolGroupClear, startPatrol, togglePatrolStop,
+  recordPatrolGroupClear, startPatrol, stopPatrol, togglePatrolStop,
 } from '../src/sim/exploration';
 import { progressTasks, rollTask, taskReward } from '../src/sim/town';
 import type { PatrolStop, TaskSlot } from '../src/sim/types';
@@ -148,6 +148,28 @@ describe('Forward travel', () => {
 });
 
 describe('local Patrol and Auto-Return', () => {
+  it('finishes at town when Patrol is stopped during the trip back to the field, including reload', () => {
+    const state = newGame(86), [first, second] = stopsForZone(state.zone);
+    const home = settlementCell(state.town.waypoint)!;
+    state.cell = { ...home, sub: null, wild: null }; state.hunting = false;
+    state.patrol.stops = [first, second]; state.patrol.active = true;
+    state.autoReturn = { enabled: true, phase: 'to-stop', resumeCell: first.cell };
+    expect(driveAutoReturn(state, true).message).toContain('heading back');
+    stopPatrol(state);
+    const restored = importJson(exportJson(state));
+    expect(restored.autoReturn.phase).toBe('to-stop');
+    restored.walk = null; restored.cell = first.cell; restored.hunting = true;
+    driveAutoReturn(restored, true);
+    expect(restored.autoReturn.phase).toBe('to-town');
+    expect((restored.walk as ReturnType<typeof newGame>['walk'])?.to).toMatchObject({ q: home.q, r: home.r });
+    expect(restored.hunting).toBe(false);
+    restored.walk = null; restored.cell = { ...home, sub: null, wild: null };
+    expect(driveAutoReturn(restored, true).deposit).toBe(true);
+    finishAutoReturnDeposit(restored, 0);
+    expect(restored.autoReturn.phase).toBe('idle');
+    expect(restored.patrol.active).toBe(false);
+    expect(restored.hunting).toBe(false);
+  });
   it('requires two visited subzones, then advances the saved route after groups are cleared', () => {
     const state = newGame(83);
     const [first, second] = stopsForZone(state.zone);

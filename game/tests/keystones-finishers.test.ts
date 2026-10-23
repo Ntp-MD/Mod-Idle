@@ -76,6 +76,6 @@ describe('Packet I — crit, finishers, secondary damage', () => {
   });
 
   it('registers the thirty-three Packet E–I keys', () => {
-    expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toHaveLength(52);
+    expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toHaveLength(105);
   });
 });

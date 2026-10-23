@@ -67,6 +67,8 @@ export const KEYBINDS: Keybind[] = [
   { id: 'map.zoom.in', label: 'Zoom the map in', group: 'map', def: '+', where: 'map focus' },
   { id: 'map.zoom.out', label: 'Zoom the map out', group: 'map', def: '-', where: 'map focus' },
   { id: 'map.zoom.reset', label: 'Reset the map view', group: 'map', def: '0', where: 'map focus' },
+  { id: 'map.rotate.left', label: 'Rotate the map counterclockwise', group: 'map', def: '[', where: 'map focus' },
+  { id: 'map.rotate.right', label: 'Rotate the map clockwise', group: 'map', def: ']', where: 'map focus' },
   { id: 'map.view.next', label: 'Next map view — terrain, band, gate', group: 'map', def: 'v', where: 'map focus' },
   { id: 'map.walk', label: 'Show or hide the walk graph', group: 'map', def: 'w', where: 'map focus' },
   { id: 'map.ids', label: 'Show or hide the cell ids', group: 'map', def: 'i', where: 'map focus' },

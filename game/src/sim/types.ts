@@ -3,6 +3,7 @@ import type { Hex } from '../../../engine/road.ts';
 import type { AlchemyLedger } from '../../../engine/alchemy.ts';
 import type { EconomyRestore } from '../../../engine/economy.ts';
 import type { QuestBonus } from './quest-rewards';
+import type { GuidanceState } from './guidance';
 
 export interface ModExtra {
   id: string;
@@ -365,7 +366,8 @@ export interface FxEvent {
   /** What carried a `hit`, so the screen knows whether to draw a weapon at all: a swing leaves an arc, a
    *  press leaves an impact, and a status clock leaves only its number. Absent means no arc is honest. */
   via?: 'swing' | 'cast' | 'dot';
-  /** Which row raised a `cast`, so the cast order can light the slot that actually fired. */
+  /** Which player or mob skill raised a cast, buff or heal. Direct hits carry the same identity so effects
+   *  do not borrow another skill's appearance when several casts share one second. */
   skillId?: string;
   /** The amount behind `text`, unformatted. `text` is what the plate prints; this is what a parked figure
    *  adds up when several blows land on one body inside the same second, so the sum is the sim's number and
@@ -435,6 +437,8 @@ export interface GameState {
   autoDissolveLevel?: number;
   /** The completion gate: the final zone's boss, one spawn, no Push (`concept.md`). */
   goal: GoalState;
+  /** The player's next-step pin. Automatic suggestions are derived and never stored. */
+  guidance?: GuidanceState;
   /** Curse lines currently written on a mob, keyed by that spawn's id (`skill-pool.md`). */
   curses: CurseStore;
   /** Burn · poison · chill · shock · mark · bleed we have put on a mob (`status.mob_side`). */

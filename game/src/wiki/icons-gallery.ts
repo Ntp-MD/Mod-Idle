@@ -210,18 +210,9 @@ export const GALLERY_RUNTIME = `(function () {
     marker.onmouseleave = function () { marker.style.background = isMarked ? 'var(--gold)' : 'var(--panel)'; };
     marker.onfocus = function () { marker.style.outline = '2px solid var(--focus)'; };
     marker.onblur = function () { marker.style.outline = ''; };
-    var flag = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    flag.setAttribute('viewBox', '0 0 16 16');
+    var flag = document.createElement('span');
     flag.setAttribute('aria-hidden', 'true');
-    flag.style.cssText = 'width:var(--icon-detail);height:var(--icon-detail);';
-    var flagPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    flagPath.setAttribute('d', 'M4 14V3m0 1h8l-2 3 2 3H4');
-    flagPath.setAttribute('fill', 'none');
-    flagPath.setAttribute('stroke', 'currentColor');
-    flagPath.setAttribute('stroke-width', '1.8');
-    flagPath.setAttribute('stroke-linecap', 'round');
-    flagPath.setAttribute('stroke-linejoin', 'round');
-    flag.appendChild(flagPath);
+    flag.style.cssText = 'display:block;width:var(--icon-detail);height:var(--icon-detail);background:currentColor;-webkit-mask:url(../../game/src/icon/ui/flag.png) center/contain no-repeat;mask:url(../../game/src/icon/ui/flag.png) center/contain no-repeat;';
     marker.appendChild(flag);
     marker.onclick = function (e) { e.stopPropagation(); toggleMark(item.path); render(); };
 

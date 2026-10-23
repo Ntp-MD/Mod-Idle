@@ -322,12 +322,37 @@ export function buildCharacter(
     : aspdDefault;
   const used = weightOfCarry(gear, carried, heldMasteryLevel);
   const burden = eng.encumbranceOf(used, core.str);
+  // Packet M trade-offs read their percentages from the bought bundles, never from this file.
+  const kp = (bundle: KeystoneBundle | undefined, name: string): number => Number(bundle?.params[name] ?? 0);
+  const titan = bundleOf(bundles, 'titan-frame');
+  const gale = bundleOf(bundles, 'gale-form');
+  const bulwark = bundleOf(bundles, 'bulwark');
+  const phantom = bundleOf(bundles, 'phantom-step');
+  const deepwell = bundleOf(bundles, 'deepwell');
+  const hollow = bundleOf(bundles, 'hollow-body');
+  const bloodEngine = bundleOf(bundles, 'blood-engine');
+  const keen = bundleOf(bundles, 'keen-edge');
+  const brutal = bundleOf(bundles, 'brutal-force');
+  const focus = bundleOf(bundles, 'spellfocus');
+  // Packet N: the expansion's sheet-side rules. Every one removes or redirects a layer rather
+  // than adding a line beside it; the combat side reads the same bundle params.
+  const anvil = bundleOf(bundles, 'anvil');
+  const blur = bundleOf(bundles, 'blur');
+  const concussive = bundleOf(bundles, 'concussive-blows');
+  const mirror = bundleOf(bundles, 'mirror-strike');
+  const purist = bundleOf(bundles, 'purist');
+  const bloodthirst = bundleOf(bundles, 'bloodthirst');
+  const emptyVessel = bundleOf(bundles, 'empty-vessel');
+  const sanctuary = bundleOf(bundles, 'sanctuary');
+  const riposte = bundleOf(bundles, 'riposte');
+  const gamblers = bundleOf(bundles, 'gamblers-step');
   // the Cap is applied LAST (docs/DECISIONS.md): after the aspd Mod band inside the
-  // formula, after a multiplicative aspd buff (Haste's ×1.15) and after the weight tax — so no
+  // formula, after a multiplicative aspd buff (Haste's A-1.15) and after the weight tax — so no
   // build passes 5 hits/sec, which is the clock rule the whole game is priced against
   const aspd = eng.capAspd(
     eng.aspdOf(core.agi, weaponAspd, lines.aspdPct + a(effects, 'attack_speed'))
-    * m(effects, 'attack_speed') * (1 - burden));
+    * m(effects, 'attack_speed') * (1 - burden)
+    * (1 + (kp(gale, 'aspdPct') - kp(titan, 'aspdPct')) / 100));
   const critPool = eng.critPool(core.lck, lines.critPct);
   // Alignment gates the mob-side status and feeds the mace's stun chance, so it is computed once
   const alignment = eng.alignmentOf(core.dex, lines.alignPct + a(effects, 'elemental_alignment'), m(effects, 'elemental_alignment'));
@@ -343,6 +368,11 @@ export function buildCharacter(
     armourValue = folded.armour;
     evasionValue = folded.evasion;
   }
+  armourValue *= 1 + (kp(bulwark, 'armourPct') - kp(phantom, 'armourPct')) / 100;
+  evasionValue *= 1 + (kp(phantom, 'evasionPct') - kp(bulwark, 'evasionPct')) / 100;
+  // 67/82: the two rules that remove the Evasion layer outright; Perfect Dodge is separate and
+  // only Gambler's Step keeps it (doubled).
+  if (anvil || gamblers) evasionValue = 0;
   const resistanceValue = eng.resistanceOf(lines.resPct + lines.allResPct, m(effects, 'elemental_resistance'), lines.resCapPct);
   const oneFlame = bundleOf(bundles, 'one-flame');
   if (oneFlame) {
@@ -354,16 +384,25 @@ export function buildCharacter(
   }
   const aegisCore = bundleOf(bundles, 'enduring-core');
   const ci = bundleOf(bundles, 'chaos-inoculation');
-  const maxManaValue = eng.maxManaOf(core.int, level, lines.manaPct, lines.manaFlat);
+  const maxManaValue = eng.maxManaOf(core.int, level, lines.manaPct, lines.manaFlat)
+    * (1 + (kp(deepwell, 'maxManaPct') - kp(bloodEngine, 'maxManaPct')) / 100)
+    * (1 + kp(emptyVessel, 'maxManaPct') / 100);
   // 34 Arcane Battery adds its ES after the base ES percent: the fixed Mana reservation buys
-  // `esPerMana × reserved Mana`, never multiplied by an ES line a second time (§7.5.3).
+  // `esPerMana A- reserved Mana`, never multiplied by an ES line a second time (A7.5.3).
   const battery = bundleOf(bundles, 'arcane-battery');
-  const esValue = aegisCore ? 0
-    : eng.maxEsOf(lines.esFlat + a(effects, 'energy_shield'), lines.esPct, core.wis)
-      + (battery ? arcaneBatteryEs(maxManaValue, battery.params as Record<string, number>) : 0);
+  const esValue = purist || aegisCore ? 0
+    : (eng.maxEsOf(lines.esFlat + a(effects, 'energy_shield'), lines.esPct, core.wis)
+      + (battery ? arcaneBatteryEs(maxManaValue, battery.params as Record<string, number>) : 0))
+      * (1 + kp(hollow, 'maxEsPct') / 100);
+  const hpMult = Math.max(0.1, 1 + (kp(titan, 'maxHpPct') + kp(bloodEngine, 'maxHpPct')
+    - kp(gale, 'maxHpPct') - kp(deepwell, 'maxHpPct') - kp(hollow, 'maxHpPct')) / 100);
   const maxHpValue = ci
     ? chaosInoculationMaxHp(ci.params as Record<string, number>)
-    : eng.maxHpOf(core.vit, level, lines.hpPct, lines.hpFlat);
+    : eng.maxHpOf(core.vit, level, lines.hpPct, lines.hpFlat) * hpMult;
+  const critChanceValue = concussive || mirror ? 0 : Math.max(0, Math.min(100, eng.critChanceOf(critPool)
+    + kp(keen, 'critChancePct') - kp(brutal, 'critChancePct')));
+  const critDmgValue = Math.max(100, eng.critDmgOf(critPool, lines.critDmgPct)
+    + kp(brutal, 'critDamagePct') - kp(keen, 'critDamagePct'));
 
   return {
     level,
@@ -374,8 +413,9 @@ export function buildCharacter(
     aspd,
     hitsPerSec: eng.hitsPerSec(aspd),
     phys: eng.physOf(core.str, lines.physFlat, lines.physPct + a(effects, 'physical_power'), weaponAspd, mainHand?.base)
-      * m(effects, 'physical_power'),
-    magic: eng.magicOf(core.int, lines.magicFlat, lines.magicPct, weaponAspd, mainHand?.base),
+      * m(effects, 'physical_power') * (1 - kp(focus, 'physicalPct') / 100),
+    magic: eng.magicOf(core.int, lines.magicFlat, lines.magicPct, weaponAspd, mainHand?.base)
+      * (1 + kp(focus, 'magicPct') / 100),
     attackDamage: lines.attackDamagePct,
     spellDamage: lines.spellDamagePct,
     elemByElement: elemPower.byElement,
@@ -389,19 +429,22 @@ export function buildCharacter(
     es: esValue,
     // ES regen is `regen_pct`% of the max pool per second; a Mod line or an `es_regen` skill/passive
     // amplifies it, both feeding the one `ampPct` argument the engine already carries.
-    esRegen: aegisCore ? 0
-      : eng.esRegenOf(eng.maxEsOf(lines.esFlat + a(effects, 'energy_shield'), lines.esPct, core.wis), lines.esRegenPct + a(effects, 'es_regen')),
+    esRegen: purist || aegisCore ? 0
+      : eng.esRegenOf(eng.maxEsOf(lines.esFlat + a(effects, 'energy_shield'), lines.esPct, core.wis), lines.esRegenPct + a(effects, 'es_regen'))
+        * (1 - kp(sanctuary, 'esRegenPct') / 100),
     maxHp: maxHpValue,
     // the regen lines multiply the stat's own regen — the engine already carries the % argument, so
     // a buff and a Mod line feed the same formula rather than each doing their own arithmetic
-    hpRegen: eng.hpRegenOf(core.vit, lines.hpRegenPct + a(effects, 'hp_regen') + (life.hp_regen_pct || 0), lines.hpRegenFlat),
+    hpRegen: bloodthirst ? 0
+      : eng.hpRegenOf(core.vit, lines.hpRegenPct + a(effects, 'hp_regen') + (life.hp_regen_pct || 0), lines.hpRegenFlat),
     maxMana: maxManaValue,
     manaRegen: eng.manaRegenOf(core.int, lines.manaRegenPct + a(effects, 'mana_regen') + (life.mana_regen_pct || 0), lines.manaRegenFlat),
     critPool,
-    critChance: eng.critChanceOf(critPool),
-    critDmg: eng.critDmgOf(critPool, lines.critDmgPct),
-    perfectDodge: eng.perfectDodgeChance(core.lck, lines.pdodgePct),
-    block: eng.blockChance(lines.blockPct),
+    critChance: critChanceValue,
+    critDmg: critDmgValue,
+    perfectDodge: anvil ? 0
+      : eng.perfectDodgeChance(core.lck, lines.pdodgePct) * (gamblers ? kp(gamblers, 'perfectDodgeMult') : 1),
+    block: eng.blockChance(lines.blockPct) * (blur ? 0 : 1) * (riposte ? kp(riposte, 'blockChanceMult') : 1),
     armourPen: lines.armourPenPct + (life.armour_pen || 0),
     bleedChance: lines.bleedChancePct,
     stunChance: eng.stunChanceFrom(alignment, lines.stunChancePct),
@@ -415,8 +458,9 @@ export function buildCharacter(
     resByElement,
     /** Haste's post-cap clock multiplier on cooldowns; attack speed carries its own share. */
     globalSpeed: m(effects, 'global_speed'),
-    /** Berserker's leech, and the leech mark on a target pays, as a % of damage dealt. */
-    leechPct: a(effects, 'leech'),
+    /** Intrinsic Life Leech; a target's Mark adds its own share when damage is paid. */
+    leechPct: a(effects, 'leech') + Number(bundleOf(bundles, 'parasitic-affliction')?.params.baseLeechPct ?? 0)
+      + kp(bloodthirst, 'leechPct'),
     /** What the skills currently up add to incoming damage — a buff can make you hurt more. */
     damageTaken: m(effects, 'damage_taken'),
     /**

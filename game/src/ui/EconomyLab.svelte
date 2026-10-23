@@ -105,11 +105,11 @@
     </div>
   </header>
 
-  <div class="lab-controls" role="group" aria-label="Advance simulation">
+  <div class="lab-controls card-read" role="group" aria-label="Advance simulation">
     <button onclick={() => advance(1)}>+1 hour</button>
     <button onclick={() => advance(6)}>+6 hours</button>
     <button onclick={() => advance(24)}>+24 hours</button>
-    <button class="quiet" onclick={reset}>Reset</button>
+    <button class="btn btn-flat" onclick={reset}>Reset</button>
     <p class="text-note" role="status" aria-live="polite">{note}</p>
   </div>
   <p class="text-note">Travel cost and Waypoint fare use the real Road graph. The lab does not move the character or enforce the sale: it shows the trade-off beside the city ledger. Delivery, home, NPC stories and projects remain outside this fixture.</p>
@@ -117,10 +117,10 @@
   <div class="lab-cities">
     {#each LAB_CITIES as city (city.id)}
       {@const live = snapshotCity(city.id)}
-      <article class="city-card" aria-labelledby={`city-${city.id}`}>
+      <article class="city-card card-read" aria-labelledby={`city-${city.id}`}>
         <header>
           <div><h3 id={`city-${city.id}`}>{cityName(city.id)}</h3><p class="text-note">{TOWN.trade.towns[city.id]?.needs}</p></div>
-          <span class="tag">{city.role}</span>
+          <span class="chip chip-tag">{city.role}</span>
         </header>
         <dl class="city-figures">
           <div><dt>Budget</dt><dd>{gold(live.budget)}g</dd></div>
@@ -143,8 +143,8 @@
   </div>
 
   <div class="lab-lower">
-    <section class="lab-card sale-card" aria-labelledby="lab-sale-title">
-      <header><h3 id="lab-sale-title">Sell into one transaction</h3><span class="tag">quote → confirm</span></header>
+    <section class="lab-card sale-card card-read" aria-labelledby="lab-sale-title">
+      <header><h3 id="lab-sale-title">Sell into one transaction</h3><span class="chip chip-tag">quote → confirm</span></header>
       <div class="sale-form">
         <label>Stand at
           <select aria-label="Route origin" value={originId} onchange={(event) => originId = event.currentTarget.value}>
@@ -164,7 +164,7 @@
         <label>Qty
           <input type="number" min="1" step="1" aria-label="Sale quantity" value={quantity} oninput={(event) => quantity = event.currentTarget.valueAsNumber} />
         </label>
-        <button class="quiet" disabled={carried === 0} onclick={() => quantity = carried}>All carried</button>
+        <button class="btn btn-flat" disabled={carried === 0} onclick={() => quantity = carried}>All carried</button>
       </div>
       <div class="quote-grid" aria-label="Sale quote">
         <div><span>Normal demand</span><b>{preview.normalDemand}</b></div>
@@ -181,10 +181,10 @@
       <h4>City buyers for {nameOf(goodId)}</h4>
       <div class="buyer-grid">
         {#each buyers as buyer (buyer.id)}
-          <article class="buyer-row" class:selected={buyer.id === cityId}>
+          <article class="buyer-row card-read selectable" class:selected={buyer.id === cityId}>
             <header>
-              <button class="buyer-name" onclick={() => cityId = buyer.id}>{cityName(buyer.id)}</button>
-              <span class="tag">{buyer.role}</span>
+              <button class="buyer-name btn btn-flat" onclick={() => cityId = buyer.id}>{cityName(buyer.id)}</button>
+              <span class="chip chip-tag">{buyer.role}</span>
             </header>
             {#if buyer.quote.ok}
               <dl>
@@ -210,11 +210,11 @@
       </div>
     </section>
 
-    <section class="lab-card event-card" aria-labelledby="lab-event-title">
-      <header><h3 id="lab-event-title">Timed events</h3><span class="tag">{CONFIG.events.length} fixed</span></header>
+    <section class="lab-card event-card card-read" aria-labelledby="lab-event-title">
+      <header><h3 id="lab-event-title">Timed events</h3><span class="chip chip-tag">{CONFIG.events.length} fixed</span></header>
       {#each CONFIG.events as event, index (event.id)}
-        <article class="event-row" class:live={eventActive(index)}>
-          <header><b>{event.id.replaceAll('-', ' ')}</b><span class="tag">{eventLabel(index)}</span></header>
+        <article class="event-row card-tile" class:live={eventActive(index)}>
+          <header><b>{event.id.replaceAll('-', ' ')}</b><span class="chip chip-tag">{eventLabel(index)}</span></header>
           <p>{cityName(event.city)} wants {eventRemaining(index)} more {nameOf(event.good)}</p>
           <small>
             {#if eventActive(index)}
@@ -231,8 +231,8 @@
       <p class="text-note">Events run on world time, including offline steps. Ending an event deletes no goods or gold.</p>
     </section>
 
-    <section class="lab-card ledger-card" aria-labelledby="lab-ledger-title">
-      <header><h3 id="lab-ledger-title">Ledger</h3><span class="tag">closed books</span></header>
+    <section class="lab-card ledger-card card-read" aria-labelledby="lab-ledger-title">
+      <header><h3 id="lab-ledger-title">Ledger</h3><span class="chip chip-tag">closed books</span></header>
       <dl class="ledger-grid">
         <div><dt>Produced</dt><dd>{sum(snapshot.ledger.produced)}</dd></div>
         <div><dt>Consumed</dt><dd>{sum(snapshot.ledger.consumed)}</dd></div>
@@ -242,8 +242,8 @@
         <div><dt>Minted</dt><dd>{gold(snapshot.ledger.mintedBasic + snapshot.ledger.mintedBudget + snapshot.ledger.mintedEvent)}g</dd></div>
       </dl>
       <div class="audit-row">
-        <span class="badge" class:ok={audit.goodsOk} class:bad={!audit.goodsOk}>Goods {audit.goodsOk ? 'balance' : 'mismatch'}</span>
-        <span class="badge" class:ok={audit.goldOk} class:bad={!audit.goldOk}>Gold {audit.goldOk ? 'balance' : 'mismatch'}</span>
+        <span class="chip chip-tag" class:here={audit.goodsOk} class:alarm={!audit.goodsOk}>Goods {audit.goodsOk ? 'balance' : 'mismatch'}</span>
+        <span class="chip chip-tag" class:here={audit.goldOk} class:alarm={!audit.goldOk}>Gold {audit.goldOk ? 'balance' : 'mismatch'}</span>
       </div>
       <p class="player-purse">Player <b>{gold(snapshot.player.gold)}g</b> + {snapshot.player.credit.toFixed(4)}g credit</p>
       <p class="text-note">Minted = floor-channel gold + budget refills + event grants. City purchases move existing city gold; they do not mint.</p>
@@ -257,18 +257,17 @@
   .lab-head, .lab-card > header, .city-card > header, .event-row > header, .sale-foot { justify-content: space-between; }
   .lab-head > div { display: grid; gap: var(--spacing-xs); }
   .eyebrow { margin: 0; color: var(--gold); font-size: var(--font-xs); letter-spacing: .12em; text-transform: uppercase; }
-  .lab-head h2 { margin: 0; font-size: var(--font-lg, 22px); }
+  .lab-head h2 { margin: 0; font-size: var(--font-lg); }
   .lab-head p, .lab-card p, .city-card p, .economy-lab > p { margin: 0; }
   .lab-clock { display: grid; justify-items: end; gap: var(--spacing-xs); }
-  .lab-clock strong { font-family: var(--num); font-size: var(--font-lg, 22px); color: var(--gold); }
+  .lab-clock strong { font-family: var(--num); font-size: var(--font-lg); color: var(--gold); }
   .lab-clock small { color: var(--dim); }
-  .lab-controls { padding: var(--spacing-sm); background: var(--inset); border: 1px solid var(--line); border-radius: var(--radius-card); }
+  .lab-controls { padding: var(--spacing-sm); }
   .lab-controls p { flex: 1 1 280px; }
   .lab-cities { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--spacing-md); }
-  .city-card, .lab-card { display: grid; gap: var(--spacing-md); align-content: start; padding: var(--spacing-md); background: var(--inset); border: 1px solid var(--line); border-radius: var(--radius-card); }
-  .city-card h3, .lab-card h3 { margin: 0; color: var(--gold); font-size: var(--font-md, 16px); }
+  .city-card, .lab-card { display: grid; gap: var(--spacing-md); align-content: start; padding: var(--spacing-md); }
+  .city-card h3, .lab-card h3 { margin: 0; color: var(--gold); font-size: var(--font-md); }
   .city-card header p { max-width: 42ch; font-size: var(--font-xs); color: var(--dim); }
-  .tag { padding: 2px var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-round, 999px); color: var(--dim); font-size: var(--font-xs); white-space: nowrap; }
   .city-figures { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-sm); margin: 0; }
   .city-figures div, .ledger-grid div { display: grid; gap: 2px; }
   dt { color: var(--dim); font-size: var(--font-xs); }
@@ -277,7 +276,7 @@
   .stock-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: var(--spacing-sm); row-gap: 3px; font-size: var(--font-xs); }
   .stock-figure { font-family: var(--num); text-align: right; color: var(--text); }
   .stock-figure small { color: var(--dim); }
-  .stock-bar { grid-column: 1 / -1; height: 4px; overflow: hidden; background: var(--bar-2, #2e3742); border-radius: 999px; }
+  .stock-bar { grid-column: 1 / -1; height: 4px; overflow: hidden; background: var(--bar-2); border-radius: var(--radius-pill); }
   .stock-bar i { display: block; height: 100%; background: var(--gold); opacity: .7; }
   .lab-lower { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: var(--spacing-md); }
   .sale-form { display: flex; align-items: end; gap: var(--spacing-sm); flex-wrap: wrap; }
@@ -291,27 +290,22 @@
   .sale-foot p { flex: 1 1 240px; }
   .lab-card h4 { margin: 0; color: var(--dim); font-size: var(--font-sm); }
   .buyer-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--spacing-sm); }
-  .buyer-row { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); }
-  .buyer-row.selected { border-color: var(--gold); background: var(--surface-selected); }
+  .buyer-row { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm); }
   .buyer-row header { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xs); }
-  .buyer-name { padding: 0; border: 0; background: transparent; color: var(--text); text-align: left; }
+  .buyer-name { padding: 0; color: var(--text); text-align: left; }
   .buyer-row dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs); margin: 0; }
   .cargo-strip { display: flex; gap: var(--spacing-xs); flex-wrap: wrap; }
   .cargo-strip button { display: inline-flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-sm); }
   .cargo-strip b { font-family: var(--num); }
   .event-card { align-content: start; }
-  .event-row { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); }
+  .event-row { display: grid; gap: var(--spacing-xs); padding: var(--spacing-sm); }
   .event-row.live { border-color: var(--gold); background: var(--surface-selected); }
   .event-row p { font-size: var(--font-sm); }
   .event-row small { color: var(--dim); }
   .ledger-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-sm) var(--spacing-md); margin: 0; }
-  .ledger-grid dd { color: var(--gold-lit, var(--gold)); }
+  .ledger-grid dd { color: var(--gold-lit); }
   .audit-row { display: flex; gap: var(--spacing-xs); flex-wrap: wrap; }
-  .badge { padding: 2px var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-round, 999px); font-size: var(--font-xs); }
-  .badge.ok { color: var(--good-lit, var(--good)); border-color: color-mix(in srgb, var(--good) 55%, var(--line)); }
-  .badge.bad { color: var(--alarm); border-color: color-mix(in srgb, var(--alarm) 55%, var(--line)); }
   .player-purse { font-family: var(--num); font-size: var(--font-sm); }
   .player-purse b { color: var(--gold); }
-  .quiet { background: transparent; }
   @media (max-width: 1200px) { .lab-cities, .lab-lower { grid-template-columns: minmax(0, 1fr); } .quote-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>

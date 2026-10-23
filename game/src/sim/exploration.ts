@@ -65,9 +65,10 @@ export function normalizeExplorationState(state: GameState): void {
   const resumeCell = Number.isInteger(rq) && Number.isInteger(rr) && Number.isInteger(rs)
     ? { q: rq, r: rr, sub: rs, wild: null } : null;
   const validResume = !!resumeCell && stops.some((stop) => stop.subzone === resumeCell.sub && at(stop.cell, resumeCell));
+  const finishingStoppedTrip = !state.patrol.active && rawAuto.resumeCell == null && phase !== 'idle';
   state.autoReturn = {
     enabled: rawAuto.enabled == null ? CFG.auto_return_default : Boolean(rawAuto.enabled),
-    phase: phase !== 'idle' && (!validResume || stops.length < 2) ? 'idle' : phase,
+    phase: phase !== 'idle' && !finishingStoppedTrip && (!validResume || stops.length < CFG.min_stops) ? 'idle' : phase,
     resumeCell: validResume && phase !== 'idle' ? resumeCell : null,
   };
 }
@@ -182,6 +183,18 @@ export function recordPatrolGroupClear(state: GameState, online: boolean): strin
 export const autoReturnThreshold = (state: GameState) =>
   Math.ceil(slotsAvailable(state) * CFG.auto_return_threshold_pct / 100);
 
+/** Readiness shared by the live trip and its preview; enabling the setting does not bypass a blocker. */
+export function autoReturnBlocker(state: GameState, wasPatrolling = state.patrol.active): string | null {
+  if (state.autoReturn.phase !== 'idle') return `Already returning (${state.autoReturn.phase})`;
+  if (!wasPatrolling) return 'Needs an active Patrol';
+  if (slotsUsed(state) < autoReturnThreshold(state)) return `Waits until ${autoReturnThreshold(state)} of ${slotsAvailable(state)} slots are used`;
+  if (state.walk) return 'Waiting for the walk to finish';
+  if (state.group.length) return 'Waiting for the fight to finish';
+  if (state.dungeon) return 'Waiting for the dungeon to finish';
+  if (state.phase === 'camp') return 'Waiting for Camp recovery';
+  return null;
+}
+
 function startReturnWalk(state: GameState): string | null {
   const feet = currentCell(state);
   const home = road.nodeById(ownerOf(feet).id);
@@ -199,12 +212,12 @@ function startReturnWalk(state: GameState): string | null {
     state.patrol.active = false;
     return `Auto-Return stopped · ${result.why || 'could not reach settlement'}`;
   }
+  state.hunting = false;
   return `Auto-Return · walking to ${home.id}`;
 }
 
 export function maybeStartAutoReturn(state: GameState, online: boolean, wasPatrolling = state.patrol.active): string | null {
-  if (!wasPatrolling || !state.autoReturn.enabled || state.autoReturn.phase !== 'idle'
-    || slotsUsed(state) < autoReturnThreshold(state) || state.walk || state.group.length || state.dungeon || state.phase === 'camp') return null;
+  if (!state.autoReturn.enabled || autoReturnBlocker(state, wasPatrolling)) return null;
   state.autoReturn.resumeCell = state.patrol.active && state.cell ? structuredClone(state.cell) : null;
   state.autoReturn.phase = online ? 'to-town' : 'waiting';
   state.hunting = false;
@@ -223,7 +236,12 @@ export function driveAutoReturn(state: GameState, online: boolean): { message: s
   }
   const resume = state.autoReturn.resumeCell;
   if (!resume) {
+    if (rankOf(currentCell(state)) > 0) {
+      state.autoReturn.phase = 'to-town';
+      return { message: startReturnWalk(state), deposit: false };
+    }
     state.autoReturn.phase = 'idle';
+    state.hunting = false;
     return { message: 'Auto-Return complete · Patrol is stopped at the settlement', deposit: false };
   }
   if (at(currentCell(state), resume)) {

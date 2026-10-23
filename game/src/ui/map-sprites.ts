@@ -17,6 +17,15 @@ export function mapSpriteWidth(href: string, x: number, y: number, width: number
   return mapSprite(href, x - paintedWidth / 2, y - height, paintedWidth, height, cls);
 }
 
+/** A landmark painted to the block's own footprint, the way the full-hex terrain art is drawn: the
+ *  painted box is stretched to the footprint instead of keeping its sprite aspect. */
+export function mapSpriteFill(href: string, x: number, y: number, width: number, height: number, cls = ''): string {
+  const box = (bounds as Record<string, number[]>)[href];
+  if (!box) return `<image class="${cls}" href="${href}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="none"/>`;
+  const [iw, ih, left, top, bw, bh] = box;
+  return `<svg class="${cls}" x="${x}" y="${y}" width="${width}" height="${height}" viewBox="${left} ${top} ${bw} ${bh}" preserveAspectRatio="none"><image href="${href}" width="${iw}" height="${ih}"/></svg>`;
+}
+
 /** Small per-art overhangs let a landmark cross its hex edge while keeping its measured base centred. */
 export function mapSpriteWidthScale(href: string): number {
   return (bounds as Record<string, number[]>)[href]?.[6] ?? 1;

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Builds, skill pieces and the finish line</title></head>
+<title>Build plan · ModWorld Field Manual</title></head>
 <body><style>:root {
     color-scheme: dark;
     --bg: #0f1217;
@@ -63,10 +63,6 @@
     --pad-area: 20px;
     --bar-h: 14px;
 
-    --minimap-size: clamp(100px, 7.74vw, 216px);
-    --map-hairline: rgba(0, 0, 0, 0.35);
-    --map-hairline-strong: rgba(0, 0, 0, 0.6);
-    --objectives-w: clamp(170px, 11.96vw, 300px);
 
     --elite: #6c5199;
     --elite-ink: #b98cff;
@@ -121,7 +117,10 @@
     --sel: rgba(127, 212, 255, 0.26);
     --bar: #232b36;
     --radius-round: 50%;
+    --radius-pill: 999px;
     --radius-card: 8px;
+    --font-3xs: 11px;
+    --font-2xs: 12px;
     --font-xs: 14px;
     --font-sm: 16px;
     --font-md: clamp(17px, 1.28vw, 36px);
@@ -136,6 +135,7 @@
     --slot-item: 40px;
     --slot-skill-size: clamp(36px, 2.6vw, 50px);
     --field-card-size: clamp(125px, 8.63vw, 180px);
+    --spacing-2xs: 2px;
     --spacing-xs: 5px;
     --spacing-sm: 10px;
     --spacing-md: 15px;
@@ -197,7 +197,11 @@ tbody tr:hover { background: rgba(255,255,255,.06); }
 .tabs tbody { display: none; }
 .tabs input:checked:nth-of-type(1) ~ table tbody:nth-of-type(1),
 .tabs input:checked:nth-of-type(2) ~ table tbody:nth-of-type(2),
-.tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3) { display: table-row-group; }
+.tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3),
+.tabs input:checked:nth-of-type(4) ~ table tbody:nth-of-type(4),
+.tabs input:checked:nth-of-type(5) ~ table tbody:nth-of-type(5),
+.tabs input:checked:nth-of-type(6) ~ table tbody:nth-of-type(6),
+.tabs input:checked:nth-of-type(7) ~ table tbody:nth-of-type(7) { display: table-row-group; }
 .tabs table { flex: 1 0 100%; width: 100%; }
 .twrap { overflow: hidden; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
 .twrap table { width: 100%; min-width: 0; table-layout: fixed; }
@@ -253,14 +257,650 @@ td .sub { display: block; color: var(--dim); font-size: var(--font-xs); }
 .legend { display: grid; gap: var(--spacing-xs); padding-left: 1.1rem; font-size: var(--font-xs); color: var(--dim); }
 .legend strong { color: var(--text); }
 .num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-card); padding: 0 .25rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; }
-ol { display: flex; flex-direction: column; gap: var(--spacing-xs); padding-left: 1.3rem; }</style><div class="layout">
-<nav><a class="" href="index.html">Start here</a><a class="" href="combat.html">Combat</a><a class="" href="skills.html">Skills</a><a class="" href="items.html">Items</a><a class="" href="weapons.html">Weapons</a><a class="" href="equipment.html">Equipment</a><a class="" href="stats.html">Stats &amp; caps</a><a class="" href="survival.html">Survival</a><a class="" href="idle.html">Away &amp; bag</a><a class="" href="world.html">World</a><a class="" href="travel.html">Travel</a><a class="" href="mobs.html">Bestiary</a><a class="" href="towns.html">Towns</a><a class="" href="economy.html">Economy</a><a class="" href="crafting.html">Crafting</a><a class="" href="progression.html">Progression</a><a class="on" href="builds.html">Builds</a><a class="" href="elements.html">Elements</a><a class="" href="icons.html">Icons</a></nav>
-<main><header class="page-head"><h1>Builds, skill pieces and the finish line</h1><p class="lead"><code>TTK = target HP / build DPS</code>. Skill duplicates, damage and effect levels use separate progress curves.</p></header>
-<div class="page-content"><section><h2>Finding a skill</h2><p class="note"><code>skill drop = per-rank chance per kill</code>, independent of gear and stone rolls. See <a href="skills.html">Skills</a> for the roster.</p><table><thead><tr><th>From</th><th>A skill piece a kill</th><th>What it means</th></tr></thead><tbody><tr><td>A normal mob</td><td>0.1%</td><td>the slow path — a skill is a find, not a purchase</td></tr><tr><td>An Elite</td><td>8.0%</td><td>about 80× the normal rate</td></tr><tr><td>A Boss</td><td>35.0%</td><td>the only place duplicates come thick, and the only place a Boss fight is open to you</td></tr></tbody></table></section>
-<section><h2>The duplicate ladder</h2><p class="note"><code>duplicatesToStep = Σ ladder.cost through step</code>. Skill level XP is earned per kill while active; ladder CDR and skill-level effects are independent.</p><table><thead><tr><th>Step</th><th>Cooldown reduction it buys</th><th>Duplicates for the step</th><th>Duplicates to reach it</th></tr></thead><tbody><tr><td><span class="num">1</span></td><td>5%</td><td><span class="num">1</span></td><td><span class="num">1</span></td></tr><tr><td><span class="num">2</span></td><td>10%</td><td><span class="num">1</span></td><td><span class="num">2</span></td></tr><tr><td><span class="num">3</span></td><td>15%</td><td><span class="num">2</span></td><td><span class="num">4</span></td></tr><tr><td><span class="num">4</span></td><td>20%</td><td><span class="num">2</span></td><td><span class="num">6</span></td></tr><tr><td><span class="num">5</span></td><td>25%</td><td><span class="num">3</span></td><td><span class="num">9</span></td></tr><tr><td><span class="num">6</span></td><td>30%</td><td><span class="num">3</span></td><td><span class="num">12</span></td></tr></tbody></table></section>
-<section><h2>What an aura holds back</h2><p class="note"><code>availableMana = MaxMana × (1 − Σ active reservePct / 100)</code>; total reserve is capped at 100%. Skill costs use their own level formula.</p><table><thead><tr><th>Aura</th><th>Reserve tier</th><th>Mana it holds open</th><th>What it writes</th></tr></thead><tbody><tr><td>Wraith of Fury</td><td>cheap</td><td><span class="num">8%</span></td><td><span class="hy">aspd +12%</span></td></tr><tr><td>Clarity</td><td>cheap</td><td><span class="num">8%</span></td><td><span class="hy">mana regen +25%</span></td></tr><tr><td>Haste</td><td>extreme</td><td><span class="num">25%</span></td><td><span class="hy">global speed ×1.15: every cooldown ticks 15% faster (a post-cap cooldown multiplier) and final attack speed ×1.15 (still clamped by the 500 Cap)</span></td></tr><tr><td>Vitality</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">hp regen +30%</span></td></tr><tr><td>Herald of Ash</td><td>heavy</td><td><span class="num">14%</span></td><td><span class="hy">fire damage flat +50 · Alignment +6%</span></td></tr><tr><td>Herald of Frost</td><td>heavy</td><td><span class="num">14%</span></td><td><span class="hy">cold damage flat +50 · Alignment +6%</span></td></tr><tr><td>Herald of Lightning</td><td>heavy</td><td><span class="num">14%</span></td><td><span class="hy">lightning damage flat +50 · Alignment +6%</span></td></tr><tr><td>Ember Conversion</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">35% of physical damage converted to fire</span></td></tr><tr><td>Rime Conversion</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">35% of physical damage converted to cold</span></td></tr><tr><td>Storm Conversion</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">35% of physical damage converted to lightning</span></td></tr><tr><td>Cast on Crit</td><td>heavy</td><td><span class="num">14%</span></td><td><span class="hy">on a crit, casts the first ready slot in the order · mana ×2 · damage ×0.7 · 1 sec between triggers</span></td></tr><tr><td>Cast on Damage Taken</td><td>heavy</td><td><span class="num">14%</span></td><td><span class="hy">on taking damage, casts the first ready slot in the order · mana ×2 · damage ×0.7 · 1 sec between triggers</span></td></tr><tr><td>Rimbo Form</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">nearby mob aspd −15% (stacks with chill; total may reach −35%)</span></td></tr><tr><td>Elemental Fury</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">foe Elemental res −12%</span></td></tr><tr><td>Trinity Form</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">Elemental res +15% on fire / cold / lightning</span></td></tr><tr><td>Grace</td><td>cheap</td><td><span class="num">8%</span></td><td><span class="hy">Evasion flat +24</span></td></tr><tr><td>Iron Guard</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">Armour flat +32</span></td></tr><tr><td>Energy Guard</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">Energy Shield flat +48</span></td></tr></tbody></table></section>
-<section><h2>Presets</h2><p class="note">Keys are client settings, not character state — a preset is a loadout, never a key map. A preset activates only owned skills and obeys the same aura reservation limit as the Skills screen.</p><table><thead><tr><th></th><th>The number</th><th>Read from</th></tr></thead><tbody><tr><td>Sets you can store</td><td><span class="num">6</span></td><td><code>presets.sets</code></td></tr><tr><td>Which one is main</td><td>index 0</td><td><code>presets.main_index</code> — where a Push sends you back</td></tr><tr><td>Auto-select by zone</td><td>yes</td><td>the game switches on its own as you climb</td></tr><tr><td>Cooldowns across a Push</td><td>yes</td><td>a bar already counting keeps counting</td></tr></tbody></table></section>
-<section><h2>The two builds every published number is measured on</h2><p class="note"><code>TTK = target HP / DPS</code>. Reference at level 100: 1,991 DPS evenly split (4.6 sec) vs 42,801 focused (0.21 sec).</p><table><thead><tr><th></th><th>Physical</th><th>Magic</th><th>Elemental</th><th>Alignment</th></tr></thead><tbody><tr><td>glass</td><td><span class="num">2,607</span></td><td><span class="num">542</span></td><td><span class="num">434</span></td><td><span class="num">5.4</span></td></tr><tr><td>caster</td><td><span class="num">542</span></td><td><span class="num">2,607</span></td><td><span class="num">1,734</span></td><td><span class="num">5.4</span></td></tr></tbody></table></section>
-<section><h2>The finish line</h2><p class="note"><code>goal progress = counted items, kills or level checkpoints</code>. Level Cap 190; Paragon starts at 101.</p><table><thead><tr><th>Level</th><th>Kills to reach it</th><th>What it is</th></tr></thead><tbody><tr><td>level 10</td><td><span class="num">204</span></td><td></td></tr><tr><td>level 30</td><td><span class="num">1,500</span></td><td></td></tr><tr><td>level 60</td><td><span class="num">8,294</span></td><td></td></tr><tr><td>level 90</td><td><span class="num">30,609</span></td><td></td></tr><tr><td>level 100</td><td><span class="num">50,534</span></td><td>Paragon starts here</td></tr><tr><td>level 120</td><td><span class="num">68,841</span></td><td></td></tr><tr><td>level 150</td><td><span class="num">91,228</span></td><td></td></tr><tr><td>level 180</td><td><span class="num">109,507</span></td><td>the mob level bound</td></tr><tr><td>level 190</td><td><span class="num">115,059</span></td><td>the level Cap</td></tr><tr><td>The win</td><td>one fight</td><td><strong>Ancient Dragon</strong> — zone 18, level 171, 26,244 health, killed inside a single spawn without being Pushed</td></tr><tr><td>Past the Cap</td><td><span class="num">19,925</span> kills</td><td>the stretch from level 90 to level 100, counted in the same currency as everything else (<code>PUSH_KILLS_91_100</code>)</td></tr></tbody></table></section>
-<section><h2>Counted, never timed</h2><table><thead><tr><th>Goal</th><th>What it spends</th><th>Read from</th></tr></thead><tbody><tr><td>A full Ascend set</td><td>12 pieces, each climbed one band</td><td><code>craft.ascend_items_per_set</code></td></tr><tr><td>A full Refine pass</td><td>Tier Stone at <code>refine_stones_per_use</code> a cast, on every line you choose to climb</td><td><code>craft.refine_stones_per_use</code></td></tr><tr><td>Every weapon type to Mastery 20</td><td>11 ladders, and the account-wide drop bonus is the reason to walk them</td><td><code>engine/mastery.ts</code></td></tr><tr><td>One skill to its top</td><td>12 duplicates</td><td><code>skills.json ladder</code></td></tr></tbody></table></section></div>
-</main></div></body></html>
+ol { display: flex; flex-direction: column; gap: var(--spacing-xs); padding-left: 1.3rem; }
+:root { --wiki-max: 96rem; --wiki-display: "Palatino Linotype", "Book Antiqua", Georgia, serif; }
+body {
+  display: block; min-height: 100vh;
+  background:
+    radial-gradient(70rem 34rem at 8% -12%, color-mix(in srgb, var(--gold) 7%, transparent), transparent 62%),
+    radial-gradient(52rem 30rem at 104% 2%, color-mix(in srgb, var(--mana) 7%, transparent), transparent 58%),
+    var(--bg);
+}
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image: linear-gradient(color-mix(in srgb, var(--line) 22%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--line) 22%, transparent) 1px, transparent 1px);
+  background-size: 4.5rem 4.5rem; opacity: .28;
+}
+.skip {
+  position: fixed; top: 1rem; left: 1rem; z-index: var(--z-popover);
+  padding: .55rem .9rem; border: 1px solid var(--gold); border-radius: var(--radius-card);
+  background: var(--panel); color: var(--gold-lit); font: inherit; cursor: pointer;
+  transform: translateY(-200%);
+}
+.skip:focus-visible { transform: none; outline: 2px solid var(--focus); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.wiki-masthead {
+  position: relative; z-index: 2; display: flex; align-items: center; gap: var(--spacing-lg);
+  width: 100%; max-width: var(--wiki-max); padding: 1.35rem 2.5rem; margin-inline: auto;
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: .75rem; color: var(--text); flex: none; }
+.brand:hover { text-decoration: none; }
+.brand-mark {
+  display: grid; place-items: center; width: 2.35rem; height: 2.35rem; flex: none;
+  border: 1px solid color-mix(in srgb, var(--gold) 70%, var(--line)); border-radius: var(--radius-round);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--gold) 18%, transparent), var(--inset) 70%);
+  box-shadow: 0 0 1.2rem color-mix(in srgb, var(--gold) 16%, transparent);
+}
+.brand-mark::before { content: ""; width: .62rem; height: .62rem; transform: rotate(45deg); background: linear-gradient(140deg, var(--gold-lit), var(--gold)); }
+.brand-text b { display: block; font-family: var(--wiki-display); font-size: 1.05rem; font-weight: 600; letter-spacing: .2em; line-height: 1.1; }
+.brand-text small { display: block; color: var(--gold); font-size: .6rem; letter-spacing: .3em; text-transform: uppercase; }
+.masthead-tag { flex: 1; color: var(--dim); font-size: .72rem; letter-spacing: .06em; }
+.masthead-tools { display: flex; align-items: center; gap: .7rem; flex: none; }
+.search { position: relative; display: flex; align-items: center; color: var(--dim); }
+.search .search-glyph { position: absolute; left: .8rem; width: 1rem; height: 1rem; background: currentColor; -webkit-mask: url(../../game/src/icon/ui/search.png) center / contain no-repeat; mask: url(../../game/src/icon/ui/search.png) center / contain no-repeat; pointer-events: none; }
+.search input {
+  width: clamp(12rem, 19vw, 21rem); padding: .55rem 1rem .55rem 2.3rem;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--inset); color: var(--text);
+  font: inherit; font-size: .8rem;
+}
+.search input::placeholder { color: color-mix(in srgb, var(--dim) 75%, transparent); }
+.search input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
+.search-results {
+  position: absolute; top: calc(100% + .5rem); right: 0; z-index: var(--z-popover);
+  display: grid; gap: .15rem; width: min(26rem, 80vw); padding: .4rem;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow-soft);
+}
+.search-results[hidden] { display: none; }
+dl, dt, dd { margin: 0; }
+.search-hit { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: .5rem .6rem; border-radius: 6px; color: var(--text); font-size: .82rem; }
+.search-hit small { color: var(--dim); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.search-hit:hover, .search-hit:focus-visible { background: var(--surface-selected); text-decoration: none; }
+.search-none { padding: .5rem .6rem; color: var(--dim); font-size: .78rem; }
+.play-link { padding: .5rem .9rem; border: 1px solid color-mix(in srgb, var(--gold) 55%, var(--line)); border-radius: 999px; color: var(--gold-lit); font-size: .72rem; letter-spacing: .04em; white-space: nowrap; }
+.play-link:hover { background: color-mix(in srgb, var(--gold) 9%, transparent); text-decoration: none; }
+.menu-toggle { display: none; align-items: center; gap: .45rem; padding: .5rem .75rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); color: var(--text); font: inherit; font-size: .78rem; cursor: pointer; }
+.menu-toggle:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.wiki-shell { position: relative; z-index: 1; display: grid; grid-template-columns: 15.5rem minmax(0, 1fr); gap: 3.2rem; width: 100%; max-width: var(--wiki-max); padding: 2.3rem 2.5rem 4rem; margin-inline: auto; }
+.wiki-nav { position: sticky; top: 1.6rem; align-self: start; display: flex; flex-direction: column; gap: 1.45rem; max-height: calc(100vh - 3.2rem); overflow: auto; min-width: 0; padding-right: .65rem; border-right: 1px solid var(--line); }
+.nav-title { color: var(--dim); font-size: .62rem; letter-spacing: .24em; text-transform: uppercase; }
+.nav-group { display: grid; gap: .5rem; }
+.nav-group h2 { display: flex; align-items: baseline; gap: .45rem; padding: 0; border: 0; color: var(--dim); font-size: .64rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.nav-group h2 span { color: var(--gold); font-family: var(--num); font-weight: 500; }
+.nav-group h2 b { color: color-mix(in srgb, var(--dim) 65%, transparent); font-family: var(--num); font-weight: 500; }
+.nav-group ul { display: grid; gap: 1px; padding: 0; list-style: none; }
+.nav-group a { display: block; padding: .38rem .65rem; border-left: 2px solid transparent; border-radius: 0 6px 6px 0; color: var(--dim); font-size: .83rem; }
+.nav-group a:hover { color: var(--text); background: color-mix(in srgb, var(--text) 4%, transparent); text-decoration: none; }
+.nav-group a.on { color: var(--gold-lit); border-left-color: var(--gold); background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 11%, transparent), transparent); }
+.nav-foot { color: color-mix(in srgb, var(--dim) 70%, transparent); font-size: .66rem; letter-spacing: .06em; }
+.wiki-main { display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
+.wiki-main h1 { font-family: var(--wiki-display); font-size: clamp(2rem, 3.4vw, 3.2rem); font-weight: 500; line-height: 1.08; letter-spacing: .01em; }
+.page-head {
+  display: grid; gap: .85rem; padding: 1.55rem 1.75rem;
+  border: 1px solid var(--line); border-radius: var(--radius-card);
+  background: linear-gradient(155deg, color-mix(in srgb, var(--panel) 92%, var(--gold) 8%), var(--inset));
+  box-shadow: var(--shadow-soft);
+}
+.crumbs, .toc, .page-turn { position: static; min-width: 0; }
+.crumbs { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: .45rem; color: var(--dim); font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; }
+.crumbs a { color: var(--dim); } .crumbs a:hover { color: var(--gold); text-decoration: none; }
+.eyebrow { display: flex; align-items: center; gap: .55rem; color: var(--gold); font-size: .64rem; letter-spacing: .22em; text-transform: uppercase; }
+.eyebrow::before { content: ""; width: 1.5rem; height: 1px; background: var(--gold); }
+.page-head .lead { max-width: 62rem; color: var(--dim); font-size: 1rem; line-height: 1.6; }
+.page-meta { display: flex; flex-wrap: wrap; gap: .4rem; }
+.chip { padding: .22rem .6rem; border: 1px solid var(--line); border-radius: 999px; color: var(--dim); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+.covers { color: var(--dim); font-size: .78rem; }
+.covers span { color: var(--gold); font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; padding-right: .45rem; }
+.toc { display: grid; gap: .55rem; padding: .95rem 1.15rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); }
+.toc ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .15rem 1rem; padding: 0; list-style: none; }
+.toc button { display: block; width: 100%; padding: .32rem .15rem; border: 0; border-bottom: 1px dotted transparent; background: none; color: var(--dim); font: inherit; font-size: .8rem; text-align: left; cursor: pointer; }
+.toc button:hover, .toc button.on { color: var(--gold-lit); border-bottom-color: color-mix(in srgb, var(--gold) 40%, transparent); }
+.toc button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.page-content { display: grid; gap: 1.15rem; counter-reset: sec; }
+.page-content > section {
+  counter-increment: sec; display: grid; gap: .8rem; padding: 1.25rem 1.45rem;
+  border: 1px solid var(--line); border-radius: var(--radius-card);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 88%, transparent), color-mix(in srgb, var(--inset) 94%, transparent));
+  overflow-x: auto;
+}
+.page-content > section > h2 { display: flex; align-items: baseline; gap: .65rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); font-family: var(--wiki-display); font-size: 1.25rem; font-weight: 500; letter-spacing: .01em; }
+.page-content > section > h2::before { content: counter(sec, decimal-leading-zero); color: var(--gold); font-family: var(--num); font-size: .7rem; letter-spacing: .08em; }
+.page-content h3 { color: var(--gold); font-size: .68rem; letter-spacing: .14em; }
+.page-content p, .page-content li { color: color-mix(in srgb, var(--text) 88%, var(--dim)); }
+.page-content .note { padding: .55rem .8rem; border-left: 2px solid color-mix(in srgb, var(--gold) 45%, var(--line)); border-radius: 0 6px 6px 0; background: color-mix(in srgb, var(--gold) 4%, transparent); }
+.page-content code { padding: .05em .28em; border-radius: 4px; background: color-mix(in srgb, var(--gold) 7%, transparent); color: var(--gold-lit); font-family: var(--num); font-size: .86em; }
+.page-content thead th { background: var(--inset); color: var(--gold); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+.page-content td:first-child { white-space: normal; }
+.page-content tbody tr:nth-child(even) { background: color-mix(in srgb, var(--text) 2.5%, transparent); }
+.page-content tbody tr:hover { background: color-mix(in srgb, var(--gold) 5%, transparent); }
+.page-foot { display: grid; gap: 1rem; padding-top: 1.1rem; border-top: 1px solid var(--line); }
+.related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .65rem; }
+.related-grid a { display: grid; gap: .2rem; padding: .75rem .85rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); color: var(--text); }
+.related-grid a:hover { border-color: color-mix(in srgb, var(--gold) 40%, var(--line)); text-decoration: none; }
+.related-grid small { color: var(--dim); font-size: .75rem; }
+.page-turn { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+.page-turn a { display: grid; gap: .2rem; padding: .65rem .85rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); color: var(--text); }
+.page-turn a:hover { border-color: color-mix(in srgb, var(--gold) 40%, var(--line)); text-decoration: none; }
+.page-turn small { color: var(--dim); font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; }
+.page-turn .next { justify-self: end; text-align: right; }
+.home-hero {
+  display: grid; gap: 1.05rem; padding: 2.2rem 2.1rem;
+  border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--line)); border-radius: var(--radius-card);
+  background:
+    radial-gradient(38rem 18rem at 12% 0%, color-mix(in srgb, var(--gold) 13%, transparent), transparent 65%),
+    linear-gradient(160deg, color-mix(in srgb, var(--panel) 90%, var(--gold) 10%), var(--inset));
+  box-shadow: var(--shadow-soft);
+}
+.home-hero h1 { font-size: clamp(2.7rem, 5vw, 4.6rem); }
+.home-hero .lead { max-width: 56rem; color: var(--dim); font-size: 1.08rem; line-height: 1.6; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
+.btn { display: inline-flex; align-items: center; gap: .45rem; padding: .55rem .95rem; border: 1px solid var(--line); border-radius: 999px; background: var(--inset); color: var(--text); font: inherit; font-size: .78rem; cursor: pointer; }
+.btn:hover { border-color: var(--gold); text-decoration: none; }
+.btn.primary { border-color: var(--gold); background: linear-gradient(180deg, var(--gold-lit), var(--gold)); color: var(--bg); font-weight: 600; }
+.btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hero-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: 1px; padding: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--line); }
+.hero-stats div { display: grid; gap: .15rem; padding: .75rem .85rem; background: var(--inset); }
+.hero-stats dt { color: var(--dim); font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; }
+.hero-stats dd { color: var(--gold-lit); font-family: var(--num); font-size: 1.3rem; }
+.start-strip { display: grid; gap: .9rem; padding: 1.3rem 1.4rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); }
+.start-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: .8rem; }
+.start-grid article { display: grid; gap: .4rem; padding: .9rem 1rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
+.start-grid article > span { color: var(--gold); font-family: var(--num); font-size: .72rem; letter-spacing: .1em; }
+.start-grid h3 { color: var(--text); font-family: var(--wiki-display); font-size: 1.05rem; font-weight: 500; letter-spacing: 0; text-transform: none; }
+.start-grid p { color: var(--dim); font-size: .8rem; }
+.start-grid a { color: var(--gold-lit); font-size: .76rem; }
+.card-links { display: flex; flex-wrap: wrap; gap: .2rem .9rem; }
+.chapters { display: grid; gap: 1rem; }
+.chapter-head { display: flex; align-items: end; justify-content: space-between; gap: 1rem; padding-bottom: .55rem; border-bottom: 1px solid var(--line); }
+.chapter-head h2 { padding: 0; border: 0; font-family: var(--wiki-display); font-size: 1.55rem; font-weight: 500; }
+.chapter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: .9rem; }
+.chapter-card { display: grid; gap: .65rem; padding: 1.05rem 1.15rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
+.chapter-card header { display: flex; align-items: baseline; gap: .55rem; }
+.chapter-card h3 { flex: 1; color: var(--text); font-family: var(--wiki-display); font-size: 1.1rem; font-weight: 500; letter-spacing: 0; text-transform: none; }
+.chapter-card header small { color: var(--dim); font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; }
+.chapter-card > p { color: var(--dim); font-size: .78rem; }
+.chapter-card ul { display: grid; gap: .25rem; padding: 0; list-style: none; }
+.chapter-card li a { display: grid; gap: .12rem; padding: .4rem .5rem; border-radius: 6px; color: var(--text); }
+.chapter-card li a:hover { background: var(--surface-selected); text-decoration: none; }
+.chapter-card li b { font-size: .82rem; font-weight: 500; }
+.chapter-card li span { color: var(--dim); font-size: .72rem; }
+.wiki-foot { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .6rem 1.2rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--dim); font-size: .66rem; letter-spacing: .03em; }
+.wiki-foot a { color: var(--dim); }
+.wiki-tree-view { display: grid; grid-template-rows: auto auto minmax(0, 1fr); overflow: hidden; border: 1px solid color-mix(in srgb, var(--gold) 24%, var(--line)); border-radius: var(--radius-card); background: var(--ground); }
+.wiki-tree-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .75rem 1rem; border-bottom: 1px solid var(--line); background: var(--inset); }
+.wiki-tree-heading { display: grid; gap: .2rem; }
+.wiki-tree-heading strong { color: var(--text); font-size: .82rem; font-weight: 500; }
+.wiki-tree-controls { display: flex; align-items: center; gap: .35rem; }
+.icon-mask { display: inline-block; width: .9rem; height: .9rem; flex: none; background: currentColor; -webkit-mask: var(--glyph) center / contain no-repeat; mask: var(--glyph) center / contain no-repeat; }
+.tree-tool { display: inline-flex; align-items: center; justify-content: center; min-width: 1.75rem; padding: .32rem .45rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--text); font: inherit; font-size: .75rem; cursor: pointer; }
+.tree-tool[data-tree-fit] { --glyph: url(../../game/src/icon/ui/expand.png); }
+.tree-tool[data-tree-zoom="0.8"] { --glyph: url(../../game/src/icon/ui/remove-minus.png); }
+.tree-tool[data-tree-zoom="1.25"] { --glyph: url(../../game/src/icon/ui/add-plus.png); }
+.tree-tool:hover { border-color: var(--gold); }
+.tree-tool:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tree-zoom { min-width: 3rem; text-align: center; color: var(--dim); font-family: var(--num); font-size: .72rem; }
+.wiki-tree-chips { display: flex; flex-wrap: wrap; gap: .3rem; padding: .55rem 1rem; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 55%, var(--ground)); }
+.tree-chip { padding: .28rem .6rem; border: 1px solid color-mix(in srgb, var(--wing) 45%, var(--line)); border-radius: 999px; background: transparent; color: color-mix(in srgb, var(--wing) 70%, var(--dim)); font: inherit; font-size: .68rem; letter-spacing: .08em; cursor: pointer; }
+.tree-chip:hover, .tree-chip.on { background: color-mix(in srgb, var(--wing) 14%, transparent); color: var(--text); }
+.tree-chip:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.wiki-tree-stage { position: relative; height: clamp(22rem, 70vh, 48rem); overflow: hidden; background: radial-gradient(60% 60% at 50% 45%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 70%), linear-gradient(160deg, color-mix(in srgb, var(--ground) 92%, var(--gold) 8%), var(--bg)); cursor: grab; touch-action: none; }
+.wiki-tree-stage:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.wiki-tree-stage.dragging { cursor: grabbing; }
+.wiki-tree-svg { display: block; width: 100%; height: 100%; user-select: none; }
+.tree-link { fill: none; stroke: color-mix(in srgb, var(--gold) 28%, var(--line)); stroke-width: 1.4; }
+.tree-link.cross { stroke-dasharray: 3 5; stroke: color-mix(in srgb, var(--gold) 52%, var(--line)); opacity: .75; }
+.tree-region .region-code { font-family: var(--wiki-display); font-size: 26px; fill: color-mix(in srgb, var(--wing) 58%, var(--dim)); }
+.tree-region .region-name { font-size: 11px; fill: var(--dim); letter-spacing: .1em; text-transform: uppercase; }
+.tree-origin .origin-ornament { fill: none; stroke: color-mix(in srgb, var(--gold) 24%, var(--line)); stroke-dasharray: 3 5; }
+.tree-origin .origin-rim { fill: none; stroke: var(--gold); }
+.tree-origin .origin-face { fill: var(--inset); stroke: var(--gold-lit); }
+.tree-origin .origin-mark { pointer-events: none; }
+.tree-origin .origin-label { fill: var(--dim); font-size: 11px; letter-spacing: .22em; }
+.wiki-tree-node { cursor: pointer; }
+.wiki-tree-node .tree-node-face { fill: var(--ground); stroke: color-mix(in srgb, var(--wing) 72%, var(--line)); stroke-width: 1.2; }
+.wiki-tree-node .tree-node-halo { fill: none; stroke: color-mix(in srgb, var(--wing) 30%, transparent); stroke-width: 1; opacity: .55; }
+.wiki-tree-node .tree-node-core { fill: var(--wing); opacity: .85; }
+.wiki-tree-node .tree-node-icon { opacity: .9; pointer-events: none; filter: sepia(.2) saturate(.7); }
+.wiki-tree-node .tree-node-rim { fill: none; stroke: var(--wing); stroke-width: 1.6; opacity: .9; }
+.wiki-tree-node .tree-node-hit { fill: transparent; pointer-events: all; }
+.wiki-tree-node.notable .tree-node-rim { stroke-width: 2; }
+.wiki-tree-node.keystone .tree-node-face { fill: color-mix(in srgb, var(--gold) 14%, var(--ground)); stroke: var(--gold); }
+.wiki-tree-node.keystone .tree-node-rim { stroke: var(--gold-lit); stroke-width: 2; }
+.tree-keystone-corners { fill: none; stroke: var(--gold); stroke-width: 1.3; }
+.wiki-tree-node:hover .tree-node-face, .wiki-tree-node.picked .tree-node-face { filter: drop-shadow(0 0 4px var(--wing)); }
+.wiki-tree-node.picked .tree-node-rim { stroke: var(--gold-lit); stroke-width: 2.6; }
+.wiki-tree-hint { position: absolute; left: .8rem; bottom: .7rem; color: var(--dim); font-size: .66rem; letter-spacing: .04em; pointer-events: none; }
+.wiki-tree-legend { position: absolute; right: .8rem; bottom: .65rem; display: flex; flex-wrap: wrap; gap: .5rem; color: var(--dim); font-size: .6rem; letter-spacing: .05em; text-transform: uppercase; pointer-events: none; }
+.wiki-tree-legend span { display: inline-flex; align-items: center; gap: .25rem; }
+.wiki-tree-legend span::before { content: ""; width: .45rem; height: .45rem; border-radius: 50%; border: 1px solid var(--line); background: var(--ground); }
+.wiki-tree-legend .l-notable::before { border-color: var(--gold); }
+.wiki-tree-legend .l-keystone::before { border-color: var(--gold-lit); background: color-mix(in srgb, var(--gold) 25%, var(--ground)); }
+.wiki-tree-legend .l-cross::before { width: .9rem; height: 0; border: 0; border-top: 1px dashed var(--gold); border-radius: 0; background: none; }
+.wiki-tree-card { position: absolute; z-index: 3; display: grid; gap: .18rem; max-width: min(19rem, 72vw); padding: .7rem .85rem; border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line)); border-radius: var(--radius-card); background: color-mix(in srgb, var(--panel) 96%, transparent); box-shadow: var(--shadow-soft); pointer-events: none; }
+.wiki-tree-card[hidden] { display: none; }
+.wiki-tree-card strong { color: var(--gold-lit); font-family: var(--wiki-display); font-size: 1rem; font-weight: 500; }
+.wiki-tree-card .tree-card-meta { color: var(--dim); font-size: .66rem; letter-spacing: .05em; text-transform: uppercase; }
+.wiki-tree-card p { color: color-mix(in srgb, var(--text) 86%, var(--dim)); font-size: .78rem; }
+.wiki-tree-node.str, .tree-region.str, .tree-chip.str { --wing: var(--hp); }
+.wiki-tree-node.agi, .tree-region.agi, .tree-chip.agi { --wing: var(--good); }
+.wiki-tree-node.dex, .tree-region.dex, .tree-chip.dex { --wing: var(--xp); }
+.wiki-tree-node.int, .tree-region.int, .tree-chip.int { --wing: var(--mana); }
+.wiki-tree-node.wis, .tree-region.wis, .tree-chip.wis { --wing: var(--curse); }
+.wiki-tree-node.vit, .tree-region.vit, .tree-chip.vit { --wing: var(--hp-lit); }
+.wiki-tree-node.lck, .tree-region.lck, .tree-chip.lck { --wing: var(--gold); }
+@media (max-width: 46rem) {
+  .wiki-tree-stage { height: 60vh; }
+  .wiki-tree-legend { display: none; }
+  .wiki-tree-bar { flex-wrap: wrap; }
+  .wiki-tree-controls { flex: 1 0 100%; justify-content: flex-end; }
+}
+@media (max-width: 64rem) {
+  .wiki-masthead { flex-wrap: wrap; padding: 1.1rem 1.4rem; }
+  .masthead-tag { flex: 1 0 100%; order: 3; }
+  .masthead-tools { order: 2; }
+  .menu-toggle { display: inline-flex; order: 1; }
+  .brand { order: 0; }
+  .wiki-shell { grid-template-columns: 1fr; padding: 1.2rem 1.4rem 3rem; }
+  .wiki-nav { position: static; display: none; max-height: none; padding: 0 0 1rem; border-right: 0; border-bottom: 1px solid var(--line); }
+  .wiki-shell.nav-open .wiki-nav { display: flex; }
+}
+@media (max-width: 46rem) {
+  .search input { width: min(100%, 14rem); }
+  .masthead-tools { flex: 1 0 100%; }
+  .search { flex: 1; } .search input { width: 100%; }
+  .page-head, .home-hero { padding: 1.1rem 1.15rem; }
+  .page-content > section { padding: 1rem 1.05rem; }
+  .page-turn { grid-template-columns: 1fr; }
+  .page-turn .next { justify-self: start; text-align: left; }
+  .toc ol { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+@media print {
+  .wiki-masthead, .wiki-nav, .toc, .page-turn, .related-grid, .wiki-foot, .skip { display: none !important; }
+  .wiki-shell { display: block; max-width: none; padding: 0; }
+  body::before { display: none; }
+  .page-content > section { break-inside: avoid; }
+}</style>
+<button class="skip" type="button" data-skip>Skip to content</button>
+<header class="wiki-masthead">
+  <a class="brand" href="index.html" aria-label="ModWorld Field Manual, home">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-text"><b>MODWORLD</b><small>Field Manual</small></span>
+  </a>
+  <p class="masthead-tag">Official player reference · live figures</p>
+  <div class="masthead-tools">
+    <div class="search" role="search">
+      <span class="search-glyph" aria-hidden="true"></span>
+      <label class="sr-only" for="wiki-search">Search the manual</label>
+      <input id="wiki-search" type="search" placeholder="Search the manual…" autocomplete="off" spellcheck="false" />
+      <div id="wiki-search-results" class="search-results" hidden></div>
+    </div>
+    <a class="play-link" href="/">Play the game</a>
+  </div>
+  <button class="menu-toggle" type="button" data-wiki-menu aria-controls="wiki-nav" aria-expanded="false"><span aria-hidden="true">☰</span> Chapters</button>
+</header>
+<div class="wiki-shell">
+<nav class="wiki-nav" id="wiki-nav" aria-label="Manual chapters">
+  <p class="nav-title">The manual</p>
+  <section class="nav-group" aria-labelledby="nav-start">
+    <h2 id="nav-start"><span>I</span>Start here<b>3</b></h2>
+    <ul><li><a href="index.html" data-page-link data-title="Start here" data-group="Start here" data-search="Start here ModWorld — how to play Start here An open-world idle RPG. Your character fights while the window is open and while it is shut." class="">Start here</a></li><li><a href="progression.html" data-page-link data-title="Progression" data-group="Start here" data-search="Progression Progression Start here XP to next level = kills at that level × XP per kill. Skill, field-skill and Mastery tracks use separate XP curves." class="">Progression</a></li><li><a href="idle.html" data-page-link data-title="Away &amp; bag" data-group="Start here" data-search="Away &amp; bag Away, and what you can carry Start here Every whole elapsed second is credited, with no offline time limit. Away gear uses the band’s floor Item level; loot is not auto-converted." class="">Away &amp; bag</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-character">
+    <h2 id="nav-character"><span>II</span>Character<b>7</b></h2>
+    <ul><li><a href="stats.html" data-page-link data-title="Stats &amp; caps" data-group="Character" data-search="Stats &amp; caps Stats and caps Character Seven Core attributes feed derived stats through the formulas and caps below." class="">Stats &amp; caps</a></li><li><a href="skills.html" data-page-link data-title="Skills" data-group="Character" data-search="Skills Skills Character Press damage = level-1 damage × damagePct(level) / 100 . Effects use effectPct ; Buffs and Auras use buffEffectPct . Special effects use their own ramp. Cap: 20." class="">Skills</a></li><li><a href="equipment.html" data-page-link data-title="Equipment" data-group="Character" data-search="Equipment Equipment Character Every slot that is not a main hand, frame by frame. The frame decides what it can roll; the roll decides what it is worth." class="">Equipment</a></li><li><a href="crafting.html" data-page-link data-title="Crafting" data-group="Character" data-search="Crafting Crafting Character Stones change what a piece is ; two of them also move how high it sits — Ascend the band, Upgrade the Gear line. At the settlement Craft bench, right-click a stone and click an equipped or carried item, or a highlighted Mod line for a targeted use. Hold Shift to keep using the stone; Esc or right-click cancels. Every price below is read, never typed." class="">Crafting</a></li><li><a href="survival.html" data-page-link data-title="Survival" data-group="Character" data-search="Survival Survival, field skills and provisions Character HP, Mana and Energy Shield use separate Core formulas. Fieldwork, Hunger and food use the rates below." class="">Survival</a></li><li><a href="passive-tree.html" data-page-link data-title="Passive tree" data-group="Character" data-search="Passive tree Passive tree Character The 775-node board the game draws, pannable here: drag to move, scroll to zoom, and jump by region. Every road, Notable and Keystone is the live tree data." class="">Passive tree</a></li><li><a href="builds.html" data-page-link data-title="Build plan" data-group="Character" data-search="Build plan Build plan Character A plan first: choose the regions your damage and defence scale on, walk one road to a Notable, and spend attainment on the Keystone that changes a rule. Skill pieces, presets and the finish line follow below." class="on" aria-current="page">Build plan</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-combat">
+    <h2 id="nav-combat"><span>III</span>Combat<b>3</b></h2>
+    <ul><li><a href="combat.html" data-page-link data-title="Combat" data-group="Combat" data-search="Combat Combat Combat One incoming hit resolves in a fixed order — avoidance, then Armour, then Elemental resistance, then a pool. Every number is the engine at the reference build (every point spent evenly across the seven Core attributes, level 190 ), so it is the line your own sheet is measured against, not a promise about it." class="">Combat</a></li><li><a href="elements.html" data-page-link data-title="Elements" data-group="Combat" data-search="Elements Elements Combat Every Element names the status its hits leave. A Species attacks with one Element and authors a separate resistance and weakness; no Element counters another. An Element declared ahead of its content reads a dash until its status and its skill rows land." class="">Elements</a></li><li><a href="mobs.html" data-page-link data-title="Bestiary" data-group="Combat" data-search="Bestiary Races, Species and Variants Combat 11 Races · 53 Species · 193 Variants · 53 Uniques. Counts describe the current world; Races and Species have no required roster size." class="">Bestiary</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-world">
+    <h2 id="nav-world"><span>IV</span>World<b>3</b></h2>
+    <ul><li><a href="world.html" data-page-link data-title="World" data-group="World" data-search="World The world World Zone Level drives HP/DPS curves; body class changes group size, evasion and DPS factor." class="">World</a></li><li><a href="travel.html" data-page-link data-title="Travel" data-group="World" data-search="Travel Travel and the Waypoint World blocks = (|Δq| + |Δr| + |Δq + Δr|) / 2 ; walk time = blocks × block_sec ." class="">Travel</a></li><li><a href="towns.html" data-page-link data-title="Towns" data-group="World" data-search="Towns Settlements World Stall price = listed income-minutes × the seller band’s gold-per-minute rate." class="">Towns</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-economy">
+    <h2 id="nav-economy"><span>V</span>Items &amp; economy<b>3</b></h2>
+    <ul><li><a href="items.html" data-page-link data-title="Items" data-group="Items &amp; economy" data-search="Items Items Items &amp; economy A piece of gear is a frame plus the Mods that rolled on it. The frame decides what it can roll; the roll decides what it is worth." class="">Items</a></li><li><a href="weapons.html" data-page-link data-title="Weapons" data-group="Items &amp; economy" data-search="Weapons Weapons Items &amp; economy 11 main-hand types. DPS index = attacksPerSecond × weaponMult / (sword attacksPerSecond × swordMult) × 100 . Frame windows use the mid band." class="">Weapons</a></li><li><a href="economy.html" data-page-link data-title="Economy" data-group="Items &amp; economy" data-search="Economy The two currencies Items &amp; economy Trade quote = item value integrated over the town’s demand curve. Stall prices use band income; Crafting lists stone costs." class="">Economy</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-reference">
+    <h2 id="nav-reference"><span>VI</span>Reference<b>1</b></h2>
+    <ul><li><a href="icons.html" data-page-link data-title="Icons" data-group="Reference" data-search="Icons Icon Gallery Reference Every icon the game ships, in one place. Search by name, filter by category, star icons to find them again, or mark unwanted icons to hide them until you're ready to remove them in a batch." class="">Icons</a></li></ul>
+  </section>
+  <p class="nav-foot">20 chapters · live data</p>
+</nav>
+<main id="wiki-main" class="wiki-main" tabindex="-1"><header class="page-head">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Field Manual</a><span aria-hidden="true">/</span><span>Character</span><span aria-hidden="true">/</span><span aria-current="page">Build plan</span></nav>
+  <p class="eyebrow">Chapter II · Character</p>
+  <h1>Build plan</h1>
+  <p class="lead">A plan first: choose the regions your damage and defence scale on, walk one road to a Notable, and spend attainment on the Keystone that changes a rule. Skill pieces, presets and the finish line follow below.</p>
+  <div class="page-meta"><span class="chip">11 sections</span><span class="chip">Live game data</span><span class="chip">Character</span></div>
+  <p class="covers"><span>Covers</span>Plan in four steps · The passive tree · The Keystones · Keystone pairs that cannot be held together · Finding a skill · The duplicate ladder</p>
+</header><nav class="toc" aria-label="On this page">
+  <p class="eyebrow">On this page</p>
+  <ol><li><button type="button" class="on" data-scroll="section-1" data-toc="section-1">Plan in four steps</button></li><li><button type="button" class="" data-scroll="section-2" data-toc="section-2">The passive tree</button></li><li><button type="button" class="" data-scroll="section-3" data-toc="section-3">The Keystones</button></li><li><button type="button" class="" data-scroll="section-4" data-toc="section-4">Keystone pairs that cannot be held together</button></li><li><button type="button" class="" data-scroll="section-5" data-toc="section-5">Finding a skill</button></li><li><button type="button" class="" data-scroll="section-6" data-toc="section-6">The duplicate ladder</button></li><li><button type="button" class="" data-scroll="section-7" data-toc="section-7">What an aura holds back</button></li><li><button type="button" class="" data-scroll="section-8" data-toc="section-8">Presets</button></li><li><button type="button" class="" data-scroll="section-9" data-toc="section-9">The two builds every published number is measured on</button></li><li><button type="button" class="" data-scroll="section-10" data-toc="section-10">The finish line</button></li><li><button type="button" class="" data-scroll="section-11" data-toc="section-11">Counted, never timed</button></li></ol>
+</nav><article class="page-content"><section><h2 id="section-1">Plan in four steps</h2><p class="note">The board previews the route and the price before a point is spent. Open the <a href="passive-tree.html">interactive tree</a> while you plan.</p><ol>
+      <li><strong>Pick the regions</strong> your damage and defence scale on; the seven Core attributes are on <a href="stats.html">Stats & caps</a>.</li>
+      <li><strong>Walk one road</strong> from Start to the Notable you need; every Keystone hangs off a Notable entrance.</li>
+      <li><strong>Spend attainment on a rule</strong>, not a stat: a Keystone changes one mechanic and never spends tree points.</li>
+      <li><strong>Keep the plan free</strong>: respec is free at any settlement, so the tree follows the build.</li>
+    </ol></section>
+<section><h2 id="section-2">The passive tree</h2><p class="note">Every node holds one rank and opens from any owned neighbour; Start is free and every region opens from it. Normal nodes form an irregular field of branching roads and local loops that cross region boundaries, and every playable route ends on a Notable or Keystone. Ordinary dead ends are retired: they keep only their layout position and cannot be bought. Notables sit on local loops or beside roads. Every Keystone has its own Notable entrance from Normal roads. You can choose either branch without buying the other branch Notable; earlier roads may join. A build can mix regions from its allocated frontier. Select a node to preview the route; Shift-click buys it when both wallets can pay. A Normal grants exactly +1 of its region's Core attribute for 1 tree point. A Notable grants its written profile of flat and percent lines for 3 tree points. A Keystone changes a mechanic for 1 attainment point and never spends tree points. <code>treePoints = base <span class="num">3</span> + <span class="num">3</span> a level from <span class="num">2</span>–<span class="num">100</span> + <span class="num">1</span> a level from <span class="num">101</span>–<span class="num">190</span> + claimed quest bonuses − spent tree</code>. The first milestone Expedition claim per zone and first milestone Delivery completion per town guarantee +1 Tree Point, outside the consumable reward choice. The point pays once on completion; skipping or expiry leaves the milestone available. Legacy saved random Tree Point promises remain payable. Respec at a settlement is free and hands both wallets back at the prices the spec charged. The redesigned roads preserve existing v3 allocations on live nodes, node effects and wallets; a rank on a retired ordinary node is refunded on load, and every live owned node remains a usable frontier. Characters predating v3 are refused with their own message rather than rewritten. The Build goals lens reads what Notables and Keystones actually grant for staying alive, managing mana, supporting the skills you own, or supporting the held weapon. It quotes the same route and the same tree/attainment split the path purchase charges, marks a route you cannot afford yet and a keystone pair that cannot be held together, and describes a keystone’s trade-off. A recommendation never allocates a point and is not a claim that the build is best. <em>Track this node</em> only pins it in Journey; selection, search, route preview and path purchase stay yours.</p><table><thead><tr><th>Region</th><th>Normal</th><th>Notable</th><th>Keystone</th><th>Node cost, tree points</th></tr></thead><tbody><tr><td>STR</td><td><span class="num">80</span></td><td><span class="num">17</span></td><td><span class="num">15</span></td><td><span class="num">131</span></td></tr><tr><td>AGI</td><td><span class="num">80</span></td><td><span class="num">15</span></td><td><span class="num">15</span></td><td><span class="num">125</span></td></tr><tr><td>DEX</td><td><span class="num">80</span></td><td><span class="num">16</span></td><td><span class="num">15</span></td><td><span class="num">128</span></td></tr><tr><td>INT</td><td><span class="num">80</span></td><td><span class="num">15</span></td><td><span class="num">15</span></td><td><span class="num">125</span></td></tr><tr><td>WIS</td><td><span class="num">80</span></td><td><span class="num">16</span></td><td><span class="num">15</span></td><td><span class="num">128</span></td></tr><tr><td>VIT</td><td><span class="num">80</span></td><td><span class="num">15</span></td><td><span class="num">15</span></td><td><span class="num">125</span></td></tr><tr><td>LCK</td><td><span class="num">80</span></td><td><span class="num">16</span></td><td><span class="num">15</span></td><td><span class="num">128</span></td></tr><tr><td>Total</td><td><span class="num">560</span></td><td><span class="num">110</span></td><td><span class="num">105</span></td><td><span class="num">890</span></td></tr></tbody></table></section>
+<section><h2 id="section-3">The Keystones</h2><p class="note">Every Keystone costs <span class="num">1</span> attainment point and never spends tree points. The numbers under a rule are its authored parameters from <code>tree.json</code>; the description is the rule the board shows when the node is selected. Pairwise exclusions are listed below.</p><div class="tabs"><input type="radio" name="tree-keystones" id="tree-keystones-str" checked><label for="tree-keystones-str">STR <b>15</b></label><input type="radio" name="tree-keystones" id="tree-keystones-agi"><label for="tree-keystones-agi">AGI <b>15</b></label><input type="radio" name="tree-keystones" id="tree-keystones-dex"><label for="tree-keystones-dex">DEX <b>15</b></label><input type="radio" name="tree-keystones" id="tree-keystones-int"><label for="tree-keystones-int">INT <b>15</b></label><input type="radio" name="tree-keystones" id="tree-keystones-wis"><label for="tree-keystones-wis">WIS <b>15</b></label><input type="radio" name="tree-keystones" id="tree-keystones-vit"><label for="tree-keystones-vit">VIT <b>15</b></label><input type="radio" name="tree-keystones" id="tree-keystones-lck"><label for="tree-keystones-lck">LCK <b>15</b></label><table><thead><tr><th>Keystone</th><th>Notable entrance</th><th>What it changes</th></tr></thead><tbody class="g-str"><tr><td>Anvil</td><td>STR Focus 11</td><td>Armour also mitigates 30% of Elemental damage. You can no longer Evade or Perfect Dodge.<br><span class="hy"><code>elementalArmourPct 30%</code></span></td></tr><tr><td>Armourbreaker</td><td>STR Focus 07</td><td>Physical hits break 5% of the target starting Armour, up to 60%. It returns after 4 seconds without a Physical hit.<br><span class="hy"><code>armourBreakPct 5%</code> <code>maxBreakPct 60%</code> <code>resetSec 4 sec</code></span></td></tr><tr><td>Bulwark</td><td>STR Focus 10</td><td>40% more Armour. 20% less Evasion Rating.<br><span class="hy"><code>armourPct 40%</code> <code>evasionPct 20%</code></span></td></tr><tr><td>Concussive Blows</td><td>Concussive Blows Approach</td><td>Your hits always stun within the control budget, and stunned enemies take 20% more damage. You cannot crit.<br><span class="hy"><code>stunSec 0.5 sec</code> <code>stunnedTakenPct 20%</code></span></td></tr><tr><td>Crimson Pact</td><td>STR Focus 04</td><td>Physical hits deal 50% immediately; the other 50% becomes Bleed over 4 seconds.<br><span class="hy"><code>directPhysicalPct 50%</code> <code>bleedTotalPct 100%</code> <code>durationSec 4 sec</code></span></td></tr><tr><td>Crushing Rhythm</td><td>STR Focus 06</td><td>Basic attacks are capped at 1 per second; faster attack speed instead multiplies their damage.<br><span class="hy"><code>maxBasicHitsPerSec 1/sec</code></span></td></tr><tr><td>Headsman</td><td>STR Focus 08</td><td>Hits that leave a normal enemy at 15% HP or less execute it; Bosses and Uniques execute at 5%.<br><span class="hy"><code>normalThresholdPct 15%</code> <code>bossUniqueThresholdPct 5%</code></span></td></tr><tr><td>Hemorrhage</td><td>Hemorrhage Approach</td><td>Bleed never expires and deals 100% more damage. Your direct Physical damage is 25% lower.<br><span class="hy"><code>bleedDamagePct 100%</code> <code>directPhysicalPct 75%</code></span></td></tr><tr><td>Ironwall</td><td>STR Focus 01</td><td>All Evasion Rating becomes Armour at 1:1. You can no longer evade.<br><span class="hy"><code>evasionToArmour ×1</code></span></td></tr><tr><td>Painforged</td><td>STR Focus 05</td><td>Damage prevented by Block is banked, up to 20% of Max HP, and adds to your next Physical hit.<br><span class="hy"><code>bankCapHpPct 20%</code> <code>nextHitBonusPct 100%</code></span></td></tr><tr><td>Redline</td><td>STR Focus 02</td><td>Landed hits grant Rage, up to 10 stacks: +3% damage per stack, and you lose 0.5% of Max HP per second. Rage fades after 3 seconds without a landed hit.<br><span class="hy"><code>hitStacks 1</code> <code>maxStacks 10</code> <code>damagePctPerStack 3%</code> <code>hpCostPctPerStackPerSec 0.5%</code> <code>idleResetSec 3 sec</code></span></td></tr><tr><td>Riposte</td><td>Riposte Approach</td><td>Block chance is halved. A blocked hit reflects 200% of the damage it prevented, once per second.<br><span class="hy"><code>blockChanceMult ×0.5</code> <code>reflectMult ×2</code> <code>icdSec 1 sec</code></span></td></tr><tr><td>Thornbound</td><td>STR Focus 03</td><td>Taking a hit retaliates for 20% of Armour as Physical damage every 0.5 seconds. Your own direct damage is halved.<br><span class="hy"><code>armourDamagePct 20%</code> <code>icdSec 0.5 sec</code> <code>ownDirectDamageMult ×0.5</code></span></td></tr><tr><td>Titan Frame</td><td>STR Focus 09</td><td>25% more Maximum HP. 15% less Attack Speed.<br><span class="hy"><code>maxHpPct 25%</code> <code>aspdPct 15%</code></span></td></tr><tr><td>Unbreakable</td><td>Unbreakable Approach</td><td>Direct hits below 5% of Max HP are ignored; larger direct hits deal 15% more damage. Damage over time is unaffected.<br><span class="hy"><code>ignoreBelowMaxHpPct 5%</code> <code>bigHitTakenPct 15%</code></span></td></tr></tbody><tbody class="g-agi"><tr><td>Barkskin</td><td>AGI Focus 03</td><td>Every 2 seconds without losing HP or ES grants a Bark charge, up to 5. An evaded hit that would damage you spends one charge to take 40% less damage.<br><span class="hy"><code>regenEverySec 2 sec</code> <code>maxCharges 5</code> <code>hitTakenMult ×0.6</code></span></td></tr><tr><td>Blur</td><td>Blur Approach</td><td>Every third direct hit against you is a Perfect Dodge. You cannot Block.<br><span class="hy"><code>hitsPerDodge 3</code></span></td></tr><tr><td>Brawler</td><td>AGI Focus 12</td><td>While above 50% Life, take 15% less damage. While below, take 15% more damage.<br><span class="hy"><code>hpThresholdPct 50%</code> <code>highReductionPct 15%</code> <code>lowIncreasePct 15%</code></span></td></tr><tr><td>Disrupting Blows</td><td>AGI Focus 06</td><td>A hit that removes at least 5% of a target Max HP delays its next action by 0.5 seconds, within the shared control budget.<br><span class="hy"><code>hitMaxHpThresholdPct 5%</code> <code>stopSec 0.5 sec</code></span></td></tr><tr><td>Frostwalker</td><td>AGI Focus 10</td><td>50% less Cold damage taken. 20% more damage taken from other Elements.<br><span class="hy"><code>element cold</code> <code>reductionPct 50%</code> <code>otherElementPct 20%</code></span></td></tr><tr><td>Gale Form</td><td>AGI Focus 08</td><td>20% more Attack Speed. 15% less Maximum HP.<br><span class="hy"><code>aspdPct 20%</code> <code>maxHpPct 15%</code></span></td></tr><tr><td>Ghost Dance</td><td>AGI Focus 04</td><td>An evaded hit restores ES equal to 3% of Evasion Rating, capped at 10% of Max ES once per second. You cannot Block.<br><span class="hy"><code>recoveryEvasionPct 3%</code> <code>maxEsPerProcPct 10%</code> <code>icdSec 1 sec</code></span></td></tr><tr><td>Instruments of Virtue</td><td>AGI Focus 05</td><td>Alternating Attack and Spell actions grants 35% more damage to the next action. Repeating a type grants nothing.<br><span class="hy"><code>alternateMult ×1.35</code></span></td></tr><tr><td>Mirror Strike</td><td>Mirror Strike Approach</td><td>Evading a hit makes your next hit a guaranteed crit within 3 seconds. Your crit chance is 0.<br><span class="hy"><code>windowSec 3 sec</code></span></td></tr><tr><td>Phantom Step</td><td>AGI Focus 09</td><td>40% more Evasion Rating. 20% less Armour.<br><span class="hy"><code>evasionPct 40%</code> <code>armourPct 20%</code></span></td></tr><tr><td>Shield Gate</td><td>AGI Focus 07</td><td>When ES breaks, the hit overflow does not reach HP. Rearms after ES refills and 8 seconds pass.<br><span class="hy"><code>rearmCdSec 8 sec</code></span></td></tr><tr><td>Single Combat</td><td>Single Combat Approach</td><td>Your skills hit only one target and deal 80% more damage.<br><span class="hy"><code>damagePct 80%</code></span></td></tr><tr><td>Stormwalker</td><td>AGI Focus 11</td><td>50% less Lightning damage taken. 20% more damage taken from other Elements.<br><span class="hy"><code>element lightning</code> <code>reductionPct 50%</code> <code>otherElementPct 20%</code></span></td></tr><tr><td>Unstoppable</td><td>AGI Focus 01</td><td>Stun no longer stops you and Slow no longer slows your attacks; while either would apply, you deal 25% less damage.<br><span class="hy"><code>penaltyDamageMult ×0.75</code></span></td></tr><tr><td>Worthy Foe</td><td>AGI Focus 02</td><td>The third hit on one target starts a duel: +30% damage dealt to it and -20% damage taken from it. Hitting another target resets.<br><span class="hy"><code>hits 3</code> <code>dealtMult ×1.3</code> <code>takenMult ×0.8</code></span></td></tr></tbody><tbody class="g-dex"><tr><td>Auto Cleanse</td><td>DEX Focus 07</td><td>A newly applied abnormal status is removed at once, with a 6-second cooldown.<br><span class="hy"><code>icdSec 6 sec</code></span></td></tr><tr><td>Conductive</td><td>Conductive Approach</td><td>Shock spreads to one additional enemy and shocked enemies take 10% more damage. Shock no longer stops actions.<br><span class="hy"><code>spreadTargets 1</code> <code>shockedTakenPct 10%</code></span></td></tr><tr><td>Crippling Strikes</td><td>Crippling Strikes Approach</td><td>Your hits always cripple and cannot chill or shock. Crippled enemies take 10% more damage.<br><span class="hy"><code>crippledTakenPct 10%</code></span></td></tr><tr><td>Demolition Sequence</td><td>DEX Focus 02</td><td>Every 5 landed hits on one target detonate it and one nearby enemy for 20% of the HP lost to those hits.<br><span class="hy"><code>hits 5</code> <code>damagePct 20%</code> <code>extraTargets 1</code> <code>element fire</code></span></td></tr><tr><td>Elemental Conduit</td><td>DEX Focus 06</td><td>Elemental damage gained as extra can apply its Element status through Alignment, once per Element per hit.</td></tr><tr><td>Elemental Equilibrium</td><td>DEX Focus 05</td><td>After an Elemental hit, that Element resistance rises 10 points and the others fall 20 for 4 seconds.<br><span class="hy"><code>durationSec 4 sec</code> <code>ownResPlus 10 pts</code> <code>otherResMinus 20 pts</code></span></td></tr><tr><td>Elemental Infusion</td><td>DEX Focus 03</td><td>Gain 30% of Physical damage as extra Elemental damage, split by your existing Flat Elemental damage.<br><span class="hy"><code>extraTotalPct 30%</code></span></td></tr><tr><td>Exploit Weakness</td><td>Exploit Weakness Approach</td><td>Deal 20% more damage to enemies holding any status, and 10% less to enemies holding none.<br><span class="hy"><code>statusDamagePct 20%</code> <code>cleanDamagePct 10%</code></span></td></tr><tr><td>Giant Slayer</td><td>DEX Focus 08</td><td>35% more damage to Bosses and Uniques. 10% less damage to other enemies.<br><span class="hy"><code>bossDamagePct 35%</code> <code>normalDamagePct 10%</code></span></td></tr><tr><td>Opener</td><td>DEX Focus 10</td><td>40% more damage to enemies at full Life. 10% less damage otherwise.<br><span class="hy"><code>fullHpDamagePct 40%</code> <code>otherDamagePct 10%</code></span></td></tr><tr><td>Plague Courier</td><td>DEX Focus 04</td><td>On a critical hit, move one Burn, Poison or Bleed from you to the target, keeping its damage and remaining duration. 4-second cooldown.<br><span class="hy"><code>icdSec 4 sec</code></span></td></tr><tr><td>Puncturing</td><td>DEX Focus 12</td><td>Hits penetrate 30% of enemy Armour. 15% less damage.<br><span class="hy"><code>armourPenPct 30%</code> <code>damagePct 15%</code></span></td></tr><tr><td>Sniper</td><td>DEX Focus 11</td><td>25% more Critical Damage. 10% less non-Critical damage.<br><span class="hy"><code>critDamagePct 25%</code> <code>nonCritDamagePct 10%</code></span></td></tr><tr><td>Swarm Bane</td><td>DEX Focus 09</td><td>30% more damage to normal and Elite enemies. 10% less damage to Bosses and Uniques.<br><span class="hy"><code>normalDamagePct 30%</code> <code>bossDamagePct 10%</code></span></td></tr><tr><td>Unerring Eye</td><td>DEX Focus 01</td><td>Your hits cannot miss from Accuracy or Evasion, but can no longer crit. Dodge and Block still apply.</td></tr></tbody><tbody class="g-int"><tr><td>Ashen Crown</td><td>Ashen Crown Approach</td><td>Burning enemies take 15% more damage from you. Your direct Fire damage is 20% lower.<br><span class="hy"><code>burningTakenPct 15%</code> <code>directFirePct 20%</code></span></td></tr><tr><td>Aura Resonance</td><td>INT Focus 07</td><td>Each active aura lowers every aura reservation by 5% and raises its effect by 5%, to a 30% cap each.<br><span class="hy"><code>reservationPctPerAura 5%</code> <code>reservationCapPct 30%</code> <code>effectPctPerAura 5%</code> <code>effectCapPct 30%</code></span></td></tr><tr><td>Deepwell</td><td>INT Focus 09</td><td>40% more Maximum Mana. 20% less Maximum HP.<br><span class="hy"><code>maxManaPct 40%</code> <code>maxHpPct 20%</code></span></td></tr><tr><td>Delayed Demolition</td><td>INT Focus 03</td><td>40% of hit damage is delayed 2 seconds, then dealt with 50% more damage. If the target dies first, it is lost.<br><span class="hy"><code>deferredPct 40%</code> <code>deferredMult ×1.5</code> <code>delaySec 2 sec</code></span></td></tr><tr><td>Earthward</td><td>INT Focus 06</td><td>50% less Earth damage taken. 20% more damage taken from other Elements.<br><span class="hy"><code>element earth</code> <code>reductionPct 50%</code> <code>otherElementPct 20%</code></span></td></tr><tr><td>Elementalist</td><td>INT Focus 12</td><td>30% more Elemental Damage. 20% less Physical Damage.<br><span class="hy"><code>elementalPct 30%</code> <code>physicalPct 20%</code></span></td></tr><tr><td>Emberheart</td><td>INT Focus 01</td><td>100% of Physical damage becomes Fire after crit, before resistance.<br><span class="hy"><code>element fire</code> <code>conversionPct 100%</code></span></td></tr><tr><td>Firewalker</td><td>INT Focus 10</td><td>50% less Fire damage taken. 20% more damage taken from other Elements.<br><span class="hy"><code>element fire</code> <code>reductionPct 50%</code> <code>otherElementPct 20%</code></span></td></tr><tr><td>Inevitable Judgement</td><td>INT Focus 11</td><td>Elemental damage from critical hits ignores resistance, but non-critical Elemental damage is 20% lower.<br><span class="hy"><code>nonCritElemMult ×0.8</code></span></td></tr><tr><td>Malediction</td><td>INT Focus 02</td><td>Enemies hold one of your curses, with 75% stronger numeric effects. A new curse replaces the old one.<br><span class="hy"><code>curseLimit 1</code> <code>effectMult ×1.75</code></span></td></tr><tr><td>Monochrome</td><td>Monochrome Approach</td><td>All Elemental damage becomes Fire and Fire deals 30% more. You cannot inflict other Elements' statuses.<br><span class="hy"><code>element fire</code> <code>elementalPct 30%</code></span></td></tr><tr><td>One Flame</td><td>INT Focus 05</td><td>50% of your Fire Resistance bonus also applies to Cold and Lightning; their own bonuses are half as effective.<br><span class="hy"><code>sharedFirePct 50%</code> <code>ownColdLightningEffectPct 50%</code></span></td></tr><tr><td>Profane Bloom</td><td>INT Focus 04</td><td>Enemies that die cursed by you explode for 15% of their Max HP as Chaos damage. The blast cannot chain.<br><span class="hy"><code>victimMaxHpPct 15%</code> <code>element chaos</code></span></td></tr><tr><td>Spellfocus</td><td>INT Focus 08</td><td>30% more Spell Damage. 20% less Physical Damage.<br><span class="hy"><code>magicPct 30%</code> <code>physicalPct 20%</code></span></td></tr><tr><td>Winter's Grip</td><td>Winter's Grip Approach</td><td>Chilled enemies take 25% more damage from you. You cannot inflict shock or burn.<br><span class="hy"><code>chilledTakenPct 25%</code></span></td></tr></tbody><tbody class="g-wis"><tr><td>Arcane Battery</td><td>WIS Focus 11</td><td>Reserve 40% of Max Mana to gain twice that much Energy Shield. The reserved Mana cannot be spent.<br><span class="hy"><code>reserveManaPct 40%</code> <code>esPerMana ×2</code></span></td></tr><tr><td>Blood Covenant</td><td>WIS Focus 07</td><td>Choose per aura whether it reserves HP or Mana. An HP reservation reduces usable HP, not Max HP.</td></tr><tr><td>Capacitive Casting</td><td>WIS Focus 02</td><td>20% of Mana actually paid for a skill restores ES, but natural ES regeneration is halved.<br><span class="hy"><code>spentManaEsPct 20%</code> <code>naturalEsRegenMult ×0.5</code></span></td></tr><tr><td>Chaos Inoculation</td><td>WIS Focus 03</td><td>Max HP becomes 1 and you are immune to Chaos damage. Other damage, including Poison and Bleed, hits ES first. You are never on Low Life.<br><span class="hy"><code>maxHp 1</code></span></td></tr><tr><td>Dark Siphon</td><td>WIS Focus 04</td><td>Life Leech and Mana Regeneration restore Energy Shield instead of HP and Mana.</td></tr><tr><td>Elemental Aegis</td><td>WIS Focus 05</td><td>Energy Shield takes 30% less Elemental damage, but Physical hits bypass it and strike HP directly.<br><span class="hy"><code>elementHitTakenMult ×0.7</code></span></td></tr><tr><td>Empty Vessel</td><td>Empty Vessel Approach</td><td>Auras reserve no Mana but their effects are halved. Maximum Mana is 20% higher.<br><span class="hy"><code>maxManaPct 20%</code> <code>auraEffectPct 50%</code></span></td></tr><tr><td>Escape Artist</td><td>WIS Focus 01</td><td>After 3 seconds without losing HP or ES, restore 50% of Max ES, repeating every 3 seconds. No natural ES regeneration.<br><span class="hy"><code>idleSec 3 sec</code> <code>burstEverySec 3 sec</code> <code>esBurstPct 50%</code></span></td></tr><tr><td>Hollow Body</td><td>WIS Focus 06</td><td>50% more Energy Shield. 25% less Maximum HP.<br><span class="hy"><code>maxEsPct 50%</code> <code>maxHpPct 25%</code></span></td></tr><tr><td>Last Stand</td><td>WIS Focus 12</td><td>While below 35% Life, take 25% less damage. While above, take 10% more damage.<br><span class="hy"><code>hpThresholdPct 35%</code> <code>lowTakenPct 25%</code> <code>highTakenPct 10%</code></span></td></tr><tr><td>Mana Debt</td><td>WIS Focus 10</td><td>Mana costs may borrow down to 50% of usable Max Mana. While in debt, Mana Regeneration is doubled but positive-cost skills are refused.<br><span class="hy"><code>debtLimitUsableManaPct 50%</code> <code>negativeRegenMult ×2</code></span></td></tr><tr><td>Mind over Matter</td><td>WIS Focus 09</td><td>30% of damage that would hit HP is paid from unreserved Mana at 1:1.<br><span class="hy"><code>manaSharePct 30%</code></span></td></tr><tr><td>Plagueward</td><td>WIS Focus 08</td><td>50% less Chaos damage taken. 20% more damage taken from other Elements.<br><span class="hy"><code>element chaos</code> <code>reductionPct 50%</code> <code>otherElementPct 20%</code></span></td></tr><tr><td>Sanctuary</td><td>Sanctuary Approach</td><td>While Energy Shield is full, you take 20% less damage. Energy Shield regeneration is 50% slower.<br><span class="hy"><code>fullEsTakenPct 20%</code> <code>esRegenPct 50%</code></span></td></tr><tr><td>Trance</td><td>Trance Approach</td><td>Every third skill cast costs no Mana. All skill costs are 50% higher.<br><span class="hy"><code>everyCasts 3</code> <code>costPct 50%</code></span></td></tr></tbody><tbody class="g-vit"><tr><td>Berserk</td><td>VIT Focus 04</td><td>While on Low Life: 40% more damage and 25% more attack speed. You always take 15% more damage.<br><span class="hy"><code>damageMult ×1.4</code> <code>aspdMult ×1.25</code> <code>takenMult ×1.15</code></span></td></tr><tr><td>Blood Engine</td><td>VIT Focus 12</td><td>25% more Maximum HP. 25% less Maximum Mana.<br><span class="hy"><code>maxHpPct 25%</code> <code>maxManaPct 25%</code></span></td></tr><tr><td>Blood Price</td><td>VIT Focus 07</td><td>Skill Mana costs are paid as HP at 1:1. A cast is refused if it would leave you below 1 HP.<br><span class="hy"><code>hpPerMana ×1</code></span></td></tr><tr><td>Bloodthirst</td><td>Bloodthirst Approach</td><td>You leech 3% of direct damage as Life. You cannot regenerate Life.<br><span class="hy"><code>leechPct 3%</code></span></td></tr><tr><td>Borrowed Time</td><td>VIT Focus 08</td><td>40% of HP lost to enemy hits is recovered over 6 seconds. You cannot Life Leech.<br><span class="hy"><code>recoupPct 40%</code> <code>durationSec 6 sec</code></span></td></tr><tr><td>Endless Hunger</td><td>VIT Focus 02</td><td>Excess Life Leech is banked, up to 20% of the destination pool for 10 seconds, then refills you when you are missing pool. No HP regeneration.<br><span class="hy"><code>bankCapPct 20%</code> <code>expirySec 10 sec</code></span></td></tr><tr><td>Enduring Core</td><td>VIT Focus 09</td><td>Damage that strikes HP below 30% of Max HP is halved. You have no Energy Shield.<br><span class="hy"><code>hpThresholdPct 30%</code> <code>belowTakenMult ×0.5</code></span></td></tr><tr><td>Fortress Under Siege</td><td>VIT Focus 03</td><td>Taking a hit grants Fortify, up to 5 stacks; each stack reduces later hits by 5%. Stacks fade after 4 seconds without taking damage.<br><span class="hy"><code>maxStacks 5</code> <code>reductionPctPerStack 5%</code> <code>resetSec 4 sec</code></span></td></tr><tr><td>Grit</td><td>Grit Approach</td><td>No direct hit can remove more than 25% of your Max HP; all other direct hits deal 15% more. Damage over time is unaffected.<br><span class="hy"><code>maxHitMaxHpPct 25%</code> <code>otherHitPct 15%</code></span></td></tr><tr><td>Master Surgeon</td><td>VIT Focus 06</td><td>HP potions heal over 4 seconds for 50% more total; a new HP potion is refused while one is still healing.<br><span class="hy"><code>healMult ×1.5</code> <code>durationSec 4 sec</code></span></td></tr><tr><td>Parasitic Affliction</td><td>VIT Focus 11</td><td>Gain 2% Life Leech, and all Life Leech works on your damage over time instead of hits.<br><span class="hy"><code>baseLeechPct 2%</code></span></td></tr><tr><td>Purist</td><td>Purist Approach</td><td>You are immune to burn, poison and bleed. You have no Energy Shield.</td></tr><tr><td>Radiant Faith</td><td>VIT Focus 05</td><td>Reserve 25% of Max HP; each hit is reduced by a flat 10% of that reserve, up to 30% of the hit.<br><span class="hy"><code>reserveHpPct 25%</code> <code>flatCutReservedPct 10%</code> <code>maxHitCutPct 30%</code></span></td></tr><tr><td>Staggering Resolve</td><td>VIT Focus 10</td><td>40% of enemy hit damage that would strike HP is instead paid over 5 seconds. Cleansing does not remove it.<br><span class="hy"><code>deferredPct 40%</code> <code>durationSec 5 sec</code></span></td></tr><tr><td>Time of Need</td><td>VIT Focus 01</td><td>Every 5 seconds, clear Burn, Poison and Bleed and restore 15% of Max HP. No HP regeneration.<br><span class="hy"><code>periodSec 5 sec</code> <code>healMaxHpPct 15%</code></span></td></tr></tbody><tbody class="g-lck"><tr><td>Ambush</td><td>LCK Focus 09</td><td>A hit that could crit always crits a full-HP target; afterwards crit chance against that target is halved.<br><span class="hy"><code>otherCritMult ×0.5</code></span></td></tr><tr><td>Bloodfeast</td><td>LCK Focus 12</td><td>Recover 5% of Maximum HP when killing a Bleeding enemy. Other kills recover 1%.<br><span class="hy"><code>bleedingHealMaxHpPct 5%</code> <code>otherHealMaxHpPct 1%</code></span></td></tr><tr><td>Brutal Force</td><td>LCK Focus 05</td><td>+30% Critical Damage. -10% Critical Chance.<br><span class="hy"><code>critDamagePct 30%</code> <code>critChancePct 10%</code></span></td></tr><tr><td>Brute</td><td>LCK Focus 02</td><td>25% more Physical Damage. 25% less Elemental Damage.<br><span class="hy"><code>physicalPct 25%</code> <code>elementalPct 25%</code></span></td></tr><tr><td>Executioner</td><td>LCK Focus 06</td><td>50% more damage to enemies below 30% Life. 15% less damage otherwise.<br><span class="hy"><code>lowHpThresholdPct 30%</code> <code>lowHpDamagePct 50%</code> <code>otherDamagePct 15%</code></span></td></tr><tr><td>Fortuna</td><td>Fortuna Approach</td><td>Crits have a 25% chance to deal double damage. Non-crits deal 10% less.<br><span class="hy"><code>doubleCritPct 25%</code> <code>nonCritPct 10%</code></span></td></tr><tr><td>Gambler's Step</td><td>Gambler's Step Approach</td><td>Your Perfect Dodge chance is doubled. You can no longer Evade.<br><span class="hy"><code>perfectDodgeMult ×2</code></span></td></tr><tr><td>Keen Edge</td><td>LCK Focus 04</td><td>+25% Critical Chance. -20% Critical Damage.<br><span class="hy"><code>critChancePct 25%</code> <code>critDamagePct 20%</code></span></td></tr><tr><td>Lucky Streak</td><td>Lucky Streak Approach</td><td>Each consecutive crit grants 3% Critical Damage, up to 30%. A non-crit resets the streak.<br><span class="hy"><code>critDamagePctPerStack 3%</code> <code>maxStacks 10</code></span></td></tr><tr><td>Overkill</td><td>LCK Focus 10</td><td>40% more damage to enemies above 80% Life. 15% less damage otherwise.<br><span class="hy"><code>highHpThresholdPct 80%</code> <code>highHpDamagePct 40%</code> <code>otherDamagePct 15%</code></span></td></tr><tr><td>Reaper</td><td>LCK Focus 01</td><td>Recover 2% of Maximum HP on kill.<br><span class="hy"><code>healMaxHpPct 2%</code></span></td></tr><tr><td>Soul Harvest</td><td>LCK Focus 07</td><td>Recover 3% of Maximum Mana on kill.<br><span class="hy"><code>restoreMaxManaPct 3%</code></span></td></tr><tr><td>Toxic Execution</td><td>LCK Focus 08</td><td>Critical hits deal no extra damage themselves; the crit bonus becomes Poison over 4 seconds.<br><span class="hy"><code>durationSec 4 sec</code></span></td></tr><tr><td>Trophy Hunter</td><td>LCK Focus 11</td><td>Bosses and Uniques restore 15% of Maximum HP and Mana on kill. Other enemies restore 1%.<br><span class="hy"><code>bossHealMaxHpPct 15%</code> <code>bossRestoreMaxManaPct 15%</code> <code>normalHealMaxHpPct 1%</code> <code>normalRestoreMaxManaPct 1%</code></span></td></tr><tr><td>Turtle Doctrine</td><td>LCK Focus 03</td><td>Block becomes a flat Physical damage reduction equal to its average chance. Block events no longer occur.</td></tr></tbody></table></div></section>
+<section><h2 id="section-4">Keystone pairs that cannot be held together</h2><p class="note">Exclusivity is pairwise only: a pair that is not listed may be held together, and there is no transitive chain — holding the middle Keystone does not block both ends.</p><div class="tabs"><input type="radio" name="tree-conflicts" id="tree-conflicts-pairs" checked><label for="tree-conflicts-pairs">Pairs <b>26</b></label><table><thead><tr><th>Keystone</th><th>May not be held with</th></tr></thead><tbody class="g-pairs"><tr><td>Berserk</td><td>Chaos Inoculation</td></tr><tr><td>Redline</td><td>Chaos Inoculation</td></tr><tr><td>Radiant Faith</td><td>Chaos Inoculation</td></tr><tr><td>Blood Price</td><td>Chaos Inoculation</td></tr><tr><td>Elemental Aegis</td><td>Chaos Inoculation · Enduring Core</td></tr><tr><td>Enduring Core</td><td>Chaos Inoculation · Shield Gate · Capacitive Casting</td></tr><tr><td>Blood Covenant</td><td>Chaos Inoculation</td></tr><tr><td>Chaos Inoculation</td><td>Staggering Resolve</td></tr><tr><td>Ghost Dance</td><td>Enduring Core · Turtle Doctrine</td></tr><tr><td>Escape Artist</td><td>Enduring Core</td></tr><tr><td>Arcane Battery</td><td>Enduring Core</td></tr><tr><td>Dark Siphon</td><td>Enduring Core</td></tr><tr><td>Unerring Eye</td><td>Ambush · Toxic Execution · Inevitable Judgement · Plague Courier</td></tr><tr><td>Painforged</td><td>Ghost Dance · Turtle Doctrine</td></tr><tr><td>Endless Hunger</td><td>Borrowed Time</td></tr><tr><td>Borrowed Time</td><td>Parasitic Affliction</td></tr><tr><td>Emberheart</td><td>Crimson Pact</td></tr><tr><td>Ironwall</td><td>Ghost Dance</td></tr><tr><td>Ashen Crown</td><td>Winter's Grip</td></tr><tr><td>Crippling Strikes</td><td>Winter's Grip · Conductive · Concussive Blows</td></tr><tr><td>Single Combat</td><td>Demolition Sequence</td></tr><tr><td>Monochrome</td><td>Elemental Equilibrium · Winter's Grip · Conductive · Crippling Strikes · Concussive Blows</td></tr><tr><td>Mirror Strike</td><td>Unerring Eye</td></tr><tr><td>Fortuna</td><td>Unerring Eye</td></tr><tr><td>Lucky Streak</td><td>Unerring Eye</td></tr><tr><td>Winter's Grip</td><td>Conductive · Concussive Blows</td></tr></tbody></table></div></section>
+<section><h2 id="section-5">Finding a skill</h2><p class="note"><code>skill drop = per-rank chance per kill</code>, independent of gear and stone rolls. See <a href="skills.html">Skills</a> for the roster.</p><table><thead><tr><th>From</th><th>A skill piece a kill</th><th>What it means</th></tr></thead><tbody><tr><td>A normal mob</td><td>0.1%</td><td>the slow path — a skill is a find, not a purchase</td></tr><tr><td>An Elite</td><td>8.0%</td><td>about 80× the normal rate</td></tr><tr><td>A Boss</td><td>35.0%</td><td>the only place duplicates come thick, and the only place a Boss fight is open to you</td></tr></tbody></table></section>
+<section><h2 id="section-6">The duplicate ladder</h2><p class="note"><code>duplicatesToStep = Σ ladder.cost through step</code>. Skill level XP is earned per kill while active; ladder CDR and skill-level effects are independent.</p><table><thead><tr><th>Step</th><th>Cooldown reduction it buys</th><th>Duplicates for the step</th><th>Duplicates to reach it</th></tr></thead><tbody><tr><td><span class="num">1</span></td><td>5%</td><td><span class="num">1</span></td><td><span class="num">1</span></td></tr><tr><td><span class="num">2</span></td><td>10%</td><td><span class="num">1</span></td><td><span class="num">2</span></td></tr><tr><td><span class="num">3</span></td><td>15%</td><td><span class="num">2</span></td><td><span class="num">4</span></td></tr><tr><td><span class="num">4</span></td><td>20%</td><td><span class="num">2</span></td><td><span class="num">6</span></td></tr><tr><td><span class="num">5</span></td><td>25%</td><td><span class="num">3</span></td><td><span class="num">9</span></td></tr><tr><td><span class="num">6</span></td><td>30%</td><td><span class="num">3</span></td><td><span class="num">12</span></td></tr></tbody></table></section>
+<section><h2 id="section-7">What an aura holds back</h2><p class="note"><code>availableMana = MaxMana × (1 − Σ active reservePct / 100)</code>; total reserve is capped at 100%. Skill costs use their own level formula.</p><table><thead><tr><th>Aura</th><th>Reserve tier</th><th>Mana it holds open</th><th>What it writes</th></tr></thead><tbody><tr><td>Wraith of Fury</td><td>cheap</td><td><span class="num">8%</span></td><td><span class="hy">aspd +12%</span></td></tr><tr><td>Clarity</td><td>cheap</td><td><span class="num">8%</span></td><td><span class="hy">mana regen +25%</span></td></tr><tr><td>Haste</td><td>extreme</td><td><span class="num">25%</span></td><td><span class="hy">global speed ×1.15: every cooldown ticks 15% faster (a post-cap cooldown multiplier) and final attack speed ×1.15 (still clamped by the 500 Cap)</span></td></tr><tr><td>Vitality</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">hp regen +30%</span></td></tr><tr><td>Herald of Ash</td><td>heavy</td><td><span class="num">14%</span></td><td><span class="hy">fire damage flat +50 · Alignment +6%</span></td></tr><tr><td>Herald of Frost</td><td>heavy</td><td><span class="num">14%</span></td><td><span class="hy">cold damage flat +50 · Alignment +6%</span></td></tr><tr><td>Herald of Lightning</td><td>heavy</td><td><span class="num">14%</span></td><td><span class="hy">lightning damage flat +50 · Alignment +6%</span></td></tr><tr><td>Ember Conversion</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">35% of physical damage converted to fire</span></td></tr><tr><td>Rime Conversion</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">35% of physical damage converted to cold</span></td></tr><tr><td>Storm Conversion</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">35% of physical damage converted to lightning</span></td></tr><tr><td>Cast on Crit</td><td>heavy</td><td><span class="num">14%</span></td><td><span class="hy">on a crit, casts the first ready slot in the order · mana ×2 · damage ×0.7 · 1 sec between triggers</span></td></tr><tr><td>Cast on Damage Taken</td><td>heavy</td><td><span class="num">14%</span></td><td><span class="hy">on taking damage, casts the first ready slot in the order · mana ×2 · damage ×0.7 · 1 sec between triggers</span></td></tr><tr><td>Rimbo Form</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">nearby mob aspd −15% (stacks with chill; total may reach −35%)</span></td></tr><tr><td>Elemental Fury</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">foe Elemental res −12%</span></td></tr><tr><td>Trinity Form</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">Elemental res +15% on fire / cold / lightning</span></td></tr><tr><td>Grace</td><td>cheap</td><td><span class="num">8%</span></td><td><span class="hy">Evasion flat +24</span></td></tr><tr><td>Iron Guard</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">Armour flat +32</span></td></tr><tr><td>Energy Guard</td><td>mid</td><td><span class="num">11%</span></td><td><span class="hy">Energy Shield flat +48</span></td></tr></tbody></table></section>
+<section><h2 id="section-8">Presets</h2><p class="note">Keys are client settings, not character state — a preset is a loadout, never a key map. A preset activates only owned skills and obeys the same aura reservation limit as the Skills screen.</p><table><thead><tr><th></th><th>The number</th><th>Read from</th></tr></thead><tbody><tr><td>Sets you can store</td><td><span class="num">6</span></td><td><code>presets.sets</code></td></tr><tr><td>Which one is main</td><td>index 0</td><td><code>presets.main_index</code> — where a Push sends you back</td></tr><tr><td>Auto-select by zone</td><td>yes</td><td>the game switches on its own as you climb</td></tr><tr><td>Cooldowns across a Push</td><td>yes</td><td>a bar already counting keeps counting</td></tr></tbody></table></section>
+<section><h2 id="section-9">The two builds every published number is measured on</h2><p class="note"><code>TTK = target HP / DPS</code>. Reference at level 100: 1,991 DPS evenly split (4.6 sec) vs 42,801 focused (0.21 sec).</p><table><thead><tr><th></th><th>Physical</th><th>Magic</th><th>Elemental</th><th>Alignment</th></tr></thead><tbody><tr><td>glass</td><td><span class="num">2,607</span></td><td><span class="num">542</span></td><td><span class="num">434</span></td><td><span class="num">5.4</span></td></tr><tr><td>caster</td><td><span class="num">542</span></td><td><span class="num">2,607</span></td><td><span class="num">1,734</span></td><td><span class="num">5.4</span></td></tr></tbody></table></section>
+<section><h2 id="section-10">The finish line</h2><p class="note"><code>goal progress = counted items, kills or level checkpoints</code>. Level Cap 190; Paragon starts at 101.</p><table><thead><tr><th>Level</th><th>Kills to reach it</th><th>What it is</th></tr></thead><tbody><tr><td>level 10</td><td><span class="num">204</span></td><td></td></tr><tr><td>level 30</td><td><span class="num">1,500</span></td><td></td></tr><tr><td>level 60</td><td><span class="num">8,294</span></td><td></td></tr><tr><td>level 90</td><td><span class="num">30,609</span></td><td></td></tr><tr><td>level 100</td><td><span class="num">50,534</span></td><td>Paragon starts here</td></tr><tr><td>level 120</td><td><span class="num">68,841</span></td><td></td></tr><tr><td>level 150</td><td><span class="num">91,228</span></td><td></td></tr><tr><td>level 180</td><td><span class="num">109,507</span></td><td>the mob level bound</td></tr><tr><td>level 190</td><td><span class="num">115,059</span></td><td>the level Cap</td></tr><tr><td>The win</td><td>one fight</td><td><strong>Ancient Dragon</strong> — zone 18, level 171, 26,244 health, killed inside a single spawn without being Pushed</td></tr><tr><td>Past the Cap</td><td><span class="num">19,925</span> kills</td><td>the stretch from level 90 to level 100, counted in the same currency as everything else (<code>PUSH_KILLS_91_100</code>)</td></tr></tbody></table></section>
+<section><h2 id="section-11">Counted, never timed</h2><table><thead><tr><th>Goal</th><th>What it spends</th><th>Read from</th></tr></thead><tbody><tr><td>A full Ascend set</td><td>12 pieces, each climbed one band</td><td><code>craft.ascend_items_per_set</code></td></tr><tr><td>A full Refine pass</td><td>Tier Stone at <code>refine_stones_per_use</code> a cast, on every line you choose to climb</td><td><code>craft.refine_stones_per_use</code></td></tr><tr><td>Every weapon type to Mastery 20</td><td>11 ladders, and the account-wide drop bonus is the reason to walk them</td><td><code>engine/mastery.ts</code></td></tr><tr><td>One skill to its top</td><td>12 duplicates</td><td><code>skills.json ladder</code></td></tr></tbody></table></section></article><footer class="page-foot">
+    <section class="related" aria-labelledby="related-title"><p class="eyebrow" id="related-title">Keep reading</p><div class="related-grid"><a href="stats.html"><b>Stats &amp; caps</b><small>Seven Core attributes feed derived stats through the formulas and caps below.</small></a><a href="skills.html"><b>Skills</b><small>Press damage = level-1 damage × damagePct(level) / 100 . Effects use effectPct ; Buffs and Auras use buffEffectPct . Special effects use…</small></a><a href="equipment.html"><b>Equipment</b><small>Every slot that is not a main hand, frame by frame. The frame decides what it can roll; the roll decides what it is worth.</small></a></div></section>
+    <nav class="page-turn" aria-label="Chapter navigation"><a class="prev" href="passive-tree.html"><small>Previous</small><b>Passive tree</b></a></nav>
+  </footer>
+<footer class="wiki-foot"><span>ModWorld Field Manual · official player reference</span><span>20 chapters · figures read live from the game</span><a href="index.html">Contents</a></footer>
+</main></div>
+<script>
+(function () {
+  var shell = document.querySelector('.wiki-shell');
+  var menu = document.querySelector('[data-wiki-menu]');
+  if (menu && shell) {
+    menu.addEventListener('click', function () {
+      var open = shell.classList.toggle('nav-open');
+      menu.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  }
+  var skip = document.querySelector('[data-skip]');
+  if (skip) skip.addEventListener('click', function () {
+    var main = document.getElementById('wiki-main');
+    if (main) { main.focus(); main.scrollIntoView({ block: 'start' }); }
+  });
+  var input = document.getElementById('wiki-search');
+  var results = document.getElementById('wiki-search-results');
+  var links = Array.prototype.slice.call(document.querySelectorAll('[data-page-link]'));
+  var close = function () { if (results) { results.hidden = true; results.innerHTML = ''; } };
+  if (input && results) {
+    var render = function () {
+      var q = input.value.trim().toLowerCase();
+      if (!q) { close(); return; }
+      var hits = links.filter(function (a) {
+        return (a.getAttribute('data-search') || '').toLowerCase().indexOf(q) >= 0;
+      }).slice(0, 8);
+      results.innerHTML = '';
+      if (!hits.length) {
+        var none = document.createElement('p');
+        none.className = 'search-none';
+        none.textContent = 'No chapter matches.';
+        results.appendChild(none);
+      } else {
+        hits.forEach(function (a) {
+          var hit = document.createElement('a');
+          hit.className = 'search-hit';
+          hit.href = a.getAttribute('href');
+          var title = document.createElement('span');
+          title.textContent = a.getAttribute('data-title') || '';
+          var group = document.createElement('small');
+          group.textContent = a.getAttribute('data-group') || '';
+          hit.appendChild(title);
+          hit.appendChild(group);
+          results.appendChild(hit);
+        });
+      }
+      results.hidden = false;
+    };
+    input.addEventListener('input', render);
+    input.addEventListener('focus', render);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { input.value = ''; close(); input.blur(); }
+      if (e.key === 'Enter') {
+        var first = results.querySelector('a');
+        if (first) { e.preventDefault(); first.click(); }
+      }
+    });
+    if (!window.__wikiSearchOutside) {
+      window.__wikiSearchOutside = true;
+      document.addEventListener('click', function (e) {
+        var box = document.querySelector('.search');
+        if (box && !box.contains(e.target)) {
+          var r = document.getElementById('wiki-search-results');
+          if (r) { r.hidden = true; r.innerHTML = ''; }
+        }
+      });
+      document.addEventListener('keydown', function (e) {
+        var field = document.getElementById('wiki-search');
+        if (!field) return;
+        if (e.key === '/' && document.activeElement !== field && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) {
+          e.preventDefault(); field.focus();
+        }
+      });
+    }
+    var q = new URLSearchParams(window.location.search).get('q');
+    if (q) { input.value = q; render(); }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-scroll]'), function (b) {
+    b.addEventListener('click', function () {
+      var target = document.getElementById(b.getAttribute('data-scroll'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (shell) shell.classList.remove('nav-open');
+    });
+  });
+  var toc = Array.prototype.slice.call(document.querySelectorAll('[data-toc]'));
+  if (toc.length && 'IntersectionObserver' in window) {
+    var seen = {};
+    toc.forEach(function (a) { seen[a.getAttribute('data-toc')] = a; });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        toc.forEach(function (a) { a.classList.toggle('on', a === seen[en.target.id]); });
+      });
+    }, { rootMargin: '-15% 0px -70% 0px' });
+    Array.prototype.forEach.call(document.querySelectorAll('.page-content > section[id]'), function (s) { io.observe(s); });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.wiki-nav [data-page-link]'), function (a) {
+    a.addEventListener('click', function () { if (shell) shell.classList.remove('nav-open'); });
+  });
+
+  // The passive-tree board: a viewBox camera over the canonical SVG, with a node card that follows
+  // the hovered or pinned node exactly as the game's board does.
+  var treeView = document.querySelector('[data-tree-view]');
+  if (treeView) {
+    var treeSvg = treeView.querySelector('svg[data-tree-svg]');
+    var treeStage = treeView.querySelector('[data-tree-stage]');
+    if (treeSvg && treeStage) {
+      var treeCard = treeView.querySelector('[data-tree-card]');
+      var treeZoomLabel = treeView.querySelector('[data-tree-zoom-label]');
+      var readTreeBox = function () {
+        var v = (treeSvg.getAttribute('viewBox') || '').split(' ').map(Number);
+        return { x: v[0] || 0, y: v[1] || 0, w: v[2] || 1, h: v[3] || 1 };
+      };
+      var treeFit = readTreeBox();
+      var treeCamera = { x: treeFit.x, y: treeFit.y, w: treeFit.w, h: treeFit.h };
+      var treeClamp = function (v, lo, hi) { return Math.max(lo, Math.min(hi, v)); };
+      var applyTree = function () {
+        treeSvg.setAttribute('viewBox', [treeCamera.x, treeCamera.y, treeCamera.w, treeCamera.h].join(' '));
+        if (treeZoomLabel) treeZoomLabel.textContent = Math.round((treeFit.w / treeCamera.w) * 100) + '%';
+        if (treeHover || treePinned) placeTreeCard(treeHover || treePinned);
+      };
+      var zoomTree = function (factor, px, py) {
+        var nextW = treeClamp(treeCamera.w / factor, treeFit.w / 8, treeFit.w / 0.65);
+        var nextH = nextW * (treeFit.h / treeFit.w);
+        var wx = treeCamera.x + px * treeCamera.w;
+        var wy = treeCamera.y + py * treeCamera.h;
+        treeCamera.x = wx - px * nextW;
+        treeCamera.y = wy - py * nextH;
+        treeCamera.w = nextW;
+        treeCamera.h = nextH;
+        applyTree();
+      };
+      var zoomTreeCenter = function (factor) { zoomTree(factor, 0.5, 0.5); };
+      var treeChips = Array.prototype.slice.call(treeView.querySelectorAll('[data-tree-region]'));
+      var clearTreeChips = function () {
+        treeChips.forEach(function (chip) { chip.classList.remove('on'); chip.setAttribute('aria-pressed', 'false'); });
+      };
+      var fitTree = function () {
+        treeCamera = { x: treeFit.x, y: treeFit.y, w: treeFit.w, h: treeFit.h };
+        applyTree();
+        clearTreeChips();
+      };
+      var fitBtn = treeView.querySelector('[data-tree-fit]');
+      if (fitBtn) fitBtn.addEventListener('click', fitTree);
+      Array.prototype.forEach.call(treeView.querySelectorAll('[data-tree-zoom]'), function (b) {
+        b.addEventListener('click', function () { zoomTreeCenter(Number(b.getAttribute('data-tree-zoom')) || 1); });
+      });
+      treeChips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          var wing = chip.getAttribute('data-tree-region');
+          var list = treeView.querySelectorAll('.wiki-tree-node.' + wing);
+          var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+          Array.prototype.forEach.call(list, function (n) {
+            var x = Number(n.getAttribute('data-x'));
+            var y = Number(n.getAttribute('data-y'));
+            if (!isFinite(x) || !isFinite(y)) return;
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          });
+          if (!isFinite(minX) || !isFinite(minY)) return;
+          var pad = 70;
+          var w = Math.max(1, maxX - minX + pad * 2);
+          var h = Math.max(1, maxY - minY + pad * 2);
+          var ratio = treeFit.h / treeFit.w;
+          if (h / w < ratio) h = w * ratio;
+          else w = h / ratio;
+          treeCamera = { x: (minX + maxX) / 2 - w / 2, y: (minY + maxY) / 2 - h / 2, w: w, h: h };
+          applyTree();
+          clearTreeChips();
+          chip.classList.add('on');
+          chip.setAttribute('aria-pressed', 'true');
+        });
+      });
+      var treeDrag = null, treeMoved = false, treeHover = null, treePinned = null;
+      var placeTreeCard = function (node) {
+        if (!node || !treeCard || treeCard.hidden) return;
+        var nr = node.getBoundingClientRect();
+        var sr = treeStage.getBoundingClientRect();
+        var cw = treeCard.offsetWidth;
+        var ch = treeCard.offsetHeight;
+        var x = nr.left + nr.width / 2 - sr.left + 18;
+        if (x + cw > sr.width - 12) x = nr.left - sr.left - cw - 18;
+        x = Math.max(12, Math.min(sr.width - cw - 12, x));
+        var y = nr.top - sr.top + nr.height / 2 - ch / 2;
+        y = Math.max(12, Math.min(sr.height - ch - 12, y));
+        treeCard.style.left = x + 'px';
+        treeCard.style.top = y + 'px';
+      };
+      var hideTreeCard = function () { if (treeCard) treeCard.hidden = true; };
+      var showTreeCard = function (node) {
+        if (!treeCard) return;
+        var name = node.getAttribute('data-name') || 'Node';
+        var meta = node.getAttribute('data-meta') || '';
+        var text = node.getAttribute('data-detail') || '';
+        treeCard.innerHTML = '';
+        var title = document.createElement('strong');
+        title.textContent = name;
+        var line = document.createElement('span');
+        line.className = 'tree-card-meta';
+        line.textContent = meta;
+        treeCard.appendChild(title);
+        treeCard.appendChild(line);
+        if (text) {
+          var body = document.createElement('p');
+          body.textContent = text;
+          treeCard.appendChild(body);
+        }
+        treeCard.hidden = false;
+        placeTreeCard(node);
+      };
+      var pickTreeNode = function (node) {
+        Array.prototype.forEach.call(treeView.querySelectorAll('.wiki-tree-node.picked'), function (n) { n.classList.remove('picked'); });
+        node.classList.add('picked');
+      };
+      Array.prototype.forEach.call(treeView.querySelectorAll('.wiki-tree-node'), function (node) {
+        node.addEventListener('pointerenter', function () {
+          if (treeMoved) return;
+          treeHover = node;
+          showTreeCard(node);
+        });
+        node.addEventListener('pointerleave', function () {
+          treeHover = null;
+          if (treePinned) showTreeCard(treePinned);
+          else hideTreeCard();
+        });
+        node.addEventListener('click', function () {
+          if (treeMoved) return;
+          treePinned = node;
+          pickTreeNode(node);
+          showTreeCard(node);
+        });
+      });
+      treeStage.addEventListener('pointerleave', function () {
+        treeHover = null;
+        if (treePinned) showTreeCard(treePinned);
+        else hideTreeCard();
+      });
+      treeStage.addEventListener('click', function (e) {
+        if (treeMoved) return;
+        var target = e.target;
+        if (target && target.closest && target.closest('.wiki-tree-node')) return;
+        treePinned = null;
+        treeHover = null;
+        Array.prototype.forEach.call(treeView.querySelectorAll('.wiki-tree-node.picked'), function (n) { n.classList.remove('picked'); });
+        hideTreeCard();
+      });
+      treeStage.addEventListener('pointerdown', function (e) {
+        if (e.button != null && e.button !== 0) return;
+        treeDrag = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false };
+        treeMoved = false;
+        try { treeStage.setPointerCapture(e.pointerId); } catch (err) {}
+        treeStage.classList.add('dragging');
+      });
+      treeStage.addEventListener('pointermove', function (e) {
+        if (!treeDrag || e.pointerId !== treeDrag.id) return;
+        var rect = treeStage.getBoundingClientRect();
+        var dx = (e.clientX - treeDrag.x) * (treeCamera.w / Math.max(1, rect.width));
+        var dy = (e.clientY - treeDrag.y) * (treeCamera.h / Math.max(1, rect.height));
+        if (Math.abs(e.clientX - treeDrag.x) + Math.abs(e.clientY - treeDrag.y) > 2) {
+          treeDrag.moved = true;
+          treeMoved = true;
+        }
+        if (!treeDrag.moved) return;
+        treeCamera.x -= dx;
+        treeCamera.y -= dy;
+        treeDrag.x = e.clientX;
+        treeDrag.y = e.clientY;
+        applyTree();
+      });
+      var endTreeDrag = function (e) {
+        if (!treeDrag || (e.pointerId != null && e.pointerId !== treeDrag.id)) return;
+        try { if (treeStage.hasPointerCapture(treeDrag.id)) treeStage.releasePointerCapture(treeDrag.id); } catch (err) {}
+        treeDrag = null;
+        treeStage.classList.remove('dragging');
+        setTimeout(function () { treeMoved = false; }, 0);
+      };
+      treeStage.addEventListener('pointerup', endTreeDrag);
+      treeStage.addEventListener('pointercancel', endTreeDrag);
+      treeStage.addEventListener('wheel', function (e) {
+        e.preventDefault();
+        var rect = treeStage.getBoundingClientRect();
+        var px = (e.clientX - rect.left) / Math.max(1, rect.width);
+        var py = (e.clientY - rect.top) / Math.max(1, rect.height);
+        zoomTree(e.deltaY < 0 ? 1.18 : 1 / 1.18, px, py);
+      }, { passive: false });
+      treeStage.addEventListener('keydown', function (e) {
+        var step = 0.12;
+        var handled = true;
+        if (e.key === 'ArrowLeft') treeCamera.x -= treeCamera.w * step;
+        else if (e.key === 'ArrowRight') treeCamera.x += treeCamera.w * step;
+        else if (e.key === 'ArrowUp') treeCamera.y -= treeCamera.h * step;
+        else if (e.key === 'ArrowDown') treeCamera.y += treeCamera.h * step;
+        else if (e.key === '+' || e.key === '=') zoomTreeCenter(1.2);
+        else if (e.key === '-' || e.key === '_') zoomTreeCenter(0.83);
+        else if (e.key === '0') fitTree();
+        else handled = false;
+        if (!handled) return;
+        e.preventDefault();
+        if (e.key !== '+' && e.key !== '=' && e.key !== '-' && e.key !== '_' && e.key !== '0') applyTree();
+      });
+      applyTree();
+    }
+  }
+})();
+</script></body></html>

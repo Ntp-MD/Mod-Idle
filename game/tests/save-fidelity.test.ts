@@ -33,6 +33,18 @@ describe('storage recovery boundaries', () => {
     }
   });
 
+  it('never persists the transient fx ring in a snapshot or its restore', async () => {
+    const state = newGame(55);
+    state.fx.push({ kind: 'buff', side: 'self', text: 'stale' } as any);
+    state.pendingSnapshot = 'level';
+    await writeSave('slot1', state);
+    const [shot] = await listSnapshots('slot1');
+    expect(shot.state.fx).toEqual([]);
+    const restored = await restoreSnapshot('slot1', 0);
+    expect(restored?.fx).toEqual([]);
+    expect((await readSave('slot1'))?.fx).toEqual([]);
+  });
+
   it('restores a prior snapshot without keeping its later rewards', async () => {
     const state = newGame(55);
     state.counters.gold = 4;
@@ -289,6 +301,15 @@ describe('the Reroll baseline survives a downgrade', () => {
 });
 
 describe('the save schema and the account', () => {
+  it('imports the previous v20 format without changing ledger, exploration or inventory', () => {
+    const s = newGame(522);
+    s.counters.gold = 123; s.fieldwork.materials.scrap = 7;
+    const loaded = importJson(JSON.stringify({ version: 20, state: s }));
+    expect(loaded.counters).toEqual(s.counters);
+    expect(loaded.fieldwork).toEqual(s.fieldwork);
+    expect(loaded.economy).toEqual(s.economy);
+    expect(loaded.mapJournal).toEqual(s.mapJournal);
+  });
   it('exports with a version and rejects a foreign one instead of converting', () => {
     const s = newGame(52);
     const text = exportJson(s);
@@ -296,6 +317,15 @@ describe('the save schema and the account', () => {
     expect(importJson(text).player.level).toBe(s.player.level);
     expect(() => importJson(JSON.stringify({ version: 1, state: s }))).toThrow(/schema version 1/);
     expect(() => importJson(JSON.stringify({ state: s }))).toThrow(/schema version none/);
+  });
+
+  it('imports a v19 export, the format the milestone-ledger release wrote', () => {
+    // v19 is documented in docs/game-rules.md §Delivery: it is a supported older save, so an
+    // export at that version must migrate instead of being refused as foreign.
+    const s = newGame(521);
+    const loaded = importJson(JSON.stringify({ version: 19, state: s }));
+    expect(loaded.player.level).toBe(s.player.level);
+    expect(loaded.economy).toBeDefined();
   });
 
   it('rejects a future local schema before migration touches its state', () => {
@@ -433,6 +463,21 @@ describe('the save schema and the account', () => {
     old.player.treePoints = 3;
     const m = migrate(JSON.parse(JSON.stringify(old)));
     expect(m.player.treePoints).toBe(tree.pointsAt(40, E.stat.level_cap) - treePointsSpent(m));
+  });
+
+  it('refunds a rank on a retired tree node', () => {
+    const s = newGame(62);
+    setLevel(s, 40);
+    // The current layout may have restored every legacy node. Supply an isolated retired key so
+    // this still exercises the refund branch without requiring live content to remain retired.
+    const retired = 'normal.legacy.refund-fixture';
+    tree.retired.add(retired);
+    try {
+      s.player.treeRanks = { [retired]: 1 };
+      const m = migrate(JSON.parse(JSON.stringify(s)));
+      expect(m.player.treeRanks).toEqual({});
+      expect(m.player.treePoints).toBe(tree.pointsAt(40, E.stat.level_cap));
+    } finally { tree.retired.delete(retired); }
   });
 
   it('still wipes a build whose ranks outrun the level it is loaded at', () => {

@@ -1,25 +1,18 @@
 <script lang="ts">
     import { eng, sm } from "../engine/client";
-    import { characterIcon, elementIcon, skillIcon } from "../icon";
+    import { elementIcon, skillIcon } from "../icon";
     import { ownsSkill, hpReserved, usableHp } from "../sim/skills";
     import { statusLabel } from "../sim/mobStatus";
     import { statusViews } from "../sim/playerStatus";
-    import { plateGesture } from "./plate";
     import { fxOut } from "./motion";
     import Meter from "./Meter.svelte";
     import Icon from "./Icon.svelte";
+    import CombatActor from "./CombatActor.svelte";
     import type { GameState, FxEvent } from "../sim/types";
     import type { Character } from "../sim/player";
     import type { Statuses, StatusName } from "../sim/combat";
 
-    /**
-     * The player's own combat card: one You identity, HP/ES/Mana readouts and combat feedback.
-     * Its 5:7 portrait frame uses the same width as a mob card. Buff and debuff badges
-     * flank the frame on their respective sides; Game controls live together in their own bottom-right HUD region.
-     *
-     * App.svelte owns the sim and the read model and hands the values in; this component only presents
-     * them. The card carries flash, knock, taken figures and defence words; effect rails sit outside it.
-     */
+    /** The actor moves independently of its fixed vitals, identity and status reads. */
     let {
         s,
         c,
@@ -42,8 +35,6 @@
         fmtNum: (n: number) => string;
     } = $props();
 
-    const faceMark = characterIcon();
-    let cardAnchor = $state<HTMLDivElement | null>(null);
 
     const shortTime = (secs: number) => (secs >= 60 ? `${Math.ceil(secs / 60)}m` : String(secs));
 
@@ -60,46 +51,8 @@
     /** Full Max stays on the bar; a reservation only names the share a heal may not reach (`35`, `54`). */
     const hpHeld = $derived(hpReserved(c, s.skills));
     const hpReach = $derived(usableHp(c, s.skills));
-    const latestLand = $derived(ring.find((e) => e.side === "field" && e.kind === "hit" && (e.via === "swing" || e.via === "cast")) || null);
-    const selfArt = $derived(plateGesture(latestTaken, latestLand));
-    /** The blow taken is the louder fact; a strictly newer swing of the character's own is ignored here —
-     *  on a shared second the card is already away charging the field, so only a one-sided exchange
-     *  leaves a knock to land on. */
-    const knocked = $derived(selfArt?.gesture === "knock" && latestTaken?.sec !== latestLand?.sec);
     const takenPops = $derived(ring.filter((e) => e.side === "self" && e.kind === "taken" && e.value).slice(0, 3));
     const defenseWords = $derived(ring.filter((e) => e.side === "self" && (e.kind === "block" || e.kind === "proc")).slice(0, 3));
-    let lastLungeId = -1;
-    let cardAnimation: Animation | null = null;
-    $effect(() => {
-        const hit = latestLand;
-        const card = cardAnchor;
-        if (!hit || !card || hit.id === lastLungeId) return;
-        lastLungeId = hit.id;
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-        const frame = requestAnimationFrame(() => {
-            if (!card.isConnected) return;
-            const field = document.querySelector(".field") as HTMLElement | null;
-            if (!field) return;
-            const mobs = Array.from(field.querySelectorAll<HTMLElement>(".mob"));
-            const target = mobs.find((mob) => mob.dataset.mobId === hit.mobId) || mobs[0];
-            const sourceRect = card.getBoundingClientRect();
-            const targetRect = target?.getBoundingClientRect() || field.getBoundingClientRect();
-            const dx = (targetRect.left + targetRect.width / 2 - sourceRect.left - sourceRect.width / 2) * 0.72;
-            const dy = (targetRect.top + targetRect.height / 2 - sourceRect.top - sourceRect.height / 2) * 0.72;
-            cardAnimation?.cancel();
-            cardAnimation = card.animate(
-                [
-                    { transform: "translate(0, 0) scale(1)", offset: 0 },
-                    { transform: "translate(0, 2px) scale(.97)", offset: 0.16 },
-                    { transform: `translate(${dx}px, ${dy}px) rotate(${Math.sign(dx) * 4}deg) scale(1.08)`, offset: 0.47 },
-                    { transform: `translate(${dx * 0.84}px, ${dy * 0.84}px) scale(1.03)`, offset: 0.6 },
-                    { transform: "translate(0, 0) scale(1)", offset: 1 },
-                ],
-                { duration: 500, easing: "cubic-bezier(.2, .75, .3, 1)" },
-            );
-        });
-        return () => cancelAnimationFrame(frame);
-    });
 
     const STATUS_ELEMENT: Record<StatusName, string> = {
         burn: "fire",
@@ -143,6 +96,7 @@
 </script>
 
 <div class="player-card combat" role="group" aria-label="Player vitals">
+    <div class="player-actor-slot"><CombatActor {ring} {c} opponents={s.group} /></div>
     <!-- the incoming figures ride above the card root, outside the cramped-layout scroller, so a rising
        number is never clipped by the body it rose off -->
     <div class="pops" aria-hidden="true">
@@ -153,17 +107,15 @@
             <span class="pop pop-word" out:fxOut={{ ms: fxOutMs }} style="--fx:{defenseColour(e.text)}; --lane:{e.id % 4}">{e.text}</span>
         {/each}
     </div>
-    <div class="card-body card card-combat" bind:this={cardAnchor}>
+    <div class="card-body card-combat">
         <div class="vitals">
             {#if latestTaken}
                 {#key latestTaken.id}
                     <span class="flash" style="--fx:{latestTaken.colour}"></span>
                 {/key}
             {/if}
-            {#key selfArt ? selfArt.id : "self-idle"}
-                <div class="cardface" class:knock={knocked}>
+                <div class="cardface">
                     <div class="identity">
-                        <img class="portrait card-portrait" src={faceMark} alt="" aria-hidden="true" />
                         <div>
                             <p class="name card-name">You</p>
                             <button
@@ -205,14 +157,13 @@
                         />
                     </div>
                 </div>
-            {/key}
         </div>
     </div>
     <div class="rails" role="group" aria-label="Player combat effects">
         <div class="rail buffs" role="list" aria-label="Active buffs and auras">
             {#each buffMarks as mark (mark.id)}
                 <span
-                    class="badge badge-status buff"
+                    class="badge-mark badge-status buff"
                     role="listitem"
                     aria-label={`${mark.label}${mark.secs != null ? `, ${mark.secs} seconds left` : ", aura active"}`}
                     title={`${mark.label}${mark.secs != null ? ` · ${mark.secs}s left` : " · aura active"}`}
@@ -225,7 +176,7 @@
         <div class="rail debuffs" role="list" aria-label="Active debuffs">
             {#each debuffMarks as mark (mark.name)}
                 <span
-                    class="badge badge-status debuff"
+                    class="badge-mark badge-status debuff"
                     role="listitem"
                     aria-label={`${mark.label}${mark.stacks > 1 ? `, ${mark.stacks} stacks` : ""}, ${mark.secs} seconds left`}
                     title={`${mark.label}${mark.stacks > 1 ? ` ×${mark.stacks}` : ""} · ${mark.secs}s left`}
@@ -239,31 +190,28 @@
 </div>
 
 <style>
-    /* One style set: this card only ever mounts inside the combat scene, so the former
-       generic + .combat duplicates collapse into single rules. Any figure the card raises
-       is anchored inside its own box — nothing paints outside the card. */
-
     .player-card {
         position: relative;
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) auto;
         width: 100%;
         height: 100%;
         min-height: 0;
     }
 
+    .player-actor-slot { position: relative; min-height: 0; }
+
     .card-body {
         display: grid;
         grid-template-columns: minmax(0, 1fr);
-        height: 100%;
         min-height: 0;
-        overflow-y: auto;
-        padding: var(--spacing-md);
+        padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-sm);
     }
 
     .vitals {
         position: relative;
         display: flex;
         flex-direction: column;
-        height: 100%;
         min-height: 0;
         gap: var(--spacing-sm);
     }
@@ -273,13 +221,9 @@
         flex-direction: column;
         justify-content: space-between;
         align-items: stretch;
-        height: 100%;
         min-height: 0;
         gap: var(--spacing-sm);
         width: 100%;
-    }
-    .cardface.knock {
-        animation: card-knock var(--motion-ui) cubic-bezier(0.2, 0.8, 0.3, 1);
     }
 
     .identity {
@@ -291,18 +235,14 @@
         text-align: center;
     }
     .identity > div {
-        display: grid;
-        justify-items: center;
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
         min-width: 0;
     }
 
-    .portrait {
-        width: calc(var(--icon-card) * 4 / 5);
-        height: calc(var(--icon-card) * 4 / 5);
-        flex: none;
-        object-fit: contain;
-        padding: var(--spacing-sm);
-    }
 
     .meters {
         display: grid;
@@ -320,7 +260,7 @@
     }
     .rail {
         position: absolute;
-        top: var(--spacing-sm);
+        top: 24%;
         display: flex;
         flex-direction: column;
         gap: var(--spacing-sm);
@@ -328,11 +268,11 @@
         pointer-events: none;
     }
     .rail.buffs {
-        right: var(--spacing-sm);
+        right: calc(-1 * (var(--icon-label) * 1.5 + var(--spacing-xs)));
         align-items: flex-end;
     }
     .rail.debuffs {
-        left: var(--spacing-sm);
+        left: calc(-1 * (var(--icon-label) * 1.5 + var(--spacing-xs)));
         align-items: flex-start;
     }
 
@@ -357,30 +297,12 @@
     .pops .pop {
         position: absolute;
         left: 50%;
-        top: 50%;
+        top: 30%;
         white-space: nowrap;
         padding: var(--spacing-sm);
     }
     .pops .pop-word {
-        top: calc(50% + var(--font-md));
-    }
-
-    .badge {
-        position: relative;
-        display: grid;
-        place-items: center;
-        width: calc(var(--icon-label) * 1.5);
-        height: calc(var(--icon-label) * 1.5);
-        pointer-events: auto;
-    }
-    .badge small {
-        position: absolute;
-        right: 0;
-        bottom: 0;
-        max-width: 100%;
-        overflow: hidden;
-        font-size: var(--font-xs);
-        line-height: 1;
+        top: 48%;
     }
 
     .name {
@@ -412,22 +334,9 @@
             opacity: 1;
         }
     }
-    @keyframes card-knock {
-        0%,
-        100% {
-            transform: none;
-        }
-        30% {
-            transform: translateY(var(--spacing-sm)) scale(0.98);
-        }
-        60% {
-            transform: translateY(-2px);
-        }
-    }
     @media (prefers-reduced-motion: reduce) {
         .flash,
-        .pops .pop,
-        .cardface.knock {
+        .pops .pop {
             animation: none;
         }
     }
