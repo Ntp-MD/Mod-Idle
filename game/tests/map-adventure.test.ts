@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { newGame } from '../src/sim/game';
 import { currentCell, road } from '../src/sim/road';
-import { E, eng, TOWN } from '../src/engine/client';
+import { eng, TOWN } from '../src/engine/client';
 import { hexKey, MAP_EXPLORATION } from '../src/sim/map-exploration';
-import { adventureTitle, adventureView, campActivityArt, stackAdventurePlacements, type AdventureCell } from '../src/ui/map-adventure';
+import { adventureTitle, adventureView, campActivityArt, stackAdventurePlacements, type AdventureCell } from '../src/ui/map/map-adventure';
 import type { GameState } from '../src/sim/types';
 import { mobFixture } from './mobFixture';
 

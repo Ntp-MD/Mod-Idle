@@ -7,10 +7,10 @@ import { clampAuraReservations } from './skills';
 /**
  * Spending the passive tree (`engine/tree.ts`).
  *
- * A level banks tree points; one point buys one rank; a node opens from any owned adjacent path, and a
- * node holds as many ranks as its kind says. A kind also names the currency it is paid in, so a
- * keystone is bought with attainment points and never competes with the ordinary nodes for them. There is
- * no unlock condition on any node: connectivity is the only rule (D3).
+ * A level banks tree points; one point buys a rank; a node opens from an owned adjacent path and holds
+ * as many ranks as its kind says. A kind names its currency, so a keystone is paid in attainment points
+ * and never competes with ordinary nodes. No node has an unlock condition: connectivity is the only
+ * rule (D3).
  *
  * Respec is **free**, at the town Counterhand — the same rule the Core attribute points obey, because
  * the build is the player's to express (`docs/game-rules.md` §Completion and progression), so taking it

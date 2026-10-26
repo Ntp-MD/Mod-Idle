@@ -1,14 +1,54 @@
 import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
-import { eng, E, BASES } from '../src/engine/client';
-import { buildCharacter, openingGear } from '../src/sim/player';
+import { eng, E, MODS } from '../src/engine/client';
+import { buildCharacter } from '../src/sim/player';
 import { newGame, tick, catchUp, huntZone, carried } from '../src/sim/game';
+import { modRangeProblems } from '../../tools/lib/mod-ranges.ts';
 
 // The cages load tools/lib/engine.ts, which is a bridge over the same engine/index.ts the client
 // calls. Requiring it here proves the client and the cages resolve to one module and one data file
 // — the shared-source ownership described in AGENTS.md.
 const require = createRequire(import.meta.url);
 const cage = require('../../tools/lib/engine.ts').eng;
+
+describe('canonical Mod range gate', () => {
+  it('accepts the current windows, including the positive singleton seam', () => {
+    expect(modRangeProblems(MODS)).toEqual([]);
+  });
+
+  it.each(['lower', 'upper'])('rejects a slice outside its declared %s bound', (bound) => {
+    const mods = structuredClone(MODS);
+    const dodge = mods.mods.find((mod) => mod.id === 'perfect_dodge_pct')!;
+    if (bound === 'lower') dodge.bands[1][0][0] = dodge.min - 1;
+    else dodge.bands[1][0][1] = dodge.max + 1;
+    expect(modRangeProblems(mods)).toContainEqual(expect.stringContaining('outside declared'));
+  });
+
+  it('rejects a decreasing band floor within the declared range', () => {
+    const mods = structuredClone(MODS);
+    const accuracy = mods.mods.find((mod) => mod.id === 'accuracy')!;
+    const previousFloor = accuracy.bands[1][0][0];
+    accuracy.bands[2][0][0] = previousFloor - 1;
+    expect(modRangeProblems(mods)).toContainEqual(expect.stringContaining(`floor ${previousFloor - 1} decreases from ${previousFloor}`));
+  });
+
+  it('rejects an ordinary touching seam even when its final slice is a singleton', () => {
+    const mods = structuredClone(MODS);
+    const crit = mods.mods.find((mod) => mod.id === 'critical_chance')!;
+    const previous = crit.bands[0];
+    crit.bands[1][0][0] = previous[previous.length - 1][1];
+    expect(modRangeProblems(mods)).toContainEqual(expect.stringContaining('seam 1 has no god-roll overlap'));
+  });
+
+  it('rejects a true gap after a singleton band', () => {
+    const mods = structuredClone(MODS);
+    const dodge = mods.mods.find((mod) => mod.id === 'perfect_dodge_pct')!;
+    const afterSingleton = dodge.bands[0][0][1] + 1;
+    dodge.bands[1][0][0] = afterSingleton;
+    dodge.bands[2][0][0] = afterSingleton;
+    expect(modRangeProblems(mods)).toContainEqual(expect.stringContaining('seam 1 has no god-roll overlap'));
+  });
+});
 
 describe('game and cages run one engine', () => {
   it('resolves the same derived ceilings', () => {

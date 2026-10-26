@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "status": "user-reference",
+  "species": "goblin",
+  "title": "Spear Goblin",
+  "source": {
+    "provider": "itch.io",
+    "url": "https://img.itch.zone/aW1nLzMxMjEzOTc0LmdpZg==/original/pJ0MEh.gif",
+    "kind": "animated preview card",
+    "sourceCanvas": [
+      144,
+      144
+    ]
+  },
+  "extraction": {
+    "removedOverlays": [
+      "ornamental card frame",
+      "in-card species title",
+      "clip caption",
+      "PREVIEW wash"
+    ],
+    "method": "drop pixels identical across all frames (card frame, title, caption), key out the card ground colour, and invert the PREVIEW blend on covered pixels",
+    "washBlend": {
+      "colour": [
+        238,
+        225,
+        186
+      ],
+      "alpha": 0.45,
+      "recovered": "underlying = (shown - alpha*colour) / (1 - alpha)"
+    },
+    "washRule": "a pixel is covered when inverting it lands on the creature's own palette in every frame the sprite reaches it; the fainter shadow ring joins by adjacency",
+    "background": "transparent",
+    "alignment": "each clip shares one crop box; frames keep their in-clip offsets so the ground line is fixed"
+  },
+  "clips": {
+    "idle": {
+      "file": "clips/idle.png",
+      "frames": 3,
+      "cell": [
+        49,
+        66
+      ],
+      "sourceBox": [
+        40,
+        25,
+        89,
+        91
+      ],
+      "frameMs": 533,
+      "durations": [
+        550,
+        700,
+        350
+      ],
+      "loop": true
+    },
+    "walk": {
+      "file": "clips/walk.png",
+      "frames": 6,
+      "cell": [
+        51,
+        65
+      ],
+      "sourceBox": [
+        38,
+        26,
+        89,
+        91
+      ],
+      "frameMs": 167,
+      "durations": [
+        170,
+        160,
+        170,
+        170,
+        160,
+        170
+      ],
+      "loop": true
+    },
+    "attack": {
+      "file": "clips/attack.png",
+      "frames": 6,
+      "cell": [
+        80,
+        65
+      ],
+      "sourceBox": [
+        36,
+        26,
+        116,
+        91
+      ],
+      "frameMs": 125,
+      "durations": [
+        80,
+        80,
+        90,
+        300,
+        100,
+        100
+      ],
+      "loop": false
+    },
+    "hurt": {
+      "file": "clips/hit.png",
+      "frames": 7,
+      "cell": [
+        70,
+        65
+      ],
+      "sourceBox": [
+        33,
+        26,
+        103,
+        91
+      ],
+      "frameMs": 61,
+      "durations": [
+        60,
+        50,
+        80,
+        20,
+        70,
+        70,
+        80
+      ],
+      "loop": false
+    },
+    "death": {
+      "file": "clips/death.png",
+      "frames": 7,
+      "cell": [
+        79,
+        70
+      ],
+      "sourceBox": [
+        27,
+        26,
+        106,
+        96
+      ],
+      "frameMs": 70,
+      "durations": [
+        70,
+        80,
+        70,
+        60,
+        60,
+        60,
+        90
+      ],
+      "loop": false
+    }
+  },
+  "review": {
+    "frameMs": {
+      "walk": 150,
+      "idle": 220,
+      "attack": 90,
+      "hurt": 110,
+      "death": 110
+    },
+    "impactFrame": {
+      "attack": 3
+    },
+    "displayHeight": 214,
+    "facing": "east",
+    "notes": [
+      "Source durations emphasise the held poses, so review playback uses an even beat.",
+      "The goblin drives the spear to full reach on frame 3 of the 6-frame attack."
+    ]
+  }
+}

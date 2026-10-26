@@ -5,12 +5,12 @@ import { exportJson, importJson, migrate } from '../src/state/save';
 import { slotsAvailable } from '../src/sim/slots';
 import { movePatrolStop } from '../src/sim/exploration';
 import { establishCamp } from '../src/sim/fieldwork';
-import { destinationIntel } from '../src/ui/map-intel';
-import { destinationPrimary } from '../src/ui/destination';
-import { campActivityArt, hasUniqueTrace, mapEventArt } from '../src/ui/map-adventure';
+import { destinationIntel } from '../src/ui/map/map-intel';
+import { destinationPrimary } from '../src/ui/map/destination';
+import { campActivityArt, hasUniqueTrace, mapEventArt } from '../src/ui/map/map-adventure';
 import { E, eng, TOWN } from '../src/engine/client';
 import {
-  hexKey, hexDistance, investigateTrailSite, mapKnowledge, normalizeMapJournal,
+  hexKey, investigateTrailSite, mapKnowledge, normalizeMapJournal,
   recordMapDiscovery, trailSiteKind, MAP_EXPLORATION,
 } from '../src/sim/map-exploration';
 

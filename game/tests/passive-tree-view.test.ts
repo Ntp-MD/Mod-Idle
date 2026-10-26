@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { TreeSpec } from '../../engine/tree';
 import { buildTreeNetwork } from '../../engine/tree-network';
 import { TREE_SPEC, tree } from '../src/engine/client';
-import { buildPassiveTreeView, initialTreeCamera, treeOrbitPath, treeViewNodeRadius, treeRouteEdges } from '../src/ui/passive-tree-view';
+import { buildPassiveTreeView, initialTreeCamera, treeOrbitPath, treeViewNodeRadius, treeRouteEdges } from '../src/ui/passive-tree/passive-tree-view';
 
 const spec = TREE_SPEC as TreeSpec;
 const routeDegree = (id: string) => tree.adjacentTo(id).length + (tree.byId[id].needs.includes('start') ? 1 : 0);

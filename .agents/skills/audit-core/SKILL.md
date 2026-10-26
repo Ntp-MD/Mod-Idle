@@ -78,13 +78,13 @@ Each letter is a **contract category**, not an instruction to run a full reposit
 | Engine weapon type ↔ `engine.json weapons[].weapon_mult` | One type multiplier; frame weight remains in `bases.json`                                       |
 | `sizeMultOf` ↔ `engine.json weapon_size_mult.ladder`     | Three size columns; magic `bolt_share_pct` (X50)                                                |
 | Live `mob.forms` ↔ its actual gate X76                   | Gate tests live block; 246 authored forms remain after removing the duplicate projection                 |
-| `game/src/sim/road.ts` ↔ `game/src/ui/map.ts`            | Same ordered cell/site/sub-zone identity                                                        |
+| `game/src/sim/road.ts` ↔ `game/src/ui/map/map.ts`            | Same ordered cell/site/sub-zone identity                                                        |
 
 ### F–J · State, presentation and time
 
 - **F — Online/offline/save parity:** Reproduce the same seeded elapsed span with live tick, `catchUp`/`catchUpAsync`, and save → load → continue. Except for explicit `game-rules.md` §Saves, offline time and RNG exceptions, compare resulting states. Old saves migrate without loss; unknown schemas reject safely.
 - **G — UI/wiki truth:** Sheet reads the combat value, not a newly calculated approximation; rounding affects display only. Caps and refusal reasons reflect the actual rule. Compare player-facing statements in `game/src/wiki/pages.ts`; a generated wiki rebuild does not correct hard-coded prose.
-- **H — HUD (only when touched):** Shared `HudLayout` in `game/src/ui/hud-layout.ts` (`HudRegionId`, `HUD_REGION_META`, `DEFAULT_HUD_LAYOUT`) must agree with `HudLayoutEditor.svelte` and `App.svelte`. Studio Apply previews, game Apply saves; old layouts backfill defaults. Exercise the live region at 1920 × 1080; follow `variables.css` sizing and `AGENTS.md` UI rules.
+- **H — HUD (only when touched):** Shared `HudLayout` in `game/src/ui/hud/hud-layout.ts` (`HudRegionId`, `HUD_REGION_META`, `DEFAULT_HUD_LAYOUT`) must agree with `HudLayoutEditor.svelte` and `App.svelte`. Studio Apply previews, game Apply saves; old layouts backfill defaults. Exercise the live region at 1920 × 1080; follow `variables.css` sizing and `AGENTS.md` UI rules.
 - **I — RNG discipline:** No gameplay-path `Math.random` in `engine/`/`game/src/`; cosmetic exceptions must be identified. Golden sequence: fixed seed + N ticks produces the same roll order unless intentionally changed (`game-rules.md` §Saves, offline time and RNG).
 - **J — Clock, replay and exploits:** Compare scheduler / catch-up / reload for backward/forward system time, DST/timezone, hidden→visible, long sleep, boss/dungeon payout, snapshot restore and reload mid-tick. No duplicate rewards or circumvented cost. Reproduce relevant exploit surfaces: aura reservation via toggle/respec/preset, HP-cost at 1 HP, filter spam, escrow enter/leave, travel rounding, full-bag sale, salvage/re-craft. A manual observation becomes a confirmed issue only with repeatable evidence and a recorded test.
 

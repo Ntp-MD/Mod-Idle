@@ -196,6 +196,8 @@ export function validateEngineData<K extends EngineData['K']>(raw: { K: K }): En
     if (sizeIds.has(size.id)) refuse(`${path}.id`, `duplicates body id ${size.id}`);
     sizeIds.add(size.id);
     numberAt(size, 'ps', path);
+    const radius = numberAt(size, 'radius_m', path);
+    if (!(radius > 0)) refuse(`${path}.radius_m`, 'must be a positive ground footprint in meters');
   });
 
   // The forge: material families/grades, pattern costs and the two grade-indexed ladders.
@@ -243,6 +245,35 @@ export function validateEngineData<K extends EngineData['K']>(raw: { K: K }): En
       if (typeof n !== 'number' || !Number.isFinite(n) || n <= 0) refuse(`forge.${key}[${i}]`, 'must be a positive finite number');
       if (i > 0 && n < (row[i - 1] as number)) refuse(`forge.${key}[${i}]`, 'must not fall below the previous grade');
     });
+  }
+
+  // Ordinary mob attacks: the legacy line adapter and every profile it can name must resolve, and a
+  // released shot needs a positive speed and a real contact radius.
+  const arena = data.combat_arena as Record<string, unknown>;
+  const normal = arena?.normal_attack as Record<string, unknown>;
+  if (!isObject(normal)) refuse('combat_arena.normal_attack', 'must be an object');
+  const legacy = normal.legacy as Record<string, unknown>;
+  const profiles = normal.profiles as Record<string, unknown>;
+  if (!isObject(legacy)) refuse('combat_arena.normal_attack.legacy', 'must be an object');
+  if (!isObject(profiles)) refuse('combat_arena.normal_attack.profiles', 'must be an object');
+  for (const line of ['front', 'stand-off']) {
+    const id = legacy[line];
+    if (typeof id !== 'string' || !isObject(profiles[id]))
+      refuse(`combat_arena.normal_attack.legacy.${line}`, 'must name a profile');
+  }
+  for (const [id, rawProfile] of Object.entries(profiles)) {
+    const path = `combat_arena.normal_attack.profiles.${id}`;
+    if (!isObject(rawProfile)) refuse(path, 'must be an object');
+    if (rawProfile.delivery !== 'melee' && rawProfile.delivery !== 'projectile')
+      refuse(`${path}.delivery`, 'must be melee or projectile');
+    const stop = numberAt(rawProfile, 'stop_at_range_pct', path);
+    if (!(stop > 0 && stop <= 100)) refuse(`${path}.stop_at_range_pct`, 'must be within (0, 100]');
+    if (rawProfile.delivery === 'projectile') {
+      if (!(numberAt(rawProfile, 'projectile_speed_mps', path) > 0))
+        refuse(`${path}.projectile_speed_mps`, 'must be a positive speed');
+      if (numberAt(rawProfile, 'hit_radius_m', path) < 0)
+        refuse(`${path}.hit_radius_m`, 'must be nonnegative');
+    }
   }
 
   return raw as unknown as EngineData;

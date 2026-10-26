@@ -1,0 +1,449 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "orc",
+  "variantId": "juggernaut-orc",
+  "name": "Juggernaut Orc",
+  "levels": [
+    41,
+    60
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-contact-at-224",
+  "directionCount": 8,
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "actions": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    "idle S SE E NE N NW W SW",
+    "walk S SE E NE N NW W SW",
+    "attack S SE E NE N NW W SW",
+    "hit S SE E NE N NW W SW",
+    "death S SE E NE N NW W SW"
+  ],
+  "slicing": {
+    "columns": 8,
+    "rows": 5,
+    "cellWidth": 256,
+    "cellHeight": 256
+  },
+  "sourceFrames": [
+    {
+      "x": 155,
+      "y": 165,
+      "width": 125,
+      "height": 127,
+      "offsetX": 155,
+      "offsetY": 165
+    },
+    {
+      "x": 535,
+      "y": 165,
+      "width": 118,
+      "height": 127,
+      "offsetX": 151,
+      "offsetY": 165
+    },
+    {
+      "x": 921,
+      "y": 168,
+      "width": 116,
+      "height": 125,
+      "offsetX": 153,
+      "offsetY": 168
+    },
+    {
+      "x": 1300,
+      "y": 165,
+      "width": 113,
+      "height": 128,
+      "offsetX": 148,
+      "offsetY": 165
+    },
+    {
+      "x": 1674,
+      "y": 165,
+      "width": 119,
+      "height": 128,
+      "offsetX": 138,
+      "offsetY": 165
+    },
+    {
+      "x": 2042,
+      "y": 164,
+      "width": 107,
+      "height": 128,
+      "offsetX": 122,
+      "offsetY": 164
+    },
+    {
+      "x": 2423,
+      "y": 164,
+      "width": 113,
+      "height": 128,
+      "offsetX": 119,
+      "offsetY": 164
+    },
+    {
+      "x": 2807,
+      "y": 164,
+      "width": 112,
+      "height": 128,
+      "offsetX": 119,
+      "offsetY": 164
+    },
+    {
+      "x": 154,
+      "y": 545,
+      "width": 122,
+      "height": 129,
+      "offsetX": 154,
+      "offsetY": 161
+    },
+    {
+      "x": 528,
+      "y": 546,
+      "width": 128,
+      "height": 131,
+      "offsetX": 144,
+      "offsetY": 162
+    },
+    {
+      "x": 914,
+      "y": 546,
+      "width": 131,
+      "height": 130,
+      "offsetX": 146,
+      "offsetY": 162
+    },
+    {
+      "x": 1295,
+      "y": 546,
+      "width": 122,
+      "height": 131,
+      "offsetX": 143,
+      "offsetY": 162
+    },
+    {
+      "x": 1671,
+      "y": 546,
+      "width": 112,
+      "height": 131,
+      "offsetX": 135,
+      "offsetY": 162
+    },
+    {
+      "x": 2032,
+      "y": 546,
+      "width": 124,
+      "height": 130,
+      "offsetX": 112,
+      "offsetY": 162
+    },
+    {
+      "x": 2414,
+      "y": 546,
+      "width": 128,
+      "height": 130,
+      "offsetX": 110,
+      "offsetY": 162
+    },
+    {
+      "x": 2799,
+      "y": 547,
+      "width": 127,
+      "height": 128,
+      "offsetX": 111,
+      "offsetY": 163
+    },
+    {
+      "x": 144,
+      "y": 911,
+      "width": 125,
+      "height": 149,
+      "offsetX": 144,
+      "offsetY": 143
+    },
+    {
+      "x": 530,
+      "y": 903,
+      "width": 106,
+      "height": 158,
+      "offsetX": 146,
+      "offsetY": 135
+    },
+    {
+      "x": 907,
+      "y": 911,
+      "width": 148,
+      "height": 148,
+      "offsetX": 139,
+      "offsetY": 143
+    },
+    {
+      "x": 1282,
+      "y": 935,
+      "width": 146,
+      "height": 124,
+      "offsetX": 130,
+      "offsetY": 167
+    },
+    {
+      "x": 1668,
+      "y": 916,
+      "width": 114,
+      "height": 144,
+      "offsetX": 132,
+      "offsetY": 148
+    },
+    {
+      "x": 2019,
+      "y": 912,
+      "width": 151,
+      "height": 149,
+      "offsetX": 99,
+      "offsetY": 144
+    },
+    {
+      "x": 2426,
+      "y": 913,
+      "width": 129,
+      "height": 148,
+      "offsetX": 122,
+      "offsetY": 145
+    },
+    {
+      "x": 2798,
+      "y": 914,
+      "width": 134,
+      "height": 147,
+      "offsetX": 110,
+      "offsetY": 146
+    },
+    {
+      "x": 150,
+      "y": 1312,
+      "width": 123,
+      "height": 133,
+      "offsetX": 150,
+      "offsetY": 160
+    },
+    {
+      "x": 533,
+      "y": 1313,
+      "width": 120,
+      "height": 131,
+      "offsetX": 149,
+      "offsetY": 161
+    },
+    {
+      "x": 914,
+      "y": 1315,
+      "width": 129,
+      "height": 127,
+      "offsetX": 146,
+      "offsetY": 163
+    },
+    {
+      "x": 1298,
+      "y": 1314,
+      "width": 117,
+      "height": 131,
+      "offsetX": 146,
+      "offsetY": 162
+    },
+    {
+      "x": 1667,
+      "y": 1319,
+      "width": 118,
+      "height": 125,
+      "offsetX": 131,
+      "offsetY": 167
+    },
+    {
+      "x": 2046,
+      "y": 1315,
+      "width": 111,
+      "height": 125,
+      "offsetX": 126,
+      "offsetY": 163
+    },
+    {
+      "x": 2421,
+      "y": 1314,
+      "width": 121,
+      "height": 131,
+      "offsetX": 117,
+      "offsetY": 162
+    },
+    {
+      "x": 2805,
+      "y": 1315,
+      "width": 118,
+      "height": 130,
+      "offsetX": 117,
+      "offsetY": 163
+    },
+    {
+      "x": 144,
+      "y": 1738,
+      "width": 133,
+      "height": 91,
+      "offsetX": 144,
+      "offsetY": 202
+    },
+    {
+      "x": 516,
+      "y": 1748,
+      "width": 141,
+      "height": 80,
+      "offsetX": 132,
+      "offsetY": 212
+    },
+    {
+      "x": 893,
+      "y": 1750,
+      "width": 151,
+      "height": 79,
+      "offsetX": 125,
+      "offsetY": 214
+    },
+    {
+      "x": 1280,
+      "y": 1754,
+      "width": 136,
+      "height": 75,
+      "offsetX": 128,
+      "offsetY": 218
+    },
+    {
+      "x": 1669,
+      "y": 1736,
+      "width": 127,
+      "height": 93,
+      "offsetX": 133,
+      "offsetY": 200
+    },
+    {
+      "x": 2032,
+      "y": 1739,
+      "width": 139,
+      "height": 87,
+      "offsetX": 112,
+      "offsetY": 203
+    },
+    {
+      "x": 2410,
+      "y": 1751,
+      "width": 147,
+      "height": 76,
+      "offsetX": 106,
+      "offsetY": 215
+    },
+    {
+      "x": 2793,
+      "y": 1749,
+      "width": 140,
+      "height": 75,
+      "offsetX": 105,
+      "offsetY": 213
+    }
+  ],
+  "generation": {
+    "sourceOutputs": [
+      "exec-141e329c-ec79-445b-aa76-7e2ed37127a6.png",
+      "exec-dea411e7-f792-4320-ad5c-c0cb244844e5.png"
+    ],
+    "generatedCanvas": {
+      "width": 1587,
+      "height": 991
+    },
+    "generatedCornerAlpha": 0,
+    "identityReference": "art-reference/monsters/orc/animation/source/base.png",
+    "styleReference": "game/public/combat/arpg/pixel-v2/player-animation-v2.png",
+    "initialPrompt": "Juggernaut Orc with heavier single iron shoulder pauldron and reinforced leather harness; target retry scaled each existing pose inside its cell."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "paletteProcessing": {
+    "method": "global-median-cut",
+    "colors": 12,
+    "dither": false
+  },
+  "normalization": {
+    "method": "raw-connected-pose-repack-384-v1",
+    "sourceCanvas": {
+      "width": 1587,
+      "height": 991
+    },
+    "sourceImageSha256": "c5352da731b327ed5ad28b3f8d7d3de67b1d86d0b84f730bebb6e5f4d42c53a8",
+    "sourceAlphaThreshold": 128,
+    "edgeAlphaRecoveryRadius": 3,
+    "minimumCellPadding": 24,
+    "primaryPoses": 40,
+    "sourceComponents": 40,
+    "rowMedianBottoms": [
+      200,
+      391,
+      594,
+      778,
+      932
+    ],
+    "uniformScale": 1.0
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+    ]
+  }
+}

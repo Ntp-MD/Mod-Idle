@@ -455,42 +455,6 @@
     box-shadow: inset 0 -1px 0 var(--gold);
 }
 
-/* mark: the square a status icon rides in; the rail and its placement stay with the card. */
-.badge-mark {
-    position: relative;
-    display: grid;
-    place-items: center;
-    width: calc(var(--icon-label) * 1.5);
-    height: calc(var(--icon-label) * 1.5);
-    pointer-events: auto;
-}
-.badge-mark small {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    max-width: 100%;
-    overflow: hidden;
-    font-size: var(--font-xs);
-    line-height: 1;
-}
-
-/* status: a buff or debuff mark riding a card's rail, with the time left in its corner. */
-.badge-status {
-    border: 1px solid var(--edge);
-    border-radius: var(--radius-card);
-    background: var(--glass);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .6);
-}
-.badge-status.buff { border-color: color-mix(in srgb, var(--good-lit) 60%, var(--edge)); }
-.badge-status.debuff { border-color: color-mix(in srgb, var(--alarm) 70%, var(--edge)); }
-.badge-status small {
-    color: var(--text);
-    font-family: var(--num);
-    text-shadow: 0 1px 2px var(--bg);
-    transform: scale(.72);
-    transform-origin: right bottom;
-}
-
 /* count: a compact value badge; urgent marks points that need the player's attention. */
 .badge-count {
     border: 1px solid color-mix(in srgb, var(--gold) 34%, var(--edge));
@@ -660,10 +624,6 @@
 
 @keyframes panel-slide {
     from { transform: translateY(clamp(15px, 1.16vw, 32px)); opacity: .4; }
-    to { transform: none; opacity: 1; }
-}
-@keyframes panel-pop {
-    from { transform: translateY(var(--x-pull-note)); opacity: .3; }
     to { transform: none; opacity: 1; }
 }
 .surface-hud {

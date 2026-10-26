@@ -72,16 +72,6 @@ export function describeRule(rule: SlotRule): string {
   return parts.join(' · ');
 }
 
-/**
- * Bag-filter presets (`grants.filter_presets`): one slot the character always owns, and one more each
- * time a Collector set pays a preset reward. A preset stores only the rule table — the keep-list is
- * re-read from what the character wears at the moment the preset is loaded, because it is a filter
- * condition, not a setting.
- */
-export interface FilterPreset {
-  bySlot: Record<string, SlotRule>;
-}
-
 /** The first slot is the character’s own; shop purchases and Collector rewards each add one. */
 const presetRow = TOWN.one_time.find((row: any) => row.id === 'filter_preset');
 export const presetSlots = (s: GameState): number => 1 + (s.grants?.filter_presets || 0)

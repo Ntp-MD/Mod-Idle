@@ -1,0 +1,484 @@
+{
+  "skillId": "attack.fireball",
+  "status": "approved",
+  "source": "atlas-spaced-v2.png",
+  "generator": "built-in imagegen",
+  "imageSize": [
+    1254,
+    1254
+  ],
+  "columns": 4,
+  "rows": 4,
+  "opening": [
+    0,
+    3
+  ],
+  "flight": [
+    4,
+    11
+  ],
+  "impact": [
+    12,
+    15
+  ],
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        313,
+        313
+      ],
+      "allAlphaBounds": [
+        25,
+        20,
+        313,
+        313
+      ],
+      "visibleBoundsAlpha16": [
+        136,
+        162,
+        192,
+        207
+      ],
+      "paddingPixels": [
+        136,
+        162,
+        121,
+        106
+      ],
+      "paddingPass": true
+    },
+    {
+      "index": 1,
+      "rect": [
+        313,
+        0,
+        314,
+        313
+      ],
+      "allAlphaBounds": [
+        0,
+        9,
+        314,
+        313
+      ],
+      "visibleBoundsAlpha16": [
+        106,
+        153,
+        204,
+        211
+      ],
+      "paddingPixels": [
+        106,
+        153,
+        110,
+        102
+      ],
+      "paddingPass": true
+    },
+    {
+      "index": 2,
+      "rect": [
+        627,
+        0,
+        313,
+        313
+      ],
+      "allAlphaBounds": [
+        1,
+        15,
+        313,
+        313
+      ],
+      "visibleBoundsAlpha16": [
+        84,
+        143,
+        214,
+        216
+      ],
+      "paddingPixels": [
+        84,
+        143,
+        99,
+        97
+      ],
+      "paddingPass": true
+    },
+    {
+      "index": 3,
+      "rect": [
+        940,
+        0,
+        314,
+        313
+      ],
+      "allAlphaBounds": [
+        0,
+        47,
+        314,
+        313
+      ],
+      "visibleBoundsAlpha16": [
+        82,
+        143,
+        222,
+        218
+      ],
+      "paddingPixels": [
+        82,
+        143,
+        92,
+        95
+      ],
+      "paddingPass": true
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        313,
+        313,
+        314
+      ],
+      "allAlphaBounds": [
+        25,
+        0,
+        313,
+        314
+      ],
+      "visibleBoundsAlpha16": [
+        82,
+        123,
+        236,
+        204
+      ],
+      "paddingPixels": [
+        82,
+        123,
+        77,
+        110
+      ],
+      "paddingPass": true
+    },
+    {
+      "index": 5,
+      "rect": [
+        313,
+        313,
+        314,
+        314
+      ],
+      "allAlphaBounds": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "visibleBoundsAlpha16": [
+        89,
+        122,
+        241,
+        208
+      ],
+      "paddingPixels": [
+        89,
+        122,
+        73,
+        106
+      ],
+      "paddingPass": true
+    },
+    {
+      "index": 6,
+      "rect": [
+        627,
+        313,
+        313,
+        314
+      ],
+      "allAlphaBounds": [
+        0,
+        0,
+        313,
+        314
+      ],
+      "visibleBoundsAlpha16": [
+        71,
+        121,
+        233,
+        208
+      ],
+      "paddingPixels": [
+        71,
+        121,
+        80,
+        106
+      ],
+      "paddingPass": true
+    },
+    {
+      "index": 7,
+      "rect": [
+        940,
+        313,
+        314,
+        314
+      ],
+      "allAlphaBounds": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "visibleBoundsAlpha16": [
+        70,
+        121,
+        235,
+        211
+      ],
+      "paddingPixels": [
+        70,
+        121,
+        79,
+        103
+      ],
+      "paddingPass": true
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        627,
+        313,
+        313
+      ],
+      "allAlphaBounds": [
+        25,
+        0,
+        313,
+        313
+      ],
+      "visibleBoundsAlpha16": [
+        80,
+        120,
+        239,
+        211
+      ],
+      "paddingPixels": [
+        80,
+        120,
+        74,
+        102
+      ],
+      "paddingPass": true
+    },
+    {
+      "index": 9,
+      "rect": [
+        313,
+        627,
+        314,
+        313
+      ],
+      "allAlphaBounds": [
+        0,
+        0,
+        314,
+        313
+      ],
+      "visibleBoundsAlpha16": [
+        84,
+        120,
+        240,
+        210
+      ],
+      "paddingPixels": [
+        84,
+        120,
+        74,
+        103
+      ],
+      "paddingPass": true
+    },
+    {
+      "index": 10,
+      "rect": [
+        627,
+        627,
+        313,
+        313
+      ],
+      "allAlphaBounds": [
+        0,
+        0,
+        313,
+        313
+      ],
+      "visibleBoundsAlpha16": [
+        82,
+        121,
+        235,
+        210
+      ],
+      "paddingPixels": [
+        82,
+        121,
+        78,
+        103
+      ],
+      "paddingPass": true
+    },
+    {
+      "index": 11,
+      "rect": [
+        940,
+        627,
+        314,
+        313
+      ],
+      "allAlphaBounds": [
+        0,
+        0,
+        314,
+        313
+      ],
+      "visibleBoundsAlpha16": [
+        83,
+        125,
+        239,
+        209
+      ],
+      "paddingPixels": [
+        83,
+        125,
+        75,
+        104
+      ],
+      "paddingPass": true
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        940,
+        313,
+        314
+      ],
+      "allAlphaBounds": [
+        29,
+        0,
+        313,
+        314
+      ],
+      "visibleBoundsAlpha16": [
+        101,
+        95,
+        213,
+        204
+      ],
+      "paddingPixels": [
+        101,
+        95,
+        100,
+        110
+      ],
+      "paddingPass": true
+    },
+    {
+      "index": 13,
+      "rect": [
+        313,
+        940,
+        314,
+        314
+      ],
+      "allAlphaBounds": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "visibleBoundsAlpha16": [
+        95,
+        90,
+        223,
+        207
+      ],
+      "paddingPixels": [
+        95,
+        90,
+        91,
+        107
+      ],
+      "paddingPass": true
+    },
+    {
+      "index": 14,
+      "rect": [
+        627,
+        940,
+        313,
+        314
+      ],
+      "allAlphaBounds": [
+        1,
+        0,
+        313,
+        314
+      ],
+      "visibleBoundsAlpha16": [
+        85,
+        95,
+        213,
+        206
+      ],
+      "paddingPixels": [
+        85,
+        95,
+        100,
+        108
+      ],
+      "paddingPass": true
+    },
+    {
+      "index": 15,
+      "rect": [
+        940,
+        940,
+        314,
+        314
+      ],
+      "allAlphaBounds": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "visibleBoundsAlpha16": [
+        115,
+        108,
+        202,
+        194
+      ],
+      "paddingPixels": [
+        115,
+        108,
+        112,
+        120
+      ],
+      "paddingPass": true
+    }
+  ],
+  "qa": {
+    "alphaRange": [
+      0,
+      255
+    ],
+    "paddingPass": true,
+    "uniformIntegerGrid": false,
+    "animationContinuity": "user approved",
+    "runtimePromotion": "approved atlas-v2.png"
+  }
+}

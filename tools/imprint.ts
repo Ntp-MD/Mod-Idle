@@ -23,7 +23,7 @@ const E = readJson(path.join(ROOT, 'tools/data/engine.json'));
 const MODS = readJson(path.join(ROOT, 'tools/data/mods.json'));
 const BASES = readJson(path.join(ROOT, 'tools/data/bases.json'));
 const LOOT = createLoot(E, MODS);
-const CRAFT = createCraft(E, LOOT);
+const CRAFT = createCraft(E, LOOT, BASES);
 const rng = () => 0.5;
 
 // A piece on a real Base, so the pool a redraw draws from is the one `loot.poolFor` owns and the
@@ -59,14 +59,17 @@ function checks() {
   if (E.craft.imprint_stones_per_use !== 1) {
     im1.push(`imprint costs ${E.craft.imprint_stones_per_use}, not one stone a use`);
   }
-  // IM2 · one stone per Mod in the game, and the bench charges exactly that stone
+  // IM2 · eligible Mods mint a stone; legacy keys keep their price but cannot bypass eligibility.
   for (const m of MODS.mods) {
     const key = imprintStoneFor(m.id);
     const cost = CRAFT.costOf('imprint', fixture(), m.id);
     if (JSON.stringify(cost) !== JSON.stringify({ [key]: 1 })) {
       im2.push(`${m.id} costs ${JSON.stringify(cost)}, not one ${key}`);
     }
+    if (LOOT.IMPRINT_IDS.includes(m.id) !== (m.imprint !== false)) im2.push(`${m.id} eligibility differs from its data`);
+    if (m.imprint === false && CRAFT.imprint(fixture(), 3, m.id, rng).ok) im2.push(`${m.id} bypasses its Imprint exclusion`);
   }
+  if (!LOOT.IMPRINT_IDS.length) im2.push('the Imprint roster is empty');
   // IM3 · the verb: a fresh roll in the window, the baseline cleared, the locked lines refused
   const target = POOL.find((id) => id !== FRAME_LINE && !fixture().lines.some((l: any) => l.id === id))
     || MODS.mods.map((m: any) => m.id).find((id: string) => id !== FRAME_LINE);
@@ -250,7 +253,7 @@ if (args.includes('--checks')) {
   const g = G.gates();
   const say = (id: string, problems: string[], detail: string) => g.add(id, problems.length === 0, problems.length ? `${detail} · ${problems.join(' · ')}` : detail);
   say('IM1', im1, `elite ${E.loot.imprint_stone_sources?.elite_imprint_chance}/kill · boss ${E.loot.imprint_stone_sources?.boss_imprint_stones} stones · 1 a use`);
-  say('IM2', im2, `one stone per Mod (${MODS.mods.length} lines), each charging itself`);
+  say('IM2', im2, `${LOOT.IMPRINT_IDS.length} eligible Mods; legacy keys retained, excluded Mods refused`);
   say('IM3', im3, 'fresh roll in-window, baseline cleared, locked lines refused, net +2 cap');
   say('IM4', im4, 'reach per verb: the Frame Mod by nothing, the Bound pair by identity verbs only, and the four whole-piece presses never by identity');
   say('IM5', im5, `a bulk press costs the single-line price × ${CRAFT.editableCount(fixture(), CRAFT.PIECE_FLOOR)} lines; the drawn and chosen twin charge one price`);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { clampMapPan, composeMapMatrix, mapBearingDegrees, mapScreenLabelMatrix, mapTurnTo, orbitMapPan, type MapMatrix, type MapPoint } from '../src/ui/map-camera';
-import { createMapProjection, MAP_CAMERA } from '../src/ui/map-projection';
+import { clampMapPan, composeMapMatrix, mapBearingDegrees, mapScreenLabelMatrix, mapTurnTo, orbitMapPan, type MapMatrix, type MapPoint } from '../src/ui/map/map-camera';
+import { createMapProjection, MAP_CAMERA } from '../src/ui/map/map-projection';
 
 const apply = (matrix: MapMatrix, p: MapPoint) => ({
   x: matrix.a * p.x + matrix.c * p.y + matrix.e,

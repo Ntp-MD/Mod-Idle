@@ -1,7 +1,6 @@
 import { sm, tree } from '../engine/client';
 import { ACTIVE_SLOTS, clampAuraReservations, clearUnownedTracks } from './skills';
 import type { GameState } from './types';
-import type { SkillState } from './skills';
 
 /**
  * Loadout presets (`skill-pool.md` · `engine.json` `presets`).

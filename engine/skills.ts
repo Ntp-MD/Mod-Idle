@@ -13,7 +13,7 @@ export const WEAPON_GROUPS = {
   magic: ['wand', 'staff', 'book'],
 };
 
-import type { EngineData, SkillRow, SkillsData } from './types.ts';
+import type { EngineData, SkillRow, SkillsData, SkillCastProfile } from './types.ts';
 
 /**
  * The two damage ladders (the PoE shape, owner ruling): `Attack damage %` scales the attack ladder —
@@ -107,6 +107,16 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   /** The live roster: retired rows stay in `byId` so an old save still resolves them, but they
    *  never drop, get offered as a reward, or appear in the owned/active lists again. */
   const ACTIVE = SKILLS.skills.filter((s) => !s.retired);
+  const castProfileOf = (skill: SkillRow): SkillCastProfile => {
+    const delivery = skill.cast?.delivery ?? 'instant';
+    const profile = SKILLS.meta.action_profiles?.[delivery];
+    if (!profile) throw new Error('skills.json: missing action profile ' + delivery);
+    const ranges = (E as any).combat_arena.range;
+    return { ...profile, delivery,
+      range_m: skill.type === 'buff' || skill.type === 'heal' ? 0
+        : ranges[skill.type === 'curse' ? 'magic' : skill.group || 'melee'] ?? ranges.melee,
+      ...skill.cast };
+  };
 
   /**
    * The price is a typed number of mana units and the unit word is part of the number: `21 flat`
@@ -355,16 +365,48 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     return null;
   };
 
+  /**
+    * The `Hits` line, derived from effects — never authored prose: burst (`hits` +
+    * optional `hit_pct`) is one press multiplied at once, linger (`dot_dps` + `dot_sec`)
+    * is damage a second for N seconds.
+   * Burst (`hits` + optional `hit_pct`) is one press multiplied at once;
+   * linger (`dot_dps` + `dot_sec`) is damage a second for N seconds (default 10,
+   * mirroring the sim — storm rows must still author `dot_sec` explicitly).
+   * A lone `hit_pct` (e.g. sidestep accuracy) is not a repeat and yields nothing.
+   * Shared by the player copy (`game/src/sim/skill-copy.ts`) and the roster S11
+   * gate (`tools/lib/roster.ts`), so the window and the gate cannot drift.
+   */
+  const fmtHitNum = (n: number): string => (Number.isInteger(n) ? String(n) : String(Math.round(n * 10) / 10));
+  const hitLineOf = (skill: SkillRow | null | undefined): string | undefined => {
+    const eff = skill?.effects || [];
+    const parts: string[] = [];
+    const hits = eff.find((e) => e.stat === 'hits')?.value;
+    const hitPct = eff.find((e) => e.stat === 'hit_pct')?.value;
+    if (hits != null && hits > 1) {
+      parts.push(hitPct != null && hitPct !== 100
+        ? `${fmtHitNum(hits)} hits at ${fmtHitNum(hitPct)}% each`
+        : `${fmtHitNum(hits)} hits`);
+    }
+    const dotDps = eff.find((e) => e.stat === 'dot_dps')?.value;
+    const dotSec = eff.find((e) => e.stat === 'dot_sec')?.value ?? 10;
+    if (dotDps != null) {
+      const el = skill?.element ? skill.element[0].toUpperCase() + skill.element.slice(1) : 'Physical';
+      parts.push(`${fmtHitNum(dotDps)} ${el} damage a second for ${fmtHitNum(dotSec)} sec`);
+    }
+    return parts.length ? parts.join(' · ') : undefined;
+  };
+
   return {
     SKILLS, byId, LEVEL_STEP, CAST_REF, LADDER, CONVERSION, WEAPON_GROUPS,
     LEVEL_ROWS, LEVEL_CAP, damagePct, effectPct, buffEffectPct, effectsAt,
     COST_LEVEL_STEP, MANA_LEVEL_STEP, MANA_REF_POOL,
     aggregateEffects, EFFECT_STATS, EFFECT_OPS, EFFECT_SUBJECTS, EFFECT_CONDITIONS, EFFECT_RULES, MODELLED_BY,
-    STATUS_EFFECTS, EFFECT_STATUSES, exploitedStatusOf,
+    STATUS_EFFECTS, EFFECT_STATUSES, exploitedStatusOf, hitLineOf,
     PRESETS, presetCount, mainPreset,
     LADDER_MAX_DUPLICATES, RESERVATION_LIMIT, GROUP_BONUS,
     manaSpec, manaCostOf, hpCostSpec, hpCostOf, costOf, basisOf, perPress, critsOnBasis, effCd, ladderPct, ladderCostToStep, skillLevel, skillXpForLevel,
     weaponGroupOf, groupBonus, weaponFits, weaponMatches, row, reservePct,
+    castProfileOf,
     all: () => ACTIVE,
     of: (type: string) => ACTIVE.filter((s) => s.type === type),
     /**

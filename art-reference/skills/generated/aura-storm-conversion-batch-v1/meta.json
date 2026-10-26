@@ -1,0 +1,415 @@
+{
+  "id": "aura.storm_conversion",
+  "src": "/fx/authored/aura-storm-conversion/batch-v1/atlas.png",
+  "columns": 4,
+  "rows": 4,
+  "cellWidth": 313.5,
+  "cellHeight": 313.5,
+  "anchorY": 0.4983031674208145,
+  "opening": [
+    0,
+    0
+  ],
+  "loop": [
+    0,
+    15
+  ],
+  "exit": [
+    15,
+    15
+  ],
+  "frameMs": 80,
+  "origin": "caster",
+  "delivery": "instant",
+  "orient": false,
+  "imageWidth": 1254,
+  "imageHeight": 1254,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        34,
+        65,
+        287,
+        262
+      ],
+      "renderedPadding": [
+        98.5,
+        129.5,
+        90.5,
+        115.5
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        313,
+        0,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        26,
+        62,
+        290,
+        269
+      ],
+      "renderedPadding": [
+        90.0,
+        126.5,
+        88.0,
+        108.5
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        627,
+        0,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        20,
+        63,
+        292,
+        273
+      ],
+      "renderedPadding": [
+        84.5,
+        127.5,
+        85.5,
+        104.5
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        940,
+        0,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        22,
+        63,
+        295,
+        271
+      ],
+      "renderedPadding": [
+        86.0,
+        127.5,
+        83.0,
+        106.5
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        313,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        17,
+        55,
+        301,
+        265
+      ],
+      "renderedPadding": [
+        81.5,
+        119.0,
+        76.5,
+        113.0
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        313,
+        313,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        12,
+        49,
+        301,
+        266
+      ],
+      "renderedPadding": [
+        76.0,
+        113.0,
+        77.0,
+        112.0
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        627,
+        313,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        17,
+        47,
+        296,
+        267
+      ],
+      "renderedPadding": [
+        81.5,
+        111.0,
+        81.5,
+        111.0
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        940,
+        313,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        16,
+        51,
+        299,
+        266
+      ],
+      "renderedPadding": [
+        80.0,
+        115.0,
+        79.0,
+        112.0
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        627,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        20,
+        40,
+        298,
+        263
+      ],
+      "renderedPadding": [
+        84.5,
+        104.5,
+        79.5,
+        114.5
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        313,
+        627,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        7,
+        41,
+        312,
+        262
+      ],
+      "renderedPadding": [
+        71.0,
+        105.5,
+        66.0,
+        115.5
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        627,
+        627,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        8,
+        45,
+        305,
+        265
+      ],
+      "renderedPadding": [
+        72.5,
+        109.5,
+        72.5,
+        112.5
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        940,
+        627,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        13,
+        40,
+        301,
+        262
+      ],
+      "renderedPadding": [
+        77.0,
+        104.5,
+        77.0,
+        115.5
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        940,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        16,
+        38,
+        303,
+        262
+      ],
+      "renderedPadding": [
+        80.5,
+        102.0,
+        74.5,
+        116.0
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        313,
+        940,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        16,
+        40,
+        299,
+        262
+      ],
+      "renderedPadding": [
+        80.0,
+        104.0,
+        79.0,
+        116.0
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        627,
+        940,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        9,
+        39,
+        304,
+        263
+      ],
+      "renderedPadding": [
+        73.5,
+        103.0,
+        73.5,
+        115.0
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        940,
+        940,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        20,
+        35,
+        298,
+        262
+      ],
+      "renderedPadding": [
+        84.0,
+        99.0,
+        80.0,
+        116.0
+      ]
+    }
+  ],
+  "virtualWidth": 442,
+  "virtualHeight": 442,
+  "contentWidthRatio": 0.6900452488687783,
+  "contentHeightRatio": 0.5135746606334841,
+  "alphaDiscard": 8,
+  "status": "ready",
+  "groundOrigin": false,
+  "anchorX": 0.5005656108597285,
+  "qa": {
+    "paddingPass": true,
+    "renderedPaddingPass": true,
+    "alphaDiscard": 8,
+    "rawPerimeterAlphaPass": false,
+    "sourceSeparatorsClear": true,
+    "sourcePixelsUnmodified": true,
+    "frameCount": 16,
+    "note": "Renderer discards alpha <=8/255; source PNG is retained unchanged. Padding belongs to shared virtual canvas."
+  }
+}

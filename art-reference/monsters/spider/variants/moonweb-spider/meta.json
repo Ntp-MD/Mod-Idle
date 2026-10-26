@@ -1,0 +1,503 @@
+{
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "spider",
+  "variantId": "moonweb-spider",
+  "name": "Moonweb Spider",
+  "levels": [
+    81,
+    100
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-anchor-at-224",
+  "grid": {
+    "columns": 8,
+    "rows": 5,
+    "totalFrames": 40
+  },
+  "states": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    {
+      "state": "idle",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "walk",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "attack",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "hit",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "death",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    }
+  ],
+  "sourceFrames": [
+    {
+      "x": 114,
+      "y": 150,
+      "width": 179,
+      "height": 142,
+      "offsetX": 114,
+      "offsetY": 150
+    },
+    {
+      "x": 502,
+      "y": 152,
+      "width": 175,
+      "height": 142,
+      "offsetX": 118,
+      "offsetY": 152
+    },
+    {
+      "x": 881,
+      "y": 150,
+      "width": 176,
+      "height": 142,
+      "offsetX": 113,
+      "offsetY": 150
+    },
+    {
+      "x": 1261,
+      "y": 154,
+      "width": 174,
+      "height": 138,
+      "offsetX": 109,
+      "offsetY": 154
+    },
+    {
+      "x": 1638,
+      "y": 152,
+      "width": 174,
+      "height": 130,
+      "offsetX": 102,
+      "offsetY": 152
+    },
+    {
+      "x": 2014,
+      "y": 152,
+      "width": 175,
+      "height": 140,
+      "offsetX": 94,
+      "offsetY": 152
+    },
+    {
+      "x": 2393,
+      "y": 152,
+      "width": 178,
+      "height": 142,
+      "offsetX": 89,
+      "offsetY": 152
+    },
+    {
+      "x": 2783,
+      "y": 154,
+      "width": 175,
+      "height": 141,
+      "offsetX": 95,
+      "offsetY": 154
+    },
+    {
+      "x": 112,
+      "y": 540,
+      "width": 179,
+      "height": 133,
+      "offsetX": 112,
+      "offsetY": 156
+    },
+    {
+      "x": 494,
+      "y": 540,
+      "width": 183,
+      "height": 137,
+      "offsetX": 110,
+      "offsetY": 156
+    },
+    {
+      "x": 878,
+      "y": 540,
+      "width": 179,
+      "height": 136,
+      "offsetX": 110,
+      "offsetY": 156
+    },
+    {
+      "x": 1260,
+      "y": 540,
+      "width": 174,
+      "height": 136,
+      "offsetX": 108,
+      "offsetY": 156
+    },
+    {
+      "x": 1645,
+      "y": 541,
+      "width": 167,
+      "height": 135,
+      "offsetX": 109,
+      "offsetY": 157
+    },
+    {
+      "x": 2016,
+      "y": 541,
+      "width": 178,
+      "height": 136,
+      "offsetX": 96,
+      "offsetY": 157
+    },
+    {
+      "x": 2395,
+      "y": 541,
+      "width": 181,
+      "height": 133,
+      "offsetX": 91,
+      "offsetY": 157
+    },
+    {
+      "x": 2784,
+      "y": 539,
+      "width": 176,
+      "height": 133,
+      "offsetX": 96,
+      "offsetY": 155
+    },
+    {
+      "x": 112,
+      "y": 923,
+      "width": 180,
+      "height": 135,
+      "offsetX": 112,
+      "offsetY": 155
+    },
+    {
+      "x": 501,
+      "y": 902,
+      "width": 183,
+      "height": 158,
+      "offsetX": 117,
+      "offsetY": 134
+    },
+    {
+      "x": 877,
+      "y": 912,
+      "width": 188,
+      "height": 147,
+      "offsetX": 109,
+      "offsetY": 144
+    },
+    {
+      "x": 1251,
+      "y": 930,
+      "width": 183,
+      "height": 134,
+      "offsetX": 99,
+      "offsetY": 162
+    },
+    {
+      "x": 1641,
+      "y": 930,
+      "width": 182,
+      "height": 134,
+      "offsetX": 105,
+      "offsetY": 162
+    },
+    {
+      "x": 2010,
+      "y": 912,
+      "width": 183,
+      "height": 146,
+      "offsetX": 90,
+      "offsetY": 144
+    },
+    {
+      "x": 2391,
+      "y": 899,
+      "width": 183,
+      "height": 161,
+      "offsetX": 87,
+      "offsetY": 131
+    },
+    {
+      "x": 2783,
+      "y": 924,
+      "width": 178,
+      "height": 136,
+      "offsetX": 95,
+      "offsetY": 156
+    },
+    {
+      "x": 110,
+      "y": 1309,
+      "width": 177,
+      "height": 135,
+      "offsetX": 110,
+      "offsetY": 157
+    },
+    {
+      "x": 494,
+      "y": 1311,
+      "width": 181,
+      "height": 132,
+      "offsetX": 110,
+      "offsetY": 159
+    },
+    {
+      "x": 884,
+      "y": 1311,
+      "width": 168,
+      "height": 133,
+      "offsetX": 116,
+      "offsetY": 159
+    },
+    {
+      "x": 1268,
+      "y": 1313,
+      "width": 164,
+      "height": 132,
+      "offsetX": 116,
+      "offsetY": 161
+    },
+    {
+      "x": 1640,
+      "y": 1313,
+      "width": 164,
+      "height": 131,
+      "offsetX": 104,
+      "offsetY": 161
+    },
+    {
+      "x": 2018,
+      "y": 1312,
+      "width": 165,
+      "height": 132,
+      "offsetX": 98,
+      "offsetY": 160
+    },
+    {
+      "x": 2391,
+      "y": 1317,
+      "width": 184,
+      "height": 127,
+      "offsetX": 87,
+      "offsetY": 165
+    },
+    {
+      "x": 2783,
+      "y": 1309,
+      "width": 178,
+      "height": 135,
+      "offsetX": 95,
+      "offsetY": 157
+    },
+    {
+      "x": 121,
+      "y": 1707,
+      "width": 168,
+      "height": 121,
+      "offsetX": 121,
+      "offsetY": 171
+    },
+    {
+      "x": 496,
+      "y": 1709,
+      "width": 176,
+      "height": 119,
+      "offsetX": 112,
+      "offsetY": 173
+    },
+    {
+      "x": 877,
+      "y": 1718,
+      "width": 170,
+      "height": 110,
+      "offsetX": 109,
+      "offsetY": 182
+    },
+    {
+      "x": 1259,
+      "y": 1725,
+      "width": 174,
+      "height": 100,
+      "offsetX": 107,
+      "offsetY": 189
+    },
+    {
+      "x": 1643,
+      "y": 1713,
+      "width": 160,
+      "height": 115,
+      "offsetX": 107,
+      "offsetY": 177
+    },
+    {
+      "x": 2020,
+      "y": 1722,
+      "width": 173,
+      "height": 104,
+      "offsetX": 100,
+      "offsetY": 186
+    },
+    {
+      "x": 2400,
+      "y": 1723,
+      "width": 175,
+      "height": 108,
+      "offsetX": 96,
+      "offsetY": 187
+    },
+    {
+      "x": 2782,
+      "y": 1725,
+      "width": 179,
+      "height": 98,
+      "offsetX": 94,
+      "offsetY": 189
+    }
+  ],
+  "identityReference": "art-reference/monsters/spider/animation/atlas/animation.png",
+  "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+  "generation": {
+    "sourceOutputs": [
+      "exec-0bfe0b86-90f5-4556-9f21-d2117d4b4a50.png"
+    ],
+    "identityReference": "art-reference/monsters/spider/animation/atlas/animation.png",
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "variantCue": "subtle pale silver markings on the back and legs, no glow",
+    "initialPrompt": "Moonweb Spider; all 8 directions for idle, walk, attack, hit, death; dark outline without fringe or halo."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "raw-connected-pose-repack-384-v1",
+    "sourceCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "sourceImageSha256": "0005e0c7a311b051f1617cab2e932725d6ee4b12d8b5b092530ffeec8049197a",
+    "sourceAlphaThreshold": 128,
+    "edgeAlphaRecoveryRadius": 3,
+    "minimumCellPadding": 24,
+    "primaryPoses": 40,
+    "sourceComponents": 40,
+    "rowMedianBottoms": [
+      183,
+      372,
+      564,
+      758,
+      946
+    ],
+    "uniformScale": 1.0
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+    ]
+  }
+}

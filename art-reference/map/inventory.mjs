@@ -4,9 +4,9 @@ import { fileURLToPath } from 'node:url';
 
 const kit=path.dirname(fileURLToPath(import.meta.url)),root=path.resolve(kit,'../..');
 const originals=JSON.parse(fs.readFileSync(path.join(kit,'source-assets.json')));
-const catalogue=fs.readFileSync(path.join(root,'game/src/ui/map-terrain.ts'),'utf8');
+const catalogue=fs.readFileSync(path.join(root,'game/src/ui/map/map-terrain.ts'),'utf8');
 const entries=[...catalogue.matchAll(/^\s+([a-z]+): '([^']+)'/gm)].map(m=>({key:m[1],href:m[2]}));
-const footprints=JSON.parse(fs.readFileSync(path.join(root,'game/src/ui/map-terrain-footprints.json')));
+const footprints=JSON.parse(fs.readFileSync(path.join(root,'game/src/ui/map/data/map-terrain-footprints.json')));
 const rows=originals.map(({original,stem,source,category})=>{
   if(!fs.existsSync(path.join(root,source)))throw new Error(`Missing original asset: ${source}`);
   const candidates=fs.readdirSync(path.join(root,'game/public/map',category)).filter(f=>f.endsWith('.png'));

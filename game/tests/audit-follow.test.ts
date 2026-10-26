@@ -9,7 +9,7 @@ import { slotsAvailable, slotsUsed } from '../src/sim/slots';
 import { condense, craftPotion, farm } from '../src/sim/farm';
 import { canCook, cookMeal, establishCamp } from '../src/sim/fieldwork';
 import { castOnce, effectsActive, newSkillState, paySkillXp } from '../src/sim/skills';
-import { playerSwing, mobSwing } from '../src/sim/combat';
+import { mobSwing } from '../src/sim/combat';
 import { emptyGear, type Character } from '../src/sim/player';
 import { NO_CURSE } from '../src/sim/curse';
 import { exportJson, importJson } from '../src/state/save';
@@ -19,7 +19,7 @@ import { switchPreset } from '../src/sim/presets';
 import type { Item, Mob } from '../src/sim/types';
 import { mobFixture } from './mobFixture';
 
-const craft = createCraft(ED, loot);
+const craft = createCraft(ED, loot, BASES);
 const armour = (): Item => {
   const frame = BASES.bases.find((b) => b.school === 'armour_flat')!;
   return { slot: frame.slot, base: frame.name, ilvl: E.opening.level, quality: 'low', tier: 'T1', q: 0, lines: [], weight: frame.weight };

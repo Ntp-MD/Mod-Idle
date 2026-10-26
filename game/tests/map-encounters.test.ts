@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { E, eng } from '../src/engine/client';
 import { mobIcon } from '../src/icon';
-import { nearbyMapEncounters, type MapEncounterSite } from '../src/ui/map-encounters';
-import { mapSpeciesArt } from '../src/ui/map-species-art';
+import { nearbyMapEncounters, type MapEncounterSite } from '../src/ui/map/map-encounters';
+import { mapSpeciesArt } from '../src/ui/map/map-species-art';
 
 const site = (key: string, q: number, r: number, species = 'Kobold'): MapEncounterSite => ({ key, q, r, species });
 describe('nearby map encounters', () => {

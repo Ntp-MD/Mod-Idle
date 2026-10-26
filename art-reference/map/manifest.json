@@ -1,35 +1,35 @@
 {
-    "generatedAtUtc":  "2026-10-23T06:34:32.4625037+00:00",
+    "generatedAtUtc":  "2026-10-25T03:28:24.8722493+00:00",
     "integrationWarnings":  [
 
                             ],
     "sources":  [
                     {
                         "sha256":  "9a6ec48daf6fdaac115cd1d746a26f4aec4b7dde72d56d86a3f44868114664ee",
-                        "path":  "game/src/ui/map-projection.ts"
+                        "path":  "game/src/ui/map/map-projection.ts"
                     },
                     {
                         "sha256":  "2584150620f78880e45e726be8f10ebf420fd673e24da7586ab212fa4cf76873",
                         "path":  "art-reference/map/geometry/terrain-hex.json"
                     },
                     {
-                        "sha256":  "f88393dc930179615182e627651d75b31e2d791d2247ee6526d7452061b438f8",
+                        "sha256":  "27ebcd1964377aa07fc683eb2d0514377995969ee5aea178dcb168685600fea7",
                         "path":  "tools/map.ts"
                     },
                     {
                         "sha256":  "9328525ef0ebffaa8c4cc4ae53cbf1ece96b590b43b9d1c76b43e4472faf5477",
-                        "path":  "game/src/ui/map-terrain.ts"
+                        "path":  "game/src/ui/map/map-terrain.ts"
                     },
                     {
                         "sha256":  "e25cf909c25ce6b39a41a84727102b01bf88e330655ab831e5b9963e1047b7c2",
-                        "path":  "game/src/ui/map-terrain-footprints.json"
+                        "path":  "game/src/ui/map/data/map-terrain-footprints.json"
                     },
                     {
                         "sha256":  "39916ecde5a7c911c4a80d51ba8a3fb1c0f5cdee4a2868b87b13b4fabb4593da",
                         "path":  "art-reference/map/source-assets.json"
                     },
                     {
-                        "sha256":  "01e13041def9b6604a54ea14eff847797b7fbc9129c7824bd9616fbd451b7540",
+                        "sha256":  "051b7b99a9ace78c711cfda867092a04dd48a4046ca165d5bb1af58d29c4161d",
                         "path":  "docs/map-art.md"
                     },
                     {

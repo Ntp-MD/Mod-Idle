@@ -100,6 +100,8 @@ A row may name one status it exploits (`bonus_vs_status`, `consume_status` or `s
 
 ## Combat order
 
+Live player skill selection uses `distance(enemy, center) <= area.radius_m` in ground meters, including the boundary. `area.origin` chooses the caster position or the nearest acquired target; target acquisition uses `combat_arena.range`. Positive radii have no target-count cap. Zero radius selects the acquired target alone. Offline casts retain the `targets` count approximation. The existing damage shares and multi-target Mana premium are applied to the resolved set; the primary receives the full press and each additional target receives `aoe.per_target_pct` of the press.
+
 One hit runs perfect dodge → Evasion → block → Armour → resistance → damage taken → ES → HP.
 
 - `sizeMultOf` is one multiplier on the physical share, applied after mitigation; skill presses carry it, magic-damage presses are exempt.

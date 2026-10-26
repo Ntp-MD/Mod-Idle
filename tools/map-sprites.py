@@ -17,5 +17,5 @@ for path in sorted((public / 'map').rglob('*.png')):
             left, top, right, bottom = box
             bounds['/' + path.relative_to(public).as_posix()] = [
                 *image.size, left, top, right - left, bottom - top]
-(root / 'game/src/ui/map-sprite-bounds.json').write_text(
+(root / 'game/src/ui/map/data/map-sprite-bounds.json').write_text(
     json.dumps(bounds, indent=2) + '\n', encoding='utf-8')

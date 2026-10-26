@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { newGame as newGameForHud } from '../src/sim/game';
 import { E, loot } from '../src/engine/client';
-import { pieceRank, rankTone, gearEntry, stackEntry, sortEntries, vsWorn, compareLines } from '../src/ui/bag';
-import { castForHit, fxByMob, plateBeat, platePark, plateStrike, plateGesture, graveIds, parked, windupOf } from '../src/ui/plate';
-import { ramp } from '../src/ui/map';
-import { snapCounters, buildAwayReport, fieldLabel, describeSnap, mechanicWords, sideSpawnWords } from '../src/ui/hud';
-import { bar, curseWords, statusWords } from '../src/ui/field';
+import { pieceRank, rankTone, gearEntry, stackEntry, sortEntries, vsWorn, compareLines } from '../src/ui/inventory/bag';
+import { castForHit, fxByMob, plateBeat, platePark, plateStrike, plateGesture, graveIds, parked, windupOf } from '../src/ui/combat/plate';
+import { ramp } from '../src/ui/map/map';
+import { snapCounters, buildAwayReport, fieldLabel, describeSnap, mechanicWords, sideSpawnWords } from '../src/ui/hud/hud';
+import { bar, curseWords, statusWords } from '../src/ui/shared/field';
 import type { Item, Mob, FxEvent } from '../src/sim/types';
 import type { BagStack } from '../src/sim/slots';
 
@@ -207,6 +207,22 @@ describe('the field HUD reads (hud.ts)', () => {
     expect(rep.levels).toBe(0);
     expect(rep.mins).toBe(90);
     expect(rep.quality).toBe(before.quality);
+  });
+
+  it('captures earned skill copies and points without counting the starting collection twice', () => {
+    const s = newGameForHud();
+    s.skills.owned.fireball = 2;
+    const before = snapCounters(s);
+    s.skills.owned.fireball += 2;
+    s.skills.owned.cleanse = 1;
+    s.player.treePoints += 3;
+    s.player.attainmentPoints = (s.player.attainmentPoints ?? 0) + 1;
+    const rep = buildAwayReport(before, 30, 1800, false, s);
+    expect(before.skills.fireball).toBe(2);
+    expect(rep.newSkills).toEqual(['cleanse']);
+    expect(rep.skillCopies).toBe(4);
+    expect(rep.treePoints).toBe(3);
+    expect(rep.attainment).toBe(1);
   });
 
   it('labels a spawn off its own ladder rung, and a boss by its name', () => {

@@ -1,7 +1,28 @@
 import { describe, expect, it } from 'vitest';
-import { isAdvancedStone, modesForStone } from '../src/ui/craft-use';
+import { isAdvancedStone, modesForStone, stoneUseReason } from '../src/ui/inventory/craft-use';
+import { newGame } from '../src/sim/game';
+import { imprintStones } from '../src/ui/inventory/stones';
+import type { Item } from '../src/sim/types';
 
 describe('craft bench disclosure', () => {
+  it('keeps a legacy excluded Imprint visible and explains why no line accepts it', () => {
+    const game = newGame();
+    const key = 'imprint_elemental_resistance_cap_pct';
+    game.counters.stones[key] = 2;
+    const item: Item = { slot: 'ring', base: 'ring', ilvl: 30, quality: 'low', tier: 'T1', q: 0, lines: [
+      { id: 'max_hp_flat', value: 40 }, { id: 'armour_flat', value: 8 },
+      { id: 'max_mana_flat', value: 15 }, { id: 'life_regen', value: 5 },
+    ] };
+    game.bag.push(item);
+    const [stone] = imprintStones(game.counters.stones);
+    expect(stone.count).toBe(2);
+    expect(stone.detail).toMatch(/cannot be Imprinted/);
+    for (const line of [null, 0, 1, 3]) {
+      expect(stoneUseReason(game, item, 'bag', 0, { op: 'imprint', target: 'line' }, line,
+        'elemental_resistance_cap_pct', true)).toMatch(/cannot be Imprinted/);
+    }
+  });
+
   it('keeps whole-piece presses out of the basic view', () => {
     expect(modesForStone('tier', false).map((mode) => mode.op)).toEqual(['refine', 'randomize', 'reroll_mod']);
     expect(modesForStone('tier', true).map((mode) => mode.op)).toContain('reroll_mod_all');

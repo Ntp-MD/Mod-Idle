@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "status": "user-reference",
+  "species": "spider",
+  "title": "Spider",
+  "source": {
+    "provider": "itch.io",
+    "url": "https://img.itch.zone/aW1nLzMxMjEzOTgxLmdpZg==/original/Gzo%2F5z.gif",
+    "kind": "animated preview card",
+    "sourceCanvas": [
+      144,
+      144
+    ]
+  },
+  "extraction": {
+    "removedOverlays": [
+      "ornamental card frame",
+      "in-card species title",
+      "clip caption",
+      "PREVIEW wash"
+    ],
+    "method": "invert the wash blend shown=0.45*[238, 225, 186]+0.55*underlying, then drop ground-coloured pixels and keep body-connected components inside the motion range",
+    "washBlend": {
+      "alpha": 0.45,
+      "colour": [
+        238,
+        225,
+        186
+      ]
+    },
+    "background": "transparent",
+    "alignment": "each clip shares one crop box; frames keep their in-clip offsets so the ground line is fixed"
+  },
+  "clips": {
+    "idle": {
+      "file": "clips/idle.png",
+      "frames": 4,
+      "cell": [
+        45,
+        37
+      ],
+      "sourceBox": [
+        49,
+        42,
+        94,
+        79
+      ],
+      "frameMs": 750,
+      "durations": [
+        900,
+        520,
+        1060,
+        520
+      ],
+      "loop": true
+    },
+    "walk": {
+      "file": "clips/walk.png",
+      "frames": 7,
+      "cell": [
+        44,
+        38
+      ],
+      "sourceBox": [
+        49,
+        42,
+        93,
+        80
+      ],
+      "frameMs": 143,
+      "durations": [
+        170,
+        160,
+        170,
+        170,
+        160,
+        80,
+        90
+      ],
+      "loop": true
+    },
+    "attack": {
+      "file": "clips/attack.png",
+      "frames": 8,
+      "cell": [
+        47,
+        39
+      ],
+      "sourceBox": [
+        48,
+        40,
+        95,
+        79
+      ],
+      "frameMs": 86,
+      "durations": [
+        90,
+        70,
+        60,
+        50,
+        80,
+        160,
+        90,
+        90
+      ],
+      "loop": false,
+      "impactFrame": 2
+    },
+    "death": {
+      "file": "clips/death.png",
+      "frames": 13,
+      "cell": [
+        47,
+        45
+      ],
+      "sourceBox": [
+        48,
+        38,
+        95,
+        83
+      ],
+      "frameMs": 138,
+      "durations": [
+        80,
+        50,
+        60,
+        70,
+        80,
+        70,
+        70,
+        60,
+        70,
+        50,
+        60,
+        70,
+        1000
+      ],
+      "loop": false
+    }
+  },
+  "review": {
+    "frameMs": {
+      "idle": 220,
+      "walk": 130,
+      "attack": 60,
+      "death": 110
+    },
+    "impactFrame": {
+      "attack": 2
+    },
+    "displayHeight": 224,
+    "facing": "east",
+    "notes": []
+  }
+}

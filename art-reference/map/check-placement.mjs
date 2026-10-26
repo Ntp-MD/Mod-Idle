@@ -8,7 +8,7 @@ const kit = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(kit, '../..');
 const names = process.argv.slice(2);
 if (!names.length) throw new Error('Usage: node art-reference/map/check-placement.mjs snow-1 [grass-1 ...]');
-const footprints = JSON.parse(fs.readFileSync(path.join(root, 'game/src/ui/map-terrain-footprints.json')));
+const footprints = JSON.parse(fs.readFileSync(path.join(root, 'game/src/ui/map/data/map-terrain-footprints.json')));
 const svg = fs.readFileSync(path.join(root, 'game/src/icon/map/map-overlay.svg'), 'utf8');
 const guide = svg.match(/class="hex-calibration"[^>]*><polygon points="([^"]+)"/);
 assert.ok(guide, 'Generated map has no footprint guide');

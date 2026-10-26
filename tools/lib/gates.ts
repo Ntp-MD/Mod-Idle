@@ -48,8 +48,6 @@ export function gates() {
   };
 }
 
-export type Gates = ReturnType<typeof gates>;
-
 /**
  * Print every row, then the problems a cage collected beside them, then the one verdict line, and
  * set `process.exitCode` if any gate FAILed. A PENDING row never reaches the exit code.

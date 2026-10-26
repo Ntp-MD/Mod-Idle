@@ -94,17 +94,8 @@
       "beetle": ["mob.physical.cleave"],
       "hornet": ["mob.lightning.static-jab"],
       "ooze": ["mob.poison.toxic-cloud"],
-      "mist": ["mob.chaos.unreal-veil"],
-      "salamander": ["mob.fire.flame-guard"],
       "wisp": ["mob.lightning.storm-mantle"],
-      "shark": ["mob.poison.serpent-strike"],
-      "crab": ["mob.earth.stone-guard"],
-      "archon": ["mob.lightning.thunderclap"],
-      "briarling": ["mob.poison.miasma"],
-      "harpy": ["mob.lightning.chain-spark"],
-      "barghest": ["mob.cold.winter-howl"],
-      "miretoad": ["mob.poison.toxic-cloud", "mob.poison.miasma"],
-      "glassserpent": ["mob.cold.rime-snare"]
+      "harpy": ["mob.lightning.chain-spark"]
     },
     "variants": {
       "Shaman Goblin": ["mob.fire.ember-lash", "mob.fire.flame-guard"]

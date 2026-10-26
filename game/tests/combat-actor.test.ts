@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { E } from '../src/engine/client';
-import { actorAction, actorArt, actorBeats, actorPrepareMs, actorProfile, actorReaction } from '../src/ui/combat-actor';
+import { actorAction, actorArt, actorBeats, actorPrepareMs, actorProfile, actorReaction, plateArt } from '../src/ui/combat/combat-actor';
 import type { FxEvent } from '../src/sim/types';
 import { mobFixture } from './mobFixture';
 
@@ -76,15 +76,25 @@ describe('combat actor events', () => {
 });
 
 describe('combat actor artwork', () => {
-  it('uses existing retained full-body paintings for every canonical species, never species pictograms', () => {
+  it('uses a retained map painting where one exists and the white species icon otherwise', () => {
     for (const row of E.mob.species) {
       const art = actorArt({ speciesId: row.id, species: row.name });
       expect(art, row.id).not.toBeNull();
-      expect(art!.href, row.id).toMatch(/(?:\/map\/characters\/species\/[^/]+\/old-[^/]+|\/src\/icon\/mob\/sprite\/[^/]+)\.png$/);
+      expect(art!.href, row.id).toMatch(/(?:\/map\/characters\/species\/[^/]+\/old-[^/]+|\/src\/icon\/mob\/icon\/[^/]+)\.png$/);
       const path = art!.href.startsWith('/map/') ? `../public${art!.href}` : `..${art!.href}`;
       expect(existsSync(fileURLToPath(new URL(path, import.meta.url))), art!.href).toBe(true);
       expect(art!.imageWidth).toBeGreaterThan(0);
       expect(art!.imageHeight).toBeGreaterThan(0);
+    }
+  });
+
+  it('draws the canonical white mob icon in FieldPlates for every species', () => {
+    for (const row of E.mob.species) {
+      const art = plateArt({ speciesId: row.id, species: row.name });
+      expect(art, row.id).not.toBeNull();
+      expect(art!.href, row.id).toMatch(/\/src\/icon\/mob\/icon\/[^/]+\.png$/);
+      expect(art!.icon, row.id).toBe(true);
+      expect(existsSync(fileURLToPath(new URL(`..${art!.href}`, import.meta.url))), art!.href).toBe(true);
     }
   });
 

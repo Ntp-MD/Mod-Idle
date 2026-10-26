@@ -4,7 +4,7 @@ import { newGame } from '../src/sim/game';
 import { startWalk, warpCost } from '../src/sim/road';
 import { establishCamp, fieldActionProblem, startFieldAction } from '../src/sim/fieldwork';
 import { enterDungeon } from '../src/sim/dungeon';
-import { destinationPrimary, type MapDestination } from '../src/ui/destination';
+import { destinationPrimary, type MapDestination } from '../src/ui/map/destination';
 
 const destination = (patch: Partial<MapDestination> = {}): MapDestination => ({
   key: 'H10', kind: 'sub', label: 'Selected ground', node: null, sub: 0, wild: null,

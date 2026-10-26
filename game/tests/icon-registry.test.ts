@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BASES, SKILLS, trade } from '../src/engine/client';
 import { characterIcon, gearIcon, icon, skillIcon, stackIcon } from '../src/icon';
-import { stackEntry } from '../src/ui/bag';
+import { stackEntry } from '../src/ui/inventory/bag';
 
 const groupFor: Record<string, string> = { material: 'materials', food: 'food', herb: 'herbs', junk: 'junk' };
 

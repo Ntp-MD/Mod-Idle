@@ -34,26 +34,17 @@
     --motion-travel: 650ms;
     --ease-ui: ease;
     --ease-out: ease-out;
-    --ease-linear: linear;
     --ease-glide: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-    /* Shared stacking order; small values are component-local layers. */
+    /* Shared stacking order for layers that cross components. */
     --z-underlay: 1;
     --z-content: 2;
-    --z-effect: 3;
     --z-highlight: 4;
-    --z-control: 5;
     --z-floater: 6;
     --z-label: 7;
     --z-toast: 8;
-    --z-travel: 35;
     --z-hud-control: 40;
-    --z-panel: 60;
-    --z-navigation: 70;
-    --z-popover-backdrop: 79;
     --z-popover: 80;
-    --z-notice: 90;
-    --z-screen-guard: 200;
 
     --focus: #7fd4ff;
 
@@ -92,8 +83,6 @@
 
     --face-top: #1c2430;
     --face-floor: #0d1218;
-    --orb-top: #242e3c;
-    --orb-floor: #10151d;
     --hot-deep: #a33428;
 
     --inset: #12151b;
@@ -101,11 +90,6 @@
 
     --sheet-ink: #cfd8e3;
     --sheet-place: #f2e7d0;
-    --sheet-id: #6d7987;
-    --pin-here: #12a06a;
-    --pin-here-glow: #2ee59a;
-    --pin-target: #e2503f;
-    --pin-target-glow: #ff6b5c;
     --ui: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
     --num: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
 
@@ -141,17 +125,11 @@
     --spacing-md: 15px;
     --spacing-lg: 20px;
     --spacing-xl: 40px;
-    --seam: 1px;
-
-    --sheet-fs-region: clamp(9px, 0.54vw, 15px);
-    --sheet-fs-walk: clamp(8px, 0.4vw, 11px);
-    --sheet-fs-place: clamp(9px, 0.5vw, 14px);
-    --sheet-fs-capital: clamp(10px, 0.6vw, 17px);
-    --sheet-fs-zonename: clamp(8px, 0.46vw, 13px);
-    --sheet-fs-id: clamp(7px, 0.4vw, 11px);
-    --x-pull-arc: clamp(-46px, -1.65vw, -21px);
-    --x-pull-burst: clamp(-32px, -1.16vw, -15px);
-    --x-pull-scale: clamp(-14px, -0.48vw, -6px);
+    /* Card tiers: a primary surface and the compact tile inside it. */
+    --card-pad: var(--spacing-md);
+    --card-gap: var(--spacing-sm);
+    --tile-pad: var(--spacing-sm);
+    --tile-gap: var(--spacing-xs);
     --x-pull-note: clamp(-11px, -0.39vw, -5px);
 }
 * { box-sizing: border-box; }
@@ -235,25 +213,74 @@ td .sub { display: block; color: var(--dim); font-size: var(--font-xs); }
 .zone[open] > summary { border-bottom: 1px solid var(--line); }
 .zone-body { display: grid; gap: var(--spacing-sm); padding: .1rem .8rem .8rem; }
 @media (max-width: 40rem) { .zone > summary { display: grid; gap: var(--spacing-xs); } .zone-meta { display: block; } }
-.race-roster { display: grid; gap: var(--spacing-md); }
-.race-group { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); padding: .65rem; }
-.race-group > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-md); border-bottom: 1px solid var(--line); padding: 0 .2rem .4rem; color: var(--dim); }
-.race-group > header h3 { color: var(--gold); font-size: var(--font-xs); }
-.race-group > header span, .species-count { font-family: var(--num); font-size: var(--font-xs); }
-.race-empty { color: var(--dim); font-size: var(--font-xs); }
-.species-roster { display: grid; gap: var(--spacing-md); }
-.species-entry { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); padding: .65rem .8rem .8rem; }
-.species-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-md); border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
-.species-entry h4 { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .05em; }
-.species-entry > header h4 { color: var(--text); font-size: var(--font-sm); text-transform: none; letter-spacing: 0; }
-.species-count { color: var(--gold); }
-.species-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--spacing-sm) var(--spacing-md); }
-.species-facts div { display: grid; gap: var(--spacing-xs); min-width: 0; font-size: var(--font-xs); overflow-wrap: anywhere; }
-.species-facts b { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .04em; }
-.species-entry table { font-size: var(--font-xs); }
-.species-entry th, .species-entry td { padding: .28rem .4rem; overflow-wrap: anywhere; }
-@media (max-width: 58rem) { .species-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 36rem) { .species-facts { grid-template-columns: 1fr 1fr; } .species-entry { padding: .6rem; } }
+/* Bestiary: race-grouped plates. A plate's left spine is its attack Element. */
+.bestiary { display: grid; gap: 1.6rem; }
+.beast-tools { display: grid; gap: .75rem; padding: .95rem 1rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); }
+.beast-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; }
+.beast-search { flex: 1 1 18rem; min-width: 0; }
+.beast-search input { width: 100%; padding: .5rem .85rem; border: 1px solid var(--line); border-radius: var(--radius-pill); background: var(--panel); color: var(--text); font: inherit; font-size: .8rem; }
+.beast-search input::placeholder { color: color-mix(in srgb, var(--dim) 72%, transparent); }
+.beast-search input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
+.beast-status { color: var(--dim); font-family: var(--num); font-size: .7rem; white-space: nowrap; }
+.beast-chips { display: flex; flex-wrap: wrap; gap: .3rem; }
+.beast-chip { padding: .26rem .6rem; border: 1px solid var(--line); border-radius: var(--radius-pill); background: transparent; color: var(--dim); font: inherit; font-size: .7rem; cursor: pointer; }
+.beast-chip b { color: color-mix(in srgb, var(--dim) 75%, transparent); font-weight: 500; }
+.beast-chip:hover { color: var(--text); border-color: color-mix(in srgb, var(--gold) 30%, var(--line)); }
+.beast-chip[aria-pressed="true"] { border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); background: color-mix(in srgb, var(--gold) 11%, transparent); color: var(--gold-lit); }
+.beast-chip[aria-pressed="true"] b { color: var(--gold); }
+.beast-chip:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.beast-group { display: grid; gap: .55rem; }
+.beast-group[hidden] { display: none; }
+.beast-group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--line); }
+.beast-group-head h3 { color: var(--gold); font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; }
+.beast-group-head span { color: var(--dim); font-family: var(--num); font-size: .68rem; }
+.beast-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: .85rem; align-items: start; }
+.page-content [data-element="fire"] { --el: var(--hp-lit); }
+.page-content [data-element="cold"] { --el: var(--mana-lit); }
+.page-content [data-element="lightning"] { --el: var(--xp-lit); }
+.page-content [data-element="poison"] { --el: var(--good-lit); }
+.page-content [data-element="chaos"] { --el: var(--curse); }
+.page-content [data-element="earth"] { --el: var(--gold); }
+.page-content [data-element="physical"] { --el: var(--mob); }
+.beast-card { --el: var(--mob); display: grid; gap: .6rem; padding: .8rem .9rem .75rem 1rem; border: 1px solid var(--line); border-left: 3px solid var(--el); border-radius: var(--radius-card); background: var(--panel); }
+.beast-card:hover { border-color: color-mix(in srgb, var(--el) 42%, var(--line)); border-left-color: var(--el); }
+.beast-card[hidden] { display: none; }
+.beast-head { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+.beast-title { display: grid; gap: .1rem; min-width: 0; }
+.beast-title h4 { color: var(--text); font-family: var(--wiki-display); font-size: 1.12rem; font-weight: 500; line-height: 1.15; }
+.beast-sub { color: var(--dim); font-size: .7rem; }
+.beast-flag { padding: 0 .3rem; border: 1px solid color-mix(in srgb, var(--good) 45%, var(--line)); border-radius: var(--radius-pill); color: var(--good-lit); font-size: .6rem; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
+.beast-el { --el: var(--mob); display: inline-flex; align-items: center; gap: .32rem; flex: none; color: var(--el); font-family: var(--num); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.beast-el::before { content: ""; width: .42rem; height: .42rem; border-radius: 50%; background: var(--el); box-shadow: 0 0 .35rem color-mix(in srgb, var(--el) 60%, transparent); }
+.beast-el.sm { font-size: .58rem; }
+.beast-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .35rem .8rem; margin: 0; }
+.beast-facts div { display: grid; gap: .05rem; min-width: 0; }
+.beast-facts div:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.beast-facts dt { color: var(--dim); font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; }
+.beast-facts dd { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem; color: var(--text); font-size: .74rem; }
+.beast-bodies { display: inline-flex; gap: .22rem; }
+.beast-body { display: inline-grid; place-items: center; width: 1.05rem; height: 1.05rem; border: 1px solid var(--line); border-radius: 3px; color: var(--dim); font-family: var(--num); font-size: .58rem; text-decoration: none; cursor: help; }
+.beast-habitat { color: var(--dim); font-size: .7rem; text-transform: capitalize; }
+.beast-label { color: var(--dim); font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; padding-right: .4rem; }
+.beast-kit { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; }
+.beast-kit .tag { color: var(--text); }
+.beast-none { color: var(--dim); font-size: .7rem; }
+.beast-fold { border-top: 1px solid var(--line); padding-top: .5rem; }
+.beast-fold summary { color: var(--dim); font-size: .7rem; cursor: pointer; }
+.beast-fold summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.beast-fold summary:hover { color: var(--text); }
+.beast-fold summary b { color: var(--el, var(--gold)); font-family: var(--num); font-size: .66rem; font-weight: 500; }
+.beast-fold summary::marker { color: var(--el, var(--gold)); }
+.beast-fold[open] { display: grid; gap: .5rem; }
+.beast-fold-wide { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); padding: .8rem 1rem; }
+.beast-fold-wide[open] { gap: .9rem; }
+.beast-fold-wide summary { font-family: var(--wiki-display); font-size: .95rem; }
+.beast-fold-wide summary b { color: var(--gold); }
+.beast-table-wrap { overflow-x: auto; }
+.beast-fold table { font-size: .7rem; }
+.beast-fold th, .beast-fold td { padding: .28rem .35rem; }
+.beast-pc { color: var(--text); font-family: var(--num); }
+.beast-unique { color: var(--gold-lit); border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
 .legend { display: grid; gap: var(--spacing-xs); padding-left: 1.1rem; font-size: var(--font-xs); color: var(--dim); }
 .legend strong { color: var(--text); }
 .num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-card); padding: 0 .25rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; }
@@ -546,32 +573,35 @@ dl, dt, dd { margin: 0; }
 <nav class="wiki-nav" id="wiki-nav" aria-label="Manual chapters">
   <p class="nav-title">The manual</p>
   <section class="nav-group" aria-labelledby="nav-start">
-    <h2 id="nav-start"><span>I</span>Start here<b>3</b></h2>
-    <ul><li><a href="index.html" data-page-link data-title="Start here" data-group="Start here" data-search="Start here ModWorld — how to play Start here An open-world idle RPG. Your character fights while the window is open and while it is shut." class="">Start here</a></li><li><a href="progression.html" data-page-link data-title="Progression" data-group="Start here" data-search="Progression Progression Start here XP to next level = kills at that level × XP per kill. Skill, field-skill and Mastery tracks use separate XP curves." class="">Progression</a></li><li><a href="idle.html" data-page-link data-title="Away &amp; bag" data-group="Start here" data-search="Away &amp; bag Away, and what you can carry Start here Every whole elapsed second is credited, with no offline time limit. Away gear uses the band’s floor Item level; loot is not auto-converted." class="">Away &amp; bag</a></li></ul>
+    <h2 id="nav-start"><span>I</span>Getting started<b>3</b></h2>
+    <ul><li><a href="index.html" data-page-link data-title="Overview" data-group="Getting started" data-search="Overview ModWorld — how to play Getting started An open-world idle RPG. Your character fights while the window is open and while it is shut." class="">Overview</a></li><li><a href="progression.html" data-page-link data-title="Progression" data-group="Getting started" data-search="Progression Progression Getting started XP to next level = kills at that level × XP per kill. Skill, field-skill and Mastery tracks use separate XP curves." class="">Progression</a></li><li><a href="idle.html" data-page-link data-title="Away &amp; bag" data-group="Getting started" data-search="Away &amp; bag Away, and what you can carry Getting started Every whole elapsed second is credited, with no offline time limit. Away gear uses the band’s floor Item level; loot is not auto-converted." class="">Away &amp; bag</a></li></ul>
   </section><section class="nav-group" aria-labelledby="nav-character">
-    <h2 id="nav-character"><span>II</span>Character<b>7</b></h2>
-    <ul><li><a href="stats.html" data-page-link data-title="Stats &amp; caps" data-group="Character" data-search="Stats &amp; caps Stats and caps Character Seven Core attributes feed derived stats through the formulas and caps below." class="">Stats &amp; caps</a></li><li><a href="skills.html" data-page-link data-title="Skills" data-group="Character" data-search="Skills Skills Character Press damage = level-1 damage × damagePct(level) / 100 . Effects use effectPct ; Buffs and Auras use buffEffectPct . Special effects use their own ramp. Cap: 20." class="">Skills</a></li><li><a href="equipment.html" data-page-link data-title="Equipment" data-group="Character" data-search="Equipment Equipment Character Every slot that is not a main hand, frame by frame. The frame decides what it can roll; the roll decides what it is worth." class="">Equipment</a></li><li><a href="crafting.html" data-page-link data-title="Crafting" data-group="Character" data-search="Crafting Crafting Character Stones change what a piece is ; two of them also move how high it sits — Ascend the band, Upgrade the Gear line. At the settlement Craft bench, right-click a stone and click an equipped or carried item, or a highlighted Mod line for a targeted use. Hold Shift to keep using the stone; Esc or right-click cancels. Every price below is read, never typed." class="">Crafting</a></li><li><a href="survival.html" data-page-link data-title="Survival" data-group="Character" data-search="Survival Survival, field skills and provisions Character HP, Mana and Energy Shield use separate Core formulas. Fieldwork, Hunger and food use the rates below." class="">Survival</a></li><li><a href="passive-tree.html" data-page-link data-title="Passive tree" data-group="Character" data-search="Passive tree Passive tree Character The 775-node board the game draws, pannable here: drag to move, scroll to zoom, and jump by region. Every road, Notable and Keystone is the live tree data." class="">Passive tree</a></li><li><a href="builds.html" data-page-link data-title="Build plan" data-group="Character" data-search="Build plan Build plan Character A plan first: choose the regions your damage and defence scale on, walk one road to a Notable, and spend attainment on the Keystone that changes a rule. Skill pieces, presets and the finish line follow below." class="">Build plan</a></li></ul>
+    <h2 id="nav-character"><span>II</span>Character<b>4</b></h2>
+    <ul><li><a href="stats.html" data-page-link data-title="Stats &amp; caps" data-group="Character" data-search="Stats &amp; caps Stats and caps Character Seven Core attributes feed derived stats through the formulas and caps below." class="">Stats &amp; caps</a></li><li><a href="skills.html" data-page-link data-title="Skills" data-group="Character" data-search="Skills Skills Character Press damage = level-1 damage × damagePct(level) / 100 . Effects use effectPct ; Buffs and Auras use buffEffectPct . Special effects use their own ramp. Cap: 20." class="">Skills</a></li><li><a href="passive-tree.html" data-page-link data-title="Passive tree" data-group="Character" data-search="Passive tree Passive tree Character The 775-node board the game draws. Drag to pan, scroll to zoom, jump by region. Every road, Notable and Keystone is live tree data." class="">Passive tree</a></li><li><a href="builds.html" data-page-link data-title="Build plan" data-group="Character" data-search="Build plan Build plan Character A plan first: choose the regions your damage and defence scale on, walk one road to a Notable, and spend attainment on the Keystone that changes a rule. Skill pieces, presets and the finish line follow below." class="">Build plan</a></li></ul>
   </section><section class="nav-group" aria-labelledby="nav-combat">
     <h2 id="nav-combat"><span>III</span>Combat<b>3</b></h2>
-    <ul><li><a href="combat.html" data-page-link data-title="Combat" data-group="Combat" data-search="Combat Combat Combat One incoming hit resolves in a fixed order — avoidance, then Armour, then Elemental resistance, then a pool. Every number is the engine at the reference build (every point spent evenly across the seven Core attributes, level 190 ), so it is the line your own sheet is measured against, not a promise about it." class="">Combat</a></li><li><a href="elements.html" data-page-link data-title="Elements" data-group="Combat" data-search="Elements Elements Combat Every Element names the status its hits leave. A Species attacks with one Element and authors a separate resistance and weakness; no Element counters another. An Element declared ahead of its content reads a dash until its status and its skill rows land." class="">Elements</a></li><li><a href="mobs.html" data-page-link data-title="Bestiary" data-group="Combat" data-search="Bestiary Races, Species and Variants Combat 11 Races · 53 Species · 193 Variants · 53 Uniques. Counts describe the current world; Races and Species have no required roster size." class="">Bestiary</a></li></ul>
+    <ul><li><a href="combat.html" data-page-link data-title="Combat" data-group="Combat" data-search="Combat Combat Combat One incoming hit resolves in a fixed order — avoidance, then Armour, then Elemental resistance, then a pool. Every number is the engine at the reference build (every point spent evenly across the seven Core attributes, level 190 ), so it is the line your own sheet is measured against, not a promise about it." class="">Combat</a></li><li><a href="elements.html" data-page-link data-title="Elements" data-group="Combat" data-search="Elements Elements Combat Every Element names the status its hits leave. A Species attacks with one Element and authors a separate resistance and weakness; no Element counters another. An Element declared ahead of its content reads a dash until its status and its skill rows land." class="">Elements</a></li><li><a href="mobs.html" data-page-link data-title="Bestiary" data-group="Combat" data-search="Bestiary Bestiary Combat 11 races · 36 species · 156 variants · 36 uniques. Every species attacks with one Element — the spine on its plate — and carries its own resistance, weakness and junk." class="">Bestiary</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-gear">
+    <h2 id="nav-gear"><span>IV</span>Gear &amp; crafting<b>4</b></h2>
+    <ul><li><a href="items.html" data-page-link data-title="Items" data-group="Gear &amp; crafting" data-search="Items Items Gear &amp; crafting A piece of gear is a frame plus the Mods that rolled on it. The frame decides what it can roll; the roll decides what it is worth." class="">Items</a></li><li><a href="weapons.html" data-page-link data-title="Weapons" data-group="Gear &amp; crafting" data-search="Weapons Weapons Gear &amp; crafting 11 main-hand types. DPS index = attacksPerSecond × weaponMult / (sword attacksPerSecond × swordMult) × 100 . Frame windows use the mid band." class="">Weapons</a></li><li><a href="equipment.html" data-page-link data-title="Equipment" data-group="Gear &amp; crafting" data-search="Equipment Equipment Gear &amp; crafting Every slot that is not a main hand, frame by frame." class="">Equipment</a></li><li><a href="crafting.html" data-page-link data-title="Crafting" data-group="Gear &amp; crafting" data-search="Crafting Crafting Gear &amp; crafting Stones change what a piece is ; two of them also move how high it sits — Ascend the band, Upgrade the Gear line. At the settlement Craft bench, right-click a stone and click an equipped or carried item, or a highlighted Mod line for a targeted use. Hold Shift to keep using the stone; Esc or right-click cancels. Every price below is read, never typed." class="">Crafting</a></li></ul>
   </section><section class="nav-group" aria-labelledby="nav-world">
-    <h2 id="nav-world"><span>IV</span>World<b>3</b></h2>
-    <ul><li><a href="world.html" data-page-link data-title="World" data-group="World" data-search="World The world World Zone Level drives HP/DPS curves; body class changes group size, evasion and DPS factor." class="">World</a></li><li><a href="travel.html" data-page-link data-title="Travel" data-group="World" data-search="Travel Travel and the Waypoint World blocks = (|Δq| + |Δr| + |Δq + Δr|) / 2 ; walk time = blocks × block_sec ." class="">Travel</a></li><li><a href="towns.html" data-page-link data-title="Towns" data-group="World" data-search="Towns Settlements World Stall price = listed income-minutes × the seller band’s gold-per-minute rate." class="on" aria-current="page">Towns</a></li></ul>
-  </section><section class="nav-group" aria-labelledby="nav-economy">
-    <h2 id="nav-economy"><span>V</span>Items &amp; economy<b>3</b></h2>
-    <ul><li><a href="items.html" data-page-link data-title="Items" data-group="Items &amp; economy" data-search="Items Items Items &amp; economy A piece of gear is a frame plus the Mods that rolled on it. The frame decides what it can roll; the roll decides what it is worth." class="">Items</a></li><li><a href="weapons.html" data-page-link data-title="Weapons" data-group="Items &amp; economy" data-search="Weapons Weapons Items &amp; economy 11 main-hand types. DPS index = attacksPerSecond × weaponMult / (sword attacksPerSecond × swordMult) × 100 . Frame windows use the mid band." class="">Weapons</a></li><li><a href="economy.html" data-page-link data-title="Economy" data-group="Items &amp; economy" data-search="Economy The two currencies Items &amp; economy Trade quote = item value integrated over the town’s demand curve. Stall prices use band income; Crafting lists stone costs." class="">Economy</a></li></ul>
-  </section><section class="nav-group" aria-labelledby="nav-reference">
-    <h2 id="nav-reference"><span>VI</span>Reference<b>1</b></h2>
-    <ul><li><a href="icons.html" data-page-link data-title="Icons" data-group="Reference" data-search="Icons Icon Gallery Reference Every icon the game ships, in one place. Search by name, filter by category, star icons to find them again, or mark unwanted icons to hide them until you're ready to remove them in a batch." class="">Icons</a></li></ul>
+    <h2 id="nav-world"><span>V</span>World<b>3</b></h2>
+    <ul><li><a href="world.html" data-page-link data-title="World" data-group="World" data-search="World The world World Zone Level drives HP/DPS curves; body class changes group size, evasion and DPS factor." class="">World</a></li><li><a href="travel.html" data-page-link data-title="Travel" data-group="World" data-search="Travel Travel and the Waypoint World blocks = (|Δq| + |Δr| + |Δq + Δr|) / 2 ; walk time = blocks × block_sec ." class="">Travel</a></li><li><a href="survival.html" data-page-link data-title="Survival" data-group="World" data-search="Survival Survival, field skills and provisions World HP, Mana and Energy Shield use separate Core formulas. Fieldwork, Hunger and food use the rates below." class="">Survival</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-trade">
+    <h2 id="nav-trade"><span>VI</span>Towns &amp; trade<b>2</b></h2>
+    <ul><li><a href="towns.html" data-page-link data-title="Towns" data-group="Towns &amp; trade" data-search="Towns Settlements Towns &amp; trade Stall price = listed income-minutes × the seller band’s gold-per-minute rate." class="on" aria-current="page">Towns</a></li><li><a href="economy.html" data-page-link data-title="Economy" data-group="Towns &amp; trade" data-search="Economy The two currencies Towns &amp; trade Trade quote = item value integrated over the town’s demand curve. Stall prices use band income; Crafting lists stone costs." class="">Economy</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-appendix">
+    <h2 id="nav-appendix"><span>VII</span>Appendix<b>1</b></h2>
+    <ul><li><a href="icons.html" data-page-link data-title="Icons" data-group="Appendix" data-search="Icons Icon Gallery Appendix Every icon the game ships, in one place. Search by name, filter by category, star icons to find them again, or mark unwanted icons to hide them until you're ready to remove them in a batch." class="">Icons</a></li></ul>
   </section>
-  <p class="nav-foot">20 chapters · live data</p>
+  <p class="nav-foot">7 chapters · 20 pages · live data</p>
 </nav>
 <main id="wiki-main" class="wiki-main" tabindex="-1"><header class="page-head">
-  <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Field Manual</a><span aria-hidden="true">/</span><span>World</span><span aria-hidden="true">/</span><span aria-current="page">Towns</span></nav>
-  <p class="eyebrow">Chapter IV · World</p>
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Field Manual</a><span aria-hidden="true">/</span><span>Towns &amp; trade</span><span aria-hidden="true">/</span><span aria-current="page">Towns</span></nav>
+  <p class="eyebrow">Chapter VI · Towns &amp; trade</p>
   <h1>Settlements</h1>
   <p class="lead">Stall price = listed income-minutes × the seller band’s gold-per-minute rate.</p>
-  <div class="page-meta"><span class="chip">7 sections</span><span class="chip">Live game data</span><span class="chip">World</span></div>
+  <div class="page-meta"><span class="chip">7 sections</span><span class="chip">Live game data</span><span class="chip">Towns &amp; trade</span></div>
   <p class="covers"><span>Covers</span>Where · Who sells what · Standing · The task board · One-time lines · Repeatable lines</p>
 </header><nav class="toc" aria-label="On this page">
   <p class="eyebrow">On this page</p>
@@ -583,10 +613,10 @@ dl, dt, dd { margin: 0; }
 <section><h2 id="section-5">One-time lines</h2><p class="note"><code>Gold price = roundConfigured(listed minutes × goldPerMinute(charge_band))</code>; one-time lines cannot be bought again. A vendor’s ladder advances to its next authored rung once the current one is owned; a rung authored at another settlement stays there.</p><table><thead><tr><th>Item</th><th>Sold by</th><th>Buys</th><th>Costs, in gold at that band</th><th>Note</th></tr></thead><tbody><tr><td>Stash tab 1</td><td>Porter</td><td>space</td><td><span class="num">90</span></td><td><span class="hy">one of the stash_tab ladder · at Eastgate it costs <span class="num">24</span></span></td></tr><tr><td>Stash tab 2</td><td>Porter</td><td>space</td><td><span class="num">135</span></td><td><span class="hy">one of the stash_tab ladder</span></td></tr><tr><td>Stash tab 3</td><td>Porter</td><td>space</td><td><span class="num">195</span></td><td><span class="hy">one of the stash_tab ladder</span></td></tr><tr><td>Stash tab 4</td><td>Porter</td><td>space</td><td><span class="num">270</span></td><td><span class="hy">one of the stash_tab ladder</span></td></tr><tr><td>Stash tab 5</td><td>Porter</td><td>space</td><td><span class="num">360</span></td><td><span class="hy">one of the stash_tab ladder</span></td></tr><tr><td>Stash tab 6</td><td>Porter</td><td>space</td><td><span class="num">450</span></td><td><span class="hy">one of the stash_tab ladder</span></td></tr><tr><td>Herb pouch II</td><td>Porter</td><td>space</td><td><span class="num">72</span></td><td><span class="hy">one of the herb_pouch ladder</span></td></tr><tr><td>Herb pouch III</td><td>Porter</td><td>space</td><td><span class="num">360</span></td><td><span class="hy">one of the herb_pouch ladder</span></td></tr><tr><td>Bag category slot (herbs / stones / gear display)</td><td>Porter</td><td>space</td><td><span class="num">36</span></td><td><span class="hy">3 a purchase</span></td></tr><tr><td>Plot deed 4</td><td>Steward</td><td>space</td><td><span class="num">216</span></td><td><span class="hy">one of the plot_deed ladder</span></td></tr><tr><td>Plot deed 5</td><td>Steward</td><td>space</td><td><span class="num">810</span></td><td><span class="hy">one of the plot_deed ladder</span></td></tr><tr><td>House Â· Ashfall</td><td>Steward</td><td>space</td><td><span class="num">96</span></td><td><span class="hy">one of the house ladder</span></td></tr><tr><td>House Â· Highspire</td><td>Steward</td><td>space</td><td><span class="num">288</span></td><td><span class="hy">one of the house ladder</span></td></tr><tr><td>House Â· Vermolch</td><td>Steward</td><td>space</td><td><span class="num">540</span></td><td><span class="hy">one of the house ladder</span></td></tr><tr><td>Saved filter preset slot (extra)</td><td>Counterhand</td><td>information</td><td>low <span class="num">24</span> · mid <span class="num">36</span> · high <span class="num">45</span></td><td><span class="hy">3 a purchase · one per band</span></td></tr><tr><td>Potion carrier slot (belt display)</td><td>Armourer</td><td>space</td><td><span class="num">48</span></td><td><span class="hy"></span></td></tr></tbody></table></section>
 <section><h2 id="section-6">Repeatable lines</h2><p class="note"><code>Gold price = roundConfigured(listed minutes × goldPerMinute(charge_band))</code>; repeat and daily limits are shown per line. Task skip tokens are spent from the Guild board.</p><table><thead><tr><th>Item</th><th>Sold by</th><th>Buys</th><th>Costs, in gold at that band</th><th>Note</th></tr></thead><tbody><tr><td>Task skip token</td><td>Guild clerk</td><td>time</td><td><span class="num">12</span></td><td><span class="hy">3 a day</span></td></tr><tr><td>Armourer repair (clears Broken, refills protection to 5)</td><td>Armourer</td><td>time</td><td><span class="num">24</span></td><td><span class="hy"></span></td></tr><tr><td>Armourer repair at Ironrow</td><td>Armourer</td><td>time</td><td><span class="num">21</span></td><td><span class="hy"></span></td></tr><tr><td>Curio pedlar stock: banner Â· Base tint Â· title</td><td>Curio pedlar</td><td>appearance</td><td><span class="num">45</span>–<span class="num">180</span></td><td><span class="hy">3 a day</span></td></tr><tr><td>Prestige title line (per quality band)</td><td>Curio pedlar</td><td>appearance</td><td><span class="num">450</span></td><td><span class="hy"></span></td></tr><tr><td>Coldres banner (settlement cosmetic)</td><td>Furrier</td><td>appearance</td><td><span class="num">108</span></td><td><span class="hy"></span></td></tr><tr><td>Heavy-school Base tint</td><td>Armourer</td><td>appearance</td><td><span class="num">68</span></td><td><span class="hy"></span></td></tr><tr><td>Collector set hint (prints which school the set wants)</td><td>Collector</td><td>information</td><td><span class="num">23</span></td><td><span class="hy"></span></td></tr><tr><td>Waypoint warp (to a settlement already reached on foot)</td><td>no vendor — see note</td><td>time</td><td>—</td><td><span class="hy">2 gold-minute a block walked</span></td></tr></tbody></table></section>
 <section><h2 id="section-7">The Collector</h2><p class="note">Collector sets reserve requested pieces before the filter runs. Rewards are data-authored. In game, the set’s school stays hidden until its Collector hint is bought.</p><table><thead><tr><th>Set</th><th>At</th><th>School</th><th>Pieces it wants</th><th>Quality</th><th>Pays</th></tr></thead><tbody><tr><td>Militia</td><td>Ashfall</td><td>light</td><td>Hood (helmet) · Ring Mail (chest) · Strapped Boots (boots)</td><td>any</td><td><span class="hy">banner + 1 saved filter preset slot · never gold, never a Mod</span></td></tr><tr><td>Reliquary</td><td>Bonegate</td><td>heavy</td><td>Sallet (helmet) · Plate Vest (chest) · Cuisses (pant)</td><td>any</td><td><span class="hy">stash tab (bypasses the one-time price ladder, once per character) · never gold, never a Mod</span></td></tr><tr><td>Garden of Ash</td><td>Vermolch</td><td>cloth</td><td>Circlet (helmet) · Vestment (chest) · Legwraps (pant)</td><td>high</td><td><span class="hy">prestige title · never gold, never a Mod</span></td></tr></tbody></table></section></article><footer class="page-foot">
-    <section class="related" aria-labelledby="related-title"><p class="eyebrow" id="related-title">Keep reading</p><div class="related-grid"><a href="world.html"><b>World</b><small>Zone Level drives HP/DPS curves; body class changes group size, evasion and DPS factor.</small></a><a href="travel.html"><b>Travel</b><small>blocks = (|Δq| + |Δr| + |Δq + Δr|) / 2 ; walk time = blocks × block_sec .</small></a></div></section>
-    <nav class="page-turn" aria-label="Chapter navigation"><a class="prev" href="travel.html"><small>Previous</small><b>Travel</b></a></nav>
+    <section class="related" aria-labelledby="related-title"><p class="eyebrow" id="related-title">Keep reading</p><div class="related-grid"><a href="economy.html"><b>Economy</b><small>Trade quote = item value integrated over the town’s demand curve. Stall prices use band income; Crafting lists stone costs.</small></a></div></section>
+    <nav class="page-turn" aria-label="Chapter navigation"><span></span><a class="next" href="economy.html"><small>Next</small><b>Economy</b></a></nav>
   </footer>
-<footer class="wiki-foot"><span>ModWorld Field Manual · official player reference</span><span>20 chapters · figures read live from the game</span><a href="index.html">Contents</a></footer>
+<footer class="wiki-foot"><span>ModWorld Field Manual · official player reference</span><span>7 chapters · 20 pages · figures read live from the game</span><a href="index.html">Contents</a></footer>
 </main></div>
 <script>
 (function () {
@@ -687,6 +717,47 @@ dl, dt, dd { margin: 0; }
   Array.prototype.forEach.call(document.querySelectorAll('.wiki-nav [data-page-link]'), function (a) {
     a.addEventListener('click', function () { if (shell) shell.classList.remove('nav-open'); });
   });
+
+  // The bestiary: one text filter and a race chip row over the same plates. Cards carry their own
+  // search haystack (name, race, Element, habitat, variants, skills), so filtering never reads the DOM.
+  var bestiary = document.querySelector('[data-bestiary]');
+  if (bestiary) {
+    var beastInput = bestiary.querySelector('[data-bestiary-search]');
+    var beastChips = Array.prototype.slice.call(bestiary.querySelectorAll('[data-bestiary-race]'));
+    var beastGroups = Array.prototype.slice.call(bestiary.querySelectorAll('[data-bestiary-group]'));
+    var beastCards = Array.prototype.slice.call(bestiary.querySelectorAll('[data-bestiary-entry]'));
+    var beastStatus = bestiary.querySelector('[data-bestiary-status]');
+    var beastRace = 'all';
+    var applyBeast = function () {
+      var q = (beastInput ? beastInput.value : '').trim().toLowerCase();
+      var shown = 0;
+      beastGroups.forEach(function (group) {
+        var visible = 0;
+        Array.prototype.forEach.call(group.querySelectorAll('[data-bestiary-entry]'), function (card) {
+          var on = (beastRace === 'all' || card.getAttribute('data-race') === beastRace) &&
+            (!q || (card.getAttribute('data-search') || '').indexOf(q) >= 0);
+          card.hidden = !on;
+          if (on) visible++;
+        });
+        group.hidden = visible === 0;
+        shown += visible;
+      });
+      if (beastStatus) {
+        beastStatus.textContent = shown
+          ? 'Showing ' + shown + ' of ' + beastCards.length + ' species'
+          : 'No species match that filter.';
+      }
+    };
+    beastChips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        beastRace = chip.getAttribute('data-bestiary-race') || 'all';
+        beastChips.forEach(function (c) { c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'); });
+        applyBeast();
+      });
+    });
+    if (beastInput) beastInput.addEventListener('input', applyBeast);
+    applyBeast();
+  }
 
   // The passive-tree board: a viewBox camera over the canonical SVG, with a node card that follows
   // the hovered or pinned node exactly as the game's board does.

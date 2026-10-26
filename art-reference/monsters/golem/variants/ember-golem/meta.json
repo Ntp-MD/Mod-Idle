@@ -1,0 +1,503 @@
+{
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "golem",
+  "variantId": "ember-golem",
+  "name": "Ember Golem",
+  "levels": [
+    61,
+    80
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-anchor-at-224",
+  "grid": {
+    "columns": 8,
+    "rows": 5,
+    "totalFrames": 40
+  },
+  "states": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    {
+      "state": "idle",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "walk",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "attack",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "hit",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "death",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    }
+  ],
+  "sourceFrames": [
+    {
+      "x": 115,
+      "y": 124,
+      "width": 180,
+      "height": 165,
+      "offsetX": 115,
+      "offsetY": 124
+    },
+    {
+      "x": 510,
+      "y": 126,
+      "width": 161,
+      "height": 165,
+      "offsetX": 126,
+      "offsetY": 126
+    },
+    {
+      "x": 903,
+      "y": 126,
+      "width": 134,
+      "height": 167,
+      "offsetX": 135,
+      "offsetY": 126
+    },
+    {
+      "x": 1275,
+      "y": 125,
+      "width": 143,
+      "height": 168,
+      "offsetX": 123,
+      "offsetY": 125
+    },
+    {
+      "x": 1636,
+      "y": 126,
+      "width": 177,
+      "height": 164,
+      "offsetX": 100,
+      "offsetY": 126
+    },
+    {
+      "x": 2034,
+      "y": 125,
+      "width": 146,
+      "height": 168,
+      "offsetX": 114,
+      "offsetY": 125
+    },
+    {
+      "x": 2417,
+      "y": 124,
+      "width": 143,
+      "height": 168,
+      "offsetX": 113,
+      "offsetY": 124
+    },
+    {
+      "x": 2784,
+      "y": 125,
+      "width": 169,
+      "height": 166,
+      "offsetX": 96,
+      "offsetY": 125
+    },
+    {
+      "x": 113,
+      "y": 506,
+      "width": 169,
+      "height": 170,
+      "offsetX": 113,
+      "offsetY": 122
+    },
+    {
+      "x": 509,
+      "y": 506,
+      "width": 149,
+      "height": 170,
+      "offsetX": 125,
+      "offsetY": 122
+    },
+    {
+      "x": 870,
+      "y": 506,
+      "width": 154,
+      "height": 167,
+      "offsetX": 102,
+      "offsetY": 122
+    },
+    {
+      "x": 1251,
+      "y": 506,
+      "width": 162,
+      "height": 169,
+      "offsetX": 99,
+      "offsetY": 122
+    },
+    {
+      "x": 1673,
+      "y": 506,
+      "width": 156,
+      "height": 170,
+      "offsetX": 137,
+      "offsetY": 122
+    },
+    {
+      "x": 2043,
+      "y": 506,
+      "width": 159,
+      "height": 167,
+      "offsetX": 123,
+      "offsetY": 122
+    },
+    {
+      "x": 2417,
+      "y": 506,
+      "width": 149,
+      "height": 170,
+      "offsetX": 113,
+      "offsetY": 122
+    },
+    {
+      "x": 2793,
+      "y": 506,
+      "width": 166,
+      "height": 170,
+      "offsetX": 105,
+      "offsetY": 122
+    },
+    {
+      "x": 117,
+      "y": 900,
+      "width": 159,
+      "height": 158,
+      "offsetX": 117,
+      "offsetY": 132
+    },
+    {
+      "x": 494,
+      "y": 904,
+      "width": 188,
+      "height": 156,
+      "offsetX": 110,
+      "offsetY": 136
+    },
+    {
+      "x": 876,
+      "y": 862,
+      "width": 159,
+      "height": 198,
+      "offsetX": 108,
+      "offsetY": 94
+    },
+    {
+      "x": 1243,
+      "y": 924,
+      "width": 209,
+      "height": 137,
+      "offsetX": 91,
+      "offsetY": 156
+    },
+    {
+      "x": 1641,
+      "y": 920,
+      "width": 205,
+      "height": 141,
+      "offsetX": 105,
+      "offsetY": 152
+    },
+    {
+      "x": 2037,
+      "y": 862,
+      "width": 160,
+      "height": 198,
+      "offsetX": 117,
+      "offsetY": 94
+    },
+    {
+      "x": 2390,
+      "y": 904,
+      "width": 187,
+      "height": 156,
+      "offsetX": 86,
+      "offsetY": 136
+    },
+    {
+      "x": 2799,
+      "y": 900,
+      "width": 155,
+      "height": 159,
+      "offsetX": 111,
+      "offsetY": 132
+    },
+    {
+      "x": 125,
+      "y": 1284,
+      "width": 154,
+      "height": 158,
+      "offsetX": 125,
+      "offsetY": 132
+    },
+    {
+      "x": 503,
+      "y": 1300,
+      "width": 168,
+      "height": 142,
+      "offsetX": 119,
+      "offsetY": 148
+    },
+    {
+      "x": 893,
+      "y": 1284,
+      "width": 145,
+      "height": 160,
+      "offsetX": 125,
+      "offsetY": 132
+    },
+    {
+      "x": 1269,
+      "y": 1285,
+      "width": 146,
+      "height": 159,
+      "offsetX": 117,
+      "offsetY": 133
+    },
+    {
+      "x": 1656,
+      "y": 1285,
+      "width": 147,
+      "height": 159,
+      "offsetX": 120,
+      "offsetY": 133
+    },
+    {
+      "x": 2034,
+      "y": 1285,
+      "width": 146,
+      "height": 159,
+      "offsetX": 114,
+      "offsetY": 133
+    },
+    {
+      "x": 2401,
+      "y": 1300,
+      "width": 165,
+      "height": 144,
+      "offsetX": 97,
+      "offsetY": 148
+    },
+    {
+      "x": 2797,
+      "y": 1284,
+      "width": 151,
+      "height": 159,
+      "offsetX": 109,
+      "offsetY": 132
+    },
+    {
+      "x": 118,
+      "y": 1693,
+      "width": 163,
+      "height": 133,
+      "offsetX": 118,
+      "offsetY": 157
+    },
+    {
+      "x": 477,
+      "y": 1702,
+      "width": 175,
+      "height": 129,
+      "offsetX": 93,
+      "offsetY": 166
+    },
+    {
+      "x": 853,
+      "y": 1725,
+      "width": 194,
+      "height": 105,
+      "offsetX": 85,
+      "offsetY": 189
+    },
+    {
+      "x": 1238,
+      "y": 1736,
+      "width": 215,
+      "height": 91,
+      "offsetX": 86,
+      "offsetY": 200
+    },
+    {
+      "x": 1648,
+      "y": 1696,
+      "width": 169,
+      "height": 137,
+      "offsetX": 112,
+      "offsetY": 160
+    },
+    {
+      "x": 2016,
+      "y": 1720,
+      "width": 186,
+      "height": 107,
+      "offsetX": 96,
+      "offsetY": 184
+    },
+    {
+      "x": 2400,
+      "y": 1730,
+      "width": 187,
+      "height": 100,
+      "offsetX": 96,
+      "offsetY": 194
+    },
+    {
+      "x": 2773,
+      "y": 1733,
+      "width": 185,
+      "height": 94,
+      "offsetX": 85,
+      "offsetY": 197
+    }
+  ],
+  "identityReference": "art-reference/monsters/golem/animation/atlas/animation.png",
+  "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+  "generation": {
+    "sourceOutputs": [
+      "exec-235de4b3-eefa-4ca8-8438-213cd136848b.png"
+    ],
+    "identityReference": "art-reference/monsters/golem/animation/atlas/animation.png",
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "variantCue": "dark slag-stone plates with a few contained amber-orange seams, no glow outside the stone",
+    "initialPrompt": "Ember Golem; all 8 directions for idle, walk, attack, hit, death; dark outline without fringe or halo."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "raw-connected-pose-repack-384-v1",
+    "sourceCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "sourceImageSha256": "e563f5d2ce190fdff8c39ed4ce5c12cd3e18567e95167d0b363e2d322941589d",
+    "sourceAlphaThreshold": 128,
+    "edgeAlphaRecoveryRadius": 3,
+    "minimumCellPadding": 24,
+    "primaryPoses": 40,
+    "sourceComponents": 40,
+    "rowMedianBottoms": [
+      222,
+      415,
+      611,
+      798,
+      960
+    ],
+    "uniformScale": 1.0
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+    ]
+  }
+}

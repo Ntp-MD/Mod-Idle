@@ -65,10 +65,6 @@ import {
 } from '../../../engine/keystones.ts';
 import type { KeystoneHook } from '../../../engine/keystones.ts';
 import type { DamagePacket } from '../../../engine/damage-provenance.ts';
-import type { Statuses } from './status-types.ts';
-
-/** One real handler function a hook slot may hold. The signature is the packet that fills it (§6). */
-export type KeystoneHandlerFn = (...args: never[]) => unknown;
 
 /** The handler set one keystone registers: at minimum, its required hooks as real functions. */
 export type KeystoneHooks = Partial<Record<KeystoneHook, unknown>>;
@@ -76,20 +72,6 @@ export type KeystoneHooks = Partial<Record<KeystoneHook, unknown>>;
 /** The closed handler table the game builds up as packets open bundles. */
 export type KeystoneHandlerTable = Record<string, KeystoneHooks>;
 
-/** The explicit environment a handler is handed (§6): data, rng, time, state and the three
- *  callbacks, never an ambient import. Filled by the packets that run handlers. */
-export interface KeystoneRuntimeEnv {
-  data: unknown;
-  rng: () => number;
-  time: { nowUs: () => number; unitsPerSec: number };
-  state: unknown;
-  /** The outgoing/incoming damage route a handler may read or extend through the packet contract. */
-  damage?: (packet: DamagePacket) => DamagePacket;
-  /** The status writer a handler goes through — never a second aggregate. */
-  status?: (statuses: Statuses) => unknown;
-  /** The recovery route a handler pays through. */
-  recovery?: (kind: string, amount: number) => void;
-}
 
 /**
  * Bind one keystone's real handlers into the table. Refuses an unknown key, a declared param that

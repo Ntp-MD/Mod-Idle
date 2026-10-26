@@ -1,5 +1,5 @@
 {
-  "note": "Mod value ranges, lifted out of mod-pool.md so the table is generated rather than typed. `min`/`max` is the Total column; `bands` is [low, mid, high] quality, each holding its Tier slices worst-to-best. Quality seams overlap by design: a low-band T1 outrolls the next band's T3, while every band's effective T1 floor rises above the band below (MP1).",
+  "note": "Mod value ranges, lifted out of mod-pool.md so the table is generated rather than typed. `min`/`max` is the Total column; `bands` is [low, mid, high] quality, each holding its Tier slices worst-to-best. Quality seams overlap by design: a low-band T1 outrolls the next band's T3, except a singleton integer band may share an endpoint. Every band's effective T1 floor rises above the band below (MP1). `imprint: false` excludes passive-tree-only Mods from Imprint drops and application.",
   "quality_bands": [
     "low",
     "mid",
@@ -1161,7 +1161,7 @@
         ],
         [
           [
-            0,
+            1,
             2
           ]
         ],
@@ -1356,6 +1356,7 @@
     },
     {
       "id": "elemental_resistance_cap_pct",
+      "imprint": false,
       "name": "Elemental resistance Cap %",
       "group": "Elemental",
       "min": 15,

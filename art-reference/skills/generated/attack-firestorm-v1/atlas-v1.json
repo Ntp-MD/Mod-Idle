@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "skill": "attack.firestorm",
+  "state": "approved",
+  "source": {
+    "raw": "raw-generation-1.png",
+    "prompt": "prompt.txt",
+    "generator": "built-in image generation"
+  },
+  "atlas": {
+    "file": "atlas-v1.png",
+    "width": 1408,
+    "height": 1408,
+    "columns": 4,
+    "rows": 4,
+    "cellWidth": 352,
+    "cellHeight": 352,
+    "frameCount": 16,
+    "order": "row-major",
+    "alphaFloor": 16,
+    "intraCellPaddingPx": 19,
+    "normalization": "1254x1254 raw padded to 1256x1256, sliced 4x4 at 314px, then each cell padded 19px inside a 352px cell on a 1408x1408 atlas"
+  },
+  "frames": {
+    "opening": [
+      0,
+      3
+    ],
+    "loop": [
+      4,
+      11
+    ],
+    "exit": [
+      12,
+      15
+    ],
+    "previewFrameMs": 80,
+    "runtimeTiming": "combat action timing (not authored here)"
+  },
+  "anchor": {
+    "groundY": 0.9,
+    "centerX": 0.5,
+    "note": "loop frames settle on the same ground line; exit frames lift as the vortex breaks up"
+  },
+  "runtime": {
+    "gamePath": "game/public/fx/authored/attack-firestorm/v1/atlas-v1.png",
+    "preset": "game/src/ui/combat/arena-authored-vfx.ts"
+  },
+  "qc": "qc.json"
+}

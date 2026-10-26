@@ -1,4 +1,4 @@
-import { E, blackMarket, sm, TOWN, fieldwork, trade } from '../engine/client';
+import { E, blackMarket, sm, TOWN, trade } from '../engine/client';
 import { atSettlement } from './craft';
 import { grantNamedSkill } from './skills';
 import { fitsTransaction } from './slots';

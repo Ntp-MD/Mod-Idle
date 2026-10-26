@@ -1,0 +1,367 @@
+{
+  "status": "integrated",
+  "file": "beetle-animation-v1.png",
+  "generator": "OpenAI built-in image_gen",
+  "generation": {
+    "sourceOutputs": [
+      "exec-3b21fa3b-1d19-4907-8900-fce4362aa577.png"
+    ],
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "identityReference": "art-reference/monsters/beetle/animation/source/base-v1.png",
+    "initialPrompt": "8x5 monster atlas; 8 idle facings; east/west crawl, mandible attack, hit and death; 4 frames each."
+  },
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 324
+  },
+  "alignment": "ground-contact-at-108",
+  "locomotion": "six-legged-crawl",
+  "rowOrder": [
+    "idle S SE E NE N NW W SW",
+    "east walk4; west walk4",
+    "east attack4; west attack4",
+    "east hit4; west hit4",
+    "east death4; west death4"
+  ],
+  "sourceFrames": [
+    {
+      "x": 83,
+      "y": 143,
+      "width": 215,
+      "height": 182,
+      "offsetX": 83,
+      "offsetY": 143
+    },
+    {
+      "x": 464,
+      "y": 143,
+      "width": 224,
+      "height": 182,
+      "offsetX": 80,
+      "offsetY": 143
+    },
+    {
+      "x": 845,
+      "y": 143,
+      "width": 230,
+      "height": 182,
+      "offsetX": 77,
+      "offsetY": 143
+    },
+    {
+      "x": 1220,
+      "y": 143,
+      "width": 245,
+      "height": 182,
+      "offsetX": 68,
+      "offsetY": 143
+    },
+    {
+      "x": 1634,
+      "y": 143,
+      "width": 188,
+      "height": 182,
+      "offsetX": 98,
+      "offsetY": 143
+    },
+    {
+      "x": 1997,
+      "y": 143,
+      "width": 230,
+      "height": 182,
+      "offsetX": 77,
+      "offsetY": 143
+    },
+    {
+      "x": 2384,
+      "y": 143,
+      "width": 224,
+      "height": 182,
+      "offsetX": 80,
+      "offsetY": 143
+    },
+    {
+      "x": 2768,
+      "y": 143,
+      "width": 221,
+      "height": 182,
+      "offsetX": 80,
+      "offsetY": 143
+    },
+    {
+      "x": 83,
+      "y": 527,
+      "width": 215,
+      "height": 182,
+      "offsetX": 83,
+      "offsetY": 143
+    },
+    {
+      "x": 455,
+      "y": 527,
+      "width": 242,
+      "height": 182,
+      "offsetX": 71,
+      "offsetY": 143
+    },
+    {
+      "x": 839,
+      "y": 527,
+      "width": 239,
+      "height": 182,
+      "offsetX": 71,
+      "offsetY": 143
+    },
+    {
+      "x": 1232,
+      "y": 527,
+      "width": 221,
+      "height": 182,
+      "offsetX": 80,
+      "offsetY": 143
+    },
+    {
+      "x": 1619,
+      "y": 527,
+      "width": 215,
+      "height": 182,
+      "offsetX": 83,
+      "offsetY": 143
+    },
+    {
+      "x": 1991,
+      "y": 527,
+      "width": 239,
+      "height": 182,
+      "offsetX": 71,
+      "offsetY": 143
+    },
+    {
+      "x": 2381,
+      "y": 527,
+      "width": 227,
+      "height": 182,
+      "offsetX": 77,
+      "offsetY": 143
+    },
+    {
+      "x": 2771,
+      "y": 527,
+      "width": 218,
+      "height": 182,
+      "offsetX": 83,
+      "offsetY": 143
+    },
+    {
+      "x": 77,
+      "y": 911,
+      "width": 230,
+      "height": 182,
+      "offsetX": 77,
+      "offsetY": 143
+    },
+    {
+      "x": 458,
+      "y": 911,
+      "width": 236,
+      "height": 182,
+      "offsetX": 74,
+      "offsetY": 143
+    },
+    {
+      "x": 821,
+      "y": 911,
+      "width": 278,
+      "height": 182,
+      "offsetX": 53,
+      "offsetY": 143
+    },
+    {
+      "x": 1229,
+      "y": 911,
+      "width": 230,
+      "height": 182,
+      "offsetX": 77,
+      "offsetY": 143
+    },
+    {
+      "x": 1613,
+      "y": 911,
+      "width": 227,
+      "height": 182,
+      "offsetX": 77,
+      "offsetY": 143
+    },
+    {
+      "x": 1976,
+      "y": 911,
+      "width": 272,
+      "height": 182,
+      "offsetX": 56,
+      "offsetY": 143
+    },
+    {
+      "x": 2375,
+      "y": 911,
+      "width": 242,
+      "height": 182,
+      "offsetX": 71,
+      "offsetY": 143
+    },
+    {
+      "x": 2765,
+      "y": 911,
+      "width": 227,
+      "height": 182,
+      "offsetX": 77,
+      "offsetY": 143
+    },
+    {
+      "x": 83,
+      "y": 1295,
+      "width": 215,
+      "height": 182,
+      "offsetX": 83,
+      "offsetY": 143
+    },
+    {
+      "x": 479,
+      "y": 1295,
+      "width": 194,
+      "height": 182,
+      "offsetX": 95,
+      "offsetY": 143
+    },
+    {
+      "x": 857,
+      "y": 1295,
+      "width": 206,
+      "height": 182,
+      "offsetX": 89,
+      "offsetY": 143
+    },
+    {
+      "x": 1229,
+      "y": 1295,
+      "width": 227,
+      "height": 182,
+      "offsetX": 77,
+      "offsetY": 143
+    },
+    {
+      "x": 1616,
+      "y": 1295,
+      "width": 224,
+      "height": 182,
+      "offsetX": 80,
+      "offsetY": 143
+    },
+    {
+      "x": 2009,
+      "y": 1295,
+      "width": 206,
+      "height": 182,
+      "offsetX": 89,
+      "offsetY": 143
+    },
+    {
+      "x": 2399,
+      "y": 1295,
+      "width": 194,
+      "height": 182,
+      "offsetX": 95,
+      "offsetY": 143
+    },
+    {
+      "x": 2774,
+      "y": 1295,
+      "width": 212,
+      "height": 182,
+      "offsetX": 86,
+      "offsetY": 143
+    },
+    {
+      "x": 74,
+      "y": 1679,
+      "width": 233,
+      "height": 182,
+      "offsetX": 74,
+      "offsetY": 143
+    },
+    {
+      "x": 446,
+      "y": 1679,
+      "width": 260,
+      "height": 182,
+      "offsetX": 62,
+      "offsetY": 143
+    },
+    {
+      "x": 854,
+      "y": 1733,
+      "width": 209,
+      "height": 128,
+      "offsetX": 86,
+      "offsetY": 197
+    },
+    {
+      "x": 1223,
+      "y": 1733,
+      "width": 239,
+      "height": 128,
+      "offsetX": 71,
+      "offsetY": 197
+    },
+    {
+      "x": 1577,
+      "y": 1679,
+      "width": 302,
+      "height": 182,
+      "offsetX": 41,
+      "offsetY": 143
+    },
+    {
+      "x": 1964,
+      "y": 1679,
+      "width": 293,
+      "height": 182,
+      "offsetX": 44,
+      "offsetY": 143
+    },
+    {
+      "x": 2402,
+      "y": 1733,
+      "width": 185,
+      "height": 128,
+      "offsetX": 98,
+      "offsetY": 197
+    },
+    {
+      "x": 2777,
+      "y": 1733,
+      "width": 206,
+      "height": 128,
+      "offsetX": 89,
+      "offsetY": 197
+    }
+  ],
+  "slicing": {
+    "columns": 8,
+    "rows": 5,
+    "cellWidth": 128,
+    "cellHeight": 128
+  },
+  "normalization": {
+    "method": "integer-nearest-upscale",
+    "scale": 3,
+    "source": "art-reference/monsters/beetle/animation/atlas/animation.png"
+  }
+}

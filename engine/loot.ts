@@ -8,7 +8,7 @@
  * the client rolls only the Mod lines `mods.json` owns.
  */
 
-import type { EngineData, ModsData, Rng } from './types.ts';
+import type { BasesData, EngineData, ModsData, Rng } from './types.ts';
 
 /** Seeded, reproducible, no top-level await: a save cannot be rerolled for a better outcome. */
 export function mulberry32(a: number) {
@@ -105,6 +105,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
   const RW = E.mod_weights.role_weights;
   const MAX_OF: Record<string, number> = {}, NAME_OF: Record<string, string> = {}, BANDS_OF: Record<string, number[][][]> = {};
   for (const m of MODS.mods) { MAX_OF[m.id] = m.max; NAME_OF[m.id] = m.name; BANDS_OF[m.id] = m.bands; }
+  const IMPRINT_IDS = MODS.mods.filter((m) => m.imprint !== false).map((m) => m.id);
 
   /** The Mod weight for one line at one band (the Flat group steps by band). */
   function weightOf(id: string, q: number) {
@@ -149,6 +150,33 @@ export function createLoot(E: EngineData, MODS: ModsData) {
     const midLo = Math.max(lo, midHi - size + 1);
     if (tier === 1) return [midLo, Math.max(midLo, midHi)];
     return [lo, Math.max(lo, midLo - 1)];
+  }
+
+  /** Roll the raw integer before applying a Frame budget, as fresh drops do. */
+  function rollValue(id: string, ilvl: number, q: number, slice: number, rng: Rng, scale = 1, minimum = 0): number {
+    const [lo, hi] = rangeOf(id, ilvl, q, slice);
+    // Polish conditions the same roll on its held value. An older value above today's window is
+    // retained; it cannot force another part of the Frame above that part's own ceiling.
+    let floor = Math.max(lo, Math.ceil((minimum - 0.5) / scale));
+    // Division can land just above an integer (10.5 / 0.7). Check the actual rounding boundary
+    // so every raw outcome that reaches the held value keeps its original probability.
+    if (floor > lo && Math.round((floor - 1) * scale) >= minimum) floor--;
+    if (Math.round(floor * scale) < minimum) floor++;
+    const u = rng();
+    if (floor > hi) return minimum;
+    return Math.max(1, minimum, Math.round((floor + Math.floor(u * (hi - floor + 1))) * scale));
+  }
+
+  const frameValueScale = (parts: number, bias = 1) =>
+    (E.loot.frame_mod.value_scale[String(parts)] ?? 1) * bias;
+
+  /** Saved weapons identify their frame by the ordered Mod tuple, including legacy tuples. */
+  function weaponFrameOf(BASES: Pick<BasesData, 'weapon_frames'>, base: string, line: { id: string; extra?: { id: string }[] }) {
+    const ids = [line.id, ...(line.extra || []).map((x) => x.id)];
+    const frames = BASES.weapon_frames?.[base] || [];
+    const matches = (mods?: string[]) => mods?.length === ids.length && mods.every((id, i) => id === ids[i]);
+    return frames.find((frame) => matches(frame.frame_mod))
+      || frames.find((frame) => matches(frame.legacy_frame_mod));
   }
 
   /** How many positions a window publishes. Uniform now — the thirds are every Mod's ladder. */
@@ -257,9 +285,7 @@ export function createLoot(E: EngineData, MODS: ModsData) {
    * shared with the Unbound lines exactly as `tools/loot.ts` rolls them.
    */
   function frameModRoll(BASES: any, slot: string, frame: any, weapon: any, rng: Rng, ilvl: number, q: number, u: number): any[] {
-    const BM = E.loot.frame_mod;
     const lineFrame = weapon && !frame ? (BASES?.weapon_frames?.[weapon.name] || [])[0] : frame;
-    const scale = (n: number) => BM.value_scale[String(n)] ?? 1;
     const ids: string[] = [];
     if (weapon) {
       // a weapon (main hand, or a dual-wielded off hand) forces every Mod its own type lists — and a
@@ -278,11 +304,10 @@ export function createLoot(E: EngineData, MODS: ModsData) {
       const pool = poolFor(BASES, slot, frame, null).filter((e) => !STAT_IDS.includes(e.id));
       if (pool.length) ids.push(weightedPick(rng, pool.map((e) => ({ id: e.id, w: e.role * weightOf(e.id, q) }))));
     }
-    const k = scale(ids.length);
+    const k = frameValueScale(ids.length, lineFrame?.value_bias ?? 1);
     const roll = (id: string) => {
       const slice = tierSlice(u);
-      const [lo, hi] = rangeOf(id, ilvl, q, slice);
-      return { id, value: Math.max(1, Math.round((lo + Math.floor(rng() * (hi - lo + 1))) * k * (lineFrame?.value_bias ?? 1))), slice };
+      return { id, value: rollValue(id, ilvl, q, slice, rng, k), slice };
     };
     if (!ids.length) return [];
     const first = roll(ids[0]);
@@ -497,9 +522,9 @@ export function createLoot(E: EngineData, MODS: ModsData) {
 
   return {
     SLOTS, GEAR_MOD_SLOTS, STAT_IDS, GEAR_MODS, STAT_ROLLS, TIER_SPLIT, TIER_NAME,
-    BAND_LABEL, RW, MAX_OF, NAME_OF, BANDS_OF, WEIGHT_BY_ID, FLAT_GROUP, ELEMENTS, ARMOUR_SLOTS,
+    BAND_LABEL, RW, MAX_OF, NAME_OF, BANDS_OF, IMPRINT_IDS, WEIGHT_BY_ID, FLAT_GROUP, ELEMENTS, ARMOUR_SLOTS,
     weightOf, windowAt, spanT, rangeOf, sliceCount, tierSlice, score, keepsDrop, notYetFound, statOf, blockedBy,
-    slotUnion, poolFor, poolChances, frameModRoll, frameModAtFloor, linesAtDrop, rollBase, buildLines,
+    slotUnion, poolFor, poolChances, frameModRoll, frameModAtFloor, frameValueScale, weaponFrameOf, rollValue, linesAtDrop, rollBase, buildLines,
     mulberry32, pick, intBetween, weightedPick, pickWeighted,
   };
 }

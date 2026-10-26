@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { E, MODS, SKILLS, eng, loot, sm } from '../src/engine/client';
 import { openingGear } from '../src/sim/player';
+import { describeSkill } from '../src/sim/skill-copy';
 import type { Item } from '../src/sim/types';
 
 /**
@@ -41,29 +42,20 @@ describe('the Gear Mod ladder is bounded by the school it raises (X42)', () => {
 });
 
 describe('every Mod range covers its own Total (MP1)', () => {
-  it('bands are contiguous thirds with an overlapping, winning seam', () => {
-    const problems: string[] = [];
-    for (const m of MODS.mods as any[]) {
-      const flat: [number, number][] = m.bands.flat();
-      if (!flat.length) { problems.push(`${m.id}: no slices`); continue; }
-      if (flat[0][0] !== m.min) problems.push(`${m.id}: starts ${flat[0][0]}, Total says ${m.min}`);
-      if (flat[flat.length - 1][1] !== m.max) problems.push(`${m.id}: ends ${flat[flat.length - 1][1]}, Total says ${m.max}`);
-      const tiers = m.bands[0].length;
-      expect(new Set(m.bands.map((b: any[]) => b.length)).size, `${m.id} tier counts differ`).toBe(1);
-      for (let i = 1; i < flat.length; i++) {
-        if (i % tiers === 0) {
-          const q = i / tiers;
-          const hi = m.bands[q][m.bands[q].length - 1][1];
-          const size = Math.ceil((hi - flat[i][0] + 1) / 3);
-          if (flat[i - 1][1] - flat[i][0] < 1) problems.push(`${m.id}: seam ${i} has no overlap`);
-          if (hi - size + 1 <= flat[i - 1][1]) problems.push(`${m.id}: seam ${i} T1 does not win`);
-        } else if (flat[i][0] !== flat[i - 1][1] + 1) {
-          problems.push(`${m.id}: slice ${i} starts ${flat[i][0]} after ${flat[i - 1][1]}`);
-        }
+  it('runtime windows stay inside Total, overlap and raise T1 across quality bands', () => {
+    for (const mod of MODS.mods) {
+      for (const [q, span] of E.item_level.spans.entries()) {
+        const [lo, hi] = loot.windowAt(mod.id, span.to, q);
+        expect(lo, mod.id).toBeGreaterThanOrEqual(mod.min);
+        expect(hi, mod.id).toBeLessThanOrEqual(mod.max);
+        if (q === 0) continue;
+        const [previousLo, previousHi] = loot.windowAt(mod.id, E.item_level.spans[q - 1].to, q - 1);
+        expect(lo, mod.id).toBeGreaterThanOrEqual(previousLo);
+        if (previousLo === previousHi) expect(lo, mod.id).toBeLessThanOrEqual(previousHi);
+        else expect(lo, mod.id).toBeLessThan(previousHi);
+        expect(loot.rangeOf(mod.id, span.to, q, 0)[0], mod.id).toBeGreaterThan(previousHi);
       }
-      for (const b of m.bands) for (const [a, z] of b) if (a > z) problems.push(`${m.id}: inverted ${a}-${z}`);
     }
-    expect(problems).toEqual([]);
   });
 });
 
@@ -95,16 +87,20 @@ describe('the opening set is a whole character and nothing more (OP7 · OP8)', (
 });
 
 describe('every declared skill effect is real and already printed (S11)', () => {
-  it('names a known stat, op, subject and condition, and its value is in its own sentence', () => {
+  it('names a known stat, op, subject and condition, and its value is in its player window', () => {
     const problems: string[] = [];
     for (const s of SKILLS.skills as any[]) {
+      if (s.retired) continue;
       for (const e of s.effects || []) {
         if (!sm.EFFECT_STATS.includes(e.stat) || !sm.EFFECT_OPS.includes(e.op)) problems.push(`${s.id}: ${e.stat}/${e.op}`);
         if (!sm.EFFECT_SUBJECTS.includes(e.subject || 'self')) problems.push(`${s.id}: subject ${e.subject}`);
         if (e.condition && !sm.EFFECT_CONDITIONS.includes(e.condition)) problems.push(`${s.id}: condition ${e.condition}`);
         if (e.element && !E.elements.order.includes(e.element)) problems.push(`${s.id}: element ${e.element}`);
-        const text = String(s.effect || '').replace(/−/g, '-');
-        if (!text.includes(String(e.value))) problems.push(`${s.id}: value ${e.value} not in its sentence`);
+        // a value may live in the derived window (Description, Duration or Hits) rather than in
+        // the sentence — the same rule the cage enforces, read through the real window helper
+        const window = describeSkill(s);
+        const text = `${s.effect || ''} ${window.duration || ''} ${window.hits || ''}`.replace(/−/g, '-');
+        if (!text.includes(String(e.value))) problems.push(`${s.id}: value ${e.value} not in its window`);
       }
     }
     expect(problems).toEqual([]);

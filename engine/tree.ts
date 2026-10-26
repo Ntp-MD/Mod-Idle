@@ -1,13 +1,13 @@
 /**
- * The passive tree, shared. `tools/data/tree.json` holds the SPEC — the wings, their nodes, their
- * parents, their grants and the layout parameters — and this module derives the node list, the
- * geometry and the lines the bought ranks grant. The cage (`tools/tree.ts`) gates the same object the
- * client spends, so a node cannot exist in one place and not the other.
+ * The passive tree, shared. `tools/data/tree.json` is the SPEC — wings, nodes, parents, grants,
+ * layout — and this module derives the node list, geometry and the lines bought ranks grant. The cage
+ * (`tools/tree.ts`) gates the same object the client spends, so a node cannot exist in one place and
+ * not the other.
  *
- * A node grants ONE or MORE lines, each with values written out in the file (D5): the tree's numbers
- * are the tree's own and do not move when a loot line's maximum moves. A node's kind sets its rank
- * count, its cost and the currency it is paid in, and a node is bought when it is connected to a path
- * the character already owns — there is no attribute requirement on any node (D3).
+ * A node grants ONE or MORE lines, values written in the file (D5): the tree's numbers are its own
+ * and do not move when a loot line's maximum moves. A node's kind sets rank count, cost and currency;
+ * a node is bought when connected to a path the character already owns. No node has an attribute
+ * requirement (D3).
  */
 
 export interface TreeGrant {

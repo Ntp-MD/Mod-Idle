@@ -34,26 +34,17 @@
     --motion-travel: 650ms;
     --ease-ui: ease;
     --ease-out: ease-out;
-    --ease-linear: linear;
     --ease-glide: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-    /* Shared stacking order; small values are component-local layers. */
+    /* Shared stacking order for layers that cross components. */
     --z-underlay: 1;
     --z-content: 2;
-    --z-effect: 3;
     --z-highlight: 4;
-    --z-control: 5;
     --z-floater: 6;
     --z-label: 7;
     --z-toast: 8;
-    --z-travel: 35;
     --z-hud-control: 40;
-    --z-panel: 60;
-    --z-navigation: 70;
-    --z-popover-backdrop: 79;
     --z-popover: 80;
-    --z-notice: 90;
-    --z-screen-guard: 200;
 
     --focus: #7fd4ff;
 
@@ -92,8 +83,6 @@
 
     --face-top: #1c2430;
     --face-floor: #0d1218;
-    --orb-top: #242e3c;
-    --orb-floor: #10151d;
     --hot-deep: #a33428;
 
     --inset: #12151b;
@@ -101,11 +90,6 @@
 
     --sheet-ink: #cfd8e3;
     --sheet-place: #f2e7d0;
-    --sheet-id: #6d7987;
-    --pin-here: #12a06a;
-    --pin-here-glow: #2ee59a;
-    --pin-target: #e2503f;
-    --pin-target-glow: #ff6b5c;
     --ui: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
     --num: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
 
@@ -141,17 +125,11 @@
     --spacing-md: 15px;
     --spacing-lg: 20px;
     --spacing-xl: 40px;
-    --seam: 1px;
-
-    --sheet-fs-region: clamp(9px, 0.54vw, 15px);
-    --sheet-fs-walk: clamp(8px, 0.4vw, 11px);
-    --sheet-fs-place: clamp(9px, 0.5vw, 14px);
-    --sheet-fs-capital: clamp(10px, 0.6vw, 17px);
-    --sheet-fs-zonename: clamp(8px, 0.46vw, 13px);
-    --sheet-fs-id: clamp(7px, 0.4vw, 11px);
-    --x-pull-arc: clamp(-46px, -1.65vw, -21px);
-    --x-pull-burst: clamp(-32px, -1.16vw, -15px);
-    --x-pull-scale: clamp(-14px, -0.48vw, -6px);
+    /* Card tiers: a primary surface and the compact tile inside it. */
+    --card-pad: var(--spacing-md);
+    --card-gap: var(--spacing-sm);
+    --tile-pad: var(--spacing-sm);
+    --tile-gap: var(--spacing-xs);
     --x-pull-note: clamp(-11px, -0.39vw, -5px);
 }
 * { box-sizing: border-box; }
@@ -235,25 +213,74 @@ td .sub { display: block; color: var(--dim); font-size: var(--font-xs); }
 .zone[open] > summary { border-bottom: 1px solid var(--line); }
 .zone-body { display: grid; gap: var(--spacing-sm); padding: .1rem .8rem .8rem; }
 @media (max-width: 40rem) { .zone > summary { display: grid; gap: var(--spacing-xs); } .zone-meta { display: block; } }
-.race-roster { display: grid; gap: var(--spacing-md); }
-.race-group { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); padding: .65rem; }
-.race-group > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-md); border-bottom: 1px solid var(--line); padding: 0 .2rem .4rem; color: var(--dim); }
-.race-group > header h3 { color: var(--gold); font-size: var(--font-xs); }
-.race-group > header span, .species-count { font-family: var(--num); font-size: var(--font-xs); }
-.race-empty { color: var(--dim); font-size: var(--font-xs); }
-.species-roster { display: grid; gap: var(--spacing-md); }
-.species-entry { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); padding: .65rem .8rem .8rem; }
-.species-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-md); border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
-.species-entry h4 { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .05em; }
-.species-entry > header h4 { color: var(--text); font-size: var(--font-sm); text-transform: none; letter-spacing: 0; }
-.species-count { color: var(--gold); }
-.species-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--spacing-sm) var(--spacing-md); }
-.species-facts div { display: grid; gap: var(--spacing-xs); min-width: 0; font-size: var(--font-xs); overflow-wrap: anywhere; }
-.species-facts b { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .04em; }
-.species-entry table { font-size: var(--font-xs); }
-.species-entry th, .species-entry td { padding: .28rem .4rem; overflow-wrap: anywhere; }
-@media (max-width: 58rem) { .species-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 36rem) { .species-facts { grid-template-columns: 1fr 1fr; } .species-entry { padding: .6rem; } }
+/* Bestiary: race-grouped plates. A plate's left spine is its attack Element. */
+.bestiary { display: grid; gap: 1.6rem; }
+.beast-tools { display: grid; gap: .75rem; padding: .95rem 1rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); }
+.beast-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; }
+.beast-search { flex: 1 1 18rem; min-width: 0; }
+.beast-search input { width: 100%; padding: .5rem .85rem; border: 1px solid var(--line); border-radius: var(--radius-pill); background: var(--panel); color: var(--text); font: inherit; font-size: .8rem; }
+.beast-search input::placeholder { color: color-mix(in srgb, var(--dim) 72%, transparent); }
+.beast-search input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
+.beast-status { color: var(--dim); font-family: var(--num); font-size: .7rem; white-space: nowrap; }
+.beast-chips { display: flex; flex-wrap: wrap; gap: .3rem; }
+.beast-chip { padding: .26rem .6rem; border: 1px solid var(--line); border-radius: var(--radius-pill); background: transparent; color: var(--dim); font: inherit; font-size: .7rem; cursor: pointer; }
+.beast-chip b { color: color-mix(in srgb, var(--dim) 75%, transparent); font-weight: 500; }
+.beast-chip:hover { color: var(--text); border-color: color-mix(in srgb, var(--gold) 30%, var(--line)); }
+.beast-chip[aria-pressed="true"] { border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); background: color-mix(in srgb, var(--gold) 11%, transparent); color: var(--gold-lit); }
+.beast-chip[aria-pressed="true"] b { color: var(--gold); }
+.beast-chip:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.beast-group { display: grid; gap: .55rem; }
+.beast-group[hidden] { display: none; }
+.beast-group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--line); }
+.beast-group-head h3 { color: var(--gold); font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; }
+.beast-group-head span { color: var(--dim); font-family: var(--num); font-size: .68rem; }
+.beast-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: .85rem; align-items: start; }
+.page-content [data-element="fire"] { --el: var(--hp-lit); }
+.page-content [data-element="cold"] { --el: var(--mana-lit); }
+.page-content [data-element="lightning"] { --el: var(--xp-lit); }
+.page-content [data-element="poison"] { --el: var(--good-lit); }
+.page-content [data-element="chaos"] { --el: var(--curse); }
+.page-content [data-element="earth"] { --el: var(--gold); }
+.page-content [data-element="physical"] { --el: var(--mob); }
+.beast-card { --el: var(--mob); display: grid; gap: .6rem; padding: .8rem .9rem .75rem 1rem; border: 1px solid var(--line); border-left: 3px solid var(--el); border-radius: var(--radius-card); background: var(--panel); }
+.beast-card:hover { border-color: color-mix(in srgb, var(--el) 42%, var(--line)); border-left-color: var(--el); }
+.beast-card[hidden] { display: none; }
+.beast-head { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+.beast-title { display: grid; gap: .1rem; min-width: 0; }
+.beast-title h4 { color: var(--text); font-family: var(--wiki-display); font-size: 1.12rem; font-weight: 500; line-height: 1.15; }
+.beast-sub { color: var(--dim); font-size: .7rem; }
+.beast-flag { padding: 0 .3rem; border: 1px solid color-mix(in srgb, var(--good) 45%, var(--line)); border-radius: var(--radius-pill); color: var(--good-lit); font-size: .6rem; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
+.beast-el { --el: var(--mob); display: inline-flex; align-items: center; gap: .32rem; flex: none; color: var(--el); font-family: var(--num); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.beast-el::before { content: ""; width: .42rem; height: .42rem; border-radius: 50%; background: var(--el); box-shadow: 0 0 .35rem color-mix(in srgb, var(--el) 60%, transparent); }
+.beast-el.sm { font-size: .58rem; }
+.beast-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .35rem .8rem; margin: 0; }
+.beast-facts div { display: grid; gap: .05rem; min-width: 0; }
+.beast-facts div:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.beast-facts dt { color: var(--dim); font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; }
+.beast-facts dd { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem; color: var(--text); font-size: .74rem; }
+.beast-bodies { display: inline-flex; gap: .22rem; }
+.beast-body { display: inline-grid; place-items: center; width: 1.05rem; height: 1.05rem; border: 1px solid var(--line); border-radius: 3px; color: var(--dim); font-family: var(--num); font-size: .58rem; text-decoration: none; cursor: help; }
+.beast-habitat { color: var(--dim); font-size: .7rem; text-transform: capitalize; }
+.beast-label { color: var(--dim); font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; padding-right: .4rem; }
+.beast-kit { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; }
+.beast-kit .tag { color: var(--text); }
+.beast-none { color: var(--dim); font-size: .7rem; }
+.beast-fold { border-top: 1px solid var(--line); padding-top: .5rem; }
+.beast-fold summary { color: var(--dim); font-size: .7rem; cursor: pointer; }
+.beast-fold summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.beast-fold summary:hover { color: var(--text); }
+.beast-fold summary b { color: var(--el, var(--gold)); font-family: var(--num); font-size: .66rem; font-weight: 500; }
+.beast-fold summary::marker { color: var(--el, var(--gold)); }
+.beast-fold[open] { display: grid; gap: .5rem; }
+.beast-fold-wide { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); padding: .8rem 1rem; }
+.beast-fold-wide[open] { gap: .9rem; }
+.beast-fold-wide summary { font-family: var(--wiki-display); font-size: .95rem; }
+.beast-fold-wide summary b { color: var(--gold); }
+.beast-table-wrap { overflow-x: auto; }
+.beast-fold table { font-size: .7rem; }
+.beast-fold th, .beast-fold td { padding: .28rem .35rem; }
+.beast-pc { color: var(--text); font-family: var(--num); }
+.beast-unique { color: var(--gold-lit); border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
 .legend { display: grid; gap: var(--spacing-xs); padding-left: 1.1rem; font-size: var(--font-xs); color: var(--dim); }
 .legend strong { color: var(--text); }
 .num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-card); padding: 0 .25rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; }
@@ -546,32 +573,35 @@ dl, dt, dd { margin: 0; }
 <nav class="wiki-nav" id="wiki-nav" aria-label="Manual chapters">
   <p class="nav-title">The manual</p>
   <section class="nav-group" aria-labelledby="nav-start">
-    <h2 id="nav-start"><span>I</span>Start here<b>3</b></h2>
-    <ul><li><a href="index.html" data-page-link data-title="Start here" data-group="Start here" data-search="Start here ModWorld — how to play Start here An open-world idle RPG. Your character fights while the window is open and while it is shut." class="">Start here</a></li><li><a href="progression.html" data-page-link data-title="Progression" data-group="Start here" data-search="Progression Progression Start here XP to next level = kills at that level × XP per kill. Skill, field-skill and Mastery tracks use separate XP curves." class="">Progression</a></li><li><a href="idle.html" data-page-link data-title="Away &amp; bag" data-group="Start here" data-search="Away &amp; bag Away, and what you can carry Start here Every whole elapsed second is credited, with no offline time limit. Away gear uses the band’s floor Item level; loot is not auto-converted." class="">Away &amp; bag</a></li></ul>
+    <h2 id="nav-start"><span>I</span>Getting started<b>3</b></h2>
+    <ul><li><a href="index.html" data-page-link data-title="Overview" data-group="Getting started" data-search="Overview ModWorld — how to play Getting started An open-world idle RPG. Your character fights while the window is open and while it is shut." class="">Overview</a></li><li><a href="progression.html" data-page-link data-title="Progression" data-group="Getting started" data-search="Progression Progression Getting started XP to next level = kills at that level × XP per kill. Skill, field-skill and Mastery tracks use separate XP curves." class="">Progression</a></li><li><a href="idle.html" data-page-link data-title="Away &amp; bag" data-group="Getting started" data-search="Away &amp; bag Away, and what you can carry Getting started Every whole elapsed second is credited, with no offline time limit. Away gear uses the band’s floor Item level; loot is not auto-converted." class="">Away &amp; bag</a></li></ul>
   </section><section class="nav-group" aria-labelledby="nav-character">
-    <h2 id="nav-character"><span>II</span>Character<b>7</b></h2>
-    <ul><li><a href="stats.html" data-page-link data-title="Stats &amp; caps" data-group="Character" data-search="Stats &amp; caps Stats and caps Character Seven Core attributes feed derived stats through the formulas and caps below." class="">Stats &amp; caps</a></li><li><a href="skills.html" data-page-link data-title="Skills" data-group="Character" data-search="Skills Skills Character Press damage = level-1 damage × damagePct(level) / 100 . Effects use effectPct ; Buffs and Auras use buffEffectPct . Special effects use their own ramp. Cap: 20." class="">Skills</a></li><li><a href="equipment.html" data-page-link data-title="Equipment" data-group="Character" data-search="Equipment Equipment Character Every slot that is not a main hand, frame by frame. The frame decides what it can roll; the roll decides what it is worth." class="">Equipment</a></li><li><a href="crafting.html" data-page-link data-title="Crafting" data-group="Character" data-search="Crafting Crafting Character Stones change what a piece is ; two of them also move how high it sits — Ascend the band, Upgrade the Gear line. At the settlement Craft bench, right-click a stone and click an equipped or carried item, or a highlighted Mod line for a targeted use. Hold Shift to keep using the stone; Esc or right-click cancels. Every price below is read, never typed." class="">Crafting</a></li><li><a href="survival.html" data-page-link data-title="Survival" data-group="Character" data-search="Survival Survival, field skills and provisions Character HP, Mana and Energy Shield use separate Core formulas. Fieldwork, Hunger and food use the rates below." class="on" aria-current="page">Survival</a></li><li><a href="passive-tree.html" data-page-link data-title="Passive tree" data-group="Character" data-search="Passive tree Passive tree Character The 775-node board the game draws, pannable here: drag to move, scroll to zoom, and jump by region. Every road, Notable and Keystone is the live tree data." class="">Passive tree</a></li><li><a href="builds.html" data-page-link data-title="Build plan" data-group="Character" data-search="Build plan Build plan Character A plan first: choose the regions your damage and defence scale on, walk one road to a Notable, and spend attainment on the Keystone that changes a rule. Skill pieces, presets and the finish line follow below." class="">Build plan</a></li></ul>
+    <h2 id="nav-character"><span>II</span>Character<b>4</b></h2>
+    <ul><li><a href="stats.html" data-page-link data-title="Stats &amp; caps" data-group="Character" data-search="Stats &amp; caps Stats and caps Character Seven Core attributes feed derived stats through the formulas and caps below." class="">Stats &amp; caps</a></li><li><a href="skills.html" data-page-link data-title="Skills" data-group="Character" data-search="Skills Skills Character Press damage = level-1 damage × damagePct(level) / 100 . Effects use effectPct ; Buffs and Auras use buffEffectPct . Special effects use their own ramp. Cap: 20." class="">Skills</a></li><li><a href="passive-tree.html" data-page-link data-title="Passive tree" data-group="Character" data-search="Passive tree Passive tree Character The 775-node board the game draws. Drag to pan, scroll to zoom, jump by region. Every road, Notable and Keystone is live tree data." class="">Passive tree</a></li><li><a href="builds.html" data-page-link data-title="Build plan" data-group="Character" data-search="Build plan Build plan Character A plan first: choose the regions your damage and defence scale on, walk one road to a Notable, and spend attainment on the Keystone that changes a rule. Skill pieces, presets and the finish line follow below." class="">Build plan</a></li></ul>
   </section><section class="nav-group" aria-labelledby="nav-combat">
     <h2 id="nav-combat"><span>III</span>Combat<b>3</b></h2>
-    <ul><li><a href="combat.html" data-page-link data-title="Combat" data-group="Combat" data-search="Combat Combat Combat One incoming hit resolves in a fixed order — avoidance, then Armour, then Elemental resistance, then a pool. Every number is the engine at the reference build (every point spent evenly across the seven Core attributes, level 190 ), so it is the line your own sheet is measured against, not a promise about it." class="">Combat</a></li><li><a href="elements.html" data-page-link data-title="Elements" data-group="Combat" data-search="Elements Elements Combat Every Element names the status its hits leave. A Species attacks with one Element and authors a separate resistance and weakness; no Element counters another. An Element declared ahead of its content reads a dash until its status and its skill rows land." class="">Elements</a></li><li><a href="mobs.html" data-page-link data-title="Bestiary" data-group="Combat" data-search="Bestiary Races, Species and Variants Combat 11 Races · 53 Species · 193 Variants · 53 Uniques. Counts describe the current world; Races and Species have no required roster size." class="">Bestiary</a></li></ul>
+    <ul><li><a href="combat.html" data-page-link data-title="Combat" data-group="Combat" data-search="Combat Combat Combat One incoming hit resolves in a fixed order — avoidance, then Armour, then Elemental resistance, then a pool. Every number is the engine at the reference build (every point spent evenly across the seven Core attributes, level 190 ), so it is the line your own sheet is measured against, not a promise about it." class="">Combat</a></li><li><a href="elements.html" data-page-link data-title="Elements" data-group="Combat" data-search="Elements Elements Combat Every Element names the status its hits leave. A Species attacks with one Element and authors a separate resistance and weakness; no Element counters another. An Element declared ahead of its content reads a dash until its status and its skill rows land." class="">Elements</a></li><li><a href="mobs.html" data-page-link data-title="Bestiary" data-group="Combat" data-search="Bestiary Bestiary Combat 11 races · 36 species · 156 variants · 36 uniques. Every species attacks with one Element — the spine on its plate — and carries its own resistance, weakness and junk." class="">Bestiary</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-gear">
+    <h2 id="nav-gear"><span>IV</span>Gear &amp; crafting<b>4</b></h2>
+    <ul><li><a href="items.html" data-page-link data-title="Items" data-group="Gear &amp; crafting" data-search="Items Items Gear &amp; crafting A piece of gear is a frame plus the Mods that rolled on it. The frame decides what it can roll; the roll decides what it is worth." class="">Items</a></li><li><a href="weapons.html" data-page-link data-title="Weapons" data-group="Gear &amp; crafting" data-search="Weapons Weapons Gear &amp; crafting 11 main-hand types. DPS index = attacksPerSecond × weaponMult / (sword attacksPerSecond × swordMult) × 100 . Frame windows use the mid band." class="">Weapons</a></li><li><a href="equipment.html" data-page-link data-title="Equipment" data-group="Gear &amp; crafting" data-search="Equipment Equipment Gear &amp; crafting Every slot that is not a main hand, frame by frame." class="">Equipment</a></li><li><a href="crafting.html" data-page-link data-title="Crafting" data-group="Gear &amp; crafting" data-search="Crafting Crafting Gear &amp; crafting Stones change what a piece is ; two of them also move how high it sits — Ascend the band, Upgrade the Gear line. At the settlement Craft bench, right-click a stone and click an equipped or carried item, or a highlighted Mod line for a targeted use. Hold Shift to keep using the stone; Esc or right-click cancels. Every price below is read, never typed." class="">Crafting</a></li></ul>
   </section><section class="nav-group" aria-labelledby="nav-world">
-    <h2 id="nav-world"><span>IV</span>World<b>3</b></h2>
-    <ul><li><a href="world.html" data-page-link data-title="World" data-group="World" data-search="World The world World Zone Level drives HP/DPS curves; body class changes group size, evasion and DPS factor." class="">World</a></li><li><a href="travel.html" data-page-link data-title="Travel" data-group="World" data-search="Travel Travel and the Waypoint World blocks = (|Δq| + |Δr| + |Δq + Δr|) / 2 ; walk time = blocks × block_sec ." class="">Travel</a></li><li><a href="towns.html" data-page-link data-title="Towns" data-group="World" data-search="Towns Settlements World Stall price = listed income-minutes × the seller band’s gold-per-minute rate." class="">Towns</a></li></ul>
-  </section><section class="nav-group" aria-labelledby="nav-economy">
-    <h2 id="nav-economy"><span>V</span>Items &amp; economy<b>3</b></h2>
-    <ul><li><a href="items.html" data-page-link data-title="Items" data-group="Items &amp; economy" data-search="Items Items Items &amp; economy A piece of gear is a frame plus the Mods that rolled on it. The frame decides what it can roll; the roll decides what it is worth." class="">Items</a></li><li><a href="weapons.html" data-page-link data-title="Weapons" data-group="Items &amp; economy" data-search="Weapons Weapons Items &amp; economy 11 main-hand types. DPS index = attacksPerSecond × weaponMult / (sword attacksPerSecond × swordMult) × 100 . Frame windows use the mid band." class="">Weapons</a></li><li><a href="economy.html" data-page-link data-title="Economy" data-group="Items &amp; economy" data-search="Economy The two currencies Items &amp; economy Trade quote = item value integrated over the town’s demand curve. Stall prices use band income; Crafting lists stone costs." class="">Economy</a></li></ul>
-  </section><section class="nav-group" aria-labelledby="nav-reference">
-    <h2 id="nav-reference"><span>VI</span>Reference<b>1</b></h2>
-    <ul><li><a href="icons.html" data-page-link data-title="Icons" data-group="Reference" data-search="Icons Icon Gallery Reference Every icon the game ships, in one place. Search by name, filter by category, star icons to find them again, or mark unwanted icons to hide them until you're ready to remove them in a batch." class="">Icons</a></li></ul>
+    <h2 id="nav-world"><span>V</span>World<b>3</b></h2>
+    <ul><li><a href="world.html" data-page-link data-title="World" data-group="World" data-search="World The world World Zone Level drives HP/DPS curves; body class changes group size, evasion and DPS factor." class="">World</a></li><li><a href="travel.html" data-page-link data-title="Travel" data-group="World" data-search="Travel Travel and the Waypoint World blocks = (|Δq| + |Δr| + |Δq + Δr|) / 2 ; walk time = blocks × block_sec ." class="">Travel</a></li><li><a href="survival.html" data-page-link data-title="Survival" data-group="World" data-search="Survival Survival, field skills and provisions World HP, Mana and Energy Shield use separate Core formulas. Fieldwork, Hunger and food use the rates below." class="on" aria-current="page">Survival</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-trade">
+    <h2 id="nav-trade"><span>VI</span>Towns &amp; trade<b>2</b></h2>
+    <ul><li><a href="towns.html" data-page-link data-title="Towns" data-group="Towns &amp; trade" data-search="Towns Settlements Towns &amp; trade Stall price = listed income-minutes × the seller band’s gold-per-minute rate." class="">Towns</a></li><li><a href="economy.html" data-page-link data-title="Economy" data-group="Towns &amp; trade" data-search="Economy The two currencies Towns &amp; trade Trade quote = item value integrated over the town’s demand curve. Stall prices use band income; Crafting lists stone costs." class="">Economy</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-appendix">
+    <h2 id="nav-appendix"><span>VII</span>Appendix<b>1</b></h2>
+    <ul><li><a href="icons.html" data-page-link data-title="Icons" data-group="Appendix" data-search="Icons Icon Gallery Appendix Every icon the game ships, in one place. Search by name, filter by category, star icons to find them again, or mark unwanted icons to hide them until you're ready to remove them in a batch." class="">Icons</a></li></ul>
   </section>
-  <p class="nav-foot">20 chapters · live data</p>
+  <p class="nav-foot">7 chapters · 20 pages · live data</p>
 </nav>
 <main id="wiki-main" class="wiki-main" tabindex="-1"><header class="page-head">
-  <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Field Manual</a><span aria-hidden="true">/</span><span>Character</span><span aria-hidden="true">/</span><span aria-current="page">Survival</span></nav>
-  <p class="eyebrow">Chapter II · Character</p>
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Field Manual</a><span aria-hidden="true">/</span><span>World</span><span aria-hidden="true">/</span><span aria-current="page">Survival</span></nav>
+  <p class="eyebrow">Chapter V · World</p>
   <h1>Survival, field skills and provisions</h1>
   <p class="lead">HP, Mana and Energy Shield use separate Core formulas. Fieldwork, Hunger and food use the rates below.</p>
-  <div class="page-meta"><span class="chip">15 sections</span><span class="chip">Live game data</span><span class="chip">Character</span></div>
+  <div class="page-meta"><span class="chip">15 sections</span><span class="chip">Live game data</span><span class="chip">World</span></div>
   <p class="covers"><span>Covers</span>The pools · Your combat readout · What a Push costs · Field Camp and life skills · Camp encounters · Field-skill progression</p>
 </header><nav class="toc" aria-label="On this page">
   <p class="eyebrow">On this page</p>
@@ -589,19 +619,19 @@ dl, dt, dd { margin: 0; }
 <section><h2 id="section-4">Field Camp and life skills</h2><p class="note">Camp relocation after the free moves costs 1 ore + 5 timber. Field Skill XP and Mastery are separate tracks.</p><table><thead><tr><th>Skill</th><th>Field site</th><th>What it yields</th></tr></thead><tbody><tr><td>Mining</td><td>wild-side index 1</td><td>1 ore every 10 sec · rich-vein chance scales with Mining and Mine Mastery</td></tr><tr><td>Woodcutting</td><td>wild-side index 2</td><td>1 timber per action · rarewood and herb chances scale with Woodcutting and Grove Mastery</td></tr><tr><td>Hunting</td><td>bare field hexes</td><td>raw meat and lineage provision chances and quantities scale with Hunting and each lineage’s Mastery</td></tr><tr><td>Fishing</td><td>Field Camp in a zone with an authored fishing source</td><td>1 catch of River Fish or Shellfish every 10 sec</td></tr><tr><td>Smithing</td><td>safe and idle at a settlement</td><td>Iron Bar · 2 Iron Ore · Iron Brackets · 2 Iron Bar + 1 Timber</td></tr><tr><td>Cooking</td><td>active Field Camp</td><td>turn raw food, fruit, edible herbs and ingredients into timed combat meals</td></tr></tbody></table></section>
 <section><h2 id="section-5">Camp encounters</h2><p>A Field Camp can draw one encounter at a time while you stand at it, online, not hunting and not already in a fight. Each character keeps its own seeded Camp stream: the encounter, its offers and its prepared group are frozen when it appears, so previewing it, refusing it, reloading and going offline never reroll it. The warning, the choice and Camp exposure run on credited online time only.</p><table><thead><tr><th>Encounter</th><th>What it is</th><th>What you can do</th></tr></thead><tbody><tr><td>Sounds</td><td>a noise just off the Camp</td><td>Investigate surveys the Camp and its neighbours once and shows the prepared group, then you Fight or Withdraw; Stay quiet lets it pass</td></tr><tr><td>Prowler</td><td>a silhouette at the fire</td><td>Fight the prepared normal group, or Secure supplies and wait it out with your work stopped and nothing deducted</td></tr><tr><td>Traveler</td><td>a traveller at the fire</td><td>Listen for news, which surveys the blocks around you; Trade provisions for ore or timber; or Decline</td></tr><tr><td>Nest</td><td>a nest at the worksite</td><td>mining and woodcutting stop while it is there; Clear it with one normal fight or wait it out — no nest record survives it</td></tr><tr><td>Herd</td><td>tracks toward a scouted Expedition subzone</td><td>Follow starts an ordinary walk and an ordinary hunt on arrival; nothing is reserved and no task is credited</td></tr><tr><td>Injured</td><td>a traveller from the Camp’s settlement</td><td>give provisions or one ordinary HP draught for one-time Standing credit, or Decline</td></tr><tr><td>Discovered</td><td>your Camp has been found</td><td>Fight, Shelter through the warning, or move the Camp by the ordinary relocation</td></tr></tbody></table><p>The Camp policy decides what happens when you do not answer:</p><table><thead><tr><th>Policy</th><th>What it does</th></tr></thead><tbody><tr><td>Avoid fights</td><td>the work stops and you shelter through the warning and the choice, then the threat passes</td></tr><tr><td>Defend Camp</td><td>you fight only when the warned threat reaches the Camp at the end of the choice</td></tr><tr><td>Engage early</td><td>you start the prepared fight as soon as the warning ends, before the threat reaches the fire</td></tr></tbody></table><p>An encounter fight is an ordinary normal group from the Camp’s own zone: no Elite, no Unique, no extra reward, and the ordinary per-kill drop still pays. Walking, warping, relocating the Camp or leaving to hunt ends the offer once; what you already earned stays earned, and a policy never spends, trades or follows for you. Camp exposure grows while you camp and fades while you are away, and moving the tent does not clear it.</p><code>check every 120 sec</code> · <code>grace 180 sec</code> · <code>chance 50.0%</code> · <code>warning 15 sec</code> · <code>choice 45 sec</code> · <code>quiet 240 sec</code> · <code>exposure 900 sec</code></section>
 <section><h2 id="section-6">Field-skill progression</h2><p class="note"><code>harvest quantity = base yield + reached milestones × bonusPerMilestone</code>. <code>drop chance = min(1, base chance × (1 + capped Skill/Mastery bonus))</code>; gear and stone chances are unchanged.</p><table><thead><tr><th>Progress</th><th>Benefit</th><th>Read from</th></tr></thead><tbody><tr><td>Harvest milestones</td><td>+1 unit per action at Skill levels 5 · 10 · 15</td><td><code>fieldwork.progression.harvest_bonus_*</code></td></tr><tr><td>Field drop rate</td><td>+0.5% per Skill level after 1 and +0.3% per resource Mastery level after 1, up to +40%</td><td><code>fieldwork.progression.drop_rate_bonus_*</code></td></tr></tbody></table></section>
-<section><h2 id="section-7">Food drops from hunts</h2><p class="note"><code>Expected provision per kill = chance × average(quantity range)</code>. Each lineage roll is separate from the raw-meat roll.</p><table><thead><tr><th>Lineage</th><th>Provision</th><th>Chance</th><th>Quantity</th></tr></thead><tbody><tr><td>goblin</td><td>Goblin Haunch</td><td>22.0%</td><td>1–2</td></tr><tr><td>human</td><td>Soldier's Ration</td><td>18.0%</td><td>1–1</td></tr><tr><td>elf · dryad</td><td>Moonmint</td><td>8.0%</td><td>1–2</td></tr><tr><td>slime · lizardman</td><td>Field Mushroom</td><td>6.0%</td><td>1–1</td></tr><tr><td>troll · giant · ogre</td><td>Forest Nuts</td><td>4.0%</td><td>1–2</td></tr><tr><td>treant</td><td>Forest Nuts</td><td>5.0%</td><td>1–2</td></tr><tr><td>kobold · beetle</td><td>Field Mushroom</td><td>5.0%</td><td>1–1</td></tr><tr><td>archon · wisp</td><td>Moonmint</td><td>4.0%</td><td>1–2</td></tr><tr><td>ooze · spider</td><td>Field Mushroom</td><td>5.0%</td><td>1–1</td></tr><tr><td>hornet</td><td>Aromatic Herb</td><td>5.0%</td><td>1–1</td></tr><tr><td>mist</td><td>Wild Berries</td><td>4.0%</td><td>1–1</td></tr><tr><td>siren · shark</td><td>River Fish</td><td>12.0%</td><td>1–2</td></tr><tr><td>crab</td><td>Shellfish</td><td>15.0%</td><td>1–2</td></tr><tr><td>dryad · treant</td><td>Marsh Sage</td><td>6.0%</td><td>1–1</td></tr></tbody></table></section>
-<section><h2 id="section-8">Ore and timber from kills</h2><p class="note"><code>Expected material per kill = chance × average(quantity range)</code>. These rows are the extra Hunting-skill roll; Mine and Grove actions use their own harvest formulas.</p><table><thead><tr><th>Lineage</th><th>Material</th><th>Chance</th><th>Quantity</th></tr></thead><tbody><tr><td>Golem</td><td>Ore</td><td>5.0%</td><td>1–1</td></tr><tr><td>Crab · Beetle</td><td>Ore</td><td>4.0%</td><td>1–1</td></tr><tr><td>Treant · Dryad</td><td>Timber</td><td>6.0%</td><td>1–1</td></tr><tr><td>Siren</td><td>Timber</td><td>3.0%</td><td>1–1</td></tr><tr><td>Treant</td><td>Rarewood</td><td>2.0%</td><td>1–1</td></tr><tr><td>Golem</td><td>Rarewood</td><td>1.0%</td><td>1–1</td></tr></tbody></table></section>
-<section><h2 id="section-9">Species bonus materials</h2><p class="note"><code>Expected material per kill = chance × average(quantity range)</code>. This roll is independent of Hunting and applies to every rank, including dungeon and ambush kills.</p><table><thead><tr><th>Material</th><th>Species</th><th>Chance</th></tr></thead><tbody><tr><td>Coin Clasp</td><td>Goblin · Kobold · Human</td><td>0.84%</td></tr><tr><td>Iron Ore</td><td>Orc · Ogre · Golem · Giant · Drowned Knight · Slag Golem</td><td>0.61%</td></tr><tr><td>Thick Pelt</td><td>Troll · Minotaur · Wolf · Werewolf · Shark · Barghest · Bog Titan</td><td>0.56%</td></tr><tr><td>Grave Bone</td><td>Skeleton · Bone Hound · Frost Revenant</td><td>0.84%</td></tr><tr><td>Funerary Linen</td><td>Mummy</td><td>0.67%</td></tr><tr><td>Chaos Ichor</td><td>Vampire · Demon · Wraith · Mist · Wisp · Moor Hag</td><td>0.19%</td></tr><tr><td>Venom Gland</td><td>Slime · Ooze · Briarling · Mire Toad · Mire Hydra</td><td>0.33%</td></tr><tr><td>Chitin Plate</td><td>Spider · Beetle · Hornet · Pale Moth</td><td>0.67%</td></tr><tr><td>Reptile Scale</td><td>Dragon · Lizardman · Wyvern · Glass Serpent · Wyrmling</td><td>0.33%</td></tr><tr><td>Hardwood</td><td>Treant · Thorn Stalker</td><td>0.75%</td></tr><tr><td>Rarewood</td><td>Elf · Dryad</td><td>0.45%</td></tr><tr><td>Willow Wood</td><td>Siren</td><td>1.13%</td></tr><tr><td>Ember Heart</td><td>Imp · Salamander · Ash Phoenix</td><td>0.22%</td></tr><tr><td>Rock Salt</td><td>Crab</td><td>1.35%</td></tr><tr><td>Silver Ore</td><td>Archon · Storm Herald</td><td>0.37%</td></tr><tr><td>Feather Plume</td><td>Harpy</td><td>0.45%</td></tr><tr><td>River Pearl</td><td>River Nymph</td><td>0.27%</td></tr></tbody></table></section>
+<section><h2 id="section-7">Food drops from hunts</h2><p class="note"><code>Expected provision per kill = chance × average(quantity range)</code>. Each lineage roll is separate from the raw-meat roll.</p><table><thead><tr><th>Lineage</th><th>Provision</th><th>Chance</th><th>Quantity</th></tr></thead><tbody><tr><td>goblin</td><td>Goblin Haunch</td><td>22.0%</td><td>1–2</td></tr><tr><td>human</td><td>Soldier's Ration</td><td>18.0%</td><td>1–1</td></tr><tr><td>elf · dryad</td><td>Moonmint</td><td>8.0%</td><td>1–2</td></tr><tr><td>slime · lizardman</td><td>Field Mushroom</td><td>6.0%</td><td>1–1</td></tr><tr><td>troll · giant · ogre</td><td>Forest Nuts</td><td>4.0%</td><td>1–2</td></tr><tr><td>treant</td><td>Forest Nuts</td><td>5.0%</td><td>1–2</td></tr><tr><td>kobold · beetle</td><td>Field Mushroom</td><td>5.0%</td><td>1–1</td></tr><tr><td>wisp</td><td>Moonmint</td><td>4.0%</td><td>1–2</td></tr><tr><td>ooze · spider</td><td>Field Mushroom</td><td>5.0%</td><td>1–1</td></tr><tr><td>hornet</td><td>Aromatic Herb</td><td>5.0%</td><td>1–1</td></tr><tr><td>siren</td><td>River Fish</td><td>12.0%</td><td>1–2</td></tr><tr><td>dryad · treant</td><td>Marsh Sage</td><td>6.0%</td><td>1–1</td></tr></tbody></table></section>
+<section><h2 id="section-8">Ore and timber from kills</h2><p class="note"><code>Expected material per kill = chance × average(quantity range)</code>. These rows are the extra Hunting-skill roll; Mine and Grove actions use their own harvest formulas.</p><table><thead><tr><th>Lineage</th><th>Material</th><th>Chance</th><th>Quantity</th></tr></thead><tbody><tr><td>Golem</td><td>Ore</td><td>5.0%</td><td>1–1</td></tr><tr><td>Beetle</td><td>Ore</td><td>4.0%</td><td>1–1</td></tr><tr><td>Treant · Dryad</td><td>Timber</td><td>6.0%</td><td>1–1</td></tr><tr><td>Siren</td><td>Timber</td><td>3.0%</td><td>1–1</td></tr><tr><td>Treant</td><td>Rarewood</td><td>2.0%</td><td>1–1</td></tr><tr><td>Golem</td><td>Rarewood</td><td>1.0%</td><td>1–1</td></tr></tbody></table></section>
+<section><h2 id="section-9">Species bonus materials</h2><p class="note"><code>Expected material per kill = chance × average(quantity range)</code>. This roll is independent of Hunting and applies to every rank, including dungeon and ambush kills.</p><table><thead><tr><th>Material</th><th>Species</th><th>Chance</th></tr></thead><tbody><tr><td>Coin Clasp</td><td>Goblin · Kobold · Human</td><td>0.84%</td></tr><tr><td>Iron Ore</td><td>Orc · Ogre · Golem · Giant · Slag Golem</td><td>0.61%</td></tr><tr><td>Thick Pelt</td><td>Troll · Minotaur · Wolf · Werewolf</td><td>0.56%</td></tr><tr><td>Grave Bone</td><td>Skeleton · Bone Hound · Frost Revenant</td><td>0.84%</td></tr><tr><td>Funerary Linen</td><td>Mummy</td><td>0.67%</td></tr><tr><td>Chaos Ichor</td><td>Vampire · Demon · Wraith · Wisp</td><td>0.19%</td></tr><tr><td>Venom Gland</td><td>Slime · Ooze · Mire Hydra</td><td>0.33%</td></tr><tr><td>Chitin Plate</td><td>Spider · Beetle · Hornet</td><td>0.67%</td></tr><tr><td>Reptile Scale</td><td>Dragon · Lizardman · Wyvern · Wyrmling</td><td>0.33%</td></tr><tr><td>Hardwood</td><td>Treant</td><td>0.75%</td></tr><tr><td>Rarewood</td><td>Elf · Dryad</td><td>0.45%</td></tr><tr><td>Willow Wood</td><td>Siren</td><td>1.13%</td></tr><tr><td>Ember Heart</td><td>Imp</td><td>0.22%</td></tr><tr><td>Feather Plume</td><td>Harpy</td><td>0.45%</td></tr></tbody></table></section>
 <section><h2 id="section-10">Hunger and provisions</h2><p class="note"><code>Hunger(t) = max(0, Hunger₀ − configured drain × elapsed time)</code>. At zero Hunger, HP regen ×0.10; ES recharge is unchanged. Auto Eat threshold: 25%.</p><table><thead><tr><th>Food</th><th>Kind</th><th>Hunger restored</th><th>Source</th></tr></thead><tbody><tr><td>Raw Game Meat</td><td>raw</td><td>+22</td><td>wildlife</td></tr><tr><td>Goblin Haunch</td><td>raw</td><td>+20</td><td>goblin scavengers</td></tr><tr><td>Wild Berries</td><td>fruit</td><td>+14</td><td>road forage</td></tr><tr><td>Forest Nuts</td><td>fruit</td><td>+18</td><td>road forage and large beasts</td></tr><tr><td>Sunroot</td><td>fruit</td><td>+21</td><td>sunlit road forage</td></tr><tr><td>Moonmint</td><td>herb</td><td>+12</td><td>elves, dryads and moonlit trails</td></tr><tr><td>Field Mushroom</td><td>ingredient</td><td>cooking ingredient</td><td>slimes and road forage</td></tr><tr><td>Aromatic Herb</td><td>ingredient</td><td>cooking ingredient</td><td>Rare Grove</td></tr><tr><td>River Fish</td><td>raw</td><td>+20</td><td>regional gathering and hunting</td></tr><tr><td>Shellfish</td><td>raw</td><td>+16</td><td>regional gathering and hunting</td></tr><tr><td>Wild Grain</td><td>ingredient</td><td>cooking ingredient</td><td>regional gathering and hunting</td></tr><tr><td>Marsh Sage</td><td>herb</td><td>+15</td><td>regional gathering and hunting</td></tr><tr><td>Trail Stew</td><td>cooked</td><td>+42</td><td>cooking</td></tr><tr><td>Hunter's Roast</td><td>cooked</td><td>+58</td><td>cooking</td></tr><tr><td>Warden Broth</td><td>cooked</td><td>+64</td><td>cooking</td></tr><tr><td>Grilled Skewer</td><td>cooked</td><td>+32</td><td>cooking</td></tr><tr><td>Berry Porridge</td><td>cooked</td><td>+38</td><td>cooking</td></tr><tr><td>Soldier's Ration</td><td>cooked</td><td>+40</td><td>human patrols and cooking</td></tr><tr><td>Goblin Bone Broth</td><td>cooked</td><td>+54</td><td>cooking</td></tr><tr><td>Moonmint Tea</td><td>cooked</td><td>+34</td><td>cooking</td></tr><tr><td>Sunroot Porridge</td><td>cooked</td><td>+46</td><td>cooking</td></tr><tr><td>Spiced Trail Roast</td><td>cooked</td><td>+62</td><td>cooking</td></tr><tr><td>Salted Fish</td><td>cooked</td><td>+55</td><td>cooking</td></tr><tr><td>Cedar-smoked Game</td><td>cooked</td><td>+60</td><td>cooking</td></tr><tr><td>Shellfish Chowder</td><td>cooked</td><td>+62</td><td>cooking</td></tr><tr><td>Pine Nut Bread</td><td>cooked</td><td>+50</td><td>cooking</td></tr><tr><td>Marsh Sage Tea</td><td>cooked</td><td>+40</td><td>cooking</td></tr></tbody></table></section>
 <section><h2 id="section-11">Camp kitchen menu</h2><p class="note"><code>Hunger after meal = min(HungerCap, Hunger + hunger_restore)</code>. A new meal replaces the active meal buff; capacity is checked before ingredients are spent.</p><table><thead><tr><th>Menu</th><th>Dish</th><th>Cooking level</th><th>Ingredients</th><th>Hunger and timed effect</th></tr></thead><tbody><tr><td>Hearth</td><td>Trail Stew</td><td>1</td><td>2 Raw Game Meat</td><td>+42 Hunger · 15 min · +5% damage · +0.2% Max HP regen/sec</td></tr><tr><td>Hearth</td><td>Hunter's Roast</td><td>6</td><td>3 Raw Game Meat · 1 Field Mushroom · 1 rarewood · 1 mid herb</td><td>+58 Hunger · 30 min · +9% damage · +0.4% Max HP regen/sec</td></tr><tr><td>Hearth</td><td>Warden Broth</td><td>11</td><td>2 Raw Game Meat · 1 Aromatic Herb · 1 high herb</td><td>+64 Hunger · 45 min · +7% damage · +0.6% Max HP regen/sec</td></tr><tr><td>Hearth</td><td>Grilled Skewer</td><td>1</td><td>1 Raw Game Meat · 1 Field Mushroom</td><td>+32 Hunger · 10 min · +3% damage · +0.1% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Berry Porridge</td><td>1</td><td>2 Wild Berries · 1 Forest Nuts · 1 low herb</td><td>+38 Hunger · 10 min · +2% damage · +0.2% Max HP regen/sec</td></tr><tr><td>Hearth</td><td>Soldier's Ration</td><td>1</td><td>1 Raw Game Meat · 1 Forest Nuts</td><td>+40 Hunger · 15 min · +2% damage · +0.1% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Goblin Bone Broth</td><td>3</td><td>2 Goblin Haunch · 1 Field Mushroom · 1 Moonmint</td><td>+54 Hunger · 20 min · +5% damage · +0.3% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Moonmint Tea</td><td>2</td><td>2 Moonmint · 1 Wild Berries</td><td>+34 Hunger · 20 min · +0% damage · +0.5% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Sunroot Porridge</td><td>4</td><td>2 Sunroot · 1 Wild Berries · 1 low herb</td><td>+46 Hunger · 25 min · +3% damage · +0.2% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Spiced Trail Roast</td><td>7</td><td>2 Raw Game Meat · 1 Forest Nuts · 1 Aromatic Herb · 1 rarewood · 1 mid herb</td><td>+62 Hunger · 35 min · +8% damage · +0.4% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Salted Fish</td><td>2</td><td>2 River Fish · 1 rock-salt · 1 timber</td><td>+55 Hunger · 30 min · +4% damage · +0.3% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Cedar-smoked Game</td><td>5</td><td>3 Raw Game Meat · 1 Aromatic Herb · 1 cedar-wood</td><td>+60 Hunger · 40 min · +6% damage · +0.2% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Shellfish Chowder</td><td>6</td><td>2 Shellfish · 1 Field Mushroom · 1 rock-salt · 1 mid herb</td><td>+62 Hunger · 30 min · +3% damage · +0.6% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Pine Nut Bread</td><td>2</td><td>2 Wild Grain · 1 Forest Nuts · 1 pine-wood · 1 low herb</td><td>+50 Hunger · 25 min · +3% damage · +0.2% Max HP regen/sec</td></tr><tr><td>Wild forage</td><td>Marsh Sage Tea</td><td>3</td><td>2 Marsh Sage · 1 Moonmint · 1 willow-wood</td><td>+40 Hunger · 30 min · +0% damage · +0.5% Max HP regen/sec</td></tr></tbody></table></section>
 <section><h2 id="section-12">Potions</h2><p class="note"><code>pool restored = MaxPool × potionPct / 100</code>. One shared 30 sec cooldown; cap 3 uses per fight. Auto-use prioritizes HP, then checks Mana when no usable HP bottle is available. Boss use: true.</p><table><thead><tr><th>Draught</th><th>Pool</th><th>Band</th><th>Effect</th><th>Brewed from</th></tr></thead><tbody><tr><td>Red Draught</td><td>hp</td><td>low</td><td><span class="num">10% of the pool, instantly</span></td><td><span class="hy">3 herbs + 1 Reroll Value Stones</span></td></tr><tr><td>Yellow Draught</td><td>hp</td><td>mid</td><td><span class="num">20% of the pool, instantly</span></td><td><span class="hy">5 herbs + 2 Reroll Value Stones</span></td></tr><tr><td>White Draught</td><td>hp</td><td>high</td><td><span class="num">30% of the pool, instantly</span></td><td><span class="hy">8 herbs + 4 Reroll Value Stones</span></td></tr><tr><td>Sky Draught</td><td>mana</td><td>low</td><td><span class="num">15% of the pool, instantly</span></td><td><span class="hy">3 herbs + 1 Reroll Value Stones</span></td></tr><tr><td>Blue Draught</td><td>mana</td><td>mid</td><td><span class="num">25% of the pool, instantly</span></td><td><span class="hy">5 herbs + 2 Reroll Value Stones</span></td></tr><tr><td>Deep Blue Draught</td><td>mana</td><td>high</td><td><span class="num">35% of the pool, instantly</span></td><td><span class="hy">8 herbs + 4 Reroll Value Stones</span></td></tr><tr><td>White Potion</td><td>HP + Mana</td><td>low</td><td><span class="num">10% Max HP + 15% Max Mana, instantly</span></td><td><span class="hy">3 herbs + 1 Reroll Value Stones</span></td></tr></tbody></table></section>
 <section><h2 id="section-13">Condensed</h2><p class="note"><code>condensed effect = base effect × 10</code>; weight = 12.</p><table><thead><tr><th></th><th>What it takes</th><th>What it gives</th></tr></thead><tbody><tr><td>A Condensed draught</td><td>10 bottles + 4 Reroll Value Stones</td><td>×10 effect, at 12 weight (20 carried loose)</td></tr></tbody></table></section>
 <section><h2 id="section-14">The herb farm</h2><p class="note"><code>farmLevel = min(cap, floor(sqrt(XP / level_divisor)) + 1)</code>; <code>XP for level L = (L − 1)² × level_divisor</code>.</p><table><thead><tr><th></th><th>The number</th><th>Read from</th></tr></thead><tbody><tr><td>Plots</td><td>3 to start, 2 bought, 5 at most</td><td><code>farm.plots</code></td></tr><tr><td>A grow</td><td>4.0 hours, then 3 herbs</td><td><code>farm.growth_hours</code> · <code>farm.yield_per_harvest</code></td></tr><tr><td>A replant</td><td>1 herb of the harvest goes back into the ground</td><td><code>farm.seed_cost_herbs</code></td></tr><tr><td>A day</td><td>2 taps; away growth has no time limit</td><td><code>farm.taps_per_day</code> · <code>farm.offline_cap_hours</code></td></tr><tr><td>A level</td><td>cap 100 · 20 XP a harvest · the same curve as Weapon Mastery</td><td><code>farm.level_*</code></td></tr><tr><td>Which draughts open</td><td>low from 1 · mid from 6 · high from 11</td><td><code>farm.tier_unlock_level</code></td></tr></tbody></table></section>
 <section><h2 id="section-15">Herbs from the ground versus herbs from a fight</h2><p class="note"><code>expected herbs per kill = bundleChance × average(bundle size)</code>; the low band chance is 0.</p><table><thead><tr><th>Zone band</th><th>A bundle a kill</th><th>A bundle holds</th><th>A brewable draught a kill</th></tr></thead><tbody><tr><td>low</td><td>0.0%</td><td>1-3 herbs</td><td>0.0%</td></tr><tr><td>mid</td><td>2.0%</td><td>1-3 herbs</td><td>0.8%</td></tr><tr><td>high</td><td>3.0%</td><td>1-3 herbs</td><td>0.8%</td></tr></tbody></table></section></article><footer class="page-foot">
-    <section class="related" aria-labelledby="related-title"><p class="eyebrow" id="related-title">Keep reading</p><div class="related-grid"><a href="stats.html"><b>Stats &amp; caps</b><small>Seven Core attributes feed derived stats through the formulas and caps below.</small></a><a href="skills.html"><b>Skills</b><small>Press damage = level-1 damage × damagePct(level) / 100 . Effects use effectPct ; Buffs and Auras use buffEffectPct . Special effects use…</small></a><a href="equipment.html"><b>Equipment</b><small>Every slot that is not a main hand, frame by frame. The frame decides what it can roll; the roll decides what it is worth.</small></a></div></section>
-    <nav class="page-turn" aria-label="Chapter navigation"><a class="prev" href="crafting.html"><small>Previous</small><b>Crafting</b></a><a class="next" href="passive-tree.html"><small>Next</small><b>Passive tree</b></a></nav>
+    <section class="related" aria-labelledby="related-title"><p class="eyebrow" id="related-title">Keep reading</p><div class="related-grid"><a href="world.html"><b>World</b><small>Zone Level drives HP/DPS curves; body class changes group size, evasion and DPS factor.</small></a><a href="travel.html"><b>Travel</b><small>blocks = (|Δq| + |Δr| + |Δq + Δr|) / 2 ; walk time = blocks × block_sec .</small></a></div></section>
+    <nav class="page-turn" aria-label="Chapter navigation"><a class="prev" href="travel.html"><small>Previous</small><b>Travel</b></a></nav>
   </footer>
-<footer class="wiki-foot"><span>ModWorld Field Manual · official player reference</span><span>20 chapters · figures read live from the game</span><a href="index.html">Contents</a></footer>
+<footer class="wiki-foot"><span>ModWorld Field Manual · official player reference</span><span>7 chapters · 20 pages · figures read live from the game</span><a href="index.html">Contents</a></footer>
 </main></div>
 <script>
 (function () {
@@ -702,6 +732,47 @@ dl, dt, dd { margin: 0; }
   Array.prototype.forEach.call(document.querySelectorAll('.wiki-nav [data-page-link]'), function (a) {
     a.addEventListener('click', function () { if (shell) shell.classList.remove('nav-open'); });
   });
+
+  // The bestiary: one text filter and a race chip row over the same plates. Cards carry their own
+  // search haystack (name, race, Element, habitat, variants, skills), so filtering never reads the DOM.
+  var bestiary = document.querySelector('[data-bestiary]');
+  if (bestiary) {
+    var beastInput = bestiary.querySelector('[data-bestiary-search]');
+    var beastChips = Array.prototype.slice.call(bestiary.querySelectorAll('[data-bestiary-race]'));
+    var beastGroups = Array.prototype.slice.call(bestiary.querySelectorAll('[data-bestiary-group]'));
+    var beastCards = Array.prototype.slice.call(bestiary.querySelectorAll('[data-bestiary-entry]'));
+    var beastStatus = bestiary.querySelector('[data-bestiary-status]');
+    var beastRace = 'all';
+    var applyBeast = function () {
+      var q = (beastInput ? beastInput.value : '').trim().toLowerCase();
+      var shown = 0;
+      beastGroups.forEach(function (group) {
+        var visible = 0;
+        Array.prototype.forEach.call(group.querySelectorAll('[data-bestiary-entry]'), function (card) {
+          var on = (beastRace === 'all' || card.getAttribute('data-race') === beastRace) &&
+            (!q || (card.getAttribute('data-search') || '').indexOf(q) >= 0);
+          card.hidden = !on;
+          if (on) visible++;
+        });
+        group.hidden = visible === 0;
+        shown += visible;
+      });
+      if (beastStatus) {
+        beastStatus.textContent = shown
+          ? 'Showing ' + shown + ' of ' + beastCards.length + ' species'
+          : 'No species match that filter.';
+      }
+    };
+    beastChips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        beastRace = chip.getAttribute('data-bestiary-race') || 'all';
+        beastChips.forEach(function (c) { c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'); });
+        applyBeast();
+      });
+    });
+    if (beastInput) beastInput.addEventListener('input', applyBeast);
+    applyBeast();
+  }
 
   // The passive-tree board: a viewBox camera over the canonical SVG, with a node card that follows
   // the hovered or pinned node exactly as the game's board does.

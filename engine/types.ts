@@ -381,6 +381,8 @@ export interface MobSize {
   ps: number;
   /** Base Evasion the body class carries, as a percent added on top of the species Dex line. */
   evasion_pct: number;
+  /** Ground footprint radius in meters — bodies push apart until edges clear, never centers. */
+  radius_m: number;
   group?: string;
   /** A boss is not a size — it declares which body class a weapon's `size_mult` reads it as. */
   reads_as?: string;
@@ -609,6 +611,8 @@ export interface MobCfg {
   reach: { bands: Record<string, number>; weapons: Record<string, number>; rules?: string };
   /** The clock a normal and an elite swing at, and a boss's own (`mob.attack_clock_per_sec`). */
   attack_clock_per_sec: { normal: number; elite: number; boss: number; note?: string };
+  /** Initial local range of a mob aura; strongest-wins still binds inside it. */
+  aura_radius_m: number;
   field_labels: FieldLabelsCfg;
 }
 
@@ -893,7 +897,65 @@ export interface EngineData {
   weapon_size_mult?: WeaponSizeMultCfg;
 }
 
+/** Circular skill footprint in ground meters; zero keeps a precise single target. */
+export type SkillShape = 'single' | 'circle' | 'line' | 'cone';
+
+export interface SkillAreaDefinition {
+  origin: 'caster' | 'target';
+  radius_m: number;
+  /** Legacy rows omit this: radius 0 is single, a positive radius is a circle. */
+  shape?: SkillShape;
+  /** Line/cone reach in meters; a line without it uses the cast range at aim time. */
+  length_m?: number;
+  /** Line strip width in meters (the full width, not the half-width). */
+  width_m?: number;
+  /** Cone full opening in degrees; must be > 0 and <= 180. */
+  angle_deg?: number;
+}
+
+/** Immutable geometry of one resolved cast, shared with presentation consumers. */
+export interface SkillAreaSnapshot {
+  origin: SkillAreaDefinition['origin'];
+  radiusM: number;
+  center: { x: number; y: number };
+  targetId?: string;
+  shape?: SkillShape;
+  lengthM?: number;
+  widthM?: number;
+  angleDeg?: number;
+  /** Committed cast direction in radians; line/cone membership reads this, never the camera. */
+  directionRad?: number;
+}
+
+export type SkillDelivery = 'instant' | 'melee' | 'projectile' | 'ground';
+
+export interface SkillCastProfile {
+  delivery: SkillDelivery;
+  range_m: number;
+  windup_sec: number;
+  recovery_sec: number;
+  impact_delay_sec: number;
+  projectile_speed_mps: number;
+  hit_radius_m: number;
+}
+
+export interface SkillCastTiming {
+  delivery: SkillDelivery;
+  startedAtUs: number;
+  releaseAtUs: number;
+  impactAtUs: number;
+  recoveryUntilUs: number;
+}
+
 /** The skill roster payload (`tools/data/skills.json`) — only the fields the model reads. */
+/** Selected multi-impact execution; count and share stay owned by `effects.hits`/`hit_pct`. */
+export interface SkillAction {
+  kind: 'projectile-burst' | 'ground-pulse-burst' | 'whirlwind-channel' | 'blizzard-field' | 'sand-field' | 'chain-strike';
+  interval_sec?: number;
+  active_sec?: number;
+  movement_speed_mult?: number;
+}
+
 export interface SkillRow {
   id: string;
   name?: string;
@@ -905,6 +967,11 @@ export interface SkillRow {
   cd?: number;
   basis?: string;
   targets?: string;
+  /** Live spatial footprint; targets remains the offline queue approximation. */
+  area?: SkillAreaDefinition;
+  cast?: Partial<SkillCastProfile> & { delivery: SkillDelivery };
+  /** Canonical execution shape for rows whose press lands more than once. */
+  action?: SkillAction;
   /** The row's own flat damage at skill level 1 — its identity, the same for every caster. */
   base_flat?: number;
   /** The share of the added power line the press receives, in percent (PoE damage effectiveness). */
@@ -922,7 +989,7 @@ export interface SkillRow {
   duration?: string;
   /** The reserve tier name this aura draws from (`reserve_tiers`). */
   reserve?: string;
-  effects?: { stat: string; element?: string; status?: string; op: string; value: number; subject?: string; condition?: string; cap?: number }[];
+  effects?: { stat: string; element?: string; status?: string; op: string; value: number; subject?: string; condition?: string; cap?: number; radius_m?: number }[];
   /** A legacy row kept resolvable for old saves, but excluded from drops, rewards and the active UI. */
   retired?: boolean;
   /** The active row that carries this retired row's role. */
@@ -931,6 +998,7 @@ export interface SkillRow {
 
 export interface SkillsData {
   meta: {
+    action_profiles?: Record<SkillDelivery, Omit<SkillCastProfile, 'delivery' | 'range_m'>>;
     formula?: {
       /** One row per skill level: the multiplier a press and an effect carry at that level. */
       skill_levels?: {
@@ -962,7 +1030,7 @@ export interface SkillsData {
 
 /** The mods payload (`tools/data/mods.json`) — only what the loot roller reads. */
 export interface ModsData {
-  mods: { id: string; name: string; group?: string; max: number; bands: number[][][]; rolls?: string[] }[];
+  mods: { id: string; name: string; group?: string; max: number; bands: number[][][]; rolls?: string[]; imprint?: boolean }[];
 }
 
 /** A Base frame (`tools/data/bases.json`) — only the fields the collector reads. */

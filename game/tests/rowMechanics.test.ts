@@ -6,9 +6,9 @@ import { buildCharacter, emptyGear } from '../src/sim/player';
 import { mastery } from '../src/sim/mastery';
 import { poolGear } from './sheetFixture';
 import { mobSwing, playerSwing } from '../src/sim/combat';
-import { newSkillState, castOnce, effectsActive, hasRule, esAbsorbPct, triggerAuras, toggleTrack } from '../src/sim/skills';
+import { newSkillState, castOnce, hasRule, esAbsorbPct, triggerAuras, toggleTrack } from '../src/sim/skills';
 import { newMobStatusStore, modsOn, holdsCondition, stepMob } from '../src/sim/mobStatus';
-import { newCurses, applyCurse, spreadOnDeath, lineValue } from '../src/sim/curse';
+import { newCurses, applyCurse, lineValue } from '../src/sim/curse';
 import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import type { Character } from '../src/sim/player';
 import type { Mob } from '../src/sim/types';
@@ -273,7 +273,6 @@ describe('the support rows that change the character', () => {
     let guard = 0;
     let rechargedWhileHit = false;
     while (guard++ < 200) {
-      const c = buildCharacter(s.player.level, s.gear, {}, 0, effectsActive(s.skills));
       s.player.es = 0;
       s.player.esIdleSec = 0; // as if it had just been hit
       tick(s, {});

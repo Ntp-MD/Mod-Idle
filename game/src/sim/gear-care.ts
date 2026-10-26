@@ -1,7 +1,6 @@
 import { TOWN } from '../engine/client';
 import type { GameState, Item } from './types';
 import { autoEquip, type EquipResult } from './gear';
-import { itemName } from './item-name';
 import { previewFilterRun, type FilterRunAction } from './game';
 import { autoReturnBlocker, autoReturnThreshold } from './exploration';
 import { slotsAvailable, slotsUsed } from './slots';

@@ -20,10 +20,11 @@
 
 // The wiki reads the engine, and only the engine: this is the same seam the client uses, so a page,
 // a cage and the game all resolve to one module and one data file.
-import { E as ENGINE, MODS as MODS_DATA, TOWN as TOWN_DATA, BASES as BASES_DATA, TREE_SPEC as TREE_DATA, SKILLS as SKILLS_DATA, MOB_SKILLS as MOB_SKILLS_DATA, eng, loot, sm, tree, road, farm, fieldwork, trade } from '../engine/client.ts';
+import { E as ENGINE, MODS as MODS_DATA, TOWN as TOWN_DATA, BASES as BASES_DATA, SKILLS as SKILLS_DATA, MOB_SKILLS as MOB_SKILLS_DATA, eng, loot, sm, tree, road, farm, fieldwork, trade } from '../engine/client.ts';
 import { STONE_NAME, PRESS_NAME } from '../../../engine/craft.ts';
 import { keystoneDef } from '../../../engine/keystones.ts';
-import { buildPassiveTreeView, treeOrbitPath, treeViewNodeRadius } from '../ui/passive-tree-view.ts';
+import { buildPassiveTreeView, treeOrbitPath, treeViewNodeRadius } from '../ui/passive-tree/passive-tree-view.ts';
+import { describeSkill } from '../sim/skill-copy.ts';
 import { WIKI_RUNTIME } from './runtime.ts';
 
 /**
@@ -61,7 +62,6 @@ const E: any = strict(ENGINE, 'engine.json');
 const MODS: any = strict(MODS_DATA, 'mods.json');
 const TOWN: any = strict(TOWN_DATA, 'town.json');
 const BASES: any = strict(BASES_DATA, 'bases.json');
-const TREE_SPEC: any = strict(TREE_DATA, 'tree.json');
 const SKILLS: any = strict(SKILLS_DATA, 'skills.json');
 
 /**
@@ -92,7 +92,6 @@ const n1 = (n: any): string => (Number.isFinite(Number(n)) ? Number(n).toLocaleS
 /** A published multiplier keeps its decimal: ×1.8 must never render as ×2. */
 const xOf = (n: any): string => (Number.isFinite(Number(n)) ? String(Math.round(Number(n) * 10) / 10) : '—');
 const list = (a: any): string => (a || []).map((x: any) => esc(x)).join(' · ');
-const pctList = (a: any): string => (a || []).map((x: any) => `${(Number(x) * 100).toFixed(1)}%`).join(' · ');
 const rowHtml = (cells: any[]): string => `<tr>${cells.map((c) => `<td>${c == null ? '' : String(c)}</td>`).join('')}</tr>`;
 const table = (head: string[], rows: any[][]): string =>
   `<table><thead><tr>${head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>` +
@@ -119,7 +118,7 @@ const QUAL_BANDS: string[] = (E.item_level.spans || []).map((sp: any) => sp.band
 /** A town price in gold: the engine's own `m` x the band's rate, the same call the town cage makes. */
 const goldAt = (m: any, band: string): string => wrap(n0(eng.goldPrice(Number(m), band)));
 
-type ChapterId = 'start' | 'character' | 'combat' | 'world' | 'economy' | 'reference';
+type ChapterId = 'start' | 'character' | 'combat' | 'gear' | 'world' | 'trade' | 'appendix';
 type Page = { file: string; nav: string; title: string; lead: string; body: string[]; group?: ChapterId };
 const PAGES: Page[] = [];
 const page = (p: Page): void => { PAGES.push(p); };
@@ -179,7 +178,6 @@ const TREE_CURRENCY = (tree as any).currencies?.tree || {};
 const QUEST_REWARDS = TOWN_DATA.quest_rewards;
 const TREE_POINT_CURVE = `base ${wrap(n0(TREE_CURRENCY.base ?? 0))}` + ((TREE_CURRENCY.level_ranges || []) as any[])
   .map((r: any) => ` + ${wrap(n0(r.per))} a level from ${wrap(n0(r.from))}–${wrap(n0(r.to))}`).join('');
-const TREE_CFG = TREE_SPEC as any;
 const TREE_REGION_NAMES: Record<string, string> = {
   str: 'Strength', agi: 'Agility', dex: 'Dexterity', int: 'Intelligence',
   wis: 'Wisdom', vit: 'Vitality', lck: 'Luck',
@@ -353,11 +351,6 @@ const treeViewer = (): string => {
     </div>
   </div>`;
 };
-const weaponFrameCounts = (BASES.weapons || []).map((weapon: any) => ((BASES.weapon_frames as any)?.[weapon.name] || []).length);
-const weaponFrameSummary = weaponFrameCounts.every((count: number) => count === weaponFrameCounts[0])
-  ? `${n0(weaponFrameCounts[0])} frames for each weapon type`
-  : `${n0(Math.min(...weaponFrameCounts))}–${n0(Math.max(...weaponFrameCounts))} frames per weapon type`;
-
 /** A Mod id as the name the player reads — the same table the engine rolls from. */
 const modName = (id: any): string => (id ? ((MODS.mods || []).find((m: any) => m.id === id)?.name || String(id)) : '—');
 /** One Mod's window per Item quality band, exactly as the data states its ladder. */
@@ -368,7 +361,7 @@ const modBands = (m: any): string => (m.bands || []).map((b: any) =>
 
 page({
   file: 'index.html',
-  nav: 'Start here',
+  nav: 'Overview',
   title: 'ModWorld — how to play',
   lead: 'An open-world idle RPG. Your character fights while the window is open and while it is shut.',
   body: [
@@ -457,26 +450,22 @@ page({
       { key: 'buff', label: 'Buff Skill', types: ['buff'] },
       { key: 'aura', label: 'Aura Skill', types: ['aura'] },
     ];
-    const head = ['Skill', 'Cooldown', 'Cost', 'Min Effect (level 1)', `Max Effect (level ${E.skill_xp.level_cap})`, 'Targets', 'What it does'];
+    const head = ['Skill', 'Type', 'Target', 'Range', 'Area', 'Element', 'SP / Reserve', 'Delay', 'Duration', 'Hits', 'Min Effect (level 1)', `Max Effect (level ${E.skill_xp.level_cap})`, 'What it does'];
     const groups = GROUPS.map((g) => ({
       key: g.key,
       label: g.label,
       rows: g.types.flatMap((t: string) => sm.of(t).map((s: any) => {
-        // A paid row names either its typed flat Mana or current-HP cost; an aura pays by holding a
-        // share of Max Mana open instead.
-        const cost = s.mana ? `${esc(s.mana)} Mana` : s.hp_cost ? `${esc(s.hp_cost)} current HP` : s.reserve ? `reserve ${sm.reservePct(s.reserve)}% Max Mana` : '';
-        // An attack's effect columns lead with its press damage; a buff, an aura, a curse or a heal shows
-        // the lines it moves. Each line names itself, so the two columns read on their own.
+        const copy = describeSkill(s);
         // a row bound to one weapon says so beside its name (only the arrow rows carry one:
         // the `bow` family token covers both bow and crossbow)
         const name = `${esc(s.name)}${s.weapon ? ` <span class="hy">${esc(s.weapon)}</span>` : ''}`;
-        return [name, s.cd ? `${n1(s.cd)} sec` : 'no cooldown', cost,
-          fxEndCell(s, 1), fxEndCell(s, E.skill_xp.level_cap),
-          esc(s.targets || ''), esc(s.effect || s.reserve || '')];
+        return [name, esc(copy.type), esc(copy.target), esc(copy.range), esc(copy.area || ''), esc(copy.element),
+          esc(copy.sp || copy.reservation || ''), esc(copy.delay || ''), esc(copy.duration || ''), esc(copy.hits || ''),
+          fxEndCell(s, 1), fxEndCell(s, E.skill_xp.level_cap), esc(s.effect || '')];
       })),
     }));
     return block('The roster', tabbedTable('skillkind', head, groups),
-      `Press damage = level-1 damage × <code>damagePct(L) / 100</code>; the table shows L=1 and L=${n0(E.skill_xp.level_cap)}. Additive effect = <code>base × effectPct(L) / 100</code>; a multiplier scales its distance from 1. Buff/Aura additive values round to whole numbers.`);
+      `Press damage = level-1 damage × <code>damagePct(L) / 100</code>; the table shows L=1 and L=${n0(E.skill_xp.level_cap)}. Additive effect = <code>base × effectPct(L) / 100</code>; a multiplier scales its distance from 1. Buff/Aura additive values round to whole numbers. Range rounds the row's metres to a cell count; Area is twice its radius.`);
   })(),
     block('When a skill fires', table(['Leg', 'Holds when', 'Reads'], [
       ['boss', 'the front target is a Boss or Unique', 'target kind'],
@@ -488,11 +477,20 @@ page({
       ['statusStacksAtLeast', 'that status holds at least this many stacks', 'row effect + status store'],
       ['selfDebuffed', 'the character carries any live status', 'character statuses'],
     ]), 'Every enabled leg is an OR; a row may wait on more than one fact. Each slot is <code>always</code>, <code>never</code> or <code>conditional</code>.'),
+    block('Windup, release and impact', (() => {
+      const profiles = SKILLS.meta.action_profiles || {};
+      return table(['Delivery', 'Windup', 'Impact delay', 'Projectile speed', 'Hit radius', 'Recovery'],
+        Object.entries(profiles).map(([delivery, p]: any) => [
+          esc(delivery), `${n2(p.windup_sec)} sec`, `${n2(p.impact_delay_sec)} sec`,
+          p.projectile_speed_mps ? `${n1(p.projectile_speed_mps)} m/sec` : '—',
+          `${n2(p.hit_radius_m)} m`, `${n2(p.recovery_sec)} sec`,
+        ]));
+    })(), 'A live cast pays its Mana or HP and starts its cooldown at release, not when the windup begins. Damage and statuses land at impact: melee checks range then, a projectile travels from its release aim and may meet another body, and a ground circle tests living positions at its committed centre. A canceled windup costs nothing; recovery blocks the next primary cast. A skill hit that crits can fire a crit-trigger aura without taking over the primary cast.'),
     block('Setup → payoff', table(['Effect', 'How the press reads it', 'What it spends'], [
       ['bonus_vs_status', '<code>press × (1 + bonus% / 100)</code> while the target holds the named status', 'nothing'],
       ['consume_status', '<code>stacks = min(live, cap)</code>; <code>press × (1 + stacks × per-stack% / 100)</code>', 'the stacks it spends, after the hit'],
       ['spread_status', 'copies the live line to up to N other targets the row reaches', 'nothing; the copy keeps stacks and remaining seconds'],
-    ]), 'The new payoff rows are <strong>Detonate</strong> (burn), <strong>Shatter</strong> (chill), <strong>Overload</strong> (shock), <strong>Catalyst</strong> (poison), <strong>Ruin</strong> (mark) and <strong>Aftershock</strong> (cripple). A payoff row names its status once, in its own effect.'),
+    ]), 'Payoff rows are <strong>Detonate</strong> (burn), <strong>Shatter</strong> (chill), <strong>Overload</strong> (shock), <strong>Catalyst</strong> (poison), <strong>Ruin</strong> (mark) and <strong>Aftershock</strong> (cripple). A payoff row names its status once, in its own effect.'),
     block('Cost and Max HP terms', table(['Rule', 'How the press reads it', 'Data term'], [
       ['Mana cost', '<code>flat × (1 + max(0, L − 1) × costStep / 100) × AoE multiplier</code>', '<code>mana</code> · <code>aoe</code>'],
       ['HP cost', '<code>cost = flat × (1 + max(0, L − 1) × costStep / 100)</code>; use only if currentHP − cost ≥ 1', '<code>hp_cost</code>'],
@@ -680,7 +678,7 @@ page({
   file: 'equipment.html',
   nav: 'Equipment',
   title: 'Equipment',
-  lead: 'Every slot that is not a main hand, frame by frame. The frame decides what it can roll; the roll decides what it is worth.',
+  lead: 'Every slot that is not a main hand, frame by frame.',
   body: [
     block('Slot by slot', slotSections(EQUIP_SLOTS), `<code>line value = tier slice(windowAt(Mod, ItemLevel, band))</code>. Frame Mods shared across n lines apply <code>shared value = line budget × frameScale[n]</code>. Bound, Unbound and Frame lines use the same slot pool; lock type controls which presses may edit them.`),
   ],
@@ -729,14 +727,14 @@ page({
   file: 'passive-tree.html',
   nav: 'Passive tree',
   title: 'Passive tree',
-  lead: `The ${n0((tree as any).nodes.length)}-node board the game draws, pannable here: drag to move, scroll to zoom, and jump by region. Every road, Notable and Keystone is the live tree data.`,
+  lead: `The ${n0((tree as any).nodes.length)}-node board the game draws. Drag to pan, scroll to zoom, jump by region. Every road, Notable and Keystone is live tree data.`,
   body: [
     block('The board', treeViewer(), 'Drag to pan · Scroll or the buttons to zoom. Hover or tap a node for its rule; the complete Keystone table is on <a href="builds.html">Build plan</a>.'),
     block('Reading the tree', table(['Node', 'Cost', 'What it is'], [
-      ['Normal', `${n0(treeKindCost('normal'))} tree point`, '+1 of its region’s Core attribute. It is the road: every purchase continues from an owned neighbour or the free Origin.'],
-      ['Notable', `${n0(treeKindCost('notable'))} tree points`, 'Its written profile of flat and percent lines; it is the entrance a Keystone hangs from.'],
-      ['Keystone', `${n0(treeKindCost('keystone'))} attainment point`, 'One rule change; it never spends tree points. Every effect is listed in the Keystone table on Build plan.'],
-    ]), 'Origin is free and every region opens from it. Respec is free at any settlement. The complete node and Keystone tables are on <a href="builds.html">Build plan</a>.'),
+      ['Normal', `${n0(treeKindCost('normal'))} tree point`, '+1 of its region’s Core attribute. The road: every purchase continues from an owned neighbour or the free Origin.'],
+      ['Notable', `${n0(treeKindCost('notable'))} tree points`, 'Its flat and percent lines; the entrance a Keystone hangs from.'],
+      ['Keystone', `${n0(treeKindCost('keystone'))} attainment point`, 'One rule change; never spends tree points. Every effect is in the Keystone table on Build plan.'],
+    ]), 'Origin is free; every region opens from it. Respec is free at any settlement. The complete node and Keystone tables are on <a href="builds.html">Build plan</a>.'),
   ],
 });
 
@@ -767,121 +765,160 @@ page({
   ],
 });
 
+const RACE_NAME = (race: string): string => race.charAt(0).toUpperCase() + race.slice(1);
+const countOf = (n: number, word: string): string => `${n0(n)} ${word}${n === 1 ? '' : 's'}`;
+const ELEMENT_NAME: Record<string, string> = {
+  fire: 'Fire', cold: 'Cold', lightning: 'Lightning', poison: 'Poison', chaos: 'Chaos', earth: 'Earth', physical: 'Physical',
+};
+const BODY_TICK: Record<string, [string, string]> = {
+  small: ['S', 'Small'], medium: ['M', 'Medium'], large: ['L', 'Large'],
+};
+/** A species' attack Element is the plate's spine; this token carries the same ink everywhere it prints. */
+const elTag = (element: string, small = false): string =>
+  `<span class="beast-el${small ? ' sm' : ''}" data-element="${escAttr(element)}">${esc(ELEMENT_NAME[element] || element)}</span>`;
+const bodyTicks = (sizes: string[]): string =>
+  ['small', 'medium', 'large'].filter((size) => sizes.includes(size))
+    .map((size) => `<abbr class="beast-body" title="${BODY_TICK[size][1]}" data-size="${size}">${BODY_TICK[size][0]}</abbr>`).join('');
+
 page({
   file: 'mobs.html',
   nav: 'Bestiary',
-  title: 'Races, Species and Variants',
+  title: 'Bestiary',
   lead: (() => {
     const variants = (E.mob as any).variants || {};
     const total = (E.mob.species || []).reduce((n: number, sp: any) => n + (variants[sp.id] || []).length, 0);
     const uniques = ((E.mob as any).uniques || []).length;
     const races = (E.mob.races?.set || []).length;
-    return `${races} Races · ${E.mob.species.length} Species · ${total} Variants · ${uniques} Uniques. Counts describe the current world; Races and Species have no required roster size.`;
+    return `${n0(races)} races · ${n0(E.mob.species.length)} species · ${n0(total)} variants · ${n0(uniques)} uniques. Every species attacks with one Element — the spine on its plate — and carries its own resistance, weakness and junk.`;
   })(),
   body: (() => {
-    const variantsBySpecies = (E.mob as any).variants || {};
-    const speciesRows = E.mob.species || [];
+    const speciesRows: any[] = E.mob.species || [];
+    const variantsBySpecies: Record<string, any[]> = (E.mob as any).variants || {};
+    const allUniques: any[] = (E.mob as any).uniques || [];
     const races: string[] = E.mob.races?.set || [];
-    const variantCount = (sp: any) => (variantsBySpecies[sp.id] || []).length;
-    const totalVariants = speciesRows.reduce((n: number, sp: any) => n + variantCount(sp), 0);
+    const skills: any[] = MOB_SKILLS_DATA.skills as any[];
+    const skillById = new Map(skills.map((row) => [row.id, row]));
+    const materialName = (sp: any): string =>
+      fieldwork.materialById[sp.bonus_material.resource]?.name || sp.bonus_material.resource;
+    const skillTags = (ids: string[]): string => ids.length
+      ? ids.map((id) => `<span class="tag">${esc(skillById.get(id)?.name || id)}</span>`).join('')
+      : '<span class="beast-none">basic swing only</span>';
+    /** One row of a plate's fold: a Variant, or a Unique with its own Element and find. */
+    const dropRow = (sp: any, row: any, kind: 'variant' | 'unique'): any[] => {
+      const drop: any = maybe(E.mob.variant_drops, row.name);
+      const chance = drop ? Number((E.junk as any).rarities?.[drop.rarity]?.drop_chance_per_kill || 0) : 0;
+      const choices = drop ? [...new Set([drop.item, sp.junk_items?.[drop.rarity]].filter(Boolean))] as string[] : [];
+      const junk = drop
+        ? `${esc(drop.item)} <span class="beast-pc">${pc1(choices.length ? chance / choices.length : chance)}</span> <span class="hy">${esc(drop.rarity)}</span>`
+        : '<span class="hy">no junk row</span>';
+      const notes = [
+        row.damage && row.damage !== sp.damage ? `hits ${esc(RACE_NAME(row.damage))}` : '',
+        drop?.lean && drop.lean !== 'none' ? `${esc(drop.lean)} lean` : '',
+      ].filter(Boolean);
+      if (kind === 'unique') notes.push('Elite stones', `XP ×${n0(E.xp.unique_mult)}`, `skill ${pc1(E.skill_drop.unique)}`);
+      const name = kind === 'unique'
+        ? `<b>${esc(row.name)}</b> <span class="tag beast-unique">Unique</span>${row.element && row.element !== sp.element ? ` ${elTag(row.element, true)}` : ''}`
+        : `<b>${esc(row.name)}</b>`;
+      return [name, kind === 'unique' ? 'wild' : `${n0(row.levels[0])}–${n0(row.levels[1])}`, junk,
+        `<span class="hy">${notes.join(' · ') || '—'}</span>`];
+    };
+    const plate = (sp: any): string => {
+      const variants: any[] = variantsBySpecies[sp.id] || [];
+      const uniques: any[] = allUniques.filter((u: any) => u.species === sp.id);
+      const levels = (Object.values(sp.zone_levels || {}) as any[]).map(Number).filter((level) => Number.isFinite(level));
+      const levelText = levels.length ? `${n0(Math.min(...levels))}–${n0(Math.max(...levels))}` : '—';
+      const habitat: string[] = sp.habitat || [];
+      const habitats = habitat.slice(0, 3).map((name: string) => esc(name)).join(' · ')
+        + (habitat.length > 3 ? ` <span class="hy">+${n0(habitat.length - 3)}</span>` : '');
+      const kitIds: string[] = (MOB_SKILLS_DATA.kits.species as Record<string, string[]>)[sp.id] || [];
+      const search = [
+        sp.name, sp.race, RACE_NAME(sp.race), sp.element, sp.damage, materialName(sp),
+        ...(sp.sizes || []), ...habitat, ...variants.map((v) => v.name), ...uniques.map((u) => u.name),
+        ...kitIds.map((id) => skillById.get(id)?.name || ''),
+      ].join(' ').toLowerCase();
+      const rows = [...variants.map((v) => dropRow(sp, v, 'variant')), ...uniques.map((u) => dropRow(sp, u, 'unique'))];
+      return `<article class="beast-card" data-bestiary-entry data-race="${escAttr(sp.race)}" data-element="${escAttr(sp.element)}" data-search="${escAttr(search)}">
+        <header class="beast-head">
+          <div class="beast-title">
+            <h4>${esc(sp.name)}</h4>
+            <p class="beast-sub">${esc(RACE_NAME(sp.race))} · ${countOf(sp.zones.length, 'zone')} · Lv <span class="num">${levelText}</span>${sp.potion_source ? ' · <span class="beast-flag">Potion source</span>' : ''}</p>
+          </div>
+          ${elTag(sp.element)}
+        </header>
+        <dl class="beast-facts">
+          <div><dt>Bodies</dt><dd>${bodyTicks(sp.sizes)}</dd></div>
+          <div><dt>Damage</dt><dd>${esc(RACE_NAME(sp.damage))}</dd></div>
+          <div><dt>Resists</dt><dd>${elTag(sp.resistance.element, true)} ${n0(sp.resistance.pct)}%</dd></div>
+          <div><dt>Weak to</dt><dd>${elTag(sp.weakness.element, true)} +${n0(sp.weakness.taken_pct)}%</dd></div>
+          <div><dt>Material</dt><dd>${esc(materialName(sp))} <span class="beast-pc">${n2(sp.bonus_material.chance * 100)}%</span></dd></div>
+        </dl>
+        ${habitats ? `<p class="beast-habitat"><span class="beast-label">Found in</span>${habitats}</p>` : ''}
+        <p class="beast-kit"><span class="beast-label">Kit</span>${skillTags(kitIds)}</p>
+        <details class="beast-fold">
+          <summary>Variants &amp; uniques <b>· ${countOf(variants.length, 'variant')} · ${countOf(uniques.length, 'unique')}</b></summary>
+          <div class="beast-table-wrap">${table(['Variant', 'Lv', 'Junk / kill', 'Notes'], rows)}</div>
+        </details>
+      </article>`;
+    };
+    const groups = races.map((race) => {
+      const members = speciesRows.filter((sp) => sp.race === race);
+      return `<section class="beast-group" data-bestiary-group data-race="${escAttr(race)}">
+        <header class="beast-group-head"><h3>${esc(RACE_NAME(race))}</h3><span>${n0(members.length)} species</span></header>
+        <div class="beast-grid">${members.map(plate).join('')}</div>
+      </section>`;
+    }).join('');
+    const skillRowsFor = (mode: string): any[][] => skills.filter((row) => row.mode === mode).map((row) => [
+      esc(row.name),
+      elTag(row.element || 'physical', true),
+      row.status ? esc(row.status) : '<span class="hy">—</span>',
+      row.cd ? `${n0(row.cd)} sec` : '<span class="hy">—</span>',
+      row.cast_sec != null ? `${n1(row.cast_sec)} sec` : '<span class="hy">—</span>',
+      esc(row.role || 'any'),
+      row.mode === 'aura'
+        ? `${esc(row.scope)} · ${Object.entries(row.effects || {}).map(([stat, value]) => `${esc(String(stat).replace(/_pct$/, ''))} +${n0(Number(value))}%`).join(' · ')}`
+        : '<span class="hy">—</span>',
+    ]);
+    const kitRows = [
+      ...Object.entries(MOB_SKILLS_DATA.kits.bosses as Record<string, string[]>)
+        .map(([name, ids]) => [`<span class="tag">Boss</span> ${esc(name)}`, skillTags(ids)]),
+      ...Object.entries(MOB_SKILLS_DATA.kits.uniques as Record<string, string[]>)
+        .map(([name, ids]) => [`<span class="tag beast-unique">Unique</span> ${esc(name)}`, skillTags(ids)]),
+    ];
     const rarityRows = Object.entries((E.junk as any).rarities || {}) as [string, any][];
     const bandRows = ['low', 'mid', 'high'].map((band) => [
-      esc(band),
-      pc1(eng.dropChance(band)),
-      pc1(farm.herbChance(band)),
+      esc(band), pc1(eng.dropChance(band)), pc1(farm.herbChance(band)),
       rarityRows.map(([rarity, row]) => `${esc(rarity)} ${pc1(row.drop_chance_per_kill)}`).join(' · '),
       pc1(farm.potionDropChance(band)),
     ]);
-    const speciesCard = (sp: any) => {
-      const variants: { name: string; levels: [number, number]; core?: Record<string, number>; damage?: string }[] = variantsBySpecies[sp.id] || [];
-      const uniques: any[] = ((E.mob as any).uniques || []).filter((u: any) => u.species === sp.id);
-      const coreText = (core?: Record<string, number>) => core
-        ? ['str', 'agi', 'vit', 'dex', 'int', 'wis', 'lck'].map((key) => `${key.toUpperCase()} ${n0(core[key] || 0)}`).join(' · ')
-        : '—';
-      const dropRow = (name: string, level: string, role: string, extraDrops: string, core?: Record<string, number>, damage = sp.damage) => {
-        const drop: any = maybe(E.mob.variant_drops, name);
-        if (!drop) return [esc(name), level, role, esc(damage), coreText(core), 'No junk row', '—', '—', extraDrops];
-        const chance = Number((E.junk as any).rarities?.[drop.rarity]?.drop_chance_per_kill || 0);
-        const choices = [...new Set([drop.item, sp.junk_items?.[drop.rarity]].filter(Boolean))] as string[];
-        const outcomePct = choices.length ? chance / choices.length : 0;
-        const outcomes = choices.map((item) => `${esc(item)} ${pc1(outcomePct)}`).join(' · ');
-        return [esc(name), level, role, esc(damage), coreText(core), outcomes || '—', `${esc(drop.rarity)} · ${pc1(chance)} total`, esc(drop.lean), extraDrops];
-      };
-      const drops = [
-        ...variants.map((v) => dropRow(v.name, `${n0(v.levels[0])}–${n0(v.levels[1])}`, 'Variant',
-          sp.potion_source ? 'Potion source · see band rates' : '—', v.core, v.damage ?? sp.damage)),
-        ...uniques.map((unique) => dropRow(unique.name, 'wild', 'Unique',
-          `Elite stones · XP ×${n0(E.xp.unique_mult)} · skill ${pc1(E.skill_drop.unique)}`, unique.core, unique.damage)),
-      ];
-      const facts = [
-        ['Sizes', list(sp.sizes)],
-        ['Default damage', esc(sp.damage)],
-        ['Attack Element', esc(sp.element)],
-        ['Resists', `${esc(sp.resistance.element)} ${n0(sp.resistance.pct)}%`],
-        ['Weak to', `${esc(sp.weakness.element)} +${n0(sp.weakness.taken_pct)}%`],
-        ['Material', `${esc(fieldwork.materialById[sp.bonus_material.resource]?.name || sp.bonus_material.resource)} ${n2(sp.bonus_material.chance * 100)}%`],
-        ['Zones', list(sp.zones)],
-        ['Fixed levels', list(Object.entries(sp.zone_levels || {}).map(([zone, level]: [string, any]) => `Z${zone} · L${n0(level)}`))],
-      ].map(([label, value]) => `<div><b>${esc(label)}</b><span>${value || '—'}</span></div>`).join('');
-      return `<article class="species-entry">`
-        + `<header><h4>${esc(sp.name)}</h4><span class="species-count">${n0(variants.length)} variants · ${n0(uniques.length)} uniques</span></header>`
-        + `<div class="species-facts">${facts}</div>`
-        + `<h4>Variants and junk drops</h4>`
-        + table(['Variant', 'Selection band', 'Role', 'Damage', 'Core', 'Junk outcomes · each %', 'Base junk / kill', 'Lean', 'Extra drops'], drops)
-        + `</article>`;
-    };
-    const raceSections = races.map((race) => {
-      const members = speciesRows.filter((sp: any) => sp.race === race);
-      const title = race[0].toUpperCase() + race.slice(1);
-      return `<section class="race-group"><header><h3>${esc(title)}</h3><span>${n0(members.length)} Species</span></header>`
-        + (members.length ? `<div class="species-roster">${members.map(speciesCard).join('')}</div>`
-          : `<p class="race-empty">No Species in this Race yet.</p>`)
-        + `</section>`;
-    }).join('');
     return [
-      block('Shared drop rates', table(['Zone band', 'Gear', 'Herbs', 'Junk by rarity', 'Potion · eligible Species'], bandRows),
-        `<code>gear chance = base_drop_chance × (1 + LCK × K_LCK_DROP)</code> before mastery and loot leans. Junk item outcomes split the rarity chance equally across the Variant item and its Species alternative.`),
-      ...(() => {
-        const rows = MOB_SKILLS_DATA.skills as any[];
-        const nameOf = (id: string) => rows.find((row) => row.id === id)?.name || id;
-        const skillLine = (id: string) => {
-          const row = rows.find((r) => r.id === id);
-          if (!row) return id;
-          if (row.mode === 'aura') {
-            const effects = Object.entries(row.effects || {}).map(([stat, value]) => `${stat.replace('_pct', '')} +${n0(Number(value))}%`).join(' · ');
-            return `${esc(row.name)} (aura · ${esc(row.scope)} · ${effects})`;
-          }
-          return `${esc(row.name)}${row.status ? ` · ${esc(row.status)}` : ''}`;
-        };
-        const speciesKitRows = Object.entries(MOB_SKILLS_DATA.kits.species as Record<string, string[]>).map(([id, ids]) => {
-          const sp = (E.mob.species || []).find((row: any) => row.id === id);
-          return [esc(sp?.name || id), list(ids.map(skillLine))];
-        });
-        const bossKitRows = [
-          ...Object.entries(MOB_SKILLS_DATA.kits.bosses as Record<string, string[]>).map(([name, ids]) => [`Boss · ${esc(name)}`, list(ids.map(skillLine))]),
-          ...Object.entries(MOB_SKILLS_DATA.kits.uniques as Record<string, string[]>).map(([name, ids]) => [`Unique · ${esc(name)}`, list(ids.map(skillLine))]),
-        ];
-        return [
-          block('Mob skill library', table(['Skill', 'Mode', 'Element', 'Status', 'Cooldown', 'Cast', 'Role', 'Aura'], rows.map((row) => [
-            esc(row.name),
-            esc(row.mode),
-            esc(row.element || 'physical'),
-            row.status ? esc(row.status) : '—',
-            row.cd ? `${n0(row.cd)} sec` : '—',
-            row.cast_sec != null ? `${n1(row.cast_sec)} sec` : '—',
-            esc(row.role || 'any'),
-            row.mode === 'aura'
-              ? `${esc(row.scope)} · ${Object.entries(row.effects || {}).map(([stat, value]) => `${esc(stat.replace('_pct', ''))} +${n0(Number(value))}%`).join(' · ')}`
-              : '—',
-          ])), `The full library (${n0(rows.length)} rows). A strike replaces the next basic swing and carries the mob's own damage; auras are passive, defensive and strongest-wins. Kits above choose which rows a spawn resolves.`),
-          block('Species signatures', table(['Species', 'Skill kit'], speciesKitRows),
-            `A Species kit is optional and carries at most ${n0(MOB_SKILLS_DATA.meta.max_kit)} skills; species without a row keep their basic swing. A Variant may replace its Species kit, and a Boss or Unique may replace either.`),
-          block('Boss and Unique kits', table(['Mob', 'Skill kit'], bossKitRows),
-            `A strike replaces the next basic swing and deals that swing's damage, so a kit never raises the published mob DPS. Auras are passive defensive group effects: <code>engaged</code> covers the front three bodies, <code>line</code> covers the source's own formation line. Strongest wins; copies do not stack.`),
-        ];
-      })(),
-      block('Race → Species → Variant', `<div class="race-roster">${raceSections}</div>`,
-        `<code>Species power = power_base + K_MOB_PS_STAT × (wPhys × STR + wMagic × INT)</code>; damage type selects the weights, and Variant may override it. Potion eligibility is a Species flag. Bosses and Uniques inherit their Species resistance and weakness.`),
+      block('Species roster',
+        `<div class="bestiary" data-bestiary>
+          <div class="beast-tools">
+            <div class="beast-toolbar">
+              <label class="beast-search"><span class="sr-only">Filter species</span><input type="search" placeholder="Filter by name, race, Element or skill…" data-bestiary-search autocomplete="off" spellcheck="false" /></label>
+              <p class="beast-status" data-bestiary-status aria-live="polite">Showing ${n0(speciesRows.length)} of ${n0(speciesRows.length)} species</p>
+            </div>
+            <div class="beast-chips" role="group" aria-label="Filter by race">
+              <button type="button" class="beast-chip" data-bestiary-race="all" aria-pressed="true">All <b>${n0(speciesRows.length)}</b></button>
+              ${races.map((race) => `<button type="button" class="beast-chip" data-bestiary-race="${escAttr(race)}" aria-pressed="false">${esc(RACE_NAME(race))} <b>${n0(speciesRows.filter((sp) => sp.race === race).length)}</b></button>`).join('')}
+            </div>
+          </div>
+          ${groups}
+        </div>`,
+        'A plate&rsquo;s spine is its attack Element. Body ticks are <abbr title="Small">S</abbr>, <abbr title="Medium">M</abbr> and <abbr title="Large">L</abbr>. Open a plate for its variants, uniques and skill kit.'),
+      block('Mob skill library',
+        `<details class="beast-fold beast-fold-wide">
+          <summary>Skills, kits and auras <b>· ${n0(skills.length)} rows</b></summary>
+          ${tabbedTable('mob-skill-mode', ['Skill', 'Element', 'Status', 'Cooldown', 'Cast', 'Role', 'Scope & effect'], [
+            { key: 'strike', label: 'Strikes', rows: skillRowsFor('strike') },
+            { key: 'aura', label: 'Auras', rows: skillRowsFor('aura') },
+          ])}
+          <h3>Boss and Unique kits</h3>
+          <div class="beast-table-wrap">${table(['Mob', 'Kit'], kitRows)}</div>
+        </details>`,
+        `A strike replaces the next basic swing and carries the mob&rsquo;s own damage, so a kit never raises the published DPS. Auras are passive, defensive and strongest-wins. Kits choose which rows a spawn resolves; a Variant may replace its Species kit, and a Boss or Unique may replace either.`),
+      block('Drop rates', table(['Zone band', 'Gear', 'Herbs', 'Junk by rarity', 'Potion drop'], bandRows),
+        `<code>gear chance = base_drop_chance × (1 + LCK × K_LCK_DROP)</code> before mastery and loot leans. A Variant&rsquo;s junk item and its Species alternative split the rarity chance equally.`),
     ];
   })(),
 });
@@ -1095,7 +1132,7 @@ page({
           [pressOf('replace_all'), tok('all', BOTH, 'set mod', 'with random'), perLine('replace', E.craft.replace_stones_per_use), 'every line in scope at the one-stone Replace price; what arrives is drawn, not named'],
         ]),
         perStone('imprint', [
-          [`${pressOf('imprint')} · one Mod you hold (${n0(MODS.mods.length)} stones in the game)`, tok('select', 1, UNB, 'set mod', 'with the stone mod'), `${n0(E.craft.imprint_stones_per_use)} stone of that one Mod`, 'a fresh Tier and value on the Mod the stone carries: no Add charge, no line count moved'],
+          [`${pressOf('imprint')} · one Mod you hold (${n0(loot.IMPRINT_IDS.length)} stone types)`, tok('select', 1, UNB, 'set mod', 'with the stone mod'), `${n0(E.craft.imprint_stones_per_use)} stone of that one Mod`, 'a fresh Tier and value, even outside the Base pool; no Add charge or line count change. Passive-tree-only Mods cannot be Imprinted.'],
         ]),
         perStone('quality', [
           [pressOf('upgrade'), tok('item', 'raise level by 1'), 'the ladder below — 1 up to ' + n0(E.craft.upgrade_costs[E.craft.upgrade_costs.length - 1]) + ' a step', `the piece own Gear line climbs (${n0(E.craft.gear_mod_per_level)} a step): not a Mod, so no line is added and nothing rerolls`],
@@ -1141,7 +1178,7 @@ page({
         [STONE_NAME.quality, chance(E.loot.quality_stone_sources.elite_quality_chance), chance(E.loot.quality_stone_sources.boss_quality_stones), chance(E.loot.quality_stone_sources.monster_quality_chance)],
         [STONE_NAME.repair, chance(E.loot.repair_stone_sources.elite_repair_chance), chance(E.loot.repair_stone_sources.boss_repair_stones), 'elites and bosses only'],
         [STONE_NAME.replace, chance(E.loot.replace_stone_sources.elite_replace_chance), chance(E.loot.replace_stone_sources.boss_replace_chance), '—'],
-        ['Imprint (any of ' + n0(MODS.mods.length) + ')', chance(E.loot.imprint_stone_sources.elite_imprint_chance), `${n0(E.loot.imprint_stone_sources.boss_imprint_stones)} stones`, 'uniform over the Mod roster'],
+        ['Imprint (any of ' + n0(loot.IMPRINT_IDS.length) + ')', chance(E.loot.imprint_stone_sources.elite_imprint_chance), `${n0(E.loot.imprint_stone_sources.boss_imprint_stones)} stones`, 'uniform over eligible gear Mods'],
         [STONE_NAME.corrupt, '—', chance(E.loot.corrupt_stone_sources.boss_corrupt_chance), 'bosses only'],
         [STONE_NAME.polish, chance(E.loot.polish_stone_sources.elite_polish_chance), chance(E.loot.polish_stone_sources.boss_polish_chance), 'one step tighter than Replace on the Elite half, and Replace own Boss half'],
         [STONE_NAME.reforge, '—', chance(E.loot.reforge_stone_sources.boss_reforge_chance), 'bosses only, on half the Corrupt chance — the bench spends it on the whole piece'],
@@ -1269,8 +1306,8 @@ page({
       ])),
       '<code>target slots = 1..weaponReach</code>. Melee waits for the front slot to close; ranged attacks keep their authored reach.'),
     block('Area, bolts and conversion', table(['Line', 'What it does', 'The number'], [
-      ['Area damage', '<code>damage per target = hit × per_target_pct / 100</code>; targets come from reach slots',
-        `${pts((E.aoe as any).per_target_pct)} each · ${wrap(n0((E.aoe as any).target_cap))} targets · ×${n2((E.aoe as any).mana_mult)} mana — <code>aoe</code>`],
+      ['Area damage', 'Live targets are all enemy centers inside the skill radius; the primary receives the full hit and additional targets receive <code>hit × per_target_pct / 100</code>. Offline uses the queue approximation.',
+        `${pts((E.aoe as any).per_target_pct)} additional-target share · offline queue cap ${wrap(n0((E.aoe as any).target_cap))} · ×${n2((E.aoe as any).mana_mult)} Mana when multiple targets are reached — <code>aoe</code>`],
       ['A bolt', '<code>bolt damage = finished hit × bolt_share_pct / 100</code>; it uses the attack clock',
         `${pts((E.weapon_size_mult as any).bolt_share_pct)} of a finished hit — <code>weapon_size_mult.bolt_share_pct</code> · <code>basicAttackOf</code>`],
       ['Conversion', '<code>converted Element = physical × min(total conversionPct, 100) / 100</code>; remainder stays physical',
@@ -1545,7 +1582,7 @@ page({
         const cost = treeNodes().regions.reduce((sum: number, name: string) => sum + treeNodes().costOf(name), 0);
         return ['Total', wrap(n0(count('normal'))), wrap(n0(count('notable'))), wrap(n0(count('keystone'))), wrap(n0(cost))];
       })(),
-    ]), `Every node holds one rank and opens from any owned neighbour; Start is free and every region opens from it. Normal nodes form an irregular field of branching roads and local loops that cross region boundaries, and every playable route ends on a Notable or Keystone. Ordinary dead ends are retired: they keep only their layout position and cannot be bought. Notables sit on local loops or beside roads. Every Keystone has its own Notable entrance from Normal roads. You can choose either branch without buying the other branch Notable; earlier roads may join. A build can mix regions from its allocated frontier. Select a node to preview the route; Shift-click buys it when both wallets can pay. A Normal grants exactly +1 of its region's Core attribute for 1 tree point. A Notable grants its written profile of flat and percent lines for 3 tree points. A Keystone changes a mechanic for 1 attainment point and never spends tree points. <code>treePoints = ${TREE_POINT_CURVE} + claimed quest bonuses − spent tree</code>. The first milestone Expedition claim per zone and first milestone Delivery completion per town guarantee +${n0(QUEST_REWARDS.milestone_tree_points)} Tree Point, outside the consumable reward choice. The point pays once on completion; skipping or expiry leaves the milestone available. Legacy saved random Tree Point promises remain payable. Respec at a settlement is free and hands both wallets back at the prices the spec charged. The redesigned roads preserve existing v3 allocations on live nodes, node effects and wallets; a rank on a retired ordinary node is refunded on load, and every live owned node remains a usable frontier. Characters predating v3 are refused with their own message rather than rewritten. The Build goals lens reads what Notables and Keystones actually grant for staying alive, managing mana, supporting the skills you own, or supporting the held weapon. It quotes the same route and the same tree/attainment split the path purchase charges, marks a route you cannot afford yet and a keystone pair that cannot be held together, and describes a keystone’s trade-off. A recommendation never allocates a point and is not a claim that the build is best. <em>Track this node</em> only pins it in Journey; selection, search, route preview and path purchase stay yours.`),
+    ]), `Every node holds one rank and opens from any owned neighbour; Start is free and every region opens from it. Normal nodes form an irregular field of branching roads and local loops that cross region boundaries, and every playable route ends on a Notable or Keystone. Ordinary dead ends are retired: they keep only their layout position and cannot be bought. Notables sit on local loops or beside roads. Every Keystone has its own Notable entrance from Normal roads. Either branch is open without the other's Notable; earlier roads may join. A build can mix regions from its allocated frontier. Select a node to preview the route; Shift-click buys it when both wallets can pay. A Normal grants exactly +1 of its region's Core attribute for 1 tree point. A Notable grants its flat and percent lines for 3 tree points. A Keystone changes a mechanic for 1 attainment point and never spends tree points. <code>treePoints = ${TREE_POINT_CURVE} + claimed quest bonuses − spent tree</code>. The first milestone Expedition claim per zone and first milestone Delivery completion per town guarantee +${n0(QUEST_REWARDS.milestone_tree_points)} Tree Point, outside the consumable reward choice. The point pays once on completion; skipping or expiry leaves the milestone available. Legacy saved random Tree Point promises remain payable. Respec at a settlement is free and hands both wallets back at the prices the spec charged. The redesigned roads preserve existing v3 allocations on live nodes, node effects and wallets; a rank on a retired ordinary node is refunded on load, and every live owned node remains a usable frontier. Characters predating v3 are refused with their own message rather than rewritten. The Build goals lens reads what Notables and Keystones grant for staying alive, managing mana, supporting your skills or the held weapon. It quotes the same route and the same tree/attainment split the path purchase charges, marks a route you cannot afford yet and a keystone pair that cannot be held together, and describes a keystone’s trade-off. A recommendation never allocates a point and is not a claim that the build is best. <em>Track this node</em> only pins it in Journey; selection, search, route preview and path purchase stay yours.`),
     block('The Keystones', tabbedTable('tree-keystones', ['Keystone', 'Notable entrance', 'What it changes'], treeNodes().regions.map((region: string) => ({
       key: region,
       label: region.toUpperCase(),
@@ -1621,11 +1658,14 @@ page({
 
 // ---------------------------------------------------------------- shell
 
-/** The nav order: the reference first, then the two questions a fight raises, then the town. */
+/** The build order: the reading order of the manual, chapter by chapter. */
 const ORDER = [
-  'index.html', 'combat.html', 'skills.html', 'items.html', 'weapons.html', 'equipment.html',
-  'stats.html', 'survival.html', 'passive-tree.html', 'idle.html', 'world.html', 'travel.html', 'mobs.html',
-  'towns.html', 'economy.html', 'crafting.html', 'progression.html', 'builds.html', 'elements.html',
+  'index.html', 'progression.html', 'idle.html',
+  'stats.html', 'skills.html', 'passive-tree.html', 'builds.html',
+  'combat.html', 'elements.html', 'mobs.html',
+  'items.html', 'weapons.html', 'equipment.html', 'crafting.html',
+  'world.html', 'travel.html', 'survival.html',
+  'towns.html', 'economy.html',
   'icons.html',
 ];
 PAGES.sort((a, b) => ((ORDER.indexOf(a.file) + 1) || 999) - ((ORDER.indexOf(b.file) + 1) || 999));
@@ -1634,38 +1674,41 @@ PAGES.sort((a, b) => ((ORDER.indexOf(a.file) + 1) || 999) - ((ORDER.indexOf(b.fi
 
 type Chapter = { id: ChapterId; label: string; numeral: string; blurb: string };
 const CHAPTERS: Chapter[] = [
-  { id: 'start', label: 'Start here', numeral: 'I', blurb: 'The run, the clock, and the loops that keep moving while you are away.' },
-  { id: 'character', label: 'Character', numeral: 'II', blurb: 'Core stats, skills, gear and the bench that changes what a piece is.' },
-  { id: 'combat', label: 'Combat', numeral: 'III', blurb: 'How a hit resolves, what each Element leaves behind, and who stands in the field.' },
-  { id: 'world', label: 'World', numeral: 'IV', blurb: 'Zones, travel, settlements and the Field Camp that keeps the hunt going.' },
-  { id: 'economy', label: 'Items & economy', numeral: 'V', blurb: 'Frames, Mods, gold, demand and the stones that move a piece up the ladder.' },
-  { id: 'reference', label: 'Reference', numeral: 'VI', blurb: 'The complete icon shelf and the live figures behind every page.' },
+  { id: 'start', label: 'Getting started', numeral: 'I', blurb: 'The run in six steps, the levels ahead, and the time the game keeps for you.' },
+  { id: 'character', label: 'Character', numeral: 'II', blurb: 'Core attributes, the skill roster, the passive board and the plan that spends them.' },
+  { id: 'combat', label: 'Combat', numeral: 'III', blurb: 'How one hit resolves, what each Element leaves behind, and the bodies that stand in the field.' },
+  { id: 'gear', label: 'Gear & crafting', numeral: 'IV', blurb: 'Frames and Mods, weapon types, every slot, and the stones that change what a piece is.' },
+  { id: 'world', label: 'World', numeral: 'V', blurb: 'Zones and dungeons, the walk between them, and the Camp and field skills that keep the hunt going.' },
+  { id: 'trade', label: 'Towns & trade', numeral: 'VI', blurb: 'Settlements, Standing, task boards, gold, demand, Haggling, Delivery and the Black Market.' },
+  { id: 'appendix', label: 'Appendix', numeral: 'VII', blurb: 'The complete icon shelf, read from the game folder.' },
 ];
 const CHAPTER_OF: Record<string, ChapterId> = {
   index: 'start', progression: 'start', idle: 'start',
-  stats: 'character', skills: 'character', equipment: 'character', crafting: 'character', builds: 'character', survival: 'character', 'passive-tree': 'character',
+  stats: 'character', skills: 'character', 'passive-tree': 'character', builds: 'character',
   combat: 'combat', elements: 'combat', mobs: 'combat',
-  world: 'world', travel: 'world', towns: 'world',
-  items: 'economy', weapons: 'economy', economy: 'economy',
-  icons: 'reference',
+  items: 'gear', weapons: 'gear', equipment: 'gear', crafting: 'gear',
+  world: 'world', travel: 'world', survival: 'world',
+  towns: 'trade', economy: 'trade',
+  icons: 'appendix',
 };
-for (const p of PAGES) p.group = CHAPTER_OF[p.file.replace(/\.html$/, '')] ?? 'reference';
+for (const p of PAGES) p.group = CHAPTER_OF[p.file.replace(/\.html$/, '')] ?? 'appendix';
 /** The reading order inside a chapter — the nav, cards and Prev/Next all follow this, not the
  *  global build order. */
 const CHAPTER_ORDER: Record<ChapterId, string[]> = {
   start: ['index.html', 'progression.html', 'idle.html'],
-  character: ['stats.html', 'skills.html', 'equipment.html', 'crafting.html', 'survival.html', 'passive-tree.html', 'builds.html'],
+  character: ['stats.html', 'skills.html', 'passive-tree.html', 'builds.html'],
   combat: ['combat.html', 'elements.html', 'mobs.html'],
-  world: ['world.html', 'travel.html', 'towns.html'],
-  economy: ['items.html', 'weapons.html', 'economy.html'],
-  reference: ['icons.html'],
+  gear: ['items.html', 'weapons.html', 'equipment.html', 'crafting.html'],
+  world: ['world.html', 'travel.html', 'survival.html'],
+  trade: ['towns.html', 'economy.html'],
+  appendix: ['icons.html'],
 };
 const chapterOf = (id?: ChapterId): Chapter => CHAPTERS.find((c) => c.id === id) ?? CHAPTERS[0];
 const pagesIn = (id: ChapterId): Page[] => CHAPTER_ORDER[id]
   .map((file) => PAGES.find((p) => p.file === file))
   .filter((p): p is Page => Boolean(p));
 const chapterPageOf = (p: Page) => {
-  const list = pagesIn(p.group ?? 'reference');
+  const list = pagesIn(p.group ?? 'appendix');
   const at = list.findIndex((q) => q.file === p.file);
   return { list, at, prev: at > 0 ? list[at - 1] : undefined, next: at >= 0 ? list[at + 1] : undefined };
 };
@@ -1790,25 +1833,74 @@ td .sub { display: block; color: var(--dim); font-size: var(--font-xs); }
 .zone[open] > summary { border-bottom: 1px solid var(--line); }
 .zone-body { display: grid; gap: var(--spacing-sm); padding: .1rem .8rem .8rem; }
 @media (max-width: 40rem) { .zone > summary { display: grid; gap: var(--spacing-xs); } .zone-meta { display: block; } }
-.race-roster { display: grid; gap: var(--spacing-md); }
-.race-group { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); padding: .65rem; }
-.race-group > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-md); border-bottom: 1px solid var(--line); padding: 0 .2rem .4rem; color: var(--dim); }
-.race-group > header h3 { color: var(--gold); font-size: var(--font-xs); }
-.race-group > header span, .species-count { font-family: var(--num); font-size: var(--font-xs); }
-.race-empty { color: var(--dim); font-size: var(--font-xs); }
-.species-roster { display: grid; gap: var(--spacing-md); }
-.species-entry { display: grid; gap: var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); padding: .65rem .8rem .8rem; }
-.species-entry > header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-md); border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
-.species-entry h4 { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .05em; }
-.species-entry > header h4 { color: var(--text); font-size: var(--font-sm); text-transform: none; letter-spacing: 0; }
-.species-count { color: var(--gold); }
-.species-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--spacing-sm) var(--spacing-md); }
-.species-facts div { display: grid; gap: var(--spacing-xs); min-width: 0; font-size: var(--font-xs); overflow-wrap: anywhere; }
-.species-facts b { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .04em; }
-.species-entry table { font-size: var(--font-xs); }
-.species-entry th, .species-entry td { padding: .28rem .4rem; overflow-wrap: anywhere; }
-@media (max-width: 58rem) { .species-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 36rem) { .species-facts { grid-template-columns: 1fr 1fr; } .species-entry { padding: .6rem; } }
+/* Bestiary: race-grouped plates. A plate's left spine is its attack Element. */
+.bestiary { display: grid; gap: 1.6rem; }
+.beast-tools { display: grid; gap: .75rem; padding: .95rem 1rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); }
+.beast-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; }
+.beast-search { flex: 1 1 18rem; min-width: 0; }
+.beast-search input { width: 100%; padding: .5rem .85rem; border: 1px solid var(--line); border-radius: var(--radius-pill); background: var(--panel); color: var(--text); font: inherit; font-size: .8rem; }
+.beast-search input::placeholder { color: color-mix(in srgb, var(--dim) 72%, transparent); }
+.beast-search input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
+.beast-status { color: var(--dim); font-family: var(--num); font-size: .7rem; white-space: nowrap; }
+.beast-chips { display: flex; flex-wrap: wrap; gap: .3rem; }
+.beast-chip { padding: .26rem .6rem; border: 1px solid var(--line); border-radius: var(--radius-pill); background: transparent; color: var(--dim); font: inherit; font-size: .7rem; cursor: pointer; }
+.beast-chip b { color: color-mix(in srgb, var(--dim) 75%, transparent); font-weight: 500; }
+.beast-chip:hover { color: var(--text); border-color: color-mix(in srgb, var(--gold) 30%, var(--line)); }
+.beast-chip[aria-pressed="true"] { border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); background: color-mix(in srgb, var(--gold) 11%, transparent); color: var(--gold-lit); }
+.beast-chip[aria-pressed="true"] b { color: var(--gold); }
+.beast-chip:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.beast-group { display: grid; gap: .55rem; }
+.beast-group[hidden] { display: none; }
+.beast-group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--line); }
+.beast-group-head h3 { color: var(--gold); font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; }
+.beast-group-head span { color: var(--dim); font-family: var(--num); font-size: .68rem; }
+.beast-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: .85rem; align-items: start; }
+.page-content [data-element="fire"] { --el: var(--hp-lit); }
+.page-content [data-element="cold"] { --el: var(--mana-lit); }
+.page-content [data-element="lightning"] { --el: var(--xp-lit); }
+.page-content [data-element="poison"] { --el: var(--good-lit); }
+.page-content [data-element="chaos"] { --el: var(--curse); }
+.page-content [data-element="earth"] { --el: var(--gold); }
+.page-content [data-element="physical"] { --el: var(--mob); }
+.beast-card { --el: var(--mob); display: grid; gap: .6rem; padding: .8rem .9rem .75rem 1rem; border: 1px solid var(--line); border-left: 3px solid var(--el); border-radius: var(--radius-card); background: var(--panel); }
+.beast-card:hover { border-color: color-mix(in srgb, var(--el) 42%, var(--line)); border-left-color: var(--el); }
+.beast-card[hidden] { display: none; }
+.beast-head { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+.beast-title { display: grid; gap: .1rem; min-width: 0; }
+.beast-title h4 { color: var(--text); font-family: var(--wiki-display); font-size: 1.12rem; font-weight: 500; line-height: 1.15; }
+.beast-sub { color: var(--dim); font-size: .7rem; }
+.beast-flag { padding: 0 .3rem; border: 1px solid color-mix(in srgb, var(--good) 45%, var(--line)); border-radius: var(--radius-pill); color: var(--good-lit); font-size: .6rem; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
+.beast-el { --el: var(--mob); display: inline-flex; align-items: center; gap: .32rem; flex: none; color: var(--el); font-family: var(--num); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.beast-el::before { content: ""; width: .42rem; height: .42rem; border-radius: 50%; background: var(--el); box-shadow: 0 0 .35rem color-mix(in srgb, var(--el) 60%, transparent); }
+.beast-el.sm { font-size: .58rem; }
+.beast-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .35rem .8rem; margin: 0; }
+.beast-facts div { display: grid; gap: .05rem; min-width: 0; }
+.beast-facts div:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.beast-facts dt { color: var(--dim); font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; }
+.beast-facts dd { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem; color: var(--text); font-size: .74rem; }
+.beast-bodies { display: inline-flex; gap: .22rem; }
+.beast-body { display: inline-grid; place-items: center; width: 1.05rem; height: 1.05rem; border: 1px solid var(--line); border-radius: 3px; color: var(--dim); font-family: var(--num); font-size: .58rem; text-decoration: none; cursor: help; }
+.beast-habitat { color: var(--dim); font-size: .7rem; text-transform: capitalize; }
+.beast-label { color: var(--dim); font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; padding-right: .4rem; }
+.beast-kit { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; }
+.beast-kit .tag { color: var(--text); }
+.beast-none { color: var(--dim); font-size: .7rem; }
+.beast-fold { border-top: 1px solid var(--line); padding-top: .5rem; }
+.beast-fold summary { color: var(--dim); font-size: .7rem; cursor: pointer; }
+.beast-fold summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.beast-fold summary:hover { color: var(--text); }
+.beast-fold summary b { color: var(--el, var(--gold)); font-family: var(--num); font-size: .66rem; font-weight: 500; }
+.beast-fold summary::marker { color: var(--el, var(--gold)); }
+.beast-fold[open] { display: grid; gap: .5rem; }
+.beast-fold-wide { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); padding: .8rem 1rem; }
+.beast-fold-wide[open] { gap: .9rem; }
+.beast-fold-wide summary { font-family: var(--wiki-display); font-size: .95rem; }
+.beast-fold-wide summary b { color: var(--gold); }
+.beast-table-wrap { overflow-x: auto; }
+.beast-fold table { font-size: .7rem; }
+.beast-fold th, .beast-fold td { padding: .28rem .35rem; }
+.beast-pc { color: var(--text); font-family: var(--num); }
+.beast-unique { color: var(--gold-lit); border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
 .legend { display: grid; gap: var(--spacing-xs); padding-left: 1.1rem; font-size: var(--font-xs); color: var(--dim); }
 .legend strong { color: var(--text); }
 .num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-card); padding: 0 .25rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; }
@@ -2107,12 +2199,12 @@ const chapterNav = (active: string): string => `<nav class="wiki-nav" id="wiki-n
     <h2 id="nav-${c.id}"><span>${c.numeral}</span>${esc(c.label)}<b>${pagesIn(c.id).length}</b></h2>
     <ul>${pagesIn(c.id).map((p) => `<li><a href="${p.file}" data-page-link data-title="${escAttr(p.nav)}" data-group="${escAttr(c.label)}" data-search="${escAttr(`${p.nav} ${p.title} ${c.label} ${plain(p.lead)}`)}" class="${p.file === active ? 'on' : ''}"${p.file === active ? ' aria-current="page"' : ''}>${esc(p.nav)}</a></li>`).join('')}</ul>
   </section>`).join('')}
-  <p class="nav-foot">${PAGES.length} chapters · live data</p>
+  <p class="nav-foot">${CHAPTERS.length} chapters · ${PAGES.length} pages · live data</p>
 </nav>`;
 
 const homeStats = (): string => {
   const rows: [string, number][] = [
-    ['Chapters', PAGES.length],
+    ['Pages', PAGES.length],
     ['Zones', eng.ZONES.length],
     ['Species', E.mob.species.length],
     ['Skills', sm.all().length],
@@ -2197,7 +2289,7 @@ ${masthead()}
 <div class="wiki-shell">
 ${chapterNav(active)}
 <main id="wiki-main" class="wiki-main" tabindex="-1">${main}
-<footer class="wiki-foot"><span>ModWorld Field Manual · official player reference</span><span>${PAGES.length} chapters · figures read live from the game</span><a href="index.html">Contents</a></footer>
+<footer class="wiki-foot"><span>ModWorld Field Manual · official player reference</span><span>${CHAPTERS.length} chapters · ${PAGES.length} pages · figures read live from the game</span><a href="index.html">Contents</a></footer>
 </main></div>`;
 };
 

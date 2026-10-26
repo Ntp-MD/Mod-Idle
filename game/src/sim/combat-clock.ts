@@ -28,8 +28,6 @@ export const EVENT_PRIORITY = {
   recovery: 60,
 } as const;
 
-export type EventPriority = (typeof EVENT_PRIORITY)[keyof typeof EVENT_PRIORITY];
-
 export interface CombatEvent {
   atUs: number;
   priority: number;
@@ -159,15 +157,4 @@ export function planAttacks(
   const times: number[] = [];
   for (let k = 1; k <= count; k++) times.push(startUs + Math.ceil(((k - p) / rate) * unitsPerSec));
   return { times, progressAtEnd: p + rate - count };
-}
-
-/**
- * A stop that begins or ends inside the window splits the attack accumulation: no progress is made
- * while the actor cannot act, and it resumes exactly where it was. Returns the segment of the
- * window the actor may act in, once any stop covering the start has been resolved.
- */
-export function activeWindows(startUs: number, windowUs: number, stopUntilUs: number | null): { fromUs: number; toUs: number } {
-  const end = startUs + windowUs;
-  if (stopUntilUs === null || stopUntilUs <= startUs) return { fromUs: startUs, toUs: end };
-  return { fromUs: Math.min(stopUntilUs, end), toUs: end };
 }

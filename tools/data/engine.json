@@ -6,6 +6,57 @@
       "tools/town.ts"
     ]
   },
+  "combat_arena": {
+    "width": 18,
+    "height": 12,
+    "player_start": {
+      "x": 7.4,
+      "y": 6.2
+    },
+    "mob_start": {
+      "x": 12.3,
+      "y": 6.2,
+      "spacing": 1.25
+    },
+    "player_speed": 2.7,
+    "player_radius_m": 0.4,
+    "mob_speed": 1.9,
+    "range": {
+      "melee": 2.1,
+      "ranged": 5.2,
+      "magic": 4.6
+    },
+    "melee_contact_angles_deg": [
+      0,
+      -120,
+      120
+    ],
+    "melee_contact_range_mult": 0.95,
+    "movement_step_sec": 0.05,
+    "action_sec": 0.3,
+    "body_sec": 2.2,
+    "history_sec": 3,
+    "normal_attack": {
+      "legacy": {
+        "front": "melee",
+        "stand-off": "ranged"
+      },
+      "profiles": {
+        "melee": {
+          "delivery": "melee",
+          "stop_at_range_pct": 95
+        },
+        "ranged": {
+          "delivery": "projectile",
+          "projectile_speed_mps": 12,
+          "stop_at_range_pct": 80,
+          "hit_radius_m": 0.35
+        }
+      },
+      "note": "Ordinary mob basics. The legacy adapter reads the spawn line: front bodies close to contact, stand-off bodies hold at 80% of ranged reach and release a non-homing single-target shot at the attack beat. A ready strike replaces that opportunity; the shot is not a second damage stream. Species/variant overrides arrive with authoring."
+    },
+    "note": "Transient forest combat presentation selected by the battlefield-style setting. Ground units, units per second, and centre-to-centre attack ranges; no collision, obstacles, kiting or positional evasion. Damage, clocks, statuses and rewards still use the existing combat pipeline. Classic combat and offline progress do not read this section."
+  },
   "stat": {
     "base": 12,
     "level_cap": 190,
@@ -129,6 +180,7 @@
       "boss": 0.8,
       "note": "combat.md section 1: a normal and an elite mob swing once a second, a boss 0.8 times. The mob clock is capped at 1 / caps.attack_interval_sec, the same clock rule the player obeys, so no Crippled stack or future mob speed line can out-run the game's one attack ceiling."
     },
+    "aura_radius_m": 4,
     "curve": {
       "skill_per_level": 0.0034,
       "hp_at_player_level_cap": 27704.261545901503,
@@ -170,8 +222,7 @@
               "golem",
               "giant",
               "troll",
-              "beetle",
-              "briarling"
+              "beetle"
             ],
             "spawn": {
               "group": "1-3",
@@ -326,8 +377,7 @@
               "minotaur",
               "giant",
               "hornet",
-              "ooze",
-              "barghest"
+              "ooze"
             ],
             "spawn": {
               "group": "1-3",
@@ -405,9 +455,7 @@
               "troll",
               "treant",
               "giant",
-              "beetle",
-              "crab",
-              "miretoad"
+              "beetle"
             ],
             "spawn": {
               "group": "3-4",
@@ -444,8 +492,7 @@
               "spider",
               "orc",
               "ogre",
-              "minotaur",
-              "salamander"
+              "minotaur"
             ],
             "spawn": {
               "group": "1-2",
@@ -482,9 +529,7 @@
               "dragon",
               "elf",
               "werewolf",
-              "golem",
-              "crab",
-              "glassserpent"
+              "golem"
             ],
             "spawn": {
               "group": "3-4",
@@ -562,8 +607,7 @@
               "ogre",
               "minotaur",
               "treant",
-              "hornet",
-              "palemoth"
+              "hornet"
             ],
             "spawn": {
               "group": "3-4",
@@ -583,8 +627,7 @@
               "demon",
               "dryad",
               "giant",
-              "wraith",
-              "archon"
+              "wraith"
             ],
             "spawn": {
               "group": "2-3",
@@ -641,8 +684,7 @@
               "werewolf",
               "dryad",
               "troll",
-              "siren",
-              "drownedknight"
+              "siren"
             ],
             "spawn": {
               "group": "3-5",
@@ -664,8 +706,7 @@
               "demon",
               "giant",
               "golem",
-              "treant",
-              "shark"
+              "treant"
             ],
             "spawn": {
               "group": "5-5",
@@ -682,8 +723,7 @@
               "spider",
               "orc",
               "ogre",
-              "minotaur",
-              "mist"
+              "minotaur"
             ],
             "spawn": {
               "group": "3-3",
@@ -818,8 +858,7 @@
               "orc",
               "ogre",
               "minotaur",
-              "golem",
-              "salamander"
+              "golem"
             ],
             "spawn": {
               "group": "5-5",
@@ -949,8 +988,7 @@
             "species": [
               "demon",
               "werewolf",
-              "beetle",
-              "moorhag"
+              "beetle"
             ],
             "spawn": {
               "group": "1-3",
@@ -964,9 +1002,7 @@
             "element": "chaos",
             "species": [
               "skeleton",
-              "werewolf",
-              "mist",
-              "moorhag"
+              "werewolf"
             ],
             "spawn": {
               "group": "1-2",
@@ -981,8 +1017,7 @@
             "species": [
               "vampire",
               "werewolf",
-              "wisp",
-              "archon"
+              "wisp"
             ],
             "spawn": {
               "group": "1-1",
@@ -1014,8 +1049,7 @@
             "species": [
               "demon",
               "golem",
-              "wraith",
-              "thornstalker"
+              "wraith"
             ],
             "spawn": {
               "group": "1-2",
@@ -1030,9 +1064,7 @@
             "species": [
               "demon",
               "slime",
-              "beetle",
-              "salamander",
-              "thornstalker"
+              "beetle"
             ],
             "spawn": {
               "group": "1-3",
@@ -1079,7 +1111,6 @@
             "species": [
               "demon",
               "human",
-              "salamander",
               "slaggolem"
             ],
             "spawn": {
@@ -1142,9 +1173,7 @@
             "species": [
               "goblin",
               "werewolf",
-              "siren",
-              "mist",
-              "rivernymph"
+              "siren"
             ],
             "spawn": {
               "group": "1-2",
@@ -1159,8 +1188,7 @@
             "species": [
               "spider",
               "werewolf",
-              "hornet",
-              "rivernymph"
+              "hornet"
             ],
             "spawn": {
               "group": "3-4",
@@ -1207,7 +1235,6 @@
               "lizardman",
               "spider",
               "siren",
-              "shark",
               "wyrmling"
             ],
             "spawn": {
@@ -1224,7 +1251,6 @@
               "ogre",
               "slime",
               "wyvern",
-              "crab",
               "wyrmling"
             ],
             "spawn": {
@@ -1272,9 +1298,7 @@
             "species": [
               "dryad",
               "elf",
-              "wraith",
-              "archon",
-              "ashphoenix"
+              "wraith"
             ],
             "spawn": {
               "group": "5-5",
@@ -1289,8 +1313,7 @@
             "species": [
               "elf",
               "werewolf",
-              "wyvern",
-              "ashphoenix"
+              "wyvern"
             ],
             "spawn": {
               "group": "3-3",
@@ -1337,9 +1360,7 @@
             "species": [
               "dryad",
               "treant",
-              "wraith",
-              "archon",
-              "stormherald"
+              "wraith"
             ],
             "spawn": {
               "group": "5-5",
@@ -1353,8 +1374,7 @@
             "element": "lightning",
             "species": [
               "dryad",
-              "werewolf",
-              "stormherald"
+              "werewolf"
             ],
             "spawn": {
               "group": "3-3",
@@ -1401,9 +1421,7 @@
             "element": "poison",
             "species": [
               "dragon",
-              "troll",
-              "shark",
-              "bogtitan"
+              "troll"
             ],
             "spawn": {
               "group": "5-5",
@@ -1417,9 +1435,7 @@
             "element": "poison",
             "species": [
               "dragon",
-              "wolf",
-              "mist",
-              "bogtitan"
+              "wolf"
             ],
             "spawn": {
               "group": "3-5",
@@ -2357,42 +2373,6 @@
         }
       },
       {
-        "species": "mist",
-        "name": "Mist Sovereign",
-        "element": "cold",
-        "damage": "magic",
-        "accuracy_mult": 0.35,
-        "reads_as": "medium",
-        "trait": "Fog sovereign - a stand-off body that swallows the queue",
-        "core": {
-          "str": 12,
-          "agi": 19,
-          "vit": 18,
-          "dex": 24,
-          "int": 24,
-          "wis": 0,
-          "lck": 19
-        }
-      },
-      {
-        "species": "salamander",
-        "name": "Salamander Tyrant",
-        "element": "fire",
-        "damage": "magic",
-        "accuracy_mult": 0.5,
-        "reads_as": "large",
-        "trait": "Foundry tyrant - a fire that stands in the way",
-        "core": {
-          "str": 18,
-          "agi": 17,
-          "vit": 23,
-          "dex": 22,
-          "int": 25,
-          "wis": 0,
-          "lck": 17
-        }
-      },
-      {
         "species": "wisp",
         "name": "Wisp Choir",
         "element": "lightning",
@@ -2411,78 +2391,6 @@
         }
       },
       {
-        "species": "shark",
-        "name": "Shark Patriarch",
-        "element": "cold",
-        "damage": "physical",
-        "accuracy_mult": 0.9,
-        "reads_as": "large",
-        "trait": "Tide patriarch - the bite that ends a swim",
-        "core": {
-          "str": 27,
-          "agi": 20,
-          "vit": 21,
-          "dex": 25,
-          "int": 0,
-          "wis": 0,
-          "lck": 16
-        }
-      },
-      {
-        "species": "crab",
-        "name": "Crab King",
-        "element": "poison",
-        "damage": "physical",
-        "accuracy_mult": 0.4,
-        "reads_as": "large",
-        "trait": "Shelf king - a shell that eats penetration for free",
-        "core": {
-          "str": 25,
-          "agi": 12,
-          "vit": 24,
-          "dex": 19,
-          "int": 0,
-          "wis": 0,
-          "lck": 16
-        }
-      },
-      {
-        "species": "archon",
-        "name": "Archon Prime",
-        "element": "lightning",
-        "damage": "magic",
-        "accuracy_mult": 1,
-        "reads_as": "large",
-        "trait": "Prime regent - the brightest and the hardest to hit",
-        "core": {
-          "str": 20,
-          "agi": 22,
-          "vit": 18,
-          "dex": 28,
-          "int": 27,
-          "wis": 0,
-          "lck": 19
-        }
-      },
-      {
-        "species": "briarling",
-        "name": "Briarling Matriarch",
-        "core": {
-          "str": 33,
-          "agi": 17,
-          "vit": 27,
-          "dex": 12,
-          "int": 0,
-          "wis": 0,
-          "lck": 8
-        },
-        "trait": "bramble ambusher · the lineage's named wild crown",
-        "element": "poison",
-        "damage": "physical",
-        "accuracy_mult": 0.75,
-        "reads_as": "large"
-      },
-      {
         "species": "harpy",
         "name": "Harpy Skyqueen",
         "core": {
@@ -2498,96 +2406,6 @@
         "element": "cold",
         "damage": "physical",
         "accuracy_mult": 0.95,
-        "reads_as": "large"
-      },
-      {
-        "species": "barghest",
-        "name": "Barghest Packlord",
-        "core": {
-          "str": 36,
-          "agi": 19,
-          "vit": 29,
-          "dex": 13,
-          "int": 0,
-          "wis": 0,
-          "lck": 8
-        },
-        "trait": "black hound · the lineage's named wild crown",
-        "element": "chaos",
-        "damage": "physical",
-        "accuracy_mult": 0.85,
-        "reads_as": "large"
-      },
-      {
-        "species": "miretoad",
-        "name": "Mire Toad Mother",
-        "core": {
-          "str": 10,
-          "agi": 25,
-          "vit": 22,
-          "dex": 22,
-          "int": 37,
-          "wis": 0,
-          "lck": 7
-        },
-        "trait": "venomous croaker · the lineage's named wild crown",
-        "element": "poison",
-        "damage": "magic",
-        "accuracy_mult": 0.7,
-        "reads_as": "large"
-      },
-      {
-        "species": "glassserpent",
-        "name": "Glass Serpent Regent",
-        "core": {
-          "str": 10,
-          "agi": 26,
-          "vit": 23,
-          "dex": 23,
-          "int": 38,
-          "wis": 0,
-          "lck": 8
-        },
-        "trait": "refracted bolt · the lineage's named wild crown",
-        "element": "lightning",
-        "damage": "magic",
-        "accuracy_mult": 0.85,
-        "reads_as": "large"
-      },
-      {
-        "species": "palemoth",
-        "name": "Pale Moth Empress",
-        "core": {
-          "str": 10,
-          "agi": 26,
-          "vit": 23,
-          "dex": 23,
-          "int": 38,
-          "wis": 0,
-          "lck": 8
-        },
-        "trait": "pale dust · the lineage's named wild crown",
-        "element": "chaos",
-        "damage": "magic",
-        "accuracy_mult": 0.9,
-        "reads_as": "large"
-      },
-      {
-        "species": "drownedknight",
-        "name": "Drowned Knight Captain",
-        "core": {
-          "str": 40,
-          "agi": 21,
-          "vit": 33,
-          "dex": 14,
-          "int": 0,
-          "wis": 0,
-          "lck": 10
-        },
-        "trait": "sunken oath · the lineage's named wild crown",
-        "element": "cold",
-        "damage": "physical",
-        "accuracy_mult": 0.75,
         "reads_as": "large"
       },
       {
@@ -2645,42 +2463,6 @@
         "reads_as": "large"
       },
       {
-        "species": "moorhag",
-        "name": "Moor Hag Grandmother",
-        "core": {
-          "str": 12,
-          "agi": 30,
-          "vit": 27,
-          "dex": 27,
-          "int": 45,
-          "wis": 0,
-          "lck": 9
-        },
-        "trait": "moor curse · the lineage's named wild crown",
-        "element": "chaos",
-        "damage": "magic",
-        "accuracy_mult": 0.8,
-        "reads_as": "large"
-      },
-      {
-        "species": "thornstalker",
-        "name": "Thorn Stalker Rootqueen",
-        "core": {
-          "str": 44,
-          "agi": 23,
-          "vit": 37,
-          "dex": 16,
-          "int": 0,
-          "wis": 0,
-          "lck": 10
-        },
-        "trait": "thorn ambush · the lineage's named wild crown",
-        "element": "poison",
-        "damage": "physical",
-        "accuracy_mult": 0.9,
-        "reads_as": "large"
-      },
-      {
         "species": "slaggolem",
         "name": "Slag Golem Forgeheart",
         "core": {
@@ -2696,24 +2478,6 @@
         "element": "fire",
         "damage": "physical",
         "accuracy_mult": 0.5,
-        "reads_as": "large"
-      },
-      {
-        "species": "rivernymph",
-        "name": "River Nymph Queen",
-        "core": {
-          "str": 12,
-          "agi": 30,
-          "vit": 27,
-          "dex": 27,
-          "int": 45,
-          "wis": 0,
-          "lck": 9
-        },
-        "trait": "slow-water song · the lineage's named wild crown",
-        "element": "cold",
-        "damage": "magic",
-        "accuracy_mult": 0.85,
         "reads_as": "large"
       },
       {
@@ -2733,60 +2497,6 @@
         "damage": "mixed",
         "accuracy_mult": 0.9,
         "reads_as": "large"
-      },
-      {
-        "species": "ashphoenix",
-        "name": "Ash Phoenix Eternal",
-        "core": {
-          "str": 12,
-          "agi": 30,
-          "vit": 27,
-          "dex": 27,
-          "int": 45,
-          "wis": 0,
-          "lck": 9
-        },
-        "trait": "ash rebirth · the lineage's named wild crown",
-        "element": "fire",
-        "damage": "magic",
-        "accuracy_mult": 1,
-        "reads_as": "large"
-      },
-      {
-        "species": "stormherald",
-        "name": "Storm Herald Thunderer",
-        "core": {
-          "str": 12,
-          "agi": 30,
-          "vit": 27,
-          "dex": 27,
-          "int": 45,
-          "wis": 0,
-          "lck": 9
-        },
-        "trait": "storm voice · the lineage's named wild crown",
-        "element": "lightning",
-        "damage": "magic",
-        "accuracy_mult": 1,
-        "reads_as": "large"
-      },
-      {
-        "species": "bogtitan",
-        "name": "Bog Titan Firstborn",
-        "core": {
-          "str": 44,
-          "agi": 23,
-          "vit": 37,
-          "dex": 16,
-          "int": 0,
-          "wis": 0,
-          "lck": 10
-        },
-        "trait": "bog colossus · the lineage's named wild crown",
-        "element": "poison",
-        "damage": "physical",
-        "accuracy_mult": 0.6,
-        "reads_as": "large"
       }
     ],
     "sizes": [
@@ -2795,6 +2505,7 @@
         "name": "Small",
         "ps": 0.7,
         "evasion_pct": 20,
+        "radius_m": 0.35,
         "group": "up to 5"
       },
       {
@@ -2802,6 +2513,7 @@
         "name": "Medium",
         "ps": 1,
         "evasion_pct": 10,
+        "radius_m": 0.45,
         "group": "up to 5"
       },
       {
@@ -2809,6 +2521,7 @@
         "name": "Large",
         "ps": 1.35,
         "evasion_pct": 0,
+        "radius_m": 0.6,
         "group": "alone"
       },
       {
@@ -2816,6 +2529,7 @@
         "name": "Boss",
         "ps": 10,
         "evasion_pct": 0,
+        "radius_m": 0.9,
         "group": "alone",
         "reads_as": "large",
         "reads_as_note": "A boss is not a size, it is a species that happens to be huge: it declares which of the three body classes a weapon's `size_mult` reads it as (- HugePatch section 12). Default Large; a boss may override it on its own entry."
@@ -5188,129 +4902,6 @@
         }
       },
       {
-        "id": "mist",
-        "race": "formless",
-        "name": "Mist",
-        "power_base": 1,
-        "line": "stand-off",
-        "damage": "magic",
-        "accuracy_mult": 0.455,
-        "sizes": [
-          "medium"
-        ],
-        "carries_weapon": false,
-        "element": "cold",
-        "resistance": {
-          "element": "cold",
-          "pct": 30
-        },
-        "weakness": {
-          "element": "fire",
-          "taken_pct": 15
-        },
-        "trait": "creeping cold - it stands off, resists nothing but answers resistance",
-        "core": {
-          "str": 12,
-          "agi": 19,
-          "vit": 18,
-          "dex": 20,
-          "int": 24,
-          "wis": 0,
-          "lck": 19
-        },
-        "junk_items": {
-          "common": "Mist Veil",
-          "uncommon": "Mist Dew Filament",
-          "rare": "Mist Heart Frost"
-        },
-        "habitat": [
-          "drowned river mouth",
-          "open moor",
-          "slow water",
-          "wet lowland"
-        ],
-        "zones": [
-          7,
-          11,
-          14,
-          18
-        ],
-        "zone_levels": {
-          "7": 66,
-          "11": 106,
-          "14": 136,
-          "18": 176
-        },
-        "bonus_material": {
-          "resource": "chaos-ichor",
-          "chance": 0.0019,
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
-        "id": "salamander",
-        "race": "elemental",
-        "name": "Salamander",
-        "power_base": 1,
-        "line": "front",
-        "damage": "magic",
-        "accuracy_mult": 0.65,
-        "sizes": [
-          "medium",
-          "large"
-        ],
-        "carries_weapon": false,
-        "element": "fire",
-        "resistance": {
-          "element": "fire",
-          "pct": 30
-        },
-        "weakness": {
-          "element": "cold",
-          "taken_pct": 20
-        },
-        "trait": "living flame - it burns from the front slot and cold is the answer",
-        "core": {
-          "str": 18,
-          "agi": 17,
-          "vit": 23,
-          "dex": 18,
-          "int": 25,
-          "wis": 0,
-          "lck": 17
-        },
-        "junk_items": {
-          "common": "Salamander Scale",
-          "uncommon": "Salamander Ember Gland",
-          "rare": "Salamander Ash Fan"
-        },
-        "habitat": [
-          "wet lowland",
-          "frost hold",
-          "thorn country",
-          "slag and foundry heat"
-        ],
-        "zones": [
-          4,
-          9,
-          12,
-          13
-        ],
-        "zone_levels": {
-          "4": 36,
-          "9": 86,
-          "12": 116,
-          "13": 126
-        },
-        "bonus_material": {
-          "resource": "ember-heart",
-          "chance": 0.0022,
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
         "id": "wisp",
         "race": "elemental",
         "name": "Wisp",
@@ -5376,247 +4967,6 @@
         }
       },
       {
-        "id": "shark",
-        "race": "fish",
-        "name": "Shark",
-        "power_base": 1.05,
-        "line": "front",
-        "damage": "physical",
-        "accuracy_mult": 1.17,
-        "sizes": [
-          "medium",
-          "large"
-        ],
-        "carries_weapon": true,
-        "element": "cold",
-        "resistance": {
-          "element": "cold",
-          "pct": 20
-        },
-        "weakness": {
-          "element": "lightning",
-          "taken_pct": 15
-        },
-        "mechanics": {
-          "fast_clock": true
-        },
-        "trait": "deep hunter - it swings often and the water never gives it cover",
-        "core": {
-          "str": 27,
-          "agi": 20,
-          "vit": 21,
-          "dex": 21,
-          "int": 0,
-          "wis": 0,
-          "lck": 16
-        },
-        "junk_items": {
-          "common": "Shark Tooth",
-          "uncommon": "Shark Cartilage",
-          "rare": "Shark Hide Panel"
-        },
-        "habitat": [
-          "drowned river mouth",
-          "wyrm breeding ground",
-          "wet lowland"
-        ],
-        "zones": [
-          7,
-          15,
-          18
-        ],
-        "zone_levels": {
-          "7": 66,
-          "15": 146,
-          "18": 176
-        },
-        "bonus_material": {
-          "resource": "thick-pelt",
-          "chance": 0.0056,
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
-        "id": "crab",
-        "race": "fish",
-        "name": "Crab",
-        "power_base": 0.9,
-        "line": "front",
-        "damage": "physical",
-        "accuracy_mult": 0.52,
-        "sizes": [
-          "small",
-          "medium"
-        ],
-        "carries_weapon": false,
-        "element": "poison",
-        "resistance": {
-          "element": "earth",
-          "pct": 25
-        },
-        "weakness": {
-          "element": "lightning",
-          "taken_pct": 20
-        },
-        "trait": "armoured scavenger - slow to hit, hard to pierce, lightning cracks the shell",
-        "core": {
-          "str": 25,
-          "agi": 12,
-          "vit": 24,
-          "dex": 15,
-          "int": 0,
-          "wis": 0,
-          "lck": 16
-        },
-        "junk_items": {
-          "common": "Crab Shell Plate",
-          "uncommon": "Crab Claw Chip",
-          "rare": "Crab Ember Joint"
-        },
-        "habitat": [
-          "wet lowland",
-          "salt flats",
-          "wyrm breeding ground"
-        ],
-        "zones": [
-          4,
-          5,
-          15
-        ],
-        "zone_levels": {
-          "4": 36,
-          "5": 46,
-          "15": 146
-        },
-        "bonus_material": {
-          "resource": "rock-salt",
-          "min": 1,
-          "max": 1,
-          "chance": 0.0135
-        }
-      },
-      {
-        "id": "archon",
-        "race": "celestial",
-        "name": "Archon",
-        "power_base": 1.05,
-        "line": "stand-off",
-        "damage": "magic",
-        "accuracy_mult": 1.235,
-        "sizes": [
-          "medium",
-          "large"
-        ],
-        "carries_weapon": true,
-        "element": "lightning",
-        "resistance": {
-          "element": "lightning",
-          "pct": 25
-        },
-        "weakness": {
-          "element": "chaos",
-          "taken_pct": 15
-        },
-        "mechanics": {
-          "bleed_immune": true
-        },
-        "trait": "light regent - accurate, bloodless and magic only: Evasion and resistance are the whole answer",
-        "core": {
-          "str": 20,
-          "agi": 23,
-          "vit": 18,
-          "dex": 22,
-          "int": 28,
-          "wis": 0,
-          "lck": 19
-        },
-        "junk_items": {
-          "common": "Archon Feather",
-          "uncommon": "Archon Halo Ring",
-          "rare": "Archon Star Ember"
-        },
-        "habitat": [
-          "the pale bloom",
-          "open moor",
-          "ash fields",
-          "storm terrace"
-        ],
-        "zones": [
-          6,
-          11,
-          16,
-          17
-        ],
-        "zone_levels": {
-          "6": 56,
-          "11": 106,
-          "16": 156,
-          "17": 166
-        },
-        "bonus_material": {
-          "resource": "silver-ore",
-          "min": 1,
-          "max": 1,
-          "chance": 0.0037
-        }
-      },
-      {
-        "id": "briarling",
-        "race": "plant",
-        "junk_items": {
-          "common": "Briarling Husk",
-          "uncommon": "Briarling Charm",
-          "rare": "Briarling Relic"
-        },
-        "power_base": 0.95,
-        "name": "Briarling",
-        "zones": [
-          1
-        ],
-        "habitat": [
-          "pinewood road"
-        ],
-        "carries_weapon": false,
-        "line": "front",
-        "damage": "physical",
-        "accuracy_mult": 0.75,
-        "sizes": [
-          "small",
-          "medium",
-          "large"
-        ],
-        "potion_source": false,
-        "trait": "bramble ambusher",
-        "element": "poison",
-        "resistance": {
-          "element": "poison",
-          "pct": 20
-        },
-        "weakness": {
-          "element": "fire",
-          "taken_pct": 15
-        },
-        "core": {
-          "str": 33,
-          "agi": 17,
-          "vit": 27,
-          "dex": 12,
-          "int": 0,
-          "wis": 0,
-          "lck": 8
-        },
-        "zone_levels": {
-          "1": 6
-        },
-        "bonus_material": {
-          "resource": "venom-gland",
-          "chance": 0.0033,
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
         "id": "harpy",
         "race": "beast",
         "junk_items": {
@@ -5672,290 +5022,6 @@
           "chance": 0.0045,
           "min": 1,
           "max": 1
-        }
-      },
-      {
-        "id": "barghest",
-        "race": "beast",
-        "junk_items": {
-          "common": "Barghest Husk",
-          "uncommon": "Barghest Charm",
-          "rare": "Barghest Relic"
-        },
-        "power_base": 1,
-        "name": "Barghest",
-        "zones": [
-          3
-        ],
-        "habitat": [
-          "wolf country"
-        ],
-        "carries_weapon": false,
-        "line": "front",
-        "damage": "physical",
-        "accuracy_mult": 0.85,
-        "sizes": [
-          "small",
-          "medium",
-          "large"
-        ],
-        "potion_source": false,
-        "trait": "black hound",
-        "element": "chaos",
-        "resistance": {
-          "element": "chaos",
-          "pct": 20
-        },
-        "weakness": {
-          "element": "fire",
-          "taken_pct": 15
-        },
-        "core": {
-          "str": 36,
-          "agi": 19,
-          "vit": 29,
-          "dex": 13,
-          "int": 0,
-          "wis": 0,
-          "lck": 8
-        },
-        "zone_levels": {
-          "3": 26
-        },
-        "bonus_material": {
-          "resource": "thick-pelt",
-          "chance": 0.0056,
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
-        "id": "miretoad",
-        "race": "beast",
-        "junk_items": {
-          "common": "Mire Toad Husk",
-          "uncommon": "Mire Toad Charm",
-          "rare": "Mire Toad Relic"
-        },
-        "power_base": 0.95,
-        "name": "Mire Toad",
-        "zones": [
-          4
-        ],
-        "habitat": [
-          "wet lowland"
-        ],
-        "carries_weapon": false,
-        "line": "stand-off",
-        "damage": "magic",
-        "accuracy_mult": 0.7,
-        "sizes": [
-          "small",
-          "medium",
-          "large"
-        ],
-        "potion_source": false,
-        "trait": "venomous croaker",
-        "element": "poison",
-        "resistance": {
-          "element": "poison",
-          "pct": 25
-        },
-        "weakness": {
-          "element": "lightning",
-          "taken_pct": 15
-        },
-        "core": {
-          "str": 10,
-          "agi": 25,
-          "vit": 22,
-          "dex": 22,
-          "int": 37,
-          "wis": 0,
-          "lck": 7
-        },
-        "zone_levels": {
-          "4": 36
-        },
-        "mechanics": {
-          "poison_burst": true
-        },
-        "bonus_material": {
-          "resource": "venom-gland",
-          "chance": 0.0033,
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
-        "id": "glassserpent",
-        "race": "dragon",
-        "junk_items": {
-          "common": "Glass Serpent Husk",
-          "uncommon": "Glass Serpent Charm",
-          "rare": "Glass Serpent Relic"
-        },
-        "power_base": 1.05,
-        "name": "Glass Serpent",
-        "zones": [
-          5
-        ],
-        "habitat": [
-          "salt flats"
-        ],
-        "carries_weapon": false,
-        "line": "stand-off",
-        "damage": "magic",
-        "accuracy_mult": 0.85,
-        "sizes": [
-          "small",
-          "medium",
-          "large"
-        ],
-        "potion_source": false,
-        "trait": "refracted bolt",
-        "element": "lightning",
-        "resistance": {
-          "element": "lightning",
-          "pct": 25
-        },
-        "weakness": {
-          "element": "earth",
-          "taken_pct": 15
-        },
-        "core": {
-          "str": 10,
-          "agi": 26,
-          "vit": 24,
-          "dex": 22,
-          "int": 38,
-          "wis": 0,
-          "lck": 8
-        },
-        "zone_levels": {
-          "5": 46
-        },
-        "bonus_material": {
-          "resource": "reptile-scale",
-          "chance": 0.0033,
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
-        "id": "palemoth",
-        "race": "insect",
-        "junk_items": {
-          "common": "Pale Moth Husk",
-          "uncommon": "Pale Moth Charm",
-          "rare": "Pale Moth Relic"
-        },
-        "power_base": 0.95,
-        "name": "Pale Moth",
-        "zones": [
-          6
-        ],
-        "habitat": [
-          "the pale bloom"
-        ],
-        "carries_weapon": false,
-        "line": "stand-off",
-        "damage": "magic",
-        "accuracy_mult": 0.9,
-        "sizes": [
-          "small",
-          "medium",
-          "large"
-        ],
-        "potion_source": false,
-        "trait": "pale dust",
-        "element": "chaos",
-        "resistance": {
-          "element": "chaos",
-          "pct": 20
-        },
-        "weakness": {
-          "element": "fire",
-          "taken_pct": 15
-        },
-        "core": {
-          "str": 10,
-          "agi": 26,
-          "vit": 24,
-          "dex": 22,
-          "int": 38,
-          "wis": 0,
-          "lck": 8
-        },
-        "zone_levels": {
-          "6": 56
-        },
-        "mechanics": {
-          "fast_clock": true
-        },
-        "bonus_material": {
-          "resource": "chitin-plate",
-          "chance": 0.0067,
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
-        "id": "drownedknight",
-        "race": "undead",
-        "junk_items": {
-          "common": "Drowned Knight Husk",
-          "uncommon": "Drowned Knight Charm",
-          "rare": "Drowned Knight Relic"
-        },
-        "power_base": 1,
-        "name": "Drowned Knight",
-        "zones": [
-          7
-        ],
-        "habitat": [
-          "drowned river mouth"
-        ],
-        "carries_weapon": true,
-        "line": "front",
-        "damage": "physical",
-        "accuracy_mult": 0.75,
-        "sizes": [
-          "small",
-          "medium",
-          "large"
-        ],
-        "potion_source": false,
-        "trait": "sunken oath",
-        "element": "cold",
-        "resistance": {
-          "element": "cold",
-          "pct": 25
-        },
-        "weakness": {
-          "element": "fire",
-          "taken_pct": 15
-        },
-        "core": {
-          "str": 40,
-          "agi": 21,
-          "vit": 33,
-          "dex": 14,
-          "int": 0,
-          "wis": 0,
-          "lck": 10
-        },
-        "zone_levels": {
-          "7": 66
-        },
-        "mechanics": {
-          "bleed_immune": true
-        },
-        "bonus_material": {
-          "resource": "iron-ore",
-          "min": 1,
-          "max": 1,
-          "chance": 0.0061
         }
       },
       {
@@ -6133,119 +5199,6 @@
         }
       },
       {
-        "id": "moorhag",
-        "race": "humanoid",
-        "junk_items": {
-          "common": "Moor Hag Husk",
-          "uncommon": "Moor Hag Charm",
-          "rare": "Moor Hag Relic"
-        },
-        "power_base": 1,
-        "name": "Moor Hag",
-        "zones": [
-          11
-        ],
-        "habitat": [
-          "open moor"
-        ],
-        "carries_weapon": true,
-        "line": "stand-off",
-        "damage": "magic",
-        "accuracy_mult": 0.8,
-        "sizes": [
-          "small",
-          "medium",
-          "large"
-        ],
-        "potion_source": false,
-        "trait": "moor curse",
-        "element": "chaos",
-        "resistance": {
-          "element": "chaos",
-          "pct": 20
-        },
-        "weakness": {
-          "element": "fire",
-          "taken_pct": 15
-        },
-        "core": {
-          "str": 12,
-          "agi": 30,
-          "vit": 32,
-          "dex": 22,
-          "int": 45,
-          "wis": 0,
-          "lck": 9
-        },
-        "zone_levels": {
-          "11": 106
-        },
-        "bonus_material": {
-          "resource": "chaos-ichor",
-          "chance": 0.0019,
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
-        "id": "thornstalker",
-        "race": "plant",
-        "junk_items": {
-          "common": "Thorn Stalker Husk",
-          "uncommon": "Thorn Stalker Charm",
-          "rare": "Thorn Stalker Relic"
-        },
-        "power_base": 0.95,
-        "name": "Thorn Stalker",
-        "zones": [
-          12
-        ],
-        "habitat": [
-          "thorn country"
-        ],
-        "carries_weapon": false,
-        "line": "front",
-        "damage": "physical",
-        "accuracy_mult": 0.9,
-        "sizes": [
-          "small",
-          "medium",
-          "large"
-        ],
-        "potion_source": false,
-        "trait": "thorn ambush",
-        "element": "poison",
-        "resistance": {
-          "element": "earth",
-          "pct": 25
-        },
-        "weakness": {
-          "element": "fire",
-          "taken_pct": 15
-        },
-        "core": {
-          "str": 44,
-          "agi": 23,
-          "vit": 37,
-          "dex": 16,
-          "int": 0,
-          "wis": 0,
-          "lck": 10
-        },
-        "zone_levels": {
-          "12": 116
-        },
-        "mechanics": {
-          "fast_clock": true
-        },
-        "bonus_material": {
-          "resource": "hardwood",
-          "min": 1,
-          "max": 1,
-          "chance": 0.0075
-        }
-      },
-      {
         "id": "slaggolem",
         "race": "elemental",
         "junk_items": {
@@ -6301,61 +5254,6 @@
         }
       },
       {
-        "id": "rivernymph",
-        "race": "fish",
-        "junk_items": {
-          "common": "River Nymph Husk",
-          "uncommon": "River Nymph Charm",
-          "rare": "River Nymph Relic"
-        },
-        "power_base": 0.95,
-        "name": "River Nymph",
-        "zones": [
-          14
-        ],
-        "habitat": [
-          "slow water"
-        ],
-        "carries_weapon": false,
-        "line": "stand-off",
-        "damage": "magic",
-        "accuracy_mult": 0.85,
-        "sizes": [
-          "small",
-          "medium",
-          "large"
-        ],
-        "potion_source": false,
-        "trait": "slow-water song",
-        "element": "cold",
-        "resistance": {
-          "element": "cold",
-          "pct": 25
-        },
-        "weakness": {
-          "element": "lightning",
-          "taken_pct": 15
-        },
-        "core": {
-          "str": 12,
-          "agi": 30,
-          "vit": 32,
-          "dex": 22,
-          "int": 45,
-          "wis": 0,
-          "lck": 9
-        },
-        "zone_levels": {
-          "14": 136
-        },
-        "bonus_material": {
-          "resource": "river-pearl",
-          "chance": 0.0027,
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
         "id": "wyrmling",
         "race": "dragon",
         "junk_items": {
@@ -6406,174 +5304,6 @@
         "bonus_material": {
           "resource": "reptile-scale",
           "chance": 0.0033,
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
-        "id": "ashphoenix",
-        "race": "elemental",
-        "junk_items": {
-          "common": "Ash Phoenix Husk",
-          "uncommon": "Ash Phoenix Charm",
-          "rare": "Ash Phoenix Relic"
-        },
-        "power_base": 1.05,
-        "name": "Ash Phoenix",
-        "zones": [
-          16
-        ],
-        "habitat": [
-          "ash fields"
-        ],
-        "carries_weapon": false,
-        "line": "stand-off",
-        "damage": "magic",
-        "accuracy_mult": 1,
-        "sizes": [
-          "small",
-          "medium",
-          "large"
-        ],
-        "potion_source": false,
-        "trait": "ash rebirth",
-        "element": "fire",
-        "resistance": {
-          "element": "fire",
-          "pct": 30
-        },
-        "weakness": {
-          "element": "cold",
-          "taken_pct": 15
-        },
-        "core": {
-          "str": 12,
-          "agi": 30,
-          "vit": 32,
-          "dex": 22,
-          "int": 45,
-          "wis": 0,
-          "lck": 9
-        },
-        "zone_levels": {
-          "16": 156
-        },
-        "bonus_material": {
-          "resource": "ember-heart",
-          "chance": 0.0022,
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
-        "id": "stormherald",
-        "race": "celestial",
-        "junk_items": {
-          "common": "Storm Herald Husk",
-          "uncommon": "Storm Herald Charm",
-          "rare": "Storm Herald Relic"
-        },
-        "power_base": 1,
-        "name": "Storm Herald",
-        "zones": [
-          17
-        ],
-        "habitat": [
-          "storm terrace"
-        ],
-        "carries_weapon": false,
-        "line": "stand-off",
-        "damage": "magic",
-        "accuracy_mult": 1,
-        "sizes": [
-          "small",
-          "medium",
-          "large"
-        ],
-        "potion_source": false,
-        "trait": "storm voice",
-        "element": "lightning",
-        "resistance": {
-          "element": "lightning",
-          "pct": 25
-        },
-        "weakness": {
-          "element": "earth",
-          "taken_pct": 15
-        },
-        "core": {
-          "str": 12,
-          "agi": 30,
-          "vit": 32,
-          "dex": 22,
-          "int": 45,
-          "wis": 0,
-          "lck": 9
-        },
-        "zone_levels": {
-          "17": 166
-        },
-        "bonus_material": {
-          "resource": "silver-ore",
-          "min": 1,
-          "max": 1,
-          "chance": 0.0037
-        }
-      },
-      {
-        "id": "bogtitan",
-        "race": "beast",
-        "junk_items": {
-          "common": "Bog Titan Husk",
-          "uncommon": "Bog Titan Charm",
-          "rare": "Bog Titan Relic"
-        },
-        "power_base": 1.1,
-        "name": "Bog Titan",
-        "zones": [
-          18
-        ],
-        "habitat": [
-          "wet lowland"
-        ],
-        "carries_weapon": false,
-        "line": "front",
-        "damage": "physical",
-        "accuracy_mult": 0.6,
-        "sizes": [
-          "small",
-          "medium",
-          "large"
-        ],
-        "potion_source": false,
-        "trait": "bog colossus",
-        "element": "poison",
-        "resistance": {
-          "element": "earth",
-          "pct": 25
-        },
-        "weakness": {
-          "element": "fire",
-          "taken_pct": 15
-        },
-        "core": {
-          "str": 44,
-          "agi": 23,
-          "vit": 37,
-          "dex": 16,
-          "int": 0,
-          "wis": 0,
-          "lck": 10
-        },
-        "zone_levels": {
-          "18": 176
-        },
-        "mechanics": {
-          "poison_burst": true
-        },
-        "bonus_material": {
-          "resource": "thick-pelt",
-          "chance": 0.0056,
           "min": 1,
           "max": 1
         }
@@ -9004,170 +7734,6 @@
           }
         }
       ],
-      "mist": [
-        {
-          "name": "Haar Mist",
-          "levels": [
-            1,
-            20
-          ],
-          "core": {
-            "str": 12,
-            "agi": 19,
-            "vit": 18,
-            "dex": 22,
-            "int": 24,
-            "wis": 0,
-            "lck": 19
-          }
-        },
-        {
-          "name": "Fen Mist",
-          "levels": [
-            21,
-            40
-          ],
-          "core": {
-            "str": 14,
-            "agi": 22,
-            "vit": 18,
-            "dex": 25,
-            "int": 26,
-            "wis": 0,
-            "lck": 19
-          }
-        },
-        {
-          "name": "Rime Mist",
-          "levels": [
-            41,
-            60
-          ],
-          "core": {
-            "str": 10,
-            "agi": 21,
-            "vit": 23,
-            "dex": 28,
-            "int": 27,
-            "wis": 0,
-            "lck": 21
-          }
-        },
-        {
-          "name": "Wailing Mist",
-          "levels": [
-            61,
-            80
-          ],
-          "core": {
-            "str": 14,
-            "agi": 23,
-            "vit": 18,
-            "dex": 31,
-            "int": 30,
-            "wis": 0,
-            "lck": 21
-          }
-        },
-        {
-          "name": "Deep Mist",
-          "levels": [
-            81,
-            100
-          ],
-          "core": {
-            "str": 16,
-            "agi": 23,
-            "vit": 24,
-            "dex": 33,
-            "int": 31,
-            "wis": 0,
-            "lck": 23
-          }
-        }
-      ],
-      "salamander": [
-        {
-          "name": "Ember Salamander",
-          "levels": [
-            1,
-            20
-          ],
-          "core": {
-            "str": 18,
-            "agi": 17,
-            "vit": 23,
-            "dex": 21,
-            "int": 26,
-            "wis": 0,
-            "lck": 17
-          }
-        },
-        {
-          "name": "Magma Salamander",
-          "levels": [
-            21,
-            40
-          ],
-          "core": {
-            "str": 21,
-            "agi": 20,
-            "vit": 23,
-            "dex": 25,
-            "int": 27,
-            "wis": 0,
-            "lck": 16
-          }
-        },
-        {
-          "name": "Cinder Salamander",
-          "levels": [
-            41,
-            60
-          ],
-          "core": {
-            "str": 17,
-            "agi": 19,
-            "vit": 29,
-            "dex": 27,
-            "int": 27,
-            "wis": 0,
-            "lck": 19
-          }
-        },
-        {
-          "name": "Forge Salamander",
-          "levels": [
-            61,
-            80
-          ],
-          "core": {
-            "str": 20,
-            "agi": 21,
-            "vit": 24,
-            "dex": 31,
-            "int": 31,
-            "wis": 0,
-            "lck": 18
-          }
-        },
-        {
-          "name": "Pyre Salamander",
-          "levels": [
-            81,
-            100
-          ],
-          "core": {
-            "str": 23,
-            "agi": 20,
-            "vit": 31,
-            "dex": 32,
-            "int": 31,
-            "wis": 0,
-            "lck": 21
-          }
-        }
-      ],
       "wisp": [
         {
           "name": "Flicker Wisp",
@@ -9250,270 +7816,6 @@
           }
         }
       ],
-      "shark": [
-        {
-          "name": "Reef Shark",
-          "levels": [
-            1,
-            20
-          ],
-          "core": {
-            "str": 27,
-            "agi": 20,
-            "vit": 21,
-            "dex": 22,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          }
-        },
-        {
-          "name": "Tiger Shark",
-          "levels": [
-            21,
-            40
-          ],
-          "core": {
-            "str": 30,
-            "agi": 23,
-            "vit": 21,
-            "dex": 25,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          }
-        },
-        {
-          "name": "Brine Shark",
-          "levels": [
-            41,
-            60
-          ],
-          "core": {
-            "str": 28,
-            "agi": 21,
-            "vit": 26,
-            "dex": 28,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          }
-        },
-        {
-          "name": "Greywound Shark",
-          "levels": [
-            61,
-            80
-          ],
-          "core": {
-            "str": 32,
-            "agi": 24,
-            "vit": 22,
-            "dex": 31,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          }
-        },
-        {
-          "name": "Abyss Shark",
-          "levels": [
-            81,
-            100
-          ],
-          "core": {
-            "str": 35,
-            "agi": 23,
-            "vit": 27,
-            "dex": 34,
-            "int": 0,
-            "wis": 0,
-            "lck": 20
-          }
-        }
-      ],
-      "crab": [
-        {
-          "name": "Sand Crab",
-          "levels": [
-            1,
-            20
-          ],
-          "core": {
-            "str": 26,
-            "agi": 13,
-            "vit": 25,
-            "dex": 18,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          }
-        },
-        {
-          "name": "Reef Crab",
-          "levels": [
-            21,
-            40
-          ],
-          "core": {
-            "str": 29,
-            "agi": 16,
-            "vit": 24,
-            "dex": 23,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          }
-        },
-        {
-          "name": "Boulder Crab",
-          "levels": [
-            41,
-            60
-          ],
-          "core": {
-            "str": 27,
-            "agi": 14,
-            "vit": 30,
-            "dex": 24,
-            "int": 0,
-            "wis": 0,
-            "lck": 19
-          }
-        },
-        {
-          "name": "Mire Crab",
-          "levels": [
-            61,
-            80
-          ],
-          "core": {
-            "str": 31,
-            "agi": 17,
-            "vit": 26,
-            "dex": 28,
-            "int": 0,
-            "wis": 0,
-            "lck": 18
-          }
-        },
-        {
-          "name": "Elder Crab",
-          "levels": [
-            81,
-            100
-          ],
-          "core": {
-            "str": 35,
-            "agi": 16,
-            "vit": 31,
-            "dex": 29,
-            "int": 0,
-            "wis": 0,
-            "lck": 21
-          }
-        }
-      ],
-      "archon": [
-        {
-          "name": "Dawn Archon",
-          "levels": [
-            1,
-            20
-          ],
-          "core": {
-            "str": 20,
-            "agi": 22,
-            "vit": 18,
-            "dex": 22,
-            "int": 27,
-            "wis": 0,
-            "lck": 19
-          }
-        },
-        {
-          "name": "Rift Archon",
-          "levels": [
-            21,
-            40
-          ],
-          "core": {
-            "str": 22,
-            "agi": 25,
-            "vit": 18,
-            "dex": 25,
-            "int": 29,
-            "wis": 0,
-            "lck": 19
-          }
-        },
-        {
-          "name": "Halo Archon",
-          "levels": [
-            41,
-            60
-          ],
-          "core": {
-            "str": 18,
-            "agi": 24,
-            "vit": 23,
-            "dex": 28,
-            "int": 30,
-            "wis": 0,
-            "lck": 21
-          }
-        },
-        {
-          "name": "Thunder Archon",
-          "levels": [
-            61,
-            80
-          ],
-          "core": {
-            "str": 22,
-            "agi": 26,
-            "vit": 18,
-            "dex": 31,
-            "int": 33,
-            "wis": 0,
-            "lck": 21
-          }
-        },
-        {
-          "name": "High Archon",
-          "levels": [
-            81,
-            100
-          ],
-          "core": {
-            "str": 24,
-            "agi": 25,
-            "vit": 24,
-            "dex": 34,
-            "int": 34,
-            "wis": 0,
-            "lck": 23
-          }
-        }
-      ],
-      "briarling": [
-        {
-          "name": "Briarling Stalker",
-          "levels": [
-            1,
-            10
-          ],
-          "core": {
-            "str": 33,
-            "agi": 17,
-            "vit": 27,
-            "dex": 12,
-            "int": 0,
-            "wis": 0,
-            "lck": 8
-          }
-        }
-      ],
       "harpy": [
         {
           "name": "Harpy Screecher",
@@ -9526,96 +7828,6 @@
             "agi": 29,
             "vit": 18,
             "dex": 17,
-            "int": 0,
-            "wis": 0,
-            "lck": 10
-          }
-        }
-      ],
-      "barghest": [
-        {
-          "name": "Barghest Alpha",
-          "levels": [
-            21,
-            30
-          ],
-          "core": {
-            "str": 36,
-            "agi": 19,
-            "vit": 29,
-            "dex": 13,
-            "int": 0,
-            "wis": 0,
-            "lck": 8
-          }
-        }
-      ],
-      "miretoad": [
-        {
-          "name": "Mire Toad Croaker",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 10,
-            "agi": 25,
-            "vit": 22,
-            "dex": 22,
-            "int": 37,
-            "wis": 0,
-            "lck": 7
-          }
-        }
-      ],
-      "glassserpent": [
-        {
-          "name": "Glass Serpent Prism",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 10,
-            "agi": 26,
-            "vit": 23,
-            "dex": 23,
-            "int": 38,
-            "wis": 0,
-            "lck": 8
-          }
-        }
-      ],
-      "palemoth": [
-        {
-          "name": "Pale Moth Oracle",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 10,
-            "agi": 26,
-            "vit": 23,
-            "dex": 23,
-            "int": 38,
-            "wis": 0,
-            "lck": 8
-          }
-        }
-      ],
-      "drownedknight": [
-        {
-          "name": "Drowned Knight Marine",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 40,
-            "agi": 21,
-            "vit": 33,
-            "dex": 14,
             "int": 0,
             "wis": 0,
             "lck": 10
@@ -9676,42 +7888,6 @@
           }
         }
       ],
-      "moorhag": [
-        {
-          "name": "Moor Hag Crone",
-          "levels": [
-            81,
-            100
-          ],
-          "core": {
-            "str": 12,
-            "agi": 30,
-            "vit": 27,
-            "dex": 27,
-            "int": 45,
-            "wis": 0,
-            "lck": 9
-          }
-        }
-      ],
-      "thornstalker": [
-        {
-          "name": "Thorn Stalker Warden",
-          "levels": [
-            81,
-            100
-          ],
-          "core": {
-            "str": 44,
-            "agi": 23,
-            "vit": 37,
-            "dex": 16,
-            "int": 0,
-            "wis": 0,
-            "lck": 10
-          }
-        }
-      ],
       "slaggolem": [
         {
           "name": "Slag Golem Crusher",
@@ -9730,24 +7906,6 @@
           }
         }
       ],
-      "rivernymph": [
-        {
-          "name": "River Nymph Singer",
-          "levels": [
-            81,
-            100
-          ],
-          "core": {
-            "str": 12,
-            "agi": 30,
-            "vit": 27,
-            "dex": 27,
-            "int": 45,
-            "wis": 0,
-            "lck": 9
-          }
-        }
-      ],
       "wyrmling": [
         {
           "name": "Wyrmling Scaler",
@@ -9763,60 +7921,6 @@
             "int": 26,
             "wis": 0,
             "lck": 9
-          }
-        }
-      ],
-      "ashphoenix": [
-        {
-          "name": "Ash Phoenix Ember",
-          "levels": [
-            81,
-            100
-          ],
-          "core": {
-            "str": 12,
-            "agi": 30,
-            "vit": 27,
-            "dex": 27,
-            "int": 45,
-            "wis": 0,
-            "lck": 9
-          }
-        }
-      ],
-      "stormherald": [
-        {
-          "name": "Storm Herald Caller",
-          "levels": [
-            81,
-            100
-          ],
-          "core": {
-            "str": 12,
-            "agi": 30,
-            "vit": 27,
-            "dex": 27,
-            "int": 45,
-            "wis": 0,
-            "lck": 9
-          }
-        }
-      ],
-      "bogtitan": [
-        {
-          "name": "Bog Titan Ancient",
-          "levels": [
-            81,
-            100
-          ],
-          "core": {
-            "str": 44,
-            "agi": 23,
-            "vit": 37,
-            "dex": 16,
-            "int": 0,
-            "wis": 0,
-            "lck": 10
           }
         }
       ]
@@ -10693,66 +8797,6 @@
         "rarity": "rare",
         "lean": "none"
       },
-      "Haar Mist": {
-        "item": "Mist Haar Clump",
-        "rarity": "common",
-        "lean": "junk"
-      },
-      "Fen Mist": {
-        "item": "Mist Fen Water",
-        "rarity": "uncommon",
-        "lean": "junk"
-      },
-      "Rime Mist": {
-        "item": "Mist Rime Wad",
-        "rarity": "rare",
-        "lean": "junk"
-      },
-      "Wailing Mist": {
-        "item": "Mist Bog Cotton",
-        "rarity": "rare",
-        "lean": "junk"
-      },
-      "Deep Mist": {
-        "item": "Mist Deep Dew",
-        "rarity": "uncommon",
-        "lean": "junk"
-      },
-      "Mist Sovereign": {
-        "item": "Mist Sovereign Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
-      "Ember Salamander": {
-        "item": "Salamander Cinder Root",
-        "rarity": "common",
-        "lean": "herb"
-      },
-      "Magma Salamander": {
-        "item": "Salamander Magma Bulb",
-        "rarity": "uncommon",
-        "lean": "herb"
-      },
-      "Cinder Salamander": {
-        "item": "Salamander Spring Fern",
-        "rarity": "rare",
-        "lean": "herb"
-      },
-      "Forge Salamander": {
-        "item": "Salamander Forge Thistle",
-        "rarity": "rare",
-        "lean": "herb"
-      },
-      "Pyre Salamander": {
-        "item": "Salamander Pyre Lichen",
-        "rarity": "uncommon",
-        "lean": "herb"
-      },
-      "Salamander Tyrant": {
-        "item": "Salamander Tyrant Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
       "Flicker Wisp": {
         "item": "Wisp Charred Needle",
         "rarity": "common",
@@ -10783,106 +8827,6 @@
         "rarity": "rare",
         "lean": "none"
       },
-      "Reef Shark": {
-        "item": "Shark Gill Plate",
-        "rarity": "common",
-        "lean": "gear"
-      },
-      "Tiger Shark": {
-        "item": "Shark Striped Scute",
-        "rarity": "uncommon",
-        "lean": "gear"
-      },
-      "Brine Shark": {
-        "item": "Shark Salted Casing",
-        "rarity": "rare",
-        "lean": "gear"
-      },
-      "Greywound Shark": {
-        "item": "Shark Jaw Hinge",
-        "rarity": "rare",
-        "lean": "gear"
-      },
-      "Abyss Shark": {
-        "item": "Shark Lantern Lure",
-        "rarity": "uncommon",
-        "lean": "gear"
-      },
-      "Shark Patriarch": {
-        "item": "Shark Patriarch Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
-      "Sand Crab": {
-        "item": "Crab Sand Chalk",
-        "rarity": "common",
-        "lean": "junk"
-      },
-      "Reef Crab": {
-        "item": "Crab Reef Grit",
-        "rarity": "uncommon",
-        "lean": "junk"
-      },
-      "Boulder Crab": {
-        "item": "Crab Boulder Chip",
-        "rarity": "rare",
-        "lean": "junk"
-      },
-      "Mire Crab": {
-        "item": "Crab Mire Pellet",
-        "rarity": "rare",
-        "lean": "junk"
-      },
-      "Elder Crab": {
-        "item": "Crab Moult Casing",
-        "rarity": "uncommon",
-        "lean": "junk"
-      },
-      "Crab King": {
-        "item": "Crab King Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
-      "Dawn Archon": {
-        "item": "Archon Dawn Filament",
-        "rarity": "common",
-        "lean": "gear"
-      },
-      "Rift Archon": {
-        "item": "Archon Rift Lens",
-        "rarity": "uncommon",
-        "lean": "gear"
-      },
-      "Halo Archon": {
-        "item": "Archon Halo Link",
-        "rarity": "rare",
-        "lean": "gear"
-      },
-      "Thunder Archon": {
-        "item": "Archon Thunder Chord",
-        "rarity": "rare",
-        "lean": "gear"
-      },
-      "High Archon": {
-        "item": "Archon Summit Wire",
-        "rarity": "uncommon",
-        "lean": "gear"
-      },
-      "Archon Prime": {
-        "item": "Archon Prime Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
-      "Briarling Stalker": {
-        "item": "Briarling Stalker Token",
-        "rarity": "uncommon",
-        "lean": "herb"
-      },
-      "Briarling Matriarch": {
-        "item": "Briarling Matriarch Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
       "Harpy Screecher": {
         "item": "Harpy Screecher Token",
         "rarity": "rare",
@@ -10890,56 +8834,6 @@
       },
       "Harpy Skyqueen": {
         "item": "Harpy Skyqueen Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
-      "Barghest Alpha": {
-        "item": "Barghest Alpha Token",
-        "rarity": "common",
-        "lean": "gear"
-      },
-      "Barghest Packlord": {
-        "item": "Barghest Packlord Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
-      "Mire Toad Croaker": {
-        "item": "Mire Toad Croaker Token",
-        "rarity": "uncommon",
-        "lean": "herb"
-      },
-      "Mire Toad Mother": {
-        "item": "Mire Toad Mother Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
-      "Glass Serpent Prism": {
-        "item": "Glass Serpent Prism Token",
-        "rarity": "rare",
-        "lean": "junk"
-      },
-      "Glass Serpent Regent": {
-        "item": "Glass Serpent Regent Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
-      "Pale Moth Oracle": {
-        "item": "Pale Moth Oracle Token",
-        "rarity": "common",
-        "lean": "gear"
-      },
-      "Pale Moth Empress": {
-        "item": "Pale Moth Empress Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
-      "Drowned Knight Marine": {
-        "item": "Drowned Knight Marine Token",
-        "rarity": "uncommon",
-        "lean": "herb"
-      },
-      "Drowned Knight Captain": {
-        "item": "Drowned Knight Captain Crown",
         "rarity": "rare",
         "lean": "none"
       },
@@ -10973,26 +8867,6 @@
         "rarity": "rare",
         "lean": "none"
       },
-      "Moor Hag Crone": {
-        "item": "Moor Hag Crone Token",
-        "rarity": "rare",
-        "lean": "junk"
-      },
-      "Moor Hag Grandmother": {
-        "item": "Moor Hag Grandmother Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
-      "Thorn Stalker Warden": {
-        "item": "Thorn Stalker Warden Token",
-        "rarity": "common",
-        "lean": "gear"
-      },
-      "Thorn Stalker Rootqueen": {
-        "item": "Thorn Stalker Rootqueen Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
       "Slag Golem Crusher": {
         "item": "Slag Golem Crusher Token",
         "rarity": "uncommon",
@@ -11003,16 +8877,6 @@
         "rarity": "rare",
         "lean": "none"
       },
-      "River Nymph Singer": {
-        "item": "River Nymph Singer Token",
-        "rarity": "rare",
-        "lean": "junk"
-      },
-      "River Nymph Queen": {
-        "item": "River Nymph Queen Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
       "Wyrmling Scaler": {
         "item": "Wyrmling Scaler Token",
         "rarity": "common",
@@ -11020,36 +8884,6 @@
       },
       "Wyrmling Progenitor": {
         "item": "Wyrmling Progenitor Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
-      "Ash Phoenix Ember": {
-        "item": "Ash Phoenix Ember Token",
-        "rarity": "uncommon",
-        "lean": "herb"
-      },
-      "Ash Phoenix Eternal": {
-        "item": "Ash Phoenix Eternal Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
-      "Storm Herald Caller": {
-        "item": "Storm Herald Caller Token",
-        "rarity": "rare",
-        "lean": "junk"
-      },
-      "Storm Herald Thunderer": {
-        "item": "Storm Herald Thunderer Crown",
-        "rarity": "rare",
-        "lean": "none"
-      },
-      "Bog Titan Ancient": {
-        "item": "Bog Titan Ancient Token",
-        "rarity": "common",
-        "lean": "gear"
-      },
-      "Bog Titan Firstborn": {
-        "item": "Bog Titan Firstborn Crown",
         "rarity": "rare",
         "lean": "none"
       }
@@ -11107,7 +8941,15 @@
       "bandit": "retired from a legacy Species roster; Human takes the Bandit lineage, and its creature/loot flavour moves to the Species that replace it",
       "knight": "retired from a legacy Species roster; creature/loot flavour moves to the Species that replace it",
       "drake": "retired from a legacy Species roster; creature/loot flavour moves to the Species that replace it",
-      "seraph": "retired from a legacy Species roster; creature/loot flavour moves to the Species that replace it"
+      "seraph": "retired from a legacy Species roster; creature/loot flavour moves to the Species that replace it",
+      "bogtitan": "retired in the high-level species cut",
+      "stormherald": "retired in the high-level species cut",
+      "ashphoenix": "retired in the high-level species cut",
+      "drownedknight": "retired in the high-level species cut",
+      "palemoth": "retired in the high-level species cut",
+      "moorhag": "retired in the high-level species cut",
+      "thornstalker": "retired in the high-level species cut",
+      "rivernymph": "retired in the high-level species cut"
     },
     "forms": {
       "1": {
@@ -12748,40 +10590,6 @@
             "lck": 16
           },
           "drop_profile": "beetle"
-        },
-        "salamander": {
-          "name": "Salamander",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 18,
-            "agi": 18,
-            "vit": 24,
-            "dex": 24,
-            "int": 26,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "salamander"
-        },
-        "crab": {
-          "name": "Crab",
-          "levels": [
-            31,
-            40
-          ],
-          "core": {
-            "str": 26,
-            "agi": 13,
-            "vit": 25,
-            "dex": 21,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "crab"
         }
       },
       "5": {
@@ -13192,23 +11000,6 @@
             "lck": 21
           },
           "drop_profile": "imp"
-        },
-        "crab": {
-          "name": "Boulder Crab",
-          "levels": [
-            41,
-            50
-          ],
-          "core": {
-            "str": 26,
-            "agi": 13,
-            "vit": 25,
-            "dex": 24,
-            "int": 0,
-            "wis": 0,
-            "lck": 16
-          },
-          "drop_profile": "crab"
         }
       },
       "6": {
@@ -13636,23 +11427,6 @@
             "lck": 22
           },
           "drop_profile": "hornet"
-        },
-        "archon": {
-          "name": "Archon",
-          "levels": [
-            51,
-            60
-          ],
-          "core": {
-            "str": 21,
-            "agi": 25,
-            "vit": 20,
-            "dex": 28,
-            "int": 31,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "archon"
         }
       },
       "7": {
@@ -14046,40 +11820,6 @@
             "lck": 19
           },
           "drop_profile": "siren"
-        },
-        "mist": {
-          "name": "Mist",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 12,
-            "agi": 21,
-            "vit": 19,
-            "dex": 31,
-            "int": 27,
-            "wis": 0,
-            "lck": 20
-          },
-          "drop_profile": "mist"
-        },
-        "shark": {
-          "name": "Shark",
-          "levels": [
-            61,
-            70
-          ],
-          "core": {
-            "str": 30,
-            "agi": 22,
-            "vit": 23,
-            "dex": 31,
-            "int": 0,
-            "wis": 0,
-            "lck": 17
-          },
-          "drop_profile": "shark"
         }
       },
       "8": {
@@ -14883,23 +12623,6 @@
             "lck": 16
           },
           "drop_profile": "wyvern"
-        },
-        "salamander": {
-          "name": "Magma Salamander",
-          "levels": [
-            81,
-            90
-          ],
-          "core": {
-            "str": 19,
-            "agi": 19,
-            "vit": 25,
-            "dex": 33,
-            "int": 28,
-            "wis": 0,
-            "lck": 18
-          },
-          "drop_profile": "salamander"
         }
       },
       "10": {
@@ -16452,10 +14175,7 @@
         "giant",
         "werewolf",
         "siren",
-        "shark",
-        "wyvern",
-        "salamander",
-        "crab"
+        "wyvern"
       ],
       "food_drops": [
         {
@@ -16528,7 +14248,6 @@
         },
         {
           "species": [
-            "archon",
             "wisp"
           ],
           "food_id": "moonmint",
@@ -16557,29 +14276,10 @@
         },
         {
           "species": [
-            "mist"
-          ],
-          "food_id": "wild_berries",
-          "chance": 0.04,
-          "min": 1,
-          "max": 1
-        },
-        {
-          "species": [
-            "siren",
-            "shark"
+            "siren"
           ],
           "food_id": "river-fish",
           "chance": 0.12,
-          "min": 1,
-          "max": 2
-        },
-        {
-          "species": [
-            "crab"
-          ],
-          "food_id": "shellfish",
-          "chance": 0.15,
           "min": 1,
           "max": 2
         },
@@ -16606,7 +14306,6 @@
         },
         {
           "species": [
-            "crab",
             "beetle"
           ],
           "resource": "ore",
@@ -17537,7 +15236,7 @@
       "boss_replace_chance": 0.5
     },
     "imprint_stone_sources": {
-      "note": "One stone per Mod line in the game (imprint_<id>): it names one Unbound line and rewrites it as its own Mod, rolling Tier and value fresh. Elites pay one random imprint stone on their own chance; a Boss pays two. The Mod is uniform over the Mod roster, so a chase line is a hunt, not a purchase.",
+      "note": "One stone per eligible gear Mod (imprint_<id>): it names one Unbound line and rewrites it as its own Mod, rolling Tier and value fresh. Elites pay one random imprint stone on their own chance; a Boss pays two. The Mod is uniform over the eligible roster declared in mods.json; passive-tree-only Mods are excluded, while eligible Mods outside a Base's ordinary pool remain available.",
       "elite_imprint_chance": 0.01,
       "boss_imprint_stones": 2
     },
@@ -17681,7 +15380,7 @@
     "retreat_keep_max": 2
   },
   "inventory": {
-    "character_slots": 300,
+    "character_slots": 100,
     "stack_size": {
       "stone": 999,
       "herb": 100,
@@ -17699,7 +15398,7 @@
     "gold_uses_slot": false,
     "offline_cap_hr": null,
     "overflow": "stop_pickup",
-    "note": "One bag = 300 slots. A kept gear piece takes one slot and a consumable stack takes one, and both are counted against the same 300. Stones and junk stack 999/slot and are weightless; herbs, potions, materials and provisions stack 100/slot and weigh 0.1/unit; gold takes no slot. Full = pickups pause: nothing auto-converts and nothing is deleted. Weight capacity is Str x K_STR_WEIGHT over everything carried, so a full bag can cut aspd up to -50% (formula.md section 11). Gear crafting and Stash are Settlement-only; Camp cooking is the field exception. The Stash is one warehouse on the character and every settlement's counter opens the same one, never a second chest per town. Every drop enters the bag by default; only a slot whose filter is armed dissolves a piece, which is what replaced the auto-convert buffer - kept gear fills at the measured upgrade rate (F4), not at the junk flow."
+    "note": "One bag = 100 fixed slots. A kept gear piece takes one slot and a consumable stack takes one, and both are counted against the same 100. Stones and junk stack 999/slot and are weightless; herbs, potions, materials and provisions stack 100/slot and weigh 0.1/unit; gold takes no slot. Full = pickups pause: nothing auto-converts and nothing is deleted. Weight capacity is Str x K_STR_WEIGHT over everything carried, so a full bag can cut aspd up to -50% (formula.md section 11). Gear crafting and Stash are Settlement-only; Camp cooking is the field exception. The Stash is one warehouse on the character and every settlement's counter opens the same one, never a second chest per town. Every drop enters the bag by default; only a slot whose filter is armed dissolves a piece, which is what replaced the auto-convert buffer - kept gear fills at the measured upgrade rate (F4), not at the junk flow."
   },
   "item_level": {
     "note": "The one axis an item's strength rides (item-level.md). The value a Mod line rolls is a window that climbs with the item's level: the window's floor climbs from the band below (so a mid-band piece starts able to roll the low band's floor and ends above it), the ceiling is the band's own top, and the roll lands in one of the window's thirds - the top third is the rarest, so a high-level drop is a chance and not a formality. The Unbound line count is not on that ladder: it is drawn inside `unbound_slots` at drop, so two pieces of one level and one band can still differ in width.",
@@ -17782,7 +15481,7 @@
     "per_target_pct": 60,
     "target_cap": 3,
     "mana_mult": 1.5,
-    "note": "The AoE rule: an AoE skill deals 60% damage to each target hit, hits at most 3 targets, and costs 1.5x mana. Damage per mana is 0.40x at 1 target, 0.80x at 2, 1.20x at the Cap. Which 3 targets it hits is the reach queue (mob.reach), not a fixed set."
+    "note": "Live area skills select all enemy centers inside the radius stored in skills.json, without a target-count cap. The primary receives the full press; additional targets receive per_target_pct of the press. The multi-target Mana premium is mana_mult. target_cap describes the offline queue approximation, which has no spatial positions."
   },
   "max_hp_press": {
     "boss_pct": 50,
@@ -17802,7 +15501,7 @@
     "rebirth_note": "One Rebirth stone buys one press, and the press is the whole Unbound set: every line the piece holds past the Bound pair — including any line an Add stone filled — leaves and a fresh Mod is drawn in its place from the piece's own pool. It is priced as one press rather than one stone a line because the reach is the product: the player is not choosing any of the five lines, only taking the set again. The Frame Mod and the Bound pair are untouched, the line count never moves, no Add charge is spent, and each slot's Reroll floor leaves with the identity it held.",
     "polish_note": "The Polish stone spends the Reroll rule across the whole piece in one press: every line's value re-rolls inside its own Tier, never below the floor that slot has ever held, and no Tier moves. It is the one stone the owner opened onto the unremovable head — the Frame Mod (line 1, on its shared `frame_mod.value_scale` budget) and the Bound pair are re-rolled with the Unbound lines — and it removes no line, spends no Add charge, moves no identity and no Element. A stone that buys reach, not a cheaper climb: the per-line Reroll is still the cheap path for the Unbound lines, and only this one reaches the three lines that are part of the piece.",
     "reforge_note": "The Reforge stone redraws the piece's Tier the way a drop does — one draw on the published weights, spent on the whole piece at once — then rolls every line's value inside the Tier it landed on, the Frame Mod on its shared budget. So it can climb every line together or drag them down: the Tier is the gamble and the values follow it. Identity, Element, line count and the Add charge are untouched. A slot whose Tier moved loses its Reroll floor, because a floor is the highest value that line held at that Tier; a slot the draw left where it was keeps its floor.",
-    "imprint_note": "The Imprint stone carries one Mod line's own identity (imprint_<id>, one stone per Mod in the game): it names one Unbound line and rewrites it as that Mod, rolling Tier and value fresh the way a drop does. One stone a use. It never touches the Frame Mod or the Bound pair, spends no Add charge and changes no line count.",
+    "imprint_note": "The Imprint stone carries one eligible gear Mod's identity (imprint_<id>): it names one Unbound line and rewrites it as that Mod, rolling Tier and value fresh the way a drop does, even outside the Base's ordinary pool. Eligibility lives in mods.json. Passive-tree-only Mods cannot be Imprinted; legacy stones and item lines keep their saved identities and counts. One stone a use. It never touches the Frame Mod or the Bound pair, spends no Add charge and changes no line count.",
     "replace_note": "The Replace stone spends what Remove + Add spend (1 + 1): it names the line that leaves and the line that comes in from the piece's own pool, and it rolls the incoming line's Tier fresh - the Mod's identity stops being a gamble, the Tier stays one, so a chosen line still has to be climbed with Reroll tier. It never touches the Frame Mod or the Bound pair, spends no Add charge and changes no line count.",
     "ascend_add_stones": 1,
     "ascend_tier_stones": 1,
@@ -17891,30 +15590,102 @@
       500
     ],
     "materials": {
-      "ore": { "family": "metal", "grade": 1 },
-      "copper-ore": { "family": "metal", "grade": 1 },
-      "copper-fittings": { "family": "metal", "grade": 1 },
-      "iron-ore": { "family": "metal", "grade": 2 },
-      "iron-bar": { "family": "metal", "grade": 2 },
-      "silver-ore": { "family": "metal", "grade": 3 },
-      "silver-inlay": { "family": "metal", "grade": 3 },
-      "pine-wood": { "family": "wood", "grade": 1 },
-      "timber": { "family": "wood", "grade": 1 },
-      "willow-wood": { "family": "wood", "grade": 1 },
-      "hardwood": { "family": "wood", "grade": 2 },
-      "cedar-wood": { "family": "wood", "grade": 2 },
-      "seasoned-planks": { "family": "wood", "grade": 2 },
-      "rarewood": { "family": "wood", "grade": 3 },
-      "grave-bone": { "family": "organic", "grade": 1 },
-      "thick-pelt": { "family": "organic", "grade": 2 },
-      "feather-plume": { "family": "organic", "grade": 2 },
-      "reptile-scale": { "family": "organic", "grade": 3 },
-      "chitin-plate": { "family": "organic", "grade": 3 },
-      "venom-gland": { "family": "essence", "grade": 2 },
-      "funerary-linen": { "family": "essence", "grade": 2 },
-      "ember-heart": { "family": "essence", "grade": 3 },
-      "chaos-ichor": { "family": "essence", "grade": 3 },
-      "river-pearl": { "family": "essence", "grade": 3 }
+      "ore": {
+        "family": "metal",
+        "grade": 1
+      },
+      "copper-ore": {
+        "family": "metal",
+        "grade": 1
+      },
+      "copper-fittings": {
+        "family": "metal",
+        "grade": 1
+      },
+      "iron-ore": {
+        "family": "metal",
+        "grade": 2
+      },
+      "iron-bar": {
+        "family": "metal",
+        "grade": 2
+      },
+      "silver-ore": {
+        "family": "metal",
+        "grade": 3
+      },
+      "silver-inlay": {
+        "family": "metal",
+        "grade": 3
+      },
+      "pine-wood": {
+        "family": "wood",
+        "grade": 1
+      },
+      "timber": {
+        "family": "wood",
+        "grade": 1
+      },
+      "willow-wood": {
+        "family": "wood",
+        "grade": 1
+      },
+      "hardwood": {
+        "family": "wood",
+        "grade": 2
+      },
+      "cedar-wood": {
+        "family": "wood",
+        "grade": 2
+      },
+      "seasoned-planks": {
+        "family": "wood",
+        "grade": 2
+      },
+      "rarewood": {
+        "family": "wood",
+        "grade": 3
+      },
+      "grave-bone": {
+        "family": "organic",
+        "grade": 1
+      },
+      "thick-pelt": {
+        "family": "organic",
+        "grade": 2
+      },
+      "feather-plume": {
+        "family": "organic",
+        "grade": 2
+      },
+      "reptile-scale": {
+        "family": "organic",
+        "grade": 3
+      },
+      "chitin-plate": {
+        "family": "organic",
+        "grade": 3
+      },
+      "venom-gland": {
+        "family": "essence",
+        "grade": 2
+      },
+      "funerary-linen": {
+        "family": "essence",
+        "grade": 2
+      },
+      "ember-heart": {
+        "family": "essence",
+        "grade": 3
+      },
+      "chaos-ichor": {
+        "family": "essence",
+        "grade": 3
+      },
+      "river-pearl": {
+        "family": "essence",
+        "grade": 3
+      }
     },
     "families": {
       "metal": {
@@ -17970,30 +15741,118 @@
       }
     },
     "armour": {
-      "helmet": { "name": "Helmet", "count": 2 },
-      "chest": { "name": "Chest", "count": 4 },
-      "pant": { "name": "Legs", "count": 3 },
-      "boots": { "name": "Boots", "count": 2 },
-      "belt": { "name": "Belt", "count": 1 },
-      "gloves": { "name": "Gloves", "count": 2 },
-      "ring": { "name": "Ring", "count": 1 },
-      "amulet": { "name": "Amulet", "count": 1 },
-      "earring": { "name": "Earring", "count": 1 },
-      "cape": { "name": "Cape", "count": 2 },
-      "off hand": { "name": "Off hand", "count": 2 }
+      "helmet": {
+        "name": "Helmet",
+        "count": 2
+      },
+      "chest": {
+        "name": "Chest",
+        "count": 4
+      },
+      "pant": {
+        "name": "Legs",
+        "count": 3
+      },
+      "boots": {
+        "name": "Boots",
+        "count": 2
+      },
+      "belt": {
+        "name": "Belt",
+        "count": 1
+      },
+      "gloves": {
+        "name": "Gloves",
+        "count": 2
+      },
+      "ring": {
+        "name": "Ring",
+        "count": 1
+      },
+      "amulet": {
+        "name": "Amulet",
+        "count": 1
+      },
+      "earring": {
+        "name": "Earring",
+        "count": 1
+      },
+      "cape": {
+        "name": "Cape",
+        "count": 2
+      },
+      "off hand": {
+        "name": "Off hand",
+        "count": 2
+      }
     },
     "weapons": {
-      "one-handed sword": { "name": "One-handed sword", "family": "metal", "frame": "Longsword", "count": 3 },
-      "one-handed axe": { "name": "One-handed axe", "family": "metal", "frame": "Cleaver", "count": 3 },
-      "dagger": { "name": "Dagger", "family": "metal", "frame": "Wraithknife", "count": 2 },
-      "mace": { "name": "Mace", "family": "metal", "frame": "Duskmaul", "count": 3 },
-      "wand": { "name": "Wand", "family": "wood", "frame": "Crystal Wand", "count": 2 },
-      "staff": { "name": "Staff", "family": "wood", "frame": "Runed Staff", "count": 4 },
-      "spear": { "name": "Spear", "family": "metal", "frame": "Gale Spear", "count": 4 },
-      "two-handed sword": { "name": "Two-handed sword", "family": "metal", "frame": "Flamberge", "count": 4 },
-      "two-handed axe": { "name": "Two-handed axe", "family": "metal", "frame": "Halberd", "count": 4 },
-      "bow": { "name": "Bow", "family": "wood", "frame": "Recurve Bow", "count": 3 },
-      "crossbow": { "name": "Crossbow", "family": "metal", "frame": "Runelock Crossbow", "count": 4 }
+      "one-handed sword": {
+        "name": "One-handed sword",
+        "family": "metal",
+        "frame": "Longsword",
+        "count": 3
+      },
+      "one-handed axe": {
+        "name": "One-handed axe",
+        "family": "metal",
+        "frame": "Cleaver",
+        "count": 3
+      },
+      "dagger": {
+        "name": "Dagger",
+        "family": "metal",
+        "frame": "Wraithknife",
+        "count": 2
+      },
+      "mace": {
+        "name": "Mace",
+        "family": "metal",
+        "frame": "Duskmaul",
+        "count": 3
+      },
+      "wand": {
+        "name": "Wand",
+        "family": "wood",
+        "frame": "Crystal Wand",
+        "count": 2
+      },
+      "staff": {
+        "name": "Staff",
+        "family": "wood",
+        "frame": "Runed Staff",
+        "count": 4
+      },
+      "spear": {
+        "name": "Spear",
+        "family": "metal",
+        "frame": "Gale Spear",
+        "count": 4
+      },
+      "two-handed sword": {
+        "name": "Two-handed sword",
+        "family": "metal",
+        "frame": "Flamberge",
+        "count": 4
+      },
+      "two-handed axe": {
+        "name": "Two-handed axe",
+        "family": "metal",
+        "frame": "Halberd",
+        "count": 4
+      },
+      "bow": {
+        "name": "Bow",
+        "family": "wood",
+        "frame": "Recurve Bow",
+        "count": 3
+      },
+      "crossbow": {
+        "name": "Crossbow",
+        "family": "metal",
+        "frame": "Runelock Crossbow",
+        "count": 4
+      }
     }
   },
   "town_shared": {

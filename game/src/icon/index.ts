@@ -10,14 +10,13 @@ import {
  * Every PNG figure under this folder is shelf art, discovered by file name. Semantic item, skill, and
  * character associations live in registry.ts and use stable IDs where available. Resolvers try ordered
  * candidates and category fallbacks, so missing bespoke art never leaves a broken image in the UI. Mob art
- * is the icon set under mob/icon/; the painted figures under mob/sprite/ and the map overlay SVG under
- * map/ are map artwork, not shelf icons.
+ * is the white icon set under mob/icon/; the map overlay SVG under map/ is map artwork, not shelf icons.
  *
  * UI icons and map glyphs are PNG art from this shelf. UI controls draw it through `.icon-mask` in
  * skins.css; map markers draw it as SVG `<image>`. Inline SVG stays for structural graphics (tree/map
  * geometry, marker frames/leaders, charts, effects), never a standalone UI glyph.
  */
-const shelfAssets = import.meta.glob<string>(['./**/*.png', '!./mob/sprite/**'], {
+const shelfAssets = import.meta.glob<string>(['./**/*.png'], {
   eager: true,
   query: '?url',
   import: 'default',
@@ -28,6 +27,19 @@ const baseName = (path: string): string => path.slice(path.lastIndexOf('/') + 1)
 const shelf = new Map<string, string>(
   Object.entries(shelfAssets).map(([p, url]) => [baseName(p), url]),
 );
+/** Mob icons resolve only inside mob/icon — a bare name like `bone` must not borrow a material icon. */
+const mobShelf = new Map<string, string>(
+  Object.entries(import.meta.glob<string>('./mob/icon/*.png', { eager: true, query: '?url', import: 'default' }))
+    .map(([p, url]) => [baseName(p), url]),
+);
+const mobArt = (...names: (string | undefined)[]): string | undefined => {
+  for (const name of names) {
+    if (!name) continue;
+    const url = mobShelf.get(name);
+    if (url) return url;
+  }
+  return undefined;
+};
 
 /** The first name the shelf carries art for. */
 function art(...names: (string | undefined)[]): string | undefined {
@@ -117,24 +129,11 @@ const MOD_ART: Record<string, string> = {
 const MOB_BY_SPECIES: Record<string, string> = {
   ogre: 'minotaur-2',
   human: 'player',
-  mist: 'spectre',
-  briarling: 'thorny-vine',
-  barghest: 'animal-skull',
-  miretoad: 'frog',
-  glassserpent: 'sea-serpent',
-  palemoth: 'butterfly',
-  drownedknight: 'knight-helmet',
-  bonehound: 'bone',
+  bonehound: 'animal-skull',
   revenant: 'ghost-1',
   mirehydra: 'hydra-1',
-  moorhag: 'spell-book',
-  thornstalker: 'thorny-tentacle',
-  slaggolem: 'boulder',
-  rivernymph: 'wave',
+  slaggolem: 'dread-skull',
   wyrmling: 'dragon-head-1',
-  ashphoenix: 'burning-meteor',
-  stormherald: 'storm-cloud',
-  bogtitan: 'giant2',
 };
 
 const pick = (...names: (string | undefined)[]): string => art(...names) ?? icon(ANCHOR);
@@ -160,7 +159,7 @@ export function mobSpeciesArt(species: string): string {
 
 export function mobIcon(species: string): string {
   const key = species.toLowerCase();
-  return pick(`old-${key}`, MOB_BY_SPECIES[key], 'dread-skull');
+  return mobArt(`old-${key}`, MOB_BY_SPECIES[key], 'dread-skull') ?? icon(ANCHOR);
 }
 
 /** The mark a boss field label carries (§11): the same dread-skull the junk stream uses. */

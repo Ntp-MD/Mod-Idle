@@ -1,0 +1,428 @@
+[
+  {
+    "id": "attack.meteor",
+    "status": "PASS",
+    "errors": [],
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "sourceSeparatorsClear": true,
+    "sourcePerimeterClear": true,
+    "rawPerimeterAlphaPass": false,
+    "fullyTransparentFraction": 0.4239479916261583,
+    "discardedAlphaFraction": 0.350746192725543,
+    "alphaDiscard": 8,
+    "frameCount": 16,
+    "sourcePixelsUnmodified": true,
+    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "runtimeActivated": true,
+    "renderedPaddingPass": true,
+    "virtualPaddingPx": 64,
+    "sourcePreview": {
+      "loaded": true,
+      "inspection": "sampled source playback plus complete atlas visual review",
+      "alphaDiscard": 8,
+      "actorBodyRulerM": 0.5,
+      "arenaCalibrationVerified": false
+    },
+    "integratedBrowserSample": true,
+    "integratedViewport": [
+      1920,
+      1080
+    ]
+  },
+  {
+    "id": "attack.blizzard",
+    "status": "PASS",
+    "errors": [],
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "sourceSeparatorsClear": true,
+    "sourcePerimeterClear": true,
+    "rawPerimeterAlphaPass": false,
+    "fullyTransparentFraction": 0.11398802937458188,
+    "discardedAlphaFraction": 0.46623245804812163,
+    "alphaDiscard": 8,
+    "frameCount": 16,
+    "sourcePixelsUnmodified": true,
+    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "runtimeActivated": true,
+    "renderedPaddingPass": true,
+    "virtualPaddingPx": 64,
+    "sourcePreview": {
+      "loaded": true,
+      "inspection": "sampled source playback plus complete atlas visual review",
+      "alphaDiscard": 8,
+      "actorBodyRulerM": 0.5,
+      "arenaCalibrationVerified": false
+    },
+    "integratedBrowserSample": true,
+    "integratedViewport": [
+      1920,
+      1080
+    ]
+  },
+  {
+    "id": "attack.firestorm",
+    "status": "PASS",
+    "errors": [],
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "sourceSeparatorsClear": true,
+    "sourcePerimeterClear": true,
+    "rawPerimeterAlphaPass": false,
+    "fullyTransparentFraction": 0.42955238611244656,
+    "discardedAlphaFraction": 0.30885536299789634,
+    "alphaDiscard": 8,
+    "frameCount": 16,
+    "sourcePixelsUnmodified": true,
+    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "runtimeActivated": true,
+    "renderedPaddingPass": true,
+    "virtualPaddingPx": 64,
+    "sourcePreview": {
+      "loaded": true,
+      "inspection": "sampled source playback plus complete atlas visual review",
+      "alphaDiscard": 8,
+      "actorBodyRulerM": 0.5,
+      "arenaCalibrationVerified": false
+    },
+    "integratedBrowserSample": false
+  },
+  {
+    "id": "attack.sand_storm",
+    "status": "PASS",
+    "errors": [],
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "sourceSeparatorsClear": true,
+    "sourcePerimeterClear": true,
+    "rawPerimeterAlphaPass": false,
+    "fullyTransparentFraction": 0.38074843117653495,
+    "discardedAlphaFraction": 0.314417150604509,
+    "alphaDiscard": 8,
+    "frameCount": 16,
+    "sourcePixelsUnmodified": true,
+    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "runtimeActivated": true,
+    "renderedPaddingPass": true,
+    "virtualPaddingPx": 64,
+    "sourcePreview": {
+      "loaded": true,
+      "inspection": "sampled source playback plus complete atlas visual review",
+      "alphaDiscard": 8,
+      "actorBodyRulerM": 0.5,
+      "arenaCalibrationVerified": false
+    },
+    "integratedBrowserSample": false
+  },
+  {
+    "id": "attack.void_blast",
+    "status": "PASS",
+    "errors": [],
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "sourceSeparatorsClear": true,
+    "sourcePerimeterClear": true,
+    "rawPerimeterAlphaPass": false,
+    "fullyTransparentFraction": 0.6917532158655302,
+    "discardedAlphaFraction": 0.07809968229258081,
+    "alphaDiscard": 8,
+    "frameCount": 16,
+    "sourcePixelsUnmodified": true,
+    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "runtimeActivated": true,
+    "renderedPaddingPass": true,
+    "virtualPaddingPx": 64,
+    "sourcePreview": {
+      "loaded": true,
+      "inspection": "sampled source playback plus complete atlas visual review",
+      "alphaDiscard": 8,
+      "actorBodyRulerM": 0.5,
+      "arenaCalibrationVerified": false
+    },
+    "integratedBrowserSample": false
+  },
+  {
+    "id": "attack.ground_slam",
+    "status": "PASS",
+    "errors": [],
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "sourceSeparatorsClear": true,
+    "sourcePerimeterClear": true,
+    "rawPerimeterAlphaPass": false,
+    "fullyTransparentFraction": 0.6208203922885364,
+    "discardedAlphaFraction": 0.076196363025877,
+    "alphaDiscard": 8,
+    "frameCount": 16,
+    "sourcePixelsUnmodified": true,
+    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "runtimeActivated": true,
+    "renderedPaddingPass": true,
+    "virtualPaddingPx": 64,
+    "sourcePreview": {
+      "loaded": true,
+      "inspection": "sampled source playback plus complete atlas visual review",
+      "alphaDiscard": 8,
+      "actorBodyRulerM": 0.5,
+      "arenaCalibrationVerified": false
+    },
+    "integratedBrowserSample": true,
+    "integratedViewport": [
+      1920,
+      1080
+    ]
+  },
+  {
+    "id": "attack.earth_shock",
+    "status": "PASS",
+    "errors": [],
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "sourceSeparatorsClear": true,
+    "sourcePerimeterClear": true,
+    "rawPerimeterAlphaPass": false,
+    "fullyTransparentFraction": 0.5510945516611596,
+    "discardedAlphaFraction": 0.19441264826558202,
+    "alphaDiscard": 8,
+    "frameCount": 16,
+    "sourcePixelsUnmodified": true,
+    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "runtimeActivated": true,
+    "renderedPaddingPass": true,
+    "virtualPaddingPx": 64,
+    "sourcePreview": {
+      "loaded": true,
+      "inspection": "sampled source playback plus complete atlas visual review",
+      "alphaDiscard": 8,
+      "actorBodyRulerM": 0.5,
+      "arenaCalibrationVerified": false
+    },
+    "integratedBrowserSample": false
+  },
+  {
+    "id": "attack.shatter",
+    "status": "PASS",
+    "errors": [],
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "sourceSeparatorsClear": true,
+    "sourcePerimeterClear": true,
+    "rawPerimeterAlphaPass": false,
+    "fullyTransparentFraction": 0.48619727875582824,
+    "discardedAlphaFraction": 0.22622281744669054,
+    "alphaDiscard": 8,
+    "frameCount": 16,
+    "sourcePixelsUnmodified": true,
+    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "runtimeActivated": true,
+    "renderedPaddingPass": true,
+    "virtualPaddingPx": 64,
+    "sourcePreview": {
+      "loaded": true,
+      "inspection": "sampled source playback plus complete atlas visual review",
+      "alphaDiscard": 8,
+      "actorBodyRulerM": 0.5,
+      "arenaCalibrationVerified": false
+    },
+    "integratedBrowserSample": false
+  },
+  {
+    "id": "attack.overload",
+    "status": "PASS",
+    "errors": [],
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "sourceSeparatorsClear": true,
+    "sourcePerimeterClear": true,
+    "rawPerimeterAlphaPass": false,
+    "fullyTransparentFraction": 0.377312536088663,
+    "discardedAlphaFraction": 0.2940682320561444,
+    "alphaDiscard": 8,
+    "frameCount": 16,
+    "sourcePixelsUnmodified": true,
+    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "runtimeActivated": true,
+    "renderedPaddingPass": true,
+    "virtualPaddingPx": 64,
+    "sourcePreview": {
+      "loaded": true,
+      "inspection": "sampled source playback plus complete atlas visual review",
+      "alphaDiscard": 8,
+      "actorBodyRulerM": 0.5,
+      "arenaCalibrationVerified": false
+    },
+    "integratedBrowserSample": false
+  },
+  {
+    "id": "attack.aftershock",
+    "status": "PASS",
+    "errors": [],
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "sourceSeparatorsClear": true,
+    "sourcePerimeterClear": true,
+    "rawPerimeterAlphaPass": false,
+    "fullyTransparentFraction": 0.48139287612971826,
+    "discardedAlphaFraction": 0.21814022877986616,
+    "alphaDiscard": 8,
+    "frameCount": 16,
+    "sourcePixelsUnmodified": true,
+    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "runtimeActivated": true,
+    "renderedPaddingPass": true,
+    "virtualPaddingPx": 64,
+    "sourcePreview": {
+      "loaded": true,
+      "inspection": "sampled source playback plus complete atlas visual review",
+      "alphaDiscard": 8,
+      "actorBodyRulerM": 0.5,
+      "arenaCalibrationVerified": false
+    },
+    "integratedBrowserSample": false
+  },
+  {
+    "id": "attack.venom_spray",
+    "status": "PASS",
+    "errors": [],
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "sourceSeparatorsClear": true,
+    "sourcePerimeterClear": true,
+    "rawPerimeterAlphaPass": false,
+    "fullyTransparentFraction": 0.5308461090380002,
+    "discardedAlphaFraction": 0.22677479911174195,
+    "alphaDiscard": 8,
+    "frameCount": 16,
+    "sourcePixelsUnmodified": true,
+    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "runtimeActivated": true,
+    "renderedPaddingPass": true,
+    "virtualPaddingPx": 64,
+    "sourcePreview": {
+      "loaded": true,
+      "inspection": "sampled source playback plus complete atlas visual review",
+      "alphaDiscard": 8,
+      "actorBodyRulerM": 0.5,
+      "arenaCalibrationVerified": false
+    },
+    "integratedBrowserSample": true,
+    "integratedViewport": [
+      1920,
+      1080
+    ]
+  },
+  {
+    "id": "attack.cleave",
+    "status": "PASS",
+    "errors": [],
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "sourceSeparatorsClear": true,
+    "sourcePerimeterClear": true,
+    "rawPerimeterAlphaPass": false,
+    "fullyTransparentFraction": 0.5596286460678301,
+    "discardedAlphaFraction": 0.25115038575124193,
+    "alphaDiscard": 8,
+    "frameCount": 16,
+    "sourcePixelsUnmodified": true,
+    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "runtimeActivated": true,
+    "renderedPaddingPass": true,
+    "virtualPaddingPx": 64,
+    "sourcePreview": {
+      "loaded": true,
+      "inspection": "sampled source playback plus complete atlas visual review",
+      "alphaDiscard": 8,
+      "actorBodyRulerM": 0.5,
+      "arenaCalibrationVerified": false
+    },
+    "integratedBrowserSample": false
+  },
+  {
+    "id": "attack.whirlwind",
+    "status": "PASS",
+    "errors": [],
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "sourceSeparatorsClear": true,
+    "sourcePerimeterClear": true,
+    "rawPerimeterAlphaPass": false,
+    "fullyTransparentFraction": 0.2725911850817416,
+    "discardedAlphaFraction": 0.27741593726232355,
+    "alphaDiscard": 8,
+    "frameCount": 16,
+    "sourcePixelsUnmodified": true,
+    "renderedPaddingPass": true,
+    "virtualPaddingPx": 64,
+    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "runtimeActivated": true,
+    "sourcePreview": {
+      "loaded": true,
+      "inspection": "sampled source playback plus complete atlas visual review",
+      "alphaDiscard": 8,
+      "actorBodyRulerM": 0.5,
+      "arenaCalibrationVerified": false
+    },
+    "integratedBrowserSample": false
+  },
+  {
+    "id": "attack.arrow_shower",
+    "status": "PASS",
+    "errors": [],
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "sourceSeparatorsClear": true,
+    "sourcePerimeterClear": true,
+    "rawPerimeterAlphaPass": false,
+    "fullyTransparentFraction": 0.903189538294046,
+    "discardedAlphaFraction": 0.05138071727092125,
+    "alphaDiscard": 8,
+    "frameCount": 16,
+    "sourcePixelsUnmodified": true,
+    "renderedPaddingPass": true,
+    "virtualPaddingPx": 64,
+    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "runtimeActivated": true,
+    "sourcePreview": {
+      "loaded": true,
+      "inspection": "sampled source playback plus complete atlas visual review",
+      "alphaDiscard": 8,
+      "actorBodyRulerM": 0.5,
+      "arenaCalibrationVerified": false
+    },
+    "integratedBrowserSample": true,
+    "integratedViewport": [
+      1920,
+      1080
+    ]
+  }
+]

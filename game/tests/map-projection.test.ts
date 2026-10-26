@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createMapProjection, MAP_CAMERA, mapUprightAt, projectedHex, projectMapBounds, projectMapPoint } from '../src/ui/map-projection';
+import { createMapProjection, MAP_CAMERA, mapUprightAt, projectedHex, projectMapBounds, projectMapPoint } from '../src/ui/map/map-projection';
 
 describe('tabletop projection', () => {
   it.each([0, 45, 90, 180, 270, 360])('keeps artwork vertical while the ground orbits to %s degrees', bearing => {

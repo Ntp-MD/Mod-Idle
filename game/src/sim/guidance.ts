@@ -154,10 +154,6 @@ export function setTrackedGoal(state: GameState, ref: GoalRef | null): void {
   state.guidance.tracked = ref;
 }
 
-export function isTracking(state: GameState, ref: GoalRef): boolean {
-  return JSON.stringify(state.guidance?.tracked ?? null) === JSON.stringify(ref);
-}
-
 /** The goal the Journey card shows: the player's pin, or the first automatic suggestion. */
 export function nextGoal(state: GameState): { view: GoalView; source: 'tracked' | 'recommended' } | null {
   const tracked = state.guidance?.tracked;

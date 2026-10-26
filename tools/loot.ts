@@ -26,7 +26,7 @@ import { createLoot } from '../engine/loot.ts';
  * The one thing this tool decides (and records) is the operational meaning of the
  * filter rule "better than the equipped piece on at least 1 axis": an item scores
  * Σ weight(line) × value ÷ Total, and it is kept when it outscores the equipped piece
- * in the same slot. See `scoring` below — the doc prints the same sentence.
+ * in the same slot. The doc prints the same sentence.
  */
 
 const MODS = readJson(path.join(import.meta.dirname, 'data', 'mods.json'));
@@ -182,49 +182,6 @@ function biasExperiment() {
 }
 
 // ---------------------------------------------------------------- generated block
-
-const scoring = 'An item scores the sum of `weight(line) x value / Total` over its own Mod lines, and the filter keeps it when it outscores the piece equipped in the same slot — that is the operational reading of "better on at least 1 axis" (loot.md section 4). A second, weaker keep reason survives: Elemental lines of an Element the player has no resistance for are always kept, so hunting a new Element still pays.';
-
-function block(rows: any, bias: any) {
-  const n = (x: any, d = 2) => x.toFixed(d);
-  const per1000 = (r: any) => (r.perHr / BAND[r.band].drops_per_hr) * 1000;
-  return [
-    '| Zone | Drops 1/14 | 2/14 | 3/14 | 4/14 | 6/14 | 12/14 | Total upgrades | Keep-rate of drops | Upgrades per 1,000 drops | Avg score per equipped piece |',
-    '|---|---|---|---|---|---|---|---|---|---|---|',
-    ...rows.map((r: any) => {
-      const at = (h: any) => n(r.hourUp[h - 1]);
-      return `| ${r.band.replace('_', ' + ')} | ${at(1)} | ${at(2)} | ${at(3)} | ${at(4)} | ${at(6)} | ${at(12)} | ${n(r.upgrades, 0)} | **${n(r.keepRate)}%** | ${n(per1000(r), 1)} | ${n(r.avgScore)} |`;
-    }),
-    '',
-    `Measured by \`node tools/loot.ts --sim\` · each band's own drop count per run x ${TRIALS} seeds, no clock — the six windows are shares of that drop count, never hours (D12). Drop rate and Lck from \`engine.json\` \`loot\`, Mod ranges from \`mods.json\`, Mod weights from \`engine.json\` \`mod_weights\`, Base frames and the Gear Mod school from \`item-base.md\`.`,
-    '',
-    `**${scoring}**`,
-    '',
-    `- Flat lines per drop: ${rows.map((r: any) => `${n(r.flatPerDrop, 3)} (${r.band.replace('_', ' + ')})`).join(' · ')} — the four early-game Flat lines are weighted 0.5 / 0.4 / 0.25 by Item quality, so they thin out exactly as the player leaves the early zones (F11)`,
-    `- Mod lines per item: ${rows.map((r: any) => n(r.linesPerItem)).join(' · ')} · Element-hunt keeps: ${rows.map((r: any) => n(r.elementKeeps, 1)).join(' · ')}`,
-    `- Keep-rate spread across seeds: ${rows.map((r: any) => `±${n(r.keepSd)}% (${r.band.replace('_', ' + ')})`).join(' · ')} — the row above is the mean, not a single lucky run`,
-    '',
-    `**Swap margin sensitivity** — the filter keeps a drop only when it beats the equipped piece by more than \`loot.filter.upgrade_margin_pct\` = ${L.filter.upgrade_margin_pct}% (a 2% gain is a reroll, not a decision):`,
-    '',
-    '| Zone | 0% (any gain counts) | set margin | 2x margin |',
-    '|---|---|---|---|',
-    ...rows.map((r: any) => {
-      const zero = measureBand(r.band, { margin: 0, trials: 4 }).keepRate;
-      const dbl = measureBand(r.band, { margin: (L.filter.upgrade_margin_pct * 2) / 100, trials: 4 }).keepRate;
-      return `| ${r.band.replace('_', ' + ')} | ${zero.toFixed(2)}% | **${r.keepRate.toFixed(2)}%** | ${dbl.toFixed(2)}% |`;
-    }),
-    '',
-    `The published keep-rates for this design (5.1% / 4.4% / 3.1% / 1.1% of drops) sit on the set-margin column, which is the evidence that the filter always meant this and the earlier numbers were measured the same way. The re-base cut the drop flow ~3x, so the same decisions are now a larger share of a smaller drop count — the rule is unchanged, the published rates are re-derived.`,
-    '',
-    '**Base bias, measured (checks.md T15)**',
-    '',
-    '| Scenario | Keep-rate | Upgrades per 1,000 drops | Avg score |',
-    '|---|---|---|---|',
-    ...bias.map((b: any) => `| ${b.label} | ${b.keepRate.toFixed(2)}% | ${(b.perHr / BAND.high.drops_per_hr * 1000).toFixed(1)} | ${b.avgScore.toFixed(2)} |`),
-    '',
-    'A settlement that rolls one school more often does move the measured rows, so a Base weight is not free — which is why `town.json` carries no frame weight while the status is pending. The pipeline above is bias-ready: add `frame_weight` and re-run.',
-  ].join('\n');
-}
 
 // ---------------------------------------------------------------- engine.json hand-back
 

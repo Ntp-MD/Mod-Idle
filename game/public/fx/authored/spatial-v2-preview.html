@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spatial VFX v2 — source art review</title>
+<style>
+body{margin:24px;background:#111a1b;color:#e4eadf;font:16px/1.5 system-ui}main{max-width:1400px;margin:auto}h1{font-size:24px;margin:0 0 8px}p{max-width:1000px;color:#b3c4bd}button,select,input{font:inherit;padding:7px;margin:4px;color:inherit;background:#22312d;border:1px solid #607568;border-radius:4px}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #e2ba62;outline-offset:2px}canvas{display:block;width:100%;height:auto;background:#283d31;border:1px solid #607568;margin:16px 0}a{color:#b2d5ff}output{font-variant-numeric:tabular-nums}#error{color:#ffb4a4}
+</style>
+<main>
+<h1>Spatial VFX v2 — source art review</h1>
+<p>0.5m actor-body ruler. A 6m field spans twelve body widths. This viewer checks source animation and relative size; ground anchors, camera projection and gameplay timing still require integration in the arena.</p>
+<label>Skill <select id="skill" aria-label="Skill"></select></label>
+<button id="play" type="button">Pause</button>
+<label>Stage <select id="stage"><option value="all">Full sequence</option><option value="active">Active loop</option></select></label>
+<label>Frame <input id="frame" type="range" min="0" max="15" value="0"></label>
+<output id="status"></output>
+<canvas id="view" width="1200" height="640" role="img" aria-label="Animated source VFX with a half-meter actor-body ruler"></canvas>
+<p id="links"></p><p id="error" role="alert"></p>
+</main>
+<script type="module">
+const manifest=await fetch('./spatial-v2-manifest.json').then(r=>{if(!r.ok)throw Error('Cannot load art manifest');return r.json()});
+const select=document.querySelector('#skill'),play=document.querySelector('#play'),stage=document.querySelector('#stage'),scrub=document.querySelector('#frame'),status=document.querySelector('#status'),canvas=document.querySelector('#view'),ctx=canvas.getContext('2d');
+const entries=Object.entries(manifest.entries),cache=new Map();let current=null,index=0,running=!matchMedia('(prefers-reduced-motion: reduce)').matches,last=0,selection=0;
+for(const [id] of entries){const option=document.createElement('option');option.value=id;option.textContent=id;select.append(option)}
+const actor=new Image();actor.src='/combat/arpg/pixel-v2/player-animation-v2.png';
+// Reference crop from player-animation-v2.json; 70 source pixels span the hood/body, excluding equipment.
+const actorFrame={x:54,y:72,width:115,height:142};
+function loadImage(src){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(Error('Cannot load '+src));image.src=src})}
+async function choose(){const request=++selection,id=select.value,meta=manifest.entries[id];if(!cache.has(id)){const image=await loadImage(meta.src),surface=document.createElement('canvas');surface.width=image.naturalWidth;surface.height=image.naturalHeight;const c=surface.getContext('2d');c.drawImage(image,0,0);const pixels=c.getImageData(0,0,surface.width,surface.height);for(let i=3;i<pixels.data.length;i+=4)if(pixels.data[i]<=meta.alphaDiscard)pixels.data[i]=0;c.putImageData(pixels,0,0);cache.set(id,{meta,surface})}if(request!==selection)return;current=cache.get(id);index=stage.value==='active'?4:0;last=0;document.querySelector('#links').innerHTML=`<a href="${meta.src}">Original transparent atlas</a> · <a href="${meta.src.replace('atlas.png','meta.json')}">Measured source rectangles</a> · <a href="${meta.src.replace('atlas.png','qa.json')}">Source QA</a>`;draw()}
+function draw(){if(!current)return;const {meta,surface}=current,frame=meta.frames[index],ppm=64,bodyWidth=ppm*.5,span=meta.authoringGeometry.spanM,fieldWidth=span*ppm,maxArtWidth=meta.contentWidthRatio*meta.virtualWidth,scale=fieldWidth/maxArtWidth,cx=740,ground=460;
+ctx.clearRect(0,0,1200,640);ctx.imageSmoothingEnabled=false;ctx.strokeStyle='#476451';ctx.lineWidth=1;for(let x=0;x<1200;x+=ppm){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,640);ctx.stroke()}for(let y=0;y<640;y+=ppm){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(1200,y);ctx.stroke()}
+ctx.fillStyle='#d9e5d6';ctx.font='17px system-ui';ctx.fillText(meta.id,28,35);ctx.fillText(`Source span ${span.toFixed(2)}m = ${(span/.5).toFixed(2)} body widths`,28,65);ctx.fillStyle='#a9bcb1';ctx.fillText('Grid: 1m reference spacing · source-only scale comparison',28,93);
+const cone=meta.composition==='whole-sector',anchorY=meta.composition==='projectile-component' ? .5 : cone ? .91 : .72;
+const [sx,sy,sw,sh]=frame.rect;ctx.drawImage(surface,sx,sy,sw,sh,cx-meta.virtualWidth*scale*.5+frame.offsetX*scale,ground-(64+meta.cellHeight*anchorY)*scale+frame.offsetY*scale,sw*scale,sh*scale);
+ctx.strokeStyle='#f2ce76';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx-fieldWidth/2,550);ctx.lineTo(cx+fieldWidth/2,550);ctx.moveTo(cx-fieldWidth/2,544);ctx.lineTo(cx-fieldWidth/2,556);ctx.moveTo(cx+fieldWidth/2,544);ctx.lineTo(cx+fieldWidth/2,556);ctx.stroke();ctx.fillStyle='#f2ce76';ctx.fillText(`${span.toFixed(2)}m authored span`,cx-fieldWidth/2,584);
+if(actor.complete&&actor.naturalWidth){const f=actorFrame,actorScale=bodyWidth/70;ctx.drawImage(actor,f.x,f.y,f.width,f.height,195-f.width*actorScale/2,460-f.height*actorScale,f.width*actorScale,f.height*actorScale)}
+ctx.beginPath();ctx.moveTo(195-bodyWidth/2,480);ctx.lineTo(195+bodyWidth/2,480);ctx.stroke();ctx.fillText('0.5m body ruler',135,515);ctx.fillStyle='#b5c5bb';ctx.font='14px system-ui';ctx.fillText('Equipment can extend past the body ruler.',60,542);ctx.fillText('Source anchors are provisional, not live arena placement.',28,615);
+scrub.value=index;status.textContent=`Frame ${index} / 15 · ${meta.frameMs}ms per source frame`;play.textContent=running?'Pause':'Play'}
+select.onchange=()=>choose().catch(fail);stage.onchange=()=>{index=stage.value==='active'?4:0;draw()};play.onclick=()=>{running=!running;draw()};scrub.oninput=()=>{running=false;index=Number(scrub.value);draw()};
+function fail(error){document.querySelector('#error').textContent=error.message;running=false}
+function tick(t){if(running&&current&&t-last>=current.meta.frameMs){const a=stage.value==='active'?4:0,b=stage.value==='active'?11:15;index=index<a||index>=b?a:index+1;last=t;draw()}requestAnimationFrame(tick)}
+actor.onload=draw;await choose().catch(fail);draw();requestAnimationFrame(tick);
+</script>
+</html>

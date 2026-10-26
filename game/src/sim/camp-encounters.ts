@@ -5,7 +5,7 @@ import { currentCell, startWalk, zoneOf } from './road';
 import { surveyMapAround } from './map-exploration';
 import { settlementById, settlementOfZone } from './town';
 import type { GameState, Mob, Cell } from './types';
-import type { CampEncounterActive, CampEncounterKind, CampEncounterPolicy } from './fieldwork';
+import type { CampEncounterActive, CampEncounterKind } from './fieldwork';
 export type { CampEncounterPolicy } from './fieldwork';
 
 const CFG = E.fieldwork.camp_encounters;

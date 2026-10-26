@@ -1,69 +1,91 @@
 <script lang="ts">
-  import QuestBonusPicker from './ui/QuestBonusPicker.svelte';
+  import QuestBonusPicker from './ui/town/QuestBonusPicker.svelte';
   import type { TaskSlot } from './sim/types';
   import { taskBonuses, resolveQuestBonus } from './sim/quest-rewards';
-  import { questBonusText } from './ui/quest-rewards';
+  import { questBonusText } from './ui/town/quest-rewards';
   import { rollTask } from './sim/town';
-  import { onDestroy, onMount, untrack } from 'svelte';
-  import { cubicOut, linear } from 'svelte/easing';
+  import { onDestroy, onMount, setContext, untrack } from 'svelte';
+  import { linear } from 'svelte/easing';
   import { prefersReducedMotion, Tween } from 'svelte/motion';
   import { eng, E, sm, TOWN, tree, loot, fieldwork, trade } from './engine/client';
+  import { MOB_DRAFT_VARIANT_QA_PASS_METADATA_PATHS } from './ui/dev/arena-art/arena-art-mob-drafts-qa-pass';
+  import { bundleOf } from '../../engine/keystones.ts';
 import { fieldSite, campHere as atFieldCamp, establishCamp, leaveCamp, returnToCamp, startFieldAction, stopFieldAction, cookMeal, eatMeal } from './sim/fieldwork';
 import { cancelCampEncounter, chooseCampEncounter, setCampEncounterPolicy, type CampEncounterAction, type CampEncounterPolicy } from './sim/camp-encounters';
   import { sellGoods, processMaterials, tradeBucket } from './sim/trade';
 import { offerDelivery, deliver, trackDelivery, acknowledgeDelivery, announceDelivery, tickDeliveries, contractById, deliveryTimeLeft, deliveryPauseReason } from './sim/delivery';
 import { buyBlackMarket } from './sim/black-market';
-  import DeliveryNotice from './ui/DeliveryNotice.svelte';
+  import DeliveryNotice from './ui/town/DeliveryNotice.svelte';
   import { previewScrapAlchemy, transmuteScrap, alchemyTierProgress } from './sim/alchemy';
-  import { newGame, setLevel, tick, push, fx, hitColour, catchUpAsync, schedulerBatch, WAKE_SEC, characterSheet, heldWeaponName, huntZone, huntHere, salvageBag, retreatDungeon, runFilterNow, isBossKind, spawnMob } from './sim/game';
+  import { newGame, setLevel, tick, push, fx, hitColour, catchUpAsync, schedulerBatch, WAKE_SEC, characterSheet, huntZone, huntHere, salvageBag, retreatDungeon, runFilterNow, isBossKind, spawnMob } from './sim/game';
+  import { restorePendingWork } from './sim/pending-work';
+  import { restoreFieldPositions } from './sim/field-area';
+  import type { ManualControl } from './sim/combat-actions';
   import { mobSkillById } from './sim/mobSkills';
   import { rollDrop } from './sim/drop';
-  import { reservedPct, hpReservedPct, auraResonanceOf, auraPoolOf, setAuraPool, hpReserved, usableHp, usableMana, skillCd, skillLevel, ladderOf, effectsActive, toggleTrack, effectLine, describeFold, EFFECT_LABEL, ACTIVE_SLOTS, costNow, modeOf, condOf, appliedStatusOf, appliedCurseOf, moveSlot } from './sim/skills';
-  import { modsOn, psMult, curableRows } from './sim/curse';
-  import { statusLabel } from './sim/mobStatus';
-  import { slotsUsed, slotsAvailable, slotsFree, pouchSlots, bagStacks } from './sim/slots';
-  import SlotGrid from './ui/SlotGrid.svelte';
-  import StatAllocator from './ui/StatAllocator.svelte';
-  import Panel from './ui/Panel.svelte';
-  import CountBadge from './ui/CountBadge.svelte';
-  import Quickbar from './ui/Quickbar.svelte';
-  import HudLayoutEditor from './ui/HudLayoutEditor.svelte';
-  import { copyHudLayout, DEFAULT_MODAL_AREA, gridAreaCss, hudGridTemplate, HUD_LAYOUT_STORAGE_KEY, HUD_LAYOUT_PREVIOUS_STORAGE_KEYS, HUD_LAYOUT_VERSION, migrateHudLayout, regionStyleCss, salvageHudLayout, validGridArea, validateHudLayout, type GridArea, type HudLayout, type HudRegionId } from './ui/hud-layout';
-  import TravelCard from './ui/TravelCard.svelte';
-  import MapJourney from './ui/MapJourney.svelte';
-  import { destinationIntel } from './ui/map-intel';
+  import { reservedPct, setAuraPool, hpReserved, usableHp, usableMana, skillCd, toggleTrack, ACTIVE_SLOTS, modeOf, condOf, appliedStatusOf, appliedCurseOf, moveSlot } from './sim/skills';
+  import { describeSkill } from './sim/skill-copy';
+  import { slotsUsed, slotsAvailable, slotsFree, bagStacks } from './sim/slots';
+  import SlotGrid from './ui/inventory/SlotGrid.svelte';
+  import StatAllocator from './ui/character/StatAllocator.svelte';
+  import Panel from './ui/hud/Panel.svelte';
+  import { PANEL_SESSION, type PanelSession } from './ui/hud/panel-session';
+  import CombatHistory from './ui/combat/CombatHistory.svelte';
+  import EnemyInspector from './ui/combat/EnemyInspector.svelte';
+  import type { EnemySnapshot } from './sim/combat-history';
+  import { refreshSelectionAfterRepair, resolveItemSelection, type ItemSelection } from './ui/inventory/item-selection';
+  import { captureCharacterUiSnapshot, emptyCharacterUiSnapshot, restoreCharacterUiSnapshot, type CharacterUiSnapshot } from './ui/character/character-ui-session';
+  import CountBadge from './ui/shared/CountBadge.svelte';
+  import Quickbar from './ui/hud/Quickbar.svelte';
+  import ActiveBuffs from './ui/hud/ActiveBuffs.svelte';
+  import HudLayoutEditor from './ui/hud/HudLayoutEditor.svelte';
+  import { copyHudLayout, DEFAULT_MODAL_AREA, gridAreaCss, hudGridTemplate, HUD_LAYOUT_STORAGE_KEY, HUD_LAYOUT_PREVIOUS_STORAGE_KEYS, HUD_LAYOUT_VERSION, migrateHudLayout, regionStyleCss, salvageHudLayout, validGridArea, validateHudLayout, type GridArea, type HudLayout, type HudRegionId } from './ui/hud/hud-layout';
+  import TravelCard from './ui/map/TravelCard.svelte';
+  import MapJourney from './ui/map/MapJourney.svelte';
+  import { destinationIntel } from './ui/map/map-intel';
   import { investigateTrailSite, recordMapDiscovery } from './sim/map-exploration';
   import { movePatrolStop } from './sim/exploration';
-  import { destinationPrimary } from './ui/destination';
-  import TownHub from './ui/TownHub.svelte';
-  import Market from './ui/Market.svelte';
-  import CraftWorkshop from './ui/CraftWorkshop.svelte';
-  import GearCare from './ui/GearCare.svelte';
-  import Forge from './ui/Forge.svelte';
-  import FieldworkBoard from './ui/FieldworkBoard.svelte';
-  import PassiveTreeBoard from './ui/PassiveTreeBoard.svelte';
-  import StashBoard from './ui/StashBoard.svelte';
-  import KeybindTable from './ui/KeybindTable.svelte';
-  import CollapseToggle from './ui/CollapseToggle.svelte';
-  import Tabs from './ui/Tabs.svelte';
-  import { KEYBINDS, bindTable, actionFor, tokenOf, isModifierKey, isTypingTarget, formatKey } from './ui/keybinds';
-  import { gearEntry, stackEntry, sortEntries, type SlotEntry, type SortKey } from './ui/bag';
-  import type { MenuItem } from './ui/menu';
-  import { ramp, cellLabel, paintSheet, paintMapNames, paintMapHover, type Picked } from './ui/map';
-  import { mapTravelPhase } from './ui/map-travel';
-  import { clampMapPan, composeMapMatrix, mapBearingDegrees, mapTurnTo, orbitMapPan, transformMapPoint } from './ui/map-camera';
-  import { createMapProjection } from './ui/map-projection';
-  import { paintMapScene } from './ui/map-scene';
-  import { adventureView, uniqueTraceSpecies, type AdventureCell } from './ui/map-adventure';
-  import { mapMarker } from './ui/map-markers';
-  import { setCastDrag, readCastDrag } from './ui/drag';
-  import { snapCounters, buildAwayReport, fieldLabel, describeSnap } from './ui/hud';
-  import { bar } from './ui/field';
-  import { fxOut } from './ui/motion';
-  import FieldPlates from './ui/FieldPlates.svelte';
-  import LogBox from './ui/LogBox.svelte';
-  import ObjectiveFeed from './ui/ObjectiveFeed.svelte';
-  import { feedEventsAfter } from './ui/logbox';
+  import { destinationPrimary } from './ui/map/destination';
+  import TownHub from './ui/town/TownHub.svelte';
+  import Market from './ui/town/Market.svelte';
+  import CraftWorkshop from './ui/inventory/CraftWorkshop.svelte';
+  import { newCraftWorkbenchView } from './ui/inventory/craft-workbench';
+  import GearCare from './ui/inventory/GearCare.svelte';
+  import ProgressRecap from './ui/hud/ProgressRecap.svelte';
+  import JourneyNotices from './ui/hud/JourneyNotices.svelte';
+  import SkillDiscovery from './ui/character/SkillDiscovery.svelte';
+  import SkillsWorkbench, { newSkillsWorkbenchView } from './ui/character/SkillsWorkbench.svelte';
+  import { skillEligibilityInState } from './sim/skills';
+  import { importantCombatEvent } from './ui/combat/combat-presentation';
+  import { newPassiveTreeSession } from './ui/passive-tree/passive-tree-view';
+  import Forge from './ui/inventory/Forge.svelte';
+  import FieldworkBoard from './ui/map/FieldworkBoard.svelte';
+  import PassiveTreeBoard from './ui/passive-tree/PassiveTreeBoard.svelte';
+  import StashBoard from './ui/inventory/StashBoard.svelte';
+  import KeybindTable from './ui/hud/KeybindTable.svelte';
+  import CollapseToggle from './ui/shared/CollapseToggle.svelte';
+  import Tabs from './ui/shared/Tabs.svelte';
+  import { KEYBINDS, bindTable, actionFor, tokenOf, isModifierKey, isTypingTarget, formatKey } from './ui/hud/keybinds';
+  import { gearEntry, stackEntry, sortEntries, type SlotEntry, type SortKey } from './ui/inventory/bag';
+  import type { MenuItem } from './ui/shared/menu';
+  import { ramp, cellLabel, paintSheet, paintMapNames, paintMapHover, type Picked } from './ui/map/map';
+  import { mapTravelPhase } from './ui/map/map-travel';
+  import { clampMapPan, composeMapMatrix, mapBearingDegrees, mapTurnTo, orbitMapPan, transformMapPoint } from './ui/map/map-camera';
+  import { createMapProjection } from './ui/map/map-projection';
+  import { paintMapScene } from './ui/map/map-scene';
+  import { adventureView, uniqueTraceSpecies, type AdventureCell } from './ui/map/map-adventure';
+  import { mapMarker } from './ui/map/map-markers';
+  import { setCastDrag, readCastDrag } from './ui/shared/drag';
+  import { snapCounters, buildAwayReport, fieldLabel, describeSnap, type AwayReport } from './ui/hud/hud';
+  import { bar } from './ui/shared/field';
+  import { fxOut } from './ui/shared/motion';
+  import FieldPlates from './ui/combat/FieldPlates.svelte';
+  import CombatArenaScene from './ui/combat/CombatArenaScene.svelte';
+  import { createCombatArena, syncCombatArena, arenaSkillTargets } from './sim/combat-arena';
+  import { snapshotEnemy } from './sim/combat-history';
+  import LogBox from './ui/hud/LogBox.svelte';
+  import ObjectiveFeed from './ui/hud/ObjectiveFeed.svelte';
+  import { feedEventsAfter } from './ui/hud/logbox';
   import {
     settlementById, settlementOfZone, stockOf, priceGold, priceMinutes, canBuy, buy, sellJunk,
     standingProgress, canTravel, claimTask, npcOf, repairGear, skipTask, skipVerdict,
@@ -76,10 +98,10 @@ import { farm, farmLevel, farmMasteryLevel, plotCount, plant, harvest, craftPoti
 import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsFree } from './sim/tree';
   import { allocateStats, respecStats } from './sim/respec';
   import { CharacterSaveSession } from './state/saveSession';
-  import { road, startWalk, walkNote, walkBlocks, warpTo, warpCost, warpRow, cellBlocks, cellSec, currentCell, settlementCell, ownerOf } from './sim/road';
+  import { road, startWalk, walkNote, walkBlocks, warpTo, warpCost, cellBlocks, cellSec, currentCell, settlementCell, ownerOf } from './sim/road';
   import { clearPatrolStops, startPatrol as startPatrolRun, stopPatrol as stopPatrolRun, togglePatrolStop } from './sim/exploration';
   import { enterDungeon, cooldownLeft } from './sim/dungeon';
-  import { masteryLabel, masteryLevel, weaponSkillBonusPct, WEAPONS } from './sim/mastery';
+  import { mastery } from './sim/mastery';
   import { storePreset, switchPreset, bindZone } from './sim/presets';
   import { col, setUnlocked, heldCount, turnIn } from './sim/collector';
   import { mulberry32 } from './engine/client-helpers';
@@ -89,9 +111,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   import { equipFromBag, autoEquip, unequip } from './sim/gear';
   import { SAVE_CFG } from './sim/snapshot';
   import { lifeSkillMilestones } from './sim/goal';
-  import { nextGoal, resolveGoal, setTrackedGoal, zoneDestination, guidanceNotices, ACTIVITY_GUIDE, type GoalRef, type GoalView, type GuidanceNotice, type ShortageOrigin } from './sim/guidance';
+  import { nextGoal, setTrackedGoal, zoneDestination, guidanceNotices, ACTIVITY_GUIDE, type GoalRef, type GoalView, type GuidanceNotice, type ShortageOrigin } from './sim/guidance';
   import { hubIcon, icon, skillIcon } from './icon';
-  import { bossMark } from './icon';
   import chevronDownGlyph from './icon/ui/chevron-down.png';
   import pauseGlyph from './icon/ui/pause.png';
   import playGlyph from './icon/ui/play.png';
@@ -139,17 +160,159 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     { kind: 'resource', glyph: 'mine', label: 'Resource site' },
   ] as const;
   const showcaseMode = import.meta.env.DEV && window.location.pathname.replace(/\/+$/, '') === '/__showcase';
-  let showcaseSample = $state('delivery');
+  const showcaseQuery = new URLSearchParams(window.location.search);
+  const requestedShowcaseSample = showcaseQuery.get('sample');
+  /** Every Gameplay sample the showcase dropdown offers — deep links (?sample=) accept the same set. */
+  const SHOWCASE_SAMPLES = ['field', 'arpg-arena', 'build-workbench', 'progress-recap', 'core-field', 'core-town',
+    'offline-progress', 'delivery', 'choice', 'full-bag', 'fallback', 'expired', 'read-only', 'economy-lab',
+    'expedition', 'craft-stash', 'combat-fx', 'skill-fx', 'map-mine', 'map-adventure',
+    'map-camp-sounds', 'map-camp-prowler', 'map-camp-traveler', 'map-camp-nest', 'map-camp-herd',
+    'map-camp-injured', 'map-camp-discovered', 'map-camp-combat', 'map-camp-timeout', 'map-camp-full-bag',
+    'map-camp-readonly'] as const;
+  const initialShowcaseSample = showcaseMode
+    ? (requestedShowcaseSample && (SHOWCASE_SAMPLES as readonly string[]).includes(requestedShowcaseSample) ? requestedShowcaseSample : 'arpg-arena')
+    : 'delivery';
+  const ARENA_MOB_SPECIES = ['goblin', 'orc', 'kobold', 'ogre', 'troll', 'minotaur', 'skeleton', 'mummy', 'vampire', 'demon',
+    'slime', 'golem', 'dragon', 'treant', 'human', 'lizardman', 'elf', 'giant', 'werewolf', 'dryad'] as const;
+  const ARENA_EXISTING_PREVIEW_SPECIES = ['wolf', 'spider', 'wisp', 'spear-goblin', 'imp', 'skeleton-sword', 'stone-golem',
+    'skeleton-bone', 'crypt-wraith', 'shadow-wolf', 'eclipse-wisp', 'pixiblop-spider'] as const;
+  const ARENA_VARIANT_QA_PASS_PATHS = new Set<string>(MOB_DRAFT_VARIANT_QA_PASS_METADATA_PATHS);
+  const ARENA_VARIANT_GROUPS = Object.entries(E.mob.variants as Record<string, { name: string }[]>).map(([speciesId, variants]) => ({
+    speciesId,
+    speciesName: eng.speciesById(speciesId).name,
+    variants: variants.map(({ name }) => ({
+      name,
+      variantId: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+    })).filter(({ variantId }) => ARENA_VARIANT_QA_PASS_PATHS.has(
+      `art-reference/monsters/${speciesId}/variants/${variantId}/meta.json`,
+    )),
+  })).filter(group => group.variants.length > 0);
+  const ARENA_VARIANT_SPECIES_ALREADY_LISTED = new Set<string>([...ARENA_MOB_SPECIES, ...ARENA_EXISTING_PREVIEW_SPECIES]);
+  const ARENA_ADDITIONAL_VARIANT_SPECIES = ARENA_VARIANT_GROUPS
+    .filter(group => !ARENA_VARIANT_SPECIES_ALREADY_LISTED.has(group.speciesId));
+  const ARENA_VARIANT_PREVIEWS = ARENA_VARIANT_GROUPS.flatMap(({ speciesId, speciesName, variants }) => variants.map(variant => ({
+    ...variant,
+    speciesId,
+    speciesName,
+    key: `${speciesId}/${variant.variantId}`,
+  })));
+  const ARENA_VARIANT_PREVIEW_BY_KEY = new Map(ARENA_VARIANT_PREVIEWS.map(variant => [variant.key, variant]));
+  const ARENA_SPRITE_SPECIES = [...ARENA_MOB_SPECIES, ...ARENA_ADDITIONAL_VARIANT_SPECIES.map(group => group.speciesId), ...ARENA_EXISTING_PREVIEW_SPECIES] as const;
+  /** A reference sheet is reviewed against the canonical body it stands in for. */
+  const ARENA_PREVIEW_SPAWN: Record<string, string> = {
+    'spear-goblin': 'goblin', 'skeleton-sword': 'skeleton', 'skeleton-bone': 'skeleton', 'crypt-wraith': 'wraith', 'shadow-wolf': 'wolf',
+    'eclipse-wisp': 'wisp', 'pixiblop-spider': 'spider', 'stone-golem': 'golem',
+  };
+  const requestedArenaSpecies = ARENA_SPRITE_SPECIES.find(id => id === showcaseQuery.get('sprite-species'));
+  const requestedArenaVariant = ARENA_VARIANT_PREVIEWS.find(variant => variant.key === showcaseQuery.get('sprite-variant'));
+  const spritePreviewMode = showcaseMode && (showcaseQuery.get('sprite-preview') === 'pixel-v2'
+    || requestedArenaSpecies !== undefined || requestedArenaVariant !== undefined);
+  let arenaSpecies = $state<string>(requestedArenaVariant?.speciesId ?? requestedArenaSpecies ?? 'skeleton');
+  let arenaVariantKey = $state<string | null>(requestedArenaVariant?.key ?? null);
+  const activeArenaVariant = $derived(ARENA_VARIANT_PREVIEW_BY_KEY.get(arenaVariantKey ?? '') ?? null);
+  const requestedArenaSkill = showcaseQuery.get('skill');
+  let arenaSkillId = $state(requestedArenaSkill && sm.byId[requestedArenaSkill] ? requestedArenaSkill : 'attack.fireball');
+  /** Deliberate local commands for the automatic farming loop. */
+  let arenaManual = $state<ManualControl>({});
+  /** The focused body shown by the arena and pinned by the sim. */
+  let arenaFocusId = $state<string | null>(null);
+  /** One uncommitted manual skill aim; a ground click confirms it. */
+  let arenaAimSkill = $state<string | null>(null);
+  function arenaLiving() { return gameState.group.filter((mob) => mob.hp > 0); }
+  function focusArenaEnemy(mobId?: string) {
+    if (!arenaMode || panel !== null) return;
+    const living = arenaLiving();
+    const next = mobId
+      ? living.find((mob) => mob.id === mobId)
+      : living[(living.findIndex((mob) => mob.id === arenaFocusId) + 1) % Math.max(1, living.length)];
+    arenaFocusId = next?.id ?? null;
+    combatArena.focusId = arenaFocusId ?? undefined;
+    arenaAimSkill = null;
+    arenaManual.cast = undefined;
+  }
+  function clearArenaFocus() {
+    arenaFocusId = null;
+    combatArena.focusId = undefined;
+    arenaAimSkill = null;
+    arenaManual.cast = undefined;
+  }
+  function toggleArenaAim() {
+    if (!arenaMode || panel !== null) return;
+    arenaAimSkill = arenaAimSkill ? null : arenaSkillId;
+    arenaManual.cast = undefined;
+    arenaManual.moveTo = undefined;
+  }
+  function castArenaAtFocus() {
+    if (!arenaMode || panel !== null || !sm.byId[arenaSkillId]) return;
+    arenaManual.cast = { skillId: arenaSkillId };
+    arenaManual.moveTo = undefined;
+    arenaAimSkill = null;
+  }
+  function issueArenaGroundCommand(point: { x: number; y: number }) {
+    if (!arenaMode || panel !== null) return;
+    if (arenaAimSkill) {
+      arenaManual.cast = { skillId: arenaAimSkill, point };
+      arenaAimSkill = null;
+    } else {
+      arenaManual.moveTo = point;
+    }
+  }
+  /** A dead focus releases the pin so sticky-nearest selection resumes. */
+  function syncArenaFocus() {
+    if (!arenaFocusId) return;
+    if (arenaLiving().some((mob) => mob.id === arenaFocusId)) return;
+    arenaFocusId = null;
+    combatArena.focusId = undefined;
+  }
+  let showcaseSample = $state(initialShowcaseSample);
+  /** One setup path for every Gameplay sample — the dropdown and deep links (?sample=) share it,
+   *  so a linked sample opens in the same state as a picked one. */
+  function applyShowcaseSample(value: string) {
+    clearCombatFxTimers();
+    animateCombatFx = false;
+    showcaseSample = value; gameState = showcaseGame(showcaseSample);
+    resetArena();
+    awayReport = null; skillDiscoveryId = null; skillRewardSeen = '';
+    feed = []; feedSeen = 0;
+    travelScene = false;
+    running = false;
+    if (showcaseSample === 'arpg-arena') running = true;
+    gameState.playerStatuses = showcaseSample === 'combat-fx' ? {
+      burn: { stacks: 1, secLeft: 8, perSec: 12 },
+      chill: { stacks: 1, secLeft: 10, perSec: 0 },
+      bleed: { stacks: 1, secLeft: 6, perSec: 8 },
+    } : {};
+    resetCharacterUi(); picked = null; pickedCell = null;
+    panel = showcaseSample === 'expedition' ? 'desk' : showcaseSample === 'craft-stash' ? 'craft' : showcaseSample === 'map-mine' || showcaseSample === 'map-adventure' || showcaseSample.startsWith('map-camp-') ? 'map' : null;
+    if (showcaseSample === 'expedition') deskTab = 'guild'; marketView = 'deliveries'; marketTownId = '';
+    if (showcaseSample === 'offline-progress') {
+      loadController = new AbortController();
+      offlineProgress = { done: 43200, total: 86400 };
+    }
+    if (showcaseSample === 'progress-recap') {
+      const before = snapCounters(gameState);
+      gameState.counters.kills += 84; gameState.counters.drops += 12;
+      gameState.counters.gold += 46; gameState.counters.stones.tier = (gameState.counters.stones.tier || 0) + 7;
+      gameState.player.treePoints += 3;
+      const learned = sm.all().find(skill => !Object.hasOwn(gameState.skills.owned, skill.id));
+      if (learned) gameState.skills.owned[learned.id] = 1;
+      awayReport = buildAwayReport(before, 90, 5400, false, gameState);
+    }
+  }
   type CombatFxPreview = 'swing' | 'critical' | 'fire' | 'lightning' | 'heal' | 'block' | 'lethal' | 'rapid'
-    | 'aoe' | 'exchange' | 'miss' | 'sizes' | 'boss';
+    | 'aoe' | 'exchange' | 'miss' | 'sizes' | 'boss' | 'skill';
   type CombatFxBeat = Exclude<CombatFxPreview, 'rapid' | 'sizes' | 'boss'>;
   let animateCombatFx = $state(false);
   let combatFxPreview = $state<CombatFxPreview>('fire');
+  let combatFxSkillId = $state('attack.firestorm');
   const combatFxTimers = new Set<ReturnType<typeof setTimeout>>();
   const previewFire = sm.byId['attack.fireball'];
   const previewLightning = sm.of('attack').find((skill: any) => skill.element === 'lightning' && !skill.retired);
   const previewHeal = sm.of('heal').find((skill: any) => !skill.retired);
   const previewArea = sm.byId['attack.firestorm'];
+  const combatFxSkills = sm.all()
+    .filter((skill: any) => !skill.retired)
+    .sort((a: any, b: any) => (a.type || '').localeCompare(b.type || '') || a.name.localeCompare(b.name));
 
   function clearCombatFxTimers() {
     for (const timer of combatFxTimers) clearTimeout(timer);
@@ -184,17 +347,24 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       { kind: 'hit', side: 'field', mobId: mob.id, via: 'swing', text: '248', value: 248, colour: hitColour('physical') },
       { kind: 'taken', side: 'self', byId: mob.id, text: '142', value: 142, colour: hitColour(mob.innate[0]) },
     ];
-    const skill = preview === 'heal' ? previewHeal : preview === 'lightning' ? previewLightning
-      : preview === 'aoe' ? previewArea : previewFire;
+    const selected = preview === 'skill' ? sm.byId[combatFxSkillId] : undefined;
+    const skill = selected ?? (preview === 'heal' ? previewHeal : preview === 'lightning' ? previewLightning
+      : preview === 'aoe' ? previewArea : previewFire);
     if (!skill) return [];
     const colour = hitColour(skill.element || null);
-    const outcome: Omit<FxEvent, 'id' | 'sec'>[] = preview === 'heal'
+    const skillType = selected?.type;
+    const multi = preview === 'aoe' || (preview === 'skill' && Number(String(skill.targets || '').split('/')[0]) > 1);
+    const outcome: Omit<FxEvent, 'id' | 'sec'>[] = preview === 'heal' || (preview === 'skill' && skillType === 'heal')
       ? [{ kind: 'heal', side: 'self', skillId: skill.id, text: '+86', value: 86, colour }]
-      : preview === 'miss'
-        ? [{ kind: 'block', side: 'field', mobId: mob.id, text: 'Miss', colour: hitColour(null) }]
-        : (preview === 'aoe' ? mobs : [mob]).map((target) => ({
-          kind: 'hit', side: 'field', mobId: target.id, via: 'cast', skillId: skill.id, text: '468', value: 468, colour,
-        }));
+      : preview === 'skill' && skillType === 'buff'
+        ? [{ kind: 'buff', side: 'self', skillId: skill.id, text: skill.name || skill.id, colour }]
+        : preview === 'skill' && skillType === 'aura'
+          ? []
+          : preview === 'miss'
+            ? [{ kind: 'block', side: 'field', mobId: mob.id, text: 'Miss', colour: hitColour(null) }]
+            : (multi ? mobs : [mob]).map((target) => ({
+              kind: 'hit', side: 'field', mobId: target.id, via: 'cast', skillId: skill.id, text: '468', value: 468, colour,
+            }));
     // Runtime publishes each outcome before its cast marker; plate.castForHit reads that order.
     return [
       ...outcome,
@@ -272,24 +442,40 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       mobId: event.mobId === originalTarget ? gameState.group[0]?.id : event.mobId,
       byId: event.byId === originalTarget ? gameState.group[0]?.id : event.byId,
     });
+    if (combatFxPreview === 'boss' || combatFxPreview === 'sizes') {
+      for (const mob of group) {
+        const skill = (mob.skillIds || []).map(mobSkillById).find(row => row?.mode === 'strike');
+        if (skill) fx(gameState, { kind: 'cast', side: 'field', mobId: mob.id, skillId: skill.id, text: skill.name, colour: hitColour(skill.element) });
+      }
+    }
+    if (combatFxPreview === 'skill') {
+      const skill = sm.byId[combatFxSkillId];
+      const mob = group[0];
+      if (skill) {
+        const colour = hitColour(skill.element || null);
+        if (skill.type === 'buff') fx(gameState, { kind: 'buff', side: 'self', skillId: skill.id, text: skill.name || skill.id, colour });
+        else if (skill.type === 'heal') fx(gameState, { kind: 'heal', side: 'self', skillId: skill.id, text: '+86', value: 86, colour });
+        else if (mob) fx(gameState, { kind: 'hit', side: 'field', mobId: mob.id, via: 'cast', skillId: skill.id, text: '468', value: 468, colour });
+        fx(gameState, { kind: 'cast', side: 'self', skillId: skill.id, text: skill.name || skill.id, colour });
+      }
+    }
   }
-  let hex3dPrototypeView = $state<any>(null);
   let economyLabView = $state<any>(null);
-  $effect(() => {
-    if (!showcaseMode || showcaseSample !== 'map-hex-3d') return;
-    let current = true;
-    import('./ui/Hex3dPrototype.svelte').then(module => { if (current) hex3dPrototypeView = module.default; });
-    return () => { current = false; hex3dPrototypeView = null; };
-  });
+  let skillFxLabView = $state<any>(null);
   $effect(() => {
     if (!showcaseMode || showcaseSample !== 'economy-lab') return;
     let current = true;
-    import('./ui/EconomyLab.svelte').then(module => { if (current) economyLabView = module.default; });
+    import('./ui/dev/EconomyLab.svelte').then(module => { if (current) economyLabView = module.default; });
     return () => { current = false; economyLabView = null; };
+  });
+  $effect(() => {
+    if (!showcaseMode || showcaseSample !== 'skill-fx') return;
+    let current = true;
+    import('./ui/dev/SkillFxLab.svelte').then(module => { if (current) skillFxLabView = module.default; });
+    return () => { current = false; skillFxLabView = null; };
   });
 
   function showcaseGame(scenario = 'delivery'): GameState {
-    if (scenario === 'map-hex-3d') scenario = 'map-adventure';
     const sample = newGame();
     const campEventExamples = new Set(['map-camp-sounds', 'map-camp-prowler', 'map-camp-traveler', 'map-camp-nest',
       'map-camp-herd', 'map-camp-injured', 'map-camp-discovered', 'map-camp-combat', 'map-camp-timeout',
@@ -299,6 +485,53 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     sample.fieldwork.foods['river-fish'] = 5;
     sample.junk[(E.mob.variant_drops as Record<string, { item: string }>)[E.mob.variants.goblin[0].name].item] = 20;
     sample.hunting = true;
+    if (scenario === 'arpg-arena') {
+      const speciesId = activeArenaVariant?.speciesId ?? ARENA_PREVIEW_SPAWN[arenaSpecies] ?? arenaSpecies;
+      const species = eng.speciesById(speciesId);
+      const spawnBody = spritePreviewMode && !species.sizes.includes('small') ? species.sizes[0] : 'small';
+      const spawnZone = species.zones.includes(sample.zone) ? sample.zone : species.zones[0];
+      const spawnSubzone = spritePreviewMode
+        ? eng.zoneById(spawnZone).subzones?.findIndex((sub: { species: string[] }) => sub.species.includes(speciesId))
+        : undefined;
+      setLevel(sample, 5);
+      sample.travel = 'stay';
+      sample.phase = 'fighting';
+      const rng = mulberry32(20261024);
+      // Three copies expose the multi-Mob layout while replaying one selected species sheet.
+      const encounterSize = 3;
+      const mobs: Mob[] = [];
+      for (let attempt = 0; attempt < 100 && mobs.length < encounterSize; attempt++) {
+        const mob = spawnMob(rng, spawnZone, 'normal', spawnBody, spawnSubzone, { allowWildUnique: false });
+        if (mob.speciesId === speciesId) mobs.push(mob);
+      }
+      if (mobs.length) sample.group = mobs;
+      if (spritePreviewMode && mobs.length) setLevel(sample, Math.max(5, ...mobs.map(mob => mob.level)));
+      const previewSkill = sm.byId[arenaSkillId] ?? sm.byId['attack.fireball'];
+      sample.skills.owned[previewSkill.id] = 0;
+      sample.skills.list.fill(null);
+      if (previewSkill.type === 'buff') {
+        sample.skills.buffs[previewSkill.id] = true;
+        sample.skills.buffUp[previewSkill.id] = 12;
+      } else if (previewSkill.type === 'aura') {
+        sample.skills.auras[previewSkill.id] = true;
+      } else {
+        sample.skills.list[0] = previewSkill.id;
+        sample.skills.cd[previewSkill.id] = 0;
+      }
+      // Hold a weapon the chosen skill can actually fire — the arena only casts a press its weapon fits,
+      // so a bow row needs a bow and a spell reads best off a magic weapon.
+      const fittingWeapon = (E.weapons as any[]).find((w) => sm.weaponFits(previewSkill, w.name)
+        && (!previewSkill.group || previewSkill.group === 'all' || sm.weaponGroupOf(w.name) === previewSkill.group));
+      const mainHandIndex = loot.SLOTS.findIndex((slot: string) => slot === 'main hand');
+      if (fittingWeapon && mainHandIndex >= 0) {
+        sample.gear[mainHandIndex] = { slot: 'main hand', base: fittingWeapon.name, ilvl: 1, quality: 'Normal', tier: 'T1', lines: [] };
+      }
+      const sheet = characterSheet(sample);
+      sample.player.hp = previewSkill.type === 'heal' ? Math.round(sheet.maxHp * .6) : sheet.maxHp;
+      sample.player.es = sheet.es;
+      sample.player.mana = sheet.maxMana;
+      return sample;
+    }
     tick(sample, { online: false, autoSkills: false });
     if (scenario === 'offline-progress') return sample;
     if (scenario === 'core-field' || scenario === 'core-town') {
@@ -320,6 +553,26 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       const carriedSample = structuredClone(starter);
       carriedSample.locked = true;
       sample.bag.push(carriedSample);
+    }
+    if (scenario === 'build-workbench') {
+      sample.player.autoSpend = false;
+      setLevel(sample, 30);
+      for (const skill of sm.all()) sample.skills.owned[skill.id] = 0;
+      sample.skills.list = sm.all().filter(skill => ['attack', 'curse', 'heal'].includes(skill.type || ''))
+        .slice(0, ACTIVE_SLOTS).map(skill => skill.id);
+      sample.skills.mode[sample.skills.list[0]!] = 'conditional';
+      sample.skills.conditions[sample.skills.list[0]!] = { ...condOf(sample.skills, sample.skills.list[0]!), boss: true, minTargets: 3, manaFloorPct: 20 };
+      const aura = sm.of('aura')[0];
+      if (aura) toggleTrack(sample.skills, aura.id);
+      const buff = sm.of('buff')[0];
+      if (buff) { sample.skills.buffs[buff.id] = true; sample.skills.buffUp[buff.id] = 20; }
+      sample.player.treePoints = 40;
+      sample.player.attainmentPoints = 8;
+      sample.bag.push(rollDrop(mulberry32(20261024), 'mid', 42));
+      sample.bag.push(rollDrop(mulberry32(20261025), 'mid', 42));
+      sample.presets[0].zones = [sample.zone];
+      storePreset(sample);
+      return sample;
     }
     if (scenario === 'craft-stash') {
       sample.counters.stones = {
@@ -505,9 +758,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
    * needed a modal. The desk is the one screen a settlement owns: the stall, the board, the counter and
    * the two tables, opened from the rail or from a place's card.
    */
-  const PANELS = ['bag', 'skills', 'tree', 'map', 'desk', 'stash', 'farm', 'camp', 'save', 'town', 'market', 'forge', 'craft', 'keys'] as const;
+  const PANELS = ['bag', 'skills', 'tree', 'map', 'desk', 'stash', 'farm', 'camp', 'save', 'town', 'market', 'forge', 'craft', 'keys', 'combat'] as const;
   type PanelId = (typeof PANELS)[number];
-  const RAIL: PanelId[] = ['map', 'town', 'market', 'craft', 'bag', 'skills', 'tree', 'desk', 'farm', 'camp', 'save', 'keys'];
+  const RAIL: PanelId[] = ['map', 'town', 'market', 'craft', 'bag', 'skills', 'tree', 'desk', 'farm', 'camp', 'combat', 'save', 'keys'];
   const MAIN_RAIL: PanelId[] = ['map', 'bag', 'skills', 'craft'];
   const MORE_RAIL = RAIL.filter((p) => !MAIN_RAIL.includes(p) && p !== 'camp');
   const HUD_GRID_LABELS = Array.from({ length: 225 }, (_, i) => `${String.fromCharCode(65 + Math.floor(i / 15))}${(i % 15) + 1}`);
@@ -516,28 +769,89 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     bag: hubIcon('bags', bagMark), skills: hubIcon('skill-book', skillMark),
     tree: treeMark, map: mapMark, desk: deskMark,
     stash: stashMark, farm: farmMark, camp: campMark, save: saveMark, town: townMark,
-    market: coinMark, forge: forgeMark, craft: hubIcon('crafting', craftMark), keys: keysMark,
+    market: coinMark, forge: forgeMark, craft: hubIcon('crafting', craftMark), keys: keysMark, combat: fieldMark,
   };
   const RAIL_LABEL: Record<PanelId, string> = {
     bag: 'bags', skills: 'skills', tree: 'tree', map: 'map', desk: 'desk',
     stash: 'stash', farm: 'farm', save: 'save', town: 'town',
-    market: 'market', forge: 'forge', craft: 'craft', keys: 'keys', camp: 'camp',
+    market: 'market', forge: 'forge', craft: 'craft', keys: 'keys', camp: 'camp', combat: 'combat history',
   };
   const SCREEN_ACTION: Record<PanelId, string> = {
     bag: 'screen.bag', skills: 'screen.skills', tree: 'screen.tree', map: 'screen.map',
     desk: 'screen.desk', stash: 'screen.stash', farm: 'screen.farm', camp: 'screen.camp', save: 'screen.save',
     town: 'screen.town', market: 'screen.market', forge: 'screen.forge', craft: 'screen.craft',
-    keys: 'screen.keys',
+    keys: 'screen.keys', combat: 'screen.combat',
   };
   // `gameState`, not `state`: a top-level `state` binding makes svelte2tsx read `$state` as a store
   // subscription and type the whole panel `any` (sveltejs/svelte#13715).
-  let gameState = $state<GameState>(showcaseMode ? showcaseGame() : newGame(undefined, crypto.getRandomValues(new Uint32Array(1))[0]));
-  let running = $state(!showcaseMode);
+  let gameState = $state<GameState>(showcaseMode ? showcaseGame(initialShowcaseSample) : newGame(undefined, crypto.getRandomValues(new Uint32Array(1))[0]));
+  let running = $state(!showcaseMode || initialShowcaseSample === 'arpg-arena');
   /** Held while a load or a snapshot rewind swaps the character: a live tick landing on the new state
    *  mid-catch-up would sim the away window twice. The interval drains its accumulator and stands down. */
   let paused = $state(false);
-  let cooldownStepMs = $state(0);
+  let cooldownVisualNow = $state(0);
+  let cooldownSimRemainder = $state(0);
+  let cooldownSchedulerAt = $state(0);
   let speed = $state(1);
+  const arenaPreview = $derived(showcaseMode && showcaseSample === 'arpg-arena');
+  /** The cooldown seconds one completed simulation tick removes, before the visual interpolation. */
+  const cooldownTickRate = () => {
+    const shockSecLeft = Math.max(0, gameState.playerStatuses.shock?.secLeft || 0);
+    const activeFraction = bundleOf(c.keystones, 'unstoppable') ? 1 : Math.max(0, 1 - Math.min(1, shockSecLeft));
+    const cdCut = (gameState.playerStatuses.crippled?.secLeft || 0) > 0 ? (E.status.crippled.cd_pct || 0) / 100 : 0;
+    return c.globalSpeed * Math.max(0, 1 - cdCut) * activeFraction;
+  };
+  /** UI projection only: interpolate between completed simulation ticks without advancing the sim. */
+  const cooldownVisualSeconds = $derived.by(() => {
+    void cooldownVisualNow;
+    if (!cooldownSchedulerAt || !transactionWriter || paused || !running) return 0;
+    const rate = cooldownTickRate();
+    if (rate <= 0) return 0;
+    const unsampled = Math.max(0, (cooldownVisualNow - cooldownSchedulerAt) / 1000) * speed;
+    return Math.min(rate, (cooldownSimRemainder + unsampled) * rate);
+  });
+  $effect(() => {
+    const hasCooldown = gameState.skills.list.some(id => !!id && (gameState.skills.cd[id] || 0) > 0);
+    if (!transactionWriter || paused || !running || !hasCooldown || prefersReducedMotion.current) return;
+    cooldownSchedulerAt = performance.now();
+    let frame = 0;
+    const sample = (now: number) => {
+      cooldownVisualNow = now;
+      frame = window.requestAnimationFrame(sample);
+    };
+    frame = window.requestAnimationFrame(sample);
+    return () => window.cancelAnimationFrame(frame);
+  });
+  let combatArena = $state.raw(createCombatArena());
+  let arenaVitals = $state<{ hp: number; es: number; mana: number } | null>(null);
+  function resetArena() {
+    arenaManual = {};
+    arenaFocusId = null;
+    arenaAimSkill = null;
+    const next = createCombatArena();
+    const units = tree.mechanics?.combat_time_units_per_sec ?? 1;
+    syncCombatArena(next, gameState, gameState.clockSec * units, units, characterSheet(gameState).maxHp);
+    restorePendingWork(next, gameState);
+    restoreFieldPositions(next, gameState);
+    combatArena = next;
+    arenaVitals = null;
+  }
+  function replayArena() {
+    gameState = showcaseGame('arpg-arena');
+    resetArena();
+    feed = []; feedSeen = 0;
+    panel = null; sheetOpen = false;
+    running = true;
+  }
+  function hudSkillEligibility(id: string) {
+    const targets = arenaMode
+      ? arenaSkillTargets(combatArena, id, gameState.group).targets
+      : gameState.group;
+    const eligibility = skillEligibilityInState(gameState, c, id, settings.autoSkills !== false, targets, arenaMode);
+    return arenaMode && eligibility.reason === 'no-target' && gameState.group.length
+      ? { ...eligibility, label: 'Out of range', detail: 'Moving into range before using this skill.' }
+      : eligibility;
+  }
   /** A vital climbs over one smooth second, but a fall lands in one step so the drop reads on its tick
    *  instead of draining. Reduced-motion users get an instant update either way. */
   function vitalVisual(source: () => number) {
@@ -553,9 +867,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const hpVisual = vitalVisual(() => gameState.player.hp);
   const esVisual = vitalVisual(() => gameState.player.es);
   const manaVisual = vitalVisual(() => gameState.player.mana);
-  const shownHp = $derived(hpVisual.current);
-  const shownEs = $derived(esVisual.current);
-  const shownMana = $derived(manaVisual.current);
   // the game opens on the ground, not on the fight: the first read is where the character stands and
   // where the walk goes, and FIELD (or Escape) folds the map down to the combat frame
   let panel = $state<PanelId | null>(showcaseMode ? null : 'map');
@@ -594,6 +905,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
   const openLayoutEditor = () => { layoutEditorOpen = true; more = false; };
   let selectedTreeNodeId = $state('normal.str.s01');
+  let treeBoardSession = $state(newPassiveTreeSession());
+  let treeFocusId = $state<string | null>(null);
   const selectedTreeVerdict = $derived(canSpendTree(gameState, selectedTreeNodeId));
   /** What a respec hands back, split by the wallet each rank was paid from. */
   const treeSpent = $derived(tree.pointsSpentByCurrency(gameState.player.treeRanks ?? {}));
@@ -612,6 +925,25 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   let takeoverSlot = $state<SlotName>('slot1');
   const canWriteAccount = $derived(accountWriterState === 'owner');
   const transactionWriter = $derived(showcaseMode ? showcaseSample !== 'read-only' && showcaseSample !== 'map-camp-readonly' : canWriteAccount);
+  let inspectedEnemy = $state.raw<EnemySnapshot | null>(null);
+  function openCombatHistory() {
+    inspectedEnemy = null;
+    sheetOpen = false;
+    more = false;
+    panel = 'combat';
+  }
+  setContext<PanelSession>(PANEL_SESSION, {
+    get state() { return gameState.phase === 'fighting' ? 'Combat running' : gameState.walk ? 'Travelling' : gameState.phase === 'camp' ? 'At Camp' : gameState.hunting ? 'Hunting' : 'Idle'; },
+    get running() { return running; },
+    get speed() { return speed; },
+    get hp() { return gameState.player.hp; },
+    get maxHp() { return c.maxHp; },
+    get writable() { return transactionWriter; },
+    get blocked() { return paused || !transactionWriter; },
+    format: (value) => fmtNum(value),
+    onpause: () => runAction('game.pause'),
+    onhistory: openCombatHistory,
+  });
   let marketView = $state<'trade' | 'workshop' | 'stall' | 'deliveries' | 'black-market'>('trade');
   let marketTownId = $state('');
   const deliveryNotice = $derived(Object.values(gameState.town.contracts).flat().find((contract) => contract.status === 'open' && !contract.announced));
@@ -652,7 +984,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       never travelled to is dropped rather than left ringing under the HUD. A desk screen closes itself. */
   function onfieldKey(ev: KeyboardEvent) {
     if (offlineProgress !== null) return;
-    if (showcaseMode) return;
+    if (showcaseMode) {
+      // The showcase carries the same local commands so the arena can be verified in place.
+      if (isTypingTarget(ev.target) || isModifierKey(ev) || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+      const action = actionFor(binds, tokenOf(ev));
+      if (action?.startsWith('arena.')) { ev.preventDefault(); runAction(action); }
+      return;
+    }
     // Native control activation owns Enter/Space; folding a HUD group must not also pause the game.
     if ((ev.key === 'Enter' || ev.key === ' ') && (ev.target as HTMLElement | null)?.closest('button, summary, a[href]')) return;
     if (ev.key === 'Escape') {
@@ -710,6 +1048,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
    * map's keys only mean something while the sheet is the thing in focus.
    */
   function runAction(action: string) {
+    if (action === 'arena.focus') { focusArenaEnemy(); return; }
+    if (action === 'arena.focus.clear') { clearArenaFocus(); return; }
+    if (action === 'arena.aim') { toggleArenaAim(); return; }
+    if (action === 'arena.cast') { castArenaAtFocus(); return; }
+    if (action === 'screen.combat') { openCombatHistory(); return; }
     if (action === 'screen.field') { panel = null; sheetOpen = false; picked = null; pickedCell = null; return; }
     if (action === 'sheet.open') { sheetOpen = !sheetOpen; return; }
     if (action?.startsWith('item.')) { useQuickSlot(Number(action.slice(5)) - 1); return; }
@@ -756,6 +1099,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
    */
   function openPanel(p: PanelId) {
     sheetOpen = false;
+    inspectedEnemy = null;
     if (TOWN_PANELS.includes(p) && !atSettlement(gameState)) {
       saveNote = `${RAIL_LABEL[p]} is a settlement service — walk or warp into one first`;
       return;
@@ -765,6 +1109,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     panel = panel === p ? null : p;
   }
   const closePanel = () => (panel = null);
+  function revealPanel(target: PanelId) {
+    panel = target;
+    if (showcaseMode) requestAnimationFrame(() => {
+      const section = ({ tree: 'passive-tree', bag: 'inventory' } as Record<string, string>)[target] || target;
+      document.getElementById(`panel-${section}`)?.scrollIntoView({ block: 'start' });
+    });
+  }
   const canStash = $derived(atSettlement(gameState) && stashTabCount(gameState) > 0);
   const townLive = $derived(atSettlement(gameState));
 
@@ -802,12 +1153,25 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const plates = $derived([...gameState.group]);
   /** the field is a fight, not a backdrop: cards answer to the Field tab or to a live fight only */
   const inCombat = $derived(gameState.phase === 'fighting' && gameState.group.length > 0);
+  const liveArpgArena = $derived(!showcaseMode);
+  const arenaMode = $derived(arenaPreview || liveArpgArena);
+  $effect(() => {
+    if (liveArpgArena) untrack(() => resetArena());
+  });
+  const shownHp = $derived(arenaMode && arenaVitals ? arenaVitals.hp : hpVisual.current);
+  const shownEs = $derived(arenaMode && arenaVitals ? arenaVitals.es : esVisual.current);
+  const shownMana = $derived(arenaMode && arenaVitals ? arenaVitals.mana : manaVisual.current);
+  // Arena labels follow the buffered vital read; other modes label the live pools.
+  const ariaHp = $derived(arenaMode && arenaVitals ? arenaVitals.hp : gameState.player.hp);
+  const ariaEs = $derived(arenaMode && arenaVitals ? arenaVitals.es : gameState.player.es);
+  const ariaMana = $derived(arenaMode && arenaVitals ? arenaVitals.mana : gameState.player.mana);
   const travelPhase = $derived(mapTravelPhase(travelScene, !!gameState.walk, inCombat));
   const travelFeet = $derived.by(() => { const p = currentCell(gameState); return `${p.q},${p.r}`; });
   const showCombatCards = $derived(panel === null || inCombat);
   /** the row that last fired — a press or a buff coming up are both the order being worked — so the bar
    *  lights the slot that actually pressed instead of the one the eye expects */
-  const latestFire = $derived((gameState.fx || []).find((e) => !!e.skillId && (e.kind === 'cast' || e.kind === 'buff')) || null);
+  const latestFire = $derived(settings.combatEffects === 'reduced' || settings.combatEffects === 'minimal' ? null
+    : (gameState.fx || []).find((e) => e.side === 'self' && !!e.skillId && (e.kind === 'cast' || e.kind === 'buff')) || null);
   const latestLevel = $derived((gameState.fx || []).find((e) => e.kind === 'level') || null);
 
   const xpPct = $derived(Math.max(0, Math.min(100, (gameState.player.xp / eng.xpToNext(gameState.player.level)) * 100)));
@@ -839,7 +1203,27 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     }))].slice(-60);
   });
 
-  let awayReport = $state<{ mins: number; secs: number; capped: boolean; kills: number; drops: number; junk: number; gold: number; stones: number; levels: number; quality: string } | null>(null);
+  let awayReport = $state<AwayReport | null>(null);
+  let skillDiscoveryId = $state<string | null>(null);
+  let skillsWorkbenchView = $state(newSkillsWorkbenchView());
+  function inspectSkill(id: string) {
+    skillsWorkbenchView = { ...newSkillsWorkbenchView(), selectedId: id };
+    revealPanel('skills');
+  }
+  let skillRewardSeen = '';
+  function resetSkillDiscovery() {
+    skillDiscoveryId = null;
+    const reward = gameState.fx?.find(event => event.kind === 'drop' && event.skillId);
+    skillRewardSeen = reward ? `${reward.id}:${reward.sec}:${reward.skillId}` : '';
+  }
+  $effect(() => {
+    const reward = ring.find(event => event.kind === 'drop' && event.skillId);
+    if (!reward?.skillId) return;
+    const key = `${reward.id}:${reward.sec}:${reward.skillId}`;
+    if (key === skillRewardSeen) return;
+    skillRewardSeen = key;
+    if (!offlineProgress) skillDiscoveryId = reward.skillId;
+  });
 
   // the away report's own reads live in `ui/hud.ts`, where a test can reach them
 
@@ -997,7 +1381,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     // invalidate every `$derived` (bag sorts, character rebuild) once a second on an idle tick.
     const dropsBefore = gameState.counters.drops;
     const wasDungeon = !!gameState.dungeon;
-    tick(gameState, { autoSkills: settings.autoSkills !== false });
+    tick(gameState, { autoSkills: settings.autoSkills !== false, ...(arenaMode ? { arena: combatArena, manual: arenaManual } : {}) });
+    if (arenaMode) {
+      syncArenaFocus();
+      combatArena = { ...combatArena };
+    }
     // Dungeon gear waits in escrow until payout; otherwise equip after each new gear roll.
     if (settings.autoEquip !== false && !gameState.dungeon && (gameState.counters.drops > dropsBefore || wasDungeon)) {
       equipCarriedBest();
@@ -1005,6 +1393,22 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   const AUTOSAVE_SEC = 30;
+
+  $effect(() => {
+    if (!arenaPreview) return;
+    let acc = 0;
+    let previous = performance.now();
+    const timer = setInterval(() => {
+      const now = performance.now();
+      const elapsed = Math.min(.5, (now - previous) / 1000);
+      previous = now;
+      if (!running || paused || document.hidden) { acc = 0; return; }
+      const batch = schedulerBatch(acc, speed, elapsed);
+      acc = batch.acc;
+      for (let index = 0; index < batch.ticks; index++) step();
+    }, WAKE_SEC * 1000);
+    return () => clearInterval(timer);
+  });
 
   onMount(() => {
     let timer: ReturnType<typeof setInterval> | null = null;
@@ -1014,6 +1418,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       document.body.classList.add('ui-showcase');
       settings = { ...DEFAULT_SETTINGS };
       speed = settings.speed || 1;
+      if (arenaPreview) resetArena();
+      // a deep-linked sample opens fully set up, exactly as if picked from the dropdown
+      if (initialShowcaseSample !== 'arpg-arena') applyShowcaseSample(initialShowcaseSample);
       return () => document.body.classList.remove('ui-showcase');
     }
     try {
@@ -1073,6 +1480,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         const before = snapCounters(gameState);
         const r = await catchUpAsync(gameState, away, { autoSkills: settings.autoSkills !== false });
         awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped, gameState) : null;
+        resetSkillDiscovery();
         push(gameState, `Away ${Math.round(away / 60)} min — ${r.simulated} sec simulated`);
         gameState = { ...gameState };
       }
@@ -1085,8 +1493,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       // The wake carries the REAL time since the last one, and `schedulerBatch` turns that into sim
       // seconds at the chosen speed: a throttled tab (a hidden one fires at most once a second) banks the
       // second it actually missed instead of a fixed quarter, so nothing is silently lost. The batch
-      // still caps at `MAX_BATCH` and drops what it cannot fit, so a stalled wake cannot stutter the draw
-      // with a queued burst.
+      // still caps at `MAX_BATCH` ticks a wake and the remainder stays owed, so a stalled wake drains
+      // over later wakes instead of stuttering the draw with a queued burst.
       if (!disposed) {
         let acc = 0;
         let last = performance.now();
@@ -1095,10 +1503,16 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
           // a wake that ran late is measured, never assumed; the tab's own throttling is the only clock
           const elapsed = Math.max(0, (now - last) / 1000);
           last = now;
-          if (!canWriteAccount || paused || !running) { acc = 0; cooldownStepMs = 0; return; }
+          if (!canWriteAccount || paused || !running) {
+            acc = 0;
+            cooldownSimRemainder = 0;
+            cooldownSchedulerAt = now;
+            return;
+          }
           const batch = schedulerBatch(acc, speed, elapsed);
           acc = batch.acc;
-          if (batch.ticks > 0) cooldownStepMs = (batch.ticks / speed) * 1000;
+          cooldownSimRemainder = acc;
+          cooldownSchedulerAt = now;
           for (let i = 0; i < batch.ticks; i++) step();
         }, WAKE_SEC * 1000);
         autosaveTimer = setInterval(() => { if (canWriteAccount && saveSession.slot) void doSave(saveSession.slot, true); }, AUTOSAVE_SEC * 1000);
@@ -1184,6 +1598,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     const it = entry.item;
     const out: MenuItem[] = [
       { label: 'Put it on', hint: it.slot, disabled: Boolean(it.broken), onpick: () => equip(entry.index) },
+      { label: 'Craft this item', hint: townLive ? 'Open on the workbench' : 'Available at a settlement', disabled: !townLive,
+        onpick: () => craftThisItem({ where: 'bag', item: it }) },
       {
         label: it.locked ? 'Unlock' : 'Lock',
         hint: it.locked ? 'the bulk verbs will move it again' : 'the bulk verbs will leave it',
@@ -1203,7 +1619,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   function wornActions(entry: SlotEntry): MenuItem[] {
     if (entry.kind !== 'worn') return [];
-    return [{ label: 'Take it off', hint: 'back to the bag', onpick: () => doUnequip(entry.index) }];
+    return [{ label: 'Take it off', hint: 'back to the bag', onpick: () => doUnequip(entry.index) },
+      ...(entry.item ? [{ label: 'Craft this item', hint: townLive ? 'Open on the workbench' : 'Available at a settlement', disabled: !townLive,
+        onpick: () => craftThisItem({ where: 'gear', item: entry.item! }) }] : [])];
   }
 
   let equipNote = $state('');
@@ -1450,6 +1868,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       if (!saveSession.isCurrent(epoch)) return;
       if (!s) { if (previousSlot) saveSession.attach(previousSlot, epoch); snapNote = 'That backup is gone'; return; }
       gameState = s;
+      resetCharacterUi();
+      awayReport = null;
+      resetSkillDiscovery();
       saveSession.attach(targetSlot, epoch);
       const what = describeSnap(snaps[index]);
       await loadSnaps();
@@ -1489,6 +1910,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     const previous = gameState;
     const previousSlot = saveSession.slot;
     const epoch = saveSession.detach();
+    let ui: CharacterUiSnapshot | null = null;
     offlineProgress = { done: 0, total: 0 };
     paused = true;
     try {
@@ -1500,6 +1922,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         saveNote = controller.signal.aborted ? 'Load cancelled; your character and saved slot were kept.' : `${slot} is empty`;
         return false;
       }
+      ui = captureCharacterUi();
       gameState = { ...s };
       const away = (Date.now() - (s.lastSavedAt || Date.now())) / 1000;
       const before = snapCounters(gameState);
@@ -1511,6 +1934,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       if (!saveSession.isCurrent(epoch)) return false;
       if (r.cancelled) {
         gameState = previous;
+        if (liveArpgArena) resetArena();
+        if (ui) restoreCharacterUi(ui);
         if (previousSlot) saveSession.attach(previousSlot, epoch);
         saveNote = 'Load cancelled; your character and saved slot were kept.';
         return false;
@@ -1518,19 +1943,24 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       if (canWriteAccount && settings.autoEquip !== false) equipCarriedBest();
       awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped, gameState) : null;
       // this slot becomes the autosave home, and the away window is spent (a reload must not recount it)
+      resetSkillDiscovery();
       saveSession.attach(slot, epoch);
+      resetCharacterUi();
       takeoverSlot = slot;
       if (canWriteAccount) gameState.lastSavedAt = Date.now();
       saveNote = canWriteAccount
         ? `Loaded ${slot} — ${r.simulated} sec caught up`
         : `Loaded ${slot} read-only — ${r.simulated} sec caught up`;
       gameState = { ...gameState };
+      if (liveArpgArena) resetArena();
       return true;
     } catch (error) {
       // a save that fails migration validation (removed content, illegal transitions) must say so —
       // an unhandled rejection leaves the player staring at the slot they just clicked
       if (saveSession.isCurrent(epoch)) {
         gameState = previous;
+        if (liveArpgArena) resetArena();
+        if (ui) restoreCharacterUi(ui);
         if (previousSlot) saveSession.attach(previousSlot, epoch);
         saveNote = `Cannot load ${slot}: ${error instanceof Error ? error.message : 'the save failed validation'} — your character and slot were kept.`;
       }
@@ -1589,9 +2019,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       if (!saveSession.isCurrent(epoch)) return;
       saveSession.detach();
       gameState = imported;
+      resetCharacterUi();
       awayReport = null;
+      resetSkillDiscovery();
       saveNote = 'Imported in memory. Choose a save slot to keep this character.';
       gameState = { ...gameState };
+      if (liveArpgArena) resetArena();
     } catch (e) {
       saveNote = `Import failed: ${(e as Error).message} — your current slot was not changed. Start a new character to play the current tree.`;
     }
@@ -1604,7 +2037,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     offlineProgress = null;
     paused = false;
     gameState = newGame(undefined, crypto.getRandomValues(new Uint32Array(1))[0]);
+    if (liveArpgArena) resetArena();
+    resetCharacterUi();
     awayReport = null;
+    resetSkillDiscovery();
     saveNote = 'New character is not saved yet. Choose a save slot; existing slots were kept.';
   }
 
@@ -1912,9 +2348,29 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     return () => cancelAnimationFrame(frame);
   });
   $effect(() => {
-    if (!showcaseMode) return;
-    // The showcase can preview online timers and requested walks through the real simulator without touching saves.
-    const timer = setInterval(() => { if (running && !paused) step(); }, 1000 / speed);
+    if (!showcaseMode || arenaPreview) return;
+    // The showcase uses the same real-time scheduler as the live game: the visual ring interpolates
+    // between whole sim ticks, while the simulation itself still advances only in whole ticks.
+    let acc = 0;
+    let previous = performance.now();
+    cooldownSimRemainder = 0;
+    cooldownSchedulerAt = previous;
+    const timer = setInterval(() => {
+      const now = performance.now();
+      const elapsed = Math.max(0, (now - previous) / 1000);
+      previous = now;
+      if (!running || paused) {
+        acc = 0;
+        cooldownSimRemainder = 0;
+        cooldownSchedulerAt = now;
+        return;
+      }
+      const batch = schedulerBatch(acc, speed, elapsed);
+      acc = batch.acc;
+      cooldownSimRemainder = acc;
+      cooldownSchedulerAt = now;
+      for (let index = 0; index < batch.ticks; index++) step();
+    }, WAKE_SEC * 1000);
     return () => clearInterval(timer);
   });
   /**
@@ -2150,7 +2606,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   });
   const firstBand = $derived(E.mob.zones[0].levels);
   const lastBand = $derived(E.mob.zones[E.mob.zones.length - 1].levels);
-  const liveBands = $derived(E.mob.zones.filter((z: any) => z.levels[0] <= gateLevel).length);
   const townStock = $derived(stockOf(town?.id ?? '', gameState));
   const skipTokens = $derived(gameState.town.owned.filter((id) => id === 'skip_token').length);
   const freeSkipsLeft = $derived(Math.max(0, (Number(TOWN.task_sizing.free_skip_per_day) || 0) - (gameState.town.freeSkipsToday || 0)));
@@ -2213,9 +2668,15 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   function doRepairGear(where: Where, index: number) {
     if (!requireAccountWriter('repairing gear')) return false;
+    const target = resolveItemSelection(gameState, benchSelection);
     const r = repairGear(gameState, town?.id ?? '', where, index);
-    benchNote = r.ok ? `Armourer repaired ${r.repaired} · ${r.gold} gold` : `Cannot repair: ${r.why}`;
-    if (r.ok) push(gameState, benchNote);
+    if (r.ok) {
+      if (r.where && r.index != null) {
+        benchSelection = refreshSelectionAfterRepair(gameState, benchSelection, target, r.where, r.index);
+      }
+      benchNote = `Armourer repaired ${r.repaired} · ${r.gold} gold`;
+      push(gameState, benchNote);
+    } else benchNote = `Cannot repair: ${r.why}`;
     gameState = { ...gameState };
     return r.ok;
   }
@@ -2311,9 +2772,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         break;
       case 'passive':
         selectedTreeNodeId = target.id;
-        panel = 'tree';
+        treeFocusId = target.id;
+        revealPanel('tree');
         break;
-      case 'tree': panel = 'tree'; break;
+      case 'tree': revealPanel('tree'); break;
       case 'hunt':
         if (gameState.hunting && gameState.zone === target.zone) panel = null;
         else goToZone(target.zone);
@@ -2434,7 +2896,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   const warpPrice = (id: string) => warpCost(gameState, id);
-  const warpFee = $derived(warpRow()?.m_per_block ?? 0);
 
   function doWalk(dest: Picked | Cell & { key?: string }) {
     if (!requireAccountWriter('walking')) return;
@@ -2478,9 +2939,62 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     gameState = { ...gameState };
   }
 
-  let bench = $state<{ where: Where; index: number } | null>(null);
+  let benchSelection = $state.raw<ItemSelection | null>(null);
+  const bench = $derived(resolveItemSelection(gameState, benchSelection));
+  let craftView = $state(newCraftWorkbenchView());
   let benchNote = $state('');
-  const benchItem = $derived(bench ? (bench.where === 'gear' ? gameState.gear[bench.index] : gameState.bag[bench.index]) : null);
+  const benchItem = $derived(bench?.item ?? null);
+  const captureCharacterUi = (): CharacterUiSnapshot => captureCharacterUiSnapshot({
+    benchSelection, benchNote, craftView, inspectedEnemy,
+  });
+  function restoreCharacterUi(snapshot: CharacterUiSnapshot) {
+    const next = restoreCharacterUiSnapshot(snapshot);
+    benchSelection = next.benchSelection;
+    benchNote = next.benchNote;
+    craftView = next.craftView;
+    inspectedEnemy = next.inspectedEnemy;
+  }
+  function resetCharacterUi() {
+    const empty = emptyCharacterUiSnapshot();
+    benchSelection = empty.benchSelection;
+    benchNote = empty.benchNote;
+    craftView = empty.craftView;
+    inspectedEnemy = empty.inspectedEnemy;
+  }
+  $effect(() => {
+    if (benchSelection && !bench) {
+      benchSelection = null;
+      benchNote = 'The selected piece left this source. Choose it again before crafting.';
+    }
+  });
+
+  function selectBench(where: Where, index: number) {
+    const item = gameState[where][index];
+    benchSelection = item ? { where, item } : null;
+    benchNote = '';
+  }
+
+  function craftThisItem(selection: ItemSelection) {
+    const current = resolveItemSelection(gameState, selection);
+    if (!current) { equipNote = 'That piece is no longer in this source.'; return; }
+    if (!atSettlement(gameState)) { saveNote = 'Craft is a settlement service — walk or warp into one first.'; return; }
+    const sourceTab = current.where === 'bag' ? 'inventory' : 'equipped';
+    const entry = gearEntry(current.item, current.index);
+    const query = craftView.bagQuery.trim().toLowerCase();
+    const visible = !query || `${entry.title} ${entry.slot} ${entry.sub}`.toLowerCase().includes(query);
+    craftView = {
+      ...craftView,
+      sourceTab,
+      bagQuery: sourceTab === 'inventory' && !visible ? '' : craftView.bagQuery,
+      stashItem: sourceTab === 'inventory' ? null : craftView.stashItem,
+      reveal: { where: current.where, item: current.item },
+    };
+    benchSelection = { where: current.where, item: current.item };
+    benchNote = '';
+    sheetOpen = false;
+    more = false;
+    panel = 'craft';
+  }
 
   let forgeNote = $state('');
 
@@ -2500,11 +3014,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   function runCraft(op: CraftOp, lineIndex: number, pick?: string) {
     if (!requireAccountWriter('crafting')) return false;
     if (!bench) return false;
+    const target = bench;
     const rng = mulberry32(gameState.rngState);
     gameState.rngState += 1;
-    const r = doCraft(gameState, bench.where, bench.index, op, lineIndex, rng, pick);
+    const r = doCraft(gameState, target.where, target.index, op, lineIndex, rng, pick);
     benchNote = r.ok ? `${op}: ${r.note}` : `${op} refused — ${r.why}`;
     if (r.ok) {
+      benchSelection = { where: target.where, item: gameState[target.where][target.index]! };
       push(gameState, `Bench ${op} · ${r.note}`);
       // a stone landing is a beat on the bench: the same gold the crit wears, because a craft that
       // worked is the field's other kind of hit
@@ -2515,7 +3031,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   let skillNote = $state('');
-  let skillTab = $state<'loadout' | 'owned' | 'effects' | 'mastery'>('loadout');
   let farmNote = $state('');
   let farmTab = $state<'plots' | 'alchemy' | 'automation'>('plots');
   const fl = $derived(farmLevel(gameState));
@@ -2686,7 +3201,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   /** Where the feet are or are heading, in the name the player acts on: a settlement's own for its ground, the zone's
    *  for everything else. The rest read and the empty field both answer to it, so neither can name the
    *  wrong place for the same ground. */
-  const hereName = $derived(townLive ? (town?.name ?? 'the field') : zone.name);
   const placeRead = $derived.by(() => {
     if (gameState.walk) return `To ${walkNote(gameState)}`;
     if (gameState.cell?.sub != null) return zone.subzones?.[gameState.cell.sub]?.name ?? 'Sub-zone';
@@ -2725,19 +3239,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     return `Fighting · ${c.hitsPerSec.toFixed(2)} hits/s${gameState.patrol.active ? ` · ${patrolRead}` : ''}`;
   });
 
-  // A press reads as its own flat damage plus its effectiveness on the caster's power line — the
-  // engine's own shape (`engine/skills.ts` perPress), so the panel never restates a formula.
-  const pressText = (k: any) => (k.base_flat == null ? '' : `${Math.round(k.base_flat)} + ${k.eff}% of your ${k.basis === 'magic' ? 'magic' : 'physical'} power${k.max_hp_pct ? ` + ${k.max_hp_pct}% of your Max HP` : ''}`);
-
-  const ownedActives = $derived(sm.all().filter((k: any) => ['attack', 'curse', 'heal'].includes(k.type) && gameState.skills.owned[k.id] != null));
-  const ownedBuffs = $derived(sm.of('buff').filter((k: any) => gameState.skills.owned[k.id] != null));
   const ownedAuras = $derived(sm.of('aura').filter((k: any) => gameState.skills.owned[k.id] != null));
   /** The reservation reads go through `c.keystones`: 54 moves an aura to HP and 64 discounts each one. */
   const reserved = $derived(reservedPct(gameState.skills, c.keystones));
-  const hpReservedShare = $derived(hpReservedPct(gameState.skills, c.keystones));
-  const resonance = $derived(auraResonanceOf(gameState.skills, c.keystones));
-  const hasBloodCovenant = $derived(c.keystones.some((k) => k.key === 'blood-covenant'));
-  const hasResonance = $derived(c.keystones.some((k) => k.key === 'aura-resonance'));
 
   function setSlot(i: number, id: string) {
     if (!requireAccountWriter('assigning skills')) return;
@@ -2778,10 +3282,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     gameState = { ...gameState };
   }
 
-  const COND_DEFAULTS = sm.SKILLS.meta.cast_conditions;
-  const HP_BELOW_DEFAULT = COND_DEFAULTS.hp_below_pct_default;
-  const MANA_FLOOR_DEFAULT = COND_DEFAULTS.mana_floor_pct_default;
-  const MIN_TARGETS_DEFAULT = COND_DEFAULTS.min_targets_default;
   /** …and the one flag a row can meaningfully wait on: the status its own Element applies, or the curse
       it writes. A row that carries neither is offered no such leg — the old list of every flag in the
       game asked the player to tick lines that could never fire for the row in front of them. */
@@ -2797,54 +3297,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     const status = sm.exploitedStatusOf(skill);
     return status ? { key: status, label: status } : null;
   }
-  function toggleStatusMissing(id: string, name: string) {
-    if (!requireAccountWriter('changing skill conditions')) return;
-    const now = condOf(gameState.skills, id).statusMissing;
-    setCond(id, { statusMissing: now.includes(name) ? now.filter((n) => n !== name) : [...now, name] });
-  }
-
-  let gateOpen = $state<string | null>(null);
-
-  /** A row's own list in one line, so the table cell and the field bar both say the same thing the
-      rotation reads. An empty list is said plainly: no leg holds, so the row never fires. */
-  function gateNote(id: string): string {
-    const cond = condOf(gameState.skills, id);
-    const legs: string[] = [];
-    if (cond.boss) legs.push('a boss');
-    if (cond.hpBelowPct > 0) legs.push(`our HP under ${cond.hpBelowPct}%`);
-    if (cond.minTargets > 0) legs.push(`${cond.minTargets}+ targets`);
-    if (cond.manaFloorPct > 0) legs.push(`keep ${cond.manaFloorPct}% of the pool`);
-    const flag = rowFlag(id);
-    if (flag && cond.statusMissing.includes(flag.key)) legs.push(`no ${flag.label}`);
-    const exploit = rowExploitFlag(id);
-    if (cond.statusPresent && exploit) legs.push(`it has ${exploit.label}`);
-    if (cond.statusStacksAtLeast > 0 && exploit) legs.push(`${cond.statusStacksAtLeast}+ ${exploit.label} stacks`);
-    if (cond.selfDebuffed) legs.push('we are debuffed');
-    return legs.join(' · ');
-  }
-
-  function copyGate(id: string) {
-    const from = { ...condOf(gameState.skills, id) };
-    for (const slot of gameState.skills.list) if (slot && modeOf(gameState.skills, slot) === 'conditional') setCond(slot, from);
-    gameState = { ...gameState };
-  }
-
   /** A row with no cooldown of its own is the FILLER: the rotation gives it the press only after every
       timed slot has had its chance, so its place in the order is not what decides when it fires. */
   const slotFiller = (id: string | null): boolean => Boolean(id) && (sm.byId[id!] as any)?.cd === 0;
-  /** What a slot is actually waiting on, in the bar's own words. A bar that rings every cooled-down row
-      as ready would hide the two modes the player set and the one reorder the sim obeys. */
-  function slotWaiting(id: string | null): string {
-    if (!id) return '';
-    const mode = modeOf(gameState.skills, id);
-    if (mode === 'never') return 'silenced';
-    if (mode === 'conditional') {
-      const note = gateNote(id);
-      return note ? `waiting on ${note}` : 'held — no condition set yet';
-    }
-    return slotFiller(id) ? 'filler — after every timed slot' : 'ready when its cooldown is up';
-  }
-
   function stonesLine(): string {
     const held = Object.entries(gameState.counters.stones).filter(([, n]) => (n as number) > 0);
     if (!held.length) return 'no stones yet';
@@ -2909,40 +3364,114 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <button onclick={cancelOfflineLoad}>Cancel loading</button>
   </Panel>
 {/if}
-<div class="showcase-frame" class:active={showcaseMode} class:economy-lab-sample={showcaseMode && showcaseSample === 'economy-lab'} inert={offlineProgress !== null}>
+<div class="showcase-frame" class:active={showcaseMode} class:economy-lab-sample={showcaseMode && showcaseSample === 'economy-lab'} class:skill-fx-sample={showcaseMode && showcaseSample === 'skill-fx'} inert={offlineProgress !== null}>
 {#if showcaseMode}
   <header class="showcase-banner">
     <div>
       <h1>UI Showcase</h1>
       <p>Live game components · sample state · changes to source UI appear here through Vite HMR</p>
       <label>Gameplay sample <select aria-label="Gameplay sample" value={showcaseSample} onchange={(event) => {
-        clearCombatFxTimers();
-        animateCombatFx = false;
-        showcaseSample = event.currentTarget.value; gameState = showcaseGame(showcaseSample);
-        feed = []; feedSeen = 0;
-        travelScene = false;
-        running = false;
-        gameState.playerStatuses = showcaseSample === 'combat-fx' ? {
-          burn: { stacks: 1, secLeft: 8, perSec: 12 },
-          chill: { stacks: 1, secLeft: 10, perSec: 0 },
-          bleed: { stacks: 1, secLeft: 6, perSec: 8 },
-        } : {};
-        bench = null; benchNote = ''; picked = null; pickedCell = null;
-        panel = showcaseSample === 'expedition' ? 'desk' : showcaseSample === 'craft-stash' ? 'craft' : showcaseSample === 'map-mine' || showcaseSample === 'map-adventure' || showcaseSample === 'map-hex-3d' || showcaseSample.startsWith('map-camp-') ? 'map' : null;
-        if (showcaseSample === 'expedition') deskTab = 'guild'; marketView = 'deliveries'; marketTownId = '';
-        if (showcaseSample === 'offline-progress') {
-          loadController = new AbortController();
-          offlineProgress = { done: 43200, total: 86400 };
-        }
+        applyShowcaseSample(event.currentTarget.value);
       }}>
-        <option value="field">Field baseline</option><option value="core-field">Core allocation · field</option><option value="core-town">Core allocation · town</option><option value="offline-progress">Offline catch-up · preview</option><option value="delivery">Delivery want · Fixed</option><option value="choice">Delivery want · Choice</option><option value="full-bag">Delivery reward bag full</option>
+        <option value="field">Field baseline</option><option value="arpg-arena">ARPG · Forest clearing</option><option value="build-workbench">Build · Full skill collection</option><option value="progress-recap">Progress · Return report</option><option value="core-field">Core allocation · field</option><option value="core-town">Core allocation · town</option><option value="offline-progress">Offline catch-up · preview</option><option value="delivery">Delivery want · Fixed</option><option value="choice">Delivery want · Choice</option><option value="full-bag">Delivery reward bag full</option>
         <option value="fallback">Delivery skill fallback</option><option value="expired">Expired partial delivery</option><option value="read-only">Read-only transactions</option><option value="economy-lab">Economy lab · Phase B</option>
-        <option value="expedition">Expedition task</option><option value="craft-stash">Crafting · Stash workbench</option><option value="combat-fx">Combat FX · all labels</option><option value="map-mine">Map · Mine & Camp</option><option value="map-adventure">Map · Adventure board</option><option value="map-hex-3d">Map · Three.js hex prototype</option>
+        <option value="expedition">Expedition task</option><option value="craft-stash">Crafting · Stash workbench</option><option value="combat-fx">Combat FX · all labels</option><option value="skill-fx">Skill FX · all skills</option><option value="map-mine">Map · Mine & Camp</option><option value="map-adventure">Map · Adventure board</option>
         <option value="map-camp-sounds">Map · Camp sounds</option><option value="map-camp-prowler">Map · Camp prowler</option><option value="map-camp-traveler">Map · Camp traveler</option><option value="map-camp-nest">Map · Camp nest</option><option value="map-camp-herd">Map · Camp herd</option><option value="map-camp-injured">Map · Camp aid</option><option value="map-camp-discovered">Map · Camp discovered</option><option value="map-camp-combat">Map · Camp combat</option><option value="map-camp-timeout">Map · Camp timeout</option><option value="map-camp-full-bag">Map · Camp full bag</option><option value="map-camp-readonly">Map · Camp read only</option>
       </select></label>
     </div>
     <a href="/">Return to the game</a>
   </header>
+  {#if arenaPreview}
+    <div class="arena-preview-controls">
+      <strong>Forest clearing</strong>
+      <span>Auto combat · Shift-click a body to focus it · click ground to move · aim then click ground for a placed cast</span>
+      <div class="arena-command-controls" role="group" aria-label="Local combat commands">
+        <button class="btn btn-quiet" type="button" onclick={() => focusArenaEnemy()} disabled={!arenaLiving().length}>
+          {arenaFocusId ? 'Next focus' : 'Focus enemy'}
+        </button>
+        <button class="btn btn-quiet" type="button" onclick={clearArenaFocus} disabled={!arenaFocusId}>Clear focus</button>
+        <button class="btn btn-quiet" type="button" aria-pressed={!!arenaAimSkill} onclick={toggleArenaAim}>
+          {arenaAimSkill ? 'Cancel aim' : `Aim ${sm.byId[arenaSkillId]?.name ?? 'skill'}`}
+        </button>
+        <button class="btn btn-quiet" type="button" onclick={castArenaAtFocus} disabled={!arenaLiving().length}>
+          Cast at focus
+        </button>
+      </div>
+      {#if spritePreviewMode}
+        <label>Species <select value={arenaSpecies} onchange={(event) => {
+          arenaSpecies = event.currentTarget.value;
+          arenaVariantKey = null;
+          const url = new URL(window.location.href);
+          url.searchParams.set('sprite-species', arenaSpecies);
+          url.searchParams.delete('sprite-variant');
+          window.history.replaceState(null, '', url);
+          replayArena();
+        }}>
+          <optgroup label="ARPG mob animations">
+            <option value="goblin">Goblin</option><option value="orc">Orc</option><option value="kobold">Kobold</option><option value="ogre">Ogre</option><option value="troll">Troll</option>
+            <option value="minotaur">Minotaur</option><option value="skeleton">Skeleton</option><option value="mummy">Mummy</option><option value="vampire">Vampire</option><option value="demon">Demon</option>
+            <option value="slime">Slime</option><option value="golem">Golem</option><option value="dragon">Dragon</option><option value="treant">Treant</option><option value="human">Human</option>
+            <option value="lizardman">Lizardman</option><option value="elf">Elf</option><option value="giant">Giant</option><option value="werewolf">Werewolf</option><option value="dryad">Dryad</option>
+          </optgroup>
+          {#if ARENA_ADDITIONAL_VARIANT_SPECIES.length}
+            <optgroup label="Other variant species">
+              {#each ARENA_ADDITIONAL_VARIANT_SPECIES as species}
+                <option value={species.speciesId}>{species.speciesName}</option>
+              {/each}
+            </optgroup>
+          {/if}
+          <optgroup label="Existing previews">
+            <option value="wolf">Wolf</option><option value="spider">Spider</option><option value="wisp">Wisp</option><option value="spear-goblin">Spear Goblin reference</option><option value="imp">Little Demon reference</option>
+            <option value="skeleton-sword">Skeleton (Sword &amp; Shield) reference</option><option value="skeleton-bone">Skeleton (Original Bone) reference</option><option value="crypt-wraith">Crypt Wraith reference</option>
+            <option value="shadow-wolf">Shadow Wolf reference</option><option value="eclipse-wisp">Eclipse Wisp reference</option><option value="pixiblop-spider">Pixiblop Spider reference</option><option value="stone-golem">Stone Golem reference</option>
+          </optgroup>
+        </select></label>
+        <label>Named variant <select aria-label="Named variant animation preview" value={arenaVariantKey ?? ''} onchange={(event) => {
+          const selectedKey = event.currentTarget.value || null;
+          arenaVariantKey = selectedKey;
+          const variant = selectedKey ? ARENA_VARIANT_PREVIEW_BY_KEY.get(selectedKey) : null;
+          if (variant) arenaSpecies = variant.speciesId;
+          const url = new URL(window.location.href);
+          if (variant) {
+            url.searchParams.set('sprite-species', variant.speciesId);
+            url.searchParams.set('sprite-variant', variant.key);
+          } else {
+            url.searchParams.set('sprite-species', arenaSpecies);
+            url.searchParams.delete('sprite-variant');
+          }
+          window.history.replaceState(null, '', url);
+          replayArena();
+        }}>
+          <option value="">Species animation</option>
+          {#each ARENA_VARIANT_GROUPS as group}
+            <optgroup label={group.speciesName}>
+              {#each group.variants as variant}
+                <option value={`${group.speciesId}/${variant.variantId}`}>{variant.name}</option>
+              {/each}
+            </optgroup>
+          {/each}
+        </select></label>
+      {/if}
+      <label>Skill <select aria-label="Skill cast in the arena" value={arenaSkillId} onchange={(event) => {
+        arenaSkillId = event.currentTarget.value;
+        arenaAimSkill = null;
+        arenaManual.cast = undefined;
+        const url = new URL(window.location.href);
+        url.searchParams.set('skill', arenaSkillId);
+        window.history.replaceState(null, '', url);
+        replayArena();
+      }}>
+        {#each ['attack', 'curse', 'heal', 'buff', 'aura'] as kind}
+          <optgroup label={kind}>
+            {#each combatFxSkills.filter((skill: any) => skill.type === kind) as skill}
+              <option value={skill.id}>{skill.name}</option>
+            {/each}
+          </optgroup>
+        {/each}
+      </select></label>
+      <button class="btn btn-quiet" type="button" onclick={replayArena}>Replay encounter</button>
+    </div>
+  {/if}
   {#if showcaseSample === 'combat-fx'}
     <div class="combat-fx-preview-controls">
       <label><input type="checkbox" checked={animateCombatFx} onchange={(event) => {
@@ -2964,7 +3493,21 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         <option value="exchange">Simultaneous exchange</option>
         <option value="miss">Missed skill</option>
         <option value="sizes">Small · Large · Boss</option>
-        <option value="boss">Boss skill windup</option>
+        <option value="boss">Boss skill</option>
+        <option value="skill">Chosen skill · all roster</option>
+      </select></label>
+      <label>Skill <select aria-label="Skill effect" value={combatFxSkillId} onchange={(event) => {
+        combatFxSkillId = event.currentTarget.value;
+        combatFxPreview = 'skill';
+        if (animateCombatFx) replayCombatFx(); else showCombatFxLabels();
+      }}>
+        {#each ['attack', 'curse', 'heal', 'buff', 'aura'] as kind}
+          <optgroup label={kind}>
+            {#each combatFxSkills.filter((skill: any) => skill.type === kind) as skill}
+              <option value={skill.id}>{skill.name}</option>
+            {/each}
+          </optgroup>
+        {/each}
       </select></label>
       <button onclick={replayCombatFx}>Replay combat effect</button>
       <span>Sample effects only · game progress stays unchanged · replay restores the encounter</span>
@@ -2977,6 +3520,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <a href="#panel-inventory">Inventory</a>
     <a href="#panel-craft">Craft</a>
     <a href="#panel-skills">Skills</a>
+    <a href="?sample=skill-fx">Skill FX lab</a>
     <a href="#panel-passive-tree">Tree</a>
     <a href="#panel-town">Town</a>
     <a href="#panel-market">Market</a>
@@ -2992,6 +3536,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     {@const EconomyLab = economyLabView}
     <div id="showcase-economy-lab" class="showcase-economy-lab"><EconomyLab /></div>
   {/if}
+  {#if showcaseMode && showcaseSample === 'skill-fx' && skillFxLabView}
+    {@const SkillFxLab = skillFxLabView}
+    <div id="showcase-skill-fx" class="showcase-skill-fx"><SkillFxLab /></div>
+  {/if}
 {/if}
 
 <!-- desktop-only surface: below the floor the corner reads stop being placeable, so it says so -->
@@ -3001,12 +3549,15 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     they need the room. Widen the window, or set the browser zoom out.</p>
 </div>
 
-<div id={showcaseMode ? 'showcase-field' : undefined} class="stage" style={`grid-template-areas:${hudLayoutAreas};`} class:showcase={showcaseMode} class:combat-fx-sample={showcaseMode && showcaseSample === 'combat-fx'} class:combat-fx-live={showcaseMode && showcaseSample === 'combat-fx' && animateCombatFx} class:fighting={inCombat} class:mapmode={panel === 'map'} class:veiled={!showcaseMode && ((panel !== null && panel !== 'map') || sheetOpen)} class:townmode={townLive && panel !== 'map'}>
-  {#if showcaseMode && showcaseSample === 'map-hex-3d' && hex3dPrototypeView}
-    {@const Hex3dPrototype = hex3dPrototypeView}
-    <Hex3dPrototype onClose={() => {
-      showcaseSample = 'map-adventure'; gameState = showcaseGame('map-adventure'); panel = 'map';
-    }} />
+<div id={showcaseMode ? 'showcase-field' : undefined} class="stage" style={`grid-template-areas:${hudLayoutAreas};`} class:showcase={showcaseMode} class:arpg-arena={arenaMode && panel !== 'map'} class:combat-fx-sample={showcaseMode && showcaseSample === 'combat-fx'} class:combat-fx-live={showcaseMode && showcaseSample === 'combat-fx' && animateCombatFx} class:fighting={inCombat} class:mapmode={panel === 'map'} class:veiled={!showcaseMode && ((panel !== null && panel !== 'map') || sheetOpen)} class:townmode={townLive && panel !== 'map'}>
+  {#if arenaMode && panel !== 'map'}
+    <CombatArenaScene arena={combatArena} s={gameState} {c} {ring} {speed} paused={!running || paused}
+      spritePreviewSpecies={spritePreviewMode ? arenaSpecies : null}
+      spritePreviewVariant={spritePreviewMode && activeArenaVariant ? { speciesId: activeArenaVariant.speciesId, variantId: activeArenaVariant.variantId } : null}
+      aoePreview={showcaseMode && showcaseQuery.get('aoe-preview') === '1'}
+      focusId={arenaFocusId}
+      onVitals={(vitals) => arenaVitals = vitals} onInspectEnemy={(mob) => inspectedEnemy = snapshotEnemy(mob)}
+      onFocusEnemy={(mob) => focusArenaEnemy(mob.id)} onGroundCommand={issueArenaGroundCommand} />
   {/if}
   <!-- one generated map sheet behind the HUD — the only copy, and the surface a place is picked on -->
   <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
@@ -3029,7 +3580,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <span class="aloud" aria-live="polite" aria-atomic="true">{pickedCell ? `Selected block ${pickedCell.key}: ${pickedCell.label}${journeySignals.length ? ' · ' + journeySignals.map(signal => signal.label).join(' · ') : ''}` : ''}</span>
   </div>
 
-  {#if plates.length}
+  {#if plates.length && !arenaMode}
     {@const front = plates[0]}
     <div class="targetbar" style={place('target')}>
       <p class="target-name">{fieldLabel(front)} <span>{front.kind}</span></p>
@@ -3068,17 +3619,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
           <p class="text-note journey-place">{gameState.walk.blocksLeft} blocks left · {gameState.group.length ? 'Step paused during combat' : `next hex in ${Math.max(0, Math.ceil(gameState.walk.secLeft))}s`}</p>
         {/if}
       </header>
+      {#if skillDiscoveryId && !awayReport}
+        <SkillDiscovery id={skillDiscoveryId} oninspect={() => inspectSkill(skillDiscoveryId!)} ondismiss={() => skillDiscoveryId = null} />
+      {/if}
       <div class="journey-alerts">
-        {#each journeyNotices as notice (notice.id)}
-          <div class="journey-notice card-tile" class:alarm={notice.kind === 'error' || notice.kind === 'blocked'}
-               role={notice.kind === 'error' ? 'alert' : undefined}>
-            <strong>{notice.title}</strong>
-            <small>{notice.detail}</small>
-            {#if notice.actionLabel && (notice.action || notice.id === 'storage-error' || notice.id === 'writer' || notice.id === 'camp-encounter')}
-              <button class="btn btn-quiet" type="button" onclick={() => runNoticeAction(notice)}>{notice.actionLabel}</button>
-            {/if}
-          </div>
-        {/each}
+        <JourneyNotices notices={journeyNotices} onaction={runNoticeAction} />
         {#if gameState.patrol.active}
           <button class="btn btn-quiet" type="button" onclick={doStopPatrol} disabled={!transactionWriter}>Stop Patrol</button>
         {/if}
@@ -3201,12 +3746,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   {/if}
 
   {#if awayReport}
-    <div class="toast notice-toast">
-      <button class="quit btn btn-flat" onclick={() => (awayReport = null)} aria-label="Dismiss">✕</button>
-      <strong>Welcome back</strong>
-      <span>away {awayReport.mins} min · {awayReport.secs} sec simulated</span>
-      <span>+{fmtNum(awayReport.kills)} kills · {fmtNum(awayReport.drops)} items · {fmtNum(awayReport.stones)} stones · {fmtNum(awayReport.junk)} junk · {fmtNum(awayReport.gold)} gold{awayReport.levels ? ` · +${awayReport.levels} level${awayReport.levels > 1 ? 's' : ''}` : ''} · quality floor {awayReport.quality}</span>
-    </div>
+    <ProgressRecap report={awayReport} treePoints={gameState.player.treePoints}
+      bagUsed={slotsUsed(gameState)} bagCapacity={slotsAvailable(gameState)} {fmtNum}
+      ondismiss={() => awayReport = null} ontree={() => revealPanel('tree')}
+      onskills={() => revealPanel('skills')} onbag={() => { invTab = 'inv'; revealPanel('bag'); }} />
   {/if}
 
   <!-- contextual overlays stay on the right edge and appear only while open. -->
@@ -3274,7 +3817,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <div class="action-cluster">
       <div class="vital-stack">
         <div class="vital-orb life-orb" style={`--shield-strength:${esFill.toFixed(3)}`}
-             role="img" aria-label={`HP ${fmtNum(gameState.player.hp)} of ${fmtNum(c.maxHp)}${hpBanked > 0 ? `, ${fmtNum(hpUsable)} usable and ${fmtNum(hpBanked)} reserved` : ''}${c.es > 0 ? `, ES ${fmtNum(gameState.player.es)} of ${fmtNum(c.es)}` : ''}`}>
+             role="img" aria-label={`HP ${fmtNum(ariaHp)} of ${fmtNum(c.maxHp)}${hpBanked > 0 ? `, ${fmtNum(hpUsable)} usable and ${fmtNum(hpBanked)} reserved` : ''}${c.es > 0 ? `, ES ${fmtNum(ariaEs)} of ${fmtNum(c.es)}` : ''}`}>
           <div class="orb-well">
             <i class="orb-fill" style={`--fill:${hpFill.toFixed(3)}`} aria-hidden="true"><span class="orb-ink"><i class="orb-energy"></i></span></i>
             <span class="orb-gloss" aria-hidden="true"></span>
@@ -3298,6 +3841,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         </div>
       </div>
       <div class="cast-stack">
+      <ActiveBuffs skills={gameState.skills} />
       <Quickbar quickbar={gameState.quickbar} potions={gameState.farm.potions} condensed={gameState.farm.condensed} writable={transactionWriter}
                 bagIcon={hubIcon('bags', bagMark)} keyFor={(n) => keyFor('item.' + n)}
                 onuse={useQuickSlot}
@@ -3308,10 +3852,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         {@const k = id ? sm.byId[id] : null}
         {@const cd = id ? (gameState.skills.cd[id] || 0) : 0}
         {@const eff = id ? skillCd(gameState.skills, id, c.cdr) : 0}
-        {@const frac = cd > 0 && eff > 0 ? Math.max(0, Math.min(1, 1 - cd / eff)) : 1}
+        {@const cdVisual = Math.max(0, cd - cooldownVisualSeconds)}
+        {@const frac = cdVisual > 0 && eff > 0 ? Math.max(0, Math.min(1, 1 - cdVisual / eff)) : 1}
         {@const when = id ? modeOf(gameState.skills, id) : 'always'}
         {@const filler = slotFiller(id)}
-        <span class="cast hud-slot" class:empty={!id || !k} class:ready={!!k && cd <= 0 && when === 'always' && !filler}
+        {@const eligibility = id ? hudSkillEligibility(id) : null}
+        {@const compact = id && k ? describeSkill(k).compact : ''}
+        <span class="cast hud-slot" class:empty={!id || !k} class:ready={!!eligibility?.ready && running && !paused}
               class:paused={!running || paused}
               class:silent={when === 'never'} class:gated={when === 'conditional'} class:filler={filler}
               role="listitem"
@@ -3319,12 +3866,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
               ondragstart={(e) => setCastDrag(e, { index: i })}
               ondragover={(e) => { if (id) e.preventDefault(); }}
               ondrop={(e) => { const f = readCastDrag(e); if (f && f.index !== i) doMoveSlot(f.index, i); }}
-              title={`Slot ${i + 1}${id && k ? `: ${k.name} · ${slotWaiting(id)}` : ': empty'}`}>
+              title={`Slot ${i + 1}${id && k ? `: ${k.name} · ${compact} · ${eligibility?.label}` : ': empty'}`}>
           {#if id && k}
+            <button class="cast-open" type="button" aria-label={`${k.name}: ${eligibility?.label}. Open skill setup.`} aria-describedby={`skill-readiness-${i}`} onclick={() => inspectSkill(id)}></button>
+            <span class="cast-tooltip" id={`skill-readiness-${i}`} role="tooltip"><strong>{k.name} · {eligibility?.label}</strong><span>{eligibility?.detail}</span>{#if !running || paused}<span>Game paused.</span>{/if}</span>
             <img src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />
             {#if cd > 0}
-              <span class="sweep" style={`--skill-cooldown-progress:${(frac * 100).toFixed(2)}%; --cooldown-step:${cooldownStepMs}ms`} aria-hidden="true"></span>
-              <small>{cd.toFixed(1)}</small>
+              <span class="sweep" style={`--skill-cooldown-progress:${(frac * 100).toFixed(3)}%`} aria-hidden="true"></span>
+              <small>{Math.max(1, Math.ceil(cdVisual))}</small>
             {/if}
             {#if latestFire?.skillId === id}
               <!-- a ring of the press's own Element, remounted once per event by the key -->
@@ -3340,7 +3889,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       </div>
       <div class="vital-stack">
         <div class="vital-orb mana-orb" class:reserved={reserved > 0} style={`--reserved:${reserved}%`}
-             role="img" aria-label={`Mana ${fmtNum(gameState.player.mana)} of ${fmtNum(c.maxMana)}${reserved > 0 ? `, ${reserved.toFixed(1)}% reserved by auras` : ''}`}>
+             role="img" aria-label={`Mana ${fmtNum(ariaMana)} of ${fmtNum(c.maxMana)}${reserved > 0 ? `, ${reserved.toFixed(1)}% reserved by auras` : ''}`}>
           <div class="orb-well">
             <i class="orb-fill" style={`--fill:${manaFill.toFixed(3)}`} aria-hidden="true"><span class="orb-ink"><i class="orb-energy"></i></span></i>
             <span class="orb-gloss" aria-hidden="true"></span>
@@ -3364,14 +3913,15 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   </div>
 
   <!-- mob plates mount on the Field tab or over a live fight, and on nothing else -->
-  {#if showCombatCards}
+  {#if showCombatCards && !arenaMode}
     <div class="field" class:clear={plates.length === 0}
          style:grid-area={gridAreaCss({ ...hudLayout.field.area, columnStart: 1, columnEnd: 15 }, true)}
          style:width={`${(hudLayout.field.area.columnEnd - hudLayout.field.area.columnStart + 1) / 15 * 100}%`}>
       <FieldPlates s={gameState} ring={ring} plates={plates} zone={zone} town={town} townLive={townLive} c={c}
                  vitals={{ hp: shownHp, es: shownEs, mana: shownMana }} statuses={gameState.playerStatuses} reserved={reserved}
                  onSheet={() => { sheetTab = 'stats'; sheetOpen = true; }} fmtNum={fmtNum}
-                 plateMotion={plateMotion} fxOutMs={fxOutMs} selfFx={selfFx} />
+                 plateMotion={plateMotion} fxOutMs={fxOutMs} selfFx={selfFx} {speed}
+                 effectLevel={settings.combatEffects || 'auto'} onInspectEnemy={(enemy) => (inspectedEnemy = enemy)} />
     </div>
 
     <!-- the hit ring: sim events with no body of their own — hits over their plate, kills and drops here;
@@ -3382,7 +3932,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
           <span class="fx fx-{e.kind}" class:crit={e.crit} class:pop={e.kind === 'drop'} class:pop-loot={e.kind === 'drop'} out:fxOut={{ ms: fxOutMs }} style="--fx:{e.colour}; --lane:{e.id % 7}">{e.text}</span>
         {/each}
       </div>
-      {#if latestTaken}
+      {#if latestTaken && (speed <= 1 || importantCombatEvent(latestTaken))}
         <!-- the veil's edge takes the colour of what landed -->
         {#key latestTaken.id}
           <span class="veil" style="--fx:{latestTaken.colour}"></span>
@@ -3453,7 +4003,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   </div>
 
   <div class="field-feed" style={place('feed', '100%', 'auto')}>
-    <LogBox lines={chatShown} tabs={CHAT_TABS} active={chatTab} hasActivity={feed.length > 0} onTab={(tab) => (chatTab = tab)} />
+    <LogBox lines={chatShown} tabs={CHAT_TABS} active={chatTab} hasActivity={feed.length > 0} onTab={(tab) => (chatTab = tab)} onOpenHistory={openCombatHistory} />
   </div>
 
   <!-- press notes are said aloud as well as printed — four pills are not one announcement -->
@@ -3464,7 +4014,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
          aria-hidden={!menuExpanded} inert={!menuExpanded}>
 
     <button type="button" class="hub-control" class:here={panel === null} onclick={closePanel}
-            title="Back to the field · Esc">
+            data-panel-fallback title="Back to the field · Esc">
       <span class="toggle-ring" class:here={panel === null}><img src={fieldMark} alt="" aria-hidden="true" /></span>
       <span class="cap">Field</span>
     </button>
@@ -3601,7 +4151,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       <div class="sheet-build">
         <section class="sheet-doll" aria-label="Worn equipment">
           <h3 class="text-accent">Worn gear <span class="text-note">{gameState.gear.filter(Boolean).length} / {E.stat.item_slots}</span></h3>
-          <SlotGrid entries={wornEntries} capacity={E.stat.item_slots} wornOf={wornOf} fixed layout="equipment"
+          <SlotGrid game={gameState} entries={wornEntries} capacity={E.stat.item_slots} wornOf={wornOf} fixed layout="equipment"
                     actions={wornActions} />
         </section>
         <StatAllocator stats={STATS} core={c.core} points={gameState.player.points} canRefund={townLive} writer={transactionWriter}
@@ -3798,7 +4348,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
           </div>
         {/snippet}
         <div class="bagmain">
-          <SlotGrid
+          <SlotGrid game={gameState}
             entries={bagShown}
             capacity={slotsAvailable(gameState)}
             compactGrid
@@ -3813,56 +4363,58 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
             empty="Nothing carried yet — stones, herbs, draughts and junk land in these slots, and so does every piece a kill keeps."
           />
         </div>
-      </div>
-      <details class="filter">
-        <summary>Bag filter — what this run keeps</summary>
-        <p><small>The filter is <b>off by default</b> — an off slot keeps every drop and dissolves nothing. An enabled slot converts a rejected piece into the complete Iron Ore + Scrap bundle. If either output cannot fit, the piece stays unpicked.</small></p>
-        <table>
-          <thead><tr><th>Slot</th><th>Filter</th><th>Keep when it beats the worn piece by</th><th>Also keep an Element you cannot resist</th><th>The rule in words</th></tr></thead>
-          <tbody>
-            {#each FILTER_SLOTS as slot}
-              {@const r = ruleFor(gameState.filter, slot)}
-              <tr>
-                <td>{slot}</td>
-                <td><input type="checkbox" aria-label={`Enable bag filter for ${slot}`} checked={r.enabled} disabled={!transactionWriter} onchange={(e) => editRule(slot, { enabled: (e.target as HTMLInputElement).checked })} /></td>
-                <td><input type="number" aria-label={`Minimum improvement over worn ${slot}, percent`} min="0" step="1" value={r.margin_pct} disabled={!r.enabled || !transactionWriter} onchange={(e) => editRule(slot, { margin_pct: Number((e.target as HTMLInputElement).value) })} /> %</td>
-                <td><input type="checkbox" aria-label={`Keep ${slot} with Element resistance missing`} checked={r.keep_missing_element} disabled={!r.enabled || !transactionWriter} onchange={(e) => editRule(slot, { keep_missing_element: (e.target as HTMLInputElement).checked })} /></td>
-                <td>{describeRule(r)}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-        <p><small>Still not found — Elements you have no resistance for: <b>{gameState.filter.missing.elements.length ? gameState.filter.missing.elements.join(', ') : 'none'}</b> · empty slots: <b>{gameState.filter.missing.slots.length ? gameState.filter.missing.slots.join(', ') : 'none'}</b></small></p>
-        <!-- the rules a whole bag lives by are read with the table they answer to -->
-        <div class="filterpresets">
-          <p class="filterpresets-head"><b>Filter presets</b>
-            <small class="text-dim">· {presetSlots(gameState)}</small></p>
-          <ul class="presetrow">
-            {#each { length: presetSlots(gameState) } as _, i (i)}
-              <li>
-                <span>Preset {i + 1}</span>
-                {#if gameState.filterPresets[i]}
-                  <small class="text-dim">stored</small>
-                  <button onclick={() => doLoadFilterPreset(i)} disabled={!transactionWriter}>Load</button>
-                  <button onclick={() => doClearFilterPreset(i)} disabled={!transactionWriter}>Clear</button>
-                {:else}
-                  <small class="text-dim">empty</small>
-                  <button onclick={() => doSaveFilterPreset(i)} disabled={!transactionWriter}>Save</button>
-                {/if}
-              </li>
-            {/each}
-          </ul>
-          <p class="autodissolve"><small>Auto-dissolve below item level
-              <input type="number" min="0" step="1" value={gameState.autoDissolveLevel ?? 0} disabled={!transactionWriter}
-                onchange={(e) => setAutoDissolve(Number((e.target as HTMLInputElement).value))} /></small></p>
+        <div class="bagcare-rail">
+          <details class="filter">
+            <summary>Bag filter — what this run keeps</summary>
+            <p><small>The filter is <b>off by default</b> — an off slot keeps every drop and dissolves nothing. An enabled slot converts a rejected piece into the complete Iron Ore + Scrap bundle. If either output cannot fit, the piece stays unpicked.</small></p>
+            <table>
+              <thead><tr><th>Slot</th><th>Filter</th><th>Keep when it beats the worn piece by</th><th>Also keep an Element you cannot resist</th><th>The rule in words</th></tr></thead>
+              <tbody>
+                {#each FILTER_SLOTS as slot}
+                  {@const r = ruleFor(gameState.filter, slot)}
+                  <tr>
+                    <td>{slot}</td>
+                    <td><input type="checkbox" aria-label={`Enable bag filter for ${slot}`} checked={r.enabled} disabled={!transactionWriter} onchange={(e) => editRule(slot, { enabled: (e.target as HTMLInputElement).checked })} /></td>
+                    <td><input type="number" aria-label={`Minimum improvement over worn ${slot}, percent`} min="0" step="1" value={r.margin_pct} disabled={!r.enabled || !transactionWriter} onchange={(e) => editRule(slot, { margin_pct: Number((e.target as HTMLInputElement).value) })} /> %</td>
+                    <td><input type="checkbox" aria-label={`Keep ${slot} with Element resistance missing`} checked={r.keep_missing_element} disabled={!r.enabled || !transactionWriter} onchange={(e) => editRule(slot, { keep_missing_element: (e.target as HTMLInputElement).checked })} /></td>
+                    <td>{describeRule(r)}</td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+            <p><small>Still not found — Elements you have no resistance for: <b>{gameState.filter.missing.elements.length ? gameState.filter.missing.elements.join(', ') : 'none'}</b> · empty slots: <b>{gameState.filter.missing.slots.length ? gameState.filter.missing.slots.join(', ') : 'none'}</b></small></p>
+            <!-- the rules a whole bag lives by are read with the table they answer to -->
+            <div class="filterpresets">
+              <p class="filterpresets-head"><b>Filter presets</b>
+                <small class="text-dim">· {presetSlots(gameState)}</small></p>
+              <ul class="presetrow">
+                {#each { length: presetSlots(gameState) } as _, i (i)}
+                  <li>
+                    <span>Preset {i + 1}</span>
+                    {#if gameState.filterPresets[i]}
+                      <small class="text-dim">stored</small>
+                      <button onclick={() => doLoadFilterPreset(i)} disabled={!transactionWriter}>Load</button>
+                      <button onclick={() => doClearFilterPreset(i)} disabled={!transactionWriter}>Clear</button>
+                    {:else}
+                      <small class="text-dim">empty</small>
+                      <button onclick={() => doSaveFilterPreset(i)} disabled={!transactionWriter}>Save</button>
+                    {/if}
+                  </li>
+                {/each}
+              </ul>
+              <p class="autodissolve"><small>Auto-dissolve below item level
+                  <input type="number" min="0" step="1" value={gameState.autoDissolveLevel ?? 0} disabled={!transactionWriter}
+                    onchange={(e) => setAutoDissolve(Number((e.target as HTMLInputElement).value))} /></small></p>
+            </div>
+            <button class="btn btn-quiet" type="button" onclick={openGearCare}>Open gear care</button>
+          </details>
+          <div class="gear-care-slot">
+            <GearCare state={gameState} writer={transactionWriter} autoEquipEnabled={settings.autoEquip !== false} marginPct={settings.equipMargin || 0}
+              onAutoEquip={(enabled) => setSetting('autoEquip', enabled)} onEquipNow={doBestEquip}
+              onMargin={(value) => setSetting('equipMargin', value)}
+              onAutoReturn={setAutoReturn} onRule={editRule} onRunFilter={doRunFilter} onOpenBag={() => openPanel('bag')} />
+          </div>
         </div>
-        <button class="btn btn-quiet" type="button" onclick={openGearCare}>Open gear care</button>
-      </details>
-      <div class="gear-care-slot">
-        <GearCare state={gameState} writer={transactionWriter} autoEquipEnabled={settings.autoEquip !== false} marginPct={settings.equipMargin || 0}
-          onAutoEquip={(enabled) => setSetting('autoEquip', enabled)} onEquipNow={doBestEquip}
-          onMargin={(value) => setSetting('equipMargin', value)}
-          onAutoReturn={setAutoReturn} onRule={editRule} onRunFilter={doRunFilter} onOpenBag={() => openPanel('bag')} />
       </div>
     </section>
     {:else}
@@ -3896,8 +4448,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {#if panel === 'craft' || showcaseMode}
   <Panel title="Craft" subtitle={`Optional · ${ACTIVITY_GUIDE.craft.when} ${ACTIVITY_GUIDE.craft.helps} Right-click a stone · click to apply · Shift-click to repeat`} width="wide" fixed topmost showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <CraftWorkshop game={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
-                   onpick={(where, index) => { bench = { where, index }; benchNote = ''; }}
-                   onclear={() => { bench = null; benchNote = ''; }}
+                   bind:view={craftView}
+                   onpick={selectBench}
+                   onclear={() => { benchSelection = null; benchNote = ''; }}
                    onrun={(op, line, pick) => runCraft(op, line ?? 0, pick)} {wornOf} note={benchNote}
                    stashTabs={tabs} stashTab={stashTab} writer={transactionWriter}
                    repairPrice={repairPrice} onrepair={doRepairGear}
@@ -3907,178 +4460,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {/if}
 
 {#if panel === 'skills' || showcaseMode}
-  <Panel title="Skills" subtitle={`${ACTIVE_SLOTS} slots, cast top-down`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
-    <div class="skills-panel">
-    <Tabs label="Skill sections" active={skillTab} onpick={(id) => (skillTab = id as typeof skillTab)}
-          tabs={[{ id: 'loadout', label: 'Loadout' }, { id: 'owned', label: 'Owned skills' }, { id: 'effects', label: 'Buffs & auras' }, { id: 'mastery', label: 'Mastery & curses' }]} />
-    {#if skillNote}<p class="skill-note" role="status">{skillNote}</p>{/if}
-    {#if skillTab === 'loadout'}
-    <div class="skill-view">
-    <div class="presets">
-      {#each gameState.presets as p, i}
-        <button class:picked={i === gameState.activePreset} aria-pressed={i === gameState.activePreset} onclick={() => doSwitchPreset(i)}>
-          {p.name}{p.zones.length ? ` · ${p.zones.length} zone${p.zones.length > 1 ? 's' : ''}` : ''}
-        </button>
-      {/each}
-      <button onclick={doStorePreset}>save current</button>
-      <button onclick={() => doBind(gameState.activePreset)}>
-        {gameState.presets[gameState.activePreset].zones.includes(gameState.zone) ? 'unbind this zone' : 'bind this zone'}
-      </button>
-    </div>
-    <details class="prose">
-      <summary>How the cast order works</summary>
-      <p><small>The first ready slot with enough usable Mana fires; a no-cooldown slot fills last. Conditional rows check their own gates. Reserved Mana is not spendable.</small></p>
-    </details>
-    <table>
-      <thead><tr><th>#</th><th>Skill</th><th>Worth</th><th>Level</th><th>cd → eff</th><th>Cost</th><th>Next in</th><th>When</th><th>Gate</th><th>Place</th></tr></thead>
-      <tbody>
-        {#each gameState.skills.list as id, i}
-          {@const k = id ? sm.byId[id] : null}
-          <tr>
-            <td>{i + 1}</td>
-            <td>
-              {#if k}<span class="skill-label"><img class="icon-label" src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}{#if !sm.weaponFits(k, heldWeaponName(gameState) || '')}<span class="chip chip-tag locked" title={`${k.name} fires only while a ${k.weapon === 'bow' ? 'bow or crossbow' : k.weapon} is held — you hold ${heldWeaponName(gameState) || 'nothing'}`}>needs {k.weapon === 'bow' ? 'bow/crossbow' : k.weapon}</span>{/if}</span>{:else}—{/if}
-            </td>
-            <td>{k && id ? (k.base_flat != null ? pressText(k) : k.type) : ''}</td>
-            <td>{id ? `${skillLevel(gameState.skills, id)} / ${E.skill_xp.level_cap}` : ''}</td>
-            <td>{k && id ? `${k.cd}s → ${skillCd(gameState.skills, id, c.cdr).toFixed(2)}s` : ''}</td>
-            <td>{k && id ? costNow(gameState.skills, id) : ''}</td>
-            <td>{id ? `${(gameState.skills.cd[id] || 0).toFixed(1)}s${(gameState.skills.buffUp[id] || 0) > 0 ? ` · window ${gameState.skills.buffUp[id]}s` : ''}` : ''}</td>
-            <td>
-              {#if id}
-                <select aria-label={`Cast mode for ${sm.byId[id]?.name || id}`} value={modeOf(gameState.skills, id)} onchange={(e) => setMode(id, (e.target as HTMLSelectElement).value)}>
-                  <option value="always">always</option>
-                  <option value="conditional">conditional</option>
-                  <option value="never">never</option>
-                </select>
-              {:else}—{/if}
-            </td>
-            <td>
-              {#if id && modeOf(gameState.skills, id) === 'conditional'}
-                <button class="gate" onclick={() => (gateOpen = gateOpen === id ? null : id)}
-                        title={gateOpen === id ? 'close this row\'s conditions' : 'edit this row\'s conditions'}>
-                  {gateNote(id) || 'nothing yet — this row never fires'}
-                </button>
-              {:else}—{/if}
-            </td>
-            <td>
-              <select aria-label={`Skill in slot ${i + 1}`} value={id || ''} onchange={(e) => setSlot(i, (e.target as HTMLSelectElement).value)}>
-                <option value="">empty</option>
-                {#each ownedActives as k2}<option value={k2.id} selected={id === k2.id}>{k2.name}</option>{/each}
-              </select>
-            </td>
-          </tr>
-          {#if id && gateOpen === id && modeOf(gameState.skills, id) === 'conditional'}
-            <!-- the legs are the fixed set the sim reads; a needed number opens at its data default -->
-            {@const cond = condOf(gameState.skills, id)}
-            {@const flag = rowFlag(id)}
-            {@const exploit = rowExploitFlag(id)}
-            <tr class="gate-editor">
-              <td></td>
-              <td colspan="9">
-                <label><input type="checkbox" checked={cond.boss} onchange={(e) => setCond(id, { boss: (e.target as HTMLInputElement).checked })} /> against a boss</label> ·
-                <label><input type="checkbox" checked={cond.hpBelowPct > 0} onchange={(e) => setCond(id, { hpBelowPct: (e.target as HTMLInputElement).checked ? HP_BELOW_DEFAULT : 0 })} /> while HP is under</label>
-                <input type="number" min="0" max="100" value={cond.hpBelowPct} onchange={(e) => setCond(id, { hpBelowPct: Number((e.target as HTMLInputElement).value) })} />% of the pool ·
-                <label><input type="checkbox" checked={cond.minTargets > 0} onchange={(e) => setCond(id, { minTargets: (e.target as HTMLInputElement).checked ? MIN_TARGETS_DEFAULT : 0 })} /> only against</label>
-                <input type="number" min="1" value={cond.minTargets} onchange={(e) => setCond(id, { minTargets: Number((e.target as HTMLInputElement).value) })} /> in the group ·
-                <label><input type="checkbox" checked={cond.manaFloorPct > 0} onchange={(e) => setCond(id, { manaFloorPct: (e.target as HTMLInputElement).checked ? MANA_FLOOR_DEFAULT : 0 })} /> never spend below</label>
-                <input type="number" min="0" max="100" value={cond.manaFloorPct} onchange={(e) => setCond(id, { manaFloorPct: Number((e.target as HTMLInputElement).value) })} />% of the usable pool ·
-                {#if flag}<label><input type="checkbox" checked={cond.statusMissing.includes(flag.key)} onchange={() => toggleStatusMissing(id, flag.key)} /> while {flag.label} is not on it</label>{/if}
-                {#if exploit}
-                  <label><input type="checkbox" checked={cond.statusPresent} onchange={(e) => setCond(id, { statusPresent: (e.target as HTMLInputElement).checked })} /> while it has {exploit.label}</label>
-                  <span>at least</span>
-                  <input type="number" min="1" value={cond.statusStacksAtLeast} onchange={(e) => setCond(id, { statusStacksAtLeast: Math.max(0, Math.floor(Number((e.target as HTMLInputElement).value))) })} /> {exploit.label} stacks ·
-                {/if}
-                <label><input type="checkbox" checked={cond.selfDebuffed} onchange={(e) => setCond(id, { selfDebuffed: (e.target as HTMLInputElement).checked })} /> while we are debuffed</label> ·
-                <button onclick={() => copyGate(id)}>copy to every conditional row</button>
-                <button onclick={() => setCond(id, { boss: false, hpBelowPct: 0, statusMissing: [], minTargets: 0, manaFloorPct: 0, statusPresent: false, statusStacksAtLeast: 0, selfDebuffed: false })}>clear</button>
-              </td>
-            </tr>
-          {/if}
-        {/each}
-      </tbody>
-    </table>
-    </div>
-    {:else if skillTab === 'owned'}
-    <div class="skill-view">
-    <h3>Owned skills · duplicates feed each skill's own ladder</h3>
-    <div class="skill-owned-grid">
-      {#each Object.keys(gameState.skills.owned) as id}
-        {@const k = sm.byId[id]}
-        <div class="skill-owned" title={`${k.name} · ${k.type} · ${k.effect || (k.base_flat != null ? `${Math.round(k.base_flat)} + ${k.eff}% of its ${k.basis} power` : k.reserve) || ''}`}>
-          <span class="skill-label"><img class="icon-label" src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" /><b>{k.name}</b></span>
-          <small>{gameState.skills.owned[id] + 1} owned · {gameState.skills.owned[id]} duplicates · {ladderOf(gameState.skills, id)}% cd</small>
-        </div>
-      {:else}
-        <p class="empty-owned">No skill yet — the first one is a boss drop ({(E.skill_drop.boss * 100).toFixed(0)}% per boss kill).</p>
-      {/each}
-    </div>
-    </div>
-    {:else if skillTab === 'effects'}
-    <div class="skill-view effects-view">
-      <p class="reserve-note"><small>New drops start off · buffs repeat · auras stay on.</small></p>
-      <section>
-        <h3>Buff track · re-presses itself and takes no slot</h3>
-        <div class="skill-effect-grid">
-          {#each ownedBuffs as k}
-            <label title={`${k.duration}s on · ${k.cd}s cooldown · ${costNow(gameState.skills, k.id)} · ${effectLine(k) || k.effect}`}><input type="checkbox" checked={gameState.skills.buffs[k.id]} onchange={() => toggle(k.id)} /><span class="skill-label"><img class="icon-label" src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span></label>
-          {:else}<small>None owned.</small>{/each}
-        </div>
-      </section>
-      <p class="reserve-note"><small>Reserved {reserved.toFixed(1)}% of Max Mana{hpReservedShare > 0 ? ` · ${hpReservedShare.toFixed(1)}% of Max HP` : ''} · cap {sm.RESERVATION_LIMIT}%. Active: {describeFold(effectsActive(gameState.skills, c.keystones)) || 'none'}.</small></p>
-      {#if hasResonance}
-        <p class="reserve-note"><small>Aura Resonance · {resonance.count} active aura{resonance.count === 1 ? '' : 's'} (trigger auras count): −{(resonance.bR * 100).toFixed(1)}% reservation, +{(resonance.bE * 100).toFixed(1)}% aura effect.</small></p>
-      {/if}
-      <section>
-        <h3>Auras · reserve Max {hasBloodCovenant ? 'Mana or HP' : 'Mana'}</h3>
-        <div class="skill-effect-grid">
-          {#each ownedAuras as k}
-            {@const pool = auraPoolOf(gameState.skills, k.id)}
-            {@const share = pool === 'hp' ? sm.reservePct(k.reserve ?? '') : sm.reservePct(k.reserve ?? '') * (1 - resonance.bR)}
-            <div class="aura-row">
-              <label title={`${k.reserve} · ${share.toFixed(1)}% of Max ${pool === 'hp' ? 'HP' : 'Mana'} · ${effectLine(k) || k.effect}`}><input type="checkbox" checked={gameState.skills.auras[k.id]} onchange={() => toggle(k.id)} /><span class="skill-label"><img class="icon-label" src={skillIcon(k.id, k.type)} alt="" aria-hidden="true" />{k.name}</span></label>
-              {#if hasBloodCovenant}
-                <select aria-label={`${k.name} reservation pool`} value={pool} onchange={(event) => chooseAuraPool(k.id, event.currentTarget.value === 'hp' ? 'hp' : 'mana')}>
-                  <option value="mana">Mana</option>
-                  <option value="hp">HP</option>
-                </select>
-              {/if}
-            </div>
-          {:else}<small>None owned.</small>{/each}
-        </div>
-        <button class="btn btn-flat" type="button" onclick={disableAllAuras} disabled={!ownedAuras.some((k) => gameState.skills.auras[k.id])}>Turn all auras off</button>
-      </section>
-    </div>
-    {:else}
-    <div class="skill-view">
-    <h3>Mastery ladder · the whole roster</h3>
-    <p><small>Only the held weapon earns XP · 4 a kill · best per slot kept.</small></p>
-    <table>
-      <thead><tr><th>Weapon</th><th>Mastery</th><th>Matching-skill bonus</th></tr></thead>
-      <tbody>
-        {#each WEAPONS as w}
-          {@const lv = masteryLevel(gameState, w.name)}
-          <tr>
-            <td>{w.name}</td>
-            <td>{masteryLabel(lv)}</td>
-            <td>{weaponSkillBonusPct(lv) > 0 ? `+${weaponSkillBonusPct(lv).toFixed(1)}%` : '—'}</td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-    <p><small>Other skills take half of the held weapon's Mastery bonus.</small></p>
-
-    <h3>Curable curses · target-side lines a press can put on a mob</h3>
-    <ul>
-      {#each curableRows() as k}
-        <li>{k.name} · {effectLine(k) || k.effect}</li>
-      {:else}
-        <li><small>None.</small></li>
-      {/each}
-    </ul>
-    </div>
-    {/if}
-    </div>
+  <Panel title="Skills" subtitle={`${ACTIVE_SLOTS} slots · timed skills first, fillers last`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
+    <SkillsWorkbench state={gameState} character={c} writable={transactionWriter} note={skillNote}
+      autoSkills={settings.autoSkills !== false} bind:view={skillsWorkbenchView}
+      onslot={setSlot} onmove={doMoveSlot} onmode={setMode} oncondition={setCond}
+      ontoggle={toggle} onaurapool={chooseAuraPool} ondisableauras={disableAllAuras}
+      onswitchpreset={doSwitchPreset} onstorepreset={doStorePreset} onbindzone={doBind} />
   </Panel>
 {/if}
 
@@ -4096,6 +4483,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       onpath={doAllocateTreePath}
       ontrackgoal={(id) => doTrackGoal({ kind: 'passive', id })}
       goalId={journeyGoal?.source === 'tracked' && journeyGoal.view.ref.kind === 'passive' ? journeyGoal.view.ref.id : null}
+      bind:session={treeBoardSession} bind:focusId={treeFocusId}
     />
   </Panel>
 {/if}
@@ -4128,7 +4516,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {/if}
 
 {#if panel === 'keys' || showcaseMode}
-  <Panel title="Keyboard" subtitle={`${KEYBINDS.length} actions, all rebound here`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
+  <Panel title="Keyboard" subtitle={`${KEYBINDS.length} actions, all rebound here`} width="normal" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <KeybindTable binds={binds} onset={setBind} onreset={resetBinds} onclear={clearBind} />
   </Panel>
 {/if}
@@ -4430,8 +4818,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {/if}
 
 {#if panel === 'save' || showcaseMode}
-  <Panel title="Save" subtitle="local only" width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
-    <div class="save-panel">
+  <Panel title="Save" subtitle="Local saves, backups and shared preferences" width="compact" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
+    <!-- The Save body owns the panel's scroll; focus makes wheel and arrow/Page keys reach it. -->
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex (the scroll region needs keyboard focus) -->
+    <div class="save-panel scroll-pane" role="region" aria-label="Save content" tabindex="0">
     <Tabs label="Save sections" active={saveTab} onpick={(id) => { saveTab = id as typeof saveTab; if (id === 'backups') loadSnaps(); }}
           tabs={[{ id: 'slots', label: 'Slots' }, { id: 'backups', label: 'Backups' }, { id: 'settings', label: 'Settings' }]} />
     {#if showcaseMode}<p class="showcase-note">Save, load, backup, import, and export are disabled here. This page never reads or writes a player save.</p>{/if}
@@ -4491,9 +4882,30 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       </select>
     </label>
     <label><input type="checkbox" checked={settings.offlineReport} onchange={(e) => setSetting('offlineReport', (e.target as HTMLInputElement).checked)} /> Show the welcome-back report after an away period</label>
+    <label>Combat effects
+      <select value={settings.combatEffects || 'auto'} onchange={(e) => setSetting('combatEffects', (e.target as HTMLSelectElement).value as NonNullable<ClientSettings['combatEffects']>)}>
+        <option value="auto">Automatic — adapt to playback speed</option>
+        <option value="full">Full</option>
+        <option value="reduced">Reduced</option>
+        <option value="minimal">Minimal</option>
+      </select>
+    </label>
+    <p class="text-note">Explicit effect levels stay the same at every playback speed. Cast labels and status details remain available; your system's reduced-motion preference is respected.</p>
     <!-- auto-dissolve lives with the bag filter now: it is a bag rule, not a display preference -->
     {/if}
     </div>
+  </Panel>
+{/if}
+
+{#if panel === 'combat' || showcaseMode}
+  <Panel title="Combat history" subtitle="Recent recorded events · damage, skills, defensive outcomes and Push" width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
+    <CombatHistory entries={gameState.combatHistory || []} oninspect={(enemy) => (inspectedEnemy = enemy)} />
+  </Panel>
+{/if}
+
+{#if inspectedEnemy}
+  <Panel title="Enemy details" subtitle="Recorded identity and resolved skill kit" width="normal" gridArea={modalGridArea} onclose={() => (inspectedEnemy = null)}>
+    <EnemyInspector enemy={inspectedEnemy} />
   </Panel>
 {/if}
 
@@ -4527,12 +4939,20 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .combat-fx-preview-controls { display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-md); padding: var(--spacing-xs) var(--screen-pad); border-bottom: 1px solid var(--line); background: var(--inset); }
   .combat-fx-preview-controls label { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
   .combat-fx-preview-controls span { color: var(--dim); font-size: var(--font-xs); }
+  .arena-preview-controls { display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-md); padding: var(--spacing-xs) var(--screen-pad); border-bottom: 1px solid var(--line); background: var(--inset); font-size: var(--font-xs); }
+  .arena-preview-controls strong { color: var(--gold-lit); }
+  .arena-preview-controls span { color: var(--sheet-ink); flex: 1; }
+  .arena-preview-controls label { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
+  .arena-command-controls { display: inline-flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-xs); }
+  .arena-command-controls button[aria-pressed="true"] { border-color: var(--gold-lit); color: var(--gold-lit); }
+  .stage.arpg-arena .map-back { visibility: hidden; pointer-events: none; }
   .showcase-index { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--screen-pad); border-bottom: 1px solid var(--line); background: var(--inset); }
   .showcase-index a { padding: var(--spacing-xs) var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-card); color: var(--dim); font-size: var(--font-xs); text-decoration: none; white-space: nowrap; }
   .showcase-index a:hover, .showcase-index a:focus-visible { border-color: var(--gold); color: var(--gold-lit); }
   .showcase-economy-lab { min-height: 0; overflow-y: auto; padding: var(--spacing-md); }
   .showcase-economy-lab > :global(.economy-lab) { max-width: 1600px; margin: 0 auto; }
-  .showcase-frame.active.economy-lab-sample .stage { display: none; }
+  .showcase-skill-fx { min-height: 0; overflow-y: auto; padding: var(--spacing-md); }
+  .showcase-frame.active.economy-lab-sample .stage, .showcase-frame.active.skill-fx-sample > .stage { display: none; }
   .showcase-note { padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); color: var(--dim); background: var(--inset); font-size: var(--font-xs); }
 
 
@@ -4640,11 +5060,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .objective-next-goal-details-body { display: grid; gap: var(--spacing-xs); padding-top: var(--spacing-xs); }
   .journey-alerts { display: grid; gap: var(--spacing-xs); padding-top: 0; }
   .journey-alerts:empty { display: none; }
-  .journey-notice { display: grid; gap: var(--spacing-2xs); padding: var(--spacing-xs); font-size: var(--font-xs); line-height: 1.35; }
-  .journey-notice.alarm { border-color: color-mix(in srgb, var(--alarm) 50%, var(--edge)); }
-  .journey-notice strong { font-size: var(--font-xs); }
-  .journey-notice small { color: var(--dim); }
-  .journey-notice button { justify-self: start; font-size: var(--font-xs); }
   .journey-body {
     display: grid; align-content: start; gap: var(--spacing-md);
     flex: 1;
@@ -4695,6 +5110,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     overflow: hidden;
 
     --rail-h: clamp(52px, 3.29vw, 66px);
+    --z-effect: 3;
+    --z-control: 5;
+    --z-navigation: 70;
+    --x-pull-arc: clamp(-46px, -1.65vw, -21px);
+    --x-pull-burst: clamp(-32px, -1.16vw, -15px);
 
     --controls-h: calc(var(--rail) + var(--spacing-sm));
 
@@ -4715,6 +5135,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .field { z-index: var(--z-content); }
 
   .stage:has(.toast) .field { grid-row-start: 5; }
+  .stage:has(:global(.progress-recap)) .field { grid-row-start: 5; }
   .stage:not(:has(.toast)) .save-note { top: var(--band-toast); }
   .stage:has(.toast) .save-note { top: calc(var(--band-toast) + var(--band-note)); }
 
@@ -4764,8 +5185,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-xs);
 
 
-    --slot-face: rgba(12, 16, 22, .82);
-    --slot-edge: rgba(255, 255, 255, .5);
     --gate-line: rgba(255, 255, 255, .45);
     --gate-line-soft: rgba(255, 255, 255, .18);
   }
@@ -4964,6 +5383,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
   .cast-stack { display: flex; flex-direction: column; gap: var(--spacing-xs); min-width: 0; }
   .cast { width: var(--slot-skill-size); height: var(--slot-skill-size); }
+  .cast-open { position: absolute; inset: 0; z-index: 3; border: 0; padding: 0; background: transparent; cursor: pointer; }
+  .cast-open:hover { background: color-mix(in srgb, var(--gold) 9%, transparent); }
+  .cast:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .cast-tooltip { display: none; position: absolute; inset-inline-start: 50%; bottom: calc(100% + 14px); transform: translateX(-50%); width: 250px; padding: 11px 13px; z-index: var(--z-floater); background: var(--inset); border: 1px solid var(--hud-edge); box-shadow: var(--shadow-soft); pointer-events: none; font-size: var(--font-2xs); line-height: 1.5; color: var(--text); gap: 5px; }
+  .cast-tooltip strong, .cast-tooltip > span { display: block; }
+  .cast-tooltip strong { color: var(--gold-lit); }
+  .cast:hover .cast-tooltip, .cast:focus-within .cast-tooltip { display: grid; }
   .cast img { width: var(--icon-hub-img); height: var(--icon-hub-img); object-fit: contain; }
 
   .cast.silent { opacity: .4; }
@@ -4978,10 +5404,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .cast .sweep {
     position: absolute; inset: 0; border-radius: var(--radius-card); pointer-events: none;
     background: conic-gradient(from -90deg, transparent 0 var(--skill-cooldown-progress), rgba(6, 8, 11, .66) var(--skill-cooldown-progress) 100%);
-    transition: --skill-cooldown-progress var(--cooldown-step, 0ms) linear;
+    /* Progress is written per animation frame; CSS transitions would trail behind and restart every frame. */
+    transition: none;
   }
-  .cast.paused .sweep { transition: none; }
-  @media (prefers-reduced-motion: reduce) { .cast .sweep { transition: none; } }
   .cast b { position: absolute; top: clamp(-8px, -0.29vw, -4px); left: clamp(-3px, -0.10vw, -1px); font-size: var(--font-xs); color: var(--dim); }
 
 
@@ -5136,7 +5561,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .sheet-sides { flex: none; }
 
 
-  .bagshell { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--spacing-sm); align-items: start; min-width: 0; }
+  .bagshell { display: grid; grid-template-columns: minmax(0, auto) minmax(320px, 1fr); gap: var(--spacing-md); align-items: start; min-width: 0; }
+  .bagcare-rail { display: grid; align-content: start; gap: var(--spacing-sm); min-width: 0; max-height: 100%; overflow: auto; }
+  @media (max-width: 1400px) {
+    .bagshell { grid-template-columns: minmax(0, 1fr); }
+  }
   .sheet-tools { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); }
   /* Equipment over Core attributes, beside the complete character values. */
   .sheet-layout {
@@ -5188,7 +5617,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .equipnote { position: relative; top: var(--x-pull-note); font-size: var(--font-xs); color: var(--good); }
   .bagblock { display: grid; align-content: start; gap: var(--spacing-xs); border: 0; }
   .gear-care-slot { border-top: 1px solid var(--line); padding-top: var(--spacing-sm); }
-  .bagblock:has(.filter[open]) .bagshell { display: none; }
   .bagmeta { margin: 0; }
   .filterpresets { display: grid; gap: var(--spacing-xs); border-top: 1px solid var(--line); padding-top: var(--spacing-sm); }
   .filterpresets-head { margin: 0; display: flex; align-items: baseline; gap: var(--spacing-xs); flex-wrap: wrap; }
@@ -5197,17 +5625,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .presetrow li span { min-width: 6ch; }
   .presetrow button, .presetrow small { font-size: var(--font-xs); }
   .autodissolve input { width: var(--input-narrow); }
-  .skill-label { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
-
-  .gate {
-    padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); color: var(--gold); cursor: pointer;
-    background: none; border: 1px dashed color-mix(in srgb, var(--gold) 50%, transparent); border-radius: var(--radius-card);
-  }
-  .gate:hover { border-style: solid; }
-
-  .gate-editor td { background: color-mix(in srgb, var(--gold) 5%, transparent); font-size: var(--font-xs); }
-  .gate-editor label { white-space: nowrap; }
-  .gate-editor input[type='number'] { width: var(--input-narrow); }
   .bagblock + .bagblock { border-top: 1px solid var(--line); padding-top: var(--spacing-sm); }
   .stats td { font-size: var(--font-xs); padding: var(--spacing-xs) var(--spacing-xs); }
   .stats td:first-child { color: var(--dim); width: 45%; }
@@ -5228,35 +5645,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .desk-content p { font-size: var(--font-xs); }
   .desk-content .picklist th, .desk-content .picklist td { padding: var(--spacing-xs) var(--spacing-xs); line-height: 1.1; font-size: var(--font-xs); }
   .desk-content .picklist button { font-size: var(--font-xs); }
-  .skills-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: var(--spacing-xs); }
-  .skill-note { margin: 0; color: var(--good); font-size: var(--font-xs); }
-  .skill-view { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: var(--spacing-xs); }
-  .skill-view h3 { margin: 0; }
-  .skill-view table { width: 100%; }
-  .skill-view th, .skill-view td { padding: var(--spacing-xs) var(--spacing-xs); line-height: 1.15; font-size: var(--font-xs); }
-  .skill-view select { max-width: 100%; padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs); }
-  .skill-view .skill-label { gap: var(--spacing-xs); }
-  .skill-view .skill-label img { width: var(--icon-detail); height: var(--icon-detail); }
-  .skill-view label { font-size: var(--font-xs); }
-  .skill-view .prose { display: flex; flex-direction: column; gap: var(--spacing-xs); }
-  .skill-owned-grid, .skill-effect-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(113px, 8.71vw, 243px), 1fr)); gap: var(--spacing-xs); align-content: start; }
-  .skill-owned-grid { flex: 1; min-height: 0; overflow: hidden; }
-  .skill-owned { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-xs); border: 1px solid var(--line); background: var(--inset); }
-  .skill-owned .skill-label { min-width: 0; }
-  .skill-owned .skill-label b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-xs); font-weight: 500; }
-  .skill-owned small { flex: none; color: var(--dim); font-size: var(--font-xs); }
-  .empty-owned { grid-column: 1 / -1; color: var(--dim); font-size: var(--font-xs); }
-  .effects-view { gap: var(--spacing-xs); }
-  .effects-view section { display: grid; gap: var(--spacing-xs); min-width: 0; }
-  .effects-view h3 { margin: 0; }
-  .skill-effect-grid label { display: flex; align-items: center; gap: var(--spacing-xs); min-width: 0; margin: 0; padding: var(--spacing-xs) var(--spacing-xs); border-bottom: 1px solid var(--line); }
-  .skill-effect-grid .skill-label { min-width: 0; overflow: hidden; }
-  .skill-effect-grid .skill-label { white-space: nowrap; text-overflow: ellipsis; }
-  .skill-effect-grid .aura-row { display: flex; align-items: center; gap: var(--spacing-xs); min-width: 0; border-bottom: 1px solid var(--line); }
-  .skill-effect-grid .aura-row label { flex: 1; border-bottom: 0; }
-  .skill-effect-grid .aura-row select { flex: none; }
-  .skill-effect-grid > small { grid-column: 1 / -1; color: var(--dim); }
-  .reserve-note { margin: 0; color: var(--dim); font-size: var(--font-xs); }
   .farm-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: var(--spacing-xs); }
   .farm-panel > p { margin: 0; font-size: var(--font-xs); }
   .farm-note { color: var(--good); }
@@ -5264,9 +5652,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .filter summary { cursor: pointer; color: var(--dim); font-size: var(--font-xs); }
   .filter table { margin: 0; }
 
-  .prose { display: flex; flex-direction: column; gap: var(--spacing-xs); }
-  .prose summary { cursor: pointer; color: var(--dim); font-size: var(--font-xs); }
-  .prose summary:hover { color: var(--text); }
   .weight { margin: 0; font-size: var(--font-xs); color: var(--dim); white-space: nowrap; }
   .weight small { color: var(--dim); }
   .warn { color: var(--alarm); }
@@ -5523,7 +5908,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .hud-grid-debug {
     position: fixed;
     inset: 0;
-    z-index: var(--z-notice);
+    z-index: 90;
     display: grid;
     grid-template-columns: repeat(15, minmax(0, 1fr));
     grid-template-rows: repeat(15, minmax(0, 1fr));

@@ -4,7 +4,7 @@ import { buildCharacter, emptyGear } from '../src/sim/player';
 import {
   newMobStatusStore, applyElement, applyBleed, stepMob, stepMobParts, modsOn, targetMods, forgetDead,
 } from '../src/sim/mobStatus';
-import { combineMods, newCurses, applyCurse } from '../src/sim/curse';
+import { combineMods } from '../src/sim/curse';
 import { playerSwing, mobSwing, rollStatus, dotDamageParts, type Statuses } from '../src/sim/combat';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { sm } from '../src/engine/client';

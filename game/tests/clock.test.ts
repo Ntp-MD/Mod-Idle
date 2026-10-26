@@ -66,8 +66,8 @@ describe('the away clock: one loop, two schedules', () => {
 
 /**
  * The live scheduler's whole job is turning wall time into whole sim seconds, so the accumulator is
- * tested on its own: the claim is the pace, not the frame rate, and a tab that was throttled must lose
- * the time it could not spend rather than owe it.
+ * tested on its own: the claim is the pace, not the frame rate, and a tab that was throttled must owe
+ * the time it could not spend rather than lose it.
  */
 describe('the live wake turns wall time into whole seconds', () => {
   it('pays one sim second per second of real time at speed 1', () => {
@@ -101,13 +101,22 @@ describe('the live wake turns wall time into whole seconds', () => {
     expect(acc).toBeCloseTo(0, 10);
   });
 
-  it('spends at most the batch in one wake and drops what a throttled tab could not fit', () => {
+  it('spends at most the batch in one wake and keeps the rest owed, never dropped', () => {
     const b = schedulerBatch(1000, 1);
     expect(b.ticks).toBe(MAX_BATCH);
-    expect(b.acc).toBe(0); // owed nothing: a queued burst would spend the next frames catching up
-    let acc = 0;
-    for (let wake = 0; wake < 100; wake++) acc = schedulerBatch(acc, 1).acc;
-    expect(acc).toBeLessThan(1);
+    expect(b.acc).toBeCloseTo(1000 + WAKE_SEC - MAX_BATCH, 10); // the backlog stays owed, not lost
+    let acc = 100;
+    let ticks = 0;
+    for (let wake = 0; wake < 20; wake++) {
+      const step = schedulerBatch(acc, 1);
+      acc = step.acc;
+      ticks += step.ticks;
+    }
+    expect(ticks).toBe(105); // the whole 100s backlog plus the 5s that passed replays, second for second
+    expect(acc).toBeCloseTo(0, 10);
+    let idle = 0;
+    for (let wake = 0; wake < 100; wake++) idle = schedulerBatch(idle, 1).acc;
+    expect(idle).toBeLessThan(1);
   });
 });
 

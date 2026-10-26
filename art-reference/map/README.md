@@ -39,7 +39,7 @@
 ./art-reference/map/refresh.ps1
 ```
 
-สคริปต์อ่าน `game/src/ui/map-projection.ts` เพื่อสร้าง geometry ใหม่ จึงไม่ต้องคัดลอกค่ามุมด้วยมือ จากนั้นอัปเดตสำเนา reference และ manifest โดยไม่แก้ renderer, asset ต้นฉบับ หรือไฟล์ใน `outputs/`
+สคริปต์อ่าน `game/src/ui/map/map-projection.ts` เพื่อสร้าง geometry ใหม่ จึงไม่ต้องคัดลอกค่ามุมด้วยมือ จากนั้นอัปเดตสำเนา reference และ manifest โดยไม่แก้ renderer, asset ต้นฉบับ หรือไฟล์ใน `outputs/`
 
 วัด silhouette ของภาพใหม่ก่อนลงทะเบียนฐาน:
 

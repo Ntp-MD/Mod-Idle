@@ -192,7 +192,7 @@ Muted natural colours, painterly fantasy illustration, top-left lighting. No bor
 2. Measure silhouettes: `./art-reference/map/measure.ps1 -Image <outputs png> -Output <json>`.
 3. Copy accepted assets to `game/public/map/landmark/` with the batch filenames.
 4. Register footprints with `python tools/map-art.py /map/landmark/<file>.png` (writes
-   `game/src/ui/map-terrain-footprints.json`).
+   `game/src/ui/map/data/map-terrain-footprints.json`).
 5. In `tools/map.ts` `LANDMARK_ART`: point the tier keys at the new files and add the two
    extra keys `town-abbey` and `capital-citadel`. Suggested fallbacks stay sensible:
    `village-small → village-riverside-1`, `city-capital → capital-cathedral-1`.

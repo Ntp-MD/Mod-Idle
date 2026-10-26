@@ -55,10 +55,6 @@ export function emptyParts(): DamageParts {
   };
 }
 
-/** The non-elemental total, in the order the existing mitigation reads it. */
-export const nonElementTotal = (p: DamageParts): number =>
-  p.physicalCritEligible + p.physicalNonCrit + p.magic;
-
 /** Every elemental part merged onto one map — the shape `mitigateMobHit` answers. */
 export function elementalByElement(p: DamageParts): Record<string, number> {
   const out: Record<string, number> = {};

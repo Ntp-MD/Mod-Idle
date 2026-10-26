@@ -36,26 +36,17 @@
     --motion-travel: 650ms;
     --ease-ui: ease;
     --ease-out: ease-out;
-    --ease-linear: linear;
     --ease-glide: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-    /* Shared stacking order; small values are component-local layers. */
+    /* Shared stacking order for layers that cross components. */
     --z-underlay: 1;
     --z-content: 2;
-    --z-effect: 3;
     --z-highlight: 4;
-    --z-control: 5;
     --z-floater: 6;
     --z-label: 7;
     --z-toast: 8;
-    --z-travel: 35;
     --z-hud-control: 40;
-    --z-panel: 60;
-    --z-navigation: 70;
-    --z-popover-backdrop: 79;
     --z-popover: 80;
-    --z-notice: 90;
-    --z-screen-guard: 200;
 
     --focus: #7fd4ff;
 
@@ -94,8 +85,6 @@
 
     --face-top: #1c2430;
     --face-floor: #0d1218;
-    --orb-top: #242e3c;
-    --orb-floor: #10151d;
     --hot-deep: #a33428;
 
     --inset: #12151b;
@@ -103,11 +92,6 @@
 
     --sheet-ink: #cfd8e3;
     --sheet-place: #f2e7d0;
-    --sheet-id: #6d7987;
-    --pin-here: #12a06a;
-    --pin-here-glow: #2ee59a;
-    --pin-target: #e2503f;
-    --pin-target-glow: #ff6b5c;
     --ui: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
     --num: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
 
@@ -143,16 +127,10 @@
     --spacing-md: 15px;
     --spacing-lg: 20px;
     --spacing-xl: 40px;
-    --seam: 1px;
-
-    --sheet-fs-region: clamp(9px, 0.54vw, 15px);
-    --sheet-fs-walk: clamp(8px, 0.4vw, 11px);
-    --sheet-fs-place: clamp(9px, 0.5vw, 14px);
-    --sheet-fs-capital: clamp(10px, 0.6vw, 17px);
-    --sheet-fs-zonename: clamp(8px, 0.46vw, 13px);
-    --sheet-fs-id: clamp(7px, 0.4vw, 11px);
-    --x-pull-arc: clamp(-46px, -1.65vw, -21px);
-    --x-pull-burst: clamp(-32px, -1.16vw, -15px);
-    --x-pull-scale: clamp(-14px, -0.48vw, -6px);
+    /* Card tiers: a primary surface and the compact tile inside it. */
+    --card-pad: var(--spacing-md);
+    --card-gap: var(--spacing-sm);
+    --tile-pad: var(--spacing-sm);
+    --tile-gap: var(--spacing-xs);
     --x-pull-note: clamp(-11px, -0.39vw, -5px);
 }

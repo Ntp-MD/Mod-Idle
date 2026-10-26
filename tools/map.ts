@@ -26,10 +26,10 @@ import path from 'node:path';
 import { readJson } from './lib/json.ts';
 import * as G from './lib/gates.ts';
 import { createRoad } from '../engine/road.ts';
-import { MAP_CAMERA_TRANSFORM, projectMapPoint, mapUprightAt, mapUprightAround, projectMapBounds, projectedHex, footprintShapeError } from '../game/src/ui/map-projection.ts';
-import { TERRAIN_ART, TERRAIN_VARIANTS } from '../game/src/ui/map-terrain.ts';
-import { mapSpriteWidth, mapSpriteWidthScale } from '../game/src/ui/map-sprites.ts';
-import footprints from '../game/src/ui/map-terrain-footprints.json' with { type: 'json' };
+import { MAP_CAMERA_TRANSFORM, projectMapPoint, mapUprightAt, mapUprightAround, projectMapBounds, projectedHex, footprintShapeError } from '../game/src/ui/map/map-projection.ts';
+import { TERRAIN_ART, TERRAIN_VARIANTS } from '../game/src/ui/map/map-terrain.ts';
+import { mapSpriteWidth, mapSpriteWidthScale } from '../game/src/ui/map/map-sprites.ts';
+import footprints from '../game/src/ui/map/data/map-terrain-footprints.json' with { type: 'json' };
 import type { EngineData, MobZone } from '../engine/types.ts';
 
 /**
@@ -259,17 +259,6 @@ const SHEET_HSL = hslOf(F.sheet);
 const towardHeld = (hex: string, t: number): string => {
   const [h, s, l] = hslOf(hex);
   return hslToHex([h, SHEET_HSL[1] + (s - SHEET_HSL[1]) * (1 - t), SHEET_HSL[2] + (l - SHEET_HSL[2]) * (1 - t)]);
-};
-/** the ramp's hues with the wheel's wrap taken out, so a step past red reads as the turn it is. */
-const hueWalk = (hexes: string[]): number[] => {
-  const out: number[] = [];
-  for (const hex of hexes) {
-    let h = hslOf(hex)[0];
-    while (out.length && h - out[out.length - 1] > 180) h -= 360;
-    while (out.length && out[out.length - 1] - h > 180) h += 360;
-    out.push(h);
-  }
-  return out;
 };
 
 /**

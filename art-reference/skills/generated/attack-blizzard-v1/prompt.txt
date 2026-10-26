@@ -1,0 +1,17 @@
+Use case: stylized-concept
+Asset type: production raster VFX animation atlas for a first-party isometric fantasy ARPG.
+Primary request: a completely new BLIZZARD skill animation, a driving ice squall that sweeps slanting snow across the circle.
+This is a squall, not a character and not a skill icon.
+Design a distinctive chunky frost silhouette, with a pale blue-white core, ice-blue (#9fe0f2) mid-tones, deep teal edges, and frost dust and angular shards.
+It should feel vast, driving, chilling while remaining readable at small game scale.
+Use crisp hand-painted pixel clusters / stepped edges matching a polished chibi ARPG; avoid a static snowball with no wind direction, smooth neon vector rings, photographic frost, excessive blur, or black outlines.
+Output: a genuinely TRANSPARENT square PNG sprite atlas. Target canvas 2048 by 2048, arranged as EXACTLY 4 columns by 4 rows, 16 equal square cells. The entire image consists of these 16 cells with invisible grid boundaries, no captions, no numbers, no borders, no labels.
+Animation order is row-major:
+Row 1, cells 0-3: four opening frames, a cold breath gathering at the ground, swelling into a slanting squall. Gradual growth; no sudden teleport.
+Row 2, cells 4-7: first four full-strength storm frames.
+Row 3, cells 8-11: next four full-strength storm frames. Together cells 4-11 form one seamless 8-frame churning loop. Show actual evolving shapes and slanting left-to-right snowfall with tumbling shards between frames, stable overall size, not eight identical copies. Frame 11 transitions cleanly back to frame 4.
+Row 4, cells 12-15: four exit frames, the squall thins into drifting flakes and cold haze; the last frame is only faint haze.
+Every cell has exactly the same fixed virtual canvas and ground/contact anchor at 88 percent cell height, horizontally centred. The full-strength form is about 72% of cell width and 78% of cell height. All visible snow, shards, haze remain completely INSIDE their own cell, with at least 8 percent clear transparent padding on all four cell edges. The anchor stays fixed throughout opening, loop and exit. No element may touch or cross any cell border. Do not enlarge a frame to fill its cell.
+Camera: fixed three-quarter ARPG view, slightly above, looking toward a broad slanting storm wall over its ground circle. Keep the same camera and anatomy in every frame.
+Lighting: bright hot core, rich frost surface, restrained soft alpha only at haze edges. No baked black or white backdrop, no checkerboard, no terrain, no ground shadow, no UI, no characters, no weapons, no text. Transparency must be real alpha.
+This atlas is visual art only; no hit counts, targets, damage numbers, or gameplay symbols.

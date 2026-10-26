@@ -104,6 +104,47 @@ export const WIKI_RUNTIME = `
     a.addEventListener('click', function () { if (shell) shell.classList.remove('nav-open'); });
   });
 
+  // The bestiary: one text filter and a race chip row over the same plates. Cards carry their own
+  // search haystack (name, race, Element, habitat, variants, skills), so filtering never reads the DOM.
+  var bestiary = document.querySelector('[data-bestiary]');
+  if (bestiary) {
+    var beastInput = bestiary.querySelector('[data-bestiary-search]');
+    var beastChips = Array.prototype.slice.call(bestiary.querySelectorAll('[data-bestiary-race]'));
+    var beastGroups = Array.prototype.slice.call(bestiary.querySelectorAll('[data-bestiary-group]'));
+    var beastCards = Array.prototype.slice.call(bestiary.querySelectorAll('[data-bestiary-entry]'));
+    var beastStatus = bestiary.querySelector('[data-bestiary-status]');
+    var beastRace = 'all';
+    var applyBeast = function () {
+      var q = (beastInput ? beastInput.value : '').trim().toLowerCase();
+      var shown = 0;
+      beastGroups.forEach(function (group) {
+        var visible = 0;
+        Array.prototype.forEach.call(group.querySelectorAll('[data-bestiary-entry]'), function (card) {
+          var on = (beastRace === 'all' || card.getAttribute('data-race') === beastRace) &&
+            (!q || (card.getAttribute('data-search') || '').indexOf(q) >= 0);
+          card.hidden = !on;
+          if (on) visible++;
+        });
+        group.hidden = visible === 0;
+        shown += visible;
+      });
+      if (beastStatus) {
+        beastStatus.textContent = shown
+          ? 'Showing ' + shown + ' of ' + beastCards.length + ' species'
+          : 'No species match that filter.';
+      }
+    };
+    beastChips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        beastRace = chip.getAttribute('data-bestiary-race') || 'all';
+        beastChips.forEach(function (c) { c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'); });
+        applyBeast();
+      });
+    });
+    if (beastInput) beastInput.addEventListener('input', applyBeast);
+    applyBeast();
+  }
+
   // The passive-tree board: a viewBox camera over the canonical SVG, with a node card that follows
   // the hovered or pinned node exactly as the game's board does.
   var treeView = document.querySelector('[data-tree-view]');

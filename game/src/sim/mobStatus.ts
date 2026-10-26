@@ -168,6 +168,20 @@ export function placeStatus(
   return name;
 }
 
+/**
+ * A lingering storm holds the control status it laid for the storm's own seconds: the chill a
+ * blizzard lays lasts the blizzard, not just the status default. Chill and crippled only —
+ * damaging stacks keep their own clocks and shock keeps its stop budget, so neither is stretched.
+ */
+export function holdStatus(
+  store: MobStatusStore, mobId: string, name: MobStatusName, sec: number,
+): void {
+  if ((name !== 'chill' && name !== 'crippled') || !(sec > 0)) return;
+  const m = mark(store, mobId);
+  const l = line(m, name);
+  l.secLeft = Math.max(l.secLeft, sec);
+}
+
 /** Spend the same rolling allowance for an action delay as for a status-based stop. */
 export function spendControlBudget(store: MobStatusStore, mobId: string, sec: number): boolean {
   const m = mark(store, mobId);

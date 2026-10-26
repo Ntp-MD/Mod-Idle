@@ -1,4 +1,5 @@
 import type { GameState } from '../sim/types';
+import { normalizeCombatHistory } from '../sim/combat-history';
 import { normalizeAlchemyLedger } from '../../../engine/alchemy.ts';
 import { normalizeBlackMarket } from '../sim/black-market';
 import { ACTIVE_SLOTS, clampAuraReservations, clearUnownedTracks, effectsActive, newSkillState } from '../sim/skills';
@@ -23,6 +24,8 @@ import { reason as snapshotReason, arm as armSnapshot, SAVE_CFG } from '../sim/s
 import { E, TOWN, BASES, eng, loot, sm, tree, STAT_KEYS, type StatKey } from '../engine/client';
 import { road } from '../sim/road';
 import { newEconomyState, validateEconomy } from '../sim/economy';
+import { normalizePendingWork } from '../sim/pending-work';
+import { normalizeFieldState, normalizeFieldArchive } from '../sim/field-area';
 
 // save.md: local only, three slots, IndexedDB with a localStorage fallback, JSON export/import.
 // The town layer is a schema bump, and an import at a different version is rejected rather than
@@ -48,11 +51,17 @@ import { newEconomyState, validateEconomy } from '../sim/economy';
 // v20 adds the city ledger (`town.json → economy`): an older save replays its own clock in whole
 // steps so the city world it meets is the one its play time implies. v21 adds the per-character
 // next-step pin (`guidance`); an older character backfills it with no pin, so it keeps following the
-// read-only automatic suggestion until the player chooses one.
+// read-only automatic suggestion until the player chooses one. v22 adds the active arena's released
+// pending work (`pendingWork`): a v21 save never held an unpaid impact, so it opens with none, while
+// a v22 ledger is validated by shape because a corrupt one must not resurrect or duplicate a hit.
+// v23 adds released ordinary mob shots to the same ledger; a v22 ledger backfills none. v24 adds the
+// loaded field registry (`field`): spawn units, cohort/combat-session identity and saved positions.
+// An older save opens with no field; the first writer tick creates the registry from its group.
+// v25 adds bounded visited-field checkpoints (`fieldArchive`); an older save starts with none.
 const DB_NAME = 'modworld';
 const STORE = 'saves';
 const ACCOUNT_KEY = 'account';
-export const SCHEMA_VERSION = 21;
+export const SCHEMA_VERSION = 25;
 
 const SLOTS = ['slot1', 'slot2', 'slot3'] as const;
 export type SlotName = (typeof SLOTS)[number];
@@ -148,9 +157,9 @@ async function get(key: string): Promise<string | null> {
 }
 
 /**
- * Client-only preferences (not part of a save slot): number format, the offline-report toggle, and the
- * keyboard map. Bindings live here rather than in `GameState` because they belong to the hand on the
- * keyboard, not to the character — one set serves all three slots, and a save file never carries them.
+ * Client-only preferences (not part of a save slot): display formats, battlefield presentation, and
+ * keyboard controls. These belong to the player and browser, not to a character save; one set serves
+ * all three slots, and a save file never carries them.
  * `keybinds` is a sparse override: an action missing from it takes its default, so adding a bound action
  * later cannot strand an old settings record.
  */
@@ -170,14 +179,27 @@ export interface ClientSettings {
   autoGoal?: boolean;
   /** show the map as coloured hexes with artwork and scenery hidden */
   cleanMap?: boolean;
+  /** Presentation density only; simulation speed and combat outcomes are unaffected. */
+  combatEffects?: 'auto' | 'full' | 'reduced' | 'minimal';
+  /**
+   * Retired client preference. Live play is ARPG-only; the classic FieldPlates renderer is kept for
+   * the showcase/reference and reads no saved switch.
+   */
+  battlefieldStyle?: 'arpg' | 'classic';
   /** the hub's drag offset from its docked corner, in px — wheel and satellites move as one */
   hub?: { x: number; y: number };
 }
-export const DEFAULT_SETTINGS: ClientSettings = { numberFormat: 'plain', offlineReport: true, keybinds: {}, equipMargin: 0, autoSkills: true, autoEquip: true, autoGoal: true, cleanMap: false };
+export const DEFAULT_SETTINGS: ClientSettings = { numberFormat: 'plain', offlineReport: true, keybinds: {}, equipMargin: 0, autoSkills: true, autoEquip: true, autoGoal: true, cleanMap: false, combatEffects: 'auto' };
 export async function readSettings(): Promise<ClientSettings> {
   const raw = await get('settings');
   if (!raw) return { ...DEFAULT_SETTINGS };
-  try { return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) }; } catch { return { ...DEFAULT_SETTINGS }; }
+  try {
+    const settings = { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    if (!['auto', 'full', 'reduced', 'minimal'].includes(settings.combatEffects)) settings.combatEffects = 'auto';
+    // The old classic switch is ignored: live play is ARPG-only.
+    delete settings.battlefieldStyle;
+    return settings;
+  } catch { return { ...DEFAULT_SETTINGS }; }
 }
 export async function writeSettings(s: ClientSettings): Promise<void> { await put('settings', JSON.stringify(s)); }
 
@@ -645,6 +667,8 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   // v11 · the HUD reads a transient event ring (`fx`), which a write never stores.
   if (!Array.isArray(s.fx)) s.fx = [];
   if (!s.fxSeq) s.fxSeq = 0;
+  s.combatHistory = normalizeCombatHistory(s.combatHistory);
+  s.fxSeq = Math.max(s.fxSeq, ...s.combatHistory.map((entry) => entry.id));
   if (!s.farm) s.farm = newFarm();
   // v13 · field gathering, Camp and cooked meals did not exist in a v12 save.
   if (fromVersion < 13 || !s.fieldwork) s.fieldwork = newFieldwork(s.seed);
@@ -758,6 +782,17 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   else s.economy = validateEconomy(s.economy);
   if (s.pendingSnapshot === undefined) s.pendingSnapshot = null;
   if (!s.nextSnapshotAt && s.nextSnapshotAt !== 0) s.nextSnapshotAt = 0;
+  // v22 · released arena work. An older save predates the ledger; a current one must hold a valid
+  // shape or none, never a guessed impact. v22-v23 differ only by the incoming-shot list, which the
+  // normalizer treats as empty when absent.
+  if (fromVersion < 22) s.pendingWork = null;
+  else s.pendingWork = normalizePendingWork(s.pendingWork);
+  // v24 · the loaded field registry. An older save predates it; a current one is validated or dropped.
+  if (fromVersion < 24) s.field = null;
+  else s.field = normalizeFieldState(s.field);
+  // v25 · visited-field checkpoints; older saves have no archived field.
+  if (fromVersion < 25) s.fieldArchive = {};
+  else s.fieldArchive = normalizeFieldArchive(s.fieldArchive);
   // An imported or hand-edited file must not be an impossible state: the numbers below are clamped
   // to what the live rules can produce, and every id the collection no longer knows is dropped.
   // Nothing here is a schema change — the shape stays, the values come back inside their bounds.
@@ -848,7 +883,7 @@ export function exportJson(state: GameState): string {
 export function importJson(text: string): GameState {
   const parsed = JSON.parse(text);
   const version = parsed.version == null ? 'none' : parsed.version;
-  if (parsed.version !== SCHEMA_VERSION && parsed.version !== 20 && parsed.version !== 19 && parsed.version !== 18 && parsed.version !== 17 && parsed.version !== 16 && parsed.version !== 15 && parsed.version !== 14) {
+  if (parsed.version !== SCHEMA_VERSION && parsed.version !== 24 && parsed.version !== 23 && parsed.version !== 22 && parsed.version !== 21 && parsed.version !== 20 && parsed.version !== 19 && parsed.version !== 18 && parsed.version !== 17 && parsed.version !== 16 && parsed.version !== 15 && parsed.version !== 14) {
     throw new Error(`schema version ${version} ≠ ${SCHEMA_VERSION}`);
   }
   const state = parsed.state as GameState;

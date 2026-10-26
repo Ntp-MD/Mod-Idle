@@ -1,10 +1,10 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { TERRAIN_ART, TERRAIN_VARIANTS } from '../src/ui/map-terrain';
+import { TERRAIN_ART, TERRAIN_VARIANTS } from '../src/ui/map/map-terrain';
 
-const bounds = JSON.parse(readFileSync(new URL('../src/ui/map-sprite-bounds.json', import.meta.url), 'utf8')) as Record<string, number[]>;
-const footprints = JSON.parse(readFileSync(new URL('../src/ui/map-terrain-footprints.json', import.meta.url), 'utf8')) as Record<string, unknown>;
+const bounds = JSON.parse(readFileSync(new URL('../src/ui/map/data/map-sprite-bounds.json', import.meta.url), 'utf8')) as Record<string, number[]>;
+const footprints = JSON.parse(readFileSync(new URL('../src/ui/map/data/map-terrain-footprints.json', import.meta.url), 'utf8')) as Record<string, unknown>;
 
 describe('upright map scenery', () => {
   it('uses existing separate scenery with measured painted bounds', () => {

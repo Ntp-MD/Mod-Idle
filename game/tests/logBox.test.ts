@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { emptyFeedState, feedEventsAfter } from '../src/ui/logbox';
+import { emptyFeedState, feedEventsAfter } from '../src/ui/hud/logbox';
 
 it('shows a feed empty state before the first event, with filters ready', () => {
   expect(emptyFeedState('all', false)).toEqual({

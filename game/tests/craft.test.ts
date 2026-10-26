@@ -1,13 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { E, ED, loot, BASES } from '../src/engine/client';
 import { createCraft } from '../../engine/craft.ts';
-import { rollDrop } from '../src/sim/drop';
-import { doCraft, stoneNames, replaceChoices, poolOf, craftedMark, craft as clientCraft } from '../src/sim/craft';
-import { newGame, tick } from '../src/sim/game';
+import { itemFromFrame, rollDrop } from '../src/sim/drop';
+import { itemName } from '../src/sim/item-name';
+import { doCraft, stoneNames, replaceChoices, poolOf, craftedMark } from '../src/sim/craft';
+import { newGame } from '../src/sim/game';
 import { mulberry32 } from '../src/engine/client-helpers';
 import type { Item } from '../src/sim/types';
 
-const craft = createCraft(ED, loot);
+const craft = createCraft(ED, loot, BASES);
 // each band's level window starts where its span starts — read off the spans, never typed
 const SPAN_FROM = (band: string) => E.item_level.spans.find((s: any) => s.band === band)!.from;
 
@@ -112,15 +113,19 @@ describe('Refine and Randomize', () => {
 
 describe('Ascend', () => {
   it('moves the whole piece one band up and carries every line into the next window', () => {
-    const item = piece(6);
+    const frame = BASES.bases.find((base) => base.base_lines?.length === 3)!;
+    const item = itemFromFrame(mulberry32(6), frame.slot, frame, null, SPAN_FROM('low'), 0);
     const r = made(craft.ascend(item, mulberry32(2)));
     expect(r.ok).toBe(true);
-    expect(r.item.q).toBe(item.q + 1);
-    for (const line of r.item.lines) {
-      const [lo, hi] = loot.rangeOf(line.id, r.item.ilvl, r.item.q, line.slice);
-      expect(line.value).toBeGreaterThanOrEqual(lo);
-      expect(line.value).toBeLessThanOrEqual(hi);
-    }
+    expect(r.item.q).toBe((item.q ?? 0) + 1);
+    r.item.lines.forEach((line: Item['lines'][number], index: number) => {
+      const k = index === 0 ? E.loot.frame_mod.value_scale[String(1 + (line.extra?.length ?? 0)) as keyof typeof E.loot.frame_mod.value_scale] : 1;
+      for (const part of [line, ...(line.extra ?? [])]) {
+        const [lo, hi] = loot.rangeOf(part.id, r.item.ilvl, r.item.q, line.slice ?? 2);
+        expect(part.value).toBeGreaterThanOrEqual(Math.max(1, Math.round(lo * k)));
+        expect(part.value).toBeLessThanOrEqual(Math.max(1, Math.round(hi * k)));
+      }
+    });
   });
 
   it('cannot skip a step and cannot pass high', () => {
@@ -131,6 +136,213 @@ describe('Ascend', () => {
     expect(two.item.q).toBe(one.item.q + 1);
     expect(three.ok).toBe(false);
     expect(three.why).toMatch(/already the top band/);
+  });
+});
+
+describe('Frame value rerolls', () => {
+  const weapon = BASES.weapons.find((row) => row.name === 'one-handed sword')!;
+  const frames = BASES.weapon_frames['one-handed sword'];
+  const biasedFrame = frames.find((frame) => frame.name === 'Gloamblade')!;
+  const highPrimaryFrame = frames.find((frame) => frame.name === 'Dawnbrand')!;
+  const top = 1 - Number.EPSILON;
+  type WeaponFrame = typeof biasedFrame;
+
+  function frameItem(frame: WeaponFrame, q = 1, slot = 'main hand'): Item {
+    const ilvl = E.item_level.spans[q].to;
+    return {
+      slot, base: weapon.name, q, ilvl, quality: loot.BAND_LABEL[q], tier: 'T1',
+      lines: loot.frameModRoll(BASES, slot, frame, weapon, () => 0, ilvl, q, top),
+    };
+  }
+
+  function expectedParts(item: Item, frame: WeaponFrame, roll: number): { id: string; value: number }[] {
+    const line = item.lines[0];
+    const parts = [line, ...(line.extra ?? [])];
+    const scale = E.loot.frame_mod.value_scale[String(parts.length) as keyof typeof E.loot.frame_mod.value_scale] * frame.value_bias;
+    return parts.map((part) => {
+      const [lo, hi] = loot.rangeOf(part.id, item.ilvl, item.q ?? 0, line.slice ?? 2);
+      const raw = lo + Math.floor(roll * (hi - lo + 1));
+      return { id: part.id, value: Math.max(1, Math.round(raw * scale)) };
+    });
+  }
+
+  function partsOf(item: Item) {
+    const line = item.lines[0];
+    return [line, ...(line.extra ?? [])].map(({ id, value }) => ({ id, value }));
+  }
+
+  function corruptRoll(kind: string, valueRoll: number): () => number {
+    const rows = E.craft.corrupt_outcomes;
+    const index = rows.findIndex((row) => row.kind === kind);
+    expect(index).toBeGreaterThanOrEqual(0);
+    const total = rows.reduce((sum, row) => sum + row.weight, 0);
+    const before = rows.slice(0, index).reduce((sum, row) => sum + row.weight, 0);
+    let first = true;
+    return () => {
+      if (!first) return valueRoll;
+      first = false;
+      return (before + rows[index].weight / 2) / total;
+    };
+  }
+
+  for (const endpoint of [0, top]) {
+    it(`Ascend rerolls every Frame part on its budget and bias at RNG ${endpoint}`, () => {
+      const item = frameItem(biasedFrame, 0);
+      const result = made(craft.ascend(item, () => endpoint));
+      expect(partsOf(result.item)).toEqual(expectedParts(result.item, biasedFrame, endpoint));
+      expect(result.item.lines[0].slice).toBe(item.lines[0].slice);
+    });
+
+    it(`Polish holds each Frame part above its own floor on its budget and bias at RNG ${endpoint}`, () => {
+      const item = frameItem(biasedFrame);
+      const result = made(craft.polish(item, () => endpoint));
+      expect(partsOf(result.item)).toEqual(expectedParts(result.item, biasedFrame, endpoint));
+    });
+
+    it(`Reforge rerolls every Frame part on its budget and bias at RNG ${endpoint}`, () => {
+      const item = frameItem(biasedFrame);
+      let first = true;
+      const result = made(craft.reforge(item, () => {
+        if (!first) return endpoint;
+        first = false;
+        return top;
+      }));
+      expect(partsOf(result.item)).toEqual(expectedParts(result.item, biasedFrame, endpoint));
+      expect(result.item.lines[0].slice).toBe(0);
+    });
+
+    for (const kind of ['reroll_values', 'quality_down']) {
+      it(`Corrupt ${kind} rerolls every Frame part on its budget and bias at RNG ${endpoint}`, () => {
+        const item = frameItem(biasedFrame);
+        const result = made(craft.corrupt(item, [], corruptRoll(kind, endpoint)));
+        expect(result.changed.outcome).toBe(kind);
+        expect(partsOf(result.item)).toEqual(expectedParts(result.item, biasedFrame, endpoint));
+        expect(result.item.corrupted).toBe(true);
+      });
+    }
+  }
+
+  it('Polish keeps a primary baseline out of the extra Mod floor', () => {
+    const item = frameItem(highPrimaryFrame, 2);
+    item.baselines = { 0: item.lines[0].value };
+    const before = partsOf(item);
+    expect(before[0].value).toBeGreaterThan(before[1].value);
+    const result = made(craft.polish(item, () => 0));
+    expect(partsOf(result.item)).toEqual(before);
+  });
+
+  it('samples raw values before scaling and rounding the Frame roll', () => {
+    const item = frameItem(biasedFrame, 0);
+    let first = true;
+    const result = made(craft.reforge(item, () => {
+      if (!first) return 0.5;
+      first = false;
+      return top;
+    }));
+    expect(partsOf(result.item)).toEqual(expectedParts(result.item, biasedFrame, 0.5));
+  });
+
+  it('uses the saved legacy Frame identity without changing its Mod order', () => {
+    const item = frameItem(biasedFrame);
+    const [id, ...extras] = biasedFrame.legacy_frame_mod;
+    item.lines = [{ id, value: 1, slice: 0, extra: extras.map((extraId) => ({ id: extraId, value: 1 })) }];
+    expect(itemName(item)).toBe(biasedFrame.name);
+    const result = made(craft.ascend(item, () => top));
+    expect(partsOf(result.item)).toEqual(expectedParts(result.item, biasedFrame, top));
+    expect(itemName(result.item)).toBe(biasedFrame.name);
+  });
+
+  it('retains the weapon Frame bias on dual-wield off-hand items', () => {
+    const item = frameItem(biasedFrame, 0, 'off hand');
+    const result = made(craft.ascend(item, () => top));
+    expect(partsOf(result.item)).toEqual(expectedParts(result.item, biasedFrame, top));
+  });
+
+  it('keeps every raw outcome that rounds to the held Polish value', () => {
+    const frame = BASES.bases.find((base) => base.base_lines?.length === 2 && base.base_lines[0] === 'armour_flat')!;
+    const item: Item = {
+      slot: frame.slot, base: frame.name, q: 0, ilvl: E.item_level.spans[0].to, quality: 'low', tier: 'T1',
+      lines: loot.frameModRoll(BASES, frame.slot, frame, null, () => 0, E.item_level.spans[0].to, 0, top),
+    };
+    const result = made(craft.polish(item, () => 0.4));
+    const [lo, hi] = loot.rangeOf(item.lines[0].id, item.ilvl, 0, 0);
+    const raw = lo + Math.floor(0.4 * (hi - lo + 1));
+    expect(result.item.lines[0].value).toBe(Math.round(raw * E.loot.frame_mod.value_scale['2']));
+  });
+
+  it('uses the saved one-part legacy budget rather than the current two-part Frame', () => {
+    const frame = BASES.weapon_frames['two-handed sword'][0];
+    expect(frame.legacy_frame_mod).toHaveLength(1);
+    const item: Item = {
+      slot: 'main hand', base: 'two-handed sword', q: 0, ilvl: E.item_level.spans[0].to, quality: 'low', tier: 'T1',
+      lines: [{ id: frame.legacy_frame_mod[0], value: 1, slice: 0 }],
+    };
+    const result = made(craft.ascend(item, () => top));
+    expect(partsOf(result.item)).toEqual(expectedParts(result.item, frame, top));
+    expect(result.item.lines[0].extra).toBeUndefined();
+    expect(itemName(result.item)).toBe(frame.name);
+  });
+
+  it('retains unmatched historical Frame identities with their own budget and no inferred bias', () => {
+    const item = frameItem(biasedFrame, 0);
+    item.lines = [{ id: 'physical_power_flat', value: 1, slice: 0, extra: [{ id: 'armour_flat', value: 1 }] }];
+    const before = structuredClone(item);
+    const result = made(craft.ascend(item, () => top));
+    expect(partsOf(result.item)).toEqual(expectedParts(result.item, { ...biasedFrame, value_bias: 1 }, top));
+    expect(itemName(result.item)).toBe(item.base);
+    expect(item).toEqual(before);
+  });
+
+  it('retains an old primary baseline above the current ceiling without moving it onto extras', () => {
+    const item = frameItem(highPrimaryFrame, 2);
+    const extra = structuredClone(item.lines[0].extra);
+    const [, hi] = loot.rangeOf(item.lines[0].id, item.ilvl, 2, 0);
+    item.baselines = { 0: hi + 1 };
+    let draws = 0;
+    const result = made(craft.polish(item, () => { draws++; return 0; }));
+    expect(result.item.lines[0].value).toBe(hi + 1);
+    expect(result.item.baselines[0]).toBe(hi + 1);
+    expect(result.item.lines[0].extra).toEqual(extra);
+    expect(draws).toBe(2);
+  });
+
+  it('draws the primary, its extras, and then the following line without identity RNG calls', () => {
+    const item = frameItem(biasedFrame, 0);
+    item.lines.push({ id: 'physical_power', value: 1, slice: 0 });
+    const values = [0, top, 0.5];
+    let draws = 0;
+    const result = made(craft.ascend(item, () => values[draws++]));
+    expect(draws).toBe(values.length);
+    const expected = expectedParts(result.item, biasedFrame, 0);
+    expected[1] = expectedParts(result.item, biasedFrame, top)[1];
+    expect(partsOf(result.item)).toEqual(expected);
+    const [lo, hi] = loot.rangeOf('physical_power', result.item.ilvl, result.item.q, 0);
+    expect(result.item.lines[1].value).toBe(lo + Math.floor(0.5 * (hi - lo + 1)));
+  });
+
+  it('applies the Frame budget through the client bench and pays only a successful press', () => {
+    const state = newGame(88);
+    const item = frameItem(biasedFrame);
+    const before = structuredClone(item);
+    state.bag.unshift(item);
+    state.counters.stones.polish = E.craft.polish_stones_per_use;
+    const result = doCraft(state, 'bag', 0, 'polish', 0, () => top);
+    expect(result.ok).toBe(true);
+    expect(partsOf(state.bag[0])).toEqual(expectedParts(state.bag[0], biasedFrame, top));
+    expect(state.counters.stones.polish).toBe(0);
+    expect(item).toEqual(before);
+
+    state.bag[0] = frameItem(biasedFrame, 2);
+    const held = structuredClone(state.bag[0]);
+    const cost = craft.costOf('ascend', state.bag[0]);
+    for (const [stone, count] of Object.entries(cost)) state.counters.stones[stone] = count;
+    const purse = { ...state.counters.stones };
+    let draws = 0;
+    const refused = doCraft(state, 'bag', 0, 'ascend', 0, () => { draws++; return top; });
+    expect(refused.ok).toBe(false);
+    expect(state.bag[0]).toEqual(held);
+    expect(state.counters.stones).toEqual(purse);
+    expect(draws).toBe(0);
   });
 });
 

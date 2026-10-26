@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { mapLevelBand, mapNameLines, mapNamePointer, mapNamePosition, placeMapNames, type MapNameBox } from '../src/ui/map-labels';
-import { mapTravelPhase } from '../src/ui/map-travel';
+import { mapLevelBand, mapNameLines, mapNamePointer, mapNamePosition, placeMapNames, type MapNameBox } from '../src/ui/map/map-labels';
+import { mapTravelPhase } from '../src/ui/map/map-travel';
 
 const box = (key: string, priority = 0, forced = false): MapNameBox =>
   ({ key, left: 10, top: 10, width: 120, height: 40, priority, forced });

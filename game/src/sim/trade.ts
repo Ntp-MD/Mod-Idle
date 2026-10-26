@@ -3,7 +3,7 @@ import type { TradeGood } from '../../../engine/trade';
 import type { GameState } from './types';
 import { atSettlement } from './craft';
 import { currentCell, ownerOf, cellBlocks, settlementCell, warpCost } from './road';
-import { addTo, fits, fitsTransaction } from './slots';
+import { addTo, fitsTransaction } from './slots';
 import { fieldMasteryLevel, fieldSkillLevel } from './fieldwork';
 import { economyCity, economyOffer } from './economy';
 

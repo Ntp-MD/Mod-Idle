@@ -8,7 +8,7 @@ files to understand how measurement and in-game alignment review were done.
 
 The camera pose, projection matrix, canvas ratio, center, and six ordered ground
 vertices live in [`../geometry/hex-spec.json`](../geometry/hex-spec.json). That
-file is regenerated from `game/src/ui/map-projection.ts` by
+file is regenerated from `game/src/ui/map/map-projection.ts` by
 [`../refresh.ps1`](../refresh.ps1). The descriptive default view is orthographic,
 38 degrees above ground, with board yaw -16 degrees in renderer coordinates.
 When the renderer changes, refresh the kit and use the new geometry. Do not

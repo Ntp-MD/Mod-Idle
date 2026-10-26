@@ -1,9 +1,12 @@
 import type { StatKey } from '../engine/client';
 import type { Hex } from '../../../engine/road.ts';
+import type { SkillAreaSnapshot, SkillCastTiming } from '../../../engine/types.ts';
 import type { AlchemyLedger } from '../../../engine/alchemy.ts';
 import type { EconomyRestore } from '../../../engine/economy.ts';
 import type { QuestBonus } from './quest-rewards';
 import type { GuidanceState } from './guidance';
+import type { PendingWorkState } from './pending-work';
+import type { FieldState, FieldArchive } from './field-area';
 
 export interface ModExtra {
   id: string;
@@ -347,6 +350,8 @@ export interface FxEvent {
   /** Monotonic within the run, so the HUD keys one animation per event and never replays an old one. */
   id: number;
   sec: number;
+  /** Exact transient combat-clock timestamp, when emitted inside a tick. */
+  atUs?: number;
   kind: 'hit' | 'cast' | 'taken' | 'block' | 'proc' | 'kill' | 'drop' | 'sell' | 'travel' | 'craft' | 'warp'
     | 'buff' | 'heal' | 'level';
   /** The number the indicator prints, already formatted by `eng.fmt`, or empty for a non-number. */
@@ -369,10 +374,26 @@ export interface FxEvent {
   /** Which player or mob skill raised a cast, buff or heal. Direct hits carry the same identity so effects
    *  do not borrow another skill's appearance when several casts share one second. */
   skillId?: string;
+  /** One live action links its release, impact hits and timing facts without replaying the cast. */
+  actionId?: number;
+  castTiming?: SkillCastTiming;
+  /** Resolved presentation facts from the cast report; VFX never guesses extra victims or stacks. */
+  skillOutcome?: {
+    targets: string[];
+    /** Ground-space footprint resolved by combat; VFX may project it without selecting victims. */
+    area?: SkillAreaSnapshot;
+    consumed?: {status:string; stacks:number}[];
+    spread?: {status:string; to:string[]}[];
+    charges?: number;
+    cleansed?: number;
+  };
   /** The amount behind `text`, unformatted. `text` is what the plate prints; this is what a parked figure
    *  adds up when several blows land on one body inside the same second, so the sum is the sim's number and
    *  never a parse of the string the player was shown. */
   value?: number;
+  /** Actual mitigated pool damage, retained separately for combat history. */
+  hpDamage?: number;
+  esDamage?: number;
 }
 
 /** The city ledger's saved state: the engine's own restore shape plus whole seconds toward its next step. */
@@ -452,6 +473,12 @@ export interface GameState {
   keystoneRuntime: KeystoneRuntimeState;
   /** Why a snapshot is owed right now (`save.md` item 5), or null when none is pending. */
   pendingSnapshot: SnapshotReason | null;
+  /** Released arena work whose impact is still owed across a reload; null when nothing is in flight. */
+  pendingWork?: PendingWorkState | null;
+  /** The loaded field's registry, spawn units, cohort/session identity and saved ground positions. */
+  field?: FieldState | null;
+  /** Bounded visited-field checkpoints: spawn units, idle identities and their own timers. */
+  fieldArchive?: FieldArchive | null;
   /** The next timer snapshot; a written snapshot pushes it out by `save.snapshot_interval_min`. */
   nextSnapshotAt: number;
   town: TownState;
@@ -471,6 +498,8 @@ export interface GameState {
   log: LogLine[];
   /** The transient ring the HUD animates. Never persisted (`save.ts`). */
   fx: FxEvent[];
+  /** Bounded factual combat records; optional for saves written before the history existed. */
+  combatHistory?: import('./combat-history').CombatHistoryEntry[];
   /** The next ring id. Stored so a restored save cannot replay an old animation key. */
   fxSeq: number;
   clockSec: number;

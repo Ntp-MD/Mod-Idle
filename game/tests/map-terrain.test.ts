@@ -2,11 +2,11 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { TERRAIN_ART, TERRAIN_VARIANTS } from '../src/ui/map-terrain';
+import { TERRAIN_ART, TERRAIN_VARIANTS } from '../src/ui/map/map-terrain';
 
 const publicDir = fileURLToPath(new URL('../public', import.meta.url));
-const footprints = JSON.parse(readFileSync(fileURLToPath(new URL('../src/ui/map-terrain-footprints.json', import.meta.url)), 'utf8'));
-const bounds = JSON.parse(readFileSync(fileURLToPath(new URL('../src/ui/map-sprite-bounds.json', import.meta.url)), 'utf8'));
+const footprints = JSON.parse(readFileSync(fileURLToPath(new URL('../src/ui/map/data/map-terrain-footprints.json', import.meta.url)), 'utf8'));
+const bounds = JSON.parse(readFileSync(fileURLToPath(new URL('../src/ui/map/data/map-sprite-bounds.json', import.meta.url)), 'utf8'));
 
 describe('modular terrain art', () => {
   it('gives every terrain exactly one piece of art', () => {

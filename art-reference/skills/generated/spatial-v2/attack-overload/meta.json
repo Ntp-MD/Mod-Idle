@@ -1,0 +1,414 @@
+{
+  "id": "attack.overload",
+  "src": "/fx/authored/attack-overload/spatial-v2/atlas.png",
+  "columns": 4,
+  "rows": 4,
+  "imageWidth": 1254,
+  "imageHeight": 1254,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        92,
+        147,
+        221,
+        242
+      ],
+      "renderedPadding": [
+        156.5,
+        211.5,
+        156.5,
+        135.5
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        313,
+        0,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        79,
+        122,
+        249,
+        274
+      ],
+      "renderedPadding": [
+        143.0,
+        186.5,
+        129.0,
+        103.5
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        627,
+        0,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        34,
+        99,
+        268,
+        279
+      ],
+      "renderedPadding": [
+        98.5,
+        163.5,
+        109.5,
+        98.5
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        940,
+        0,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        24,
+        79,
+        293,
+        295
+      ],
+      "renderedPadding": [
+        88.0,
+        143.5,
+        85.0,
+        82.5
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        313,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        16,
+        41,
+        305,
+        290
+      ],
+      "renderedPadding": [
+        80.5,
+        105.0,
+        72.5,
+        88.0
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        313,
+        313,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        13,
+        35,
+        313,
+        291
+      ],
+      "renderedPadding": [
+        77.0,
+        99.0,
+        65.0,
+        87.0
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        627,
+        313,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        10,
+        30,
+        307,
+        290
+      ],
+      "renderedPadding": [
+        74.5,
+        94.0,
+        70.5,
+        88.0
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        940,
+        313,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        5,
+        26,
+        300,
+        298
+      ],
+      "renderedPadding": [
+        69.0,
+        90.0,
+        78.0,
+        80.0
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        627,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        12,
+        39,
+        306,
+        275
+      ],
+      "renderedPadding": [
+        76.5,
+        103.5,
+        71.5,
+        102.5
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        313,
+        627,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        9,
+        32,
+        306,
+        274
+      ],
+      "renderedPadding": [
+        73.0,
+        96.5,
+        72.0,
+        103.5
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        627,
+        627,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        7,
+        30,
+        306,
+        279
+      ],
+      "renderedPadding": [
+        71.5,
+        94.5,
+        71.5,
+        98.5
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        940,
+        627,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        11,
+        37,
+        302,
+        271
+      ],
+      "renderedPadding": [
+        75.0,
+        101.5,
+        76.0,
+        106.5
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        940,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        23,
+        25,
+        305,
+        258
+      ],
+      "renderedPadding": [
+        87.5,
+        89.0,
+        72.5,
+        120.0
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        313,
+        940,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        19,
+        40,
+        298,
+        244
+      ],
+      "renderedPadding": [
+        83.0,
+        104.0,
+        80.0,
+        134.0
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        627,
+        940,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        64,
+        57,
+        279,
+        224
+      ],
+      "renderedPadding": [
+        128.5,
+        121.0,
+        98.5,
+        154.0
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        940,
+        940,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        84,
+        124,
+        247,
+        197
+      ],
+      "renderedPadding": [
+        148.0,
+        188.0,
+        131.0,
+        181.0
+      ]
+    }
+  ],
+  "virtualWidth": 442,
+  "virtualHeight": 442,
+  "alphaDiscard": 8,
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    4,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "frameMs": 90,
+  "composition": "whole-field",
+  "actorBodyWidthM": 0.5,
+  "authoringDiameterM": 5,
+  "geometrySource": "current committed action/field footprint",
+  "anchorStatus": "runtime ground-anchor fit from source bounds and committed footprint",
+  "sourcePixelsUnmodified": true,
+  "sourceSha256": "835060d78d3f54ee704820601a8beefaeeca3ea0eca14c5e8a276fca88a864ee",
+  "status": "active-spatial-v2",
+  "cellWidth": 313.5,
+  "cellHeight": 313.5,
+  "contentWidthRatio": 0.6787330316742082,
+  "contentHeightRatio": 0.6153846153846154,
+  "authoringGeometry": {
+    "shape": "circle",
+    "radiusM": 2.5,
+    "spanM": 5.0,
+    "depthM": 5.0,
+    "origin": "target",
+    "canonicalSource": "tools/data/skills.json#attack.overload"
+  }
+}

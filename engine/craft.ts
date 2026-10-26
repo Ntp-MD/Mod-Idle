@@ -19,7 +19,7 @@
  */
 
 import type * as lootMod from './loot.ts';
-import type { EngineData, Rng } from './types.ts';
+import type { BasesData, EngineData, Rng } from './types.ts';
 
 export const QUALITY_STEPS = ['low', 'mid', 'high'];
 
@@ -81,7 +81,7 @@ export const PRESS_NAME: Record<string, string> = {
 /** The press name, or the op id when a screen has not been given a name for it yet. */
 export const pressName = (op: string) => PRESS_NAME[op] || op;
 
-export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.createLoot>) {
+export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.createLoot>, BASES: Pick<BasesData, 'weapon_frames'>) {
   const C = E.craft;
 
   const costOf = (op: string, item: any, extra?: string): Record<string, number> => ({
@@ -188,6 +188,20 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
 
   const lineSlice = (line: any, fallback: number) => (line.slice == null ? fallback : line.slice);
 
+  /** Whole-piece rolls keep the saved Frame identity and use the fresh-drop budget and bias. */
+  function rollLineValues(item: any, line: any, index: number, rng: Rng, minimum = 0, holdExtras = false) {
+    const scale = index === 0 ? loot.frameValueScale(
+      1 + (line.extra || []).length,
+      loot.weaponFrameOf(BASES, item.base, line)?.value_bias ?? 1,
+    ) : 1;
+    const slice = lineSlice(line, 2);
+    const value = loot.rollValue(line.id, item.ilvl, item.q, slice, rng, scale, minimum);
+    const extra = (line.extra || []).map((x: any) => ({
+      ...x, value: loot.rollValue(x.id, item.ilvl, item.q, slice, rng, scale, holdExtras ? x.value : 0),
+    }));
+    return { ...line, value, ...(extra.length ? { extra } : {}) };
+  }
+
   /**
    * Reroll one line inside its own Tier. The floor is the highest value that slot has *ever*
    * held (save.md "Reroll baseline"), not just the value it holds now, so a later Refine cannot
@@ -248,10 +262,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     if (item.q >= QUALITY_STEPS.length - 1) return { ok: false, why: 'already the top band' };
     const q = item.q + 1;
     const ilvl = (item.ilvl || 0) + E.item_level.ascend_levels;
-    const lines = item.lines.map((l: any) => {
-      const [lo, hi] = loot.rangeOf(l.id, ilvl, q, lineSlice(l, 2));
-      return { ...l, value: lo + Math.floor(rng() * (hi - lo + 1)) };
-    });
+    const lines = item.lines.map((l: any, i: number) => rollLineValues({ ...item, ilvl, q }, l, i, rng));
     return { ok: true, item: { ...item, ilvl, q, quality: QUALITY_STEPS[q], lines }, changed: { q, ilvl } };
   }
 
@@ -324,6 +335,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     const e = editable(item, index);
     if (!e.ok) return e;
     if (!modId || !loot.NAME_OF[modId]) return { ok: false, why: 'no such Mod line' };
+    if (!loot.IMPRINT_IDS.includes(modId)) return { ok: false, why: 'this Mod cannot be imprinted on gear' };
     const taken = new Set<string>(item.lines.flatMap((l: any) => [l.id, ...((l.extra || []).map((x: any) => x.id))]));
     if (taken.has(modId)) return { ok: false, why: 'this piece already carries that Mod' };
     if (loot.blockedBy(taken).has(modId)) return { ok: false, why: 'that Mod is blocked on this piece' };
@@ -499,22 +511,6 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
   }
 
   /**
-   * The Frame Mod's shared budget: one line may carry up to three Mods, and `loot.frame_mod.value_scale`
-   * divides one window between them. The same published figure the drop spends, read here rather than
-   * copied, so a whole-piece stone cannot disagree with a fresh drop about what line 1 is worth.
-   */
-  const frameScale = (line: any) =>
-    E.loot.frame_mod.value_scale[String(1 + ((line?.extra || []).length))] ?? 1;
-
-  /** One line's window at one Tier, with the Frame Mod's shared budget applied. */
-  function windowOf(item: any, id: string, slice: number, k: number): [number, number] {
-    const [lo, hi] = loot.rangeOf(id, item.ilvl, item.q, slice);
-    const scaled = (v: number) => Math.max(1, Math.round(v * k));
-    const a = scaled(lo), b = scaled(hi);
-    return [a, Math.max(a, b)];
-  }
-
-  /**
    * Polish stone: the Reroll rule spent across the whole piece in one press. Every line's value
    * re-rolls inside its own Tier and never below the floor that slot has ever held, and no Tier moves —
    * the Frame Mod and the Bound pair are included, which is the reach no other stone has. Identity,
@@ -525,18 +521,9 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     if (!g.ok) return g;
     const baselines = { ...(item.baselines || {}) };
     const lines = item.lines.map((l: any, i: number) => {
-      const k = i === 0 ? frameScale(l) : 1;
-      const slice = lineSlice(l, 2);
-      const rollLine = (id: string, now: number) => {
-        const [lo, hi] = windowOf(item, id, slice, k);
-        const floor = Math.max(lo, baselines[i] ?? 0, now);
-        const value = floor + Math.floor(rng() * Math.max(0, hi - floor + 1));
-        return { value, hi: Math.max(floor, hi) };
-      };
-      const r = rollLine(l.id, l.value);
+      const r = rollLineValues(item, l, i, rng, Math.max(baselines[i] ?? 0, l.value), true);
       baselines[i] = Math.max(baselines[i] ?? 0, r.value);
-      const extra = (l.extra || []).map((x: any) => ({ ...x, value: rollLine(x.id, x.value).value }));
-      return { ...l, value: r.value, ...(extra.length ? { extra } : {}) };
+      return r;
     });
     return { ok: true, item: { ...item, baselines, lines }, changed: { lines: lines.length, tiers: 'held' } };
   }
@@ -557,14 +544,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     const lines = item.lines.map((l: any, i: number) => {
       const was = lineSlice(l, 2);
       if (was !== slice) { delete baselines[i]; moved++; }
-      const k = i === 0 ? frameScale(l) : 1;
-      const [lo, hi] = windowOf(item, l.id, slice, k);
-      const value = lo + Math.floor(rng() * Math.max(0, hi - lo + 1));
-      const extra = (l.extra || []).map((x: any) => {
-        const [xlo, xhi] = windowOf(item, x.id, slice, k);
-        return { ...x, value: xlo + Math.floor(rng() * Math.max(0, xhi - xlo + 1)) };
-      });
-      return { ...l, slice, value, ...(extra.length ? { extra } : {}) };
+      return rollLineValues(item, { ...l, slice }, i, rng);
     });
     return { ok: true, item: { ...item, baselines, lines }, changed: { lines: lines.length, slice, moved } };
   }
@@ -675,10 +655,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
     let next = { ...item, corrupted: true };
     let detail = {};
     if (outcome.kind === 'reroll_values') {
-      next.lines = item.lines.map((l: any) => {
-        const [lo, hi] = loot.rangeOf(l.id, next.ilvl, next.q, lineSlice(l, 2));
-        return { ...l, value: lo + Math.floor(rng() * (hi - lo + 1)) };
-      });
+      next.lines = item.lines.map((l: any, i: number) => rollLineValues(next, l, i, rng));
       detail = { lines: next.lines.length };
     } else if (outcome.kind === 'add_mod') {
       // the gamble's own outcome works on the piece as it was: the `corrupted` seal lands after,
@@ -706,10 +683,7 @@ export function createCraft(E: EngineData, loot: ReturnType<typeof lootMod.creat
       const q = Math.max(0, (item.q || 0) - 1);
       const ilvl = Math.max(1, (item.ilvl || 0) - E.item_level.ascend_levels);
       next = { ...next, ilvl, q, quality: QUALITY_STEPS[q] };
-      next.lines = next.lines.map((l: any) => {
-        const [lo, hi] = loot.rangeOf(l.id, ilvl, q, lineSlice(l, 2));
-        return { ...l, value: lo + Math.floor(rng() * (hi - lo + 1)) };
-      });
+      next.lines = next.lines.map((l: any, i: number) => rollLineValues(next, l, i, rng));
       detail = { q, ilvl };
     }
     return { ok: true, item: next, changed: { outcome: outcome.kind, weight: outcome.weight, ...detail } };

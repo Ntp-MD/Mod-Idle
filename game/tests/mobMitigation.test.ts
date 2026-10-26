@@ -5,23 +5,12 @@ import { buildCharacter, emptyGear } from '../src/sim/player';
 import { poolGear } from './sheetFixture';
 import { mobSwing, playerSwing } from '../src/sim/combat';
 import { newMobStatusStore, stepMob, applyBleed, modsOn, targetMods } from '../src/sim/mobStatus';
-import { NO_CURSE, applyCurse, newCurses, modsFromAuraFold, modsOn as curseModsOn } from '../src/sim/curse';
-import { castOnce, newSkillState, effectsActive } from '../src/sim/skills';
+import { NO_CURSE, modsFromAuraFold } from '../src/sim/curse';
+import { newSkillState, effectsActive } from '../src/sim/skills';
 import type { Item, Mob } from '../src/sim/types';
 import { mobFixture } from './mobFixture';
 
 const valueOf = (id: string, stat: string) => sm.byId[id]!.effects!.find((e: any) => e.stat === stat)!.value;
-
-/** HP one cast takes off one mob, so a press can be read off the target rather than recomputed. */
-function castPress(id: string, c: ReturnType<typeof buildCharacter>, target: Mob): number {
-  const s = newSkillState();
-  s.list[0] = id; s.owned[id] ??= 0;
-  s.xp[id] = 8000;
-  const before = target.hp;
-  const cast = castOnce(s, c, c.maxMana, [target], {}, mulberry32(7));
-  expect(cast).not.toBeNull();
-  return before - target.hp;
-}
 
 /**
  * B8 · the mob's own defences.

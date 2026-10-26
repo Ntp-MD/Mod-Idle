@@ -2,6 +2,40 @@
   "meta": {
     "note": "The roster source of truth and the only home of a skill number. engine/skills.ts is the one calculator and the client calls the same function, so a press is never typed twice. tools/skills.ts --calc prints the workshop; --checks runs the mechanic gate.",
     "active_slots": 16,
+    "spatial_targeting": {
+      "unit": "meter",
+      "note": "Live offensive casts use each row area.origin and area.radius_m. Positive radii hit every living enemy center inside the circle with no target-count cap; zero selects the primary target only. Caster-centered skills cast when an enemy enters their radius. Target-centered skills acquire within combat_arena.range, then test the circle around that target. The targets column remains the offline queue approximation. Cast reports snapshot the actual center and radius for VFX."
+    },
+    "action_profiles": {
+      "instant": {
+        "windup_sec": 0.15,
+        "recovery_sec": 0.15,
+        "impact_delay_sec": 0,
+        "projectile_speed_mps": 0,
+        "hit_radius_m": 0.45
+      },
+      "melee": {
+        "windup_sec": 0.18,
+        "recovery_sec": 0.22,
+        "impact_delay_sec": 0,
+        "projectile_speed_mps": 0,
+        "hit_radius_m": 0.55
+      },
+      "projectile": {
+        "windup_sec": 0.25,
+        "recovery_sec": 0.25,
+        "impact_delay_sec": 0,
+        "projectile_speed_mps": 9,
+        "hit_radius_m": 0.35
+      },
+      "ground": {
+        "windup_sec": 0.4,
+        "recovery_sec": 0.25,
+        "impact_delay_sec": 0.45,
+        "projectile_speed_mps": 0,
+        "hit_radius_m": 0.5
+      }
+    },
     "types": [
       "attack",
       "buff",
@@ -11,9 +45,9 @@
     ],
     "type_meta": {
       "attack": "Order list · cooldown + Mana or current-HP cost",
-      "buff": "Timed self-buff - own cd and duration, never persists between fights",
-      "curse": "Attached to target · Uses same hit_chance as attacks",
-      "heal": "Same list (key on bosses)",
+      "buff": "Timed self-buff · own cooldown and duration; ends between fights",
+      "curse": "Attached to target · same hit_chance as attacks",
+      "heal": "Same list · key on bosses",
       "aura": "Player-managed set · **Reserves Max Mana**"
     },
     "weapon_groups": [
@@ -38,7 +72,7 @@
       "hp_below_pct_default": 50,
       "mana_floor_pct_default": 20,
       "min_targets_default": 2,
-      "note": "The cast order's condition list, held per conditional slot rather than shared, so two rows may wait on different facts. A row fires while any one of its legs holds, so a list is an OR and the player never writes an expression. The legs: `boss` (the front target is a boss), `hpBelowPct` (our own pool is under that share), `statusMissing` (the target lacks a status or curse this row applies), `minTargets` (the group is at least that wide) and `manaFloorPct` (the press must leave that share of the usable pool). Each `*_default` is the number a leg opens at when its tick-box is first checked and the player edits it from there; they are the only defaults any screen may show, so no screen types its own."
+      "note": "The cast order's condition list, held per conditional slot rather than shared, so two rows may wait on different facts. A row fires while any one of its legs holds, so a list is an OR and the player never writes an expression. The legs: `boss` (the front target is a boss), `hpBelowPct` (our own pool is under that share), `statusMissing` (the target lacks a status or curse this row applies), `minTargets` (the resolved live area, or offline queue, contains at least that many targets) and `manaFloorPct` (the press must leave that share of the usable pool). Each `*_default` is the number a leg opens at when its tick-box is first checked and the player edits it from there; they are the only defaults any screen may show, so no screen types its own."
     },
     "formula": {
       "mana_level_step_pct": 5,
@@ -242,8 +276,10 @@
       "cd": 6,
       "mana": "21 flat",
       "basis": "magic",
-      "targets": "1/1",
-      "effect": "Single target · applies 2 burn stacks",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "projectile", "range_m": 4.6},
+      "effect": "Applies 2 burn stacks.",
       "effects": [
         {
           "stat": "burn_stacks",
@@ -266,7 +302,7 @@
       "cd": 5,
       "mana": "16 flat",
       "basis": "magic",
-      "targets": "1/1",
+      "targets": "1",
       "effect": "Fast cheap fire bolt · 1 burn stack",
       "effects": [
         {
@@ -288,8 +324,10 @@
       "cd": 13,
       "mana": "21 flat (AoE ×1.5)",
       "basis": "magic",
-      "targets": "3/1",
-      "effect": "AoE firestorm · 1 burn stack to all hit",
+      "targets": "3",
+      "area": { "origin": "target", "radius_m": 3 },
+      "cast": {"delivery": "ground", "range_m": 4.6},
+      "effect": "Applies 1 burn stack.",
       "effects": [
         {
           "stat": "burn_stacks",
@@ -306,8 +344,6 @@
     },
     {
       "id": "attack.meteor",
-      "retired": true,
-      "retired_to": "attack.firestorm",
       "name": "Meteor",
       "type": "attack",
       "group": "magic",
@@ -315,8 +351,10 @@
       "cd": 14,
       "mana": "22 flat (AoE ×1.5)",
       "basis": "magic",
-      "targets": "3/1",
-      "effect": "Heavy AoE slam · 2 burn stacks to all hit",
+      "targets": "3",
+      "area": { "origin": "target", "radius_m": 3 },
+      "cast": {"delivery": "ground", "range_m": 4.6},
+      "effect": "Applies 2 burn stacks.",
       "effects": [
         {
           "stat": "burn_stacks",
@@ -342,7 +380,7 @@
       "cd": 9,
       "mana": "22 flat",
       "basis": "magic",
-      "targets": "1/1",
+      "targets": "1",
       "effect": "Single target · 3 burn stacks",
       "effects": [
         {
@@ -366,7 +404,7 @@
       "cd": 5,
       "mana": "16 flat",
       "basis": "magic",
-      "targets": "1/1",
+      "targets": "1",
       "effect": "Fast cold bolt · 1 chill",
       "rules": [
         "guaranteed_status"
@@ -385,7 +423,7 @@
       "cd": 6,
       "mana": "19 flat",
       "basis": "magic",
-      "targets": "1/1",
+      "targets": "1",
       "effect": "Single target · 1 chill",
       "rules": [
         "guaranteed_status"
@@ -402,8 +440,11 @@
       "cd": 8,
       "mana": "21 flat",
       "basis": "magic",
-      "targets": "1/2",
-      "effect": "2 hits at 55% each · chills the target",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "projectile", "range_m": 4.6},
+      "action": { "kind": "projectile-burst", "interval_sec": 0.15 },
+      "effect": "Chills the target.",
       "effects": [
         {
           "stat": "hits",
@@ -433,8 +474,26 @@
       "cd": 13,
       "mana": "20 flat (AoE ×1.5)",
       "basis": "magic",
-      "targets": "3/1",
-      "effect": "AoE storm · chills all hit",
+      "targets": "3",
+      "area": { "origin": "target", "radius_m": 3 },
+      "cast": {"delivery": "ground", "range_m": 4.6},
+      "action": { "kind": "blizzard-field" },
+      "effect": "Chills everything it touches.",
+      "duration": "8 sec",
+      "effects": [
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 20,
+          "subject": "self"
+        },
+        {
+          "stat": "hit_pct",
+          "op": "add_pct",
+          "value": 5,
+          "subject": "self"
+        }
+      ],
       "rules": [
         "guaranteed_status",
         "every_target"
@@ -453,7 +512,7 @@
       "cd": 10,
       "mana": "16 flat (AoE ×1.5)",
       "basis": "magic",
-      "targets": "3/1",
+      "targets": "3",
       "effect": "Orb that chills all it touches",
       "rules": [
         "guaranteed_status",
@@ -471,8 +530,10 @@
       "cd": 8,
       "mana": "21 flat",
       "basis": "magic",
-      "targets": "1/1",
-      "effect": "+25% damage if the target is already chilled",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "instant", "range_m": 4.6},
+      "effect": "+25% damage against chilled targets.",
       "duration": "8 sec",
       "effects": [
         {
@@ -495,8 +556,11 @@
       "cd": 9,
       "mana": "24 flat (AoE ×1.5)",
       "basis": "magic",
-      "targets": "3/1",
-      "effect": "Arcs to 3 targets · shocks all hit",
+      "targets": "3",
+      "area": { "origin": "target", "radius_m": 3 },
+      "cast": {"delivery": "instant", "range_m": 4.6},
+      "action": { "kind": "chain-strike" },
+      "effect": "Shocks everything it reaches.",
       "rules": [
         "guaranteed_status",
         "every_target"
@@ -515,7 +579,7 @@
       "cd": 5,
       "mana": "18 flat",
       "basis": "magic",
-      "targets": "1/1",
+      "targets": "1",
       "effect": "Fast single bolt · 1 shock",
       "rules": [
         "guaranteed_status"
@@ -532,8 +596,10 @@
       "cd": 4,
       "mana": "13 flat",
       "basis": "magic",
-      "targets": "1/1",
-      "effect": "Cheapest fastest press · 1 shock",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "projectile", "range_m": 4.6},
+      "effect": "Applies 1 shock stack.",
       "rules": [
         "guaranteed_status"
       ],
@@ -549,8 +615,10 @@
       "cd": 11,
       "mana": "18 flat",
       "basis": "magic",
-      "targets": "1/1",
-      "effect": "Heavy single hit · shocks the target (shock carries the 1 sec interrupt)",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "ground", "range_m": 4.6},
+      "effect": "Shocks the target.",
       "rules": [
         "guaranteed_status"
       ],
@@ -568,7 +636,7 @@
       "cd": 14,
       "mana": "22 flat (AoE ×1.5)",
       "basis": "magic",
-      "targets": "3/1",
+      "targets": "3",
       "effect": "Big AoE storm · shocks all hit",
       "rules": [
         "guaranteed_status",
@@ -588,7 +656,7 @@
       "cd": 10,
       "mana": "22 flat (AoE ×1.5)",
       "basis": "magic",
-      "targets": "3/1",
+      "targets": "3",
       "effect": "Field around self · shocks all hit",
       "rules": [
         "guaranteed_status",
@@ -606,8 +674,10 @@
       "cd": 6,
       "mana": "19 flat",
       "basis": "magic",
-      "targets": "1/1",
-      "effect": "Single target · 2 poison stacks",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "projectile", "range_m": 4.6},
+      "effect": "Applies 2 poison stacks.",
       "effects": [
         {
           "stat": "poison_stacks",
@@ -628,8 +698,10 @@
       "cd": 9,
       "mana": "24 flat (AoE ×1.5)",
       "basis": "magic",
-      "targets": "3/1",
-      "effect": "Spray · 1 poison stack to all hit",
+      "targets": "3",
+      "area": { "origin": "caster", "radius_m": 2.5, "shape": "cone", "angle_deg": 90 },
+      "cast": {"delivery": "melee", "range_m": 2.5},
+      "effect": "Sprays venom in a 90° cone, applying 1 poison stack.",
       "effects": [
         {
           "stat": "poison_stacks",
@@ -653,8 +725,10 @@
       "cd": 7,
       "mana": "21 flat",
       "basis": "magic",
-      "targets": "1/1",
-      "effect": "Single target · 3 poison stacks",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "projectile", "range_m": 4.6},
+      "effect": "Applies 3 poison stacks.",
       "effects": [
         {
           "stat": "poison_stacks",
@@ -677,7 +751,7 @@
       "cd": 12,
       "mana": "19 flat (AoE ×1.5)",
       "basis": "magic",
-      "targets": "3/1",
+      "targets": "3",
       "effect": "Lingering cloud · 2 poison stacks to all hit",
       "effects": [
         {
@@ -702,8 +776,10 @@
       "cd": 6,
       "mana": "19 flat",
       "basis": "magic",
-      "targets": "1/1",
-      "effect": "Single target · 1 mark stack",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "projectile", "range_m": 4.6},
+      "effect": "Applies 1 mark stack.",
       "effects": [
         {
           "stat": "mark_stacks",
@@ -724,8 +800,10 @@
       "cd": 9,
       "mana": "24 flat (AoE ×1.5)",
       "basis": "magic",
-      "targets": "3/1",
-      "effect": "AoE blast · applies 1 mark stack to all hit",
+      "targets": "3",
+      "area": { "origin": "target", "radius_m": 2.5 },
+      "cast": {"delivery": "ground", "range_m": 4.6},
+      "effect": "Applies 1 mark stack.",
       "effects": [
         {
           "stat": "mark_stacks",
@@ -749,8 +827,11 @@
       "cd": 12,
       "mana": "19 flat (AoE ×1.5)",
       "basis": "magic",
-      "targets": "3/1",
-      "effect": "AoE sandstorm · accuracy −20% on every target it hits, and 20 earth damage a second for 10 sec",
+      "targets": "3",
+      "area": { "origin": "target", "radius_m": 3 },
+      "cast": {"delivery": "ground", "range_m": 4.6},
+      "action": { "kind": "sand-field" },
+      "effect": "Blinds with −20% accuracy.",
       "effects": [
         {
           "stat": "accuracy",
@@ -786,8 +867,10 @@
       "cd": 11,
       "mana": "18 flat",
       "basis": "magic",
-      "targets": "1/1",
-      "effect": "Heavy slam · adds 15% of the target's own maximum pool as damage, at half of that against a boss",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "ground", "range_m": 4.6},
+      "effect": "Adds 15% of the target's maximum pool as damage, halved against bosses.",
       "effects": [
         {
           "stat": "max_hp_pct_damage",
@@ -810,7 +893,7 @@
       "cd": 6,
       "mana": "15 flat (AoE ×1.5)",
       "basis": "phys",
-      "targets": "3/1",
+      "targets": "3",
       "effect": "AoE opener · 2 quick cuts on every target hit",
       "effects": [
         {
@@ -835,8 +918,10 @@
       "cd": 10,
       "mana": "27 flat",
       "basis": "phys",
-      "targets": "1/1",
-      "effect": "Reads the opening: +25% crit chance on this press",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "melee", "range_m": 2.1},
+      "effect": "+25% crit chance on this press.",
       "effects": [
         {
           "stat": "crit_chance",
@@ -859,7 +944,7 @@
       "cd": 7,
       "mana": "18 flat",
       "basis": "phys",
-      "targets": "1/1",
+      "targets": "1",
       "effect": "A hidden edge · 2 poison stacks to the target",
       "effects": [
         {
@@ -881,8 +966,10 @@
       "cd": 7,
       "mana": "18 flat",
       "basis": "phys",
-      "targets": "1/1",
-      "effect": "Slips inside the guard: +30% hit chance on this press",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "melee", "range_m": 2.1},
+      "effect": "+30% hit chance on this press.",
       "effects": [
         {
           "stat": "hit_pct",
@@ -905,7 +992,7 @@
       "cd": 7,
       "mana": "18 flat",
       "basis": "phys",
-      "targets": "1/1",
+      "targets": "1",
       "effect": "A cut on the nerve · the target deals −25% damage",
       "effects": [
         {
@@ -927,8 +1014,10 @@
       "cd": 9,
       "mana": "22 flat",
       "basis": "phys",
-      "targets": "1/1",
-      "effect": "A thrust through the guard · pierces 100% of the resistance it meets",
+      "targets": "1",
+      "area": { "origin": "caster", "radius_m": 0, "shape": "line", "length_m": 2.1, "width_m": 0.75 },
+      "cast": {"delivery": "melee", "range_m": 2.1},
+      "effect": "A line thrust that pierces 100% of the resistance it meets.",
       "effects": [
         {
           "stat": "resistance_pierce_pct",
@@ -951,7 +1040,7 @@
       "cd": 9,
       "mana": "22 flat (AoE ×1.5)",
       "basis": "phys",
-      "targets": "3/3",
+      "targets": "3",
       "effect": "Skewers the whole rank · 3 thrusts on every target hit",
       "effects": [
         {
@@ -978,7 +1067,7 @@
       "cd": 12,
       "mana": "24 flat",
       "basis": "phys",
-      "targets": "1/1",
+      "targets": "1",
       "effect": "The longest, slowest thrust of the reach — one heavy hit",
       "effects": [],
       "base_flat": 4535.6,
@@ -995,7 +1084,7 @@
       "cd": 8,
       "mana": "18 flat",
       "basis": "phys",
-      "targets": "1/1",
+      "targets": "1",
       "effect": "Takes the legs out · attack speed −20% on the target",
       "effects": [
         {
@@ -1017,8 +1106,10 @@
       "cd": 8,
       "mana": "18 flat",
       "basis": "phys",
-      "targets": "1/1",
-      "effect": "A blow to the head · +20% stun chance on this hit",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "melee", "range_m": 2.1},
+      "effect": "+20% stun chance on this hit.",
       "effects": [
         {
           "stat": "stun_chance",
@@ -1039,8 +1130,10 @@
       "cd": 6,
       "mana": "15 flat (AoE ×1.5)",
       "basis": "phys",
-      "targets": "3/1",
-      "effect": "Slams the ground · stops every target hit for 1 sec",
+      "targets": "3",
+      "area": { "origin": "caster", "radius_m": 2.5 },
+      "cast": {"delivery": "melee", "range_m": 2.5},
+      "effect": "Stops targets for 1 sec.",
       "effects": [
         {
           "stat": "stop_sec",
@@ -1064,8 +1157,10 @@
       "cd": 12,
       "mana": "24 flat",
       "basis": "phys",
-      "targets": "1/1",
-      "effect": "Breaks the body open · the execute threshold shifts to 35%",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "melee", "range_m": 2.1},
+      "effect": "Shifts the execute threshold to 35%.",
       "effects": [
         {
           "stat": "execute_threshold_pct",
@@ -1088,7 +1183,7 @@
       "cd": 10,
       "mana": "27 flat",
       "basis": "phys",
-      "targets": "1/1",
+      "targets": "1",
       "effect": "A tolling blow · the target deals −25% damage",
       "effects": [
         {
@@ -1112,7 +1207,7 @@
       "cd": 6,
       "mana": "15 flat (AoE ×1.5)",
       "basis": "phys",
-      "targets": "3/1",
+      "targets": "3",
       "effect": "One wide cut across the whole group — no rider, just the reach",
       "effects": [],
       "rules": [
@@ -1132,7 +1227,7 @@
       "cd": 9,
       "mana": "22 flat (AoE ×1.5)",
       "basis": "phys",
-      "targets": "3/3",
+      "targets": "3",
       "effect": "Spins the axe through the rank · 2 cuts on every target hit",
       "effects": [
         {
@@ -1157,8 +1252,10 @@
       "cd": 10,
       "mana": "27 flat",
       "basis": "phys",
-      "targets": "1/1",
-      "effect": "Drinks the wound · leech +15% off this hit",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "melee", "range_m": 2.1},
+      "effect": "Leeches 15% of this hit.",
       "effects": [
         {
           "stat": "leech",
@@ -1179,8 +1276,10 @@
       "cd": 12,
       "mana": "24 flat",
       "basis": "phys",
-      "targets": "1/1",
-      "effect": "Splits the body itself · adds 10% of the target’s own maximum pool (halved on a boss)",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "melee", "range_m": 2.1},
+      "effect": "Adds 10% of the target's maximum pool as damage, halved against bosses.",
       "effects": [
         {
           "stat": "max_hp_pct_damage",
@@ -1201,8 +1300,10 @@
       "cd": 6,
       "mana": "15 flat (AoE ×1.5)",
       "basis": "phys",
-      "targets": "3/1",
-      "effect": "Swing around, hits all in range",
+      "targets": "3",
+      "area": { "origin": "caster", "radius_m": 2.1, "shape": "cone", "angle_deg": 120 },
+      "cast": {"delivery": "melee", "range_m": 2.1},
+      "effect": "A 120° sweeping swing — one hit to every enemy in front of you.",
       "modelled_by": "targets",
       "base_flat": 1445.7,
       "eff": 67.79
@@ -1216,8 +1317,10 @@
       "cd": 10,
       "mana": "27 flat",
       "basis": "phys",
-      "targets": "1/1",
-      "effect": "Heavy hit + target takes +15% Element damage 8 sec (replaces Guard Break, which referenced a nonexistent system)",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "melee", "range_m": 2.1},
+      "effect": "The target takes +15% elemental damage.",
       "duration": "8 sec",
       "effects": [
         {
@@ -1239,8 +1342,11 @@
       "cd": 9,
       "mana": "22 flat (AoE ×1.5)",
       "basis": "phys",
-      "targets": "3/3",
-      "effect": "Spin 3 rounds, 1 hit per target per round · Per-target hit count = proc engine",
+      "targets": "3",
+      "area": { "origin": "caster", "radius_m": 3 },
+      "cast": {"delivery": "melee", "range_m": 3},
+      "action": { "kind": "whirlwind-channel", "active_sec": 1.2, "movement_speed_mult": 0.6 },
+      "effect": "One hit per target per round.",
       "effects": [
         {
           "stat": "hits",
@@ -1261,8 +1367,10 @@
       "cd": 8,
       "mana": "18 flat",
       "basis": "phys",
-      "targets": "1/1",
-      "effect": "Stops target attacks 1 sec (a flat stop, not a rolled stun chance)",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "melee", "range_m": 2.1},
+      "effect": "Stops the target for 1 sec.",
       "effects": [
         {
           "stat": "stop_sec",
@@ -1286,8 +1394,10 @@
       "cd": 7,
       "mana": "18 flat",
       "basis": "phys",
-      "targets": "1/1",
-      "effect": "Guarantees bleeding on the hit (100% bleed chance · bleed does not stack, a new hit refreshes its 5 sec)",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "melee", "range_m": 2.1},
+      "effect": "Guarantees bleed at 100% chance and refreshes its duration.",
       "effects": [
         {
           "stat": "bleed_chance",
@@ -1308,8 +1418,10 @@
       "cd": 9,
       "mana": "14 flat",
       "basis": "phys",
-      "targets": "1/1",
-      "effect": "Leech +25% and physical power x1.10 for 6 sec · the window opens on the press and rides the skill's own duration",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "melee", "range_m": 2.1},
+      "effect": "Leeches 25% and grants ×1.10 physical power.",
       "duration": "6 sec",
       "effects": [
         {
@@ -1341,8 +1453,10 @@
       "cd": 6,
       "mana": "15 flat",
       "basis": "phys",
-      "targets": "1/1",
-      "effect": "Single target · This hit does not roll dodge",
+      "targets": "1",
+      "area": { "origin": "caster", "radius_m": 0, "shape": "line", "length_m": 5.2, "width_m": 0.75 },
+      "cast": {"delivery": "projectile", "range_m": 5.2},
+      "effect": "A piercing shot along a line; this hit cannot be dodged.",
       "rules": [
         "ignores_dodge"
       ],
@@ -1359,8 +1473,11 @@
       "cd": 7,
       "mana": "19 flat",
       "basis": "phys",
-      "targets": "1/3",
-      "effect": "3 arrows, 40% each, 120% total of formula · Per-hit procs fire 3 times",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "projectile", "range_m": 5.2},
+      "action": { "kind": "projectile-burst", "interval_sec": 0.15 },
+      "effect": "Each arrow can trigger effects.",
       "effects": [
         {
           "stat": "hits",
@@ -1388,8 +1505,10 @@
       "cd": 12,
       "mana": "24 flat",
       "basis": "phys",
-      "targets": "1/1",
-      "effect": "This hit +25% crit chance · Burst window for crit builds",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "projectile", "range_m": 5.2},
+      "effect": "+25% crit chance on this hit.",
       "effects": [
         {
           "stat": "crit_chance",
@@ -1411,8 +1530,10 @@
       "cd": 7,
       "mana": "12 flat",
       "basis": "phys",
-      "targets": "1/1",
-      "effect": "This hit does not roll dodge and strips the target's Elemental resistance -15% for 8 sec",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "projectile", "range_m": 5.2},
+      "effect": "Ignores dodge and strips −15% elemental resistance.",
       "duration": "8 sec",
       "effects": [
         {
@@ -1437,8 +1558,10 @@
       "cd": 12,
       "mana": "19 flat (AoE ×1.5)",
       "basis": "magic",
-      "targets": "3/1",
-      "effect": "AoE earthshock · cripples every target it hits",
+      "targets": "3",
+      "area": { "origin": "target", "radius_m": 2.5 },
+      "cast": {"delivery": "ground", "range_m": 4.6},
+      "effect": "Applies cripple.",
       "rules": [
         "guaranteed_status",
         "every_target"
@@ -1455,8 +1578,10 @@
       "cd": 10,
       "mana": "24 flat",
       "basis": "magic",
-      "targets": "1/1",
-      "effect": "Consumes up to 5 burn stacks · +15% damage per stack",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "ground", "range_m": 4.6},
+      "effect": "Consumes up to 5 burn stacks. +15% damage per stack.",
       "effects": [
         {
           "stat": "consume_status",
@@ -1479,8 +1604,10 @@
       "cd": 13,
       "mana": "22 flat (AoE ×1.5)",
       "basis": "magic",
-      "targets": "3/1",
-      "effect": "Bonus +30% against chilled targets · stops them 1 sec",
+      "targets": "3",
+      "area": { "origin": "target", "radius_m": 2.5 },
+      "cast": {"delivery": "ground", "range_m": 4.6},
+      "effect": "+30% damage against chilled targets. Stops them for 1 sec.",
       "effects": [
         {
           "stat": "bonus_vs_status",
@@ -1508,8 +1635,11 @@
       "cd": 12,
       "mana": "24 flat (AoE ×1.5)",
       "basis": "magic",
-      "targets": "3/1",
-      "effect": "Bonus +30% against shocked targets · 2 hits at 50% each",
+      "targets": "3",
+      "area": { "origin": "target", "radius_m": 2.5 },
+      "cast": {"delivery": "ground", "range_m": 4.6},
+      "action": { "kind": "ground-pulse-burst", "interval_sec": 0.3 },
+      "effect": "+30% damage against shocked targets.",
       "effects": [
         {
           "stat": "bonus_vs_status",
@@ -1546,8 +1676,10 @@
       "cd": 11,
       "mana": "22 flat",
       "basis": "magic",
-      "targets": "1/1",
-      "effect": "Consumes up to 5 poison stacks · +12% damage per stack · spreads poison to 2 others",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "instant", "range_m": 4.6},
+      "effect": "Consumes up to 5 poison stacks. +12% damage per stack. Spreads poison to 2 others.",
       "effects": [
         {
           "stat": "consume_status",
@@ -1562,7 +1694,8 @@
           "status": "poison",
           "op": "add_flat",
           "value": 2,
-          "subject": "target"
+          "subject": "target",
+          "radius_m": 3
         }
       ],
       "base_flat": 900,
@@ -1577,8 +1710,10 @@
       "cd": 14,
       "mana": "26 flat",
       "basis": "magic",
-      "targets": "1/1",
-      "effect": "Consumes up to 10 mark stacks · +8% damage per stack",
+      "targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "instant", "range_m": 4.6},
+      "effect": "Consumes up to 10 mark stacks. +8% damage per stack.",
       "effects": [
         {
           "stat": "consume_status",
@@ -1601,8 +1736,10 @@
       "cd": 12,
       "mana": "22 flat (AoE ×1.5)",
       "basis": "magic",
-      "targets": "3/1",
-      "effect": "Bonus +25% against crippled targets · Armour +20% for 6 sec",
+      "targets": "3",
+      "area": { "origin": "caster", "radius_m": 3 },
+      "cast": {"delivery": "ground", "range_m": 3},
+      "effect": "+25% damage against crippled targets. Grants +20% armour.",
       "duration": "6 sec",
       "effects": [
         {
@@ -1633,7 +1770,8 @@
       "cd": 15,
       "mana": "15 flat",
       "duration": "10 sec",
-      "effect": "Physical power x1.15 and Elemental alignment and Elemental resistance x1.20 while up",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "×1.15 physical power, ×1.20 elemental alignment and elemental resistance.",
       "effects": [
         {
           "stat": "physical_power",
@@ -1659,7 +1797,8 @@
       "cd": 15,
       "mana": "15 flat",
       "duration": "10 sec",
-      "effect": "Attack speed x1.20 and leech +15%, and damage taken x1.15 while up",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "×1.20 attack speed, +15% leech, and damage taken ×1.15.",
       "effects": [
         {
           "stat": "attack_speed",
@@ -1688,7 +1827,8 @@
       "cd": 15,
       "mana": "15 flat",
       "duration": "10 sec",
-      "effect": "Armour x1.20 and damage taken x0.90 while up",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "×1.20 Armour, damage taken ×0.90.",
       "effects": [
         {
           "stat": "armour",
@@ -1709,7 +1849,8 @@
       "cd": 20,
       "mana": "18 flat",
       "duration": "7 sec",
-      "effect": "No Element debuff (burn, chill, shock, poison, mark) or bleed can be applied while up, and casting it clears the ones already on you",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "No Element debuff or bleed can be applied. Casting clears the ones on you.",
       "rules": [
         "status_immunity",
         "cleanses_on_cast"
@@ -1722,7 +1863,8 @@
       "cd": 15,
       "mana": "15 flat",
       "duration": "10 sec",
-      "effect": "Grants perfect dodge charges: 3 at skill level 1, +1 every 5 levels up to 7 at level 20 · each charge deletes one incoming hit outright and is not opposed (stops DoT ticks and unconditional effects)",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "Grants perfect-dodge charges that delete incoming hits outright: 3 at level 1, +1 every 5 levels, up to 7 at level 20.",
       "effects": [
         {
           "stat": "dodge_charges",
@@ -1751,7 +1893,8 @@
       "cd": 15,
       "mana": "15 flat",
       "duration": "10 sec",
-      "effect": "Grants block charges: 5 at skill level 1, +1 every 3 levels up to 10 at level 20 · each charge cuts one incoming physical hit by the block rule (a flat share of Armour), never deletes it",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "Grants block charges that cut physical hits by the block rule, never deleting them: 5 at level 1, +1 every 3 levels, up to 10 at level 20.",
       "effects": [
         {
           "stat": "block_charges",
@@ -1780,7 +1923,8 @@
       "cd": 20,
       "mana": "18 flat",
       "duration": "8 sec",
-      "effect": "Forces Energy Shield to start recharging immediately (ignores the 5 sec delay) and the recharge is not interrupted by hits while up",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "Energy Shield starts recharging at once, ignoring the 5 sec delay, and hits do not interrupt the recharge.",
       "rules": [
         "es_recharge_immediate"
       ]
@@ -1792,7 +1936,8 @@
       "cd": 20,
       "mana": "18 flat",
       "duration": "3 sec",
-      "effect": "Converts 15% of every incoming hit into Energy Shield at skill level 1, rising to 30% at level 20, and that share is negated from HP either way while up",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "Converts 15% of every incoming hit into Energy Shield, rising to 30% at level 20.",
       "effects": [
         {
           "stat": "es_absorb_pct",
@@ -1816,7 +1961,8 @@
       "cd": 16,
       "mana": "18 flat",
       "duration": "8 sec",
-      "effect": "Grants a flat 350 Energy Shield pool that soaks damage while the guard is up",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "Grants a 350 Energy Shield pool that soaks damage while the guard is up.",
       "effects": [
         {
           "stat": "energy_shield",
@@ -1833,7 +1979,9 @@
       "cd": 12,
       "mana": "21 flat",
       "duration": "8 sec",
-      "effect": "Target deals -25% damage",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "instant", "range_m": 4.6},
+      "effect": "The target deals −25% damage.",
       "effects": [
         {
           "stat": "damage_dealt",
@@ -1850,7 +1998,9 @@
       "cd": 12,
       "mana": "21 flat",
       "duration": "8 sec",
-      "effect": "Target accuracy -30% (multiplies with our Evasion = true EHP)",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "instant", "range_m": 4.6},
+      "effect": "The target's accuracy is −30%.",
       "effects": [
         {
           "stat": "accuracy",
@@ -1867,7 +2017,9 @@
       "cd": 14,
       "mana": "24 flat",
       "duration": "8 sec",
-      "effect": "Target takes +20% damage",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "instant", "range_m": 4.6},
+      "effect": "The target takes +20% damage.",
       "effects": [
         {
           "stat": "damage_taken",
@@ -1884,7 +2036,9 @@
       "cd": 12,
       "mana": "21 flat",
       "duration": "8 sec",
-      "effect": "Target aspd -20% · Element-free so usable with all weapons",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "instant", "range_m": 4.6},
+      "effect": "The target's attack speed is −20%.",
       "effects": [
         {
           "stat": "attack_speed",
@@ -1901,7 +2055,9 @@
       "cd": 13,
       "mana": "19 flat",
       "duration": "8 sec",
-      "effect": "Target easier to crit: our crit chance against it +15%",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "instant", "range_m": 4.6},
+      "effect": "+15% chance to crit against the target.",
       "effects": [
         {
           "stat": "crit_chance",
@@ -1918,7 +2074,9 @@
       "cd": 15,
       "mana": "21 flat",
       "duration": "6 sec",
-      "effect": "Poison stacks on target do not fall 6 sec · Locks 10-stack DoT for the whole window",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "instant", "range_m": 4.6},
+      "effect": "Poison stacks on the target stop falling.",
       "effects": [
         {
           "stat": "poison_hold_sec",
@@ -1935,7 +2093,8 @@
       "cd": 20,
       "mana": "30 flat",
       "duration": "8 sec",
-      "effect": "Restores 10% Max HP per second 8 sec (= +80% pool in long fights)",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "Restores 10% of Max HP each second.",
       "effects": [
         {
           "stat": "heal_per_sec",
@@ -1951,7 +2110,8 @@
       "cd": 40,
       "mana": "37 flat",
       "duration": "Instant",
-      "effect": "Restores 60% Max HP instantly · Covers last-moment windows",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "Restores 60% of Max HP at once.",
       "effects": [
         {
           "stat": "heal_instant",
@@ -1967,7 +2127,8 @@
       "cd": 24,
       "mana": "24 flat",
       "duration": "Instant",
-      "effect": "Cleanses all statuses on self + restores 8% Max HP · Answer to 10-stack poison",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "Cleanses every status on you and restores 8% of Max HP.",
       "effects": [
         {
           "stat": "heal_instant",
@@ -1986,7 +2147,7 @@
       "type": "aura",
       "kind": "self",
       "reserve": "cheap",
-      "effect": "aspd +12%",
+      "effect": "Attack speed +12%.",
       "effects": [
         {
           "stat": "attack_speed",
@@ -2001,7 +2162,7 @@
       "type": "aura",
       "kind": "self",
       "reserve": "cheap",
-      "effect": "mana regen +25%",
+      "effect": "Mana regeneration +25%.",
       "effects": [
         {
           "stat": "mana_regen",
@@ -2016,7 +2177,7 @@
       "type": "aura",
       "kind": "self",
       "reserve": "extreme",
-      "effect": "global speed ×1.15: every cooldown ticks 15% faster (a post-cap cooldown multiplier) and final attack speed ×1.15 (still clamped by the 500 Cap)",
+      "effect": "Global speed ×1.15: cooldowns tick 15% faster and final attack speed ×1.15. Clamped by the 500 Cap.",
       "effects": [
         {
           "stat": "attack_speed",
@@ -2038,7 +2199,7 @@
       "type": "aura",
       "kind": "self",
       "reserve": "mid",
-      "effect": "hp regen +30%",
+      "effect": "Health regeneration +30%.",
       "effects": [
         {
           "stat": "hp_regen",
@@ -2053,7 +2214,7 @@
       "type": "aura",
       "kind": "fire",
       "reserve": "heavy",
-      "effect": "fire damage flat +50 · Alignment +6%",
+      "effect": "+50 Fire damage · Alignment +6%.",
       "effects": [
         {
           "stat": "elemental_power",
@@ -2076,7 +2237,7 @@
       "type": "aura",
       "kind": "cold",
       "reserve": "heavy",
-      "effect": "cold damage flat +50 · Alignment +6%",
+      "effect": "+50 Cold damage · Alignment +6%.",
       "effects": [
         {
           "stat": "elemental_power",
@@ -2099,7 +2260,7 @@
       "type": "aura",
       "kind": "lightning",
       "reserve": "heavy",
-      "effect": "lightning damage flat +50 · Alignment +6%",
+      "effect": "+50 Lightning damage · Alignment +6%.",
       "effects": [
         {
           "stat": "elemental_power",
@@ -2122,7 +2283,7 @@
       "type": "aura",
       "kind": "fire",
       "reserve": "mid",
-      "effect": "35% of physical damage converted to fire",
+      "effect": "35% of physical damage converted to fire.",
       "effects": [
         {
           "stat": "damage_conversion",
@@ -2139,7 +2300,7 @@
       "type": "aura",
       "kind": "cold",
       "reserve": "mid",
-      "effect": "35% of physical damage converted to cold",
+      "effect": "35% of physical damage converted to cold.",
       "effects": [
         {
           "stat": "damage_conversion",
@@ -2156,7 +2317,7 @@
       "type": "aura",
       "kind": "lightning",
       "reserve": "mid",
-      "effect": "35% of physical damage converted to lightning",
+      "effect": "35% of physical damage converted to lightning.",
       "effects": [
         {
           "stat": "damage_conversion",
@@ -2173,7 +2334,7 @@
       "type": "aura",
       "kind": "trigger",
       "reserve": "heavy",
-      "effect": "on a crit, casts the first ready slot in the order · mana ×2 · damage ×0.7 · 1 sec between triggers",
+      "effect": "Casts the first ready slot in the order. Mana ×2, damage ×0.7, 1 sec between triggers.",
       "rules": [
         "cast_on_crit"
       ],
@@ -2204,7 +2365,7 @@
       "type": "aura",
       "kind": "trigger",
       "reserve": "heavy",
-      "effect": "on taking damage, casts the first ready slot in the order · mana ×2 · damage ×0.7 · 1 sec between triggers",
+      "effect": "Casts the first ready slot in the order. Mana ×2, damage ×0.7, 1 sec between triggers.",
       "rules": [
         "cast_on_damage_taken"
       ],
@@ -2235,7 +2396,7 @@
       "type": "aura",
       "kind": "debuff",
       "reserve": "mid",
-      "effect": "nearby mob aspd −15% (stacks with chill; total may reach −35%)",
+      "effect": "Nearby mobs attack −15% slower. Stacks with chill up to −35%.",
       "effects": [
         {
           "stat": "attack_speed",
@@ -2251,7 +2412,7 @@
       "type": "aura",
       "kind": "debuff",
       "reserve": "mid",
-      "effect": "foe Elemental res −12%",
+      "effect": "Foes' elemental resistance −12%.",
       "effects": [
         {
           "stat": "mob_elemental_resistance_pct",
@@ -2267,7 +2428,7 @@
       "type": "aura",
       "kind": "defense",
       "reserve": "mid",
-      "effect": "Elemental res +15% on fire / cold / lightning",
+      "effect": "+15% resistance to fire, cold and lightning.",
       "effects": [
         {
           "stat": "elemental_resistance",
@@ -2298,7 +2459,7 @@
       "type": "aura",
       "kind": "defense",
       "reserve": "cheap",
-      "effect": "Evasion flat +24",
+      "effect": "Evasion +24.",
       "effects": [
         {
           "stat": "evasion",
@@ -2313,7 +2474,7 @@
       "type": "aura",
       "kind": "defense",
       "reserve": "mid",
-      "effect": "Armour flat +32",
+      "effect": "Armour +32.",
       "effects": [
         {
           "stat": "armour",
@@ -2328,7 +2489,7 @@
       "type": "aura",
       "kind": "defense",
       "reserve": "mid",
-      "effect": "Energy Shield flat +48",
+      "effect": "Energy Shield +48.",
       "effects": [
         {
           "stat": "energy_shield",

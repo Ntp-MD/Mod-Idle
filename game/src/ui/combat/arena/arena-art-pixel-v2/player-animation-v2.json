@@ -1,0 +1,517 @@
+{
+  "status": "visual-approved",
+  "file": "player-animation-v2.png",
+  "generator": "OpenAI built-in image_gen",
+  "generation": {
+    "sourceOutputs": [
+      "exec-9c54cd1c-70b7-468f-a83f-1ca669128455.png",
+      "exec-5697b574-3619-4f46-8512-5440a83894d1.png"
+    ],
+    "initialPrompt": "Create ONE production game sprite atlas, not a concept illustration. Use the attached old traveler sheet ONLY for character identity (cream hood, dusty blue short cape, brown leather clothes, short steel sword in right hand, small round wooden shield on left arm). Completely redraw as compact genuine low-resolution pixel art: chunky clean pixel clusters, 3-4 flat shades per material, strong dark selective outline, large head and compact limbs, no painterly rendering or smooth shading. Original dark-fantasy isometric sprite visual language like small professional monster sprite packs. Do not reproduce another artist's exact character.\n\nEXACT OUTPUT: transparent RGBA PNG canvas 1024 pixels wide by 640 pixels high, exactly 8 columns and 5 rows, exactly 128x128 pixels per cell. No gutters, no grid lines, no labels, no extra margins, do not crop the canvas. Each cell is an independent native 128px frame, character body approx 68px high with empty margins. Pixel edges must be hard native pixel steps, no anti-aliasing, no soft alpha, no blur, no gradients. Draw at native pixels, do not paint large and downsample. Identical character size throughout. Standing ground/root anchor at local (64,108) in every frame; fixed elevated three-quarter game camera, light from upper left. Keep sword, shield, cape and the whole body inside each cell, minimum 8px margin to all cell edges. NO cast shadows, backdrop, effects, text, borders, watermark, guide lines or checkerboard.\n\nEXACT ROW ORDER, all 40 cells occupied, left to right:\nRow0: 8 idle facing directions: south, south-east, east, north-east, north, north-west, west, south-west. Same neutral ready pose, no duplicated direction.\nRow1: cells0-3 four-frame EAST walk loop (left foot forward, passing, right foot forward, passing); cells4-7 four-frame WEST walk loop. Real alternating legs and counter-swing, cape slight sway, root stays in place.\nRow2: cells0-3 four-frame EAST sword attack (ready anticipation, raised windup, decisive outward strike, recovery); cells4-7 corresponding WEST sword attack. Sword and shield remain anatomically on correct arms; no glowing slash or trail.\nRow3: cells0-3 four-frame EAST hit reaction (impact recoils torso, strongest backward bend, regaining footing, ready); cells4-7 WEST hit reaction. Feet remain fixed, outfit never changes.\nRow4: cells0-3 four-frame EAST death (buckling knees, falling, body lands, fully prone still); cells4-7 WEST death. Body lies in same cell with sword and shield, no blood, no disappearance. Final death frame stays low on the ground.\n\nCRITICAL: equal regular cell centers x=64,192,320,448,576,704,832,960. Each row begins at y=0,128,256,384,512. Never spill pixels into a neighboring cell. This image will be sliced by those exact mathematical cells. Return only the atlas PNG with real alpha.",
+    "revisionPrompt": "Edit image1, the traveler atlas. Image2 is STYLE REFERENCE ONLY: use the tiny compact low-color pixel-art sprites shown in the monster gallery, NOT its cards/text/UI/creatures. Redraw original traveler identity in that low-resolution style. Keep all 40 poses, directions and 8-column/5-row order from image1, but fix all frame spacing and simplify severely.\nPreserve actual canvas EXACTLY 1586x992 transparent pixels. Define a regular 1584x990 atlas at top left with EXACT 198x198 cells, 8 columns and 5 rows; final 2px right and bottom are transparent padding. Each character must be newly DRAWN directly as a SMALL native pixel sprite, upright body only 76 pixels tall (not 140), head roughly 23px, short limbs, 3 flat shades per material, crisp 1px clusters, no detailed texture, no gradients or soft outline. Do NOT downsample painted artwork. Render at native resolution. Hard alpha only, no colored edge glow.\nCritical: EVERY CELL has huge transparent margins. All visible pixels MUST be between local x=35..163 and y=65..170. Upright feet share local ground y=170 and horizontal root x=99. Full sword/cape/shield must fit. Death final corpses lie between local x=35..163 y=140..170, so the corpse stays at the same ground level. Do not move feet upward between rows. All cells must have at least 27px fully transparent gap to neighbors, never crossing a cell edge. Consistent character proportions and equipment.\nOrder unchanged: row0 idle S SE E NE N NW W SW; row1 E walk4 / W walk4; row2 E sword attack4 / W attack4; row3 E hit4 / W hit4; row4 E death4 / W death4. Real pose changes, not merely shifted cutouts. Hit final returns ready, death progresses buckling/falling/landed/prone. No shadow, platform, FX, labels, grid, decorative border, background or watermark. Return ONLY transparent atlas."
+  },
+  "sourceCanvas": {
+    "width": 1585,
+    "height": 992
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 54,
+      "y": 72,
+      "width": 115,
+      "height": 142,
+      "offsetX": 83,
+      "offsetY": 84
+    },
+    {
+      "x": 244,
+      "y": 78,
+      "width": 113,
+      "height": 136,
+      "offsetX": 75,
+      "offsetY": 90
+    },
+    {
+      "x": 450,
+      "y": 78,
+      "width": 113,
+      "height": 136,
+      "offsetX": 83,
+      "offsetY": 90
+    },
+    {
+      "x": 637,
+      "y": 75,
+      "width": 123,
+      "height": 139,
+      "offsetX": 72,
+      "offsetY": 87
+    },
+    {
+      "x": 830,
+      "y": 66,
+      "width": 118,
+      "height": 148,
+      "offsetX": 66,
+      "offsetY": 78
+    },
+    {
+      "x": 1039,
+      "y": 76,
+      "width": 114,
+      "height": 138,
+      "offsetX": 77,
+      "offsetY": 88
+    },
+    {
+      "x": 1214,
+      "y": 75,
+      "width": 114,
+      "height": 139,
+      "offsetX": 54,
+      "offsetY": 87
+    },
+    {
+      "x": 1409,
+      "y": 73,
+      "width": 120,
+      "height": 141,
+      "offsetX": 51,
+      "offsetY": 85
+    },
+    {
+      "x": 46,
+      "y": 257,
+      "width": 120,
+      "height": 143,
+      "offsetX": 75,
+      "offsetY": 83
+    },
+    {
+      "x": 238,
+      "y": 258,
+      "width": 128,
+      "height": 142,
+      "offsetX": 69,
+      "offsetY": 84
+    },
+    {
+      "x": 427,
+      "y": 258,
+      "width": 135,
+      "height": 142,
+      "offsetX": 60,
+      "offsetY": 84
+    },
+    {
+      "x": 618,
+      "y": 262,
+      "width": 148,
+      "height": 138,
+      "offsetX": 53,
+      "offsetY": 88
+    },
+    {
+      "x": 815,
+      "y": 258,
+      "width": 147,
+      "height": 142,
+      "offsetX": 51,
+      "offsetY": 84
+    },
+    {
+      "x": 1022,
+      "y": 258,
+      "width": 127,
+      "height": 142,
+      "offsetX": 60,
+      "offsetY": 84
+    },
+    {
+      "x": 1217,
+      "y": 259,
+      "width": 135,
+      "height": 141,
+      "offsetX": 57,
+      "offsetY": 85
+    },
+    {
+      "x": 1420,
+      "y": 258,
+      "width": 121,
+      "height": 142,
+      "offsetX": 62,
+      "offsetY": 84
+    },
+    {
+      "x": 50,
+      "y": 450,
+      "width": 112,
+      "height": 144,
+      "offsetX": 79,
+      "offsetY": 82
+    },
+    {
+      "x": 235,
+      "y": 434,
+      "width": 136,
+      "height": 159,
+      "offsetX": 66,
+      "offsetY": 67
+    },
+    {
+      "x": 416,
+      "y": 453,
+      "width": 189,
+      "height": 140,
+      "offsetX": 49,
+      "offsetY": 86
+    },
+    {
+      "x": 628,
+      "y": 454,
+      "width": 143,
+      "height": 140,
+      "offsetX": 63,
+      "offsetY": 86
+    },
+    {
+      "x": 812,
+      "y": 454,
+      "width": 140,
+      "height": 140,
+      "offsetX": 48,
+      "offsetY": 86
+    },
+    {
+      "x": 1009,
+      "y": 446,
+      "width": 144,
+      "height": 148,
+      "offsetX": 47,
+      "offsetY": 78
+    },
+    {
+      "x": 1169,
+      "y": 454,
+      "width": 195,
+      "height": 140,
+      "offsetX": 9,
+      "offsetY": 86
+    },
+    {
+      "x": 1420,
+      "y": 450,
+      "width": 112,
+      "height": 144,
+      "offsetX": 62,
+      "offsetY": 82
+    },
+    {
+      "x": 64,
+      "y": 639,
+      "width": 116,
+      "height": 147,
+      "offsetX": 93,
+      "offsetY": 79
+    },
+    {
+      "x": 258,
+      "y": 648,
+      "width": 113,
+      "height": 139,
+      "offsetX": 89,
+      "offsetY": 87
+    },
+    {
+      "x": 437,
+      "y": 641,
+      "width": 126,
+      "height": 145,
+      "offsetX": 70,
+      "offsetY": 81
+    },
+    {
+      "x": 631,
+      "y": 642,
+      "width": 126,
+      "height": 145,
+      "offsetX": 66,
+      "offsetY": 81
+    },
+    {
+      "x": 823,
+      "y": 641,
+      "width": 123,
+      "height": 146,
+      "offsetX": 59,
+      "offsetY": 80
+    },
+    {
+      "x": 1018,
+      "y": 648,
+      "width": 134,
+      "height": 138,
+      "offsetX": 56,
+      "offsetY": 88
+    },
+    {
+      "x": 1214,
+      "y": 644,
+      "width": 132,
+      "height": 143,
+      "offsetX": 54,
+      "offsetY": 83
+    },
+    {
+      "x": 1414,
+      "y": 639,
+      "width": 119,
+      "height": 148,
+      "offsetX": 56,
+      "offsetY": 78
+    },
+    {
+      "x": 46,
+      "y": 831,
+      "width": 135,
+      "height": 119,
+      "offsetX": 75,
+      "offsetY": 107
+    },
+    {
+      "x": 221,
+      "y": 840,
+      "width": 141,
+      "height": 109,
+      "offsetX": 52,
+      "offsetY": 117
+    },
+    {
+      "x": 401,
+      "y": 861,
+      "width": 170,
+      "height": 84,
+      "offsetX": 34,
+      "offsetY": 142
+    },
+    {
+      "x": 598,
+      "y": 880,
+      "width": 187,
+      "height": 69,
+      "offsetX": 33,
+      "offsetY": 157
+    },
+    {
+      "x": 816,
+      "y": 836,
+      "width": 136,
+      "height": 116,
+      "offsetX": 52,
+      "offsetY": 110
+    },
+    {
+      "x": 998,
+      "y": 856,
+      "width": 155,
+      "height": 97,
+      "offsetX": 36,
+      "offsetY": 129
+    },
+    {
+      "x": 1189,
+      "y": 878,
+      "width": 166,
+      "height": 72,
+      "offsetX": 29,
+      "offsetY": 154
+    },
+    {
+      "x": 1372,
+      "y": 880,
+      "width": 178,
+      "height": 69,
+      "offsetX": 14,
+      "offsetY": 157
+    }
+  ],
+  "rowOrder": [
+    "idle S SE E NE N NW W SW",
+    "east walk4, west walk4",
+    "east attack4, west attack4",
+    "east hit4, west hit4",
+    "east death4, west death4"
+  ],
+  "quality": {
+    "requestedCellSize128Met": false,
+    "alphaLevels": 256,
+    "nativePixelArtApproved": false,
+    "directionsComplete": false,
+    "notes": [
+      "Original generated PNG is unmodified. Runtime source rectangles isolate poses without resizing or editing image pixels.",
+      "Native 128px and hard-alpha requirements remain unmet; this is an opt-in development review, not approved game art.",
+      "Idle has eight facings; walk, attack, hit and death have east/west only."
+    ]
+  },
+  "slicing": {
+    "rowCuts": [
+      0,
+      214,
+      400,
+      595,
+      794,
+      992
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "yRange": [
+          0,
+          214
+        ],
+        "xCuts": [
+          0,
+          198,
+          396,
+          594,
+          792,
+          991,
+          1189,
+          1387,
+          1585
+        ],
+        "cutPixelCounts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row": 1,
+        "yRange": [
+          214,
+          400
+        ],
+        "xCuts": [
+          0,
+          198,
+          396,
+          594,
+          792,
+          991,
+          1189,
+          1387,
+          1585
+        ],
+        "cutPixelCounts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row": 2,
+        "yRange": [
+          400,
+          595
+        ],
+        "xCuts": [
+          0,
+          198,
+          396,
+          605,
+          792,
+          991,
+          1169,
+          1387,
+          1585
+        ],
+        "cutPixelCounts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row": 3,
+        "yRange": [
+          595,
+          794
+        ],
+        "xCuts": [
+          0,
+          198,
+          396,
+          594,
+          792,
+          991,
+          1189,
+          1387,
+          1585
+        ],
+        "cutPixelCounts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row": 4,
+        "yRange": [
+          794,
+          992
+        ],
+        "xCuts": [
+          0,
+          198,
+          396,
+          594,
+          792,
+          991,
+          1189,
+          1372,
+          1585
+        ],
+        "cutPixelCounts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  "visualReview": {
+    "status": "approved",
+    "reviewer": "user",
+    "note": "User is satisfied with the first player/goblin batch and authorized continuing in this visual direction. Native-cell and hard-alpha technical flags remain separate."
+  }
+}

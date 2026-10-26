@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { eng, E, ED, loot, sm, MODS, fieldwork, TOWN, tree } from '../src/engine/client';
+import { eng, E, ED, loot, sm, MODS, BASES, TOWN, tree } from '../src/engine/client';
 import { createCraft } from '../../engine/craft.ts';
 import { newGame, tick, huntZone, carried, setLevel, catchUp } from '../src/sim/game';
 import { buildCharacter } from '../src/sim/player';
@@ -236,7 +236,7 @@ describe('progression holds the curve it is priced on', () => {
 });
 
 describe('the Corrupt gamble pays what its table promises', () => {
-  const craft = createCraft(ED, loot);
+  const craft = createCraft(ED, loot, BASES);
   const piece = (seed: number) => rollDrop(mulberry32(seed), 'low', E.item_level.spans[0].from) as any;
 
   it('the add_mod outcome can actually add its line', () => {

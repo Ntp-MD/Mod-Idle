@@ -1,0 +1,443 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "slime",
+  "variantId": "bog-slime",
+  "name": "Bog Slime",
+  "levels": [
+    61,
+    80
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-contact-at-224",
+  "directionCount": 8,
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "actions": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    "idle S SE E NE N NW W SW",
+    "walk S SE E NE N NW W SW",
+    "attack S SE E NE N NW W SW",
+    "hit S SE E NE N NW W SW",
+    "death S SE E NE N NW W SW"
+  ],
+  "slicing": {
+    "columns": 8,
+    "rows": 5,
+    "cellWidth": 256,
+    "cellHeight": 256
+  },
+  "sourceFrames": [
+    {
+      "x": 135,
+      "y": 157,
+      "width": 152,
+      "height": 133,
+      "offsetX": 135,
+      "offsetY": 157
+    },
+    {
+      "x": 513,
+      "y": 155,
+      "width": 153,
+      "height": 136,
+      "offsetX": 129,
+      "offsetY": 155
+    },
+    {
+      "x": 895,
+      "y": 159,
+      "width": 150,
+      "height": 133,
+      "offsetX": 127,
+      "offsetY": 159
+    },
+    {
+      "x": 1273,
+      "y": 155,
+      "width": 148,
+      "height": 137,
+      "offsetX": 121,
+      "offsetY": 155
+    },
+    {
+      "x": 1652,
+      "y": 155,
+      "width": 149,
+      "height": 134,
+      "offsetX": 116,
+      "offsetY": 155
+    },
+    {
+      "x": 2030,
+      "y": 159,
+      "width": 148,
+      "height": 133,
+      "offsetX": 110,
+      "offsetY": 159
+    },
+    {
+      "x": 2408,
+      "y": 155,
+      "width": 151,
+      "height": 137,
+      "offsetX": 104,
+      "offsetY": 155
+    },
+    {
+      "x": 2786,
+      "y": 155,
+      "width": 153,
+      "height": 136,
+      "offsetX": 98,
+      "offsetY": 155
+    },
+    {
+      "x": 132,
+      "y": 549,
+      "width": 152,
+      "height": 127,
+      "offsetX": 132,
+      "offsetY": 165
+    },
+    {
+      "x": 506,
+      "y": 549,
+      "width": 160,
+      "height": 124,
+      "offsetX": 122,
+      "offsetY": 165
+    },
+    {
+      "x": 879,
+      "y": 559,
+      "width": 168,
+      "height": 117,
+      "offsetX": 111,
+      "offsetY": 175
+    },
+    {
+      "x": 1264,
+      "y": 552,
+      "width": 157,
+      "height": 130,
+      "offsetX": 112,
+      "offsetY": 168
+    },
+    {
+      "x": 1647,
+      "y": 567,
+      "width": 158,
+      "height": 115,
+      "offsetX": 111,
+      "offsetY": 183
+    },
+    {
+      "x": 2030,
+      "y": 552,
+      "width": 160,
+      "height": 125,
+      "offsetX": 110,
+      "offsetY": 168
+    },
+    {
+      "x": 2406,
+      "y": 552,
+      "width": 160,
+      "height": 124,
+      "offsetX": 102,
+      "offsetY": 168
+    },
+    {
+      "x": 2787,
+      "y": 545,
+      "width": 154,
+      "height": 131,
+      "offsetX": 99,
+      "offsetY": 161
+    },
+    {
+      "x": 134,
+      "y": 899,
+      "width": 146,
+      "height": 162,
+      "offsetX": 134,
+      "offsetY": 131
+    },
+    {
+      "x": 486,
+      "y": 920,
+      "width": 191,
+      "height": 140,
+      "offsetX": 102,
+      "offsetY": 152
+    },
+    {
+      "x": 887,
+      "y": 914,
+      "width": 174,
+      "height": 144,
+      "offsetX": 119,
+      "offsetY": 146
+    },
+    {
+      "x": 1268,
+      "y": 907,
+      "width": 140,
+      "height": 153,
+      "offsetX": 116,
+      "offsetY": 139
+    },
+    {
+      "x": 1662,
+      "y": 904,
+      "width": 141,
+      "height": 156,
+      "offsetX": 126,
+      "offsetY": 136
+    },
+    {
+      "x": 2010,
+      "y": 914,
+      "width": 172,
+      "height": 144,
+      "offsetX": 90,
+      "offsetY": 146
+    },
+    {
+      "x": 2395,
+      "y": 920,
+      "width": 191,
+      "height": 140,
+      "offsetX": 91,
+      "offsetY": 152
+    },
+    {
+      "x": 2793,
+      "y": 899,
+      "width": 146,
+      "height": 161,
+      "offsetX": 105,
+      "offsetY": 131
+    },
+    {
+      "x": 132,
+      "y": 1295,
+      "width": 152,
+      "height": 149,
+      "offsetX": 132,
+      "offsetY": 143
+    },
+    {
+      "x": 500,
+      "y": 1310,
+      "width": 165,
+      "height": 130,
+      "offsetX": 116,
+      "offsetY": 158
+    },
+    {
+      "x": 875,
+      "y": 1339,
+      "width": 183,
+      "height": 104,
+      "offsetX": 107,
+      "offsetY": 187
+    },
+    {
+      "x": 1261,
+      "y": 1322,
+      "width": 170,
+      "height": 122,
+      "offsetX": 109,
+      "offsetY": 170
+    },
+    {
+      "x": 1641,
+      "y": 1322,
+      "width": 166,
+      "height": 122,
+      "offsetX": 105,
+      "offsetY": 170
+    },
+    {
+      "x": 2014,
+      "y": 1340,
+      "width": 182,
+      "height": 104,
+      "offsetX": 94,
+      "offsetY": 188
+    },
+    {
+      "x": 2407,
+      "y": 1310,
+      "width": 165,
+      "height": 130,
+      "offsetX": 103,
+      "offsetY": 158
+    },
+    {
+      "x": 2788,
+      "y": 1295,
+      "width": 152,
+      "height": 149,
+      "offsetX": 100,
+      "offsetY": 143
+    },
+    {
+      "x": 113,
+      "y": 1729,
+      "width": 180,
+      "height": 99,
+      "offsetX": 113,
+      "offsetY": 193
+    },
+    {
+      "x": 495,
+      "y": 1728,
+      "width": 182,
+      "height": 94,
+      "offsetX": 111,
+      "offsetY": 192
+    },
+    {
+      "x": 874,
+      "y": 1725,
+      "width": 180,
+      "height": 100,
+      "offsetX": 106,
+      "offsetY": 189
+    },
+    {
+      "x": 1259,
+      "y": 1724,
+      "width": 173,
+      "height": 104,
+      "offsetX": 107,
+      "offsetY": 188
+    },
+    {
+      "x": 1640,
+      "y": 1728,
+      "width": 177,
+      "height": 100,
+      "offsetX": 104,
+      "offsetY": 192
+    },
+    {
+      "x": 2022,
+      "y": 1724,
+      "width": 176,
+      "height": 103,
+      "offsetX": 102,
+      "offsetY": 188
+    },
+    {
+      "x": 2396,
+      "y": 1728,
+      "width": 181,
+      "height": 93,
+      "offsetX": 92,
+      "offsetY": 192
+    },
+    {
+      "x": 2779,
+      "y": 1729,
+      "width": 180,
+      "height": 99,
+      "offsetX": 91,
+      "offsetY": 193
+    }
+  ],
+  "generation": {
+    "sourceOutputs": [
+      "exec-65d9f24e-b8ed-4381-acad-da7a2692ceb6.png"
+    ],
+    "generatedCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "generatedCornerAlpha": 1,
+    "identityReference": "art-reference/monsters/slime/animation/source/base.png",
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "initialPrompt": "40-cell 8x5 full-direction atlas; muted moss-green patches and a few tiny reed shapes embedded in the same jelly body; dark outline, no halo."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "raw-connected-pose-repack-384-v1",
+    "sourceCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "sourceImageSha256": "1effc699141551060ac07437df8090b795837eea0d923416a4918a659edc2dbc",
+    "sourceAlphaThreshold": 128,
+    "edgeAlphaRecoveryRadius": 3,
+    "minimumCellPadding": 24,
+    "primaryPoses": 40,
+    "sourceComponents": 85,
+    "rowMedianBottoms": [
+      212,
+      397,
+      607,
+      800,
+      958
+    ],
+    "uniformScale": 1.0
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+    ]
+  }
+}

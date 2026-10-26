@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { validateEngineData } from '../../engine/validate.ts';
 import { K_KEYS } from '../../engine/types.ts';
-import { E } from '../src/engine/client';
+import { E, sm } from '../src/engine/client';
 
 /**
  * The canonical data is checked before anything reads it. Every case runs on a copy, so a bad
@@ -14,6 +14,69 @@ const copy = (): any => structuredClone(E as any);
 describe('the canonical data is checked before anything reads it', () => {
   it('loads the real file', () => {
     expect(() => validateEngineData(copy())).not.toThrow();
+  });
+
+  it('refuses an ordinary-attack profile with no usable shot', () => {
+    const slow = copy();
+    slow.combat_arena.normal_attack.profiles.ranged.projectile_speed_mps = 0;
+    expect(() => validateEngineData(slow)).toThrow(/normal_attack\.profiles\.ranged\.projectile_speed_mps/);
+
+    const missing = copy();
+    delete missing.combat_arena.normal_attack.profiles.ranged;
+    expect(() => validateEngineData(missing)).toThrow(/normal_attack\.profiles\.?ranged|legacy\.stand-off/);
+  });
+
+  it('keeps every multi-impact action row executable', () => {
+    const kinds = new Set(['projectile-burst', 'ground-pulse-burst', 'whirlwind-channel', 'blizzard-field', 'sand-field', 'chain-strike']);
+    for (const row of Object.values(sm.byId)) {
+      const action = (row as any).action;
+      if (!action) continue;
+      expect(kinds.has(action.kind), row.id).toBe(true);
+      const hits = (row.effects || []).find((effect: any) => effect.stat === 'hits')?.value ?? 1;
+      if (action.kind !== 'sand-field' && action.kind !== 'chain-strike') expect(hits, row.id).toBeGreaterThan(1);
+      if (action.kind === 'chain-strike') {
+        const count = Number(String((row as any).targets ?? '1').split('/')[0]) || 1;
+        expect(count, row.id).toBeGreaterThan(1);
+        expect((row as any).area?.radius_m, row.id).toBeGreaterThan(0);
+      }
+      if (action.kind === 'projectile-burst' || action.kind === 'blizzard-field') {
+        expect((row.effects || []).find((effect: any) => effect.stat === 'hit_pct')?.value, row.id)
+          .toBeGreaterThan(0);
+      }
+      if (action.kind === 'projectile-burst') expect(action.interval_sec, row.id).toBeGreaterThan(0);
+      if (action.kind === 'ground-pulse-burst') expect(action.interval_sec, row.id).toBeGreaterThan(0);
+      if (action.kind === 'blizzard-field') {
+        expect(Number.parseFloat(String((row as any).duration ?? '')), row.id).toBeGreaterThan(0);
+      }
+      if (action.kind === 'sand-field') {
+        expect((row.effects || []).find((effect: any) => effect.stat === 'dot_sec')?.value, row.id)
+          .toBeGreaterThan(0);
+        expect((row.effects || []).find((effect: any) => effect.stat === 'dot_dps')?.value, row.id)
+          .toBeGreaterThan(0);
+      }
+      if (action.kind === 'whirlwind-channel') {
+        expect(action.active_sec, row.id).toBeGreaterThan(0);
+        expect(action.movement_speed_mult, row.id).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('keeps every authored footprint executable', () => {
+    for (const row of Object.values(sm.byId)) {
+      const area = (row as any).area;
+      if (!area?.shape) continue;
+      if (area.shape === 'line') {
+        expect(area.origin, row.id).toBe('caster');
+        expect(area.length_m, row.id).toBeGreaterThan(0);
+        expect(area.width_m, row.id).toBeGreaterThan(0);
+      }
+      if (area.shape === 'cone') {
+        expect(area.origin, row.id).toBe('caster');
+        expect(area.radius_m, row.id).toBeGreaterThan(0);
+        expect(area.angle_deg, row.id).toBeGreaterThan(0);
+        expect(area.angle_deg, row.id).toBeLessThanOrEqual(180);
+      }
+    }
   });
 
   it('carries exactly the constants the engine declares', () => {

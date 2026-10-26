@@ -3,7 +3,7 @@ import {
   DEFAULT_HUD_LAYOUT, DEFAULT_MODAL_AREA, HUD_LAYOUT_VERSION, HUD_LAYOUT_PREVIOUS_STORAGE_KEYS, HUD_REGION_META,
   copyHudLayout, migrateHudLayout, salvageHudLayout, validateHudLayout,
   type GridArea, type HudLayout, type HudRegion,
-} from '../src/ui/hud-layout';
+} from '../src/ui/hud/hud-layout';
 
 const area = (rowStart: number, rowEnd: number, columnStart: number, columnEnd: number): GridArea =>
   ({ rowStart, rowEnd, columnStart, columnEnd });

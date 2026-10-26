@@ -1,0 +1,554 @@
+{
+  "/map/characters/species/beetle/beetle-v2.png": [
+    1385,
+    1136,
+    101,
+    110,
+    1201,
+    952
+  ],
+  "/map/characters/species/demon/demon.png": [
+    1385,
+    1136,
+    176,
+    15,
+    1125,
+    1073
+  ],
+  "/map/characters/species/dragon/dragon.png": [
+    1385,
+    1136,
+    125,
+    8,
+    1141,
+    1120
+  ],
+  "/map/characters/species/dryad/dryad.png": [
+    1329,
+    1183,
+    255,
+    2,
+    932,
+    1177
+  ],
+  "/map/characters/species/elf/elf-v2.png": [
+    1385,
+    1136,
+    119,
+    14,
+    1218,
+    1091
+  ],
+  "/map/characters/species/giant/giant.png": [
+    1385,
+    1136,
+    11,
+    10,
+    1355,
+    1115
+  ],
+  "/map/characters/species/goblin/goblin.png": [
+    1385,
+    1136,
+    176,
+    125,
+    1020,
+    894
+  ],
+  "/map/characters/species/golem/golem.png": [
+    1385,
+    1136,
+    134,
+    94,
+    1140,
+    1008
+  ],
+  "/map/characters/species/hornet/hornet.png": [
+    1385,
+    1136,
+    79,
+    20,
+    1286,
+    1094
+  ],
+  "/map/characters/species/human/human.png": [
+    1385,
+    1136,
+    59,
+    26,
+    1242,
+    1078
+  ],
+  "/map/characters/species/imp/imp.png": [
+    1385,
+    1136,
+    201,
+    30,
+    1115,
+    1077
+  ],
+  "/map/characters/species/kobold/kobold.png": [
+    1385,
+    1136,
+    74,
+    77,
+    1245,
+    1001
+  ],
+  "/map/characters/species/lizardman/lizardman.png": [
+    1385,
+    1136,
+    59,
+    12,
+    1292,
+    1103
+  ],
+  "/map/characters/species/minotaur/minotaur.png": [
+    1385,
+    1136,
+    45,
+    26,
+    1318,
+    1056
+  ],
+  "/map/characters/species/mummy/mummy.png": [
+    1385,
+    1136,
+    89,
+    95,
+    1216,
+    959
+  ],
+  "/map/characters/species/ogre/ogre.png": [
+    1385,
+    1136,
+    41,
+    51,
+    1321,
+    1047
+  ],
+  "/map/characters/species/ooze/ooze.png": [
+    1385,
+    1136,
+    30,
+    148,
+    1335,
+    882
+  ],
+  "/map/characters/species/orc/orc.png": [
+    1385,
+    1136,
+    87,
+    19,
+    1195,
+    1076
+  ],
+  "/map/characters/species/siren/siren.png": [
+    1329,
+    1183,
+    34,
+    10,
+    1288,
+    1166
+  ],
+  "/map/characters/species/skeleton/skeleton.png": [
+    1385,
+    1136,
+    93,
+    99,
+    1186,
+    941
+  ],
+  "/map/characters/species/slime/slime.png": [
+    1385,
+    1136,
+    110,
+    85,
+    1196,
+    983
+  ],
+  "/map/characters/species/spider/spider.png": [
+    1385,
+    1136,
+    80,
+    64,
+    1263,
+    1028
+  ],
+  "/map/characters/player/traveler-piece.png": [
+    1293,
+    1217,
+    319,
+    177,
+    602,
+    909
+  ],
+  "/map/characters/species/treant/treant-v2.png": [
+    1385,
+    1136,
+    46,
+    15,
+    1319,
+    1106
+  ],
+  "/map/characters/species/troll/troll.png": [
+    1385,
+    1136,
+    70,
+    53,
+    1240,
+    1019
+  ],
+  "/map/characters/species/vampire/vampire-v2.png": [
+    1385,
+    1136,
+    379,
+    9,
+    982,
+    1096
+  ],
+  "/map/characters/species/werewolf/werewolf.png": [
+    1385,
+    1136,
+    73,
+    18,
+    1304,
+    1102
+  ],
+  "/map/characters/species/wisp/wisp.png": [
+    1254,
+    1254,
+    107,
+    50,
+    1037,
+    1166
+  ],
+  "/map/characters/species/wolf/wolf.png": [
+    1385,
+    1136,
+    184,
+    47,
+    1192,
+    1028
+  ],
+  "/map/characters/species/wraith/wraith.png": [
+    1329,
+    1183,
+    83,
+    14,
+    1215,
+    1144
+  ],
+  "/map/characters/species/wyvern/wyvern.png": [
+    1385,
+    1136,
+    7,
+    6,
+    1375,
+    1122
+  ],
+  "/map/landmark/camp-unlit.png": [
+    1385,
+    1136,
+    49,
+    50,
+    1328,
+    1036
+  ],
+  "/map/landmark/camp.png": [
+    1385,
+    1136,
+    156,
+    128,
+    1130,
+    866
+  ],
+  "/map/landmark/encounter-ruins.png": [
+    1329,
+    1183,
+    39,
+    122,
+    1262,
+    1016
+  ],
+  "/map/landmark/mob-stage.png": [
+    1402,
+    1122,
+    94,
+    45,
+    1228,
+    1025
+  ],
+  "/map/landmark/provision-caravan.png": [
+    1385,
+    1136,
+    258,
+    122,
+    923,
+    810
+  ],
+  "/map/landmark/town-1.png": [
+    1605,
+    980,
+    3,
+    2,
+    1600,
+    978
+  ],
+  "/map/landmark/town.png": [
+    1385,
+    1136,
+    263,
+    33,
+    987,
+    1037
+  ],
+  "/map/landmark/village.png": [
+    1385,
+    1136,
+    193,
+    153,
+    1015,
+    788
+  ],
+  "/map/terrain/ash-1.png": [
+    1605,
+    980,
+    11,
+    2,
+    1585,
+    973
+  ],
+  "/map/terrain/ash-2.png": [
+    1606,
+    979,
+    5,
+    0,
+    1597,
+    972
+  ],
+  "/map/terrain/ash.png": [
+    1329,
+    1183,
+    23,
+    118,
+    1291,
+    992
+  ],
+  "/map/terrain/forest-relief-1.png": [
+    1606,
+    979,
+    3,
+    2,
+    1600,
+    975
+  ],
+  "/map/terrain/forest-relief-2.png": [
+    1606,
+    979,
+    4,
+    0,
+    1601,
+    978
+  ],
+  "/map/terrain/forest-relief.png": [
+    1385,
+    1136,
+    328,
+    96,
+    727,
+    932
+  ],
+  "/map/terrain/grass-1.png": [
+    1605,
+    980,
+    0,
+    0,
+    1605,
+    980
+  ],
+  "/map/terrain/grass-2.png": [
+    1605,
+    980,
+    2,
+    0,
+    1602,
+    979
+  ],
+  "/map/terrain/grass.png": [
+    1329,
+    1183,
+    16,
+    296,
+    1306,
+    765
+  ],
+  "/map/terrain/marsh-1.png": [
+    1605,
+    980,
+    1,
+    0,
+    1603,
+    974
+  ],
+  "/map/terrain/marsh-2.png": [
+    1605,
+    980,
+    0,
+    0,
+    1605,
+    977
+  ],
+  "/map/terrain/marsh.png": [
+    1329,
+    1183,
+    52,
+    167,
+    1235,
+    935
+  ],
+  "/map/terrain/moor-1.png": [
+    1605,
+    980,
+    3,
+    1,
+    1598,
+    978
+  ],
+  "/map/terrain/moor-2.png": [
+    1605,
+    980,
+    5,
+    1,
+    1599,
+    977
+  ],
+  "/map/terrain/moor.png": [
+    1329,
+    1183,
+    41,
+    80,
+    1249,
+    1029
+  ],
+  "/map/terrain/mountain-relief-1.png": [
+    1606,
+    979,
+    4,
+    0,
+    1598,
+    978
+  ],
+  "/map/terrain/mountain-relief-2.png": [
+    1605,
+    980,
+    1,
+    0,
+    1604,
+    980
+  ],
+  "/map/terrain/mountain-relief.png": [
+    1536,
+    1024,
+    190,
+    55,
+    1175,
+    927
+  ],
+  "/map/terrain/salt-1.png": [
+    1605,
+    980,
+    10,
+    2,
+    1587,
+    960
+  ],
+  "/map/terrain/salt-2.png": [
+    1605,
+    980,
+    0,
+    1,
+    1605,
+    979
+  ],
+  "/map/terrain/salt.png": [
+    1461,
+    1077,
+    40,
+    72,
+    1404,
+    966
+  ],
+  "/map/terrain/snow-1.png": [
+    1605,
+    980,
+    6,
+    0,
+    1599,
+    980
+  ],
+  "/map/terrain/snow-2.png": [
+    1605,
+    980,
+    8,
+    0,
+    1597,
+    980
+  ],
+  "/map/terrain/snow.png": [
+    1329,
+    1183,
+    37,
+    89,
+    1249,
+    1029
+  ],
+  "/map/terrain/waste-1.png": [
+    1605,
+    980,
+    3,
+    4,
+    1599,
+    968
+  ],
+  "/map/terrain/waste-2.png": [
+    1605,
+    980,
+    0,
+    0,
+    1605,
+    980
+  ],
+  "/map/terrain/waste.png": [
+    1329,
+    1183,
+    69,
+    61,
+    1227,
+    1066
+  ],
+  "/map/terrain/water-1.png": [
+    1605,
+    980,
+    0,
+    0,
+    1605,
+    976
+  ],
+  "/map/terrain/water-2.png": [
+    1605,
+    980,
+    1,
+    0,
+    1604,
+    980
+  ],
+  "/map/terrain/water.png": [
+    1329,
+    1183,
+    23,
+    42,
+    1300,
+    1107
+  ]
+}

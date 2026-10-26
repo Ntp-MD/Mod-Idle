@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { E, TOWN, eng, farm, fieldwork, lifeSkills, road, sm, STAT_KEYS } from '../src/engine/client';
+import { E, TOWN, eng, farm, fieldwork, lifeSkills, road, STAT_KEYS } from '../src/engine/client';
 import { newGame, huntHere } from '../src/sim/game';
 import {
   cookMeal, establishCamp, fieldHarvestAmount, fieldSkillLevel, lifeSkillBonuses,

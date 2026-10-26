@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 /**
  * The suite is pure module imports over a read-only engine: no DOM, no fixtures on disk, no global
@@ -12,6 +13,7 @@ import { defineConfig } from 'vitest/config';
  * a flake the day the machine gets busier.
  */
 export default defineConfig({
+  plugins: [svelte()],
   test: {
     pool: 'threads',
     isolate: false,

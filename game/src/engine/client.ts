@@ -49,7 +49,8 @@ export const TREE_SPEC = treeJson;
  *  when the file lost a constant the engine still declares. */
 const ENGINE_DATA: EngineData = validateEngineData(engineJson);
 const MODS_DATA: ModsData = modsJson;
-const SKILLS_DATA: SkillsData = skillsJson;
+// JSON widens area.origin to string; the roster gate validates its authored origin and radius.
+const SKILLS_DATA: SkillsData = skillsJson as SkillsData;
 // A JSON import cannot infer the `mode` union; the library is authored to the declared shape and X55
 // validates every row, so this seam narrows once rather than re-typing the data in the sim.
 const MOB_SKILLS_DATA: MobSkillsData = mobSkillsJson as unknown as MobSkillsData;

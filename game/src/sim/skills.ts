@@ -5,11 +5,12 @@ import {
 } from '../../../engine/keystones.ts';
 import { directFlags, emptyParts, validateDamagePacket } from '../../../engine/damage-provenance.ts';
 import type { DamagePacket } from '../../../engine/damage-provenance.ts';
+import type { SkillAreaSnapshot } from '../../../engine/types.ts';
 import { mastery } from './mastery';
-import { setStacks, setErosion, stopMob, placeStatus, modsOn as mobModsOn, targetMods, applyWeaponRiders, holdsCondition, CONDITION_OF, consumeStatus, copyStatus, keystoneBlocksStatus, keystoneTargetMods, type MobStatusName } from './mobStatus';
+import { setStacks, setErosion, stopMob, placeStatus, holdStatus, modsOn as mobModsOn, targetMods, applyWeaponRiders, holdsCondition, CONDITION_OF, consumeStatus, copyStatus, keystoneBlocksStatus, keystoneTargetMods, type MobStatusName } from './mobStatus';
 import { lineValue, applyCurse } from './curse';
 import type { Character } from './player';
-import type { Mob } from './types';
+import type { GameState, Mob } from './types';
 import type { Statuses } from './combat';
 
 export interface SkillState {
@@ -223,6 +224,13 @@ export const ladderOf = (s: SkillState, id: string) => sm.ladderPct(s.owned[id] 
 
 /** A row's mechanic word — each one is in `engine/skills.ts` `EFFECT_RULES` and has a reader here. */
 export const hasRule = (skill: any, rule: string): boolean => ((skill?.rules || []) as string[]).includes(rule);
+
+/** A storm-hold row: a ground circle whose guaranteed control status (chill/cripple) outlives
+ *  the press, held for the row's own duration when no DOT seconds name the window. */
+const isStormHold = (skill: any, status: string | null): boolean =>
+  (status === 'chill' || status === 'crippled')
+  && skill?.cast?.delivery === 'ground'
+  && (skill?.area?.radius_m ?? 0) > 0;
 
 /** One named magnitude off the row, with a default when the row does not state it. */
 const valueOf = (skill: any, stat: string, fallback: number): number => {
@@ -491,7 +499,34 @@ export function paySkillXp(s: SkillState) {
 }
 
 /** The stores a cast may write to, passed in so the rotation stays a function of state. */
+export interface CastTargetRoll {
+  hit?: boolean;
+  dodged?: boolean;
+  /** Payoff share read at the first successful impact and reused by later impacts. */
+  bonusPct?: number;
+  consumeStacks?: number;
+}
+
+/** One press can land several impacts; these facts are rolled/read once and shared by all of them. */
+export interface CastRollCache {
+  crit?: boolean;
+  targets: Record<string, CastTargetRoll>;
+  /** Cast-target effect receipts: guaranteed status, riders, consume/spread and curse write once. */
+  effects: Record<string, true>;
+}
+
+export const newCastRollCache = (): CastRollCache => ({ targets: {}, effects: {} });
+
 export interface CastEnv {
+  /** Legacy target-filter callback; canonical arena casts use resolveTargetsForSkill. */
+  targetsForSkill?: (skillId: string, group: Mob[]) => Mob[];
+  /** Canonical spatial selection and its footprint, captured together before damage. */
+  resolveTargetsForSkill?: (skillId: string, group: Mob[]) => { targets: Mob[]; area?: SkillAreaSnapshot };
+  spatialTargets?: boolean;
+  /** A manual ground order may be paid at an empty permitted point; the rotation still needs a target. */
+  allowEmptyTarget?: boolean;
+  /** A deliberate manual press ignores automatic slot modes and conditional gates. */
+  ignoreConditions?: boolean;
   mobStatus?: any;
   curses?: any;
   /** The current HP pool is the affordability check for a skill with a flat HP cost. */
@@ -515,6 +550,16 @@ export interface CastEnv {
   critDamageBonusPct?: number;
   /** Trance: this press is the free one in its cycle. */
   freeCast?: boolean;
+  /** One real impact of a multi-impact press; every impact shares the same cast cache. */
+  impact?: { index: number; sharePct: number; cache: CastRollCache };
+  /** The deployed field's periodic damage: flat, mitigated, never a crit or a fresh effect. */
+  fieldPulse?: number;
+  /** The field's initial press must not attach the legacy lingering erosion line. */
+  suppressErosion?: boolean;
+  /** Living bodies available to a spread effect, beyond the press's resolved targets. */
+  availableGroup?: Mob[];
+  /** Live ground position by actor id; absent offline, where spread falls back to queue order. */
+  positionOf?: (id: string) => { x: number; y: number } | undefined;
 }
 
 export interface CastReport {
@@ -525,11 +570,13 @@ export interface CastReport {
   /** HP paid from the caster's current pool; cost cannot take the final HP point. */
   hpCost: number;
   targets: number;
+  area?: SkillAreaSnapshot;
   heal?: { secLeft: number; pctPerSec: number };
   /** A heal that lands at once, as a % of the pool — Greater Heal, not the per-second drip. */
   instantHealPct?: number;
   /** The mob a landed curse wrote its lines on, or null when it missed or writes nothing. */
   curseOn?: string | null;
+  curseTargets?: string[];
   /** A phys-basis press rolled crit (pin 1); a magic-basis press never sets this. */
   crit?: boolean;
   /** HP actually removed by this cast, across every target it landed on. */
@@ -597,13 +644,14 @@ export function effectsActive(sk: SkillState, bundles: readonly KeystoneBundle[]
 
 /** The stat a skill scales on is the finished hit it multiplies, so no `scale` lookup remains. */
 
-/** "3/1" → 3 targets when the group is big enough, else 1 (`skill-pool-attack.md` targets column).
- *  The AoE rule is 60% per target, Cap 3, mana ×1.5 (`skill-pool.md`) — the cost multiplier is
- * read from `engine.json` `aoe.mana_mult` inside `manaCostOf`, not repeated here. */
 /** the row's per-target share, read off the AoE rule the engine prices (`aoe.per_target_pct`) */
 const AOE_PCT_PER_EXTRA_TARGET = (E.aoe as any).per_target_pct / 100;
 
-function targetCount(skill: any, group: Mob[]): number {
+function targetCount(skill: any, group: Mob[], spatial = false): number {
+  // Live area selection already resolved the footprint. Queue counts approximate offline combat.
+  const shape = skill.area?.shape;
+  if (spatial && (shape === 'line' || shape === 'cone' || (skill.area?.radius_m ?? 0) > 0))
+    return group.length;
   const cap = Number(String(skill.targets || '1').split('/')[0]) || 1;
   return Math.max(1, Math.min(cap, group.length));
 }
@@ -635,390 +683,547 @@ export function buffCastOutcome(s: SkillState, id: string): {
   };
 }
 
+/** The upkeep track and its inspector share the same base resource payment. */
+export function buffRecastCost(s: SkillState, c: Character, id: string) {
+  const cost = sm.costOf(sm.byId[id], { skillLevel: skillLevel(s, id), aoe: false });
+  const blood = bundleOf(c.keystones, 'blood-price');
+  return cost.resource === 'mana' && blood
+    ? { resource: 'hp', amount: bloodPriceHp(cost.amount, blood.params as Record<string, number>) }
+    : cost;
+}
+
+export type SkillEligibilityReason = 'ready' | 'unowned' | 'weapon' | 'no-target' | 'cooldown' | 'shock'
+  | 'silenced' | 'conditions' | 'mana' | 'mana-debt' | 'hp' | 'mana-floor' | 'auto-off';
+
+export interface SkillEligibility {
+  ready: boolean;
+  reason: SkillEligibilityReason;
+  label: string;
+  detail: string;
+  /** The actual pools this press would pay after its keystone and trigger rules. */
+  manaCost: number;
+  hpCost: number;
+  aoe: boolean;
+}
+
+/** The same read prices and gates a rotation press and explains it in the interface. No RNG or writes. */
+export function skillEligibility(
+  s: SkillState, c: Character, id: string, mana: number, group: Mob[], statuses: Statuses,
+  env: CastEnv & { autoSkills?: boolean } = {},
+): SkillEligibility {
+  const skill = sm.byId[id];
+  const spatial = !!(env.spatialTargets || env.resolveTargetsForSkill);
+  const aoe = !!skill && !bundleOf(c.keystones, 'single-combat') && targetCount(skill, group, spatial) > 1;
+  const cost = skill ? sm.costOf(skill, { skillLevel: skillLevel(s, id), aoe }) : { resource: 'mana', amount: 0 };
+  let manaCost = (cost.resource === 'mana' ? cost.amount : 0) * (env.trigger?.manaMult ?? 1);
+  let hpCost = cost.resource === 'hp' ? cost.amount : 0;
+  const trance = bundleOf(c.keystones, 'trance');
+  if (trance) {
+    const mult = 1 + Number(trance.params.costPct) / 100;
+    manaCost *= mult;
+    hpCost *= mult;
+  }
+  if (env.freeCast) { manaCost = 0; hpCost = 0; }
+  // The player's floor reads the pre-conversion Mana price, matching the rotation restraint.
+  const floorPrice = manaCost;
+  const blood = bundleOf(c.keystones, 'blood-price');
+  if (blood && manaCost > 0) {
+    hpCost += bloodPriceHp(manaCost, blood.params as Record<string, number>);
+    manaCost = 0;
+  }
+  const result = (reason: SkillEligibilityReason, label: string, detail: string): SkillEligibility =>
+    ({ ready: reason === 'ready', reason, label, detail, manaCost, hpCost, aoe });
+  if (!skill || !ownsSkill(s, id)) return result('unowned', 'Not owned', 'This skill is not in your collection.');
+  if (!sm.weaponFits(skill, c.weaponName)) return result('weapon', 'Wrong weapon', `Requires ${skill.weapon === 'bow' ? 'a bow or crossbow' : skill.weapon}; held: ${c.weaponName || 'bare hands'}.`);
+  if (env.autoSkills === false) return result('auto-off', 'Auto Skills off', 'Enable Auto Skills to let the rotation cast.');
+  if (!group.length && !env.allowEmptyTarget)
+    return result('no-target', 'No target', 'The rotation waits for a combat target.');
+  if ((s.cd[id] || 0) > 0) return result('cooldown', 'Cooling down', `${s.cd[id].toFixed(1)}s left on this skill’s clock.`);
+  const mode = env.ignoreConditions ? 'always' : modeOf(s, id);
+  if (mode === 'never') return result('silenced', 'Silenced', 'Cast mode is Never. Change it to Always or Conditional.');
+  const cond = mode === 'conditional' ? condOf(s, id) : NO_COND;
+  if (mode === 'conditional') {
+    const boss = env.isBoss ?? (String(group[0].kind).startsWith('Boss') || String(group[0].kind).startsWith('Unique'));
+    const holds = conditionsHold(cond, boss, env.missingHpPct || 0, group.length)
+      || appliesMissingStatus(cond, skill, env, group[0])
+      || appliesPresentStatus(cond, skill, env, group[0])
+      || selfDebuffedHolds(cond, statuses);
+    if (!holds) return result('conditions', 'Condition unmet', 'None of this skill’s enabled OR triggers holds right now.');
+  }
+  const pool = usableMana(c, s);
+  const debt = bundleOf(c.keystones, 'mana-debt');
+  const debtFloor = debt ? -manaDebtFloor(pool, debt.params as Record<string, number>) : 0;
+  if (manaCost > 0 && mana < 0) return result('mana-debt', 'Repaying Mana debt', 'Positive-cost skills wait until spendable Mana returns to zero.');
+  if (manaCost > 0 && mana - manaCost < debtFloor) return result('mana', 'Not enough Mana', `Costs ${manaCost.toFixed(1)} Mana; ${mana.toFixed(1)} spendable${debt ? `, borrowing allowed to ${debtFloor.toFixed(1)}` : ''}.`);
+  if (hpCost > 0 && hpCost >= (env.currentHp ?? c.maxHp)) return result('hp', 'Not enough HP', `Costs ${hpCost.toFixed(1)} HP and must leave at least 1 HP.`);
+  if (cond.manaFloorPct > 0 && mana - floorPrice < pool * cond.manaFloorPct / 100)
+    return result('mana-floor', 'Mana floor protected', `This press would cross your ${cond.manaFloorPct}% usable-Mana floor.`);
+  return result('ready', 'Eligible now', `${skill.cd === 0 ? 'Filler: checked after every timed skill.' : 'Checked in cast order.'} Conditions and resources currently allow this press.`);
+}
+
+/** Timed slots keep their order; all zero-cooldown fillers are checked afterward. */
+export function rotationOrder(s: SkillState): string[] {
+  const ids = s.list.filter((id): id is string => Boolean(id) && ownsSkill(s, id!) && Boolean(sm.byId[id!]));
+  return ids.filter((id) => sm.byId[id].cd !== 0).concat(ids.filter((id) => sm.byId[id].cd === 0));
+}
+
+/** Snapshot facts used by both the loadout inspector and field skill bar. */
+export function skillEligibilityInState(state: GameState, c: Character, id: string, autoSkills = true, targets: Mob[] = state.group, spatialTargets = false): SkillEligibility {
+  const trance = bundleOf(c.keystones, 'trance');
+  const eligibility = skillEligibility(state.skills, c, id, spendableMana(c, state.skills, state.player.mana), targets, state.playerStatuses, {
+    autoSkills, spatialTargets, currentHp: state.player.hp,
+    missingHpPct: c.maxHp > 0 ? (1 - state.player.hp / c.maxHp) * 100 : 0,
+    mobStatus: state.mobStatus, curses: state.curses,
+    freeCast: !!trance && ((state.keystoneRuntime.counters.tranceCasts || 0) + 1) % Number(trance.params.everyCasts) === 0,
+  });
+  if (eligibility.ready && (state.playerStatuses.shock?.secLeft || 0) >= 1 && !bundleOf(c.keystones, 'unstoppable')) {
+    return { ...eligibility, ready: false, reason: 'shock', label: 'Stopped by Shock', detail: 'Shock pauses actions for the next combat step.' };
+  }
+  return eligibility;
+}
+
 /**
  * The rotation: cycle the active slots top-down and cast the first skill whose cooldown is ready and
  * whose mana fits the usable pool. No manual presses — the player only arranges order.
  */
-export function castOnce(
-  s: SkillState,
-  c: Character,
-  mana: number,
-  group: Mob[],
-  statuses: Statuses,
-  rng: () => number,
-  env: CastEnv = {},
-): CastReport | null {
-  if (!group.length) return null;
-  const pool = usableMana(c, s);
-  // §14: the two facts every row's own condition list is read against — the front target's kind and
-  // our own pool. They are resolved once per tick, not once per row, so a wide group costs nothing extra
-  const condBoss = env.isBoss ?? (String(group[0].kind).startsWith('Boss') || String(group[0].kind).startsWith('Unique'));
-  const condMissingHp = env.missingHpPct || 0;
-  // §13: a row with no timer of its own is the FILLER — it presses only after every timed slot has had
-  // its chance, so a cd-0 row can never take the mana the rotation's real slots are waiting on
-  const eligible = s.list.filter((id): id is string => Boolean(id) && ownsSkill(s, id!) && Boolean(sm.byId[id!]) && sm.weaponFits(sm.byId[id!], c.weaponName));
-  const order = eligible.filter((id) => sm.byId[id].cd !== 0)
-    .concat(eligible.filter((id) => sm.byId[id].cd === 0));
-  for (const id of order) {
-    if (!id || (s.cd[id] || 0) > 0) continue;
-    // §14: the player's own switch on the slot — `never` silences a row, `conditional` gates it on
-    // that row's own list, which is how two rows can wait on different things. `always` (the default)
-    // is the old "cast when ready", and it reads no list at all.
-    const slotMode = modeOf(s, id);
-    if (slotMode === 'never') continue;
-    const skill = sm.byId[id];
-    const cond = slotMode === 'conditional' ? condOf(s, id) : NO_COND;
-    if (slotMode === 'conditional') {
-      const holds = conditionsHold(cond, condBoss, condMissingHp, group.length)
-        || appliesMissingStatus(cond, skill, env, group[0])
-        || appliesPresentStatus(cond, skill, env, group[0])
-        || selfDebuffedHolds(cond, statuses);
-      if (!holds) continue;
-    }
-    // Single Combat: the press reaches one body and pays no AoE price.
-    const single = bundleOf(c.keystones, 'single-combat');
-    const aoe = !single && targetCount(skill, group) > 1;
-    const cost = sm.costOf(skill, {
-      skillLevel: skillLevel(s, id), aoe,
-    });
-    let manaCost = (cost.resource === 'mana' ? cost.amount : 0) * (env.trigger?.manaMult ?? 1);
-    let hpCost = cost.resource === 'hp' ? cost.amount : 0;
-    // Trance: every third cast is free; the rest pay 50% more.
-    const trance = bundleOf(c.keystones, 'trance');
-    if (trance) {
-      const mult = 1 + Number(trance.params.costPct) / 100;
-      manaCost *= mult;
-      hpCost *= mult;
-    }
-    if (env.freeCast) {
-      manaCost = 0;
-      hpCost = 0;
-    }
-    const currentHp = env.currentHp ?? c.maxHp;
-    // 37 Blood Price: the Mana part of a skill cost is paid in HP 1:1. Auras and reservations are
-    // not part of this conversion (§7.4.11).
-    let paidMana = manaCost;
-    const blood = bundleOf(c.keystones, 'blood-price');
-    if (blood && paidMana > 0) {
-      hpCost += bloodPriceHp(paidMana, blood.params as Record<string, number>);
-      paidMana = 0;
-    }
-    // 52 Mana Debt: a positive-cost press may start only from a non-negative pool, and may end at the
-    // borrow floor; once in debt, positive costs are refused until the pool returns to zero.
-    const debt = bundleOf(c.keystones, 'mana-debt');
-    const debtFloor = debt ? -manaDebtFloor(usableMana(c, s), debt.params as Record<string, number>) : 0;
-    if (paidMana > 0 && (mana < 0 || mana - paidMana < debtFloor)) continue;
-    // HP payment is atomic and must leave at least 1 HP
-    if (hpCost > 0 && hpCost >= currentHp) continue;
-    // the mana floor is the rotation's one act of restraint: a row that would drop the usable pool under
-    // the share the player named stands down, and the tick goes to whatever else is ready
-    if (cond.manaFloorPct > 0 && mana - manaCost < pool * (cond.manaFloorPct / 100)) continue;
+export interface PreparedSkillCast {
+  id: string;
+  manaCost: number;
+  hpCost: number;
+  level: number;
+  cooldownSec: number;
+  spatial: boolean;
+  targets: Mob[];
+  area?: SkillAreaSnapshot;
+}
 
-    // a triggered press runs on the trigger's own clock (`trigger_cd_sec`), so the skill's cooldown is
-    // spent by an ordinary cast only — a trigger can fire the same row again without eating its cd
-    if (!env.trigger) s.cd[id] = skillCd(s, id, c.cdr);
-    const spent = paidMana;
+/** Commit exactly one selected row at release. Damage and RNG wait for impact. */
+export function prepareSkillCast(
+  s: SkillState, c: Character, id: string, mana: number, targets: Mob[], statuses: Statuses,
+  env: CastEnv = {}, area?: SkillAreaSnapshot,
+): PreparedSkillCast | null {
+  const eligibility = skillEligibility(s, c, id, mana, targets, statuses, env);
+  if (!eligibility.ready) return null;
+  const cooldownSec = skillCd(s, id, c.cdr);
+  if (!env.trigger) s.cd[id] = cooldownSec;
+  return { id, manaCost: eligibility.manaCost, hpCost: eligibility.hpCost,
+    level: skillLevel(s, id), cooldownSec,
+    spatial: !!(env.spatialTargets || env.resolveTargetsForSkill), targets, area };
+}
 
-    if (skill.type === 'heal') {
-      const h = healOf(skill);
-      return {
-        id, name: skill.name ?? '', damage: 0, manaCost: spent, hpCost, targets: 0, byMob: [],
-        heal: h?.heal, instantHealPct: h?.instantHealPct,
-        cleansesSelf: hasRule(skill, 'cleanses_status'),
-      };
-    }
-    if (skill.type === 'buff') {
-      const outcome = buffCastOutcome(s, id)!;
-      s.buffUp[id] = outcome.durationSec;
-      return {
-        id, name: skill.name ?? '', damage: 0, manaCost: spent, hpCost, targets: 0, byMob: [],
-        charges: outcome.charges, blockCharges: outcome.blockCharges, cleansesSelf: outcome.cleansesSelf,
-      };
-    }
-    if (skill.type === 'curse') {
-      // a curse attaches with the same hit chance an attack uses (skill-pool.md)
-      const mob = group[0];
-      const hit = rng() <= eng.hitChance(c.accuracy, mob.evasion);
-      const writes = (skill.effects || []).some((e: any) => e.subject === 'target');
-      return {
-        id, name: skill.name ?? '', damage: 0, manaCost: spent, hpCost, targets: hit ? 1 : 0, byMob: [],
-        curseOn: hit && writes ? mob.id : null,
-      };
-    }
-    // attack: the row's own fraction of the character's finished hit, then the group bonus and AoE split
-    const level = skillLevel(s, id);
-    // the row's effects at the level actually held: the stored value is its level-1 number
-    const effects = sm.effectsAt(skill, level) as any[];
-    let dmg = sm.perPress(skill, { phys: c.phys, magic: c.magic, elem: c.elem, align: c.alignment, maxHp: c.maxHp, level, attackPct: c.attackDamage, spellPct: c.spellDamage }) || 0;
-    // pin 1: a phys-basis press can crit on top of the pre-crit hit, a magic-basis one cannot.
-    // A row that names extra crit chance on itself (Headshot) spends it on this press only.
-    const ownCrit = effects.find((e: any) => e.stat === 'crit_chance' && e.subject !== 'target');
-    let crit = false;
-    const forceCrit = Boolean(env.forceCrit) && dmg > 0 && sm.critsOnBasis(skill);
-    if (dmg > 0 && sm.critsOnBasis(skill)
-      && (forceCrit || rng() * 100 < c.critChance + (ownCrit ? ownCrit.value : 0))) {
+/** Resolve a paid cast against its impact-time targets. Never charges or starts cooldown again. */
+export function resolvePreparedCast(
+  s: SkillState, c: Character, prepared: PreparedSkillCast, statuses: Statuses,
+  rng: () => number, env: CastEnv = {},
+): CastReport {
+  const { id, targets: group, manaCost: spent, hpCost, spatial } = prepared;
+  const skill = sm.byId[id];
+  const single = bundleOf(c.keystones, 'single-combat');
+  const resolved = { area: prepared.area };
+  if (!group.length && (skill.type === 'attack' || skill.type === 'curse'))
+    return { id, name: skill.name ?? '', damage: 0, manaCost: spent, hpCost, targets: 0,
+      byMob: [], ...(prepared.area ? { area: prepared.area } : {}) };
+  if (skill.type === 'heal') {
+    const h = healOf(skill);
+    return {
+      id, name: skill.name ?? '', damage: 0, manaCost: spent, hpCost, targets: 0, byMob: [],
+      heal: h?.heal, instantHealPct: h?.instantHealPct,
+      cleansesSelf: hasRule(skill, 'cleanses_status'),
+    };
+  }
+  if (skill.type === 'buff') {
+    const outcome = buffCastOutcome(s, id)!;
+    s.buffUp[id] = outcome.durationSec;
+    return {
+      id, name: skill.name ?? '', damage: 0, manaCost: spent, hpCost, targets: 0, byMob: [],
+      charges: outcome.charges, blockCharges: outcome.blockCharges, cleansesSelf: outcome.cleansesSelf,
+    };
+  }
+  if (skill.type === 'curse') {
+    // a curse attaches with the same hit chance an attack uses (skill-pool.md)
+    const count = single ? 1 : targetCount(skill, group, spatial);
+    const hitTargets = group.slice(0, count).filter((mob) => rng() <= eng.hitChance(c.accuracy, mob.evasion));
+    const writes = (skill.effects || []).some((e: any) => e.subject === 'target');
+    const curseTargets = writes ? hitTargets.map((mob) => mob.id) : [];
+    return {
+      id, name: skill.name ?? '', damage: 0, manaCost: spent, hpCost, targets: hitTargets.length, byMob: [],
+      curseOn: curseTargets[0] ?? null,
+      ...(curseTargets.length > 1 ? { curseTargets } : {}),
+      ...(resolved?.area ? { area: resolved.area } : {}),
+    };
+  }
+  // attack: the row's own fraction of the character's finished hit, then the group bonus and AoE split
+  const level = prepared.level;
+  // the row's effects at the level actually held: the stored value is its level-1 number
+  const effects = sm.effectsAt(skill, level) as any[];
+  const fieldPulse = env.fieldPulse;
+  let dmg = fieldPulse ?? (sm.perPress(skill, { phys: c.phys, magic: c.magic, elem: c.elem, align: c.alignment, maxHp: c.maxHp, level, attackPct: c.attackDamage, spellPct: c.spellDamage }) || 0);
+  // pin 1: a phys-basis press can crit on top of the pre-crit hit, a magic-basis one cannot.
+  // A row that names extra crit chance on itself (Headshot) spends it on this press only.
+  const ownCrit = effects.find((e: any) => e.stat === 'crit_chance' && e.subject !== 'target');
+  let crit = false;
+  const rollCache = env.impact?.cache;
+  if (!fieldPulse && dmg > 0 && sm.critsOnBasis(skill)) {
+    const forceCrit = Boolean(env.forceCrit);
+    const rolled = rollCache?.crit !== undefined
+      ? rollCache.crit
+      : forceCrit || rng() * 100 < c.critChance + (ownCrit ? ownCrit.value : 0);
+    if (rollCache) rollCache.crit = rolled;
+    if (rolled) {
       dmg = (dmg * (c.critDmg + Number(env.critDamageBonusPct || 0))) / 100;
       crit = true;
     }
-    // a row may press more than once: Whirlwind "3 rounds", Arrow Shower "3 arrows, 40% each"
-    const hits = valueOf(skill, 'hits', 1);
-    if (hits > 1) dmg *= hits * (valueOf(skill, 'hit_pct', 100) / 100);
-    dmg *= sm.groupBonus(skill, c.weaponName) * mastery.skillBonus(c.weaponMastery || 0, sm.weaponMatches(skill, c.weaponName));
-    const perEvasion = effects.find((e) => e.stat === 'damage_per_evasion_pct');
-    // the Evasion-scaling row (parked with the physical add-ons) scales on the Evasion chance the sheet carries, which is the line
-    // Dodge was merged into, so the key names what it actually reads.
-    if (perEvasion) dmg *= 1 + Math.min(perEvasion.cap ?? Infinity, c.evasionChance * perEvasion.value) / 100;
-    // a missing-HP row: nothing extra at full HP, its own multiplier at the share of lost HP it
-    // names, growing in between — the tank tool that gives Vit a damage line at last
-    const atMissing = effects.find((e: any) => e.stat === 'missing_hp_pct_for_max');
-    const atMax = effects.find((e: any) => e.stat === 'damage_at_missing_hp');
-    if (atMissing && atMax) {
-      const missing = Math.min(atMissing.value, Math.max(0, env.missingHpPct || 0));
-      dmg *= 1 + (missing / atMissing.value) * (atMax.value - 1);
+  }
+  // a row may press more than once: Whirlwind "3 rounds", Arrow Shower "3 arrows, 40% each"
+  const hits = env.impact ? 1 : valueOf(skill, 'hits', 1);
+  if (hits > 1) dmg *= hits * (valueOf(skill, 'hit_pct', 100) / 100);
+  // A scheduled impact carries only its authored share; the cast-level rolls are already cached.
+  if (env.impact) dmg *= env.impact.sharePct / 100;
+  dmg *= sm.groupBonus(skill, c.weaponName) * mastery.skillBonus(c.weaponMastery || 0, sm.weaponMatches(skill, c.weaponName));
+  const perEvasion = effects.find((e) => e.stat === 'damage_per_evasion_pct');
+  // the Evasion-scaling row (parked with the physical add-ons) scales on the Evasion chance the sheet carries, which is the line
+  // Dodge was merged into, so the key names what it actually reads.
+  if (perEvasion) dmg *= 1 + Math.min(perEvasion.cap ?? Infinity, c.evasionChance * perEvasion.value) / 100;
+  // a missing-HP row: nothing extra at full HP, its own multiplier at the share of lost HP it
+  // names, growing in between — the tank tool that gives Vit a damage line at last
+  const atMissing = effects.find((e: any) => e.stat === 'missing_hp_pct_for_max');
+  const atMax = effects.find((e: any) => e.stat === 'damage_at_missing_hp');
+  if (atMissing && atMax) {
+    const missing = Math.min(atMissing.value, Math.max(0, env.missingHpPct || 0));
+    dmg *= 1 + (missing / atMissing.value) * (atMax.value - 1);
+  }
+  const n = single ? 1 : targetCount(skill, group, spatial);
+  const front = group[0];
+  // the Evasion and execute rows read the same row numbers the panel prints; see above for the Cap
+  // the execute row's threshold, or the one a curse moved on this target
+  const threshold = effects.find((e) => e.stat === 'execute_threshold_pct');
+  if (threshold && front && front.hp > 0) {
+    const onTarget = env.curses ? lineValue(env.curses, front.id, 'execute_threshold_pct') : 0;
+    const limit = onTarget || threshold.value;
+    const times = effects.find((e) => e.stat === 'execute_damage');
+    if ((front.hp / front.hpMax) * 100 < limit && times) dmg *= times.value;
+  }
+  // the trigger's price on the press it fired: damage scaled down before it is split over targets
+  if (env.trigger?.damageMult) dmg *= env.trigger.damageMult;
+  // `E.global.damage_mult` reads the whole clock: a press rides the same bucket a swing does
+  dmg *= E.global.damage_mult;
+  // Packet N — the press-side rules. Single Combat buys its one target; the element rules read the
+  // row's named Element; Hemorrhage's direct cut applies to a physical-basis press.
+  if (single) dmg *= 1 + Number(single.params.damagePct) / 100;
+  const fortuna = bundleOf(c.keystones, 'fortuna');
+  if (fortuna && dmg > 0) {
+    if (crit) {
+      if (rng() * 100 < Number(fortuna.params.doubleCritPct)) dmg *= 2;
+    } else dmg *= 1 - Number(fortuna.params.nonCritPct) / 100;
+  }
+  const ashen = bundleOf(c.keystones, 'ashen-crown');
+  if (ashen && skill.element === 'fire') dmg *= 1 - Number(ashen.params.directFirePct) / 100;
+  const mono = bundleOf(c.keystones, 'monochrome');
+  if (mono && (skill.element || skill.basis === 'magic')) dmg *= 1 + Number(mono.params.elementalPct) / 100;
+  const hemorrhage = bundleOf(c.keystones, 'hemorrhage');
+  if (hemorrhage && skill.basis === 'phys') dmg *= Number(hemorrhage.params.directPhysicalPct) / 100;
+  const alignedPerSec = c.elem * (c.alignment / 100) * c.hitsPerSec;
+  // the row's own lines are spent on each mob the skill actually reaches: a row that says "all in
+  // range" reaches every target the AoE resolved, and a guaranteed status skips only the two rolls
+  // that decide *whether* a status lands, never the control budget that decides how often 
+  const everyTarget = hasRule(skill, 'every_target');
+  const statusName = hasRule(skill, 'guaranteed_status')
+    ? (E.elements.status_of as Record<string, MobStatusName | undefined>)[skill.element ?? ''] : null;
+  const spendOn = (t: Mob) => {
+    if (!env.mobStatus) return;
+    for (const e of effects) {
+      if (e.subject !== 'target') continue;
+      if (e.stat === 'poison_stacks' && !keystoneBlocksStatus(c, 'poison')) setStacks(env.mobStatus, t.id, 'poison', e.value, alignedPerSec);
+      if (e.stat === 'burn_stacks' && !keystoneBlocksStatus(c, 'burn')) setStacks(env.mobStatus, t.id, 'burn', e.value, alignedPerSec);
+      if (e.stat === 'mark_stacks') setStacks(env.mobStatus, t.id, 'mark', e.value, alignedPerSec);
+      // Sand Storm's own lingering line: the row types the damage a second and the seconds, and the
+      // tick counts inside the shared DoT budget the cap already runs on
+      if (e.stat === 'dot_dps' && !env.suppressErosion) setErosion(env.mobStatus, t.id, e.value, dotSec, alignedPerSec);
+      if (e.stat === 'stop_sec') stopMob(env.mobStatus, t.id, e.value, hasRule(skill, 'bypasses_control_cap'));
     }
-    const n = single ? 1 : targetCount(skill, group);
-    const front = group[0];
-    // the Evasion and execute rows read the same row numbers the panel prints; see above for the Cap
-    // the execute row's threshold, or the one a curse moved on this target
-    const threshold = effects.find((e) => e.stat === 'execute_threshold_pct');
-    if (threshold && front && front.hp > 0) {
-      const onTarget = env.curses ? lineValue(env.curses, front.id, 'execute_threshold_pct') : 0;
-      const limit = onTarget || threshold.value;
-      const times = effects.find((e) => e.stat === 'execute_damage');
-      if ((front.hp / front.hpMax) * 100 < limit && times) dmg *= times.value;
+    if (statusName) {
+      const placed = placeStatus(env.mobStatus, t.id, statusName, c, alignedPerSec, t.immune || []);
+      // a storm holds its own control status for the storm window: the dot seconds when the
+      // storm deals damage over time, otherwise the row's own duration (a ground circle whose
+      // chill outlives the press). The chill a blizzard lays lasts the blizzard rather than
+      // lapsing on the status default mid-storm.
+      const stormWindow = effects.some((e) => e.stat === 'dot_dps')
+        ? dotSec
+        : isStormHold(skill, statusName)
+          ? Number(String(skill.duration).match(/\d+/)?.[0] || 0)
+          : 0;
+      if (placed && stormWindow > 0)
+        holdStatus(env.mobStatus, t.id, statusName, stormWindow);
     }
-    // the trigger's price on the press it fired: damage scaled down before it is split over targets
-    if (env.trigger?.damageMult) dmg *= env.trigger.damageMult;
-    // `E.global.damage_mult` reads the whole clock: a press rides the same bucket a swing does
-    dmg *= E.global.damage_mult;
-    // Packet N — the press-side rules. Single Combat buys its one target; the element rules read the
-    // row's named Element; Hemorrhage's direct cut applies to a physical-basis press.
-    if (single) dmg *= 1 + Number(single.params.damagePct) / 100;
-    const fortuna = bundleOf(c.keystones, 'fortuna');
-    if (fortuna && dmg > 0) {
-      if (crit) {
-        if (rng() * 100 < Number(fortuna.params.doubleCritPct)) dmg *= 2;
-      } else dmg *= 1 - Number(fortuna.params.nonCritPct) / 100;
-    }
-    const ashen = bundleOf(c.keystones, 'ashen-crown');
-    if (ashen && skill.element === 'fire') dmg *= 1 - Number(ashen.params.directFirePct) / 100;
-    const mono = bundleOf(c.keystones, 'monochrome');
-    if (mono && (skill.element || skill.basis === 'magic')) dmg *= 1 + Number(mono.params.elementalPct) / 100;
-    const hemorrhage = bundleOf(c.keystones, 'hemorrhage');
-    if (hemorrhage && skill.basis === 'phys') dmg *= Number(hemorrhage.params.directPhysicalPct) / 100;
-    const alignedPerSec = c.elem * (c.alignment / 100) * c.hitsPerSec;
-    // the row's own lines are spent on each mob the skill actually reaches: a row that says "all in
-    // range" reaches every target the AoE resolved, and a guaranteed status skips only the two rolls
-    // that decide *whether* a status lands, never the control budget that decides how often 
-    const everyTarget = hasRule(skill, 'every_target');
-    const statusName = hasRule(skill, 'guaranteed_status')
-      ? (E.elements.status_of as Record<string, MobStatusName | undefined>)[skill.element ?? ''] : null;
-    const spendOn = (t: Mob) => {
-      if (!env.mobStatus) return;
-      for (const e of effects) {
-        if (e.subject !== 'target') continue;
-        if (e.stat === 'poison_stacks' && !keystoneBlocksStatus(c, 'poison')) setStacks(env.mobStatus, t.id, 'poison', e.value, alignedPerSec);
-        if (e.stat === 'burn_stacks' && !keystoneBlocksStatus(c, 'burn')) setStacks(env.mobStatus, t.id, 'burn', e.value, alignedPerSec);
-        if (e.stat === 'mark_stacks') setStacks(env.mobStatus, t.id, 'mark', e.value, alignedPerSec);
-        // Sand Storm's own lingering line: the row types the damage a second and the seconds, and the
-        // tick counts inside the shared DoT budget the cap already runs on
-        if (e.stat === 'dot_dps') setErosion(env.mobStatus, t.id, e.value, dotSec, alignedPerSec);
-        if (e.stat === 'stop_sec') stopMob(env.mobStatus, t.id, e.value, hasRule(skill, 'bypasses_control_cap'));
+  };
+  // a cast goes through the same defence chain as a swing: hit, then the mob's own dodge
+  // (skill-pool.md — a curse attaches "with the same hit chance an attack uses"). A row whose hit is
+  // undodgeable (Piercing Shot) drops that second step only.
+  const dodges = !hasRule(skill, 'ignores_dodge');
+  let landed = 0;
+  let dealt = 0;
+  const struck: { id: string; amount: number; packet?: DamagePacket }[] = [];
+  // §7.2: a press's nominal rate is one over its effective cooldown in world seconds — the DoT
+  // budget basis, never the number of targets the press split across
+  const nominalRate = 1 / Math.max(1, Math.ceil(prepared.cooldownSec / Math.max(1e-9, c.globalSpeed || 1)));
+  // the Element share of a magic-basis press is the part the mob's resistance answers, and a
+  // row that names a pierce removes that share of the mob's own line for this press only
+  const magicBasis = skill.basis === 'magic' ? c.magic + c.elem * (c.alignment / 100) : 0;
+  // the character's own Element mix, so a press's Element share can be split the way a swing's pools are
+  const elemPools = Object.entries(c.elemByElement);
+  const elemPoolTotal = elemPools.reduce((a, [, v]) => a + v, 0);
+  const pierce = effects.find((e) => e.stat === 'resistance_pierce_pct');
+  // Sand Storm's own seconds, unscaled by the ramp (it opts out in `special_level_effects`)
+  const dotSec = effects.find((e) => e.stat === 'dot_sec')?.value ?? 10;
+  // Earth Splitter: the share of the TARGET's own maximum pool the row adds, and the cut a boss takes
+  // (owner ticket) — a %HP slam lands on a body, so it is read per target, never from the caster
+  const pctPool = effects
+    .filter((e) => e.stat === 'max_hp_pct_damage' && (e.subject || 'self') === 'target')
+    .reduce((s, e) => s + e.value, 0);
+  // the row's own bleed feed: a target-side `bleed_chance` it guarantees on the mob it lands on
+  const rowBleedPct = effects
+    .filter((e) => e.stat === 'bleed_chance' && (e.subject || 'self') === 'target')
+    .reduce((s, e) => s + e.value, 0);
+  // and its stun feed, the same shape: a row that adds a stun chance the mace's own line did not
+  const rowStunPct = effects
+    .filter((e) => e.stat === 'stun_chance' && (e.subject || 'self') === 'target')
+    .reduce((s, e) => s + e.value, 0);
+  // setup → payoff: the row names the status it reads (bonus), spends (consume), or copies (spread)
+  const statusBonus = effects.find((e) => e.stat === 'bonus_vs_status');
+  const fieldAccuracy = effects.find((e) => e.stat === 'accuracy' && e.subject === 'target');
+  const statusConsume = effects.find((e) => e.stat === 'consume_status');
+  const statusSpread = effects.find((e) => e.stat === 'spread_status');
+  const consumed: { status: string; stacks: number }[] = [];
+  const spread: { status: string; to: string[] }[] = [];
+  for (let i = 0; i < n; i++) {
+    const t = group[i];
+    const targetRoll = rollCache && !fieldPulse ? (rollCache.targets[t.id] ??= {}) : undefined;
+    if (!fieldPulse) {
+      if (targetRoll) {
+        // One cached result per cast-target; a later impact reuses it instead of rolling again.
+        if (targetRoll.hit === undefined) targetRoll.hit = rng() <= eng.hitChance(c.accuracy, t.evasion);
+        if (!targetRoll.hit) continue;
+        if (dodges) {
+          if (targetRoll.dodged === undefined) targetRoll.dodged = rng() * 100 < eng.dodgeChance(t.dodgeRate, c.accuracy);
+          if (targetRoll.dodged) continue;
+        }
+      } else {
+        if (rng() > eng.hitChance(c.accuracy, t.evasion)) continue;
+        if (dodges && rng() * 100 < eng.dodgeChance(t.dodgeRate, c.accuracy)) continue;
       }
-      if (statusName) placeStatus(env.mobStatus, t.id, statusName, c, alignedPerSec, t.immune || []);
-    };
-    // a cast goes through the same defence chain as a swing: hit, then the mob's own dodge
-    // (skill-pool.md — a curse attaches "with the same hit chance an attack uses"). A row whose hit is
-    // undodgeable (Piercing Shot) drops that second step only.
-    const dodges = !hasRule(skill, 'ignores_dodge');
-    let landed = 0;
-    let dealt = 0;
-    const struck: { id: string; amount: number; packet?: DamagePacket }[] = [];
-    // §7.2: a press's nominal rate is one over its effective cooldown in world seconds — the DoT
-    // budget basis, never the number of targets the press split across
-    const nominalRate = 1 / Math.max(1, Math.ceil(skillCd(s, id, c.cdr) / Math.max(1e-9, c.globalSpeed || 1)));
-    // the Element share of a magic-basis press is the part the mob's resistance answers, and a
-    // row that names a pierce removes that share of the mob's own line for this press only
-    const magicBasis = skill.basis === 'magic' ? c.magic + c.elem * (c.alignment / 100) : 0;
-    // the character's own Element mix, so a press's Element share can be split the way a swing's pools are
-    const elemPools = Object.entries(c.elemByElement);
-    const elemPoolTotal = elemPools.reduce((a, [, v]) => a + v, 0);
-    const pierce = effects.find((e) => e.stat === 'resistance_pierce_pct');
-    // Sand Storm's own seconds, unscaled by the ramp (it opts out in `special_level_effects`)
-    const dotSec = effects.find((e) => e.stat === 'dot_sec')?.value ?? 10;
-    // Earth Splitter: the share of the TARGET's own maximum pool the row adds, and the cut a boss takes
-    // (owner ticket) — a %HP slam lands on a body, so it is read per target, never from the caster
-    const pctPool = effects
-      .filter((e) => e.stat === 'max_hp_pct_damage' && (e.subject || 'self') === 'target')
-      .reduce((s, e) => s + e.value, 0);
-    // the row's own bleed feed: a target-side `bleed_chance` it guarantees on the mob it lands on
-    const rowBleedPct = effects
-      .filter((e) => e.stat === 'bleed_chance' && (e.subject || 'self') === 'target')
-      .reduce((s, e) => s + e.value, 0);
-    // and its stun feed, the same shape: a row that adds a stun chance the mace's own line did not
-    const rowStunPct = effects
-      .filter((e) => e.stat === 'stun_chance' && (e.subject || 'self') === 'target')
-      .reduce((s, e) => s + e.value, 0);
-    // setup → payoff: the row names the status it reads (bonus), spends (consume), or copies (spread)
-    const statusBonus = effects.find((e) => e.stat === 'bonus_vs_status');
-    const statusConsume = effects.find((e) => e.stat === 'consume_status');
-    const statusSpread = effects.find((e) => e.stat === 'spread_status');
-    const consumed: { status: string; stacks: number }[] = [];
-    const spread: { status: string; to: string[] }[] = [];
-    for (let i = 0; i < n; i++) {
-      const t = group[i];
-      if (rng() > eng.hitChance(c.accuracy, t.evasion)) continue;
-      if (dodges && rng() * 100 < eng.dodgeChance(t.dodgeRate, c.accuracy)) continue;
-      // the pool term is the mob's own maximum, so it is added after the press: a hit on a body with
-      // more HP hits harder, and a boss takes its own reduced share of it
-      const poolTerm = pctPool > 0
-        ? t.hpMax * (pctPool / 100) * ((t.kind.startsWith('Boss') || t.kind.startsWith('Unique')) ? (E.max_hp_press.boss_pct / 100) : 1)
-        : 0;
-      // the payoff is read off the target's live line before this press writes anything new, so a
-      // setup and its payoff can share a slot order without the payoff eating its own application
+    }
+    const firstEffects = !fieldPulse && (!rollCache || !rollCache.effects[t.id]);
+    // A deployed field's accuracy line is a presence fact, refreshed only while the body is inside;
+    // it expires within one tick of leaving or of the field's last pulse.
+    if (fieldPulse && env.curses && fieldAccuracy) {
+      const lines = env.curses[t.id] || (env.curses[t.id] = {});
+      lines.field_presence = { stat: 'accuracy', value: fieldAccuracy.value, secLeft: 2, from: id };
+    }
+    // the pool term is the mob's own maximum, so it is added after the press: a hit on a body with
+    // more HP hits harder, and a boss takes its own reduced share of it
+    const poolTerm = pctPool > 0
+      ? t.hpMax * (pctPool / 100) * ((t.kind.startsWith('Boss') || t.kind.startsWith('Unique')) ? (E.max_hp_press.boss_pct / 100) : 1)
+      : 0;
+    // The payoff is read at the first successful impact for this cast-target and cached: consuming
+    // the prerequisite there must not remove the bonus from the rest of the same prepared press.
+    let bonusPct = fieldPulse ? 0 : targetRoll?.bonusPct;
+    if (bonusPct === undefined) {
       const bonusLine = statusBonus ? statusLineOf(env, t, statusBonus.status) : null;
+      bonusPct = bonusLine ? statusBonus.value : 0;
+      if (targetRoll) targetRoll.bonusPct = bonusPct;
+    }
+    let consumeStacks = fieldPulse ? 0 : targetRoll?.consumeStacks;
+    if (consumeStacks === undefined) {
       const consumeLine = statusConsume ? statusLineOf(env, t, statusConsume.status) : null;
       const consumeAvailable = consumeLine
         ? (statusConsume!.status === 'poison' || statusConsume!.status === 'mark' ? consumeLine.stacks : (consumeLine.stacks || 1))
         : 0;
       const consumeCap = statusConsume && Number.isFinite(statusConsume.cap) ? statusConsume.cap : consumeAvailable;
-      const consumeStacks = Math.max(0, Math.min(consumeAvailable, consumeCap));
-      let share = (i === 0 ? dmg : dmg * AOE_PCT_PER_EXTRA_TARGET) + poolTerm;
-      if (bonusLine) share *= 1 + statusBonus.value / 100;
-      if (consumeStacks > 0) share *= 1 + (consumeStacks * statusConsume.value) / 100;
-      const elemPart = magicBasis > 0 ? share * ((c.elem * (c.alignment / 100)) / magicBasis) : 0;
-      const cut = env.mobStatus ? (targetMods(mobModsOn(env.mobStatus, t.id)).armourCut || 0) : 0;
-      // Packet N's target-side rules (chilled/burning/crippled/shocked/statused) ride the same
-      // damage-taken bucket on a press that they do on a swing.
-      const keyTaken = env.mobStatus ? (keystoneTargetMods(env.mobStatus, t.id, c).damageTaken || 0) : 0;
-      const stripped = env.curses ? lineValue(env.curses, t.id, 'mob_elemental_resistance_pct') : 0;
-      const pierced = pierce ? -((t.res || 0) * (pierce.value / 100)) : 0;
-      // the press's Element share meets the Species' per-Element resistance (X54) exactly as a swing's does:
-      // the share is split by the character's own Element mix, or by the mob's innate when the build
-      // carries no named pool, so a Species that shrugs fire and fears cold answers each pool on its own.
-      let elemArg: number | Record<string, number> = elemPart;
-      if (elemPart > 0) {
-        const byEl: Record<string, number> = {};
-        if (elemPoolTotal > 0) for (const [el, pool] of elemPools) byEl[el] = elemPart * (pool / elemPoolTotal);
-        else if (t.innate && t.innate.length) byEl[t.innate[0]] = elemPart;
-        if (Object.keys(byEl).length) elemArg = byEl;
+      consumeStacks = Math.max(0, Math.min(consumeAvailable, consumeCap));
+      if (targetRoll) targetRoll.consumeStacks = consumeStacks;
+    }
+    let share = fieldPulse ? dmg + poolTerm : (i === 0 ? dmg : dmg * AOE_PCT_PER_EXTRA_TARGET) + poolTerm;
+    if (bonusPct) share *= 1 + bonusPct / 100;
+    if (consumeStacks > 0) share *= 1 + (consumeStacks * statusConsume!.value) / 100;
+    const elemPart = magicBasis > 0 ? share * ((c.elem * (c.alignment / 100)) / magicBasis) : 0;
+    const cut = env.mobStatus ? (targetMods(mobModsOn(env.mobStatus, t.id)).armourCut || 0) : 0;
+    // Packet N's target-side rules (chilled/burning/crippled/shocked/statused) ride the same
+    // damage-taken bucket on a press that they do on a swing.
+    const keyTaken = env.mobStatus ? (keystoneTargetMods(env.mobStatus, t.id, c).damageTaken || 0) : 0;
+    const stripped = env.curses ? lineValue(env.curses, t.id, 'mob_elemental_resistance_pct') : 0;
+    const pierced = pierce ? -((t.res || 0) * (pierce.value / 100)) : 0;
+    // the press's Element share meets the Species' per-Element resistance (X54) exactly as a swing's does:
+    // the share is split by the character's own Element mix, or by the mob's innate when the build
+    // carries no named pool, so a Species that shrugs fire and fears cold answers each pool on its own.
+    let elemArg: number | Record<string, number> = elemPart;
+    if (elemPart > 0) {
+      const byEl: Record<string, number> = {};
+      if (elemPoolTotal > 0) for (const [el, pool] of elemPools) byEl[el] = elemPart * (pool / elemPoolTotal);
+      else if (t.innate && t.innate.length) byEl[t.innate[0]] = elemPart;
+      if (Object.keys(byEl).length) elemArg = byEl;
+    }
+    // Monochrome: the press's Element answers Fire's resistance line, not the pools it was built
+    // from. A physical-basis conversion is already in `elemArg` by this point, so it converts too.
+    if (mono) {
+      const totalElem = typeof elemArg === 'object'
+        ? Object.values(elemArg).reduce((sum, value) => sum + value, 0)
+        : elemArg;
+      if (totalElem > 0) elemArg = { fire: totalElem };
+    }
+    // conversion (`draft/convert-damage.md`): a physical-basis press routes a percent of its own
+    // physical share into the named Element before mitigation, through the same `convertDamageOf`
+    // the swing uses; a magic-basis press never converts.
+    let nonElementPart = share - elemPart;
+    let convertedParts: Record<string, number> = {};
+    if (skill.basis === 'phys' && c.conversion && Object.keys(c.conversion).length) {
+      const conv = eng.convertDamageOf(nonElementPart, c.conversion) as { physical: number; byElement: Record<string, number> };
+      nonElementPart = conv.physical;
+      if (Object.keys(conv.byElement).length) { elemArg = conv.byElement; convertedParts = { ...conv.byElement }; }
+    }
+    const mitigated0 = eng.mitigateMobHit(t, nonElementPart, elemArg, cut, stripped + pierced);
+    // §12: a PHYSICAL press is the weapon arguing with a body too, so it carries the size ladder;
+    // a magic-damage press is exempt (the caster's spell is not the weapon's own swing).
+    const mitigated = (skill.basis === 'phys'
+      ? eng.applySizeMult(mitigated0, 1, eng.sizeMultOf(E.weapon_size_mult?.ladder, c.weaponName, (t as any).readsAs || 'medium'))
+      : mitigated0) * (1 + keyTaken / 100);
+    t.hp -= mitigated;
+    dealt += mitigated;
+    landed++;
+    // §7.2 provenance per target: the same press's parts, labelled. The pool term (Earth Splitter)
+    // was added after the crit roll, so it claims the non-crit physical share first and the rest of
+    // the non-elemental part rides its basis' pool — the split never goes negative and sums back
+    // to exactly what mitigation answered.
+    const parts = emptyParts();
+    const poolShare = Math.min(poolTerm, nonElementPart);
+    parts.physicalNonCrit = poolShare;
+    const restOfNonElement = nonElementPart - poolShare;
+    if (skill.basis === 'phys') parts.physicalCritEligible = restOfNonElement;
+    else parts.magic = restOfNonElement;
+    if (Object.keys(convertedParts).length) {
+      for (const [el, v] of Object.entries(convertedParts)) parts.convertedElement[el] = v;
+    } else if (typeof elemArg === 'object') {
+      for (const [el, v] of Object.entries(elemArg)) parts.nativeElement[el] = v;
+    } else if (elemPart > 0) {
+      parts.nativeElement[''] = elemPart;
+    }
+    struck.push({
+      id: t.id, amount: mitigated,
+      packet: validateDamagePacket({
+        sourceActionId: id, actorId: 'player', targetId: t.id,
+        timeUs: env.timeUs ?? null, nominalRate,
+        flags: directFlags(sm.critsOnBasis(skill), true, true),
+        parts,
+      }),
+    });
+    // Cast-target effects run once per successful cast-target, on its first real impact: riders,
+    // guaranteed status/stacks, consume/spread and the curse write. Later impacts carry damage only.
+    if (firstEffects) {
+    // §14: a landing attack press carries the swing's own riders — the weapon Element status
+    // proc, its bleed chance and the mace's stun — so a rotation does not silently stop applying
+    // status the moment the bar fills
+    if (env.mobStatus) {
+      applyWeaponRiders(rng, c, env.mobStatus, t.id, env.curses ? lineValue(env.curses, t.id, 'bleed_chance') > 0 : false, rowBleedPct, rowStunPct, t.immune || []);
+      // Conductive: the shock the press just wrote jumps to one more body, without its stop.
+      const cond = bundleOf(c.keystones, 'conductive');
+      if (cond) {
+        const shock = env.mobStatus[t.id]?.statuses.shock;
+        let left = shock && shock.secLeft > 0 ? Number(cond.params.spreadTargets) : 0;
+        for (const other of group) {
+          if (left <= 0) break;
+          if (other.id === t.id) continue;
+          if (copyStatus(env.mobStatus, t.id, other.id, 'shock', other.immune || [])) left--;
+        }
       }
-      // Monochrome: the press's Element answers Fire's resistance line, not the pools it was built
-      // from. A physical-basis conversion is already in `elemArg` by this point, so it converts too.
-      if (mono) {
-        const totalElem = typeof elemArg === 'object'
-          ? Object.values(elemArg).reduce((sum, value) => sum + value, 0)
-          : elemArg;
-        if (totalElem > 0) elemArg = { fire: totalElem };
-      }
-      // conversion (`draft/convert-damage.md`): a physical-basis press routes a percent of its own
-      // physical share into the named Element before mitigation, through the same `convertDamageOf`
-      // the swing uses; a magic-basis press never converts.
-      let nonElementPart = share - elemPart;
-      let convertedParts: Record<string, number> = {};
-      if (skill.basis === 'phys' && c.conversion && Object.keys(c.conversion).length) {
-        const conv = eng.convertDamageOf(nonElementPart, c.conversion) as { physical: number; byElement: Record<string, number> };
-        nonElementPart = conv.physical;
-        if (Object.keys(conv.byElement).length) { elemArg = conv.byElement; convertedParts = { ...conv.byElement }; }
-      }
-      const mitigated0 = eng.mitigateMobHit(t, nonElementPart, elemArg, cut, stripped + pierced);
-      // §12: a PHYSICAL press is the weapon arguing with a body too, so it carries the size ladder;
-      // a magic-damage press is exempt (the caster's spell is not the weapon's own swing).
-      const mitigated = (skill.basis === 'phys'
-        ? eng.applySizeMult(mitigated0, 1, eng.sizeMultOf(E.weapon_size_mult?.ladder, c.weaponName, (t as any).readsAs || 'medium'))
-        : mitigated0) * (1 + keyTaken / 100);
-      t.hp -= mitigated;
-      dealt += mitigated;
-      landed++;
-      // §7.2 provenance per target: the same press's parts, labelled. The pool term (Earth Splitter)
-      // was added after the crit roll, so it claims the non-crit physical share first and the rest of
-      // the non-elemental part rides its basis' pool — the split never goes negative and sums back
-      // to exactly what mitigation answered.
-      const parts = emptyParts();
-      const poolShare = Math.min(poolTerm, nonElementPart);
-      parts.physicalNonCrit = poolShare;
-      const restOfNonElement = nonElementPart - poolShare;
-      if (skill.basis === 'phys') parts.physicalCritEligible = restOfNonElement;
-      else parts.magic = restOfNonElement;
-      if (Object.keys(convertedParts).length) {
-        for (const [el, v] of Object.entries(convertedParts)) parts.convertedElement[el] = v;
-      } else if (typeof elemArg === 'object') {
-        for (const [el, v] of Object.entries(elemArg)) parts.nativeElement[el] = v;
-      } else if (elemPart > 0) {
-        parts.nativeElement[''] = elemPart;
-      }
-      struck.push({
-        id: t.id, amount: mitigated,
-        packet: validateDamagePacket({
-          sourceActionId: id, actorId: 'player', targetId: t.id,
-          timeUs: env.timeUs ?? null, nominalRate,
-          flags: directFlags(sm.critsOnBasis(skill), true, true),
-          parts,
-        }),
-      });
-      // §14: a landing attack press carries the swing's own riders — the weapon Element status
-      // proc, its bleed chance and the mace's stun — so a rotation does not silently stop applying
-      // status the moment the bar fills
-      if (env.mobStatus) {
-        applyWeaponRiders(rng, c, env.mobStatus, t.id, env.curses ? lineValue(env.curses, t.id, 'bleed_chance') > 0 : false, rowBleedPct, rowStunPct, t.immune || []);
-        // Conductive: the shock the press just wrote jumps to one more body, without its stop.
-        const cond = bundleOf(c.keystones, 'conductive');
-        if (cond) {
-          const shock = env.mobStatus[t.id]?.statuses.shock;
-          let left = shock && shock.secLeft > 0 ? Number(cond.params.spreadTargets) : 0;
-          for (const other of group) {
-            if (left <= 0) break;
-            if (other.id === t.id) continue;
-            if (copyStatus(env.mobStatus, t.id, other.id, 'shock', other.immune || [])) left--;
+      // copy the live line to the other bodies first, then spend it on the source: Catalyst reads
+      // the poison it is about to consume, not the empty line left behind
+      // Single Combat forbids the press from reaching another body, so its status copy cannot
+      // travel either; the spread row waits until the keystone is refunded.
+      if (statusSpread && !single && (everyTarget || i === 0)) {
+        let left = Math.max(0, Math.floor(statusSpread.value));
+        const to: string[] = [];
+        const origin = env.positionOf?.(t.id);
+        const radius = Number(statusSpread.radius_m ?? Infinity);
+        const candidates = (env.availableGroup ?? group)
+          .filter((other) => other.id !== t.id && other.hp > 0)
+          .map((other, index) => {
+            const pose = env.positionOf?.(other.id);
+            const dist = origin && pose ? Math.hypot(pose.x - origin.x, pose.y - origin.y) : 0;
+            return { other, dist, index };
+          })
+          .filter((entry) => !env.positionOf || !origin || entry.dist <= radius + 1e-7)
+          .sort((a, b) => a.dist - b.dist || a.index - b.index);
+        for (const { other } of candidates) {
+          if (left <= 0) break;
+          if (copyStatus(env.mobStatus, t.id, other.id, statusSpread.status as MobStatusName, (other as any).immune || [])) {
+            to.push(other.id);
+            left--;
           }
         }
-        // copy the live line to the other bodies first, then spend it on the source: Catalyst reads
-        // the poison it is about to consume, not the empty line left behind
-        // Single Combat forbids the press from reaching another body, so its status copy cannot
-        // travel either; the spread row waits until the keystone is refunded.
-        if (statusSpread && !single && (everyTarget || i === 0)) {
-          let left = Math.max(0, Math.floor(statusSpread.value));
-          const to: string[] = [];
-          for (const other of group) {
-            if (left <= 0) break;
-            if (other.id === t.id) continue;
-            if (copyStatus(env.mobStatus, t.id, other.id, statusSpread.status as MobStatusName, (other as any).immune || [])) {
-              to.push(other.id);
-              left--;
-            }
-          }
-          if (to.length) spread.push({ status: statusSpread.status, to });
-        }
-        if (consumeStacks > 0) {
-          const took = consumeStatus(env.mobStatus, t.id, statusConsume!.status as MobStatusName, consumeStacks);
-          if (took > 0) consumed.push({ status: statusConsume!.status, stacks: took });
-        }
+        if (to.length) spread.push({ status: statusSpread.status, to });
       }
-      if (everyTarget || i === 0) spendOn(t);
-      // a row's TARGET lines are a curse it writes on the hit: the same store a curse skill fills, so
-      // `accuracy`, `damage_dealt` and a resistance strip read off a press exactly as they do off a curse
-      if (env.curses) applyCurse(env.curses, t.id, skill, c.keystones);
+      if (consumeStacks > 0) {
+        const took = consumeStatus(env.mobStatus, t.id, statusConsume!.status as MobStatusName, consumeStacks);
+        if (took > 0) consumed.push({ status: statusConsume!.status, stacks: took });
+      }
     }
-    // a press that opens a self window (Reap) folds the row onto the character sheet for its own
-    // duration, on the same `buffUp` clock a toggled buff runs on — the window is the row's own
-    // `duration`, and the rule word is what keeps an ordinary press from opening one
-    if (hasRule(skill, 'self_window')) {
-      s.buffUp[id] = Number(String(skill.duration).match(/\d+/)?.[0] || 0);
+    if (everyTarget || i === 0) spendOn(t);
+    // a row's TARGET lines are a curse it writes on the hit: the same store a curse skill fills, so
+    // `accuracy`, `damage_dealt` and a resistance strip read off a press exactly as they do off a curse
+    if (env.curses) applyCurse(env.curses, t.id, skill, c.keystones);
+    if (rollCache) rollCache.effects[t.id] = true;
     }
-    return {
-      id, name: skill.name ?? '', damage: dmg, manaCost: spent, hpCost, targets: landed, crit, dealt, byMob: struck,
-      ...(consumed.length ? { consumed } : {}),
-      ...(spread.length ? { spread } : {}),
-    };
+  }
+  // a press that opens a self window (Reap) folds the row onto the character sheet for its own
+  // duration, on the same `buffUp` clock a toggled buff runs on — the window is the row's own
+  // `duration`, and the rule word is what keeps an ordinary press from opening one
+  if (hasRule(skill, 'self_window') && (!env.impact || env.impact.index === 0)) {
+    s.buffUp[id] = Number(String(skill.duration).match(/\d+/)?.[0] || 0);
+  }
+  return {
+    id, name: skill.name ?? '', damage: dmg, manaCost: spent, hpCost, targets: landed, crit, dealt, byMob: struck,
+    ...(resolved?.area ? { area: resolved.area } : {}),
+    ...(consumed.length ? { consumed } : {}),
+    ...(spread.length ? { spread } : {}),
+  };
+}
+
+/** First ready slot in cast order, prepared but not resolved. */
+export function prepareFirstSkillCast(
+  s: SkillState, c: Character, mana: number, availableGroup: Mob[], statuses: Statuses,
+  env: CastEnv = {},
+): PreparedSkillCast | null {
+  if (!availableGroup.length) return null;
+  for (const id of rotationOrder(s)) {
+    const resolved = env.resolveTargetsForSkill?.(id, availableGroup);
+    const targets = resolved?.targets ?? env.targetsForSkill?.(id, availableGroup) ?? availableGroup;
+    const prepared = prepareSkillCast(s, c, id, mana, targets, statuses, env, resolved?.area);
+    if (prepared) return prepared;
   }
   return null;
 }
 
+/** Immediate queue casts retain their existing path; live arena actions resolve this preparation later. */
+export function castOnce(
+  s: SkillState, c: Character, mana: number, availableGroup: Mob[], statuses: Statuses,
+  rng: () => number, env: CastEnv = {},
+): CastReport | null {
+  const prepared = prepareFirstSkillCast(s, c, mana, availableGroup, statuses, env);
+  return prepared ? resolvePreparedCast(s, c, prepared, statuses, rng, env) : null;
+}
+
 /** Cooldowns and buff clocks tick down once per second, post-cap speed aside — the same multiplier
  *  moves both, so Haste shortens a buff's window and its recast cooldown together. */
+export function tickSkillCooldowns(s: SkillState, elapsed = 1) {
+  for (const id of Object.keys(s.cd)) if (s.cd[id] > 0) s.cd[id] = Math.max(0, s.cd[id] - elapsed);
+}
+
+export function tickSkillBuffs(s: SkillState, elapsed = 1) {
+  for (const id of Object.keys(s.buffUp)) if (s.buffUp[id] > 0) s.buffUp[id] = Math.max(0, s.buffUp[id] - elapsed);
+}
+
 export function tickSkills(s: SkillState, globalSpeed = 1) {
-  for (const id of Object.keys(s.cd)) if (s.cd[id] > 0) s.cd[id] = Math.max(0, s.cd[id] - globalSpeed);
-  for (const id of Object.keys(s.buffUp)) if (s.buffUp[id] > 0) s.buffUp[id] = Math.max(0, s.buffUp[id] - globalSpeed);
+  tickSkillCooldowns(s, globalSpeed);
+  tickSkillBuffs(s, globalSpeed);
 }
 
 /** A toggled buff re-presses itself the moment it lapses (`skill-pool.md` "Buff — toggle track"). */

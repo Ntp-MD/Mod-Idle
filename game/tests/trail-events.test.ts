@@ -5,7 +5,7 @@ import { newGame, tick } from '../src/sim/game';
 import { currentCell, rankOf } from '../src/sim/road';
 import { hexDistance, hexKey, MAP_EXPLORATION, normalizeMapJournal, tickTrailSites, trailSites } from '../src/sim/map-exploration';
 import { exportJson, importJson, migrate } from '../src/state/save';
-import { adventureView } from '../src/ui/map-adventure';
+import { adventureView } from '../src/ui/map/map-adventure';
 
 const cfg = MAP_EXPLORATION.spawn;
 const prepared = (seed = 734) => {

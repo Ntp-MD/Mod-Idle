@@ -2,7 +2,7 @@ import { eng, TOWN, trade, sm } from '../engine/client';
 import { dayOf } from './game';
 import type { GameState, Item, TaskSlot, TownState } from './types';
 import { atSettlement, craft, type Where } from './craft';
-import { addTo, fits, fitsTransaction, slotsFree } from './slots';
+import { fitsTransaction, slotsFree } from './slots';
 import { milestoneAvailable, payQuestBonus, recordQuestMilestone, resolveQuestBonus, taskBonuses } from './quest-rewards';
 import { usefulSkillDuplicate } from './skills';
 import { sellGoods, tradeInventory } from './trade';

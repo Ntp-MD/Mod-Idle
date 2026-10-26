@@ -1,0 +1,414 @@
+{
+  "id": "attack.firestorm",
+  "src": "/fx/authored/attack-firestorm/spatial-v2/atlas.png",
+  "columns": 4,
+  "rows": 4,
+  "imageWidth": 1254,
+  "imageHeight": 1254,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        313,
+        343
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        35,
+        219,
+        284,
+        337
+      ],
+      "renderedPadding": [
+        99.5,
+        283.0,
+        93.5,
+        70.0
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        313,
+        0,
+        314,
+        343
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        27,
+        161,
+        290,
+        339
+      ],
+      "renderedPadding": [
+        91.0,
+        225.0,
+        88.0,
+        68.0
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        627,
+        0,
+        313,
+        343
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        9,
+        121,
+        293,
+        343
+      ],
+      "renderedPadding": [
+        73.5,
+        185.0,
+        84.5,
+        64.0
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        940,
+        0,
+        314,
+        343
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        9,
+        112,
+        295,
+        341
+      ],
+      "renderedPadding": [
+        73.0,
+        176.0,
+        83.0,
+        66.0
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        343,
+        313,
+        287
+      ],
+      "offsetX": 64.5,
+      "offsetY": 92.0,
+      "bounds": [
+        14,
+        70,
+        308,
+        285
+      ],
+      "renderedPadding": [
+        78.5,
+        162.0,
+        69.5,
+        94.0
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        313,
+        343,
+        314,
+        287
+      ],
+      "offsetX": 64.0,
+      "offsetY": 92.0,
+      "bounds": [
+        14,
+        49,
+        312,
+        287
+      ],
+      "renderedPadding": [
+        78.0,
+        141.0,
+        66.0,
+        92.0
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        627,
+        343,
+        313,
+        287
+      ],
+      "offsetX": 64.5,
+      "offsetY": 92.0,
+      "bounds": [
+        12,
+        45,
+        302,
+        287
+      ],
+      "renderedPadding": [
+        76.5,
+        137.0,
+        75.5,
+        92.0
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        940,
+        343,
+        314,
+        287
+      ],
+      "offsetX": 64.0,
+      "offsetY": 92.0,
+      "bounds": [
+        4,
+        45,
+        303,
+        287
+      ],
+      "renderedPadding": [
+        68.0,
+        137.0,
+        75.0,
+        92.0
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        630,
+        313,
+        310
+      ],
+      "offsetX": 64.5,
+      "offsetY": 80.5,
+      "bounds": [
+        20,
+        54,
+        303,
+        289
+      ],
+      "renderedPadding": [
+        84.5,
+        134.5,
+        74.5,
+        101.5
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        313,
+        630,
+        314,
+        310
+      ],
+      "offsetX": 64.0,
+      "offsetY": 80.5,
+      "bounds": [
+        12,
+        80,
+        308,
+        291
+      ],
+      "renderedPadding": [
+        76.0,
+        160.5,
+        70.0,
+        99.5
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        627,
+        630,
+        313,
+        310
+      ],
+      "offsetX": 64.5,
+      "offsetY": 80.5,
+      "bounds": [
+        12,
+        63,
+        305,
+        293
+      ],
+      "renderedPadding": [
+        76.5,
+        143.5,
+        72.5,
+        97.5
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        940,
+        630,
+        314,
+        310
+      ],
+      "offsetX": 64.0,
+      "offsetY": 80.5,
+      "bounds": [
+        12,
+        62,
+        299,
+        288
+      ],
+      "renderedPadding": [
+        76.0,
+        142.5,
+        79.0,
+        102.5
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        940,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 78.5,
+      "bounds": [
+        28,
+        94,
+        294,
+        263
+      ],
+      "renderedPadding": [
+        92.5,
+        172.5,
+        83.5,
+        129.5
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        313,
+        940,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 78.5,
+      "bounds": [
+        19,
+        103,
+        294,
+        265
+      ],
+      "renderedPadding": [
+        83.0,
+        181.5,
+        84.0,
+        127.5
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        627,
+        940,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 78.5,
+      "bounds": [
+        31,
+        98,
+        286,
+        265
+      ],
+      "renderedPadding": [
+        95.5,
+        176.5,
+        91.5,
+        127.5
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        940,
+        940,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 78.5,
+      "bounds": [
+        42,
+        130,
+        277,
+        261
+      ],
+      "renderedPadding": [
+        106.0,
+        208.5,
+        101.0,
+        131.5
+      ]
+    }
+  ],
+  "virtualWidth": 442,
+  "virtualHeight": 471,
+  "alphaDiscard": 8,
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    4,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "frameMs": 90,
+  "composition": "whole-field",
+  "actorBodyWidthM": 0.5,
+  "authoringDiameterM": 6,
+  "geometrySource": "current committed action/field footprint",
+  "anchorStatus": "runtime ground-anchor fit from source bounds and committed footprint",
+  "sourcePixelsUnmodified": true,
+  "sourceSha256": "6fa30fac12cf074b95153cf8890ea874dfdc3b1b16ab72d9d17d37bea749bf5f",
+  "status": "active-spatial-v2",
+  "cellWidth": 313.5,
+  "cellHeight": 313.5,
+  "contentWidthRatio": 0.6764705882352942,
+  "contentHeightRatio": 0.5138004246284501,
+  "authoringGeometry": {
+    "shape": "circle",
+    "radiusM": 3,
+    "spanM": 6,
+    "depthM": 6,
+    "origin": "target",
+    "canonicalSource": "tools/data/skills.json#attack.firestorm"
+  }
+}

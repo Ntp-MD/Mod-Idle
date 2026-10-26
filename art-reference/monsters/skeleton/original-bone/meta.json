@@ -1,0 +1,387 @@
+{
+  "schemaVersion": 1,
+  "status": "user-reference",
+  "species": "skeleton",
+  "title": "Skeleton Original Bone",
+  "source": {
+    "provider": "itch.io",
+    "url": "https://pixiblop.itch.io/pixiblop-monster-collection-15-enemies-playable-demo",
+    "kind": "sprite sheet pack",
+    "sourceCanvas": [
+      80,
+      80
+    ],
+    "sourceClips": [
+      "Idle",
+      "Walk",
+      "Attack",
+      "Hurt",
+      "Hurt-White-Flash",
+      "Death",
+      "Full-Cycle"
+    ],
+    "note": "Skeleton-Monster-Free-All-Animations; the pack page states personal and commercial use."
+  },
+  "extraction": {
+    "removedOverlays": [],
+    "method": "tight alpha bounds per clip, one shared crop box per clip, frames mirrored horizontally to face east",
+    "background": "transparent",
+    "alignment": "cells share a 67px height so every clip snaps to one integer display scale; feet sit on the cell bottom and in-clip offsets are preserved",
+    "normalisation": "source art faced west; frames mirrored to face east"
+  },
+  "clips": {
+    "idle": {
+      "file": "clips/idle.png",
+      "frames": 6,
+      "cell": [
+        35,
+        67
+      ],
+      "sourceBox": [
+        23,
+        3,
+        35,
+        67
+      ],
+      "frameMs": 333,
+      "durations": [
+        250,
+        170,
+        170,
+        750,
+        170,
+        490
+      ],
+      "loop": true,
+      "tightBounds": [
+        [
+          0,
+          7,
+          35,
+          60
+        ],
+        [
+          0,
+          6,
+          35,
+          61
+        ],
+        [
+          1,
+          5,
+          33,
+          62
+        ],
+        [
+          1,
+          4,
+          32,
+          63
+        ],
+        [
+          1,
+          5,
+          33,
+          62
+        ],
+        [
+          0,
+          6,
+          35,
+          61
+        ]
+      ]
+    },
+    "walk": {
+      "file": "clips/walk.png",
+      "frames": 8,
+      "cell": [
+        45,
+        67
+      ],
+      "sourceBox": [
+        18,
+        6,
+        45,
+        67
+      ],
+      "frameMs": 125,
+      "durations": [
+        120,
+        130,
+        120,
+        130,
+        120,
+        130,
+        120,
+        130
+      ],
+      "loop": true,
+      "tightBounds": [
+        [
+          3,
+          5,
+          36,
+          59
+        ],
+        [
+          4,
+          6,
+          34,
+          59
+        ],
+        [
+          4,
+          4,
+          35,
+          60
+        ],
+        [
+          1,
+          4,
+          41,
+          59
+        ],
+        [
+          0,
+          5,
+          45,
+          61
+        ],
+        [
+          0,
+          5,
+          45,
+          62
+        ],
+        [
+          2,
+          4,
+          41,
+          61
+        ],
+        [
+          4,
+          4,
+          35,
+          60
+        ]
+      ]
+    },
+    "attack": {
+      "file": "clips/attack.png",
+      "frames": 6,
+      "cell": [
+        62,
+        67
+      ],
+      "sourceBox": [
+        7,
+        4,
+        62,
+        67
+      ],
+      "frameMs": 67,
+      "durations": [
+        50,
+        90,
+        70,
+        60,
+        60,
+        70
+      ],
+      "loop": false,
+      "tightBounds": [
+        [
+          16,
+          6,
+          35,
+          60
+        ],
+        [
+          12,
+          6,
+          50,
+          60
+        ],
+        [
+          0,
+          13,
+          49,
+          54
+        ],
+        [
+          11,
+          9,
+          36,
+          57
+        ],
+        [
+          13,
+          7,
+          34,
+          59
+        ],
+        [
+          16,
+          6,
+          35,
+          60
+        ]
+      ]
+    },
+    "hurt": {
+      "file": "clips/hit.png",
+      "frames": 5,
+      "cell": [
+        47,
+        67
+      ],
+      "sourceBox": [
+        23,
+        3,
+        47,
+        67
+      ],
+      "frameMs": 84,
+      "durations": [
+        60,
+        40,
+        140,
+        80,
+        100
+      ],
+      "loop": false,
+      "tightBounds": [
+        [
+          0,
+          7,
+          35,
+          60
+        ],
+        [
+          1,
+          7,
+          45,
+          60
+        ],
+        [
+          1,
+          7,
+          46,
+          60
+        ],
+        [
+          1,
+          6,
+          39,
+          61
+        ],
+        [
+          0,
+          7,
+          35,
+          60
+        ]
+      ]
+    },
+    "death": {
+      "file": "clips/death.png",
+      "frames": 5,
+      "cell": [
+        72,
+        67
+      ],
+      "sourceBox": [
+        3,
+        10,
+        72,
+        67
+      ],
+      "frameMs": 268,
+      "durations": [
+        60,
+        120,
+        80,
+        80,
+        1000
+      ],
+      "loop": false,
+      "tightBounds": [
+        [
+          20,
+          0,
+          35,
+          60
+        ],
+        [
+          16,
+          9,
+          38,
+          51
+        ],
+        [
+          11,
+          10,
+          48,
+          49
+        ],
+        [
+          3,
+          16,
+          59,
+          48
+        ],
+        [
+          0,
+          27,
+          72,
+          40
+        ]
+      ]
+    }
+  },
+  "review": {
+    "frameMs": {
+      "idle": 200,
+      "walk": 125,
+      "attack": 70,
+      "hurt": 80,
+      "death": 110
+    },
+    "impactFrame": {
+      "attack": 2
+    },
+    "displayHeight": 252,
+    "facing": "east",
+    "notes": [
+      "The source GIF holds some idle poses; review playback uses an even beat.",
+      "The pack also ships a white-flash hit variant, kept on the shelf as an extra rather than baked into the hit clip."
+    ]
+  },
+  "extras": {
+    "hurtWhiteFlash": {
+      "file": "clips/hit-white-flash.png",
+      "frames": 6,
+      "cell": [
+        47,
+        67
+      ],
+      "sourceBox": [
+        23,
+        3,
+        47,
+        67
+      ],
+      "durations": [
+        60,
+        40,
+        40,
+        100,
+        80,
+        100
+      ],
+      "note": "Not wired: the arena hit flash is rendered from the hurt clip. Kept for a later explicit hit-flash pass."
+    }
+  }
+}

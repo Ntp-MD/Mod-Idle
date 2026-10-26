@@ -1,0 +1,26 @@
+[
+  {
+    "id": "attack.void_blast",
+    "slug": "attack-void-blast",
+    "original": "C:\\Users\\disda\\.codex\\generated_images\\01a1747a-a7f3-7852-96df-31293cc0db1b\\exec-f71c4ea1-6281-4b4e-809e-7661fdf2ec6e.png",
+    "source": "C:\\Users\\disda\\.codex\\generated_images\\01a1747a-a7f3-7852-96df-31293cc0db1b\\exec-e5cb502d-ad42-442b-a3e5-2aaf77196ee8.png"
+  },
+  {
+    "id": "attack.ground_slam",
+    "slug": "attack-ground-slam",
+    "original": "C:\\Users\\disda\\.codex\\generated_images\\01a1747a-a7f3-7852-96df-31293cc0db1b\\exec-8d3cb9aa-e7b0-4d93-b6d3-47dadc15f9b4.png",
+    "source": "C:\\Users\\disda\\.codex\\generated_images\\01a1747a-a7f3-7852-96df-31293cc0db1b\\exec-e00f1eab-3c4a-4e3b-b0ef-fd42e92bf1aa.png"
+  },
+  {
+    "id": "attack.shatter",
+    "slug": "attack-shatter",
+    "original": "C:\\Users\\disda\\.codex\\generated_images\\01a1747a-a7f3-7852-96df-31293cc0db1b\\exec-633767df-1cca-4e1e-9c19-c72fabb62eeb.png",
+    "source": "C:\\Users\\disda\\.codex\\generated_images\\01a1747a-a7f3-7852-96df-31293cc0db1b\\exec-b02dec56-cafe-4f0a-bfd5-b67fd5b674d9.png"
+  },
+  {
+    "id": "attack.cleave",
+    "slug": "attack-cleave",
+    "original": "C:\\Users\\disda\\.codex\\generated_images\\01a1747a-a7f3-7852-96df-31293cc0db1b\\exec-050b0f02-608c-4121-bdbe-a50bda9da98b.png",
+    "source": "C:\\Users\\disda\\.codex\\generated_images\\01a1747a-a7f3-7852-96df-31293cc0db1b\\exec-ac9276f9-abf2-4a8c-98f2-ec6d9b2fcd9f.png"
+  }
+]

@@ -9,8 +9,6 @@
  * function supplied there — never by a "supported list" kept beside the handlers.
  */
 
-import { STAT_KEYS } from './core-attributes.ts';
-
 export type { StatKey } from './core-attributes.ts';
 
 /** The hook names a keystone handler may answer — a closed union (§6). */
@@ -305,23 +303,12 @@ export interface KeystoneBundle {
   params: Record<string, number | string>;
 }
 
-/** Validate one bundle against the registry and return it in the shape the sim carries. */
-export function keystoneBundle(key: string, params: unknown, elements: readonly string[] = []): KeystoneBundle {
-  return { key, params: validateKeystoneParams(key, params, elements) };
-}
-
 /** The first bundle with this key, or undefined — the one lookup every handler uses. A caller with no
  *  allocation (or a fixture built before the field existed) reads as "not bought". */
 export const bundleOf = (bundles: readonly KeystoneBundle[] | undefined, key: string): KeystoneBundle | undefined =>
   bundles?.find((b) => b.key === key);
 
 export const bundleHas = (bundles: readonly KeystoneBundle[] | undefined, key: string): boolean => bundleOf(bundles, key) !== undefined;
-
-const pnum = (bundle: KeystoneBundle | undefined, name: string): number => {
-  if (!bundle) return 0;
-  const v = bundle.params[name];
-  return typeof v === 'number' ? v : 0;
-};
 
 /**
  * 01 Ironwall: every point of Evasion Rating becomes Armour 1:1 and the Evasion layer goes away.
@@ -451,9 +438,6 @@ export function mindOverMatter(hpDamage: number, manaAvailable: number, params: 
   const mana = Math.max(0, Math.min(hpDamage * (params.manaSharePct / 100), manaAvailable));
   return { mana, hp: Math.max(0, hpDamage - mana) };
 }
-
-/** 42 Crushing Rhythm: the cap and the single multiplier that turns excess cadence into damage. */
-export const crushingRhythmOf = crushingRhythm;
 
 /** 44 Turtle Doctrine: the expected cut of a Block, replacing the roll. `p` is 0..1. */
 export function turtleCut(blockChancePct: number, armour: number, divisor: number, physical: number): number {
@@ -853,7 +837,3 @@ export function validateKeystoneRuntime(raw: unknown): KeystoneRuntimeState {
     if (typeof v !== 'string') fail(`keystoneRuntime.targetRefs.${name}`, 'must be an actor id string');
   return r as unknown as KeystoneRuntimeState;
 }
-
-/** The Core keys the sheet's targeted grants feed — re-declared here so a bundle reader that must
- *  not import the client still checks against one list. */
-export const CORE_ATTRIBUTE_KEYS = STAT_KEYS;

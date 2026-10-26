@@ -1,0 +1,17 @@
+Use case: stylized-concept
+Asset type: production raster VFX animation atlas for a first-party isometric fantasy ARPG.
+Primary request: a completely new FIREBALL skill animation, a compact blazing comet that ignites, streaks head-first with a short trailing flame, then bursts radially on impact.
+This is a comet, not a character and not a skill icon. It must not reuse, crop, slice, rotate or recolour any existing atlas, especially not the firestorm vortex.
+Design a distinctive chunky flame silhouette, with white-hot yellow core, orange mid #e2603a, deep red edge, and sparse ash plume.
+It should feel compact, direct and searing while remaining readable at small game scale.
+Use crisp hand-painted pixel clusters / stepped edges matching a polished chibi ARPG; avoid a static featureless ball with no tail or direction, a tornado or vortex funnel of any kind, smooth neon vector rings, photographic flame, excessive blur, or black outlines.
+Output: a genuinely TRANSPARENT square PNG sprite atlas. Target canvas 2048 by 2048, arranged as EXACTLY 4 columns by 4 rows, 16 equal square cells. The entire image consists of these 16 cells with invisible grid boundaries, no captions, no numbers, no borders, no labels.
+Animation order is row-major:
+Row 1, cells 0-3: four opening frames, beginning as a tiny ember spark gathering and swelling into a compact fireball with a short tail. Gradual growth; no sudden teleport.
+Row 2, cells 4-7: first four full-strength flight frames, head leading with tail trailing left.
+Row 3, cells 8-11: next four full-strength flight frames. Together cells 4-11 form one seamless 8-frame flight loop. Show actual evolving flame shapes and forward left-to-right rushing flow with flickering tail between frames, stable overall size, not eight identical copies. Frame 11 transitions cleanly back to frame 4.
+Row 4, cells 12-15: four exit frames, a central impact flash expanding then breaking into drifting embers and thin smoke; the last frame is only faint residue.
+Every cell has exactly the same fixed virtual canvas and head centred in the cell with the tail pointing left; the last four frames read as a single radial burst from the cell centre: head centred, tail pointing left for flight, impact expanding from the cell centre. The full-strength form is about 34% of cell width and 32% of cell height. All visible flame, tail, embers, smoke and flash remain completely INSIDE their own cell, with at least 8 percent clear transparent padding on all four cell edges. The anchor stays fixed throughout opening, loop and exit. No element may touch or cross any cell border. Do not enlarge a frame to fill its cell.
+Camera: fixed three-quarter ARPG view, slightly above, tracking a small head-first comet in side flight with a centred impact burst. Keep the same camera and anatomy in every frame.
+Lighting: bright hot core, rich flame surface, restrained soft alpha only at smoke and glow edges. No baked black or white backdrop, no checkerboard, no terrain, no ground shadow, no UI, no characters, no weapons, no text. Transparency must be real alpha.
+This atlas is visual art only; no hit counts, targets, damage numbers, or gameplay symbols.

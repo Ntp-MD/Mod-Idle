@@ -1,0 +1,422 @@
+{
+  "skillId": "attack.piercing_shot",
+  "src": "/fx/authored/attack-piercing-shot/batch-v1/atlas.png",
+  "imageWidth": 1305,
+  "imageHeight": 1206,
+  "columns": 4,
+  "rows": 4,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        326,
+        301
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        107,
+        151,
+        267,
+        192
+      ],
+      "renderedPadding": [
+        171.5,
+        215.5,
+        123.5,
+        173.5
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        326,
+        0,
+        326,
+        301
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        66,
+        152,
+        255,
+        192
+      ],
+      "renderedPadding": [
+        130.5,
+        216.5,
+        135.5,
+        173.5
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        652,
+        0,
+        326,
+        301
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        30,
+        150,
+        256,
+        195
+      ],
+      "renderedPadding": [
+        94.5,
+        214.5,
+        134.5,
+        170.5
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        978,
+        0,
+        327,
+        301
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        14,
+        150,
+        264,
+        200
+      ],
+      "renderedPadding": [
+        78.0,
+        214.5,
+        127.0,
+        165.5
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        301,
+        326,
+        302
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        30,
+        159,
+        273,
+        212
+      ],
+      "renderedPadding": [
+        94.5,
+        223.0,
+        117.5,
+        154.0
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        326,
+        301,
+        326,
+        302
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        19,
+        158,
+        265,
+        213
+      ],
+      "renderedPadding": [
+        83.5,
+        222.0,
+        125.5,
+        153.0
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        652,
+        301,
+        326,
+        302
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        15,
+        158,
+        263,
+        212
+      ],
+      "renderedPadding": [
+        79.5,
+        222.0,
+        127.5,
+        154.0
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        978,
+        301,
+        327,
+        302
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        3,
+        156,
+        274,
+        213
+      ],
+      "renderedPadding": [
+        67.0,
+        220.0,
+        117.0,
+        153.0
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        603,
+        326,
+        301
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        50,
+        139,
+        268,
+        185
+      ],
+      "renderedPadding": [
+        114.5,
+        203.5,
+        122.5,
+        180.5
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        326,
+        603,
+        326,
+        301
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        46,
+        139,
+        260,
+        185
+      ],
+      "renderedPadding": [
+        110.5,
+        203.5,
+        130.5,
+        180.5
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        652,
+        603,
+        326,
+        301
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        68,
+        144,
+        256,
+        184
+      ],
+      "renderedPadding": [
+        132.5,
+        208.5,
+        134.5,
+        181.5
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        978,
+        603,
+        327,
+        301
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        91,
+        143,
+        252,
+        183
+      ],
+      "renderedPadding": [
+        155.0,
+        207.5,
+        139.0,
+        182.5
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        904,
+        326,
+        302
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        107,
+        77,
+        289,
+        219
+      ],
+      "renderedPadding": [
+        171.5,
+        141.0,
+        101.5,
+        147.0
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        326,
+        904,
+        326,
+        302
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        101,
+        86,
+        273,
+        219
+      ],
+      "renderedPadding": [
+        165.5,
+        150.0,
+        117.5,
+        147.0
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        652,
+        904,
+        326,
+        302
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        100,
+        97,
+        237,
+        201
+      ],
+      "renderedPadding": [
+        164.5,
+        161.0,
+        153.5,
+        165.0
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        978,
+        904,
+        327,
+        302
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        148,
+        107,
+        231,
+        196
+      ],
+      "renderedPadding": [
+        212.0,
+        171.0,
+        160.0,
+        170.0
+      ]
+    }
+  ],
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    4,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "frameMs": 70,
+  "delivery": "projectile",
+  "origin": "target",
+  "radiusM": 0,
+  "anchorY": 0.5546511627906977,
+  "orient": true,
+  "status": "ready",
+  "qa": {
+    "paddingPass": true,
+    "renderedPaddingPass": true,
+    "alphaDiscard": 8,
+    "rawPerimeterAlphaPass": false,
+    "sourceSeparatorsClear": true,
+    "sourcePixelsUnmodified": true,
+    "frameCount": 16,
+    "note": "Renderer discards alpha <=8/255; source PNG is retained unchanged. Padding belongs to shared virtual canvas."
+  },
+  "contentWidthRatio": 0.5956043956043956,
+  "contentHeightRatio": 0.3302325581395349,
+  "artDirectionReview": "Wood steel rightward arrow with straight ivory streak, last row compact hard impact.",
+  "provenance": {
+    "tool": "built-in imagegen",
+    "raw": "art-reference/skills/generated/attack-piercing-shot-batch-v1/raw.png",
+    "prompt": "art-reference/skills/generated/attack-piercing-shot-batch-v1/prompt.txt"
+  },
+  "virtualWidth": 455,
+  "virtualHeight": 430,
+  "alphaDiscard": 8,
+  "groundOrigin": false,
+  "anchorX": 0.47637362637362635,
+  "impactAnchorX": 0.5527472527472528,
+  "impactAnchorY": 0.49534883720930234
+}

@@ -1,5 +1,5 @@
 {
-    "source":  "game/src/ui/map-projection.ts",
+    "source":  "game/src/ui/map/map-projection.ts",
     "camera":  {
                    "projection":  "orthographic / parallel",
                    "elevationDegrees":  38,

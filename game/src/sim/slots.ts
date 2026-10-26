@@ -175,7 +175,8 @@ export function pouchSlots(state: GameState): number {
   return granted;
 }
 
-/** The bag the character actually carries: the published base plus the space it bought. */
-export const slotsAvailable = (state: GameState): number => INV.character_slots + pouchSlots(state);
+/** The bag is fixed at its published capacity; legacy pouch grants are read but cannot raise it. */
+export const slotsAvailable = (state: GameState): number =>
+  Math.min(INV.character_slots + pouchSlots(state), INV.character_slots);
 
 export const bagSlots = INV.character_slots;

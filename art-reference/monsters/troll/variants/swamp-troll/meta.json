@@ -1,0 +1,443 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "troll",
+  "variantId": "swamp-troll",
+  "name": "Swamp Troll",
+  "levels": [
+    21,
+    40
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-contact-at-224",
+  "directionCount": 8,
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "actions": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    "idle S SE E NE N NW W SW",
+    "walk S SE E NE N NW W SW",
+    "attack S SE E NE N NW W SW",
+    "hit S SE E NE N NW W SW",
+    "death S SE E NE N NW W SW"
+  ],
+  "slicing": {
+    "columns": 8,
+    "rows": 5,
+    "cellWidth": 256,
+    "cellHeight": 256
+  },
+  "sourceFrames": [
+    {
+      "x": 153,
+      "y": 128,
+      "width": 135,
+      "height": 168,
+      "offsetX": 153,
+      "offsetY": 128
+    },
+    {
+      "x": 521,
+      "y": 128,
+      "width": 134,
+      "height": 170,
+      "offsetX": 137,
+      "offsetY": 128
+    },
+    {
+      "x": 918,
+      "y": 127,
+      "width": 122,
+      "height": 165,
+      "offsetX": 150,
+      "offsetY": 127
+    },
+    {
+      "x": 1287,
+      "y": 127,
+      "width": 147,
+      "height": 165,
+      "offsetX": 135,
+      "offsetY": 127
+    },
+    {
+      "x": 1665,
+      "y": 126,
+      "width": 127,
+      "height": 161,
+      "offsetX": 129,
+      "offsetY": 126
+    },
+    {
+      "x": 2022,
+      "y": 128,
+      "width": 133,
+      "height": 164,
+      "offsetX": 102,
+      "offsetY": 128
+    },
+    {
+      "x": 2404,
+      "y": 127,
+      "width": 123,
+      "height": 169,
+      "offsetX": 100,
+      "offsetY": 127
+    },
+    {
+      "x": 2790,
+      "y": 127,
+      "width": 132,
+      "height": 164,
+      "offsetX": 102,
+      "offsetY": 127
+    },
+    {
+      "x": 138,
+      "y": 505,
+      "width": 147,
+      "height": 170,
+      "offsetX": 138,
+      "offsetY": 121
+    },
+    {
+      "x": 534,
+      "y": 506,
+      "width": 123,
+      "height": 174,
+      "offsetX": 150,
+      "offsetY": 122
+    },
+    {
+      "x": 907,
+      "y": 504,
+      "width": 119,
+      "height": 172,
+      "offsetX": 139,
+      "offsetY": 120
+    },
+    {
+      "x": 1280,
+      "y": 504,
+      "width": 148,
+      "height": 173,
+      "offsetX": 128,
+      "offsetY": 120
+    },
+    {
+      "x": 1664,
+      "y": 501,
+      "width": 122,
+      "height": 166,
+      "offsetX": 128,
+      "offsetY": 117
+    },
+    {
+      "x": 2026,
+      "y": 503,
+      "width": 141,
+      "height": 176,
+      "offsetX": 106,
+      "offsetY": 119
+    },
+    {
+      "x": 2419,
+      "y": 503,
+      "width": 117,
+      "height": 173,
+      "offsetX": 115,
+      "offsetY": 119
+    },
+    {
+      "x": 2792,
+      "y": 504,
+      "width": 136,
+      "height": 169,
+      "offsetX": 104,
+      "offsetY": 120
+    },
+    {
+      "x": 125,
+      "y": 895,
+      "width": 156,
+      "height": 165,
+      "offsetX": 125,
+      "offsetY": 127
+    },
+    {
+      "x": 518,
+      "y": 898,
+      "width": 170,
+      "height": 162,
+      "offsetX": 134,
+      "offsetY": 130
+    },
+    {
+      "x": 899,
+      "y": 894,
+      "width": 164,
+      "height": 161,
+      "offsetX": 131,
+      "offsetY": 126
+    },
+    {
+      "x": 1276,
+      "y": 894,
+      "width": 177,
+      "height": 166,
+      "offsetX": 124,
+      "offsetY": 126
+    },
+    {
+      "x": 1666,
+      "y": 872,
+      "width": 131,
+      "height": 188,
+      "offsetX": 130,
+      "offsetY": 104
+    },
+    {
+      "x": 2013,
+      "y": 892,
+      "width": 136,
+      "height": 168,
+      "offsetX": 93,
+      "offsetY": 124
+    },
+    {
+      "x": 2351,
+      "y": 891,
+      "width": 190,
+      "height": 169,
+      "offsetX": 47,
+      "offsetY": 123
+    },
+    {
+      "x": 2755,
+      "y": 898,
+      "width": 163,
+      "height": 170,
+      "offsetX": 67,
+      "offsetY": 130
+    },
+    {
+      "x": 136,
+      "y": 1278,
+      "width": 152,
+      "height": 156,
+      "offsetX": 136,
+      "offsetY": 126
+    },
+    {
+      "x": 517,
+      "y": 1269,
+      "width": 139,
+      "height": 176,
+      "offsetX": 133,
+      "offsetY": 117
+    },
+    {
+      "x": 891,
+      "y": 1279,
+      "width": 132,
+      "height": 178,
+      "offsetX": 123,
+      "offsetY": 127
+    },
+    {
+      "x": 1282,
+      "y": 1290,
+      "width": 118,
+      "height": 166,
+      "offsetX": 130,
+      "offsetY": 138
+    },
+    {
+      "x": 1658,
+      "y": 1279,
+      "width": 135,
+      "height": 164,
+      "offsetX": 122,
+      "offsetY": 127
+    },
+    {
+      "x": 2025,
+      "y": 1291,
+      "width": 128,
+      "height": 151,
+      "offsetX": 105,
+      "offsetY": 139
+    },
+    {
+      "x": 2397,
+      "y": 1281,
+      "width": 143,
+      "height": 165,
+      "offsetX": 93,
+      "offsetY": 129
+    },
+    {
+      "x": 2783,
+      "y": 1273,
+      "width": 159,
+      "height": 166,
+      "offsetX": 95,
+      "offsetY": 121
+    },
+    {
+      "x": 141,
+      "y": 1704,
+      "width": 177,
+      "height": 128,
+      "offsetX": 141,
+      "offsetY": 168
+    },
+    {
+      "x": 508,
+      "y": 1692,
+      "width": 171,
+      "height": 136,
+      "offsetX": 124,
+      "offsetY": 156
+    },
+    {
+      "x": 876,
+      "y": 1707,
+      "width": 184,
+      "height": 121,
+      "offsetX": 108,
+      "offsetY": 171
+    },
+    {
+      "x": 1255,
+      "y": 1708,
+      "width": 180,
+      "height": 113,
+      "offsetX": 103,
+      "offsetY": 172
+    },
+    {
+      "x": 1639,
+      "y": 1702,
+      "width": 164,
+      "height": 111,
+      "offsetX": 103,
+      "offsetY": 166
+    },
+    {
+      "x": 2001,
+      "y": 1707,
+      "width": 192,
+      "height": 120,
+      "offsetX": 81,
+      "offsetY": 171
+    },
+    {
+      "x": 2386,
+      "y": 1705,
+      "width": 177,
+      "height": 123,
+      "offsetX": 82,
+      "offsetY": 169
+    },
+    {
+      "x": 2754,
+      "y": 1704,
+      "width": 178,
+      "height": 128,
+      "offsetX": 66,
+      "offsetY": 168
+    }
+  ],
+  "generation": {
+    "sourceOutputs": [
+      "exec-5bb86bf9-57b3-4143-88e2-c59cd7887529.png"
+    ],
+    "generatedCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "generatedCornerAlpha": 0,
+    "identityReference": "art-reference/monsters/troll/animation/source/base.png",
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "initialPrompt": "40-cell 8x5 full-direction atlas; muted moss-green mottling on the shoulders, small reed ties and a muddy brown hide wrap; retain the same green skin; hard dark outline, no colored fringe or halo."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "raw-connected-pose-repack-384-v1",
+    "sourceCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "sourceImageSha256": "63b7ae929db14f8270c262078c65b952ea773eda580cf172340df096e6ac3aa2",
+    "sourceAlphaThreshold": 128,
+    "edgeAlphaRecoveryRadius": 3,
+    "minimumCellPadding": 24,
+    "primaryPoses": 40,
+    "sourceComponents": 43,
+    "rowMedianBottoms": [
+      198,
+      383,
+      572,
+      771,
+      944
+    ],
+    "uniformScale": 1.0
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+    ]
+  }
+}

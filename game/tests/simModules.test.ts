@@ -2,14 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { E, eng, sm, TOWN, loot, trade, farm as FARM } from '../src/engine/client';
 import { newGame } from '../src/sim/game';
 import { bagStacks, slotsUsed, slotsFree, slotsAvailable, addTo, fits, bagSlots, pouchSlots } from '../src/sim/slots';
-import { newPresets, storePreset, switchPreset, autoSelect, bindZone } from '../src/sim/presets';
+import { switchPreset, autoSelect, bindZone } from '../src/sim/presets';
 import { newFarm, plotCount, farmLevel, plant, harvest, craftPotion, condense } from '../src/sim/farm';
 import { startSettlement, stockOf, standingShare, standingTier, standingProgress, sellJunk, taskReward, stashTabCount, canBuy, buy, priceGold } from '../src/sim/town';
 import { presetSlots, savePreset } from '../src/sim/filter';
 import { newCollector, newGrants, heldFor, heldCount, turnIn } from '../src/sim/collector';
 import { rollDrop } from '../src/sim/drop';
 import { mulberry32 } from '../src/engine/client-helpers';
-import type { GameState, Item } from '../src/sim/types';
+import type { Item } from '../src/sim/types';
 
 /**
  * The sim modules the client drives but no test had reached: the bag's slot accounting, the six
@@ -23,7 +23,7 @@ const piece = (base: string, slot = 'helmet'): Item => ({
 }) as unknown as Item;
 
 describe('the bag counts slots the way the data prices them', () => {
-  it('reads the published slot count and adds only what a pouch deed granted', () => {
+  it('reads the published slot count and caps the bag at that fixed capacity', () => {
     const s = newGame();
     expect(bagSlots).toBe(E.inventory.character_slots);
     expect(pouchSlots(s)).toBe(0);
@@ -31,7 +31,7 @@ describe('the bag counts slots the way the data prices them', () => {
     const pouch = ((TOWN.one_time as any[]).find((r) => r.character_slot_grant) as any);
     s.town.owned.push(pouch.id);
     expect(pouchSlots(s)).toBe(pouch.character_slot_grant);
-    expect(slotsAvailable(s)).toBe(E.inventory.character_slots + pouch.character_slot_grant);
+    expect(slotsAvailable(s)).toBe(E.inventory.character_slots);
   });
 
   it('counts one slot per stack and refuses a grant the bag cannot hold, without deleting anything', () => {

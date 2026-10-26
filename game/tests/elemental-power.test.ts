@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { E, eng } from '../src/engine/client';
+import { eng } from '../src/engine/client';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import type { Item } from '../src/sim/types';
 

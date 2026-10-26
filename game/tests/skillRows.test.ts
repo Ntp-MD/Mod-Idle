@@ -4,8 +4,8 @@ import { mulberry32 } from '../src/engine/client-helpers';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { playerSwing } from '../src/sim/combat';
 import { newSkillState, castOnce, effectsActive, type CastEnv } from '../src/sim/skills';
-import { newCurses, applyCurse, modsOn, lineValue } from '../src/sim/curse';
-import { newMobStatusStore, stepMob, holdsCondition, CONDITION_OF, applyBleed } from '../src/sim/mobStatus';
+import { lineValue } from '../src/sim/curse';
+import { newMobStatusStore, stepMob, CONDITION_OF } from '../src/sim/mobStatus';
 import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
 import type { Character } from '../src/sim/player';
 import type { Mob } from '../src/sim/types';
@@ -140,6 +140,22 @@ describe('the stack rows and the status curses reach the status store', () => {
     };
     expect(run(seeded(false), S.poison.decay_sec)).toBe(S.poison.stack_max - 1); // the decay lands
     expect(run(seeded(true), S.poison.decay_sec)).toBe(S.poison.stack_max); // and the hold ate it
+  });
+
+  it('a storm holds its control status for the storm window without being a DOT', () => {
+    const c = { ...buildCharacter(90, emptyGear()), alignment: 100, weaponName: 'one-handed sword' };
+    const store = newMobStatusStore();
+    const target = mob();
+    castDamage('attack.blizzard', c, target, { mobStatus: store });
+    // 20 strikes land at once (burst, not erosion); the chill default is 3s but the 8s storm
+    // holds it for its own duration window — and no erosion line is written anywhere
+    expect(store[target.id].statuses.chill!.secLeft).toBe(8);
+    expect(store[target.id].statuses.erosion).toBeUndefined();
+    const sandy = newMobStatusStore();
+    const sandyTarget = mob({ id: 'm2' });
+    castDamage('attack.sand_storm', c, sandyTarget, { mobStatus: sandy });
+    expect(sandy[sandyTarget.id].statuses.erosion!.secLeft).toBe(10);
+    expect(sandy[sandyTarget.id].statuses.chill).toBeUndefined();
   });
 
   it('every condition a row may name has a reader in the status store', () => {

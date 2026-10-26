@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { E, eng, sm, tree } from '../src/engine/client';
 import { newGame, tick, catchUp, setLevel, huntZone } from '../src/sim/game';
-import { buildCharacter, emptyGear, openingGear } from '../src/sim/player';
+import { emptyGear, openingGear } from '../src/sim/player';
 import { craft } from '../src/sim/craft';
 import { rollDrop } from '../src/sim/drop';
 import { setRule } from '../src/sim/filter';

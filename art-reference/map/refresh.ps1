@@ -13,14 +13,14 @@ function Write-JsonFile($filePath, $value) {
 # Geometry is derived from the renderer, including descriptive camera angles.
 $geometryCode = @'
 import fs from 'node:fs';
-import { projectedHex, MAP_CAMERA, MAP_CAMERA_TRANSFORM } from './game/src/ui/map-projection.ts';
+import { projectedHex, MAP_CAMERA, MAP_CAMERA_TRANSFORM } from './game/src/ui/map/map-projection.ts';
 const {width,height} = JSON.parse(fs.readFileSync('art-reference/map/geometry/terrain-hex.json','utf8'));
 const h = projectedHex(1);
 const elevation = Math.asin(Math.hypot(MAP_CAMERA.b, MAP_CAMERA.d)) * 180 / Math.PI;
 const yaw = Math.atan2(-MAP_CAMERA.c, MAP_CAMERA.a) * 180 / Math.PI;
 const round = n => Math.round(n * 1e8) / 1e8;
 console.log(JSON.stringify({
-  source: 'game/src/ui/map-projection.ts',
+  source: 'game/src/ui/map/map-projection.ts',
   camera: { projection: 'orthographic / parallel', elevationDegrees: round(elevation), fromVerticalDegrees: round(90-elevation), boardYawDegrees: round(yaw), matrix: MAP_CAMERA_TRANSFORM },
   canvas: { width, height, center: [width/2,height/2], note: 'Integer raster reference; exact projected aspect is stored separately.' },
   projectedAspect: h.width/h.height,
@@ -72,7 +72,7 @@ $references = @(
     @{ source = 'game/public/map/terrain/forest-relief-1.png'; file = 'forest-relief-1.png'; role = 'Composition and style example. Raw generated footprint is approximate; renderer registration is required. Not a certified camera reference.' },
     @{ source = 'game/public/map/terrain/mountain-relief-1.png'; file = 'mountain-relief-1.png'; role = 'User-approved mountain composition and scale in the actual map. Raw footprint requires registration. Not a certified 3D camera reference.' }
 )
-$sourcePaths = @('game/src/ui/map-projection.ts', 'art-reference/map/geometry/terrain-hex.json', 'tools/map.ts', 'game/src/ui/map-terrain.ts', 'game/src/ui/map-terrain-footprints.json', 'art-reference/map/source-assets.json', 'docs/map-art.md')
+$sourcePaths = @('game/src/ui/map/map-projection.ts', 'art-reference/map/geometry/terrain-hex.json', 'tools/map.ts', 'game/src/ui/map/map-terrain.ts', 'game/src/ui/map/data/map-terrain-footprints.json', 'art-reference/map/source-assets.json', 'docs/map-art.md')
 foreach ($reference in $references) {
     $source = Join-Path $repoRoot $reference.source
     Copy-Item -LiteralPath $source -Destination (Join-Path $referenceDir $reference.file) -Force
@@ -82,7 +82,7 @@ foreach ($reference in $references) {
 Write-JsonFile (Join-Path $referenceDir 'index.json') $references
 
 $warnings = [System.Collections.Generic.List[string]]::new()
-$current = Get-Content -LiteralPath (Join-Path $repoRoot 'game/src/ui/map-terrain-footprints.json') -Raw | ConvertFrom-Json
+$current = Get-Content -LiteralPath (Join-Path $repoRoot 'game/src/ui/map/data/map-terrain-footprints.json') -Raw | ConvertFrom-Json
 foreach ($entry in $current.PSObject.Properties) {
     if (-not $entry.Value.groundFill) { $warnings.Add("Current footprint metadata for $($entry.Name) has no groundFill; the current generator requires it. Check integration before rebuilding. This kit does not change runtime metadata.") }
 }

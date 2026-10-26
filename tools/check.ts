@@ -17,6 +17,7 @@ import * as G from './lib/gates.ts';
 import { readJson } from './lib/json.ts';
 import { createSkillModel } from '../engine/skills.ts';
 import { createLoot, leanReweight, leanReweightMany } from '../engine/loot.ts';
+import { modRangeProblems } from './lib/mod-ranges.ts';
 
 const { E, S, K, M, LG, BAND, BANDS, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL, DERIVED, ES, WEAPONS, STONE, LCK_BOUND, L, C, TS } = eng;
 const MODS = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/data/mods.json'), 'utf8'));
@@ -730,7 +731,7 @@ function runChecks() {
   }
   for (const sp of E.mob.species) {
     if (!sp.zones.length) rp.push(`${sp.name} is placed in no zone`);
-    for (const s of sp.sizes) if (!ZONES.some((z) => sp.zones.includes(z.id))) rp.push(`${sp.name} has a body but no zone`);
+    if (sp.sizes.length && !ZONES.some((z) => sp.zones.includes(z.id))) rp.push(`${sp.name} has a body but no zone`);
     if (!(E.elements.order as string[]).includes((sp as any).element)) rp.push(`${sp.name} owns Element ${(sp as any).element}, which is not a declared Element`);
   }
   for (const sp of E.mob.species) if (typeof sp.carries_weapon !== 'boolean') rp.push(`${sp.name} has no carries_weapon ruling`);
@@ -1454,36 +1455,9 @@ function runChecks() {
     `no piece outside the main hand carries an attack line (${[...ATTACK_LINES].length} are watched), so the set dresses the character without moving a price the mob curve publishes${opAttack.length ? ' · FOUND: ' + opAttack.join(' · ') : ''}`);
 
   // ---- mod pool ranges (tools/data/mods.json → mod-pool.md `mod-pool`)
-  const modProblems = [];
-  for (const m of MODS.mods) {
-    const flat = m.bands.flat();
-    if (!flat.length) { modProblems.push(`${m.id} has no slices`); continue; }
-    if (flat[0][0] !== m.min) modProblems.push(`${m.id} starts at ${flat[0][0]}, Total says ${m.min}`);
-    if (flat[flat.length - 1][1] !== m.max) modProblems.push(`${m.id} ends at ${flat[flat.length - 1][1]}, Total says ${m.max}`);
-    // thirds are contiguous inside a band; a seam overlaps by design (owner ruling): a low-band T1
-    // outrolls the next band's T3, while every band's effective T1 floor still rises above the band
-    // below — the god-roll window is real and the top third always wins.
-    const tiers = m.bands[0].length;
-    for (let i = 1; i < flat.length; i++) {
-      const seam = i % tiers === 0;
-      if (!seam) {
-        if (flat[i][0] <= flat[i - 1][1]) modProblems.push(`${m.id} slice ${i} (${flat[i][0]}) overlaps slice ${i - 1} (ends ${flat[i - 1][1]})`);
-        else if (flat[i][0] !== flat[i - 1][1] + 1) modProblems.push(`${m.id} slice ${i} starts ${flat[i][0]}, a gap after ${flat[i - 1][1]}`);
-      } else {
-        const q = i / tiers;
-        const ov = flat[i - 1][1] - flat[i][0];
-        if (ov < 1) modProblems.push(`${m.id} seam ${i} has no god-roll overlap`);
-        const hi = m.bands[q][m.bands[q].length - 1][1];
-        const size = Math.ceil((hi - flat[i][0] + 1) / 3);
-        if (hi - size + 1 <= flat[i - 1][1]) modProblems.push(`${m.id} seam ${i} T1 no longer wins outright`);
-      }
-    }
-    const tierCounts = new Set(m.bands.map((b: any[]) => b.length));
-    if (tierCounts.size !== 1) modProblems.push(`${m.id} has ${[...tierCounts].join('/')} Tiers across its quality bands`);
-    for (const b of m.bands) for (const [a, z] of b) if (a > z) modProblems.push(`${m.id} slice ${a}-${z} is inverted`);
-  }
+  const modProblems = modRangeProblems(MODS);
   add('MP1', modProblems.length === 0,
-    `every mod range covers its Total — contiguous thirds, overlapping seams, rising T1 floors${modProblems.length ? ' · ' + modProblems.join(' · ') : ''}`);
+    `every mod range stays within its Total — contiguous thirds, nondecreasing band floors, strict seams (singleton endpoint allowed), rising T1 floors${modProblems.length ? ' · ' + modProblems.join(' · ') : ''}`);
 
   const modIds = MODS.mods.map((m: any) => m.id);
   add('MP2', modIds.length === new Set(modIds).size && MODS.pending.every((p: any) => !modIds.includes(p.id)),

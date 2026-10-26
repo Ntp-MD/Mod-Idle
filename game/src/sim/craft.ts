@@ -5,7 +5,7 @@ import { road } from './road';
 import type { GameState, Item } from './types';
 
 /** The bench calls the shared craft module — one home for the prices and one for the names. */
-export const craft: any = createCraft(ED, loot);
+export const craft: any = createCraft(ED, loot, BASES);
 /** The press name comes from the engine, so a screen never renames a verb for itself. */
 export const pressName = (op: string) => craft.pressName(op);
 /**
@@ -26,10 +26,6 @@ export type CraftOp = 'reroll' | 'reroll_random' | 'refine' | 'randomize' | 'rer
   | 'imprint' | 'polish' | 'reforge' | 'rebirth'
   | 'upgrade' | 'repair' | 'corrupt';
 export type Where = 'gear' | 'bag';
-
-/** The ops that take the piece rather than one named line. */
-const PIECE_OPS = new Set<CraftOp>(['ascend', 'add', 'add_specific', 'remove', 'reroll_random',
-  'reroll_mod_all', 'replace_all', 'polish', 'reforge', 'rebirth']);
 
 /**
  * The pool a piece may draw from on lines 2-7 (item-base.md): the slot's union of Bases plus

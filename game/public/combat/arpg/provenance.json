@@ -1,0 +1,138 @@
+{
+  "purpose": "Pixel-v2 character art is the production style for the auto-ARPG prototype. The original forest clearing is retained pending a later scene-art pass.",
+  "style": "pixel-v2",
+  "characterAtlases": [
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/player-animation-v2.png",
+      "source": "art-reference/monsters/pilots/player-animation-v2.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/wolf-animation-v2.png",
+      "source": "art-reference/monsters/pilots/wolf-animation-v2.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/spider-animation-v1.png",
+      "source": "art-reference/monsters/pilots/spider-animation-v1.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/wisp-animation-v2.png",
+      "source": "art-reference/monsters/pilots/wisp-animation-v2.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/goblin-animation-v1.png",
+      "source": "art-reference/monsters/goblin/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/orc-animation-v1.png",
+      "source": "art-reference/monsters/orc/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/kobold-animation-v1.png",
+      "source": "art-reference/monsters/kobold/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/ogre-animation-v1.png",
+      "source": "art-reference/monsters/ogre/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/troll-animation-v1.png",
+      "source": "art-reference/monsters/troll/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/minotaur-animation-v1.png",
+      "source": "art-reference/monsters/minotaur/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/skeleton-animation-v1.png",
+      "source": "art-reference/monsters/skeleton/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/mummy-animation-v1.png",
+      "source": "art-reference/monsters/mummy/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/vampire-animation-v1.png",
+      "source": "art-reference/monsters/vampire/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/demon-animation-v1.png",
+      "source": "art-reference/monsters/demon/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/slime-animation-v1.png",
+      "source": "art-reference/monsters/slime/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/golem-animation-v1.png",
+      "source": "art-reference/monsters/golem/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/dragon-animation-v1.png",
+      "source": "art-reference/monsters/dragon/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/treant-animation-v1.png",
+      "source": "art-reference/monsters/treant/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/human-animation-v1.png",
+      "source": "art-reference/monsters/human/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/lizardman-animation-v1.png",
+      "source": "art-reference/monsters/lizardman/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/elf-animation-v1.png",
+      "source": "art-reference/monsters/elf/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/giant-animation-v1.png",
+      "source": "art-reference/monsters/giant/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/werewolf-animation-v1.png",
+      "source": "art-reference/monsters/werewolf/animation/meta.json"
+    },
+    {
+      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
+      "file": "pixel-v2/dryad-animation-v1.png",
+      "source": "art-reference/monsters/dryad/animation/meta.json"
+    }
+  ],
+  "backdrop": {
+    "style": "existing scene art; refresh postponed per user request",
+    "file": "forest-clearing.png"
+  },
+  "retiredIllustratedAtlases": {
+    "status": "traveler art remains archived; Goblin art removed per user request",
+    "archive": "art-reference/monsters/previous-arpg-style",
+    "files": [
+      "traveler-actions.png",
+      "traveler-idle.png"
+    ]
+  }
+}

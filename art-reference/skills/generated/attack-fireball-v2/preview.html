@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Fireball V2 art review</title>
+<style>body{margin:32px;background:#151922;color:#eee;font:16px system-ui}canvas{display:block;background:#263126;max-width:100%;border:1px solid #707781;margin:20px 0}button,select,input{font:inherit;margin:6px;padding:8px}a{color:#9cceff}</style>
+<h1>Fireball V2 — draft review</h1>
+<p>Generated art; not promoted. Review frame edges, projectile anchor and loop continuity.</p>
+<button id="play">Pause</button><label>Stage <select id="stage"><option value="all">All frames</option><option value="opening">Opening</option><option value="flight">Flight loop</option><option value="impact">Impact</option></select></label>
+<label>Frame <input id="scrub" type="range" min="0" max="15" value="0"></label><output id="status"></output>
+<canvas id="view" width="600" height="600"></canvas>
+<p><a href="atlas-spaced-v2.png">Original atlas</a> · <a href="meta.json">Frame bounds / QA</a> · <a href="prompt.txt">Generation prompt</a></p>
+<script>
+const img=new Image(),canvas=document.querySelector('#view'),ctx=canvas.getContext('2d'),play=document.querySelector('#play'),stage=document.querySelector('#stage'),scrub=document.querySelector('#scrub'),status=document.querySelector('#status');
+let running=true,frame=0,last=0;const ranges={all:[0,15],opening:[0,3],flight:[4,11],impact:[12,15]};
+function draw(){if(!img.complete||!img.naturalWidth)return;const w=img.naturalWidth,h=img.naturalHeight,x=Math.floor(frame%4*w/4),y=Math.floor(Math.floor(frame/4)*h/4),cw=Math.floor((frame%4+1)*w/4)-x,ch=Math.floor((Math.floor(frame/4)+1)*h/4)-y;ctx.clearRect(0,0,600,600);ctx.drawImage(img,x,y,cw,ch,60,60,480,480);ctx.strokeStyle='#95a498';ctx.strokeRect(60,60,480,480);status.textContent=`Frame ${frame} · original cell boundaries shown`;scrub.value=frame}
+play.onclick=()=>{running=!running;play.textContent=running?'Pause':'Play'};stage.onchange=()=>{frame=ranges[stage.value][0];draw()};scrub.oninput=()=>{running=false;play.textContent='Play';frame=+scrub.value;draw()};
+function tick(t){if(running&&t-last>=90){const [a,b]=ranges[stage.value];frame=frame<a||frame>=b?a:frame+1;last=t;draw()}requestAnimationFrame(tick)}img.onload=()=>{draw();requestAnimationFrame(tick)};img.src='atlas-spaced-v2.png';
+</script></html>

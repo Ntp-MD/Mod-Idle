@@ -37,7 +37,6 @@ export function statusViews(statuses: Statuses): PlayerStatusView[] {
 
 export const stacksOf = (statuses: Statuses, family: StatusName): number => statuses[family]?.stacks ?? 0;
 export const perSecOf = (statuses: Statuses, family: StatusName): number => statusDamagePerSec(statuses[family]);
-export const secLeftOf = (statuses: Statuses, family: StatusName): number => statuses[family]?.secLeft ?? 0;
 
 /**
  * The §7.6 instances the native aggregate supports today: one per DoT family, on the native lane.

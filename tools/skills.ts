@@ -67,9 +67,9 @@ function list(which: string) {
     const rows = activeByType(t);
     console.log('');
     console.log(`# ${t} - ${rows.length} row(s)`);
-    const head = ['id', 'name', 'cd', 'cost', 'duration', 'group', 'targets', 'reserve', 'basis (flat / eff%)'];
-    const body = rows.map((s: any) => [s.id, s.name, s.cd ?? '-', s.hp_cost ? `${s.hp_cost} current HP` : s.mana ? `${s.mana} Mana` : '-', s.duration ?? '-', s.group ?? '-',
-      s.targets ?? '-', s.reserve ?? '-', s.base_flat != null ? `${s.basis} ${s.base_flat} / ${s.eff}${s.max_hp_pct ? ` + ${s.max_hp_pct}% Max HP` : ''}` : '-']);
+    const head = ['id', 'name', 'cd', 'cost', 'duration', 'hits', 'group', 'live area / offline targets', 'reserve', 'basis (flat / eff%)'];
+    const body = rows.map((s: any) => [s.id, s.name, s.cd ?? '-', s.hp_cost ? `${s.hp_cost} current HP` : s.mana ? `${s.mana} Mana` : '-', s.duration ?? '-', M.hitLineOf(s) ?? '-', s.group ?? '-',
+      s.area ? `${s.area.radius_m}m ${s.area.origin} / ${s.targets ?? '1'}` : s.targets ?? '-', s.reserve ?? '-', s.base_flat != null ? `${s.basis} ${s.base_flat} / ${s.eff}${s.max_hp_pct ? ` + ${s.max_hp_pct}% Max HP` : ''}` : '-']);
     const widths = head.map((h: string, i: number) => Math.max(String(h).length, ...body.map((r: any[]) => String(r[i]).length)));
     const draw = (r: any[]) => r.map((c: any, i: number) => String(c).padEnd(widths[i])).join('  ').trimEnd();
     console.log(draw(head));

@@ -126,14 +126,19 @@ function gates(): G.GateRow[] {
         if (e.op !== wantOp) badStat.push(`${s.id}:${e.stat} op ${e.op}`);
         if (e.cap != null && (!Number.isInteger(e.cap) || e.cap <= 0)) badStat.push(`${s.id}:${e.stat} cap ${e.cap}`);
       } else if (e.status) badStat.push(`${s.id}:status on ${e.stat}`);
-      // a minus written as a real minus sign (−12%) is the same number as -12 in the data
-      const text = String(s.effect || '').replace(/−/g, '-');
+      // a minus written as a real minus sign (−12%) is the same number as -12 in the data.
+      // a value may live in the derived window (Description, Duration or Hits) rather than in the
+      // sentence: the Hits line comes from the same `hitLineOf` the player window uses, so copy
+      // and gate cannot drift.
+      const text = String(s.effect || '').replace(/−/g, '-')
+        + ' ' + String((s as any).duration || '')
+        + ' ' + (SM.hitLineOf(s as any) || '');
       if (!text.includes(String(e.value))) badValue.push(`${s.id}:${e.value}`);
     }
   }
   add('S11', badStat.length === 0 && badValue.length === 0,
-    `${declared.length} of ${SKILLS.length} rows carry numeric effects (${declared.filter((s) => (s.effects || []).some((e: any) => e.subject === 'target')).length} of them target-side), and each value is printed in its own effect sentence` +
-    `${badStat.length ? ' · UNKNOWN STAT: ' + badStat.join(', ') : ''}${badValue.length ? ' · NOT IN TEXT: ' + badValue.join(', ') : ''}`);
+    `${declared.length} of ${SKILLS.length} rows carry numeric effects (${declared.filter((s) => (s.effects || []).some((e: any) => e.subject === 'target')).length} of them target-side), and each value is printed in its player window (Description, Duration or Hits)` +
+    `${badStat.length ? ' · UNKNOWN STAT: ' + badStat.join(', ') : ''}${badValue.length ? ' · NOT IN WINDOW: ' + badValue.join(', ') : ''}`);
   // S19 · conversion's Cap is the whole hit (`draft/convert-damage.md` · `convertDamageOf`), and a Cap
   // that cannot be reached is a lie (D3). The `damage_conversion` rows are the only source, so they must
   // sum to the Cap or past it — overflow is wasted, never a multiplier.
@@ -260,6 +265,44 @@ function gates(): G.GateRow[] {
   soft('S22', deadPayoffs.length === 0,
     `${exploitedStatuses.size} exploited status(es) each have a live writer: ${[...exploitedStatuses].sort().join(' · ')}` +
     `${deadPayoffs.length ? ' · NO LIVE WRITER: ' + deadPayoffs.join(', ') : ''}`);
+
+  const offensive = ACTIVE.filter((s) => s.type === 'attack' || s.type === 'curse');
+  const badArea = offensive.filter((s) => {
+    const area = s.area as any;
+    if (!area || !['caster', 'target'].includes(area.origin)) return true;
+    if (area.shape === 'line') {
+      return area.origin !== 'caster' || !(Number(area.length_m) > 0) || !(Number(area.width_m) > 0);
+    }
+    if (area.shape === 'cone') {
+      return area.origin !== 'caster' || !(Number(area.radius_m) > 0)
+        || !(Number(area.angle_deg) > 0) || Number(area.angle_deg) > 180;
+    }
+    if (area.shape && !['single', 'circle'].includes(area.shape)) return true;
+    return !Number.isFinite(area.radius_m) || area.radius_m < 0
+      || (area.origin === 'caster' && area.radius_m === 0);
+  });
+  add('S23', badArea.length === 0,
+    'Live offensive rows declare a valid footprint (single · circle · line · cone) in meters' +
+    (badArea.length ? ' · BAD: ' + badArea.map((s) => s.id).join(', ') : ''));
+
+  const deliveries = ['instant', 'melee', 'projectile', 'ground'];
+  const profiles = (DATA.meta?.action_profiles || {}) as Record<string, any>;
+  const missingProfiles = deliveries.filter((delivery) => !profiles[delivery]);
+  const castRows = ACTIVE.filter((s) => ['attack', 'curse', 'heal', 'buff'].includes(s.type));
+  const badCast = castRows.filter((s) => {
+    const cast = s.cast;
+    if (!cast || !deliveries.includes(cast.delivery)) return true;
+    const profile = { ...profiles[cast.delivery], ...cast };
+    const finite = [profile.windup_sec, profile.recovery_sec, profile.impact_delay_sec, profile.hit_radius_m];
+    return !Number.isFinite(profile.range_m) || profile.range_m < 0
+      || ((s.type === 'attack' || s.type === 'curse') && !(profile.range_m > 0))
+      || finite.some((value) => !Number.isFinite(value) || value < 0)
+      || (profile.delivery === 'projectile' ? !(profile.projectile_speed_mps > 0) : profile.projectile_speed_mps !== 0);
+  });
+  add('S24', missingProfiles.length === 0 && badCast.length === 0,
+    `Cast rows resolve a delivery profile and a finite range (${castRows.length} rows)` +
+    `${missingProfiles.length ? ' · MISSING PROFILES: ' + missingProfiles.join(', ') : ''}` +
+    `${badCast.length ? ' · BAD: ' + badCast.map((s) => s.id).join(', ') : ''}`);
 
   return g.rows();
 }

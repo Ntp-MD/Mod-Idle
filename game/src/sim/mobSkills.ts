@@ -9,6 +9,13 @@ export function mobSkillById(id: string): MobSkillRow | undefined {
   return BY_ID.get(id);
 }
 
+/** The reach a strike's authored role claims; `any` keeps the body's ordinary reach. */
+export function mobStrikeRange(row: MobSkillRow, mob: Mob): number {
+  if (row.role === 'front') return E.combat_arena.range.melee;
+  if (row.role === 'stand-off') return E.combat_arena.range.ranged;
+  return mob.line === 'stand-off' ? E.combat_arena.range.ranged : E.combat_arena.range.melee;
+}
+
 /**
  * Resolve one spawn's kit by override, never by merging layers: a unique uses its own list or falls
  * back down the same ladder, a boss uses its own list, a variant may replace its species list, and a
@@ -77,7 +84,7 @@ export function planMobSkills(mob: Mob, timesUs: number[], unitsPerSec: number):
  * across sources, so duplicate copies never stack; a source that dies stops contributing on the next
  * tick because only the living are read. Non-engaged bodies stay at their base values.
  */
-export function applyMobAuras(group: Mob[], engaged: Mob[]): void {
+export function applyMobAuras(group: Mob[], engaged: Mob[], inRange?: (sourceId: string, targetId: string) => boolean): void {
   const living = engaged.filter((mob) => mob.hp > 0);
   for (const mob of group) {
     mob.effArmour = mob.armour;
@@ -96,6 +103,7 @@ export function applyMobAuras(group: Mob[], engaged: Mob[]): void {
         const row = BY_ID.get(id);
         if (!row || row.mode !== 'aura') continue;
         if (row.scope === 'line' && source.line !== target.line) continue;
+        if (inRange && !inRange(source.id, target.id)) continue;
         for (const [stat, value] of Object.entries(row.effects || {})) {
           if (!(value > 0)) continue;
           if (stat === 'armour_pct') armourPct = Math.max(armourPct, value);

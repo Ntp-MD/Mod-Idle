@@ -1,7 +1,7 @@
 import { eng, loot, E, STAT_KEYS, BASES, BASE_BY_NAME } from '../engine/client';
 import { mastery } from './mastery';
 import { weaponWeightOf } from './drop';
-import type { Item, ModLine } from './types';
+import type { Item } from './types';
 import { tree } from '../engine/client';
 import type { StatKey } from '../engine/client';
 import type { LifeSkillBonus } from '../../../engine/life-skills.ts';

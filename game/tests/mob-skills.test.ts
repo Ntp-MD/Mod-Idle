@@ -21,7 +21,7 @@ describe('mob skill kits', () => {
     expect(resolveMobKit('boss', 'goblin', undefined, 'Goblin King')).toHaveLength(3);
     expect(resolveMobKit('unique', 'demon', 'Archdemon', 'Archdemon')).toHaveLength(4);
     expect(resolveMobKit('unique', 'demon', 'Archdemon', 'Archdemon')).toContain('mob.chaos.warped-aura');
-    expect(resolveMobKit('normal', 'palemoth')).toEqual([]);
+    expect(resolveMobKit('normal', 'slaggolem')).toEqual([]);
   });
 
   it('keeps every authored kit within the cap and pointed at a real row', () => {
@@ -143,6 +143,21 @@ describe('mob auras', () => {
 });
 
 describe('mob skill statuses', () => {
+  it('keeps strongest-wins auras inside the local radius and legacy scopes', () => {
+    const source = mob({ id: 'aura-source', skillIds: ['mob.fire.ash-veil'] });
+    const target = mob({ id: 'aura-target' });
+    applyMobAuras([source, target], [source, target], () => false);
+    expect(target.effRes).toBe(target.res);
+    applyMobAuras([source, target], [source, target]);
+    expect(target.effRes).toBeGreaterThan(target.res);
+
+    const lineSource = mob({ id: 'line-source', line: 'front', skillIds: ['mob.fire.flame-guard'] });
+    const standoff = mob({ id: 'line-target', line: 'stand-off' });
+    applyMobAuras([lineSource, standoff], [lineSource, standoff], () => true);
+    expect(standoff.effArmour).toBe(standoff.armour);
+    expect(lineSource.effArmour).toBeGreaterThan(lineSource.armour);
+  });
+
   it('writes a control status through the shared status writer', () => {
     const statuses: Statuses = {};
     expect(applyStatus(statuses, 'chill', 10)).toBe('chill');

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "skill": "attack.fireball",
+  "state": "approved",
+  "source": {
+    "raw": "atlas-v1.png",
+    "prompt": "prompt.txt",
+    "generator": "local first-party kitbash/composite (Pillow) from the approved attack.firestorm v1 atlas; no external generation service"
+  },
+  "atlas": {
+    "file": "atlas-v1.png",
+    "width": 1408,
+    "height": 1408,
+    "columns": 4,
+    "rows": 4,
+    "cellWidth": 352,
+    "cellHeight": 352,
+    "frameCount": 16,
+    "order": "row-major",
+    "alphaFloor": 16,
+    "intraCellPaddingPx": 34,
+    "normalization": "16 frames rendered at 704px and downsampled to 352px cells, assembled 4x4 row-major on a 1408x1408 transparent atlas; alpha floor 16"
+  },
+  "frames": {
+    "opening": [
+      0,
+      3
+    ],
+    "loop": [
+      4,
+      7
+    ],
+    "exit": [
+      8,
+      15
+    ],
+    "previewFrameMs": 65,
+    "runtimeTiming": "ignition 4x70ms; flight 4x65ms; impact 8x60ms then fade"
+  },
+  "anchor": {
+    "centerX": 0.5,
+    "centerY": 0.5,
+    "headAnchorX": 0.5,
+    "headAnchorY": 0.5,
+    "note": "flight head centred in the cell with the flame tail pointing left; impact expands from the cell centre"
+  },
+  "runtime": {
+    "gamePath": "game/public/fx/authored/attack-fireball/v1/atlas-v1.png",
+    "preset": "game/src/ui/combat/arena-authored-vfx.ts",
+    "status": "live"
+  },
+  "qc": "qc.json"
+}

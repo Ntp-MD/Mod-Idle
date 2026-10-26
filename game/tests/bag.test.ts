@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { compareLines, vsWorn } from '../src/ui/bag';
+import { compareLines, vsWorn } from '../src/ui/inventory/bag';
 import type { Item } from '../src/sim/types';
 
 /**

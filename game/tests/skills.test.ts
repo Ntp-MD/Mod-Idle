@@ -3,7 +3,7 @@ import { eng, E, sm, SKILLS } from '../src/engine/client';
 import { buildCharacter, emptyGear } from '../src/sim/player';
 import { newGame, tick, huntZone } from '../src/sim/game';
 import {
-  newSkillState, grantSkill, castOnce, skillCd, skillLevel, ladderOf, reservedPct, usableMana,
+  newSkillState, grantSkill, castOnce, skillLevel, ladderOf, reservedPct, usableMana,
   effectsActive, tickSkills, toggleTrack, clearUnownedTracks, ownsSkill, ACTIVE_SLOTS,
 } from '../src/sim/skills';
 import { mulberry32 } from '../src/engine/client-helpers';

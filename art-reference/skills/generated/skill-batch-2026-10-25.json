@@ -1,0 +1,216 @@
+{
+  "tool": "built-in image_gen",
+  "status": "imported",
+  "skills": [
+    {
+      "id": "buff.berserker",
+      "atlas": "buff-berserker-v1/atlas-v1.png",
+      "prompt": "buff-berserker-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/buff-berserker/batch-v1/atlas.png"
+    },
+    {
+      "id": "buff.earth_wall",
+      "atlas": "buff-earth_wall-v1/atlas-v1.png",
+      "prompt": "buff-earth_wall-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/buff-earth-wall/batch-v1/atlas.png"
+    },
+    {
+      "id": "buff.energy_absorb",
+      "atlas": "buff-energy_absorb-v1/atlas-v1.png",
+      "prompt": "buff-energy_absorb-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/buff-energy-absorb/batch-v1/atlas.png"
+    },
+    {
+      "id": "buff.flame_guard",
+      "atlas": "buff-flame_guard-v1/atlas-v1.png",
+      "prompt": "buff-flame_guard-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/buff-flame-guard/batch-v1/atlas.png"
+    },
+    {
+      "id": "buff.ghost_dance",
+      "atlas": "buff-ghost_dance-v1/atlas-v1.png",
+      "prompt": "buff-ghost_dance-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/buff-ghost-dance/batch-v1/atlas.png"
+    },
+    {
+      "id": "buff.holy_veil",
+      "atlas": "buff-holy_veil-v1/atlas-v1.png",
+      "prompt": "buff-holy_veil-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/buff-holy-veil/batch-v1/atlas.png"
+    },
+    {
+      "id": "buff.iron_will",
+      "atlas": "buff-iron_will-v1/atlas-v1.png",
+      "prompt": "buff-iron_will-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/buff-iron-will/batch-v1/atlas.png"
+    },
+    {
+      "id": "buff.magia_drive",
+      "atlas": "buff-magia_drive-v1/atlas-v1.png",
+      "prompt": "buff-magia_drive-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/buff-magia-drive/batch-v1/atlas.png"
+    },
+    {
+      "id": "buff.warcry",
+      "atlas": "buff-warcry-v1/atlas-v1.png",
+      "prompt": "buff-warcry-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/buff-warcry/batch-v1/atlas.png"
+    },
+    {
+      "id": "curse.blinding_mark",
+      "atlas": "curse-blinding_mark-v1/atlas-v1.png",
+      "prompt": "curse-blinding_mark-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/curse-blinding-mark/batch-v1/atlas.png"
+    },
+    {
+      "id": "curse.cripple",
+      "atlas": "curse-cripple-v1/atlas-v1.png",
+      "prompt": "curse-cripple-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/curse-cripple/batch-v1/atlas.png"
+    },
+    {
+      "id": "curse.expose",
+      "atlas": "curse-expose-v1/atlas-v1.png",
+      "prompt": "curse-expose-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/curse-expose/batch-v1/atlas.png"
+    },
+    {
+      "id": "curse.jinx",
+      "atlas": "curse-jinx-v1/atlas-v1.png",
+      "prompt": "curse-jinx-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/curse-jinx/batch-v1/atlas.png"
+    },
+    {
+      "id": "curse.venom_bind",
+      "atlas": "curse-venom_bind-v1/atlas-v1.png",
+      "prompt": "curse-venom_bind-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/curse-venom-bind/batch-v1/atlas.png"
+    },
+    {
+      "id": "curse.weaken",
+      "atlas": "curse-weaken-v1/atlas-v1.png",
+      "prompt": "curse-weaken-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/curse-weaken/batch-v1/atlas.png"
+    },
+    {
+      "id": "heal.cleanse",
+      "atlas": "heal-cleanse-v1/atlas-v1.png",
+      "prompt": "heal-cleanse-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/heal-cleanse/batch-v1/atlas.png"
+    },
+    {
+      "id": "heal.greater_heal",
+      "atlas": "heal-greater_heal-v1/atlas-v1.png",
+      "prompt": "heal-greater_heal-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/heal-greater-heal/batch-v1/atlas.png"
+    },
+    {
+      "id": "heal.heal",
+      "atlas": "heal-heal-v1/atlas-v1.png",
+      "prompt": "heal-heal-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/heal-heal/batch-v1/atlas.png"
+    },
+    {
+      "id": "attack.acid_arrow",
+      "atlas": "attack-acid_arrow-v1/atlas-v1.png",
+      "prompt": "attack-acid_arrow-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/attack-acid-arrow/batch-v1/atlas.png"
+    },
+    {
+      "id": "attack.aftershock",
+      "atlas": "attack-aftershock-v1/atlas-v1.png",
+      "prompt": "attack-aftershock-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/attack-aftershock/batch-v1/atlas.png"
+    },
+    {
+      "id": "attack.arrow_shower",
+      "atlas": "attack-arrow_shower-v1/atlas-v1.png",
+      "prompt": "attack-arrow_shower-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/attack-arrow-shower/batch-v1/atlas.png"
+    },
+    {
+      "id": "attack.backstab",
+      "atlas": "attack-backstab-v1/atlas-v1.png",
+      "prompt": "attack-backstab-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/attack-backstab/batch-v1/atlas.png"
+    },
+    {
+      "id": "attack.blizzard",
+      "atlas": "attack-blizzard-v1/atlas-v2.png",
+      "prompt": "attack-blizzard-v1/generation-prompt-v2.txt",
+      "runtime": "/fx/authored/attack-blizzard/batch-v1/atlas.png"
+    },
+    {
+      "id": "attack.bone_breaker",
+      "atlas": "attack-bone_breaker-v1/atlas-v1.png",
+      "prompt": "attack-bone_breaker-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/attack-bone-breaker/batch-v1/atlas.png"
+    },
+    {
+      "id": "attack.carnage",
+      "atlas": "attack-carnage-v1/atlas-v1.png",
+      "prompt": "attack-carnage-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/attack-carnage/batch-v1/atlas.png"
+    },
+    {
+      "id": "attack.catalyst",
+      "atlas": "attack-catalyst-v1/atlas-v1.png",
+      "prompt": "attack-catalyst-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/attack-catalyst/batch-v1/atlas.png"
+    },
+    {
+      "id": "attack.chain_lightning",
+      "atlas": "attack-chain_lightning-v1/atlas-v1.png",
+      "prompt": "attack-chain_lightning-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/attack-chain-lightning/batch-v1/atlas.png"
+    },
+    {
+      "id": "attack.chaos_bolt",
+      "atlas": "attack-chaos_bolt-v1/atlas-v1.png",
+      "prompt": "attack-chaos_bolt-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/attack-chaos-bolt/batch-v1/atlas.png"
+    },
+    {
+      "id": "attack.cleave",
+      "atlas": "attack-cleave-v1/atlas-v1.png",
+      "prompt": "attack-cleave-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/attack-cleave/batch-v1/atlas.png"
+    },
+    {
+      "id": "attack.cleave_down",
+      "atlas": "attack-cleave_down-v1/atlas-v1.png",
+      "prompt": "attack-cleave_down-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/attack-cleave-down/batch-v1/atlas.png"
+    },
+    {
+      "id": "attack.detonate",
+      "atlas": "attack-detonate-v1/atlas-v1.png",
+      "prompt": "attack-detonate-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/attack-detonate/batch-v1/atlas.png"
+    },
+    {
+      "id": "attack.earth_shock",
+      "atlas": "attack-earth_shock-v1/atlas-v1.png",
+      "prompt": "attack-earth_shock-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/attack-earth-shock/batch-v1/atlas.png"
+    },
+    {
+      "id": "attack.earth_splitter",
+      "atlas": "attack-earth_splitter-v1/atlas-v1.png",
+      "prompt": "attack-earth_splitter-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/attack-earth-splitter/batch-v1/atlas.png"
+    },
+    {
+      "id": "attack.elemental_break",
+      "atlas": "attack-elemental_break-v1/atlas-v1.png",
+      "prompt": "attack-elemental_break-v1/generation-prompt.txt",
+      "runtime": "/fx/authored/attack-elemental-break/batch-v1/atlas.png"
+    }
+  ],
+  "notes": [
+    "All 34 skills are activated in game/public/fx/authored/batch-manifest.json.",
+    "Per-frame source rectangles and virtual padding measured by tools/check-authored-vfx.py; original pixels retained.",
+    "Blizzard regenerated as atlas-v2.png to provide clear frame separators.",
+    "Browser Effect lab verified authored rendering for all 34 skills."
+  ]
+}

@@ -36,7 +36,6 @@ th {
 button,
 select,
 summary,
-.pill,
 .slot,
 .cast,
 .knob,
@@ -226,7 +225,7 @@ tbody tr:hover {
 .small-screen {
     position: fixed;
     inset: 0;
-    z-index: var(--z-screen-guard);
+    z-index: 200;
     display: none;
     place-content: center;
     gap: var(--spacing-xs);

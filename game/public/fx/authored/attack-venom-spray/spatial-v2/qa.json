@@ -1,0 +1,33 @@
+{
+  "id": "attack.venom_spray",
+  "status": "PASS",
+  "errors": [],
+  "imageSize": [
+    1254,
+    1254
+  ],
+  "sourceSeparatorsClear": true,
+  "sourcePerimeterClear": true,
+  "rawPerimeterAlphaPass": false,
+  "fullyTransparentFraction": 0.5308461090380002,
+  "discardedAlphaFraction": 0.22677479911174195,
+  "alphaDiscard": 8,
+  "frameCount": 16,
+  "sourcePixelsUnmodified": true,
+  "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+  "runtimeActivated": true,
+  "renderedPaddingPass": true,
+  "virtualPaddingPx": 64,
+  "sourcePreview": {
+    "loaded": true,
+    "inspection": "sampled source playback plus complete atlas visual review",
+    "alphaDiscard": 8,
+    "actorBodyRulerM": 0.5,
+    "arenaCalibrationVerified": false
+  },
+  "integratedBrowserSample": true,
+  "integratedViewport": [
+    1920,
+    1080
+  ]
+}
