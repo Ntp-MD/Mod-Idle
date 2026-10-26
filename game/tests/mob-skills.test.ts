@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { MS, eng } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { spawnMob, newGame, setLevel, tick } from '../src/sim/game';
-import { applyStatus, mobSwing, type Statuses } from '../src/sim/combat';
-import { buildCharacter } from '../src/sim/player';
-import { applyMobAuras, markMobSkillUsed, mobSkillById, planMobSkills, readyMobSkill, resolveMobKit } from '../src/sim/mobSkills';
-import type { Mob } from '../src/sim/types';
+import { spawnMob, newGame, setLevel, tick } from '../src/sim/core/game';
+import { applyStatus, mobSwing, type Statuses } from '../src/sim/combat/combat';
+import { buildCharacter } from '../src/sim/core/player';
+import { applyMobAuras, markMobSkillUsed, mobSkillById, planMobSkills, readyMobSkill, resolveMobKit } from '../src/sim/combat/mobSkills';
+import type { Mob } from '../src/sim/core/types';
 
 const mob = (over: Partial<Mob> = {}): Mob => ({
   id: 'm', species: 'Test', speciesId: 'goblin', kind: 'Normal', zone: 1, level: 1,
@@ -55,6 +55,13 @@ describe('mob skill kits', () => {
     expect(plan.get(1_000_000)?.id).toBe('mob.cold.ice-shard');
     expect(plan.has(2_000_000)).toBe(false);
     expect(plan.get(10_000_000)?.id).toBe('mob.cold.ice-shard');
+  });
+
+  it('skips an unavailable earlier kit entry without hiding a later usable strike', () => {
+    const m = mob({ skillIds: ['mob.physical.cleave', 'mob.cold.ice-shard'] });
+    expect(readyMobSkill(m, 0, row => row.role === 'stand-off')?.id).toBe('mob.cold.ice-shard');
+    expect(m.skillReadyAtUs ?? {}).toEqual({});
+    expect(readyMobSkill(m, 0, () => false)).toBeUndefined();
   });
 
   it('casts a boss kit inside the live field loop', () => {

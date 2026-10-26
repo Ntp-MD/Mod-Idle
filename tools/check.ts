@@ -17,6 +17,7 @@ import * as G from './lib/gates.ts';
 import { readJson } from './lib/json.ts';
 import { createSkillModel } from '../engine/skills.ts';
 import { createLoot, leanReweight, leanReweightMany } from '../engine/loot.ts';
+import { createSpawns } from '../engine/spawns.ts';
 import { modRangeProblems } from './lib/mod-ranges.ts';
 
 const { E, S, K, M, LG, BAND, BANDS, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL, DERIVED, ES, WEAPONS, STONE, LCK_BOUND, L, C, TS } = eng;
@@ -939,6 +940,27 @@ function runChecks() {
   add('X26', zp.length === 0, zp.length ? zp.join(' · ')
     : `zone identity has one home — engine.json mob.zones: every zone's group average matches the group size its own band owns (${ZONES.length} zones read from the list, the band list from item_level.spans, the expected size from loot.bands[band].group_mobs — no per-band group string is typed)`);
 
+  // Field spawn points are one authored layout, resolved against every zone/subzone. This gate is
+  // the bridge between the population model and the canonical roster: a missing zone, an impossible
+  // cap or a home disc outside the arena fails before the runtime ever sees the file.
+  const SPAWNS_JSON = readJson(path.join(import.meta.dirname, 'data/spawns.json'));
+  const RAW_ENGINE = readJson(path.join(import.meta.dirname, 'data/engine.json'));
+  let spawnCoverage: { zones: number; subzones: number; layouts: number; points: number } | null = null;
+  try {
+    const model = createSpawns(SPAWNS_JSON, {
+      arena: RAW_ENGINE.combat_arena, playerStart: RAW_ENGINE.combat_arena.player_start, zones: E.mob.zones,
+    });
+    spawnCoverage = model.coverage;
+  } catch (error) {
+    add('SP1', false, error instanceof Error ? error.message : String(error));
+  }
+  if (spawnCoverage) {
+    add('SP1', spawnCoverage.zones === ZONES.length
+      && spawnCoverage.subzones === ZONES.reduce((sum, zone) => sum + (zone.subzones?.length ?? 0), 0)
+      && spawnCoverage.layouts >= 1 && spawnCoverage.points >= 1,
+    `${spawnCoverage.zones} zones · ${spawnCoverage.subzones} subzones · ${spawnCoverage.layouts} layout · ${spawnCoverage.points} points resolve inside the arena`);
+  }
+
   // B2: mob_HP(L) is defined at every level, not only the published anchors (X37). The curve is
   // anchored at each zone edge and interpolated inside the zone, so a mob at an unlisted level
   // still has an HP; mob_PS derives from the same line. This gate also pins the published HP and mob_PS rows.
@@ -1226,24 +1248,16 @@ function runChecks() {
       : `each Species' normal Variants share one archetype lean and its Uniques carry 'none': ${leaned} leans checked (${normalLeaned} normal rows), each lean raises its stream and conserves ${sum(sample).toFixed(2)} expected drops/kill (mob.variant_drops · loot.variant_lean)`);
   }
 
-  // The AoE rule is data now, and its shape must stay a real trade: lose at 1 target, win at the Cap.
-  // What is a condition and what is a measurement:
-  //  - the shape of the fields — a percentage, a target cap, and a mana multiplier that really is a
-  //    cost (below 1x it stops being one) — is a condition;
-  //  - the trade the block exists to hold (AoE loses at one target, wins at the Cap) is the owning
-  //    rule (skill-pool-system.md), so it is a condition too;
-  //  - the damage-per-mana figures are measurements, and they are printed, not gated.
+  // The AoE rule is data now: one per-target damage share and a queue cap. A press pays its typed
+  // Mana/HP price whether it lands on one target or many, so no Mana multiplier belongs in this block.
   {
     const A = E.aoe || {};
     const p = [];
     if (!(A.per_target_pct > 0 && A.per_target_pct <= 100)) p.push('aoe per-target damage must be a percentage');
     if (!(A.target_cap >= 1)) p.push('aoe needs a target cap');
-    if (!(A.mana_mult >= 1)) p.push('aoe mana must cost at least 1x');
-    const dpm = (n: number) => (Math.min(n, A.target_cap) * A.per_target_pct) / 100 / A.mana_mult;
-    if (!(dpm(1) < 1)) p.push('aoe must lose to single-target damage per mana at 1 target');
-    if (!(dpm(A.target_cap) > 1)) p.push('aoe must beat single-target damage per mana at the Cap');
+    if ((A as any).mana_mult != null) p.push('aoe must not carry a multi-target Mana multiplier');
     add('X40', p.length === 0, p.length ? p.join(' · ')
-      : `the AoE rule is data: ${A.per_target_pct}% per target · Cap ${A.target_cap} · mana ×${A.mana_mult} → damage per mana ${f2(dpm(1))}× / ${f2(dpm(2))}× / ${f2(dpm(A.target_cap))}×, so AoE loses at 1 target and wins at the Cap (skill-pool-system.md)`);
+      : `the AoE rule is data: ${A.per_target_pct}% per target · Cap ${A.target_cap} · damage shares only; every press pays the same typed Mana/HP price (skill-pool-system.md)`);
   }
 
 // The Road is walking now: a hex graph, one block per `block_sec`, one encounter chance per block,
@@ -1267,7 +1281,6 @@ function runChecks() {
     }
   }
   if (!(ROAD.block_sec >= 1)) roadP.push(`block_sec is ${ROAD.block_sec} — a block must cost at least a second`);
-  if (!(ROAD.encounter_chance_pct > 0 && ROAD.encounter_chance_pct < 100)) roadP.push(`encounter chance is ${ROAD.encounter_chance_pct}% — a walk must be able to be quiet and able to be ambushed`);
   // the walk pays nothing outside a kill: the rules may not name a purse, a chest, Standing or a stone
   for (const [key, text] of [['encounter_rule', ROAD.encounter_rule], ['push_rule', ROAD.push_rule], ['waypoint_rule', ROAD.waypoint_rule], ['graph_rule', ROAD.graph_rule]]) {
     if (/\bpurse\b|\bchest\b|\bpedlar\b|\bcaravan\b/i.test(text)) roadP.push(`${key} still names a Road reward — the walk pays a drop roll and nothing else`);
@@ -1289,7 +1302,7 @@ function runChecks() {
   }
   if (/\bstone/i.test(ROAD.waypoint_rule)) roadP.push('a Waypoint may never be priced in a stone — stones are the power currency');
   add('X36', roadP.length === 0, roadP.length ? roadP.join(' · ')
-    : `the walk is a closed shape: ${ROAD.nodes.length} settlements on the hex lattice · ${ROAD.block_sec}s a block · ${ROAD.encounter_chance_pct}% an encounter per block, so a ${WALK.blocksBetween(ROAD.nodes[0].id, ROAD.nodes[1].id)}-block walk pays ${f1((Number(ROAD.encounter_chance_pct) / 100) * Number(WALK.blocksBetween(ROAD.nodes[0].id, ROAD.nodes[1].id)))} fights in expectation · a fight is an ordinary mob group that pays the ordinary drop roll · a Push keeps the walk's blocks · a Waypoint unlocks on foot and warps for ${WARP.m_per_block} minutes of gold a block`);
+    : `the walk is a closed shape: ${ROAD.nodes.length} settlements on the hex lattice · ${ROAD.block_sec}s a block · a walk is a transition to the destination field's spawn-slot population, with no separate road encounter group · a Push keeps the walk's blocks · a Waypoint unlocks on foot and warps for ${WARP.m_per_block} minutes of gold a block`);
 
   // X46 · the walk is online-only and Push-neutral. A Push cannot refund a block, a same-zone Field
   // Camp can end its current route, an away period must not walk, and a Waypoint must not gate a zone.

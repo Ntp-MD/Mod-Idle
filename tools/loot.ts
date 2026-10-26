@@ -272,7 +272,7 @@ function gates(rows: any, bias: any) {
     `The variant lean: 'none' is the identity, each configured lean raises its own stream, and every lean conserves ${sum(sample).toFixed(2)} expected drops/kill across gear · herb · junk${!identity ? ' · NONE NOT IDENTITY' : ''}${!conserved ? ' · TOTAL NOT CONSERVED' : ''}${!leaning ? ' · LEAN NOT RAISED' : ''}`);
 
   // The cage rolls the item the client rolls. A Stat Mod bakes the Core stat it feeds at drop, and the
-  // draw that spends sits between the value window and the value (`game/src/sim/drop.ts`) — skip it and
+  // draw that spends sits between the value window and the value (`game/src/sim/gear/drop.ts`) — skip it and
   // every later draw shifts, so one seed stops producing one item across the two rolls and the rates
   // published here price a different drop stream than the game runs.
   {
@@ -289,7 +289,7 @@ function gates(rows: any, bias: any) {
     }
     add('LT15', bad.length === 0 && baked > 0, bad.length
       ? `this roll is not the client's roll: ${bad.slice(0, 4).join(' · ')}`
-      : `this roll is the client's roll: a Stat Mod bakes the Core stat its own \`rolls\` names, in the draw position \`game/src/sim/drop.ts\` spends it, so one seed buys one item on both sides (${baked} baked line(s) over 400 mid-band drops)`);
+      : `this roll is the client's roll: a Stat Mod bakes the Core stat its own \`rolls\` names, in the draw position \`game/src/sim/gear/drop.ts\` spends it, so one seed buys one item on both sides (${baked} baked line(s) over 400 mid-band drops)`);
   }
 
   return g.rows();

@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { craft, craftedMark } from '../../sim/craft';
+  import { craft, craftedMark } from '../../sim/gear/craft';
   import { MODS } from '../../engine/client';
-  import { gearModOf } from '../../sim/gear';
-  import { itemName } from '../../sim/item-name';
+  import { gearModOf } from '../../sim/gear/gear';
+  import { itemName } from '../../sim/gear/item-name';
   import { vsWorn, compareLines, pieceRank, type LineCmp } from './bag';
   import { modIcon } from '../../icon';
-  import { previewEquip } from '../../sim/build-preview';
+  import { previewEquip } from '../../sim/core/build-preview';
   import BuildChangePreview from '../shared/BuildChangePreview.svelte';
-  import type { GameState, Item } from '../../sim/types';
+  import type { GameState, Item } from '../../sim/core/types';
 
   /**
    * The detail card a slot shows on hover: a pure projection of the rolled line and `mods.json`, so

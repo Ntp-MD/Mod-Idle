@@ -1,9 +1,9 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import { createFieldwork } from '../../engine/fieldwork';
 import { fieldwork } from '../src/engine/client';
-import { newGame, tick } from '../src/sim/game';
-import { currentCell, rankOf } from '../src/sim/road';
-import { hexDistance, hexKey, MAP_EXPLORATION, normalizeMapJournal, tickTrailSites, trailSites } from '../src/sim/map-exploration';
+import { newGame, tick } from '../src/sim/core/game';
+import { currentCell, rankOf } from '../src/sim/world/road';
+import { hexDistance, hexKey, MAP_EXPLORATION, normalizeMapJournal, tickTrailSites, trailSites } from '../src/sim/world/map-exploration';
 import { exportJson, importJson, migrate } from '../src/state/save';
 import { adventureView } from '../src/ui/map/map-adventure';
 

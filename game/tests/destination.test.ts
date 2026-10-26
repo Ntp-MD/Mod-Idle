@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { E, fieldwork } from '../src/engine/client';
-import { newGame } from '../src/sim/game';
-import { startWalk, warpCost } from '../src/sim/road';
-import { establishCamp, fieldActionProblem, startFieldAction } from '../src/sim/fieldwork';
-import { enterDungeon } from '../src/sim/dungeon';
+import { newGame } from '../src/sim/core/game';
+import { startWalk, warpCost } from '../src/sim/world/road';
+import { establishCamp, fieldActionProblem, startFieldAction } from '../src/sim/world/fieldwork';
+import { enterDungeon } from '../src/sim/world/dungeon';
 import { destinationPrimary, type MapDestination } from '../src/ui/map/destination';
 
 const destination = (patch: Partial<MapDestination> = {}): MapDestination => ({

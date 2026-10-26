@@ -1,10 +1,10 @@
 <script lang="ts">
   import { E, eng } from '../../engine/client';
-  import type { GameState } from '../../sim/types';
-  import { ownerOf } from '../../sim/road';
-  import { settlementById } from '../../sim/town';
-  import { mapKnowledge, trailSites, trailSiteKind } from '../../sim/map-exploration';
-  import type { CampEncounterAction, CampEncounterPolicy } from '../../sim/camp-encounters';
+  import type { GameState } from '../../sim/core/types';
+  import { ownerOf } from '../../sim/world/road';
+  import { settlementById } from '../../sim/town/town';
+  import { mapKnowledge, trailSites, trailSiteKind } from '../../sim/world/map-exploration';
+  import type { CampEncounterAction, CampEncounterPolicy } from '../../sim/world/camp-encounters';
   import chevronUp from '../../icon/ui/chevron-up.png';
   import chevronDown from '../../icon/ui/chevron-down.png';
   let { state, writable, expanded = $bindable(false), onSelect, onStart, onStop, onClear, onMove, onEncounter, onPolicy, onRepeat, onAutoReturn } : {

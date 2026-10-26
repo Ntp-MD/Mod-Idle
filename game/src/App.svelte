@@ -1,38 +1,38 @@
 <script lang="ts">
   import QuestBonusPicker from './ui/town/QuestBonusPicker.svelte';
-  import type { TaskSlot } from './sim/types';
-  import { taskBonuses, resolveQuestBonus } from './sim/quest-rewards';
+  import type { TaskSlot } from './sim/core/types';
+  import { taskBonuses, resolveQuestBonus } from './sim/town/quest-rewards';
   import { questBonusText } from './ui/town/quest-rewards';
-  import { rollTask } from './sim/town';
+  import { rollTask } from './sim/town/town';
   import { onDestroy, onMount, setContext, untrack } from 'svelte';
   import { linear } from 'svelte/easing';
   import { prefersReducedMotion, Tween } from 'svelte/motion';
   import { eng, E, sm, TOWN, tree, loot, fieldwork, trade } from './engine/client';
   import { MOB_DRAFT_VARIANT_QA_PASS_METADATA_PATHS } from './ui/dev/arena-art/arena-art-mob-drafts-qa-pass';
   import { bundleOf } from '../../engine/keystones.ts';
-import { fieldSite, campHere as atFieldCamp, establishCamp, leaveCamp, returnToCamp, startFieldAction, stopFieldAction, cookMeal, eatMeal } from './sim/fieldwork';
-import { cancelCampEncounter, chooseCampEncounter, setCampEncounterPolicy, type CampEncounterAction, type CampEncounterPolicy } from './sim/camp-encounters';
-  import { sellGoods, processMaterials, tradeBucket } from './sim/trade';
-import { offerDelivery, deliver, trackDelivery, acknowledgeDelivery, announceDelivery, tickDeliveries, contractById, deliveryTimeLeft, deliveryPauseReason } from './sim/delivery';
-import { buyBlackMarket } from './sim/black-market';
+import { fieldSite, campHere as atFieldCamp, establishCamp, leaveCamp, returnToCamp, startFieldAction, stopFieldAction, cookMeal, eatMeal } from './sim/world/fieldwork';
+import { cancelCampEncounter, chooseCampEncounter, setCampEncounterPolicy, type CampEncounterAction, type CampEncounterPolicy } from './sim/world/camp-encounters';
+  import { sellGoods, processMaterials, tradeBucket } from './sim/town/trade';
+import { offerDelivery, deliver, trackDelivery, acknowledgeDelivery, announceDelivery, tickDeliveries, contractById, deliveryTimeLeft, deliveryPauseReason } from './sim/town/delivery';
+import { buyBlackMarket } from './sim/town/black-market';
   import DeliveryNotice from './ui/town/DeliveryNotice.svelte';
-  import { previewScrapAlchemy, transmuteScrap, alchemyTierProgress } from './sim/alchemy';
-  import { newGame, setLevel, tick, push, fx, hitColour, catchUpAsync, schedulerBatch, WAKE_SEC, characterSheet, huntZone, huntHere, salvageBag, retreatDungeon, runFilterNow, isBossKind, spawnMob } from './sim/game';
-  import { restorePendingWork } from './sim/pending-work';
-  import { restoreFieldPositions } from './sim/field-area';
-  import type { ManualControl } from './sim/combat-actions';
-  import { mobSkillById } from './sim/mobSkills';
-  import { rollDrop } from './sim/drop';
-  import { reservedPct, setAuraPool, hpReserved, usableHp, usableMana, skillCd, toggleTrack, ACTIVE_SLOTS, modeOf, condOf, appliedStatusOf, appliedCurseOf, moveSlot } from './sim/skills';
-  import { describeSkill } from './sim/skill-copy';
-  import { slotsUsed, slotsAvailable, slotsFree, bagStacks } from './sim/slots';
+  import { previewScrapAlchemy, transmuteScrap, alchemyTierProgress } from './sim/gear/alchemy';
+  import { newGame, setLevel, tick, push, fx, hitColour, catchUpAsync, schedulerBatch, WAKE_SEC, characterSheet, huntZone, huntHere, salvageBag, retreatDungeon, runFilterNow, isBossKind, spawnMob } from './sim/core/game';
+  import { restorePendingWork } from './sim/core/pending-work';
+  import { fieldInFight, restoreFieldPositions } from './sim/world/field-area';
+  import type { ManualControl } from './sim/combat/combat-actions';
+  import { mobSkillById } from './sim/combat/mobSkills';
+  import { rollDrop } from './sim/gear/drop';
+  import { reservedPct, setAuraPool, hpReserved, usableHp, usableMana, skillCd, toggleTrack, ACTIVE_SLOTS, modeOf, condOf, appliedStatusOf, appliedCurseOf, moveSlot } from './sim/combat/skills';
+  import { describeSkill } from './sim/combat/skill-copy';
+  import { slotsUsed, slotsAvailable, slotsFree, bagStacks } from './sim/gear/slots';
   import SlotGrid from './ui/inventory/SlotGrid.svelte';
   import StatAllocator from './ui/character/StatAllocator.svelte';
   import Panel from './ui/hud/Panel.svelte';
   import { PANEL_SESSION, type PanelSession } from './ui/hud/panel-session';
   import CombatHistory from './ui/combat/CombatHistory.svelte';
   import EnemyInspector from './ui/combat/EnemyInspector.svelte';
-  import type { EnemySnapshot } from './sim/combat-history';
+  import type { EnemySnapshot } from './sim/combat/combat-history';
   import { refreshSelectionAfterRepair, resolveItemSelection, type ItemSelection } from './ui/inventory/item-selection';
   import { captureCharacterUiSnapshot, emptyCharacterUiSnapshot, restoreCharacterUiSnapshot, type CharacterUiSnapshot } from './ui/character/character-ui-session';
   import CountBadge from './ui/shared/CountBadge.svelte';
@@ -43,8 +43,8 @@ import { buyBlackMarket } from './sim/black-market';
   import TravelCard from './ui/map/TravelCard.svelte';
   import MapJourney from './ui/map/MapJourney.svelte';
   import { destinationIntel } from './ui/map/map-intel';
-  import { investigateTrailSite, recordMapDiscovery } from './sim/map-exploration';
-  import { movePatrolStop } from './sim/exploration';
+  import { investigateTrailSite, recordMapDiscovery } from './sim/world/map-exploration';
+  import { movePatrolStop } from './sim/world/exploration';
   import { destinationPrimary } from './ui/map/destination';
   import TownHub from './ui/town/TownHub.svelte';
   import Market from './ui/town/Market.svelte';
@@ -55,7 +55,7 @@ import { buyBlackMarket } from './sim/black-market';
   import JourneyNotices from './ui/hud/JourneyNotices.svelte';
   import SkillDiscovery from './ui/character/SkillDiscovery.svelte';
   import SkillsWorkbench, { newSkillsWorkbenchView } from './ui/character/SkillsWorkbench.svelte';
-  import { skillEligibilityInState } from './sim/skills';
+  import { skillEligibilityInState } from './sim/combat/skills';
   import { importantCombatEvent } from './ui/combat/combat-presentation';
   import { newPassiveTreeSession } from './ui/passive-tree/passive-tree-view';
   import Forge from './ui/inventory/Forge.svelte';
@@ -81,37 +81,37 @@ import { buyBlackMarket } from './sim/black-market';
   import { fxOut } from './ui/shared/motion';
   import FieldPlates from './ui/combat/FieldPlates.svelte';
   import CombatArenaScene from './ui/combat/CombatArenaScene.svelte';
-  import { createCombatArena, syncCombatArena, arenaSkillTargets } from './sim/combat-arena';
-  import { snapshotEnemy } from './sim/combat-history';
+  import { createCombatArena, syncCombatArena, arenaSkillTargets } from './sim/combat/combat-arena';
+  import { snapshotEnemy } from './sim/combat/combat-history';
   import LogBox from './ui/hud/LogBox.svelte';
   import ObjectiveFeed from './ui/hud/ObjectiveFeed.svelte';
   import { feedEventsAfter } from './ui/hud/logbox';
   import {
     settlementById, settlementOfZone, stockOf, priceGold, priceMinutes, canBuy, buy, sellJunk,
     standingProgress, canTravel, claimTask, npcOf, repairGear, skipTask, skipVerdict,
-  } from './sim/town';
-  import { doCraft, stoneName, atSettlement, replaceChoices, type CraftOp, type Where } from './sim/craft';
-  import { forgeGear } from './sim/forge';
+  } from './sim/town/town';
+  import { doCraft, stoneName, atSettlement, replaceChoices, type CraftOp, type Where } from './sim/gear/craft';
+  import { forgeGear } from './sim/gear/forge';
   import type { ForgeKind } from '../../engine/forge.ts';
-import { farm, farmLevel, farmMasteryLevel, plotCount, plant, harvest, craftPotion, condense, drink, cycleQuickbar } from './sim/farm';
-  import { stashTabCount, STASH_TAB_CAP, deposit, withdraw, depositMany, withdrawMany } from './sim/town';
-import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsFree } from './sim/tree';
-  import { allocateStats, respecStats } from './sim/respec';
+import { farm, farmLevel, farmMasteryLevel, plotCount, plant, harvest, craftPotion, condense, drink, cycleQuickbar } from './sim/world/farm';
+  import { stashTabCount, STASH_TAB_CAP, deposit, withdraw, depositMany, withdrawMany } from './sim/town/town';
+import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsFree } from './sim/core/tree';
+  import { allocateStats, respecStats } from './sim/core/respec';
   import { CharacterSaveSession } from './state/saveSession';
-  import { road, startWalk, walkNote, walkBlocks, warpTo, warpCost, cellBlocks, cellSec, currentCell, settlementCell, ownerOf } from './sim/road';
-  import { clearPatrolStops, startPatrol as startPatrolRun, stopPatrol as stopPatrolRun, togglePatrolStop } from './sim/exploration';
-  import { enterDungeon, cooldownLeft } from './sim/dungeon';
-  import { mastery } from './sim/mastery';
-  import { storePreset, switchPreset, bindZone } from './sim/presets';
-  import { col, setUnlocked, heldCount, turnIn } from './sim/collector';
+  import { road, startWalk, walkNote, walkBlocks, warpTo, warpCost, cellBlocks, cellSec, currentCell, settlementCell, ownerOf } from './sim/world/road';
+  import { clearPatrolStops, startPatrol as startPatrolRun, stopPatrol as stopPatrolRun, togglePatrolStop } from './sim/world/exploration';
+  import { enterDungeon, cooldownLeft } from './sim/world/dungeon';
+  import { mastery } from './sim/core/mastery';
+  import { storePreset, switchPreset, bindZone } from './sim/core/presets';
+  import { col, setUnlocked, heldCount, turnIn } from './sim/town/collector';
   import { mulberry32 } from './engine/client-helpers';
   import { writeSaveSync, readSave, exportJson, importJson, saveSlots, listSnapshots, restoreSnapshot, readSettings, writeSettings, DEFAULT_SETTINGS, type SlotName, type Snapshot, type ClientSettings } from './state/save';
   import { requestAccountWriterLock, type AccountWriterLockResult } from './state/accountWriterLock';
-  import { FILTER_SLOTS, ruleFor, setRule, describeRule, presetSlots, savePreset, loadPreset, clearPreset } from './sim/filter';
-  import { equipFromBag, autoEquip, unequip } from './sim/gear';
-  import { SAVE_CFG } from './sim/snapshot';
-  import { lifeSkillMilestones } from './sim/goal';
-  import { nextGoal, setTrackedGoal, zoneDestination, guidanceNotices, ACTIVITY_GUIDE, type GoalRef, type GoalView, type GuidanceNotice, type ShortageOrigin } from './sim/guidance';
+  import { FILTER_SLOTS, ruleFor, setRule, describeRule, presetSlots, savePreset, loadPreset, clearPreset } from './sim/gear/filter';
+  import { equipFromBag, autoEquip, unequip } from './sim/gear/gear';
+  import { SAVE_CFG } from './sim/core/snapshot';
+  import { lifeSkillMilestones } from './sim/core/goal';
+  import { nextGoal, setTrackedGoal, zoneDestination, guidanceNotices, ACTIVITY_GUIDE, type GoalRef, type GoalView, type GuidanceNotice, type ShortageOrigin } from './sim/core/guidance';
   import { hubIcon, icon, skillIcon } from './icon';
   import chevronDownGlyph from './icon/ui/chevron-down.png';
   import pauseGlyph from './icon/ui/pause.png';
@@ -146,9 +146,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   // the picked cell are all toggled by id — the client reads no coordinate, only settlement ids and
   // cell keys it already holds (X33 · M7 · M10)
   import mapOverlayRaw from './icon/map/map-overlay.svg?raw';
-  import type { GameState, Item, Cell, Mob, FxEvent } from './sim/types';
+  import type { GameState, Item, Cell, Mob, FxEvent } from './sim/core/types';
   import type { StatKey } from './engine/client';
-  import type { SkillConditions } from './sim/skills';
+  import type { SkillConditions } from './sim/combat/skills';
 
   const STATS: StatKey[] = ['str', 'int', 'vit', 'agi', 'dex', 'wis', 'lck'];
   const MAP_MARKER_LEGEND = [
@@ -798,8 +798,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const cooldownTickRate = () => {
     const shockSecLeft = Math.max(0, gameState.playerStatuses.shock?.secLeft || 0);
     const activeFraction = bundleOf(c.keystones, 'unstoppable') ? 1 : Math.max(0, 1 - Math.min(1, shockSecLeft));
-    const cdCut = (gameState.playerStatuses.crippled?.secLeft || 0) > 0 ? (E.status.crippled.cd_pct || 0) / 100 : 0;
-    return c.globalSpeed * Math.max(0, 1 - cdCut) * activeFraction;
+    // Crippled cuts outgoing direct damage only; it never slows cooldowns. Shock's stop
+    // (`shock.stop_sec`, shortened by Stun Recovery) is the one control that pauses the clock.
+    return c.globalSpeed * activeFraction;
   };
   /** UI projection only: interpolate between completed simulation ticks without advancing the sim. */
   const cooldownVisualSeconds = $derived.by(() => {
@@ -1152,7 +1153,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const latestOrbHeal = $derived(ring.find((e) => e.side === 'self' && e.kind === 'heal') || null);
   const plates = $derived([...gameState.group]);
   /** the field is a fight, not a backdrop: cards answer to the Field tab or to a live fight only */
-  const inCombat = $derived(gameState.phase === 'fighting' && gameState.group.length > 0);
+  const inCombat = $derived(gameState.phase === 'fighting' && fieldInFight(gameState));
   const liveArpgArena = $derived(!showcaseMode);
   const arenaMode = $derived(arenaPreview || liveArpgArena);
   $effect(() => {
@@ -1260,7 +1261,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     .filter((contract) => contract && contract.status === 'open'));
   const deliveryPause = $derived(deliveryPauseReason(gameState));
   const settlementName = (id: string) => TOWN.settlements.find((town) => town.id === id)?.name || id;
-  /** One next step, read from the character's pin or the fixed suggestion order in `sim/guidance.ts`. */
+  /** One next step, read from the character's pin or the fixed suggestion order in `sim/core/guidance.ts`. */
   const journeyGoal = $derived.by(() => {
     const next = nextGoal(gameState);
     if (!next) return null;
@@ -1536,7 +1537,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   function equip(index: number) {
     if (!requireAccountWriter('equipping gear')) return;
-    // the rule lives in `sim/gear.ts`, where the tests can reach it too; this copy only makes the
+    // the rule lives in `sim/gear/gear.ts`, where the tests can reach it too; this copy only makes the
     // panel re-read the gameState the verb mutated in place
     const r = equipFromBag(gameState, index);
     if (!r.ok) equipNote = `Cannot put it on: ${r.why}`;
@@ -1627,7 +1628,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   let equipNote = $state('');
   /**
    * One press, the whole body dressed from what the character carries. The choice itself — what counts as
-   * best, and what must never be moved — is `sim/gear.ts`'s, and the tests reach it there; this only says
+   * best, and what must never be moved — is `sim/gear/gear.ts`'s, and the tests reach it there; this only says
    * what came of it, in the numbers the player acts on.
    */
   function doBestEquip() {
@@ -3224,17 +3225,16 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       return `Recovering at Camp · ${Math.max(0, Math.ceil(gameState.campSec))}s`;
     }
     if (gameState.walk) return gameState.autoReturn.phase !== 'idle'
-      ? gameState.group.length ? 'Ambushed · Auto-Return paused' : gameState.autoReturn.phase === 'to-stop' ? 'Returning to Patrol…' : 'Auto-Return…'
-      : gameState.patrol.active ? gameState.group.length ? `Patrol ambush · ${stopName}` : `Patrol traveling · ${stopName}`
-        : gameState.group.length ? 'Ambushed on the road' : 'Traveling…';
+      ? gameState.autoReturn.phase === 'to-stop' ? 'Returning to Patrol…' : 'Auto-Return…'
+      : gameState.patrol.active ? `Patrol traveling · ${stopName}` : 'Traveling…';
     if (gameState.autoReturn.phase === 'waiting') return 'Patrol paused · Auto-Return waits for an online trip';
     if (gameState.autoReturn.phase === 'to-town') return 'Auto-Return · waiting for the settlement';
     if (gameState.autoReturn.phase === 'to-stop') return 'Patrol resuming';
     if (!gameState.hunting) return 'At rest';
-    if (!gameState.group.length) {
+    if (!fieldInFight(gameState)) {
       return gameState.patrol.active
-        ? `${patrolRead} · next ${Math.max(0, gameState.spawnIn)}s`
-        : `Hunting · next group in ${Math.max(0, gameState.spawnIn)}s`;
+        ? `${patrolRead} · waiting for a pull`
+        : 'Hunting · waiting for a pull';
     }
     return `Fighting · ${c.hitsPerSec.toFixed(2)} hits/s${gameState.patrol.active ? ` · ${patrolRead}` : ''}`;
   });
@@ -3328,7 +3328,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   function toggle(id: string) {
     if (!requireAccountWriter('toggling skills')) return;
-    // the reservation rule and the buff switch both live in sim/skills.ts, so no sum is repeated here
+    // the reservation rule and the buff switch both live in sim/combat/skills.ts, so no sum is repeated here
     const r = toggleTrack(gameState.skills, id, c.keystones);
     saveNote = r.ok ? '' : r.why || 'cannot';
     gameState = { ...gameState };
@@ -3552,10 +3552,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 <div id={showcaseMode ? 'showcase-field' : undefined} class="stage" style={`grid-template-areas:${hudLayoutAreas};`} class:showcase={showcaseMode} class:arpg-arena={arenaMode && panel !== 'map'} class:combat-fx-sample={showcaseMode && showcaseSample === 'combat-fx'} class:combat-fx-live={showcaseMode && showcaseSample === 'combat-fx' && animateCombatFx} class:fighting={inCombat} class:mapmode={panel === 'map'} class:veiled={!showcaseMode && ((panel !== null && panel !== 'map') || sheetOpen)} class:townmode={townLive && panel !== 'map'}>
   {#if arenaMode && panel !== 'map'}
     <CombatArenaScene arena={combatArena} s={gameState} {c} {ring} {speed} paused={!running || paused}
+      inspect={arenaPreview} onReviewPause={() => { running = false; }}
+      onReviewStep={() => { running = false; step(); }}
       spritePreviewSpecies={spritePreviewMode ? arenaSpecies : null}
       spritePreviewVariant={spritePreviewMode && activeArenaVariant ? { speciesId: activeArenaVariant.speciesId, variantId: activeArenaVariant.variantId } : null}
       aoePreview={showcaseMode && showcaseQuery.get('aoe-preview') === '1'}
       focusId={arenaFocusId}
+      aimSkill={arenaAimSkill}
       onVitals={(vitals) => arenaVitals = vitals} onInspectEnemy={(mob) => inspectedEnemy = snapshotEnemy(mob)}
       onFocusEnemy={(mob) => focusArenaEnemy(mob.id)} onGroundCommand={issueArenaGroundCommand} />
   {/if}
@@ -3616,7 +3619,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         {#if showPlaceRead}<p class="text-note journey-place">{placeRead}</p>{/if}
         <p class="journey-status">{phaseRead}</p>
         {#if gameState.walk}
-          <p class="text-note journey-place">{gameState.walk.blocksLeft} blocks left · {gameState.group.length ? 'Step paused during combat' : `next hex in ${Math.max(0, Math.ceil(gameState.walk.secLeft))}s`}</p>
+          <p class="text-note journey-place">{gameState.walk.blocksLeft} blocks left · next hex in {Math.max(0, Math.ceil(gameState.walk.secLeft))}s</p>
         {/if}
       </header>
       {#if skillDiscoveryId && !awayReport}
@@ -3687,7 +3690,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
               {#if cleanMap}<p id="clean-map-names-note" class="map-hint text-note">Clean map shows names on hover or selection. Hex colours follow the selected map display.</p>{/if}
               <p class="map-hint text-note">Select a hex · Drag horizontally to pan · Ctrl + drag horizontally to orbit · Scroll to zoom</p>
               {#if gameState.walk}
-                <p class="map-hint text-note">{gameState.group.length ? 'Ambushed en route to' : 'Traveling to'} <b>{walkNote(gameState)}</b>.</p>
+                <p class="map-hint text-note">Traveling to <b>{walkNote(gameState)}</b>.</p>
               {/if}
             </div>
             <details class="map-tools-section" name="map-tools-sections">
@@ -3716,7 +3719,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
               campHere={journeyDest.self && fieldCampHere}
               campHunting={journeyDest.self && fieldCampHere && gameState.hunting}
               busy={!!gameState.walk || gameState.phase === 'camp'}
-              fightActive={gameState.group.length > 0}
+              fightActive={inCombat}
               warpReason={journeyDest.node === gameState.town.waypoint ? 'This is your current Waypoint.' : ''}
               patrol={gameState.patrol}
               maxPatrolStops={E.road.patrol.max_stops}

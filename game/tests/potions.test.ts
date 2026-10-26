@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { newGame } from '../src/sim/game';
-import { buildCharacter } from '../src/sim/player';
-import { drink, cycleQuickbar, ownedPotions, maybeDrink } from '../src/sim/farm';
+import { newGame } from '../src/sim/core/game';
+import { buildCharacter } from '../src/sim/core/player';
+import { drink, cycleQuickbar, ownedPotions, maybeDrink } from '../src/sim/world/farm';
 import { migrate } from '../src/state/save';
 import { farm } from '../src/engine/client';
 

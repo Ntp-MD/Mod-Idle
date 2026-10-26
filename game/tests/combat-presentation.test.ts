@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { combatCastCues, combatDamagePops, combatEffectLevel, combatMotionWeight, combatTempo, sceneCombatEvents } from '../src/ui/combat/combat-presentation';
 import { actorImpactMs } from '../src/ui/combat/combat-actor';
-import type { FxEvent } from '../src/sim/types';
+import type { FxEvent } from '../src/sim/core/types';
 
 const hit = (id: number, over: Partial<FxEvent> = {}): FxEvent => ({
   id, sec: 12, kind: 'hit', side: 'field', via: 'swing', mobId: 'a', value: 10,

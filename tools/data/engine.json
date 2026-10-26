@@ -19,19 +19,13 @@
       "spacing": 1.25
     },
     "player_speed": 2.7,
-    "player_radius_m": 0.4,
+    "player_radius_m": 0.25,
     "mob_speed": 1.9,
     "range": {
       "melee": 2.1,
       "ranged": 5.2,
       "magic": 4.6
     },
-    "melee_contact_angles_deg": [
-      0,
-      -120,
-      120
-    ],
-    "melee_contact_range_mult": 0.95,
     "movement_step_sec": 0.05,
     "action_sec": 0.3,
     "body_sec": 2.2,
@@ -55,7 +49,7 @@
       },
       "note": "Ordinary mob basics. The legacy adapter reads the spawn line: front bodies close to contact, stand-off bodies hold at 80% of ranged reach and release a non-homing single-target shot at the attack beat. A ready strike replaces that opportunity; the shot is not a second damage stream. Species/variant overrides arrive with authoring."
     },
-    "note": "Transient forest combat presentation selected by the battlefield-style setting. Ground units, units per second, and centre-to-centre attack ranges; no collision, obstacles, kiting or positional evasion. Damage, clocks, statuses and rewards still use the existing combat pipeline. Classic combat and offline progress do not read this section."
+    "note": "Transient forest combat presentation selected by the battlefield-style setting. Ground units, units per second, and centre-to-centre attack ranges; bodies keep their footprint edges apart and melee bodies claim reachable contact points. No obstacles, obstacle navigation, positional evasion or networked play. Damage, clocks, statuses and rewards still use the existing combat pipeline. Classic combat and offline progress do not read this section."
   },
   "stat": {
     "base": 12,
@@ -107,51 +101,47 @@
   },
   "status": {
     "burn": {
-      "k_dps": 0.3,
+      "k_dps": 0.2,
       "stack_max": 5,
       "time_sec": 5,
       "regen_cut_per_stack": 0.1,
       "regen_cut_max": 0.5
     },
     "chill": {
-      "aspd_pct": 10,
-      "aspd_cap": 20,
-      "acc_pct": 10,
-      "acc_cap": 30,
+      "aspd_pct": 15,
+      "aspd_cap": 30,
       "time_sec": 3,
       "armour_cut": 0.25
     },
     "shock": {
-      "aspd_pct": 20,
-      "aspd_cap": 20,
-      "stop_sec": 1,
+      "acc_pct": 20,
+      "acc_cap": 20,
+      "stop_sec": 0.5,
       "time_sec": 2,
-      "align_cut": 0.2,
       "stacks": false
     },
     "poison": {
-      "k_dps": 0.08,
+      "k_dps": 0.1,
       "stack_max": 10,
       "decay_sec": 8
     },
     "mark": {
-      "stack_max": 25,
-      "k_dmg": 0.01,
-      "k_leech": 0.002,
+      "stack_max": 10,
+      "k_dmg": 0.02,
+      "k_leech": 0.005,
       "decay_sec": 5
     },
     "crippled": {
-      "clock_pct": 50,
-      "clock_cap": 50,
-      "cd_pct": 50,
+      "outgoing_damage_pct": -20,
       "time_sec": 3,
-      "note": "Earth's status (owner ticket), and it cuts two clocks. On a mob it slows the attack CLOCK — a second of its clock costs 2000 ms — so what it pays is frequency, never the damage of a swing; that is the half a mob feels today. On us it also slows COOLDOWNS: `cd_pct` of the tick rate goes, so a rotation comes back half as fast while it holds (the mirror of Haste's post-cap multiplier, and the same field the mob side reads once mob skills land). It is not an aspd cut — chill and shock move that number, this one slows the timers. No stacks: a second application restarts the three seconds."
+      "stacks": false,
+      "note": "Earth's status: the body is injured, so its direct hits and skill presses deal 20% less damage. It does not slow the attack clock or cooldowns, and it has no mob cooldown effect. No stacks: a second application refreshes the three seconds. The payoff row is Aftershock."
     },
     "dot_cap": 1.5,
-    "dot_cap_note": "burn + poison + the earth line a row leaves (Sand Storm), combined, as a multiple of confirmed Element damage per second (elements.md section 6). burn reaches it exactly at 5 stacks x 0.30, so a maxed fire build fills the whole budget on its own",
+    "dot_cap_note": "burn + poison + the earth line a row leaves (Sand Storm), combined, as a multiple of confirmed Element damage per second (elements.md section 6). burn reaches 1.0 at 5 stacks x 0.20 and poison reaches 1.0 at 10 stacks x 0.10; together they are still held at the shared 1.5 cap.",
     "proc_chance": 0.2,
     "mob_control_budget_pct": 0.15,
-    "mob_side": "decided — mob→player is unchanged (combat.md §5). Player→mob splits three ways: DoT (burn/poison/bleed) lands in full; damage-shaping debuffs (every curse, chill's Armour cut) land; control is bounded, never a lockout — mobs are immune to root/freeze/held-past-action and stun chance has no Cap, while a separate rolling stop-time budget (mob_control_budget_pct) limits total stopped time. Chill/shock/Cripple speed cuts obey their own Caps, so no fight can be stun-locked. No mob resist stat. combat.md §5b"
+    "mob_side": "decided — mob→player is unchanged (combat.md §5). Player→mob splits three ways: DoT (burn/poison/bleed) lands in full; damage-shaping debuffs (every curse, chill's Armour cut, crippled's outgoing-damage cut) land; control is bounded, never a lockout — mobs are immune to root/freeze/held-past-action and stun chance has no Cap, while a separate rolling stop-time budget (mob_control_budget_pct) limits total stopped time. Chill/shock speed cuts obey their own Caps, so no fight can be stun-locked. No mob resist stat. combat.md §5b"
   },
   "mob": {
     "races": {
@@ -1496,7 +1486,7 @@
         "wand": 3,
         "book": 3
       },
-      "rules": "A group is a queue ordered front line first. A weapon's reach is how many queue slots it may hit: 1 = the front slot only, 2 = front and second, 3 = any slot in the group. Only the front slot swings at the player; a stand-off mob shoots or casts from where it stands and still counts inside the 3-attacker cap. If the front slot dies while stand-off mobs live, a reach-1 attack waits one engage cycle (1 sec) for the group to close; reach 2 and 3 keep pressing. AoE keeps its rules (60% per target · Cap 3 · mana ×1.5) and only changes which 3: melee fans from the front, stand-off picks any 3. There are no tiles, no movement speed and no coordinates — reach is the whole positional model, and it replaces the stray 'within 3 tiles' wording."
+      "rules": "A group is a queue ordered front line first. A weapon's reach is how many queue slots it may hit: 1 = the front slot only, 2 = front and second, 3 = any slot in the group. Only the front slot swings at the player; a stand-off mob shoots or casts from where it stands and still counts inside the 3-attacker cap. If the front slot dies while stand-off mobs live, a reach-1 attack waits one engage cycle (1 sec) for the group to close; reach 2 and 3 keep pressing. AoE keeps its damage rules (60% per target · Cap 3) and only changes which 3: melee fans from the front, stand-off picks any 3; its Mana price does not change with target count. There are no tiles, no movement speed and no coordinates — reach is the whole positional model, and it replaces the stray 'within 3 tiles' wording."
     },
     "spawn_weights": {
       "small": 3,
@@ -2503,9 +2493,9 @@
       {
         "id": "small",
         "name": "Small",
-        "ps": 0.7,
+        "ps": 1,
         "evasion_pct": 20,
-        "radius_m": 0.35,
+        "radius_m": 0.25,
         "group": "up to 5"
       },
       {
@@ -2513,15 +2503,15 @@
         "name": "Medium",
         "ps": 1,
         "evasion_pct": 10,
-        "radius_m": 0.45,
+        "radius_m": 0.25,
         "group": "up to 5"
       },
       {
         "id": "large",
         "name": "Large",
-        "ps": 1.35,
+        "ps": 1,
         "evasion_pct": 0,
-        "radius_m": 0.6,
+        "radius_m": 0.25,
         "group": "alone"
       },
       {
@@ -2529,7 +2519,7 @@
         "name": "Boss",
         "ps": 10,
         "evasion_pct": 0,
-        "radius_m": 0.9,
+        "radius_m": 0.25,
         "group": "alone",
         "reads_as": "large",
         "reads_as_note": "A boss is not a size, it is a species that happens to be huge: it declares which of the three body classes a weapon's `size_mult` reads it as (- HugePatch section 12). Default Large; a boss may override it on its own entry."
@@ -2547,7 +2537,7 @@
       "Four card sizes, copied from Ragnarok: Small · Medium · Large · Boss. A size REPLACES the base numbers, it never multiplies with Elite or with another size.",
       "Small and Medium form the groups world.md counts (1-2 / 2-3 / 3-5). Large, Elite and Boss always appear alone. Each species carries only the sizes that fit it; every species with normal variants needs Small or Medium to enter a group, while Large remains the solo Elite body.",
       "The body class carries a base Evasion as a percent on top of its species Dex line: Small +20%, Medium +10%, and nothing above Medium - a Large, Elite or Boss body is not punished for its size, it simply presents all of itself. The rating under the percent is the mob's own flat Core attribute line (`mob.stat`), never a level number.",
-      "Size raises HP faster than PS, so a Large mob takes longer to kill without hitting proportionally harder - that is what makes Small the farming body and Large the roadblock."
+      "Body classes do not scale damage: Small, Medium and Large share the same base PS, so pack size is what sets them apart - Small and Medium come in groups while Large stands alone."
     ],
     "species": [
       {
@@ -13826,7 +13816,7 @@
         "thornwake-trail-3"
       ]
     },
-    "note": "Field life skills follow a prepare-travel-hunt-cook loop. Configured skill-level milestones increase harvest amounts; skill level and per-resource Mastery improve field-material and provision drop rates within a cap, without changing gear or stone drops. Hunger drains on walks, hunts and gathering. Raw food, fruit, edible herbs and cooked dishes have distinct uses. Humans can carry cooked rations, goblins scavenge raw haunches, and wild creatures yield local forage. Empty Hunger cuts HP regeneration by the configured amount and never touches Energy Shield recharge. Road events are an independent supply/rest roll per crossed block and do not replace ambushes. Trail sites are authored per settlement and scale with its band — one in low, two in mid, three in high — each on its own bare block outside any named side, and a settlement with no spare bare block keeps the one it has. All rates and effects live here; map.json remains presentation only. Regional Mine and Grove bonus yields are authored per zone in regional_sources. Existing ore, timber and rarewood keep their keys and uses. Workshop recipes consume gathered materials at a settlement and produce trade goods; all cooking recipes also define edible cooked provisions.",
+    "note": "Field life skills follow a prepare-travel-hunt-cook loop. Configured skill-level milestones increase harvest amounts; skill level and per-resource Mastery improve field-material and provision drop rates within a cap, without changing gear or stone drops. Hunger drains on walks, hunts and gathering. Raw food, fruit, edible herbs and cooked dishes have distinct uses. Humans can carry cooked rations, goblins scavenge raw haunches, and wild creatures yield local forage. Empty Hunger cuts HP regeneration by the configured amount and never touches Energy Shield recharge. Road events are an independent supply/rest roll per crossed block and do not spawn a road mob group. Trail sites are authored per settlement and scale with its band — one in low, two in mid, three in high — each on its own bare block outside any named side, and a settlement with no spare bare block keeps the one it has. All rates and effects live here; map.json remains presentation only. Regional Mine and Grove bonus yields are authored per zone in regional_sources. Existing ore, timber and rarewood keep their keys and uses. Workshop recipes consume gathered materials at a settlement and produce trade goods; all cooking recipes also define edible cooked provisions.",
     "level_divisor": 100,
     "level_cap": 100,
     "mastery_divisor": 25,
@@ -15166,7 +15156,7 @@
     "base_drop_chance": 0.08,
     "filter": {
       "upgrade_margin_pct": 10,
-      "note": "The bag filter keeps a drop only when it beats the equipped piece in the same slot by more than noise. Scored as Sum(weight(line) x value / Total), a swap must gain at least upgrade_margin_pct, because a 2% gain is not a decision - it is a reroll. tools/loot.ts measures the keep-rates that margin produces and loot.md publishes them; game/src/sim/filter.ts reads the same value as the per-slot default, so a raised threshold is a player setting and never a second number.",
+      "note": "The bag filter keeps a drop only when it beats the equipped piece in the same slot by more than noise. Scored as Sum(weight(line) x value / Total), a swap must gain at least upgrade_margin_pct, because a 2% gain is not a decision - it is a reroll. tools/loot.ts measures the keep-rates that margin produces and loot.md publishes them; game/src/sim/gear/filter.ts reads the same value as the per-slot default, so a raised threshold is a player setting and never a second number.",
       "rules": {
         "default_enabled": false,
         "default_keep_missing_element": true,
@@ -15261,14 +15251,13 @@
     "unique_chance_note": "Wild-unique rate: share of normal spawns upgraded to one of the Species' optional Uniques (mob.uniques)."
   },
   "road": {
-    "note": "Travel is walking. The world is a pointy-top hex lattice and a settlement owns its own hex; any cell may be stood on, so a walk joins the two cells it starts and ends on and is a count of blocks and never a link with a price. Every block costs `block_sec` and rolls one encounter chance. An encounter is an ordinary mob group from the lower of the two zones, fought with the ordinary rules, and it pays the ordinary drop roll and nothing else: no gold purse, no chest, no Standing, no crafting stones. Gold and junk come from killing mobs, so walking can never mint (`economy.md`). A settlement's Waypoint unlocks the first time the character arrives there on foot, and then warps to any unlocked settlement instantly, for gold at the destination's band; a Waystone will be a second destination kind on the same rule. The Road's old ladder and branch links, its trip minutes, its terrain tilt table, its encounter kinds, the purse, the chest, the Circuit and the Standing-per-leg are all gone with this shape, and none of them comes back: `encounter_chance_pct` is the retired one-encounter-a-minute rate written in blocks rather than a number chosen by hand, and a branch link has no meaning when the block count IS the distance - a pass would need its own shorter hex path in the lattice.",
+    "note": "Travel is walking. The world is a pointy-top hex lattice and a settlement owns its own hex; any cell may be stood on, so a walk joins the two cells it starts and ends on and is a count of blocks and never a link with a price. Every block costs `block_sec`; a walk is a transition to the destination field, which owns its spawn-slot population. There is no separate road encounter group, purse, chest or Standing. Gold and junk come from killing mobs, so walking can never mint (`economy.md`). A settlement's Waypoint unlocks the first time the character arrives there on foot, and then warps to any unlocked settlement instantly, for gold at the destination's band; a Waystone will be a second destination kind on the same rule. The Road's old ladder and branch links, its trip minutes, its terrain tilt table, its encounter kinds, the purse, the chest, the Circuit and the Standing-per-leg are all gone with this shape, and none of them comes back: a branch link has no meaning when the block count IS the distance - a pass would need its own shorter hex path in the lattice.",
     "graph_rule": "A node is one settlement's own hex in axial coordinates on the pointy-top lattice, which is the field the sheet draws: 20 columns by 15 rows, 300 cells, the starting settlement at the centre cell and the level bands climbing outward by distance rank. Blocks between two cells are their hex distance, computed from those coordinates and never typed, so a walk's length is derived and one block is one cell the player can see. Every cell is walkable from every other - there is no edge list, no route to buy and no ground that refuses a foot - and a walk to a far cell is plotted as an ordered chain of adjacent cells and crossed one cell at a time. A step only ever enters a cell adjacent to the one the foot is on, which is what makes the chain a walk and not a jump. A Waypoint covers the distance for gold once the settlement at the far end has been walked to.",
     "standing_rule": "Every cell of the field is a place to stand. A cell's zone is its nearest settlement's, measured in blocks and never typed; ground equally near two settlements belongs to the tied one holding the lowest zone, so a tie is answered by the rule and not by a coin toss. Rank is the distance from that settlement: 0 is the settlement itself, 1 is one of its sides, 2 and out is bare ground. Standing on a side that has a sub-zone written into it hunts that sub-zone's cast; standing where no sub-zone is named - in a town, on a side with nothing written into it, on bare ground - rolls the zone's whole cast. A Waypoint opens only where a cell is rank 0, because a Waypoint marks a settlement and not a patch of ground.",
     "cost_rule": "Every cell costs one block whatever lies under it: no terrain cost, no passability table, no ground dearer to cross than any other. A walk's price is the hex distance between its two cells times `block_sec`, so two routes of the same length are the same walk.",
     "block_sec": 1,
-    "encounter_chance_pct": 16.6667,
-    "encounter_rule": "Every block walked rolls one encounter chance. A block that rolls nothing is silent. An encounter that fires is a real mob group drawn from the lower of the two zones the walk joins, at each Species' fixed zone_levels value and at that zone's own group size, fought with the ordinary combat and drop rules: it pays the ordinary drop roll and nothing else.",
-    "push_rule": "A Push costs recovery time. A same-zone Field Camp receives the character and ends the current walk without refunding a block. With no same-zone Field Camp, the existing walk is preserved and resumes on the ambush block after recovery. Away time never walks.",
+    "encounter_rule": "A walk joins two cells; it rolls no separate road encounter group. The destination field owns its authored spawn-slot population, which is the only source of mobs and the ordinary drop roll. A block that rolls nothing stays silent.",
+    "push_rule": "A Push costs recovery time. A same-zone Field Camp receives the character and ends the current walk without refunding a block. With no same-zone Field Camp, the existing walk is preserved and resumes on the interrupted block after recovery. Away time never walks.",
     "waypoint_rule": "Arriving at a settlement on foot unlocks its Waypoint, once. A Waypoint warps to any unlocked settlement instantly, and it costs gold at the destination settlement's own band: a warp buys back the walk's time, which is what gold is for, and it buys nothing else (`town.json` `waypoint_warp`). It never gates a zone: a settlement you have not walked to is reached by walking, and no amount of gold opens a Waypoint you have not earned on foot. A Waystone will be a second destination kind that a Waypoint may also target.",
     "patrol": {
       "min_stops": 2,
@@ -15480,8 +15469,7 @@
   "aoe": {
     "per_target_pct": 60,
     "target_cap": 3,
-    "mana_mult": 1.5,
-    "note": "Live area skills select all enemy centers inside the radius stored in skills.json, without a target-count cap. The primary receives the full press; additional targets receive per_target_pct of the press. The multi-target Mana premium is mana_mult. target_cap describes the offline queue approximation, which has no spatial positions."
+    "note": "Live area skills select all enemy centers inside the radius stored in skills.json, without a target-count cap. The primary receives the full press; additional targets receive per_target_pct of the press. A press pays its typed cost whether it lands on one target or many; target_cap describes the offline queue approximation, which has no spatial positions."
   },
   "max_hp_press": {
     "boss_pct": 50,

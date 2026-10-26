@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { E } from '../src/engine/client';
-import { KEYSTONE_HANDLERS, registerStaticKeystoneHandlers, supportedKeystoneKeys } from '../src/sim/keystone-runtime';
+import { KEYSTONE_HANDLERS, registerStaticKeystoneHandlers, supportedKeystoneKeys } from '../src/sim/core/keystone-runtime';
 import { autoCleanseReady, ghostDanceRecovery, shieldGateHolds } from '../../engine/keystones.ts';
 
 registerStaticKeystoneHandlers(KEYSTONE_HANDLERS, Object.keys(E.elements.status_of));

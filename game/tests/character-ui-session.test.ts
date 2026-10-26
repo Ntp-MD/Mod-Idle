@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { EnemySnapshot } from '../src/sim/combat-history';
-import type { Item } from '../src/sim/types';
+import type { EnemySnapshot } from '../src/sim/combat/combat-history';
+import type { Item } from '../src/sim/core/types';
 import { newCraftWorkbenchView } from '../src/ui/inventory/craft-workbench';
 import {
   captureCharacterUiSnapshot, emptyCharacterUiSnapshot, restoreCharacterUiSnapshot,

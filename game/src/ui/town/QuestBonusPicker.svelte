@@ -1,9 +1,9 @@
 <script lang="ts">
   import { sm } from '../../engine/client';
-  import { stoneName } from '../../sim/craft';
-  import { ownsSkill, usefulSkillDuplicate } from '../../sim/skills';
-  import type { GameState } from '../../sim/types';
-  import type { QuestBonus } from '../../sim/quest-rewards';
+  import { stoneName } from '../../sim/gear/craft';
+  import { ownsSkill, usefulSkillDuplicate } from '../../sim/combat/skills';
+  import type { GameState } from '../../sim/core/types';
+  import type { QuestBonus } from '../../sim/town/quest-rewards';
   import { questBonusText } from './quest-rewards';
   let { state, options, name, choice, writer = true, onchoose }: {
     state: GameState; options: QuestBonus[]; name: string; choice?: string; writer?: boolean;

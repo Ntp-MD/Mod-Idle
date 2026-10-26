@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { createTree, type TreeSpec } from '../../engine/tree';
 import { E, MODS, TREE_SPEC, tree } from '../src/engine/client';
-import { newGame, setLevel } from '../src/sim/game';
-import { keystoneBuildContext } from '../src/sim/keystone-runtime';
-import { allocateTreePath, canSpendTree, spendTreePoint, treePath } from '../src/sim/tree';
+import { newGame, setLevel } from '../src/sim/core/game';
+import { keystoneBuildContext } from '../src/sim/core/keystone-runtime';
+import { allocateTreePath, canSpendTree, spendTreePoint, treePath } from '../src/sim/core/tree';
 import { exportJson, importJson } from '../src/state/save';
 
 const spec = TREE_SPEC as TreeSpec;

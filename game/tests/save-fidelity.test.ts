@@ -1,15 +1,15 @@
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { E, eng, sm, tree } from '../src/engine/client';
-import { newGame, tick, catchUp, setLevel, huntZone } from '../src/sim/game';
-import { emptyGear, openingGear } from '../src/sim/player';
-import { craft } from '../src/sim/craft';
-import { rollDrop } from '../src/sim/drop';
-import { setRule } from '../src/sim/filter';
+import { newGame, tick, catchUp, setLevel, huntZone } from '../src/sim/core/game';
+import { emptyGear, openingGear } from '../src/sim/core/player';
+import { craft } from '../src/sim/gear/craft';
+import { rollDrop } from '../src/sim/gear/drop';
+import { setRule } from '../src/sim/gear/filter';
 import { exportJson, importJson, listSnapshots, migrate, newAccount, mergeMastery, applyAccount, readSave, restoreSnapshot, SCHEMA_VERSION, writeSave, writeSaveSync } from '../src/state/save';
 import { requestAccountWriterLock } from '../src/state/accountWriterLock';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { spendTreePoint, treeLines, treePointsSpent } from '../src/sim/tree';
-import { startWalk, road, settlementCell } from '../src/sim/road';
+import { spendTreePoint, treeLines, treePointsSpent } from '../src/sim/core/tree';
+import { startWalk, road, settlementCell } from '../src/sim/world/road';
 
 describe('storage recovery boundaries', () => {
   const mirror = new Map<string, string>();

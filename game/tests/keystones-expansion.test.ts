@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import engineJson from '../../tools/data/engine.json' with { type: 'json' };
-import { KEYSTONE_HANDLERS, registerStaticKeystoneHandlers } from '../src/sim/keystone-runtime';
+import { KEYSTONE_HANDLERS, registerStaticKeystoneHandlers } from '../src/sim/core/keystone-runtime';
 registerStaticKeystoneHandlers(KEYSTONE_HANDLERS, Object.keys((engineJson as any).elements.status_of));
 import { tree } from '../src/engine/client';
-import { buildCharacter, emptyGear, type Character } from '../src/sim/player';
-import { mobSwing, playerSwing } from '../src/sim/combat';
-import { applyWeaponRiders, keystoneTargetMods, newMobStatusStore, placeStatus } from '../src/sim/mobStatus';
-import { huntZone, newGame, setLevel, tick } from '../src/sim/game';
+import { buildCharacter, emptyGear, type Character } from '../src/sim/core/player';
+import { mobSwing, playerSwing } from '../src/sim/combat/combat';
+import { applyWeaponRiders, keystoneTargetMods, newMobStatusStore, placeStatus } from '../src/sim/combat/mobStatus';
+import { huntZone, newGame, setLevel, tick } from '../src/sim/core/game';
 import type { KeystoneBundle } from '../../engine/keystones.ts';
-import type { Mob } from '../src/sim/types';
+import type { Mob } from '../src/sim/core/types';
 
 /** Packet M's trade-offs: each condition and its price are measured against the same fixture
  *  without the bundle, so a key that is registered but not wired cannot pass. */

@@ -1,16 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { E, BASES, SKILLS, MODS, TREE_SPEC, eng, tree } from '../src/engine/client';
 import { createTree } from '../../engine/tree';
-import { newGame, setLevel, tick } from '../src/sim/game';
+import { newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
+import { mulberry32 } from '../src/engine/client-helpers';
 import { exportJson, importJson } from '../src/state/save';
-import { mastery, masteryLevel, dropMultiplier, weaponSkillBonusPct } from '../src/sim/mastery';
-import { canSpendTree, spendTreePoint, respecTree, treePointsSpent, treeLines, treePath, allocateTreePath } from '../src/sim/tree';
-import { keystoneBuildContext } from '../src/sim/keystone-runtime';
-import { newGoal, target, onSpawn, onKill, watch } from '../src/sim/goal';
-import type { GameState, Mob } from '../src/sim/types';
-import { allocateStats, respecStats } from '../src/sim/respec';
-import { buildCharacter, openingGear } from '../src/sim/player';
-import { mobFixture } from './mobFixture';
+import { mastery, masteryLevel, dropMultiplier, weaponSkillBonusPct } from '../src/sim/core/mastery';
+import { canSpendTree, spendTreePoint, respecTree, treePointsSpent, treeLines, treePath, allocateTreePath } from '../src/sim/core/tree';
+import { keystoneBuildContext } from '../src/sim/core/keystone-runtime';
+import { newGoal, target, onSpawn, onKill, watch } from '../src/sim/core/goal';
+import type { GameState, Mob } from '../src/sim/core/types';
+import { allocateStats, respecStats } from '../src/sim/core/respec';
+import { buildCharacter, openingGear } from '../src/sim/core/player';
+import { mobFixture, pinFieldPopulation } from './mobFixture';
 
 /** The three progression side-tracks the game runs beside the level bar: Mastery, the passive tree, the
  *  win gate. Each one's rules live in the sim; these read them through the same calls the client makes. */
@@ -299,9 +300,14 @@ describe('the win gate', () => {
     setLevel(s, E.stat.level_cap);
     s.zone = target().zone;
     s.hunting = true;
-    s.bossDueAt = s.clockSec + 1;
+    // The spawn contract is covered by boss-arena; this test isolates goal arming, reload and
+    // completion, so it stages a non-attacking final boss in the field.
+    const boss = spawnMob(mulberry32(171), s.zone, 'boss');
+    Object.assign(boss, { ps: 0, evasion: 0, dodgeRate: 0, hp: 1e9, hpMax: 1e9 });
+    s.group = [boss];
+    s.bossDueAt = 0;
+    pinFieldPopulation(s);
     tick(s, { online: true });
-    const boss = s.group.find((m) => m.kind.startsWith('Boss'))!;
     expect(boss).toBeDefined();
     expect(s.goal.spawnId).toBe(boss.id);
     expect(s.goal.attempts).toBe(1);

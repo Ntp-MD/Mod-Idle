@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { newGame, tick } from '../src/sim/game';
-import { currentCell, road, startWalk, zoneOf } from '../src/sim/road';
+import { newGame, tick } from '../src/sim/core/game';
+import { currentCell, road, startWalk, zoneOf } from '../src/sim/world/road';
 import { exportJson, importJson, migrate } from '../src/state/save';
-import { slotsAvailable } from '../src/sim/slots';
-import { movePatrolStop } from '../src/sim/exploration';
-import { establishCamp } from '../src/sim/fieldwork';
+import { slotsAvailable } from '../src/sim/gear/slots';
+import { movePatrolStop } from '../src/sim/world/exploration';
+import { establishCamp } from '../src/sim/world/fieldwork';
 import { destinationIntel } from '../src/ui/map/map-intel';
 import { destinationPrimary } from '../src/ui/map/destination';
 import { campActivityArt, hasUniqueTrace, mapEventArt } from '../src/ui/map/map-adventure';
@@ -12,7 +12,7 @@ import { E, eng, TOWN } from '../src/engine/client';
 import {
   hexKey, investigateTrailSite, mapKnowledge, normalizeMapJournal,
   recordMapDiscovery, trailSiteKind, MAP_EXPLORATION,
-} from '../src/sim/map-exploration';
+} from '../src/sim/world/map-exploration';
 
 const place = (s: ReturnType<typeof newGame>, h: { q: number; r: number }) => {
   s.cell = { ...h, sub: null, wild: null }; s.walk = null; s.zone = zoneOf(h)!;

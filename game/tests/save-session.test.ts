@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { CharacterSaveSession } from '../src/state/saveSession';
-import { newGame } from '../src/sim/game';
+import { newGame } from '../src/sim/core/game';
 
 function deferred() {
   let resolve!: () => void;

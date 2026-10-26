@@ -1,7 +1,7 @@
 import { render } from 'svelte/server';
 import { describe, expect, it } from 'vitest';
 import ActiveBuffs from '../src/ui/hud/ActiveBuffs.svelte';
-import { newSkillState } from '../src/sim/skills';
+import { newSkillState } from '../src/sim/combat/skills';
 
 describe('active buff indicators', () => {
   it('shows remaining time for a live buff and the enabled aura', () => {

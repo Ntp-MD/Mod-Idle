@@ -209,15 +209,11 @@ function gates(): G.GateRow[] {
     `Mana and HP costs climb ${costStep}% a skill level and the level ladder is their only price term — all ${priced.length} paid rows reach ×${atCap(costStep).toFixed(2)} at cap while presses reach ×${atCap(dmgStep).toFixed(2)} — a level buys efficiency` +
     `${costStep <= 0 ? ' · A COST MUST RISE WITH SKILL LEVEL' : ''}${offLadder.length ? ' · OFF THE LADDER: ' + offLadder.join(', ') : ''}`);
 
-  //: the `(AoE ×n)` suffix is decoration the client never reads — the sim derives AoE from the
-  // target count — so a suffix that disagrees with the data is a second source for the multiplier.
-  const badAoe = paidRows.filter((s) => {
-    const m = String(s.mana || '').match(/AoE\s*[×x]\s*(\d+(?:\.\d+)?)/i);
-    return m && Number(m[1]) !== EN.E.aoe.mana_mult;
-  }).map((s) => `${s.id}:${(String(s.mana || '').match(/AoE\s*[×x]\s*(\d+(?:\.\d+)?)/i) || [])[1]}`);
-  soft('S17', badAoe.length === 0,
-    `every (AoE ×n) suffix in a mana cost states the data's own ${EN.E.aoe.mana_mult} mana multiplier` +
-    `${badAoe.length ? ' · DISAGREES: ' + badAoe.join(', ') : ''}`);
+  //: a mana row states its typed price only. The retired `(AoE ×n)` suffix would be a second source
+  // for a premium the game no longer charges, so any survivor is a finding.
+  const staleAoe = paidRows.filter((s) => /AoE\s*[×x]\s*\d/i.test(String(s.mana || ''))).map((s) => s.id);
+  soft('S17', staleAoe.length === 0,
+    `mana costs carry no legacy (AoE ×n) suffix${staleAoe.length ? ' · FOUND: ' + staleAoe.join(', ') : ''}`);
 
   // A caster Max-HP basis is an additive percentage term inside the skill press formula.
   const badMaxHpBasis = SKILLS.filter((s) => s.max_hp_pct != null

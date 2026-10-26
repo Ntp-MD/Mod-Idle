@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { TOWN } from '../src/engine/client';
-import { newGame } from '../src/sim/game';
-import { settlementCell } from '../src/sim/road';
-import { trade, sellGoods, quoteSale, tradeBucket } from '../src/sim/trade';
-import { economyCity } from '../src/sim/economy';
+import { newGame } from '../src/sim/core/game';
+import { settlementCell } from '../src/sim/world/road';
+import { trade, sellGoods, quoteSale, tradeBucket } from '../src/sim/town/trade';
+import { economyCity } from '../src/sim/core/economy';
 
 const STAND = (id: string) => settlementCell(id)!;
 const gold = (value: number) => value.toFixed(TOWN.trade.currency_decimals);

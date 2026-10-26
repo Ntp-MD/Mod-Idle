@@ -1,9 +1,9 @@
 <script lang="ts">
   import type { TreeNode } from '../../../../engine/tree';
   import { tree } from '../../engine/client';
-  import { canSpendTree, treePointsFree } from '../../sim/tree';
-  import type { GameState } from '../../sim/types';
-  import { previewTreeRoute } from '../../sim/build-preview';
+  import { canSpendTree, treePointsFree } from '../../sim/core/tree';
+  import type { GameState } from '../../sim/core/types';
+  import { previewTreeRoute } from '../../sim/core/build-preview';
   import BuildChangePreview from '../shared/BuildChangePreview.svelte';
   import flagGlyph from '../../icon/ui/flag.png';
 

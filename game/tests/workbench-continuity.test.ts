@@ -4,9 +4,9 @@ import { createServer, type ViteDevServer } from 'vite';
 import type { Component } from 'svelte';
 import type { render as renderComponent } from 'svelte/server';
 import { tree } from '../src/engine/client';
-import { newGame } from '../src/sim/game';
-import { canSpendTree, treePath } from '../src/sim/tree';
-import type { Item } from '../src/sim/types';
+import { newGame } from '../src/sim/core/game';
+import { canSpendTree, treePath } from '../src/sim/core/tree';
+import type { Item } from '../src/sim/core/types';
 import { newCraftWorkbenchView } from '../src/ui/inventory/craft-workbench';
 
 let server: ViteDevServer;

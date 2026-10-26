@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { E } from '../src/engine/client';
-import { buildCharacter, emptyGear } from '../src/sim/player';
-import { playerSwing } from '../src/sim/combat';
-import { KEYSTONE_HANDLERS, registerStaticKeystoneHandlers, supportedKeystoneKeys } from '../src/sim/keystone-runtime';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
+import { playerSwing } from '../src/sim/combat/combat';
+import { KEYSTONE_HANDLERS, registerStaticKeystoneHandlers, supportedKeystoneKeys } from '../src/sim/core/keystone-runtime';
 import {
   ambushCritChance, demolitionBlast, headsmanExecutes, inevitableElementMult,
   painforgedBank, thornboundRetaliation, type KeystoneBundle,
 } from '../../engine/keystones.ts';
-import type { Mob } from '../src/sim/types';
+import type { Mob } from '../src/sim/core/types';
 
 registerStaticKeystoneHandlers(KEYSTONE_HANDLERS, Object.keys(E.elements.status_of));
 const h = (key: string) => KEYSTONE_HANDLERS[key] as any;

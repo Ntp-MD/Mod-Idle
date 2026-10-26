@@ -3,8 +3,8 @@ import { createDelivery, type AcquisitionContext, type DeliveryCfg } from '../..
 import { createEngine } from '../../engine/index';
 import { createTrade, type TradeCfg, type TradeGood } from '../../engine/trade';
 import { ED, TOWN } from '../src/engine/client';
-import { acquisitionContext } from '../src/sim/delivery';
-import { newGame } from '../src/sim/game';
+import { acquisitionContext } from '../src/sim/town/delivery';
+import { newGame } from '../src/sim/core/game';
 
 function fixture(authored = false) {
   const data = structuredClone(ED);

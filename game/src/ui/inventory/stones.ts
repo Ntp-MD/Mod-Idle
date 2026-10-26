@@ -1,5 +1,5 @@
 import { icon } from '../../icon';
-import { stoneName } from '../../sim/craft';
+import { stoneName } from '../../sim/gear/craft';
 import { loot } from '../../engine/client';
 
 /**

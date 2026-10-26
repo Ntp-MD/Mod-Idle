@@ -1,9 +1,9 @@
 <script lang="ts">
   import { sm } from '../../engine/client';
   import { skillIcon } from '../../icon';
-  import type { FxEvent, Mob } from '../../sim/types';
+  import type { FxEvent, Mob } from '../../sim/core/types';
   import Icon from '../shared/Icon.svelte';
-  import { mobSkillById } from '../../sim/mobSkills';
+  import { mobSkillById } from '../../sim/combat/mobSkills';
   import { fieldLabel } from '../hud/hud';
   import { combatCastCues, combatEffectLevel, type CombatEffectLevel } from './combat-presentation';
 

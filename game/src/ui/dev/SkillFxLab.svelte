@@ -1,8 +1,8 @@
 <script lang="ts">
   import { sm } from '../../engine/client';
   import { skillIcon } from '../../icon';
-  import { effectLine } from '../../sim/skills';
-  import { describeSkill, skillWindowEntries } from '../../sim/skill-copy';
+  import { effectLine } from '../../sim/combat/skills';
+  import { describeSkill, skillWindowEntries } from '../../sim/combat/skill-copy';
   import SkillFxPreview from '../combat/SkillFxPreview.svelte';
 
   const TYPES = ['all', 'attack', 'curse', 'heal', 'buff', 'aura'] as const;

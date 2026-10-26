@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { TOWN } from '../src/engine/client';
-import { catchUp, catchUpPlan, newGame, tick } from '../src/sim/game';
+import { catchUp, catchUpPlan, newGame, tick } from '../src/sim/core/game';
 import { migrate, SCHEMA_VERSION } from '../src/state/save';
 
 const STEP = (TOWN as any).economy.step_sec as number;

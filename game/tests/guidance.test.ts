@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { newGame } from '../src/sim/game';
-import { forge } from '../src/sim/forge';
+import { newGame } from '../src/sim/core/game';
+import { forge } from '../src/sim/gear/forge';
 import { fieldwork } from '../src/engine/client';
 import {
   guidanceNotices, materialSourceFor, newGuidance, nextGoal, normalizeGuidance, recommendGoal, resolveGoal, setTrackedGoal,
-} from '../src/sim/guidance';
+} from '../src/sim/core/guidance';
 import { migrate } from '../src/state/save';
 
 const forgeFixture = () => {

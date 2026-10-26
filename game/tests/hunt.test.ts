@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { newGame, setLevel, tick, huntZone } from '../src/sim/game';
-import { arrive, road, settlementCell } from '../src/sim/road';
+import { newGame, setLevel, tick, huntZone } from '../src/sim/core/game';
+import { arrive, road, settlementCell } from '../src/sim/world/road';
 import { migrate } from '../src/state/save';
 
 /**

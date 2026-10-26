@@ -2,16 +2,17 @@
   import ArenaFxSprite from './ArenaFxSprite.svelte';
   import ArenaVfxAtmosphere from './ArenaVfxAtmosphere.svelte';
   import ArenaAuthoredSkillVfx from './ArenaAuthoredSkillVfx.svelte';
+  import ArenaWhirlwindVfx from './ArenaWhirlwindVfx.svelte';
   import { ACTIVE_VFX } from './arena-active-vfx';
   import { authoredVfxFor } from './arena-authored-vfx';
   import type { VfxFootprint } from './arena-vfx-space';
-  let { id, shape, age, source, point, ground, cast, element = 'physical', layer = 'front', strikeCount = 1, sizeScale = 1, durationOverride, authoredAreaDiameter, critical = false, flightProgress, windupProgress, preImpact = false, area, reducedMotion = false }: {
-    id: string; shape: string; age: number; source: {x:number;y:number}; point: {x:number;y:number};
-    ground: {x:number;y:number}; cast: boolean; element?: string; layer?: 'ground' | 'front'; strikeCount?:number; sizeScale?:number; durationOverride?:number; authoredAreaDiameter?:number; critical?:boolean; flightProgress?:number; windupProgress?:number; preImpact?:boolean; area?:VfxFootprint; reducedMotion?: boolean;
+  let { id, shape, age, visualSeed = 0, allowComponents = true, source, point, ground, cast, element = 'physical', layer = 'front', strikeCount = 1, sizeScale = 1, durationOverride, authoredAreaDiameter, critical = false, flightProgress, windupProgress, preImpact = false, charging = false, channelAge = age, area, reducedMotion = false, chainFrom }: {
+    allowComponents?:boolean; visualSeed?:number; id: string; shape: string; age: number; source: {x:number;y:number}; point: {x:number;y:number};
+    ground: {x:number;y:number}; cast: boolean; element?: string; layer?: 'ground' | 'front'; strikeCount?:number; sizeScale?:number; durationOverride?:number; authoredAreaDiameter?:number; critical?:boolean; flightProgress?:number; windupProgress?:number; preImpact?:boolean; charging?:boolean; channelAge?:number; area?:VfxFootprint; reducedMotion?: boolean; chainFrom?: string;
   } = $props();
   const recipe = $derived(ACTIVE_VFX[shape] ? {...ACTIVE_VFX[shape],size:ACTIVE_VFX[shape].size*sizeScale,duration:durationOverride ?? ACTIVE_VFX[shape].duration} : undefined);
   const authored = $derived(authoredVfxFor(id));
-  const inWindow = $derived((age >= -.26 || (authored && cast && preImpact) || (authored?.delivery === 'projectile' && age < 0 && flightProgress !== undefined && flightProgress > 0)) && age <= (recipe?.duration ?? 0));
+  const inWindow = $derived((age >= -.26 || (cast && preImpact && (authored || shape === 'whirlwind')) || (authored?.delivery === 'projectile' && age < 0 && flightProgress !== undefined && flightProgress > 0)) && age <= (recipe?.duration ?? 0));
   const self = $derived(id.startsWith('buff.') || id.startsWith('heal.') || shape === 'whirlwind' || shape === 'cleave' || shape === 'groundSlam');
   const center = $derived(self ? source : point);
   const floor = $derived(self ? {x:source.x, y:source.y + 58} : ground);
@@ -190,9 +191,9 @@
   });
 </script>
 
-{#if recipe && inWindow && (!authored || cast)}
-  <g data-active-skill-vfx={id} data-vfx-family={recipe.family} opacity={age < 0 ? 1 : envelope}>
-    {#if layer === 'ground' && cast && age >= 0 && !authored}
+{#if recipe && inWindow && (!authored || cast || shape === 'chainLightning')}
+  <g data-active-skill-vfx={id} data-vfx-family={recipe.family} data-chain-from={chainFrom ?? undefined} opacity={age < 0 ? 1 : envelope}>
+    {#if layer === 'ground' && cast && age >= 0 && !authored && shape !== 'whirlwind'}
       <defs>
         <radialGradient id={lightId}>
           <stop offset="0" stop-color="currentColor" stop-opacity=".8" />
@@ -202,6 +203,10 @@
       </defs>
       <ellipse cx={floor.x} cy={floor.y} rx={recipe.size*(sustain ? .72 : .55)} ry={recipe.size*.24}
         fill={`url(#${lightId})`} opacity={sustain ? .45 : .45*opening} />
+    {/if}
+    {#if shape === 'whirlwind'}
+      <ArenaWhirlwindVfx age={channelAge} {source} {point} {ground} {cast} {area} duration={recipe.duration} strikes={strikeCount}
+        {charging} windup={windupProgress ?? 0} {critical} {layer} showCasterVortex={false} {reducedMotion} />
     {/if}
     {#if layer === 'front' && recipe.family === 'projectile' && !cast && age < 0 && ['piercingShot','headshot','pierceVeil','acidArrow'].includes(shape) && !reducedMotion}
       {@const flight=progress}
@@ -235,15 +240,15 @@
       <ArenaFxSprite art={recipe.impact} {age} x={point.x} y={point.y} width={recipe.size*.7} {element} {reducedMotion} />
       <ArenaFxSprite art="spark-1066" age={age*1.5} x={point.x} y={point.y} width={recipe.size} element="physical" {reducedMotion} />
     {/if}
-    {#if layer==='front' && !authored}
+    {#if layer==='front' && !authored && shape !== 'whirlwind'}
       <ArenaVfxAtmosphere {age} family={recipe.family} {element} {source} {point} ground={floor} size={recipe.size}
         {cast} {self} {critical} {reducedMotion} />
     {/if}
     {#if authored && cast}
       {#if layer === (authored.spatial?.layer ?? 'front')}
-        <ArenaAuthoredSkillVfx {id} {age} {source} {point} {flightProgress} {windupProgress} {preImpact} {strikeCount} duration={recipe.duration} ground={floor} baseSize={recipe.size} areaDiameter={authoredAreaDiameter} {area} {reducedMotion} />
+        <ArenaAuthoredSkillVfx {id} {age} {visualSeed} {allowComponents} {source} {point} {flightProgress} {windupProgress} {preImpact} {strikeCount} duration={recipe.duration} ground={floor} baseSize={recipe.size} areaDiameter={authoredAreaDiameter} {area} {reducedMotion} />
       {/if}
-    {:else}
+    {:else if shape !== 'whirlwind'}
       {#each pieces as piece}
         <ArenaFxSprite {...piece} element={piece.element ?? (self && id.startsWith('heal.') ? 'poison' : element)} {reducedMotion} />
       {/each}

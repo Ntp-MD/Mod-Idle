@@ -1,8 +1,8 @@
 import { E, eng, fieldwork, TOWN } from '../../engine/client';
-import type { GameState } from '../../sim/types';
-import { currentCell } from '../../sim/road';
-import { standingProgress } from '../../sim/town';
-import { hexDistance, hexKey, mapKnowledge, MAP_EXPLORATION, type MapKnowledge, trailSites, trailSiteKind } from '../../sim/map-exploration';
+import type { GameState } from '../../sim/core/types';
+import { currentCell } from '../../sim/world/road';
+import { standingProgress } from '../../sim/town/town';
+import { hexDistance, hexKey, mapKnowledge, MAP_EXPLORATION, type MapKnowledge, trailSites, trailSiteKind } from '../../sim/world/map-exploration';
 import { MAP_CAMERA_TRANSFORM, mapUprightAt } from './map-projection';
 import { mapMarker, mapSpeciesGlyph, type MapMarkerGlyph, type MapMarkerKind, type MapMarkerOptions } from './map-markers';
 

@@ -18,7 +18,7 @@ body{margin:24px;background:#111a1b;color:#e4eadf;font:16px/1.5 system-ui}main{m
 <p id="links"></p><p id="error" role="alert"></p>
 </main>
 <script type="module">
-const manifest=await fetch('./spatial-v2-manifest.json').then(r=>{if(!r.ok)throw Error('Cannot load art manifest');return r.json()});
+const manifest=await fetch('/src/ui/combat/fx-manifests/spatial-v2-manifest.json').then(r=>{if(!r.ok)throw Error('Cannot load art manifest');return r.json()});
 const select=document.querySelector('#skill'),play=document.querySelector('#play'),stage=document.querySelector('#stage'),scrub=document.querySelector('#frame'),status=document.querySelector('#status'),canvas=document.querySelector('#view'),ctx=canvas.getContext('2d');
 const entries=Object.entries(manifest.entries),cache=new Map();let current=null,index=0,running=!matchMedia('(prefers-reduced-motion: reduce)').matches,last=0,selection=0;
 for(const [id] of entries){const option=document.createElement('option');option.value=id;option.textContent=id;select.append(option)}

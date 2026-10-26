@@ -1,6 +1,6 @@
 import { E } from '../src/engine/client';
-import { emptyGear } from '../src/sim/player';
-import type { Item } from '../src/sim/types';
+import { emptyGear } from '../src/sim/core/player';
+import type { Item } from '../src/sim/core/types';
 
 /**
  * A worn piece carrying the two lines a bare sheet does not have.

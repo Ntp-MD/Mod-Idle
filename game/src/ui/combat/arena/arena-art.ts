@@ -20,6 +20,8 @@ export type ArenaSpriteSheet = {
   frameMs: number;
   loop: boolean;
   impactMs?: number;
+  /** Hand/muzzle in the untrimmed cell at the release marker, not atlas coordinates. */
+  releaseSocket?: { x: number; y: number; provenance: 'measured' | 'authored-fallback' };
   /** A one-sided sheet may be mirrored by the renderer instead of duplicating its frames. */
   mirror?: boolean;
 };

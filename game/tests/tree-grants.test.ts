@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createTree, type TreeSpec, type TreeGrant } from '../../engine/tree.ts';
 import { MODS, eng, E } from '../src/engine/client';
-import { emptyGear, sumLines } from '../src/sim/player';
+import { emptyGear, sumLines } from '../src/sim/core/player';
 
 /**
  * The targeted Core/Element grants: a grant that names a stat feeds that stat alone, a grant that

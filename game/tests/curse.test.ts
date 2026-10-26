@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { sm } from '../src/engine/client';
-import { buildCharacter, emptyGear } from '../src/sim/player';
-import { mobSwing, playerSwing } from '../src/sim/combat';
-import { newCurses, applyCurse, modsOn, tickCurses, psMult, accMult, takenMult, NO_CURSE, curableRows } from '../src/sim/curse';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
+import { mobSwing, playerSwing } from '../src/sim/combat/combat';
+import { newCurses, applyCurse, modsOn, tickCurses, psMult, accMult, takenMult, NO_CURSE, curableRows } from '../src/sim/combat/curse';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
-import type { Mob } from '../src/sim/types';
+import { newGame, tick, setLevel, huntZone } from '../src/sim/core/game';
+import type { Mob } from '../src/sim/core/types';
 import { mobFixture } from './mobFixture';
 
 const row = (id: string) => sm.byId[id]!;

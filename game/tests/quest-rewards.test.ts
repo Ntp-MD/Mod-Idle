@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { TOWN, sm } from '../src/engine/client';
-import { newGame } from '../src/sim/game';
-import { claimTask, rollTask, skipTask } from '../src/sim/town';
-import { deliver, deliveryConfig, offerDelivery, previewDelivery, pruneDeliveries, tickDeliveries } from '../src/sim/delivery';
-import { taskBonuses } from '../src/sim/quest-rewards';
-import { tradeBucket } from '../src/sim/trade';
+import { newGame } from '../src/sim/core/game';
+import { claimTask, rollTask, skipTask } from '../src/sim/town/town';
+import { deliver, deliveryConfig, offerDelivery, previewDelivery, pruneDeliveries, tickDeliveries } from '../src/sim/town/delivery';
+import { taskBonuses } from '../src/sim/town/quest-rewards';
+import { tradeBucket } from '../src/sim/town/trade';
 import { trade } from '../src/engine/client';
-import { slotsAvailable, slotsUsed } from '../src/sim/slots';
+import { slotsAvailable, slotsUsed } from '../src/sim/gear/slots';
 import { exportJson, importJson } from '../src/state/save';
 
 const writer = { writer: true };

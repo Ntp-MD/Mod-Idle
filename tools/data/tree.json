@@ -8526,7 +8526,7 @@
       ],
       "grants": [],
       "name": "Elemental Infusion",
-      "description": "Gain 30% of Physical damage as extra Elemental damage, split by your existing Flat Elemental damage.",
+      "description": "Gain 30% of Physical damage as extra Elemental damage, split by your existing Elemental damage.",
       "draft_ref": 65,
       "weight": 4,
       "placement": {
@@ -13934,7 +13934,7 @@
       ],
       "grants": [],
       "name": "Radiant Faith",
-      "description": "Reserve 25% of Max HP; each hit is reduced by a flat 10% of that reserve, up to 30% of the hit.",
+      "description": "Reserve 25% of Max HP; each hit is reduced by a fixed 10% of that reserve, up to 30% of the hit.",
       "draft_ref": 35,
       "weight": 3,
       "placement": {
@@ -15385,7 +15385,7 @@
       ],
       "grants": [],
       "name": "Turtle Doctrine",
-      "description": "Block becomes a flat Physical damage reduction equal to its average chance. Block events no longer occur.",
+      "description": "Block becomes a fixed Physical damage reduction equal to its average chance. Block events no longer occur.",
       "draft_ref": 44,
       "weight": 4,
       "placement": {

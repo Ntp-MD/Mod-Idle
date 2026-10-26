@@ -1,21 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import { E, sm, tree } from '../src/engine/client';
-import { buildCharacter, emptyGear } from '../src/sim/player';
-import { mobSwing } from '../src/sim/combat';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
+import { mobSwing } from '../src/sim/combat/combat';
 import {
   auraResonanceOf, castOnce, effectsActive, hpReservedPct, newSkillState, reservedPct,
   setAuraPool, spendableMana, usableHp, usableMana,
   toggleTrack,
-} from '../src/sim/skills';
-import { KEYSTONE_HANDLERS, registerStaticKeystoneHandlers, supportedKeystoneKeys } from '../src/sim/keystone-runtime';
+} from '../src/sim/combat/skills';
+import { KEYSTONE_HANDLERS, registerStaticKeystoneHandlers, supportedKeystoneKeys } from '../src/sim/core/keystone-runtime';
 import {
   arcaneBatteryEs, manaDebtFloor, manaRegenWhileNegative, newKeystoneRuntimeState, radiantFaithCut,
   validateKeystoneRuntime, type KeystoneBundle,
 } from '../../engine/keystones.ts';
-import type { Mob } from '../src/sim/types';
-import { characterSheet, newGame, setLevel, tick } from '../src/sim/game';
-import { allocateTreePath, spendTreePoint } from '../src/sim/tree';
-import { switchPreset } from '../src/sim/presets';
+import type { Mob } from '../src/sim/core/types';
+import { characterSheet, newGame, setLevel, tick } from '../src/sim/core/game';
+import { allocateTreePath, spendTreePoint } from '../src/sim/core/tree';
+import { switchPreset } from '../src/sim/core/presets';
 import { exportJson, importJson } from '../src/state/save';
 
 registerStaticKeystoneHandlers(KEYSTONE_HANDLERS, Object.keys(E.elements.status_of));
@@ -152,11 +152,11 @@ describe('Packet F — reservation and costs', () => {
   it('37 Blood Price pays the Mana part in HP 1:1 and leaves at least 1 HP', () => {
     const s = newSkillState();
     const row = (sm.all() as any[]).find((r) => r.type === 'attack'
-      && sm.costOf(r, { skillLevel: 1, aoe: false }).resource === 'mana'
-      && sm.costOf(r, { skillLevel: 1, aoe: false }).amount > 0);
+      && sm.costOf(r, { skillLevel: 1 }).resource === 'mana'
+      && sm.costOf(r, { skillLevel: 1 }).amount > 0);
     expect(row).toBeDefined();
     s.owned[row.id] = 1; s.list[0] = row.id;
-    const cost = sm.costOf(row, { skillLevel: 1, aoe: false }).amount;
+    const cost = sm.costOf(row, { skillLevel: 1 }).amount;
     const c = { ...sheet([bundle('blood-price', { hpPerMana: 1 })]), maxMana: 1e9, maxHp: 1000 };
     const group = [dumbMob()];
     const r = castOnce(s, c, 1e9, group, {}, () => 0.5, { currentHp: cost + 1 });
@@ -171,10 +171,10 @@ describe('Packet F — reservation and costs', () => {
     expect(manaRegenWhileNegative(10, true, { debtLimitUsableManaPct: 50, negativeRegenMult: 2 })).toBe(20);
     const s = newSkillState();
     const row = (sm.all() as any[]).find((r) => r.type === 'attack'
-      && sm.costOf(r, { skillLevel: 1, aoe: false }).resource === 'mana'
-      && sm.costOf(r, { skillLevel: 1, aoe: false }).amount > 0);
+      && sm.costOf(r, { skillLevel: 1 }).resource === 'mana'
+      && sm.costOf(r, { skillLevel: 1 }).amount > 0);
     s.owned[row.id] = 1; s.list[0] = row.id;
-    const cost = sm.costOf(row, { skillLevel: 1, aoe: false }).amount;
+    const cost = sm.costOf(row, { skillLevel: 1 }).amount;
     const c = { ...sheet([bundle('mana-debt', { debtLimitUsableManaPct: 50, negativeRegenMult: 2 })]), maxMana: 200, maxHp: 1000 };
     const group = [dumbMob()];
     const first = castOnce(s, c, spendableMana(c, s, Math.max(0, cost - 30)), group, {}, () => 0.5, { currentHp: 1000 });

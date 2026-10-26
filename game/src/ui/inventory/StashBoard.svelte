@@ -7,20 +7,20 @@
    * particular house, and the town's own screen spends its bag slot on this instead of a second shelf.
    *
    * Two grids face each other and one piece is selected at a time, because the actual job is a transfer:
-   * read the piece, say which way it moves. Deposit and withdrawal rules stay in `sim/town` — a locked
+   * read the piece, say which way it moves. Deposit and withdrawal rules stay in `sim/town/town` — a locked
    * piece stays put, and a full bag refuses the walk back rather than dropping anything. Neither shelf is
    * paged: every slot the side holds is drawn at once, and the panel body is what scrolls.
    */
   import { gearIcon, icon } from '../../icon';
-  import { STASH_TAB_CAP } from '../../sim/town';
-  import { slotsAvailable, slotsFree, slotsUsed } from '../../sim/slots';
-  import { itemName } from '../../sim/item-name';
+  import { STASH_TAB_CAP } from '../../sim/town/town';
+  import { slotsAvailable, slotsFree, slotsUsed } from '../../sim/gear/slots';
+  import { itemName } from '../../sim/gear/item-name';
   import { gearEntry, sortEntries, rankTone, SORT_LABELS, type SortKey } from './bag';
   import ItemDetail from './ItemDetail.svelte';
   import Tabs from '../shared/Tabs.svelte';
   import CountBadge from '../shared/CountBadge.svelte';
   import { setDrag, readDrag } from '../shared/drag';
-  import type { GameState, Item } from '../../sim/types';
+  import type { GameState, Item } from '../../sim/core/types';
 
   let { game, tabs, tab, carriedSort = 'level', addtab = null, ontab, onaddtab, oncarriedsort, ondeposit, onwithdraw, ondepositAll, onwithdrawAll, onlock, onequip, wornOf }: {
     game: GameState;

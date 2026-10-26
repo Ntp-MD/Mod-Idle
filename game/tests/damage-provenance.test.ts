@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { eng, E, sm, BASES } from '../src/engine/client';
-import { playerSwing, type HitReport, type Statuses } from '../src/sim/combat';
-import { NO_CURSE, takenMult } from '../src/sim/curse';
+import { playerSwing, type HitReport, type Statuses } from '../src/sim/combat/combat';
+import { NO_CURSE, takenMult } from '../src/sim/combat/curse';
 import { elementalByElement, type DamagePacket } from '../../engine/damage-provenance.ts';
-import { castOnce, newSkillState, grantNamedSkill } from '../src/sim/skills';
-import { buildCharacter } from '../src/sim/player';
-import type { Character } from '../src/sim/player';
-import type { Mob } from '../src/sim/types';
+import { castOnce, newSkillState, grantNamedSkill } from '../src/sim/combat/skills';
+import { buildCharacter } from '../src/sim/core/player';
+import type { Character } from '../src/sim/core/player';
+import type { Mob } from '../src/sim/core/types';
 import { mobFixture } from './mobFixture';
 
 /**

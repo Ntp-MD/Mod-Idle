@@ -22,6 +22,15 @@
     "x": 128,
     "y": 224
   },
+  "releaseSockets": {
+    "east": { "x": 177, "y": 139, "provenance": "measured" },
+    "west": { "x": 66, "y": 138, "provenance": "measured" }
+  },
+  "releaseSocketMeasurement": {
+    "frames": [18, 22],
+    "method": "Manual hand-centre measurement on original attack source crops, converted using source offsets",
+    "estimatedTolerancePx": 4
+  },
   "sourceFrames": [
     {
       "x": 54,

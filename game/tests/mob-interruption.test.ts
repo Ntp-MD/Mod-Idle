@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { captureCombatArena, createCombatArena, syncCombatArena } from '../src/sim/combat-arena';
-import { characterSheet, newGame, setLevel, spawnMob, tick } from '../src/sim/game';
+import { captureCombatArena, createCombatArena, syncCombatArena } from '../src/sim/combat/combat-arena';
+import { characterSheet, newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
+import { pinFieldPopulation } from './mobFixture';
 
 function controlledFight() {
   const state = newGame(41);
@@ -22,6 +23,7 @@ function controlledFight() {
   Object.assign(arena.player, { x: 1, y: 6 });
   Object.assign(arena.mobs[mob.id], { x: 2, y: 6 });
   captureCombatArena(arena, state, 0);
+  pinFieldPopulation(state);
   state.mobStatus[mob.id] = {
     statuses: { shock: { stacks: 1, secLeft: 2, perSec: 0 } },
     alignedPerSec: 0, elapsedSec: 0, stoppedSec: 0, stoppedUntil: 1.5,
@@ -43,9 +45,14 @@ describe('hard control of an ordinary mob attack', () => {
     const { state, mob, arena } = controlledFight();
     tick(state, { arena, autoSkills: false });
     tick(state, { arena, autoSkills: false });
-    const actions = arena.actions.filter((action) => action.actorId === mob.id);
-    expect(actions.length).toBeGreaterThan(0);
-    expect(state.fx.filter((event) => event.kind === 'taken' && event.byId === mob.id)).toHaveLength(1);
+    // the stop has expired: the ready strike starts its authored preparation, and the
+    // cooldown still commits with the actual strike, so nothing is spent yet
+    const telegraphs = arena.actions.filter((action) => action.actorId === mob.id);
+    expect(telegraphs.length).toBeGreaterThan(0);
+    expect(mob.skillReadyAtUs?.['mob.lightning.static-jab']).toBeUndefined();
+    tick(state, { arena, autoSkills: false });
+    // the preparation releases: damage lands and the strike cooldown is spent once
+    expect(state.fx.filter((event) => event.kind === 'taken' && event.byId === mob.id).length).toBeGreaterThan(0);
     expect(mob.skillReadyAtUs?.['mob.lightning.static-jab']).toBeGreaterThan(0);
   });
 });

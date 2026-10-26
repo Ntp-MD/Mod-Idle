@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { E, sm } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { buildCharacter, emptyGear } from '../src/sim/player';
-import { castOnce, newSkillState, condOf, NO_COND, appliedStatusOf } from '../src/sim/skills';
-import { newMobStatusStore, setStacks, placeStatus, stepMob } from '../src/sim/mobStatus';
-import { newCurses, applyCurse } from '../src/sim/curse';
-import type { Mob } from '../src/sim/types';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
+import { castOnce, newSkillState, condOf, NO_COND, appliedStatusOf } from '../src/sim/combat/skills';
+import { newMobStatusStore, setStacks, placeStatus, stepMob } from '../src/sim/combat/mobStatus';
+import { newCurses, applyCurse } from '../src/sim/combat/curse';
+import type { Mob } from '../src/sim/core/types';
 import { mobFixture } from './mobFixture';
 
 /**

@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { sm, E } from '../src/engine/client';
-import { buildCharacter, emptyGear } from '../src/sim/player';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
 import { poolGear } from './sheetFixture';
-import { newSkillState, effectsActive, toggleTrack, effectLine, describeFold } from '../src/sim/skills';
-import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
-import { placeStatus } from '../src/sim/mobStatus';
+import { newSkillState, effectsActive, toggleTrack, effectLine, describeFold } from '../src/sim/combat/skills';
+import { newGame, tick, setLevel, huntZone } from '../src/sim/core/game';
+import { placeStatus } from '../src/sim/combat/mobStatus';
 import { eng } from '../src/engine/client';
 
 const row = (id: string) => sm.byId[id]!;
@@ -279,6 +279,8 @@ describe('the ring carries the beats an animation is made of', () => {
 
   it('a heal says what the pool actually took back', () => {
     const s = hunting();
+    s.hunting = false;
+    s.group = [];
     s.player.hp = 1;
     s.healUp = { pctPerSec: 0.05, secLeft: 3 };
     s.fx = [];

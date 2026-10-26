@@ -81,7 +81,7 @@
     "alphaDiscard": 8,
     "frameCount": 16,
     "sourcePixelsUnmodified": true,
-    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "visualReview": "source silhouettes, full atlas phases and sampled in-app arena cast inspected; 1920 screenshot surface unavailable",
     "runtimeActivated": true,
     "renderedPaddingPass": true,
     "virtualPaddingPx": 64,
@@ -92,7 +92,11 @@
       "actorBodyRulerM": 0.5,
       "arenaCalibrationVerified": false
     },
-    "integratedBrowserSample": false
+    "integratedBrowserSample": true,
+    "integratedViewport": [
+      831,
+      785
+    ]
   },
   {
     "id": "attack.sand_storm",
@@ -110,7 +114,7 @@
     "alphaDiscard": 8,
     "frameCount": 16,
     "sourcePixelsUnmodified": true,
-    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "visualReview": "source silhouettes, full atlas phases and sampled in-app arena cast inspected; 1920 screenshot surface unavailable",
     "runtimeActivated": true,
     "renderedPaddingPass": true,
     "virtualPaddingPx": 64,
@@ -121,7 +125,11 @@
       "actorBodyRulerM": 0.5,
       "arenaCalibrationVerified": false
     },
-    "integratedBrowserSample": false
+    "integratedBrowserSample": true,
+    "integratedViewport": [
+      831,
+      785
+    ]
   },
   {
     "id": "attack.void_blast",
@@ -139,7 +147,7 @@
     "alphaDiscard": 8,
     "frameCount": 16,
     "sourcePixelsUnmodified": true,
-    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "visualReview": "source silhouettes, full atlas phases and sampled in-app arena cast inspected; 1920 screenshot surface unavailable",
     "runtimeActivated": true,
     "renderedPaddingPass": true,
     "virtualPaddingPx": 64,
@@ -150,7 +158,11 @@
       "actorBodyRulerM": 0.5,
       "arenaCalibrationVerified": false
     },
-    "integratedBrowserSample": false
+    "integratedBrowserSample": true,
+    "integratedViewport": [
+      831,
+      785
+    ]
   },
   {
     "id": "attack.ground_slam",
@@ -201,7 +213,7 @@
     "alphaDiscard": 8,
     "frameCount": 16,
     "sourcePixelsUnmodified": true,
-    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "visualReview": "source silhouettes, full atlas phases and sampled in-app arena cast inspected; 1920 screenshot surface unavailable",
     "runtimeActivated": true,
     "renderedPaddingPass": true,
     "virtualPaddingPx": 64,
@@ -212,7 +224,11 @@
       "actorBodyRulerM": 0.5,
       "arenaCalibrationVerified": false
     },
-    "integratedBrowserSample": false
+    "integratedBrowserSample": true,
+    "integratedViewport": [
+      831,
+      785
+    ]
   },
   {
     "id": "attack.shatter",
@@ -230,7 +246,7 @@
     "alphaDiscard": 8,
     "frameCount": 16,
     "sourcePixelsUnmodified": true,
-    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "visualReview": "source silhouettes, full atlas phases and sampled in-app arena cast inspected; 1920 screenshot surface unavailable",
     "runtimeActivated": true,
     "renderedPaddingPass": true,
     "virtualPaddingPx": 64,
@@ -241,7 +257,11 @@
       "actorBodyRulerM": 0.5,
       "arenaCalibrationVerified": false
     },
-    "integratedBrowserSample": false
+    "integratedBrowserSample": true,
+    "integratedViewport": [
+      831,
+      785
+    ]
   },
   {
     "id": "attack.overload",
@@ -259,7 +279,7 @@
     "alphaDiscard": 8,
     "frameCount": 16,
     "sourcePixelsUnmodified": true,
-    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "visualReview": "source silhouettes, full atlas phases and sampled in-app arena cast inspected; 1920 screenshot surface unavailable",
     "runtimeActivated": true,
     "renderedPaddingPass": true,
     "virtualPaddingPx": 64,
@@ -270,7 +290,11 @@
       "actorBodyRulerM": 0.5,
       "arenaCalibrationVerified": false
     },
-    "integratedBrowserSample": false
+    "integratedBrowserSample": true,
+    "integratedViewport": [
+      831,
+      785
+    ]
   },
   {
     "id": "attack.aftershock",
@@ -288,7 +312,7 @@
     "alphaDiscard": 8,
     "frameCount": 16,
     "sourcePixelsUnmodified": true,
-    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "visualReview": "source silhouettes, full atlas phases and sampled in-app arena cast inspected; 1920 screenshot surface unavailable",
     "runtimeActivated": true,
     "renderedPaddingPass": true,
     "virtualPaddingPx": 64,
@@ -299,7 +323,11 @@
       "actorBodyRulerM": 0.5,
       "arenaCalibrationVerified": false
     },
-    "integratedBrowserSample": false
+    "integratedBrowserSample": true,
+    "integratedViewport": [
+      831,
+      785
+    ]
   },
   {
     "id": "attack.venom_spray",
@@ -350,7 +378,7 @@
     "alphaDiscard": 8,
     "frameCount": 16,
     "sourcePixelsUnmodified": true,
-    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "visualReview": "source silhouettes, full atlas phases and sampled in-app arena cast inspected; 1920 screenshot surface unavailable",
     "runtimeActivated": true,
     "renderedPaddingPass": true,
     "virtualPaddingPx": 64,
@@ -361,7 +389,11 @@
       "actorBodyRulerM": 0.5,
       "arenaCalibrationVerified": false
     },
-    "integratedBrowserSample": false
+    "integratedBrowserSample": true,
+    "integratedViewport": [
+      831,
+      785
+    ]
   },
   {
     "id": "attack.whirlwind",
@@ -381,7 +413,7 @@
     "sourcePixelsUnmodified": true,
     "renderedPaddingPass": true,
     "virtualPaddingPx": 64,
-    "visualReview": "source silhouettes, full atlas phases and sampled browser playback inspected; live ground-plane calibration pending",
+    "visualReview": "user-verified arena playback: sampled-feet follow, cancel, overlap; source atlas phases inspected",
     "runtimeActivated": true,
     "sourcePreview": {
       "loaded": true,
@@ -390,7 +422,11 @@
       "actorBodyRulerM": 0.5,
       "arenaCalibrationVerified": false
     },
-    "integratedBrowserSample": false
+    "integratedBrowserSample": true,
+    "integratedViewport": [
+      1920,
+      1080
+    ]
   },
   {
     "id": "attack.arrow_shower",

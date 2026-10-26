@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { lineName, craftedMark } from "../../sim/craft";
+  import { lineName, craftedMark } from "../../sim/gear/craft";
   import { loot } from "../../engine/client";
   import { slotIcon } from "../../icon";
   import { SORT_LABELS, vsWorn, rankTone, type SlotEntry, type SortKey } from "./bag";
@@ -9,7 +9,7 @@
   import Pager from "../shared/Pager.svelte";
   import CountBadge from "../shared/CountBadge.svelte";
   import type { MenuItem } from "../shared/menu";
-  import type { GameState, Item } from "../../sim/types";
+  import type { GameState, Item } from "../../sim/core/types";
   import type { Snippet } from "svelte";
 
   /**

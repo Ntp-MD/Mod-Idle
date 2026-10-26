@@ -1,9 +1,9 @@
 import { fieldwork } from '../../engine/client';
-import { cooldownLeft } from '../../sim/dungeon';
-import { fieldActionProblem } from '../../sim/fieldwork';
-import type { GameState } from '../../sim/types';
-import { currentCell } from '../../sim/road';
-import { trailSiteAt } from '../../sim/map-exploration';
+import { cooldownLeft } from '../../sim/world/dungeon';
+import { fieldActionProblem } from '../../sim/world/fieldwork';
+import type { GameState } from '../../sim/core/types';
+import { currentCell } from '../../sim/world/road';
+import { trailSiteAt } from '../../sim/world/map-exploration';
 
 export interface MapDestination {
   key: string;

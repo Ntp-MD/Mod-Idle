@@ -1,17 +1,17 @@
 <script lang="ts">
     import { eng, sm } from "../../engine/client";
     import { elementIcon, skillIcon } from "../../icon";
-    import { ownsSkill, hpReserved, usableHp, effectLine } from "../../sim/skills";
-    import { statusLabel } from "../../sim/mobStatus";
-    import { statusViews } from "../../sim/playerStatus";
+    import { ownsSkill, hpReserved, usableHp, effectLine } from "../../sim/combat/skills";
+    import { statusLabel } from "../../sim/combat/mobStatus";
+    import { statusViews } from "../../sim/combat/playerStatus";
     import { fxOut } from "../shared/motion";
     import Meter from "../shared/Meter.svelte";
     import CombatActor from "./CombatActor.svelte";
     import CombatEffectBadge from "./CombatEffectBadge.svelte";
     import { combatDamagePops, combatEffectLevel, importantCombatEvent, type CombatEffectLevel } from "./combat-presentation";
-    import type { GameState, FxEvent } from "../../sim/types";
-    import type { Character } from "../../sim/player";
-    import type { Statuses, StatusName } from "../../sim/combat";
+    import type { GameState, FxEvent } from "../../sim/core/types";
+    import type { Character } from "../../sim/core/player";
+    import type { Statuses, StatusName } from "../../sim/combat/combat";
 
     /** The actor moves independently of its fixed vitals, identity and status reads. */
     let {
@@ -85,7 +85,7 @@
     });
     const debuffMarks = $derived.by(() => {
         void s.clockSec;
-        // the aggregate views come through the one status adapter (`sim/playerStatus.ts`), never a
+        // the aggregate views come through the one status adapter (`sim/combat/playerStatus.ts`), never a
         // second read of the raw line
         return statusViews(statuses)
             .filter((v) => v.secLeft > 0)

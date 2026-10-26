@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { newGame } from '../src/sim/game';
-import { repairGear } from '../src/sim/town';
-import { settlementCell } from '../src/sim/road';
-import type { Item } from '../src/sim/types';
+import { newGame } from '../src/sim/core/game';
+import { repairGear } from '../src/sim/town/town';
+import { settlementCell } from '../src/sim/world/road';
+import type { Item } from '../src/sim/core/types';
 import { refreshSelectionAfterRepair, resolveItemSelection } from '../src/ui/inventory/item-selection';
 import { newCraftWorkbenchView, nextCraftReveal, revealPageFor } from '../src/ui/inventory/craft-workbench';
 

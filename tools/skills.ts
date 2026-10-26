@@ -39,7 +39,7 @@ function calc() {
   const head = ['Skill', 'basis', 'cd', 'eff cd', 'press/s', 'cost', 'cost/s', 'dmg/press'];
   const rows = activeByType('attack').map((s: any) => {
     const r = M.row(s, { ...ref, cdrPct, ladderPct, level });
-    const cost = M.costOf(s, { skillLevel: level, aoe: (Number(String(s.targets || '1').split('/')[0]) || 1) > 1 });
+    const cost = M.costOf(s, { skillLevel: level });
     // a row with no timer of its own has no cooldown-derived rate: its beat is the attack clock
     const rateN = r.pressesPerSec == null ? beatRate : r.pressesPerSec;
     const rate = r.pressesPerSec == null ? `${beatRate.toFixed(2)} beat` : r.pressesPerSec.toFixed(2);
@@ -99,7 +99,7 @@ function levels(which: string) {
     const head = ['level', 'damage%', 'effect%', 'press (glass)', 'press (caster)', 'cost', ...(s.effects || []).map((e: any) => `${e.stat}${e.op === 'mult' ? ' x' : e.op === 'add_flat' ? ' +' : ' +%'}`)];
     const body: any[][] = [];
     for (let lv = 1; lv <= L; lv++) {
-      const cost = M.costOf(s, { skillLevel: lv, aoe: (Number(String(s.targets || '1').split('/')[0]) || 1) > 1 });
+      const cost = M.costOf(s, { skillLevel: lv });
       body.push([`${lv}`, `${M.damagePct(lv)}`, `${M.effectPct(lv)}`, fmt(Math.round(M.pressOn(s, 'glass', lv))), fmt(Math.round(M.pressOn(s, 'caster', lv))), `${fmt(Math.round(cost.amount))} ${cost.resource}`,
         ...M.effectsAt(s, lv).map((e: any) => (e.op === 'mult' ? e.value.toFixed(2) : e.value.toFixed(1)))]);
     }

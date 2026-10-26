@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { isAdvancedStone, modesForStone, stoneUseReason } from '../src/ui/inventory/craft-use';
-import { newGame } from '../src/sim/game';
+import { newGame } from '../src/sim/core/game';
 import { imprintStones } from '../src/ui/inventory/stones';
-import type { Item } from '../src/sim/types';
+import type { Item } from '../src/sim/core/types';
 
 describe('craft bench disclosure', () => {
   it('keeps a legacy excluded Imprint visible and explains why no line accepts it', () => {

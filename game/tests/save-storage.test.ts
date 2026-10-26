@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { newGame } from '../src/sim/game';
+import { newGame } from '../src/sim/core/game';
 
 describe('durable save success and storage recovery', () => {
   let save: typeof import('../src/state/save');

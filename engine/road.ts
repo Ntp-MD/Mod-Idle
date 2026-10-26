@@ -139,11 +139,6 @@ export function createRoad(E: EngineData) {
   /** How many blocks from the nearest settlement: 0 is a town, 1 is a side of it, 2 and out is bare. */
   const cellRank = (h: Hex) => hexDistance(h, owningNode(h));
 
-  /** One encounter chance per block walked, so a longer walk is a longer series of chances. */
-  const encounterChance = () => R.encounter_chance_pct / 100;
-  /** True when a block rolls an encounter. Offline it never does: an away period never walks. */
-  const rollEncounter = (rng: Rng) => rng() < encounterChance();
-
   /** The whole world on foot: every ordered pair, so the UI can offer any destination. */
   const pairs = nodes.flatMap((a) => nodes.filter((b) => b.id !== a.id).map((b) => ({
     a: a.id,
@@ -155,7 +150,6 @@ export function createRoad(E: EngineData) {
   return {
     R, nodes, nodeById, blocksBetween, secBetween, routeBetween, routeKeys, pairs,
     hexKeys, routeHex, blocksBetweenHex, secFromHex, neighbours, owners, owningNode, cellRank,
-    encounterChance, rollEncounter,
     blockSec: R.block_sec,
   };
 }

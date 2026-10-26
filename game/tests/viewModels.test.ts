@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { newGame as newGameForHud } from '../src/sim/game';
+import { newGame as newGameForHud } from '../src/sim/core/game';
 import { E, loot } from '../src/engine/client';
 import { pieceRank, rankTone, gearEntry, stackEntry, sortEntries, vsWorn, compareLines } from '../src/ui/inventory/bag';
 import { castForHit, fxByMob, plateBeat, platePark, plateStrike, plateGesture, graveIds, parked, windupOf } from '../src/ui/combat/plate';
 import { ramp } from '../src/ui/map/map';
 import { snapCounters, buildAwayReport, fieldLabel, describeSnap, mechanicWords, sideSpawnWords } from '../src/ui/hud/hud';
 import { bar, curseWords, statusWords } from '../src/ui/shared/field';
-import type { Item, Mob, FxEvent } from '../src/sim/types';
-import type { BagStack } from '../src/sim/slots';
+import type { Item, Mob, FxEvent } from '../src/sim/core/types';
+import type { BagStack } from '../src/sim/gear/slots';
 
 /**
  * The two view models the HUD draws from. They are pure by design — no clock, no state between reads —

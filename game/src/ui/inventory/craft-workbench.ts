@@ -1,5 +1,5 @@
-import type { CraftOp, Where } from '../../sim/craft';
-import type { Item } from '../../sim/types';
+import type { CraftOp, Where } from '../../sim/gear/craft';
+import type { Item } from '../../sim/core/types';
 
 /** A contextual open asks the board to show one piece once, after it has measured the grid. */
 export interface CraftReveal {

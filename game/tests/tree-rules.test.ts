@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { createTree, type TreeSpec } from '../../engine/tree.ts';
 import { MODS, tree } from '../src/engine/client';
-import { emptyGear, sumLines, applyTreeRules, conversionOf } from '../src/sim/player';
-import { canSpendTree, spendTreePoint } from '../src/sim/tree';
-import { newGame } from '../src/sim/game';
+import { emptyGear, sumLines, applyTreeRules, conversionOf } from '../src/sim/core/player';
+import { canSpendTree, spendTreePoint } from '../src/sim/core/tree';
+import { newGame } from '../src/sim/core/game';
 
 /**
  * The bounded rule vocabulary (a keystone may carry a drawback), the threshold clusters, and the

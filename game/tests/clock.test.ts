@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { E } from '../src/engine/client';
-import { newGame, tick, catchUp, catchUpAsync, catchUpPlan, schedulerBatch, WAKE_SEC, MAX_BATCH, huntZone, setLevel } from '../src/sim/game';
-import type { GameState } from '../src/sim/types';
+import { newGame, tick, catchUp, catchUpAsync, catchUpPlan, schedulerBatch, WAKE_SEC, MAX_BATCH, huntZone, setLevel } from '../src/sim/core/game';
+import type { GameState } from '../src/sim/core/types';
 
 /**
  * The world clock has three callers and one loop: the live scheduler ticks online, `catchUp` runs the

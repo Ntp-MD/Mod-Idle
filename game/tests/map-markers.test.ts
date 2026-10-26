@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { E } from '../src/engine/client';
-import { newGame } from '../src/sim/game';
+import { newGame } from '../src/sim/core/game';
 import { adventureView, stackAdventurePlacements, type AdventureCell } from '../src/ui/map/map-adventure';
 import { mapMarker, mapSpeciesGlyph, type MapMarkerGlyph, type MapMarkerKind } from '../src/ui/map/map-markers';
 import { mobFixture } from './mobFixture';

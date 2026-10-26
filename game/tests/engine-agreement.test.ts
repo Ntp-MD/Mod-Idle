@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
 import { eng, E, MODS } from '../src/engine/client';
-import { buildCharacter } from '../src/sim/player';
-import { newGame, tick, catchUp, huntZone, carried } from '../src/sim/game';
+import { buildCharacter } from '../src/sim/core/player';
+import { newGame, tick, catchUp, huntZone, carried } from '../src/sim/core/game';
 import { modRangeProblems } from '../../tools/lib/mod-ranges.ts';
 
 // The cages load tools/lib/engine.ts, which is a bridge over the same engine/index.ts the client

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { newGame } from '../src/sim/game';
-import { currentCell, road } from '../src/sim/road';
+import { newGame } from '../src/sim/core/game';
+import { currentCell, road } from '../src/sim/world/road';
 import { eng, TOWN } from '../src/engine/client';
-import { hexKey, MAP_EXPLORATION } from '../src/sim/map-exploration';
+import { hexKey, MAP_EXPLORATION } from '../src/sim/world/map-exploration';
 import { adventureTitle, adventureView, campActivityArt, stackAdventurePlacements, type AdventureCell } from '../src/ui/map/map-adventure';
-import type { GameState } from '../src/sim/types';
+import type { GameState } from '../src/sim/core/types';
 import { mobFixture } from './mobFixture';
 
 /**

@@ -1,15 +1,15 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { E, TOWN, sm, trade } from '../src/engine/client';
-import { newGame, tick } from '../src/sim/game';
+import { newGame, tick } from '../src/sim/core/game';
 import {
   acknowledgeDelivery, contractById, deliver, deliveryConfig, deliveryPauseReason, normalizeDeliveries,
   offerDelivery, previewDelivery, pruneDeliveries, tickDeliveries, trackDelivery,
-} from '../src/sim/delivery';
-import type { DeliveryContract } from '../src/sim/delivery-types';
-import { newDeliverySummary } from '../src/sim/delivery-types';
-import { quoteSale, tradeBucket } from '../src/sim/trade';
-import { settlementCell, startWalk } from '../src/sim/road';
-import { slotsAvailable } from '../src/sim/slots';
+} from '../src/sim/town/delivery';
+import type { DeliveryContract } from '../src/sim/town/delivery-types';
+import { newDeliverySummary } from '../src/sim/town/delivery-types';
+import { quoteSale, tradeBucket } from '../src/sim/town/trade';
+import { settlementCell, startWalk } from '../src/sim/world/road';
+import { slotsAvailable } from '../src/sim/gear/slots';
 import { exportJson, importJson, migrate } from '../src/state/save';
 
 const writer = { writer: true }, readonly = { writer: false };

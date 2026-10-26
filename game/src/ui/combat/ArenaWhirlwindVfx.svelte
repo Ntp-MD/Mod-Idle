@@ -4,10 +4,10 @@
 
   type Point = {x:number; y:number};
   let { age, source, point, ground, cast, area, duration, strikes = 3, charging = false, windup = 0,
-    reducedMotion = false, critical = false, layer = 'front' }: {
+    reducedMotion = false, critical = false, layer = 'front', showCasterVortex = true }: {
     age:number; source:Point; point:Point; ground:Point; cast:boolean; area?:VfxFootprint;
     duration:number; strikes?:number; charging?:boolean; windup?:number; reducedMotion?:boolean;
-    critical?:boolean; layer?:'ground'|'front';
+    critical?:boolean; layer?:'ground'|'front'; showCasterVortex?:boolean;
   } = $props();
   const id = $props.id();
   const total = $derived(Math.max(.2, duration));
@@ -35,7 +35,9 @@
         <stop offset=".62" stop-color="currentColor" stop-opacity=".13" />
         <stop offset="1" stop-color="currentColor" stop-opacity="0" />
       </radialGradient>
+      <clipPath id={`${id}-far-arc`}><rect x="-1.2" y="-1.2" width="2.4" height="1.2" /></clipPath>
     </defs>
+    <g clip-path={`url(#${id}-far-arc)`}>
     <circle r="1.08" fill={`url(#${id}-field)`} />
     <circle class="ring" r=".98" stroke-dasharray=".17 .09" stroke-dashoffset={reducedMotion?0:-age*.8} opacity=".55" />
     <circle class="ring" r=".72" stroke-dasharray=".11 .1" stroke-dashoffset={reducedMotion?0:age*1.1} opacity=".38" />
@@ -44,10 +46,25 @@
       {@const angle = tick/8*Math.PI*2+(reducedMotion?0:age*.7)}
       <path class="tick" d={`M${Math.cos(angle)*.78} ${Math.sin(angle)*.78} L${Math.cos(angle)*1.03} ${Math.sin(angle)*1.03}`} opacity=".4" />
     {/each}
+    </g>
   </g>
 {/if}
 
-{#if cast && charging && layer === 'front'}
+{#if cast && layer === 'front' && area}
+  <g transform={areaMatrix} class="whirlwind" data-whirlwind-near-arc opacity={charging ? .3+windup*.35 : Math.min(1,fade*1.2)}>
+    <defs><clipPath id={`${id}-near-arc`}><rect x="-1.2" y="0" width="2.4" height="1.2" /></clipPath></defs>
+    <g clip-path={`url(#${id}-near-arc)`}>
+      <circle class="ring" r=".98" stroke-dasharray=".17 .09" stroke-dashoffset={reducedMotion?0:-age*.8} opacity=".62" />
+      <circle class="ring" r=".72" stroke-dasharray=".11 .1" stroke-dashoffset={reducedMotion?0:age*1.1} opacity=".4" />
+      {#each Array.from({length:8},(_,index)=>index) as tick}
+        {@const angle = tick/8*Math.PI*2+(reducedMotion?0:age*.7)}
+        <path class="tick" d={`M${Math.cos(angle)*.78} ${Math.sin(angle)*.78} L${Math.cos(angle)*1.03} ${Math.sin(angle)*1.03}`} opacity=".48" />
+      {/each}
+    </g>
+  </g>
+{/if}
+
+{#if cast && charging && layer === 'front' && showCasterVortex}
   <g transform={`translate(${floor.x} ${floor.y})`} class="whirlwind" opacity={.25+windup*.45} data-whirlwind-charge>
     <ellipse rx={width*(.12+windup*.16)} ry={width*(.04+windup*.05)} fill="none" stroke="currentColor"
       stroke-width="1.4" stroke-dasharray="10 8" stroke-dashoffset={-windup*36} opacity=".7" />
@@ -56,7 +73,7 @@
   </g>
 {/if}
 
-{#if cast && layer === 'front' && age >= 0}
+{#if cast && layer === 'front' && age >= 0 && showCasterVortex}
   <g transform={`translate(${floor.x} ${floor.y})`} class="whirlwind" opacity={fade} data-whirlwind-cast data-whirlwind-rounds={rounds}>
     <defs>
       <radialGradient id={`${id}-base`}>

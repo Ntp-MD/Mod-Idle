@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { E, eng, sm } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { buildCharacter, emptyGear } from '../src/sim/player';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
 import { poolGear } from './sheetFixture';
-import { mobSwing, playerSwing } from '../src/sim/combat';
-import { newMobStatusStore, stepMob, applyBleed, modsOn, targetMods } from '../src/sim/mobStatus';
-import { NO_CURSE, modsFromAuraFold } from '../src/sim/curse';
-import { newSkillState, effectsActive } from '../src/sim/skills';
-import type { Item, Mob } from '../src/sim/types';
+import { mobSwing, playerSwing } from '../src/sim/combat/combat';
+import { newMobStatusStore, stepMob, applyBleed, modsOn, targetMods } from '../src/sim/combat/mobStatus';
+import { NO_CURSE, modsFromAuraFold } from '../src/sim/combat/curse';
+import { newSkillState, effectsActive } from '../src/sim/combat/skills';
+import type { Item, Mob } from '../src/sim/core/types';
 import { mobFixture } from './mobFixture';
 
 const valueOf = (id: string, stat: string) => sm.byId[id]!.effects!.find((e: any) => e.stat === stat)!.value;

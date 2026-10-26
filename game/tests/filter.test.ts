@@ -1,18 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { E, eng, loot } from '../src/engine/client';
-import { newGame, tick, setLevel, huntZone, adjudicateDrop, runFilterNow } from '../src/sim/game';
-import { openingGear } from '../src/sim/player';
-import { autoEquip } from '../src/sim/gear';
-import { wants } from '../src/sim/collector';
-import { rollDrop } from '../src/sim/drop';
-import { newFilter, ruleFor, setRule, refresh, describeRule, FILTER_SLOTS, presetSlots, savePreset, loadPreset, clearPreset } from '../src/sim/filter';
-import { slotsAvailable, slotsUsed } from '../src/sim/slots';
-import { mark, reason, arm, SAVE_CFG } from '../src/sim/snapshot';
+import { newGame, tick, setLevel, huntZone, adjudicateDrop, runFilterNow } from '../src/sim/core/game';
+import { openingGear } from '../src/sim/core/player';
+import { autoEquip } from '../src/sim/gear/gear';
+import { wants } from '../src/sim/town/collector';
+import { rollDrop } from '../src/sim/gear/drop';
+import { newFilter, ruleFor, setRule, refresh, describeRule, FILTER_SLOTS, presetSlots, savePreset, loadPreset, clearPreset } from '../src/sim/gear/filter';
+import { slotsAvailable, slotsUsed } from '../src/sim/gear/slots';
+import { mark, reason, arm, SAVE_CFG } from '../src/sim/core/snapshot';
 import { mulberry32 } from '../src/engine/client-helpers';
 import {
   writeSave, listSnapshots, restoreSnapshot, readAccount, SCHEMA_VERSION, exportJson, importJson,
 } from '../src/state/save';
-import type { Item } from '../src/sim/types';
+import type { Item } from '../src/sim/core/types';
 
 const piece = (over: Partial<Item>): Item => ({
   slot: 'helmet', base: 'coif', ilvl: 1, quality: 'low', tier: 'T3', lines: [], q: 0, ...over,

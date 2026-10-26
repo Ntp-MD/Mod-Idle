@@ -1,13 +1,13 @@
 import { E, eng, fieldwork } from '../../engine/client';
-import { settlementById } from '../../sim/town';
-import { rankOf, currentCell, walkedCells, trailCells, cellsTo } from '../../sim/road';
+import { settlementById } from '../../sim/town/town';
+import { rankOf, currentCell, walkedCells, trailCells, cellsTo } from '../../sim/world/road';
 import { mapUprightAt, projectedHex, projectMapPoint } from './map-projection';
 import { mapScreenLabelMatrix } from './map-camera';
 import { mapSceneProjection, paintMapScene } from './map-scene';
 import { mapLevelBand, mapNameLines, mapNamePointer, mapNamePosition, placeMapNames, type MapNameBox } from './map-labels';
 import { paintMapAdventure } from './map-adventure';
 import { mapMarker } from './map-markers';
-import { MAP_EXPLORATION, type TrailSite } from '../../sim/map-exploration';
+import { MAP_EXPLORATION, type TrailSite } from '../../sim/world/map-exploration';
 
 const figureArt = new WeakMap<Element, string>();
 type SheetIndex = {

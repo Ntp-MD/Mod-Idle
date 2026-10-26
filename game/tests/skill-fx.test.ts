@@ -23,11 +23,12 @@ describe('skill FX assembly', () => {
     }
   });
 
-  it('composes shared atoms into distinct fireball and meteor projectile art', () => {
+  it('keeps Fireball, Firestorm and Meteor identities distinct', () => {
     const fireball = skillFxFor('attack.fireball')!;
-    const meteor = skillFxFor('attack.firestorm')!;
+    const meteor = skillFxFor('attack.meteor')!;
+    const firestorm = skillFxFor('attack.firestorm')!;
     expect(fireball.projectilePath).not.toBe(meteor.projectilePath);
-    expect(meteor.projectilePath.length).toBeGreaterThan(fireball.projectilePath.length);
+    expect(meteor.path).not.toBe(firestorm.path);
     expect(fireball.path.length).toBeGreaterThan(0);
     expect(meteor.path.length).toBeGreaterThan(0);
   });

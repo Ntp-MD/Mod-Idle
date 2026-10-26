@@ -208,7 +208,7 @@
     }
   ],
   "notes": [
-    "All 34 skills are activated in game/public/fx/authored/batch-manifest.json.",
+    "All 34 skills are activated in game/src/ui/combat/fx-manifests/batch-manifest.json.",
     "Per-frame source rectangles and virtual padding measured by tools/check-authored-vfx.py; original pixels retained.",
     "Blizzard regenerated as atlas-v2.png to provide clear frame separators.",
     "Browser Effect lab verified authored rendering for all 34 skills."

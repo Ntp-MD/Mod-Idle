@@ -2,16 +2,16 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { E, sm } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { buildCharacter, emptyGear } from '../src/sim/player';
-import { mastery } from '../src/sim/mastery';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
+import { mastery } from '../src/sim/core/mastery';
 import { poolGear } from './sheetFixture';
-import { mobSwing, playerSwing } from '../src/sim/combat';
-import { newSkillState, castOnce, hasRule, esAbsorbPct, triggerAuras, toggleTrack } from '../src/sim/skills';
-import { newMobStatusStore, modsOn, holdsCondition, stepMob } from '../src/sim/mobStatus';
-import { newCurses, applyCurse, lineValue } from '../src/sim/curse';
-import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
-import type { Character } from '../src/sim/player';
-import type { Mob } from '../src/sim/types';
+import { mobSwing, playerSwing } from '../src/sim/combat/combat';
+import { newSkillState, castOnce, hasRule, esAbsorbPct, triggerAuras, toggleTrack } from '../src/sim/combat/skills';
+import { newMobStatusStore, modsOn, holdsCondition, stepMob } from '../src/sim/combat/mobStatus';
+import { newCurses, applyCurse, lineValue } from '../src/sim/combat/curse';
+import { newGame, tick, setLevel, huntZone } from '../src/sim/core/game';
+import type { Character } from '../src/sim/core/player';
+import type { Mob } from '../src/sim/core/types';
 import { mobFixture } from './mobFixture';
 
 /**
@@ -188,7 +188,7 @@ describe('the support rows that change the character', () => {
       tick(s, { online: true });
       return s;
     };
-    const cost = sm.costOf(sm.byId['buff.ghost_dance'], { skillLevel: 1, aoe: false });
+    const cost = sm.costOf(sm.byId['buff.ghost_dance'], { skillLevel: 1 });
     expect(cost.resource).toBe('mana');
     // the pool (plus one tick's regen) cannot fund the cost, so only Blood Price can bring it up
     expect(setup(false).skills.buffUp['buff.ghost_dance'] ?? 0).toBe(0);
@@ -372,12 +372,12 @@ describe('the trigger auras fire the first ready slot at their own price', () =>
 
 describe('no mechanic word is left unread', () => {
   it('every rule in the closed set appears in a client source file', () => {
-    const spent = ['src/sim/skills.ts', 'src/sim/game.ts', 'src/sim/combat.ts', 'src/sim/mobStatus.ts']
+    const spent = ['src/sim/combat/skills.ts', 'src/sim/core/game.ts', 'src/sim/combat/combat.ts', 'src/sim/combat/mobStatus.ts']
       .map((f) => readFileSync(f, 'utf8')).join('\n');
     for (const rule of sm.EFFECT_RULES) {
       expect(spent).toContain(`'${rule}'`);
     }
-    for (const by of sm.MODELLED_BY) expect(spent + readFileSync('src/sim/skills.ts', 'utf8')).toContain(by);
+    for (const by of sm.MODELLED_BY) expect(spent + readFileSync('src/sim/combat/skills.ts', 'utf8')).toContain(by);
   });
 });
 

@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { mulberry32 } from '../src/engine/client-helpers';
 import {
   arenaDistance, captureCombatArena, createCombatArena, syncCombatArena,
-} from '../src/sim/combat-arena';
-import { characterSheet, hitColour, newGame, setLevel, spawnMob, tick } from '../src/sim/game';
+} from '../src/sim/combat/combat-arena';
+import { characterSheet, hitColour, newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
+import { pinFieldPopulation } from './mobFixture';
 
 function rangedFight(distance = 3, over: Record<string, unknown> = {}) {
   const state = newGame(41);
@@ -23,12 +24,58 @@ function rangedFight(distance = 3, over: Record<string, unknown> = {}) {
   Object.assign(arena.player, { x: 1, y: 6 });
   Object.assign(arena.mobs[mob.id], { x: 1 + distance, y: 6 });
   captureCombatArena(arena, state, 0);
+  pinFieldPopulation(state);
   return { state, mob, arena };
 }
 
 const shots = (arena: ReturnType<typeof createCombatArena>) => arena.actions.filter((action) => action.ranged);
 
 describe('ordinary ranged mob defaults', () => {
+  it('prepares the first usable kit entry for its full cast time before releasing it', () => {
+    const { state, mob, arena } = rangedFight(3, {
+      skillIds: ['mob.physical.cleave', 'mob.cold.ice-shard'], skillReadyAtUs: {},
+    });
+    state.gear[0] = { slot: 'main hand', base: 'bow', ilvl: 1, quality: 'Normal', tier: 'T1', lines: [] };
+    tick(state, { arena, autoSkills: false });
+    const action = arena.actions.find(entry => entry.actorId === mob.id && entry.skillId === 'mob.cold.ice-shard')!;
+    expect(action?.timing).toBeDefined();
+    expect(action.timing!.releaseAtUs - action.timing!.startedAtUs).toBe(400_000);
+    expect(state.fx.filter(event => event.kind === 'taken' && event.skillId === 'mob.cold.ice-shard')).toHaveLength(0);
+    expect(mob.skillReadyAtUs?.['mob.cold.ice-shard']).toBeUndefined();
+    tick(state, { arena, autoSkills: false });
+    const hits = state.fx.filter(event => event.kind === 'taken' && event.skillId === 'mob.cold.ice-shard');
+    expect(hits).toHaveLength(1);
+    expect(hits[0].atUs).toBe(1_400_000);
+    expect(shots(arena).some(shot => shot.atUs === 1_000_000)).toBe(false);
+  });
+
+  it('keeps a heavy preparation across ticks without shortening it to the first opportunity', () => {
+    const { state, mob, arena } = rangedFight(1, {
+      line: 'front', hitsPerSec: 2, skillIds: ['mob.physical.crushing-blow'], skillReadyAtUs: {},
+    });
+    tick(state, { arena, autoSkills: false });
+    const action = arena.actions.find(entry => entry.actorId === mob.id && entry.skillId === 'mob.physical.crushing-blow')!;
+    expect(action?.timing?.startedAtUs).toBe(500_000);
+    expect(action?.timing?.releaseAtUs).toBe(1_300_000);
+    expect(state.fx.filter(event => event.kind === 'taken' && event.byId === mob.id)).toHaveLength(0);
+    tick(state, { arena, autoSkills: false });
+    expect(state.fx.filter(event => event.kind === 'taken' && event.skillId === 'mob.physical.crushing-blow').map(event => event.atUs)).toEqual([1_300_000]);
+    expect(arena.actions.filter(entry => entry.actorId === mob.id && entry.skillId === 'mob.physical.crushing-blow')).toHaveLength(1);
+  });
+
+  it('cancels a carried preparation on control without spending its strike cooldown', () => {
+    const { state, mob, arena } = rangedFight(1, {
+      line: 'front', hitsPerSec: 2, skillIds: ['mob.physical.crushing-blow'], skillReadyAtUs: {},
+    });
+    tick(state, { arena, autoSkills: false });
+    const action = arena.actions.find(entry => entry.actorId === mob.id && entry.skillId === 'mob.physical.crushing-blow')!;
+    state.mobStatus[mob.id] = { statuses: { shock: { stacks: 1, secLeft: 2, perSec: 0 } },
+      alignedPerSec: 0, elapsedSec: 0, stoppedSec: 0, stoppedUntil: 1.5 };
+    tick(state, { arena, autoSkills: false });
+    expect(arena.actions.find(entry => entry.id === action.id)?.cancelledAtUs).toBeLessThanOrEqual(1_300_000);
+    expect(mob.skillReadyAtUs?.['mob.physical.crushing-blow']).toBeUndefined();
+    expect(state.fx.filter(event => event.kind === 'taken' && event.skillId === 'mob.physical.crushing-blow')).toHaveLength(0);
+  });
   it('releases on the attack beat and applies damage at projectile contact', () => {
     const { state, arena } = rangedFight(3);
     tick(state, { arena, autoSkills: false });
@@ -122,6 +169,8 @@ describe('ordinary ranged mob defaults', () => {
     tick(state, { arena, autoSkills: false });
     expect(shots(arena)).toHaveLength(0);
     expect(arena.mobFlights).toHaveLength(0);
+    expect(state.fx.filter((event) => event.kind === 'taken')).toHaveLength(0);
+    tick(state, { arena, autoSkills: false });
     expect(state.fx.filter((event) => event.kind === 'taken').length).toBe(1);
   });
 
@@ -143,6 +192,8 @@ describe('ordinary ranged mob defaults', () => {
     tick(state, { arena, autoSkills: true });
     expect(shots(arena)).toHaveLength(0);
     expect(arena.mobFlights).toHaveLength(0);
+    expect(mob.skillReadyAtUs?.['mob.lightning.static-jab']).toBeUndefined();
+    tick(state, { arena, autoSkills: true });
     expect(state.fx.filter((event) => event.kind === 'taken' && event.byId === 'archer')).toHaveLength(1);
     expect(mob.skillReadyAtUs?.['mob.lightning.static-jab']).toBeGreaterThan(0);
   });

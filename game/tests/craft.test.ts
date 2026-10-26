@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { E, ED, loot, BASES } from '../src/engine/client';
 import { createCraft } from '../../engine/craft.ts';
-import { itemFromFrame, rollDrop } from '../src/sim/drop';
-import { itemName } from '../src/sim/item-name';
-import { doCraft, stoneNames, replaceChoices, poolOf, craftedMark } from '../src/sim/craft';
-import { newGame } from '../src/sim/game';
+import { itemFromFrame, rollDrop } from '../src/sim/gear/drop';
+import { itemName } from '../src/sim/gear/item-name';
+import { doCraft, stoneNames, replaceChoices, poolOf, craftedMark } from '../src/sim/gear/craft';
+import { newGame } from '../src/sim/core/game';
 import { mulberry32 } from '../src/engine/client-helpers';
-import type { Item } from '../src/sim/types';
+import type { Item } from '../src/sim/core/types';
 
 const craft = createCraft(ED, loot, BASES);
 // each band's level window starts where its span starts — read off the spans, never typed
@@ -30,7 +30,7 @@ describe('broken upgrade repair', () => {
   });
 });
 
-// `rollDrop` always stamps the quality band (`sim/drop.ts`), so a rolled piece carries a `q` even
+// `rollDrop` always stamps the quality band (`sim/gear/drop.ts`), so a rolled piece carries a `q` even
 // though `Item.q` is optional for hand-built fixtures elsewhere.
 function piece(seed = 1, band = 'low'): Item & { q: number } {
   return rollDrop(mulberry32(seed), band, SPAN_FROM(band)) as Item & { q: number };

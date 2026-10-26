@@ -18,7 +18,7 @@ Task guidance for simplifying repository work. Not a persistent voice. User inte
 1. **Understand** — read the relevant source, docs and callers; state the expected behavior.
 2. **Find the cause** — trace shared behavior; fix it once at its source, not at each symptom.
 3. **Change the least** — reuse existing code and platform features; no speculative abstractions, dependencies or scaffolding.
-4. **Check narrowly** — run the focused check for the changed behavior first.
+4. **Check narrowly** — run the focused check for the changed behavior first, then follow the verification scope in `AGENTS.md`; broaden when a shared contract changed.
 5. **Stop** — when acceptance criteria pass. Do not refactor adjacent code, and do not repeat passing checks without a relevant change.
 
 ## Do not cut

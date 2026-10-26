@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { GameState } from '../../sim/types';
-  import { itemName } from '../../sim/item-name';
-  import { ruleFor, FILTER_SLOTS, describeRule } from '../../sim/filter';
-  import { gearCarePreview } from '../../sim/gear-care';
-  import { autoReturnThreshold } from '../../sim/exploration';
-  import { slotsAvailable } from '../../sim/slots';
+  import type { GameState } from '../../sim/core/types';
+  import { itemName } from '../../sim/gear/item-name';
+  import { ruleFor, FILTER_SLOTS, describeRule } from '../../sim/gear/filter';
+  import { gearCarePreview } from '../../sim/gear/gear-care';
+  import { autoReturnThreshold } from '../../sim/world/exploration';
+  import { slotsAvailable } from '../../sim/gear/slots';
 
   let { state: gameState, writer, autoEquipEnabled, marginPct,
     onAutoEquip, onEquipNow, onMargin, onAutoReturn, onRule, onRunFilter, onOpenBag,

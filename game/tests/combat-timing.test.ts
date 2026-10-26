@@ -3,10 +3,12 @@ import { mulberry32 } from '../src/engine/client-helpers';
 import { sm } from '../src/engine/client';
 import {
   arenaAction, captureCombatArena, createCombatArena, sampleCombatArena, syncCombatArena,
-} from '../src/sim/combat-arena';
-import { characterSheet, newGame, setLevel, spawnMob, tick } from '../src/sim/game';
-import { prepareSkillCast } from '../src/sim/skills';
+} from '../src/sim/combat/combat-arena';
+import { characterSheet, newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
+import { prepareSkillCast } from '../src/sim/combat/skills';
 import { skillCastTiming } from '../../engine/skill-actions.ts';
+import { pinFieldPopulation } from './mobFixture';
+import { mobSkillById } from '../src/sim/combat/mobSkills';
 
 function arenaFight(skillId: string, distance: number) {
   const state = newGame(41);
@@ -28,6 +30,7 @@ function arenaFight(skillId: string, distance: number) {
   Object.assign(arena.player, { x: 1, y: 6 });
   Object.assign(arena.mobs[mob.id], { x: 1 + distance, y: 6 });
   captureCombatArena(arena, state, 0);
+  pinFieldPopulation(state);
   return { state, mob, arena };
 }
 
@@ -49,14 +52,17 @@ describe('live cast timing', () => {
   });
 
   it('cancels a windup without paying or starting cooldown when auto skills turn off', () => {
-    const { state, arena } = arenaFight('attack.firestorm', 9);
-    tick(state, { arena });
-    expect(arena.intent?.phase).toBe('windup');
-    expect(state.fx.some((event) => event.kind === 'cast' && event.skillId === 'attack.firestorm')).toBe(false);
-    expect(state.skills.cd['attack.firestorm'] || 0).toBe(0);
+    const { state, arena, mob } = arenaFight('attack.firestorm', 3);
+    const profile = sm.castProfileOf(sm.byId['attack.firestorm']);
+    const area = { origin: 'target' as const, radiusM: 3, center: { x: 4, y: 6 }, targetId: mob.id };
+    const timing = { ...skillCastTiming(profile, 0, 1_000_000, { x: 1, y: 6 }, area.center),
+      releaseAtUs: 3_000_000, impactAtUs: 4_000_000, recoveryUntilUs: 4_500_000 };
+    const action = arenaAction(arena, 'player', 'cast', 0, mob.id, 'attack.firestorm', area, timing)!;
+    arena.intent = { skillId: 'attack.firestorm', targetId: mob.id, targetPoint: { x: 4, y: 6 },
+      phase: 'windup', actionId: action.id, releaseAtUs: 3_000_000, recoveryUntilUs: 4_500_000 };
     tick(state, { arena, autoSkills: false });
     expect(arena.intent).toBeUndefined();
-    expect(arena.actions.find((entry) => entry.skillId === 'attack.firestorm')?.cancelledAtUs).toBeDefined();
+    expect(arena.actions.find((entry) => entry.id === action.id)?.cancelledAtUs).toBeDefined();
     expect(state.skills.cd['attack.firestorm'] || 0).toBe(0);
     expect(state.fx.some((event) => event.kind === 'cast' && event.skillId === 'attack.firestorm')).toBe(false);
   });
@@ -166,7 +172,9 @@ describe('live cast timing', () => {
 
   it('cancels an unpaid windup at the shock timestamp rather than at the next sample', () => {
     const { state, mob, arena } = arenaFight('attack.fireball', 3);
-    Object.assign(mob, { hitsPerSec: 2, atkTimer: -0.04, acc: 1e12, ps: 5,
+    // Keep Shock contact at .52s; its selected mob skill now performs its full preparation.
+    const prepareAtUs = 520_000 - Math.ceil(mobSkillById('mob.lightning.static-jab')!.cast_sec! * 1_000_000);
+    Object.assign(mob, { hitsPerSec: 2, atkTimer: 1 - prepareAtUs / 1_000_000 * 2, acc: 1e12, ps: 5,
       skillIds: ['mob.lightning.static-jab'], skillReadyAtUs: {} });
     Object.assign(arena.mobs[mob.id], { x: 2, y: 6 });
     const profile = sm.castProfileOf(sm.byId['attack.fireball']);

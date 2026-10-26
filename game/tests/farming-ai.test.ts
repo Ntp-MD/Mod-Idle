@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { arenaDistance, captureCombatArena, createCombatArena, syncCombatArena } from '../src/sim/combat-arena';
-import { characterSheet, newGame, setLevel, spawnMob, tick } from '../src/sim/game';
+import { arenaDistance, captureCombatArena, createCombatArena, syncCombatArena } from '../src/sim/combat/combat-arena';
+import { characterSheet, newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
+import { pinFieldPopulation } from './mobFixture';
 
 function farmFight(weapon: string | null, spots: { id: string; x: number; y: number }[]) {
   const state = newGame(41);
@@ -23,6 +24,7 @@ function farmFight(weapon: string | null, spots: { id: string; x: number; y: num
   Object.assign(arena.player, { x: 1, y: 6 });
   for (const spot of spots) Object.assign(arena.mobs[spot.id], { x: spot.x, y: spot.y });
   captureCombatArena(arena, state, 0);
+  pinFieldPopulation(state);
   return { state, arena };
 }
 

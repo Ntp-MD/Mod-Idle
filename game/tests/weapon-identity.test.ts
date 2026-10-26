@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { BASES, E, eng, loot, MODS, sm } from '../src/engine/client';
 import { createMastery } from '../../engine/mastery';
 import { createTree, type TreeSpec } from '../../engine/tree';
-import { rollDrop } from '../src/sim/drop';
-import { itemName } from '../src/sim/item-name';
-import { buildCharacter, emptyGear } from '../src/sim/player';
+import { rollDrop } from '../src/sim/gear/drop';
+import { itemName } from '../src/sim/gear/item-name';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
 
 const WEAPON_MULTS: Record<string, [number, number]> = {
   'one-handed sword': [1.2, 1],

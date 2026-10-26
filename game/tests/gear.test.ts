@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { E, BASES, STAT_KEYS, loot } from '../src/engine/client';
-import { newGame, tick, equippedCount, huntZone, carried } from '../src/sim/game';
-import { equipFromBag, gearModOf, autoEquip } from '../src/sim/gear';
-import { itemName } from '../src/sim/item-name';
-import { buildCharacter, emptyGear, openingGear } from '../src/sim/player';
-import { craft as clientCraft } from '../src/sim/craft';
-import { rollDrop } from '../src/sim/drop';
+import { newGame, tick, equippedCount, huntZone, carried } from '../src/sim/core/game';
+import { equipFromBag, gearModOf, autoEquip } from '../src/sim/gear/gear';
+import { itemName } from '../src/sim/gear/item-name';
+import { buildCharacter, emptyGear, openingGear } from '../src/sim/core/player';
+import { craft as clientCraft } from '../src/sim/gear/craft';
+import { rollDrop } from '../src/sim/gear/drop';
 import { mulberry32 } from '../src/engine/client-helpers';
-import type { Item } from '../src/sim/types';
+import type { Item } from '../src/sim/core/types';
 
 /**
  * Wearing a piece, as one verb (`game/src/sim/gear.ts`).

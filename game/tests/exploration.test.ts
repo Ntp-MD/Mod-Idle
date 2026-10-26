@@ -1,17 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { E, eng, TOWN, fieldwork } from '../src/engine/client';
-import { catchUp, catchUpAsync, newGame, setLevel, tick } from '../src/sim/game';
+import { catchUp, catchUpAsync, newGame, setLevel, tick } from '../src/sim/core/game';
 import { exportJson, importJson } from '../src/state/save';
-import { openingGear } from '../src/sim/player';
-import { depositMany } from '../src/sim/town';
-import { road, settlementCell, startWalk, zoneOf, rankOf } from '../src/sim/road';
-import { resolveTravelEvent } from '../src/sim/fieldwork';
+import { openingGear } from '../src/sim/core/player';
+import { depositMany } from '../src/sim/town/town';
+import { road, settlementCell, startWalk, zoneOf, rankOf } from '../src/sim/world/road';
+import { resolveTravelEvent } from '../src/sim/world/fieldwork';
 import {
   autoReturnThreshold, driveAutoReturn, finishAutoReturnDeposit, maybeStartAutoReturn,
   recordPatrolGroupClear, startPatrol, stopPatrol, togglePatrolStop,
-} from '../src/sim/exploration';
-import { progressTasks, rollTask, taskReward } from '../src/sim/town';
-import type { PatrolStop, TaskSlot } from '../src/sim/types';
+} from '../src/sim/world/exploration';
+import { progressTasks, rollTask, taskReward } from '../src/sim/town/town';
+import type { PatrolStop, TaskSlot } from '../src/sim/core/types';
 
 function stopsForZone(zone: number): PatrolStop[] {
   const settlement = TOWN.settlements.find((entry: any) => entry.zone === zone)!;

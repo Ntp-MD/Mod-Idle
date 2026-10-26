@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { E, dungeon as D } from '../src/engine/client';
-import { newGame, setLevel, tick, huntZone } from '../src/sim/game';
-import { enterDungeon, cooldownLeft } from '../src/sim/dungeon';
+import { E, dungeon as D, spawns } from '../src/engine/client';
+import { newGame, setLevel, tick, huntZone } from '../src/sim/core/game';
+import { enterDungeon, cooldownLeft } from '../src/sim/world/dungeon';
 
 /**
  * DG4 · the run's behaviour. A run fields `mob_cap` normals of its zone in encounters of at
@@ -64,7 +64,8 @@ describe('dungeon run', () => {
     expect(s.dungeon).toBeNull();
     // the run fields exactly its mob count, in capped encounters
     expect(s.counters.kills - kills0).toBe(D.mobCap);
-    expect(maxGroup).toBeLessThanOrEqual(D.groupCap);
+    // the run fields its budget in the zone's authored population density, not the retired 1-5 wave
+    expect(maxGroup).toBeLessThanOrEqual(spawns.profileFor(s.dungeon?.zone ?? s.zone, s.cell?.sub ?? null).cap);
     // the escrow paid out: something material landed
     const paid = s.bag.length - bag0 > 0 || (s.counters.salvaged || 0) > 0
       || sum(s.junk) - junk0 > 0 || sum(s.counters.stones) - stones0 > 0;

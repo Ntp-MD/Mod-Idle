@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { E } from '../src/engine/client';
-import { newGame } from '../src/sim/game';
-import { fitsTransaction, slotsAvailable, type BagCost } from '../src/sim/slots';
+import { newGame } from '../src/sim/core/game';
+import { fitsTransaction, slotsAvailable, type BagCost } from '../src/sim/gear/slots';
 
 function emptyBag() {
   const state = newGame(19);

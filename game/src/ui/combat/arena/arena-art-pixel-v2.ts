@@ -32,9 +32,19 @@ export type SpriteAtlasMetadata = {
   sourceFrames?: NonNullable<ArenaSpriteSheet['sourceFrames']>;
   sourceFrameOrder?: number[];
   frameBottoms?: number[];
+  releaseSockets?: Partial<Record<'east' | 'west', { x: number; y: number; provenance: string }>>;
 };
 
 export function pilotArt(href: string, atlas: SpriteAtlasMetadata, displayHeight: number, hoverAtRest = false): ArenaCharacterArt {
+  const socketFor = (direction: 'east' | 'west'): ArenaSpriteSheet['releaseSocket'] => {
+    const socket = atlas.releaseSockets?.[direction];
+    if (!socket) return undefined;
+    if (!Number.isFinite(socket.x) || !Number.isFinite(socket.y) || socket.x < 0 || socket.y < 0
+      || socket.x > atlas.frameCanvas.width || socket.y > atlas.frameCanvas.height
+      || !['measured', 'authored-fallback'].includes(socket.provenance))
+      throw new Error(`Invalid release socket: ${href} ${direction}`);
+    return { ...socket, provenance: socket.provenance === 'measured' ? 'measured' : 'authored-fallback' };
+  };
   const sourceFrames = atlas.sourceFrames ?? Array.from({ length: 40 }, (_, index) => {
     const sourceIndex = atlas.sourceFrameOrder?.[index] ?? index;
     const bottom = atlas.frameBottoms?.[sourceIndex] ?? atlas.frameCanvas.height - 1;
@@ -63,8 +73,8 @@ export function pilotArt(href: string, atlas: SpriteAtlasMetadata, displayHeight
       },
       walk: { east: sheet(8), west: sheet(12) },
       attack: {
-        east: { ...sheet(16, 4, 100, false), impactMs: 200 },
-        west: { ...sheet(20, 4, 100, false), impactMs: 200 },
+        east: { ...sheet(16, 4, 100, false), impactMs: 200, releaseSocket: socketFor('east') },
+        west: { ...sheet(20, 4, 100, false), impactMs: 200, releaseSocket: socketFor('west') },
       },
       hit: { east: sheet(24, 4, 65, false), west: sheet(28, 4, 65, false) },
       death: { east: sheet(32, 4, 140, false), west: sheet(36, 4, 140, false) },

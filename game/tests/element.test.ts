@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { E, eng, sm } from '../src/engine/client';
-import { buildCharacter, emptyGear } from '../src/sim/player';
-import { playerSwing } from '../src/sim/combat';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
+import { playerSwing } from '../src/sim/combat/combat';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
-import type { Item, Mob } from '../src/sim/types';
+import { newGame, tick, setLevel, huntZone } from '../src/sim/core/game';
+import type { Item, Mob } from '../src/sim/core/types';
 import { mobFixture } from './mobFixture';
 
 const mobOf = (innate: string[]): Mob => mobFixture({ id: 'm', species: 'Slime', ps: 100, acc: 100, innate });

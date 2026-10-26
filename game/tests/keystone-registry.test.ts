@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 // Packet E's registration runs in the sim entry; a registry cage binds it here against the canonical data.
 import engineJson from '../../tools/data/engine.json' with { type: 'json' };
-import { registerStaticKeystoneHandlers } from '../src/sim/keystone-runtime';
+import { registerStaticKeystoneHandlers } from '../src/sim/core/keystone-runtime';
 registerStaticKeystoneHandlers(KEYSTONE_HANDLERS, Object.keys((engineJson as any).elements.status_of));
 import {
   KEYSTONE_HOOKS,
@@ -26,7 +26,7 @@ import {
   assertKeystonePurchasable,
   registerKeystoneHandler,
   supportedKeystoneKeys,
-} from '../src/sim/keystone-runtime.ts';
+} from '../src/sim/core/keystone-runtime.ts';
 
 /**
  * Packet D1 — the bundle registry of `docs/DECISIONS.md` (the passive tree): the 82 keys, their

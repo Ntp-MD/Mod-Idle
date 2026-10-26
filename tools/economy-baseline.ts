@@ -188,7 +188,7 @@ const deliveryRows = [1, 5, 10, 20, 40].map((difficulty) => {
   return `| ${difficulty} | ${(bonus * 100).toFixed(0)}% | ${(bonus * T.delivery.choice_reward_mult * 100).toFixed(0)}% |`;
 });
 section('Gold sources', [
-  'The client adds gold in exactly two places: a market sale (`sim/trade.ts`) and a paid Delivery/quest bonus (`sim/quest-rewards.ts`). Mob kills mint no gold themselves — their junk must be sold. Tasks pay stones, not gold.',
+  'The client adds gold in exactly two places: a market sale (`sim/town/trade.ts`) and a paid Delivery/quest bonus (`sim/town/quest-rewards.ts`). Mob kills mint no gold themselves — their junk must be sold. Tasks pay stones, not gold.',
   '',
   '| band | reference junk income / minute |',
   '|---|---:|',

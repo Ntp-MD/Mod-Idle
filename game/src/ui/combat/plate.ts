@@ -1,7 +1,7 @@
 /**
  * What the plate reads.
  *
- * The sim raises the events (`sim/game.ts` `fx`); this file decides which of them a body's own card shows
+ * The sim raises the events (`sim/core/game.ts` `fx`); this file decides which of them a body's own card shows
  * and how the figure that lands on it is put together. It lives apart from `App.svelte` for one reason: the
  * rules below are the ones a player can see, so they are worth naming and testing instead of being written
  * inline in markup.
@@ -10,7 +10,7 @@
  * ring the sim already owns and of a hold map the caller keeps — which is the design rule for motion on this
  * client: a beat is mounted by the fact that happened, never by a timer the stylesheet guessed.
  */
-import type { FxEvent, Mob } from '../../sim/types';
+import type { FxEvent, Mob } from '../../sim/core/types';
 
 /** Every event the ring still holds, bucketed by the body it names, newest first as the ring already is. */
 export function fxByMob(ring: FxEvent[]): Map<string, FxEvent[]> {

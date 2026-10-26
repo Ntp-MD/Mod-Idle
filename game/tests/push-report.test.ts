@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { buildPushReport, pushReportLines } from '../src/sim/push-report';
-import { huntZone, newGame, tick } from '../src/sim/game';
-import type { Character } from '../src/sim/player';
-import type { GameState, Mob } from '../src/sim/types';
+import { buildPushReport, pushReportLines } from '../src/sim/core/push-report';
+import { huntZone, newGame, tick } from '../src/sim/core/game';
+import type { Character } from '../src/sim/core/player';
+import type { GameState, Mob } from '../src/sim/core/types';
 
 const state = { player: { level: 10 }, zone: 1 } as unknown as GameState;
 const character = {

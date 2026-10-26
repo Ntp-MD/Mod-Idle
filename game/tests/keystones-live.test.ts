@@ -1,16 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { E, farm, sm } from '../src/engine/client';
-import { buildCharacter, emptyGear } from '../src/sim/player';
-import { respecTree } from '../src/sim/tree';
-import { mobSwing, playerSwing } from '../src/sim/combat';
-import { applyCurse, lineValue, newCurses } from '../src/sim/curse';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
+import { respecTree } from '../src/sim/core/tree';
+import { mobSwing, playerSwing } from '../src/sim/combat/combat';
+import { applyCurse, lineValue, newCurses } from '../src/sim/combat/curse';
 import {
   applyWeaponRiders, carriesTransferable, newMobStatusStore, placeKeystoneDoT, setStacks, stepMobParts, transferStatus,
-} from '../src/sim/mobStatus';
-import { drink } from '../src/sim/farm';
-import { applyEquilibrium, dominantElement, huntZone, newGame, revertEquilibrium, setLevel, tick } from '../src/sim/game';
+} from '../src/sim/combat/mobStatus';
+import { drink } from '../src/sim/world/farm';
+import { applyEquilibrium, dominantElement, huntZone, newGame, revertEquilibrium, setLevel, tick } from '../src/sim/core/game';
 import { painforgedBank, type KeystoneBundle } from '../../engine/keystones.ts';
-import type { GameState, Mob } from '../src/sim/types';
+import type { GameState, Mob } from '../src/sim/core/types';
 
 /**
  * The ten bundles whose arithmetic `engine/keystones.ts` owns and the sim has to actually spend. Each

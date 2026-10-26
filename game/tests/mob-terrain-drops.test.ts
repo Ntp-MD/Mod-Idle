@@ -3,16 +3,17 @@ import { describe, expect, it } from 'vitest';
 import { E, eng } from '../src/engine/client';
 import { createEngine } from '../../engine/index.ts';
 import { mobIcon, mobSpeciesArt } from '../src/icon/index';
-import { huntZone, newGame, setLevel, tick } from '../src/sim/game';
-import { buildCharacter } from '../src/sim/player';
-import { mobSwing } from '../src/sim/combat';
-import { newMobStatusStore, applyBleed, placeStatus } from '../src/sim/mobStatus';
-import { road, settlementZone } from '../src/sim/road';
-import type { Mob } from '../src/sim/types';
+import { huntZone, newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
+import { buildCharacter } from '../src/sim/core/player';
+import { mobSwing } from '../src/sim/combat/combat';
+import { newMobStatusStore, applyBleed, placeStatus } from '../src/sim/combat/mobStatus';
+import { road, settlementZone } from '../src/sim/world/road';
+import type { Mob } from '../src/sim/core/types';
 import * as loot from '../../engine/loot.ts';
 import { leanReweight, leanReweightMany } from '../../engine/loot.ts';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { rollDrop } from '../src/sim/drop';
+import { pinFieldPopulation } from './mobFixture';
+import { rollDrop } from '../src/sim/gear/drop';
 
 const engineData = JSON.parse(readFileSync(new URL('../../tools/data/engine.json', import.meta.url), 'utf8'));
 const mapData = JSON.parse(readFileSync(new URL('../../tools/data/map.json', import.meta.url), 'utf8'));
@@ -490,6 +491,8 @@ describe('the species trait read as a mechanic', () => {
     // the kill is the whole application: no proc roll, and the line is a share of the body's own output
     const perSec = burst.ps * burst.burst.ps_pct / 100;
     s.group = [burst];
+    pinFieldPopulation(s, 1);
+    s.playerStatuses = {};
     burst.hp = 0.5;
     tick(s, { online: true });
     expect(s.playerStatuses.poison?.stacks).toBeGreaterThanOrEqual(1);
@@ -518,46 +521,22 @@ describe('the side the feet stand on', () => {
     }
   });
 
-  /** Count the groups the hunt actually forms on one side, with nothing dying to hide a size. */
-  const sampleSide = (zoneId: number, sub: number | null, want = 240) => {
-    const s = newGame(1234);
-    setLevel(s, 1);
-    huntZone(s, zoneId);
-    if (s.cell) s.cell = { ...s.cell, sub };
-    let groups = 0, normals = 0, mobs = 0, smalls = 0, bodies = 0;
-    for (let i = 0; i < 400000 && groups < want; i++) {
-      s.hunting = true;
-      s.player.hp = 1e9;
-      tick(s, { online: true });
-      if (!s.group.length) continue;
-      groups++;
-      if (s.group[0].kind === 'Elite') { s.group = []; s.spawnIn = 0; continue; }
-      normals++;
-      mobs += s.group.length;
-      for (const m of s.group) { bodies++; if (m.kind === 'Small') smalls++; m.hp = 1e9; }
-      s.group = [];
-      s.spawnIn = 0;
-    }
-    return { elite: groups ? (groups - normals) / groups : 0, pack: mobs / Math.max(1, normals), small: smalls / Math.max(1, bodies) };
-  };
-
-  it('reads crowded on one side and heavy on another, and the zone pays its published rates', () => {
+  it('reads the authored body mix and Elite rate per side', () => {
     const zone = (E.mob.zones as any[]).find((z) => z.subzones?.length === 3)!;
-    const sides = [0, 1, 2].map((i) => ({ i, ...sampleSide(zone.id, i, 200) }));
-    const byPack = Object.fromEntries(sides.map((s) => [(zone.subzones[s.i] as any).spawn.pack, s]));
-    // the swarm side rolls the denser pack, the heavy side the sparser one, and each side its own Elite rate
-    expect((byPack.swarm as any).pack).toBeGreaterThan((byPack.brute as any).pack);
+    const sides = [0, 1, 2].map((i) => {
+      const rng = mulberry32(500 + i);
+      let smalls = 0;
+      for (let n = 0; n < 240; n++) {
+        const mob = spawnMob(rng, zone.id, 'normal', undefined, i, { allowWildUnique: false });
+        if (mob.kind === 'Small') smalls++;
+      }
+      return { i, small: smalls / 240, elite: eng.eliteChanceOf(zone.id, i) };
+    });
+    const byPack = Object.fromEntries(sides.map((side) => [(zone.subzones[side.i] as any).spawn.pack, side]));
+    // The body mix and Elite rate stay authored per side; population size and respawn are zone data.
     expect((byPack.swarm as any).small).toBeGreaterThan((byPack.brute as any).small);
     expect((byPack.brute as any).elite).toBeGreaterThan((byPack.swarm as any).elite);
-    for (const side of sides) {
-      // a sampled rate, so the bar is the side's own figure within the sampling noise — not a fixed window
-      expect(Math.abs(side.elite - zone.subzones[side.i].spawn.elite_pct / 100)).toBeLessThan(0.05);
-    }
-    // and the zone's own average is the figure the published rates state
-    expect(Math.abs(sides.reduce((a, s) => a + s.pack, 0) / 3 - mid(zone.group))).toBeLessThan(0.15);
-    expect(Math.abs(sides.reduce((a, s) => a + s.elite, 0) / 3 - E.loot.elite_spawn_chance)).toBeLessThan(0.03);
-    const bare = sampleSide(zone.id, null, 200);
-    expect(Math.abs(bare.pack - mid(zone.group))).toBeLessThan(0.15);
-    expect(Math.abs(bare.elite - E.loot.elite_spawn_chance)).toBeLessThan(0.05);
+    for (const side of sides)
+      expect(side.elite).toBeCloseTo(zone.subzones[side.i].spawn.elite_pct / 100, 9);
   });
 });

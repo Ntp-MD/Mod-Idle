@@ -10,10 +10,11 @@
   "skills": [
     {
       "id": "attack.firestorm",
-      "status": "approved",
+      "status": "integrated",
       "runtime": "authored",
       "draft": "generated/attack-firestorm-v1",
-      "authored": "game/public/fx/authored/attack-firestorm/v1"
+      "authored": "game/public/fx/authored/attack-firestorm/spatial-v2",
+      "qa": "meta.json"
     },
     {
       "id": "attack.fireball",
@@ -37,7 +38,7 @@
       "status": "integrated",
       "runtime": "authored",
       "draft": "generated/attack-blizzard-v1",
-      "authored": "game/public/fx/authored/attack-blizzard/batch-v1",
+      "authored": "game/public/fx/authored/attack-blizzard/spatial-v2",
       "qa": "meta.json"
     },
     {
@@ -85,7 +86,7 @@
       "status": "integrated",
       "runtime": "authored",
       "draft": "generated/attack-venom-spray-batch-v1",
-      "authored": "game/public/fx/authored/attack-venom-spray/batch-v1",
+      "authored": "game/public/fx/authored/attack-venom-spray/spatial-v2",
       "qa": "meta.json"
     },
     {
@@ -109,7 +110,7 @@
       "status": "integrated",
       "runtime": "authored",
       "draft": "generated/attack-void-blast-batch-v1",
-      "authored": "game/public/fx/authored/attack-void-blast/batch-v1",
+      "authored": "game/public/fx/authored/attack-void-blast/spatial-v2",
       "qa": "meta.json"
     },
     {
@@ -117,7 +118,7 @@
       "status": "integrated",
       "runtime": "authored",
       "draft": "generated/attack-sand-storm-batch-v1",
-      "authored": "game/public/fx/authored/attack-sand-storm/batch-v1",
+      "authored": "game/public/fx/authored/attack-sand-storm/spatial-v2",
       "qa": "meta.json"
     },
     {
@@ -165,7 +166,7 @@
       "status": "integrated",
       "runtime": "authored",
       "draft": "generated/attack-ground-slam-batch-v1",
-      "authored": "game/public/fx/authored/attack-ground-slam/batch-v1",
+      "authored": "game/public/fx/authored/attack-ground-slam/spatial-v2",
       "qa": "meta.json"
     },
     {
@@ -197,7 +198,7 @@
       "status": "integrated",
       "runtime": "authored",
       "draft": "generated/attack-cleave-v1",
-      "authored": "game/public/fx/authored/attack-cleave/batch-v1",
+      "authored": "game/public/fx/authored/attack-cleave/spatial-v2",
       "qa": "meta.json"
     },
     {
@@ -213,7 +214,7 @@
       "status": "integrated",
       "runtime": "authored",
       "draft": "generated/attack-whirlwind-batch-v1",
-      "authored": "game/public/fx/authored/attack-whirlwind/batch-v1",
+      "authored": "game/public/fx/authored/attack-whirlwind/spatial-v2",
       "qa": "meta.json"
     },
     {
@@ -253,7 +254,7 @@
       "status": "integrated",
       "runtime": "authored",
       "draft": "generated/attack-arrow_shower-v1",
-      "authored": "game/public/fx/authored/attack-arrow-shower/batch-v1",
+      "authored": "game/public/fx/authored/attack-arrow-shower/spatial-v2",
       "qa": "meta.json"
     },
     {
@@ -277,7 +278,7 @@
       "status": "integrated",
       "runtime": "authored",
       "draft": "generated/attack-earth_shock-v1",
-      "authored": "game/public/fx/authored/attack-earth-shock/batch-v1",
+      "authored": "game/public/fx/authored/attack-earth-shock/spatial-v2",
       "qa": "meta.json"
     },
     {
@@ -293,7 +294,7 @@
       "status": "integrated",
       "runtime": "authored",
       "draft": "generated/attack-shatter-batch-v1",
-      "authored": "game/public/fx/authored/attack-shatter/batch-v1",
+      "authored": "game/public/fx/authored/attack-shatter/spatial-v2",
       "qa": "meta.json"
     },
     {
@@ -301,7 +302,7 @@
       "status": "integrated",
       "runtime": "authored",
       "draft": "generated/attack-overload-batch-v1",
-      "authored": "game/public/fx/authored/attack-overload/batch-v1",
+      "authored": "game/public/fx/authored/attack-overload/spatial-v2",
       "qa": "meta.json"
     },
     {
@@ -325,7 +326,7 @@
       "status": "integrated",
       "runtime": "authored",
       "draft": "generated/attack-aftershock-v1",
-      "authored": "game/public/fx/authored/attack-aftershock/batch-v1",
+      "authored": "game/public/fx/authored/attack-aftershock/spatial-v2",
       "qa": "meta.json"
     },
     {
@@ -476,9 +477,10 @@
       "id": "attack.meteor",
       "status": "integrated",
       "runtime": "authored",
-      "draft": "generated/attack-meteor-v1",
-      "authored": "game/public/fx/authored/attack-meteor/batch-v1",
-      "qa": "meta.json"
+      "draft": "generated/components-v1/attack-meteor",
+      "authored": "game/public/fx/authored/attack-meteor/spatial-v2",
+      "manifest": "game/src/ui/combat/fx-manifests/components-v2-manifest.json",
+      "qa": "art-reference/skills/generated/components-v1/attack-meteor/handoff.md"
     },
     {
       "id": "aura.wraith_of_fury",
@@ -652,12 +654,14 @@
   ],
   "batchStatus": "integrated",
   "verification": {
-    "assetGate": "23/23 atlases, 368 frames PASS; alpha<=8 renderer discard, virtual padding; raw PNG retained",
+    "assetGate": "77 live selected atlases + 3 Meteor components PASS; alpha<=8 discard and virtual padding; raw PNG preserved",
+    "focusedTests": "arena-authored-vfx and render suites PASS",
     "typecheck": "passed",
     "svelteCheck": "0 errors / 0 warnings",
-    "liveHttp": "23 PNG + 3 modules + showcase route: passed",
-    "browser": "blocked: Windows CUA could not determine browser URL confidently; no playback verification",
-    "build": "passed after final timing/multi-hit changes",
-    "visualReview": "all 23 atlas sheets inspected; live playback not verified"
+    "liveHttp": "77 selected atlases + 3 component modules + showcase route: passed",
+    "browser": "in-app arena casts verified for 14 spatial replacements; line/chain/Arrow Shower representatives verified; 1920 screenshot surface unavailable",
+    "build": "passed",
+    "visualReview": "all selected atlas sheets inspected; 14 in-app arena samples recorded",
+    "performance": "no data available"
   }
 }

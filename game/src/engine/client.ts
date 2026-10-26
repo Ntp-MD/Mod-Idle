@@ -8,6 +8,7 @@ import mobSkillsJson from '../../../tools/data/mob-skills.json' with { type: 'js
 import townJson from '../../../tools/data/town.json' with { type: 'json' };
 import basesJson from '../../../tools/data/bases.json' with { type: 'json' };
 import treeJson from '../../../tools/data/tree.json' with { type: 'json' };
+import spawnsJson from '../../../tools/data/spawns.json' with { type: 'json' };
 import { createCatalog } from '../../../engine/catalog.ts';
 import { createCollector } from '../../../engine/collector.ts';
 import { createEngine } from '../../../engine/index.ts';
@@ -21,8 +22,9 @@ import { createBlackMarket, type BlackMarketCfg } from '../../../engine/black-ma
 import { createTrade, type TradeCfg } from '../../../engine/trade.ts';
 import { createDelivery, type DeliveryCfg } from '../../../engine/delivery.ts';
 import { createSkillModel } from '../../../engine/skills.ts';
+import { createSpawns } from '../../../engine/spawns.ts';
 import { createTree } from '../../../engine/tree.ts';
-import { keystoneBuildContext } from '../sim/keystone-runtime.ts';
+import { keystoneBuildContext } from '../sim/core/keystone-runtime.ts';
 import { validateEngineData } from '../../../engine/validate.ts';
 import type { EngineData, ModsData, SkillsData, MobSkillsData } from '../../../engine/types.ts';
 // Each export keeps the type TypeScript infers from its own JSON file. A hand-written interface would be
@@ -35,6 +37,7 @@ export const MOB_SKILLS = mobSkillsJson;
 export const TOWN = townJson;
 export const BASES = basesJson;
 export const TREE_SPEC = treeJson;
+export const SPAWNS = spawnsJson;
 
 /** The shared math, instantiated once. Every formula in the game comes out of this object.
  *
@@ -77,6 +80,12 @@ export const eng = createEngine(ENGINE_DATA);
 export const dungeon = createDungeon(ENGINE_DATA);
 export const loot = createLoot(ENGINE_DATA, MODS_DATA);
 export const sm = createSkillModel(SKILLS_DATA, ENGINE_DATA);
+/** Field spawn points and RO engagement ranges, validated against the arena and canonical zone roster. */
+export const spawns = createSpawns(spawnsJson, {
+  arena: engineJson.combat_arena,
+  playerStart: engineJson.combat_arena.player_start,
+  zones: engineJson.mob.zones,
+});
 /** The passive tree, derived once from its spec — the same object the tree cage gates. The canonical
  *  Elements and the real keystone handler table ride in as the caller's context: a v3 keystone is
  *  purchasable only when the runtime table can actually run its bundle. */

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { E, TOWN, eng, road, trade } from '../../engine/client';
-  import { warpRow } from '../../sim/road';
+  import { warpRow } from '../../sim/world/road';
   import { createEconomy } from '../../../../engine/economy';
   import type { EconomySnapshot, Units } from '../../../../engine/economy';
   import { economyFixture, economyPlayer, LAB_CITIES, LAB_PLAYER_GOODS } from '../../lab/economy';

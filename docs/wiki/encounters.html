@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elite, Unique and Boss · ModWorld Field Manual</title></head>
+<body><style>:root {
+    color-scheme: dark;
+    --bg: #0f1217;
+    --panel: #1c2027;
+    --line: #2c3340;
+    --text: #e3e9f2;
+    --dim: #8b96a8;
+    --hp: #c0392b;
+    --mana: #2980b9;
+    --es: #4fc3f7;
+    --xp: #f1c40f;
+    --mob: #7f8c8d;
+    --good: #27ae60;
+
+    --glass: rgba(17, 22, 30, 0.74);
+    --edge: rgba(255, 255, 255, 0.1);
+    --gold: #e8c169;
+
+    --hud-face: linear-gradient(180deg, rgba(23, 29, 40, 0.88), rgba(11, 15, 21, 0.94));
+    --hud-edge: color-mix(in srgb, var(--gold) 30%, var(--edge));
+
+    /* Shared visual states */
+    --surface-selected: rgba(232, 193, 105, 0.12);
+    --shadow-raised: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --shadow-soft: 0 4px 14px rgba(0, 0, 0, 0.45);
+
+    /* Shared motion */
+    --motion-fast: 150ms;
+    --motion-ui: 220ms;
+    --motion-map: 450ms;
+    --motion-travel: 650ms;
+    --ease-ui: ease;
+    --ease-out: ease-out;
+    --ease-glide: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    /* Shared stacking order for layers that cross components. */
+    --z-underlay: 1;
+    --z-content: 2;
+    --z-highlight: 4;
+    --z-floater: 6;
+    --z-label: 7;
+    --z-toast: 8;
+    --z-hud-control: 40;
+    --z-popover: 80;
+
+    --focus: #7fd4ff;
+
+    --rail: clamp(46px, 3.19vw, 88px);
+
+    --screen-pad: var(--spacing-md);
+    --pad-area: 20px;
+    --bar-h: 14px;
+
+
+    --elite: #6c5199;
+    --elite-ink: #b98cff;
+    --boss: #9d3b34;
+    --boss-ink: #ff8b7a;
+    --curse: #c8a5ff;
+
+    --rar-common: #8b96a8;
+    --rar-uncommon: #5fb87a;
+    --rar-rare: #4f8fe0;
+    --rar-epic: #a877e8;
+    --rar-legend: #e0913f;
+    --alarm: #ffb3a8;
+    --hot: #e2503f;
+    --good-lit: #9fe0bb;
+    --gold-lit: #ffd9a0;
+    --hp-lit: #ff8a6b;
+    --mana-lit: #6bc4f0;
+    --es-lit: #a8e6ff;
+    --xp-lit: #f7e07a;
+
+    --ground: #0a0e13;
+    --ground-2: #131926;
+    --ground-3: #181d18;
+    --glow-moss: #465c3a;
+    --glow-dusk: #304a6c;
+
+    --face-top: #1c2430;
+    --face-floor: #0d1218;
+    --hot-deep: #a33428;
+
+    --inset: #12151b;
+    --bar-2: #2e3742;
+
+    --sheet-ink: #cfd8e3;
+    --sheet-place: #f2e7d0;
+    --ui: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+    --num: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+
+    --dof-rest: 4px;
+
+    --dof-far: 5px;
+    --dof: var(--dof-rest);
+
+    --sel: rgba(127, 212, 255, 0.26);
+    --bar: #232b36;
+    --radius-round: 50%;
+    --radius-pill: 999px;
+    --radius-card: 8px;
+    --font-3xs: 11px;
+    --font-2xs: 12px;
+    --font-xs: 14px;
+    --font-sm: 16px;
+    --font-md: clamp(17px, 1.28vw, 36px);
+    --font-lg: clamp(22px, 1.67vw, 47px);
+    --font-xl: clamp(29px, 2.18vw, 62px);
+    --icon-detail: clamp(11px, 0.72vw, 23px);
+    --icon-label: clamp(14px, 1vw, 31px);
+    --icon-card: clamp(32px, 3vw, 68px);
+    --icon-hub: clamp(40px, 4vw, 60px);
+    --icon-hub-img: 70%;
+    --input-narrow: clamp(44px, 4vw, 95px);
+    --slot-item: 40px;
+    --slot-skill-size: clamp(36px, 2.6vw, 50px);
+    --field-card-size: clamp(125px, 8.63vw, 180px);
+    --spacing-2xs: 2px;
+    --spacing-xs: 5px;
+    --spacing-sm: 10px;
+    --spacing-md: 15px;
+    --spacing-lg: 20px;
+    --spacing-xl: 40px;
+    /* Card tiers: a primary surface and the compact tile inside it. */
+    --card-pad: var(--spacing-md);
+    --card-gap: var(--spacing-sm);
+    --tile-pad: var(--spacing-sm);
+    --tile-gap: var(--spacing-xs);
+    --x-pull-note: clamp(-11px, -0.39vw, -5px);
+}
+* { box-sizing: border-box; }
+body { margin: 0; display: flex; justify-content: center; background: var(--bg); color: var(--text); font: var(--font-xs)/1.55 var(--ui); }
+a { color: var(--gold); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.layout { display: flex; align-items: flex-start; gap: var(--spacing-xl); width: 100%; max-width: 116rem; padding: 2rem 2.5rem 4rem; }
+nav { position: sticky; top: 2rem; min-width: 11rem; display: flex; flex-direction: column; gap: var(--spacing-sm); }
+nav a { color: var(--dim); }
+nav a.on { color: var(--gold); }
+main { display: flex; flex: 1; flex-direction: column; gap: var(--spacing-xl); min-width: 0; }
+.page-head { display: grid; gap: var(--spacing-xs); }
+.page-content { display: grid; gap: var(--spacing-xl); }
+h1 { font-size: var(--font-md); }
+.lead { color: var(--dim); }
+section { display: grid; gap: var(--spacing-sm); }
+h2 { font-size: var(--font-sm); border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
+h3 { font-size: var(--font-xs); color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
+.note { color: var(--dim); font-size: var(--font-xs); }
+h1, h2, h3, h4, p, ul, ol { margin: 0; }
+table { border-collapse: collapse; width: 100%; font-size: var(--font-xs); }
+th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--dim); font-weight: 600; }
+thead th { position: sticky; background: var(--panel); z-index: 1; }
+thead tr:first-child th { top: 0; }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.028); }
+tbody tr:hover { background: rgba(255,255,255,.06); }
+/* One table, its rows split into tabbed groups: the strip is a radio group, each tab is a <tbody>, and a
+   press swaps which body shows over the shared header — no script, so the static build and the live wiki
+   behave alike. Generic over the group count a page declares (three here). */
+.tabs { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
+.tabs > input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.tabs > label {
+  display: inline-flex; align-items: baseline; gap: var(--spacing-sm); padding: .3em .9em;
+  border: 1px solid var(--line); border-bottom: 0; border-radius: var(--radius-card);
+  color: var(--dim); font-size: var(--font-xs); cursor: pointer;
+}
+.tabs > label b { color: var(--mob); font-weight: 500; }
+.tabs > label:hover { color: var(--text); }
+.tabs > input:checked + label { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); background: color-mix(in srgb, var(--gold) 10%, transparent); }
+.tabs > input:checked + label b { color: var(--gold); }
+.tabs > input:focus-visible + label { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tabs tbody { display: none; }
+.tabs input:checked:nth-of-type(1) ~ table tbody:nth-of-type(1),
+.tabs input:checked:nth-of-type(2) ~ table tbody:nth-of-type(2),
+.tabs input:checked:nth-of-type(3) ~ table tbody:nth-of-type(3),
+.tabs input:checked:nth-of-type(4) ~ table tbody:nth-of-type(4),
+.tabs input:checked:nth-of-type(5) ~ table tbody:nth-of-type(5),
+.tabs input:checked:nth-of-type(6) ~ table tbody:nth-of-type(6),
+.tabs input:checked:nth-of-type(7) ~ table tbody:nth-of-type(7) { display: table-row-group; }
+.tabs table { flex: 1 0 100%; width: 100%; }
+.twrap { overflow: hidden; padding: 0 0.25rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
+.twrap table { width: 100%; min-width: 0; table-layout: fixed; }
+.twrap th, .twrap td { overflow-wrap: anywhere; }
+.twrap td:first-child { white-space: normal; }
+td:first-child { white-space: nowrap; }
+.rolls { list-style: none; display: grid; gap: var(--spacing-xs); padding: 0; font-size: var(--font-xs); }
+.rolls li { position: relative; display: flex; gap: var(--spacing-sm); align-items: baseline; padding: .02rem .25rem; }
+.rolls .bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--line); opacity: .55; }
+.rolls .rn { position: relative; flex: 1; }
+.rolls .rv { position: relative; font-family: var(--num); color: var(--text); font-size: var(--font-xs); white-space: nowrap; opacity: .8; }
+.rolls .rp { position: relative; font-family: var(--num); color: var(--dim); font-size: var(--font-xs); white-space: nowrap; }
+.cell-stack { display: grid; gap: var(--spacing-xs); }
+td .hy { color: var(--dim); font-size: var(--font-xs); }
+.fx { list-style: none; display: grid; gap: var(--spacing-xs); padding: 0; font-size: var(--font-xs); }
+.fx li { display: flex; gap: var(--spacing-sm); align-items: baseline; padding: .04rem 0; border-bottom: 1px dotted var(--line); }
+.fx li:last-child { border-bottom: 0; }
+.fx .fk { flex: 1; font-family: var(--num); color: var(--dim); }
+.fx .fk em { color: var(--text); font-style: normal; }
+.fx .fs { color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; letter-spacing: .04em; }
+.fx .fv { font-family: var(--num); white-space: nowrap; }
+td .sub { display: block; color: var(--dim); font-size: var(--font-xs); }
+.rolls .forced .rn { color: var(--gold); }
+.rolls .forced .rp { color: var(--gold); font-family: var(--ui); font-size: var(--font-xs); }
+.zone { display: grid; gap: var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
+.zone > summary { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-xs) var(--spacing-md); padding: .65rem .8rem; cursor: pointer; }
+.zone > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.zone > summary::marker { color: var(--gold); }
+.zone-title { font-weight: 600; }
+.zone-meta { color: var(--dim); font-size: var(--font-xs); }
+.zone[open] > summary { border-bottom: 1px solid var(--line); }
+.zone-body { display: grid; gap: var(--spacing-sm); padding: .1rem .8rem .8rem; }
+@media (max-width: 40rem) { .zone > summary { display: grid; gap: var(--spacing-xs); } .zone-meta { display: block; } }
+/* Bestiary: race-grouped plates. A plate's left spine is its attack Element. */
+.bestiary { display: grid; gap: 1.6rem; }
+.beast-tools { display: grid; gap: .75rem; padding: .95rem 1rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); }
+.beast-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; }
+.beast-search { flex: 1 1 18rem; min-width: 0; }
+.beast-search input { width: 100%; padding: .5rem .85rem; border: 1px solid var(--line); border-radius: var(--radius-pill); background: var(--panel); color: var(--text); font: inherit; font-size: .8rem; }
+.beast-search input::placeholder { color: color-mix(in srgb, var(--dim) 72%, transparent); }
+.beast-search input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
+.beast-status { color: var(--dim); font-family: var(--num); font-size: .7rem; white-space: nowrap; }
+.beast-chips { display: flex; flex-wrap: wrap; gap: .3rem; }
+.beast-chip { padding: .26rem .6rem; border: 1px solid var(--line); border-radius: var(--radius-pill); background: transparent; color: var(--dim); font: inherit; font-size: .7rem; cursor: pointer; }
+.beast-chip b { color: color-mix(in srgb, var(--dim) 75%, transparent); font-weight: 500; }
+.beast-chip:hover { color: var(--text); border-color: color-mix(in srgb, var(--gold) 30%, var(--line)); }
+.beast-chip[aria-pressed="true"] { border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); background: color-mix(in srgb, var(--gold) 11%, transparent); color: var(--gold-lit); }
+.beast-chip[aria-pressed="true"] b { color: var(--gold); }
+.beast-chip:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.beast-group { display: grid; gap: .55rem; }
+.beast-group[hidden] { display: none; }
+.beast-group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--line); }
+.beast-group-head h3 { color: var(--gold); font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; }
+.beast-group-head span { color: var(--dim); font-family: var(--num); font-size: .68rem; }
+.beast-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: .85rem; align-items: start; }
+.page-content [data-element="fire"] { --el: var(--hp-lit); }
+.page-content [data-element="cold"] { --el: var(--mana-lit); }
+.page-content [data-element="lightning"] { --el: var(--xp-lit); }
+.page-content [data-element="poison"] { --el: var(--good-lit); }
+.page-content [data-element="chaos"] { --el: var(--curse); }
+.page-content [data-element="earth"] { --el: var(--gold); }
+.page-content [data-element="physical"] { --el: var(--mob); }
+.beast-card { --el: var(--mob); display: grid; gap: .6rem; padding: .8rem .9rem .75rem 1rem; border: 1px solid var(--line); border-left: 3px solid var(--el); border-radius: var(--radius-card); background: var(--panel); }
+.beast-card:hover { border-color: color-mix(in srgb, var(--el) 42%, var(--line)); border-left-color: var(--el); }
+.beast-card[hidden] { display: none; }
+.beast-head { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+.beast-title { display: grid; gap: .1rem; min-width: 0; }
+.beast-title h4 { color: var(--text); font-family: var(--wiki-display); font-size: 1.12rem; font-weight: 500; line-height: 1.15; }
+.beast-sub { color: var(--dim); font-size: .7rem; }
+.beast-flag { padding: 0 .3rem; border: 1px solid color-mix(in srgb, var(--good) 45%, var(--line)); border-radius: var(--radius-pill); color: var(--good-lit); font-size: .6rem; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
+.beast-el { --el: var(--mob); display: inline-flex; align-items: center; gap: .32rem; flex: none; color: var(--el); font-family: var(--num); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.beast-el::before { content: ""; width: .42rem; height: .42rem; border-radius: 50%; background: var(--el); box-shadow: 0 0 .35rem color-mix(in srgb, var(--el) 60%, transparent); }
+.beast-el.sm { font-size: .58rem; }
+.beast-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .35rem .8rem; margin: 0; }
+.beast-facts div { display: grid; gap: .05rem; min-width: 0; }
+.beast-facts div:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.beast-facts dt { color: var(--dim); font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; }
+.beast-facts dd { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem; color: var(--text); font-size: .74rem; }
+.beast-bodies { display: inline-flex; gap: .22rem; }
+.beast-body { display: inline-grid; place-items: center; width: 1.05rem; height: 1.05rem; border: 1px solid var(--line); border-radius: 3px; color: var(--dim); font-family: var(--num); font-size: .58rem; text-decoration: none; cursor: help; }
+.beast-habitat { color: var(--dim); font-size: .7rem; text-transform: capitalize; }
+.beast-label { color: var(--dim); font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; padding-right: .4rem; }
+.beast-kit { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; }
+.beast-kit .tag { color: var(--text); }
+.beast-none { color: var(--dim); font-size: .7rem; }
+.beast-fold { border-top: 1px solid var(--line); padding-top: .5rem; }
+.beast-fold summary { color: var(--dim); font-size: .7rem; cursor: pointer; }
+.beast-fold summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.beast-fold summary:hover { color: var(--text); }
+.beast-fold summary b { color: var(--el, var(--gold)); font-family: var(--num); font-size: .66rem; font-weight: 500; }
+.beast-fold summary::marker { color: var(--el, var(--gold)); }
+.beast-fold[open] { display: grid; gap: .5rem; }
+.beast-fold-wide { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); padding: .8rem 1rem; }
+.beast-fold-wide[open] { gap: .9rem; }
+.beast-fold-wide summary { font-family: var(--wiki-display); font-size: .95rem; }
+.beast-fold-wide summary b { color: var(--gold); }
+.beast-table-wrap { overflow-x: auto; }
+.beast-fold table { font-size: .7rem; }
+.beast-fold th, .beast-fold td { padding: .28rem .35rem; }
+.beast-pc { color: var(--text); font-family: var(--num); }
+.beast-unique { color: var(--gold-lit); border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
+.legend { display: grid; gap: var(--spacing-xs); padding-left: 1.1rem; font-size: var(--font-xs); color: var(--dim); }
+.legend strong { color: var(--text); }
+.num { font-family: var(--num); font-variant-numeric: tabular-nums; }.tag { border: 1px solid var(--line); border-radius: var(--radius-card); padding: 0 .25rem; color: var(--dim); font-size: var(--font-xs); text-transform: uppercase; }
+ol { display: flex; flex-direction: column; gap: var(--spacing-xs); padding-left: 1.3rem; }
+:root { --wiki-max: 96rem; --wiki-display: "Palatino Linotype", "Book Antiqua", Georgia, serif; }
+body {
+  display: block; min-height: 100vh;
+  background:
+    radial-gradient(70rem 34rem at 8% -12%, color-mix(in srgb, var(--gold) 7%, transparent), transparent 62%),
+    radial-gradient(52rem 30rem at 104% 2%, color-mix(in srgb, var(--mana) 7%, transparent), transparent 58%),
+    var(--bg);
+}
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image: linear-gradient(color-mix(in srgb, var(--line) 22%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--line) 22%, transparent) 1px, transparent 1px);
+  background-size: 4.5rem 4.5rem; opacity: .28;
+}
+.skip {
+  position: fixed; top: 1rem; left: 1rem; z-index: var(--z-popover);
+  padding: .55rem .9rem; border: 1px solid var(--gold); border-radius: var(--radius-card);
+  background: var(--panel); color: var(--gold-lit); font: inherit; cursor: pointer;
+  transform: translateY(-200%);
+}
+.skip:focus-visible { transform: none; outline: 2px solid var(--focus); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.wiki-masthead {
+  position: relative; z-index: 2; display: flex; align-items: center; gap: var(--spacing-lg);
+  width: 100%; max-width: var(--wiki-max); padding: 1.35rem 2.5rem; margin-inline: auto;
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: .75rem; color: var(--text); flex: none; }
+.brand:hover { text-decoration: none; }
+.brand-mark {
+  display: grid; place-items: center; width: 2.35rem; height: 2.35rem; flex: none;
+  border: 1px solid color-mix(in srgb, var(--gold) 70%, var(--line)); border-radius: var(--radius-round);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--gold) 18%, transparent), var(--inset) 70%);
+  box-shadow: 0 0 1.2rem color-mix(in srgb, var(--gold) 16%, transparent);
+}
+.brand-mark::before { content: ""; width: .62rem; height: .62rem; transform: rotate(45deg); background: linear-gradient(140deg, var(--gold-lit), var(--gold)); }
+.brand-text b { display: block; font-family: var(--wiki-display); font-size: 1.05rem; font-weight: 600; letter-spacing: .2em; line-height: 1.1; }
+.brand-text small { display: block; color: var(--gold); font-size: .6rem; letter-spacing: .3em; text-transform: uppercase; }
+.masthead-tag { flex: 1; color: var(--dim); font-size: .72rem; letter-spacing: .06em; }
+.masthead-tools { display: flex; align-items: center; gap: .7rem; flex: none; }
+.search { position: relative; display: flex; align-items: center; color: var(--dim); }
+.search .search-glyph { position: absolute; left: .8rem; width: 1rem; height: 1rem; background: currentColor; -webkit-mask: url(../../game/src/icon/ui/search.png) center / contain no-repeat; mask: url(../../game/src/icon/ui/search.png) center / contain no-repeat; pointer-events: none; }
+.search input {
+  width: clamp(12rem, 19vw, 21rem); padding: .55rem 1rem .55rem 2.3rem;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--inset); color: var(--text);
+  font: inherit; font-size: .8rem;
+}
+.search input::placeholder { color: color-mix(in srgb, var(--dim) 75%, transparent); }
+.search input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
+.search-results {
+  position: absolute; top: calc(100% + .5rem); right: 0; z-index: var(--z-popover);
+  display: grid; gap: .15rem; width: min(26rem, 80vw); padding: .4rem;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow-soft);
+}
+.search-results[hidden] { display: none; }
+dl, dt, dd { margin: 0; }
+.search-hit { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: .5rem .6rem; border-radius: 6px; color: var(--text); font-size: .82rem; }
+.search-hit small { color: var(--dim); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.search-hit:hover, .search-hit:focus-visible { background: var(--surface-selected); text-decoration: none; }
+.search-none { padding: .5rem .6rem; color: var(--dim); font-size: .78rem; }
+.play-link { padding: .5rem .9rem; border: 1px solid color-mix(in srgb, var(--gold) 55%, var(--line)); border-radius: 999px; color: var(--gold-lit); font-size: .72rem; letter-spacing: .04em; white-space: nowrap; }
+.play-link:hover { background: color-mix(in srgb, var(--gold) 9%, transparent); text-decoration: none; }
+.menu-toggle { display: none; align-items: center; gap: .45rem; padding: .5rem .75rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); color: var(--text); font: inherit; font-size: .78rem; cursor: pointer; }
+.menu-toggle:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.wiki-shell { position: relative; z-index: 1; display: grid; grid-template-columns: 15.5rem minmax(0, 1fr); gap: 3.2rem; width: 100%; max-width: var(--wiki-max); padding: 2.3rem 2.5rem 4rem; margin-inline: auto; }
+.wiki-nav { position: sticky; top: 1.6rem; align-self: start; display: flex; flex-direction: column; gap: 1.45rem; max-height: calc(100vh - 3.2rem); overflow: auto; min-width: 0; padding-right: .65rem; border-right: 1px solid var(--line); }
+.nav-title { color: var(--dim); font-size: .62rem; letter-spacing: .24em; text-transform: uppercase; }
+.nav-group { display: grid; gap: .5rem; }
+.nav-group h2 { display: flex; align-items: baseline; gap: .45rem; padding: 0; border: 0; color: var(--dim); font-size: .64rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.nav-group h2 span { color: var(--gold); font-family: var(--num); font-weight: 500; }
+.nav-group h2 b { color: color-mix(in srgb, var(--dim) 65%, transparent); font-family: var(--num); font-weight: 500; }
+.nav-group ul { display: grid; gap: 1px; padding: 0; list-style: none; }
+.nav-group a { display: block; padding: .38rem .65rem; border-left: 2px solid transparent; border-radius: 0 6px 6px 0; color: var(--dim); font-size: .83rem; }
+.nav-group a:hover { color: var(--text); background: color-mix(in srgb, var(--text) 4%, transparent); text-decoration: none; }
+.nav-group a.on { color: var(--gold-lit); border-left-color: var(--gold); background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 11%, transparent), transparent); }
+.nav-foot { color: color-mix(in srgb, var(--dim) 70%, transparent); font-size: .66rem; letter-spacing: .06em; }
+.wiki-main { display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
+.wiki-main h1 { font-family: var(--wiki-display); font-size: clamp(2rem, 3.4vw, 3.2rem); font-weight: 500; line-height: 1.08; letter-spacing: .01em; }
+.page-head {
+  display: grid; gap: .85rem; padding: 1.55rem 1.75rem;
+  border: 1px solid var(--line); border-radius: var(--radius-card);
+  background: linear-gradient(155deg, color-mix(in srgb, var(--panel) 92%, var(--gold) 8%), var(--inset));
+  box-shadow: var(--shadow-soft);
+}
+.crumbs, .toc, .page-turn { position: static; min-width: 0; }
+.crumbs { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: .45rem; color: var(--dim); font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; }
+.crumbs a { color: var(--dim); } .crumbs a:hover { color: var(--gold); text-decoration: none; }
+.eyebrow { display: flex; align-items: center; gap: .55rem; color: var(--gold); font-size: .64rem; letter-spacing: .22em; text-transform: uppercase; }
+.eyebrow::before { content: ""; width: 1.5rem; height: 1px; background: var(--gold); }
+.page-head .lead { max-width: 62rem; color: var(--dim); font-size: 1rem; line-height: 1.6; }
+.page-meta { display: flex; flex-wrap: wrap; gap: .4rem; }
+.chip { padding: .22rem .6rem; border: 1px solid var(--line); border-radius: 999px; color: var(--dim); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+.covers { color: var(--dim); font-size: .78rem; }
+.covers span { color: var(--gold); font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; padding-right: .45rem; }
+.toc { display: grid; gap: .55rem; padding: .95rem 1.15rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); }
+.toc ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .15rem 1rem; padding: 0; list-style: none; }
+.toc button { display: block; width: 100%; padding: .32rem .15rem; border: 0; border-bottom: 1px dotted transparent; background: none; color: var(--dim); font: inherit; font-size: .8rem; text-align: left; cursor: pointer; }
+.toc button:hover, .toc button.on { color: var(--gold-lit); border-bottom-color: color-mix(in srgb, var(--gold) 40%, transparent); }
+.toc button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.page-content { display: grid; gap: 1.15rem; counter-reset: sec; }
+.page-content > section {
+  counter-increment: sec; display: grid; gap: .8rem; padding: 1.25rem 1.45rem;
+  border: 1px solid var(--line); border-radius: var(--radius-card);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 88%, transparent), color-mix(in srgb, var(--inset) 94%, transparent));
+  overflow-x: auto;
+}
+.page-content > section > h2 { display: flex; align-items: baseline; gap: .65rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); font-family: var(--wiki-display); font-size: 1.25rem; font-weight: 500; letter-spacing: .01em; }
+.page-content > section > h2::before { content: counter(sec, decimal-leading-zero); color: var(--gold); font-family: var(--num); font-size: .7rem; letter-spacing: .08em; }
+.page-content h3 { color: var(--gold); font-size: .68rem; letter-spacing: .14em; }
+.page-content p, .page-content li { color: color-mix(in srgb, var(--text) 88%, var(--dim)); }
+.page-content .note { padding: .55rem .8rem; border-left: 2px solid color-mix(in srgb, var(--gold) 45%, var(--line)); border-radius: 0 6px 6px 0; background: color-mix(in srgb, var(--gold) 4%, transparent); }
+.page-content code { padding: .05em .28em; border-radius: 4px; background: color-mix(in srgb, var(--gold) 7%, transparent); color: var(--gold-lit); font-family: var(--num); font-size: .86em; }
+.page-content thead th { background: var(--inset); color: var(--gold); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+.page-content td:first-child { white-space: normal; }
+.page-content tbody tr:nth-child(even) { background: color-mix(in srgb, var(--text) 2.5%, transparent); }
+.page-content tbody tr:hover { background: color-mix(in srgb, var(--gold) 5%, transparent); }
+.page-foot { display: grid; gap: 1rem; padding-top: 1.1rem; border-top: 1px solid var(--line); }
+.related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .65rem; }
+.related-grid a { display: grid; gap: .2rem; padding: .75rem .85rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); color: var(--text); }
+.related-grid a:hover { border-color: color-mix(in srgb, var(--gold) 40%, var(--line)); text-decoration: none; }
+.related-grid small { color: var(--dim); font-size: .75rem; }
+.page-turn { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+.page-turn a { display: grid; gap: .2rem; padding: .65rem .85rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); color: var(--text); }
+.page-turn a:hover { border-color: color-mix(in srgb, var(--gold) 40%, var(--line)); text-decoration: none; }
+.page-turn small { color: var(--dim); font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; }
+.page-turn .next { justify-self: end; text-align: right; }
+.home-hero {
+  display: grid; gap: 1.05rem; padding: 2.2rem 2.1rem;
+  border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--line)); border-radius: var(--radius-card);
+  background:
+    radial-gradient(38rem 18rem at 12% 0%, color-mix(in srgb, var(--gold) 13%, transparent), transparent 65%),
+    linear-gradient(160deg, color-mix(in srgb, var(--panel) 90%, var(--gold) 10%), var(--inset));
+  box-shadow: var(--shadow-soft);
+}
+.home-hero h1 { font-size: clamp(2.7rem, 5vw, 4.6rem); }
+.home-hero .lead { max-width: 56rem; color: var(--dim); font-size: 1.08rem; line-height: 1.6; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
+.btn { display: inline-flex; align-items: center; gap: .45rem; padding: .55rem .95rem; border: 1px solid var(--line); border-radius: 999px; background: var(--inset); color: var(--text); font: inherit; font-size: .78rem; cursor: pointer; }
+.btn:hover { border-color: var(--gold); text-decoration: none; }
+.btn.primary { border-color: var(--gold); background: linear-gradient(180deg, var(--gold-lit), var(--gold)); color: var(--bg); font-weight: 600; }
+.btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hero-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: 1px; padding: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--line); }
+.hero-stats div { display: grid; gap: .15rem; padding: .75rem .85rem; background: var(--inset); }
+.hero-stats dt { color: var(--dim); font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; }
+.hero-stats dd { color: var(--gold-lit); font-family: var(--num); font-size: 1.3rem; }
+.start-strip { display: grid; gap: .9rem; padding: 1.3rem 1.4rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--inset); }
+.start-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: .8rem; }
+.start-grid article { display: grid; gap: .4rem; padding: .9rem 1rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
+.start-grid article > span { color: var(--gold); font-family: var(--num); font-size: .72rem; letter-spacing: .1em; }
+.start-grid h3 { color: var(--text); font-family: var(--wiki-display); font-size: 1.05rem; font-weight: 500; letter-spacing: 0; text-transform: none; }
+.start-grid p { color: var(--dim); font-size: .8rem; }
+.start-grid a { color: var(--gold-lit); font-size: .76rem; }
+.card-links { display: flex; flex-wrap: wrap; gap: .2rem .9rem; }
+.chapters { display: grid; gap: 1rem; }
+.chapter-head { display: flex; align-items: end; justify-content: space-between; gap: 1rem; padding-bottom: .55rem; border-bottom: 1px solid var(--line); }
+.chapter-head h2 { padding: 0; border: 0; font-family: var(--wiki-display); font-size: 1.55rem; font-weight: 500; }
+.chapter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: .9rem; }
+.chapter-card { display: grid; gap: .65rem; padding: 1.05rem 1.15rem; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel); }
+.chapter-card header { display: flex; align-items: baseline; gap: .55rem; }
+.chapter-card h3 { flex: 1; color: var(--text); font-family: var(--wiki-display); font-size: 1.1rem; font-weight: 500; letter-spacing: 0; text-transform: none; }
+.chapter-card header small { color: var(--dim); font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; }
+.chapter-card > p { color: var(--dim); font-size: .78rem; }
+.chapter-card ul { display: grid; gap: .25rem; padding: 0; list-style: none; }
+.chapter-card li a { display: grid; gap: .12rem; padding: .4rem .5rem; border-radius: 6px; color: var(--text); }
+.chapter-card li a:hover { background: var(--surface-selected); text-decoration: none; }
+.chapter-card li b { font-size: .82rem; font-weight: 500; }
+.chapter-card li span { color: var(--dim); font-size: .72rem; }
+.wiki-foot { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .6rem 1.2rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--dim); font-size: .66rem; letter-spacing: .03em; }
+.wiki-foot a { color: var(--dim); }
+.wiki-tree-view { display: grid; grid-template-rows: auto auto minmax(0, 1fr); overflow: hidden; border: 1px solid color-mix(in srgb, var(--gold) 24%, var(--line)); border-radius: var(--radius-card); background: var(--ground); }
+.wiki-tree-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .75rem 1rem; border-bottom: 1px solid var(--line); background: var(--inset); }
+.wiki-tree-heading { display: grid; gap: .2rem; }
+.wiki-tree-heading strong { color: var(--text); font-size: .82rem; font-weight: 500; }
+.wiki-tree-controls { display: flex; align-items: center; gap: .35rem; }
+.icon-mask { display: inline-block; width: .9rem; height: .9rem; flex: none; background: currentColor; -webkit-mask: var(--glyph) center / contain no-repeat; mask: var(--glyph) center / contain no-repeat; }
+.tree-tool { display: inline-flex; align-items: center; justify-content: center; min-width: 1.75rem; padding: .32rem .45rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--text); font: inherit; font-size: .75rem; cursor: pointer; }
+.tree-tool[data-tree-fit] { --glyph: url(../../game/src/icon/ui/expand.png); }
+.tree-tool[data-tree-zoom="0.8"] { --glyph: url(../../game/src/icon/ui/remove-minus.png); }
+.tree-tool[data-tree-zoom="1.25"] { --glyph: url(../../game/src/icon/ui/add-plus.png); }
+.tree-tool:hover { border-color: var(--gold); }
+.tree-tool:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tree-zoom { min-width: 3rem; text-align: center; color: var(--dim); font-family: var(--num); font-size: .72rem; }
+.wiki-tree-chips { display: flex; flex-wrap: wrap; gap: .3rem; padding: .55rem 1rem; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 55%, var(--ground)); }
+.tree-chip { padding: .28rem .6rem; border: 1px solid color-mix(in srgb, var(--wing) 45%, var(--line)); border-radius: 999px; background: transparent; color: color-mix(in srgb, var(--wing) 70%, var(--dim)); font: inherit; font-size: .68rem; letter-spacing: .08em; cursor: pointer; }
+.tree-chip:hover, .tree-chip.on { background: color-mix(in srgb, var(--wing) 14%, transparent); color: var(--text); }
+.tree-chip:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.wiki-tree-stage { position: relative; height: clamp(22rem, 70vh, 48rem); overflow: hidden; background: radial-gradient(60% 60% at 50% 45%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 70%), linear-gradient(160deg, color-mix(in srgb, var(--ground) 92%, var(--gold) 8%), var(--bg)); cursor: grab; touch-action: none; }
+.wiki-tree-stage:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.wiki-tree-stage.dragging { cursor: grabbing; }
+.wiki-tree-svg { display: block; width: 100%; height: 100%; user-select: none; }
+.tree-link { fill: none; stroke: color-mix(in srgb, var(--gold) 28%, var(--line)); stroke-width: 1.4; }
+.tree-link.cross { stroke-dasharray: 3 5; stroke: color-mix(in srgb, var(--gold) 52%, var(--line)); opacity: .75; }
+.tree-region .region-code { font-family: var(--wiki-display); font-size: 26px; fill: color-mix(in srgb, var(--wing) 58%, var(--dim)); }
+.tree-region .region-name { font-size: 11px; fill: var(--dim); letter-spacing: .1em; text-transform: uppercase; }
+.tree-origin .origin-ornament { fill: none; stroke: color-mix(in srgb, var(--gold) 24%, var(--line)); stroke-dasharray: 3 5; }
+.tree-origin .origin-rim { fill: none; stroke: var(--gold); }
+.tree-origin .origin-face { fill: var(--inset); stroke: var(--gold-lit); }
+.tree-origin .origin-mark { pointer-events: none; }
+.tree-origin .origin-label { fill: var(--dim); font-size: 11px; letter-spacing: .22em; }
+.wiki-tree-node { cursor: pointer; }
+.wiki-tree-node .tree-node-face { fill: var(--ground); stroke: color-mix(in srgb, var(--wing) 72%, var(--line)); stroke-width: 1.2; }
+.wiki-tree-node .tree-node-halo { fill: none; stroke: color-mix(in srgb, var(--wing) 30%, transparent); stroke-width: 1; opacity: .55; }
+.wiki-tree-node .tree-node-core { fill: var(--wing); opacity: .85; }
+.wiki-tree-node .tree-node-icon { opacity: .9; pointer-events: none; filter: sepia(.2) saturate(.7); }
+.wiki-tree-node .tree-node-rim { fill: none; stroke: var(--wing); stroke-width: 1.6; opacity: .9; }
+.wiki-tree-node .tree-node-hit { fill: transparent; pointer-events: all; }
+.wiki-tree-node.notable .tree-node-rim { stroke-width: 2; }
+.wiki-tree-node.keystone .tree-node-face { fill: color-mix(in srgb, var(--gold) 14%, var(--ground)); stroke: var(--gold); }
+.wiki-tree-node.keystone .tree-node-rim { stroke: var(--gold-lit); stroke-width: 2; }
+.tree-keystone-corners { fill: none; stroke: var(--gold); stroke-width: 1.3; }
+.wiki-tree-node:hover .tree-node-face, .wiki-tree-node.picked .tree-node-face { filter: drop-shadow(0 0 4px var(--wing)); }
+.wiki-tree-node.picked .tree-node-rim { stroke: var(--gold-lit); stroke-width: 2.6; }
+.wiki-tree-hint { position: absolute; left: .8rem; bottom: .7rem; color: var(--dim); font-size: .66rem; letter-spacing: .04em; pointer-events: none; }
+.wiki-tree-legend { position: absolute; right: .8rem; bottom: .65rem; display: flex; flex-wrap: wrap; gap: .5rem; color: var(--dim); font-size: .6rem; letter-spacing: .05em; text-transform: uppercase; pointer-events: none; }
+.wiki-tree-legend span { display: inline-flex; align-items: center; gap: .25rem; }
+.wiki-tree-legend span::before { content: ""; width: .45rem; height: .45rem; border-radius: 50%; border: 1px solid var(--line); background: var(--ground); }
+.wiki-tree-legend .l-notable::before { border-color: var(--gold); }
+.wiki-tree-legend .l-keystone::before { border-color: var(--gold-lit); background: color-mix(in srgb, var(--gold) 25%, var(--ground)); }
+.wiki-tree-legend .l-cross::before { width: .9rem; height: 0; border: 0; border-top: 1px dashed var(--gold); border-radius: 0; background: none; }
+.wiki-tree-card { position: absolute; z-index: 3; display: grid; gap: .18rem; max-width: min(19rem, 72vw); padding: .7rem .85rem; border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line)); border-radius: var(--radius-card); background: color-mix(in srgb, var(--panel) 96%, transparent); box-shadow: var(--shadow-soft); pointer-events: none; }
+.wiki-tree-card[hidden] { display: none; }
+.wiki-tree-card strong { color: var(--gold-lit); font-family: var(--wiki-display); font-size: 1rem; font-weight: 500; }
+.wiki-tree-card .tree-card-meta { color: var(--dim); font-size: .66rem; letter-spacing: .05em; text-transform: uppercase; }
+.wiki-tree-card p { color: color-mix(in srgb, var(--text) 86%, var(--dim)); font-size: .78rem; }
+.wiki-tree-node.str, .tree-region.str, .tree-chip.str { --wing: var(--hp); }
+.wiki-tree-node.agi, .tree-region.agi, .tree-chip.agi { --wing: var(--good); }
+.wiki-tree-node.dex, .tree-region.dex, .tree-chip.dex { --wing: var(--xp); }
+.wiki-tree-node.int, .tree-region.int, .tree-chip.int { --wing: var(--mana); }
+.wiki-tree-node.wis, .tree-region.wis, .tree-chip.wis { --wing: var(--curse); }
+.wiki-tree-node.vit, .tree-region.vit, .tree-chip.vit { --wing: var(--hp-lit); }
+.wiki-tree-node.lck, .tree-region.lck, .tree-chip.lck { --wing: var(--gold); }
+@media (max-width: 46rem) {
+  .wiki-tree-stage { height: 60vh; }
+  .wiki-tree-legend { display: none; }
+  .wiki-tree-bar { flex-wrap: wrap; }
+  .wiki-tree-controls { flex: 1 0 100%; justify-content: flex-end; }
+}
+@media (max-width: 64rem) {
+  .wiki-masthead { flex-wrap: wrap; padding: 1.1rem 1.4rem; }
+  .masthead-tag { flex: 1 0 100%; order: 3; }
+  .masthead-tools { order: 2; }
+  .menu-toggle { display: inline-flex; order: 1; }
+  .brand { order: 0; }
+  .wiki-shell { grid-template-columns: 1fr; padding: 1.2rem 1.4rem 3rem; }
+  .wiki-nav { position: static; display: none; max-height: none; padding: 0 0 1rem; border-right: 0; border-bottom: 1px solid var(--line); }
+  .wiki-shell.nav-open .wiki-nav { display: flex; }
+}
+@media (max-width: 46rem) {
+  .search input { width: min(100%, 14rem); }
+  .masthead-tools { flex: 1 0 100%; }
+  .search { flex: 1; } .search input { width: 100%; }
+  .page-head, .home-hero { padding: 1.1rem 1.15rem; }
+  .page-content > section { padding: 1rem 1.05rem; }
+  .page-turn { grid-template-columns: 1fr; }
+  .page-turn .next { justify-self: start; text-align: left; }
+  .toc ol { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+@media print {
+  .wiki-masthead, .wiki-nav, .toc, .page-turn, .related-grid, .wiki-foot, .skip { display: none !important; }
+  .wiki-shell { display: block; max-width: none; padding: 0; }
+  body::before { display: none; }
+  .page-content > section { break-inside: avoid; }
+}</style>
+<button class="skip" type="button" data-skip>Skip to content</button>
+<header class="wiki-masthead">
+  <a class="brand" href="index.html" aria-label="ModWorld Field Manual, home">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-text"><b>MODWORLD</b><small>Field Manual</small></span>
+  </a>
+  <p class="masthead-tag">Official player reference · live figures</p>
+  <div class="masthead-tools">
+    <div class="search" role="search">
+      <span class="search-glyph" aria-hidden="true"></span>
+      <label class="sr-only" for="wiki-search">Search the manual</label>
+      <input id="wiki-search" type="search" placeholder="Search the manual…" autocomplete="off" spellcheck="false" />
+      <div id="wiki-search-results" class="search-results" hidden></div>
+    </div>
+    <a class="play-link" href="/">Play the game</a>
+  </div>
+  <button class="menu-toggle" type="button" data-wiki-menu aria-controls="wiki-nav" aria-expanded="false"><span aria-hidden="true">☰</span> Chapters</button>
+</header>
+<div class="wiki-shell">
+<nav class="wiki-nav" id="wiki-nav" aria-label="Manual chapters">
+  <p class="nav-title">The manual</p>
+  <section class="nav-group" aria-labelledby="nav-start">
+    <h2 id="nav-start"><span>I</span>Getting started<b>6</b></h2>
+    <ul><li><a href="index.html" data-page-link data-title="Overview" data-group="Getting started" data-search="Overview ModWorld — how to play Getting started An open-world idle RPG. Your character fights while the window is open and while it is shut." class="">Overview</a></li><li><a href="progression.html" data-page-link data-title="Progression" data-group="Getting started" data-search="Progression Progression Getting started XP to next level = kills at that level × XP per kill. Weapon mastery is on Weapon mastery ; the finish line is on Finish line ." class="">Progression</a></li><li><a href="mastery.html" data-page-link data-title="Weapon mastery" data-group="Getting started" data-search="Weapon mastery Weapon mastery Getting started Each weapon type has its own Mastery ladder; the held type discounts weight and boosts matching skills, and every type at its cap adds account-wide drop rate." class="">Weapon mastery</a></li><li><a href="goals.html" data-page-link data-title="Finish line" data-group="Getting started" data-search="Finish line The finish line Getting started What the run counts toward, and the goals that are counted rather than timed." class="">Finish line</a></li><li><a href="away.html" data-page-link data-title="Away" data-group="Getting started" data-search="Away Away Getting started Every whole elapsed second is credited, with no offline time limit. Away gear uses the band’s floor Item level; loot is not auto-converted." class="">Away</a></li><li><a href="bag.html" data-page-link data-title="Bag &amp; weight" data-group="Getting started" data-search="Bag &amp; weight Bag, weight and junk Getting started What you can carry, how it stacks, what encumbrance costs and how the bag filter decides." class="">Bag &amp; weight</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-character">
+    <h2 id="nav-character"><span>II</span>Character<b>7</b></h2>
+    <ul><li><a href="stats.html" data-page-link data-title="Stats &amp; caps" data-group="Character" data-search="Stats &amp; caps Stats and caps Character Seven Core attributes feed derived stats through the formulas and caps below." class="">Stats &amp; caps</a></li><li><a href="skills.html" data-page-link data-title="Skills" data-group="Character" data-search="Skills Skills Character How a press is timed, paid and resolved. The full row list is on Skill roster ; statuses and the Alignment gate are on Statuses ." class="">Skills</a></li><li><a href="skills-roster.html" data-page-link data-title="Skill roster" data-group="Character" data-search="Skill roster Skill roster Character Every live skill row, grouped by type. Press damage = level-1 damage × damagePct(level) / 100 ; effects use effectPct , Buffs and Auras use buffEffectPct . Cap: 20." class="">Skill roster</a></li><li><a href="statuses.html" data-page-link data-title="Statuses" data-group="Character" data-search="Statuses Statuses and the Alignment gate Character What each status changes, how far it climbs, and the Alignment gate every rolled status passes. Element resistance and its status map are on Elements ; presses that apply statuses are on Skills ." class="">Statuses</a></li><li><a href="passive-tree.html" data-page-link data-title="Passive tree" data-group="Character" data-search="Passive tree Passive tree Character The 775-node board the game draws. Drag to pan, scroll to zoom, jump by region. Every road, Notable and Keystone is live tree data." class="">Passive tree</a></li><li><a href="keystones.html" data-page-link data-title="Keystones" data-group="Character" data-search="Keystones Keystones Character Every Keystone, its Notable entrance, its authored parameters and the pairs that cannot be held together." class="">Keystones</a></li><li><a href="builds.html" data-page-link data-title="Build plan" data-group="Character" data-search="Build plan Build plan Character A plan first: choose the regions your damage and defence scale on, walk one road to a Notable, and spend attainment on the Keystone that changes a rule. The tree and Keystone reference are separate pages; this page keeps the plan and the reference builds." class="">Build plan</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-combat">
+    <h2 id="nav-combat"><span>III</span>Combat<b>6</b></h2>
+    <ul><li><a href="combat.html" data-page-link data-title="Combat" data-group="Combat" data-search="Combat Combat Combat One incoming hit resolves in a fixed order — avoidance, then Armour, then Elemental resistance, then a pool. Damage shapes, area and body size are on Damage ; encounter ranks on Encounters . Every number is the engine at the reference build (every point spent evenly across the seven Core attributes, level 190 ), so it is the line your own sheet is measured against, not a promise about it." class="">Combat</a></li><li><a href="damage.html" data-page-link data-title="Damage" data-group="Combat" data-search="Damage Damage, area and bodies Combat How a finished hit meets body size, reach, area, conversion and bleed. Hit order and the defensive pools stay on Combat ." class="">Damage</a></li><li><a href="encounters.html" data-page-link data-title="Encounters" data-group="Combat" data-search="Encounters Elite, Unique and Boss Combat The three ranks that are not ordinary bodies: their HP, DPS and spawn rules." class="on" aria-current="page">Encounters</a></li><li><a href="elements.html" data-page-link data-title="Elements" data-group="Combat" data-search="Elements Elements Combat Every Element names the status its hits leave. A Species attacks with one Element and authors a separate resistance and weakness; no Element counters another. The status rules are on Statuses ." class="">Elements</a></li><li><a href="mobs.html" data-page-link data-title="Bestiary" data-group="Combat" data-search="Bestiary Bestiary Combat 11 races · 36 species · 156 variants · 36 uniques. Every species attacks with one Element — the spine on its plate — and carries its own resistance, weakness and junk. Mob skills are on Mob skills ; drop rates on Drop rates ." class="">Bestiary</a></li><li><a href="mob-skills.html" data-page-link data-title="Mob skills" data-group="Combat" data-search="Mob skills Mob skills Combat The mob-only skill library: strikes, auras, and the Boss and Unique kits that choose them." class="">Mob skills</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-gear">
+    <h2 id="nav-gear"><span>IV</span>Gear &amp; crafting<b>10</b></h2>
+    <ul><li><a href="items.html" data-page-link data-title="Items" data-group="Gear &amp; crafting" data-search="Items Items Gear &amp; crafting A piece of gear is a frame plus the Mods that rolled on it. The frame decides what it can roll; the roll decides what it is worth. Every Mod and its window is on Mods ; per-kill drop odds are on Drop rates ." class="">Items</a></li><li><a href="mods.html" data-page-link data-title="Mods" data-group="Gear &amp; crafting" data-search="Mods Mods and windows Gear &amp; crafting Every Mod the gear pool rolls, its range, and the window it publishes at each Item quality. An amount carries no unit; a percent value carries % ." class="">Mods</a></li><li><a href="drops.html" data-page-link data-title="Drop rates" data-group="Gear &amp; crafting" data-search="Drop rates Drop rates Gear &amp; crafting What a zone band pays per kill: gear, herbs, junk by rarity and potion drops." class="">Drop rates</a></li><li><a href="weapons.html" data-page-link data-title="Weapons" data-group="Gear &amp; crafting" data-search="Weapons Weapons Gear &amp; crafting 11 main-hand types. DPS index = attacksPerSecond × weaponMult / (sword attacksPerSecond × swordMult) × 100 . Frame windows use the mid band." class="">Weapons</a></li><li><a href="equipment.html" data-page-link data-title="Equipment" data-group="Gear &amp; crafting" data-search="Equipment Equipment Gear &amp; crafting Every slot that is not a main hand. Pick a slot group for frames, frame Mods and the lines each one can roll." class="">Equipment</a></li><li><a href="armour.html" data-page-link data-title="Armour" data-group="Gear &amp; crafting" data-search="Armour Armour slots Gear &amp; crafting Helmet, chest, pant, boots, belt, gloves and cape, frame by frame." class="">Armour</a></li><li><a href="jewellery.html" data-page-link data-title="Jewellery" data-group="Gear &amp; crafting" data-search="Jewellery Jewellery slots Gear &amp; crafting Ring, amulet and earring, frame by frame." class="">Jewellery</a></li><li><a href="offhand.html" data-page-link data-title="Off hand" data-group="Gear &amp; crafting" data-search="Off hand Off hand Gear &amp; crafting Shields, quivers, tomes and foci — the off-hand frame pool." class="">Off hand</a></li><li><a href="crafting.html" data-page-link data-title="Crafting" data-group="Gear &amp; crafting" data-search="Crafting Crafting Gear &amp; crafting The Craft bench and the Forge: place a piece, choose a pattern and read the line caps. Every stone press, its cost and the quality ladder are on Stones ." class="">Crafting</a></li><li><a href="stones.html" data-page-link data-title="Stones" data-group="Gear &amp; crafting" data-search="Stones Crafting stones Gear &amp; crafting Every stone, the presses it buys, the quality ladder and where each stone comes from. The bench itself is on Crafting ." class="">Stones</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-world">
+    <h2 id="nav-world"><span>V</span>World<b>5</b></h2>
+    <ul><li><a href="world.html" data-page-link data-title="World" data-group="World" data-search="World The world World Zone Level drives HP/DPS curves. Body classes and species are on Bestiary ." class="">World</a></li><li><a href="travel.html" data-page-link data-title="Travel" data-group="World" data-search="Travel Travel and the Waypoint World blocks = (|Δq| + |Δr| + |Δq + Δr|) / 2 ; walk time = blocks × block_sec ." class="">Travel</a></li><li><a href="survival.html" data-page-link data-title="Survival" data-group="World" data-search="Survival Field camp and survival World HP, Mana and Energy Shield use separate Core formulas. Field skills are on Field skills ; food, potions and herbs are on Provisions ." class="">Survival</a></li><li><a href="field-skills.html" data-page-link data-title="Field skills" data-group="World" data-search="Field skills Field skills and gathering World Field-skill progression, the extra rolls a hunt pays, and the regional Mine, Grove and forage sources." class="">Field skills</a></li><li><a href="provisions.html" data-page-link data-title="Provisions" data-group="World" data-search="Provisions Provisions, potions and herbs World Hunger, the Camp kitchen, potions, Condensed draughts and the herb farm." class="">Provisions</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-trade">
+    <h2 id="nav-trade"><span>VI</span>Towns &amp; trade<b>4</b></h2>
+    <ul><li><a href="towns.html" data-page-link data-title="Towns" data-group="Towns &amp; trade" data-search="Towns Settlements Towns &amp; trade Stall price = listed income-minutes × the seller band’s gold-per-minute rate. Standing, tasks and the Collector are on Standing ." class="">Towns</a></li><li><a href="standing.html" data-page-link data-title="Standing" data-group="Towns &amp; trade" data-search="Standing Standing, tasks and the Collector Towns &amp; trade Settlement Standing, the task board and the Collector set that asks for specific pieces. Settlement stock is on Towns ." class="">Standing</a></li><li><a href="economy.html" data-page-link data-title="Economy" data-group="Towns &amp; trade" data-search="Economy The two currencies Towns &amp; trade Trade quote = item value integrated over the town’s demand curve. Delivery and Black Market are on Delivery ; craft stone prices are on Stones ." class="">Economy</a></li><li><a href="delivery.html" data-page-link data-title="Delivery" data-group="Towns &amp; trade" data-search="Delivery Delivery, Black Market and cargo Towns &amp; trade Timed town demand, the Black Market stock, and the Workshop cargo that turns field materials into sale goods." class="">Delivery</a></li></ul>
+  </section><section class="nav-group" aria-labelledby="nav-appendix">
+    <h2 id="nav-appendix"><span>VII</span>Appendix<b>1</b></h2>
+    <ul><li><a href="icons.html" data-page-link data-title="Icons" data-group="Appendix" data-search="Icons Icon Gallery Appendix Every icon the game ships, in one place. Search by name, filter by category, star icons to find them again, or mark unwanted icons to hide them until you're ready to remove them in a batch." class="">Icons</a></li></ul>
+  </section>
+  <p class="nav-foot">7 chapters · 39 pages · live data</p>
+</nav>
+<main id="wiki-main" class="wiki-main" tabindex="-1"><header class="page-head">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Field Manual</a><span aria-hidden="true">/</span><span>Combat</span><span aria-hidden="true">/</span><span aria-current="page">Encounters</span></nav>
+  <p class="eyebrow">Chapter III · Combat</p>
+  <h1>Elite, Unique and Boss</h1>
+  <p class="lead">The three ranks that are not ordinary bodies: their HP, DPS and spawn rules.</p>
+  <div class="page-meta"><span class="chip">1 section</span><span class="chip">Live game data</span><span class="chip">Combat</span></div>
+  <p class="covers"><span>Covers</span>Elite, Unique and Boss</p>
+</header><nav class="toc" aria-label="On this page">
+  <p class="eyebrow">On this page</p>
+  <ol><li><button type="button" class="on" data-scroll="section-1" data-toc="section-1">Elite, Unique and Boss</button></li></ol>
+</nav><article class="page-content"><section><h2 id="section-1">Elite, Unique and Boss</h2><p class="note"><code>BaseHP(L, Core) = mobHpAt(L) + hp_per_level × (L − 1) + Core.VIT × K_VIT_HP</code>. <code>speciesPsMult</code> is profile power ÷ zone-mean species power; profile power = <code>power_base + K_MOB_PS_STAT × (wPhys × STR + wMagic × INT)</code>. L is the Species zone level; Unique replaces a normal spawn at zone top level. Boss and Unique have no extra HP multiplier. XP multipliers: Elite ×3 · Boss ×15 · Unique ×30.</p><table><thead><tr><th>Rank</th><th>HP</th><th>DPS</th><th>Spawn</th></tr></thead><tbody><tr><td>Elite</td><td><code>BaseHP(L, Variant Core) × 1.8</code></td><td><code>mobPsAt(L) × 4 / zoneBodyFactor × speciesPsMult</code></td><td>20.0% of kills</td></tr><tr><td>Boss</td><td><code>BaseHP(L, Boss Core)</code></td><td><code>mobPsAt(L) × 10 / zoneBodyFactor × profilePsMult</code></td><td>4.0 an hour · online only</td></tr><tr><td>Unique</td><td><code>BaseHP(zoneTop, Unique Core)</code></td><td><code>mobPsAt(zoneTop) × 10 / zoneBodyFactor × profilePsMult</code></td><td>1.0% of spawns</td></tr></tbody></table></section></article><footer class="page-foot">
+    <section class="related" aria-labelledby="related-title"><p class="eyebrow" id="related-title">Keep reading</p><div class="related-grid"><a href="combat.html"><b>Combat</b><small>One incoming hit resolves in a fixed order — avoidance, then Armour, then Elemental resistance, then a pool. Damage shapes, area and body…</small></a><a href="damage.html"><b>Damage</b><small>How a finished hit meets body size, reach, area, conversion and bleed. Hit order and the defensive pools stay on Combat .</small></a><a href="elements.html"><b>Elements</b><small>Every Element names the status its hits leave. A Species attacks with one Element and authors a separate resistance and weakness; no…</small></a></div></section>
+    <nav class="page-turn" aria-label="Chapter navigation"><a class="prev" href="damage.html"><small>Previous</small><b>Damage</b></a><a class="next" href="elements.html"><small>Next</small><b>Elements</b></a></nav>
+  </footer>
+<footer class="wiki-foot"><span>ModWorld Field Manual · official player reference</span><span>7 chapters · 39 pages · figures read live from the game</span><a href="index.html">Contents</a></footer>
+</main></div>
+<script>
+(function () {
+  var shell = document.querySelector('.wiki-shell');
+  var menu = document.querySelector('[data-wiki-menu]');
+  if (menu && shell) {
+    menu.addEventListener('click', function () {
+      var open = shell.classList.toggle('nav-open');
+      menu.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  }
+  var skip = document.querySelector('[data-skip]');
+  if (skip) skip.addEventListener('click', function () {
+    var main = document.getElementById('wiki-main');
+    if (main) { main.focus(); main.scrollIntoView({ block: 'start' }); }
+  });
+  var input = document.getElementById('wiki-search');
+  var results = document.getElementById('wiki-search-results');
+  var links = Array.prototype.slice.call(document.querySelectorAll('[data-page-link]'));
+  var close = function () { if (results) { results.hidden = true; results.innerHTML = ''; } };
+  if (input && results) {
+    var render = function () {
+      var q = input.value.trim().toLowerCase();
+      if (!q) { close(); return; }
+      var hits = links.filter(function (a) {
+        return (a.getAttribute('data-search') || '').toLowerCase().indexOf(q) >= 0;
+      }).slice(0, 8);
+      results.innerHTML = '';
+      if (!hits.length) {
+        var none = document.createElement('p');
+        none.className = 'search-none';
+        none.textContent = 'No chapter matches.';
+        results.appendChild(none);
+      } else {
+        hits.forEach(function (a) {
+          var hit = document.createElement('a');
+          hit.className = 'search-hit';
+          hit.href = a.getAttribute('href');
+          var title = document.createElement('span');
+          title.textContent = a.getAttribute('data-title') || '';
+          var group = document.createElement('small');
+          group.textContent = a.getAttribute('data-group') || '';
+          hit.appendChild(title);
+          hit.appendChild(group);
+          results.appendChild(hit);
+        });
+      }
+      results.hidden = false;
+    };
+    input.addEventListener('input', render);
+    input.addEventListener('focus', render);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { input.value = ''; close(); input.blur(); }
+      if (e.key === 'Enter') {
+        var first = results.querySelector('a');
+        if (first) { e.preventDefault(); first.click(); }
+      }
+    });
+    if (!window.__wikiSearchOutside) {
+      window.__wikiSearchOutside = true;
+      document.addEventListener('click', function (e) {
+        var box = document.querySelector('.search');
+        if (box && !box.contains(e.target)) {
+          var r = document.getElementById('wiki-search-results');
+          if (r) { r.hidden = true; r.innerHTML = ''; }
+        }
+      });
+      document.addEventListener('keydown', function (e) {
+        var field = document.getElementById('wiki-search');
+        if (!field) return;
+        if (e.key === '/' && document.activeElement !== field && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) {
+          e.preventDefault(); field.focus();
+        }
+      });
+    }
+    var q = new URLSearchParams(window.location.search).get('q');
+    if (q) { input.value = q; render(); }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-scroll]'), function (b) {
+    b.addEventListener('click', function () {
+      var target = document.getElementById(b.getAttribute('data-scroll'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (shell) shell.classList.remove('nav-open');
+    });
+  });
+  var toc = Array.prototype.slice.call(document.querySelectorAll('[data-toc]'));
+  if (toc.length && 'IntersectionObserver' in window) {
+    var seen = {};
+    toc.forEach(function (a) { seen[a.getAttribute('data-toc')] = a; });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        toc.forEach(function (a) { a.classList.toggle('on', a === seen[en.target.id]); });
+      });
+    }, { rootMargin: '-15% 0px -70% 0px' });
+    Array.prototype.forEach.call(document.querySelectorAll('.page-content > section[id]'), function (s) { io.observe(s); });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.wiki-nav [data-page-link]'), function (a) {
+    a.addEventListener('click', function () { if (shell) shell.classList.remove('nav-open'); });
+  });
+
+  // The bestiary: one text filter and a race chip row over the same plates. Cards carry their own
+  // search haystack (name, race, Element, habitat, variants, skills), so filtering never reads the DOM.
+  var bestiary = document.querySelector('[data-bestiary]');
+  if (bestiary) {
+    var beastInput = bestiary.querySelector('[data-bestiary-search]');
+    var beastChips = Array.prototype.slice.call(bestiary.querySelectorAll('[data-bestiary-race]'));
+    var beastGroups = Array.prototype.slice.call(bestiary.querySelectorAll('[data-bestiary-group]'));
+    var beastCards = Array.prototype.slice.call(bestiary.querySelectorAll('[data-bestiary-entry]'));
+    var beastStatus = bestiary.querySelector('[data-bestiary-status]');
+    var beastRace = 'all';
+    var applyBeast = function () {
+      var q = (beastInput ? beastInput.value : '').trim().toLowerCase();
+      var shown = 0;
+      beastGroups.forEach(function (group) {
+        var visible = 0;
+        Array.prototype.forEach.call(group.querySelectorAll('[data-bestiary-entry]'), function (card) {
+          var on = (beastRace === 'all' || card.getAttribute('data-race') === beastRace) &&
+            (!q || (card.getAttribute('data-search') || '').indexOf(q) >= 0);
+          card.hidden = !on;
+          if (on) visible++;
+        });
+        group.hidden = visible === 0;
+        shown += visible;
+      });
+      if (beastStatus) {
+        beastStatus.textContent = shown
+          ? 'Showing ' + shown + ' of ' + beastCards.length + ' species'
+          : 'No species match that filter.';
+      }
+    };
+    beastChips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        beastRace = chip.getAttribute('data-bestiary-race') || 'all';
+        beastChips.forEach(function (c) { c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'); });
+        applyBeast();
+      });
+    });
+    if (beastInput) beastInput.addEventListener('input', applyBeast);
+    applyBeast();
+  }
+
+  // The passive-tree board: a viewBox camera over the canonical SVG, with a node card that follows
+  // the hovered or pinned node exactly as the game's board does.
+  var treeView = document.querySelector('[data-tree-view]');
+  if (treeView) {
+    var treeSvg = treeView.querySelector('svg[data-tree-svg]');
+    var treeStage = treeView.querySelector('[data-tree-stage]');
+    if (treeSvg && treeStage) {
+      var treeCard = treeView.querySelector('[data-tree-card]');
+      var treeZoomLabel = treeView.querySelector('[data-tree-zoom-label]');
+      var readTreeBox = function () {
+        var v = (treeSvg.getAttribute('viewBox') || '').split(' ').map(Number);
+        return { x: v[0] || 0, y: v[1] || 0, w: v[2] || 1, h: v[3] || 1 };
+      };
+      var treeFit = readTreeBox();
+      var treeCamera = { x: treeFit.x, y: treeFit.y, w: treeFit.w, h: treeFit.h };
+      var treeClamp = function (v, lo, hi) { return Math.max(lo, Math.min(hi, v)); };
+      var applyTree = function () {
+        treeSvg.setAttribute('viewBox', [treeCamera.x, treeCamera.y, treeCamera.w, treeCamera.h].join(' '));
+        if (treeZoomLabel) treeZoomLabel.textContent = Math.round((treeFit.w / treeCamera.w) * 100) + '%';
+        if (treeHover || treePinned) placeTreeCard(treeHover || treePinned);
+      };
+      var zoomTree = function (factor, px, py) {
+        var nextW = treeClamp(treeCamera.w / factor, treeFit.w / 8, treeFit.w / 0.65);
+        var nextH = nextW * (treeFit.h / treeFit.w);
+        var wx = treeCamera.x + px * treeCamera.w;
+        var wy = treeCamera.y + py * treeCamera.h;
+        treeCamera.x = wx - px * nextW;
+        treeCamera.y = wy - py * nextH;
+        treeCamera.w = nextW;
+        treeCamera.h = nextH;
+        applyTree();
+      };
+      var zoomTreeCenter = function (factor) { zoomTree(factor, 0.5, 0.5); };
+      var treeChips = Array.prototype.slice.call(treeView.querySelectorAll('[data-tree-region]'));
+      var clearTreeChips = function () {
+        treeChips.forEach(function (chip) { chip.classList.remove('on'); chip.setAttribute('aria-pressed', 'false'); });
+      };
+      var fitTree = function () {
+        treeCamera = { x: treeFit.x, y: treeFit.y, w: treeFit.w, h: treeFit.h };
+        applyTree();
+        clearTreeChips();
+      };
+      var fitBtn = treeView.querySelector('[data-tree-fit]');
+      if (fitBtn) fitBtn.addEventListener('click', fitTree);
+      Array.prototype.forEach.call(treeView.querySelectorAll('[data-tree-zoom]'), function (b) {
+        b.addEventListener('click', function () { zoomTreeCenter(Number(b.getAttribute('data-tree-zoom')) || 1); });
+      });
+      treeChips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          var wing = chip.getAttribute('data-tree-region');
+          var list = treeView.querySelectorAll('.wiki-tree-node.' + wing);
+          var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+          Array.prototype.forEach.call(list, function (n) {
+            var x = Number(n.getAttribute('data-x'));
+            var y = Number(n.getAttribute('data-y'));
+            if (!isFinite(x) || !isFinite(y)) return;
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          });
+          if (!isFinite(minX) || !isFinite(minY)) return;
+          var pad = 70;
+          var w = Math.max(1, maxX - minX + pad * 2);
+          var h = Math.max(1, maxY - minY + pad * 2);
+          var ratio = treeFit.h / treeFit.w;
+          if (h / w < ratio) h = w * ratio;
+          else w = h / ratio;
+          treeCamera = { x: (minX + maxX) / 2 - w / 2, y: (minY + maxY) / 2 - h / 2, w: w, h: h };
+          applyTree();
+          clearTreeChips();
+          chip.classList.add('on');
+          chip.setAttribute('aria-pressed', 'true');
+        });
+      });
+      var treeDrag = null, treeMoved = false, treeHover = null, treePinned = null;
+      var placeTreeCard = function (node) {
+        if (!node || !treeCard || treeCard.hidden) return;
+        var nr = node.getBoundingClientRect();
+        var sr = treeStage.getBoundingClientRect();
+        var cw = treeCard.offsetWidth;
+        var ch = treeCard.offsetHeight;
+        var x = nr.left + nr.width / 2 - sr.left + 18;
+        if (x + cw > sr.width - 12) x = nr.left - sr.left - cw - 18;
+        x = Math.max(12, Math.min(sr.width - cw - 12, x));
+        var y = nr.top - sr.top + nr.height / 2 - ch / 2;
+        y = Math.max(12, Math.min(sr.height - ch - 12, y));
+        treeCard.style.left = x + 'px';
+        treeCard.style.top = y + 'px';
+      };
+      var hideTreeCard = function () { if (treeCard) treeCard.hidden = true; };
+      var showTreeCard = function (node) {
+        if (!treeCard) return;
+        var name = node.getAttribute('data-name') || 'Node';
+        var meta = node.getAttribute('data-meta') || '';
+        var text = node.getAttribute('data-detail') || '';
+        treeCard.innerHTML = '';
+        var title = document.createElement('strong');
+        title.textContent = name;
+        var line = document.createElement('span');
+        line.className = 'tree-card-meta';
+        line.textContent = meta;
+        treeCard.appendChild(title);
+        treeCard.appendChild(line);
+        if (text) {
+          var body = document.createElement('p');
+          body.textContent = text;
+          treeCard.appendChild(body);
+        }
+        treeCard.hidden = false;
+        placeTreeCard(node);
+      };
+      var pickTreeNode = function (node) {
+        Array.prototype.forEach.call(treeView.querySelectorAll('.wiki-tree-node.picked'), function (n) { n.classList.remove('picked'); });
+        node.classList.add('picked');
+      };
+      Array.prototype.forEach.call(treeView.querySelectorAll('.wiki-tree-node'), function (node) {
+        node.addEventListener('pointerenter', function () {
+          if (treeMoved) return;
+          treeHover = node;
+          showTreeCard(node);
+        });
+        node.addEventListener('pointerleave', function () {
+          treeHover = null;
+          if (treePinned) showTreeCard(treePinned);
+          else hideTreeCard();
+        });
+        node.addEventListener('click', function () {
+          if (treeMoved) return;
+          treePinned = node;
+          pickTreeNode(node);
+          showTreeCard(node);
+        });
+      });
+      treeStage.addEventListener('pointerleave', function () {
+        treeHover = null;
+        if (treePinned) showTreeCard(treePinned);
+        else hideTreeCard();
+      });
+      treeStage.addEventListener('click', function (e) {
+        if (treeMoved) return;
+        var target = e.target;
+        if (target && target.closest && target.closest('.wiki-tree-node')) return;
+        treePinned = null;
+        treeHover = null;
+        Array.prototype.forEach.call(treeView.querySelectorAll('.wiki-tree-node.picked'), function (n) { n.classList.remove('picked'); });
+        hideTreeCard();
+      });
+      treeStage.addEventListener('pointerdown', function (e) {
+        if (e.button != null && e.button !== 0) return;
+        treeDrag = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false };
+        treeMoved = false;
+        try { treeStage.setPointerCapture(e.pointerId); } catch (err) {}
+        treeStage.classList.add('dragging');
+      });
+      treeStage.addEventListener('pointermove', function (e) {
+        if (!treeDrag || e.pointerId !== treeDrag.id) return;
+        var rect = treeStage.getBoundingClientRect();
+        var dx = (e.clientX - treeDrag.x) * (treeCamera.w / Math.max(1, rect.width));
+        var dy = (e.clientY - treeDrag.y) * (treeCamera.h / Math.max(1, rect.height));
+        if (Math.abs(e.clientX - treeDrag.x) + Math.abs(e.clientY - treeDrag.y) > 2) {
+          treeDrag.moved = true;
+          treeMoved = true;
+        }
+        if (!treeDrag.moved) return;
+        treeCamera.x -= dx;
+        treeCamera.y -= dy;
+        treeDrag.x = e.clientX;
+        treeDrag.y = e.clientY;
+        applyTree();
+      });
+      var endTreeDrag = function (e) {
+        if (!treeDrag || (e.pointerId != null && e.pointerId !== treeDrag.id)) return;
+        try { if (treeStage.hasPointerCapture(treeDrag.id)) treeStage.releasePointerCapture(treeDrag.id); } catch (err) {}
+        treeDrag = null;
+        treeStage.classList.remove('dragging');
+        setTimeout(function () { treeMoved = false; }, 0);
+      };
+      treeStage.addEventListener('pointerup', endTreeDrag);
+      treeStage.addEventListener('pointercancel', endTreeDrag);
+      treeStage.addEventListener('wheel', function (e) {
+        e.preventDefault();
+        var rect = treeStage.getBoundingClientRect();
+        var px = (e.clientX - rect.left) / Math.max(1, rect.width);
+        var py = (e.clientY - rect.top) / Math.max(1, rect.height);
+        zoomTree(e.deltaY < 0 ? 1.18 : 1 / 1.18, px, py);
+      }, { passive: false });
+      treeStage.addEventListener('keydown', function (e) {
+        var step = 0.12;
+        var handled = true;
+        if (e.key === 'ArrowLeft') treeCamera.x -= treeCamera.w * step;
+        else if (e.key === 'ArrowRight') treeCamera.x += treeCamera.w * step;
+        else if (e.key === 'ArrowUp') treeCamera.y -= treeCamera.h * step;
+        else if (e.key === 'ArrowDown') treeCamera.y += treeCamera.h * step;
+        else if (e.key === '+' || e.key === '=') zoomTreeCenter(1.2);
+        else if (e.key === '-' || e.key === '_') zoomTreeCenter(0.83);
+        else if (e.key === '0') fitTree();
+        else handled = false;
+        if (!handled) return;
+        e.preventDefault();
+        if (e.key !== '+' && e.key !== '=' && e.key !== '-' && e.key !== '_' && e.key !== '0') applyTree();
+      });
+      applyTree();
+    }
+  }
+})();
+</script></body></html>

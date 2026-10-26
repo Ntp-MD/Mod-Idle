@@ -4,10 +4,11 @@ import { mulberry32 } from '../src/engine/client-helpers';
 import { sm } from '../src/engine/client';
 import {
   arenaAction, captureCombatArena, createCombatArena, syncCombatArena,
-} from '../src/sim/combat-arena';
-import { catchUp, characterSheet, encounterKeyOf, newGame, setLevel, spawnMob, tick } from '../src/sim/game';
-import { normalizePendingWork, restorePendingWork } from '../src/sim/pending-work';
-import { prepareSkillCast } from '../src/sim/skills';
+} from '../src/sim/combat/combat-arena';
+import { catchUp, characterSheet, encounterKeyOf, newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
+import { normalizePendingWork, restorePendingWork } from '../src/sim/core/pending-work';
+import { prepareSkillCast } from '../src/sim/combat/skills';
+import { pinFieldPopulation } from './mobFixture';
 import { exportJson, importJson, migrate, SCHEMA_VERSION } from '../src/state/save';
 
 function pendingFight() {
@@ -30,6 +31,7 @@ function pendingFight() {
   Object.assign(arena.player, { x: 1, y: 6 });
   Object.assign(arena.mobs[mob.id], { x: 1.6, y: 6 });
   captureCombatArena(arena, state, 0);
+  pinFieldPopulation(state);
   const c = characterSheet(state);
   const area = { origin: 'target' as const, radiusM: 3, center: { x: 1.6, y: 6 }, targetId: mob.id };
   const prepared = prepareSkillCast(state.skills, c, 'attack.firestorm', c.maxMana, [mob],
@@ -112,6 +114,7 @@ describe('released pending work across a save', () => {
     const { state, mob, arena } = pendingFight();
     tick(state, { arena, autoSkills: false });
     const hpBefore = mob.hp;
+    state.hunting = false;
     const loaded = importJson(exportJson(state));
     loaded.group = [];
     loaded.fx = [];
@@ -206,6 +209,7 @@ describe('released pending work across a save', () => {
     mob.ps = 100;
     tick(state, { arena, autoSkills: false });
     expect(state.pendingWork?.mobFlights).toHaveLength(1);
+    state.hunting = false;
     state.group = [];
     const hpBefore = state.player.hp;
     const loaded = importJson(exportJson(state));
@@ -230,5 +234,26 @@ describe('released pending work across a save', () => {
       actors: [], actions: [], flights: [{ actionId: 3, skillId: 'attack.nope', targetIds: [], prepared: { id: 'attack.nope' } }] };
     expect(migrate(current, SCHEMA_VERSION).pendingWork).toBeNull();
     expect(normalizePendingWork({ unitsPerSec: 0, flights: [] })).toBeNull();
+  });
+  it('keeps committed line/cone dimensions and drops a ledger with impossible geometry', () => {
+    const base = { actionId: 3, skillId: 'attack.firestorm', targetIds: [],
+      prepared: { id: 'attack.firestorm', manaCost: 1, hpCost: 0, level: 1, cooldownSec: 1, spatial: true },
+      character: { phys: 1, magic: 1, maxHp: 1, critChance: 1, critDmg: 1 },
+      modifiers: {}, profile: { delivery: 'melee', hit_radius_m: 0.5 },
+      timing: { releaseAtUs: 0, impactAtUs: 1, startedAtUs: 0, recoveryUntilUs: 2 },
+      source: { x: 0, y: 0 }, destination: { x: 1, y: 1 }, position: { x: 0, y: 0 }, lastCheckedAtUs: 0 };
+    const ledger = (area: unknown) => normalizePendingWork({ unitsPerSec: 1_000_000, player: { x: 0, y: 0 },
+      actors: [], actions: [], flights: [{ ...base, area }] });
+    const line = { origin: 'caster', radiusM: 0, center: { x: 0, y: 0 }, targetId: 'a',
+      shape: 'line', lengthM: 6, widthM: 1.2, directionRad: 0 };
+    expect(ledger(line)?.flights.length).toBe(1);
+    expect(ledger({ ...line, shape: 'wedge' })).toBeNull();
+    expect(ledger({ ...line, lengthM: 0 })).toBeNull();
+    expect(ledger({ ...line, directionRad: Number.NaN })).toBeNull();
+    const cone = { origin: 'caster', radiusM: 2.1, center: { x: 0, y: 0 }, targetId: 'a',
+      shape: 'cone', lengthM: 2.1, angleDeg: 120, directionRad: 0 };
+    expect(ledger(cone)?.flights.length).toBe(1);
+    expect(ledger({ ...cone, angleDeg: 181 })).toBeNull();
+    expect(ledger({ ...line, origin: 'side' })).toBeNull();
   });
 });

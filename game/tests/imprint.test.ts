@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { E, loot, MODS } from '../src/engine/client';
-import { newGame, setLevel, tick, huntZone } from '../src/sim/game';
-import { craft, doCraft, imprintStonesOf, poolOf } from '../src/sim/craft';
+import { newGame, setLevel, tick, huntZone } from '../src/sim/core/game';
+import { craft, doCraft, imprintStonesOf, poolOf } from '../src/sim/gear/craft';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { exportJson, importJson } from '../src/state/save';
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { MS, sm } from '../src/engine/client';
-import { describeMobSkill, describeSkill, skillWindowEntries } from '../src/sim/skill-copy';
+import { describeMobSkill, describeSkill, skillWindowEntries } from '../src/sim/combat/skill-copy';
 
 const row = (id: string) => sm.byId[id]!;
 
@@ -13,7 +13,7 @@ describe('the player skill window derives its fields from the row', () => {
       range: '5',
       area: '6x6',
       element: 'Fire',
-      sp: '21 flat (AoE ×1.5)',
+      sp: '21',
       delay: '13 sec',
       compact: 'Area · 6x6 · 5 · 13 sec',
     });

@@ -52,7 +52,6 @@
   const warpBlocked = $derived(!writable ? 'Read-only: another tab controls progress.' : busy ? 'Finish traveling or recovering first.' : warpReason || (!afford ? `Needs ${fare} gold.` : ''));
   const isDungeon = $derived(site === 'dungeon');
   const zone = $derived(eng.zoneById(settlement.zone));
-  const ambushChance = new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 }).format(E.road.encounter_chance_pct);
   const subzone = $derived(dest.kind === 'sub' && dest.sub != null ? zone.subzones?.[dest.sub] ?? null : null);
   const encounterNames = $derived.by(() => {
     // The zone's fixed levels belong to Species; its selected Variant supplies the name and Core.
@@ -102,9 +101,8 @@
     <p class="dest-purpose">{intel.purpose}</p>
   {/if}
   {#if selected && !dest.self}
-    <dl class="dest-trip" aria-label="Travel time and route risk">
+    <dl class="dest-trip" aria-label="Travel time">
       <div><dt>Travel</dt><dd>{dest.blocks} {dest.blocks === 1 ? 'block' : 'blocks'} · {dest.sec}s</dd></div>
-      <div><dt>Ambush on route</dt><dd>{intel ? `${intel.ambushRisk}%` : `${ambushChance}% / block`}</dd></div>
     </dl>
   {:else}
     <p class="text-good">You are here{campHere ? ' · Field Camp' : ''}</p>
@@ -170,7 +168,6 @@
     <summary><span>Details</span><span class="icon-mask dest-chevron" style={`--glyph:url(${chevronDown})`} aria-hidden="true"></span></summary>
     <div class="dest-section-body">
       <p class="text-note">{intel && !intel.known && dest.kind !== 'town' ? `Cell ${dest.key} · details hidden until scouted` : `${settlement.name} · Zone ${settlement.zone} · ${settlement.band} band · Cell ${dest.key}`}</p>
-      {#if selected && !dest.self}<p class="text-note">Ambush chance per block · {ambushChance}%</p>{/if}
       <p class="text-note">{intel && !intel.known ? intel.purpose : ground}</p>
       {#if settlement.capital && (!intel || intel.known || dest.kind === 'town')}<p class="text-note">{settlement.capital} capital</p>{/if}
       {#if (!intel || intel.known) && (site === 'hunt' || isDungeon)}
@@ -193,7 +190,7 @@
         </section>
       {/if}
       {#if isDungeon}
-        <p class="text-note">Up to {E.dungeon.mob_cap} mobs in groups of {E.dungeon.group_cap}. Loot stays in escrow until the last falls.</p>
+        <p class="text-note">Up to {E.dungeon.mob_cap} mobs in population waves. Loot stays in escrow until the last falls.</p>
         {#if (dungeon?.cooldown ?? 0) > 0}<p class="text-note">Cooldown · {dungeon?.cooldown}s remaining.</p>{/if}
       {/if}
     </div>

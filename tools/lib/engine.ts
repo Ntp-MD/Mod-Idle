@@ -56,7 +56,7 @@ function engineForTown(): any {
       high: eng.goldPerMinute('high'), high_full_lck: eng.goldPerMinute('high_full_lck'),
     },
     // the walk's own shape, so T9 prints the block time and the encounter chance rather than a copy
-    road: { block_sec: E.road.block_sec, encounter_chance_pct: E.road.encounter_chance_pct },
+    road: { block_sec: E.road.block_sec },
   };
 }
 

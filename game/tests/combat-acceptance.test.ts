@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { E, loot } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { arenaDistance, arenaWeaponRange, captureCombatArena, createCombatArena, syncCombatArena } from '../src/sim/combat-arena';
-import { characterSheet, newGame, setLevel, spawnMob, tick } from '../src/sim/game';
+import { arenaDistance, arenaWeaponRange, captureCombatArena, createCombatArena, syncCombatArena } from '../src/sim/combat/combat-arena';
+import { characterSheet, newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
+import { pinFieldPopulation } from './mobFixture';
 
 /** The first-release release proof: the same spatial loop carries all three archetypes. */
 function encounter(weaponName: string, skillId?: string, distance = 14) {
@@ -25,6 +26,7 @@ function encounter(weaponName: string, skillId?: string, distance = 14) {
   Object.assign(arena.player, { x: 1, y: 6 });
   Object.assign(arena.mobs[mob.id], { x: 1 + distance, y: 6 });
   captureCombatArena(arena, state, 0);
+  pinFieldPopulation(state);
   return { state, mob, arena };
 }
 
@@ -51,6 +53,7 @@ describe('first-release combat acceptance', () => {
     Object.assign(arena.mobs.inside, { x: 6, y: 6 });
     Object.assign(arena.mobs.outside, { x: 8, y: 6 });
     captureCombatArena(arena, state, 0);
+    pinFieldPopulation(state);
     tick(state, { arena, autoSkills: false });
     expect(bodies[1].effArmour).toBeCloseTo(125, 5);
     expect(bodies[2].effArmour).toBeCloseTo(100, 5);

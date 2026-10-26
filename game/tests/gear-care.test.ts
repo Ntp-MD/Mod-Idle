@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { newGame } from '../src/sim/game';
-import { rollDrop } from '../src/sim/drop';
+import { newGame } from '../src/sim/core/game';
+import { rollDrop } from '../src/sim/gear/drop';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { loot } from '../src/engine/client';
-import { gearCarePreview } from '../src/sim/gear-care';
-import { setRule } from '../src/sim/filter';
-import { slotsAvailable, slotsUsed } from '../src/sim/slots';
-import { autoReturnThreshold } from '../src/sim/exploration';
+import { gearCarePreview } from '../src/sim/gear/gear-care';
+import { setRule } from '../src/sim/gear/filter';
+import { slotsAvailable, slotsUsed } from '../src/sim/gear/slots';
+import { autoReturnThreshold } from '../src/sim/world/exploration';
 
 const withCarried = (count = 6) => {
   const state = newGame();

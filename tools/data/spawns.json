@@ -1,0 +1,150 @@
+{
+  "meta": {
+    "title": "Field spawn points, population caps and RO-style engagement ranges",
+    "read_by": [
+      "engine/spawns.ts",
+      "tools/check.ts"
+    ],
+    "note": "One generic clearing layout is shared by every field. A zone profile owns its population cap, per-slot respawn time and aggro/assist/leash ranges; a subzone inherits its zone profile unless a subzone override is authored. Species, level, body and rank remain engine.json mob data. Spawn points are gameplay positions in arena meters, never map pixels."
+  },
+  "defaults": {
+    "layout": "forest-clearing",
+    "cap": 8,
+    "respawn_sec": 50,
+    "aggro_m": 4,
+    "assist_m": 3,
+    "leash_m": 9,
+    "roam_m": 2,
+    "camp_safe_m": 6,
+    "offline_share": 0.6
+  },
+  "layouts": {
+    "forest-clearing": {
+      "points": [
+        {
+          "id": "west-north",
+          "x": 3.2,
+          "y": 2.8,
+          "roam_m": 1.8
+        },
+        {
+          "id": "north-west",
+          "x": 6.2,
+          "y": 2.0,
+          "roam_m": 1.5
+        },
+        {
+          "id": "north",
+          "x": 9.6,
+          "y": 2.4,
+          "roam_m": 1.8
+        },
+        {
+          "id": "north-east",
+          "x": 14.4,
+          "y": 2.8,
+          "roam_m": 1.8
+        },
+        {
+          "id": "east",
+          "x": 15.4,
+          "y": 6.0,
+          "roam_m": 2.0
+        },
+        {
+          "id": "south-east",
+          "x": 13.8,
+          "y": 9.2,
+          "roam_m": 1.8
+        },
+        {
+          "id": "south",
+          "x": 9.0,
+          "y": 9.6,
+          "roam_m": 1.8
+        },
+        {
+          "id": "south-west",
+          "x": 4.2,
+          "y": 8.6,
+          "roam_m": 1.8
+        }
+      ]
+    }
+  },
+  "zones": {
+    "1": {
+      "cap": 6,
+      "respawn_sec": 43
+    },
+    "2": {
+      "cap": 6,
+      "respawn_sec": 43
+    },
+    "3": {
+      "cap": 6,
+      "respawn_sec": 43
+    },
+    "4": {
+      "cap": 8,
+      "respawn_sec": 49
+    },
+    "5": {
+      "cap": 8,
+      "respawn_sec": 49
+    },
+    "6": {
+      "cap": 8,
+      "respawn_sec": 49
+    },
+    "7": {
+      "cap": 8,
+      "respawn_sec": 45
+    },
+    "8": {
+      "cap": 8,
+      "respawn_sec": 45
+    },
+    "9": {
+      "cap": 8,
+      "respawn_sec": 45
+    },
+    "10": {
+      "cap": 6,
+      "respawn_sec": 43
+    },
+    "11": {
+      "cap": 6,
+      "respawn_sec": 43
+    },
+    "12": {
+      "cap": 6,
+      "respawn_sec": 43
+    },
+    "13": {
+      "cap": 8,
+      "respawn_sec": 49
+    },
+    "14": {
+      "cap": 8,
+      "respawn_sec": 49
+    },
+    "15": {
+      "cap": 8,
+      "respawn_sec": 49
+    },
+    "16": {
+      "cap": 8,
+      "respawn_sec": 45
+    },
+    "17": {
+      "cap": 8,
+      "respawn_sec": 45
+    },
+    "18": {
+      "cap": 8,
+      "respawn_sec": 45
+    }
+  },
+  "subzones": {}
+}

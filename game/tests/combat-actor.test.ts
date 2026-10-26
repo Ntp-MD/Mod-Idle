@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { E } from '../src/engine/client';
 import { actorAction, actorArt, actorBeats, actorPrepareMs, actorProfile, actorReaction, plateArt } from '../src/ui/combat/combat-actor';
-import type { FxEvent } from '../src/sim/types';
+import type { FxEvent } from '../src/sim/core/types';
 import { mobFixture } from './mobFixture';
 
 const fx = (over: Partial<FxEvent>): FxEvent => ({ id: 1, sec: 10, kind: 'hit', side: 'field', text: '10', colour: '#fff', ...over });

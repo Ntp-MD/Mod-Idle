@@ -1,5 +1,5 @@
-import type { GameState, Item } from '../../sim/types';
-import type { Where } from '../../sim/craft';
+import type { GameState, Item } from '../../sim/core/types';
+import type { Where } from '../../sim/gear/craft';
 
 export interface ItemSelection { where: Where; item: Item }
 

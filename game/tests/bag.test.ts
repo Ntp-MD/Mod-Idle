@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { compareLines, vsWorn } from '../src/ui/inventory/bag';
-import type { Item } from '../src/sim/types';
+import type { Item } from '../src/sim/core/types';
 
 /**
  * The swap reading the bag panel shows. `vsWorn` is the aggregate score's answer and `compareLines` is

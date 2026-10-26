@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { E, fieldwork } from '../src/engine/client';
-import { newGame } from '../src/sim/game';
+import { newGame } from '../src/sim/core/game';
 import {
   activeMeal, canCook, cookMeal, eatMeal, establishCamp, fieldDropChance, fieldHarvestAmount, fieldHarvestBonus, fieldMasteryLevel, fieldSkillLevel,
   recordHuntKill, resolveTravelEvent, startFieldAction, tickFieldwork, tickHunger, withHunger, withMeal,
-} from '../src/sim/fieldwork';
-import { buildCharacter } from '../src/sim/player';
-import { carried } from '../src/sim/game';
+} from '../src/sim/world/fieldwork';
+import { buildCharacter } from '../src/sim/core/player';
+import { carried } from '../src/sim/core/game';
 import { migrate } from '../src/state/save';
-import { atSettlement } from '../src/sim/craft';
+import { atSettlement } from '../src/sim/gear/craft';
 
 function standAt(state: ReturnType<typeof newGame>, wild: number | null) {
   state.cell = { q: 1, r: 0, sub: null, wild };

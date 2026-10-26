@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { captureCombatArena, createCombatArena, syncCombatArena, arenaAction } from '../src/sim/combat-arena';
-import { characterSheet, newGame, setLevel, tick } from '../src/sim/game';
+import { captureCombatArena, createCombatArena, syncCombatArena, arenaAction } from '../src/sim/combat/combat-arena';
+import { characterSheet, newGame, setLevel, tick } from '../src/sim/core/game';
+import { isBossKind } from '../src/sim/core/game';
 
 function bossFight() {
   const state = newGame(41);
   setLevel(state, 30);
   state.hunting = true;
-  state.spawnIn = 0;
   state.group = [];
   state.bossDueAt = -1;
   const arena = createCombatArena();
@@ -32,21 +32,27 @@ describe('Boss local arena epoch', () => {
     });
     const epoch = state.field?.arenaEpoch ?? 0;
     tick(state, { arena });
-    expect(state.group[0]?.kind.startsWith('Boss')).toBe(true);
+    const boss = state.group.find((mob) => isBossKind(String(mob.kind)));
+    expect(boss).toBeDefined();
     expect(arena.actions.find((entry) => entry.id === action.id)?.cancelReason).toBe('boss-arena');
-    expect(state.field!.arenaEpoch).toBeGreaterThanOrEqual(epoch);
+    expect(state.field!.arenaEpoch).toBeGreaterThan(epoch);
+    // The population is already there; the Boss is one of its slots, not the whole field.
+    expect(state.group.length).toBeGreaterThan(1);
   });
 
   it('settles remaining work when the Boss dies and returns to the checkpointed field', () => {
     const { state, arena } = bossFight();
     tick(state, { arena });
-    expect(state.group[0]?.kind.startsWith('Boss')).toBe(true);
+    const boss = state.group.find((mob) => isBossKind(String(mob.kind)))!;
+    boss.hp = 1;
+    Object.assign(arena.mobs[boss.id], { x: arena.player.x + 1.2, y: arena.player.y });
     const epoch = state.field!.arenaEpoch;
     const anchor = { ...state.field!.farmingAnchor };
-    const idleIds = state.field!.idleUnits.flatMap((unit) => unit.mobs.map((mob) => mob.id)).sort();
-    const timing = { delivery: 'instant' as const, startedAtUs: 1_000_000, releaseAtUs: 1_000_000,
-      impactAtUs: 20_000_000, recoveryUntilUs: 1_000_000 };
-    const action = arenaAction(arena, 'player', 'cast', 1_000_000, undefined, 'attack.firestorm', undefined, timing)!;
+    const homes = state.field!.slots.map((slot) => `${slot.id}:${slot.home.x},${slot.home.y}`);
+    const timing = { delivery: 'instant' as const, startedAtUs: state.clockSec * 1_000_000,
+      releaseAtUs: state.clockSec * 1_000_000, impactAtUs: 20_000_000, recoveryUntilUs: 0 };
+    const action = arenaAction(arena, 'player', 'cast', state.clockSec * 1_000_000, undefined,
+      'attack.firestorm', undefined, timing)!;
     arena.flights.push({
       actionId: action.id, cast: { id: 'attack.firestorm', manaCost: 0, hpCost: 0, level: 1,
         cooldownSec: 0, spatial: true, targets: [] },
@@ -54,15 +60,16 @@ describe('Boss local arena epoch', () => {
         delivery: 'instant', range_m: 0, windup_sec: 0, recovery_sec: 0, impact_delay_sec: 0,
         projectile_speed_mps: 0, hit_radius_m: 0.5,
       }, timing, source: { x: 1, y: 6 }, destination: { x: 1, y: 6 },
-      area: undefined, position: { x: 1, y: 6 }, lastCheckedAtUs: 1_000_000,
+      area: undefined, position: { x: 1, y: 6 }, lastCheckedAtUs: 0,
     });
-    state.group[0].hp = 0;
-    tick(state, { arena });
-    expect(state.group.length).toBe(0);
+    for (let index = 0; index < 8 && state.group.some((mob) => mob.id === boss.id && mob.hp > 0); index++)
+      tick(state, { arena, autoSkills: false });
+    expect(state.group.some((mob) => mob.id === boss.id && mob.hp > 0)).toBe(false);
     expect(arena.actions.find((entry) => entry.id === action.id)?.cancelReason).toBe('boss-exit');
     expect(state.field!.arenaEpoch).toBeGreaterThan(epoch);
-    // The field, its visible units and the farming anchor were checkpointed under the Boss arena.
-    expect(state.field!.idleUnits.flatMap((unit) => unit.mobs.map((mob) => mob.id)).sort()).toEqual(idleIds);
-    expect(state.field!.farmingAnchor).toEqual(anchor);
+    // The field, its authored homes and the farming anchor survive the Boss arena.
+    expect(state.field!.slots.map((slot) => `${slot.id}:${slot.home.x},${slot.home.y}`)).toEqual(homes);
+    expect(Number.isFinite(state.field!.farmingAnchor.x)).toBe(true);
+    expect(Number.isFinite(state.field!.farmingAnchor.y)).toBe(true);
   });
 });

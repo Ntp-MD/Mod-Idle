@@ -10,6 +10,9 @@ art/favs.json
 
 
 
+# Local image-generation notes carry a live API token — never commit
+image-generate.md
+
 # Local browser-automation logs
 .playwright-mcp/
 

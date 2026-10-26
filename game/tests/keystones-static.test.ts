@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { E, eng } from '../src/engine/client';
-import { buildCharacter, emptyGear } from '../src/sim/player';
-import { mobSwing, playerSwing } from '../src/sim/combat';
-import { KEYSTONE_HANDLERS, registerKeystoneHandler, registerStaticKeystoneHandlers, supportedKeystoneKeys } from '../src/sim/keystone-runtime';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
+import { mobSwing, playerSwing } from '../src/sim/combat/combat';
+import { KEYSTONE_HANDLERS, registerKeystoneHandler, registerStaticKeystoneHandlers, supportedKeystoneKeys } from '../src/sim/core/keystone-runtime';
 import { ironwallSheet, type KeystoneBundle } from '../../engine/keystones.ts';
-import type { Mob } from '../src/sim/types';
+import type { Mob } from '../src/sim/core/types';
 
 registerStaticKeystoneHandlers(KEYSTONE_HANDLERS, Object.keys(E.elements.status_of));
 

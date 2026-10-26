@@ -121,7 +121,8 @@ function assign(shape: SkillFxShape, ids: string, options: Omit<SkillFxDefinitio
 
 export const skillFxDefinitions: Record<string, SkillFxDefinition> = {
   ...assign('fireball', 'attack.fireball', { projectile: true, asset: 'fireball' }),
-  ...assign('firestorm', 'attack.firestorm attack.meteor'),
+  ...assign('firestorm', 'attack.firestorm'),
+  ...assign('firestorm', 'attack.meteor', { asset: 'meteor' }),
   ...assign('iceLance', 'attack.ice_lance', { projectile: true, pulses: 2 }),
   ...assign('blizzard', 'attack.blizzard'),
   ...assign('frostbite', 'attack.frostbite'),

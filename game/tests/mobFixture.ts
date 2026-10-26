@@ -1,4 +1,6 @@
-import type { Mob } from '../src/sim/types';
+import type { Mob } from '../src/sim/core/types';
+import type { GameState } from '../src/sim/core/types';
+import { createFieldState } from '../src/sim/world/field-area';
 
 /**
  * One mob fixture for the suite.
@@ -42,3 +44,26 @@ export const mobFixture = (over: MobOverride = {}): Mob => ({
   engageSec: 0,
   ...over,
 } as Mob);
+
+/**
+ * Pin a test scenario to its current bodies: trim the authored field slots to the group size and
+ * fill them, so the live population controller has no empty slot to refill. Production data keeps
+ * its full cap; this fixture only keeps a mechanics test from growing an unrelated population.
+ */
+export function pinFieldPopulation(state: GameState, count = state.group.length): void {
+  if (!state.field) state.field = createFieldState(state);
+  if (state.field.slots.length < count) state.field.slots = createFieldState(state).slots;
+  const slots = state.field.slots.slice(0, Math.max(1, count));
+  for (const slot of slots) {
+    slot.mobId = undefined;
+    slot.respawnAtSec = Number.MAX_SAFE_INTEGER;
+  }
+  state.group.forEach((mob, index) => {
+    const slot = slots[index];
+    if (!slot) return;
+    slot.mobId = mob.id;
+    slot.respawnAtSec = 0;
+    mob.spawnSlotId = slot.id;
+  });
+  state.field.slots = slots;
+}

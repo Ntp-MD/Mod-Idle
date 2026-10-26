@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onMount, tick, untrack } from 'svelte';
   import type { TreeNode } from '../../../../engine/tree';
-  import type { GameState } from '../../sim/types';
-  import { lineName } from '../../sim/craft';
+  import type { GameState } from '../../sim/core/types';
+  import { lineName } from '../../sim/gear/craft';
   import { tree } from '../../engine/client';
-  import { treePath } from '../../sim/tree';
+  import { treePath } from '../../sim/core/tree';
   import { buildPassiveTreeView, initialTreeCamera, treeOrbitPath, treeViewNodeRadius, treeRouteEdges, newPassiveTreeSession, type PassiveTreeSession } from './passive-tree-view';
   import PassiveTreeDetails from './PassiveTreeDetails.svelte';
-  import { recommendTreeNodes, treeGoals, type TreeGoalId } from '../../sim/tree-guide';
+  import { recommendTreeNodes, treeGoals, type TreeGoalId } from '../../sim/core/tree-guide';
   import swords from '../../icon/gear/weapon/crossed-swords-1.png';
   import boots from '../../icon/gear/armour/winged-boots.png';
   import bow from '../../icon/gear/weapon/bow-arrow.png';

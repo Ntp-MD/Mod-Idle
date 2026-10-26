@@ -2,10 +2,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { E, TOWN, blackMarket, sm, trade } from '../src/engine/client';
 import type { BlackMarketOffer } from '../../engine/black-market';
 import { mulberry32 } from '../../engine/loot';
-import { newGame, catchUp, catchUpAsync } from '../src/sim/game';
-import { blackMarketState, buyBlackMarket, tickBlackMarket } from '../src/sim/black-market';
-import { settlementCell, startWalk } from '../src/sim/road';
-import { slotsAvailable } from '../src/sim/slots';
+import { newGame, catchUp, catchUpAsync } from '../src/sim/core/game';
+import { blackMarketState, buyBlackMarket, tickBlackMarket } from '../src/sim/town/black-market';
+import { settlementCell, startWalk } from '../src/sim/world/road';
+import { slotsAvailable } from '../src/sim/gear/slots';
 import { exportJson, importJson, migrate } from '../src/state/save';
 
 const writer = { writer: true }, readonly = { writer: false };

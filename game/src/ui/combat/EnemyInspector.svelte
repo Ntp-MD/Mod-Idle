@@ -1,10 +1,10 @@
 <script lang="ts">
   import { eng } from '../../engine/client';
   import { skillIcon } from '../../icon';
-  import { mobSkillById } from '../../sim/mobSkills';
-  import { statusLabel } from '../../sim/mobStatus';
-  import { describeMobSkill } from '../../sim/skill-copy';
-  import type { EnemySnapshot } from '../../sim/combat-history';
+  import { mobSkillById } from '../../sim/combat/mobSkills';
+  import { statusLabel } from '../../sim/combat/mobStatus';
+  import { describeMobSkill } from '../../sim/combat/skill-copy';
+  import type { EnemySnapshot } from '../../sim/combat/combat-history';
   import { fieldLabel } from '../hud/hud';
   import Icon from '../shared/Icon.svelte';
 

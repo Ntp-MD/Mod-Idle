@@ -13,13 +13,13 @@
   import CombatActor from './CombatActor.svelte';
   import CombatEffectBadge from './CombatEffectBadge.svelte';
   import { combatDamagePops, combatEffectLevel, type CombatEffectLevel } from './combat-presentation';
-  import { snapshotEnemy, type EnemySnapshot } from '../../sim/combat-history';
-  import { effectLine } from '../../sim/skills';
-  import { statusLabel, type MobStatusName } from '../../sim/mobStatus';
-  import { mobSkillById } from '../../sim/mobSkills';
-  import type { GameState, Mob, FxEvent } from '../../sim/types';
-  import type { Character } from '../../sim/player';
-  import type { Statuses } from '../../sim/combat';
+  import { snapshotEnemy, type EnemySnapshot } from '../../sim/combat/combat-history';
+  import { effectLine } from '../../sim/combat/skills';
+  import { statusLabel, type MobStatusName } from '../../sim/combat/mobStatus';
+  import { mobSkillById } from '../../sim/combat/mobSkills';
+  import type { GameState, Mob, FxEvent } from '../../sim/core/types';
+  import type { Character } from '../../sim/core/player';
+  import type { Statuses } from '../../sim/combat/combat';
 
   /** Full-body actors move independently of their fixed names, vitals and status badges. */
   let { s, c, ring, plates, statuses, zone, town, townLive, vitals, reserved, onSheet,

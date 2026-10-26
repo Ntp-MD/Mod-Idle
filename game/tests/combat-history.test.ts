@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { fx, newGame, setLevel, spawnMob, tick } from '../src/sim/game';
+import { fx, newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { normalizeCombatHistory, snapshotEnemy, summarizeCombat, type CombatHistoryEntry } from '../src/sim/combat-history';
+import { normalizeCombatHistory, snapshotEnemy, summarizeCombat, type CombatHistoryEntry } from '../src/sim/combat/combat-history';
 
 describe('recorded combat history', () => {
   it('summarizes the retained window from actual records', () => {

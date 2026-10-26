@@ -233,7 +233,7 @@ export function createEngine(E: EngineData) {
     return (E.elements.order as string[]).filter((el) => worn.has(el));
   };
   const sizeById = (id: string): MobSize | undefined => E.mob.sizes.find((x) => x.id === id);
-  const sizeOr1 = (id: string): MobSize => sizeById(id) || { id, name: id, ps: 1, evasion_pct: 0, radius_m: 0.45 };
+  const sizeOr1 = (id: string): MobSize => sizeById(id) || { id, name: id, ps: 1, evasion_pct: 0, radius_m: 0.25 };
   const zoneBodyFactorCache = new Map<number, number>();
   function zoneBodyFactor(zoneId: number) {
     const cached = zoneBodyFactorCache.get(zoneId);

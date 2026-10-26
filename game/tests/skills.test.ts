@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { eng, E, sm, SKILLS } from '../src/engine/client';
-import { buildCharacter, emptyGear } from '../src/sim/player';
-import { newGame, tick, huntZone } from '../src/sim/game';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
+import { newGame, tick, huntZone } from '../src/sim/core/game';
 import {
   newSkillState, grantSkill, castOnce, skillLevel, ladderOf, reservedPct, usableMana,
   effectsActive, tickSkills, toggleTrack, clearUnownedTracks, ownsSkill, ACTIVE_SLOTS,
-} from '../src/sim/skills';
+} from '../src/sim/combat/skills';
 import { mulberry32 } from '../src/engine/client-helpers';
 // the same module tools/skills.ts --calc prints from, imported so the suite's transform carries it
 import { model as cageModel } from '../../tools/lib/skillmodel.ts';
@@ -170,10 +170,7 @@ describe('one mana price, typed in units ', () => {
     expect(cageModel.MANA_LEVEL_STEP).toBe(sm.MANA_LEVEL_STEP);
   });
 
-  it('the AoE premium is one multiplier charged once, never a per-target count', () => {
-    for (const skill of sm.all().filter((k: any) => sm.manaSpec(k) != null)) {
-      expect(sm.manaCostOf(skill, { aoe: true })).toBeCloseTo(sm.manaCostOf(skill) * E.aoe.mana_mult, 9);
-    }
+  it('a press pays the same price on one target or many', () => {
     // a wide row through the real cast: one mob, two mobs and three mobs of group
     const cast = (n: number) => {
       const s = newSkillState();
@@ -181,8 +178,8 @@ describe('one mana price, typed in units ', () => {
       const group = Array.from({ length: n }, (_, i) => ({ id: `m${i}`, hp: 1e9, hpMax: 1e9, evasion: 0, dodgeRate: 0 }) as any);
       return castOnce(s, c, c.maxMana, group, {}, mulberry32(4))!.manaCost;
     };
-    expect(cast(2) / cast(1)).toBeCloseTo(E.aoe.mana_mult, 6);
-    expect(cast(3)).toBeCloseTo(cast(2), 6);
+    expect(cast(2)).toBeCloseTo(cast(1), 9);
+    expect(cast(3)).toBeCloseTo(cast(1), 9);
   });
 
   it('an aura reserves the bar but never discounts the price', () => {

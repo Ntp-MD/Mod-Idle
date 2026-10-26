@@ -11,10 +11,13 @@ Single-player, browser-only idle RPG; no server. This is the shared entry point 
 | `docs/glossary.md` | Short definitions of game terms | A term is ambiguous, new or renamed |
 | `docs/game-rules.md` | Current gameplay intent and non-obvious behavior constraints | Changing the relevant game system |
 | `docs/map-art.md` | Map terrain artwork contract and the projected ground footprint | Producing or placing terrain hex art |
-| `art-reference/` | Portable map art reference kit, generated-image holding area awaiting approval, concept images and map calibration snapshots | Generating, measuring or QC-ing map art; generated files are not game-ready until approved and copied into game assets; refresh with `art-reference/map/refresh.ps1` |
+| `art-reference/` | Portable map art reference kit, generated-image holding area awaiting approval, concept images and map calibration snapshots; never imported by game runtime (dev review + tests only) | Generating, measuring or QC-ing map art; generated files are not game-ready until approved and copied into game assets; refresh with `art-reference/map/refresh.ps1` |
+| `art/` | Generated gallery output (`gallery.html`, `favs.json` queue); never hand-edited, rebuilt by `tools/gallery.ts` | Reviewing shelf sheets in a browser |
+| `game/src/assets/` | Runtime non-shelf images (backgrounds, skins); not keyed by the icon resolver | Adding a non-glyph runtime image |
 | `tools/data/*.json` | Numbers, tuning, catalogues and content | Changing or tracing those values |
 | `engine/`, `game/src/` | Implementation, interfaces and UI appearance | Working on the affected code |
 | `game/src/icon/` | Art shelf for item, skill, mob, UI and map-glyph images; folders group by subject and resolvers key on the file name | Adding or sorting artwork |
+| `game/src/ui/combat/arena/`, `game/src/ui/combat/fx-manifests/` | Runtime animation + VFX manifests embedded by import; data, not shelf art | Changing arena animation or authored VFX |
 | `game/src/wiki/pages.ts` | Player-facing wiki source | Changing what the wiki explains |
 
 Each fact has one owner. Link to it rather than copying it. Provider entry files import or point here; they carry no separate project rules.
@@ -43,6 +46,7 @@ For repository implementation, fixes, reviews and investigation, apply [lean-age
 - Reuse verified reads and passing checks until affected inputs change or a concrete uncertainty remains. Do not poll unchanged state without a reason.
 - Batch independent searches/reads in one call and inspect each result. Run dependent actions sequentially; do not create unnecessary parallel work.
 - If output is truncated, narrow the query or select a useful slice. On failure, identify the cause before retrying; retry only with a changed approach or new evidence. Repeated failure without new evidence calls for reassessment or a blocker report.
+- A failing check outside the changed surface, with no changed input that explains it, is baseline or in-flight work: report it and do not fix or rerun it repeatedly without new evidence or a user request. Preserve concurrent edits in shared files; if verification cannot be made repeatable, say so instead of treating the result as a regression.
 - Follow the verification scope below. Stop when acceptance criteria and required checks are satisfied. Review an unexpectedly long tool sequence for avoidable work; a call count never justifies skipping essential verification.
 
 ## Temporary files and cleanup
@@ -62,6 +66,7 @@ For repository implementation, fixes, reviews and investigation, apply [lean-age
 |---|---|
 | `engine/` | Shared formulas and data-driven mechanics |
 | `tools/data/engine.json` | Stats, combat, loot, craft, mobs/zones, inventory, fieldwork and dungeon configuration |
+| `tools/data/spawns.json` | Field spawn layout, population cap, per-slot respawn, aggro/assist/leash ranges and offline engagement share |
 | `tools/data/mods.json` | Mod ranges, quality bands and drop weights |
 | `tools/data/town.json` | Town stock/prices, Standing, Collector, tasks, trade, Haggling, Delivery and Black Market |
 | `tools/data/skills.json` | Skill roster, reserve tiers and skill configuration |
@@ -71,8 +76,10 @@ For repository implementation, fixes, reviews and investigation, apply [lean-age
 | `tools/data/bases.json` | Hand-maintained frames, slots and Mod pools; never generate by parsing docs |
 | `tools/data/map.json` | Presentation map layout, terrain and colours; never import in `engine/` or `game/src/` |
 | `tools/` | Cages, reports and shared readers; `tools/map.ts` generates the overlay |
+| `art/` | Generated gallery output (`gallery.html`, `favs.json` queue); never hand-edited, rebuilt by `tools/gallery.ts` |
+| `game/src/assets/` | Runtime non-shelf images (backgrounds, skins); not keyed by the icon resolver |
 | `game/src/engine/client.ts` | Browser bridge to canonical JSON and shared engine factories |
-| `game/src/sim/` | Runtime composition/state; `player.ts` composes the character sheet |
+| `game/src/sim/` | Runtime composition/state; `core/` sheet+loop, `combat/` fights+skills, `town/` markets+contracts, `gear/` loot+craft, `world/` map+field; `core/player.ts` composes the character sheet |
 | `game/src/state/save.ts` | Save loading, migration and persistence |
 | `game/src/ui/`, `game/src/App.svelte` | Components and application wiring |
 

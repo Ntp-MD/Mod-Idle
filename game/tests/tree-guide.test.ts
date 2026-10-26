@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { newGame } from '../src/sim/game';
-import { treePath } from '../src/sim/tree';
-import { recommendTreeNodes, treeGoals } from '../src/sim/tree-guide';
-import { resolveGoal, setTrackedGoal } from '../src/sim/guidance';
+import { newGame } from '../src/sim/core/game';
+import { treePath } from '../src/sim/core/tree';
+import { recommendTreeNodes, treeGoals } from '../src/sim/core/tree-guide';
+import { resolveGoal, setTrackedGoal } from '../src/sim/core/guidance';
 
 describe('passive tree guidance', () => {
   it('offers the four build lenses with reasons tied to the character', () => {

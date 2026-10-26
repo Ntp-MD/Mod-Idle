@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { tree } from '../src/engine/client';
-import { newGame, tick, huntZone } from '../src/sim/game';
+import { newGame, tick, huntZone } from '../src/sim/core/game';
 import { exportJson, importJson, migrate } from '../src/state/save';
-import { deriveDotInstances, perSecOf, stacksOf, statusViews } from '../src/sim/playerStatus';
+import { deriveDotInstances, perSecOf, stacksOf, statusViews } from '../src/sim/combat/playerStatus';
 import { newKeystoneRuntimeState, validatePlayerStatuses } from '../../engine/keystones.ts';
 
 /**

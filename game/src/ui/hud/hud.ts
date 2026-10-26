@@ -1,5 +1,5 @@
 import { E, eng } from '../../engine/client';
-import type { GameState } from '../../sim/types';
+import type { GameState } from '../../sim/core/types';
 import type { Snapshot } from '../../state/save';
 
 /**

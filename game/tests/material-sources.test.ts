@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { materialSources } from '../src/sim/material-sources';
+import { materialSources } from '../src/sim/gear/material-sources';
 
 describe('material sources', () => {
   it('names the Mine zones for ore', () => {

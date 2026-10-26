@@ -1,7 +1,7 @@
 import { E, eng, fieldwork, TOWN } from '../../engine/client';
-import type { GameState } from '../../sim/types';
-import { mapKnowledge, trailSiteAt, trailSiteKind, hexDistance } from '../../sim/map-exploration';
-import { standingProgress } from '../../sim/town';
+import type { GameState } from '../../sim/core/types';
+import { mapKnowledge, trailSiteAt, trailSiteKind, hexDistance } from '../../sim/world/map-exploration';
+import { standingProgress } from '../../sim/town/town';
 import type { Picked } from './map';
 
 export function destinationIntel(state: GameState, cell: Picked, townId: string, blocks: number) {
@@ -40,7 +40,6 @@ export function destinationIntel(state: GameState, cell: Picked, townId: string,
                 : 'Hunt this roster or add this subzone to your Patrol.',
     levelNote: !known ? 'Levels unknown until scouted' : state.player.level < zone.levels[0]
       ? `Above your level · starts at Lv ${zone.levels[0]}` : `Lv ${zone.levels[0]}–${zone.levels[1]}`,
-    ambushRisk: Math.round((1 - (1 - E.road.encounter_chance_pct / 100) ** blocks) * 100),
     campDistance: state.fieldwork.camp ? hexDistance(state.fieldwork.camp.cell, cell) : null,
     site: site ? { id: site.id, name: trailSiteKind(site).name, claimed: !!state.mapJournal?.claimedSites.includes(site.id) } : null,
     standing: standing ? {

@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { E, eng, farm, TOWN } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { cancelCampEncounter, chooseCampEncounter, tickCampEncounters } from '../src/sim/camp-encounters';
-import { newGame, tick } from '../src/sim/game';
-import { standingProgress, settlementOfZone } from '../src/sim/town';
-import { fieldActionProblem } from '../src/sim/fieldwork';
-import { settlementCell, zoneOf } from '../src/sim/road';
-import { hexKey } from '../src/sim/map-exploration';
-import type { CampEncounterActive, CampEncounterKind } from '../src/sim/fieldwork';
-import type { Mob } from '../src/sim/types';
+import { cancelCampEncounter, chooseCampEncounter, tickCampEncounters } from '../src/sim/world/camp-encounters';
+import { newGame, tick } from '../src/sim/core/game';
+import { standingProgress, settlementOfZone } from '../src/sim/town/town';
+import { fieldActionProblem } from '../src/sim/world/fieldwork';
+import { settlementCell, zoneOf } from '../src/sim/world/road';
+import { hexKey } from '../src/sim/world/map-exploration';
+import type { CampEncounterActive, CampEncounterKind } from '../src/sim/world/fieldwork';
+import type { Mob } from '../src/sim/core/types';
 
 const atCamp = () => {
   const state = newGame(91);

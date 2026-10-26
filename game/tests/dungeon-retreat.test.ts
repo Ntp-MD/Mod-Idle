@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { E } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { selectDungeonRescue } from '../../engine/dungeon-rescue';
-import { catchUp, catchUpAsync, newGame, retreatDungeon, tick } from '../src/sim/game';
-import { cooldownLeft, enterDungeon } from '../src/sim/dungeon';
-import { slotsAvailable, slotsUsed } from '../src/sim/slots';
-import type { Item } from '../src/sim/types';
+import { catchUp, catchUpAsync, newGame, retreatDungeon, tick } from '../src/sim/core/game';
+import { cooldownLeft, enterDungeon } from '../src/sim/world/dungeon';
+import { slotsAvailable, slotsUsed } from '../src/sim/gear/slots';
+import type { Item } from '../src/sim/core/types';
 
 function entered(seed = 47) {
   const state = newGame(seed);

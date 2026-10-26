@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { GuidanceNotice } from '../../sim/guidance';
+  import type { GuidanceNotice } from '../../sim/core/guidance';
   let { notices, onaction }: { notices: GuidanceNotice[]; onaction: (notice: GuidanceNotice) => void } = $props();
   const attention = $derived(notices.filter(notice => notice.kind !== 'tracked' && notice.kind !== 'optional'));
   const updates = $derived(notices.filter(notice => notice.kind === 'tracked' || notice.kind === 'optional'));

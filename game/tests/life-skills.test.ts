@@ -1,19 +1,19 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { E, TOWN, eng, farm, fieldwork, lifeSkills, road, STAT_KEYS } from '../src/engine/client';
-import { newGame, huntHere } from '../src/sim/game';
+import { newGame, huntHere } from '../src/sim/core/game';
 import {
   cookMeal, establishCamp, fieldHarvestAmount, fieldSkillLevel, lifeSkillBonuses,
   returnToCamp, startFieldAction, tickFieldwork,
-} from '../src/sim/fieldwork';
-import { farmGrowthSec, farmLevel, harvest, plant } from '../src/sim/farm';
-import { processMaterials } from '../src/sim/trade';
-import { buildCharacter } from '../src/sim/player';
-import { reservedPct, usableMana } from '../src/sim/skills';
-import { lifeSkillMilestones } from '../src/sim/goal';
-import { settlementCell, startWalk, zoneOf } from '../src/sim/road';
-import { slotsAvailable } from '../src/sim/slots';
+} from '../src/sim/world/fieldwork';
+import { farmGrowthSec, farmLevel, harvest, plant } from '../src/sim/world/farm';
+import { processMaterials } from '../src/sim/town/trade';
+import { buildCharacter } from '../src/sim/core/player';
+import { reservedPct, usableMana } from '../src/sim/combat/skills';
+import { lifeSkillMilestones } from '../src/sim/core/goal';
+import { settlementCell, startWalk, zoneOf } from '../src/sim/world/road';
+import { slotsAvailable } from '../src/sim/gear/slots';
 import { exportJson, importJson, migrate } from '../src/state/save';
-import type { Item } from '../src/sim/types';
+import type { Item } from '../src/sim/core/types';
 import type { LifeSkillId } from '../../engine/life-skills';
 
 afterEach(() => vi.restoreAllMocks());

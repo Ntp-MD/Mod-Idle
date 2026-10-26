@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { E, BASES } from '../src/engine/client';
 import { mulberry32 } from '../../engine/loot.ts';
-import { newGame } from '../src/sim/game';
-import { forge, canForge, forgeGear } from '../src/sim/forge';
-import { itemName } from '../src/sim/item-name';
-import { doCraft } from '../src/sim/craft';
-import { slotsAvailable, slotsFree } from '../src/sim/slots';
+import { newGame } from '../src/sim/core/game';
+import { forge, canForge, forgeGear } from '../src/sim/gear/forge';
+import { itemName } from '../src/sim/gear/item-name';
+import { doCraft } from '../src/sim/gear/craft';
+import { slotsAvailable, slotsFree } from '../src/sim/gear/slots';
 import { exportJson, importJson } from '../src/state/save';
-import type { GameState, Item } from '../src/sim/types';
+import type { GameState, Item } from '../src/sim/core/types';
 
 const xpAt = (level: number) => (level - 1) ** 2 * E.fieldwork.level_divisor;
 

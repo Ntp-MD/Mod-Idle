@@ -1,4 +1,4 @@
-import type { Item } from '../sim/types';
+import type { Item } from '../sim/core/types';
 import {
   characterIconCandidates, gearIconCandidates, skillIconCandidates,
   slotIconCandidates, stackIconCandidates,

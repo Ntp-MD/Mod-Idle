@@ -2,9 +2,9 @@
   import { onMount, tick } from 'svelte';
   import { E, loot } from '../../engine/client';
   import { gearIcon, modIcon } from '../../icon';
-  import { itemName } from '../../sim/item-name';
-  import { craft, craftedMark, lineName, lineTier, stoneName, replaceChoices, pressName, type CraftOp, type Where } from '../../sim/craft';
-  import { slotsFree } from '../../sim/slots';
+  import { itemName } from '../../sim/gear/item-name';
+  import { craft, craftedMark, lineName, lineTier, stoneName, replaceChoices, pressName, type CraftOp, type Where } from '../../sim/gear/craft';
+  import { slotsFree } from '../../sim/gear/slots';
   import { gearEntry, pieceRank, type SlotEntry } from './bag';
   import { shelfStones, stoneIcon, stoneQuality, STONE_MIME } from './stones';
   import { modesForStone, isAdvancedStone, stoneUseReason } from './craft-use';
@@ -13,7 +13,7 @@
   import CountBadge from '../shared/CountBadge.svelte';
   import Icon from '../shared/Icon.svelte';
   import Pager from '../shared/Pager.svelte';
-  import type { GameState, Item } from '../../sim/types';
+  import type { GameState, Item } from '../../sim/core/types';
   import { newCraftWorkbenchView, nextCraftReveal, type CraftWorkbenchView } from './craft-workbench';
 
   let { game, item, where = null, index = -1, onpick, onclear, onrun, wornOf, note = '',

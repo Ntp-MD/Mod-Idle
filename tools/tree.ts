@@ -4,8 +4,8 @@ import { readJson } from './lib/json.ts';
 import * as G from './lib/gates.ts';
 import { createTree, type TreeSpec } from '../engine/tree.ts';
 import { buildTreeNetwork } from '../engine/tree-network.ts';
-import { SHEET_LINES } from '../game/src/sim/lines.ts';
-import { keystoneBuildContext } from '../game/src/sim/keystone-runtime.ts';
+import { SHEET_LINES } from '../game/src/sim/core/lines.ts';
+import { keystoneBuildContext } from '../game/src/sim/core/keystone-runtime.ts';
 import { E } from './lib/engine.ts';
 
 /**

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { newGame, tick, carried, huntZone } from '../src/sim/game';
-import { buildCharacter } from '../src/sim/player';
-import { slotsAvailable, slotsUsed } from '../src/sim/slots';
+import { newGame, tick, carried, huntZone } from '../src/sim/core/game';
+import { buildCharacter } from '../src/sim/core/player';
+import { slotsAvailable, slotsUsed } from '../src/sim/gear/slots';
 
 /**
  * The one long walk the unit tests never take: a live hunt from the opening minute, long enough that

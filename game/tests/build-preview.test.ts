@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { E, loot, sm, TREE_SPEC, tree } from '../src/engine/client';
-import { previewEquip, previewTreeRoute } from '../src/sim/build-preview';
-import { characterSheet, newGame, setLevel } from '../src/sim/game';
-import { equipFromBag } from '../src/sim/gear';
-import { allocateTreePath } from '../src/sim/tree';
-import type { Item } from '../src/sim/types';
+import { previewEquip, previewTreeRoute } from '../src/sim/core/build-preview';
+import { characterSheet, newGame, setLevel } from '../src/sim/core/game';
+import { equipFromBag } from '../src/sim/gear/gear';
+import { allocateTreePath } from '../src/sim/core/tree';
+import type { Item } from '../src/sim/core/types';
 
 const ring = (value: number, weight = 4): Item => ({
   slot: 'ring', base: 'Band', ilvl: 20, quality: 'mid', tier: 'T1', q: 1, weight,

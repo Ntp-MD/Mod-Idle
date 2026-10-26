@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { sm } from '../src/engine/client';
-import { captureCombatArena, createCombatArena, syncCombatArena } from '../src/sim/combat-arena';
-import { characterSheet, newGame, setLevel, spawnMob, tick } from '../src/sim/game';
-import { restorePendingWork } from '../src/sim/pending-work';
-import { prepareSkillCast, resolvePreparedCast, newCastRollCache } from '../src/sim/skills';
-import type { ManualControl } from '../src/sim/combat-actions';
+import { captureCombatArena, createCombatArena, syncCombatArena } from '../src/sim/combat/combat-arena';
+import { characterSheet, newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
+import { restorePendingWork } from '../src/sim/core/pending-work';
+import { prepareSkillCast, resolvePreparedCast, newCastRollCache } from '../src/sim/combat/skills';
+import type { ManualControl } from '../src/sim/combat/combat-actions';
 import { exportJson, importJson } from '../src/state/save';
+import { pinFieldPopulation } from './mobFixture';
+import { mobSkillById } from '../src/sim/combat/mobSkills';
 
 function skillFight(skillId: string, distance = 2) {
   const state = newGame(41);
@@ -28,6 +30,7 @@ function skillFight(skillId: string, distance = 2) {
   Object.assign(arena.player, { x: 1, y: 6 });
   Object.assign(arena.mobs[mob.id], { x: 1 + distance, y: 6 });
   captureCombatArena(arena, state, 0);
+  pinFieldPopulation(state);
   return { state, mob, arena };
 }
 
@@ -44,6 +47,20 @@ function controlDamage(skillId: string, distance = 2) {
 }
 
 describe('real multi-hit impacts', () => {
+  it('does not sweep a later burst projectile before its own release at point-blank range', () => {
+    const { state, arena } = skillFight('attack.ice_lance', .52);
+    tick(state, { arena });
+    const action = arena.actions.find(entry => entry.skillId === 'attack.ice_lance')!;
+    expect(action.payloads).toHaveLength(2);
+    for (const payload of action.payloads!) {
+      expect(payload.impactAtUs).toBeDefined();
+      expect(payload.impactAtUs!).toBeGreaterThanOrEqual(payload.releaseAtUs);
+    }
+    const hits = state.fx.filter(event => event.kind === 'hit' && event.actionId === action.id)
+      .sort((a, b) => a.atUs! - b.atUs!);
+    expect(hits).toHaveLength(2);
+    expect(hits[1].atUs! - hits[0].atUs!).toBeGreaterThanOrEqual(100_000);
+  });
   it('lands Overload as two scheduled half-shares without doubling the press', () => {
     const { state, mob, arena } = skillFight('attack.overload', 3);
     const control = controlDamage('attack.overload', 3);
@@ -71,6 +88,9 @@ describe('real multi-hit impacts', () => {
       .sort((a, b) => (a.atUs ?? 0) - (b.atUs ?? 0));
     expect(hits).toHaveLength(2);
     expect(hits[1].atUs! - hits[0].atUs!).toBeGreaterThanOrEqual(150_000);
+    expect(cast.payloads).toHaveLength(2);
+    expect(cast.payloads![1].releaseAtUs - cast.payloads![0].releaseAtUs).toBe(150_000);
+    expect(cast.payloads!.map(payload => payload.index)).toEqual([0, 1]);
     expect(state.mobStatus[mob.id]?.statuses.chill?.stacks).toBe(1);
     const total = hits.reduce((sum, hit) => sum + (hit.value ?? 0), 0);
     expect(total).toBeGreaterThan(control * 0.98);
@@ -271,7 +291,8 @@ describe('channel interruption', () => {
     const { state, mob, arena } = skillFight('attack.whirlwind', 2);
     Object.assign(mob, {
       acc: 1e9, skillIds: ['mob.lightning.static-jab'], skillReadyAtUs: {},
-      hitsPerSec: 1, atkTimer,
+      // The argument places contact; the opportunity must now include the real preparation.
+      hitsPerSec: 1, atkTimer: atkTimer + mobSkillById('mob.lightning.static-jab')!.cast_sec!,
     });
     return { state, mob, arena };
   }

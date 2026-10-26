@@ -1,17 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { E, tree } from '../src/engine/client';
-import { buildCharacter, emptyGear } from '../src/sim/player';
-import { playerSwing } from '../src/sim/combat';
-import { KEYSTONE_HANDLERS, registerStaticKeystoneHandlers, supportedKeystoneKeys } from '../src/sim/keystone-runtime';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
+import { playerSwing } from '../src/sim/combat/combat';
+import { KEYSTONE_HANDLERS, registerStaticKeystoneHandlers, supportedKeystoneKeys } from '../src/sim/core/keystone-runtime';
 import {
   armourBreak, borrowedRecoup, crimsonPactSplit, deferredHit, disruptingStop, endlessHungerBank,
   equilibriumResistance, escapeBurst, maledictionValue, parasiticLeech, plagueTransfer,
   staggeringSplit, surgeonStream, timeOfNeedHeal, toxicExecution, type KeystoneBundle,
 } from '../../engine/keystones.ts';
-import type { Mob } from '../src/sim/types';
-import { characterSheet, huntZone, newGame, spawnMob, tick, catchUp } from '../src/sim/game';
-import { placeKeystoneDoT, placeStatus } from '../src/sim/mobStatus';
-import { NO_CURSE } from '../src/sim/curse';
+import type { Mob } from '../src/sim/core/types';
+import { characterSheet, huntZone, newGame, spawnMob, tick, catchUp } from '../src/sim/core/game';
+import { placeKeystoneDoT, placeStatus } from '../src/sim/combat/mobStatus';
+import { NO_CURSE } from '../src/sim/combat/curse';
 import { exportJson, importJson } from '../src/state/save';
 
 registerStaticKeystoneHandlers(KEYSTONE_HANDLERS, Object.keys(E.elements.status_of));

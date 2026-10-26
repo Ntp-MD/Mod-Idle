@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { E, eng } from '../src/engine/client';
-import { spawnMob } from '../src/sim/game';
+import { spawnMob } from '../src/sim/core/game';
 import { mulberry32 } from '../src/engine/client-helpers';
 
 /**

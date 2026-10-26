@@ -2,21 +2,21 @@ import { describe, it, expect } from 'vitest';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { eng, E, ED, loot, sm, MODS, BASES, TOWN, tree } from '../src/engine/client';
 import { createCraft } from '../../engine/craft.ts';
-import { newGame, tick, huntZone, carried, setLevel, catchUp } from '../src/sim/game';
-import { buildCharacter } from '../src/sim/player';
-import { rollDrop } from '../src/sim/drop';
-import { poolOf } from '../src/sim/craft';
-import { cooldownLeft, enterDungeon } from '../src/sim/dungeon';
-import { col, turnIn } from '../src/sim/collector';
-import { settlementById } from '../src/sim/town';
-import { settlementCell, walkNote } from '../src/sim/road';
-import { mobSwing, dotDamageParts, type Statuses } from '../src/sim/combat';
-import { newMobStatusStore, placeStatus, applyBleed, stepMob, modsOn, targetMods } from '../src/sim/mobStatus';
-import { spendableMana, reservedMana, usableMana, tickSkills, newSkillState } from '../src/sim/skills';
-import { switchPreset } from '../src/sim/presets';
+import { newGame, tick, huntZone, carried, setLevel, catchUp } from '../src/sim/core/game';
+import { buildCharacter } from '../src/sim/core/player';
+import { rollDrop } from '../src/sim/gear/drop';
+import { poolOf } from '../src/sim/gear/craft';
+import { cooldownLeft, enterDungeon } from '../src/sim/world/dungeon';
+import { col, turnIn } from '../src/sim/town/collector';
+import { settlementById } from '../src/sim/town/town';
+import { settlementCell, walkNote } from '../src/sim/world/road';
+import { mobSwing, dotDamageParts, type Statuses } from '../src/sim/combat/combat';
+import { newMobStatusStore, placeStatus, applyBleed, stepMob, modsOn, targetMods } from '../src/sim/combat/mobStatus';
+import { spendableMana, reservedMana, usableMana, tickSkills, newSkillState } from '../src/sim/combat/skills';
+import { switchPreset } from '../src/sim/core/presets';
 import { PAGES } from '../src/wiki/pages';
-import type { Character } from '../src/sim/player';
-import type { Mob } from '../src/sim/types';
+import type { Character } from '../src/sim/core/player';
+import type { Mob } from '../src/sim/core/types';
 import { mobFixture } from './mobFixture';
 
 /**
@@ -101,13 +101,15 @@ describe('the incoming layer order', () => {
     expect(r.toHp + r.toEs).toBeCloseTo(expected, 6);
   });
 
-  it('the shock merge takes the stronger attack-speed cut', () => {
+  it('shock cuts accuracy while chill holds the attack-speed cut', () => {
     const store = newMobStatusStore();
     const c = char({});
     placeStatus(store, 'm1', 'chill', c, 10);
+    placeStatus(store, 'm1', 'chill', c, 10);
     placeStatus(store, 'm1', 'shock', c, 10);
     const mods = targetMods(modsOn(store, 'm1'));
-    expect(mods.attackSpeed).toBeLessThanOrEqual(-(E.status as any).shock.aspd_cap);
+    expect(mods.attackSpeed).toBe(-(E.status as any).chill.aspd_cap);
+    expect(mods.accuracy).toBe(-(E.status as any).shock.acc_pct);
   });
 });
 
@@ -351,10 +353,10 @@ describe('the wiki overview reads the live slot and mob-health contracts', () =>
   });
 
   it('does not print a missing body-class health multiplier as ×—', () => {
-    const world = PAGES.find((p) => p.file === 'world.html')!.body.join('\n');
-    const combat = PAGES.find((p) => p.file === 'combat.html')!.body.join('\n');
-    const body = sectionOf(world, 'Body classes');
-    const ranks = sectionOf(combat, 'Elite, Unique and Boss');
+    const mobs = PAGES.find((p) => p.file === 'mobs.html')!.body.join('\n');
+    const encounters = PAGES.find((p) => p.file === 'encounters.html')!.body.join('\n');
+    const body = sectionOf(mobs, 'Body classes');
+    const ranks = sectionOf(encounters, 'Elite, Unique and Boss');
     expect(body).not.toContain('<th>Health</th>');
     expect(body).not.toContain('×—');
     expect(ranks).not.toContain('×—');

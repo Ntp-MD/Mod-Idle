@@ -1,4 +1,4 @@
-import type { FxEvent } from '../../sim/types';
+import type { FxEvent } from '../../sim/core/types';
 
 export type CombatEffectLevel = 'auto' | 'full' | 'reduced' | 'minimal';
 

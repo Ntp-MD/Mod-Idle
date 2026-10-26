@@ -15,17 +15,17 @@
 <script lang="ts">
   import { E, eng, sm } from '../../engine/client';
   import { skillIcon } from '../../icon';
-  import type { GameState } from '../../sim/types';
-  import type { Character } from '../../sim/player';
-  import type { SkillConditions, SkillMode } from '../../sim/skills';
+  import type { GameState } from '../../sim/core/types';
+  import type { Character } from '../../sim/core/player';
+  import type { SkillConditions, SkillMode } from '../../sim/combat/skills';
   import {
     NO_COND, appliedCurseOf, appliedStatusOf, auraPoolOf, auraResonanceOf, buffRecastCost, condOf,
     describeFold, effectLine, effectsActive, hpReservedPct, ladderOf, modeOf,
     reservedPct, rotationOrder, skillCd, skillEligibilityInState, skillLevel, usableHp, usableMana,
-  } from '../../sim/skills';
-  import { curableRows } from '../../sim/curse';
-  import { describeSkill, skillWindowEntries } from '../../sim/skill-copy';
-  import { WEAPONS, mastery, masteryLabel, masteryLevel, weaponSkillBonusPct } from '../../sim/mastery';
+  } from '../../sim/combat/skills';
+  import { curableRows } from '../../sim/combat/curse';
+  import { describeSkill, skillWindowEntries } from '../../sim/combat/skill-copy';
+  import { WEAPONS, mastery, masteryLabel, masteryLevel, weaponSkillBonusPct } from '../../sim/core/mastery';
   import Tabs from '../shared/Tabs.svelte';
   import SkillFxPreview from '../combat/SkillFxPreview.svelte';
 

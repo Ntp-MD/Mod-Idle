@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { E, TOWN, fieldwork, trade } from '../src/engine/client';
-import { newGame, tick } from '../src/sim/game';
-import { sellGoods, quoteSale, processMaterials, canProcess, marketDestinations, type MarketQuote } from '../src/sim/trade';
-import { sellJunk, priceGold, stockOf, buy } from '../src/sim/town';
-import { settlementCell, startWalk, arrive } from '../src/sim/road';
-import { cookMeal, eatMeal, tickFieldwork } from '../src/sim/fieldwork';
+import { newGame, tick } from '../src/sim/core/game';
+import { sellGoods, quoteSale, processMaterials, canProcess, marketDestinations, type MarketQuote } from '../src/sim/town/trade';
+import { sellJunk, priceGold, stockOf, buy } from '../src/sim/town/town';
+import { settlementCell, startWalk, arrive } from '../src/sim/world/road';
+import { cookMeal, eatMeal, tickFieldwork } from '../src/sim/world/fieldwork';
 import { exportJson, importJson, migrate } from '../src/state/save';
 
 const inTown = (id = 'eastgate') => {

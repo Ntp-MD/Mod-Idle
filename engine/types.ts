@@ -703,7 +703,6 @@ export interface RoadCfg {
   standing_rule: string;
   cost_rule: string;
   block_sec: number;
-  encounter_chance_pct: number;
   encounter_rule: string;
   push_rule: string;
   waypoint_rule: string;

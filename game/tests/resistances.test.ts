@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildCharacter, emptyGear } from '../src/sim/player';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
 
 describe('per-Element resistance', () => {
   it('an Elemental resistance line hardens only its own Element', () => {

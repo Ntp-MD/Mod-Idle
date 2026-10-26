@@ -1,12 +1,12 @@
 import { readFileSync } from 'node:fs';
 import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
-import { newGame, push } from '../src/sim/game';
+import { newGame, push } from '../src/sim/core/game';
 import { E, loot } from '../src/engine/client';
-import { buildCharacter } from '../src/sim/player';
-import { autoEquip, equipFromBag, unequip } from '../src/sim/gear';
-import { drink, cycleQuickbar } from '../src/sim/farm';
-import { depositMany, withdrawMany } from '../src/sim/town';
+import { buildCharacter } from '../src/sim/core/player';
+import { autoEquip, equipFromBag, unequip } from '../src/sim/gear/gear';
+import { drink, cycleQuickbar } from '../src/sim/world/farm';
+import { depositMany, withdrawMany } from '../src/sim/town/town';
 
 // Execute the actual Svelte controller callbacks without a second copy of their logic.
 // Rendering and native input still require the integrated-browser check.

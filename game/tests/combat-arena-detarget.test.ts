@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { E, sm } from '../src/engine/client';
-import { intentTargets, selectCombatIntent } from '../src/sim/combat-actions';
-import { advanceCombatArena, aimForSkill, arenaSkillRange, bodyRadiusM, createCombatArena, syncCombatArena } from '../src/sim/combat-arena';
-import { newGame } from '../src/sim/game';
-import { buildCharacter, emptyGear } from '../src/sim/player';
-import { characterSheet } from '../src/sim/game';
+import { intentTargets, selectCombatIntent } from '../src/sim/combat/combat-actions';
+import { advanceCombatArena, aimForSkill, arenaDistance, arenaSkillRange, bodyRadiusM, createCombatArena, syncCombatArena } from '../src/sim/combat/combat-arena';
+import { newGame } from '../src/sim/core/game';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
+import { characterSheet } from '../src/sim/core/game';
 import { mobFixture } from './mobFixture';
 
 /**
@@ -35,6 +35,17 @@ function encounter() {
 }
 
 describe('ARPG detarget', () => {
+  it('tracks the same single-target intent while an equally useful neighbour gets closer', () => {
+    const { state, arena, character } = encounter();
+    const id = 'attack.fireball';
+    state.skills.owned[id] = 0;
+    state.skills.list[0] = id;
+    arena.intent = { skillId: id, targetId: 'detarget-0', targetPoint: { x: 2.5, y: 6 }, phase: 'approach' };
+    Object.assign(arena.mobs['detarget-1'], { x: 2.3, y: 6 });
+    const held = selectCombatIntent(arena, state, character, true)!;
+    expect(held.targetId).toBe('detarget-0');
+    expect(held.targetPoint).toEqual({ x: 2.5, y: 6 });
+  });
   it('centres a target circle on the best cluster, not the nearest body', () => {
     const { state, arena, id, character } = encounter();
     const nearest = arena.mobs['detarget-0'];
@@ -105,6 +116,9 @@ describe('ARPG detarget', () => {
       (E.mob.sizes as any[]).find((s) => s.id === 'boss').radius_m);
     expect(bodyRadiusM(mobFixture() as any)).toBe(
       (E.mob.sizes as any[]).find((s) => s.id === 'medium').radius_m);
+    // The baseline is one 0.5m ground diameter for every body class; rank does not resize it.
+    expect(E.combat_arena.player_radius_m).toBe(0.25);
+    for (const size of E.mob.sizes as any[]) expect(size.radius_m).toBe(0.25);
   });
 
   it('re-tracks the held approach aim when the cluster leaves cast range', () => {
@@ -162,6 +176,50 @@ describe('bodies occupy ground', () => {
       const actor = arena.mobs[mob.id];
       const need = bodyRadiusM(actor.mob) + bodyRadiusM(undefined);
       expect(Math.hypot(actor.x - 1, actor.y - 6)).toBeGreaterThanOrEqual(need - 1e-6);
+    }
+  });
+
+  it('settles a six-body pack in reach, clear of each other and inside the field', () => {
+    const state = newGame(31);
+    state.group = Array.from({ length: 6 }, (_, index) => mobFixture({
+      id: `pack-${index}`, hp: 1e9, hpMax: 1e9, innate: [], skillIds: [],
+    }));
+    const arena = createCombatArena();
+    syncCombatArena(arena, state, 0, 1_000_000, characterSheet(state).maxHp);
+    Object.assign(arena.player, { x: 9, y: 6 });
+    for (const mob of state.group) Object.assign(arena.mobs[mob.id], { x: 13, y: 6 });
+    const opts = { ...stepOpts, playerRange: 2.1, playerLocked: true };
+    for (let index = 1; index <= 160; index++) advanceCombatArena(arena, state, index * 50_000, opts);
+    const actors = state.group.map((mob) => arena.mobs[mob.id]);
+    for (const actor of actors) {
+      const radius = actor.radiusM ?? 0.25;
+      expect(arenaDistance(actor, arena.player)).toBeLessThanOrEqual(2.1 + 1e-7);
+      expect(actor.x).toBeGreaterThanOrEqual(radius - 1e-6);
+      expect(actor.y).toBeGreaterThanOrEqual(radius - 1e-6);
+      expect(actor.x).toBeLessThanOrEqual(arena.bounds.width - radius + 1e-6);
+      expect(actor.y).toBeLessThanOrEqual(arena.bounds.height - radius + 1e-6);
+      for (const other of actors) if (other !== actor)
+        expect(arenaDistance(actor, other)).toBeGreaterThanOrEqual(radius + (other.radiusM ?? 0.25) - 1e-6);
+    }
+    expect(Object.keys(arena.contacts)).toHaveLength(actors.length);
+    const claims = new Set(Object.values(arena.contacts).map((claim) => `${claim.x.toFixed(3)},${claim.y.toFixed(3)}`));
+    expect(claims.size).toBe(actors.length);
+  });
+
+  it('insets every body by its radius at the field edge', () => {
+    const state = newGame(31);
+    state.group = [0, 1].map((index) => mobFixture({
+      id: `edge-${index}`, hp: 1e9, hpMax: 1e9, innate: [], skillIds: [],
+    }));
+    const arena = createCombatArena();
+    syncCombatArena(arena, state, 0, 1_000_000, characterSheet(state).maxHp);
+    Object.assign(arena.player, { x: 0.05, y: 0.05 });
+    for (const mob of state.group) Object.assign(arena.mobs[mob.id], { x: 0.02, y: 0.02 });
+    advanceCombatArena(arena, state, 50_000, stepOpts);
+    for (const actor of [arena.player, ...state.group.map((mob) => arena.mobs[mob.id])]) {
+      const radius = actor.radiusM ?? 0.25;
+      expect(actor.x).toBeGreaterThanOrEqual(radius - 1e-6);
+      expect(actor.y).toBeGreaterThanOrEqual(radius - 1e-6);
     }
   });
 });

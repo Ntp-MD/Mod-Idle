@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { E, TOWN, eng } from '../src/engine/client';
-import { grantBonusMaterial, newGame, rollBonusMaterial } from '../src/sim/game';
-import { newEscrow, payoutStacks } from '../src/sim/dungeon';
-import type { Mob } from '../src/sim/types';
+import { grantBonusMaterial, newGame, rollBonusMaterial } from '../src/sim/core/game';
+import { newEscrow, payoutStacks } from '../src/sim/world/dungeon';
+import type { Mob } from '../src/sim/core/types';
 
 const goblin = (): Mob => eng.spawnAt(1, 'medium', 'goblin') as unknown as Mob;
 

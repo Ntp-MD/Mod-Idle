@@ -139,14 +139,13 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
    * What the row costs, in mana units: the typed price grown only by skill level on
    * `MANA_LEVEL_STEP`, steeper than the damage ramp so a maxed rotation costs more. The pool sets
    * nothing — a bigger bar buys more casts, never a cheaper press — so an aura that reserves a share
-   * of it changes what is there to spend, never the price of the spend. The AoE premium is
-   * `engine.json` `aoe.mana_mult`, charged once on a press that lands on more than one target.
+   * of it changes what is there to spend, never the price of the spend. A press that lands on more
+   * than one target pays the same typed price as a single-target press.
    */
-  function manaCostOf(skill: SkillRow, { skillLevel = 1, aoe = false }: { skillLevel?: number; aoe?: boolean } = {}) {
+  function manaCostOf(skill: SkillRow, { skillLevel = 1 }: { skillLevel?: number } = {}) {
     const value = manaSpec(skill);
     if (value == null) throw new Error(`skill ${skill.id || '(unnamed)'} has no readable mana cost: ${JSON.stringify(skill.mana)}`);
-    const aoeMult = aoe ? (E.aoe ? E.aoe.mana_mult : 1.5) : 1;
-    return value * (1 + Math.max(0, skillLevel - 1) * COST_LEVEL_STEP / 100) * aoeMult;
+    return value * (1 + Math.max(0, skillLevel - 1) * COST_LEVEL_STEP / 100);
   }
 
   /** HP prices use the same level ladder but remain flat pool units, not a share of Max HP. */
@@ -156,8 +155,8 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     return value * (1 + Math.max(0, skillLevel - 1) * COST_LEVEL_STEP / 100);
   }
 
-  /** One paid resource per active row. Mana keeps its AoE premium; HP is paid as the row's flat amount. */
-  function costOf(skill: SkillRow, opts: { skillLevel?: number; aoe?: boolean } = {}) {
+  /** One paid resource per active row; neither resource carries a multi-target premium. */
+  function costOf(skill: SkillRow, opts: { skillLevel?: number } = {}) {
     if (skill.mana != null && skill.hp_cost != null) throw new Error(`skill ${skill.id || '(unnamed)'} cannot charge both Mana and HP`);
     if (skill.hp_cost != null) return { resource: 'hp' as const, amount: hpCostOf(skill, opts) };
     return { resource: 'mana' as const, amount: manaCostOf(skill, opts) };

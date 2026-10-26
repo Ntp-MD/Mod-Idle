@@ -2,32 +2,42 @@
   import { onMount } from 'svelte';
   import ArenaSkillVfx from './ArenaSkillVfx.svelte';
   import ArenaGroundAura from './ArenaGroundAura.svelte';
-  import { authoredVfxFor } from './arena-authored-vfx';
-  import { groundAuraFootprint, projectVfxFootprint } from './arena-vfx-space';
+  import { authoredVfxFor, authoredCompositionFor, authoredComponentSites, authoredCompositionDuration, arenaComponentDepth, type AuthoredComponent } from './arena-authored-vfx';
+  import ArenaComponentVfx from './ArenaComponentVfx.svelte';
+  import { groundAuraFootprint, groundShapePath, projectVfxFootprint } from './arena-vfx-space';
   import { ACTIVE_VFX, activeVfxElement, activeVfxMechanics, activeVfxPlaybackDuration } from './arena-active-vfx';
   import { E, sm } from '../../engine/client';
+  import { skillAreaSnapshot } from '../../../../engine/skill-area';
   import { elementIcon, skillIcon } from '../../icon';
-  import { statusLabel } from '../../sim/mobStatus';
-  import { mobSkillById } from '../../sim/mobSkills';
-  import type { Character } from '../../sim/player';
-  import type { FxEvent, GameState, Mob } from '../../sim/types';
-  import { sampleCombatArena, type CombatArena, type CombatArenaActor, type CombatArenaAction } from '../../sim/combat-arena';
+  import { statusLabel } from '../../sim/combat/mobStatus';
+  import { mobSkillById } from '../../sim/combat/mobSkills';
+  import type { Character } from '../../sim/core/player';
+  import type { FxEvent, GameState, Mob } from '../../sim/core/types';
+  import { arenaSkillRange, sampleCombatArena, type CombatArena, type CombatArenaActor, type CombatArenaAction } from '../../sim/combat/combat-arena';
   import { arenaArt, arenaArtForSpecies, type ArenaCharacterArt, type ArenaSpriteSheet } from './arena/arena-art';
   import { auraFxFor, skillFxFor } from './arena-skill-effects';
   import { actorArt, actorProfile } from './combat-actor';
   import { arenaMobShape, arenaSkillShape } from '../fx';
-  import { aoePulseMs, groundCirclePath } from './arena-space';
-  import { ARENA_VIEW, arenaActorAction, arenaActorPixelScale, arenaCameraOffset, arenaAttackElapsedMs, arenaDirection, arenaEventTiming, arenaFieldNote, arenaPlaybackTime, arenaRangedShots, arenaSpriteFrame, arenaSpriteIndex, projectArenaPoint, unprojectArenaPoint } from './combat-arena-view';
+  import { aoePulseMs, groundCirclePath, groundDistance } from './arena-space';
+  import { ARENA_VIEW, arenaActionPose, arenaActorAction, arenaActorPixelScale, arenaCameraOffset, arenaEventTiming, arenaFacingSector, arenaFieldNote, arenaPhaseOffset, arenaPlaybackTime, arenaRangedShots, arenaScreenAngleFor, arenaSheetDirection, arenaSpriteFrame, arenaSpriteIndex, createArenaGait, projectArenaPoint, unprojectArenaPoint } from './combat-arena-view';
   import ArenaFxSprite from './ArenaFxSprite.svelte';
+  import { arenaPayloadSample, arenaPresentationArea, arenaReleaseSocket, arenaDirection as arenaDirectionForSocket } from './combat-arena-view';
+  import type { CombatArenaPayload } from '../../sim/combat/combat-arena';
   import { fieldLabel } from '../hud/hud';
+  import { ARENA_DIRECTIONS } from '../../presentation/arena-camera';
 
   let { arena, s, c, ring, speed = 1, paused = false, spritePreviewSpecies = null, spritePreviewVariant = null, aoePreview = false,
-    focusId = null, onInspectEnemy, onFocusEnemy, onGroundCommand, onVitals }: {
+    focusId = null, aimSkill = null, inspect = false, onReviewPause, onReviewStep, onInspectEnemy, onFocusEnemy, onGroundCommand, onVitals }: {
     arena: CombatArena; s: GameState; c: Character; ring: FxEvent[]; speed?: number; paused?: boolean;
     spritePreviewSpecies?: string | null;
     spritePreviewVariant?: { speciesId: string; variantId: string } | null;
     aoePreview?: boolean;
     focusId?: string | null;
+    /** The one skill whose cast range and footprint are being aimed right now. */
+    aimSkill?: string | null;
+    inspect?: boolean;
+    onReviewPause?: () => void;
+    onReviewStep?: () => void;
     onInspectEnemy?: (mob: Mob) => void;
     onFocusEnemy?: (mob: Mob) => void;
     /** A deliberate local move order in arena meters, clamped to the field bounds. */
@@ -38,20 +48,43 @@
   let host = $state<HTMLDivElement | null>(null);
   let stage = $state({ width: ARENA_VIEW.width, height: ARENA_VIEW.height });
   let playhead = $state(0);
+  let reviewAt = $state<number | null>(null);
+  let reviewPlaying = $state(false);
+  let reviewWall = 0;
+  let motionReview = $state<'system' | 'full' | 'reduced'>('system');
   const spriteClipPrefix = $props.id();
-  let reducedMotion = $state(false);
+  let systemReducedMotion = $state(false);
+  const reducedMotion = $derived(inspect && motionReview !== 'system' ? motionReview === 'reduced' : systemReducedMotion);
   let reviewArt = $state<ArenaCharacterArt | null>(null);
+  let aimPointer = $state<{ x: number; y: number } | null>(null);
+  const gait = createArenaGait();
   let anchorNow = 0;
   let anchorWall = 0;
   let anchorSpeed = 1;
   let frozenAt: number | null = null;
   let previousVitals = '';
+  function seekArena(atUs: number) {
+    onReviewPause?.();
+    reviewPlaying = false;
+    reviewAt = Math.max(arena.frames[0]?.atUs ?? 0, Math.min(arena.nowUs, atUs));
+    playhead = reviewAt;
+  }
+  $effect(() => { if (!paused) { reviewAt = null; reviewPlaying = false; } });
   const scale = $derived(stage.height / ARENA_VIEW.height);
   const sampled = $derived(sampleCombatArena(arena, playhead));
   const player = $derived(sampled.player);
-  const targetId = $derived(focusId && sampled.mobs[focusId]?.hp > 0 ? focusId
-    : Object.values(sampled.mobs).filter((actor) => actor.hp > 0)
-      .sort((a, b) => Math.hypot(a.x - player.x, a.y - player.y) - Math.hypot(b.x - player.x, b.y - player.y))[0]?.id);
+  const nearestTargetId = $derived(Object.values(sampled.mobs).filter((actor) => actor.hp > 0)
+    .sort((a, b) => Math.hypot(a.x - player.x, a.y - player.y) - Math.hypot(b.x - player.x, b.y - player.y))[0]?.id);
+  /** The action or decision that owns the highlight, never a detached renderer acquisition. */
+  const committedTargetId = $derived.by(() => {
+    const action = arenaActorAction(arena, sampled.player, playhead);
+    const id = action?.targetId ?? sampled.intent?.targetId;
+    return id && id !== 'player' ? id : undefined;
+  });
+  const targetId = $derived(committedTargetId
+    ? sampled.mobs[committedTargetId]?.hp > 0 ? committedTargetId : undefined
+    : focusId && sampled.mobs[focusId]?.hp > 0 ? focusId : nearestTargetId);
+  const focusTargetId = $derived(focusId && focusId !== targetId && sampled.mobs[focusId]?.hp > 0 ? focusId : null);
   const camera = $derived(arenaCameraOffset(player,sampled.mobs[targetId ?? '']));
   // Dev-only calibration rings: one arena unit is one meter, drawn through the ground projection.
   const aoePreviewRings = $derived(aoePreview
@@ -63,10 +96,46 @@
   const bodyRings = $derived(
     [sampled.player, ...Object.values(sampled.mobs)]
       .filter((actor) => actor.hp > 0 && (actor.radiusM ?? 0) > 0)
-      .map((actor) => ({ id: actor.id, path: groundCirclePath({ x: actor.x, y: actor.y }, actor.radiusM ?? 0.45, 20) }))
+      .map((actor) => ({ id: actor.id, path: groundCirclePath({ x: actor.x, y: actor.y }, actor.radiusM ?? 0.25, 20) }))
   );
+  const aimDefinition = $derived(aimSkill ? sm.byId[aimSkill] : undefined);
+  const aimRange = $derived(aimSkill ? arenaSkillRange(aimSkill) : 0);
+  const aimArea = $derived.by(() => {
+    if (!aimSkill || !aimDefinition) return undefined;
+    const focus = targetId ? sampled.mobs[targetId] : undefined;
+    const point = aimPointer ?? (focus ? { x: focus.x, y: focus.y } : { x: player.x, y: player.y });
+    return skillAreaSnapshot(aimDefinition.area ?? { origin: 'target' as const, radius_m: 0 },
+      player, point, targetId ?? '', player.facing);
+  });
+  const aimShapePath = $derived(aimArea ? groundShapePath(aimArea) : '');
+  const aimRangePath = $derived(Number.isFinite(aimRange) && aimRange > 0
+    ? groundCirclePath({ x: player.x, y: player.y }, aimRange, 64) : '');
+  const aimValid = $derived.by(() => {
+    if (!aimSkill || !aimArea) return false;
+    if (aimDefinition?.area?.origin === 'caster') return true;
+    if (!Number.isFinite(aimRange)) return true;
+    return groundDistance(player, aimArea.center) <= aimRange + 1e-7;
+  });
   const aoePreviewCenter = $derived(projectArenaPoint({ x: player.x, y: player.y }));
   const fieldNote = $derived(arenaFieldNote(s));
+  $effect(() => {
+    const ids = new Set(['player', ...Object.keys(sampled.mobs)]);
+    gait.retain(ids);
+  });
+
+  function pointerWorld(event: PointerEvent | MouseEvent): { x: number; y: number } | undefined {
+    if (!host) return undefined;
+    const rect = host.getBoundingClientRect();
+    const view = {
+      x: (event.clientX - rect.left) / rect.width * ARENA_VIEW.width + camera.x,
+      y: (event.clientY - rect.top) / rect.height * ARENA_VIEW.height + camera.y,
+    };
+    const point = unprojectArenaPoint(view);
+    return {
+      x: Math.max(0, Math.min(arena.bounds.width, point.x)),
+      y: Math.max(0, Math.min(arena.bounds.height, point.y)),
+    };
+  }
 
   function skillColour(id: string) {
     const element = sm.byId[id]?.element || mobSkillById(id)?.element;
@@ -173,7 +242,7 @@
 
   onMount(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const motion = () => { reducedMotion = query.matches; };
+    const motion = () => { systemReducedMotion = query.matches; };
     motion();
     query.addEventListener('change', motion);
     const resize = new ResizeObserver(([entry]) => { stage = { width: entry.contentRect.width, height: entry.contentRect.height }; });
@@ -183,7 +252,12 @@
     playhead = Math.max(0, anchorNow - arena.unitsPerSec);
     let frame = 0;
     const advance = (wall: number) => {
-      playhead = frozenAt ?? arenaPlaybackTime(anchorNow, arena.unitsPerSec, wall - anchorWall, speed, paused);
+      if (reviewPlaying && reviewAt != null) {
+        if (!document.hidden) reviewAt = Math.min(arena.nowUs, reviewAt + Math.max(0, wall - reviewWall) * arena.unitsPerSec * speed / 1000);
+        reviewWall = wall;
+        if (reviewAt >= arena.nowUs) reviewPlaying = false;
+      }
+      playhead = reviewAt ?? frozenAt ?? arenaPlaybackTime(anchorNow, arena.unitsPerSec, wall - anchorWall, speed, paused);
       frame = requestAnimationFrame(advance);
     };
     frame = requestAnimationFrame(advance);
@@ -193,6 +267,25 @@
   const actors = $derived([player, ...Object.values(sampled.mobs), ...sampled.bodies]
     .map((actor) => actorView(actor))
     .sort((a, b) => a.ground.y - b.ground.y || a.actor.id.localeCompare(b.actor.id)));
+  const actorViews = $derived(new Map(actors.map((view) => [view.actor.id, view])));
+  /** Neutral attachment fallback uses visible body height, not transparent runtime-cell padding. */
+  function bodyLift(id: string | undefined, share: number, fallback: number): number {
+    const view = id ? actorViews.get(id) : undefined;
+    return view ? view.bodyHeight * share : fallback;
+  }
+
+  function releaseSocket(actorId: string, atUs: number, worldSource: { x: number; y: number }) {
+    const frame = sampleCombatArena(arena, atUs);
+    const actor = actorId === 'player' ? frame.player : frame.mobs[actorId];
+    const art = actor && artFor(actor);
+    const sheet = art?.clips.attack[arenaDirectionForSocket(actor?.facing ?? 0, art.clips.attack)];
+    const rest = art?.clips.idle.south ?? Object.values(art?.clips.idle ?? {})[0];
+    const reference = rest && containedFrame(rest, rest.startFrame ?? 0);
+    if (!sheet || !art || !reference) return undefined;
+    const anchor = sheet.anchor ?? art.anchor;
+    return arenaReleaseSocket(sheet, { x: anchor.x * sheet.frameWidth, y: anchor.y * sheet.frameHeight },
+      projectArenaPoint(worldSource), arenaActorPixelScale(reference.width, 1));
+  }
 
   function artFor(actor: CombatArenaActor): ArenaCharacterArt | null {
     if (actor.id === 'player') return arenaArt.hero;
@@ -249,25 +342,38 @@
       ? { ...sampledActor, diedAtUs: playerDeathTime() } : sampledActor;
     const ground = projectArenaPoint(actor);
     const art = artFor(actor);
-    const sheetFor = (clip: ArenaCharacterArt['clips']['idle'] | undefined) => clip?.[arenaDirection(actor.facing, clip)];
+    // One nominal projected sector per actor; each clip then falls back to the sheets it owns.
+    const nominal = arenaFacingSector(actor.facing,
+      actor.facingSector == null ? undefined : ARENA_DIRECTIONS[actor.facingSector]);
+    const sheetFor = (clip: ArenaCharacterArt['clips']['idle'] | undefined) =>
+      clip?.[arenaSheetDirection(nominal, clip)];
     const dead = actor.diedAtUs != null;
     const action = dead ? undefined : arenaActorAction(arena, actor, playhead, art?.clips.attack);
     const attackSheet = sheetFor(art?.clips.attack);
+    const pose = action ? arenaActionPose(action, playhead, arena.unitsPerSec, attackSheet) : undefined;
+    const gaitSample = actor.diedAtUs == null ? gait.sample(arena, actor.id, playhead) : undefined;
+    // A stopped actor holds its last foot beat briefly instead of snapping to idle mid-step.
+    const settle = !actor.moving && !!gaitSample
+      && playhead - gaitSample.lastMovedAtUs < 90 * arena.unitsPerSec / 1000;
     const deathSheet = sheetFor(art?.clips.death);
     const hitSheet = sheetFor(art?.clips.hit);
     const hitDurationMs = hitSheet ? hitSheet.frames * hitSheet.frameMs : 0;
-    const hit = ring.find((event) => {
+    const hit = ring.filter((event) => {
       if (!((actor.id === 'player' && event.kind === 'taken') || (event.mobId === actor.id && event.kind === 'hit'))) return false;
       const damage = event.hpDamage != null || event.esDamage != null ? (event.hpDamage ?? 0) + (event.esDamage ?? 0) : event.value ?? 0;
       const elapsedMs = (playhead - eventTime(event)) / arena.unitsPerSec * 1000;
       return damage > 0 && elapsedMs >= 0 && elapsedMs < Math.max(160, hitDurationMs);
-    });
+    }).sort((a, b) => {
+      const damage = (event: FxEvent) => event.hpDamage != null || event.esDamage != null
+        ? (event.hpDamage ?? 0) + (event.esDamage ?? 0) : event.value ?? 0;
+      return damage(b) - damage(a) || b.id - a.id;
+    })[0];
     const hitElapsedMs = hit ? (playhead - eventTime(hit)) / arena.unitsPerSec * 1000 : 0;
-    // Keep anticipation/contact visible; an actual hit may interrupt attack recovery.
+    // A light reaction may replace recovery, but never protected preparation, release or contact.
     const showHit = hit && hitElapsedMs < hitDurationMs
-      && (!action || playhead >= action.atUs + (attackSheet?.frameMs ?? 100) / 1000 * arena.unitsPerSec);
+      && (!pose || pose.phase === 'recovery');
     const clipName = dead ? deathSheet ? 'death' : 'idle'
-      : showHit ? 'hit' : action ? 'attack' : actor.moving ? 'walk' : 'idle';
+      : showHit ? 'hit' : pose ? 'attack' : actor.moving || settle ? 'walk' : 'idle';
     const sheet = sheetFor(art?.clips[clipName]) ?? sheetFor(art?.clips.idle);
     const anchor = sheet?.anchor ?? (sheet ? art?.anchor : null) ?? { x: .5, y: 1 };
     const fallback = actorArt(actor.mob);
@@ -305,21 +411,35 @@
       ? Math.max(58, artReach * 2 * (pixelScale ?? height / restSheet.frameHeight))
       : width * .75;
     const age = actor.diedAtUs == null ? 0 : Math.max(0, (playhead - actor.diedAtUs) / arena.unitsPerSec);
-    const attackElapsedMs = action ? arenaAttackElapsedMs(action, playhead, arena.unitsPerSec, attackSheet) : 0;
+    const attackElapsedMs = pose?.elapsedMs ?? 0;
     const attackDurationMs = attackSheet ? attackSheet.frames * attackSheet.frameMs : 520;
-    const attackPhase = action ? Math.max(0, Math.min(1, attackElapsedMs / attackDurationMs)) : 0;
+    const impactMs = attackSheet?.impactMs ?? 340;
     const direction = action?.targetX != null && action?.targetY != null
       ? projectArenaPoint({ x: action.targetX, y: action.targetY }) : ground;
     const angle = Math.atan2(direction.y - ground.y, direction.x - ground.x);
-    const reach = reducedMotion || !action || clipName !== 'attack' ? 0 : Math.sin(attackPhase * Math.PI) * (actionStyle(action, actor.mob) === 'slash' ? 8 : -3);
+    // The lunge belongs to the active strike, not to the walk, the preparation or a held channel.
+    const lunge = pose?.phase === 'contact' ? 1
+      : pose?.phase === 'recovery' && !action?.channel
+        ? Math.max(0, 1 - (attackElapsedMs - impactMs) / Math.max(1, attackDurationMs - impactMs))
+        : 0;
+    const reach = art?.pixelArt || reducedMotion || !pose || clipName !== 'attack'
+      ? 0 : lunge * (actionStyle(action!, actor.mob) === 'slash' ? 8 : -3);
     const cue = action?.skillId ? (actor.mob ? mobSkillById(action.skillId) : sm.byId[action.skillId]) : null;
     const statuses = Object.entries(actor.statuses || {}).filter(([, line]) => line.stacks > 0 || line.secLeft > 0).map(([name, line]) => {
       const element = Object.entries(E.elements.status_of as Record<string, string>).find(([, status]) => status === name)?.[0] || 'physical';
       return { name, stacks: line.stacks, label: statusLabel(name), icon: elementIcon(element),
         colour: (E.elements.colour as Record<string, string>)[element] || E.elements.physical_colour };
     });
+    // Walk phase comes from voluntary distance; idle keeps a stable per-actor offset.
+    const walkSheet = sheetFor(art?.clips.walk);
+    const walkCycleMs = walkSheet ? walkSheet.frames * walkSheet.frameMs : 0;
+    const idleCycleMs = restSheet ? restSheet.frames * restSheet.frameMs : 1000;
+    const walkPhase = clipName === 'walk' && gaitSample ? gaitSample.phase : 0;
+    const idleOffset = arenaPhaseOffset(actor.id) * idleCycleMs;
     const elapsedMs = clipName === 'death' ? age * 1000 : clipName === 'hit' ? hitElapsedMs
-      : action ? attackElapsedMs : playhead / arena.unitsPerSec * 1000;
+      : pose ? attackElapsedMs
+      : clipName === 'walk' && walkCycleMs > 0 ? walkPhase * walkCycleMs
+      : playhead / arena.unitsPerSec * 1000 + idleOffset;
     const frameIndex = sheet ? arenaSpriteIndex(sheet, elapsedMs, reducedMotion, clipName === 'death') : 0;
     // Tight-crop sheets index one authored rect per frame; an overrun must clamp to that list, never
     // fall back to a cell crop that would pull neighbouring frames into view.
@@ -327,7 +447,9 @@
       ? containedFrame(sheet, Math.min(frameIndex, sheet.sourceFrames.length - 1))
       : undefined;
     const skillEffects = actorSkillEffects(actor, dead);
-    return { actor, ground, action, art, sheet, anchor, fallback, height, width, nameplateHeight, hitboxWidth, age, cue, statuses, clipName, sourceFrame, mirror: Boolean(sheet?.mirror), ...skillEffects,
+    return { actor, ground, action, art, sheet, anchor, fallback, height, width,
+      bodyHeight: restFrame ? restFrame.height * (pixelScale ?? height / (sheet?.frameHeight ?? 1)) : height,
+      nameplateHeight, hitboxWidth, age, cue, statuses, clipName, sourceFrame, mirror: Boolean(sheet?.mirror), ...skillEffects,
       frame: sourceFrame && sheet ? `0 0 ${sheet.frameWidth} ${sheet.frameHeight}`
         : sheet ? arenaSpriteFrame(sheet, elapsedMs, reducedMotion, clipName === 'death') : '',
       x: art?.pixelArt ? Math.round(ground.x / ARENA_VIEW.width * stage.width) : ground.x / ARENA_VIEW.width * stage.width,
@@ -336,7 +458,8 @@
       bodyY: art?.pixelArt ? Math.round(Math.sin(angle) * reach * scale) : Math.sin(angle) * reach * scale,
       brightness: hit && hitElapsedMs < 160 ? 1.6 : 1,
       opacity: actor.diedAtUs == null || actor.id === 'player' ? 1 : Math.max(0, 1 - age / 1.7),
-      deadRotation: actor.diedAtUs == null || deathSheet || reducedMotion ? 0 : Math.min(1, age / .32) * (Math.cos(actor.facing) < 0 ? -78 : 78),
+      deadRotation: actor.diedAtUs == null || deathSheet || reducedMotion ? 0
+        : Math.min(1, age / .32) * (Math.cos(arenaScreenAngleFor({ x: Math.cos(actor.facing), y: Math.sin(actor.facing) })) < 0 ? -78 : 78),
       shadow: actor.mob ? actorProfile(actor.mob).boss ? 47 : 29 : 23,
     };
   }
@@ -378,16 +501,45 @@
   });
   const effects = $derived([...ring,...longCasts.filter(event => !ring.some(current => current.id === event.id))]
     .filter((event) => ['hit', 'taken', 'block', 'heal', 'buff', 'drop', 'cast'].includes(event.kind))
-    .map((event) => effectView(event))
+    .flatMap((event) => {
+      const action = event.actionId != null ? arena.actions.find(entry => entry.id === event.actionId) : undefined;
+      return event.kind === 'cast' && action?.payloads?.length
+        ? action.payloads.map(payload => effectView(event, payload)) : [effectView(event)];
+    })
     .filter((mark) => mark != null)
     .sort((a,b) => Number(b.event.kind === 'cast' && b.activeFx)-Number(a.event.kind === 'cast' && a.activeFx))
     .slice(0, speed >= 4 ? 8 : 14));
   const rangedShots = $derived(arenaRangedShots(arena, playhead).map((shot) => {
     const ground = projectArenaPoint({ x: shot.x, y: shot.y });
-    return { ...shot, ground, art: shot.element ? 'orb/3a' : 'wave-1224', colour: shot.element ?? 'physical' };
+    return { ...shot, ground, lift: bodyLift(shot.actorId, .6, 48), art: shot.element ? 'orb/3a' : 'wave-1224', colour: shot.element ?? 'physical' };
   }));
 
-  function effectView(event: FxEvent) {
+  let failedCompositions = $state<string[]>([]);
+  type EffectMark = NonNullable<ReturnType<typeof effectView>>;
+  function externalComposition(mark: EffectMark) {
+    return mark.event.kind === 'cast' && mark.activeFx && mark.vfxArea && !failedCompositions.includes(mark.key)
+      ? authoredCompositionFor(mark.event.skillId ?? '') : undefined;
+  }
+  const componentMarks = $derived(effects.flatMap(mark => {
+    const composition = externalComposition(mark);
+    return composition && mark.vfxArea && mark.vfxAge >= -.7 && mark.vfxAge < authoredCompositionDuration(composition)
+      ? [{ mark, composition, area: mark.vfxArea }] : [];
+  }));
+  const depthComponents = $derived(componentMarks.flatMap(entry => authoredComponentSites(entry.composition,
+    entry.area, entry.mark.event.actionId ?? entry.mark.event.id).map((site, index) => ({ ...entry, site, index,
+      key: `${entry.mark.key}:${index}`, depth: arenaComponentDepth(site.y, camera.y) }))));
+  function failComposition(key: string, component: AuthoredComponent) {
+    if (failedCompositions.includes(key)) return;
+    console.warn(`VFX ${component.art.src} failed; using the retained authored atlas.`);
+    failedCompositions = [...failedCompositions, key];
+  }
+  $effect(() => {
+    const active = new Set(effects.map(mark => mark.key));
+    if (failedCompositions.some(key => !active.has(key)))
+      failedCompositions = failedCompositions.filter(key => active.has(key));
+  });
+
+  function effectView(event: FxEvent, payload?: CombatArenaPayload) {
     const atUs = eventTime(event);
     const age = (playhead - atUs) / arena.unitsPerSec;
     const skillFx = skillFxFor(event.skillId);
@@ -406,7 +558,14 @@
     const action = linkedAction ?? (arena.actions.find((a) => a.actorId === sourceId && Math.abs(a.atUs - atUs) < 2
       && (!targetActorId || !a.targetId || a.targetId === targetActorId)
       && (event.skillId ? a.skillId === event.skillId : event.via === 'swing' ? a.kind === 'swing' : true)) || skillAction);
-    const castTiming = arenaEventTiming(event, arena) ?? action?.timing;
+    // Cancellation ends future field/channel decoration; resolved hit cues remain independent.
+    if (castVisual && action?.cancelledAtUs != null && playhead >= action.cancelledAtUs
+      && (!payload || payload.releaseAtUs >= action.cancelledAtUs || action.cancelReason === 'area-exit')) return null;
+    if (payload && payload.index > 0 && playhead < payload.releaseAtUs) return null;
+    const payloadSample = payload ? arenaPayloadSample(payload, playhead) : undefined;
+    const baseTiming = arenaEventTiming(event, arena) ?? action?.timing;
+    const castTiming = baseTiming && payload && payloadSample
+      ? { ...baseTiming, releaseAtUs: payload.releaseAtUs, impactAtUs: payloadSample.terminalAtUs } : baseTiming;
     const timing = activeFx && castTiming ? {
       startedAtSec: castTiming.startedAtUs / arena.unitsPerSec,
       releasedAtSec: castTiming.releaseAtUs / arena.unitsPerSec,
@@ -421,19 +580,23 @@
     const target = targetActorId === 'player' ? player : sampled.mobs[targetActorId || ''] || sampled.bodies.find((body) => body.id === targetActorId)
       || arena.bodies.find((body) => body.id === targetActorId);
     const actionTarget = action?.targetX != null && action.targetY != null ? { x: action.targetX, y: action.targetY } : undefined;
-    const targetPoint = target || actionTarget;
+    const targetPoint = payloadSample?.point ?? target ?? actionTarget;
     if (!targetPoint) return null;
     const sourceActor = sourceId === 'player' ? player : sampled.mobs[sourceId || '']
       || sampled.bodies.find((body) => body.id === sourceId) || arena.bodies.find((body) => body.id === sourceId);
-    const point = projectArenaPoint(actionTarget && action?.targetId === targetActorId ? actionTarget : targetPoint);
+    const point = projectArenaPoint(payloadSample?.point ?? (actionTarget && action?.targetId === targetActorId ? actionTarget : targetPoint));
     let source = projectArenaPoint(action && castTiming ? {x:action.x,y:action.y} : activeFx && (event.skillId?.startsWith('buff.') || event.skillId?.startsWith('heal.') || skillFx?.shape === 'whirlwind')
       ? sourceActor || target! : action ? { x: action.x, y: action.y } : sourceActor || target!);
+    if (payload) source = projectArenaPoint(payload.source);
+    if (action?.channel && sourceActor) source = projectArenaPoint(sourceActor);
+    let chainFrom: string | undefined;
     if (activeFx && skillFx?.shape === 'chainLightning' && event.kind === 'hit') {
-      const prior = ring.filter(other => other.kind === 'hit' && other.skillId === event.skillId && other.id < event.id && Math.abs(eventTime(other) - atUs) < 2).sort((a,b) => b.id-a.id)[0];
+      const prior = ring.filter(other => other.kind === 'hit' && other.skillId === event.skillId && other.id < event.id
+        && (event.actionId != null ? other.actionId === event.actionId : Math.abs(eventTime(other) - atUs) < 2)).sort((a,b) => b.id-a.id)[0];
       const previousTarget = prior?.mobId ? sampled.mobs[prior.mobId] || sampled.bodies.find(body => body.id === prior.mobId) : undefined;
-      if (previousTarget) source = projectArenaPoint(previousTarget);
+      if (previousTarget) { source = projectArenaPoint(previousTarget); chainFrom = previousTarget.id; }
     }
-    const castArea = event.skillOutcome?.area ?? action?.area;
+    const castArea = action?.channel ? arenaPresentationArea(action, sampled) : event.skillOutcome?.area ?? action?.area;
     const vfxArea = castArea ? projectVfxFootprint(castArea) : undefined;
     const relatedHits = ring.filter(other => other.kind === 'hit' && other.via === 'cast' && other.skillId === event.skillId
       && (event.actionId != null ? other.actionId === event.actionId : Math.abs(eventTime(other)-atUs) < 2));
@@ -451,11 +614,20 @@
     const flight = !!action && (skillFx?.projectile || (!skillFx && !['slash', 'block', 'dodge', 'status', 'heal', 'buff', 'drop'].includes(kind)))
       && event.via !== 'dot' && event.kind !== 'cast';
     const progress = Math.max(0, Math.min(1, (age + .24) / .24));
-    return { event, age, vfxAge, timing, vfxArea, kind, skillFx, activeFx, stormFx, targets, spreadTargets, consumed, castTargetFx: event.kind === 'cast' && sm.byId[event.skillId || '']?.type === 'curse',
-      point: { x: point.x, y: point.y - 48 }, ground: point, source: { x: source.x, y: source.y - 58 }, flight,
-      projectile: { x: source.x + (point.x - source.x) * progress, y: source.y - 58 + (point.y - source.y + 10) * progress - Math.sin(progress * Math.PI) * (kind === 'arrow' ? 18 : 5) },
-      skillProjectile: { x: source.x + (point.x - source.x) * progress, y: source.y - 58 + (point.y - source.y + 10) * progress - Math.sin(progress * Math.PI) * 12 },
-      angle: Math.atan2(point.y - source.y + 10, point.x - source.x) * 180 / Math.PI,
+    // Body-relative anchors come from the drawn actor, not one fixed pixel offset for every size.
+    const targetLift = bodyLift(targetActorId, .52, 48);
+    const sourceLift = bodyLift(sourceActor?.id ?? 'player', .6, 58);
+    const pointY = point.y - targetLift;
+    const socket = payload ? releaseSocket(sourceId ?? 'player', payload.releaseAtUs, payload.source) : undefined;
+    if (socket) source = { x: socket.x, y: socket.y + sourceLift };
+    const sourceY = source.y - sourceLift;
+    return { key: `${event.id}:${payload?.index ?? 'event'}`, event, age, vfxAge, timing, vfxArea, kind, skillFx, activeFx, stormFx, targets, spreadTargets, consumed, chainFrom,
+      flightProgressOverride: payloadSample?.progress, castTargetFx: event.kind === 'cast' && sm.byId[event.skillId || '']?.type === 'curse',
+      attachmentProvenance: socket?.provenance ?? 'neutral-fallback',
+      point: { x: point.x, y: pointY }, ground: point, source: { x: source.x, y: sourceY }, flight,
+      projectile: { x: source.x + (point.x - source.x) * progress, y: sourceY + (pointY - sourceY) * progress - Math.sin(progress * Math.PI) * (kind === 'arrow' ? 18 : 5) },
+      skillProjectile: { x: source.x + (point.x - source.x) * progress, y: sourceY + (pointY - sourceY) * progress - Math.sin(progress * Math.PI) * 12 },
+      angle: Math.atan2(pointY - sourceY, point.x - source.x) * 180 / Math.PI,
       opacity: age < 0 ? 1 : Math.max(0, 1 - age / .5),
       popOpacity: vfxAge < 0 ? 0 : Math.min(1, vfxAge / .035) * Math.max(0, 1 - vfxAge / .72),
       rise: reducedMotion ? 0 : Math.max(0, age) * 43,
@@ -465,22 +637,35 @@
 
 <div class="combat-arena" class:reduced-motion={reducedMotion} class:fast={speed >= 4} bind:this={host}
   data-combat-arena data-arena-time={Math.round(playhead)} aria-label="Live combat arena">
+  {#if inspect && import.meta.env.DEV}
+    <div class="arena-review" aria-label="Arena animation inspection">
+      <button type="button" onclick={onReviewStep}>Advance simulation 1s</button>
+      <button type="button" aria-pressed={reviewPlaying} onclick={() => {
+        onReviewPause?.(); reviewAt ??= playhead; reviewWall = performance.now(); reviewPlaying = !reviewPlaying;
+      }}>{reviewPlaying ? 'Hold window' : 'Play window'}</button>
+      <button type="button" onclick={() => seekArena(playhead - arena.unitsPerSec * .05)}>Previous frame</button>
+      <input type="range" aria-label="Arena animation time" min={arena.frames[0]?.atUs ?? 0} max={arena.nowUs}
+        step={Math.max(1, arena.unitsPerSec / 1000)} value={playhead}
+        oninput={(event) => seekArena(Number(event.currentTarget.value))} />
+      <button type="button" onclick={() => seekArena(playhead + arena.unitsPerSec * .05)}>Next frame</button>
+      <input type="number" aria-label="Arena time in seconds" min={(arena.frames[0]?.atUs ?? 0) / arena.unitsPerSec}
+        max={arena.nowUs / arena.unitsPerSec} step=".01" value={(playhead / arena.unitsPerSec).toFixed(3)}
+        oninput={(event) => seekArena(Number(event.currentTarget.value) * arena.unitsPerSec)} />
+      <select aria-label="Arena motion preview" bind:value={motionReview}>
+        <option value="system">System motion</option><option value="full">Full motion</option><option value="reduced">Reduced motion</option>
+      </select>
+      <output aria-label="Arena effect timing">{effects.filter(mark => mark.event.kind === 'cast').slice(0, 1).map(mark => `${mark.event.text}: ${mark.timing?.startedAtSec.toFixed(3)} / ${mark.timing?.releasedAtSec.toFixed(3)} / ${mark.timing?.impactAtSec.toFixed(3)}`).join(' ')}</output>
+    </div>
+  {/if}
   <img class="arena-ground" src={arenaArt.background.href} alt="" aria-hidden="true" draggable="false" />
   {#if onGroundCommand}
     <button class="arena-ground-command" type="button" tabindex="-1"
-      aria-label="Issue a local move order at this ground point"
+      aria-label={aimSkill ? 'Confirm the aimed skill at this ground point' : 'Issue a local move order at this ground point'}
+      onpointermove={(event) => { if (aimSkill) aimPointer = pointerWorld(event) ?? null; }}
+      onpointerleave={() => { aimPointer = null; }}
       onclick={(event) => {
-        if (!host) return;
-        const rect = host.getBoundingClientRect();
-        const view = {
-          x: (event.clientX - rect.left) / rect.width * ARENA_VIEW.width + camera.x,
-          y: (event.clientY - rect.top) / rect.height * ARENA_VIEW.height + camera.y,
-        };
-        const point = unprojectArenaPoint(view);
-        onGroundCommand({
-          x: Math.max(0, Math.min(arena.bounds.width, point.x)),
-          y: Math.max(0, Math.min(arena.bounds.height, point.y)),
-        });
+        const point = pointerWorld(event);
+        if (point) onGroundCommand(point);
       }}></button>
   {/if}
   <div class="arena-light" aria-hidden="true"></div>
@@ -499,6 +684,10 @@
   {/if}
 
   <svg class="arena-ground-fx" viewBox={`0 0 ${ARENA_VIEW.width} ${ARENA_VIEW.height}`} preserveAspectRatio="none" aria-hidden="true">
+    {#if aimSkill && aimShapePath}
+      {#if aimRangePath}<path class="aim-range" d={aimRangePath} />{/if}
+      <path class="aim-shape" class:invalid={!aimValid} d={aimShapePath} />
+    {/if}
     {#each actors as view (view.actor.id)}
       {#each view.auras.filter(aura => !!authoredVfxFor(aura.id)) as aura, index (aura.id)}
         <ArenaGroundAura id={aura.id} age={playhead / arena.unitsPerSec} footprint={groundAuraFootprint(view.ground,72+index*5)} {reducedMotion} />
@@ -507,29 +696,48 @@
     {#each bodyRings as ring (ring.id)}
       <path class="body-ring" d={ring.path} />
     {/each}
+    {#each componentMarks as entry (entry.mark.key)}
+      <g data-component-footprint={entry.mark.key} style:color={skillColour(entry.mark.event.skillId!)}
+        transform={`matrix(${entry.area.basisX.x} ${entry.area.basisX.y} ${entry.area.basisY.x} ${entry.area.basisY.y} ${entry.area.center.x} ${entry.area.center.y})`}>
+        <circle r="1" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width="1" vector-effect="non-scaling-stroke" />
+      </g>
+    {/each}
     {#each rangedShots as shot (shot.id)}
-      <g transform={`translate(${shot.ground.x} ${shot.ground.y - 48}) rotate(${shot.angle})`}>
+      <g transform={`translate(${shot.ground.x} ${shot.ground.y - shot.lift}) rotate(${shot.angle})`}>
         <ArenaFxSprite art={shot.art} age={0} x={0} y={0} width={shot.element ? 30 : 42} element={shot.colour} loop={true} {reducedMotion} />
       </g>
     {/each}
-    {#each effects as mark (mark.event.id)}
-      {#if mark?.activeFx && mark.skillFx}
+    {#each effects as mark (mark.key)}
+      {#if mark?.activeFx && mark.skillFx && !externalComposition(mark)}
         <g style:color={mark.activeFx && mark.event.skillId ? skillColour(mark.event.skillId) : mark.event.colour}>
-          <ArenaSkillVfx id={mark.event.skillId!} element={sm.byId[mark.event.skillId!]?.element} shape={mark.skillFx.shape} age={mark.vfxAge} timing={mark.timing} source={mark.source} point={mark.point} ground={mark.ground} cast={mark.event.kind === 'cast'} area={mark.vfxArea} targets={mark.targets} spreadTargets={mark.spreadTargets} consumed={mark.consumed} charges={mark.event.skillOutcome?.charges} cleansed={mark.event.skillOutcome?.cleansed} critical={!!mark.event.crit} layer="ground" {reducedMotion} />
+          <ArenaSkillVfx id={mark.event.skillId!} element={sm.byId[mark.event.skillId!]?.element} shape={mark.skillFx.shape} age={mark.vfxAge} timing={mark.timing} visualSeed={mark.event.actionId ?? mark.event.id} allowComponents={!failedCompositions.includes(mark.key)} flightProgressOverride={mark.flightProgressOverride} source={mark.source} point={mark.point} ground={mark.ground} cast={mark.event.kind === 'cast'} area={mark.vfxArea} targets={mark.targets} spreadTargets={mark.spreadTargets} consumed={mark.consumed} charges={mark.event.skillOutcome?.charges} cleansed={mark.event.skillOutcome?.cleansed} critical={!!mark.event.crit} layer="ground" {reducedMotion} chainFrom={mark.chainFrom} />
         </g>
       {/if}
     {/each}
   </svg>
 
+  {#each depthComponents as entry (entry.key)}
+    <svg class="arena-depth-fx" viewBox={`0 0 ${ARENA_VIEW.width} ${ARENA_VIEW.height}`} preserveAspectRatio="none"
+      style:z-index={entry.depth} style:color={skillColour(entry.mark.event.skillId!)}
+      data-component-depth={entry.depth} data-vfx-ground-y={entry.site.y} aria-hidden="true">
+      <ArenaComponentVfx composition={entry.composition} area={entry.area} age={entry.mark.vfxAge}
+        site={entry.site} siteIndex={entry.index} showFootprint={false} {reducedMotion}
+        onAssetError={(component) => failComposition(entry.mark.key, component)} />
+    </svg>
+  {/each}
+
   {#each actors as view (view.actor.id)}
     <div class="arena-actor" class:hero={view.actor.id === 'player'} class:dead={view.actor.diedAtUs != null}
       class:target={targetId === view.actor.id} class:moving={view.actor.moving}
       data-arena-actor={view.actor.id} data-moving={view.actor.moving} data-action={view.action?.kind || 'idle'} data-animation={view.clipName}
-      style:left={`${view.x}px`} style:top={`${view.y}px`} style:z-index={Math.max(1,Math.round(view.ground.y-camera.y))}
+      style:left={`${view.x}px`} style:top={`${view.y}px`} style:z-index={arenaComponentDepth(view.ground.y,camera.y)}
       style:opacity={view.opacity} style={`--actor-height:${view.nameplateHeight}px;--actor-width:${view.width}px;--shadow-width:${view.shadow * scale}px`}>
       <span class="foot-shadow" aria-hidden="true"></span>
       {#if targetId === view.actor.id && view.actor.diedAtUs == null}
         <svg class="target-ground" viewBox="0 0 100 40" aria-hidden="true"><path d="M6 17Q12 7 31 5M69 5Q88 7 94 17M94 23Q88 33 69 35M31 35Q12 33 6 23" /></svg>
+      {/if}
+      {#if focusTargetId === view.actor.id && view.actor.diedAtUs == null}
+        <svg class="focus-ground" viewBox="0 0 100 40" aria-hidden="true"><path d="M50 2v7M50 31v7M14 20h7M79 20h7" /></svg>
       {/if}
       <div class="arena-body" style:width={`${view.width}px`} style:height={`${view.height}px`}
         style:left={`${-view.width * view.anchor.x}px`} style:top={`${-view.height * view.anchor.y}px`}
@@ -601,11 +809,11 @@
   {/each}
 
   <svg class="arena-effects" viewBox={`0 0 ${ARENA_VIEW.width} ${ARENA_VIEW.height}`} preserveAspectRatio="none" aria-hidden="true">
-    {#each effects as mark (mark.event.id)}
+    {#each effects as mark (mark.key)}
       {#if mark}
         <g class="arena-effect" class:critical={mark.event.crit} style:color={mark.activeFx && mark.event.skillId ? skillColour(mark.event.skillId) : mark.event.colour}>
-          {#if mark.activeFx && mark.skillFx}
-            <ArenaSkillVfx id={mark.event.skillId!} element={sm.byId[mark.event.skillId!]?.element} shape={mark.skillFx.shape} age={mark.vfxAge} timing={mark.timing} source={mark.source} point={mark.point} ground={mark.ground} cast={mark.event.kind === 'cast'} area={mark.vfxArea} targets={mark.targets} spreadTargets={mark.spreadTargets} consumed={mark.consumed} charges={mark.event.skillOutcome?.charges} cleansed={mark.event.skillOutcome?.cleansed} critical={!!mark.event.crit} {reducedMotion} />
+          {#if mark.activeFx && mark.skillFx && !externalComposition(mark)}
+            <ArenaSkillVfx id={mark.event.skillId!} element={sm.byId[mark.event.skillId!]?.element} shape={mark.skillFx.shape} age={mark.vfxAge} timing={mark.timing} visualSeed={mark.event.actionId ?? mark.event.id} allowComponents={!failedCompositions.includes(mark.key)} flightProgressOverride={mark.flightProgressOverride} source={mark.source} point={mark.point} ground={mark.ground} cast={mark.event.kind === 'cast'} area={mark.vfxArea} targets={mark.targets} spreadTargets={mark.spreadTargets} consumed={mark.consumed} charges={mark.event.skillOutcome?.charges} cleansed={mark.event.skillOutcome?.cleansed} critical={!!mark.event.crit} {reducedMotion} chainFrom={mark.chainFrom} />
           {/if}
           {#if mark.flight && !mark.activeFx && !mark.stormFx && mark.age < 0 && !reducedMotion}
             <g transform={`translate(${mark.skillFx ? mark.skillProjectile.x : mark.projectile.x} ${mark.skillFx ? mark.skillProjectile.y : mark.projectile.y}) rotate(${mark.angle})`}>
@@ -678,6 +886,9 @@
 </div>
 
 <style>
+  .arena-review { position: absolute; z-index: 5000; top: 4px; left: 30%; display: flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs); background: var(--panel); color: var(--text); pointer-events: auto; font-size: var(--font-3xs); }
+  .arena-review input[type='range'] { width: 170px; }
+  .arena-review input[type='number'] { width: 80px; }
   .combat-arena { position: absolute; inset: 0; overflow: hidden; isolation: isolate; pointer-events: none; color: var(--text); background: #202c27; }
   .arena-camera { position:absolute; inset:0; pointer-events:none; isolation:isolate; }
   .arena-ground { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; }
@@ -692,6 +903,9 @@
   .aoe-ring[data-aoe-radius="3"] { stroke: var(--hp-lit); }
   .aoe-center { fill: var(--gold-lit); opacity: .75; }
   .body-ring { fill: none; stroke: currentColor; stroke-width: 1; opacity: .16; vector-effect: non-scaling-stroke; }
+  .aim-range { fill: none; stroke: var(--es); stroke-width: 1.2; stroke-dasharray: 7 6; opacity: .5; vector-effect: non-scaling-stroke; }
+  .aim-shape { fill: color-mix(in srgb, var(--es) 16%, transparent); stroke: var(--es-lit); stroke-width: 1.4; opacity: .72; vector-effect: non-scaling-stroke; }
+  .aim-shape.invalid { fill: color-mix(in srgb, var(--hp-lit) 13%, transparent); stroke: var(--hp-lit); opacity: .6; }
   @keyframes aoe-breathe { from { opacity: .2; } to { opacity: .6; } }
   .reduced-motion .aoe-ring { animation: none; opacity: .45; }
   .arena-actor { position: absolute; width: 0; height: 0; }
@@ -711,6 +925,8 @@
   .dead .arena-sprite { filter: saturate(.65) brightness(.65) drop-shadow(2px 3px 2px rgba(7, 14, 10, .3)); }
   .target-ground { position: absolute; width: 78px; height: 31px; left: -39px; top: -13px; color: var(--gold-lit); opacity: .9; }
   .target-ground path { fill: none; stroke: currentColor; stroke-width: 1.7; filter: drop-shadow(0 1px 1px #263322); }
+  .focus-ground { position: absolute; width: 92px; height: 37px; left: -46px; top: -17px; color: var(--es-lit); opacity: .8; }
+  .focus-ground path { fill: none; stroke: currentColor; stroke-width: 1.5; filter: drop-shadow(0 1px 1px #263322); }
   .arena-inspect { position: absolute; bottom: -6px; left: 0; translate: -50% 0; padding: 0; border: 0; border-radius: 2px; outline-offset: 5px; background: transparent; color: var(--text); cursor: pointer; pointer-events: auto; }
   .arena-inspect:hover, .arena-inspect:focus-visible { background: transparent; }
   .arena-inspect:focus-visible { outline: none; }
@@ -730,6 +946,7 @@
   .arena-cast > .icon-mask { flex: none; width: 21px; height: 21px; filter: drop-shadow(0 2px 2px #0a100d); }
   .arena-cast > span:last-child { padding: 3px 5px; border-radius: 2px; background: rgba(8, 15, 13, .82); }
   .arena-effects { position: absolute; inset: 0; z-index: 1200; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+  .arena-depth-fx { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
   .arena-effect { fill: currentColor; }
   .skill-fx-projectile { fill: currentColor; stroke: #fff0c6; stroke-width: 1.3; stroke-linejoin: round; filter: drop-shadow(0 0 5px currentColor); }
   .skill-fx-impact { fill: currentColor; stroke: #fff1ca; stroke-width: 1.8; stroke-linejoin: round; filter: drop-shadow(0 0 4px currentColor); }

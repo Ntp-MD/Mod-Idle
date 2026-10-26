@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { E, MODS, SKILLS, eng, loot, sm } from '../src/engine/client';
-import { openingGear } from '../src/sim/player';
-import { describeSkill } from '../src/sim/skill-copy';
-import type { Item } from '../src/sim/types';
+import { openingGear } from '../src/sim/core/player';
+import { describeSkill } from '../src/sim/combat/skill-copy';
+import type { Item } from '../src/sim/core/types';
 
 /**
  * The shapes the cages report as advisory (`soft`) but that must never silently break. Each block is one

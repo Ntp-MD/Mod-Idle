@@ -4,7 +4,7 @@
   "generationTool": "OpenAI built-in image_gen",
   "newAreaAtlasCount": 13,
   "retainedComponentCount": 63,
-  "runtimeVerified": false,
+  "runtimeVerified": true,
   "skills": [
     {
       "id": "attack.fireball",
@@ -946,5 +946,29 @@
     }
   ],
   "newComponentAtlasCount": 1,
-  "totalNewAtlasCount": 14
+  "totalNewAtlasCount": 14,
+  "runtimeVerification": {
+    "gate": "arena-authored-vfx.test.ts + arena-authored-vfx-render.test.ts",
+    "allSelectedAtlasesRender": "77/77",
+    "representativeArenaCasts": [
+      "attack.meteor",
+      "attack.blizzard",
+      "attack.ground_slam",
+      "attack.venom_spray",
+      "attack.arrow_shower",
+      "attack.firestorm",
+      "attack.sand_storm",
+      "attack.void_blast",
+      "attack.earth_shock",
+      "attack.shatter",
+      "attack.overload",
+      "attack.aftershock",
+      "attack.cleave",
+      "attack.whirlwind"
+    ],
+    "line": "committed corridor rendered in arena",
+    "chain": "target-to-target links rendered",
+    "arrowShower": "one component per launch payload",
+    "viewport": "in-app arena 831x785; 1920 screenshot surface unavailable"
+  }
 }

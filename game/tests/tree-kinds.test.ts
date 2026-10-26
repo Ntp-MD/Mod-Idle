@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { createTree, type TreeSpec } from '../../engine/tree.ts';
 import { MODS, tree } from '../src/engine/client';
-import { buildCharacter, emptyGear, sumLines } from '../src/sim/player';
-import { newGame } from '../src/sim/game';
-import { canSpendTree, spendTreePoint, treeLines } from '../src/sim/tree';
+import { buildCharacter, emptyGear, sumLines } from '../src/sim/core/player';
+import { newGame } from '../src/sim/core/game';
+import { canSpendTree, spendTreePoint, treeLines } from '../src/sim/core/tree';
 
 /**
  * The node kinds: a node's kind sets its rank count, its cost and the currency it is paid in, and a

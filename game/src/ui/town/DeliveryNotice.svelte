@@ -1,10 +1,10 @@
 <script lang="ts">
   import { trade, TOWN } from '../../engine/client';
-  import { stoneName } from '../../sim/craft';
-  import { deliveryTimeLeft, deliveryPauseReason } from '../../sim/delivery';
-  import type { DeliveryContract } from '../../sim/delivery-types';
-  import type { GameState } from '../../sim/types';
-  import { deliveryBonuses } from '../../sim/quest-rewards';
+  import { stoneName } from '../../sim/gear/craft';
+  import { deliveryTimeLeft, deliveryPauseReason } from '../../sim/town/delivery';
+  import type { DeliveryContract } from '../../sim/town/delivery-types';
+  import type { GameState } from '../../sim/core/types';
+  import { deliveryBonuses } from '../../sim/town/quest-rewards';
   import { questBonusText } from './quest-rewards';
   let { state: gameState, contract, writer, ontrack, ondetails, ondismiss }: {
     state: GameState; contract: DeliveryContract; writer: boolean;

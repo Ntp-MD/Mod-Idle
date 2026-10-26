@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { mulberry32 } from '../../engine/loot.ts';
 import { rollItem, LOOT, BASES_JSON } from '../../tools/loot.ts';
-import { rollDrop } from '../src/sim/drop';
+import { rollDrop } from '../src/sim/gear/drop';
 import { loot, BASES } from '../src/engine/client';
 import { CAGE_REFERENCE, CLIENT_REFERENCE } from './dropReference';
 

@@ -1,31 +1,31 @@
-import type { GameState } from '../sim/types';
-import { normalizeCombatHistory } from '../sim/combat-history';
+import type { GameState } from '../sim/core/types';
+import { normalizeCombatHistory } from '../sim/combat/combat-history';
 import { normalizeAlchemyLedger } from '../../../engine/alchemy.ts';
-import { normalizeBlackMarket } from '../sim/black-market';
-import { ACTIVE_SLOTS, clampAuraReservations, clearUnownedTracks, effectsActive, newSkillState } from '../sim/skills';
-import { newTown } from '../sim/town';
-import { normalizeDeliveries } from '../sim/delivery';
-import { normalizeQuestRewards } from '../sim/quest-rewards';
-import { normalizeExplorationState } from '../sim/exploration';
-import { normalizeMapJournal } from '../sim/map-exploration';
-import { newFarm, QUICKBAR_SLOTS } from '../sim/farm';
-import { slotsAvailable, slotsUsed } from '../sim/slots';
-import { newFieldwork, normalizeCampEncounterState } from '../sim/fieldwork';
-import { newPresets } from '../sim/presets';
-import { newCollector, newGrants } from '../sim/collector';
-import { newFilter, refresh as refreshFilter } from '../sim/filter';
-import { newGoal } from '../sim/goal';
-import { newGuidance, normalizeGuidance } from '../sim/guidance';
-import { buildCharacter } from '../sim/player';
-import { newCurses } from '../sim/curse';
-import { newMobStatusStore } from '../sim/mobStatus';
+import { normalizeBlackMarket } from '../sim/town/black-market';
+import { ACTIVE_SLOTS, clampAuraReservations, clearUnownedTracks, effectsActive, newSkillState } from '../sim/combat/skills';
+import { newTown } from '../sim/town/town';
+import { normalizeDeliveries } from '../sim/town/delivery';
+import { normalizeQuestRewards } from '../sim/town/quest-rewards';
+import { normalizeExplorationState } from '../sim/world/exploration';
+import { normalizeMapJournal } from '../sim/world/map-exploration';
+import { newFarm, QUICKBAR_SLOTS } from '../sim/world/farm';
+import { slotsAvailable, slotsUsed } from '../sim/gear/slots';
+import { newFieldwork, normalizeCampEncounterState } from '../sim/world/fieldwork';
+import { newPresets } from '../sim/core/presets';
+import { newCollector, newGrants } from '../sim/town/collector';
+import { newFilter, refresh as refreshFilter } from '../sim/gear/filter';
+import { newGoal } from '../sim/core/goal';
+import { newGuidance, normalizeGuidance } from '../sim/core/guidance';
+import { buildCharacter } from '../sim/core/player';
+import { newCurses } from '../sim/combat/curse';
+import { newMobStatusStore } from '../sim/combat/mobStatus';
 import { newKeystoneRuntimeState, validateKeystoneRuntime, validatePlayerStatuses } from '../../../engine/keystones.ts';
-import { reason as snapshotReason, arm as armSnapshot, SAVE_CFG } from '../sim/snapshot';
+import { reason as snapshotReason, arm as armSnapshot, SAVE_CFG } from '../sim/core/snapshot';
 import { E, TOWN, BASES, eng, loot, sm, tree, STAT_KEYS, type StatKey } from '../engine/client';
-import { road } from '../sim/road';
-import { newEconomyState, validateEconomy } from '../sim/economy';
-import { normalizePendingWork } from '../sim/pending-work';
-import { normalizeFieldState, normalizeFieldArchive } from '../sim/field-area';
+import { road } from '../sim/world/road';
+import { newEconomyState, validateEconomy } from '../sim/core/economy';
+import { normalizePendingWork } from '../sim/core/pending-work';
+import { normalizeFieldState, normalizeFieldArchive } from '../sim/world/field-area';
 
 // save.md: local only, three slots, IndexedDB with a localStorage fallback, JSON export/import.
 // The town layer is a schema bump, and an import at a different version is rejected rather than
@@ -58,10 +58,12 @@ import { normalizeFieldState, normalizeFieldArchive } from '../sim/field-area';
 // loaded field registry (`field`): spawn units, cohort/combat-session identity and saved positions.
 // An older save opens with no field; the first writer tick creates the registry from its group.
 // v25 adds bounded visited-field checkpoints (`fieldArchive`); an older save starts with none.
+// v26 replaces wave/cohort fields with the spawn-slot population. A v25 field opens without slots;
+// the first writer tick creates the authored homes and assigns the surviving group to them.
 const DB_NAME = 'modworld';
 const STORE = 'saves';
 const ACCOUNT_KEY = 'account';
-export const SCHEMA_VERSION = 25;
+export const SCHEMA_VERSION = 26;
 
 const SLOTS = ['slot1', 'slot2', 'slot3'] as const;
 export type SlotName = (typeof SLOTS)[number];
@@ -793,6 +795,8 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   // v25 · visited-field checkpoints; older saves have no archived field.
   if (fromVersion < 25) s.fieldArchive = {};
   else s.fieldArchive = normalizeFieldArchive(s.fieldArchive);
+  // v26 · the field population is the saved group plus spawn slots. A v25 field normalizes to empty
+  // slots and is seeded on the first writer tick; its surviving group stays the authority.
   // An imported or hand-edited file must not be an impossible state: the numbers below are clamped
   // to what the live rules can produce, and every id the collection no longer knows is dropped.
   // Nothing here is a schema change — the shape stays, the values come back inside their bounds.
@@ -883,7 +887,7 @@ export function exportJson(state: GameState): string {
 export function importJson(text: string): GameState {
   const parsed = JSON.parse(text);
   const version = parsed.version == null ? 'none' : parsed.version;
-  if (parsed.version !== SCHEMA_VERSION && parsed.version !== 24 && parsed.version !== 23 && parsed.version !== 22 && parsed.version !== 21 && parsed.version !== 20 && parsed.version !== 19 && parsed.version !== 18 && parsed.version !== 17 && parsed.version !== 16 && parsed.version !== 15 && parsed.version !== 14) {
+  if (parsed.version !== SCHEMA_VERSION && parsed.version !== 25 && parsed.version !== 24 && parsed.version !== 23 && parsed.version !== 22 && parsed.version !== 21 && parsed.version !== 20 && parsed.version !== 19 && parsed.version !== 18 && parsed.version !== 17 && parsed.version !== 16 && parsed.version !== 15 && parsed.version !== 14) {
     throw new Error(`schema version ${version} ≠ ${SCHEMA_VERSION}`);
   }
   const state = parsed.state as GameState;

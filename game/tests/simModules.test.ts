@@ -1,15 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import { E, eng, sm, TOWN, loot, trade, farm as FARM } from '../src/engine/client';
-import { newGame } from '../src/sim/game';
-import { bagStacks, slotsUsed, slotsFree, slotsAvailable, addTo, fits, bagSlots, pouchSlots } from '../src/sim/slots';
-import { switchPreset, autoSelect, bindZone } from '../src/sim/presets';
-import { newFarm, plotCount, farmLevel, plant, harvest, craftPotion, condense } from '../src/sim/farm';
-import { startSettlement, stockOf, standingShare, standingTier, standingProgress, sellJunk, taskReward, stashTabCount, canBuy, buy, priceGold } from '../src/sim/town';
-import { presetSlots, savePreset } from '../src/sim/filter';
-import { newCollector, newGrants, heldFor, heldCount, turnIn } from '../src/sim/collector';
-import { rollDrop } from '../src/sim/drop';
+import { newGame } from '../src/sim/core/game';
+import { bagStacks, slotsUsed, slotsFree, slotsAvailable, addTo, fits, bagSlots, pouchSlots } from '../src/sim/gear/slots';
+import { switchPreset, autoSelect, bindZone } from '../src/sim/core/presets';
+import { newFarm, plotCount, farmLevel, plant, harvest, craftPotion, condense } from '../src/sim/world/farm';
+import { startSettlement, stockOf, standingShare, standingTier, standingProgress, sellJunk, taskReward, stashTabCount, canBuy, buy, priceGold } from '../src/sim/town/town';
+import { presetSlots, savePreset } from '../src/sim/gear/filter';
+import { newCollector, newGrants, heldFor, heldCount, turnIn } from '../src/sim/town/collector';
+import { rollDrop } from '../src/sim/gear/drop';
 import { mulberry32 } from '../src/engine/client-helpers';
-import type { Item } from '../src/sim/types';
+import type { Item } from '../src/sim/core/types';
 
 /**
  * The sim modules the client drives but no test had reached: the bag's slot accounting, the six

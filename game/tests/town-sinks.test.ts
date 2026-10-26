@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { TOWN, eng } from '../src/engine/client';
-import { newGame } from '../src/sim/game';
-import { buy, canBuy, priceGold, skipTask, skipVerdict, stockOf, stashTabCount } from '../src/sim/town';
-import { plotCount } from '../src/sim/farm';
-import { settlementCell } from '../src/sim/road';
-import { openingGear } from '../src/sim/player';
-import { craft } from '../src/sim/craft';
+import { newGame } from '../src/sim/core/game';
+import { buy, canBuy, priceGold, skipTask, skipVerdict, stockOf, stashTabCount } from '../src/sim/town/town';
+import { plotCount } from '../src/sim/world/farm';
+import { settlementCell } from '../src/sim/world/road';
+import { openingGear } from '../src/sim/core/player';
+import { craft } from '../src/sim/gear/craft';
 import { exportJson, importJson } from '../src/state/save';
-import type { Item } from '../src/sim/types';
+import type { Item } from '../src/sim/core/types';
 
 const inTown = (id: string) => {
   const state = newGame(404);

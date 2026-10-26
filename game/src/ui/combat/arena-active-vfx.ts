@@ -1,4 +1,4 @@
-import manifest from '../../../public/fx/manifest.json';
+import manifest from './fx-manifests/manifest.json';
 
 type Family = 'projectile' | 'slash' | 'thrust' | 'impact' | 'quake' | 'lightning' | 'storm' | 'rain' | 'nova' | 'ward' | 'heal' | 'curse' | 'fan';
 export type ActiveVfx = { family: Family; art: string; impact: string; size: number; duration: number; ground?: string; turn?: number };

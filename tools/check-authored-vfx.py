@@ -99,8 +99,13 @@ def check(skill_id, write):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--write', action='store_true')
+    parser.add_argument('--selected', action='store_true', help='Read-only check of current batch + spatial overrides and selected component atlases')
     parser.add_argument('skills', nargs='*')
     args = parser.parse_args()
+    if args.selected:
+        if args.write or args.skills:
+            parser.error('--selected is read-only and does not take individual skills')
+        raise SystemExit(check_selected())
     failed = False
     for skill_id in args.skills or ['attack.' + key for key in REQUESTED]:
         try:
@@ -109,6 +114,60 @@ def main():
             failed = True
             print(json.dumps({'id': skill_id, 'status': 'FAIL', 'reason': str(error)}))
     raise SystemExit(1 if failed else 0)
+
+
+def check_selected():
+    """Validate actual selected manifests, including explicit rectangles of arbitrary dimensions."""
+    shelf = ROOT / 'game/public/fx/authored'
+    manifests = ROOT / 'game/src/ui/combat/fx-manifests'
+    selected = json.loads((manifests / 'batch-manifest.json').read_text(encoding='utf-8-sig'))
+    selected.update(json.loads((manifests / 'spatial-v2-manifest.json').read_text(encoding='utf-8-sig'))['entries'])
+    live = {row['id'] for row in json.loads((ROOT / 'tools/data/skills.json').read_text(encoding='utf-8-sig'))['skills'] if not row.get('retired')}
+    failures = []
+    if set(selected) != live:
+        failures.append({'coverage': {'missing': sorted(live - set(selected)), 'extra': sorted(set(selected) - live)}})
+    component_pack = json.loads((manifests / 'components-v2-manifest.json').read_text())
+    entries = list(selected.items()) + [(component_pack['skillId'] + ':' + part['key'], part['art']) for part in component_pack['components']]
+    for key, art in entries:
+        try:
+            src = art['src']
+            if not src.startswith('/fx/authored/'):
+                raise ValueError('source is outside the runtime art shelf')
+            image_path = (ROOT / 'game/public' / src.lstrip('/')).resolve()
+            if not image_path.is_relative_to(shelf.resolve()):
+                raise ValueError('source escapes the runtime art shelf')
+            image = Image.open(image_path)
+            if image.mode != 'RGBA':
+                raise ValueError('PNG must retain an RGBA channel')
+            alpha = image.getchannel('A')
+            mask = alpha.point(lambda v: 255 if v > art.get('alphaDiscard', THRESHOLD) else 0)
+            width, height = image.size
+            if [width, height] != [art.get('imageWidth'), art.get('imageHeight')]:
+                raise ValueError('stored image dimensions differ from original pixels')
+            if alpha.getextrema()[0] == 255 or not mask.getbbox():
+                raise ValueError('opaque background or empty atlas')
+            if any(mask.crop(rect).getbbox() for rect in [(0, 0, width, 1), (0, height-1, width, height), (0, 0, 1, height), (width-1, 0, width, height)]):
+                raise ValueError('visible alpha touches atlas perimeter')
+            frames = art.get('frames', [])
+            if not frames or len({f['index'] for f in frames}) != len(frames):
+                raise ValueError('missing or duplicated explicit frame rectangles')
+            for frame in frames:
+                x, y, w, h = frame['rect']
+                if not all(math.isfinite(v) for v in [x, y, w, h]) or min(x, y) < 0 or min(w, h) <= 0 or x+w > width or y+h > height:
+                    raise ValueError(f"frame {frame['index']} exceeds source bounds")
+                ox, oy = frame.get('offsetX', 0), frame.get('offsetY', 0)
+                if min(ox, oy) < 0 or ox+w > art['virtualWidth'] or oy+h > art['virtualHeight']:
+                    raise ValueError(f"frame {frame['index']} clips in its virtual canvas")
+            for phase in ['opening', 'loop', 'exit']:
+                first, last = art[phase]
+                if not 0 <= first <= last < len(frames):
+                    raise ValueError(f'{phase} range is invalid')
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            failures.append({'id': key, 'reason': str(error)})
+    for failure in failures:
+        print(json.dumps({'status': 'FAIL', **failure}))
+    print(json.dumps({'status': 'FAIL' if failures else 'PASS', 'liveSkills': len(live), 'selectedSkills': len(selected), 'componentAtlases': len(component_pack['components']), 'checkedAtlases': len(entries), 'failures': len(failures), 'scope': 'source pixels, alpha, rectangles and coverage; motion and arena acceptance are separate'}))
+    return 1 if failures else 0
 
 if __name__ == '__main__':
     main()

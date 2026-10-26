@@ -9,19 +9,20 @@
   import { authoredVfxFor } from './arena-authored-vfx';
 
   type Point = {x:number; y:number};
-  let { id, shape, age:providedAge, source, point, ground, cast, element, layer = 'front', area, timing,
-    targets, spreadTargets = [], consumed = 0, charges, cleansed = 0, critical = false, reducedMotion = false }: {
-    id:string; shape:string; age:number; source:Point; point:Point; ground:Point; cast:boolean;
-    element?:string; layer?:'ground'|'front'; area?:VfxFootprint; timing?:VfxTiming; targets?:Point[]; spreadTargets?:Point[]; consumed?:number; charges?:number; cleansed?:number; critical?:boolean; reducedMotion?:boolean;
+  let { id, shape, age:providedAge, source, point, ground, cast, element, layer = 'front', area, timing, flightProgressOverride, visualSeed = 0, allowComponents = true,
+    targets, spreadTargets = [], consumed = 0, charges, cleansed = 0, critical = false, reducedMotion = false, chainFrom }: {
+    allowComponents?:boolean; visualSeed?:number; id:string; shape:string; age:number; source:Point; point:Point; ground:Point; cast:boolean;
+    element?:string; layer?:'ground'|'front'; area?:VfxFootprint; timing?:VfxTiming; flightProgressOverride?:number; targets?:Point[]; spreadTargets?:Point[]; consumed?:number; charges?:number; cleansed?:number; critical?:boolean; reducedMotion?:boolean; chainFrom?:string;
   } = $props();
-  const age = $derived(timing ? timing.nowSec-timing.impactAtSec : providedAge);
+  const age = $derived(timing ? timing.nowSec-(shape === 'whirlwind' ? timing.releasedAtSec : timing.impactAtSec) : providedAge);
   const charging = $derived(!!timing && timing.nowSec>=timing.startedAtSec && timing.nowSec<timing.releasedAtSec);
+  const channelAge = $derived(timing ? timing.nowSec-timing.releasedAtSec : providedAge);
   const preImpact = $derived(!!timing && timing.nowSec>=timing.startedAtSec && timing.nowSec<timing.impactAtSec);
   const windup = $derived(timing ? Math.max(0,Math.min(1,(timing.nowSec-timing.startedAtSec)/Math.max(.001,timing.releasedAtSec-timing.startedAtSec))) : 0);
-  const flightProgress = $derived(timing ? Math.max(0,Math.min(1,(timing.nowSec-timing.releasedAtSec)/Math.max(.001,timing.impactAtSec-timing.releasedAtSec))) : undefined);
+  const flightProgress = $derived(flightProgressOverride ?? (timing ? Math.max(0,Math.min(1,(timing.nowSec-timing.releasedAtSec)/Math.max(.001,timing.impactAtSec-timing.releasedAtSec))) : undefined));
   const mechanics = $derived(activeVfxMechanics(sm.byId[id]));
   const displayElement = $derived(activeVfxElement(id,element));
-  const authored = $derived(authoredVfxFor(id));
+  const authored = $derived(shape === 'whirlwind' ? undefined : authoredVfxFor(id));
   const footprint = $derived(cast && !!sm.byId[id]?.targets?.includes('/') && !!targets?.length);
   const fields = $derived(!authored && cast && footprint && !['groundSlam','cleave','venomFan','whirlwind'].includes(shape));
   const centers = $derived(cast && id.startsWith('curse.') && targets?.length === 0 ? []
@@ -30,17 +31,19 @@
   const repeats = $derived(!cast && mechanics.hits > 1 ? mechanics.hits : 1);
   const strikeDuration = $derived(activeVfxPlaybackDuration(shape,sm.byId[id],id));
   const chargeCount = $derived(charges ?? sm.byId[id]?.effects?.find((effect:any) => ['dodge_charges','block_charges'].includes(effect.stat))?.value ?? 0);
-  const visibleCast = $derived(!(cast && sm.byId[id]?.type === 'attack' && targets?.length === 0));
+  const visibleCast = $derived(!(cast && sm.byId[id]?.type === 'attack' && targets?.length === 0 && !area));
   const fieldScale = $derived(area && ['cleave','groundSlam'].includes(shape)
     ? area.diameter/(ACTIVE_VFX[shape].size*(shape==='groundSlam'?2.2:1)) : 1);
 </script>
 
 {#if visibleCast}
 <g data-skill-target-count={centers.length} data-skill-hit-count={mechanics.hits}>
-  {#if !authored && cast && layer==='ground' && area}
-    {#if area.shape === 'line' || area.shape === 'cone'}
+  {#if cast && layer==='ground' && area && shape !== 'whirlwind'}
+    {#if area.shape === 'line'}
+      <ArenaVfxShape {area} age={preImpact ? Math.max(0, windup*.25) : Math.max(0, age)} element={displayElement} {reducedMotion} />
+    {:else if !authored && area.shape === 'cone'}
       <ArenaVfxShape {area} age={preImpact ? windup*.25 : age} element={displayElement} {reducedMotion} />
-    {:else}
+    {:else if !authored}
       <ArenaVfxField {area} age={preImpact ? windup*.25 : age} element={displayElement} art={ACTIVE_VFX[shape].ground}
         sustained={['storm','ward'].includes(ACTIVE_VFX[shape].family)} charging={preImpact} {reducedMotion} />
     {/if}
@@ -49,14 +52,14 @@
     <ArenaFxSprite art="spiral-1572" age={windup*.32} x={source.x} y={source.y} width={38+windup*36} element={displayElement} opacity={.25+windup*.55} {reducedMotion} />
   {/if}
   {#each centers as target, index}
-    {#if !(cast && layer==='ground' && area) || authored?.spatial?.layer === 'ground'}
+    {#if !(cast && layer==='ground' && area) || authored?.spatial?.layer === 'ground' || shape === 'whirlwind'}
       {#each Array.from({length:repeats},(_,i)=>i) as hit}
-        <ArenaSkillVfxBody {id} {shape} age={age-hit*.14-(fields ? index*.055 : 0)-(!authored && cast && consumed>0 ? .18 : 0)} {source}
+        <ArenaSkillVfxBody {id} {shape} {visualSeed} {allowComponents} age={age-hit*.14-(fields ? index*.055 : 0)-(!authored && cast && consumed>0 ? .18 : 0)} {source}
           point={fields ? {x:target.x,y:target.y-48} : point} ground={target} {cast} element={displayElement} {layer}
           durationOverride={strikeDuration} authoredAreaDiameter={area?.diameter} {critical} {flightProgress}
-          windupProgress={timing ? windup : undefined} {preImpact}
+          windupProgress={timing ? windup : undefined} {preImpact} {charging} {channelAge}
           strikeCount={mechanics.hits} sizeScale={fieldScale*((fields && centers.length>1 ? .72 : 1)+Math.min(.3,consumed*.03))}
-          {area} {reducedMotion} />
+          {area} {reducedMotion} {chainFrom} />
       {/each}
     {/if}
     {#if !authored && cast && index===0 && shape === 'aftershock' && age < activeVfxDuration(shape,sm.byId[id])}

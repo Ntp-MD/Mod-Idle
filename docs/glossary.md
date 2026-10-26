@@ -94,8 +94,10 @@ Calculation order: [DECISIONS.md](DECISIONS.md#combat-order).
 | **Element** | fire · cold · lightning · poison · chaos · earth. One item holds exactly one, and it decides which status the item can inflict. |
 | **Innate element** | The Element a normal or Elite mob inherits from its Species (`mob.species[].element`); a zone Boss may declare its own (`mob.bosses[].element`). |
 | **burn** (fire) | Damage over time. |
-| **chill** (cold) | A cut to the target's attack speed and accuracy. |
-| **shock** (lightning) | Stops the target's clock and cuts its attack speed. |
+| **chill** (cold) | A cut to the target's attack speed and Armour. No accuracy cut. |
+| **shock** (lightning) | Cuts accuracy and stops the clock for 0.5 sec, under the control budget. |
+| **crippled** (earth) | Cuts outgoing direct damage by 20%. No attack clock or cooldown cut. |
+| **stun** | Not a status: a stop proc that reuses the shock stop. |
 | **poison** (poison) | Stacking damage over time. |
 | **mark** (chaos) | A growing multiplier on the hit it rides, plus leech. |
 | **bleed** | Physical damage over time. **Not an Element** — no Element tag and no resistance line. |

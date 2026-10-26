@@ -1,8 +1,8 @@
 import { E, sm } from '../../engine/client';
 import { mobIcon } from '../../icon';
-import { mobSkillById } from '../../sim/mobSkills';
-import type { Character } from '../../sim/player';
-import type { FxEvent, Mob } from '../../sim/types';
+import { mobSkillById } from '../../sim/combat/mobSkills';
+import type { Character } from '../../sim/core/player';
+import type { FxEvent, Mob } from '../../sim/core/types';
 import spriteBounds from '../map/data/map-sprite-bounds.json' with { type: 'json' };
 import { combatTempo } from './combat-presentation';
 

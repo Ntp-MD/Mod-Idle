@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { eng } from '../src/engine/client';
-import { buildCharacter, emptyGear } from '../src/sim/player';
-import type { Item } from '../src/sim/types';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
+import type { Item } from '../src/sim/core/types';
 
 /**
  * Elemental power is one rule, and the engine owns it (DECISIONS: per Element, the flat pool plus

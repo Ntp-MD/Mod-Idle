@@ -3,10 +3,11 @@ import { E } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
 import {
   arenaDistance, arenaInRange, arenaMobRange, arenaSkillRange, arenaWeaponRange, captureCombatArena,
-  createCombatArena, sampleCombatArena, syncCombatArena,
-} from '../src/sim/combat-arena';
-import { characterSheet, newGame, setLevel, spawnMob, tick } from '../src/sim/game';
-import { skillEligibilityInState } from '../src/sim/skills';
+  createCombatArena, sampleCombatArena, syncCombatArena, advanceCombatArena, type CombatArena,
+} from '../src/sim/combat/combat-arena';
+import { characterSheet, newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
+import { skillEligibilityInState } from '../src/sim/combat/skills';
+import { pinFieldPopulation } from './mobFixture';
 
 function fight(distance = 15) {
   const state = newGame(17);
@@ -24,6 +25,7 @@ function fight(distance = 15) {
   Object.assign(arena.player, { x: 1, y: 6 });
   Object.assign(arena.mobs[mob.id], { x: 1 + distance, y: 6 });
   captureCombatArena(arena, state, 0);
+  pinFieldPopulation(state);
   return { state, mob, arena };
 }
 
@@ -69,13 +71,44 @@ describe('opt-in spatial combat', () => {
     expect(state.counters.damageBy?.cast).toBeGreaterThan(0);
   });
 
+  it('links every chain hop to one action with real per-hop contacts', () => {
+    const state = newGame(17);
+    setLevel(state, 30);
+    state.hunting = true;
+    state.spawnIn = 999;
+    const mk = (id: string) => {
+      const mob = spawnMob(mulberry32(23), 1, 'normal');
+      Object.assign(mob, {
+        id, hp: 1e8, hpMax: 1e8, ps: 1, evasion: 0, dodgeRate: 0,
+        armour: 0, line: 'front', damage: 'physical', innate: [], skillIds: [],
+      });
+      return mob;
+    };
+    state.group = [mk('chain-a'), mk('chain-b'), mk('chain-c')];
+    const id = 'attack.chain_lightning';
+    state.skills.owned[id] = 0;
+    state.skills.list.fill(null);
+    state.skills.list[0] = id;
+    state.player.mana = characterSheet(state).maxMana;
+    const arena = createCombatArena();
+    syncCombatArena(arena, state, 0, 1_000_000, characterSheet(state).maxHp);
+    Object.assign(arena.player, { x: 1, y: 6 });
+    Object.assign(arena.mobs['chain-a'], { x: 3, y: 6 });
+    Object.assign(arena.mobs['chain-b'], { x: 4, y: 6 });
+    Object.assign(arena.mobs['chain-c'], { x: 5, y: 6 });
+    captureCombatArena(arena, state, 0);
+    pinFieldPopulation(state);
+    for (let i = 0; i < 3; i++) tick(state, { arena });
+    const hits = state.fx.filter((event) => event.kind === 'hit' && event.skillId === id);
+    expect(hits.length).toBeGreaterThanOrEqual(2);
+    expect(new Set(hits.map((hit) => hit.actionId)).size).toBe(1);
+    expect(new Set(hits.map((hit) => hit.mobId)).size).toBe(hits.length);
+  });
   it('keeps point-blank damage, RNG, rewards and ordinary clocks identical to the existing mode', () => {
     const { state, arena } = fight(E.combat_arena.range.melee);
     const ordinary = structuredClone(state);
-    // Ground positions are presentation facts owned by the live arena; gameplay fields must agree.
-    const withoutGroundFacts = (s: typeof state) => ({ ...s, field: s.field ? {
-      ...s.field, player: undefined, actors: undefined, farmingAnchor: undefined,
-    } : s.field });
+    // Ground positions and the field registry are arena presentation facts; gameplay fields must agree.
+    const withoutGroundFacts = (s: typeof state) => ({ ...s, field: undefined, fieldArchive: undefined });
     for (let i = 0; i < 8; i++) {
       tick(state, { arena, autoSkills: false });
       tick(ordinary, { autoSkills: false });
@@ -88,21 +121,26 @@ describe('opt-in spatial combat', () => {
     state.group = [0, 1, 2].map((index) => ({ ...structuredClone(mob), id: `contact-${index}` }));
     const arena = createCombatArena();
     syncCombatArena(arena, state, 0, 1_000_000, characterSheet(state).maxHp);
+    pinFieldPopulation(state);
     const twinState = structuredClone(state);
     const twinArena = structuredClone(arena);
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
       tick(state, { arena, autoSkills: false });
       tick(twinState, { arena: twinArena, autoSkills: false });
     }
     expect(arena).toEqual(twinArena);
     // Only engaged bodies move, act and keep contact spacing; visible idle population stays home.
+    // Contact points are real geometry: every body must reach the player without overlapping a
+    // neighbour. The old fixed 120° slot ring is gone; exact pair distance is not a contract.
     const actors = state.group.map((entry) => arena.mobs[entry.id]);
     for (const actor of actors) {
       expect(arenaDistance(actor, arena.player)).toBeLessThanOrEqual(E.combat_arena.range.melee + 1e-7);
       expect(arena.actions.some((action) => action.actorId === actor.id)).toBe(true);
       for (const other of actors) if (other !== actor)
-        expect(arenaDistance(actor, other)).toBeGreaterThan(E.combat_arena.range.melee);
+        expect(arenaDistance(actor, other)).toBeGreaterThanOrEqual(
+          (actor.radiusM ?? 0.25) + (other.radiusM ?? 0.25) - 1e-6);
     }
+    expect(new Set(actors.map((actor) => `${actor.x.toFixed(2)},${actor.y.toFixed(2)}`)).size).toBe(actors.length);
     for (let index = 1; index < arena.frames.length; index++) {
       const previous = arena.frames[index - 1];
       const current = arena.frames[index];
@@ -170,10 +208,36 @@ describe('opt-in spatial combat', () => {
     expect('arena' in state).toBe(false);
   });
 
+  it('interpolates facing on the shortest arc across the -pi/pi seam', () => {
+    const player = (atUs: number, facing: number) => ({
+      id: 'player', x: 0, y: 0, facing, moving: false, radiusM: .25, hp: 1, hpMax: 1,
+    });
+    const arena = {
+      frames: [
+        { atUs: 0, player: player(0, 3), mobs: {}, bodies: [] },
+        { atUs: 100_000, player: player(100_000, -3), mobs: {}, bodies: [] },
+      ],
+    } as unknown as CombatArena;
+    const middle = sampleCombatArena(arena, 50_000).player.facing;
+    expect(Math.abs(Math.abs(middle) - Math.PI)).toBeLessThan(1e-6);
+  });
+
+  it('returns an unengaged body to its home and lets it wander there', () => {
+    const { state, mob, arena } = fight(10);
+    const slot = state.field!.slots[0];
+    const home = slot.home;
+    const step = { playerRange: 2.1, playerSpeedMult: 1, mobSpeedMult: () => 1, engagedIds: new Set<string>() };
+    const before = arenaDistance(arena.mobs[mob.id], home);
+    advanceCombatArena(arena, state, 100_000, step);
+    expect(arenaDistance(arena.mobs[mob.id], home)).toBeLessThan(before);
+    for (let index = 0; index < 120; index++) advanceCombatArena(arena, state, 200_000 + index * 100_000, step);
+    expect(arenaDistance(arena.mobs[mob.id], home)).toBeLessThan(slot.roamM + 0.5);
+    expect(arena.mobs[mob.id].moving).toBe(true);
+  });
+
   it('samples movement smoothly and changes HP/death only on the resolved impact timestamp', () => {
     const { state, mob, arena } = fight(E.combat_arena.range.melee);
-    mob.hp = mob.hpMax = 1;
-    for (let i = 0; i < 5 && !state.counters.kills; i++) tick(state, { arena, autoSkills: false });
+    mob.hp = mob.hpMax = 1;    for (let i = 0; i < 5 && !state.counters.kills; i++) tick(state, { arena, autoSkills: false });
     expect(state.counters.kills).toBe(1);
     const kill = state.fx.find((event) => event.kind === 'kill' && event.mobId === mob.id)!;
     expect(kill.atUs).toBeGreaterThan(0);

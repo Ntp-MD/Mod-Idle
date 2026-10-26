@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { sm, tree } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { buildCharacter, emptyGear } from '../src/sim/player';
-import { characterSheet, newGame } from '../src/sim/game';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
+import { characterSheet, newGame } from '../src/sim/core/game';
 import {
   NO_COND, buffRecastCost, castOnce, newSkillState, rotationOrder, skillEligibility,
   skillEligibilityInState, usableMana,
-} from '../src/sim/skills';
+} from '../src/sim/combat/skills';
 import { mobFixture } from './mobFixture';
 
 const id = 'attack.cleave';
@@ -80,13 +80,13 @@ describe('shared skill eligibility and rotation', () => {
     expect(skillEligibility(state(), character, id, 0, group(), {}).reason).toBe('mana');
   });
 
-  it('Single Combat removes the AoE price in both explanation and payment', () => {
+  it('Single Combat limits targets without changing the price', () => {
     const skills = state();
     const c = { ...character, keystones: tree.keystoneBundles({ 'keystone.single-combat': 1 }) };
     const mobs = [group()[0], { ...group()[0], id: 'm2' }];
     const read = skillEligibility(skills, c, id, c.maxMana, mobs, {});
     expect(read.aoe).toBe(false);
-    expect(read.manaCost).toBeLessThan(skillEligibility(skills, character, id, character.maxMana, mobs, {}).manaCost);
+    expect(read.manaCost).toBe(skillEligibility(skills, character, id, character.maxMana, mobs, {}).manaCost);
     expect(castOnce(skills, c, c.maxMana, mobs, {}, mulberry32(7))?.manaCost).toBe(read.manaCost);
   });
 
@@ -145,27 +145,29 @@ describe('shared skill eligibility and rotation', () => {
     } finally { delete sm.byId[filler.id]; }
   });
 
-  it('holds snapshot readiness during a fully stopped Shock step and respects Unstoppable', () => {
+  it('holds snapshot readiness while Shock is live and respects Unstoppable', () => {
     const game = newGame(100);
     game.skills = state();
     game.group = group();
     const c = { ...characterSheet(game), weaponName: character.weaponName };
-    game.playerStatuses.shock = { stacks: 1, secLeft: 2, perSec: 0 };
+    // a live 0.5s stop blocks new presses; the read draws no RNG and writes nothing
+    game.playerStatuses.shock = { stacks: 1, secLeft: 0.5, perSec: 0 };
     const before = JSON.stringify(game);
     expect(skillEligibilityInState(game, c, id)).toMatchObject({ ready: false, reason: 'shock' });
     expect(JSON.stringify(game)).toBe(before);
     const unstoppable = { ...c, keystones: tree.keystoneBundles({ 'keystone.unstoppable': 1 }) };
     expect(skillEligibilityInState(game, unstoppable, id).ready).toBe(true);
-    game.playerStatuses.shock.secLeft = .5;
+    // an expired stop releases the gate
+    game.playerStatuses.shock.secLeft = 0;
     expect(skillEligibilityInState(game, c, id).ready).toBe(true);
   });
 
   it('quotes the buff track base price while a Trance rotation press is free', () => {
     const skills = newSkillState();
-    const buff = sm.all().find(row => row.type === 'buff' && sm.costOf(row, { skillLevel: 1, aoe: false }).resource === 'mana')!;
+    const buff = sm.all().find(row => row.type === 'buff' && sm.costOf(row, { skillLevel: 1 }).resource === 'mana')!;
     skills.owned[buff.id] = 0;
     const c = { ...character, keystones: tree.keystoneBundles({ 'keystone.trance': 1 }) };
-    const base = sm.costOf(buff, { skillLevel: 1, aoe: false });
+    const base = sm.costOf(buff, { skillLevel: 1 });
     expect(base.amount).toBeGreaterThan(0);
     expect(buffRecastCost(skills, c, buff.id)).toEqual(base);
     expect(skillEligibility(skills, c, buff.id, c.maxMana, group(), {}, { freeCast: true }).manaCost).toBe(0);

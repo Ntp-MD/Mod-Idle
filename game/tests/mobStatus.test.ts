@@ -1,16 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { E, eng } from '../src/engine/client';
-import { buildCharacter, emptyGear } from '../src/sim/player';
+import { buildCharacter, emptyGear } from '../src/sim/core/player';
 import {
   newMobStatusStore, applyElement, applyBleed, stepMob, stepMobParts, modsOn, targetMods, forgetDead,
-} from '../src/sim/mobStatus';
-import { combineMods } from '../src/sim/curse';
-import { playerSwing, mobSwing, rollStatus, dotDamageParts, type Statuses } from '../src/sim/combat';
+  consumeStatus, setStacks, stunMob, placeStatus,
+} from '../src/sim/combat/mobStatus';
+import { combineMods } from '../src/sim/combat/curse';
+import { playerSwing, mobSwing, rollStatus, dotDamageParts, type Statuses } from '../src/sim/combat/combat';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { sm } from '../src/engine/client';
-import { newGame, tick, setLevel, huntZone } from '../src/sim/game';
-import type { Character } from '../src/sim/player';
-import type { Item, Mob } from '../src/sim/types';
+import { newGame, tick, setLevel, huntZone } from '../src/sim/core/game';
+import type { Character } from '../src/sim/core/player';
+import type { Item, Mob } from '../src/sim/core/types';
 import { mobFixture } from './mobFixture';
 
 const S = E.status as any;
@@ -71,8 +72,8 @@ describe('burn and poison obey the DoT budget', () => {
     const burn = store.m1.statuses.burn!;
     expect(burn.stacks).toBe(S.burn.stack_max);
     expect(burn.perSec).toBeCloseTo(aligned * S.burn.k_dps, 10);
-    // full burn stacks pay exactly the global DoT Cap the status data publishes
-    expect(stepMob(store, 'm1')).toBeCloseTo(S.dot_cap * aligned, 6);
+    // full burn alone pays its own 1.0 × aligned line, under the shared 1.5 cap
+    expect(stepMob(store, 'm1')).toBeCloseTo(S.burn.stack_max * S.burn.k_dps * aligned, 6);
   });
 
   it('poison only falls on its own decay clock', () => {
@@ -212,13 +213,12 @@ describe('control is bounded, never a lockout', () => {
     expect(appliedSec).toBeCloseTo(expectedSec, 10);
   });
 
-  it('chill cuts the swing rate and the accuracy only to their own Caps', () => {
+  it('chill cuts the swing rate to its cap and Armour, with no accuracy cut', () => {
     const c = charWith('cold', 100);
     const mods = modsOn(inflict('cold', c), 'm1');
     const t = targetMods(mods);
     expect(t.attackSpeed).toBe(-S.chill.aspd_cap); // the whole cut sits at the chill Cap the data publishes
-    expect(t.accuracy).toBeLessThanOrEqual(0);
-    expect(t.accuracy).toBeGreaterThanOrEqual(-S.chill.acc_cap);
+    expect(t.accuracy).toBe(0);
     expect(mods.armourCut).toBe(S.chill.armour_cut);
   });
 
@@ -333,5 +333,79 @@ describe('the store forgets a mob that left, and the sim runs the whole path', (
     expect(sawStatus).toBe(true);
     expect(s.counters.kills).toBeGreaterThan(0);
     expect(sm.byId['attack.flame_wisp'].effect).toMatch(/burn/);
+  });
+});
+
+describe('status alignment redesign acceptance', () => {
+  it('burn 5 stacks pays 1.0 aligned dps and poison 10 pays 1.0, capped together at 1.5', () => {
+    const c = charWith('fire', 100);
+    const aligned = 200;
+    const burnStore = newMobStatusStore();
+    for (let i = 0; i < 60; i++) applyElement(mulberry32(i), burnStore, 'm1', 'fire', c, aligned);
+    expect(burnStore.m1.statuses.burn!.stacks).toBe(S.burn.stack_max);
+    expect(S.burn.stack_max * S.burn.k_dps).toBeCloseTo(1.0, 10);
+    expect(S.poison.stack_max * S.poison.k_dps).toBeCloseTo(1.0, 10);
+    // full burn alone pays its own 1.0 × aligned line, under the shared 1.5 cap
+    expect(stepMob(burnStore, 'm1')).toBeCloseTo(aligned, 6);
+    // burn + poison + erosion share one budget
+    const both = newMobStatusStore();
+    both.m1 = {
+      statuses: {
+        burn: { stacks: 5, secLeft: 5, perSec: aligned * S.burn.k_dps },
+        poison: { stacks: 10, secLeft: 8, perSec: aligned * S.poison.k_dps },
+        erosion: { stacks: 1, secLeft: 8, perSec: aligned * 0.5 },
+      },
+      alignedPerSec: aligned, stoppedSec: 0, elapsedSec: 1,
+    };
+    expect(stepMob(both, 'm1')).toBeCloseTo(S.dot_cap * aligned, 6);
+  });
+
+  it('mark stacks to 10 and Ruin consumes 10, with no overflow', () => {
+    const store = newMobStatusStore();
+    const c = charWith('chaos', 100);
+    setStacks(store, 'm1', 'mark', 4, 100);
+    setStacks(store, 'm1', 'mark', 9, 100);
+    expect(store.m1.statuses.mark!.stacks).toBe(S.mark.stack_max);
+    expect(consumeStatus(store, 'm1', 'mark', 10)).toBe(10);
+    expect(store.m1.statuses.mark).toBeUndefined();
+  });
+
+  it('chill has no accuracy, caps attack speed at 30% and cuts Armour 25%', () => {
+    expect(S.chill.aspd_pct * 2).toBe(S.chill.aspd_cap);
+    expect(S.chill.armour_cut).toBeCloseTo(0.25, 10);
+    const store = newMobStatusStore();
+    const c = charWith('cold', 100);
+    placeStatus(store, 'm1', 'chill', c, 10);
+    placeStatus(store, 'm1', 'chill', c, 10);
+    placeStatus(store, 'm1', 'chill', c, 10);
+    expect(store.m1.statuses.chill!.stacks).toBe(2);
+    const t = targetMods(modsOn(store, 'm1'));
+    expect(t.accuracy).toBe(0);
+    expect(t.attackSpeed).toBe(-30);
+  });
+
+  it('shock cuts accuracy 20% and stops 0.5s; stun reuses the same stop', () => {
+    expect(S.shock.acc_pct).toBe(20);
+    expect(S.shock.stop_sec).toBeCloseTo(0.5, 10);
+    expect((S as any).shock.aspd_pct).toBeUndefined();
+    expect((S as any).shock.align_cut).toBeUndefined();
+    const store = newMobStatusStore();
+    const c = charWith('lightning', 100);
+    placeStatus(store, 'm1', 'shock', c, 10);
+    const t = targetMods(modsOn(store, 'm1'));
+    expect(t.accuracy).toBe(-20);
+    const stunned = stunMob(mulberry32(1), newMobStatusStore(), 'm1', 100);
+    expect(stunned).toBe(true);
+  });
+
+  it('crippled cuts outgoing direct damage 20% with no clock or cooldown term', () => {
+    expect(S.crippled.outgoing_damage_pct).toBe(-20);
+    expect((S.crippled as any).clock_pct).toBeUndefined();
+    expect((S.crippled as any).cd_pct).toBeUndefined();
+    const store = newMobStatusStore();
+    const c = charWith('earth', 100);
+    placeStatus(store, 'm1', 'crippled', c, 10);
+    expect(store.m1.statuses.crippled!.stacks).toBe(1);
+    expect(targetMods(modsOn(store, 'm1')).damageDealt).toBe(-20);
   });
 });

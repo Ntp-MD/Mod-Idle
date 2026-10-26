@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   CombatClock, EVENT_PRIORITY, compareEvents, planAttacks, type CombatEvent,
-} from '../src/sim/combat-clock';
-import { newGame, setLevel, tick } from '../src/sim/game';
-import { buildCharacter } from '../src/sim/player';
+} from '../src/sim/combat/combat-clock';
+import { newGame, setLevel, tick } from '../src/sim/core/game';
+import { buildCharacter } from '../src/sim/core/player';
 
 const units = 1_000_000;
 

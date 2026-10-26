@@ -100,7 +100,7 @@ A row may name one status it exploits (`bonus_vs_status`, `consume_status` or `s
 
 ## Combat order
 
-Live player skill selection uses `distance(enemy, center) <= area.radius_m` in ground meters, including the boundary. `area.origin` chooses the caster position or the nearest acquired target; target acquisition uses `combat_arena.range`. Positive radii have no target-count cap. Zero radius selects the acquired target alone. Offline casts retain the `targets` count approximation. The existing damage shares and multi-target Mana premium are applied to the resolved set; the primary receives the full press and each additional target receives `aoe.per_target_pct` of the press.
+Live player skill selection uses `distance(enemy, center) <= area.radius_m` in ground meters, including the boundary. `area.origin` chooses the caster position or the nearest acquired target; target acquisition uses `combat_arena.range`. Positive radii have no target-count cap. Zero radius selects the acquired target alone. Offline casts retain the `targets` count approximation. The existing damage shares are applied to the resolved set; the primary receives the full press and each additional target receives `aoe.per_target_pct` of the press. A press pays its typed Mana or HP cost regardless of how many targets it lands on.
 
 One hit runs perfect dodge → Evasion → block → Armour → resistance → damage taken → ES → HP.
 
@@ -138,7 +138,7 @@ mobWeakness(Element) = Element === species.weakness.element ? 1 + species.weakne
 speciesPower(profile, damageType) = profile.power_base + K_MOB_PS_STAT × (wPhys × profile.str + wMagic × profile.int), where [wPhys, wMagic] = damage_split[damageType]
 speciesPsMult(profile, damageType) = speciesPower(profile, damageType) / zoneMeanSpeciesPower
 bodyDPS(level, bodyPS, speciesPsMult) = mobPsAt(level) × bodyPS / zoneBodyFactor × speciesPsMult
-normalDPS = bodyDPS(level, selectedBody.ps, speciesPsMult(selectedProfile, mobDamageType))
+normalDPS = bodyDPS(level, 1, speciesPsMult(selectedProfile, mobDamageType)) — body classes do not scale damage, so normal bodies always pass 1; bodyPS survives for the Elite/Boss/Unique profiles
 eliteDPS = bodyDPS(level, mob.elite.ps, speciesPsMult(selectedProfile, mobDamageType))
 bossDPS = bodyDPS(level, bossBody.ps, speciesPsMult(bossProfile, bossProfile.damage))
 uniqueDPS = bodyDPS(zoneTopLevel, bossBody.ps, speciesPsMult(uniqueProfile, uniqueProfile.damage))

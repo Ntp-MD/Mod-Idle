@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { E, sm } from '../src/engine/client';
-import { grantNamedSkill, grantSkill, newSkillState, usefulSkillDuplicate } from '../src/sim/skills';
+import { grantNamedSkill, grantSkill, newSkillState, usefulSkillDuplicate } from '../src/sim/combat/skills';
 
 const timed = sm.all().find((row) => row.type === 'attack' && (row.cd ?? 0) > 0)!;
 
