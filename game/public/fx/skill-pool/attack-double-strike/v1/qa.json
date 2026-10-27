@@ -1,0 +1,20 @@
+{
+  "id": "attack.double_strike",
+  "status": "PASS",
+  "errors": [],
+  "imageSize": [
+    1024,
+    1024
+  ],
+  "frameCount": 16,
+  "alphaDiscard": 8,
+  "virtualPaddingPx": 64,
+  "sourceSeparatorsClear": true,
+  "sourcePixelsUnmodified": false,
+  "contentWidthPx": 244,
+  "contentHeightPx": 249,
+  "contentWidthRatio": 0.6354,
+  "contentHeightRatio": 0.6484,
+  "visualReview": "Two crossed gold-white slashes; the X burst is the second blow. Keyed sheet inspected on the arena ground colour; live arena sample pending.",
+  "runtimeActivated": true
+}

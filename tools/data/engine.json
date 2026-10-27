@@ -26,6 +26,7 @@
       "ranged": 5.2,
       "magic": 4.6
     },
+    "range_note": "Legacy centre-to-centre table kept for older readers. Ordinary and player basics resolve through `normal_attack.profiles`; a profile declares whether its metres are centre distance or the gap between body edges.",
     "movement_step_sec": 0.05,
     "action_sec": 0.3,
     "body_sec": 2.2,
@@ -35,21 +36,43 @@
         "front": "melee",
         "stand-off": "ranged"
       },
+      "player": {
+        "melee": "melee",
+        "ranged": "ranged",
+        "magic": "magic"
+      },
+      "contact_clearance_m": 0.02,
+      "contact_band_m": 0.06,
       "profiles": {
         "melee": {
           "delivery": "melee",
-          "stop_at_range_pct": 95
+          "range": { "basis": "body-edge", "meters": 0.2 },
+          "stop_at_range_pct": 75,
+          "windup_interval_pct": 35,
+          "recovery_interval_pct": 20
         },
         "ranged": {
           "delivery": "projectile",
-          "projectile_speed_mps": 12,
+          "range": { "basis": "center", "meters": 5.2 },
           "stop_at_range_pct": 80,
+          "windup_interval_pct": 35,
+          "recovery_interval_pct": 20,
+          "projectile_speed_mps": 12,
+          "hit_radius_m": 0.35
+        },
+        "magic": {
+          "delivery": "projectile",
+          "range": { "basis": "center", "meters": 4.6 },
+          "stop_at_range_pct": 80,
+          "windup_interval_pct": 35,
+          "recovery_interval_pct": 20,
+          "projectile_speed_mps": 12,
           "hit_radius_m": 0.35
         }
       },
-      "note": "Ordinary mob basics. The legacy adapter reads the spawn line: front bodies close to contact, stand-off bodies hold at 80% of ranged reach and release a non-homing single-target shot at the attack beat. A ready strike replaces that opportunity; the shot is not a second damage stream. Species/variant overrides arrive with authoring."
+      "note": "Ordinary basics. The legacy adapter maps the spawn line to a profile and the player mapping maps its weapon group to one; neither delivery nor reach is guessed from the sprite or the line elsewhere. A body-edge profile measures the gap between footprints, so 0.20 m with two 0.25 m bodies reaches at a 0.70 m centre distance and stops at 0.65 m. A centre profile keeps its authored centre distance. Stand-off bodies release a non-homing single-target shot at the attack beat; a ready strike replaces that opportunity and the shot is not a second damage stream."
     },
-    "note": "Transient forest combat presentation selected by the battlefield-style setting. Ground units, units per second, and centre-to-centre attack ranges; bodies keep their footprint edges apart and melee bodies claim reachable contact points. No obstacles, obstacle navigation, positional evasion or networked play. Damage, clocks, statuses and rewards still use the existing combat pipeline. Classic combat and offline progress do not read this section."
+    "note": "Transient forest combat presentation selected by the battlefield-style setting. Ground units, units per second, and attack profiles that state their range basis; bodies keep their footprint edges apart and melee bodies claim reachable contact points inside their stop band. No obstacles, obstacle navigation, positional evasion or networked play. Damage, clocks, statuses and rewards still use the existing combat pipeline. Classic combat and offline progress do not read this section."
   },
   "stat": {
     "base": 12,

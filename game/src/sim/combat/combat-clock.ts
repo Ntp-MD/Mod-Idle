@@ -149,12 +149,15 @@ export function planAttacks(
   unitsPerSec: number,
   windowUs: number = unitsPerSec,
 ): AttackPlan {
-  if (!(rate > 0) || !(unitsPerSec > 0)) return { times: [], progressAtEnd: progress };
+  if (!(rate > 0) || !(unitsPerSec > 0) || !(windowUs > 0))
+    return { times: [], progressAtEnd: progress };
   // progress may be negative: a caller that parks the clock keeps subtracting, and an attack only
-  // exists when the running total reaches 1.
+  // exists when the running total reaches 1. A partial window accumulates only its own share, so a
+  // body that joins mid-tick cannot borrow attacks from time before it was engaged.
   const p = progress;
-  const count = Math.max(0, Math.floor(p + rate));
+  const gained = rate * windowUs / unitsPerSec;
+  const count = Math.max(0, Math.floor(p + gained + 1e-9));
   const times: number[] = [];
   for (let k = 1; k <= count; k++) times.push(startUs + Math.ceil(((k - p) / rate) * unitsPerSec));
-  return { times, progressAtEnd: p + rate - count };
+  return { times, progressAtEnd: p + gained - count };
 }

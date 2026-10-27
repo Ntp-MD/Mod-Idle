@@ -1,0 +1,410 @@
+{
+  "id": "attack.split_shot",
+  "src": "/fx/skill-pool/attack-split-shot/v1/atlas.png",
+  "columns": 4,
+  "rows": 4,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        23,
+        62,
+        233,
+        206
+      ],
+      "renderedPadding": [
+        87,
+        126,
+        87,
+        114
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        256,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        27,
+        73,
+        230,
+        188
+      ],
+      "renderedPadding": [
+        91,
+        137,
+        90,
+        132
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        512,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        23,
+        49,
+        227,
+        203
+      ],
+      "renderedPadding": [
+        87,
+        113,
+        93,
+        117
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        768,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        22,
+        57,
+        224,
+        203
+      ],
+      "renderedPadding": [
+        86,
+        121,
+        96,
+        117
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        25,
+        67,
+        223,
+        198
+      ],
+      "renderedPadding": [
+        89,
+        131,
+        97,
+        122
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        256,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        19,
+        67,
+        228,
+        202
+      ],
+      "renderedPadding": [
+        83,
+        131,
+        92,
+        118
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        512,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        22,
+        68,
+        233,
+        201
+      ],
+      "renderedPadding": [
+        86,
+        132,
+        87,
+        119
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        768,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        25,
+        70,
+        236,
+        199
+      ],
+      "renderedPadding": [
+        89,
+        134,
+        84,
+        121
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        25,
+        67,
+        223,
+        198
+      ],
+      "renderedPadding": [
+        89,
+        131,
+        97,
+        122
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        256,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        21,
+        65,
+        227,
+        198
+      ],
+      "renderedPadding": [
+        85,
+        129,
+        93,
+        122
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        512,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        24,
+        68,
+        232,
+        198
+      ],
+      "renderedPadding": [
+        88,
+        132,
+        88,
+        122
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        768,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        22,
+        69,
+        234,
+        198
+      ],
+      "renderedPadding": [
+        86,
+        133,
+        86,
+        122
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        28,
+        37,
+        234,
+        204
+      ],
+      "renderedPadding": [
+        92,
+        101,
+        86,
+        116
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        256,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        28,
+        35,
+        219,
+        205
+      ],
+      "renderedPadding": [
+        92,
+        99,
+        101,
+        115
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        512,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        37,
+        30,
+        216,
+        207
+      ],
+      "renderedPadding": [
+        101,
+        94,
+        104,
+        113
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        768,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        33,
+        31,
+        211,
+        207
+      ],
+      "renderedPadding": [
+        97,
+        95,
+        109,
+        113
+      ]
+    }
+  ],
+  "virtualWidth": 384,
+  "virtualHeight": 384,
+  "alphaDiscard": 8,
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    4,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "frameMs": 60,
+  "cellWidth": 256,
+  "cellHeight": 256,
+  "contentWidthRatio": 0.5520833333333334,
+  "contentHeightRatio": 0.4609375,
+  "delivery": "projectile",
+  "origin": "target",
+  "orient": true,
+  "groundOrigin": false,
+  "anchorX": 0.49528,
+  "anchorY": 0.513835,
+  "impactAnchorX": 0.494141,
+  "impactAnchorY": 0.477865,
+  "status": "ready",
+  "sourcePixelsUnmodified": false,
+  "sourceSheet": "vibe_images/split-shot-sheet_1793027904887_81f5001f.png",
+  "keying": "magenta green-channel matte, magenta-fringe hue repair, 5px cell-edge feather; raw sheet kept"
+}

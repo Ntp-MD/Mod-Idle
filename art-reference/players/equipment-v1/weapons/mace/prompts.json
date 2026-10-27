@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI built-in image_gen",
+  "transparentBackground": true,
+  "useCase": "stylized-concept / identity-preserve",
+  "prompts": [
+    {
+      "view": "side",
+      "prompt": "Use case: stylized-concept. Asset type: isolated equipment sprite for the referenced chibi ARPG hero. The reference image is STYLE ONLY, never draw the hero. Generate exactly ONE small heavy steel flanged mace, simple six-flange squat metal head, short brown leather wrapped hilt, tiny steel pommel. Side view: shaft horizontal, mace head to RIGHT and hilt/pommel to LEFT. Main grip near left quarter of shaft. Crisp compact pixel art clusters matching the reference hero: dark selective outline, upper-left warm light, steel blue-gray in 3 simple tones, brown grip in 2 tones, no fine engraving. No hands or body. Render the mace around 240 pixels wide and 80 pixels tall in the center of a 1024 by 1024 canvas, surrounded by enormous empty fully transparent margins on all sides. Whole weapon fully inside canvas. Actual alpha transparent background; no floor, shadow, aura, scene, text, grid, border, labels, or other objects. This is one real game weapon layer, not a weapon inventory sheet.",
+      "references": [
+        "game/public/combat/arpg/pixel-v2/player-animation-v2.png"
+      ],
+      "rawSource": "C:/Users/disda/.codex/generated_images/01a1781f-1f62-7ba1-b6f3-6de9c939d42a/exec-3737d705-7c54-4bab-b19f-ecf713b76441.png",
+      "output": "side.png"
+    },
+    {
+      "view": "raised",
+      "prompt": "Use case: identity-preserve. Asset type: isolated alternate weapon view for chibi ARPG animation. Image1 is the EXACT weapon identity to preserve. Image2 is STYLE ONLY. Render exactly ONE view of that same steel flanged mace with the same squat six-flange head, short brown leather wrapped handle, tiny steel pommel and steel collar. Change ONLY its angle: raised upward windup, mace head toward UPPER RIGHT and pommel toward LOWER LEFT, shaft around 55 degrees above horizontal. Reveal slightly the underside of the flanges for three-quarter game camera, retain chunky simple proportions, no ornament. Upper-left lighting, dark selective pixel outline, compact crisp pixel clusters, simple 2-3 shades per material. Isolated weapon ONLY: no hand, arm, body, hero, shadow, floor, glow, scene, diagram, labels, text, grid, or duplicated weapon. Use an actual transparent background. Place small centrally, about 240 native pixels long on a square 1024x1024 clear canvas with enormous empty transparent margins and all edges safely inside. One asset, not an atlas.",
+      "references": [
+        "art-reference/players/equipment-v1/weapons/mace/side.png",
+        "game/public/combat/arpg/pixel-v2/player-animation-v2.png"
+      ],
+      "rawSource": "C:/Users/disda/.codex/generated_images/01a1781f-1f62-7ba1-b6f3-6de9c939d42a/exec-8edc38b4-2cc4-4d40-8df8-a011efe74a04.png",
+      "output": "raised.png"
+    },
+    {
+      "view": "foreshortened",
+      "prompt": "Use case: identity-preserve. Asset type: isolated foreshortened equipment sprite for chibi ARPG. Image1 is EXACT same mace identity: squat six-flange steel head with tiny terminal steel nub, brown leather grip, steel collar and steel pommel. Image2 STYLE ONLY, never draw character. Rotate this same mace in 3D so the heavy head points TOWARD THE CAMERA and slightly upper-right. The frontal head is dominant with flanges radiating around the steel terminal nub; the short shaft recedes diagonally down-left behind it, showing visible brown grip and pommel below-left. Strong foreshortening: total silhouette roughly 1.3 times as long as wide. Retain same chunky head and materials. Crisp compact pixel-art clusters, dark selective outline, upper-left light, simple 2-3 shades per material. Render ONE whole isolated weapon at small center, about 220 native pixels on a 1024x1024 fully transparent canvas with enormous margins, no edge touching. No hands/body, floor, shadow, glow, scene, text, labels, border, grid, extra weapon or sheet. True transparent background.",
+      "references": [
+        "art-reference/players/equipment-v1/weapons/mace/side.png",
+        "game/public/combat/arpg/pixel-v2/player-animation-v2.png"
+      ],
+      "rawSource": "C:/Users/disda/.codex/generated_images/01a1781f-1f62-7ba1-b6f3-6de9c939d42a/exec-9ca344cf-7e96-42ac-93d5-615e64c8f682.png",
+      "output": "foreshortened.png"
+    }
+  ]
+}

@@ -5,7 +5,7 @@ import { mulberry32 } from '../src/engine/client-helpers';
 
 /**
  * A mob's HP is one shape, in one place: the published zone curve, plus the flat level grant, plus
- * the Core Vit term (DECISIONS: one Core model — the player and a mob run the same shape). The engine
+ * the Core Vit term: the player and a mob run the same shape. The engine
  * owns it (`mobHpOf`), and a normal body, an Elite, a boss and a wild unique all read it.
  *
  * The formula below is written out from the data, not from the engine's helper, so the two cannot
@@ -54,7 +54,7 @@ describe("a mob's HP is one shape, in one place", () => {
 
   it('keeps the tree and the gear out of the mob curve', () => {
     // the same spawn twice: a mob wears no gear and holds no passive-tree rank, so its HP is a
-    // function of its level and its Core alone (DECISIONS: mobHP excludes passive-tree power)
+    // function of its level and its Core alone: mobHP excludes passive-tree power
     const a = spawnMob(mulberry32(11), 1, 'normal');
     const b = spawnMob(mulberry32(11), 1, 'normal');
     expect(a.hp).toBe(b.hp);

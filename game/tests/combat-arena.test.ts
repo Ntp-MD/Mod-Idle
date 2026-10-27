@@ -2,12 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { E } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
 import {
-  arenaDistance, arenaInRange, arenaMobRange, arenaSkillRange, arenaWeaponRange, captureCombatArena,
+  arenaAction, arenaDistance, arenaInRange, arenaMobRange, arenaSkillRange, arenaWeaponRange, captureCombatArena,
   createCombatArena, sampleCombatArena, syncCombatArena, advanceCombatArena, type CombatArena,
 } from '../src/sim/combat/combat-arena';
 import { characterSheet, newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
 import { skillEligibilityInState } from '../src/sim/combat/skills';
 import { pinFieldPopulation } from './mobFixture';
+
+/** Reach for the two 0.25 m bodies this fixture spawns, read from the authored melee profile. */
+const MELEE_REACH = E.combat_arena.normal_attack.profiles.melee.range.meters + E.combat_arena.player_radius_m * 2;
 
 function fight(distance = 15) {
   const state = newGame(17);
@@ -30,6 +33,19 @@ function fight(distance = 15) {
 }
 
 describe('opt-in spatial combat', () => {
+  it('resumes pursuit after recovery even while the action remains in presentation history', () => {
+    const { state, mob, arena } = fight(5);
+    const timing = { delivery: 'melee' as const, startedAtUs: 0, releaseAtUs: 200_000,
+      impactAtUs: 200_000, recoveryUntilUs: 400_000 };
+    const action = arenaAction(arena, mob.id, 'cast', 0, 'player', undefined, undefined, timing)!;
+    expect(action.endsAtUs).toBeGreaterThan(timing.recoveryUntilUs);
+    const x = arena.mobs[mob.id].x;
+    advanceCombatArena(arena, state, 450_000, { playerRange: 0, playerSpeedMult: 0,
+      mobSpeedMult: () => 1, engagedIds: new Set([mob.id]) });
+    expect(arena.mobs[mob.id].x).toBeLessThan(x);
+    expect(x - arena.mobs[mob.id].x).toBeLessThanOrEqual(E.combat_arena.mob_speed * 0.05 + 1e-7);
+  });
+
   it('approaches before either side can swing, then resolves real canonical attacks in range', () => {
     const { state, mob, arena } = fight();
     const initialHp = mob.hp;
@@ -104,16 +120,18 @@ describe('opt-in spatial combat', () => {
     expect(new Set(hits.map((hit) => hit.actionId)).size).toBe(1);
     expect(new Set(hits.map((hit) => hit.mobId)).size).toBe(hits.length);
   });
-  it('keeps point-blank damage, RNG, rewards and ordinary clocks identical to the existing mode', () => {
-    const { state, arena } = fight(E.combat_arena.range.melee);
-    const ordinary = structuredClone(state);
-    // Ground positions and the field registry are arena presentation facts; gameplay fields must agree.
-    const withoutGroundFacts = (s: typeof state) => ({ ...s, field: undefined, fieldArchive: undefined });
-    for (let i = 0; i < 8; i++) {
-      tick(state, { arena, autoSkills: false });
-      tick(ordinary, { autoSkills: false });
-      expect(withoutGroundFacts(state)).toEqual(withoutGroundFacts(ordinary));
+  it('repeats the same arena actions and gameplay outcomes for identical inputs', () => {
+    // Arena mode now executes a real basic windup, so its hit timestamps intentionally differ from
+    // the classic no-arena path. The invariant is determinism, not cross-mode timing equality.
+    const first = fight(MELEE_REACH);
+    const second = fight(MELEE_REACH);
+    for (let index = 0; index < 8; index++) {
+      tick(first.state, { arena: first.arena, autoSkills: false });
+      tick(second.state, { arena: second.arena, autoSkills: false });
     }
+    // The autosave receipt is wall-clock metadata, not combat state.
+    expect({ ...second.state, lastSavedAt: 0 }).toEqual({ ...first.state, lastSavedAt: 0 });
+    expect(second.arena).toEqual(first.arena);
   });
 
   it('walks three melee bodies into distinct contact positions with real attack range and bounded speed', () => {
@@ -134,7 +152,7 @@ describe('opt-in spatial combat', () => {
     // neighbour. The old fixed 120° slot ring is gone; exact pair distance is not a contract.
     const actors = state.group.map((entry) => arena.mobs[entry.id]);
     for (const actor of actors) {
-      expect(arenaDistance(actor, arena.player)).toBeLessThanOrEqual(E.combat_arena.range.melee + 1e-7);
+      expect(arenaDistance(actor, arena.player)).toBeLessThanOrEqual(MELEE_REACH + 1e-7);
       expect(arena.actions.some((action) => action.actorId === actor.id)).toBe(true);
       for (const other of actors) if (other !== actor)
         expect(arenaDistance(actor, other)).toBeGreaterThanOrEqual(
@@ -149,7 +167,7 @@ describe('opt-in spatial combat', () => {
         expect(arenaDistance(actor, previous.mobs[actor.id])).toBeLessThanOrEqual(maxDistance + 1e-7);
     }
     for (const action of arena.actions.filter((action) => action.kind === 'swing'))
-      expect(Math.hypot(action.targetX! - action.x, action.targetY! - action.y)).toBeLessThanOrEqual(E.combat_arena.range.melee + 1e-7);
+      expect(Math.hypot(action.targetX! - action.x, action.targetY! - action.y)).toBeLessThanOrEqual(MELEE_REACH + 1e-7);
   });
 
   it('holds a weapon-bound press until the fitting weapon is held (showcase all-in-one cast)', () => {
@@ -230,13 +248,14 @@ describe('opt-in spatial combat', () => {
     const before = arenaDistance(arena.mobs[mob.id], home);
     advanceCombatArena(arena, state, 100_000, step);
     expect(arenaDistance(arena.mobs[mob.id], home)).toBeLessThan(before);
+    const travelled = arena.mobs[mob.id].travelledM ?? 0;
     for (let index = 0; index < 120; index++) advanceCombatArena(arena, state, 200_000 + index * 100_000, step);
     expect(arenaDistance(arena.mobs[mob.id], home)).toBeLessThan(slot.roamM + 0.5);
-    expect(arena.mobs[mob.id].moving).toBe(true);
+    expect(arena.mobs[mob.id].travelledM ?? 0).toBeGreaterThan(travelled);
   });
 
   it('samples movement smoothly and changes HP/death only on the resolved impact timestamp', () => {
-    const { state, mob, arena } = fight(E.combat_arena.range.melee);
+    const { state, mob, arena } = fight(MELEE_REACH);
     mob.hp = mob.hpMax = 1;    for (let i = 0; i < 5 && !state.counters.kills; i++) tick(state, { arena, autoSkills: false });
     expect(state.counters.kills).toBe(1);
     const kill = state.fx.find((event) => event.kind === 'kill' && event.mobId === mob.id)!;

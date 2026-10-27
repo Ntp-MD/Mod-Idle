@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { E, loot } from '../src/engine/client';
+import { loot } from '../src/engine/client';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { arenaDistance, arenaWeaponRange, captureCombatArena, createCombatArena, syncCombatArena } from '../src/sim/combat/combat-arena';
 import { characterSheet, newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
@@ -77,7 +77,7 @@ describe('first-release combat acceptance', () => {
     expect(arenaDistance({ x: bowSwing.x, y: bowSwing.y },
       { x: bowSwing.targetX!, y: bowSwing.targetY! }))
       .toBeLessThanOrEqual(arenaWeaponRange(characterSheet(ranged.state).weaponName) + 1e-7);
-    expect(arenaWeaponRange('bow')).toBeGreaterThan(E.combat_arena.range.melee);
+    expect(arenaWeaponRange('bow')).toBeGreaterThan(arenaWeaponRange('one-handed sword'));
     expect(ranged.mob.hp).toBeLessThan(1e9);
 
     const magic = encounter('staff', 'attack.fireball', 6);

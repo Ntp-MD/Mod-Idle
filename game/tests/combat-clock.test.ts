@@ -53,6 +53,20 @@ describe('combat clock (§7.1)', () => {
     expect(slow.progressAtEnd).toBeCloseTo(0.6, 10);
   });
 
+  it('expands only the attacks that fit a partial window and carries the rest', () => {
+    const early = planAttacks(0, 0, 2, units, 300_000);
+    expect(early.times).toEqual([]);
+    expect(early.progressAtEnd).toBeCloseTo(0.6, 10);
+
+    const first = planAttacks(0, 0.25, 2.5, units, 400_000);
+    expect(first.times).toEqual([300_000]);
+    expect(first.progressAtEnd).toBeCloseTo(0.25, 10);
+    const second = planAttacks(400_000, first.progressAtEnd, 2.5, units, 600_000);
+    expect(second.times).toEqual([700_000]);
+    expect(second.progressAtEnd).toBeCloseTo(0.75, 10);
+    expect([...first.times, ...second.times]).toEqual(planAttacks(0, 0.25, 2.5, units).times);
+  });
+
   it('keeps a negative parked progress negative and fires nothing', () => {
     const plan = planAttacks(0, -10000, 1.4, units);
     expect(plan.times).toEqual([]);

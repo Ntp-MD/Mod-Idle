@@ -29,7 +29,7 @@ import {
 } from '../src/sim/core/keystone-runtime.ts';
 
 /**
- * Packet D1 — the bundle registry of `docs/DECISIONS.md` (the passive tree): the 82 keys, their
+ * Packet D1 — the bundle registry (the passive tree): the 82 keys, their
  * params, their required hooks, the capability gate that refuses a key without real handlers, and
  * the pure formulas the tables lock. The registry is gated as DATA here; no keystone effect runs.
  */

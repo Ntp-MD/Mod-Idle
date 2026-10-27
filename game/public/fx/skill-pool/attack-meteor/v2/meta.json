@@ -1,0 +1,414 @@
+{
+  "id": "attack.meteor",
+  "src": "/fx/skill-pool/attack-meteor/v2/atlas.png",
+  "columns": 4,
+  "rows": 4,
+  "imageWidth": 1254,
+  "imageHeight": 1254,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        313,
+        311
+      ],
+      "offsetX": 64.5,
+      "offsetY": 69.0,
+      "bounds": [
+        31,
+        20,
+        298,
+        290
+      ],
+      "renderedPadding": [
+        95.5,
+        89.0,
+        79.5,
+        90.0
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        313,
+        0,
+        314,
+        311
+      ],
+      "offsetX": 64.0,
+      "offsetY": 69.0,
+      "bounds": [
+        33,
+        31,
+        295,
+        299
+      ],
+      "renderedPadding": [
+        97.0,
+        100.0,
+        83.0,
+        81.0
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        627,
+        0,
+        313,
+        311
+      ],
+      "offsetX": 64.5,
+      "offsetY": 69.0,
+      "bounds": [
+        24,
+        25,
+        285,
+        297
+      ],
+      "renderedPadding": [
+        88.5,
+        94.0,
+        92.5,
+        83.0
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        940,
+        0,
+        314,
+        311
+      ],
+      "offsetX": 64.0,
+      "offsetY": 69.0,
+      "bounds": [
+        26,
+        52,
+        294,
+        293
+      ],
+      "renderedPadding": [
+        90.0,
+        121.0,
+        84.0,
+        87.0
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        311,
+        313,
+        315
+      ],
+      "offsetX": 64.5,
+      "offsetY": 67.0,
+      "bounds": [
+        28,
+        1,
+        302,
+        283
+      ],
+      "renderedPadding": [
+        92.5,
+        68.0,
+        75.5,
+        99.0
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        313,
+        311,
+        314,
+        315
+      ],
+      "offsetX": 64.0,
+      "offsetY": 67.0,
+      "bounds": [
+        28,
+        12,
+        292,
+        287
+      ],
+      "renderedPadding": [
+        92.0,
+        79.0,
+        86.0,
+        95.0
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        627,
+        311,
+        313,
+        315
+      ],
+      "offsetX": 64.5,
+      "offsetY": 67.0,
+      "bounds": [
+        21,
+        11,
+        297,
+        286
+      ],
+      "renderedPadding": [
+        85.5,
+        78.0,
+        80.5,
+        96.0
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        940,
+        311,
+        314,
+        315
+      ],
+      "offsetX": 64.0,
+      "offsetY": 67.0,
+      "bounds": [
+        17,
+        10,
+        294,
+        288
+      ],
+      "renderedPadding": [
+        81.0,
+        77.0,
+        84.0,
+        94.0
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        626,
+        313,
+        307
+      ],
+      "offsetX": 64.5,
+      "offsetY": 71.0,
+      "bounds": [
+        27,
+        9,
+        303,
+        275
+      ],
+      "renderedPadding": [
+        91.5,
+        80.0,
+        74.5,
+        103.0
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        313,
+        626,
+        314,
+        307
+      ],
+      "offsetX": 64.0,
+      "offsetY": 71.0,
+      "bounds": [
+        24,
+        1,
+        295,
+        279
+      ],
+      "renderedPadding": [
+        88.0,
+        72.0,
+        83.0,
+        99.0
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        627,
+        626,
+        313,
+        307
+      ],
+      "offsetX": 64.5,
+      "offsetY": 71.0,
+      "bounds": [
+        22,
+        15,
+        286,
+        277
+      ],
+      "renderedPadding": [
+        86.5,
+        86.0,
+        91.5,
+        101.0
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        940,
+        626,
+        314,
+        307
+      ],
+      "offsetX": 64.0,
+      "offsetY": 71.0,
+      "bounds": [
+        21,
+        41,
+        286,
+        276
+      ],
+      "renderedPadding": [
+        85.0,
+        112.0,
+        92.0,
+        102.0
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        933,
+        313,
+        321
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        32,
+        1,
+        298,
+        258
+      ],
+      "renderedPadding": [
+        96.5,
+        65.0,
+        79.5,
+        127.0
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        313,
+        933,
+        314,
+        321
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        27,
+        22,
+        295,
+        261
+      ],
+      "renderedPadding": [
+        91.0,
+        86.0,
+        83.0,
+        124.0
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        627,
+        933,
+        313,
+        321
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        29,
+        115,
+        283,
+        261
+      ],
+      "renderedPadding": [
+        93.5,
+        179.0,
+        94.5,
+        124.0
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        940,
+        933,
+        314,
+        321
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        32,
+        119,
+        277,
+        270
+      ],
+      "renderedPadding": [
+        96.0,
+        183.0,
+        101.0,
+        115.0
+      ]
+    }
+  ],
+  "virtualWidth": 442,
+  "virtualHeight": 449,
+  "alphaDiscard": 8,
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    4,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "frameMs": 90,
+  "composition": "whole-field",
+  "actorBodyWidthM": 0.5,
+  "authoringDiameterM": 6,
+  "geometrySource": "current committed action/field footprint",
+  "anchorStatus": "runtime ground-anchor fit from source bounds and committed footprint",
+  "sourcePixelsUnmodified": true,
+  "sourceSha256": "55f0801a357c78f11424acc7a814fcad83e2b77470ed8c1ef49fc6ba5ee416ec",
+  "status": "active-spatial-v2",
+  "cellWidth": 313.5,
+  "cellHeight": 313.5,
+  "contentWidthRatio": 0.6266968325791855,
+  "contentHeightRatio": 0.6280623608017817,
+  "authoringGeometry": {
+    "shape": "circle",
+    "radiusM": 3,
+    "spanM": 6,
+    "depthM": 6,
+    "origin": "target",
+    "canonicalSource": "tools/data/skills.json#attack.meteor"
+  }
+}

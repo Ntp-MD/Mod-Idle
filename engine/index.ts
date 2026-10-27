@@ -269,7 +269,7 @@ export function createEngine(E: EngineData) {
   DERIVED.mob_evasion_ref = MOB_EVASION_REF;
   DERIVED.hit_chance = DERIVED.accuracy / (DERIVED.accuracy + MOB_EVASION_REF);
 
-  // ---- armour: Str line both sides, PoE diminishing ratio (docs/DECISIONS.md · combat order)
+  // ---- armour: Str line both sides, PoE diminishing ratio
 
   const armourOf = (str: number) => str * K.K_ARMOUR;
   const armourReduce = (armour: number, rawPhysical: number) => armour / (armour + K.armour_divisor * rawPhysical);
@@ -389,12 +389,12 @@ export function createEngine(E: EngineData) {
     return packs[name] || packs.even || {};
   };
 
-  // The win target uses the final authored zone (docs/game-rules.md §Completion and progression).
+  // The win target uses the final authored zone.
   const finalZoneId = () => ZONES[ZONES.length - 1].id;
 
   /**
    * The completion gate as data: the final zone's boss, killed inside one spawn while never being
-   * Pushed (docs/game-rules.md §Completion and progression). Its HP is the same curve `mobRoster` and the client's spawn both use, so
+   * Pushed. Its HP is the same curve `mobRoster` and the client's spawn both use, so
    * the number the player reads is the number the fight actually rolls.
    */
   function winTarget() {
@@ -437,7 +437,7 @@ export function createEngine(E: EngineData) {
   const typicalDpsAt = (Lv: number) => mobHpAt(Lv) / skillF(Lv);
   const mobPsAt = (Lv: number) => typicalDpsAt(Lv) / K.mob_damage_divisor;
 
-  // A mob's pools run the SAME shape the player's do (DECISIONS: one Core model): Base + a flat
+  // A mob's pools run the SAME shape the player's do: Base + a flat
   // per-level grant + a K_core term. Base HP is the published zone curve (`mob_HP`, kept as the zone's
   // strength); the grant is its OWN line (`level_gain` 10 hp / 5 mana a level, never from Vit or Int);
   // the K_core term is the mob's Core Vit / Int through the shared `K` table. A mob earns no free Core
@@ -567,8 +567,8 @@ export function createEngine(E: EngineData) {
   const physOf = (str: number, flat: number, pct: number, weaponAspd: number, weaponName?: string) => (str * K.K_STR + flat) * (1 + pct / 100) * weaponMult(weaponAspd, weaponName);
   const magicOf = (int: number, flat: number, pct: number, weaponAspd: number, weaponName?: string) => (int * K.K_INT + flat) * (1 + pct / 100) * weaponMult(weaponAspd, weaponName);
 
-  // ---- elemental power (DECISIONS: per Element, the flat pool + `Int x K_ELEM` for the weapon's own
-  // Element, scaled by the shared and the Element-specific percents).
+  // ---- elemental power: the flat pool + `Int x K_ELEM` for the weapon's own Element, scaled by the
+  // shared and the Element-specific percents.
   // A Herald adds flat damage of one named Element ON TOP of what the gear already carries, so it
   // joins that Element's pool, lifts the total, and leaves every other pool as it was. Anything no
   // line names keeps the rest of the pool unattributed — the `''` key — and is never countered either

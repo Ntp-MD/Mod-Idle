@@ -24,7 +24,7 @@
       "sizeM": 0.35,
       "sizeAxis": "width",
       "art": {
-        "src": "/fx/authored/attack-meteor/components-v1/meteor-fall.png",
+        "src": "/fx/skill-pool/attack-meteor/v3/meteor-fall.png",
         "columns": 4,
         "rows": 4,
         "cellWidth": 313.5,
@@ -397,7 +397,7 @@
       "sizeM": 0.8,
       "sizeAxis": "height",
       "art": {
-        "src": "/fx/authored/attack-meteor/components-v1/meteor-trail.png",
+        "src": "/fx/skill-pool/attack-meteor/v3/meteor-trail.png",
         "columns": 4,
         "rows": 4,
         "cellWidth": 313.5,
@@ -770,7 +770,7 @@
       "sizeM": 0.65,
       "sizeAxis": "width",
       "art": {
-        "src": "/fx/authored/attack-meteor/components-v1/meteor-impact.png",
+        "src": "/fx/skill-pool/attack-meteor/v3/meteor-impact.png",
         "columns": 4,
         "rows": 4,
         "cellWidth": 313.5,

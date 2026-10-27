@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "canonicalWeaponType": "mace",
+  "appearanceId": "steel-flanged-mace",
+  "status": "generated-visually-reviewed-pending-integration",
+  "generator": "OpenAI built-in image_gen",
+  "identityReference": "game/public/combat/arpg/pixel-v2/player-animation-v2.png",
+  "sourcePixelsPreserved": true,
+  "measurement": {
+    "coordinateSystem": "source-pixel coordinates, x right, y down",
+    "boundsConvention": "left/top inclusive; right/bottom exclusive",
+    "rawAlphaBounds": "alpha > 0",
+    "visibleAlphaBounds": "alpha > 8",
+    "gripMethod": "visually placed center of leather gripping region",
+    "forwardMethod": "visually placed grip-to-head center axis; points toward striking head",
+    "pointTolerancePx": 12,
+    "vectorToleranceDegrees": 8
+  },
+  "views": {
+    "side": {
+      "file": "side.png",
+      "width": 2172,
+      "height": 724,
+      "rawAlphaBounds": [
+        709,
+        152,
+        1508,
+        577
+      ],
+      "visibleAlphaBounds": [
+        832,
+        249,
+        1356,
+        466
+      ],
+      "visiblePadding": {
+        "left": 832,
+        "top": 249,
+        "right": 816,
+        "bottom": 258
+      },
+      "gripPivot": {
+        "x": 970,
+        "y": 361,
+        "tolerancePx": 12
+      },
+      "forwardVector": {
+        "x": 1,
+        "y": 0
+      },
+      "headCenter": {
+        "x": 1250,
+        "y": 361,
+        "tolerancePx": 14
+      },
+      "tip": {
+        "x": 1340,
+        "y": 361,
+        "tolerancePx": 12
+      },
+      "review": "One complete side-facing mace; head right, brown leather handle left; generous visible padding."
+    },
+    "raised": {
+      "file": "raised.png",
+      "width": 1254,
+      "height": 1254,
+      "rawAlphaBounds": [
+        33,
+        39,
+        1216,
+        1196
+      ],
+      "visibleAlphaBounds": [
+        431,
+        461,
+        853,
+        822
+      ],
+      "visiblePadding": {
+        "left": 431,
+        "top": 461,
+        "right": 401,
+        "bottom": 432
+      },
+      "gripPivot": {
+        "x": 541,
+        "y": 720,
+        "tolerancePx": 12
+      },
+      "forwardVector": {
+        "x": 0.79,
+        "y": -0.613
+      },
+      "headCenter": {
+        "x": 736,
+        "y": 569,
+        "tolerancePx": 16
+      },
+      "tip": {
+        "x": 820,
+        "y": 539,
+        "tolerancePx": 12
+      },
+      "review": "Same steel flanged mace angled upward-right, leather grip lower-left; three-quarter steel facets visible."
+    },
+    "foreshortened": {
+      "file": "foreshortened.png",
+      "width": 1254,
+      "height": 1254,
+      "rawAlphaBounds": [
+        0,
+        101,
+        1101,
+        1143
+      ],
+      "visibleAlphaBounds": [
+        440,
+        451,
+        835,
+        805
+      ],
+      "visiblePadding": {
+        "left": 440,
+        "top": 451,
+        "right": 419,
+        "bottom": 449
+      },
+      "gripPivot": {
+        "x": 535,
+        "y": 713,
+        "tolerancePx": 12
+      },
+      "forwardVector": {
+        "x": 0.858,
+        "y": -0.514
+      },
+      "headCenter": {
+        "x": 710,
+        "y": 608,
+        "tolerancePx": 16
+      },
+      "tip": {
+        "x": 737,
+        "y": 594,
+        "tolerancePx": 12
+      },
+      "review": "Head projects toward camera; terminal nub is prominent, shaft shortened behind head; same material identity."
+    }
+  },
+  "qa": {
+    "visuallyInspectedAllViews": true,
+    "completeWeaponSilhouette": true,
+    "noHandBodySceneTextGridShadow": true,
+    "actualTransparentBackground": true,
+    "rawAlphaNoiseOutsideVisibleArt": true,
+    "alphaNoiseMaximumOutsideVisibleBounds": 8,
+    "requiresRawSilhouetteRegeneration": false,
+    "packingNote": "PNG files are exact generator outputs. Raw alpha bounds include faint generator noise. Integration should measure crop/visible bounds at alpha > 8 and explicitly discard alpha <= 8 during packing or rendering without changing source files.",
+    "sizeNote": "Generator produced larger canvases/art than requested; use measured source geometry and root-owned runtime normalization rather than assuming 1024 or a nominal grid.",
+    "socketNote": "Pivots and directions are authored estimates with tolerances; root should align grips against actual body frames before promotion."
+  }
+}

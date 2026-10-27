@@ -25,6 +25,7 @@ function farmFight(weapon: string | null, spots: { id: string; x: number; y: num
   for (const spot of spots) Object.assign(arena.mobs[spot.id], { x: spot.x, y: spot.y });
   captureCombatArena(arena, state, 0);
   pinFieldPopulation(state);
+  state.field!.slots.forEach((slot, index) => { slot.home = { x: spots[index].x, y: spots[index].y }; });
   return { state, arena };
 }
 

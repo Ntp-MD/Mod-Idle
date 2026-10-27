@@ -13,8 +13,9 @@
   import { mobSkillById } from '../../sim/combat/mobSkills';
   import type { Character } from '../../sim/core/player';
   import type { FxEvent, GameState, Mob } from '../../sim/core/types';
-  import { arenaSkillRange, sampleCombatArena, type CombatArena, type CombatArenaActor, type CombatArenaAction } from '../../sim/combat/combat-arena';
+  import { arenaDistance, arenaSkillRange, attackGeometryFor, mobAttackProfile, sampleCombatArena, type CombatArena, type CombatArenaActor, type CombatArenaAction } from '../../sim/combat/combat-arena';
   import { arenaArt, arenaArtForSpecies, type ArenaCharacterArt, type ArenaSpriteSheet } from './arena/arena-art';
+  import { equippedPlayerArt, playerEquipmentLayers, playerSkillContactPose, type ArenaEquipmentLayer } from './arena/arena-equipped-player';
   import { auraFxFor, skillFxFor } from './arena-skill-effects';
   import { actorArt, actorProfile } from './combat-actor';
   import { arenaMobShape, arenaSkillShape } from '../fx';
@@ -63,6 +64,40 @@
   let anchorSpeed = 1;
   let frozenAt: number | null = null;
   let previousVitals = '';
+  /** Dev inspection reads the same sampled frame and geometry the sim used, never a near copy. */
+  const inspectRows = $derived.by(() => {
+    if (!inspect) return [];
+    const frame = sampleCombatArena(arena, playhead);
+    return s.group.map((mob) => {
+      const actor = frame.mobs[mob.id];
+      if (!actor) return { id: mob.id, label: mob.species, state: 'gone', reason: 'not in frame',
+        center: 0, edge: 0, max: 0, stop: 0, claim: '—', timing: '—' };
+      const geometry = attackGeometryFor(mobAttackProfile(mob), actor.radiusM ?? .25,
+        frame.player.radiusM ?? .25, arenaDistance(actor, frame.player));
+      const timing = actor.action?.timing;
+      const preparing = timing ? playhead < timing.releaseAtUs : false;
+      const recovering = timing ? playhead >= timing.releaseAtUs && playhead < timing.recoveryUntilUs : false;
+      const state = actor.returning ? 'returning'
+        : actor.waitingForContact ? 'blocked-contact'
+          : recovering ? 'recovering'
+            : geometry.inRange ? 'in-range' : 'out-of-range';
+      const reason = state === 'returning' ? 'home reset / immune'
+        : state === 'blocked-contact' ? 'no reachable claim'
+          : state === 'recovering' ? 'action owns feet'
+            : state === 'out-of-range' ? 'approach'
+              : preparing ? 'windup' : 'in stop band';
+      const claim = frame.contacts?.[mob.id];
+      return {
+        id: mob.id, label: mob.species, state, reason,
+        center: geometry.centerDistance, edge: geometry.edgeGap,
+        max: geometry.maxCenterDistance, stop: geometry.stopCenterDistance,
+        claim: claim ? `${claim.x.toFixed(2)}, ${claim.y.toFixed(2)}` : '—',
+        timing: timing
+          ? `${(timing.startedAtUs / arena.unitsPerSec).toFixed(2)} / ${(timing.releaseAtUs / arena.unitsPerSec).toFixed(2)} / ${(timing.impactAtUs / arena.unitsPerSec).toFixed(2)}`
+          : '—',
+      };
+    });
+  });
   function seekArena(atUs: number) {
     onReviewPause?.();
     reviewPlaying = false;
@@ -288,7 +323,7 @@
   }
 
   function artFor(actor: CombatArenaActor): ArenaCharacterArt | null {
-    if (actor.id === 'player') return arenaArt.hero;
+    if (actor.id === 'player') return equippedPlayerArt;
     const speciesId = actor.mob?.speciesId;
     // A preview encounter spawns one species, so its loaded sheet owns every body on the field.
     if (spritePreviewSpecies && reviewArt && actor.mob) return reviewArt;
@@ -313,11 +348,11 @@
 
   /** A source crop kept inside the runtime cell and the image, so it cannot pull in a neighbour
    *  frame (repeat) or be clipped by the cell edge (cut). */
-  function containedFrame(sheet: ArenaSpriteSheet | undefined, index: number) {
-    const frame = sheet?.sourceFrames?.[index];
-    if (!frame) return undefined;
-    const imageWidth = sheet.imageWidth ?? sheet.frameWidth * sheet.columns;
-    const imageHeight = sheet.imageHeight ?? sheet.frameHeight * sheet.rows;
+  function containedFrame(sheet: ArenaSpriteSheet | undefined, index: number, standalone = sheet?.frameImages?.[index]) {
+    const frame = standalone?.sourceFrame ?? sheet?.sourceFrames?.[index];
+    if (!frame || !sheet) return undefined;
+    const imageWidth = standalone?.imageWidth ?? sheet?.imageWidth ?? sheet!.frameWidth * sheet!.columns;
+    const imageHeight = standalone?.imageHeight ?? sheet?.imageHeight ?? sheet!.frameHeight * sheet!.rows;
     let x = frame.x, y = frame.y, width = frame.width, height = frame.height;
     let offsetX = frame.offsetX, offsetY = frame.offsetY;
     if (offsetX < 0) { x -= offsetX; width += offsetX; offsetX = 0; }
@@ -441,13 +476,25 @@
       : clipName === 'walk' && walkCycleMs > 0 ? walkPhase * walkCycleMs
       : playhead / arena.unitsPerSec * 1000 + idleOffset;
     const frameIndex = sheet ? arenaSpriteIndex(sheet, elapsedMs, reducedMotion, clipName === 'death') : 0;
+    const skillContactPose = actor.id === 'player' && pose?.phase === 'contact' && action?.skillId
+      ? playerSkillContactPose(s, c, action.skillId, nominal) : undefined;
+    const standaloneFrame = skillContactPose ?? sheet?.frameImages?.[frameIndex];
     // Tight-crop sheets index one authored rect per frame; an overrun must clamp to that list, never
     // fall back to a cell crop that would pull neighbouring frames into view.
-    const sourceFrame = sheet?.sourceFrames?.length
-      ? containedFrame(sheet, Math.min(frameIndex, sheet.sourceFrames.length - 1))
+    const sourceFrameCount = standaloneFrame ? sheet?.frameImages?.length ?? 0 : sheet?.sourceFrames?.length ?? 0;
+    const sourceFrame = sourceFrameCount
+      ? containedFrame(sheet, Math.min(frameIndex, sourceFrameCount - 1), standaloneFrame)
       : undefined;
+    // Generated attack poses can fill much more of the fixed canvas than the idle sprite.
+    // Normalize their visible body height against this direction's idle pose, pivoting at the feet.
+    const bodyScale = actor.id === 'player' && art?.pixelArt && clipName === 'attack' && restFrame?.height && sourceFrame?.height
+      ? restFrame.height / sourceFrame.height : 1;
+    const equipmentLayers: ArenaEquipmentLayer[] = actor.id === 'player' && standaloneFrame && !standaloneFrame.equipmentBaked
+      ? playerEquipmentLayers({ state: s, character: c, frame: standaloneFrame,
+        bodyHeight: restFrame?.height ?? 0, clip: clipName, phase: pose?.phase, facing: actor.facing })
+      : [];
     const skillEffects = actorSkillEffects(actor, dead);
-    return { actor, ground, action, art, sheet, anchor, fallback, height, width,
+    return { actor, ground, action, art, sheet, standaloneFrame, equipmentLayers, anchor, fallback, height, width, bodyScale,
       bodyHeight: restFrame ? restFrame.height * (pixelScale ?? height / (sheet?.frameHeight ?? 1)) : height,
       nameplateHeight, hitboxWidth, age, cue, statuses, clipName, sourceFrame, mirror: Boolean(sheet?.mirror), ...skillEffects,
       frame: sourceFrame && sheet ? `0 0 ${sheet.frameWidth} ${sheet.frameHeight}`
@@ -655,6 +702,16 @@
         <option value="system">System motion</option><option value="full">Full motion</option><option value="reduced">Reduced motion</option>
       </select>
       <output aria-label="Arena effect timing">{effects.filter(mark => mark.event.kind === 'cast').slice(0, 1).map(mark => `${mark.event.text}: ${mark.timing?.startedAtSec.toFixed(3)} / ${mark.timing?.releasedAtSec.toFixed(3)} / ${mark.timing?.impactAtSec.toFixed(3)}`).join(' ')}</output>
+      {#if inspectRows.length}
+        <div class="arena-inspect-geometry" aria-label="Body range and AI inspection">
+          <span class="inspect-head">player {arena.player.x.toFixed(2)}, {arena.player.y.toFixed(2)} · start/release/impact s</span>
+          {#each inspectRows as row (row.id)}
+            <span data-ai-state={row.state}>
+              <b>{row.label}</b> · {row.state} · d {row.center.toFixed(2)} · edge {row.edge.toFixed(2)} · max {row.max.toFixed(2)} · stop {row.stop.toFixed(2)} · claim {row.claim} · {row.timing} · {row.reason}
+            </span>
+          {/each}
+        </div>
+      {/if}
     </div>
   {/if}
   <img class="arena-ground" src={arenaArt.background.href} alt="" aria-hidden="true" draggable="false" />
@@ -742,21 +799,39 @@
       <div class="arena-body" style:width={`${view.width}px`} style:height={`${view.height}px`}
         style:left={`${-view.width * view.anchor.x}px`} style:top={`${-view.height * view.anchor.y}px`}
         style:transform-origin={`${view.anchor.x * 100}% ${view.anchor.y * 100}%`}
-        style:transform={`translate(${view.bodyX}px, ${view.bodyY}px) rotate(${view.deadRotation}deg)`} style:filter={`brightness(${view.brightness})`}>
+        style:transform={`translate(${view.bodyX}px, ${view.bodyY}px) rotate(${view.deadRotation}deg) scale(${view.bodyScale})`} style:filter={`brightness(${view.brightness})`}>
         {#if view.sheet}
           <svg class="arena-sprite" class:pixel-art={view.art?.pixelArt} class:mirror={view.mirror} viewBox={view.frame} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            {#each view.equipmentLayers as layer, index (`${layer.kind}-${index}`)}
+              <g transform={layer.transform}>
+                <svg x="0" y="0" width={layer.imageWidth} height={layer.imageHeight}
+                  viewBox={`0 0 ${layer.imageWidth} ${layer.imageHeight}`} preserveAspectRatio="none">
+                  <defs>
+                    <clipPath id={`${spriteClipPrefix}-equipment-${view.actor.id}-${index}`} clipPathUnits="userSpaceOnUse">
+                      <rect x={layer.clipBounds[0]} y={layer.clipBounds[1]}
+                        width={layer.clipBounds[2]-layer.clipBounds[0]} height={layer.clipBounds[3]-layer.clipBounds[1]} />
+                    </clipPath>
+                  </defs>
+                  <image href={layer.href} width={layer.imageWidth} height={layer.imageHeight}
+                    clip-path={`url(#${spriteClipPrefix}-equipment-${view.actor.id}-${index})`} />
+                </svg>
+              </g>
+            {/each}
             {#if view.sourceFrame}
               <defs>
                 <clipPath id={`${spriteClipPrefix}-${view.actor.id}`} clipPathUnits="userSpaceOnUse">
                   <rect x={view.sourceFrame.offsetX} y={view.sourceFrame.offsetY} width={view.sourceFrame.width} height={view.sourceFrame.height} />
                 </clipPath>
               </defs>
-              <image href={view.sheet.href}
+              <image href={view.standaloneFrame?.href ?? view.sheet.href}
                 x={view.sourceFrame.offsetX-view.sourceFrame.x} y={view.sourceFrame.offsetY-view.sourceFrame.y}
-                width={view.sheet.imageWidth ?? view.sheet.frameWidth * view.sheet.columns} height={view.sheet.imageHeight ?? view.sheet.frameHeight * view.sheet.rows}
+                width={view.standaloneFrame?.imageWidth ?? view.sheet.imageWidth ?? view.sheet.frameWidth * view.sheet.columns}
+                height={view.standaloneFrame?.imageHeight ?? view.sheet.imageHeight ?? view.sheet.frameHeight * view.sheet.rows}
                 clip-path={`url(#${spriteClipPrefix}-${view.actor.id})`} />
             {:else}
-              <image href={view.sheet.href} width={view.sheet.imageWidth ?? view.sheet.frameWidth * view.sheet.columns} height={view.sheet.imageHeight ?? view.sheet.frameHeight * view.sheet.rows} />
+              <image href={view.standaloneFrame?.href ?? view.sheet.href}
+                width={view.standaloneFrame?.imageWidth ?? view.sheet.imageWidth ?? view.sheet.frameWidth * view.sheet.columns}
+                height={view.standaloneFrame?.imageHeight ?? view.sheet.imageHeight ?? view.sheet.frameHeight * view.sheet.rows} />
             {/if}
           </svg>
         {:else if view.fallback}
@@ -889,6 +964,11 @@
   .arena-review { position: absolute; z-index: 5000; top: 4px; left: 30%; display: flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs); background: var(--panel); color: var(--text); pointer-events: auto; font-size: var(--font-3xs); }
   .arena-review input[type='range'] { width: 170px; }
   .arena-review input[type='number'] { width: 80px; }
+  .arena-inspect-geometry { position: absolute; top: 100%; left: 0; display: grid; gap: 2px; width: max-content; max-width: 72vw; max-height: 38vh; overflow: auto; padding: var(--spacing-xs); border: 1px solid var(--line); background: var(--panel); color: var(--text); font-family: var(--font-mono, monospace); font-size: var(--font-3xs); white-space: nowrap; }
+  .arena-inspect-geometry [data-ai-state='in-range'] { color: var(--es); }
+  .arena-inspect-geometry [data-ai-state='out-of-range'], .arena-inspect-geometry [data-ai-state='gone'] { color: var(--dim); }
+  .arena-inspect-geometry [data-ai-state='blocked-contact'], .arena-inspect-geometry [data-ai-state='returning'] { color: var(--es-lit); }
+  .arena-inspect-geometry .inspect-head { color: var(--dim); }
   .combat-arena { position: absolute; inset: 0; overflow: hidden; isolation: isolate; pointer-events: none; color: var(--text); background: #202c27; }
   .arena-camera { position:absolute; inset:0; pointer-events:none; isolation:isolate; }
   .arena-ground { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; }

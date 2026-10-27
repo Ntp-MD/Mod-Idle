@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI built-in image_gen",
+  "transparentBackground": true,
+  "identityReference": "game/public/combat/arpg/pixel-v2/player-animation-v2.png",
+  "prompts": [
+    {
+      "view": "side",
+      "attempt": 1,
+      "selected": false,
+      "prompt": "Use case: stylized-concept. Asset type: isolated equipment sprite for a chibi pixel-art ARPG player, not an illustration or icon card. Reference image is STYLE ONLY: match its crisp chunky pixel clusters, near-black outline, compact readable forms, 2–3 flat shades per material and upper-left light. Generate exactly ONE complete plain two-handed sword, side view, blade pointing RIGHT, handle on LEFT, horizontal axis. Broad long straight silver-steel blade, pointed tip, a short simple steel crossguard and plain long brown leather-wrapped grip sized for two hands, small dark steel pommel. Blade is about three times the grip length. Entire sword roughly 300 pixels long, centered near (512,512) on a square 1024x1024 genuinely transparent canvas; very large empty transparent margins on every side. At final small native scale it should remain crisp. No character, hands, gloves, sheath, extras, ornament, jewels, runes, magic, glow, motion trail, ground, shadow, scenery, background colour, checkerboard drawing, text, labels, grid, frame or watermark. Complete tip and pommel fully visible, never touching an image boundary."
+    },
+    {
+      "view": "side",
+      "attempt": 2,
+      "selected": true,
+      "reference": "side attempt 1",
+      "prompt": "Use case: precise-object-edit. This is an equipment sprite canvas framing correction. Keep exactly the same single plain steel two-handed sword identity, pixel style, brown two-hand grip, steel guard and horizontal right-pointing side view as the supplied reference. Correct ONLY composition scale: make the entire sword occupy about ONE QUARTER (25%) of the full canvas width, centered at the middle of the transparent square. Huge empty transparent space: at least 35% canvas width on both left and right, at least 35% canvas height above and below. Aim 300px sword length on a roughly 1200px square canvas. Crisp compact native pixel clusters, not an enlarged screenshot. Complete sword only; genuinely transparent background, no shadow, no text, no other object. Do not fill the canvas with the sword."
+    },
+    {
+      "view": "raised",
+      "attempt": 1,
+      "selected": true,
+      "reference": "side.png",
+      "prompt": "Use case: stylized-concept. Asset type: ONE isolated transparent equipment sprite for the same chibi pixel ARPG hero. Input reference is the identity of the ONLY sword: preserve its broad long steel blade, plain small dark steel crossguard, long brown leather-wrapped TWO-HAND grip and round dark pommel, crisp chunky native pixel clusters, near-black outline and 2–3 shades per material, upper-left light. Generate a NEW raised-overhead windup view of that SAME sword only. Show the complete sword diagonally with grip at lower-right and blade extending up-left, viewed in the hero's slightly top-down three-quarter game camera; sword itself only, not hands or a wielder. Keep blade length and grip proportions from reference. Sword occupies no more than one third of canvas width and height near canvas centre with huge transparent margins. Aim compact ~300px long subject on square ~1024px transparent canvas. Genuinely transparent background. Complete tip and pommel. No character, body, hands, sheath, extra weapon, jewels, ornament, magic, glow, motion trail, shadow, ground, scenery, labels, text, grid, frame or watermark."
+    },
+    {
+      "view": "foreshortened",
+      "attempt": 1,
+      "selected": true,
+      "reference": "side.png"
+    }
+  ]
+}

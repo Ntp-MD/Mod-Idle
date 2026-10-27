@@ -19,8 +19,6 @@ Two words that are constantly confused:
 - **Offensive / Defensive** are **Mod pools** — which Mods may roll on which slot.
 - **Attack layer / Defend layer** is the **runtime order** — what happens to one number, in sequence.
 
-Calculation order: [DECISIONS.md](DECISIONS.md#combat-order).
-
 # Item and Mod Vocabulary
 
 | Term | Meaning |

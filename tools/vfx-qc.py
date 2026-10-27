@@ -3,11 +3,11 @@
 Measures one atlas against the authored-VFX standard and, with --write, records `qc.json` in the
 draft folder. Read-only by default.
 
-    python tools/vfx-qc.py art-reference/skills/generated/attack-firestorm-v1
-    python tools/vfx-qc.py art-reference/skills/generated/attack-blizzard-v1 --write
+    python tools/vfx-qc.py game/public/fx/skill-pool/attack-firestorm/v2
+    python tools/vfx-qc.py game/public/fx/skill-pool/attack-blizzard/v2 --write
 
 Gates come from the approved Firestorm v1 measurement; the wording that produced it lives in
-`art-reference/skills/vfx-style-lock.md`. Exit code 1 means at least one gate failed.
+the authored VFX production notes. Exit code 1 means at least one gate failed.
 
 Requires Pillow in the tooling environment.
 """

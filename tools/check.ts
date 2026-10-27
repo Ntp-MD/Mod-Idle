@@ -635,7 +635,7 @@ function runChecks() {
   add('X15', mpProblems.length === 0, mpProblems.length ? mpProblems.join(' · ')
     : `${MP_RULES.length} Mod maxima read out of \`mods.json\` and equal the engine — the data owns the number, mod-pool.md only prints it `);
 
-  // Mob species: the Core is an integer POINT block (DECISIONS: one Core model). A stat is live only
+  // Mob species: the Core is an integer POINT block. A stat is live only
   // where the mob reads it: Wis feeds no mob line at all, and Int feeds magic power, so a pure-physical
   // body carries neither — those entries must be 0, and every live entry a whole non-negative number.
   const MOB = E.mob;
@@ -843,6 +843,35 @@ function runChecks() {
         if (!(row.cd > 0)) sk.push(`${row.id}: a strike needs a positive cooldown`);
         if (!(row.cast_sec >= 0 && row.cast_sec <= 2)) sk.push(`${row.id}: cast_sec is outside 0..2`);
         if (row.effects || row.scope) sk.push(`${row.id}: a strike cannot carry aura fields`);
+        const cast = row.cast;
+        if (!cast || typeof cast !== 'object') sk.push(`${row.id}: a strike must author its cast profile`);
+        else {
+          if (!['melee', 'projectile', 'ground'].includes(cast.delivery))
+            sk.push(`${row.id}: cast delivery is not melee/projectile/ground`);
+          if (!cast.range || !['center', 'body-edge'].includes(cast.range.basis)
+            || !(Number(cast.range.meters) > 0))
+            sk.push(`${row.id}: cast range must state a positive basis/metres`);
+          if (!(Number(cast.windup_sec) >= 0 && Number(cast.windup_sec) <= 2))
+            sk.push(`${row.id}: cast windup_sec is outside 0..2`);
+          if (!(Number(cast.recovery_sec) >= 0 && Number(cast.recovery_sec) <= 2))
+            sk.push(`${row.id}: cast recovery_sec is outside 0..2`);
+          if (Number(cast.windup_sec) !== Number(row.cast_sec))
+            sk.push(`${row.id}: cast_sec and cast.windup_sec disagree`);
+          if (cast.delivery === 'melee') {
+            if (cast.range.basis !== 'body-edge')
+              sk.push(`${row.id}: a melee cast must use body-edge range`);
+          }
+          if (cast.delivery === 'projectile') {
+            if (!(Number(cast.projectile_speed_mps) > 0)) sk.push(`${row.id}: projectile cast needs a speed`);
+            if (!(Number(cast.hit_radius_m) >= 0)) sk.push(`${row.id}: projectile cast needs a hit radius`);
+          }
+          if (cast.delivery === 'ground') {
+            if (!(Number(cast.impact_delay_sec) > 0)) sk.push(`${row.id}: ground cast needs an impact delay`);
+            if (!row.area || !(Number(row.area.radius_m) > 0))
+              sk.push(`${row.id}: ground cast needs a positive committed area`);
+          }
+        }
+        if (row.area && cast?.delivery !== 'ground') sk.push(`${row.id}: only a ground cast owns an area`);
         const c = coverage.get(row.element || 'physical') || { strike: 0, aura: 0 };
         c.strike++;
         coverage.set(row.element || 'physical', c);
@@ -854,7 +883,8 @@ function runChecks() {
           if (!allowedAura.has(stat)) sk.push(`${row.id}: aura stat ${stat} is outside the defensive set`);
           if (!(Number(value) > 0)) sk.push(`${row.id}: aura ${stat} must be positive`);
         }
-        if (row.cd != null || row.cast_sec != null) sk.push(`${row.id}: an aura has no cast/cooldown`);
+        if (row.cd != null || row.cast_sec != null || row.cast != null || row.area != null)
+          sk.push(`${row.id}: an aura has no cast/cooldown`);
         const c = coverage.get(row.element || 'physical') || { strike: 0, aura: 0 };
         c.aura++;
         coverage.set(row.element || 'physical', c);

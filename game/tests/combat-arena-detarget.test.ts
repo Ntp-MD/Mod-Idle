@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { E, sm } from '../src/engine/client';
 import { intentTargets, selectCombatIntent } from '../src/sim/combat/combat-actions';
-import { advanceCombatArena, aimForSkill, arenaDistance, arenaSkillRange, bodyRadiusM, createCombatArena, syncCombatArena } from '../src/sim/combat/combat-arena';
+import { advanceCombatArena, aimForSkill, arenaDistance, arenaMobRange, arenaSkillRange, bodyRadiusM, createCombatArena, syncCombatArena } from '../src/sim/combat/combat-arena';
 import { newGame } from '../src/sim/core/game';
 import { buildCharacter, emptyGear } from '../src/sim/core/player';
 import { characterSheet } from '../src/sim/core/game';
@@ -193,7 +193,7 @@ describe('bodies occupy ground', () => {
     const actors = state.group.map((mob) => arena.mobs[mob.id]);
     for (const actor of actors) {
       const radius = actor.radiusM ?? 0.25;
-      expect(arenaDistance(actor, arena.player)).toBeLessThanOrEqual(2.1 + 1e-7);
+      expect(arenaDistance(actor, arena.player)).toBeLessThanOrEqual(arenaMobRange(actor.mob!) + 1e-7);
       expect(actor.x).toBeGreaterThanOrEqual(radius - 1e-6);
       expect(actor.y).toBeGreaterThanOrEqual(radius - 1e-6);
       expect(actor.x).toBeLessThanOrEqual(arena.bounds.width - radius + 1e-6);
@@ -204,6 +204,60 @@ describe('bodies occupy ground', () => {
     expect(Object.keys(arena.contacts)).toHaveLength(actors.length);
     const claims = new Set(Object.values(arena.contacts).map((claim) => `${claim.x.toFixed(3)},${claim.y.toFixed(3)}`));
     expect(claims.size).toBe(actors.length);
+  });
+
+  it('keeps an eight-body pack clear and names the bodies that cannot reach', () => {
+    const state = newGame(31);
+    state.group = Array.from({ length: 8 }, (_, index) => mobFixture({
+      id: `dense-${index}`, hp: 1e9, hpMax: 1e9, innate: [], skillIds: [],
+    }));
+    const arena = createCombatArena();
+    syncCombatArena(arena, state, 0, 1_000_000, characterSheet(state).maxHp);
+    Object.assign(arena.player, { x: 9, y: 6 });
+    for (const mob of state.group) Object.assign(arena.mobs[mob.id], { x: 13, y: 6 });
+    const opts = { ...stepOpts, playerRange: 2.1, playerLocked: true };
+    for (let index = 1; index <= 160; index++) advanceCombatArena(arena, state, index * 50_000, opts);
+    const actors = state.group.map((mob) => arena.mobs[mob.id]);
+    for (const actor of actors) {
+      for (const other of actors) if (other !== actor)
+        expect(arenaDistance(actor, other)).toBeGreaterThanOrEqual(
+          (actor.radiusM ?? 0.25) + (other.radiusM ?? 0.25) - 1e-6);
+    }
+    expect(Object.keys(arena.contacts).length).toBeGreaterThanOrEqual(6);
+    expect(actors.filter((actor) => actor.waitingForContact).length).toBeGreaterThanOrEqual(1);
+    for (const actor of actors) {
+      if (!actor.waitingForContact) continue;
+      expect(arenaDistance(actor, arena.player)).toBeGreaterThan(0.7 + 1e-7);
+    }
+  });
+
+  it('keeps a corner pack reachable, clear and deterministic without claim churn', () => {
+    const state = newGame(31);
+    state.group = [0, 1, 2].map((index) => mobFixture({
+      id: `corner-${index}`, hp: 1e9, hpMax: 1e9, innate: [], skillIds: [],
+    }));
+    const arena = createCombatArena();
+    syncCombatArena(arena, state, 0, 1_000_000, characterSheet(state).maxHp);
+    Object.assign(arena.player, { x: 17.5, y: 11.5 });
+    state.group.forEach((mob, index) => Object.assign(arena.mobs[mob.id], { x: 15 + index * .2, y: 11.2 }));
+    const twinState = structuredClone(state);
+    const twinArena = structuredClone(arena);
+    const opts = { ...stepOpts, playerRange: 2.1, playerLocked: true };
+    for (let index = 1; index <= 100; index++) {
+      advanceCombatArena(arena, state, index * 50_000, opts);
+      advanceCombatArena(twinArena, twinState, index * 50_000, opts);
+    }
+    expect(arena).toEqual(twinArena);
+    const actors = state.group.map((mob) => arena.mobs[mob.id]);
+    for (const actor of actors) {
+      expect(actor.x).toBeGreaterThanOrEqual((actor.radiusM ?? .25) - 1e-6);
+      expect(actor.y).toBeGreaterThanOrEqual((actor.radiusM ?? .25) - 1e-6);
+      expect(actor.x).toBeLessThanOrEqual(arena.bounds.width - (actor.radiusM ?? .25) + 1e-6);
+      expect(actor.y).toBeLessThanOrEqual(arena.bounds.height - (actor.radiusM ?? .25) + 1e-6);
+      if (actor.waitingForContact) expect(arena.contacts[actor.id]).toBeUndefined();
+    }
+    expect(new Set(Object.values(arena.contacts).map((claim) => `${claim.x.toFixed(2)},${claim.y.toFixed(2)}`)).size)
+      .toBe(Object.keys(arena.contacts).length);
   });
 
   it('insets every body by its radius at the field edge', () => {

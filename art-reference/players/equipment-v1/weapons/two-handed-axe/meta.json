@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "kind": "equipment-sprite-views",
+  "weaponType": "two-handed axe",
+  "appearance": "steel-bearded-axe",
+  "status": "generated-for-runtime-packing",
+  "generator": "OpenAI built-in image_gen",
+  "sourcePixelsUnchanged": true,
+  "styleReference": "game/public/combat/arpg/pixel-v2/player-animation-v2.png",
+  "identityReference": "side.png",
+  "coordinateSystem": "source PNG pixels, origin top-left; bounds right/bottom exclusive",
+  "landmarkProvenance": {
+    "method": "Manual visual placement after inspecting each selected generated PNG",
+    "tolerancePx": 16,
+    "frontGripMeaning": "forward hand nearer axe head",
+    "rearGripMeaning": "rear hand nearer butt",
+    "tipMeaning": "outer cutting-edge contact point; separate forwardAxis follows shaft toward socket"
+  },
+  "alphaPolicy": {
+    "rawAlphaPreserved": true,
+    "measurementThreshold": 8,
+    "reason": "Built-in output contains sparse alpha <= 8 background noise; do not treat raw alpha bounds as visible item geometry.",
+    "runtimeRecommendation": "Use measured alphaAbove8Bounds and an explicit <=8 alpha discard during packing/rendering if supported; never stretch to raw alpha bounds."
+  },
+  "views": {
+    "side": {
+      "file": "side.png",
+      "width": 1254,
+      "height": 1254,
+      "alphaBounds": [
+        0,
+        39,
+        1208,
+        1228
+      ],
+      "alphaAbove8Bounds": [
+        174,
+        487,
+        1093,
+        830
+      ],
+      "frontGrip": {
+        "x": 615,
+        "y": 667
+      },
+      "rearGrip": {
+        "x": 312,
+        "y": 757
+      },
+      "tip": {
+        "x": 1077,
+        "y": 723
+      },
+      "forwardAxis": {
+        "from": {
+          "x": 312,
+          "y": 757
+        },
+        "to": {
+          "x": 922,
+          "y": 580
+        }
+      },
+      "headSocket": {
+        "x": 922,
+        "y": 580
+      },
+      "generationSource": "C:/Users/disda/.codex/generated_images/01a1781f-f9d2-7c01-83fe-8ba8448e9b75/exec-c13796aa-47fd-43cd-9713-af202c4dacdc.png"
+    },
+    "raised": {
+      "file": "raised.png",
+      "width": 1254,
+      "height": 1254,
+      "alphaBounds": [
+        49,
+        99,
+        1234,
+        1223
+      ],
+      "alphaAbove8Bounds": [
+        264,
+        220,
+        1118,
+        1061
+      ],
+      "frontGrip": {
+        "x": 615,
+        "y": 663
+      },
+      "rearGrip": {
+        "x": 385,
+        "y": 928
+      },
+      "tip": {
+        "x": 1092,
+        "y": 463
+      },
+      "forwardAxis": {
+        "from": {
+          "x": 385,
+          "y": 928
+        },
+        "to": {
+          "x": 878,
+          "y": 369
+        }
+      },
+      "headSocket": {
+        "x": 878,
+        "y": 369
+      },
+      "generationSource": "C:/Users/disda/.codex/generated_images/01a1781f-f9d2-7c01-83fe-8ba8448e9b75/exec-69aec4e5-d99c-4703-b0d7-c3492259ee31.png"
+    },
+    "foreshortened": {
+      "file": "foreshortened.png",
+      "width": 1254,
+      "height": 1254,
+      "alphaBounds": [
+        25,
+        126,
+        1192,
+        1150
+      ],
+      "alphaAbove8Bounds": [
+        170,
+        288,
+        1165,
+        916
+      ],
+      "frontGrip": {
+        "x": 514,
+        "y": 682
+      },
+      "rearGrip": {
+        "x": 276,
+        "y": 825
+      },
+      "tip": {
+        "x": 1145,
+        "y": 761
+      },
+      "forwardAxis": {
+        "from": {
+          "x": 276,
+          "y": 825
+        },
+        "to": {
+          "x": 792,
+          "y": 536
+        }
+      },
+      "headSocket": {
+        "x": 792,
+        "y": 536
+      },
+      "generationSource": "C:/Users/disda/.codex/generated_images/01a1781f-f9d2-7c01-83fe-8ba8448e9b75/exec-7748c783-9eaf-4b8c-aff6-ac60b1492ca4.png"
+    }
+  },
+  "inspection": {
+    "passed": [
+      "One axe per view; no hands/body/shadow/VFX/text/grid",
+      "Selected side identity retained in raised and foreshortened views",
+      "Visible alpha >8 silhouette complete with margin on all four sides",
+      "Broad bearded steel blade, small rear poll, brown shaft, bands and butt grip consistent"
+    ],
+    "limitations": [
+      "Generator returned 1254 square instead of requested 1024 and much larger item coverage than requested; use actual measured metadata for runtime packing.",
+      "Sparse alpha <=8 background noise preserved exactly, including raw-alpha contact with side canvas edge.",
+      "Grip/contact markers are manual estimates with 16px tolerance and need final adjustment against the body attachment track."
+    ]
+  }
+}

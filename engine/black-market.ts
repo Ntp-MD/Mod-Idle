@@ -37,7 +37,7 @@ export function createBlackMarket(
   const price = (candidate: Candidate, count: number) => {
     const decimals = trade.C.currency_decimals, unit = 10 ** -decimals;
     // the smallest-unit cover belongs to the computed material quote; stones and skill offers are
-    // authored at their price and must be charged exactly (DECISIONS, Black Market prices)
+    // authored at their price and must be charged exactly
     return candidate.kind === 'material'
       ? trade.floorCurrency(candidate.priceEach * count + unit)
       : trade.floorCurrency(candidate.priceEach * count);

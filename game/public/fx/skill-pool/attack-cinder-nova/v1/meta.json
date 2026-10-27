@@ -1,0 +1,421 @@
+{
+  "id": "attack.cinder_nova",
+  "src": "/fx/skill-pool/attack-cinder-nova/v1/atlas.png",
+  "columns": 4,
+  "rows": 4,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        94,
+        88,
+        167,
+        176
+      ],
+      "renderedPadding": [
+        158,
+        152,
+        153,
+        144
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        256,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        71,
+        60,
+        187,
+        194
+      ],
+      "renderedPadding": [
+        135,
+        124,
+        133,
+        126
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        512,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        41,
+        39,
+        207,
+        201
+      ],
+      "renderedPadding": [
+        105,
+        103,
+        113,
+        119
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        768,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        38,
+        31,
+        226,
+        210
+      ],
+      "renderedPadding": [
+        102,
+        95,
+        94,
+        110
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        25,
+        39,
+        232,
+        208
+      ],
+      "renderedPadding": [
+        89,
+        103,
+        88,
+        112
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        256,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        22,
+        32,
+        242,
+        208
+      ],
+      "renderedPadding": [
+        86,
+        96,
+        78,
+        112
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        512,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        10,
+        25,
+        242,
+        211
+      ],
+      "renderedPadding": [
+        74,
+        89,
+        78,
+        109
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        768,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        10,
+        32,
+        245,
+        218
+      ],
+      "renderedPadding": [
+        74,
+        96,
+        75,
+        102
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        7,
+        22,
+        250,
+        227
+      ],
+      "renderedPadding": [
+        71,
+        86,
+        70,
+        93
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        256,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        10,
+        24,
+        251,
+        219
+      ],
+      "renderedPadding": [
+        74,
+        88,
+        69,
+        101
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        512,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        11,
+        25,
+        248,
+        227
+      ],
+      "renderedPadding": [
+        75,
+        89,
+        72,
+        93
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        768,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        16,
+        37,
+        243,
+        220
+      ],
+      "renderedPadding": [
+        80,
+        101,
+        77,
+        100
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        14,
+        44,
+        237,
+        209
+      ],
+      "renderedPadding": [
+        78,
+        108,
+        83,
+        111
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        256,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        28,
+        54,
+        233,
+        208
+      ],
+      "renderedPadding": [
+        92,
+        118,
+        87,
+        112
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        512,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        33,
+        77,
+        221,
+        204
+      ],
+      "renderedPadding": [
+        97,
+        141,
+        99,
+        116
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        768,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        50,
+        97,
+        204,
+        193
+      ],
+      "renderedPadding": [
+        114,
+        161,
+        116,
+        127
+      ]
+    }
+  ],
+  "virtualWidth": 384,
+  "virtualHeight": 384,
+  "alphaDiscard": 8,
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    0,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "frameMs": 70,
+  "cellWidth": 256,
+  "cellHeight": 256,
+  "contentWidthRatio": 0.6328125,
+  "contentHeightRatio": 0.5338541666666666,
+  "delivery": "instant",
+  "origin": "caster",
+  "orient": false,
+  "groundOrigin": false,
+  "anchorX": 0.502496,
+  "anchorY": 0.489258,
+  "impactAnchorX": 0.498698,
+  "impactAnchorY": 0.520182,
+  "status": "ready",
+  "sourcePixelsUnmodified": false,
+  "sourceSheet": "vibe_images/attack-cinder-nova-sheet_1793033657998_2e99ed4c.png",
+  "keying": "magenta green-channel matte, fringe hue repair, 5px cell-edge feather; raw sheet kept",
+  "composition": "whole-field",
+  "actorBodyWidthM": 0.5,
+  "authoringDiameterM": 5.0,
+  "authoringGeometry": {
+    "shape": "circle",
+    "radiusM": 2.5,
+    "spanM": 5.0,
+    "depthM": 5.0,
+    "origin": "caster",
+    "canonicalSource": "tools/data/skills.json#attack.cinder_nova"
+  }
+}

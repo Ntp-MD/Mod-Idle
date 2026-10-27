@@ -490,6 +490,56 @@ export interface MobElite {
   evasion_pct: number;
 }
 
+/** How an attack range is measured: centre-to-centre, or the gap between body footprints. */
+export type AttackRangeBasis = 'center' | 'body-edge';
+
+export interface AttackRangeDefinition {
+  basis: AttackRangeBasis;
+  meters: number;
+}
+
+/** One ordinary basic-attack profile; numbers are authored, the resolver owns their meaning. */
+export interface AttackRangeProfile {
+  delivery: 'melee' | 'projectile';
+  range: AttackRangeDefinition;
+  /** Where the approach stops, as a percentage of the profile's own reach. */
+  stop_at_range_pct: number;
+  /** Executable windup and recovery as a percentage of the resolved attack interval. */
+  windup_interval_pct: number;
+  recovery_interval_pct: number;
+  projectile_speed_mps?: number;
+  hit_radius_m?: number;
+}
+
+/** `engine.json` `combat_arena.normal_attack`: the legacy line adapter and its profiles. */
+export interface NormalAttackConfig {
+  legacy: Record<'front' | 'stand-off', string>;
+  player: Record<'melee' | 'ranged' | 'magic', string>;
+  contact_clearance_m: number;
+  contact_band_m: number;
+  profiles: Record<string, AttackRangeProfile>;
+}
+
+/** One authored mob cast: positioning range, delivery and executable preparation. */
+export interface MobCastProfile {
+  delivery: 'melee' | 'projectile' | 'ground';
+  range: AttackRangeDefinition;
+  /** Full executable preparation, not a display lead-in. */
+  windup_sec: number;
+  recovery_sec: number;
+  /** Ground-only: time between release and the committed impact. */
+  impact_delay_sec?: number;
+  projectile_speed_mps?: number;
+  hit_radius_m?: number;
+}
+
+/** Committed ground footprint for a mob cast; a single target keeps radius 0. */
+export interface MobCastArea {
+  origin: 'target' | 'caster';
+  radius_m: number;
+  shape?: SkillShape;
+}
+
 /** One mob-only skill row. A strike replaces the next basic swing; an aura is a passive group buff. */
 export interface MobSkillRow {
   id: string;
@@ -501,8 +551,13 @@ export interface MobSkillRow {
   status?: string | null;
   /** Seconds between casts; absent or zero means always ready. */
   cd?: number;
-  /** Display lead-in for the cast beat; it never moves the action clock. */
+  /** Legacy full windup; kept equal to cast.windup_sec so an older reader cannot shorten it. */
   cast_sec?: number;
+  /** Position, delivery and timing. Every strike row must author one. */
+  cast?: MobCastProfile;
+  /** Ground impact footprint; absent for single-target melee/projectile casts. */
+  area?: MobCastArea;
+  /** Placement preference only: front closes, stand-off holds. Never decides delivery. */
   role?: 'front' | 'stand-off' | 'any';
   /** Auras affect the engaged group (max 3), or only that source's own line. */
   scope?: 'engaged' | 'line';

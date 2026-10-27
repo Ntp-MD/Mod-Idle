@@ -1,0 +1,415 @@
+{
+  "id": "heal.cleanse",
+  "src": "/fx/skill-pool/heal-cleanse/v1/atlas.png",
+  "columns": 4,
+  "rows": 4,
+  "cellWidth": 313.5,
+  "cellHeight": 313.5,
+  "anchorY": 0.5107466063348416,
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    4,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "frameMs": 80,
+  "delivery": "instant",
+  "origin": "caster",
+  "orient": false,
+  "imageWidth": 1254,
+  "imageHeight": 1254,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        103,
+        156,
+        219,
+        287
+      ],
+      "renderedPadding": [
+        167.5,
+        220.5,
+        158.5,
+        90.5
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        313,
+        0,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        85,
+        122,
+        256,
+        290
+      ],
+      "renderedPadding": [
+        149.0,
+        186.5,
+        122.0,
+        87.5
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        627,
+        0,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        62,
+        90,
+        256,
+        289
+      ],
+      "renderedPadding": [
+        126.5,
+        154.5,
+        121.5,
+        88.5
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        940,
+        0,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        6,
+        49,
+        279,
+        297
+      ],
+      "renderedPadding": [
+        70.0,
+        113.5,
+        99.0,
+        80.5
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        313,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        36,
+        40,
+        289,
+        283
+      ],
+      "renderedPadding": [
+        100.5,
+        104.0,
+        88.5,
+        95.0
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        313,
+        313,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        37,
+        44,
+        292,
+        288
+      ],
+      "renderedPadding": [
+        101.0,
+        108.0,
+        86.0,
+        90.0
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        627,
+        313,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        29,
+        42,
+        297,
+        294
+      ],
+      "renderedPadding": [
+        93.5,
+        106.0,
+        80.5,
+        84.0
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        940,
+        313,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        20,
+        28,
+        288,
+        296
+      ],
+      "renderedPadding": [
+        84.0,
+        92.0,
+        90.0,
+        82.0
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        627,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        47,
+        28,
+        273,
+        278
+      ],
+      "renderedPadding": [
+        111.5,
+        92.5,
+        104.5,
+        99.5
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        313,
+        627,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        54,
+        38,
+        283,
+        274
+      ],
+      "renderedPadding": [
+        118.0,
+        102.5,
+        95.0,
+        103.5
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        627,
+        627,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        67,
+        46,
+        257,
+        279
+      ],
+      "renderedPadding": [
+        131.5,
+        110.5,
+        120.5,
+        98.5
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        940,
+        627,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        68,
+        31,
+        249,
+        276
+      ],
+      "renderedPadding": [
+        132.0,
+        95.5,
+        129.0,
+        101.5
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        940,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        78,
+        27,
+        239,
+        258
+      ],
+      "renderedPadding": [
+        142.5,
+        91.0,
+        138.5,
+        120.0
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        313,
+        940,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        89,
+        54,
+        243,
+        250
+      ],
+      "renderedPadding": [
+        153.0,
+        118.0,
+        135.0,
+        128.0
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        627,
+        940,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        91,
+        57,
+        231,
+        247
+      ],
+      "renderedPadding": [
+        155.5,
+        121.0,
+        146.5,
+        131.0
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        940,
+        940,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        90,
+        87,
+        244,
+        248
+      ],
+      "renderedPadding": [
+        154.0,
+        151.0,
+        134.0,
+        130.0
+      ]
+    }
+  ],
+  "virtualWidth": 442,
+  "virtualHeight": 442,
+  "contentWidthRatio": 0.6176470588235294,
+  "contentHeightRatio": 0.6063348416289592,
+  "alphaDiscard": 8,
+  "status": "ready",
+  "groundOrigin": false,
+  "anchorX": 0.5130090497737556,
+  "qa": {
+    "paddingPass": true,
+    "renderedPaddingPass": true,
+    "alphaDiscard": 8,
+    "rawPerimeterAlphaPass": false,
+    "sourceSeparatorsClear": true,
+    "sourcePixelsUnmodified": true,
+    "frameCount": 16,
+    "note": "Renderer discards alpha <=8/255; source PNG is retained unchanged. Padding belongs to shared virtual canvas."
+  }
+}

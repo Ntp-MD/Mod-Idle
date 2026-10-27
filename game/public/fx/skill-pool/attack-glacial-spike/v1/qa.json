@@ -1,0 +1,20 @@
+{
+  "id": "attack.glacial_spike",
+  "status": "PASS",
+  "errors": [],
+  "imageSize": [
+    1024,
+    1024
+  ],
+  "frameCount": 16,
+  "alphaDiscard": 8,
+  "virtualPaddingPx": 64,
+  "sourceSeparatorsClear": true,
+  "sourcePixelsUnmodified": false,
+  "contentWidthPx": 238,
+  "contentHeightPx": 234,
+  "contentWidthRatio": 0.6198,
+  "contentHeightRatio": 0.6094,
+  "visualReview": "Charged ice spear, straight flight, shard impact. Keyed sheet inspected on the arena ground colour; live arena sample pending.",
+  "runtimeActivated": true
+}

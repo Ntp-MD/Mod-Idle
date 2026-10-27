@@ -4,9 +4,8 @@ import { buildCharacter, emptyGear } from '../src/sim/core/player';
 import type { Item } from '../src/sim/core/types';
 
 /**
- * Elemental power is one rule, and the engine owns it (DECISIONS: per Element, the flat pool plus
- * `Int x K_ELEM` for the weapon's own Element, scaled by the shared and the Element-specific
- * percents).
+ * Elemental power is one rule, and the engine owns it: the flat pool plus `Int x K_ELEM` for the
+ * weapon's own Element, scaled by the shared and the Element-specific percents.
  *
  * The figures below were read off the sheet BEFORE the rule moved into the engine, so they are a
  * before/after record and not a restatement of the code. Each case names a shape the rule has to

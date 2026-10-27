@@ -1,0 +1,602 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "path": "tools/data/skills.json",
+    "selection": "skills: not retired"
+  },
+  "workflow": "complete-requested-batch-then-integrate",
+  "currentSkillId": null,
+  "fallback": "Existing active VFX remains live until that skill has an approved authored replacement.",
+  "skills": [
+    {
+      "id": "attack.firestorm",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-firestorm/v2"
+    },
+    {
+      "id": "attack.fireball",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-fireball/v2"
+    },
+    {
+      "id": "attack.ice_lance",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-ice-lance/v1"
+    },
+    {
+      "id": "attack.blizzard",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-blizzard/v2"
+    },
+    {
+      "id": "attack.frostbite",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-frostbite/v1"
+    },
+    {
+      "id": "attack.chain_lightning",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-chain-lightning/v1"
+    },
+    {
+      "id": "attack.spark",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-spark/v1"
+    },
+    {
+      "id": "attack.thunder_strike",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-thunder-strike/v1"
+    },
+    {
+      "id": "attack.poison_bolt",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-poison-bolt/v1"
+    },
+    {
+      "id": "attack.venom_spray",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-venom-spray/v2"
+    },
+    {
+      "id": "attack.acid_arrow",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-acid-arrow/v1"
+    },
+    {
+      "id": "attack.chaos_bolt",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-chaos-bolt/v1"
+    },
+    {
+      "id": "attack.void_blast",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-void-blast/v2"
+    },
+    {
+      "id": "attack.sand_storm",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-sand-storm/v2"
+    },
+    {
+      "id": "attack.earth_splitter",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-earth-splitter/v1"
+    },
+    {
+      "id": "attack.backstab",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-backstab/v1"
+    },
+    {
+      "id": "attack.sidestep",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-sidestep/v1"
+    },
+    {
+      "id": "attack.impale",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-impale/v1"
+    },
+    {
+      "id": "attack.skull_crack",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-skull-crack/v1"
+    },
+    {
+      "id": "attack.ground_slam",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-ground-slam/v2"
+    },
+    {
+      "id": "attack.bone_breaker",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-bone-breaker/v1"
+    },
+    {
+      "id": "attack.carnage",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-carnage/v1"
+    },
+    {
+      "id": "attack.cleave_down",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-cleave-down/v1"
+    },
+    {
+      "id": "attack.cleave",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-cleave/v2"
+    },
+    {
+      "id": "attack.elemental_break",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-elemental-break/v1"
+    },
+    {
+      "id": "attack.whirlwind",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-whirlwind/v2"
+    },
+    {
+      "id": "attack.shield_bash",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-shield-bash/v1"
+    },
+    {
+      "id": "attack.puncture",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-puncture/v1"
+    },
+    {
+      "id": "attack.reap",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-reap/v1"
+    },
+    {
+      "id": "attack.piercing_shot",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-piercing-shot/v1"
+    },
+    {
+      "id": "attack.arrow_shower",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-arrow-shower/v2"
+    },
+    {
+      "id": "attack.headshot",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-headshot/v1"
+    },
+    {
+      "id": "attack.pierce_the_veil",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-pierce-the-veil/v1"
+    },
+    {
+      "id": "attack.earth_shock",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-earth-shock/v2"
+    },
+    {
+      "id": "attack.detonate",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-detonate/v1"
+    },
+    {
+      "id": "attack.shatter",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-shatter/v2"
+    },
+    {
+      "id": "attack.overload",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-overload/v2"
+    },
+    {
+      "id": "attack.catalyst",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-catalyst/v1"
+    },
+    {
+      "id": "attack.ruin",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-ruin/v1"
+    },
+    {
+      "id": "attack.aftershock",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-aftershock/v2"
+    },
+    {
+      "id": "buff.warcry",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/buff-warcry/v1"
+    },
+    {
+      "id": "buff.berserker",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/buff-berserker/v1"
+    },
+    {
+      "id": "buff.iron_will",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/buff-iron-will/v1"
+    },
+    {
+      "id": "buff.holy_veil",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/buff-holy-veil/v1"
+    },
+    {
+      "id": "buff.ghost_dance",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/buff-ghost-dance/v1"
+    },
+    {
+      "id": "buff.earth_wall",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/buff-earth-wall/v1"
+    },
+    {
+      "id": "buff.magia_drive",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/buff-magia-drive/v1"
+    },
+    {
+      "id": "buff.energy_absorb",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/buff-energy-absorb/v1"
+    },
+    {
+      "id": "buff.flame_guard",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/buff-flame-guard/v1"
+    },
+    {
+      "id": "curse.weaken",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/curse-weaken/v1"
+    },
+    {
+      "id": "curse.blinding_mark",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/curse-blinding-mark/v1"
+    },
+    {
+      "id": "curse.expose",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/curse-expose/v1"
+    },
+    {
+      "id": "curse.cripple",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/curse-cripple/v1"
+    },
+    {
+      "id": "curse.jinx",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/curse-jinx/v1"
+    },
+    {
+      "id": "curse.venom_bind",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/curse-venom-bind/v1"
+    },
+    {
+      "id": "heal.heal",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/heal-heal/v1"
+    },
+    {
+      "id": "heal.greater_heal",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/heal-greater-heal/v1"
+    },
+    {
+      "id": "heal.cleanse",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/heal-cleanse/v1"
+    },
+    {
+      "id": "attack.meteor",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-meteor/v2",
+      "manifest": "game/src/ui/combat/fx-manifests/components-v2-manifest.json"
+    },
+    {
+      "id": "aura.wraith_of_fury",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-wraith-of-fury/v1"
+    },
+    {
+      "id": "aura.clarity",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-clarity/v1"
+    },
+    {
+      "id": "aura.haste",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-haste/v1"
+    },
+    {
+      "id": "aura.vitality",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-vitality/v1"
+    },
+    {
+      "id": "aura.herald_of_ash",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-herald-of-ash/v1"
+    },
+    {
+      "id": "aura.herald_of_frost",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-herald-of-frost/v1"
+    },
+    {
+      "id": "aura.herald_of_lightning",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-herald-of-lightning/v1"
+    },
+    {
+      "id": "aura.ember_conversion",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-ember-conversion/v1"
+    },
+    {
+      "id": "aura.rime_conversion",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-rime-conversion/v1"
+    },
+    {
+      "id": "aura.storm_conversion",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-storm-conversion/v1"
+    },
+    {
+      "id": "aura.cast_on_crit",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-cast-on-crit/v1"
+    },
+    {
+      "id": "aura.cast_on_damage_taken",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-cast-on-damage-taken/v1"
+    },
+    {
+      "id": "aura.rimbo_form",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-rimbo-form/v1"
+    },
+    {
+      "id": "aura.elemental_fury",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-elemental-fury/v1"
+    },
+    {
+      "id": "aura.trinity_form",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-trinity-form/v1"
+    },
+    {
+      "id": "aura.grace",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-grace/v1"
+    },
+    {
+      "id": "aura.iron_guard",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-iron-guard/v1"
+    },
+    {
+      "id": "aura.energy_guard",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/aura-energy-guard/v1"
+    },
+    {
+      "id": "attack.double_strike",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-double-strike/v1"
+    },
+    {
+      "id": "attack.frost_nova",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-frost-nova/v1"
+    },
+    {
+      "id": "attack.glacial_spike",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-glacial-spike/v1"
+    },
+    {
+      "id": "attack.split_shot",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-split-shot/v1"
+    },
+    {
+      "id": "attack.cinder_nova",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-cinder-nova/v1"
+    },
+    {
+      "id": "attack.thunder_storm",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-thunder-storm/v1"
+    },
+    {
+      "id": "attack.storm_field",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-storm-field/v1"
+    },
+    {
+      "id": "attack.poison_cloud",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-poison-cloud/v1"
+    },
+    {
+      "id": "attack.chaos_wave",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-chaos-wave/v1"
+    },
+    {
+      "id": "attack.fissure",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-fissure/v1"
+    },
+    {
+      "id": "attack.stone_spike",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-stone-spike/v1"
+    },
+    {
+      "id": "attack.water_ball",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-water-ball/v1"
+    },
+    {
+      "id": "attack.ignite",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-ignite/v1"
+    },
+    {
+      "id": "attack.venom_bolt",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-venom-bolt/v1"
+    },
+    {
+      "id": "attack.entropy",
+      "status": "integrated",
+      "runtime": "authored",
+      "authored": "game/public/fx/skill-pool/attack-entropy/v1"
+    }
+  ],
+  "batchSkillIds": [
+    "attack.fireball",
+    "attack.frostbite",
+    "attack.ground_slam",
+    "attack.headshot",
+    "attack.ice_lance",
+    "attack.impale",
+    "attack.overload",
+    "attack.pierce_the_veil",
+    "attack.piercing_shot",
+    "attack.poison_bolt",
+    "attack.puncture",
+    "attack.reap",
+    "attack.ruin",
+    "attack.sand_storm",
+    "attack.shatter",
+    "attack.shield_bash",
+    "attack.sidestep",
+    "attack.skull_crack",
+    "attack.spark",
+    "attack.thunder_strike",
+    "attack.venom_spray",
+    "attack.void_blast",
+    "attack.whirlwind"
+  ],
+  "batchStatus": "integrated",
+  "verification": {
+    "assetGate": "92 live selected atlases + 3 Meteor components PASS; alpha<=8 discard and virtual padding; raw sheets preserved beside runtime art",
+    "focusedTests": "arena-authored-vfx (15) and render (16) suites PASS",
+    "typecheck": "passed",
+    "svelteCheck": "0 errors / 0 warnings",
+    "liveHttp": "92 selected atlases + 3 component modules + showcase route: passed",
+    "browser": "skill lab verified Double Strike, Frost Nova, Glacial Spike, Split Shot and Fissure; the remaining new atlas sets were verified through the shared authored renderer test; 1920 screenshot surface unavailable during the final pass",
+    "build": "passed",
+    "visualReview": "all selected atlas sheets inspected on the arena ground colour; 21 spatial replacements and 8 new frontal effects reviewed",
+    "performance": "no data available"
+  }
+}

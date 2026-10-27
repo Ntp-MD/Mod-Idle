@@ -1,0 +1,2 @@
+same two-handed sword point aimed toward camera
+Single isolated transparent weapon view. Use the established item identity and pixel-art style reference. Preserve native source pixels. No hands, body, shadow, scenery, FX, labels or grid.

@@ -295,8 +295,8 @@ export function buildCharacter(
   // physical-basis press route their physical share through it, a magic-basis press never does. A
   // keystone may route the same way.
   const conversion = conversionOf(effects, treeRules);
-  // the elemental pools: the engine owns the rule (DECISIONS: per Element, the flat pool plus
-  // `Int x K_ELEM` for the weapon's own Element, scaled by the shared and Element-specific percents)
+  // the elemental pools: the engine owns the rule — the flat pool plus `Int x K_ELEM` for the weapon's
+  // own Element, scaled by the shared and Element-specific percents
   const elemPower = eng.elementalPowerOf({
     intCore: core.int,
     weaponElement,
@@ -346,7 +346,7 @@ export function buildCharacter(
   const sanctuary = bundleOf(bundles, 'sanctuary');
   const riposte = bundleOf(bundles, 'riposte');
   const gamblers = bundleOf(bundles, 'gamblers-step');
-  // the Cap is applied LAST (docs/DECISIONS.md): after the aspd Mod band inside the
+  // the Cap is applied LAST: after the aspd Mod band inside the
   // formula, after a multiplicative aspd buff (Haste's A-1.15) and after the weight tax — so no
   // build passes 5 hits/sec, which is the clock rule the whole game is priced against
   const aspd = eng.capAspd(

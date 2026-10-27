@@ -30,6 +30,10 @@ export interface SpawnProfile {
   assist_m: number;
   leash_m: number;
   roam_m: number;
+  /** A returning body re-enters the idle/aggro state only inside this radius of home. */
+  home_band_m: number;
+  /** Return pace as a share of the body's ordinary walk speed; never above 1. */
+  return_speed_mult: number;
   /** Hostile spawns and aggro are suppressed within this distance of a field Camp. */
   camp_safe_m: number;
   /** Share of wall seconds an offline field counts as engaged combat time. */
@@ -107,13 +111,18 @@ function profileAt(raw: unknown, path: string): SpawnProfile {
   if (leash < aggro) refuse(`${path}.leash_m`, 'must be at least aggro_m');
   const roam = numberAt(raw, 'roam_m', path);
   if (roam < 0) refuse(`${path}.roam_m`, 'must be nonnegative');
+  const homeBand = numberAt(raw, 'home_band_m', path);
+  if (!(homeBand > 0 && homeBand <= roam + 1)) refuse(`${path}.home_band_m`, 'must be positive and near the idle roam radius');
+  const returnSpeed = numberAt(raw, 'return_speed_mult', path);
+  if (!(returnSpeed > 0 && returnSpeed <= 1)) refuse(`${path}.return_speed_mult`, 'must be within (0, 1]');
   const campSafe = numberAt(raw, 'camp_safe_m', path);
   if (campSafe < 0) refuse(`${path}.camp_safe_m`, 'must be nonnegative');
   const offlineShare = numberAt(raw, 'offline_share', path);
   if (!(offlineShare >= 0 && offlineShare <= 1)) refuse(`${path}.offline_share`, 'must be within [0, 1]');
   return {
     layout, cap, respawn_sec: respawn, aggro_m: aggro, assist_m: assist, leash_m: leash,
-    roam_m: roam, camp_safe_m: campSafe, offline_share: offlineShare,
+    roam_m: roam, home_band_m: homeBand, return_speed_mult: returnSpeed,
+    camp_safe_m: campSafe, offline_share: offlineShare,
   };
 }
 

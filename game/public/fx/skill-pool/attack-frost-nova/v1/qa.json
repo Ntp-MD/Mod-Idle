@@ -1,0 +1,20 @@
+{
+  "id": "attack.frost_nova",
+  "status": "PASS",
+  "errors": [],
+  "imageSize": [
+    1024,
+    1024
+  ],
+  "frameCount": 16,
+  "alphaDiscard": 8,
+  "virtualPaddingPx": 64,
+  "sourceSeparatorsClear": true,
+  "sourcePixelsUnmodified": false,
+  "contentWidthPx": 236,
+  "contentHeightPx": 235,
+  "contentWidthRatio": 0.6146,
+  "contentHeightRatio": 0.612,
+  "visualReview": "Ground nova: shard burst grows into a spinning frost ring, then fades. Keyed sheet inspected on the arena ground colour; live arena sample pending.",
+  "runtimeActivated": true
+}

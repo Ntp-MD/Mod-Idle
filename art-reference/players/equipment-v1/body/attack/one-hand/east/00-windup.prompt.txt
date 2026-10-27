@@ -1,0 +1,2 @@
+One-handed sword windup. Main hand lifted near grip point; offhand held ready for shield.
+Same cream hooded amber-eyed traveler as ../../reference.png. Fixed elevated three-quarter camera, upper-left light, crisp pixel-cluster style, transparent canvas, whole body/feet visible, empty hands, no weapon/shield, effects, shadow, floor, labels or grid.

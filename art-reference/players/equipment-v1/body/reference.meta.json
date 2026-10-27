@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "assetType": "clean-body-reference",
+  "generator": "OpenAI built-in image_gen",
+  "source": "reference.png",
+  "sourceDimensions": {
+    "width": 1254,
+    "height": 1254
+  },
+  "alphaBoundsExclusive": [
+    33,
+    53,
+    1208,
+    1152
+  ],
+  "alphaBoundsProvenance": "Pillow alpha > 0 read-only measurement",
+  "footAnchor": {
+    "x": 645,
+    "y": 933
+  },
+  "mainHandCenter": {
+    "x": 608,
+    "y": 777
+  },
+  "offhandCenter": {
+    "x": 795,
+    "y": 751
+  },
+  "gripProvenance": "manual-visual estimate in source pixels; anatomical main hand is the near hand on image left for south-east view",
+  "estimateTolerancePx": 14,
+  "facing": "south-east",
+  "qa": {
+    "visuallyInspected": true,
+    "emptyHands": true,
+    "wholeBodyVisible": true,
+    "canvasPerimeterAlphaMaximum": 0,
+    "sourcePixelsModified": false,
+    "requestedScaleMatched": false,
+    "scaleNote": "Generator produced a larger source body than requested. Keep original pixels; root may uniformly scale during atlas assembly. Faint low-alpha noise expands alpha>0 bounds."
+  },
+  "visibleBoundsAlphaAbove8Exclusive": [
+    414,
+    420,
+    833,
+    940
+  ]
+}

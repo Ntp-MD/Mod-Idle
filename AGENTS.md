@@ -7,9 +7,7 @@ Single-player, browser-only idle RPG; no server. This is the shared entry point 
 | Source | Owns | Read when |
 |---|---|---|
 | `AGENTS.md` | Workflow, ownership, commands and verification | Starting work; reuse once loaded |
-| `docs/DECISIONS.md` | Formulas, variables and calculation order | Changing the relevant calculation |
 | `docs/glossary.md` | Short definitions of game terms | A term is ambiguous, new or renamed |
-| `docs/game-rules.md` | Current gameplay intent and non-obvious behavior constraints | Changing the relevant game system |
 | `docs/map-art.md` | Map terrain artwork contract and the projected ground footprint | Producing or placing terrain hex art |
 | `art-reference/` | Portable map art reference kit, generated-image holding area awaiting approval, concept images and map calibration snapshots; never imported by game runtime (dev review + tests only) | Generating, measuring or QC-ing map art; generated files are not game-ready until approved and copied into game assets; refresh with `art-reference/map/refresh.ps1` |
 | `art/` | Generated gallery output (`gallery.html`, `favs.json` queue); never hand-edited, rebuilt by `tools/gallery.ts` | Reviewing shelf sheets in a browser |
@@ -34,7 +32,7 @@ For repository implementation, fixes, reviews and investigation, apply [lean-age
 - Edit docs only when requested, or when this task changes a documented formula, term, behavior contract or integration point that future work relies on. Patch that section only; no incidental reorganization, changelogs or unrelated rewrites.
 - Skills and audit prompts follow this scope; they create no extra approval steps, documentation work or redesigns outside the task.
 - Production art and art generation are first-party. Do not add third-party asset packs or external generation services (for example PixelLab). Existing imported reference packs stay as reference/placeholder only unless the user asks to remove them.
-- Active-skill VFX follows [the authored VFX production queue](art-reference/skills/vfx-production.md). The user requested the listed 23 attack skills completed and integrated together, without per-skill approval; skills outside that batch retain their existing effects.
+- Active-skill VFX follows [the authored VFX production queue](game/public/fx/skill-pool/vfx-production.md). The user requested the listed 23 attack skills completed and integrated together, without per-skill approval; skills outside that batch retain their existing effects.
 - Work only in the active workspace/sandbox and on files supplied for the task. The current local files are the source of truth. Do not inspect Git state, history, branches, remotes or other worktrees; do not compare the workspace with committed content.
 - Preserve in-flight changes. Plan briefly for risky/cross-layer work; implement straightforward changes directly. Delegate only independent work with nonoverlapping ownership when delegation is authorized.
 - Ask about unclear scope, new dependencies, destructive operations or unsafe/lossy compatibility changes. Routine choices and explicitly requested design changes need no extra approval.

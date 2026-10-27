@@ -1,8 +1,9 @@
 import { E, sm } from '../../engine/client';
 import { arenaFacingIndex } from '../../presentation/arena-camera';
+import { attackProfileGeometry, withinAttackStopBand, type AttackRangeGeometry } from '../../../../engine/attack-range.ts';
 import { targetsInSkillArea } from '../../../../engine/skill-actions.ts';
 import { skillAreaSnapshot } from '../../../../engine/skill-area.ts';
-import type { SkillAreaSnapshot, SkillCastTiming } from '../../../../engine/types.ts';
+import type { AttackRangeProfile, SkillAreaSnapshot, SkillCastTiming } from '../../../../engine/types.ts';
 import type { CombatIntent, CombatFlight } from './combat-actions';
 import type { FxEvent, GameState, Mob } from '../core/types';
 
@@ -39,6 +40,10 @@ export interface CombatArenaAction {
   impactCount?: number;
   /** A released ordinary ranged shot; presentation may draw it differently from a melee swing. */
   ranged?: boolean;
+  /** The committed release beat; later reschedules must not release the same action twice. */
+  releasedAtUs?: number;
+  /** Encounter identity when the action began; a change before release cancels the preparation. */
+  areaKey?: string;
   /** A trigger/proc cast owns an effect and flight, never the actor's primary pose. */
   nonblocking?: boolean;
   /** A channel holds its active pose until the last pulse, then recovers. */
@@ -73,6 +78,10 @@ export interface CombatMobFlight {
   impactAtUs: number;
   speedMps: number;
   radiusM: number;
+  /** A skill shot names its row; a plain ranged basic leaves both cast fields absent. */
+  skillId?: string;
+  kind?: 'projectile' | 'ground';
+  impactRadiusM?: number;
   /** Encounter identity at release; leaving it cancels the shot with a receipt. */
   areaKey?: string;
   queued?: boolean;
@@ -121,6 +130,10 @@ export interface CombatArenaActor {
   statuses?: Record<string, { stacks: number; secLeft: number }>;
   /** A stand-off body that has fired from its current band holds until the target leaves reach. */
   holdAtRange?: boolean;
+  /** A disengaged body returning to its home band; it takes no new targets until it arrives. */
+  returning?: boolean;
+  /** Engaged melee body with no reachable claim this sample; it waits instead of overlapping. */
+  waitingForContact?: boolean;
   mob?: Mob;
   action?: CombatArenaAction;
 }
@@ -137,6 +150,8 @@ export interface CombatArenaFrame {
   bodies: CombatArenaBody[];
   /** The player's committed approach/windup decision sampled with this frame. */
   intent?: CombatIntent;
+  /** Contact claims sampled with the frame, for deterministic inspection at a seek. */
+  contacts?: Record<string, CombatContactClaim>;
 }
 
 export interface CombatArena extends CombatArenaFrame {
@@ -169,9 +184,67 @@ export function createCombatArena(): CombatArena {
 export const arenaDistance = (a: { x: number; y: number }, b: { x: number; y: number }) =>
   Math.hypot(b.x - a.x, b.y - a.y);
 
+const NORMAL_ATTACK = CFG.normal_attack;
+const ATTACK_CLEARANCE_M = Number(NORMAL_ATTACK.contact_clearance_m);
+const ATTACK_BAND_M = Number(NORMAL_ATTACK.contact_band_m);
+
+/** The profile an ordinary spawn line resolves to; delivery is never inferred from a sprite. */
+export function mobAttackProfile(mob: Mob): AttackRangeProfile {
+  const line = mob.line === 'stand-off' ? 'stand-off' : 'front';
+  const id = NORMAL_ATTACK.legacy[line];
+  return NORMAL_ATTACK.profiles[id as keyof typeof NORMAL_ATTACK.profiles] as AttackRangeProfile;
+}
+
+/** The profile a player basic resolves to from the held weapon group. */
+export function playerAttackProfile(weaponName: string): AttackRangeProfile {
+  const group = sm.weaponGroupOf(weaponName);
+  const key = group === 'ranged' || group === 'magic' ? group : 'melee';
+  const id = NORMAL_ATTACK.player[key];
+  return NORMAL_ATTACK.profiles[id as keyof typeof NORMAL_ATTACK.profiles] as AttackRangeProfile;
+}
+
+/** One geometry read for every basic-attack caller: AI, start, release, contact and debug. */
+export function attackGeometryFor(
+  profile: AttackRangeProfile, selfRadius: number, targetRadius: number, distance: number,
+): AttackRangeGeometry {
+  return attackProfileGeometry(profile, { selfRadius, targetRadius }, distance,
+    ATTACK_CLEARANCE_M, ATTACK_BAND_M);
+}
+
+export function arenaMobAttackGeometry(arena: CombatArena, mobId: string): AttackRangeGeometry | undefined {
+  const actor = arena.mobs[mobId];
+  if (!actor?.mob) return undefined;
+  return attackGeometryFor(mobAttackProfile(actor.mob),
+    actor.radiusM ?? bodyRadiusM(actor.mob), arena.player.radiusM ?? bodyRadiusM(),
+    arenaDistance(actor, arena.player));
+}
+
+export function arenaMobInReach(arena: CombatArena, mobId: string): boolean {
+  return arenaMobAttackGeometry(arena, mobId)?.inRange === true;
+}
+
+export function arenaPlayerAttackGeometry(
+  arena: CombatArena, weaponName: string, mobId: string,
+): AttackRangeGeometry | undefined {
+  const target = arena.mobs[mobId];
+  if (!target) return undefined;
+  return attackGeometryFor(playerAttackProfile(weaponName),
+    arena.player.radiusM ?? bodyRadiusM(), target.radiusM ?? bodyRadiusM(), arenaDistance(arena.player, target));
+}
+
+export function arenaPlayerInReach(arena: CombatArena, weaponName: string, mobId: string): boolean {
+  return arenaPlayerAttackGeometry(arena, weaponName, mobId)?.inRange === true;
+}
+
+/** Standard-body maximum centre distance; callers with real bodies use `attackGeometryFor`. */
 export function arenaWeaponRange(weaponName: string): number {
-  const group = sm.weaponGroupOf(weaponName) as keyof typeof CFG.range;
-  return CFG.range[group] ?? CFG.range.melee;
+  const radius = bodyRadiusM();
+  return attackGeometryFor(playerAttackProfile(weaponName), radius, radius, 0).maxCenterDistance;
+}
+
+export function arenaWeaponStopRange(weaponName: string): number {
+  const radius = bodyRadiusM();
+  return attackGeometryFor(playerAttackProfile(weaponName), radius, radius, 0).stopCenterDistance;
 }
 
 export function arenaSkillRange(skillId: string): number {
@@ -196,7 +269,8 @@ export function aimForSkill(
   const radius = skill?.area?.radius_m ?? 0;
   // A deliberate focus pins the target of every aim path until the body is gone.
   const focused = arena.focusId
-    ? group.find((mob) => mob.id === arena.focusId && mob.hp > 0 && arena.mobs[mob.id]) : undefined;
+    ? group.find((mob) => mob.id === arena.focusId && mob.hp > 0 && arena.mobs[mob.id]
+      && !arena.mobs[mob.id].returning) : undefined;
   if (focused) {
     const pose = arena.mobs[focused.id];
     if (requireRange && arenaDistance(arena.player, pose) > arenaSkillRange(skillId) + 1e-7)
@@ -223,7 +297,7 @@ export function aimForSkill(
     return t;
   }
   if (skill.area!.origin === 'caster') {
-    const inside = group.some((mob) => mob.hp > 0 && arena.mobs[mob.id]
+    const inside = group.some((mob) => mob.hp > 0 && arena.mobs[mob.id] && !arena.mobs[mob.id].returning
       && arenaDistance(arena.player, arena.mobs[mob.id]) <= radius + 1e-7);
     if (!inside && requireRange) return undefined;
     const t = arenaTarget(arena, group);
@@ -238,13 +312,13 @@ export function aimForSkill(
   let best: { mob: Mob; point: { x: number; y: number }; count: number; dist: number } | undefined;
   for (const mob of group) {
     const pose = arena.mobs[mob.id];
-    if (mob.hp <= 0 || !pose) continue;
+    if (mob.hp <= 0 || !pose || pose.returning) continue;
     const dist = arenaDistance(arena.player, pose);
     if (dist > range + 1e-7) continue;
     let n = 0;
     for (const other of group) {
       const p2 = arena.mobs[other.id];
-      if (other.hp <= 0 || !p2) continue;
+      if (other.hp <= 0 || !p2 || p2.returning) continue;
       if (arenaDistance(pose, p2) <= radius + 1e-7) n++;
     }
     if (!best || n > best.count || (n === best.count && dist < best.dist - 1e-7))
@@ -274,20 +348,21 @@ export function arenaSkillTargets(arena: CombatArena, skillId: string, group: Mo
     return { targets: [] };
   }
   const area = skillAreaSnapshot(definition, arena.player, aimPoint, aim.mob.id, arena.player.facing);
-  const actors = group.flatMap((mob) => mob.hp > 0 && arena.mobs[mob.id]
+  const actors = group.flatMap((mob) => mob.hp > 0 && arena.mobs[mob.id] && !arena.mobs[mob.id].returning
     ? [{ ...arena.mobs[mob.id], mob }] : []);
   return { targets: targetsInSkillArea(area, actors).map((actor) => actor.mob), area };
 }
 
+/** Standard-body maximum centre distance for an ordinary spawn; real actors use geometry. */
 export function arenaMobRange(mob: Mob): number {
-  return mob.line === 'stand-off' ? CFG.range.ranged : CFG.range.melee;
+  const selfRadius = bodyRadiusM(mob);
+  return attackGeometryFor(mobAttackProfile(mob), selfRadius, bodyRadiusM(), 0).maxCenterDistance;
 }
 
-/** Ordinary stand-off bodies hold short of their maximum reach instead of touching the range edge. */
+/** Standard-body stop distance for an ordinary spawn; real actors use geometry. */
 export function arenaMobStopRange(mob: Mob): number {
-  if (mob.line !== 'stand-off') return arenaMobRange(mob);
-  const pct = Number(E.combat_arena.normal_attack.profiles.ranged.stop_at_range_pct) / 100;
-  return arenaMobRange(mob) * (Number.isFinite(pct) ? pct : 1);
+  const selfRadius = bodyRadiusM(mob);
+  return attackGeometryFor(mobAttackProfile(mob), selfRadius, bodyRadiusM(), 0).stopCenterDistance;
 }
 
 export function arenaInRange(arena: CombatArena, mobId: string, range: number): boolean {
@@ -298,14 +373,15 @@ export function arenaInRange(arena: CombatArena, mobId: string, range: number): 
 /** Nearest living body, with queue order as the deterministic tie-break. */
 export function arenaTarget(arena: CombatArena, group: Mob[]): Mob | undefined {
   if (arena.focusId) {
-    const focused = group.find((mob) => mob.id === arena.focusId && mob.hp > 0 && arena.mobs[mob.id]);
+    const focused = group.find((mob) => mob.id === arena.focusId && mob.hp > 0 && arena.mobs[mob.id]
+      && !arena.mobs[mob.id].returning);
     if (focused) return focused;
   }
   let target: Mob | undefined;
   let nearest = Infinity;
   for (const mob of group) {
     const pose = arena.mobs[mob.id];
-    if (mob.hp <= 0 || !pose) continue;
+    if (mob.hp <= 0 || !pose || pose.returning) continue;
     const distance = arenaDistance(arena.player, pose);
     if (distance < nearest) { nearest = distance; target = mob; }
   }
@@ -409,6 +485,7 @@ export function captureCombatArena(arena: CombatArena, state: GameState, atUs: n
       [id, keepVoluntary(actorCopy(actor), previousFrame?.mobs[id])])),
     bodies: arena.bodies.map((body) => ({ ...body, mob: { ...body.mob } })),
     ...(arena.intent ? { intent: { ...arena.intent, targetPoint: { ...arena.intent.targetPoint } } } : {}),
+    contacts: Object.fromEntries(Object.entries(arena.contacts).map(([id, claim]) => [id, { ...claim }])),
   };
   if (arena.frames.at(-1)?.atUs === atUs) arena.frames[arena.frames.length - 1] = frame;
   else arena.frames.push(frame);
@@ -450,11 +527,6 @@ function approach(actor: CombatArenaActor, target: { x: number; y: number }, ran
   return Math.max(0, move);
 }
 
-const CONTACT_CLEARANCE_M = 0.02;
-const PLAYER_STOP_INSET_M = 0.05;
-/** Melee claims sit further inside reach so a neighbour's correction cannot push them out of range. */
-const MOB_CONTACT_INSET_M = 0.1;
-
 /**
  * Bodies occupy ground: after movement, overlapping edges are pushed apart until clear.
  * Mob pairs split the correction; the player is immovable, so a mob clears the player fully.
@@ -487,29 +559,35 @@ function separateBodies(arena: CombatArena, state: GameState): void {
     for (let i = 0; i < ids.length; i++) {
       for (let j = i + 1; j < ids.length; j++) {
         const a = arena.mobs[ids[i]], b = arena.mobs[ids[j]];
-        push(a, b, (a.radiusM ?? 0.25) + (b.radiusM ?? 0.25) + CONTACT_CLEARANCE_M, 0.5);
+        push(a, b, (a.radiusM ?? 0.25) + (b.radiusM ?? 0.25) + ATTACK_CLEARANCE_M, 0.5);
       }
       const actor = arena.mobs[ids[i]];
       push(actor, arena.player,
-        (actor.radiusM ?? 0.25) + (arena.player.radiusM ?? 0.25) + CONTACT_CLEARANCE_M, 1);
+        (actor.radiusM ?? 0.25) + (arena.player.radiusM ?? 0.25) + ATTACK_CLEARANCE_M, 1);
     }
     clampBody(arena.player);
     for (const id of ids) clampBody(arena.mobs[id]);
   }
 }
 
-/** Bearings are chosen in tiers so a small pack fans out before it shares a close angle. */
+/**
+ * Bearings are chosen in tiers so a small pack fans out before it shares a close angle. A melee
+ * stop ring holds at most seven 0.25 m bodies with the 0.02 m clearance; the first tier therefore
+ * offers the six 60° slots a full ring needs instead of the old four 90° slots that stranded a
+ * sixth body at maximum reach.
+ */
 const CONTACT_BEARING_TIERS_DEG: readonly (readonly number[])[] = [
-  [0, 90, -90, 180],
-  [45, -45, 135, -135],
-  [22.5, -22.5, 67.5, -67.5, 112.5, -112.5, 157.5, -157.5],
+  [0, 60, -60, 120, -120, 180],
+  [30, -30, 90, -90, 150, -150],
+  [15, -15, 45, -45, 75, -75, 105, -105, 135, -135, 165, -165],
 ];
 
 /**
- * Claim a reachable, clear contact point per melee body. Retention comes first: a body that can
- * already strike keeps its ground, then its previous claim, and only then searches bearings in
- * tiers. Claims are approach rights, not attack rights; range and control are rechecked by the
- * caller. Stable order and deterministic ties keep a reload or twin run identical.
+ * Claim a reachable, clear contact point per melee body. Retention comes first: a body inside its
+ * profile's stop band keeps its ground, then a held claim inside that same band, and only then
+ * searches bearings in tiers. Standing at maximum reach is not a reason to stop approaching.
+ * Claims are approach rights, not attack rights; range and control are rechecked by the caller.
+ * Stable order and deterministic ties keep a reload or twin run identical.
  */
 function assignContactPoints(arena: CombatArena, state: GameState, melee: readonly Mob[]): void {
   const player = arena.player;
@@ -534,61 +612,59 @@ function assignContactPoints(arena: CombatArena, state: GameState, melee: readon
   const reserved: { id: string; x: number; y: number; r: number }[] = [];
   const clearOf = (point: { x: number; y: number }, radius: number, ignore: string) =>
     reserved.every((claim) => claim.id === ignore
-      || arenaDistance(point, claim) >= radius + claim.r + CONTACT_CLEARANCE_M);
-  /** Spacing tiers keep a small pack fanned out before tighter contact is allowed. */
-  const spacedFrom = (point: { x: number; y: number }, radius: number, ignore: string, spacing: number) =>
-    reserved.every((claim) => claim.id === ignore
-      || (arenaDistance(point, claim) >= radius + claim.r + CONTACT_CLEARANCE_M
-        && arenaDistance(point, claim) >= spacing - 1e-9));
+      || arenaDistance(point, claim) >= radius + claim.r + ATTACK_CLEARANCE_M);
   const order = [...melee].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
   for (const mob of order) {
     const actor = arena.mobs[mob.id];
     if (!actor) continue;
     const radius = actor.radiusM ?? bodyRadiusM(mob);
-    const reach = arenaMobRange(mob);
-    const stop = Math.max(playerRadius + radius + CONTACT_CLEARANCE_M, reach - MOB_CONTACT_INSET_M);
+    const profile = mobAttackProfile(mob);
+    const current = attackGeometryFor(profile, radius, playerRadius, arenaDistance(actor, player));
     const held = arena.contacts[mob.id];
     let point: { x: number; y: number } | undefined;
     const currentClear = living.every((other) => {
       if (other.id === mob.id) return true;
       const pose = arena.mobs[other.id];
-      return !pose || arenaDistance(actor, pose) >= radius + (pose.radiusM ?? 0.25) + CONTACT_CLEARANCE_M;
+      return !pose || arenaDistance(actor, pose) >= radius + (pose.radiusM ?? 0.25) + ATTACK_CLEARANCE_M;
     });
-    // A real attack opportunity takes priority over completing a decorative formation.
-    if (arenaDistance(actor, player) <= reach + 1e-7 && currentClear && inBounds(actor, radius)) {
+    // A real attack opportunity inside the stop band takes priority over completing a formation.
+    if (current.inRange && withinAttackStopBand(current) && currentClear && inBounds(actor, radius)) {
       point = { x: actor.x, y: actor.y };
     } else if (held && held.targetId === 'player'
-      && arenaDistance(held, player) <= reach + 1e-7
-      && arenaDistance(held, player) >= playerRadius + radius + CONTACT_CLEARANCE_M
+      && withinAttackStopBand(attackGeometryFor(profile, radius, playerRadius, arenaDistance(held, player)))
       && inBounds(held, radius)
       && clearOf(held, radius, mob.id)) {
       point = { x: held.x, y: held.y };
     }
     if (!point) {
+      const minGap = playerRadius + radius + ATTACK_CLEARANCE_M;
+      const stop = current.stopCenterDistance;
       const anchor = Math.atan2(actor.y - player.y, actor.x - player.x);
-      for (const spacing of [reach, 1.2, 0]) {
-        for (const tier of CONTACT_BEARING_TIERS_DEG) {
-          const options: { x: number; y: number; travel: number; tie: number }[] = [];
-          for (const offsetDeg of tier) {
-            const angle = anchor + offsetDeg * Math.PI / 180;
-            const candidate = {
-              x: Math.max(radius, Math.min(arena.bounds.width - radius, player.x + Math.cos(angle) * stop)),
-              y: Math.max(radius, Math.min(arena.bounds.height - radius, player.y + Math.sin(angle) * stop)),
-            };
-            const gap = arenaDistance(candidate, player);
-            if (gap > reach + 1e-7 || gap < playerRadius + radius + CONTACT_CLEARANCE_M - 1e-7) continue;
-            if (!spacedFrom(candidate, radius, mob.id, spacing)) continue;
-            options.push({ ...candidate, travel: arenaDistance(actor, candidate), tie: Math.abs(offsetDeg) });
-          }
-          if (!options.length) continue;
-          options.sort((a, b) => a.travel - b.travel || a.tie - b.tie);
-          point = { x: options[0].x, y: options[0].y };
-          break;
+      for (const tier of CONTACT_BEARING_TIERS_DEG) {
+        const options: { x: number; y: number; travel: number; tie: number }[] = [];
+        for (const offsetDeg of tier) {
+          const angle = anchor + offsetDeg * Math.PI / 180;
+          const candidate = {
+            x: Math.max(radius, Math.min(arena.bounds.width - radius, player.x + Math.cos(angle) * stop)),
+            y: Math.max(radius, Math.min(arena.bounds.height - radius, player.y + Math.sin(angle) * stop)),
+          };
+          const gap = arenaDistance(candidate, player);
+          if (gap > current.maxCenterDistance + 1e-7 || gap < minGap - 1e-7) continue;
+          if (!clearOf(candidate, radius, mob.id)) continue;
+          options.push({ ...candidate, travel: arenaDistance(actor, candidate), tie: Math.abs(offsetDeg) });
         }
-        if (point) break;
+        if (!options.length) continue;
+        options.sort((a, b) => a.travel - b.travel || a.tie - b.tie);
+        point = { x: options[0].x, y: options[0].y };
+        break;
       }
     }
-    if (!point) { delete arena.contacts[mob.id]; continue; }
+    if (!point) {
+      delete arena.contacts[mob.id];
+      actor.waitingForContact = true;
+      continue;
+    }
+    actor.waitingForContact = false;
     arena.contacts[mob.id] = {
       x: point.x, y: point.y, targetId: 'player', atUs: arena.nowUs,
       playerX: player.x, playerY: player.y,
@@ -597,14 +673,23 @@ function assignContactPoints(arena: CombatArena, state: GameState, melee: readon
   }
 }
 
+/** Retained action history does not own the feet after the authored recovery has ended. */
+export function actionFeetUntil(action: CombatArenaAction | undefined): number {
+  if (!action || action.nonblocking) return -Infinity;
+  const timing = action.primaryTiming ?? action.timing;
+  const end = timing ? Math.max(timing.releaseAtUs, timing.recoveryUntilUs) : action.endsAtUs;
+  return Math.min(end, action.cancelledAtUs ?? Infinity);
+}
+
 /** Advance to a combat event or fixed movement sample; callers provide existing status-clock cuts. */
 export function advanceCombatArena(
   arena: CombatArena, state: GameState, atUs: number,
   options: { playerRange: number; playerSpeedMult: number; mobSpeedMult: (mob: Mob) => number;
     playerTargetId?: string; playerLocked?: boolean; playerMoveTo?: { x: number; y: number };
-    engagedIds?: ReadonlySet<string> },
+    engagedIds?: ReadonlySet<string>; homeBandM?: number; returnSpeedMult?: number },
 ): void {
-  const seconds = Math.max(0, atUs - arena.nowUs) / arena.unitsPerSec;
+  const fromUs = arena.nowUs;
+  const seconds = Math.max(0, atUs - fromUs) / arena.unitsPerSec;
   arena.nowUs = atUs;
   if (seconds === 0) { captureCombatArena(arena, state, atUs); return; }
   arena.player.moving = false;
@@ -618,8 +703,8 @@ export function advanceCombatArena(
     approach(arena.player, options.playerMoveTo, 0,
       CFG.player_speed * options.playerSpeedMult * seconds, seconds);
   } else if (target && state.player.hp > 0 && !options.playerLocked) {
-    // Stop just inside the valid range so a moving body cannot shuffle in and out of reach.
-    approach(arena.player, arena.mobs[target.id], Math.max(0, options.playerRange - PLAYER_STOP_INSET_M),
+    // `playerRange` is the profile's already-inset stop distance, never its far edge.
+    approach(arena.player, arena.mobs[target.id], Math.max(0, options.playerRange),
       CFG.player_speed * options.playerSpeedMult * seconds, seconds);
   }
   const engaging = state.group.filter((mob) => mob.hp > 0
@@ -632,36 +717,44 @@ export function advanceCombatArena(
     const actor = arena.mobs[mob.id];
     if (!actor) continue;
     if (engaged.has(mob.id) && mob.hp > 0 && state.player.hp > 0) {
-      const distance = CFG.mob_speed * options.mobSpeedMult(mob) * seconds;
+      const lockedUntilUs = actionFeetUntil(actor.action);
+      const freeSeconds = Math.max(0, atUs - Math.max(fromUs, lockedUntilUs)) / arena.unitsPerSec;
+      const distance = CFG.mob_speed * options.mobSpeedMult(mob) * freeSeconds;
       if (meleeIds.has(mob.id)) {
         // A committed strike or preparation owns the feet and the facing; only an idle melee body
-        // walks and turns toward its claim.
-        const busy = !!actor.action && actor.action.endsAtUs > atUs;
+        // walks and turns toward its claim. No claim is an explicit wait, never a push through a
+        // neighbour or a silent stop with no reason.
         const claim = arena.contacts[mob.id];
-        if (!busy) {
-          if (claim) approach(actor, claim, 0, distance, seconds);
-          turnToward(actor, arena.player.x, arena.player.y, seconds);
+        actor.waitingForContact = !claim;
+        if (freeSeconds > 0) {
+          if (claim) approach(actor, claim, 0, distance, freeSeconds);
+          turnToward(actor, arena.player.x, arena.player.y, freeSeconds);
         }
       } else {
+        actor.waitingForContact = false;
         // A stand-off body that can already fire holds while its shot/recovery is active and after
-        // its first valid opportunity; it walks to the preferred stop only before that.
-        const inMaxRange = arenaDistance(actor, arena.player) <= arenaMobRange(mob) + 1e-7;
-        if (!inMaxRange) actor.holdAtRange = false;
-        const holding = inMaxRange && (actor.holdAtRange || (!!actor.action && actor.action.endsAtUs > atUs));
+        // its first valid opportunity; it walks to the profile's stop distance only before that.
+        const geometry = attackGeometryFor(mobAttackProfile(mob), actor.radiusM ?? bodyRadiusM(mob),
+          arena.player.radiusM ?? bodyRadiusM(), arenaDistance(actor, arena.player));
+        if (!geometry.inRange) actor.holdAtRange = false;
+        const holding = geometry.inRange && (actor.holdAtRange || lockedUntilUs > atUs);
         if (holding) {
           const released = actor.action?.timing != null && atUs >= actor.action.timing.releaseAtUs;
           if (!released) turnToward(actor, arena.player.x, arena.player.y, seconds);
-        } else approach(actor, arena.player, Math.max(0, arenaMobStopRange(mob) - PLAYER_STOP_INSET_M), distance, seconds);
+        } else approach(actor, arena.player, geometry.stopCenterDistance, distance, freeSeconds);
       }
     } else if (mob.hp > 0 && options.engagedIds) {
+      actor.waitingForContact = false;
       // An unengaged body returns to its authored home, then idles around it. The wander target is
       // a function of combat time and slot identity, so a seek draws the same step.
       const slot = state.field?.slots.find((entry) => entry.id === mob.spawnSlotId);
       if (!slot) continue;
       const speed = CFG.mob_speed * options.mobSpeedMult(mob) * seconds;
       const gap = arenaDistance(actor, slot.home);
-      if (gap > 0.35) {
-        approach(actor, slot.home, 0, speed * 0.65, seconds);
+      const band = Math.max(0, options.homeBandM ?? 0.35);
+      const returnMult = Math.max(0, Math.min(1, options.returnSpeedMult ?? 0.65));
+      if (gap > band) {
+        approach(actor, slot.home, band, speed * returnMult, seconds);
       } else {
         const phase = atUs / arena.unitsPerSec * 0.28 + (slot.home.x + slot.home.y) * 0.13;
         approach(actor, {
@@ -762,5 +855,6 @@ export function sampleCombatArena(arena: CombatArena, atUs: number): CombatArena
     mobs: Object.fromEntries(Object.entries(before.mobs).map(([id, actor]) => [id, pose(actor, after.mobs[id])])),
     bodies: before.bodies,
     ...(before.intent ? { intent: before.intent } : {}),
+    ...(before.contacts ? { contacts: before.contacts } : {}),
   };
 }

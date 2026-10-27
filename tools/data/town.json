@@ -953,7 +953,7 @@
     "offer_weight_expedition": 0.25,
     "offer_weight_rule": "Elite and Expedition share the former 75% Tier-stone offer share; Boss uses the remaining 25%. Expedition rewards replace, rather than add to, the previous Tier-stone offer budget. Typed in town.ts rather than in the client, because the board's roll is a read the client performs on the data",
     "income_bound_pct": 10,
-    "income_bound_rule": "Sizing guidance only, not an enforced ceiling. Task and Delivery stones derive from eng.taskPayout within the existing stone funnel; do not gate a prescribed income share (docs/game-rules.md).",
+    "income_bound_rule": "Sizing guidance only, not an enforced ceiling. Task and Delivery stones derive from eng.taskPayout within the existing stone funnel; do not gate a prescribed income share.",
     "refill_sec": 86400,
     "refill_rule": "A finished or skipped slot refills once its configured clock runs out.",
     "slots": 3,

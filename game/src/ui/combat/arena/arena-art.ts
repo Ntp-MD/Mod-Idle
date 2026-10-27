@@ -5,13 +5,29 @@ export type ArenaDirection =
   | 'south' | 'east' | 'north' | 'west'
   | 'south-east' | 'north-east' | 'north-west' | 'south-west';
 
+export type ArenaSourceFrame = { x: number; y: number; width: number; height: number; offsetX: number; offsetY: number };
+
+/** A standalone transparent pose PNG with its own source rectangle and untrimmed-cell sockets. */
+export type ArenaSpriteFrameImage = {
+  href: string;
+  imageWidth: number;
+  imageHeight: number;
+  sourceFrame: ArenaSourceFrame;
+  mainGripCell?: { x: number; y: number };
+  offGripCell?: { x: number; y: number };
+  /** This source pose includes its weapon/offhand pixels; suppress separate equipment layers. */
+  equipmentBaked?: boolean;
+};
+
 export type ArenaSpriteSheet = {
   href: string;
   frameWidth: number;
   frameHeight: number;
   imageWidth?: number;
   imageHeight?: number;
-  sourceFrames?: readonly { x: number; y: number; width: number; height: number; offsetX: number; offsetY: number }[];
+  sourceFrames?: readonly ArenaSourceFrame[];
+  /** Optional one-PNG-per-frame source. Existing atlases continue to use `href` + `sourceFrames`. */
+  frameImages?: readonly ArenaSpriteFrameImage[];
   columns: number;
   rows: number;
   frames: number;

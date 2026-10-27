@@ -26,6 +26,25 @@ describe('the canonical data is checked before anything reads it', () => {
     expect(() => validateEngineData(missing)).toThrow(/normal_attack\.profiles\.?ranged|legacy\.stand-off/);
   });
 
+  it('refuses an ordinary-attack profile that cannot state or hold its reach', () => {
+    const noBasis = copy();
+    delete noBasis.combat_arena.normal_attack.profiles.melee.range.basis;
+    expect(() => validateEngineData(noBasis)).toThrow(/normal_attack\.profiles\.melee\.range\.basis/);
+
+    const overlap = copy();
+    overlap.combat_arena.normal_attack.profiles.melee.range.meters = 0.01;
+    expect(() => validateEngineData(overlap)).toThrow(/normal_attack\.profiles\.melee\.range\.meters/);
+
+    const stopInside = copy();
+    stopInside.combat_arena.normal_attack.profiles.ranged.range.meters = 0.5;
+    expect(() => validateEngineData(stopInside))
+      .toThrow(/normal_attack\.profiles\.ranged\.(stop_at_range_pct|range\.meters)/);
+
+    const noPlayerMap = copy();
+    delete noPlayerMap.combat_arena.normal_attack.player.magic;
+    expect(() => validateEngineData(noPlayerMap)).toThrow(/normal_attack\.player\.magic/);
+  });
+
   it('keeps every multi-impact action row executable', () => {
     const kinds = new Set(['projectile-burst', 'ground-pulse-burst', 'whirlwind-channel', 'blizzard-field', 'sand-field', 'chain-strike']);
     for (const row of Object.values(sm.byId)) {

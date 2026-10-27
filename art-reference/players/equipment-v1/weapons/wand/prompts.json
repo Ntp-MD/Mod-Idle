@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI built-in image_gen",
+  "useCase": "stylized-concept",
+  "identityReference": "game/public/combat/arpg/pixel-v2/player-animation-v2.png",
+  "views": [
+    {
+      "id": "side",
+      "prompt": "Use case: stylized-concept. Asset type: isolated modular equipment sprite for a chibi ARPG player. Primary request: exactly ONE simple short wooden wand, SIDE VIEW, pointing horizontally to the RIGHT, handle grip at LEFT. One small faceted AMBER GEM at tip, small dark metal collar, warm brown tapered wooden shaft, short dark brown wrapped handle. Input image 1 is STYLE REFERENCE ONLY: match crisp dark outlined pixel clusters, 2–3 flat shades, tiny bright upper-left highlights of the hooded traveler sprites. Do not draw traveler or any part of traveler. The wand must remain very simple and readable at tiny game size; no enormous ornament. Composition: exactly one standalone entire wand centered in a 1024 x 1024 genuinely transparent canvas; visible item only 200 pixels long, approximately x412–612, y490–530, with enormous clear margins. Hard crisp pixel-art edges, dark charcoal outline, no blur, no painterly texture, no antialias fuzz. Lighting upper-left. No glow, magic, VFX, rays, trail, hand, arm, body, background, floor, shadow, letters, numbers, panels, grid, extra views, duplicate items, watermark. Transparent alpha everywhere outside wand.",
+      "references": [
+        "game/public/combat/arpg/pixel-v2/player-animation-v2.png"
+      ]
+    },
+    {
+      "id": "raised",
+      "references": [
+        "art-reference/players/equipment-v1/weapons/wand/side.png"
+      ]
+    },
+    {
+      "id": "foreshortened",
+      "references": [
+        "art-reference/players/equipment-v1/weapons/wand/side.png"
+      ]
+    }
+  ]
+}

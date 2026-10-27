@@ -5,6 +5,7 @@ import {
 } from '../src/sim/combat/combat-arena';
 import { characterSheet, hitColour, newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
 import { pinFieldPopulation } from './mobFixture';
+import { arenaActionPose } from '../src/ui/combat/combat-arena-view';
 
 function rangedFight(distance = 3, over: Record<string, unknown> = {}) {
   const state = newGame(41);
@@ -28,9 +29,45 @@ function rangedFight(distance = 3, over: Record<string, unknown> = {}) {
   return { state, mob, arena };
 }
 
-const shots = (arena: ReturnType<typeof createCombatArena>) => arena.actions.filter((action) => action.ranged);
+const shots = (arena: ReturnType<typeof createCombatArena>) =>
+  arena.actions.filter((action) => action.ranged && !action.skillId);
 
 describe('ordinary ranged mob defaults', () => {
+  it('cancels an out-of-range release and resumes pursuit without spending the skill', () => {
+    const { state, mob, arena } = rangedFight(1, {
+      line: 'front', skillIds: ['mob.physical.crushing-blow'], skillReadyAtUs: {},
+    });
+    tick(state, { arena, autoSkills: false });
+    const action = arena.actions.find(entry => entry.actorId === mob.id && entry.skillId === 'mob.physical.crushing-blow')!;
+    const x = arena.mobs[mob.id].x;
+    arena.player.x = 15;
+    state.playerStatuses.shock = { stacks: 1, secLeft: 3, perSec: 0 };
+    tick(state, { arena, autoSkills: false });
+    expect(arena.actions.find(entry => entry.id === action.id)?.cancelReason).toBe('release-invalid');
+    expect(mob.skillReadyAtUs?.['mob.physical.crushing-blow']).toBeUndefined();
+    expect(state.fx.filter(event => event.kind === 'taken' && event.skillId === 'mob.physical.crushing-blow')).toHaveLength(0);
+    expect(arena.mobs[mob.id].x).toBeGreaterThan(x);
+  });
+
+  it('shows the firing pose at the committed release of an ordinary projectile', () => {
+    const { state, arena } = rangedFight(3);
+    tick(state, { arena, autoSkills: false });
+    const action = arena.actions.find(entry => entry.actorId === 'archer' && entry.timing)!;
+    expect(action.timing!.releaseAtUs).toBeGreaterThan(action.timing!.startedAtUs);
+    expect(arenaActionPose(action, action.timing!.releaseAtUs, arena.unitsPerSec)?.phase).toBe('contact');
+  });
+
+  it('keeps the contact pose alive when a prepared mob strike actually lands', () => {
+    const { state, mob, arena } = rangedFight(1, {
+      line: 'front', skillIds: ['mob.physical.crushing-blow'], skillReadyAtUs: {},
+    });
+    tick(state, { arena, autoSkills: false });
+    tick(state, { arena, autoSkills: false });
+    const action = arena.actions.find(entry => entry.actorId === mob.id && entry.skillId === 'mob.physical.crushing-blow')!;
+    expect(action.impactCount).toBe(1);
+    expect(arenaActionPose(action, action.timing!.impactAtUs, arena.unitsPerSec)?.phase).toBe('contact');
+  });
+
   it('prepares the first usable kit entry for its full cast time before releasing it', () => {
     const { state, mob, arena } = rangedFight(3, {
       skillIds: ['mob.physical.cleave', 'mob.cold.ice-shard'], skillReadyAtUs: {},
@@ -45,7 +82,9 @@ describe('ordinary ranged mob defaults', () => {
     tick(state, { arena, autoSkills: false });
     const hits = state.fx.filter(event => event.kind === 'taken' && event.skillId === 'mob.cold.ice-shard');
     expect(hits).toHaveLength(1);
-    expect(hits[0].atUs).toBe(1_400_000);
+    const resolved = arena.actions.find(entry => entry.id === action.id)!;
+    expect(resolved.timing!.impactAtUs).toBeGreaterThan(resolved.timing!.releaseAtUs);
+    expect(hits[0].atUs).toBe(resolved.timing!.impactAtUs);
     expect(shots(arena).some(shot => shot.atUs === 1_000_000)).toBe(false);
   });
 
@@ -76,61 +115,61 @@ describe('ordinary ranged mob defaults', () => {
     expect(mob.skillReadyAtUs?.['mob.physical.crushing-blow']).toBeUndefined();
     expect(state.fx.filter(event => event.kind === 'taken' && event.skillId === 'mob.physical.crushing-blow')).toHaveLength(0);
   });
-  it('releases on the attack beat and applies damage at projectile contact', () => {
+  it('starts a windup, releases at its own beat, and lands at projectile contact', () => {
     const { state, arena } = rangedFight(3);
     tick(state, { arena, autoSkills: false });
-    expect(arena.mobFlights).toHaveLength(1);
+    const action = arena.actions.find(entry => entry.actorId === 'archer' && entry.timing)!;
+    expect(action.timing!.startedAtUs).toBe(1_000_000);
+    expect(action.timing!.releaseAtUs).toBe(1_350_000);
+    expect(action.releasedAtUs).toBeUndefined();
+    expect(arena.mobFlights).toHaveLength(0);
     expect(state.fx.some((event) => event.kind === 'taken')).toBe(false);
-    expect(shots(arena)).toHaveLength(1);
-    const release = shots(arena)[0];
-    expect(release.timing!.releaseAtUs).toBe(1_000_000);
-    expect(release.timing!.impactAtUs).toBeGreaterThan(release.timing!.releaseAtUs);
 
     tick(state, { arena, autoSkills: false });
     const taken = state.fx.filter((event) => event.kind === 'taken' && event.byId === 'archer');
-    const resolved = arena.actions.find((action) => action.id === release.id)!;
+    const resolved = arena.actions.find((entry) => entry.id === action.id)!;
     expect(taken).toHaveLength(1);
+    expect(resolved.releasedAtUs).toBe(1_350_000);
+    expect(resolved.ranged).toBe(true);
     expect(taken[0].atUs).toBe(resolved.timing!.impactAtUs);
-    expect(resolved.timing!.impactAtUs).toBeLessThan(release.timing!.impactAtUs);
-    expect(release.cancelledAtUs).toBeUndefined();
-    expect(arena.mobFlights).toHaveLength(1);
+    expect(resolved.timing!.impactAtUs).toBeGreaterThan(resolved.timing!.releaseAtUs);
+    expect(resolved.cancelledAtUs).toBeUndefined();
   });
 
   it('fires once per attack interval and never adds a second damage stream', () => {
     const { state, arena } = rangedFight(3);
-    tick(state, { arena, autoSkills: false });
-    tick(state, { arena, autoSkills: false });
-    tick(state, { arena, autoSkills: false });
+    for (let index = 0; index < 4; index++) tick(state, { arena, autoSkills: false });
     expect(shots(arena)).toHaveLength(3);
     const taken = state.fx.filter((event) => event.kind === 'taken' && event.byId === 'archer');
-    expect(taken).toHaveLength(2);
+    expect(taken).toHaveLength(3);
     const beats = shots(arena).map((action) => action.timing!.releaseAtUs);
-    expect(beats).toEqual([1_000_000, 2_000_000, 3_000_000]);
+    expect(beats).toEqual([1_350_000, 2_350_000, 3_350_000]);
   });
 
-  it('fizzles a shot that reaches its committed endpoint without contact', () => {
+  it('cancels a shot whose release no longer has its target in reach', () => {
     const { state, mob, arena } = rangedFight(3);
     tick(state, { arena, autoSkills: false });
-    const release = shots(arena)[0];
-    arena.player.y = 10;
-    arena.intent = { skillId: 'attack.firestorm', targetId: mob.id, targetPoint: { x: 1, y: 10 },
+    const action = arena.actions.find(entry => entry.actorId === 'archer' && entry.timing)!;
+    arena.player.x = 15;
+    arena.intent = { skillId: 'attack.firestorm', targetId: mob.id, targetPoint: { x: 15, y: 6 },
       phase: 'windup', releaseAtUs: 10_000_000 };
     tick(state, { arena, autoSkills: true });
     expect(state.fx.filter((event) => event.kind === 'taken' && event.byId === 'archer')).toHaveLength(0);
-    expect(arena.mobFlights).toHaveLength(1);
-    const resolved = arena.actions.find((action) => action.id === release.id)!;
-    expect(resolved.cancelledAtUs).toBeUndefined();
-    expect(resolved.timing!.impactAtUs).toBeGreaterThan(release.timing!.releaseAtUs);
+    expect(arena.actions.find(entry => entry.id === action.id)?.cancelReason).toBe('release-invalid');
+    expect(arena.mobFlights).toHaveLength(0);
   });
 
-  it('keeps a released shot after its source dies', () => {
+  it('cancels an unreleased shot when its source dies', () => {
     const { state, mob, arena } = rangedFight(3);
     tick(state, { arena, autoSkills: false });
-    expect(arena.mobFlights).toHaveLength(1);
+    const action = arena.actions.find(entry => entry.actorId === 'archer' && entry.timing)!;
     mob.hp = 0;
     state.group = [];
     tick(state, { arena, autoSkills: false });
-    expect(state.fx.filter((event) => event.kind === 'taken' && event.byId === 'archer')).toHaveLength(1);
+    const resolved = arena.actions.find(entry => entry.id === action.id)!;
+    expect(resolved.releasedAtUs).toBeUndefined();
+    expect(['source-unavailable', 'release-invalid']).toContain(resolved.cancelReason);
+    expect(state.fx.filter((event) => event.kind === 'taken' && event.byId === 'archer')).toHaveLength(0);
   });
 
   it('keeps the shot physical or elemental while matching the visible colour', () => {
@@ -143,15 +182,15 @@ describe('ordinary ranged mob defaults', () => {
     expect(taken[0].value).toBeGreaterThan(0);
   });
 
-  it('cancels a released shot when the encounter changes', () => {
+  it('cancels an unreleased shot when the encounter changes', () => {
     const { state, arena } = rangedFight(3);
     tick(state, { arena, autoSkills: false });
-    const release = shots(arena)[0];
+    const action = arena.actions.find(entry => entry.actorId === 'archer' && entry.timing)!;
     state.cell = { q: 5, r: 5, sub: null, wild: null };
     tick(state, { arena, autoSkills: false });
-    const resolved = arena.actions.find((action) => action.id === release.id)!;
+    const resolved = arena.actions.find((entry) => entry.id === action.id)!;
     expect(resolved.cancelReason).toBe('area-exit');
-    expect(arena.mobFlights.some((shot) => shot.actionId === release.id)).toBe(false);
+    expect(arena.mobFlights.some((shot) => shot.actionId === action.id)).toBe(false);
     expect(state.fx.filter((event) => event.kind === 'taken' && event.byId === 'archer')).toHaveLength(0);
   });
 
@@ -179,14 +218,31 @@ describe('ordinary ranged mob defaults', () => {
     arena.intent = { skillId: 'attack.firestorm', targetId: mob.id, targetPoint: { x: 1, y: 6 },
       phase: 'windup', releaseAtUs: 10_000_000 };
     tick(state, { arena, autoSkills: true });
+    expect(shots(arena)).toHaveLength(0);
+    tick(state, { arena, autoSkills: true });
     expect(shots(arena)).toHaveLength(1);
-    expect(arena.mobFlights).toHaveLength(1);
-    expect(state.fx.filter((event) => event.kind === 'taken')).toHaveLength(0);
+    const taken = state.fx.filter((event) => event.kind === 'taken');
+    expect(taken).toHaveLength(1);
+    expect(taken[0].skillId).toBeUndefined();
     expect(mob.skillReadyAtUs?.['mob.lightning.static-jab']).toBeUndefined();
   });
 
+  it('spends the strike cooldown when a perfect dodge deletes the released hit', () => {
+    const { state, mob, arena } = rangedFight(1.5, {
+      line: 'front', skillIds: ['mob.lightning.static-jab'], skillReadyAtUs: {},
+    });
+    state.player.charges = 1;
+    tick(state, { arena, autoSkills: false });
+    tick(state, { arena, autoSkills: false });
+    expect(state.player.charges).toBe(0);
+    expect(state.fx.filter((event) => event.kind === 'taken' && event.byId === 'archer')).toHaveLength(0);
+    expect(mob.skillReadyAtUs?.['mob.lightning.static-jab']).toBeGreaterThan(0);
+  });
+
   it('uses the ready strike when the player is inside its role reach', () => {
-    const { state, mob, arena } = rangedFight(1.5, { skillIds: ['mob.lightning.static-jab'], skillReadyAtUs: {} });
+    const { state, mob, arena } = rangedFight(1.5, {
+      line: 'front', skillIds: ['mob.lightning.static-jab'], skillReadyAtUs: {},
+    });
     arena.intent = { skillId: 'attack.firestorm', targetId: mob.id, targetPoint: { x: 1, y: 6 },
       phase: 'windup', releaseAtUs: 10_000_000 };
     tick(state, { arena, autoSkills: true });

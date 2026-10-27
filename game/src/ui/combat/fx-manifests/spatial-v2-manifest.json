@@ -7,7 +7,7 @@
   "entries": {
     "attack.meteor": {
       "id": "attack.meteor",
-      "src": "/fx/authored/attack-meteor/spatial-v2/atlas.png",
+      "src": "/fx/skill-pool/attack-meteor/v2/atlas.png",
       "columns": 4,
       "rows": 4,
       "imageWidth": 1254,
@@ -22,7 +22,7 @@
             311
           ],
           "offsetX": 64.5,
-          "offsetY": 69.0,
+          "offsetY": 69,
           "bounds": [
             31,
             20,
@@ -31,9 +31,9 @@
           ],
           "renderedPadding": [
             95.5,
-            89.0,
+            89,
             79.5,
-            90.0
+            90
           ]
         },
         {
@@ -44,8 +44,8 @@
             314,
             311
           ],
-          "offsetX": 64.0,
-          "offsetY": 69.0,
+          "offsetX": 64,
+          "offsetY": 69,
           "bounds": [
             33,
             31,
@@ -53,10 +53,10 @@
             299
           ],
           "renderedPadding": [
-            97.0,
-            100.0,
-            83.0,
-            81.0
+            97,
+            100,
+            83,
+            81
           ]
         },
         {
@@ -68,7 +68,7 @@
             311
           ],
           "offsetX": 64.5,
-          "offsetY": 69.0,
+          "offsetY": 69,
           "bounds": [
             24,
             25,
@@ -77,9 +77,9 @@
           ],
           "renderedPadding": [
             88.5,
-            94.0,
+            94,
             92.5,
-            83.0
+            83
           ]
         },
         {
@@ -90,8 +90,8 @@
             314,
             311
           ],
-          "offsetX": 64.0,
-          "offsetY": 69.0,
+          "offsetX": 64,
+          "offsetY": 69,
           "bounds": [
             26,
             52,
@@ -99,10 +99,10 @@
             293
           ],
           "renderedPadding": [
-            90.0,
-            121.0,
-            84.0,
-            87.0
+            90,
+            121,
+            84,
+            87
           ]
         },
         {
@@ -114,7 +114,7 @@
             315
           ],
           "offsetX": 64.5,
-          "offsetY": 67.0,
+          "offsetY": 67,
           "bounds": [
             28,
             1,
@@ -123,9 +123,9 @@
           ],
           "renderedPadding": [
             92.5,
-            68.0,
+            68,
             75.5,
-            99.0
+            99
           ]
         },
         {
@@ -136,8 +136,8 @@
             314,
             315
           ],
-          "offsetX": 64.0,
-          "offsetY": 67.0,
+          "offsetX": 64,
+          "offsetY": 67,
           "bounds": [
             28,
             12,
@@ -145,10 +145,10 @@
             287
           ],
           "renderedPadding": [
-            92.0,
-            79.0,
-            86.0,
-            95.0
+            92,
+            79,
+            86,
+            95
           ]
         },
         {
@@ -160,7 +160,7 @@
             315
           ],
           "offsetX": 64.5,
-          "offsetY": 67.0,
+          "offsetY": 67,
           "bounds": [
             21,
             11,
@@ -169,9 +169,9 @@
           ],
           "renderedPadding": [
             85.5,
-            78.0,
+            78,
             80.5,
-            96.0
+            96
           ]
         },
         {
@@ -182,8 +182,8 @@
             314,
             315
           ],
-          "offsetX": 64.0,
-          "offsetY": 67.0,
+          "offsetX": 64,
+          "offsetY": 67,
           "bounds": [
             17,
             10,
@@ -191,10 +191,10 @@
             288
           ],
           "renderedPadding": [
-            81.0,
-            77.0,
-            84.0,
-            94.0
+            81,
+            77,
+            84,
+            94
           ]
         },
         {
@@ -206,7 +206,7 @@
             307
           ],
           "offsetX": 64.5,
-          "offsetY": 71.0,
+          "offsetY": 71,
           "bounds": [
             27,
             9,
@@ -215,9 +215,9 @@
           ],
           "renderedPadding": [
             91.5,
-            80.0,
+            80,
             74.5,
-            103.0
+            103
           ]
         },
         {
@@ -228,8 +228,8 @@
             314,
             307
           ],
-          "offsetX": 64.0,
-          "offsetY": 71.0,
+          "offsetX": 64,
+          "offsetY": 71,
           "bounds": [
             24,
             1,
@@ -237,10 +237,10 @@
             279
           ],
           "renderedPadding": [
-            88.0,
-            72.0,
-            83.0,
-            99.0
+            88,
+            72,
+            83,
+            99
           ]
         },
         {
@@ -252,7 +252,7 @@
             307
           ],
           "offsetX": 64.5,
-          "offsetY": 71.0,
+          "offsetY": 71,
           "bounds": [
             22,
             15,
@@ -261,9 +261,9 @@
           ],
           "renderedPadding": [
             86.5,
-            86.0,
+            86,
             91.5,
-            101.0
+            101
           ]
         },
         {
@@ -274,8 +274,8 @@
             314,
             307
           ],
-          "offsetX": 64.0,
-          "offsetY": 71.0,
+          "offsetX": 64,
+          "offsetY": 71,
           "bounds": [
             21,
             41,
@@ -283,10 +283,10 @@
             276
           ],
           "renderedPadding": [
-            85.0,
-            112.0,
-            92.0,
-            102.0
+            85,
+            112,
+            92,
+            102
           ]
         },
         {
@@ -298,7 +298,7 @@
             321
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             32,
             1,
@@ -307,9 +307,9 @@
           ],
           "renderedPadding": [
             96.5,
-            65.0,
+            65,
             79.5,
-            127.0
+            127
           ]
         },
         {
@@ -320,8 +320,8 @@
             314,
             321
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             27,
             22,
@@ -329,10 +329,10 @@
             261
           ],
           "renderedPadding": [
-            91.0,
-            86.0,
-            83.0,
-            124.0
+            91,
+            86,
+            83,
+            124
           ]
         },
         {
@@ -344,7 +344,7 @@
             321
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             29,
             115,
@@ -353,9 +353,9 @@
           ],
           "renderedPadding": [
             93.5,
-            179.0,
+            179,
             94.5,
-            124.0
+            124
           ]
         },
         {
@@ -366,8 +366,8 @@
             314,
             321
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             32,
             119,
@@ -375,10 +375,10 @@
             270
           ],
           "renderedPadding": [
-            96.0,
-            183.0,
-            101.0,
-            115.0
+            96,
+            183,
+            101,
+            115
           ]
         }
       ],
@@ -421,7 +421,7 @@
     },
     "attack.blizzard": {
       "id": "attack.blizzard",
-      "src": "/fx/authored/attack-blizzard/spatial-v2/atlas.png",
+      "src": "/fx/skill-pool/attack-blizzard/v2/atlas.png",
       "columns": 4,
       "rows": 4,
       "imageWidth": 1254,
@@ -458,7 +458,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             32,
@@ -467,9 +467,9 @@
             291
           ],
           "renderedPadding": [
-            96.0,
+            96,
             168.5,
-            80.0,
+            80,
             86.5
           ]
         },
@@ -504,7 +504,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             10,
@@ -513,9 +513,9 @@
             303
           ],
           "renderedPadding": [
-            74.0,
+            74,
             146.5,
-            81.0,
+            81,
             74.5
           ]
         },
@@ -528,7 +528,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             26,
             56,
@@ -537,9 +537,9 @@
           ],
           "renderedPadding": [
             90.5,
-            120.0,
+            120,
             71.5,
-            80.0
+            80
           ]
         },
         {
@@ -550,8 +550,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             17,
             65,
@@ -559,10 +559,10 @@
             303
           ],
           "renderedPadding": [
-            81.0,
-            129.0,
-            79.0,
-            75.0
+            81,
+            129,
+            79,
+            75
           ]
         },
         {
@@ -574,7 +574,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             12,
             66,
@@ -583,9 +583,9 @@
           ],
           "renderedPadding": [
             76.5,
-            130.0,
+            130,
             76.5,
-            76.0
+            76
           ]
         },
         {
@@ -596,8 +596,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             9,
             71,
@@ -605,10 +605,10 @@
             299
           ],
           "renderedPadding": [
-            73.0,
-            135.0,
-            80.0,
-            79.0
+            73,
+            135,
+            80,
+            79
           ]
         },
         {
@@ -642,7 +642,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             20,
@@ -651,9 +651,9 @@
             298
           ],
           "renderedPadding": [
-            84.0,
+            84,
             125.5,
-            81.0,
+            81,
             79.5
           ]
         },
@@ -688,7 +688,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             17,
@@ -697,9 +697,9 @@
             288
           ],
           "renderedPadding": [
-            81.0,
+            81,
             137.5,
-            91.0,
+            91,
             89.5
           ]
         },
@@ -712,7 +712,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             35,
             53,
@@ -721,9 +721,9 @@
           ],
           "renderedPadding": [
             99.5,
-            117.0,
+            117,
             86.5,
-            113.0
+            113
           ]
         },
         {
@@ -734,8 +734,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             31,
             64,
@@ -743,10 +743,10 @@
             264
           ],
           "renderedPadding": [
-            95.0,
-            128.0,
-            87.0,
-            114.0
+            95,
+            128,
+            87,
+            114
           ]
         },
         {
@@ -758,7 +758,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             39,
             63,
@@ -767,9 +767,9 @@
           ],
           "renderedPadding": [
             103.5,
-            127.0,
+            127,
             93.5,
-            115.0
+            115
           ]
         },
         {
@@ -780,8 +780,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             26,
             71,
@@ -789,10 +789,10 @@
             253
           ],
           "renderedPadding": [
-            90.0,
-            135.0,
-            97.0,
-            125.0
+            90,
+            135,
+            97,
+            125
           ]
         }
       ],
@@ -835,7 +835,7 @@
     },
     "attack.firestorm": {
       "id": "attack.firestorm",
-      "src": "/fx/authored/attack-firestorm/spatial-v2/atlas.png",
+      "src": "/fx/skill-pool/attack-firestorm/v2/atlas.png",
       "columns": 4,
       "rows": 4,
       "imageWidth": 1254,
@@ -850,7 +850,7 @@
             343
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             35,
             219,
@@ -859,9 +859,9 @@
           ],
           "renderedPadding": [
             99.5,
-            283.0,
+            283,
             93.5,
-            70.0
+            70
           ]
         },
         {
@@ -872,8 +872,8 @@
             314,
             343
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             27,
             161,
@@ -881,10 +881,10 @@
             339
           ],
           "renderedPadding": [
-            91.0,
-            225.0,
-            88.0,
-            68.0
+            91,
+            225,
+            88,
+            68
           ]
         },
         {
@@ -896,7 +896,7 @@
             343
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             9,
             121,
@@ -905,9 +905,9 @@
           ],
           "renderedPadding": [
             73.5,
-            185.0,
+            185,
             84.5,
-            64.0
+            64
           ]
         },
         {
@@ -918,8 +918,8 @@
             314,
             343
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             9,
             112,
@@ -927,10 +927,10 @@
             341
           ],
           "renderedPadding": [
-            73.0,
-            176.0,
-            83.0,
-            66.0
+            73,
+            176,
+            83,
+            66
           ]
         },
         {
@@ -942,7 +942,7 @@
             287
           ],
           "offsetX": 64.5,
-          "offsetY": 92.0,
+          "offsetY": 92,
           "bounds": [
             14,
             70,
@@ -951,9 +951,9 @@
           ],
           "renderedPadding": [
             78.5,
-            162.0,
+            162,
             69.5,
-            94.0
+            94
           ]
         },
         {
@@ -964,8 +964,8 @@
             314,
             287
           ],
-          "offsetX": 64.0,
-          "offsetY": 92.0,
+          "offsetX": 64,
+          "offsetY": 92,
           "bounds": [
             14,
             49,
@@ -973,10 +973,10 @@
             287
           ],
           "renderedPadding": [
-            78.0,
-            141.0,
-            66.0,
-            92.0
+            78,
+            141,
+            66,
+            92
           ]
         },
         {
@@ -988,7 +988,7 @@
             287
           ],
           "offsetX": 64.5,
-          "offsetY": 92.0,
+          "offsetY": 92,
           "bounds": [
             12,
             45,
@@ -997,9 +997,9 @@
           ],
           "renderedPadding": [
             76.5,
-            137.0,
+            137,
             75.5,
-            92.0
+            92
           ]
         },
         {
@@ -1010,8 +1010,8 @@
             314,
             287
           ],
-          "offsetX": 64.0,
-          "offsetY": 92.0,
+          "offsetX": 64,
+          "offsetY": 92,
           "bounds": [
             4,
             45,
@@ -1019,10 +1019,10 @@
             287
           ],
           "renderedPadding": [
-            68.0,
-            137.0,
-            75.0,
-            92.0
+            68,
+            137,
+            75,
+            92
           ]
         },
         {
@@ -1056,7 +1056,7 @@
             314,
             310
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 80.5,
           "bounds": [
             12,
@@ -1065,9 +1065,9 @@
             291
           ],
           "renderedPadding": [
-            76.0,
+            76,
             160.5,
-            70.0,
+            70,
             99.5
           ]
         },
@@ -1102,7 +1102,7 @@
             314,
             310
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 80.5,
           "bounds": [
             12,
@@ -1111,9 +1111,9 @@
             288
           ],
           "renderedPadding": [
-            76.0,
+            76,
             142.5,
-            79.0,
+            79,
             102.5
           ]
         },
@@ -1148,7 +1148,7 @@
             314,
             314
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 78.5,
           "bounds": [
             19,
@@ -1157,9 +1157,9 @@
             265
           ],
           "renderedPadding": [
-            83.0,
+            83,
             181.5,
-            84.0,
+            84,
             127.5
           ]
         },
@@ -1194,7 +1194,7 @@
             314,
             314
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 78.5,
           "bounds": [
             42,
@@ -1203,9 +1203,9 @@
             261
           ],
           "renderedPadding": [
-            106.0,
+            106,
             208.5,
-            101.0,
+            101,
             131.5
           ]
         }
@@ -1249,7 +1249,7 @@
     },
     "attack.sand_storm": {
       "id": "attack.sand_storm",
-      "src": "/fx/authored/attack-sand-storm/spatial-v2/atlas.png",
+      "src": "/fx/skill-pool/attack-sand-storm/v2/atlas.png",
       "columns": 4,
       "rows": 4,
       "imageWidth": 1254,
@@ -1286,7 +1286,7 @@
             312,
             313
           ],
-          "offsetX": 66.0,
+          "offsetX": 66,
           "offsetY": 64.5,
           "bounds": [
             23,
@@ -1295,9 +1295,9 @@
             257
           ],
           "renderedPadding": [
-            89.0,
+            89,
             154.5,
-            81.0,
+            81,
             120.5
           ]
         },
@@ -1332,7 +1332,7 @@
             316,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             2,
@@ -1341,9 +1341,9 @@
             277
           ],
           "renderedPadding": [
-            66.0,
+            66,
             138.5,
-            83.0,
+            83,
             100.5
           ]
         },
@@ -1356,7 +1356,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             18,
             42,
@@ -1365,9 +1365,9 @@
           ],
           "renderedPadding": [
             82.5,
-            106.0,
+            106,
             71.5,
-            115.0
+            115
           ]
         },
         {
@@ -1378,8 +1378,8 @@
             312,
             314
           ],
-          "offsetX": 66.0,
-          "offsetY": 64.0,
+          "offsetX": 66,
+          "offsetY": 64,
           "bounds": [
             11,
             36,
@@ -1387,10 +1387,10 @@
             276
           ],
           "renderedPadding": [
-            77.0,
-            100.0,
-            77.0,
-            102.0
+            77,
+            100,
+            77,
+            102
           ]
         },
         {
@@ -1402,7 +1402,7 @@
             314
           ],
           "offsetX": 66.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             7,
             30,
@@ -1411,9 +1411,9 @@
           ],
           "renderedPadding": [
             73.5,
-            94.0,
+            94,
             80.5,
-            102.0
+            102
           ]
         },
         {
@@ -1424,8 +1424,8 @@
             316,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             3,
             34,
@@ -1433,10 +1433,10 @@
             277
           ],
           "renderedPadding": [
-            67.0,
-            98.0,
-            81.0,
-            101.0
+            67,
+            98,
+            81,
+            101
           ]
         },
         {
@@ -1470,7 +1470,7 @@
             312,
             313
           ],
-          "offsetX": 66.0,
+          "offsetX": 66,
           "offsetY": 64.5,
           "bounds": [
             16,
@@ -1479,9 +1479,9 @@
             273
           ],
           "renderedPadding": [
-            82.0,
+            82,
             96.5,
-            74.0,
+            74,
             104.5
           ]
         },
@@ -1516,7 +1516,7 @@
             316,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             1,
@@ -1525,9 +1525,9 @@
             268
           ],
           "renderedPadding": [
-            65.0,
+            65,
             97.5,
-            82.0,
+            82,
             109.5
           ]
         },
@@ -1540,7 +1540,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             17,
             40,
@@ -1549,9 +1549,9 @@
           ],
           "renderedPadding": [
             81.5,
-            104.0,
+            104,
             64.5,
-            140.0
+            140
           ]
         },
         {
@@ -1562,8 +1562,8 @@
             312,
             314
           ],
-          "offsetX": 66.0,
-          "offsetY": 64.0,
+          "offsetX": 66,
+          "offsetY": 64,
           "bounds": [
             37,
             58,
@@ -1571,10 +1571,10 @@
             223
           ],
           "renderedPadding": [
-            103.0,
-            122.0,
-            85.0,
-            155.0
+            103,
+            122,
+            85,
+            155
           ]
         },
         {
@@ -1586,7 +1586,7 @@
             314
           ],
           "offsetX": 66.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             30,
             63,
@@ -1595,9 +1595,9 @@
           ],
           "renderedPadding": [
             96.5,
-            127.0,
+            127,
             94.5,
-            161.0
+            161
           ]
         },
         {
@@ -1608,8 +1608,8 @@
             316,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             24,
             66,
@@ -1617,10 +1617,10 @@
             197
           ],
           "renderedPadding": [
-            88.0,
-            130.0,
-            101.0,
-            181.0
+            88,
+            130,
+            101,
+            181
           ]
         }
       ],
@@ -1663,7 +1663,7 @@
     },
     "attack.void_blast": {
       "id": "attack.void_blast",
-      "src": "/fx/authored/attack-void-blast/spatial-v2/atlas.png",
+      "src": "/fx/skill-pool/attack-void-blast/v2/atlas.png",
       "columns": 4,
       "rows": 4,
       "imageWidth": 1254,
@@ -1700,7 +1700,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             82,
@@ -1709,9 +1709,9 @@
             262
           ],
           "renderedPadding": [
-            146.0,
+            146,
             198.5,
-            145.0,
+            145,
             115.5
           ]
         },
@@ -1746,7 +1746,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             28,
@@ -1755,9 +1755,9 @@
             290
           ],
           "renderedPadding": [
-            92.0,
+            92,
             163.5,
-            99.0,
+            99,
             87.5
           ]
         },
@@ -1770,7 +1770,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             32,
             79,
@@ -1779,9 +1779,9 @@
           ],
           "renderedPadding": [
             96.5,
-            143.0,
+            143,
             84.5,
-            94.0
+            94
           ]
         },
         {
@@ -1792,8 +1792,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             34,
             77,
@@ -1801,10 +1801,10 @@
             281
           ],
           "renderedPadding": [
-            98.0,
-            141.0,
-            84.0,
-            97.0
+            98,
+            141,
+            84,
+            97
           ]
         },
         {
@@ -1816,7 +1816,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             27,
             75,
@@ -1825,9 +1825,9 @@
           ],
           "renderedPadding": [
             91.5,
-            139.0,
+            139,
             84.5,
-            91.0
+            91
           ]
         },
         {
@@ -1838,8 +1838,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             22,
             87,
@@ -1847,10 +1847,10 @@
             282
           ],
           "renderedPadding": [
-            86.0,
-            151.0,
-            90.0,
-            96.0
+            86,
+            151,
+            90,
+            96
           ]
         },
         {
@@ -1884,7 +1884,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             34,
@@ -1893,9 +1893,9 @@
             282
           ],
           "renderedPadding": [
-            98.0,
+            98,
             135.5,
-            87.0,
+            87,
             95.5
           ]
         },
@@ -1930,7 +1930,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             28,
@@ -1939,9 +1939,9 @@
             270
           ],
           "renderedPadding": [
-            92.0,
+            92,
             138.5,
-            96.0,
+            96,
             107.5
           ]
         },
@@ -1954,7 +1954,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             37,
             53,
@@ -1963,9 +1963,9 @@
           ],
           "renderedPadding": [
             101.5,
-            117.0,
+            117,
             91.5,
-            139.0
+            139
           ]
         },
         {
@@ -1976,8 +1976,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             44,
             66,
@@ -1985,10 +1985,10 @@
             248
           ],
           "renderedPadding": [
-            108.0,
-            130.0,
-            90.0,
-            130.0
+            108,
+            130,
+            90,
+            130
           ]
         },
         {
@@ -2000,7 +2000,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             38,
             76,
@@ -2009,9 +2009,9 @@
           ],
           "renderedPadding": [
             102.5,
-            140.0,
+            140,
             93.5,
-            134.0
+            134
           ]
         },
         {
@@ -2022,8 +2022,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             42,
             75,
@@ -2031,10 +2031,10 @@
             224
           ],
           "renderedPadding": [
-            106.0,
-            139.0,
-            102.0,
-            154.0
+            106,
+            139,
+            102,
+            154
           ]
         }
       ],
@@ -2069,15 +2069,15 @@
       "authoringGeometry": {
         "shape": "circle",
         "radiusM": 2.5,
-        "spanM": 5.0,
-        "depthM": 5.0,
+        "spanM": 5,
+        "depthM": 5,
         "origin": "target",
         "canonicalSource": "tools/data/skills.json#attack.void_blast"
       }
     },
     "attack.ground_slam": {
       "id": "attack.ground_slam",
-      "src": "/fx/authored/attack-ground-slam/spatial-v2/atlas.png",
+      "src": "/fx/skill-pool/attack-ground-slam/v2/atlas.png",
       "columns": 4,
       "rows": 4,
       "imageWidth": 1254,
@@ -2114,7 +2114,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             70,
@@ -2123,9 +2123,9 @@
             302
           ],
           "renderedPadding": [
-            134.0,
+            134,
             228.5,
-            128.0,
+            128,
             75.5
           ]
         },
@@ -2160,7 +2160,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             21,
@@ -2169,9 +2169,9 @@
             308
           ],
           "renderedPadding": [
-            85.0,
+            85,
             153.5,
-            93.0,
+            93,
             69.5
           ]
         },
@@ -2184,7 +2184,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             18,
             102,
@@ -2193,9 +2193,9 @@
           ],
           "renderedPadding": [
             82.5,
-            166.0,
+            166,
             81.5,
-            83.0
+            83
           ]
         },
         {
@@ -2206,8 +2206,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             24,
             95,
@@ -2215,10 +2215,10 @@
             303
           ],
           "renderedPadding": [
-            88.0,
-            159.0,
-            80.0,
-            75.0
+            88,
+            159,
+            80,
+            75
           ]
         },
         {
@@ -2230,7 +2230,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             7,
             91,
@@ -2239,9 +2239,9 @@
           ],
           "renderedPadding": [
             71.5,
-            155.0,
+            155,
             80.5,
-            64.0
+            64
           ]
         },
         {
@@ -2252,8 +2252,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             16,
             99,
@@ -2261,10 +2261,10 @@
             305
           ],
           "renderedPadding": [
-            80.0,
-            163.0,
-            81.0,
-            73.0
+            80,
+            163,
+            81,
+            73
           ]
         },
         {
@@ -2298,7 +2298,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             24,
@@ -2307,9 +2307,9 @@
             292
           ],
           "renderedPadding": [
-            88.0,
+            88,
             151.5,
-            80.0,
+            80,
             85.5
           ]
         },
@@ -2344,7 +2344,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             17,
@@ -2353,9 +2353,9 @@
             289
           ],
           "renderedPadding": [
-            81.0,
+            81,
             155.5,
-            77.0,
+            77,
             88.5
           ]
         },
@@ -2368,7 +2368,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             29,
             101,
@@ -2377,9 +2377,9 @@
           ],
           "renderedPadding": [
             93.5,
-            165.0,
+            165,
             90.5,
-            122.0
+            122
           ]
         },
         {
@@ -2390,8 +2390,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             39,
             122,
@@ -2399,10 +2399,10 @@
             249
           ],
           "renderedPadding": [
-            103.0,
-            186.0,
-            92.0,
-            129.0
+            103,
+            186,
+            92,
+            129
           ]
         },
         {
@@ -2414,7 +2414,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             45,
             131,
@@ -2423,9 +2423,9 @@
           ],
           "renderedPadding": [
             109.5,
-            195.0,
+            195,
             107.5,
-            134.0
+            134
           ]
         },
         {
@@ -2436,8 +2436,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             50,
             156,
@@ -2445,10 +2445,10 @@
             247
           ],
           "renderedPadding": [
-            114.0,
-            220.0,
-            113.0,
-            131.0
+            114,
+            220,
+            113,
+            131
           ]
         }
       ],
@@ -2483,15 +2483,15 @@
       "authoringGeometry": {
         "shape": "circle",
         "radiusM": 2.5,
-        "spanM": 5.0,
-        "depthM": 5.0,
+        "spanM": 5,
+        "depthM": 5,
         "origin": "caster",
         "canonicalSource": "tools/data/skills.json#attack.ground_slam"
       }
     },
     "attack.earth_shock": {
       "id": "attack.earth_shock",
-      "src": "/fx/authored/attack-earth-shock/spatial-v2/atlas.png",
+      "src": "/fx/skill-pool/attack-earth-shock/v2/atlas.png",
       "columns": 4,
       "rows": 4,
       "imageWidth": 1254,
@@ -2506,7 +2506,7 @@
             313
           ],
           "offsetX": 64.5,
-          "offsetY": 65.0,
+          "offsetY": 65,
           "bounds": [
             112,
             164,
@@ -2515,9 +2515,9 @@
           ],
           "renderedPadding": [
             176.5,
-            229.0,
+            229,
             142.5,
-            92.0
+            92
           ]
         },
         {
@@ -2528,8 +2528,8 @@
             314,
             313
           ],
-          "offsetX": 64.0,
-          "offsetY": 65.0,
+          "offsetX": 64,
+          "offsetY": 65,
           "bounds": [
             55,
             170,
@@ -2537,10 +2537,10 @@
             293
           ],
           "renderedPadding": [
-            119.0,
-            235.0,
-            113.0,
-            85.0
+            119,
+            235,
+            113,
+            85
           ]
         },
         {
@@ -2552,7 +2552,7 @@
             313
           ],
           "offsetX": 64.5,
-          "offsetY": 65.0,
+          "offsetY": 65,
           "bounds": [
             21,
             146,
@@ -2561,9 +2561,9 @@
           ],
           "renderedPadding": [
             85.5,
-            211.0,
+            211,
             104.5,
-            68.0
+            68
           ]
         },
         {
@@ -2574,8 +2574,8 @@
             314,
             313
           ],
-          "offsetX": 64.0,
-          "offsetY": 65.0,
+          "offsetX": 64,
+          "offsetY": 65,
           "bounds": [
             5,
             133,
@@ -2583,10 +2583,10 @@
             313
           ],
           "renderedPadding": [
-            69.0,
-            198.0,
-            92.0,
-            65.0
+            69,
+            198,
+            92,
+            65
           ]
         },
         {
@@ -2598,7 +2598,7 @@
             315
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             22,
             134,
@@ -2607,9 +2607,9 @@
           ],
           "renderedPadding": [
             86.5,
-            198.0,
+            198,
             73.5,
-            72.0
+            72
           ]
         },
         {
@@ -2620,8 +2620,8 @@
             314,
             315
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             16,
             130,
@@ -2629,10 +2629,10 @@
             309
           ],
           "renderedPadding": [
-            80.0,
-            194.0,
-            76.0,
-            70.0
+            80,
+            194,
+            76,
+            70
           ]
         },
         {
@@ -2644,7 +2644,7 @@
             315
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             7,
             118,
@@ -2653,9 +2653,9 @@
           ],
           "renderedPadding": [
             71.5,
-            182.0,
+            182,
             72.5,
-            64.0
+            64
           ]
         },
         {
@@ -2666,8 +2666,8 @@
             314,
             315
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             6,
             114,
@@ -2675,10 +2675,10 @@
             311
           ],
           "renderedPadding": [
-            70.0,
-            178.0,
-            78.0,
-            68.0
+            70,
+            178,
+            78,
+            68
           ]
         },
         {
@@ -2712,7 +2712,7 @@
             314,
             312
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 65.5,
           "bounds": [
             17,
@@ -2721,9 +2721,9 @@
             290
           ],
           "renderedPadding": [
-            81.0,
+            81,
             184.5,
-            71.0,
+            71,
             87.5
           ]
         },
@@ -2758,7 +2758,7 @@
             314,
             312
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 65.5,
           "bounds": [
             12,
@@ -2767,9 +2767,9 @@
             285
           ],
           "renderedPadding": [
-            76.0,
+            76,
             203.5,
-            77.0,
+            77,
             92.5
           ]
         },
@@ -2804,7 +2804,7 @@
             314,
             314
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             24,
@@ -2813,9 +2813,9 @@
             256
           ],
           "renderedPadding": [
-            88.0,
+            88,
             167.5,
-            80.0,
+            80,
             122.5
           ]
         },
@@ -2850,7 +2850,7 @@
             314,
             314
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             32,
@@ -2859,9 +2859,9 @@
             249
           ],
           "renderedPadding": [
-            96.0,
+            96,
             187.5,
-            97.0,
+            97,
             129.5
           ]
         }
@@ -2897,15 +2897,15 @@
       "authoringGeometry": {
         "shape": "circle",
         "radiusM": 2.5,
-        "spanM": 5.0,
-        "depthM": 5.0,
+        "spanM": 5,
+        "depthM": 5,
         "origin": "target",
         "canonicalSource": "tools/data/skills.json#attack.earth_shock"
       }
     },
     "attack.shatter": {
       "id": "attack.shatter",
-      "src": "/fx/authored/attack-shatter/spatial-v2/atlas.png",
+      "src": "/fx/skill-pool/attack-shatter/v2/atlas.png",
       "columns": 4,
       "rows": 4,
       "imageWidth": 1254,
@@ -2942,7 +2942,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             49,
@@ -2951,9 +2951,9 @@
             301
           ],
           "renderedPadding": [
-            113.0,
+            113,
             211.5,
-            106.0,
+            106,
             76.5
           ]
         },
@@ -2988,7 +2988,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             28,
@@ -2997,9 +2997,9 @@
             307
           ],
           "renderedPadding": [
-            92.0,
+            92,
             194.5,
-            94.0,
+            94,
             70.5
           ]
         },
@@ -3012,7 +3012,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             42,
             103,
@@ -3021,9 +3021,9 @@
           ],
           "renderedPadding": [
             106.5,
-            167.0,
+            167,
             89.5,
-            83.0
+            83
           ]
         },
         {
@@ -3034,8 +3034,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             24,
             93,
@@ -3043,10 +3043,10 @@
             298
           ],
           "renderedPadding": [
-            88.0,
-            157.0,
-            89.0,
-            80.0
+            88,
+            157,
+            89,
+            80
           ]
         },
         {
@@ -3058,7 +3058,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             21,
             91,
@@ -3067,9 +3067,9 @@
           ],
           "renderedPadding": [
             85.5,
-            155.0,
+            155,
             91.5,
-            73.0
+            73
           ]
         },
         {
@@ -3080,8 +3080,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             25,
             99,
@@ -3089,10 +3089,10 @@
             306
           ],
           "renderedPadding": [
-            89.0,
-            163.0,
-            84.0,
-            72.0
+            89,
+            163,
+            84,
+            72
           ]
         },
         {
@@ -3126,7 +3126,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             30,
@@ -3135,9 +3135,9 @@
             298
           ],
           "renderedPadding": [
-            94.0,
+            94,
             136.5,
-            84.0,
+            84,
             79.5
           ]
         },
@@ -3172,7 +3172,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             28,
@@ -3181,9 +3181,9 @@
             288
           ],
           "renderedPadding": [
-            92.0,
+            92,
             159.5,
-            95.0,
+            95,
             89.5
           ]
         },
@@ -3196,7 +3196,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             51,
             90,
@@ -3205,9 +3205,9 @@
           ],
           "renderedPadding": [
             115.5,
-            154.0,
+            154,
             99.5,
-            132.0
+            132
           ]
         },
         {
@@ -3218,8 +3218,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             46,
             89,
@@ -3227,10 +3227,10 @@
             241
           ],
           "renderedPadding": [
-            110.0,
-            153.0,
-            98.0,
-            137.0
+            110,
+            153,
+            98,
+            137
           ]
         },
         {
@@ -3242,7 +3242,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             43,
             101,
@@ -3251,9 +3251,9 @@
           ],
           "renderedPadding": [
             107.5,
-            165.0,
+            165,
             112.5,
-            141.0
+            141
           ]
         },
         {
@@ -3264,8 +3264,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             44,
             100,
@@ -3273,10 +3273,10 @@
             226
           ],
           "renderedPadding": [
-            108.0,
-            164.0,
-            122.0,
-            152.0
+            108,
+            164,
+            122,
+            152
           ]
         }
       ],
@@ -3311,15 +3311,15 @@
       "authoringGeometry": {
         "shape": "circle",
         "radiusM": 2.5,
-        "spanM": 5.0,
-        "depthM": 5.0,
+        "spanM": 5,
+        "depthM": 5,
         "origin": "target",
         "canonicalSource": "tools/data/skills.json#attack.shatter"
       }
     },
     "attack.overload": {
       "id": "attack.overload",
-      "src": "/fx/authored/attack-overload/spatial-v2/atlas.png",
+      "src": "/fx/skill-pool/attack-overload/v2/atlas.png",
       "columns": 4,
       "rows": 4,
       "imageWidth": 1254,
@@ -3356,7 +3356,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             79,
@@ -3365,9 +3365,9 @@
             274
           ],
           "renderedPadding": [
-            143.0,
+            143,
             186.5,
-            129.0,
+            129,
             103.5
           ]
         },
@@ -3402,7 +3402,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             24,
@@ -3411,9 +3411,9 @@
             295
           ],
           "renderedPadding": [
-            88.0,
+            88,
             143.5,
-            85.0,
+            85,
             82.5
           ]
         },
@@ -3426,7 +3426,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             16,
             41,
@@ -3435,9 +3435,9 @@
           ],
           "renderedPadding": [
             80.5,
-            105.0,
+            105,
             72.5,
-            88.0
+            88
           ]
         },
         {
@@ -3448,8 +3448,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             13,
             35,
@@ -3457,10 +3457,10 @@
             291
           ],
           "renderedPadding": [
-            77.0,
-            99.0,
-            65.0,
-            87.0
+            77,
+            99,
+            65,
+            87
           ]
         },
         {
@@ -3472,7 +3472,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             10,
             30,
@@ -3481,9 +3481,9 @@
           ],
           "renderedPadding": [
             74.5,
-            94.0,
+            94,
             70.5,
-            88.0
+            88
           ]
         },
         {
@@ -3494,8 +3494,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             5,
             26,
@@ -3503,10 +3503,10 @@
             298
           ],
           "renderedPadding": [
-            69.0,
-            90.0,
-            78.0,
-            80.0
+            69,
+            90,
+            78,
+            80
           ]
         },
         {
@@ -3540,7 +3540,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             9,
@@ -3549,9 +3549,9 @@
             274
           ],
           "renderedPadding": [
-            73.0,
+            73,
             96.5,
-            72.0,
+            72,
             103.5
           ]
         },
@@ -3586,7 +3586,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             11,
@@ -3595,9 +3595,9 @@
             271
           ],
           "renderedPadding": [
-            75.0,
+            75,
             101.5,
-            76.0,
+            76,
             106.5
           ]
         },
@@ -3610,7 +3610,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             23,
             25,
@@ -3619,9 +3619,9 @@
           ],
           "renderedPadding": [
             87.5,
-            89.0,
+            89,
             72.5,
-            120.0
+            120
           ]
         },
         {
@@ -3632,8 +3632,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             19,
             40,
@@ -3641,10 +3641,10 @@
             244
           ],
           "renderedPadding": [
-            83.0,
-            104.0,
-            80.0,
-            134.0
+            83,
+            104,
+            80,
+            134
           ]
         },
         {
@@ -3656,7 +3656,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             64,
             57,
@@ -3665,9 +3665,9 @@
           ],
           "renderedPadding": [
             128.5,
-            121.0,
+            121,
             98.5,
-            154.0
+            154
           ]
         },
         {
@@ -3678,8 +3678,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             84,
             124,
@@ -3687,10 +3687,10 @@
             197
           ],
           "renderedPadding": [
-            148.0,
-            188.0,
-            131.0,
-            181.0
+            148,
+            188,
+            131,
+            181
           ]
         }
       ],
@@ -3725,15 +3725,15 @@
       "authoringGeometry": {
         "shape": "circle",
         "radiusM": 2.5,
-        "spanM": 5.0,
-        "depthM": 5.0,
+        "spanM": 5,
+        "depthM": 5,
         "origin": "target",
         "canonicalSource": "tools/data/skills.json#attack.overload"
       }
     },
     "attack.aftershock": {
       "id": "attack.aftershock",
-      "src": "/fx/authored/attack-aftershock/spatial-v2/atlas.png",
+      "src": "/fx/skill-pool/attack-aftershock/v2/atlas.png",
       "columns": 4,
       "rows": 4,
       "imageWidth": 1254,
@@ -3770,7 +3770,7 @@
             319,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             69,
@@ -3779,9 +3779,9 @@
             262
           ],
           "renderedPadding": [
-            133.0,
+            133,
             196.5,
-            121.0,
+            121,
             115.5
           ]
         },
@@ -3793,7 +3793,7 @@
             311,
             313
           ],
-          "offsetX": 68.0,
+          "offsetX": 68,
           "offsetY": 64.5,
           "bounds": [
             26,
@@ -3802,9 +3802,9 @@
             272
           ],
           "renderedPadding": [
-            94.0,
+            94,
             172.5,
-            98.0,
+            98,
             105.5
           ]
         },
@@ -3840,7 +3840,7 @@
             314
           ],
           "offsetX": 69.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             17,
             62,
@@ -3849,9 +3849,9 @@
           ],
           "renderedPadding": [
             86.5,
-            126.0,
+            126,
             72.5,
-            107.0
+            107
           ]
         },
         {
@@ -3862,8 +3862,8 @@
             319,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             1,
             56,
@@ -3871,10 +3871,10 @@
             284
           ],
           "renderedPadding": [
-            65.0,
-            120.0,
-            68.0,
-            94.0
+            65,
+            120,
+            68,
+            94
           ]
         },
         {
@@ -3885,8 +3885,8 @@
             311,
             314
           ],
-          "offsetX": 68.0,
-          "offsetY": 64.0,
+          "offsetX": 68,
+          "offsetY": 64,
           "bounds": [
             2,
             63,
@@ -3894,10 +3894,10 @@
             277
           ],
           "renderedPadding": [
-            70.0,
-            127.0,
-            71.0,
-            101.0
+            70,
+            127,
+            71,
+            101
           ]
         },
         {
@@ -3909,7 +3909,7 @@
             314
           ],
           "offsetX": 65.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             1,
             50,
@@ -3918,9 +3918,9 @@
           ],
           "renderedPadding": [
             66.5,
-            114.0,
+            114,
             79.5,
-            94.0
+            94
           ]
         },
         {
@@ -3954,7 +3954,7 @@
             319,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             13,
@@ -3963,9 +3963,9 @@
             271
           ],
           "renderedPadding": [
-            77.0,
+            77,
             129.5,
-            69.0,
+            69,
             106.5
           ]
         },
@@ -3977,7 +3977,7 @@
             311,
             313
           ],
-          "offsetX": 68.0,
+          "offsetX": 68,
           "offsetY": 64.5,
           "bounds": [
             9,
@@ -3986,9 +3986,9 @@
             273
           ],
           "renderedPadding": [
-            77.0,
+            77,
             121.5,
-            73.0,
+            73,
             104.5
           ]
         },
@@ -4024,7 +4024,7 @@
             314
           ],
           "offsetX": 69.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             34,
             83,
@@ -4033,9 +4033,9 @@
           ],
           "renderedPadding": [
             103.5,
-            147.0,
+            147,
             78.5,
-            140.0
+            140
           ]
         },
         {
@@ -4046,8 +4046,8 @@
             319,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             27,
             82,
@@ -4055,10 +4055,10 @@
             248
           ],
           "renderedPadding": [
-            91.0,
-            146.0,
-            82.0,
-            130.0
+            91,
+            146,
+            82,
+            130
           ]
         },
         {
@@ -4069,8 +4069,8 @@
             311,
             314
           ],
-          "offsetX": 68.0,
-          "offsetY": 64.0,
+          "offsetX": 68,
+          "offsetY": 64,
           "bounds": [
             50,
             90,
@@ -4078,10 +4078,10 @@
             229
           ],
           "renderedPadding": [
-            118.0,
-            154.0,
-            117.0,
-            149.0
+            118,
+            154,
+            117,
+            149
           ]
         },
         {
@@ -4093,7 +4093,7 @@
             314
           ],
           "offsetX": 65.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             60,
             112,
@@ -4102,9 +4102,9 @@
           ],
           "renderedPadding": [
             125.5,
-            176.0,
+            176,
             121.5,
-            159.0
+            159
           ]
         }
       ],
@@ -4147,7 +4147,7 @@
     },
     "attack.whirlwind": {
       "id": "attack.whirlwind",
-      "src": "/fx/authored/attack-whirlwind/spatial-v2/atlas.png",
+      "src": "/fx/skill-pool/attack-whirlwind/v2/atlas.png",
       "columns": 4,
       "rows": 4,
       "imageWidth": 1254,
@@ -4162,7 +4162,7 @@
             318
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             39,
             117,
@@ -4171,9 +4171,9 @@
           ],
           "renderedPadding": [
             103.5,
-            181.0,
+            181,
             85.5,
-            79.0
+            79
           ]
         },
         {
@@ -4184,8 +4184,8 @@
             314,
             318
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             23,
             84,
@@ -4193,10 +4193,10 @@
             300
           ],
           "renderedPadding": [
-            87.0,
-            148.0,
-            84.0,
-            82.0
+            87,
+            148,
+            84,
+            82
           ]
         },
         {
@@ -4208,7 +4208,7 @@
             318
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             17,
             75,
@@ -4217,9 +4217,9 @@
           ],
           "renderedPadding": [
             81.5,
-            139.0,
+            139,
             83.5,
-            75.0
+            75
           ]
         },
         {
@@ -4230,8 +4230,8 @@
             314,
             318
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             15,
             71,
@@ -4239,10 +4239,10 @@
             318
           ],
           "renderedPadding": [
-            79.0,
-            135.0,
-            87.0,
-            64.0
+            79,
+            135,
+            87,
+            64
           ]
         },
         {
@@ -4276,7 +4276,7 @@
             314,
             309
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 68.5,
           "bounds": [
             25,
@@ -4285,9 +4285,9 @@
             294
           ],
           "renderedPadding": [
-            89.0,
+            89,
             127.5,
-            82.0,
+            82,
             83.5
           ]
         },
@@ -4322,7 +4322,7 @@
             314,
             309
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 68.5,
           "bounds": [
             16,
@@ -4331,9 +4331,9 @@
             295
           ],
           "renderedPadding": [
-            80.0,
+            80,
             126.5,
-            86.0,
+            86,
             82.5
           ]
         },
@@ -4368,7 +4368,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 66.5,
           "bounds": [
             23,
@@ -4377,9 +4377,9 @@
             288
           ],
           "renderedPadding": [
-            87.0,
+            87,
             113.5,
-            83.0,
+            83,
             91.5
           ]
         },
@@ -4414,7 +4414,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 66.5,
           "bounds": [
             13,
@@ -4423,9 +4423,9 @@
             285
           ],
           "renderedPadding": [
-            77.0,
+            77,
             118.5,
-            86.0,
+            86,
             94.5
           ]
         },
@@ -4438,7 +4438,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 66.0,
+          "offsetY": 66,
           "bounds": [
             41,
             40,
@@ -4447,9 +4447,9 @@
           ],
           "renderedPadding": [
             105.5,
-            106.0,
+            106,
             75.5,
-            135.0
+            135
           ]
         },
         {
@@ -4460,8 +4460,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 66.0,
+          "offsetX": 64,
+          "offsetY": 66,
           "bounds": [
             26,
             42,
@@ -4469,10 +4469,10 @@
             248
           ],
           "renderedPadding": [
-            90.0,
-            108.0,
-            79.0,
-            132.0
+            90,
+            108,
+            79,
+            132
           ]
         },
         {
@@ -4484,7 +4484,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 66.0,
+          "offsetY": 66,
           "bounds": [
             35,
             67,
@@ -4493,9 +4493,9 @@
           ],
           "renderedPadding": [
             99.5,
-            133.0,
+            133,
             94.5,
-            135.0
+            135
           ]
         },
         {
@@ -4506,8 +4506,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 66.0,
+          "offsetX": 64,
+          "offsetY": 66,
           "bounds": [
             28,
             84,
@@ -4515,10 +4515,10 @@
             232
           ],
           "renderedPadding": [
-            92.0,
-            150.0,
-            107.0,
-            148.0
+            92,
+            150,
+            107,
+            148
           ]
         }
       ],
@@ -4561,7 +4561,7 @@
     },
     "attack.venom_spray": {
       "id": "attack.venom_spray",
-      "src": "/fx/authored/attack-venom-spray/spatial-v2/atlas.png",
+      "src": "/fx/skill-pool/attack-venom-spray/v2/atlas.png",
       "columns": 4,
       "rows": 4,
       "imageWidth": 1254,
@@ -4598,7 +4598,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             72,
@@ -4607,9 +4607,9 @@
             294
           ],
           "renderedPadding": [
-            136.0,
+            136,
             194.5,
-            134.0,
+            134,
             83.5
           ]
         },
@@ -4644,7 +4644,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             10,
@@ -4653,9 +4653,9 @@
             294
           ],
           "renderedPadding": [
-            74.0,
+            74,
             145.5,
-            75.0,
+            75,
             83.5
           ]
         },
@@ -4668,7 +4668,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             9,
             63,
@@ -4677,9 +4677,9 @@
           ],
           "renderedPadding": [
             73.5,
-            127.0,
+            127,
             72.5,
-            82.0
+            82
           ]
         },
         {
@@ -4690,8 +4690,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             9,
             55,
@@ -4699,10 +4699,10 @@
             296
           ],
           "renderedPadding": [
-            73.0,
-            119.0,
-            71.0,
-            82.0
+            73,
+            119,
+            71,
+            82
           ]
         },
         {
@@ -4714,7 +4714,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             8,
             54,
@@ -4723,9 +4723,9 @@
           ],
           "renderedPadding": [
             72.5,
-            118.0,
+            118,
             71.5,
-            82.0
+            82
           ]
         },
         {
@@ -4736,8 +4736,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             8,
             58,
@@ -4745,10 +4745,10 @@
             296
           ],
           "renderedPadding": [
-            72.0,
-            122.0,
-            72.0,
-            82.0
+            72,
+            122,
+            72,
+            82
           ]
         },
         {
@@ -4782,7 +4782,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             18,
@@ -4791,9 +4791,9 @@
             295
           ],
           "renderedPadding": [
-            82.0,
+            82,
             121.5,
-            74.0,
+            74,
             82.5
           ]
         },
@@ -4828,7 +4828,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             18,
@@ -4837,9 +4837,9 @@
             295
           ],
           "renderedPadding": [
-            82.0,
+            82,
             130.5,
-            80.0,
+            80,
             82.5
           ]
         },
@@ -4852,7 +4852,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             24,
             70,
@@ -4861,9 +4861,9 @@
           ],
           "renderedPadding": [
             88.5,
-            134.0,
+            134,
             86.5,
-            96.0
+            96
           ]
         },
         {
@@ -4874,8 +4874,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             32,
             69,
@@ -4883,10 +4883,10 @@
             282
           ],
           "renderedPadding": [
-            96.0,
-            133.0,
-            83.0,
-            96.0
+            96,
+            133,
+            83,
+            96
           ]
         },
         {
@@ -4898,7 +4898,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             49,
             90,
@@ -4907,9 +4907,9 @@
           ],
           "renderedPadding": [
             113.5,
-            154.0,
+            154,
             107.5,
-            96.0
+            96
           ]
         },
         {
@@ -4920,8 +4920,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             57,
             99,
@@ -4929,10 +4929,10 @@
             282
           ],
           "renderedPadding": [
-            121.0,
-            163.0,
-            120.0,
-            96.0
+            121,
+            163,
+            120,
+            96
           ]
         }
       ],
@@ -4976,7 +4976,7 @@
     },
     "attack.cleave": {
       "id": "attack.cleave",
-      "src": "/fx/authored/attack-cleave/spatial-v2/atlas.png",
+      "src": "/fx/skill-pool/attack-cleave/v2/atlas.png",
       "columns": 4,
       "rows": 4,
       "imageWidth": 1254,
@@ -4991,7 +4991,7 @@
             318
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             100,
             201,
@@ -5000,9 +5000,9 @@
           ],
           "renderedPadding": [
             164.5,
-            265.0,
+            265,
             147.5,
-            89.0
+            89
           ]
         },
         {
@@ -5013,8 +5013,8 @@
             314,
             318
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             72,
             175,
@@ -5022,10 +5022,10 @@
             306
           ],
           "renderedPadding": [
-            136.0,
-            239.0,
-            174.0,
-            76.0
+            136,
+            239,
+            174,
+            76
           ]
         },
         {
@@ -5037,7 +5037,7 @@
             318
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             27,
             144,
@@ -5046,9 +5046,9 @@
           ],
           "renderedPadding": [
             91.5,
-            208.0,
+            208,
             107.5,
-            64.0
+            64
           ]
         },
         {
@@ -5059,8 +5059,8 @@
             314,
             318
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             6,
             132,
@@ -5068,10 +5068,10 @@
             314
           ],
           "renderedPadding": [
-            70.0,
-            196.0,
-            83.0,
-            68.0
+            70,
+            196,
+            83,
+            68
           ]
         },
         {
@@ -5105,7 +5105,7 @@
             314,
             309
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 68.5,
           "bounds": [
             7,
@@ -5114,9 +5114,9 @@
             303
           ],
           "renderedPadding": [
-            71.0,
+            71,
             175.5,
-            66.0,
+            66,
             74.5
           ]
         },
@@ -5151,7 +5151,7 @@
             314,
             309
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 68.5,
           "bounds": [
             63,
@@ -5160,9 +5160,9 @@
             301
           ],
           "renderedPadding": [
-            127.0,
+            127,
             200.5,
-            103.0,
+            103,
             76.5
           ]
         },
@@ -5197,7 +5197,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 66.5,
           "bounds": [
             30,
@@ -5206,9 +5206,9 @@
             276
           ],
           "renderedPadding": [
-            94.0,
+            94,
             181.5,
-            64.0,
+            64,
             103.5
           ]
         },
@@ -5243,7 +5243,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 66.5,
           "bounds": [
             37,
@@ -5252,9 +5252,9 @@
             272
           ],
           "renderedPadding": [
-            101.0,
+            101,
             181.5,
-            94.0,
+            94,
             107.5
           ]
         },
@@ -5267,7 +5267,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 66.0,
+          "offsetY": 66,
           "bounds": [
             54,
             86,
@@ -5276,9 +5276,9 @@
           ],
           "renderedPadding": [
             118.5,
-            152.0,
+            152,
             90.5,
-            141.0
+            141
           ]
         },
         {
@@ -5289,8 +5289,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 66.0,
+          "offsetX": 64,
+          "offsetY": 66,
           "bounds": [
             44,
             100,
@@ -5298,10 +5298,10 @@
             240
           ],
           "renderedPadding": [
-            108.0,
-            166.0,
-            86.0,
-            140.0
+            108,
+            166,
+            86,
+            140
           ]
         },
         {
@@ -5313,7 +5313,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 66.0,
+          "offsetY": 66,
           "bounds": [
             45,
             98,
@@ -5322,9 +5322,9 @@
           ],
           "renderedPadding": [
             109.5,
-            164.0,
+            164,
             98.5,
-            140.0
+            140
           ]
         },
         {
@@ -5335,8 +5335,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 66.0,
+          "offsetX": 64,
+          "offsetY": 66,
           "bounds": [
             60,
             92,
@@ -5344,10 +5344,10 @@
             239
           ],
           "renderedPadding": [
-            124.0,
-            158.0,
-            108.0,
-            141.0
+            124,
+            158,
+            108,
+            141
           ]
         }
       ],
@@ -5391,7 +5391,7 @@
     },
     "attack.arrow_shower": {
       "id": "attack.arrow_shower",
-      "src": "/fx/authored/attack-arrow-shower/spatial-v2/atlas.png",
+      "src": "/fx/skill-pool/attack-arrow-shower/v2/atlas.png",
       "columns": 4,
       "rows": 4,
       "alphaDiscard": 8,
@@ -5453,7 +5453,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             68,
@@ -5462,9 +5462,9 @@
             213
           ],
           "renderedPadding": [
-            132.0,
+            132,
             233.5,
-            114.0,
+            114,
             164.5
           ]
         },
@@ -5499,7 +5499,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             37,
@@ -5508,9 +5508,9 @@
             209
           ],
           "renderedPadding": [
-            101.0,
+            101,
             234.5,
-            152.0,
+            152,
             168.5
           ]
         },
@@ -5523,7 +5523,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             79,
             135,
@@ -5532,9 +5532,9 @@
           ],
           "renderedPadding": [
             143.5,
-            199.0,
+            199,
             99.5,
-            193.0
+            193
           ]
         },
         {
@@ -5545,8 +5545,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             70,
             139,
@@ -5554,10 +5554,10 @@
             186
           ],
           "renderedPadding": [
-            134.0,
-            203.0,
-            114.0,
-            192.0
+            134,
+            203,
+            114,
+            192
           ]
         },
         {
@@ -5569,7 +5569,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             59,
             143,
@@ -5578,9 +5578,9 @@
           ],
           "renderedPadding": [
             123.5,
-            207.0,
+            207,
             127.5,
-            190.0
+            190
           ]
         },
         {
@@ -5591,8 +5591,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             41,
             142,
@@ -5600,10 +5600,10 @@
             185
           ],
           "renderedPadding": [
-            105.0,
-            206.0,
-            144.0,
-            193.0
+            105,
+            206,
+            144,
+            193
           ]
         },
         {
@@ -5637,7 +5637,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             73,
@@ -5646,9 +5646,9 @@
             167
           ],
           "renderedPadding": [
-            137.0,
+            137,
             190.5,
-            114.0,
+            114,
             210.5
           ]
         },
@@ -5683,7 +5683,7 @@
             314,
             313
           ],
-          "offsetX": 64.0,
+          "offsetX": 64,
           "offsetY": 64.5,
           "bounds": [
             41,
@@ -5692,9 +5692,9 @@
             165
           ],
           "renderedPadding": [
-            105.0,
+            105,
             190.5,
-            142.0,
+            142,
             212.5
           ]
         },
@@ -5707,7 +5707,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             85,
             84,
@@ -5716,9 +5716,9 @@
           ],
           "renderedPadding": [
             149.5,
-            148.0,
+            148,
             72.5,
-            216.0
+            216
           ]
         },
         {
@@ -5729,8 +5729,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             74,
             90,
@@ -5738,10 +5738,10 @@
             146
           ],
           "renderedPadding": [
-            138.0,
-            154.0,
-            92.0,
-            232.0
+            138,
+            154,
+            92,
+            232
           ]
         },
         {
@@ -5753,7 +5753,7 @@
             314
           ],
           "offsetX": 64.5,
-          "offsetY": 64.0,
+          "offsetY": 64,
           "bounds": [
             59,
             94,
@@ -5762,9 +5762,9 @@
           ],
           "renderedPadding": [
             123.5,
-            158.0,
+            158,
             102.5,
-            231.0
+            231
           ]
         },
         {
@@ -5775,8 +5775,8 @@
             314,
             314
           ],
-          "offsetX": 64.0,
-          "offsetY": 64.0,
+          "offsetX": 64,
+          "offsetY": 64,
           "bounds": [
             46,
             98,
@@ -5784,10 +5784,10 @@
             140
           ],
           "renderedPadding": [
-            110.0,
-            162.0,
-            125.0,
-            238.0
+            110,
+            162,
+            125,
+            238
           ]
         }
       ],
@@ -5801,6 +5801,2955 @@
       "status": "active-spatial-v2",
       "anchorX": 0.7268099547511312,
       "anchorY": 0.4920814479638009
+    },
+    "attack.frost_nova": {
+      "id": "attack.frost_nova",
+      "src": "/fx/skill-pool/attack-frost-nova/v1/atlas.png",
+      "columns": 4,
+      "rows": 4,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frames": [
+        {
+          "index": 0,
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            38,
+            46,
+            216,
+            218
+          ],
+          "renderedPadding": [
+            102,
+            110,
+            104,
+            102
+          ]
+        },
+        {
+          "index": 1,
+          "rect": [
+            256,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            16,
+            25,
+            238,
+            240
+          ],
+          "renderedPadding": [
+            80,
+            89,
+            82,
+            80
+          ]
+        },
+        {
+          "index": 2,
+          "rect": [
+            512,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            8,
+            17,
+            241,
+            245
+          ],
+          "renderedPadding": [
+            72,
+            81,
+            79,
+            75
+          ]
+        },
+        {
+          "index": 3,
+          "rect": [
+            768,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            8,
+            13,
+            244,
+            248
+          ],
+          "renderedPadding": [
+            72,
+            77,
+            76,
+            72
+          ]
+        },
+        {
+          "index": 4,
+          "rect": [
+            0,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            15,
+            16,
+            244,
+            245
+          ],
+          "renderedPadding": [
+            79,
+            80,
+            76,
+            75
+          ]
+        },
+        {
+          "index": 5,
+          "rect": [
+            256,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            12,
+            19,
+            242,
+            243
+          ],
+          "renderedPadding": [
+            76,
+            83,
+            78,
+            77
+          ]
+        },
+        {
+          "index": 6,
+          "rect": [
+            512,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            9,
+            16,
+            240,
+            244
+          ],
+          "renderedPadding": [
+            73,
+            80,
+            80,
+            76
+          ]
+        },
+        {
+          "index": 7,
+          "rect": [
+            768,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            11,
+            17,
+            241,
+            243
+          ],
+          "renderedPadding": [
+            75,
+            81,
+            79,
+            77
+          ]
+        },
+        {
+          "index": 8,
+          "rect": [
+            0,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            16,
+            18,
+            238,
+            243
+          ],
+          "renderedPadding": [
+            80,
+            82,
+            82,
+            77
+          ]
+        },
+        {
+          "index": 9,
+          "rect": [
+            256,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            11,
+            16,
+            240,
+            244
+          ],
+          "renderedPadding": [
+            75,
+            80,
+            80,
+            76
+          ]
+        },
+        {
+          "index": 10,
+          "rect": [
+            512,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            13,
+            15,
+            240,
+            242
+          ],
+          "renderedPadding": [
+            77,
+            79,
+            80,
+            78
+          ]
+        },
+        {
+          "index": 11,
+          "rect": [
+            768,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            14,
+            18,
+            239,
+            241
+          ],
+          "renderedPadding": [
+            78,
+            82,
+            81,
+            79
+          ]
+        },
+        {
+          "index": 12,
+          "rect": [
+            0,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            20,
+            20,
+            239,
+            234
+          ],
+          "renderedPadding": [
+            84,
+            84,
+            81,
+            86
+          ]
+        },
+        {
+          "index": 13,
+          "rect": [
+            256,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            24,
+            24,
+            234,
+            229
+          ],
+          "renderedPadding": [
+            88,
+            88,
+            86,
+            91
+          ]
+        },
+        {
+          "index": 14,
+          "rect": [
+            512,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            22,
+            26,
+            231,
+            227
+          ],
+          "renderedPadding": [
+            86,
+            90,
+            89,
+            93
+          ]
+        },
+        {
+          "index": 15,
+          "rect": [
+            768,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            34,
+            34,
+            223,
+            220
+          ],
+          "renderedPadding": [
+            98,
+            98,
+            97,
+            100
+          ]
+        }
+      ],
+      "virtualWidth": 384,
+      "virtualHeight": 384,
+      "alphaDiscard": 8,
+      "opening": [
+        0,
+        3
+      ],
+      "loop": [
+        0,
+        11
+      ],
+      "exit": [
+        12,
+        15
+      ],
+      "frameMs": 35,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "contentWidthRatio": 0.6145833333333334,
+      "contentHeightRatio": 0.6119791666666666,
+      "delivery": "instant",
+      "origin": "caster",
+      "orient": false,
+      "groundOrigin": false,
+      "anchorX": 0.496257,
+      "anchorY": 0.505208,
+      "impactAnchorX": 0.500977,
+      "impactAnchorY": 0.496745,
+      "status": "active-spatial-v2",
+      "sourcePixelsUnmodified": false,
+      "composition": "whole-field",
+      "actorBodyWidthM": 0.5,
+      "authoringDiameterM": 5,
+      "geometrySource": "current committed action/field footprint",
+      "anchorStatus": "runtime ground-anchor fit from source bounds and committed footprint",
+      "authoringGeometry": {
+        "shape": "circle",
+        "radiusM": 2.5,
+        "spanM": 5,
+        "depthM": 5,
+        "origin": "caster",
+        "canonicalSource": "tools/data/skills.json#attack.frost_nova"
+      }
+    },
+    "attack.cinder_nova": {
+      "id": "attack.cinder_nova",
+      "src": "/fx/skill-pool/attack-cinder-nova/v1/atlas.png",
+      "columns": 4,
+      "rows": 4,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frames": [
+        {
+          "index": 0,
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            94,
+            88,
+            167,
+            176
+          ],
+          "renderedPadding": [
+            158,
+            152,
+            153,
+            144
+          ]
+        },
+        {
+          "index": 1,
+          "rect": [
+            256,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            71,
+            60,
+            187,
+            194
+          ],
+          "renderedPadding": [
+            135,
+            124,
+            133,
+            126
+          ]
+        },
+        {
+          "index": 2,
+          "rect": [
+            512,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            41,
+            39,
+            207,
+            201
+          ],
+          "renderedPadding": [
+            105,
+            103,
+            113,
+            119
+          ]
+        },
+        {
+          "index": 3,
+          "rect": [
+            768,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            38,
+            31,
+            226,
+            210
+          ],
+          "renderedPadding": [
+            102,
+            95,
+            94,
+            110
+          ]
+        },
+        {
+          "index": 4,
+          "rect": [
+            0,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            25,
+            39,
+            232,
+            208
+          ],
+          "renderedPadding": [
+            89,
+            103,
+            88,
+            112
+          ]
+        },
+        {
+          "index": 5,
+          "rect": [
+            256,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            22,
+            32,
+            242,
+            208
+          ],
+          "renderedPadding": [
+            86,
+            96,
+            78,
+            112
+          ]
+        },
+        {
+          "index": 6,
+          "rect": [
+            512,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            10,
+            25,
+            242,
+            211
+          ],
+          "renderedPadding": [
+            74,
+            89,
+            78,
+            109
+          ]
+        },
+        {
+          "index": 7,
+          "rect": [
+            768,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            10,
+            32,
+            245,
+            218
+          ],
+          "renderedPadding": [
+            74,
+            96,
+            75,
+            102
+          ]
+        },
+        {
+          "index": 8,
+          "rect": [
+            0,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            7,
+            22,
+            250,
+            227
+          ],
+          "renderedPadding": [
+            71,
+            86,
+            70,
+            93
+          ]
+        },
+        {
+          "index": 9,
+          "rect": [
+            256,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            10,
+            24,
+            251,
+            219
+          ],
+          "renderedPadding": [
+            74,
+            88,
+            69,
+            101
+          ]
+        },
+        {
+          "index": 10,
+          "rect": [
+            512,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            11,
+            25,
+            248,
+            227
+          ],
+          "renderedPadding": [
+            75,
+            89,
+            72,
+            93
+          ]
+        },
+        {
+          "index": 11,
+          "rect": [
+            768,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            16,
+            37,
+            243,
+            220
+          ],
+          "renderedPadding": [
+            80,
+            101,
+            77,
+            100
+          ]
+        },
+        {
+          "index": 12,
+          "rect": [
+            0,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            14,
+            44,
+            237,
+            209
+          ],
+          "renderedPadding": [
+            78,
+            108,
+            83,
+            111
+          ]
+        },
+        {
+          "index": 13,
+          "rect": [
+            256,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            28,
+            54,
+            233,
+            208
+          ],
+          "renderedPadding": [
+            92,
+            118,
+            87,
+            112
+          ]
+        },
+        {
+          "index": 14,
+          "rect": [
+            512,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            33,
+            77,
+            221,
+            204
+          ],
+          "renderedPadding": [
+            97,
+            141,
+            99,
+            116
+          ]
+        },
+        {
+          "index": 15,
+          "rect": [
+            768,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            50,
+            97,
+            204,
+            193
+          ],
+          "renderedPadding": [
+            114,
+            161,
+            116,
+            127
+          ]
+        }
+      ],
+      "virtualWidth": 384,
+      "virtualHeight": 384,
+      "alphaDiscard": 8,
+      "opening": [
+        0,
+        3
+      ],
+      "loop": [
+        0,
+        11
+      ],
+      "exit": [
+        12,
+        15
+      ],
+      "frameMs": 70,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "contentWidthRatio": 0.6328125,
+      "contentHeightRatio": 0.5338541666666666,
+      "delivery": "instant",
+      "origin": "caster",
+      "orient": false,
+      "groundOrigin": false,
+      "anchorX": 0.502496,
+      "anchorY": 0.489258,
+      "impactAnchorX": 0.498698,
+      "impactAnchorY": 0.520182,
+      "status": "active-spatial-v2",
+      "sourcePixelsUnmodified": false,
+      "composition": "whole-field",
+      "actorBodyWidthM": 0.5,
+      "authoringDiameterM": 5,
+      "geometrySource": "current committed action/field footprint",
+      "anchorStatus": "runtime ground-anchor fit from source bounds and committed footprint",
+      "authoringGeometry": {
+        "shape": "circle",
+        "radiusM": 2.5,
+        "spanM": 5,
+        "depthM": 5,
+        "origin": "caster",
+        "canonicalSource": "tools/data/skills.json#attack.cinder_nova"
+      }
+    },
+    "attack.thunder_storm": {
+      "id": "attack.thunder_storm",
+      "src": "/fx/skill-pool/attack-thunder-storm/v1/atlas.png",
+      "columns": 4,
+      "rows": 4,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frames": [
+        {
+          "index": 0,
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            40,
+            85,
+            218,
+            220
+          ],
+          "renderedPadding": [
+            104,
+            149,
+            102,
+            100
+          ]
+        },
+        {
+          "index": 1,
+          "rect": [
+            256,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            28,
+            54,
+            226,
+            229
+          ],
+          "renderedPadding": [
+            92,
+            118,
+            94,
+            91
+          ]
+        },
+        {
+          "index": 2,
+          "rect": [
+            512,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            25,
+            69,
+            234,
+            229
+          ],
+          "renderedPadding": [
+            89,
+            133,
+            86,
+            91
+          ]
+        },
+        {
+          "index": 3,
+          "rect": [
+            768,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            28,
+            1,
+            232,
+            229
+          ],
+          "renderedPadding": [
+            92,
+            65,
+            88,
+            91
+          ]
+        },
+        {
+          "index": 4,
+          "rect": [
+            0,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            26,
+            1,
+            235,
+            229
+          ],
+          "renderedPadding": [
+            90,
+            65,
+            85,
+            91
+          ]
+        },
+        {
+          "index": 5,
+          "rect": [
+            256,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            26,
+            1,
+            235,
+            254
+          ],
+          "renderedPadding": [
+            90,
+            65,
+            85,
+            66
+          ]
+        },
+        {
+          "index": 6,
+          "rect": [
+            512,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            26,
+            1,
+            237,
+            231
+          ],
+          "renderedPadding": [
+            90,
+            65,
+            83,
+            89
+          ]
+        },
+        {
+          "index": 7,
+          "rect": [
+            768,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            26,
+            1,
+            236,
+            254
+          ],
+          "renderedPadding": [
+            90,
+            65,
+            84,
+            66
+          ]
+        },
+        {
+          "index": 8,
+          "rect": [
+            0,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            26,
+            1,
+            237,
+            237
+          ],
+          "renderedPadding": [
+            90,
+            65,
+            83,
+            83
+          ]
+        },
+        {
+          "index": 9,
+          "rect": [
+            256,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            26,
+            1,
+            235,
+            230
+          ],
+          "renderedPadding": [
+            90,
+            65,
+            85,
+            90
+          ]
+        },
+        {
+          "index": 10,
+          "rect": [
+            512,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            25,
+            1,
+            236,
+            229
+          ],
+          "renderedPadding": [
+            89,
+            65,
+            84,
+            91
+          ]
+        },
+        {
+          "index": 11,
+          "rect": [
+            768,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            26,
+            1,
+            231,
+            231
+          ],
+          "renderedPadding": [
+            90,
+            65,
+            89,
+            89
+          ]
+        },
+        {
+          "index": 12,
+          "rect": [
+            0,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            25,
+            50,
+            234,
+            236
+          ],
+          "renderedPadding": [
+            89,
+            114,
+            86,
+            84
+          ]
+        },
+        {
+          "index": 13,
+          "rect": [
+            256,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            28,
+            50,
+            233,
+            227
+          ],
+          "renderedPadding": [
+            92,
+            114,
+            87,
+            93
+          ]
+        },
+        {
+          "index": 14,
+          "rect": [
+            512,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            27,
+            82,
+            225,
+            224
+          ],
+          "renderedPadding": [
+            91,
+            146,
+            95,
+            96
+          ]
+        },
+        {
+          "index": 15,
+          "rect": [
+            768,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            29,
+            99,
+            224,
+            226
+          ],
+          "renderedPadding": [
+            93,
+            163,
+            96,
+            94
+          ]
+        }
+      ],
+      "virtualWidth": 384,
+      "virtualHeight": 384,
+      "alphaDiscard": 8,
+      "opening": [
+        0,
+        3
+      ],
+      "loop": [
+        0,
+        11
+      ],
+      "exit": [
+        12,
+        15
+      ],
+      "frameMs": 70,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "contentWidthRatio": 0.5494791666666666,
+      "contentHeightRatio": 0.6588541666666666,
+      "delivery": "instant",
+      "origin": "caster",
+      "orient": false,
+      "groundOrigin": false,
+      "anchorX": 0.505208,
+      "anchorY": 0.494249,
+      "impactAnchorX": 0.500326,
+      "impactAnchorY": 0.555339,
+      "status": "active-spatial-v2",
+      "sourcePixelsUnmodified": false,
+      "composition": "whole-field",
+      "actorBodyWidthM": 0.5,
+      "authoringDiameterM": 5,
+      "geometrySource": "current committed action/field footprint",
+      "anchorStatus": "runtime ground-anchor fit from source bounds and committed footprint",
+      "authoringGeometry": {
+        "shape": "circle",
+        "radiusM": 2.5,
+        "spanM": 5,
+        "depthM": 5,
+        "origin": "caster",
+        "canonicalSource": "tools/data/skills.json#attack.thunder_storm"
+      }
+    },
+    "attack.storm_field": {
+      "id": "attack.storm_field",
+      "src": "/fx/skill-pool/attack-storm-field/v1/atlas.png",
+      "columns": 4,
+      "rows": 4,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frames": [
+        {
+          "index": 0,
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            48,
+            119,
+            207,
+            195
+          ],
+          "renderedPadding": [
+            112,
+            183,
+            113,
+            125
+          ]
+        },
+        {
+          "index": 1,
+          "rect": [
+            256,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            27,
+            88,
+            222,
+            199
+          ],
+          "renderedPadding": [
+            91,
+            152,
+            98,
+            121
+          ]
+        },
+        {
+          "index": 2,
+          "rect": [
+            512,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            25,
+            72,
+            223,
+            215
+          ],
+          "renderedPadding": [
+            89,
+            136,
+            97,
+            105
+          ]
+        },
+        {
+          "index": 3,
+          "rect": [
+            768,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            16,
+            78,
+            233,
+            219
+          ],
+          "renderedPadding": [
+            80,
+            142,
+            87,
+            101
+          ]
+        },
+        {
+          "index": 4,
+          "rect": [
+            0,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            19,
+            73,
+            233,
+            218
+          ],
+          "renderedPadding": [
+            83,
+            137,
+            87,
+            102
+          ]
+        },
+        {
+          "index": 5,
+          "rect": [
+            256,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            15,
+            65,
+            237,
+            222
+          ],
+          "renderedPadding": [
+            79,
+            129,
+            83,
+            98
+          ]
+        },
+        {
+          "index": 6,
+          "rect": [
+            512,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            15,
+            44,
+            238,
+            221
+          ],
+          "renderedPadding": [
+            79,
+            108,
+            82,
+            99
+          ]
+        },
+        {
+          "index": 7,
+          "rect": [
+            768,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            12,
+            55,
+            237,
+            222
+          ],
+          "renderedPadding": [
+            76,
+            119,
+            83,
+            98
+          ]
+        },
+        {
+          "index": 8,
+          "rect": [
+            0,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            15,
+            54,
+            239,
+            220
+          ],
+          "renderedPadding": [
+            79,
+            118,
+            81,
+            100
+          ]
+        },
+        {
+          "index": 9,
+          "rect": [
+            256,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            14,
+            72,
+            237,
+            221
+          ],
+          "renderedPadding": [
+            78,
+            136,
+            83,
+            99
+          ]
+        },
+        {
+          "index": 10,
+          "rect": [
+            512,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            13,
+            62,
+            236,
+            221
+          ],
+          "renderedPadding": [
+            77,
+            126,
+            84,
+            99
+          ]
+        },
+        {
+          "index": 11,
+          "rect": [
+            768,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            8,
+            73,
+            240,
+            221
+          ],
+          "renderedPadding": [
+            72,
+            137,
+            80,
+            99
+          ]
+        },
+        {
+          "index": 12,
+          "rect": [
+            0,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            21,
+            27,
+            239,
+            212
+          ],
+          "renderedPadding": [
+            85,
+            91,
+            81,
+            108
+          ]
+        },
+        {
+          "index": 13,
+          "rect": [
+            256,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            18,
+            68,
+            226,
+            211
+          ],
+          "renderedPadding": [
+            82,
+            132,
+            94,
+            109
+          ]
+        },
+        {
+          "index": 14,
+          "rect": [
+            512,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            22,
+            83,
+            213,
+            200
+          ],
+          "renderedPadding": [
+            86,
+            147,
+            107,
+            120
+          ]
+        },
+        {
+          "index": 15,
+          "rect": [
+            768,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            19,
+            91,
+            220,
+            203
+          ],
+          "renderedPadding": [
+            83,
+            155,
+            100,
+            117
+          ]
+        }
+      ],
+      "virtualWidth": 384,
+      "virtualHeight": 384,
+      "alphaDiscard": 8,
+      "opening": [
+        0,
+        3
+      ],
+      "loop": [
+        0,
+        11
+      ],
+      "exit": [
+        12,
+        15
+      ],
+      "frameMs": 80,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "contentWidthRatio": 0.6041666666666666,
+      "contentHeightRatio": 0.4817708333333333,
+      "delivery": "ground",
+      "origin": "target",
+      "orient": false,
+      "groundOrigin": false,
+      "anchorX": 0.493164,
+      "anchorY": 0.540907,
+      "impactAnchorX": 0.485026,
+      "impactAnchorY": 0.523112,
+      "status": "active-spatial-v2",
+      "sourcePixelsUnmodified": false,
+      "composition": "whole-field",
+      "actorBodyWidthM": 0.5,
+      "authoringDiameterM": 5,
+      "geometrySource": "current committed action/field footprint",
+      "anchorStatus": "runtime ground-anchor fit from source bounds and committed footprint",
+      "authoringGeometry": {
+        "shape": "circle",
+        "radiusM": 2.5,
+        "spanM": 5,
+        "depthM": 5,
+        "origin": "target",
+        "canonicalSource": "tools/data/skills.json#attack.storm_field"
+      }
+    },
+    "attack.poison_cloud": {
+      "id": "attack.poison_cloud",
+      "src": "/fx/skill-pool/attack-poison-cloud/v1/atlas.png",
+      "columns": 4,
+      "rows": 4,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frames": [
+        {
+          "index": 0,
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            58,
+            94,
+            208,
+            193
+          ],
+          "renderedPadding": [
+            122,
+            158,
+            112,
+            127
+          ]
+        },
+        {
+          "index": 1,
+          "rect": [
+            256,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            25,
+            39,
+            230,
+            212
+          ],
+          "renderedPadding": [
+            89,
+            103,
+            90,
+            108
+          ]
+        },
+        {
+          "index": 2,
+          "rect": [
+            512,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            17,
+            25,
+            233,
+            220
+          ],
+          "renderedPadding": [
+            81,
+            89,
+            87,
+            100
+          ]
+        },
+        {
+          "index": 3,
+          "rect": [
+            768,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            8,
+            21,
+            241,
+            225
+          ],
+          "renderedPadding": [
+            72,
+            85,
+            79,
+            95
+          ]
+        },
+        {
+          "index": 4,
+          "rect": [
+            0,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            14,
+            16,
+            241,
+            227
+          ],
+          "renderedPadding": [
+            78,
+            80,
+            79,
+            93
+          ]
+        },
+        {
+          "index": 5,
+          "rect": [
+            256,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            12,
+            14,
+            240,
+            226
+          ],
+          "renderedPadding": [
+            76,
+            78,
+            80,
+            94
+          ]
+        },
+        {
+          "index": 6,
+          "rect": [
+            512,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            15,
+            19,
+            241,
+            228
+          ],
+          "renderedPadding": [
+            79,
+            83,
+            79,
+            92
+          ]
+        },
+        {
+          "index": 7,
+          "rect": [
+            768,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            14,
+            15,
+            241,
+            226
+          ],
+          "renderedPadding": [
+            78,
+            79,
+            79,
+            94
+          ]
+        },
+        {
+          "index": 8,
+          "rect": [
+            0,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            17,
+            24,
+            243,
+            225
+          ],
+          "renderedPadding": [
+            81,
+            88,
+            77,
+            95
+          ]
+        },
+        {
+          "index": 9,
+          "rect": [
+            256,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            17,
+            18,
+            242,
+            224
+          ],
+          "renderedPadding": [
+            81,
+            82,
+            78,
+            96
+          ]
+        },
+        {
+          "index": 10,
+          "rect": [
+            512,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            15,
+            22,
+            240,
+            225
+          ],
+          "renderedPadding": [
+            79,
+            86,
+            80,
+            95
+          ]
+        },
+        {
+          "index": 11,
+          "rect": [
+            768,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            23,
+            28,
+            233,
+            222
+          ],
+          "renderedPadding": [
+            87,
+            92,
+            87,
+            98
+          ]
+        },
+        {
+          "index": 12,
+          "rect": [
+            0,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            23,
+            34,
+            230,
+            212
+          ],
+          "renderedPadding": [
+            87,
+            98,
+            90,
+            108
+          ]
+        },
+        {
+          "index": 13,
+          "rect": [
+            256,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            25,
+            47,
+            223,
+            206
+          ],
+          "renderedPadding": [
+            89,
+            111,
+            97,
+            114
+          ]
+        },
+        {
+          "index": 14,
+          "rect": [
+            512,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            39,
+            44,
+            215,
+            197
+          ],
+          "renderedPadding": [
+            103,
+            108,
+            105,
+            123
+          ]
+        },
+        {
+          "index": 15,
+          "rect": [
+            768,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            48,
+            52,
+            205,
+            190
+          ],
+          "renderedPadding": [
+            112,
+            116,
+            115,
+            130
+          ]
+        }
+      ],
+      "virtualWidth": 384,
+      "virtualHeight": 384,
+      "alphaDiscard": 8,
+      "opening": [
+        0,
+        3
+      ],
+      "loop": [
+        0,
+        11
+      ],
+      "exit": [
+        12,
+        15
+      ],
+      "frameMs": 90,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "contentWidthRatio": 0.6067708333333334,
+      "contentHeightRatio": 0.5520833333333334,
+      "delivery": "ground",
+      "origin": "target",
+      "orient": false,
+      "groundOrigin": false,
+      "anchorX": 0.499566,
+      "anchorY": 0.490885,
+      "impactAnchorX": 0.494792,
+      "impactAnchorY": 0.486328,
+      "status": "active-spatial-v2",
+      "sourcePixelsUnmodified": false,
+      "composition": "whole-field",
+      "actorBodyWidthM": 0.5,
+      "authoringDiameterM": 5,
+      "geometrySource": "current committed action/field footprint",
+      "anchorStatus": "runtime ground-anchor fit from source bounds and committed footprint",
+      "authoringGeometry": {
+        "shape": "circle",
+        "radiusM": 2.5,
+        "spanM": 5,
+        "depthM": 5,
+        "origin": "target",
+        "canonicalSource": "tools/data/skills.json#attack.poison_cloud"
+      }
+    },
+    "attack.chaos_wave": {
+      "id": "attack.chaos_wave",
+      "src": "/fx/skill-pool/attack-chaos-wave/v1/atlas.png",
+      "columns": 4,
+      "rows": 4,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frames": [
+        {
+          "index": 0,
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            75,
+            77,
+            179,
+            182
+          ],
+          "renderedPadding": [
+            139,
+            141,
+            141,
+            138
+          ]
+        },
+        {
+          "index": 1,
+          "rect": [
+            256,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            55,
+            72,
+            201,
+            194
+          ],
+          "renderedPadding": [
+            119,
+            136,
+            119,
+            126
+          ]
+        },
+        {
+          "index": 2,
+          "rect": [
+            512,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            31,
+            68,
+            220,
+            210
+          ],
+          "renderedPadding": [
+            95,
+            132,
+            100,
+            110
+          ]
+        },
+        {
+          "index": 3,
+          "rect": [
+            768,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            10,
+            57,
+            240,
+            221
+          ],
+          "renderedPadding": [
+            74,
+            121,
+            80,
+            99
+          ]
+        },
+        {
+          "index": 4,
+          "rect": [
+            0,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            3,
+            26,
+            255,
+            229
+          ],
+          "renderedPadding": [
+            67,
+            90,
+            65,
+            91
+          ]
+        },
+        {
+          "index": 5,
+          "rect": [
+            256,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            7,
+            28,
+            255,
+            232
+          ],
+          "renderedPadding": [
+            71,
+            92,
+            65,
+            88
+          ]
+        },
+        {
+          "index": 6,
+          "rect": [
+            512,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            5,
+            34,
+            255,
+            230
+          ],
+          "renderedPadding": [
+            69,
+            98,
+            65,
+            90
+          ]
+        },
+        {
+          "index": 7,
+          "rect": [
+            768,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            1,
+            28,
+            254,
+            231
+          ],
+          "renderedPadding": [
+            65,
+            92,
+            66,
+            89
+          ]
+        },
+        {
+          "index": 8,
+          "rect": [
+            0,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            1,
+            26,
+            253,
+            230
+          ],
+          "renderedPadding": [
+            65,
+            90,
+            67,
+            90
+          ]
+        },
+        {
+          "index": 9,
+          "rect": [
+            256,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            2,
+            25,
+            255,
+            233
+          ],
+          "renderedPadding": [
+            66,
+            89,
+            65,
+            87
+          ]
+        },
+        {
+          "index": 10,
+          "rect": [
+            512,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            1,
+            34,
+            255,
+            236
+          ],
+          "renderedPadding": [
+            65,
+            98,
+            65,
+            84
+          ]
+        },
+        {
+          "index": 11,
+          "rect": [
+            768,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            3,
+            30,
+            254,
+            232
+          ],
+          "renderedPadding": [
+            67,
+            94,
+            66,
+            88
+          ]
+        },
+        {
+          "index": 12,
+          "rect": [
+            0,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            21,
+            30,
+            233,
+            217
+          ],
+          "renderedPadding": [
+            85,
+            94,
+            87,
+            103
+          ]
+        },
+        {
+          "index": 13,
+          "rect": [
+            256,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            23,
+            37,
+            229,
+            207
+          ],
+          "renderedPadding": [
+            87,
+            101,
+            91,
+            113
+          ]
+        },
+        {
+          "index": 14,
+          "rect": [
+            512,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            28,
+            47,
+            227,
+            211
+          ],
+          "renderedPadding": [
+            92,
+            111,
+            93,
+            109
+          ]
+        },
+        {
+          "index": 15,
+          "rect": [
+            768,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            34,
+            69,
+            217,
+            205
+          ],
+          "renderedPadding": [
+            98,
+            133,
+            103,
+            115
+          ]
+        }
+      ],
+      "virtualWidth": 384,
+      "virtualHeight": 384,
+      "alphaDiscard": 8,
+      "opening": [
+        0,
+        3
+      ],
+      "loop": [
+        0,
+        11
+      ],
+      "exit": [
+        12,
+        15
+      ],
+      "frameMs": 70,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "contentWidthRatio": 0.6614583333333334,
+      "contentHeightRatio": 0.5416666666666666,
+      "delivery": "instant",
+      "origin": "caster",
+      "orient": false,
+      "groundOrigin": false,
+      "anchorX": 0.499783,
+      "anchorY": 0.510091,
+      "impactAnchorX": 0.496094,
+      "impactAnchorY": 0.499674,
+      "status": "active-spatial-v2",
+      "sourcePixelsUnmodified": false,
+      "composition": "whole-field",
+      "actorBodyWidthM": 0.5,
+      "authoringDiameterM": 5,
+      "geometrySource": "current committed action/field footprint",
+      "anchorStatus": "runtime ground-anchor fit from source bounds and committed footprint",
+      "authoringGeometry": {
+        "shape": "circle",
+        "radiusM": 2.5,
+        "spanM": 5,
+        "depthM": 5,
+        "origin": "caster",
+        "canonicalSource": "tools/data/skills.json#attack.chaos_wave"
+      }
+    },
+    "attack.fissure": {
+      "id": "attack.fissure",
+      "src": "/fx/skill-pool/attack-fissure/v1/atlas.png",
+      "columns": 4,
+      "rows": 4,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frames": [
+        {
+          "index": 0,
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            17,
+            114,
+            116,
+            156
+          ],
+          "renderedPadding": [
+            81,
+            178,
+            204,
+            164
+          ]
+        },
+        {
+          "index": 1,
+          "rect": [
+            256,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            9,
+            106,
+            149,
+            159
+          ],
+          "renderedPadding": [
+            73,
+            170,
+            171,
+            161
+          ]
+        },
+        {
+          "index": 2,
+          "rect": [
+            512,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            4,
+            102,
+            213,
+            166
+          ],
+          "renderedPadding": [
+            68,
+            166,
+            107,
+            154
+          ]
+        },
+        {
+          "index": 3,
+          "rect": [
+            768,
+            0,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            4,
+            95,
+            239,
+            170
+          ],
+          "renderedPadding": [
+            68,
+            159,
+            81,
+            150
+          ]
+        },
+        {
+          "index": 4,
+          "rect": [
+            0,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            4,
+            91,
+            243,
+            175
+          ],
+          "renderedPadding": [
+            68,
+            155,
+            77,
+            145
+          ]
+        },
+        {
+          "index": 5,
+          "rect": [
+            256,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            2,
+            78,
+            252,
+            175
+          ],
+          "renderedPadding": [
+            66,
+            142,
+            68,
+            145
+          ]
+        },
+        {
+          "index": 6,
+          "rect": [
+            512,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            3,
+            77,
+            253,
+            177
+          ],
+          "renderedPadding": [
+            67,
+            141,
+            67,
+            143
+          ]
+        },
+        {
+          "index": 7,
+          "rect": [
+            768,
+            256,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            5,
+            78,
+            253,
+            178
+          ],
+          "renderedPadding": [
+            69,
+            142,
+            67,
+            142
+          ]
+        },
+        {
+          "index": 8,
+          "rect": [
+            0,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            3,
+            55,
+            254,
+            178
+          ],
+          "renderedPadding": [
+            67,
+            119,
+            66,
+            142
+          ]
+        },
+        {
+          "index": 9,
+          "rect": [
+            256,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            4,
+            75,
+            253,
+            178
+          ],
+          "renderedPadding": [
+            68,
+            139,
+            67,
+            142
+          ]
+        },
+        {
+          "index": 10,
+          "rect": [
+            512,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            4,
+            78,
+            254,
+            178
+          ],
+          "renderedPadding": [
+            68,
+            142,
+            66,
+            142
+          ]
+        },
+        {
+          "index": 11,
+          "rect": [
+            768,
+            512,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            5,
+            90,
+            253,
+            178
+          ],
+          "renderedPadding": [
+            69,
+            154,
+            67,
+            142
+          ]
+        },
+        {
+          "index": 12,
+          "rect": [
+            0,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            6,
+            88,
+            245,
+            175
+          ],
+          "renderedPadding": [
+            70,
+            152,
+            75,
+            145
+          ]
+        },
+        {
+          "index": 13,
+          "rect": [
+            256,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            7,
+            92,
+            243,
+            172
+          ],
+          "renderedPadding": [
+            71,
+            156,
+            77,
+            148
+          ]
+        },
+        {
+          "index": 14,
+          "rect": [
+            512,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            8,
+            105,
+            243,
+            174
+          ],
+          "renderedPadding": [
+            72,
+            169,
+            77,
+            146
+          ]
+        },
+        {
+          "index": 15,
+          "rect": [
+            768,
+            768,
+            256,
+            256
+          ],
+          "offsetX": 64,
+          "offsetY": 64,
+          "bounds": [
+            9,
+            118,
+            245,
+            173
+          ],
+          "renderedPadding": [
+            73,
+            182,
+            75,
+            147
+          ]
+        }
+      ],
+      "virtualWidth": 384,
+      "virtualHeight": 384,
+      "alphaDiscard": 8,
+      "opening": [
+        0,
+        3
+      ],
+      "loop": [
+        0,
+        11
+      ],
+      "exit": [
+        12,
+        15
+      ],
+      "frameMs": 60,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "contentWidthRatio": 0.6536458333333334,
+      "contentHeightRatio": 0.3203125,
+      "delivery": "ground",
+      "origin": "caster",
+      "orient": false,
+      "groundOrigin": false,
+      "anchorX": 0.470052,
+      "anchorY": 0.503798,
+      "impactAnchorX": 0.494141,
+      "impactAnchorY": 0.523763,
+      "status": "active-spatial-v2",
+      "sourcePixelsUnmodified": false,
+      "composition": "whole-field",
+      "actorBodyWidthM": 0.5,
+      "authoringDiameterM": 6,
+      "geometrySource": "current committed action/field footprint",
+      "anchorStatus": "runtime ground-anchor fit from source bounds and committed footprint",
+      "authoringGeometry": {
+        "shape": "line",
+        "radiusM": 0,
+        "spanM": 6,
+        "depthM": 1.2,
+        "origin": "caster",
+        "canonicalSource": "tools/data/skills.json#attack.fissure",
+        "lengthM": 6,
+        "widthM": 1.2
+      }
     }
   },
   "legacySource": "LEGACY_AUTHORED_VFX / original batch-manifest.json"

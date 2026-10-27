@@ -40,13 +40,13 @@ export type AuthoredVfx = {
 /** Preserved production presets and PNGs, available for reuse or rollback. */
 export const LEGACY_AUTHORED_VFX: Record<string, AuthoredVfx> = {
   'attack.fireball': {
-    src: '/fx/authored/attack-fireball/v1/atlas-v2.png',
+    src: '/fx/skill-pool/attack-fireball/v1/atlas-v2.png',
     columns: 4, rows: 4, cellWidth: 313.5, cellHeight: 313.5,
     anchorY: .5, opening: [0, 3], loop: [4, 11], exit: [12, 15], frameMs: 80,
     delivery: 'projectile', origin: 'target', orient: true,
   },
   'attack.firestorm': {
-    src: '/fx/authored/attack-firestorm/v1/atlas-v1.png',
+    src: '/fx/skill-pool/attack-firestorm/v1/atlas-v1.png',
     columns: 4,
     rows: 4,
     cellWidth: 352,
@@ -61,7 +61,8 @@ export const LEGACY_AUTHORED_VFX: Record<string, AuthoredVfx> = {
   ...(batchManifest as unknown as Record<string, AuthoredVfx>),
 };
 
-const groundArt = new Set(['attack.ground_slam', 'attack.earth_shock', 'attack.aftershock', 'attack.void_blast', 'attack.shatter', 'attack.overload']);
+const groundArt = new Set(['attack.ground_slam', 'attack.earth_shock', 'attack.aftershock', 'attack.void_blast', 'attack.shatter', 'attack.overload', 'attack.frost_nova',
+  'attack.cinder_nova', 'attack.thunder_storm', 'attack.storm_field', 'attack.poison_cloud', 'attack.chaos_wave', 'attack.fissure']);
 const spatialEntries = spatialManifest.entries as unknown as Record<string, AuthoredVfx & {
   composition: NonNullable<AuthoredVfx['spatial']>['composition']; authoringGeometry: {spanM:number};
 }>;
@@ -115,7 +116,7 @@ export function validAuthoredComposition(input: unknown): input is AuthoredCompo
       && ring.radius < 1 && Number.isInteger(ring.count) && ring.count > 0 && ring.count <= 32)
     && value.components.every(component => Number.isFinite(component.sizeM) && component.sizeM > 0
       && ['width', 'height'].includes(component.sizeAxis) && !!component.art
-      && typeof component.art.src === 'string' && component.art.src.startsWith('/fx/authored/')
+      && typeof component.art.src === 'string' && component.art.src.startsWith('/fx/skill-pool/')
       && Number.isFinite(component.art.frameMs) && component.art.frameMs > 0
       && Number.isFinite(component.art.virtualWidth) && component.art.virtualWidth! > 0
       && Number.isFinite(component.art.virtualHeight) && component.art.virtualHeight! > 0
@@ -195,6 +196,21 @@ export function spatialVfxMatrix(preset: AuthoredVfx, frame: number, area: VfxFo
   const anchorY = cell.offsetY + (bounds ? bounds[3] - (sector ? 0 : width * .25) : cell.height * .72);
   const radiusX = (preset.contentWidthRatio ?? 1) * (preset.virtualWidth ?? cell.width) / 2;
   let a: number, b: number, c: number, d: number;
+  if (area.shape === 'line') {
+    const reach = area.lengthM ?? 1, band = area.widthM ?? 1;
+    const direction = area.directionRad ?? 0, cos = Math.cos(direction), sin = Math.sin(direction);
+    const unitX = {x:area.basisX.x / reach, y:area.basisX.y / reach};
+    const unitY = {x:area.basisY.x / reach, y:area.basisY.y / reach};
+    const along = {x:cos*unitX.x + sin*unitY.x, y:cos*unitX.y + sin*unitY.y};
+    const across = {x:-sin*unitX.x + cos*unitY.x, y:-sin*unitX.y + cos*unitY.y};
+    const contentWidth = bounds ? bounds[2] - bounds[0] : cell.width;
+    const contentHeight = bounds ? bounds[3] - bounds[1] : cell.height;
+    const startX = cell.offsetX + (bounds ? bounds[0] : 0);
+    const startY = cell.offsetY + (bounds ? (bounds[1] + bounds[3]) / 2 : cell.height / 2);
+    a = along.x * reach / contentWidth; b = along.y * reach / contentWidth;
+    c = across.x * band / contentHeight; d = across.y * band / contentHeight;
+    return [a,b,c,d,area.center.x - a*startX - c*startY,area.center.y - b*startX - d*startY];
+  }
   if (sector && area.shape === 'cone') {
     const direction = area.directionRad ?? 0, reach = area.lengthM ?? 1;
     const halfAngle = (area.angleDeg ?? 90) * Math.PI / 360;

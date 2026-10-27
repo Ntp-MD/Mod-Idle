@@ -7,7 +7,7 @@
   import { onDestroy, onMount, setContext, untrack } from 'svelte';
   import { linear } from 'svelte/easing';
   import { prefersReducedMotion, Tween } from 'svelte/motion';
-  import { eng, E, sm, TOWN, tree, loot, fieldwork, trade } from './engine/client';
+  import { eng, E, sm, TOWN, tree, loot, fieldwork, trade, BASES } from './engine/client';
   import { MOB_DRAFT_VARIANT_QA_PASS_METADATA_PATHS } from './ui/dev/arena-art/arena-art-mob-drafts-qa-pass';
   import { bundleOf } from '../../engine/keystones.ts';
 import { fieldSite, campHere as atFieldCamp, establishCamp, leaveCamp, returnToCamp, startFieldAction, stopFieldAction, cookMeal, eatMeal } from './sim/world/fieldwork';
@@ -162,6 +162,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const showcaseMode = import.meta.env.DEV && window.location.pathname.replace(/\/+$/, '') === '/__showcase';
   const showcaseQuery = new URLSearchParams(window.location.search);
   const requestedShowcaseSample = showcaseQuery.get('sample');
+  const showcasePlayerWeapon = showcaseQuery.get('player-weapon');
+  const showcasePlayerOffhand = showcaseQuery.get('player-offhand');
   /** Every Gameplay sample the showcase dropdown offers — deep links (?sample=) accept the same set. */
   const SHOWCASE_SAMPLES = ['field', 'arpg-arena', 'build-workbench', 'progress-recap', 'core-field', 'core-town',
     'offline-progress', 'delivery', 'choice', 'full-bag', 'fallback', 'expired', 'read-only', 'economy-lab',
@@ -221,7 +223,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   function arenaLiving() { return gameState.group.filter((mob) => mob.hp > 0); }
   function focusArenaEnemy(mobId?: string) {
     if (!arenaMode || panel !== null) return;
-    const living = arenaLiving();
+    const living = arenaLiving().filter((mob) => !combatArena.mobs[mob.id]?.returning);
     const next = mobId
       ? living.find((mob) => mob.id === mobId)
       : living[(living.findIndex((mob) => mob.id === arenaFocusId) + 1) % Math.max(1, living.length)];
@@ -260,7 +262,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   /** A dead focus releases the pin so sticky-nearest selection resumes. */
   function syncArenaFocus() {
     if (!arenaFocusId) return;
-    if (arenaLiving().some((mob) => mob.id === arenaFocusId)) return;
+    if (arenaLiving().some((mob) => mob.id === arenaFocusId && !combatArena.mobs[mob.id]?.returning)) return;
     arenaFocusId = null;
     combatArena.focusId = undefined;
   }
@@ -522,9 +524,20 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       // so a bow row needs a bow and a spell reads best off a magic weapon.
       const fittingWeapon = (E.weapons as any[]).find((w) => sm.weaponFits(previewSkill, w.name)
         && (!previewSkill.group || previewSkill.group === 'all' || sm.weaponGroupOf(w.name) === previewSkill.group));
+      const requestedFrames = showcasePlayerWeapon
+        ? (BASES.weapon_frames as Record<string, { name: string }[]>)[showcasePlayerWeapon]
+        : undefined;
+      const previewWeaponBase = requestedFrames?.[0]?.name ?? fittingWeapon?.name;
       const mainHandIndex = loot.SLOTS.findIndex((slot: string) => slot === 'main hand');
-      if (fittingWeapon && mainHandIndex >= 0) {
-        sample.gear[mainHandIndex] = { slot: 'main hand', base: fittingWeapon.name, ilvl: 1, quality: 'Normal', tier: 'T1', lines: [] };
+      if (previewWeaponBase && mainHandIndex >= 0) {
+        sample.gear[mainHandIndex] = { slot: 'main hand', base: previewWeaponBase, ilvl: 1, quality: 'Normal', tier: 'T1', lines: [] };
+      }
+      if (showcasePlayerOffhand === 'shield') {
+        const shieldBase = (BASES.bases as { name: string; slot?: string; family?: string | null }[])
+          .find(item => item.slot === 'off hand' && item.family === 'Shield');
+        const offhandIndex = loot.SLOTS.findIndex((slot: string) => slot === 'off hand');
+        if (shieldBase && offhandIndex >= 0)
+          sample.gear[offhandIndex] = { slot: 'off hand', base: shieldBase.name, ilvl: 1, quality: 'Normal', tier: 'T1', lines: [] };
       }
       const sheet = characterSheet(sample);
       sample.player.hp = previewSkill.type === 'heal' ? Math.round(sheet.maxHp * .6) : sheet.maxHp;

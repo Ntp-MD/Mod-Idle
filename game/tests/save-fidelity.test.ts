@@ -320,7 +320,7 @@ describe('the save schema and the account', () => {
   });
 
   it('imports a v19 export, the format the milestone-ledger release wrote', () => {
-    // v19 is documented in docs/game-rules.md §Delivery: it is a supported older save, so an
+    // v19 is a supported older save, so an
     // export at that version must migrate instead of being refused as foreign.
     const s = newGame(521);
     const loaded = importJson(JSON.stringify({ version: 19, state: s }));

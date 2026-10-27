@@ -40,7 +40,7 @@ export interface FieldState {
   offlineCredit?: number;
   farmingAnchor: FieldPoint;
   player: FieldPoint;
-  actors: { id: string; x: number; y: number }[];
+  actors: { id: string; x: number; y: number; returning?: boolean }[];
   /** Last wall second this field was current; the offline catch-up starts from here. */
   lastSeenAtSec?: number;
 }
@@ -160,7 +160,8 @@ export function syncFieldState(s: GameState, arena?: CombatArena, quietTicks = 2
     field.player = { x: arena.player.x, y: arena.player.y };
     field.actors = s.group.filter((mob) => mob.hp > 0 && arena.mobs[mob.id])
       .slice(0, MAX_ACTORS)
-      .map((mob) => ({ id: mob.id, x: arena.mobs[mob.id].x, y: arena.mobs[mob.id].y }));
+      .map((mob) => ({ id: mob.id, x: arena.mobs[mob.id].x, y: arena.mobs[mob.id].y,
+        ...(arena.mobs[mob.id].returning ? { returning: true } : {}) }));
   }
   // Engagement is written by the combat loop; a session starts on the first engaged body and ends
   // after the field has been quiet for `quietTicks`.
@@ -213,7 +214,8 @@ export function restoreFieldPositions(arena: CombatArena, s: GameState): void {
     Object.assign(arena.player, { x: field.player.x, y: field.player.y });
   for (const actor of field.actors) {
     const saved = arena.mobs[actor.id];
-    if (saved && saved.hp > 0) Object.assign(saved, { x: actor.x, y: actor.y });
+    if (saved && saved.hp > 0)
+      Object.assign(saved, { x: actor.x, y: actor.y, ...(actor.returning ? { returning: true } : {}) });
   }
 }
 
@@ -242,7 +244,8 @@ export function normalizeFieldState(value: unknown): FieldState | null {
       ...(typeof slot.mobId === 'string' ? { mobId: slot.mobId } : {}),
     }));
   const actors = (Array.isArray(field.actors) ? field.actors : []).filter((actor) =>
-    !!actor && typeof actor.id === 'string' && finite(actor.x) && finite(actor.y)).slice(0, MAX_ACTORS);
+    !!actor && typeof actor.id === 'string' && finite(actor.x) && finite(actor.y)).slice(0, MAX_ACTORS)
+    .map((actor) => ({ id: actor.id, x: actor.x, y: actor.y, ...(actor.returning === true ? { returning: true } : {}) }));
   return {
     areaKey: field.areaKey,
     arenaEpoch: Math.max(1, Math.floor(field.arenaEpoch)),

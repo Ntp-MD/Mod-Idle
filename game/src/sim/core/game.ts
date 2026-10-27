@@ -2,10 +2,14 @@ import { eng, E, sm, loot, TOWN, tree, spawns } from '../../engine/client';
 import { buildCharacter, emptyGear, SLOT_COUNT } from './player';
 import { itemName } from '../gear/item-name';
 import { playerSwing, mobSwing, rollStatus, applyStatus, poisonBurst, dotDamageParts, decayStatusStack, type Statuses, type StatusName } from '../combat/combat';
+import { basicPhaseBudget } from '../../../../engine/attack-range.ts';
 import { CombatClock, EVENT_PRIORITY, planAttacks } from '../combat/combat-clock';
 import {
-  advanceCombatArena, aimForSkill, arenaAction, arenaInRange, arenaMobRange, arenaSkillRange, arenaSkillTargets, arenaTarget,
-  arenaWeaponRange, captureCombatArena, createCombatArena, recordCombatArenaFx, syncCombatArena, updateArenaAction, arenaDistance, type CombatArena, type CombatMobFlight, type CombatArenaAction,
+  actionFeetUntil, advanceCombatArena, aimForSkill, arenaAction, arenaInRange, arenaMobInReach, arenaPlayerInReach,
+  arenaSkillRange, arenaSkillTargets, arenaTarget, arenaWeaponRange, arenaWeaponStopRange, captureCombatArena,
+  createCombatArena, mobAttackProfile, playerAttackProfile, recordCombatArenaFx, syncCombatArena, updateArenaAction,
+  arenaDistance,
+  type CombatArena, type CombatMobFlight, type CombatArenaAction,
 } from '../combat/combat-arena';
 import {
   flightTargets, intentInRange, intentTargets, projectilePosition, selectCombatIntent, trackIntentAim,
@@ -14,7 +18,7 @@ import {
 import { firstProjectileHit, releasedSkillCastTiming, skillCastTiming, targetsInSkillArea } from '../../../../engine/skill-actions.ts';
 import { skillAreaSnapshot } from '../../../../engine/skill-area.ts';
 import { spawnSlotSeed } from '../../../../engine/spawns.ts';
-import type { MobSkillRow, SkillAreaSnapshot, SkillCastTiming } from '../../../../engine/types.ts';
+import type { MobCastProfile, MobSkillRow, SkillAreaSnapshot, SkillCastTiming } from '../../../../engine/types.ts';
 import { rollDrop } from '../gear/drop';
 import { abandonRun, payoutStacks } from '../world/dungeon';
 import { selectDungeonRescue, type DungeonRescueEntry } from '../../../../engine/dungeon-rescue.ts';
@@ -45,7 +49,10 @@ import { newFilter, ruleFor, coveredElements, refresh as refreshFilter } from '.
 import { addTo, fits, slotsFree } from '../gear/slots';
 import { settlementOfZone, settlementById } from '../town/town';
 import { effectsActive, esAbsorbPct } from '../combat/skills';
-import { applyMobAuras, markMobSkillUsed, mobSkillById, mobStrikeRange, planMobSkills, readyMobSkill, resolveMobKit } from '../combat/mobSkills';
+import {
+  applyMobAuras, markMobSkillUsed, mobCastGeometry, mobCastProfile, mobSkillById, mobStrikeRange,
+  planMobSkills, readyMobSkill, resolveMobKit,
+} from '../combat/mobSkills';
 import { mark as markSnapshot } from './snapshot';
 import { newGoal, onSpawn as goalSpawn, onKill as goalKill, watch as goalWatch } from './goal';
 import { newGuidance } from './guidance';
@@ -1425,8 +1432,60 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
   if (arena) syncCombatArena(arena, s, tickStartUs, units, c.maxHp);
 
   // Engagement is spatial: only bodies inside aggro, an existing leash, an assist neighbour, or the
-  // player's committed target may attack. The rest keep their home ground.
-  if (s.field) {
+  // player's committed target may attack. The rest keep their home ground. The same resolver runs
+  // again after every authoritative movement sample, so joining or leaving is not delayed a second.
+  type EngagementDelta = { added: string[]; removed: string[] };
+  /** Keep the saved field actor in step when the return flag changes mid-tick. */
+  function persistReturning(id: string, value: boolean): void {
+    const actor = s.field?.actors.find((entry) => entry.id === id);
+    if (!actor) return;
+    if (value) actor.returning = true;
+    else delete actor.returning;
+  }
+  /** The target a swing/aim selected this tick, even before an intent exists. */
+  let deliberateTargetId: string | undefined;
+  /**
+   * Home return is a committed state: a displaced ordinary body drops damage and may not be
+   * targeted again until it reaches its authored home band. Bosses and camp fights keep their own
+   * boundary policy, so they are never given this field immunity automatically.
+   */
+  function refreshReturning(atUs: number): void {
+    if (!arena || !s.field) return;
+    const campFight = s.fieldwork.campEncounters?.active?.stage === 'combat';
+    const band = Math.max(0.01, Number(fieldProfile().home_band_m) || 0.35);
+    const engaged = new Set(s.field.engagementIds);
+    for (const mob of s.group) {
+      const actor = arena.mobs[mob.id];
+      if (!actor || mob.hp <= 0) continue;
+      const slot = s.field.slots.find((entry) => entry.id === mob.spawnSlotId);
+      if (!slot) continue;
+      const ordinary = !campFight && !isBossKind(String(mob.kind));
+      const distance = arenaDistance(actor, slot.home);
+      if (!ordinary) { actor.returning = false; persistReturning(mob.id, false); continue; }
+      // The transition out of engagement owns the one reset and the persisted flag; this pass
+      // only releases the state once the body has actually reached its home band. A stale saved
+      // engagement id cannot cancel an in-progress return.
+      if (actor.returning) {
+        if (distance <= band + 1e-6) {
+          actor.returning = false;
+          persistReturning(mob.id, false);
+        }
+        continue;
+      }
+      if (engaged.has(mob.id)) continue;
+    }
+    if (arena.focusId && arena.mobs[arena.focusId]?.returning) {
+      const name = s.group.find((mob) => mob.id === arena!.focusId)?.species ?? 'Target';
+      arena.focusId = undefined;
+      push(s, `${name} is returning home`);
+    }
+    if (arena.intent?.targetId && arena.mobs[arena.intent.targetId]?.returning)
+      cancelIntent('target returning');
+  }
+  function syncEngagement(atUs: number): EngagementDelta {
+    const empty: EngagementDelta = { added: [], removed: [] };
+    if (!s.field) return empty;
+    const was = new Set(s.field.engagementIds);
     if (!arena) {
       if (!online) {
         // A-lite offline duty: accumulate the authored engagement share and fight a solo pull only
@@ -1442,51 +1501,94 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
         // body in the engagement set; the ground resolver is the only difference.
         s.field.engagementIds = s.group.filter((mob) => mob.hp > 0).map((mob) => mob.id);
       }
-    } else {
-      const profile = fieldProfile();
-      const was = new Set(s.field.engagementIds);
-      const next = new Set<string>();
-      const live = s.group.filter((mob) => mob.hp > 0 && arena.mobs[mob.id]);
-      const campFight = s.fieldwork.campEncounters?.active?.stage === 'combat';
-      if ((s.hunting || campFight) && s.player.hp > 0) {
-        for (const mob of live) {
-          if (campFight || arenaDistance(arena.mobs[mob.id], arena.player) <= profile.aggro_m + 1e-7) next.add(mob.id);
-        }
-        for (const mob of live) {
-          if (!was.has(mob.id)) continue;
-          const slot = s.field.slots.find((entry) => entry.id === mob.spawnSlotId);
-          if (!slot || arenaDistance(arena.mobs[mob.id], slot.home) <= profile.leash_m + 1e-7) next.add(mob.id);
-        }
-        for (const mob of live) {
-          if (next.has(mob.id)) continue;
-          if (live.some((other) => next.has(other.id)
-            && arenaDistance(arena.mobs[mob.id], arena.mobs[other.id]) <= profile.assist_m + 1e-7)) next.add(mob.id);
-        }
-        if (arena.intent?.targetId) next.add(arena.intent.targetId);
-      }
-      // A body that leaves its leash drops its damage and returns with its home pool, like a map
-      // reset; this is the same receipt whether it was pulled too far or the player left it behind.
-      for (const id of was) {
-        if (next.has(id)) continue;
-        const mob = s.group.find((entry) => entry.id === id);
-        if (!mob || mob.hp <= 0) continue;
-        mob.hp = mob.hpMax;
-        delete s.mobStatus[id];
-        delete s.curses[id];
-      }
-      s.field.engagementIds = [...next].slice(0, Math.max(1, s.field.slots.length));
+      const now = new Set(s.field.engagementIds);
+      return {
+        added: [...now].filter((id) => !was.has(id)),
+        removed: [...was].filter((id) => !now.has(id)),
+      };
     }
+    const profile = fieldProfile();
+    const next = new Set<string>();
+    const live = s.group.filter((mob) => mob.hp > 0 && arena.mobs[mob.id]
+      && !arena.mobs[mob.id].returning && insideHomeLeash(mob));
+    const campFight = s.fieldwork.campEncounters?.active?.stage === 'combat';
+    if ((s.hunting || campFight) && s.player.hp > 0) {
+      for (const mob of live) {
+        if (campFight || arenaDistance(arena.mobs[mob.id], arena.player) <= profile.aggro_m + 1e-7) next.add(mob.id);
+      }
+      for (const mob of live) {
+        if (!was.has(mob.id)) continue;
+        const slot = s.field.slots.find((entry) => entry.id === mob.spawnSlotId);
+        if (!slot || arenaDistance(arena.mobs[mob.id], slot.home) <= profile.leash_m + 1e-7) next.add(mob.id);
+      }
+      if (arena.intent?.targetId && live.some(mob => mob.id === arena.intent!.targetId)) next.add(arena.intent.targetId);
+      if (arena.focusId && live.some(mob => mob.id === arena.focusId)) next.add(arena.focusId);
+      if (deliberateTargetId && live.some(mob => mob.id === deliberateTargetId)) next.add(deliberateTargetId);
+      const basicTarget = arena.player.action?.targetId;
+      if (basicTarget && live.some(mob => mob.id === basicTarget)) next.add(basicTarget);
+      // Expand the spatial assist chain to a fixed point; queue order cannot decide who wakes.
+      const assisting = [...next];
+      for (let index = 0; index < assisting.length; index++) {
+        const source = arena.mobs[assisting[index]];
+        for (const mob of live) {
+          if (!next.has(mob.id) && arenaDistance(arena.mobs[mob.id], source) <= profile.assist_m + 1e-7) {
+            next.add(mob.id);
+            assisting.push(mob.id);
+          }
+        }
+      }
+    }
+    // A body that leaves its leash drops its damage and returns with its home pool, like a map
+    // reset; this is the same receipt whether it was pulled too far or the player left it behind.
+    const campFightNow = s.fieldwork.campEncounters?.active?.stage === 'combat';
+    for (const id of was) {
+      if (next.has(id)) continue;
+      const mob = s.group.find((entry) => entry.id === id);
+      if (!mob || mob.hp <= 0) continue;
+      mob.hp = mob.hpMax;
+      delete s.mobStatus[id];
+      delete s.curses[id];
+      const actor = arena.mobs[id];
+      if (actor && !campFightNow && !isBossKind(String(mob.kind))) {
+        actor.returning = true;
+        persistReturning(id, true);
+      }
+    }
+    s.field.engagementIds = [...next].slice(0, Math.max(1, s.field.slots.length));
+    const now = new Set(s.field.engagementIds);
+    const removed = [...was].filter((id) => !now.has(id));
+    for (const id of removed) {
+      const action = arena.mobs[id]?.action;
+      if (action && action.cancelledAtUs == null && action.releasedAtUs == null && !action.impactCount)
+        cancelMobPreparation(action, atUs, 'disengaged');
+    }
+    return { added: [...now].filter((id) => !was.has(id)), removed };
   }
+  refreshReturning(tickStartUs);
+  syncEngagement(tickStartUs);
   // The per-fight potion budget belongs to a combat session, not to each spawn.
   if (syncFieldState(s, arena, 2, false)) s.farm.usesThisFight = 0;
 
-  /** A committed player target enters its aggro window even when it stood outside the radius. */
+  /** Home leash is an outer bound for proximity, assistance and deliberate targeting alike. */
+  function insideHomeLeash(mob: Mob): boolean {
+    if (!arena || !s.field || s.fieldwork.campEncounters?.active?.stage === 'combat') return true;
+    const actor = arena.mobs[mob.id];
+    const slot = s.field.slots.find(entry => entry.id === mob.spawnSlotId);
+    return !!actor && (!slot || arenaDistance(actor, slot.home) <= fieldProfile().leash_m + 1e-7);
+  }
+
+  /** A committed player target enters its aggro window only while its home leash still holds. */
   function engageTarget(targetId?: string): void {
     if (!arena || !s.field || !targetId) return;
-    if (!s.group.some((mob) => mob.id === targetId && mob.hp > 0 && arena.mobs[targetId])) return;
+    if (arena.mobs[targetId]?.returning) return;
+    if (!s.group.some((mob) => mob.id === targetId && mob.hp > 0 && insideHomeLeash(mob))) return;
     if (s.field.engagementIds.includes(targetId)) return;
-    s.field.engagementIds = [...s.field.engagementIds, targetId]
-      .slice(0, Math.max(1, s.field.slots.length));
+    deliberateTargetId = targetId;
+    const delta = syncEngagement(clock.nowUs);
+    for (const id of delta.added) {
+      const mob = s.group.find((entry) => entry.id === id && entry.hp > 0);
+      if (mob) scheduleMobAttacksFor(mob, clock.nowUs);
+    }
   }
 
   // the completion gate is armed before the first swing of a spawn, so a fast kill still counts
@@ -1528,6 +1630,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
   const unstoppablePenalty = unstoppable && slowed ? Number(unstoppable.params.penaltyDamageMult) : 1;
   const playerActiveFraction = unstoppable ? 1 : Math.max(0, 1 - Math.min(1, shockSecLeft));
   const playerRange = arena ? arenaWeaponRange(c.weaponName) : 0;
+  const playerStopRange = arena ? arenaWeaponStopRange(c.weaponName) : 0;
   // A skill walks on its own range: the row's cast range, or its own radius for
   // caster-centred circles. Weapon range never shortens it — a mage with a 4.6 row
   // approaches to 4.6, not to weapon distance.
@@ -1539,15 +1642,16 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     return arenaSkillRange(id);
   };
   const approachRange = () => {
-    if (!autoSkills) return playerRange;
+    // Basic attacks have their own profile stop; skills still stop just inside their cast range.
+    if (!autoSkills) return playerStopRange;
     const held = arena?.intent?.skillId;
-    if (held) return skillRange(held);
+    if (held) return Math.max(0, skillRange(held) - 0.05);
     const ready = rotationOrder(s.skills).find((id) => {
       const skill = sm.byId[id];
       return (skill.type === 'attack' || skill.type === 'curse')
         && skillEligibilityInState(s, c, id).ready;
     });
-    return ready ? skillRange(ready) : playerRange;
+    return ready ? Math.max(0, skillRange(ready) - 0.05) : playerStopRange;
   };
   let cooldownAtUs = tickStartUs;
   const advanceArenaAt = (atUs: number) => {
@@ -1555,7 +1659,11 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     const intent = arena.intent;
     // Whirlwind is the one mobile channel: its recovered primary action still permits movement.
     const channeling = intent?.phase === 'recovery' && !!intent.mobile;
+    if (manual?.moveTo) cancelPlayerBasic('manual move');
     if (manual?.moveTo && intent?.phase === 'windup') cancelIntent('manual move');
+    const basic = arena.player.action;
+    const basicOwnsFeet = !!basic && basic.kind === 'swing' && !!basic.timing
+      && basic.cancelledAtUs == null && atUs >= basic.timing.startedAtUs && atUs < actionFeetUntil(basic);
     // A placed ground order outside cast range walks to its own point; other manual casts close
     // through the ordinary target approach. An explicit local move always wins.
     const reachable = intent && intentInRange(arena, intent, s.group);
@@ -1572,13 +1680,23 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
       playerRange: approachRange(),
       playerSpeedMult: playerActiveFraction * (channeling ? (intent!.speedMult ?? 0.6) : 1),
       playerTargetId: intent?.targetId,
-      playerLocked: !channeling && (intent?.phase === 'windup' || intent?.phase === 'recovery'),
+      playerLocked: !channeling && (intent?.phase === 'windup' || intent?.phase === 'recovery' || basicOwnsFeet),
       playerMoveTo: manual?.moveTo ?? placedApproach,
       engagedIds: new Set(s.field?.engagementIds ?? []),
       mobSpeedMult: (mob) => {
         return statusModsOn(s.mobStatus, mob.id).stopped ? 0 : 1;
       },
+      homeBandM: Number(fieldProfile().home_band_m) || 0.35,
+      returnSpeedMult: Number(fieldProfile().return_speed_mult) || 0.65,
     });
+    // Membership follows the authoritative movement sample; a body that just entered aggro gets
+    // its own remaining-window attack plan instead of waiting for the next world tick.
+    refreshReturning(atUs);
+    const delta = syncEngagement(atUs);
+    for (const id of delta.added) {
+      const mob = s.group.find((entry) => entry.id === id && entry.hp > 0);
+      if (mob) scheduleMobAttacksFor(mob, atUs);
+    }
     if (manual?.moveTo && arenaDistance(arena.player, manual.moveTo) <= 0.3) {
       manual.anchor = { x: manual.moveTo.x, y: manual.moveTo.y };
       arena.anchor = { ...manual.anchor };
@@ -1875,6 +1993,15 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     cooldownAtUs = atUs;
   }
 
+  /** Cancel an unreleased player basic; a released swing keeps its pose and receipt. */
+  function cancelPlayerBasic(reason: string) {
+    const action = arena?.player.action;
+    if (!arena || !action || action.kind !== 'swing' || action.cancelledAtUs != null
+      || action.releasedAtUs != null || action.impactCount) return;
+    updateArenaAction(arena, action.id, { cancelledAtUs: clock.nowUs, cancelReason: reason, endsAtUs: clock.nowUs });
+    arena.player.action = undefined;
+  }
+
   function cancelIntent(reason: string) {
     const intent = arena?.intent;
     if (!arena || !intent) return;
@@ -1923,7 +2050,8 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
   const areaChanged = (flight: CombatFlight) => !!flight.areaKey && flight.areaKey !== encounterKeyOf(s);
 
   const arenaActors = (group: Mob[]) => group.flatMap((mob) =>
-    mob.hp > 0 && arena?.mobs[mob.id] ? [{ ...arena.mobs[mob.id], mob }] : []);
+    mob.hp > 0 && arena?.mobs[mob.id] && !arena.mobs[mob.id].returning
+      ? [{ ...arena.mobs[mob.id], mob }] : []);
 
   function startWindup(intent: CombatIntent, atUs: number) {
     if (!arena) return;
@@ -2420,9 +2548,27 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
         ? s.group.find((mob) => mob.id === arena.intent!.targetId && mob.hp > 0) : undefined;
       const target = arena ? intended ?? arenaTarget(arena, s.group) : s.group[0];
       if (!target) { swingsStopped = true; return; }
-      if (arena && !arenaInRange(arena, target.id, playerRange)) return;
+      if (arena && !arenaPlayerInReach(arena, c.weaponName, target.id)) return;
       engageTarget(target.id);
-      if (arena) arenaAction(arena, 'player', 'swing', clock.nowUs, target.id);
+      if (!arena) { resolvePlayerBasic(target, clock.nowUs); return; }
+      const profile = playerAttackProfile(c.weaponName);
+      const intervalUs = Math.round(units / Math.max(1e-9, playerRate));
+      const phase = basicPhaseBudget(profile, intervalUs);
+      const releaseAtUs = clock.nowUs + phase.windupUs;
+      const timing: SkillCastTiming = {
+        delivery: profile.delivery, startedAtUs: clock.nowUs, releaseAtUs,
+        impactAtUs: releaseAtUs, recoveryUntilUs: releaseAtUs + phase.recoveryUs,
+      };
+      const action = arenaAction(arena, 'player', 'swing', clock.nowUs, target.id, undefined, undefined, timing);
+      if (action) {
+        updateArenaAction(arena, action.id, { areaKey: encounterKeyOf(s) });
+        schedulePlayerBasic(action, target);
+      }
+    });
+  }
+
+  /** Apply the canonical player basic at its contact beat; the caller owns validation. */
+  function resolvePlayerBasic(target: Mob, atUs: number): void {
       const tm = mobMods(target.id);
       // Packet H action history: 04 Rage, 12 Worthy Foe and 32 Instruments all ride the one Hit
       // multiplier, composed here so each condition is read at the event's own time.
@@ -2581,9 +2727,28 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
         // landed blow pops its number — a dodge reads where the dodger stands, never in a shared column.
         fx(s, { kind: 'block', side: 'field', mobId: target.id, text: r.why, colour: hitColour(null) });
       }
-    });
   }
 
+  /** Release the player's prepared basic at its committed beat. */
+  function schedulePlayerBasic(action: CombatArenaAction, target: Mob): void {
+    if (!arena || !action.timing || action.releasedAtUs != null) return;
+    const atUs = Math.max(tickStartUs, action.timing.releaseAtUs);
+    if (atUs > tickEndUs) return;
+    clock.schedule(atUs, EVENT_PRIORITY.playerAction, 'player', target.id, () => {
+      const current = arena.actions.find(entry => entry.id === action.id);
+      if (!current || current.cancelledAtUs != null || current.impactCount || current.releasedAtUs != null) return;
+      advanceArenaAt(clock.nowUs);
+      if (!arena.actions.includes(current) || current.cancelledAtUs != null) return;
+      updateArenaAction(arena, current.id, {
+        impactCount: 1, releasedAtUs: clock.nowUs,
+        timing: { ...(current.timing as SkillCastTiming), impactAtUs: clock.nowUs },
+      });
+      if (target.hp <= 0 || !s.group.includes(target) || s.player.hp <= 0) return;
+      if (arena.mobs[target.id]?.returning) return;
+      if (!arenaPlayerInReach(arena, c.weaponName, target.id)) return;
+      resolvePlayerBasic(target, clock.nowUs);
+    });
+  }
   // The rotation presses at t0 (§7.1 priority 30), before the window's own swing events.
   clock.schedule(tickStartUs, EVENT_PRIORITY.playerAction, 'player', front?.id ?? '', () => {
     // the rotation casts the first ready, affordable slot top-down — no manual presses.
@@ -2748,10 +2913,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
       rkH.icdsUs.mirrorUntil = clock.nowUs + Number(mirror.params.windowSec) * units;
       push(s, 'Mirror Strike banks a guaranteed crit');
     }
-    if (mobSkill) {
-      markMobSkillUsed(live, mobSkill, clock.nowUs, units);
-      if (online) push(s, `${mob.species} uses ${mobSkill.name}`);
-    }
+    if (mobSkill && online) push(s, `${mob.species} uses ${mobSkill.name}`);
     // an Earth Wall charge answered the swing: it is spent whether the shield rolled or not
     if (r.blockChargeSpent) s.player.blockCharges!--;
     // `10` Painforged: what a Block actually took off this Hit is banked, up to its share of Max HP,
@@ -2916,6 +3078,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
         // A hard stop cancels the unpaid windup at the control timestamp, not at the next
         // movement sample; the queued release then finds no intent and pays nothing.
         if (st === 'shock' && (statuses.shock?.secLeft ?? 0) > 0) {
+          cancelPlayerBasic('shock');
           if (arena?.intent?.phase === 'windup') cancelIntent('shock');
           else if (arena?.intent?.phase === 'recovery' && arena.intent.mobile) {
             // Completed channel pulses stay spent; unresolved future pulses are dropped.
@@ -2954,23 +3117,25 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
    * Release one ordinary stand-off basic: commit the aim at the attack beat, then let the swept
    * body query decide contact. A ready strike never reaches this path; it replaces the opportunity.
    */
-  function launchMobShot(mob: Mob, atUs: number) {
+  function launchMobShot(mob: Mob, atUs: number, existing?: CombatArenaAction) {
     if (!arena) return;
     const actor = arena.mobs[mob.id];
     if (!actor) return;
-    const profile = E.combat_arena.normal_attack.profiles.ranged;
+    const profile = mobAttackProfile(mob);
     const speed = Number(profile.projectile_speed_mps);
     const radius = Number(profile.hit_radius_m);
     if (!(speed > 0) || !(radius >= 0)) return;
-    const action = arenaAction(arena, mob.id, 'swing', atUs, 'player');
+    const action = existing ?? arenaAction(arena, mob.id, 'swing', atUs, 'player');
     if (!action) return;
     const source = { x: actor.x, y: actor.y };
     const destination = { x: arena.player.x, y: arena.player.y };
     const impactAtUs = atUs + Math.ceil(Math.hypot(destination.x - source.x, destination.y - source.y)
       / speed * units);
-    const timing: SkillCastTiming = { delivery: 'projectile', startedAtUs: atUs, releaseAtUs: atUs,
-      impactAtUs, recoveryUntilUs: atUs };
-    updateArenaAction(arena, action.id, { timing, ranged: true,
+    const plannedRecoveryUs = existing?.timing
+      ? Math.max(0, existing.timing.recoveryUntilUs - existing.timing.impactAtUs) : 0;
+    const timing: SkillCastTiming = { delivery: 'projectile', startedAtUs: existing?.timing?.startedAtUs ?? atUs,
+      releaseAtUs: atUs, impactAtUs, recoveryUntilUs: atUs + plannedRecoveryUs };
+    updateArenaAction(arena, action.id, { timing, ranged: true, releasedAtUs: atUs,
       targetX: destination.x, targetY: destination.y });
     actor.holdAtRange = true;
     arena.mobFlights.push({
@@ -2989,25 +3154,31 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
       updateArenaAction(arena, action.id, { cancelledAtUs: atUs, cancelReason: reason, endsAtUs: atUs });
   }
 
-  /** Contact ends the shot; a terminal arrival with no contact is a miss, never a ghost hit. */
+  /** Contact/impact ends the shot; a terminal arrival with no contact is a miss, never a ghost hit. */
   function resolveMobShot(shot: CombatMobFlight, atUs: number, contact: boolean) {
     if (!arena) return;
     shot.queued = false;
     const at = arena.mobFlights.indexOf(shot);
     if (at >= 0) arena.mobFlights.splice(at, 1);
-    const point = mobShotPosition(shot, atUs);
+    const row = shot.skillId ? mobSkillById(shot.skillId) : undefined;
+    const point = shot.kind === 'ground' ? shot.destination : mobShotPosition(shot, atUs);
     const action = arena.actions.find((entry) => entry.id === shot.actionId);
     if (action && action.cancelledAtUs == null) {
       const timing = action.timing ? { ...action.timing, impactAtUs: atUs } : action.timing;
       updateArenaAction(arena, action.id, {
         ...(timing ? { timing } : {}),
+        impactCount: 1,
         targetX: point.x, targetY: point.y,
         endsAtUs: Math.max(action.endsAtUs, atUs + E.combat_arena.action_sec * units),
       });
     }
-    if (!contact || s.player.hp <= 0) return;
+    if (s.player.hp <= 0) return;
+    if (shot.kind === 'ground') {
+      // The committed point is fixed; the player is read where they actually stand at impact.
+      if (arenaDistance(shot.destination, arena.player) > (shot.impactRadiusM ?? 0) + 1e-7) return;
+    } else if (!contact) return;
     const live = s.group.find((entry) => entry.id === shot.mobId && entry.hp > 0);
-    resolveIncomingHit(shot.mob, undefined, rng, live ?? shot.mob);
+    resolveIncomingHit(shot.mob, row, rng, live ?? shot.mob);
   }
 
   function scheduleMobShot(shot: CombatMobFlight) {
@@ -3030,10 +3201,12 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
       if (shot.areaKey && shot.areaKey !== encounterKeyOf(s)) { cancelMobShot(shot, atUs, 'area-exit'); continue; }
       const from = shot.position;
       const to = mobShotPosition(shot, atUs);
+      shot.position = to;
+      // A ground cast owns its committed impact; only a projectile tests swept contact on the way.
+      if (shot.kind === 'ground') continue;
       const previous = arena.frames.at(-2)?.player ?? arena.frames.at(-1)?.player;
       const target = { ...arena.player, ...(previous ? { previous: { x: previous.x, y: previous.y } } : {}) };
       const hit = firstProjectileHit(from, to, [target], shot.radiusM);
-      shot.position = to;
       if (hit) resolveMobShot(shot, atUs, true);
     }
   }
@@ -3043,40 +3216,175 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
       updateArenaAction(arena, action.id, { cancelledAtUs: atUs, cancelReason: reason, endsAtUs: atUs });
   }
 
+  /** Start an ordinary basic with an executable windup; release is the only contact receipt. */
+  function startMobBasic(mob: Mob, atUs: number, rate: number): void {
+    if (!arena) return;
+    const profile = mobAttackProfile(mob);
+    const intervalUs = Math.round(units / Math.max(1e-9, rate));
+    const phase = basicPhaseBudget(profile, intervalUs);
+    const releaseAtUs = atUs + phase.windupUs;
+    const timing: SkillCastTiming = {
+      delivery: profile.delivery, startedAtUs: atUs, releaseAtUs,
+      impactAtUs: releaseAtUs, recoveryUntilUs: releaseAtUs + phase.recoveryUs,
+    };
+    const action = arenaAction(arena, mob.id, 'swing', atUs, 'player', undefined, undefined, timing);
+    if (action) {
+      updateArenaAction(arena, action.id, { areaKey: encounterKeyOf(s) });
+      scheduleMobBasic(action, mob);
+    }
+  }
+
+  /** Release an ordinary basic at its committed beat; a miss still owns the action. */
+  function scheduleMobBasic(action: CombatArenaAction, mob: Mob): void {
+    if (!arena || !action.timing || action.releasedAtUs != null) return;
+    const atUs = Math.max(tickStartUs, action.timing.releaseAtUs);
+    if (atUs > tickEndUs) return;
+    clock.schedule(atUs, EVENT_PRIORITY.mobAction, mob.id, 'player', () => {
+      if (!arena) return;
+      advanceArenaAt(clock.nowUs);
+      const current = arena.actions.find(entry => entry.id === action.id);
+      if (!current || current.cancelledAtUs != null || current.impactCount || current.releasedAtUs != null) return;
+      if (current.areaKey && current.areaKey !== encounterKeyOf(s)) {
+        cancelMobPreparation(current, clock.nowUs, 'area-exit');
+        return;
+      }
+      if (mob.hp <= 0 || !s.group.includes(mob) || s.player.hp <= 0
+        || statusModsOn(s.mobStatus, mob.id).stopped) {
+        cancelMobPreparation(current, clock.nowUs, 'release-invalid');
+        return;
+      }
+      const profile = mobAttackProfile(mob);
+      if (profile.delivery === 'projectile') {
+        if (mob.line !== 'stand-off' || !arenaMobInReach(arena, mob.id)) {
+          cancelMobPreparation(current, clock.nowUs, 'release-invalid');
+          return;
+        }
+        launchMobShot(mob, clock.nowUs, current);
+        return;
+      }
+      updateArenaAction(arena, current.id, {
+        impactCount: 1, releasedAtUs: clock.nowUs,
+        timing: { ...(current.timing as SkillCastTiming), impactAtUs: clock.nowUs },
+      });
+      // Melee contact is re-tested at the body, not the windup's old distance.
+      if (arenaMobInReach(arena, mob.id)) resolveIncomingHit(mob, undefined, rng);
+    });
+  }
+
+  /** Release a typed mob cast by its delivery; damage only follows the delivery's own receipt. */
+  function launchMobSkillShot(mob: Mob, row: MobSkillRow, cast: MobCastProfile,
+    action: CombatArenaAction, atUs: number): void {
+    if (!arena) return;
+    const actor = arena.mobs[mob.id];
+    if (!actor) return;
+    const source = { x: actor.x, y: actor.y };
+    const destination = { x: arena.player.x, y: arena.player.y };
+    const distance = Math.hypot(destination.x - source.x, destination.y - source.y);
+    const groundDelay = Math.max(0.001, Number(cast.impact_delay_sec) || 0.4);
+    const speed = cast.delivery === 'ground'
+      ? Math.max(0.001, distance / groundDelay)
+      : Math.max(0.001, Number(cast.projectile_speed_mps) || 12);
+    const impactAtUs = cast.delivery === 'ground'
+      ? atUs + Math.round(groundDelay * units)
+      : atUs + Math.ceil(distance / speed * units);
+    const radius = cast.delivery === 'ground'
+      ? Math.max(0, Number(row.area?.radius_m) || 0)
+      : Math.max(0, Number(cast.hit_radius_m) || 0);
+    const timing: SkillCastTiming = {
+      delivery: cast.delivery,
+      startedAtUs: action.timing?.startedAtUs ?? atUs,
+      releaseAtUs: atUs, impactAtUs,
+      recoveryUntilUs: action.timing?.recoveryUntilUs ?? atUs,
+    };
+    updateArenaAction(arena, action.id, {
+      timing, releasedAtUs: atUs, targetX: destination.x, targetY: destination.y,
+      ...(cast.delivery === 'projectile' ? { ranged: true } : {}),
+      ...(cast.delivery === 'ground' && row.area ? {
+        area: { origin: row.area.origin, radiusM: row.area.radius_m, center: { ...destination },
+          targetId: 'player', ...(row.area.shape ? { shape: row.area.shape } : {}) },
+      } : {}),
+    });
+    arena.mobFlights.push({
+      actionId: action.id, mobId: mob.id, mob: { ...mob }, source, destination,
+      position: { ...source }, releaseAtUs: atUs, impactAtUs, speedMps: speed, radiusM: radius,
+      skillId: row.id, kind: cast.delivery === 'ground' ? 'ground' : 'projectile',
+      ...(cast.delivery === 'ground' ? { impactRadiusM: radius } : {}),
+      areaKey: encounterKeyOf(s),
+    });
+  }
+
   function scheduleMobStrike(action: CombatArenaAction, mob: Mob) {
-    if (!arena || !action.timing || action.timing.releaseAtUs > tickEndUs) return;
+    if (!arena || !action.timing || action.releasedAtUs != null || action.timing.releaseAtUs > tickEndUs) return;
     clock.schedule(Math.max(tickStartUs, action.timing.releaseAtUs), EVENT_PRIORITY.mobAction, mob.id, 'player', () => {
       if (!arena) return;
       advanceArenaAt(clock.nowUs);
       const current = arena.actions.find(entry => entry.id === action.id);
-      if (!current || current.cancelledAtUs != null || current.impactCount) return;
+      if (!current || current.cancelledAtUs != null || current.impactCount || current.releasedAtUs != null) return;
       const row = current.skillId ? mobSkillById(current.skillId) : undefined;
-      if (!row || mob.hp <= 0 || !s.group.includes(mob) || s.player.hp <= 0
+      const cast = row ? mobCastProfile(row, mob) : undefined;
+      const actor = arena.mobs[mob.id];
+      const geometry = row && cast && actor
+        ? mobCastGeometry(row, mob, actor.radiusM ?? 0.25, arena.player.radiusM ?? 0.25,
+          arenaDistance(actor, arena.player)) : undefined;
+      if (!row || !cast || !geometry?.inRange || mob.hp <= 0 || !s.group.includes(mob) || s.player.hp <= 0
         || statusModsOn(s.mobStatus, mob.id).stopped
-        || !arenaInRange(arena, mob.id, mobStrikeRange(row, mob))
         || (mob.skillReadyAtUs?.[row.id] ?? 0) > clock.nowUs) {
         cancelMobPreparation(current, clock.nowUs, 'release-invalid');
         return;
       }
-      updateArenaAction(arena, current.id, { impactCount: 1 });
-      resolveIncomingHit(mob, row, rng);
+      // Commit the cooldown at the valid release, before any defence can return early.
+      markMobSkillUsed(mob, row, clock.nowUs, units);
+      if (cast.delivery === 'melee') {
+        updateArenaAction(arena, current.id, { impactCount: 1, releasedAtUs: clock.nowUs,
+          timing: { ...(current.timing as SkillCastTiming), impactAtUs: clock.nowUs } });
+        resolveIncomingHit(mob, row, rng);
+        return;
+      }
+      launchMobSkillShot(mob, row, cast, current, clock.nowUs);
     });
   }
 
-  // Unpaid preparations retain their selected skill and release time across tick boundaries.
+  // The player's prepared basic keeps its release beat across a tick boundary.
+  if (arena) {
+    const action = arena.player.action;
+    if (action?.kind === 'swing' && action.timing && action.cancelledAtUs == null
+      && !action.impactCount && action.releasedAtUs == null) {
+      const target = action.targetId
+        ? s.group.find((mob) => mob.id === action.targetId && mob.hp > 0) : undefined;
+      if (!target || (action.areaKey && action.areaKey !== encounterKeyOf(s)))
+        cancelPlayerBasic(!target ? 'target lost' : 'area-exit');
+      else schedulePlayerBasic(action, target);
+    }
+  }
+  // A body removed by resync can no longer own a pending preparation; drop its receipt by name.
+  if (arena) for (const action of [...arena.actions]) {
+    if (action.actorId === 'player' || action.kind === 'death' || action.cancelledAtUs != null
+      || action.impactCount || action.releasedAtUs != null) continue;
+    if (!arena.mobs[action.actorId]) cancelMobPreparation(action, tickStartUs, 'source-unavailable');
+  }
+  // Unpaid preparations and basic windups retain their release time across tick boundaries.
   if (arena) for (const actor of Object.values(arena.mobs)) {
     const action = actor.action;
-    if (action?.kind !== 'cast' || !action.timing || action.impactCount || action.cancelledAtUs != null) continue;
+    if (!action?.timing || action.impactCount || action.releasedAtUs != null || action.cancelledAtUs != null) continue;
     const mob = engaging.find(entry => entry.id === actor.id && entry.hp > 0);
-    if (!mob) cancelMobPreparation(action, tickStartUs, 'source-unavailable');
-    else scheduleMobStrike(action, mob);
+    if (action.kind === 'cast') {
+      if (!mob) cancelMobPreparation(action, tickStartUs, 'source-unavailable');
+      else scheduleMobStrike(action, mob);
+    } else if (action.kind === 'swing' && action.releasedAtUs == null) {
+      if (!mob) cancelMobPreparation(action, tickStartUs, 'source-unavailable');
+      else scheduleMobBasic(action, mob);
+    }
   }
 
-  for (const mob of engaging) {
-    if (mob.hp <= 0 || !s.group.includes(mob)) continue;
+  /** Schedule one engaged body from the moment it joins; duplicate schedules are ignored. */
+  const scheduledMobs = new Set<string>();
+  function scheduleMobAttacksFor(mob: Mob, fromUs: number): void {
+    if (scheduledMobs.has(mob.id)) return;
+    scheduledMobs.add(mob.id);
+    if (mob.hp <= 0 || !s.group.includes(mob)) return;
     const tm = mobMods(mob.id);
     const rate = mob.hitsPerSec * (mob.auraSpeedMult ?? 1) * Math.max(0, 1 + tm.attackSpeed / 100);
-    const plan = planAttacks(tickStartUs, mob.atkTimer, rate, units);
+    const plan = planAttacks(fromUs, mob.atkTimer, rate, units, Math.max(0, tickEndUs - fromUs));
     mob.atkTimer = plan.progressAtEnd;
     const pending = { mob, rate, actionsLeft: plan.times.length };
     mobPlans.push(pending);
@@ -3086,10 +3394,11 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
       if (plannedSkill) {
         // The cast beat is placed before the action, clamped to this window; the swing itself still
         // lands on the planned action time, so the telegraph never changes the DPS clock.
-        const castAt = Math.max(tickStartUs, atUs - Math.max(0, plannedSkill.cast_sec || 0) * units);
+        const castAt = Math.max(fromUs, atUs - Math.max(0, mobCastProfile(plannedSkill, mob).windup_sec) * units);
         clock.schedule(castAt, EVENT_PRIORITY.mobAction, mob.id, 'player', () => {
           if (mob.hp <= 0 || !s.group.includes(mob)) return;
           advanceArenaAt(clock.nowUs);
+          if (s.field && !s.field.engagementIds.includes(mob.id)) return;
           if (statusModsOn(s.mobStatus, mob.id).stopped) return;
           if (arena && !arenaInRange(arena, mob.id, mobStrikeRange(plannedSkill, mob))) return;
           fx(s, { kind: 'cast', side: 'field', mobId: mob.id, skillId: plannedSkill.id, text: plannedSkill.name, colour: hitColour(plannedSkill.element) });
@@ -3109,6 +3418,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
         pending.actionsLeft--;
         if (mob.hp <= 0 || !s.group.includes(mob)) return;
         advanceArenaAt(clock.nowUs);
+        if (s.field && !s.field.engagementIds.includes(mob.id)) return;
         // Hard control before the beat cancels the attack and leaves the strike's cooldown unspent.
         if (statusModsOn(s.mobStatus, mob.id).stopped) return;
         if (arena) {
@@ -3119,11 +3429,16 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
         // A ready strike replaces the opportunity only while its role reach holds. An out-of-reach
         // strike does not block the ordinary attack, and the mob never walks in just to enable it.
         const strike = readyMobSkill(mob, atUs, row => !arena || arenaInRange(arena, mob.id, mobStrikeRange(row, mob)));
-        if (!strike && arena && !arenaInRange(arena, mob.id, arenaMobRange(mob))) return;
+        if (!strike && arena && !arenaMobInReach(arena, mob.id)) return;
         if (arena && strike) {
-          const releaseAtUs = atUs + Math.ceil(Math.max(0, strike.cast_sec || 0) * units);
-          const timing: SkillCastTiming = { delivery: 'melee', startedAtUs: atUs,
-            releaseAtUs, impactAtUs: releaseAtUs, recoveryUntilUs: releaseAtUs };
+          const cast = mobCastProfile(strike, mob);
+          const releaseAtUs = atUs + Math.ceil(Math.max(0, cast.windup_sec) * units);
+          const recoveryUs = Math.ceil(Math.max(0, cast.recovery_sec) * units);
+          const impactAtUs = cast.delivery === 'ground'
+            ? releaseAtUs + Math.ceil(Math.max(0.001, Number(cast.impact_delay_sec) || 0.4) * units)
+            : releaseAtUs;
+          const timing: SkillCastTiming = { delivery: cast.delivery, startedAtUs: atUs,
+            releaseAtUs, impactAtUs, recoveryUntilUs: releaseAtUs + recoveryUs };
           const action = arenaAction(arena, mob.id, 'cast', atUs, 'player', strike.id, undefined, timing);
           if (action) {
             fx(s, { kind: 'cast', side: 'field', mobId: mob.id, skillId: strike.id,
@@ -3133,15 +3448,16 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
           }
           return;
         }
-        if (arena && !strike && mob.line === 'stand-off') {
-          launchMobShot(mob, clock.nowUs);
+        if (arena) {
+          startMobBasic(mob, clock.nowUs, rate);
           return;
         }
-        if (arena) arenaAction(arena, mob.id, strike ? 'cast' : 'swing', clock.nowUs, 'player', strike?.id);
+        if (strike) markMobSkillUsed(mob, strike, clock.nowUs, units);
         resolveIncomingHit(mob, strike, rng);
       });
     }
   }
+  for (const mob of engaging) scheduleMobAttacksFor(mob, tickStartUs);
 
   // §7.1: run the window's events in time order. A fatal hit latches Push and stops the rest, so no
   // recovery event behind it can revive the character.

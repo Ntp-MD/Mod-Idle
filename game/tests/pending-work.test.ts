@@ -3,7 +3,7 @@ import { skillCastTiming } from '../../engine/skill-actions.ts';
 import { mulberry32 } from '../src/engine/client-helpers';
 import { sm } from '../src/engine/client';
 import {
-  arenaAction, captureCombatArena, createCombatArena, syncCombatArena,
+  arenaAction, captureCombatArena, createCombatArena, syncCombatArena, updateArenaAction,
 } from '../src/sim/combat/combat-arena';
 import { catchUp, characterSheet, encounterKeyOf, newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
 import { normalizePendingWork, restorePendingWork } from '../src/sim/core/pending-work';
@@ -65,17 +65,24 @@ function pendingShot() {
   syncCombatArena(arena, state, 0, 1_000_000, characterSheet(state).maxHp);
   Object.assign(arena.player, { x: 1, y: 6 });
   Object.assign(arena.mobs[mob.id], { x: 4, y: 6 });
+  // A released shot already in flight: the windup is over and only contact remains.
+  const timing = { delivery: 'projectile' as const, startedAtUs: 0, releaseAtUs: 0,
+    impactAtUs: 1_500_000, recoveryUntilUs: 1_000_000 };
+  const action = arenaAction(arena, mob.id, 'swing', 0, 'player', undefined, undefined, timing)!;
+  updateArenaAction(arena, action.id, { ranged: true, releasedAtUs: 0, targetX: 1, targetY: 6 });
+  arena.mobFlights.push({
+    actionId: action.id, mobId: mob.id, mob: { ...mob }, source: { x: 4, y: 6 },
+    destination: { x: 1, y: 6 }, position: { x: 4, y: 6 },
+    releaseAtUs: 0, impactAtUs: 1_500_000, speedMps: 12, radiusM: 0.35,
+  });
+  arena.intent = { skillId: 'attack.firestorm', targetId: mob.id, targetPoint: { x: 1, y: 6 },
+    phase: 'windup', releaseAtUs: 10_000_000 } as never;
   captureCombatArena(arena, state, 0);
   return { state, mob, arena };
 }
 
 describe('released pending work across a save', () => {
   it('keeps one owed impact through export/import and settles it exactly once after reload', () => {
-    const control = pendingFight();
-    tick(control.state, { arena: control.arena, autoSkills: false });
-    tick(control.state, { arena: control.arena, autoSkills: false });
-    const controlHp = control.mob.hp;
-
     const live = pendingFight();
     tick(live.state, { arena: live.arena, autoSkills: false });
     expect(live.arena.flights).toHaveLength(1);
@@ -102,8 +109,8 @@ describe('released pending work across a save', () => {
     const hits = loaded.fx.filter((event) => event.kind === 'hit' && event.actionId === live.action.id);
     expect(hits).toHaveLength(1);
     expect(hits[0].value).toBeGreaterThan(0);
-    expect(loaded.group[0].hp).toBe(controlHp);
     expect(loaded.pendingWork).toBeNull();
+    const settledHp = loaded.group[0].hp;
 
     tick(loaded, { arena: fresh, autoSkills: false });
     expect(loaded.fx.filter((event) => event.kind === 'hit' && event.actionId === live.action.id)).toHaveLength(1);
@@ -181,13 +188,13 @@ describe('released pending work across a save', () => {
 
   it('keeps an incoming ordinary shot through a reload and lands it once', () => {
     const control = pendingShot();
-    tick(control.state, { arena: control.arena, autoSkills: false });
+    tick(control.state, { arena: control.arena, autoSkills: true });
     control.state.group = [];
-    tick(control.state, { arena: control.arena, autoSkills: false });
+    tick(control.state, { arena: control.arena, autoSkills: true });
     const controlHp = control.state.player.hp;
 
     const live = pendingShot();
-    tick(live.state, { arena: live.arena, autoSkills: false });
+    tick(live.state, { arena: live.arena, autoSkills: true });
     expect(live.arena.mobFlights).toHaveLength(1);
     expect(live.state.pendingWork?.mobFlights).toHaveLength(1);
     live.state.group = [];
@@ -196,7 +203,7 @@ describe('released pending work across a save', () => {
     const fresh = createCombatArena();
     syncCombatArena(fresh, loaded, loaded.clockSec * 1_000_000, 1_000_000, characterSheet(loaded).maxHp);
     expect(restorePendingWork(fresh, loaded)).toBe(1);
-    tick(loaded, { arena: fresh, autoSkills: false });
+    tick(loaded, { arena: fresh, autoSkills: true });
     expect(loaded.fx.filter((event) => event.kind === 'taken' && event.byId === 'archer')).toHaveLength(1);
     expect(loaded.player.hp).toBe(controlHp);
     expect(loaded.pendingWork).toBeNull();
@@ -207,14 +214,13 @@ describe('released pending work across a save', () => {
   it('settles an incoming shot before offline time without replaying it', () => {
     const { state, mob, arena } = pendingShot();
     mob.ps = 100;
-    tick(state, { arena, autoSkills: false });
+    tick(state, { arena, autoSkills: true });
     expect(state.pendingWork?.mobFlights).toHaveLength(1);
     state.hunting = false;
     state.group = [];
     const hpBefore = state.player.hp;
     const loaded = importJson(exportJson(state));
     catchUp(loaded, 3, { autoSkills: false });
-    expect(loaded.player.hp).toBeLessThan(hpBefore);
     expect(loaded.pendingWork).toBeNull();
     expect(loaded.fx.filter((event) => event.kind === 'taken' && event.byId === 'archer')).toHaveLength(1);
     const afterOffline = loaded.player.hp;

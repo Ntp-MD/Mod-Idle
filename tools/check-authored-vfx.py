@@ -28,7 +28,7 @@ def cuts(projection, length):
 
 def check(skill_id, write):
     slug = skill_id.replace('.', '-').replace('_', '-')
-    folder = ROOT / 'game/public/fx/authored' / slug / 'batch-v1'
+    folder = ROOT / 'game/public/fx/skill-pool' / slug / 'v1'
     path = folder / 'meta.json'
     meta = json.loads(path.read_text(encoding='utf-8-sig'))
     geometry_keys = ['imageWidth', 'imageHeight', 'frames', 'virtualWidth', 'virtualHeight', 'contentWidthRatio', 'contentHeightRatio', 'alphaDiscard', 'anchorX', 'anchorY', 'impactAnchorX', 'impactAnchorY']
@@ -91,9 +91,6 @@ def check(skill_id, write):
     if write:
         encoded = json.dumps(meta, indent=2) + '\n'
         path.write_text(encoded, encoding='utf-8')
-        draft = ROOT / 'art-reference/skills/generated' / (slug + '-batch-v1')
-        draft.mkdir(parents=True, exist_ok=True)
-        (draft / 'meta.json').write_text(encoded, encoding='utf-8')
     return {'id': skill_id, 'status': 'PASS', 'frames': len(frames), 'image': [width, height], 'virtual': [virtual_width, virtual_height], 'rawPerimeterAlphaPass': not raw_perimeter}
 
 def main():
@@ -118,7 +115,7 @@ def main():
 
 def check_selected():
     """Validate actual selected manifests, including explicit rectangles of arbitrary dimensions."""
-    shelf = ROOT / 'game/public/fx/authored'
+    shelf = ROOT / 'game/public/fx/skill-pool'
     manifests = ROOT / 'game/src/ui/combat/fx-manifests'
     selected = json.loads((manifests / 'batch-manifest.json').read_text(encoding='utf-8-sig'))
     selected.update(json.loads((manifests / 'spatial-v2-manifest.json').read_text(encoding='utf-8-sig'))['entries'])
@@ -131,7 +128,7 @@ def check_selected():
     for key, art in entries:
         try:
             src = art['src']
-            if not src.startswith('/fx/authored/'):
+            if not src.startswith('/fx/skill-pool/'):
                 raise ValueError('source is outside the runtime art shelf')
             image_path = (ROOT / 'game/public' / src.lstrip('/')).resolve()
             if not image_path.is_relative_to(shelf.resolve()):

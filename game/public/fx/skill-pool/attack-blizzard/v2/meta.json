@@ -1,0 +1,414 @@
+{
+  "id": "attack.blizzard",
+  "src": "/fx/skill-pool/attack-blizzard/v2/atlas.png",
+  "columns": 4,
+  "rows": 4,
+  "imageWidth": 1254,
+  "imageHeight": 1254,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        38,
+        99,
+        303,
+        289
+      ],
+      "renderedPadding": [
+        102.5,
+        163.5,
+        74.5,
+        88.5
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        313,
+        0,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        32,
+        104,
+        298,
+        291
+      ],
+      "renderedPadding": [
+        96.0,
+        168.5,
+        80.0,
+        86.5
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        627,
+        0,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        17,
+        95,
+        300,
+        301
+      ],
+      "renderedPadding": [
+        81.5,
+        159.5,
+        77.5,
+        76.5
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        940,
+        0,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        10,
+        82,
+        297,
+        303
+      ],
+      "renderedPadding": [
+        74.0,
+        146.5,
+        81.0,
+        74.5
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        313,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        26,
+        56,
+        306,
+        298
+      ],
+      "renderedPadding": [
+        90.5,
+        120.0,
+        71.5,
+        80.0
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        313,
+        313,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        17,
+        65,
+        299,
+        303
+      ],
+      "renderedPadding": [
+        81.0,
+        129.0,
+        79.0,
+        75.0
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        627,
+        313,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        12,
+        66,
+        301,
+        302
+      ],
+      "renderedPadding": [
+        76.5,
+        130.0,
+        76.5,
+        76.0
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        940,
+        313,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        9,
+        71,
+        298,
+        299
+      ],
+      "renderedPadding": [
+        73.0,
+        135.0,
+        80.0,
+        79.0
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        627,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        36,
+        62,
+        306,
+        289
+      ],
+      "renderedPadding": [
+        100.5,
+        126.5,
+        71.5,
+        88.5
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        313,
+        627,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        20,
+        61,
+        297,
+        298
+      ],
+      "renderedPadding": [
+        84.0,
+        125.5,
+        81.0,
+        79.5
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        627,
+        627,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        17,
+        53,
+        300,
+        290
+      ],
+      "renderedPadding": [
+        81.5,
+        117.5,
+        77.5,
+        87.5
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        940,
+        627,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        17,
+        73,
+        287,
+        288
+      ],
+      "renderedPadding": [
+        81.0,
+        137.5,
+        91.0,
+        89.5
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        940,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        35,
+        53,
+        291,
+        265
+      ],
+      "renderedPadding": [
+        99.5,
+        117.0,
+        86.5,
+        113.0
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        313,
+        940,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        31,
+        64,
+        291,
+        264
+      ],
+      "renderedPadding": [
+        95.0,
+        128.0,
+        87.0,
+        114.0
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        627,
+        940,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        39,
+        63,
+        284,
+        263
+      ],
+      "renderedPadding": [
+        103.5,
+        127.0,
+        93.5,
+        115.0
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        940,
+        940,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        26,
+        71,
+        281,
+        253
+      ],
+      "renderedPadding": [
+        90.0,
+        135.0,
+        97.0,
+        125.0
+      ]
+    }
+  ],
+  "virtualWidth": 442,
+  "virtualHeight": 442,
+  "alphaDiscard": 8,
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    4,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "frameMs": 90,
+  "composition": "whole-field",
+  "actorBodyWidthM": 0.5,
+  "authoringDiameterM": 6,
+  "geometrySource": "current committed action/field footprint",
+  "anchorStatus": "runtime ground-anchor fit from source bounds and committed footprint",
+  "sourcePixelsUnmodified": true,
+  "sourceSha256": "854c74660d3ffdfedf5ed7b2be25d6c4e920f8985598e4a46ee2de47b08b683d",
+  "status": "active-spatial-v2",
+  "cellWidth": 313.5,
+  "cellHeight": 313.5,
+  "contentWidthRatio": 0.6538461538461539,
+  "contentHeightRatio": 0.5475113122171946,
+  "authoringGeometry": {
+    "shape": "circle",
+    "radiusM": 3,
+    "spanM": 6,
+    "depthM": 6,
+    "origin": "target",
+    "canonicalSource": "tools/data/skills.json#attack.blizzard"
+  }
+}

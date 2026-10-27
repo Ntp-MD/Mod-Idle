@@ -76,6 +76,12 @@
   const previewArea = $derived<VfxFootprint | undefined>((skill?.area?.radius_m ?? 0) > 0 ? {
     center:fieldCenter,basisX:{x:fieldRadius,y:-fieldRadius*.19},basisY:{x:fieldRadius*.22,y:fieldRadius*.7},diameter:fieldRadius*2,
     ...(areaShape === 'cone' ? {shape:'cone' as const,lengthM:skill?.area?.radius_m,angleDeg:skill?.area?.angle_deg,directionRad:0} : {}),
+  } : areaShape === 'line' ? {
+    center:fieldCenter,
+    basisX:{x:(skill?.area?.length_m ?? 6)*45,y:0},
+    basisY:{x:0,y:(skill?.area?.length_m ?? 6)*45*.6},
+    diameter:(skill?.area?.length_m ?? 6)*90,
+    shape:'line' as const, lengthM:skill?.area?.length_m ?? 6, widthM:skill?.area?.width_m ?? 1.2, directionRad:0,
   } : undefined);
   const previewTargets = $derived(mechanics.targets > 1 ? [-2.5,-.6,1.5].slice(0,mechanics.targets).map(angle=>({x:fieldCenter.x+Math.cos(angle)*fieldRadius*.72,y:fieldCenter.y+Math.sin(angle)*fieldRadius*.48})) : [fieldCenter]);
   const previewSpread = $derived([{x:300,y:250},{x:490,y:285}].slice(0,spreads));

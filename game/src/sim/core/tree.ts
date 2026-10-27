@@ -13,8 +13,7 @@ import { clampAuraReservations } from '../combat/skills';
  * rule (D3).
  *
  * Respec is **free**, at the town Counterhand — the same rule the Core attribute points obey, because
- * the build is the player's to express (`docs/game-rules.md` §Completion and progression), so taking it
- * back costs nothing.
+ * the build is the player's to express, so taking it back costs nothing.
  */
 
 export interface TreeVerdict { ok: boolean; why?: string }

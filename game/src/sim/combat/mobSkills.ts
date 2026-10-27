@@ -1,5 +1,7 @@
 import { E, MS } from '../../engine/client';
-import type { MobSkillRow } from '../../../../engine/types';
+import { attackRangeGeometry } from '../../../../engine/attack-range.ts';
+import type { AttackRangeGeometry } from '../../../../engine/attack-range.ts';
+import type { MobCastProfile, MobSkillRow } from '../../../../engine/types';
 import type { Mob } from '../core/types';
 
 const BY_ID = new Map(MS.skills.map((row) => [row.id, row]));
@@ -9,11 +11,47 @@ export function mobSkillById(id: string): MobSkillRow | undefined {
   return BY_ID.get(id);
 }
 
-/** The reach a strike's authored role claims; `any` keeps the body's ordinary reach. */
-export function mobStrikeRange(row: MobSkillRow, mob: Mob): number {
-  if (row.role === 'front') return E.combat_arena.range.melee;
-  if (row.role === 'stand-off') return E.combat_arena.range.ranged;
-  return mob.line === 'stand-off' ? E.combat_arena.range.ranged : E.combat_arena.range.melee;
+/**
+ * The one legacy adapter, used only if a strike row predates explicit cast authoring. The data
+ * cage refuses such rows; it maps the old role to the same ordinary profiles the basics use.
+ */
+export function mobCastProfile(row: MobSkillRow, mob: Mob): MobCastProfile {
+  if (row.cast) return row.cast;
+  const standOff = row.role === 'stand-off' || (row.role !== 'front' && mob.line === 'stand-off');
+  return standOff
+    ? {
+      delivery: 'projectile',
+      range: { basis: 'center', meters: E.combat_arena.range.ranged },
+      windup_sec: Number(row.cast_sec || 0), recovery_sec: 0.2,
+      projectile_speed_mps: 12, hit_radius_m: 0.35,
+    }
+    : {
+      delivery: 'melee',
+      range: { basis: 'body-edge', meters: E.combat_arena.normal_attack.profiles.melee.range.meters },
+      windup_sec: Number(row.cast_sec || 0), recovery_sec: 0.2,
+    };
+}
+
+function bodyRadius(mob: Mob): number {
+  const entry = (E.mob.sizes as { id: string; radius_m?: number }[] | undefined)
+    ?.find((size) => size.id === (mob.readsAs || 'medium'));
+  return entry?.radius_m ?? E.combat_arena.player_radius_m;
+}
+
+/** Authored cast reach as a maximum centre distance for the real bodies. */
+export function mobStrikeRange(row: MobSkillRow, mob: Mob,
+  targetRadius = E.combat_arena.player_radius_m): number {
+  const cast = mobCastProfile(row, mob);
+  return attackRangeGeometry(cast.range, { selfRadius: bodyRadius(mob), targetRadius }, 0, 100,
+    E.combat_arena.normal_attack.contact_clearance_m).maxCenterDistance;
+}
+
+/** Release/contact geometry for one mob cast against the body's actual feet. */
+export function mobCastGeometry(row: MobSkillRow, mob: Mob, selfRadius: number, targetRadius: number,
+  distance: number): AttackRangeGeometry {
+  const cast = mobCastProfile(row, mob);
+  return attackRangeGeometry(cast.range, { selfRadius, targetRadius }, distance, 100,
+    E.combat_arena.normal_attack.contact_clearance_m);
 }
 
 /**

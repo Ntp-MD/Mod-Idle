@@ -53,6 +53,9 @@ export interface PendingMobFlightState {
   impactAtUs: number;
   speedMps: number;
   radiusM: number;
+  skillId?: string;
+  kind?: 'projectile' | 'ground';
+  impactRadiusM?: number;
   areaKey?: string;
 }
 
@@ -121,6 +124,9 @@ export function snapshotPendingWork(arena: CombatArena, group: readonly Mob[]): 
       impactAtUs: shot.impactAtUs,
       speedMps: shot.speedMps,
       radiusM: shot.radiusM,
+      ...(shot.skillId ? { skillId: shot.skillId } : {}),
+      ...(shot.kind ? { kind: shot.kind } : {}),
+      ...(shot.impactRadiusM != null ? { impactRadiusM: shot.impactRadiusM } : {}),
       ...(shot.areaKey ? { areaKey: shot.areaKey } : {}),
     })),
   });
@@ -182,6 +188,9 @@ export function restorePendingWork(arena: CombatArena, state: GameState): number
       impactAtUs: shot.impactAtUs,
       speedMps: shot.speedMps,
       radiusM: shot.radiusM,
+      ...(shot.skillId ? { skillId: shot.skillId } : {}),
+      ...(shot.kind ? { kind: shot.kind } : {}),
+      ...(shot.impactRadiusM != null ? { impactRadiusM: shot.impactRadiusM } : {}),
       ...(shot.areaKey ? { areaKey: shot.areaKey } : {}),
     });
     restored++;
@@ -256,6 +265,9 @@ export function normalizePendingWork(value: unknown): PendingWorkState | null {
     if (!isPoint(shot.source) || !isPoint(shot.destination) || !isPoint(shot.position)) return false;
     if (!finite(shot.releaseAtUs) || !finite(shot.impactAtUs)) return false;
     if (!finite(shot.speedMps) || shot.speedMps <= 0 || !finite(shot.radiusM) || shot.radiusM < 0) return false;
+    if (shot.skillId != null && typeof shot.skillId !== 'string') return false;
+    if (shot.kind != null && shot.kind !== 'projectile' && shot.kind !== 'ground') return false;
+    if (shot.impactRadiusM != null && (!finite(shot.impactRadiusM) || shot.impactRadiusM < 0)) return false;
     if (shot.areaKey != null && typeof shot.areaKey !== 'string') return false;
     seen.add(shot.actionId);
     return true;

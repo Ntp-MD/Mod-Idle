@@ -176,14 +176,14 @@ describe('live cast timing', () => {
     const prepareAtUs = 520_000 - Math.ceil(mobSkillById('mob.lightning.static-jab')!.cast_sec! * 1_000_000);
     Object.assign(mob, { hitsPerSec: 2, atkTimer: 1 - prepareAtUs / 1_000_000 * 2, acc: 1e12, ps: 5,
       skillIds: ['mob.lightning.static-jab'], skillReadyAtUs: {} });
-    Object.assign(arena.mobs[mob.id], { x: 2, y: 6 });
+    Object.assign(arena.mobs[mob.id], { x: 1.6, y: 6 });
     const profile = sm.castProfileOf(sm.byId['attack.fireball']);
     const area = { origin: 'target' as const, radiusM: 0,
-      center: { x: 2, y: 6 }, targetId: mob.id };
+      center: { x: 1.6, y: 6 }, targetId: mob.id };
     const timing = { ...skillCastTiming(profile, 0, 1_000_000, { x: 1, y: 6 }, area.center),
       releaseAtUs: 530_000, impactAtUs: 1_000_000, recoveryUntilUs: 800_000 };
     const action = arenaAction(arena, 'player', 'cast', 0, mob.id, 'attack.fireball', area, timing)!;
-    arena.intent = { skillId: 'attack.fireball', targetId: mob.id, targetPoint: { x: 2, y: 6 },
+    arena.intent = { skillId: 'attack.fireball', targetId: mob.id, targetPoint: { x: 1.6, y: 6 },
       phase: 'windup', actionId: action.id, releaseAtUs: 530_000, recoveryUntilUs: 800_000 };
     tick(state, { arena });
     expect(state.playerStatuses.shock?.secLeft ?? 0).toBeGreaterThan(0);

@@ -65,6 +65,8 @@ export const ACTIVE_VFX: Record<string, ActiveVfx> = {
   heal: fx('heal', 'cross-1056', 'spark-1066', 115, .85, 'ring-1712'),
   greaterHeal: fx('heal', 'column-104', 'cross-1056', 175, 1.1, 'ring-1338'),
   cleanse: fx('heal', 'ring-1338', 'spark-1066', 185, .8, 'ring-1712'),
+  cloud: fx('storm', 'smoke-1428', 'smoke-1075', 175, 1.4, 'ring-1712'),
+  fissure: fx('thrust', 'spark-1247', 'burst-926', 190, .6),
 };
 
 const sheets = new Map(manifest.entries.map(entry => [entry.kind === 'bullet'

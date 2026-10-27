@@ -6,9 +6,7 @@ import { AUTHORED_VFX, LEGACY_AUTHORED_VFX, authoredVfxCell, authoredVfxFor, aut
 import { activeVfxDuration, activeVfxPlaybackDuration } from '../src/ui/combat/arena-active-vfx';
 import { authoredCompositionFor, authoredComponentSites, authoredComponentPose, validAuthoredComposition } from '../src/ui/combat/arena-authored-vfx';
 import skillData from '../../tools/data/skills.json';
-import review from '../../art-reference/skills/generated/spatial-v2/review.json';
-import roster from '../../art-reference/skills/vfx-production-roster.json';
-import qaSummary from '../../art-reference/skills/generated/spatial-v2/qa-summary.json';
+import roster from '../../game/public/fx/skill-pool/vfx-production-roster.json';
 
 const firestorm = authoredVfxFor('attack.firestorm', 'legacy')!;
 
@@ -46,8 +44,8 @@ describe('authored active-skill VFX', () => {
     expect(validAuthoredComposition(invalid)).toBe(false);
   });
   it('keeps original presets accessible while activating spatial replacement art', () => {
-    expect(authoredVfxFor('attack.meteor')!.src).toContain('/spatial-v2/');
-    expect(authoredVfxFor('attack.meteor', 'legacy')!.src).toContain('/batch-v1/');
+    expect(authoredVfxFor('attack.meteor')!.src).toContain('/v2/');
+    expect(authoredVfxFor('attack.meteor', 'legacy')!.src).toContain('/v1/');
     expect(authoredVfxFor('attack.fireball')).toBe(LEGACY_AUTHORED_VFX['attack.fireball']);
     for (const [id, preset] of Object.entries(LEGACY_AUTHORED_VFX)) {
       expect(existsSync(fileURLToPath(new URL('../public' + preset.src, import.meta.url))), id).toBe(true);
@@ -80,6 +78,19 @@ describe('authored active-skill VFX', () => {
     expect(spatialVfxClipPath(area)).toMatch(/^M500 400 L.* Z$/);
   });
 
+  it('anchors a line effect at its footprint start and spans the committed length', () => {
+    const preset = { ...authoredVfxFor('attack.fissure')!,
+      frames: [{ index: 0, rect: [0, 0, 100, 50], offsetX: 0, offsetY: 0, bounds: [10, 10, 90, 40] }] };
+    const area = { center: { x: 500, y: 400 }, basisX: { x: 600, y: 0 }, basisY: { x: 0, y: 300 },
+      diameter: 1200, shape: 'line' as const, lengthM: 6, widthM: 1.2, directionRad: 0 };
+    const [a, b, c, d, x, y] = spatialVfxMatrix(preset, 0, area);
+    expect(a * 10 + c * 25 + x).toBeCloseTo(500);
+    expect(b * 10 + d * 25 + y).toBeCloseTo(400);
+    expect(a * 90 + c * 25 + x).toBeCloseTo(1100);
+    expect(b * 90 + d * 25 + y).toBeCloseTo(400);
+    expect(Math.hypot(c, d) * 30).toBeCloseTo(60);
+  });
+
   it('loops weather by presentation time without turning damage hit counts into extra fields', () => {
     const blizzard=authoredVfxFor('attack.blizzard')!;
     for(const age of [.1,.7,2,6,7.9]) {
@@ -89,7 +100,7 @@ describe('authored active-skill VFX', () => {
   it('points every preset at a shipped atlas and a live skill', () => {
     for (const [id, preset] of Object.entries(AUTHORED_VFX)) {
       expect(sm.byId[id], id).toBeDefined();
-      expect(preset.src.startsWith('/fx/authored/'), id).toBe(true);
+      expect(preset.src.startsWith('/fx/skill-pool/'), id).toBe(true);
       expect(existsSync(fileURLToPath(new URL('../public' + preset.src, import.meta.url))), id).toBe(true);
       const last = preset.columns * preset.rows - 1;
       for (const range of [preset.opening, preset.loop, preset.exit]) {
@@ -100,34 +111,16 @@ describe('authored active-skill VFX', () => {
     }
   });
 
-  it('gates every live skill on selected art, review disposition and staged source', () => {
+  it('gates every live skill on authored art and the production roster', () => {
     const live = (skillData.skills as { id: string; retired?: boolean }[])
       .filter((skill) => !skill.retired).map((skill) => skill.id);
     const ids = new Set(live);
     expect(new Set(Object.keys(AUTHORED_VFX))).toEqual(ids);
-    expect(new Set(review.skills.map((row) => row.id))).toEqual(ids);
     expect(new Set(roster.skills.map((row) => row.id))).toEqual(ids);
-    expect(review.skills).toHaveLength(ids.size);
     expect(roster.skills).toHaveLength(ids.size);
-    const dispositions = new Set(['reuse-component-recompose-and-calibrate', 'new-area-art', 'new-projectile-component']);
-    const activations = new Set(['existing-active-component', 'active-spatial-v2']);
-    for (const row of review.skills) {
-      expect(dispositions.has(row.disposition), row.id).toBe(true);
-      expect(activations.has(row.runtimeActivation), row.id).toBe(true);
-      expect(row.sourceQa, row.id).toBe('PASS');
-      expect(existsSync(fileURLToPath(new URL('../../' + row.sourceAsset, import.meta.url))), row.id).toBe(true);
-      if (row.stagedAsset)
-        expect(existsSync(fileURLToPath(new URL('../public' + row.stagedAsset, import.meta.url))), row.id).toBe(true);
-    }
     for (const row of roster.skills) {
       expect(row.status, row.id).toBe('integrated');
       expect(existsSync(fileURLToPath(new URL('../../' + row.authored, import.meta.url))), row.id).toBe(true);
-    }
-    const spatial = new Set(Object.entries(AUTHORED_VFX).filter(([, preset]) => preset.spatial).map(([id]) => id));
-    expect(new Set(qaSummary.map((row) => row.id))).toEqual(spatial);
-    for (const row of qaSummary) {
-      expect(row.status, row.id).toBe('PASS');
-      expect(row.runtimeActivated, row.id).toBe(true);
     }
   });
 

@@ -99,7 +99,7 @@ describe('real multi-hit impacts', () => {
   });
 
   it('lands Whirlwind as three caster pulses while the primary action stays mobile', () => {
-    const { state, mob, arena } = skillFight('attack.whirlwind', 2);
+    const { state, mob, arena } = skillFight('attack.whirlwind', 0.6);
     tick(state, { arena });
     tick(state, { arena });
     const cast = arena.actions.find((action) => action.skillId === 'attack.whirlwind')!;
@@ -288,7 +288,7 @@ describe('real multi-hit impacts', () => {
 
 describe('channel interruption', () => {
   function channelFight(atkTimer: number) {
-    const { state, mob, arena } = skillFight('attack.whirlwind', 2);
+    const { state, mob, arena } = skillFight('attack.whirlwind', 0.6);
     Object.assign(mob, {
       acc: 1e9, skillIds: ['mob.lightning.static-jab'], skillReadyAtUs: {},
       // The argument places contact; the opportunity must now include the real preparation.

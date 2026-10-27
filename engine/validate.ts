@@ -247,27 +247,68 @@ export function validateEngineData<K extends EngineData['K']>(raw: { K: K }): En
     });
   }
 
-  // Ordinary mob attacks: the legacy line adapter and every profile it can name must resolve, and a
-  // released shot needs a positive speed and a real contact radius.
+  // Ordinary attacks: both adapters and every profile they name must resolve, each profile must
+  // state whether its metres are centre distance or body-edge reach, and its stop point must stay
+  // inside that reach without forcing two authored bodies to occupy the same ground.
   const arena = data.combat_arena as Record<string, unknown>;
   const normal = arena?.normal_attack as Record<string, unknown>;
   if (!isObject(normal)) refuse('combat_arena.normal_attack', 'must be an object');
   const legacy = normal.legacy as Record<string, unknown>;
+  const playerMap = normal.player as Record<string, unknown>;
   const profiles = normal.profiles as Record<string, unknown>;
   if (!isObject(legacy)) refuse('combat_arena.normal_attack.legacy', 'must be an object');
+  if (!isObject(playerMap)) refuse('combat_arena.normal_attack.player', 'must be an object');
   if (!isObject(profiles)) refuse('combat_arena.normal_attack.profiles', 'must be an object');
   for (const line of ['front', 'stand-off']) {
     const id = legacy[line];
     if (typeof id !== 'string' || !isObject(profiles[id]))
       refuse(`combat_arena.normal_attack.legacy.${line}`, 'must name a profile');
   }
+  for (const group of ['melee', 'ranged', 'magic']) {
+    const id = playerMap[group];
+    if (typeof id !== 'string' || !isObject(profiles[id]))
+      refuse(`combat_arena.normal_attack.player.${group}`, 'must name a profile');
+  }
+  const clearance = numberAt(normal, 'contact_clearance_m', 'combat_arena.normal_attack');
+  if (!(clearance >= 0)) refuse('combat_arena.normal_attack.contact_clearance_m', 'must be nonnegative');
+  const band = numberAt(normal, 'contact_band_m', 'combat_arena.normal_attack');
+  if (!(band >= 0)) refuse('combat_arena.normal_attack.contact_band_m', 'must be nonnegative');
+  const playerRadius = numberAt(arena, 'player_radius_m', 'combat_arena');
+  if (!(playerRadius > 0)) refuse('combat_arena.player_radius_m', 'must be a positive radius');
+  const sizeRows = (data.mob as Record<string, unknown> | undefined)?.sizes;
+  let bodyRadius = playerRadius;
+  if (Array.isArray(sizeRows)) for (const row of sizeRows) {
+    if (isObject(row) && typeof row.radius_m === 'number' && Number.isFinite(row.radius_m))
+      bodyRadius = Math.max(bodyRadius, row.radius_m);
+  }
+  const minContact = playerRadius + bodyRadius + clearance;
   for (const [id, rawProfile] of Object.entries(profiles)) {
     const path = `combat_arena.normal_attack.profiles.${id}`;
     if (!isObject(rawProfile)) refuse(path, 'must be an object');
     if (rawProfile.delivery !== 'melee' && rawProfile.delivery !== 'projectile')
       refuse(`${path}.delivery`, 'must be melee or projectile');
+    const range = rawProfile.range as Record<string, unknown>;
+    if (!isObject(range)) refuse(`${path}.range`, 'must be an object');
+    if (range.basis !== 'center' && range.basis !== 'body-edge')
+      refuse(`${path}.range.basis`, 'must be center or body-edge');
+    const meters = numberAt(range, 'meters', `${path}.range`);
+    if (!(meters > 0)) refuse(`${path}.range.meters`, 'must be a positive distance');
     const stop = numberAt(rawProfile, 'stop_at_range_pct', path);
     if (!(stop > 0 && stop <= 100)) refuse(`${path}.stop_at_range_pct`, 'must be within (0, 100]');
+    const windup = numberAt(rawProfile, 'windup_interval_pct', path);
+    if (!(windup > 0 && windup < 100)) refuse(`${path}.windup_interval_pct`, 'must be within (0, 100)');
+    const recovery = numberAt(rawProfile, 'recovery_interval_pct', path);
+    if (!(recovery >= 0 && recovery < 100)) refuse(`${path}.recovery_interval_pct`, 'must be within [0, 100)');
+    if (windup + recovery > 100) refuse(`${path}`, 'windup and recovery must leave part of the interval free');
+    if (range.basis === 'body-edge') {
+      if (!(meters > clearance))
+        refuse(`${path}.range.meters`, 'must exceed contact_clearance_m so the stop band stays inside reach');
+    } else {
+      if (!(meters * stop / 100 >= minContact))
+        refuse(`${path}.stop_at_range_pct`, 'places the stop closer than two body footprints allow');
+      if (!(minContact <= meters))
+        refuse(`${path}.range.meters`, 'cannot reach even touching bodies');
+    }
     if (rawProfile.delivery === 'projectile') {
       if (!(numberAt(rawProfile, 'projectile_speed_mps', path) > 0))
         refuse(`${path}.projectile_speed_mps`, 'must be a positive speed');

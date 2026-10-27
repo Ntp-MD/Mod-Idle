@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { mulberry32 } from '../src/engine/client-helpers';
-import { captureCombatArena, createCombatArena, syncCombatArena } from '../src/sim/combat/combat-arena';
-import { fieldAreaKey, releaseSpawnSlot, restoreFieldPositions } from '../src/sim/world/field-area';
+import { arenaDistance, captureCombatArena, createCombatArena, syncCombatArena } from '../src/sim/combat/combat-arena';
+import { fieldAreaKey, releaseSpawnSlot, restoreFieldPositions, syncFieldState } from '../src/sim/world/field-area';
 import { characterSheet, newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
 import { exportJson, importJson, migrate, SCHEMA_VERSION } from '../src/state/save';
 import { pinFieldPopulation } from './mobFixture';
@@ -29,6 +29,161 @@ function fieldFight(count = 3) {
 }
 
 describe('field population registry', () => {
+  it('resolves the same assist chain regardless of the living-body queue order', () => {
+    const first = fieldFight(3);
+    first.state.group.forEach((mob, index) => {
+      const point = { x: 4.9 + index * 2.9, y: 6 };
+      Object.assign(first.arena.mobs[mob.id], point);
+      first.state.field!.slots[index].home = point;
+    });
+    first.state.playerStatuses.shock = { stacks: 1, secLeft: 3, perSec: 0 };
+    const second = structuredClone(first);
+    second.state.group.reverse();
+    for (const { state, arena } of [first, second]) tick(state, { arena, autoSkills: false });
+    expect([...second.state.field!.engagementIds].sort()).toEqual([...first.state.field!.engagementIds].sort());
+  });
+
+  it.each([false, true])('drops a body beyond its home leash despite nearby aggro or a held target (%s)', heldTarget => {
+    const { state, arena } = fieldFight(1);
+    const mob = state.group[0];
+    state.field!.slots[0].home = { x: 1, y: 6 };
+    state.field!.engagementIds = [mob.id];
+    Object.assign(arena.player, { x: 13, y: 6 });
+    Object.assign(arena.mobs[mob.id], { x: 12, y: 6 });
+    state.playerStatuses.shock = { stacks: 1, secLeft: 3, perSec: 0 };
+    mob.hp = mob.hpMax / 2;
+    if (heldTarget) arena.intent = { skillId: 'attack.firestorm', targetId: mob.id,
+      targetPoint: { x: 12, y: 6 }, phase: 'approach' };
+    tick(state, { arena, autoSkills: false });
+    expect(state.field!.engagementIds).not.toContain(mob.id);
+    expect(mob.hp).toBe(mob.hpMax);
+    expect(state.fx.filter(event => event.kind === 'taken' && event.byId === mob.id)).toHaveLength(0);
+    expect(arena.mobs[mob.id].x).toBeLessThan(12);
+  });
+
+  it('schedules a target selected after the initial engagement snapshot', () => {
+    const { state, arena } = fieldFight(1);
+    const mob = state.group[0];
+    Object.assign(mob, { line: 'stand-off' });
+    Object.assign(arena.mobs[mob.id], { x: 7, y: 6 });
+    state.field!.slots[0].home = { x: 7, y: 6 };
+    state.field!.engagementIds = [];
+    expect(arenaDistance(arena.player, arena.mobs[mob.id])).toBeGreaterThan(4);
+    tick(state, { arena, autoSkills: true, manual: { cast: { skillId: 'attack.firestorm' } } });
+    expect(state.field!.engagementIds).toContain(mob.id);
+    const action = arena.actions.find((entry) => entry.actorId === mob.id && entry.kind === 'swing');
+    expect(action?.timing).toBeDefined();
+    expect(action!.timing!.startedAtUs).toBeLessThanOrEqual(1_000_000);
+  });
+
+  it('admits a body that enters aggro at a movement sample and schedules from that moment', () => {
+    const { state, arena } = fieldFight(1);
+    const mob = state.group[0];
+    Object.assign(mob, { line: 'stand-off', atkTimer: 0.8, hitsPerSec: 1 });
+    Object.assign(arena.mobs[mob.id], { x: 6, y: 6 });
+    state.field!.slots[0].home = { x: 6, y: 6 };
+    state.field!.engagementIds = [];
+    tick(state, { arena, autoSkills: false, manual: { moveTo: { x: 4, y: 6 } } });
+    expect(state.field!.engagementIds).toContain(mob.id);
+    const action = arena.actions.find((entry) => entry.actorId === mob.id && entry.timing);
+    expect(action).toBeDefined();
+    // The plan starts after the player actually crossed the aggro line, not at tick start.
+    expect(action!.timing!.startedAtUs).toBeGreaterThan(0);
+    expect(action!.timing!.startedAtUs).toBeLessThan(1_000_000);
+  });
+
+  it('keeps a returning body untargetable until it reaches its home band', () => {
+    const { state, arena } = fieldFight(1);
+    const mob = state.group[0];
+    const home = { x: 2, y: 6 };
+    state.field!.slots[0].home = home;
+    Object.assign(arena.mobs[mob.id], { x: 12, y: 6 });
+    Object.assign(arena.player, { x: 13, y: 6 });
+    state.field!.engagementIds = [mob.id];
+    mob.hp = mob.hpMax / 2;
+    state.mobStatus[mob.id] = { statuses: { burn: { stacks: 1, secLeft: 3, perSec: 10 } },
+      alignedPerSec: 0, elapsedSec: 0, stoppedSec: 0 };
+
+    tick(state, { arena, autoSkills: false });
+    expect(state.field!.engagementIds).not.toContain(mob.id);
+    expect(arena.mobs[mob.id].returning).toBe(true);
+    expect(state.field!.actors.find((actor) => actor.id === mob.id)?.returning).toBe(true);
+    expect(mob.hp).toBe(mob.hpMax);
+    expect(state.mobStatus[mob.id]).toBeUndefined();
+
+    // The reset belongs to the transition; later returning frames do not refill the pool again.
+    mob.hp = mob.hpMax / 2;
+    arena.focusId = mob.id;
+    tick(state, { arena, autoSkills: false });
+    expect(mob.hp).toBe(mob.hpMax / 2);
+    expect(arena.focusId).toBeUndefined();
+    expect(state.log.some((line) => /returning home/.test(line.text))).toBe(true);
+    expect(state.fx.filter((event) => event.kind === 'hit' && event.mobId === mob.id)).toHaveLength(0);
+
+    let clearedAt = -1;
+    let clearedDistance = Infinity;
+    for (let index = 0; index < 12; index++) {
+      tick(state, { arena, autoSkills: false });
+      if (!arena.mobs[mob.id].returning) {
+        clearedAt = index;
+        clearedDistance = arenaDistance(arena.mobs[mob.id], home);
+        break;
+      }
+    }
+    expect(clearedAt).toBeGreaterThanOrEqual(0);
+    expect(clearedDistance).toBeLessThanOrEqual(0.35 + 1e-6);
+    for (let index = 0; index < 3; index++) tick(state, { arena, autoSkills: false });
+    expect(arena.mobs[mob.id].returning).toBe(false);
+  });
+
+  it('does not let a stale engagement id cancel an in-progress return', () => {
+    const { state, arena } = fieldFight(1);
+    const mob = state.group[0];
+    Object.assign(arena.mobs[mob.id], { x: 12, y: 6, returning: true });
+    Object.assign(arena.player, { x: 13, y: 6 });
+    state.field!.slots[0].home = { x: 2, y: 6 };
+    state.field!.engagementIds = [mob.id];
+    mob.hp = mob.hpMax / 2;
+    tick(state, { arena, autoSkills: false });
+    expect(state.field!.engagementIds).not.toContain(mob.id);
+    expect(arena.mobs[mob.id].returning).toBe(true);
+    expect(mob.hp).toBe(mob.hpMax);
+  });
+
+  it('round-trips the returning flag through the saved field actors', () => {
+    const { state, arena } = fieldFight(1);
+    const mob = state.group[0];
+    arena.mobs[mob.id].returning = true;
+    syncFieldState(state, arena, 2, false);
+    expect(state.field!.actors.find((actor) => actor.id === mob.id)?.returning).toBe(true);
+    const loaded = importJson(exportJson(state));
+    expect(loaded.field!.actors.find((actor) => actor.id === mob.id)?.returning).toBe(true);
+    const fresh = createCombatArena();
+    syncCombatArena(fresh, loaded, loaded.clockSec * 1_000_000, 1_000_000, characterSheet(loaded).maxHp);
+    restoreFieldPositions(fresh, loaded);
+    expect(fresh.mobs[mob.id].returning).toBe(true);
+  });
+
+  it('cancels an unpaid mob preparation when the body leaves its leash mid-tick', () => {
+    const { state, arena } = fieldFight(1);
+    const mob = state.group[0];
+    Object.assign(mob, {
+      line: 'stand-off', hitsPerSec: 2, atkTimer: 0,
+      skillIds: ['mob.poison.venom-spit'], skillReadyAtUs: {},
+    });
+    state.field!.slots[0].home = { x: 0.5, y: 6 };
+    Object.assign(arena.player, { x: 7.5, y: 6 });
+    Object.assign(arena.mobs[mob.id], { x: 8.5, y: 6 });
+    tick(state, { arena, autoSkills: false, manual: { moveTo: { x: 17, y: 6 } } });
+    const action = arena.actions.find((entry) => entry.actorId === mob.id && entry.kind === 'cast');
+    expect(action).toBeDefined();
+    expect(action!.releasedAtUs).toBeUndefined();
+    expect(action!.cancelReason).toBe('disengaged');
+    expect(state.fx.filter((event) => event.kind === 'taken' && event.byId === mob.id)).toHaveLength(0);
+    expect(mob.skillReadyAtUs?.['mob.poison.venom-spit']).toBeUndefined();
+    expect(arena.mobs[mob.id].returning).toBe(true);
+  });
+
   it('owns one slot per living body and records engagement without copying HP', () => {
     const { state, arena } = fieldFight();
     tick(state, { arena, autoSkills: false });

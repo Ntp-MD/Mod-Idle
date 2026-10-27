@@ -1,0 +1,37 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "transparentBackground": true,
+  "identityReference": "game/public/combat/arpg/pixel-v2/player-animation-v2.png",
+  "calls": [
+    {
+      "id": "side-initial",
+      "prompt": "Use case: stylized-concept. Asset type: isolated modular weapon sprite for a chibi ARPG player. Reference image: supplied player atlas is STYLE REFERENCE ONLY, do not reproduce the character or atlas. Generate exactly ONE single short dagger appearance, side view, blade tip pointing RIGHT, hilt on LEFT, horizontal. Dagger identity: narrow tapered steel blade, dark iron modest straight guard, brown leather wrapped hilt, small iron pommel. Compact native pixel-art clusters with deliberate dark outline, 2-3 steel shades, crisp stair-step edges matching the reference hero, upper-left lighting. No intricate decoration, no glow. One whole isolated dagger, approximately 190 pixels long on a 1024x1024 genuinely transparent canvas, centered with generous completely transparent margins. Clear readable hand grip at hilt. No hands, character, arms, cast shadow, scenery, text, grid, duplicated views, labels, gradients or motion effects. Preserve genuine transparency.",
+      "selected": false,
+      "reason": "Visible item much larger than requested; one targeted framing correction follows"
+    },
+    {
+      "id": "side",
+      "prompt": "Use case: precise-object-edit. Edit the supplied isolated dagger sprite only. Keep its exact identity: narrow steel blade tip to RIGHT, brown wrapped short hilt LEFT, modest straight dark iron guard, iron pommel, dark outline, the same pixel-cluster rendering and upper-left lighting. Correct ONLY the framing/scale: make the entire dagger much smaller, a total visible width of only about 210 pixels, centered on a 1024x1024 genuinely transparent canvas. The object should occupy only one fifth of the canvas width; over 80 percent of canvas is empty transparent space. Keep all parts whole and remove all stray alpha marks far from the object. Do not add character, hands, shadow, text, grid, glow, extra views, or scenery.",
+      "selected": true,
+      "reference": "side-initial"
+    },
+    {
+      "id": "raised",
+      "prompt": "Use case: stylized-concept. Asset type: ONE isolated modular weapon sprite for chibi ARPG equipment animation. Reference supplied is the exact dagger identity to preserve: short narrow tapered silver steel blade, modest straight dark iron guard, brown leather-wrapped hilt, small dark iron pommel. Generate a NEW raised windup view of this SAME dagger, blade tip pointing upper-right at approximately 60 degrees above horizontal, hilt at lower-left, side of blade visible. Same proportions and palette; upper-left lighting, compact native pixel clusters with dark outline, only 2-3 shades per material, crisp stair-step edges. Transparent canvas approximately 1024 square, center the entire isolated dagger so item occupies only about 25 percent of canvas height; generous clear margins. Render only one dagger. No hands, body, character, shadow, motion arc, glow, VFX, scenery, labels, text, grid or extra views. Genuinely transparent background, no stray marks away from item.",
+      "selected": true,
+      "reference": "side"
+    },
+    {
+      "id": "foreshortened-initial",
+      "prompt": "Use case: stylized-concept. Asset type: ONE isolated modular weapon sprite for chibi ARPG thrust animation. Reference supplied is the exact dagger identity: short narrow tapered steel blade, modest straight dark iron guard, brown leather-wrapped hilt, small dark iron pommel. Generate a NEW foreshortened view of this SAME dagger thrusting TOWARD the camera and slightly to the RIGHT. The blade point projects right/down-right; the hilt recedes left/up-left, strongly foreshortened so visible blade is compact and wide near guard, tapering to tip. Keep identity and upper-left lighting. Compact native pixel clusters with dark outline and 2-3 shades per material, deliberate crisp stair-step edges, same chibi ARPG style. Single entire isolated dagger centered with generous clear margins on approximately 1024 square genuine transparent canvas; item occupies only one quarter of canvas width. No hands, arms, character, shadow, motion blur, arcs, glows, VFX, scenery, text, labels, grid or extra views. No stray marks.",
+      "selected": false,
+      "reason": "Needed stronger foreshortening rather than diagonal side view"
+    },
+    {
+      "id": "foreshortened",
+      "prompt": "Use case: precise-object-edit. Correct ONLY the camera view of this same dagger; preserve its narrow steel blade, small straight dark iron crossguard, brown leather hilt, small iron pommel, palette, chunky pixel clusters and dark outline. This must be a strongly FORESHORTENED THRUST toward the viewer, not a flat side view rotated diagonally. Camera is near the blade point looking almost straight down the blade toward the guard: the blade's projected length is very short, a broad compact triangular tip in the foreground, guard behind it, brown hilt visibly receding behind and to upper-left. The same physical dagger, not a different weapon. Entire projected dagger fits in approximately 240 by 180 pixels, centered on a large truly transparent square canvas with generous margins. Tip is foreground lower-right, pommel far upper-left. Upper-left light, crisp small native pixel clusters, no hands, body, motion blur, shadow, text, grid or extra objects. No stray alpha marks.",
+      "selected": true,
+      "reference": "foreshortened-initial"
+    }
+  ]
+}

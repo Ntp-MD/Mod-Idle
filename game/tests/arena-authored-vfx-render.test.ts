@@ -181,7 +181,7 @@ describe('authored VFX rendering', () => {
         const body=render(ArenaSkillVfx,{props}).body+render(ArenaSkillVfx,{props:{...props,layer:'ground'}}).body;
         expect(body.match(/data-vfx-version="spatial-v2"/g),id).toHaveLength(1);
         expect(body,id).toContain('matrix(');
-        expect(body,id).toContain('/spatial-v2/atlas.png');
+        expect(body,id).toContain('/v2/atlas.png');
       }
     }
   });
