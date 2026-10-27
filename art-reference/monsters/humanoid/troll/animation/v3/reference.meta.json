@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "assetType": "mob-identity-reference",
+  "source": "reference.png",
+  "sourceDimensions": {
+    "width": 1254,
+    "height": 1254
+  },
+  "facing": "south-east",
+  "bakedWeaponId": "stone-club",
+  "footAnchor": {
+    "x": 492,
+    "y": 962,
+    "provenance": "Measured at the visible near-foot sole in source pixels"
+  },
+  "alpha": {
+    "distinctValues": 256,
+    "binaryOnly": false
+  },
+  "qa": {
+    "visuallyInspected": true,
+    "wholeBodyVisible": true,
+    "sourcePixelsModified": false
+  }
+}

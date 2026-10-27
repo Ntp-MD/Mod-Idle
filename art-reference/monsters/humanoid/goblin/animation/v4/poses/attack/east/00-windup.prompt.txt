@@ -1,0 +1,9 @@
+Use case: stylized-concept. Asset type: one source pose for a 40-pose RPG mob animation set.
+Image 1 is the Goblin identity reference: preserve its exact face, green skin, proportions, brown clothing and single wooden spear with steel point. Image 2 is a player pose used for body angle, camera and composition only; do not copy player identity, sword or shield.
+SPECIES: Goblin — Compact upright green goblin humanoid; oversized head, long pointed ears, glowing orange eyes, short sturdy limbs, ragged brown clothing.
+WEAPON: one fixed wooden spear with a steel tip, matching the Goblin source; the spear must be visibly in the Goblin's hand in this pose, not separate or omitted.
+POSE: attack/east/00-windup — Close melee spear attack facing east: compress the body and draw the spear backward opposite the thrust, anticipation before a close melee strike; clear distinct phase, keep the same planted ground line and the spear tip inside the frame.
+CAMERA: fixed mildly elevated three-quarter game camera, upper-left light; match Image 1 scale and projection. Change the whole body facing for directions, not only the head.
+OUTPUT: exactly one complete Goblin pose in a transparent RGBA PNG. Match Image 1 canvas/framing; keep the visible sprite approximately 56–64 logical pixels tall, feet on the same baseline as Image 1 for upright poses (about source y=957), centered near the same ground anchor. The full body and spear must stay within the image with clear transparent padding. Hard alpha only (0 or 255); crisp native pixel clusters, no antialiasing, blur, gradients or dithering. Limbs, hands and spear form one connected opaque pose.
+FORBIDDEN: extra poses, multiple characters, empty hands, different weapon, detached weapon, separate weapon image, grid, checkerboard, background, floor, shadow, scenery, VFX, trail, text, labels, watermark, border.
+Return only the one transparent pose PNG.

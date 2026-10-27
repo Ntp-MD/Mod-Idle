@@ -14,7 +14,7 @@ Painterly fantasy otherworld tabletop diorama. Muted natural colours, readable s
 
 1. **Complete projected hex terrain:** ground and small scenery already composed inside the projected hex. Use `geometry/hex-mask.png` as the exact shape/framing reference. Ground reaches every edge; everything outside is transparent. Keep all vegetation, branches and shadows inside the silhouette with breathing room. Do not use a conventional symmetric isometric hex in place of the supplied shape.
 2. **Surface texture for a mesh:** flat top-down material without baked perspective, hex shape, trees, rocks, shadows or platform edges. The renderer projects and bounds it. Never apply the complete-hex prompt to this texture.
-3. **Separate object/figure:** transparent cutout depicting the shared elevated camera view; its ground-contact anchor is explicit. Do not include terrain, a tile, pedestal or circular base. A raster cutout has a baked view; arbitrary camera rotation requires 3D geometry or additional views.
+3. **Separate object/figure:** transparent cutout depicting the shared elevated camera view; its ground-contact anchor is explicit. Do not include terrain, a tile, pedestal or circular base. A raster cutout has a baked view; arbitrary camera rotation requires additional views.
 
 Camera terminology: orthographic/parallel, three-quarter overhead, isometric-like. Use the actual numeric values from `geometry/hex-spec.json`, not the word “isometric” alone. Board yaw is a renderer convention; the shape mask is the reliable framing instruction. Do not rotate a finished projected tile a second time.
 
@@ -22,7 +22,7 @@ Camera terminology: orthographic/parallel, three-quarter overhead, isometric-lik
 
 - The mask controls shape, framing and ground footprint.
 - The original forest controls painterly treatment and colours only. Its tall freeform silhouette is unsuitable as a complete hex tile.
-- Forest version 1 demonstrates smaller trees and composition. Its raw generated silhouette approximates the template and was registered by the renderer; it is not a perfect uncorrected geometry reference or a verified 3D camera reference.
+- Forest version 1 demonstrates smaller trees and composition. Its raw generated silhouette approximates the template and was registered by the renderer; it is not a perfect uncorrected geometry reference or a verified camera reference.
 - A numbered guide is explanatory only. Never reproduce its labels, crosshair or outlines in artwork.
 
 ## Deliver and validate

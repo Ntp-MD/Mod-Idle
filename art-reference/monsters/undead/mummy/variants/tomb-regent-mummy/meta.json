@@ -1,0 +1,443 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "mummy",
+  "variantId": "tomb-regent-mummy",
+  "name": "Tomb Regent Mummy",
+  "levels": [
+    81,
+    100
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-contact-at-224",
+  "directionCount": 8,
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "actions": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    "idle S SE E NE N NW W SW",
+    "walk S SE E NE N NW W SW",
+    "attack S SE E NE N NW W SW",
+    "hit S SE E NE N NW W SW",
+    "death S SE E NE N NW W SW"
+  ],
+  "slicing": {
+    "columns": 8,
+    "rows": 5,
+    "cellWidth": 256,
+    "cellHeight": 256
+  },
+  "sourceFrames": [
+    {
+      "x": 162,
+      "y": 115,
+      "width": 110,
+      "height": 177,
+      "offsetX": 162,
+      "offsetY": 115
+    },
+    {
+      "x": 539,
+      "y": 115,
+      "width": 119,
+      "height": 177,
+      "offsetX": 155,
+      "offsetY": 115
+    },
+    {
+      "x": 911,
+      "y": 115,
+      "width": 120,
+      "height": 177,
+      "offsetX": 143,
+      "offsetY": 115
+    },
+    {
+      "x": 1288,
+      "y": 115,
+      "width": 118,
+      "height": 176,
+      "offsetX": 136,
+      "offsetY": 115
+    },
+    {
+      "x": 1683,
+      "y": 115,
+      "width": 97,
+      "height": 177,
+      "offsetX": 147,
+      "offsetY": 115
+    },
+    {
+      "x": 2044,
+      "y": 115,
+      "width": 113,
+      "height": 176,
+      "offsetX": 124,
+      "offsetY": 115
+    },
+    {
+      "x": 2415,
+      "y": 115,
+      "width": 121,
+      "height": 177,
+      "offsetX": 111,
+      "offsetY": 115
+    },
+    {
+      "x": 2799,
+      "y": 115,
+      "width": 115,
+      "height": 177,
+      "offsetX": 111,
+      "offsetY": 115
+    },
+    {
+      "x": 149,
+      "y": 500,
+      "width": 138,
+      "height": 173,
+      "offsetX": 149,
+      "offsetY": 116
+    },
+    {
+      "x": 524,
+      "y": 501,
+      "width": 137,
+      "height": 173,
+      "offsetX": 140,
+      "offsetY": 117
+    },
+    {
+      "x": 904,
+      "y": 501,
+      "width": 130,
+      "height": 176,
+      "offsetX": 136,
+      "offsetY": 117
+    },
+    {
+      "x": 1275,
+      "y": 501,
+      "width": 136,
+      "height": 176,
+      "offsetX": 123,
+      "offsetY": 117
+    },
+    {
+      "x": 1677,
+      "y": 504,
+      "width": 109,
+      "height": 173,
+      "offsetX": 141,
+      "offsetY": 120
+    },
+    {
+      "x": 2038,
+      "y": 501,
+      "width": 132,
+      "height": 176,
+      "offsetX": 118,
+      "offsetY": 117
+    },
+    {
+      "x": 2414,
+      "y": 501,
+      "width": 134,
+      "height": 173,
+      "offsetX": 110,
+      "offsetY": 117
+    },
+    {
+      "x": 2785,
+      "y": 502,
+      "width": 137,
+      "height": 171,
+      "offsetX": 97,
+      "offsetY": 118
+    },
+    {
+      "x": 135,
+      "y": 859,
+      "width": 150,
+      "height": 201,
+      "offsetX": 135,
+      "offsetY": 91
+    },
+    {
+      "x": 516,
+      "y": 877,
+      "width": 135,
+      "height": 183,
+      "offsetX": 132,
+      "offsetY": 109
+    },
+    {
+      "x": 898,
+      "y": 887,
+      "width": 134,
+      "height": 169,
+      "offsetX": 130,
+      "offsetY": 119
+    },
+    {
+      "x": 1272,
+      "y": 872,
+      "width": 137,
+      "height": 185,
+      "offsetX": 120,
+      "offsetY": 104
+    },
+    {
+      "x": 1652,
+      "y": 861,
+      "width": 140,
+      "height": 202,
+      "offsetX": 116,
+      "offsetY": 93
+    },
+    {
+      "x": 2039,
+      "y": 889,
+      "width": 134,
+      "height": 171,
+      "offsetX": 119,
+      "offsetY": 121
+    },
+    {
+      "x": 2414,
+      "y": 876,
+      "width": 137,
+      "height": 181,
+      "offsetX": 110,
+      "offsetY": 108
+    },
+    {
+      "x": 2789,
+      "y": 859,
+      "width": 152,
+      "height": 201,
+      "offsetX": 101,
+      "offsetY": 91
+    },
+    {
+      "x": 152,
+      "y": 1287,
+      "width": 144,
+      "height": 157,
+      "offsetX": 152,
+      "offsetY": 135
+    },
+    {
+      "x": 530,
+      "y": 1286,
+      "width": 131,
+      "height": 159,
+      "offsetX": 146,
+      "offsetY": 134
+    },
+    {
+      "x": 900,
+      "y": 1295,
+      "width": 132,
+      "height": 149,
+      "offsetX": 132,
+      "offsetY": 143
+    },
+    {
+      "x": 1281,
+      "y": 1296,
+      "width": 131,
+      "height": 148,
+      "offsetX": 129,
+      "offsetY": 144
+    },
+    {
+      "x": 1655,
+      "y": 1292,
+      "width": 134,
+      "height": 152,
+      "offsetX": 119,
+      "offsetY": 140
+    },
+    {
+      "x": 2042,
+      "y": 1295,
+      "width": 125,
+      "height": 150,
+      "offsetX": 122,
+      "offsetY": 143
+    },
+    {
+      "x": 2411,
+      "y": 1287,
+      "width": 130,
+      "height": 157,
+      "offsetX": 107,
+      "offsetY": 135
+    },
+    {
+      "x": 2774,
+      "y": 1294,
+      "width": 142,
+      "height": 151,
+      "offsetX": 86,
+      "offsetY": 142
+    },
+    {
+      "x": 144,
+      "y": 1717,
+      "width": 144,
+      "height": 109,
+      "offsetX": 144,
+      "offsetY": 181
+    },
+    {
+      "x": 498,
+      "y": 1718,
+      "width": 157,
+      "height": 108,
+      "offsetX": 114,
+      "offsetY": 182
+    },
+    {
+      "x": 865,
+      "y": 1735,
+      "width": 172,
+      "height": 91,
+      "offsetX": 97,
+      "offsetY": 199
+    },
+    {
+      "x": 1245,
+      "y": 1736,
+      "width": 176,
+      "height": 95,
+      "offsetX": 93,
+      "offsetY": 200
+    },
+    {
+      "x": 1631,
+      "y": 1719,
+      "width": 172,
+      "height": 117,
+      "offsetX": 95,
+      "offsetY": 183
+    },
+    {
+      "x": 2034,
+      "y": 1735,
+      "width": 172,
+      "height": 95,
+      "offsetX": 114,
+      "offsetY": 199
+    },
+    {
+      "x": 2414,
+      "y": 1733,
+      "width": 162,
+      "height": 99,
+      "offsetX": 110,
+      "offsetY": 197
+    },
+    {
+      "x": 2788,
+      "y": 1718,
+      "width": 149,
+      "height": 108,
+      "offsetX": 100,
+      "offsetY": 182
+    }
+  ],
+  "generation": {
+    "sourceOutputs": [
+      "exec-10949978-64c1-4e60-a4ed-dab9a76f69b4.png"
+    ],
+    "generatedCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "generatedCornerAlpha": 0,
+    "identityReference": "art-reference/monsters/undead/mummy/animation/source/base.png",
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "initialPrompt": "40-cell 8x5 full-direction atlas; a restrained old-gold collar and a narrow striped head wrap, with a small ceremonial curved blade; hard dark outline, no colored fringe or halo."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "raw-connected-pose-repack-384-v1",
+    "sourceCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "sourceImageSha256": "bd1a9a139dd5f59c68f816f5d8c4a765e4ffc311ae0af5198356f4e8f116ed6b",
+    "sourceAlphaThreshold": 128,
+    "edgeAlphaRecoveryRadius": 3,
+    "minimumCellPadding": 24,
+    "primaryPoses": 40,
+    "sourceComponents": 40,
+    "rowMedianBottoms": [
+      218,
+      420,
+      628,
+      813,
+      950
+    ],
+    "uniformScale": 1.0
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+    ]
+  }
+}

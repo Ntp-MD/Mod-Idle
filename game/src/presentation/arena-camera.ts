@@ -2,14 +2,16 @@
 export const ARENA_VIEW = { width: 1920, height: 1080 };
 export const ARENA_ACTOR_WIDTH_M = .5;
 const CX = 1040, CY = 530;
+// Field centre for the 50 x 32.0513 m arena (engine.json combat_arena).
+const WORLD_CX = 25, WORLD_CY = 16.0256;
 const U = 42, V = 10, W = -8, Z = 30;
 const SCALE = 70 / (ARENA_ACTOR_WIDTH_M * Math.hypot(U, W));
 export const ARENA_FACING_HYSTERESIS = .14;
 export const ARENA_DIRECTIONS = ['east', 'south-east', 'south', 'south-west', 'west', 'north-west', 'north', 'north-east'] as const;
 
 export function projectArenaPoint(point: { x: number; y: number }) {
-  return { x: CX + ((point.x - 9) * U + (point.y - 6) * V) * SCALE,
-    y: CY + ((point.y - 6) * Z + (point.x - 9) * W) * SCALE };
+  return { x: CX + ((point.x - WORLD_CX) * U + (point.y - WORLD_CY) * V) * SCALE,
+    y: CY + ((point.y - WORLD_CY) * Z + (point.x - WORLD_CX) * W) * SCALE };
 }
 export function projectArenaVector(vector: { x: number; y: number }) {
   return { x: (vector.x * U + vector.y * V) * SCALE, y: (vector.y * Z + vector.x * W) * SCALE };
@@ -32,7 +34,7 @@ export function arenaActorPixelScale(idleWidth: number, viewportScale: number) {
 }
 export function unprojectArenaPoint(point: { x: number; y: number }) {
   const a = (point.x - CX) / SCALE, b = (point.y - CY) / SCALE, det = U * Z - V * W;
-  return { x: (Z * a - V * b) / det + 9, y: (U * b - W * a) / det + 6 };
+  return { x: (Z * a - V * b) / det + WORLD_CX, y: (U * b - W * a) / det + WORLD_CY };
 }
 
 /** Ingest at authoritative samples; captured actors retain this latch across history trimming. */

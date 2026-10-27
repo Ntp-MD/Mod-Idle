@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "action": "death",
+  "direction": "west",
+  "pose": "grounded body; provisional 02-ground mapping based on visual content",
+  "generator": "OpenAI built-in image_gen",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "rawAlphaBoundsExclusive": [
+    0,
+    38,
+    1236,
+    1205
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    80,
+    568,
+    1218,
+    1171
+  ],
+  "boundsProvenance": "Pillow read-only alpha measurement",
+  "footAnchor": {
+    "x": 640,
+    "y": 1171
+  },
+  "anchorProvenance": "x=640 aligned to Minotaur reference body center; y=Pillow measured visible-alpha bottom; death uses terminal ground contact",
+  "sourcePixelsModified": false,
+  "styleReference": {
+    "identity": "art-reference/monsters/humanoid/minotaur/animation/v3/reference.png",
+    "bodyAngleOnly": "art-reference/players/one-handed-sword/_staging/body-death/west.png"
+  },
+  "bakedWeapon": "broad-battle-axe",
+  "alphaMeasurement": {
+    "hardAlpha": false,
+    "semiTransparentPixels": 374633
+  },
+  "mappingConfidence": "provisional",
+  "note": "Successful imagegen result from concurrent death/west batch; HTTP 429 interrupted result association, so mapped to 02-ground by visible grounded corpse pose. Replace or reassign after review."
+}

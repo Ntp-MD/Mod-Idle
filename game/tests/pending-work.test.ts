@@ -15,7 +15,6 @@ function pendingFight() {
   const state = newGame(41);
   setLevel(state, 30);
   state.hunting = true;
-  state.spawnIn = 999;
   const mob = spawnMob(mulberry32(23), 1, 'normal');
   Object.assign(mob, {
     id: 'pending-target', hp: 1e8, hpMax: 1e8, ps: 1, evasion: 0, dodgeRate: 0,
@@ -52,7 +51,6 @@ function pendingShot() {
   const state = newGame(41);
   setLevel(state, 30);
   state.hunting = true;
-  state.spawnIn = 999;
   const mob = spawnMob(mulberry32(23), 1, 'normal');
   Object.assign(mob, {
     id: 'archer', hp: 1e8, hpMax: 1e8, ps: 1, acc: 1e9, evasion: 0, dodgeRate: 0,

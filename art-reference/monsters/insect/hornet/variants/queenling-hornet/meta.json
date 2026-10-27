@@ -1,0 +1,503 @@
+{
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "hornet",
+  "variantId": "queenling-hornet",
+  "name": "Queenling Hornet",
+  "levels": [
+    81,
+    100
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-anchor-at-224",
+  "grid": {
+    "columns": 8,
+    "rows": 5,
+    "totalFrames": 40
+  },
+  "states": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    {
+      "state": "idle",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "walk",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "attack",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "hit",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "death",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    }
+  ],
+  "sourceFrames": [
+    {
+      "x": 141,
+      "y": 140,
+      "width": 140,
+      "height": 152,
+      "offsetX": 141,
+      "offsetY": 140
+    },
+    {
+      "x": 529,
+      "y": 138,
+      "width": 147,
+      "height": 154,
+      "offsetX": 145,
+      "offsetY": 138
+    },
+    {
+      "x": 906,
+      "y": 138,
+      "width": 162,
+      "height": 152,
+      "offsetX": 138,
+      "offsetY": 138
+    },
+    {
+      "x": 1299,
+      "y": 131,
+      "width": 142,
+      "height": 163,
+      "offsetX": 147,
+      "offsetY": 131
+    },
+    {
+      "x": 1653,
+      "y": 136,
+      "width": 156,
+      "height": 159,
+      "offsetX": 117,
+      "offsetY": 136
+    },
+    {
+      "x": 2022,
+      "y": 134,
+      "width": 148,
+      "height": 159,
+      "offsetX": 102,
+      "offsetY": 134
+    },
+    {
+      "x": 2393,
+      "y": 145,
+      "width": 161,
+      "height": 145,
+      "offsetX": 89,
+      "offsetY": 145
+    },
+    {
+      "x": 2786,
+      "y": 140,
+      "width": 139,
+      "height": 152,
+      "offsetX": 98,
+      "offsetY": 140
+    },
+    {
+      "x": 141,
+      "y": 523,
+      "width": 141,
+      "height": 159,
+      "offsetX": 141,
+      "offsetY": 139
+    },
+    {
+      "x": 525,
+      "y": 530,
+      "width": 165,
+      "height": 143,
+      "offsetX": 141,
+      "offsetY": 146
+    },
+    {
+      "x": 907,
+      "y": 528,
+      "width": 163,
+      "height": 149,
+      "offsetX": 139,
+      "offsetY": 144
+    },
+    {
+      "x": 1297,
+      "y": 526,
+      "width": 148,
+      "height": 148,
+      "offsetX": 145,
+      "offsetY": 142
+    },
+    {
+      "x": 1649,
+      "y": 527,
+      "width": 162,
+      "height": 149,
+      "offsetX": 113,
+      "offsetY": 143
+    },
+    {
+      "x": 2020,
+      "y": 526,
+      "width": 150,
+      "height": 148,
+      "offsetX": 100,
+      "offsetY": 142
+    },
+    {
+      "x": 2393,
+      "y": 532,
+      "width": 160,
+      "height": 149,
+      "offsetX": 89,
+      "offsetY": 148
+    },
+    {
+      "x": 2773,
+      "y": 528,
+      "width": 156,
+      "height": 150,
+      "offsetX": 85,
+      "offsetY": 144
+    },
+    {
+      "x": 142,
+      "y": 902,
+      "width": 144,
+      "height": 158,
+      "offsetX": 142,
+      "offsetY": 134
+    },
+    {
+      "x": 506,
+      "y": 896,
+      "width": 179,
+      "height": 162,
+      "offsetX": 122,
+      "offsetY": 128
+    },
+    {
+      "x": 892,
+      "y": 904,
+      "width": 188,
+      "height": 157,
+      "offsetX": 124,
+      "offsetY": 136
+    },
+    {
+      "x": 1275,
+      "y": 899,
+      "width": 168,
+      "height": 164,
+      "offsetX": 123,
+      "offsetY": 131
+    },
+    {
+      "x": 1646,
+      "y": 904,
+      "width": 156,
+      "height": 155,
+      "offsetX": 110,
+      "offsetY": 136
+    },
+    {
+      "x": 2018,
+      "y": 897,
+      "width": 172,
+      "height": 166,
+      "offsetX": 98,
+      "offsetY": 129
+    },
+    {
+      "x": 2389,
+      "y": 897,
+      "width": 170,
+      "height": 160,
+      "offsetX": 85,
+      "offsetY": 129
+    },
+    {
+      "x": 2774,
+      "y": 904,
+      "width": 167,
+      "height": 159,
+      "offsetX": 86,
+      "offsetY": 136
+    },
+    {
+      "x": 135,
+      "y": 1274,
+      "width": 174,
+      "height": 170,
+      "offsetX": 135,
+      "offsetY": 122
+    },
+    {
+      "x": 520,
+      "y": 1274,
+      "width": 182,
+      "height": 167,
+      "offsetX": 136,
+      "offsetY": 122
+    },
+    {
+      "x": 910,
+      "y": 1305,
+      "width": 158,
+      "height": 139,
+      "offsetX": 142,
+      "offsetY": 153
+    },
+    {
+      "x": 1284,
+      "y": 1295,
+      "width": 157,
+      "height": 150,
+      "offsetX": 132,
+      "offsetY": 143
+    },
+    {
+      "x": 1666,
+      "y": 1281,
+      "width": 157,
+      "height": 162,
+      "offsetX": 130,
+      "offsetY": 129
+    },
+    {
+      "x": 2034,
+      "y": 1299,
+      "width": 168,
+      "height": 146,
+      "offsetX": 114,
+      "offsetY": 147
+    },
+    {
+      "x": 2412,
+      "y": 1289,
+      "width": 163,
+      "height": 155,
+      "offsetX": 108,
+      "offsetY": 137
+    },
+    {
+      "x": 2785,
+      "y": 1293,
+      "width": 154,
+      "height": 148,
+      "offsetX": 97,
+      "offsetY": 141
+    },
+    {
+      "x": 136,
+      "y": 1712,
+      "width": 149,
+      "height": 112,
+      "offsetX": 136,
+      "offsetY": 176
+    },
+    {
+      "x": 514,
+      "y": 1721,
+      "width": 174,
+      "height": 107,
+      "offsetX": 130,
+      "offsetY": 185
+    },
+    {
+      "x": 907,
+      "y": 1721,
+      "width": 167,
+      "height": 104,
+      "offsetX": 139,
+      "offsetY": 185
+    },
+    {
+      "x": 1282,
+      "y": 1734,
+      "width": 157,
+      "height": 95,
+      "offsetX": 130,
+      "offsetY": 198
+    },
+    {
+      "x": 1646,
+      "y": 1728,
+      "width": 166,
+      "height": 101,
+      "offsetX": 110,
+      "offsetY": 192
+    },
+    {
+      "x": 2025,
+      "y": 1730,
+      "width": 153,
+      "height": 98,
+      "offsetX": 105,
+      "offsetY": 194
+    },
+    {
+      "x": 2385,
+      "y": 1724,
+      "width": 179,
+      "height": 105,
+      "offsetX": 81,
+      "offsetY": 188
+    },
+    {
+      "x": 2767,
+      "y": 1724,
+      "width": 169,
+      "height": 102,
+      "offsetX": 79,
+      "offsetY": 188
+    }
+  ],
+  "identityReference": "art-reference/monsters/insect/hornet/animation/source/base.png",
+  "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+  "generation": {
+    "sourceOutputs": [
+      "exec-56b4ed2f-431b-4911-8cdc-92542185e12d.png"
+    ],
+    "identityReference": "art-reference/monsters/insect/hornet/animation/source/base.png",
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "variantCue": "a very small pale-gold crown-like marking on the thorax and slightly fuller abdomen, preserve ordinary hornet anatomy",
+    "initialPrompt": "Queenling Hornet; 8 directions for idle, walk, attack, hit, death."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "raw-connected-pose-repack-384-v1",
+    "sourceCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "sourceImageSha256": "50f06d0625aa996ff3e873fc9584c2accf1700c5c70bd6296d8ab623906187ca",
+    "sourceAlphaThreshold": 128,
+    "edgeAlphaRecoveryRadius": 3,
+    "minimumCellPadding": 24,
+    "primaryPoses": 40,
+    "sourceComponents": 40,
+    "rowMedianBottoms": [
+      199,
+      386,
+      578,
+      773,
+      943
+    ],
+    "uniformScale": 1.0
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+    ]
+  }
+}

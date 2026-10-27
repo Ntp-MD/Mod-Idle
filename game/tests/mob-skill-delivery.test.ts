@@ -11,7 +11,6 @@ function fight(skillId: string, distance: number, over: Record<string, unknown> 
   const state = newGame(77);
   setLevel(state, 30);
   state.hunting = true;
-  state.spawnIn = 999;
   const mob = mobFixture({
     id: 'caster', hp: 1e9, hpMax: 1e9, ps: 1, acc: 1e9, evasion: 0, dodgeRate: 0,
     armour: 0, line: 'front', damage: 'physical', innate: [], hitsPerSec: 1, atkTimer: 0,

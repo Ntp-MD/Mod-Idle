@@ -26,12 +26,10 @@ describe('Dungeon Retreat state and payouts', () => {
   it('exits an empty run without consuming RNG and starts the full cooldown', () => {
     const state = entered();
     const rng = state.rngState;
-    state.spawnIn = 15;
     expect(retreatDungeon(state)).toEqual({ ok: true, selected: 0, received: 0, rejected: 0 });
     expect(state.rngState).toBe(rng);
     expect(state.dungeon).toBeNull();
     expect(state.group).toEqual([]);
-    expect(state.spawnIn).toBe(0);
     expect(state.hunting).toBe(false);
     expect(state.dungeonClearedAt).toBe(state.clockSec);
     expect(cooldownLeft(state)).toBe(E.dungeon.cooldown_sec);
@@ -157,7 +155,6 @@ describe('Dungeon Retreat state and payouts', () => {
     expect(state.curses).toEqual(newGame().curses);
     expect(state.mobStatus).toEqual(newGame().mobStatus);
     expect(state.hunting).toBe(false);
-    expect(state.spawnIn).toBe(0);
   });
 });
 

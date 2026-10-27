@@ -1,0 +1,1258 @@
+{
+  "status": "draft-review",
+  "speciesId": "siren",
+  "variantId": "shoal-siren",
+  "name": "Shoal Siren",
+  "levels": [
+    1,
+    20
+  ],
+  "identityRef": "art-reference/monsters/fish/siren/animation/source/base.png",
+  "styleRef": "art-reference/monsters/_shared/collection/reference.png",
+  "atlas": "atlas/animation-draft.png",
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "frameCount": 40
+  },
+  "directions": {
+    "idle": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "walk": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "attack": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "hit": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "death": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ]
+  },
+  "framesPerDirection": 1,
+  "frameCount": 40,
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south",
+      "frame": 0,
+      "source": {
+        "x": 137,
+        "y": 127,
+        "width": 108,
+        "height": 164
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east",
+      "frame": 0,
+      "source": {
+        "x": 530,
+        "y": 128,
+        "width": 108,
+        "height": 164
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east",
+      "frame": 0,
+      "source": {
+        "x": 915,
+        "y": 132,
+        "width": 108,
+        "height": 160
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east",
+      "frame": 0,
+      "source": {
+        "x": 1299,
+        "y": 132,
+        "width": 111,
+        "height": 160
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north",
+      "frame": 0,
+      "source": {
+        "x": 1670,
+        "y": 126,
+        "width": 108,
+        "height": 163
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west",
+      "frame": 0,
+      "source": {
+        "x": 2051,
+        "y": 132,
+        "width": 107,
+        "height": 160
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west",
+      "frame": 0,
+      "source": {
+        "x": 2431,
+        "y": 130,
+        "width": 110,
+        "height": 162
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west",
+      "frame": 0,
+      "source": {
+        "x": 2828,
+        "y": 129,
+        "width": 106,
+        "height": 164
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 8,
+      "action": "walk",
+      "direction": "south",
+      "frame": 0,
+      "source": {
+        "x": 133,
+        "y": 508,
+        "width": 110,
+        "height": 168
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 9,
+      "action": "walk",
+      "direction": "south-east",
+      "frame": 0,
+      "source": {
+        "x": 524,
+        "y": 512,
+        "width": 117,
+        "height": 164
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 10,
+      "action": "walk",
+      "direction": "east",
+      "frame": 0,
+      "source": {
+        "x": 905,
+        "y": 509,
+        "width": 119,
+        "height": 165
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 11,
+      "action": "walk",
+      "direction": "north-east",
+      "frame": 0,
+      "source": {
+        "x": 1292,
+        "y": 512,
+        "width": 115,
+        "height": 163
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 12,
+      "action": "walk",
+      "direction": "north",
+      "frame": 0,
+      "source": {
+        "x": 1666,
+        "y": 507,
+        "width": 121,
+        "height": 167
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 13,
+      "action": "walk",
+      "direction": "north-west",
+      "frame": 0,
+      "source": {
+        "x": 2047,
+        "y": 511,
+        "width": 119,
+        "height": 164
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 14,
+      "action": "walk",
+      "direction": "west",
+      "frame": 0,
+      "source": {
+        "x": 2432,
+        "y": 511,
+        "width": 116,
+        "height": 165
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 15,
+      "action": "walk",
+      "direction": "south-west",
+      "frame": 0,
+      "source": {
+        "x": 2831,
+        "y": 506,
+        "width": 106,
+        "height": 170
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 16,
+      "action": "attack",
+      "direction": "south",
+      "frame": 0,
+      "source": {
+        "x": 129,
+        "y": 900,
+        "width": 151,
+        "height": 157
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 17,
+      "action": "attack",
+      "direction": "south-east",
+      "frame": 0,
+      "source": {
+        "x": 516,
+        "y": 902,
+        "width": 147,
+        "height": 156
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 18,
+      "action": "attack",
+      "direction": "east",
+      "frame": 0,
+      "source": {
+        "x": 909,
+        "y": 902,
+        "width": 132,
+        "height": 161
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 19,
+      "action": "attack",
+      "direction": "north-east",
+      "frame": 0,
+      "source": {
+        "x": 1283,
+        "y": 902,
+        "width": 149,
+        "height": 159
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 20,
+      "action": "attack",
+      "direction": "north",
+      "frame": 0,
+      "source": {
+        "x": 1666,
+        "y": 892,
+        "width": 119,
+        "height": 170
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 21,
+      "action": "attack",
+      "direction": "north-west",
+      "frame": 0,
+      "source": {
+        "x": 2032,
+        "y": 902,
+        "width": 132,
+        "height": 161
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 22,
+      "action": "attack",
+      "direction": "west",
+      "frame": 0,
+      "source": {
+        "x": 2411,
+        "y": 902,
+        "width": 145,
+        "height": 157
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 23,
+      "action": "attack",
+      "direction": "south-west",
+      "frame": 0,
+      "source": {
+        "x": 2796,
+        "y": 900,
+        "width": 142,
+        "height": 157
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 24,
+      "action": "hit",
+      "direction": "south",
+      "frame": 0,
+      "source": {
+        "x": 130,
+        "y": 1277,
+        "width": 112,
+        "height": 168
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 25,
+      "action": "hit",
+      "direction": "south-east",
+      "frame": 0,
+      "source": {
+        "x": 530,
+        "y": 1282,
+        "width": 106,
+        "height": 165
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 26,
+      "action": "hit",
+      "direction": "east",
+      "frame": 0,
+      "source": {
+        "x": 915,
+        "y": 1288,
+        "width": 116,
+        "height": 155
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 27,
+      "action": "hit",
+      "direction": "north-east",
+      "frame": 0,
+      "source": {
+        "x": 1298,
+        "y": 1287,
+        "width": 111,
+        "height": 156
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 28,
+      "action": "hit",
+      "direction": "north",
+      "frame": 0,
+      "source": {
+        "x": 1666,
+        "y": 1284,
+        "width": 121,
+        "height": 158
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 29,
+      "action": "hit",
+      "direction": "north-west",
+      "frame": 0,
+      "source": {
+        "x": 2043,
+        "y": 1286,
+        "width": 111,
+        "height": 157
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 30,
+      "action": "hit",
+      "direction": "west",
+      "frame": 0,
+      "source": {
+        "x": 2436,
+        "y": 1282,
+        "width": 113,
+        "height": 165
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 31,
+      "action": "hit",
+      "direction": "south-west",
+      "frame": 0,
+      "source": {
+        "x": 2828,
+        "y": 1280,
+        "width": 114,
+        "height": 167
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 32,
+      "action": "death",
+      "direction": "south",
+      "frame": 0,
+      "source": {
+        "x": 129,
+        "y": 1722,
+        "width": 144,
+        "height": 107
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 33,
+      "action": "death",
+      "direction": "south-east",
+      "frame": 0,
+      "source": {
+        "x": 501,
+        "y": 1729,
+        "width": 162,
+        "height": 98
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 34,
+      "action": "death",
+      "direction": "east",
+      "frame": 0,
+      "source": {
+        "x": 890,
+        "y": 1736,
+        "width": 164,
+        "height": 92
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 35,
+      "action": "death",
+      "direction": "north-east",
+      "frame": 0,
+      "source": {
+        "x": 1272,
+        "y": 1732,
+        "width": 158,
+        "height": 97
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 36,
+      "action": "death",
+      "direction": "north",
+      "frame": 0,
+      "source": {
+        "x": 1644,
+        "y": 1731,
+        "width": 162,
+        "height": 93
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 37,
+      "action": "death",
+      "direction": "north-west",
+      "frame": 0,
+      "source": {
+        "x": 2019,
+        "y": 1737,
+        "width": 163,
+        "height": 91
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 38,
+      "action": "death",
+      "direction": "west",
+      "frame": 0,
+      "source": {
+        "x": 2410,
+        "y": 1728,
+        "width": 162,
+        "height": 99
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    },
+    {
+      "index": 39,
+      "action": "death",
+      "direction": "south-west",
+      "frame": 0,
+      "source": {
+        "x": 2799,
+        "y": 1727,
+        "width": 150,
+        "height": 102
+      },
+      "frameCanvas": {
+        "width": 384,
+        "height": 384
+      },
+      "anchor": {
+        "x": 192,
+        "y": 288
+      }
+    }
+  ],
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "sourceFrames": [
+    {
+      "x": 137,
+      "y": 127,
+      "width": 108,
+      "height": 164,
+      "offsetX": 137,
+      "offsetY": 127
+    },
+    {
+      "x": 530,
+      "y": 128,
+      "width": 108,
+      "height": 164,
+      "offsetX": 146,
+      "offsetY": 128
+    },
+    {
+      "x": 915,
+      "y": 132,
+      "width": 108,
+      "height": 160,
+      "offsetX": 147,
+      "offsetY": 132
+    },
+    {
+      "x": 1299,
+      "y": 132,
+      "width": 111,
+      "height": 160,
+      "offsetX": 147,
+      "offsetY": 132
+    },
+    {
+      "x": 1670,
+      "y": 126,
+      "width": 108,
+      "height": 163,
+      "offsetX": 134,
+      "offsetY": 126
+    },
+    {
+      "x": 2051,
+      "y": 132,
+      "width": 107,
+      "height": 160,
+      "offsetX": 131,
+      "offsetY": 132
+    },
+    {
+      "x": 2431,
+      "y": 130,
+      "width": 110,
+      "height": 162,
+      "offsetX": 127,
+      "offsetY": 130
+    },
+    {
+      "x": 2828,
+      "y": 129,
+      "width": 106,
+      "height": 164,
+      "offsetX": 140,
+      "offsetY": 129
+    },
+    {
+      "x": 133,
+      "y": 508,
+      "width": 110,
+      "height": 168,
+      "offsetX": 133,
+      "offsetY": 124
+    },
+    {
+      "x": 524,
+      "y": 512,
+      "width": 117,
+      "height": 164,
+      "offsetX": 140,
+      "offsetY": 128
+    },
+    {
+      "x": 905,
+      "y": 509,
+      "width": 119,
+      "height": 165,
+      "offsetX": 137,
+      "offsetY": 125
+    },
+    {
+      "x": 1292,
+      "y": 512,
+      "width": 115,
+      "height": 163,
+      "offsetX": 140,
+      "offsetY": 128
+    },
+    {
+      "x": 1666,
+      "y": 507,
+      "width": 121,
+      "height": 167,
+      "offsetX": 130,
+      "offsetY": 123
+    },
+    {
+      "x": 2047,
+      "y": 511,
+      "width": 119,
+      "height": 164,
+      "offsetX": 127,
+      "offsetY": 127
+    },
+    {
+      "x": 2432,
+      "y": 511,
+      "width": 116,
+      "height": 165,
+      "offsetX": 128,
+      "offsetY": 127
+    },
+    {
+      "x": 2831,
+      "y": 506,
+      "width": 106,
+      "height": 170,
+      "offsetX": 143,
+      "offsetY": 122
+    },
+    {
+      "x": 129,
+      "y": 900,
+      "width": 151,
+      "height": 157,
+      "offsetX": 129,
+      "offsetY": 132
+    },
+    {
+      "x": 516,
+      "y": 902,
+      "width": 147,
+      "height": 156,
+      "offsetX": 132,
+      "offsetY": 134
+    },
+    {
+      "x": 909,
+      "y": 902,
+      "width": 132,
+      "height": 161,
+      "offsetX": 141,
+      "offsetY": 134
+    },
+    {
+      "x": 1283,
+      "y": 902,
+      "width": 149,
+      "height": 159,
+      "offsetX": 131,
+      "offsetY": 134
+    },
+    {
+      "x": 1666,
+      "y": 892,
+      "width": 119,
+      "height": 170,
+      "offsetX": 130,
+      "offsetY": 124
+    },
+    {
+      "x": 2032,
+      "y": 902,
+      "width": 132,
+      "height": 161,
+      "offsetX": 112,
+      "offsetY": 134
+    },
+    {
+      "x": 2411,
+      "y": 902,
+      "width": 145,
+      "height": 157,
+      "offsetX": 107,
+      "offsetY": 134
+    },
+    {
+      "x": 2796,
+      "y": 900,
+      "width": 142,
+      "height": 157,
+      "offsetX": 108,
+      "offsetY": 132
+    },
+    {
+      "x": 130,
+      "y": 1277,
+      "width": 112,
+      "height": 168,
+      "offsetX": 130,
+      "offsetY": 125
+    },
+    {
+      "x": 530,
+      "y": 1282,
+      "width": 106,
+      "height": 165,
+      "offsetX": 146,
+      "offsetY": 130
+    },
+    {
+      "x": 915,
+      "y": 1288,
+      "width": 116,
+      "height": 155,
+      "offsetX": 147,
+      "offsetY": 136
+    },
+    {
+      "x": 1298,
+      "y": 1287,
+      "width": 111,
+      "height": 156,
+      "offsetX": 146,
+      "offsetY": 135
+    },
+    {
+      "x": 1666,
+      "y": 1284,
+      "width": 121,
+      "height": 158,
+      "offsetX": 130,
+      "offsetY": 132
+    },
+    {
+      "x": 2043,
+      "y": 1286,
+      "width": 111,
+      "height": 157,
+      "offsetX": 123,
+      "offsetY": 134
+    },
+    {
+      "x": 2436,
+      "y": 1282,
+      "width": 113,
+      "height": 165,
+      "offsetX": 132,
+      "offsetY": 130
+    },
+    {
+      "x": 2828,
+      "y": 1280,
+      "width": 114,
+      "height": 167,
+      "offsetX": 140,
+      "offsetY": 128
+    },
+    {
+      "x": 129,
+      "y": 1722,
+      "width": 144,
+      "height": 107,
+      "offsetX": 129,
+      "offsetY": 186
+    },
+    {
+      "x": 501,
+      "y": 1729,
+      "width": 162,
+      "height": 98,
+      "offsetX": 117,
+      "offsetY": 193
+    },
+    {
+      "x": 890,
+      "y": 1736,
+      "width": 164,
+      "height": 92,
+      "offsetX": 122,
+      "offsetY": 200
+    },
+    {
+      "x": 1272,
+      "y": 1732,
+      "width": 158,
+      "height": 97,
+      "offsetX": 120,
+      "offsetY": 196
+    },
+    {
+      "x": 1644,
+      "y": 1731,
+      "width": 162,
+      "height": 93,
+      "offsetX": 108,
+      "offsetY": 195
+    },
+    {
+      "x": 2019,
+      "y": 1737,
+      "width": 163,
+      "height": 91,
+      "offsetX": 99,
+      "offsetY": 201
+    },
+    {
+      "x": 2410,
+      "y": 1728,
+      "width": 162,
+      "height": 99,
+      "offsetX": 106,
+      "offsetY": 192
+    },
+    {
+      "x": 2799,
+      "y": 1727,
+      "width": 150,
+      "height": 102,
+      "offsetX": 111,
+      "offsetY": 191
+    }
+  ],
+  "normalization": {
+    "method": "raw-connected-pose-repack-384-v1",
+    "sourceCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "sourceImageSha256": "25c64126ec9372072aa1643b39305019b56fdb2f0e9d5d622a87a769f104fec8",
+    "sourceAlphaThreshold": 128,
+    "edgeAlphaRecoveryRadius": 3,
+    "minimumCellPadding": 24,
+    "primaryPoses": 40,
+    "sourceComponents": 40,
+    "rowMedianBottoms": [
+      195,
+      398,
+      597,
+      795,
+      949
+    ],
+    "uniformScale": 1.0
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+    ]
+  },
+  "generation": {
+    "sourceOutputs": [
+      "exec-7cd7020e-cda3-4e65-87e4-6042c7caaa30.png"
+    ]
+  }
+}

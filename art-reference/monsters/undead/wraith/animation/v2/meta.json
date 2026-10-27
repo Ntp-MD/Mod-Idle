@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-review",
+  "speciesId": "wraith",
+  "generator": "OpenAI built-in image_gen",
+  "file": "atlas/animation-draft.png",
+  "sourceCanvas": {
+    "width": 1584,
+    "height": 993
+  },
+  "requestedCanvas": {
+    "width": 1585,
+    "height": 992
+  },
+  "imageMode": "RGBA",
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "frameCount": 40,
+    "cellOrder": "row-major"
+  },
+  "rowOrder": [
+    "idle S SE E NE N NW W SW",
+    "east walk 4, west walk 4",
+    "east far attack aim/release/follow-through/recovery 4, west far attack 4",
+    "east hit flinch/recoil/recover/ready 4, west hit 4",
+    "east death fall/collapse/ground/settle 4, west death 4"
+  ],
+  "attackKind": "far",
+  "identityReference": "../atlas/animation.png",
+  "playerPoseReferences": [
+    "art-reference/players/one-handed-sword/poses/idle/south-east.png",
+    "art-reference/players/one-handed-sword/poses/attack/east/01-contact.png"
+  ],
+  "qa": {
+    "visualApproved": false,
+    "alphaBinary": "unverified",
+    "cellBounds": "unverified",
+    "frameBounds": "unmeasured",
+    "groundAnchor": "unmeasured",
+    "releaseSocket": "unmeasured",
+    "poseDistinctness": "unverified",
+    "runtimeReady": false
+  },
+  "note": "One-image visual draft for review. Actual source canvas differs from requested canvas by one pixel in each axis. Geometry and release socket are unmeasured; generate single poses and compose/QA before runtime promotion."
+}

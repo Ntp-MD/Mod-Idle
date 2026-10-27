@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "assetType": "clean-body-idle",
+  "facing": "north-west",
+  "source": "north-west.png",
+  "sourceDimensions": {
+    "width": 1254,
+    "height": 1254
+  },
+  "alphaBoundsExclusive": [
+    0,
+    53,
+    1226,
+    1133
+  ],
+  "visibleBoundsAlphaAbove8Exclusive": [
+    457,
+    418,
+    888,
+    960
+  ],
+  "alphaBoundsProvenance": "Pillow read-only alpha measurement",
+  "footAnchor": {
+    "x": 631,
+    "y": 951
+  },
+  "mainHandCenter": {
+    "x": 655,
+    "y": 749
+  },
+  "offhandCenter": {
+    "x": 499,
+    "y": 783
+  },
+  "mainHandVisibility": "occluded",
+  "offhandVisibility": "visible",
+  "gripProvenance": "manual-visual estimate in source pixels; main=anatomical right, offhand=anatomical left; hidden hand positions inferred from shoulder/arm pose",
+  "estimateTolerancePx": 20,
+  "qa": {
+    "visuallyInspected": true,
+    "emptyHands": true,
+    "wholeBodyVisible": true,
+    "canvasPerimeterAlphaMaximum": 1,
+    "sourcePixelsModified": false
+  }
+}

@@ -60,7 +60,6 @@ describe('safe town', () => {
       blocksTotal: 1, blocksLeft: 0, secLeft: 0, blocksWalked: 1,
     } as any);
     expect(s.hunting).toBe(true);
-    expect(s.spawnIn).toBe(0);
     // the arrival tick is the tick the spawn gate reads, so the group is up before the walk's fx even settles
     tick(s, {});
     expect(s.group.length).toBeGreaterThan(0);

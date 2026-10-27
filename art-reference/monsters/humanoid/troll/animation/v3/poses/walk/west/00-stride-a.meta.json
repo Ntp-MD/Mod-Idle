@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "action": "walk",
+  "direction": "west",
+  "pose": "00-stride-a",
+  "generator": "OpenAI built-in image_gen",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "rawAlphaBoundsExclusive": [
+    33,
+    32,
+    1190,
+    1142
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    283,
+    389,
+    882,
+    1003
+  ],
+  "boundsProvenance": "measured from the unmodified PNG alpha channel",
+  "footAnchor": {
+    "x": 582,
+    "y": 1003,
+    "provenance": "bounds-derived candidate; physical sole not separately verified"
+  },
+  "anchorProvenance": "candidate from visible alpha bounds; inspect foot contact",
+  "sourcePixelsModified": false,
+  "styleReference": [
+    "art-reference/players/one-handed-sword/reference.png",
+    "art-reference/players/one-handed-sword/poses/"
+  ],
+  "bakedWeapon": "stone-club",
+  "alphaDistinctValues": 256,
+  "note": "Raw image retained without pixel edits. Semi-transparent alpha may fail the composer hard-alpha check; foot anchor needs visual confirmation."
+}

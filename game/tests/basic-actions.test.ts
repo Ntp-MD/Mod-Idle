@@ -15,7 +15,6 @@ function fight(distance = 0.65, over: Record<string, unknown> = {}) {
   const state = newGame(73);
   setLevel(state, 30);
   state.hunting = true;
-  state.spawnIn = 999;
   const mob = mobFixture({
     id: 'basic-target', hp: 1e9, hpMax: 1e9, ps: 1, acc: 1e9, evasion: 0, dodgeRate: 0,
     armour: 0, line: 'front', damage: 'physical', innate: [], skillIds: [], hitsPerSec: 1,

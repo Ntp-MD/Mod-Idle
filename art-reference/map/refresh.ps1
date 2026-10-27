@@ -70,7 +70,7 @@ $guide = '<svg xmlns="http://www.w3.org/2000/svg" width="' + $guideWidth + '" he
 $references = @(
     @{ source = 'game/public/map/terrain/forest-relief.png'; file = 'forest-original-style.png'; role = 'Painterly style and palette ONLY. Freeform tall scenery; unsuitable as a full-hex shape reference.' },
     @{ source = 'game/public/map/terrain/forest-relief-1.png'; file = 'forest-relief-1.png'; role = 'Composition and style example. Raw generated footprint is approximate; renderer registration is required. Not a certified camera reference.' },
-    @{ source = 'game/public/map/terrain/mountain-relief-1.png'; file = 'mountain-relief-1.png'; role = 'User-approved mountain composition and scale in the actual map. Raw footprint requires registration. Not a certified 3D camera reference.' }
+    @{ source = 'game/public/map/terrain/mountain-relief-1.png'; file = 'mountain-relief-1.png'; role = 'User-approved mountain composition and scale in the actual map. Raw footprint requires registration. Not a certified camera reference.' }
 )
 $sourcePaths = @('game/src/ui/map/map-projection.ts', 'art-reference/map/geometry/terrain-hex.json', 'tools/map.ts', 'game/src/ui/map/map-terrain.ts', 'game/src/ui/map/data/map-terrain-footprints.json', 'art-reference/map/source-assets.json', 'docs/map-art.md')
 foreach ($reference in $references) {

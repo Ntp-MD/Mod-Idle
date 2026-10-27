@@ -1,0 +1,6 @@
+Species id: orc (Orc) — broad upright green humanoid with pointed ears, heavy brow and small tusks; compact chibi proportions.
+WEAPON (baked, fixed): axe — one-handed iron axe held in the right hand in every pose; no shield or alternate weapon.
+POSE: full-body idle facing south-east, neutral ready stance, feet planted.
+CAMERA: fixed elevated three-quarter game camera, upper-left light.
+RENDER: match the approved Orc base and player animation scale; crisp pixel-art clusters and hard alpha. No shadows, scenery, text, effects, or extra equipment.
+SOURCE: copied unchanged from the approved animation/source/base.png.

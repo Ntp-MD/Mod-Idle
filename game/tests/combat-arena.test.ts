@@ -16,7 +16,6 @@ function fight(distance = 15) {
   const state = newGame(17);
   setLevel(state, 30);
   state.hunting = true;
-  state.spawnIn = 999;
   const mob = spawnMob(mulberry32(23), 1, 'normal');
   Object.assign(mob, {
     id: 'arena-target', hp: 1e8, hpMax: 1e8, ps: 1, evasion: 0, dodgeRate: 0,
@@ -28,7 +27,7 @@ function fight(distance = 15) {
   Object.assign(arena.player, { x: 1, y: 6 });
   Object.assign(arena.mobs[mob.id], { x: 1 + distance, y: 6 });
   captureCombatArena(arena, state, 0);
-  pinFieldPopulation(state);
+  pinFieldPopulation(state, state.group.length, new Map(state.group.map((entry) => [entry.id, arena.mobs[entry.id]])));
   return { state, mob, arena };
 }
 
@@ -91,8 +90,7 @@ describe('opt-in spatial combat', () => {
     const state = newGame(17);
     setLevel(state, 30);
     state.hunting = true;
-    state.spawnIn = 999;
-    const mk = (id: string) => {
+      const mk = (id: string) => {
       const mob = spawnMob(mulberry32(23), 1, 'normal');
       Object.assign(mob, {
         id, hp: 1e8, hpMax: 1e8, ps: 1, evasion: 0, dodgeRate: 0,
@@ -139,7 +137,9 @@ describe('opt-in spatial combat', () => {
     state.group = [0, 1, 2].map((index) => ({ ...structuredClone(mob), id: `contact-${index}` }));
     const arena = createCombatArena();
     syncCombatArena(arena, state, 0, 1_000_000, characterSheet(state).maxHp);
-    pinFieldPopulation(state);
+    Object.assign(arena.player, { x: 1, y: 6 });
+    state.group.forEach((entry, index) => Object.assign(arena.mobs[entry.id], { x: 3 + index, y: 6 }));
+    pinFieldPopulation(state, state.group.length, new Map(state.group.map((entry) => [entry.id, arena.mobs[entry.id]])));
     const twinState = structuredClone(state);
     const twinArena = structuredClone(arena);
     for (let i = 0; i < 20; i++) {

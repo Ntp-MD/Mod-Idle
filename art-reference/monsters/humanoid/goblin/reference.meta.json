@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "assetType": "mob-identity-reference",
+  "source": "reference.png",
+  "sourceDimensions": {
+    "width": 1254,
+    "height": 1254
+  },
+  "alphaBoundsExclusive": [
+    0,
+    19,
+    1232,
+    1230
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    405,
+    417,
+    1020,
+    958
+  ],
+  "boundsProvenance": "Pillow direct alpha measurement",
+  "facing": "south-east",
+  "bakedWeaponId": "spear",
+  "footAnchor": {
+    "x": 613,
+    "y": 957
+  },
+  "anchorProvenance": "Pillow measured visible footprint in lowest 18 source rows; midpoint between left and right foot extents",
+  "qa": {
+    "visuallyInspected": true,
+    "wholeBodyVisible": true,
+    "sourcePixelsModified": false,
+    "hardAlpha": false,
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "alphaLevels": 256,
+    "note": "Generated source retained unchanged; built-in image_gen output contains alpha levels that require review."
+  }
+}

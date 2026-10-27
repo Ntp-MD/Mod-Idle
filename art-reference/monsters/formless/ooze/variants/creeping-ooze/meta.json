@@ -1,0 +1,503 @@
+{
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "ooze",
+  "variantId": "creeping-ooze",
+  "name": "Creeping Ooze",
+  "levels": [
+    41,
+    60
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-anchor-at-224",
+  "grid": {
+    "columns": 8,
+    "rows": 5,
+    "totalFrames": 40
+  },
+  "states": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    {
+      "state": "idle",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "walk",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "attack",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "hit",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "death",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    }
+  ],
+  "sourceFrames": [
+    {
+      "x": 121,
+      "y": 145,
+      "width": 152,
+      "height": 147,
+      "offsetX": 121,
+      "offsetY": 145
+    },
+    {
+      "x": 500,
+      "y": 145,
+      "width": 162,
+      "height": 147,
+      "offsetX": 116,
+      "offsetY": 145
+    },
+    {
+      "x": 882,
+      "y": 142,
+      "width": 135,
+      "height": 150,
+      "offsetX": 114,
+      "offsetY": 142
+    },
+    {
+      "x": 1264,
+      "y": 142,
+      "width": 141,
+      "height": 150,
+      "offsetX": 112,
+      "offsetY": 142
+    },
+    {
+      "x": 1655,
+      "y": 142,
+      "width": 146,
+      "height": 151,
+      "offsetX": 119,
+      "offsetY": 142
+    },
+    {
+      "x": 2052,
+      "y": 142,
+      "width": 143,
+      "height": 150,
+      "offsetX": 132,
+      "offsetY": 142
+    },
+    {
+      "x": 2437,
+      "y": 142,
+      "width": 132,
+      "height": 150,
+      "offsetX": 133,
+      "offsetY": 142
+    },
+    {
+      "x": 2800,
+      "y": 145,
+      "width": 163,
+      "height": 147,
+      "offsetX": 112,
+      "offsetY": 145
+    },
+    {
+      "x": 105,
+      "y": 526,
+      "width": 168,
+      "height": 149,
+      "offsetX": 105,
+      "offsetY": 142
+    },
+    {
+      "x": 489,
+      "y": 524,
+      "width": 162,
+      "height": 152,
+      "offsetX": 105,
+      "offsetY": 140
+    },
+    {
+      "x": 867,
+      "y": 524,
+      "width": 159,
+      "height": 150,
+      "offsetX": 99,
+      "offsetY": 140
+    },
+    {
+      "x": 1247,
+      "y": 521,
+      "width": 161,
+      "height": 154,
+      "offsetX": 95,
+      "offsetY": 137
+    },
+    {
+      "x": 1654,
+      "y": 523,
+      "width": 156,
+      "height": 153,
+      "offsetX": 118,
+      "offsetY": 139
+    },
+    {
+      "x": 2050,
+      "y": 523,
+      "width": 152,
+      "height": 153,
+      "offsetX": 130,
+      "offsetY": 139
+    },
+    {
+      "x": 2427,
+      "y": 524,
+      "width": 161,
+      "height": 152,
+      "offsetX": 123,
+      "offsetY": 140
+    },
+    {
+      "x": 2802,
+      "y": 526,
+      "width": 163,
+      "height": 150,
+      "offsetX": 114,
+      "offsetY": 142
+    },
+    {
+      "x": 113,
+      "y": 914,
+      "width": 178,
+      "height": 145,
+      "offsetX": 113,
+      "offsetY": 146
+    },
+    {
+      "x": 484,
+      "y": 920,
+      "width": 197,
+      "height": 140,
+      "offsetX": 100,
+      "offsetY": 152
+    },
+    {
+      "x": 870,
+      "y": 912,
+      "width": 203,
+      "height": 148,
+      "offsetX": 102,
+      "offsetY": 144
+    },
+    {
+      "x": 1263,
+      "y": 923,
+      "width": 179,
+      "height": 137,
+      "offsetX": 111,
+      "offsetY": 155
+    },
+    {
+      "x": 1636,
+      "y": 917,
+      "width": 182,
+      "height": 144,
+      "offsetX": 100,
+      "offsetY": 149
+    },
+    {
+      "x": 1998,
+      "y": 914,
+      "width": 203,
+      "height": 146,
+      "offsetX": 78,
+      "offsetY": 146
+    },
+    {
+      "x": 2390,
+      "y": 921,
+      "width": 198,
+      "height": 139,
+      "offsetX": 86,
+      "offsetY": 153
+    },
+    {
+      "x": 2780,
+      "y": 916,
+      "width": 190,
+      "height": 144,
+      "offsetX": 92,
+      "offsetY": 148
+    },
+    {
+      "x": 111,
+      "y": 1307,
+      "width": 174,
+      "height": 136,
+      "offsetX": 111,
+      "offsetY": 155
+    },
+    {
+      "x": 495,
+      "y": 1300,
+      "width": 158,
+      "height": 144,
+      "offsetX": 111,
+      "offsetY": 148
+    },
+    {
+      "x": 881,
+      "y": 1291,
+      "width": 166,
+      "height": 153,
+      "offsetX": 113,
+      "offsetY": 139
+    },
+    {
+      "x": 1265,
+      "y": 1309,
+      "width": 152,
+      "height": 134,
+      "offsetX": 113,
+      "offsetY": 157
+    },
+    {
+      "x": 1655,
+      "y": 1305,
+      "width": 150,
+      "height": 139,
+      "offsetX": 119,
+      "offsetY": 153
+    },
+    {
+      "x": 2036,
+      "y": 1300,
+      "width": 153,
+      "height": 144,
+      "offsetX": 116,
+      "offsetY": 148
+    },
+    {
+      "x": 2407,
+      "y": 1299,
+      "width": 179,
+      "height": 145,
+      "offsetX": 103,
+      "offsetY": 147
+    },
+    {
+      "x": 2790,
+      "y": 1290,
+      "width": 175,
+      "height": 153,
+      "offsetX": 102,
+      "offsetY": 138
+    },
+    {
+      "x": 111,
+      "y": 1729,
+      "width": 169,
+      "height": 98,
+      "offsetX": 111,
+      "offsetY": 193
+    },
+    {
+      "x": 493,
+      "y": 1744,
+      "width": 169,
+      "height": 85,
+      "offsetX": 109,
+      "offsetY": 208
+    },
+    {
+      "x": 876,
+      "y": 1753,
+      "width": 171,
+      "height": 75,
+      "offsetX": 108,
+      "offsetY": 217
+    },
+    {
+      "x": 1261,
+      "y": 1752,
+      "width": 167,
+      "height": 75,
+      "offsetX": 109,
+      "offsetY": 216
+    },
+    {
+      "x": 1645,
+      "y": 1753,
+      "width": 164,
+      "height": 74,
+      "offsetX": 109,
+      "offsetY": 217
+    },
+    {
+      "x": 2026,
+      "y": 1747,
+      "width": 170,
+      "height": 81,
+      "offsetX": 106,
+      "offsetY": 211
+    },
+    {
+      "x": 2408,
+      "y": 1745,
+      "width": 171,
+      "height": 83,
+      "offsetX": 104,
+      "offsetY": 209
+    },
+    {
+      "x": 2793,
+      "y": 1753,
+      "width": 172,
+      "height": 75,
+      "offsetX": 105,
+      "offsetY": 217
+    }
+  ],
+  "identityReference": "art-reference/monsters/formless/ooze/animation/source/base.png",
+  "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+  "generation": {
+    "sourceOutputs": [
+      "exec-f1dd1bf2-934e-4918-a74d-7b0b0c19ac0c.png"
+    ],
+    "identityReference": "art-reference/monsters/formless/ooze/animation/source/base.png",
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "variantCue": "a muted swamp-olive body tint and a few small trailing gel lobes while remaining one cohesive slime",
+    "initialPrompt": "Creeping Ooze; 8 directions for idle, walk, attack, hit, death."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "raw-connected-pose-repack-384-v1",
+    "sourceCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "sourceImageSha256": "3f309b30ebdeb1e02563189a78fcf59bee72561cce6475d951e1b3bbe5873eeb",
+    "sourceAlphaThreshold": 128,
+    "edgeAlphaRecoveryRadius": 3,
+    "minimumCellPadding": 24,
+    "primaryPoses": 40,
+    "sourceComponents": 136,
+    "rowMedianBottoms": [
+      195,
+      395,
+      590,
+      799,
+      969
+    ],
+    "uniformScale": 1.0
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+    ]
+  }
+}

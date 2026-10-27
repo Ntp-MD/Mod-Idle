@@ -13,7 +13,7 @@
     },
     {
         "sha256":  "beacde9269e7a7c6a4f2699afc40be0cd89b1d7671837e7decc02090fd77350d",
-        "role":  "User-approved mountain composition and scale in the actual map. Raw footprint requires registration. Not a certified 3D camera reference.",
+        "role":  "User-approved mountain composition and scale in the actual map. Raw footprint requires registration. Not a certified camera reference.",
         "source":  "game/public/map/terrain/mountain-relief-1.png",
         "file":  "mountain-relief-1.png"
     }

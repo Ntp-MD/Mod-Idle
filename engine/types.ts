@@ -553,6 +553,8 @@ export interface MobSkillRow {
   cd?: number;
   /** Legacy full windup; kept equal to cast.windup_sec so an older reader cannot shorten it. */
   cast_sec?: number;
+  /** A committed heavy ground threat: bounded auto-avoid may leave its landing circle. */
+  heavy?: boolean;
   /** Position, delivery and timing. Every strike row must author one. */
   cast?: MobCastProfile;
   /** Ground impact footprint; absent for single-target melee/projectile casts. */

@@ -156,7 +156,7 @@ describe('radius casts in the live simulation', () => {
 
   it('approaches a ready caster-centered skill even while holding a longer-range weapon', () => {
     const { state, arena } = encounter();
-    state.hunting = true; state.spawnIn = 999;
+    state.hunting = true;
     state.group = [state.group[0]];
     state.group[0].line = 'stand-off';
     const id = 'attack.venom_spray';
@@ -172,7 +172,7 @@ describe('radius casts in the live simulation', () => {
 
   it('publishes the release-aimed cast footprint to the event and action without recomputing it after a kill', () => {
     const { state, arena } = encounter();
-    state.hunting = true; state.spawnIn = 999;
+    state.hunting = true;
     const primaryId = state.group[0].id;
     state.group[0].hp = 1;
     state.skills.owned['attack.firestorm'] = 0;

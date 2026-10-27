@@ -68,7 +68,6 @@ describe('mob skill kits', () => {
     const s = newGame(7);
     setLevel(s, 50);
     s.hunting = true;
-    s.spawnIn = 999;
     const boss = spawnMob(mulberry32(11), 1, 'boss');
     boss.hp = boss.hpMax = 1e12;
     s.group = [boss];

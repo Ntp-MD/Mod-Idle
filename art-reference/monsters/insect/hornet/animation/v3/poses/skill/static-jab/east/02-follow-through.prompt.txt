@@ -1,0 +1,5 @@
+SPECIES: hornet (Hornet) — match the approved Hornet reference silhouette exactly; preserve its body plan, proportions, palette, and fixed natural anatomy; add no unreferenced equipment
+WEAPON (baked, fixed): TODO: identify the signature natural weapon/anatomy from the approved reference before generation — in hand every frame; no equip switch
+SLOT: skill/static-jab/east/02-follow-through — example melee kit-action east: follow-through past the contact point; copy per kit entry with a cast block
+CAMERA: fixed elevated three-quarter, upper-left light; whole sprite including feet inside the frame
+RENDER: chibi pixel-art clusters, hard opaque edges only, transparent background; no shadow, scenery, text, effects, grid

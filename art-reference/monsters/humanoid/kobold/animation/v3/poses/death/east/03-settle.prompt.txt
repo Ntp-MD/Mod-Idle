@@ -1,0 +1,10 @@
+SPECIES: kobold (Kobold) — Compact blue-scaled bipedal reptilian Kobold with an oversized chibi head, angular snout, pointed ears, glowing yellow eyes, cream chest and belly, long curled tail, short sturdy limbs, a ragged brown loincloth, and one fixed wooden spear with a pale pointed head.
+WEAPON (baked, fixed): spear — keep the same wooden shaft and pale pointed head grasped in the same hand every frame; no equipment switch, no dropped or separate weapon
+SLOT: death/east/03-settle — death east: final settled pose
+CAMERA: fixed elevated three-quarter, upper-left light; whole sprite including feet inside the frame
+RENDER: chibi pixel-art clusters, hard opaque edges only, transparent background; no shadow, scenery, text, effects, grid
+
+OUTPUT: one transparent RGBA PNG, one complete sprite only, square canvas, hard alpha edges (alpha only 0 or 255), crisp native pixel-art clusters; no extra frames, text, grid, border, scenery, floor, shadow, VFX, or background.
+REFERENCE: Image 1 is the approved Kobold identity and fixed spear; preserve the blue scales, yellow eyes, cream chest, brown loincloth, tail and spear exactly. Image 2 is a Player pose from art-reference/players/one-handed-sword/poses used only for camera/body-angle. Do not copy its human identity or sword.
+CAMERA: fixed elevated three-quarter game camera, upper-left light; turn the whole body to the requested direction; keep scale and foot anchor consistent.
+

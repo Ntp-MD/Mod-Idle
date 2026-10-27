@@ -112,7 +112,6 @@ export function startPatrol(state: GameState): { ok: boolean; why?: string } {
   state.patrol.index = 0;
   state.patrol.groupsCleared = 0;
   state.hunting = true;
-  state.spawnIn = 0;
   drivePatrol(state, true);
   return { ok: true };
 }
@@ -140,7 +139,6 @@ export function drivePatrol(state: GameState, online: boolean): string | null {
   const target = stopCell(stop);
   if (state.zone === stop.zone && state.cell?.sub === stop.subzone && at(currentCell(state), target)) {
     state.hunting = true;
-    if (state.spawnIn > 0) state.spawnIn = 0;
     return null;
   }
   const result = startWalk(state, target);
@@ -249,8 +247,7 @@ export function driveAutoReturn(state: GameState, online: boolean): { message: s
     state.autoReturn.phase = 'idle';
     state.autoReturn.resumeCell = null;
     state.hunting = true;
-    state.spawnIn = 0;
-    return { message: 'Patrol resumed', deposit: false };
+      return { message: 'Patrol resumed', deposit: false };
   }
   const result = startWalk(state, resume);
   if (!result.ok) {

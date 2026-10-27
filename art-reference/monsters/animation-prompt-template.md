@@ -39,7 +39,7 @@ For named variant atlases, keep at least 24 transparent pixels between visible a
 
 - **Image 1 — style and animation standard:** `game/public/combat/arpg/pixel-v2/player-animation-v2.png`; match its camera, sprite scale, atlas arrangement and frame canvas. Do not copy the Player's identity or equipment.
 - **Body-angle reference:** the approved bases (`ogre/animation/source/base-v2.png`, `troll/animation/source/base-v3.png`) show the required whole-body rotation; match their torso/hip/leg orientation, not just the head.
-- **Image 2 — approved base (optional):** `art-reference/monsters/<species>/animation/source/base.png`; use only after the base is approved. Never use `game/src/icon/mob` painted icons.
+- **Image 2 — approved base (optional):** `art-reference/monsters/<race>/<species>/animation/source/base.png`; use only after the base is approved. Never use `game/src/icon/mob` painted icons.
 - **Optional source:** `<path to an approved concept or previous variant>`
 - **First pass:** when no approved base exists, generate from the written species block only; do not attach the mob icon shelf.
 
@@ -51,9 +51,9 @@ Species name: <name>
 Silhouette: <body plan, limb count, tail/wings/horns, posture>
 Head ratio: <head height as a fraction of visible body height>
 Face: <species-specific deviations from the shared Face language below — ear shape, snout/beak, mouth/tusks; keep the glowing eyes, low detail and upper-left lighting. Tusks are optional per species>
-Equipment: <weapon, shield, armour, clothing; write "none" if none>
+Equipment: <weapon, shield, armour, clothing baked into every frame; write "none" if none. Mobs have no equip switch — one fixed baked set per species/variant>
 Locomotion: <walk gait for a four-legged / biped / hover body>
-Attack: <one readable attack; state windup and contact>
+Attack: <one readable attack; state windup and contact, and whether it is close (melee, body-edge) or far (projectile, center)>
 Hit reaction: <how the body recoils without moving its feet>
 Death: <how the body falls and settles>
 Forbidden extras: <anything this species must never carry>
@@ -70,7 +70,7 @@ Every species uses the same chibi goblin face language, adapted to its anatomy:
 - **Expression:** fierce and ugly, never cute or soft.
 - **Species exception — Slime:** use a round, friendly blue slime face with large dark eyes and a small mouth (Rimuru-inspired), not the fierce goblin face. Keep every other shared face rule.
 
-The approved reference is `art-reference/monsters/ogre/animation/source/base-v2.png`.
+The approved reference is `art-reference/monsters/humanoid/ogre/animation/source/base-v2.png`.
 
 ## Step 1 — static base pose (generate first)
 
@@ -146,7 +146,7 @@ Request 40 files named `000.png` … `039.png` in row-major order: idle, walk, a
 ### Intake command
 
 ```powershell
-python -B tools/monster-animation-compose.py --frames-dir <frames> --meta-base <base-meta.json> --out-dir art-reference/monsters/<species>/[<variant-id>/]
+python -B tools/monster-animation-compose.py --frames-dir <frames> --meta-base <base-meta.json> --out-dir art-reference/monsters/<race>/<species>/[<variant-id>/]
 ```
 
 The tool fails closed (writes nothing) on any violation, writes `meta.json` + `atlas/animation-draft.png` as `draft-review`, then runs `monster-animation-qa.py` over the composed atlas. Promotion to `atlas/animation.png` and the game registry stays a human approval plus the existing runtime-repack path.
@@ -191,7 +191,7 @@ Edit Image 1. Preserve its exact canvas, all 40 frames, identity, scale, palette
 ## Output placement
 
 ```text
-art-reference/monsters/<species>/animation/
+art-reference/monsters/<race>/<species>/animation/
   source/base.png          approved static base (128×128, feet at y=108)
   source/base-v*.png       optional raw generations
   meta.json
@@ -199,7 +199,7 @@ art-reference/monsters/<species>/animation/
   atlas/animation.png      only after the base and atlas are approved
 ```
 
-Set `meta.json` to the actual dimensions, frame size, anchor and status. Use `base-approved` until the atlas exists. Species-level baselines stay under `<species>/animation/`. Named gameplay variants use `<species>/variants/<variant-id>/meta.json` and `<species>/variants/<variant-id>/atlas/animation-draft.png`. Keep one current set per named variant; do not add version folders.
+Set `meta.json` to the actual dimensions, frame size, anchor and status. Use `base-approved` until the atlas exists. Species-level baselines stay under `<race>/<species>/animation/`. Named gameplay variants use `<race>/<species>/variants/<variant-id>/v<k>/meta.json` and `<race>/<species>/variants/<variant-id>/v<k>/atlas/animation-draft.png`. Each new candidate opens a new `v<k>/` folder; never overwrite a shipped version.
 
 ## Example species lines
 
@@ -210,4 +210,4 @@ These examples are starting points only. Fill a complete, species-specific block
 - **Skeleton with Sword & Shield:** “Thin skeleton; skull about one-quarter to one-third of visible height, with separated ribs and limbs. Keep one sword and one shield distinct. Attack with a short sword slash while the shield guards the body.”
 - **Little Demon:** “Compact demon; head about one-third to two-fifths of visible height. Use small horns and wings to define its silhouette. Attack with a quick claw swipe.”
 
-The ratios refer to visible character height, not the 128-pixel cell. Use the reference for visual language only; do not use the mob icon shelf as a character reference. Apply the shared Face language above; the approved Ogre base (`art-reference/monsters/ogre/animation/source/base-v2.png`) is the facial reference.
+The ratios refer to visible character height, not the 128-pixel cell. Use the reference for visual language only; do not use the mob icon shelf as a character reference. Apply the shared Face language above; the approved Ogre base (`art-reference/monsters/humanoid/ogre/animation/source/base-v2.png`) is the facial reference.

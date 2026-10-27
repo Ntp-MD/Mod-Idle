@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-review",
+  "speciesId": "wisp",
+  "attackKind": "far",
+  "bakedWeaponId": null,
+  "generator": "OpenAI built-in image_gen",
+  "file": "atlas/animation-draft.png",
+  "sourceCanvas": { "width": 1585, "height": 992, "measured": true },
+  "layout": { "columns": 8, "rows": 5, "frameCount": 40 },
+  "intendedRowOrder": ["idle S SE E NE N NW W SW", "east walk 4, west walk 4", "east far attack 4, west far attack 4", "east hit 4, west hit 4", "east death 4, west death 4"],
+  "globalAlphaBoundsExclusive": [23, 19, 1573, 992],
+  "semiTransparentPixelCount": 445381,
+  "sourceFrames": [],
+  "perFrameBounds": "unknown; not measured by monster-animation-compose.py",
+  "releaseSocket": "not measured",
+  "alphaQA": "not passed; soft alpha detected and per-cell gutters not verified",
+  "reviewNote": "Visual-only. Generated rows appear to follow the required east x4 then west x4 action sequence, with the core brightening on release. Layout, frame bounds and releaseSocket are not machine-verified. Do not promote or use at runtime."
+}

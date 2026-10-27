@@ -26,6 +26,9 @@ export interface SpawnProfile {
   cap: number;
   /** Seconds before an emptied slot refills. */
   respawn_sec: number;
+  /** Deterministic window around `respawn_sec`; defaults to the scalar when unauthored. */
+  respawn_min_sec: number;
+  respawn_max_sec: number;
   aggro_m: number;
   assist_m: number;
   leash_m: number;
@@ -46,7 +49,11 @@ export interface SpawnsData {
   layouts: Record<string, SpawnLayout>;
   zones: Record<string, Partial<SpawnProfile>>;
   subzones?: Record<string, Partial<SpawnProfile>>;
+  /** Camp, dungeon and offline paths keep the pre-50 m baseline. */
+  legacy?: { defaults?: Partial<SpawnProfile>; zones?: Record<string, Partial<SpawnProfile>> };
 }
+
+export type SpawnDomain = 'live' | 'legacy';
 
 export interface SpawnContext {
   arena: { width: number; height: number };
@@ -65,7 +72,7 @@ export interface SpawnModel {
   readonly data: SpawnsData;
   readonly coverage: SpawnCoverage;
   layout(id: string): SpawnLayout;
-  profileFor(zoneId: number, subIndex?: number | null): SpawnProfile;
+  profileFor(zoneId: number, subIndex?: number | null, domain?: SpawnDomain): SpawnProfile;
   pointsFor(zoneId: number, subIndex?: number | null): readonly SpawnPoint[];
 }
 
@@ -103,6 +110,9 @@ function profileAt(raw: unknown, path: string): SpawnProfile {
   if (!Number.isInteger(cap) || cap <= 0) refuse(`${path}.cap`, 'must be a positive whole number');
   const respawn = numberAt(raw, 'respawn_sec', path);
   if (!(respawn > 0)) refuse(`${path}.respawn_sec`, 'must be positive');
+  const respawnMin = raw.respawn_min_sec == null ? respawn : numberAt(raw, 'respawn_min_sec', path);
+  const respawnMax = raw.respawn_max_sec == null ? respawn : numberAt(raw, 'respawn_max_sec', path);
+  if (!(respawnMin > 0) || respawnMax < respawnMin) refuse(`${path}.respawn_min_sec`, 'must be positive and no greater than respawn_max_sec');
   const aggro = numberAt(raw, 'aggro_m', path);
   if (!(aggro > 0)) refuse(`${path}.aggro_m`, 'must be positive');
   const assist = numberAt(raw, 'assist_m', path);
@@ -120,7 +130,7 @@ function profileAt(raw: unknown, path: string): SpawnProfile {
   const offlineShare = numberAt(raw, 'offline_share', path);
   if (!(offlineShare >= 0 && offlineShare <= 1)) refuse(`${path}.offline_share`, 'must be within [0, 1]');
   return {
-    layout, cap, respawn_sec: respawn, aggro_m: aggro, assist_m: assist, leash_m: leash,
+    layout, cap, respawn_sec: respawn, respawn_min_sec: respawnMin, respawn_max_sec: respawnMax, aggro_m: aggro, assist_m: assist, leash_m: leash,
     roam_m: roam, home_band_m: homeBand, return_speed_mult: returnSpeed,
     camp_safe_m: campSafe, offline_share: offlineShare,
   };
@@ -160,6 +170,10 @@ export function createSpawns(raw: unknown, context: SpawnContext): SpawnModel {
   if (!Array.isArray(context.zones) || !context.zones.length) refuse('context.zones', 'must be a non-empty roster');
 
   const defaults = profileAt(raw.defaults, 'defaults');
+  const legacyRaw = raw.legacy ?? {};
+  if (!isObject(legacyRaw)) refuse('legacy', 'must be an object');
+  const legacyDefaults = profileAt({ ...defaults, ...(isObject(legacyRaw.defaults) ? legacyRaw.defaults : {}) }, 'legacy.defaults');
+  if (legacyRaw.zones != null && !isObject(legacyRaw.zones)) refuse('legacy.zones', 'must be an object');
   const layouts: Record<string, SpawnLayout> = {};
   for (const [id, value] of Object.entries(raw.layouts)) {
     layouts[id] = layoutAt(value, `layouts.${id}`);
@@ -189,7 +203,10 @@ export function createSpawns(raw: unknown, context: SpawnContext): SpawnModel {
 
   const zoneIds = new Set(context.zones.map((zone) => String(zone.id)));
   for (const id of Object.keys(raw.zones)) if (!zoneIds.has(id)) refuse(`zones.${id}`, 'names no authored zone');
+  for (const id of Object.keys(isObject(legacyRaw.zones) ? legacyRaw.zones : {}))
+    if (!zoneIds.has(id)) refuse(`legacy.zones.${id}`, 'names no authored zone');
   const profiles = new Map<number, SpawnProfile>();
+  const legacyProfiles = new Map<number, SpawnProfile>();
   const zoneSubProfiles = new Map<string, SpawnProfile>();
   let subzoneCount = 0;
   for (const zone of context.zones) {
@@ -202,6 +219,15 @@ export function createSpawns(raw: unknown, context: SpawnContext): SpawnModel {
       refuse(`${path}.cap`, `exceeds the ${layouts[profile.layout].points.length} authored points`);
     }
     profiles.set(zone.id, profile);
+    const legacyOverride = isObject(legacyRaw.zones)
+      ? (legacyRaw.zones[String(zone.id)] as Partial<SpawnProfile> | undefined)
+      : undefined;
+    const legacyProfile = profileAt({ ...legacyDefaults, ...(legacyOverride ?? {}) }, `legacy.zones.${zone.id}`);
+    if (!layouts[legacyProfile.layout]) refuse(`legacy.zones.${zone.id}.layout`, `names unknown layout ${legacyProfile.layout}`);
+    if (legacyProfile.cap > layouts[legacyProfile.layout].points.length) {
+      refuse(`legacy.zones.${zone.id}.cap`, `exceeds the ${layouts[legacyProfile.layout].points.length} authored points`);
+    }
+    legacyProfiles.set(zone.id, legacyProfile);
     const subCount = zone.subzones?.length ?? 0;
     for (let index = 0; index < subCount; index++) {
       subzoneCount++;
@@ -224,7 +250,12 @@ export function createSpawns(raw: unknown, context: SpawnContext): SpawnModel {
     if (!layout) refuse(`layouts.${id}`, 'is not authored');
     return layout;
   };
-  const profileOf = (zoneId: number, subIndex: number | null = null): SpawnProfile => {
+  const profileOf = (zoneId: number, subIndex: number | null = null, domain: SpawnDomain = 'live'): SpawnProfile => {
+    if (domain === 'legacy') {
+      const profile = legacyProfiles.get(zoneId);
+      if (!profile) refuse(`legacy.zones.${zoneId}`, 'is not authored');
+      return profile;
+    }
     if (subIndex != null) {
       const profile = zoneSubProfiles.get(`${zoneId}:${subIndex}`);
       if (profile) return profile;

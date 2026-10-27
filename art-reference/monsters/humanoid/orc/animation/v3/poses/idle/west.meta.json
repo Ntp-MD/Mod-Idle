@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "action": "idle",
+  "direction": "west",
+  "pose": "neutral ready stance",
+  "generator": "OpenAI built-in image_gen",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "rawAlphaBoundsExclusive": {
+    "left": 0,
+    "top": 37,
+    "right": 1184,
+    "bottom": 1214
+  },
+  "visibleAlphaGt8BoundsExclusive": {
+    "left": 353,
+    "top": 369,
+    "right": 868,
+    "bottom": 1017
+  },
+  "boundsProvenance": "Pillow direct measurement on untouched generator PNG; right and bottom exclusive",
+  "footAnchor": {
+    "x": 747,
+    "y": 1017
+  },
+  "anchorProvenance": "Lowest visible alpha (>8) row measured; foot contact not independently isolated",
+  "sourcePixelsModified": false,
+  "styleReference": [
+    "art-reference/players/one-handed-sword/poses/idle/west.png",
+    "game/public/combat/arpg/pixel-v2/player-animation-v2.png"
+  ],
+  "bakedWeapon": "axe",
+  "qa": {
+    "hardAlpha": false,
+    "alphaLevels": 256,
+    "canvasEdgeClear": false
+  },
+  "note": "Untouched raw generator output has semi-transparent alpha; recorded for user review and expected to fail compose."
+}

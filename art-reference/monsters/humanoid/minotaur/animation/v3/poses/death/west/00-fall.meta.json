@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "action": "death",
+  "direction": "west",
+  "pose": "death begins facing west; whole body starts falling",
+  "generator": "OpenAI built-in image_gen",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "rawAlphaBoundsExclusive": [
+    0,
+    9,
+    1222,
+    1214
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    152,
+    571,
+    1118,
+    1133
+  ],
+  "boundsProvenance": "Pillow read-only alpha measurement",
+  "footAnchor": {
+    "x": 640,
+    "y": 1133
+  },
+  "anchorProvenance": "x=640 aligned to Minotaur reference body center; y=Pillow measured visible-alpha bottom; death uses terminal ground contact",
+  "sourcePixelsModified": false,
+  "styleReference": {
+    "identity": "art-reference/monsters/humanoid/minotaur/animation/v3/reference.png",
+    "bodyAngleOnly": "art-reference/players/one-handed-sword/_staging/body-death/west.png"
+  },
+  "bakedWeapon": "broad-battle-axe",
+  "alphaMeasurement": {
+    "hardAlpha": false,
+    "semiTransparentPixels": 305305
+  },
+  "note": "Unmodified single-pose generation; alpha level and edge bounds measured for intake."
+}

@@ -8,7 +8,6 @@ function shapedFight(skillId: string, weapon: string | null, spots: { id: string
   const state = newGame(41);
   setLevel(state, 30);
   state.hunting = true;
-  state.spawnIn = 999;
   state.group = spots.map((spot, index) => {
     const mob = spawnMob(mulberry32(30 + index), 1, 'normal');
     Object.assign(mob, {

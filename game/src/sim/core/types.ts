@@ -491,7 +491,8 @@ export interface GameState {
   group: Mob[];
   phase: Phase;
   campSec: number;
-  spawnIn: number;
+  /** Last avoidance reaction, in absolute clock seconds. */
+  avoidCooldownUntilSec?: number;
   /** The open dungeon run, or null on open ground. A run is a mode, never a coordinate (M7). */
   dungeon: DungeonRun | null;
   /** The clock second of the last cleared run; entry cools down from here (`dungeon.cooldown_sec`). */

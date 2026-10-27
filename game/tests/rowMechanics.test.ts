@@ -364,6 +364,10 @@ describe('the trigger auras fire the first ready slot at their own price', () =>
     s.skills.list[0] = 'attack.cleave'; s.skills.owned['attack.cleave'] ??= 0;
     s.skills.owned['aura.cast_on_crit'] = 1;
     s.skills.auras['aura.cast_on_crit'] = true;
+    // This test owns the aura trigger, not field density; keep the scenario small and stable.
+    tick(s, {});
+    if (s.field) s.field.slots = s.field.slots.slice(0, 6);
+    s.group = s.group.slice(0, 6);
     // tick until the state under test exists, never for a guessed window (AGENTS.md): the bound is a hang guard
     for (let i = 0; i < 20000 && !s.log.some((l) => /Cast on Crit triggers/.test(l.text)); i++) tick(s, {});
     expect(s.log.some((l) => /Cast on Crit triggers/.test(l.text))).toBe(true);

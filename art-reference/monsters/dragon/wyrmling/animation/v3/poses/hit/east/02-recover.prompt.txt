@@ -1,0 +1,5 @@
+SPECIES: wyrmling (Wyrmling) — match the approved Wyrmling reference silhouette exactly; preserve its body plan, proportions, palette, and fixed natural anatomy; add no unreferenced equipment
+WEAPON (baked, fixed): TODO: identify the signature natural weapon/anatomy from the approved reference before generation — in hand every frame; no equip switch
+SLOT: hit/east/02-recover — hit reaction east: recovering toward guard
+CAMERA: fixed elevated three-quarter, upper-left light; whole sprite including feet inside the frame
+RENDER: chibi pixel-art clusters, hard opaque edges only, transparent background; no shadow, scenery, text, effects, grid

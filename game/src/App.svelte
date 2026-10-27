@@ -9,6 +9,8 @@
   import { prefersReducedMotion, Tween } from 'svelte/motion';
   import { eng, E, sm, TOWN, tree, loot, fieldwork, trade, BASES } from './engine/client';
   import { MOB_DRAFT_VARIANT_QA_PASS_METADATA_PATHS } from './ui/dev/arena-art/arena-art-mob-drafts-qa-pass';
+  import { combatPreviewEvents, combatPreviewGroup, previewArea, previewFire, previewHeal, previewLightning,
+    type CombatFxBeat, type CombatFxPreview } from './ui/dev/combat-fx-preview';
   import { bundleOf } from '../../engine/keystones.ts';
 import { fieldSite, campHere as atFieldCamp, establishCamp, leaveCamp, returnToCamp, startFieldAction, stopFieldAction, cookMeal, eatMeal } from './sim/world/fieldwork';
 import { cancelCampEncounter, chooseCampEncounter, setCampEncounterPolicy, type CampEncounterAction, type CampEncounterPolicy } from './sim/world/camp-encounters';
@@ -301,17 +303,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       awayReport = buildAwayReport(before, 90, 5400, false, gameState);
     }
   }
-  type CombatFxPreview = 'swing' | 'critical' | 'fire' | 'lightning' | 'heal' | 'block' | 'lethal' | 'rapid'
-    | 'aoe' | 'exchange' | 'miss' | 'sizes' | 'boss' | 'skill';
-  type CombatFxBeat = Exclude<CombatFxPreview, 'rapid' | 'sizes' | 'boss'>;
   let animateCombatFx = $state(false);
   let combatFxPreview = $state<CombatFxPreview>('fire');
   let combatFxSkillId = $state('attack.firestorm');
   const combatFxTimers = new Set<ReturnType<typeof setTimeout>>();
-  const previewFire = sm.byId['attack.fireball'];
-  const previewLightning = sm.of('attack').find((skill: any) => skill.element === 'lightning' && !skill.retired);
-  const previewHeal = sm.of('heal').find((skill: any) => !skill.retired);
-  const previewArea = sm.byId['attack.firestorm'];
   const combatFxSkills = sm.all()
     .filter((skill: any) => !skill.retired)
     .sort((a: any, b: any) => (a.type || '').localeCompare(b.type || '') || a.name.localeCompare(b.name));
@@ -324,55 +319,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   $effect(() => {
     if (!showcaseMode || showcaseSample !== 'combat-fx' || !animateCombatFx) clearCombatFxTimers();
   });
-
-  function combatPreviewGroup(sample: GameState, preview: CombatFxPreview): Mob[] {
-    const rng = mulberry32(20261023);
-    if (preview === 'aoe') return ['small', 'medium', 'medium'].map((body) =>
-      spawnMob(rng, sample.zone, 'normal', body, undefined, { allowWildUnique: false }));
-    if (preview === 'sizes') return [
-      spawnMob(rng, sample.zone, 'normal', 'small', undefined, { allowWildUnique: false }),
-      spawnMob(rng, sample.zone, 'elite'),
-      spawnMob(rng, sample.zone, 'boss'),
-    ];
-    return preview === 'boss' ? [spawnMob(rng, sample.zone, 'boss')] : sample.group;
-  }
-
-  function combatPreviewEvents(preview: CombatFxBeat, mobs: Mob[]): Omit<FxEvent, 'id' | 'sec'>[] {
-    const mob = mobs[0];
-    if (!mob) return [];
-    if (preview === 'swing' || preview === 'critical') {
-      const crit = preview === 'critical';
-      return [{ kind: 'hit', side: 'field', mobId: mob.id, via: 'swing', text: crit ? '1,240!' : '248', value: crit ? 1240 : 248, crit, colour: hitColour('physical', crit) }];
-    }
-    if (preview === 'block') return [{ kind: 'block', side: 'self', byId: mob.id, text: 'Block', colour: hitColour(null) }];
-    if (preview === 'exchange') return [
-      { kind: 'hit', side: 'field', mobId: mob.id, via: 'swing', text: '248', value: 248, colour: hitColour('physical') },
-      { kind: 'taken', side: 'self', byId: mob.id, text: '142', value: 142, colour: hitColour(mob.innate[0]) },
-    ];
-    const selected = preview === 'skill' ? sm.byId[combatFxSkillId] : undefined;
-    const skill = selected ?? (preview === 'heal' ? previewHeal : preview === 'lightning' ? previewLightning
-      : preview === 'aoe' ? previewArea : previewFire);
-    if (!skill) return [];
-    const colour = hitColour(skill.element || null);
-    const skillType = selected?.type;
-    const multi = preview === 'aoe' || (preview === 'skill' && Number(String(skill.targets || '').split('/')[0]) > 1);
-    const outcome: Omit<FxEvent, 'id' | 'sec'>[] = preview === 'heal' || (preview === 'skill' && skillType === 'heal')
-      ? [{ kind: 'heal', side: 'self', skillId: skill.id, text: '+86', value: 86, colour }]
-      : preview === 'skill' && skillType === 'buff'
-        ? [{ kind: 'buff', side: 'self', skillId: skill.id, text: skill.name || skill.id, colour }]
-        : preview === 'skill' && skillType === 'aura'
-          ? []
-          : preview === 'miss'
-            ? [{ kind: 'block', side: 'field', mobId: mob.id, text: 'Miss', colour: hitColour(null) }]
-            : (multi ? mobs : [mob]).map((target) => ({
-              kind: 'hit', side: 'field', mobId: target.id, via: 'cast', skillId: skill.id, text: '468', value: 468, colour,
-            }));
-    // Runtime publishes each outcome before its cast marker; plate.castForHit reads that order.
-    return [
-      ...outcome,
-      { kind: 'cast', side: 'self', skillId: skill.id, text: skill.name || skill.id, colour },
-    ];
-  }
 
   function scheduleCombatFx(action: () => void, delay: number) {
     const timer = setTimeout(() => { combatFxTimers.delete(timer); action(); }, delay);
@@ -392,7 +338,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     gameState.fx = [];
     const emit = (beat: CombatFxBeat) => {
       const mob = gameState.group[0];
-      for (const event of combatPreviewEvents(beat, gameState.group)) fx(gameState, event);
+      for (const event of combatPreviewEvents(beat, gameState.group, combatFxSkillId)) fx(gameState, event);
       if (mob && beat === 'lethal') {
         fx(gameState, { kind: 'kill', side: 'field', mobId: mob.id, text: `${fieldLabel(mob)} defeated`, colour: hitColour('fire') });
         gameState.group = [];

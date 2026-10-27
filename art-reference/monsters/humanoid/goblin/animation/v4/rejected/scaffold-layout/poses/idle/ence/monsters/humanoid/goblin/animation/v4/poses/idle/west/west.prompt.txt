@@ -1,0 +1,5 @@
+SPECIES: goblin (Goblin) — match the approved Goblin reference silhouette exactly; preserve its body plan, proportions, palette, and fixed natural anatomy; add no unreferenced equipment
+WEAPON (baked, fixed): spear — in hand every frame; no equip switch
+SLOT: idle/west — idle facing west, neutral ready stance, feet planted
+CAMERA: fixed elevated three-quarter, upper-left light; whole sprite including feet inside the frame
+RENDER: chibi pixel-art clusters, hard opaque edges only, transparent background; no shadow, scenery, text, effects, grid

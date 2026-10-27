@@ -1,0 +1,4 @@
+Use case: precise-object-edit
+Input image is the exact shield identity to preserve. Render ONE identical shield in the SAME front near-three-quarter orientation with SAME upper-left lighting and same humble wood/steel design. Correct only its size.
+Output a square transparent canvas. The shield is a TINY equipment sprite: exactly about120pixels in height and100pixels wide in native output pixels, located at canvas center. This is about one-tenth the canvas height; over90% of each canvas axis stays transparent. The prior output was239pixels high, still too large: this version must be half its height. Do not zoom or crop. Keep huge transparent margins, crisp native stepped pixel clusters and dark outline; no blur. Only2–3shades/material.
+No body, hands, arms, shadows, background, scenery, checkerboard, text, grid, crest, glow or second object. Genuine alpha transparency.

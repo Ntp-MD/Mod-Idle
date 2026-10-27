@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "action": "hit",
+  "direction": "east",
+  "pose": "02-recover",
+  "generator": "pending image generation",
+  "sourceSize": null,
+  "rawAlphaBoundsExclusive": null,
+  "visibleAlphaGt8BoundsExclusive": null,
+  "boundsProvenance": "pending image generation and measurement",
+  "footAnchor": null,
+  "anchorProvenance": "pending image generation and measurement",
+  "sourcePixelsModified": false,
+  "styleReference": "art-reference/players/one-handed-sword/poses (camera and body-angle reference only)",
+  "bakedWeapon": "axe",
+  "note": "Scaffold only; no pose PNG is provided by this file."
+}

@@ -1,0 +1,5 @@
+SPECIES: wraith (Wraith) — match the approved Wraith reference silhouette exactly; preserve its body plan, proportions, palette, and fixed natural anatomy; add no unreferenced equipment
+WEAPON (baked, fixed): TODO: identify the fixed baked weapon from the approved reference before generation — in hand every frame; no equip switch
+SLOT: skill/void-pulse/west/00-aim — example projectile kit-action west: aim extended toward facing, feet planted; copy per kit entry with a cast block
+CAMERA: fixed elevated three-quarter, upper-left light; whole sprite including feet inside the frame
+RENDER: chibi pixel-art clusters, hard opaque edges only, transparent background; no shadow, scenery, text, effects, grid

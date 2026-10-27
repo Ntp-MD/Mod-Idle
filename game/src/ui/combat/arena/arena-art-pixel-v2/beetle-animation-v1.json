@@ -7,7 +7,7 @@
       "exec-3b21fa3b-1d19-4907-8900-fce4362aa577.png"
     ],
     "styleReference": "art-reference/monsters/_shared/collection/reference.png",
-    "identityReference": "art-reference/monsters/beetle/animation/source/base-v1.png",
+    "identityReference": "art-reference/monsters/insect/beetle/animation/source/base-v1.png",
     "initialPrompt": "8x5 monster atlas; 8 idle facings; east/west crawl, mandible attack, hit and death; 4 frames each."
   },
   "sourceCanvas": {
@@ -362,6 +362,6 @@
   "normalization": {
     "method": "integer-nearest-upscale",
     "scale": 3,
-    "source": "art-reference/monsters/beetle/animation/atlas/animation.png"
+    "source": "art-reference/monsters/insect/beetle/animation/atlas/animation.png"
   }
 }

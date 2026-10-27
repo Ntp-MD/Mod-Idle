@@ -50,20 +50,31 @@ export const mobFixture = (over: MobOverride = {}): Mob => ({
  * fill them, so the live population controller has no empty slot to refill. Production data keeps
  * its full cap; this fixture only keeps a mechanics test from growing an unrelated population.
  */
-export function pinFieldPopulation(state: GameState, count = state.group.length): void {
+export function pinFieldPopulation(
+  state: GameState,
+  count = state.group.length,
+  positions?: ReadonlyMap<string, { x: number; y: number }>,
+): void {
   if (!state.field) state.field = createFieldState(state);
-  if (state.field.slots.length < count) state.field.slots = createFieldState(state).slots;
-  const slots = state.field.slots.slice(0, Math.max(1, count));
-  for (const slot of slots) {
+  const candidates = state.field.slots.length >= count ? state.field.slots : createFieldState(state).slots;
+  for (const slot of candidates) {
     slot.mobId = undefined;
     slot.respawnAtSec = Number.MAX_SAFE_INTEGER;
   }
-  state.group.forEach((mob, index) => {
-    const slot = slots[index];
-    if (!slot) return;
+  const used = new Set<string>();
+  const slots = [];
+  for (const mob of state.group.slice(0, Math.max(1, count))) {
+    const point = positions?.get(mob.id);
+    const slot = point
+      ? candidates.filter((entry) => !used.has(entry.id)).sort((a, b) =>
+        Math.hypot(a.home.x - point.x, a.home.y - point.y) - Math.hypot(b.home.x - point.x, b.home.y - point.y))[0]
+      : candidates.find((entry) => !used.has(entry.id));
+    if (!slot) continue;
+    used.add(slot.id);
     slot.mobId = mob.id;
     slot.respawnAtSec = 0;
     mob.spawnSlotId = slot.id;
-  });
+    slots.push(slot);
+  }
   state.field.slots = slots;
 }

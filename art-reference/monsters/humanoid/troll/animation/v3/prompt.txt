@@ -1,0 +1,6 @@
+SPECIES: troll (Troll) — stocky green humanoid troll with a large head, dark spiky hair, broad limbs, brown primitive clothing, and glowing pale eyes.
+WEAPON (baked, fixed): stone-club — one wooden handle with a rounded gray stone head, held in the same hand; no equip switch.
+POSE: full-body idle facing south-east, neutral ready stance, feet staggered and planted; show the entire stone club.
+CAMERA: fixed elevated three-quarter game camera, upper-left light; whole body including feet and weapon inside the frame.
+RENDER: crisp chibi pixel-art clusters, hard opaque edges only, transparent background; no shadow, scenery, text, effects, grid, extra weapons, or checkerboard.
+STYLE REFERENCE: use the one-handed-sword player source and pose files only for camera, body angle, and scale. Do not copy the player's identity or sword.

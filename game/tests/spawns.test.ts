@@ -10,11 +10,14 @@ const context = () => ({
 
 describe('field spawn data', () => {
   it('covers every live zone and subzone with one validated layout', () => {
-    expect(spawns.coverage).toEqual({ zones: 18, subzones: 54, layouts: 1, points: 8 });
+    expect(spawns.coverage).toEqual({ zones: 18, subzones: 54, layouts: 1, points: 48 });
     for (const zone of E.mob.zones) {
       const profile = spawns.profileFor(zone.id);
       expect(profile.cap).toBeLessThanOrEqual(spawns.layout(profile.layout).points.length);
       expect(profile.cap).toBeGreaterThan(0);
+      expect([32, 40, 48]).toContain(profile.cap);
+      expect(profile.respawn_sec).toBeGreaterThanOrEqual(24);
+      expect(profile.respawn_sec).toBeLessThanOrEqual(40);
       expect(profile.respawn_sec).toBeGreaterThan(0);
       expect(profile.aggro_m).toBeGreaterThan(0);
       expect(profile.assist_m).toBeGreaterThanOrEqual(0);
@@ -22,7 +25,7 @@ describe('field spawn data', () => {
       expect(profile.camp_safe_m).toBeGreaterThanOrEqual(0);
       expect(profile.offline_share).toBeGreaterThanOrEqual(0);
       expect(profile.offline_share).toBeLessThanOrEqual(1);
-      expect(new Set(spawns.pointsFor(zone.id).map((point) => point.id)).size).toBe(8);
+      expect(new Set(spawns.pointsFor(zone.id).map((point) => point.id)).size).toBe(48);
       for (let sub = 0; sub < (zone.subzones?.length ?? 0); sub++) {
         expect(spawns.profileFor(zone.id, sub)).toEqual(profile);
         expect(spawns.pointsFor(zone.id, sub)).toBe(spawns.pointsFor(zone.id));
@@ -43,14 +46,24 @@ describe('field spawn data', () => {
     }
   });
 
-  it('keeps the authored population supply within five percent of the band kill target', () => {
+  it('keeps the authored population supply within five percent of the 7x band kill target', () => {
     for (const zone of E.mob.zones) {
       const [lo, hi] = eng.groupRangeOf(zone.id);
       const expected = (lo + hi) / 2;
-      const target = 3600 / (expected * E.loot.ttk_per_mob_sec + E.loot.group_spawn_sec) * expected;
+      const target = 3600 / (expected * E.loot.ttk_per_mob_sec + E.loot.group_spawn_sec) * expected * 7;
       const profile = spawns.profileFor(zone.id);
       const supply = 3600 * profile.cap / profile.respawn_sec;
       expect(Math.abs(supply - target) / target).toBeLessThan(0.05);
+    }
+  });
+
+  it('keeps live population caps out of the legacy Camp/dungeon/offline domain', () => {
+    for (const zone of E.mob.zones) {
+      const live = spawns.profileFor(zone.id);
+      const legacy = spawns.profileFor(zone.id, null, 'legacy');
+      expect(live.cap).toBeGreaterThanOrEqual(32);
+      expect(legacy.cap).toBeLessThanOrEqual(8);
+      expect(live.respawn_sec).toBeLessThan(legacy.respawn_sec);
     }
   });
 
@@ -64,8 +77,8 @@ describe('field spawn data', () => {
     expect(() => createSpawns(cap, context())).toThrow(/spawns\.json: zones\.1\.cap exceeds/);
 
     const outside = structuredClone(SPAWNS) as unknown as Record<string, any>;
-    outside.layouts['forest-clearing'].points[0].x = 17.8;
-    expect(() => createSpawns(outside, context())).toThrow(/spawns\.json: layouts\.forest-clearing\.west-north/);
+    outside.layouts['forest-clearing'].points[0].x = 49.2;
+    expect(() => createSpawns(outside, context())).toThrow(/spawns\.json: layouts\.forest-clearing\.p01/);
 
     const unknown = structuredClone(SPAWNS) as unknown as Record<string, any>;
     unknown.subzones['1:99'] = { cap: 2 };

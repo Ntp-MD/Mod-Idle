@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { mulberry32 } from '../src/engine/client-helpers';
+import { spawns } from '../src/engine/client';
 import { arenaDistance, captureCombatArena, createCombatArena, syncCombatArena } from '../src/sim/combat/combat-arena';
-import { fieldAreaKey, releaseSpawnSlot, restoreFieldPositions, syncFieldState } from '../src/sim/world/field-area';
+import { fieldAreaKey, normalizeFieldState, releaseSpawnSlot, restoreFieldPositions, syncFieldState } from '../src/sim/world/field-area';
 import { characterSheet, newGame, setLevel, spawnMob, tick } from '../src/sim/core/game';
 import { exportJson, importJson, migrate, SCHEMA_VERSION } from '../src/state/save';
 import { pinFieldPopulation } from './mobFixture';
@@ -24,7 +25,7 @@ function fieldFight(count = 3) {
   Object.assign(arena.player, { x: 1, y: 6 });
   state.group.forEach((mob, index) => Object.assign(arena.mobs[mob.id], { x: 3 + index, y: 6 }));
   captureCombatArena(arena, state, 0);
-  pinFieldPopulation(state, count);
+  pinFieldPopulation(state, count, new Map(state.group.map((mob) => [mob.id, arena.mobs[mob.id]])));
   return { state, arena };
 }
 
@@ -264,5 +265,70 @@ describe('field population registry', () => {
     const bad = JSON.parse(JSON.stringify(state));
     bad.field = { areaKey: 'x', arenaEpoch: 1 };
     expect(migrate(bad, SCHEMA_VERSION).field).toBeNull();
+  });
+
+  it('preserves a fractional respawn deadline through save normalization', () => {
+    const normalized = normalizeFieldState({
+      areaKey: 'x', arenaEpoch: 1, farmingAnchor: { x: 0, y: 0 }, player: { x: 0, y: 0 },
+      slots: [{ id: 's', pointId: 'p', home: { x: 1, y: 1 }, roamM: 1, respawnAtSec: 12.345, respawnCount: 0 }],
+      actors: [], engagementIds: [], combatSessionId: 0, sessionActive: false, quietSec: 0,
+    });
+    expect(normalized?.slots[0].respawnAtSec).toBeCloseTo(12.345);
+  });
+
+  it('translates a legacy 18x12 field once into the 50 m arena', () => {
+    const raw = {
+      areaKey: 'x', layoutRevision: 1, arenaEpoch: 1, farmingAnchor: { x: 1, y: 1 }, player: { x: 1, y: 1 },
+      slots: [{ id: 's', pointId: 'p', home: { x: 1, y: 1 }, roamM: 1, respawnAtSec: 5, respawnCount: 0 }],
+      actors: [{ id: 'a', x: 1, y: 1 }], engagementIds: [], combatSessionId: 0, sessionActive: false, quietSec: 0,
+    };
+    const once = normalizeFieldState(raw)!;
+    expect(once.layoutRevision).toBe(2);
+    expect(once.player).toEqual({ x: 17, y: 11.0256 });
+    expect(once.farmingAnchor).toEqual({ x: 17, y: 11.0256 });
+    expect(once.slots[0].home).toEqual({ x: 17, y: 11.0256 });
+    expect(once.actors[0]).toMatchObject({ x: 17, y: 11.0256 });
+    const twice = normalizeFieldState(once)!;
+    expect(twice.player).toEqual(once.player);
+    expect(twice.slots[0].home).toEqual(once.slots[0].home);
+  });
+
+  it('reconstitutes an archived field life with the same identity and HP, without a reward', () => {
+    const { state, arena } = fieldFight(2);
+    tick(state, { arena, autoSkills: false });
+    const mob = state.group[0];
+    mob.hp = 123;
+    state.mobStatus[mob.id] = { statuses: {}, alignedPerSec: 0, stoppedSec: 0, elapsedSec: 0 };
+    const id = mob.id;
+    const species = mob.species;
+    const home = state.cell ? { ...state.cell } : { q: 0, r: 0, sub: null, wild: null };
+    const kills = state.counters.kills;
+    state.cell = { q: 4, r: 4, sub: null, wild: null };
+    syncFieldState(state);
+    state.group = [];
+    state.cell = home;
+    syncFieldState(state);
+    const restored = state.group.find((entry) => entry.id === id);
+    expect(restored?.species).toBe(species);
+    expect(restored?.hp).toBe(123);
+    expect(restored?.spawnSlotId).toBeDefined();
+    expect(state.mobStatus[id]).toBeDefined();
+    expect(state.counters.kills).toBe(kills);
+  });
+
+  it('draws a deterministic respawn window from slot identity', () => {
+    const first = fieldFight(2);
+    const second = fieldFight(2);
+    tick(first.state, { arena: first.arena, autoSkills: false });
+    tick(second.state, { arena: second.arena, autoSkills: false });
+    const mob = first.state.group[0];
+    expect(releaseSpawnSlot(first.state, mob)).toBe(true);
+    expect(releaseSpawnSlot(second.state, structuredClone(second.state.group[0]))).toBe(true);
+    const slot = first.state.field!.slots.find((entry) => entry.id === mob.spawnSlotId)!;
+    const twin = second.state.field!.slots.find((entry) => entry.id === second.state.group[0].spawnSlotId)!;
+    expect(slot.respawnAtSec).toBeCloseTo(twin.respawnAtSec);
+    const profile = spawns.profileFor(first.state.zone, first.state.cell?.sub ?? null);
+    expect(slot.respawnAtSec - first.state.clockSec).toBeGreaterThanOrEqual(profile.respawn_min_sec - 1e-9);
+    expect(slot.respawnAtSec - first.state.clockSec).toBeLessThanOrEqual(profile.respawn_max_sec + 1e-9);
   });
 });

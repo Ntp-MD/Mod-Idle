@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "action": "idle",
+  "direction": "south-east",
+  "pose": "neutral-ready full body",
+  "generator": "OpenAI built-in image_gen",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "rawAlphaBoundsExclusive": [
+    0,
+    21,
+    1226,
+    1254
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    113,
+    244,
+    968,
+    1217
+  ],
+  "boundsProvenance": "Pillow read-only alpha measurement",
+  "footAnchor": {
+    "x": 640,
+    "y": 1227
+  },
+  "anchorProvenance": "Prompt target; not pixel-measured; inspect sole line during composition",
+  "sourcePixelsModified": false,
+  "styleReference": "../../../../../../players/one-handed-sword/poses/idle/south-east.png (camera/body-angle only)",
+  "bakedWeapon": "broad-battle-axe",
+  "alphaStats": {
+    "distinctLevels": 256,
+    "semiTransparentPixels": 464347,
+    "transparentPixels": 1107348,
+    "opaquePixels": 821,
+    "edgeTouch": {
+      "left": true,
+      "right": false,
+      "top": false,
+      "bottom": true
+    }
+  },
+  "note": "Unmodified generated source. Measured semi-alpha and edge contact are recorded; not eligible for compose until repaired or explicitly accepted.",
+  "rejectedAttempt": "../rejected/idle/south-east.attempt-1.png",
+  "reviewReason": "axe extends below boot soles / ground-anchor failure",
+  "reviewDisposition": "rejected"
+}

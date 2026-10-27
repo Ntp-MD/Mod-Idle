@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "action": "attack",
+  "direction": "east",
+  "pose": "00-windup",
+  "attempt": 1,
+  "generator": "OpenAI built-in image_gen",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "rawAlphaBoundsExclusive": [
+    0,
+    19,
+    1240,
+    1254
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    66,
+    195,
+    1072,
+    1147
+  ],
+  "boundsProvenance": "Pillow read-only alpha measurement",
+  "footAnchor": {
+    "x": 627,
+    "y": 1227
+  },
+  "anchorProvenance": "targeted prompt anchor; bounds recorded separately",
+  "sourcePixelsModified": false,
+  "styleReference": "art-reference/players/one-handed-sword/poses/attack/east/00-windup.png (body-angle/timing only)",
+  "bakedWeapon": "broad-battle-axe",
+  "alphaMeasurement": {
+    "distinctLevels": 256,
+    "semiTransparentPixels": 459130,
+    "hardAlpha": false,
+    "sourceEdgeTouched": true
+  },
+  "rejectionReason": "Composer rejects semi-transparent alpha and/or art touching source edge; image preserved unmodified."
+}

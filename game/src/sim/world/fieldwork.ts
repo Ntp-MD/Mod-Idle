@@ -264,7 +264,6 @@ export function establishCamp(state: GameState): { ok: boolean; why?: string; mo
   state.fieldwork.action = null;
   state.group = [];
   state.hunting = false;
-  state.spawnIn = 0;
   state.player.atkTimer = 0;
   return { ok: true, moved: !!prior };
 }
@@ -276,7 +275,6 @@ export function leaveCamp(state: GameState): { ok: boolean; why?: string } {
   state.fieldwork.action = null;
   state.hunting = true;
   state.group = [];
-  state.spawnIn = 0;
   state.player.atkTimer = 0;
   return { ok: true };
 }
@@ -288,7 +286,6 @@ export function returnToCamp(state: GameState): { ok: boolean; why?: string } {
   state.fieldwork.action = null;
   state.hunting = false;
   state.group = [];
-  state.spawnIn = 0;
   state.player.atkTimer = 0;
   return { ok: true };
 }
@@ -504,6 +501,5 @@ export function finishPushAtCamp(state: GameState): boolean {
   state.phase = 'fighting';
   state.hunting = false;
   state.group = [];
-  state.spawnIn = 0;
   return true;
 }

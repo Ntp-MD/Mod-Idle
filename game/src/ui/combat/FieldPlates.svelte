@@ -95,6 +95,13 @@
   const fxByMob = $derived(bucketFx(ring));
 
   const hereName = $derived(townLive ? (town?.name ?? 'the field') : zone.name);
+  const nextSpawnSec = $derived.by(() => {
+    const due = (s.field?.slots ?? [])
+      .filter((slot) => !slot.mobId && slot.respawnAtSec > 0)
+      .map((slot) => slot.respawnAtSec)
+      .sort((a, b) => a - b)[0];
+    return due == null ? null : Math.max(0, Math.ceil(due - s.clockSec));
+  });
 </script>
 
 <div class="combat-ground" class:engaged={plates.length > 0} aria-hidden="true"></div>
@@ -185,7 +192,7 @@
     </p>
   {:else}
     <p class="clear-field">
-      <b>Next group in {Math.max(0, s.spawnIn)} sec.</b>
+      {#if nextSpawnSec != null}<b>Next group in {nextSpawnSec} sec.</b>{:else}<b>All slots are occupied.</b>{/if}
       <span>{hereName} · levels {zone.levels[0]}–{zone.levels[1]}</span>
     </p>
   {/if}

@@ -1,0 +1,24 @@
+{
+  "status": "rejected",
+  "slot": "idle/south-east",
+  "generator": "OpenAI built-in image_gen",
+  "file": "idle-south-east-edge-test.png",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "distinctAlphaValues": 256,
+  "rawAlphaBoundsExclusive": [
+    0,
+    17,
+    1224,
+    1254
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    352,
+    299,
+    938,
+    1133
+  ],
+  "reason": "Faint alpha pixels touch the source image border; composer rejects the pose. Kept unchanged for review; not part of the canonical 40."
+}

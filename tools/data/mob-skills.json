@@ -2,128 +2,1097 @@
   "meta": {
     "note": "Mob-only skills. A strike replaces the mob's next basic swing and deals exactly that swing's damage, so mob DPS stays priced by mob PS. Statuses are control/utility only; auras are defensive group effects. Kits are optional and resolve by override: unique > boss > variant > species.",
     "max_kit": 4,
-    "statuses": ["chill", "shock", "crippled", "mark"],
-    "aura_stats": ["armour_pct", "resist_pct"],
-    "scopes": ["engaged", "line"]
+    "statuses": [
+      "chill",
+      "shock",
+      "crippled",
+      "mark"
+    ],
+    "aura_stats": [
+      "armour_pct",
+      "resist_pct"
+    ],
+    "scopes": [
+      "engaged",
+      "line"
+    ]
   },
   "skills": [
-    {"id": "mob.physical.backstab", "name": "Backstab", "mode": "strike", "element": null, "status": null, "cd": 9, "cast_sec": 0.4, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.4, "recovery_sec": 0.2}},
-    {"id": "mob.physical.cleave", "name": "Cleave", "mode": "strike", "element": null, "status": null, "cd": 8, "cast_sec": 0.5, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.5, "recovery_sec": 0.2}},
-    {"id": "mob.physical.hamstring", "name": "Hamstring", "mode": "strike", "element": null, "status": null, "cd": 10, "cast_sec": 0.4, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.4, "recovery_sec": 0.2}},
-    {"id": "mob.physical.shield-bash", "name": "Shield Bash", "mode": "strike", "element": null, "status": null, "cd": 11, "cast_sec": 0.6, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.6, "recovery_sec": 0.2}},
-    {"id": "mob.physical.pounce", "name": "Pounce", "mode": "strike", "element": null, "status": null, "cd": 9, "cast_sec": 0.3, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.3, "recovery_sec": 0.2}},
-    {"id": "mob.physical.gore", "name": "Gore", "mode": "strike", "element": null, "status": null, "cd": 10, "cast_sec": 0.5, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.5, "recovery_sec": 0.2}},
-    {"id": "mob.physical.crushing-blow", "name": "Crushing Blow", "mode": "strike", "element": null, "status": null, "cd": 12, "cast_sec": 0.8, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.8, "recovery_sec": 0.2}},
-    {"id": "mob.physical.sweeping-tail", "name": "Sweeping Tail", "mode": "strike", "element": null, "status": null, "cd": 9, "cast_sec": 0.5, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.5, "recovery_sec": 0.2}},
-    {"id": "mob.physical.rend", "name": "Rend", "mode": "strike", "element": null, "status": null, "cd": 8, "cast_sec": 0.4, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.4, "recovery_sec": 0.2}},
-    {"id": "mob.physical.trample", "name": "Trample", "mode": "strike", "element": null, "status": null, "cd": 12, "cast_sec": 0.7, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.7, "recovery_sec": 0.2}},
-    {"id": "mob.physical.skull-crack", "name": "Skull Crack", "mode": "strike", "element": null, "status": null, "cd": 11, "cast_sec": 0.6, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.6, "recovery_sec": 0.2}},
-    {"id": "mob.physical.overbear", "name": "Overbear", "mode": "strike", "element": null, "status": null, "cd": 10, "cast_sec": 0.5, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.5, "recovery_sec": 0.2}},
-
-    {"id": "mob.fire.ember-lash", "name": "Ember Lash", "mode": "strike", "element": "fire", "status": null, "cd": 8, "cast_sec": 0.4, "role": "stand-off", "cast": {"delivery": "projectile", "range": {"basis": "center", "meters": 5.2}, "windup_sec": 0.4, "recovery_sec": 0.2, "projectile_speed_mps": 12, "hit_radius_m": 0.35}},
-    {"id": "mob.fire.cinder-burst", "name": "Cinder Burst", "mode": "strike", "element": "fire", "status": null, "cd": 11, "cast_sec": 0.7, "role": "stand-off", "cast": {"delivery": "projectile", "range": {"basis": "center", "meters": 5.2}, "windup_sec": 0.7, "recovery_sec": 0.2, "projectile_speed_mps": 12, "hit_radius_m": 0.35}},
-    {"id": "mob.fire.scorching-roar", "name": "Scorching Roar", "mode": "strike", "element": "fire", "status": null, "cd": 12, "cast_sec": 0.8, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.8, "recovery_sec": 0.2}},
-    {"id": "mob.fire.molten-step", "name": "Molten Step", "mode": "strike", "element": "fire", "status": null, "cd": 9, "cast_sec": 0.4, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.4, "recovery_sec": 0.2}},
-
-    {"id": "mob.cold.frost-bite", "name": "Frost Bite", "mode": "strike", "element": "cold", "status": "chill", "cd": 8, "cast_sec": 0.4, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.4, "recovery_sec": 0.2}},
-    {"id": "mob.cold.rime-snare", "name": "Rime Snare", "mode": "strike", "element": "cold", "status": "chill", "cd": 10, "cast_sec": 0.5, "role": "stand-off", "cast": {"delivery": "projectile", "range": {"basis": "center", "meters": 5.2}, "windup_sec": 0.5, "recovery_sec": 0.2, "projectile_speed_mps": 12, "hit_radius_m": 0.35}},
-    {"id": "mob.cold.winter-howl", "name": "Winter Howl", "mode": "strike", "element": "cold", "status": "chill", "cd": 12, "cast_sec": 0.7, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.7, "recovery_sec": 0.2}},
-    {"id": "mob.cold.ice-shard", "name": "Ice Shard", "mode": "strike", "element": "cold", "status": "chill", "cd": 9, "cast_sec": 0.4, "role": "stand-off", "cast": {"delivery": "projectile", "range": {"basis": "center", "meters": 5.2}, "windup_sec": 0.4, "recovery_sec": 0.2, "projectile_speed_mps": 12, "hit_radius_m": 0.35}},
-
-    {"id": "mob.lightning.static-jab", "name": "Static Jab", "mode": "strike", "element": "lightning", "status": "shock", "cd": 8, "cast_sec": 0.3, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.3, "recovery_sec": 0.2}},
-    {"id": "mob.lightning.thunderclap", "name": "Thunderclap", "mode": "strike", "element": "lightning", "status": "shock", "cd": 11, "cast_sec": 0.7, "role": "stand-off", "cast": {"delivery": "projectile", "range": {"basis": "center", "meters": 5.2}, "windup_sec": 0.7, "recovery_sec": 0.2, "projectile_speed_mps": 12, "hit_radius_m": 0.35}},
-    {"id": "mob.lightning.chain-spark", "name": "Chain Spark", "mode": "strike", "element": "lightning", "status": "shock", "cd": 9, "cast_sec": 0.5, "role": "stand-off", "cast": {"delivery": "projectile", "range": {"basis": "center", "meters": 5.2}, "windup_sec": 0.5, "recovery_sec": 0.2, "projectile_speed_mps": 12, "hit_radius_m": 0.35}},
-    {"id": "mob.lightning.volt-rush", "name": "Volt Rush", "mode": "strike", "element": "lightning", "status": "shock", "cd": 10, "cast_sec": 0.4, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.4, "recovery_sec": 0.2}},
-
-    {"id": "mob.poison.venom-spit", "name": "Venom Spit", "mode": "strike", "element": "poison", "status": null, "cd": 8, "cast_sec": 0.4, "role": "stand-off", "cast": {"delivery": "projectile", "range": {"basis": "center", "meters": 5.2}, "windup_sec": 0.4, "recovery_sec": 0.2, "projectile_speed_mps": 12, "hit_radius_m": 0.35}},
-    {"id": "mob.poison.toxic-cloud", "name": "Toxic Cloud", "mode": "strike", "element": "poison", "status": null, "cd": 11, "cast_sec": 0.6, "role": "stand-off", "cast": {"delivery": "projectile", "range": {"basis": "center", "meters": 5.2}, "windup_sec": 0.6, "recovery_sec": 0.2, "projectile_speed_mps": 12, "hit_radius_m": 0.35}},
-    {"id": "mob.poison.serpent-strike", "name": "Serpent Strike", "mode": "strike", "element": "poison", "status": null, "cd": 9, "cast_sec": 0.4, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.4, "recovery_sec": 0.2}},
-    {"id": "mob.poison.acid-spray", "name": "Acid Spray", "mode": "strike", "element": "poison", "status": null, "cd": 10, "cast_sec": 0.5, "role": "stand-off", "cast": {"delivery": "projectile", "range": {"basis": "center", "meters": 5.2}, "windup_sec": 0.5, "recovery_sec": 0.2, "projectile_speed_mps": 12, "hit_radius_m": 0.35}},
-
-    {"id": "mob.chaos.mind-shear", "name": "Mind Shear", "mode": "strike", "element": "chaos", "status": "mark", "cd": 9, "cast_sec": 0.5, "role": "stand-off", "cast": {"delivery": "projectile", "range": {"basis": "center", "meters": 5.2}, "windup_sec": 0.5, "recovery_sec": 0.2, "projectile_speed_mps": 12, "hit_radius_m": 0.35}},
-    {"id": "mob.chaos.void-pulse", "name": "Void Pulse", "mode": "strike", "element": "chaos", "status": "mark", "cd": 11, "cast_sec": 0.7, "role": "stand-off", "cast": {"delivery": "projectile", "range": {"basis": "center", "meters": 5.2}, "windup_sec": 0.7, "recovery_sec": 0.2, "projectile_speed_mps": 12, "hit_radius_m": 0.35}},
-    {"id": "mob.chaos.hex-bolt", "name": "Hex Bolt", "mode": "strike", "element": "chaos", "status": "mark", "cd": 8, "cast_sec": 0.4, "role": "stand-off", "cast": {"delivery": "projectile", "range": {"basis": "center", "meters": 5.2}, "windup_sec": 0.4, "recovery_sec": 0.2, "projectile_speed_mps": 12, "hit_radius_m": 0.35}},
-    {"id": "mob.chaos.dissonant-cry", "name": "Dissonant Cry", "mode": "strike", "element": "chaos", "status": "mark", "cd": 12, "cast_sec": 0.7, "role": "stand-off", "cast": {"delivery": "projectile", "range": {"basis": "center", "meters": 5.2}, "windup_sec": 0.7, "recovery_sec": 0.2, "projectile_speed_mps": 12, "hit_radius_m": 0.35}},
-
-    {"id": "mob.earth.stone-fist", "name": "Stone Fist", "mode": "strike", "element": "earth", "status": "crippled", "cd": 9, "cast_sec": 0.5, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.5, "recovery_sec": 0.2}},
-    {"id": "mob.earth.quake-step", "name": "Quake Step", "mode": "strike", "element": "earth", "status": "crippled", "cd": 12, "cast_sec": 0.8, "role": "front", "cast": {"delivery": "melee", "range": {"basis": "body-edge", "meters": 0.2}, "windup_sec": 0.8, "recovery_sec": 0.2}},
-    {"id": "mob.earth.dust-blind", "name": "Dust Blind", "mode": "strike", "element": "earth", "status": "crippled", "cd": 10, "cast_sec": 0.5, "role": "stand-off", "cast": {"delivery": "projectile", "range": {"basis": "center", "meters": 5.2}, "windup_sec": 0.5, "recovery_sec": 0.2, "projectile_speed_mps": 12, "hit_radius_m": 0.35}},
-    {"id": "mob.earth.boulder-toss", "name": "Boulder Toss", "mode": "strike", "element": "earth", "status": "crippled", "cd": 11, "cast_sec": 0.6, "role": "stand-off", "area": {"origin": "target", "radius_m": 1.5, "shape": "circle"}, "cast": {"delivery": "ground", "range": {"basis": "center", "meters": 5.2}, "windup_sec": 0.6, "recovery_sec": 0.2, "impact_delay_sec": 0.8}},
-
-    { "id": "mob.fire.ash-veil", "name": "Ash Veil", "mode": "aura", "element": "fire", "role": "any", "scope": "engaged", "effects": { "resist_pct": 10 } },
-    { "id": "mob.fire.flame-guard", "name": "Flame Guard", "mode": "aura", "element": "fire", "role": "any", "scope": "line", "effects": { "armour_pct": 15 } },
-    { "id": "mob.cold.glacial-ward", "name": "Glacial Ward", "mode": "aura", "element": "cold", "role": "any", "scope": "engaged", "effects": { "resist_pct": 15 } },
-    { "id": "mob.cold.permafrost", "name": "Permafrost", "mode": "aura", "element": "cold", "role": "any", "scope": "line", "effects": { "armour_pct": 20 } },
-    { "id": "mob.lightning.storm-mantle", "name": "Storm Mantle", "mode": "aura", "element": "lightning", "role": "any", "scope": "engaged", "effects": { "armour_pct": 10 } },
-    { "id": "mob.lightning.charged-field", "name": "Charged Field", "mode": "aura", "element": "lightning", "role": "any", "scope": "line", "effects": { "resist_pct": 10 } },
-    { "id": "mob.poison.miasma", "name": "Miasma", "mode": "aura", "element": "poison", "role": "any", "scope": "engaged", "effects": { "resist_pct": 10 } },
-    { "id": "mob.poison.creeping-rot", "name": "Creeping Rot", "mode": "aura", "element": "poison", "role": "any", "scope": "line", "effects": { "armour_pct": 10 } },
-    { "id": "mob.chaos.unreal-veil", "name": "Unreal Veil", "mode": "aura", "element": "chaos", "role": "any", "scope": "engaged", "effects": { "resist_pct": 15 } },
-    { "id": "mob.chaos.warped-aura", "name": "Warped Aura", "mode": "aura", "element": "chaos", "role": "any", "scope": "line", "effects": { "armour_pct": 15 } },
-    { "id": "mob.earth.stone-guard", "name": "Stone Guard", "mode": "aura", "element": "earth", "role": "any", "scope": "engaged", "effects": { "armour_pct": 25 } },
-    { "id": "mob.earth.rooted-stance", "name": "Rooted Stance", "mode": "aura", "element": "earth", "role": "any", "scope": "line", "effects": { "resist_pct": 20 } }
+    {
+      "id": "mob.physical.backstab",
+      "name": "Backstab",
+      "mode": "strike",
+      "element": null,
+      "status": null,
+      "cd": 9,
+      "cast_sec": 0.4,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.4,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.physical.cleave",
+      "name": "Cleave",
+      "mode": "strike",
+      "element": null,
+      "status": null,
+      "cd": 8,
+      "cast_sec": 0.5,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.5,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.physical.hamstring",
+      "name": "Hamstring",
+      "mode": "strike",
+      "element": null,
+      "status": null,
+      "cd": 10,
+      "cast_sec": 0.4,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.4,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.physical.shield-bash",
+      "name": "Shield Bash",
+      "mode": "strike",
+      "element": null,
+      "status": null,
+      "cd": 11,
+      "cast_sec": 0.6,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.6,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.physical.pounce",
+      "name": "Pounce",
+      "mode": "strike",
+      "element": null,
+      "status": null,
+      "cd": 9,
+      "cast_sec": 0.3,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.3,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.physical.gore",
+      "name": "Gore",
+      "mode": "strike",
+      "element": null,
+      "status": null,
+      "cd": 10,
+      "cast_sec": 0.5,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.5,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.physical.crushing-blow",
+      "name": "Crushing Blow",
+      "mode": "strike",
+      "element": null,
+      "status": null,
+      "cd": 12,
+      "cast_sec": 0.8,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.8,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.physical.sweeping-tail",
+      "name": "Sweeping Tail",
+      "mode": "strike",
+      "element": null,
+      "status": null,
+      "cd": 9,
+      "cast_sec": 0.5,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.5,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.physical.rend",
+      "name": "Rend",
+      "mode": "strike",
+      "element": null,
+      "status": null,
+      "cd": 8,
+      "cast_sec": 0.4,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.4,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.physical.trample",
+      "name": "Trample",
+      "mode": "strike",
+      "element": null,
+      "status": null,
+      "cd": 12,
+      "cast_sec": 0.7,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.7,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.physical.skull-crack",
+      "name": "Skull Crack",
+      "mode": "strike",
+      "element": null,
+      "status": null,
+      "cd": 11,
+      "cast_sec": 0.6,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.6,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.physical.overbear",
+      "name": "Overbear",
+      "mode": "strike",
+      "element": null,
+      "status": null,
+      "cd": 10,
+      "cast_sec": 0.5,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.5,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.fire.ember-lash",
+      "name": "Ember Lash",
+      "mode": "strike",
+      "element": "fire",
+      "status": null,
+      "cd": 8,
+      "cast_sec": 0.4,
+      "role": "stand-off",
+      "cast": {
+        "delivery": "projectile",
+        "range": {
+          "basis": "center",
+          "meters": 5.2
+        },
+        "windup_sec": 0.4,
+        "recovery_sec": 0.2,
+        "projectile_speed_mps": 12,
+        "hit_radius_m": 0.35
+      }
+    },
+    {
+      "id": "mob.fire.cinder-burst",
+      "name": "Cinder Burst",
+      "mode": "strike",
+      "element": "fire",
+      "status": null,
+      "cd": 11,
+      "cast_sec": 0.7,
+      "role": "stand-off",
+      "cast": {
+        "delivery": "projectile",
+        "range": {
+          "basis": "center",
+          "meters": 5.2
+        },
+        "windup_sec": 0.7,
+        "recovery_sec": 0.2,
+        "projectile_speed_mps": 12,
+        "hit_radius_m": 0.35
+      }
+    },
+    {
+      "id": "mob.fire.scorching-roar",
+      "name": "Scorching Roar",
+      "mode": "strike",
+      "element": "fire",
+      "status": null,
+      "cd": 12,
+      "cast_sec": 0.8,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.8,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.fire.molten-step",
+      "name": "Molten Step",
+      "mode": "strike",
+      "element": "fire",
+      "status": null,
+      "cd": 9,
+      "cast_sec": 0.4,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.4,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.cold.frost-bite",
+      "name": "Frost Bite",
+      "mode": "strike",
+      "element": "cold",
+      "status": "chill",
+      "cd": 8,
+      "cast_sec": 0.4,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.4,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.cold.rime-snare",
+      "name": "Rime Snare",
+      "mode": "strike",
+      "element": "cold",
+      "status": "chill",
+      "cd": 10,
+      "cast_sec": 0.5,
+      "role": "stand-off",
+      "cast": {
+        "delivery": "projectile",
+        "range": {
+          "basis": "center",
+          "meters": 5.2
+        },
+        "windup_sec": 0.5,
+        "recovery_sec": 0.2,
+        "projectile_speed_mps": 12,
+        "hit_radius_m": 0.35
+      }
+    },
+    {
+      "id": "mob.cold.winter-howl",
+      "name": "Winter Howl",
+      "mode": "strike",
+      "element": "cold",
+      "status": "chill",
+      "cd": 12,
+      "cast_sec": 0.7,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.7,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.cold.ice-shard",
+      "name": "Ice Shard",
+      "mode": "strike",
+      "element": "cold",
+      "status": "chill",
+      "cd": 9,
+      "cast_sec": 0.4,
+      "role": "stand-off",
+      "cast": {
+        "delivery": "projectile",
+        "range": {
+          "basis": "center",
+          "meters": 5.2
+        },
+        "windup_sec": 0.4,
+        "recovery_sec": 0.2,
+        "projectile_speed_mps": 12,
+        "hit_radius_m": 0.35
+      }
+    },
+    {
+      "id": "mob.lightning.static-jab",
+      "name": "Static Jab",
+      "mode": "strike",
+      "element": "lightning",
+      "status": "shock",
+      "cd": 8,
+      "cast_sec": 0.3,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.3,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.lightning.thunderclap",
+      "name": "Thunderclap",
+      "mode": "strike",
+      "element": "lightning",
+      "status": "shock",
+      "cd": 11,
+      "cast_sec": 0.7,
+      "role": "stand-off",
+      "cast": {
+        "delivery": "projectile",
+        "range": {
+          "basis": "center",
+          "meters": 5.2
+        },
+        "windup_sec": 0.7,
+        "recovery_sec": 0.2,
+        "projectile_speed_mps": 12,
+        "hit_radius_m": 0.35
+      }
+    },
+    {
+      "id": "mob.lightning.chain-spark",
+      "name": "Chain Spark",
+      "mode": "strike",
+      "element": "lightning",
+      "status": "shock",
+      "cd": 9,
+      "cast_sec": 0.5,
+      "role": "stand-off",
+      "cast": {
+        "delivery": "projectile",
+        "range": {
+          "basis": "center",
+          "meters": 5.2
+        },
+        "windup_sec": 0.5,
+        "recovery_sec": 0.2,
+        "projectile_speed_mps": 12,
+        "hit_radius_m": 0.35
+      }
+    },
+    {
+      "id": "mob.lightning.volt-rush",
+      "name": "Volt Rush",
+      "mode": "strike",
+      "element": "lightning",
+      "status": "shock",
+      "cd": 10,
+      "cast_sec": 0.4,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.4,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.poison.venom-spit",
+      "name": "Venom Spit",
+      "mode": "strike",
+      "element": "poison",
+      "status": null,
+      "cd": 8,
+      "cast_sec": 0.4,
+      "role": "stand-off",
+      "cast": {
+        "delivery": "projectile",
+        "range": {
+          "basis": "center",
+          "meters": 5.2
+        },
+        "windup_sec": 0.4,
+        "recovery_sec": 0.2,
+        "projectile_speed_mps": 12,
+        "hit_radius_m": 0.35
+      }
+    },
+    {
+      "id": "mob.poison.toxic-cloud",
+      "name": "Toxic Cloud",
+      "mode": "strike",
+      "element": "poison",
+      "status": null,
+      "cd": 11,
+      "cast_sec": 0.6,
+      "role": "stand-off",
+      "cast": {
+        "delivery": "projectile",
+        "range": {
+          "basis": "center",
+          "meters": 5.2
+        },
+        "windup_sec": 0.6,
+        "recovery_sec": 0.2,
+        "projectile_speed_mps": 12,
+        "hit_radius_m": 0.35
+      }
+    },
+    {
+      "id": "mob.poison.serpent-strike",
+      "name": "Serpent Strike",
+      "mode": "strike",
+      "element": "poison",
+      "status": null,
+      "cd": 9,
+      "cast_sec": 0.4,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.4,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.poison.acid-spray",
+      "name": "Acid Spray",
+      "mode": "strike",
+      "element": "poison",
+      "status": null,
+      "cd": 10,
+      "cast_sec": 0.5,
+      "role": "stand-off",
+      "cast": {
+        "delivery": "projectile",
+        "range": {
+          "basis": "center",
+          "meters": 5.2
+        },
+        "windup_sec": 0.5,
+        "recovery_sec": 0.2,
+        "projectile_speed_mps": 12,
+        "hit_radius_m": 0.35
+      }
+    },
+    {
+      "id": "mob.chaos.mind-shear",
+      "name": "Mind Shear",
+      "mode": "strike",
+      "element": "chaos",
+      "status": "mark",
+      "cd": 9,
+      "cast_sec": 0.5,
+      "role": "stand-off",
+      "cast": {
+        "delivery": "projectile",
+        "range": {
+          "basis": "center",
+          "meters": 5.2
+        },
+        "windup_sec": 0.5,
+        "recovery_sec": 0.2,
+        "projectile_speed_mps": 12,
+        "hit_radius_m": 0.35
+      }
+    },
+    {
+      "id": "mob.chaos.void-pulse",
+      "name": "Void Pulse",
+      "mode": "strike",
+      "element": "chaos",
+      "status": "mark",
+      "cd": 11,
+      "cast_sec": 0.7,
+      "role": "stand-off",
+      "cast": {
+        "delivery": "projectile",
+        "range": {
+          "basis": "center",
+          "meters": 5.2
+        },
+        "windup_sec": 0.7,
+        "recovery_sec": 0.2,
+        "projectile_speed_mps": 12,
+        "hit_radius_m": 0.35
+      }
+    },
+    {
+      "id": "mob.chaos.hex-bolt",
+      "name": "Hex Bolt",
+      "mode": "strike",
+      "element": "chaos",
+      "status": "mark",
+      "cd": 8,
+      "cast_sec": 0.4,
+      "role": "stand-off",
+      "cast": {
+        "delivery": "projectile",
+        "range": {
+          "basis": "center",
+          "meters": 5.2
+        },
+        "windup_sec": 0.4,
+        "recovery_sec": 0.2,
+        "projectile_speed_mps": 12,
+        "hit_radius_m": 0.35
+      }
+    },
+    {
+      "id": "mob.chaos.dissonant-cry",
+      "name": "Dissonant Cry",
+      "mode": "strike",
+      "element": "chaos",
+      "status": "mark",
+      "cd": 12,
+      "cast_sec": 0.7,
+      "role": "stand-off",
+      "cast": {
+        "delivery": "projectile",
+        "range": {
+          "basis": "center",
+          "meters": 5.2
+        },
+        "windup_sec": 0.7,
+        "recovery_sec": 0.2,
+        "projectile_speed_mps": 12,
+        "hit_radius_m": 0.35
+      }
+    },
+    {
+      "id": "mob.earth.stone-fist",
+      "name": "Stone Fist",
+      "mode": "strike",
+      "element": "earth",
+      "status": "crippled",
+      "cd": 9,
+      "cast_sec": 0.5,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.5,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.earth.quake-step",
+      "name": "Quake Step",
+      "mode": "strike",
+      "element": "earth",
+      "status": "crippled",
+      "cd": 12,
+      "cast_sec": 0.8,
+      "role": "front",
+      "cast": {
+        "delivery": "melee",
+        "range": {
+          "basis": "body-edge",
+          "meters": 0.2
+        },
+        "windup_sec": 0.8,
+        "recovery_sec": 0.2
+      }
+    },
+    {
+      "id": "mob.earth.dust-blind",
+      "name": "Dust Blind",
+      "mode": "strike",
+      "element": "earth",
+      "status": "crippled",
+      "cd": 10,
+      "cast_sec": 0.5,
+      "role": "stand-off",
+      "cast": {
+        "delivery": "projectile",
+        "range": {
+          "basis": "center",
+          "meters": 5.2
+        },
+        "windup_sec": 0.5,
+        "recovery_sec": 0.2,
+        "projectile_speed_mps": 12,
+        "hit_radius_m": 0.35
+      }
+    },
+    {
+      "id": "mob.earth.boulder-toss",
+      "name": "Boulder Toss",
+      "mode": "strike",
+      "element": "earth",
+      "status": "crippled",
+      "cd": 11,
+      "cast_sec": 0.6,
+      "role": "stand-off",
+      "area": {
+        "origin": "target",
+        "radius_m": 1.5,
+        "shape": "circle"
+      },
+      "cast": {
+        "delivery": "ground",
+        "range": {
+          "basis": "center",
+          "meters": 5.2
+        },
+        "windup_sec": 0.6,
+        "recovery_sec": 0.2,
+        "impact_delay_sec": 0.8
+      },
+      "heavy": true
+    },
+    {
+      "id": "mob.fire.ash-veil",
+      "name": "Ash Veil",
+      "mode": "aura",
+      "element": "fire",
+      "role": "any",
+      "scope": "engaged",
+      "effects": {
+        "resist_pct": 10
+      }
+    },
+    {
+      "id": "mob.fire.flame-guard",
+      "name": "Flame Guard",
+      "mode": "aura",
+      "element": "fire",
+      "role": "any",
+      "scope": "line",
+      "effects": {
+        "armour_pct": 15
+      }
+    },
+    {
+      "id": "mob.cold.glacial-ward",
+      "name": "Glacial Ward",
+      "mode": "aura",
+      "element": "cold",
+      "role": "any",
+      "scope": "engaged",
+      "effects": {
+        "resist_pct": 15
+      }
+    },
+    {
+      "id": "mob.cold.permafrost",
+      "name": "Permafrost",
+      "mode": "aura",
+      "element": "cold",
+      "role": "any",
+      "scope": "line",
+      "effects": {
+        "armour_pct": 20
+      }
+    },
+    {
+      "id": "mob.lightning.storm-mantle",
+      "name": "Storm Mantle",
+      "mode": "aura",
+      "element": "lightning",
+      "role": "any",
+      "scope": "engaged",
+      "effects": {
+        "armour_pct": 10
+      }
+    },
+    {
+      "id": "mob.lightning.charged-field",
+      "name": "Charged Field",
+      "mode": "aura",
+      "element": "lightning",
+      "role": "any",
+      "scope": "line",
+      "effects": {
+        "resist_pct": 10
+      }
+    },
+    {
+      "id": "mob.poison.miasma",
+      "name": "Miasma",
+      "mode": "aura",
+      "element": "poison",
+      "role": "any",
+      "scope": "engaged",
+      "effects": {
+        "resist_pct": 10
+      }
+    },
+    {
+      "id": "mob.poison.creeping-rot",
+      "name": "Creeping Rot",
+      "mode": "aura",
+      "element": "poison",
+      "role": "any",
+      "scope": "line",
+      "effects": {
+        "armour_pct": 10
+      }
+    },
+    {
+      "id": "mob.chaos.unreal-veil",
+      "name": "Unreal Veil",
+      "mode": "aura",
+      "element": "chaos",
+      "role": "any",
+      "scope": "engaged",
+      "effects": {
+        "resist_pct": 15
+      }
+    },
+    {
+      "id": "mob.chaos.warped-aura",
+      "name": "Warped Aura",
+      "mode": "aura",
+      "element": "chaos",
+      "role": "any",
+      "scope": "line",
+      "effects": {
+        "armour_pct": 15
+      }
+    },
+    {
+      "id": "mob.earth.stone-guard",
+      "name": "Stone Guard",
+      "mode": "aura",
+      "element": "earth",
+      "role": "any",
+      "scope": "engaged",
+      "effects": {
+        "armour_pct": 25
+      }
+    },
+    {
+      "id": "mob.earth.rooted-stance",
+      "name": "Rooted Stance",
+      "mode": "aura",
+      "element": "earth",
+      "role": "any",
+      "scope": "line",
+      "effects": {
+        "resist_pct": 20
+      }
+    }
   ],
   "kits": {
     "species": {
-      "goblin": ["mob.physical.backstab"],
-      "orc": ["mob.physical.rend"],
-      "kobold": ["mob.physical.pounce"],
-      "ogre": ["mob.physical.crushing-blow"],
-      "troll": ["mob.earth.stone-fist"],
-      "minotaur": ["mob.physical.gore"],
-      "skeleton": ["mob.physical.skull-crack"],
-      "mummy": ["mob.earth.dust-blind"],
-      "vampire": ["mob.chaos.mind-shear"],
-      "demon": ["mob.chaos.hex-bolt"],
-      "slime": ["mob.poison.acid-spray"],
-      "spider": ["mob.poison.venom-spit"],
-      "wolf": ["mob.physical.hamstring"],
-      "golem": ["mob.earth.boulder-toss"],
-      "dragon": ["mob.fire.cinder-burst"],
-      "treant": ["mob.earth.rooted-stance"],
-      "human": ["mob.physical.shield-bash"],
-      "lizardman": ["mob.physical.sweeping-tail"],
-      "elf": ["mob.cold.frost-bite"],
-      "giant": ["mob.physical.trample", "mob.earth.stone-guard"],
-      "werewolf": ["mob.physical.overbear"],
-      "dryad": ["mob.poison.creeping-rot"],
-      "siren": ["mob.chaos.dissonant-cry"],
-      "wraith": ["mob.chaos.void-pulse"],
-      "imp": ["mob.fire.ember-lash"],
-      "wyvern": ["mob.cold.ice-shard"],
-      "beetle": ["mob.physical.cleave"],
-      "hornet": ["mob.lightning.static-jab"],
-      "ooze": ["mob.poison.toxic-cloud"],
-      "wisp": ["mob.lightning.storm-mantle"],
-      "harpy": ["mob.lightning.chain-spark"]
+      "goblin": [
+        "mob.physical.backstab"
+      ],
+      "orc": [
+        "mob.physical.rend"
+      ],
+      "kobold": [
+        "mob.physical.pounce"
+      ],
+      "ogre": [
+        "mob.physical.crushing-blow"
+      ],
+      "troll": [
+        "mob.earth.stone-fist"
+      ],
+      "minotaur": [
+        "mob.physical.gore"
+      ],
+      "skeleton": [
+        "mob.physical.skull-crack"
+      ],
+      "mummy": [
+        "mob.earth.dust-blind"
+      ],
+      "vampire": [
+        "mob.chaos.mind-shear"
+      ],
+      "demon": [
+        "mob.chaos.hex-bolt"
+      ],
+      "slime": [
+        "mob.poison.acid-spray"
+      ],
+      "spider": [
+        "mob.poison.venom-spit"
+      ],
+      "wolf": [
+        "mob.physical.hamstring"
+      ],
+      "golem": [
+        "mob.earth.boulder-toss"
+      ],
+      "dragon": [
+        "mob.fire.cinder-burst"
+      ],
+      "treant": [
+        "mob.earth.rooted-stance"
+      ],
+      "human": [
+        "mob.physical.shield-bash"
+      ],
+      "lizardman": [
+        "mob.physical.sweeping-tail"
+      ],
+      "elf": [
+        "mob.cold.frost-bite"
+      ],
+      "giant": [
+        "mob.physical.trample",
+        "mob.earth.stone-guard"
+      ],
+      "werewolf": [
+        "mob.physical.overbear"
+      ],
+      "dryad": [
+        "mob.poison.creeping-rot"
+      ],
+      "siren": [
+        "mob.chaos.dissonant-cry"
+      ],
+      "wraith": [
+        "mob.chaos.void-pulse"
+      ],
+      "imp": [
+        "mob.fire.ember-lash"
+      ],
+      "wyvern": [
+        "mob.cold.ice-shard"
+      ],
+      "beetle": [
+        "mob.physical.cleave"
+      ],
+      "hornet": [
+        "mob.lightning.static-jab"
+      ],
+      "ooze": [
+        "mob.poison.toxic-cloud"
+      ],
+      "wisp": [
+        "mob.lightning.storm-mantle"
+      ],
+      "harpy": [
+        "mob.lightning.chain-spark"
+      ]
     },
     "variants": {
-      "Shaman Goblin": ["mob.fire.ember-lash", "mob.fire.flame-guard"]
+      "Shaman Goblin": [
+        "mob.fire.ember-lash",
+        "mob.fire.flame-guard"
+      ]
     },
     "bosses": {
-      "Goblin King": ["mob.physical.backstab", "mob.physical.shield-bash", "mob.fire.ember-lash"],
-      "Broodmother": ["mob.poison.venom-spit", "mob.poison.toxic-cloud", "mob.poison.acid-spray", "mob.poison.creeping-rot"],
-      "Treant Elder": ["mob.earth.rooted-stance", "mob.earth.stone-guard", "mob.physical.crushing-blow"],
-      "Elven Archmage": ["mob.cold.frost-bite", "mob.cold.rime-snare", "mob.cold.glacial-ward", "mob.cold.ice-shard"],
-      "Elder Troll": ["mob.earth.stone-fist", "mob.physical.crushing-blow", "mob.fire.flame-guard"],
-      "Warlord Orc": ["mob.physical.rend", "mob.physical.cleave", "mob.physical.overbear", "mob.fire.ember-lash"],
-      "Hoarder Kobold": ["mob.physical.pounce", "mob.physical.backstab", "mob.lightning.storm-mantle"],
-      "Ogre King": ["mob.physical.crushing-blow", "mob.physical.trample", "mob.earth.stone-guard", "mob.earth.quake-step"],
-      "Wolf King": ["mob.physical.hamstring", "mob.physical.pounce", "mob.cold.winter-howl", "mob.physical.overbear"],
-      "Ancient Dragon": ["mob.fire.cinder-burst", "mob.fire.scorching-roar", "mob.fire.flame-guard", "mob.fire.molten-step"],
-      "Mummy Lord": ["mob.earth.dust-blind", "mob.physical.skull-crack", "mob.poison.miasma", "mob.poison.creeping-rot"],
-      "Bone Colossus": ["mob.physical.skull-crack", "mob.physical.cleave", "mob.earth.stone-guard"],
-      "Ancient Vampire": ["mob.chaos.mind-shear", "mob.chaos.void-pulse", "mob.chaos.unreal-veil", "mob.chaos.hex-bolt"],
-      "Archdemon": ["mob.chaos.hex-bolt", "mob.chaos.mind-shear", "mob.chaos.warped-aura", "mob.fire.cinder-burst"],
-      "Slime King": ["mob.poison.acid-spray", "mob.poison.toxic-cloud", "mob.poison.miasma", "mob.poison.creeping-rot"],
-      "Colossus": ["mob.earth.boulder-toss", "mob.earth.stone-guard", "mob.earth.quake-step", "mob.physical.crushing-blow"],
-      "Lizardman Chief": ["mob.physical.sweeping-tail", "mob.poison.venom-spit", "mob.poison.serpent-strike"],
-      "Paladin": ["mob.physical.shield-bash", "mob.earth.stone-guard", "mob.lightning.thunderclap"]
+      "Goblin King": [
+        "mob.physical.backstab",
+        "mob.physical.shield-bash",
+        "mob.fire.ember-lash"
+      ],
+      "Broodmother": [
+        "mob.poison.venom-spit",
+        "mob.poison.toxic-cloud",
+        "mob.poison.acid-spray",
+        "mob.poison.creeping-rot"
+      ],
+      "Treant Elder": [
+        "mob.earth.rooted-stance",
+        "mob.earth.stone-guard",
+        "mob.physical.crushing-blow"
+      ],
+      "Elven Archmage": [
+        "mob.cold.frost-bite",
+        "mob.cold.rime-snare",
+        "mob.cold.glacial-ward",
+        "mob.cold.ice-shard"
+      ],
+      "Elder Troll": [
+        "mob.earth.stone-fist",
+        "mob.physical.crushing-blow",
+        "mob.fire.flame-guard"
+      ],
+      "Warlord Orc": [
+        "mob.physical.rend",
+        "mob.physical.cleave",
+        "mob.physical.overbear",
+        "mob.fire.ember-lash"
+      ],
+      "Hoarder Kobold": [
+        "mob.physical.pounce",
+        "mob.physical.backstab",
+        "mob.lightning.storm-mantle"
+      ],
+      "Ogre King": [
+        "mob.physical.crushing-blow",
+        "mob.physical.trample",
+        "mob.earth.stone-guard",
+        "mob.earth.quake-step"
+      ],
+      "Wolf King": [
+        "mob.physical.hamstring",
+        "mob.physical.pounce",
+        "mob.cold.winter-howl",
+        "mob.physical.overbear"
+      ],
+      "Ancient Dragon": [
+        "mob.fire.cinder-burst",
+        "mob.fire.scorching-roar",
+        "mob.fire.flame-guard",
+        "mob.fire.molten-step"
+      ],
+      "Mummy Lord": [
+        "mob.earth.dust-blind",
+        "mob.physical.skull-crack",
+        "mob.poison.miasma",
+        "mob.poison.creeping-rot"
+      ],
+      "Bone Colossus": [
+        "mob.physical.skull-crack",
+        "mob.physical.cleave",
+        "mob.earth.stone-guard"
+      ],
+      "Ancient Vampire": [
+        "mob.chaos.mind-shear",
+        "mob.chaos.void-pulse",
+        "mob.chaos.unreal-veil",
+        "mob.chaos.hex-bolt"
+      ],
+      "Archdemon": [
+        "mob.chaos.hex-bolt",
+        "mob.chaos.mind-shear",
+        "mob.chaos.warped-aura",
+        "mob.fire.cinder-burst"
+      ],
+      "Slime King": [
+        "mob.poison.acid-spray",
+        "mob.poison.toxic-cloud",
+        "mob.poison.miasma",
+        "mob.poison.creeping-rot"
+      ],
+      "Colossus": [
+        "mob.earth.boulder-toss",
+        "mob.earth.stone-guard",
+        "mob.earth.quake-step",
+        "mob.physical.crushing-blow"
+      ],
+      "Lizardman Chief": [
+        "mob.physical.sweeping-tail",
+        "mob.poison.venom-spit",
+        "mob.poison.serpent-strike"
+      ],
+      "Paladin": [
+        "mob.physical.shield-bash",
+        "mob.earth.stone-guard",
+        "mob.lightning.thunderclap"
+      ]
     },
     "uniques": {
-      "Archdemon": ["mob.chaos.mind-shear", "mob.chaos.hex-bolt", "mob.chaos.warped-aura", "mob.chaos.void-pulse"],
-      "Siren Queen": ["mob.chaos.dissonant-cry", "mob.cold.rime-snare", "mob.chaos.unreal-veil"],
-      "Werewolf Lord": ["mob.physical.rend", "mob.physical.hamstring", "mob.physical.overbear"]
+      "Archdemon": [
+        "mob.chaos.mind-shear",
+        "mob.chaos.hex-bolt",
+        "mob.chaos.warped-aura",
+        "mob.chaos.void-pulse"
+      ],
+      "Siren Queen": [
+        "mob.chaos.dissonant-cry",
+        "mob.cold.rime-snare",
+        "mob.chaos.unreal-veil"
+      ],
+      "Werewolf Lord": [
+        "mob.physical.rend",
+        "mob.physical.hamstring",
+        "mob.physical.overbear"
+      ]
     }
   }
 }

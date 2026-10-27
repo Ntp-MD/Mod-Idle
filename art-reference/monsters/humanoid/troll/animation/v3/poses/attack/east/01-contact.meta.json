@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "action": "attack",
+  "direction": "east",
+  "pose": "01-contact",
+  "generator": "OpenAI built-in image_gen",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "rawAlphaBoundsExclusive": [
+    0,
+    63,
+    1236,
+    1230
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    351,
+    387,
+    1157,
+    940
+  ],
+  "boundsProvenance": "measured from the unmodified PNG alpha channel",
+  "footAnchor": {
+    "x": 754,
+    "y": 940,
+    "provenance": "bounds-derived candidate; physical sole not separately verified"
+  },
+  "anchorProvenance": "candidate from visible alpha bounds; inspect foot contact",
+  "sourcePixelsModified": false,
+  "styleReference": [
+    "art-reference/players/one-handed-sword/reference.png",
+    "art-reference/players/one-handed-sword/poses/"
+  ],
+  "bakedWeapon": "stone-club",
+  "alphaDistinctValues": 256,
+  "note": "Raw image retained without pixel edits. Semi-transparent alpha may fail the composer hard-alpha check; foot anchor needs visual confirmation."
+}

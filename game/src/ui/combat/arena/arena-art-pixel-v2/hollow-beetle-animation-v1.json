@@ -7,7 +7,7 @@
     81,
     100
   ],
-  "identityRef": "art-reference/monsters/beetle/animation/source/base.png",
+  "identityRef": "art-reference/monsters/insect/beetle/animation/source/base.png",
   "styleRef": "art-reference/monsters/_shared/collection/reference.png",
   "atlas": "atlas/animation-draft.png",
   "generator": "OpenAI built-in image_gen",
@@ -15,7 +15,7 @@
     "sourceOutputs": [
       "exec-d16be99d-4683-480a-8238-70fd24a62f32.png"
     ],
-    "identityReference": "art-reference/monsters/beetle/animation/source/base.png",
+    "identityReference": "art-reference/monsters/insect/beetle/animation/source/base.png",
     "styleReference": "art-reference/monsters/_shared/collection/reference.png",
     "initialPrompt": "8x5 atlas for Hollow Beetle: idle, walk, attack, hit, death in eight directions; one pose per state and direction."
   },

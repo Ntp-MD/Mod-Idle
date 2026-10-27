@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "status": "draft",
+  "speciesId": "harpy",
+  "attackKind": "far",
+  "bakedWeaponId": "TODO: identify the signature natural weapon/anatomy from the approved reference before generation",
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major"
+  },
+  "rowOrder": [
+    "idle S SE E NE N NW W SW",
+    "east walk 4, west walk 4",
+    "east attack 4, west attack 4",
+    "east hit 4, west hit 4",
+    "east death 4, west death 4"
+  ],
+  "sourceFrames": [],
+  "_note": "Offline scaffold only. Replace weapon/reference TODOs and generate/measure frames before compose.",
+  "identityRef": "../../reference.png",
+  "styleRef": "art-reference/players/one-handed-sword/poses (camera/body-angle reference only)",
+  "scaffoldOnly": true,
+  "referenceReady": true,
+  "offlinePreparationNote": "Pose prompts and metadata are scaffolded; raw pose PNGs still require imagegen, measurement, compose, and QA."
+}

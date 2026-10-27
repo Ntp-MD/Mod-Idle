@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-review",
+  "speciesId": "ogre",
+  "attackKind": "close",
+  "bakedWeaponId": "wooden-handled-stone-maul",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "sourceCanvas": {
+    "width": 1586,
+    "height": 992
+  },
+  "layout": {
+    "rowOrder": [
+      "idle S SE E NE N NW W SW",
+      "east walk 4, west walk 4",
+      "east attack 4, west attack 4",
+      "east hit 4, west hit 4",
+      "east death 4, west death 4"
+    ],
+    "frameCount": 40,
+    "cellOrder": "row-major",
+    "columns": 8,
+    "rows": 5
+  },
+  "attackPhases": [
+    "windup",
+    "contact",
+    "follow-through",
+    "recovery"
+  ],
+  "alphaMeasurement": {
+    "hardAlpha": false,
+    "distinctLevels": 256,
+    "extrema": [
+      0,
+      255
+    ],
+    "source": "Pillow direct measurement"
+  },
+  "frameBounds": "unverified: generated grid draft not composed",
+  "groundAnchor": "unverified: generated grid draft not composed",
+  "releaseSocket": "not applicable: close attack",
+  "reviewNotes": "Maul is visible throughout this generated draft; visually reviewed for presence only. Bounds and runtime QA remain unverified."
+}

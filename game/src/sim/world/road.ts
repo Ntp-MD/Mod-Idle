@@ -2,7 +2,7 @@ import { E, TOWN, road, fieldwork } from '../../engine/client';
 import { hexAdjacent } from '../../../../engine/road.ts';
 import type { Hex } from '../../../../engine/road.ts';
 import { abandonRun } from './dungeon';
-import { priceGold, rowById } from '../town/town';
+import { priceGold, rowById } from '../town/pricing';
 import type { GameState, Cell, Walk } from '../core/types';
 
 /** The walk model is `client.ts`'s own instance — one object for the sim, the map views and the wiki. */
@@ -207,11 +207,9 @@ export function arrive(state: GameState, walk: Walk) {
   state.walk = null;
   state.group = [];
   // A settlement is safe ground; wild ground is a fight the moment the feet land on it. The owner's travel
-  // switch is a hunt wherever it stands, and `spawnIn = 0` is what makes the arrival tick itself field the
-  // group — the spawn gate reads this on the same tick (`sim/core/game.ts`), so no dead second is spent looking
-  // for an enemy that is already due.
+  // switch is a hunt wherever it stands, so the arrival tick itself fields the group — no dead second is
+  // spent looking for an enemy that is already due.
   state.hunting = rank !== 0 || state.travel === 'forward';
-  if (rank !== 0) state.spawnIn = 0;
   return {
     name: dest?.name ?? node.id,
     first,

@@ -1,0 +1,15 @@
+SPECIES: troll (Troll) — stocky green humanoid troll with a large head, dark spiky hair, broad limbs, and brown primitive clothing
+WEAPON (baked, fixed): stone-club — in hand every frame; no equip switch
+SLOT: walk/east/02-stride-c — walk east, stride phase 02-stride-c; the 4 frames form one full cycle
+CAMERA: fixed elevated three-quarter, upper-left light; whole sprite including feet inside the frame
+RENDER: chibi pixel-art clusters, hard opaque edges only, transparent background; no shadow, scenery, text, effects, grid
+
+IDENTITY: Match animation/v3/reference.png exactly. Keep the same rounded gray stone head and brown wooden handle visible in every pose. No second weapon or equipment switch.
+CANVAS: One transparent RGBA sprite PNG, 1024x1024 target, character centered with full body and club visible; do not draw a grid or multiple poses.
+ALPHA: Hard alpha only, every pixel fully transparent or fully opaque. No antialiasing, blur, shadow, scenery, VFX, text, border, or checkerboard.
+STYLE REFERENCE: art-reference/players/one-handed-sword/reference.png and poses are for camera/body angle and scale only; do not copy player identity or sword.
+
+INPUTS: Image 1 is the fixed Troll reference; the player source/pose images are camera, scale, and body-angle references only. Preserve the same identity and baked stone club.
+OUTPUT: one transparent RGBA PNG containing only this one pose; no grid or additional poses.
+SCALE AND SAFE AREA: center the full Troll and full club with at least 10% clear transparent margin on all sides. Never crop the hair, feet, or club. In upright poses, keep the club head no lower than the soles so the bottom ground line remains stable.
+ALPHA: request a hard binary alpha mask (0 or 255 only).

@@ -1,0 +1,204 @@
+{
+  "frames": [
+    {
+      "direction": "south",
+      "index": 0,
+      "action": "idle"
+    },
+    {
+      "direction": "south-east",
+      "index": 1,
+      "action": "idle"
+    },
+    {
+      "direction": "east",
+      "index": 2,
+      "action": "idle"
+    },
+    {
+      "direction": "north-east",
+      "index": 3,
+      "action": "idle"
+    },
+    {
+      "direction": "north",
+      "index": 4,
+      "action": "idle"
+    },
+    {
+      "direction": "north-west",
+      "index": 5,
+      "action": "idle"
+    },
+    {
+      "direction": "west",
+      "index": 6,
+      "action": "idle"
+    },
+    {
+      "direction": "south-west",
+      "index": 7,
+      "action": "idle"
+    },
+    {
+      "direction": "east",
+      "index": 8,
+      "action": "walk"
+    },
+    {
+      "direction": "east",
+      "index": 9,
+      "action": "walk"
+    },
+    {
+      "direction": "east",
+      "index": 10,
+      "action": "walk"
+    },
+    {
+      "direction": "east",
+      "index": 11,
+      "action": "walk"
+    },
+    {
+      "direction": "west",
+      "index": 12,
+      "action": "walk"
+    },
+    {
+      "direction": "west",
+      "index": 13,
+      "action": "walk"
+    },
+    {
+      "direction": "west",
+      "index": 14,
+      "action": "walk"
+    },
+    {
+      "direction": "west",
+      "index": 15,
+      "action": "walk"
+    },
+    {
+      "direction": "east",
+      "index": 16,
+      "action": "attack"
+    },
+    {
+      "direction": "east",
+      "index": 17,
+      "action": "attack"
+    },
+    {
+      "direction": "east",
+      "index": 18,
+      "action": "attack"
+    },
+    {
+      "direction": "east",
+      "index": 19,
+      "action": "attack"
+    },
+    {
+      "direction": "west",
+      "index": 20,
+      "action": "attack"
+    },
+    {
+      "direction": "west",
+      "index": 21,
+      "action": "attack"
+    },
+    {
+      "direction": "west",
+      "index": 22,
+      "action": "attack"
+    },
+    {
+      "direction": "west",
+      "index": 23,
+      "action": "attack"
+    },
+    {
+      "direction": "east",
+      "index": 24,
+      "action": "hit"
+    },
+    {
+      "direction": "east",
+      "index": 25,
+      "action": "hit"
+    },
+    {
+      "direction": "east",
+      "index": 26,
+      "action": "hit"
+    },
+    {
+      "direction": "east",
+      "index": 27,
+      "action": "hit"
+    },
+    {
+      "direction": "west",
+      "index": 28,
+      "action": "hit"
+    },
+    {
+      "direction": "west",
+      "index": 29,
+      "action": "hit"
+    },
+    {
+      "direction": "west",
+      "index": 30,
+      "action": "hit"
+    },
+    {
+      "direction": "west",
+      "index": 31,
+      "action": "hit"
+    },
+    {
+      "direction": "east",
+      "index": 32,
+      "action": "death"
+    },
+    {
+      "direction": "east",
+      "index": 33,
+      "action": "death"
+    },
+    {
+      "direction": "east",
+      "index": 34,
+      "action": "death"
+    },
+    {
+      "direction": "east",
+      "index": 35,
+      "action": "death"
+    },
+    {
+      "direction": "west",
+      "index": 36,
+      "action": "death"
+    },
+    {
+      "direction": "west",
+      "index": 37,
+      "action": "death"
+    },
+    {
+      "direction": "west",
+      "index": 38,
+      "action": "death"
+    },
+    {
+      "direction": "west",
+      "index": 39,
+      "action": "death"
+    }
+  ]
+}

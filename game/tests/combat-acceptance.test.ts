@@ -10,7 +10,6 @@ function encounter(weaponName: string, skillId?: string, distance = 14) {
   const state = newGame(91);
   setLevel(state, 30);
   state.hunting = true;
-  state.spawnIn = 999;
   const mainHand = loot.SLOTS.findIndex((slot: string) => slot === 'main hand');
   state.gear[mainHand] = { slot: 'main hand', base: weaponName, ilvl: 1, quality: 'Normal', tier: 'T1', lines: [] } as never;
   state.skills.list.fill(null);
@@ -35,8 +34,7 @@ describe('first-release combat acceptance', () => {
     const state = newGame(55);
     setLevel(state, 30);
     state.hunting = true;
-    state.spawnIn = 999;
-    const bodies = ['source', 'inside', 'outside'].map((id, index) => {
+      const bodies = ['source', 'inside', 'outside'].map((id, index) => {
       const mob = spawnMob(mulberry32(60 + index), 1, 'normal');
       Object.assign(mob, {
         id, hp: 1e8, hpMax: 1e8, ps: 1, evasion: 0, dodgeRate: 0,

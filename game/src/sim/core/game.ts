@@ -15,6 +15,7 @@ import {
   flightTargets, intentInRange, intentTargets, projectilePosition, selectCombatIntent, trackIntentAim,
   type CombatFlight, type CombatIntent, type ManualControl,
 } from '../combat/combat-actions';
+import { planAutoAvoid } from '../combat/auto-avoid';
 import { firstProjectileHit, releasedSkillCastTiming, skillCastTiming, targetsInSkillArea } from '../../../../engine/skill-actions.ts';
 import { skillAreaSnapshot } from '../../../../engine/skill-area.ts';
 import { spawnSlotSeed } from '../../../../engine/spawns.ts';
@@ -35,6 +36,22 @@ import { newFieldwork, tickFieldwork, tickHunger, resolveTravelEvent, recordHunt
 import { buildPushReport, pushReportLines } from './push-report';
 import { recordCombatEvent, recordCombatPush } from '../combat/combat-history';
 import { snapshotPendingWork, restorePendingWork } from './pending-work';
+import { settleTick } from './tick/settlement-stage';
+import { advancePreTick } from './tick/pre-tick';
+import { applyKeystonePrep } from './tick/keystone-prep';
+import { advanceForward } from './tick/forward';
+import { advancePostTick } from './tick/post-tick';
+import { advanceCampStage } from './tick/camp-stage';
+import { advanceWalkStage } from './tick/walk-stage';
+import { advanceFieldPopulation } from './tick/field-population';
+import { advanceEngagement, createEngagementState } from './tick/engagement';
+import { createMobShots } from './tick/mob-shots';
+import { createMobActions } from './tick/mob-actions';
+import { createPlayerBasicActions } from './tick/player-basic';
+import { createIncomingHit } from './tick/incoming-hit';
+import { createCastTrigger } from './tick/cast-trigger';
+import { createIntents } from './tick/intents';
+import { createArenaWork } from './tick/arena-work';
 import { fieldAreaKey, fieldInFight, releaseSpawnSlot, syncFieldState, type FieldSpawnSlot } from '../world/field-area';
 import { road, arrive, ownerOf, zoneOf, startWalk, currentCell as currentCellForJournal } from '../world/road';
 import { newMapJournal, normalizeMapJournal, recordMapDiscovery, tickTrailSites } from '../world/map-exploration';
@@ -76,7 +93,9 @@ const L = E.loot;
 /** Packet E's seven static bundles are bound once, against the canonical Element list. */
 registerStaticKeystoneHandlers(KEYSTONE_HANDLERS, Object.keys(E.elements.status_of));
 /** loot.md F7 publishes 4 bosses an hour; the clock is per character and online only. */
-const BOSS_EVERY_SEC = Math.round(3600 / L.boss_per_hour);
+/** The boss cadence lives with the other clock constants; re-exported for its callers. */
+export { BOSS_EVERY_SEC } from './clock';
+import { BOSS_EVERY_SEC } from './clock';
 const BAND_OF_QUALITY = (quality: string): string =>
   quality.startsWith('high') ? 'high' : quality.startsWith('mid') ? 'mid' : 'low';
 
@@ -88,65 +107,9 @@ const MOB_CLOCK_CAP = 1 / E.caps.attack_interval_sec;
 const mobClock = (kind: string, mult = 1) =>
   Math.min(((kind.startsWith('Boss') || kind.startsWith('Unique')) ? MOB_CLOCK_FLOOR.boss : MOB_CLOCK_FLOOR.normal) * mult, MOB_CLOCK_CAP);
 
-/** the held weapon's base name, for the read that names what is in hand */
-export function heldWeaponName(s: GameState): string | null {
-  const main = s.gear.find((g) => g && !g.broken && g.slot === 'main hand');
-  const w = main ? weaponByName(main.base) : null;
-  return w ? w.name : null;
-}
-
-/** What the character carries besides gear: potions, condensed bottles and herbs all weigh. */
-export function carried(s: GameState) {
-  const bottles = Object.values(s.farm.potions).reduce((a: number, b: number) => a + b, 0);
-  const condensed = Object.values(s.farm.condensed).reduce((a: number, b: number) => a + b, 0);
-  const herbs = Object.values(s.farm.herbs).reduce((a: number, b: number) => a + b, 0);
-  const materials = Object.values(s.fieldwork.materials).reduce((a: number, b: number) => a + b, 0);
-  const food = Object.values(s.fieldwork.foods).reduce((a: number, b: number) => a + b, 0);
-  // the kept pieces ride on the back: each weighs what its Base says, against the same capacity
-  const bagWeight = s.bag.reduce((t, g) => t + (g?.weight || 0), 0);
-  return { potions: bottles, condensed, herbs, materials, food, bagWeight };
-}
-
-/** The current character used by the HUD and live combat, including active skill effects. */
-export function characterSheet(s: GameState, effects = effectsActive(s.skills, tree.keystoneBundles(s.player.treeRanks))) {
-  return withHunger(withMeal(buildCharacter(s.player.level, s.gear, carried(s), masteryLevel(s, heldWeaponName(s)),
-    effects, s.player.points, s.player.treeRanks, lifeSkillBonuses(s)), s), s);
-}
-
-/** A fresh character has spent no points: the sheet starts empty and grants on level-up. */
-const ZERO_POINTS = (): Record<StatKey, number> =>
-  Object.fromEntries(STAT_KEYS.map((k) => [k, 0])) as Record<StatKey, number>;
-
-/**
- * Spend banked points on the least-invested Core attributes — the REFERENCE allocation the published
- * numbers (and `mob_HP`) are priced against. Choosing by current totals carries the remainder across
- * 5-point level grants, instead of restarting at Strength and starving the last stats every level.
- */
-export function spendReference(s: GameState): void {
-  const p = s.player;
-  while (p.statPoints > 0) {
-    const next = STAT_KEYS.reduce((least, k) => p.points[k] < p.points[least] ? k : least, STAT_KEYS[0]);
-    p.points[next]++;
-    p.statPoints--;
-  }
-}
-
-/**
- * Jump a headless character to `level` with exactly the stat points that level grants, spent evenly.
- * a level grants points rather than stats, so a test that assigns `.level` alone leaves
- * the character at its level-1 line; this is the test-facing form of the level-up path in `tick`.
- */
-export function setLevel(s: GameState, level: number): void {
-  s.player.level = level;
-  const spent = STAT_KEYS.reduce((a, k) => a + s.player.points[k], 0);
-  s.player.statPoints = Math.max(0, eng.pointsAt(level) - spent);
-  // the same shortcut has to bank the tree points the level is worth, or a character placed at a level
-  // holds none and the tree cannot be touched at all
-  const qEarned = s.player.questTreePointsEarned ?? 0;
-  const spentTree = tree.pointsSpentByCurrency(s.player.treeRanks).tree ?? 0;
-  s.player.treePoints = Math.max(0, tree.pointsAt(level, E.stat.level_cap) + qEarned - spentTree);
-  spendReference(s);
-}
+/** The character line lives in `state.ts`; re-exported so every existing importer keeps its path. */
+export { heldWeaponName, carried, characterSheet, spendReference, setLevel, clampPools, ZERO_POINTS } from './state';
+import { carried, characterSheet, heldWeaponName, spendReference, ZERO_POINTS } from './state';
 
 export function newGame(seed = 20260101, trailSeed = seed): GameState {
   const gear = emptyGear();
@@ -220,7 +183,6 @@ export function newGame(seed = 20260101, trailSeed = seed): GameState {
     group: [],
     phase: 'fighting',
     campSec: 0,
-    spawnIn: 0,
     dungeon: null,
     counters: {
       kills: 0,
@@ -282,7 +244,8 @@ const bossInZone = (zoneId: number): any => {
 };
 
 /** A boss-class kill: the clock Boss or a wild Species Unique. Both pay the boss lines. */
-export const isBossKind = (k: string) => k.startsWith('Boss') || k.startsWith('Unique');
+export { isBossKind } from './kinds';
+import { isBossKind } from './kinds';
 const _uniquesBySpecies = new Map<string, any[]>();
 const uniquesInSpecies = (speciesId: string): any[] => {
   if (!_uniquesBySpecies.has(speciesId)) _uniquesBySpecies.set(speciesId, eng.uniquesOf(speciesId));
@@ -916,7 +879,6 @@ function completeDungeonRun(s: GameState): void {
   s.group = [];
   s.curses = newCurses();
   s.mobStatus = newMobStatusStore();
-  s.spawnIn = 0;
   let gear = 0;
   for (const item of run.escrow.items) {
     adjudicateDrop(s, item);
@@ -950,7 +912,6 @@ export function retreatDungeon(s: GameState, access: { writer: boolean } = { wri
   s.group = [];
   s.curses = newCurses();
   s.mobStatus = newMobStatusStore();
-  s.spawnIn = 0;
   s.hunting = false;
   s.dungeonClearedAt = s.clockSec;
   let received = 0, receivedMaterials = 0, total = 0;
@@ -973,28 +934,8 @@ export function retreatDungeon(s: GameState, access: { writer: boolean } = { wri
   return { ok: true, selected: total, received, rejected };
 }
 
-export function push(s: GameState, text: string) {
-  s.log.unshift({ sec: s.clockSec, text });
-  if (s.log.length > 60) s.log.length = 60;
-}
-
-function runExplorationAutomation(s: GameState, online: boolean, wasPatrolling = s.patrol.active) {
-  const triggered = maybeStartAutoReturn(s, online, wasPatrolling);
-  if (triggered) push(s, triggered);
-  const automatic = driveAutoReturn(s, online);
-  if (automatic.message) push(s, automatic.message);
-  if (automatic.deposit) {
-    s.hunting = false;
-    const moved = stashTabCount(s) > 0 ? depositMany(s, s.bag.map((_, i) => i), 0) : 0;
-    push(s, finishAutoReturnDeposit(s, moved));
-    const resume = driveAutoReturn(s, online);
-    if (resume.message) push(s, resume.message);
-  }
-  if (s.autoReturn.phase === 'idle') {
-    const patrol = drivePatrol(s, online);
-    if (patrol) push(s, patrol);
-  }
-}
+export { push } from './log';
+import { push } from './log';
 
 /**
  * Head out to hunt a zone on foot from the map: safe ground ends where the hunt begins. Only a
@@ -1033,66 +974,13 @@ export function huntHere(s: GameState): { ok: boolean; why?: string } {
   return { ok: true };
 }
 
-/** How many events the HUD ring keeps — enough to read a fight by, small enough to never grow. */
-const FX_RING = 24;
-const tickFxClock = new WeakMap<GameState, { clock: CombatClock; arena?: CombatArena }>();
+/** The tick's feedback line lives in `feedback.ts`; re-exported so every importer keeps its path. */
+export { fx, hitColour, statusColour, credit, tickFxClock, FX_RING } from './feedback';
+import { fx, hitColour, statusColour, dotLead, credit, tickFxClock } from './feedback';
 
-/**
- * One event handed to the screen. A log line is for reading later; this is for animating now, and it
- * carries the number and the colour, which a total (`counters.damageBy`) and a sentence both lose.
- */
-export function fx(s: GameState, ev: Omit<FxEvent, 'id' | 'sec'>, source?: Mob) {
-  s.fx = s.fx || [];
-  s.fxSeq = (s.fxSeq || 0) + 1;
-  const context = tickFxClock.get(s);
-  s.fx.unshift({ id: s.fxSeq, sec: s.clockSec, ...(context ? { atUs: context.clock.nowUs } : {}), ...ev });
-  if (context?.arena) recordCombatArenaFx(context.arena, s, s.fx[0], source);
-  recordCombatEvent(s, s.fx[0], source);
-  if (s.fx.length > FX_RING) s.fx.length = FX_RING;
-}
-
-/**
- * The indicator's colour for one hit: a crit first, then the Element that carried it, then neutral.
- * A missing data colour falls to `var(--text)`, so the client's own token stays the only neutral.
- */
-export function hitColour(element: string | null | undefined, crit = false): string {
-  const C = E.elements as any;
-  if (crit) return C.crit_colour || 'var(--text)';
-  if (element && C.colour?.[element]) return C.colour[element];
-  return C.physical_colour || 'var(--text)';
-}
-
-/**
- * The colour a status takes — the colour of the Element that inflicts it, read through
- * `elements.status_of`, so a proc never owns a second copy of a colour. The cold proc is `chill`, and
- * `chill` is the game's freeze: the ice colour is the same one either word reads.
- */
-export function statusColour(status: string): string {
-  const C = E.elements as any;
-  const el = Object.keys(C.status_of || {}).find((k) => C.status_of[k] === status);
-  return (el && C.colour?.[el]) || C.physical_colour || 'var(--text)';
-}
-
-/**
- * The status that carried a DoT tick, so the number has one colour to wear. A tie goes to the
- * Element line over the physical one, which is the same order the budget is written in.
- */
-function dotLead(parts: { burn: number; poison: number; bleed: number }): string {
-  return parts.burn >= parts.poison && parts.burn >= parts.bleed ? 'burn'
-    : parts.poison >= parts.bleed ? 'poison' : 'bleed';
-}
-
-/**
- * One credit of damage dealt, sorted by what dealt it. The total is what the tests divide by time;
- * the split is what answers whether a build's damage comes from its hits or from the statuses those
- * hits leave behind (`concept.md` P0-2).
- */
-export function credit(s: GameState, kind: 'swing' | 'cast' | 'dot', amount: number) {
-  if (!(amount > 0)) return;
-  s.counters.damage = (s.counters.damage || 0) + amount;
-  const by = s.counters.damageBy || (s.counters.damageBy = { swing: 0, cast: 0, dot: 0 });
-  by[kind] += amount;
-}
+/** Patrol and Auto-Return live in `tick/automation.ts`; re-exported for its existing callers. */
+export { runExplorationAutomation } from './tick/automation';
+import { runExplorationAutomation } from './tick/automation';
 
 /** One second of the world. Fixed tick, every unit on its own timer (combat.md §1). The statuses on
  *  the character live in `s.playerStatuses` — canonical saved state (§7.7), never a caller's argument. */
@@ -1114,7 +1002,7 @@ export function tick(s: GameState, opts: { online?: boolean; autoSkills?: boolea
     tickBlackMarket(result, rng, { writer: true }, opts.online !== false);
     tickCampEncounters(result, opts.online !== false, (zone, subzone, campRng) => {
       // A Camp threat is a population pull at the Camp's authored density, not the old 1-5 wave.
-      const size = Math.max(1, spawns.profileFor(zone, subzone).cap);
+      const size = Math.max(1, spawns.profileFor(zone, subzone, 'legacy').cap);
       const group = Array.from({ length: size }, () => spawnMob(campRng, zone, 'normal', undefined, subzone,
         { allowWildUnique: false }));
       return group.sort((a, b) => (a.line === 'front' ? -1 : 1) - (b.line === 'front' ? -1 : 1));
@@ -1148,22 +1036,20 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
   // An arena is ignored during ordinary offline catch-up; `settleArena` is the one exception, used
   // to resolve work that was already released before the session ended.
   const arena = online ? opts.arena : opts.settleArena;
+  const { cancelPlayerBasic, cancelIntent, cancelArenaWork, cancelFlight } = createArenaWork({ arena, clock });
+
+  const autoAvoid = arena && !manual?.moveTo && !manual?.cast && !arena.intent?.manual
+    ? planAutoAvoid(arena, s, tickStartUs, units) : null;
+  if (autoAvoid) s.avoidCooldownUntilSec = s.clockSec + 1;
   tickFxClock.set(s, { clock, arena });
   const timeUs: number | null = unitsPerSec === undefined ? null : tickStartUs;
   s.online = online;
   s.clockSec++;
-  advanceEconomy(s);
-  s.counters.playSec++;
-  const foodNote = tickHunger(s, online);
-  if (foodNote) push(s, foodNote);
-  // the active-skill effect fold changes only on cast/toggle, so compute it once per tick and reuse
-  // it for the character sheet and the per-mob aura lines (previously folded again on every swing)
-  // the idle default spends this tick's level points before the pool is clamped, so the sheet the
-  // pool is read against already includes them; manual players bank and spend by hand.
-  if (s.player.autoSpend && s.player.statPoints > 0) spendReference(s);
+  advancePreTick(s, online);
   const effects = effectsActive(s.skills, tree.keystoneBundles(s.player.treeRanks));
   const c = characterSheet(s, effects);
   const debt52 = bundleOf(c.keystones, 'mana-debt');
+  const rkH = s.keystoneRuntime;
   // Packet N helpers: one read each for the rules that cross the swing and cast paths.
   const mirrorReady = () => Boolean(bundleOf(c.keystones, 'mirror-strike'))
     && Boolean(rkH.flags.mirrorCrit) && clock.nowUs <= (rkH.icdsUs.mirrorUntil ?? 0);
@@ -1190,70 +1076,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
       if (copyStatus(s.mobStatus, target.id, other.id, 'shock', other.immune || [])) left--;
     }
   };
-  // Packet H upkeep: 04 Rage's idle reset and per-second HP drain, 11 Fortify's idle reset, 16 Bark's
-  // charge accumulation. All three read the absolute µs clock, never a mutable tick count.
-  const rkH = s.keystoneRuntime;
-  const redlineH = bundleOf(c.keystones, 'redline');
-  if (redlineH) {
-    const idleUs = Number(redlineH.params.idleResetSec) * units;
-    if (rkH.lastHitAtUs !== null && tickStartUs - rkH.lastHitAtUs >= idleUs) {
-      rkH.stacks.redline = 0;
-      rkH.lastHitAtUs = null;
-    }
-    const stacks = rkH.stacks.redline || 0;
-    if (stacks > 0) {
-      const drain = c.maxHp * (Number(redlineH.params.hpCostPctPerStackPerSec) / 100) * stacks;
-      if (s.player.hp - drain >= 1) s.player.hp -= drain;
-      else { s.player.hp = 1; rkH.stacks.redline = 0; }
-    }
-  }
-  const fortH = bundleOf(c.keystones, 'fortress-under-siege');
-  if (fortH && rkH.lastLossAtUs !== null
-    && tickStartUs - rkH.lastLossAtUs >= Number(fortH.params.resetSec) * units) rkH.stacks.fortress = 0;
-  // 43 Armourbreaker restores the initial Armour after 4s without a Physical Hit
-  const breakerH = bundleOf(c.keystones, 'armourbreaker');
-  if (breakerH) for (const m of s.group) {
-    const init = rkH.targetCounters[`ab:init:${m.id}`];
-    const last = rkH.icdsUs[`ab:last:${m.id}`];
-    if (init !== undefined && last !== undefined
-      && tickStartUs - last >= Number(breakerH.params.resetSec) * units) {
-      m.armour = init;
-      rkH.targetCounters[`ab:stacks:${m.id}`] = 0;
-      delete rkH.targetCounters[`ab:init:${m.id}`];
-      delete rkH.icdsUs[`ab:last:${m.id}`];
-    }
-  }
-  // `22` Demolition Sequence counts one body: whatever left the field takes its count and its summed
-  // HP loss with it, so a fifth Hit can never be paid against a target that is no longer there (§7.2).
-  for (const key of Object.keys(rkH.counters)) {
-    if (!key.startsWith('ds:hits:')) continue;
-    const gone = key.slice('ds:hits:'.length);
-    if (s.group.some((m) => m.id === gone)) continue;
-    delete rkH.counters[key];
-    delete rkH.targetCounters[`ds:loss:${gone}`];
-  }
-  // 57 Shield Gate rearms only after ES is full and its 8s cooldown has passed
-  const gateH = bundleOf(c.keystones, 'shield-gate');
-  if (gateH && !(rkH.flags.shieldGateArmed ?? true)
-    && s.player.es >= c.es && tickStartUs >= (rkH.icdsUs.shieldGateArmAt ?? 0)) rkH.flags.shieldGateArmed = true;
-  const barkH = bundleOf(c.keystones, 'barkskin');
-  if (barkH) {
-    const everyUs = Number(barkH.params.regenEverySec) * units;
-    const maxBark = Number(barkH.params.maxCharges);
-    let next = rkH.icdsUs.bark ?? tickStartUs + everyUs;
-    while (tickStartUs >= next && (rkH.stacks.bark || 0) < maxBark) {
-      rkH.stacks.bark = (rkH.stacks.bark || 0) + 1;
-      next += everyUs;
-    }
-    rkH.icdsUs.bark = next;
-  }
-  // a pool is bounded by what it is: never below nothing, never above what the sheet says it holds.
-  // The bars read these straight, so an unbounded value here is what shows as a negative number there.
-  // 52 lets the pool stand negative; without it the bar never reads below zero
-  s.player.mana = Math.min(debt52 ? s.player.mana : Math.max(0, s.player.mana), c.maxMana);
-  s.player.es = Math.min(Math.max(0, s.player.es), c.es);
-  // reservations hold the usable ceiling below Full Max HP, never below 1 (§7.5)
-  s.player.hp = Math.min(s.player.hp, usableHp(c, s.skills));
+  applyKeystonePrep(s, c, debt52, units, tickStartUs);
   const day = dayOf(s.clockSec);
   if (s.pedlar.day !== day || !s.pedlar.minutes.length) {
     s.pedlar = {
@@ -1262,320 +1085,36 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
       minutes: Array.from({ length: col.PEDLAR.per_day_cap }, () => col.pedlarPrice(rng())),
     };
   }
-  // Forward Mode follows the opened chapter ladder on foot. A newly discovered settlement still
-  // needs the player's first walk; known chapters become an online walk when the current band is behind.
-  // A Push returns to the last zone held and blocks re-entry until a level is gained against it.
-  if (online && s.travel === 'forward' && !s.dungeon && !s.walk && !s.patrol.active && s.autoReturn.phase === 'idle') {
-    const here = eng.zoneById(s.zone);
-    if (s.player.level > here.levels[1]) {
-      const next = eng.ZONES.find((z: any) => z.id > here.id
-        && s.town.visited.includes(settlementOfZone(z.id)?.id || ''));
-      const blocked = next && next.id === s.forwardBlockedZone
-        && s.player.level <= (s.forwardBlockedLevel ?? 0);
-      if (next && !blocked) {
-        const there = road.nodeById(settlementOfZone(next.id)?.id || '');
-        if (there) {
-          const walk = startWalk(s, { q: there.q, r: there.r, sub: null, wild: null });
-          if (walk.ok) {
-            s.forwardSafe = here.id; // the zone just left is the floor a Push falls back to
-            push(s, `Walking to ${next.name} (levels ${next.levels.join('-')})`);
-          }
-        }
-      }
-    }
-  }
-  if (s.lastAutoZone !== s.zone) {
-    // the game picks the set bound to the zone on its own (`skill-pool.md` Preset)
-    s.lastAutoZone = s.zone;
-    autoSelect(s, s.zone);
-  }
+  advanceForward(s, online);
   tickTown(s, rng);
   runExplorationAutomation(s, online);
 
-  if (s.phase === 'camp') {
-    s.campSec--;
-    s.player.hp = Math.min(c.maxHp, s.player.hp + c.hpRegen * 8);
-    if (s.campSec <= 0) {
-      if (finishPushAtCamp(s)) push(s, `Recovered at your field Camp in ${eng.zoneById(s.zone).name}`);
-      else {
-        s.phase = 'fighting';
-        push(s, `Back in ${eng.zoneById(s.zone).name} — the walk-back costs no items and no XP`);
-      }
-    }
-    return s;
-  }
+  if (advanceCampStage(s, c)) return s;
 
   // While walking, the character crosses one block per `block_sec`. No ambient zone group appears:
   // a walk is its own minute-to-minute activity — and it is ONLINE only, so an away period never
   // crosses a block and never opens a Waypoint it did not earn online.
-  if (online && s.walk) {
-    const walk = s.walk;
-    walk.secLeft--;
-    if (walk.secLeft <= 0 && !s.group.length) {
-      // the block is crossed: one encounter chance, then the next block starts
-      walk.blocksLeft--;
-      walk.blocksWalked++;
-      walk.secLeft = road.blockSec;
-      recordMapDiscovery(s);
-      // A crossed block says nothing: no number floats off the character and no line is logged for it —
-      // the walk reads as the one word on the field plus the route lighting itself off `blocksWalked`,
-      // one cell per block (`walkedCells`). Only arriving, and being ambushed, are events.
-      const trailEvent = resolveTravelEvent(s, rng);
-      if (trailEvent) {
-        const feet = currentCellForJournal(s);
-        s.mapJournal!.lastEvent = { ...feet, text: trailEvent, atSec: s.clockSec };
-        push(s, `Trail event · ${trailEvent}`);
-      }
-      if (walk.blocksLeft <= 0) {
-        const arrived = arrive(s, walk);
-        if (arrived) {
-          if (s.lastAutoZone !== s.zone) {
-            s.lastAutoZone = s.zone;
-            autoSelect(s, s.zone);
-          }
-          push(s, arrived.first
-            ? `Arrived on foot at ${arrived.name} — its Waypoint is open`
-            : `Arrived at ${arrived.name}`);
-          fx(s, { kind: 'travel', side: 'self', text: `arrived · ${arrived.name}`, colour: hitColour(null) });
-          runExplorationAutomation(s, online);
-        }
-      }
-    }
-  }
+  advanceWalkStage(s, online, rng);
 
   // leaving the run's zone ends the run: a dungeon is entered ground, not a destination
-  if (s.dungeon && s.dungeon.zone !== s.zone) push(s, abandonRun(s, 'Pulled out'));
+  
   function fieldProfile() {
-    return spawns.profileFor(s.zone, s.cell?.sub ?? null);
+    return spawns.profileFor(s.zone, s.cell?.sub ?? null, opts.online === false ? 'legacy' : 'live');
   }
 
-  function spawnFieldMob(slot: FieldSpawnSlot): Mob | undefined {
-    const field = s.field;
-    if (!field) return;
-    if (s.group.filter((mob) => mob.hp > 0).length >= field.slots.length) return;
-    const [lo, hi] = eng.groupRangeOf(s.zone, s.cell?.sub);
-    const expected = Math.max(1, (lo + hi) / 2);
-    const profile = fieldProfile();
-    const waveSec = Number(L.group_spawn_sec) + expected * Number(L.ttk_per_mob_sec);
-    const slotRate = Math.max(1e-9, field.slots.length / profile.respawn_sec);
-    let kind: 'normal' | 'elite' | 'boss' = 'normal';
-    let bossSpawn = false;
-    if (online && s.bossDueAt != null && s.clockSec >= s.bossDueAt
-      && !s.group.some((mob) => isBossKind(String(mob.kind)))) {
-      kind = 'boss';
-      bossSpawn = true;
-    } else {
-      // Preserve the old wave's Elite and Unique rates: one per the same expected seconds, not one
-      // per arbitrary slot roll. A faster refill therefore gets a proportionally smaller chance.
-      const eliteChance = eng.eliteChanceOf(s.zone, s.cell?.sub) / Math.max(1e-9, waveSec * slotRate);
-      const roll = mulberry32(spawnSlotSeed(s.seed, field.areaKey, slot.id, slot.respawnCount));
-      if (roll() < Math.min(1, eliteChance)) kind = 'elite';
-    }
-    const uniqueChance = Number(E.loot.unique_chance || 0) * expected / Math.max(1e-9, waveSec * slotRate);
-    if (bossSpawn) {
-      cancelArenaWork('boss-arena');
-      field.arenaEpoch++;
-    }
-    const rng = mulberry32(spawnSlotSeed(s.seed, field.areaKey, slot.id, slot.respawnCount));
-    const mob = spawnMob(rng, s.zone, kind, undefined, s.cell?.sub ?? null, { uniqueChance });
-    mob.spawnSlotId = slot.id;
-    slot.mobId = mob.id;
-    slot.respawnAtSec = 0;
-    slot.respawnCount++;
-    s.group.push(mob);
-    field.actors = field.actors.filter((actor) => actor.id !== mob.id);
-    field.actors.push({ id: mob.id, x: slot.home.x, y: slot.home.y });
-    if (bossSpawn) {
-      s.bossDueAt = s.clockSec + BOSS_EVERY_SEC;
-      push(s, `Boss spawn in ${eng.zoneById(s.zone).name}`);
-    }
-    return mob;
-  }
-
-  function ensureFieldPopulation(): void {
-    const field = s.field;
-    if (!field || s.walk || !s.hunting || s.dungeon || s.phase === 'camp' || s.player.hp <= 0) return;
-    if (!field.slots.length) syncFieldState(s, arena, 2, false);
-    if (online && !s.bossDueAt) s.bossDueAt = s.clockSec + BOSS_EVERY_SEC;
-    const living = new Set(s.group.filter((mob) => mob.hp > 0).map((mob) => mob.id));
-    // Without ground positions the away resolver keeps one active pull; the arena fills its authored
-    // cap. This is the A-lite seam that the dedicated offline throughput gate will tune.
-    const populationCap = arena ? field.slots.length : Math.min(1, field.slots.length);
-    for (const slot of field.slots) {
-      if (slot.mobId && living.has(slot.mobId)) continue;
-      if (slot.mobId) {
-        slot.mobId = undefined;
-        if (!(slot.respawnAtSec > s.clockSec)) slot.respawnAtSec = s.clockSec;
-      }
-      if (s.clockSec < slot.respawnAtSec) continue;
-      if (living.size >= populationCap) break;
-      const mob = spawnFieldMob(slot);
-      if (mob) living.add(mob.id);
-    }
-    s.group.sort((a, b) => (a.line === 'front' ? -1 : 1) - (b.line === 'front' ? -1 : 1));
-  }
-
-  // Dungeon runs keep their authored budget until that path is migrated to spawn slots.
-  if (!s.group.length && !s.walk && s.hunting && s.dungeon) {
-    const run = s.dungeon;
-    // A run fields the same authored population density as the field; `left` is the run budget.
-    const size = Math.min(spawns.profileFor(run.zone, s.cell?.sub ?? null).cap, Math.max(0, run.left));
-    if (size > 0) {
-      s.group = Array.from({ length: size }, () => spawnMob(rng, run.zone, 'normal'));
-      s.group.sort((m) => (m.line === 'front' ? -1 : 1));
-    }
-  }
-
-  if (!s.field || s.field.areaKey !== fieldAreaKey(s)) syncFieldState(s, arena, 2, false);
-  syncFieldState(s, arena, 2, false);
-  ensureFieldPopulation();
-  if (arena) syncCombatArena(arena, s, tickStartUs, units, c.maxHp);
+  advanceFieldPopulation(s, {
+    arena, c, online, rng, tickStartUs, units, cancelArenaWork, fieldProfile, spawnMob,
+  });
 
   // Engagement is spatial: only bodies inside aggro, an existing leash, an assist neighbour, or the
   // player's committed target may attack. The rest keep their home ground. The same resolver runs
   // again after every authoritative movement sample, so joining or leaving is not delayed a second.
-  type EngagementDelta = { added: string[]; removed: string[] };
-  /** Keep the saved field actor in step when the return flag changes mid-tick. */
-  function persistReturning(id: string, value: boolean): void {
-    const actor = s.field?.actors.find((entry) => entry.id === id);
-    if (!actor) return;
-    if (value) actor.returning = true;
-    else delete actor.returning;
-  }
-  /** The target a swing/aim selected this tick, even before an intent exists. */
-  let deliberateTargetId: string | undefined;
-  /**
-   * Home return is a committed state: a displaced ordinary body drops damage and may not be
-   * targeted again until it reaches its authored home band. Bosses and camp fights keep their own
-   * boundary policy, so they are never given this field immunity automatically.
-   */
-  function refreshReturning(atUs: number): void {
-    if (!arena || !s.field) return;
-    const campFight = s.fieldwork.campEncounters?.active?.stage === 'combat';
-    const band = Math.max(0.01, Number(fieldProfile().home_band_m) || 0.35);
-    const engaged = new Set(s.field.engagementIds);
-    for (const mob of s.group) {
-      const actor = arena.mobs[mob.id];
-      if (!actor || mob.hp <= 0) continue;
-      const slot = s.field.slots.find((entry) => entry.id === mob.spawnSlotId);
-      if (!slot) continue;
-      const ordinary = !campFight && !isBossKind(String(mob.kind));
-      const distance = arenaDistance(actor, slot.home);
-      if (!ordinary) { actor.returning = false; persistReturning(mob.id, false); continue; }
-      // The transition out of engagement owns the one reset and the persisted flag; this pass
-      // only releases the state once the body has actually reached its home band. A stale saved
-      // engagement id cannot cancel an in-progress return.
-      if (actor.returning) {
-        if (distance <= band + 1e-6) {
-          actor.returning = false;
-          persistReturning(mob.id, false);
-        }
-        continue;
-      }
-      if (engaged.has(mob.id)) continue;
-    }
-    if (arena.focusId && arena.mobs[arena.focusId]?.returning) {
-      const name = s.group.find((mob) => mob.id === arena!.focusId)?.species ?? 'Target';
-      arena.focusId = undefined;
-      push(s, `${name} is returning home`);
-    }
-    if (arena.intent?.targetId && arena.mobs[arena.intent.targetId]?.returning)
-      cancelIntent('target returning');
-  }
-  function syncEngagement(atUs: number): EngagementDelta {
-    const empty: EngagementDelta = { added: [], removed: [] };
-    if (!s.field) return empty;
-    const was = new Set(s.field.engagementIds);
-    if (!arena) {
-      if (!online) {
-        // A-lite offline duty: accumulate the authored engagement share and fight a solo pull only
-        // on whole engaged seconds. The population and slot timers still advance on wall time.
-        const profile = fieldProfile();
-        const credit = (s.field.offlineCredit ?? 0) + profile.offline_share;
-        const active = credit >= 1;
-        s.field.offlineCredit = active ? credit - 1 : credit;
-        s.field.engagementIds = active
-          ? s.group.filter((mob) => mob.hp > 0).slice(0, 1).map((mob) => mob.id) : [];
-      } else {
-        // An online host without the arena renderer (tests, headless settle) keeps every living
-        // body in the engagement set; the ground resolver is the only difference.
-        s.field.engagementIds = s.group.filter((mob) => mob.hp > 0).map((mob) => mob.id);
-      }
-      const now = new Set(s.field.engagementIds);
-      return {
-        added: [...now].filter((id) => !was.has(id)),
-        removed: [...was].filter((id) => !now.has(id)),
-      };
-    }
-    const profile = fieldProfile();
-    const next = new Set<string>();
-    const live = s.group.filter((mob) => mob.hp > 0 && arena.mobs[mob.id]
-      && !arena.mobs[mob.id].returning && insideHomeLeash(mob));
-    const campFight = s.fieldwork.campEncounters?.active?.stage === 'combat';
-    if ((s.hunting || campFight) && s.player.hp > 0) {
-      for (const mob of live) {
-        if (campFight || arenaDistance(arena.mobs[mob.id], arena.player) <= profile.aggro_m + 1e-7) next.add(mob.id);
-      }
-      for (const mob of live) {
-        if (!was.has(mob.id)) continue;
-        const slot = s.field.slots.find((entry) => entry.id === mob.spawnSlotId);
-        if (!slot || arenaDistance(arena.mobs[mob.id], slot.home) <= profile.leash_m + 1e-7) next.add(mob.id);
-      }
-      if (arena.intent?.targetId && live.some(mob => mob.id === arena.intent!.targetId)) next.add(arena.intent.targetId);
-      if (arena.focusId && live.some(mob => mob.id === arena.focusId)) next.add(arena.focusId);
-      if (deliberateTargetId && live.some(mob => mob.id === deliberateTargetId)) next.add(deliberateTargetId);
-      const basicTarget = arena.player.action?.targetId;
-      if (basicTarget && live.some(mob => mob.id === basicTarget)) next.add(basicTarget);
-      // Expand the spatial assist chain to a fixed point; queue order cannot decide who wakes.
-      const assisting = [...next];
-      for (let index = 0; index < assisting.length; index++) {
-        const source = arena.mobs[assisting[index]];
-        for (const mob of live) {
-          if (!next.has(mob.id) && arenaDistance(arena.mobs[mob.id], source) <= profile.assist_m + 1e-7) {
-            next.add(mob.id);
-            assisting.push(mob.id);
-          }
-        }
-      }
-    }
-    // A body that leaves its leash drops its damage and returns with its home pool, like a map
-    // reset; this is the same receipt whether it was pulled too far or the player left it behind.
-    const campFightNow = s.fieldwork.campEncounters?.active?.stage === 'combat';
-    for (const id of was) {
-      if (next.has(id)) continue;
-      const mob = s.group.find((entry) => entry.id === id);
-      if (!mob || mob.hp <= 0) continue;
-      mob.hp = mob.hpMax;
-      delete s.mobStatus[id];
-      delete s.curses[id];
-      const actor = arena.mobs[id];
-      if (actor && !campFightNow && !isBossKind(String(mob.kind))) {
-        actor.returning = true;
-        persistReturning(id, true);
-      }
-    }
-    s.field.engagementIds = [...next].slice(0, Math.max(1, s.field.slots.length));
-    const now = new Set(s.field.engagementIds);
-    const removed = [...was].filter((id) => !now.has(id));
-    for (const id of removed) {
-      const action = arena.mobs[id]?.action;
-      if (action && action.cancelledAtUs == null && action.releasedAtUs == null && !action.impactCount)
-        cancelMobPreparation(action, atUs, 'disengaged');
-    }
-    return { added: [...now].filter((id) => !was.has(id)), removed };
-  }
-  refreshReturning(tickStartUs);
-  syncEngagement(tickStartUs);
+  const engagement = createEngagementState();
+  const { syncEngagement, refreshReturning, insideHomeLeash } = advanceEngagement(s, {
+    arena, online, fieldProfile, cancelIntent, cancelMobPreparation, tickStartUs, state: engagement,
+  });
   // The per-fight potion budget belongs to a combat session, not to each spawn.
   if (syncFieldState(s, arena, 2, false)) s.farm.usesThisFight = 0;
-
-  /** Home leash is an outer bound for proximity, assistance and deliberate targeting alike. */
-  function insideHomeLeash(mob: Mob): boolean {
-    if (!arena || !s.field || s.fieldwork.campEncounters?.active?.stage === 'combat') return true;
-    const actor = arena.mobs[mob.id];
-    const slot = s.field.slots.find(entry => entry.id === mob.spawnSlotId);
-    return !!actor && (!slot || arenaDistance(actor, slot.home) <= fieldProfile().leash_m + 1e-7);
-  }
 
   /** A committed player target enters its aggro window only while its home leash still holds. */
   function engageTarget(targetId?: string): void {
@@ -1583,7 +1122,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     if (arena.mobs[targetId]?.returning) return;
     if (!s.group.some((mob) => mob.id === targetId && mob.hp > 0 && insideHomeLeash(mob))) return;
     if (s.field.engagementIds.includes(targetId)) return;
-    deliberateTargetId = targetId;
+    engagement.deliberateTargetId = targetId;
     const delta = syncEngagement(clock.nowUs);
     for (const id of delta.added) {
       const mob = s.group.find((entry) => entry.id === id && entry.hp > 0);
@@ -1653,14 +1192,14 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     });
     return ready ? Math.max(0, skillRange(ready) - 0.05) : playerStopRange;
   };
-  let cooldownAtUs = tickStartUs;
+  const cooldown = { atUs: tickStartUs };
   const advanceArenaAt = (atUs: number) => {
     if (!arena) return;
     const intent = arena.intent;
     // Whirlwind is the one mobile channel: its recovered primary action still permits movement.
     const channeling = intent?.phase === 'recovery' && !!intent.mobile;
-    if (manual?.moveTo) cancelPlayerBasic('manual move');
-    if (manual?.moveTo && intent?.phase === 'windup') cancelIntent('manual move');
+    if (manual?.moveTo || autoAvoid) cancelPlayerBasic(autoAvoid ? 'auto-avoid' : 'manual move');
+    if ((manual?.moveTo || autoAvoid) && intent?.phase === 'windup') cancelIntent(autoAvoid ? 'auto-avoid' : 'manual move');
     const basic = arena.player.action;
     const basicOwnsFeet = !!basic && basic.kind === 'swing' && !!basic.timing
       && basic.cancelledAtUs == null && atUs >= basic.timing.startedAtUs && atUs < actionFeetUntil(basic);
@@ -1678,10 +1217,10 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     }
     advanceCombatArena(arena, s, atUs, {
       playerRange: approachRange(),
-      playerSpeedMult: playerActiveFraction * (channeling ? (intent!.speedMult ?? 0.6) : 1),
+      playerSpeedMult: autoAvoid ? 1 : playerActiveFraction * (channeling ? (intent!.speedMult ?? 0.6) : 1),
       playerTargetId: intent?.targetId,
-      playerLocked: !channeling && (intent?.phase === 'windup' || intent?.phase === 'recovery' || basicOwnsFeet),
-      playerMoveTo: manual?.moveTo ?? placedApproach,
+      playerLocked: autoAvoid ? false : !channeling && (intent?.phase === 'windup' || intent?.phase === 'recovery' || basicOwnsFeet),
+      playerMoveTo: autoAvoid ? { x: autoAvoid.x, y: autoAvoid.y } : manual?.moveTo ?? placedApproach,
       engagedIds: new Set(s.field?.engagementIds ?? []),
       mobSpeedMult: (mob) => {
         return statusModsOn(s.mobStatus, mob.id).stopped ? 0 : 1;
@@ -1775,545 +1314,29 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     castTiming?: SkillCastTiming;
   };
 
-  function payCast(cast: Pick<PreparedSkillCast, 'manaCost' | 'hpCost'>) {
-    const debt = bundleOf(c.keystones, 'mana-debt');
-    const capac = bundleOf(c.keystones, 'capacitive-casting');
-    const manaBefore = s.player.mana;
-    s.player.mana = debt ? s.player.mana - cast.manaCost : Math.max(0, s.player.mana - cast.manaCost);
-    // 58 Capacitive Casting: 20% of FUNDED Mana spend returns as ES (borrowed Mana gives nothing)
-    if (capac && cast.manaCost > 0) {
-      s.player.es = Math.min(c.es, s.player.es + capacitiveEs(cast.manaCost,
-        Math.max(0, manaBefore - reservedMana(c, s.skills)), capac.params as Record<string, number>));
-    }
-    if (debt) {
-      // snapshot the borrow limit the moment the pool first crosses zero; a later MaxMana change
-      // never moves it, and reaching zero again clears it (§7.4.10)
-      if (s.player.mana < 0 && s.keystoneRuntime.manaDebtLimit === null) {
-        s.keystoneRuntime.manaDebtLimit = manaDebtFloor(usableMana(c, s.skills), debt.params as Record<string, number>);
-      } else if (s.player.mana >= 0) s.keystoneRuntime.manaDebtLimit = null;
-    }
-    if (cast.hpCost > 0) s.player.hp = Math.max(1, s.player.hp - cast.hpCost);
-  }
-
-  function castFx(id: string, area: SkillAreaSnapshot | undefined, targets: string[], actionId?: number,
-    timing?: SkillCastTiming, extra: { charges?: number; cleansed?: number } = {}) {
-    const skill = sm.byId[id];
-    fx(s, {
-      kind: 'cast', side: 'self', skillId: id, actionId, castTiming: timing,
-      text: String(skill?.name || id), colour: hitColour((skill as any)?.element || null),
-      skillOutcome: { targets, area, ...extra },
-    });
-  }
-
-  function applyCastOutcome(cast: CastReport | null, opts: CastOutcomeOptions = {}) {
-    if (!cast) return;
-    if (opts.pay !== false) payCast(cast);
-    if (cast.heal) s.healUp = cast.heal;
-    if (cast.charges != null) {
-      s.player.charges = cast.charges;
-      push(s, `${cast.name} grants ${cast.charges} perfect-dodge charges`);
-    }
-    if (cast.blockCharges != null) {
-      s.player.blockCharges = cast.blockCharges;
-      push(s, `${cast.name} grants ${cast.blockCharges} blocks`);
-    }
-    let cleansed = 0;
-    if (cast.cleansesSelf) {
-      const cleared = Object.keys(statuses).length;
-      cleansed = cleared;
-      for (const k of Object.keys(statuses) as StatusName[]) delete statuses[k];
-      if (cleared) push(s, `${cast.name} clears ${cleared} status${cleared > 1 ? '' : 'es'} off you`);
-    }
-    if (cast.instantHealPct) {
-      const healed = (c.maxHp * cast.instantHealPct) / 100;
-      const before = s.player.hp;
-      s.player.hp = Math.min(c.maxHp, s.player.hp + healed);
-      push(s, `${cast.name} restores ${eng.fmt(healed)} HP at once (${cast.instantHealPct}% of the pool)`);
-      // the pool's own answer, in the colour of the Element the press carried — the number the heal
-      // actually moved, not the number the row prices, so a top-off at full HP says what it did
-      fx(s, { kind: 'heal', side: 'self', skillId: cast.id, actionId: opts.actionId, text: `+${eng.fmt(s.player.hp - before)}`, colour: hitColour((sm.byId[cast.id] as any)?.element || null) });
-    }
-    if (cast.damage && cast.targets) push(s, `${cast.name} hits ${cast.targets} for ${eng.fmt(cast.damage)}${cast.crit ? ' (crit)' : ''}`);
-    // the press's colour comes from the row's own Element (`skills.json` `element`), the same field
-    // the status rider reads — a press with no Element name is the neutral half
-    const castElement = (sm.byId[cast.id] as any)?.element || null;
-    // one number per mob the press actually hurt, each on its own plate: the sim already decided how the
-    // share split and the mitigation landed on every target, so the screen shows that and not the total
-    for (const h of cast.byMob) {
-      fx(s, {
-        kind: 'hit', side: 'field', mobId: h.id, crit: cast.crit, via: 'cast', skillId: cast.id, actionId: opts.actionId,
-        text: eng.fmt(h.amount), value: h.amount, colour: hitColour(castElement, cast.crit),
-      });
-    }
-    if (cast.crit && cast.byMob[0]) queueTrigger(trig.crit, cast.byMob[0].id);
-    if (cast.name && opts.emitCast !== false) castFx(cast.id, cast.area,
-      cast.curseTargets ?? (cast.curseOn ? [cast.curseOn] : cast.byMob.map(hit => hit.id)),
-      opts.actionId, opts.castTiming, { charges: cast.charges ?? cast.blockCharges, cleansed });
-    if (cast.consumed?.length) push(s, `${cast.name} consumes ${cast.consumed.map((c) => `${c.stacks} ${c.status}`).join(', ')}`);
-    if (cast.spread?.length) push(s, `${cast.name} spreads ${cast.spread.map((c) => c.status).join(', ')}`);
-    if (cast.damage && !cast.targets) push(s, `${cast.name} was dodged`);
-    credit(s, 'cast', cast.dealt || 0);
-    // Bloodthirst: the press's direct damage leeches as the swing's does. The intrinsic leech
-    // line keeps its historical swing-only route; this is the bundle's own 3%.
-    const bloodthirst = bundleOf(c.keystones, 'bloodthirst');
-    const castDealt = cast.dealt ?? 0;
-    if (bloodthirst && castDealt > 0)
-      recoverLeech(castDealt * Number(bloodthirst.params.leechPct) / 100, clock.nowUs);
-    for (const targetId of cast.curseTargets ?? (cast.curseOn ? [cast.curseOn] : [])) {
-      const sec = applyCurse(s.curses, targetId, sm.byId[cast.id], c.keystones);
-      // a curse line that names a status clock (Venom Bind) is spent on the status store, not the
-      // curse store, because it changes how another line decays rather than adding a multiplier — and
-      // it is read back off the line the curse actually wrote, so `28` Malediction stretches it once
-      for (const e of (sm.byId[cast.id].effects || [])) {
-        if (e.subject === 'target' && e.stat === 'poison_hold_sec')
-          holdPoison(s.mobStatus, targetId, lineValue(s.curses, targetId, 'poison_hold_sec') || e.value);
-      }
-      push(s, `${cast.name} lands for ${sec} sec`);
-    }
-    // Trance counts every cast; Lucky Streak only moves on a damage press; Mirror Strike's
-    // banked crit is spent by the first press that actually lands on a target.
-    const trance = bundleOf(c.keystones, 'trance');
-    if (trance && opts.castCounter !== false) rkH.counters.tranceCasts = (rkH.counters.tranceCasts || 0) + 1;
-    const lucky = bundleOf(c.keystones, 'lucky-streak');
-    if (lucky && cast.damage > 0) rkH.stacks.luckyStreak = cast.crit
-      ? Math.min(Number(lucky.params.maxStacks), (rkH.stacks.luckyStreak || 0) + 1) : 0;
-    if (opts.mirror !== false && cast.targets > 0) rkH.flags.mirrorCrit = false;
-    while (s.group.some((mob) => mob.hp <= 0)) {
-      const dead = s.group.splice(s.group.findIndex((mob) => mob.hp <= 0), 1)[0];
-      onKill(s, rng, dead, c, statuses);
-    }
-  }
-
-  function applyCast(cast: CastReport | null) {
-    if (!cast) return;
-    applyCastOutcome(cast);
-  }
-
-  /**
-   * A trigger aura's press: the same `castOnce` the rotation uses, asking for the first ready slot in
-   * the cast order, with the aura's price on it. It spends the aura's own clock (`trigger_cd_sec`),
-   * never the skill's cooldown, so the trigger is an extra press rather than a re-ordered rotation.
-   */
-  function fireTrigger(aura: TriggerAura | null) {
-    if (!aura || playerActiveFraction <= 0 || (s.skills.cd[aura.id] || 0) > 0) return;
-    const free = tranceFree();
-    const force = mirrorReady();
-    const lucky = luckyBonus();
-    const trigger = { manaMult: aura.manaMult, damageMult: aura.damageMult };
-    const env = {
-      resolveTargetsForSkill,
-      mobStatus: s.mobStatus, curses: s.curses,
-      currentHp: s.player.hp,
-      missingHpPct: c.maxHp > 0 ? (1 - s.player.hp / c.maxHp) * 100 : 0,
-      isBoss: s.group.some((mob) => isBossKind(String(mob.kind))),
-      trigger,
-      timeUs: arena ? clock.nowUs : timeUs,
-      freeCast: free,
-      forceCrit: force,
-      critDamageBonusPct: lucky,
-      spatialTargets: !!arena,
-    };
-    if (!arena) {
-      const t = castOnce(s.skills, attackCharacter, spendableMana(attackCharacter, s.skills, s.player.mana), s.group, statuses, rng, env);
-      if (!t) return;
-      s.skills.cd[aura.id] = aura.cdSec;
-      push(s, `${sm.byId[aura.id].name} triggers ${t.name}`);
-      applyCast(t);
-      return;
-    }
-    const prepared = prepareFirstSkillCast(s.skills, attackCharacter,
-      spendableMana(attackCharacter, s.skills, s.player.mana), s.group, statuses, env);
-    if (!prepared) return;
-    s.skills.cd[aura.id] = aura.cdSec;
-    push(s, `${sm.byId[aura.id].name} triggers ${sm.byId[prepared.id].name}`);
-    launchTrigger(prepared, trigger, free, force, lucky, clock.nowUs);
-  }
-
-  /** Trigger auras are immediate, non-blocking casts: they own an action and flight but never the intent. */
-  function launchTrigger(
-    prepared: PreparedSkillCast, trigger: { manaMult: number; damageMult: number },
-    free: boolean, force: boolean, lucky: number, atUs: number,
-  ) {
-    if (!arena) return;
-    const skill = sm.byId[prepared.id];
-    if (!skill) return;
-    const profile = sm.castProfileOf(skill);
-    const timing = skillCastTiming({ ...profile, windup_sec: 0, recovery_sec: 0 }, atUs, units,
-      { x: arena.player.x, y: arena.player.y }, prepared.area?.center ?? { x: arena.player.x, y: arena.player.y },
-      Math.max(1e-7, c.globalSpeed || 1));
-    const targetId = prepared.targets[0]?.id ?? prepared.area?.targetId ?? arena.intent?.targetId ?? front?.id;
-    const previousAction = arena.player.action;
-    const wasMoving = arena.player.moving;
-    const action = arenaAction(arena, 'player', 'cast', atUs, targetId, prepared.id, prepared.area, timing);
-    if (previousAction) arena.player.action = previousAction;
-    arena.player.moving = wasMoving;
-    if (!action) return;
-    // The trigger owns its effect and flight; the primary pose stays with the action underneath.
-    updateArenaAction(arena, action.id, { nonblocking: true });
-    payCast(prepared);
-    const trance = bundleOf(c.keystones, 'trance');
-    if (trance) rkH.counters.tranceCasts = (rkH.counters.tranceCasts || 0) + 1;
-    if (force && skill.type === 'attack') rkH.flags.mirrorCrit = false;
-    const struck = prepared.area
-      ? targetsInSkillArea(prepared.area, arenaActors(s.group), profile.hit_radius_m).map((actor) => actor.mob.id)
-      : skill.type === 'attack' || skill.type === 'curse' ? prepared.targets.map((mob) => mob.id) : [];
-    castFx(prepared.id, prepared.area, struck, action.id, timing);
-    const missingHpPct = c.maxHp > 0 ? (1 - s.player.hp / c.maxHp) * 100 : 0;
-    const flight: CombatFlight = {
-      actionId: action.id, cast: prepared, character: attackCharacter,
-      modifiers: { trigger, forceCrit: force, critDamageBonusPct: lucky, freeCast: free, missingHpPct,
-        outgoingDamageMult: crippledOutgoingMult },
-      profile, timing,
-      source: { x: arena.player.x, y: arena.player.y },
-      destination: prepared.area?.center ?? { x: arena.player.x, y: arena.player.y },
-      area: prepared.area, position: { x: arena.player.x, y: arena.player.y }, lastCheckedAtUs: atUs,
-      areaKey: encounterKeyOf(s),
-    };
-    if (skill.type === 'heal' || skill.type === 'buff') {
-      const report = resolvePreparedCast(s.skills, attackCharacter, prepared, statuses, rng, {
-        mobStatus: s.mobStatus, curses: s.curses, timeUs: atUs, trigger, missingHpPct,
-      });
-      applyCastOutcome(report, { pay: false, emitCast: false, castCounter: false, mirror: false,
-        actionId: action.id, castTiming: timing });
-      return;
-    }
-    if (profile.delivery === 'projectile' || timing.impactAtUs > atUs) {
-      arena.flights.push(flight);
-      scheduleFlight(flight);
-      return;
-    }
-    resolveFlight(flight, atUs);
-  }
-
-  function advanceLiveClocks(atUs: number) {
-    if (!arena) return;
-    const elapsed = Math.max(0, atUs - cooldownAtUs) / units;
-    if (elapsed <= 0) return;
-    tickSkillCooldowns(s.skills, elapsed * c.globalSpeed * playerActiveFraction);
-    cooldownAtUs = atUs;
-  }
-
-  /** Cancel an unreleased player basic; a released swing keeps its pose and receipt. */
-  function cancelPlayerBasic(reason: string) {
-    const action = arena?.player.action;
-    if (!arena || !action || action.kind !== 'swing' || action.cancelledAtUs != null
-      || action.releasedAtUs != null || action.impactCount) return;
-    updateArenaAction(arena, action.id, { cancelledAtUs: clock.nowUs, cancelReason: reason, endsAtUs: clock.nowUs });
-    arena.player.action = undefined;
-  }
-
-  function cancelIntent(reason: string) {
-    const intent = arena?.intent;
-    if (!arena || !intent) return;
-    arena.intent = undefined;
-    const action = intent.actionId != null
-      ? arena.actions.find((entry) => entry.id === intent.actionId) : undefined;
-    // A normal recovery keeps its pose; a channel is owned by its primary action and stops at
-    // the control receipt instead of playing a tail the simulation already refused.
-    const cutsPose = intent.phase !== 'recovery' || !!intent.mobile || !!action?.channel;
-    if (!cutsPose || intent.actionId == null) return;
-    if (action && action.cancelledAtUs == null)
-      updateArenaAction(arena, action.id, { cancelledAtUs: clock.nowUs, cancelReason: reason, endsAtUs: clock.nowUs });
-    if (arena.player.action?.id === intent.actionId) arena.player.action = undefined;
-  }
-
-  function cancelArenaWork(reason: string) {
-    if (!arena) return;
-    cancelIntent(reason);
-    for (const flight of arena.flights) {
-      const action = arena.actions.find((entry) => entry.id === flight.actionId);
-      if (action && action.cancelledAtUs == null)
-        updateArenaAction(arena, action.id, { cancelledAtUs: clock.nowUs, cancelReason: reason, endsAtUs: clock.nowUs });
-    }
-    arena.flights = [];
-    for (const shot of arena.mobFlights) {
-      const action = arena.actions.find((entry) => entry.id === shot.actionId);
-      if (action && action.cancelledAtUs == null)
-        updateArenaAction(arena, action.id, { cancelledAtUs: clock.nowUs, cancelReason: reason, endsAtUs: clock.nowUs });
-    }
-    arena.mobFlights = [];
-    if (arena.player.action && arena.player.action.cancelledAtUs == null)
-      updateArenaAction(arena, arena.player.action.id, { cancelledAtUs: clock.nowUs, cancelReason: reason, endsAtUs: clock.nowUs });
-    arena.player.action = undefined;
-  }
-
-  /** Drop one released flight with its receipt; used when its encounter is no longer current. */
-  function cancelFlight(flight: CombatFlight, atUs: number, reason: string) {
-    if (!arena) return;
-    const at = arena.flights.indexOf(flight);
-    if (at >= 0) arena.flights.splice(at, 1);
-    const action = arena.actions.find((entry) => entry.id === flight.actionId);
-    if (action && action.cancelledAtUs == null)
-      updateArenaAction(arena, action.id, { cancelledAtUs: atUs, cancelReason: reason, endsAtUs: atUs });
-  }
-
   const areaChanged = (flight: CombatFlight) => !!flight.areaKey && flight.areaKey !== encounterKeyOf(s);
 
   const arenaActors = (group: Mob[]) => group.flatMap((mob) =>
     mob.hp > 0 && arena?.mobs[mob.id] && !arena.mobs[mob.id].returning
       ? [{ ...arena.mobs[mob.id], mob }] : []);
 
-  function startWindup(intent: CombatIntent, atUs: number) {
-    if (!arena) return;
-    const skill = sm.byId[intent.skillId];
-    if (!skill) { cancelIntent('missing skill'); return; }
-    const profile = sm.castProfileOf(skill);
-    const resolved = intentTargets(arena, s.group, intent);
-    const source = { x: arena.player.x, y: arena.player.y };
-    const destination = resolved.area?.center ?? source;
-    const timing = skillCastTiming(profile, atUs, units, source, destination,
-      Math.max(1e-7, c.globalSpeed || 1));
-    const action = arenaAction(arena, 'player', 'cast', atUs, intent.targetId, intent.skillId, resolved.area, timing);
-    if (!action) { arena.intent = undefined; return; }
-    intent.phase = 'windup';
-    intent.actionId = action.id;
-    intent.releaseAtUs = timing.releaseAtUs;
-    intent.recoveryUntilUs = timing.recoveryUntilUs;
-    intent.releaseQueued = false;
-    arena.intent = intent;
-    scheduleRelease(intent);
-  }
+  const { payCast, castFx, applyCastOutcome, applyCast, fireTrigger, launchTrigger } = createCastTrigger({
+    arena, clock, rng, s, c, attackCharacter, units, timeUs, statuses, rkH, front,
+    crippledOutgoingMult, playerActiveFraction, trig, queueTrigger, recoverLeech,
+    mirrorReady, luckyBonus, tranceFree, arenaActors, resolveTargetsForSkill,
+    resolveFlight, scheduleFlight, onKill,
+  });
 
-  function scheduleRelease(intent: CombatIntent) {
-    if (!arena || intent.releaseQueued || intent.releaseAtUs == null) return;
-    if (intent.releaseAtUs > tickEndUs) return;
-    intent.releaseQueued = true;
-    clock.schedule(intent.releaseAtUs, EVENT_PRIORITY.playerAction, 'player', intent.targetId, () => {
-      if (arena?.intent !== intent || intent.phase !== 'windup') return;
-      releaseIntent(clock.nowUs);
-    });
-  }
+  const { advanceLiveClocks, startWindup, scheduleRelease, releaseIntent } = createIntents({
+    arena, clock, rng, s, c, attackCharacter, units, tickEndUs, timeUs, statuses, rkH, front,
+    crippledOutgoingMult, playerActiveFraction, trig, cooldown, queueTrigger, recoverLeech,
+    mirrorReady, luckyBonus, tranceFree, resolveTargetsForSkill, resolveFlight, scheduleFlight,
+    applyCastOutcome, applyCast, payCast, castFx, cancelIntent, cancelPlayerBasic, cancelFlight,
+    fireTrigger,
+  });
 
-  function releaseIntent(atUs: number) {
-    const intent = arena?.intent;
-    if (!arena || !intent || intent.phase !== 'windup' || intent.actionId == null) return;
-    advanceLiveClocks(atUs);
-    const action = arena.actions.find((entry) => entry.id === intent.actionId);
-    if (!action || action.cancelledAtUs != null) { cancelIntent('action cancelled'); return; }
-    const skill = sm.byId[intent.skillId];
-    if (!skill) { cancelIntent('missing skill'); return; }
-    const profile = sm.castProfileOf(skill);
-    const free = tranceFree();
-    const force = mirrorReady();
-    const lucky = luckyBonus();
-    const env = {
-      mobStatus: s.mobStatus, curses: s.curses, currentHp: s.player.hp,
-      missingHpPct: c.maxHp > 0 ? (1 - s.player.hp / c.maxHp) * 100 : 0,
-      isBoss: s.group.some((mob) => isBossKind(String(mob.kind))),
-      timeUs: atUs, freeCast: free, forceCrit: force, critDamageBonusPct: lucky,
-      spatialTargets: true,
-      ...(intent.manual ? { ignoreConditions: true } : {}),
-      ...(intent.manual && intent.aimPoint ? { allowEmptyTarget: true } : {}),
-    };
-    // Re-aim at release: the bodies may have moved since windup began, so the
-    // committed footprint is recomputed from live positions instead of reusing the
-    // windup snapshot. Buffs and heals keep the windup aim; impact still re-tests
-    // living positions at impact for everything.
-    let releaseArea = action.area;
-    let releaseTargets = intentTargets(arena, s.group, intent, true).targets;
-    if (intent.manual && intent.aimPoint) {
-      // A manual ground request stays where it was placed, including empty permitted ground;
-      // range is still re-tested at release, and the impact reads living bodies at that point.
-      if (skill.area?.origin !== 'caster'
-        && arenaDistance(arena.player, intent.targetPoint) > arenaSkillRange(skill.id) + 1e-7) {
-        cancelIntent('out of range');
-        return;
-      }
-      const definition = skill.area ?? { origin: 'target' as const, radius_m: 0 };
-      releaseArea = skillAreaSnapshot(definition, arena.player, intent.targetPoint, intent.targetId, arena.player.facing);
-      releaseTargets = targetsInSkillArea(releaseArea, arenaActors(s.group)).map((actor) => actor.mob);
-    } else if (skill.type === 'attack' || skill.type === 'curse') {
-      const tracked = trackIntentAim(arena, s.group, intent);
-      if (!tracked) { cancelIntent('target lost'); return; }
-      intent.targetPoint = tracked.targetPoint;
-      const live = intentTargets(arena, s.group, intent, false);
-      if (!live.targets.length) { cancelIntent('target lost'); return; }
-      releaseArea = live.area;
-      releaseTargets = live.targets;
-      arena.intent = intent;
-    }
-    // The release is the committed receipt: travel and recovery are measured from the actual
-    // release source/aim, replacing the windup snapshot rather than keeping its old distance.
-    let chainHopRange = 0;
-    if (skill.action?.kind === 'chain-strike') {
-      const primary = s.group.find((mob) => mob.id === intent.targetId && mob.hp > 0);
-      if (!primary) { cancelIntent('target lost'); return; }
-      const pose = arena.mobs[primary.id];
-      releaseArea = { origin: 'target', radiusM: 0, targetId: primary.id,
-        center: pose ? { x: pose.x, y: pose.y } : { x: intent.targetPoint.x, y: intent.targetPoint.y } };
-      releaseTargets = [primary];
-      chainHopRange = Number(skill.area?.radius_m ?? 0) || 3;
-    }
-    const releaseSource = { x: arena.player.x, y: arena.player.y };
-    const releaseDestination = releaseArea?.center ?? releaseSource;
-    const releaseTiming = releasedSkillCastTiming(profile, action.timing?.startedAtUs ?? action.atUs,
-      atUs, units, releaseSource, releaseDestination, Math.max(1e-7, c.globalSpeed || 1));
-    intent.recoveryUntilUs = releaseTiming.recoveryUntilUs;
-    updateArenaAction(arena, action.id, { timing: releaseTiming, primaryTiming: releaseTiming, area: releaseArea,
-      targetId: releaseArea?.targetId ?? intent.targetId,
-      targetX: releaseArea?.center.x ?? releaseDestination.x, targetY: releaseArea?.center.y ?? releaseDestination.y });
-    const prepared = prepareSkillCast(s.skills, attackCharacter, intent.skillId,
-      spendableMana(attackCharacter, s.skills, s.player.mana), releaseTargets, statuses, env, releaseArea);
-    if (!prepared) { cancelIntent('not ready'); return; }
-    payCast(prepared);
-    const trance = bundleOf(c.keystones, 'trance');
-    if (trance) rkH.counters.tranceCasts = (rkH.counters.tranceCasts || 0) + 1;
-    if (force && skill.type === 'attack') rkH.flags.mirrorCrit = false;
-    const struck = releaseArea
-      ? targetsInSkillArea(releaseArea, arenaActors(s.group), profile.hit_radius_m).map((actor) => actor.mob.id)
-      : [intent.targetId];
-    castFx(intent.skillId, releaseArea, struck, action.id, releaseTiming);
-    intent.phase = 'recovery';
-    const flight: CombatFlight = {
-      actionId: action.id, cast: prepared, character: attackCharacter,
-      modifiers: { forceCrit: force, critDamageBonusPct: lucky,
-        freeCast: free, missingHpPct: env.missingHpPct, outgoingDamageMult: crippledOutgoingMult },
-      profile, timing: releaseTiming,
-      source: releaseSource,
-      destination: releaseDestination,
-      area: releaseArea, position: { x: releaseSource.x, y: releaseSource.y }, lastCheckedAtUs: atUs,
-      areaKey: encounterKeyOf(s),
-    };
-    if (skill.type === 'heal' || skill.type === 'buff') {
-      const report = resolvePreparedCast(s.skills, attackCharacter, prepared, statuses, rng, env);
-      applyCastOutcome(report, { pay: false, emitCast: false, castCounter: false, mirror: false,
-        actionId: action.id, castTiming: releaseTiming });
-      return;
-    }
-    if (skill.action?.kind === 'sand-field') {
-      const scaled = sm.effectsAt(skill, prepared.level) as { stat: string; value: number }[];      const dotSec = Math.max(0, Math.floor(Number(scaled.find((effect) => effect.stat === 'dot_sec')?.value ?? 0)));
-      const dotDps = Math.max(0, Number(scaled.find((effect) => effect.stat === 'dot_dps')?.value ?? 0));
-      for (const old of [...arena.flights]) {
-        if (old.cast.id !== skill.id) continue;
-        const at = arena.flights.indexOf(old);
-        if (at >= 0) arena.flights.splice(at, 1);
-        const oldAction = arena.actions.find((entry) => entry.id === old.actionId);
-        if (oldAction && oldAction.cancelledAtUs == null)
-          updateArenaAction(arena, oldAction.id, { cancelledAtUs: atUs, cancelReason: 'replaced', endsAtUs: atUs });
-      }
-      const flights: CombatFlight[] = [{ ...flight, fieldInitial: true, impactIndex: 0, impactSharePct: 100 }];
-      for (let index = 1; index <= dotSec; index++) {
-        flights.push({ ...flight, fieldPulseDamage: dotDps,
-          timing: { ...releaseTiming, impactAtUs: releaseTiming.releaseAtUs + index * units },
-          impactIndex: index, impactSharePct: 100 });
-      }
-      const lastImpact = releaseTiming.releaseAtUs + dotSec * units;
-      updateArenaAction(arena, action.id, {
-        endsAtUs: Math.max(action.endsAtUs, lastImpact + E.combat_arena.action_sec * units),
-      });
-      for (const entry of flights) {
-        arena.flights.push(entry);
-        scheduleFlight(entry);
-      }
-      return;
-    }
-    if (skill.action?.kind === 'chain-strike') {
-      const cache = newCastRollCache();
-      const count = Math.max(1, Number(String(skill.targets ?? '1').split('/')[0]) || 1);
-      const chained: CombatFlight = {
-        ...flight, rolls: cache, impactIndex: 0, impactSharePct: 100,
-        chain: {
-          visited: [releaseArea?.targetId ?? intent.targetId],
-          remaining: Math.max(0, count - 1),
-          hopRange: chainHopRange,
-          sharePct: 60,
-          intervalSec: 0.08,
-        },
-      };
-      arena.flights.push(chained);
-      scheduleFlight(chained);
-      return;
-    }
-    const actionDef = skill.action;
-    if (actionDef) {
-      const scaled = sm.effectsAt(skill, prepared.level) as { stat: string; value: number }[];
-      const count = Math.max(1, Number(scaled.find((effect) => effect.stat === 'hits')?.value ?? 1));
-      if (count > 1) {
-        const sharePct = Number(scaled.find((effect) => effect.stat === 'hit_pct')?.value ?? 100);
-        const cache = newCastRollCache();
-        const recoveryUs = Math.ceil(profile.recovery_sec / Math.max(1e-7, c.globalSpeed || 1) * units);
-        // One deployed field per caster-skill-arena: a deliberate recast replaces it at release and
-        // cancels only its unspent pulses. Resolved pulses and their rewards stay spent.
-        if (actionDef.kind === 'blizzard-field') {
-          for (const old of [...arena.flights]) {
-            if (old.cast.id !== skill.id) continue;
-            const at = arena.flights.indexOf(old);
-            if (at >= 0) arena.flights.splice(at, 1);
-            const oldAction = arena.actions.find((entry) => entry.id === old.actionId);
-            if (oldAction && oldAction.cancelledAtUs == null)
-              updateArenaAction(arena, oldAction.id, { cancelledAtUs: atUs, cancelReason: 'replaced', endsAtUs: atUs });
-          }
-        }
-        const flights: CombatFlight[] = [];
-        for (let index = 0; index < count; index++) {
-          let timing = releaseTiming;
-          let follow = false;
-          if (actionDef.kind === 'projectile-burst') {
-            const releaseAt = releaseTiming.releaseAtUs
-              + Math.round(index * Number(actionDef.interval_sec ?? 0.15) * units);
-            timing = { ...releaseTiming, releaseAtUs: releaseAt,
-              impactAtUs: releaseAt + Math.max(0, releaseTiming.impactAtUs - releaseTiming.releaseAtUs),
-              recoveryUntilUs: releaseAt + recoveryUs };
-          } else if (actionDef.kind === 'ground-pulse-burst') {
-            timing = { ...releaseTiming,
-              impactAtUs: releaseTiming.impactAtUs
-                + Math.round(index * Number(actionDef.interval_sec ?? 0.3) * units) };
-          } else if (actionDef.kind === 'blizzard-field') {
-            const durationSec = Number.parseFloat(String(skill.duration ?? '')) || 8;
-            timing = { ...releaseTiming,
-              impactAtUs: releaseTiming.releaseAtUs
-                + Math.round(durationSec * units * (index + 1) / count) };
-          } else {
-            // Whirlwind: a caster-following pulse at the authored share of its active window.
-            const activeUs = Number(actionDef.active_sec ?? 1.2) * units;
-            const impactAt = releaseTiming.releaseAtUs + Math.round(activeUs * (index + 1) / count);
-            timing = { ...releaseTiming, impactAtUs: impactAt, recoveryUntilUs: impactAt + recoveryUs };
-            follow = true;
-          }
-          flights.push({ ...flight, timing, ...(follow ? { follow: true } : {}),
-            impactIndex: index, impactSharePct: sharePct, rolls: cache });
-        }
-        if (actionDef.kind === 'whirlwind-channel') {
-          intent.mobile = true;
-          intent.speedMult = Number(actionDef.movement_speed_mult ?? 0.6);
-          intent.recoveryUntilUs = Math.max(...flights.map((entry) => entry.timing.impactAtUs)) + recoveryUs;
-          updateArenaAction(arena, action.id, {
-            channel: true,
-            timing: { ...releaseTiming, recoveryUntilUs: intent.recoveryUntilUs },
-            primaryTiming: { ...releaseTiming, recoveryUntilUs: intent.recoveryUntilUs },
-          });
-        } else if (actionDef.kind === 'projectile-burst') {
-          intent.recoveryUntilUs = Math.max(...flights.map((entry) => entry.timing.releaseAtUs)) + recoveryUs;
-          updateArenaAction(arena, action.id, {
-            channel: true,
-            timing: { ...releaseTiming, recoveryUntilUs: intent.recoveryUntilUs },
-          });
-        }
-        const lastImpact = Math.max(...flights.map((entry) => entry.timing.impactAtUs));
-        updateArenaAction(arena, action.id, {
-          endsAtUs: Math.max(action.endsAtUs, lastImpact + E.combat_arena.action_sec * units),
-        });
-        for (const entry of flights) {
-          arena.flights.push(entry);
-          scheduleFlight(entry);
-        }
-        return;
-      }
-    }
-    if (profile.delivery === 'projectile') {
-      arena.flights.push(flight);
-      scheduleFlight(flight);
-      return;
-    }
-    if (action.timing && action.timing.impactAtUs > atUs) {
-      arena.flights.push(flight);
-      scheduleFlight(flight);
-      return;
-    }
-    resolveFlight(flight, atUs);
-  }
 
-  function scheduleFlight(flight: CombatFlight) {
+function scheduleFlight(flight: CombatFlight) {
     if (!arena || flight.queued) return;
     if (flight.profile.delivery === 'projectile') {
       const action = arena.actions.find(entry => entry.id === flight.actionId);
@@ -2452,6 +1475,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     }
   }
 
+
   function ensureIntent(atUs: number) {
     if (!arena) return;
     let intent = arena.intent;
@@ -2528,227 +1552,14 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
 
   // §7.1: the basic swing is expanded from accumulated progress into absolute-µs events, so a stop,
   // a rate change or a kill inside the window moves the queue instead of replaying the second.
-  const playerRate = playerHitsPerSec * playerActiveFraction;
-  // 42 Crushing Rhythm: the basic clock is capped and the real excess rate becomes one damage
-  // multiplier on the swing (an already-slow weapon is never hurried and Slow still binds).
-  const crush = bundleOf(c.keystones, 'crushing-rhythm');
-  const crushNow = crush ? crushingRhythm(playerRate, crush.params as Record<string, number>) : null;
-  const playerPlan = planAttacks(tickStartUs, s.player.atkTimer, crushNow ? crushNow.actualRate : playerRate, units);
-  s.player.atkTimer = playerPlan.progressAtEnd;
-  let swingsStopped = false;
-  for (const atUs of playerPlan.times) {
-    clock.schedule(atUs, EVENT_PRIORITY.playerAction, 'player', front?.id ?? '', () => {
-      if (swingsStopped) return;
-      if (!arena && !online && !fieldInFight(s)) return;
-      // A local move order pauses new automatic primary attacks until it arrives.
-      if (manual?.moveTo) return;
-      if (arena?.intent && (arena.intent.phase === 'windup' || arena.intent.phase === 'recovery')) return;
-      advanceArenaAt(clock.nowUs);
-      const intended = arena?.intent?.targetId
-        ? s.group.find((mob) => mob.id === arena.intent!.targetId && mob.hp > 0) : undefined;
-      const target = arena ? intended ?? arenaTarget(arena, s.group) : s.group[0];
-      if (!target) { swingsStopped = true; return; }
-      if (arena && !arenaPlayerInReach(arena, c.weaponName, target.id)) return;
-      engageTarget(target.id);
-      if (!arena) { resolvePlayerBasic(target, clock.nowUs); return; }
-      const profile = playerAttackProfile(c.weaponName);
-      const intervalUs = Math.round(units / Math.max(1e-9, playerRate));
-      const phase = basicPhaseBudget(profile, intervalUs);
-      const releaseAtUs = clock.nowUs + phase.windupUs;
-      const timing: SkillCastTiming = {
-        delivery: profile.delivery, startedAtUs: clock.nowUs, releaseAtUs,
-        impactAtUs: releaseAtUs, recoveryUntilUs: releaseAtUs + phase.recoveryUs,
-      };
-      const action = arenaAction(arena, 'player', 'swing', clock.nowUs, target.id, undefined, undefined, timing);
-      if (action) {
-        updateArenaAction(arena, action.id, { areaKey: encounterKeyOf(s) });
-        schedulePlayerBasic(action, target);
-      }
-    });
-  }
+  const { schedulePlayerBasic } = createPlayerBasicActions({
+    arena, clock, rng, s, c, attackCharacter, units, tickStartUs, tickEndUs, online, manual,
+    crippledOutgoingMult, unstoppablePenalty, berserkDealt, playerHitsPerSec, playerActiveFraction,
+    statuses, trig, queueTrigger, recoverLeech, mobMods, mobPlans, spreadShock, mirrorReady,
+    luckyBonus, advanceArenaAt, engageTarget, cancelIntent, onKill, dominantElement,
+    applyEquilibrium, revertEquilibrium,
+  });
 
-  /** Apply the canonical player basic at its contact beat; the caller owns validation. */
-  function resolvePlayerBasic(target: Mob, atUs: number): void {
-      const tm = mobMods(target.id);
-      // Packet H action history: 04 Rage, 12 Worthy Foe and 32 Instruments all ride the one Hit
-      // multiplier, composed here so each condition is read at the event's own time.
-      const rk = s.keystoneRuntime;
-      const redline = bundleOf(c.keystones, 'redline');
-      const instruments = bundleOf(c.keystones, 'instruments-of-virtue');
-      const worthy = bundleOf(c.keystones, 'worthy-foe');
-      const worthyNow = worthy ? worthyFoe(rk.counters[target.id] || 0, worthy.params as Record<string, number>) : { dealtMult: 1, takenMult: 1 };
-      const hitMult = (crushNow ? crushNow.damageMult : 1) * berserkDealt * unstoppablePenalty * crippledOutgoingMult
-        * (redline ? redlineDamageMult(redline.params as Record<string, number>, rk.stacks.redline || 0) : 1)
-        * worthyNow.dealtMult
-        * (instruments ? instrumentsMult(rk.lastAction, 'attack', instruments.params as Record<string, number>) : 1);
-      // `10` Painforged spends its bank on this Hit as flat Physical, before the crit roll (§7.2.2)
-      const forged = bundleOf(c.keystones, 'painforged');
-      const lucky = bundleOf(c.keystones, 'lucky-streak');
-      const forceMirror = mirrorReady();
-      const hpBefore = target.hp;
-      const r = playerSwing(rng, attackCharacter, target, c.weaponElement, tm, atUs, hitMult,
-        forged ? rk.stacks.painforged || 0 : 0, forceMirror, luckyBonus());
-      if (r.landed) {
-        if (forceMirror) rk.flags.mirrorCrit = false;
-        if (lucky) rk.stacks.luckyStreak = r.crit
-          ? Math.min(Number(lucky.params.maxStacks), (rk.stacks.luckyStreak || 0) + 1) : 0;
-        if (forged) rk.stacks.painforged = 0;
-        if (worthy) {
-          for (const id of Object.keys(rk.counters)) if (id !== target.id) delete rk.counters[id];
-          rk.counters[target.id] = (rk.counters[target.id] || 0) + 1;
-        }
-        if (redline) {
-          rk.stacks.redline = Math.min(Number(redline.params.maxStacks), (rk.stacks.redline || 0) + Number(redline.params.hitStacks));
-          rk.lastHitAtUs = atUs;
-        }
-        if (instruments) rk.lastAction = 'attack';
-        // `66` Elemental Conduit: the as-extra lane this Hit carried gets its own separate status
-        // attempt per Element — the same gate, proc and immunity every other status answer.
-        const conduit = bundleOf(c.keystones, 'elemental-conduit');
-        const extraLane = conduit ? r.packet?.parts.extraElement || {} : {};
-        // the weapon's own riders — Element status, bleed and stun — on the swing's own hit, and on a
-        // landing press too (§14), through one function so the two cannot drift
-        applyWeaponRiders(rng, c, s.mobStatus, target.id, lineValue(s.curses, target.id, 'bleed_chance') > 0, 0, 0, target.immune || [], extraLane);
-        spreadShock(target);
-        // `09` Crimson Pact and `20` Toxic Execution: the physical this Hit withheld is not lost, it is
-        // written on the target's own status clock — no Alignment gate and no proc roll, because the
-        // bundle already decided the application. Immunity is the only thing that answers it.
-        if (r.bleed) placeKeystoneDoT(s.mobStatus, target.id, 'bleed', r.bleed.perSec, r.bleed.sec, 0, target.immune || []);
-        if (r.poison) placeKeystoneDoT(s.mobStatus, target.id, 'poison', r.poison.perSec, r.poison.sec, r.poison.budgetDps, target.immune || []);
-        // `30` Elemental Equilibrium: the Element that carried this Hit decides which line the target
-        // resists harder from here, and which it stops resisting (its own seconds, then it lapses).
-        const eq = bundleOf(c.keystones, 'elemental-equilibrium');
-        if (eq && r.packet) {
-          const dominant = dominantElement(r.packet.parts);
-          if (dominant) applyEquilibrium(target, dominant, eq.params as Record<string, number>, s.clockSec);
-        }
-        // `60` Plague Courier: a crit sends one Burn, Poison or Bleed off a neighbour and onto the body
-        // the crit landed on, with the damage and the life it had left. A transfer that immunity
-        // refuses costs nothing, so the ICD waits for the next crit (§7.6).
-        const plague = bundleOf(c.keystones, 'plague-courier');
-        if (plague && r.crit && clock.nowUs >= (rk.icdsUs.plagueCourier ?? 0)) {
-          const carrier = s.group.find((m) => m !== target && carriesTransferable(s.mobStatus, m.id));
-          if (carrier && transferStatus(s.mobStatus, carrier.id, target.id, target.immune || []))
-            rk.icdsUs.plagueCourier = clock.nowUs + Number(plague.params.icdSec) * units;
-        }
-        // a swing that gives back HP is two events, not one: the blow the mob sees and the return the
-        // character feels, each on its own half of the field
-        recoverLeech(r.leech || 0, atUs);
-        credit(s, 'swing', r.damage);
-        // 21 Delayed Demolition: the deferred share is queued against this target and lost if it dies
-        if (r.deferred && r.deferred > 0) {
-          const dd = bundleOf(c.keystones, 'delayed-demolition')!;
-          s.keystoneRuntime.queues.deferred.push({
-            dueAtUs: atUs + Number(dd.params.delaySec) * units, amount: r.deferred,
-            sourceId: 'player', targetId: target.id,
-          });
-        }
-        // `22` Demolition Sequence: five landed Hits that actually took Health off this one body sum
-        // their loss, and the fifth spends it — a blast worth a share of that sum on the body itself
-        // and the weakest neighbour still standing. DoT, deferred damage and this blast count for
-        // nothing, and changing the target before the fifth Hit clears the sum (§7.2).
-        const seq = bundleOf(c.keystones, 'demolition-sequence');
-        const realLoss = Math.max(0, hpBefore - target.hp);
-        if (seq && realLoss > 0) {
-          const hitsKey = `ds:hits:${target.id}`;
-          const lossKey = `ds:loss:${target.id}`;
-          const hits = (rk.counters[hitsKey] || 0) + 1;
-          const summed = (rk.targetCounters[lossKey] || 0) + realLoss;
-          if (hits >= Number(seq.params.hits)) {
-            rk.counters[hitsKey] = 0;
-            rk.targetCounters[lossKey] = 0;
-            const promised = demolitionBlast(summed, seq.params as Record<string, number>);
-            const element = String(seq.params.element);
-            const neighbours = s.group.filter((m) => m !== target && m.hp > 0)
-              .sort((a, b) => a.hp - b.hp || (a.id < b.id ? -1 : 1))
-              .slice(0, Number(seq.params.extraTargets));
-            for (const hit of [target, ...neighbours]) {
-              const dealt = eng.mitigateMobHit(hit, 0, { [element]: promised });
-              if (!(dealt > 0)) continue;
-              hit.hp -= dealt;
-              credit(s, 'swing', dealt);
-              fx(s, { kind: 'hit', side: 'field', mobId: hit.id, via: 'swing', text: eng.fmt(dealt), value: dealt, colour: hitColour(element) });
-            }
-            push(s, `Demolition Sequence detonates for ${eng.fmt(promised)}`);
-            while (s.group.some((m) => m.hp <= 0)) {
-              const dead = s.group.splice(s.group.findIndex((m) => m.hp <= 0), 1)[0];
-              delete rk.counters[`ds:hits:${dead.id}`];
-              delete rk.targetCounters[`ds:loss:${dead.id}`];
-              onKill(s, rng, dead, c, statuses);
-            }
-          } else {
-            rk.counters[hitsKey] = hits;
-            rk.targetCounters[lossKey] = summed;
-          }
-        }
-        // 43 Armourbreaker: each landed Physical Hit breaks 5% of the target's initial Armour
-        const breaker = bundleOf(c.keystones, 'armourbreaker');
-        const physical = (r.packet?.parts.physicalCritEligible || 0) + (r.packet?.parts.physicalNonCrit || 0);
-        if (breaker && physical > 0) {
-          const initKey = `ab:init:${target.id}`;
-          const stackKey = `ab:stacks:${target.id}`;
-          if (s.keystoneRuntime.targetCounters[initKey] === undefined) s.keystoneRuntime.targetCounters[initKey] = target.armour;
-          const init = s.keystoneRuntime.targetCounters[initKey];
-          const broken = armourBreak(init, s.keystoneRuntime.targetCounters[stackKey] || 0, breaker.params as Record<string, number>);
-          s.keystoneRuntime.targetCounters[stackKey] = broken.stacks;
-          target.armour = broken.armour;
-          s.keystoneRuntime.icdsUs[`ab:last:${target.id}`] = clock.nowUs;
-        }
-        // 46 delays the action clock, including pending telegraphs, without applying Shock's debuff.
-        const disrupt = bundleOf(c.keystones, 'disrupting-blows');
-        if (disrupt && disruptingStop(r.damage, target.hpMax, disrupt.params as Record<string, number>)) {
-          const delaySec = Number(disrupt.params.stopSec);
-          const plan = mobPlans.find((entry) => entry.mob === target);
-          if (plan && spendControlBudget(s.mobStatus, target.id, delaySec)) {
-            clock.delayActor(target.id, delaySec * units);
-            target.atkTimer -= plan.rate * delaySec;
-          }
-        }
-        fx(s, {
-          kind: 'hit', side: 'field', mobId: target.id, crit: r.crit, via: 'swing',
-          text: eng.fmt(r.damage), value: r.damage, colour: hitColour(r.element || null, r.crit),
-        });
-        if (r.crit) {
-          push(s, `Crit for ${eng.fmt(r.damage)} (${target.species})`);
-          queueTrigger(trig.crit, target.id);
-        }
-        if (target.hp <= 0) {
-          // a Detonation above may already have taken this body off the field, and a kill credits once
-          if (s.group.includes(target)) {
-            s.group.splice(s.group.indexOf(target), 1);
-            onKill(s, rng, target, c, statuses);
-          }
-          if (arena?.intent?.targetId === target.id) cancelIntent('target lost');
-          s.player.atkTimer = 0;
-          swingsStopped = true;
-        }
-      } else if (r.why) {
-        // a swing the mob answered without taking pops its word on that mob's own corner, the way a
-        // landed blow pops its number — a dodge reads where the dodger stands, never in a shared column.
-        fx(s, { kind: 'block', side: 'field', mobId: target.id, text: r.why, colour: hitColour(null) });
-      }
-  }
-
-  /** Release the player's prepared basic at its committed beat. */
-  function schedulePlayerBasic(action: CombatArenaAction, target: Mob): void {
-    if (!arena || !action.timing || action.releasedAtUs != null) return;
-    const atUs = Math.max(tickStartUs, action.timing.releaseAtUs);
-    if (atUs > tickEndUs) return;
-    clock.schedule(atUs, EVENT_PRIORITY.playerAction, 'player', target.id, () => {
-      const current = arena.actions.find(entry => entry.id === action.id);
-      if (!current || current.cancelledAtUs != null || current.impactCount || current.releasedAtUs != null) return;
-      advanceArenaAt(clock.nowUs);
-      if (!arena.actions.includes(current) || current.cancelledAtUs != null) return;
-      updateArenaAction(arena, current.id, {
-        impactCount: 1, releasedAtUs: clock.nowUs,
-        timing: { ...(current.timing as SkillCastTiming), impactAtUs: clock.nowUs },
-      });
-      if (target.hp <= 0 || !s.group.includes(target) || s.player.hp <= 0) return;
-      if (arena.mobs[target.id]?.returning) return;
-      if (!arenaPlayerInReach(arena, c.weaponName, target.id)) return;
-      resolvePlayerBasic(target, clock.nowUs);
-    });
-  }
   // The rotation presses at t0 (§7.1 priority 30), before the window's own swing events.
   clock.schedule(tickStartUs, EVENT_PRIORITY.playerAction, 'player', front?.id ?? '', () => {
     // the rotation casts the first ready, affordable slot top-down — no manual presses.
@@ -2797,7 +1608,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
         });
       }
       if (arena) {
-        cooldownAtUs = tickStartUs;
+        cooldown.atUs = tickStartUs;
         ensureIntent(tickStartUs);
       } else {
         const cast = castOnce(s.skills, attackCharacter, spendableMana(attackCharacter, s.skills, s.player.mana), s.group, statuses, rng, {
@@ -2877,339 +1688,14 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
    * One incoming direct hit, resolved wherever it actually lands. The caller owns release-range,
    * target and opportunity checks; defence, statuses and keystone reactions read live state here.
    */
-  function resolveIncomingHit(mob: Mob, plannedSkill: MobSkillRow | undefined, rng: () => number, live: Mob = mob) {
-    const tm = mobMods(mob.id);
-    let hurt = false;
-    // Blur: every third direct Hit is a Perfect Dodge. It is its own rule, not a roll.
-    const blur = bundleOf(c.keystones, 'blur');
-    if (blur) {
-      rkH.counters.blurHits = (rkH.counters.blurHits || 0) + 1;
-      if (rkH.counters.blurHits >= Number(blur.params.hitsPerDodge)) {
-        rkH.counters.blurHits = 0;
-        fx(s, { kind: 'proc', side: 'self', byId: mob.id, skillId: plannedSkill?.id, text: 'perfect dodge', colour: hitColour(null) });
-        return;
-      }
-    }
-    // a Ghost Dance charge deletes the hit outright and is not opposed: it goes before the
-    // rolls, which is the whole difference between it and Dodge
-    if ((s.player.charges || 0) > 0) {
-      s.player.charges!--;
-      return;
-    }
-    // 03's always-on take-more line and 12's duel defence are per incoming Hit and per target
-    const worthyT = bundleOf(c.keystones, 'worthy-foe');
-    const duel = worthyT ? worthyFoe(rkH.counters[mob.id] || 0, worthyT.params as Record<string, number>) : { dealtMult: 1, takenMult: 1 };
-    const takenChar = {
-      ...c,
-      damageTaken: (c.damageTaken ?? 1)
-        * (berserk ? Number(berserk.params.takenMult) : 1) * duel.takenMult,
-    };
-    const mobSkill = plannedSkill;
-    const r = mobSwing(rng, takenChar, mob, statuses, tm, s.player.es, absorbPct, (s.player.blockCharges || 0) > 0, s.player.hp);
-    // Mirror Strike: the Evasion success banks the next player Hit's crit.
-    const mirror = bundleOf(c.keystones, 'mirror-strike');
-    if (mirror && r.blocked === 'evasion') {
-      rkH.flags.mirrorCrit = true;
-      rkH.icdsUs.mirrorUntil = clock.nowUs + Number(mirror.params.windowSec) * units;
-      push(s, 'Mirror Strike banks a guaranteed crit');
-    }
-    if (mobSkill && online) push(s, `${mob.species} uses ${mobSkill.name}`);
-    // an Earth Wall charge answered the swing: it is spent whether the shield rolled or not
-    if (r.blockChargeSpent) s.player.blockCharges!--;
-    // `10` Painforged: what a Block actually took off this Hit is banked, up to its share of Max HP,
-    // and the next swing spends the whole of it as flat Physical. Turtle Doctrine's expected cut is
-    // not a Block event, so it feeds the bank nothing (§7.3.3).
-    const forgedIn = bundleOf(c.keystones, 'painforged');
-    if (forgedIn && r.blockCut) {
-      rkH.stacks.painforged = painforgedBank(rkH.stacks.painforged || 0, r.blockCut, c.maxHp,
-        forgedIn.params as Record<string, number>);
-    }
-    // Riposte: a real Block sends its prevented damage back, on its own ICD.
-    const riposte = bundleOf(c.keystones, 'riposte');
-    const blockedCut = r.blockCut ?? 0;
-    if (riposte && blockedCut > 0 && clock.nowUs >= (rkH.icdsUs.riposte ?? 0)) {
-      const promised = blockedCut * Number(riposte.params.reflectMult);
-      const dealt = eng.mitigateMobHit(live, promised, 0);
-      if (dealt > 0) {
-        live.hp -= dealt;
-        rkH.icdsUs.riposte = clock.nowUs + Number(riposte.params.icdSec) * units;
-        credit(s, 'swing', dealt);
-        fx(s, { kind: 'hit', side: 'field', mobId: mob.id, via: 'swing', text: eng.fmt(dealt), value: dealt, colour: hitColour(null) });
-        push(s, `Riposte answers ${mob.species} for ${eng.fmt(dealt)}`);
-        if (live.hp <= 0 && s.group.includes(live)) {
-          s.group.splice(s.group.indexOf(live), 1);
-          onKill(s, rng, live, c, statuses);
-        }
-      }
-    }
-    if (r.leech && r.leech > 0) live.hp = Math.min(live.hpMax, live.hp + r.leech);
-    // 11 Fortify cuts every later Hit by its stacks; 16 Bark spends one charge on a Hit that lands
-    const fortNow = bundleOf(c.keystones, 'fortress-under-siege');
-    const barkNow = bundleOf(c.keystones, 'barkskin');
-    let toEs = r.toEs;
-    let toHp = r.toHp;
-    if (fortNow) {
-      const reduction = Math.max(0, 1 - Math.min(Number(fortNow.params.maxStacks), rkH.stacks.fortress || 0)
-        * Number(fortNow.params.reductionPctPerStack) / 100);
-      toEs *= reduction;
-      toHp *= reduction;
-    }
-    if (barkNow && toEs + toHp > 0 && (rkH.stacks.bark || 0) > 0) {
-      const taken = Number(barkNow.params.hitTakenMult);
-      toEs *= taken;
-      toHp *= taken;
-      rkH.stacks.bark!--;
-    }
-    // a defence is an event too: the screen has to say *which* answer stopped the hit, because
-    // Block, Evasion and a perfect dodge animate differently and the player reads them apart. Either way
-    // the striker is named, so the body that swung can lean into its own blow.
-    if (r.blocked) fx(s, { kind: 'block', side: 'self', byId: mob.id, skillId: plannedSkill?.id, text: r.blocked, colour: hitColour(null) });
-    // 23 Ghost Dance: an Evasion success (not Perfect Dodge) recovers ES on its own ICD
-    const ghost = bundleOf(c.keystones, 'ghost-dance');
-    if (ghost && r.blocked === 'evasion' && clock.nowUs >= (rkH.icdsUs.ghostDance ?? 0)) {
-      const gained = ghostDanceRecovery(c.evasion, c.es, ghost.params as Record<string, number>);
-      s.player.es = Math.min(c.es, s.player.es + gained);
-      rkH.icdsUs.ghostDance = clock.nowUs + Number(ghost.params.icdSec) * units;
-    }
-    // `cast_on_damage_taken` listens for any hit that actually took off the player (HP or shield)
-    if (toHp > 0 || toEs > 0) {
-      hurt = true;
-      // the incoming number wears the attacker's own Element, the same line the resistance roll
-      // answered — a chaos hit reads purple whether or not the shield ate it
-      fx(s, {
-        kind: 'taken', side: 'self', byId: mob.id, skillId: plannedSkill?.id,
-        text: eng.fmt(toHp + toEs), value: toHp + toEs,
-        hpDamage: toHp, esDamage: toEs,
-        colour: hitColour(mob.innate?.[0] || null),
-      });
-    }
-    if (r.absorbed > 0) s.player.es = Math.min(c.es, s.player.es + r.absorbed);
-    const gate = bundleOf(c.keystones, 'shield-gate');
-    const esBefore = s.player.es;
-    if (toEs > 0) { s.player.es -= toEs; if (!buffRuleUp(s.skills, 'es_recharge_immediate')) s.player.esIdleSec = 0; }
-    if (gate && shieldGateHolds(esBefore, s.player.es, rkH.flags.shieldGateArmed ?? true)) {
-      // the overflow of the Hit that broke the shield does not reach HP; the gate disarms
-      toHp = 0;
-      rkH.flags.shieldGateArmed = false;
-      rkH.icdsUs.shieldGateArmAt = clock.nowUs + Number(gate.params.rearmCdSec) * units;
-    }
-    if (toHp > 0) {
-      // 33 Mind over Matter pays its share from positive unreserved Mana, 1:1 — after ES (§7.3.8)
-      let hpLoss = toHp;
-      const mom = bundleOf(c.keystones, 'mind-over-matter');
-      if (mom) {
-        const pay = mindOverMatter(hpLoss, Math.max(0, s.player.mana - reservedMana(c, s.skills)), mom.params as Record<string, number>);
-        s.player.mana -= pay.mana;
-        hpLoss = pay.hp;
-      }
-      // 56 Staggering Resolve splits the HP-bound share after 33/51; debt is committed loss
-      const stagger = bundleOf(c.keystones, 'staggering-resolve');
-      if (stagger) {
-        const split = staggeringSplit(hpLoss, stagger.params as Record<string, number>);
-        hpLoss = split.immediate;
-        for (let i = 1; i <= Number(stagger.params.durationSec); i++)
-          s.keystoneRuntime.queues.hpDebt.push({ dueAtUs: clock.nowUs + i * units, amount: split.perDebt, sourceId: mob.id, targetId: 'player' });
-      }
-      s.player.hp -= hpLoss;
-      // 40 Borrowed Time recoups 40% of the HP actually paid, over six seconds
-      const recoup = bundleOf(c.keystones, 'borrowed-time');
-      if (recoup && hpLoss > 0) {
-        const r40 = borrowedRecoup(hpLoss, recoup.params as Record<string, number>);
-        for (let i = 1; i <= Number(recoup.params.durationSec); i++)
-          s.keystoneRuntime.queues.recoup.push({ dueAtUs: clock.nowUs + i * units, amount: r40.perPay, sourceId: mob.id, targetId: 'player' });
-      }
-      if (!buffRuleUp(s.skills, 'es_recharge_immediate')) s.player.esIdleSec = 0;
-    }
-    // real loss feeds 11, 16 and 40's clocks; a fully absorbed or cut Hit feeds nothing
-    if (toHp + toEs > 0) {
-      rkH.lastLossAtUs = clock.nowUs;
-      if (fortNow) rkH.stacks.fortress = Math.min(Number(fortNow.params.maxStacks), (rkH.stacks.fortress || 0) + 1);
-      if (barkNow) rkH.icdsUs.bark = clock.nowUs + Number(barkNow.params.regenEverySec) * units;
-      // `53` Thornbound: the body that took something off us is answered by a share of our Armour,
-      // once on its own clock. It is secondary damage — no crit, no status, no leech, no hit counter,
-      // and it never answers a different body because this one died first (§7.2).
-      const thornH = bundleOf(c.keystones, 'thornbound');
-      if (thornH && clock.nowUs >= (rkH.icdsUs.thornbound ?? 0)) {
-        const promised = thornboundRetaliation(c.armour, thornH.params as Record<string, number>) * berserkDealt;
-        const dealt = eng.mitigateMobHit(live, promised, 0);
-        if (dealt > 0) {
-          live.hp -= dealt;
-          rkH.icdsUs.thornbound = clock.nowUs + Number(thornH.params.icdSec) * units;
-          credit(s, 'swing', dealt);
-          fx(s, { kind: 'hit', side: 'field', mobId: mob.id, via: 'swing', text: eng.fmt(dealt), value: dealt, colour: hitColour(null) });
-          push(s, `Thornbound answers ${mob.species} for ${eng.fmt(dealt)}`);
-          if (live.hp <= 0 && s.group.includes(live)) {
-            s.group.splice(s.group.indexOf(live), 1);
-            onKill(s, rng, live, c, statuses);
-          }
-        }
-      }
-    }
-    // A shield block deflects the status, including an Earth Wall charge. Evasion and perfect dodge
-    // return raw=0; a hit absorbed by ES still landed and can apply its status.
-    if (r.raw > 0 && r.blocked !== 'block' && r.blocked !== 'block charge') {
-      // the mirror of `applyWeaponRiders`: the mob's aligned Elemental DPS — its full per-second
-      // Element output under its own Alignment multiplier — is both the per-second DoT basis and
-      // the budget's basis, exactly what our statuses on a mob are priced from
-      const alignedElemDps = mob.ps * eng.damageSplit(mob.damage)[1] * (((mob as any).align ?? 100) / 100);
-      // A forced mob status still passes `statusResist`: the gear answer cuts the application,
-      // while `statusImmunity` blocks it outright. The roll is drawn here so `applyStatus`
-      // keeps its single writer role and the tick draw order stays frozen otherwise.
-      const resistCut = Math.max(0, Math.min(100, c.statusResist || 0)) / 100;
-      const resisted = resistCut > 0 && rng() < resistCut;
-      const forced = mobSkill?.status && !immune && !resisted ? applyStatus(statuses, mobSkill.status, alignedElemDps) : null;
-      let st = forced ?? (immune ? null : rollStatus(rng, mob, alignedElemDps, statuses, c.statusResist, c.stunRecovery, alignedElemDps));
-      // Purist: damaging statuses are refused after the writer names them, before the tick
-      // can pay them; control statuses and Mark still land.
-      if (st && bundleOf(c.keystones, 'purist') && ['burn', 'poison', 'bleed'].includes(st)) {
-        delete statuses[st];
-        st = null;
-      }
-      if (st) {
-        statusesAppliedThisTick.add(st);
-        push(s, `${mob.species} inflicts ${st}`);
-        // 59 Auto Cleanse: a family that actually landed is removed at once, on its 6s ICD
-        const cleanse = bundleOf(c.keystones, 'auto-cleanse');
-        if (cleanse && autoCleanseReady(clock.nowUs, rkH.icdsUs.autoCleanse ?? 0)) {
-          delete statuses[st];
-          rkH.icdsUs.autoCleanse = clock.nowUs + Number(cleanse.params.icdSec) * units;
-          push(s, 'Auto Cleanse removes it');
-        }
-        // A hard stop cancels the unpaid windup at the control timestamp, not at the next
-        // movement sample; the queued release then finds no intent and pays nothing.
-        if (st === 'shock' && (statuses.shock?.secLeft ?? 0) > 0) {
-          cancelPlayerBasic('shock');
-          if (arena?.intent?.phase === 'windup') cancelIntent('shock');
-          else if (arena?.intent?.phase === 'recovery' && arena.intent.mobile) {
-            // Completed channel pulses stay spent; unresolved future pulses are dropped.
-            const channelAction = arena.intent.actionId;
-            for (const flight of [...arena.flights]) {
-              if (flight.actionId !== channelAction || flight.timing.impactAtUs <= clock.nowUs) continue;
-              const at = arena.flights.indexOf(flight);
-              if (at >= 0) arena.flights.splice(at, 1);
-            }
-            cancelIntent('shock');
-          } else if (arena?.intent?.phase === 'recovery' && arena.intent.actionId != null
-            && sm.byId[arena.intent.skillId]?.action?.kind === 'projectile-burst') {
-            // A committed burst drops only the shots that have not left the bow yet.
-            for (const flight of [...arena.flights]) {
-              if (flight.actionId !== arena.intent.actionId || flight.timing.releaseAtUs <= clock.nowUs) continue;
-              const at = arena.flights.indexOf(flight);
-              if (at >= 0) arena.flights.splice(at, 1);
-            }
-          }
-        }
-      }
-      if (st) fx(s, { kind: 'proc', side: 'self', byId: mob.id, skillId: plannedSkill?.id, text: st, colour: statusColour(st) });
-    }
-    // the damage-taken trigger fires at the hit that raised it, in the secondary queue
-    if (hurt && s.player.hp > 0) queueTrigger(trig.taken, mob.id);
-  }
+  const { resolveIncomingHit } = createIncomingHit({
+    arena, clock, rng, s, c, units, online, rkH, statuses, statusesAppliedThisTick,
+    trig, immune, absorbPct, berserk, berserkDealt, mobMods, queueTrigger, cancelIntent, cancelPlayerBasic, onKill,
+  });
 
-  function mobShotPosition(shot: CombatMobFlight, atUs: number) {
-    const span = shot.impactAtUs - shot.releaseAtUs;
-    const progress = span > 0 ? Math.max(0, Math.min(1, (atUs - shot.releaseAtUs) / span)) : 1;
-    return { x: shot.source.x + (shot.destination.x - shot.source.x) * progress,
-      y: shot.source.y + (shot.destination.y - shot.source.y) * progress };
-  }
-
-  /**
-   * Release one ordinary stand-off basic: commit the aim at the attack beat, then let the swept
-   * body query decide contact. A ready strike never reaches this path; it replaces the opportunity.
-   */
-  function launchMobShot(mob: Mob, atUs: number, existing?: CombatArenaAction) {
-    if (!arena) return;
-    const actor = arena.mobs[mob.id];
-    if (!actor) return;
-    const profile = mobAttackProfile(mob);
-    const speed = Number(profile.projectile_speed_mps);
-    const radius = Number(profile.hit_radius_m);
-    if (!(speed > 0) || !(radius >= 0)) return;
-    const action = existing ?? arenaAction(arena, mob.id, 'swing', atUs, 'player');
-    if (!action) return;
-    const source = { x: actor.x, y: actor.y };
-    const destination = { x: arena.player.x, y: arena.player.y };
-    const impactAtUs = atUs + Math.ceil(Math.hypot(destination.x - source.x, destination.y - source.y)
-      / speed * units);
-    const plannedRecoveryUs = existing?.timing
-      ? Math.max(0, existing.timing.recoveryUntilUs - existing.timing.impactAtUs) : 0;
-    const timing: SkillCastTiming = { delivery: 'projectile', startedAtUs: existing?.timing?.startedAtUs ?? atUs,
-      releaseAtUs: atUs, impactAtUs, recoveryUntilUs: atUs + plannedRecoveryUs };
-    updateArenaAction(arena, action.id, { timing, ranged: true, releasedAtUs: atUs,
-      targetX: destination.x, targetY: destination.y });
-    actor.holdAtRange = true;
-    arena.mobFlights.push({
-      actionId: action.id, mobId: mob.id, mob: { ...mob }, source, destination,
-      position: { x: source.x, y: source.y }, releaseAtUs: atUs, impactAtUs, speedMps: speed,
-      radiusM: radius, areaKey: encounterKeyOf(s),
-    });
-  }
-
-  function cancelMobShot(shot: CombatMobFlight, atUs: number, reason: string) {
-    if (!arena) return;
-    const at = arena.mobFlights.indexOf(shot);
-    if (at >= 0) arena.mobFlights.splice(at, 1);
-    const action = arena.actions.find((entry) => entry.id === shot.actionId);
-    if (action && action.cancelledAtUs == null)
-      updateArenaAction(arena, action.id, { cancelledAtUs: atUs, cancelReason: reason, endsAtUs: atUs });
-  }
-
-  /** Contact/impact ends the shot; a terminal arrival with no contact is a miss, never a ghost hit. */
-  function resolveMobShot(shot: CombatMobFlight, atUs: number, contact: boolean) {
-    if (!arena) return;
-    shot.queued = false;
-    const at = arena.mobFlights.indexOf(shot);
-    if (at >= 0) arena.mobFlights.splice(at, 1);
-    const row = shot.skillId ? mobSkillById(shot.skillId) : undefined;
-    const point = shot.kind === 'ground' ? shot.destination : mobShotPosition(shot, atUs);
-    const action = arena.actions.find((entry) => entry.id === shot.actionId);
-    if (action && action.cancelledAtUs == null) {
-      const timing = action.timing ? { ...action.timing, impactAtUs: atUs } : action.timing;
-      updateArenaAction(arena, action.id, {
-        ...(timing ? { timing } : {}),
-        impactCount: 1,
-        targetX: point.x, targetY: point.y,
-        endsAtUs: Math.max(action.endsAtUs, atUs + E.combat_arena.action_sec * units),
-      });
-    }
-    if (s.player.hp <= 0) return;
-    if (shot.kind === 'ground') {
-      // The committed point is fixed; the player is read where they actually stand at impact.
-      if (arenaDistance(shot.destination, arena.player) > (shot.impactRadiusM ?? 0) + 1e-7) return;
-    } else if (!contact) return;
-    const live = s.group.find((entry) => entry.id === shot.mobId && entry.hp > 0);
-    resolveIncomingHit(shot.mob, row, rng, live ?? shot.mob);
-  }
-
-  function scheduleMobShot(shot: CombatMobFlight) {
-    if (!arena || shot.queued) return;
-    const atUs = Math.max(tickStartUs, shot.impactAtUs);
-    if (atUs > tickEndUs) return;
-    shot.queued = true;
-    clock.schedule(atUs, EVENT_PRIORITY.mobAction, shot.mobId, 'player', () => {
-      shot.queued = false;
-      if (!arena?.mobFlights.includes(shot)) return;
-      // One last sweep covers contact exactly at the committed endpoint; otherwise the shot is spent.
-      sweepMobShots(atUs);
-      if (arena?.mobFlights.includes(shot)) resolveMobShot(shot, clock.nowUs, false);
-    });
-  }
-
-  function sweepMobShots(atUs: number) {
-    if (!arena || s.player.hp <= 0) return;
-    for (const shot of [...arena.mobFlights]) {
-      if (shot.areaKey && shot.areaKey !== encounterKeyOf(s)) { cancelMobShot(shot, atUs, 'area-exit'); continue; }
-      const from = shot.position;
-      const to = mobShotPosition(shot, atUs);
-      shot.position = to;
-      // A ground cast owns its committed impact; only a projectile tests swept contact on the way.
-      if (shot.kind === 'ground') continue;
-      const previous = arena.frames.at(-2)?.player ?? arena.frames.at(-1)?.player;
-      const target = { ...arena.player, ...(previous ? { previous: { x: previous.x, y: previous.y } } : {}) };
-      const hit = firstProjectileHit(from, to, [target], shot.radiusM);
-      if (hit) resolveMobShot(shot, atUs, true);
-    }
-  }
+  const { launchMobShot, cancelMobShot, resolveMobShot, scheduleMobShot, sweepMobShots } = createMobShots({
+    arena, clock, rng, s, tickStartUs, tickEndUs, units, resolveIncomingHit,
+  });
 
   function cancelMobPreparation(action: CombatArenaAction, atUs: number, reason: string) {
     if (arena && action.cancelledAtUs == null)
@@ -3217,132 +1703,9 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
   }
 
   /** Start an ordinary basic with an executable windup; release is the only contact receipt. */
-  function startMobBasic(mob: Mob, atUs: number, rate: number): void {
-    if (!arena) return;
-    const profile = mobAttackProfile(mob);
-    const intervalUs = Math.round(units / Math.max(1e-9, rate));
-    const phase = basicPhaseBudget(profile, intervalUs);
-    const releaseAtUs = atUs + phase.windupUs;
-    const timing: SkillCastTiming = {
-      delivery: profile.delivery, startedAtUs: atUs, releaseAtUs,
-      impactAtUs: releaseAtUs, recoveryUntilUs: releaseAtUs + phase.recoveryUs,
-    };
-    const action = arenaAction(arena, mob.id, 'swing', atUs, 'player', undefined, undefined, timing);
-    if (action) {
-      updateArenaAction(arena, action.id, { areaKey: encounterKeyOf(s) });
-      scheduleMobBasic(action, mob);
-    }
-  }
-
-  /** Release an ordinary basic at its committed beat; a miss still owns the action. */
-  function scheduleMobBasic(action: CombatArenaAction, mob: Mob): void {
-    if (!arena || !action.timing || action.releasedAtUs != null) return;
-    const atUs = Math.max(tickStartUs, action.timing.releaseAtUs);
-    if (atUs > tickEndUs) return;
-    clock.schedule(atUs, EVENT_PRIORITY.mobAction, mob.id, 'player', () => {
-      if (!arena) return;
-      advanceArenaAt(clock.nowUs);
-      const current = arena.actions.find(entry => entry.id === action.id);
-      if (!current || current.cancelledAtUs != null || current.impactCount || current.releasedAtUs != null) return;
-      if (current.areaKey && current.areaKey !== encounterKeyOf(s)) {
-        cancelMobPreparation(current, clock.nowUs, 'area-exit');
-        return;
-      }
-      if (mob.hp <= 0 || !s.group.includes(mob) || s.player.hp <= 0
-        || statusModsOn(s.mobStatus, mob.id).stopped) {
-        cancelMobPreparation(current, clock.nowUs, 'release-invalid');
-        return;
-      }
-      const profile = mobAttackProfile(mob);
-      if (profile.delivery === 'projectile') {
-        if (mob.line !== 'stand-off' || !arenaMobInReach(arena, mob.id)) {
-          cancelMobPreparation(current, clock.nowUs, 'release-invalid');
-          return;
-        }
-        launchMobShot(mob, clock.nowUs, current);
-        return;
-      }
-      updateArenaAction(arena, current.id, {
-        impactCount: 1, releasedAtUs: clock.nowUs,
-        timing: { ...(current.timing as SkillCastTiming), impactAtUs: clock.nowUs },
-      });
-      // Melee contact is re-tested at the body, not the windup's old distance.
-      if (arenaMobInReach(arena, mob.id)) resolveIncomingHit(mob, undefined, rng);
-    });
-  }
-
-  /** Release a typed mob cast by its delivery; damage only follows the delivery's own receipt. */
-  function launchMobSkillShot(mob: Mob, row: MobSkillRow, cast: MobCastProfile,
-    action: CombatArenaAction, atUs: number): void {
-    if (!arena) return;
-    const actor = arena.mobs[mob.id];
-    if (!actor) return;
-    const source = { x: actor.x, y: actor.y };
-    const destination = { x: arena.player.x, y: arena.player.y };
-    const distance = Math.hypot(destination.x - source.x, destination.y - source.y);
-    const groundDelay = Math.max(0.001, Number(cast.impact_delay_sec) || 0.4);
-    const speed = cast.delivery === 'ground'
-      ? Math.max(0.001, distance / groundDelay)
-      : Math.max(0.001, Number(cast.projectile_speed_mps) || 12);
-    const impactAtUs = cast.delivery === 'ground'
-      ? atUs + Math.round(groundDelay * units)
-      : atUs + Math.ceil(distance / speed * units);
-    const radius = cast.delivery === 'ground'
-      ? Math.max(0, Number(row.area?.radius_m) || 0)
-      : Math.max(0, Number(cast.hit_radius_m) || 0);
-    const timing: SkillCastTiming = {
-      delivery: cast.delivery,
-      startedAtUs: action.timing?.startedAtUs ?? atUs,
-      releaseAtUs: atUs, impactAtUs,
-      recoveryUntilUs: action.timing?.recoveryUntilUs ?? atUs,
-    };
-    updateArenaAction(arena, action.id, {
-      timing, releasedAtUs: atUs, targetX: destination.x, targetY: destination.y,
-      ...(cast.delivery === 'projectile' ? { ranged: true } : {}),
-      ...(cast.delivery === 'ground' && row.area ? {
-        area: { origin: row.area.origin, radiusM: row.area.radius_m, center: { ...destination },
-          targetId: 'player', ...(row.area.shape ? { shape: row.area.shape } : {}) },
-      } : {}),
-    });
-    arena.mobFlights.push({
-      actionId: action.id, mobId: mob.id, mob: { ...mob }, source, destination,
-      position: { ...source }, releaseAtUs: atUs, impactAtUs, speedMps: speed, radiusM: radius,
-      skillId: row.id, kind: cast.delivery === 'ground' ? 'ground' : 'projectile',
-      ...(cast.delivery === 'ground' ? { impactRadiusM: radius } : {}),
-      areaKey: encounterKeyOf(s),
-    });
-  }
-
-  function scheduleMobStrike(action: CombatArenaAction, mob: Mob) {
-    if (!arena || !action.timing || action.releasedAtUs != null || action.timing.releaseAtUs > tickEndUs) return;
-    clock.schedule(Math.max(tickStartUs, action.timing.releaseAtUs), EVENT_PRIORITY.mobAction, mob.id, 'player', () => {
-      if (!arena) return;
-      advanceArenaAt(clock.nowUs);
-      const current = arena.actions.find(entry => entry.id === action.id);
-      if (!current || current.cancelledAtUs != null || current.impactCount || current.releasedAtUs != null) return;
-      const row = current.skillId ? mobSkillById(current.skillId) : undefined;
-      const cast = row ? mobCastProfile(row, mob) : undefined;
-      const actor = arena.mobs[mob.id];
-      const geometry = row && cast && actor
-        ? mobCastGeometry(row, mob, actor.radiusM ?? 0.25, arena.player.radiusM ?? 0.25,
-          arenaDistance(actor, arena.player)) : undefined;
-      if (!row || !cast || !geometry?.inRange || mob.hp <= 0 || !s.group.includes(mob) || s.player.hp <= 0
-        || statusModsOn(s.mobStatus, mob.id).stopped
-        || (mob.skillReadyAtUs?.[row.id] ?? 0) > clock.nowUs) {
-        cancelMobPreparation(current, clock.nowUs, 'release-invalid');
-        return;
-      }
-      // Commit the cooldown at the valid release, before any defence can return early.
-      markMobSkillUsed(mob, row, clock.nowUs, units);
-      if (cast.delivery === 'melee') {
-        updateArenaAction(arena, current.id, { impactCount: 1, releasedAtUs: clock.nowUs,
-          timing: { ...(current.timing as SkillCastTiming), impactAtUs: clock.nowUs } });
-        resolveIncomingHit(mob, row, rng);
-        return;
-      }
-      launchMobSkillShot(mob, row, cast, current, clock.nowUs);
-    });
-  }
+  const { startMobBasic, scheduleMobBasic, launchMobSkillShot, scheduleMobStrike } = createMobActions({
+    arena, clock, rng, s, units, tickStartUs, tickEndUs, advanceArenaAt, launchMobShot, cancelMobPreparation, resolveIncomingHit,
+  });
 
   // The player's prepared basic keeps its release beat across a tick boundary.
   if (arena) {
@@ -3604,33 +1967,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
   if (!escape && (rechargeNow || s.player.esIdleSec >= E.energy_shield.delay_sec)) s.player.es = Math.min(c.es, s.player.es + esRegenNow);
   }
 
-  const groupIds = new Set(s.group.map((m) => m.id));
-  tickCurses(s.curses, groupIds);
-  forgetMobStatus(s.mobStatus, groupIds);
-  for (const key of Object.keys(statuses) as (keyof Statuses)[]) {
-    const st = statuses[key]!;
-    // A Shock inflicted in the mob phase starts at the end of this step, so its duration begins next step.
-    if (key === 'shock' && statusesAppliedThisTick.has('shock')) continue;
-    if (key === 'poison' || key === 'mark') {
-      st.secLeft--;
-      if (st.secLeft <= 0) {
-        decayStatusStack(st);
-        if (st.stacks > 0) st.secLeft = key === 'poison'
-          ? E.status.poison.decay_sec : E.status.mark.decay_sec;
-        else delete statuses[key];
-      }
-    } else {
-      st.secLeft--;
-      if (st.secLeft <= 0) delete statuses[key];
-    }
-  }
-
-  const drank = s.player.hp > 0 ? maybeDrink(s, c, s.group.some((m) => isBossKind(m.kind))) : null;
-  if (drank) push(s, `${drank.name} restores ${eng.fmt(drank.amount)} ${drank.pool} (shared ${E.potions.shared_cooldown_sec}s cooldown)`);
-
-  // the farm's own automation, the twin of the potion path (parking: "Auto plant, harvest and brew")
-  for (const line of maybeFarm(s)) push(s, line);
-  tickFieldwork(s, rng);
+  advancePostTick(s, c, rng, statuses, statusesAppliedThisTick);
 
   if (s.player.hp <= 0) {
     // HP reaches 0 → Push, never death (combat.md §4)
@@ -3680,34 +2017,12 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
       s.forwardBlockedZone = s.zone;
       s.forwardBlockedLevel = s.player.level;
       s.zone = s.forwardSafe;
-      s.spawnIn = 0;
-      s.lastAutoZone = -1;
+          s.lastAutoZone = -1;
       push(s, `Pushed in ${from.name} — falling back to ${back.name}, the last zone held; the climb resumes at level ${s.player.level + 1}`);
     }
   }
-  clampPools(s);
-  // The field registry mirrors the authoritative group by id and records the cohort/session facts.
-  syncFieldState(s, arena);
-  // The active arena's released work is canonical saved state: refresh the pure-data ledger after
-  // the tick so a save cannot hold the reward with an unapplied (or already-applied) impact.
-  if (arena) {
-    const pending = snapshotPendingWork(arena, s.group);
-    if (pending || s.pendingWork) s.pendingWork = pending;
-  }
+  settleTick(s, arena);
   return s;
-}
-
-/**
- * Re-read the pools against the sheet the tick ended on. A tick can move a pool's ceiling after the
- * opening clamp — equipping a piece drops the `Max Mana %` line it replaced, a spent point raises
- * Int — so the bar is bounded again here, otherwise it reads above what the character now holds.
- */
-function clampPools(s: GameState): void {
-  const c = characterSheet(s);
-  const debt52 = bundleOf(c.keystones, 'mana-debt');
-  s.player.mana = Math.min(debt52 ? s.player.mana : Math.max(0, s.player.mana), c.maxMana);
-  s.player.es = Math.min(Math.max(0, s.player.es), c.es);
-  s.player.hp = Math.min(s.player.hp, usableHp(c, s.skills));
 }
 
 /**
@@ -3715,37 +2030,11 @@ function clampPools(s: GameState): void {
  * `WAKE_SEC`, the player's speed multiplies what that wake is worth, and never more than `MAX_BATCH`
  * seconds are spent in one wake — a throttled tab's backlog is dropped rather than queued, because a
  * queued burst would play catch-up in the foreground and cost the frame its stutter-free draw.
+ *
+ * The wake math lives in `clock.ts`; it is re-exported here so every existing importer keeps its path.
  */
-/** Which day the run's clock stands on — the one home, so two callers cannot disagree. */
-export const dayOf = (clockSec: number): number => Math.floor(clockSec / 86400);
-
-export const WAKE_SEC = 0.25;
-export const MAX_BATCH = 8;
-/**
- * Real time into sim seconds, for one wake. `elapsedSec` is what actually passed since the last wake — a
- * timer that ran late banks what it missed instead of a fixed slice, so a throttled tab (a hidden one
- * fires at most once a second) still earns, and a stalled wake keeps its backlog as debt instead of
- * losing it. The batch is what runs: at most `MAX_BATCH` ticks a wake, so a queued backlog drains over
- * later wakes rather than bursting in the foreground and costing the frame its stutter-free draw.
- * Offline catch-up stays uncapped; the live loop matches it by never dropping whole seconds either.
- */
-export function schedulerBatch(acc: number, speed: number, elapsedSec: number = WAKE_SEC): { ticks: number; acc: number } {
-  const total = acc + elapsedSec * speed;
-  const ticks = Math.floor(total);
-  if (ticks <= 0) return { ticks: 0, acc: total };
-  if (ticks > MAX_BATCH) return { ticks: MAX_BATCH, acc: total - MAX_BATCH };
-  return { ticks, acc: total - ticks };
-}
-
-/** A null configured limit pays every valid whole elapsed second. */
-export function catchUpPlan(elapsedSec: number) {
-  // an away period never walks: a walk is online only, so the catch-up never crosses a block
-  const configured: number | null = E.inventory.offline_cap_hr;
-  const cap = configured == null ? Infinity : configured * 3600;
-  const whole = Math.floor(elapsedSec);
-  const elapsed = Number.isSafeInteger(whole) ? Math.max(0, whole) : 0;
-  return { secs: Math.min(elapsed, cap), capped: elapsed > cap };
-}
+export { dayOf, WAKE_SEC, MAX_BATCH, schedulerBatch, catchUpPlan } from './clock';
+import { catchUpPlan, dayOf } from './clock';
 
 /** The tick loop both catch-up paths share — one order of ticks, so the numbers cannot diverge. */
 function runTicks(s: GameState, from: number, to: number, autoSkills = true) {
@@ -3762,10 +2051,12 @@ function pauseBossClock(s: GameState, secs: number): void {
   if (s.bossDueAt !== undefined) s.bossDueAt += secs;
 }
 
-/** The dungeon cooldown is an online gate like the boss clock: away time must not accrue toward it.
- *  A run that cleared mid-window stamped its cooldown at a virtual mid-away second, so shifting the
- *  whole window would over-charge it; that stamp is re-set to the return second instead, and the
- *  full `cooldown_sec` stands when the player is back. */
+/**
+ * The dungeon cooldown is an online gate like the boss clock: away time must not accrue toward it.
+ * A run that cleared mid-window stamped its cooldown at a virtual mid-away second, so shifting the
+ * whole window would over-charge it; that stamp is re-set to the return second instead, and the
+ * full `cooldown_sec` stands when the player is back.
+ */
 function settleDungeonClock(s: GameState, startClock: number, secs: number): void {
   if (s.dungeonClearedAt === undefined) return;
   if (s.dungeon === null && s.dungeonClearedAt > startClock && s.dungeonClearedAt <= startClock + secs) {

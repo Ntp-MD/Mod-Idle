@@ -1,0 +1,5 @@
+SPECIES: vampire (Vampire) — match the approved Vampire reference silhouette exactly; preserve its body plan, proportions, palette, and fixed natural anatomy; add no unreferenced equipment
+WEAPON (baked, fixed): TODO: identify the fixed baked weapon from the approved reference before generation — in hand every frame; no equip switch
+SLOT: skill/mind-shear/west/03-recovery — example projectile kit-action west: recovery back to guard; copy per kit entry with a cast block
+CAMERA: fixed elevated three-quarter, upper-left light; whole sprite including feet inside the frame
+RENDER: chibi pixel-art clusters, hard opaque edges only, transparent background; no shadow, scenery, text, effects, grid

@@ -44,6 +44,13 @@ describe('Boss local arena epoch', () => {
     const { state, arena } = bossFight();
     tick(state, { arena });
     const boss = state.group.find((mob) => isBossKind(String(mob.kind)))!;
+    // This test owns the Boss arena epoch, not field density: isolate the Boss and its slot.
+    state.group = state.group.filter((mob) => mob.id === boss.id);
+    const bossSlot = state.field!.slots.find((slot) => slot.id === boss.spawnSlotId);
+    const at = { x: arena.player.x + 1.2, y: arena.player.y };
+    Object.assign(arena.mobs[boss.id], at);
+    if (bossSlot) state.field!.slots = [{ ...bossSlot, home: at }];
+    state.field!.actors = [{ id: boss.id, ...at }];
     boss.hp = 1;
     Object.assign(arena.mobs[boss.id], { x: arena.player.x + 1.2, y: arena.player.y });
     const epoch = state.field!.arenaEpoch;

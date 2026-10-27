@@ -1,0 +1,449 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "minotaur",
+  "variantId": "maze-warden-minotaur",
+  "name": "Maze Warden Minotaur",
+  "levels": [
+    61,
+    80
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-contact-at-224",
+  "directionCount": 8,
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "actions": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    "idle S SE E NE N NW W SW",
+    "walk S SE E NE N NW W SW",
+    "attack S SE E NE N NW W SW",
+    "hit S SE E NE N NW W SW",
+    "death S SE E NE N NW W SW"
+  ],
+  "slicing": {
+    "columns": 8,
+    "rows": 5,
+    "cellWidth": 256,
+    "cellHeight": 256
+  },
+  "sourceFrames": [
+    {
+      "x": 113,
+      "y": 112,
+      "width": 153,
+      "height": 179,
+      "offsetX": 113,
+      "offsetY": 112
+    },
+    {
+      "x": 497,
+      "y": 112,
+      "width": 148,
+      "height": 179,
+      "offsetX": 113,
+      "offsetY": 112
+    },
+    {
+      "x": 885,
+      "y": 113,
+      "width": 133,
+      "height": 179,
+      "offsetX": 117,
+      "offsetY": 113
+    },
+    {
+      "x": 1248,
+      "y": 114,
+      "width": 169,
+      "height": 178,
+      "offsetX": 96,
+      "offsetY": 114
+    },
+    {
+      "x": 1632,
+      "y": 112,
+      "width": 158,
+      "height": 178,
+      "offsetX": 96,
+      "offsetY": 112
+    },
+    {
+      "x": 2007,
+      "y": 113,
+      "width": 172,
+      "height": 179,
+      "offsetX": 87,
+      "offsetY": 113
+    },
+    {
+      "x": 2403,
+      "y": 113,
+      "width": 138,
+      "height": 179,
+      "offsetX": 99,
+      "offsetY": 113
+    },
+    {
+      "x": 2779,
+      "y": 112,
+      "width": 150,
+      "height": 180,
+      "offsetX": 91,
+      "offsetY": 112
+    },
+    {
+      "x": 112,
+      "y": 496,
+      "width": 157,
+      "height": 180,
+      "offsetX": 112,
+      "offsetY": 112
+    },
+    {
+      "x": 496,
+      "y": 496,
+      "width": 153,
+      "height": 180,
+      "offsetX": 112,
+      "offsetY": 112
+    },
+    {
+      "x": 881,
+      "y": 495,
+      "width": 139,
+      "height": 181,
+      "offsetX": 113,
+      "offsetY": 111
+    },
+    {
+      "x": 1239,
+      "y": 506,
+      "width": 185,
+      "height": 169,
+      "offsetX": 87,
+      "offsetY": 122
+    },
+    {
+      "x": 1632,
+      "y": 496,
+      "width": 157,
+      "height": 179,
+      "offsetX": 96,
+      "offsetY": 112
+    },
+    {
+      "x": 2001,
+      "y": 496,
+      "width": 183,
+      "height": 180,
+      "offsetX": 81,
+      "offsetY": 112
+    },
+    {
+      "x": 2403,
+      "y": 497,
+      "width": 139,
+      "height": 180,
+      "offsetX": 99,
+      "offsetY": 113
+    },
+    {
+      "x": 2781,
+      "y": 496,
+      "width": 148,
+      "height": 180,
+      "offsetX": 93,
+      "offsetY": 112
+    },
+    {
+      "x": 126,
+      "y": 879,
+      "width": 129,
+      "height": 181,
+      "offsetX": 126,
+      "offsetY": 111
+    },
+    {
+      "x": 502,
+      "y": 880,
+      "width": 137,
+      "height": 180,
+      "offsetX": 118,
+      "offsetY": 112
+    },
+    {
+      "x": 872,
+      "y": 880,
+      "width": 157,
+      "height": 180,
+      "offsetX": 104,
+      "offsetY": 112
+    },
+    {
+      "x": 1259,
+      "y": 880,
+      "width": 141,
+      "height": 180,
+      "offsetX": 107,
+      "offsetY": 112
+    },
+    {
+      "x": 1644,
+      "y": 879,
+      "width": 134,
+      "height": 181,
+      "offsetX": 108,
+      "offsetY": 111
+    },
+    {
+      "x": 2026,
+      "y": 880,
+      "width": 133,
+      "height": 180,
+      "offsetX": 106,
+      "offsetY": 112
+    },
+    {
+      "x": 2380,
+      "y": 906,
+      "width": 185,
+      "height": 154,
+      "offsetX": 76,
+      "offsetY": 138
+    },
+    {
+      "x": 2794,
+      "y": 879,
+      "width": 122,
+      "height": 181,
+      "offsetX": 106,
+      "offsetY": 111
+    },
+    {
+      "x": 105,
+      "y": 1263,
+      "width": 170,
+      "height": 181,
+      "offsetX": 105,
+      "offsetY": 111
+    },
+    {
+      "x": 493,
+      "y": 1264,
+      "width": 157,
+      "height": 179,
+      "offsetX": 109,
+      "offsetY": 112
+    },
+    {
+      "x": 866,
+      "y": 1263,
+      "width": 168,
+      "height": 180,
+      "offsetX": 98,
+      "offsetY": 111
+    },
+    {
+      "x": 1249,
+      "y": 1262,
+      "width": 161,
+      "height": 182,
+      "offsetX": 97,
+      "offsetY": 110
+    },
+    {
+      "x": 1621,
+      "y": 1263,
+      "width": 180,
+      "height": 181,
+      "offsetX": 85,
+      "offsetY": 111
+    },
+    {
+      "x": 2000,
+      "y": 1264,
+      "width": 185,
+      "height": 180,
+      "offsetX": 80,
+      "offsetY": 112
+    },
+    {
+      "x": 2394,
+      "y": 1263,
+      "width": 156,
+      "height": 181,
+      "offsetX": 90,
+      "offsetY": 111
+    },
+    {
+      "x": 2774,
+      "y": 1262,
+      "width": 161,
+      "height": 182,
+      "offsetX": 86,
+      "offsetY": 110
+    },
+    {
+      "x": 99,
+      "y": 1692,
+      "width": 183,
+      "height": 135,
+      "offsetX": 99,
+      "offsetY": 156
+    },
+    {
+      "x": 481,
+      "y": 1721,
+      "width": 180,
+      "height": 106,
+      "offsetX": 97,
+      "offsetY": 185
+    },
+    {
+      "x": 856,
+      "y": 1735,
+      "width": 185,
+      "height": 96,
+      "offsetX": 88,
+      "offsetY": 199
+    },
+    {
+      "x": 1238,
+      "y": 1737,
+      "width": 183,
+      "height": 91,
+      "offsetX": 86,
+      "offsetY": 201
+    },
+    {
+      "x": 1619,
+      "y": 1688,
+      "width": 183,
+      "height": 140,
+      "offsetX": 83,
+      "offsetY": 152
+    },
+    {
+      "x": 2001,
+      "y": 1719,
+      "width": 182,
+      "height": 108,
+      "offsetX": 81,
+      "offsetY": 183
+    },
+    {
+      "x": 2381,
+      "y": 1739,
+      "width": 183,
+      "height": 91,
+      "offsetX": 77,
+      "offsetY": 203
+    },
+    {
+      "x": 2763,
+      "y": 1744,
+      "width": 182,
+      "height": 84,
+      "offsetX": 75,
+      "offsetY": 208
+    }
+  ],
+  "generation": {
+    "sourceOutputs": [
+      "exec-51dc410f-2c1a-4206-b4bd-b87675c5d5ef.png"
+    ],
+    "generatedCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "generatedCornerAlpha": 0,
+    "identityReference": "art-reference/monsters/humanoid/minotaur/animation/source/base.png",
+    "styleReference": "game/public/combat/arpg/pixel-v2/player-animation-v2.png",
+    "initialPrompt": "40-pose 8x5 full-direction Maze Warden Minotaur atlas; approved Minotaur base identity and Player pixel-art style; orange-brown hide, ivory horns, bovine muzzle, axe, engraved maze strap and iron chest ring.",
+    "revisionPrompt": "Clarify only the variant cue: dark etched maze on the leather shoulder strap and one plain iron ring pendant at chest; preserve all poses and silhouettes."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "paletteProcessing": {
+    "method": "global-median-cut",
+    "colors": 12,
+    "dither": false
+  },
+  "normalization": {
+    "method": "raw-connected-pose-repack-384-v1",
+    "sourceCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "sourceImageSha256": "e4a59cbce299f9cf36348e3c5fc86e4b658b3ca05298d372e3bd5f22cab0dcd9",
+    "sourceAlphaThreshold": 128,
+    "edgeAlphaRecoveryRadius": 3,
+    "minimumCellPadding": 24,
+    "primaryPoses": 40,
+    "sourceComponents": 40,
+    "rowMedianBottoms": [
+      183,
+      377,
+      571,
+      766,
+      961
+    ],
+    "uniformScale": 1.0
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+    ]
+  }
+}

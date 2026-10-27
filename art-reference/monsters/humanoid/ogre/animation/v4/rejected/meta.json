@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "status": "rejected-review-evidence",
+  "generator": "OpenAI built-in image_gen",
+  "rejectedCandidates": [
+    { "file": "reference-v1-edge-contact.png", "sourceOutput": "exec-f63601c2-5a9d-44a6-ae87-e9c534a2ebf3.png", "sourceSize": [1254, 1254], "alphaBoundsExclusive": [0, 21, 1168, 1254], "visibleAlphaGt8BoundsExclusive": [253, 140, 997, 1165], "semiTransparentPixels": 502682, "reason": "Weapon and sprite touch canvas edges; maul head extends below the feet and would dominate composition anchor." },
+    { "file": "reference-v2-maul-below-feet.png", "sourceOutput": "exec-cca33e3b-cd5e-4e28-8be9-e25399a4fbc5.png", "sourceSize": [1254, 1254], "alphaBoundsExclusive": [0, 37, 1220, 1224], "visibleAlphaGt8BoundsExclusive": [336, 258, 912, 1050], "semiTransparentPixels": 311984, "reason": "Clear margins, but stone maul head extends below the feet; would shift the composed ground anchor." },
+    { "file": "idle-south-maul-below-feet.png", "sourceOutput": "exec-d0947c0e-a2b9-4630-aa00-d02e7ada22cd.png", "sourceSize": [1254, 1254], "alphaBoundsExclusive": [0, 19, 1202, 1244], "visibleAlphaGt8BoundsExclusive": [321, 300, 901, 1045], "semiTransparentPixels": 302612, "reason": "Maul head extends below the feet, so the pose bottom is not the foot line." },
+    { "file": "idle-south-east-maul-below-feet.png", "sourceOutput": "exec-780d94d9-023f-4782-aef3-472159bc05f0.png", "sourceSize": [1254, 1254], "alphaBoundsExclusive": [0, 25, 1218, 1254], "visibleAlphaGt8BoundsExclusive": [292, 245, 962, 1079], "semiTransparentPixels": 369371, "reason": "Maul head extends below the feet, so the pose bottom is not the foot line." },
+    { "file": "idle-east-maul-below-feet.png", "sourceOutput": "exec-daec55ac-c2c3-4775-9fb2-d5ccbf86b994.png", "sourceSize": [1254, 1254], "alphaBoundsExclusive": [33, 39, 1230, 1254], "visibleAlphaGt8BoundsExclusive": [364, 308, 882, 1084], "semiTransparentPixels": 275515, "reason": "Maul head extends below the feet, so the pose bottom is not the foot line." },
+    { "file": "idle-north-east-maul-below-feet.png", "sourceOutput": "exec-a9d1cb36-403d-427e-9896-f262580ed415.png", "sourceSize": [1254, 1254], "alphaBoundsExclusive": [33, 21, 1240, 1230], "visibleAlphaGt8BoundsExclusive": [379, 289, 1066, 1043], "semiTransparentPixels": 287311, "reason": "Maul head extends below the feet, so the pose bottom is not the foot line." }
+  ],
+  "note": "Raw generation outputs are preserved unchanged for later inspection. No alpha thresholding or resampling was applied."
+}

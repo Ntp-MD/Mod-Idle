@@ -6,12 +6,15 @@
  * same field after a reload. No slot holds a second Mob copy; it holds an id and a timer.
  */
 import { E, spawns } from '../../engine/client';
+import { spawnSlotSeed } from '../../../../engine/spawns.ts';
 import type { CombatArena } from '../combat/combat-arena';
+import type { MobMark } from '../combat/mobStatus';
 import type { GameState, Mob } from '../core/types';
 
 export type FieldPoint = { x: number; y: number };
 
 /** One authored home. The slot is empty while `mobId` is absent and `respawnAtSec` is counting. */
+export type FieldLifeStatus = Record<string, { stacks: number; secLeft: number } | undefined>;
 export interface FieldSpawnSlot {
   id: string;
   pointId: string;
@@ -22,10 +25,14 @@ export interface FieldSpawnSlot {
   /** How many times this slot has refilled; part of the deterministic spawn seed. */
   respawnCount: number;
   mobId?: string;
+  /** Compact saved life for an inactive field; reconstituted with the same identity and pool. */
+  life?: { mob: Mob; hp: number; hpMax: number; mark?: MobMark };
 }
 
 export interface FieldState {
   areaKey: string;
+  /** Ground-layout generation; 1 = 18x12, 2 = 50x32.0513. */
+  layoutRevision: number;
   arenaEpoch: number;
   nextSlotSeq: number;
   slots: FieldSpawnSlot[];
@@ -45,8 +52,11 @@ export interface FieldState {
   lastSeenAtSec?: number;
 }
 
-const MAX_SLOTS = 16;
+const MAX_SLOTS = 48;
 const MAX_ACTORS = 64;
+const LAYOUT_REVISION = 2;
+const LAYOUT_DX = 16;
+const LAYOUT_DY = 10.0256;
 const copy = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
 export interface FieldArchiveEntry extends FieldState {
@@ -84,6 +94,7 @@ export function createFieldState(s: Pick<GameState, 'zone' | 'cell' | 'dungeon' 
   const slots = createFieldSlots(s.zone, s.cell?.sub, s.clockSec);
   return {
     areaKey: fieldAreaKey(s),
+    layoutRevision: LAYOUT_REVISION,
     arenaEpoch: 1,
     nextSlotSeq: slots.length + 1,
     slots,
@@ -98,6 +109,21 @@ export function createFieldState(s: Pick<GameState, 'zone' | 'cell' | 'dungeon' 
   };
 }
 
+/** Reconstitute an inactive field's saved lives once; same identity/HP/status, no reroll or reward. */
+function restoreFieldLives(s: GameState, field: FieldState): void {
+  if (s.group.some((mob) => mob.hp > 0)) return;
+  for (const slot of field.slots) {
+    if (!slot.mobId || !slot.life) continue;
+    const mob = copy(slot.life.mob);
+    mob.id = slot.mobId;
+    mob.hp = slot.life.hp;
+    mob.hpMax = slot.life.hpMax;
+    mob.spawnSlotId = slot.id;
+    s.group.push(mob);
+    if (slot.life.mark) s.mobStatus[mob.id] = copy(slot.life.mark);
+  }
+}
+
 /**
  * Keep the field in step with its area, slots and the arena. Spawning and respawning belong to the
  * caller; this function reconciles identities, timers and saved positions only.
@@ -107,6 +133,13 @@ export function syncFieldState(s: GameState, arena?: CombatArena, quietTicks = 2
   if (!s.field) s.field = createFieldState(s);
   let field = s.field;
   if (field.areaKey !== key) {
+    const leaving = new Map(s.group.filter((mob) => mob.hp > 0).map((mob) => [mob.id, mob]));
+    for (const slot of field.slots) {
+      const mob = slot.mobId ? leaving.get(slot.mobId) : undefined;
+      if (!mob) continue;
+      slot.life = { mob: copy(mob), hp: mob.hp, hpMax: mob.hpMax,
+        ...(s.mobStatus[mob.id] ? { mark: copy(s.mobStatus[mob.id]) } : {}) };
+    }
     s.fieldArchive ??= {};
     s.fieldArchive[field.areaKey] = copy({
       ...field,
@@ -136,6 +169,7 @@ export function syncFieldState(s: GameState, arena?: CombatArena, quietTicks = 2
       field = { ...createFieldState(s), arenaEpoch: field.arenaEpoch + 1 };
     }
     s.field = field;
+    restoreFieldLives(s, field);
   }
   if (!field.slots?.length) field.slots = createFieldSlots(s.zone, s.cell?.sub, s.clockSec);
 
@@ -147,6 +181,7 @@ export function syncFieldState(s: GameState, arena?: CombatArena, quietTicks = 2
     if (!slot) continue;
     slot.mobId = mob.id;
     slot.respawnAtSec = 0;
+    slot.life = undefined;
     mob.spawnSlotId = slot.id;
   }
   for (const slot of field.slots) {
@@ -200,7 +235,9 @@ export function releaseSpawnSlot(s: GameState, mob: Mob): boolean {
   if (!slot || (slot.mobId && slot.mobId !== mob.id)) return false;
   const profile = spawns.profileFor(s.zone, s.cell?.sub ?? null);
   slot.mobId = undefined;
-  slot.respawnAtSec = s.clockSec + Math.max(1, Math.round(profile.respawn_sec));
+  slot.life = undefined;
+  const uniform = (spawnSlotSeed(s.seed, fieldAreaKey(s), slot.id, slot.respawnCount) >>> 0) / 0x1_0000_0000;
+  slot.respawnAtSec = s.clockSec + profile.respawn_min_sec + (profile.respawn_max_sec - profile.respawn_min_sec) * uniform;
   slot.respawnCount++;
   return true;
 }
@@ -233,21 +270,31 @@ export function normalizeFieldState(value: unknown): FieldState | null {
   const finite = (n: unknown): n is number => typeof n === 'number' && Number.isFinite(n);
   if (typeof field.areaKey !== 'string' || !finite(field.arenaEpoch)) return null;
   if (!finitePoint(field.farmingAnchor) || !finitePoint(field.player)) return null;
+  const revision = finite(field.layoutRevision) ? Math.floor(field.layoutRevision) : 1;
+  const translate = revision < LAYOUT_REVISION;
+  const point = (p: FieldPoint): FieldPoint => translate
+    ? { x: p.x + LAYOUT_DX, y: p.y + LAYOUT_DY }
+    : { x: p.x, y: p.y };
   const slots = (Array.isArray(field.slots) ? field.slots : []).filter((slot): slot is FieldSpawnSlot =>
     !!slot && typeof slot.id === 'string' && typeof slot.pointId === 'string'
     && finitePoint(slot.home) && finite(slot.roamM) && finite(slot.respawnAtSec)
     && Number.isInteger(slot.respawnCount)).slice(0, MAX_SLOTS)
     .map((slot) => ({
       ...slot,
-      respawnAtSec: Math.max(0, Math.floor(slot.respawnAtSec)),
+      home: point(slot.home),
+      respawnAtSec: Math.max(0, slot.respawnAtSec),
       respawnCount: Math.max(0, Math.floor(slot.respawnCount)),
       ...(typeof slot.mobId === 'string' ? { mobId: slot.mobId } : {}),
     }));
   const actors = (Array.isArray(field.actors) ? field.actors : []).filter((actor) =>
     !!actor && typeof actor.id === 'string' && finite(actor.x) && finite(actor.y)).slice(0, MAX_ACTORS)
-    .map((actor) => ({ id: actor.id, x: actor.x, y: actor.y, ...(actor.returning === true ? { returning: true } : {}) }));
+    .map((actor) => {
+      const at = point({ x: actor.x, y: actor.y });
+      return { id: actor.id, x: at.x, y: at.y, ...(actor.returning === true ? { returning: true } : {}) };
+    });
   return {
     areaKey: field.areaKey,
+    layoutRevision: LAYOUT_REVISION,
     arenaEpoch: Math.max(1, Math.floor(field.arenaEpoch)),
     nextSlotSeq: Math.max(1, Math.floor(finite(field.nextSlotSeq) ? field.nextSlotSeq : 1)),
     slots,
@@ -258,8 +305,8 @@ export function normalizeFieldState(value: unknown): FieldState | null {
     quietSec: Math.max(0, Math.floor(finite(field.quietSec) ? field.quietSec : 0)),
     ...(finite(field.bossDefeatedAtSec) ? { bossDefeatedAtSec: Math.max(0, Math.floor(field.bossDefeatedAtSec)) } : {}),
     ...(finite(field.offlineCredit) ? { offlineCredit: Math.max(0, Math.min(1, field.offlineCredit)) } : {}),
-    farmingAnchor: { x: field.farmingAnchor.x, y: field.farmingAnchor.y },
-    player: { x: field.player.x, y: field.player.y },
+    farmingAnchor: point(field.farmingAnchor),
+    player: point(field.player),
     actors,
     ...(finite(field.lastSeenAtSec) ? { lastSeenAtSec: Math.max(0, Math.floor(field.lastSeenAtSec)) } : {}),
   };

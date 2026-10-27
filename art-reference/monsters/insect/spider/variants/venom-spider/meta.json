@@ -1,0 +1,503 @@
+{
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "spider",
+  "variantId": "venom-spider",
+  "name": "Venom Spider",
+  "levels": [
+    41,
+    60
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-anchor-at-224",
+  "grid": {
+    "columns": 8,
+    "rows": 5,
+    "totalFrames": 40
+  },
+  "states": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    {
+      "state": "idle",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "walk",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "attack",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "hit",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "death",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    }
+  ],
+  "sourceFrames": [
+    {
+      "x": 116,
+      "y": 153,
+      "width": 176,
+      "height": 140,
+      "offsetX": 116,
+      "offsetY": 153
+    },
+    {
+      "x": 503,
+      "y": 155,
+      "width": 174,
+      "height": 139,
+      "offsetX": 119,
+      "offsetY": 155
+    },
+    {
+      "x": 881,
+      "y": 155,
+      "width": 174,
+      "height": 137,
+      "offsetX": 113,
+      "offsetY": 155
+    },
+    {
+      "x": 1261,
+      "y": 154,
+      "width": 173,
+      "height": 138,
+      "offsetX": 109,
+      "offsetY": 154
+    },
+    {
+      "x": 1639,
+      "y": 155,
+      "width": 172,
+      "height": 127,
+      "offsetX": 103,
+      "offsetY": 155
+    },
+    {
+      "x": 2014,
+      "y": 156,
+      "width": 174,
+      "height": 136,
+      "offsetX": 94,
+      "offsetY": 156
+    },
+    {
+      "x": 2395,
+      "y": 156,
+      "width": 176,
+      "height": 138,
+      "offsetX": 91,
+      "offsetY": 156
+    },
+    {
+      "x": 2784,
+      "y": 156,
+      "width": 171,
+      "height": 137,
+      "offsetX": 96,
+      "offsetY": 156
+    },
+    {
+      "x": 112,
+      "y": 541,
+      "width": 179,
+      "height": 133,
+      "offsetX": 112,
+      "offsetY": 157
+    },
+    {
+      "x": 496,
+      "y": 541,
+      "width": 178,
+      "height": 136,
+      "offsetX": 112,
+      "offsetY": 157
+    },
+    {
+      "x": 879,
+      "y": 541,
+      "width": 176,
+      "height": 135,
+      "offsetX": 111,
+      "offsetY": 157
+    },
+    {
+      "x": 1261,
+      "y": 541,
+      "width": 174,
+      "height": 136,
+      "offsetX": 109,
+      "offsetY": 157
+    },
+    {
+      "x": 1645,
+      "y": 541,
+      "width": 166,
+      "height": 135,
+      "offsetX": 109,
+      "offsetY": 157
+    },
+    {
+      "x": 2016,
+      "y": 541,
+      "width": 179,
+      "height": 137,
+      "offsetX": 96,
+      "offsetY": 157
+    },
+    {
+      "x": 2393,
+      "y": 541,
+      "width": 183,
+      "height": 134,
+      "offsetX": 89,
+      "offsetY": 157
+    },
+    {
+      "x": 2782,
+      "y": 541,
+      "width": 180,
+      "height": 130,
+      "offsetX": 94,
+      "offsetY": 157
+    },
+    {
+      "x": 113,
+      "y": 925,
+      "width": 177,
+      "height": 134,
+      "offsetX": 113,
+      "offsetY": 157
+    },
+    {
+      "x": 500,
+      "y": 902,
+      "width": 183,
+      "height": 158,
+      "offsetX": 116,
+      "offsetY": 134
+    },
+    {
+      "x": 877,
+      "y": 913,
+      "width": 184,
+      "height": 147,
+      "offsetX": 109,
+      "offsetY": 145
+    },
+    {
+      "x": 1250,
+      "y": 931,
+      "width": 184,
+      "height": 135,
+      "offsetX": 98,
+      "offsetY": 163
+    },
+    {
+      "x": 1643,
+      "y": 931,
+      "width": 178,
+      "height": 133,
+      "offsetX": 107,
+      "offsetY": 163
+    },
+    {
+      "x": 2010,
+      "y": 910,
+      "width": 186,
+      "height": 150,
+      "offsetX": 90,
+      "offsetY": 142
+    },
+    {
+      "x": 2392,
+      "y": 902,
+      "width": 181,
+      "height": 159,
+      "offsetX": 88,
+      "offsetY": 134
+    },
+    {
+      "x": 2782,
+      "y": 926,
+      "width": 177,
+      "height": 134,
+      "offsetX": 94,
+      "offsetY": 158
+    },
+    {
+      "x": 110,
+      "y": 1309,
+      "width": 180,
+      "height": 135,
+      "offsetX": 110,
+      "offsetY": 157
+    },
+    {
+      "x": 496,
+      "y": 1310,
+      "width": 180,
+      "height": 134,
+      "offsetX": 112,
+      "offsetY": 158
+    },
+    {
+      "x": 885,
+      "y": 1312,
+      "width": 167,
+      "height": 131,
+      "offsetX": 117,
+      "offsetY": 160
+    },
+    {
+      "x": 1268,
+      "y": 1311,
+      "width": 166,
+      "height": 133,
+      "offsetX": 116,
+      "offsetY": 159
+    },
+    {
+      "x": 1642,
+      "y": 1312,
+      "width": 162,
+      "height": 131,
+      "offsetX": 106,
+      "offsetY": 160
+    },
+    {
+      "x": 2018,
+      "y": 1312,
+      "width": 161,
+      "height": 131,
+      "offsetX": 98,
+      "offsetY": 160
+    },
+    {
+      "x": 2391,
+      "y": 1314,
+      "width": 184,
+      "height": 130,
+      "offsetX": 87,
+      "offsetY": 162
+    },
+    {
+      "x": 2783,
+      "y": 1307,
+      "width": 179,
+      "height": 137,
+      "offsetX": 95,
+      "offsetY": 155
+    },
+    {
+      "x": 120,
+      "y": 1710,
+      "width": 170,
+      "height": 119,
+      "offsetX": 120,
+      "offsetY": 174
+    },
+    {
+      "x": 496,
+      "y": 1715,
+      "width": 176,
+      "height": 114,
+      "offsetX": 112,
+      "offsetY": 179
+    },
+    {
+      "x": 877,
+      "y": 1719,
+      "width": 170,
+      "height": 109,
+      "offsetX": 109,
+      "offsetY": 183
+    },
+    {
+      "x": 1259,
+      "y": 1728,
+      "width": 176,
+      "height": 97,
+      "offsetX": 107,
+      "offsetY": 192
+    },
+    {
+      "x": 1644,
+      "y": 1715,
+      "width": 159,
+      "height": 114,
+      "offsetX": 108,
+      "offsetY": 179
+    },
+    {
+      "x": 2021,
+      "y": 1722,
+      "width": 172,
+      "height": 104,
+      "offsetX": 101,
+      "offsetY": 186
+    },
+    {
+      "x": 2399,
+      "y": 1724,
+      "width": 175,
+      "height": 105,
+      "offsetX": 95,
+      "offsetY": 188
+    },
+    {
+      "x": 2782,
+      "y": 1727,
+      "width": 180,
+      "height": 97,
+      "offsetX": 94,
+      "offsetY": 191
+    }
+  ],
+  "identityReference": "art-reference/monsters/insect/spider/animation/atlas/animation.png",
+  "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+  "generation": {
+    "sourceOutputs": [
+      "exec-dbcf94c0-3ef7-41d7-908e-7e13817f0d2d.png"
+    ],
+    "identityReference": "art-reference/monsters/insect/spider/animation/atlas/animation.png",
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "variantCue": "dark violet-black abdomen with a couple of restrained yellow-green venom spots",
+    "initialPrompt": "Venom Spider; all 8 directions for idle, walk, attack, hit, death; dark outline without fringe or halo."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "raw-connected-pose-repack-384-v1",
+    "sourceCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "sourceImageSha256": "708a1c873fefbf778ff2f6e15b413f99390f11955d3b48b1735a7bfc6474f548",
+    "sourceAlphaThreshold": 128,
+    "edgeAlphaRecoveryRadius": 3,
+    "minimumCellPadding": 24,
+    "primaryPoses": 40,
+    "sourceComponents": 40,
+    "rowMedianBottoms": [
+      182,
+      372,
+      563,
+      760,
+      946
+    ],
+    "uniformScale": 1.0
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+    ]
+  }
+}

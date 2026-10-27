@@ -1,0 +1,288 @@
+{
+  "schemaVersion": 1,
+  "speciesId": "elf",
+  "attackKind": "far",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south",
+      "pose": "south",
+      "semanticPath": "idle/south/south.png"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east",
+      "pose": "south-east",
+      "semanticPath": "idle/south-east/south-east.png"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east",
+      "pose": "east",
+      "semanticPath": "idle/east/east.png"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east",
+      "pose": "north-east",
+      "semanticPath": "idle/north-east/north-east.png"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north",
+      "pose": "north",
+      "semanticPath": "idle/north/north.png"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west",
+      "pose": "north-west",
+      "semanticPath": "idle/north-west/north-west.png"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west",
+      "pose": "west",
+      "semanticPath": "idle/west/west.png"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west",
+      "pose": "south-west",
+      "semanticPath": "idle/south-west/south-west.png"
+    },
+    {
+      "index": 8,
+      "action": "walk",
+      "direction": "east",
+      "pose": "00-stride-a",
+      "semanticPath": "walk/east/00-stride-a.png"
+    },
+    {
+      "index": 9,
+      "action": "walk",
+      "direction": "east",
+      "pose": "01-stride-b",
+      "semanticPath": "walk/east/01-stride-b.png"
+    },
+    {
+      "index": 10,
+      "action": "walk",
+      "direction": "east",
+      "pose": "02-stride-c",
+      "semanticPath": "walk/east/02-stride-c.png"
+    },
+    {
+      "index": 11,
+      "action": "walk",
+      "direction": "east",
+      "pose": "03-stride-d",
+      "semanticPath": "walk/east/03-stride-d.png"
+    },
+    {
+      "index": 12,
+      "action": "walk",
+      "direction": "west",
+      "pose": "00-stride-a",
+      "semanticPath": "walk/west/00-stride-a.png"
+    },
+    {
+      "index": 13,
+      "action": "walk",
+      "direction": "west",
+      "pose": "01-stride-b",
+      "semanticPath": "walk/west/01-stride-b.png"
+    },
+    {
+      "index": 14,
+      "action": "walk",
+      "direction": "west",
+      "pose": "02-stride-c",
+      "semanticPath": "walk/west/02-stride-c.png"
+    },
+    {
+      "index": 15,
+      "action": "walk",
+      "direction": "west",
+      "pose": "03-stride-d",
+      "semanticPath": "walk/west/03-stride-d.png"
+    },
+    {
+      "index": 16,
+      "action": "attack",
+      "direction": "east",
+      "pose": "00-aim",
+      "semanticPath": "attack/east/00-aim.png"
+    },
+    {
+      "index": 17,
+      "action": "attack",
+      "direction": "east",
+      "pose": "01-release",
+      "semanticPath": "attack/east/01-release.png"
+    },
+    {
+      "index": 18,
+      "action": "attack",
+      "direction": "east",
+      "pose": "02-follow-through",
+      "semanticPath": "attack/east/02-follow-through.png"
+    },
+    {
+      "index": 19,
+      "action": "attack",
+      "direction": "east",
+      "pose": "03-recovery",
+      "semanticPath": "attack/east/03-recovery.png"
+    },
+    {
+      "index": 20,
+      "action": "attack",
+      "direction": "west",
+      "pose": "00-aim",
+      "semanticPath": "attack/west/00-aim.png"
+    },
+    {
+      "index": 21,
+      "action": "attack",
+      "direction": "west",
+      "pose": "01-release",
+      "semanticPath": "attack/west/01-release.png"
+    },
+    {
+      "index": 22,
+      "action": "attack",
+      "direction": "west",
+      "pose": "02-follow-through",
+      "semanticPath": "attack/west/02-follow-through.png"
+    },
+    {
+      "index": 23,
+      "action": "attack",
+      "direction": "west",
+      "pose": "03-recovery",
+      "semanticPath": "attack/west/03-recovery.png"
+    },
+    {
+      "index": 24,
+      "action": "hit",
+      "direction": "east",
+      "pose": "00-flinch",
+      "semanticPath": "hit/east/00-flinch.png"
+    },
+    {
+      "index": 25,
+      "action": "hit",
+      "direction": "east",
+      "pose": "01-recoil",
+      "semanticPath": "hit/east/01-recoil.png"
+    },
+    {
+      "index": 26,
+      "action": "hit",
+      "direction": "east",
+      "pose": "02-recover",
+      "semanticPath": "hit/east/02-recover.png"
+    },
+    {
+      "index": 27,
+      "action": "hit",
+      "direction": "east",
+      "pose": "03-ready",
+      "semanticPath": "hit/east/03-ready.png"
+    },
+    {
+      "index": 28,
+      "action": "hit",
+      "direction": "west",
+      "pose": "00-flinch",
+      "semanticPath": "hit/west/00-flinch.png"
+    },
+    {
+      "index": 29,
+      "action": "hit",
+      "direction": "west",
+      "pose": "01-recoil",
+      "semanticPath": "hit/west/01-recoil.png"
+    },
+    {
+      "index": 30,
+      "action": "hit",
+      "direction": "west",
+      "pose": "02-recover",
+      "semanticPath": "hit/west/02-recover.png"
+    },
+    {
+      "index": 31,
+      "action": "hit",
+      "direction": "west",
+      "pose": "03-ready",
+      "semanticPath": "hit/west/03-ready.png"
+    },
+    {
+      "index": 32,
+      "action": "death",
+      "direction": "east",
+      "pose": "00-fall",
+      "semanticPath": "death/east/00-fall.png"
+    },
+    {
+      "index": 33,
+      "action": "death",
+      "direction": "east",
+      "pose": "01-collapse",
+      "semanticPath": "death/east/01-collapse.png"
+    },
+    {
+      "index": 34,
+      "action": "death",
+      "direction": "east",
+      "pose": "02-ground",
+      "semanticPath": "death/east/02-ground.png"
+    },
+    {
+      "index": 35,
+      "action": "death",
+      "direction": "east",
+      "pose": "03-settle",
+      "semanticPath": "death/east/03-settle.png"
+    },
+    {
+      "index": 36,
+      "action": "death",
+      "direction": "west",
+      "pose": "00-fall",
+      "semanticPath": "death/west/00-fall.png"
+    },
+    {
+      "index": 37,
+      "action": "death",
+      "direction": "west",
+      "pose": "01-collapse",
+      "semanticPath": "death/west/01-collapse.png"
+    },
+    {
+      "index": 38,
+      "action": "death",
+      "direction": "west",
+      "pose": "02-ground",
+      "semanticPath": "death/west/02-ground.png"
+    },
+    {
+      "index": 39,
+      "action": "death",
+      "direction": "west",
+      "pose": "03-settle",
+      "semanticPath": "death/west/03-settle.png"
+    }
+  ],
+  "note": "Composer indices follow the mob mold: idle 8; then walk, attack, hit, death each east x4 then west x4."
+}

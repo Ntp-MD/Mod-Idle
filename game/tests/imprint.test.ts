@@ -16,6 +16,10 @@ function piece() {
   const s = newGame();
   huntZone(s, s.zone);
   setLevel(s, 60);
+  // This test owns the loot path, not field density; keep the scenario's population small and stable.
+  tick(s, { online: true });
+  if (s.field) s.field.slots = s.field.slots.slice(0, 6);
+  s.group = s.group.slice(0, 6);
   let guard = 0;
   while (s.bag.length === 0 && guard++ < 40000) tick(s, { online: true });
   return { s, item: s.bag[0] };

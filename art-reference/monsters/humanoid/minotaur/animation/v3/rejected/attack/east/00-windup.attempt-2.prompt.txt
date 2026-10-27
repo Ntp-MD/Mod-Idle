@@ -1,0 +1,5 @@
+Use case: stylized-concept. Create ONE transparent pixel-art animation atlas as an unapproved v2 review-draft for the Minotaur close windup pose. Reference Image 1 only for the exact Minotaur identity and broad battle-axe; Image 2 only for camera/body-angle/timing. Do not copy player identity or equipment.
+
+Output one transparent RGBA image, 1254x1254. The Minotaur faces east, compressing torso and hips opposite the strike and drawing the broad axe back in anticipation; feet planted and entire sprite/axe inside the frame. Crisp pixel clusters, upper-left light.
+
+Require binary alpha: every art pixel alpha=255, every background pixel alpha=0, no intermediate alpha values. Leave 24px transparent margin at all four edges. No antialiasing, smoothing, glow, feathering, blur, floor, shadow, scenery, VFX, text, grid, labels or border.

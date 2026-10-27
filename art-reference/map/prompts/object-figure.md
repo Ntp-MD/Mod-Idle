@@ -1,6 +1,6 @@
 # Separate object or figure
 
-Choose one subject and attach an appropriate style reference. A real 3D camera render is preferable as a view reference when available; do not label an approximate generated view as exact.
+Choose one subject and attach an appropriate style reference. A real camera render is preferable as a view reference when available; do not label an approximate generated view as exact.
 
 ```text
 Create one isolated [SUBJECT] for a painterly fantasy tabletop map. Orthographic three-quarter overhead view, elevation [camera.elevationDegrees from hex-spec.json] degrees above horizontal. Use [EXPLICIT FACING DIRECTION OR APPROVED FACING REFERENCE]. Show enough top surface to read correctly from above. Match the project's muted colours, small readable forms and top-left lighting.

@@ -9,7 +9,6 @@ function manualFight(spots: { id: string; x: number; y: number }[]) {
   const state = newGame(41);
   setLevel(state, 30);
   state.hunting = true;
-  state.spawnIn = 999;
   state.group = spots.map((spot, index) => {
     const mob = spawnMob(mulberry32(80 + index), 1, 'normal');
     Object.assign(mob, {

@@ -114,9 +114,12 @@ describe('the live roster copy leaves derived facts to the fields', () => {
       if (eff.some((e) => e.stat === 'dot_dps'))
         expect(eff.some((e) => e.stat === 'dot_sec'),
           `${row.id} names its own dot_sec`).toBe(true);
-      if (row.targets === '3')
-        expect(row.area && row.area.radius_m > 0,
-          `${row.id} pairs its queue count with a live circle`).toBe(true);
+      if (row.targets === '3') {
+        const area = row.area;
+        const liveArea = !!area && (area.radius_m > 0
+          || (area.shape === 'line' && (area.length_m ?? 0) > 0 && (area.width_m ?? 0) > 0));
+        expect(liveArea, `${row.id} pairs its queue count with a live area`).toBe(true);
+      }
       if (row.type === 'attack' && row.duration) {
         const opensWindow = (row.rules || []).includes('self_window');
         const writesTarget = eff.some((e) => e.subject === 'target');

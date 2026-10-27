@@ -1,0 +1,362 @@
+{
+    "status":  "draft-review",
+    "file":  "atlas/animation.png",
+    "generator":  "OpenAI built-in image_gen",
+    "generation":  {
+                       "sourceOutputs":  [
+                                             "exec-1cbbc0ef-a382-41a2-8d65-d008be450f6a.png"
+                                         ],
+                       "styleReference":  "art-reference/monsters/_shared/collection/reference.png",
+                       "identityReference":  "art-reference/monsters/beast/harpy/animation/source/base-v1.png",
+                       "initialPrompt":  "8x5 monster atlas; 8 idle facings; east/west hop-walk, wing-claw attack, hit and death; 4 frames each."
+                   },
+    "sourceCanvas":  {
+                         "width":  1024,
+                         "height":  640
+                     },
+    "frameCanvas":  {
+                        "width":  128,
+                        "height":  128
+                    },
+    "anchor":  {
+                   "x":  64,
+                   "y":  108
+               },
+    "alignment":  "talon-ground-contact-at-108",
+    "locomotion":  "bipedal-hop-step",
+    "rowOrder":  [
+                     "idle S SE E NE N NW W SW",
+                     "east walk4; west walk4",
+                     "east attack4; west attack4",
+                     "east hit4; west hit4",
+                     "east death4; west death4"
+                 ],
+    "sourceFrames":  [
+                         {
+                             "x":  0,
+                             "y":  0,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  128,
+                             "y":  0,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  256,
+                             "y":  0,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  384,
+                             "y":  0,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  512,
+                             "y":  0,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  640,
+                             "y":  0,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  768,
+                             "y":  0,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  896,
+                             "y":  0,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  0,
+                             "y":  128,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  128,
+                             "y":  128,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  256,
+                             "y":  128,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  384,
+                             "y":  128,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  512,
+                             "y":  128,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  640,
+                             "y":  128,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  768,
+                             "y":  128,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  896,
+                             "y":  128,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  0,
+                             "y":  256,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  128,
+                             "y":  256,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  256,
+                             "y":  256,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  384,
+                             "y":  256,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  512,
+                             "y":  256,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  640,
+                             "y":  256,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  768,
+                             "y":  256,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  896,
+                             "y":  256,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  0,
+                             "y":  384,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  128,
+                             "y":  384,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  256,
+                             "y":  384,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  384,
+                             "y":  384,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  512,
+                             "y":  384,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  640,
+                             "y":  384,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  768,
+                             "y":  384,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  896,
+                             "y":  384,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  0,
+                             "y":  512,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  128,
+                             "y":  512,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  256,
+                             "y":  512,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  384,
+                             "y":  512,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  512,
+                             "y":  512,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  640,
+                             "y":  512,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  768,
+                             "y":  512,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         },
+                         {
+                             "x":  896,
+                             "y":  512,
+                             "width":  128,
+                             "height":  128,
+                             "offsetX":  0,
+                             "offsetY":  0
+                         }
+                     ],
+    "slicing":  {
+                    "columns":  8,
+                    "rows":  5,
+                    "cellWidth":  128,
+                    "cellHeight":  128
+                }
+}

@@ -1,0 +1,503 @@
+{
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "wyvern",
+  "variantId": "gale-wyvern",
+  "name": "Gale Wyvern",
+  "levels": [
+    61,
+    80
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-anchor-at-224",
+  "grid": {
+    "columns": 8,
+    "rows": 5,
+    "totalFrames": 40
+  },
+  "states": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    {
+      "state": "idle",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "walk",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "attack",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "hit",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "death",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    }
+  ],
+  "sourceFrames": [
+    {
+      "x": 118,
+      "y": 141,
+      "width": 154,
+      "height": 151,
+      "offsetX": 118,
+      "offsetY": 141
+    },
+    {
+      "x": 484,
+      "y": 146,
+      "width": 180,
+      "height": 147,
+      "offsetX": 100,
+      "offsetY": 146
+    },
+    {
+      "x": 864,
+      "y": 142,
+      "width": 183,
+      "height": 150,
+      "offsetX": 96,
+      "offsetY": 142
+    },
+    {
+      "x": 1243,
+      "y": 137,
+      "width": 169,
+      "height": 154,
+      "offsetX": 91,
+      "offsetY": 137
+    },
+    {
+      "x": 1641,
+      "y": 140,
+      "width": 169,
+      "height": 163,
+      "offsetX": 105,
+      "offsetY": 140
+    },
+    {
+      "x": 2043,
+      "y": 137,
+      "width": 170,
+      "height": 155,
+      "offsetX": 123,
+      "offsetY": 137
+    },
+    {
+      "x": 2408,
+      "y": 143,
+      "width": 184,
+      "height": 150,
+      "offsetX": 104,
+      "offsetY": 143
+    },
+    {
+      "x": 2801,
+      "y": 142,
+      "width": 154,
+      "height": 151,
+      "offsetX": 113,
+      "offsetY": 142
+    },
+    {
+      "x": 100,
+      "y": 521,
+      "width": 171,
+      "height": 155,
+      "offsetX": 100,
+      "offsetY": 137
+    },
+    {
+      "x": 481,
+      "y": 526,
+      "width": 173,
+      "height": 149,
+      "offsetX": 97,
+      "offsetY": 142
+    },
+    {
+      "x": 849,
+      "y": 526,
+      "width": 207,
+      "height": 150,
+      "offsetX": 81,
+      "offsetY": 142
+    },
+    {
+      "x": 1247,
+      "y": 515,
+      "width": 165,
+      "height": 160,
+      "offsetX": 95,
+      "offsetY": 131
+    },
+    {
+      "x": 1627,
+      "y": 520,
+      "width": 202,
+      "height": 169,
+      "offsetX": 91,
+      "offsetY": 136
+    },
+    {
+      "x": 2044,
+      "y": 516,
+      "width": 165,
+      "height": 160,
+      "offsetX": 124,
+      "offsetY": 132
+    },
+    {
+      "x": 2399,
+      "y": 526,
+      "width": 206,
+      "height": 151,
+      "offsetX": 95,
+      "offsetY": 142
+    },
+    {
+      "x": 2802,
+      "y": 521,
+      "width": 170,
+      "height": 155,
+      "offsetX": 114,
+      "offsetY": 137
+    },
+    {
+      "x": 103,
+      "y": 866,
+      "width": 210,
+      "height": 193,
+      "offsetX": 103,
+      "offsetY": 98
+    },
+    {
+      "x": 495,
+      "y": 870,
+      "width": 185,
+      "height": 180,
+      "offsetX": 111,
+      "offsetY": 102
+    },
+    {
+      "x": 873,
+      "y": 875,
+      "width": 190,
+      "height": 183,
+      "offsetX": 105,
+      "offsetY": 107
+    },
+    {
+      "x": 1238,
+      "y": 862,
+      "width": 194,
+      "height": 204,
+      "offsetX": 86,
+      "offsetY": 94
+    },
+    {
+      "x": 1617,
+      "y": 881,
+      "width": 217,
+      "height": 180,
+      "offsetX": 81,
+      "offsetY": 113
+    },
+    {
+      "x": 2019,
+      "y": 864,
+      "width": 190,
+      "height": 201,
+      "offsetX": 99,
+      "offsetY": 96
+    },
+    {
+      "x": 2393,
+      "y": 870,
+      "width": 186,
+      "height": 179,
+      "offsetX": 89,
+      "offsetY": 102
+    },
+    {
+      "x": 2762,
+      "y": 866,
+      "width": 206,
+      "height": 194,
+      "offsetX": 74,
+      "offsetY": 98
+    },
+    {
+      "x": 99,
+      "y": 1294,
+      "width": 176,
+      "height": 150,
+      "offsetX": 99,
+      "offsetY": 142
+    },
+    {
+      "x": 481,
+      "y": 1299,
+      "width": 174,
+      "height": 145,
+      "offsetX": 97,
+      "offsetY": 147
+    },
+    {
+      "x": 868,
+      "y": 1292,
+      "width": 161,
+      "height": 152,
+      "offsetX": 100,
+      "offsetY": 140
+    },
+    {
+      "x": 1249,
+      "y": 1293,
+      "width": 161,
+      "height": 146,
+      "offsetX": 97,
+      "offsetY": 141
+    },
+    {
+      "x": 1643,
+      "y": 1294,
+      "width": 161,
+      "height": 167,
+      "offsetX": 107,
+      "offsetY": 142
+    },
+    {
+      "x": 2042,
+      "y": 1293,
+      "width": 151,
+      "height": 151,
+      "offsetX": 122,
+      "offsetY": 141
+    },
+    {
+      "x": 2409,
+      "y": 1301,
+      "width": 180,
+      "height": 144,
+      "offsetX": 105,
+      "offsetY": 149
+    },
+    {
+      "x": 2797,
+      "y": 1294,
+      "width": 176,
+      "height": 150,
+      "offsetX": 109,
+      "offsetY": 142
+    },
+    {
+      "x": 99,
+      "y": 1742,
+      "width": 180,
+      "height": 90,
+      "offsetX": 99,
+      "offsetY": 206
+    },
+    {
+      "x": 468,
+      "y": 1740,
+      "width": 197,
+      "height": 84,
+      "offsetX": 84,
+      "offsetY": 204
+    },
+    {
+      "x": 863,
+      "y": 1739,
+      "width": 196,
+      "height": 89,
+      "offsetX": 95,
+      "offsetY": 203
+    },
+    {
+      "x": 1245,
+      "y": 1741,
+      "width": 193,
+      "height": 87,
+      "offsetX": 93,
+      "offsetY": 205
+    },
+    {
+      "x": 1615,
+      "y": 1747,
+      "width": 218,
+      "height": 99,
+      "offsetX": 79,
+      "offsetY": 211
+    },
+    {
+      "x": 2017,
+      "y": 1739,
+      "width": 194,
+      "height": 90,
+      "offsetX": 97,
+      "offsetY": 203
+    },
+    {
+      "x": 2399,
+      "y": 1745,
+      "width": 204,
+      "height": 82,
+      "offsetX": 95,
+      "offsetY": 209
+    },
+    {
+      "x": 2794,
+      "y": 1742,
+      "width": 179,
+      "height": 90,
+      "offsetX": 106,
+      "offsetY": 206
+    }
+  ],
+  "identityReference": "art-reference/monsters/dragon/wyvern/animation/source/base.png",
+  "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+  "generation": {
+    "sourceOutputs": [
+      "exec-0e965c90-2628-4d1e-b2c2-75ec57141fa2.png"
+    ],
+    "identityReference": "art-reference/monsters/dragon/wyvern/animation/source/base.png",
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "variantCue": "swept-back wing membranes with muted gray-green tones, keeping the same wing anatomy",
+    "initialPrompt": "Gale Wyvern; all 8 directions for idle, walk, attack, hit, death; dark outline without fringe or halo."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "raw-connected-pose-repack-384-v1",
+    "sourceCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "sourceImageSha256": "ce938bed1bc377a49b87f8ac6a69e55383d0e181eb01c9ab2bbe91d7842d50f0",
+    "sourceAlphaThreshold": 128,
+    "edgeAlphaRecoveryRadius": 3,
+    "minimumCellPadding": 24,
+    "primaryPoses": 40,
+    "sourceComponents": 42,
+    "rowMedianBottoms": [
+      208,
+      392,
+      612,
+      791,
+      926
+    ],
+    "uniformScale": 1.0
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+    ]
+  }
+}

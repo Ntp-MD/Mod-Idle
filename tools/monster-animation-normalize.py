@@ -11,7 +11,7 @@ Run from the repository root:
 
     python -B tools/monster-animation-normalize.py
     python -B tools/monster-animation-normalize.py --write
-    python -B tools/monster-animation-normalize.py --metadata art-reference/monsters/goblin/variants/shaman-goblin/meta.json --write
+    python -B tools/monster-animation-normalize.py --metadata art-reference/monsters/humanoid/goblin/variants/shaman-goblin/meta.json --write
 """
 
 from __future__ import annotations
@@ -89,7 +89,8 @@ def load_qa_module():
 
 
 def discover_metadata() -> list[Path]:
-    return sorted(MONSTER_ROOT.glob("*/variants/*/meta.json"))
+    return sorted({*MONSTER_ROOT.glob("*/*/variants/*/meta.json"),
+                   *MONSTER_ROOT.glob("*/*/variants/*/v*/meta.json")})
 
 
 def source_bounds(metadata: dict[str, Any]) -> list[tuple[int, int, int, int, int, int]]:

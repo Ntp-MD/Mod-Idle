@@ -619,7 +619,6 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   // hunting tick, and an unowned one would cast without ownership — dropped, not kept
   s.skills.list = s.skills.list.map((id) => (id && sm.byId[id] && Object.hasOwn(s.skills.owned, id) ? id : null));
   if (!s.healUp) s.healUp = null;
-  if (!s.spawnIn && s.spawnIn !== 0) s.spawnIn = 0;
   if (!s.counters.zoneKills) s.counters.zoneKills = {};
   if (!s.counters.stones) s.counters.stones = {};
   if (!s.junk) s.junk = {};

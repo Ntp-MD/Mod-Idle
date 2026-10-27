@@ -1,12 +1,12 @@
-import golem from '../../../../../art-reference/monsters/golem/stone-golem/meta.json';
+import golem from '../../../../../art-reference/monsters/elemental/golem/stone-golem/meta.json';
 import type { ArenaCharacterArt, ArenaDirection, ArenaSpriteSheet } from '../../combat/arena/arena-art';
 
 const hrefs = {
-  walk: new URL('../../../../../art-reference/monsters/golem/stone-golem/clips/walk.png', import.meta.url).href,
-  idle: new URL('../../../../../art-reference/monsters/golem/stone-golem/clips/idle.png', import.meta.url).href,
-  attack: new URL('../../../../../art-reference/monsters/golem/stone-golem/clips/attack.png', import.meta.url).href,
-  hurt: new URL('../../../../../art-reference/monsters/golem/stone-golem/clips/hit.png', import.meta.url).href,
-  death: new URL('../../../../../art-reference/monsters/golem/stone-golem/clips/death.png', import.meta.url).href,
+  walk: new URL('../../../../../art-reference/monsters/elemental/golem/stone-golem/clips/walk.png', import.meta.url).href,
+  idle: new URL('../../../../../art-reference/monsters/elemental/golem/stone-golem/clips/idle.png', import.meta.url).href,
+  attack: new URL('../../../../../art-reference/monsters/elemental/golem/stone-golem/clips/attack.png', import.meta.url).href,
+  hurt: new URL('../../../../../art-reference/monsters/elemental/golem/stone-golem/clips/hit.png', import.meta.url).href,
+  death: new URL('../../../../../art-reference/monsters/elemental/golem/stone-golem/clips/death.png', import.meta.url).href,
 };
 
 /** Each clip strip shares one ground line, so the pack's single lead direction serves both facings. */

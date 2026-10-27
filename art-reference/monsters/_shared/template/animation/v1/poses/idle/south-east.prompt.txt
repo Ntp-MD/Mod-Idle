@@ -1,0 +1,5 @@
+SPECIES: <species-id> (<Species Name>) — <silhouette one-liner>
+WEAPON (baked, fixed): <weapon-id> — in hand every frame; no equip switch
+SLOT: idle/south-east — idle facing south-east, neutral ready stance, feet planted
+CAMERA: fixed elevated three-quarter, upper-left light; whole sprite including feet inside the frame
+RENDER: chibi pixel-art clusters, hard opaque edges only, transparent background; no shadow, scenery, text, effects, grid

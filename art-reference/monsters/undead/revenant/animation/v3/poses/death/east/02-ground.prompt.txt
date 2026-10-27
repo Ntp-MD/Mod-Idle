@@ -1,0 +1,5 @@
+SPECIES: revenant (Frost Revenant) — match the approved Frost Revenant reference silhouette exactly; preserve its body plan, proportions, palette, and fixed natural anatomy; add no unreferenced equipment
+WEAPON (baked, fixed): TODO: identify the fixed baked weapon from the approved reference before generation — in hand every frame; no equip switch
+SLOT: death/east/02-ground — death east: body on the ground
+CAMERA: fixed elevated three-quarter, upper-left light; whole sprite including feet inside the frame
+RENDER: chibi pixel-art clusters, hard opaque edges only, transparent background; no shadow, scenery, text, effects, grid

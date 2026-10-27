@@ -9,8 +9,8 @@
   },
   "defaults": {
     "layout": "forest-clearing",
-    "cap": 8,
-    "respawn_sec": 50,
+    "cap": 40,
+    "respawn_sec": 35,
     "aggro_m": 4,
     "assist_m": 3,
     "leash_m": 9,
@@ -18,135 +18,540 @@
     "home_band_m": 0.35,
     "return_speed_mult": 0.65,
     "camp_safe_m": 6,
-    "offline_share": 0.6
+    "offline_share": 0.6,
+    "respawn_min_sec": 31.5,
+    "respawn_max_sec": 38.5
   },
   "layouts": {
     "forest-clearing": {
       "points": [
         {
-          "id": "west-north",
-          "x": 3.2,
-          "y": 2.8,
-          "roam_m": 1.8
-        },
-        {
-          "id": "north-west",
-          "x": 6.2,
-          "y": 2.0,
-          "roam_m": 1.5
-        },
-        {
-          "id": "north",
-          "x": 9.6,
-          "y": 2.4,
-          "roam_m": 1.8
-        },
-        {
-          "id": "north-east",
-          "x": 14.4,
-          "y": 2.8,
-          "roam_m": 1.8
-        },
-        {
-          "id": "east",
-          "x": 15.4,
-          "y": 6.0,
+          "id": "p01",
+          "x": 3,
+          "y": 3,
           "roam_m": 2.0
         },
         {
-          "id": "south-east",
-          "x": 13.8,
-          "y": 9.2,
-          "roam_m": 1.8
+          "id": "p02",
+          "x": 3,
+          "y": 8,
+          "roam_m": 2.0
         },
         {
-          "id": "south",
-          "x": 9.0,
-          "y": 9.6,
-          "roam_m": 1.8
+          "id": "p03",
+          "x": 3,
+          "y": 13,
+          "roam_m": 2.0
         },
         {
-          "id": "south-west",
-          "x": 4.2,
-          "y": 8.6,
-          "roam_m": 1.8
+          "id": "p04",
+          "x": 3,
+          "y": 18,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p05",
+          "x": 3,
+          "y": 23,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p06",
+          "x": 3,
+          "y": 28,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p07",
+          "x": 9,
+          "y": 3,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p08",
+          "x": 9,
+          "y": 8,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p09",
+          "x": 9,
+          "y": 13,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p10",
+          "x": 9,
+          "y": 18,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p11",
+          "x": 9,
+          "y": 23,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p12",
+          "x": 9,
+          "y": 28,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p13",
+          "x": 15,
+          "y": 3,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p14",
+          "x": 15,
+          "y": 8,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p15",
+          "x": 15,
+          "y": 13,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p16",
+          "x": 15,
+          "y": 18,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p17",
+          "x": 15,
+          "y": 23,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p18",
+          "x": 15,
+          "y": 28,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p19",
+          "x": 21,
+          "y": 3,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p20",
+          "x": 21,
+          "y": 8,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p21",
+          "x": 21,
+          "y": 13,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p22",
+          "x": 21,
+          "y": 18,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p23",
+          "x": 21,
+          "y": 23,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p24",
+          "x": 21,
+          "y": 28,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p25",
+          "x": 27,
+          "y": 3,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p26",
+          "x": 27,
+          "y": 8,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p27",
+          "x": 27,
+          "y": 13,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p28",
+          "x": 27,
+          "y": 18,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p29",
+          "x": 27,
+          "y": 23,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p30",
+          "x": 27,
+          "y": 28,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p31",
+          "x": 33,
+          "y": 3,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p32",
+          "x": 33,
+          "y": 8,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p33",
+          "x": 33,
+          "y": 13,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p34",
+          "x": 33,
+          "y": 18,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p35",
+          "x": 33,
+          "y": 23,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p36",
+          "x": 33,
+          "y": 28,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p37",
+          "x": 39,
+          "y": 3,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p38",
+          "x": 39,
+          "y": 8,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p39",
+          "x": 39,
+          "y": 13,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p40",
+          "x": 39,
+          "y": 18,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p41",
+          "x": 39,
+          "y": 23,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p42",
+          "x": 39,
+          "y": 28,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p43",
+          "x": 45,
+          "y": 3,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p44",
+          "x": 45,
+          "y": 8,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p45",
+          "x": 45,
+          "y": 13,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p46",
+          "x": 45,
+          "y": 18,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p47",
+          "x": 45,
+          "y": 23,
+          "roam_m": 2.0
+        },
+        {
+          "id": "p48",
+          "x": 45,
+          "y": 28,
+          "roam_m": 2.0
         }
       ]
     }
   },
   "zones": {
     "1": {
-      "cap": 6,
-      "respawn_sec": 43
+      "cap": 32,
+      "respawn_sec": 33,
+      "respawn_min_sec": 29.7,
+      "respawn_max_sec": 36.3
     },
     "2": {
-      "cap": 6,
-      "respawn_sec": 43
+      "cap": 32,
+      "respawn_sec": 33,
+      "respawn_min_sec": 29.7,
+      "respawn_max_sec": 36.3
     },
     "3": {
-      "cap": 6,
-      "respawn_sec": 43
+      "cap": 32,
+      "respawn_sec": 33,
+      "respawn_min_sec": 29.7,
+      "respawn_max_sec": 36.3
     },
     "4": {
-      "cap": 8,
-      "respawn_sec": 49
+      "cap": 40,
+      "respawn_sec": 35,
+      "respawn_min_sec": 31.5,
+      "respawn_max_sec": 38.5
     },
     "5": {
-      "cap": 8,
-      "respawn_sec": 49
+      "cap": 40,
+      "respawn_sec": 35,
+      "respawn_min_sec": 31.5,
+      "respawn_max_sec": 38.5
     },
     "6": {
-      "cap": 8,
-      "respawn_sec": 49
+      "cap": 40,
+      "respawn_sec": 35,
+      "respawn_min_sec": 31.5,
+      "respawn_max_sec": 38.5
     },
     "7": {
-      "cap": 8,
-      "respawn_sec": 45
+      "cap": 48,
+      "respawn_sec": 38,
+      "respawn_min_sec": 34.2,
+      "respawn_max_sec": 41.8
     },
     "8": {
-      "cap": 8,
-      "respawn_sec": 45
+      "cap": 48,
+      "respawn_sec": 38,
+      "respawn_min_sec": 34.2,
+      "respawn_max_sec": 41.8
     },
     "9": {
-      "cap": 8,
-      "respawn_sec": 45
+      "cap": 48,
+      "respawn_sec": 38,
+      "respawn_min_sec": 34.2,
+      "respawn_max_sec": 41.8
     },
     "10": {
-      "cap": 6,
-      "respawn_sec": 43
+      "cap": 32,
+      "respawn_sec": 33,
+      "respawn_min_sec": 29.7,
+      "respawn_max_sec": 36.3
     },
     "11": {
-      "cap": 6,
-      "respawn_sec": 43
+      "cap": 32,
+      "respawn_sec": 33,
+      "respawn_min_sec": 29.7,
+      "respawn_max_sec": 36.3
     },
     "12": {
-      "cap": 6,
-      "respawn_sec": 43
+      "cap": 32,
+      "respawn_sec": 33,
+      "respawn_min_sec": 29.7,
+      "respawn_max_sec": 36.3
     },
     "13": {
-      "cap": 8,
-      "respawn_sec": 49
+      "cap": 40,
+      "respawn_sec": 35,
+      "respawn_min_sec": 31.5,
+      "respawn_max_sec": 38.5
     },
     "14": {
-      "cap": 8,
-      "respawn_sec": 49
+      "cap": 40,
+      "respawn_sec": 35,
+      "respawn_min_sec": 31.5,
+      "respawn_max_sec": 38.5
     },
     "15": {
-      "cap": 8,
-      "respawn_sec": 49
+      "cap": 40,
+      "respawn_sec": 35,
+      "respawn_min_sec": 31.5,
+      "respawn_max_sec": 38.5
     },
     "16": {
-      "cap": 8,
-      "respawn_sec": 45
+      "cap": 48,
+      "respawn_sec": 38,
+      "respawn_min_sec": 34.2,
+      "respawn_max_sec": 41.8
     },
     "17": {
-      "cap": 8,
-      "respawn_sec": 45
+      "cap": 48,
+      "respawn_sec": 38,
+      "respawn_min_sec": 34.2,
+      "respawn_max_sec": 41.8
     },
     "18": {
-      "cap": 8,
-      "respawn_sec": 45
+      "cap": 48,
+      "respawn_sec": 38,
+      "respawn_min_sec": 34.2,
+      "respawn_max_sec": 41.8
     }
   },
-  "subzones": {}
+  "subzones": {},
+  "legacy": {
+    "defaults": {
+      "layout": "forest-clearing",
+      "cap": 8,
+      "respawn_sec": 50,
+      "aggro_m": 4,
+      "assist_m": 3,
+      "leash_m": 9,
+      "roam_m": 2,
+      "home_band_m": 0.35,
+      "return_speed_mult": 0.65,
+      "camp_safe_m": 6,
+      "offline_share": 0.6,
+      "respawn_min_sec": 45.0,
+      "respawn_max_sec": 55.0
+    },
+    "zones": {
+      "1": {
+        "cap": 6,
+        "respawn_sec": 43,
+        "respawn_min_sec": 38.7,
+        "respawn_max_sec": 47.3
+      },
+      "2": {
+        "cap": 6,
+        "respawn_sec": 43,
+        "respawn_min_sec": 38.7,
+        "respawn_max_sec": 47.3
+      },
+      "3": {
+        "cap": 6,
+        "respawn_sec": 43,
+        "respawn_min_sec": 38.7,
+        "respawn_max_sec": 47.3
+      },
+      "4": {
+        "cap": 8,
+        "respawn_sec": 49,
+        "respawn_min_sec": 44.1,
+        "respawn_max_sec": 53.9
+      },
+      "5": {
+        "cap": 8,
+        "respawn_sec": 49,
+        "respawn_min_sec": 44.1,
+        "respawn_max_sec": 53.9
+      },
+      "6": {
+        "cap": 8,
+        "respawn_sec": 49,
+        "respawn_min_sec": 44.1,
+        "respawn_max_sec": 53.9
+      },
+      "7": {
+        "cap": 8,
+        "respawn_sec": 44,
+        "respawn_min_sec": 39.6,
+        "respawn_max_sec": 48.4
+      },
+      "8": {
+        "cap": 8,
+        "respawn_sec": 44,
+        "respawn_min_sec": 39.6,
+        "respawn_max_sec": 48.4
+      },
+      "9": {
+        "cap": 8,
+        "respawn_sec": 44,
+        "respawn_min_sec": 39.6,
+        "respawn_max_sec": 48.4
+      },
+      "10": {
+        "cap": 6,
+        "respawn_sec": 43,
+        "respawn_min_sec": 38.7,
+        "respawn_max_sec": 47.3
+      },
+      "11": {
+        "cap": 6,
+        "respawn_sec": 43,
+        "respawn_min_sec": 38.7,
+        "respawn_max_sec": 47.3
+      },
+      "12": {
+        "cap": 6,
+        "respawn_sec": 43,
+        "respawn_min_sec": 38.7,
+        "respawn_max_sec": 47.3
+      },
+      "13": {
+        "cap": 8,
+        "respawn_sec": 49,
+        "respawn_min_sec": 44.1,
+        "respawn_max_sec": 53.9
+      },
+      "14": {
+        "cap": 8,
+        "respawn_sec": 49,
+        "respawn_min_sec": 44.1,
+        "respawn_max_sec": 53.9
+      },
+      "15": {
+        "cap": 8,
+        "respawn_sec": 49,
+        "respawn_min_sec": 44.1,
+        "respawn_max_sec": 53.9
+      },
+      "16": {
+        "cap": 8,
+        "respawn_sec": 44,
+        "respawn_min_sec": 39.6,
+        "respawn_max_sec": 48.4
+      },
+      "17": {
+        "cap": 8,
+        "respawn_sec": 44,
+        "respawn_min_sec": 39.6,
+        "respawn_max_sec": 48.4
+      },
+      "18": {
+        "cap": 8,
+        "respawn_sec": 44,
+        "respawn_min_sec": 39.6,
+        "respawn_max_sec": 48.4
+      }
+    }
+  }
 }

@@ -1,12 +1,12 @@
-import spear from '../../../../../art-reference/monsters/goblin/spear-goblin/meta.json';
+import spear from '../../../../../art-reference/monsters/humanoid/goblin/spear-goblin/meta.json';
 import type { ArenaCharacterArt, ArenaDirection, ArenaSpriteSheet } from '../../combat/arena/arena-art';
 
 const hrefs = {
-  walk: new URL('../../../../../art-reference/monsters/goblin/spear-goblin/clips/walk.png', import.meta.url).href,
-  idle: new URL('../../../../../art-reference/monsters/goblin/spear-goblin/clips/idle.png', import.meta.url).href,
-  attack: new URL('../../../../../art-reference/monsters/goblin/spear-goblin/clips/attack.png', import.meta.url).href,
-  hurt: new URL('../../../../../art-reference/monsters/goblin/spear-goblin/clips/hit.png', import.meta.url).href,
-  death: new URL('../../../../../art-reference/monsters/goblin/spear-goblin/clips/death.png', import.meta.url).href,
+  walk: new URL('../../../../../art-reference/monsters/humanoid/goblin/spear-goblin/clips/walk.png', import.meta.url).href,
+  idle: new URL('../../../../../art-reference/monsters/humanoid/goblin/spear-goblin/clips/idle.png', import.meta.url).href,
+  attack: new URL('../../../../../art-reference/monsters/humanoid/goblin/spear-goblin/clips/attack.png', import.meta.url).href,
+  hurt: new URL('../../../../../art-reference/monsters/humanoid/goblin/spear-goblin/clips/hit.png', import.meta.url).href,
+  death: new URL('../../../../../art-reference/monsters/humanoid/goblin/spear-goblin/clips/death.png', import.meta.url).href,
 };
 
 /** Each clip strip shares one ground line, so the pack's single lead direction serves both facings. */

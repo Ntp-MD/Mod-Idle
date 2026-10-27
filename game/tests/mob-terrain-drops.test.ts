@@ -270,7 +270,6 @@ describe('mob, terrain and drop data', () => {
         s.town.visited = [...new Set([...s.town.visited, town.id])];
         expect(huntZone(s, zoneId).ok).toBe(true);
         s.hunting = true;
-        s.spawnIn = 0;
         for (let step = 0; step < 250 && seen.length < 6; step++) {
           tick(s, { online: true });
           const mob = s.group.find((candidate) => candidate.speciesId != null
@@ -281,8 +280,7 @@ describe('mob, terrain and drop data', () => {
           }
           if (s.group.length) {
             s.group = [];
-            s.spawnIn = 0;
-          }
+              }
         }
       }
       expect(seen).toHaveLength(6);
@@ -382,7 +380,6 @@ describe('mob, terrain and drop data', () => {
     setLevel(state, 60);
     expect(huntZone(state, state.zone).ok).toBe(true);
     state.bossDueAt = state.clockSec + 0.1;
-    state.spawnIn = 0;
     state.player.atkTimer = -10000;
     tick(state, { autoSkills: false });
 
@@ -483,7 +480,6 @@ describe('the species trait read as a mechanic', () => {
     huntZone(s, s.zone);
     s.zone = 3;
     s.hunting = true;
-    s.spawnIn = 0;
     let guard = 0;
     while (guard++ < 40000 && !s.group.some((m: any) => m.burst?.ps_pct)) tick(s, { online: true });
     const burst = s.group.find((m: any) => m.burst?.ps_pct) as any;

@@ -14,7 +14,6 @@ function arenaFight(skillId: string, distance: number) {
   const state = newGame(41);
   setLevel(state, 30);
   state.hunting = true;
-  state.spawnIn = 999;
   const mob = spawnMob(mulberry32(23), 1, 'normal');
   Object.assign(mob, {
     id: 'timing-target', hp: 1e8, hpMax: 1e8, ps: 1, evasion: 0, dodgeRate: 0,

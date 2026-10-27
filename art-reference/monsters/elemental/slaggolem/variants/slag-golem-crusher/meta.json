@@ -1,0 +1,503 @@
+{
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "slaggolem",
+  "variantId": "slag-golem-crusher",
+  "name": "Slag Golem Crusher",
+  "levels": [
+    81,
+    100
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-anchor-at-224",
+  "grid": {
+    "columns": 8,
+    "rows": 5,
+    "totalFrames": 40
+  },
+  "states": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    {
+      "state": "idle",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "walk",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "attack",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "hit",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "death",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    }
+  ],
+  "sourceFrames": [
+    {
+      "x": 124,
+      "y": 136,
+      "width": 162,
+      "height": 155,
+      "offsetX": 124,
+      "offsetY": 136
+    },
+    {
+      "x": 512,
+      "y": 135,
+      "width": 150,
+      "height": 158,
+      "offsetX": 128,
+      "offsetY": 135
+    },
+    {
+      "x": 907,
+      "y": 135,
+      "width": 108,
+      "height": 157,
+      "offsetX": 139,
+      "offsetY": 135
+    },
+    {
+      "x": 1268,
+      "y": 136,
+      "width": 149,
+      "height": 157,
+      "offsetX": 116,
+      "offsetY": 136
+    },
+    {
+      "x": 1637,
+      "y": 138,
+      "width": 167,
+      "height": 153,
+      "offsetX": 101,
+      "offsetY": 138
+    },
+    {
+      "x": 2030,
+      "y": 135,
+      "width": 146,
+      "height": 157,
+      "offsetX": 110,
+      "offsetY": 135
+    },
+    {
+      "x": 2436,
+      "y": 136,
+      "width": 107,
+      "height": 157,
+      "offsetX": 132,
+      "offsetY": 136
+    },
+    {
+      "x": 2785,
+      "y": 135,
+      "width": 154,
+      "height": 158,
+      "offsetX": 97,
+      "offsetY": 135
+    },
+    {
+      "x": 129,
+      "y": 511,
+      "width": 160,
+      "height": 163,
+      "offsetX": 129,
+      "offsetY": 127
+    },
+    {
+      "x": 516,
+      "y": 509,
+      "width": 147,
+      "height": 168,
+      "offsetX": 132,
+      "offsetY": 125
+    },
+    {
+      "x": 893,
+      "y": 509,
+      "width": 134,
+      "height": 167,
+      "offsetX": 125,
+      "offsetY": 125
+    },
+    {
+      "x": 1268,
+      "y": 508,
+      "width": 153,
+      "height": 166,
+      "offsetX": 116,
+      "offsetY": 124
+    },
+    {
+      "x": 1639,
+      "y": 509,
+      "width": 162,
+      "height": 167,
+      "offsetX": 103,
+      "offsetY": 125
+    },
+    {
+      "x": 2037,
+      "y": 508,
+      "width": 161,
+      "height": 168,
+      "offsetX": 117,
+      "offsetY": 124
+    },
+    {
+      "x": 2436,
+      "y": 511,
+      "width": 118,
+      "height": 165,
+      "offsetX": 132,
+      "offsetY": 127
+    },
+    {
+      "x": 2790,
+      "y": 509,
+      "width": 149,
+      "height": 166,
+      "offsetX": 102,
+      "offsetY": 125
+    },
+    {
+      "x": 124,
+      "y": 870,
+      "width": 164,
+      "height": 190,
+      "offsetX": 124,
+      "offsetY": 102
+    },
+    {
+      "x": 514,
+      "y": 882,
+      "width": 135,
+      "height": 178,
+      "offsetX": 130,
+      "offsetY": 114
+    },
+    {
+      "x": 870,
+      "y": 904,
+      "width": 192,
+      "height": 154,
+      "offsetX": 102,
+      "offsetY": 136
+    },
+    {
+      "x": 1257,
+      "y": 904,
+      "width": 185,
+      "height": 156,
+      "offsetX": 105,
+      "offsetY": 136
+    },
+    {
+      "x": 1645,
+      "y": 876,
+      "width": 154,
+      "height": 176,
+      "offsetX": 109,
+      "offsetY": 108
+    },
+    {
+      "x": 2003,
+      "y": 905,
+      "width": 170,
+      "height": 155,
+      "offsetX": 83,
+      "offsetY": 137
+    },
+    {
+      "x": 2390,
+      "y": 907,
+      "width": 187,
+      "height": 153,
+      "offsetX": 86,
+      "offsetY": 139
+    },
+    {
+      "x": 2790,
+      "y": 874,
+      "width": 147,
+      "height": 185,
+      "offsetX": 102,
+      "offsetY": 106
+    },
+    {
+      "x": 123,
+      "y": 1283,
+      "width": 162,
+      "height": 159,
+      "offsetX": 123,
+      "offsetY": 131
+    },
+    {
+      "x": 515,
+      "y": 1281,
+      "width": 144,
+      "height": 164,
+      "offsetX": 131,
+      "offsetY": 129
+    },
+    {
+      "x": 889,
+      "y": 1295,
+      "width": 140,
+      "height": 147,
+      "offsetX": 121,
+      "offsetY": 143
+    },
+    {
+      "x": 1263,
+      "y": 1296,
+      "width": 150,
+      "height": 149,
+      "offsetX": 111,
+      "offsetY": 144
+    },
+    {
+      "x": 1640,
+      "y": 1292,
+      "width": 151,
+      "height": 151,
+      "offsetX": 104,
+      "offsetY": 140
+    },
+    {
+      "x": 2046,
+      "y": 1296,
+      "width": 134,
+      "height": 151,
+      "offsetX": 126,
+      "offsetY": 144
+    },
+    {
+      "x": 2436,
+      "y": 1290,
+      "width": 109,
+      "height": 152,
+      "offsetX": 132,
+      "offsetY": 138
+    },
+    {
+      "x": 2778,
+      "y": 1296,
+      "width": 168,
+      "height": 149,
+      "offsetX": 90,
+      "offsetY": 144
+    },
+    {
+      "x": 107,
+      "y": 1711,
+      "width": 180,
+      "height": 117,
+      "offsetX": 107,
+      "offsetY": 175
+    },
+    {
+      "x": 490,
+      "y": 1711,
+      "width": 176,
+      "height": 117,
+      "offsetX": 106,
+      "offsetY": 175
+    },
+    {
+      "x": 860,
+      "y": 1736,
+      "width": 198,
+      "height": 92,
+      "offsetX": 92,
+      "offsetY": 200
+    },
+    {
+      "x": 1252,
+      "y": 1738,
+      "width": 183,
+      "height": 90,
+      "offsetX": 100,
+      "offsetY": 202
+    },
+    {
+      "x": 1629,
+      "y": 1727,
+      "width": 198,
+      "height": 104,
+      "offsetX": 93,
+      "offsetY": 191
+    },
+    {
+      "x": 2021,
+      "y": 1728,
+      "width": 178,
+      "height": 102,
+      "offsetX": 101,
+      "offsetY": 192
+    },
+    {
+      "x": 2399,
+      "y": 1732,
+      "width": 187,
+      "height": 89,
+      "offsetX": 95,
+      "offsetY": 196
+    },
+    {
+      "x": 2781,
+      "y": 1735,
+      "width": 184,
+      "height": 93,
+      "offsetX": 93,
+      "offsetY": 199
+    }
+  ],
+  "identityReference": "art-reference/monsters/elemental/slaggolem/animation/source/base.png",
+  "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+  "generation": {
+    "sourceOutputs": [
+      "exec-3728d8d2-c0bd-4476-b51f-6fa1770ea6e9.png"
+    ],
+    "identityReference": "art-reference/monsters/elemental/slaggolem/animation/source/base.png",
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "variantCue": "a few restrained ember-orange cracks and darker slag chunks embedded in the stone, with no external glow",
+    "initialPrompt": "Slag Golem Crusher; all 8 directions for idle, walk, attack, hit, death; dark outline without fringe or halo."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "raw-connected-pose-repack-384-v1",
+    "sourceCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "sourceImageSha256": "5164b7245436ae7d961233bc4b88ebc0bb323e8d8f8dcf9be09ac777e0ec3a4e",
+    "sourceAlphaThreshold": 128,
+    "edgeAlphaRecoveryRadius": 3,
+    "minimumCellPadding": 24,
+    "primaryPoses": 40,
+    "sourceComponents": 40,
+    "rowMedianBottoms": [
+      198,
+      388,
+      591,
+      781,
+      947
+    ],
+    "uniformScale": 1.0
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+    ]
+  }
+}

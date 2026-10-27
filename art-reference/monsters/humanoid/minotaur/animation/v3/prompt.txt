@@ -1,0 +1,6 @@
+SPECIES: minotaur (Minotaur) — Broad bull-headed humanoid with two pale curved horns, heavy shoulders and powerful bipedal legs; preserve the approved orange-brown hide, face, proportions and palette.
+WEAPON (baked, fixed): broad-battle-axe — held in hand; preserve the exact approved axe silhouette, head shape, handle and orientation identity. No equip switch.
+POSE: full-body idle facing south-east, neutral ready stance, both feet grounded.
+CAMERA: fixed elevated three-quarter, upper-left light.
+RENDER: preserve the approved source/base.png as the v3 identity reference; no edits. Keep full body and the whole broad battle-axe visible on transparent background, no shadow, scenery, text, effects or labels.
+SOURCE: byte-for-byte copy of animation/source/base.png; not a new image generation.

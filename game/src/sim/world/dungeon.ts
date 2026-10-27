@@ -43,7 +43,6 @@ export function enterDungeon(s: GameState): { ok: boolean; why?: string } {
   s.dungeon = { zone: s.zone, left: D.mobCap, total: D.mobCap, escrow: newEscrow() };
   s.group = [];
   s.fieldwork.action = null;
-  s.spawnIn = 0;
   // stepping in is heading out: safe ground ends where the run begins
   s.hunting = true;
   return { ok: true };

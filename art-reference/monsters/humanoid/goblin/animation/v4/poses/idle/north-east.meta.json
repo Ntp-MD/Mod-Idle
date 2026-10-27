@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "action": "idle",
+  "direction": "north-east",
+  "pose": "neutral-ready",
+  "generator": "OpenAI built-in image_gen",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "rawAlphaBoundsExclusive": [
+    0,
+    28,
+    1224,
+    1230
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    450,
+    433,
+    995,
+    952
+  ],
+  "boundsProvenance": "Pillow direct alpha measurement",
+  "footAnchor": {
+    "x": 642,
+    "y": 951
+  },
+  "anchorProvenance": "Pillow measured visible footprint in lowest 18 rows; x is midpoint of left/right extents, y is lowest visible row",
+  "releaseSocket": null,
+  "sourcePixelsModified": false,
+  "styleReference": "C:/Users/ITOP/Desktop/MOD@ITOPPLUS/Mod-Space/Mod-idle/art-reference/players/one-handed-sword/poses/idle/north-east.png",
+  "bakedWeapon": "spear",
+  "alphaMeasurement": {
+    "extrema": [
+      0,
+      255
+    ],
+    "distinctLevels": 256,
+    "hardAlpha": false,
+    "borderAlpha": true
+  },
+  "note": "Untouched generator output. Alpha/border values measured; composer may reject if alpha is soft or touches the source edge."
+}

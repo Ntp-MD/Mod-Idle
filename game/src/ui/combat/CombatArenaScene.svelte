@@ -57,6 +57,7 @@
   let systemReducedMotion = $state(false);
   const reducedMotion = $derived(inspect && motionReview !== 'system' ? motionReview === 'reduced' : systemReducedMotion);
   let reviewArt = $state<ArenaCharacterArt | null>(null);
+  const playerArt = equippedPlayerArt;
   let aimPointer = $state<{ x: number; y: number } | null>(null);
   const gait = createArenaGait();
   let anchorNow = 0;
@@ -323,7 +324,7 @@
   }
 
   function artFor(actor: CombatArenaActor): ArenaCharacterArt | null {
-    if (actor.id === 'player') return equippedPlayerArt;
+    if (actor.id === 'player') return playerArt;
     const speciesId = actor.mob?.speciesId;
     // A preview encounter spawns one species, so its loaded sheet owns every body on the field.
     if (spritePreviewSpecies && reviewArt && actor.mob) return reviewArt;

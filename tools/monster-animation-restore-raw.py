@@ -461,12 +461,15 @@ def main() -> int:
     species = roster["productionAnimationBatch"]["species"]
     supplemental_species = roster["productionContract"].get("runtimeSupplementalSpecies", [])
     runtime_species = list(dict.fromkeys([*species, *supplemental_species]))
-    variant_metadata = sorted(MONSTER_ROOT.glob("*/variants/*/meta.json"))
+    variant_metadata = sorted({*MONSTER_ROOT.glob("*/*/variants/*/meta.json"),
+                               *MONSTER_ROOT.glob("*/*/variants/*/v*/meta.json")})
     selected_variants = [] if args.runtime_only else variant_metadata
     requests = [(path, None, None) for path in selected_variants]
     production_metadata = []
     for species_id in runtime_species:
-        metadata_path = MONSTER_ROOT / species_id / "animation/meta.json"
+        candidates = sorted(MONSTER_ROOT.glob(f"*/{species_id}/animation/meta.json"))
+        candidates += sorted(MONSTER_ROOT.glob(f"*/{species_id}/animation/v*/meta.json"))
+        metadata_path = candidates[-1] if candidates else MONSTER_ROOT / species_id / "animation/meta.json"
         pair = runtime_by_species.get(species_id)
         if not metadata_path.is_file() or pair is None:
             print(f"production art pair missing for {species_id}", file=sys.stderr)

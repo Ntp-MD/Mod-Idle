@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "assetType": "mob-identity-reference",
+  "source": "reference.png",
+  "sourceDimensions": {
+    "width": "TODO",
+    "height": "TODO"
+  },
+  "facing": "south-east",
+  "bakedWeaponId": "TODO species signature weapon or natural weapon",
+  "footAnchor": {
+    "x": "TODO measured",
+    "y": "TODO measured"
+  },
+  "qa": {
+    "visuallyInspected": false,
+    "wholeBodyVisible": "TODO",
+    "sourcePixelsModified": false
+  }
+}
