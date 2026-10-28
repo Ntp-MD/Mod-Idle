@@ -167,7 +167,7 @@ Do not sacrifice readability or interaction clarity for visual compactness.
 
 1. Identify the relevant screens and shared components.
 2. Inspect existing design tokens and UI conventions.
-3. Inspect actual rendered screenshots at the viewport(s) authorized by `AGENTS.md` or the current request.
+3. Inspect actual rendered screenshots from the headless Playwright browser at the viewport(s) authorized by `AGENTS.md` or the current request.
 4. Identify and classify objective visual and usability issues.
 5. Prioritize by severity, frequency, and gameplay impact.
 6. Fix underlying layout and styling causes.

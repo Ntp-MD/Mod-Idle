@@ -133,6 +133,9 @@ export function createCastTrigger(opts: {
         fx(s, {
           kind: 'hit', side: 'field', mobId: h.id, crit: cast.crit, via: 'cast', skillId: cast.id, actionId: opts.actionId,
           text: eng.fmt(h.amount), value: h.amount, colour: hitColour(castElement, cast.crit),
+          // A flight resolves at its crossing beat, not the noticing sample (F20); instant
+          // presses carry no flight timing and keep the tick clock as before.
+          ...(opts.castTiming?.impactAtUs != null ? { atUs: opts.castTiming.impactAtUs } : {}),
         });
       }
       if (cast.crit && cast.byMob[0]) queueTrigger(trig.crit, cast.byMob[0].id);
@@ -141,6 +144,9 @@ export function createCastTrigger(opts: {
         opts.actionId, opts.castTiming, { charges: cast.charges ?? cast.blockCharges, cleansed });
       if (cast.consumed?.length) push(s, `${cast.name} consumes ${cast.consumed.map((c) => `${c.stacks} ${c.status}`).join(', ')}`);
       if (cast.spread?.length) push(s, `${cast.name} spreads ${cast.spread.map((c) => c.status).join(', ')}`);
+      // A refused interrupt names its body: the player pressed, the lane was spent (F24).
+      if (cast.resisted?.length) for (const r of cast.resisted)
+        push(s, `${cast.name} — ${r.species} resists the stop (control spent)`);
       if (cast.damage && !cast.targets) push(s, `${cast.name} was dodged`);
       credit(s, 'cast', cast.dealt || 0);
       // Bloodthirst: the press's direct damage leeches as the swing's does. The intrinsic leech
@@ -228,9 +234,10 @@ export function createCastTrigger(opts: {
       const skill = sm.byId[prepared.id];
       if (!skill) return;
       const profile = sm.castProfileOf(skill);
+      // Trigger casts are immediate by design: no animation commitment, so no step floor.
       const timing = skillCastTiming({ ...profile, windup_sec: 0, recovery_sec: 0 }, atUs, units,
         { x: arena.player.x, y: arena.player.y }, prepared.area?.center ?? { x: arena.player.x, y: arena.player.y },
-        Math.max(1e-7, c.globalSpeed || 1));
+        { cast: c.castSpeed, recovery: c.recoverySpeed });
       const targetId = prepared.targets[0]?.id ?? prepared.area?.targetId ?? arena.intent?.targetId ?? front?.id;
       const previousAction = arena.player.action;
       const wasMoving = arena.player.moving;

@@ -66,7 +66,7 @@ const REQUIRED_STAT = [
 /** The `caps` block: every Cap is a number or an explicit `null` (no Cap). */
 const REQUIRED_CAPS = [
   'alignment', 'crit_chance', 'accuracy', 'attack_interval_sec', 'cdr', 'elem_res', 'elem_res_max',
-  'evasion', 'perfect_dodge', 'weight_overload', 'block', 'block_divisor', 'stun',
+  'evasion', 'perfect_dodge', 'weight_overload', 'block', 'block_divisor', 'stun', 'speed_mult',
 ] as const;
 
 /** The seven Core attributes a mob's or a species' Core block must carry. */

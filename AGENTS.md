@@ -2,6 +2,10 @@
 
 Single-player, browser-only idle RPG; no server. Shared entry point for every coding agent.
 
+## Design references
+
+ROX / Ragnarok Origin is the reference for combat feel only. Do not use Melvor or any other idle game as the reference for engine or idle architecture; those decisions cite `engine/`, `tools/data/*.json` and our own measurements. The existing gameplay feature set stays as it is.
+
 ## Document map
 
 | Source | Owns | Read when |
@@ -60,7 +64,7 @@ Gameplay numbers live in data JSON, formulas in `engine/`; do not duplicate eith
 - Current shell: fixed 15 × 15 Hub Grid, shared `HudLayout` regions, one scroll owner per region. Added/moved regions update `HudRegionId`, `HUD_REGION_META`, `DEFAULT_HUD_LAYOUT` in `game/src/ui/hud/hud-layout.ts` plus `App.svelte` wiring; backfill old layouts.
 - New panels wire through `PANELS`, `RAIL`, icon/label maps, keyboard actions in `App.svelte`. Reuse shared controls like `CollapseToggle.svelte`.
 - Keep native semantics, labels, keyboard access, visible focus. Map arrows select adjacent Blocks; Enter walks or uses a known Waypoint, with selection announcements.
-- Inspect components with HMR at `http://localhost:5173/__showcase#showcase-field`, **1920 × 1080 only** unless requested. One visible tab; close it after verification. Playwright is not installed — never launch a standalone/headless browser or mirror; verify with the dev server, focused tests, `npm --prefix game run check`, or report no browser available.
+- Inspect components with HMR at `http://localhost:5173/__showcase#showcase-field`, **1920 × 1080 only** unless requested. Default to the Playwright tools in headless mode: resize to 1920 × 1080, read the snapshot and console, interact, then close the browser. One tab per check. Reuse the dev server already on port 5173 — never start a second or kill one to reclaim the port. Headed browsing only when a human must watch; when no browser tool is available, say so and fall back to the dev server, focused tests and `npm --prefix game run check`.
 - For HUD placement use `#panel-hud-layout-studio`: **Studio Apply** previews, **game Apply** saves. Verify the live region moves; preserve interactions and saved-layout compatibility.
 
 ## Commands and verification
@@ -69,7 +73,7 @@ Windows + PowerShell; forward slashes in code paths. Run commands from the appli
 
 - Development: `npm install`, `npm run dev`; **port 5173 only**. Check `Get-NetTCPConnection -LocalPort 5173` first. Reuse an existing server; never start a second or kill one to reclaim the port. `npm run lint` runs the conservative Biome baseline.
 - Gameplay/data: relevant cages/tests and `npm run typecheck`; broaden checks when shared behavior changes. `npm run verify` runs all cages; `npm test` runs `game/tests/`.
-- UI: typecheck, `npm --prefix game run check` (warnings fail), focused tests, `npm --prefix game run build`, and integrated-browser checks for behavior/layout changes.
+- UI: typecheck, `npm --prefix game run check` (warnings fail), focused tests, `npm --prefix game run build`, and a headless-browser check for behavior/layout changes.
 - Coverage (optional report): `npm --prefix game run test:coverage`; no threshold is enforced yet.
 - Docs/comments only: inspect the edited files and local links; no gameplay suite or browser check.
 - Wiki: `npm run wiki` when wiki source, displayed data/formulas or player-facing behavior changes. `docs/wiki/*.html` is generated; never hand-edit. UI-only changes do not trigger wiki rebuilds.

@@ -5,6 +5,7 @@ import { newGame, tick, huntZone } from '@sim/core/game';
 import {
   newSkillState, grantSkill, castOnce, skillLevel, ladderOf, reservedPct, usableMana,
   effectsActive, tickSkills, toggleTrack, clearUnownedTracks, ownsSkill, ACTIVE_SLOTS,
+  defaultManualSkill,
 } from '@sim/combat/skills';
 import { mulberry32 } from '../../src/engine/client-helpers';
 // the same module tools/skills.ts --calc prints from, imported so the suite's transform carries it
@@ -348,4 +349,25 @@ describe('skills in the live loop', () => {
     expect(Object.keys(game.skills.owned).length).toBeGreaterThan(0);
     expect(game.skills.list.filter(Boolean).length).toBeGreaterThan(0);
   }, 30000);
+});
+
+describe('F34 active skill contract — one manual skill for bar, shortcut, aim and command', () => {
+  it('reads the first slotted attack or curse in rotation order', () => {
+    const s = newSkillState();
+    s.owned['attack.fireball'] = 0;
+    s.owned['buff.warcry'] = 0;
+    s.list.fill(null);
+    s.list[2] = 'buff.warcry';
+    s.list[1] = 'attack.fireball';
+    expect(defaultManualSkill(s)).toBe('attack.fireball');
+  });
+
+  it('skips non-damage slots instead of inventing Fireball', () => {
+    const s = newSkillState();
+    s.owned['buff.warcry'] = 0;
+    s.list.fill(null);
+    s.list[0] = 'buff.warcry';
+    expect(defaultManualSkill(s)).toBeUndefined();
+    expect(defaultManualSkill(newSkillState())).toBeUndefined();
+  });
 });

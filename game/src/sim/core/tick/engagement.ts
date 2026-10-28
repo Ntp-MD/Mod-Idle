@@ -140,14 +140,18 @@ export function advanceEngagement(s: GameState, opts: {
       if (state.deliberateTargetId && live.some(mob => mob.id === state.deliberateTargetId)) next.add(state.deliberateTargetId);
       const basicTarget = arena.player.action?.targetId;
       if (basicTarget && live.some(mob => mob.id === basicTarget)) next.add(basicTarget);
-      // Expand the spatial assist chain to a fixed point; queue order cannot decide who wakes.
-      const assisting = [...next];
+      // F27 — stop the overpull: assistance reaches one link, never cascades. A body the
+      // player aggroed, focused or committed to wakes its neighbours; those neighbours do not
+      // wake theirs. Deliberate targeting still adds directly above, outside this expansion.
+      const assisting: { id: string; depth: number }[] = [...next].map((id) => ({ id, depth: 0 }));
       for (let index = 0; index < assisting.length; index++) {
-        const source = arena.mobs[assisting[index]];
+        const { id, depth } = assisting[index];
+        if (depth > 0) continue;
+        const source = arena.mobs[id];
         for (const mob of live) {
           if (!next.has(mob.id) && arenaDistance(arena.mobs[mob.id], source) <= profile.assist_m + 1e-7) {
             next.add(mob.id);
-            assisting.push(mob.id);
+            assisting.push({ id: mob.id, depth: depth + 1 });
           }
         }
       }

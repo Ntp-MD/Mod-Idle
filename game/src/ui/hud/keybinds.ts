@@ -13,6 +13,11 @@
 
 export type KeyGroup = 'screen' | 'map' | 'field' | 'warehouse';
 
+/** Where a binding answers: `global` everywhere, `arena` only with the arena command bar up
+ *  (arena mode, no panel). The same key may serve a screen globally and a skill slot in the
+ *  arena — that is one context per press, never a conflict. */
+export type KeyContext = 'global' | 'arena';
+
 export interface Keybind {
   id: string;
   /** the words the settings list prints */
@@ -21,6 +26,7 @@ export interface Keybind {
   def: string;
   /** the screen or control this key stands in for, so the list can name what it opens */
   where: string;
+  context?: KeyContext;
 }
 
 export const KEYGROUP_LABEL: Record<KeyGroup, string> = {
@@ -59,7 +65,19 @@ export const KEYBINDS: Keybind[] = [
   { id: 'arena.focus', label: 'Focus the next enemy', group: 'field', def: 't', where: 'the field' },
   { id: 'arena.focus.clear', label: 'Release the enemy focus', group: 'field', def: 'Shift+t', where: 'the field' },
   { id: 'arena.aim', label: 'Aim or cancel the selected skill', group: 'field', def: 'r', where: 'the field' },
-  { id: 'arena.cast', label: 'Cast the selected skill at the focus', group: 'field', def: 'g', where: 'the field' },
+  { id: 'arena.cast', label: 'Cast the selected skill at the focus', group: 'field', def: 'x', where: 'the field' },
+  { id: 'arena.slot.1', label: 'Cast skill slot 1', group: 'field', def: '1', where: 'the field, in a fight', context: 'arena' },
+  { id: 'arena.slot.2', label: 'Cast skill slot 2', group: 'field', def: '2', where: 'the field, in a fight', context: 'arena' },
+  { id: 'arena.slot.3', label: 'Cast skill slot 3', group: 'field', def: '3', where: 'the field, in a fight', context: 'arena' },
+  { id: 'arena.slot.4', label: 'Cast skill slot 4', group: 'field', def: '4', where: 'the field, in a fight', context: 'arena' },
+  { id: 'arena.slot.5', label: 'Cast skill slot 5', group: 'field', def: '5', where: 'the field, in a fight', context: 'arena' },
+  { id: 'arena.slot.6', label: 'Cast skill slot 6', group: 'field', def: '6', where: 'the field, in a fight', context: 'arena' },
+  { id: 'arena.slot.7', label: 'Cast skill slot 7', group: 'field', def: '7', where: 'the field, in a fight', context: 'arena' },
+  { id: 'arena.slot.8', label: 'Cast skill slot 8', group: 'field', def: '8', where: 'the field, in a fight', context: 'arena' },
+  { id: 'arena.move.north', label: 'Walk north', group: 'field', def: 'w', where: 'the field, in a fight', context: 'arena' },
+  { id: 'arena.move.south', label: 'Walk south', group: 'field', def: 's', where: 'the field, in a fight', context: 'arena' },
+  { id: 'arena.move.west', label: 'Walk west', group: 'field', def: 'a', where: 'the field, in a fight', context: 'arena' },
+  { id: 'arena.move.east', label: 'Walk east', group: 'field', def: 'd', where: 'the field, in a fight', context: 'arena' },
 
   { id: 'item.1', label: 'Drink shortcut item 1', group: 'field', def: 'F1', where: 'the quickbar' },
   { id: 'item.2', label: 'Drink shortcut item 2', group: 'field', def: 'F2', where: 'the quickbar' },
@@ -91,6 +109,19 @@ export const DEFAULT_BINDS: Record<string, string> = Object.fromEntries(
   KEYBINDS.map((b) => [b.id, b.def]),
 );
 
+/** A held-direction set reduced to one ground step: opposites cancel, diagonals hold their
+ *  bearing at full pace. WASD streams orders through key repeat; the sim still owns the feet. */
+export function wasdVector(held: ReadonlySet<string>): { x: number; y: number } | null {
+  let x = 0, y = 0;
+  if (held.has('arena.move.west')) x -= 1;
+  if (held.has('arena.move.east')) x += 1;
+  if (held.has('arena.move.north')) y -= 1;
+  if (held.has('arena.move.south')) y += 1;
+  if (x === 0 && y === 0) return null;
+  const length = Math.hypot(x, y);
+  return { x: x / length, y: y / length };
+}
+
 const MOD_ORDER = ['Ctrl', 'Alt', 'Shift', 'Meta'] as const;
 
 /** A press has modifiers in one order only, so a stored binding and a live event can never disagree. */
@@ -106,7 +137,10 @@ export function tokenOf(ev: KeyboardEvent): string {
   // a shifted digit or punctuation pair is the glyph the player sees on the board, so the token names
   // that glyph rather than the unshifted one underneath it
   if (base === '=' && ev.shiftKey) base = '+';
-  const mods = modsOf(ev).filter((m) => m !== 'Shift');
+  // a shifted glyph already carries the Shift, but a shifted letter does not: Shift+T must stay
+  // distinguishable from T or a chord binding can never be reached
+  const letter = /^[a-z]$/.test(base);
+  const mods = modsOf(ev).filter((m) => !(m === 'Shift' && !letter));
   return [...mods, base].join('+');
 }
 
@@ -133,17 +167,35 @@ export function bindTable(over: Record<string, string> = {}): Record<string, str
   return out;
 }
 
-/** Which action this press belongs to. The table is bound action → key, so the scan is the short way round. */
-export function actionFor(binds: Record<string, string>, token: string): string | null {
-  for (const id of Object.keys(binds)) if (binds[id] === token) return id;
-  return null;
+/** The context an action answers in; KEYBINDS without one answer everywhere. */
+export function keyContextOf(id: string): KeyContext {
+  return KEYBINDS.find((b) => b.id === id)?.context ?? 'global';
 }
 
-/** Two actions on one key: the settings screen says so rather than letting one silently win. */
+/**
+ * Which action this press belongs to, in this context. An arena binding wins in the arena;
+ * everywhere else (and for keys the arena does not bind) the global table answers, so the
+ * same digit can cast slot 1 in a fight and still open the map out of one.
+ */
+export function actionFor(binds: Record<string, string>, token: string, context: KeyContext = 'global'): string | null {
+  let fallback: string | null = null;
+  for (const id of Object.keys(binds)) {
+    if (binds[id] !== token) continue;
+    const where = keyContextOf(id);
+    if (where === context) return id;
+    if (where === 'global') fallback ??= id;
+  }
+  return fallback;
+}
+
+/** Two actions on one key *in one context*: the settings screen says so rather than letting one silently win. */
 export function conflicts(binds: Record<string, string>): Record<string, string[]> {
   const byToken: Record<string, string[]> = {};
-  for (const [id, token] of Object.entries(binds)) (byToken[token] ||= []).push(id);
-  return Object.fromEntries(Object.entries(byToken).filter(([, ids]) => ids.length > 1));
+  for (const [id, token] of Object.entries(binds))
+    ((byToken[`${keyContextOf(id)}:${token}`] ||= []) as string[]).push(id);
+  return Object.fromEntries(Object.entries(byToken)
+    .filter(([, ids]) => ids.length > 1)
+    .map(([key, ids]) => [key.split(':').slice(1).join(':'), ids]));
 }
 
 /**

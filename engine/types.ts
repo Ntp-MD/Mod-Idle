@@ -66,6 +66,9 @@ export interface Caps {
   block_divisor: number;
   /** The lightning stun chance Cap, elements.md — fed by Alignment plus the gear line. No Cap (owner ruling). */
   stun: number | null;
+  /** Haste's ceiling as a plain multiplier. No Cap (owner ruling): no haste stat exists yet, so no
+   *  cap can bind by the X11 rule — when one lands, it must sit above the maxed build's reach. */
+  speed_mult: number | null;
 }
 
 export interface ModMax {
@@ -557,6 +560,9 @@ export interface MobSkillRow {
   heavy?: boolean;
   /** Position, delivery and timing. Every strike row must author one. */
   cast?: MobCastProfile;
+  /** Phase gate: the strike is only eligible inside this HP window of its own body.
+   *  Absent means always eligible. Adds/shield-break/retreat are not rows — see the plan. */
+  phase?: { hpBelowPct?: number; hpAbovePct?: number };
   /** Ground impact footprint; absent for single-target melee/projectile casts. */
   area?: MobCastArea;
   /** Placement preference only: front closes, stand-off holds. Never decides delivery. */
@@ -990,9 +996,19 @@ export interface SkillCastProfile {
   range_m: number;
   windup_sec: number;
   recovery_sec: number;
+  /** Seconds of windup haste cannot compress — the readable commitment (F44). */
+  fixed_windup_sec?: number;
+  /** Seconds of recovery haste cannot compress — release and recovery stay separable (F44). */
+  fixed_recovery_sec?: number;
   impact_delay_sec: number;
   projectile_speed_mps: number;
   hit_radius_m: number;
+}
+
+/** Per-phase haste: cast owns the windup, recovery owns the tail, cooldown owns the clock. */
+export interface PhaseSpeeds {
+  cast?: number;
+  recovery?: number;
 }
 
 export interface SkillCastTiming {

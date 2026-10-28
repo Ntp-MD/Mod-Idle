@@ -136,6 +136,8 @@ export interface Mob {
   engageSec: number;
   /** Resolved mob skill kit, in priority order (max 4). Runtime-only; a spawn rebuilds it. */
   skillIds?: string[];
+  /** Encounter phase of this body: how many of its kit's HP gates it has crossed. Runtime-only. */
+  phase?: number;
   /** The field spawn slot this body belongs to; a death returns the slot to its own timer. */
   spawnSlotId?: string;
   /** Absolute µs each skill becomes ready again. Runtime-only; absent means ready. */
@@ -403,6 +405,17 @@ export interface GameEconomy extends EconomyRestore {
   accumSec: number;
 }
 
+/** One manual command's outcome, reported at the combat timestamp it was judged at. */
+export interface CombatReceipt {
+  atUs: number;
+  /** The same instant in whole clock seconds, so reports can window receipts. */
+  atSec?: number;
+  command: 'cast' | 'move' | 'stop';
+  status: 'accepted' | 'queued' | 'rejected';
+  reason: string;
+  skillId?: string;
+}
+
 export interface GameState {
   seed: number;
   rngState: number;
@@ -493,6 +506,12 @@ export interface GameState {
   campSec: number;
   /** Last avoidance reaction, in absolute clock seconds. */
   avoidCooldownUntilSec?: number;
+  /** The player turned automatic dodging off; manual movement still works. */
+  autoAvoidOff?: boolean;
+  /** The blow that took the last HP, so the Push report names the actual cause. */
+  lastFatalHit?: { mobId: string; species: string; value: number; atSec: number; skillId?: string };
+  /** Recent manual-command outcomes, oldest first, so the HUD can report accepted/queued/rejected. */
+  combatReceipts?: CombatReceipt[];
   /** The open dungeon run, or null on open ground. A run is a mode, never a coordinate (M7). */
   dungeon: DungeonRun | null;
   /** The clock second of the last cleared run; entry cools down from here (`dungeon.cooldown_sec`). */

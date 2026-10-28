@@ -318,3 +318,49 @@ describe('opt-in spatial combat', () => {
     expect(b.x).toBeCloseTo((a.x + c.x) / 2, 10);
   });
 });
+
+describe('F27 — protect the anchor', () => {
+  const step = (over: Record<string, unknown> = {}) => ({
+    playerRange: 0.65, playerSpeedMult: 1, mobSpeedMult: () => 0,
+    engagedIds: new Set<string>(), ...over,
+  });
+
+  it('holds auto pursuit at the hold line instead of chasing past it', () => {
+    const { state, mob, arena } = fight(15);
+    const noted: string[] = [];
+    for (let index = 1; index <= 80; index++) {
+      advanceCombatArena(arena, state, index * 50_000, step({
+        playerTargetId: mob.id,
+        engagedIds: new Set([mob.id]),
+        anchorHold: { x: 1, y: 6, radiusM: 4 },
+        onAnchorHold: (id: string) => noted.push(id),
+      }));
+    }
+    // the anchor stands at x=1 with a 4 m line: the feet stop at x=5, ten metres short of the body.
+    expect(arena.player.x).toBeLessThanOrEqual(5 + 1e-6);
+    expect(arena.player.x).toBeGreaterThan(4);
+    expect(arenaDistance({ x: 1, y: 6 }, arena.player)).toBeLessThanOrEqual(4 + 1e-6);
+    expect(noted[0]).toBe(mob.id);
+  });
+
+  it('walks the full approach when no anchor is planted', () => {
+    const { state, mob, arena } = fight(15);
+    for (let index = 1; index <= 80; index++) {
+      advanceCombatArena(arena, state, index * 50_000, step({
+        playerTargetId: mob.id, engagedIds: new Set([mob.id]),
+      }));
+    }
+    expect(arenaDistance(arena.player, arena.mobs[mob.id])).toBeLessThan(15 - 4);
+  });
+
+  it('approaches a target that walks inside the hold line', () => {
+    const { state, mob, arena } = fight(15);
+    Object.assign(arena.mobs[mob.id], { x: 3, y: 6 });
+    advanceCombatArena(arena, state, 50_000, step({
+      playerTargetId: mob.id,
+      engagedIds: new Set([mob.id]),
+      anchorHold: { x: 1, y: 6, radiusM: 4 },
+    }));
+    expect(arena.player.x).toBeGreaterThan(1);
+  });
+});

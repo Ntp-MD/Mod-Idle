@@ -314,6 +314,43 @@
           "roam_m": 2.0
         }
       ]
+    },
+    "grove-slice": {
+      "points": [
+        { "id": "s01", "x": 6, "y": 6, "roam_m": 1.5 },
+        { "id": "s02", "x": 6, "y": 26, "roam_m": 1.5 },
+        { "id": "s03", "x": 14, "y": 16, "roam_m": 1.5 },
+        { "id": "s04", "x": 26, "y": 6, "roam_m": 1.5 },
+        { "id": "s05", "x": 26, "y": 26, "roam_m": 1.5 },
+        { "id": "s06", "x": 32, "y": 16, "roam_m": 1.5 },
+        { "id": "s07", "x": 44, "y": 6, "roam_m": 1.5 },
+        { "id": "s08", "x": 44, "y": 26, "roam_m": 1.5 }
+      ],
+      "nav": {
+        "version": 1,
+        "origin": { "x": 0, "y": 0 },
+        "cell_size_m": 1,
+        "obstacles": [
+          {
+            "id": "ridge-north",
+            "kind": "box",
+            "x": 20, "y": 0, "width": 2.5, "height": 13,
+            "blocks_movement": true, "blocks_sight": true, "blocks_projectiles": true
+          },
+          {
+            "id": "ridge-south",
+            "kind": "box",
+            "x": 20, "y": 19, "width": 2.5, "height": 13.0513,
+            "blocks_movement": true, "blocks_sight": true, "blocks_projectiles": true
+          },
+          {
+            "id": "thicket",
+            "kind": "circle",
+            "x": 37, "y": 16, "radius": 2.5,
+            "blocks_movement": true, "blocks_sight": false, "blocks_projectiles": false
+          }
+        ]
+      }
     }
   },
   "zones": {

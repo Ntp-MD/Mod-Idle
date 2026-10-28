@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { GameState } from '@sim/core/types';
   import { itemName } from '@sim/gear/item-name';
+  import { sm } from '../../engine/client';
   import { ruleFor, FILTER_SLOTS, describeRule } from '@sim/gear/filter';
   import { gearCarePreview } from '@sim/gear/gear-care';
   import { autoReturnThreshold } from '@sim/world/exploration';
@@ -27,6 +28,11 @@
   const threshold = $derived(autoReturnThreshold(gameState));
   const available = $derived(slotsAvailable(gameState));
   const gain = (value: number) => value === Infinity ? 'empty cell' : `+${value.toFixed(1)}%`;
+  const skillName = (id: string) => sm.byId[id]?.name || id;
+  const heldSkills = (ids: string[]) => {
+    const names = ids.map(skillName);
+    return names.length > 3 ? `${names.slice(0, 3).join(', ')} +${names.length - 3} more` : names.join(', ');
+  };
   const actionLabel = { keep: 'Keep', dissolve: 'Dissolve', protected: 'Protected', blocked: 'Blocked', 'not-reached': 'Not reached' } as const;
 </script>
 
@@ -56,6 +62,7 @@
         <p class="text-note">
           Leaves alone: {preview.equip.spared.locked} locked · {preview.equip.spared.set} held for a set · {preview.equip.spared.broken} Broken.
           {#if preview.equip.inStash}<b>{preview.equip.inStash} stashed piece(s) would beat something worn</b> — take one out to wear it.{/if}
+          {#if preview.equip.rotationHeld}<b>Held back: {preview.equip.rotationHeld.base}</b> ({gain(preview.equip.rotationHeld.gains)}) — equipping it would silence {heldSkills(preview.equip.rotationHeld.skills)}. Reslot or unslot those skills first if the swap is worth it.{/if}
         </p>
         <div class="gear-care-actions">
           <button class="btn btn-quiet" type="button" disabled={!writer || !preview.equip.swaps.length}

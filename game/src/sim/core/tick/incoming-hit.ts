@@ -46,7 +46,8 @@ export function createIncomingHit(opts: {
     cancelPlayerBasic, onKill,
   } = opts;
 
-  function resolveIncomingHit(mob: Mob, plannedSkill: MobSkillRow | undefined, rng: () => number, live: Mob = mob) {
+  function resolveIncomingHit(mob: Mob, plannedSkill: MobSkillRow | undefined, rng: () => number, live: Mob = mob,
+    atUs: number = clock.nowUs) {
       const tm = mobMods(mob.id);
       let hurt = false;
       // Blur: every third direct Hit is a Perfect Dodge. It is its own rule, not a roll.
@@ -144,12 +145,14 @@ export function createIncomingHit(opts: {
       if (toHp > 0 || toEs > 0) {
         hurt = true;
         // the incoming number wears the attacker's own Element, the same line the resistance roll
-        // answered — a chaos hit reads purple whether or not the shield ate it
+        // answered — a chaos hit reads purple whether or not the shield ate it. The receipt
+        // carries the crossing beat for a swept projectile, the tick clock otherwise (F20).
         fx(s, {
           kind: 'taken', side: 'self', byId: mob.id, skillId: plannedSkill?.id,
           text: eng.fmt(toHp + toEs), value: toHp + toEs,
           hpDamage: toHp, esDamage: toEs,
           colour: hitColour(mob.innate?.[0] || null),
+          atUs,
         });
       }
       if (r.absorbed > 0) s.player.es = Math.min(c.es, s.player.es + r.absorbed);
@@ -180,6 +183,12 @@ export function createIncomingHit(opts: {
             s.keystoneRuntime.queues.hpDebt.push({ dueAtUs: clock.nowUs + i * units, amount: split.perDebt, sourceId: mob.id, targetId: 'player' });
         }
         s.player.hp -= hpLoss;
+        if (s.player.hp <= 0 && hpLoss > 0) {
+          s.lastFatalHit = {
+            mobId: mob.id, species: mob.species, value: hpLoss, atSec: clock.nowUs / units,
+            ...(mobSkill ? { skillId: mobSkill.id } : {}),
+          };
+        }
         // 40 Borrowed Time recoups 40% of the HP actually paid, over six seconds
         const recoup = bundleOf(c.keystones, 'borrowed-time');
         if (recoup && hpLoss > 0) {

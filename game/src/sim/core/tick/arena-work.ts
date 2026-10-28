@@ -55,6 +55,13 @@ export function createArenaWork(opts: { arena: CombatArena | undefined; clock: C
         updateArenaAction(arena, action.id, { cancelledAtUs: clock.nowUs, cancelReason: reason, endsAtUs: clock.nowUs });
     }
     arena.mobFlights = [];
+    arena.player.avoidActionId = undefined;
+    for (const shot of arena.playerShots) {
+      const action = arena.actions.find((entry) => entry.id === shot.actionId);
+      if (action && action.cancelledAtUs == null)
+        updateArenaAction(arena, action.id, { cancelledAtUs: clock.nowUs, cancelReason: reason, endsAtUs: clock.nowUs });
+    }
+    arena.playerShots = [];
     if (arena.player.action && arena.player.action.cancelledAtUs == null)
       updateArenaAction(arena, arena.player.action.id, { cancelledAtUs: clock.nowUs, cancelReason: reason, endsAtUs: clock.nowUs });
     arena.player.action = undefined;

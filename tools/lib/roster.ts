@@ -289,7 +289,8 @@ function gates(): G.GateRow[] {
     const cast = s.cast;
     if (!cast || !deliveries.includes(cast.delivery)) return true;
     const profile = { ...profiles[cast.delivery], ...cast };
-    const finite = [profile.windup_sec, profile.recovery_sec, profile.impact_delay_sec, profile.hit_radius_m];
+    const finite = [profile.windup_sec, profile.recovery_sec, profile.impact_delay_sec, profile.hit_radius_m,
+      profile.fixed_windup_sec ?? 0, profile.fixed_recovery_sec ?? 0];
     return !Number.isFinite(profile.range_m) || profile.range_m < 0
       || ((s.type === 'attack' || s.type === 'curse') && !(profile.range_m > 0))
       || finite.some((value) => !Number.isFinite(value) || value < 0)

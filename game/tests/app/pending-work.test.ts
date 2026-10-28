@@ -5,7 +5,7 @@ import { sm } from '../../src/engine/client';
 import {
   arenaAction, captureCombatArena, createCombatArena, syncCombatArena, updateArenaAction,
 } from '@sim/combat/combat-arena';
-import { catchUp, characterSheet, encounterKeyOf, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
+import { catchUp, catchUpAsync, characterSheet, encounterKeyOf, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
 import { normalizePendingWork, restorePendingWork } from '@sim/core/pending-work';
 import { prepareSkillCast, type CastRollCache } from '@sim/combat/skills';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
@@ -309,5 +309,69 @@ describe('pending work payloads beyond the first contact', () => {
     const badInitial = structuredClone(base) as typeof base;
     (badInitial.flights[0] as { fieldInitial?: unknown }).fieldInitial = 'yes';
     expect(normalizePendingWork(badInitial)).toBeNull();
+  });
+});
+
+describe('settlement pays only for the away budget it is given', () => {
+  it('does not settle or advance the clock when no time has passed', () => {
+    const live = pendingFight();
+    tick(live.state, { arena: live.arena, autoSkills: false });
+    const loaded = importJson(exportJson(live.state));
+    const clock = loaded.clockSec;
+    const hp = loaded.group[0].hp;
+    expect(loaded.pendingWork).not.toBeNull();
+
+    expect(catchUp(loaded, 0)).toEqual({ simulated: 0, capped: false });
+
+    expect(loaded.clockSec).toBe(clock);
+    expect(loaded.group[0].hp).toBe(hp);
+    expect(loaded.pendingWork).not.toBeNull();
+  });
+
+  it('leaves the character untouched when the async catch-up is aborted before it starts', async () => {
+    const live = pendingFight();
+    tick(live.state, { arena: live.arena, autoSkills: false });
+    const loaded = importJson(exportJson(live.state));
+    const clock = loaded.clockSec;
+    const controller = new AbortController();
+    controller.abort();
+
+    const result = await catchUpAsync(loaded, 100, { signal: controller.signal });
+
+    expect(result.simulated).toBe(0);
+    expect(loaded.clockSec).toBe(clock);
+    expect(loaded.pendingWork).not.toBeNull();
+  });
+});
+
+describe('released work settles across the whole away interval', () => {
+  it('pays a flight whose impact lands well after the first away second', () => {
+    const live = pendingFight();
+    Object.assign(live.arena.flights[0].timing, { impactAtUs: 10_500_000 });
+    tick(live.state, { arena: live.arena, autoSkills: false });
+    const loaded = importJson(exportJson(live.state));
+    expect(loaded.pendingWork?.flights[0].timing.impactAtUs).toBe(10_500_000);
+    const actionId = live.action.id;
+    const clock = loaded.clockSec;
+
+    const result = catchUp(loaded, 20);
+
+    expect(result.simulated).toBe(20);
+    expect(loaded.clockSec).toBe(clock + 20);
+    expect(loaded.pendingWork).toBeNull();
+    expect(loaded.fx.filter((event) => event.kind === 'hit' && event.actionId === actionId)).toHaveLength(1);
+  });
+
+  it('keeps the work owed when the budget stops before its impact', () => {
+    const live = pendingFight();
+    Object.assign(live.arena.flights[0].timing, { impactAtUs: 10_500_000 });
+    tick(live.state, { arena: live.arena, autoSkills: false });
+    const loaded = importJson(exportJson(live.state));
+    const actionId = live.action.id;
+
+    catchUp(loaded, 5);
+
+    expect(loaded.pendingWork).not.toBeNull();
+    expect(loaded.fx.filter((event) => event.kind === 'hit' && event.actionId === actionId)).toHaveLength(0);
   });
 });

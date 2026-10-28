@@ -9,6 +9,7 @@ import { EVENT_PRIORITY } from '../../combat/combat-clock';
 import { arenaDistance, updateArenaAction } from '../../combat/combat-arena';
 import { flightTargets, projectilePosition } from '../../combat/combat-actions';
 import { firstProjectileHit } from '../../../../../engine/skill-actions.ts';
+import { sweepDisc } from '../../../../../engine/navigation.ts';
 import { resolvePreparedCast } from '../../combat/skills';
 import { fieldAreaKey } from '../../world/field-area';
 
@@ -155,6 +156,12 @@ export function createFlights(opts: {
       if (flight.profile.delivery !== 'projectile') continue;
       if (atUs < flight.timing.releaseAtUs) continue;
       const from = flight.position;
+      // The segment starts where the last sweep left off — never before this flight's own
+      // release, since burst pulses share a template stamped at the first release. Contact
+      // backdates to the exact crossing instead of the sample that noticed it (F20).
+      const fromAtUs = Math.max(flight.lastCheckedAtUs ?? flight.timing.releaseAtUs, flight.timing.releaseAtUs);
+      const contactAtUs = (fraction: number) =>
+        Math.round(fromAtUs + fraction * Math.max(0, atUs - fromAtUs));
       const to = projectilePosition(flight, atUs);
       const previous = arena.frames.at(-2) ?? arena.frames.at(-1);
       const actors = arenaActors(s.group).map((actor) => {
@@ -162,6 +169,15 @@ export function createFlights(opts: {
         return { ...actor, ...(before ? { previous: { x: before.x, y: before.y } } : {}) };
       });
       const hit = firstProjectileHit(from, to, actors, flight.profile.hit_radius_m);
+      // Authored projectile barriers stop a shot that reaches them first; a body already struck
+      // earlier on the segment still takes its hit.
+      const barrier = arena.nav ? sweepDisc(arena.nav, from, to, 0, 'projectiles') : null;
+      if (barrier && (!hit || barrier.fraction <= hit.fraction)) {
+        flight.position = { x: barrier.x, y: barrier.y };
+        flight.lastCheckedAtUs = atUs;
+        cancelFlight(flight, contactAtUs(barrier.fraction), 'obstacle');
+        continue;
+      }
       flight.position = to;
       flight.lastCheckedAtUs = atUs;
       if (hit) {
@@ -169,10 +185,10 @@ export function createFlights(opts: {
           y: from.y + (to.y - from.y) * hit.fraction };
         if (flight.area?.shape === 'line') {
           // A piercing shot commits a line, not a body: every eligible body on it is struck once.
-          resolveFlight(flight, atUs, undefined, contact);
+          resolveFlight(flight, contactAtUs(hit.fraction), undefined, contact);
         } else {
           flight.hitTargetId = hit.target.mob.id;
-          resolveFlight(flight, atUs, [hit.target.mob], contact);
+          resolveFlight(flight, contactAtUs(hit.fraction), [hit.target.mob], contact);
         }
       }
     }

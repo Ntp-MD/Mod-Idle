@@ -8,6 +8,7 @@ import { fieldAreaKey, syncFieldState, type FieldSpawnSlot } from '../../world/f
 import { syncCombatArena, type CombatArena } from '../../combat/combat-arena';
 import { isBossKind } from '../kinds';
 import { push } from '../log';
+import { byFrontLine } from '../roster-order';
 
 /**
  * Field and dungeon population for one tick: which slots refill, what body they roll, and how the
@@ -95,7 +96,7 @@ export function advanceFieldPopulation(s: GameState, opts: {
       const mob = spawnFieldMob(slot);
       if (mob) living.add(mob.id);
     }
-    s.group.sort((a, b) => (a.line === 'front' ? -1 : 1) - (b.line === 'front' ? -1 : 1));
+    s.group.sort(byFrontLine);
   }
 
   // Dungeon runs keep their authored budget until that path is migrated to spawn slots.
@@ -105,7 +106,7 @@ export function advanceFieldPopulation(s: GameState, opts: {
     const size = Math.min(spawns.profileFor(run.zone, s.cell?.sub ?? null, 'legacy').cap, Math.max(0, run.left));
     if (size > 0) {
       s.group = Array.from({ length: size }, () => spawnMob(rng, run.zone, 'normal'));
-      s.group.sort((m) => (m.line === 'front' ? -1 : 1));
+      s.group.sort(byFrontLine);
     }
   }
 

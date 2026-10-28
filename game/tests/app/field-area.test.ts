@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { mulberry32 } from '../../src/engine/client-helpers';
 import { spawns } from '../../src/engine/client';
 import { arenaDistance, captureCombatArena, createCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
+import { advanceEngagement, createEngagementState } from '@sim/core/tick/engagement';
 import { createFieldSlots, fieldAreaKey, normalizeFieldState, releaseSpawnSlot, restoreFieldPositions, syncFieldState } from '@sim/world/field-area';
 import { characterSheet, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
 import { exportJson, importJson, migrate, SCHEMA_VERSION } from '../../src/state/save';
@@ -76,6 +77,41 @@ describe('field population registry', () => {
     second.state.group.reverse();
     for (const { state, arena } of [first, second]) tick(state, { arena, autoSkills: false });
     expect([...second.state.field!.engagementIds].sort()).toEqual([...first.state.field!.engagementIds].sort());
+  });
+
+  it('wakes one assist link without cascading across the field', () => {
+    const { state, arena } = fieldFight(3);
+    // the third body stands far enough that a full tick of wander and approach
+    // can never close the assist gap: only the depth rule can keep it asleep.
+    const points = [{ x: 4.9, y: 6 }, { x: 7.8, y: 6 }, { x: 14, y: 6 }];
+    state.group.forEach((mob, index) => {
+      Object.assign(arena.mobs[mob.id], points[index]);
+      state.field!.slots[index].home = points[index];
+    });
+    state.playerStatuses.shock = { stacks: 1, secLeft: 3, perSec: 0 };
+    tick(state, { arena, autoSkills: false });
+    expect(state.field!.engagementIds).toContain('field-0');
+    expect(state.field!.engagementIds).toContain('field-1');
+    expect(state.field!.engagementIds).not.toContain('field-2');
+  });
+
+  it('caps assist expansion at one link in a single resolver pass', () => {
+    const { state, arena } = fieldFight(3);
+    state.group.forEach((mob, index) => {
+      const point = { x: 4.9 + index * 2.9, y: 6 };
+      Object.assign(arena.mobs[mob.id], point);
+      state.field!.slots[index].home = point;
+    });
+    // one resolver pass, no movement in between: the old fixed-point chain wakes
+    // the third body here, the one-link cap leaves it asleep.
+    advanceEngagement(state, {
+      arena, online: true, fieldProfile: () => spawns.profileFor(state.zone, state.cell?.sub ?? null),
+      cancelIntent: () => {}, cancelMobPreparation: () => {},
+      tickStartUs: 0, state: createEngagementState(),
+    });
+    expect(state.field!.engagementIds).toContain('field-0');
+    expect(state.field!.engagementIds).toContain('field-1');
+    expect(state.field!.engagementIds).not.toContain('field-2');
   });
 
   it.each([false, true])('drops a body beyond its home leash despite nearby aggro or a held target (%s)', heldTarget => {

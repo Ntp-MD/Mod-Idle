@@ -4,7 +4,7 @@ import { isClear } from '@engine/navigation.ts';
 import { E } from '../../src/engine/client';
 import { mulberry32 } from '../../src/engine/client-helpers';
 import { advanceCombatArena, captureCombatArena, createCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
-import { characterSheet, newGame, setLevel, spawnMob } from '@sim/core/game';
+import { characterSheet, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
 
 const BOUNDS = { x: 0, y: 0, width: E.combat_arena.width, height: E.combat_arena.height };
@@ -48,6 +48,40 @@ describe('static ground in the combat arena', () => {
     expect(isClear(arena.nav, actor, radius)).toBe(true);
     expect(actor.x).toBeGreaterThan(5 + radius - 1e-6);
     expect(actor.x).toBeLessThan(8);
+  });
+
+  it('routes a player order around a wall that has a gap', () => {
+    const { state, arena } = fight(5, 30);
+    arena.nav = {
+      version: 1, bounds: BOUNDS, cellSize: 1,
+      obstacles: [{ kind: 'box', id: 'wall', x: 9, y: 0, width: 2, height: 12,
+        flags: { movement: true, sight: true, projectiles: true } }],
+    };
+    Object.assign(arena.player, { x: 5, y: 6 });
+    const options = {
+      playerRange: 0, playerSpeedMult: 1, playerLocked: false,
+      playerMoveTo: { x: 15, y: 6 }, engagedIds: new Set<string>(), mobSpeedMult: () => 1,
+    };
+    const radius = arena.player.radiusM ?? 0.25;
+    for (let index = 0; index < 200; index++) {
+      advanceCombatArena(arena, state, (index + 1) * 100_000, options);
+      expect(isClear(arena.nav, arena.player, radius)).toBe(true);
+    }
+    expect(arena.player.x).toBeGreaterThan(13.5);
+    expect(Math.abs(arena.player.y - 6)).toBeLessThan(1);
+  });
+
+  it('ends a manual order against a full wall with a reason', () => {
+    const { state, arena } = fight(1, 20);
+    arena.nav = wallAt(4);
+    Object.assign(arena.player, { x: 1, y: 6 });
+    const manual: { moveTo?: { x: number; y: number } } = { moveTo: { x: 8, y: 6 } };
+
+    for (let index = 0; index < 3; index++) tick(state, { arena, manual });
+    const receipt = (state.combatReceipts ?? []).find((entry) => entry.command === 'move' && entry.status === 'rejected');
+    expect(receipt?.status).toBe('rejected');
+    expect(receipt?.reason).toBe('unreachable');
+    expect(manual.moveTo).toBeUndefined();
   });
 
   it('crosses the same wall when no geometry is authored, so the block above is the geometry', () => {

@@ -839,6 +839,20 @@ function runChecks() {
       if (row.element != null && !elements.includes(row.element)) sk.push(`${row.id}: unknown element ${row.element}`);
       if (row.status != null && !allowedStatus.has(row.status)) sk.push(`${row.id}: status ${row.status} is not a control status`);
       if (!['front', 'stand-off', 'any'].includes(row.role)) sk.push(`${row.id}: role is not front/stand-off/any`);
+      const phase = row.phase;
+      if (phase != null) {
+        if (row.mode !== 'strike') sk.push(`${row.id}: only a strike owns a phase gate`);
+        else {
+          const below = phase.hpBelowPct, above = phase.hpAbovePct;
+          if (below != null && (!(Number(below) > 0) || !(Number(below) <= 100)))
+            sk.push(`${row.id}: phase hpBelowPct must be within (0, 100]`);
+          if (above != null && (!(Number(above) >= 0) || !(Number(above) < 100)))
+            sk.push(`${row.id}: phase hpAbovePct must be within [0, 100)`);
+          if (below != null && above != null && !(Number(above) < Number(below)))
+            sk.push(`${row.id}: phase hpAbovePct must sit below hpBelowPct`);
+          if (below == null && above == null) sk.push(`${row.id}: phase gate names no bound`);
+        }
+      }
       if (row.mode === 'strike') {
         if (!(row.cd > 0)) sk.push(`${row.id}: a strike needs a positive cooldown`);
         if (!(row.cast_sec >= 0 && row.cast_sec <= 2)) sk.push(`${row.id}: cast_sec is outside 0..2`);

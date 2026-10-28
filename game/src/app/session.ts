@@ -96,6 +96,8 @@ export function createSessionActions(ctx: SessionContext) {
       if (!ctx.saveSession.isCurrent(epoch)) return;
       if (!s) { if (previousSlot) ctx.saveSession.attach(previousSlot, epoch); ctx.snapNote = 'That backup is gone'; return; }
       ctx.gameState = s;
+      // A rewind replaces the character, so the living arena must start a new generation too.
+      if (ctx.liveArpgArena) ctx.resetArena();
       ctx.resetCharacterUi();
       ctx.awayReport = null;
       ctx.resetSkillDiscovery();

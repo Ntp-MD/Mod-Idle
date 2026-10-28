@@ -36,6 +36,9 @@ export function createGameLoop(ctx: LoopContext) {
     const state = ctx.gameState;
     const dropsBefore = state.counters.drops;
     const wasDungeon = !!state.dungeon;
+    // The avoid planner reads state, not settings: the loop mirrors the client switch
+    // onto it every tick, so a flipped toggle takes effect on the next step.
+    state.autoAvoidOff = ctx.settings.autoAvoid === false;
     tick(state, { autoSkills: ctx.settings.autoSkills !== false, ...(ctx.arenaMode ? { arena: ctx.combatArena, manual: ctx.arenaManual } : {}) });
     if (ctx.arenaMode) {
       ctx.syncArenaFocus();
@@ -47,29 +50,34 @@ export function createGameLoop(ctx: LoopContext) {
     }
   }
 
-  /** Start the live wake; the returned cleanup stops it. */
+  /** One wake: bank the elapsed time and run at most `MAX_BATCH` ticks. Exposed for tests. */
   function startWakeLoop(): () => void {
-    let acc = 0;
     let last = performance.now();
-    const timer = setInterval(() => {
-      const now = performance.now();
-      // a wake that ran late is measured, never assumed; the tab's own throttling is the only clock
-      const elapsed = Math.max(0, (now - last) / 1000);
-      last = now;
-      if (!ctx.canWriteAccount || ctx.paused || !ctx.running) {
-        acc = 0;
-        ctx.cooldownSimRemainder = 0;
-        ctx.cooldownSchedulerAt = now;
-        return;
-      }
-      const batch = schedulerBatch(acc, ctx.speed, elapsed);
-      acc = batch.acc;
-      ctx.cooldownSimRemainder = acc;
-      ctx.cooldownSchedulerAt = now;
-      for (let i = 0; i < batch.ticks; i++) step();
-    }, WAKE_SEC * 1000);
+    const timer = setInterval(() => wake(performance.now()), WAKE_SEC * 1000);
     return () => clearInterval(timer);
   }
 
-  return { step, startWakeLoop };
+  let acc = 0;
+  let last = 0;
+  let started = false;
+  function wake(now: number): void {
+    if (!started) { started = true; last = now; return; }
+    // a wake that ran late is measured, never assumed; the tab's own throttling is the only clock
+    const elapsed = Math.max(0, (now - last) / 1000);
+    last = now;
+    if (!ctx.canWriteAccount || ctx.paused || !ctx.running) {
+      // Earned whole seconds survive a pause: only the anchor moves, so paused wall time is never
+      // simulated but a backlog banked before the pause is still paid out afterwards.
+      ctx.cooldownSimRemainder = acc;
+      ctx.cooldownSchedulerAt = now;
+      return;
+    }
+    const batch = schedulerBatch(acc, ctx.speed, elapsed);
+    acc = batch.acc;
+    ctx.cooldownSimRemainder = acc;
+    ctx.cooldownSchedulerAt = now;
+    for (let i = 0; i < batch.ticks; i++) step();
+  }
+
+  return { step, startWakeLoop, wake };
 }

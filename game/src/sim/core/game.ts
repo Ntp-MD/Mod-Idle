@@ -72,7 +72,8 @@ import { applyMobAuras, resolveMobKit } from '../combat/mobSkills';
 import { mark as markSnapshot } from './snapshot';
 import { newGoal, onSpawn as goalSpawn, onKill as goalKill, watch as goalWatch } from './goal';
 import { newGuidance } from './guidance';
-import { newCurses, modsOn, applyCurse, tickCurses, combineMods, lineValue, modsFromAuraFold, spreadOnDeath } from '../combat/curse';
+import { byFrontLine } from './roster-order';
+import { newCurses, modsOn, applyCurse, tickCurses, combineMods, lineValue, modsFromAuraFold } from '../combat/curse';
 import { newMobStatusStore, applyWeaponRiders, holdPoison, spendControlBudget, forgetDead as forgetMobStatus,
   placeKeystoneDoT, transferStatus, carriesTransferable, copyStatus,
   modsOn as statusModsOn, targetMods, holdsCondition, keystoneTargetMods,
@@ -654,21 +655,37 @@ export function revertEquilibrium(mob: Mob, nowSec: number): void {
   delete mob.resShift;
 }
 
-function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof buildCharacter>, statuses: Statuses = {}, bloomChain = true) {
+/** A secondary kill leaves the field with no economy: slot freed, death shown, nothing paid. */
+function burySecondaryKill(s: GameState, mob: Mob) {
+  releaseSpawnSlot(s, mob);
+  if (isBossKind(String(mob.kind)) && s.field) s.field.bossDefeatedAtSec = s.clockSec;
+  fx(s, { kind: 'kill', side: 'field', mobId: mob.id, text: mob.species, colour: hitColour(mob.innate?.[0] || null), value: 0 }, mob);
+}
+
+function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof buildCharacter>, statuses: Statuses = {}, bloomChain = true,
+  positions?: (id: string) => { x: number; y: number } | undefined) {
   // The slot owns the respawn timer; a death never rerolls or copies another body.
   releaseSpawnSlot(s, mob);
   if (isBossKind(String(mob.kind)) && s.field) s.field.bossDefeatedAtSec = s.clockSec;
   const online = s.online !== false;
-  // `27` Profane Bloom: a body that dies carrying your curse pays its own Max HP as Chaos to the rest
-  // of the group. The blast is secondary damage — no crit, no status, no leech, no hit counter — and it
-  // never sets a second body off, because that would turn one kill into a chain reaction (§7.2).
+  // `27` Profane Bloom: a cursed body that dies detonates its own Max HP as Chaos, but only
+  // across ground — bodies outside `radiusM` of the blast are untouched (F40). The blast is
+  // secondary damage — no crit, no status, no leech, no hit counter — and it never chains, and
+  // the bodies it fells pay no kill rewards: no XP, no drops, no stones, no tasks, no dungeon
+  // progress. A secondary kill leaves the field, never the economy.
   const bloom = bundleOf(c.keystones, 'profane-bloom');
   if (bloom && bloomChain && Object.keys(s.curses[mob.id] || {}).length) {
     const element = String(bloom.params.element);
     const promised = mob.hpMax * Number(bloom.params.victimMaxHpPct) / 100;
+    const radiusM = Number(bloom.params.radiusM ?? 4);
+    const burstFrom = positions?.(mob.id);
     let burst = 0;
     for (const other of s.group) {
       if (other === mob || other.hp <= 0) continue;
+      if (burstFrom) {
+        const pose = positions!(other.id);
+        if (!pose || Math.hypot(pose.x - burstFrom.x, pose.y - burstFrom.y) > radiusM + 1e-7) continue;
+      }
       const dealt = eng.mitigateMobHit(other, 0, { [element]: promised });
       if (!(dealt > 0)) continue;
       other.hp -= dealt;
@@ -679,12 +696,9 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
     if (burst > 0) push(s, `Profane Bloom — ${mob.species} bursts for ${eng.fmt(burst)}`);
     while (s.group.some((m) => m.hp <= 0)) {
       const dead = s.group.splice(s.group.findIndex((m) => m.hp <= 0), 1)[0];
-      onKill(s, rng, dead, c, statuses, false);
+      burySecondaryKill(s, dead);
     }
   }
-  // the lines this mob was carrying jump to the neighbours its row names 
-  const caught = spreadOnDeath(s.curses, mob.id, s.group.map((m) => m.id));
-  if (caught) push(s, `the curse spreads to ${caught} nearby`);
   // a bursting body pays its poison as it goes (`mob.trait_mechanics.poison_burst`) — a guaranteed
   // line, not a proc, and the one answer to it is the fighter's own status immunity
   if (mob.burst?.ps_pct && !buffRuleUp(s.skills, 'status_immunity') && !bundleOf(c.keystones, 'purist')) {
@@ -1004,7 +1018,7 @@ export function tick(s: GameState, opts: { online?: boolean; autoSkills?: boolea
       const size = Math.max(1, spawns.profileFor(zone, subzone, 'legacy').cap);
       const group = Array.from({ length: size }, () => spawnMob(campRng, zone, 'normal', undefined, subzone,
         { allowWildUnique: false }));
-      return group.sort((a, b) => (a.line === 'front' ? -1 : 1) - (b.line === 'front' ? -1 : 1));
+      return group.sort(byFrontLine);
     }, { eligibleAtStart: campEligibleAtStart });
     return result;
   } finally {
@@ -1037,9 +1051,10 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
   const arena = online ? opts.arena : opts.settleArena;
   const { cancelPlayerBasic, cancelIntent, cancelArenaWork, cancelFlight } = createArenaWork({ arena, clock, s });
 
-  const autoAvoid = arena && !manual?.moveTo && !manual?.cast && !arena.intent?.manual
-    ? planAutoAvoid(arena, s, tickStartUs, units) : null;
-  if (autoAvoid) s.avoidCooldownUntilSec = s.clockSec + 1;
+  // Asked per movement sample: a threat that is still pending must be re-answered instead of letting
+  // the automatic approach walk the body back under it between world ticks.
+  const autoAvoid = () => (arena && !manual?.moveTo && !manual?.cast && !arena.intent?.manual
+    ? planAutoAvoid(arena, s, clock.nowUs, units) : null);
   tickFxClock.set(s, { clock, arena });
   const timeUs: number | null = unitsPerSec === undefined ? null : tickStartUs;
   s.online = online;
@@ -1069,12 +1084,30 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     const shock = s.mobStatus[target.id]?.statuses.shock;
     if (!shock || shock.secLeft <= 0) return;
     let left = Number(cond.params.spreadTargets);
-    for (const other of s.group) {
+    // Nearest living bodies first when the arena knows the ground (F39); otherwise group order.
+    const origin = arena?.mobs[target.id];
+    const ordered = origin
+      ? [...s.group].map((other, index) => {
+        const pose = other.id === target.id ? undefined : arena!.mobs[other.id];
+        return { other, index, dist: !pose ? Infinity : arenaDistance(origin, pose) };
+      }).sort((a, b) => a.dist - b.dist || a.index - b.index).map((entry) => entry.other)
+      : s.group;
+    for (const other of ordered) {
       if (left <= 0) break;
       if (other.id === target.id) continue;
       if (copyStatus(s.mobStatus, target.id, other.id, 'shock', other.immune || [])) left--;
     }
   };
+  // Deaths inside a tick carry the arena ground with them, so Profane Bloom (F40) and any
+  // future burst can read the blast origin. Away from the arena the lookup is absent and the
+  // legacy whole-group behaviour stands in, documented, not silent.
+  const mobPositions = arena ? (id: string) => {
+    const pose = arena.mobs[id];
+    return pose ? { x: pose.x, y: pose.y } : undefined;
+  } : undefined;
+  function killMob(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof buildCharacter>, statuses: Statuses = {}, bloomChain = true) {
+    onKill(s, rng, mob, c, statuses, bloomChain, mobPositions);
+  }
   applyKeystonePrep(s, c, debt52, units, tickStartUs);
   const day = dayOf(s.clockSec);
   if (s.pedlar.day !== day || !s.pedlar.minutes.length) {
@@ -1199,6 +1232,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     scheduleMobAttacksFor: (mob, atUs) => scheduleMobAttacksFor(mob, atUs),
     sweepFlights: (atUs) => sweepFlights(atUs),
     sweepMobShots: (atUs) => sweepMobShots(atUs),
+    sweepPlayerShots: (atUs) => sweepPlayerShots(atUs),
     fieldProfile,
   });
   const resolveTargetsForSkill = arena ? (id: string, group: Mob[]) => {
@@ -1276,7 +1310,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     crippledOutgoingMult, playerActiveFraction, trig, queueTrigger, recoverLeech,
     mirrorReady, luckyBonus, tranceFree, arenaActors, resolveTargetsForSkill,
     resolveFlight: (flight, atUs, forced) => flightWork.resolve(flight, atUs, forced),
-    scheduleFlight: (flight) => flightWork.schedule(flight), onKill,
+    scheduleFlight: (flight) => flightWork.schedule(flight), onKill: killMob,
   });
 
   const { scheduleFlight, resolveFlight, sweepFlights } = createFlights({
@@ -1303,18 +1337,18 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
 
   // §7.1: the basic swing is expanded from accumulated progress into absolute-µs events, so a stop,
   // a rate change or a kill inside the window moves the queue instead of replaying the second.
-  const { schedulePlayerBasic } = createPlayerBasicActions({
+  const { schedulePlayerBasic, schedulePlayerShot, sweepPlayerShots } = createPlayerBasicActions({
     arena, clock, rng, s, c, attackCharacter, units, tickStartUs, tickEndUs, online, manual,
     crippledOutgoingMult, unstoppablePenalty, berserkDealt, playerHitsPerSec, playerActiveFraction,
     statuses, trig, queueTrigger, recoverLeech, mobMods, mobPlans, spreadShock, mirrorReady,
-    luckyBonus, advanceArenaAt, engageTarget, cancelIntent, onKill, dominantElement,
+    luckyBonus, advanceArenaAt, engageTarget, cancelIntent, onKill: killMob, dominantElement,
     applyEquilibrium, revertEquilibrium,
   });
 
   // The rotation presses at t0 (§7.1 priority 30), before the window's own swing events.
   schedulePlayerAction({
     arena, clock, rng, s, c, attackCharacter, autoSkills, playerActiveFraction, online, tickStartUs,
-    frontId: front?.id ?? '', statuses, cooldown, ensureIntent, cancelIntent,
+    frontId: front?.id ?? '', statuses, cooldown, ensureIntent, cancelIntent, manual,
     resolveTargetsForSkill, tranceFree, mirrorReady, luckyBonus, applyCast,
   });
 
@@ -1322,7 +1356,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
   const hadEngagement = (s.field?.engagementIds.length ?? 0) > 0;
   // statuses age once a second, and the DoT they deal lands before the window's actions (§7.1 priority 10)
   scheduleMobDot({
-    clock, tickStartUs, s, c, rng, statuses, mobMods, recoverLeech, revertEquilibrium, onKill,
+    clock, tickStartUs, s, c, rng, statuses, mobMods, recoverLeech, revertEquilibrium, onKill: killMob,
   });
 
   // Committed payments use their own timestamps and the same fatal-damage latch as direct hits.
@@ -1346,7 +1380,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
       fx(s, { kind: 'hit', side: 'field', mobId: target.id, via: 'swing', text: eng.fmt(payment.amount), value: payment.amount, colour: hitColour(null) });
       if (target.hp <= 0) {
         s.group.splice(s.group.indexOf(target), 1);
-        onKill(s, rng, target, c, statuses);
+        killMob(s, rng, target, c, statuses);
       }
     });
   }
@@ -1361,7 +1395,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
    */
   const { resolveIncomingHit } = createIncomingHit({
     arena, clock, rng, s, c, units, online, rkH, statuses, statusesAppliedThisTick,
-    trig, immune, absorbPct, berserk, berserkDealt, mobMods, queueTrigger, cancelIntent, cancelPlayerBasic, onKill,
+    trig, immune, absorbPct, berserk, berserkDealt, mobMods, queueTrigger, cancelIntent, cancelPlayerBasic, onKill: killMob,
   });
 
   const { launchMobShot, cancelMobShot, resolveMobShot, scheduleMobShot, sweepMobShots } = createMobShots({
@@ -1424,6 +1458,8 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     for (const flight of [...arena.flights]) scheduleFlight(flight);
     for (const shot of arena.mobFlights) shot.queued = false;
     for (const shot of [...arena.mobFlights]) scheduleMobShot(shot);
+    for (const shot of arena.playerShots) shot.queued = false;
+    for (const shot of [...arena.playerShots]) schedulePlayerShot(shot);
     const stepUs = Math.max(1, Math.round(E.combat_arena.movement_step_sec * units));
     for (let atUs = tickStartUs + stepUs; atUs <= tickEndUs; atUs += stepUs) {
       clock.schedule(atUs, EVENT_PRIORITY.expire, 'arena', '', () => {
@@ -1510,25 +1546,38 @@ function settleDungeonClock(s: GameState, startClock: number, secs: number): voi
   }
 }
 
-/** One arena tick that settles released work saved with the character; counts against away time. */
-function settleSavedPendingWork(s: GameState, autoSkills: boolean): number {
-  if (!s.pendingWork) return 0;
-  const units = tree.mechanics?.combat_time_units_per_sec ?? 1;
-  const arena = createCombatArena();
-  syncCombatArena(arena, s, s.clockSec * units, units, characterSheet(s).maxHp);
-  if (restorePendingWork(arena, s) <= 0) {
-    s.pendingWork = null;
-    return 0;
+/** The longest stretch of released work one reload settles before ordinary away ticks take over. */
+const SETTLE_SECONDS_CAP = 120;
+
+/**
+ * Arena ticks that settle released work saved with the character. A projectile owed ten seconds
+ * from now must be paid ten seconds from now, not clamped to the first second after reload, so the
+ * settlement keeps stepping until nothing is owed; every second it spends counts against away time.
+ */
+function settleSavedPendingWork(s: GameState, autoSkills: boolean, budgetSec = 1): number {
+  const budget = Math.min(Math.max(0, Math.floor(budgetSec)), SETTLE_SECONDS_CAP);
+  let done = 0;
+  while (s.pendingWork && done < budget) {
+    const units = tree.mechanics?.combat_time_units_per_sec ?? 1;
+    const arena = createCombatArena();
+    syncCombatArena(arena, s, s.clockSec * units, units, characterSheet(s).maxHp);
+    if (restorePendingWork(arena, s) <= 0) {
+      s.pendingWork = null;
+      break;
+    }
+    tick(s, { online: false, autoSkills, settleArena: arena });
+    done++;
+    if (!s.pendingWork) break;
   }
-  tick(s, { online: false, autoSkills, settleArena: arena });
-  return 1;
+  return done;
 }
 
 /** Synchronous catch-up — tests and any non-UI caller. */
 export function catchUp(s: GameState, elapsedSec: number, opts: { autoSkills?: boolean } = {}) {
   const { secs, capped } = catchUpPlan(elapsedSec);
   const startClock = s.clockSec;
-  const settled = settleSavedPendingWork(s, opts.autoSkills !== false);
+  // No away second, no settlement: released work stays owed until the budget can pay for it.
+  const settled = secs > 0 ? settleSavedPendingWork(s, opts.autoSkills !== false, secs) : 0;
   const ticks = Math.max(0, secs - settled);
   runTicks(s, 0, ticks, opts.autoSkills !== false);
   const simulated = settled + ticks;
@@ -1550,7 +1599,8 @@ export async function catchUpAsync(s: GameState, elapsedSec: number, opts: {
   // Work released before the save resolves before any away time is simulated, through the same
   // arena/tick path that pays kills and rewards exactly once. This tick counts against the away
   // budget so the catch-up does not grant a free extra second.
-  let done = settleSavedPendingWork(s, opts.autoSkills !== false);
+  let done = secs > 0 && !opts.signal?.aborted
+    ? settleSavedPendingWork(s, opts.autoSkills !== false, secs) : 0;
   opts.onProgress?.(done, secs);
   while (done < secs && !opts.signal?.aborted) {
     const end = Math.min(done + SLICE, secs);

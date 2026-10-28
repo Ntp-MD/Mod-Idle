@@ -26,6 +26,14 @@ export function createIntentSelect(opts: {
     cancelIntent, startWindup, engageTarget,
   } = opts;
 
+  function note(atUs: number, command: 'cast' | 'move' | 'stop', status: 'accepted' | 'queued' | 'rejected', reason: string, skillId?: string) {
+    const list = (s.combatReceipts ||= []);
+    const last = list[list.length - 1];
+    if (last && last.atUs === atUs && last.command === command && last.status === status && last.reason === reason) return;
+    list.push({ atUs, atSec: atUs / (arena?.unitsPerSec || 1), command, status, reason, ...(skillId ? { skillId } : {}) });
+    if (list.length > 8) list.splice(0, list.length - 8);
+  }
+
   function ensureIntent(atUs: number) {
     if (!arena) return;
     let intent = arena.intent;
@@ -36,7 +44,7 @@ export function createIntentSelect(opts: {
     // A deliberate cast request bypasses automatic slot enable/conditions; canonical ownership,
     // range, resource and cooldown checks still run at release.
     if (manual?.cast) {
-      if (intent?.phase === 'windup') { cancelIntent('manual cast'); intent = arena.intent; }
+      if (intent?.phase === 'windup') { note(atUs, 'cast', 'accepted', 'superseded windup', manual.cast.skillId); cancelIntent('manual cast'); intent = arena.intent; }
       if (intent?.phase === 'recovery') {
         if (intent.mobile) {
           for (const flight of [...arena.flights]) {
@@ -46,7 +54,7 @@ export function createIntentSelect(opts: {
           }
           return;
         }
-        if (atUs < (intent.recoveryUntilUs ?? 0)) return;
+        if (atUs < (intent.recoveryUntilUs ?? 0)) { note(atUs, 'cast', 'queued', 'recovery', manual.cast.skillId); return; }
         arena.intent = undefined;
         intent = undefined;
       }
@@ -55,7 +63,7 @@ export function createIntentSelect(opts: {
         ? s.group.find((mob) => mob.id === arena!.focusId && mob.hp > 0 && arena!.mobs[mob.id]) : undefined;
       const primary = focus ?? arenaTarget(arena, s.group);
       const pose = primary ? arena.mobs[primary.id] : undefined;
-      if (!sm.byId[request.skillId]) { manual.cast = undefined; return; }
+      if (!sm.byId[request.skillId]) { note(atUs, 'cast', 'rejected', 'unknown skill', request.skillId); manual.cast = undefined; return; }
       const next: CombatIntent = {
         skillId: request.skillId,
         targetId: primary?.id ?? '',
@@ -64,6 +72,7 @@ export function createIntentSelect(opts: {
         manual: true,
         ...(request.point ? { aimPoint: true } : {}),
       };
+      note(atUs, 'cast', 'accepted', 'committed', request.skillId);
       manual.cast = undefined;
       manual.moveTo = undefined;
       arena.intent = next;
@@ -80,8 +89,9 @@ export function createIntentSelect(opts: {
       return;
     }
     if (manual?.moveTo) {
-      if (arena.intent?.phase === 'windup') cancelIntent('manual move');
-      else if (arena.intent?.phase === 'approach') arena.intent = undefined;
+      if (arena.intent?.phase === 'windup') { note(atUs, 'move', 'accepted', 'cancelled windup'); cancelIntent('manual move'); }
+      else if (arena.intent?.phase === 'approach') { note(atUs, 'move', 'accepted', 'dropped approach'); arena.intent = undefined; }
+      else note(atUs, 'move', 'accepted', 'ordered');
       return;
     }
     // A manual request keeps its action alive when automatic skills are off; hard control still

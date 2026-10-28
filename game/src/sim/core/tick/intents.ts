@@ -12,6 +12,7 @@ import {
 import { intentTargets, trackIntentAim } from '../../combat/combat-actions';
 import { prepareSkillCast, spendableMana, newCastRollCache, resolvePreparedCast } from '../../combat/skills';
 import { skillCastTiming, releasedSkillCastTiming, targetsInSkillArea } from '../../../../../engine/skill-actions.ts';
+import { isClear, sweepDisc } from '../../../../../engine/navigation.ts';
 import { skillAreaSnapshot } from '../../../../../engine/skill-area.ts';
 import { bundleOf } from '../../../../../engine/keystones.ts';
 import { isBossKind } from '../kinds';
@@ -90,8 +91,9 @@ export function createIntents(opts: {
       const resolved = intentTargets(arena, s.group, intent);
       const source = { x: arena.player.x, y: arena.player.y };
       const destination = resolved.area?.center ?? source;
+      const stepFloorUs = Math.round(E.combat_arena.movement_step_sec * units);
       const timing = skillCastTiming(profile, atUs, units, source, destination,
-        Math.max(1e-7, c.globalSpeed || 1));
+        { cast: c.castSpeed, recovery: c.recoverySpeed }, stepFloorUs);
       const action = arenaAction(arena, 'player', 'cast', atUs, intent.targetId, intent.skillId, resolved.area, timing);
       if (!action) { arena.intent = undefined; return; }
       intent.phase = 'windup';
@@ -121,6 +123,19 @@ export function createIntents(opts: {
       if (!action || action.cancelledAtUs != null) { cancelIntent('action cancelled'); return; }
       const skill = sm.byId[intent.skillId];
       if (!skill) { cancelIntent('missing skill'); return; }
+      // Authored cover is read at release, not only at acquisition: a screen raised
+      // mid-windup still blocks a targeted strike. Ground placements need standable
+      // ground at the moment they fire.
+      if (arena.nav && (skill.type === 'attack' || skill.type === 'curse') && !intent.aimPoint
+        && intent.targetId && arena.mobs[intent.targetId]
+        && sweepDisc(arena.nav, arena.player, arena.mobs[intent.targetId], 0, 'sight')) {
+        cancelIntent('no line of sight');
+        return;
+      }
+      if (arena.nav && intent.aimPoint && !isClear(arena.nav, intent.targetPoint, 0)) {
+        cancelIntent('ground blocked');
+        return;
+      }
       const profile = sm.castProfileOf(skill);
       const free = tranceFree();
       const force = mirrorReady();
@@ -131,6 +146,8 @@ export function createIntents(opts: {
         isBoss: s.group.some((mob) => isBossKind(String(mob.kind))),
         timeUs: atUs, freeCast: free, forceCrit: force, critDamageBonusPct: lucky,
         spatialTargets: true,
+        positionOf: (id: string) => arena.mobs[id] ? { x: arena.mobs[id].x, y: arena.mobs[id].y } : undefined,
+        availableGroup: s.group,
         ...(intent.manual ? { ignoreConditions: true } : {}),
         ...(intent.manual && intent.aimPoint ? { allowEmptyTarget: true } : {}),
       };
@@ -174,9 +191,20 @@ export function createIntents(opts: {
         chainHopRange = Number(skill.area?.radius_m ?? 0) || 3;
       }
       const releaseSource = { x: arena.player.x, y: arena.player.y };
-      const releaseDestination = releaseArea?.center ?? releaseSource;
+      // A caster-origin line or cone is aimed, not centred: the bolt travels to the far edge of
+      // the footprint, while damage still propagates along the committed area (F16). Other
+      // shapes resolve at their snapshot center.
+      const downRange = releaseArea && releaseArea.origin === 'caster'
+        && (releaseArea.shape === 'line' || releaseArea.shape === 'cone')
+        && releaseArea.directionRad != null && releaseArea.lengthM != null;
+      const releaseDestination = downRange
+        ? { x: releaseSource.x + Math.cos(releaseArea!.directionRad!) * releaseArea!.lengthM!,
+            y: releaseSource.y + Math.sin(releaseArea!.directionRad!) * releaseArea!.lengthM! }
+        : releaseArea?.center ?? releaseSource;
       const releaseTiming = releasedSkillCastTiming(profile, action.timing?.startedAtUs ?? action.atUs,
-        atUs, units, releaseSource, releaseDestination, Math.max(1e-7, c.globalSpeed || 1));
+        atUs, units, releaseSource, releaseDestination,
+        { cast: c.castSpeed, recovery: c.recoverySpeed },
+        Math.round(E.combat_arena.movement_step_sec * units));
       intent.recoveryUntilUs = releaseTiming.recoveryUntilUs;
       updateArenaAction(arena, action.id, { timing: releaseTiming, primaryTiming: releaseTiming, area: releaseArea,
         targetId: releaseArea?.targetId ?? intent.targetId,
@@ -260,7 +288,7 @@ export function createIntents(opts: {
         if (count > 1) {
           const sharePct = Number(scaled.find((effect) => effect.stat === 'hit_pct')?.value ?? 100);
           const cache = newCastRollCache();
-          const recoveryUs = Math.ceil(profile.recovery_sec / Math.max(1e-7, c.globalSpeed || 1) * units);
+          const recoveryUs = Math.ceil(profile.recovery_sec / Math.max(1e-7, c.recoverySpeed || 1) * units);
           // One deployed field per caster-skill-arena: a deliberate recast replaces it at release and
           // cancels only its unspent pulses. Resolved pulses and their rewards stay spent.
           if (actionDef.kind === 'blizzard-field') {

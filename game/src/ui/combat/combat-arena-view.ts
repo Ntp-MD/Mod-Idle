@@ -253,6 +253,56 @@ export function arenaNearestTarget(
   return best;
 }
 
+/** Which read the arena target bar names: the committed strike, the requested focus, or the next body. */
+export type ArenaTargetKind = 'committed' | 'focus' | 'nearest';
+
+/**
+ * The persistent target read (F37): one named body with its kind, an offscreen flag with a
+ * screen-space bearing for the edge arrow, and the range in meters. Hover stays transient and
+ * inspection keeps its own panel — the bar never mixes them, it only names its own kind.
+ */
+export interface ArenaTargetRead {
+  id: string;
+  kind: ArenaTargetKind;
+  offscreen: boolean;
+  /** Screen-space bearing from the player to the target, in degrees for the edge arrow. */
+  bearingDeg: number;
+  rangeM: number;
+}
+
+export function describeArenaTarget(opts: {
+  mobs: Readonly<Record<string, { hp: number; x: number; y: number; returning?: boolean } | undefined>>;
+  player: { x: number; y: number };
+  committedId?: string;
+  focusId?: string | null;
+  camera: { x: number; y: number };
+  view: { width: number; height: number };
+}): ArenaTargetRead | null {
+  const live = (id?: string | null) => {
+    if (!id) return undefined;
+    const actor = opts.mobs[id];
+    return actor && actor.hp > 0 && !actor.returning ? { id, actor } : undefined;
+  };
+  const committed = live(opts.committedId);
+  const focus = live(opts.focusId);
+  const nearestId = !committed && !focus ? arenaNearestTarget(opts.mobs, opts.player) : undefined;
+  const nearest = live(nearestId);
+  const picked = committed ? { ...committed, kind: 'committed' as const }
+    : focus ? { ...focus, kind: 'focus' as const }
+    : nearest ? { ...nearest, kind: 'nearest' as const } : null;
+  if (!picked) return null;
+  const rangeM = Math.hypot(picked.actor.x - opts.player.x, picked.actor.y - opts.player.y);
+  // The camera lives in projected space, so the target is projected before the view test —
+  // the same mapping the pointer path uses in reverse.
+  const screen = projectArenaPoint(picked.actor);
+  const offscreen = screen.x < opts.camera.x || screen.x > opts.camera.x + opts.view.width
+    || screen.y < opts.camera.y || screen.y > opts.camera.y + opts.view.height;
+  return {
+    id: picked.id, kind: picked.kind, offscreen, rangeM,
+    bearingDeg: arenaScreenAngle(opts.player, picked.actor),
+  };
+}
+
 /**
  * Projectile progress for the drawn flight. A committed window moves at the sim's own speed from
  * release; only an event with no authored span keeps the legacy 0.24 s lead-in.
@@ -268,6 +318,48 @@ export function arenaFlightProgress(
 /** Damage pulses show contact feedback; the deployed field atlas belongs to the cast event. */
 export function arenaPersistentFieldVisual(event: FxEvent, persistentField: boolean): boolean {
   return !persistentField || event.kind === 'cast';
+}
+
+/**
+ * One in-flight incoming shot with its own lifecycle, independent of the caster's pose (F38).
+ * The position interpolates the committed release→impact span at the playhead, so a projectile
+ * that is still travelling has a telegraph of its own instead of borrowing the caster's.
+ */
+export interface ArenaIncomingHazard {
+  actionId: number;
+  skillId?: string;
+  kind: 'projectile' | 'ground';
+  x: number;
+  y: number;
+  destX: number;
+  destY: number;
+  releaseAtUs: number;
+  impactAtUs: number;
+  /** Hit radius for a projectile, committed landing radius for ground. */
+  radiusM: number;
+  sourceMobId: string;
+}
+
+export function arenaIncomingHazards(arena: CombatArena, atUs: number): ArenaIncomingHazard[] {
+  const hazards: ArenaIncomingHazard[] = [];
+  for (const shot of arena.mobFlights ?? []) {
+    const span = shot.impactAtUs - shot.releaseAtUs;
+    const t = span > 0 ? clamp01((atUs - shot.releaseAtUs) / span) : 1;
+    hazards.push({
+      actionId: shot.actionId,
+      skillId: shot.skillId,
+      kind: shot.kind === 'ground' ? 'ground' : 'projectile',
+      x: shot.source.x + (shot.destination.x - shot.source.x) * t,
+      y: shot.source.y + (shot.destination.y - shot.source.y) * t,
+      destX: shot.destination.x,
+      destY: shot.destination.y,
+      releaseAtUs: shot.releaseAtUs,
+      impactAtUs: shot.impactAtUs,
+      radiusM: shot.kind === 'ground' ? shot.impactRadiusM ?? 0 : shot.radiusM,
+      sourceMobId: shot.mobId,
+    });
+  }
+  return hazards;
 }
 
 export function arenaPayloadSample(payload: CombatArenaPayload, atUs: number) {

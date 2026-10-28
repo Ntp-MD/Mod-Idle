@@ -181,21 +181,3 @@ export const takenMult = (m: CurseMods) => 1 + m.damageTaken / 100;
 /** Which of the character's skills can write a line on a mob, for the panel. */
 export const curableRows = () => sm.of('curse').filter((s: any) => (s.effects || []).some((e: any) => e.subject === 'target'));
 
-/**
- * When a cursed target dies, the lines it was carrying go to the neighbours its row
- * names, each with the duration it still had left. The count is read off the mob's own curse
- * line at the moment of death, so no cast state has to remember it. Returns how many caught it.
- */
-export function spreadOnDeath(store: CurseStore, mobId: string, neighbours: string[]): number {
-  const cap = lineValue(store, mobId, 'spread_targets');
-  const lines = store[mobId];
-  if (!cap || !lines) return 0;
-  const carrying = Object.values(lines).filter((l) => l.stat !== 'spread_targets');
-  let caught = 0;
-  for (const id of neighbours.slice(0, cap)) {
-    const mine = store[id] || (store[id] = {});
-    for (const l of carrying) mine[lineKey(l)] = { ...l };
-    caught++;
-  }
-  return caught;
-}

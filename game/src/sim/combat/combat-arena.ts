@@ -1,6 +1,6 @@
 import { E, sm, spawns } from '../../engine/client';
 import { arenaFacingIndex } from '../../presentation/arena-camera';
-import { isClear, sweepDisc, type NavLayout, type NavPoint } from '../../../../engine/navigation.ts';
+import { isClear, route, sweepDisc, type NavLayout, type NavPoint } from '../../../../engine/navigation.ts';
 import { attackProfileGeometry, withinAttackStopBand, type AttackRangeGeometry } from '../../../../engine/attack-range.ts';
 import { targetsInSkillArea } from '../../../../engine/skill-actions.ts';
 import { skillAreaSnapshot } from '../../../../engine/skill-area.ts';
@@ -66,6 +66,24 @@ export interface CombatArenaPayload {
   targetId?: string;
 }
 
+/** A released player ordinary shot. The projectile is non-homing and owns its own contact. */
+export interface CombatPlayerShot {
+  actionId: number;
+  targetId: string;
+  source: { x: number; y: number };
+  destination: { x: number; y: number };
+  position: { x: number; y: number };
+  releaseAtUs: number;
+  impactAtUs: number;
+  speedMps: number;
+  radiusM: number;
+  /** Encounter identity at release; leaving it cancels the shot with a receipt. */
+  areaKey?: string;
+  queued?: boolean;
+  /** Start of the segment the next sweep measures from; contact backdates to its crossing. */
+  lastCheckedAtUs?: number;
+}
+
 /** A released incoming ordinary shot. The projectile is non-homing and owns its own contact. */
 export interface CombatMobFlight {
   actionId: number;
@@ -86,7 +104,11 @@ export interface CombatMobFlight {
   /** Encounter identity at release; leaving it cancels the shot with a receipt. */
   areaKey?: string;
   queued?: boolean;
+  /** Start of the segment the next sweep measures from; contact backdates to its crossing. */
+  lastCheckedAtUs?: number;
 }
+
+/** Ground footprint radius in meters: the sim reads body classes, never pixels. */
 
 /** Ground footprint radius in meters: the sim reads body classes, never pixels. */
 export function bodyRadiusM(mob?: Mob): number {
@@ -118,6 +140,12 @@ export interface CombatArenaActor {
   moving: boolean;
   /** Ground footprint radius in meters, from the body class (player: the arena constant). */
   radiusM: number;
+  /** Authored-geometry route being followed, in ground meters. */
+  path?: NavPoint[];
+  /** The goal the current path was planned for, so a moved goal replans. */
+  pathGoal?: NavPoint;
+  /** The last route to this goal failed; callers report it and drop the order. */
+  routeFailed?: boolean;
   hp: number;
   hpMax: number;
   es?: number;
@@ -135,6 +163,9 @@ export interface CombatArenaActor {
   returning?: boolean;
   /** Engaged melee body with no reachable claim this sample; it waits instead of overlapping. */
   waitingForContact?: boolean;
+  /** The committed ground threat the body is still answering; the plan holds until the flight
+   *  lands or the body clears the hysteresis band, so the farmer cannot wander back inside. */
+  avoidActionId?: number;
   mob?: Mob;
   action?: CombatArenaAction;
 }
@@ -153,6 +184,12 @@ export interface CombatArenaFrame {
   intent?: CombatIntent;
   /** Contact claims sampled with the frame, for deterministic inspection at a seek. */
   contacts?: Record<string, CombatContactClaim>;
+  /** Player buff timers sampled with this frame, so a HUD read cannot mix clocks. */
+  buffs?: Record<string, number>;
+  /** Curse lines per mob sampled with this frame (stat → value). */
+  curses?: Record<string, Record<string, number>>;
+  /** The player's deliberate target pin sampled with this frame. */
+  focusId?: string;
 }
 
 export interface CombatArena extends CombatArenaFrame {
@@ -165,10 +202,13 @@ export interface CombatArena extends CombatArenaFrame {
   intent?: CombatIntent;
   flights: CombatFlight[];
   mobFlights: CombatMobFlight[];
+  playerShots: CombatPlayerShot[];
   /** The player's deliberate target pin; cleared/ignored when the body is gone. */
   focusId?: string;
   /** The player's local farming anchor, in field meters. */
   anchor?: { x: number; y: number };
+  /** The held target the anchor-hold line was last noted for; one feed line per target, not per sample. */
+  anchorHoldFor?: string;
   /** Planned melee contact points, keyed by actor id; revalidated every movement sample. */
   contacts: Record<string, CombatContactClaim>;
   /** Authored static ground geometry; absent means none is proven, never "open ground". */
@@ -182,7 +222,7 @@ export function createCombatArena(): CombatArena {
     bounds: { width: CFG.width, height: CFG.height },
     nowUs: 0, atUs: 0, unitsPerSec: 1_000_000,
     player: { id: 'player', ...CFG.player_start, facing: 0, moving: false, radiusM: bodyRadiusM(), hp: 0, hpMax: 0 },
-    mobs: {}, bodies: [], actions: [], frames: [], actionSeq: 0, flights: [], mobFlights: [], contacts: {},
+    mobs: {}, bodies: [], actions: [], frames: [], actionSeq: 0, flights: [], mobFlights: [], playerShots: [], contacts: {},
   };
 }
 
@@ -293,7 +333,11 @@ export function aimForSkill(
     if (!pose) return undefined;
     return { mob: t, point: { x: pose.x, y: pose.y } };
   };
-  if (!skill || radius <= 0) {
+  // A caster-origin cone or line is aimed by direction even when its footprint declares no radius
+  // (a line carries `length_m` instead), so it must not fall into the plain nearest-body path.
+  const casterOriented = !!skill?.area && skill.area.origin === 'caster'
+    && (skill.area.shape === 'cone' || skill.area.shape === 'line');
+  if (!skill || (radius <= 0 && !casterOriented)) {
     const t = nearest();
     if (!t) return undefined;
     // a single press casts only while its primary is already in cast range
@@ -301,17 +345,36 @@ export function aimForSkill(
       return undefined;
     return t;
   }
+  if (casterOriented) {
+    const reach = Math.max(radius, skill.area!.length_m ?? 0);
+    const live = group.filter((mob) => mob.hp > 0 && arena.mobs[mob.id] && !arena.mobs[mob.id].returning);
+    const inside = live.some((mob) => arenaDistance(arena.player, arena.mobs[mob.id]) <= reach + 1e-7);
+    if (!inside && requireRange) return undefined;
+    const t = arenaTarget(arena, group);
+    if (!t) return undefined;
+    const castPose = arena.mobs[t.id];
+    // The direction that reaches the most bodies wins; the nearest body only breaks ties.
+    const actors = live.map((mob) => ({ ...arena.mobs[mob.id], mob }));
+    let best = { mob: t, point: { x: castPose.x, y: castPose.y }, count: -1, dist: Infinity };
+    for (const mob of live) {
+      const pose = arena.mobs[mob.id];
+      const area = skillAreaSnapshot(skill.area!, arena.player, pose, mob.id, arena.player.facing);
+      const count = targetsInSkillArea(area, actors).length;
+      const dist = arenaDistance(arena.player, pose);
+      if (count > best.count || (count === best.count && dist < best.dist - 1e-7)) {
+        best = { mob, point: { x: pose.x, y: pose.y }, count, dist };
+      }
+    }
+    return { mob: best.mob, point: best.point };
+  }
   if (skill.area!.origin === 'caster') {
+    // A circle stays centred on the player; the nearest body is only the approach magnet.
     const inside = group.some((mob) => mob.hp > 0 && arena.mobs[mob.id] && !arena.mobs[mob.id].returning
       && arenaDistance(arena.player, arena.mobs[mob.id]) <= radius + 1e-7);
     if (!inside && requireRange) return undefined;
     const t = arenaTarget(arena, group);
     if (!t) return undefined;
-    const pose = arena.mobs[t.id];
-    // A cone/line needs a real direction; a circle keeps its caster-centred aim contract.
-    const oriented = skill.area!.shape === 'cone' || skill.area!.shape === 'line';
-    return { mob: t, point: oriented && pose
-      ? { x: pose.x, y: pose.y } : { x: arena.player.x, y: arena.player.y } };
+    return { mob: t, point: { x: arena.player.x, y: arena.player.y } };
   }
   const range = arenaSkillRange(skillId);
   let best: { mob: Mob; point: { x: number; y: number }; count: number; dist: number } | undefined;
@@ -387,6 +450,8 @@ export function arenaTarget(arena: CombatArena, group: Mob[]): Mob | undefined {
   for (const mob of group) {
     const pose = arena.mobs[mob.id];
     if (mob.hp <= 0 || !pose || pose.returning) continue;
+    // Authored sight screens hide a body from acquisition; a pinned focus above stays explicit.
+    if (arena.nav && sweepDisc(arena.nav, arena.player, pose, 0, 'sight')) continue;
     const distance = arenaDistance(arena.player, pose);
     if (distance < nearest) { nearest = distance; target = mob; }
   }
@@ -395,12 +460,16 @@ export function arenaTarget(arena: CombatArena, group: Mob[]): Mob | undefined {
 
 /** Reconcile spawns without consuming combat RNG or moving existing bodies. */
 export function syncCombatArena(arena: CombatArena, state: GameState, atUs: number, unitsPerSec: number, maxHp: number): void {
-  if (atUs > arena.nowUs + CFG.movement_step_sec * unitsPerSec || state.player.hp <= 0) {
+  // A clock that jumped backwards is a different character generation (a rewind or a restore), so
+  // the arena cannot keep work from the timeline it left behind.
+  const rewound = atUs < arena.nowUs - CFG.movement_step_sec * unitsPerSec;
+  if (rewound || atUs > arena.nowUs + CFG.movement_step_sec * unitsPerSec || state.player.hp <= 0) {
     const cancelled = new Set<number>();
     if (arena.intent?.actionId != null) cancelled.add(arena.intent.actionId);
     for (const flight of arena.flights) cancelled.add(flight.actionId);
     if (arena.player.action) cancelled.add(arena.player.action.id);
     for (const shot of arena.mobFlights) cancelled.add(shot.actionId);
+    for (const shot of arena.playerShots) cancelled.add(shot.actionId);
     for (const actor of Object.values(arena.mobs)) {
       if (actor.action?.kind === 'cast' && actor.action.timing && !actor.action.impactCount)
         cancelled.add(actor.action.id);
@@ -413,6 +482,8 @@ export function syncCombatArena(arena: CombatArena, state: GameState, atUs: numb
     arena.intent = undefined;
     arena.flights = [];
     arena.mobFlights = [];
+    arena.playerShots = [];
+    arena.player.avoidActionId = undefined;
     arena.contacts = {};
     arena.player.action = undefined;
   }
@@ -497,6 +568,10 @@ export function captureCombatArena(arena: CombatArena, state: GameState, atUs: n
     bodies: arena.bodies.map((body) => ({ ...body, mob: { ...body.mob } })),
     ...(arena.intent ? { intent: { ...arena.intent, targetPoint: { ...arena.intent.targetPoint } } } : {}),
     contacts: Object.fromEntries(Object.entries(arena.contacts).map(([id, claim]) => [id, { ...claim }])),
+    buffs: { ...(state.skills?.buffUp ?? {}) },
+    curses: Object.fromEntries(Object.entries(state.curses ?? {}).map(([id, lines]) =>
+      [id, Object.fromEntries(Object.entries(lines).map(([stat, line]) => [stat, line.value]))])),
+    ...(arena.focusId ? { focusId: arena.focusId } : {}),
   };
   if (arena.frames.at(-1)?.atUs === atUs) arena.frames[arena.frames.length - 1] = frame;
   else arena.frames.push(frame);
@@ -509,6 +584,8 @@ export function captureCombatArena(arena: CombatArena, state: GameState, atUs: n
 /** Arrival easing and turn-rate facts: bodies slow inside the last half meter and
  *  never snap their facing, so motion reads as weight rather than teleporting. */
 const ARRIVE_SLOW_M = 0.5;
+/** A goal that moved further than this invalidates the planned route. */
+const ROUTE_GOAL_EPS = 0.6;
 const ARRIVE_MIN_FACTOR = 0.35;
 const TURN_RATE_RAD_S = 9;
 
@@ -521,20 +598,50 @@ function turnToward(actor: CombatArenaActor, tx: number, ty: number, seconds: nu
   actor.facing += Math.max(-cap, Math.min(cap, delta));
 }
 
+/** The next point to steer at: the goal itself, or the first waypoint of a route around ground. */
+function routedStep(
+  actor: CombatArenaActor, target: { x: number; y: number }, nav: NavLayout, radius: number,
+): NavPoint {
+  // The plan is cached per goal: an unreachable goal must not run the search on every sample.
+  const goalMoved = !actor.pathGoal || arenaDistance(actor.pathGoal, target) > ROUTE_GOAL_EPS;
+  if (goalMoved) {
+    const found = route(nav, { x: actor.x, y: actor.y }, [{ id: 'goal', x: target.x, y: target.y }], radius);
+    actor.path = found.ok ? found.waypoints.map((point) => ({ ...point })) : [];
+    actor.pathGoal = { x: target.x, y: target.y };
+    actor.routeFailed = !found.ok;
+  }
+  if (!actor.path?.length) return target;
+  while (actor.path.length && arenaDistance(actor, actor.path[0]) <= radius + 0.05) actor.path.shift();
+  if (!actor.path.length) return target;
+  const next = actor.path[0];
+  // A body standing where the route wants to go forces a fresh plan on the next sample.
+  if (sweepDisc(nav, actor, next, radius)) { actor.pathGoal = undefined; return target; }
+  return next;
+}
+
 function approach(
   actor: CombatArenaActor, target: { x: number; y: number }, range: number, distance: number, seconds: number,
   nav?: NavLayout,
 ): number {
-  const gap = arenaDistance(actor, target);
-  const remaining = Math.max(0, gap - range);
-  turnToward(actor, target.x, target.y, seconds);
-  const ease = remaining > ARRIVE_SLOW_M ? 1
-    : ARRIVE_MIN_FACTOR + (1 - ARRIVE_MIN_FACTOR) * (remaining / ARRIVE_SLOW_M);
-  const move = Math.min(distance * ease, remaining);
+  const radius = actor.radiusM ?? bodyRadiusM();
+  const gapToTarget = arenaDistance(actor, target);
+  const remaining = Math.max(0, gapToTarget - range);
+  let steer: NavPoint = target;
+  if (nav && remaining > 0) {
+    if (sweepDisc(nav, actor, target, radius)) steer = routedStep(actor, target, nav, radius);
+    else if (actor.path) { actor.path = undefined; actor.pathGoal = undefined; }
+  }
+  const gap = arenaDistance(actor, steer);
+  const legRemaining = Math.max(0, gap - (steer === target ? range : 0));
+  turnToward(actor, steer.x, steer.y, seconds);
+  const ease = steer === target && remaining <= ARRIVE_SLOW_M
+    ? ARRIVE_MIN_FACTOR + (1 - ARRIVE_MIN_FACTOR) * (remaining / ARRIVE_SLOW_M)
+    : 1;
+  const move = Math.min(distance * ease, legRemaining);
   const from = { x: actor.x, y: actor.y };
   let to = { x: actor.x, y: actor.y };
   if (move > 0 && gap > 0) {
-    to = { x: from.x + (target.x - from.x) / gap * move, y: from.y + (target.y - from.y) / gap * move };
+    to = { x: from.x + (steer.x - from.x) / gap * move, y: from.y + (steer.y - from.y) / gap * move };
   }
   if (nav) {
     // The step is swept, not sampled: a fast body cannot land past a thin wall.
@@ -739,7 +846,11 @@ export function advanceCombatArena(
   arena: CombatArena, state: GameState, atUs: number,
   options: { playerRange: number; playerSpeedMult: number; mobSpeedMult: (mob: Mob) => number;
     playerTargetId?: string; playerLocked?: boolean; playerMoveTo?: { x: number; y: number };
-    engagedIds?: ReadonlySet<string>; homeBandM?: number; returnSpeedMult?: number },
+    engagedIds?: ReadonlySet<string>; homeBandM?: number; returnSpeedMult?: number;
+    /** F27 — protect the anchor: auto pursuit stops at this line instead of chasing past it.
+     *  Explicit move orders and avoidance set their own destination and never read it. */
+    anchorHold?: { x: number; y: number; radiusM: number } | null;
+    onAnchorHold?: (targetId: string) => void },
 ): void {
   const fromUs = arena.nowUs;
   const seconds = Math.max(0, atUs - fromUs) / arena.unitsPerSec;
@@ -764,9 +875,22 @@ export function advanceCombatArena(
     approach(arena.player, options.playerMoveTo, 0,
       CFG.player_speed * options.playerSpeedMult * seconds, seconds, arena.nav);
   } else if (target && state.player.hp > 0 && !options.playerLocked) {
-    // `playerRange` is the profile's already-inset stop distance, never its far edge.
-    approach(arena.player, arena.mobs[target.id], Math.max(0, options.playerRange),
-      CFG.player_speed * options.playerSpeedMult * seconds, seconds, arena.nav);
+    const pose = arena.mobs[target.id];
+    const hold = options.anchorHold;
+    if (hold && pose && arenaDistance(hold, pose) > hold.radiusM + 1e-7) {
+      // The hold line is the farthest the auto feet go: walk to it and cast from there. A target
+      // that walks inside is approached normally; one that never does is left to its leash.
+      const gap = Math.max(1e-9, arenaDistance(hold, pose));
+      approach(arena.player, {
+        x: hold.x + (pose.x - hold.x) / gap * hold.radiusM,
+        y: hold.y + (pose.y - hold.y) / gap * hold.radiusM,
+      }, 0, CFG.player_speed * options.playerSpeedMult * seconds, seconds, arena.nav);
+      if (options.onAnchorHold) options.onAnchorHold(target.id);
+    } else {
+      // `playerRange` is the profile's already-inset stop distance, never its far edge.
+      approach(arena.player, arena.mobs[target.id], Math.max(0, options.playerRange),
+        CFG.player_speed * options.playerSpeedMult * seconds, seconds, arena.nav);
+    }
   }
   const engaging = state.group.filter((mob) => mob.hp > 0
     && (!options.engagedIds || options.engagedIds.has(mob.id)));
@@ -918,5 +1042,8 @@ export function sampleCombatArena(arena: CombatArena, atUs: number): CombatArena
     bodies: before.bodies,
     ...(before.intent ? { intent: before.intent } : {}),
     ...(before.contacts ? { contacts: before.contacts } : {}),
+    ...(before.buffs ? { buffs: before.buffs } : {}),
+    ...(before.curses ? { curses: before.curses } : {}),
+    ...(before.focusId ? { focusId: before.focusId } : {}),
   };
 }

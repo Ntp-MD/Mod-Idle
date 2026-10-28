@@ -1,4 +1,9 @@
-import type { SkillAreaSnapshot, SkillCastProfile, SkillCastTiming } from './types.ts';
+import type { PhaseSpeeds, SkillAreaSnapshot, SkillCastProfile, SkillCastTiming } from './types.ts';
+
+const phaseRate = (speeds: number | PhaseSpeeds | undefined, phase: 'cast' | 'recovery'): number => {
+  const value = typeof speeds === 'number' ? speeds : speeds?.[phase] ?? 1;
+  return Math.max(1e-7, value || 1);
+};
 
 type Point = { x: number; y: number };
 /**
@@ -10,26 +15,33 @@ type Target = Point & { id: string; previous?: Point; radiusM?: number };
 
 export function skillCastTiming(
   profile: SkillCastProfile, atUs: number, unitsPerSec: number,
-  source: Point, destination: Point, speed = 1,
+  source: Point, destination: Point, speeds: number | PhaseSpeeds = 1, floorUs = 0,
 ): SkillCastTiming {
-  const releaseAtUs = atUs + Math.ceil(profile.windup_sec / Math.max(1e-7, speed) * unitsPerSec);
-  return releasedSkillCastTiming(profile, atUs, releaseAtUs, unitsPerSec, source, destination, speed);
+  const fixedWindupUs = Math.round(Math.max(0, profile.fixed_windup_sec ?? 0) * unitsPerSec);
+  const variableWindupUs = Math.ceil(Math.max(0, profile.windup_sec - (profile.fixed_windup_sec ?? 0))
+    / phaseRate(speeds, 'cast') * unitsPerSec);
+  const releaseAtUs = atUs + Math.max(floorUs, fixedWindupUs + variableWindupUs);
+  return releasedSkillCastTiming(profile, atUs, releaseAtUs, unitsPerSec, source, destination, speeds, floorUs);
 }
 
 /**
  * Timing once the windup has finished: travel and recovery are measured from the actual release,
- * using the release-time source and aim, not the windup snapshot.
+ * using the release-time source and aim, not the windup snapshot. Each phase keeps its fixed
+ * commitment and never compresses below the combat-step floor (F44).
  */
 export function releasedSkillCastTiming(
   profile: SkillCastProfile, startedAtUs: number, releaseAtUs: number, unitsPerSec: number,
-  source: Point, destination: Point, speed = 1,
+  source: Point, destination: Point, speeds: number | PhaseSpeeds = 1, floorUs = 0,
 ): SkillCastTiming {
   const travelSec = profile.delivery === 'projectile'
     ? Math.hypot(destination.x - source.x, destination.y - source.y) / profile.projectile_speed_mps : 0;
+  const fixedRecoveryUs = Math.round(Math.max(0, profile.fixed_recovery_sec ?? 0) * unitsPerSec);
+  const variableRecoveryUs = Math.ceil(Math.max(0, profile.recovery_sec - (profile.fixed_recovery_sec ?? 0))
+    / phaseRate(speeds, 'recovery') * unitsPerSec);
   return {
     delivery: profile.delivery, startedAtUs, releaseAtUs,
     impactAtUs: releaseAtUs + Math.ceil((profile.impact_delay_sec + travelSec) * unitsPerSec),
-    recoveryUntilUs: releaseAtUs + Math.ceil(profile.recovery_sec / Math.max(1e-7, speed) * unitsPerSec),
+    recoveryUntilUs: releaseAtUs + Math.max(floorUs, fixedRecoveryUs + variableRecoveryUs),
   };
 }
 

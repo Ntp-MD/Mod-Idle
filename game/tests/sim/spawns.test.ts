@@ -11,7 +11,7 @@ const context = () => ({
 
 describe('field spawn data', () => {
   it('covers every live zone and subzone with one validated layout', () => {
-    expect(spawns.coverage).toEqual({ zones: 18, subzones: 54, layouts: 1, points: 48 });
+    expect(spawns.coverage).toEqual({ zones: 18, subzones: 54, layouts: 2, points: 56 });
     for (const zone of E.mob.zones) {
       const profile = spawns.profileFor(zone.id);
       expect(profile.cap).toBeLessThanOrEqual(spawns.layout(profile.layout).points.length);
@@ -157,5 +157,14 @@ describe('authored navigation geometry', () => {
         blocks_movement: false, blocks_sight: true, blocks_projectiles: false }),
     ] }));
     expect(checkSpawnNavigation(model, 'forest-clearing', E.combat_arena.player_start, 0.3)).toEqual([]);
+  });
+
+  it('proves the slice layout: authored homes reachable around authored ground', () => {
+    const nav = spawns.navigation('grove-slice');
+    expect(nav).not.toBeNull();
+    expect(nav!.obstacles.map((o) => o.id).sort())
+      .toEqual(['ridge-north', 'ridge-south', 'thicket']);
+    for (const point of spawns.layout('grove-slice').points) expect(isClear(nav!, point, 0.3)).toBe(true);
+    expect(checkSpawnNavigation(spawns, 'grove-slice', E.combat_arena.player_start, 0.3)).toEqual([]);
   });
 });

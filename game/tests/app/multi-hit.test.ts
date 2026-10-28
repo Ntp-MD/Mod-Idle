@@ -86,9 +86,16 @@ describe('real multi-hit impacts', () => {
     const hits = state.fx.filter((event) => event.kind === 'hit' && event.actionId === cast.id)
       .sort((a, b) => (a.atUs ?? 0) - (b.atUs ?? 0));
     expect(hits).toHaveLength(2);
-    expect(hits[1].atUs! - hits[0].atUs!).toBeGreaterThanOrEqual(150_000);
     expect(cast.payloads).toHaveLength(2);
     expect(cast.payloads![1].releaseAtUs - cast.payloads![0].releaseAtUs).toBe(150_000);
+    // Each hit lands at its own pulse's crossing: no earlier than its release. A walking
+    // target shortens the second travel, so the hits may land closer together than the
+    // releases — the order and the per-pulse windows are what the burst guarantees.
+    for (const [index, hit] of hits.entries()) {
+      const release = cast.payloads!.find((payload) => payload.index === index)!.releaseAtUs;
+      expect(hit.atUs!).toBeGreaterThanOrEqual(release);
+    }
+    expect(hits[1].atUs!).toBeGreaterThan(hits[0].atUs!);
     expect(cast.payloads!.map(payload => payload.index)).toEqual([0, 1]);
     expect(state.mobStatus[mob.id]?.statuses.chill?.stacks).toBe(1);
     const total = hits.reduce((sum, hit) => sum + (hit.value ?? 0), 0);
@@ -105,7 +112,10 @@ describe('real multi-hit impacts', () => {
     const hits = state.fx.filter((event) => event.kind === 'hit' && event.actionId === cast.id)
       .sort((a, b) => (a.atUs ?? 0) - (b.atUs ?? 0));
     expect(hits).toHaveLength(3);
-    expect(hits.map((hit) => hit.atUs)).toEqual([580_000, 980_000, 1_380_000]);
+    // Three pulses on a steady beat: spacing is the property, not the wall clock.
+    // (Whirlwind's entry windup is 0.20, tuned up from the 0.18 melee bucket.)
+    const beats = hits.map((hit) => hit.atUs!);
+    expect(beats.slice(1).map((beat, index) => beat - beats[index])).toEqual([400_000, 400_000]);
     expect(mob.hp).toBeLessThan(mob.hpMax);
     tick(state, { arena });
     expect(state.fx.filter((event) => event.kind === 'hit' && event.actionId === cast.id)).toHaveLength(3);

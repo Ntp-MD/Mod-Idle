@@ -2,10 +2,13 @@ import { describe, expect, it } from 'vitest';
 import {
   captureCombatArena, createCombatArena, syncCombatArena,
 } from '@sim/combat/combat-arena';
+import { CombatClock } from '@sim/combat/combat-clock';
+import { createMobShots } from '@sim/core/tick/mob-shots';
 import { mobCastProfile } from '@sim/combat/mobSkills';
 import { arenaActionPose, arenaRangedShots } from '../../src/ui/combat/combat-arena-view';
 import { characterSheet, newGame, setLevel, tick } from '@sim/core/game';
 import { mobFixture, pinFieldPopulation } from '../fixtures/mobFixture';
+import { mulberry32 } from '../../src/engine/client-helpers';
 
 function fight(skillId: string, distance: number, over: Record<string, unknown> = {}) {
   const state = newGame(77);
@@ -120,6 +123,7 @@ describe('typed mob skill delivery', () => {
   it('commits Boulder Toss to the ground point and resolves only bodies still inside at impact', () => {
     const skillId = 'mob.earth.boulder-toss';
     const { state, arena } = fight(skillId, 3.5, { line: 'stand-off' });
+    state.autoAvoidOff = true;
     tick(state, { arena, autoSkills: true });
     const action = casts(arena, skillId)[0];
     expect(action.timing!.delivery).toBe('ground');
@@ -143,5 +147,63 @@ describe('typed mob skill delivery', () => {
     dodge.arena.player.x = 12;
     tick(dodge.state, { arena: dodge.arena, autoSkills: true });
     expect(dodge.state.fx.filter((event) => event.kind === 'taken' && event.skillId === skillId)).toHaveLength(0);
+  });
+});
+
+describe('F20 time-of-impact — the receipt carries the crossing beat', () => {
+  it('stamps a mob projectile at its body crossing, not the noticing sample', () => {
+    const state = newGame(78);
+    setLevel(state, 30);
+    state.hunting = true;
+    const mob = mobFixture({
+      id: 'shooter', hp: 1e9, hpMax: 1e9, ps: 1, evasion: 0, dodgeRate: 0,
+      armour: 0, line: 'stand-off', damage: 'physical', innate: [], hitsPerSec: 1, atkTimer: 0,
+    });
+    state.group = [mob];
+    state.skills.list.fill(null);
+    const arena = createCombatArena();
+    syncCombatArena(arena, state, 0, 1_000_000, characterSheet(state).maxHp);
+    Object.assign(arena.player, { x: 1, y: 6 });
+    Object.assign(arena.mobs[mob.id], { x: 5, y: 6 });
+    captureCombatArena(arena, state, 0);
+    pinFieldPopulation(state);
+    const clock = new CombatClock(0, 2_000_000, () => false);
+    const { launchMobShot, sweepMobShots } = createMobShots({
+      arena, clock, rng: mulberry32(3), s: state,
+      tickStartUs: 0, tickEndUs: 2_000_000, units: 1_000_000, resolveIncomingHit: () => {},
+    });
+    launchMobShot(mob, 0);
+    const shot = arena.mobFlights[0];
+    expect(shot).toBeDefined();
+    // Sweep once with the head already past the player's edge: the old code stamps this
+    // sample, the crossing beat lands strictly inside the segment.
+    const atUs = shot.releaseAtUs + Math.floor((shot.impactAtUs - shot.releaseAtUs) * 0.9);
+    sweepMobShots(atUs);
+    const action = arena.actions.find((entry) => entry.id === shot.actionId)!;
+    expect(action.timing!.impactAtUs).toBeGreaterThan(shot.releaseAtUs);
+    expect(action.timing!.impactAtUs).toBeLessThan(atUs);
+  });
+});
+
+describe('authored projectile barriers', () => {
+  const barrier = {
+    version: 1, bounds: { x: 0, y: 0, width: 50, height: 32 }, cellSize: 1,
+    obstacles: [{ kind: 'box' as const, id: 'barrier', x: 2.5, y: 0, width: 1, height: 20,
+      flags: { movement: false, sight: false, projectiles: true } }],
+  };
+  const skillId = 'mob.fire.ember-lash';
+
+  it('lands on the player when no barrier is authored', () => {
+    const { state, arena } = fight(skillId, 4.5);
+    for (let index = 0; index < 6; index++) tick(state, { arena, autoSkills: false });
+    expect(state.fx.filter((event) => event.kind === 'taken' && event.skillId === skillId)).toHaveLength(1);
+  });
+
+  it('stops a projectile at the barrier instead of reaching the player', () => {
+    const { state, arena } = fight(skillId, 4.5);
+    arena.nav = barrier;
+    for (let index = 0; index < 6; index++) tick(state, { arena, autoSkills: false });
+    expect(state.fx.filter((event) => event.kind === 'taken' && event.skillId === skillId)).toHaveLength(0);
+    expect(arena.mobFlights).toHaveLength(0);
   });
 });

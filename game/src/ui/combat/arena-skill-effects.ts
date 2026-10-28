@@ -218,6 +218,7 @@ export const skillFxDefinitions: Record<string, SkillFxDefinition> = {
   ...assign('cleaveDown', 'mob.physical.crushing-blow'),
   ...assign('tail', 'mob.physical.sweeping-tail'),
   ...assign('groundSlam', 'mob.physical.trample'),
+  ...assign('groundSlam', 'mob.earth.seismic-slam'),
   ...assign('skullCrack', 'mob.physical.skull-crack'),
   ...assign('whip', 'mob.fire.ember-lash'),
   ...assign('fireball', 'mob.fire.cinder-burst', { projectile: true, asset: 'fireball' }),

@@ -1,12 +1,14 @@
 import type { GameState, Mob } from '../types';
 import type { Character } from '../player';
-import type { CombatArena, CombatArenaAction } from '../../combat/combat-arena';
+import type { CombatArena, CombatArenaAction, CombatPlayerShot } from '../../combat/combat-arena';
 import type { CombatClock } from '../../combat/combat-clock';
 import type { SkillCastTiming } from '../../../../../engine/types.ts';
+import { firstProjectileHit } from '../../../../../engine/skill-actions.ts';
+import { sweepDisc } from '../../../../../engine/navigation.ts';
 import { E, eng } from '../../../engine/client';
 import { EVENT_PRIORITY, planAttacks } from '../../combat/combat-clock';
 import {
-  arenaAction, arenaPlayerInReach, arenaTarget, playerAttackProfile, updateArenaAction,
+  arenaAction, arenaDistance, arenaPlayerInReach, arenaTarget, playerAttackProfile, updateArenaAction,
 } from '../../combat/combat-arena';
 import { basicPhaseBudget } from '../../../../../engine/attack-range.ts';
 import {
@@ -100,9 +102,15 @@ export function createPlayerBasicActions(opts: {
         const intervalUs = Math.round(units / Math.max(1e-9, playerRate));
         const phase = basicPhaseBudget(profile, intervalUs);
         const releaseAtUs = clock.nowUs + phase.windupUs;
+        // A projectile basic owns a travel leg: melee resolves at release (a reach-checked
+        // hitscan), ranged and magic fly like an incoming mob shot and can miss or be blocked.
+        const travelUs = profile.delivery === 'projectile'
+          ? Math.ceil(arenaDistance(arena.player, arena.mobs[target.id] ?? arena.player)
+            / Math.max(1e-9, Number(profile.projectile_speed_mps) || 12) * units)
+          : 0;
         const timing: SkillCastTiming = {
           delivery: profile.delivery, startedAtUs: clock.nowUs, releaseAtUs,
-          impactAtUs: releaseAtUs, recoveryUntilUs: releaseAtUs + phase.recoveryUs,
+          impactAtUs: releaseAtUs + travelUs, recoveryUntilUs: releaseAtUs + phase.recoveryUs,
         };
         const action = arenaAction(arena, 'player', 'swing', clock.nowUs, target.id, undefined, undefined, timing);
         if (action) {
@@ -284,16 +292,128 @@ export function createPlayerBasicActions(opts: {
         if (!current || current.cancelledAtUs != null || current.impactCount || current.releasedAtUs != null) return;
         advanceArenaAt(clock.nowUs);
         if (!arena.actions.includes(current) || current.cancelledAtUs != null) return;
+        if (target.hp <= 0 || !s.group.includes(target) || s.player.hp <= 0) return;
+        if (arena.mobs[target.id]?.returning) return;
+        if (!arenaPlayerInReach(arena, c.weaponName, target.id)) return;
+        // A projectile basic leaves the bow/string at release and resolves where it lands.
+        if (current.timing?.delivery === 'projectile') {
+          launchPlayerShot(current, target);
+          return;
+        }
         updateArenaAction(arena, current.id, {
           impactCount: 1, releasedAtUs: clock.nowUs,
           timing: { ...(current.timing as SkillCastTiming), impactAtUs: clock.nowUs },
         });
-        if (target.hp <= 0 || !s.group.includes(target) || s.player.hp <= 0) return;
-        if (arena.mobs[target.id]?.returning) return;
-        if (!arenaPlayerInReach(arena, c.weaponName, target.id)) return;
         resolvePlayerBasic(target, clock.nowUs);
       });
     }
 
-  return { resolvePlayerBasic, schedulePlayerBasic };
+    /** Loose one ordinary player shot at the release beat; the sweep owns contact from here. */
+    function launchPlayerShot(action: CombatArenaAction, target: Mob): void {
+      if (!arena || !action.timing) return;
+      const profile = playerAttackProfile(c.weaponName);
+      const speed = Number(profile.projectile_speed_mps) || 12;
+      const pose = arena.mobs[target.id];
+      if (!pose) return;
+      const source = { x: arena.player.x, y: arena.player.y };
+      const destination = { x: pose.x, y: pose.y };
+      const impactAtUs = clock.nowUs + Math.ceil(Math.hypot(destination.x - source.x,
+        destination.y - source.y) / Math.max(1e-9, speed) * units);
+      updateArenaAction(arena, action.id, {
+        releasedAtUs: clock.nowUs, ranged: true,
+        timing: { ...action.timing, impactAtUs },
+        targetX: destination.x, targetY: destination.y,
+      });
+      arena.playerShots.push({
+        actionId: action.id, targetId: target.id, source, destination,
+        position: { ...source }, releaseAtUs: clock.nowUs, impactAtUs,
+        speedMps: speed, radiusM: Number(profile.hit_radius_m) || 0,
+        areaKey: encounterKeyOf(s), lastCheckedAtUs: clock.nowUs,
+      });
+      schedulePlayerShot(arena.playerShots[arena.playerShots.length - 1]);
+    }
+
+    function cancelPlayerShot(shot: CombatPlayerShot, atUs: number, reason: string): void {
+      if (!arena) return;
+      const at = arena.playerShots.indexOf(shot);
+      if (at >= 0) arena.playerShots.splice(at, 1);
+      const action = arena.actions.find((entry) => entry.id === shot.actionId);
+      if (action && action.cancelledAtUs == null)
+        updateArenaAction(arena, action.id, { cancelledAtUs: atUs, cancelReason: reason, endsAtUs: atUs });
+    }
+
+    /** A spent arrival without contact is a miss, never a ghost hit. */
+    function resolvePlayerShot(shot: CombatPlayerShot, atUs: number, contact: boolean): void {
+      if (!arena) return;
+      shot.queued = false;
+      const at = arena.playerShots.indexOf(shot);
+      if (at >= 0) arena.playerShots.splice(at, 1);
+      const action = arena.actions.find((entry) => entry.id === shot.actionId);
+      if (action && action.cancelledAtUs == null) {
+        const timing = action.timing ? { ...action.timing, impactAtUs: atUs } : action.timing;
+        updateArenaAction(arena, action.id, {
+          ...(timing ? { timing } : {}),
+          impactCount: 1,
+          targetX: shot.destination.x, targetY: shot.destination.y,
+          endsAtUs: Math.max(action.endsAtUs, atUs + E.combat_arena.action_sec * units),
+        });
+      }
+      if (s.player.hp <= 0) return;
+      const target = s.group.find((mob) => mob.id === shot.targetId && mob.hp > 0);
+      if (!target || arena.mobs[target.id]?.returning) return;
+      if (!contact) return;
+      resolvePlayerBasic(target, atUs);
+    }
+
+    function schedulePlayerShot(shot: CombatPlayerShot): void {
+      if (!arena || shot.queued) return;
+      const atUs = Math.max(tickStartUs, shot.impactAtUs);
+      if (atUs > tickEndUs) return;
+      shot.queued = true;
+      clock.schedule(atUs, EVENT_PRIORITY.secondary, 'player', shot.targetId, () => {
+        shot.queued = false;
+        if (!arena?.playerShots.includes(shot)) return;
+        // One last sweep covers contact exactly at the committed endpoint; otherwise the shot is spent.
+        sweepPlayerShots(atUs);
+        if (arena?.playerShots.includes(shot)) resolvePlayerShot(shot, clock.nowUs, false);
+      });
+    }
+
+    function sweepPlayerShots(atUs: number): void {
+      if (!arena || s.player.hp <= 0) return;
+      for (const shot of [...arena.playerShots]) {
+        if (shot.areaKey && shot.areaKey !== encounterKeyOf(s)) { cancelPlayerShot(shot, atUs, 'area-exit'); continue; }
+        const span = shot.impactAtUs - shot.releaseAtUs;
+        const progress = span > 0 ? Math.max(0, Math.min(1, (atUs - shot.releaseAtUs) / span)) : 1;
+        const from = { ...shot.position };
+        const fromAtUs = shot.lastCheckedAtUs ?? shot.releaseAtUs;
+        const to = { x: shot.source.x + (shot.destination.x - shot.source.x) * progress,
+          y: shot.source.y + (shot.destination.y - shot.source.y) * progress };
+        // Authored projectile barriers stop a shot that reaches them first; contact backdates to
+        // the exact crossing instead of the sample that noticed it (F20: time-of-impact).
+        const barrier = arena.nav ? sweepDisc(arena.nav, from, to, 0, 'projectiles') : null;
+        if (barrier) {
+          shot.position = { x: barrier.x, y: barrier.y };
+          shot.lastCheckedAtUs = atUs;
+          resolvePlayerShot(shot,
+            Math.round(fromAtUs + barrier.fraction * Math.max(0, atUs - fromAtUs)), false);
+          continue;
+        }
+        shot.position = to;
+        shot.lastCheckedAtUs = atUs;
+        const target = s.group.find((mob) => mob.id === shot.targetId && mob.hp > 0);
+        const pose = target ? arena.mobs[target.id] : undefined;
+        if (!target || !pose || pose.returning) { resolvePlayerShot(shot, atUs, false); continue; }
+        const previous = arena.frames.at(-2) ?? arena.frames.at(-1);
+        const before = previous?.mobs[target.id];
+        const hit = firstProjectileHit(from, to,
+          [{ ...pose, ...(before ? { previous: { x: before.x, y: before.y } } : {}) }], shot.radiusM);
+        // Edge contact ends the flight early: the receipt carries the crossing beat, and the
+        // planned center arrival never happens.
+        if (hit) resolvePlayerShot(shot,
+          Math.round(fromAtUs + hit.fraction * Math.max(0, atUs - fromAtUs)), true);
+      }
+    }
+
+  return { resolvePlayerBasic, schedulePlayerBasic, schedulePlayerShot, sweepPlayerShots, resolvePlayerShot, cancelPlayerShot };
 }

@@ -7,7 +7,7 @@ import { directFlags, emptyParts, validateDamagePacket } from '../../../../engin
 import type { DamagePacket } from '../../../../engine/damage-provenance.ts';
 import type { SkillAreaSnapshot } from '../../../../engine/types.ts';
 import { mastery } from '../core/mastery';
-import { setStacks, setErosion, stopMob, placeStatus, holdStatus, modsOn as mobModsOn, targetMods, applyWeaponRiders, holdsCondition, CONDITION_OF, consumeStatus, copyStatus, keystoneBlocksStatus, keystoneTargetMods, type MobStatusName } from './mobStatus';
+import { setStacks, setErosion, stopMob, stopMobDeliberate, placeStatus, holdStatus, modsOn as mobModsOn, targetMods, applyWeaponRiders, holdsCondition, CONDITION_OF, consumeStatus, copyStatus, keystoneBlocksStatus, keystoneTargetMods, type MobStatusName } from './mobStatus';
 import { lineValue, applyCurse } from './curse';
 import type { Character } from '../core/player';
 import type { GameState, Mob } from '../core/types';
@@ -590,6 +590,8 @@ export interface CastReport {
   byMob: { id: string; amount: number; packet?: DamagePacket }[];
   /** Setup → payoff: the stacks this press spent, per status, for the log and the plates. */
   consumed?: { status: string; stacks: number }[];
+  /** Bodies whose deliberate stop the control lane refused — the receipt names them (F24). */
+  resisted?: { id: string; species: string }[];
   /** The bodies a payoff row copied its status onto after the hit. */
   spread?: { status: string; to: string[] }[];
   /** Ghost Dance: perfect-dodge charges this press grants, from its own level ramp. */
@@ -769,6 +771,19 @@ export function rotationOrder(s: SkillState): string[] {
   return ids.filter((id) => sm.byId[id].cd !== 0).concat(ids.filter((id) => sm.byId[id].cd === 0));
 }
 
+/**
+ * The one manual cast contract (F34): the action bar, the shortcut, the aim preview and the
+ * command read the same skill. An explicit UI pick wins; otherwise the first slotted
+ * attack/curse in rotation order; a missing Fireball is no longer invented — no skill, no button.
+ */
+export function defaultManualSkill(s: SkillState): string | undefined {
+  for (const id of rotationOrder(s)) {
+    const type = sm.byId[id]?.type;
+    if (type === 'attack' || type === 'curse') return id;
+  }
+  return undefined;
+}
+
 /** Snapshot facts used by both the loadout inspector and field skill bar. */
 export function skillEligibilityInState(state: GameState, c: Character, id: string, autoSkills = true, targets: Mob[] = state.group, spatialTargets = false): SkillEligibility {
   const trance = bundleOf(c.keystones, 'trance');
@@ -945,7 +960,13 @@ export function resolvePreparedCast(
       // Sand Storm's own lingering line: the row types the damage a second and the seconds, and the
       // tick counts inside the shared DoT budget the cap already runs on
       if (e.stat === 'dot_dps' && !env.suppressErosion) setErosion(env.mobStatus, t.id, e.value, dotSec, alignedPerSec);
-      if (e.stat === 'stop_sec') stopMob(env.mobStatus, t.id, e.value, hasRule(skill, 'bypasses_control_cap'));
+      // A deliberate stop spends the deliberate lane, never the proc budget — per-hit procs
+      // cannot eat a cooldown-gated interrupt before it fires. A refusal names the body (F24).
+      if (e.stat === 'stop_sec') {
+        if (stopMobDeliberate(env.mobStatus, t.id, e.value, hasRule(skill, 'bypasses_control_cap'))) continue;
+        if (!resisted.some((entry) => entry.id === t.id))
+          resisted.push({ id: t.id, species: t.species });
+      }
     }
     if (statusName) {
       const placed = placeStatus(env.mobStatus, t.id, statusName, c, alignedPerSec, t.immune || []);
@@ -971,7 +992,7 @@ export function resolvePreparedCast(
   const struck: { id: string; amount: number; packet?: DamagePacket }[] = [];
   // §7.2: a press's nominal rate is one over its effective cooldown in world seconds — the DoT
   // budget basis, never the number of targets the press split across
-  const nominalRate = 1 / Math.max(1, Math.ceil(prepared.cooldownSec / Math.max(1e-9, c.globalSpeed || 1)));
+  const nominalRate = 1 / Math.max(1, Math.ceil(prepared.cooldownSec / Math.max(1e-9, c.cooldownRate || 1)));
   // the Element share of a magic-basis press is the part the mob's resistance answers, and a
   // row that names a pierce removes that share of the mob's own line for this press only
   const magicBasis = skill.basis === 'magic' ? c.magic + c.elem * (c.alignment / 100) : 0;
@@ -1001,6 +1022,7 @@ export function resolvePreparedCast(
   const statusSpread = effects.find((e) => e.stat === 'spread_status');
   const consumed: { status: string; stacks: number }[] = [];
   const spread: { status: string; to: string[] }[] = [];
+  const resisted: { id: string; species: string }[] = [];
   for (let i = 0; i < n; i++) {
     const t = group[i];
     const targetRoll = rollCache && !fieldPulse ? (rollCache.targets[t.id] ??= {}) : undefined;
@@ -1129,12 +1151,21 @@ export function resolvePreparedCast(
     // status the moment the bar fills
     if (env.mobStatus) {
       applyWeaponRiders(rng, c, env.mobStatus, t.id, env.curses ? lineValue(env.curses, t.id, 'bleed_chance') > 0 : false, rowBleedPct, rowStunPct, t.immune || []);
-      // Conductive: the shock the press just wrote jumps to one more body, without its stop.
+      // Conductive: the shock the press just wrote jumps to the nearest living bodies first —
+      // "nearby" is ground distance from the struck body, the same spatial owner targeting uses
+      // (F39). Without positions (offline) the group order stands in, documented, not silent.
       const cond = bundleOf(c.keystones, 'conductive');
       if (cond) {
         const shock = env.mobStatus[t.id]?.statuses.shock;
         let left = shock && shock.secLeft > 0 ? Number(cond.params.spreadTargets) : 0;
-        for (const other of group) {
+        const origin = env.positionOf?.(t.id);
+        const ordered = origin
+          ? [...group].map((other, index) => {
+            const pose = other.id === t.id ? undefined : env.positionOf!(other.id);
+            return { other, index, dist: !pose ? Infinity : Math.hypot(pose.x - origin.x, pose.y - origin.y) };
+          }).sort((a, b) => a.dist - b.dist || a.index - b.index).map((entry) => entry.other)
+          : group;
+        for (const other of ordered) {
           if (left <= 0) break;
           if (other.id === t.id) continue;
           if (copyStatus(env.mobStatus, t.id, other.id, 'shock', other.immune || [])) left--;
@@ -1190,6 +1221,7 @@ export function resolvePreparedCast(
     ...(resolved?.area ? { area: resolved.area } : {}),
     ...(consumed.length ? { consumed } : {}),
     ...(spread.length ? { spread } : {}),
+    ...(resisted.length ? { resisted } : {}),
   };
 }
 
@@ -1227,9 +1259,10 @@ export function tickSkillBuffs(s: SkillState, elapsed = 1) {
   for (const id of Object.keys(s.buffUp)) if (s.buffUp[id] > 0) s.buffUp[id] = Math.max(0, s.buffUp[id] - elapsed);
 }
 
-export function tickSkills(s: SkillState, globalSpeed = 1) {
-  tickSkillCooldowns(s, globalSpeed);
-  tickSkillBuffs(s, globalSpeed);
+/** Cooldowns and buff clocks tick down with the cooldown lever (F44); callers pass the rate. */
+export function tickSkills(s: SkillState, cooldownRate = 1) {
+  tickSkillCooldowns(s, cooldownRate);
+  tickSkillBuffs(s, cooldownRate);
 }
 
 /** A toggled buff re-presses itself the moment it lapses (`skill-pool.md` "Buff — toggle track"). */

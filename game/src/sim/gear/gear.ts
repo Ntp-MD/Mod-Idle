@@ -1,4 +1,4 @@
-import { BASES, loot } from '../../engine/client';
+import { BASES, loot, sm } from '../../engine/client';
 import { itemName } from './item-name';
 import { push } from '../core/game';
 import { refresh as refreshFilter } from './filter';
@@ -118,6 +118,8 @@ export interface EquipResult {
   spared: { locked: number; set: number; broken: number };
   /** stored pieces that would beat something worn — the warehouse is reported, never raided */
   inStash: number;
+  /** the strongest carried piece the press held back because it would silence the rotation */
+  rotationHeld: { base: string; skills: string[]; gains: number } | null;
 }
 
 /**
@@ -138,14 +140,46 @@ export interface EquipResult {
  *
  * Each pass re-reads the carried pieces, because wearing one piece shifts every index after it.
  */
+/**
+ * A main-hand swap that leaves no slotted attack or curse skill usable would silently disarm the
+ * rotation, so Auto Equip refuses it even when the piece scores higher.
+ */
+const slottedRotation = (s: GameState): string[] =>
+  s.skills.list.filter((id): id is string => {
+    if (!id) return false;
+    const skill = sm.byId[id];
+    return !!skill && (skill.type === 'attack' || skill.type === 'curse');
+  });
+
+/**
+ * Which slotted rotation rows a candidate main hand keeps casting, and which go dark.
+ * The Equip button and Auto Equip read the same answer, so the card warns exactly what
+ * the press would refuse.
+ */
+export function rotationFit(s: GameState, item: Item): { kept: string[]; dropped: string[] } {
+  const kept: string[] = [], dropped: string[] = [];
+  for (const id of slottedRotation(s)) (sm.weaponFits(sm.byId[id], item.base) ? kept : dropped).push(id);
+  return { kept, dropped };
+}
+
+export function wouldBreakRotation(s: GameState, item: Item): boolean {
+  if (item.slot !== 'main hand') return false;
+  const slotted = slottedRotation(s);
+  if (!slotted.length) return false;
+  if (slotted.some((id) => sm.weaponFits(sm.byId[id], item.base))) return false;
+  const current = s.gear.find((piece) => piece?.slot === 'main hand')?.base || 'bare hand';
+  return slotted.some((id) => sm.weaponFits(sm.byId[id], current));
+}
+
 export function autoEquip(s: GameState, marginPct = 0): EquipResult {
   const swaps: EquipSwap[] = [];
   let refused: string | null = null;
+  let rotationHeld: EquipResult['rotationHeld'] = null;
   // one swap per cell the body owns is the most any press can do, so the pass count is bounded by the body
   for (let pass = 0; pass < s.gear.length; pass++) {
     // the whole carried list read against the body it has now, then the single best swap taken. It is
     // re-read every pass because wearing a piece shifts every index after it.
-    const best = s.bag
+    const cands = s.bag
       .map((item, bagIndex) => ({ item, bagIndex }))
       .filter((p): p is { item: Item; bagIndex: number } => Boolean(p.item) && !untouchable(p.item!))
       .map((p) => {
@@ -153,7 +187,16 @@ export function autoEquip(s: GameState, marginPct = 0): EquipResult {
         const worn = cell >= 0 ? s.gear[cell] : null;
         return { ...p, cell, worn, gains: cell >= 0 ? gainPct(p.item, worn) : 0 };
       })
-      .filter((p) => p.cell >= 0 && p.gains > marginPct)
+      .filter((p) => p.cell >= 0 && p.gains > marginPct);
+    // a refused upgrade is still an answer: the press names the strongest piece it held back
+    // and the rotation rows it would have silenced, so "nothing better" is never a lie.
+    for (const p of cands) {
+      if (!wouldBreakRotation(s, p.item)) continue;
+      if (!rotationHeld || p.gains > rotationHeld.gains)
+        rotationHeld = { base: itemName(p.item), skills: rotationFit(s, p.item).dropped, gains: p.gains };
+    }
+    const best = cands
+      .filter((p) => !wouldBreakRotation(s, p.item))
       .sort((a, b) => b.gains - a.gains)[0];
     if (!best) break;
     const reservation = best.item.heldFor || null;
@@ -191,5 +234,5 @@ export function autoEquip(s: GameState, marginPct = 0): EquipResult {
     push(s, `Nothing to change — what you wear is already the best you carry`
       + (held ? `, and ${held} piece${held === 1 ? '' : 's'} in the bag are left alone (locked, promised to a set, or Broken)` : ''));
   }
-  return { swaps, spared, inStash };
+  return { swaps, spared, inStash, rotationHeld };
 }

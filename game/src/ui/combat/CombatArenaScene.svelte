@@ -20,7 +20,7 @@
   import { actorArt, actorProfile } from './combat-actor';
   import { arenaMobShape, arenaSkillShape } from '../fx';
   import { aoePulseMs, groundCirclePath, groundDistance } from './arena-space';
-  import { ARENA_VIEW, arenaActionPose, arenaActorAction, arenaActorPixelScale, arenaCameraOffset, arenaCastCharge, arenaEventTiming, arenaFlightProgress, arenaFlightWindow, arenaNearestTarget, arenaPersistentFieldVisual, arenaFacingSector, arenaFieldNote, arenaPhaseOffset, arenaPlaybackTime, arenaRangedShots, arenaScreenAngleFor, arenaSheetDirection, arenaSpriteFrame, arenaSpriteIndex, createArenaGait, projectArenaPoint, unprojectArenaPoint } from './combat-arena-view';
+  import { ARENA_VIEW, arenaActionPose, arenaActorAction, arenaActorPixelScale, arenaCameraOffset, arenaCastCharge, arenaEventTiming, arenaFlightProgress, arenaFlightWindow, arenaIncomingHazards, arenaNearestTarget, arenaPersistentFieldVisual, arenaFacingSector, arenaFieldNote, arenaPhaseOffset, arenaPlaybackTime, arenaRangedShots, arenaScreenAngleFor, arenaSheetDirection, arenaSpriteFrame, arenaSpriteIndex, createArenaGait, describeArenaTarget, projectArenaPoint, unprojectArenaPoint, type ArenaTargetRead } from './combat-arena-view';
   import ArenaFxSprite from './ArenaFxSprite.svelte';
   import { arenaPayloadSample, arenaPresentationArea, arenaReleaseSocket, arenaDirection as arenaDirectionForSocket } from './combat-arena-view';
   import type { CombatArenaPayload } from '@sim/combat/combat-arena';
@@ -28,7 +28,7 @@
   import { ARENA_DIRECTIONS, arenaGroundBounds } from '../../presentation/arena-camera';
 
   let { arena, s, c, ring, speed = 1, paused = false, spritePreviewSpecies = null, spritePreviewVariant = null, aoePreview = false,
-    focusId = null, aimSkill = null, inspect = false, onReviewPause, onReviewStep, onInspectEnemy, onFocusEnemy, onGroundCommand, onVitals }: {
+    focusId = null, aimSkill = null, inspect = false, onReviewPause, onReviewStep, onInspectEnemy, onFocusEnemy, onGroundCommand, onVitals, onTargetRead }: {
     arena: CombatArena; s: GameState; c: Character; ring: FxEvent[]; speed?: number; paused?: boolean;
     spritePreviewSpecies?: string | null;
     spritePreviewVariant?: { speciesId: string; variantId: string } | null;
@@ -44,6 +44,8 @@
     /** A deliberate local move order in arena meters, clamped to the field bounds. */
     onGroundCommand?: (point: { x: number; y: number }) => void;
     onVitals?: (vitals: { hp: number; es: number; mana: number }) => void;
+    /** The persistent target read for the HUD bar — identity, kind, offscreen bearing and range. */
+    onTargetRead?: (read: ArenaTargetRead | null) => void;
   } = $props();
 
   let host = $state<HTMLDivElement | null>(null);
@@ -124,6 +126,21 @@
   const focusTargetId = $derived(focusId && focusId !== targetId && sampled.mobs[focusId]?.hp > 0
     && !sampled.mobs[focusId]?.returning ? focusId : null);
   const camera = $derived(arenaCameraOffset(player));
+  /** F37 — one named read for the bar: committed strike, requested focus, or the next body,
+   *  with an offscreen bearing so a focus that leaves the view stays readable. */
+  const targetRead = $derived(describeArenaTarget({
+    mobs: sampled.mobs, player, committedId: committedTargetId, focusId, camera, view: ARENA_VIEW,
+  }));
+  let lastTargetKey = '';
+  $effect(() => {
+    const read = targetRead;
+    const key = read
+      ? `${read.id}|${read.kind}|${read.offscreen}|${Math.round(read.bearingDeg / 10)}|${Math.round(read.rangeM * 2)}`
+      : 'none';
+    if (key === lastTargetKey) return;
+    lastTargetKey = key;
+    onTargetRead?.(read);
+  });
   const cameraTransform = $derived(`translate(${-camera.x * stage.width / ARENA_VIEW.width}px,${-camera.y * scale}px)`);
   const groundBounds = $derived(arenaGroundBounds(arena.bounds));
   // Dev-only calibration rings: one arena unit is one meter, drawn through the ground projection.
@@ -157,6 +174,9 @@
     return groundDistance(player, aimArea.center) <= aimRange + 1e-7;
   });
   const aoePreviewCenter = $derived(projectArenaPoint({ x: player.x, y: player.y }));
+  // In-flight incoming shots own their telegraph: the committed span at the playhead, never the
+  // caster's pose (F38). Ground shots draw their landing circle; projectiles draw their head.
+  const hazardMarks = $derived(arenaIncomingHazards(arena, playhead));
   const fieldNote = $derived(arenaFieldNote(s));
   $effect(() => {
     const ids = new Set(['player', ...Object.keys(sampled.mobs)]);
@@ -981,6 +1001,16 @@
         </g>
       {/if}
     {/each}
+    {#each hazardMarks as hazard (hazard.actionId)}
+      {#if hazard.kind === 'ground' && hazard.radiusM > 0}
+        <path class="aoe-ring hazard-ring" data-hazard-action={hazard.actionId}
+          data-hazard-heavy={mobSkillById(hazard.skillId ?? '')?.heavy ? 'true' : 'false'}
+          d={groundCirclePath({ x: hazard.destX, y: hazard.destY }, hazard.radiusM, 40)} />
+      {:else}
+        {@const head = projectArenaPoint({ x: hazard.x, y: hazard.y })}
+        <circle class="projectile-core" data-hazard-action={hazard.actionId} cx={head.x} cy={head.y} r="4" />
+      {/if}
+    {/each}
   </svg>
   </div>
   {#if fieldNote}
@@ -1009,6 +1039,8 @@
   .aoe-ring[data-aoe-radius="1"] { stroke: var(--es-lit); }
   .aoe-ring[data-aoe-radius="2"] { stroke: var(--gold-lit); }
   .aoe-ring[data-aoe-radius="3"] { stroke: var(--hp-lit); }
+  .aoe-ring.hazard-ring { stroke: var(--hp-lit); opacity: .5; }
+  .aoe-ring.hazard-ring[data-hazard-heavy="false"] { stroke-dasharray: 5 4; opacity: .3; }
   .aoe-center { fill: var(--gold-lit); opacity: .75; }
   .body-ring { fill: none; stroke: currentColor; stroke-width: 1; opacity: .16; vector-effect: non-scaling-stroke; }
   .aim-range { fill: none; stroke: var(--es); stroke-width: 1.2; stroke-dasharray: 7 6; opacity: .5; vector-effect: non-scaling-stroke; }

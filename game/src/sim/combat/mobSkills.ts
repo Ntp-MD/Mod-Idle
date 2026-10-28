@@ -80,11 +80,33 @@ export function resolveMobKit(
   }).slice(0, MAX_KIT);
 }
 
+/** A strike row only answers inside its authored HP window; ungated rows answer always. */
+export function rowPhaseAllows(row: MobSkillRow, mob: Mob): boolean {
+  const gate = row.phase;
+  if (!gate) return true;
+  const frac = mob.hpMax > 0 ? mob.hp / mob.hpMax * 100 : 100;
+  if (gate.hpBelowPct != null && !(frac <= gate.hpBelowPct + 1e-9)) return false;
+  if (gate.hpAbovePct != null && !(frac >= gate.hpAbovePct - 1e-9)) return false;
+  return true;
+}
+
+/** Encounter phase of one body: how many of its kit's HP gates it has crossed (0 is the opening). */
+export function mobPhase(mob: Mob, rows: readonly MobSkillRow[]): number {
+  const frac = mob.hpMax > 0 ? mob.hp / mob.hpMax * 100 : 100;
+  const thresholds = new Set<number>();
+  for (const row of rows) if (row.phase?.hpBelowPct != null) thresholds.add(row.phase.hpBelowPct);
+  let phase = 0;
+  for (const threshold of [...thresholds].sort((a, b) => b - a))
+    if (frac <= threshold + 1e-9) phase++;
+  return phase;
+}
+
 /** The first strike in kit order whose cooldown has elapsed; auras are passive and never picked. */
 export function readyMobSkill(mob: Mob, atUs: number, usable: (row: MobSkillRow) => boolean = () => true): MobSkillRow | undefined {
   for (const id of mob.skillIds || []) {
     const row = BY_ID.get(id);
     if (!row || row.mode !== 'strike') continue;
+    if (!rowPhaseAllows(row, mob)) continue;
     if ((mob.skillReadyAtUs?.[id] ?? 0) <= atUs && usable(row)) return row;
   }
   return undefined;
@@ -107,6 +129,7 @@ export function planMobSkills(mob: Mob, timesUs: number[], unitsPerSec: number):
     for (const id of mob.skillIds || []) {
       const row = BY_ID.get(id);
       if (!row || row.mode !== 'strike') continue;
+      if (!rowPhaseAllows(row, mob)) continue;
       if ((ready[id] ?? 0) <= atUs) {
         plan.set(atUs, row);
         ready[id] = atUs + Math.max(0, row.cd || 0) * unitsPerSec;

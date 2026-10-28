@@ -330,7 +330,7 @@ export function registerStaticKeystoneHandlers(table: KeystoneHandlerTable, elem
   registerKeystoneHandler(table, 'profane-bloom', {
     kill: (victim: { maxHp: number; cursed: boolean }) =>
       victim.cursed ? victim.maxHp * 0.15 : 0,
-  }, { victimMaxHpPct: 15, element: 'chaos' }, elements);
+  }, { victimMaxHpPct: 15, element: 'chaos', radiusM: 4 }, elements);
   registerKeystoneHandler(table, 'inevitable-judgement', {
     outgoing: (crit: boolean) => inevitableElementMult(crit, { nonCritElemMult: 0.8 }),
   }, { nonCritElemMult: 0.8 }, elements);

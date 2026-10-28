@@ -47,6 +47,15 @@ function defectAt(obstacle: NavObstacle, point: NavPoint, radius: number): numbe
   }
   const dx = Math.max(obstacle.x - point.x, 0, point.x - (obstacle.x + obstacle.width));
   const dy = Math.max(obstacle.y - point.y, 0, point.y - (obstacle.y + obstacle.height));
+  if (dx === 0 && dy === 0) {
+    // A point inside the box is a penetration, not a tangent: a zero-radius ray must still stop,
+    // so the depth is the nearest edge (positive inside, zero on the face).
+    const depth = Math.min(
+      point.x - obstacle.x, obstacle.x + obstacle.width - point.x,
+      point.y - obstacle.y, obstacle.y + obstacle.height - point.y,
+    );
+    return -Math.max(depth, 0) - radius;
+  }
   return Math.hypot(dx, dy) - radius;
 }
 

@@ -8,6 +8,7 @@ import {
   arenaAction, arenaDistance, mobAttackProfile, updateArenaAction,
 } from '../../combat/combat-arena';
 import { firstProjectileHit } from '../../../../../engine/skill-actions.ts';
+import { sweepDisc } from '../../../../../engine/navigation.ts';
 import { mobSkillById } from '../../combat/mobSkills';
 import { fieldAreaKey } from '../../world/field-area';
 
@@ -25,7 +26,7 @@ export function createMobShots(opts: {
   tickStartUs: number;
   tickEndUs: number;
   units: number;
-  resolveIncomingHit: (mob: Mob, plannedSkill: any, rng: () => number, live: Mob) => void;
+  resolveIncomingHit: (mob: Mob, plannedSkill: any, rng: () => number, live: Mob, atUs?: number) => void;
 }) {
   const { arena, clock, rng, s, tickStartUs, tickEndUs, units, resolveIncomingHit } = opts;
   const encounterKeyOf = (state: GameState) => fieldAreaKey(state);
@@ -102,7 +103,7 @@ export function createMobShots(opts: {
       if (arenaDistance(shot.destination, arena.player) > (shot.impactRadiusM ?? 0) + 1e-7) return;
     } else if (!contact) return;
     const live = s.group.find((entry) => entry.id === shot.mobId && entry.hp > 0);
-    resolveIncomingHit(shot.mob, row, rng, live ?? shot.mob);
+    resolveIncomingHit(shot.mob, row, rng, live ?? shot.mob, atUs);
   }
 
   function scheduleMobShot(shot: CombatMobFlight) {
@@ -124,14 +125,28 @@ export function createMobShots(opts: {
     for (const shot of [...arena.mobFlights]) {
       if (shot.areaKey && shot.areaKey !== encounterKeyOf(s)) { cancelMobShot(shot, atUs, 'area-exit'); continue; }
       const from = shot.position;
+      // The segment starts where the last sweep left off — never before this shot's own
+      // release. Contact backdates to the exact crossing instead of the sample that
+      // noticed it (F20: time-of-impact).
+      const fromAtUs = Math.max(shot.lastCheckedAtUs ?? shot.releaseAtUs, shot.releaseAtUs);
+      const contactAtUs = (fraction: number) =>
+        Math.round(fromAtUs + fraction * Math.max(0, atUs - fromAtUs));
       const to = mobShotPosition(shot, atUs);
-      shot.position = to;
       // A ground cast owns its committed impact; only a projectile tests swept contact on the way.
-      if (shot.kind === 'ground') continue;
+      if (shot.kind === 'ground') { shot.position = to; shot.lastCheckedAtUs = atUs; continue; }
+      const barrier = arena.nav ? sweepDisc(arena.nav, from, to, 0, 'projectiles') : null;
+      if (barrier) {
+        shot.position = { x: barrier.x, y: barrier.y };
+        shot.lastCheckedAtUs = atUs;
+        resolveMobShot(shot, contactAtUs(barrier.fraction), false);
+        continue;
+      }
+      shot.position = to;
+      shot.lastCheckedAtUs = atUs;
       const previous = arena.frames.at(-2)?.player ?? arena.frames.at(-1)?.player;
       const target = { ...arena.player, ...(previous ? { previous: { x: previous.x, y: previous.y } } : {}) };
       const hit = firstProjectileHit(from, to, [target], shot.radiusM);
-      if (hit) resolveMobShot(shot, atUs, true);
+      if (hit) resolveMobShot(shot, contactAtUs(hit.fraction), true);
     }
   }
 

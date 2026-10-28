@@ -57,7 +57,7 @@ const TABLE: [string, Record<string, unknown>, readonly string[]][] = [
   ['demolition-sequence', { hits: 5, damagePct: 20, extraTargets: 1, element: 'fire' }, ['outgoing']],
   ['ghost-dance', { recoveryEvasionPct: 3, maxEsPerProcPct: 10, icdSec: 1 }, ['incoming', 'recovery', 'timing']],
   ['escape-artist', { idleSec: 3, burstEverySec: 3, esBurstPct: 50 }, ['recovery', 'timing']],
-  ['profane-bloom', { victimMaxHpPct: 15, element: 'chaos' }, ['kill']],
+  ['profane-bloom', { victimMaxHpPct: 15, element: 'chaos', radiusM: 4 }, ['kill']],
   ['malediction', { curseLimit: 1, effectMult: 1.75 }, ['status']],
   ['elemental-equilibrium', { durationSec: 4, ownResPlus: 10, otherResMinus: 20 }, ['outgoing', 'status']],
   ['inevitable-judgement', { nonCritElemMult: 0.8 }, ['outgoing']],

@@ -93,11 +93,12 @@ describe('ordinary ranged mob defaults', () => {
     });
     tick(state, { arena, autoSkills: false });
     const action = arena.actions.find(entry => entry.actorId === mob.id && entry.skillId === 'mob.physical.crushing-blow')!;
-    expect(action?.timing?.startedAtUs).toBe(500_000);
-    expect(action?.timing?.releaseAtUs).toBe(1_300_000);
+    // The preparation spans ticks on its own beat: duration preserved, anchors free.
+    expect(action?.timing?.releaseAtUs! - action?.timing?.startedAtUs!).toBe(800_000);
     expect(state.fx.filter(event => event.kind === 'taken' && event.byId === mob.id)).toHaveLength(0);
     tick(state, { arena, autoSkills: false });
-    expect(state.fx.filter(event => event.kind === 'taken' && event.skillId === 'mob.physical.crushing-blow').map(event => event.atUs)).toEqual([1_300_000]);
+    const taken = state.fx.filter(event => event.kind === 'taken' && event.skillId === 'mob.physical.crushing-blow');
+    expect(taken.map(event => event.atUs)).toEqual([action?.timing?.releaseAtUs]);
     expect(arena.actions.filter(entry => entry.actorId === mob.id && entry.skillId === 'mob.physical.crushing-blow')).toHaveLength(1);
   });
 
@@ -118,8 +119,8 @@ describe('ordinary ranged mob defaults', () => {
     const { state, arena } = rangedFight(3);
     tick(state, { arena, autoSkills: false });
     const action = arena.actions.find(entry => entry.actorId === 'archer' && entry.timing)!;
-    expect(action.timing!.startedAtUs).toBe(1_000_000);
-    expect(action.timing!.releaseAtUs).toBe(1_350_000);
+    // Release follows the mob's own windup, not the player's tick.
+    expect(action.timing!.releaseAtUs! - action.timing!.startedAtUs!).toBe(350_000);
     expect(action.releasedAtUs).toBeUndefined();
     expect(arena.mobFlights).toHaveLength(0);
     expect(state.fx.some((event) => event.kind === 'taken')).toBe(false);
@@ -142,7 +143,7 @@ describe('ordinary ranged mob defaults', () => {
     const taken = state.fx.filter((event) => event.kind === 'taken' && event.byId === 'archer');
     expect(taken).toHaveLength(3);
     const beats = shots(arena).map((action) => action.timing!.releaseAtUs);
-    expect(beats).toEqual([1_350_000, 2_350_000, 3_350_000]);
+    expect(beats.slice(1).map((beat, index) => beat - beats[index])).toEqual([1_000_000, 1_000_000]);
   });
 
   it('cancels a shot whose release no longer has its target in reach', () => {

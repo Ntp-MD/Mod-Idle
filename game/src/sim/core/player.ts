@@ -151,6 +151,12 @@ export interface Character {
   resByElement: Record<string, number>;
   /** A post-cap multiplier on the character's own clock — Haste, and nothing else. */
   globalSpeed: number;
+  /** Haste's share of the windup: how fast a cast commits (F44). */
+  castSpeed: number;
+  /** Haste's share of the tail: how fast a cast recovers, independent of the commit (F44). */
+  recoverySpeed: number;
+  /** Haste's share of the skill clock: how fast cooldowns tick (F44). */
+  cooldownRate: number;
   /** The multiplier a buff puts on incoming damage (Berserker takes more, Iron Will less). */
   damageTaken: number;
   /** % cut on the status proc AND crowd control (stun/stop) — the Status Alignment resistance Mod. */
@@ -403,6 +409,10 @@ export function buildCharacter(
     + kp(keen, 'critChancePct') - kp(brutal, 'critChancePct')));
   const critDmgValue = Math.max(100, eng.critDmgOf(critPool, lines.critDmgPct)
     + kp(brutal, 'critDamagePct') - kp(keen, 'critDamagePct'));
+  // Haste reads the data's ceiling when one exists; `null` is the data's word for "keeps
+  // climbing", so the cap only binds once a haste stat gives it a reach to sit above (X11).
+  const hasteCap = E.caps.speed_mult ?? Infinity;
+  const cappedHaste = Math.min(m(effects, 'global_speed'), Math.max(1e-7, hasteCap));
 
   return {
     level,
@@ -456,8 +466,13 @@ export function buildCharacter(
     stunRecovery: eng.stunRecoveryOf(core.vit),
     /** Extra resistance against one named Element, from an aura that names it. */
     resByElement,
-    /** Haste's post-cap clock multiplier on cooldowns; attack speed carries its own share. */
-    globalSpeed: m(effects, 'global_speed'),
+    /** Haste's post-cap clock multiplier; attack speed carries its own share. One source feeds
+     *  three levers (F44): the windup commit, the recovery tail and the cooldown clock stay
+     *  separable even while no data differentiates them yet. */
+    globalSpeed: cappedHaste,
+    castSpeed: cappedHaste,
+    recoverySpeed: cappedHaste,
+    cooldownRate: cappedHaste,
     /** Intrinsic Life Leech; a target's Mark adds its own share when damage is paid. */
     leechPct: a(effects, 'leech') + Number(bundleOf(bundles, 'parasitic-affliction')?.params.baseLeechPct ?? 0)
       + kp(bloodthirst, 'leechPct'),

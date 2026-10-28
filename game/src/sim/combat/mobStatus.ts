@@ -34,6 +34,9 @@ export interface MobMark {
   alignedPerSec: number;
   /** Seconds of clock this spawn has already had stopped, against the rolling control budget. */
   stoppedSec: number;
+  /** Same rolling bound, but only deliberate presses spend it — per-hit procs cannot eat a
+   *  cooldown-gated interrupt before it fires (F24). Rate-limited by cooldowns, not by procs. */
+  deliberateSec?: number;
   /** Absolute second this spawn's current stop ends; the shock debuff has its own `secLeft`. */
   stoppedUntil?: number;
   elapsedSec: number;
@@ -187,6 +190,28 @@ export function spendControlBudget(store: MobStatusStore, mobId: string, sec: nu
   const m = mark(store, mobId);
   if (m.stoppedSec + sec > CONTROL_BOUND * m.elapsedSec && m.stoppedSec > 0) return false;
   m.stoppedSec += sec;
+  return true;
+}
+
+/** A deliberate press spends its own rolling allowance; per-hit procs never touch this lane (F24). */
+export function spendDeliberateBudget(store: MobStatusStore, mobId: string, sec: number): boolean {
+  const m = mark(store, mobId);
+  const spent = m.deliberateSec ?? 0;
+  if (spent + sec > CONTROL_BOUND * m.elapsedSec && spent > 0) return false;
+  m.deliberateSec = spent + sec;
+  return true;
+}
+
+/** A deliberate stop: same anti-lock bound as a proc, but on the deliberate lane, with a refusal
+ *  answer instead of silence. Cooldown-gated presses cannot lock a fight through this lane. */
+export function stopMobDeliberate(store: MobStatusStore, mobId: string, sec: number, bypassBudget = false): boolean {
+  if (!bypassBudget && !spendDeliberateBudget(store, mobId, sec)) return false;
+  const m = mark(store, mobId);
+  const l = line(m, 'shock');
+  l.stacks = 1;
+  l.perSec = 0;
+  l.secLeft = Math.max(l.secLeft, sec);
+  m.stoppedUntil = Math.max(m.stoppedUntil ?? 0, m.elapsedSec + sec);
   return true;
 }
 
@@ -467,6 +492,7 @@ export function stepMobParts(store: MobStatusStore, mobId: string): DotTick {
   // the control budget is a rolling share of the fight, so each second alive pays that share back
   // from the stopped-time allowance and a long fight can still be shocked again
   m.stoppedSec = Math.max(0, m.stoppedSec - CONTROL_BOUND);
+  m.deliberateSec = Math.max(0, (m.deliberateSec ?? 0) - CONTROL_BOUND);
   let burnDot = 0;
   let poisonDot = 0;
   let bleedDot = 0;

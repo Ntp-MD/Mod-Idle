@@ -316,7 +316,7 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     // put on the press they fire — the mana the trigger charges and the damage it scales
     'trigger_cd_sec', 'cast_mana_mult', 'cast_damage_mult',
     'missing_hp_pct_for_max', 'damage_at_missing_hp', 'dodge_charges', 'dodge_charges_per_levels',
-    'dodge_charges_cap', 'spread_targets',
+    'dodge_charges_cap',
     // Earth Wall: a charge pool that BLOCKS instead of dodging — same shape as the dodge pair above,
     // one cut per charge rather than one hit deleted
     'block_charges', 'block_charges_per_levels', 'block_charges_cap',

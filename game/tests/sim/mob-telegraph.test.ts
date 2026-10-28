@@ -29,6 +29,7 @@ function boulderFight() {
 describe('mob ground telegraph', () => {
   it('commits the circle at release, shows it through the flight, and lands once', () => {
     const { state, mob, arena } = boulderFight();
+    state.autoAvoidOff = true;
     let telegraph: { area?: { origin?: string; radiusM?: number; center?: { x: number; y: number } }; timing?: { releaseAtUs: number; impactAtUs: number } } | undefined;
     let feet = { x: 0, y: 0 };
     let resolved = false;

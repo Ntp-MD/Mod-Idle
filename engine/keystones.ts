@@ -24,7 +24,7 @@ export type PlayerStatusFamily = (typeof PLAYER_STATUS_FAMILIES)[number];
 /** A param's unit and bounds, from §6: % in 0..100, mult >= 0, duration/interval > 0, count a
  *  positive integer. `pct-positive` and `mult-positive` are the fields whose zero has no meaning
  *  (the conversion rate of 05); `points` is a resistance-point move, `rate` a per-second frequency. */
-export type KeystoneParamKind = 'pct' | 'pct-positive' | 'mult' | 'mult-positive' | 'count' | 'sec' | 'rate' | 'points' | 'element';
+export type KeystoneParamKind = 'pct' | 'pct-positive' | 'mult' | 'mult-positive' | 'count' | 'sec' | 'rate' | 'points' | 'meters' | 'element';
 
 export interface KeystoneBundleDef {
   /** The slug shared with the node id suffix (`keystone.<key>`). */
@@ -58,7 +58,7 @@ const BUNDLES: KeystoneBundleDef[] = [
   { key: 'demolition-sequence', params: { hits: 'count', damagePct: 'pct', extraTargets: 'count', element: 'element' }, requiredHooks: ['outgoing'] },
   { key: 'ghost-dance', params: { recoveryEvasionPct: 'pct', maxEsPerProcPct: 'pct', icdSec: 'sec' }, requiredHooks: ['incoming', 'recovery', 'timing'] },
   { key: 'escape-artist', params: { idleSec: 'sec', burstEverySec: 'sec', esBurstPct: 'pct' }, requiredHooks: ['recovery', 'timing'] },
-  { key: 'profane-bloom', params: { victimMaxHpPct: 'pct', element: 'element' }, requiredHooks: ['kill'] },
+  { key: 'profane-bloom', params: { victimMaxHpPct: 'pct', element: 'element', radiusM: 'meters' }, requiredHooks: ['kill'] },
   { key: 'malediction', params: { curseLimit: 'count', effectMult: 'mult' }, requiredHooks: ['status'] },
   { key: 'elemental-equilibrium', params: { durationSec: 'sec', ownResPlus: 'points', otherResMinus: 'points' }, requiredHooks: ['outgoing', 'status'] },
   { key: 'inevitable-judgement', params: { nonCritElemMult: 'mult' }, requiredHooks: ['outgoing'] },
@@ -169,7 +169,7 @@ const inRange = (kind: KeystoneParamKind, v: number): boolean => {
     case 'mult': return v >= 0;
     case 'mult-positive': return v > 0;
     case 'count': return Number.isSafeInteger(v) && v > 0;
-    case 'sec': case 'rate': case 'points': return v > 0;
+    case 'sec': case 'rate': case 'points': case 'meters': return v > 0;
     case 'element': return true;
   }
 };

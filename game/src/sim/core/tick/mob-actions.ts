@@ -10,7 +10,7 @@ import {
 } from '../../combat/combat-arena';
 import { basicPhaseBudget } from '../../../../../engine/attack-range.ts';
 import {
-  mobCastGeometry, mobCastProfile, mobSkillById, markMobSkillUsed,
+  mobCastGeometry, mobCastProfile, mobSkillById, markMobSkillUsed, mobPhase,
   mobStrikeRange, planMobSkills, readyMobSkill,
 } from '../../combat/mobSkills';
 import { modsOn as statusModsOn } from '../../combat/mobStatus';
@@ -177,6 +177,12 @@ export function createMobActions(opts: {
     if (scheduledMobs.has(mob.id)) return;
     scheduledMobs.add(mob.id);
     if (mob.hp <= 0 || !s.group.includes(mob)) return;
+    // Encounter phase (F25): a body that crosses one of its kit's HP gates fights the next phase
+    // down. The gate, not a timer, owns the transition, and the log names it once.
+    const rows = (mob.skillIds || []).map((id) => mobSkillById(id)).filter((row) => !!row);
+    const phase = mobPhase(mob, rows);
+    if (phase > (mob.phase ?? 0)) push(s, `${mob.species} shifts tactics (phase ${phase})`);
+    mob.phase = phase;
     const tm = mobMods(mob.id);
     const rate = mob.hitsPerSec * (mob.auraSpeedMult ?? 1) * Math.max(0, 1 + tm.attackSpeed / 100);
     const plan = planAttacks(fromUs, mob.atkTimer, rate, units, Math.max(0, tickEndUs - fromUs));

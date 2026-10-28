@@ -177,6 +177,8 @@ export interface ClientSettings {
   autoSkills?: boolean;
   /** whether better gear found in the carried bag is equipped automatically */
   autoEquip?: boolean;
+  /** whether the feet step out of telegraphed ground on their own; off holds position unless ordered */
+  autoAvoid?: boolean;
   /** show an automatic next-goal suggestion when the player has pinned none */
   autoGoal?: boolean;
   /** show the map as coloured hexes with artwork and scenery hidden */
@@ -191,7 +193,7 @@ export interface ClientSettings {
   /** the hub's drag offset from its docked corner, in px — wheel and satellites move as one */
   hub?: { x: number; y: number };
 }
-export const DEFAULT_SETTINGS: ClientSettings = { numberFormat: 'plain', offlineReport: true, keybinds: {}, equipMargin: 0, autoSkills: true, autoEquip: true, autoGoal: true, cleanMap: false, combatEffects: 'auto' };
+export const DEFAULT_SETTINGS: ClientSettings = { numberFormat: 'plain', offlineReport: true, keybinds: {}, equipMargin: 0, autoSkills: true, autoEquip: true, autoAvoid: true, autoGoal: true, cleanMap: false, combatEffects: 'auto' };
 export async function readSettings(): Promise<ClientSettings> {
   const raw = await get('settings');
   if (!raw) return { ...DEFAULT_SETTINGS };

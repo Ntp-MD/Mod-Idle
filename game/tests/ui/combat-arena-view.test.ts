@@ -10,7 +10,7 @@ import { arenaAction, createCombatArena, captureCombatArena, recordCombatArenaFx
 import { characterSheet, newGame } from '@sim/core/game';
 import { mobFixture } from '../fixtures/mobFixture';
 import { ARENA_DIRECTIONS, ARENA_VIEW, arenaGroundBounds } from '../../src/presentation/arena-camera';
-import { arenaPayloadSample, arenaPresentationArea, arenaReleaseSocket } from '../../src/ui/combat/combat-arena-view';
+import { arenaPayloadSample, arenaPresentationArea, arenaReleaseSocket, arenaIncomingHazards, describeArenaTarget } from '../../src/ui/combat/combat-arena-view';
 
 const sheet: ArenaSpriteSheet = { href: '/test.png', frameWidth: 128, frameHeight: 128, columns: 4, rows: 4, frames: 4, frameMs: 100, loop: true };
 
@@ -515,5 +515,99 @@ describe('status duration readout', () => {
     const body = render(CombatArenaScene, { props: { arena, s: state, c, ring: [] } }).body;
     expect(body).toContain('burning · 4s');
     expect(body).toContain('burning 4 seconds');
+  });
+});
+
+describe('F38 in-flight hazards — the shot owns its telegraph', () => {
+  const shot = (over: Record<string, unknown> = {}) => ({
+    actionId: 11, mobId: 'hurler', mob: mobFixture({ id: 'hurler' }),
+    source: { x: 0, y: 6 }, destination: { x: 10, y: 6 }, position: { x: 0, y: 6 },
+    releaseAtUs: 0, impactAtUs: 1_000_000, speedMps: 10, radiusM: 0.35,
+    skillId: 'mob.physical.backstab', kind: 'projectile' as const, ...over,
+  });
+
+  it('interpolates the committed span at the playhead', () => {
+    const arena = createCombatArena();
+    arena.mobFlights.push(shot() as never);
+    const [half] = arenaIncomingHazards(arena, 500_000);
+    expect(half.x).toBeCloseTo(5, 9);
+    expect(half.y).toBeCloseTo(6, 9);
+    expect(half.destX).toBe(10);
+    const [done] = arenaIncomingHazards(arena, 2_000_000);
+    expect(done.x).toBeCloseTo(10, 9);
+  });
+
+  it('reads the committed landing radius for ground shots', () => {
+    const arena = createCombatArena();
+    arena.mobFlights.push(shot({ kind: 'ground', skillId: 'mob.earth.boulder-toss', impactRadiusM: 1.5 }) as never);
+    const [hazard] = arenaIncomingHazards(arena, 400_000);
+    expect(hazard.kind).toBe('ground');
+    expect(hazard.radiusM).toBe(1.5);
+    expect(hazard.destX).toBe(10);
+  });
+
+  it('draws the landing circle and the flying head in the scene', () => {
+    const state = newGame(41), arena = createCombatArena();
+    const mob = mobFixture({ id: 'hurler', hp: 10, hpMax: 10 });
+    state.group = [mob];
+    const c = characterSheet(state);
+    syncCombatArena(arena, state, 0, 1_000_000, c.maxHp);
+    Object.assign(arena.mobs[mob.id], { x: 0, y: 6 });
+    arena.mobFlights.push(shot({ actionId: 21, destination: { x: 10, y: 6 },
+      kind: 'ground', skillId: 'mob.earth.boulder-toss', impactRadiusM: 1.5 }) as never);
+    arena.mobFlights.push(shot({ actionId: 22, destination: { x: 10, y: 6 } }) as never);
+    captureCombatArena(arena, state, 500_000);
+    const body = render(CombatArenaScene, { props: { arena, s: state, c, ring: [] } }).body;
+    expect(body).toContain('data-hazard-action="21"');
+    expect(body).toContain('data-hazard-action="22"');
+  });
+});
+
+describe('F37 persistent target read — one named body, never a mix', () => {
+  const mobs = (over: Record<string, { hp: number; x: number; y: number; returning?: boolean }> = {}) => ({
+    committed: { hp: 10, x: 30, y: 16 },
+    focus: { hp: 10, x: 20, y: 16 },
+    near: { hp: 10, x: 26, y: 16 },
+    ...over,
+  });
+  const player = { x: 25, y: 16 };
+  const camera = { x: -1e6, y: -1e6 };
+  const view = { width: 2e6, height: 2e6 };
+
+  it('ranks the committed strike above the requested focus above the next body', () => {
+    expect(describeArenaTarget({ mobs: mobs(), player, committedId: 'committed', focusId: 'focus', camera, view })?.id).toBe('committed');
+    const read = describeArenaTarget({ mobs: mobs(), player, focusId: 'focus', camera, view });
+    expect(read?.id).toBe('focus');
+    expect(read?.kind).toBe('focus');
+    const next = describeArenaTarget({ mobs: mobs(), player, camera, view });
+    expect(next?.id).toBe('near');
+    expect(next?.kind).toBe('nearest');
+  });
+
+  it('skips dead and returning bodies in every rank', () => {
+    const dead = mobs({ committed: { hp: 0, x: 30, y: 16 }, focus: { hp: 10, x: 20, y: 16, returning: true } });
+    const read = describeArenaTarget({ mobs: dead, player, committedId: 'committed', focusId: 'focus', camera, view });
+    expect(read?.id).toBe('near');
+    expect(describeArenaTarget({ mobs: { gone: { hp: 0, x: 1, y: 1 } }, player, camera, view })).toBeNull();
+  });
+
+  it('flags an offscreen body with a bearing and a range', () => {
+    const tight = { x: 0, y: 0 };
+    const out = describeArenaTarget({ mobs: mobs(), player, committedId: 'committed', camera: tight, view: { width: 10, height: 10 } });
+    expect(out?.offscreen).toBe(true);
+    expect(out?.rangeM).toBeCloseTo(5, 9);
+    expect(out?.bearingDeg).toBeTypeOf('number');
+    const inside = describeArenaTarget({ mobs: mobs(), player, committedId: 'near', camera, view });
+    expect(inside?.offscreen).toBe(false);
+  });
+});
+
+describe('three-duel showcase — the container renders without a GL context', () => {
+  it('renders the duel shell server-side; the renderer only starts on mount', async () => {
+    const { render } = await import('svelte/server');
+    const { default: ThreeDuel } = await import('../../src/ui/dev/ThreeDuel.svelte');
+    const body = render(ThreeDuel, {}).body;
+    expect(body).toContain('three-duel');
+    expect(body).toContain('loading models');
   });
 });

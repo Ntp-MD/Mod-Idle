@@ -10350,7 +10350,7 @@
       ],
       "grants": [],
       "name": "Profane Bloom",
-      "description": "Enemies that die cursed by you explode for 15% of their Max HP as Chaos damage. The blast cannot chain.",
+      "description": "Enemies that die cursed by you explode for 15% of their Max HP as Chaos damage to enemies within 4 m. The blast cannot chain.",
       "draft_ref": 27,
       "weight": 3,
       "placement": {
@@ -10363,7 +10363,8 @@
           "key": "profane-bloom",
           "params": {
             "victimMaxHpPct": 15,
-            "element": "chaos"
+            "element": "chaos",
+            "radiusM": 4
           }
         }
       ]

@@ -868,6 +868,35 @@
       "effects": {
         "resist_pct": 20
       }
+    },
+    {
+      "id": "mob.earth.seismic-slam",
+      "name": "Seismic Slam",
+      "mode": "strike",
+      "element": "earth",
+      "status": null,
+      "cd": 14,
+      "cast_sec": 0.8,
+      "role": "front",
+      "phase": {
+        "hpBelowPct": 50
+      },
+      "area": {
+        "origin": "target",
+        "radius_m": 1.5,
+        "shape": "circle"
+      },
+      "cast": {
+        "delivery": "ground",
+        "range": {
+          "basis": "center",
+          "meters": 5.2
+        },
+        "windup_sec": 0.8,
+        "recovery_sec": 0.2,
+        "impact_delay_sec": 0.8
+      },
+      "heavy": true
     }
   ],
   "kits": {
@@ -988,7 +1017,8 @@
       "Treant Elder": [
         "mob.earth.rooted-stance",
         "mob.earth.stone-guard",
-        "mob.physical.crushing-blow"
+        "mob.physical.crushing-blow",
+        "mob.earth.seismic-slam"
       ],
       "Elven Archmage": [
         "mob.cold.frost-bite",

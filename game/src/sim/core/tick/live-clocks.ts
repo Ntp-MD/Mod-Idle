@@ -21,7 +21,7 @@ export function createLiveClocks(opts: {
     if (!arena) return;
     const elapsed = Math.max(0, atUs - cooldown.atUs) / units;
     if (elapsed <= 0) return;
-    tickSkillCooldowns(s.skills, elapsed * c.globalSpeed * playerActiveFraction);
+    tickSkillCooldowns(s.skills, elapsed * c.cooldownRate * playerActiveFraction);
     cooldown.atUs = atUs;
   }
 
