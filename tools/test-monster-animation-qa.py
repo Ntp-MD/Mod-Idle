@@ -48,6 +48,10 @@ class AtlasQATests(unittest.TestCase):
             y = y0 + 24
             y_end = y0 + 200 - 24
             self.draw.rectangle((x, y, x + width - 1, y_end - 1), fill=(255, 255, 255, 255))
+            # Make each fixture pose unique without changing its bounds or ground line.
+            for bit in range(6):
+                if index & (1 << bit):
+                    self.draw.point((x + 1 + bit, y + 1), fill=(0, 0, 0, 0))
             self.metadata["sourceFrames"].append({
                 "x": x,
                 "y": y,
@@ -71,6 +75,16 @@ class AtlasQATests(unittest.TestCase):
         self.assertEqual(result.issues, [])
         self.assertEqual(result.frame_count, 40)
         self.assertEqual(result.clearances, [(index, 24) for index in range(40)])
+
+    def test_translated_copy_is_rejected_by_pose_content(self) -> None:
+        # The same opaque pose remains a duplicate when shifted inside its own padded cell.
+        self.draw.rectangle((100, 0, 199, 199), fill=(0, 0, 0, 0))
+        self.draw.rectangle((124, 24, 131, 175), fill=(255, 255, 255, 255))
+        self.metadata["sourceFrames"][1].update({"x": 124, "y": 24, "width": 8, "height": 152})
+        self.save()
+
+        result = qa.audit_atlas(self.metadata_path)
+        self.assertTrue(any("frame 01: opaque content duplicates frame 00" in issue for issue in result.issues))
 
     def test_extra_bottom_clearance_is_reported_but_does_not_fail(self) -> None:
         self.draw.rectangle((0, 0, 99, 199), fill=(0, 0, 0, 0))
@@ -151,6 +165,10 @@ class RuntimeAtlasQATests(unittest.TestCase):
         for index in range(40):
             x0, y0 = index % 8 * 384, index // 8 * 384
             self.draw.rectangle((x0 + 160, y0 + 100, x0 + 223, y0 + 235), fill=(255, 255, 255, 255))
+            # Distinct alpha masks keep this fixture from triggering pose duplicates.
+            for bit in range(6):
+                if index & (1 << bit):
+                    self.draw.point((x0 + 161 + bit, y0 + 101), fill=(0, 0, 0, 0))
             self.metadata["sourceFrames"].append({
                 "x": x0 + 159, "y": y0 + 99, "width": 66, "height": 138,
                 "offsetX": 159, "offsetY": 99,

@@ -1,5 +1,5 @@
 import { writeSave, type SlotName } from './save';
-import type { GameState } from '../sim/core/types';
+import type { GameState } from '@sim/core/types';
 
 /** A save belongs to the character that requested it, even if a later character is now on screen. */
 export class CharacterSaveSession {

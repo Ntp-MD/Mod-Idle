@@ -15,6 +15,9 @@ import demonMob from './arena-art-pixel-v2/demon-animation-v1.json';
 import slimeMob from './arena-art-pixel-v2/slime-animation-v1.json';
 import golemMob from './arena-art-pixel-v2/golem-animation-v1.json';
 import dragonMob from './arena-art-pixel-v2/dragon-animation-v1.json';
+import wyvernMob from './arena-art-pixel-v2/wyvern-animation-v1.json';
+import mirehydraMob from './arena-art-pixel-v2/mirehydra-animation-v1.json';
+import wyrmlingMob from './arena-art-pixel-v2/wyrmling-animation-v1.json';
 import treantMob from './arena-art-pixel-v2/treant-animation-v1.json';
 import humanMob from './arena-art-pixel-v2/human-animation-v1.json';
 import lizardmanMob from './arena-art-pixel-v2/lizardman-animation-v1.json';
@@ -101,6 +104,9 @@ export const pixelArenaArt: ArenaPixelSpriteSet = {
     slime: pilotArt('/combat/arpg/pixel-v2/slime-animation-v1.png', slimeMob, 224),
     golem: pilotArt('/combat/arpg/pixel-v2/golem-animation-v1.png', golemMob, 224),
     dragon: pilotArt('/combat/arpg/pixel-v2/dragon-animation-v1.png', dragonMob, 224),
+    wyvern: pilotArt('/combat/arpg/pixel-v2/wyvern-animation-v1.png', wyvernMob, 224),
+    mirehydra: pilotArt('/combat/arpg/pixel-v2/mirehydra-animation-v1.png', mirehydraMob, 224),
+    wyrmling: pilotArt('/combat/arpg/pixel-v2/wyrmling-animation-v1.png', wyrmlingMob, 224),
     treant: pilotArt('/combat/arpg/pixel-v2/treant-animation-v1.png', treantMob, 224),
     human: pilotArt('/combat/arpg/pixel-v2/human-animation-v1.png', humanMob, 224),
     lizardman: pilotArt('/combat/arpg/pixel-v2/lizardman-animation-v1.png', lizardmanMob, 224),

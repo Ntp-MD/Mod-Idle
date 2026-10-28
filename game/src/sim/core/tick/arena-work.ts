@@ -2,14 +2,18 @@ import type { CombatArena } from '../../combat/combat-arena';
 import type { CombatFlight } from '../../combat/combat-actions';
 import type { CombatClock } from '../../combat/combat-clock';
 import { updateArenaAction } from '../../combat/combat-arena';
+import type { GameState } from '../types';
+import { push } from '../log';
 
 /**
  * Cancelling arena work: the player's unreleased basic, the committed intent, every flight in the
  * encounter, and one released flight. These read only the arena and the clock, so the tick can build
  * them before any other stage needs them.
  */
-export function createArenaWork(opts: { arena: CombatArena | undefined; clock: CombatClock }) {
-  const { arena, clock } = opts;
+export function createArenaWork(opts: { arena: CombatArena | undefined; clock: CombatClock; s?: GameState }) {
+  const { arena, clock, s } = opts;
+  /** A deliberate request that the rules refused deserves the reason on the field log. */
+  const REJECTIONS = new Set(['out of range', 'target lost', 'not ready', 'target returning']);
 
   /** Cancel an unreleased player basic; a released swing keeps its pose and receipt. */
   function cancelPlayerBasic(reason: string) {
@@ -23,6 +27,7 @@ export function createArenaWork(opts: { arena: CombatArena | undefined; clock: C
   function cancelIntent(reason: string) {
     const intent = arena?.intent;
     if (!arena || !intent) return;
+    if (intent.manual && s && REJECTIONS.has(reason)) push(s, `Cast cancelled · ${reason}`);
     arena.intent = undefined;
     const action = intent.actionId != null
       ? arena.actions.find((entry) => entry.id === intent.actionId) : undefined;

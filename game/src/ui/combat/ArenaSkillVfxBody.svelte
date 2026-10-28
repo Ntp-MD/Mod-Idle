@@ -6,16 +6,16 @@
   import { ACTIVE_VFX } from './arena-active-vfx';
   import { authoredVfxFor } from './arena-authored-vfx';
   import type { VfxFootprint } from './arena-vfx-space';
-  let { id, shape, age, visualSeed = 0, allowComponents = true, source, point, ground, cast, element = 'physical', layer = 'front', strikeCount = 1, sizeScale = 1, durationOverride, authoredAreaDiameter, critical = false, flightProgress, windupProgress, preImpact = false, charging = false, channelAge = age, area, reducedMotion = false, chainFrom }: {
+  let { id, shape, age, visualSeed = 0, allowComponents = true, source, point, ground, casterGround, cast, element = 'physical', layer = 'front', strikeCount = 1, sizeScale = 1, durationOverride, authoredAreaDiameter, critical = false, flightProgress, windupProgress, preImpact = false, charging = false, channelAge = age, area, reducedMotion = false, chainFrom }: {
     allowComponents?:boolean; visualSeed?:number; id: string; shape: string; age: number; source: {x:number;y:number}; point: {x:number;y:number};
-    ground: {x:number;y:number}; cast: boolean; element?: string; layer?: 'ground' | 'front'; strikeCount?:number; sizeScale?:number; durationOverride?:number; authoredAreaDiameter?:number; critical?:boolean; flightProgress?:number; windupProgress?:number; preImpact?:boolean; charging?:boolean; channelAge?:number; area?:VfxFootprint; reducedMotion?: boolean; chainFrom?: string;
+    ground: {x:number;y:number}; casterGround?: {x:number;y:number}; cast: boolean; element?: string; layer?: 'ground' | 'front'; strikeCount?:number; sizeScale?:number; durationOverride?:number; authoredAreaDiameter?:number; critical?:boolean; flightProgress?:number; windupProgress?:number; preImpact?:boolean; charging?:boolean; channelAge?:number; area?:VfxFootprint; reducedMotion?: boolean; chainFrom?: string;
   } = $props();
   const recipe = $derived(ACTIVE_VFX[shape] ? {...ACTIVE_VFX[shape],size:ACTIVE_VFX[shape].size*sizeScale,duration:durationOverride ?? ACTIVE_VFX[shape].duration} : undefined);
   const authored = $derived(authoredVfxFor(id));
   const inWindow = $derived((age >= -.26 || (cast && preImpact && (authored || shape === 'whirlwind')) || (authored?.delivery === 'projectile' && age < 0 && flightProgress !== undefined && flightProgress > 0)) && age <= (recipe?.duration ?? 0));
   const self = $derived(id.startsWith('buff.') || id.startsWith('heal.') || shape === 'whirlwind' || shape === 'cleave' || shape === 'groundSlam');
   const center = $derived(self ? source : point);
-  const floor = $derived(self ? {x:source.x, y:source.y + 58} : ground);
+  const floor = $derived(self ? (casterGround ?? {x:source.x, y:source.y + 58}) : ground);
   const angle = $derived(Math.atan2(point.y - source.y, point.x - source.x) * 180 / Math.PI);
   const progress = $derived(flightProgress ?? Math.max(0, Math.min(1, (age + .26) / .26)));
   const envelope = $derived(authored && cast ? 1 : recipe ? Math.max(0, Math.min(1, (age + .04) * 16, (recipe.duration - age) * 5)) : 0);
@@ -246,7 +246,7 @@
     {/if}
     {#if authored && cast}
       {#if layer === (authored.spatial?.layer ?? 'front')}
-        <ArenaAuthoredSkillVfx {id} {age} {visualSeed} {allowComponents} {source} {point} {flightProgress} {windupProgress} {preImpact} {strikeCount} duration={recipe.duration} ground={floor} baseSize={recipe.size} areaDiameter={authoredAreaDiameter} {area} {reducedMotion} />
+        <ArenaAuthoredSkillVfx {id} {age} {visualSeed} {allowComponents} {source} {point} {flightProgress} {windupProgress} {preImpact} {strikeCount} duration={recipe.duration} ground={floor} casterGround={casterGround} baseSize={recipe.size} areaDiameter={authoredAreaDiameter} {area} {reducedMotion} />
       {/if}
     {:else if shape !== 'whirlwind'}
       {#each pieces as piece}

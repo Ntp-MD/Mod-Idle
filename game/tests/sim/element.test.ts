@@ -1,0 +1,143 @@
+import { describe, it, expect } from 'vitest';
+import { E, eng, sm } from '../../src/engine/client';
+import { buildCharacter, emptyGear } from '@sim/core/player';
+import { playerSwing } from '@sim/combat/combat';
+import { mulberry32 } from '../../src/engine/client-helpers';
+import { newGame, tick, setLevel, huntZone } from '@sim/core/game';
+import type { Item, Mob } from '@sim/core/types';
+import { mobFixture } from '../fixtures/mobFixture';
+
+const mobOf = (innate: string[]): Mob => mobFixture({ id: 'm', species: 'Slime', ps: 100, acc: 100, innate });
+
+/** A main hand that carries one Elemental line, so the piece has a stored Element. */
+const weaponWith = (element: string | null): (Item | null)[] => {
+  const gear = emptyGear();
+  const at = gear.findIndex((_, i) => i === 10); // main hand index in loot.SLOTS
+  gear[at] = {
+    slot: 'main hand', base: 'one-handed sword', ilvl: 1, quality: 'low', tier: 'T3',
+    weaponAspd: 1.2, q: 0,
+    lines: [{ id: 'elemental_power_flat', value: 40, slice: 0, element }],
+  };
+  return gear;
+};
+
+const SWING = () => mulberry32(3);
+
+describe('a weapon carries the Element its own line stores', () => {
+  it('reads it off the piece, not off the weapon type', () => {
+    expect(buildCharacter(40, weaponWith('fire')).weaponElement).toBe('fire');
+    expect(buildCharacter(40, weaponWith(null)).weaponElement).toBe(null);
+    expect(buildCharacter(40, emptyGear()).weaponElement).toBe(null);
+  });
+
+  it('scales only the Elemental share, and no Element counters another', () => {
+    const c = buildCharacter(40, weaponWith('chaos'));
+    const share = c.elem * (c.alignment / 100);
+    expect(share).toBeGreaterThan(0);
+
+    // no matchup multiplier exists: the same swing lands identically on every Element a Species owns
+    const onChaos = playerSwing(SWING(), c, mobOf(['chaos']), c.weaponElement).damage;
+    const onFire = playerSwing(SWING(), c, mobOf(['fire']), c.weaponElement).damage;
+    const onNone = playerSwing(SWING(), c, mobOf([]), c.weaponElement).damage;
+    expect(onChaos).toBeCloseTo(onFire, 6);
+    expect(onChaos).toBeCloseTo(onNone, 6);
+
+    // and that figure is exactly the Elemental share: strip the pool and the share goes with it
+    const bare = { ...c, elem: 0, elemByElement: {} } as typeof c;
+    const bareHit = playerSwing(SWING(), bare, mobOf(['chaos']), null).damage;
+    expect(onChaos).toBeCloseTo(bareHit + share, 6);
+  });
+
+  it('splits a two-Element weapon into pools and answers each on its own res line', () => {
+    const gear = emptyGear();
+    gear[10] = {
+      slot: 'main hand', base: 'one-handed sword', ilvl: 61, quality: 'mid', tier: 'T2',
+      weaponAspd: 1.2, q: 1,
+      lines: [
+        { id: 'elemental_power_flat', value: 60, slice: 0, element: 'fire' },
+        { id: 'elemental_power_flat', value: 40, slice: 0, element: 'cold' },
+      ],
+    } as unknown as Item;
+    const c = buildCharacter(40, gear);
+    const align = c.alignment / 100;
+    const fire = c.elemByElement.fire, cold = c.elemByElement.cold;
+    expect(Object.keys(c.elemByElement)).toEqual(['fire', 'cold']);
+    expect(fire).toBeGreaterThan(cold); // the K_ELEM base rides with the piece's own Element
+    expect(fire + cold).toBeCloseTo(c.elem, 6); // and the split never invents or loses pool
+
+    // no matchup multiplier: the split exists so each pool meets its own resistance line
+    const vsFire = playerSwing(SWING(), c, mobOf(['fire']), 'fire').damage;
+    const neutral = playerSwing(SWING(), { ...c, elemByElement: {}, elem: 0, phys: c.phys, magic: c.magic }, mobOf(['fire']), null).damage;
+    expect(vsFire).toBeCloseTo(neutral + (fire + cold) * align, 6);
+    expect(vsFire).not.toBeCloseTo(neutral, 6);
+  });
+
+  it('leaves a build with no Elemental damage exactly as strong as before', () => {
+    const c = buildCharacter(40, weaponWith('fire'));
+    const withNoElement = { ...c, elem: 0, alignment: 0 };
+    const a = playerSwing(SWING(), withNoElement, mobOf(['fire']), 'fire').damage;
+    const b = playerSwing(SWING(), withNoElement, mobOf(['cold']), null).damage;
+    expect(a).toBeCloseTo(b, 10);
+  });
+
+  it('is in play inside the sim, where a counter pair is a normal fact of the zone', () => {
+    const s = newGame(71);
+    huntZone(s, s.zone);
+    setLevel(s, 40);
+    s.zone = 4; // a lightning zone, so a fire weapon meets a Species whose Element is not its own
+    s.gear = weaponWith('fire');
+    // Tick until the state under test exists, never for a guessed window: a fixed window is a time
+    // premise (AGENTS.md) and a coin flip on the roll it is waiting for. The bound is a hang guard.
+    for (let i = 0; i < 20000 && s.counters.kills === 0; i++) tick(s, {});
+    expect(buildCharacter(s.player.level, s.gear, {}, 0).weaponElement).toBe('fire');
+    expect(s.counters.kills).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * Conversion: a percent of the finished physical share is ROUTED into a
+ * named Element before mitigation, so it answers Elemental resistance instead of Armour. The cage holds
+ * the two promises: a converted swing is the same strength as an unconverted one against
+ * a target that mitigates nothing, and it is weaker-or-equal against one that resists the destination —
+ * never a multiplier, and the summed percent never overflows the hit.
+ */
+describe('conversion routes the physical share, it does not add power', () => {
+  // no crit, so the physical share is exactly `c.phys` and the routing can be checked to the digit
+  const plain = { ...buildCharacter(40, weaponWith(null)), critChance: 0, critPool: 0 };
+  const at = (pct: Record<string, number>) => ({ ...plain, conversion: pct });
+  const tanky = (res: number): Mob => ({ ...mobOf([]), res, resByElement: {} } as Mob);
+
+  it('is exactly as strong as an unconverted swing against a target that mitigates nothing', () => {
+    const a = playerSwing(SWING(), plain, mobOf([]), null).damage;
+    const b = playerSwing(SWING(), at({ fire: 25 }), mobOf([]), null).damage;
+    expect(b).toBeCloseTo(a, 6);
+  });
+
+  it('is weaker, never stronger, against a target that resists the destination Element', () => {
+    const a = playerSwing(SWING(), plain, tanky(50), null).damage;
+    const b = playerSwing(SWING(), at({ fire: 25 }), tanky(50), null).damage;
+    expect(b).toBeLessThan(a);
+    expect(b).toBeGreaterThan(0);
+    // the routed share is what the resistance now answers: the drop is that share times the cut
+    const routed = plain.phys * 0.25;
+    expect(a - b).toBeCloseTo(routed * (Math.min(50, E.caps.elem_res) / 100), 4);
+  });
+
+  it('caps the summed percent at the whole hit — overflow is wasted, never a multiplier', () => {
+    const conv = eng.convertDamageOf(1000, { fire: 60, cold: 60 });
+    expect(conv.byElement.fire).toBeCloseTo(600, 6);
+    expect(conv.byElement.cold).toBeCloseTo(400, 6);
+    expect(conv.physical).toBe(0);
+    const over = eng.convertDamageOf(1000, { fire: 200 });
+    expect(over.byElement.fire).toBeCloseTo(1000, 6);
+    expect(over.physical).toBe(0);
+  });
+
+  it('is folded from the aura rows into the sheet, and the swing spends it', () => {
+    const fold = sm.aggregateEffects([sm.byId['aura.ember_conversion']]);
+    const c = buildCharacter(40, weaponWith(null), {}, 0, fold);
+    expect(c.conversion).toEqual({ fire: sm.byId['aura.ember_conversion'].effects![0]!.value });
+    // the same build with no aura routes nothing, so the sheet field is the only switch
+    expect(buildCharacter(40, weaponWith(null)).conversion).toEqual({});
+  });
+});

@@ -1,6 +1,6 @@
 import { sm, TOWN } from '../../engine/client';
-import { stoneName } from '../../sim/gear/craft';
-import type { QuestBonus } from '../../sim/town/quest-rewards';
+import { stoneName } from '@sim/gear/craft';
+import type { QuestBonus } from '@sim/town/quest-rewards';
 
 export function questBonusText(bonus: Pick<QuestBonus, 'gold' | 'stones' | 'skill'>): string {
   const parts = bonus.stones.map((stone) => `${stone.count} ${stoneName(stone.key)}`);

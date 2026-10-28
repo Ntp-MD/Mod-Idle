@@ -1,4 +1,4 @@
-import type { EconomyCfg, EconomyPlayerCfg } from '../../../engine/economy';
+import type { EconomyCfg, EconomyPlayerCfg } from '@engine/economy';
 import { TOWN } from '../engine/client';
 
 /**

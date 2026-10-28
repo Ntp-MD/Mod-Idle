@@ -62,7 +62,8 @@ export const LEGACY_AUTHORED_VFX: Record<string, AuthoredVfx> = {
 };
 
 const groundArt = new Set(['attack.ground_slam', 'attack.earth_shock', 'attack.aftershock', 'attack.void_blast', 'attack.shatter', 'attack.overload', 'attack.frost_nova',
-  'attack.cinder_nova', 'attack.thunder_storm', 'attack.storm_field', 'attack.poison_cloud', 'attack.chaos_wave', 'attack.fissure']);
+  'attack.cinder_nova', 'attack.thunder_storm', 'attack.storm_field', 'attack.poison_cloud', 'attack.chaos_wave', 'attack.fissure',
+  'attack.venom_spray', 'attack.cleave']);
 const spatialEntries = spatialManifest.entries as unknown as Record<string, AuthoredVfx & {
   composition: NonNullable<AuthoredVfx['spatial']>['composition']; authoringGeometry: {spanM:number};
 }>;

@@ -7,13 +7,12 @@ import type { CastReport, PreparedSkillCast, TriggerAura } from '../../combat/sk
 import { E, sm } from '../../../engine/client';
 import { EVENT_PRIORITY } from '../../combat/combat-clock';
 import {
-  arenaAction, arenaDistance, arenaPlayerInReach, arenaSkillRange, updateArenaAction,
+  arenaAction, arenaDistance, arenaSkillRange, updateArenaAction,
 } from '../../combat/combat-arena';
 import { intentTargets, trackIntentAim } from '../../combat/combat-actions';
-import { tickSkillCooldowns, prepareSkillCast, spendableMana, newCastRollCache, resolvePreparedCast } from '../../combat/skills';
+import { prepareSkillCast, spendableMana, newCastRollCache, resolvePreparedCast } from '../../combat/skills';
 import { skillCastTiming, releasedSkillCastTiming, targetsInSkillArea } from '../../../../../engine/skill-actions.ts';
 import { skillAreaSnapshot } from '../../../../../engine/skill-area.ts';
-import { basicPhaseBudget } from '../../../../../engine/attack-range.ts';
 import { bundleOf } from '../../../../../engine/keystones.ts';
 import { isBossKind } from '../kinds';
 import { fieldAreaKey } from '../../world/field-area';
@@ -38,7 +37,7 @@ export function createIntents(opts: {
   crippledOutgoingMult: number;
   playerActiveFraction: number;
   trig: { crit: TriggerAura | null; taken: TriggerAura | null };
-  cooldown: { atUs: number };
+  advanceLiveClocks: (atUs: number) => void;
   queueTrigger: (aura: TriggerAura | null, targetId: string) => void;
   recoverLeech: (amount: number, atUs: number) => void;
   mirrorReady: () => boolean;
@@ -59,19 +58,11 @@ export function createIntents(opts: {
   const encounterKeyOf = (state: GameState) => fieldAreaKey(state);
   const {
     arena, clock, rng, s, c, attackCharacter, units, tickEndUs, timeUs, statuses, rkH, front,
-    crippledOutgoingMult, playerActiveFraction, trig, cooldown, queueTrigger, recoverLeech,
+    crippledOutgoingMult, playerActiveFraction, trig, advanceLiveClocks, queueTrigger, recoverLeech,
     mirrorReady, luckyBonus, tranceFree, resolveTargetsForSkill, resolveFlight, scheduleFlight,
     applyCastOutcome, applyCast, payCast, castFx, cancelIntent, cancelPlayerBasic, cancelFlight,
     fireTrigger,
   } = opts;
-
-  function advanceLiveClocks(atUs: number) {
-      if (!arena) return;
-      const elapsed = Math.max(0, atUs - cooldown.atUs) / units;
-      if (elapsed <= 0) return;
-      tickSkillCooldowns(s.skills, elapsed * c.globalSpeed * playerActiveFraction);
-      cooldown.atUs = atUs;
-    }
 
     /** Cancel an unreleased player basic; a released swing keeps its pose and receipt. */
   
@@ -351,5 +342,5 @@ export function createIntents(opts: {
       resolveFlight(flight, atUs);
     }
 
-  return { advanceLiveClocks, startWindup, scheduleRelease, releaseIntent };
+  return { startWindup, scheduleRelease, releaseIntent };
 }

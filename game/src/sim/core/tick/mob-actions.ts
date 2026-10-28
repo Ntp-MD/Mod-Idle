@@ -3,15 +3,20 @@ import type { CombatArena, CombatArenaAction } from '../../combat/combat-arena';
 import type { CombatClock } from '../../combat/combat-clock';
 import type { MobCastProfile, MobSkillRow, SkillCastTiming } from '../../../../../engine/types.ts';
 import { E } from '../../../engine/client';
-import { EVENT_PRIORITY } from '../../combat/combat-clock';
+import { EVENT_PRIORITY, planAttacks } from '../../combat/combat-clock';
 import {
-  arenaAction, arenaMobInReach, updateArenaAction,
+  arenaAction, arenaInRange, arenaMobInReach, updateArenaAction,
   mobAttackProfile, arenaDistance,
 } from '../../combat/combat-arena';
 import { basicPhaseBudget } from '../../../../../engine/attack-range.ts';
-import { mobCastGeometry, mobCastProfile, mobSkillById, markMobSkillUsed } from '../../combat/mobSkills';
+import {
+  mobCastGeometry, mobCastProfile, mobSkillById, markMobSkillUsed,
+  mobStrikeRange, planMobSkills, readyMobSkill,
+} from '../../combat/mobSkills';
 import { modsOn as statusModsOn } from '../../combat/mobStatus';
 import { fieldAreaKey } from '../../world/field-area';
+import { fx, hitColour } from '../feedback';
+import { push } from '../log';
 
 /**
  * Mob basics and typed strikes: the committed release beat, the melee re-test, and the projectile
@@ -29,8 +34,14 @@ export function createMobActions(opts: {
   launchMobShot: (mob: Mob, atUs: number, existing?: CombatArenaAction) => void;
   cancelMobPreparation: (action: CombatArenaAction, atUs: number, reason: string) => void;
   resolveIncomingHit: (mob: Mob, plannedSkill: MobSkillRow | undefined, rng: () => number) => void;
+  mobMods: (mobId: string) => { attackSpeed: number };
+  mobPlans: { mob: Mob; rate: number; actionsLeft: number }[];
+  online: boolean;
 }) {
-  const { arena, clock, rng, s, units, tickStartUs, tickEndUs, advanceArenaAt, launchMobShot, cancelMobPreparation, resolveIncomingHit } = opts;
+  const {
+    arena, clock, rng, s, units, tickStartUs, tickEndUs, advanceArenaAt, launchMobShot,
+    cancelMobPreparation, resolveIncomingHit, mobMods, mobPlans, online,
+  } = opts;
   const encounterKeyOf = (state: GameState) => fieldAreaKey(state);
 
   function startMobBasic(mob: Mob, atUs: number, rate: number): void {
@@ -160,5 +171,87 @@ export function createMobActions(opts: {
     });
   }
 
-  return { startMobBasic, scheduleMobBasic, launchMobSkillShot, scheduleMobStrike };
+  /** Schedule one engaged body from the moment it joins; duplicate schedules are ignored. */
+  const scheduledMobs = new Set<string>();
+  function scheduleMobAttacksFor(mob: Mob, fromUs: number): void {
+    if (scheduledMobs.has(mob.id)) return;
+    scheduledMobs.add(mob.id);
+    if (mob.hp <= 0 || !s.group.includes(mob)) return;
+    const tm = mobMods(mob.id);
+    const rate = mob.hitsPerSec * (mob.auraSpeedMult ?? 1) * Math.max(0, 1 + tm.attackSpeed / 100);
+    const plan = planAttacks(fromUs, mob.atkTimer, rate, units, Math.max(0, tickEndUs - fromUs));
+    mob.atkTimer = plan.progressAtEnd;
+    const pending = { mob, rate, actionsLeft: plan.times.length };
+    mobPlans.push(pending);
+    const skillPlan = arena ? undefined : planMobSkills(mob, plan.times, units);
+    for (const atUs of plan.times) {
+      const plannedSkill = skillPlan?.get(atUs);
+      if (plannedSkill) {
+        // The cast beat is placed before the action, clamped to this window; the swing itself still
+        // lands on the planned action time, so the telegraph never changes the DPS clock.
+        const castAt = Math.max(fromUs, atUs - Math.max(0, mobCastProfile(plannedSkill, mob).windup_sec) * units);
+        clock.schedule(castAt, EVENT_PRIORITY.mobAction, mob.id, 'player', () => {
+          if (mob.hp <= 0 || !s.group.includes(mob)) return;
+          advanceArenaAt(clock.nowUs);
+          if (s.field && !s.field.engagementIds.includes(mob.id)) return;
+          if (statusModsOn(s.mobStatus, mob.id).stopped) return;
+          if (arena && !arenaInRange(arena, mob.id, mobStrikeRange(plannedSkill, mob))) return;
+          fx(s, { kind: 'cast', side: 'field', mobId: mob.id, skillId: plannedSkill.id, text: plannedSkill.name, colour: hitColour(plannedSkill.element) });
+          // The telegraph owns the body from its cast beat to the strike beat, so preparation
+          // reads at the authored length instead of the default 0.3s action tail.
+          const castAction = arena && [...arena.actions].reverse().find((entry) => entry.actorId === mob.id
+            && entry.kind === 'cast' && entry.skillId === plannedSkill.id
+            && entry.atUs === clock.nowUs && !entry.timing);
+          if (arena && castAction) updateArenaAction(arena, castAction.id, {
+            timing: { delivery: 'melee', startedAtUs: clock.nowUs, releaseAtUs: atUs, impactAtUs: atUs, recoveryUntilUs: atUs },
+            endsAtUs: Math.max(castAction.endsAtUs, atUs),
+          });
+          if (online) push(s, `${mob.species} begins ${plannedSkill.name}`);
+        });
+      }
+      clock.schedule(atUs, EVENT_PRIORITY.mobAction, mob.id, 'player', () => {
+        pending.actionsLeft--;
+        if (mob.hp <= 0 || !s.group.includes(mob)) return;
+        advanceArenaAt(clock.nowUs);
+        if (s.field && !s.field.engagementIds.includes(mob.id)) return;
+        // Hard control before the beat cancels the attack and leaves the strike's cooldown unspent.
+        if (statusModsOn(s.mobStatus, mob.id).stopped) return;
+        if (arena) {
+          const owned = arena.mobs[mob.id]?.action;
+          if (owned?.kind === 'cast' && owned.timing && owned.cancelledAtUs == null
+            && !owned.impactCount && owned.timing.releaseAtUs >= atUs) return;
+        }
+        // A ready strike replaces the opportunity only while its role reach holds. An out-of-reach
+        // strike does not block the ordinary attack, and the mob never walks in just to enable it.
+        const strike = readyMobSkill(mob, atUs, row => !arena || arenaInRange(arena, mob.id, mobStrikeRange(row, mob)));
+        if (!strike && arena && !arenaMobInReach(arena, mob.id)) return;
+        if (arena && strike) {
+          const cast = mobCastProfile(strike, mob);
+          const releaseAtUs = atUs + Math.ceil(Math.max(0, cast.windup_sec) * units);
+          const recoveryUs = Math.ceil(Math.max(0, cast.recovery_sec) * units);
+          const impactAtUs = cast.delivery === 'ground'
+            ? releaseAtUs + Math.ceil(Math.max(0.001, Number(cast.impact_delay_sec) || 0.4) * units)
+            : releaseAtUs;
+          const timing: SkillCastTiming = { delivery: cast.delivery, startedAtUs: atUs,
+            releaseAtUs, impactAtUs, recoveryUntilUs: releaseAtUs + recoveryUs };
+          const action = arenaAction(arena, mob.id, 'cast', atUs, 'player', strike.id, undefined, timing);
+          if (action) {
+            fx(s, { kind: 'cast', side: 'field', mobId: mob.id, skillId: strike.id,
+              actionId: action.id, castTiming: timing, text: strike.name, colour: hitColour(strike.element) });
+            scheduleMobStrike(action, mob);
+            if (online) push(s, `${mob.species} begins ${strike.name}`);
+          }
+          return;
+        }
+        if (arena) {
+          startMobBasic(mob, clock.nowUs, rate);
+          return;
+        }
+        if (strike) markMobSkillUsed(mob, strike, clock.nowUs, units);
+        resolveIncomingHit(mob, strike, rng);
+      });
+    }
+  }
+
+  return { startMobBasic, scheduleMobBasic, launchMobSkillShot, scheduleMobStrike, scheduleMobAttacksFor };
 }

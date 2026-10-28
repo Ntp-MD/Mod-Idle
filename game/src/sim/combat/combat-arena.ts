@@ -1,5 +1,6 @@
-import { E, sm } from '../../engine/client';
+import { E, sm, spawns } from '../../engine/client';
 import { arenaFacingIndex } from '../../presentation/arena-camera';
+import { isClear, sweepDisc, type NavLayout, type NavPoint } from '../../../../engine/navigation.ts';
 import { attackProfileGeometry, withinAttackStopBand, type AttackRangeGeometry } from '../../../../engine/attack-range.ts';
 import { targetsInSkillArea } from '../../../../engine/skill-actions.ts';
 import { skillAreaSnapshot } from '../../../../engine/skill-area.ts';
@@ -170,6 +171,10 @@ export interface CombatArena extends CombatArenaFrame {
   anchor?: { x: number; y: number };
   /** Planned melee contact points, keyed by actor id; revalidated every movement sample. */
   contacts: Record<string, CombatContactClaim>;
+  /** Authored static ground geometry; absent means none is proven, never "open ground". */
+  nav?: NavLayout;
+  /** Layout id the current `nav` was resolved from, so a tick does not rebuild it. */
+  navLayoutId?: string;
 }
 
 export function createCombatArena(): CombatArena {
@@ -413,6 +418,12 @@ export function syncCombatArena(arena: CombatArena, state: GameState, atUs: numb
   }
   arena.unitsPerSec = unitsPerSec;
   arena.nowUs = atUs;
+  // Static ground is data: resolve it once per authored layout, and never invent it.
+  const layoutId = spawns.profileFor(state.zone, state.cell?.sub ?? null).layout;
+  if (arena.navLayoutId !== layoutId) {
+    arena.navLayoutId = layoutId;
+    arena.nav = spawns.navigation(layoutId) ?? undefined;
+  }
   arena.player.hp = state.player.hp;
   arena.player.es = state.player.es;
   arena.player.mana = state.player.mana;
@@ -510,21 +521,59 @@ function turnToward(actor: CombatArenaActor, tx: number, ty: number, seconds: nu
   actor.facing += Math.max(-cap, Math.min(cap, delta));
 }
 
-function approach(actor: CombatArenaActor, target: { x: number; y: number }, range: number, distance: number, seconds: number): number {
+function approach(
+  actor: CombatArenaActor, target: { x: number; y: number }, range: number, distance: number, seconds: number,
+  nav?: NavLayout,
+): number {
   const gap = arenaDistance(actor, target);
   const remaining = Math.max(0, gap - range);
   turnToward(actor, target.x, target.y, seconds);
   const ease = remaining > ARRIVE_SLOW_M ? 1
     : ARRIVE_MIN_FACTOR + (1 - ARRIVE_MIN_FACTOR) * (remaining / ARRIVE_SLOW_M);
   const move = Math.min(distance * ease, remaining);
-  actor.moving = move > 1e-7;
-  actor.voluntaryM = (actor.voluntaryM ?? 0) + Math.max(0, move);
-  actor.travelledM = (actor.travelledM ?? 0) + Math.max(0, move);
+  const from = { x: actor.x, y: actor.y };
+  let to = { x: actor.x, y: actor.y };
   if (move > 0 && gap > 0) {
-    actor.x += (target.x - actor.x) / gap * move;
-    actor.y += (target.y - actor.y) / gap * move;
+    to = { x: from.x + (target.x - from.x) / gap * move, y: from.y + (target.y - from.y) / gap * move };
   }
-  return Math.max(0, move);
+  if (nav) {
+    // The step is swept, not sampled: a fast body cannot land past a thin wall.
+    const contact = sweepDisc(nav, from, to, actor.radiusM ?? bodyRadiusM());
+    if (contact) {
+      const keep = Math.max(0, contact.fraction - 1e-6);
+      to = { x: from.x + (to.x - from.x) * keep, y: from.y + (to.y - from.y) * keep };
+    }
+  }
+  const travelled = arenaDistance(from, to);
+  actor.moving = travelled > 1e-7;
+  actor.voluntaryM = (actor.voluntaryM ?? 0) + travelled;
+  actor.travelledM = (actor.travelledM ?? 0) + travelled;
+  actor.x = to.x;
+  actor.y = to.y;
+  return travelled;
+}
+
+/** After separation and contact correction, no body may finish a sample inside static ground. */
+function settleStaticClearance(
+  arena: CombatArena, state: GameState, before: Map<string, NavPoint>,
+): void {
+  const nav = arena.nav;
+  if (!nav) return;
+  const settle = (body: CombatArenaActor, id: string): void => {
+    const radius = body.radiusM ?? bodyRadiusM();
+    if (isClear(nav, body, radius)) return;
+    const legal = before.get(id);
+    if (!legal || !isClear(nav, legal, radius)) return;
+    body.x = legal.x;
+    body.y = legal.y;
+    body.voluntaryM = 0;
+    body.moving = false;
+  };
+  settle(arena.player, 'player');
+  for (const mob of state.group) {
+    const actor = arena.mobs[mob.id];
+    if (actor && mob.hp > 0) settle(actor, mob.id);
+  }
 }
 
 /**
@@ -591,6 +640,7 @@ const CONTACT_BEARING_TIERS_DEG: readonly (readonly number[])[] = [
  */
 function assignContactPoints(arena: CombatArena, state: GameState, melee: readonly Mob[]): void {
   const player = arena.player;
+  const nav = arena.nav;
   if (state.player.hp <= 0) { arena.contacts = {}; return; }
   const living = state.group.filter((mob) => mob.hp > 0 && arena.mobs[mob.id]);
   const livingIds = new Set(living.map((mob) => mob.id));
@@ -628,11 +678,13 @@ function assignContactPoints(arena: CombatArena, state: GameState, melee: readon
       return !pose || arenaDistance(actor, pose) >= radius + (pose.radiusM ?? 0.25) + ATTACK_CLEARANCE_M;
     });
     // A real attack opportunity inside the stop band takes priority over completing a formation.
-    if (current.inRange && withinAttackStopBand(current) && currentClear && inBounds(actor, radius)) {
+    if (current.inRange && withinAttackStopBand(current) && currentClear && inBounds(actor, radius)
+      && (!nav || isClear(nav, actor, radius))) {
       point = { x: actor.x, y: actor.y };
     } else if (held && held.targetId === 'player'
       && withinAttackStopBand(attackGeometryFor(profile, radius, playerRadius, arenaDistance(held, player)))
       && inBounds(held, radius)
+      && (!nav || isClear(nav, held, radius))
       && clearOf(held, radius, mob.id)) {
       point = { x: held.x, y: held.y };
     }
@@ -651,6 +703,7 @@ function assignContactPoints(arena: CombatArena, state: GameState, melee: readon
           const gap = arenaDistance(candidate, player);
           if (gap > current.maxCenterDistance + 1e-7 || gap < minGap - 1e-7) continue;
           if (!clearOf(candidate, radius, mob.id)) continue;
+          if (nav && !isClear(nav, candidate, radius)) continue;
           options.push({ ...candidate, travel: arenaDistance(actor, candidate), tie: Math.abs(offsetDeg) });
         }
         if (!options.length) continue;
@@ -692,6 +745,14 @@ export function advanceCombatArena(
   const seconds = Math.max(0, atUs - fromUs) / arena.unitsPerSec;
   arena.nowUs = atUs;
   if (seconds === 0) { captureCombatArena(arena, state, atUs); return; }
+  const before = arena.nav ? new Map<string, NavPoint>() : null;
+  if (before) {
+    before.set('player', { x: arena.player.x, y: arena.player.y });
+    for (const mob of state.group) {
+      const actor = arena.mobs[mob.id];
+      if (actor) before.set(mob.id, { x: actor.x, y: actor.y });
+    }
+  }
   arena.player.moving = false;
   arena.player.voluntaryM = 0;
   for (const actor of Object.values(arena.mobs)) { actor.moving = false; actor.voluntaryM = 0; }
@@ -701,11 +762,11 @@ export function advanceCombatArena(
   arena.player.moving = false;
   if (options.playerMoveTo && state.player.hp > 0) {
     approach(arena.player, options.playerMoveTo, 0,
-      CFG.player_speed * options.playerSpeedMult * seconds, seconds);
+      CFG.player_speed * options.playerSpeedMult * seconds, seconds, arena.nav);
   } else if (target && state.player.hp > 0 && !options.playerLocked) {
     // `playerRange` is the profile's already-inset stop distance, never its far edge.
     approach(arena.player, arena.mobs[target.id], Math.max(0, options.playerRange),
-      CFG.player_speed * options.playerSpeedMult * seconds, seconds);
+      CFG.player_speed * options.playerSpeedMult * seconds, seconds, arena.nav);
   }
   const engaging = state.group.filter((mob) => mob.hp > 0
     && (!options.engagedIds || options.engagedIds.has(mob.id)));
@@ -727,7 +788,7 @@ export function advanceCombatArena(
         const claim = arena.contacts[mob.id];
         actor.waitingForContact = !claim;
         if (freeSeconds > 0) {
-          if (claim) approach(actor, claim, 0, distance, freeSeconds);
+          if (claim) approach(actor, claim, 0, distance, freeSeconds, arena.nav);
           turnToward(actor, arena.player.x, arena.player.y, freeSeconds);
         }
       } else {
@@ -741,7 +802,7 @@ export function advanceCombatArena(
         if (holding) {
           const released = actor.action?.timing != null && atUs >= actor.action.timing.releaseAtUs;
           if (!released) turnToward(actor, arena.player.x, arena.player.y, seconds);
-        } else approach(actor, arena.player, geometry.stopCenterDistance, distance, freeSeconds);
+        } else approach(actor, arena.player, geometry.stopCenterDistance, distance, freeSeconds, arena.nav);
       }
     } else if (mob.hp > 0 && options.engagedIds) {
       actor.waitingForContact = false;
@@ -753,18 +814,19 @@ export function advanceCombatArena(
       const gap = arenaDistance(actor, slot.home);
       const band = Math.max(0, options.homeBandM ?? 0.35);
       const returnMult = Math.max(0, Math.min(1, options.returnSpeedMult ?? 0.65));
-      if (gap > band) {
-        approach(actor, slot.home, band, speed * returnMult, seconds);
+      if (actor.returning || gap > slot.roamM) {
+        approach(actor, slot.home, band, speed * returnMult, seconds, arena.nav);
       } else {
         const phase = atUs / arena.unitsPerSec * 0.28 + (slot.home.x + slot.home.y) * 0.13;
         approach(actor, {
           x: slot.home.x + Math.cos(phase) * slot.roamM * 0.6,
           y: slot.home.y + Math.sin(phase) * slot.roamM * 0.6,
-        }, 0, speed * 0.3, seconds);
+        }, 0, speed * 0.3, seconds, arena.nav);
       }
     }
   }
   separateBodies(arena, state);
+  if (before) settleStaticClearance(arena, state, before);
   captureCombatArena(arena, state, atUs);
 }
 

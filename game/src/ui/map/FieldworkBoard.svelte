@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fieldwork } from '../../engine/client';
-  import { activeMeal, canCook, fieldActionProblem, fieldHarvestAmount, fieldMasteryLevel, fieldSkillLevel } from '../../sim/world/fieldwork';
-  import type { GameState } from '../../sim/core/types';
+  import { activeMeal, canCook, fieldActionProblem, fieldHarvestAmount, fieldMasteryLevel, fieldSkillLevel } from '@sim/world/fieldwork';
+  import type { GameState } from '@sim/core/types';
   import { stackIcon, icon } from '../../icon';
   import Tabs from '../shared/Tabs.svelte';
   import CountBadge from '../shared/CountBadge.svelte';

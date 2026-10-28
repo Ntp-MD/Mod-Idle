@@ -1,6 +1,6 @@
 import { E, loot } from '../../engine/client';
-import { atSettlement, craft, lineTier, opScope, replaceChoices, type CraftOp, type Where } from '../../sim/gear/craft';
-import type { GameState, Item } from '../../sim/core/types';
+import { atSettlement, craft, lineTier, opScope, replaceChoices, type CraftOp, type Where } from '@sim/gear/craft';
+import type { GameState, Item } from '@sim/core/types';
 
 export type StoneMode = { op: CraftOp; target: 'piece' | 'line'; pick?: boolean };
 /** Interaction choices only. Prices, reach and results remain owned by the crafting engine. */

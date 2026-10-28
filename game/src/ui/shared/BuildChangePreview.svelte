@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { formatBuildValue, type BuildPreview } from '../../sim/core/build-preview';
+  import { formatBuildValue, type BuildPreview } from '@sim/core/build-preview';
 
   let { preview, title = 'After equipping', omitNote = '' }: {
     preview: BuildPreview;

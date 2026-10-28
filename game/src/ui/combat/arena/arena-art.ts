@@ -50,6 +50,29 @@ export type ArenaCharacterArt = {
     & Partial<Record<'hit' | 'death', Partial<Record<ArenaDirection, ArenaSpriteSheet>>>>;
 };
 
+const artExtents = new WeakMap<ArenaCharacterArt, { left: number; top: number; right: number; bottom: number } | null>();
+
+/** Immutable art is scanned once, shared by every body and render frame using the same asset. */
+export function arenaArtExtent(art: ArenaCharacterArt | null) {
+  if (!art) return null;
+  const cached = artExtents.get(art);
+  if (cached !== undefined) return cached;
+  let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
+  for (const clip of Object.values(art?.clips ?? {})) {
+    for (const sheet of Object.values(clip ?? {})) {
+      for (const frame of sheet?.sourceFrames ?? []) {
+        left = Math.min(left, frame.offsetX);
+        top = Math.min(top, frame.offsetY);
+        right = Math.max(right, frame.offsetX + frame.width);
+        bottom = Math.max(bottom, frame.offsetY + frame.height);
+      }
+    }
+  }
+  const extent = Number.isFinite(left) ? { left, top, right, bottom } : null;
+  artExtents.set(art, extent);
+  return extent;
+}
+
 export type ArenaPixelSpriteSet = {
   hero: ArenaCharacterArt;
   species: Readonly<Partial<Record<string, ArenaCharacterArt>>>;

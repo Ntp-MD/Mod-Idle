@@ -1,7 +1,7 @@
 <script lang="ts">
   import { eng } from '../../engine/client';
-  import type { CombatHistoryEntry, EnemySnapshot } from '../../sim/combat/combat-history';
-  import { COMBAT_HISTORY_LIMIT, summarizeCombat } from '../../sim/combat/combat-history';
+  import type { CombatHistoryEntry, EnemySnapshot } from '@sim/combat/combat-history';
+  import { COMBAT_HISTORY_LIMIT, summarizeCombat } from '@sim/combat/combat-history';
   import { fieldLabel } from '../hud/hud';
 
   let { entries, oninspect }: { entries: CombatHistoryEntry[]; oninspect: (enemy: EnemySnapshot) => void } = $props();

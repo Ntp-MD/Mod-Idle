@@ -107,6 +107,25 @@ export function activeVfxMechanics(skill?: {targets?: string; effects?: {stat:st
   };
 }
 
+/**
+ * How many strike visuals one arena event owns. A press the tick resolves into separate impact
+ * flights (`action` rows) already emits one event per hit, so each event draws exactly one. Only a
+ * folded row (no action; `skills.ts` multiplies `hits` into one damage receipt) needs the repeat.
+ */
+export function activeVfxResolvedHits(
+  skill: { action?: unknown; effects?: { stat: string; value: number }[] } | undefined,
+  cast: boolean,
+): number {
+  if (cast || skill?.action) return 1;
+  return Math.max(1, Number(skill?.effects?.find((effect) => effect.stat === 'hits')?.value ?? 1));
+}
+
+/** A folded multi-hit receipt pays every hit as one number; the label says how many. */
+export function arenaDamageLabel(text: string | undefined, hits: number, crit = false): string {
+  if (!text) return '';
+  return `${text}${crit ? '!' : ''}${hits > 1 ? ` ×${hits}` : ''}`;
+}
+
 /** Visual palette for skills without a gameplay element; these choices never feed combat data. */
 export function activeVfxElement(id: string, element?: string | null) {
   return element ?? ({

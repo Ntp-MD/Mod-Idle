@@ -1,7 +1,7 @@
 import { E, eng, fieldwork, TOWN } from '../../engine/client';
-import type { GameState } from '../../sim/core/types';
-import { mapKnowledge, trailSiteAt, trailSiteKind, hexDistance } from '../../sim/world/map-exploration';
-import { standingProgress } from '../../sim/town/town';
+import type { GameState } from '@sim/core/types';
+import { mapKnowledge, trailSiteAt, trailSiteKind, hexDistance } from '@sim/world/map-exploration';
+import { standingProgress } from '@sim/town/town';
 import type { Picked } from './map';
 
 export function destinationIntel(state: GameState, cell: Picked, townId: string, blocks: number) {

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "action": "attack",
+  "direction": "east",
+  "pose": "03-recovery",
+  "generator": "Deterministic extraction from existing species atlas",
+  "sourceSize": {
+    "width": 384,
+    "height": 384
+  },
+  "rawAlphaBoundsExclusive": [
+    131,
+    168,
+    253,
+    288
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    131,
+    168,
+    253,
+    288
+  ],
+  "boundsProvenance": "Pillow direct alpha measurement after 2x nearest-neighbor scale and anchor placement",
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Source cell visible bbox bottom centered at shared (192,288) anchor",
+  "releaseSocket": null,
+  "sourcePixelsModified": true,
+  "styleReference": "art-reference/players/one-handed-sword/reference.png",
+  "bakedWeapon": "none",
+  "sourceAtlas": "art-reference/monsters/formless/ooze/animation/atlas/animation.png",
+  "sourceCellIndex": 19,
+  "transformation": "128x128 source cell extracted and enlarged 2x with NEAREST, then placed on a transparent 384x384 canvas. Source color and alpha values preserved except for explicitly listed detached components.",
+  "removedComponents": [
+    {
+      "area": 15,
+      "reason": "Detached stray fragment; it becomes a separate component after 2x scaling and is excluded by one-connected-pose rule.",
+      "sourceBounds": [
+        29,
+        79,
+        31,
+        88
+      ]
+    }
+  ]
+}

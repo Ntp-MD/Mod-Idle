@@ -1,9 +1,9 @@
 <script lang="ts">
   import { sm, trade, TOWN } from '../../engine/client';
-  import { blackMarketOfferReason, blackMarketState } from '../../sim/town/black-market';
-  import { stoneName } from '../../sim/gear/craft';
+  import { blackMarketOfferReason, blackMarketState } from '@sim/town/black-market';
+  import { stoneName } from '@sim/gear/craft';
   import { skillIcon, stackIcon } from '../../icon';
-  import type { GameState } from '../../sim/core/types';
+  import type { GameState } from '@sim/core/types';
   let { state, townId, here, writer, onbuy }: { state: GameState; townId: string; here: boolean; writer: boolean; onbuy: (town: string, offerId: string) => void } = $props();
   const stock = $derived(blackMarketState(state, townId));
   const gold = (value: number) => value.toFixed(TOWN.trade.currency_decimals);

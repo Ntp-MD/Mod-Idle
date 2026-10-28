@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "action": "attack",
+  "direction": "east",
+  "pose": "02-follow-through",
+  "generator": "Recovered source pose; not newly generated",
+  "sourceSize": {
+    "width": 384,
+    "height": 384
+  },
+  "rawAlphaBoundsExclusive": [
+    78,
+    139,
+    294,
+    291
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    80,
+    140,
+    292,
+    289
+  ],
+  "boundsProvenance": "Pillow measurement of raw-recovered 384x384 frame cell",
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Shared anchor authored by tools/monster-animation-restore-raw.py; not independently visually measured",
+  "sourcePixelsModified": true,
+  "recoveredSource": {
+    "rawGeneratorOutput": "01a16e04-954e-7ff2-bf9d-a0a91eeae401/exec-a062b954-9a06-47ef-9280-7ac92828fcf4.png",
+    "sourceSpeciesMetadata": "art-reference/monsters/dragon/mirehydra/animation/meta.json",
+    "frameIndex": 18,
+    "method": "raw-connected-pose-repack-384-v1",
+    "sourceAlphaThreshold": 128,
+    "edgeRecoveryRadius": null,
+    "normalizationScale": 1.0
+  },
+  "styleReference": null,
+  "bakedWeapon": "natural-bite",
+  "alphaMeasurement": {
+    "extrema": [
+      0,
+      255
+    ],
+    "distinctLevels": 256,
+    "hardAlpha": false
+  },
+  "note": "Recovered pose pixels are cropped from the raw-recovered atlas; alpha/components may be reconstructed. This is not an untouched source PNG and remains draft-review. Direct production set: fixed baked natural weapon natural-bite."
+}

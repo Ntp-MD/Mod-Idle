@@ -296,23 +296,32 @@ def check_mold(target: Path, species: str | None, kit: list[str] | None) -> tupl
             issues.append(f"reference.meta.json: cannot read: {error}")
 
     attack_kind = None
-    anim_meta_path = target / "animation/v1/meta.json"
-    if not anim_meta_path.is_file():
-        issues.append("missing animation/v1/meta.json")
+    animation_roots = (
+        (target / "animation/v1/meta.json", target / "animation/v1/poses"),
+        (target / "animation/meta.json", target / "animation/poses"),
+    )
+    selected_animation = next(((meta, poses) for meta, poses in animation_roots if meta.is_file()), None)
+    if selected_animation is None:
+        anim_meta_path = animation_roots[0][0]
+        poses_root = animation_roots[0][1]
+        anim_meta_label = "animation/v1/meta.json or animation/meta.json"
+        issues.append(f"missing {anim_meta_label}")
     else:
+        anim_meta_path, poses_root = selected_animation
+        anim_meta_label = anim_meta_path.relative_to(target).as_posix()
         try:
             if "TODO" in anim_meta_path.read_text(encoding="utf-8-sig"):
-                issues.append("animation/v1/meta.json: still contains unfilled template TODO")
+                issues.append(f"{anim_meta_label}: still contains unfilled template TODO")
             anim_meta = read_json(anim_meta_path)
         except (OSError, json.JSONDecodeError) as error:
-            issues.append(f"animation/v1/meta.json: cannot read: {error}")
+            issues.append(f"{anim_meta_label}: cannot read: {error}")
             anim_meta = {}
         attack_kind = anim_meta.get("attackKind") if isinstance(anim_meta, dict) else None
         if attack_kind not in ("close", "far"):
-            issues.append('animation/v1/meta.json: attackKind must be "close" or "far"')
+            issues.append(f'{anim_meta_label}: attackKind must be "close" or "far"')
             attack_kind = None
         elif not ref_baked or anim_meta.get("bakedWeaponId") != ref_baked:
-            issues.append("animation/v1/meta.json: bakedWeaponId must match reference.meta.json")
+            issues.append(f"{anim_meta_label}: bakedWeaponId must match reference.meta.json")
 
     poses: list[str] = []
     for key in ("idle", "walk", "hit", "death"):
@@ -326,7 +335,7 @@ def check_mold(target: Path, species: str | None, kit: list[str] | None) -> tupl
         kind_files[str(kind)] = [str(entry) for entry in files] if isinstance(files, list) else []
     if attack_kind in kind_files:
         poses.extend(kind_files[attack_kind])
-    elif anim_meta_path.is_file():
+    elif selected_animation is not None:
         issues.append("skipped attack poses: no valid attackKind")
 
     def check_pose(poses_root: Path, stem: str, kind: str | None) -> None:
@@ -350,7 +359,6 @@ def check_mold(target: Path, species: str | None, kit: list[str] | None) -> tupl
         if kind == "far" and stem.endswith("01-release") and "releaseSocket" not in meta:
             issues.append(f"poses/{stem}.meta.json: releaseSocket is required on far release frames")
 
-    poses_root = target / "animation/v1/poses"
     for pose in poses:
         stem = pose[:-len(".png")] if pose.endswith(".png") else pose
         check_pose(poses_root, stem, attack_kind if "/attack/" in stem else None)
@@ -494,7 +502,7 @@ def audit_atlas(metadata_path: Path, *, runtime_image: Path | None = None) -> At
         alpha_channel = alpha_channel.point(lambda value: int(value >= RUNTIME_ALPHA_THRESHOLD))
     alpha = alpha_channel.tobytes()
     clearances: list[tuple[int, int]] = []
-    signatures: dict[int, tuple[tuple[int, int, int, int], int]] = {}
+    signatures: dict[int, tuple[int, int, bytes]] = {}
 
     if frames:
         for index, frame in enumerate(frames):
@@ -520,8 +528,8 @@ def audit_atlas(metadata_path: Path, *, runtime_image: Path | None = None) -> At
                 continue
 
             bx0, by0, bx1, by1 = box
-            histogram = cell_alpha.histogram()
-            signatures[index] = ((bx0, by0, bx1, by1), sum(histogram[1:]))
+            pose_mask = cell_alpha.crop(box)
+            signatures[index] = (pose_mask.width, pose_mask.height, pose_mask.tobytes())
             content_x0, content_y0 = x0 + bx0, y0 + by0
             content_x1, content_y1 = x0 + bx1, y0 + by1
             if is_variant or runtime:
@@ -562,7 +570,7 @@ def audit_atlas(metadata_path: Path, *, runtime_image: Path | None = None) -> At
                     f"falls outside its sourceFrames crop ({frame.x},{frame.y},{frame.right},{frame.bottom})"
                 )
 
-    seen: dict[tuple[tuple[int, int, int, int], int], int] = {}
+    seen: dict[tuple[int, int, bytes], int] = {}
     for index in sorted(signatures):
         signature = signatures[index]
         if signature in seen:

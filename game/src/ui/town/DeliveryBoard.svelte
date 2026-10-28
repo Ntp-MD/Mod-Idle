@@ -1,12 +1,12 @@
 <script lang="ts">
   import { sm, TOWN, trade } from '../../engine/client';
-  import { stoneName } from '../../sim/gear/craft';
-  import { deliveryTimeLeft, deliveryPauseReason, previewDelivery, contractById } from '../../sim/town/delivery';
-  import { tradeBucket } from '../../sim/town/trade';
-  import type { GameState } from '../../sim/core/types';
-  import type { DeliveryContract } from '../../sim/town/delivery-types';
-  import { deliveryBonuses } from '../../sim/town/quest-rewards';
-  import { acquisitionSources, ACTIVITY_GUIDE } from '../../sim/core/guidance';
+  import { stoneName } from '@sim/gear/craft';
+  import { deliveryTimeLeft, deliveryPauseReason, previewDelivery, contractById } from '@sim/town/delivery';
+  import { tradeBucket } from '@sim/town/trade';
+  import type { GameState } from '@sim/core/types';
+  import type { DeliveryContract } from '@sim/town/delivery-types';
+  import { deliveryBonuses } from '@sim/town/quest-rewards';
+  import { acquisitionSources, ACTIVITY_GUIDE } from '@sim/core/guidance';
   import QuestBonusPicker from './QuestBonusPicker.svelte';
   import EmptyNote from '../shared/EmptyNote.svelte';
   import { questBonusText } from './quest-rewards';

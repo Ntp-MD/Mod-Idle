@@ -34,7 +34,7 @@ Each fact has one owner; link, don't copy. Provider entry files carry no separat
 |---|---|
 | `engine/` | Shared formulas and data-driven mechanics |
 | `tools/data/engine.json` | Stats, combat, loot, craft, mobs/zones, inventory, fieldwork and dungeon configuration |
-| `tools/data/spawns.json` | Field spawn layout, population cap, per-slot respawn, aggro/assist/leash ranges and offline engagement share |
+| `tools/data/spawns.json` | Field spawn layout, optional calibrated navigation geometry (origin, cell size, static obstacles with movement/sight/projectile flags), population cap, per-slot respawn, aggro/assist/leash ranges and offline engagement share |
 | `tools/data/mods.json` | Mod ranges, quality bands and drop weights |
 | `tools/data/town.json` | Town stock/prices, Standing, Collector, tasks, trade, Haggling, Delivery and Black Market |
 | `tools/data/skills.json` | Skill roster, reserve tiers and skill configuration |

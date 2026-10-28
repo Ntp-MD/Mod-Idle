@@ -7,7 +7,8 @@
     "runtimeSupplementalSpecies": [
       "wolf",
       "spider",
-      "wisp"
+      "wisp",
+      "beetle"
     ],
     "layout": {
       "columns": 8,
@@ -31,8 +32,8 @@
   },
   "productionAnimationBatch": {
     "status": "visual-approved",
-    "atlasPathPattern": "art-reference/monsters/<race>/<species>/animation/v<k>/atlas/animation.png",
-    "metadataPathPattern": "art-reference/monsters/<race>/<species>/animation/v<k>/meta.json",
+    "atlasPathPattern": "art-reference/monsters/<race>/<species>/animation/atlas/animation.png",
+    "metadataPathPattern": "art-reference/monsters/<race>/<species>/animation/meta.json",
     "species": [
       "goblin",
       "orc",
@@ -53,10 +54,13 @@
       "elf",
       "giant",
       "werewolf",
-      "dryad"
+      "dryad",
+      "wyvern",
+      "mirehydra",
+      "wyrmling"
     ],
     "notes": [
-      "These 20 baseline atlases are approved for the live ARPG battlefield; each meta.json records the actual source PNG size and frame bounds."
+      "These 23 baseline atlases are approved for the live ARPG battlefield; each root meta.json records the actual source PNG size and frame bounds."
     ]
   },
   "variantAnimationBatch": {
@@ -69,7 +73,7 @@
     "metadataPathPattern": "art-reference/monsters/<race>/<species>/variants/<variant-id>/v<k>/meta.json",
     "notes": [
       "Variant drafts were generated as 8 facings x 1 frame per state (40 cells). Production pose structure is owned by the mold; the runtime consumes east/west x4 rows. Remap before runtime registration.",
-      "These are review candidates. Runtime art registration and production approval remain separate work."
+      "All 156 existing variant drafts were normalized in place to 384 x 384 cells with the required 24 px gutters and passed atlas QA. They remain review candidates: each action/direction still has one pose, so they are not animated gait or runtime-complete. Runtime registration and production approval remain separate work."
     ]
   },
   "productionPlayerSet": "art-reference/players/one-handed-sword (staged from equipment-v1; status unbaked-staging). Legacy pilot art-reference/monsters/player retired and removed."

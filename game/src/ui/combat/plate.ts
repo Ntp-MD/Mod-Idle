@@ -10,7 +10,7 @@
  * ring the sim already owns and of a hold map the caller keeps — which is the design rule for motion on this
  * client: a beat is mounted by the fact that happened, never by a timer the stylesheet guessed.
  */
-import type { FxEvent, Mob } from '../../sim/core/types';
+import type { FxEvent, Mob } from '@sim/core/types';
 
 /** Every event the ring still holds, bucketed by the body it names, newest first as the ring already is. */
 export function fxByMob(ring: FxEvent[]): Map<string, FxEvent[]> {

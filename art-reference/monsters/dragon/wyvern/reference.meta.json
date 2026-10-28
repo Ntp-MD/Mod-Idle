@@ -7,18 +7,19 @@
     "height": 128
   },
   "facing": "south-east",
-  "bakedWeaponId": "TODO: identify the signature natural weapon/anatomy from the approved reference before generation",
+  "bakedWeaponId": "natural-claws",
   "footAnchor": {
-    "x": null,
-    "y": null,
-    "provenance": "pending reference image and measurement"
+    "x": 64,
+    "y": 108,
+    "provenance": "measured canonical 128x128 reference ground line"
   },
   "qa": {
-    "visuallyInspected": false,
-    "wholeBodyVisible": null,
+    "visuallyInspected": true,
+    "wholeBodyVisible": true,
+    "canvasPerimeterAlphaMaximum": 0,
     "sourcePixelsModified": false
   },
-  "note": "Scaffold only; reference.png is not generated/copy-filled by this offline preparation.",
+  "note": "Direct production identity review: Wyvern; fixed baked natural weapon is natural-claws.",
   "alphaBoundsExclusive": [
     29,
     48,

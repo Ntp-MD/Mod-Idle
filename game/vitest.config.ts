@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
+import { fileURLToPath } from 'node:url';
 
 /**
  * The suite is pure module imports over a read-only engine: no DOM, no fixtures on disk, no global
@@ -14,6 +15,12 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
  */
 export default defineConfig({
   plugins: [svelte()],
+  resolve: {
+    alias: {
+      '@engine': fileURLToPath(new URL('../engine', import.meta.url)),
+      '@sim': fileURLToPath(new URL('./src/sim', import.meta.url)),
+    },
+  },
   test: {
     pool: 'threads',
     isolate: false,

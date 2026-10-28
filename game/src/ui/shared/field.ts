@@ -1,6 +1,6 @@
-import { EFFECT_LABEL } from '../../sim/combat/skills';
-import { statusLabel } from '../../sim/combat/mobStatus';
-import type { GameState } from '../../sim/core/types';
+import { EFFECT_LABEL } from '@sim/combat/skills';
+import { statusLabel } from '@sim/combat/mobStatus';
+import type { GameState } from '@sim/core/types';
 
 /**
  * The field's own reads, in words and in bar geometry.

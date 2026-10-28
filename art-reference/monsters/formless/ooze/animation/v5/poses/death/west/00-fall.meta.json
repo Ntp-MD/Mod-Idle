@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "action": "death",
+  "direction": "west",
+  "pose": "00-fall",
+  "generator": "Deterministic extraction from existing species atlas",
+  "sourceSize": {
+    "width": 384,
+    "height": 384
+  },
+  "rawAlphaBoundsExclusive": [
+    108,
+    168,
+    276,
+    288
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    108,
+    168,
+    276,
+    288
+  ],
+  "boundsProvenance": "Pillow direct alpha measurement after 2x nearest-neighbor scale and anchor placement",
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Source cell visible bbox bottom centered at shared (192,288) anchor",
+  "releaseSocket": null,
+  "sourcePixelsModified": false,
+  "styleReference": "art-reference/players/one-handed-sword/reference.png",
+  "bakedWeapon": "none",
+  "sourceAtlas": "art-reference/monsters/formless/ooze/animation/atlas/animation.png",
+  "sourceCellIndex": 36,
+  "transformation": "128x128 source cell extracted and enlarged 2x with NEAREST, then placed on a transparent 384x384 canvas. Source color and alpha values preserved except for explicitly listed detached components.",
+  "removedComponents": []
+}

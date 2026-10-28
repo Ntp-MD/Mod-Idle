@@ -1262,7 +1262,7 @@
     "virtualHeight": 432,
     "alphaDiscard": 8,
     "delivery": "melee",
-    "origin": "target",
+    "origin": "caster",
     "orient": true,
     "groundOrigin": false,
     "contentWidthRatio": 0.5176991150442478,

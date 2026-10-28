@@ -1,6 +1,7 @@
-import type { CombatArena, CombatArenaAction, CombatArenaActor, CombatArenaFrame, CombatArenaPayload } from '../../sim/combat/combat-arena';
-import type { FxEvent, GameState } from '../../sim/core/types';
+import type { CombatArena, CombatArenaAction, CombatArenaActor, CombatArenaFrame, CombatArenaPayload } from '@sim/combat/combat-arena';
+import type { FxEvent, GameState } from '@sim/core/types';
 import type { ArenaDirection, ArenaSpriteSheet } from './arena/arena-art';
+import { sm } from '../../engine/client';
 
 import { ARENA_DIRECTIONS, ARENA_FACING_HYSTERESIS, arenaFacingIndex, projectArenaPoint, projectArenaVector, arenaScreenAngle, arenaScreenAngleFor } from '../../presentation/arena-camera';
 export { ARENA_VIEW, ARENA_ACTOR_WIDTH_M, projectArenaPoint, projectArenaVector, arenaScreenAngle, arenaScreenAngleFor, arenaCameraOffset, arenaActorPixelScale, unprojectArenaPoint } from '../../presentation/arena-camera';
@@ -191,8 +192,10 @@ export function arenaActorAction(
   return best?.action;
 }
 
-export function arenaPlaybackTime(nowUs: number, unitsPerSec: number, elapsedMs: number, speed: number, paused = false) {
-  return Math.max(0, Math.min(nowUs, nowUs - unitsPerSec + (paused ? 0 : Math.max(0, elapsedMs) * unitsPerSec * speed / 1000)));
+/** Continue the displayed window when a wake delivers more simulation; never skip to its last tick. */
+export function arenaPlaybackTime(nowUs: number, unitsPerSec: number, elapsedMs: number, speed: number, paused = false,
+  fromUs = nowUs - unitsPerSec) {
+  return Math.max(0, Math.min(nowUs, fromUs + (paused ? 0 : Math.max(0, elapsedMs) * unitsPerSec * speed / 1000)));
 }
 
 /**
@@ -202,7 +205,69 @@ export function arenaPlaybackTime(nowUs: number, unitsPerSec: number, elapsedMs:
 export function arenaEventTiming(event: FxEvent, arena: CombatArena) {
   const linked = event.actionId != null
     ? arena.actions.find((action) => action.id === event.actionId) : undefined;
+  const kind = event.skillId ? sm.byId[event.skillId]?.action?.kind : undefined;
+  if (event.kind === 'cast' && (kind === 'blizzard-field' || kind === 'sand-field') && linked?.primaryTiming) {
+    // The deployed field owns one presentation clock; later damage pulses only update hit receipts.
+    return { ...linked.primaryTiming, impactAtUs: linked.primaryTiming.releaseAtUs };
+  }
   return linked?.timing ?? event.castTiming;
+}
+
+/** The committed release→impact span a projectile actually flies; null when the hit lands at release. */
+export function arenaFlightWindow(
+  timing: { releaseAtUs: number; impactAtUs: number } | undefined | null,
+  unitsPerSec: number,
+): { releaseAtUs: number; impactAtUs: number; leadSec: number } | null {
+  if (!timing || !(timing.impactAtUs > timing.releaseAtUs) || !(unitsPerSec > 0)) return null;
+  return { releaseAtUs: timing.releaseAtUs, impactAtUs: timing.impactAtUs,
+    leadSec: (timing.impactAtUs - timing.releaseAtUs) / unitsPerSec };
+}
+
+/** Charge progress for the cast label: 0 at the cast beat, 1 just before release; undefined outside. */
+export function arenaCastCharge(
+  timing: { startedAtUs: number; releaseAtUs: number } | undefined, playhead: number,
+): number | undefined {
+  if (!timing || !(timing.releaseAtUs > timing.startedAtUs)) return undefined;
+  if (playhead < timing.startedAtUs || playhead >= timing.releaseAtUs) return undefined;
+  return clamp01((playhead - timing.startedAtUs) / (timing.releaseAtUs - timing.startedAtUs));
+}
+
+/**
+ * The nearest body the renderer may highlight. It mirrors `arenaTarget`: a returning body is
+ * untargetable until it reaches its home band, so it cannot wear the target ring.
+ */
+export function arenaNearestTarget(
+  mobs: Readonly<Record<string, { hp: number; x: number; y: number; returning?: boolean } | undefined>>,
+  player: { x: number; y: number },
+): string | undefined {
+  let best: string | undefined;
+  let nearest = Infinity;
+  for (const [id, actor] of Object.entries(mobs)) {
+    if (!actor || actor.hp <= 0 || actor.returning) continue;
+    const gap = Math.hypot(actor.x - player.x, actor.y - player.y);
+    if (gap < nearest - 1e-9 || (Math.abs(gap - nearest) <= 1e-9 && best != null && id < best)) {
+      nearest = gap;
+      best = id;
+    }
+  }
+  return best;
+}
+
+/**
+ * Projectile progress for the drawn flight. A committed window moves at the sim's own speed from
+ * release; only an event with no authored span keeps the legacy 0.24 s lead-in.
+ */
+export function arenaFlightProgress(
+  playhead: number, window: { releaseAtUs: number; impactAtUs: number } | null, age: number,
+): number {
+  return window
+    ? clamp01((playhead - window.releaseAtUs) / Math.max(1, window.impactAtUs - window.releaseAtUs))
+    : clamp01((age + .24) / .24);
+}
+
+/** Damage pulses show contact feedback; the deployed field atlas belongs to the cast event. */
+export function arenaPersistentFieldVisual(event: FxEvent, persistentField: boolean): boolean {
+  return !persistentField || event.kind === 'cast';
 }
 
 export function arenaPayloadSample(payload: CombatArenaPayload, atUs: number) {

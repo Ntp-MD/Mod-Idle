@@ -9,6 +9,34 @@
       "y": 1000
     }
   },
+  "feetByClip": {
+    "idle": {
+      "south": 972,
+      "south-east": 951,
+      "east": 943,
+      "north-east": 957,
+      "north": 937,
+      "north-west": 959,
+      "west": 942,
+      "south-west": 953
+    },
+    "walk": {
+      "east": 962,
+      "west": 976
+    },
+    "attack": {
+      "east": 1038,
+      "west": 992
+    },
+    "hit": {
+      "east": 934,
+      "west": 987
+    },
+    "death": {
+      "east": 905,
+      "west": 916
+    }
+  },
   "body": {
     "idle": {
       "south": [

@@ -11,9 +11,9 @@
    * Every number is read from the sim modules the cages already test; nothing here restates a rule.
    */
   import { E, eng } from '../../engine/client';
-  import { canBuy, stockOf, settlementById, standingProgress, rowById } from '../../sim/town/town';
-  import { slotsAvailable, slotsUsed } from '../../sim/gear/slots';
-  import type { GameState } from '../../sim/core/types';
+  import { canBuy, stockOf, settlementById, standingProgress, rowById } from '@sim/town/town';
+  import { slotsAvailable, slotsUsed } from '@sim/gear/slots';
+  import type { GameState } from '@sim/core/types';
   import { icon } from '../../icon';
   const marketMark = icon('currency-strongbox');
   const forgeMark = icon('anvil-1');

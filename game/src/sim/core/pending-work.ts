@@ -38,6 +38,11 @@ export interface PendingFlightState {
   impactSharePct?: number;
   rolls?: CastRollCache;
   follow?: boolean;
+  /** A deployed field's initial press suppresses the legacy erosion; later pulses carry flat DPS. */
+  fieldInitial?: boolean;
+  fieldPulseDamage?: number;
+  /** Chain contacts committed at release; the visited list keeps a reload from re-hitting. */
+  chain?: NonNullable<CombatFlight['chain']>;
   hitTargetId?: string;
 }
 
@@ -111,6 +116,9 @@ export function snapshotPendingWork(arena: CombatArena, group: readonly Mob[]): 
       ...(flight.impactSharePct != null ? { impactSharePct: flight.impactSharePct } : {}),
       ...(flight.rolls ? { rolls: flight.rolls } : {}),
       ...(flight.follow ? { follow: true } : {}),
+      ...(flight.fieldInitial ? { fieldInitial: true } : {}),
+      ...(flight.fieldPulseDamage != null ? { fieldPulseDamage: flight.fieldPulseDamage } : {}),
+      ...(flight.chain ? { chain: flight.chain } : {}),
       ...(flight.hitTargetId ? { hitTargetId: flight.hitTargetId } : {}),
     })),
     mobFlights: arena.mobFlights.map((shot) => ({
@@ -152,6 +160,9 @@ export function restorePendingWork(arena: CombatArena, state: GameState): number
     arena.actionSeq = Math.max(arena.actionSeq, action.id);
   }
   let restored = 0;
+  // Multi-impact flights of one press shared a cache at release; restore that identity, not copies,
+  // so a later impact cannot reroll a first-encounter effect the earlier one already spent.
+  const sharedRolls = new Map<number, CastRollCache>();
   for (const flight of work.flights) {
     if (!sm.byId[flight.skillId]) continue;
     const targets = flight.targetIds.map((id) => living.get(id)).filter((mob): mob is Mob => !!mob);
@@ -170,8 +181,14 @@ export function restorePendingWork(arena: CombatArena, state: GameState): number
       ...(flight.areaKey ? { areaKey: flight.areaKey } : {}),
       ...(flight.impactIndex != null ? { impactIndex: flight.impactIndex } : {}),
       ...(flight.impactSharePct != null ? { impactSharePct: flight.impactSharePct } : {}),
-      ...(flight.rolls ? { rolls: copy(flight.rolls) } : {}),
+      ...(flight.rolls ? {
+        rolls: sharedRolls.get(flight.actionId)
+          ?? (() => { const cache = copy(flight.rolls!); sharedRolls.set(flight.actionId, cache); return cache; })(),
+      } : {}),
       ...(flight.follow ? { follow: true } : {}),
+      ...(flight.fieldInitial ? { fieldInitial: true } : {}),
+      ...(flight.fieldPulseDamage != null ? { fieldPulseDamage: flight.fieldPulseDamage } : {}),
+      ...(flight.chain ? { chain: copy(flight.chain) } : {}),
       ...(flight.hitTargetId ? { hitTargetId: flight.hitTargetId } : {}),
     });
     restored++;
@@ -216,6 +233,17 @@ export function normalizePendingWork(value: unknown): PendingWorkState | null {
     if (flight.follow != null && typeof flight.follow !== 'boolean') return false;
     if (flight.rolls != null && (typeof flight.rolls !== 'object' || !flight.rolls.targets || !flight.rolls.effects))
       return false;
+    if (flight.fieldInitial != null && typeof flight.fieldInitial !== 'boolean') return false;
+    if (flight.fieldPulseDamage != null && (!finite(flight.fieldPulseDamage) || flight.fieldPulseDamage < 0)) return false;
+    if (flight.chain != null) {
+      const chain = flight.chain as Record<string, unknown>;
+      const visited = chain.visited;
+      if (!Array.isArray(visited) || !visited.every((id) => typeof id === 'string')) return false;
+      if (!finite(chain.remaining) || chain.remaining < 0) return false;
+      if (!finite(chain.hopRange) || !(chain.hopRange > 0)) return false;
+      if (!finite(chain.sharePct) || chain.sharePct < 0) return false;
+      if (chain.intervalSec != null && (!finite(chain.intervalSec) || !(chain.intervalSec > 0))) return false;
+    }
     if (!flight.skillId || !sm.byId[flight.skillId]) return false;
     if (!flight.prepared || flight.prepared.id !== flight.skillId) return false;
     if (!finite(flight.prepared.manaCost) || !finite(flight.prepared.hpCost)) return false;

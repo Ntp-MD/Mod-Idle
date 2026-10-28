@@ -1,8 +1,8 @@
 import { loot } from '../../engine/client';
 import { gearIcon, stackIcon } from '../../icon';
-import { itemName } from '../../sim/gear/item-name';
-import type { Item } from '../../sim/core/types';
-import type { BagStack } from '../../sim/gear/slots';
+import { itemName } from '@sim/gear/item-name';
+import type { Item } from '@sim/core/types';
+import type { BagStack } from '@sim/gear/slots';
 
 /**
  * The bag view model.

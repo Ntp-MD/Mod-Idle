@@ -1,9 +1,9 @@
 <script lang="ts">
   import QuestBonusPicker from './ui/town/QuestBonusPicker.svelte';
-  import type { TaskSlot } from './sim/core/types';
-  import { taskBonuses, resolveQuestBonus } from './sim/town/quest-rewards';
+  import type { TaskSlot } from '@sim/core/types';
+  import { taskBonuses, resolveQuestBonus } from '@sim/town/quest-rewards';
   import { questBonusText } from './ui/town/quest-rewards';
-  import { rollTask } from './sim/town/town';
+  import { rollTask } from '@sim/town/town';
   import { onDestroy, onMount, setContext, untrack } from 'svelte';
   import { linear } from 'svelte/easing';
   import { prefersReducedMotion, Tween } from 'svelte/motion';
@@ -11,42 +11,43 @@
   import { MOB_DRAFT_VARIANT_QA_PASS_METADATA_PATHS } from './ui/dev/arena-art/arena-art-mob-drafts-qa-pass';
   import { combatPreviewEvents, combatPreviewGroup, previewArea, previewFire, previewHeal, previewLightning,
     type CombatFxBeat, type CombatFxPreview } from './ui/dev/combat-fx-preview';
-  import { bundleOf } from '../../engine/keystones.ts';
-import { fieldSite, campHere as atFieldCamp, establishCamp, leaveCamp, returnToCamp, startFieldAction, stopFieldAction, cookMeal, eatMeal } from './sim/world/fieldwork';
-import { cancelCampEncounter, chooseCampEncounter, setCampEncounterPolicy, type CampEncounterAction, type CampEncounterPolicy } from './sim/world/camp-encounters';
-  import { sellGoods, processMaterials, tradeBucket } from './sim/town/trade';
-import { offerDelivery, deliver, trackDelivery, acknowledgeDelivery, announceDelivery, tickDeliveries, contractById, deliveryTimeLeft, deliveryPauseReason } from './sim/town/delivery';
-import { buyBlackMarket } from './sim/town/black-market';
+  import { bundleOf } from '@engine/keystones.ts';
+import { fieldSite, campHere as atFieldCamp, establishCamp, leaveCamp, returnToCamp, startFieldAction, stopFieldAction, cookMeal, eatMeal } from '@sim/world/fieldwork';
+import { cancelCampEncounter, chooseCampEncounter, setCampEncounterPolicy, type CampEncounterAction, type CampEncounterPolicy } from '@sim/world/camp-encounters';
+  import { sellGoods, processMaterials, tradeBucket } from '@sim/town/trade';
+import { offerDelivery, deliver, trackDelivery, acknowledgeDelivery, announceDelivery, tickDeliveries, contractById, deliveryTimeLeft, deliveryPauseReason } from '@sim/town/delivery';
+import { buyBlackMarket } from '@sim/town/black-market';
   import DeliveryNotice from './ui/town/DeliveryNotice.svelte';
-  import { previewScrapAlchemy, transmuteScrap, alchemyTierProgress } from './sim/gear/alchemy';
-  import { newGame, setLevel, tick, push, fx, hitColour, catchUpAsync, schedulerBatch, WAKE_SEC, characterSheet, huntZone, huntHere, salvageBag, retreatDungeon, runFilterNow, isBossKind, spawnMob } from './sim/core/game';
-  import { restorePendingWork } from './sim/core/pending-work';
-  import { fieldInFight, restoreFieldPositions } from './sim/world/field-area';
-  import type { ManualControl } from './sim/combat/combat-actions';
-  import { mobSkillById } from './sim/combat/mobSkills';
-  import { rollDrop } from './sim/gear/drop';
-  import { reservedPct, setAuraPool, hpReserved, usableHp, usableMana, skillCd, toggleTrack, ACTIVE_SLOTS, modeOf, condOf, appliedStatusOf, appliedCurseOf, moveSlot } from './sim/combat/skills';
-  import { describeSkill } from './sim/combat/skill-copy';
-  import { slotsUsed, slotsAvailable, slotsFree, bagStacks } from './sim/gear/slots';
+  import { previewScrapAlchemy, transmuteScrap, alchemyTierProgress } from '@sim/gear/alchemy';
+  import { newGame, setLevel, tick, push, fx, hitColour, catchUpAsync, schedulerBatch, WAKE_SEC, characterSheet, huntZone, huntHere, salvageBag, retreatDungeon, runFilterNow, isBossKind, spawnMob } from '@sim/core/game';
+  import { restorePendingWork } from '@sim/core/pending-work';
+  import { fieldInFight, restoreFieldPositions } from '@sim/world/field-area';
+  import type { ManualControl } from '@sim/combat/combat-actions';
+  import { mobSkillById } from '@sim/combat/mobSkills';
+  import { rollDrop } from '@sim/gear/drop';
+  import { reservedPct, setAuraPool, hpReserved, usableHp, usableMana, skillCd, toggleTrack, ACTIVE_SLOTS, modeOf, condOf, appliedStatusOf, appliedCurseOf, moveSlot } from '@sim/combat/skills';
+  import { describeSkill } from '@sim/combat/skill-copy';
+  import { slotsUsed, slotsAvailable, slotsFree, bagStacks } from '@sim/gear/slots';
   import SlotGrid from './ui/inventory/SlotGrid.svelte';
   import StatAllocator from './ui/character/StatAllocator.svelte';
   import Panel from './ui/hud/Panel.svelte';
   import { PANEL_SESSION, type PanelSession } from './ui/hud/panel-session';
   import CombatHistory from './ui/combat/CombatHistory.svelte';
   import EnemyInspector from './ui/combat/EnemyInspector.svelte';
-  import type { EnemySnapshot } from './sim/combat/combat-history';
+  import type { EnemySnapshot } from '@sim/combat/combat-history';
   import { refreshSelectionAfterRepair, resolveItemSelection, type ItemSelection } from './ui/inventory/item-selection';
   import { captureCharacterUiSnapshot, emptyCharacterUiSnapshot, restoreCharacterUiSnapshot, type CharacterUiSnapshot } from './ui/character/character-ui-session';
   import CountBadge from './ui/shared/CountBadge.svelte';
   import Quickbar from './ui/hud/Quickbar.svelte';
   import ActiveBuffs from './ui/hud/ActiveBuffs.svelte';
+  import PlayerStatusRow from './ui/combat/PlayerStatusRow.svelte';
   import HudLayoutEditor from './ui/hud/HudLayoutEditor.svelte';
   import { copyHudLayout, DEFAULT_MODAL_AREA, gridAreaCss, hudGridTemplate, HUD_LAYOUT_STORAGE_KEY, HUD_LAYOUT_PREVIOUS_STORAGE_KEYS, HUD_LAYOUT_VERSION, migrateHudLayout, regionStyleCss, salvageHudLayout, validGridArea, validateHudLayout, type GridArea, type HudLayout, type HudRegionId } from './ui/hud/hud-layout';
   import TravelCard from './ui/map/TravelCard.svelte';
   import MapJourney from './ui/map/MapJourney.svelte';
   import { destinationIntel } from './ui/map/map-intel';
-  import { investigateTrailSite, recordMapDiscovery } from './sim/world/map-exploration';
-  import { movePatrolStop } from './sim/world/exploration';
+  import { investigateTrailSite, recordMapDiscovery } from '@sim/world/map-exploration';
+  import { movePatrolStop } from '@sim/world/exploration';
   import { destinationPrimary } from './ui/map/destination';
   import TownHub from './ui/town/TownHub.svelte';
   import Market from './ui/town/Market.svelte';
@@ -57,7 +58,7 @@ import { buyBlackMarket } from './sim/town/black-market';
   import JourneyNotices from './ui/hud/JourneyNotices.svelte';
   import SkillDiscovery from './ui/character/SkillDiscovery.svelte';
   import SkillsWorkbench, { newSkillsWorkbenchView } from './ui/character/SkillsWorkbench.svelte';
-  import { skillEligibilityInState } from './sim/combat/skills';
+  import { skillEligibilityInState } from '@sim/combat/skills';
   import { importantCombatEvent } from './ui/combat/combat-presentation';
   import { newPassiveTreeSession } from './ui/passive-tree/passive-tree-view';
   import Forge from './ui/inventory/Forge.svelte';
@@ -78,42 +79,44 @@ import { buyBlackMarket } from './sim/town/black-market';
   import { adventureView, uniqueTraceSpecies, type AdventureCell } from './ui/map/map-adventure';
   import { mapMarker } from './ui/map/map-markers';
   import { setCastDrag, readCastDrag } from './ui/shared/drag';
-  import { snapCounters, buildAwayReport, fieldLabel, describeSnap, type AwayReport } from './ui/hud/hud';
+  import { snapCounters, buildAwayReport, fieldLabel, type AwayReport } from './ui/hud/hud';
   import { bar } from './ui/shared/field';
   import { fxOut } from './ui/shared/motion';
   import FieldPlates from './ui/combat/FieldPlates.svelte';
   import CombatArenaScene from './ui/combat/CombatArenaScene.svelte';
-  import { createCombatArena, syncCombatArena, arenaSkillTargets } from './sim/combat/combat-arena';
-  import { snapshotEnemy } from './sim/combat/combat-history';
+  import { createCombatArena, syncCombatArena, arenaSkillTargets, type CombatArena } from '@sim/combat/combat-arena';
+  import { snapshotEnemy } from '@sim/combat/combat-history';
   import LogBox from './ui/hud/LogBox.svelte';
   import ObjectiveFeed from './ui/hud/ObjectiveFeed.svelte';
   import { feedEventsAfter } from './ui/hud/logbox';
   import {
     settlementById, settlementOfZone, stockOf, priceGold, priceMinutes, canBuy, buy, sellJunk,
     standingProgress, canTravel, claimTask, npcOf, repairGear, skipTask, skipVerdict,
-  } from './sim/town/town';
-  import { doCraft, stoneName, atSettlement, replaceChoices, type CraftOp, type Where } from './sim/gear/craft';
-  import { forgeGear } from './sim/gear/forge';
-  import type { ForgeKind } from '../../engine/forge.ts';
-import { farm, farmLevel, farmMasteryLevel, plotCount, plant, harvest, craftPotion, condense, drink, cycleQuickbar } from './sim/world/farm';
-  import { stashTabCount, STASH_TAB_CAP, deposit, withdraw, depositMany, withdrawMany } from './sim/town/town';
-import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsFree } from './sim/core/tree';
-  import { allocateStats, respecStats } from './sim/core/respec';
+  } from '@sim/town/town';
+  import { doCraft, stoneName, atSettlement, replaceChoices, type CraftOp, type Where } from '@sim/gear/craft';
+  import { forgeGear } from '@sim/gear/forge';
+  import type { ForgeKind } from '@engine/forge.ts';
+import { farm, farmLevel, farmMasteryLevel, plotCount, plant, harvest, craftPotion, condense, drink, cycleQuickbar } from '@sim/world/farm';
+  import { stashTabCount, STASH_TAB_CAP, deposit, withdraw, depositMany, withdrawMany } from '@sim/town/town';
+import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsFree } from '@sim/core/tree';
+  import { allocateStats, respecStats } from '@sim/core/respec';
   import { CharacterSaveSession } from './state/saveSession';
-  import { road, startWalk, walkNote, walkBlocks, warpTo, warpCost, cellBlocks, cellSec, currentCell, settlementCell, ownerOf } from './sim/world/road';
-  import { clearPatrolStops, startPatrol as startPatrolRun, stopPatrol as stopPatrolRun, togglePatrolStop } from './sim/world/exploration';
-  import { enterDungeon, cooldownLeft } from './sim/world/dungeon';
-  import { mastery } from './sim/core/mastery';
-  import { storePreset, switchPreset, bindZone } from './sim/core/presets';
-  import { col, setUnlocked, heldCount, turnIn } from './sim/town/collector';
+  import { createSessionActions, type AccountWriterLease } from './app/session';
+  import { createGameLoop } from './app/loop';
+  import { road, startWalk, walkNote, walkBlocks, warpTo, warpCost, cellBlocks, cellSec, currentCell, settlementCell, ownerOf } from '@sim/world/road';
+  import { clearPatrolStops, startPatrol as startPatrolRun, stopPatrol as stopPatrolRun, togglePatrolStop } from '@sim/world/exploration';
+  import { enterDungeon, cooldownLeft } from '@sim/world/dungeon';
+  import { mastery } from '@sim/core/mastery';
+  import { storePreset, switchPreset, bindZone } from '@sim/core/presets';
+  import { col, setUnlocked, heldCount, turnIn } from '@sim/town/collector';
   import { mulberry32 } from './engine/client-helpers';
-  import { writeSaveSync, readSave, exportJson, importJson, saveSlots, listSnapshots, restoreSnapshot, readSettings, writeSettings, DEFAULT_SETTINGS, type SlotName, type Snapshot, type ClientSettings } from './state/save';
+  import { saveSlots, readSettings, writeSettings, DEFAULT_SETTINGS, type SlotName, type Snapshot, type ClientSettings } from './state/save';
   import { requestAccountWriterLock, type AccountWriterLockResult } from './state/accountWriterLock';
-  import { FILTER_SLOTS, ruleFor, setRule, describeRule, presetSlots, savePreset, loadPreset, clearPreset } from './sim/gear/filter';
-  import { equipFromBag, autoEquip, unequip } from './sim/gear/gear';
-  import { SAVE_CFG } from './sim/core/snapshot';
-  import { lifeSkillMilestones } from './sim/core/goal';
-  import { nextGoal, setTrackedGoal, zoneDestination, guidanceNotices, ACTIVITY_GUIDE, type GoalRef, type GoalView, type GuidanceNotice, type ShortageOrigin } from './sim/core/guidance';
+  import { FILTER_SLOTS, ruleFor, setRule, describeRule, presetSlots, savePreset, loadPreset, clearPreset } from '@sim/gear/filter';
+  import { equipFromBag, autoEquip, unequip } from '@sim/gear/gear';
+  import { SAVE_CFG } from '@sim/core/snapshot';
+  import { lifeSkillMilestones } from '@sim/core/goal';
+  import { nextGoal, setTrackedGoal, zoneDestination, guidanceNotices, ACTIVITY_GUIDE, type GoalRef, type GoalView, type GuidanceNotice, type ShortageOrigin } from '@sim/core/guidance';
   import { hubIcon, icon, skillIcon } from './icon';
   import chevronDownGlyph from './icon/ui/chevron-down.png';
   import pauseGlyph from './icon/ui/pause.png';
@@ -148,9 +151,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   // the picked cell are all toggled by id — the client reads no coordinate, only settlement ids and
   // cell keys it already holds (X33 · M7 · M10)
   import mapOverlayRaw from './icon/map/map-overlay.svg?raw';
-  import type { GameState, Item, Cell, Mob, FxEvent } from './sim/core/types';
+  import type { GameState, Item, Cell, Mob, FxEvent } from '@sim/core/types';
   import type { StatKey } from './engine/client';
-  import type { SkillConditions } from './sim/combat/skills';
+  import type { SkillConditions } from '@sim/combat/skills';
 
   const STATS: StatKey[] = ['str', 'int', 'vit', 'agi', 'dex', 'wis', 'lck'];
   const MAP_MARKER_LEGEND = [
@@ -169,7 +172,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   /** Every Gameplay sample the showcase dropdown offers — deep links (?sample=) accept the same set. */
   const SHOWCASE_SAMPLES = ['field', 'arpg-arena', 'build-workbench', 'progress-recap', 'core-field', 'core-town',
     'offline-progress', 'delivery', 'choice', 'full-bag', 'fallback', 'expired', 'read-only', 'economy-lab',
-    'expedition', 'craft-stash', 'combat-fx', 'skill-fx', 'map-mine', 'map-adventure',
+    'expedition', 'craft-stash', 'combat-fx', 'skill-fx', 'nav-proof', 'map-mine', 'map-adventure',
     'map-camp-sounds', 'map-camp-prowler', 'map-camp-traveler', 'map-camp-nest', 'map-camp-herd',
     'map-camp-injured', 'map-camp-discovered', 'map-camp-combat', 'map-camp-timeout', 'map-camp-full-bag',
     'map-camp-readonly'] as const;
@@ -410,6 +413,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
   let economyLabView = $state<any>(null);
   let skillFxLabView = $state<any>(null);
+  let navProofView = $state<any>(null);
   $effect(() => {
     if (!showcaseMode || showcaseSample !== 'economy-lab') return;
     let current = true;
@@ -421,6 +425,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     let current = true;
     import('./ui/dev/SkillFxLab.svelte').then(module => { if (current) skillFxLabView = module.default; });
     return () => { current = false; skillFxLabView = null; };
+  });
+  $effect(() => {
+    if (!showcaseMode || showcaseSample !== 'nav-proof') return;
+    let current = true;
+    import('./ui/dev/FieldNavProof.svelte').then(module => { if (current) navProofView = module.default; });
+    return () => { current = false; navProofView = null; };
   });
 
   function showcaseGame(scenario = 'delivery'): GameState {
@@ -1334,24 +1344,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     if (respecStats(gameState).ok) gameState = { ...gameState };
   }
 
-  function step() {
-    if (!transactionWriter) return;
-    // `tick` mutates the state in place. `gameState` is a deep `$state` proxy, so its fine-grained
-    // signals fire on their own — no need to clone the whole root and reassign, which used to
-    // invalidate every `$derived` (bag sorts, character rebuild) once a second on an idle tick.
-    const dropsBefore = gameState.counters.drops;
-    const wasDungeon = !!gameState.dungeon;
-    tick(gameState, { autoSkills: settings.autoSkills !== false, ...(arenaMode ? { arena: combatArena, manual: arenaManual } : {}) });
-    if (arenaMode) {
-      syncArenaFocus();
-      combatArena = { ...combatArena };
-    }
-    // Dungeon gear waits in escrow until payout; otherwise equip after each new gear roll.
-    if (settings.autoEquip !== false && !gameState.dungeon && (gameState.counters.drops > dropsBefore || wasDungeon)) {
-      equipCarriedBest();
-    }
-  }
-
   const AUTOSAVE_SEC = 30;
 
   $effect(() => {
@@ -1371,7 +1363,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   });
 
   onMount(() => {
-    let timer: ReturnType<typeof setInterval> | null = null;
+    let stopWake: (() => void) | null = null;
     let autosaveTimer: ReturnType<typeof setInterval> | null = null;
     let disposed = false;
     if (showcaseMode) {
@@ -1402,21 +1394,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       // storage itself is unreachable (private mode, quota): play on the defaults in memory and
       // leave whatever is on disk alone rather than destroying a layout we could not read
     }
-    // The unload flush must be synchronous: IndexedDB commits asynchronously and the page can be gone
-    // first, so `writeSaveSync` writes the mirror in one turn. It refreshes the away stamp too, so a
-    // reload right after cannot count the same absence twice.
-    const flushSync = (event?: Event) => {
-      if (!canWriteAccount || !saveSession.slot) return;
-      try { writeSaveSync(saveSession.slot, gameState); persistenceError = null; }
-      catch (error) {
-        persistenceError = error instanceof Error ? error.message : 'Emergency save failed; export JSON before closing.';
-        saveNote = persistenceError;
-        if (event?.type === 'beforeunload') {
-          event.preventDefault();
-          (event as BeforeUnloadEvent).returnValue = '';
-        }
-      }
-    };
     const onHide = () => { if (document.visibilityState === 'hidden') flushSync(); };
     (async () => {
       const writerLock = await requestAccountWriterLock();
@@ -1449,32 +1426,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       // credit the same absence a second time
       gameState.lastSavedAt = Date.now();
       loadSnaps();
-      // the clock is armed only after the catch-up, so a slice boundary cannot add an extra tick.
-      // The wake carries the REAL time since the last one, and `schedulerBatch` turns that into sim
-      // seconds at the chosen speed: a throttled tab (a hidden one fires at most once a second) banks the
-      // second it actually missed instead of a fixed quarter, so nothing is silently lost. The batch
-      // still caps at `MAX_BATCH` ticks a wake and the remainder stays owed, so a stalled wake drains
-      // over later wakes instead of stuttering the draw with a queued burst.
+      // The clock is armed only after the catch-up, so a slice boundary cannot add an extra tick.
       if (!disposed) {
-        let acc = 0;
-        let last = performance.now();
-        timer = setInterval(() => {
-          const now = performance.now();
-          // a wake that ran late is measured, never assumed; the tab's own throttling is the only clock
-          const elapsed = Math.max(0, (now - last) / 1000);
-          last = now;
-          if (!canWriteAccount || paused || !running) {
-            acc = 0;
-            cooldownSimRemainder = 0;
-            cooldownSchedulerAt = now;
-            return;
-          }
-          const batch = schedulerBatch(acc, speed, elapsed);
-          acc = batch.acc;
-          cooldownSimRemainder = acc;
-          cooldownSchedulerAt = now;
-          for (let i = 0; i < batch.ticks; i++) step();
-        }, WAKE_SEC * 1000);
+        stopWake = startWakeLoop();
         autosaveTimer = setInterval(() => { if (canWriteAccount && saveSession.slot) void doSave(saveSession.slot, true); }, AUTOSAVE_SEC * 1000);
         document.addEventListener('visibilitychange', onHide);
         window.addEventListener('beforeunload', flushSync);
@@ -1482,7 +1436,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     })();
     return () => {
       disposed = true;
-      if (timer) clearInterval(timer);
+      stopWake?.();
       if (autosaveTimer) clearInterval(autosaveTimer);
       document.removeEventListener('visibilitychange', onHide);
       window.removeEventListener('beforeunload', flushSync);
@@ -1781,68 +1735,69 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }));
   let loadController = $state.raw<AbortController | null>(null);
   let offlineProgress = $state<{ done: number; total: number } | null>(null);
-  function cancelOfflineLoad() {
-    loadController?.abort();
-    if (showcaseMode) { offlineProgress = null; loadController = null; }
-  }
-
-  async function doSave(slot: SlotName, quiet = false) {
-    if (showcaseMode) return;
-    if (!canWriteAccount) { saveNote = 'This tab does not control account saves.'; return; }
-    const epoch = saveSession.checkpoint();
-    try {
-      if (!await saveSession.save(slot, gameState)) return;
-      persistenceError = null;
-      if (!quiet) {
-        gameState = { ...gameState };
-        saveNote = `Saved to ${slot}`;
-        if (slot === snapSlot) await loadSnaps();
-      }
-    } catch (error) {
-      if (saveSession.isCurrent(epoch)) {
-        persistenceError = `Save failed: ${error instanceof Error ? error.message : 'browser storage failed'}`;
-        saveNote = persistenceError;
-      }
-    }
-  }
-
   let snaps: Snapshot[] = $state([]);
   let snapSlot = $state<SlotName>('slot1');
   let snapNote = $state('');
   let saveTab = $state<'slots' | 'backups' | 'settings'>('slots');
 
-  async function loadSnaps() {
-    if (showcaseMode) { snaps = []; snapNote = 'Snapshots are disabled in the Showcase.'; return; }
-    snaps = await listSnapshots(snapSlot);
-    snapNote = snaps.length ? '' : 'No backup yet — one is owed on the next level up, craft or timer.';
-  }
+  const session = createSessionActions({
+    showcaseMode,
+    saveSession,
+    get gameState() { return gameState; },
+    set gameState(value: GameState) { gameState = value; },
+    get canWriteAccount() { return canWriteAccount; },
+    get settings() { return settings; },
+    get paused() { return paused; },
+    set paused(value: boolean) { paused = value; },
+    get loadController() { return loadController; },
+    set loadController(value: AbortController | null) { loadController = value; },
+    set offlineProgress(value: { done: number; total: number } | null) { offlineProgress = value; },
+    set saveNote(value: string) { saveNote = value; },
+    set persistenceError(value: string | null) { persistenceError = value; },
+    set awayReport(value: AwayReport | null) { awayReport = value; },
+    get liveArpgArena() { return liveArpgArena; },
+    get accountWriterState() { return accountWriterState; },
+    set accountWriterState(value: AccountWriterState) { accountWriterState = value; },
+    get accountWriterLease() { return accountWriterLease; },
+    set accountWriterLease(value: AccountWriterLease | null) { accountWriterLease = value; },
+    get takeoverController() { return takeoverController; },
+    set takeoverController(value: AbortController | null) { takeoverController = value; },
+    get takeoverSlot() { return takeoverSlot; },
+    set takeoverSlot(value: SlotName) { takeoverSlot = value; },
+    get snapSlot() { return snapSlot; },
+    get snaps() { return snaps; },
+    set snaps(value: Snapshot[]) { snaps = value; },
+    set snapNote(value: string) { snapNote = value; },
+    resetArena,
+    resetSkillDiscovery,
+    captureCharacterUi: () => captureCharacterUi(),
+    restoreCharacterUi: (snapshot: CharacterUiSnapshot) => restoreCharacterUi(snapshot),
+    resetCharacterUi: () => resetCharacterUi(),
+    equipCarriedBest,
+  });
+  const {
+    cancelOfflineLoad, doSave, loadSnaps, restore, doLoad, takeOverAccount, cancelTakeover,
+    download, upload, reset, flushSync,
+  } = session;
 
-  async function restore(index: number) {
-    if (showcaseMode || !canWriteAccount) return;
-    const targetSlot = snapSlot;
-    const previousSlot = saveSession.slot;
-    const epoch = saveSession.detach();
-    paused = true;
-    try {
-      const s = await saveSession.run(() => restoreSnapshot(targetSlot, index));
-      if (!saveSession.isCurrent(epoch)) return;
-      if (!s) { if (previousSlot) saveSession.attach(previousSlot, epoch); snapNote = 'That backup is gone'; return; }
-      gameState = s;
-      resetCharacterUi();
-      awayReport = null;
-      resetSkillDiscovery();
-      saveSession.attach(targetSlot, epoch);
-      const what = describeSnap(snaps[index]);
-      await loadSnaps();
-      snapNote = `Rewound ${targetSlot} to the backup taken ${what} — the character went back whole, stones and craft counts with it`;
-    } catch (error) {
-      if (saveSession.isCurrent(epoch)) {
-        if (previousSlot) saveSession.attach(previousSlot, epoch);
-        snapNote = `Cannot rewind: ${error instanceof Error ? error.message : 'the backup failed validation'}`;
-      }
-    } finally { if (saveSession.isCurrent(epoch)) paused = false; }
-  }
-
+  const loop = createGameLoop({
+    get gameState() { return gameState; },
+    get settings() { return settings; },
+    get transactionWriter() { return transactionWriter; },
+    get arenaMode() { return arenaMode; },
+    get combatArena() { return combatArena; },
+    set combatArena(value: CombatArena) { combatArena = value; },
+    get arenaManual() { return arenaManual; },
+    get running() { return running; },
+    get paused() { return paused; },
+    get speed() { return speed; },
+    get canWriteAccount() { return canWriteAccount; },
+    set cooldownSimRemainder(value: number) { cooldownSimRemainder = value; },
+    set cooldownSchedulerAt(value: number) { cooldownSchedulerAt = value; },
+    syncArenaFocus,
+    equipCarriedBest,
+  });
+  const { step, startWakeLoop } = loop;
 
   function editRule(slot: string, patch: Record<string, unknown>) {
     if (!requireAccountWriter('changing the bag filter')) return;
@@ -1860,148 +1815,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     const gear = document.querySelector<HTMLDetailsElement>('.gear-care');
     if (gear) gear.open = true;
     requestAnimationFrame(() => gear?.scrollIntoView({ block: 'start' }));
-  }
-
-  async function doLoad(slot: SlotName) {
-    if (showcaseMode) return;
-    loadController?.abort();
-    const controller = new AbortController();
-    loadController = controller;
-    const previous = gameState;
-    const previousSlot = saveSession.slot;
-    const epoch = saveSession.detach();
-    let ui: CharacterUiSnapshot | null = null;
-    offlineProgress = { done: 0, total: 0 };
-    paused = true;
-    try {
-      await saveSession.flush();
-      const s = await readSave(slot);
-      if (!saveSession.isCurrent(epoch)) return false;
-      if (!s || controller.signal.aborted) {
-        if (previousSlot) saveSession.attach(previousSlot, epoch);
-        saveNote = controller.signal.aborted ? 'Load cancelled; your character and saved slot were kept.' : `${slot} is empty`;
-        return false;
-      }
-      ui = captureCharacterUi();
-      gameState = { ...s };
-      const away = (Date.now() - (s.lastSavedAt || Date.now())) / 1000;
-      const before = snapCounters(gameState);
-      // a load never clears the statuses the save just carried in (§7.7)
-      const r = canWriteAccount ? await catchUpAsync(gameState, away, {
-        autoSkills: settings.autoSkills !== false, signal: controller.signal,
-        onProgress: (done, total) => { if (saveSession.isCurrent(epoch)) offlineProgress = { done, total }; },
-      }) : { simulated: 0, capped: false, cancelled: false };
-      if (!saveSession.isCurrent(epoch)) return false;
-      if (r.cancelled) {
-        gameState = previous;
-        if (liveArpgArena) resetArena();
-        if (ui) restoreCharacterUi(ui);
-        if (previousSlot) saveSession.attach(previousSlot, epoch);
-        saveNote = 'Load cancelled; your character and saved slot were kept.';
-        return false;
-      }
-      if (canWriteAccount && settings.autoEquip !== false) equipCarriedBest();
-      awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped, gameState) : null;
-      // this slot becomes the autosave home, and the away window is spent (a reload must not recount it)
-      resetSkillDiscovery();
-      saveSession.attach(slot, epoch);
-      resetCharacterUi();
-      takeoverSlot = slot;
-      if (canWriteAccount) gameState.lastSavedAt = Date.now();
-      saveNote = canWriteAccount
-        ? `Loaded ${slot} — ${r.simulated} sec caught up`
-        : `Loaded ${slot} read-only — ${r.simulated} sec caught up`;
-      gameState = { ...gameState };
-      if (liveArpgArena) resetArena();
-      return true;
-    } catch (error) {
-      // a save that fails migration validation (removed content, illegal transitions) must say so —
-      // an unhandled rejection leaves the player staring at the slot they just clicked
-      if (saveSession.isCurrent(epoch)) {
-        gameState = previous;
-        if (liveArpgArena) resetArena();
-        if (ui) restoreCharacterUi(ui);
-        if (previousSlot) saveSession.attach(previousSlot, epoch);
-        saveNote = `Cannot load ${slot}: ${error instanceof Error ? error.message : 'the save failed validation'} — your character and slot were kept.`;
-      }
-      return false;
-    } finally {
-      if (saveSession.isCurrent(epoch)) { paused = false; offlineProgress = null; loadController = null; }
-    }
-  }
-
-  async function takeOverAccount() {
-    if (showcaseMode || accountWriterState !== 'readonly') return;
-    const controller = new AbortController();
-    takeoverController = controller;
-    accountWriterState = 'waiting';
-    const result = await requestAccountWriterLock({ wait: true, signal: controller.signal });
-    if (takeoverController !== controller) {
-      if (result.status === 'acquired') result.release();
-      return;
-    }
-    takeoverController = null;
-    if (result.status !== 'acquired') {
-      accountWriterState = result.status === 'cancelled' ? 'readonly' : 'unsupported';
-      return;
-    }
-    accountWriterLease = result;
-    accountWriterState = 'owner';
-    const loaded = await doLoad(takeoverSlot);
-    if (!loaded) {
-      accountWriterLease.release();
-      accountWriterLease = null;
-      accountWriterState = 'readonly';
-      saveNote = `${takeoverSlot} is empty. Choose a slot with a saved character before taking over.`;
-    }
-  }
-
-  function cancelTakeover() {
-    takeoverController?.abort();
-  }
-
-  function download() {
-    const blob = new Blob([exportJson(gameState)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `modworld-${gameState.player.level}.json`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  }
-
-  async function upload(ev: Event) {
-    if (showcaseMode || !canWriteAccount) return;
-    const file = (ev.target as HTMLInputElement).files?.[0];
-    if (!file) return;
-    const epoch = saveSession.checkpoint();
-    try {
-      const imported = importJson(await file.text());
-      if (!saveSession.isCurrent(epoch)) return;
-      saveSession.detach();
-      gameState = imported;
-      resetCharacterUi();
-      awayReport = null;
-      resetSkillDiscovery();
-      saveNote = 'Imported in memory. Choose a save slot to keep this character.';
-      gameState = { ...gameState };
-      if (liveArpgArena) resetArena();
-    } catch (e) {
-      saveNote = `Import failed: ${(e as Error).message} — your current slot was not changed. Start a new character to play the current tree.`;
-    }
-  }
-
-  function reset() {
-    if (!canWriteAccount) return;
-    loadController?.abort();
-    saveSession.detach();
-    offlineProgress = null;
-    paused = false;
-    gameState = newGame(undefined, crypto.getRandomValues(new Uint32Array(1))[0]);
-    if (liveArpgArena) resetArena();
-    resetCharacterUi();
-    awayReport = null;
-    resetSkillDiscovery();
-    saveNote = 'New character is not saved yet. Choose a save slot; existing slots were kept.';
   }
 
   // the panel follows the zone the character is actually hunting, so an auto-travel step cannot
@@ -3323,7 +3136,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <button onclick={cancelOfflineLoad}>Cancel loading</button>
   </Panel>
 {/if}
-<div class="showcase-frame" class:active={showcaseMode} class:economy-lab-sample={showcaseMode && showcaseSample === 'economy-lab'} class:skill-fx-sample={showcaseMode && showcaseSample === 'skill-fx'} inert={offlineProgress !== null}>
+<div class="showcase-frame" class:active={showcaseMode} class:economy-lab-sample={showcaseMode && showcaseSample === 'economy-lab'} class:skill-fx-sample={showcaseMode && showcaseSample === 'skill-fx'} class:nav-proof-sample={showcaseMode && showcaseSample === 'nav-proof'} inert={offlineProgress !== null}>
 {#if showcaseMode}
   <header class="showcase-banner">
     <div>
@@ -3334,7 +3147,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       }}>
         <option value="field">Field baseline</option><option value="arpg-arena">ARPG · Forest clearing</option><option value="build-workbench">Build · Full skill collection</option><option value="progress-recap">Progress · Return report</option><option value="core-field">Core allocation · field</option><option value="core-town">Core allocation · town</option><option value="offline-progress">Offline catch-up · preview</option><option value="delivery">Delivery want · Fixed</option><option value="choice">Delivery want · Choice</option><option value="full-bag">Delivery reward bag full</option>
         <option value="fallback">Delivery skill fallback</option><option value="expired">Expired partial delivery</option><option value="read-only">Read-only transactions</option><option value="economy-lab">Economy lab · Phase B</option>
-        <option value="expedition">Expedition task</option><option value="craft-stash">Crafting · Stash workbench</option><option value="combat-fx">Combat FX · all labels</option><option value="skill-fx">Skill FX · all skills</option><option value="map-mine">Map · Mine & Camp</option><option value="map-adventure">Map · Adventure board</option>
+        <option value="expedition">Expedition task</option><option value="craft-stash">Crafting · Stash workbench</option><option value="combat-fx">Combat FX · all labels</option><option value="skill-fx">Skill FX · all skills</option><option value="nav-proof">Field nav · proof overlay</option><option value="map-mine">Map · Mine & Camp</option><option value="map-adventure">Map · Adventure board</option>
         <option value="map-camp-sounds">Map · Camp sounds</option><option value="map-camp-prowler">Map · Camp prowler</option><option value="map-camp-traveler">Map · Camp traveler</option><option value="map-camp-nest">Map · Camp nest</option><option value="map-camp-herd">Map · Camp herd</option><option value="map-camp-injured">Map · Camp aid</option><option value="map-camp-discovered">Map · Camp discovered</option><option value="map-camp-combat">Map · Camp combat</option><option value="map-camp-timeout">Map · Camp timeout</option><option value="map-camp-full-bag">Map · Camp full bag</option><option value="map-camp-readonly">Map · Camp read only</option>
       </select></label>
     </div>
@@ -3480,6 +3293,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <a href="#panel-craft">Craft</a>
     <a href="#panel-skills">Skills</a>
     <a href="?sample=skill-fx">Skill FX lab</a>
+    <a href="?sample=nav-proof">Field nav proof</a>
     <a href="#panel-passive-tree">Tree</a>
     <a href="#panel-town">Town</a>
     <a href="#panel-market">Market</a>
@@ -3498,6 +3312,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   {#if showcaseMode && showcaseSample === 'skill-fx' && skillFxLabView}
     {@const SkillFxLab = skillFxLabView}
     <div id="showcase-skill-fx" class="showcase-skill-fx"><SkillFxLab /></div>
+  {/if}
+  {#if showcaseMode && showcaseSample === 'nav-proof' && navProofView}
+    {@const NavProof = navProofView}
+    <div id="showcase-nav-proof" class="showcase-nav-proof"><NavProof /></div>
   {/if}
 {/if}
 
@@ -3803,6 +3621,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         </div>
       </div>
       <div class="cast-stack">
+      {#if arenaMode}<PlayerStatusRow statuses={gameState.playerStatuses} />{/if}
       <ActiveBuffs skills={gameState.skills} />
       <Quickbar quickbar={gameState.quickbar} potions={gameState.farm.potions} condensed={gameState.farm.condensed} writable={transactionWriter}
                 bagIcon={hubIcon('bags', bagMark)} keyFor={(n) => keyFor('item.' + n)}
@@ -4914,7 +4733,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .showcase-economy-lab { min-height: 0; overflow-y: auto; padding: var(--spacing-md); }
   .showcase-economy-lab > :global(.economy-lab) { max-width: 1600px; margin: 0 auto; }
   .showcase-skill-fx { min-height: 0; overflow-y: auto; padding: var(--spacing-md); }
-  .showcase-frame.active.economy-lab-sample .stage, .showcase-frame.active.skill-fx-sample > .stage { display: none; }
+  .showcase-nav-proof { min-height: 0; overflow-y: auto; padding: var(--spacing-md); }
+  .showcase-frame.active.economy-lab-sample .stage, .showcase-frame.active.skill-fx-sample > .stage,
+  .showcase-frame.active.nav-proof-sample > .stage { display: none; }
   .showcase-note { padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); color: var(--dim); background: var(--inset); font-size: var(--font-xs); }
 
 

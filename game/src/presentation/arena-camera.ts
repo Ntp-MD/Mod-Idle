@@ -23,9 +23,25 @@ export function arenaScreenAngleFor(vector: { x: number; y: number }) {
 export function arenaScreenAngle(from: { x: number; y: number }, to: { x: number; y: number }) {
   return arenaScreenAngleFor({ x: to.x - from.x, y: to.y - from.y }) * 180 / Math.PI;
 }
-export function arenaCameraOffset(player: { x: number; y: number }, target?: { x: number; y: number }) {
-  const point = projectArenaPoint(target ? { x: (player.x + target.x) / 2, y: (player.y + target.y) / 2 } : player);
+// Accept the old target argument for existing callers; a target change never moves the camera.
+export function arenaCameraOffset(player: { x: number; y: number }, _target?: { x: number; y: number }) {
+  const point = projectArenaPoint(player);
   return { x: point.x - CX, y: point.y - CY };
+}
+
+/** Fixed world-space ground coverage, including the viewport at every reachable field edge. */
+export function arenaGroundBounds(bounds: { width: number; height: number }) {
+  const cameras = [
+    { x: 0, y: 0 }, { x: bounds.width, y: 0 },
+    { x: 0, y: bounds.height }, { x: bounds.width, y: bounds.height },
+  ].map(point => arenaCameraOffset(point));
+  const left = Math.min(...cameras.map(point => point.x));
+  const top = Math.min(...cameras.map(point => point.y));
+  return {
+    left, top,
+    width: Math.max(...cameras.map(point => point.x)) - left + ARENA_VIEW.width,
+    height: Math.max(...cameras.map(point => point.y)) - top + ARENA_VIEW.height,
+  };
 }
 export function arenaActorPixelScale(idleWidth: number, viewportScale: number) {
   // Horizontal extent of the projected circular footprint, not one projected world axis.

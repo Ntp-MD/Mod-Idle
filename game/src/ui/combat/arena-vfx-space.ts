@@ -1,4 +1,4 @@
-import type { SkillAreaSnapshot, SkillDelivery, SkillShape } from '../../../../engine/types';
+import type { SkillAreaSnapshot, SkillDelivery, SkillShape } from '@engine/types';
 import { sm } from '../../engine/client';
 import { projectArenaPoint } from './combat-arena-view';
 import { groundCirclePath } from './arena-space';

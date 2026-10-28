@@ -29,9 +29,9 @@ art-reference/monsters/
 
 - `<race>` is the canonical race id from `tools/data/engine.json` `mob.races`; each species lives under its race.
 - `<species>` is the canonical species id.
-- `reference.png` + `reference.meta.json` + `prompt.txt` at the set root fix the identity and the one baked weapon; every pose below must match them.
+- `reference.png` + `reference.meta.json` at the set root fix the identity and the one baked weapon; new sets also keep `prompt.txt`. Finished sets may retire prompt files, recorded in `prompt-deletion-registry-*.json`. Every pose below must match them.
 - `animation/` is a first-party animation set.
-- `poses/` holds the 41 base slots plus `skill/<action-slug>/` per kit entry with a cast block, exactly as named in `_shared/mob-animation-template.json`; each pose ships as `<slot>.png` + `<slot>.meta.json` + `<slot>.prompt.txt`.
+- `poses/` holds the 41 base slots plus `skill/<action-slug>/` per kit entry with a cast block, exactly as named in `_shared/mob-animation-template.json`; new sets ship each pose as `<slot>.png` + `<slot>.meta.json` + `<slot>.prompt.txt`, and `_shared/template/` keeps the full triad.
 - `animation/meta.json` declares `attackKind` (`close` for front line, `far` for stand-off unless recorded otherwise) and the baked weapon ids.
 - `v1/`, `v2/`, ... are versioned candidates; a new candidate always opens a new version folder, never overwrites a shipped path. `source/` and the root reference trio are shared across versions. Version lifecycle follows the versioned asset pool in `docs/plans/vfx-image-generation-work.md`; the integrator promotes the selected version as default per slice and keeps the previous one as fallback.
 - `<style-variant>/` is a third-party reference pack, named in full (`spear-goblin`, `stone-golem`, `shadow-wolf`, `sword-shield`), never a bare suffix such as `spear` or `stone`.
@@ -41,6 +41,7 @@ art-reference/monsters/
 workflow. New animation must use its single-frame intake (Step 2b) with
 `tools/monster-animation-compose.py`; grid atlases are accepted only for
 drafts already under review.
+- [Variant sprite generation guide](./variant-sprite-generation-guide.md) is the per-variant movement brief, pose prompt and Field acceptance checklist; the Field art-owner matrix must be resolved before declaring eight-direction gait complete.
 - `production-roster.json` is the machine-read atlas geometry contract, versioned path patterns and species list.
 
 ## Required variant layout
@@ -101,6 +102,9 @@ demon/demon/animation/
 formless/slime/animation/
 elemental/golem/animation/
 dragon/dragon/animation/
+dragon/wyvern/animation/
+dragon/mirehydra/animation/
+dragon/wyrmling/animation/
 plant/treant/animation/
 humanoid/human/animation/
 humanoid/lizardman/animation/
@@ -109,6 +113,7 @@ humanoid/giant/animation/
 beast/werewolf/animation/
 plant/dryad/animation/
 insect/spider/animation/
+insect/beetle/animation/
 elemental/wisp/animation/
 beast/wolf/animation/
 
@@ -126,7 +131,9 @@ _shared/collection/reference.png
 ```
 
 This folder intentionally keeps only app-used animation and review packs. There is no `_packs/` or `archive/` layer; history lives in the `v<k>/` version folders.
-The 20 target species above have approved baseline atlases at `animation/atlas/animation.png`; each runtime copy is registered in the Pixel-v2 combat atlas.
+The 23 species in the production batch have approved baseline atlases at `animation/atlas/animation.png`; wolf, spider, wisp and beetle are additional runtime sprites. Their copies are registered in the Pixel-v2 combat atlas.
+
+The 156 named Variant atlases are review drafts. Their existing 8-facing, one-pose-per-action sheets have been normalized in place to 384 × 384 cells with 24 px gutters and pass atlas QA; they still need the accepted gait matrix before they count as production locomotion.
 
 ## Generation prompt
 

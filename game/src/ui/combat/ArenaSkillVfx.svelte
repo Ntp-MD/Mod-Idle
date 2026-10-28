@@ -5,13 +5,13 @@
   import ArenaVfxField from './ArenaVfxField.svelte';
   import ArenaVfxShape from './ArenaVfxShape.svelte';
   import type { VfxFootprint, VfxTiming } from './arena-vfx-space';
-  import { ACTIVE_VFX, activeVfxDuration, activeVfxElement, activeVfxMechanics, activeVfxPlaybackDuration } from './arena-active-vfx';
+  import { ACTIVE_VFX, activeVfxDuration, activeVfxElement, activeVfxMechanics, activeVfxPlaybackDuration, activeVfxResolvedHits } from './arena-active-vfx';
   import { authoredVfxFor } from './arena-authored-vfx';
 
   type Point = {x:number; y:number};
-  let { id, shape, age:providedAge, source, point, ground, cast, element, layer = 'front', area, timing, flightProgressOverride, visualSeed = 0, allowComponents = true,
+  let { id, shape, age:providedAge, source, point, ground, sourceGround, cast, element, layer = 'front', area, timing, flightProgressOverride, visualSeed = 0, allowComponents = true,
     targets, spreadTargets = [], consumed = 0, charges, cleansed = 0, critical = false, reducedMotion = false, chainFrom }: {
-    allowComponents?:boolean; visualSeed?:number; id:string; shape:string; age:number; source:Point; point:Point; ground:Point; cast:boolean;
+    allowComponents?:boolean; visualSeed?:number; id:string; shape:string; age:number; source:Point; point:Point; ground:Point; sourceGround?:Point; cast:boolean;
     element?:string; layer?:'ground'|'front'; area?:VfxFootprint; timing?:VfxTiming; flightProgressOverride?:number; targets?:Point[]; spreadTargets?:Point[]; consumed?:number; charges?:number; cleansed?:number; critical?:boolean; reducedMotion?:boolean; chainFrom?:string;
   } = $props();
   const age = $derived(timing ? timing.nowSec-(shape === 'whirlwind' ? timing.releasedAtSec : timing.impactAtSec) : providedAge);
@@ -28,7 +28,7 @@
   const centers = $derived(cast && id.startsWith('curse.') && targets?.length === 0 ? []
     : authored && cast ? [area?.center ?? ground]
     : fields ? targets ?? [ground] : [ground]);
-  const repeats = $derived(!cast && mechanics.hits > 1 ? mechanics.hits : 1);
+  const repeats = $derived(activeVfxResolvedHits(sm.byId[id], cast));
   const strikeDuration = $derived(activeVfxPlaybackDuration(shape,sm.byId[id],id));
   const chargeCount = $derived(charges ?? sm.byId[id]?.effects?.find((effect:any) => ['dodge_charges','block_charges'].includes(effect.stat))?.value ?? 0);
   const visibleCast = $derived(!(cast && sm.byId[id]?.type === 'attack' && targets?.length === 0 && !area));
@@ -55,7 +55,7 @@
     {#if !(cast && layer==='ground' && area) || authored?.spatial?.layer === 'ground' || shape === 'whirlwind'}
       {#each Array.from({length:repeats},(_,i)=>i) as hit}
         <ArenaSkillVfxBody {id} {shape} {visualSeed} {allowComponents} age={age-hit*.14-(fields ? index*.055 : 0)-(!authored && cast && consumed>0 ? .18 : 0)} {source}
-          point={fields ? {x:target.x,y:target.y-48} : point} ground={target} {cast} element={displayElement} {layer}
+          point={fields ? {x:target.x,y:target.y-48} : point} ground={target} casterGround={sourceGround} {cast} element={displayElement} {layer}
           durationOverride={strikeDuration} authoredAreaDiameter={area?.diameter} {critical} {flightProgress}
           windupProgress={timing ? windup : undefined} {preImpact} {charging} {channelAge}
           strikeCount={mechanics.hits} sizeScale={fieldScale*((fields && centers.length>1 ? .72 : 1)+Math.min(.3,consumed*.03))}

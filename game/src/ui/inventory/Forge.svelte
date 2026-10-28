@@ -1,10 +1,10 @@
 <script lang="ts">
   import { ED, TOWN, fieldwork } from '../../engine/client';
-  import { forge, canForge } from '../../sim/gear/forge';
-  import { fieldSkillLevel } from '../../sim/world/fieldwork';
-  import { materialSources, sourceLine } from '../../sim/gear/material-sources';
-  import type { ForgeKind } from '../../../../engine/forge.ts';
-  import type { GameState } from '../../sim/core/types';
+  import { forge, canForge } from '@sim/gear/forge';
+  import { fieldSkillLevel } from '@sim/world/fieldwork';
+  import { materialSources, sourceLine } from '@sim/gear/material-sources';
+  import type { ForgeKind } from '@engine/forge.ts';
+  import type { GameState } from '@sim/core/types';
   import EmptyNote from '../shared/EmptyNote.svelte';
   import Tabs from '../shared/Tabs.svelte';
 

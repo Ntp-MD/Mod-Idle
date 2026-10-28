@@ -3,9 +3,9 @@
   import ArenaComponentVfx from './ArenaComponentVfx.svelte';
   import type { VfxFootprint } from './arena-vfx-space';
   type Point = {x:number;y:number};
-  let { id, age, duration, visualSeed = 0, allowComponents = true, ground, source, point, flightProgress, windupProgress, preImpact = false, strikeCount = 1, baseSize, areaDiameter, area, reducedMotion = false, looping = false }: {
+  let { id, age, duration, visualSeed = 0, allowComponents = true, ground, source, casterGround, point, flightProgress, windupProgress, preImpact = false, strikeCount = 1, baseSize, areaDiameter, area, reducedMotion = false, looping = false }: {
     allowComponents?:boolean; visualSeed?:number; id: string; age: number; duration: number; ground: Point;
-    baseSize: number; areaDiameter?: number; area?: VfxFootprint; reducedMotion?: boolean;
+    baseSize: number; areaDiameter?: number; area?: VfxFootprint; reducedMotion?: boolean; casterGround?: Point;
     source?: Point; point?: Point; flightProgress?: number; windupProgress?:number; preImpact?:boolean; strikeCount?:number; looping?:boolean;
   } = $props();
   let failedComponents = $state(false);
@@ -20,7 +20,7 @@
   const anticipating = $derived(!!preset?.delivery && !projectile && preImpact && age < 0);
   const position = $derived.by(() => {
     if (flying && source && point) return {x:source.x+(point.x-source.x)*progress,y:source.y+(point.y-source.y)*progress};
-    if (preset?.origin === 'caster' && source) return preset.delivery === 'ground' || preset.groundOrigin ? {x:source.x,y:source.y+58} : source;
+    if (preset?.origin === 'caster' && source) return preset.delivery === 'ground' || preset.groundOrigin ? (casterGround ?? {x:source.x,y:source.y+58}) : source;
     if (preset?.delivery === 'ground' || !preset?.delivery) return ground;
     return point ?? ground;
   });

@@ -15,17 +15,18 @@
 <script lang="ts">
   import { E, eng, sm } from '../../engine/client';
   import { skillIcon } from '../../icon';
-  import type { GameState } from '../../sim/core/types';
-  import type { Character } from '../../sim/core/player';
-  import type { SkillConditions, SkillMode } from '../../sim/combat/skills';
+  import type { GameState } from '@sim/core/types';
+  import type { Character } from '@sim/core/player';
+  import type { SkillConditions, SkillMode } from '@sim/combat/skills';
   import {
     NO_COND, appliedCurseOf, appliedStatusOf, auraPoolOf, auraResonanceOf, buffRecastCost, condOf,
     describeFold, effectLine, effectsActive, hpReservedPct, ladderOf, modeOf,
     reservedPct, rotationOrder, skillCd, skillEligibilityInState, skillLevel, usableHp, usableMana,
-  } from '../../sim/combat/skills';
-  import { curableRows } from '../../sim/combat/curse';
-  import { describeSkill, skillWindowEntries } from '../../sim/combat/skill-copy';
-  import { WEAPONS, mastery, masteryLabel, masteryLevel, weaponSkillBonusPct } from '../../sim/core/mastery';
+  } from '@sim/combat/skills';
+  import { curableRows } from '@sim/combat/curse';
+  import { describeSkill, skillWindowEntries } from '@sim/combat/skill-copy';
+  import { skillSlotState } from './skill-slot-copy';
+  import { WEAPONS, mastery, masteryLabel, masteryLevel, weaponSkillBonusPct } from '@sim/core/mastery';
   import Tabs from '../shared/Tabs.svelte';
   import SkillFxPreview from '../combat/SkillFxPreview.svelte';
 
@@ -202,7 +203,7 @@
                   onclick={() => { if (id) view.selectedId = id; }} aria-label={row ? `Inspect slot ${index + 1}: ${row.name}` : `Empty slot ${index + 1}. Add a skill from its inspector.`}>
                   {#if row && id && ready}
                     <span class="skill-art icon-mask" style:--glyph={`url("${skillIcon(id, row.type)}")`} aria-hidden="true"></span>
-                    <span class="slot-copy"><strong>{row.name}{#if row.cd === 0}<em>Filler</em>{/if}</strong><small class:ready={ready.ready} title={ready.detail}>{firstEligible === id ? 'First eligible' : ready.label} · {ready.hpCost > 0 ? `${format(ready.hpCost)} HP` : `${format(ready.manaCost)} Mana`}{ready.hpCost > 0 && ready.manaCost > 0 ? ` + ${format(ready.manaCost)} Mana` : ''} · {skillCd(sk, id, character.cdr).toFixed(1)}s CD</small></span>
+                    <span class="slot-copy"><strong>{row.name}{#if row.cd === 0}<em>Filler</em>{/if}</strong><small class:ready={ready.ready} title={ready.detail}>{firstEligible === id ? 'First eligible' : skillSlotState(ready.label, game.skills.cd[id] ?? 0, ready.ready)} · {ready.hpCost > 0 ? `${format(ready.hpCost)} HP` : `${format(ready.manaCost)} Mana`}{ready.hpCost > 0 && ready.manaCost > 0 ? ` + ${format(ready.manaCost)} Mana` : ''} · {skillCd(sk, id, character.cdr).toFixed(1)}s CD</small></span>
                   {:else}<span class="empty-slot">Empty slot</span>{/if}
                 </button>
                 <div class="move-buttons"><button aria-label={`Move slot ${index + 1} up`} title="Move up" disabled={!writable || index === 0} onclick={() => move(index, index - 1)}>Up</button><button aria-label={`Move slot ${index + 1} down`} title="Move down" disabled={!writable || index === sk.list.length - 1} onclick={() => move(index, index + 1)}>Down</button></div>
@@ -245,7 +246,7 @@
           {#if selectedIsTrack}
             <p class="live-state">{selected.type === 'aura' ? (sk.auras[selected.id] ? 'Aura enabled' : 'Aura off') : sk.buffs[selected.id] ? 'Buff track enabled' : 'Buff track off'}</p>
           {:else if eligibility}
-            <p class="live-state" class:ready={eligibility.ready}>{eligibility.label}</p><p class="reason">{eligibility.detail}</p>
+            <p class="live-state" class:ready={eligibility.ready}>{skillSlotState(eligibility.label, game.skills.cd[selected.id] ?? 0, eligibility.ready)}</p><p class="reason">{eligibility.detail}</p>
             {#if selectedSlot < 0}<p class="reason">Not in the cast order.</p>{/if}
           {/if}
           <dl class="skill-facts skill-window">

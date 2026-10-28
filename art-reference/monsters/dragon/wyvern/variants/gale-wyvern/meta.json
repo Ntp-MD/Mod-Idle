@@ -344,11 +344,11 @@
     },
     {
       "x": 1643,
-      "y": 1294,
+      "y": 1286,
       "width": 161,
       "height": 167,
       "offsetX": 107,
-      "offsetY": 142
+      "offsetY": 134
     },
     {
       "x": 2042,
@@ -492,12 +492,21 @@
       791,
       926
     ],
-    "uniformScale": 1.0
+    "uniformScale": 1.0,
+    "frameGroundCorrections": [
+      {
+        "frame": 28,
+        "deltaY": -4,
+        "reason": "minimal correction to fit the authored 24px upright ground-line tolerance"
+      }
+    ]
   },
   "quality": {
     "nativePixelArtApproved": false,
     "notes": [
-      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged.",
+      "Frame 28 shifted up 4px to meet the upright ground-line tolerance.",
+      "Applied minimal vertical ground-line correction to the named frames after the source atlas failed the 24px drift gate."
     ]
   }
 }

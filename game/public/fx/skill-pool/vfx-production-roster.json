@@ -590,11 +590,11 @@
   "batchStatus": "integrated",
   "verification": {
     "assetGate": "92 live selected atlases + 3 Meteor components PASS; alpha<=8 discard and virtual padding; raw sheets preserved beside runtime art",
-    "focusedTests": "arena-authored-vfx (15) and render (16) suites PASS",
+    "focusedTests": "caster-ground-anchor (2), skill-vfx-spec (8), arena-authored-vfx (15), render (16), handoff (4), skill-fx (3), fx-resolve (7), ground-slam (7), whirlwind (7) and combat-presentation (9): 78 passed; the anchor invariant is machine-checked by rendering the ground layer with resolved caster feet (cx/cy and translate on the feet, fixed-offset fallback only when none were resolved)",
     "typecheck": "passed",
     "svelteCheck": "0 errors / 0 warnings",
     "liveHttp": "92 selected atlases + 3 component modules + showcase route: passed",
-    "browser": "skill lab verified Double Strike, Frost Nova, Glacial Spike, Split Shot and Fissure; the remaining new atlas sets were verified through the shared authored renderer test; 1920 screenshot surface unavailable during the final pass",
+    "browser": "Visible-tab pass on 2026-10-28 at 1981x1145: the showcase field arena mounted 25+ real chibi actors on their ground line and advanced time; a Fireball cast was frozen mid-effect (3 data-active-skill-vfx groups) through the review Hold window button, and the Skill FX lab renders the authored atlases at full size. Two limits are recorded: the frozen groups vanished when the field sample re-synced its arena, so no stable actor-relative screenshot of a caster-origin ground effect exists yet, and the lab preview draws its ground plane more open (basisY about 0.7 of radius) than the arena camera (about 0.34 squash), so the arena stays the only source of truth for anchor-versus-feet judgments.",
     "build": "passed",
     "visualReview": "all selected atlas sheets inspected on the arena ground colour; 21 spatial replacements and 8 new frontal effects reviewed",
     "performance": "no data available"

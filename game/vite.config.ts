@@ -9,6 +9,12 @@ const repoRoot = fileURLToPath(new URL('..', import.meta.url));
 
 export default defineConfig({
   plugins: [svelte()],
+  resolve: {
+    alias: {
+      '@engine': fileURLToPath(new URL('../engine', import.meta.url)),
+      '@sim': fileURLToPath(new URL('./src/sim', import.meta.url)),
+    },
+  },
   server: { port: 5173, strictPort: true, fs: { allow: [repoRoot] } },
   build: {
     outDir: 'dist',

@@ -1,4 +1,5 @@
 import { E, TOWN, road, fieldwork } from '../../engine/client';
+import { checkpointFieldLives } from './field-area';
 import { hexAdjacent } from '../../../../engine/road.ts';
 import type { Hex } from '../../../../engine/road.ts';
 import { abandonRun } from './dungeon';
@@ -113,6 +114,7 @@ export function warpTo(state: GameState, id: string): { ok: boolean; why?: strin
   // ground it arrives on is the same cell a foot would have stood on
   const node = road.nodeById(id);
   if (node) state.cell = { q: node.q, r: node.r, sub: null, wild: null };
+  checkpointFieldLives(state);
   state.group = [];
   // warping home is safe ground: town fields no mobs until the character heads back out
   state.hunting = false;
@@ -172,7 +174,8 @@ export function startWalk(state: GameState, dest: Cell): { ok: boolean; why?: st
   if (state.fieldwork) state.fieldwork.action = null;
   // the walk spends the standing fight: a group left alive here keeps swinging through the whole
   // walk — block and evasion events off mobs the field never shows — so it is dropped whole, the
-  // same way entering a hunt drops it. An ambush on the road spawns its own group fresh.
+  // same way entering a hunt drops it. Its lives stay parked in their slots for the return.
+  checkpointFieldLives(state);
   state.group = [];
   state.player.atkTimer = 0;
   // walking out abandons the open run: a dungeon is entered ground, not a destination
@@ -205,6 +208,7 @@ export function arrive(state: GameState, walk: Walk) {
     state.town.waypoint = dest.id;
   }
   state.walk = null;
+  checkpointFieldLives(state);
   state.group = [];
   // A settlement is safe ground; wild ground is a fight the moment the feet land on it. The owner's travel
   // switch is a hunt wherever it stands, so the arrival tick itself fields the group — no dead second is

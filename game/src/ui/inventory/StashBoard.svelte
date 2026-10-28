@@ -12,15 +12,15 @@
    * paged: every slot the side holds is drawn at once, and the panel body is what scrolls.
    */
   import { gearIcon, icon } from '../../icon';
-  import { STASH_TAB_CAP } from '../../sim/town/town';
-  import { slotsAvailable, slotsFree, slotsUsed } from '../../sim/gear/slots';
-  import { itemName } from '../../sim/gear/item-name';
+  import { STASH_TAB_CAP } from '@sim/town/town';
+  import { slotsAvailable, slotsFree, slotsUsed } from '@sim/gear/slots';
+  import { itemName } from '@sim/gear/item-name';
   import { gearEntry, sortEntries, rankTone, SORT_LABELS, type SortKey } from './bag';
   import ItemDetail from './ItemDetail.svelte';
   import Tabs from '../shared/Tabs.svelte';
   import CountBadge from '../shared/CountBadge.svelte';
   import { setDrag, readDrag } from '../shared/drag';
-  import type { GameState, Item } from '../../sim/core/types';
+  import type { GameState, Item } from '@sim/core/types';
 
   let { game, tabs, tab, carriedSort = 'level', addtab = null, ontab, onaddtab, oncarriedsort, ondeposit, onwithdraw, ondepositAll, onwithdrawAll, onlock, onequip, wornOf }: {
     game: GameState;

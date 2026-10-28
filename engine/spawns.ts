@@ -8,6 +8,8 @@
  *
  * Pure: no file, no clock, no DOM. The same factory runs in the browser client and the cages.
  */
+import { isClear, route } from './navigation.ts';
+import type { NavLayout, NavPoint } from './navigation.ts';
 
 export interface SpawnPoint {
   id: string;
@@ -17,8 +19,49 @@ export interface SpawnPoint {
   roam_m: number;
 }
 
+/**
+ * One static ground obstacle. Movement, sight and projectile flags are independent so a wall can
+ * stop a body without hiding a target, and a canopy can hide without blocking a walk.
+ */
+export interface SpawnNavCircle {
+  kind: 'circle';
+  id: string;
+  x: number;
+  y: number;
+  radius: number;
+  blocksMovement: boolean;
+  blocksSight: boolean;
+  blocksProjectiles: boolean;
+}
+
+export interface SpawnNavBox {
+  kind: 'box';
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  blocksMovement: boolean;
+  blocksSight: boolean;
+  blocksProjectiles: boolean;
+}
+
+export type SpawnNavObstacle = SpawnNavCircle | SpawnNavBox;
+
+/**
+ * Optional vetted navigation geometry for one authored layout. Authored only after an overlay
+ * calibration; absent means "no geometry proven yet", never "open ground".
+ */
+export interface SpawnNav {
+  version: number;
+  origin: { x: number; y: number };
+  cellSizeM: number;
+  obstacles: SpawnNavObstacle[];
+}
+
 export interface SpawnLayout {
   points: SpawnPoint[];
+  nav?: SpawnNav;
 }
 
 export interface SpawnProfile {
@@ -68,12 +111,19 @@ export interface SpawnCoverage {
   points: number;
 }
 
+export interface SpawnNavigationIssue {
+  pointId: string;
+  reason: 'blocked' | 'unreachable';
+}
+
 export interface SpawnModel {
   readonly data: SpawnsData;
   readonly coverage: SpawnCoverage;
   layout(id: string): SpawnLayout;
   profileFor(zoneId: number, subIndex?: number | null, domain?: SpawnDomain): SpawnProfile;
   pointsFor(zoneId: number, subIndex?: number | null): readonly SpawnPoint[];
+  /** The layout's authored geometry in the pure kernel's shape, or null when none is proven yet. */
+  navigation(id: string): NavLayout | null;
 }
 
 const SOURCE = 'spawns.json';
@@ -136,6 +186,55 @@ function profileAt(raw: unknown, path: string): SpawnProfile {
   };
 }
 
+function flagAt(raw: Record<string, unknown>, key: string, path: string): boolean {
+  const value = raw[key];
+  if (typeof value !== 'boolean') refuse(`${path}.${key}`, 'must be true or false');
+  return value;
+}
+
+function navAt(raw: unknown, path: string): SpawnNav {
+  if (!isObject(raw)) refuse(path, 'must be an object');
+  const version = numberAt(raw, 'version', path);
+  if (!Number.isInteger(version) || version <= 0) refuse(`${path}.version`, 'must be a positive whole number');
+  if (!isObject(raw.origin)) refuse(`${path}.origin`, 'must be an object');
+  const origin = {
+    x: numberAt(raw.origin, 'x', `${path}.origin`),
+    y: numberAt(raw.origin, 'y', `${path}.origin`),
+  };
+  const cellSize = numberAt(raw, 'cell_size_m', path);
+  if (!(cellSize > 0)) refuse(`${path}.cell_size_m`, 'must be positive');
+  if (!Array.isArray(raw.obstacles)) refuse(`${path}.obstacles`, 'must be an array');
+  const ids = new Set<string>();
+  const obstacles = raw.obstacles.map((entry, index): SpawnNavObstacle => {
+    const at = `${path}.obstacles[${index}]`;
+    if (!isObject(entry)) refuse(at, 'must be an object');
+    const id = entry.id;
+    if (typeof id !== 'string' || !id) refuse(`${at}.id`, 'must be a non-empty id');
+    if (ids.has(id)) refuse(`${at}.id`, `duplicates obstacle ${id}`);
+    ids.add(id);
+    const kind = entry.kind;
+    if (kind !== 'circle' && kind !== 'box') refuse(`${at}.kind`, 'must be circle or box');
+    const flags = {
+      blocksMovement: flagAt(entry, 'blocks_movement', at),
+      blocksSight: flagAt(entry, 'blocks_sight', at),
+      blocksProjectiles: flagAt(entry, 'blocks_projectiles', at),
+    };
+    const x = numberAt(entry, 'x', at);
+    const y = numberAt(entry, 'y', at);
+    if (kind === 'circle') {
+      const radius = numberAt(entry, 'radius', at);
+      if (!(radius > 0)) refuse(`${at}.radius`, 'must be positive');
+      return { kind, id, x, y, radius, ...flags };
+    }
+    const width = numberAt(entry, 'width', at);
+    const height = numberAt(entry, 'height', at);
+    if (!(width > 0)) refuse(`${at}.width`, 'must be positive');
+    if (!(height > 0)) refuse(`${at}.height`, 'must be positive');
+    return { kind, id, x, y, width, height, ...flags };
+  });
+  return { version, origin, cellSizeM: cellSize, obstacles };
+}
+
 function layoutAt(raw: unknown, path: string): SpawnLayout {
   if (!isObject(raw)) refuse(path, 'must be an object');
   if (!Array.isArray(raw.points) || !raw.points.length) refuse(`${path}.points`, 'must be a non-empty array');
@@ -152,7 +251,7 @@ function layoutAt(raw: unknown, path: string): SpawnLayout {
     if (roam < 0) refuse(`${at}.roam_m`, 'must be nonnegative');
     return { id: entry.id, x, y, roam_m: roam };
   });
-  return { points };
+  return { points, ...(raw.nav != null ? { nav: navAt(raw.nav, `${path}.nav`) } : {}) };
 }
 
 /** Resolve and validate the authored spawn file against the arena and the zone roster. */
@@ -274,7 +373,51 @@ export function createSpawns(raw: unknown, context: SpawnContext): SpawnModel {
     pointsFor(zoneId, subIndex = null) {
       return layoutOf(profileOf(zoneId, subIndex).layout).points;
     },
+    navigation(id) {
+      const nav = layoutOf(id).nav;
+      if (!nav) return null;
+      return {
+        version: nav.version,
+        // The authored origin IS the world origin for this layout; the arena supplies the extent.
+        bounds: { x: nav.origin.x, y: nav.origin.y, width: context.arena.width, height: context.arena.height },
+        cellSize: nav.cellSizeM,
+        obstacles: nav.obstacles.map((obstacle) => {
+          const flags = {
+            movement: obstacle.blocksMovement,
+            sight: obstacle.blocksSight,
+            projectiles: obstacle.blocksProjectiles,
+          };
+          return obstacle.kind === 'circle'
+            ? { kind: 'circle' as const, id: obstacle.id, x: obstacle.x, y: obstacle.y, radius: obstacle.radius, flags }
+            : { kind: 'box' as const, id: obstacle.id, x: obstacle.x, y: obstacle.y,
+              width: obstacle.width, height: obstacle.height, flags };
+        }),
+      };
+    },
   };
+}
+
+/**
+ * Layout validator, for a cage or a dev overlay: every authored home must hold the body and be
+ * reachable from the entry point. Returns null when the layout has no authored geometry yet —
+ * that is "not proven", never "clear".
+ */
+export function checkSpawnNavigation(
+  model: SpawnModel, layoutId: string, start: NavPoint, radius: number,
+): SpawnNavigationIssue[] | null {
+  const nav = model.navigation(layoutId);
+  if (!nav) return null;
+  if (!isClear(nav, start, radius)) return [{ pointId: 'start', reason: 'blocked' }];
+  const issues: SpawnNavigationIssue[] = [];
+  for (const point of model.layout(layoutId).points) {
+    if (!isClear(nav, point, radius)) {
+      issues.push({ pointId: point.id, reason: 'blocked' });
+      continue;
+    }
+    const result = route(nav, start, [{ id: point.id, x: point.x, y: point.y }], radius);
+    if (!result.ok) issues.push({ pointId: point.id, reason: 'unreachable' });
+  }
+  return issues;
 }
 
 export { SOURCE as SPAWNS_SOURCE };

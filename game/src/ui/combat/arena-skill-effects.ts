@@ -263,6 +263,15 @@ export function skillFxFor(id: string | undefined) {
   };
 }
 
+/**
+ * Mob skills have no player VFX row of their own; the authored delivery picks a representative
+ * one so a cast beat and its impact still read on the field.
+ */
+export function mobCastFxFor(delivery: string | undefined) {
+  return skillFxFor(delivery === 'ground' ? 'attack.ground_slam'
+    : delivery === 'projectile' ? 'attack.fireball' : 'attack.cleave');
+}
+
 export function auraFxFor(id: string) {
   const definition = skillFxFor(id);
   return definition?.aura ? definition : undefined;

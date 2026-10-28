@@ -1,8 +1,8 @@
 import { sm } from '../../engine/client';
 import { mulberry32 } from '../../engine/client-helpers';
-import { hitColour } from '../../sim/core/feedback';
-import { spawnMob } from '../../sim/core/game';
-import type { GameState, Mob, FxEvent } from '../../sim/core/types';
+import { hitColour } from '@sim/core/feedback';
+import { spawnMob } from '@sim/core/game';
+import type { GameState, Mob, FxEvent } from '@sim/core/types';
 
 /**
  * The development showcase's combat-effect preview: the sample bodies a beat is drawn over, and the

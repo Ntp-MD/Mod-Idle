@@ -1,7 +1,7 @@
 <script lang="ts">
   import { sm } from '../../engine/client';
   import { skillIcon } from '../../icon';
-  import type { SkillState } from '../../sim/combat/skills';
+  import type { SkillState } from '@sim/combat/skills';
 
   let { skills }: { skills: SkillState } = $props();
   const active = $derived([

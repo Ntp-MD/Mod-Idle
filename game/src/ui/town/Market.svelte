@@ -1,12 +1,12 @@
 <script lang="ts">
   import { TOWN, fieldwork } from '../../engine/client';
-  import { npcOf, priceGold, stockOf, canBuy, settlementById } from '../../sim/town/town';
-  import { atSettlement } from '../../sim/gear/craft';
-  import { trade, tradeInventory, quoteSale, marketDestinations, canProcess } from '../../sim/town/trade';
-  import { fieldMasteryLevel } from '../../sim/world/fieldwork';
-  import { materialSources } from '../../sim/gear/material-sources';
-  import { ACTIVITY_GUIDE } from '../../sim/core/guidance';
-  import type { GameState } from '../../sim/core/types';
+  import { npcOf, priceGold, stockOf, canBuy, settlementById } from '@sim/town/town';
+  import { atSettlement } from '@sim/gear/craft';
+  import { trade, tradeInventory, quoteSale, marketDestinations, canProcess } from '@sim/town/trade';
+  import { fieldMasteryLevel } from '@sim/world/fieldwork';
+  import { materialSources } from '@sim/gear/material-sources';
+  import { ACTIVITY_GUIDE } from '@sim/core/guidance';
+  import type { GameState } from '@sim/core/types';
   import DeliveryBoard from './DeliveryBoard.svelte';
   import BlackMarketBoard from './BlackMarketBoard.svelte';
   import CountBadge from '../shared/CountBadge.svelte';

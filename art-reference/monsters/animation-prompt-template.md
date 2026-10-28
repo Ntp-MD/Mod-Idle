@@ -4,7 +4,7 @@ Use the species block and approved references for every run. The roster below is
 
 ## Target roster
 
-Create one atlas for each of these 20 canonical species, in this order. The identifier is the canonical species id from `production-roster.json`:
+Create one atlas for each of these 23 canonical species, in this order. The identifier is the canonical species id from `production-roster.json`:
 
 1. `goblin` — Goblin
 2. `orc` — Orc
@@ -26,6 +26,9 @@ Create one atlas for each of these 20 canonical species, in this order. The iden
 18. `giant` — Giant
 19. `werewolf` — Werewolf
 20. `dryad` — Dryad
+21. `wyvern` — Wyvern
+22. `mirehydra` — Mire Hydra
+23. `wyrmling` — Wyrmling
 
 Use the approved species design and references to fill the Species block for each run. Do not infer a complete design from the species name alone. If a species has no approved design block yet, define and review that block before generating its atlas.
 

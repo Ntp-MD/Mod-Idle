@@ -1,5 +1,0 @@
-SPECIES: skeleton (Skeleton) — match the approved Skeleton reference silhouette exactly; preserve its body plan, proportions, palette, and fixed natural anatomy; add no unreferenced equipment
-WEAPON (baked, fixed): TODO: identify the fixed baked weapon from the approved reference before generation — in hand every frame; no equip switch
-SLOT: attack/east/02-follow-through — melee attack east: follow-through past the contact point
-CAMERA: fixed elevated three-quarter, upper-left light; whole sprite including feet inside the frame
-RENDER: chibi pixel-art clusters, hard opaque edges only, transparent background; no shadow, scenery, text, effects, grid

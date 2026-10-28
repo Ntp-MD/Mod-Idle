@@ -298,11 +298,11 @@
     },
     {
       "x": 2417,
-      "y": 1261,
+      "y": 1258,
       "width": 134,
       "height": 196,
       "offsetX": 113,
-      "offsetY": 109
+      "offsetY": 106
     },
     {
       "x": 2787,
@@ -432,12 +432,14 @@
       797,
       961
     ],
-    "uniformScale": 1.0
+    "uniformScale": 1.0,
+    "frameGroundCorrections": []
   },
   "quality": {
     "nativePixelArtApproved": false,
     "notes": [
-      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged.",
+      "Frame 30 shifted up 3px to meet the upright ground-line tolerance."
     ]
   }
 }

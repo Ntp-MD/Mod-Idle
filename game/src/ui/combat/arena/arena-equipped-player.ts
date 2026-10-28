@@ -2,8 +2,8 @@ import { BASES } from '../../../engine/client';
 import type { ArenaCharacterArt, ArenaSpriteFrameImage, ArenaSpriteSheet } from './arena-art';
 import { arenaScreenAngleFor } from '../../../presentation/arena-camera';
 import equipment from './player-equipment-v1.json';
-import type { Character } from '../../../sim/core/player';
-import type { GameState, Item } from '../../../sim/core/types';
+import type { Character } from '@sim/core/player';
+import type { GameState, Item } from '@sim/core/types';
 
 type Point = { x: number; y: number };
 type Bounds = [number, number, number, number];
@@ -28,13 +28,21 @@ type EquipmentFrame = ArenaSpriteFrameImage;
 const source = equipment as unknown as {
   schemaVersion: number;
   frameCanvas: { width: number; height: number; anchor: Point };
+  /** Measured lowest alpha row per clip and direction: the 3/4 foot line this art was drawn on. */
+  feetByClip?: Record<string, Record<string, number>>;
   body: Record<string, Record<string, EquipmentFrame[]>>;
   weapons: Record<string, EquipmentRecord>;
   shield: { targetHeightBodyHeightRatio: number; attachmentHand: 'off'; views: Record<string, EquipmentView> };
   bodySkillOverrides?: Record<string, Partial<Record<'east' | 'west', EquipmentFrame>>>;
 };
 
-function sheet(frames: readonly EquipmentFrame[], frameMs: number, loop: boolean, impactMs?: number, release = false): ArenaSpriteSheet {
+/** The clip's measured foot line, normalized; a missing measurement keeps the canvas anchor. */
+function feetAnchor(clip: string, direction: string): Point {
+  const feet = source.feetByClip?.[clip]?.[direction];
+  return { x: 0.5, y: (feet ?? source.frameCanvas.anchor.y) / source.frameCanvas.height };
+}
+
+function sheet(frames: readonly EquipmentFrame[], frameMs: number, loop: boolean, anchor?: Point, impactMs?: number, release = false): ArenaSpriteSheet {
   const first = frames[0];
   const releaseGrip = release ? frames[1]?.mainGripCell ?? first.mainGripCell : undefined;
   return {
@@ -50,16 +58,22 @@ function sheet(frames: readonly EquipmentFrame[], frameMs: number, loop: boolean
     frames: frames.length,
     frameMs,
     loop,
+    ...(anchor ? { anchor } : {}),
     ...(impactMs == null ? {} : { impactMs }),
     ...(releaseGrip ? { releaseSocket: { ...releaseGrip, provenance: 'authored-fallback' as const } } : {}),
   };
 }
 
-const idle = Object.fromEntries(Object.entries(source.body.idle).map(([direction, frames]) => [direction, sheet(frames, 140, true)]));
-const walk = Object.fromEntries(Object.entries(source.body.walk).map(([direction, frames]) => [direction, sheet(frames, 130, true)]));
-const attack = Object.fromEntries(Object.entries(source.body.attack).map(([direction, frames]) => [direction, sheet(frames, 100, false, 100, true)]));
-const hit = Object.fromEntries(Object.entries(source.body.hit).map(([direction, frames]) => [direction, sheet(frames, 110, false)]));
-const death = Object.fromEntries(Object.entries(source.body.death).map(([direction, frames]) => [direction, sheet(frames, 180, false)]));
+const idle = Object.fromEntries(Object.entries(source.body.idle).map(([direction, frames]) =>
+  [direction, sheet(frames, 140, true, feetAnchor('idle', direction))]));
+const walk = Object.fromEntries(Object.entries(source.body.walk).map(([direction, frames]) =>
+  [direction, sheet(frames, 130, true, feetAnchor('walk', direction))]));
+const attack = Object.fromEntries(Object.entries(source.body.attack).map(([direction, frames]) =>
+  [direction, sheet(frames, 100, false, feetAnchor('attack', direction), 100, true)]));
+const hit = Object.fromEntries(Object.entries(source.body.hit).map(([direction, frames]) =>
+  [direction, sheet(frames, 110, false, feetAnchor('hit', direction))]));
+const death = Object.fromEntries(Object.entries(source.body.death).map(([direction, frames]) =>
+  [direction, sheet(frames, 180, false, feetAnchor('death', direction))]));
 
 /** Clean player body animation. Weapon and offhand pictures are drawn as independent layers. */
 export const equippedPlayerArt: ArenaCharacterArt = {

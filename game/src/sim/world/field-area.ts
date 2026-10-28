@@ -31,7 +31,7 @@ export interface FieldSpawnSlot {
 
 export interface FieldState {
   areaKey: string;
-  /** Ground-layout generation; 1 = 18x12, 2 = 50x32.0513. */
+  /** Ground-layout generation; 1 = 18x12, 2 = 50x32.0513, 3 = full-field population. */
   layoutRevision: number;
   arenaEpoch: number;
   nextSlotSeq: number;
@@ -54,7 +54,7 @@ export interface FieldState {
 
 const MAX_SLOTS = 48;
 const MAX_ACTORS = 64;
-const LAYOUT_REVISION = 2;
+const LAYOUT_REVISION = 3;
 const LAYOUT_DX = 16;
 const LAYOUT_DY = 10.0256;
 const copy = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
@@ -78,7 +78,8 @@ export function createFieldSlots(zone: number, sub: number | null | undefined, a
   const points = spawns.pointsFor(zone, sub ?? null);
   const count = Math.min(MAX_SLOTS, profile.cap, points.length);
   return Array.from({ length: count }, (_, index) => {
-    const point = points[index];
+    // Layouts are column ordered; a prefix leaves the far side empty at lower zone caps.
+    const point = points[Math.floor(index * points.length / count)];
     return {
       id: `s${index + 1}`,
       pointId: point.id,
@@ -107,6 +108,18 @@ export function createFieldState(s: Pick<GameState, 'zone' | 'cell' | 'dungeon' 
     actors: [],
     lastSeenAtSec: s.clockSec,
   };
+}
+
+/** Park living bodies in their own slots before a transition clears the travelling group. */
+export function checkpointFieldLives(s: GameState): void {
+  if (!s.field) return;
+  const living = new Map(s.group.filter((mob) => mob.hp > 0).map((mob) => [mob.id, mob]));
+  for (const slot of s.field.slots) {
+    const mob = slot.mobId ? living.get(slot.mobId) : undefined;
+    if (!mob) continue;
+    slot.life = { mob: copy(mob), hp: mob.hp, hpMax: mob.hpMax,
+      ...(s.mobStatus[mob.id] ? { mark: copy(s.mobStatus[mob.id]) } : {}) };
+  }
 }
 
 /** Reconstitute an inactive field's saved lives once; same identity/HP/status, no reroll or reward. */
@@ -172,6 +185,24 @@ export function syncFieldState(s: GameState, arena?: CombatArena, quietTicks = 2
     restoreFieldLives(s, field);
   }
   if (!field.slots?.length) field.slots = createFieldSlots(s.zone, s.cell?.sub, s.clockSec);
+  if (field.layoutRevision < LAYOUT_REVISION) {
+    // Older saves retain lives, positions and refill deadlines while their homes cover the full
+    // clearing. Reconcile once, rather than resetting population or timers every tick.
+    const authored = createFieldSlots(s.zone, s.cell?.sub, s.clockSec);
+    const ids = new Set(field.slots.map(slot => slot.id));
+    for (const [index, slot] of authored.entries()) {
+      const existing = field.slots[index];
+      if (existing) {
+        Object.assign(existing, { pointId: slot.pointId, home: slot.home, roamM: slot.roamM });
+        continue;
+      }
+      while (ids.has(slot.id)) slot.id = `s${field.nextSlotSeq++}`;
+      ids.add(slot.id);
+      field.slots.push(slot);
+    }
+    field.nextSlotSeq = Math.max(field.nextSlotSeq, field.slots.length + 1);
+    field.layoutRevision = LAYOUT_REVISION;
+  }
 
   const living = new Map(s.group.filter((mob) => mob.hp > 0).map((mob) => [mob.id, mob]));
   // A live body without a slot (legacy save, first purchase) takes the first free authored home.
@@ -186,6 +217,9 @@ export function syncFieldState(s: GameState, arena?: CombatArena, quietTicks = 2
   }
   for (const slot of field.slots) {
     if (slot.mobId && !living.has(slot.mobId)) {
+      // A parked life waits for its field to become current again; only a released slot
+      // (no saved life) starts the respawn timer.
+      if (slot.life) continue;
       slot.mobId = undefined;
       if (!(slot.respawnAtSec > s.clockSec)) slot.respawnAtSec = s.clockSec;
     }
@@ -271,7 +305,7 @@ export function normalizeFieldState(value: unknown): FieldState | null {
   if (typeof field.areaKey !== 'string' || !finite(field.arenaEpoch)) return null;
   if (!finitePoint(field.farmingAnchor) || !finitePoint(field.player)) return null;
   const revision = finite(field.layoutRevision) ? Math.floor(field.layoutRevision) : 1;
-  const translate = revision < LAYOUT_REVISION;
+  const translate = revision < 2;
   const point = (p: FieldPoint): FieldPoint => translate
     ? { x: p.x + LAYOUT_DX, y: p.y + LAYOUT_DY }
     : { x: p.x, y: p.y };
@@ -294,7 +328,7 @@ export function normalizeFieldState(value: unknown): FieldState | null {
     });
   return {
     areaKey: field.areaKey,
-    layoutRevision: LAYOUT_REVISION,
+    layoutRevision: Math.max(2, Math.min(LAYOUT_REVISION, revision)),
     arenaEpoch: Math.max(1, Math.floor(field.arenaEpoch)),
     nextSlotSeq: Math.max(1, Math.floor(finite(field.nextSlotSeq) ? field.nextSlotSeq : 1)),
     slots,

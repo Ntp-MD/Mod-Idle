@@ -4,11 +4,11 @@
   import { castForHit } from './plate';
   import { fieldShape } from '../fx';
   import { skillFxFor } from './arena-skill-effects';
-  import { mobSkillById } from '../../sim/combat/mobSkills';
+  import { mobSkillById } from '@sim/combat/mobSkills';
   import { actorImpactMs } from './combat-actor';
   import { combatEffectLevel, importantCombatEvent, sceneCombatEvents, type CombatEffectLevel } from './combat-presentation';
-  import type { FxEvent, Mob } from '../../sim/core/types';
-  import type { Character } from '../../sim/core/player';
+  import type { FxEvent, Mob } from '@sim/core/types';
+  import type { Character } from '@sim/core/player';
 
   let { ring, c, plates, speed = 1, effectLevel = 'auto' }: { ring: FxEvent[]; c: Character; plates: Mob[]; speed?: number; effectLevel?: CombatEffectLevel } = $props();
   const effects = $derived(combatEffectLevel(effectLevel, speed));

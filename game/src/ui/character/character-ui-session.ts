@@ -1,4 +1,4 @@
-import type { EnemySnapshot } from '../../sim/combat/combat-history';
+import type { EnemySnapshot } from '@sim/combat/combat-history';
 import { newCraftWorkbenchView, type CraftWorkbenchView } from '../inventory/craft-workbench';
 import type { ItemSelection } from '../inventory/item-selection';
 
