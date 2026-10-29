@@ -6,12 +6,10 @@
 
 ## เริ่มใช้งาน
 
-1. ส่ง [agent-brief.md](agent-brief.md) ให้ agent อ่านก่อน
-2. เลือกประเภทงาน: **terrain เต็ม hex**, **surface texture**, หรือ **object/figure แยกชิ้น** ห้ามใช้ prompt สลับประเภท
-3. ใช้มุมกล้องและสัดส่วนจาก [geometry ที่ refresh จากโค้ดจริง](geometry/hex-spec.json); อย่ากำหนดองศาจาก screenshot หรือคัดลอกค่าด้วยมือ
-4. งาน terrain เต็ม hex: แนบ [hex-mask.png](geometry/hex-mask.png) เป็น **shape reference** และเลือกภาพสไตล์จาก [reference index](references/index.json)
-5. ใช้ prompt ที่ตรงประเภทใน [prompts/](prompts/) และทำเพียงหนึ่งชิ้นก่อน
-6. วัดและตรวจตาม [checklist](review/checklist.md) แล้วทดลองวางในเกมก่อนทำประเภทถัดไป
+1. เลือกประเภทงาน: **terrain เต็ม hex**, **surface texture**, หรือ **object/figure แยกชิ้น** ห้ามสลับประเภทงาน
+2. ใช้มุมกล้องและสัดส่วนจาก [geometry ที่ refresh จากโค้ดจริง](geometry/hex-spec.json); อย่ากำหนดองศาจาก screenshot หรือคัดลอกค่าด้วยมือ
+3. งาน terrain เต็ม hex: แนบ [hex-mask.png](geometry/hex-mask.png) เป็น **shape reference** และเลือกภาพสไตล์จาก [reference index](references/index.json)
+4. วัดและตรวจตาม [checklist](review/checklist.md) แล้วทดลองวางในเกมก่อนทำประเภทถัดไป
 
 ## มีอะไรอยู่ที่ไหน
 
@@ -23,7 +21,6 @@
 | `geometry/hex-spec.json` | ค่ากล้อง สัดส่วน พิกัดจุดยอด และ matrix ที่คำนวณจากโค้ด |
 | `calibration/` | ผลวัด registration ของภาพตัวอย่างและ screenshot ตรวจแนว hex ในเกม; เป็นหลักฐานตรวจ ไม่ใช่ตัวแทน geometry หรือมุมกล้อง |
 | `references/` | ภาพตัวอย่างพร้อมบทบาทของแต่ละรูป ไม่ได้หมายความว่ามุมของทุกรูปถูกต้อง |
-| `prompts/` | Prompt ภาษาอังกฤษ แยกตามวิธี render |
 | `examples/footprint-format.json` | ตัวอย่าง metadata ของภาพป่า; ต้องวัดใหม่สำหรับภาพอื่น |
 | `outputs/` | ที่เก็บผลงานใหม่แบบมีเลขรุ่น; ยังไม่ใช่การนำเข้าเกม |
 | `manifest.json` | แหล่งที่มา hash ของสำเนา และข้อไม่ตรงกันที่พบตอน refresh |
@@ -59,6 +56,6 @@ node art-reference/map/check-placement.mjs snow-1 grass-1
 
 รายการต้นฉบับที่ต้องทำให้ครบอยู่ใน `source-assets.json` และอ้างไฟล์จริงใน `terrain/` กับ `landmark/` รวมหมู่บ้าน ค่าย เมือง และซากโบราณ ดูรายการที่ยังขาดใน `terrain-inventory.json` ซึ่งสร้างโดย `refresh.ps1` หรือ `node art-reference/map/inventory.mjs` ไม่ได้กำหนดจำนวนตายตัวในโค้ด
 
-`geometry/` และ `references/` เป็น snapshot สำหรับส่งต่อ ถ้าเปลี่ยนกล้องให้ refresh ก่อนใช้งาน อ่าน warning ใน `manifest.json` ด้วย ข้อมูลต้นทางยังเป็นเจ้าของข้อเท็จจริงตาม [สัญญางาน art](../../docs/map-art.md)
+`geometry/` และ `references/` เป็น snapshot สำหรับส่งต่อ ถ้าเปลี่ยนกล้องให้ refresh ก่อนใช้งาน อ่าน warning ใน `manifest.json` ด้วย ข้อมูลต้นทางยังเป็นเจ้าของข้อเท็จจริง
 
 **ฐานตรง hex ไม่ได้พิสูจน์ว่าต้นไม้/อาคารในภาพวาดด้วยกล้อง 38° จริง** ต้องตรวจมุมของวัตถุแยก และไม่ควรใช้ภาพที่ผ่านการ warp เป็นหลักฐานความแม่นของมุมวัตถุ

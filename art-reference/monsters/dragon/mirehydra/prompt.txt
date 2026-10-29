@@ -1,4 +1,0 @@
-Species: mirehydra (Mire Hydra)
-Silhouette: Exactly three long-necked heads on one low green-scaled quadruped body, cream undersides, yellow eyes and a heavy tail. Its baked natural attack is a bite from one head.
-Baked natural weapon: natural-bite (fixed in every pose).
-Camera: fixed three-quarter view, upper-left light.

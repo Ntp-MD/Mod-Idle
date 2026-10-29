@@ -100,7 +100,13 @@ export function warpCost(state: GameState, id: string): number {
 export function warpTo(state: GameState, id: string): { ok: boolean; why?: string; gold?: number; forfeit?: string } {
   if (state.walk) return { ok: false, why: 'mid-walk — finish the route or turn back' };
   if (state.phase === 'camp') return { ok: false, why: 'recovering at camp' };
-  if (id === state.town.waypoint) return { ok: false, why: 'you already stand there' };
+  // "already stand there" is about the feet, not the last town the Waypoint names: a step out
+  // into the field must not read as standing in the settlement just left.
+  const stop = road.nodeById(id);
+  if (stop) {
+    const feet = currentCell(state);
+    if (feet.q === stop.q && feet.r === stop.r) return { ok: false, why: 'you already stand there' };
+  }
   if (!waypointUnlocked(state, id)) return { ok: false, why: 'no Waypoint — reach it on foot first' };
   const gold = warpCost(state, id);
   if (state.counters.gold < gold) return { ok: false, why: `needs ${gold} gold`, gold };

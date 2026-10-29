@@ -57,6 +57,11 @@ describe('the canonical data is checked before anything reads it', () => {
         const count = Number(String((row as any).targets ?? '1').split('/')[0]) || 1;
         expect(count, row.id).toBeGreaterThan(1);
         expect((row as any).area?.radius_m, row.id).toBeGreaterThan(0);
+        // T5: hop cadence and share live in canonical action data (80ms, 60% baseline).
+        // Presence and finiteness only — no tuning cap is invented here.
+        expect(action.interval_sec, row.id).toBeGreaterThan(0);
+        expect(Number.isFinite(Number(action.hop_share_pct)), row.id).toBe(true);
+        expect(Number(action.hop_share_pct), row.id).toBeGreaterThanOrEqual(0);
       }
       if (action.kind === 'projectile-burst' || action.kind === 'blizzard-field') {
         expect((row.effects || []).find((effect: any) => effect.stat === 'hit_pct')?.value, row.id)

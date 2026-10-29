@@ -1,20 +1,15 @@
 import { E, sm } from '../../engine/client';
-import { mobIcon } from '../../icon';
+import { characterIcon, mobIcon } from '../../icon';
 import { mobSkillById } from '@sim/combat/mobSkills';
 import type { Character } from '@sim/core/player';
 import type { FxEvent, Mob } from '@sim/core/types';
-import spriteBounds from '../map/data/map-sprite-bounds.json' with { type: 'json' };
 import { combatTempo } from './combat-presentation';
 
 export type ActorAction = 'melee' | 'ranged' | 'magic' | 'support' | 'prepare';
 export type ActorReaction = 'hit' | 'block' | 'dodge';
 export type ActorArt = { href: string; imageWidth: number; imageHeight: number; viewBox: string; icon?: boolean };
 
-const PLAYER_ART = '/map/characters/player/traveler-piece.png';
-const SPECIES_ART = new Map(Object.keys(spriteBounds)
-  .filter((href) => href.startsWith('/map/characters/species/'))
-  .map((href) => [href.split('/')[4], href]));
-/** The white mob icon is a 256 square head mark, drawn in place of a full-body figure. */
+/** The white icon mark is a 256 square head, drawn in place of a full-body figure. */
 const ICON_ART = { imageWidth: 256, imageHeight: 256, viewBox: '0 0 256 256', icon: true } as const;
 
 function speciesKey(mob?: Pick<Mob, 'speciesId' | 'species'>) {
@@ -22,25 +17,11 @@ function speciesKey(mob?: Pick<Mob, 'speciesId' | 'species'>) {
     || mob.species.toLowerCase());
 }
 
-/** The full-body art the ARPG arena can fall back to: a measured map piece, otherwise the white icon. */
-export function actorArt(mob?: Pick<Mob, 'speciesId' | 'species'>): ActorArt | null {
+/** Every actor reads through its white icon: the player's character mark, or the mob's species mark. */
+export function actorArt(mob?: Pick<Mob, 'speciesId' | 'species'>): ActorArt {
+  if (!mob) return { href: characterIcon(), ...ICON_ART };
   const species = speciesKey(mob);
-  const measuredPath = mob ? SPECIES_ART.get(species!) : PLAYER_ART;
-  if (measuredPath) {
-    const box = (spriteBounds as Record<string, number[]>)[measuredPath];
-    if (!box) return null;
-    const href = mob ? measuredPath.replace(/\/([^/]+)$/, '/old-$1') : measuredPath;
-    const [imageWidth, imageHeight, left, top, width, height] = box;
-    return { href, imageWidth, imageHeight, viewBox: `${left} ${top} ${width} ${height}` };
-  }
-  return species ? { href: mobIcon(species), ...ICON_ART } : null;
-}
-
-/** FieldPlates draws the canonical white mob icon; the player keeps the map traveler figure. */
-export function plateArt(mob?: Pick<Mob, 'speciesId' | 'species'>): ActorArt | null {
-  if (!mob) return actorArt();
-  const species = speciesKey(mob);
-  return species ? { href: mobIcon(species), ...ICON_ART } : null;
+  return { href: species ? mobIcon(species) : characterIcon(), ...ICON_ART };
 }
 
 /** Presentation measurements only. The body's class comes from the spawned mob and canonical roster. */

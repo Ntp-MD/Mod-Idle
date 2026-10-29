@@ -15,6 +15,17 @@ import { arenaPayloadSample, arenaPresentationArea, arenaReleaseSocket, arenaInc
 const sheet: ArenaSpriteSheet = { href: '/test.png', frameWidth: 128, frameHeight: 128, columns: 4, rows: 4, frames: 4, frameMs: 100, loop: true };
 
 describe('arena camera and playback', () => {
+  it('draws icon fallbacks for the merged combat-field showcase', () => {
+    const state = newGame(42), arena = createCombatArena();
+    state.group = [mobFixture({ id: 'icon-target', hp: 100, hpMax: 100 })];
+    const c = characterSheet(state);
+    syncCombatArena(arena, state, 0, 1_000_000, c.maxHp);
+    const body = render(CombatArenaScene, { props: { arena, s: state, c, ring: [], iconActors: true } }).body;
+    expect(body).toContain('data-animation-source="icon"');
+    expect(body).toContain('data-arena-actor="player"');
+    expect(body).toContain('data-arena-actor="icon-target"');
+  });
+
   it('keeps terrain and a fallen body on the same camera transform', () => {
     const state = newGame(41), arena = createCombatArena();
     const fallen = mobFixture({ id: 'fallen', hp: 1, hpMax: 1 });
@@ -599,15 +610,5 @@ describe('F37 persistent target read — one named body, never a mix', () => {
     expect(out?.bearingDeg).toBeTypeOf('number');
     const inside = describeArenaTarget({ mobs: mobs(), player, committedId: 'near', camera, view });
     expect(inside?.offscreen).toBe(false);
-  });
-});
-
-describe('three-duel showcase — the container renders without a GL context', () => {
-  it('renders the duel shell server-side; the renderer only starts on mount', async () => {
-    const { render } = await import('svelte/server');
-    const { default: ThreeDuel } = await import('../../src/ui/dev/ThreeDuel.svelte');
-    const body = render(ThreeDuel, {}).body;
-    expect(body).toContain('three-duel');
-    expect(body).toContain('loading models');
   });
 });

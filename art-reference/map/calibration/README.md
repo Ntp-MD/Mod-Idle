@@ -27,9 +27,8 @@ derive or adjust these values by eye from the screenshot in this folder.
 
 ## Generation and review
 
-1. Choose the matching prompt from `../prompts/` and attach
-   `../geometry/hex-mask.png` for full-hex ground artwork. For dioramas or
-   isolated figures, follow the object prompt and do not force a hex silhouette.
+1. Attach `../geometry/hex-mask.png` for full-hex ground artwork. For dioramas
+   or isolated figures, do not force a hex silhouette.
 2. Keep generated candidates and measurements under `../outputs/` until
    approved. Measure each new full-hex image; never reuse the example vertices
    from `registration.json` for another image.

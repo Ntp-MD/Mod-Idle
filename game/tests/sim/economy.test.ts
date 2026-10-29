@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { trade, TOWN } from '../../src/engine/client';
 import { createEconomy, type EconomyCfg, type EconomyPlayerCfg, type Units } from '@engine/economy';
-import { economyFixture, economyPlayer } from '../../src/lab/economy';
+import { economyFixture, economyPlayer } from '../fixtures/economy';
 
 const STEP = 3600;
 const sum = (units: Units) => Object.values(units).reduce((total, value) => total + value, 0);

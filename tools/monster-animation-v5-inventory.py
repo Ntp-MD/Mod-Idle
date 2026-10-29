@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Read-only v5 source inventory. PNG presence never means visual approval.
+"""Read-only pose source inventory. PNG presence never means visual approval.
 
     python -B tools/monster-animation-v5-inventory.py --species goblin
     python -B tools/monster-animation-v5-inventory.py --species goblin --image-metrics
 
-The Goblin v5 manifest owns expected directions/action phases. Metrics measure
+The Goblin poses manifest owns expected directions/action phases. Metrics measure
 source alpha at two thresholds without changing pixels or deciding acceptance.
 """
 
@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent / "art-reference/monsters"
-TEMPLATE = ROOT / "humanoid/goblin/animation/v5/meta.json"
+TEMPLATE = ROOT / "humanoid/goblin/animation/poses.json"
 
 
 def read_json(path):
@@ -47,29 +47,29 @@ def image_metrics(path):
 
 
 def inventory(species, template, metrics):
-    version = species / "animation/v5"
+    version = species / "animation"
     expected = {pose_path(action, frame): action for action, data in template["actions"].items()
                 for frame in data["frames"]}
     present = {path.relative_to(version) for path in (version / "poses").rglob("*.png")}
     issues = []
-    metadata = version / "meta.json"
+    metadata = version / "poses.json"
     try:
         own = read_json(metadata)
         if own.get("directions") != template["directions"]:
-            issues.append("directions differ from Goblin v5 contract")
+            issues.append("directions differ from Goblin poses contract")
         if set(own.get("actions", {})) != set(template["actions"]):
-            issues.append("action set differs from Goblin v5 contract")
+            issues.append("action set differs from Goblin poses contract")
         for action, data in template["actions"].items():
             own_frames = own.get("actions", {}).get(action, {}).get("frames", [])
             if {pose_path(action, frame) for frame in own_frames} != {
                     path for path, name in expected.items() if name == action}:
-                issues.append(f"{action} frame paths differ from Goblin v5 contract")
+                issues.append(f"{action} frame paths differ from Goblin poses contract")
     except (OSError, ValueError, KeyError, TypeError) as error:
         issues.append(f"metadata unavailable/invalid: {error}")
     missing_sidecars = []
     measurements = {}
     for relative in sorted(present & expected.keys()):
-        for suffix in (".meta.json", ".prompt.txt"):
+        for suffix in (".meta.json",):
             sidecar = relative.with_suffix(suffix)
             if not (version / sidecar).is_file():
                 missing_sidecars.append(sidecar.as_posix())
@@ -104,7 +104,7 @@ def main():
         assert len(paths) == len(set(paths)) == 272
         assert pose_path("idle", {"file": "south.png"}) == Path("poses/idle/south.png")
         assert pose_path("walk", {"direction": "south", "file": "00-stride-a.png"}) == Path("poses/walk/south/00-stride-a.png")
-        print("v5 path contract: PASS")
+        print("poses path contract: PASS")
         return
     species = sorted(path for race in ROOT.iterdir() if race.is_dir() and not race.name.startswith("_")
                      for path in race.iterdir() if path.is_dir() and (not args.species or path.name in args.species))

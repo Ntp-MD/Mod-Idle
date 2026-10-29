@@ -56,6 +56,27 @@ describe('F39 conductive — shock jumps to the nearest body', () => {
   });
 });
 
+describe('T5 chain lightning — spatial hops answer to ground distance', () => {
+  it('hops mid → near (1 m), never the array-first far body (20 m)', () => {
+    const { state, arena, far, mid, near } = trio(501, []);
+    for (const mob of [far, mid, near]) {
+      Object.assign(mob, { ps: 0, evasion: 0, dodgeRate: 0, armour: 0, res: 0 });
+    }
+    state.skills.owned['attack.chain_lightning'] = 0;
+    state.skills.list.fill(null);
+    state.skills.list[0] = 'attack.chain_lightning';
+    state.player.mana = characterSheet(state).maxMana;
+    tick(state, { arena });
+    const cast = arena.actions.find((action) => action.skillId === 'attack.chain_lightning');
+    expect(cast).toBeDefined();
+    const hits = state.fx.filter((event) => event.kind === 'hit' && event.actionId === cast!.id)
+      .sort((a, b) => (a.atUs ?? 0) - (b.atUs ?? 0));
+    expect(hits.map((hit) => hit.mobId)).toEqual([mid.id, near.id]);
+    expect(hits[1].atUs! - hits[0].atUs!).toBe(80_000);
+    expect(far.hp).toBe(1e9);
+  });
+});
+
 describe('F40 profane bloom — a 4 m blast whose secondary kills pay nothing', () => {
   it('hits bodies inside 4 m, spares the field beyond, and buries secondaries unrewarded', () => {
     const { state, arena, far, mid: victim, near: doomed } = trio(502, ['keystone.profane-bloom']);
@@ -75,6 +96,29 @@ describe('F40 profane bloom — a 4 m blast whose secondary kills pay nothing', 
     expect(state.group.includes(doomed)).toBe(false);
     expect(far.hp).toBe(1e9);
     // Exactly one rewarded kill — the primary. The secondary leaves the field owing nothing.
+    expect(state.counters.kills - killsBefore).toBe(1);
+    expect(state.player.xp - xpBefore).toBe(victimXp);
+  });
+
+  it('stays nonrecursive when the blast itself fells a cursed body (T5 baseline)', () => {
+    const { state, arena, far, mid: victim, near: doomed } = trio(503, ['keystone.profane-bloom']);
+    victim.hp = 1;
+    doomed.hp = 1;
+    const curseRow = {
+      id: 'curse.expose', duration: '20 sec',
+      effects: [{ subject: 'target', stat: 'damage_taken', op: 'add_pct', value: 20 }],
+    } as never;
+    applyCurse(state.curses, victim.id, curseRow);
+    applyCurse(state.curses, doomed.id, curseRow);
+    const killsBefore = state.counters.kills;
+    const xpBefore = state.player.xp;
+    const victimXp = victim.xp;
+    for (let i = 0; i < 8 && state.group.includes(victim); i++)
+      tick(state, { arena, autoSkills: false });
+    // One burst only: the cursed secondary's death bursts nothing further and pays nothing.
+    expect(state.log.filter((line) => line.text.startsWith('Profane Bloom'))).toHaveLength(1);
+    expect(state.group.includes(doomed)).toBe(false);
+    expect(far.hp).toBe(1e9);
     expect(state.counters.kills - killsBefore).toBe(1);
     expect(state.player.xp - xpBefore).toBe(victimXp);
   });

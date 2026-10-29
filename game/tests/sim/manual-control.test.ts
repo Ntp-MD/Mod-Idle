@@ -84,6 +84,19 @@ describe('deliberate local control', () => {
     expect(manual.cast).toBeUndefined();
   });
 
+  it('keeps a manual windup alive when automatic skills are off', () => {
+    const { state, arena } = manualFight([{ id: 'target', x: 3, y: 6 }]);
+    const action = arenaAction(arena, 'player', 'cast', 0, 'target', 'attack.fireball', undefined, {
+      delivery: 'instant', startedAtUs: 0, releaseAtUs: 1_500_000, impactAtUs: 1_500_000,
+      recoveryUntilUs: 1_800_000,
+    })!;
+    arena.intent = { skillId: 'attack.fireball', targetId: 'target', targetPoint: { x: 3, y: 6 },
+      phase: 'windup', manual: true, actionId: action.id, releaseAtUs: 1_500_000, recoveryUntilUs: 1_800_000 };
+    tick(state, { arena, autoSkills: false });
+    expect(arena.intent?.phase).toBe('windup');
+    expect(arena.actions.find((entry) => entry.id === action.id)?.cancelReason).toBeUndefined();
+  });
+
   it('commits a manual ground cast to empty permitted ground and pays for it', () => {
     const { state, arena } = manualFight([{ id: 'target', x: 3.6, y: 6 }]);
     state.skills.owned['attack.meteor'] = 0;

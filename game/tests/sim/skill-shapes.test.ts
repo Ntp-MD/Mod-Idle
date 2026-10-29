@@ -66,7 +66,7 @@ describe('the selected four shapes in a real cast', () => {
     expect([...action.hitIds!].sort()).toEqual(['front', 'second']);
     expect(action.hitIds).not.toContain('off');
     expect(action.area?.shape).toBe('line');
-    expect(action.area?.widthM).toBe(0.75);
+    expect(action.area?.widthM).toBe(1);
   });
 });
 describe('self and target circles in a real cast', () => {

@@ -87,7 +87,7 @@ describe('ARPG detarget', () => {
     expect(arenaSkillRange('attack.firestorm')).toBeGreaterThan(
       arenaSkillRange('attack.cleave') === 0 ? -1 : 0);
     expect(E.combat_arena.range.magic).toBe(4.6);
-    expect(arenaSkillRange('attack.firestorm')).toBe(4.6);
+    expect(arenaSkillRange('attack.firestorm')).toBe(5);
   });
 
   it('stands its ground: a castable row fires before a farther row walks', () => {

@@ -287,6 +287,8 @@ export function validateEngineData<K extends EngineData['K']>(raw: { K: K }): En
     if (!isObject(rawProfile)) refuse(path, 'must be an object');
     if (rawProfile.delivery !== 'melee' && rawProfile.delivery !== 'projectile')
       refuse(`${path}.delivery`, 'must be melee or projectile');
+    if (rawProfile.hit_class !== 'attack')
+      refuse(`${path}.hit_class`, 'must be attack for an ordinary basic');
     const range = rawProfile.range as Record<string, unknown>;
     if (!isObject(range)) refuse(`${path}.range`, 'must be an object');
     if (range.basis !== 'center' && range.basis !== 'body-edge')

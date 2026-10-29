@@ -1,4 +1,0 @@
-Species: wyrmling (Wyrmling)
-Silhouette: Small golden-brown dragon quadruped with a cream belly, short wings, a curled tail, sharp claws and glowing amber eyes. Its baked natural attacks are claws and bite.
-Baked natural weapon: natural-claws-and-bite (fixed in every pose).
-Camera: fixed three-quarter view, upper-left light.

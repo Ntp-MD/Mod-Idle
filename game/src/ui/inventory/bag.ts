@@ -137,10 +137,12 @@ export function vsWorn(candidate: Item, worn: Item | null | undefined): number |
   return Math.round(((loot.score({ ...candidate, q: candidate.q ?? 0 }) - base) / base) * 1000) / 10;
 }
 
-/** One line the swap changes, read by Mod id (and the Element a line rolled). */
+/** One line the swap changes, read by Mod id (and the Element or Core stat a line rolled). */
 export type LineCmp = {
   id: string;
   element?: string;
+  /** the Core stat a Stat Mod line carries — STR +5 and DEX +5 are different trades */
+  stat?: string;
   /** what the candidate carries there, or null when only the worn piece has it */
   cand: number | null;
   /** what is worn there, or null when the candidate brings a line nothing is worn against */
@@ -151,7 +153,7 @@ export type LineCmp = {
 /**
  * The per-axis half of a comparison: `vsWorn` answers "is this piece stronger overall", this answers
  * "what does the swap actually change", so a piece that ties on score but trades a line still reads
- * as the trade it is. Lines are paired by id and Element, and a `Frame Mod` carries its extras, so a
+ * as the trade it is. Lines are paired by id, Element and Core stat, and a `Frame Mod` carries its extras, so a
  * line is flattened the same way the card prints it. The Keep decision is not here — that is the
  * aggregate score's, in `loot.keepsDrop`. A line both pieces carry at the same value is dropped: it
  * is already printed in the list above.
@@ -159,12 +161,12 @@ export type LineCmp = {
 export function compareLines(candidate: Item, worn: Item | null | undefined): LineCmp[] {
   if (!worn) return [];
   const flat = (it: Item) => (it.lines || []).flatMap((l: any) => [l, ...(l.extra || [])]);
-  const key = (l: any) => `${l.id}${l.element ? ':' + l.element : ''}`;
+  const key = (l: any) => `${l.id}|${l.element ?? ''}|${l.stat ?? ''}`;
   const map = new Map<string, LineCmp>();
-  for (const l of flat(worn)) map.set(key(l), { id: l.id, element: l.element, cand: null, worn: l.value, kind: 'lost' });
+  for (const l of flat(worn)) map.set(key(l), { id: l.id, element: l.element, stat: l.stat, cand: null, worn: l.value, kind: 'lost' });
   for (const l of flat(candidate)) {
     const k = key(l);
-    const row: LineCmp = map.get(k) || { id: l.id, element: l.element, cand: null, worn: null, kind: 'gained' };
+    const row: LineCmp = map.get(k) || { id: l.id, element: l.element, stat: l.stat, cand: null, worn: null, kind: 'gained' };
     row.cand = l.value;
     row.kind = row.worn == null ? 'gained' : l.value > row.worn ? 'over' : l.value < row.worn ? 'under' : 'even';
     map.set(k, row);

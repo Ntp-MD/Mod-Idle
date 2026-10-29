@@ -1,4 +1,0 @@
-Species: wyvern (Wyvern)
-Silhouette: Winged quadrupedal reptile with blue scales, a cream underside, a long tail, two large folded wings, taloned feet and glowing amber eyes. Its baked natural attack is its claws.
-Baked natural weapon: natural-claws (fixed in every pose).
-Camera: fixed three-quarter view, upper-left light.

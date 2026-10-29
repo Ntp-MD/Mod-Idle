@@ -46,7 +46,7 @@ export function applyPush(opts: {
   if (s.dungeon) push(s, abandonRun(s, 'Pushed'));
   s.group = [];
   // A same-zone Field Camp ends an interrupted walk after preserving its block count; without one,
-  // the ordinary walk resumes at the ambush block. Forward Mode stands down during either Push.
+  // the ordinary walk resumes at the interrupted block. Forward Mode stands down during either Push.
   const walking = !!s.walk;
   // a Push returns the main preset, but cooldowns already counting keep counting (§rule 12)
   if (switchPreset(s, sm.mainPreset)) push(s, `Back on the ${s.presets[sm.mainPreset].name} preset · running cooldowns kept`);

@@ -15,6 +15,20 @@ export const WEAPON_GROUPS = {
 
 import type { EngineData, SkillRow, SkillsData, SkillCastProfile } from './types.ts';
 
+/** Validate authored hit families without inferring them from damage or delivery. */
+export function validateSkillHitClasses(
+  rows: readonly { id: string; type?: string; mode?: string; hit_class?: unknown }[],
+  source: string,
+): void {
+  for (const row of rows) {
+    const hostile = row.mode !== undefined ? row.mode === 'strike'
+      : row.type === 'attack' || row.type === 'curse';
+    if (hostile ? row.hit_class !== 'attack' && row.hit_class !== 'spell' : row.hit_class !== 'none') {
+      throw new Error(`${source}: ${row.id}.hit_class must be ${hostile ? 'attack or spell' : 'none'}`);
+    }
+  }
+}
+
 /**
  * The two damage ladders (the PoE shape, owner ruling): `Attack damage %` scales the attack ladder —
  * a weapon's own swing and a phys-basis press — and `Spell damage %` scales the spell ladder — a

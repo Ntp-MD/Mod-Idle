@@ -28,7 +28,6 @@
   import { skillSlotState } from './skill-slot-copy';
   import { WEAPONS, mastery, masteryLabel, masteryLevel, weaponSkillBonusPct } from '@sim/core/mastery';
   import Tabs from '../shared/Tabs.svelte';
-  import SkillFxPreview from '../combat/SkillFxPreview.svelte';
 
   let {
     state: game, character, writable = true, autoSkills = true, note = '',
@@ -242,7 +241,6 @@
       <aside class="inspector" aria-label="Selected skill inspector">
         {#if selected}
           <header class="selected-heading"><span class="skill-art icon-mask" style:--glyph={`url("${skillIcon(selected.id, selected.type)}")`} aria-hidden="true"></span><div><h3>{selected.name}</h3><p>{skillWindow?.type ?? selected.type} · Level: {skillLevel(sk, selected.id)} / {E.skill_xp.level_cap}</p></div></header>
-          {#key selected.id}<SkillFxPreview id={selected.id} />{/key}
           {#if selectedIsTrack}
             <p class="live-state">{selected.type === 'aura' ? (sk.auras[selected.id] ? 'Aura enabled' : 'Aura off') : sk.buffs[selected.id] ? 'Buff track enabled' : 'Buff track off'}</p>
           {:else if eligibility}

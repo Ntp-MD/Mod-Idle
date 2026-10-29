@@ -197,7 +197,9 @@ export function autoEquip(s: GameState, marginPct = 0): EquipResult {
     }
     const best = cands
       .filter((p) => !wouldBreakRotation(s, p.item))
-      .sort((a, b) => b.gains - a.gains)[0];
+      // an empty cell scores every candidate Infinity alike, so the tie breaks on the
+      // piece's own strength — otherwise bag order, not worth, picks what fills the body
+      .sort((a, b) => (b.gains - a.gains) || (scoreOf(b.item) - scoreOf(a.item)))[0];
     if (!best) break;
     const reservation = best.item.heldFor || null;
     const wore = equipFromBag(s, best.bagIndex, true, true);

@@ -111,6 +111,12 @@ export function createFlights(opts: {
     });
     if (arena.intent && arena.intent.actionId === flight.actionId
       && arena.intent.phase === 'windup') cancelIntent('impact');
+    // T5/C2 baseline (preserve, do not extend): a resolved contact attempt always continues
+    // while hops remain — even on a miss — reading the next hop from live poses at resolve time.
+    // Recorded quirks for C2, changed nothing: selection does not exclude `returning` bodies (they
+    // are picked then miss at impact, since membership re-tests eligibility); a hop that moved after
+    // selection still lands (a radius-0 single resolves its body id, not a distance); trigger-fired
+    // chain rows resolve once via launchTrigger and never hop.
     if (flight.chain && flight.chain.remaining > 0) {
       const lastId = flight.area?.targetId ?? flight.cast.targets[0]?.id;
       const lastPose = lastId ? arena.mobs[lastId] : undefined;
@@ -185,6 +191,10 @@ export function createFlights(opts: {
           y: from.y + (to.y - from.y) * hit.fraction };
         if (flight.area?.shape === 'line') {
           // A piercing shot commits a line, not a body: every eligible body on it is struck once.
+          resolveFlight(flight, contactAtUs(hit.fraction), undefined, contact);
+        } else if ((flight.area?.radiusM ?? 0) > 0) {
+          // A committed circle keeps its release center: the sweep only selects the impact
+          // time, while membership re-tests live eligible centers (T3). No forced contact hit.
           resolveFlight(flight, contactAtUs(hit.fraction), undefined, contact);
         } else {
           flight.hitTargetId = hit.target.mob.id;

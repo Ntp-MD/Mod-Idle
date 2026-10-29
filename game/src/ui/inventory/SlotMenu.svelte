@@ -27,15 +27,44 @@
       x: Math.max(2, Math.min(x, window.innerWidth - w - 2)),
       y: Math.max(2, Math.min(y, window.innerHeight - h - 2)),
     };
-    box?.focus();
+    // keyboard lands on the first action, not the container, so the menu is operable
+    // without a pointer; the container stays the fallback when everything is disabled
+    (firstEnabled() ?? box)?.focus();
   });
-  /** the capture-phase swallow, so the frame's Escape never runs behind the open menu. */
+  /** the enabled verbs, in the order they are drawn */
+  function firstEnabled(): HTMLButtonElement | null {
+    return (box?.querySelector('button:not([disabled])') as HTMLButtonElement | null) ?? null;
+  }
+  function stepables(): HTMLButtonElement[] {
+    return box ? Array.from(box.querySelectorAll('button:not([disabled])')) : [];
+  }
+  /** the capture-phase swallow: Escape closes, and Tab/arrows stay inside the menu so the
+   * frame's own focus trap (the panel this menu was portalled out of) never fires behind it */
   function swallow(node: HTMLElement) {
     const onkey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return;
-      e.stopPropagation();
-      e.preventDefault();
-      onclose();
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        e.preventDefault();
+        onclose();
+        return;
+      }
+      const stops = stepables();
+      if (!stops.length) return;
+      const at = stops.indexOf(document.activeElement as HTMLButtonElement);
+      if (e.key === 'Tab') {
+        e.stopPropagation();
+        e.preventDefault();
+        const next = e.shiftKey ? (at <= 0 ? stops.length - 1 : at - 1) : (at < 0 || at >= stops.length - 1 ? 0 : at + 1);
+        stops[next].focus();
+      } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Home' || e.key === 'End') {
+        e.stopPropagation();
+        e.preventDefault();
+        const next = e.key === 'Home' ? 0
+          : e.key === 'End' ? stops.length - 1
+          : e.key === 'ArrowDown' ? (at < 0 || at >= stops.length - 1 ? 0 : at + 1)
+          : at <= 0 ? stops.length - 1 : at - 1;
+        stops[next].focus();
+      }
     };
     window.addEventListener('keydown', onkey, true);
     return { destroy: () => window.removeEventListener('keydown', onkey, true) };

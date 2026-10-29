@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
-  import { actorAction, actorArt, actorBeats, actorImpactMs, actorPrepareMs, actorProfile, actorReaction, plateArt } from './combat-actor';
+  import { actorAction, actorArt, actorBeats, actorImpactMs, actorPrepareMs, actorProfile, actorReaction } from './combat-actor';
   import { combatMotionWeight, combatTempo, type CombatEffectLevel } from './combat-presentation';
   import type { Character } from '@sim/core/player';
   import type { FxEvent, Mob } from '@sim/core/types';
@@ -8,7 +8,7 @@
   let { ring, c, mob, opponents = [], speed = 1, effectLevel = 'auto' }: { ring: FxEvent[]; c: Character; mob?: Mob; opponents?: Mob[]; speed?: number; effectLevel?: CombatEffectLevel } = $props();
   const profile = $derived(actorProfile(mob));
   const beats = $derived(actorBeats(ring, mob));
-  const art = $derived(mob ? plateArt(mob) : actorArt());
+  const art = $derived(actorArt(mob));
   let host = $state<HTMLDivElement | null>(null);
   let actionNode = $state<HTMLDivElement | null>(null);
   let reactionNode = $state<HTMLDivElement | null>(null);

@@ -1,5 +1,0 @@
-RETROSPECTIVE REGENERATION BRIEF ? not the original generation prompt.
-Species id: wyvern (Wyvern). Silhouette: Winged quadrupedal reptile with blue scales, cream underside, long tail, folded wings and taloned feet.
-Slot: attack/east/03-recovery. Pose direction: east. Phase: 03-recovery.
-Pose intent: close natural-weapon action; use body weight and head/claw contact at the target-facing edge; keep all parts inside the cell. Preserve the approved species identity, palette, proportions and fixed baked natural weapon `natural-claws`. Keep the fixed elevated three-quarter camera and upper-left light; the whole torso, hips and limbs face the requested direction. Use the existing pose image only as the pose source; do not add limbs, gear, detached effects or a second figure.
-Output contract for any future regeneration: one connected transparent RGBA pose, hard alpha only, same source canvas and ground line as the set; retain 24px clearance on every edge of its 384x384 runtime cell. The current pixels were recovered from the original atlas by the project raw-recovery tool; this record documents the slot and preservation requirements, not a newly generated frame.

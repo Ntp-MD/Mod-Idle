@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { mulberry32 } from '../../src/engine/client-helpers';
-import { sm } from '../../src/engine/client';
+import { E, sm } from '../../src/engine/client';
 import { captureCombatArena, createCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
-import { characterSheet, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
+import { characterSheet, newGame, setLevel, spawnMob, stepCombat, tick } from '@sim/core/game';
+import type { GameState, Mob } from '@sim/core/types';
 import { restorePendingWork } from '@sim/core/pending-work';
 import { prepareSkillCast, resolvePreparedCast, newCastRollCache } from '@sim/combat/skills';
 import type { ManualControl } from '@sim/combat/combat-actions';
@@ -292,6 +293,356 @@ describe('real multi-hit impacts', () => {
     expect(state.mobStatus[near.id]?.statuses.poison?.stacks).toBeGreaterThan(0);
     expect(state.mobStatus[far.id]?.statuses.poison).toBeUndefined();
     expect(state.mobStatus[state.group[0].id]?.statuses.poison?.stacks ?? 0).toBe(0);
+  });
+});
+
+describe('T5 chain lightning — canonical hops and preserved policies', () => {
+  const CHAIN = 'attack.chain_lightning';
+
+  const neutral = (mob: Mob): Mob => Object.assign(mob, {
+    hp: 1e9, hpMax: 1e9, ps: 0, evasion: 0, dodgeRate: 0,
+    armour: 0, res: 0, resByElement: {}, effRes: 0, effResByElement: {},
+    line: 'front', damage: 'physical', innate: [], skillIds: [],
+    immune: [],
+    // Chain hops read live ground positions; a retreating body would leave the field instead of
+    // standing for its hop (F25), so these fixtures pin bodies in place like secondary-spatial's trio.
+    retreatAtPct: undefined, retreating: false,
+  });
+
+  function chainArena(spots: { id: string; x: number; y: number }[], distance = 2) {
+    const { state, mob, arena } = skillFight(CHAIN, distance);
+    neutral(mob);
+    // Identical bodies from one seed: same Species/size/speed/behavior, so hop order answers to
+    // ground distance alone and hop shares read back exactly.
+    spots.forEach((spot) => {
+      const extra = spawnMob(mulberry32(500), 1, 'normal');
+      extra.id = spot.id;
+      neutral(extra);
+      state.group.push(extra);
+    });
+    syncCombatArena(arena, state, 0, 1_000_000, characterSheet(state).maxHp);
+    Object.assign(arena.player, { x: 1, y: 6 });
+    Object.assign(arena.mobs[mob.id], { x: 1 + distance, y: 6 });
+    for (const spot of spots) Object.assign(arena.mobs[spot.id], { x: spot.x, y: spot.y });
+    // No re-pin: the extras stay slotless exactly like the existing chain test above, so the
+    // engagement/leash pass never marks them returning or wipes their status lines mid-chain.
+    return { state, mob, arena };
+  }
+
+  const chainHits = (state: GameState, actionId: number) =>
+    state.fx.filter((event) => event.kind === 'hit' && event.actionId === actionId)
+      .sort((a, b) => (a.atUs ?? 0) - (b.atUs ?? 0));
+
+  const chainTotal = (state: GameState, actionId: number) =>
+    chainHits(state, actionId).reduce((sum, hit) => sum + (hit.value ?? 0), 0);
+
+  // Hops read live ground poses, and bodies + player drift every second they fight. Resetting the
+  // feet to the authored setup between ticks keeps multi-cast assertions about authored geometry.
+  const reposition = (
+    arena: ReturnType<typeof chainArena>['arena'],
+    player: { x: number; y: number },
+    spots: { id: string; x: number; y: number }[],
+    primary: { id: string; x: number; y: number },
+  ) => {
+    Object.assign(arena.player, { x: player.x, y: player.y });
+    Object.assign(arena.mobs[primary.id], { x: primary.x, y: primary.y });
+    for (const spot of spots) Object.assign(arena.mobs[spot.id], { x: spot.x, y: spot.y });
+  };
+
+  // The 3 m boundary has zero margin by construction, so this one test freezes ground speeds and
+  // restores them after: the authored distances then read back exactly at hop time.
+  const freezeGroundSpeeds = () => {
+    const arenaCfg = E.combat_arena as unknown as { mob_speed: number; player_speed: number };
+    const prev = { mob: arenaCfg.mob_speed, player: arenaCfg.player_speed };
+    arenaCfg.mob_speed = 0;
+    arenaCfg.player_speed = 0;
+    return () => { arenaCfg.mob_speed = prev.mob; arenaCfg.player_speed = prev.player; };
+  };
+
+  it('carries the 80ms hop cadence and 60% hop share in canonical action data', () => {
+    const action = sm.byId[CHAIN].action!;
+    expect(action.kind).toBe('chain-strike');
+    expect(action.interval_sec).toBe(0.08);
+    expect(action.hop_share_pct).toBe(60);
+  });
+
+  it('drives hop timing and shares from canonical data rather than hardcoded constants', () => {
+    const row = sm.byId[CHAIN];
+    const prev = { ...row.action! };
+    try {
+      row.action = { kind: 'chain-strike', interval_sec: 0.16, hop_share_pct: 50 };
+      const { state, arena } = chainArena([
+        { id: 'chain-2', x: 4.5, y: 6 }, { id: 'chain-3', x: 5.5, y: 6 },
+      ]);
+      tick(state, { arena });
+      const cast = arena.actions.find((action) => action.skillId === CHAIN)!;
+      const hits = chainHits(state, cast.id);
+      expect(hits.map((hit) => hit.mobId)).toEqual(['multi-target', 'chain-2', 'chain-3']);
+      expect(hits[1].atUs! - hits[0].atUs!).toBe(160_000);
+      expect(hits[2].atUs! - hits[1].atUs!).toBe(160_000);
+      expect(hits[1].value! / hits[0].value!).toBeCloseTo(0.5, 1);
+    } finally {
+      row.action = prev;
+    }
+  });
+
+  it('lands three contacts with exact order, 80ms gaps, 60% hop shares, shock and one payment', () => {
+    const { state, arena } = chainArena([
+      { id: 'chain-2', x: 4.5, y: 6 }, { id: 'chain-3', x: 5.5, y: 6 },
+    ]);
+    const manaBefore = state.player.mana;
+    tick(state, { arena });
+    const casts = arena.actions.filter((action) => action.skillId === CHAIN);
+    expect(casts).toHaveLength(1);
+    const cast = casts[0];
+    expect(state.skills.cd[CHAIN]).toBeGreaterThan(0);
+    expect(state.fx.filter((event) => event.kind === 'cast' && event.actionId === cast.id)).toHaveLength(1);
+    const hits = chainHits(state, cast.id);
+    expect(hits.map((hit) => hit.mobId)).toEqual(['multi-target', 'chain-2', 'chain-3']);
+    expect(hits[1].atUs! - hits[0].atUs!).toBe(80_000);
+    expect(hits[2].atUs! - hits[1].atUs!).toBe(80_000);
+    expect(hits[1].value! / hits[0].value!).toBeCloseTo(0.6, 1);
+    expect(hits[2].value! / hits[1].value!).toBeCloseTo(1, 1);
+    for (const id of ['multi-target', 'chain-2', 'chain-3'])
+      expect(state.mobStatus[id]?.statuses.shock).toBeDefined();
+    expect(state.player.mana).toBeLessThan(manaBefore);
+    expect(cast.impactCount).toBe(3);
+    // Follow-up contacts pay nothing: with the rotation held, a later second only regens.
+    const manaAfterFirst = state.player.mana;
+    tick(state, { arena, autoSkills: false });
+    expect(chainHits(state, cast.id)).toHaveLength(3);
+    expect(state.player.mana).toBeGreaterThanOrEqual(manaAfterFirst);
+  });
+
+  it('hops to the nearest unused body, not the array-first body', () => {
+    const { state, arena } = chainArena([
+      { id: 'chain-far', x: 10.5, y: 6 },
+      { id: 'chain-near', x: 4.5, y: 6 },
+    ]);
+    expect(state.group[1].id).toBe('chain-far');
+    tick(state, { arena });
+    const cast = arena.actions.find((action) => action.skillId === CHAIN)!;
+    expect(chainHits(state, cast.id).map((hit) => hit.mobId))
+      .toEqual(['multi-target', 'chain-near']);
+    expect(state.group.find((mob) => mob.id === 'chain-far')!.hp).toBe(1e9);
+  });
+
+  it('breaks equal-distance ties by stable id order and replays deterministically', () => {
+    // Mirror-symmetric about the player's own axis (player on the x=3 bisector): every body drifts
+    // in mirror image, so the 1.5 m tie holds exactly at hop time whatever the approach does.
+    const build = () => {
+      const fight = chainArena([
+        { id: 'chain-mm', x: 4.5, y: 6 },
+        { id: 'chain-aa', x: 1.5, y: 6 },
+      ]);
+      Object.assign(fight.arena.player, { x: 3, y: 2 });
+      return fight;
+    };
+    const run = () => {
+      const { state, arena } = build();
+      tick(state, { arena });
+      const cast = arena.actions.find((action) => action.skillId === CHAIN)!;
+      return chainHits(state, cast.id).map((hit) => ({ id: hit.mobId, at: hit.atUs, value: hit.value }));
+    };
+    const first = run();
+    expect(first.map((hit) => hit.id)).toEqual(['multi-target', 'chain-aa', 'chain-mm']);
+    expect(run()).toEqual(first);
+  });
+
+  it('treats the 3m hop reach as inclusive and spares bodies past it', () => {
+    const restore = freezeGroundSpeeds();
+    try {
+      const edge = chainArena([{ id: 'chain-edge', x: 6, y: 6 }]);
+      tick(edge.state, { arena: edge.arena });
+      const edgeCast = edge.arena.actions.find((action) => action.skillId === CHAIN)!;
+      expect(chainHits(edge.state, edgeCast.id).map((hit) => hit.mobId))
+        .toEqual(['multi-target', 'chain-edge']);
+
+      const beyond = chainArena([{ id: 'chain-beyond', x: 6.02, y: 6 }]);
+      tick(beyond.state, { arena: beyond.arena });
+      const beyondCast = beyond.arena.actions.find((action) => action.skillId === CHAIN)!;
+      expect(chainHits(beyond.state, beyondCast.id).map((hit) => hit.mobId)).toEqual(['multi-target']);
+      expect(beyondCast.impactCount).toBe(1);
+    } finally {
+      restore();
+    }
+  });
+
+  it('fizzles remaining hops finitely with a single hit when nothing is in reach', () => {
+    const { state, arena } = chainArena([]);
+    tick(state, { arena });
+    const cast = arena.actions.find((action) => action.skillId === CHAIN)!;
+    expect(chainHits(state, cast.id)).toHaveLength(1);
+    expect(cast.impactCount).toBe(1);
+    expect(arena.flights.filter((flight) => flight.cast.id === CHAIN)).toHaveLength(0);
+    tick(state, { arena, autoSkills: false });
+    expect(chainHits(state, cast.id)).toHaveLength(1);
+  });
+
+  it('continues after a resolved miss and records the attempt (C2 baseline)', () => {
+    const { state, arena } = chainArena([
+      { id: 'chain-mid', x: 4.5, y: 6 }, { id: 'chain-last', x: 5.5, y: 6 },
+    ]);
+    // C2 records, not repairs: selection does not exclude `returning` bodies, so the hop is
+    // picked and then misses at impact while the chain still continues to the last body.
+    arena.mobs['chain-mid'].returning = true;
+    tick(state, { arena });
+    const cast = arena.actions.find((action) => action.skillId === CHAIN)!;
+    expect(chainHits(state, cast.id).map((hit) => hit.mobId))
+      .toEqual(['multi-target', 'chain-last']);
+    expect(cast.impactCount).toBe(3);
+    expect(state.group.find((mob) => mob.id === 'chain-mid')!.hp).toBe(1e9);
+  });
+
+  it('skips bodies removed from the living group on later casts', () => {
+    const restore = freezeGroundSpeeds();
+    try {
+      const { state, arena } = chainArena([
+        { id: 'chain-mid', x: 4.5, y: 6 }, { id: 'chain-last', x: 5.5, y: 6 },
+      ]);
+      tick(state, { arena });
+      const first = arena.actions.find((action) => action.skillId === CHAIN)!;
+      expect(chainHits(state, first.id).map((hit) => hit.mobId))
+        .toEqual(['multi-target', 'chain-mid', 'chain-last']);
+      // The middle body leaves the field outright (group and pose removed, no re-pin so no
+      // respawn slot opens), the feet are reset to the authored setup, and the next cast hops
+      // straight to the last body.
+      state.group = state.group.filter((mob) => mob.id !== 'chain-mid');
+      delete arena.mobs['chain-mid'];
+      state.skills.cd[CHAIN] = 0;
+      state.player.mana = characterSheet(state).maxMana;
+      reposition(arena, { x: 1, y: 6 },
+        [{ id: 'chain-last', x: 5.5, y: 6 }], { id: 'multi-target', x: 3, y: 6 });
+      tick(state, { arena });
+      const casts = arena.actions.filter((action) => action.skillId === CHAIN);
+      expect(casts).toHaveLength(2);
+      expect(chainHits(state, casts[1].id).map((hit) => hit.mobId))
+        .toEqual(['multi-target', 'chain-last']);
+    } finally {
+      restore();
+    }
+  });
+
+  it('credits ordinary chain kills once with rewards and keeps hopping', () => {
+    const { state, mob, arena } = chainArena([
+      { id: 'chain-2', x: 7, y: 6 }, { id: 'chain-3', x: 8, y: 6 },
+    ], 4);
+    const victim = state.group.find((entry) => entry.id === mob.id)!;
+    const victimXp = victim.xp;
+    victim.hp = 1;
+    const killsBefore = state.counters.kills;
+    const xpBefore = state.player.xp;
+    tick(state, { arena });
+    const cast = arena.actions.find((action) => action.skillId === CHAIN)!;
+    expect(chainHits(state, cast.id).map((hit) => hit.mobId))
+      .toEqual(['multi-target', 'chain-2', 'chain-3']);
+    expect(state.group.some((entry) => entry.id === 'multi-target')).toBe(false);
+    expect(state.counters.kills - killsBefore).toBe(1);
+    expect(state.player.xp - xpBefore).toBe(victimXp);
+  });
+
+  it('keeps separate visited sets per cast so a later cast re-hits the same bodies', () => {
+    const spots = [{ id: 'chain-2', x: 4.5, y: 6 }, { id: 'chain-3', x: 5.5, y: 6 }];
+    const { state, arena } = chainArena(spots);
+    tick(state, { arena });
+    state.skills.cd[CHAIN] = 0;
+    state.player.mana = characterSheet(state).maxMana;
+    reposition(arena, { x: 1, y: 6 }, spots, { id: 'multi-target', x: 3, y: 6 });
+    tick(state, { arena });
+    const casts = arena.actions.filter((action) => action.skillId === CHAIN);
+    expect(casts).toHaveLength(2);
+    expect(casts[0].id).not.toBe(casts[1].id);
+    for (const cast of casts)
+      expect(chainHits(state, cast.id).map((hit) => hit.mobId))
+        .toEqual(['multi-target', 'chain-2', 'chain-3']);
+  });
+
+  it('matches whole-second ticks with combat-step stepping exactly', () => {
+    const spots = [{ id: 'chain-2', x: 4.5, y: 6 }, { id: 'chain-3', x: 5.5, y: 6 }];
+    const whole = chainArena(spots);
+    tick(whole.state, { arena: whole.arena });
+    tick(whole.state, { arena: whole.arena });
+    const stepped = chainArena(spots);
+    let guard = 0;
+    while (stepped.state.clockSec < 2 && guard++ < 100) stepCombat(stepped.state, { arena: stepped.arena });
+    expect(stepped.state.clockSec).toBe(2);
+    const snapshot = (state: GameState, arena: typeof whole.arena) =>
+      arena.actions.filter((action) => action.skillId === CHAIN)
+        .map((action) => chainHits(state, action.id)
+          .map((hit) => [hit.mobId, hit.atUs, hit.value]));
+    expect(snapshot(stepped.state, stepped.arena)).toEqual(snapshot(whole.state, whole.arena));
+  });
+
+  it('cancels remaining hops with an area-exit receipt when the encounter changes', () => {
+    const { state, arena } = chainArena([
+      { id: 'chain-2', x: 4.5, y: 6 }, { id: 'chain-3', x: 5.5, y: 6 },
+    ]);
+    let castId = 0;
+    for (let i = 0; i < 40; i++) {
+      stepCombat(state, { arena });
+      const cast = arena.actions.find((action) => action.skillId === CHAIN);
+      if (cast && (cast.impactCount ?? 0) >= 1) { castId = cast.id; break; }
+    }
+    expect(castId).toBeGreaterThan(0);
+    expect(chainHits(state, castId)).toHaveLength(1);
+    expect(arena.flights.some((flight) => flight.chain && flight.chain.remaining > 0)).toBe(true);
+    state.cell = { q: 5, r: 5, sub: null, wild: null };
+    for (let i = 0; i < 40; i++) stepCombat(state, { arena });
+    expect(arena.actions.find((action) => action.id === castId)?.cancelReason).toBe('area-exit');
+    expect(chainHits(state, castId)).toHaveLength(1);
+  });
+
+  it('keeps Demolition/Thornbound policies: chain hits feed neither the demolition count nor a thorn cut', () => {
+    const spots = [{ id: 'chain-2', x: 4.5, y: 6 }, { id: 'chain-3', x: 5.5, y: 6 }];
+    const plain = chainArena(spots);
+    tick(plain.state, { arena: plain.arena });
+    const plainCast = plain.arena.actions.find((action) => action.skillId === CHAIN)!;
+    const plainTotal = chainTotal(plain.state, plainCast.id);
+
+    const demo = chainArena(spots);
+    demo.state.player.treeRanks ||= {};
+    demo.state.player.treeRanks['keystone.demolition-sequence'] = 1;
+    tick(demo.state, { arena: demo.arena });
+    expect(demo.state.log.some((line) => line.text.startsWith('Demolition Sequence'))).toBe(false);
+
+    const thorn = chainArena(spots);
+    thorn.state.player.treeRanks ||= {};
+    thorn.state.player.treeRanks['keystone.thornbound'] = 1;
+    tick(thorn.state, { arena: thorn.arena });
+    const thornCast = thorn.arena.actions.find((action) => action.skillId === CHAIN)!;
+    expect(chainTotal(thorn.state, thornCast.id)).toBe(plainTotal);
+  });
+
+  it('shares the per-world-tick trigger guard while a crit trigger fires once beside the chain', () => {
+    const spots = [{ id: 'chain-2', x: 4.5, y: 6 }, { id: 'chain-3', x: 5.5, y: 6 }];
+    const { state, mob, arena } = chainArena(spots);
+    neutral(mob);
+    state.gear[0] = {
+      slot: 'main hand', base: 'one-handed axe', ilvl: 1, quality: 'Normal', tier: 'T1',
+      lines: [{ id: 'critical_chance', value: 100 }],
+    };
+    state.skills.list = ['attack.cleave', 'attack.fireball', CHAIN];
+    state.skills.owned['attack.cleave'] = 0;
+    state.skills.owned['attack.fireball'] = 0;
+    state.skills.owned['aura.cast_on_crit'] = 0;
+    state.skills.auras['aura.cast_on_crit'] = true;
+    state.player.mana = characterSheet(state).maxMana;
+    for (const entry of state.group) entry.hp = entry.hpMax = 1e9;
+    tick(state, { arena });
+    state.player.mana = characterSheet(state).maxMana;
+    reposition(arena, { x: 1, y: 6 }, spots, { id: 'multi-target', x: 3, y: 6 });
+    tick(state, { arena });
+    state.player.mana = characterSheet(state).maxMana;
+    reposition(arena, { x: 1, y: 6 }, spots, { id: 'multi-target', x: 3, y: 6 });
+    tick(state, { arena });
+    expect(state.log.filter((line) => line.text.includes('triggers'))).toHaveLength(1);
+    const casts = arena.actions.filter((action) => action.skillId === CHAIN);
+    expect(casts.length).toBeGreaterThanOrEqual(1);
+    const hopped = casts.find((cast) => chainHits(state, cast.id).length === 3)!;
+    expect(hopped).toBeDefined();
+    const hops = chainHits(state, hopped.id);
+    expect(hops[1].atUs! - hops[0].atUs!).toBe(80_000);
+    expect(hops[2].atUs! - hops[1].atUs!).toBe(80_000);
   });
 });
 

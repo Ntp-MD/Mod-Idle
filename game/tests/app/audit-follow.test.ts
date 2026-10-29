@@ -281,14 +281,22 @@ describe('audit follow-up', () => {
     if (existing) s.fieldwork.materials['iron-ore'] = 1;
     fillBag(s);
     const before = exportJson(s);
+    if (existing) {
+      // the freed gear slot covers the one new scrap stack: the swap still fits at 100/100
+      expect(salvageBag(s, 0).ok).toBe(true);
+      expect(s.bag).toHaveLength(0);
+      expect(s.fieldwork.materials.scrap).toBe(1);
+      expect(s.fieldwork.materials['iron-ore']).toBe(2);
+      return;
+    }
     expect(salvageBag(s, 0).ok).toBe(false);
     expect(exportJson(s)).toBe(before);
     delete s.junk['filler-0'];
-    if (!existing) delete s.junk['filler-1'];
+    delete s.junk['filler-1'];
     expect(salvageBag(s, 0).ok).toBe(true);
     expect(s.bag).toHaveLength(0);
     expect(s.fieldwork.materials.scrap).toBe(1);
-    expect(s.fieldwork.materials['iron-ore']).toBe(existing ? 2 : 1);
+    expect(s.fieldwork.materials['iron-ore']).toBe(1);
   });
 
   it.each([false, true])('a lethal hit causes Push before recovery (active heal: %s)', (activeHeal) => {

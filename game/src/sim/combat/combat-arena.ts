@@ -357,6 +357,7 @@ export function aimForSkill(
     if (!t) return undefined;
     const castPose = arena.mobs[t.id];
     // The direction that reaches the most bodies wins; the nearest body only breaks ties.
+    // Score actual eligible footprints only.
     const actors = live.map((mob) => ({ ...arena.mobs[mob.id], mob }));
     let best = { mob: t, point: { x: castPose.x, y: castPose.y }, count: -1, dist: Infinity };
     for (const mob of live) {
@@ -367,6 +368,16 @@ export function aimForSkill(
       if (count > best.count || (count === best.count && dist < best.dist - 1e-7)) {
         best = { mob, point: { x: pose.x, y: pose.y }, count, dist };
       }
+    }
+    // Without chasing their bearing anchor: a distant bearing that still hits nearby
+    // occupants must not force a walk to the far point. Clamp the point to the
+    // authored reach while preserving the bearing.
+    if (best.count > 0 && arenaDistance(arena.player, best.point) > reach + 1e-7) {
+      const angle = Math.atan2(best.point.y - arena.player.y, best.point.x - arena.player.x);
+      best.point = {
+        x: arena.player.x + Math.cos(angle) * reach,
+        y: arena.player.y + Math.sin(angle) * reach,
+      };
     }
     return { mob: best.mob, point: best.point };
   }

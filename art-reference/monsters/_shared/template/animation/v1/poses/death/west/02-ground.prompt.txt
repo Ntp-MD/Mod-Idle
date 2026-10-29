@@ -1,5 +1,0 @@
-SPECIES: <species-id> (<Species Name>) — <silhouette one-liner>
-WEAPON (baked, fixed): <weapon-id> — in hand every frame; no equip switch
-SLOT: death/west/02-ground — death west: body on the ground
-CAMERA: fixed elevated three-quarter, upper-left light; whole sprite including feet inside the frame
-RENDER: chibi pixel-art clusters, hard opaque edges only, transparent background; no shadow, scenery, text, effects, grid

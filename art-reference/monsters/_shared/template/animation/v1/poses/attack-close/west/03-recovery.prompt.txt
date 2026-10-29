@@ -1,5 +1,0 @@
-SPECIES: <species-id> (<Species Name>) — <silhouette one-liner>
-WEAPON (baked, fixed): <weapon-id> — in hand every frame; no equip switch
-SLOT: attack-close/west/03-recovery — melee attack west: recovery back to guard
-CAMERA: fixed elevated three-quarter, upper-left light; whole sprite including feet inside the frame
-RENDER: chibi pixel-art clusters, hard opaque edges only, transparent background; no shadow, scenery, text, effects, grid

@@ -1,50 +1,29 @@
 {
-  "schemaVersion": 1,
-  "action": "idle",
-  "direction": "south-east",
-  "pose": "neutral-ready",
-  "generator": "Recovered source pose; not newly generated",
-  "sourceSize": {
-    "width": 384,
-    "height": 384
-  },
-  "rawAlphaBoundsExclusive": [
-    101,
-    140,
-    276,
-    292
-  ],
-  "visibleAlphaGt8BoundsExclusive": [
-    104,
-    141,
-    274,
-    289
-  ],
-  "boundsProvenance": "Pillow measurement of raw-recovered 384x384 frame cell",
-  "footAnchor": {
-    "x": 192,
-    "y": 288
-  },
-  "anchorProvenance": "Shared anchor authored by tools/monster-animation-restore-raw.py; not independently visually measured",
-  "sourcePixelsModified": true,
-  "recoveredSource": {
-    "rawGeneratorOutput": "01a16e04-954e-7ff2-bf9d-a0a91eeae401/exec-469f9180-83ff-4199-80df-bc2e2072b1c2.png",
-    "sourceSpeciesMetadata": "art-reference/monsters/dragon/wyrmling/animation/meta.json",
-    "frameIndex": 1,
-    "method": "raw-connected-pose-repack-384-v1",
-    "sourceAlphaThreshold": 128,
-    "edgeRecoveryRadius": null,
-    "normalizationScale": 1.0
-  },
-  "styleReference": null,
-  "bakedWeapon": "natural-claws-and-bite",
-  "alphaMeasurement": {
-    "extrema": [
-      0,
-      255
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "sourcePixelsModified": false,
+  "visualReviewRequired": true,
+  "measurement": {
+    "canvas": [
+      1254,
+      1254
     ],
-    "distinctLevels": 255,
-    "hardAlpha": false
+    "alphaBoundsExclusive": [
+      0,
+      37,
+      1240,
+      1254
+    ],
+    "alphaLevelCount": 256,
+    "sourcePixelsModified": false,
+    "anyAlphaTouchesCanvasEdge": true,
+    "alpha128BoundsExclusive": [
+      245,
+      370,
+      1036,
+      1012
+    ],
+    "alpha128TouchesCanvasEdge": false
   },
-  "note": "Recovered pose pixels are cropped from the raw-recovered atlas; alpha/components may be reconstructed. This is not an untouched source PNG and remains draft-review. Direct production set: fixed baked natural weapon natural-claws-and-bite."
+  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review"
 }

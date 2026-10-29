@@ -300,9 +300,9 @@ export interface TownState {
  * One walk on foot, counted in blocks.
  *
  * `blocksTotal` is the hex distance between the two cells and `secLeft` is the time left on the block
- * being crossed. Every block crossed rolls one encounter chance. A Push preserves the block count.
- * A same-zone Field Camp can end the walk and receive the character; without one, recovery returns to
- * the ambush block and the route continues.
+ * being crossed. A crossed block may roll one independent trail event; it never fields a group. A Push
+ * preserves the block count. A same-zone Field Camp can end the walk and receive the character; without
+ * one, recovery returns to the interrupted block and the route continues.
  *
  * A walk joins two cells, not two settlements (`road.standing_rule`): the destination is any hex the
  * player clicked, and `node`/`kind`/`sub`/`wild` say what stands on it — a settlement, a named side of
@@ -468,7 +468,7 @@ export interface GameState {
   travel: 'stay' | 'forward';
   /**
    * False on safe ground: a town fields no mobs, so nothing spawns until the character heads
-   * out (the hunt button, a forward climb, a walk ambush or a dungeon run). True everywhere else.
+   * out (the hunt button, a forward climb or a dungeon run). True everywhere else.
    */
   hunting: boolean;
   /**

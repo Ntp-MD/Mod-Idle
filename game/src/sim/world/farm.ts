@@ -296,7 +296,7 @@ export function maybeFarm(state: GameState): string[] {
  */
 export function rollPotion(state: GameState, rng: () => number, band: string, potionSource: boolean): string | null {
   if (!potionSource || rng() >= farm.potionDropChance(band)) return null;
-  const pool = rng() < 0.5 ? 'hp' : 'mp';
+  const pool = rng() < 0.5 ? 'hp' : 'mana';
   const potion = farm.P.list.find((p: any) => p.pool === pool && p.tier === band);
   if (!potion) return null;
   return addTo(state, state.farm.potions, potion.name, 'potion', 1) ? potion.name : null;

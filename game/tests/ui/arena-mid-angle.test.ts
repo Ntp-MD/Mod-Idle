@@ -27,7 +27,7 @@ describe('mid-angle presentation', () => {
 
   it('keeps the canonical piercing line exact at 16 angles, not snapped to the actor bins', () => {
     const piercing = sm.byId['attack.piercing_shot'];
-    expect(piercing.area).toMatchObject({ shape: 'line', length_m: 5.2, width_m: .75 });
+    expect(piercing.area).toMatchObject({ shape: 'line', length_m: 5, width_m: 1 });
     const length = piercing.area?.length_m ?? 0;
     const half = (piercing.area?.width_m ?? 0) / 2;
     const line = { origin: 'caster' as const, radius_m: 0, shape: 'line' as const, length_m: length, width_m: half * 2 };

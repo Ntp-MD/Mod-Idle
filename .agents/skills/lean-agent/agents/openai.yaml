@@ -1,7 +1,0 @@
-interface:
-  display_name: "Lean Agent"
-  short_description: "Minimal changes and concise, precise communication"
-  default_prompt: "Use $lean-agent to complete this repository task with the smallest correct change and concise reporting."
-
-policy:
-  allow_implicit_invocation: true

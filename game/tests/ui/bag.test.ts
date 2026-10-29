@@ -50,4 +50,13 @@ describe('the line-by-line swap reading', () => {
     expect(compareLines(piece({ lines: [line('max_hp_flat', 40)] }), null)).toEqual([]);
     expect(vsWorn(piece({ lines: [line('max_hp_flat', 40)] }), null)).toBeNull();
   });
+
+  it('keeps two Stat Mod lines apart when they rolled different Core stats', () => {
+    const worn = piece({ lines: [{ id: 'stat_mod_flat', value: 5, stat: 'str' } as any] });
+    const cand = piece({ lines: [{ id: 'stat_mod_flat', value: 5, stat: 'dex' } as any] });
+    const rows = compareLines(cand, worn);
+    expect(rows).toHaveLength(2);
+    expect(rows.find((r) => r.stat === 'str')).toMatchObject({ kind: 'lost', worn: 5, cand: null });
+    expect(rows.find((r) => r.stat === 'dex')).toMatchObject({ kind: 'gained', worn: null, cand: 5 });
+  });
 });

@@ -1,26 +1,33 @@
 # Player art references
 
-Production player sets plus the frozen `equipment-v1` archive. Not the game asset shelf.
+Canonical player reference set plus review concepts. Not the game asset shelf.
 
 ## Layout
 
 ```text
 art-reference/players/
   README.md
-  equipment-v1/        frozen archive of the modular pipeline (clean body + separate
-                       weapon PNGs); runtime fallback only, do not extend
-  <weapon-set>/        one baked set per weapon family (e.g. one-handed-sword)
-    reference.png, reference.meta.json, prompt.txt
-    README.md          set status plus conformance/gap map
-    animation/v1/      meta.json (atlas/ appears after compose)
-    poses/             mold slots, one <slot>.png + .meta.json + .prompt.txt each
-    _staging/          pre-bake source and legacy-named files pending re-pose; never runtime
+  production.json          set manifest (coverage, frame contract, runtime pointers)
+  runtime-candidate.json   runtime integration candidate data
+  animation-mold.json      pose mold spec (slot order, phases)
+  body/                    canonical clean player body, no weapon
+    reference.png, reference.meta.json
+    idle/                  8 directions, one <slot>.png + .meta.json each
+    walk/                  east/west phases
+    attack/one-hand/       east/west x windup/contact/follow-through/recovery
+    hit/ death/            east/west single poses
+    skill/shield-bash/     east/west baked contact poses
+  weapons/                 one folder per family (side/raised/foreshortened;
+                           bow/crossbow: ready/drawn/released)
+  shield/                  front/side/stowed
+  concepts/                review-only drafts, never runtime
+    pixel-archer-direction-concept-*.png
+    one-handed-sword-direction-proof/
 ```
 
 ## Rules
 
-- Lowercase-hyphen set names. New candidates ship as `v1/`, `v2/` versions per
-  `art-reference/monsters/README.md`; never overwrite a shipped path.
-- Mold: `art-reference/monsters/_shared/mob-animation-template.json` (41 base slots,
-  close/far attack kinds, skill profiles per kit entry with a cast block).
-  Baked only: one fixed weapon per set, no equip switch.
+- Lowercase-hyphen names. No versioned or staging duplicates: one canonical
+  copy of each pixel; drafts live under `concepts/`.
+- Body frames contain no weapon. Baking a weapon into a pose is art-owner
+  work; never fake it by compositing pixels here.

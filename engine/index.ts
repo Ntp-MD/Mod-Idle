@@ -573,6 +573,10 @@ export function createEngine(E: EngineData) {
   // joins that Element's pool, lifts the total, and leaves every other pool as it was. Anything no
   // line names keeps the rest of the pool unattributed — the `''` key — and is never countered either
   // way. The parts always sum back to the total: the split never invents or loses pool.
+  // A percent scale can never take a pool below zero: a combined reduction past -100% floors the
+  // factor at zero instead of minting a negative pool the damage packet must refuse (a swing spends
+  // its HP before the packet is validated, so a negative pool is a throw after damage, never a miss).
+  const share = (pct: number) => Math.max(0, 1 + pct / 100);
   const elementalPowerOf = (o: {
     /** The character's own Int, the source of the `K_ELEM` base. */
     intCore: number;
@@ -587,14 +591,14 @@ export function createEngine(E: EngineData) {
     /** A Herald's flat addition per named Element, before the shared percent rides it. */
     herald: Record<string, number>;
   }) => {
-    const fromGear = (o.intCore * K.K_ELEM + o.flat) * (1 + o.pct / 100);
+    const fromGear = (o.intCore * K.K_ELEM + o.flat) * share(o.pct);
     const herald: Record<string, number> = {};
-    for (const [el, v] of Object.entries(o.herald)) herald[el] = (herald[el] || 0) + v * (1 + o.pct / 100);
+    for (const [el, v] of Object.entries(o.herald)) herald[el] = (herald[el] || 0) + v * share(o.pct);
     const total = fromGear + Object.values(herald).reduce((t, v) => t + v, 0);
     const byElement: Record<string, number> = {};
     for (const [el, bucket] of Object.entries(o.byElement)) {
       const base = el === o.weaponElement ? o.intCore * K.K_ELEM : 0;
-      byElement[el] = (base + bucket.flat) * (1 + (o.pct + bucket.pct) / 100);
+      byElement[el] = (base + bucket.flat) * share(o.pct + bucket.pct);
     }
     const named = Object.values(byElement).reduce((a, b) => a + b, 0);
     if (fromGear - named !== 0) byElement[''] = fromGear - named;

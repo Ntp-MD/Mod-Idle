@@ -501,8 +501,13 @@ export interface AttackRangeDefinition {
   meters: number;
 }
 
+/** Hit avoidance family, independent of damage basis, element and delivery. */
+export type SkillHitClass = 'attack' | 'spell' | 'none';
+
 /** One ordinary basic-attack profile; numbers are authored, the resolver owns their meaning. */
 export interface AttackRangeProfile {
+  /** Canonical basic profiles are attacks, including magic-weapon bolts. */
+  hit_class?: SkillHitClass;
   delivery: 'melee' | 'projectile';
   range: AttackRangeDefinition;
   /** Where the approach stops, as a percentage of the profile's own reach. */
@@ -551,6 +556,8 @@ export interface MobSkillRow {
   id: string;
   name: string;
   mode: 'strike' | 'aura';
+  /** Required on canonical rows; auras have no hostile hit. */
+  hit_class?: SkillHitClass;
   /** The skill's visual Element; damage still comes from the mob's own damage type and innate Element. */
   element: string | null;
   /** A forced control status. Damaging statuses are deliberately absent from the MVP. */
@@ -1031,12 +1038,16 @@ export interface SkillAction {
   interval_sec?: number;
   active_sec?: number;
   movement_speed_mult?: number;
+  /** Chain-strike only: share of the press each hop after the primary lands for, in percent. */
+  hop_share_pct?: number;
 }
 
 export interface SkillRow {
   id: string;
   name?: string;
   type?: string;
+  /** Required on canonical rows; support rows with no hostile hit use none. */
+  hit_class?: SkillHitClass;
   group?: string;
   /** the weapon family this row fires with, matched against the Base's own name — only the arrow rows carry one (`bow` covers bow and crossbow) */
   weapon?: string;

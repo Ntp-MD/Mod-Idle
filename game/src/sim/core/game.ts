@@ -104,8 +104,10 @@ const BAND_OF_QUALITY = (quality: string): string =>
  *  by the same number in `mobSwing`, so the faster body deals exactly its published damage per second. */
 const MOB_CLOCK_FLOOR = E.mob.attack_clock_per_sec;
 const MOB_CLOCK_CAP = 1 / E.caps.attack_interval_sec;
-const mobClock = (kind: string, mult = 1) =>
-  Math.min(((kind.startsWith('Boss') || kind.startsWith('Unique')) ? MOB_CLOCK_FLOOR.boss : MOB_CLOCK_FLOOR.normal) * mult, MOB_CLOCK_CAP);
+const mobClock = (kind: string, mult = 1) => {
+  const rank = kind.toLowerCase();
+  return Math.min(((rank.startsWith('boss') || rank.startsWith('unique')) ? MOB_CLOCK_FLOOR.boss : MOB_CLOCK_FLOOR.normal) * mult, MOB_CLOCK_CAP);
+};
 
 /** The character line lives in `state.ts`; re-exported so every existing importer keeps its path. */
 export { heldWeaponName, carried, characterSheet, spendReference, setLevel, clampPools, ZERO_POINTS } from './state';
@@ -487,8 +489,13 @@ export function salvageBag(s: GameState, bagIndex: number): { ok: boolean; why?:
   if (!item) return { ok: false, why: 'nothing in that bag slot' };
   if (item.locked) return { ok: false, why: 'that piece is locked' };
   if (item.heldFor) return { ok: false, why: 'that piece is promised to a Collector set' };
-  if (!canDissolve(s)) return { ok: false, why: 'make room in the bag for the whole salvage resource bundle' };
+  // the piece leaves first, so the preflight counts the slot it frees: a full bag whose
+  // salvage bundle still fits after the swap is a swap, not a refusal.
   s.bag.splice(bagIndex, 1);
+  if (!canDissolve(s)) {
+    s.bag.splice(bagIndex, 0, item);
+    return { ok: false, why: 'make room in the bag for the whole salvage resource bundle' };
+  }
   dissolve(s);
   push(s, `Salvaged ${itemName(item)} → ${Object.entries(E.salvage.outputs).map(([key, count]) => `${count} ${key}`).join(' + ')}`);
   return { ok: true };
@@ -519,7 +526,10 @@ function filterRunPass(s: GameState, onRow?: (row: FilterRunRow) => void): { dis
       onRow?.({ index: i, action: 'keep', reason: verdict.reason });
       continue;
     }
+    // the piece leaves first, so the preflight counts the slot it frees — same rule as the hand salvage
+    s.bag.splice(i, 1);
     if (!canDissolve(s)) {
+      s.bag.splice(i, 0, item);
       onRow?.({ index: i, action: 'blocked', reason: 'The bag cannot take the next salvage bundle. Free a slot and run the filter again.' });
       for (let pending = i - 1; pending >= 0; pending--) {
         if (s.bag[pending]) onRow?.({ index: pending, action: 'not-reached', reason: 'The filter stopped before reaching this piece.' });
@@ -527,7 +537,6 @@ function filterRunPass(s: GameState, onRow?: (row: FilterRunRow) => void): { dis
       push(s, `Filter run stopped — the bag cannot take the next salvage bundle (${dissolved} melted so far)`);
       return { dissolved, spared, why: 'the bag cannot take the next salvage bundle' };
     }
-    s.bag.splice(i, 1);
     dissolve(s);
     dissolved++;
     onRow?.({ index: i, action: 'dissolve', reason: 'Fails this slot rule; the full salvage bundle fits.' });
@@ -574,7 +583,7 @@ export function filterVerdict(s: GameState, item: Item) {
 }
 
 /**
- * One rolled piece through the bag filter. A mob kill — on foot, in an ambush or paid out of a
+ * One rolled piece through the bag filter. A mob kill — on foot, on arrival or paid out of a
  * dungeon escrow — and any future item source use this same path, so "what the filter keeps" can
  * never mean two different things.
  */

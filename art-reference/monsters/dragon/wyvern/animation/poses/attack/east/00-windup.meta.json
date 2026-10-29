@@ -1,50 +1,10 @@
 {
-  "schemaVersion": 1,
-  "action": "attack",
-  "direction": "east",
-  "pose": "00-windup",
-  "generator": "Recovered source pose; not newly generated",
-  "sourceSize": {
-    "width": 384,
-    "height": 384
-  },
-  "rawAlphaBoundsExclusive": [
-    100,
-    130,
-    283,
-    292
+  "status": "baseline-extracted-candidate",
+  "source": "../../../../atlas/animation.png",
+  "sourceCell": [
+    0,
+    2
   ],
-  "visibleAlphaGt8BoundsExclusive": [
-    102,
-    132,
-    281,
-    290
-  ],
-  "boundsProvenance": "Pillow measurement of raw-recovered 384x384 frame cell",
-  "footAnchor": {
-    "x": 192,
-    "y": 288
-  },
-  "anchorProvenance": "Shared anchor authored by tools/monster-animation-restore-raw.py; not independently visually measured",
-  "sourcePixelsModified": true,
-  "recoveredSource": {
-    "rawGeneratorOutput": "01a16e04-954e-7ff2-bf9d-a0a91eeae401/exec-88bf1f6f-9e86-49b5-95a7-aba534fef8bf.png",
-    "sourceSpeciesMetadata": "art-reference/monsters/dragon/wyvern/animation/meta.json",
-    "frameIndex": 16,
-    "method": "raw-connected-pose-repack-384-v1",
-    "sourceAlphaThreshold": 128,
-    "edgeRecoveryRadius": null,
-    "normalizationScale": 1.0
-  },
-  "styleReference": null,
-  "bakedWeapon": "natural-claws",
-  "alphaMeasurement": {
-    "extrema": [
-      0,
-      255
-    ],
-    "distinctLevels": 256,
-    "hardAlpha": false
-  },
-  "note": "Recovered pose pixels are cropped from the raw-recovered atlas; alpha/components may be reconstructed. This is not an untouched source PNG and remains draft-review. Direct production set: fixed baked natural weapon natural-claws."
+  "pixelsRepainted": false,
+  "visualReviewRequired": true
 }

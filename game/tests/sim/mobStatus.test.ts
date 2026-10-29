@@ -6,7 +6,7 @@ import {
   consumeStatus, setStacks, stunMob, placeStatus,
 } from '@sim/combat/mobStatus';
 import { combineMods } from '@sim/combat/curse';
-import { playerSwing, mobSwing, rollStatus, dotDamageParts, type Statuses } from '@sim/combat/combat';
+import { playerSwing, mobSwing, rollStatus, applyStatus, dotDamageParts, type Statuses } from '@sim/combat/combat';
 import { mulberry32 } from '../../src/engine/client-helpers';
 import { sm } from '../../src/engine/client';
 import { newGame, tick, setLevel, huntZone } from '@sim/core/game';
@@ -252,6 +252,15 @@ describe('control is bounded, never a lockout', () => {
     const tm = combineMods({ damageDealt: 0, attackSpeed: 0, accuracy: 0, damageTaken: 0, critChance: 0, leechPct: 0, clockPct: 0, stopped: false, armourCut: 0, resistCut: 0, elemTakenPct: 0 }, targetMods(modsOn(store, 'm1')));
     expect(tm.attackSpeed).toBe(-S.chill.aspd_cap);
     expect(Math.max(0, 1 + tm.attackSpeed / 100)).toBeCloseTo(1 - S.chill.aspd_cap / 100, 10);
+  });
+
+  it('a forced mob-skill shock still answers Stun Recovery', () => {
+    const plain: Statuses = {};
+    applyStatus(plain, 'shock', 100, 100, 0);
+    const cut: Statuses = {};
+    applyStatus(cut, 'shock', 100, 100, 80);
+    expect(plain.shock?.secLeft).toBeCloseTo(S.shock.stop_sec, 10);
+    expect(cut.shock?.secLeft).toBeCloseTo((plain.shock?.secLeft ?? 0) * 0.2, 10);
   });
 });
 

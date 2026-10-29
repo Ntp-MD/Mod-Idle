@@ -21,7 +21,7 @@ import { createLifeSkills } from '../../../engine/life-skills.ts';
 import { createBlackMarket, type BlackMarketCfg } from '../../../engine/black-market.ts';
 import { createTrade, type TradeCfg } from '../../../engine/trade.ts';
 import { createDelivery, type DeliveryCfg } from '../../../engine/delivery.ts';
-import { createSkillModel } from '../../../engine/skills.ts';
+import { createSkillModel, validateSkillHitClasses } from '../../../engine/skills.ts';
 import { createSpawns } from '../../../engine/spawns.ts';
 import { createTree } from '../../../engine/tree.ts';
 import { keystoneBuildContext } from '../sim/core/keystone-runtime.ts';
@@ -57,6 +57,8 @@ const SKILLS_DATA: SkillsData = skillsJson as SkillsData;
 // A JSON import cannot infer the `mode` union; the library is authored to the declared shape and X55
 // validates every row, so this seam narrows once rather than re-typing the data in the sim.
 const MOB_SKILLS_DATA: MobSkillsData = mobSkillsJson as unknown as MobSkillsData;
+validateSkillHitClasses(skillsJson.skills, 'skills.json');
+validateSkillHitClasses(mobSkillsJson.skills, 'mob-skills.json');
 // a JSON import cannot infer a union such as `TreeGrant.stat`; the engine validates every grant it
 // reads, so the seam narrows to its own declared shape here rather than re-typing the data
 const TREE_DATA = treeJson as unknown as Parameters<typeof createTree>[0];

@@ -32,6 +32,7 @@
   "skills": [
     {
       "id": "mob.physical.backstab",
+      "hit_class": "attack",
       "name": "Backstab",
       "mode": "strike",
       "element": null,
@@ -51,6 +52,7 @@
     },
     {
       "id": "mob.physical.cleave",
+      "hit_class": "attack",
       "name": "Cleave",
       "mode": "strike",
       "element": null,
@@ -70,6 +72,7 @@
     },
     {
       "id": "mob.physical.hamstring",
+      "hit_class": "attack",
       "name": "Hamstring",
       "mode": "strike",
       "element": null,
@@ -89,6 +92,7 @@
     },
     {
       "id": "mob.physical.shield-bash",
+      "hit_class": "attack",
       "name": "Shield Bash",
       "mode": "strike",
       "element": null,
@@ -109,6 +113,7 @@
     },
     {
       "id": "mob.physical.pounce",
+      "hit_class": "attack",
       "name": "Pounce",
       "mode": "strike",
       "element": null,
@@ -128,6 +133,7 @@
     },
     {
       "id": "mob.physical.gore",
+      "hit_class": "attack",
       "name": "Gore",
       "mode": "strike",
       "element": null,
@@ -151,6 +157,7 @@
     },
     {
       "id": "mob.physical.crushing-blow",
+      "hit_class": "attack",
       "name": "Crushing Blow",
       "mode": "strike",
       "element": null,
@@ -170,6 +177,7 @@
     },
     {
       "id": "mob.physical.sweeping-tail",
+      "hit_class": "attack",
       "name": "Sweeping Tail",
       "mode": "strike",
       "element": null,
@@ -189,6 +197,7 @@
     },
     {
       "id": "mob.physical.rend",
+      "hit_class": "attack",
       "name": "Rend",
       "mode": "strike",
       "element": null,
@@ -208,6 +217,7 @@
     },
     {
       "id": "mob.physical.trample",
+      "hit_class": "attack",
       "name": "Trample",
       "mode": "strike",
       "element": null,
@@ -227,6 +237,7 @@
     },
     {
       "id": "mob.physical.skull-crack",
+      "hit_class": "attack",
       "name": "Skull Crack",
       "mode": "strike",
       "element": null,
@@ -246,6 +257,7 @@
     },
     {
       "id": "mob.physical.overbear",
+      "hit_class": "attack",
       "name": "Overbear",
       "mode": "strike",
       "element": null,
@@ -265,6 +277,7 @@
     },
     {
       "id": "mob.fire.ember-lash",
+      "hit_class": "spell",
       "name": "Ember Lash",
       "mode": "strike",
       "element": "fire",
@@ -286,6 +299,7 @@
     },
     {
       "id": "mob.fire.cinder-burst",
+      "hit_class": "spell",
       "name": "Cinder Burst",
       "mode": "strike",
       "element": "fire",
@@ -307,6 +321,7 @@
     },
     {
       "id": "mob.fire.scorching-roar",
+      "hit_class": "spell",
       "name": "Scorching Roar",
       "mode": "strike",
       "element": "fire",
@@ -326,6 +341,7 @@
     },
     {
       "id": "mob.fire.molten-step",
+      "hit_class": "attack",
       "name": "Molten Step",
       "mode": "strike",
       "element": "fire",
@@ -345,6 +361,7 @@
     },
     {
       "id": "mob.cold.frost-bite",
+      "hit_class": "spell",
       "name": "Frost Bite",
       "mode": "strike",
       "element": "cold",
@@ -364,6 +381,7 @@
     },
     {
       "id": "mob.cold.rime-snare",
+      "hit_class": "spell",
       "name": "Rime Snare",
       "mode": "strike",
       "element": "cold",
@@ -385,6 +403,7 @@
     },
     {
       "id": "mob.cold.winter-howl",
+      "hit_class": "spell",
       "name": "Winter Howl",
       "mode": "strike",
       "element": "cold",
@@ -404,6 +423,7 @@
     },
     {
       "id": "mob.cold.ice-shard",
+      "hit_class": "spell",
       "name": "Ice Shard",
       "mode": "strike",
       "element": "cold",
@@ -425,6 +445,7 @@
     },
     {
       "id": "mob.lightning.static-jab",
+      "hit_class": "attack",
       "name": "Static Jab",
       "mode": "strike",
       "element": "lightning",
@@ -444,6 +465,7 @@
     },
     {
       "id": "mob.lightning.thunderclap",
+      "hit_class": "spell",
       "name": "Thunderclap",
       "mode": "strike",
       "element": "lightning",
@@ -465,6 +487,7 @@
     },
     {
       "id": "mob.lightning.chain-spark",
+      "hit_class": "spell",
       "name": "Chain Spark",
       "mode": "strike",
       "element": "lightning",
@@ -486,6 +509,7 @@
     },
     {
       "id": "mob.lightning.volt-rush",
+      "hit_class": "attack",
       "name": "Volt Rush",
       "mode": "strike",
       "element": "lightning",
@@ -505,6 +529,7 @@
     },
     {
       "id": "mob.poison.venom-spit",
+      "hit_class": "attack",
       "name": "Venom Spit",
       "mode": "strike",
       "element": "poison",
@@ -526,6 +551,7 @@
     },
     {
       "id": "mob.poison.toxic-cloud",
+      "hit_class": "spell",
       "name": "Toxic Cloud",
       "mode": "strike",
       "element": "poison",
@@ -547,6 +573,7 @@
     },
     {
       "id": "mob.poison.serpent-strike",
+      "hit_class": "attack",
       "name": "Serpent Strike",
       "mode": "strike",
       "element": "poison",
@@ -566,6 +593,7 @@
     },
     {
       "id": "mob.poison.acid-spray",
+      "hit_class": "attack",
       "name": "Acid Spray",
       "mode": "strike",
       "element": "poison",
@@ -587,6 +615,7 @@
     },
     {
       "id": "mob.chaos.mind-shear",
+      "hit_class": "spell",
       "name": "Mind Shear",
       "mode": "strike",
       "element": "chaos",
@@ -608,6 +637,7 @@
     },
     {
       "id": "mob.chaos.void-pulse",
+      "hit_class": "spell",
       "name": "Void Pulse",
       "mode": "strike",
       "element": "chaos",
@@ -629,6 +659,7 @@
     },
     {
       "id": "mob.chaos.hex-bolt",
+      "hit_class": "spell",
       "name": "Hex Bolt",
       "mode": "strike",
       "element": "chaos",
@@ -650,6 +681,7 @@
     },
     {
       "id": "mob.chaos.dissonant-cry",
+      "hit_class": "spell",
       "name": "Dissonant Cry",
       "mode": "strike",
       "element": "chaos",
@@ -671,6 +703,7 @@
     },
     {
       "id": "mob.earth.stone-fist",
+      "hit_class": "attack",
       "name": "Stone Fist",
       "mode": "strike",
       "element": "earth",
@@ -690,6 +723,7 @@
     },
     {
       "id": "mob.earth.quake-step",
+      "hit_class": "attack",
       "name": "Quake Step",
       "mode": "strike",
       "element": "earth",
@@ -709,6 +743,7 @@
     },
     {
       "id": "mob.earth.dust-blind",
+      "hit_class": "spell",
       "name": "Dust Blind",
       "mode": "strike",
       "element": "earth",
@@ -730,6 +765,7 @@
     },
     {
       "id": "mob.earth.boulder-toss",
+      "hit_class": "attack",
       "name": "Boulder Toss",
       "mode": "strike",
       "element": "earth",
@@ -756,6 +792,7 @@
     },
     {
       "id": "mob.fire.ash-veil",
+      "hit_class": "none",
       "name": "Ash Veil",
       "mode": "aura",
       "element": "fire",
@@ -767,6 +804,7 @@
     },
     {
       "id": "mob.fire.flame-guard",
+      "hit_class": "none",
       "name": "Flame Guard",
       "mode": "aura",
       "element": "fire",
@@ -778,6 +816,7 @@
     },
     {
       "id": "mob.cold.glacial-ward",
+      "hit_class": "none",
       "name": "Glacial Ward",
       "mode": "aura",
       "element": "cold",
@@ -789,6 +828,7 @@
     },
     {
       "id": "mob.cold.permafrost",
+      "hit_class": "none",
       "name": "Permafrost",
       "mode": "aura",
       "element": "cold",
@@ -800,6 +840,7 @@
     },
     {
       "id": "mob.lightning.storm-mantle",
+      "hit_class": "none",
       "name": "Storm Mantle",
       "mode": "aura",
       "element": "lightning",
@@ -811,6 +852,7 @@
     },
     {
       "id": "mob.lightning.charged-field",
+      "hit_class": "none",
       "name": "Charged Field",
       "mode": "aura",
       "element": "lightning",
@@ -822,6 +864,7 @@
     },
     {
       "id": "mob.poison.miasma",
+      "hit_class": "none",
       "name": "Miasma",
       "mode": "aura",
       "element": "poison",
@@ -833,6 +876,7 @@
     },
     {
       "id": "mob.poison.creeping-rot",
+      "hit_class": "none",
       "name": "Creeping Rot",
       "mode": "aura",
       "element": "poison",
@@ -844,6 +888,7 @@
     },
     {
       "id": "mob.chaos.unreal-veil",
+      "hit_class": "none",
       "name": "Unreal Veil",
       "mode": "aura",
       "element": "chaos",
@@ -855,6 +900,7 @@
     },
     {
       "id": "mob.chaos.warped-aura",
+      "hit_class": "none",
       "name": "Warped Aura",
       "mode": "aura",
       "element": "chaos",
@@ -866,6 +912,7 @@
     },
     {
       "id": "mob.earth.stone-guard",
+      "hit_class": "none",
       "name": "Stone Guard",
       "mode": "aura",
       "element": "earth",
@@ -877,6 +924,7 @@
     },
     {
       "id": "mob.earth.rooted-stance",
+      "hit_class": "none",
       "name": "Rooted Stance",
       "mode": "aura",
       "element": "earth",
@@ -888,6 +936,7 @@
     },
     {
       "id": "mob.earth.seismic-slam",
+      "hit_class": "spell",
       "name": "Seismic Slam",
       "mode": "strike",
       "element": "earth",

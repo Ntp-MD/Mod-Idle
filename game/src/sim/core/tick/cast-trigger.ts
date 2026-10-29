@@ -235,7 +235,7 @@ export function createCastTrigger(opts: {
       if (!skill) return;
       const profile = sm.castProfileOf(skill);
       // Trigger casts are immediate by design: no animation commitment, so no step floor.
-      const timing = skillCastTiming({ ...profile, windup_sec: 0, recovery_sec: 0 }, atUs, units,
+      const timing = skillCastTiming({ ...profile, windup_sec: 0, fixed_windup_sec: 0, recovery_sec: 0 }, atUs, units,
         { x: arena.player.x, y: arena.player.y }, prepared.area?.center ?? { x: arena.player.x, y: arena.player.y },
         { cast: c.castSpeed, recovery: c.recoverySpeed });
       const targetId = prepared.targets[0]?.id ?? prepared.area?.targetId ?? arena.intent?.targetId ?? front?.id;

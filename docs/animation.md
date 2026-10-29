@@ -12,7 +12,6 @@ damage, a cooldown or a reward.
 |---|---|
 | `game/src/ui/combat/animation/manifest.ts` | Runtime identity → rig/sprite resolution, the clip schema, the validator and the phase floor. |
 | `game/src/ui/combat/arena/`, `game/src/icon/mob/`, `game/src/icon/gear/` | Shelf art the fallback names. |
-| `game/src/ui/dev/three-arena-layer.ts` | The DEV source-model stand-in: Quaternius Ninja/Orc feet, projection and clip sampling. Not a production rig. |
 | `docs/animation.md` | This contract. |
 
 A production rig is imported only after `validateAnimationManifest` accepts it and every runtime
@@ -47,6 +46,5 @@ animation stays readable but the sim's hit time does not move.
 1. Every active species and each player weapon group resolves through the manifest; a rig's
    model stem is lowercase-hyphen and its feet pivot is at `y = 0`.
 2. Walk speed, release and impact line up with the sim beat; no snap at a transition.
-3. A missing rig reports the sprite name it draws. The DEV Quaternius stand-ins are never
-   reported as production rigs.
+3. A missing rig reports the sprite name it draws.
 4. Damage and rewards never read a clip's end or a frame callback.

@@ -168,6 +168,15 @@
     hover = { entry, top: b.top, left: b.left, right: b.right, bottom: b.bottom };
   }
 
+  /** A press addresses the piece it shows, not the slot it sat in when drawn: a drop that lands
+   * between render and press unshifts the bag, so an index read at draw time could already name the
+   * neighbour. Identity resolves the live slot; -1 refuses safely in the sim instead of a wrong piece. */
+  function liveIndex(entry: SlotEntry): number {
+    if (entry.kind !== 'gear' || !entry.item || !game) return entry.index;
+    const at = game.bag.indexOf(entry.item);
+    return at >= 0 ? at : -1;
+  }
+
   /** the verbs come from the caller; this component only knows a square can offer some */
   function openMenu(e: MouseEvent, entry: SlotEntry) {
     if (!actions || !actions(entry).length) return;
@@ -303,7 +312,7 @@
             <td>{lineSummary(entry)}</td>
             <td>{entry.kind === "gear" ? Math.round(entry.score) : "—"}</td>
             <td
-              >{#if onequip && entry.item}<button onclick={() => onequip(entry.index)}>Equip</button>{/if}</td
+              >{#if onequip && entry.item}<button onclick={() => onequip(liveIndex(entry))}>Equip</button>{/if}</td
             >
           </tr>
         {:else}
@@ -341,7 +350,7 @@
         wornHere={pinned.kind === "worn"}
         onequip={onequip
           ? () => {
-              onequip(pinned.index);
+              onequip(liveIndex(pinned));
               hover = null;
             }
           : null}

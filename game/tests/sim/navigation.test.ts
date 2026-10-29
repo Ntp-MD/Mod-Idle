@@ -134,6 +134,20 @@ describe('routes over injected ground', () => {
     expect(result.waypoints).toContainEqual(detour);
   });
 
+  it('refuses a diagonal its own straight sweep flags, even when both doglegs are clear', () => {
+    // A sliver on the y = x line clips the direct (1.5,1.5)→(2.5,2.5) leg while every
+    // half-leg of both doglegs passes at least 0.2 away, outside the 0.05 body.
+    const clip = square(4, [box('sliver', 2.05, 1.9, 0.1, 0.4)], 1);
+    const result = route(clip, { x: 1.5, y: 1.5 }, [goal('across', 2.5, 2.5)], 0.05);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // the direct leg would measure √2; the legal answer walks around the sliver
+    expect(result.length).toBeGreaterThan(1.5);
+    for (let index = 1; index < result.waypoints.length; index++) {
+      expect(sweepDisc(clip, result.waypoints[index - 1], result.waypoints[index], 0.05)).toBeNull();
+    }
+  });
+
   it('attaches through a cardinal path when the containing cell centre is blocked', () => {
     const blockedCentre = square(6, [circle('rock', 3, 3, 0.5)]);
     const result = route(blockedCentre, { x: 1, y: 1 }, [goal('behind', 2.2, 2.2)], 0.1);

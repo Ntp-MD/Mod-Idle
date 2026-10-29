@@ -72,7 +72,7 @@ $references = @(
     @{ source = 'game/public/map/terrain/forest-relief-1.png'; file = 'forest-relief-1.png'; role = 'Composition and style example. Raw generated footprint is approximate; renderer registration is required. Not a certified camera reference.' },
     @{ source = 'game/public/map/terrain/mountain-relief-1.png'; file = 'mountain-relief-1.png'; role = 'User-approved mountain composition and scale in the actual map. Raw footprint requires registration. Not a certified camera reference.' }
 )
-$sourcePaths = @('game/src/ui/map/map-projection.ts', 'art-reference/map/geometry/terrain-hex.json', 'tools/map.ts', 'game/src/ui/map/map-terrain.ts', 'game/src/ui/map/data/map-terrain-footprints.json', 'art-reference/map/source-assets.json', 'docs/map-art.md')
+$sourcePaths = @('game/src/ui/map/map-projection.ts', 'art-reference/map/geometry/terrain-hex.json', 'tools/map.ts', 'game/src/ui/map/map-terrain.ts', 'game/src/ui/map/data/map-terrain-footprints.json', 'art-reference/map/source-assets.json')
 foreach ($reference in $references) {
     $source = Join-Path $repoRoot $reference.source
     Copy-Item -LiteralPath $source -Destination (Join-Path $referenceDir $reference.file) -Force

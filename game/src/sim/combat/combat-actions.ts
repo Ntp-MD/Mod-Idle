@@ -159,6 +159,11 @@ export function selectCombatIntent(
   const previous = arena.intent && trackIntentAim(arena, state.group, arena.intent);
   if (previous?.phase === 'approach' && usable(previous)) {
     const now = pickIntent(arena, state, character, usable, true);
+    // Focus pin: an equally useful northern focus must replace the eastern approach.
+    if (arena.focusId && arena.focusId !== previous.targetId) {
+      if (now && now.targetId === arena.focusId) return now;
+      if (fresh && fresh.targetId === arena.focusId) return fresh;
+    }
     if (now && now.skillId !== previous.skillId) return now;
     if (now) {
       // A now-usable target is a hard opportunity; otherwise keep an equally useful held aim.
@@ -187,6 +192,15 @@ export function selectCombatIntent(
 export function intentInRange(arena: CombatArena, intent: CombatIntent, group: Mob[] = []): boolean {
   const skill = sm.byId[intent.skillId];
   if (skill.type === 'buff' || skill.type === 'heal') return true;
+  const isCasterOriented = skill.area?.origin === 'caster'
+    && (skill.area.shape === 'cone' || skill.area.shape === 'line');
+  if (isCasterOriented) {
+    // With occupants, near/far collinear points share the same bearing; distance to the
+    // bearing anchor must not force a chase. With no occupants, still approach.
+    if (intentTargets(arena, group, intent, false).targets.length > 0) return true;
+    if (arenaDistance(arena.player, intent.targetPoint) > arenaSkillRange(intent.skillId) + 1e-7) return false;
+    return false;
+  }
   if (arenaDistance(arena.player, intent.targetPoint) > arenaSkillRange(intent.skillId) + 1e-7) return false;
   return skill.area?.origin !== 'caster'
     || intentTargets(arena, group, intent, false).targets.length > 0;

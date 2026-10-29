@@ -1,1 +1,0 @@
-Exact 384x384 source cell extracted losslessly from the existing visual-approved Goblin atlas. No pixels were redrawn or transformed; retained only as the corresponding direction/action baseline while building the 16-direction successor.

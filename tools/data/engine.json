@@ -53,6 +53,7 @@
       "contact_band_m": 0.06,
       "profiles": {
         "melee": {
+          "hit_class": "attack",
           "delivery": "melee",
           "range": {
             "basis": "body-edge",
@@ -63,6 +64,7 @@
           "recovery_interval_pct": 20
         },
         "ranged": {
+          "hit_class": "attack",
           "delivery": "projectile",
           "range": {
             "basis": "center",
@@ -75,6 +77,7 @@
           "hit_radius_m": 0.35
         },
         "magic": {
+          "hit_class": "attack",
           "delivery": "projectile",
           "range": {
             "basis": "center",

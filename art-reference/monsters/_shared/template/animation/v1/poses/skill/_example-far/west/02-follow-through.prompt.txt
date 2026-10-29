@@ -1,5 +1,0 @@
-SPECIES: <species-id> (<Species Name>) — <silhouette one-liner>
-WEAPON (baked, fixed): <weapon-id> — in hand every frame; no equip switch
-SLOT: skill/_example-far/west/02-follow-through — example projectile kit-action west: follow-through after release; copy per kit entry with a cast block
-CAMERA: fixed elevated three-quarter, upper-left light; whole sprite including feet inside the frame
-RENDER: chibi pixel-art clusters, hard opaque edges only, transparent background; no shadow, scenery, text, effects, grid

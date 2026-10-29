@@ -47,11 +47,11 @@ describe('F16 line — the bolt travels the footprint, damage follows the line',
       };
     expect(cast).toBeDefined();
     expect(cast.timing.delivery).toBe('projectile');
-    // The trajectory is the 5.2 m footprint, not a zero-length point at the caster.
+    // The trajectory is the 5 m footprint, not a zero-length point at the caster.
     expect(cast.timing.impactAtUs).toBeGreaterThan(cast.timing.releaseAtUs);
     const mouth = cast.payloads?.[0]?.destination;
     expect(mouth).toBeDefined();
-    expect(Math.hypot(mouth!.x - cast.x, mouth!.y - cast.y)).toBeCloseTo(5.2, 1);
+    expect(Math.hypot(mouth!.x - cast.x, mouth!.y - cast.y)).toBeCloseTo(5, 1);
     expect(mobs[0].hp).toBeLessThan(1e9);
     expect(mobs[1].hp).toBeLessThan(1e9);
     // F20: the line resolves at its body crossing, not the noticing sample — the impact

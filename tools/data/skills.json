@@ -4,7 +4,7 @@
     "active_slots": 16,
     "spatial_targeting": {
       "unit": "meter",
-      "note": "Live offensive casts use each row area.origin and area.radius_m. Positive radii hit every living enemy center inside the circle with no target-count cap; zero selects the primary target only. Caster-centered skills cast when an enemy enters their radius. Target-centered skills acquire within combat_arena.range, then test the circle around that target. The targets column remains the offline queue approximation. Cast reports snapshot the actual center and radius for VFX."
+      "note": "Live offensive casts resolve in three separate steps. Acquisition picks a primary: a target-origin row acquires within its cast.range_m, a line row acquires within its length_m instead, and a caster-origin row casts when a body enters its radius_m. The footprint is the committed snapshot — shape, center and cast direction rebuilt at release from live positions (engine/skill-area.ts skillAreaSnapshot; engine/skill-actions.ts targetsInSkillArea): circles test every living center inside with no target-count cap, lines and cones test the aimed footprint, so a zero-radius line still holds every body along it and radius_m 0 alone never means single-target. A chain-strike row reuses area.radius_m as its hop reach between contacts, not as a circle. No row carries child spread: the cluster system is decided but has no live adopter, so nothing spawns children. The targets column remains the offline queue approximation. Cast reports snapshot the actual footprint for VFX."
     },
     "action_profiles": {
       "instant": {
@@ -47,7 +47,7 @@
       "attack": "Order list · cooldown + Mana or current-HP cost",
       "buff": "Timed self-buff · own cooldown and duration; ends between fights",
       "curse": "Attached to target · same hit_chance as attacks",
-      "heal": "Same list · key on bosses",
+      "heal": "Same list · lands on the player: a per-second drip or an instant restore, never a mob target",
       "aura": "Player-managed set · **Reserves Max Mana**"
     },
     "weapon_groups": [
@@ -269,6 +269,7 @@
   "skills": [
     {
       "id": "attack.fireball",
+      "hit_class": "spell",
       "name": "Fireball",
       "type": "attack",
       "group": "magic",
@@ -278,7 +279,7 @@
       "basis": "magic",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "projectile", "range_m": 4.6},
+      "cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.25},
       "effect": "Applies 2 burn stacks.",
       "effects": [
         {
@@ -293,6 +294,7 @@
     },
     {
       "id": "attack.flame_bolt",
+      "hit_class": "spell",
       "retired": true,
       "retired_to": "attack.fireball",
       "name": "Flame Bolt",
@@ -317,6 +319,7 @@
     },
     {
       "id": "attack.firestorm",
+      "hit_class": "spell",
       "name": "Firestorm",
       "type": "attack",
       "group": "magic",
@@ -326,7 +329,7 @@
       "basis": "magic",
       "targets": "3",
       "area": { "origin": "target", "radius_m": 3 },
-      "cast": {"delivery": "ground", "range_m": 4.6},
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.5, "fixed_windup_sec": 0.15, "recovery_sec": 0.3},
       "effect": "Applies 1 burn stack.",
       "effects": [
         {
@@ -344,6 +347,7 @@
     },
     {
       "id": "attack.meteor",
+      "hit_class": "spell",
       "name": "Meteor",
       "type": "attack",
       "group": "magic",
@@ -353,7 +357,7 @@
       "basis": "magic",
       "targets": "3",
       "area": { "origin": "target", "radius_m": 3 },
-      "cast": {"delivery": "ground", "range_m": 4.6},
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.6, "fixed_windup_sec": 0.2, "recovery_sec": 0.3},
       "effect": "Applies 2 burn stacks.",
       "effects": [
         {
@@ -371,6 +375,7 @@
     },
     {
       "id": "attack.flame_wisp",
+      "hit_class": "spell",
       "retired": true,
       "retired_to": "attack.fireball",
       "name": "Flame Wisp",
@@ -395,6 +400,7 @@
     },
     {
       "id": "attack.frost_bolt",
+      "hit_class": "spell",
       "retired": true,
       "retired_to": "attack.ice_lance",
       "name": "Frost Bolt",
@@ -414,6 +420,7 @@
     },
     {
       "id": "attack.ice_shard",
+      "hit_class": "spell",
       "retired": true,
       "retired_to": "attack.ice_lance",
       "name": "Ice Shard",
@@ -433,6 +440,7 @@
     },
     {
       "id": "attack.ice_lance",
+      "hit_class": "spell",
       "name": "Ice Lance",
       "type": "attack",
       "group": "magic",
@@ -442,7 +450,7 @@
       "basis": "magic",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "projectile", "range_m": 4.6},
+      "cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.25},
       "action": { "kind": "projectile-burst", "interval_sec": 0.15 },
       "effect": "Chills the target.",
       "effects": [
@@ -467,6 +475,7 @@
     },
     {
       "id": "attack.blizzard",
+      "hit_class": "spell",
       "name": "Blizzard",
       "type": "attack",
       "group": "magic",
@@ -476,7 +485,7 @@
       "basis": "magic",
       "targets": "3",
       "area": { "origin": "target", "radius_m": 3 },
-      "cast": {"delivery": "ground", "range_m": 4.6},
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.5, "fixed_windup_sec": 0.15, "recovery_sec": 0.25},
       "action": { "kind": "blizzard-field" },
       "effect": "Chills everything it touches.",
       "duration": "8 sec",
@@ -503,6 +512,7 @@
     },
     {
       "id": "attack.frozen_orb",
+      "hit_class": "spell",
       "retired": true,
       "retired_to": "attack.blizzard",
       "name": "Frozen Orb",
@@ -523,6 +533,7 @@
     },
     {
       "id": "attack.frostbite",
+      "hit_class": "spell",
       "name": "Frostbite",
       "type": "attack",
       "group": "magic",
@@ -532,7 +543,7 @@
       "basis": "magic",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "instant", "range_m": 4.6},
+      "cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.2, "recovery_sec": 0.15},
       "effect": "+25% damage against chilled targets.",
       "duration": "8 sec",
       "effects": [
@@ -549,6 +560,7 @@
     },
     {
       "id": "attack.chain_lightning",
+      "hit_class": "spell",
       "name": "Chain Lightning",
       "type": "attack",
       "group": "magic",
@@ -558,8 +570,8 @@
       "basis": "magic",
       "targets": "3",
       "area": { "origin": "target", "radius_m": 3 },
-      "cast": {"delivery": "instant", "range_m": 4.6},
-      "action": { "kind": "chain-strike" },
+      "cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},
+      "action": { "kind": "chain-strike", "interval_sec": 0.08, "hop_share_pct": 60 },
       "effect": "Shocks everything it reaches.",
       "rules": [
         "guaranteed_status",
@@ -570,6 +582,7 @@
     },
     {
       "id": "attack.lightning_bolt",
+      "hit_class": "spell",
       "retired": true,
       "retired_to": "attack.spark",
       "name": "Lightning Bolt",
@@ -589,6 +602,7 @@
     },
     {
       "id": "attack.spark",
+      "hit_class": "spell",
       "name": "Spark",
       "type": "attack",
       "group": "magic",
@@ -598,7 +612,7 @@
       "basis": "magic",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "projectile", "range_m": 4.6},
+      "cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.15, "recovery_sec": 0.25},
       "effect": "Applies 1 shock stack.",
       "rules": [
         "guaranteed_status"
@@ -608,6 +622,7 @@
     },
     {
       "id": "attack.thunder_strike",
+      "hit_class": "spell",
       "name": "Thunder Strike",
       "type": "attack",
       "group": "magic",
@@ -617,7 +632,7 @@
       "basis": "magic",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "ground", "range_m": 4.6},
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.4, "fixed_windup_sec": 0.05, "recovery_sec": 0.25},
       "effect": "Shocks the target.",
       "rules": [
         "guaranteed_status"
@@ -627,6 +642,7 @@
     },
     {
       "id": "attack.storm_call",
+      "hit_class": "spell",
       "retired": true,
       "retired_to": "attack.chain_lightning",
       "name": "Storm Call",
@@ -647,6 +663,7 @@
     },
     {
       "id": "attack.static_field",
+      "hit_class": "spell",
       "retired": true,
       "retired_to": "attack.chain_lightning",
       "name": "Static Field",
@@ -667,6 +684,7 @@
     },
     {
       "id": "attack.poison_bolt",
+      "hit_class": "spell",
       "name": "Poison Bolt",
       "type": "attack",
       "group": "magic",
@@ -691,6 +709,7 @@
     },
     {
       "id": "attack.venom_spray",
+      "hit_class": "spell",
       "name": "Venom Spray",
       "type": "attack",
       "group": "magic",
@@ -699,8 +718,8 @@
       "mana": "24 flat",
       "basis": "magic",
       "targets": "3",
-      "area": { "origin": "caster", "radius_m": 2.5, "shape": "cone", "angle_deg": 90 },
-      "cast": {"delivery": "melee", "range_m": 2.5, "windup_sec": 0.25, "fixed_windup_sec": 0.05},
+      "area":{ "origin": "caster", "radius_m": 3, "shape": "cone", "angle_deg": 90 },
+      "cast":{"delivery": "melee", "range_m": 3, "windup_sec": 0.25, "fixed_windup_sec": 0.05, "recovery_sec": 0.22},
       "effect": "Sprays venom in a 90° cone, applying 1 poison stack.",
       "effects": [
         {
@@ -718,6 +737,7 @@
     },
     {
       "id": "attack.acid_arrow",
+      "hit_class": "spell",
       "name": "Acid Arrow",
       "type": "attack",
       "group": "magic",
@@ -742,6 +762,7 @@
     },
     {
       "id": "attack.toxic_cloud",
+      "hit_class": "spell",
       "retired": true,
       "retired_to": "attack.venom_spray",
       "name": "Toxic Cloud",
@@ -769,6 +790,7 @@
     },
     {
       "id": "attack.chaos_bolt",
+      "hit_class": "spell",
       "name": "Chaos Bolt",
       "type": "attack",
       "group": "magic",
@@ -793,6 +815,7 @@
     },
     {
       "id": "attack.void_blast",
+      "hit_class": "spell",
       "name": "Void Blast",
       "type": "attack",
       "group": "magic",
@@ -801,8 +824,8 @@
       "mana": "24 flat",
       "basis": "magic",
       "targets": "3",
-      "area": { "origin": "target", "radius_m": 2.5 },
-      "cast": {"delivery": "ground", "range_m": 4.6},
+      "area":{ "origin": "target", "radius_m": 3 },
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.45, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},
       "effect": "Applies 1 mark stack.",
       "effects": [
         {
@@ -820,6 +843,7 @@
     },
     {
       "id": "attack.sand_storm",
+      "hit_class": "spell",
       "name": "Sand Storm",
       "type": "attack",
       "group": "magic",
@@ -829,7 +853,7 @@
       "basis": "magic",
       "targets": "3",
       "area": { "origin": "target", "radius_m": 3 },
-      "cast": {"delivery": "ground", "range_m": 4.6},
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.5, "fixed_windup_sec": 0.15, "recovery_sec": 0.25},
       "action": { "kind": "sand-field" },
       "effect": "Blinds with −20% accuracy.",
       "effects": [
@@ -860,6 +884,7 @@
     },
     {
       "id": "attack.earth_splitter",
+      "hit_class": "spell",
       "name": "Earth Splitter",
       "type": "attack",
       "group": "magic",
@@ -869,7 +894,7 @@
       "basis": "magic",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "ground", "range_m": 4.6},
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.4, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},
       "effect": "Adds 15% of the target's maximum pool as damage, halved against bosses.",
       "effects": [
         {
@@ -884,6 +909,7 @@
     },
     {
       "id": "attack.fan_of_knives",
+      "hit_class": "attack",
       "retired": true,
       "retired_to": "attack.whirlwind",
       "name": "Fan of Knives",
@@ -911,6 +937,7 @@
     },
     {
       "id": "attack.backstab",
+      "hit_class": "attack",
       "name": "Backstab",
       "type": "attack",
       "group": "melee",
@@ -920,7 +947,7 @@
       "basis": "phys",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "melee", "range_m": 2.1, "windup_sec": 0.25, "fixed_windup_sec": 0.05},
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.25, "fixed_windup_sec": 0.05, "recovery_sec": 0.22},
       "effect": "+25% crit chance on this press.",
       "effects": [
         {
@@ -935,6 +962,7 @@
     },
     {
       "id": "attack.poisoned_edge",
+      "hit_class": "attack",
       "retired": true,
       "retired_to": "attack.poison_bolt",
       "name": "Poisoned Edge",
@@ -959,6 +987,7 @@
     },
     {
       "id": "attack.sidestep",
+      "hit_class": "attack",
       "name": "Sidestep",
       "type": "attack",
       "group": "melee",
@@ -968,7 +997,7 @@
       "basis": "phys",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "melee", "range_m": 2.1, "windup_sec": 0.15, "fixed_windup_sec": 0},
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.15, "fixed_windup_sec": 0, "recovery_sec": 0.22},
       "effect": "+30% hit chance on this press.",
       "effects": [
         {
@@ -983,6 +1012,7 @@
     },
     {
       "id": "attack.nerve_strike",
+      "hit_class": "attack",
       "retired": true,
       "retired_to": "curse.weaken",
       "name": "Nerve Strike",
@@ -1007,6 +1037,7 @@
     },
     {
       "id": "attack.impale",
+      "hit_class": "attack",
       "name": "Impale",
       "type": "attack",
       "group": "melee",
@@ -1015,8 +1046,8 @@
       "mana": "22 flat",
       "basis": "phys",
       "targets": "1",
-      "area": { "origin": "caster", "radius_m": 0, "shape": "line", "length_m": 2.1, "width_m": 0.75 },
-      "cast": {"delivery": "melee", "range_m": 2.1, "windup_sec": 0.25, "fixed_windup_sec": 0.05},
+      "area":{ "origin": "caster", "radius_m": 0, "shape": "line", "length_m": 2, "width_m": 1 },
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.25, "fixed_windup_sec": 0.05, "recovery_sec": 0.22},
       "effect": "A line thrust that pierces 100% of the resistance it meets.",
       "effects": [
         {
@@ -1031,6 +1062,7 @@
     },
     {
       "id": "attack.skewer_line",
+      "hit_class": "attack",
       "retired": true,
       "retired_to": "attack.whirlwind",
       "name": "Skewer Line",
@@ -1058,6 +1090,7 @@
     },
     {
       "id": "attack.reach_thrust",
+      "hit_class": "attack",
       "retired": true,
       "retired_to": "attack.bone_breaker",
       "name": "Reach Thrust",
@@ -1075,6 +1108,7 @@
     },
     {
       "id": "attack.low_sweep",
+      "hit_class": "attack",
       "retired": true,
       "retired_to": "curse.cripple",
       "name": "Low Sweep",
@@ -1099,6 +1133,7 @@
     },
     {
       "id": "attack.skull_crack",
+      "hit_class": "attack",
       "name": "Skull Crack",
       "type": "attack",
       "group": "melee",
@@ -1108,7 +1143,7 @@
       "basis": "phys",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "melee", "range_m": 2.1, "windup_sec": 0.2, "fixed_windup_sec": 0},
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.2, "fixed_windup_sec": 0, "recovery_sec": 0.22},
       "effect": "+20% stun chance on this hit.",
       "effects": [
         {
@@ -1123,6 +1158,7 @@
     },
     {
       "id": "attack.ground_slam",
+      "hit_class": "attack",
       "name": "Ground Slam",
       "type": "attack",
       "group": "melee",
@@ -1131,8 +1167,8 @@
       "mana": "15 flat",
       "basis": "phys",
       "targets": "3",
-      "area": { "origin": "caster", "radius_m": 2.5 },
-      "cast": {"delivery": "melee", "range_m": 2.5, "windup_sec": 0.25, "fixed_windup_sec": 0.05},
+      "area":{ "origin": "caster", "radius_m": 3 },
+      "cast":{"delivery": "melee", "range_m": 3, "windup_sec": 0.25, "fixed_windup_sec": 0.05, "recovery_sec": 0.22},
       "effect": "Stops targets for 1 sec.",
       "effects": [
         {
@@ -1150,6 +1186,7 @@
     },
     {
       "id": "attack.bone_breaker",
+      "hit_class": "attack",
       "name": "Bone Breaker",
       "type": "attack",
       "group": "melee",
@@ -1159,7 +1196,7 @@
       "basis": "phys",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "melee", "range_m": 2.1, "windup_sec": 0.35, "fixed_windup_sec": 0.1},
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.35, "fixed_windup_sec": 0.1, "recovery_sec": 0.22},
       "effect": "Shifts the execute threshold to 35%.",
       "effects": [
         {
@@ -1174,6 +1211,7 @@
     },
     {
       "id": "attack.iron_toll",
+      "hit_class": "attack",
       "retired": true,
       "retired_to": "curse.weaken",
       "name": "Iron Toll",
@@ -1198,6 +1236,7 @@
     },
     {
       "id": "attack.wide_swing",
+      "hit_class": "attack",
       "retired": true,
       "retired_to": "attack.cleave",
       "name": "Wide Swing",
@@ -1218,6 +1257,7 @@
     },
     {
       "id": "attack.whirlaxe",
+      "hit_class": "attack",
       "retired": true,
       "retired_to": "attack.whirlwind",
       "name": "Whirlaxe",
@@ -1245,6 +1285,7 @@
     },
     {
       "id": "attack.carnage",
+      "hit_class": "attack",
       "name": "Carnage",
       "type": "attack",
       "group": "melee",
@@ -1254,7 +1295,7 @@
       "basis": "phys",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "melee", "range_m": 2.1, "windup_sec": 0.25, "fixed_windup_sec": 0.05},
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.25, "fixed_windup_sec": 0.05, "recovery_sec": 0.22},
       "effect": "Leeches 15% of this hit.",
       "effects": [
         {
@@ -1269,6 +1310,7 @@
     },
     {
       "id": "attack.cleave_down",
+      "hit_class": "attack",
       "name": "Cleave Down",
       "type": "attack",
       "group": "melee",
@@ -1278,7 +1320,7 @@
       "basis": "phys",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "melee", "range_m": 2.1, "windup_sec": 0.35, "fixed_windup_sec": 0.1},
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.35, "fixed_windup_sec": 0.1, "recovery_sec": 0.22},
       "effect": "Adds 10% of the target's maximum pool as damage, halved against bosses.",
       "effects": [
         {
@@ -1293,6 +1335,7 @@
     },
     {
       "id": "attack.cleave",
+      "hit_class": "attack",
       "name": "Cleave",
       "type": "attack",
       "group": "melee",
@@ -1310,6 +1353,7 @@
     },
     {
       "id": "attack.elemental_break",
+      "hit_class": "attack",
       "name": "Elemental Break",
       "type": "attack",
       "group": "melee",
@@ -1319,7 +1363,7 @@
       "basis": "phys",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "melee", "range_m": 2.1, "windup_sec": 0.25, "fixed_windup_sec": 0.05},
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.25, "fixed_windup_sec": 0.05, "recovery_sec": 0.22},
       "effect": "The target takes +15% elemental damage.",
       "duration": "8 sec",
       "effects": [
@@ -1335,6 +1379,7 @@
     },
     {
       "id": "attack.whirlwind",
+      "hit_class": "attack",
       "name": "Whirlwind",
       "type": "attack",
       "group": "melee",
@@ -1344,7 +1389,7 @@
       "basis": "phys",
       "targets": "3",
       "area": { "origin": "caster", "radius_m": 3 },
-      "cast": {"delivery": "melee", "range_m": 3, "windup_sec": 0.2, "fixed_windup_sec": 0},
+      "cast":{"delivery": "melee", "range_m": 3, "windup_sec": 0.2, "fixed_windup_sec": 0, "recovery_sec": 0.22},
       "action": { "kind": "whirlwind-channel", "active_sec": 1.2, "movement_speed_mult": 0.6 },
       "effect": "One hit per target per round.",
       "effects": [
@@ -1360,6 +1405,7 @@
     },
     {
       "id": "attack.shield_bash",
+      "hit_class": "attack",
       "name": "Shield Bash",
       "type": "attack",
       "group": "melee",
@@ -1369,7 +1415,7 @@
       "basis": "phys",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "melee", "range_m": 2.1, "windup_sec": 0.2, "fixed_windup_sec": 0},
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.2, "fixed_windup_sec": 0, "recovery_sec": 0.22},
       "effect": "Stops the target for 1 sec.",
       "effects": [
         {
@@ -1387,6 +1433,7 @@
     },
     {
       "id": "attack.puncture",
+      "hit_class": "attack",
       "name": "Puncture",
       "type": "attack",
       "group": "melee",
@@ -1396,7 +1443,7 @@
       "basis": "phys",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "melee", "range_m": 2.1, "windup_sec": 0.15, "fixed_windup_sec": 0},
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.15, "fixed_windup_sec": 0, "recovery_sec": 0.22},
       "effect": "Guarantees bleed at 100% chance and refreshes its duration.",
       "effects": [
         {
@@ -1411,6 +1458,7 @@
     },
     {
       "id": "attack.reap",
+      "hit_class": "attack",
       "name": "Reap",
       "type": "attack",
       "group": "melee",
@@ -1420,7 +1468,7 @@
       "basis": "phys",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "melee", "range_m": 2.1, "windup_sec": 0.25, "fixed_windup_sec": 0},
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.25, "fixed_windup_sec": 0, "recovery_sec": 0.22},
       "effect": "Leeches 25% and grants ×1.10 physical power.",
       "duration": "6 sec",
       "effects": [
@@ -1445,6 +1493,7 @@
     },
     {
       "id": "attack.piercing_shot",
+      "hit_class": "attack",
       "name": "Piercing Shot",
       "type": "attack",
       "group": "ranged",
@@ -1454,8 +1503,8 @@
       "mana": "15 flat",
       "basis": "phys",
       "targets": "1",
-      "area": { "origin": "caster", "radius_m": 0, "shape": "line", "length_m": 5.2, "width_m": 0.75 },
-      "cast": {"delivery": "projectile", "range_m": 5.2, "windup_sec": 0.35, "fixed_windup_sec": 0.05},
+      "area":{ "origin": "caster", "radius_m": 0, "shape": "line", "length_m": 5, "width_m": 1 },
+      "cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.35, "fixed_windup_sec": 0.05, "recovery_sec": 0.25},
       "effect": "A piercing shot along a line; this hit cannot be dodged.",
       "rules": [
         "ignores_dodge"
@@ -1465,6 +1514,7 @@
     },
     {
       "id": "attack.arrow_shower",
+      "hit_class": "attack",
       "name": "Arrow Shower",
       "type": "attack",
       "group": "ranged",
@@ -1475,7 +1525,7 @@
       "basis": "phys",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "projectile", "range_m": 5.2, "windup_sec": 0.35, "fixed_windup_sec": 0.05},
+      "cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.35, "fixed_windup_sec": 0.05, "recovery_sec": 0.25},
       "action": { "kind": "projectile-burst", "interval_sec": 0.15 },
       "effect": "Each arrow can trigger effects.",
       "effects": [
@@ -1497,6 +1547,7 @@
     },
     {
       "id": "attack.headshot",
+      "hit_class": "attack",
       "name": "Headshot",
       "type": "attack",
       "group": "ranged",
@@ -1507,7 +1558,7 @@
       "basis": "phys",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "projectile", "range_m": 5.2, "windup_sec": 0.55, "fixed_windup_sec": 0.15},
+      "cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.55, "fixed_windup_sec": 0.15, "recovery_sec": 0.25},
       "effect": "+25% crit chance on this hit.",
       "effects": [
         {
@@ -1522,6 +1573,7 @@
     },
     {
       "id": "attack.pierce_the_veil",
+      "hit_class": "attack",
       "name": "Pierce the Veil",
       "type": "attack",
       "group": "ranged",
@@ -1532,7 +1584,7 @@
       "basis": "phys",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "projectile", "range_m": 5.2, "windup_sec": 0.3, "fixed_windup_sec": 0},
+      "cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0, "recovery_sec": 0.25},
       "effect": "Ignores dodge and strips −15% elemental resistance.",
       "duration": "8 sec",
       "effects": [
@@ -1551,6 +1603,7 @@
     },
     {
       "id": "attack.earth_shock",
+      "hit_class": "spell",
       "name": "Earth Shock",
       "type": "attack",
       "group": "magic",
@@ -1559,8 +1612,8 @@
       "mana": "19 flat",
       "basis": "magic",
       "targets": "3",
-      "area": { "origin": "target", "radius_m": 2.5 },
-      "cast": {"delivery": "ground", "range_m": 4.6},
+      "area":{ "origin": "target", "radius_m": 3 },
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.5, "fixed_windup_sec": 0.15, "recovery_sec": 0.25},
       "effect": "Applies cripple.",
       "rules": [
         "guaranteed_status",
@@ -1571,6 +1624,7 @@
     },
     {
       "id": "attack.detonate",
+      "hit_class": "spell",
       "name": "Detonate",
       "type": "attack",
       "group": "magic",
@@ -1580,7 +1634,7 @@
       "basis": "magic",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "ground", "range_m": 4.6},
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.4, "fixed_windup_sec": 0.05, "recovery_sec": 0.25},
       "effect": "Consumes up to 5 burn stacks. +15% damage per stack.",
       "effects": [
         {
@@ -1597,6 +1651,7 @@
     },
     {
       "id": "attack.shatter",
+      "hit_class": "spell",
       "name": "Shatter",
       "type": "attack",
       "group": "magic",
@@ -1605,8 +1660,8 @@
       "mana": "22 flat",
       "basis": "magic",
       "targets": "3",
-      "area": { "origin": "target", "radius_m": 2.5 },
-      "cast": {"delivery": "ground", "range_m": 4.6},
+      "area":{ "origin": "target", "radius_m": 3 },
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.55, "fixed_windup_sec": 0.15, "recovery_sec": 0.3},
       "effect": "+30% damage against chilled targets. Stops them for 1 sec.",
       "effects": [
         {
@@ -1628,6 +1683,7 @@
     },
     {
       "id": "attack.overload",
+      "hit_class": "spell",
       "name": "Overload",
       "type": "attack",
       "group": "magic",
@@ -1637,7 +1693,7 @@
       "basis": "magic",
       "targets": "3",
       "area": { "origin": "target", "radius_m": 2.5 },
-      "cast": {"delivery": "ground", "range_m": 4.6},
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.45, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},
       "action": { "kind": "ground-pulse-burst", "interval_sec": 0.3 },
       "effect": "+30% damage against shocked targets.",
       "effects": [
@@ -1669,6 +1725,7 @@
     },
     {
       "id": "attack.catalyst",
+      "hit_class": "spell",
       "name": "Catalyst",
       "type": "attack",
       "group": "magic",
@@ -1678,7 +1735,7 @@
       "basis": "magic",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "instant", "range_m": 4.6},
+      "cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},
       "effect": "Consumes up to 5 poison stacks. +12% damage per stack. Spreads poison to 2 others.",
       "effects": [
         {
@@ -1703,6 +1760,7 @@
     },
     {
       "id": "attack.ruin",
+      "hit_class": "spell",
       "name": "Ruin",
       "type": "attack",
       "group": "magic",
@@ -1712,7 +1770,7 @@
       "basis": "magic",
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "instant", "range_m": 4.6},
+      "cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.4, "fixed_windup_sec": 0.15, "recovery_sec": 0.15},
       "effect": "Consumes up to 10 mark stacks. +8% damage per stack.",
       "effects": [
         {
@@ -1729,6 +1787,7 @@
     },
     {
       "id": "attack.aftershock",
+      "hit_class": "spell",
       "name": "Aftershock",
       "type": "attack",
       "group": "magic",
@@ -1738,7 +1797,7 @@
       "basis": "magic",
       "targets": "3",
       "area": { "origin": "caster", "radius_m": 3 },
-      "cast": {"delivery": "ground", "range_m": 3},
+      "cast":{"delivery": "ground", "range_m": 3, "windup_sec": 0.45, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},
       "effect": "+25% damage against crippled targets. Grants +20% armour.",
       "duration": "6 sec",
       "effects": [
@@ -1765,6 +1824,7 @@
     },
     {
       "id": "buff.warcry",
+      "hit_class": "none",
       "name": "Warcry",
       "type": "buff",
       "cd": 15,
@@ -1792,6 +1852,7 @@
     },
     {
       "id": "buff.berserker",
+      "hit_class": "none",
       "name": "Berserker",
       "type": "buff",
       "cd": 15,
@@ -1822,6 +1883,7 @@
     },
     {
       "id": "buff.iron_will",
+      "hit_class": "none",
       "name": "Iron Will",
       "type": "buff",
       "cd": 15,
@@ -1844,6 +1906,7 @@
     },
     {
       "id": "buff.holy_veil",
+      "hit_class": "none",
       "name": "Holy veil",
       "type": "buff",
       "cd": 20,
@@ -1858,6 +1921,7 @@
     },
     {
       "id": "buff.ghost_dance",
+      "hit_class": "none",
       "name": "Ghost Dance",
       "type": "buff",
       "cd": 15,
@@ -1888,6 +1952,7 @@
     },
     {
       "id": "buff.earth_wall",
+      "hit_class": "none",
       "name": "Earth Wall",
       "type": "buff",
       "cd": 15,
@@ -1918,6 +1983,7 @@
     },
     {
       "id": "buff.magia_drive",
+      "hit_class": "none",
       "name": "Magia Drive",
       "type": "buff",
       "cd": 20,
@@ -1931,6 +1997,7 @@
     },
     {
       "id": "buff.energy_absorb",
+      "hit_class": "none",
       "name": "Energy Absorb",
       "type": "buff",
       "cd": 20,
@@ -1955,6 +2022,7 @@
     },
     {
       "id": "buff.flame_guard",
+      "hit_class": "none",
       "name": "Flame Guard",
       "type": "buff",
       "element": "fire",
@@ -1974,6 +2042,7 @@
     },
     {
       "id": "curse.weaken",
+      "hit_class": "spell",
       "name": "Weaken",
       "type": "curse",
       "cd": 12,
@@ -1993,6 +2062,7 @@
     },
     {
       "id": "curse.blinding_mark",
+      "hit_class": "spell",
       "name": "Blinding Mark",
       "type": "curse",
       "cd": 12,
@@ -2012,13 +2082,14 @@
     },
     {
       "id": "curse.expose",
+      "hit_class": "spell",
       "name": "Expose",
       "type": "curse",
       "cd": 14,
       "mana": "24 flat",
       "duration": "8 sec",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "instant", "range_m": 4.6},
+      "cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},
       "effect": "The target takes +20% damage.",
       "effects": [
         {
@@ -2031,6 +2102,7 @@
     },
     {
       "id": "curse.cripple",
+      "hit_class": "spell",
       "name": "Cripple",
       "type": "curse",
       "cd": 12,
@@ -2050,13 +2122,14 @@
     },
     {
       "id": "curse.jinx",
+      "hit_class": "spell",
       "name": "Jinx",
       "type": "curse",
       "cd": 13,
       "mana": "19 flat",
       "duration": "8 sec",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "instant", "range_m": 4.6},
+      "cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.2, "recovery_sec": 0.15},
       "effect": "+15% chance to crit against the target.",
       "effects": [
         {
@@ -2069,13 +2142,14 @@
     },
     {
       "id": "curse.venom_bind",
+      "hit_class": "spell",
       "name": "Venom Bind",
       "type": "curse",
       "cd": 15,
       "mana": "21 flat",
       "duration": "6 sec",
       "area": { "origin": "target", "radius_m": 0 },
-      "cast": {"delivery": "instant", "range_m": 4.6},
+      "cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},
       "effect": "Poison stacks on the target stop falling.",
       "effects": [
         {
@@ -2088,12 +2162,13 @@
     },
     {
       "id": "heal.heal",
+      "hit_class": "none",
       "name": "Heal",
       "type": "heal",
       "cd": 20,
       "mana": "30 flat",
       "duration": "8 sec",
-      "cast": {"delivery": "instant", "range_m": 0},
+      "cast":{"delivery": "instant", "range_m": 0, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},
       "effect": "Restores 10% of Max HP each second.",
       "effects": [
         {
@@ -2105,12 +2180,13 @@
     },
     {
       "id": "heal.greater_heal",
+      "hit_class": "none",
       "name": "Greater Heal",
       "type": "heal",
       "cd": 40,
       "mana": "37 flat",
       "duration": "Instant",
-      "cast": {"delivery": "instant", "range_m": 0},
+      "cast":{"delivery": "instant", "range_m": 0, "windup_sec": 0.6, "fixed_windup_sec": 0.2, "recovery_sec": 0.25},
       "effect": "Restores 60% of Max HP at once.",
       "effects": [
         {
@@ -2122,12 +2198,13 @@
     },
     {
       "id": "heal.cleanse",
+      "hit_class": "none",
       "name": "Cleanse",
       "type": "heal",
       "cd": 24,
       "mana": "24 flat",
       "duration": "Instant",
-      "cast": {"delivery": "instant", "range_m": 0},
+      "cast":{"delivery": "instant", "range_m": 0, "windup_sec": 0.2, "recovery_sec": 0.15},
       "effect": "Cleanses every status on you and restores 8% of Max HP.",
       "effects": [
         {
@@ -2143,6 +2220,7 @@
     },
     {
       "id": "aura.wraith_of_fury",
+      "hit_class": "none",
       "name": "Wraith of Fury",
       "type": "aura",
       "kind": "self",
@@ -2158,6 +2236,7 @@
     },
     {
       "id": "aura.clarity",
+      "hit_class": "none",
       "name": "Clarity",
       "type": "aura",
       "kind": "self",
@@ -2173,6 +2252,7 @@
     },
     {
       "id": "aura.haste",
+      "hit_class": "none",
       "name": "Haste",
       "type": "aura",
       "kind": "self",
@@ -2195,6 +2275,7 @@
     },
     {
       "id": "aura.vitality",
+      "hit_class": "none",
       "name": "Vitality",
       "type": "aura",
       "kind": "self",
@@ -2210,6 +2291,7 @@
     },
     {
       "id": "aura.herald_of_ash",
+      "hit_class": "none",
       "name": "Herald of Ash",
       "type": "aura",
       "kind": "fire",
@@ -2233,6 +2315,7 @@
     },
     {
       "id": "aura.herald_of_frost",
+      "hit_class": "none",
       "name": "Herald of Frost",
       "type": "aura",
       "kind": "cold",
@@ -2256,6 +2339,7 @@
     },
     {
       "id": "aura.herald_of_lightning",
+      "hit_class": "none",
       "name": "Herald of Lightning",
       "type": "aura",
       "kind": "lightning",
@@ -2279,6 +2363,7 @@
     },
     {
       "id": "aura.ember_conversion",
+      "hit_class": "none",
       "name": "Ember Conversion",
       "type": "aura",
       "kind": "fire",
@@ -2296,6 +2381,7 @@
     },
     {
       "id": "aura.rime_conversion",
+      "hit_class": "none",
       "name": "Rime Conversion",
       "type": "aura",
       "kind": "cold",
@@ -2313,6 +2399,7 @@
     },
     {
       "id": "aura.storm_conversion",
+      "hit_class": "none",
       "name": "Storm Conversion",
       "type": "aura",
       "kind": "lightning",
@@ -2330,6 +2417,7 @@
     },
     {
       "id": "aura.cast_on_crit",
+      "hit_class": "none",
       "name": "Cast on Crit",
       "type": "aura",
       "kind": "trigger",
@@ -2361,6 +2449,7 @@
     },
     {
       "id": "aura.cast_on_damage_taken",
+      "hit_class": "none",
       "name": "Cast on Damage Taken",
       "type": "aura",
       "kind": "trigger",
@@ -2392,6 +2481,7 @@
     },
     {
       "id": "aura.rimbo_form",
+      "hit_class": "none",
       "name": "Rimbo Form",
       "type": "aura",
       "kind": "debuff",
@@ -2408,6 +2498,7 @@
     },
     {
       "id": "aura.elemental_fury",
+      "hit_class": "none",
       "name": "Elemental Fury",
       "type": "aura",
       "kind": "debuff",
@@ -2424,6 +2515,7 @@
     },
     {
       "id": "aura.trinity_form",
+      "hit_class": "none",
       "name": "Trinity Form",
       "type": "aura",
       "kind": "defense",
@@ -2455,6 +2547,7 @@
     },
     {
       "id": "aura.grace",
+      "hit_class": "none",
       "name": "Grace",
       "type": "aura",
       "kind": "defense",
@@ -2470,6 +2563,7 @@
     },
     {
       "id": "aura.iron_guard",
+      "hit_class": "none",
       "name": "Iron Guard",
       "type": "aura",
       "kind": "defense",
@@ -2485,6 +2579,7 @@
     },
     {
       "id": "aura.energy_guard",
+      "hit_class": "none",
       "name": "Energy Guard",
       "type": "aura",
       "kind": "defense",
@@ -2498,21 +2593,21 @@
         }
       ]
     },
-  {"id":"attack.water_ball","name":"Water Ball","type":"attack","group":"magic","element":"cold","cd":7,"mana":"20 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"projectile","range_m":4.6},"effect":"A volley of water spheres. Chills the target.","rules":["guaranteed_status"],"effects":[{"stat":"hits","op":"add_flat","value":5,"subject":"self"},{"stat":"hit_pct","op":"add_pct","value":20,"subject":"self"}],"base_flat":420,"eff":88},
-  {"id":"attack.frost_nova","name":"Frost Nova","type":"attack","group":"magic","element":"cold","cd":10,"mana":"24 flat","basis":"magic","targets":"3","area":{"origin":"caster","radius_m":2.5},"cast":{"delivery":"instant","range_m":4.6},"effect":"Chills every enemy around you.","rules":["guaranteed_status","every_target"],"base_flat":550,"eff":100},
-  {"id":"attack.glacial_spike","name":"Glacial Spike","type":"attack","group":"magic","element":"cold","cd":12,"mana":"20 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"projectile","range_m":4.6},"effect":"Stops the target for 1.5 sec.","effects":[{"stat":"stop_sec","op":"add_flat","value":1.5,"subject":"target"}],"base_flat":900,"eff":105},
-  {"id":"attack.split_shot","name":"Split Shot","type":"attack","group":"ranged","element":"physical","cd":7,"mana":"15 flat","basis":"phys","targets":"3","area":{"origin":"target","radius_m":1.5},"cast": {"delivery": "projectile", "range_m": 5.2, "windup_sec": 0.3, "fixed_windup_sec": 0},"effect":"Splits on impact, hitting every enemy in a small circle.","base_flat":1649.8,"eff":77.36},
-  {"id":"attack.double_strike","name":"Double Strike","type":"attack","group":"melee","element":"physical","cd": 5,"mana":"12 flat","basis":"phys","targets":"1","area":{"origin":"target","radius_m":0},"cast": {"delivery": "melee", "range_m": 2.1, "windup_sec": 0.15, "fixed_windup_sec": 0},"effect":"A pair of quick blows.","effects":[{"stat":"hits","op":"add_flat","value":2,"subject":"self"},{"stat":"hit_pct","op":"add_pct","value":60,"subject":"self"}],"base_flat":1400,"eff":60},
-  {"id":"attack.ignite","name":"Ignite","type":"attack","group":"magic","element":"fire","cd":8,"mana":"19 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"instant","range_m":4.6},"effect":"Applies 5 burn stacks.","effects":[{"stat":"burn_stacks","op":"add_flat","value":5,"subject":"target"}],"base_flat":381.5,"eff":82.43},
-  {"id":"attack.cinder_nova","name":"Cinder Nova","type":"attack","group":"magic","element":"fire","cd":10,"mana":"24 flat","basis":"magic","targets":"3","area":{"origin":"caster","radius_m":2.5},"cast":{"delivery":"instant","range_m":4.6},"effect":"Burns every enemy around you.","rules":["guaranteed_status","every_target"],"base_flat":550,"eff":100},
-  {"id":"attack.thunder_storm","name":"Thunder Storm","type":"attack","group":"magic","element":"lightning","cd":10,"mana":"24 flat","basis":"magic","targets":"3","area":{"origin":"caster","radius_m":2.5},"cast":{"delivery":"instant","range_m":4.6},"effect":"Shocks every enemy around you.","rules":["guaranteed_status","every_target"],"base_flat":550,"eff":100},
-  {"id":"attack.storm_field","name":"Storm Field","type":"attack","group":"magic","element":"lightning","cd":12,"mana":"20 flat","basis":"magic","targets":"3","area":{"origin":"target","radius_m":2.5},"cast":{"delivery":"ground","range_m":4.6},"effect":"Leaves a charged storm.","rules":["guaranteed_status","every_target"],"effects":[{"stat":"dot_dps","op":"add_flat","value":25,"subject":"target"},{"stat":"dot_sec","op":"add_flat","value":8,"subject":"target"}],"base_flat":800,"eff":90},
-  {"id":"attack.poison_cloud","name":"Poison Cloud","type":"attack","group":"magic","element":"poison","cd":10,"mana":"24 flat","basis":"magic","targets":"3","area":{"origin":"target","radius_m":2.5},"cast":{"delivery":"ground","range_m":4.6},"effect":"2 poison stacks. Leaves a toxic cloud.","rules":["every_target"],"effects":[{"stat":"poison_stacks","op":"add_flat","value":2,"subject":"target"},{"stat":"dot_dps","op":"add_flat","value":15,"subject":"target"},{"stat":"dot_sec","op":"add_flat","value":8,"subject":"target"}],"base_flat":600,"eff":80},
-  {"id":"attack.venom_bolt","name":"Venom Bolt","type":"attack","group":"magic","element":"poison","cd":8,"mana":"21 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"instant","range_m":4.6},"effect":"Applies 5 poison stacks.","effects":[{"stat":"poison_stacks","op":"add_flat","value":5,"subject":"target"}],"base_flat":445.1,"eff":96.16},
-  {"id":"attack.chaos_wave","name":"Chaos Wave","type":"attack","group":"magic","element":"chaos","cd":10,"mana":"24 flat","basis":"magic","targets":"3","area":{"origin":"caster","radius_m":2.5},"cast":{"delivery":"instant","range_m":4.6},"effect":"Marks every enemy around you.","rules":["guaranteed_status","every_target"],"base_flat":550,"eff":100},
-  {"id":"attack.entropy","name":"Entropy","type":"attack","group":"magic","element":"chaos","cd":8,"mana":"20 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"instant","range_m":4.6},"effect":"+30% damage against marked targets.","effects":[{"stat":"bonus_vs_status","status":"mark","op":"add_pct","value":30,"subject":"target"}],"base_flat":699.2,"eff":82.4},
-  {"id":"attack.stone_spike","name":"Stone Spike","type":"attack","group":"magic","element":"earth","cd":12,"mana":"20 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"ground","range_m":4.6},"effect":"+30% damage against crippled targets.","effects":[{"stat":"bonus_vs_status","status":"crippled","op":"add_pct","value":30,"subject":"target"}],"base_flat":900,"eff":105},
-  {"id":"attack.fissure","name":"Fissure","type":"attack","group":"magic","element":"earth","cd":11,"mana":"22 flat","basis":"magic","targets":"3","area":{"origin":"caster","radius_m":0,"shape":"line","length_m":6,"width_m":1.2},"cast":{"delivery":"ground","range_m":6},"effect":"Rends a line, stopping enemies for 1 sec.","rules":["every_target"],"effects":[{"stat":"stop_sec","op":"add_flat","value":1,"subject":"target"}],"base_flat":850,"eff":100}
+  {"id":"attack.water_ball","hit_class":"spell","name":"Water Ball","type":"attack","group":"magic","element":"cold","cd":7,"mana":"20 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"projectile","range_m":4.6},"effect":"A volley of water spheres. Chills the target.","rules":["guaranteed_status"],"effects":[{"stat":"hits","op":"add_flat","value":5,"subject":"self"},{"stat":"hit_pct","op":"add_pct","value":20,"subject":"self"}],"base_flat":420,"eff":88},
+  {"id":"attack.frost_nova","hit_class":"spell","name":"Frost Nova","type":"attack","group":"magic","element":"cold","cd":10,"mana":"24 flat","basis":"magic","targets":"3","area":{ "origin": "caster", "radius_m": 3 },"cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},"effect":"Chills every enemy around you.","rules":["guaranteed_status","every_target"],"base_flat":550,"eff":100},
+  {"id":"attack.glacial_spike","hit_class":"spell","name":"Glacial Spike","type":"attack","group":"magic","element":"cold","cd":12,"mana":"20 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.5, "fixed_windup_sec": 0.15, "recovery_sec": 0.25},"effect":"Stops the target for 1.5 sec.","effects":[{"stat":"stop_sec","op":"add_flat","value":1.5,"subject":"target"}],"base_flat":900,"eff":105},
+  {"id":"attack.split_shot","hit_class":"attack","name":"Split Shot","type":"attack","group":"ranged","element":"physical","cd":7,"mana":"15 flat","basis":"phys","targets":"3","area":{ "origin": "target", "radius_m": 2 },"cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0, "recovery_sec": 0.25},"effect":"Splits on impact, hitting every enemy in a small circle.","base_flat":1649.8,"eff":77.36},
+  {"id":"attack.double_strike","hit_class":"attack","name":"Double Strike","type":"attack","group":"melee","element":"physical","cd": 5,"mana":"12 flat","basis":"phys","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.15, "fixed_windup_sec": 0, "recovery_sec": 0.22},"effect":"A pair of quick blows.","effects":[{"stat":"hits","op":"add_flat","value":2,"subject":"self"},{"stat":"hit_pct","op":"add_pct","value":60,"subject":"self"}],"base_flat":1400,"eff":60},
+  {"id":"attack.ignite","hit_class":"spell","name":"Ignite","type":"attack","group":"magic","element":"fire","cd":8,"mana":"19 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.2, "recovery_sec": 0.15},"effect":"Applies 5 burn stacks.","effects":[{"stat":"burn_stacks","op":"add_flat","value":5,"subject":"target"}],"base_flat":381.5,"eff":82.43},
+  {"id":"attack.cinder_nova","hit_class":"spell","name":"Cinder Nova","type":"attack","group":"magic","element":"fire","cd":10,"mana":"24 flat","basis":"magic","targets":"3","area":{ "origin": "caster", "radius_m": 3 },"cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},"effect":"Burns every enemy around you.","rules":["guaranteed_status","every_target"],"base_flat":550,"eff":100},
+  {"id":"attack.thunder_storm","hit_class":"spell","name":"Thunder Storm","type":"attack","group":"magic","element":"lightning","cd":10,"mana":"24 flat","basis":"magic","targets":"3","area":{ "origin": "caster", "radius_m": 3 },"cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},"effect":"Shocks every enemy around you.","rules":["guaranteed_status","every_target"],"base_flat":550,"eff":100},
+  {"id":"attack.storm_field","hit_class":"spell","name":"Storm Field","type":"attack","group":"magic","element":"lightning","cd":12,"mana":"20 flat","basis":"magic","targets":"3","area":{ "origin": "target", "radius_m": 3 },"cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.5, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},"effect":"Leaves a charged storm.","rules":["guaranteed_status","every_target"],"effects":[{"stat":"dot_dps","op":"add_flat","value":25,"subject":"target"},{"stat":"dot_sec","op":"add_flat","value":8,"subject":"target"}],"base_flat":800,"eff":90},
+  {"id":"attack.poison_cloud","hit_class":"spell","name":"Poison Cloud","type":"attack","group":"magic","element":"poison","cd":10,"mana":"24 flat","basis":"magic","targets":"3","area":{ "origin": "target", "radius_m": 3 },"cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.45, "fixed_windup_sec": 0.05, "recovery_sec": 0.25},"effect":"2 poison stacks. Leaves a toxic cloud.","rules":["every_target"],"effects":[{"stat":"poison_stacks","op":"add_flat","value":2,"subject":"target"},{"stat":"dot_dps","op":"add_flat","value":15,"subject":"target"},{"stat":"dot_sec","op":"add_flat","value":8,"subject":"target"}],"base_flat":600,"eff":80},
+  {"id":"attack.venom_bolt","hit_class":"spell","name":"Venom Bolt","type":"attack","group":"magic","element":"poison","cd":8,"mana":"21 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.2, "recovery_sec": 0.15},"effect":"Applies 5 poison stacks.","effects":[{"stat":"poison_stacks","op":"add_flat","value":5,"subject":"target"}],"base_flat":445.1,"eff":96.16},
+  {"id":"attack.chaos_wave","hit_class":"spell","name":"Chaos Wave","type":"attack","group":"magic","element":"chaos","cd":10,"mana":"24 flat","basis":"magic","targets":"3","area":{ "origin": "caster", "radius_m": 3 },"cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},"effect":"Marks every enemy around you.","rules":["guaranteed_status","every_target"],"base_flat":550,"eff":100},
+  {"id":"attack.entropy","hit_class":"spell","name":"Entropy","type":"attack","group":"magic","element":"chaos","cd":8,"mana":"20 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.2, "recovery_sec": 0.15},"effect":"+30% damage against marked targets.","effects":[{"stat":"bonus_vs_status","status":"mark","op":"add_pct","value":30,"subject":"target"}],"base_flat":699.2,"eff":82.4},
+  {"id":"attack.stone_spike","hit_class":"spell","name":"Stone Spike","type":"attack","group":"magic","element":"earth","cd":12,"mana":"20 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.45, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},"effect":"+30% damage against crippled targets.","effects":[{"stat":"bonus_vs_status","status":"crippled","op":"add_pct","value":30,"subject":"target"}],"base_flat":900,"eff":105},
+  {"id":"attack.fissure","hit_class":"spell","name":"Fissure","type":"attack","group":"magic","element":"earth","cd":11,"mana":"22 flat","basis":"magic","targets":"3","area":{ "origin": "caster", "radius_m": 0, "shape": "line", "length_m": 6, "width_m": 1 },"cast":{"delivery": "ground", "range_m": 6, "windup_sec": 0.5, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},"effect":"Rends a line, stopping enemies for 1 sec.","rules":["every_target"],"effects":[{"stat":"stop_sec","op":"add_flat","value":1,"subject":"target"}],"base_flat":850,"eff":100}
   ],
   "deprecated": {
     "Arcane Pulse": "cut in the roster trim (owner ticket) — the cd-0 filler row; nothing took its slot over",

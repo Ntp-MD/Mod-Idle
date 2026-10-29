@@ -28,7 +28,7 @@ export function advanceWalkStage(s: GameState, online: boolean, rng: () => numbe
       recordMapDiscovery(s);
       // A crossed block says nothing: no number floats off the character and no line is logged for it —
       // the walk reads as the one word on the field plus the route lighting itself off `blocksWalked`,
-      // one cell per block (`walkedCells`). Only arriving, and being ambushed, are events.
+      // one cell per block (`walkedCells`). Only arriving and a trail event are walk events.
       const trailEvent = resolveTravelEvent(s, rng);
       if (trailEvent) {
         const feet = currentCellForJournal(s);

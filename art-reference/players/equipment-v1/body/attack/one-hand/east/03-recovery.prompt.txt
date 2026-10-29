@@ -1,2 +1,0 @@
-One-handed sword recovery to guard; main hand low ready, offhand near chest.
-Same cream hooded amber-eyed traveler as ../../reference.png. Fixed elevated three-quarter camera, upper-left light, crisp pixel-cluster style, transparent canvas, whole body/feet visible, empty hands, no weapon/shield, effects, shadow, floor, labels or grid.

@@ -2,7 +2,7 @@
 
 Short definitions of game terms. Read only the terms needed for the task. Document ownership and update policy: [AGENTS.md](../AGENTS.md#document-map).
 
-# The 2 Layers of an Item
+## The 2 Layers of an Item
 
 | Term | Meaning |
 |---|---|
@@ -10,7 +10,7 @@ Short definitions of game terms. Read only the terms needed for the task. Docume
 | **Band** | low · mid · high — the label the drop source's zone already carries. |
 | **Tier** | Which third of a Mod's value window the roll landed in. One item carries one Tier set, shared by all its Mods. |
 
-# Attack and Defend Layers
+## Attack and Defend Layers
 
 A **layer** is one step of the calculation, in a fixed order. A layer either **removes** the hit, **reduces** the damage, **scales** it, or **receives** it.
 
@@ -19,7 +19,7 @@ Two words that are constantly confused:
 - **Offensive / Defensive** are **Mod pools** — which Mods may roll on which slot.
 - **Attack layer / Defend layer** is the **runtime order** — what happens to one number, in sequence.
 
-# Item and Mod Vocabulary
+## Item and Mod Vocabulary
 
 | Term | Meaning |
 |---|---|
@@ -39,7 +39,7 @@ Two words that are constantly confused:
 | **Capacity** | How much weight a build can carry, set by Str. |
 | **Level floor** | The first level of a band — what an away window (offline) is limited to; the window above it is the band's own ceiling. |
 
-# Stats and Formulas
+## Stats and Formulas
 
 | Term | Meaning |
 |---|---|
@@ -57,12 +57,12 @@ Two words that are constantly confused:
 | **damage taken** | A multiplier on the incoming hit that runs after every mitigation layer and before any pool. |
 | **global damage / global defend / global speed** | The three reserved umbrella multipliers (`engine.json` `global`). |
 
-# Combat
+## Combat
 
 | Term | Meaning |
 |---|---|
 | **Push** | HP reaching zero is **not death**: the fighter is pushed out of combat, rests, then walks back in alone. Time is the only thing this game charges. |
-| **Camp** | Short for Field Camp: a player-set safe hex that receives a Push and enables field gathering and cooking. |
+| **Camp** | Alias for **Field Camp**. |
 | **No death** | The standing rule: defensive value comes from time not lost, not from survival. |
 | **DoT** | Damage over time, ticking once a second. |
 | **Leech** | HP returned as a percentage of damage just dealt. |
@@ -76,7 +76,7 @@ Two words that are constantly confused:
 | **Foe** | The **Field of Enemies** — every mob the character is fighting at once. |
 | **Elite** | A flag on a Large body, never a size of its own: a rank over the rolled variant, keeping its name. |
 
-# Field and HUD
+## Field and HUD
 
 | Term | Meaning |
 |---|---|
@@ -85,7 +85,7 @@ Two words that are constantly confused:
 | **Menu hub** | The HUD group for navigation and field controls. |
 | **Objectives** | The HUD feed for the run target and tracked Delivery wants. |
 
-# Elements and Statuses
+## Elements and Statuses
 
 | Term | Meaning |
 |---|---|
@@ -100,7 +100,7 @@ Two words that are constantly confused:
 | **mark** (chaos) | A growing multiplier on the hit it rides, plus leech. |
 | **bleed** | Physical damage over time. **Not an Element** — no Element tag and no resistance line. |
 
-# The passive tree
+## The passive tree
 
 | Term | Meaning |
 |---|---|
@@ -118,7 +118,7 @@ Two words that are constantly confused:
 | **Low Life** | Current HP at or below half of **Full Max HP**. A reservation that lowers usable HP does not cause it; Chaos Inoculation is never Low Life. |
 | **Full Max / usable** | Full Max is the pool before reservation; usable is what healing and spending may reach. Reservations lower usable only. |
 
-# Crafting
+## Crafting
 
 | Term | Meaning |
 |---|---|
@@ -158,9 +158,9 @@ Two words that are constantly confused:
 | **Hunger** | The character's food/provision meter. |
 | **Auto Eat** | Automatic consumption of carried provisions to restore Hunger. |
 | **provision** | Carried food or cooking ingredients. |
-| **trail event** | An independent travel-block event that finds the current zone's regional food or restores Hunger; it never replaces the block's ambush roll. |
-| **trail site** | An authored optional map stop offering a one-time regional provision bundle, Hunger restoration or a survey of surrounding blocks. |
-| **scouted block** | A block whose landmark and encounter details have been learned by approaching it or surveying Hunting Tracks. |
+| **trail event** | An independent travel-block event that finds the current zone's regional food or restores Hunger; it never fields a mob group. |
+| **trail site** | An authored optional map stop offering a one-time regional provision bundle or Hunger restoration. |
+| **scouted block** | A block whose landmark and encounter details have been learned by approaching it or through a Camp encounter's survey. |
 | **explored block** | A block the character has stood on; the map journal remembers it across saves. |
 | **junk** | A flavoured drop from a **variant**, sold to the settlement Counterhand for gold. |
 | **trade good** | Carried junk, material, provision or farm herb that a town Counterhand buys; ingredients can instead be kept for their recipes and field uses. |
@@ -172,7 +172,7 @@ Two words that are constantly confused:
 | **mob kit** | The optional list of mob skills one spawn resolves from `tools/data/mob-skills.json`, capped at 4. Resolution is an override, never a merge: Unique > Boss > Variant > Species. A Species without a kit keeps its basic swing. |
 | **aura scope** | Where a mob aura applies: `engaged` affects the front three bodies of the group; `line` affects only bodies on the source's own formation line. Strongest wins and copies do not stack. |
 
-# Town and Economy
+## Town and Economy
 
 | Term | Meaning |
 |---|---|
@@ -208,7 +208,7 @@ Two words that are constantly confused:
 | **Reservation** | An aura holding back a share of Max Mana. |
 | **reserve tier** | The share of the pool one aura holds back. |
 
-# Mobs
+## Mobs
 
 | Term | Meaning |
 |---|---|
@@ -219,7 +219,7 @@ Two words that are constantly confused:
 | **weapon group** | The three families a weapon belongs to: melee, ranged, magic. |
 | **mob accuracy** | Derived from the mob's own stats through the same K values the player uses, scaled by the Species accuracy tier. |
 
-# Abbreviations
+## Abbreviations
 
 | Term | Abbreviation |
 |---|---|

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { E, fieldwork } from '../../src/engine/client';
 import { newGame } from '@sim/core/game';
-import { startWalk, warpCost } from '@sim/world/road';
+import { settlementCell, startWalk, warpCost, warpTo } from '@sim/world/road';
 import { establishCamp, fieldActionProblem, startFieldAction } from '@sim/world/fieldwork';
 import { enterDungeon } from '@sim/world/dungeon';
 import { destinationPrimary, type MapDestination } from '../../src/ui/map/destination';
@@ -71,5 +71,24 @@ describe('map destination primary action', () => {
     state.hunting = true;
     expect(destinationPrimary(state, dest)).toMatchObject({ kind: 'hunt', disabled: true });
     expect(destinationPrimary(state, destination(), false)).toMatchObject({ kind: 'walk', disabled: true });
+  });
+});
+
+describe('warp home', () => {
+  it('refuses a warp to the settlement the feet stand on', () => {
+    const state = newGame();
+    expect(warpTo(state, state.town.waypoint)).toMatchObject({ ok: false, why: 'you already stand there' });
+  });
+
+  it('warps back to the last town from a block out', () => {
+    const state = newGame();
+    const home = state.town.waypoint;
+    if (!state.town.visited.includes(home)) state.town.visited.push(home);
+    state.counters.gold = 1e9;
+    const cell = settlementCell(home)!;
+    state.cell = { q: cell.q + 1, r: cell.r, sub: null, wild: null };
+    const r = warpTo(state, home);
+    expect(r.ok).toBe(true);
+    expect(state.town.waypoint).toBe(home);
   });
 });

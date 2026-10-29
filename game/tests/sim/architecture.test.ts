@@ -47,11 +47,17 @@ const ALIASES: [string, string][] = [
 
 function resolve(file: string, spec: string): string | null {
   const alias = ALIASES.find(([prefix]) => spec.startsWith(prefix));
-  const abs = alias
-    ? path.resolve(alias[1], spec.slice(alias[0].length))
-    : spec.startsWith('.') ? path.resolve(path.dirname(file), spec) : null;
-  if (!abs) return null;
-  return abs.replace(/\\/g, '/').replace(/\.(ts|svelte|js)$/, '').replace(/\/index$/, '');
+  if (alias) {
+    const abs = path.resolve(alias[1], spec.slice(alias[0].length));
+    return abs.replace(/\\/g, '/').replace(/\.(ts|svelte|js)$/, '').replace(/\/index$/, '');
+  }
+  if (spec.startsWith('.')) {
+    const abs = path.resolve(path.dirname(file), spec);
+    return abs.replace(/\\/g, '/').replace(/\.(ts|svelte|js)$/, '').replace(/\/index$/, '');
+  }
+  // a bare specifier stays as written instead of being dropped: the layer rules below must
+  // see a Node builtin (`node:fs`, `fs`) to refuse it — a null here would blind the check
+  return spec;
 }
 
 function moduleIds() {
@@ -102,7 +108,7 @@ describe('simulation layering', () => {
     const found = modules
       .filter((module) => under(module.id, 'sim'))
       .flatMap((module) => module.imports
-        .filter((target) => /(^|\/)node:/.test(target) || /\/(fs|path|crypto|child_process)$/.test(target))
+        .filter((target) => /(^|\/)node:/.test(target) || /(^|\/)(fs|path|crypto|child_process)$/.test(target))
         .map((target) => `${path.relative(repo, module.file).replace(/\\/g, '/')} -> ${target}`));
     expect(found).toEqual([]);
   });

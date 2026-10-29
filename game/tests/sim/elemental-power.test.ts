@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { eng } from '../../src/engine/client';
 import { buildCharacter, emptyGear } from '@sim/core/player';
+import { craft } from '@sim/gear/craft';
+import { newGame } from '@sim/core/game';
+import { equipFromBag } from '@sim/gear/gear';
+import { playerSwing } from '@sim/combat/combat';
+import { NO_CURSE } from '@sim/combat/curse';
+import { mobFixture } from '../fixtures/mobFixture';
+import { mulberry32 } from '../../src/engine/client-helpers';
 import type { Item } from '@sim/core/types';
 
 /**
@@ -102,5 +109,56 @@ describe('the elemental pool is the engine rule, and the sheet reads it', () => 
     expect(c.elem).toBeCloseTo(own.total, 6);
     expect(c.elemByElement.fire).toBeCloseTo(own.byElement.fire, 6);
     expect(c.elemByElement.cold).toBeCloseTo(own.byElement.cold, 6);
+  });
+
+  it('floors a combined percent below -100% at zero instead of minting a negative pool', () => {
+    const own = eng.elementalPowerOf({
+      intCore: 10, weaponElement: 'poison', flat: 100, pct: -114,
+      byElement: { poison: { flat: 40, pct: 4 } }, herald: {},
+    });
+    expect(own.byElement.poison).toBe(0);
+    expect(Object.values(own.byElement).every((v) => v >= 0)).toBe(true);
+    expect(own.total).toBeCloseTo(
+      Object.values(own.byElement).reduce((a, b) => a + b, 0), 10);
+  });
+});
+
+describe('imprint → equip → swing with a sub -100% combined percent', () => {
+  it('lands without the validator refusing the packet after HP was paid', () => {
+    // a real drop shape: frame + bound pair up top, one editable line to imprint
+    const drop: Item = {
+      slot: 'main hand', base: 'one-handed sword', ilvl: 99, quality: 'mid', tier: 'T3',
+      weaponAspd: 1.2, q: 1,
+      lines: [
+        { id: 'physical_power_flat', value: 10, slice: 2 },
+        { id: 'armour_flat', value: 5, slice: 2 },
+        { id: 'accuracy_flat', value: 5, slice: 2 },
+        { id: 'attack_damage_flat', value: 8, slice: 2 },
+      ],
+    } as unknown as Item;
+    const stamped = craft.imprint(drop, 3, 'elemental_power', mulberry32(7));
+    expect(stamped.ok).toBe(true);
+    const el = (stamped.item.lines[3] as any).element as string;
+    expect(typeof el).toBe('string');
+    // the rest of the build drags the shared percent below -100%
+    const anchor: Item = {
+      slot: 'chest', base: 'Plate', ilvl: 99, quality: 'mid', tier: 'T3', q: 1,
+      lines: [{ id: 'elemental_power', value: -114, slice: 0, element: null }],
+    } as unknown as Item;
+    const s = newGame(71);
+    s.bag = [stamped.item, anchor];
+    expect(equipFromBag(s, 0).ok).toBe(true);
+    expect(equipFromBag(s, 0).ok).toBe(true);
+    const c = buildCharacter(50, s.gear);
+    expect(c.elemByElement[el]).toBe(0);
+    expect(Object.values(c.elemByElement).every((v) => (v as number) >= 0)).toBe(true);
+    const m = mobFixture({
+      species: 'Goblin', level: 1, hp: 100000, hpMax: 100000, xp: 10, ps: 100, acc: 50,
+      evasion: 10, damage: 'phys', align: 100, crit: 0, innate: [el],
+    });
+    const r = playerSwing(() => 0.5, c, m, null, NO_CURSE, null);
+    expect(r.landed).toBe(true);
+    for (const lane of [r.packet!.parts.nativeElement, r.packet!.parts.convertedElement, r.packet!.parts.extraElement])
+      for (const v of Object.values(lane)) expect(v).toBeGreaterThanOrEqual(0);
   });
 });

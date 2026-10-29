@@ -12,6 +12,7 @@ import {
 import { intentTargets, trackIntentAim } from '../../combat/combat-actions';
 import { prepareSkillCast, spendableMana, newCastRollCache, resolvePreparedCast } from '../../combat/skills';
 import { skillCastTiming, releasedSkillCastTiming, targetsInSkillArea } from '../../../../../engine/skill-actions.ts';
+import type { SkillCastTiming } from '../../../../../engine/types.ts';
 import { isClear, sweepDisc } from '../../../../../engine/navigation.ts';
 import { skillAreaSnapshot } from '../../../../../engine/skill-area.ts';
 import { bundleOf } from '../../../../../engine/keystones.ts';
@@ -123,17 +124,25 @@ export function createIntents(opts: {
       if (!action || action.cancelledAtUs != null) { cancelIntent('action cancelled'); return; }
       const skill = sm.byId[intent.skillId];
       if (!skill) { cancelIntent('missing skill'); return; }
+      const failTerminal = () => {
+        updateArenaAction(arena, action.id, {
+          releasedAtUs: atUs, impactCount: 1,
+          timing: { ...(action.timing as SkillCastTiming), releaseAtUs: atUs, impactAtUs: atUs },
+        });
+        intent.phase = 'recovery';
+        arena.intent = intent;
+      };
       // Authored cover is read at release, not only at acquisition: a screen raised
       // mid-windup still blocks a targeted strike. Ground placements need standable
       // ground at the moment they fire.
       if (arena.nav && (skill.type === 'attack' || skill.type === 'curse') && !intent.aimPoint
         && intent.targetId && arena.mobs[intent.targetId]
         && sweepDisc(arena.nav, arena.player, arena.mobs[intent.targetId], 0, 'sight')) {
-        cancelIntent('no line of sight');
+        failTerminal();
         return;
       }
       if (arena.nav && intent.aimPoint && !isClear(arena.nav, intent.targetPoint, 0)) {
-        cancelIntent('ground blocked');
+        failTerminal();
         return;
       }
       const profile = sm.castProfileOf(skill);
@@ -162,7 +171,7 @@ export function createIntents(opts: {
         // range is still re-tested at release, and the impact reads living bodies at that point.
         if (skill.area?.origin !== 'caster'
           && arenaDistance(arena.player, intent.targetPoint) > arenaSkillRange(skill.id) + 1e-7) {
-          cancelIntent('out of range');
+          failTerminal();
           return;
         }
         const definition = skill.area ?? { origin: 'target' as const, radius_m: 0 };
@@ -170,10 +179,10 @@ export function createIntents(opts: {
         releaseTargets = targetsInSkillArea(releaseArea, arenaActors(s.group)).map((actor) => actor.mob);
       } else if (skill.type === 'attack' || skill.type === 'curse') {
         const tracked = trackIntentAim(arena, s.group, intent);
-        if (!tracked) { cancelIntent('target lost'); return; }
+        if (!tracked) { failTerminal(); return; }
         intent.targetPoint = tracked.targetPoint;
         const live = intentTargets(arena, s.group, intent, false);
-        if (!live.targets.length) { cancelIntent('target lost'); return; }
+        if (!live.targets.length) { failTerminal(); return; }
         releaseArea = live.area;
         releaseTargets = live.targets;
         arena.intent = intent;
@@ -183,7 +192,7 @@ export function createIntents(opts: {
       let chainHopRange = 0;
       if (skill.action?.kind === 'chain-strike') {
         const primary = s.group.find((mob) => mob.id === intent.targetId && mob.hp > 0);
-        if (!primary) { cancelIntent('target lost'); return; }
+        if (!primary) { failTerminal(); return; }
         const pose = arena.mobs[primary.id];
         releaseArea = { origin: 'target', radiusM: 0, targetId: primary.id,
           center: pose ? { x: pose.x, y: pose.y } : { x: intent.targetPoint.x, y: intent.targetPoint.y } };
@@ -211,7 +220,7 @@ export function createIntents(opts: {
         targetX: releaseArea?.center.x ?? releaseDestination.x, targetY: releaseArea?.center.y ?? releaseDestination.y });
       const prepared = prepareSkillCast(s.skills, attackCharacter, intent.skillId,
         spendableMana(attackCharacter, s.skills, s.player.mana), releaseTargets, statuses, env, releaseArea);
-      if (!prepared) { cancelIntent('not ready'); return; }
+      if (!prepared) { failTerminal(); return; }
       payCast(prepared);
       const trance = bundleOf(c.keystones, 'trance');
       if (trance) rkH.counters.tranceCasts = (rkH.counters.tranceCasts || 0) + 1;
@@ -267,14 +276,20 @@ export function createIntents(opts: {
       if (skill.action?.kind === 'chain-strike') {
         const cache = newCastRollCache();
         const count = Math.max(1, Number(String(skill.targets ?? '1').split('/')[0]) || 1);
+        // T5: hop cadence and share are canonical action data (80ms, 60%); the fallbacks only
+        // preserve the baseline when an old row omits them — no tuning cap is invented here.
+        const rawInterval = Number(skill.action.interval_sec ?? 0.08);
+        const intervalSec = Number.isFinite(rawInterval) && rawInterval > 0 ? rawInterval : 0.08;
+        const rawShare = Number((skill.action as { hop_share_pct?: unknown }).hop_share_pct ?? 60);
+        const sharePct = Number.isFinite(rawShare) && rawShare >= 0 ? rawShare : 60;
         const chained: CombatFlight = {
           ...flight, rolls: cache, impactIndex: 0, impactSharePct: 100,
           chain: {
             visited: [releaseArea?.targetId ?? intent.targetId],
             remaining: Math.max(0, count - 1),
             hopRange: chainHopRange,
-            sharePct: 60,
-            intervalSec: 0.08,
+            sharePct,
+            intervalSec,
           },
         };
         arena.flights.push(chained);

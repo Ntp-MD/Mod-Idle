@@ -15,7 +15,7 @@ import path from 'node:path';
 import { eng, ROOT } from './lib/engine.ts';
 import * as G from './lib/gates.ts';
 import { readJson } from './lib/json.ts';
-import { createSkillModel } from '../engine/skills.ts';
+import { createSkillModel, validateSkillHitClasses } from '../engine/skills.ts';
 import { createLoot, leanReweight, leanReweightMany } from '../engine/loot.ts';
 import { createSpawns } from '../engine/spawns.ts';
 import { modRangeProblems } from './lib/mod-ranges.ts';
@@ -822,6 +822,8 @@ function runChecks() {
   {
     const sk: string[] = [];
     const lib = MOB_SKILLS.skills as any[];
+    try { validateSkillHitClasses(lib, 'mob-skills.json'); }
+    catch (error) { sk.push(String(error)); }
     const byId = new Map<string, any>(lib.map((row) => [row.id, row]));
     const elements = Object.keys(E.elements.status_of || {});
     const allowedStatus = new Set(MOB_SKILLS.meta.statuses as string[]);

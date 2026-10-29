@@ -104,6 +104,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   import { allocateStats, respecStats } from '@sim/core/respec';
   import { CharacterSaveSession } from './state/saveSession';
   import { CueScheduler, createWebAudioSink, cueFor } from './app/audio';
+  import { SHOWCASE_SAMPLE_LABELS, SHOWCASE_SAMPLES } from './app/showcase-samples';
   import { createSessionActions, type AccountWriterLease } from './app/session';
   import { createGameLoop } from './app/loop';
   import { road, startWalk, walkNote, walkBlocks, warpTo, warpCost, cellBlocks, cellSec, currentCell, settlementCell, ownerOf } from '@sim/world/road';
@@ -173,15 +174,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const requestedShowcaseSample = showcaseQuery.get('sample');
   const showcasePlayerWeapon = showcaseQuery.get('player-weapon');
   const showcasePlayerOffhand = showcaseQuery.get('player-offhand');
-  /** Every Gameplay sample the showcase dropdown offers — deep links (?sample=) accept the same set. */
-  const SHOWCASE_SAMPLES = ['field', 'arpg-arena', 'build-workbench', 'progress-recap', 'core-field', 'core-town',
-    'offline-progress', 'delivery', 'choice', 'full-bag', 'fallback', 'expired', 'read-only', 'economy-lab',
-    'expedition', 'craft-stash', 'combat-fx', 'skill-fx', 'nav-proof', 'three-duel', 'sprite-directions', 'map-mine', 'map-adventure',
-    'map-camp-sounds', 'map-camp-prowler', 'map-camp-traveler', 'map-camp-nest', 'map-camp-herd',
-    'map-camp-injured', 'map-camp-discovered', 'map-camp-combat', 'map-camp-timeout', 'map-camp-full-bag',
-    'map-camp-readonly'] as const;
   const initialShowcaseSample = showcaseMode
-    ? (requestedShowcaseSample && (SHOWCASE_SAMPLES as readonly string[]).includes(requestedShowcaseSample) ? requestedShowcaseSample : 'arpg-arena')
+    ? (requestedShowcaseSample && (SHOWCASE_SAMPLES as readonly string[]).includes(requestedShowcaseSample) ? requestedShowcaseSample : 'combat-field')
     : 'delivery';
   const ARENA_MOB_SPECIES = ['goblin', 'orc', 'kobold', 'ogre', 'troll', 'minotaur', 'skeleton', 'mummy', 'vampire', 'demon',
     'slime', 'golem', 'dragon', 'treant', 'human', 'lizardman', 'elf', 'giant', 'werewolf', 'dryad'] as const;
@@ -373,8 +367,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     combatArena.focusId = undefined;
   }
   let showcaseSample = $state(initialShowcaseSample);
-  let sourceModelPreview = $state(showcaseMode && showcaseQuery.get('renderer') === '3d');
-  const sourceModelSample = $derived(showcaseMode && ['three-duel', 'sprite-directions'].includes(showcaseSample));
   /** One setup path for every Gameplay sample — the dropdown and deep links (?sample=) share it,
    *  so a linked sample opens in the same state as a picked one. */
   function applyShowcaseSample(value: string) {
@@ -386,7 +378,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     feed = []; feedSeen = 0;
     travelScene = false;
     running = false;
-    if (showcaseSample === 'arpg-arena') running = true;
+    if (showcaseSample === 'combat-field') running = true;
     gameState.playerStatuses = showcaseSample === 'combat-fx' ? {
       burn: { stacks: 1, secLeft: 8, perSec: 12 },
       chill: { stacks: 1, secLeft: 10, perSec: 0 },
@@ -514,46 +506,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       }
     }
   }
-  let economyLabView = $state<any>(null);
-  let skillFxLabView = $state<any>(null);
-  let navProofView = $state<any>(null);
-  let threeDuelView = $state<any>(null);
-  let spriteDirectionView = $state<any>(null);
-  let spriteDirectionError = $state(false);
-  $effect(() => {
-    if (!showcaseMode || showcaseSample !== 'sprite-directions') return;
-    let current = true;
-    spriteDirectionError = false;
-    import('./ui/dev/SpriteDirectionLab.svelte').then(module => { if (current) spriteDirectionView = module.default; },
-      error => { if (current) { spriteDirectionError = true; console.error('[sprite-directions]', error); } });
-    return () => { current = false; spriteDirectionView = null; };
-  });
-  $effect(() => {
-    if (!showcaseMode || showcaseSample !== 'economy-lab') return;
-    let current = true;
-    import('./ui/dev/EconomyLab.svelte').then(module => { if (current) economyLabView = module.default; });
-    return () => { current = false; economyLabView = null; };
-  });
-  $effect(() => {
-    if (!showcaseMode || showcaseSample !== 'skill-fx') return;
-    let current = true;
-    import('./ui/dev/SkillFxLab.svelte').then(module => { if (current) skillFxLabView = module.default; });
-    return () => { current = false; skillFxLabView = null; };
-  });
-  $effect(() => {
-    if (!showcaseMode || showcaseSample !== 'nav-proof') return;
-    let current = true;
-    import('./ui/dev/FieldNavProof.svelte').then(module => { if (current) navProofView = module.default; });
-    return () => { current = false; navProofView = null; };
-  });
-  $effect(() => {
-    if (!showcaseMode || showcaseSample !== 'three-duel') return;
-    let current = true;
-    console.info('[three-duel] loading showcase module');
-    import('./ui/dev/ThreeDuel.svelte').then(module => { if (current) threeDuelView = module.default; },
-      (error) => { if (current) console.error('[three-duel] showcase module failed to load', error); });
-    return () => { current = false; threeDuelView = null; };
-  });
 
   function showcaseGame(scenario = 'delivery'): GameState {
     const sample = newGame();
@@ -565,7 +517,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     sample.fieldwork.foods['river-fish'] = 5;
     sample.junk[(E.mob.variant_drops as Record<string, { item: string }>)[E.mob.variants.goblin[0].name].item] = 20;
     sample.hunting = true;
-    if (scenario === 'arpg-arena') {
+    if (scenario === 'combat-field') {
       const speciesId = activeArenaVariant?.speciesId ?? ARENA_PREVIEW_SPAWN[arenaSpecies] ?? arenaSpecies;
       const species = eng.speciesById(speciesId);
       const spawnBody = spritePreviewMode && !species.sizes.includes('small') ? species.sizes[0] : 'small';
@@ -702,7 +654,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       const task = rollTask(() => draws.shift() ?? 0, sample);
       task.progress = task.n;
       sample.town.tasks[1] = task;
-    } else if (scenario !== 'field' && scenario !== 'craft-stash' && scenario !== 'map-mine'
+    } else if (scenario !== 'craft-stash' && scenario !== 'map-mine'
       && scenario !== 'map-adventure' && !campEventExamples.has(scenario)) {
       const draws = [0, 0.99, 0, 0, 0];
       if (scenario === 'choice') sample.town.contractSerial = 1;
@@ -876,7 +828,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   // `gameState`, not `state`: a top-level `state` binding makes svelte2tsx read `$state` as a store
   // subscription and type the whole panel `any` (sveltejs/svelte#13715).
   let gameState = $state<GameState>(showcaseMode ? showcaseGame(initialShowcaseSample) : newGame(undefined, crypto.getRandomValues(new Uint32Array(1))[0]));
-  let running = $state(!showcaseMode || initialShowcaseSample === 'arpg-arena');
+  let running = $state(!showcaseMode || initialShowcaseSample === 'combat-field');
   /** Held while a load or a snapshot rewind swaps the character: a live tick landing on the new state
    *  mid-catch-up would sim the away window twice. The interval drains its accumulator and stands down. */
   let paused = $state(false);
@@ -884,7 +836,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   let cooldownSimRemainder = $state(0);
   let cooldownSchedulerAt = $state(0);
   let speed = $state(1);
-  const arenaPreview = $derived(showcaseMode && showcaseSample === 'arpg-arena');
+  const arenaPreview = $derived(showcaseMode && showcaseSample === 'combat-field');
   /** The cooldown seconds one completed simulation tick removes, before the visual interpolation. */
   const cooldownTickRate = () => {
     const shockSecLeft = Math.max(0, gameState.playerStatuses.shock?.secLeft || 0);
@@ -932,7 +884,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     arenaTargetRead = null;
   }
   function replayArena() {
-    gameState = showcaseGame('arpg-arena');
+    gameState = showcaseGame('combat-field');
     resetArena();
     feed = []; feedSeen = 0;
     panel = null; sheetOpen = false;
@@ -1548,7 +1500,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       speed = settings.speed || 1;
       if (arenaPreview) resetArena();
       // a deep-linked sample opens fully set up, exactly as if picked from the dropdown
-      if (initialShowcaseSample !== 'arpg-arena') applyShowcaseSample(initialShowcaseSample);
+      if (initialShowcaseSample !== 'combat-field') applyShowcaseSample(initialShowcaseSample);
       return () => document.body.classList.remove('ui-showcase');
     }
     try {
@@ -1692,12 +1644,22 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
    * there — onto the body, into the warehouse (only where a settlement has made that legal), or into a
    * stone. The worn grid's one verb is the way back off the body. Both lists read the same sim calls the
    * panel's buttons already make; nothing here is a second rule.
+   *
+   * A menu outlives the bag order it opened on: a drop that lands while it is open unshifts the bag,
+   * so every verb re-resolves its piece by identity at press time. An index read at open time could
+   * already name the neighbour.
    */
   function bagPieceActions(entry: SlotEntry): MenuItem[] {
     if (entry.kind !== 'gear' || !entry.item) return [];
     const it = entry.item;
+    /** the piece's live bag slot, or -1 when it already left the bag */
+    const liveIndex = () => gameState.bag.indexOf(it);
+    const gone = () => {
+      equipNote = 'That piece already left the bag';
+      gameState = { ...gameState };
+    };
     const out: MenuItem[] = [
-      { label: 'Put it on', hint: it.slot, disabled: Boolean(it.broken), onpick: () => equip(entry.index) },
+      { label: 'Put it on', hint: it.slot, disabled: Boolean(it.broken), onpick: () => { const i = liveIndex(); if (i < 0) return gone(); equip(i); } },
       { label: 'Craft this item', hint: townLive ? 'Open on the workbench' : 'Available at a settlement', disabled: !townLive,
         onpick: () => craftThisItem({ where: 'bag', item: it }) },
       {
@@ -1706,13 +1668,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         onpick: () => toggleLock(it),
       },
     ];
-    if (townLive && tabs) out.push({ label: `Stash it → Tab ${stashTab + 1}`, onpick: () => doDeposit(entry.index, stashTab) });
+    if (townLive && tabs) out.push({ label: `Stash it → Tab ${stashTab + 1}`, onpick: () => { const i = liveIndex(); if (i < 0) return gone(); doDeposit(i, stashTab); } });
     out.push({
       label: 'Dissolve',
       hint: 'Iron Ore + Scrap',
       danger: true,
       disabled: Boolean(it.locked || it.heldFor),
-      onpick: () => doSalvage(entry.index),
+      onpick: () => { const i = liveIndex(); if (i < 0) return gone(); doSalvage(i); },
     });
     return out;
   }
@@ -3327,7 +3289,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <button onclick={cancelOfflineLoad}>Cancel loading</button>
   </Panel>
 {/if}
-<div class="showcase-frame" class:active={showcaseMode} class:source-model-sample={sourceModelSample} class:economy-lab-sample={showcaseMode && showcaseSample === 'economy-lab'} class:skill-fx-sample={showcaseMode && showcaseSample === 'skill-fx'} class:nav-proof-sample={showcaseMode && showcaseSample === 'nav-proof'} inert={offlineProgress !== null}>
+<div class="showcase-frame" class:active={showcaseMode} inert={offlineProgress !== null}>
 {#if showcaseMode}
   <header class="showcase-banner">
     <div>
@@ -3336,10 +3298,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       <label>Gameplay sample <select aria-label="Gameplay sample" value={showcaseSample} onchange={(event) => {
         applyShowcaseSample(event.currentTarget.value);
       }}>
-        <option value="field">Field baseline</option><option value="arpg-arena">ARPG · Forest clearing</option><option value="build-workbench">Build · Full skill collection</option><option value="progress-recap">Progress · Return report</option><option value="core-field">Core allocation · field</option><option value="core-town">Core allocation · town</option><option value="offline-progress">Offline catch-up · preview</option><option value="delivery">Delivery want · Fixed</option><option value="choice">Delivery want · Choice</option><option value="full-bag">Delivery reward bag full</option>
-        <option value="fallback">Delivery skill fallback</option><option value="expired">Expired partial delivery</option><option value="read-only">Read-only transactions</option><option value="economy-lab">Economy lab · Phase B</option>
-        <option value="expedition">Expedition task</option><option value="craft-stash">Crafting · Stash workbench</option><option value="combat-fx">Combat FX · all labels</option><option value="skill-fx">Skill FX · all skills</option><option value="nav-proof">Field nav · proof overlay</option><option value="three-duel">3D source models · Orc &amp; Ninja</option><option value="sprite-directions">Sprites: 16 vs 32 directions</option><option value="map-mine">Map · Mine & Camp</option><option value="map-adventure">Map · Adventure board</option>
-        <option value="map-camp-sounds">Map · Camp sounds</option><option value="map-camp-prowler">Map · Camp prowler</option><option value="map-camp-traveler">Map · Camp traveler</option><option value="map-camp-nest">Map · Camp nest</option><option value="map-camp-herd">Map · Camp herd</option><option value="map-camp-injured">Map · Camp aid</option><option value="map-camp-discovered">Map · Camp discovered</option><option value="map-camp-combat">Map · Camp combat</option><option value="map-camp-timeout">Map · Camp timeout</option><option value="map-camp-full-bag">Map · Camp full bag</option><option value="map-camp-readonly">Map · Camp read only</option>
+        {#each SHOWCASE_SAMPLES as sample}
+          <option value={sample}>{SHOWCASE_SAMPLE_LABELS[sample]}</option>
+        {/each}
       </select></label>
     </div>
     <a href="/">Return to the game</a>
@@ -3348,18 +3309,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <div class="arena-preview-controls">
       <strong>Forest clearing</strong>
       <span>Auto combat · click a body to focus it · Alt-click to inspect · click ground to move · aim, then click or use the arrow keys and Enter for a placed cast</span>
-      <label>Characters <select aria-label="Character renderer" value={sourceModelPreview ? '3d' : '2d'} onchange={(event) => {
-        sourceModelPreview = event.currentTarget.value === '3d';
-        const url = new URL(window.location.href);
-        if (sourceModelPreview) url.searchParams.set('renderer', '3d');
-        else url.searchParams.delete('renderer');
-        window.history.replaceState(null, '', url);
-      }}>
-        <option value="2d">2D sprites</option>
-        <option value="3d">3D · Quaternius models</option>
-      </select></label>
-      <a href="/__showcase?sample=three-duel">Inspect source models</a>
-      {#if sourceModelPreview}<span class="source-model-note">Source models: Ninja player · Orc enemy stand-ins</span>{/if}
       <div class="arena-command-controls" role="group" aria-label="Local combat commands">
         <button class="btn btn-quiet" type="button" onclick={() => focusArenaEnemy()} disabled={!arenaLiving().length}>
           {arenaFocusId ? 'Next focus' : 'Focus enemy'}
@@ -3488,7 +3437,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       <span>Sample effects only · game progress stays unchanged · replay restores the encounter</span>
     </div>
   {/if}
-  {#if !sourceModelSample}
   <nav class="showcase-index" aria-label="Showcase sections">
     <a href="#showcase-field">Field HUD</a>
     <a href="#panel-hud-layout-studio">HUD Layout</a>
@@ -3496,15 +3444,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <a href="#panel-inventory">Inventory</a>
     <a href="#panel-craft">Craft</a>
     <a href="#panel-skills">Skills</a>
-    <a href="?sample=skill-fx">Skill FX lab</a>
-    <a href="?sample=nav-proof">Field nav proof</a>
-    <a href="?sample=arpg-arena&amp;renderer=3d">3D Field preview</a>
-    <a href="?sample=three-duel">3D source models</a>
-    <a href="?sample=sprite-directions">Sprites · 16 vs 32 directions</a>
+    <a href="?sample=combat-field">Combat field</a>
     <a href="#panel-passive-tree">Tree</a>
     <a href="#panel-town">Town</a>
     <a href="#panel-market">Market</a>
-    <a href="#showcase-economy-lab">Economy lab</a>
     <a href="#panel-delivery-notice">Delivery notice</a>
     <a href="#panel-keyboard">Keys</a>
     <a href="#panel-field-camp">Camp</a>
@@ -3512,38 +3455,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <a href="#panel-settlement">Desk</a>
     <a href="#panel-save">Save</a>
   </nav>
-  {/if}
-  {#if showcaseMode && showcaseSample === 'economy-lab' && economyLabView}
-    {@const EconomyLab = economyLabView}
-    <div id="showcase-economy-lab" class="showcase-economy-lab"><EconomyLab /></div>
-  {/if}
-  {#if showcaseMode && showcaseSample === 'skill-fx' && skillFxLabView}
-    {@const SkillFxLab = skillFxLabView}
-    <div id="showcase-skill-fx" class="showcase-skill-fx"><SkillFxLab /></div>
-  {/if}
-  {#if showcaseMode && showcaseSample === 'nav-proof' && navProofView}
-    {@const NavProof = navProofView}
-    <div id="showcase-nav-proof" class="showcase-nav-proof"><NavProof /></div>
-  {/if}
-  {#if showcaseMode && showcaseSample === 'three-duel' && threeDuelView}
-    {@const ThreeDuel = threeDuelView}
-    <div id="showcase-three-duel" class="showcase-three-duel"><ThreeDuel /></div>
-  {:else if showcaseMode && showcaseSample === 'three-duel'}
-    <div id="showcase-three-duel" class="showcase-three-duel"><div class="three-duel"><p class="three-duel-hud">Loading 3D duel…</p></div></div>
-  {/if}
-  {#if showcaseMode && showcaseSample === 'sprite-directions'}
-    <div id="showcase-sprite-directions" class="showcase-three-duel">
-      {#if spriteDirectionView}
-        {@const SpriteDirectionView = spriteDirectionView}
-        <SpriteDirectionView />
-      {:else}
-        <p role="status">{spriteDirectionError ? 'Sprite comparison could not load. Reload the page to retry.' : 'Loading sprite comparison…'}</p>
-      {/if}
-    </div>
-  {/if}
 {/if}
 
-{#if !sourceModelSample}
 <!-- desktop-only surface: below the floor the corner reads stop being placeable, so it says so -->
 <div class="small-screen" role="alert">
   <h2>Mod-Idle is played on a desktop</h2>
@@ -3559,7 +3472,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       spritePreviewSpecies={spritePreviewMode ? arenaSpecies : null}
       spritePreviewVariant={spritePreviewMode && activeArenaVariant ? { speciesId: activeArenaVariant.speciesId, variantId: activeArenaVariant.variantId } : null}
       aoePreview={showcaseMode && showcaseQuery.get('aoe-preview') === '1'}
-      sourceModelPreview={arenaPreview && sourceModelPreview}
+      iconActors={arenaPreview && !spritePreviewMode}
       focusId={arenaFocusId}
       aimSkill={arenaAimSkill}
       keyboardAim={arenaAimPoint}
@@ -4135,10 +4048,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     </div>
   </nav>
 </div>
-{/if}
 </div>
 
-{#if !sourceModelSample}
 {#if hudGridVisible}
   <div class="hud-grid-debug" aria-hidden="true">
     {#each HUD_GRID_LABELS as cell (cell)}<span>{cell}</span>{/each}
@@ -4964,7 +4875,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <EnemyInspector enemy={inspectedEnemy} />
   </Panel>
 {/if}
-{/if}
 
 <!-- the ink's distortion field: one static turbulence map shared by both orbs' ink layers -->
 <svg class="orb-warp-defs" width="0" height="0" aria-hidden="true" focusable="false">
@@ -4982,8 +4892,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   :global(body.ui-showcase) { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: auto; }
   .showcase-frame { display: contents; }
   .showcase-frame.active { display: grid; grid-template-rows: auto auto minmax(0, 1fr); height: 100vh; }
-  .showcase-frame.active.source-model-sample { grid-template-rows: auto minmax(0, 1fr); }
-  .showcase-three-duel { min-height: 0; overflow: hidden; }
   .showcase-frame.active:has(.combat-fx-preview-controls) { grid-template-rows: auto auto auto minmax(0, 1fr); }
   .showcase-banner {
     display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md);
@@ -5002,19 +4910,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .arena-preview-controls strong { color: var(--gold-lit); }
   .arena-preview-controls span { color: var(--sheet-ink); flex: 1; }
   .arena-preview-controls label { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
-  .arena-preview-controls .source-model-note { flex-basis: 100%; color: var(--gold-lit); }
   .arena-command-controls { display: inline-flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-xs); }
   .arena-command-controls button[aria-pressed="true"] { border-color: var(--gold-lit); color: var(--gold-lit); }
   .stage.arpg-arena .map-back { visibility: hidden; pointer-events: none; }
   .showcase-index { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--screen-pad); border-bottom: 1px solid var(--line); background: var(--inset); }
   .showcase-index a { padding: var(--spacing-xs) var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-card); color: var(--dim); font-size: var(--font-xs); text-decoration: none; white-space: nowrap; }
   .showcase-index a:hover, .showcase-index a:focus-visible { border-color: var(--gold); color: var(--gold-lit); }
-  .showcase-economy-lab { min-height: 0; overflow-y: auto; padding: var(--spacing-md); }
-  .showcase-economy-lab > :global(.economy-lab) { max-width: 1600px; margin: 0 auto; }
-  .showcase-skill-fx { min-height: 0; overflow-y: auto; padding: var(--spacing-md); }
-  .showcase-nav-proof { min-height: 0; overflow-y: auto; padding: var(--spacing-md); }
-  .showcase-frame.active.economy-lab-sample .stage, .showcase-frame.active.skill-fx-sample > .stage,
-  .showcase-frame.active.nav-proof-sample > .stage { display: none; }
   .showcase-note { padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); color: var(--dim); background: var(--inset); font-size: var(--font-xs); }
 
 

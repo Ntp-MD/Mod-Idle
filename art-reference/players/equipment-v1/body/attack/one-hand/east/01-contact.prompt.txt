@@ -1,2 +1,0 @@
-One-handed sword contact pose; main forearm extends toward screen right, feet planted.
-Same cream hooded amber-eyed traveler as ../../reference.png. Fixed elevated three-quarter camera, upper-left light, crisp pixel-cluster style, transparent canvas, whole body/feet visible, empty hands, no weapon/shield, effects, shadow, floor, labels or grid.

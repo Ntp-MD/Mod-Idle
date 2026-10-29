@@ -102,7 +102,11 @@
    * them — no number here is typed, both sides come off the two drops.
    */
   const diff = $derived(wornHere ? [] : compareLines(item, comparedWorn));
-  const cmpName = (r: LineCmp): string => (r.element ? `${r.element} ${plainName(r.id)}` : plainName(r.id));
+  const cmpName = (r: LineCmp): string => {
+    if (r.id === 'stat_mod_flat') return r.stat || 'stat';
+    if (r.id === 'all_stat_flat') return 'all stats';
+    return r.element ? `${r.element} ${plainName(r.id)}` : plainName(r.id);
+  };
   const cmpText = (r: LineCmp): string =>
     r.cand == null ? `${cmpName(r)} −${modValue(r.id, r.worn ?? 0)}`
       : r.worn == null ? `${cmpName(r)} +${modValue(r.id, r.cand)}`

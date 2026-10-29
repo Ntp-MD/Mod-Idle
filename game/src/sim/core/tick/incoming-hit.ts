@@ -244,7 +244,7 @@ export function createIncomingHit(opts: {
         // keeps its single writer role and the tick draw order stays frozen otherwise.
         const resistCut = Math.max(0, Math.min(100, c.statusResist || 0)) / 100;
         const resisted = resistCut > 0 && rng() < resistCut;
-        const forced = mobSkill?.status && !immune && !resisted ? applyStatus(statuses, mobSkill.status, alignedElemDps) : null;
+        const forced = mobSkill?.status && !immune && !resisted ? applyStatus(statuses, mobSkill.status, alignedElemDps, alignedElemDps, c.stunRecovery) : null;
         let st = forced ?? (immune ? null : rollStatus(rng, mob, alignedElemDps, statuses, c.statusResist, c.stunRecovery, alignedElemDps));
         // Purist: damaging statuses are refused after the writer names them, before the tick
         // can pay them; control statuses and Mark still land.
@@ -263,8 +263,10 @@ export function createIncomingHit(opts: {
             push(s, 'Auto Cleanse removes it');
           }
           // A hard stop cancels the unpaid windup at the control timestamp, not at the next
-          // movement sample; the queued release then finds no intent and pays nothing.
-          if (st === 'shock' && (statuses.shock?.secLeft ?? 0) > 0) {
+          // movement sample; the queued release then finds no intent and pays nothing. Unstoppable
+          // keeps its word — "Stun no longer stops you" — so the stop lands but the windup stands.
+          const unstoppable = bundleOf(c.keystones, 'unstoppable');
+          if (st === 'shock' && (statuses.shock?.secLeft ?? 0) > 0 && !unstoppable) {
             cancelPlayerBasic('shock');
             if (arena?.intent?.phase === 'windup') cancelIntent('shock');
             else if (arena?.intent?.phase === 'recovery' && arena.intent.mobile) {

@@ -54,4 +54,16 @@ describe('P5 auto-equip — never silently disarm the rotation', () => {
     expect(r.rotationHeld?.base).toContain('sword');
     expect(s.gear[mainHand]?.base).toBe('bow');
   });
+
+  it('breaks an empty-cell Infinity tie on strength, not bag order', () => {
+    const ring = (v: number): Item =>
+      ({ slot: 'ring', base: 'Band', ilvl: 20, quality: 'mid', tier: 'T1', q: 1, lines: [{ id: 'all_stat_flat', value: v, slice: 1 }] } as Item);
+    const s = newGame(11);
+    s.gear[6] = null;
+    s.gear[7] = null;
+    s.bag = [ring(1), ring(99)];
+    const r = autoEquip(s, 0);
+    expect(r.swaps.length).toBeGreaterThan(0);
+    expect(s.gear[6]!.lines[0].value).toBe(99);
+  });
 });

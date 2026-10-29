@@ -296,7 +296,7 @@ export function createPlayerBasicActions(opts: {
               s.group.splice(s.group.indexOf(target), 1);
               onKill(s, rng, target, c, statuses);
             }
-            if (arena?.intent?.targetId === target.id) cancelIntent('target lost');
+            if (arena?.intent?.targetId === target.id && !(arena.intent.manual && arena.intent.aimPoint)) cancelIntent('target lost');
             s.player.atkTimer = 0;
             plan!.stopped = true;
           }
@@ -317,9 +317,16 @@ export function createPlayerBasicActions(opts: {
         if (!current || current.cancelledAtUs != null || current.impactCount || current.releasedAtUs != null) return;
         advanceArenaAt(clock.nowUs);
         if (!arena.actions.includes(current) || current.cancelledAtUs != null) return;
-        if (target.hp <= 0 || !s.group.includes(target) || s.player.hp <= 0) return;
-        if (arena.mobs[target.id]?.returning) return;
-        if (!arenaPlayerInReach(arena, c.weaponName, target.id)) return;
+        const dead = target.hp <= 0 || !s.group.includes(target) || s.player.hp <= 0;
+        const returning = !!arena.mobs[target.id]?.returning;
+        const inReach = arenaPlayerInReach(arena, c.weaponName, target.id);
+        if (dead || returning || !inReach) {
+          updateArenaAction(arena, current.id, {
+            impactCount: 1, releasedAtUs: clock.nowUs,
+            timing: { ...(current.timing as SkillCastTiming), impactAtUs: clock.nowUs },
+          });
+          return;
+        }
         // A projectile basic leaves the bow/string at release and resolves where it lands.
         if (current.timing?.delivery === 'projectile') {
           launchPlayerShot(current, target);

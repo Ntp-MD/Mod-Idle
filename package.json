@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "dev": "npm --prefix game run dev",
     "build": "npm --prefix game run build",
+    "test:changed": "node tools/test-changed.mjs",
     "test": "npm --prefix game run test",
     "check": "npm run typecheck && npm --prefix game run check"
   },

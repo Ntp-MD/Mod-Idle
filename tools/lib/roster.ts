@@ -10,7 +10,7 @@ import path from 'node:path';
 import { readJson } from './json.ts';
 import * as G from './gates.ts';
 import * as EN from './engine.ts';
-import { createSkillModel } from '../../engine/skills.ts';
+import { createSkillModel, validateSkillHitClasses } from '../../engine/skills.ts';
 import type { SkillsData } from './types.ts';
 
 const DATA = readJson<SkillsData>(path.join(import.meta.dirname, '..', 'data', 'skills.json'));
@@ -300,6 +300,11 @@ function gates(): G.GateRow[] {
     `Cast rows resolve a delivery profile and a finite range (${castRows.length} rows)` +
     `${missingProfiles.length ? ' · MISSING PROFILES: ' + missingProfiles.join(', ') : ''}` +
     `${badCast.length ? ' · BAD: ' + badCast.map((s) => s.id).join(', ') : ''}`);
+
+  let hitClassError = '';
+  try { validateSkillHitClasses(SKILLS, 'skills.json'); }
+  catch (error) { hitClassError = String(error); }
+  add('S25', !hitClassError, hitClassError || 'Every skill authors its hit class independently of damage and delivery');
 
   return g.rows();
 }

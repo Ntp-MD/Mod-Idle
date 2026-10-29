@@ -1,5 +1,0 @@
-SPECIES: <species-id> (<Species Name>) — <silhouette one-liner>
-WEAPON (baked, fixed): <weapon-id> — in hand every frame; no equip switch
-SLOT: walk/west/01-stride-b — walk west, stride phase 01-stride-b; the 4 frames form one full cycle
-CAMERA: fixed elevated three-quarter, upper-left light; whole sprite including feet inside the frame
-RENDER: chibi pixel-art clusters, hard opaque edges only, transparent background; no shadow, scenery, text, effects, grid

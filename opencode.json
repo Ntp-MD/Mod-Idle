@@ -1,4 +1,12 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["opencode-gpt-imagegen"]
+  "plugin": [
+    "opencode-gpt-imagegen"
+  ],
+  "skills": {
+    "paths": [
+      "C:/Users/ITOP/.agents/skills",
+      "C:/Users/ITOP/.qoder/skills"
+    ]
+  }
 }

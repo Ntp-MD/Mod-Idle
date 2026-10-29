@@ -34,9 +34,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parent.parent
 MONSTER_ROOT = ROOT / "art-reference" / "monsters"
 ROSTER_PATH = MONSTER_ROOT / "production-roster.json"
-MOLD_PATH = MONSTER_ROOT / "_shared/mob-animation-template.json"
 MOB_SKILLS_PATH = ROOT / "tools/data/mob-skills.json"
-MOLD_SLOT_SUFFIXES = (".png", ".meta.json", ".prompt.txt")
 SPECIES_MIN_BOTTOM_PADDING = 10
 VARIANT_MIN_CELL_PADDING = 24
 RUNTIME_ALPHA_THRESHOLD = 200
@@ -265,144 +263,6 @@ def runtime_pose_issues(alpha: bytes, width: int, height: int, frames: list[Fram
                                     bounds.right >= frame.right or bounds.bottom >= frame.bottom):
                 issues.append(f"frame {index:02d}: source crop needs at least 1 transparent pixel around its connected pose")
     return issues
-
-
-def check_mold(target: Path, species: str | None, kit: list[str] | None) -> tuple[list[str], int]:
-    """Verify one species/variant/set folder against the mold contract.
-
-    Machine-reads _shared/mob-animation-template.json: the reference trio,
-    attackKind, per-pose png+meta+prompt triples, footAnchor on every pose meta,
-    releaseSocket on far release frames, and skill folders matching the kit.
-    """
-    issues: list[str] = []
-    checked = 0
-    try:
-        mold = read_json(MOLD_PATH)
-    except (OSError, json.JSONDecodeError) as error:
-        return [f"cannot read mold contract: {error}"], 0
-    slots = mold.get("slots", {}) if isinstance(mold, dict) else {}
-
-    for name in ("reference.png", "reference.meta.json", "prompt.txt"):
-        if not (target / name).is_file():
-            issues.append(f"missing {name}")
-    ref_baked = None
-    ref_meta_path = target / "reference.meta.json"
-    if ref_meta_path.is_file():
-        try:
-            if "TODO" in ref_meta_path.read_text(encoding="utf-8-sig"):
-                issues.append("reference.meta.json: still contains unfilled template TODO")
-            ref_baked = read_json(ref_meta_path).get("bakedWeaponId")
-        except (OSError, json.JSONDecodeError) as error:
-            issues.append(f"reference.meta.json: cannot read: {error}")
-
-    attack_kind = None
-    animation_roots = (
-        (target / "animation/v1/meta.json", target / "animation/v1/poses"),
-        (target / "animation/meta.json", target / "animation/poses"),
-    )
-    selected_animation = next(((meta, poses) for meta, poses in animation_roots if meta.is_file()), None)
-    if selected_animation is None:
-        anim_meta_path = animation_roots[0][0]
-        poses_root = animation_roots[0][1]
-        anim_meta_label = "animation/v1/meta.json or animation/meta.json"
-        issues.append(f"missing {anim_meta_label}")
-    else:
-        anim_meta_path, poses_root = selected_animation
-        anim_meta_label = anim_meta_path.relative_to(target).as_posix()
-        try:
-            if "TODO" in anim_meta_path.read_text(encoding="utf-8-sig"):
-                issues.append(f"{anim_meta_label}: still contains unfilled template TODO")
-            anim_meta = read_json(anim_meta_path)
-        except (OSError, json.JSONDecodeError) as error:
-            issues.append(f"{anim_meta_label}: cannot read: {error}")
-            anim_meta = {}
-        attack_kind = anim_meta.get("attackKind") if isinstance(anim_meta, dict) else None
-        if attack_kind not in ("close", "far"):
-            issues.append(f'{anim_meta_label}: attackKind must be "close" or "far"')
-            attack_kind = None
-        elif not ref_baked or anim_meta.get("bakedWeaponId") != ref_baked:
-            issues.append(f"{anim_meta_label}: bakedWeaponId must match reference.meta.json")
-
-    poses: list[str] = []
-    for key in ("idle", "walk", "hit", "death"):
-        files = slots.get(key, {}).get("files", [])
-        if isinstance(files, list):
-            poses.extend(str(entry) for entry in files)
-    kinds = slots.get("attack", {}).get("kinds", {})
-    kind_files: dict[str, list[str]] = {}
-    for kind, body in kinds.items():
-        files = body.get("files", []) if isinstance(body, dict) else []
-        kind_files[str(kind)] = [str(entry) for entry in files] if isinstance(files, list) else []
-    if attack_kind in kind_files:
-        poses.extend(kind_files[attack_kind])
-    elif selected_animation is not None:
-        issues.append("skipped attack poses: no valid attackKind")
-
-    def check_pose(poses_root: Path, stem: str, kind: str | None) -> None:
-        nonlocal checked
-        for suffix in MOLD_SLOT_SUFFIXES:
-            candidate = poses_root / (stem + suffix)
-            if candidate.is_file():
-                checked += 1
-            else:
-                issues.append(f"missing poses/{stem + suffix}")
-        meta_path = poses_root / (stem + ".meta.json")
-        if not meta_path.is_file():
-            return
-        try:
-            meta = read_json(meta_path)
-        except (OSError, json.JSONDecodeError) as error:
-            issues.append(f"poses/{stem}.meta.json: cannot parse: {error}")
-            return
-        if not isinstance(meta, dict) or "footAnchor" not in meta:
-            issues.append(f"poses/{stem}.meta.json: footAnchor is required")
-        if kind == "far" and stem.endswith("01-release") and "releaseSocket" not in meta:
-            issues.append(f"poses/{stem}.meta.json: releaseSocket is required on far release frames")
-
-    for pose in poses:
-        stem = pose[:-len(".png")] if pose.endswith(".png") else pose
-        check_pose(poses_root, stem, attack_kind if "/attack/" in stem else None)
-
-    skill_ids: list[str] = list(kit) if kit else []
-    if species and not kit:
-        try:
-            kits = read_json(MOB_SKILLS_PATH).get("kits", {})
-        except (OSError, json.JSONDecodeError) as error:
-            issues.append(f"cannot read mob kits: {error}")
-            kits = {}
-        if species not in kits:
-            issues.append(f"species {species!r} has no kit in mob-skills.json")
-        else:
-            skill_ids = [str(entry) for entry in kits[species]]
-    by_id: dict[str, Any] = {}
-    if skill_ids:
-        try:
-            entries = read_json(MOB_SKILLS_PATH).get("skills", [])
-            by_id = {s.get("id"): s for s in entries if isinstance(s, dict)}
-        except (OSError, json.JSONDecodeError) as error:
-            issues.append(f"cannot read mob skills: {error}")
-    skill_conf = slots.get("skill", {})
-    kind_map = skill_conf.get("deliveryKinds", {}) if isinstance(skill_conf, dict) else {}
-    expected_slugs: set[str] = set()
-    for skill_id in skill_ids:
-        entry = by_id.get(skill_id, {})
-        delivery = (entry.get("cast") or {}).get("delivery") if isinstance(entry, dict) else None
-        if delivery not in kind_map:
-            continue
-        slug = skill_id.split(".")[-1]
-        expected_slugs.add(slug)
-        kind = kind_map[delivery]
-        phases = [Path(entry).name[:-len(".png")] for entry in kind_files.get(kind, [])
-                  if "/east/" in entry.replace("\\", "/")]
-        for direction in ("east", "west"):
-            for phase in phases:
-                check_pose(poses_root, f"skill/{slug}/{direction}/{phase}", kind)
-    skill_root = poses_root / "skill"
-    if skill_root.is_dir():
-        for child in sorted(skill_root.iterdir()):
-            if child.is_dir() and not child.name.startswith("_") and child.name not in expected_slugs:
-                issues.append(f"skill/{child.name}/: not in the resolved kit")
-    return issues, checked
 
 
 def audit_atlas(metadata_path: Path, *, runtime_image: Path | None = None) -> AtlasResult:
@@ -695,35 +555,11 @@ def main(argv: list[str] | None = None) -> int:
         "--runtime", action="store_true",
         help="check every production mob PNG and metadata pair used by the runtime species registry, regardless of approval status",
     )
-    selection.add_argument(
-        "--mold",
-        type=Path,
-        help="species/variant/set folder to check against the mold contract",
-    )
-    parser.add_argument("--species", default=None, help="species id for kit lookup (with --mold)")
-    parser.add_argument("--kit", nargs="*", default=None, help="explicit skill ids (with --mold)")
     parser.add_argument("--json", action="store_true", help="emit a machine-readable JSON result")
     args = parser.parse_args(argv)
 
     discovery_errors: list[str] = []
     runtime_pairs: list[tuple[Path, Path]] = []
-    if args.mold:
-        target = args.mold if args.mold.is_absolute() else ROOT / args.mold
-        issues, checked = check_mold(target, args.species, args.kit)
-        if args.json:
-            print(json.dumps({
-                "schemaVersion": 1,
-                "mold": relative(target),
-                "checked": checked,
-                "passed": not issues,
-                "issues": issues,
-            }, indent=2))
-        else:
-            print(f"{'PASS' if not issues else 'FAIL'} {relative(target)}: "
-                  f"{checked} slot files checked; {len(issues)} issue(s)")
-            for issue in issues:
-                print(f"  - {issue}")
-        return 1 if issues else 0
     if args.runtime:
         runtime_pairs, discovery_errors = runtime_atlases()
         metadata_paths = [metadata for metadata, _ in runtime_pairs]

@@ -220,6 +220,9 @@ function attachments(layout: NavLayout, point: NavPoint, radius: number): Endpoi
         if (!legal(cell.row, col) || !legal(row, cell.col)) continue;
         if (!segmentClear(point, sideA) || !segmentClear(sideA, centre)) continue;
         if (!segmentClear(point, sideB) || !segmentClear(sideB, centre)) continue;
+        // the emitted leg is the direct diagonal, not the dogleg that was just
+        // probed: a corner the halves slip past can still clip the straight line
+        if (!segmentClear(point, centre)) continue;
       } else if (!segmentClear(point, centre)) continue;
       nodes.set(row * cols + col, distance(point, centre));
     }
@@ -325,7 +328,10 @@ function astar(
           [from, sideA], [sideA, to], [from, sideB], [sideB, to],
         ];
         const ok = legal(sideA) && legal(sideB)
-          && corners.every(([x, y]) => sweepDisc(layout, centre(x), centre(y), radius) === null);
+          && corners.every(([x, y]) => sweepDisc(layout, centre(x), centre(y), radius) === null)
+          // the emitted leg is the direct centre-to-centre diagonal, so a corner that
+          // clears both doglegs can still refuse the straight line it actually draws
+          && sweepDisc(layout, a, b, radius) === null;
         cost = ok ? distance(a, b) : null;
       } else {
         cost = sweepDisc(layout, a, b, radius) === null ? distance(a, b) : null;

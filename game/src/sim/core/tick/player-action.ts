@@ -154,6 +154,6 @@ export function schedulePlayerAction(opts: {
         });
         applyCast(cast);
       }
-    } else if (arena) cancelIntent('auto-off');
+    } else if (arena && !arena.intent?.manual) cancelIntent('auto-off');
   });
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { E } from '../../src/engine/client';
-import { actorAction, actorArt, actorBeats, actorPrepareMs, actorProfile, actorReaction, plateArt } from '../../src/ui/combat/combat-actor';
+import { actorAction, actorArt, actorBeats, actorPrepareMs, actorProfile, actorReaction } from '../../src/ui/combat/combat-actor';
 import type { FxEvent } from '@sim/core/types';
 import { mobFixture } from '../fixtures/mobFixture';
 
@@ -76,34 +76,23 @@ describe('combat actor events', () => {
 });
 
 describe('combat actor artwork', () => {
-  it('uses a retained map painting where one exists and the white species icon otherwise', () => {
+  it('draws the canonical white mob icon for every species', () => {
     for (const row of E.mob.species) {
       const art = actorArt({ speciesId: row.id, species: row.name });
-      expect(art, row.id).not.toBeNull();
-      expect(art!.href, row.id).toMatch(/(?:\/map\/characters\/species\/[^/]+\/old-[^/]+|\/src\/icon\/mob\/icon\/[^/]+)\.png$/);
-      const path = art!.href.startsWith('/map/') ? `../../public${art!.href}` : `../..${art!.href}`;
-      expect(existsSync(fileURLToPath(new URL(path, import.meta.url))), art!.href).toBe(true);
-      expect(art!.imageWidth).toBeGreaterThan(0);
-      expect(art!.imageHeight).toBeGreaterThan(0);
+      expect(art.href, row.id).toMatch(/\/src\/icon\/mob\/icon\/[^/]+\.png$/);
+      expect(art.icon, row.id).toBe(true);
+      expect(art.imageWidth).toBeGreaterThan(0);
+      expect(art.imageHeight).toBeGreaterThan(0);
+      expect(existsSync(fileURLToPath(new URL(`../..${art.href}`, import.meta.url))), art.href).toBe(true);
     }
   });
 
-  it('draws the canonical white mob icon in FieldPlates for every species', () => {
-    for (const row of E.mob.species) {
-      const art = plateArt({ speciesId: row.id, species: row.name });
-      expect(art, row.id).not.toBeNull();
-      expect(art!.href, row.id).toMatch(/\/src\/icon\/mob\/icon\/[^/]+\.png$/);
-      expect(art!.icon, row.id).toBe(true);
-      expect(existsSync(fileURLToPath(new URL(`../..${art!.href}`, import.meta.url))), art!.href).toBe(true);
-    }
-  });
-
-  it('crops only transparent traveler margins using the existing painted bounds and keeps versioned species', () => {
-    expect(actorArt()).toEqual({
-      href: '/map/characters/player/traveler-piece.png', imageWidth: 1293, imageHeight: 1217,
-      viewBox: '319 177 602 909',
+  it('draws the player character icon when no mob is staged', () => {
+    expect(actorArt()).toMatchObject({
+      href: expect.stringMatching(/\/src\/icon\/.*knight-helmet\.png$/),
+      imageWidth: 256, imageHeight: 256, icon: true,
     });
-    expect(actorArt({ species: 'Elf' })!.href).toBe('/map/characters/species/elf/old-elf-v2.png');
+    expect(actorArt({ species: 'Elf' }).href).toMatch(/\/src\/icon\/mob\/icon\/[^/]+\.png$/);
   });
 });
 

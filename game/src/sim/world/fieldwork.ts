@@ -170,7 +170,7 @@ export function tickHunger(state: GameState, online = true): string | null {
   return null;
 }
 
-/** An independent road event roll; its supplies and rest do not replace the block's ambush roll. */
+/** An independent road event roll; its supplies and rest never add a mob group. */
 export function resolveTravelEvent(state: GameState, rng: () => number): string | null {
   const config = fieldwork.F.travel_events;
   if (rng() >= config.chance_per_block) return null;

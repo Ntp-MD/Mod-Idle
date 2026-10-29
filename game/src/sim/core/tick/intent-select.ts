@@ -84,7 +84,7 @@ export function createIntentSelect(opts: {
       return;
     }
     if (intent?.manual && intent.phase === 'approach') {
-      if (intent.targetId && !s.group.some((mob) => mob.id === intent!.targetId && mob.hp > 0)) {
+      if (!intent.aimPoint && intent.targetId && !s.group.some((mob) => mob.id === intent!.targetId && mob.hp > 0)) {
         arena.intent = undefined;
         return;
       }
@@ -102,7 +102,7 @@ export function createIntentSelect(opts: {
     if (playerActiveFraction <= 0) { cancelIntent('inactive'); return; }
     if (!autoSkills && !intent?.manual) { cancelIntent('inactive'); return; }
     if (intent?.phase === 'windup') {
-      if (!s.group.some((mob) => mob.id === intent!.targetId && mob.hp > 0)) cancelIntent('target lost');
+      if (!(intent.manual && intent.aimPoint) && !s.group.some((mob) => mob.id === intent!.targetId && mob.hp > 0)) cancelIntent('target lost');
       return;
     }
     if (intent?.phase === 'recovery') return;

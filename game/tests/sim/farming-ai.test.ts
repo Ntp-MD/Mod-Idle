@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { mulberry32 } from '../../src/engine/client-helpers';
 import { arenaDistance, captureCombatArena, createCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
 import { characterSheet, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
+import { rollPotion } from '@sim/world/farm';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
 
 function farmFight(weapon: string | null, spots: { id: string; x: number; y: number }[]) {
@@ -82,5 +83,14 @@ describe('stable auto-farming', () => {
       expect(a.arena.actions.map((action) => [action.actorId, action.kind, action.skillId]))
         .toEqual(b.arena.actions.map((action) => [action.actorId, action.kind, action.skillId]));
     }
+  });
+});
+
+describe('potion drops', () => {
+  const seq = (values: number[]) => { let i = 0; return () => values[i++ % values.length]; };
+  it('drops from both the hp and the mana pool', () => {
+    const s = newGame(41);
+    expect(rollPotion(s, seq([0, 0]), 'mid', true)).toBe('Yellow Draught');
+    expect(rollPotion(s, seq([0, 0.9]), 'mid', true)).toBe('Blue Draught');
   });
 });
