@@ -534,6 +534,9 @@ export interface MobCastProfile {
   impact_delay_sec?: number;
   projectile_speed_mps?: number;
   hit_radius_m?: number;
+  /** Melee-only committed lunge: the release carries the body to the point frozen at windup.
+   *  A target that stepped out of the committed line is missed, not tracked. */
+  charge?: { distance_m: number; speed_mps: number };
 }
 
 /** Committed ground footprint for a mob cast; a single target keeps radius 0. */
@@ -558,6 +561,8 @@ export interface MobSkillRow {
   cast_sec?: number;
   /** A committed heavy ground threat: bounded auto-avoid may leave its landing circle. */
   heavy?: boolean;
+  /** A guard-breaker: the hit strips the player's Energy Shield and block charges before damage. */
+  shieldBreak?: boolean;
   /** Position, delivery and timing. Every strike row must author one. */
   cast?: MobCastProfile;
   /** Phase gate: the strike is only eligible inside this HP window of its own body.

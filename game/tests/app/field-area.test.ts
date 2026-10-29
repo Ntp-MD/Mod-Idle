@@ -79,6 +79,18 @@ describe('field population registry', () => {
     expect([...second.state.field!.engagementIds].sort()).toEqual([...first.state.field!.engagementIds].sort());
   });
 
+  it('never pulls more bodies than the field has slots', () => {
+    const { state, arena } = fieldFight(6);
+    // Every body is inside the aggro radius; the population ceiling still caps the engagement.
+    state.group.forEach((mob, index) => {
+      Object.assign(arena.mobs[mob.id], { x: 2.4 + index * 0.3, y: 6 });
+      state.field!.slots[index % state.field!.slots.length].home = { x: 2.4, y: 6 };
+    });
+    tick(state, { arena, autoSkills: false });
+    expect(state.field!.engagementIds.length).toBeLessThanOrEqual(state.field!.slots.length);
+    expect(new Set(state.field!.engagementIds).size).toBe(state.field!.engagementIds.length);
+  });
+
   it('wakes one assist link without cascading across the field', () => {
     const { state, arena } = fieldFight(3);
     // the third body stands far enough that a full tick of wander and approach

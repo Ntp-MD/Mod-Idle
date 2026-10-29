@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "action": "death",
+  "direction": "west",
+  "pose": "03-settle",
+  "source": "../../../../../animation/atlas/animation.png",
+  "sourceFrameIndex": 39,
+  "bakedWeapon": "spear",
+  "sourcePixelsModified": false,
+  "sourceBounds": {
+    "x": 2763,
+    "y": 1745,
+    "width": 182,
+    "height": 78,
+    "offsetX": 75,
+    "offsetY": 209
+  },
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "generator": "Lossless extraction from the approved Goblin 8-direction atlas",
+  "status": "approved-source-pose"
+}

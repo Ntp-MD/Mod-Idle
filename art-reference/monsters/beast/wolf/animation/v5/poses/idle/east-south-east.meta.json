@@ -1,0 +1,14 @@
+{
+  "status": "rejected-needs-regeneration",
+  "generator": "OpenAI built-in image_gen",
+  "sourceOutput": "exec-a5291fbf-1227-4b2a-a8d8-9c4c30a9fc71.png",
+  "direction": "east-south-east",
+  "angleDegrees": 67.5,
+  "sourcePixelsModified": false,
+  "visualReview": {
+    "inspected": true,
+    "haloRemoved": true,
+    "atlasReady": false,
+    "reason": "Halo removed but orientation remains frontal three-quarter, too close to south-south-east"
+  }
+}

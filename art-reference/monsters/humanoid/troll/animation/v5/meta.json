@@ -1,0 +1,1488 @@
+{
+  "schemaVersion": 1,
+  "status": "direction16-candidate-incomplete",
+  "speciesId": "troll",
+  "race": "humanoid",
+  "version": "v5",
+  "attackKind": "close",
+  "bakedWeaponId": "stone club",
+  "identityRef": "../../reference.png",
+  "sourcePoseRef": "../atlas/animation.png",
+  "directionCount": 16,
+  "angleStepDegrees": 22.5,
+  "directions": [
+    {
+      "name": "south",
+      "angleDegrees": 0
+    },
+    {
+      "name": "south-south-east",
+      "angleDegrees": 22.5
+    },
+    {
+      "name": "south-east",
+      "angleDegrees": 45
+    },
+    {
+      "name": "east-south-east",
+      "angleDegrees": 67.5
+    },
+    {
+      "name": "east",
+      "angleDegrees": 90
+    },
+    {
+      "name": "east-north-east",
+      "angleDegrees": 112.5
+    },
+    {
+      "name": "north-east",
+      "angleDegrees": 135
+    },
+    {
+      "name": "north-north-east",
+      "angleDegrees": 157.5
+    },
+    {
+      "name": "north",
+      "angleDegrees": 180
+    },
+    {
+      "name": "north-north-west",
+      "angleDegrees": 202.5
+    },
+    {
+      "name": "north-west",
+      "angleDegrees": 225
+    },
+    {
+      "name": "west-north-west",
+      "angleDegrees": 247.5
+    },
+    {
+      "name": "west",
+      "angleDegrees": 270
+    },
+    {
+      "name": "west-south-west",
+      "angleDegrees": 292.5
+    },
+    {
+      "name": "south-west",
+      "angleDegrees": 315
+    },
+    {
+      "name": "south-south-west",
+      "angleDegrees": 337.5
+    }
+  ],
+  "camera": "One fixed elevated three-quarter camera; rotate the whole creature facing in the world, never rotate the camera or flat sprite",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
+  },
+  "statusNote": "16-direction production candidate. Existing approved atlas retained until replacement completes visual and atlas QA. No runtime promotion.",
+  "actions": {
+    "idle": {
+      "framesPerDirection": 1,
+      "poseCount": 16,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "south.png",
+          "pose": "one neutral ready pose facing 0 degrees"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "south-south-east.png",
+          "pose": "one neutral ready pose facing 22.5 degrees"
+        },
+        {
+          "direction": "south-east",
+          "file": "south-east.png",
+          "pose": "one neutral ready pose facing 45 degrees"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "east-south-east.png",
+          "pose": "one neutral ready pose facing 67.5 degrees"
+        },
+        {
+          "direction": "east",
+          "file": "east.png",
+          "pose": "one neutral ready pose facing 90 degrees"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "east-north-east.png",
+          "pose": "one neutral ready pose facing 112.5 degrees"
+        },
+        {
+          "direction": "north-east",
+          "file": "north-east.png",
+          "pose": "one neutral ready pose facing 135 degrees"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "north-north-east.png",
+          "pose": "one neutral ready pose facing 157.5 degrees"
+        },
+        {
+          "direction": "north",
+          "file": "north.png",
+          "pose": "one neutral ready pose facing 180 degrees"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "north-north-west.png",
+          "pose": "one neutral ready pose facing 202.5 degrees"
+        },
+        {
+          "direction": "north-west",
+          "file": "north-west.png",
+          "pose": "one neutral ready pose facing 225 degrees"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "west-north-west.png",
+          "pose": "one neutral ready pose facing 247.5 degrees"
+        },
+        {
+          "direction": "west",
+          "file": "west.png",
+          "pose": "one neutral ready pose facing 270 degrees"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "west-south-west.png",
+          "pose": "one neutral ready pose facing 292.5 degrees"
+        },
+        {
+          "direction": "south-west",
+          "file": "south-west.png",
+          "pose": "one neutral ready pose facing 315 degrees"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "south-south-west.png",
+          "pose": "one neutral ready pose facing 337.5 degrees"
+        }
+      ]
+    },
+    "walk": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-stride-a.png",
+          "pose": "left foot reaches ahead and contacts ground, right leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "south",
+          "file": "01-stride-b.png",
+          "pose": "left foot planted below hips supporting weight, right knee bends and right foot passes forward beneath torso"
+        },
+        {
+          "direction": "south",
+          "file": "02-stride-c.png",
+          "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "south",
+          "file": "03-stride-d.png",
+          "pose": "right foot planted below hips supporting weight, left knee bends and left foot passes forward beneath torso"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-stride-a.png",
+          "pose": "left foot reaches ahead and contacts ground, right leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-stride-b.png",
+          "pose": "left foot planted below hips supporting weight, right knee bends and right foot passes forward beneath torso"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-stride-c.png",
+          "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-stride-d.png",
+          "pose": "right foot planted below hips supporting weight, left knee bends and left foot passes forward beneath torso"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-stride-a.png",
+          "pose": "left foot reaches ahead and contacts ground, right leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-stride-b.png",
+          "pose": "left foot planted below hips supporting weight, right knee bends and right foot passes forward beneath torso"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-stride-c.png",
+          "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-stride-d.png",
+          "pose": "right foot planted below hips supporting weight, left knee bends and left foot passes forward beneath torso"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-stride-a.png",
+          "pose": "left foot reaches ahead and contacts ground, right leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-stride-b.png",
+          "pose": "left foot planted below hips supporting weight, right knee bends and right foot passes forward beneath torso"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-stride-c.png",
+          "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-stride-d.png",
+          "pose": "right foot planted below hips supporting weight, left knee bends and left foot passes forward beneath torso"
+        },
+        {
+          "direction": "east",
+          "file": "00-stride-a.png",
+          "pose": "left foot reaches ahead and contacts ground, right leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "east",
+          "file": "01-stride-b.png",
+          "pose": "left foot planted below hips supporting weight, right knee bends and right foot passes forward beneath torso"
+        },
+        {
+          "direction": "east",
+          "file": "02-stride-c.png",
+          "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "east",
+          "file": "03-stride-d.png",
+          "pose": "right foot planted below hips supporting weight, left knee bends and left foot passes forward beneath torso"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-stride-a.png",
+          "pose": "left foot reaches ahead and contacts ground, right leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-stride-b.png",
+          "pose": "left foot planted below hips supporting weight, right knee bends and right foot passes forward beneath torso"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-stride-c.png",
+          "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-stride-d.png",
+          "pose": "right foot planted below hips supporting weight, left knee bends and left foot passes forward beneath torso"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-stride-a.png",
+          "pose": "left foot reaches ahead and contacts ground, right leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-stride-b.png",
+          "pose": "left foot planted below hips supporting weight, right knee bends and right foot passes forward beneath torso"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-stride-c.png",
+          "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-stride-d.png",
+          "pose": "right foot planted below hips supporting weight, left knee bends and left foot passes forward beneath torso"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-stride-a.png",
+          "pose": "left foot reaches ahead and contacts ground, right leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-stride-b.png",
+          "pose": "left foot planted below hips supporting weight, right knee bends and right foot passes forward beneath torso"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-stride-c.png",
+          "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-stride-d.png",
+          "pose": "right foot planted below hips supporting weight, left knee bends and left foot passes forward beneath torso"
+        },
+        {
+          "direction": "north",
+          "file": "00-stride-a.png",
+          "pose": "left foot reaches ahead and contacts ground, right leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "north",
+          "file": "01-stride-b.png",
+          "pose": "left foot planted below hips supporting weight, right knee bends and right foot passes forward beneath torso"
+        },
+        {
+          "direction": "north",
+          "file": "02-stride-c.png",
+          "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "north",
+          "file": "03-stride-d.png",
+          "pose": "right foot planted below hips supporting weight, left knee bends and left foot passes forward beneath torso"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-stride-a.png",
+          "pose": "left foot reaches ahead and contacts ground, right leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-stride-b.png",
+          "pose": "left foot planted below hips supporting weight, right knee bends and right foot passes forward beneath torso"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-stride-c.png",
+          "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-stride-d.png",
+          "pose": "right foot planted below hips supporting weight, left knee bends and left foot passes forward beneath torso"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-stride-a.png",
+          "pose": "left foot reaches ahead and contacts ground, right leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-stride-b.png",
+          "pose": "left foot planted below hips supporting weight, right knee bends and right foot passes forward beneath torso"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-stride-c.png",
+          "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-stride-d.png",
+          "pose": "right foot planted below hips supporting weight, left knee bends and left foot passes forward beneath torso"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-stride-a.png",
+          "pose": "left foot reaches ahead and contacts ground, right leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-stride-b.png",
+          "pose": "left foot planted below hips supporting weight, right knee bends and right foot passes forward beneath torso"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-stride-c.png",
+          "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-stride-d.png",
+          "pose": "right foot planted below hips supporting weight, left knee bends and left foot passes forward beneath torso"
+        },
+        {
+          "direction": "west",
+          "file": "00-stride-a.png",
+          "pose": "left foot reaches ahead and contacts ground, right leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "west",
+          "file": "01-stride-b.png",
+          "pose": "left foot planted below hips supporting weight, right knee bends and right foot passes forward beneath torso"
+        },
+        {
+          "direction": "west",
+          "file": "02-stride-c.png",
+          "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "west",
+          "file": "03-stride-d.png",
+          "pose": "right foot planted below hips supporting weight, left knee bends and left foot passes forward beneath torso"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-stride-a.png",
+          "pose": "left foot reaches ahead and contacts ground, right leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-stride-b.png",
+          "pose": "left foot planted below hips supporting weight, right knee bends and right foot passes forward beneath torso"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-stride-c.png",
+          "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-stride-d.png",
+          "pose": "right foot planted below hips supporting weight, left knee bends and left foot passes forward beneath torso"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-stride-a.png",
+          "pose": "left foot reaches ahead and contacts ground, right leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-stride-b.png",
+          "pose": "left foot planted below hips supporting weight, right knee bends and right foot passes forward beneath torso"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-stride-c.png",
+          "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-stride-d.png",
+          "pose": "right foot planted below hips supporting weight, left knee bends and left foot passes forward beneath torso"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-stride-a.png",
+          "pose": "left foot reaches ahead and contacts ground, right leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-stride-b.png",
+          "pose": "left foot planted below hips supporting weight, right knee bends and right foot passes forward beneath torso"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-stride-c.png",
+          "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-stride-d.png",
+          "pose": "right foot planted below hips supporting weight, left knee bends and left foot passes forward beneath torso"
+        }
+      ]
+    },
+    "attack": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-windup.png",
+          "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing"
+        },
+        {
+          "direction": "south",
+          "file": "01-contact.png",
+          "pose": "right arm drives stone club down and forward at contact in facing direction; knees flex, body leans into strike"
+        },
+        {
+          "direction": "south",
+          "file": "02-follow-through.png",
+          "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance"
+        },
+        {
+          "direction": "south",
+          "file": "03-recovery.png",
+          "pose": "right arm retracts club to low guard, torso returns to neutral ready stance"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-windup.png",
+          "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-contact.png",
+          "pose": "right arm drives stone club down and forward at contact in facing direction; knees flex, body leans into strike"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-follow-through.png",
+          "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-recovery.png",
+          "pose": "right arm retracts club to low guard, torso returns to neutral ready stance"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-windup.png",
+          "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-contact.png",
+          "pose": "right arm drives stone club down and forward at contact in facing direction; knees flex, body leans into strike"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-follow-through.png",
+          "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-recovery.png",
+          "pose": "right arm retracts club to low guard, torso returns to neutral ready stance"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-windup.png",
+          "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-contact.png",
+          "pose": "right arm drives stone club down and forward at contact in facing direction; knees flex, body leans into strike"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-follow-through.png",
+          "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-recovery.png",
+          "pose": "right arm retracts club to low guard, torso returns to neutral ready stance"
+        },
+        {
+          "direction": "east",
+          "file": "00-windup.png",
+          "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing"
+        },
+        {
+          "direction": "east",
+          "file": "01-contact.png",
+          "pose": "right arm drives stone club down and forward at contact in facing direction; knees flex, body leans into strike"
+        },
+        {
+          "direction": "east",
+          "file": "02-follow-through.png",
+          "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance"
+        },
+        {
+          "direction": "east",
+          "file": "03-recovery.png",
+          "pose": "right arm retracts club to low guard, torso returns to neutral ready stance"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-windup.png",
+          "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-contact.png",
+          "pose": "right arm drives stone club down and forward at contact in facing direction; knees flex, body leans into strike"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-follow-through.png",
+          "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-recovery.png",
+          "pose": "right arm retracts club to low guard, torso returns to neutral ready stance"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-windup.png",
+          "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-contact.png",
+          "pose": "right arm drives stone club down and forward at contact in facing direction; knees flex, body leans into strike"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-follow-through.png",
+          "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-recovery.png",
+          "pose": "right arm retracts club to low guard, torso returns to neutral ready stance"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-windup.png",
+          "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-contact.png",
+          "pose": "right arm drives stone club down and forward at contact in facing direction; knees flex, body leans into strike"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-follow-through.png",
+          "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-recovery.png",
+          "pose": "right arm retracts club to low guard, torso returns to neutral ready stance"
+        },
+        {
+          "direction": "north",
+          "file": "00-windup.png",
+          "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing"
+        },
+        {
+          "direction": "north",
+          "file": "01-contact.png",
+          "pose": "right arm drives stone club down and forward at contact in facing direction; knees flex, body leans into strike"
+        },
+        {
+          "direction": "north",
+          "file": "02-follow-through.png",
+          "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance"
+        },
+        {
+          "direction": "north",
+          "file": "03-recovery.png",
+          "pose": "right arm retracts club to low guard, torso returns to neutral ready stance"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-windup.png",
+          "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-contact.png",
+          "pose": "right arm drives stone club down and forward at contact in facing direction; knees flex, body leans into strike"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-follow-through.png",
+          "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-recovery.png",
+          "pose": "right arm retracts club to low guard, torso returns to neutral ready stance"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-windup.png",
+          "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-contact.png",
+          "pose": "right arm drives stone club down and forward at contact in facing direction; knees flex, body leans into strike"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-follow-through.png",
+          "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-recovery.png",
+          "pose": "right arm retracts club to low guard, torso returns to neutral ready stance"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-windup.png",
+          "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-contact.png",
+          "pose": "right arm drives stone club down and forward at contact in facing direction; knees flex, body leans into strike"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-follow-through.png",
+          "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-recovery.png",
+          "pose": "right arm retracts club to low guard, torso returns to neutral ready stance"
+        },
+        {
+          "direction": "west",
+          "file": "00-windup.png",
+          "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing"
+        },
+        {
+          "direction": "west",
+          "file": "01-contact.png",
+          "pose": "right arm drives stone club down and forward at contact in facing direction; knees flex, body leans into strike"
+        },
+        {
+          "direction": "west",
+          "file": "02-follow-through.png",
+          "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance"
+        },
+        {
+          "direction": "west",
+          "file": "03-recovery.png",
+          "pose": "right arm retracts club to low guard, torso returns to neutral ready stance"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-windup.png",
+          "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-contact.png",
+          "pose": "right arm drives stone club down and forward at contact in facing direction; knees flex, body leans into strike"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-follow-through.png",
+          "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-recovery.png",
+          "pose": "right arm retracts club to low guard, torso returns to neutral ready stance"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-windup.png",
+          "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-contact.png",
+          "pose": "right arm drives stone club down and forward at contact in facing direction; knees flex, body leans into strike"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-follow-through.png",
+          "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-recovery.png",
+          "pose": "right arm retracts club to low guard, torso returns to neutral ready stance"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-windup.png",
+          "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-contact.png",
+          "pose": "right arm drives stone club down and forward at contact in facing direction; knees flex, body leans into strike"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-follow-through.png",
+          "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-recovery.png",
+          "pose": "right arm retracts club to low guard, torso returns to neutral ready stance"
+        }
+      ]
+    },
+    "hit": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-flinch.png",
+          "pose": "head and chest jerk backward slightly from received blow, shoulders tense and club hand loosens low"
+        },
+        {
+          "direction": "south",
+          "file": "01-recoil.png",
+          "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body"
+        },
+        {
+          "direction": "south",
+          "file": "02-recover.png",
+          "pose": "torso rises and re-centers above planted feet, club draws back to guard"
+        },
+        {
+          "direction": "south",
+          "file": "03-ready.png",
+          "pose": "balanced hunched ready pose matching idle; body stabilized and club held low"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-flinch.png",
+          "pose": "head and chest jerk backward slightly from received blow, shoulders tense and club hand loosens low"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-recoil.png",
+          "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-recover.png",
+          "pose": "torso rises and re-centers above planted feet, club draws back to guard"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-ready.png",
+          "pose": "balanced hunched ready pose matching idle; body stabilized and club held low"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-flinch.png",
+          "pose": "head and chest jerk backward slightly from received blow, shoulders tense and club hand loosens low"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-recoil.png",
+          "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-recover.png",
+          "pose": "torso rises and re-centers above planted feet, club draws back to guard"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-ready.png",
+          "pose": "balanced hunched ready pose matching idle; body stabilized and club held low"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-flinch.png",
+          "pose": "head and chest jerk backward slightly from received blow, shoulders tense and club hand loosens low"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-recoil.png",
+          "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-recover.png",
+          "pose": "torso rises and re-centers above planted feet, club draws back to guard"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-ready.png",
+          "pose": "balanced hunched ready pose matching idle; body stabilized and club held low"
+        },
+        {
+          "direction": "east",
+          "file": "00-flinch.png",
+          "pose": "head and chest jerk backward slightly from received blow, shoulders tense and club hand loosens low"
+        },
+        {
+          "direction": "east",
+          "file": "01-recoil.png",
+          "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body"
+        },
+        {
+          "direction": "east",
+          "file": "02-recover.png",
+          "pose": "torso rises and re-centers above planted feet, club draws back to guard"
+        },
+        {
+          "direction": "east",
+          "file": "03-ready.png",
+          "pose": "balanced hunched ready pose matching idle; body stabilized and club held low"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-flinch.png",
+          "pose": "head and chest jerk backward slightly from received blow, shoulders tense and club hand loosens low"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-recoil.png",
+          "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-recover.png",
+          "pose": "torso rises and re-centers above planted feet, club draws back to guard"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-ready.png",
+          "pose": "balanced hunched ready pose matching idle; body stabilized and club held low"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-flinch.png",
+          "pose": "head and chest jerk backward slightly from received blow, shoulders tense and club hand loosens low"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-recoil.png",
+          "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-recover.png",
+          "pose": "torso rises and re-centers above planted feet, club draws back to guard"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-ready.png",
+          "pose": "balanced hunched ready pose matching idle; body stabilized and club held low"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-flinch.png",
+          "pose": "head and chest jerk backward slightly from received blow, shoulders tense and club hand loosens low"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-recoil.png",
+          "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-recover.png",
+          "pose": "torso rises and re-centers above planted feet, club draws back to guard"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-ready.png",
+          "pose": "balanced hunched ready pose matching idle; body stabilized and club held low"
+        },
+        {
+          "direction": "north",
+          "file": "00-flinch.png",
+          "pose": "head and chest jerk backward slightly from received blow, shoulders tense and club hand loosens low"
+        },
+        {
+          "direction": "north",
+          "file": "01-recoil.png",
+          "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body"
+        },
+        {
+          "direction": "north",
+          "file": "02-recover.png",
+          "pose": "torso rises and re-centers above planted feet, club draws back to guard"
+        },
+        {
+          "direction": "north",
+          "file": "03-ready.png",
+          "pose": "balanced hunched ready pose matching idle; body stabilized and club held low"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-flinch.png",
+          "pose": "head and chest jerk backward slightly from received blow, shoulders tense and club hand loosens low"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-recoil.png",
+          "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-recover.png",
+          "pose": "torso rises and re-centers above planted feet, club draws back to guard"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-ready.png",
+          "pose": "balanced hunched ready pose matching idle; body stabilized and club held low"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-flinch.png",
+          "pose": "head and chest jerk backward slightly from received blow, shoulders tense and club hand loosens low"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-recoil.png",
+          "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-recover.png",
+          "pose": "torso rises and re-centers above planted feet, club draws back to guard"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-ready.png",
+          "pose": "balanced hunched ready pose matching idle; body stabilized and club held low"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-flinch.png",
+          "pose": "head and chest jerk backward slightly from received blow, shoulders tense and club hand loosens low"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-recoil.png",
+          "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-recover.png",
+          "pose": "torso rises and re-centers above planted feet, club draws back to guard"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-ready.png",
+          "pose": "balanced hunched ready pose matching idle; body stabilized and club held low"
+        },
+        {
+          "direction": "west",
+          "file": "00-flinch.png",
+          "pose": "head and chest jerk backward slightly from received blow, shoulders tense and club hand loosens low"
+        },
+        {
+          "direction": "west",
+          "file": "01-recoil.png",
+          "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body"
+        },
+        {
+          "direction": "west",
+          "file": "02-recover.png",
+          "pose": "torso rises and re-centers above planted feet, club draws back to guard"
+        },
+        {
+          "direction": "west",
+          "file": "03-ready.png",
+          "pose": "balanced hunched ready pose matching idle; body stabilized and club held low"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-flinch.png",
+          "pose": "head and chest jerk backward slightly from received blow, shoulders tense and club hand loosens low"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-recoil.png",
+          "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-recover.png",
+          "pose": "torso rises and re-centers above planted feet, club draws back to guard"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-ready.png",
+          "pose": "balanced hunched ready pose matching idle; body stabilized and club held low"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-flinch.png",
+          "pose": "head and chest jerk backward slightly from received blow, shoulders tense and club hand loosens low"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-recoil.png",
+          "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-recover.png",
+          "pose": "torso rises and re-centers above planted feet, club draws back to guard"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-ready.png",
+          "pose": "balanced hunched ready pose matching idle; body stabilized and club held low"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-flinch.png",
+          "pose": "head and chest jerk backward slightly from received blow, shoulders tense and club hand loosens low"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-recoil.png",
+          "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-recover.png",
+          "pose": "torso rises and re-centers above planted feet, club draws back to guard"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-ready.png",
+          "pose": "balanced hunched ready pose matching idle; body stabilized and club held low"
+        }
+      ]
+    },
+    "death": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-fall.png",
+          "pose": "knees buckle and torso tips downward; club hand lowers while head droops"
+        },
+        {
+          "direction": "south",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways toward ground; one shoulder nears floor and club falls beside right hand"
+        },
+        {
+          "direction": "south",
+          "file": "02-ground.png",
+          "pose": "whole body lies fully grounded on side, limbs folded naturally; stone club rests beside hand"
+        },
+        {
+          "direction": "south",
+          "file": "03-settle.png",
+          "pose": "final still corpse fully grounded on side, no hovering limbs, club settled nearby"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and torso tips downward; club hand lowers while head droops"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways toward ground; one shoulder nears floor and club falls beside right hand"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-ground.png",
+          "pose": "whole body lies fully grounded on side, limbs folded naturally; stone club rests beside hand"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-settle.png",
+          "pose": "final still corpse fully grounded on side, no hovering limbs, club settled nearby"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and torso tips downward; club hand lowers while head droops"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways toward ground; one shoulder nears floor and club falls beside right hand"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-ground.png",
+          "pose": "whole body lies fully grounded on side, limbs folded naturally; stone club rests beside hand"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-settle.png",
+          "pose": "final still corpse fully grounded on side, no hovering limbs, club settled nearby"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and torso tips downward; club hand lowers while head droops"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways toward ground; one shoulder nears floor and club falls beside right hand"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-ground.png",
+          "pose": "whole body lies fully grounded on side, limbs folded naturally; stone club rests beside hand"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-settle.png",
+          "pose": "final still corpse fully grounded on side, no hovering limbs, club settled nearby"
+        },
+        {
+          "direction": "east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and torso tips downward; club hand lowers while head droops"
+        },
+        {
+          "direction": "east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways toward ground; one shoulder nears floor and club falls beside right hand"
+        },
+        {
+          "direction": "east",
+          "file": "02-ground.png",
+          "pose": "whole body lies fully grounded on side, limbs folded naturally; stone club rests beside hand"
+        },
+        {
+          "direction": "east",
+          "file": "03-settle.png",
+          "pose": "final still corpse fully grounded on side, no hovering limbs, club settled nearby"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and torso tips downward; club hand lowers while head droops"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways toward ground; one shoulder nears floor and club falls beside right hand"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-ground.png",
+          "pose": "whole body lies fully grounded on side, limbs folded naturally; stone club rests beside hand"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-settle.png",
+          "pose": "final still corpse fully grounded on side, no hovering limbs, club settled nearby"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and torso tips downward; club hand lowers while head droops"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways toward ground; one shoulder nears floor and club falls beside right hand"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-ground.png",
+          "pose": "whole body lies fully grounded on side, limbs folded naturally; stone club rests beside hand"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-settle.png",
+          "pose": "final still corpse fully grounded on side, no hovering limbs, club settled nearby"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and torso tips downward; club hand lowers while head droops"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways toward ground; one shoulder nears floor and club falls beside right hand"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-ground.png",
+          "pose": "whole body lies fully grounded on side, limbs folded naturally; stone club rests beside hand"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-settle.png",
+          "pose": "final still corpse fully grounded on side, no hovering limbs, club settled nearby"
+        },
+        {
+          "direction": "north",
+          "file": "00-fall.png",
+          "pose": "knees buckle and torso tips downward; club hand lowers while head droops"
+        },
+        {
+          "direction": "north",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways toward ground; one shoulder nears floor and club falls beside right hand"
+        },
+        {
+          "direction": "north",
+          "file": "02-ground.png",
+          "pose": "whole body lies fully grounded on side, limbs folded naturally; stone club rests beside hand"
+        },
+        {
+          "direction": "north",
+          "file": "03-settle.png",
+          "pose": "final still corpse fully grounded on side, no hovering limbs, club settled nearby"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and torso tips downward; club hand lowers while head droops"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways toward ground; one shoulder nears floor and club falls beside right hand"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-ground.png",
+          "pose": "whole body lies fully grounded on side, limbs folded naturally; stone club rests beside hand"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-settle.png",
+          "pose": "final still corpse fully grounded on side, no hovering limbs, club settled nearby"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and torso tips downward; club hand lowers while head droops"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways toward ground; one shoulder nears floor and club falls beside right hand"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-ground.png",
+          "pose": "whole body lies fully grounded on side, limbs folded naturally; stone club rests beside hand"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-settle.png",
+          "pose": "final still corpse fully grounded on side, no hovering limbs, club settled nearby"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and torso tips downward; club hand lowers while head droops"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways toward ground; one shoulder nears floor and club falls beside right hand"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-ground.png",
+          "pose": "whole body lies fully grounded on side, limbs folded naturally; stone club rests beside hand"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-settle.png",
+          "pose": "final still corpse fully grounded on side, no hovering limbs, club settled nearby"
+        },
+        {
+          "direction": "west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and torso tips downward; club hand lowers while head droops"
+        },
+        {
+          "direction": "west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways toward ground; one shoulder nears floor and club falls beside right hand"
+        },
+        {
+          "direction": "west",
+          "file": "02-ground.png",
+          "pose": "whole body lies fully grounded on side, limbs folded naturally; stone club rests beside hand"
+        },
+        {
+          "direction": "west",
+          "file": "03-settle.png",
+          "pose": "final still corpse fully grounded on side, no hovering limbs, club settled nearby"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and torso tips downward; club hand lowers while head droops"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways toward ground; one shoulder nears floor and club falls beside right hand"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-ground.png",
+          "pose": "whole body lies fully grounded on side, limbs folded naturally; stone club rests beside hand"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-settle.png",
+          "pose": "final still corpse fully grounded on side, no hovering limbs, club settled nearby"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and torso tips downward; club hand lowers while head droops"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways toward ground; one shoulder nears floor and club falls beside right hand"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-ground.png",
+          "pose": "whole body lies fully grounded on side, limbs folded naturally; stone club rests beside hand"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-settle.png",
+          "pose": "final still corpse fully grounded on side, no hovering limbs, club settled nearby"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and torso tips downward; club hand lowers while head droops"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways toward ground; one shoulder nears floor and club falls beside right hand"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-ground.png",
+          "pose": "whole body lies fully grounded on side, limbs folded naturally; stone club rests beside hand"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-settle.png",
+          "pose": "final still corpse fully grounded on side, no hovering limbs, club settled nearby"
+        }
+      ]
+    }
+  },
+  "requiredRootFiles": [
+    "meta.json",
+    "poses/"
+  ],
+  "imageQa": "Raw built-in imagegen outputs are candidate source only. Every pose still requires visual identity/facing review, hard-alpha/edge QA, foot-anchor measurement, and atlas QA before acceptance.",
+  "locomotionGuide": "Loping long-arm bipedal gait with planted feet, passing positions and delayed stone-club arm weight. Keep anatomical right-hand club consistent across all headings."
+}

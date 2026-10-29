@@ -1,0 +1,18 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18331-b8a3-77e3-a009-41c372f14976\\exec-10371833-a544-420c-996f-89158a639fad.png",
+  "action": "idle",
+  "direction": "north-east",
+  "angleDegrees": 135,
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": true,
+    "facingPlausible": true,
+    "identityPlausible": true,
+    "handednessApproved": false,
+    "exactYawApproved": false,
+    "atlasApproved": false,
+    "note": "Rear view correct; back necklace bones and hand continuity require review."
+  }
+}

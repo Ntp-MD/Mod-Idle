@@ -1,0 +1,27 @@
+{
+  "speciesId": "bonehound",
+  "action": "idle",
+  "direction": "south",
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "sourcePixelsModified": false,
+  "visualReview": "True front-facing skeletal quadruped, whole silhouette fits; identity/style and atlas alpha/anchor still require review.",
+  "alphaMeasurement": {
+    "sourceSize": [
+      1254,
+      1254
+    ],
+    "boundsExclusive": [
+      0,
+      37,
+      1186,
+      1158
+    ],
+    "distinctAlphaLevels": 256,
+    "sourcePixelsModified": false
+  },
+  "qa": {
+    "visualApproved": false,
+    "atlasApproved": false
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-829c-7060-99a8-9918a3b8d766\\exec-622b1d4b-1863-432e-83fb-dc623b0324ef.png",
+  "action": "idle",
+  "direction": "east-north-east",
+  "qa": {
+    "visual": false,
+    "facing": false,
+    "atlas": false,
+    "anchor": false
+  },
+  "previousCandidateMetadata": {
+    "schemaVersion": 1,
+    "assetType": "mob-idle-direction-candidate",
+    "speciesId": "goblin",
+    "action": "idle",
+    "direction": "east-north-east",
+    "requestedFacingDegrees": 112.5,
+    "sourceReference": "../../../../reference.png",
+    "bakedWeaponId": "spear",
+    "generator": "OpenAI built-in image_gen",
+    "sourcePixelsModified": false,
+    "status": "candidate-review",
+    "qa": {
+      "exactAngleVerified": false,
+      "hardAlphaVerified": false,
+      "footAnchorVerified": false,
+      "productionApproved": false
+    },
+    "generationSource": "C:\\Users\\disda\\.codex\\generated_images\\01a17d4d-3b5a-72a1-83b1-947b6fe9c9d9\\exec-93b89174-10f1-4d43-b2b6-2056fcc9218e.png",
+    "visualReview": {
+      "status": "failed-facing",
+      "review": "Output remains front three-quarter; requested direction requires side or rear-biased silhouette. Both eyes/front chest visible in candidate.",
+      "requiresRegeneration": true
+    }
+  }
+}

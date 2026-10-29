@@ -1,0 +1,15 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-1ec5d3ec-0f81-4cb5-8098-a316fa6c3d98.png",
+  "action": "walk",
+  "phase": "03-stride-d.png",
+  "direction": "south-south-east",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": false,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false
+  }
+}

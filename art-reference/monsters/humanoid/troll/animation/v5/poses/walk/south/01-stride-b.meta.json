@@ -1,0 +1,19 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18331-b8a3-77e3-a009-41c372f14976\\exec-28a7dae3-12f7-4105-b008-6ba91eb58128.png",
+  "action": "walk",
+  "direction": "south",
+  "phase": "01-stride-b.png",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": true,
+    "facingApproved": false,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false,
+    "facingPlausible": true,
+    "identityPlausible": true,
+    "reviewNote": "Needs regeneration: visually too similar to 00-stride-a with same forward foot; requested passing phase not achieved. Heading and identity plausible."
+  }
+}

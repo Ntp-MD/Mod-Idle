@@ -9,6 +9,7 @@ import {
   mobAttackProfile, arenaDistance,
 } from '../../combat/combat-arena';
 import { basicPhaseBudget } from '../../../../../engine/attack-range.ts';
+import { sweepDisc } from '../../../../../engine/navigation.ts';
 import {
   mobCastGeometry, mobCastProfile, mobSkillById, markMobSkillUsed, mobPhase,
   mobStrikeRange, planMobSkills, readyMobSkill,
@@ -17,6 +18,23 @@ import { modsOn as statusModsOn } from '../../combat/mobStatus';
 import { fieldAreaKey } from '../../world/field-area';
 import { fx, hitColour } from '../feedback';
 import { push } from '../log';
+
+/**
+ * One mob's attacks for the rest of a world second. The times are expanded once from the second's
+ * own progress, so twenty 50 ms windows and one 1 s window keep the same beats. Windows only
+ * schedule the next due times; the plan is never re-derived from a window boundary.
+ */
+export interface MobAttackPlan {
+  mob: Mob;
+  rate: number;
+  times: number[];
+  /** Non-arena telegraphs: the cast beat that precedes a planned strike. */
+  castBeats: { atUs: number; attackAtUs: number; skill: MobSkillRow }[];
+  progressAtEnd: number;
+  nextAttack: number;
+  nextCast: number;
+  fired: number;
+}
 
 /**
  * Mob basics and typed strikes: the committed release beat, the melee re-test, and the projectile
@@ -30,25 +48,79 @@ export function createMobActions(opts: {
   units: number;
   tickStartUs: number;
   tickEndUs: number;
+  /** End of the open world second: an attack plan covers up to here, not just this window. */
+  secondEndUs: number;
+  plans: Map<string, MobAttackPlan>;
   advanceArenaAt: (atUs: number) => void;
   launchMobShot: (mob: Mob, atUs: number, existing?: CombatArenaAction) => void;
   cancelMobPreparation: (action: CombatArenaAction, atUs: number, reason: string) => void;
   resolveIncomingHit: (mob: Mob, plannedSkill: MobSkillRow | undefined, rng: () => number) => void;
   mobMods: (mobId: string) => { attackSpeed: number };
-  mobPlans: { mob: Mob; rate: number; actionsLeft: number }[];
+  /** A delay shifts the stored plan's future beats and the live events of this window. */
+  shiftPlan?: (mobId: string, delaySec: number) => void;
+  /** F25 boss adds: a phase gate summons its own bodies; reward settlement stays ordinary. */
+  onPhaseAdds?: (mob: Mob, phase: number) => void;
   online: boolean;
 }) {
   const {
     arena, clock, rng, s, units, tickStartUs, tickEndUs, advanceArenaAt, launchMobShot,
-    cancelMobPreparation, resolveIncomingHit, mobMods, mobPlans, online,
+    cancelMobPreparation, resolveIncomingHit, mobMods, online,
   } = opts;
   const encounterKeyOf = (state: GameState) => fieldAreaKey(state);
+
+  /** A skirmisher leaves its own reach after a strike, then re-enters on its held window. */
+  function startSkirmishRetreat(mob: Mob, atUs: number): void {
+    if (!arena || mob.behavior !== 'skirmisher') return;
+    const actor = arena.mobs[mob.id];
+    if (!actor) return;
+    const cfg = (E.combat_arena as { behavior?: Record<string, number> }).behavior ?? {};
+    const gap = Number(cfg.skirmish_gap_m) || 2.6;
+    const holdUs = Math.max(0, Number(cfg.skirmish_hold_sec) || 0.8) * units;
+    const dx = actor.x - arena.player.x;
+    const dy = actor.y - arena.player.y;
+    const dist = Math.hypot(dx, dy) || 1;
+    const radius = actor.radiusM ?? 0.25;
+    mob.repositionPoint = {
+      x: Math.max(radius, Math.min(arena.bounds.width - radius, actor.x + dx / dist * gap)),
+      y: Math.max(radius, Math.min(arena.bounds.height - radius, actor.y + dy / dist * gap)),
+    };
+    mob.repositionUntilUs = atUs + holdUs;
+  }
+
+  /** A committed charge travels to the point frozen at windup, never to the player's new feet. */
+  function commitCharge(mob: Mob, action: CombatArenaAction, cast: MobCastProfile, atUs: number): void {
+    if (!arena || !cast.charge) return;
+    const actor = arena.mobs[mob.id];
+    if (!actor) return;
+    const target = { x: action.targetX ?? arena.player.x, y: action.targetY ?? arena.player.y };
+    const dx = target.x - actor.x;
+    const dy = target.y - actor.y;
+    const distance = Math.hypot(dx, dy);
+    const travel = Math.min(Math.max(0, cast.charge.distance_m), distance);
+    if (!(travel > 0) || !(distance > 1e-9)) return;
+    const from = { x: actor.x, y: actor.y };
+    let to = { x: actor.x + dx / distance * travel, y: actor.y + dy / distance * travel };
+    if (arena.nav) {
+      const contact = sweepDisc(arena.nav, from, to, actor.radiusM ?? 0.25, 'movement');
+      if (contact) {
+        const keep = Math.max(0, contact.fraction - 1e-6);
+        to = { x: from.x + (to.x - from.x) * keep, y: from.y + (to.y - from.y) * keep };
+      }
+    }
+    const moved = Math.hypot(to.x - from.x, to.y - from.y);
+    actor.x = to.x;
+    actor.y = to.y;
+    actor.moving = moved > 1e-7;
+    actor.voluntaryM = (actor.voluntaryM ?? 0) + moved;
+    void atUs;
+  }
 
   function startMobBasic(mob: Mob, atUs: number, rate: number): void {
     if (!arena) return;
     const profile = mobAttackProfile(mob);
     const intervalUs = Math.round(units / Math.max(1e-9, rate));
-    const phase = basicPhaseBudget(profile, intervalUs);
+    const phase = basicPhaseBudget(profile, intervalUs,
+      Math.round((E.combat_arena.animation_phase_floor_sec ?? 0) * units));
     const releaseAtUs = atUs + phase.windupUs;
     const timing: SkillCastTiming = {
       delivery: profile.delivery, startedAtUs: atUs, releaseAtUs,
@@ -95,6 +167,7 @@ export function createMobActions(opts: {
       });
       // Melee contact is re-tested at the body, not the windup's old distance.
       if (arenaMobInReach(arena, mob.id)) resolveIncomingHit(mob, undefined, rng);
+      startSkirmishRetreat(mob, clock.nowUs);
     });
   }
 
@@ -150,10 +223,14 @@ export function createMobActions(opts: {
       const row = current.skillId ? mobSkillById(current.skillId) : undefined;
       const cast = row ? mobCastProfile(row, mob) : undefined;
       const actor = arena.mobs[mob.id];
+      const reach = row && actor
+        ? arenaDistance(actor, arena.player) : undefined;
       const geometry = row && cast && actor
-        ? mobCastGeometry(row, mob, actor.radiusM ?? 0.25, arena.player.radiusM ?? 0.25,
-          arenaDistance(actor, arena.player)) : undefined;
-      if (!row || !cast || !geometry?.inRange || mob.hp <= 0 || !s.group.includes(mob) || s.player.hp <= 0
+        ? mobCastGeometry(row, mob, actor.radiusM ?? 0.25, arena.player.radiusM ?? 0.25, reach ?? 0) : undefined;
+      const chargeReach = Math.max(0, Number(cast?.charge?.distance_m) || 0);
+      const releasedInReach = !!geometry?.inRange
+        || (chargeReach > 0 && reach != null && reach <= mobStrikeRange(row!, mob) + chargeReach + 1e-7);
+      if (!row || !cast || !releasedInReach || mob.hp <= 0 || !s.group.includes(mob) || s.player.hp <= 0
         || statusModsOn(s.mobStatus, mob.id).stopped
         || (mob.skillReadyAtUs?.[row.id] ?? 0) > clock.nowUs) {
         cancelMobPreparation(current, clock.nowUs, 'release-invalid');
@@ -164,59 +241,80 @@ export function createMobActions(opts: {
       if (cast.delivery === 'melee') {
         updateArenaAction(arena, current.id, { impactCount: 1, releasedAtUs: clock.nowUs,
           timing: { ...(current.timing as SkillCastTiming), impactAtUs: clock.nowUs } });
-        resolveIncomingHit(mob, row, rng);
+        commitCharge(mob, current, cast, clock.nowUs);
+        // A lunge that stopped short of the body is a miss; damage only follows real contact.
+        if (arenaMobInReach(arena, mob.id)) resolveIncomingHit(mob, row, rng);
+        startSkirmishRetreat(mob, clock.nowUs);
         return;
       }
       launchMobSkillShot(mob, row, cast, current, clock.nowUs);
     });
   }
 
-  /** Schedule one engaged body from the moment it joins; duplicate schedules are ignored. */
-  const scheduledMobs = new Set<string>();
+  /** The full-second plan is created on the body's first call in a second, then advanced per window. */
   function scheduleMobAttacksFor(mob: Mob, fromUs: number): void {
-    if (scheduledMobs.has(mob.id)) return;
-    scheduledMobs.add(mob.id);
     if (mob.hp <= 0 || !s.group.includes(mob)) return;
-    // Encounter phase (F25): a body that crosses one of its kit's HP gates fights the next phase
-    // down. The gate, not a timer, owns the transition, and the log names it once.
-    const rows = (mob.skillIds || []).map((id) => mobSkillById(id)).filter((row) => !!row);
-    const phase = mobPhase(mob, rows);
-    if (phase > (mob.phase ?? 0)) push(s, `${mob.species} shifts tactics (phase ${phase})`);
-    mob.phase = phase;
-    const tm = mobMods(mob.id);
-    const rate = mob.hitsPerSec * (mob.auraSpeedMult ?? 1) * Math.max(0, 1 + tm.attackSpeed / 100);
-    const plan = planAttacks(fromUs, mob.atkTimer, rate, units, Math.max(0, tickEndUs - fromUs));
-    mob.atkTimer = plan.progressAtEnd;
-    const pending = { mob, rate, actionsLeft: plan.times.length };
-    mobPlans.push(pending);
-    const skillPlan = arena ? undefined : planMobSkills(mob, plan.times, units);
-    for (const atUs of plan.times) {
-      const plannedSkill = skillPlan?.get(atUs);
-      if (plannedSkill) {
-        // The cast beat is placed before the action, clamped to this window; the swing itself still
-        // lands on the planned action time, so the telegraph never changes the DPS clock.
-        const castAt = Math.max(fromUs, atUs - Math.max(0, mobCastProfile(plannedSkill, mob).windup_sec) * units);
-        clock.schedule(castAt, EVENT_PRIORITY.mobAction, mob.id, 'player', () => {
-          if (mob.hp <= 0 || !s.group.includes(mob)) return;
-          advanceArenaAt(clock.nowUs);
-          if (s.field && !s.field.engagementIds.includes(mob.id)) return;
-          if (statusModsOn(s.mobStatus, mob.id).stopped) return;
-          if (arena && !arenaInRange(arena, mob.id, mobStrikeRange(plannedSkill, mob))) return;
-          fx(s, { kind: 'cast', side: 'field', mobId: mob.id, skillId: plannedSkill.id, text: plannedSkill.name, colour: hitColour(plannedSkill.element) });
-          // The telegraph owns the body from its cast beat to the strike beat, so preparation
-          // reads at the authored length instead of the default 0.3s action tail.
-          const castAction = arena && [...arena.actions].reverse().find((entry) => entry.actorId === mob.id
-            && entry.kind === 'cast' && entry.skillId === plannedSkill.id
-            && entry.atUs === clock.nowUs && !entry.timing);
-          if (arena && castAction) updateArenaAction(arena, castAction.id, {
-            timing: { delivery: 'melee', startedAtUs: clock.nowUs, releaseAtUs: atUs, impactAtUs: atUs, recoveryUntilUs: atUs },
-            endsAtUs: Math.max(castAction.endsAtUs, atUs),
-          });
-          if (online) push(s, `${mob.species} begins ${plannedSkill.name}`);
-        });
+    let plan = opts.plans.get(mob.id);
+    if (!plan) {
+      // Encounter phase (F25): a body that crosses one of its kit's HP gates fights the next phase
+      // down. The gate, not a timer, owns the transition, and the log names it once.
+      const rows = (mob.skillIds || []).map((id) => mobSkillById(id)).filter((row) => !!row);
+      const phase = mobPhase(mob, rows);
+      const previousPhase = mob.phase ?? 0;
+      if (phase > previousPhase) {
+        push(s, `${mob.species} shifts tactics (phase ${phase})`);
+        opts.onPhaseAdds?.(mob, phase);
       }
+      mob.phase = phase;
+      const tm = mobMods(mob.id);
+      const rate = Math.max(1e-9, mob.hitsPerSec * (mob.auraSpeedMult ?? 1) * Math.max(0, 1 + tm.attackSpeed / 100));
+      const expanded = planAttacks(fromUs, mob.atkTimer, rate, units, Math.max(0, opts.secondEndUs - fromUs));
+      const castBeats = arena ? [] : [...(planMobSkills(mob, expanded.times, units) || new Map()).entries()]
+        .map(([attackAtUs, skill]) => ({
+          skill,
+          attackAtUs,
+          atUs: Math.max(fromUs, attackAtUs - Math.max(0, mobCastProfile(skill, mob).windup_sec) * units),
+        }))
+        .sort((a, b) => a.atUs - b.atUs || (a.skill.id < b.skill.id ? -1 : 1));
+      plan = {
+        mob, rate, times: expanded.times, castBeats, progressAtEnd: expanded.progressAtEnd,
+        nextAttack: 0, nextCast: 0, fired: 0,
+      };
+      opts.plans.set(mob.id, plan);
+      mob.atkTimer = expanded.progressAtEnd;
+    }
+    // Only the beats that fall in this window are queued; the next window continues the same plan.
+    for (; plan.nextCast < plan.castBeats.length; plan.nextCast++) {
+      const beat = plan.castBeats[plan.nextCast];
+      if (beat.atUs > tickEndUs) break;
+      if (beat.atUs < tickStartUs) continue;
+      const plannedSkill = beat.skill;
+      clock.schedule(beat.atUs, EVENT_PRIORITY.mobAction, mob.id, 'player', () => {
+        if (mob.hp <= 0 || !s.group.includes(mob)) return;
+        advanceArenaAt(clock.nowUs);
+        if (s.field && !s.field.engagementIds.includes(mob.id)) return;
+        if (statusModsOn(s.mobStatus, mob.id).stopped) return;
+        if (arena && !arenaInRange(arena, mob.id, mobStrikeRange(plannedSkill, mob))) return;
+        fx(s, { kind: 'cast', side: 'field', mobId: mob.id, skillId: plannedSkill.id, text: plannedSkill.name, colour: hitColour(plannedSkill.element) });
+        // The telegraph owns the body from its cast beat to the strike beat, so preparation
+        // reads at the authored length instead of the default 0.3s action tail.
+        const castAction = arena && [...arena.actions].reverse().find((entry) => entry.actorId === mob.id
+          && entry.kind === 'cast' && entry.skillId === plannedSkill.id
+          && entry.atUs === clock.nowUs && !entry.timing);
+        if (arena && castAction) updateArenaAction(arena, castAction.id, {
+          timing: { delivery: 'melee', startedAtUs: clock.nowUs, releaseAtUs: beat.attackAtUs, impactAtUs: beat.attackAtUs, recoveryUntilUs: beat.attackAtUs },
+          endsAtUs: Math.max(castAction.endsAtUs, beat.attackAtUs),
+        });
+        if (online) push(s, `${mob.species} begins ${plannedSkill.name}`);
+      });
+    }
+    for (; plan.nextAttack < plan.times.length; plan.nextAttack++) {
+      const atUs = plan.times[plan.nextAttack];
+      if (atUs > tickEndUs) break;
+      if (atUs < tickStartUs) { plan.fired++; continue; }
+      const pace = plan;
       clock.schedule(atUs, EVENT_PRIORITY.mobAction, mob.id, 'player', () => {
-        pending.actionsLeft--;
+        pace.fired++;
         if (mob.hp <= 0 || !s.group.includes(mob)) return;
         advanceArenaAt(clock.nowUs);
         if (s.field && !s.field.engagementIds.includes(mob.id)) return;
@@ -227,9 +325,12 @@ export function createMobActions(opts: {
           if (owned?.kind === 'cast' && owned.timing && owned.cancelledAtUs == null
             && !owned.impactCount && owned.timing.releaseAtUs >= atUs) return;
         }
-        // A ready strike replaces the opportunity only while its role reach holds. An out-of-reach
-        // strike does not block the ordinary attack, and the mob never walks in just to enable it.
-        const strike = readyMobSkill(mob, atUs, row => !arena || arenaInRange(arena, mob.id, mobStrikeRange(row, mob)));
+        // A ready strike replaces the opportunity only while its role reach holds. A committed
+        // charge may start at its own lunge distance; an out-of-reach strike never blocks the
+        // ordinary attack, and the mob never walks in just to enable it.
+        const strikeReach = (row: MobSkillRow) => mobStrikeRange(row, mob)
+          + Math.max(0, Number(row.cast?.charge?.distance_m) || 0);
+        const strike = readyMobSkill(mob, atUs, row => !arena || arenaInRange(arena, mob.id, strikeReach(row)));
         if (!strike && arena && !arenaMobInReach(arena, mob.id)) return;
         if (arena && strike) {
           const cast = mobCastProfile(strike, mob);
@@ -250,7 +351,7 @@ export function createMobActions(opts: {
           return;
         }
         if (arena) {
-          startMobBasic(mob, clock.nowUs, rate);
+          startMobBasic(mob, clock.nowUs, pace.rate);
           return;
         }
         if (strike) markMobSkillUsed(mob, strike, clock.nowUs, units);

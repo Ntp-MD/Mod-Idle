@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "assetType": "player-direction-candidate",
+  "identityRef": "../../../reference.png",
+  "requestedFacingDegrees": 326.25,
+  "referenceViews": [
+    "south-west",
+    "south"
+  ],
+  "referenceFraction": 0.25,
+  "generator": "OpenAI built-in image_gen",
+  "sourcePixelsModified": false,
+  "status": "candidate-review",
+  "qa": {
+    "exactAngleVerified": false,
+    "productionApproved": false
+  },
+  "generationSource": "C:\\Users\\disda\\.codex\\generated_images\\01a17d4d-3b5a-72a1-83b1-947b6fe9c9d9\\exec-4b919a36-adc0-4eb2-bf4f-81f77abdce34.png"
+}

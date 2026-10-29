@@ -1,0 +1,16 @@
+{
+  "status": "baseline-extracted-candidate",
+  "speciesId": "wisp",
+  "action": "walk",
+  "direction": "west",
+  "source": "../../../../atlas/animation.png",
+  "sourceCell": [
+    7,
+    1
+  ],
+  "sourcePixelsModified": false,
+  "qa": {
+    "visualIdentityReviewed": false,
+    "atlasReady": false
+  }
+}

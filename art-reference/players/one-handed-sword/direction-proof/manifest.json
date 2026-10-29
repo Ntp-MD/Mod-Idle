@@ -1,0 +1,722 @@
+{
+  "schemaVersion": 1,
+  "status": "direction-candidate-review",
+  "identity": "Original ModWorld cream-hooded player from art-reference/players/one-handed-sword",
+  "sourceRoot": "art-reference/players/one-handed-sword",
+  "sourcePixelsModified": false,
+  "existingViews": 8,
+  "generatedCandidates": 24,
+  "generator": "OpenAI built-in image_gen",
+  "pose": "idle, empty hands matching the source set",
+  "displayHeight": 140,
+  "angleConvention": "Requested bearings: south/front=0, east=90, north=180, west=270. Exact rendered azimuths are not certified.",
+  "qualityNote": "32 views is the selected production target. Generated in-between views need silhouette, volume and turn-continuity review. This is not approved production locomotion.",
+  "frames": [
+    {
+      "index": 0,
+      "requestedAngle": 0.0,
+      "path": "poses/idle/south.png",
+      "kind": "existing-player-source",
+      "bounds": [
+        411,
+        413,
+        841,
+        973
+      ],
+      "footAnchor": {
+        "x": 628.0,
+        "y": 973
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "1dc20d2c7fba317a1199a934f5232f4e186ae0193baf953c7002890aec96bb27",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 1,
+      "requestedAngle": 11.25,
+      "path": "direction-proof/poses/idle/angle-11-25.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        409,
+        398,
+        820,
+        972
+      ],
+      "footAnchor": {
+        "x": 644.0,
+        "y": 972
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "c389da7b96212571ce4695353af3e3ba26392c79882aec7f7161cf26d83b1ee4",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 2,
+      "requestedAngle": 22.5,
+      "path": "direction-proof/poses/idle/angle-22-5.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        371,
+        336,
+        863,
+        1025
+      ],
+      "footAnchor": {
+        "x": 649.0,
+        "y": 1025
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "516c137be6eaab7364941760d8218da878a89e295f67bd370c962e421c99f933",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 3,
+      "requestedAngle": 33.75,
+      "path": "direction-proof/poses/idle/angle-33-75.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        391,
+        345,
+        836,
+        1022
+      ],
+      "footAnchor": {
+        "x": 663.0,
+        "y": 1022
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "5c5fbdb75311245d3bb7fb5ee62d8732660c2bbcaae36ad27a623b107c76f2ba",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 4,
+      "requestedAngle": 45.0,
+      "path": "poses/idle/south-east.png",
+      "kind": "existing-player-source",
+      "bounds": [
+        413,
+        414,
+        844,
+        952
+      ],
+      "footAnchor": {
+        "x": 556.5,
+        "y": 952
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "e08b9d74feedd8391a313afca4e4d5cb385b3eccf06e89c6d60a226d4e2193cf",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 5,
+      "requestedAngle": 56.25,
+      "path": "direction-proof/poses/idle/angle-56-25.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        380,
+        361,
+        832,
+        1000
+      ],
+      "footAnchor": {
+        "x": 574.0,
+        "y": 1000
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "6cd573e6c282411fc45a3d36a09247b788b43f39a5ae62d8b09913676211a53f",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 6,
+      "requestedAngle": 67.5,
+      "path": "direction-proof/poses/idle/angle-67-5.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        441,
+        421,
+        801,
+        943
+      ],
+      "footAnchor": {
+        "x": 659.5,
+        "y": 943
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "3af0dfc067e4fe480715232233444fce013233c45b8ee545f3e1ce0be043114d",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 7,
+      "requestedAngle": 78.75,
+      "path": "direction-proof/poses/idle/angle-78-75.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        445,
+        426,
+        789,
+        947
+      ],
+      "footAnchor": {
+        "x": 655.0,
+        "y": 947
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "930ff22108e9b8c0e32ef21360bae338e462609a08b4e920fdbebd3bc966e2ff",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 8,
+      "requestedAngle": 90.0,
+      "path": "poses/idle/east.png",
+      "kind": "existing-player-source",
+      "bounds": [
+        433,
+        428,
+        804,
+        944
+      ],
+      "footAnchor": {
+        "x": 658.5,
+        "y": 944
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "6ef43923ad59deb5018c9946cf386f3e3826c2c31951bd106209bcdb632e7b10",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 9,
+      "requestedAngle": 101.25,
+      "path": "direction-proof/poses/idle/angle-101-25.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        438,
+        420,
+        787,
+        941
+      ],
+      "footAnchor": {
+        "x": 659.0,
+        "y": 941
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "65b508e75206d40517804f55f393799958fc80dd26b3fc81367905e27b541122",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 10,
+      "requestedAngle": 112.5,
+      "path": "direction-proof/poses/idle/angle-112-5.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        416,
+        418,
+        811,
+        971
+      ],
+      "footAnchor": {
+        "x": 653.0,
+        "y": 971
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "2d29f353ecdc3a468289c64893051d8058fa5c79f538ef33f68bb6dc1221ef6f",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 11,
+      "requestedAngle": 123.75,
+      "path": "direction-proof/poses/idle/angle-123-75.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        413,
+        418,
+        800,
+        953
+      ],
+      "footAnchor": {
+        "x": 650.5,
+        "y": 953
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "a7e3e93f642bf16761b192b178a873db68509f144fb5484a1fe45a99cde8c4ca",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 12,
+      "requestedAngle": 135.0,
+      "path": "poses/idle/north-east.png",
+      "kind": "existing-player-source",
+      "bounds": [
+        401,
+        420,
+        818,
+        958
+      ],
+      "footAnchor": {
+        "x": 652.0,
+        "y": 958
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "bd0225960b7c32beb8cc09734f79be6faeca2a0c411927faa4b4eec1b8752b35",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 13,
+      "requestedAngle": 146.25,
+      "path": "direction-proof/poses/idle/angle-146-25.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        430,
+        431,
+        790,
+        937
+      ],
+      "footAnchor": {
+        "x": 649.5,
+        "y": 937
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "1b414df73b2a78f14c128c002a8889fd5226c4aad69c32a0543a884e8db759b4",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 14,
+      "requestedAngle": 157.5,
+      "path": "direction-proof/poses/idle/angle-157-5.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        467,
+        420,
+        787,
+        949
+      ],
+      "footAnchor": {
+        "x": 658.0,
+        "y": 949
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "6504f8f0515c640675a0f50f1270be2b0ffb0d6a76ca1672501bb61444b058b9",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 15,
+      "requestedAngle": 168.75,
+      "path": "direction-proof/poses/idle/angle-168-75.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        466,
+        422,
+        834,
+        942
+      ],
+      "footAnchor": {
+        "x": 613.5,
+        "y": 942
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "056c744c5a3b0aab88978786c162b50901164a4e214840eac869fc66a70dd1c8",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 16,
+      "requestedAngle": 180.0,
+      "path": "poses/idle/north.png",
+      "kind": "existing-player-source",
+      "bounds": [
+        454,
+        428,
+        800,
+        938
+      ],
+      "footAnchor": {
+        "x": 629.5,
+        "y": 938
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7cb3a776b8afaa53fce56b417efbe68551fbdf01b3855c83e416ff7386b4f47f",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 17,
+      "requestedAngle": 191.25,
+      "path": "direction-proof/poses/idle/angle-191-25.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        467,
+        421,
+        813,
+        939
+      ],
+      "footAnchor": {
+        "x": 633.5,
+        "y": 939
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7e6b2bd521869afa8528634e614e546d4989e81af9059d2232629d643e09c8f1",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 18,
+      "requestedAngle": 202.5,
+      "path": "direction-proof/poses/idle/angle-202-5.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        471,
+        424,
+        831,
+        939
+      ],
+      "footAnchor": {
+        "x": 627.0,
+        "y": 939
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "238dd8c1b5197801289251b143ad2739451eeed6e1cd7a7f5e2cdc93e41b89b2",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 19,
+      "requestedAngle": 213.75,
+      "path": "direction-proof/poses/idle/angle-213-75.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        471,
+        419,
+        834,
+        947
+      ],
+      "footAnchor": {
+        "x": 624.0,
+        "y": 947
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "53dcb64d7d8826c5a38eff41964d4c5e628cc9ba61eaf9022d92ab45e75e2fa1",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 20,
+      "requestedAngle": 225.0,
+      "path": "poses/idle/north-west.png",
+      "kind": "existing-player-source",
+      "bounds": [
+        457,
+        418,
+        888,
+        960
+      ],
+      "footAnchor": {
+        "x": 624.5,
+        "y": 960
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "1523300cc850f1e5313bfdb2020c6186cfce64bb292bcce47c5770d56c5a8bb2",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 21,
+      "requestedAngle": 236.25,
+      "path": "direction-proof/poses/idle/angle-236-25.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        460,
+        417,
+        882,
+        958
+      ],
+      "footAnchor": {
+        "x": 626.0,
+        "y": 958
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "65987789b1db439de2817ccbf5b05f3bf503fbf109f7b8bda676aaa565ff95c2",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 22,
+      "requestedAngle": 247.5,
+      "path": "direction-proof/poses/idle/angle-247-5.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        463,
+        424,
+        863,
+        945
+      ],
+      "footAnchor": {
+        "x": 702.0,
+        "y": 945
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "60a7f2ac72b9585b3c4fdc1a2b205656cf543c4206c23f9f4925b11c993e3348",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 23,
+      "requestedAngle": 258.75,
+      "path": "direction-proof/poses/idle/angle-258-75.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        474,
+        417,
+        868,
+        937
+      ],
+      "footAnchor": {
+        "x": 633.0,
+        "y": 937
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "a1ac450f70d3a3ca6c3507c5bb0dab766590a370a2cde9f18357129eea2d6671",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 24,
+      "requestedAngle": 270.0,
+      "path": "poses/idle/west.png",
+      "kind": "existing-player-source",
+      "bounds": [
+        460,
+        422,
+        853,
+        943
+      ],
+      "footAnchor": {
+        "x": 633.5,
+        "y": 943
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "fc1d1b9a71e22268743b47d2b8506b7669b1f1b3c7d901cb97924e19ca631168",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 25,
+      "requestedAngle": 281.25,
+      "path": "direction-proof/poses/idle/angle-281-25.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        461,
+        422,
+        846,
+        953
+      ],
+      "footAnchor": {
+        "x": 688.0,
+        "y": 953
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "fe837fd951c827a4eec10e28ec54ff1fa38eb9633c55febab921ac333a2f75a7",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 26,
+      "requestedAngle": 292.5,
+      "path": "direction-proof/poses/idle/angle-292-5.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        466,
+        421,
+        846,
+        952
+      ],
+      "footAnchor": {
+        "x": 702.5,
+        "y": 952
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "e8840563c95312bb7d00d7a2ef6f94716d1a154d1ed16bcc22c6bc3a7e85f15c",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 27,
+      "requestedAngle": 303.75,
+      "path": "direction-proof/poses/idle/angle-303-75.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        470,
+        420,
+        862,
+        949
+      ],
+      "footAnchor": {
+        "x": 700.0,
+        "y": 949
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "1de3f009d2031426b1c0ed04c3b5b6ebf60d83c95d35ddbd27a45c72738d57a9",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 28,
+      "requestedAngle": 315.0,
+      "path": "poses/idle/south-west.png",
+      "kind": "existing-player-source",
+      "bounds": [
+        461,
+        424,
+        851,
+        954
+      ],
+      "footAnchor": {
+        "x": 702.0,
+        "y": 954
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "9185fe81eddbc3e340cdf583853dc2aa50520aaaf73caa9c67faf4d170a541c3",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 29,
+      "requestedAngle": 326.25,
+      "path": "direction-proof/poses/idle/angle-326-25.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        398,
+        417,
+        785,
+        968
+      ],
+      "footAnchor": {
+        "x": 558.0,
+        "y": 968
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7533b9b2fb8befaae12cd577c6156564c0220d086619869949e12bbb8fc53631",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 30,
+      "requestedAngle": 337.5,
+      "path": "direction-proof/poses/idle/angle-337-5.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        468,
+        417,
+        845,
+        956
+      ],
+      "footAnchor": {
+        "x": 706.5,
+        "y": 956
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "6c236f17c17e9224df8209909bdb8fcbb42c3bfa74ae11dfeeaecbb186933600",
+      "exactAngleVerified": false
+    },
+    {
+      "index": 31,
+      "requestedAngle": 348.75,
+      "path": "direction-proof/poses/idle/angle-348-75.png",
+      "kind": "generated-candidate",
+      "bounds": [
+        450,
+        385,
+        862,
+        967
+      ],
+      "footAnchor": {
+        "x": 711.5,
+        "y": 967
+      },
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "38080d9600d496f4355ad84ec8aefca9ad6173be824ff2a347a1783ab5d17f54",
+      "exactAngleVerified": false
+    }
+  ],
+  "chosenDirectionTarget": 32,
+  "chosenAngleStepDegrees": 11.25
+}

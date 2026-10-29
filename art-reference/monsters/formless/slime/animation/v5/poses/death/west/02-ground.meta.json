@@ -1,0 +1,16 @@
+{
+  "status": "baseline-extracted-candidate",
+  "speciesId": "slime",
+  "action": "death",
+  "direction": "west",
+  "source": "../../../../atlas/animation.png",
+  "sourceCell": [
+    6,
+    4
+  ],
+  "sourcePixelsModified": false,
+  "qa": {
+    "visualIdentityReviewed": false,
+    "atlasReady": false
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "status": "baseline-extracted-candidate",
+  "source": "../../../atlas/animation.png",
+  "sourceCell": [
+    5,
+    0
+  ],
+  "pixelsRepainted": false,
+  "visualReviewRequired": true
+}

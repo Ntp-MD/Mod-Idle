@@ -1,0 +1,15 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-a2ba7c23-078f-4ed7-b265-3f592532b763.png",
+  "action": "hit",
+  "phase": "01-recoil.png",
+  "direction": "south",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": false,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false
+  }
+}

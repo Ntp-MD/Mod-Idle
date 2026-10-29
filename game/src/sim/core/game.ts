@@ -48,7 +48,7 @@ import { advanceRecovery } from './tick/recovery-stage';
 import { applyPush } from './tick/push-stage';
 import { scheduleMobDot } from './tick/mob-dot-stage';
 import { createIntentSelect } from './tick/intent-select';
-import { schedulePlayerAction } from './tick/player-action';
+import { reactiveRearm, schedulePlayerAction } from './tick/player-action';
 import { createLiveClocks } from './tick/live-clocks';
 import { createFlights } from './tick/flights';
 import { createArenaStep } from './tick/arena-step';
@@ -68,7 +68,7 @@ import { newFilter, ruleFor, coveredElements, refresh as refreshFilter } from '.
 import { addTo, fits, slotsFree } from '../gear/slots';
 import { settlementOfZone, settlementById } from '../town/town';
 import { effectsActive, esAbsorbPct } from '../combat/skills';
-import { applyMobAuras, resolveMobKit } from '../combat/mobSkills';
+import { applyMobAuras, resolveMobBehavior, resolveMobKit } from '../combat/mobSkills';
 import { mark as markSnapshot } from './snapshot';
 import { newGoal, onSpawn as goalSpawn, onKill as goalKill, watch as goalWatch } from './goal';
 import { newGuidance } from './guidance';
@@ -84,7 +84,7 @@ import { KEYSTONE_HANDLERS, registerStaticKeystoneHandlers } from './keystone-ru
 import { tickCampEncounters, campEncounterEligible } from '../world/camp-encounters';
 import {
   newSkillState, prepareSkillCast, prepareFirstSkillCast, paySkillXp, grantSkill, usableMana, usableHp, buffRuleUp,
-  triggerAuras, rotationOrder, skillEligibilityInState, newCastRollCache, type TriggerAura, type CastReport, type PreparedSkillCast,
+  spendableMana, triggerAuras, rotationOrder, skillEligibilityInState, newCastRollCache, type TriggerAura, type CastReport, type PreparedSkillCast,
 } from '../combat/skills';
 import type { GameState, Mob, Item, FxEvent } from './types';
 import { mulberry32, pick, intBetween } from '../../engine/client-helpers';
@@ -381,6 +381,7 @@ export function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'el
   // boss/unique name for those ranks. Drawn last on purpose — every field above keeps the random
   // stream it had, so a variant is purely additive.
   const variantName = fixedName || (variant ? variant.name : species.name);
+  const skillIds = resolveMobKit(rank, species.id, variantName, fixedName);
   return {
     id: `${zoneId}_${species.id}_${body}_${Math.floor(rng() * 1e9)}`,
     species: species.name,
@@ -412,7 +413,9 @@ export function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'el
     hitsPerSec: mobClock(rank, base.clock_mult),
     atkTimer: 0,
     engageSec: 0,
-    skillIds: resolveMobKit(rank, species.id, variantName, fixedName),
+    behavior: resolveMobBehavior(species.id, species.line, skillIds),
+    retreatAtPct: rank === 'boss' || rank === 'unique' ? undefined : E.mob.retreat_at_pct,
+    skillIds,
     skillReadyAtUs: {},
   };
 }
@@ -1000,69 +1003,286 @@ import { runExplorationAutomation } from './tick/automation';
 /** The loaded encounter identity. A released action from another one may not land here. */
 export const encounterKeyOf = (s: GameState): string => fieldAreaKey(s);
 
-export function tick(s: GameState, opts: { online?: boolean; autoSkills?: boolean; writer?: boolean; arena?: CombatArena; settleArena?: CombatArena; manual?: ManualControl } = {}): GameState {
-  if (opts.writer === false) return s;
+export interface TickOptions {
+  online?: boolean;
+  autoSkills?: boolean;
+  writer?: boolean;
+  arena?: CombatArena;
+  settleArena?: CombatArena;
+  manual?: ManualControl;
+  /** Settlement only: released-work targets stay pinned through the pay-out ticks. */
+  settlePinned?: ReadonlySet<string>;
+}
+
+/**
+ * The values one world second fixes before its combat windows run. A window is 50 ms of the same
+ * second: the world stages, the character sheet, the auras and the rotation's own press are read
+ * once here, while movement, releases, impacts and command receipts run in every window. Keeping
+ * these out of the window is what makes twenty steps and one second produce one timeline.
+ */
+interface TickSecond {
+  startUs: number;
+  endUs: number;
+  units: number;
+  nextUs: number;
+  rng: () => number;
+  arena?: CombatArena;
+  manual?: ManualControl;
+  statusesApplied: Set<StatusName>;
+  triggerFired: boolean;
+  mobAttackPlans: Map<string, import('./tick/mob-actions').MobAttackPlan>;
+  playerBasicPlan?: import('./tick/player-basic').PlayerBasicPlan;
+  cooldown: { atUs: number };
+  engagement: import('./tick/engagement').EngagementState;
+  hadGroupBeforeDamage: boolean;
+  hadEngagement: boolean;
+  pausedAtStart: boolean;
+  campEligibleAtStart: boolean;
+  camped: boolean;
+  halted: boolean;
+  haltedAtUs: number;
+  cancelArenaWork?: (reason: string) => void;
+  derived?: SecondDerived;
+}
+
+interface SecondDerived {
+  effects: ReturnType<typeof effectsActive>;
+  c: ReturnType<typeof characterSheet>;
+  attackCharacter: ReturnType<typeof characterSheet>;
+  playerActiveFraction: number;
+  playerHitsPerSec: number;
+  berserkDealt: number;
+  crippledOutgoingMult: number;
+  unstoppablePenalty: number;
+  front: Mob | undefined;
+}
+
+const TICK_SECONDS = new WeakMap<GameState, TickSecond>();
+
+const combatStepUs = (units: number) =>
+  Math.max(1, Math.round(Number(E.combat_arena.movement_step_sec) * units));
+
+/** The fixed combat step in integer microseconds; the live loop wakes on this beat. */
+export const COMBAT_STEP_US = (): number =>
+  combatStepUs(tree.mechanics?.combat_time_units_per_sec ?? 1);
+
+function openSecond(s: GameState, opts: TickOptions, units: number, arena: CombatArena | undefined): TickSecond {
+  const startUs = s.clockSec * units;
+  return {
+    startUs,
+    endUs: startUs + units,
+    units,
+    nextUs: startUs,
+    // one seeded stream per world second, not per window: a batch of steps must consume the same rolls
+    rng: mulberry32(s.rngState++),
+    arena,
+    manual: opts.manual,
+    statusesApplied: new Set(),
+    triggerFired: false,
+    mobAttackPlans: new Map(),
+    cooldown: { atUs: startUs },
+    engagement: createEngagementState(),
+    hadGroupBeforeDamage: s.group.length > 0,
+    hadEngagement: (s.field?.engagementIds.length ?? 0) > 0,
+    pausedAtStart: !!deliveryPauseReason(s),
+    // The Camp gate is read before the world moves, so a walk that ends, a Push that recovers or a
+    // fight that clears this second cannot open a Camp event on the same tick.
+    campEligibleAtStart: campEncounterEligible(s),
+    camped: false,
+    halted: false,
+    haltedAtUs: startUs,
+  };
+}
+
+/** The outer stages of one whole second, run once when its last window closes. */
+function closeSecond(s: GameState, opts: TickOptions, second: TickSecond): void {
+  const online = opts.online !== false;
   try {
-    const pausedAtStart = !!deliveryPauseReason(s);
-    const rng = mulberry32(s.rngState++);
-    /* The Camp gate is read before the world moves, so a walk that ends, a Push that recovers or a
-       fight that clears this second cannot open a Camp event on the same tick. */
-    const campEligibleAtStart = campEncounterEligible(s);
-    const result = tickWorld(s, opts, rng);
-    if (opts.online !== false) recordMapDiscovery(result);
-    tickTrailSites(result, opts.online !== false);
-    tickDeliveries(result, rng, opts.online !== false, pausedAtStart, { writer: true });
-    tickBlackMarket(result, rng, { writer: true }, opts.online !== false);
-    tickCampEncounters(result, opts.online !== false, (zone, subzone, campRng) => {
+    if (online) recordMapDiscovery(s);
+    tickTrailSites(s, online);
+    tickDeliveries(s, second.rng, online, second.pausedAtStart, { writer: true });
+    tickBlackMarket(s, second.rng, { writer: true }, online);
+    tickCampEncounters(s, online, (zone, subzone, campRng) => {
       // A Camp threat is a population pull at the Camp's authored density, not the old 1-5 wave.
       const size = Math.max(1, spawns.profileFor(zone, subzone, 'legacy').cap);
       const group = Array.from({ length: size }, () => spawnMob(campRng, zone, 'normal', undefined, subzone,
         { allowWildUnique: false }));
       return group.sort(byFrontLine);
-    }, { eligibleAtStart: campEligibleAtStart });
-    return result;
+    }, { eligibleAtStart: second.campEligibleAtStart });
   } finally {
-    const context = tickFxClock.get(s);
-    if (context?.arena) {
-      context.arena.nowUs = context.clock.halted ? context.clock.nowUs : Math.round(s.clockSec * context.arena.unitsPerSec);
-      captureCombatArena(context.arena, s, context.arena.nowUs);
+    if (second.arena) {
+      second.arena.nowUs = second.halted ? second.haltedAtUs : second.endUs;
+      captureCombatArena(second.arena, s, second.arena.nowUs);
     }
-    tickFxClock.delete(s);
+    // A Camp second ends at the stage that rested the character: no recovery, fields or arena
+    // settlement, exactly as the early return always ordered it. The end stages still read the
+    // second's own clock, so a heal or DoT number is stamped at the closing beat, never at wall time.
+    if (second.derived && !second.camped) {
+      tickFxClock.set(s, { clock: new CombatClock(second.endUs, second.endUs), arena: second.arena });
+      try {
+        tickSecondEnd(s, second);
+      } finally {
+        tickFxClock.delete(s);
+      }
+    }
   }
 }
 
-function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean; arena?: CombatArena; settleArena?: CombatArena; manual?: ManualControl }, rng: () => number): GameState {
+/**
+ * Advance the world by one combat step (50 ms at the default mechanics). Commands are judged inside
+ * this window, so input latency is the step, never a whole second. A second is opened on its first
+ * step and closed on its last; the same function backs both the live loop and the whole-second
+ * `tick`, so a different batch size cannot reorder an event or reroll a number.
+ */
+export function stepCombat(s: GameState, opts: TickOptions = {}): GameState {
+  if (opts.writer === false) return s;
+  const units = tree.mechanics?.combat_time_units_per_sec ?? 1;
+  const arena = opts.online === false ? opts.settleArena : opts.arena;
+  let second = TICK_SECONDS.get(s);
+  // A shallow presentation copy (a Svelte `$state.raw` refresh) shares this arena's ground,
+  // actions and frames; it is the same encounter and must not restart the second. A genuinely
+  // different arena does, and its unspent work belongs to the truth it left.
+  const sameArenaView = (a?: CombatArena, b?: CombatArena) => !!a && !!b
+    && a.frames === b.frames && a.actions === b.actions && a.player === b.player
+    && a.mobs === b.mobs && a.flights === b.flights;
+  if (second && (second.units !== units
+    || (second.arena !== arena && (!!second.arena || !!arena) && !sameArenaView(second.arena, arena)))) {
+    if (second.derived) tickSecondEnd(s, second);
+    TICK_SECONDS.delete(s);
+    second = undefined;
+  }
+  if (second && second.arena !== arena) second.arena = arena;
+  if (!second) {
+    second = openSecond(s, opts, units, arena);
+    TICK_SECONDS.set(s, second);
+  } else {
+    if (opts.manual !== undefined) second.manual = opts.manual;
+    second.arena = arena;
+  }
+  if (!second.camped && !second.halted) {
+    const fromUs = second.nextUs;
+    const toUs = Math.min(fromUs + combatStepUs(units), second.endUs);
+    tickWorld(s, { ...opts, manual: second.manual }, second, fromUs, toUs);
+    if (second.camped || second.halted) second.nextUs = second.endUs;
+    else second.nextUs = toUs;
+  }
+  if (second.nextUs >= second.endUs) {
+    closeSecond(s, opts, second);
+    TICK_SECONDS.delete(s);
+  }
+  return s;
+}
+
+export function tick(s: GameState, opts: TickOptions = {}): GameState {
+  if (opts.writer === false) return s;
+  let guard = 0;
+  do {
+    stepCombat(s, opts);
+  } while (TICK_SECONDS.get(s) && guard++ < 64);
+  return s;
+}
+
+function tickSecondEnd(s: GameState, second: TickSecond): void {
+  const d = second.derived!;
+  // An attack the second did not spend (the fatal latch or a skipped window) stays on its own
+  // clock for the next second instead of being rerolled or lost.
+  for (const plan of second.mobAttackPlans.values()) {
+    const unfired = plan.times.length - plan.fired;
+    if (unfired > 0) plan.mob.atkTimer += unfired;
+  }
+  // A Boss owns a local arena epoch. Its own death receipt settles the remaining released work even
+  // while other field bodies are still alive under the population model.
+  if (s.field?.bossDefeatedAtSec === s.clockSec) {
+    second.cancelArenaWork?.('boss-exit');
+    s.field.arenaEpoch++;
+    s.field.bossDefeatedAtSec = undefined;
+  }
+  if (second.hadEngagement && s.field && s.field.engagementIds.length === 0) {
+    const wasPatrolling = s.patrol.active;
+    const patrolNote = recordPatrolGroupClear(s, s.online !== false);
+    if (patrolNote) push(s, patrolNote);
+    runExplorationAutomation(s, s.online !== false, wasPatrolling);
+  }
+  if (second.hadGroupBeforeDamage && s.group.length === 0) {
+    const wasPatrolling = s.patrol.active;
+    const patrolNote = recordPatrolGroupClear(s, s.online !== false);
+    if (patrolNote) push(s, patrolNote);
+    runExplorationAutomation(s, s.online !== false, wasPatrolling);
+  }
+  if (!second.halted) {
+    advanceRecovery({
+      s, c: d.c, statuses: s.playerStatuses, debt52: bundleOf(d.c.keystones, 'mana-debt'),
+      units: second.units, tickStartUs: second.startUs, tickEndUs: second.endUs,
+      playerActiveFraction: d.playerActiveFraction,
+    });
+  }
+  advancePostTick(s, d.c, second.rng, s.playerStatuses, second.statusesApplied);
+  if (s.player.hp <= 0) {
+    applyPush({ s, c: d.c, statuses: s.playerStatuses,
+      cancelArenaWork: second.cancelArenaWork ?? (() => {}) });
+  }
+  settleTick(s, second.arena);
+}
+
+function tickWorld(s: GameState, opts: TickOptions, second: TickSecond, tickStartUs: number, tickEndUs: number): GameState {
   const online = opts.online !== false;
   const autoSkills = opts.autoSkills !== false;
-  const manual = opts.manual;
+  const manual = second.manual;
+  const rng = second.rng;
+  const secondStart = tickStartUs === second.startUs;
   // the character's statuses (§7.7): this is the one reference into the saved state, not a copy
   const statuses = s.playerStatuses;
-  // §7.1: the window is (t0, t1]; t0 is the clock before this tick increments, and every event is
-  // stamped in absolute integer µs off it. A spec without the mechanics line falls back to whole
-  // seconds, which is the pre-keystone world rate.
+  // §7.1: every event is stamped in absolute integer µs off the second's own start. A spec without
+  // the mechanics line falls back to whole seconds, which is the pre-keystone world rate.
   const unitsPerSec = tree.mechanics?.combat_time_units_per_sec;
-  const units = unitsPerSec ?? 1;
-  const tickStartUs = Math.round(s.clockSec * units);
-  const tickEndUs = tickStartUs + units;
-  // the Push latch (§7.7): a fatal hit stops every later event of the tick, so no heal revives it
+  const units = second.units;
+  // the Push latch (§7.7): a fatal hit stops every later event of the second, so no heal revives it
   const clock = new CombatClock(tickStartUs, tickEndUs, () => s.player.hp <= 0);
   // An arena is ignored during ordinary offline catch-up; `settleArena` is the one exception, used
   // to resolve work that was already released before the session ended.
   const arena = online ? opts.arena : opts.settleArena;
   const { cancelPlayerBasic, cancelIntent, cancelArenaWork, cancelFlight } = createArenaWork({ arena, clock, s });
+  second.cancelArenaWork = cancelArenaWork;
 
   // Asked per movement sample: a threat that is still pending must be re-answered instead of letting
   // the automatic approach walk the body back under it between world ticks.
   const autoAvoid = () => (arena && !manual?.moveTo && !manual?.cast && !arena.intent?.manual
     ? planAutoAvoid(arena, s, clock.nowUs, units) : null);
-  tickFxClock.set(s, { clock, arena });
   const timeUs: number | null = unitsPerSec === undefined ? null : tickStartUs;
   s.online = online;
-  s.clockSec++;
-  advancePreTick(s, online);
-  const effects = effectsActive(s.skills, tree.keystoneBundles(s.player.treeRanks));
-  const c = characterSheet(s, effects);
-  const debt52 = bundleOf(c.keystones, 'mana-debt');
+  let derived = second.derived;
+  if (!derived) {
+    s.clockSec++;
+    advancePreTick(s, online);
+    const effects = effectsActive(s.skills, tree.keystoneBundles(s.player.treeRanks));
+    const c = characterSheet(s, effects);
+    derived = {
+      effects, c, attackCharacter: c, playerActiveFraction: 1, playerHitsPerSec: c.hitsPerSec,
+      berserkDealt: 1, crippledOutgoingMult: 1, unstoppablePenalty: 1, front: undefined,
+    };
+    second.derived = derived;
+    applyKeystonePrep(s, c, bundleOf(c.keystones, 'mana-debt'), units, tickStartUs);
+    const day = dayOf(s.clockSec);
+    if (s.pedlar.day !== day || !s.pedlar.minutes.length) {
+      s.pedlar = {
+        day,
+        bought: 0,
+        minutes: Array.from({ length: col.PEDLAR.per_day_cap }, () => col.pedlarPrice(rng())),
+      };
+    }
+    advanceForward(s, online);
+    tickTown(s, rng);
+    runExplorationAutomation(s, online);
+    if (advanceCampStage(s, c)) {
+      second.camped = true;
+      return s;
+    }
+    // While walking, the character crosses one block per `block_sec`. No ambient zone group appears:
+    // a walk is its own minute-to-minute activity — and it is ONLINE only, so an away period never
+    // crosses a block and never opens a Waypoint it did not earn online.
+    advanceWalkStage(s, online, rng);
+  }
+  const { effects, c } = derived;
   const rkH = s.keystoneRuntime;
   // Packet N helpers: one read each for the rules that cross the swing and cast paths.
   const mirrorReady = () => Boolean(bundleOf(c.keystones, 'mirror-strike'))
@@ -1108,45 +1328,30 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
   function killMob(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof buildCharacter>, statuses: Statuses = {}, bloomChain = true) {
     onKill(s, rng, mob, c, statuses, bloomChain, mobPositions);
   }
-  applyKeystonePrep(s, c, debt52, units, tickStartUs);
-  const day = dayOf(s.clockSec);
-  if (s.pedlar.day !== day || !s.pedlar.minutes.length) {
-    s.pedlar = {
-      day,
-      bought: 0,
-      minutes: Array.from({ length: col.PEDLAR.per_day_cap }, () => col.pedlarPrice(rng())),
-    };
-  }
-  advanceForward(s, online);
-  tickTown(s, rng);
-  runExplorationAutomation(s, online);
-
-  if (advanceCampStage(s, c)) return s;
-
-  // While walking, the character crosses one block per `block_sec`. No ambient zone group appears:
-  // a walk is its own minute-to-minute activity — and it is ONLINE only, so an away period never
-  // crosses a block and never opens a Waypoint it did not earn online.
-  advanceWalkStage(s, online, rng);
-
   // leaving the run's zone ends the run: a dungeon is entered ground, not a destination
-  
+
   function fieldProfile() {
     return spawns.profileFor(s.zone, s.cell?.sub ?? null, opts.online === false ? 'legacy' : 'live');
   }
 
-  advanceFieldPopulation(s, {
-    arena, c, online, rng, tickStartUs, units, cancelArenaWork, fieldProfile, spawnMob,
-  });
+  if (secondStart) {
+    advanceFieldPopulation(s, {
+      arena, c, online, rng, tickStartUs, units, cancelArenaWork, fieldProfile, spawnMob,
+    });
+    // The per-fight potion budget belongs to a combat session, not to each spawn.
+    if (syncFieldState(s, arena, 2, false)) s.farm.usesThisFight = 0;
+    // the completion gate is armed before the first swing of a spawn, so a fast kill still counts
+    goalWatch(s);
+    for (const m of s.group) goalSpawn(s, m);
+  }
 
   // Engagement is spatial: only bodies inside aggro, an existing leash, an assist neighbour, or the
   // player's committed target may attack. The rest keep their home ground. The same resolver runs
   // again after every authoritative movement sample, so joining or leaving is not delayed a second.
-  const engagement = createEngagementState();
   const { syncEngagement, refreshReturning, insideHomeLeash } = advanceEngagement(s, {
-    arena, online, fieldProfile, cancelIntent, cancelMobPreparation, tickStartUs, state: engagement,
+    arena, online, fieldProfile, cancelIntent, cancelMobPreparation, tickStartUs,
+    state: second.engagement, prime: secondStart, pinnedIds: opts.settlePinned,
   });
-  // The per-fight potion budget belongs to a combat session, not to each spawn.
-  if (syncFieldState(s, arena, 2, false)) s.farm.usesThisFight = 0;
 
   /** A committed player target enters its aggro window only while its home leash still holds. */
   function engageTarget(targetId?: string): void {
@@ -1154,7 +1359,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     if (arena.mobs[targetId]?.returning) return;
     if (!s.group.some((mob) => mob.id === targetId && mob.hp > 0 && insideHomeLeash(mob))) return;
     if (s.field.engagementIds.includes(targetId)) return;
-    engagement.deliberateTargetId = targetId;
+    second.engagement.deliberateTargetId = targetId;
     const delta = syncEngagement(clock.nowUs);
     for (const id of delta.added) {
       const mob = s.group.find((entry) => entry.id === id && entry.hp > 0);
@@ -1162,22 +1367,21 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     }
   }
 
-  // the completion gate is armed before the first swing of a spawn, so a fast kill still counts
-  goalWatch(s);
-  for (const m of s.group) goalSpawn(s, m);
-
   const engagedIds = new Set(s.field?.engagementIds ?? []);
   const engaging = s.group.filter((mob) => mob.hp > 0 && (!arena || engagedIds.has(mob.id)));
   // Auras are read from the living engaged bodies before either side's events are scheduled, so the
   // player's damage and the mob clock in this tick answer the same effective modifiers.
-  const auraRadius = Number(E.mob.aura_radius_m) || 4;
-  applyMobAuras(s.group, engaging, arena
-    ? (sourceId, targetId) => {
-        const source = arena.mobs[sourceId], target = arena.mobs[targetId];
-        return !source || !target || arenaDistance(source, target) <= auraRadius + 1e-7;
-      }
-    : undefined);
-  const front = s.group[0];
+  if (secondStart) {
+    const auraRadius = Number(E.mob.aura_radius_m) || 4;
+    applyMobAuras(s.group, engaging, arena
+      ? (sourceId, targetId) => {
+          const source = arena.mobs[sourceId], target = arena.mobs[targetId];
+          return !source || !target || arenaDistance(source, target) <= auraRadius + 1e-7;
+        }
+      : undefined);
+    derived.front = s.group[0];
+  }
+  const front = derived.front;
 
   /** Everything one mob carries: curse lines (conditional ones only while their status holds),
    *  the statuses we inflicted, and the target-side lines an aura writes on everything in range. */
@@ -1191,15 +1395,38 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     keystoneTargetMods(s.mobStatus, mobId, c),
   );
 
-  // Shock spends only its remaining part of this one-second step. Vit's Stun Recovery shortens that
-  // stopped slice, and the attack / cooldown / regen clocks advance through the rest of the second.
-  const shockSecLeft = Math.max(0, statuses.shock?.secLeft || 0);
-  // 02 Unstoppable: Stun no longer stops the action, and Slow no longer cuts the attack rate; while
-  // either effect would have done so, outgoing damage is multiplied by its penalty instead (§5.02).
-  const unstoppable = bundleOf(c.keystones, 'unstoppable');
-  const slowed = (statuses.shock?.secLeft || 0) > 0 || (statuses.chill?.secLeft || 0) > 0;
-  const unstoppablePenalty = unstoppable && slowed ? Number(unstoppable.params.penaltyDamageMult) : 1;
-  const playerActiveFraction = unstoppable ? 1 : Math.max(0, 1 - Math.min(1, shockSecLeft));
+  const unabated = bundleOf(c.keystones, 'unstoppable');
+  if (secondStart) {
+    // Shock spends only its remaining part of this one-second step. Vit's Stun Recovery shortens that
+    // stopped slice, and the attack / cooldown / regen clocks advance through the rest of the second.
+    const shockSecLeft = Math.max(0, statuses.shock?.secLeft || 0);
+    // 02 Unstoppable: Stun no longer stops the action, and Slow no longer cuts the attack rate; while
+    // either effect would have done so, outgoing damage is multiplied by its penalty instead (§5.02).
+    const slowed = (statuses.shock?.secLeft || 0) > 0 || (statuses.chill?.secLeft || 0) > 0;
+    derived.unstoppablePenalty = unabated && slowed ? Number(unabated.params.penaltyDamageMult) : 1;
+    derived.playerActiveFraction = unabated ? 1 : Math.max(0, 1 - Math.min(1, shockSecLeft));
+    const chill = statuses.chill && statuses.chill.secLeft > 0 ? statuses.chill : null;
+    const chillAspdCut = chill && !unabated
+      ? Math.min(E.status.chill.aspd_cap, chill.stacks * E.status.chill.aspd_pct) / 100 : 0;
+    const shockAccuracyCut = statuses.shock
+      ? Math.min(E.status.shock.acc_cap, E.status.shock.acc_pct) / 100 : 0;
+    const crippled = statuses.crippled && statuses.crippled.secLeft > 0 ? statuses.crippled : null;
+    derived.crippledOutgoingMult = crippled
+      ? 1 + E.status.crippled.outgoing_damage_pct / 100 : 1;
+    derived.attackCharacter = shockAccuracyCut > 0
+      ? { ...c, accuracy: c.accuracy * (1 - shockAccuracyCut) } : c;
+    // 03 Berserk: Low Life against the FULL Max HP grants damage and speed, while the take-more line
+    // is always on (the taken multiplier is applied per incoming Hit below).
+    const lowLife = belowLowLife(s.player.hp, c.maxHp, tree.mechanics?.low_life_pct ?? 50);
+    const berserkOn = !!bundleOf(c.keystones, 'berserk') && lowLife;
+    const berserkHeld = bundleOf(c.keystones, 'berserk');
+    derived.berserkDealt = berserkOn ? Number(berserkHeld!.params.damageMult) : 1;
+    derived.playerHitsPerSec = c.hitsPerSec * (berserkOn ? Number(berserkHeld!.params.aspdMult) : 1)
+      * Math.max(0, 1 - chillAspdCut);
+  }
+  const {
+    playerActiveFraction, playerHitsPerSec, berserkDealt, crippledOutgoingMult, unstoppablePenalty,
+  } = derived;
   const playerRange = arena ? arenaWeaponRange(c.weaponName) : 0;
   const playerStopRange = arena ? arenaWeaponStopRange(c.weaponName) : 0;
   // A skill walks on its own range: the row's cast range, or its own radius for
@@ -1224,7 +1451,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     });
     return ready ? Math.max(0, skillRange(ready) - 0.05) : playerStopRange;
   };
-  const cooldown = { atUs: tickStartUs };
+  const cooldown = second.cooldown;
   const { advanceLiveClocks } = createLiveClocks({ arena, s, c, units, cooldown, playerActiveFraction });
   const { advanceArenaAt } = createArenaStep({
     arena, s, clock, units, manual, autoAvoid, cancelPlayerBasic, cancelIntent, cancelMobPreparation,
@@ -1239,30 +1466,12 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     advanceArenaAt(clock.nowUs);
     return arenaSkillTargets(arena, id, group);
   } : undefined;
-  const statusesAppliedThisTick = new Set<StatusName>();
-  const chill = statuses.chill && statuses.chill.secLeft > 0 ? statuses.chill : null;
-  const chillAspdCut = chill && !unstoppable
-    ? Math.min(E.status.chill.aspd_cap, chill.stacks * E.status.chill.aspd_pct) / 100 : 0;
-  const shockAccuracyCut = statuses.shock
-    ? Math.min(E.status.shock.acc_cap, E.status.shock.acc_pct) / 100 : 0;
-  const crippled = statuses.crippled && statuses.crippled.secLeft > 0 ? statuses.crippled : null;
-  const crippledOutgoingMult = crippled
-    ? 1 + E.status.crippled.outgoing_damage_pct / 100 : 1;
-  const attackCharacter = shockAccuracyCut > 0
-    ? { ...c, accuracy: c.accuracy * (1 - shockAccuracyCut) } : c;
-  // 03 Berserk: Low Life against the FULL Max HP grants damage and speed, while the take-more line
-  // is always on (the taken multiplier is applied per incoming Hit below).
+  const statusesAppliedThisTick = second.statusesApplied;
+  const attackCharacter = derived.attackCharacter;
   const berserk = bundleOf(c.keystones, 'berserk');
-  const lowLife = belowLowLife(s.player.hp, c.maxHp, tree.mechanics?.low_life_pct ?? 50);
-  const berserkOn = !!berserk && lowLife;
-  const berserkDealt = berserkOn ? Number(berserk!.params.damageMult) : 1;
-  const playerHitsPerSec = c.hitsPerSec * (berserkOn ? Number(berserk!.params.aspdMult) : 1)
-    * Math.max(0, 1 - chillAspdCut);
   // the events the trigger auras listen for, collected where they happen: a crit in this tick's swings,
   // and any hit that took HP or Energy Shield off the player
   const trig = triggerAuras(s.skills);
-  let triggerFired = false;
-  const mobPlans: { mob: Mob; rate: number; actionsLeft: number }[] = [];
 
   /** Hits and DoT share the leech destination, usable ceiling and excess bank. */
   function recoverLeech(amount: number, atUs: number): void {
@@ -1288,8 +1497,8 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
   function queueTrigger(aura: TriggerAura | null, targetId: string) {
     if (!autoSkills || !aura) return;
     clock.schedule(clock.nowUs, EVENT_PRIORITY.secondary, 'player', targetId, () => {
-      if (triggerFired || clock.halted) return;
-      triggerFired = true;
+      if (second.triggerFired || clock.halted) return;
+      second.triggerFired = true;
       fireTrigger(aura);
     });
   }
@@ -1330,32 +1539,51 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     fireTrigger,
   });
 
+  // F27 — the hold is a property of the sample, not of the world tick's one press. The automatic
+  // rotation may not spend on a filler the mana a reactive re-arm is waiting for, even when a row
+  // carries no cooldown. A deliberate order always passes.
+  const holdFiller = () => {
+    if (!autoSkills || manual?.cast || manual?.moveTo) return false;
+    const hold = reactiveRearm(s, c, statuses);
+    return hold > 0 && hold <= usableMana(c, s.skills) && (c.manaRegen || 0) > 0
+      && spendableMana(attackCharacter, s.skills, s.player.mana) < hold;
+  };
   const { ensureIntent } = createIntentSelect({
     arena, s, attackCharacter, autoSkills, playerActiveFraction, manual,
-    cancelIntent, startWindup, engageTarget,
+    cancelIntent, startWindup, engageTarget, holdFiller,
   });
+
+  /** Control delays a body's whole committed plan, not only this window's already-queued events. */
+  const delayMobPlan = (mobId: string, delaySec: number): boolean => {
+    const plan = second.mobAttackPlans.get(mobId);
+    if (!plan) return false;
+    const shift = Math.round(delaySec * units);
+    for (let index = plan.nextAttack; index < plan.times.length; index++) plan.times[index] += shift;
+    plan.mob.atkTimer -= plan.rate * delaySec;
+    return true;
+  };
 
   // §7.1: the basic swing is expanded from accumulated progress into absolute-µs events, so a stop,
   // a rate change or a kill inside the window moves the queue instead of replaying the second.
   const { schedulePlayerBasic, schedulePlayerShot, sweepPlayerShots } = createPlayerBasicActions({
-    arena, clock, rng, s, c, attackCharacter, units, tickStartUs, tickEndUs, online, manual,
+    arena, clock, rng, s, c, attackCharacter, units, tickStartUs, tickEndUs,
+    plan: second.playerBasicPlan, savePlan: (plan) => { second.playerBasicPlan = plan; }, online, manual,
     crippledOutgoingMult, unstoppablePenalty, berserkDealt, playerHitsPerSec, playerActiveFraction,
-    statuses, trig, queueTrigger, recoverLeech, mobMods, mobPlans, spreadShock, mirrorReady,
+    statuses, trig, queueTrigger, recoverLeech, mobMods, delayMobPlan, spreadShock, mirrorReady,
     luckyBonus, advanceArenaAt, engageTarget, cancelIntent, onKill: killMob, dominantElement,
     applyEquilibrium, revertEquilibrium,
   });
 
-  // The rotation presses at t0 (§7.1 priority 30), before the window's own swing events.
-  schedulePlayerAction({
+  // The rotation presses at t0 (§7.1 priority 30), before the first window's own events. The buff
+  // clocks age once per second, so this press is the second's own, never one per combat step.
+  if (secondStart) schedulePlayerAction({
     arena, clock, rng, s, c, attackCharacter, autoSkills, playerActiveFraction, online, tickStartUs,
     frontId: front?.id ?? '', statuses, cooldown, ensureIntent, cancelIntent, manual,
     resolveTargetsForSkill, tranceFree, mirrorReady, luckyBonus, applyCast,
   });
 
-  const hadGroupBeforeDamage = s.group.length > 0;
-  const hadEngagement = (s.field?.engagementIds.length ?? 0) > 0;
-  // statuses age once a second, and the DoT they deal lands before the window's actions (§7.1 priority 10)
-  scheduleMobDot({
+  // statuses age once a second, and the DoT they deal lands before the second's actions (§7.1 priority 10)
+  if (secondStart) scheduleMobDot({
     clock, tickStartUs, s, c, rng, statuses, mobMods, recoverLeech, revertEquilibrium, onKill: killMob,
   });
 
@@ -1409,8 +1637,24 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
 
   /** Start an ordinary basic with an executable windup; release is the only contact receipt. */
   const { startMobBasic, scheduleMobBasic, launchMobSkillShot, scheduleMobStrike, scheduleMobAttacksFor } = createMobActions({
-    arena, clock, rng, s, units, tickStartUs, tickEndUs, advanceArenaAt, launchMobShot, cancelMobPreparation, resolveIncomingHit,
-    mobMods, mobPlans, online,
+    arena, clock, rng, s, units, tickStartUs, tickEndUs, secondEndUs: second.endUs,
+    plans: second.mobAttackPlans, advanceArenaAt, launchMobShot, cancelMobPreparation, resolveIncomingHit,
+    mobMods, shiftPlan: delayMobPlan,
+    onPhaseAdds: (boss, phase) => {
+      // F25 adds: a phase gate is a kit fact, not a timer. Adds pay ordinary rewards and carry the
+      // caller's id, so a reward read can classify them without a second settlement path.
+      const count = Math.max(1, Math.floor(Number(E.mob.phase_adds?.count ?? 2)));
+      let added = 0;
+      for (let index = 0; index < count; index++) {
+        const add = spawnMob(rng, s.zone, 'normal', undefined, s.cell?.sub ?? null, { allowWildUnique: false });
+        add.addedBy = boss.id;
+        s.group.push(add);
+        added++;
+      }
+      if (arena && added) syncCombatArena(arena, s, clock.nowUs, units, c.maxHp);
+      if (added) push(s, `${boss.species} calls ${added} add${added === 1 ? '' : 's'} (phase ${phase})`);
+    },
+    online,
   });
 
   // The player's prepared basic keeps its release beat across a tick boundary.
@@ -1460,48 +1704,32 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
     for (const shot of [...arena.mobFlights]) scheduleMobShot(shot);
     for (const shot of arena.playerShots) shot.queued = false;
     for (const shot of [...arena.playerShots]) schedulePlayerShot(shot);
-    const stepUs = Math.max(1, Math.round(E.combat_arena.movement_step_sec * units));
+    const stepUs = combatStepUs(units);
+    // Every window ends on its own movement sample, so a command received during it is judged on
+    // this beat instead of waiting for the next whole second.
     for (let atUs = tickStartUs + stepUs; atUs <= tickEndUs; atUs += stepUs) {
       clock.schedule(atUs, EVENT_PRIORITY.expire, 'arena', '', () => {
         advanceArenaAt(clock.nowUs);
         ensureIntent(clock.nowUs);
       });
     }
+    if (tickEndUs > tickStartUs && tickEndUs - tickStartUs < stepUs) {
+      clock.schedule(tickEndUs, EVENT_PRIORITY.expire, 'arena', '', () => {
+        advanceArenaAt(clock.nowUs);
+        ensureIntent(clock.nowUs);
+      });
+    }
   }
-  clock.runUntil(tickEndUs);
-  // A delayed event beyond this window was not spent; its progress is saved for the next tick.
-  for (const plan of mobPlans) plan.mob.atkTimer += plan.actionsLeft;
-  // A Boss owns a local arena epoch. Its own death receipt settles the remaining released work even
-  // while other field bodies are still alive under the population model.
-  if (s.field?.bossDefeatedAtSec === s.clockSec) {
-    cancelArenaWork('boss-exit');
-    s.field.arenaEpoch++;
-    s.field.bossDefeatedAtSec = undefined;
+  tickFxClock.set(s, { clock, arena });
+  try {
+    clock.runUntil(tickEndUs);
+  } finally {
+    tickFxClock.delete(s);
   }
-  if (hadEngagement && s.field && s.field.engagementIds.length === 0) {
-    const wasPatrolling = s.patrol.active;
-    const patrolNote = recordPatrolGroupClear(s, online);
-    if (patrolNote) push(s, patrolNote);
-    runExplorationAutomation(s, online, wasPatrolling);
+  if (clock.halted) {
+    second.halted = true;
+    second.haltedAtUs = clock.nowUs;
   }
-  if (hadGroupBeforeDamage && s.group.length === 0) {
-    const wasPatrolling = s.patrol.active;
-    const patrolNote = recordPatrolGroupClear(s, online);
-    if (patrolNote) push(s, patrolNote);
-    runExplorationAutomation(s, online, wasPatrolling);
-  }
-
-  // damage over time on us, then regen (field rule 2: regen works during combat)
-  if (!clock.halted) {
-    advanceRecovery({ s, c, statuses, debt52, units, tickStartUs, tickEndUs, playerActiveFraction });
-  }
-
-  advancePostTick(s, c, rng, statuses, statusesAppliedThisTick);
-
-  if (s.player.hp <= 0) {
-    applyPush({ s, c, statuses, cancelArenaWork });
-  }
-  settleTick(s, arena);
   return s;
 }
 
@@ -1513,7 +1741,7 @@ function tickWorld(s: GameState, opts: { online?: boolean; autoSkills?: boolean;
  *
  * The wake math lives in `clock.ts`; it is re-exported here so every existing importer keeps its path.
  */
-export { dayOf, WAKE_SEC, MAX_BATCH, schedulerBatch, catchUpPlan } from './clock';
+export { dayOf, WAKE_SEC, MAX_BATCH, schedulerBatch, schedulerSteps, catchUpPlan } from './clock';
 import { catchUpPlan, dayOf } from './clock';
 
 /** The tick loop both catch-up paths share — one order of ticks, so the numbers cannot diverge. */
@@ -1546,8 +1774,9 @@ function settleDungeonClock(s: GameState, startClock: number, secs: number): voi
   }
 }
 
-/** The longest stretch of released work one reload settles before ordinary away ticks take over. */
-const SETTLE_SECONDS_CAP = 120;
+/** The longest stretch of released work one reload settles before ordinary away ticks take over.
+ *  It is a ruleset value (`engine.json → save.settle_seconds_cap`), never a code constant. */
+const SETTLE_SECONDS_CAP = Number(E.save.settle_seconds_cap);
 
 /**
  * Arena ticks that settle released work saved with the character. A projectile owed ten seconds
@@ -1557,6 +1786,13 @@ const SETTLE_SECONDS_CAP = 120;
 function settleSavedPendingWork(s: GameState, autoSkills: boolean, budgetSec = 1): number {
   const budget = Math.min(Math.max(0, Math.floor(budgetSec)), SETTLE_SECONDS_CAP);
   let done = 0;
+  // Every target named by the released ledger is pinned while its impact is owed: the body stays
+  // in the engagement and keeps its wounds, so the shot cannot be voided by a leash reset.
+  const pinned = new Set<string>();
+  for (const flight of s.pendingWork?.flights ?? []) {
+    for (const id of flight.targetIds) pinned.add(id);
+    if (flight.area?.targetId) pinned.add(flight.area.targetId);
+  }
   while (s.pendingWork && done < budget) {
     const units = tree.mechanics?.combat_time_units_per_sec ?? 1;
     const arena = createCombatArena();
@@ -1565,7 +1801,7 @@ function settleSavedPendingWork(s: GameState, autoSkills: boolean, budgetSec = 1
       s.pendingWork = null;
       break;
     }
-    tick(s, { online: false, autoSkills, settleArena: arena });
+    tick(s, { online: false, autoSkills, settleArena: arena, settlePinned: pinned });
     done++;
     if (!s.pendingWork) break;
   }

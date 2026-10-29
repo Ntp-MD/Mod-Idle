@@ -13,6 +13,8 @@ ROX / Ragnarok Origin is the reference for combat feel only. Do not use Melvor o
 | `AGENTS.md` | Workflow, ownership, commands and verification | Starting work; reuse once loaded |
 | `docs/glossary.md` | Short definitions of game terms | A term is ambiguous, new or renamed |
 | `docs/map-art.md` | Map terrain artwork contract and the projected ground footprint | Producing or placing terrain hex art |
+| `docs/animation.md` | Runtime identity → rig/clip resolution, sockets, phase floor and fallback naming | Importing a model, rig, clip or equipment socket |
+| `docs/renderer-decision.md` | Renderer candidate, evidence and the hardware gate before cutover | Choosing or cutting over a world renderer |
 | `game/src/assets/` | Runtime non-shelf images (backgrounds, skins); not keyed by the icon resolver | Adding a non-glyph runtime image |
 | `tools/data/*.json` | Numbers, tuning, catalogues and content | Changing or tracing those values |
 | `engine/`, `game/src/` | Implementation, interfaces and UI appearance | Working on the affected code |

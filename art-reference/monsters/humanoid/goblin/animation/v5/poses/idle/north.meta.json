@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "action": "idle",
+  "direction": "north",
+  "generator": "Lossless extraction from visually-approved root Goblin atlas",
+  "source": "../../../../atlas/animation.png",
+  "sourcePixelsModified": false,
+  "sourceCellIndex": 4,
+  "sourceCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "visibleAlphaGt8BoundsExclusive": [
+    133,
+    150,
+    258,
+    288
+  ],
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "copied from approved Goblin animation meta",
+  "bakedWeapon": "spear",
+  "status": "approved-source-pose",
+  "visualReview": {
+    "status": "failed-weapon-hand",
+    "review": "Legacybackview places spear screen-left, which conflicts with canonical anatomicalRIGHT hand derivedfrom Southfront. Backview must spear screen-right.",
+    "requiresRegeneration": true
+  },
+  "pendingRegeneration": {
+    "prompt": "Use case: identity-preserve. Create ONE transparent pixel-art RPG Goblin idle sprite. Input is canonical FRONT view: it holds ONE spear in its anatomical RIGHT HAND, which appears SCREEN-LEFT in that front view. Generate the exact same creature now seen DIRECTLY FROM BEHIND: NORTH direction180degrees away from viewer, fixed elevated three-quarter camera. Back of roundolivehead, ear backs and crossed brown backstraps face camera. NO visible face or orangeeyes. IMPORTANT HAND LOCK: from this BACK view its anatomical RIGHT HAND MUST be on SCREEN-RIGHT, holding the ONE upright wooden spear on SCREEN-RIGHT. Its SCREEN-LEFT hand is EMPTY. Exactly one silver spearhead, nootherweapon. Same compactproportions, brown hidewrap, greenfeet and crisp detailedpixelclusters as reference. Neutral standingpose, broad transparent margins all sides, wholebody and wholeweapon. No floor/shadow/text/VFX. Do not mirror the picture; reconstruct correct back anatomy.",
+    "status": "blocked-imagegen-quota",
+    "error": "HTTP429 usage_limit_reached",
+    "resetsAt": 1793288069
+  }
+}

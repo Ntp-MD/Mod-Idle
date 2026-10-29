@@ -1,0 +1,1483 @@
+{
+  "status": "blocked-imagegen-usage-limit",
+  "expectedPoseCount": 272,
+  "presentPoseCount": 40,
+  "generatedCandidateCount": 1,
+  "baselinePoseCount": 39,
+  "approvedNewPoseCount": 0,
+  "byAction": {
+    "idle": {
+      "present": 8,
+      "generatedCandidates": 1,
+      "baselineReferences": 7,
+      "missing": 8
+    },
+    "walk": {
+      "present": 8,
+      "generatedCandidates": 0,
+      "baselineReferences": 8,
+      "missing": 56
+    },
+    "attack": {
+      "present": 8,
+      "generatedCandidates": 0,
+      "baselineReferences": 8,
+      "missing": 56
+    },
+    "hit": {
+      "present": 8,
+      "generatedCandidates": 0,
+      "baselineReferences": 8,
+      "missing": 56
+    },
+    "death": {
+      "present": 8,
+      "generatedCandidates": 0,
+      "baselineReferences": 8,
+      "missing": 56
+    }
+  },
+  "missing": [
+    {
+      "action": "idle",
+      "direction": "south-south-east",
+      "file": "south-south-east.png",
+      "pose": "balanced neutral idle matching species reference anatomy"
+    },
+    {
+      "action": "idle",
+      "direction": "east-south-east",
+      "file": "east-south-east.png",
+      "pose": "balanced neutral idle matching species reference anatomy"
+    },
+    {
+      "action": "idle",
+      "direction": "east-north-east",
+      "file": "east-north-east.png",
+      "pose": "balanced neutral idle matching species reference anatomy"
+    },
+    {
+      "action": "idle",
+      "direction": "north-north-east",
+      "file": "north-north-east.png",
+      "pose": "balanced neutral idle matching species reference anatomy"
+    },
+    {
+      "action": "idle",
+      "direction": "north-north-west",
+      "file": "north-north-west.png",
+      "pose": "balanced neutral idle matching species reference anatomy"
+    },
+    {
+      "action": "idle",
+      "direction": "west-north-west",
+      "file": "west-north-west.png",
+      "pose": "balanced neutral idle matching species reference anatomy"
+    },
+    {
+      "action": "idle",
+      "direction": "west-south-west",
+      "file": "west-south-west.png",
+      "pose": "balanced neutral idle matching species reference anatomy"
+    },
+    {
+      "action": "idle",
+      "direction": "south-south-west",
+      "file": "south-south-west.png",
+      "pose": "balanced neutral idle matching species reference anatomy"
+    },
+    {
+      "action": "walk",
+      "direction": "south",
+      "file": "00-stride-a.png",
+      "pose": "small quadruped stride with folded wings and tail balance; first planted support and opposite limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "south",
+      "file": "01-stride-b.png",
+      "pose": "small quadruped stride with folded wings and tail balance; body passes over planted support"
+    },
+    {
+      "action": "walk",
+      "direction": "south",
+      "file": "02-stride-c.png",
+      "pose": "small quadruped stride with folded wings and tail balance; opposite support planted and first limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "south",
+      "file": "03-stride-d.png",
+      "pose": "small quadruped stride with folded wings and tail balance; return toward first support for seamless cycle"
+    },
+    {
+      "action": "walk",
+      "direction": "south-south-east",
+      "file": "00-stride-a.png",
+      "pose": "small quadruped stride with folded wings and tail balance; first planted support and opposite limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "south-south-east",
+      "file": "01-stride-b.png",
+      "pose": "small quadruped stride with folded wings and tail balance; body passes over planted support"
+    },
+    {
+      "action": "walk",
+      "direction": "south-south-east",
+      "file": "02-stride-c.png",
+      "pose": "small quadruped stride with folded wings and tail balance; opposite support planted and first limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "south-south-east",
+      "file": "03-stride-d.png",
+      "pose": "small quadruped stride with folded wings and tail balance; return toward first support for seamless cycle"
+    },
+    {
+      "action": "walk",
+      "direction": "south-east",
+      "file": "00-stride-a.png",
+      "pose": "small quadruped stride with folded wings and tail balance; first planted support and opposite limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "south-east",
+      "file": "01-stride-b.png",
+      "pose": "small quadruped stride with folded wings and tail balance; body passes over planted support"
+    },
+    {
+      "action": "walk",
+      "direction": "south-east",
+      "file": "02-stride-c.png",
+      "pose": "small quadruped stride with folded wings and tail balance; opposite support planted and first limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "south-east",
+      "file": "03-stride-d.png",
+      "pose": "small quadruped stride with folded wings and tail balance; return toward first support for seamless cycle"
+    },
+    {
+      "action": "walk",
+      "direction": "east-south-east",
+      "file": "00-stride-a.png",
+      "pose": "small quadruped stride with folded wings and tail balance; first planted support and opposite limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "east-south-east",
+      "file": "01-stride-b.png",
+      "pose": "small quadruped stride with folded wings and tail balance; body passes over planted support"
+    },
+    {
+      "action": "walk",
+      "direction": "east-south-east",
+      "file": "02-stride-c.png",
+      "pose": "small quadruped stride with folded wings and tail balance; opposite support planted and first limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "east-south-east",
+      "file": "03-stride-d.png",
+      "pose": "small quadruped stride with folded wings and tail balance; return toward first support for seamless cycle"
+    },
+    {
+      "action": "walk",
+      "direction": "east-north-east",
+      "file": "00-stride-a.png",
+      "pose": "small quadruped stride with folded wings and tail balance; first planted support and opposite limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "east-north-east",
+      "file": "01-stride-b.png",
+      "pose": "small quadruped stride with folded wings and tail balance; body passes over planted support"
+    },
+    {
+      "action": "walk",
+      "direction": "east-north-east",
+      "file": "02-stride-c.png",
+      "pose": "small quadruped stride with folded wings and tail balance; opposite support planted and first limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "east-north-east",
+      "file": "03-stride-d.png",
+      "pose": "small quadruped stride with folded wings and tail balance; return toward first support for seamless cycle"
+    },
+    {
+      "action": "walk",
+      "direction": "north-east",
+      "file": "00-stride-a.png",
+      "pose": "small quadruped stride with folded wings and tail balance; first planted support and opposite limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "north-east",
+      "file": "01-stride-b.png",
+      "pose": "small quadruped stride with folded wings and tail balance; body passes over planted support"
+    },
+    {
+      "action": "walk",
+      "direction": "north-east",
+      "file": "02-stride-c.png",
+      "pose": "small quadruped stride with folded wings and tail balance; opposite support planted and first limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "north-east",
+      "file": "03-stride-d.png",
+      "pose": "small quadruped stride with folded wings and tail balance; return toward first support for seamless cycle"
+    },
+    {
+      "action": "walk",
+      "direction": "north-north-east",
+      "file": "00-stride-a.png",
+      "pose": "small quadruped stride with folded wings and tail balance; first planted support and opposite limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "north-north-east",
+      "file": "01-stride-b.png",
+      "pose": "small quadruped stride with folded wings and tail balance; body passes over planted support"
+    },
+    {
+      "action": "walk",
+      "direction": "north-north-east",
+      "file": "02-stride-c.png",
+      "pose": "small quadruped stride with folded wings and tail balance; opposite support planted and first limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "north-north-east",
+      "file": "03-stride-d.png",
+      "pose": "small quadruped stride with folded wings and tail balance; return toward first support for seamless cycle"
+    },
+    {
+      "action": "walk",
+      "direction": "north",
+      "file": "00-stride-a.png",
+      "pose": "small quadruped stride with folded wings and tail balance; first planted support and opposite limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "north",
+      "file": "01-stride-b.png",
+      "pose": "small quadruped stride with folded wings and tail balance; body passes over planted support"
+    },
+    {
+      "action": "walk",
+      "direction": "north",
+      "file": "02-stride-c.png",
+      "pose": "small quadruped stride with folded wings and tail balance; opposite support planted and first limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "north",
+      "file": "03-stride-d.png",
+      "pose": "small quadruped stride with folded wings and tail balance; return toward first support for seamless cycle"
+    },
+    {
+      "action": "walk",
+      "direction": "north-north-west",
+      "file": "00-stride-a.png",
+      "pose": "small quadruped stride with folded wings and tail balance; first planted support and opposite limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "north-north-west",
+      "file": "01-stride-b.png",
+      "pose": "small quadruped stride with folded wings and tail balance; body passes over planted support"
+    },
+    {
+      "action": "walk",
+      "direction": "north-north-west",
+      "file": "02-stride-c.png",
+      "pose": "small quadruped stride with folded wings and tail balance; opposite support planted and first limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "north-north-west",
+      "file": "03-stride-d.png",
+      "pose": "small quadruped stride with folded wings and tail balance; return toward first support for seamless cycle"
+    },
+    {
+      "action": "walk",
+      "direction": "north-west",
+      "file": "00-stride-a.png",
+      "pose": "small quadruped stride with folded wings and tail balance; first planted support and opposite limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "north-west",
+      "file": "01-stride-b.png",
+      "pose": "small quadruped stride with folded wings and tail balance; body passes over planted support"
+    },
+    {
+      "action": "walk",
+      "direction": "north-west",
+      "file": "02-stride-c.png",
+      "pose": "small quadruped stride with folded wings and tail balance; opposite support planted and first limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "north-west",
+      "file": "03-stride-d.png",
+      "pose": "small quadruped stride with folded wings and tail balance; return toward first support for seamless cycle"
+    },
+    {
+      "action": "walk",
+      "direction": "west-north-west",
+      "file": "00-stride-a.png",
+      "pose": "small quadruped stride with folded wings and tail balance; first planted support and opposite limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "west-north-west",
+      "file": "01-stride-b.png",
+      "pose": "small quadruped stride with folded wings and tail balance; body passes over planted support"
+    },
+    {
+      "action": "walk",
+      "direction": "west-north-west",
+      "file": "02-stride-c.png",
+      "pose": "small quadruped stride with folded wings and tail balance; opposite support planted and first limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "west-north-west",
+      "file": "03-stride-d.png",
+      "pose": "small quadruped stride with folded wings and tail balance; return toward first support for seamless cycle"
+    },
+    {
+      "action": "walk",
+      "direction": "west-south-west",
+      "file": "00-stride-a.png",
+      "pose": "small quadruped stride with folded wings and tail balance; first planted support and opposite limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "west-south-west",
+      "file": "01-stride-b.png",
+      "pose": "small quadruped stride with folded wings and tail balance; body passes over planted support"
+    },
+    {
+      "action": "walk",
+      "direction": "west-south-west",
+      "file": "02-stride-c.png",
+      "pose": "small quadruped stride with folded wings and tail balance; opposite support planted and first limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "west-south-west",
+      "file": "03-stride-d.png",
+      "pose": "small quadruped stride with folded wings and tail balance; return toward first support for seamless cycle"
+    },
+    {
+      "action": "walk",
+      "direction": "south-west",
+      "file": "00-stride-a.png",
+      "pose": "small quadruped stride with folded wings and tail balance; first planted support and opposite limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "south-west",
+      "file": "01-stride-b.png",
+      "pose": "small quadruped stride with folded wings and tail balance; body passes over planted support"
+    },
+    {
+      "action": "walk",
+      "direction": "south-west",
+      "file": "02-stride-c.png",
+      "pose": "small quadruped stride with folded wings and tail balance; opposite support planted and first limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "south-west",
+      "file": "03-stride-d.png",
+      "pose": "small quadruped stride with folded wings and tail balance; return toward first support for seamless cycle"
+    },
+    {
+      "action": "walk",
+      "direction": "south-south-west",
+      "file": "00-stride-a.png",
+      "pose": "small quadruped stride with folded wings and tail balance; first planted support and opposite limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "south-south-west",
+      "file": "01-stride-b.png",
+      "pose": "small quadruped stride with folded wings and tail balance; body passes over planted support"
+    },
+    {
+      "action": "walk",
+      "direction": "south-south-west",
+      "file": "02-stride-c.png",
+      "pose": "small quadruped stride with folded wings and tail balance; opposite support planted and first limb reaching"
+    },
+    {
+      "action": "walk",
+      "direction": "south-south-west",
+      "file": "03-stride-d.png",
+      "pose": "small quadruped stride with folded wings and tail balance; return toward first support for seamless cycle"
+    },
+    {
+      "action": "attack",
+      "direction": "south",
+      "file": "00-windup.png",
+      "pose": "jaw bite; anticipation gathers body without changing world root"
+    },
+    {
+      "action": "attack",
+      "direction": "south",
+      "file": "01-contact.png",
+      "pose": "jaw bite; maximum extension at authoritative contact"
+    },
+    {
+      "action": "attack",
+      "direction": "south",
+      "file": "02-follow-through.png",
+      "pose": "jaw bite; follow-through, controlled weight transfer"
+    },
+    {
+      "action": "attack",
+      "direction": "south",
+      "file": "03-recovery.png",
+      "pose": "jaw bite; return to neutral idle silhouette"
+    },
+    {
+      "action": "attack",
+      "direction": "south-south-east",
+      "file": "00-windup.png",
+      "pose": "jaw bite; anticipation gathers body without changing world root"
+    },
+    {
+      "action": "attack",
+      "direction": "south-south-east",
+      "file": "01-contact.png",
+      "pose": "jaw bite; maximum extension at authoritative contact"
+    },
+    {
+      "action": "attack",
+      "direction": "south-south-east",
+      "file": "02-follow-through.png",
+      "pose": "jaw bite; follow-through, controlled weight transfer"
+    },
+    {
+      "action": "attack",
+      "direction": "south-south-east",
+      "file": "03-recovery.png",
+      "pose": "jaw bite; return to neutral idle silhouette"
+    },
+    {
+      "action": "attack",
+      "direction": "south-east",
+      "file": "00-windup.png",
+      "pose": "jaw bite; anticipation gathers body without changing world root"
+    },
+    {
+      "action": "attack",
+      "direction": "south-east",
+      "file": "01-contact.png",
+      "pose": "jaw bite; maximum extension at authoritative contact"
+    },
+    {
+      "action": "attack",
+      "direction": "south-east",
+      "file": "02-follow-through.png",
+      "pose": "jaw bite; follow-through, controlled weight transfer"
+    },
+    {
+      "action": "attack",
+      "direction": "south-east",
+      "file": "03-recovery.png",
+      "pose": "jaw bite; return to neutral idle silhouette"
+    },
+    {
+      "action": "attack",
+      "direction": "east-south-east",
+      "file": "00-windup.png",
+      "pose": "jaw bite; anticipation gathers body without changing world root"
+    },
+    {
+      "action": "attack",
+      "direction": "east-south-east",
+      "file": "01-contact.png",
+      "pose": "jaw bite; maximum extension at authoritative contact"
+    },
+    {
+      "action": "attack",
+      "direction": "east-south-east",
+      "file": "02-follow-through.png",
+      "pose": "jaw bite; follow-through, controlled weight transfer"
+    },
+    {
+      "action": "attack",
+      "direction": "east-south-east",
+      "file": "03-recovery.png",
+      "pose": "jaw bite; return to neutral idle silhouette"
+    },
+    {
+      "action": "attack",
+      "direction": "east-north-east",
+      "file": "00-windup.png",
+      "pose": "jaw bite; anticipation gathers body without changing world root"
+    },
+    {
+      "action": "attack",
+      "direction": "east-north-east",
+      "file": "01-contact.png",
+      "pose": "jaw bite; maximum extension at authoritative contact"
+    },
+    {
+      "action": "attack",
+      "direction": "east-north-east",
+      "file": "02-follow-through.png",
+      "pose": "jaw bite; follow-through, controlled weight transfer"
+    },
+    {
+      "action": "attack",
+      "direction": "east-north-east",
+      "file": "03-recovery.png",
+      "pose": "jaw bite; return to neutral idle silhouette"
+    },
+    {
+      "action": "attack",
+      "direction": "north-east",
+      "file": "00-windup.png",
+      "pose": "jaw bite; anticipation gathers body without changing world root"
+    },
+    {
+      "action": "attack",
+      "direction": "north-east",
+      "file": "01-contact.png",
+      "pose": "jaw bite; maximum extension at authoritative contact"
+    },
+    {
+      "action": "attack",
+      "direction": "north-east",
+      "file": "02-follow-through.png",
+      "pose": "jaw bite; follow-through, controlled weight transfer"
+    },
+    {
+      "action": "attack",
+      "direction": "north-east",
+      "file": "03-recovery.png",
+      "pose": "jaw bite; return to neutral idle silhouette"
+    },
+    {
+      "action": "attack",
+      "direction": "north-north-east",
+      "file": "00-windup.png",
+      "pose": "jaw bite; anticipation gathers body without changing world root"
+    },
+    {
+      "action": "attack",
+      "direction": "north-north-east",
+      "file": "01-contact.png",
+      "pose": "jaw bite; maximum extension at authoritative contact"
+    },
+    {
+      "action": "attack",
+      "direction": "north-north-east",
+      "file": "02-follow-through.png",
+      "pose": "jaw bite; follow-through, controlled weight transfer"
+    },
+    {
+      "action": "attack",
+      "direction": "north-north-east",
+      "file": "03-recovery.png",
+      "pose": "jaw bite; return to neutral idle silhouette"
+    },
+    {
+      "action": "attack",
+      "direction": "north",
+      "file": "00-windup.png",
+      "pose": "jaw bite; anticipation gathers body without changing world root"
+    },
+    {
+      "action": "attack",
+      "direction": "north",
+      "file": "01-contact.png",
+      "pose": "jaw bite; maximum extension at authoritative contact"
+    },
+    {
+      "action": "attack",
+      "direction": "north",
+      "file": "02-follow-through.png",
+      "pose": "jaw bite; follow-through, controlled weight transfer"
+    },
+    {
+      "action": "attack",
+      "direction": "north",
+      "file": "03-recovery.png",
+      "pose": "jaw bite; return to neutral idle silhouette"
+    },
+    {
+      "action": "attack",
+      "direction": "north-north-west",
+      "file": "00-windup.png",
+      "pose": "jaw bite; anticipation gathers body without changing world root"
+    },
+    {
+      "action": "attack",
+      "direction": "north-north-west",
+      "file": "01-contact.png",
+      "pose": "jaw bite; maximum extension at authoritative contact"
+    },
+    {
+      "action": "attack",
+      "direction": "north-north-west",
+      "file": "02-follow-through.png",
+      "pose": "jaw bite; follow-through, controlled weight transfer"
+    },
+    {
+      "action": "attack",
+      "direction": "north-north-west",
+      "file": "03-recovery.png",
+      "pose": "jaw bite; return to neutral idle silhouette"
+    },
+    {
+      "action": "attack",
+      "direction": "north-west",
+      "file": "00-windup.png",
+      "pose": "jaw bite; anticipation gathers body without changing world root"
+    },
+    {
+      "action": "attack",
+      "direction": "north-west",
+      "file": "01-contact.png",
+      "pose": "jaw bite; maximum extension at authoritative contact"
+    },
+    {
+      "action": "attack",
+      "direction": "north-west",
+      "file": "02-follow-through.png",
+      "pose": "jaw bite; follow-through, controlled weight transfer"
+    },
+    {
+      "action": "attack",
+      "direction": "north-west",
+      "file": "03-recovery.png",
+      "pose": "jaw bite; return to neutral idle silhouette"
+    },
+    {
+      "action": "attack",
+      "direction": "west-north-west",
+      "file": "00-windup.png",
+      "pose": "jaw bite; anticipation gathers body without changing world root"
+    },
+    {
+      "action": "attack",
+      "direction": "west-north-west",
+      "file": "01-contact.png",
+      "pose": "jaw bite; maximum extension at authoritative contact"
+    },
+    {
+      "action": "attack",
+      "direction": "west-north-west",
+      "file": "02-follow-through.png",
+      "pose": "jaw bite; follow-through, controlled weight transfer"
+    },
+    {
+      "action": "attack",
+      "direction": "west-north-west",
+      "file": "03-recovery.png",
+      "pose": "jaw bite; return to neutral idle silhouette"
+    },
+    {
+      "action": "attack",
+      "direction": "west-south-west",
+      "file": "00-windup.png",
+      "pose": "jaw bite; anticipation gathers body without changing world root"
+    },
+    {
+      "action": "attack",
+      "direction": "west-south-west",
+      "file": "01-contact.png",
+      "pose": "jaw bite; maximum extension at authoritative contact"
+    },
+    {
+      "action": "attack",
+      "direction": "west-south-west",
+      "file": "02-follow-through.png",
+      "pose": "jaw bite; follow-through, controlled weight transfer"
+    },
+    {
+      "action": "attack",
+      "direction": "west-south-west",
+      "file": "03-recovery.png",
+      "pose": "jaw bite; return to neutral idle silhouette"
+    },
+    {
+      "action": "attack",
+      "direction": "south-west",
+      "file": "00-windup.png",
+      "pose": "jaw bite; anticipation gathers body without changing world root"
+    },
+    {
+      "action": "attack",
+      "direction": "south-west",
+      "file": "01-contact.png",
+      "pose": "jaw bite; maximum extension at authoritative contact"
+    },
+    {
+      "action": "attack",
+      "direction": "south-west",
+      "file": "02-follow-through.png",
+      "pose": "jaw bite; follow-through, controlled weight transfer"
+    },
+    {
+      "action": "attack",
+      "direction": "south-west",
+      "file": "03-recovery.png",
+      "pose": "jaw bite; return to neutral idle silhouette"
+    },
+    {
+      "action": "attack",
+      "direction": "south-south-west",
+      "file": "00-windup.png",
+      "pose": "jaw bite; anticipation gathers body without changing world root"
+    },
+    {
+      "action": "attack",
+      "direction": "south-south-west",
+      "file": "01-contact.png",
+      "pose": "jaw bite; maximum extension at authoritative contact"
+    },
+    {
+      "action": "attack",
+      "direction": "south-south-west",
+      "file": "02-follow-through.png",
+      "pose": "jaw bite; follow-through, controlled weight transfer"
+    },
+    {
+      "action": "attack",
+      "direction": "south-south-west",
+      "file": "03-recovery.png",
+      "pose": "jaw bite; return to neutral idle silhouette"
+    },
+    {
+      "action": "hit",
+      "direction": "south",
+      "file": "00-flinch.png",
+      "pose": "brief impact flinch preserving planted root"
+    },
+    {
+      "action": "hit",
+      "direction": "south",
+      "file": "01-recoil.png",
+      "pose": "peak recoil with compressed body"
+    },
+    {
+      "action": "hit",
+      "direction": "south",
+      "file": "02-recover.png",
+      "pose": "body straightens back toward balanced idle"
+    },
+    {
+      "action": "hit",
+      "direction": "south",
+      "file": "03-ready.png",
+      "pose": "same balanced pose as idle for clean transition"
+    },
+    {
+      "action": "hit",
+      "direction": "south-south-east",
+      "file": "00-flinch.png",
+      "pose": "brief impact flinch preserving planted root"
+    },
+    {
+      "action": "hit",
+      "direction": "south-south-east",
+      "file": "01-recoil.png",
+      "pose": "peak recoil with compressed body"
+    },
+    {
+      "action": "hit",
+      "direction": "south-south-east",
+      "file": "02-recover.png",
+      "pose": "body straightens back toward balanced idle"
+    },
+    {
+      "action": "hit",
+      "direction": "south-south-east",
+      "file": "03-ready.png",
+      "pose": "same balanced pose as idle for clean transition"
+    },
+    {
+      "action": "hit",
+      "direction": "south-east",
+      "file": "00-flinch.png",
+      "pose": "brief impact flinch preserving planted root"
+    },
+    {
+      "action": "hit",
+      "direction": "south-east",
+      "file": "01-recoil.png",
+      "pose": "peak recoil with compressed body"
+    },
+    {
+      "action": "hit",
+      "direction": "south-east",
+      "file": "02-recover.png",
+      "pose": "body straightens back toward balanced idle"
+    },
+    {
+      "action": "hit",
+      "direction": "south-east",
+      "file": "03-ready.png",
+      "pose": "same balanced pose as idle for clean transition"
+    },
+    {
+      "action": "hit",
+      "direction": "east-south-east",
+      "file": "00-flinch.png",
+      "pose": "brief impact flinch preserving planted root"
+    },
+    {
+      "action": "hit",
+      "direction": "east-south-east",
+      "file": "01-recoil.png",
+      "pose": "peak recoil with compressed body"
+    },
+    {
+      "action": "hit",
+      "direction": "east-south-east",
+      "file": "02-recover.png",
+      "pose": "body straightens back toward balanced idle"
+    },
+    {
+      "action": "hit",
+      "direction": "east-south-east",
+      "file": "03-ready.png",
+      "pose": "same balanced pose as idle for clean transition"
+    },
+    {
+      "action": "hit",
+      "direction": "east-north-east",
+      "file": "00-flinch.png",
+      "pose": "brief impact flinch preserving planted root"
+    },
+    {
+      "action": "hit",
+      "direction": "east-north-east",
+      "file": "01-recoil.png",
+      "pose": "peak recoil with compressed body"
+    },
+    {
+      "action": "hit",
+      "direction": "east-north-east",
+      "file": "02-recover.png",
+      "pose": "body straightens back toward balanced idle"
+    },
+    {
+      "action": "hit",
+      "direction": "east-north-east",
+      "file": "03-ready.png",
+      "pose": "same balanced pose as idle for clean transition"
+    },
+    {
+      "action": "hit",
+      "direction": "north-east",
+      "file": "00-flinch.png",
+      "pose": "brief impact flinch preserving planted root"
+    },
+    {
+      "action": "hit",
+      "direction": "north-east",
+      "file": "01-recoil.png",
+      "pose": "peak recoil with compressed body"
+    },
+    {
+      "action": "hit",
+      "direction": "north-east",
+      "file": "02-recover.png",
+      "pose": "body straightens back toward balanced idle"
+    },
+    {
+      "action": "hit",
+      "direction": "north-east",
+      "file": "03-ready.png",
+      "pose": "same balanced pose as idle for clean transition"
+    },
+    {
+      "action": "hit",
+      "direction": "north-north-east",
+      "file": "00-flinch.png",
+      "pose": "brief impact flinch preserving planted root"
+    },
+    {
+      "action": "hit",
+      "direction": "north-north-east",
+      "file": "01-recoil.png",
+      "pose": "peak recoil with compressed body"
+    },
+    {
+      "action": "hit",
+      "direction": "north-north-east",
+      "file": "02-recover.png",
+      "pose": "body straightens back toward balanced idle"
+    },
+    {
+      "action": "hit",
+      "direction": "north-north-east",
+      "file": "03-ready.png",
+      "pose": "same balanced pose as idle for clean transition"
+    },
+    {
+      "action": "hit",
+      "direction": "north",
+      "file": "00-flinch.png",
+      "pose": "brief impact flinch preserving planted root"
+    },
+    {
+      "action": "hit",
+      "direction": "north",
+      "file": "01-recoil.png",
+      "pose": "peak recoil with compressed body"
+    },
+    {
+      "action": "hit",
+      "direction": "north",
+      "file": "02-recover.png",
+      "pose": "body straightens back toward balanced idle"
+    },
+    {
+      "action": "hit",
+      "direction": "north",
+      "file": "03-ready.png",
+      "pose": "same balanced pose as idle for clean transition"
+    },
+    {
+      "action": "hit",
+      "direction": "north-north-west",
+      "file": "00-flinch.png",
+      "pose": "brief impact flinch preserving planted root"
+    },
+    {
+      "action": "hit",
+      "direction": "north-north-west",
+      "file": "01-recoil.png",
+      "pose": "peak recoil with compressed body"
+    },
+    {
+      "action": "hit",
+      "direction": "north-north-west",
+      "file": "02-recover.png",
+      "pose": "body straightens back toward balanced idle"
+    },
+    {
+      "action": "hit",
+      "direction": "north-north-west",
+      "file": "03-ready.png",
+      "pose": "same balanced pose as idle for clean transition"
+    },
+    {
+      "action": "hit",
+      "direction": "north-west",
+      "file": "00-flinch.png",
+      "pose": "brief impact flinch preserving planted root"
+    },
+    {
+      "action": "hit",
+      "direction": "north-west",
+      "file": "01-recoil.png",
+      "pose": "peak recoil with compressed body"
+    },
+    {
+      "action": "hit",
+      "direction": "north-west",
+      "file": "02-recover.png",
+      "pose": "body straightens back toward balanced idle"
+    },
+    {
+      "action": "hit",
+      "direction": "north-west",
+      "file": "03-ready.png",
+      "pose": "same balanced pose as idle for clean transition"
+    },
+    {
+      "action": "hit",
+      "direction": "west-north-west",
+      "file": "00-flinch.png",
+      "pose": "brief impact flinch preserving planted root"
+    },
+    {
+      "action": "hit",
+      "direction": "west-north-west",
+      "file": "01-recoil.png",
+      "pose": "peak recoil with compressed body"
+    },
+    {
+      "action": "hit",
+      "direction": "west-north-west",
+      "file": "02-recover.png",
+      "pose": "body straightens back toward balanced idle"
+    },
+    {
+      "action": "hit",
+      "direction": "west-north-west",
+      "file": "03-ready.png",
+      "pose": "same balanced pose as idle for clean transition"
+    },
+    {
+      "action": "hit",
+      "direction": "west-south-west",
+      "file": "00-flinch.png",
+      "pose": "brief impact flinch preserving planted root"
+    },
+    {
+      "action": "hit",
+      "direction": "west-south-west",
+      "file": "01-recoil.png",
+      "pose": "peak recoil with compressed body"
+    },
+    {
+      "action": "hit",
+      "direction": "west-south-west",
+      "file": "02-recover.png",
+      "pose": "body straightens back toward balanced idle"
+    },
+    {
+      "action": "hit",
+      "direction": "west-south-west",
+      "file": "03-ready.png",
+      "pose": "same balanced pose as idle for clean transition"
+    },
+    {
+      "action": "hit",
+      "direction": "south-west",
+      "file": "00-flinch.png",
+      "pose": "brief impact flinch preserving planted root"
+    },
+    {
+      "action": "hit",
+      "direction": "south-west",
+      "file": "01-recoil.png",
+      "pose": "peak recoil with compressed body"
+    },
+    {
+      "action": "hit",
+      "direction": "south-west",
+      "file": "02-recover.png",
+      "pose": "body straightens back toward balanced idle"
+    },
+    {
+      "action": "hit",
+      "direction": "south-west",
+      "file": "03-ready.png",
+      "pose": "same balanced pose as idle for clean transition"
+    },
+    {
+      "action": "hit",
+      "direction": "south-south-west",
+      "file": "00-flinch.png",
+      "pose": "brief impact flinch preserving planted root"
+    },
+    {
+      "action": "hit",
+      "direction": "south-south-west",
+      "file": "01-recoil.png",
+      "pose": "peak recoil with compressed body"
+    },
+    {
+      "action": "hit",
+      "direction": "south-south-west",
+      "file": "02-recover.png",
+      "pose": "body straightens back toward balanced idle"
+    },
+    {
+      "action": "hit",
+      "direction": "south-south-west",
+      "file": "03-ready.png",
+      "pose": "same balanced pose as idle for clean transition"
+    },
+    {
+      "action": "death",
+      "direction": "south",
+      "file": "00-fall.png",
+      "pose": "defeated body tips and support buckles"
+    },
+    {
+      "action": "death",
+      "direction": "south",
+      "file": "01-collapse.png",
+      "pose": "body collapses sideways with all anatomy intact"
+    },
+    {
+      "action": "death",
+      "direction": "south",
+      "file": "02-ground.png",
+      "pose": "fully grounded body, wings and tail contained naturally"
+    },
+    {
+      "action": "death",
+      "direction": "south",
+      "file": "03-settle.png",
+      "pose": "final grounded still corpse with no disappearing anatomy"
+    },
+    {
+      "action": "death",
+      "direction": "south-south-east",
+      "file": "00-fall.png",
+      "pose": "defeated body tips and support buckles"
+    },
+    {
+      "action": "death",
+      "direction": "south-south-east",
+      "file": "01-collapse.png",
+      "pose": "body collapses sideways with all anatomy intact"
+    },
+    {
+      "action": "death",
+      "direction": "south-south-east",
+      "file": "02-ground.png",
+      "pose": "fully grounded body, wings and tail contained naturally"
+    },
+    {
+      "action": "death",
+      "direction": "south-south-east",
+      "file": "03-settle.png",
+      "pose": "final grounded still corpse with no disappearing anatomy"
+    },
+    {
+      "action": "death",
+      "direction": "south-east",
+      "file": "00-fall.png",
+      "pose": "defeated body tips and support buckles"
+    },
+    {
+      "action": "death",
+      "direction": "south-east",
+      "file": "01-collapse.png",
+      "pose": "body collapses sideways with all anatomy intact"
+    },
+    {
+      "action": "death",
+      "direction": "south-east",
+      "file": "02-ground.png",
+      "pose": "fully grounded body, wings and tail contained naturally"
+    },
+    {
+      "action": "death",
+      "direction": "south-east",
+      "file": "03-settle.png",
+      "pose": "final grounded still corpse with no disappearing anatomy"
+    },
+    {
+      "action": "death",
+      "direction": "east-south-east",
+      "file": "00-fall.png",
+      "pose": "defeated body tips and support buckles"
+    },
+    {
+      "action": "death",
+      "direction": "east-south-east",
+      "file": "01-collapse.png",
+      "pose": "body collapses sideways with all anatomy intact"
+    },
+    {
+      "action": "death",
+      "direction": "east-south-east",
+      "file": "02-ground.png",
+      "pose": "fully grounded body, wings and tail contained naturally"
+    },
+    {
+      "action": "death",
+      "direction": "east-south-east",
+      "file": "03-settle.png",
+      "pose": "final grounded still corpse with no disappearing anatomy"
+    },
+    {
+      "action": "death",
+      "direction": "east-north-east",
+      "file": "00-fall.png",
+      "pose": "defeated body tips and support buckles"
+    },
+    {
+      "action": "death",
+      "direction": "east-north-east",
+      "file": "01-collapse.png",
+      "pose": "body collapses sideways with all anatomy intact"
+    },
+    {
+      "action": "death",
+      "direction": "east-north-east",
+      "file": "02-ground.png",
+      "pose": "fully grounded body, wings and tail contained naturally"
+    },
+    {
+      "action": "death",
+      "direction": "east-north-east",
+      "file": "03-settle.png",
+      "pose": "final grounded still corpse with no disappearing anatomy"
+    },
+    {
+      "action": "death",
+      "direction": "north-east",
+      "file": "00-fall.png",
+      "pose": "defeated body tips and support buckles"
+    },
+    {
+      "action": "death",
+      "direction": "north-east",
+      "file": "01-collapse.png",
+      "pose": "body collapses sideways with all anatomy intact"
+    },
+    {
+      "action": "death",
+      "direction": "north-east",
+      "file": "02-ground.png",
+      "pose": "fully grounded body, wings and tail contained naturally"
+    },
+    {
+      "action": "death",
+      "direction": "north-east",
+      "file": "03-settle.png",
+      "pose": "final grounded still corpse with no disappearing anatomy"
+    },
+    {
+      "action": "death",
+      "direction": "north-north-east",
+      "file": "00-fall.png",
+      "pose": "defeated body tips and support buckles"
+    },
+    {
+      "action": "death",
+      "direction": "north-north-east",
+      "file": "01-collapse.png",
+      "pose": "body collapses sideways with all anatomy intact"
+    },
+    {
+      "action": "death",
+      "direction": "north-north-east",
+      "file": "02-ground.png",
+      "pose": "fully grounded body, wings and tail contained naturally"
+    },
+    {
+      "action": "death",
+      "direction": "north-north-east",
+      "file": "03-settle.png",
+      "pose": "final grounded still corpse with no disappearing anatomy"
+    },
+    {
+      "action": "death",
+      "direction": "north",
+      "file": "00-fall.png",
+      "pose": "defeated body tips and support buckles"
+    },
+    {
+      "action": "death",
+      "direction": "north",
+      "file": "01-collapse.png",
+      "pose": "body collapses sideways with all anatomy intact"
+    },
+    {
+      "action": "death",
+      "direction": "north",
+      "file": "02-ground.png",
+      "pose": "fully grounded body, wings and tail contained naturally"
+    },
+    {
+      "action": "death",
+      "direction": "north",
+      "file": "03-settle.png",
+      "pose": "final grounded still corpse with no disappearing anatomy"
+    },
+    {
+      "action": "death",
+      "direction": "north-north-west",
+      "file": "00-fall.png",
+      "pose": "defeated body tips and support buckles"
+    },
+    {
+      "action": "death",
+      "direction": "north-north-west",
+      "file": "01-collapse.png",
+      "pose": "body collapses sideways with all anatomy intact"
+    },
+    {
+      "action": "death",
+      "direction": "north-north-west",
+      "file": "02-ground.png",
+      "pose": "fully grounded body, wings and tail contained naturally"
+    },
+    {
+      "action": "death",
+      "direction": "north-north-west",
+      "file": "03-settle.png",
+      "pose": "final grounded still corpse with no disappearing anatomy"
+    },
+    {
+      "action": "death",
+      "direction": "north-west",
+      "file": "00-fall.png",
+      "pose": "defeated body tips and support buckles"
+    },
+    {
+      "action": "death",
+      "direction": "north-west",
+      "file": "01-collapse.png",
+      "pose": "body collapses sideways with all anatomy intact"
+    },
+    {
+      "action": "death",
+      "direction": "north-west",
+      "file": "02-ground.png",
+      "pose": "fully grounded body, wings and tail contained naturally"
+    },
+    {
+      "action": "death",
+      "direction": "north-west",
+      "file": "03-settle.png",
+      "pose": "final grounded still corpse with no disappearing anatomy"
+    },
+    {
+      "action": "death",
+      "direction": "west-north-west",
+      "file": "00-fall.png",
+      "pose": "defeated body tips and support buckles"
+    },
+    {
+      "action": "death",
+      "direction": "west-north-west",
+      "file": "01-collapse.png",
+      "pose": "body collapses sideways with all anatomy intact"
+    },
+    {
+      "action": "death",
+      "direction": "west-north-west",
+      "file": "02-ground.png",
+      "pose": "fully grounded body, wings and tail contained naturally"
+    },
+    {
+      "action": "death",
+      "direction": "west-north-west",
+      "file": "03-settle.png",
+      "pose": "final grounded still corpse with no disappearing anatomy"
+    },
+    {
+      "action": "death",
+      "direction": "west-south-west",
+      "file": "00-fall.png",
+      "pose": "defeated body tips and support buckles"
+    },
+    {
+      "action": "death",
+      "direction": "west-south-west",
+      "file": "01-collapse.png",
+      "pose": "body collapses sideways with all anatomy intact"
+    },
+    {
+      "action": "death",
+      "direction": "west-south-west",
+      "file": "02-ground.png",
+      "pose": "fully grounded body, wings and tail contained naturally"
+    },
+    {
+      "action": "death",
+      "direction": "west-south-west",
+      "file": "03-settle.png",
+      "pose": "final grounded still corpse with no disappearing anatomy"
+    },
+    {
+      "action": "death",
+      "direction": "south-west",
+      "file": "00-fall.png",
+      "pose": "defeated body tips and support buckles"
+    },
+    {
+      "action": "death",
+      "direction": "south-west",
+      "file": "01-collapse.png",
+      "pose": "body collapses sideways with all anatomy intact"
+    },
+    {
+      "action": "death",
+      "direction": "south-west",
+      "file": "02-ground.png",
+      "pose": "fully grounded body, wings and tail contained naturally"
+    },
+    {
+      "action": "death",
+      "direction": "south-west",
+      "file": "03-settle.png",
+      "pose": "final grounded still corpse with no disappearing anatomy"
+    },
+    {
+      "action": "death",
+      "direction": "south-south-west",
+      "file": "00-fall.png",
+      "pose": "defeated body tips and support buckles"
+    },
+    {
+      "action": "death",
+      "direction": "south-south-west",
+      "file": "01-collapse.png",
+      "pose": "body collapses sideways with all anatomy intact"
+    },
+    {
+      "action": "death",
+      "direction": "south-south-west",
+      "file": "02-ground.png",
+      "pose": "fully grounded body, wings and tail contained naturally"
+    },
+    {
+      "action": "death",
+      "direction": "south-south-west",
+      "file": "03-settle.png",
+      "pose": "final grounded still corpse with no disappearing anatomy"
+    }
+  ],
+  "baselineReferencesRequiringReviewOrReplacement": [
+    "poses/idle/south.png",
+    "poses/idle/east.png",
+    "poses/idle/north-east.png",
+    "poses/idle/north.png",
+    "poses/idle/north-west.png",
+    "poses/idle/west.png",
+    "poses/idle/south-west.png",
+    "poses/walk/east/00-stride-a.png",
+    "poses/walk/east/01-stride-b.png",
+    "poses/walk/east/02-stride-c.png",
+    "poses/walk/east/03-stride-d.png",
+    "poses/walk/west/00-stride-a.png",
+    "poses/walk/west/01-stride-b.png",
+    "poses/walk/west/02-stride-c.png",
+    "poses/walk/west/03-stride-d.png",
+    "poses/attack/east/00-windup.png",
+    "poses/attack/east/01-contact.png",
+    "poses/attack/east/02-follow-through.png",
+    "poses/attack/east/03-recovery.png",
+    "poses/attack/west/00-windup.png",
+    "poses/attack/west/01-contact.png",
+    "poses/attack/west/02-follow-through.png",
+    "poses/attack/west/03-recovery.png",
+    "poses/hit/east/00-flinch.png",
+    "poses/hit/east/01-recoil.png",
+    "poses/hit/east/02-recover.png",
+    "poses/hit/east/03-ready.png",
+    "poses/hit/west/00-flinch.png",
+    "poses/hit/west/01-recoil.png",
+    "poses/hit/west/02-recover.png",
+    "poses/hit/west/03-ready.png",
+    "poses/death/east/00-fall.png",
+    "poses/death/east/01-collapse.png",
+    "poses/death/east/02-ground.png",
+    "poses/death/east/03-settle.png",
+    "poses/death/west/00-fall.png",
+    "poses/death/west/01-collapse.png",
+    "poses/death/west/02-ground.png",
+    "poses/death/west/03-settle.png"
+  ],
+  "blocker": {
+    "type": "imagegen-http429-usage-limit-reached",
+    "resetsAtUnix": 1793288069
+  },
+  "note": "No species complete. Every generated image remains candidate. Baseline cells are source references pending semantic/finish review. Runtime and variants unchanged; old versions retained.",
+  "visualFindings": [
+    "Polished SE key inspected: gold palette, crest/horns, wings and body identity retained. Other directions/actions incomplete."
+  ]
+}

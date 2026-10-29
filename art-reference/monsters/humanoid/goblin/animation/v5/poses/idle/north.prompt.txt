@@ -1,0 +1,1 @@
+Source pose losslessly extracted from the approved Goblin idle atlas cell. Pixels unchanged. Retain as the canonical 16-direction baseline view.

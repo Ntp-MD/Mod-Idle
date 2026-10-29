@@ -3,7 +3,7 @@ import type { NavLayout } from '@engine/navigation.ts';
 import { isClear } from '@engine/navigation.ts';
 import { E } from '../../src/engine/client';
 import { mulberry32 } from '../../src/engine/client-helpers';
-import { advanceCombatArena, captureCombatArena, createCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
+import { advanceCombatArena, captureCombatArena, createCombatArena, nextRoutePoint, syncCombatArena } from '@sim/combat/combat-arena';
 import { characterSheet, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
 
@@ -120,6 +120,48 @@ describe('static ground in the combat arena', () => {
     expect(claim).toBeDefined();
     expect(claim!.x).toBeLessThan(4);
     expect(isClear(arena.nav, claim!, arena.mobs[mob.id].radiusM ?? 0.25)).toBe(true);
+  });
+
+  it('smooths a route with a clear look-ahead instead of steering at every cell centre', () => {
+    const { state, arena } = fight(5, 30);
+    arena.nav = { version: 1, bounds: BOUNDS, cellSize: 1, obstacles: [
+      // A block from the floor to y = 10: the direct line at y = 6 must go around the top.
+      { kind: 'box', id: 'block', x: 9, y: 0, width: 2, height: 10,
+        flags: { movement: true, sight: true, projectiles: true } },
+    ] };
+    Object.assign(arena.player, { x: 5, y: 6 });
+    const actor = arena.player;
+    actor.path = [
+      { x: 5.5, y: 6 }, { x: 8.5, y: 6 }, { x: 8.5, y: 10.5 },
+      { x: 11.5, y: 10.5 }, { x: 11.5, y: 6 }, { x: 15, y: 6 },
+    ];
+    actor.pathGoal = { x: 15, y: 6 };
+    actor.pathPlannedAtUs = 0;
+    const radius = actor.radiusM ?? 0.25;
+    const next = nextRoutePoint(actor, { x: 15, y: 6 }, arena.nav, radius, 50_000);
+    // The returned point is a look-ahead on a swept-clear segment, not the first cell centre.
+    expect(next).not.toEqual({ x: 5.5, y: 6 });
+    expect(isClear(arena.nav, next, radius)).toBe(true);
+    const contact = arena.nav ? nextRoutePoint(actor, { x: 15, y: 6 }, arena.nav, radius, 100_000) : next;
+    expect(state.group.length).toBe(1);
+    expect(contact).toBeDefined();
+  });
+
+  it('replans a moving target on the replan beat without restarting on every sample', () => {
+    const { state, arena } = fight(5, 8);
+    arena.nav = openNav();
+    const actor = arena.player;
+    actor.pathGoal = { x: 10, y: 6 };
+    actor.pathPlannedAtUs = 0;
+    actor.path = [{ x: 10, y: 6 }];
+    // A drift under the large invalidation radius waits for the beat.
+    nextRoutePoint(actor, { x: 10.3, y: 6 }, arena.nav, 0.25, 100_000);
+    expect(actor.pathPlannedAtUs).toBe(0);
+    // At the beat it re-plans once, and the goal is the new body position.
+    nextRoutePoint(actor, { x: 10.3, y: 6 }, arena.nav, 0.25, 300_000);
+    expect(actor.pathPlannedAtUs).toBe(300_000);
+    expect(actor.pathGoal).toEqual({ x: 10.3, y: 6 });
+    expect(state.group[0].hp).toBeGreaterThan(0);
   });
 
   it('keeps an empty nav layout identical to no layout at all', () => {

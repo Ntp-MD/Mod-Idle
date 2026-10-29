@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { mulberry32 } from '../../src/engine/client-helpers';
 import { toggleTrack } from '@sim/combat/skills';
 import { createCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
-import { characterSheet, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
+import { characterSheet, newGame, setLevel, spawnMob, stepCombat, tick } from '@sim/core/game';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
 
 /** F21 — upkeep lanes: rotational represses on lapse, reactive re-arms only on need. */
@@ -83,5 +83,38 @@ describe('F27 hold the line — the rotation yields to a defensive re-arm', () =
     s.player.mana = 100;
     tick(s, { arena });
     expect(s.player.charges).toBeGreaterThan(0);
+  });
+
+  it('holds a zero-cooldown filler on every combat sample, not only the world press', () => {
+    const s = newGame(106);
+    setLevel(s, 60);
+    s.hunting = true;
+    s.player.hp = 1e9;
+    s.skills.owned['buff.ghost_dance'] = 0;
+    s.skills.owned['attack.double_strike'] = 0;
+    s.skills.list.fill(null);
+    s.skills.list[0] = 'attack.double_strike';
+    expect(toggleTrack(s.skills, 'buff.ghost_dance').ok).toBe(true);
+    const mob = spawnMob(mulberry32(106), 1, 'normal');
+    Object.assign(mob, {
+      id: 'sample-hold-target', hp: 1e9, hpMax: 1e9, ps: 0, accuracy: 0, evasion: 0, dodgeRate: 0,
+      armour: 0, line: 'stand-off', damage: 'physical', innate: [], skillIds: [],
+    });
+    s.group = [mob];
+    const arena = createCombatArena();
+    syncCombatArena(arena, s, 0, 1_000_000, characterSheet(s).maxHp);
+    Object.assign(arena.player, { x: 9.5, y: 6 });
+    Object.assign(arena.mobs[mob.id], { x: 10, y: 6 });
+    arena.focusId = mob.id;
+    pinFieldPopulation(s);
+    // A zero-cooldown row would be picked on the very next sample if the hold lived only at t0.
+    for (let sample = 0; sample < 40; sample++) {
+      s.player.mana = 12;
+      s.skills.cd['attack.double_strike'] = 0;
+      stepCombat(s, { online: true, arena });
+    }
+    expect(s.player.charges ?? 0).toBe(0);
+    expect(arena.actions.some((action) => action.actorId === 'player'
+      && action.skillId === 'attack.double_strike')).toBe(false);
   });
 });

@@ -1,0 +1,16 @@
+{
+  "status": "source-reference-unverified",
+  "source": "../../../../atlas/animation.png",
+  "sourceCell": [
+    5,
+    3
+  ],
+  "sourcePixelsModified": false,
+  "method": "lossless exact cell extraction; root atlas is draft-review",
+  "visualReview": {
+    "inspected": false,
+    "semanticMappingVerified": false,
+    "angleVerified": false,
+    "atlasReady": false
+  }
+}

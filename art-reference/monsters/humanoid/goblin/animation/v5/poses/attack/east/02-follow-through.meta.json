@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "action": "attack",
+  "direction": "east",
+  "pose": "02-follow-through",
+  "source": "../../../../../animation/atlas/animation.png",
+  "sourceFrameIndex": 18,
+  "bakedWeapon": "spear",
+  "sourcePixelsModified": false,
+  "sourceBounds": {
+    "x": 867,
+    "y": 933,
+    "width": 253,
+    "height": 125,
+    "offsetX": 99,
+    "offsetY": 165
+  },
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "generator": "Lossless extraction from the approved Goblin 8-direction atlas",
+  "status": "approved-source-pose"
+}

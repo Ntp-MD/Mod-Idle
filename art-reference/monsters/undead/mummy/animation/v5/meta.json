@@ -1,0 +1,1495 @@
+{
+  "schemaVersion": 1,
+  "status": "direction16-candidate-incomplete",
+  "speciesId": "mummy",
+  "race": "undead",
+  "version": "v5",
+  "attackKind": "close",
+  "bakedWeaponId": null,
+  "identityRef": "../../reference.png",
+  "sourcePoseRef": "../atlas/animation.png",
+  "directionCount": 16,
+  "angleStepDegrees": 22.5,
+  "directions": [
+    {
+      "name": "south",
+      "angleDegrees": 0
+    },
+    {
+      "name": "south-south-east",
+      "angleDegrees": 22.5
+    },
+    {
+      "name": "south-east",
+      "angleDegrees": 45
+    },
+    {
+      "name": "east-south-east",
+      "angleDegrees": 67.5
+    },
+    {
+      "name": "east",
+      "angleDegrees": 90
+    },
+    {
+      "name": "east-north-east",
+      "angleDegrees": 112.5
+    },
+    {
+      "name": "north-east",
+      "angleDegrees": 135
+    },
+    {
+      "name": "north-north-east",
+      "angleDegrees": 157.5
+    },
+    {
+      "name": "north",
+      "angleDegrees": 180
+    },
+    {
+      "name": "north-north-west",
+      "angleDegrees": 202.5
+    },
+    {
+      "name": "north-west",
+      "angleDegrees": 225
+    },
+    {
+      "name": "west-north-west",
+      "angleDegrees": 247.5
+    },
+    {
+      "name": "west",
+      "angleDegrees": 270
+    },
+    {
+      "name": "west-south-west",
+      "angleDegrees": 292.5
+    },
+    {
+      "name": "south-west",
+      "angleDegrees": 315
+    },
+    {
+      "name": "south-south-west",
+      "angleDegrees": 337.5
+    }
+  ],
+  "camera": "one fixed elevated three-quarter camera; rotate the whole goblin facing in the world, never rotate the camera or flat sprite",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "target only; measure completed poses before promotion"
+  },
+  "statusNote": "16-direction production; source poses remain candidates until visual and atlas review. No runtime promotion.",
+  "actions": {
+    "idle": {
+      "framesPerDirection": 1,
+      "poseCount": 16,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "south.png",
+          "pose": "neutral species-specific ready stance"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "south-south-east.png",
+          "pose": "neutral species-specific ready stance"
+        },
+        {
+          "direction": "south-east",
+          "file": "south-east.png",
+          "pose": "neutral species-specific ready stance"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "east-south-east.png",
+          "pose": "neutral species-specific ready stance"
+        },
+        {
+          "direction": "east",
+          "file": "east.png",
+          "pose": "neutral species-specific ready stance"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "east-north-east.png",
+          "pose": "neutral species-specific ready stance"
+        },
+        {
+          "direction": "north-east",
+          "file": "north-east.png",
+          "pose": "neutral species-specific ready stance"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "north-north-east.png",
+          "pose": "neutral species-specific ready stance"
+        },
+        {
+          "direction": "north",
+          "file": "north.png",
+          "pose": "neutral species-specific ready stance"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "north-north-west.png",
+          "pose": "neutral species-specific ready stance"
+        },
+        {
+          "direction": "north-west",
+          "file": "north-west.png",
+          "pose": "neutral species-specific ready stance"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "west-north-west.png",
+          "pose": "neutral species-specific ready stance"
+        },
+        {
+          "direction": "west",
+          "file": "west.png",
+          "pose": "neutral species-specific ready stance"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "west-south-west.png",
+          "pose": "neutral species-specific ready stance"
+        },
+        {
+          "direction": "south-west",
+          "file": "south-west.png",
+          "pose": "neutral species-specific ready stance"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "south-south-west.png",
+          "pose": "neutral species-specific ready stance"
+        }
+      ]
+    },
+    "walk": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-stride-a.png",
+          "pose": "species-specific locomotion phase 00-stride-a.png"
+        },
+        {
+          "direction": "south",
+          "file": "01-stride-b.png",
+          "pose": "species-specific locomotion phase 01-stride-b.png"
+        },
+        {
+          "direction": "south",
+          "file": "02-stride-c.png",
+          "pose": "species-specific locomotion phase 02-stride-c.png"
+        },
+        {
+          "direction": "south",
+          "file": "03-stride-d.png",
+          "pose": "species-specific locomotion phase 03-stride-d.png"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-stride-a.png",
+          "pose": "species-specific locomotion phase 00-stride-a.png"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-stride-b.png",
+          "pose": "species-specific locomotion phase 01-stride-b.png"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-stride-c.png",
+          "pose": "species-specific locomotion phase 02-stride-c.png"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-stride-d.png",
+          "pose": "species-specific locomotion phase 03-stride-d.png"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-stride-a.png",
+          "pose": "species-specific locomotion phase 00-stride-a.png"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-stride-b.png",
+          "pose": "species-specific locomotion phase 01-stride-b.png"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-stride-c.png",
+          "pose": "species-specific locomotion phase 02-stride-c.png"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-stride-d.png",
+          "pose": "species-specific locomotion phase 03-stride-d.png"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-stride-a.png",
+          "pose": "species-specific locomotion phase 00-stride-a.png"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-stride-b.png",
+          "pose": "species-specific locomotion phase 01-stride-b.png"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-stride-c.png",
+          "pose": "species-specific locomotion phase 02-stride-c.png"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-stride-d.png",
+          "pose": "species-specific locomotion phase 03-stride-d.png"
+        },
+        {
+          "direction": "east",
+          "file": "00-stride-a.png",
+          "pose": "species-specific locomotion phase 00-stride-a.png"
+        },
+        {
+          "direction": "east",
+          "file": "01-stride-b.png",
+          "pose": "species-specific locomotion phase 01-stride-b.png"
+        },
+        {
+          "direction": "east",
+          "file": "02-stride-c.png",
+          "pose": "species-specific locomotion phase 02-stride-c.png"
+        },
+        {
+          "direction": "east",
+          "file": "03-stride-d.png",
+          "pose": "species-specific locomotion phase 03-stride-d.png"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-stride-a.png",
+          "pose": "species-specific locomotion phase 00-stride-a.png"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-stride-b.png",
+          "pose": "species-specific locomotion phase 01-stride-b.png"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-stride-c.png",
+          "pose": "species-specific locomotion phase 02-stride-c.png"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-stride-d.png",
+          "pose": "species-specific locomotion phase 03-stride-d.png"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-stride-a.png",
+          "pose": "species-specific locomotion phase 00-stride-a.png"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-stride-b.png",
+          "pose": "species-specific locomotion phase 01-stride-b.png"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-stride-c.png",
+          "pose": "species-specific locomotion phase 02-stride-c.png"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-stride-d.png",
+          "pose": "species-specific locomotion phase 03-stride-d.png"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-stride-a.png",
+          "pose": "species-specific locomotion phase 00-stride-a.png"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-stride-b.png",
+          "pose": "species-specific locomotion phase 01-stride-b.png"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-stride-c.png",
+          "pose": "species-specific locomotion phase 02-stride-c.png"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-stride-d.png",
+          "pose": "species-specific locomotion phase 03-stride-d.png"
+        },
+        {
+          "direction": "north",
+          "file": "00-stride-a.png",
+          "pose": "species-specific locomotion phase 00-stride-a.png"
+        },
+        {
+          "direction": "north",
+          "file": "01-stride-b.png",
+          "pose": "species-specific locomotion phase 01-stride-b.png"
+        },
+        {
+          "direction": "north",
+          "file": "02-stride-c.png",
+          "pose": "species-specific locomotion phase 02-stride-c.png"
+        },
+        {
+          "direction": "north",
+          "file": "03-stride-d.png",
+          "pose": "species-specific locomotion phase 03-stride-d.png"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-stride-a.png",
+          "pose": "species-specific locomotion phase 00-stride-a.png"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-stride-b.png",
+          "pose": "species-specific locomotion phase 01-stride-b.png"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-stride-c.png",
+          "pose": "species-specific locomotion phase 02-stride-c.png"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-stride-d.png",
+          "pose": "species-specific locomotion phase 03-stride-d.png"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-stride-a.png",
+          "pose": "species-specific locomotion phase 00-stride-a.png"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-stride-b.png",
+          "pose": "species-specific locomotion phase 01-stride-b.png"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-stride-c.png",
+          "pose": "species-specific locomotion phase 02-stride-c.png"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-stride-d.png",
+          "pose": "species-specific locomotion phase 03-stride-d.png"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-stride-a.png",
+          "pose": "species-specific locomotion phase 00-stride-a.png"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-stride-b.png",
+          "pose": "species-specific locomotion phase 01-stride-b.png"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-stride-c.png",
+          "pose": "species-specific locomotion phase 02-stride-c.png"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-stride-d.png",
+          "pose": "species-specific locomotion phase 03-stride-d.png"
+        },
+        {
+          "direction": "west",
+          "file": "00-stride-a.png",
+          "pose": "species-specific locomotion phase 00-stride-a.png"
+        },
+        {
+          "direction": "west",
+          "file": "01-stride-b.png",
+          "pose": "species-specific locomotion phase 01-stride-b.png"
+        },
+        {
+          "direction": "west",
+          "file": "02-stride-c.png",
+          "pose": "species-specific locomotion phase 02-stride-c.png"
+        },
+        {
+          "direction": "west",
+          "file": "03-stride-d.png",
+          "pose": "species-specific locomotion phase 03-stride-d.png"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-stride-a.png",
+          "pose": "species-specific locomotion phase 00-stride-a.png"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-stride-b.png",
+          "pose": "species-specific locomotion phase 01-stride-b.png"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-stride-c.png",
+          "pose": "species-specific locomotion phase 02-stride-c.png"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-stride-d.png",
+          "pose": "species-specific locomotion phase 03-stride-d.png"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-stride-a.png",
+          "pose": "species-specific locomotion phase 00-stride-a.png"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-stride-b.png",
+          "pose": "species-specific locomotion phase 01-stride-b.png"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-stride-c.png",
+          "pose": "species-specific locomotion phase 02-stride-c.png"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-stride-d.png",
+          "pose": "species-specific locomotion phase 03-stride-d.png"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-stride-a.png",
+          "pose": "species-specific locomotion phase 00-stride-a.png"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-stride-b.png",
+          "pose": "species-specific locomotion phase 01-stride-b.png"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-stride-c.png",
+          "pose": "species-specific locomotion phase 02-stride-c.png"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-stride-d.png",
+          "pose": "species-specific locomotion phase 03-stride-d.png"
+        }
+      ]
+    },
+    "attack": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-windup.png",
+          "pose": "short spear-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "south",
+          "file": "01-contact.png",
+          "pose": "spear fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "south",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the spear tip through target space without changing camera"
+        },
+        {
+          "direction": "south",
+          "file": "03-recovery.png",
+          "pose": "withdraw spear and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-windup.png",
+          "pose": "short spear-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-contact.png",
+          "pose": "spear fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the spear tip through target space without changing camera"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-recovery.png",
+          "pose": "withdraw spear and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-windup.png",
+          "pose": "short spear-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-contact.png",
+          "pose": "spear fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the spear tip through target space without changing camera"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-recovery.png",
+          "pose": "withdraw spear and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-windup.png",
+          "pose": "short spear-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-contact.png",
+          "pose": "spear fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the spear tip through target space without changing camera"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-recovery.png",
+          "pose": "withdraw spear and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "east",
+          "file": "00-windup.png",
+          "pose": "short spear-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "east",
+          "file": "01-contact.png",
+          "pose": "spear fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "east",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the spear tip through target space without changing camera"
+        },
+        {
+          "direction": "east",
+          "file": "03-recovery.png",
+          "pose": "withdraw spear and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-windup.png",
+          "pose": "short spear-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-contact.png",
+          "pose": "spear fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the spear tip through target space without changing camera"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-recovery.png",
+          "pose": "withdraw spear and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-windup.png",
+          "pose": "short spear-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-contact.png",
+          "pose": "spear fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the spear tip through target space without changing camera"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-recovery.png",
+          "pose": "withdraw spear and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-windup.png",
+          "pose": "short spear-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-contact.png",
+          "pose": "spear fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the spear tip through target space without changing camera"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-recovery.png",
+          "pose": "withdraw spear and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "north",
+          "file": "00-windup.png",
+          "pose": "short spear-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "north",
+          "file": "01-contact.png",
+          "pose": "spear fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "north",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the spear tip through target space without changing camera"
+        },
+        {
+          "direction": "north",
+          "file": "03-recovery.png",
+          "pose": "withdraw spear and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-windup.png",
+          "pose": "short spear-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-contact.png",
+          "pose": "spear fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the spear tip through target space without changing camera"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-recovery.png",
+          "pose": "withdraw spear and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-windup.png",
+          "pose": "short spear-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-contact.png",
+          "pose": "spear fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the spear tip through target space without changing camera"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-recovery.png",
+          "pose": "withdraw spear and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-windup.png",
+          "pose": "short spear-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-contact.png",
+          "pose": "spear fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the spear tip through target space without changing camera"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-recovery.png",
+          "pose": "withdraw spear and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "west",
+          "file": "00-windup.png",
+          "pose": "short spear-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "west",
+          "file": "01-contact.png",
+          "pose": "spear fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "west",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the spear tip through target space without changing camera"
+        },
+        {
+          "direction": "west",
+          "file": "03-recovery.png",
+          "pose": "withdraw spear and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-windup.png",
+          "pose": "short spear-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-contact.png",
+          "pose": "spear fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the spear tip through target space without changing camera"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-recovery.png",
+          "pose": "withdraw spear and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-windup.png",
+          "pose": "short spear-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-contact.png",
+          "pose": "spear fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the spear tip through target space without changing camera"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-recovery.png",
+          "pose": "withdraw spear and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-windup.png",
+          "pose": "short spear-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-contact.png",
+          "pose": "spear fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the spear tip through target space without changing camera"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-recovery.png",
+          "pose": "withdraw spear and return balance to neutral idle silhouette"
+        }
+      ]
+    },
+    "hit": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; spear remains visible, feet planted"
+        },
+        {
+          "direction": "south",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "south",
+          "file": "02-recover.png",
+          "pose": "body straightens and spear returns in front guard"
+        },
+        {
+          "direction": "south",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; spear remains visible, feet planted"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and spear returns in front guard"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; spear remains visible, feet planted"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and spear returns in front guard"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; spear remains visible, feet planted"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and spear returns in front guard"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; spear remains visible, feet planted"
+        },
+        {
+          "direction": "east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "east",
+          "file": "02-recover.png",
+          "pose": "body straightens and spear returns in front guard"
+        },
+        {
+          "direction": "east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; spear remains visible, feet planted"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and spear returns in front guard"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; spear remains visible, feet planted"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and spear returns in front guard"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; spear remains visible, feet planted"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and spear returns in front guard"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "north",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; spear remains visible, feet planted"
+        },
+        {
+          "direction": "north",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "north",
+          "file": "02-recover.png",
+          "pose": "body straightens and spear returns in front guard"
+        },
+        {
+          "direction": "north",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; spear remains visible, feet planted"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and spear returns in front guard"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; spear remains visible, feet planted"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and spear returns in front guard"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; spear remains visible, feet planted"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and spear returns in front guard"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; spear remains visible, feet planted"
+        },
+        {
+          "direction": "west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "west",
+          "file": "02-recover.png",
+          "pose": "body straightens and spear returns in front guard"
+        },
+        {
+          "direction": "west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; spear remains visible, feet planted"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and spear returns in front guard"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; spear remains visible, feet planted"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and spear returns in front guard"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; spear remains visible, feet planted"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and spear returns in front guard"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        }
+      ]
+    },
+    "death": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; spear descends with near hand"
+        },
+        {
+          "direction": "south",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding spear"
+        },
+        {
+          "direction": "south",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone goblin and spear; natural compact silhouette within cell"
+        },
+        {
+          "direction": "south",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; spear descends with near hand"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding spear"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone goblin and spear; natural compact silhouette within cell"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; spear descends with near hand"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding spear"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone goblin and spear; natural compact silhouette within cell"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; spear descends with near hand"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding spear"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone goblin and spear; natural compact silhouette within cell"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; spear descends with near hand"
+        },
+        {
+          "direction": "east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding spear"
+        },
+        {
+          "direction": "east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone goblin and spear; natural compact silhouette within cell"
+        },
+        {
+          "direction": "east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; spear descends with near hand"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding spear"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone goblin and spear; natural compact silhouette within cell"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; spear descends with near hand"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding spear"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone goblin and spear; natural compact silhouette within cell"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; spear descends with near hand"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding spear"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone goblin and spear; natural compact silhouette within cell"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "north",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; spear descends with near hand"
+        },
+        {
+          "direction": "north",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding spear"
+        },
+        {
+          "direction": "north",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone goblin and spear; natural compact silhouette within cell"
+        },
+        {
+          "direction": "north",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; spear descends with near hand"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding spear"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone goblin and spear; natural compact silhouette within cell"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; spear descends with near hand"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding spear"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone goblin and spear; natural compact silhouette within cell"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; spear descends with near hand"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding spear"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone goblin and spear; natural compact silhouette within cell"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; spear descends with near hand"
+        },
+        {
+          "direction": "west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding spear"
+        },
+        {
+          "direction": "west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone goblin and spear; natural compact silhouette within cell"
+        },
+        {
+          "direction": "west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; spear descends with near hand"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding spear"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone goblin and spear; natural compact silhouette within cell"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; spear descends with near hand"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding spear"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone goblin and spear; natural compact silhouette within cell"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; spear descends with near hand"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding spear"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone goblin and spear; natural compact silhouette within cell"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        }
+      ]
+    }
+  },
+  "requiredRootFiles": [
+    "meta.json",
+    "poses/"
+  ],
+  "imageQa": "Raw built-in imagegen outputs are candidate source only. Every pose still requires visual identity/facing review, hard-alpha/edge QA, foot-anchor measurement, and atlas QA before acceptance.",
+  "productionProgress": {
+    "presentPosePngs": 0,
+    "expectedPosePngs": 272,
+    "acceptedPosePngs": 0,
+    "status": "blocked-image-generation-quota",
+    "quotaResetUnixSeconds": 1793288069,
+    "note": "Built-in image generation returned429usage_limit_reached. No variants, atlas promotion or old-version cleanup performed. Raw candidates retain original pixels."
+  }
+}

@@ -140,11 +140,7 @@ async function put(key: string, payload: string): Promise<void> {
   }
 }
 
-async function get(key: string): Promise<string | null> {
-  // the mirror first: every `put` writes it synchronously, so it can never be staler than the DB, and
-  // an unload flush mid-transaction is a save the next session actually reads
-  const local = lsRead(key);
-  if (local != null) return local;
+async function dbRead(key: string): Promise<string | null> {
   try {
     const db = await openDb();
     return await new Promise<string | null>((resolve, reject) => {
@@ -156,6 +152,50 @@ async function get(key: string): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+async function get(key: string): Promise<string | null> {
+  // the mirror first: every `put` writes it synchronously, so it can never be staler than the DB, and
+  // an unload flush mid-transaction is a save the next session actually reads
+  const local = lsRead(key);
+  if (local != null) return local;
+  return dbRead(key);
+}
+
+interface SaveEnvelopeStamp { version: number; writtenAt: number }
+
+function envelopeOf(raw: string | null): SaveEnvelopeStamp | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as { version?: unknown; writtenAt?: unknown };
+    return {
+      version: Number.isFinite(Number(parsed.version)) ? Number(parsed.version) : 0,
+      writtenAt: Number.isFinite(Number(parsed.writtenAt)) ? Number(parsed.writtenAt) : 0,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A save slot has two backends. The mirror is normally newer or equal because every write lands
+ * there first; a database record that is genuinely newer means the mirror failed, so it wins.
+ * A future-schema record is never replaced by an older one in either direction: the newer build
+ * is the only thing allowed to touch it. Unreadable copies fall back to the readable side, and a
+ * tie keeps the mirror because an unload flush may have written it last.
+ */
+async function getSlot(key: string): Promise<string | null> {
+  const local = lsRead(key);
+  const remote = await dbRead(key);
+  if (local == null) return remote;
+  if (remote == null) return local;
+  const l = envelopeOf(local);
+  const r = envelopeOf(remote);
+  if (!l) return r ? remote : local;
+  if (!r) return local;
+  if (l.version > SCHEMA_VERSION && r.version <= SCHEMA_VERSION) return local;
+  if (r.version > SCHEMA_VERSION && l.version <= SCHEMA_VERSION) return remote;
+  return r.writtenAt > l.writtenAt ? remote : local;
 }
 
 /**
@@ -185,6 +225,8 @@ export interface ClientSettings {
   cleanMap?: boolean;
   /** Presentation density only; simulation speed and combat outcomes are unaffected. */
   combatEffects?: 'auto' | 'full' | 'reduced' | 'minimal';
+  /** Short synthesized combat cues; muted play loses no information, every cue has a visual read. */
+  sound?: boolean;
   /**
    * Retired client preference. Live play is ARPG-only; the classic FieldPlates renderer is kept for
    * the showcase/reference and reads no saved switch.
@@ -193,7 +235,7 @@ export interface ClientSettings {
   /** the hub's drag offset from its docked corner, in px — wheel and satellites move as one */
   hub?: { x: number; y: number };
 }
-export const DEFAULT_SETTINGS: ClientSettings = { numberFormat: 'plain', offlineReport: true, keybinds: {}, equipMargin: 0, autoSkills: true, autoEquip: true, autoAvoid: true, autoGoal: true, cleanMap: false, combatEffects: 'auto' };
+export const DEFAULT_SETTINGS: ClientSettings = { numberFormat: 'plain', offlineReport: true, keybinds: {}, equipMargin: 0, autoSkills: true, autoEquip: true, autoAvoid: true, autoGoal: true, cleanMap: false, combatEffects: 'auto', sound: true };
 export async function readSettings(): Promise<ClientSettings> {
   const raw = await get('settings');
   if (!raw) return { ...DEFAULT_SETTINGS };
@@ -255,7 +297,7 @@ export async function writeSave(slot: SlotName, state: GameState): Promise<void>
   if (shot) await pushSnapshot(slot, shot, current);
   if (!current()) return;
   if (why) armSnapshot(saved);
-  await put(slot, JSON.stringify({ version: SCHEMA_VERSION, state: { ...saved, fx: [] } }));
+  await put(slot, JSON.stringify({ version: SCHEMA_VERSION, writtenAt: saved.lastSavedAt, state: { ...saved, fx: [] } }));
   if (!current()) return;
   if (state.lastSavedAt === beforeStamp) state.lastSavedAt = saved.lastSavedAt;
   if (why && state.pendingSnapshot === pending && state.clockSec === saved.clockSec) {
@@ -309,7 +351,7 @@ export function writeSaveSync(slot: SlotName, state: GameState): void {
     snapshotOk = lsWrite(snapKey(slot), JSON.stringify([shot, ...readSnapshotsSync(slot)].slice(0, SAVE_CFG.snapshot_slots)));
     if (snapshotOk) armSnapshot(saved);
   }
-  const slotOk = lsWrite(slot, JSON.stringify({ version: SCHEMA_VERSION, state: { ...saved, fx: [] } }));
+  const slotOk = lsWrite(slot, JSON.stringify({ version: SCHEMA_VERSION, writtenAt: saved.lastSavedAt, state: { ...saved, fx: [] } }));
   // A confirmed visibility/unload save supersedes the async queue's older frozen state.
   // If the slot could not be written, let that queue finish its database recovery instead.
   if (slotOk) emergencySaveRevision[slot] = (emergencySaveRevision[slot] ?? 0) + 1;
@@ -360,7 +402,7 @@ export async function restoreSnapshot(slot: SlotName, index: number): Promise<Ga
   assertPassiveTreeVersion(raw);
   const state = migrate(raw, shot.version ?? 0);
   state.pendingSnapshot = null;
-  await put(slot, JSON.stringify({ version: SCHEMA_VERSION, state }));
+  await put(slot, JSON.stringify({ version: SCHEMA_VERSION, writtenAt: Date.now(), state }));
   await put(ACCOUNT_KEY, JSON.stringify(await rebuildAccount()));
   return state;
 }
@@ -369,7 +411,7 @@ export async function restoreSnapshot(slot: SlotName, index: number): Promise<Ga
 export async function rebuildAccount(): Promise<Account> {
   const account = newAccount();
   for (const slot of SLOTS) {
-    const raw = await get(slot);
+    const raw = await getSlot(slot);
     if (!raw) continue;
     try {
       const parsed = JSON.parse(raw);
@@ -402,7 +444,7 @@ export function assertPassiveTreeVersion(state: GameState): void {
 }
 
 export async function readSave(slot: SlotName): Promise<GameState | null> {
-  const raw = await get(slot);
+  const raw = await getSlot(slot);
   if (!raw) return null;
   const parsed = JSON.parse(raw);
   const state = (parsed.state || parsed) as GameState;

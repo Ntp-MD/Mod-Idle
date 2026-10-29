@@ -1,0 +1,18 @@
+{
+  "status": "inherited-approved-source-candidate",
+  "source": "../atlas/animation.png",
+  "operation": "lossless existing cell extraction",
+  "sourceCell": {
+    "column": 6,
+    "row": 2,
+    "width": 384,
+    "height": 384
+  },
+  "action": "attack",
+  "direction": "west",
+  "sourcePixelsModified": false,
+  "qa": {
+    "atlasApproved": false,
+    "note": "source atlas approved; new 16-direction atlas not approved"
+  }
+}

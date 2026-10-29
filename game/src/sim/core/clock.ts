@@ -25,6 +25,22 @@ export function schedulerBatch(acc: number, speed: number, elapsedSec: number = 
   return { ticks, acc: total - ticks };
 }
 
+/**
+ * The live loop's own batch: one combat step is 50 ms, so a wake converts its real elapsed time
+ * into steps. The cap is still eight simulated seconds a wake; a throttled tab banks the rest
+ * rather than bursting a backlog in one frame. `acc` stays in seconds so the cooldown display and
+ * the whole-second catch-up keep one meaning.
+ */
+export function schedulerSteps(acc: number, speed: number, elapsedSec: number, stepSec: number): { steps: number; acc: number } {
+  const step = Math.max(1e-6, stepSec);
+  const total = acc + elapsedSec * speed;
+  const steps = Math.floor(total / step + 1e-9);
+  const cap = Math.max(1, Math.ceil(MAX_BATCH / step));
+  if (steps <= 0) return { steps: 0, acc: total };
+  if (steps > cap) return { steps: cap, acc: total - cap * step };
+  return { steps, acc: total - steps * step };
+}
+
 /** A null configured limit pays every valid whole elapsed second. */
 export function catchUpPlan(elapsedSec: number) {
   // an away period never walks: a walk is online only, so the catch-up never crosses a block

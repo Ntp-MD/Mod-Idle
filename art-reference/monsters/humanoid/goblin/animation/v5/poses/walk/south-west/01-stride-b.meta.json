@@ -1,0 +1,18 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-829c-7060-99a8-9918a3b8d766\\exec-0456058a-539d-4acb-8fc2-96cc08a9ae4f.png",
+  "action": "walk",
+  "direction": "south-west",
+  "qa": {
+    "visual": false,
+    "facing": false,
+    "atlas": false,
+    "anchor": false
+  },
+  "visualReview": {
+    "status": "failed-phase",
+    "review": "Left-leading wide stride retained; target passing pose requires feet passing under hips.",
+    "requiresRegeneration": true
+  }
+}

@@ -27,6 +27,16 @@ import { mobSkillById } from '../../combat/mobSkills';
 import type { TriggerAura } from '../../combat/skills';
 
 /**
+ * One world second's player basic beats, expanded once from the progress at its start. A window
+ * only queues the beats that fall inside it, so the second's plan does not depend on wake size.
+ */
+export interface PlayerBasicPlan {
+  times: number[];
+  next: number;
+  stopped: boolean;
+}
+
+/**
  * The player's automatic basics: the accumulated-progress plan, the per-beat schedule, and the
  * contact resolution. Bodies arrive verbatim from the tick; the factory closes over the tick state
  * and the tick-owned helpers it calls.
@@ -41,6 +51,9 @@ export function createPlayerBasicActions(opts: {
   units: number;
   tickStartUs: number;
   tickEndUs: number;
+  /** The second's expanded beats, carried across this second's windows. */
+  plan?: PlayerBasicPlan;
+  savePlan?: (plan: PlayerBasicPlan) => void;
   online: boolean;
   manual: { moveTo?: { x: number; y: number } } | undefined;
   crippledOutgoingMult: number;
@@ -53,7 +66,8 @@ export function createPlayerBasicActions(opts: {
   queueTrigger: (aura: TriggerAura | null, targetId: string) => void;
   recoverLeech: (amount: number, atUs: number) => void;
   mobMods: (mobId: string) => any;
-  mobPlans: { mob: Mob; rate: number; actionsLeft: number }[];
+  /** Shift a target's committed attack plan; the caller already delayed this window's events. */
+  delayMobPlan: (mobId: string, delaySec: number) => boolean;
   spreadShock: (target: { id: string; immune?: string[] }) => void;
   mirrorReady: () => boolean;
   luckyBonus: () => number;
@@ -68,7 +82,7 @@ export function createPlayerBasicActions(opts: {
   const {
     arena, clock, rng, s, c, attackCharacter, units, tickStartUs, tickEndUs, online, manual,
     crippledOutgoingMult, unstoppablePenalty, berserkDealt, playerHitsPerSec, playerActiveFraction,
-    statuses, trig, queueTrigger, recoverLeech, mobMods, mobPlans, spreadShock, mirrorReady,
+    statuses, trig, queueTrigger, recoverLeech, mobMods, delayMobPlan, spreadShock, mirrorReady,
     luckyBonus, advanceArenaAt, engageTarget, cancelIntent, onKill, dominantElement,
     applyEquilibrium, revertEquilibrium,
   } = opts;
@@ -80,12 +94,18 @@ export function createPlayerBasicActions(opts: {
     // multiplier on the swing (an already-slow weapon is never hurried and Slow still binds).
     const crush = bundleOf(c.keystones, 'crushing-rhythm');
     const crushNow = crush ? crushingRhythm(playerRate, crush.params as Record<string, number>) : null;
-    const playerPlan = planAttacks(tickStartUs, s.player.atkTimer, crushNow ? crushNow.actualRate : playerRate, units);
-    s.player.atkTimer = playerPlan.progressAtEnd;
-    let swingsStopped = false;
-    for (const atUs of playerPlan.times) {
-      clock.schedule(atUs, EVENT_PRIORITY.playerAction, 'player', front?.id ?? '', () => {
-        if (swingsStopped) return;
+    // The second's beats are expanded from its own start once. Later windows (and later wake
+    // collections) queue their due share; they never re-derive a beat from a window boundary.
+    let plan = opts.plan;
+    if (!plan) {
+      const expanded = planAttacks(tickStartUs, s.player.atkTimer,
+        crushNow ? crushNow.actualRate : playerRate, units, units);
+      s.player.atkTimer = expanded.progressAtEnd;
+      plan = { times: expanded.times, next: 0, stopped: false };
+      opts.savePlan?.(plan);
+    }
+    function fireBasic(atUs: number): void {
+        if (plan!.stopped) return;
         if (!arena && !online && !fieldInFight(s)) return;
         // A local move order pauses new automatic primary attacks until it arrives.
         if (manual?.moveTo) return;
@@ -94,13 +114,14 @@ export function createPlayerBasicActions(opts: {
         const intended = arena?.intent?.targetId
           ? s.group.find((mob) => mob.id === arena.intent!.targetId && mob.hp > 0) : undefined;
         const target = arena ? intended ?? arenaTarget(arena, s.group) : s.group[0];
-        if (!target) { swingsStopped = true; return; }
+        if (!target) { plan!.stopped = true; return; }
         if (arena && !arenaPlayerInReach(arena, c.weaponName, target.id)) return;
         engageTarget(target.id);
         if (!arena) { resolvePlayerBasic(target, clock.nowUs); return; }
         const profile = playerAttackProfile(c.weaponName);
         const intervalUs = Math.round(units / Math.max(1e-9, playerRate));
-        const phase = basicPhaseBudget(profile, intervalUs);
+        const phase = basicPhaseBudget(profile, intervalUs,
+          Math.round((E.combat_arena.animation_phase_floor_sec ?? 0) * units));
         const releaseAtUs = clock.nowUs + phase.windupUs;
         // A projectile basic owns a travel leg: melee resolves at release (a reach-checked
         // hitscan), ranged and magic fly like an incoming mob shot and can miss or be blocked.
@@ -117,7 +138,12 @@ export function createPlayerBasicActions(opts: {
           updateArenaAction(arena, action.id, { areaKey: encounterKeyOf(s) });
           schedulePlayerBasic(action, target);
         }
-      });
+    }
+    for (; plan.next < plan.times.length; plan.next++) {
+      const atUs = plan.times[plan.next];
+      if (atUs > tickEndUs) break;
+      if (atUs < tickStartUs) continue;
+      clock.schedule(atUs, EVENT_PRIORITY.playerAction, 'player', front?.id ?? '', () => fireBasic(atUs));
     }
 
     /** Apply the canonical player basic at its contact beat; the caller owns validation. */
@@ -251,10 +277,9 @@ export function createPlayerBasicActions(opts: {
           const disrupt = bundleOf(c.keystones, 'disrupting-blows');
           if (disrupt && disruptingStop(r.damage, target.hpMax, disrupt.params as Record<string, number>)) {
             const delaySec = Number(disrupt.params.stopSec);
-            const plan = mobPlans.find((entry) => entry.mob === target);
-            if (plan && spendControlBudget(s.mobStatus, target.id, delaySec)) {
+            if (spendControlBudget(s.mobStatus, target.id, delaySec)) {
               clock.delayActor(target.id, delaySec * units);
-              target.atkTimer -= plan.rate * delaySec;
+              delayMobPlan(target.id, delaySec);
             }
           }
           fx(s, {
@@ -273,7 +298,7 @@ export function createPlayerBasicActions(opts: {
             }
             if (arena?.intent?.targetId === target.id) cancelIntent('target lost');
             s.player.atkTimer = 0;
-            swingsStopped = true;
+            plan!.stopped = true;
           }
         } else if (r.why) {
           // a swing the mob answered without taking pops its word on that mob's own corner, the way a

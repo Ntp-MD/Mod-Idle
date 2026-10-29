@@ -34,6 +34,10 @@ export function advanceEngagement(s: GameState, opts: {
   cancelMobPreparation: (action: CombatArenaAction, atUs: number, reason: string) => void;
   tickStartUs: number;
   state: EngagementState;
+  /** The world second's opening pass. Combat windows after it only rebind their callbacks. */
+  prime?: boolean;
+  /** Released-work targets pinned through a settlement; they stay engaged, never leash-reset. */
+  pinnedIds?: ReadonlySet<string>;
 }): {
   syncEngagement: (atUs: number) => EngagementDelta;
   refreshReturning: (atUs: number) => void;
@@ -73,6 +77,7 @@ export function advanceEngagement(s: GameState, opts: {
       if (actor.returning) {
         if (distance <= band + 1e-6) {
           actor.returning = false;
+          mob.retreating = false;
           persistReturning(mob.id, false);
         }
         continue;
@@ -123,8 +128,18 @@ export function advanceEngagement(s: GameState, opts: {
     }
     const profile = fieldProfile();
     const next = new Set<string>();
+    // Released work pins its own target until the impact settles. A projectile already paid for
+    // may not be dropped by a leash reset, or a reload between release and impact would heal the
+    // body and void the shot. The pin is identity, not damage: it only keeps membership.
+    const releasedTargets = new Set<string>(opts.pinnedIds ?? []);
+    for (const flight of arena.flights) {
+      if (flight.area?.targetId) releasedTargets.add(flight.area.targetId);
+      if (flight.hitTargetId) releasedTargets.add(flight.hitTargetId);
+      for (const target of flight.cast.targets) releasedTargets.add(target.id);
+    }
+    for (const shot of arena.playerShots) releasedTargets.add(shot.targetId);
     const live = s.group.filter((mob) => mob.hp > 0 && arena.mobs[mob.id]
-      && !arena.mobs[mob.id].returning && insideHomeLeash(mob));
+      && !arena.mobs[mob.id].returning && (insideHomeLeash(mob) || releasedTargets.has(mob.id)));
     const campFight = s.fieldwork.campEncounters?.active?.stage === 'combat';
     if ((s.hunting || campFight) && s.player.hp > 0) {
       for (const mob of live) {
@@ -163,6 +178,12 @@ export function advanceEngagement(s: GameState, opts: {
       if (next.has(id)) continue;
       const mob = s.group.find((entry) => entry.id === id);
       if (!mob || mob.hp <= 0) continue;
+      if (releasedTargets.has(id)) {
+        // A body owed an impact stays in the fight without its home reset, so the released
+        // work can still find it at the committed contact.
+        next.add(id);
+        continue;
+      }
       mob.hp = mob.hpMax;
       delete s.mobStatus[id];
       delete s.curses[id];
@@ -183,8 +204,10 @@ export function advanceEngagement(s: GameState, opts: {
     return { added: [...now].filter((id) => !was.has(id)), removed };
   }
 
-  refreshReturning(tickStartUs);
-  syncEngagement(tickStartUs);
+  if (opts.prime !== false) {
+    refreshReturning(tickStartUs);
+    syncEngagement(tickStartUs);
+  }
 
   return { syncEngagement, refreshReturning, insideHomeLeash };
 }

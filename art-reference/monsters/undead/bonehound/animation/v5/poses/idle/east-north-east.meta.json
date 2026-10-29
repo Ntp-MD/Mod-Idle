@@ -1,0 +1,29 @@
+{
+  "speciesId": "bonehound",
+  "action": "idle",
+  "direction": "east-north-east",
+  "angleDegrees": 112.5,
+  "status": "rejected-facing",
+  "generator": "OpenAI built-in image_gen",
+  "sourcePixelsModified": false,
+  "sourceOutput": "C:\\Users\\disda\\.codex\\generated_images\\01a18325-2c1d-71e0-9245-76f3b5215265\\exec-ea55959b-814f-4571-904e-662592ea1f0e.png",
+  "qa": {
+    "visualApproved": false,
+    "atlasApproved": false
+  },
+  "visualReview": "Yaw does not match requested direction; remains close to source southeast. Must regenerate before accepting.",
+  "alphaMeasurement": {
+    "sourceSize": [
+      1254,
+      1254
+    ],
+    "boundsExclusive": [
+      67,
+      69,
+      1200,
+      1229
+    ],
+    "distinctAlphaLevels": 256,
+    "sourcePixelsModified": false
+  }
+}

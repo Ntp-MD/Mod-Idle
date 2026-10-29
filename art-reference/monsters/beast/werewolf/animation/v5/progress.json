@@ -1,0 +1,23 @@
+{
+  "status": "incomplete-generation-limited",
+  "expectedPoses": 272,
+  "presentRequiredPaths": {
+    "idle": 8,
+    "walk": 8,
+    "attack": 8,
+    "hit": 8,
+    "death": 8
+  },
+  "presentTotal": 40,
+  "missingTotal": 232,
+  "countIsNotVisualApproval": true,
+  "variantsStarted": false,
+  "oldVersionsDeleted": false,
+  "runtimePromoted": false,
+  "generationBlocker": {
+    "type": "usage_limit_reached",
+    "resetsAtUnix": 1793288069,
+    "fallbackUsed": false
+  },
+  "newGeneratedPosesThisRun": 0
+}

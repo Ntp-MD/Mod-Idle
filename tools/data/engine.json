@@ -31,6 +31,14 @@
     "action_sec": 0.3,
     "body_sec": 2.2,
     "history_sec": 3,
+    "animation_phase_floor_sec": 0.1,
+    "behavior": {
+      "skirmish_gap_m": 2.6,
+      "skirmish_hold_sec": 0.8,
+      "kite_range_m": 2.0,
+      "support_hold_m": 5.0,
+      "charge_speed_mps": 9
+    },
     "normal_attack": {
       "legacy": {
         "front": "melee",
@@ -203,6 +211,10 @@
       "note": "combat.md section 1: a normal and an elite mob swing once a second, a boss 0.8 times. The mob clock is capped at 1 / caps.attack_interval_sec, the same clock rule the player obeys, so no Crippled stack or future mob speed line can out-run the game's one attack ceiling."
     },
     "aura_radius_m": 4,
+    "retreat_at_pct": 15,
+    "phase_adds": {
+      "count": 2
+    },
     "curve": {
       "skill_per_level": 0.0034,
       "hp_at_player_level_cap": 27704.261545901503,
@@ -15478,7 +15490,8 @@
       "level",
       "ascend",
       "refine"
-    ]
+    ],
+    "settle_seconds_cap": 120
   },
   "junk": {
     "stack": 999,

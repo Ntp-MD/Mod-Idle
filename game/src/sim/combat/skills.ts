@@ -5,13 +5,38 @@ import {
 } from '../../../../engine/keystones.ts';
 import { directFlags, emptyParts, validateDamagePacket } from '../../../../engine/damage-provenance.ts';
 import type { DamagePacket } from '../../../../engine/damage-provenance.ts';
-import type { SkillAreaSnapshot } from '../../../../engine/types.ts';
+import type { SkillAreaSnapshot, SkillRow } from '../../../../engine/types.ts';
 import { mastery } from '../core/mastery';
 import { setStacks, setErosion, stopMob, stopMobDeliberate, placeStatus, holdStatus, modsOn as mobModsOn, targetMods, applyWeaponRiders, holdsCondition, CONDITION_OF, consumeStatus, copyStatus, keystoneBlocksStatus, keystoneTargetMods, type MobStatusName } from './mobStatus';
 import { lineValue, applyCurse } from './curse';
 import type { Character } from '../core/player';
 import type { GameState, Mob } from '../core/types';
 import type { Statuses } from './combat';
+
+/**
+ * F23 — what a row is for, read from its own shape. This is a naming contract for the bar, the
+ * wiki and a balance review; it never changes a cast. A row may be sustain and pack-clear at once
+ * (a healing field); the more specific survival answer wins the label.
+ */
+export type SkillIdentity = 'single-target' | 'pack-clear' | 'sustain' | 'control' | 'utility';
+
+export function skillIdentity(skill: SkillRow): SkillIdentity {
+  const effects = skill.effects || [];
+  const sustain = skill.type === 'heal'
+    || effects.some((effect) => /heal|leech|regen|restore/i.test(effect.stat))
+    || (skill.kind || '').toLowerCase() === 'sustain';
+  if (sustain) return 'sustain';
+  const control = skill.type === 'curse'
+    || effects.some((effect) => !!effect.status || /stun|shock|chill|slow|fear|root/i.test(effect.stat));
+  if (control) return 'control';
+  const area = skill.area;
+  const areaTargets = !!area && ((area.radius_m || 0) > 0 || area.shape === 'cone' || area.shape === 'line'
+    || area.shape === 'circle');
+  const many = areaTargets || /all|multi|pack|area/i.test(skill.targets || '');
+  if (many) return 'pack-clear';
+  if (skill.type === 'attack') return 'single-target';
+  return 'utility';
+}
 
 export interface SkillState {
   /** Owned skills: id → duplicates poured into its own ladder. */

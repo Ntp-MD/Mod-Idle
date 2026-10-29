@@ -1,0 +1,19 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-dd11facd-a85e-49d6-99c7-a13471218c77.png",
+  "direction": "south",
+  "angleDegrees": 0,
+  "action": "attack",
+  "phase": "01-contact",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": true,
+    "identityPlausible": true,
+    "facingPlausible": true,
+    "phaseApproved": true,
+    "cycleApproved": false,
+    "atlasApproved": false,
+    "note": "Attack raised windup and lowered contact visually distinguishable, anchor/scale not approved."
+  }
+}

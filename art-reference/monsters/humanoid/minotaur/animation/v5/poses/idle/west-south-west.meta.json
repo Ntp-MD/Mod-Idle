@@ -1,0 +1,16 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-588e439e-1b49-4fc2-984c-9a529b63566a.png",
+  "direction": "west-south-west",
+  "angleDegrees": 292.5,
+  "action": "idle",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": true,
+    "facingPlausible": true,
+    "exactYawApproved": false,
+    "atlasApproved": false,
+    "note": "Correct screen side and profile/front distinction observed; full16heading/anchor review still pending."
+  }
+}

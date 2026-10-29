@@ -1,0 +1,1520 @@
+{
+  "schemaVersion": 1,
+  "status": "direction16-candidate-incomplete",
+  "speciesId": "dryad",
+  "race": "plant",
+  "version": "v5",
+  "attackKind": "close",
+  "bakedWeaponId": null,
+  "identityRef": "../atlas/animation.png",
+  "sourcePoseRef": "../atlas/animation.png",
+  "directionCount": 16,
+  "angleStepDegrees": 22.5,
+  "directions": [
+    {
+      "name": "south",
+      "angleDegrees": 0
+    },
+    {
+      "name": "south-south-east",
+      "angleDegrees": 22.5
+    },
+    {
+      "name": "south-east",
+      "angleDegrees": 45
+    },
+    {
+      "name": "east-south-east",
+      "angleDegrees": 67.5
+    },
+    {
+      "name": "east",
+      "angleDegrees": 90
+    },
+    {
+      "name": "east-north-east",
+      "angleDegrees": 112.5
+    },
+    {
+      "name": "north-east",
+      "angleDegrees": 135
+    },
+    {
+      "name": "north-north-east",
+      "angleDegrees": 157.5
+    },
+    {
+      "name": "north",
+      "angleDegrees": 180
+    },
+    {
+      "name": "north-north-west",
+      "angleDegrees": 202.5
+    },
+    {
+      "name": "north-west",
+      "angleDegrees": 225
+    },
+    {
+      "name": "west-north-west",
+      "angleDegrees": 247.5
+    },
+    {
+      "name": "west",
+      "angleDegrees": 270
+    },
+    {
+      "name": "west-south-west",
+      "angleDegrees": 292.5
+    },
+    {
+      "name": "south-west",
+      "angleDegrees": 315
+    },
+    {
+      "name": "south-south-west",
+      "angleDegrees": 337.5
+    }
+  ],
+  "camera": "fixed elevated three-quarter camera; turn whole creature in world, never flat-rotate image",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
+  },
+  "statusNote": "Production incomplete; PNG presence is not acceptance. Legacy cells are source references only. No runtime promotion or variant production. Further generation blocked by shared ImageGen quota.",
+  "actions": {
+    "idle": {
+      "framesPerDirection": 1,
+      "poseCount": 16,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "south.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "south-south-east.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "south-east",
+          "file": "south-east.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "east-south-east.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "east",
+          "file": "east.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "east-north-east.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "north-east",
+          "file": "north-east.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "north-north-east.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "north",
+          "file": "north.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "north-north-west.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "north-west",
+          "file": "north-west.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "west-north-west.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "west",
+          "file": "west.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "west-south-west.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "south-west",
+          "file": "south-west.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "south-south-west.png",
+          "pose": "neutral ready stance"
+        }
+      ]
+    },
+    "walk": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-stride-a.png",
+          "pose": "left root foot forward"
+        },
+        {
+          "direction": "south",
+          "file": "01-stride-b.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "south",
+          "file": "02-stride-c.png",
+          "pose": "right root foot forward"
+        },
+        {
+          "direction": "south",
+          "file": "03-stride-d.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-stride-a.png",
+          "pose": "left root foot forward"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-stride-b.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-stride-c.png",
+          "pose": "right root foot forward"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-stride-d.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-stride-a.png",
+          "pose": "left root foot forward"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-stride-b.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-stride-c.png",
+          "pose": "right root foot forward"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-stride-d.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-stride-a.png",
+          "pose": "left root foot forward"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-stride-b.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-stride-c.png",
+          "pose": "right root foot forward"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-stride-d.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "east",
+          "file": "00-stride-a.png",
+          "pose": "left root foot forward"
+        },
+        {
+          "direction": "east",
+          "file": "01-stride-b.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "east",
+          "file": "02-stride-c.png",
+          "pose": "right root foot forward"
+        },
+        {
+          "direction": "east",
+          "file": "03-stride-d.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-stride-a.png",
+          "pose": "left root foot forward"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-stride-b.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-stride-c.png",
+          "pose": "right root foot forward"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-stride-d.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-stride-a.png",
+          "pose": "left root foot forward"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-stride-b.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-stride-c.png",
+          "pose": "right root foot forward"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-stride-d.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-stride-a.png",
+          "pose": "left root foot forward"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-stride-b.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-stride-c.png",
+          "pose": "right root foot forward"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-stride-d.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "north",
+          "file": "00-stride-a.png",
+          "pose": "left root foot forward"
+        },
+        {
+          "direction": "north",
+          "file": "01-stride-b.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "north",
+          "file": "02-stride-c.png",
+          "pose": "right root foot forward"
+        },
+        {
+          "direction": "north",
+          "file": "03-stride-d.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-stride-a.png",
+          "pose": "left root foot forward"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-stride-b.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-stride-c.png",
+          "pose": "right root foot forward"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-stride-d.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-stride-a.png",
+          "pose": "left root foot forward"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-stride-b.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-stride-c.png",
+          "pose": "right root foot forward"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-stride-d.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-stride-a.png",
+          "pose": "left root foot forward"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-stride-b.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-stride-c.png",
+          "pose": "right root foot forward"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-stride-d.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "west",
+          "file": "00-stride-a.png",
+          "pose": "left root foot forward"
+        },
+        {
+          "direction": "west",
+          "file": "01-stride-b.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "west",
+          "file": "02-stride-c.png",
+          "pose": "right root foot forward"
+        },
+        {
+          "direction": "west",
+          "file": "03-stride-d.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-stride-a.png",
+          "pose": "left root foot forward"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-stride-b.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-stride-c.png",
+          "pose": "right root foot forward"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-stride-d.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-stride-a.png",
+          "pose": "left root foot forward"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-stride-b.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-stride-c.png",
+          "pose": "right root foot forward"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-stride-d.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-stride-a.png",
+          "pose": "left root foot forward"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-stride-b.png",
+          "pose": "root feet pass"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-stride-c.png",
+          "pose": "right root foot forward"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-stride-d.png",
+          "pose": "root feet pass"
+        }
+      ]
+    },
+    "attack": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-windup.png",
+          "pose": "draw wooden arm back"
+        },
+        {
+          "direction": "south",
+          "file": "01-contact.png",
+          "pose": "sweep branch arm forward at contact"
+        },
+        {
+          "direction": "south",
+          "file": "02-follow-through.png",
+          "pose": "branch strike follows through"
+        },
+        {
+          "direction": "south",
+          "file": "03-recovery.png",
+          "pose": "ready stance"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-windup.png",
+          "pose": "draw wooden arm back"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-contact.png",
+          "pose": "sweep branch arm forward at contact"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-follow-through.png",
+          "pose": "branch strike follows through"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-recovery.png",
+          "pose": "ready stance"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-windup.png",
+          "pose": "draw wooden arm back"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-contact.png",
+          "pose": "sweep branch arm forward at contact"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-follow-through.png",
+          "pose": "branch strike follows through"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-recovery.png",
+          "pose": "ready stance"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-windup.png",
+          "pose": "draw wooden arm back"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-contact.png",
+          "pose": "sweep branch arm forward at contact"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-follow-through.png",
+          "pose": "branch strike follows through"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-recovery.png",
+          "pose": "ready stance"
+        },
+        {
+          "direction": "east",
+          "file": "00-windup.png",
+          "pose": "draw wooden arm back"
+        },
+        {
+          "direction": "east",
+          "file": "01-contact.png",
+          "pose": "sweep branch arm forward at contact"
+        },
+        {
+          "direction": "east",
+          "file": "02-follow-through.png",
+          "pose": "branch strike follows through"
+        },
+        {
+          "direction": "east",
+          "file": "03-recovery.png",
+          "pose": "ready stance"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-windup.png",
+          "pose": "draw wooden arm back"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-contact.png",
+          "pose": "sweep branch arm forward at contact"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-follow-through.png",
+          "pose": "branch strike follows through"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-recovery.png",
+          "pose": "ready stance"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-windup.png",
+          "pose": "draw wooden arm back"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-contact.png",
+          "pose": "sweep branch arm forward at contact"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-follow-through.png",
+          "pose": "branch strike follows through"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-recovery.png",
+          "pose": "ready stance"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-windup.png",
+          "pose": "draw wooden arm back"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-contact.png",
+          "pose": "sweep branch arm forward at contact"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-follow-through.png",
+          "pose": "branch strike follows through"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-recovery.png",
+          "pose": "ready stance"
+        },
+        {
+          "direction": "north",
+          "file": "00-windup.png",
+          "pose": "draw wooden arm back"
+        },
+        {
+          "direction": "north",
+          "file": "01-contact.png",
+          "pose": "sweep branch arm forward at contact"
+        },
+        {
+          "direction": "north",
+          "file": "02-follow-through.png",
+          "pose": "branch strike follows through"
+        },
+        {
+          "direction": "north",
+          "file": "03-recovery.png",
+          "pose": "ready stance"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-windup.png",
+          "pose": "draw wooden arm back"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-contact.png",
+          "pose": "sweep branch arm forward at contact"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-follow-through.png",
+          "pose": "branch strike follows through"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-recovery.png",
+          "pose": "ready stance"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-windup.png",
+          "pose": "draw wooden arm back"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-contact.png",
+          "pose": "sweep branch arm forward at contact"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-follow-through.png",
+          "pose": "branch strike follows through"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-recovery.png",
+          "pose": "ready stance"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-windup.png",
+          "pose": "draw wooden arm back"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-contact.png",
+          "pose": "sweep branch arm forward at contact"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-follow-through.png",
+          "pose": "branch strike follows through"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-recovery.png",
+          "pose": "ready stance"
+        },
+        {
+          "direction": "west",
+          "file": "00-windup.png",
+          "pose": "draw wooden arm back"
+        },
+        {
+          "direction": "west",
+          "file": "01-contact.png",
+          "pose": "sweep branch arm forward at contact"
+        },
+        {
+          "direction": "west",
+          "file": "02-follow-through.png",
+          "pose": "branch strike follows through"
+        },
+        {
+          "direction": "west",
+          "file": "03-recovery.png",
+          "pose": "ready stance"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-windup.png",
+          "pose": "draw wooden arm back"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-contact.png",
+          "pose": "sweep branch arm forward at contact"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-follow-through.png",
+          "pose": "branch strike follows through"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-recovery.png",
+          "pose": "ready stance"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-windup.png",
+          "pose": "draw wooden arm back"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-contact.png",
+          "pose": "sweep branch arm forward at contact"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-follow-through.png",
+          "pose": "branch strike follows through"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-recovery.png",
+          "pose": "ready stance"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-windup.png",
+          "pose": "draw wooden arm back"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-contact.png",
+          "pose": "sweep branch arm forward at contact"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-follow-through.png",
+          "pose": "branch strike follows through"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-recovery.png",
+          "pose": "ready stance"
+        }
+      ]
+    },
+    "hit": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-flinch.png",
+          "pose": "initial flinch"
+        },
+        {
+          "direction": "south",
+          "file": "01-recoil.png",
+          "pose": "strongest recoil"
+        },
+        {
+          "direction": "south",
+          "file": "02-recover.png",
+          "pose": "regaining stance"
+        },
+        {
+          "direction": "south",
+          "file": "03-ready.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-flinch.png",
+          "pose": "initial flinch"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-recoil.png",
+          "pose": "strongest recoil"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-recover.png",
+          "pose": "regaining stance"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-ready.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-flinch.png",
+          "pose": "initial flinch"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-recoil.png",
+          "pose": "strongest recoil"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-recover.png",
+          "pose": "regaining stance"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-ready.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-flinch.png",
+          "pose": "initial flinch"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-recoil.png",
+          "pose": "strongest recoil"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-recover.png",
+          "pose": "regaining stance"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-ready.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "east",
+          "file": "00-flinch.png",
+          "pose": "initial flinch"
+        },
+        {
+          "direction": "east",
+          "file": "01-recoil.png",
+          "pose": "strongest recoil"
+        },
+        {
+          "direction": "east",
+          "file": "02-recover.png",
+          "pose": "regaining stance"
+        },
+        {
+          "direction": "east",
+          "file": "03-ready.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-flinch.png",
+          "pose": "initial flinch"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-recoil.png",
+          "pose": "strongest recoil"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-recover.png",
+          "pose": "regaining stance"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-ready.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-flinch.png",
+          "pose": "initial flinch"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-recoil.png",
+          "pose": "strongest recoil"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-recover.png",
+          "pose": "regaining stance"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-ready.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-flinch.png",
+          "pose": "initial flinch"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-recoil.png",
+          "pose": "strongest recoil"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-recover.png",
+          "pose": "regaining stance"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-ready.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "north",
+          "file": "00-flinch.png",
+          "pose": "initial flinch"
+        },
+        {
+          "direction": "north",
+          "file": "01-recoil.png",
+          "pose": "strongest recoil"
+        },
+        {
+          "direction": "north",
+          "file": "02-recover.png",
+          "pose": "regaining stance"
+        },
+        {
+          "direction": "north",
+          "file": "03-ready.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-flinch.png",
+          "pose": "initial flinch"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-recoil.png",
+          "pose": "strongest recoil"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-recover.png",
+          "pose": "regaining stance"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-ready.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-flinch.png",
+          "pose": "initial flinch"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-recoil.png",
+          "pose": "strongest recoil"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-recover.png",
+          "pose": "regaining stance"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-ready.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-flinch.png",
+          "pose": "initial flinch"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-recoil.png",
+          "pose": "strongest recoil"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-recover.png",
+          "pose": "regaining stance"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-ready.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "west",
+          "file": "00-flinch.png",
+          "pose": "initial flinch"
+        },
+        {
+          "direction": "west",
+          "file": "01-recoil.png",
+          "pose": "strongest recoil"
+        },
+        {
+          "direction": "west",
+          "file": "02-recover.png",
+          "pose": "regaining stance"
+        },
+        {
+          "direction": "west",
+          "file": "03-ready.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-flinch.png",
+          "pose": "initial flinch"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-recoil.png",
+          "pose": "strongest recoil"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-recover.png",
+          "pose": "regaining stance"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-ready.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-flinch.png",
+          "pose": "initial flinch"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-recoil.png",
+          "pose": "strongest recoil"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-recover.png",
+          "pose": "regaining stance"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-ready.png",
+          "pose": "neutral ready stance"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-flinch.png",
+          "pose": "initial flinch"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-recoil.png",
+          "pose": "strongest recoil"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-recover.png",
+          "pose": "regaining stance"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-ready.png",
+          "pose": "neutral ready stance"
+        }
+      ]
+    },
+    "death": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-fall.png",
+          "pose": "body starts collapsing"
+        },
+        {
+          "direction": "south",
+          "file": "01-collapse.png",
+          "pose": "body falls toward ground"
+        },
+        {
+          "direction": "south",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed body"
+        },
+        {
+          "direction": "south",
+          "file": "03-settle.png",
+          "pose": "final settled still body"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-fall.png",
+          "pose": "body starts collapsing"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-collapse.png",
+          "pose": "body falls toward ground"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed body"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-settle.png",
+          "pose": "final settled still body"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-fall.png",
+          "pose": "body starts collapsing"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-collapse.png",
+          "pose": "body falls toward ground"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed body"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-settle.png",
+          "pose": "final settled still body"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-fall.png",
+          "pose": "body starts collapsing"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-collapse.png",
+          "pose": "body falls toward ground"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed body"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-settle.png",
+          "pose": "final settled still body"
+        },
+        {
+          "direction": "east",
+          "file": "00-fall.png",
+          "pose": "body starts collapsing"
+        },
+        {
+          "direction": "east",
+          "file": "01-collapse.png",
+          "pose": "body falls toward ground"
+        },
+        {
+          "direction": "east",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed body"
+        },
+        {
+          "direction": "east",
+          "file": "03-settle.png",
+          "pose": "final settled still body"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-fall.png",
+          "pose": "body starts collapsing"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-collapse.png",
+          "pose": "body falls toward ground"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed body"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-settle.png",
+          "pose": "final settled still body"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-fall.png",
+          "pose": "body starts collapsing"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-collapse.png",
+          "pose": "body falls toward ground"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed body"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-settle.png",
+          "pose": "final settled still body"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-fall.png",
+          "pose": "body starts collapsing"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-collapse.png",
+          "pose": "body falls toward ground"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed body"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-settle.png",
+          "pose": "final settled still body"
+        },
+        {
+          "direction": "north",
+          "file": "00-fall.png",
+          "pose": "body starts collapsing"
+        },
+        {
+          "direction": "north",
+          "file": "01-collapse.png",
+          "pose": "body falls toward ground"
+        },
+        {
+          "direction": "north",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed body"
+        },
+        {
+          "direction": "north",
+          "file": "03-settle.png",
+          "pose": "final settled still body"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-fall.png",
+          "pose": "body starts collapsing"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-collapse.png",
+          "pose": "body falls toward ground"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed body"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-settle.png",
+          "pose": "final settled still body"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-fall.png",
+          "pose": "body starts collapsing"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-collapse.png",
+          "pose": "body falls toward ground"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed body"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-settle.png",
+          "pose": "final settled still body"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-fall.png",
+          "pose": "body starts collapsing"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-collapse.png",
+          "pose": "body falls toward ground"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed body"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-settle.png",
+          "pose": "final settled still body"
+        },
+        {
+          "direction": "west",
+          "file": "00-fall.png",
+          "pose": "body starts collapsing"
+        },
+        {
+          "direction": "west",
+          "file": "01-collapse.png",
+          "pose": "body falls toward ground"
+        },
+        {
+          "direction": "west",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed body"
+        },
+        {
+          "direction": "west",
+          "file": "03-settle.png",
+          "pose": "final settled still body"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-fall.png",
+          "pose": "body starts collapsing"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-collapse.png",
+          "pose": "body falls toward ground"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed body"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-settle.png",
+          "pose": "final settled still body"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-fall.png",
+          "pose": "body starts collapsing"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-collapse.png",
+          "pose": "body falls toward ground"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed body"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-settle.png",
+          "pose": "final settled still body"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-fall.png",
+          "pose": "body starts collapsing"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-collapse.png",
+          "pose": "body falls toward ground"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed body"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-settle.png",
+          "pose": "final settled still body"
+        }
+      ]
+    }
+  },
+  "requiredRootFiles": [
+    "meta.json",
+    "poses/"
+  ],
+  "imageQa": "Raw built-in imagegen outputs are candidate source only. Every pose still requires visual identity/facing review, hard-alpha/edge QA, foot-anchor measurement, and atlas QA before acceptance.",
+  "identityDescription": "slim brown bark creature with tall branch crown, green leaf accents and glowing yellow eyes",
+  "productionQa": {
+    "acceptedPoses": 0,
+    "baselineCellsAreSourceReferencesOnly": true,
+    "requiredChecks": [
+      "species identity",
+      "actual world facing",
+      "action phase semantics",
+      "fixed projection and scale",
+      "feet anchor",
+      "atlas margins and alpha"
+    ],
+    "runtimePromoted": false,
+    "posePresenceByAction": {
+      "idle": 8,
+      "walk": 8,
+      "attack": 9,
+      "hit": 8,
+      "death": 8
+    },
+    "posePresence": 41,
+    "expectedPoseCount": 272,
+    "missingPoseCount": 231,
+    "statusCounts": {
+      "source-reference-unverified": 40,
+      "candidate-review": 1
+    },
+    "missingSidecars": [],
+    "generationBlocker": {
+      "reason": "OpenAI built-in image_gen HTTP429 usage_limit_reached",
+      "resetsAtUnix": 1793288069
+    }
+  }
+}

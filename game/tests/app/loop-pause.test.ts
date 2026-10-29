@@ -6,13 +6,15 @@ import { createCombatArena } from '@sim/combat/combat-arena';
 function harness(settings: Record<string, unknown> = { autoSkills: true, autoEquip: false }) {
   const state = newGame(9);
   let paused = false;
+  let arena = createCombatArena();
+  let arenaMode = false;
   const ctx: LoopContext = {
     get gameState() { return state; },
     get settings() { return settings as never; },
     get transactionWriter() { return true; },
-    get arenaMode() { return false; },
-    get combatArena() { return createCombatArena(); },
-    set combatArena(_value) { /* not used without arena mode */ },
+    get arenaMode() { return arenaMode; },
+    get combatArena() { return arena; },
+    set combatArena(value) { arena = value; },
     get arenaManual() { return {}; },
     get running() { return true; },
     get paused() { return paused; },
@@ -23,7 +25,11 @@ function harness(settings: Record<string, unknown> = { autoSkills: true, autoEqu
     syncArenaFocus() { /* no arena */ },
     equipCarriedBest() { /* no gear */ },
   };
-  return { ctx, state, setPaused: (value: boolean) => { paused = value; } };
+  return {
+    ctx, state, arena: () => arena,
+    setPaused: (value: boolean) => { paused = value; },
+    setArenaMode: (value: boolean) => { arenaMode = value; },
+  };
 }
 
 describe('the live wake keeps earned time through a pause', () => {
@@ -55,6 +61,22 @@ describe('the live wake keeps earned time through a pause', () => {
     loop.wake(10_250);
     // one second of the pause's 9.75 s may be paid at most; never the whole pause
     expect(state.clockSec - before).toBeLessThan(3);
+  });
+});
+
+describe('the live loop advances combat in steps, not one second per step', () => {
+  it('runs twenty 50 ms samples as one world second even when the arena view is replaced', () => {
+    const { ctx, state, setArenaMode, arena } = harness();
+    setArenaMode(true);
+    const loop = createGameLoop(ctx);
+    loop.wake(0);
+    const before = state.clockSec;
+    loop.wake(1000);
+    // A decision that restarted the second on every Svelte copy would advance twenty seconds.
+    expect(state.clockSec - before).toBeLessThanOrEqual(1);
+    expect(state.clockSec - before).toBeGreaterThan(0);
+    // The presentation copy is the same encounter, so its released work is still on one arena.
+    expect(arena().frames.length).toBeGreaterThan(0);
   });
 });
 

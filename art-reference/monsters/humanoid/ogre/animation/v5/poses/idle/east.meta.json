@@ -1,0 +1,17 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18331-935d-7402-9037-44298252456b\\exec-60de42c4-b290-4870-8692-546701948456.png",
+  "action": "idle",
+  "direction": "east",
+  "angleDegrees": 90,
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": true,
+    "facingPlausible": true,
+    "identityPlausible": true,
+    "exactYawApproved": false,
+    "atlasApproved": false,
+    "note": "Maul head shape varies between facing candidates; consistency review remains."
+  }
+}

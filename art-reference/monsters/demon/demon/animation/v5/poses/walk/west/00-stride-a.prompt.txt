@@ -1,0 +1,1 @@
+Lossless cell extraction from approved source atlas. No generative prompt; no repaint.

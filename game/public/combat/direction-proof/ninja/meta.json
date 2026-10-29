@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "status": "technical-comparison-fixture",
+  "identity": "Quaternius Ninja, visual stand-in; not final ModWorld player art",
+  "source": "showcase-models/quaternius-ninja.gltf",
+  "license": "CC0-1.0",
+  "sourcePage": "https://quaternius.com/packs/ultimatemonsters.html",
+  "generator": "game/src/ui/dev/sprite-direction-bake.ts",
+  "method": "Deterministic orthographic render of original rig, materials, normals and clips to transparent PNG",
+  "cell": { "width": 192, "height": 192 },
+  "directionCount": 32,
+  "angleStepDegrees": 11.25,
+  "directionOrder": "0 faces camera/south; positive angles rotate the model toward screen right",
+  "sixteenDirectionSubset": "Use rows 0, 2, 4, ..., 30 from the same source atlas",
+  "camera": { "projection": "orthographic", "elevationDegrees": 30, "verticalSpan": 5.2, "targetHeight": 1.7 },
+  "feetPivot": { "x": 96, "y": 150.36 },
+  "bakedShadow": false,
+  "clips": {
+    "walk": { "file": "walk.png", "sourceClip": "Walk", "columns": 24, "rows": 32, "durationSeconds": 1, "loop": true },
+    "idle": { "file": "idle.png", "sourceClip": "Idle", "columns": 12, "rows": 32, "durationSeconds": 1, "loop": true }
+  },
+  "runtime": "2D Canvas only; source WebGL renderer runs only with the dev authoring query bake=1 and is disposed after export"
+}

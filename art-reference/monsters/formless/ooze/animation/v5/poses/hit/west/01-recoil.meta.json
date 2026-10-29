@@ -33,5 +33,6 @@
   "sourceAtlas": "art-reference/monsters/formless/ooze/animation/atlas/animation.png",
   "sourceCellIndex": 29,
   "transformation": "128x128 source cell extracted and enlarged 2x with NEAREST, then placed on a transparent 384x384 canvas. Source color and alpha values preserved except for explicitly listed detached components.",
-  "removedComponents": []
+  "removedComponents": [],
+  "source": "../../../../atlas/animation.png"
 }

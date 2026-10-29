@@ -1,0 +1,1517 @@
+{
+  "schemaVersion": 1,
+  "status": "direction16-candidate-incomplete",
+  "speciesId": "wisp",
+  "race": "elemental",
+  "version": "v5",
+  "attackKind": "close",
+  "bakedWeaponId": null,
+  "identityRef": "../atlas/animation.png",
+  "sourcePoseRef": "../atlas/animation.png",
+  "directionCount": 16,
+  "angleStepDegrees": 22.5,
+  "directions": [
+    {
+      "name": "south",
+      "angleDegrees": 0
+    },
+    {
+      "name": "south-south-east",
+      "angleDegrees": 22.5
+    },
+    {
+      "name": "south-east",
+      "angleDegrees": 45
+    },
+    {
+      "name": "east-south-east",
+      "angleDegrees": 67.5
+    },
+    {
+      "name": "east",
+      "angleDegrees": 90
+    },
+    {
+      "name": "east-north-east",
+      "angleDegrees": 112.5
+    },
+    {
+      "name": "north-east",
+      "angleDegrees": 135
+    },
+    {
+      "name": "north-north-east",
+      "angleDegrees": 157.5
+    },
+    {
+      "name": "north",
+      "angleDegrees": 180
+    },
+    {
+      "name": "north-north-west",
+      "angleDegrees": 202.5
+    },
+    {
+      "name": "north-west",
+      "angleDegrees": 225
+    },
+    {
+      "name": "west-north-west",
+      "angleDegrees": 247.5
+    },
+    {
+      "name": "west",
+      "angleDegrees": 270
+    },
+    {
+      "name": "west-south-west",
+      "angleDegrees": 292.5
+    },
+    {
+      "name": "south-west",
+      "angleDegrees": 315
+    },
+    {
+      "name": "south-south-west",
+      "angleDegrees": 337.5
+    }
+  ],
+  "camera": "one fixed elevated three-quarter camera; rotate the whole wisp facing in the world, never rotate the camera or flat sprite",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
+  },
+  "statusNote": "16-direction production candidates; baseline untouched until full replacement reviewed.",
+  "actions": {
+    "idle": {
+      "framesPerDirection": 1,
+      "poseCount": 16,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "south.png",
+          "pose": "one neutral ready pose facing 0 degrees"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "south-south-east.png",
+          "pose": "one neutral ready pose facing 22.5 degrees"
+        },
+        {
+          "direction": "south-east",
+          "file": "south-east.png",
+          "pose": "one neutral ready pose facing 45 degrees"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "east-south-east.png",
+          "pose": "one neutral ready pose facing 67.5 degrees"
+        },
+        {
+          "direction": "east",
+          "file": "east.png",
+          "pose": "one neutral ready pose facing 90 degrees"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "east-north-east.png",
+          "pose": "one neutral ready pose facing 112.5 degrees"
+        },
+        {
+          "direction": "north-east",
+          "file": "north-east.png",
+          "pose": "one neutral ready pose facing 135 degrees"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "north-north-east.png",
+          "pose": "one neutral ready pose facing 157.5 degrees"
+        },
+        {
+          "direction": "north",
+          "file": "north.png",
+          "pose": "one neutral ready pose facing 180 degrees"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "north-north-west.png",
+          "pose": "one neutral ready pose facing 202.5 degrees"
+        },
+        {
+          "direction": "north-west",
+          "file": "north-west.png",
+          "pose": "one neutral ready pose facing 225 degrees"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "west-north-west.png",
+          "pose": "one neutral ready pose facing 247.5 degrees"
+        },
+        {
+          "direction": "west",
+          "file": "west.png",
+          "pose": "one neutral ready pose facing 270 degrees"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "west-south-west.png",
+          "pose": "one neutral ready pose facing 292.5 degrees"
+        },
+        {
+          "direction": "south-west",
+          "file": "south-west.png",
+          "pose": "one neutral ready pose facing 315 degrees"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "south-south-west.png",
+          "pose": "one neutral ready pose facing 337.5 degrees"
+        }
+      ]
+    },
+    "walk": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-stride-a.png",
+          "pose": "cloud coil compresses and core leans in travel direction"
+        },
+        {
+          "direction": "south",
+          "file": "01-stride-b.png",
+          "pose": "cloud and trailing wisp stretch forward while floating"
+        },
+        {
+          "direction": "south",
+          "file": "02-stride-c.png",
+          "pose": "cloud coil expands on opposite bob phase"
+        },
+        {
+          "direction": "south",
+          "file": "03-stride-d.png",
+          "pose": "cloud returns to neutral floating height"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-stride-a.png",
+          "pose": "cloud coil compresses and core leans in travel direction"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-stride-b.png",
+          "pose": "cloud and trailing wisp stretch forward while floating"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-stride-c.png",
+          "pose": "cloud coil expands on opposite bob phase"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-stride-d.png",
+          "pose": "cloud returns to neutral floating height"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-stride-a.png",
+          "pose": "cloud coil compresses and core leans in travel direction"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-stride-b.png",
+          "pose": "cloud and trailing wisp stretch forward while floating"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-stride-c.png",
+          "pose": "cloud coil expands on opposite bob phase"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-stride-d.png",
+          "pose": "cloud returns to neutral floating height"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-stride-a.png",
+          "pose": "cloud coil compresses and core leans in travel direction"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-stride-b.png",
+          "pose": "cloud and trailing wisp stretch forward while floating"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-stride-c.png",
+          "pose": "cloud coil expands on opposite bob phase"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-stride-d.png",
+          "pose": "cloud returns to neutral floating height"
+        },
+        {
+          "direction": "east",
+          "file": "00-stride-a.png",
+          "pose": "cloud coil compresses and core leans in travel direction"
+        },
+        {
+          "direction": "east",
+          "file": "01-stride-b.png",
+          "pose": "cloud and trailing wisp stretch forward while floating"
+        },
+        {
+          "direction": "east",
+          "file": "02-stride-c.png",
+          "pose": "cloud coil expands on opposite bob phase"
+        },
+        {
+          "direction": "east",
+          "file": "03-stride-d.png",
+          "pose": "cloud returns to neutral floating height"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-stride-a.png",
+          "pose": "cloud coil compresses and core leans in travel direction"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-stride-b.png",
+          "pose": "cloud and trailing wisp stretch forward while floating"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-stride-c.png",
+          "pose": "cloud coil expands on opposite bob phase"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-stride-d.png",
+          "pose": "cloud returns to neutral floating height"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-stride-a.png",
+          "pose": "cloud coil compresses and core leans in travel direction"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-stride-b.png",
+          "pose": "cloud and trailing wisp stretch forward while floating"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-stride-c.png",
+          "pose": "cloud coil expands on opposite bob phase"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-stride-d.png",
+          "pose": "cloud returns to neutral floating height"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-stride-a.png",
+          "pose": "cloud coil compresses and core leans in travel direction"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-stride-b.png",
+          "pose": "cloud and trailing wisp stretch forward while floating"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-stride-c.png",
+          "pose": "cloud coil expands on opposite bob phase"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-stride-d.png",
+          "pose": "cloud returns to neutral floating height"
+        },
+        {
+          "direction": "north",
+          "file": "00-stride-a.png",
+          "pose": "cloud coil compresses and core leans in travel direction"
+        },
+        {
+          "direction": "north",
+          "file": "01-stride-b.png",
+          "pose": "cloud and trailing wisp stretch forward while floating"
+        },
+        {
+          "direction": "north",
+          "file": "02-stride-c.png",
+          "pose": "cloud coil expands on opposite bob phase"
+        },
+        {
+          "direction": "north",
+          "file": "03-stride-d.png",
+          "pose": "cloud returns to neutral floating height"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-stride-a.png",
+          "pose": "cloud coil compresses and core leans in travel direction"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-stride-b.png",
+          "pose": "cloud and trailing wisp stretch forward while floating"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-stride-c.png",
+          "pose": "cloud coil expands on opposite bob phase"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-stride-d.png",
+          "pose": "cloud returns to neutral floating height"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-stride-a.png",
+          "pose": "cloud coil compresses and core leans in travel direction"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-stride-b.png",
+          "pose": "cloud and trailing wisp stretch forward while floating"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-stride-c.png",
+          "pose": "cloud coil expands on opposite bob phase"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-stride-d.png",
+          "pose": "cloud returns to neutral floating height"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-stride-a.png",
+          "pose": "cloud coil compresses and core leans in travel direction"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-stride-b.png",
+          "pose": "cloud and trailing wisp stretch forward while floating"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-stride-c.png",
+          "pose": "cloud coil expands on opposite bob phase"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-stride-d.png",
+          "pose": "cloud returns to neutral floating height"
+        },
+        {
+          "direction": "west",
+          "file": "00-stride-a.png",
+          "pose": "cloud coil compresses and core leans in travel direction"
+        },
+        {
+          "direction": "west",
+          "file": "01-stride-b.png",
+          "pose": "cloud and trailing wisp stretch forward while floating"
+        },
+        {
+          "direction": "west",
+          "file": "02-stride-c.png",
+          "pose": "cloud coil expands on opposite bob phase"
+        },
+        {
+          "direction": "west",
+          "file": "03-stride-d.png",
+          "pose": "cloud returns to neutral floating height"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-stride-a.png",
+          "pose": "cloud coil compresses and core leans in travel direction"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-stride-b.png",
+          "pose": "cloud and trailing wisp stretch forward while floating"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-stride-c.png",
+          "pose": "cloud coil expands on opposite bob phase"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-stride-d.png",
+          "pose": "cloud returns to neutral floating height"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-stride-a.png",
+          "pose": "cloud coil compresses and core leans in travel direction"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-stride-b.png",
+          "pose": "cloud and trailing wisp stretch forward while floating"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-stride-c.png",
+          "pose": "cloud coil expands on opposite bob phase"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-stride-d.png",
+          "pose": "cloud returns to neutral floating height"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-stride-a.png",
+          "pose": "cloud coil compresses and core leans in travel direction"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-stride-b.png",
+          "pose": "cloud and trailing wisp stretch forward while floating"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-stride-c.png",
+          "pose": "cloud coil expands on opposite bob phase"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-stride-d.png",
+          "pose": "cloud returns to neutral floating height"
+        }
+      ]
+    },
+    "attack": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-windup.png",
+          "pose": "cloud coils tighten around bright core"
+        },
+        {
+          "direction": "south",
+          "file": "01-contact.png",
+          "pose": "core pulses forward within cloud, no projectile"
+        },
+        {
+          "direction": "south",
+          "file": "02-follow-through.png",
+          "pose": "cloud stretches toward aim direction at release"
+        },
+        {
+          "direction": "south",
+          "file": "03-recovery.png",
+          "pose": "cloud settles around core into neutral hover"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-windup.png",
+          "pose": "cloud coils tighten around bright core"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-contact.png",
+          "pose": "core pulses forward within cloud, no projectile"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-follow-through.png",
+          "pose": "cloud stretches toward aim direction at release"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-recovery.png",
+          "pose": "cloud settles around core into neutral hover"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-windup.png",
+          "pose": "cloud coils tighten around bright core"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-contact.png",
+          "pose": "core pulses forward within cloud, no projectile"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-follow-through.png",
+          "pose": "cloud stretches toward aim direction at release"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-recovery.png",
+          "pose": "cloud settles around core into neutral hover"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-windup.png",
+          "pose": "cloud coils tighten around bright core"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-contact.png",
+          "pose": "core pulses forward within cloud, no projectile"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-follow-through.png",
+          "pose": "cloud stretches toward aim direction at release"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-recovery.png",
+          "pose": "cloud settles around core into neutral hover"
+        },
+        {
+          "direction": "east",
+          "file": "00-windup.png",
+          "pose": "cloud coils tighten around bright core"
+        },
+        {
+          "direction": "east",
+          "file": "01-contact.png",
+          "pose": "core pulses forward within cloud, no projectile"
+        },
+        {
+          "direction": "east",
+          "file": "02-follow-through.png",
+          "pose": "cloud stretches toward aim direction at release"
+        },
+        {
+          "direction": "east",
+          "file": "03-recovery.png",
+          "pose": "cloud settles around core into neutral hover"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-windup.png",
+          "pose": "cloud coils tighten around bright core"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-contact.png",
+          "pose": "core pulses forward within cloud, no projectile"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-follow-through.png",
+          "pose": "cloud stretches toward aim direction at release"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-recovery.png",
+          "pose": "cloud settles around core into neutral hover"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-windup.png",
+          "pose": "cloud coils tighten around bright core"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-contact.png",
+          "pose": "core pulses forward within cloud, no projectile"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-follow-through.png",
+          "pose": "cloud stretches toward aim direction at release"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-recovery.png",
+          "pose": "cloud settles around core into neutral hover"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-windup.png",
+          "pose": "cloud coils tighten around bright core"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-contact.png",
+          "pose": "core pulses forward within cloud, no projectile"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-follow-through.png",
+          "pose": "cloud stretches toward aim direction at release"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-recovery.png",
+          "pose": "cloud settles around core into neutral hover"
+        },
+        {
+          "direction": "north",
+          "file": "00-windup.png",
+          "pose": "cloud coils tighten around bright core"
+        },
+        {
+          "direction": "north",
+          "file": "01-contact.png",
+          "pose": "core pulses forward within cloud, no projectile"
+        },
+        {
+          "direction": "north",
+          "file": "02-follow-through.png",
+          "pose": "cloud stretches toward aim direction at release"
+        },
+        {
+          "direction": "north",
+          "file": "03-recovery.png",
+          "pose": "cloud settles around core into neutral hover"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-windup.png",
+          "pose": "cloud coils tighten around bright core"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-contact.png",
+          "pose": "core pulses forward within cloud, no projectile"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-follow-through.png",
+          "pose": "cloud stretches toward aim direction at release"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-recovery.png",
+          "pose": "cloud settles around core into neutral hover"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-windup.png",
+          "pose": "cloud coils tighten around bright core"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-contact.png",
+          "pose": "core pulses forward within cloud, no projectile"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-follow-through.png",
+          "pose": "cloud stretches toward aim direction at release"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-recovery.png",
+          "pose": "cloud settles around core into neutral hover"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-windup.png",
+          "pose": "cloud coils tighten around bright core"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-contact.png",
+          "pose": "core pulses forward within cloud, no projectile"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-follow-through.png",
+          "pose": "cloud stretches toward aim direction at release"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-recovery.png",
+          "pose": "cloud settles around core into neutral hover"
+        },
+        {
+          "direction": "west",
+          "file": "00-windup.png",
+          "pose": "cloud coils tighten around bright core"
+        },
+        {
+          "direction": "west",
+          "file": "01-contact.png",
+          "pose": "core pulses forward within cloud, no projectile"
+        },
+        {
+          "direction": "west",
+          "file": "02-follow-through.png",
+          "pose": "cloud stretches toward aim direction at release"
+        },
+        {
+          "direction": "west",
+          "file": "03-recovery.png",
+          "pose": "cloud settles around core into neutral hover"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-windup.png",
+          "pose": "cloud coils tighten around bright core"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-contact.png",
+          "pose": "core pulses forward within cloud, no projectile"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-follow-through.png",
+          "pose": "cloud stretches toward aim direction at release"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-recovery.png",
+          "pose": "cloud settles around core into neutral hover"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-windup.png",
+          "pose": "cloud coils tighten around bright core"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-contact.png",
+          "pose": "core pulses forward within cloud, no projectile"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-follow-through.png",
+          "pose": "cloud stretches toward aim direction at release"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-recovery.png",
+          "pose": "cloud settles around core into neutral hover"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-windup.png",
+          "pose": "cloud coils tighten around bright core"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-contact.png",
+          "pose": "core pulses forward within cloud, no projectile"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-follow-through.png",
+          "pose": "cloud stretches toward aim direction at release"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-recovery.png",
+          "pose": "cloud settles around core into neutral hover"
+        }
+      ]
+    },
+    "hit": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-flinch.png",
+          "pose": "cloud compresses abruptly around core"
+        },
+        {
+          "direction": "south",
+          "file": "01-recoil.png",
+          "pose": "cloud and core recoil away from hit"
+        },
+        {
+          "direction": "south",
+          "file": "02-recover.png",
+          "pose": "cloud curls reform around steady core"
+        },
+        {
+          "direction": "south",
+          "file": "03-ready.png",
+          "pose": "balanced neutral hovering cloud silhouette"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-flinch.png",
+          "pose": "cloud compresses abruptly around core"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-recoil.png",
+          "pose": "cloud and core recoil away from hit"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-recover.png",
+          "pose": "cloud curls reform around steady core"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral hovering cloud silhouette"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-flinch.png",
+          "pose": "cloud compresses abruptly around core"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-recoil.png",
+          "pose": "cloud and core recoil away from hit"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-recover.png",
+          "pose": "cloud curls reform around steady core"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral hovering cloud silhouette"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-flinch.png",
+          "pose": "cloud compresses abruptly around core"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-recoil.png",
+          "pose": "cloud and core recoil away from hit"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-recover.png",
+          "pose": "cloud curls reform around steady core"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral hovering cloud silhouette"
+        },
+        {
+          "direction": "east",
+          "file": "00-flinch.png",
+          "pose": "cloud compresses abruptly around core"
+        },
+        {
+          "direction": "east",
+          "file": "01-recoil.png",
+          "pose": "cloud and core recoil away from hit"
+        },
+        {
+          "direction": "east",
+          "file": "02-recover.png",
+          "pose": "cloud curls reform around steady core"
+        },
+        {
+          "direction": "east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral hovering cloud silhouette"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-flinch.png",
+          "pose": "cloud compresses abruptly around core"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-recoil.png",
+          "pose": "cloud and core recoil away from hit"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-recover.png",
+          "pose": "cloud curls reform around steady core"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral hovering cloud silhouette"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-flinch.png",
+          "pose": "cloud compresses abruptly around core"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-recoil.png",
+          "pose": "cloud and core recoil away from hit"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-recover.png",
+          "pose": "cloud curls reform around steady core"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral hovering cloud silhouette"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-flinch.png",
+          "pose": "cloud compresses abruptly around core"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-recoil.png",
+          "pose": "cloud and core recoil away from hit"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-recover.png",
+          "pose": "cloud curls reform around steady core"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral hovering cloud silhouette"
+        },
+        {
+          "direction": "north",
+          "file": "00-flinch.png",
+          "pose": "cloud compresses abruptly around core"
+        },
+        {
+          "direction": "north",
+          "file": "01-recoil.png",
+          "pose": "cloud and core recoil away from hit"
+        },
+        {
+          "direction": "north",
+          "file": "02-recover.png",
+          "pose": "cloud curls reform around steady core"
+        },
+        {
+          "direction": "north",
+          "file": "03-ready.png",
+          "pose": "balanced neutral hovering cloud silhouette"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-flinch.png",
+          "pose": "cloud compresses abruptly around core"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-recoil.png",
+          "pose": "cloud and core recoil away from hit"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-recover.png",
+          "pose": "cloud curls reform around steady core"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral hovering cloud silhouette"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-flinch.png",
+          "pose": "cloud compresses abruptly around core"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-recoil.png",
+          "pose": "cloud and core recoil away from hit"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-recover.png",
+          "pose": "cloud curls reform around steady core"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral hovering cloud silhouette"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-flinch.png",
+          "pose": "cloud compresses abruptly around core"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-recoil.png",
+          "pose": "cloud and core recoil away from hit"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-recover.png",
+          "pose": "cloud curls reform around steady core"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral hovering cloud silhouette"
+        },
+        {
+          "direction": "west",
+          "file": "00-flinch.png",
+          "pose": "cloud compresses abruptly around core"
+        },
+        {
+          "direction": "west",
+          "file": "01-recoil.png",
+          "pose": "cloud and core recoil away from hit"
+        },
+        {
+          "direction": "west",
+          "file": "02-recover.png",
+          "pose": "cloud curls reform around steady core"
+        },
+        {
+          "direction": "west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral hovering cloud silhouette"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-flinch.png",
+          "pose": "cloud compresses abruptly around core"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-recoil.png",
+          "pose": "cloud and core recoil away from hit"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-recover.png",
+          "pose": "cloud curls reform around steady core"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral hovering cloud silhouette"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-flinch.png",
+          "pose": "cloud compresses abruptly around core"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-recoil.png",
+          "pose": "cloud and core recoil away from hit"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-recover.png",
+          "pose": "cloud curls reform around steady core"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral hovering cloud silhouette"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-flinch.png",
+          "pose": "cloud compresses abruptly around core"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-recoil.png",
+          "pose": "cloud and core recoil away from hit"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-recover.png",
+          "pose": "cloud curls reform around steady core"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral hovering cloud silhouette"
+        }
+      ]
+    },
+    "death": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-fall.png",
+          "pose": "core dims as cloud sags"
+        },
+        {
+          "direction": "south",
+          "file": "01-collapse.png",
+          "pose": "cloud coils loosen and droop"
+        },
+        {
+          "direction": "south",
+          "file": "02-ground.png",
+          "pose": "cloud contracts into small dying shape"
+        },
+        {
+          "direction": "south",
+          "file": "03-settle.png",
+          "pose": "still dim compact cloud remnant"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-fall.png",
+          "pose": "core dims as cloud sags"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-collapse.png",
+          "pose": "cloud coils loosen and droop"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-ground.png",
+          "pose": "cloud contracts into small dying shape"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-settle.png",
+          "pose": "still dim compact cloud remnant"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-fall.png",
+          "pose": "core dims as cloud sags"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-collapse.png",
+          "pose": "cloud coils loosen and droop"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-ground.png",
+          "pose": "cloud contracts into small dying shape"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-settle.png",
+          "pose": "still dim compact cloud remnant"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-fall.png",
+          "pose": "core dims as cloud sags"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-collapse.png",
+          "pose": "cloud coils loosen and droop"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-ground.png",
+          "pose": "cloud contracts into small dying shape"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-settle.png",
+          "pose": "still dim compact cloud remnant"
+        },
+        {
+          "direction": "east",
+          "file": "00-fall.png",
+          "pose": "core dims as cloud sags"
+        },
+        {
+          "direction": "east",
+          "file": "01-collapse.png",
+          "pose": "cloud coils loosen and droop"
+        },
+        {
+          "direction": "east",
+          "file": "02-ground.png",
+          "pose": "cloud contracts into small dying shape"
+        },
+        {
+          "direction": "east",
+          "file": "03-settle.png",
+          "pose": "still dim compact cloud remnant"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-fall.png",
+          "pose": "core dims as cloud sags"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-collapse.png",
+          "pose": "cloud coils loosen and droop"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-ground.png",
+          "pose": "cloud contracts into small dying shape"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-settle.png",
+          "pose": "still dim compact cloud remnant"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-fall.png",
+          "pose": "core dims as cloud sags"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-collapse.png",
+          "pose": "cloud coils loosen and droop"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-ground.png",
+          "pose": "cloud contracts into small dying shape"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-settle.png",
+          "pose": "still dim compact cloud remnant"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-fall.png",
+          "pose": "core dims as cloud sags"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-collapse.png",
+          "pose": "cloud coils loosen and droop"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-ground.png",
+          "pose": "cloud contracts into small dying shape"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-settle.png",
+          "pose": "still dim compact cloud remnant"
+        },
+        {
+          "direction": "north",
+          "file": "00-fall.png",
+          "pose": "core dims as cloud sags"
+        },
+        {
+          "direction": "north",
+          "file": "01-collapse.png",
+          "pose": "cloud coils loosen and droop"
+        },
+        {
+          "direction": "north",
+          "file": "02-ground.png",
+          "pose": "cloud contracts into small dying shape"
+        },
+        {
+          "direction": "north",
+          "file": "03-settle.png",
+          "pose": "still dim compact cloud remnant"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-fall.png",
+          "pose": "core dims as cloud sags"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-collapse.png",
+          "pose": "cloud coils loosen and droop"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-ground.png",
+          "pose": "cloud contracts into small dying shape"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-settle.png",
+          "pose": "still dim compact cloud remnant"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-fall.png",
+          "pose": "core dims as cloud sags"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-collapse.png",
+          "pose": "cloud coils loosen and droop"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-ground.png",
+          "pose": "cloud contracts into small dying shape"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-settle.png",
+          "pose": "still dim compact cloud remnant"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-fall.png",
+          "pose": "core dims as cloud sags"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-collapse.png",
+          "pose": "cloud coils loosen and droop"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-ground.png",
+          "pose": "cloud contracts into small dying shape"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-settle.png",
+          "pose": "still dim compact cloud remnant"
+        },
+        {
+          "direction": "west",
+          "file": "00-fall.png",
+          "pose": "core dims as cloud sags"
+        },
+        {
+          "direction": "west",
+          "file": "01-collapse.png",
+          "pose": "cloud coils loosen and droop"
+        },
+        {
+          "direction": "west",
+          "file": "02-ground.png",
+          "pose": "cloud contracts into small dying shape"
+        },
+        {
+          "direction": "west",
+          "file": "03-settle.png",
+          "pose": "still dim compact cloud remnant"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-fall.png",
+          "pose": "core dims as cloud sags"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-collapse.png",
+          "pose": "cloud coils loosen and droop"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-ground.png",
+          "pose": "cloud contracts into small dying shape"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-settle.png",
+          "pose": "still dim compact cloud remnant"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-fall.png",
+          "pose": "core dims as cloud sags"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-collapse.png",
+          "pose": "cloud coils loosen and droop"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-ground.png",
+          "pose": "cloud contracts into small dying shape"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-settle.png",
+          "pose": "still dim compact cloud remnant"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-fall.png",
+          "pose": "core dims as cloud sags"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-collapse.png",
+          "pose": "cloud coils loosen and droop"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-ground.png",
+          "pose": "cloud contracts into small dying shape"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-settle.png",
+          "pose": "still dim compact cloud remnant"
+        }
+      ]
+    }
+  },
+  "requiredRootFiles": [
+    "meta.json",
+    "poses/"
+  ],
+  "imageQa": "Raw built-in imagegen outputs are candidate source only. Every pose still requires visual identity/facing review, hard-alpha/edge QA, foot-anchor measurement, and atlas QA before acceptance.",
+  "locomotionProfile": "hovering bob and cloud deformation",
+  "progress": {
+    "poseFiles": 40,
+    "expectedPoseFiles": 272,
+    "actionCounts": {
+      "idle": 8,
+      "walk": 8,
+      "attack": 8,
+      "hit": 8,
+      "death": 8
+    },
+    "generatedPoseFiles": 0,
+    "complete": false,
+    "qaApproved": false,
+    "rejectedMetadata": [],
+    "missingPoseFiles": 232,
+    "sourceCandidateFiles": 40
+  },
+  "sourceInventory": {
+    "cellSizes": {
+      "(384, 384)": 40
+    },
+    "alphaTouchesCellEdge": 0,
+    "note": "Lossless baseline source cells retain original dimensions; normalize placement only during atlas packing after visual review."
+  },
+  "generationBlocker": {
+    "type": "imagegen-usage-limit",
+    "resetsAtUnix": 1793288069,
+    "note": "Built-in imagegen returned HTTP429 usage_limit_reached; pending queues terminated, no API fallback used."
+  }
+}

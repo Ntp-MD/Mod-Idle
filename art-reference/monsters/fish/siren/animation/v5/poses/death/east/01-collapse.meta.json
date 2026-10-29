@@ -1,0 +1,16 @@
+{
+  "status": "baseline-extracted-candidate",
+  "speciesId": "siren",
+  "action": "death",
+  "direction": "east",
+  "source": "../../../../atlas/animation.png",
+  "sourceCell": [
+    1,
+    4
+  ],
+  "sourcePixelsModified": false,
+  "qa": {
+    "visualIdentityReviewed": false,
+    "atlasReady": false
+  }
+}

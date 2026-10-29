@@ -1,0 +1,23 @@
+{
+  "status": "legacy-extracted-candidate",
+  "speciesId": "human",
+  "action": "death",
+  "direction": "west",
+  "source": "../../../../atlas/animation.png",
+  "sourceCell": {
+    "row": 4,
+    "column": 7,
+    "box": [
+      2688,
+      1536,
+      3072,
+      1920
+    ]
+  },
+  "sourcePixelsModified": false,
+  "qa": {
+    "new16DirectionSetAccepted": false,
+    "anchor": false,
+    "atlas": false
+  }
+}

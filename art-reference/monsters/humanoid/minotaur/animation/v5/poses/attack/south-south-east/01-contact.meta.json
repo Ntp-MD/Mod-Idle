@@ -1,0 +1,15 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-1ec9ebef-e2ac-4bc5-82c9-43d2d841727e.png",
+  "action": "attack",
+  "phase": "01-contact.png",
+  "direction": "south-south-east",
+  "phaseReference": "../south/01-contact.png",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": false,
+    "phaseApproved": false,
+    "atlasApproved": false
+  }
+}

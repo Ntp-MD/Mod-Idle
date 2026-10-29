@@ -66,6 +66,15 @@ export function createIncomingHit(opts: {
         s.player.charges!--;
         return;
       }
+      // F25 shield break: the guard is stripped before the blow is rolled, so a full Energy Shield
+      // and Earth Wall's block charges cannot answer it. A perfect dodge above still deletes the hit.
+      if (plannedSkill?.shieldBreak) {
+        const had = s.player.es + (s.player.blockCharges || 0);
+        s.player.es = 0;
+        s.player.blockCharges = 0;
+        if (had > 0) fx(s, { kind: 'proc', side: 'self', byId: mob.id, skillId: plannedSkill.id,
+          text: 'shield broken', colour: hitColour(null) });
+      }
       // 03's always-on take-more line and 12's duel defence are per incoming Hit and per target
       const worthyT = bundleOf(c.keystones, 'worthy-foe');
       const duel = worthyT ? worthyFoe(rkH.counters[mob.id] || 0, worthyT.params as Record<string, number>) : { dealtMult: 1, takenMult: 1 };

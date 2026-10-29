@@ -1,0 +1,15 @@
+{
+  "status": "candidate-review",
+  "speciesId": "golem",
+  "action": "death",
+  "direction": "south",
+  "phase": "02-ground",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-ea67-78c0-8f1a-12b9004e2a12\\exec-22075b23-19d9-42b8-9762-9b027ec7660b.png",
+  "qa": {
+    "identity": true,
+    "facing": true,
+    "phase": true,
+    "atlasReady": false
+  },
+  "review": "Visually inspected: expected action phase readable and front-facing identity preserved; spacing/sequence/atlas still pending."
+}

@@ -2,6 +2,18 @@
   "meta": {
     "note": "Mob-only skills. A strike replaces the mob's next basic swing and deals exactly that swing's damage, so mob DPS stays priced by mob PS. Statuses are control/utility only; auras are defensive group effects. Kits are optional and resolve by override: unique > boss > variant > species.",
     "max_kit": 4,
+    "behaviors": {
+      "goblin": "skirmisher",
+      "kobold": "skirmisher",
+      "spider": "skirmisher",
+      "orc": "charger",
+      "minotaur": "charger",
+      "golem": "artillery",
+      "treant": "support",
+      "giant": "support",
+      "dryad": "support",
+      "wisp": "support"
+    },
     "statuses": [
       "chill",
       "shock",
@@ -83,6 +95,7 @@
       "status": null,
       "cd": 11,
       "cast_sec": 0.6,
+      "shieldBreak": true,
       "role": "front",
       "cast": {
         "delivery": "melee",
@@ -129,7 +142,11 @@
           "meters": 0.2
         },
         "windup_sec": 0.5,
-        "recovery_sec": 0.2
+        "recovery_sec": 0.2,
+        "charge": {
+          "distance_m": 5,
+          "speed_mps": 9
+        }
       }
     },
     {

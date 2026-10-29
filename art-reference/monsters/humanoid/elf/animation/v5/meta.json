@@ -1,25 +1,1492 @@
 {
   "schemaVersion": 1,
-  "status": "draft",
+  "status": "direction16-candidate-incomplete",
   "speciesId": "elf",
+  "race": "humanoid",
+  "version": "v5",
   "attackKind": "far",
   "bakedWeaponId": "TODO: identify the fixed baked weapon from the approved reference before generation",
-  "anchor": {
-    "x": 128,
-    "y": 224
-  },
-  "layout": {
-    "columns": 8,
-    "rows": 5,
-    "cellOrder": "row-major"
-  },
-  "rowOrder": [
-    "idle S SE E NE N NW W SW",
-    "east walk 4, west walk 4",
-    "east attack 4, west attack 4",
-    "east hit 4, west hit 4",
-    "east death 4, west death 4"
+  "identityRef": "../../reference.png",
+  "sourcePoseRef": "../atlas/animation.png",
+  "directionCount": 16,
+  "angleStepDegrees": 22.5,
+  "directions": [
+    {
+      "name": "south",
+      "angleDegrees": 0
+    },
+    {
+      "name": "south-south-east",
+      "angleDegrees": 22.5
+    },
+    {
+      "name": "south-east",
+      "angleDegrees": 45
+    },
+    {
+      "name": "east-south-east",
+      "angleDegrees": 67.5
+    },
+    {
+      "name": "east",
+      "angleDegrees": 90
+    },
+    {
+      "name": "east-north-east",
+      "angleDegrees": 112.5
+    },
+    {
+      "name": "north-east",
+      "angleDegrees": 135
+    },
+    {
+      "name": "north-north-east",
+      "angleDegrees": 157.5
+    },
+    {
+      "name": "north",
+      "angleDegrees": 180
+    },
+    {
+      "name": "north-north-west",
+      "angleDegrees": 202.5
+    },
+    {
+      "name": "north-west",
+      "angleDegrees": 225
+    },
+    {
+      "name": "west-north-west",
+      "angleDegrees": 247.5
+    },
+    {
+      "name": "west",
+      "angleDegrees": 270
+    },
+    {
+      "name": "west-south-west",
+      "angleDegrees": 292.5
+    },
+    {
+      "name": "south-west",
+      "angleDegrees": 315
+    },
+    {
+      "name": "south-south-west",
+      "angleDegrees": 337.5
+    }
   ],
-  "sourceFrames": [],
-  "_note": "Offline scaffold only. Replace weapon/reference TODOs and generate/measure frames before compose."
+  "camera": "one fixed elevated three-quarter camera; change the whole sprite facing in the world, never rotate the camera or flat sprite",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "provisional template anchor; measure completed frames before atlas promotion"
+  },
+  "statusNote": "Shared 16-direction, five-action contract aligned to Goblin v5. Legacy extracted cells are source references only. Elf weapon identity is unresolved in the supplied reference; do not bake an assumed weapon into generated poses.",
+  "actions": {
+    "idle": {
+      "framesPerDirection": 1,
+      "poseCount": 16,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "south.png",
+          "pose": "one neutral ready pose facing south"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "south-south-east.png",
+          "pose": "one neutral ready pose facing south-south-east"
+        },
+        {
+          "direction": "south-east",
+          "file": "south-east.png",
+          "pose": "one neutral ready pose facing south-east"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "east-south-east.png",
+          "pose": "one neutral ready pose facing east-south-east"
+        },
+        {
+          "direction": "east",
+          "file": "east.png",
+          "pose": "one neutral ready pose facing east"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "east-north-east.png",
+          "pose": "one neutral ready pose facing east-north-east"
+        },
+        {
+          "direction": "north-east",
+          "file": "north-east.png",
+          "pose": "one neutral ready pose facing north-east"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "north-north-east.png",
+          "pose": "one neutral ready pose facing north-north-east"
+        },
+        {
+          "direction": "north",
+          "file": "north.png",
+          "pose": "one neutral ready pose facing north"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "north-north-west.png",
+          "pose": "one neutral ready pose facing north-north-west"
+        },
+        {
+          "direction": "north-west",
+          "file": "north-west.png",
+          "pose": "one neutral ready pose facing north-west"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "west-north-west.png",
+          "pose": "one neutral ready pose facing west-north-west"
+        },
+        {
+          "direction": "west",
+          "file": "west.png",
+          "pose": "one neutral ready pose facing west"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "west-south-west.png",
+          "pose": "one neutral ready pose facing west-south-west"
+        },
+        {
+          "direction": "south-west",
+          "file": "south-west.png",
+          "pose": "one neutral ready pose facing south-west"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "south-south-west.png",
+          "pose": "one neutral ready pose facing south-south-west"
+        }
+      ]
+    },
+    "walk": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-stride-a.png",
+          "pose": "load/support pose; body starts a grounded step"
+        },
+        {
+          "direction": "south",
+          "file": "01-stride-b.png",
+          "pose": "opposite-leg passing pose; legs visibly trade support"
+        },
+        {
+          "direction": "south",
+          "file": "02-stride-c.png",
+          "pose": "opposite foot leads; body counterbalance follows the step"
+        },
+        {
+          "direction": "south",
+          "file": "03-stride-d.png",
+          "pose": "return phase that connects cleanly to the next stride"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-stride-a.png",
+          "pose": "load/support pose; body starts a grounded step"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-stride-b.png",
+          "pose": "opposite-leg passing pose; legs visibly trade support"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-stride-c.png",
+          "pose": "opposite foot leads; body counterbalance follows the step"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-stride-d.png",
+          "pose": "return phase that connects cleanly to the next stride"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-stride-a.png",
+          "pose": "load/support pose; body starts a grounded step"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-stride-b.png",
+          "pose": "opposite-leg passing pose; legs visibly trade support"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-stride-c.png",
+          "pose": "opposite foot leads; body counterbalance follows the step"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-stride-d.png",
+          "pose": "return phase that connects cleanly to the next stride"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-stride-a.png",
+          "pose": "load/support pose; body starts a grounded step"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-stride-b.png",
+          "pose": "opposite-leg passing pose; legs visibly trade support"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-stride-c.png",
+          "pose": "opposite foot leads; body counterbalance follows the step"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-stride-d.png",
+          "pose": "return phase that connects cleanly to the next stride"
+        },
+        {
+          "direction": "east",
+          "file": "00-stride-a.png",
+          "pose": "load/support pose; body starts a grounded step"
+        },
+        {
+          "direction": "east",
+          "file": "01-stride-b.png",
+          "pose": "opposite-leg passing pose; legs visibly trade support"
+        },
+        {
+          "direction": "east",
+          "file": "02-stride-c.png",
+          "pose": "opposite foot leads; body counterbalance follows the step"
+        },
+        {
+          "direction": "east",
+          "file": "03-stride-d.png",
+          "pose": "return phase that connects cleanly to the next stride"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-stride-a.png",
+          "pose": "load/support pose; body starts a grounded step"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-stride-b.png",
+          "pose": "opposite-leg passing pose; legs visibly trade support"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-stride-c.png",
+          "pose": "opposite foot leads; body counterbalance follows the step"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-stride-d.png",
+          "pose": "return phase that connects cleanly to the next stride"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-stride-a.png",
+          "pose": "load/support pose; body starts a grounded step"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-stride-b.png",
+          "pose": "opposite-leg passing pose; legs visibly trade support"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-stride-c.png",
+          "pose": "opposite foot leads; body counterbalance follows the step"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-stride-d.png",
+          "pose": "return phase that connects cleanly to the next stride"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-stride-a.png",
+          "pose": "load/support pose; body starts a grounded step"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-stride-b.png",
+          "pose": "opposite-leg passing pose; legs visibly trade support"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-stride-c.png",
+          "pose": "opposite foot leads; body counterbalance follows the step"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-stride-d.png",
+          "pose": "return phase that connects cleanly to the next stride"
+        },
+        {
+          "direction": "north",
+          "file": "00-stride-a.png",
+          "pose": "load/support pose; body starts a grounded step"
+        },
+        {
+          "direction": "north",
+          "file": "01-stride-b.png",
+          "pose": "opposite-leg passing pose; legs visibly trade support"
+        },
+        {
+          "direction": "north",
+          "file": "02-stride-c.png",
+          "pose": "opposite foot leads; body counterbalance follows the step"
+        },
+        {
+          "direction": "north",
+          "file": "03-stride-d.png",
+          "pose": "return phase that connects cleanly to the next stride"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-stride-a.png",
+          "pose": "load/support pose; body starts a grounded step"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-stride-b.png",
+          "pose": "opposite-leg passing pose; legs visibly trade support"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-stride-c.png",
+          "pose": "opposite foot leads; body counterbalance follows the step"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-stride-d.png",
+          "pose": "return phase that connects cleanly to the next stride"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-stride-a.png",
+          "pose": "load/support pose; body starts a grounded step"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-stride-b.png",
+          "pose": "opposite-leg passing pose; legs visibly trade support"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-stride-c.png",
+          "pose": "opposite foot leads; body counterbalance follows the step"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-stride-d.png",
+          "pose": "return phase that connects cleanly to the next stride"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-stride-a.png",
+          "pose": "load/support pose; body starts a grounded step"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-stride-b.png",
+          "pose": "opposite-leg passing pose; legs visibly trade support"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-stride-c.png",
+          "pose": "opposite foot leads; body counterbalance follows the step"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-stride-d.png",
+          "pose": "return phase that connects cleanly to the next stride"
+        },
+        {
+          "direction": "west",
+          "file": "00-stride-a.png",
+          "pose": "load/support pose; body starts a grounded step"
+        },
+        {
+          "direction": "west",
+          "file": "01-stride-b.png",
+          "pose": "opposite-leg passing pose; legs visibly trade support"
+        },
+        {
+          "direction": "west",
+          "file": "02-stride-c.png",
+          "pose": "opposite foot leads; body counterbalance follows the step"
+        },
+        {
+          "direction": "west",
+          "file": "03-stride-d.png",
+          "pose": "return phase that connects cleanly to the next stride"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-stride-a.png",
+          "pose": "load/support pose; body starts a grounded step"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-stride-b.png",
+          "pose": "opposite-leg passing pose; legs visibly trade support"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-stride-c.png",
+          "pose": "opposite foot leads; body counterbalance follows the step"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-stride-d.png",
+          "pose": "return phase that connects cleanly to the next stride"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-stride-a.png",
+          "pose": "load/support pose; body starts a grounded step"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-stride-b.png",
+          "pose": "opposite-leg passing pose; legs visibly trade support"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-stride-c.png",
+          "pose": "opposite foot leads; body counterbalance follows the step"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-stride-d.png",
+          "pose": "return phase that connects cleanly to the next stride"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-stride-a.png",
+          "pose": "load/support pose; body starts a grounded step"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-stride-b.png",
+          "pose": "opposite-leg passing pose; legs visibly trade support"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-stride-c.png",
+          "pose": "opposite foot leads; body counterbalance follows the step"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-stride-d.png",
+          "pose": "return phase that connects cleanly to the next stride"
+        }
+      ]
+    },
+    "attack": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-windup.png",
+          "pose": "far-attack anticipation using the species canonical method; root remains grounded"
+        },
+        {
+          "direction": "south",
+          "file": "01-contact.png",
+          "pose": "clear attack release or contact pose; do not duplicate weapons or effects"
+        },
+        {
+          "direction": "south",
+          "file": "02-follow-through.png",
+          "pose": "controlled follow-through from the attack"
+        },
+        {
+          "direction": "south",
+          "file": "03-recovery.png",
+          "pose": "return toward canonical idle posture"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-windup.png",
+          "pose": "far-attack anticipation using the species canonical method; root remains grounded"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-contact.png",
+          "pose": "clear attack release or contact pose; do not duplicate weapons or effects"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-follow-through.png",
+          "pose": "controlled follow-through from the attack"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-recovery.png",
+          "pose": "return toward canonical idle posture"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-windup.png",
+          "pose": "far-attack anticipation using the species canonical method; root remains grounded"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-contact.png",
+          "pose": "clear attack release or contact pose; do not duplicate weapons or effects"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-follow-through.png",
+          "pose": "controlled follow-through from the attack"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-recovery.png",
+          "pose": "return toward canonical idle posture"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-windup.png",
+          "pose": "far-attack anticipation using the species canonical method; root remains grounded"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-contact.png",
+          "pose": "clear attack release or contact pose; do not duplicate weapons or effects"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-follow-through.png",
+          "pose": "controlled follow-through from the attack"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-recovery.png",
+          "pose": "return toward canonical idle posture"
+        },
+        {
+          "direction": "east",
+          "file": "00-windup.png",
+          "pose": "far-attack anticipation using the species canonical method; root remains grounded"
+        },
+        {
+          "direction": "east",
+          "file": "01-contact.png",
+          "pose": "clear attack release or contact pose; do not duplicate weapons or effects"
+        },
+        {
+          "direction": "east",
+          "file": "02-follow-through.png",
+          "pose": "controlled follow-through from the attack"
+        },
+        {
+          "direction": "east",
+          "file": "03-recovery.png",
+          "pose": "return toward canonical idle posture"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-windup.png",
+          "pose": "far-attack anticipation using the species canonical method; root remains grounded"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-contact.png",
+          "pose": "clear attack release or contact pose; do not duplicate weapons or effects"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-follow-through.png",
+          "pose": "controlled follow-through from the attack"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-recovery.png",
+          "pose": "return toward canonical idle posture"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-windup.png",
+          "pose": "far-attack anticipation using the species canonical method; root remains grounded"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-contact.png",
+          "pose": "clear attack release or contact pose; do not duplicate weapons or effects"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-follow-through.png",
+          "pose": "controlled follow-through from the attack"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-recovery.png",
+          "pose": "return toward canonical idle posture"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-windup.png",
+          "pose": "far-attack anticipation using the species canonical method; root remains grounded"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-contact.png",
+          "pose": "clear attack release or contact pose; do not duplicate weapons or effects"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-follow-through.png",
+          "pose": "controlled follow-through from the attack"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-recovery.png",
+          "pose": "return toward canonical idle posture"
+        },
+        {
+          "direction": "north",
+          "file": "00-windup.png",
+          "pose": "far-attack anticipation using the species canonical method; root remains grounded"
+        },
+        {
+          "direction": "north",
+          "file": "01-contact.png",
+          "pose": "clear attack release or contact pose; do not duplicate weapons or effects"
+        },
+        {
+          "direction": "north",
+          "file": "02-follow-through.png",
+          "pose": "controlled follow-through from the attack"
+        },
+        {
+          "direction": "north",
+          "file": "03-recovery.png",
+          "pose": "return toward canonical idle posture"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-windup.png",
+          "pose": "far-attack anticipation using the species canonical method; root remains grounded"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-contact.png",
+          "pose": "clear attack release or contact pose; do not duplicate weapons or effects"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-follow-through.png",
+          "pose": "controlled follow-through from the attack"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-recovery.png",
+          "pose": "return toward canonical idle posture"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-windup.png",
+          "pose": "far-attack anticipation using the species canonical method; root remains grounded"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-contact.png",
+          "pose": "clear attack release or contact pose; do not duplicate weapons or effects"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-follow-through.png",
+          "pose": "controlled follow-through from the attack"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-recovery.png",
+          "pose": "return toward canonical idle posture"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-windup.png",
+          "pose": "far-attack anticipation using the species canonical method; root remains grounded"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-contact.png",
+          "pose": "clear attack release or contact pose; do not duplicate weapons or effects"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-follow-through.png",
+          "pose": "controlled follow-through from the attack"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-recovery.png",
+          "pose": "return toward canonical idle posture"
+        },
+        {
+          "direction": "west",
+          "file": "00-windup.png",
+          "pose": "far-attack anticipation using the species canonical method; root remains grounded"
+        },
+        {
+          "direction": "west",
+          "file": "01-contact.png",
+          "pose": "clear attack release or contact pose; do not duplicate weapons or effects"
+        },
+        {
+          "direction": "west",
+          "file": "02-follow-through.png",
+          "pose": "controlled follow-through from the attack"
+        },
+        {
+          "direction": "west",
+          "file": "03-recovery.png",
+          "pose": "return toward canonical idle posture"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-windup.png",
+          "pose": "far-attack anticipation using the species canonical method; root remains grounded"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-contact.png",
+          "pose": "clear attack release or contact pose; do not duplicate weapons or effects"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-follow-through.png",
+          "pose": "controlled follow-through from the attack"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-recovery.png",
+          "pose": "return toward canonical idle posture"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-windup.png",
+          "pose": "far-attack anticipation using the species canonical method; root remains grounded"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-contact.png",
+          "pose": "clear attack release or contact pose; do not duplicate weapons or effects"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-follow-through.png",
+          "pose": "controlled follow-through from the attack"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-recovery.png",
+          "pose": "return toward canonical idle posture"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-windup.png",
+          "pose": "far-attack anticipation using the species canonical method; root remains grounded"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-contact.png",
+          "pose": "clear attack release or contact pose; do not duplicate weapons or effects"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-follow-through.png",
+          "pose": "controlled follow-through from the attack"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-recovery.png",
+          "pose": "return toward canonical idle posture"
+        }
+      ]
+    },
+    "hit": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-flinch.png",
+          "pose": "brief impact flinch while preserving the species silhouette"
+        },
+        {
+          "direction": "south",
+          "file": "01-recoil.png",
+          "pose": "body recoils from impact"
+        },
+        {
+          "direction": "south",
+          "file": "02-recover.png",
+          "pose": "body regains balance"
+        },
+        {
+          "direction": "south",
+          "file": "03-ready.png",
+          "pose": "return to canonical idle posture"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-flinch.png",
+          "pose": "brief impact flinch while preserving the species silhouette"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-recoil.png",
+          "pose": "body recoils from impact"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-recover.png",
+          "pose": "body regains balance"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-ready.png",
+          "pose": "return to canonical idle posture"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-flinch.png",
+          "pose": "brief impact flinch while preserving the species silhouette"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-recoil.png",
+          "pose": "body recoils from impact"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-recover.png",
+          "pose": "body regains balance"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-ready.png",
+          "pose": "return to canonical idle posture"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-flinch.png",
+          "pose": "brief impact flinch while preserving the species silhouette"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-recoil.png",
+          "pose": "body recoils from impact"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-recover.png",
+          "pose": "body regains balance"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-ready.png",
+          "pose": "return to canonical idle posture"
+        },
+        {
+          "direction": "east",
+          "file": "00-flinch.png",
+          "pose": "brief impact flinch while preserving the species silhouette"
+        },
+        {
+          "direction": "east",
+          "file": "01-recoil.png",
+          "pose": "body recoils from impact"
+        },
+        {
+          "direction": "east",
+          "file": "02-recover.png",
+          "pose": "body regains balance"
+        },
+        {
+          "direction": "east",
+          "file": "03-ready.png",
+          "pose": "return to canonical idle posture"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-flinch.png",
+          "pose": "brief impact flinch while preserving the species silhouette"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-recoil.png",
+          "pose": "body recoils from impact"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-recover.png",
+          "pose": "body regains balance"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-ready.png",
+          "pose": "return to canonical idle posture"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-flinch.png",
+          "pose": "brief impact flinch while preserving the species silhouette"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-recoil.png",
+          "pose": "body recoils from impact"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-recover.png",
+          "pose": "body regains balance"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-ready.png",
+          "pose": "return to canonical idle posture"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-flinch.png",
+          "pose": "brief impact flinch while preserving the species silhouette"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-recoil.png",
+          "pose": "body recoils from impact"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-recover.png",
+          "pose": "body regains balance"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-ready.png",
+          "pose": "return to canonical idle posture"
+        },
+        {
+          "direction": "north",
+          "file": "00-flinch.png",
+          "pose": "brief impact flinch while preserving the species silhouette"
+        },
+        {
+          "direction": "north",
+          "file": "01-recoil.png",
+          "pose": "body recoils from impact"
+        },
+        {
+          "direction": "north",
+          "file": "02-recover.png",
+          "pose": "body regains balance"
+        },
+        {
+          "direction": "north",
+          "file": "03-ready.png",
+          "pose": "return to canonical idle posture"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-flinch.png",
+          "pose": "brief impact flinch while preserving the species silhouette"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-recoil.png",
+          "pose": "body recoils from impact"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-recover.png",
+          "pose": "body regains balance"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-ready.png",
+          "pose": "return to canonical idle posture"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-flinch.png",
+          "pose": "brief impact flinch while preserving the species silhouette"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-recoil.png",
+          "pose": "body recoils from impact"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-recover.png",
+          "pose": "body regains balance"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-ready.png",
+          "pose": "return to canonical idle posture"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-flinch.png",
+          "pose": "brief impact flinch while preserving the species silhouette"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-recoil.png",
+          "pose": "body recoils from impact"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-recover.png",
+          "pose": "body regains balance"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-ready.png",
+          "pose": "return to canonical idle posture"
+        },
+        {
+          "direction": "west",
+          "file": "00-flinch.png",
+          "pose": "brief impact flinch while preserving the species silhouette"
+        },
+        {
+          "direction": "west",
+          "file": "01-recoil.png",
+          "pose": "body recoils from impact"
+        },
+        {
+          "direction": "west",
+          "file": "02-recover.png",
+          "pose": "body regains balance"
+        },
+        {
+          "direction": "west",
+          "file": "03-ready.png",
+          "pose": "return to canonical idle posture"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-flinch.png",
+          "pose": "brief impact flinch while preserving the species silhouette"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-recoil.png",
+          "pose": "body recoils from impact"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-recover.png",
+          "pose": "body regains balance"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-ready.png",
+          "pose": "return to canonical idle posture"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-flinch.png",
+          "pose": "brief impact flinch while preserving the species silhouette"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-recoil.png",
+          "pose": "body recoils from impact"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-recover.png",
+          "pose": "body regains balance"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-ready.png",
+          "pose": "return to canonical idle posture"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-flinch.png",
+          "pose": "brief impact flinch while preserving the species silhouette"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-recoil.png",
+          "pose": "body recoils from impact"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-recover.png",
+          "pose": "body regains balance"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-ready.png",
+          "pose": "return to canonical idle posture"
+        }
+      ]
+    },
+    "death": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-fall.png",
+          "pose": "defeated posture begins to collapse"
+        },
+        {
+          "direction": "south",
+          "file": "01-collapse.png",
+          "pose": "body reaches the ground naturally"
+        },
+        {
+          "direction": "south",
+          "file": "02-ground.png",
+          "pose": "settled grounded body, stable silhouette"
+        },
+        {
+          "direction": "south",
+          "file": "03-settle.png",
+          "pose": "final still ground pose matching frame 02 orientation"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture begins to collapse"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-collapse.png",
+          "pose": "body reaches the ground naturally"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-ground.png",
+          "pose": "settled grounded body, stable silhouette"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-settle.png",
+          "pose": "final still ground pose matching frame 02 orientation"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture begins to collapse"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-collapse.png",
+          "pose": "body reaches the ground naturally"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-ground.png",
+          "pose": "settled grounded body, stable silhouette"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-settle.png",
+          "pose": "final still ground pose matching frame 02 orientation"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture begins to collapse"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-collapse.png",
+          "pose": "body reaches the ground naturally"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-ground.png",
+          "pose": "settled grounded body, stable silhouette"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-settle.png",
+          "pose": "final still ground pose matching frame 02 orientation"
+        },
+        {
+          "direction": "east",
+          "file": "00-fall.png",
+          "pose": "defeated posture begins to collapse"
+        },
+        {
+          "direction": "east",
+          "file": "01-collapse.png",
+          "pose": "body reaches the ground naturally"
+        },
+        {
+          "direction": "east",
+          "file": "02-ground.png",
+          "pose": "settled grounded body, stable silhouette"
+        },
+        {
+          "direction": "east",
+          "file": "03-settle.png",
+          "pose": "final still ground pose matching frame 02 orientation"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture begins to collapse"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-collapse.png",
+          "pose": "body reaches the ground naturally"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-ground.png",
+          "pose": "settled grounded body, stable silhouette"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-settle.png",
+          "pose": "final still ground pose matching frame 02 orientation"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture begins to collapse"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-collapse.png",
+          "pose": "body reaches the ground naturally"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-ground.png",
+          "pose": "settled grounded body, stable silhouette"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-settle.png",
+          "pose": "final still ground pose matching frame 02 orientation"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture begins to collapse"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-collapse.png",
+          "pose": "body reaches the ground naturally"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-ground.png",
+          "pose": "settled grounded body, stable silhouette"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-settle.png",
+          "pose": "final still ground pose matching frame 02 orientation"
+        },
+        {
+          "direction": "north",
+          "file": "00-fall.png",
+          "pose": "defeated posture begins to collapse"
+        },
+        {
+          "direction": "north",
+          "file": "01-collapse.png",
+          "pose": "body reaches the ground naturally"
+        },
+        {
+          "direction": "north",
+          "file": "02-ground.png",
+          "pose": "settled grounded body, stable silhouette"
+        },
+        {
+          "direction": "north",
+          "file": "03-settle.png",
+          "pose": "final still ground pose matching frame 02 orientation"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture begins to collapse"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-collapse.png",
+          "pose": "body reaches the ground naturally"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-ground.png",
+          "pose": "settled grounded body, stable silhouette"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-settle.png",
+          "pose": "final still ground pose matching frame 02 orientation"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture begins to collapse"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-collapse.png",
+          "pose": "body reaches the ground naturally"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-ground.png",
+          "pose": "settled grounded body, stable silhouette"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-settle.png",
+          "pose": "final still ground pose matching frame 02 orientation"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture begins to collapse"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-collapse.png",
+          "pose": "body reaches the ground naturally"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-ground.png",
+          "pose": "settled grounded body, stable silhouette"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-settle.png",
+          "pose": "final still ground pose matching frame 02 orientation"
+        },
+        {
+          "direction": "west",
+          "file": "00-fall.png",
+          "pose": "defeated posture begins to collapse"
+        },
+        {
+          "direction": "west",
+          "file": "01-collapse.png",
+          "pose": "body reaches the ground naturally"
+        },
+        {
+          "direction": "west",
+          "file": "02-ground.png",
+          "pose": "settled grounded body, stable silhouette"
+        },
+        {
+          "direction": "west",
+          "file": "03-settle.png",
+          "pose": "final still ground pose matching frame 02 orientation"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture begins to collapse"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-collapse.png",
+          "pose": "body reaches the ground naturally"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-ground.png",
+          "pose": "settled grounded body, stable silhouette"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-settle.png",
+          "pose": "final still ground pose matching frame 02 orientation"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture begins to collapse"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-collapse.png",
+          "pose": "body reaches the ground naturally"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-ground.png",
+          "pose": "settled grounded body, stable silhouette"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-settle.png",
+          "pose": "final still ground pose matching frame 02 orientation"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture begins to collapse"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-collapse.png",
+          "pose": "body reaches the ground naturally"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-ground.png",
+          "pose": "settled grounded body, stable silhouette"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-settle.png",
+          "pose": "final still ground pose matching frame 02 orientation"
+        }
+      ]
+    }
+  },
+  "requiredRootFiles": [
+    "meta.json",
+    "poses/"
+  ],
+  "imageQa": "Generated frames remain candidates until visual identity, facing, phase continuity, alpha/edge, foot anchor, scale and atlas QA pass.",
+  "productionBlocker": {
+    "status": "imagegen-quota",
+    "resetsAt": 1793288069,
+    "nextStep": "After reset, identify canonical elf weapon and regenerate missing detailed action/direction frames."
+  }
 }

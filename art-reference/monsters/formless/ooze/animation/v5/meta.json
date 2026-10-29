@@ -1,1282 +1,1517 @@
 {
   "schemaVersion": 1,
-  "status": "draft-review",
+  "status": "direction16-candidate-incomplete",
   "speciesId": "ooze",
-  "name": "Ooze",
+  "race": "formless",
+  "version": "v5",
   "attackKind": "close",
   "bakedWeaponId": null,
-  "identityRef": "art-reference/monsters/formless/ooze/reference.png",
-  "styleRef": "art-reference/players/one-handed-sword/reference.png",
-  "sourceAtlas": "art-reference/monsters/formless/ooze/animation/atlas/animation.png",
-  "transformation": "Existing 128x128 source cells were enlarged 2x with NEAREST and placed at the shared (192,288) anchor on transparent 384x384 source poses. Two disconnected projectile/effect components were removed in derived pose frames 18 and 19 to satisfy the one-connected-pose/no-VFX contract; root atlas remains unchanged.",
-  "anchor": {
-    "x": 192,
-    "y": 288
-  },
-  "layout": {
-    "columns": 8,
-    "rows": 5,
-    "cellOrder": "row-major",
-    "sourceCellApprox": {
-      "width": 384,
-      "height": 384
+  "identityRef": "../atlas/animation.png",
+  "sourcePoseRef": "../atlas/animation.png",
+  "directionCount": 16,
+  "angleStepDegrees": 22.5,
+  "directions": [
+    {
+      "name": "south",
+      "angleDegrees": 0
     },
-    "actionRows": [
-      "idle",
-      "walk",
-      "attack",
-      "hit",
-      "death"
-    ],
-    "directions": {
-      "idle": [
-        "south",
-        "south-east",
-        "east",
-        "north-east",
-        "north",
-        "north-west",
-        "west",
-        "south-west"
-      ],
-      "walk": [
-        "east",
-        "east",
-        "east",
-        "east",
-        "west",
-        "west",
-        "west",
-        "west"
-      ],
-      "attack": [
-        "east",
-        "east",
-        "east",
-        "east",
-        "west",
-        "west",
-        "west",
-        "west"
-      ],
-      "hit": [
-        "east",
-        "east",
-        "east",
-        "east",
-        "west",
-        "west",
-        "west",
-        "west"
-      ],
-      "death": [
-        "east",
-        "east",
-        "east",
-        "east",
-        "west",
-        "west",
-        "west",
-        "west"
-      ]
+    {
+      "name": "south-south-east",
+      "angleDegrees": 22.5
     },
-    "framesPerDirection": {
-      "idle": 8,
-      "walk": 2,
-      "attack": 2,
-      "hit": 2,
-      "death": 2
+    {
+      "name": "south-east",
+      "angleDegrees": 45
     },
-    "frameCount": 40
-  },
-  "rowOrder": [
-    "idle S SE E NE N NW W SW",
-    "east walk4, west walk4",
-    "east attack4, west attack4",
-    "east hit4, west hit4",
-    "east death4, west death4"
+    {
+      "name": "east-south-east",
+      "angleDegrees": 67.5
+    },
+    {
+      "name": "east",
+      "angleDegrees": 90
+    },
+    {
+      "name": "east-north-east",
+      "angleDegrees": 112.5
+    },
+    {
+      "name": "north-east",
+      "angleDegrees": 135
+    },
+    {
+      "name": "north-north-east",
+      "angleDegrees": 157.5
+    },
+    {
+      "name": "north",
+      "angleDegrees": 180
+    },
+    {
+      "name": "north-north-west",
+      "angleDegrees": 202.5
+    },
+    {
+      "name": "north-west",
+      "angleDegrees": 225
+    },
+    {
+      "name": "west-north-west",
+      "angleDegrees": 247.5
+    },
+    {
+      "name": "west",
+      "angleDegrees": 270
+    },
+    {
+      "name": "west-south-west",
+      "angleDegrees": 292.5
+    },
+    {
+      "name": "south-west",
+      "angleDegrees": 315
+    },
+    {
+      "name": "south-south-west",
+      "angleDegrees": 337.5
+    }
   ],
-  "atlas": "atlas/animation-draft.png",
-  "sourceCanvas": {
-    "width": 3072,
-    "height": 1920
-  },
+  "camera": "one fixed elevated three-quarter camera; rotate the whole ooze facing in the world, never rotate the camera or flat sprite",
   "frameCanvas": {
     "width": 384,
     "height": 384
   },
-  "frames": [
-    {
-      "index": 0,
-      "action": "idle",
-      "direction": "south",
-      "frame": 0,
-      "source": {
-        "x": 131,
-        "y": 168,
-        "width": 122,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
+  },
+  "statusNote": "16-direction production candidates; baseline untouched until full replacement reviewed.",
+  "actions": {
+    "idle": {
+      "framesPerDirection": 1,
+      "poseCount": 16,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "south.png",
+          "pose": "one neutral ready pose facing 0 degrees"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "south-south-east.png",
+          "pose": "one neutral ready pose facing 22.5 degrees"
+        },
+        {
+          "direction": "south-east",
+          "file": "south-east.png",
+          "pose": "one neutral ready pose facing 45 degrees"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "east-south-east.png",
+          "pose": "one neutral ready pose facing 67.5 degrees"
+        },
+        {
+          "direction": "east",
+          "file": "east.png",
+          "pose": "one neutral ready pose facing 90 degrees"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "east-north-east.png",
+          "pose": "one neutral ready pose facing 112.5 degrees"
+        },
+        {
+          "direction": "north-east",
+          "file": "north-east.png",
+          "pose": "one neutral ready pose facing 135 degrees"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "north-north-east.png",
+          "pose": "one neutral ready pose facing 157.5 degrees"
+        },
+        {
+          "direction": "north",
+          "file": "north.png",
+          "pose": "one neutral ready pose facing 180 degrees"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "north-north-west.png",
+          "pose": "one neutral ready pose facing 202.5 degrees"
+        },
+        {
+          "direction": "north-west",
+          "file": "north-west.png",
+          "pose": "one neutral ready pose facing 225 degrees"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "west-north-west.png",
+          "pose": "one neutral ready pose facing 247.5 degrees"
+        },
+        {
+          "direction": "west",
+          "file": "west.png",
+          "pose": "one neutral ready pose facing 270 degrees"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "west-south-west.png",
+          "pose": "one neutral ready pose facing 292.5 degrees"
+        },
+        {
+          "direction": "south-west",
+          "file": "south-west.png",
+          "pose": "one neutral ready pose facing 315 degrees"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "south-south-west.png",
+          "pose": "one neutral ready pose facing 337.5 degrees"
+        }
+      ]
     },
-    {
-      "index": 1,
-      "action": "idle",
-      "direction": "south-east",
-      "frame": 0,
-      "source": {
-        "x": 518,
-        "y": 168,
-        "width": 116,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
+    "walk": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-stride-a.png",
+          "pose": "purple mass squashes toward ground and leading lobe extends"
+        },
+        {
+          "direction": "south",
+          "file": "01-stride-b.png",
+          "pose": "mass stretches forward as rear lobe pulls in"
+        },
+        {
+          "direction": "south",
+          "file": "02-stride-c.png",
+          "pose": "opposite lobes compress with body lifted slightly"
+        },
+        {
+          "direction": "south",
+          "file": "03-stride-d.png",
+          "pose": "mass settles into rounder neutral shape"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-stride-a.png",
+          "pose": "purple mass squashes toward ground and leading lobe extends"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-stride-b.png",
+          "pose": "mass stretches forward as rear lobe pulls in"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-stride-c.png",
+          "pose": "opposite lobes compress with body lifted slightly"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-stride-d.png",
+          "pose": "mass settles into rounder neutral shape"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-stride-a.png",
+          "pose": "purple mass squashes toward ground and leading lobe extends"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-stride-b.png",
+          "pose": "mass stretches forward as rear lobe pulls in"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-stride-c.png",
+          "pose": "opposite lobes compress with body lifted slightly"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-stride-d.png",
+          "pose": "mass settles into rounder neutral shape"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-stride-a.png",
+          "pose": "purple mass squashes toward ground and leading lobe extends"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-stride-b.png",
+          "pose": "mass stretches forward as rear lobe pulls in"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-stride-c.png",
+          "pose": "opposite lobes compress with body lifted slightly"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-stride-d.png",
+          "pose": "mass settles into rounder neutral shape"
+        },
+        {
+          "direction": "east",
+          "file": "00-stride-a.png",
+          "pose": "purple mass squashes toward ground and leading lobe extends"
+        },
+        {
+          "direction": "east",
+          "file": "01-stride-b.png",
+          "pose": "mass stretches forward as rear lobe pulls in"
+        },
+        {
+          "direction": "east",
+          "file": "02-stride-c.png",
+          "pose": "opposite lobes compress with body lifted slightly"
+        },
+        {
+          "direction": "east",
+          "file": "03-stride-d.png",
+          "pose": "mass settles into rounder neutral shape"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-stride-a.png",
+          "pose": "purple mass squashes toward ground and leading lobe extends"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-stride-b.png",
+          "pose": "mass stretches forward as rear lobe pulls in"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-stride-c.png",
+          "pose": "opposite lobes compress with body lifted slightly"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-stride-d.png",
+          "pose": "mass settles into rounder neutral shape"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-stride-a.png",
+          "pose": "purple mass squashes toward ground and leading lobe extends"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-stride-b.png",
+          "pose": "mass stretches forward as rear lobe pulls in"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-stride-c.png",
+          "pose": "opposite lobes compress with body lifted slightly"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-stride-d.png",
+          "pose": "mass settles into rounder neutral shape"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-stride-a.png",
+          "pose": "purple mass squashes toward ground and leading lobe extends"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-stride-b.png",
+          "pose": "mass stretches forward as rear lobe pulls in"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-stride-c.png",
+          "pose": "opposite lobes compress with body lifted slightly"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-stride-d.png",
+          "pose": "mass settles into rounder neutral shape"
+        },
+        {
+          "direction": "north",
+          "file": "00-stride-a.png",
+          "pose": "purple mass squashes toward ground and leading lobe extends"
+        },
+        {
+          "direction": "north",
+          "file": "01-stride-b.png",
+          "pose": "mass stretches forward as rear lobe pulls in"
+        },
+        {
+          "direction": "north",
+          "file": "02-stride-c.png",
+          "pose": "opposite lobes compress with body lifted slightly"
+        },
+        {
+          "direction": "north",
+          "file": "03-stride-d.png",
+          "pose": "mass settles into rounder neutral shape"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-stride-a.png",
+          "pose": "purple mass squashes toward ground and leading lobe extends"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-stride-b.png",
+          "pose": "mass stretches forward as rear lobe pulls in"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-stride-c.png",
+          "pose": "opposite lobes compress with body lifted slightly"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-stride-d.png",
+          "pose": "mass settles into rounder neutral shape"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-stride-a.png",
+          "pose": "purple mass squashes toward ground and leading lobe extends"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-stride-b.png",
+          "pose": "mass stretches forward as rear lobe pulls in"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-stride-c.png",
+          "pose": "opposite lobes compress with body lifted slightly"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-stride-d.png",
+          "pose": "mass settles into rounder neutral shape"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-stride-a.png",
+          "pose": "purple mass squashes toward ground and leading lobe extends"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-stride-b.png",
+          "pose": "mass stretches forward as rear lobe pulls in"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-stride-c.png",
+          "pose": "opposite lobes compress with body lifted slightly"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-stride-d.png",
+          "pose": "mass settles into rounder neutral shape"
+        },
+        {
+          "direction": "west",
+          "file": "00-stride-a.png",
+          "pose": "purple mass squashes toward ground and leading lobe extends"
+        },
+        {
+          "direction": "west",
+          "file": "01-stride-b.png",
+          "pose": "mass stretches forward as rear lobe pulls in"
+        },
+        {
+          "direction": "west",
+          "file": "02-stride-c.png",
+          "pose": "opposite lobes compress with body lifted slightly"
+        },
+        {
+          "direction": "west",
+          "file": "03-stride-d.png",
+          "pose": "mass settles into rounder neutral shape"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-stride-a.png",
+          "pose": "purple mass squashes toward ground and leading lobe extends"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-stride-b.png",
+          "pose": "mass stretches forward as rear lobe pulls in"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-stride-c.png",
+          "pose": "opposite lobes compress with body lifted slightly"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-stride-d.png",
+          "pose": "mass settles into rounder neutral shape"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-stride-a.png",
+          "pose": "purple mass squashes toward ground and leading lobe extends"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-stride-b.png",
+          "pose": "mass stretches forward as rear lobe pulls in"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-stride-c.png",
+          "pose": "opposite lobes compress with body lifted slightly"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-stride-d.png",
+          "pose": "mass settles into rounder neutral shape"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-stride-a.png",
+          "pose": "purple mass squashes toward ground and leading lobe extends"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-stride-b.png",
+          "pose": "mass stretches forward as rear lobe pulls in"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-stride-c.png",
+          "pose": "opposite lobes compress with body lifted slightly"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-stride-d.png",
+          "pose": "mass settles into rounder neutral shape"
+        }
+      ]
     },
-    {
-      "index": 2,
-      "action": "idle",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 904,
-        "y": 168,
-        "width": 112,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
+    "attack": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-windup.png",
+          "pose": "purple body compresses and one pseudopod draws back"
+        },
+        {
+          "direction": "south",
+          "file": "01-contact.png",
+          "pose": "pseudopod punches toward target, attached to main body"
+        },
+        {
+          "direction": "south",
+          "file": "02-follow-through.png",
+          "pose": "pseudopod stretches through follow-through"
+        },
+        {
+          "direction": "south",
+          "file": "03-recovery.png",
+          "pose": "pseudopod retracts into neutral lobed body"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-windup.png",
+          "pose": "purple body compresses and one pseudopod draws back"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-contact.png",
+          "pose": "pseudopod punches toward target, attached to main body"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-follow-through.png",
+          "pose": "pseudopod stretches through follow-through"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-recovery.png",
+          "pose": "pseudopod retracts into neutral lobed body"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-windup.png",
+          "pose": "purple body compresses and one pseudopod draws back"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-contact.png",
+          "pose": "pseudopod punches toward target, attached to main body"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-follow-through.png",
+          "pose": "pseudopod stretches through follow-through"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-recovery.png",
+          "pose": "pseudopod retracts into neutral lobed body"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-windup.png",
+          "pose": "purple body compresses and one pseudopod draws back"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-contact.png",
+          "pose": "pseudopod punches toward target, attached to main body"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-follow-through.png",
+          "pose": "pseudopod stretches through follow-through"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-recovery.png",
+          "pose": "pseudopod retracts into neutral lobed body"
+        },
+        {
+          "direction": "east",
+          "file": "00-windup.png",
+          "pose": "purple body compresses and one pseudopod draws back"
+        },
+        {
+          "direction": "east",
+          "file": "01-contact.png",
+          "pose": "pseudopod punches toward target, attached to main body"
+        },
+        {
+          "direction": "east",
+          "file": "02-follow-through.png",
+          "pose": "pseudopod stretches through follow-through"
+        },
+        {
+          "direction": "east",
+          "file": "03-recovery.png",
+          "pose": "pseudopod retracts into neutral lobed body"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-windup.png",
+          "pose": "purple body compresses and one pseudopod draws back"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-contact.png",
+          "pose": "pseudopod punches toward target, attached to main body"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-follow-through.png",
+          "pose": "pseudopod stretches through follow-through"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-recovery.png",
+          "pose": "pseudopod retracts into neutral lobed body"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-windup.png",
+          "pose": "purple body compresses and one pseudopod draws back"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-contact.png",
+          "pose": "pseudopod punches toward target, attached to main body"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-follow-through.png",
+          "pose": "pseudopod stretches through follow-through"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-recovery.png",
+          "pose": "pseudopod retracts into neutral lobed body"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-windup.png",
+          "pose": "purple body compresses and one pseudopod draws back"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-contact.png",
+          "pose": "pseudopod punches toward target, attached to main body"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-follow-through.png",
+          "pose": "pseudopod stretches through follow-through"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-recovery.png",
+          "pose": "pseudopod retracts into neutral lobed body"
+        },
+        {
+          "direction": "north",
+          "file": "00-windup.png",
+          "pose": "purple body compresses and one pseudopod draws back"
+        },
+        {
+          "direction": "north",
+          "file": "01-contact.png",
+          "pose": "pseudopod punches toward target, attached to main body"
+        },
+        {
+          "direction": "north",
+          "file": "02-follow-through.png",
+          "pose": "pseudopod stretches through follow-through"
+        },
+        {
+          "direction": "north",
+          "file": "03-recovery.png",
+          "pose": "pseudopod retracts into neutral lobed body"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-windup.png",
+          "pose": "purple body compresses and one pseudopod draws back"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-contact.png",
+          "pose": "pseudopod punches toward target, attached to main body"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-follow-through.png",
+          "pose": "pseudopod stretches through follow-through"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-recovery.png",
+          "pose": "pseudopod retracts into neutral lobed body"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-windup.png",
+          "pose": "purple body compresses and one pseudopod draws back"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-contact.png",
+          "pose": "pseudopod punches toward target, attached to main body"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-follow-through.png",
+          "pose": "pseudopod stretches through follow-through"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-recovery.png",
+          "pose": "pseudopod retracts into neutral lobed body"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-windup.png",
+          "pose": "purple body compresses and one pseudopod draws back"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-contact.png",
+          "pose": "pseudopod punches toward target, attached to main body"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-follow-through.png",
+          "pose": "pseudopod stretches through follow-through"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-recovery.png",
+          "pose": "pseudopod retracts into neutral lobed body"
+        },
+        {
+          "direction": "west",
+          "file": "00-windup.png",
+          "pose": "purple body compresses and one pseudopod draws back"
+        },
+        {
+          "direction": "west",
+          "file": "01-contact.png",
+          "pose": "pseudopod punches toward target, attached to main body"
+        },
+        {
+          "direction": "west",
+          "file": "02-follow-through.png",
+          "pose": "pseudopod stretches through follow-through"
+        },
+        {
+          "direction": "west",
+          "file": "03-recovery.png",
+          "pose": "pseudopod retracts into neutral lobed body"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-windup.png",
+          "pose": "purple body compresses and one pseudopod draws back"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-contact.png",
+          "pose": "pseudopod punches toward target, attached to main body"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-follow-through.png",
+          "pose": "pseudopod stretches through follow-through"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-recovery.png",
+          "pose": "pseudopod retracts into neutral lobed body"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-windup.png",
+          "pose": "purple body compresses and one pseudopod draws back"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-contact.png",
+          "pose": "pseudopod punches toward target, attached to main body"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-follow-through.png",
+          "pose": "pseudopod stretches through follow-through"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-recovery.png",
+          "pose": "pseudopod retracts into neutral lobed body"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-windup.png",
+          "pose": "purple body compresses and one pseudopod draws back"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-contact.png",
+          "pose": "pseudopod punches toward target, attached to main body"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-follow-through.png",
+          "pose": "pseudopod stretches through follow-through"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-recovery.png",
+          "pose": "pseudopod retracts into neutral lobed body"
+        }
+      ]
     },
-    {
-      "index": 3,
-      "action": "idle",
-      "direction": "north-east",
-      "frame": 0,
-      "source": {
-        "x": 1285,
-        "y": 168,
-        "width": 118,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
+    "hit": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-flinch.png",
+          "pose": "purple mass dents toward impact"
+        },
+        {
+          "direction": "south",
+          "file": "01-recoil.png",
+          "pose": "mass ripples and recoils away"
+        },
+        {
+          "direction": "south",
+          "file": "02-recover.png",
+          "pose": "lobes reform and eyes steady"
+        },
+        {
+          "direction": "south",
+          "file": "03-ready.png",
+          "pose": "neutral upright lobed ready silhouette"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-flinch.png",
+          "pose": "purple mass dents toward impact"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-recoil.png",
+          "pose": "mass ripples and recoils away"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-recover.png",
+          "pose": "lobes reform and eyes steady"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-ready.png",
+          "pose": "neutral upright lobed ready silhouette"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-flinch.png",
+          "pose": "purple mass dents toward impact"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-recoil.png",
+          "pose": "mass ripples and recoils away"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-recover.png",
+          "pose": "lobes reform and eyes steady"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-ready.png",
+          "pose": "neutral upright lobed ready silhouette"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-flinch.png",
+          "pose": "purple mass dents toward impact"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-recoil.png",
+          "pose": "mass ripples and recoils away"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-recover.png",
+          "pose": "lobes reform and eyes steady"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-ready.png",
+          "pose": "neutral upright lobed ready silhouette"
+        },
+        {
+          "direction": "east",
+          "file": "00-flinch.png",
+          "pose": "purple mass dents toward impact"
+        },
+        {
+          "direction": "east",
+          "file": "01-recoil.png",
+          "pose": "mass ripples and recoils away"
+        },
+        {
+          "direction": "east",
+          "file": "02-recover.png",
+          "pose": "lobes reform and eyes steady"
+        },
+        {
+          "direction": "east",
+          "file": "03-ready.png",
+          "pose": "neutral upright lobed ready silhouette"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-flinch.png",
+          "pose": "purple mass dents toward impact"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-recoil.png",
+          "pose": "mass ripples and recoils away"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-recover.png",
+          "pose": "lobes reform and eyes steady"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-ready.png",
+          "pose": "neutral upright lobed ready silhouette"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-flinch.png",
+          "pose": "purple mass dents toward impact"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-recoil.png",
+          "pose": "mass ripples and recoils away"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-recover.png",
+          "pose": "lobes reform and eyes steady"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-ready.png",
+          "pose": "neutral upright lobed ready silhouette"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-flinch.png",
+          "pose": "purple mass dents toward impact"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-recoil.png",
+          "pose": "mass ripples and recoils away"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-recover.png",
+          "pose": "lobes reform and eyes steady"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-ready.png",
+          "pose": "neutral upright lobed ready silhouette"
+        },
+        {
+          "direction": "north",
+          "file": "00-flinch.png",
+          "pose": "purple mass dents toward impact"
+        },
+        {
+          "direction": "north",
+          "file": "01-recoil.png",
+          "pose": "mass ripples and recoils away"
+        },
+        {
+          "direction": "north",
+          "file": "02-recover.png",
+          "pose": "lobes reform and eyes steady"
+        },
+        {
+          "direction": "north",
+          "file": "03-ready.png",
+          "pose": "neutral upright lobed ready silhouette"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-flinch.png",
+          "pose": "purple mass dents toward impact"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-recoil.png",
+          "pose": "mass ripples and recoils away"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-recover.png",
+          "pose": "lobes reform and eyes steady"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-ready.png",
+          "pose": "neutral upright lobed ready silhouette"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-flinch.png",
+          "pose": "purple mass dents toward impact"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-recoil.png",
+          "pose": "mass ripples and recoils away"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-recover.png",
+          "pose": "lobes reform and eyes steady"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-ready.png",
+          "pose": "neutral upright lobed ready silhouette"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-flinch.png",
+          "pose": "purple mass dents toward impact"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-recoil.png",
+          "pose": "mass ripples and recoils away"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-recover.png",
+          "pose": "lobes reform and eyes steady"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-ready.png",
+          "pose": "neutral upright lobed ready silhouette"
+        },
+        {
+          "direction": "west",
+          "file": "00-flinch.png",
+          "pose": "purple mass dents toward impact"
+        },
+        {
+          "direction": "west",
+          "file": "01-recoil.png",
+          "pose": "mass ripples and recoils away"
+        },
+        {
+          "direction": "west",
+          "file": "02-recover.png",
+          "pose": "lobes reform and eyes steady"
+        },
+        {
+          "direction": "west",
+          "file": "03-ready.png",
+          "pose": "neutral upright lobed ready silhouette"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-flinch.png",
+          "pose": "purple mass dents toward impact"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-recoil.png",
+          "pose": "mass ripples and recoils away"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-recover.png",
+          "pose": "lobes reform and eyes steady"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-ready.png",
+          "pose": "neutral upright lobed ready silhouette"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-flinch.png",
+          "pose": "purple mass dents toward impact"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-recoil.png",
+          "pose": "mass ripples and recoils away"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-recover.png",
+          "pose": "lobes reform and eyes steady"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-ready.png",
+          "pose": "neutral upright lobed ready silhouette"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-flinch.png",
+          "pose": "purple mass dents toward impact"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-recoil.png",
+          "pose": "mass ripples and recoils away"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-recover.png",
+          "pose": "lobes reform and eyes steady"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-ready.png",
+          "pose": "neutral upright lobed ready silhouette"
+        }
+      ]
     },
-    {
-      "index": 4,
-      "action": "idle",
-      "direction": "north",
-      "frame": 0,
-      "source": {
-        "x": 1673,
-        "y": 168,
-        "width": 110,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 5,
-      "action": "idle",
-      "direction": "north-west",
-      "frame": 0,
-      "source": {
-        "x": 2052,
-        "y": 168,
-        "width": 120,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 6,
-      "action": "idle",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 2440,
-        "y": 168,
-        "width": 112,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 7,
-      "action": "idle",
-      "direction": "south-west",
-      "frame": 0,
-      "source": {
-        "x": 2823,
-        "y": 168,
-        "width": 114,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 8,
-      "action": "walk",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 131,
-        "y": 552,
-        "width": 122,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 9,
-      "action": "walk",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 518,
-        "y": 552,
-        "width": 116,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 10,
-      "action": "walk",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 894,
-        "y": 552,
-        "width": 132,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 11,
-      "action": "walk",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 1285,
-        "y": 552,
-        "width": 118,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 12,
-      "action": "walk",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 1668,
-        "y": 552,
-        "width": 120,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 13,
-      "action": "walk",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 2045,
-        "y": 552,
-        "width": 134,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 14,
-      "action": "walk",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 2439,
-        "y": 552,
-        "width": 114,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 15,
-      "action": "walk",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 2818,
-        "y": 552,
-        "width": 124,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 16,
-      "action": "attack",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 130,
-        "y": 936,
-        "width": 124,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 17,
-      "action": "attack",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 502,
-        "y": 936,
-        "width": 148,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 18,
-      "action": "attack",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 885,
-        "y": 936,
-        "width": 150,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 19,
-      "action": "attack",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 1283,
-        "y": 936,
-        "width": 122,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 20,
-      "action": "attack",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 1667,
-        "y": 936,
-        "width": 122,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 21,
-      "action": "attack",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 2027,
-        "y": 936,
-        "width": 170,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 22,
-      "action": "attack",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 2421,
-        "y": 936,
-        "width": 150,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 23,
-      "action": "attack",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 2819,
-        "y": 936,
-        "width": 122,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 24,
-      "action": "hit",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 132,
-        "y": 1320,
-        "width": 120,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 25,
-      "action": "hit",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 497,
-        "y": 1320,
-        "width": 158,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 26,
-      "action": "hit",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 886,
-        "y": 1320,
-        "width": 148,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 27,
-      "action": "hit",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 1283,
-        "y": 1320,
-        "width": 122,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 28,
-      "action": "hit",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 1666,
-        "y": 1320,
-        "width": 124,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 29,
-      "action": "hit",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 2041,
-        "y": 1320,
-        "width": 142,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 30,
-      "action": "hit",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 2417,
-        "y": 1320,
-        "width": 158,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 31,
-      "action": "hit",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 2819,
-        "y": 1320,
-        "width": 122,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 32,
-      "action": "death",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 114,
-        "y": 1704,
-        "width": 156,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 33,
-      "action": "death",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 465,
-        "y": 1704,
-        "width": 222,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 34,
-      "action": "death",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 865,
-        "y": 1740,
-        "width": 190,
-        "height": 84
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 35,
-      "action": "death",
-      "direction": "east",
-      "frame": 0,
-      "source": {
-        "x": 1247,
-        "y": 1740,
-        "width": 194,
-        "height": 84
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 36,
-      "action": "death",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 1644,
-        "y": 1704,
-        "width": 168,
-        "height": 120
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 37,
-      "action": "death",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 2000,
-        "y": 1720,
-        "width": 224,
-        "height": 104
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 38,
-      "action": "death",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 2408,
-        "y": 1740,
-        "width": 176,
-        "height": 84
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
-    },
-    {
-      "index": 39,
-      "action": "death",
-      "direction": "west",
-      "frame": 0,
-      "source": {
-        "x": 2787,
-        "y": 1740,
-        "width": 186,
-        "height": 84
-      },
-      "frameCanvas": {
-        "width": 384,
-        "height": 384
-      },
-      "anchor": {
-        "x": 192,
-        "y": 288
-      }
+    "death": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-fall.png",
+          "pose": "purple mass sags and eyes droop"
+        },
+        {
+          "direction": "south",
+          "file": "01-collapse.png",
+          "pose": "mass collapses into low puddle"
+        },
+        {
+          "direction": "south",
+          "file": "02-ground.png",
+          "pose": "fully flattened purple puddle, face dim"
+        },
+        {
+          "direction": "south",
+          "file": "03-settle.png",
+          "pose": "still compact low puddle"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-fall.png",
+          "pose": "purple mass sags and eyes droop"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-collapse.png",
+          "pose": "mass collapses into low puddle"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-ground.png",
+          "pose": "fully flattened purple puddle, face dim"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-settle.png",
+          "pose": "still compact low puddle"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-fall.png",
+          "pose": "purple mass sags and eyes droop"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-collapse.png",
+          "pose": "mass collapses into low puddle"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-ground.png",
+          "pose": "fully flattened purple puddle, face dim"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-settle.png",
+          "pose": "still compact low puddle"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-fall.png",
+          "pose": "purple mass sags and eyes droop"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-collapse.png",
+          "pose": "mass collapses into low puddle"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-ground.png",
+          "pose": "fully flattened purple puddle, face dim"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-settle.png",
+          "pose": "still compact low puddle"
+        },
+        {
+          "direction": "east",
+          "file": "00-fall.png",
+          "pose": "purple mass sags and eyes droop"
+        },
+        {
+          "direction": "east",
+          "file": "01-collapse.png",
+          "pose": "mass collapses into low puddle"
+        },
+        {
+          "direction": "east",
+          "file": "02-ground.png",
+          "pose": "fully flattened purple puddle, face dim"
+        },
+        {
+          "direction": "east",
+          "file": "03-settle.png",
+          "pose": "still compact low puddle"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-fall.png",
+          "pose": "purple mass sags and eyes droop"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-collapse.png",
+          "pose": "mass collapses into low puddle"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-ground.png",
+          "pose": "fully flattened purple puddle, face dim"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-settle.png",
+          "pose": "still compact low puddle"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-fall.png",
+          "pose": "purple mass sags and eyes droop"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-collapse.png",
+          "pose": "mass collapses into low puddle"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-ground.png",
+          "pose": "fully flattened purple puddle, face dim"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-settle.png",
+          "pose": "still compact low puddle"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-fall.png",
+          "pose": "purple mass sags and eyes droop"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-collapse.png",
+          "pose": "mass collapses into low puddle"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-ground.png",
+          "pose": "fully flattened purple puddle, face dim"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-settle.png",
+          "pose": "still compact low puddle"
+        },
+        {
+          "direction": "north",
+          "file": "00-fall.png",
+          "pose": "purple mass sags and eyes droop"
+        },
+        {
+          "direction": "north",
+          "file": "01-collapse.png",
+          "pose": "mass collapses into low puddle"
+        },
+        {
+          "direction": "north",
+          "file": "02-ground.png",
+          "pose": "fully flattened purple puddle, face dim"
+        },
+        {
+          "direction": "north",
+          "file": "03-settle.png",
+          "pose": "still compact low puddle"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-fall.png",
+          "pose": "purple mass sags and eyes droop"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-collapse.png",
+          "pose": "mass collapses into low puddle"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-ground.png",
+          "pose": "fully flattened purple puddle, face dim"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-settle.png",
+          "pose": "still compact low puddle"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-fall.png",
+          "pose": "purple mass sags and eyes droop"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-collapse.png",
+          "pose": "mass collapses into low puddle"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-ground.png",
+          "pose": "fully flattened purple puddle, face dim"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-settle.png",
+          "pose": "still compact low puddle"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-fall.png",
+          "pose": "purple mass sags and eyes droop"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-collapse.png",
+          "pose": "mass collapses into low puddle"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-ground.png",
+          "pose": "fully flattened purple puddle, face dim"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-settle.png",
+          "pose": "still compact low puddle"
+        },
+        {
+          "direction": "west",
+          "file": "00-fall.png",
+          "pose": "purple mass sags and eyes droop"
+        },
+        {
+          "direction": "west",
+          "file": "01-collapse.png",
+          "pose": "mass collapses into low puddle"
+        },
+        {
+          "direction": "west",
+          "file": "02-ground.png",
+          "pose": "fully flattened purple puddle, face dim"
+        },
+        {
+          "direction": "west",
+          "file": "03-settle.png",
+          "pose": "still compact low puddle"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-fall.png",
+          "pose": "purple mass sags and eyes droop"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-collapse.png",
+          "pose": "mass collapses into low puddle"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-ground.png",
+          "pose": "fully flattened purple puddle, face dim"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-settle.png",
+          "pose": "still compact low puddle"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-fall.png",
+          "pose": "purple mass sags and eyes droop"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-collapse.png",
+          "pose": "mass collapses into low puddle"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-ground.png",
+          "pose": "fully flattened purple puddle, face dim"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-settle.png",
+          "pose": "still compact low puddle"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-fall.png",
+          "pose": "purple mass sags and eyes droop"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-collapse.png",
+          "pose": "mass collapses into low puddle"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-ground.png",
+          "pose": "fully flattened purple puddle, face dim"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-settle.png",
+          "pose": "still compact low puddle"
+        }
+      ]
     }
+  },
+  "requiredRootFiles": [
+    "meta.json",
+    "poses/"
   ],
-  "sourceFrames": [
-    {
-      "x": 131,
-      "y": 168,
-      "width": 122,
-      "height": 120,
-      "offsetX": 131,
-      "offsetY": 168
+  "imageQa": "Raw built-in imagegen outputs are candidate source only. Every pose still requires visual identity/facing review, hard-alpha/edge QA, foot-anchor measurement, and atlas QA before acceptance.",
+  "locomotionProfile": "grounded lobed slither",
+  "progress": {
+    "poseFiles": 40,
+    "expectedPoseFiles": 272,
+    "actionCounts": {
+      "idle": 8,
+      "walk": 8,
+      "attack": 8,
+      "hit": 8,
+      "death": 8
     },
-    {
-      "x": 518,
-      "y": 168,
-      "width": 116,
-      "height": 120,
-      "offsetX": 134,
-      "offsetY": 168
+    "generatedPoseFiles": 0,
+    "complete": false,
+    "qaApproved": false,
+    "rejectedMetadata": [],
+    "missingPoseFiles": 232,
+    "sourceCandidateFiles": 40
+  },
+  "sourceInventory": {
+    "cellSizes": {
+      "(384, 384)": 40
     },
-    {
-      "x": 904,
-      "y": 168,
-      "width": 112,
-      "height": 120,
-      "offsetX": 136,
-      "offsetY": 168
-    },
-    {
-      "x": 1285,
-      "y": 168,
-      "width": 118,
-      "height": 120,
-      "offsetX": 133,
-      "offsetY": 168
-    },
-    {
-      "x": 1673,
-      "y": 168,
-      "width": 110,
-      "height": 120,
-      "offsetX": 137,
-      "offsetY": 168
-    },
-    {
-      "x": 2052,
-      "y": 168,
-      "width": 120,
-      "height": 120,
-      "offsetX": 132,
-      "offsetY": 168
-    },
-    {
-      "x": 2440,
-      "y": 168,
-      "width": 112,
-      "height": 120,
-      "offsetX": 136,
-      "offsetY": 168
-    },
-    {
-      "x": 2823,
-      "y": 168,
-      "width": 114,
-      "height": 120,
-      "offsetX": 135,
-      "offsetY": 168
-    },
-    {
-      "x": 131,
-      "y": 552,
-      "width": 122,
-      "height": 120,
-      "offsetX": 131,
-      "offsetY": 168
-    },
-    {
-      "x": 518,
-      "y": 552,
-      "width": 116,
-      "height": 120,
-      "offsetX": 134,
-      "offsetY": 168
-    },
-    {
-      "x": 894,
-      "y": 552,
-      "width": 132,
-      "height": 120,
-      "offsetX": 126,
-      "offsetY": 168
-    },
-    {
-      "x": 1285,
-      "y": 552,
-      "width": 118,
-      "height": 120,
-      "offsetX": 133,
-      "offsetY": 168
-    },
-    {
-      "x": 1668,
-      "y": 552,
-      "width": 120,
-      "height": 120,
-      "offsetX": 132,
-      "offsetY": 168
-    },
-    {
-      "x": 2045,
-      "y": 552,
-      "width": 134,
-      "height": 120,
-      "offsetX": 125,
-      "offsetY": 168
-    },
-    {
-      "x": 2439,
-      "y": 552,
-      "width": 114,
-      "height": 120,
-      "offsetX": 135,
-      "offsetY": 168
-    },
-    {
-      "x": 2818,
-      "y": 552,
-      "width": 124,
-      "height": 120,
-      "offsetX": 130,
-      "offsetY": 168
-    },
-    {
-      "x": 130,
-      "y": 936,
-      "width": 124,
-      "height": 120,
-      "offsetX": 130,
-      "offsetY": 168
-    },
-    {
-      "x": 502,
-      "y": 936,
-      "width": 148,
-      "height": 120,
-      "offsetX": 118,
-      "offsetY": 168
-    },
-    {
-      "x": 885,
-      "y": 936,
-      "width": 150,
-      "height": 120,
-      "offsetX": 117,
-      "offsetY": 168
-    },
-    {
-      "x": 1283,
-      "y": 936,
-      "width": 122,
-      "height": 120,
-      "offsetX": 131,
-      "offsetY": 168
-    },
-    {
-      "x": 1667,
-      "y": 936,
-      "width": 122,
-      "height": 120,
-      "offsetX": 131,
-      "offsetY": 168
-    },
-    {
-      "x": 2027,
-      "y": 936,
-      "width": 170,
-      "height": 120,
-      "offsetX": 107,
-      "offsetY": 168
-    },
-    {
-      "x": 2421,
-      "y": 936,
-      "width": 150,
-      "height": 120,
-      "offsetX": 117,
-      "offsetY": 168
-    },
-    {
-      "x": 2819,
-      "y": 936,
-      "width": 122,
-      "height": 120,
-      "offsetX": 131,
-      "offsetY": 168
-    },
-    {
-      "x": 132,
-      "y": 1320,
-      "width": 120,
-      "height": 120,
-      "offsetX": 132,
-      "offsetY": 168
-    },
-    {
-      "x": 497,
-      "y": 1320,
-      "width": 158,
-      "height": 120,
-      "offsetX": 113,
-      "offsetY": 168
-    },
-    {
-      "x": 886,
-      "y": 1320,
-      "width": 148,
-      "height": 120,
-      "offsetX": 118,
-      "offsetY": 168
-    },
-    {
-      "x": 1283,
-      "y": 1320,
-      "width": 122,
-      "height": 120,
-      "offsetX": 131,
-      "offsetY": 168
-    },
-    {
-      "x": 1666,
-      "y": 1320,
-      "width": 124,
-      "height": 120,
-      "offsetX": 130,
-      "offsetY": 168
-    },
-    {
-      "x": 2041,
-      "y": 1320,
-      "width": 142,
-      "height": 120,
-      "offsetX": 121,
-      "offsetY": 168
-    },
-    {
-      "x": 2417,
-      "y": 1320,
-      "width": 158,
-      "height": 120,
-      "offsetX": 113,
-      "offsetY": 168
-    },
-    {
-      "x": 2819,
-      "y": 1320,
-      "width": 122,
-      "height": 120,
-      "offsetX": 131,
-      "offsetY": 168
-    },
-    {
-      "x": 114,
-      "y": 1704,
-      "width": 156,
-      "height": 120,
-      "offsetX": 114,
-      "offsetY": 168
-    },
-    {
-      "x": 465,
-      "y": 1704,
-      "width": 222,
-      "height": 120,
-      "offsetX": 81,
-      "offsetY": 168
-    },
-    {
-      "x": 865,
-      "y": 1740,
-      "width": 190,
-      "height": 84,
-      "offsetX": 97,
-      "offsetY": 204
-    },
-    {
-      "x": 1247,
-      "y": 1740,
-      "width": 194,
-      "height": 84,
-      "offsetX": 95,
-      "offsetY": 204
-    },
-    {
-      "x": 1644,
-      "y": 1704,
-      "width": 168,
-      "height": 120,
-      "offsetX": 108,
-      "offsetY": 168
-    },
-    {
-      "x": 2000,
-      "y": 1720,
-      "width": 224,
-      "height": 104,
-      "offsetX": 80,
-      "offsetY": 184
-    },
-    {
-      "x": 2408,
-      "y": 1740,
-      "width": 176,
-      "height": 84,
-      "offsetX": 104,
-      "offsetY": 204
-    },
-    {
-      "x": 2787,
-      "y": 1740,
-      "width": 186,
-      "height": 84,
-      "offsetX": 99,
-      "offsetY": 204
-    }
-  ],
-  "composition": {
-    "tool": "tools/monster-animation-compose.py",
-    "padding": 24,
-    "anchor": {
-      "x": 192,
-      "y": 288
-    },
-    "scales": {
-      "0": 1,
-      "1": 1,
-      "2": 1,
-      "3": 1,
-      "4": 1,
-      "5": 1,
-      "6": 1,
-      "7": 1,
-      "8": 1,
-      "9": 1,
-      "10": 1,
-      "11": 1,
-      "12": 1,
-      "13": 1,
-      "14": 1,
-      "15": 1,
-      "16": 1,
-      "17": 1,
-      "18": 1,
-      "19": 1,
-      "20": 1,
-      "21": 1,
-      "22": 1,
-      "23": 1,
-      "24": 1,
-      "25": 1,
-      "26": 1,
-      "27": 1,
-      "28": 1,
-      "29": 1,
-      "30": 1,
-      "31": 1,
-      "32": 1,
-      "33": 1,
-      "34": 1,
-      "35": 1,
-      "36": 1,
-      "37": 1,
-      "38": 1,
-      "39": 1
-    }
+    "alphaTouchesCellEdge": 0,
+    "note": "Lossless baseline source cells retain original dimensions; normalize placement only during atlas packing after visual review."
+  },
+  "generationBlocker": {
+    "type": "imagegen-usage-limit",
+    "resetsAtUnix": 1793288069,
+    "note": "Built-in imagegen returned HTTP429 usage_limit_reached; pending queues terminated, no API fallback used."
   }
 }

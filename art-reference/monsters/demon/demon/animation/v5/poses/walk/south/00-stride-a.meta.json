@@ -1,0 +1,32 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "action": "walk",
+  "direction": "south",
+  "phase": "00-stride-a",
+  "sourcePixelsModified": false,
+  "visualReviewRequired": true,
+  "measurement": {
+    "canvas": [
+      1254,
+      1254
+    ],
+    "alphaBoundsExclusive": [
+      0,
+      23,
+      1226,
+      1218
+    ],
+    "alphaLevelCount": 256,
+    "sourcePixelsModified": false,
+    "anyAlphaTouchesCanvasEdge": true,
+    "alpha128BoundsExclusive": [
+      358,
+      324,
+      899,
+      1026
+    ],
+    "alpha128TouchesCanvasEdge": false
+  },
+  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review"
+}

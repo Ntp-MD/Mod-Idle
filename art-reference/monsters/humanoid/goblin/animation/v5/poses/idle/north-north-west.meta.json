@@ -1,0 +1,36 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-829c-7060-99a8-9918a3b8d766\\exec-ad86189b-f245-4cd9-834f-504d2f470da8.png",
+  "action": "idle",
+  "direction": "north-north-west",
+  "qa": {
+    "visual": false,
+    "facing": false,
+    "atlas": false,
+    "anchor": false
+  },
+  "previousCandidateMetadata": {
+    "schemaVersion": 1,
+    "action": "idle",
+    "direction": "north-north-west",
+    "requestedFacingDegrees": 202.5,
+    "source": "../../../../reference.png",
+    "bakedWeaponId": "spear",
+    "generator": "OpenAI built-in image_gen",
+    "generationSource": "C:\\Users\\disda\\.codex\\generated_images\\01a17d4d-3b5a-72a1-83b1-947b6fe9c9d9\\exec-0cf30cb9-9f2c-4bc0-94de-6a8022a96d8b.png",
+    "sourcePixelsModified": false,
+    "status": "candidate-review",
+    "qa": {
+      "exactAngleVerified": false,
+      "hardAlphaVerified": false,
+      "footAnchorVerified": false,
+      "productionApproved": false
+    },
+    "visualReview": {
+      "status": "failed-facing",
+      "review": "Output remains front three-quarter; requested direction requires side or rear-biased silhouette. Both eyes/front chest visible in candidate.",
+      "requiresRegeneration": true
+    }
+  }
+}

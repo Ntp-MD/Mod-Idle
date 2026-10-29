@@ -84,14 +84,20 @@ export function withinAttackStopBand(geometry: AttackRangeGeometry): boolean {
   return geometry.centerDistance <= geometry.stopBandCenterDistance + ATTACK_RANGE_EPSILON;
 }
 
-/** Basic-action phases as a share of the resolved attack interval, never a fixed animation cap. */
-export function basicPhaseBudget(profile: AttackRangeProfile, intervalUs: number): {
+/**
+ * Basic-action phases as a share of the resolved attack interval, never a fixed animation cap.
+ * `floorUs` is the F44 animation floor: at a high attack rate the phase may not shrink below the
+ * shortest read an authored clip can play. The caller reads the floor from `combat_arena` data;
+ * zero keeps the pre-animation contract for callers that have no clips.
+ */
+export function basicPhaseBudget(profile: AttackRangeProfile, intervalUs: number, floorUs = 0): {
   windupUs: number; recoveryUs: number;
 } {
   const interval = Math.max(1, Number.isFinite(intervalUs) ? intervalUs : 1);
+  const floor = Math.max(0, Number.isFinite(floorUs) ? floorUs : 0);
   return {
-    windupUs: Math.max(1, Math.round(interval * profile.windup_interval_pct / 100)),
-    recoveryUs: Math.max(0, Math.round(interval * profile.recovery_interval_pct / 100)),
+    windupUs: Math.max(1, floor, Math.round(interval * profile.windup_interval_pct / 100)),
+    recoveryUs: Math.max(0, floor, Math.round(interval * profile.recovery_interval_pct / 100)),
   };
 }
 

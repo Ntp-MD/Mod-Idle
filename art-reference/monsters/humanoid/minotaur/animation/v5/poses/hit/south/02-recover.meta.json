@@ -1,0 +1,15 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-bbef86e1-4fde-4fbc-8521-c037462918b9.png",
+  "action": "hit",
+  "phase": "02-recover.png",
+  "direction": "south",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": false,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false
+  }
+}

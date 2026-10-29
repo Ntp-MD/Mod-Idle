@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "assetType": "player-direction-candidate",
+  "identityRef": "../../../reference.png",
+  "sourceBodyRef": "../../../poses/idle/south.png",
+  "requestedFacingDegrees": 56.25,
+  "requestedFacingConvention": "south/front=0, east=90, north=180, west=270",
+  "generator": "OpenAI built-in image_gen",
+  "sourcePixelsModified": false,
+  "status": "candidate-review",
+  "qa": {
+    "identityReviewed": true,
+    "exactAngleVerified": false,
+    "productionApproved": false
+  },
+  "generationSource": "C:\\Users\\disda\\.codex\\generated_images\\01a17d4d-3b5a-72a1-83b1-947b6fe9c9d9\\exec-53b3e844-6f6c-4889-8359-2e8fd89e4fd9.png"
+}

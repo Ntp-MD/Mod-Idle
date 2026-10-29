@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "action": "walk",
+  "direction": "west",
+  "pose": "00-stride-a",
+  "source": "../../../../../animation/atlas/animation.png",
+  "sourceFrameIndex": 12,
+  "bakedWeapon": "spear",
+  "sourcePixelsModified": false,
+  "sourceBounds": {
+    "x": 1635,
+    "y": 547,
+    "width": 162,
+    "height": 129,
+    "offsetX": 99,
+    "offsetY": 163
+  },
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "generator": "Lossless extraction from the approved Goblin 8-direction atlas",
+  "status": "approved-source-pose"
+}

@@ -1,0 +1,16 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "sourceOutput": "C:\\Users\\disda\\.codex\\generated_images\\01a18325-0641-7be2-aaca-162aad945c3d\\exec-89991450-9b91-4ecb-96ea-1243d399e810.png",
+  "direction": "east-north-east",
+  "angleDegrees": 112.5,
+  "sourcePixelsModified": false,
+  "visualReview": {
+    "inspected": true,
+    "atlasReady": false,
+    "identityPlausible": true,
+    "haloVisible": false,
+    "exactAngleVerified": false,
+    "sequenceAccepted": false
+  }
+}

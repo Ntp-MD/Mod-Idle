@@ -1,0 +1,11 @@
+{
+  "runtimePromoted": false,
+  "status": "incomplete",
+  "generatedCardinalReview": {
+    "south": "frontal correct; candidate",
+    "north": "back visible, face hidden; candidate",
+    "west": "rejected: too much chest front, not exact profile",
+    "east": "rejected: too much chest front, closer to east-south-east than profile"
+  },
+  "originalOutputsRetainedInCodex": true
+}

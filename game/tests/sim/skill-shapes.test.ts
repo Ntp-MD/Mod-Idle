@@ -13,6 +13,8 @@ function shapedFight(skillId: string, weapon: string | null, spots: { id: string
     Object.assign(mob, {
       id: spot.id, hp: 1e9, hpMax: 1e9, ps: 1, evasion: 0, dodgeRate: 0,
       armour: 0, line: 'front', damage: 'physical', innate: [], skillIds: [],
+      // This fixture proves the line footprint, not the behavior-role movement.
+      behavior: 'contact', retreatAtPct: undefined, retreating: false,
     });
     return mob;
   });
@@ -27,6 +29,12 @@ function shapedFight(skillId: string, weapon: string | null, spots: { id: string
   for (const spot of spots) Object.assign(arena.mobs[spot.id], { x: spot.x, y: spot.y });
   captureCombatArena(arena, state, 0);
   pinFieldPopulation(state);
+  // The fixture proves the footprint; keep each body's home under it so a leash reset cannot
+  // remove a line target before the cast resolves.
+  state.group.forEach((mob, index) => {
+    const slot = state.field?.slots.find((entry) => entry.mobId === mob.id);
+    if (slot) slot.home = { x: spots[index].x, y: spots[index].y };
+  });
   return { state, arena };
 }
 

@@ -1,0 +1,20 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "sourceOutput": "C:\\Users\\disda\\.codex\\generated_images\\01a18325-0641-7be2-aaca-162aad945c3d\\exec-0cbdfde2-3028-42fe-85b4-6f2dc3f2d2a5.png",
+  "action": "walk",
+  "direction": "south-south-east",
+  "file": "00-stride-a.png",
+  "pose": "tripod leg group A extends",
+  "angleDegrees": 22.5,
+  "sourcePixelsModified": false,
+  "visualReview": {
+    "inspected": true,
+    "atlasReady": false,
+    "identityPlausible": true,
+    "haloVisible": false,
+    "exactAngleVerified": false,
+    "sequenceAccepted": false,
+    "phaseReadability": "Limb changes small; tripod alternation requires stronger sequence proof."
+  }
+}

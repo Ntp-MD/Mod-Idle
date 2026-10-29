@@ -67,13 +67,15 @@ describe('durable save success and storage recovery', () => {
     expect(database.has('slot2')).toBe(false);
   });
 
-  it('reports an unreplaced stale mirror instead of falsely confirming a readable new save', async () => {
+  it('reports an unreplaced stale mirror while the database keeps the durable new save', async () => {
     const state = newGame(63);
     await save.writeSave('slot1', state);
     faults.mirror = faults.remove = true;
     state.counters.kills = 9;
     await expect(save.writeSave('slot1', state)).rejects.toThrow(/older browser copy/);
-    expect((await save.readSave('slot1'))?.counters.kills).toBe(0);
+    // The caller still gets the failure; the newer database record is the one that actually
+    // committed, so the next load reads it rather than the mirror shadow it outlived.
+    expect((await save.readSave('slot1'))?.counters.kills).toBe(9);
   });
 
   it('retries a failed database open when storage becomes available again', async () => {
@@ -83,6 +85,32 @@ describe('durable save success and storage recovery', () => {
     faults.open = false;
     await expect(save.writeSave('slot1', state)).resolves.toBeUndefined();
     expect(await save.readSave('slot1')).not.toBeNull();
+  });
+
+  it('loads the newer database record when the mirror is a confirmed stale copy', async () => {
+    const state = newGame(67); state.counters.kills = 5;
+    await save.writeSave('slot1', state);
+    const local = JSON.parse(mirror.get('modworld:slot1')!);
+    local.writtenAt = 1;
+    mirror.set('modworld:slot1', JSON.stringify(local));
+    const newer = newGame(67); newer.counters.kills = 77;
+    database.set('slot1', JSON.stringify({
+      version: save.SCHEMA_VERSION, writtenAt: Date.now() + 1_000,
+      state: { ...JSON.parse(JSON.stringify(newer)), fx: [] },
+    }));
+    expect((await save.readSave('slot1'))?.counters.kills).toBe(77);
+  });
+
+  it('never downgrades a future-schema record from either backend', async () => {
+    const state = newGame(68); state.counters.kills = 1;
+    await save.writeSave('slot1', state);
+    const future = { version: save.SCHEMA_VERSION + 1, writtenAt: Date.now() + 1_000,
+      state: JSON.parse(JSON.stringify(state)) };
+    mirror.set('modworld:slot1', JSON.stringify(future));
+    await expect(save.readSave('slot1')).rejects.toThrow(/schema version/);
+    mirror.delete('modworld:slot1');
+    database.set('slot1', JSON.stringify(future));
+    await expect(save.readSave('slot1')).rejects.toThrow(/schema version/);
   });
 
   it('stores one consistent state and leaves a newer snapshot trigger pending during an async write', async () => {

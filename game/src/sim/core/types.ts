@@ -75,6 +75,8 @@ export interface Item {
   gearMod?: number;
 }
 
+export type MobBehavior = 'contact' | 'skirmisher' | 'ranged' | 'charger' | 'artillery' | 'support';
+
 export interface Mob {
   id: string;
   species: string;
@@ -138,6 +140,19 @@ export interface Mob {
   skillIds?: string[];
   /** Encounter phase of this body: how many of its kit's HP gates it has crossed. Runtime-only. */
   phase?: number;
+  /** Data-driven movement/counterplay identity; absent reads from its kit and line. Runtime-only. */
+  behavior?: MobBehavior;
+  /** A non-boss body that leaves at low health instead of fighting to the death. */
+  retreatAtPct?: number;
+  retreating?: boolean;
+  /** Skirmisher hit-and-run window, absolute µs, and the point it backs toward. */
+  repositionUntilUs?: number;
+  repositionPoint?: { x: number; y: number };
+  /** A boss phase add names the body that called it, so a reward read can classify it. */
+  addedBy?: string;
+  /** Damage the body must take before its guard breaks; runtime-only and never saved. */
+  shieldHp?: number;
+  shieldMax?: number;
   /** The field spawn slot this body belongs to; a death returns the slot to its own timer. */
   spawnSlotId?: string;
   /** Absolute µs each skill becomes ready again. Runtime-only; absent means ready. */

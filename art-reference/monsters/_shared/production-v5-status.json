@@ -1,0 +1,637 @@
+{
+  "updatedAt": "2026-10-29T03:43:57.8569197+07:00",
+  "scope": "36 core species first; variants deferred",
+  "template": "humanoid/goblin/animation/v5/meta.json",
+  "directions": 16,
+  "actionFramesPerDirection": {
+    "idle": 1,
+    "walk": 4,
+    "attack": 4,
+    "hit": 4,
+    "death": 4
+  },
+  "expectedSpeciesCount": 36,
+  "expectedTotalPoseCount": 9792,
+  "note": "PNG presence is inventory only; all 36 species remain incomplete and acceptedPoseCount is zero. Extracted legacy cells are source references. New candidates still need facing, identity, phase, alpha, scale, anchor and atlas review. Variants stay queued until every core species passes.",
+  "species": [
+    {
+      "species": "harpy",
+      "race": "beast",
+      "directory": "beast/harpy/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 47.0,
+      "actions": {
+        "idle": 12,
+        "walk": 11,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "werewolf",
+      "race": "beast",
+      "directory": "beast/werewolf/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 40.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "wolf",
+      "race": "beast",
+      "directory": "beast/wolf/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 48.0,
+      "actions": {
+        "idle": 16,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "demon",
+      "race": "demon",
+      "directory": "demon/demon/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 60.0,
+      "actions": {
+        "idle": 16,
+        "walk": 16,
+        "attack": 12,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "imp",
+      "race": "demon",
+      "directory": "demon/imp/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 42.0,
+      "actions": {
+        "idle": 10,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "dragon",
+      "race": "dragon",
+      "directory": "dragon/dragon/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 40.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "mirehydra",
+      "race": "dragon",
+      "directory": "dragon/mirehydra/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 40.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "wyrmling",
+      "race": "dragon",
+      "directory": "dragon/wyrmling/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 40.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "wyvern",
+      "race": "dragon",
+      "directory": "dragon/wyvern/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 40.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "golem",
+      "race": "elemental",
+      "directory": "elemental/golem/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 81.0,
+      "actions": {
+        "idle": 16,
+        "walk": 19,
+        "attack": 20,
+        "hit": 13,
+        "death": 13
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "slaggolem",
+      "race": "elemental",
+      "directory": "elemental/slaggolem/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 40.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "wisp",
+      "race": "elemental",
+      "directory": "elemental/wisp/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 40.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "siren",
+      "race": "fish",
+      "directory": "fish/siren/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 40.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "ooze",
+      "race": "formless",
+      "directory": "formless/ooze/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 40.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "slime",
+      "race": "formless",
+      "directory": "formless/slime/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 40.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "elf",
+      "race": "humanoid",
+      "directory": "humanoid/elf/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 40.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "giant",
+      "race": "humanoid",
+      "directory": "humanoid/giant/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 40.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "goblin",
+      "race": "humanoid",
+      "directory": "humanoid/goblin/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 107.0,
+      "actions": {
+        "idle": 16,
+        "walk": 60,
+        "attack": 15,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "human",
+      "race": "humanoid",
+      "directory": "humanoid/human/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 40.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "kobold",
+      "race": "humanoid",
+      "directory": "humanoid/kobold/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 40.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "lizardman",
+      "race": "humanoid",
+      "directory": "humanoid/lizardman/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 40.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "minotaur",
+      "race": "humanoid",
+      "directory": "humanoid/minotaur/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 73.0,
+      "actions": {
+        "idle": 16,
+        "walk": 20,
+        "attack": 15,
+        "hit": 11,
+        "death": 11
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "ogre",
+      "race": "humanoid",
+      "directory": "humanoid/ogre/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 45.0,
+      "actions": {
+        "idle": 10,
+        "walk": 11,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "orc",
+      "race": "humanoid",
+      "directory": "humanoid/orc/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 40.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "troll",
+      "race": "humanoid",
+      "directory": "humanoid/troll/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 44.0,
+      "actions": {
+        "idle": 10,
+        "walk": 10,
+        "attack": 8,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "beetle",
+      "race": "insect",
+      "directory": "insect/beetle/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 63.0,
+      "actions": {
+        "idle": 13,
+        "walk": 14,
+        "attack": 12,
+        "hit": 12,
+        "death": 12
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "hornet",
+      "race": "insect",
+      "directory": "insect/hornet/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 41.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 9,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "spider",
+      "race": "insect",
+      "directory": "insect/spider/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 41.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 9,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "dryad",
+      "race": "plant",
+      "directory": "plant/dryad/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 41.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 9,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "treant",
+      "race": "plant",
+      "directory": "plant/treant/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 41.0,
+      "actions": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 9,
+        "hit": 8,
+        "death": 8
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "bonehound",
+      "race": "undead",
+      "directory": "undead/bonehound/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 15.0,
+      "actions": {
+        "idle": 6,
+        "walk": 4,
+        "attack": 4,
+        "hit": 1,
+        "death": 0
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "mummy",
+      "race": "undead",
+      "directory": "undead/mummy/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 0.0,
+      "actions": {
+        "idle": 0,
+        "walk": 0,
+        "attack": 0,
+        "hit": 0,
+        "death": 0
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "revenant",
+      "race": "undead",
+      "directory": "undead/revenant/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 0.0,
+      "actions": {
+        "idle": 0,
+        "walk": 0,
+        "attack": 0,
+        "hit": 0,
+        "death": 0
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "skeleton",
+      "race": "undead",
+      "directory": "undead/skeleton/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 0.0,
+      "actions": {
+        "idle": 0,
+        "walk": 0,
+        "attack": 0,
+        "hit": 0,
+        "death": 0
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "vampire",
+      "race": "undead",
+      "directory": "undead/vampire/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 0.0,
+      "actions": {
+        "idle": 0,
+        "walk": 0,
+        "attack": 0,
+        "hit": 0,
+        "death": 0
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    },
+    {
+      "species": "wraith",
+      "race": "undead",
+      "directory": "undead/wraith/animation/v5",
+      "expectedPoseCount": 272,
+      "presentPngCount": 0.0,
+      "actions": {
+        "idle": 0,
+        "walk": 0,
+        "attack": 0,
+        "hit": 0,
+        "death": 0
+      },
+      "acceptance": "pending-visual-facing-anchor-atlas-review",
+      "acceptedPoseCount": 0,
+      "status": "incomplete-candidate"
+    }
+  ],
+  "generationBlock": {
+    "provider": "built-in ImageGen",
+    "reason": "HTTP 429 usage_limit_reached",
+    "resetsAtUnix": 1793288069,
+    "resetsAtLocal": "2026-10-29T22:34:29+07:00",
+    "resumeNewGenerationAfterReset": true
+  }
+}

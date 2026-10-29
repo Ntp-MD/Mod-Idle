@@ -1,0 +1,55 @@
+{
+  "status": "usage-limit",
+  "resetAtUnix": 1793288069,
+  "requests": [
+    {
+      "action": "idle",
+      "direction": "east-north-east",
+      "angleDegrees": 112.5,
+      "prompt": "Use case: identity-preserve. ONE detailed RPG pixel-art troll idle sprite. Images are same troll in nearby headings: use them as bracketing orientation references, redraw intermediate heading. Exact lean green troll with swept-back spiky dark moss hair, long ears, pale eyes, short tusks, long forearms, bare broad feet, bone necklace brown ragged loincloth and ONE gray stone club anatomically RIGHT hand. Fixed elevated three-quarter game camera. Desired facing east-north-east yaw112.5 clockwise from SOUTH/front. between RIGHT profile and REAR RIGHT diagonal; rightward muzzle side mostly hidden, back shoulder and spine visible, no frontal chest. Same neutral hunched planted ready stance, low club. Preserve outfit, anatomy, palette, handedness; no flat rotation/mirroring. Full body complete club centered generous transparent margin all4sides, same scale baseline. Actual transparent background no shadow, scene, text, grid, effects or additional poses.",
+      "state": "not-generated-usage-limit"
+    },
+    {
+      "action": "idle",
+      "direction": "north-north-east",
+      "angleDegrees": 157.5,
+      "prompt": "Use case: identity-preserve. ONE detailed RPG pixel-art troll idle sprite. Images are same troll in nearby headings: use them as bracketing orientation references, redraw intermediate heading. Exact lean green troll with swept-back spiky dark moss hair, long ears, pale eyes, short tusks, long forearms, bare broad feet, bone necklace brown ragged loincloth and ONE gray stone club anatomically RIGHT hand. Fixed elevated three-quarter game camera. Desired facing north-north-east yaw157.5 clockwise from SOUTH/front. between REAR RIGHT diagonal and full BACK, only slight rightward turn; face/eyes hidden, broad back visible. Same neutral hunched planted ready stance, low club. Preserve outfit, anatomy, palette, handedness; no flat rotation/mirroring. Full body complete club centered generous transparent margin all4sides, same scale baseline. Actual transparent background no shadow, scene, text, grid, effects or additional poses.",
+      "state": "not-generated-usage-limit"
+    },
+    {
+      "action": "idle",
+      "direction": "north-north-west",
+      "angleDegrees": 202.5,
+      "prompt": "Use case: identity-preserve. ONE detailed RPG pixel-art troll idle sprite. Images are same troll in nearby headings: use them as bracketing orientation references, redraw intermediate heading. Exact lean green troll with swept-back spiky dark moss hair, long ears, pale eyes, short tusks, long forearms, bare broad feet, bone necklace brown ragged loincloth and ONE gray stone club anatomically RIGHT hand. Fixed elevated three-quarter game camera. Desired facing north-north-west yaw202.5 clockwise from SOUTH/front. between full BACK and REAR LEFT diagonal, only slight leftward turn; face/eyes hidden, broad back visible. Same neutral hunched planted ready stance, low club. Preserve outfit, anatomy, palette, handedness; no flat rotation/mirroring. Full body complete club centered generous transparent margin all4sides, same scale baseline. Actual transparent background no shadow, scene, text, grid, effects or additional poses.",
+      "state": "not-generated-usage-limit"
+    },
+    {
+      "action": "idle",
+      "direction": "north-west",
+      "angleDegrees": 225,
+      "prompt": "Use case: identity-preserve. ONE detailed RPG pixel-art troll idle sprite. Images are same troll in nearby headings: use them as bracketing orientation references, redraw intermediate heading. Exact lean green troll with swept-back spiky dark moss hair, long ears, pale eyes, short tusks, long forearms, bare broad feet, bone necklace brown ragged loincloth and ONE gray stone club anatomically RIGHT hand. Fixed elevated three-quarter game camera. Desired facing north-west yaw225 clockwise from SOUTH/front. REAR LEFT three-quarter: back of head and spine dominate, muzzle tiny leftward contour, no frontal chest. Same neutral hunched planted ready stance, low club. Preserve outfit, anatomy, palette, handedness; no flat rotation/mirroring. Full body complete club centered generous transparent margin all4sides, same scale baseline. Actual transparent background no shadow, scene, text, grid, effects or additional poses.",
+      "state": "not-generated-usage-limit"
+    },
+    {
+      "action": "idle",
+      "direction": "west-north-west",
+      "angleDegrees": 247.5,
+      "prompt": "Use case: identity-preserve. ONE detailed RPG pixel-art troll idle sprite. Images are same troll in nearby headings: use them as bracketing orientation references, redraw intermediate heading. Exact lean green troll with swept-back spiky dark moss hair, long ears, pale eyes, short tusks, long forearms, bare broad feet, bone necklace brown ragged loincloth and ONE gray stone club anatomically RIGHT hand. Fixed elevated three-quarter game camera. Desired facing west-north-west yaw247.5 clockwise from SOUTH/front. between REAR LEFT diagonal and LEFT profile, broad back and outer leftward muzzle contour, no frontal chest. Same neutral hunched planted ready stance, low club. Preserve outfit, anatomy, palette, handedness; no flat rotation/mirroring. Full body complete club centered generous transparent margin all4sides, same scale baseline. Actual transparent background no shadow, scene, text, grid, effects or additional poses.",
+      "state": "not-generated-usage-limit"
+    },
+    {
+      "action": "idle",
+      "direction": "west-south-west",
+      "angleDegrees": 292.5,
+      "prompt": "Use case: identity-preserve. ONE detailed RPG pixel-art troll idle sprite. Images are same troll in nearby headings: use them as bracketing orientation references, redraw intermediate heading. Exact lean green troll with swept-back spiky dark moss hair, long ears, pale eyes, short tusks, long forearms, bare broad feet, bone necklace brown ragged loincloth and ONE gray stone club anatomically RIGHT hand. Fixed elevated three-quarter game camera. Desired facing west-south-west yaw292.5 clockwise from SOUTH/front. between LEFT profile and FRONT LEFT diagonal; mostly side profile with narrow strip of frontal chest, far eye barely visible. Same neutral hunched planted ready stance, low club. Preserve outfit, anatomy, palette, handedness; no flat rotation/mirroring. Full body complete club centered generous transparent margin all4sides, same scale baseline. Actual transparent background no shadow, scene, text, grid, effects or additional poses.",
+      "state": "not-generated-usage-limit"
+    },
+    {
+      "action": "idle",
+      "direction": "south-south-west",
+      "angleDegrees": 337.5,
+      "prompt": "Use case: identity-preserve. ONE detailed RPG pixel-art troll idle sprite. Images are same troll in nearby headings: use them as bracketing orientation references, redraw intermediate heading. Exact lean green troll with swept-back spiky dark moss hair, long ears, pale eyes, short tusks, long forearms, bare broad feet, bone necklace brown ragged loincloth and ONE gray stone club anatomically RIGHT hand. Fixed elevated three-quarter game camera. Desired facing south-south-west yaw337.5 clockwise from SOUTH/front. near FRONT turned just22.5degrees toward screen-left; both eyes visible, chest mostly frontal, much closer to front than profile. Same neutral hunched planted ready stance, low club. Preserve outfit, anatomy, palette, handedness; no flat rotation/mirroring. Full body complete club centered generous transparent margin all4sides, same scale baseline. Actual transparent background no shadow, scene, text, grid, effects or additional poses.",
+      "state": "not-generated-usage-limit"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "status": "rejected-needs-regeneration",
+  "generator": "OpenAI built-in image_gen",
+  "sourceOutput": "C:\\Users\\disda\\.codex\\generated_images\\01a18325-0641-7be2-aaca-162aad945c3d\\exec-a80c10e2-2f0e-4d7a-ab7d-bffc618edd10.png",
+  "direction": "west-south-west",
+  "angleDegrees": 292.5,
+  "sourcePixelsModified": false,
+  "visualReview": {
+    "inspected": true,
+    "identityPlausible": true,
+    "haloVisible": true,
+    "atlasReady": false,
+    "reason": "visible brown halo around body"
+  }
+}

@@ -20,10 +20,13 @@ export function createIntentSelect(opts: {
   cancelIntent: (reason: string) => void;
   startWindup: (intent: CombatIntent, atUs: number) => void;
   engageTarget: (targetId?: string) => void;
+  /** F27 hold the line: while true the automatic rotation yields to an unaffordable re-arm.
+   *  The same gate runs on every movement sample, not only at the world tick's one press. */
+  holdFiller?: () => boolean;
 }) {
   const {
     arena, s, attackCharacter, autoSkills, playerActiveFraction, manual,
-    cancelIntent, startWindup, engageTarget,
+    cancelIntent, startWindup, engageTarget, holdFiller,
   } = opts;
 
   function note(atUs: number, command: 'cast' | 'move' | 'stop', status: 'accepted' | 'queued' | 'rejected', reason: string, skillId?: string) {
@@ -103,6 +106,9 @@ export function createIntentSelect(opts: {
       return;
     }
     if (intent?.phase === 'recovery') return;
+    // A held filler never punches through the re-arm: the yield lives on every sample, so a
+    // zero-cooldown row cannot spend mana the upkeep needs on the very next movement step.
+    if (holdFiller?.()) return;
     const next = selectCombatIntent(arena, s, attackCharacter, autoSkills);
     if (!next) { arena.intent = undefined; return; }
     arena.intent = next;
