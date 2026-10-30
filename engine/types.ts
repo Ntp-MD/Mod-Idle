@@ -34,7 +34,7 @@ export interface StatCfg {
  */
 export const K_KEYS = [
   'K_STR', 'K_INT', 'K_ELEM', 'K_VIT_HP', 'K_VIT_REGEN', 'K_INT_MP', 'K_INT_MREGEN', 'K_AGI_ASPD',
-  'K_WIS_CDR', 'K_WIS_ES', 'K_DEX_ACC', 'K_DEX_ALIGN', 'K_MOB_RES', 'K_VIT_STUNREC', 'K_LCK_CRIT',
+  'K_WIS_CDR', 'K_WIS_CAST_REDUCTION', 'K_WIS_ES', 'K_DEX_ACC', 'K_DEX_ALIGN', 'K_MOB_RES', 'K_VIT_STUNREC', 'K_LCK_CRIT',
   'K_LCK_PDOGE', 'K_LCK_DROP', 'K_STR_WEIGHT', 'K_PDOGE', 'K_CRIT_CAP', 'K_CRIT_OVERFLOW',
   'K_STUN_PER_ALIGN', 'K_EVASION', 'K_ARMOUR', 'armour_divisor', 'mob_damage_divisor',
   'K_MOB_PS_STAT', 'K_BLEED', 'K_BLEED_CHANCE', 'bleed_time_sec', 'K_MOB_DODGE',
@@ -572,6 +572,8 @@ export interface MobSkillRow {
   shieldBreak?: boolean;
   /** Position, delivery and timing. Every strike row must author one. */
   cast?: MobCastProfile;
+  /** Closed mechanic vocabulary for a strike; an aura may not carry one. */
+  rules?: string[];
   /** Phase gate: the strike is only eligible inside this HP window of its own body.
    *  Absent means always eligible. Adds/shield-break/retreat are not rows — see the plan. */
   phase?: { hpBelowPct?: number; hpAbovePct?: number };
@@ -1030,6 +1032,8 @@ export interface SkillCastProfile {
 export interface PhaseSpeeds {
   cast?: number;
   recovery?: number;
+  /** Percent of variable windup removed by Wis; finite, 0–100, and never a rate multiplier. */
+  castReductionPct?: number;
 }
 
 export interface SkillCastTiming {
@@ -1044,6 +1048,8 @@ export interface SkillCastTiming {
 /** Selected multi-impact execution; count and share stay owned by `effects.hits`/`hit_pct`. */
 export interface SkillAction {
   kind: 'projectile-burst' | 'ground-pulse-burst' | 'whirlwind-channel' | 'blizzard-field' | 'sand-field' | 'chain-strike' | 'cluster-burst' | 'targeted-burst';
+  /** Whether every payload of the action reuses one roll cache or each rolls afresh. */
+  roll_policy?: 'shared' | 'independent';
   interval_sec?: number;
   active_sec?: number;
   movement_speed_mult?: number;
@@ -1106,6 +1112,12 @@ export interface SkillRow {
   retired?: boolean;
   /** The active row that carries this retired row's role. */
   retired_to?: string;
+  /**
+   * Who may fire this row (`auto` · `manual` · `both`, omitted = `both`). Only the automatic
+   * rotation reads it: `manual` keeps the row out of auto casts, while a deliberate manual press
+   * still bypasses the flag. `auto` is accepted for the later manual-affordance decision.
+   */
+  auto?: 'auto' | 'manual' | 'both';
 }
 
 export interface SkillsData {

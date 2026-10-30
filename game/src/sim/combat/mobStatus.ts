@@ -1,6 +1,7 @@
 import { E, eng } from '../../engine/client';
 import { bundleOf } from '../../../../engine/keystones.ts';
 import type { Character } from '../core/player';
+import { addStack, decayStatusStack } from './combat';
 import type { CurseMods } from './curse';
 
 /**
@@ -17,8 +18,15 @@ export type MobStatusName = 'burn' | 'chill' | 'shock' | 'poison' | 'mark' | 'cr
 export interface MobLine {
   stacks: number;
   secLeft: number;
-  /** Absolute damage per second this line is dealing, already scaled by the dealer's Element. */
+  /** Absolute damage per second this line is dealing: the weighted mean of `stackPerSec`, so
+   *  `stacks × perSec` is the sum of every application still standing. */
   perSec: number;
+  /**
+   * Per-application rates, the mirror of the player's `StatusLine.stackPerSec` (`combat.ts`
+   * `addStack`): a burn/poison line keeps the worth of every stack it received, so a weak proc adds
+   * its own rate to the ladder instead of overwriting a stronger application.
+   */
+  stackPerSec?: number[];
   /**
    * A line a Keystone wrote with its own stated lifetime: it pays `secLeft` seconds and never
    * stack-decays on the family's own clock, because the Keystone already decided the total.
@@ -136,8 +144,9 @@ export function placeStatus(
   const l = line(m, name);
   const cfg = S[name];
   if (name === 'burn' || name === 'poison') {
-    l.stacks = Math.min(stacksUnderCap(name), l.stacks + 1);
-    l.perSec = alignedPerHit * cfg.k_dps;
+    // the player-side ladder: each application keeps its own rate, so the line pays the sum of what
+    // every stack is worth instead of the newest (possibly weakest) proc overwriting the rest
+    addStack(l, stacksUnderCap(name), alignedPerHit * cfg.k_dps);
     if (name === 'burn') l.secLeft = cfg.time_sec;
   } else if (name === 'mark') {
     l.stacks = Math.min(cfg.stack_max, l.stacks + 1);
@@ -261,9 +270,14 @@ export function setStacks(
   m.alignedPerSec = Math.max(m.alignedPerSec, alignedPerSec);
   const cfg = S[name];
   const l = line(m, name);
-  l.stacks = Math.min(cfg.stack_max, l.stacks + stacks);
   // a status whose own row carries no DoT coefficient (a mark) adds no per-sec damage of its own
-  l.perSec = alignedPerSec * ((cfg as any).k_dps ?? 0);
+  if (name === 'mark') {
+    l.stacks = Math.min(cfg.stack_max, l.stacks + stacks);
+    l.perSec = 0;
+  } else {
+    // the same ladder a proc uses: a row that writes N stacks adds N rates, not one overwrite
+    addStack(l, cfg.stack_max, alignedPerSec * ((cfg as any).k_dps ?? 0), stacks);
+  }
   if (name === 'burn') l.secLeft = cfg.time_sec;
   return l.stacks;
 }
@@ -329,6 +343,8 @@ export function placeKeystoneDoT(
   // clock at the stronger rate instead of converting a stacking line into a timed one
   if (name === 'poison' && l.stacks > 0 && !l.fixedSec) {
     l.perSec = Math.max(l.perSec, perSec);
+    // the Keystone rate is now the whole line's mean; later procs seed a fresh ladder from it
+    delete l.stackPerSec;
     return true;
   }
   l.stacks = Math.max(1, l.stacks);
@@ -369,9 +385,11 @@ export function transferStatus(
   // the transfer keeps what it carried — the damage the line is dealing and the life it has left —
   // and starts no new clock of its own
   const dst = line(mark(store, toId), name);
+  // the mean is carried, not the old ladder: the destination's own stacks and rates are its own
   dst.stacks = Math.max(dst.stacks, moving.stacks);
   dst.perSec = Math.max(dst.perSec, moving.perSec);
   dst.secLeft = Math.max(dst.secLeft, moving.secLeft);
+  delete dst.stackPerSec;
   if (moving.fixedSec) dst.fixedSec = true;
   return name;
 }
@@ -393,6 +411,8 @@ export function consumeStatus(
   const take = Math.max(0, Math.min(Math.max(0, maxStacks), available));
   if (take <= 0) return 0;
   l.stacks -= take;
+  // the spent stacks leave the ladder too: the remaining mean is the line's own, no history carried
+  delete l.stackPerSec;
   if (l.stacks <= 0) delete store[mobId]!.statuses[name];
   return take;
 }
@@ -418,6 +438,8 @@ export function copyStatus(
   dst.stacks = Math.max(dst.stacks, src.stacks);
   dst.perSec = Math.max(dst.perSec, src.perSec);
   dst.secLeft = Math.max(dst.secLeft, src.secLeft);
+  // the mean travels; the destination's ladder restarts from the line it now carries
+  delete dst.stackPerSec;
   if (src.fixedSec) dst.fixedSec = true;
   return true;
 }
@@ -509,7 +531,9 @@ export function stepMobParts(store: MobStatusStore, mobId: string): DotTick {
       }
       // the hold covers the next `sec` of this mob's own clock, so the last held second is inclusive
       const held = (m.poisonHeldUntil || 0) >= m.elapsedSec;
-      if (!held && m.elapsedSec % S.poison.decay_sec === 0 && l.stacks > 0) l.stacks--;
+      // one stack falls on its own beat through the same ladder the player's poison uses, so the
+      // remaining stacks keep their own rates instead of the line losing the newest application only
+      if (!held && m.elapsedSec % S.poison.decay_sec === 0 && l.stacks > 0) decayStatusStack(l);
       poisonDot += l.stacks * l.perSec;
       if (l.stacks <= 0) delete m.statuses.poison;
       continue;

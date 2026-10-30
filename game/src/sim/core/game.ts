@@ -11,6 +11,7 @@ import {
   type CombatArena, type CombatMobFlight, type CombatArenaAction,
 } from '../combat/combat-arena';
 import type { CombatFlight, ManualControl } from '../combat/combat-actions';
+import { approachStopRange } from '../combat/combat-actions';
 import { planAutoAvoid } from '../combat/auto-avoid';
 import { releasedSkillCastTiming, skillCastTiming, targetsInSkillArea } from '../../../../engine/skill-actions.ts';
 import { skillAreaSnapshot } from '../../../../engine/skill-area.ts';
@@ -33,7 +34,6 @@ import { snapshotPendingWork, restorePendingWork } from './pending-work';
 import { settleTick } from './tick/settlement-stage';
 import { advancePreTick } from './tick/pre-tick';
 import { applyKeystonePrep } from './tick/keystone-prep';
-import { advanceForward } from './tick/forward';
 import { advancePostTick } from './tick/post-tick';
 import { advanceCampStage } from './tick/camp-stage';
 import { advanceWalkStage } from './tick/walk-stage';
@@ -67,7 +67,7 @@ import { newCollector, newGrants, wants, col } from '../town/collector';
 import { newFilter, ruleFor, coveredElements, refresh as refreshFilter } from '../gear/filter';
 import { addTo, fits, slotsFree } from '../gear/slots';
 import { settlementOfZone, settlementById } from '../town/town';
-import { effectsActive, esAbsorbPct } from '../combat/skills';
+import { effectsActive, esAbsorbPct, tickSkillBuffs } from '../combat/skills';
 import { applyMobAuras, resolveMobKit } from '../combat/mobSkills';
 import { mark as markSnapshot } from './snapshot';
 import { newGoal, onSpawn as goalSpawn, onKill as goalKill, watch as goalWatch } from './goal';
@@ -161,7 +161,6 @@ export function newGame(seed = 20260101, trailSeed = seed): GameState {
     pedlar: { day: 0, minutes: [], bought: 0 },
     filter: newFilter(),
     filterPresets: [],
-    travel: 'stay',
     // minute one stands in town: safe ground fields no mobs until the character heads out
     hunting: false,
     autoDissolveLevel: 0,
@@ -1267,6 +1266,9 @@ function tickWorld(s: GameState, opts: TickOptions, second: TickSecond, tickStar
       berserkDealt: 1, crippledOutgoingMult: 1, unstoppablePenalty: 1, front: undefined,
     };
     second.derived = derived;
+    // Buff windows run on simulation time alone: one whole credited second, unaffected by Haste,
+    // control, camp or travel. Draining at the second's own opening keeps this tick's sheet intact.
+    tickSkillBuffs(s.skills, 1);
     applyKeystonePrep(s, c, bundleOf(c.keystones, 'mana-debt'), units, tickStartUs);
     const day = dayOf(s.clockSec);
     if (s.pedlar.day !== day || !s.pedlar.minutes.length) {
@@ -1276,7 +1278,11 @@ function tickWorld(s: GameState, opts: TickOptions, second: TickSecond, tickStar
         minutes: Array.from({ length: col.PEDLAR.per_day_cap }, () => col.pedlarPrice(rng())),
       };
     }
-    advanceForward(s, online);
+    if (s.lastAutoZone !== s.zone) {
+      // the game picks the set bound to the zone on its own
+      s.lastAutoZone = s.zone;
+      autoSelect(s, s.zone);
+    }
     tickTown(s, rng);
     runExplorationAutomation(s, online);
     if (advanceCampStage(s, c)) {
@@ -1444,14 +1450,26 @@ function tickWorld(s: GameState, opts: TickOptions, second: TickSecond, tickStar
   const approachRange = () => {
     // Basic attacks have their own profile stop; skills still stop just inside their cast range.
     if (!autoSkills) return playerStopRange;
-    const held = arena?.intent?.skillId;
-    if (held) return Math.max(0, skillRange(held) - 0.05);
+    // The generated-contact band is the existing hysteresis unit; approach adds no new number.
+    const band = Number(E.combat_arena.normal_attack.contact_band_m) || 0;
     const ready = rotationOrder(s.skills).find((id) => {
       const skill = sm.byId[id];
       return (skill.type === 'attack' || skill.type === 'curse')
         && skillEligibilityInState(s, c, id).ready;
     });
-    return ready ? Math.max(0, skillRange(ready) - 0.05) : playerStopRange;
+    const fresh = ready ? Math.max(0, skillRange(ready) - 0.05) : undefined;
+    // A live held order owns the stop distance. Re-deriving it from whichever row happens to be
+    // ready each sample walks the body between two ranges; a fresh row takes over only when it
+    // stops a clear band closer, and a dead target releases the held order.
+    const held = arena?.intent;
+    const liveTarget = !!held && (held.aimPoint || !held.targetId
+      || s.group.some((mob) => mob.id === held.targetId && mob.hp > 0));
+    return approachStopRange(
+      held && sm.byId[held.skillId]
+        ? { range: Math.max(0, skillRange(held.skillId) - 0.05), valid: liveTarget }
+        : undefined,
+      fresh, playerStopRange, band,
+    );
   };
   const cooldown = second.cooldown;
   const { advanceLiveClocks } = createLiveClocks({ arena, s, c, units, cooldown, playerActiveFraction });

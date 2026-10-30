@@ -83,8 +83,6 @@ export interface SpawnProfile {
   idle_decision_sec: number;
   /** Share of idle beats that wait instead of choosing a reachable spot, within [0, 1]. */
   idle_wait_pct: number;
-  /** Hostile spawns and aggro are suppressed within this distance of a field Camp. */
-  camp_safe_m: number;
   /** Share of wall seconds an offline field counts as engaged combat time. */
   offline_share: number;
 }
@@ -180,15 +178,13 @@ function profileAt(raw: unknown, path: string): SpawnProfile {
   if (!(idleDecisionSec > 0)) refuse(`${path}.idle_decision_sec`, 'must be positive');
   const idleWaitPct = raw.idle_wait_pct == null ? 0 : numberAt(raw, 'idle_wait_pct', path);
   if (!(idleWaitPct >= 0 && idleWaitPct <= 1)) refuse(`${path}.idle_wait_pct`, 'must be within [0, 1]');
-  const campSafe = numberAt(raw, 'camp_safe_m', path);
-  if (campSafe < 0) refuse(`${path}.camp_safe_m`, 'must be nonnegative');
   const offlineShare = numberAt(raw, 'offline_share', path);
   if (!(offlineShare >= 0 && offlineShare <= 1)) refuse(`${path}.offline_share`, 'must be within [0, 1]');
   return {
     layout, cap, respawn_sec: respawn, respawn_min_sec: respawnMin, respawn_max_sec: respawnMax, aggro_m: aggro, assist_m: assist,
     roam_m: roam, home_band_m: homeBand, return_speed_mult: returnSpeed,
     idle_decision_sec: idleDecisionSec, idle_wait_pct: idleWaitPct,
-    camp_safe_m: campSafe, offline_share: offlineShare,
+    offline_share: offlineShare,
   };
 }
 

@@ -86,7 +86,7 @@ export function togglePatrolStop(state: GameState, stop: PatrolStop): { ok: bool
     return { ok: true, added: false };
   }
   if (state.patrol.stops.length >= CFG.max_stops) return { ok: false, why: `Patrols hold up to ${CFG.max_stops} stops` };
-  if (state.patrol.stops.length && state.patrol.stops[0].zone !== stop.zone) return { ok: false, why: 'Keep a Patrol inside one zone; use Forward or walk to travel farther' };
+  if (state.patrol.stops.length && state.patrol.stops[0].zone !== stop.zone) return { ok: false, why: 'Keep a Patrol inside one zone; walk to travel farther' };
   state.patrol.stops.push(structuredClone(stop));
   state.patrol.index = 0;
   state.patrol.groupsCleared = 0;

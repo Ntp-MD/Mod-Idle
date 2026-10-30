@@ -43,3 +43,56 @@ describe('F44 timing levers — haste splits by phase, fixed portions resist it'
     expect(c.cooldownRate).toBe(c.globalSpeed);
   });
 });
+
+describe('Wis cast reduction is its own finite lever', () => {
+  // BaseCast 1000 ms, fixed 200 ms, no phase floor: the plan's synthetic example.
+  const profile: SkillCastProfile = {
+    ...melee, windup_sec: 1, fixed_windup_sec: 0.2,
+  };
+  const at = (wis: number, haste = 1) => skillCastTiming(profile, 0, UNITS, point, point,
+    { cast: haste, recovery: haste, castReductionPct: wis * 0.03 }).releaseAtUs;
+
+  it.each([
+    [0, 1_000_000, 840_000],
+    [100, 976_000, 820_800],
+    [500, 880_000, 744_000],
+    [1_000, 760_000, 648_000],
+  ])('maps %i Wis to the published arithmetic', (wis, g1, g125) => {
+    expect(at(wis)).toBe(g1);
+    expect(at(wis, 1.25)).toBe(g125);
+  });
+
+  it('leaves a fixed-only cast and a variable-only cast at their own boundaries', () => {
+    const fixedOnly = skillCastTiming({ ...melee, windup_sec: 0.2, fixed_windup_sec: 0.2 }, 0, UNITS,
+      point, point, { cast: 4, recovery: 1, castReductionPct: 100 });
+    expect(fixedOnly.releaseAtUs).toBe(200_000);
+    const variableOnly = skillCastTiming({ ...melee, windup_sec: 1, fixed_windup_sec: 0 }, 0, UNITS,
+      point, point, { cast: 1.25, recovery: 1 });
+    expect(variableOnly.releaseAtUs).toBe(800_000);
+  });
+
+  it('clamps extreme input instead of turning full reduction into infinite speed', () => {
+    const full = skillCastTiming(profile, 0, UNITS, point, point,
+      { cast: 1, recovery: 1, castReductionPct: 1e9 });
+    expect(Number.isFinite(full.releaseAtUs)).toBe(true);
+    expect(full.releaseAtUs).toBe(200_000);
+    const negative = skillCastTiming(profile, 0, UNITS, point, point,
+      { cast: 1, recovery: 1, castReductionPct: -50 });
+    expect(negative.releaseAtUs).toBe(1_000_000);
+  });
+
+  it('still obeys the phase floor after reduction', () => {
+    const floored = skillCastTiming({ ...melee, windup_sec: 1, fixed_windup_sec: 0 }, 0, UNITS, point, point,
+      { cast: 1, recovery: 1, castReductionPct: 100 }, 50_000);
+    expect(floored.releaseAtUs).toBe(50_000);
+  });
+
+  it('derives the sheet share from Wis, separately from cooldown reduction', () => {
+    const c = buildCharacter(90, emptyGear());
+    const wis = c.core.wis;
+    expect(c.castReductionPct).toBeGreaterThan(0);
+    expect(c.castReductionPct).toBeLessThanOrEqual(100);
+    expect(c.castSpeed).toBe(c.globalSpeed);
+    expect(c.castReductionPct).toBeCloseTo(wis * 0.03, 9);
+  });
+});

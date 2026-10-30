@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { CharacterSaveSession } from '../../src/state/saveSession';
+import { CharacterSaveSession, FRESH_SESSION_PHASE } from '../../src/state/saveSession';
+import { createSessionActions } from '../../src/app/session';
 import { newGame } from '@sim/core/game';
 
 function deferred() {
@@ -65,5 +66,68 @@ describe('character ownership of save requests', () => {
     expect(session.slot).toBeNull();
     expect(session.attach('slot2', currentLoad)).toBe(true);
     expect(session.slot).toBe('slot2');
+  });
+});
+
+
+describe('fresh-session phase disables gameplay persistence', () => {
+  const makeCtx = () => {
+    const write = vi.fn(async () => {});
+    const session = new CharacterSaveSession(write);
+    const ctx: any = {
+      showcaseMode: false,
+      liveArpgArena: true,
+      saveSession: session,
+      gameState: newGame(77),
+      canWriteAccount: true,
+      settings: { autoSkills: true },
+      paused: false,
+      loadController: null,
+      offlineProgress: null,
+      accountWriterState: 'owner',
+      accountWriterLease: null,
+      takeoverController: null,
+      takeoverSlot: 'slot1',
+      snapSlot: 'slot1',
+      snaps: [],
+      resetArena: vi.fn(),
+      restartLoop: vi.fn(),
+      resetSkillDiscovery: vi.fn(),
+      resetCharacterUi: vi.fn(),
+      equipCarriedBest: vi.fn(),
+    };
+    return { ctx, write };
+  };
+
+  it('is enabled for this phase', () => {
+    expect(FRESH_SESSION_PHASE).toBe(true);
+  });
+
+  it('does not write, load, export, import or flush through the session', async () => {
+    const { ctx, write } = makeCtx();
+    const session = createSessionActions(ctx);
+    await session.doSave('slot1');
+    expect(write).not.toHaveBeenCalled();
+    expect(await session.doLoad('slot1')).toBe(false);
+    expect(await session.loadSnaps()).toBeUndefined();
+    expect(ctx.snaps).toEqual([]);
+    session.download();
+    await session.upload({ target: { files: [] } } as any);
+    session.flushSync();
+    expect(write).not.toHaveBeenCalled();
+    expect(ctx.saveSession.slot).toBeNull();
+  });
+
+  it('reset starts a new run without attaching a slot', () => {
+    const { ctx, write } = makeCtx();
+    ctx.gameState.player.level = 99;
+    const session = createSessionActions(ctx);
+    session.reset();
+    expect(ctx.gameState.player.level).not.toBe(99);
+    expect(ctx.gameState.clockSec).toBe(0);
+    expect(ctx.resetArena).toHaveBeenCalledTimes(1);
+    expect(ctx.restartLoop).toHaveBeenCalledTimes(1);
+    expect(ctx.saveSession.slot).toBeNull();
+    expect(write).not.toHaveBeenCalled();
   });
 });

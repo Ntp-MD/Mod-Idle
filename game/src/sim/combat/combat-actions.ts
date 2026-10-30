@@ -1,4 +1,4 @@
-import { sm } from '../../engine/client';
+import { E, sm } from '../../engine/client';
 import { targetsInSkillArea } from '../../../../engine/skill-actions.ts';
 import { skillAreaSnapshot } from '../../../../engine/skill-area.ts';
 import type { SkillAreaSnapshot, SkillCastProfile, SkillCastTiming } from '../../../../engine/types.ts';
@@ -142,10 +142,36 @@ function usefulFieldActive(arena: CombatArena, group: Mob[], skillId: string): b
 }
 
 /**
- * Hold one row and aim while approaching; cast immediately with any row that can fire now
- * rather than walking past live targets, otherwise refresh the aim to live positions, switch
- * to a strictly better cluster (at least one more body) or a newly-ready higher-priority row,
- * and cancel only when the held intent becomes unusable.
+ * The distance the automatic approach keeps. A live held order owns the feet: a fresh row is
+ * adopted only when it would stop a clear band closer, so two ready rows with different ranges
+ * cannot walk the body back and forth. An invalid held order (target gone) releases the feet.
+ */
+export function approachStopRange(
+  held: { range: number; valid: boolean } | undefined,
+  fresh: number | undefined,
+  fallback: number,
+  band: number,
+): number {
+  if (!held || !held.valid) return fresh ?? fallback;
+  if (fresh == null) return held.range;
+  return fresh <= held.range - band ? fresh : held.range;
+}
+
+/** The authored contact band reused as the approach hysteresis: no new gameplay number. */
+const APPROACH_BAND_M = Number(E.combat_arena.normal_attack.contact_band_m) || 0;
+
+/** A different `now` row replaces a held aim only when it is a clear band closer than that aim. */
+function closerByBand(arena: CombatArena, held: CombatIntent, now: CombatIntent): boolean {
+  return arenaDistance(arena.player, held.targetPoint) - arenaDistance(arena.player, now.targetPoint)
+    >= APPROACH_BAND_M;
+}
+
+/**
+ * Hold one row and aim while approaching; cast immediately with any row that can fire now rather
+ * than walking past live targets. While the held order is in range it keeps the feet — a different
+ * `now` row takes over only when its aim is a clear band closer — so two ready rows cannot trade
+ * the body back and forth. Out of range, refresh the aim to live positions and adopt a strictly
+ * better cluster or a newly-ready higher-priority row.
  */
 export function selectCombatIntent(
   arena: CombatArena, state: GameState, character: Character, autoSkills: boolean,
@@ -168,14 +194,23 @@ export function selectCombatIntent(
       if (now && now.targetId === arena.focusId) return now;
       if (fresh && fresh.targetId === arena.focusId) return fresh;
     }
-    if (now && now.skillId !== previous.skillId) return now;
-    if (now) {
+    const heldInRange = intentInRange(arena, previous, state.group);
+    if (now && now.skillId === previous.skillId) {
       // A now-usable target is a hard opportunity; otherwise keep an equally useful held aim.
-      if (!intentInRange(arena, previous, state.group)) return now;
+      if (!heldInRange) return now;
       const heldCount = intentTargets(arena, state.group, previous, false).targets.length;
       const nowCount = intentTargets(arena, state.group, now, false).targets.length;
       return nowCount > heldCount ? now : previous;
     }
+    if (now) {
+      // The held order owns the feet while it can fire; a different row takes over only when
+      // its aim is a clear band closer, so two ready rows cannot trade the body back and forth.
+      if (heldInRange && !closerByBand(arena, previous, now)) return previous;
+      return now;
+    }
+    // Keep the held order while it is in range: the next press is the held one, and it clears
+    // its own recovery before the rotation re-picks a newly-ready higher-priority row.
+    if (heldInRange) return previous;
     if (fresh && fresh.skillId !== previous.skillId) {
       const heldCount = intentTargets(arena, state.group, previous, true).targets.length;
       const freshCount = intentTargets(arena, state.group, fresh, true).targets.length;

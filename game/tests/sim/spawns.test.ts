@@ -10,8 +10,8 @@ const context = () => ({
 });
 
 describe('field spawn data', () => {
-  it('covers every live zone and subzone with one validated layout', () => {
-    expect(spawns.coverage).toEqual({ zones: 18, subzones: 54, layouts: 2, points: 56 });
+  it('covers every live zone and subzone with validated layouts', () => {
+    expect(spawns.coverage).toEqual({ zones: 18, subzones: 54, layouts: 2, points: 96 });
     for (const zone of E.mob.zones) {
       const profile = spawns.profileFor(zone.id);
       expect(profile.cap).toBeLessThanOrEqual(spawns.layout(profile.layout).points.length);
@@ -22,7 +22,6 @@ describe('field spawn data', () => {
       expect(profile.respawn_sec).toBeGreaterThan(0);
       expect(profile.aggro_m).toBeGreaterThan(0);
       expect(profile.assist_m).toBeGreaterThanOrEqual(0);
-      expect(profile.camp_safe_m).toBeGreaterThanOrEqual(0);
       expect(profile.offline_share).toBeGreaterThanOrEqual(0);
       expect(profile.offline_share).toBeLessThanOrEqual(1);
       expect(new Set(spawns.pointsFor(zone.id).map((point) => point.id)).size).toBe(48);
@@ -109,6 +108,31 @@ describe('authored navigation geometry', () => {
     expect(checkSpawnNavigation(spawns, 'forest-clearing', E.combat_arena.player_start, 0.3)).toBeNull();
   });
 
+  it('authors static ground for exactly one low zone and proves it walkable', () => {
+    const navZone = E.mob.zones.find((zone: { id: number }) => zone.id === 2);
+    expect(navZone).toBeDefined();
+    const profile = spawns.profileFor(2);
+    expect(profile.layout).toBe('forest-ridge');
+    const nav = spawns.navigation(profile.layout);
+    expect(nav).not.toBeNull();
+    expect(nav!.obstacles.map((obstacle) => obstacle.id)).toEqual(['ridge-north', 'ridge-south', 'thicket']);
+    const flags = Object.fromEntries(nav!.obstacles.map((obstacle) => [obstacle.id, obstacle.flags]));
+    expect(flags['ridge-north']).toEqual({ movement: true, sight: true, projectiles: true });
+    expect(flags['ridge-south']).toEqual({ movement: true, sight: true, projectiles: true });
+    expect(flags.thicket).toEqual({ movement: true, sight: false, projectiles: false });
+    expect(checkSpawnNavigation(spawns, profile.layout, E.combat_arena.player_start, 0.3)).toEqual([]);
+    for (const zone of E.mob.zones) {
+      if (zone.id === 2) continue;
+      expect(spawns.navigation(spawns.profileFor(zone.id).layout)).toBeNull();
+      for (let sub = 0; sub < (zone.subzones?.length ?? 0); sub++)
+        expect(spawns.navigation(spawns.profileFor(zone.id, sub).layout)).toBeNull();
+    }
+    for (let sub = 0; sub < (navZone!.subzones?.length ?? 0); sub++)
+      expect(spawns.navigation(spawns.profileFor(2, sub).layout)).not.toBeNull();
+    // Camp, dungeon and offline keep the shared clearing with no authored ground.
+    expect(spawns.navigation(spawns.profileFor(2, null, 'legacy').layout)).toBeNull();
+  });
+
   it('resolves authored obstacles into independent kernel flags', () => {
     const model = withNav(openNav({ obstacles: [
       obstacle({ id: 'rock', blocks_projectiles: false }),
@@ -158,12 +182,18 @@ describe('authored navigation geometry', () => {
     expect(checkSpawnNavigation(model, 'forest-clearing', E.combat_arena.player_start, 0.3)).toEqual([]);
   });
 
-  it('proves the slice layout: authored homes reachable around authored ground', () => {
-    const nav = spawns.navigation('grove-slice');
+  it('proves authored homes reachable around inline obstacle ground', () => {
+    const model = withNav(openNav({ obstacles: [
+      obstacle({ id: 'ridge-north', kind: 'box', x: 24, y: 0, width: 2.5, height: 13, radius: undefined }),
+      obstacle({ id: 'ridge-south', kind: 'box', x: 24, y: 19, width: 2.5, height: 13.0513, radius: undefined }),
+      obstacle({ id: 'thicket', kind: 'circle', x: 37, y: 16, radius: 2.5,
+        blocks_sight: false, blocks_projectiles: false }),
+    ] }));
+    const nav = model.navigation('forest-clearing');
     expect(nav).not.toBeNull();
     expect(nav!.obstacles.map((o) => o.id).sort())
       .toEqual(['ridge-north', 'ridge-south', 'thicket']);
-    for (const point of spawns.layout('grove-slice').points) expect(isClear(nav!, point, 0.3)).toBe(true);
-    expect(checkSpawnNavigation(spawns, 'grove-slice', E.combat_arena.player_start, 0.3)).toEqual([]);
+    for (const point of spawns.pointsFor(1)) expect(isClear(nav!, point, 0.3)).toBe(true);
+    expect(checkSpawnNavigation(model, 'forest-clearing', E.combat_arena.player_start, 0.3)).toEqual([]);
   });
 });

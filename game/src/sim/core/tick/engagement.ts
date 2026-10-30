@@ -1,8 +1,10 @@
 import type { GameState, Mob } from '../types';
-import { arenaDistance, type CombatArena, type CombatArenaAction } from '../../combat/combat-arena';
+import {
+  arenaDistance, type CombatArena, type CombatArenaAction, type CombatMobFlight,
+} from '../../combat/combat-arena';
 import { E } from '../../../engine/client';
 import { traceSight } from '../../../../../engine/navigation.ts';
-import type { EngagementCause } from '../../world/field-area';
+import type { EngagementCause, FieldState } from '../../world/field-area';
 
 /**
  * Spatial engagement for one encounter: who joins and who leaves.
@@ -21,6 +23,44 @@ export type EngagementDelta = { added: string[]; removed: string[] };
 export interface EngagementState {}
 
 export const createEngagementState = (): EngagementState => ({});
+
+/**
+ * A transient receipt, not saved state: how many living candidates the slot cap dropped on the
+ * last sample. Pinned bodies are reserved before the cap, so they can never be part of this count.
+ */
+type EngagementReceipt = { engagementTruncated?: number };
+
+function recordTruncation(field: FieldState, dropped: number): void {
+  (field as FieldState & EngagementReceipt).engagementTruncated = Math.max(0, dropped);
+}
+
+/**
+ * A body that left the fight deals no new hits. A resolved shot is already gone from the list; a
+ * released projectile still owed an impact is dropped with a terminal action receipt. A ground
+ * cast is kept: its committed point is the cast's own physics, resolved where the player stands at
+ * impact (`mob-shots.ts`), not a homing hit owned by the caster.
+ */
+export function cancelDepartedMobShots(
+  arena: CombatArena | undefined,
+  removedIds: ReadonlySet<string>,
+  atUs: number,
+  cancelMobPreparation: (action: CombatArenaAction, atUs: number, reason: string) => void,
+): number {
+  if (!arena || !removedIds.size || !arena.mobFlights.length) return 0;
+  const kept: CombatMobFlight[] = [];
+  let cancelled = 0;
+  for (const shot of arena.mobFlights) {
+    if (shot.kind === 'ground' || !removedIds.has(shot.mobId)) {
+      kept.push(shot);
+      continue;
+    }
+    const action = arena.actions.find((entry) => entry.id === shot.actionId);
+    if (action) cancelMobPreparation(action, atUs, 'disengaged');
+    cancelled++;
+  }
+  if (cancelled) arena.mobFlights = kept;
+  return cancelled;
+}
 
 type FieldProfile = {
   offline_share: number;
@@ -89,6 +129,7 @@ export function advanceEngagement(s: GameState, opts: {
       }
       s.field.engagementCauses = Object.fromEntries(
         s.field.engagementIds.map((id) => [id, 'contact' as const]));
+      recordTruncation(s.field, 0);
       const now = new Set(s.field.engagementIds);
       return {
         added: [...now].filter((id) => !was.has(id)),
@@ -139,7 +180,15 @@ export function advanceEngagement(s: GameState, opts: {
     for (const id of opts.pinnedIds ?? []) {
       if (liveById.has(id)) next.set(id, next.get(id) ?? 'contact');
     }
-    const capped = [...next].slice(0, Math.max(1, s.field.slots.length));
+    // Pinned bodies (released work whose impact is still owed) are reserved before the cap: a
+    // whole-cap field plus boss adds may drop an ordinary candidate, never an impact-owed body.
+    const pinned = new Set(opts.pinnedIds ?? []);
+    const candidates = [...next];
+    const reserved = candidates.filter(([id]) => pinned.has(id));
+    const ordinary = candidates.filter(([id]) => !pinned.has(id));
+    const cap = Math.max(1, s.field.slots.length);
+    const capped = [...reserved, ...ordinary.slice(0, Math.max(0, cap - reserved.length))];
+    recordTruncation(s.field, candidates.length - capped.length);
     s.field.engagementIds = capped.map(([id]) => id);
     s.field.engagementCauses = Object.fromEntries(capped);
     const now = new Set(s.field.engagementIds);
@@ -149,6 +198,7 @@ export function advanceEngagement(s: GameState, opts: {
       if (action && action.cancelledAtUs == null && action.releasedAtUs == null && !action.impactCount)
         cancelMobPreparation(action, atUs, 'disengaged');
     }
+    cancelDepartedMobShots(arena, new Set(removed), atUs, cancelMobPreparation);
     return { added: [...now].filter((id) => !was.has(id)), removed };
   }
 

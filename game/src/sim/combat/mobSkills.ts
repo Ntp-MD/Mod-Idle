@@ -89,14 +89,30 @@ export function rowPhaseAllows(row: MobSkillRow, mob: Mob): boolean {
   return true;
 }
 
-/** Encounter phase of one body: how many of its kit's HP gates it has crossed (0 is the opening). */
+/**
+ * Encounter phase of one body: how many distinct HP gates of its kit it has crossed (0 is the
+ * opening). The count follows live HP both ways, so a heal lowers it and a later crossing raises it
+ * again; the caller owns whether that re-crossing is a new transition.
+ *
+ * Duplicate thresholds from two rows of the same phase count once, and the scan is allocation-free
+ * because the scheduler now samples the phase on every combat step rather than once per plan.
+ */
 export function mobPhase(mob: Mob, rows: readonly MobSkillRow[]): number {
   const frac = mob.hpMax > 0 ? mob.hp / mob.hpMax * 100 : 100;
-  const thresholds = new Set<number>();
-  for (const row of rows) if (row.phase?.hpBelowPct != null) thresholds.add(row.phase.hpBelowPct);
   let phase = 0;
-  for (const threshold of [...thresholds].sort((a, b) => b - a))
-    if (frac <= threshold + 1e-9) phase++;
+  for (let index = 0; index < rows.length; index++) {
+    const threshold = rows[index].phase?.hpBelowPct;
+    if (threshold == null) continue;
+    let duplicate = false;
+    for (let prior = 0; prior < index; prior++) {
+      const other = rows[prior].phase?.hpBelowPct;
+      if (other === threshold || (Number.isNaN(other) && Number.isNaN(threshold))) {
+        duplicate = true;
+        break;
+      }
+    }
+    if (!duplicate && frac <= threshold + 1e-9) phase++;
+  }
   return phase;
 }
 

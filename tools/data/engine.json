@@ -112,6 +112,7 @@
     "K_INT_MREGEN": 0.160275,
     "K_AGI_ASPD": 0.25,
     "K_WIS_CDR": 0.03,
+    "K_WIS_CAST_REDUCTION": 0.03,
     "K_WIS_ES": 4,
     "K_DEX_ACC": 1.5,
     "K_DEX_ALIGN": 0.05,

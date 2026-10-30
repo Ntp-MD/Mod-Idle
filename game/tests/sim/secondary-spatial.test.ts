@@ -5,6 +5,7 @@ import { placeStatus } from '@sim/combat/mobStatus';
 import { createCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
 import { characterSheet, huntZone, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
 import { buildCharacter, emptyGear } from '@sim/core/player';
+import { newSkillState, prepareSkillCast, resolvePreparedCast } from '@sim/combat/skills';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
 
 /** Secondary damage and status spread answer to ground distance, not group order. */
@@ -72,6 +73,49 @@ describe('T5 chain lightning — spatial hops answer to ground distance', () => 
     expect(hits.map((hit) => hit.mobId)).toEqual([mid.id, near.id]);
     expect(hits[1].atUs! - hits[0].atUs!).toBe(80_000);
     expect(far.hp).toBe(1e9);
+  });
+});
+
+describe('T5 chain lightning — offline hops use the same nearest-unused rule', () => {
+  const chainMob = (id: string) => ({
+    id, species: 'Rat', kind: 'Normal', zone: 1, level: 60,
+    hp: 1e9, hpMax: 1e9, ps: 0, acc: 0, evasion: 0, dodgeRate: 0, armour: 0, res: 0,
+    damage: 'physical' as const, innate: [], xp: 1, line: 'front', hitsPerSec: 1, atkTimer: 0, engageSec: 0,
+  });
+
+  function chainReport(order: string[], positions?: Record<string, { x: number; y: number }>) {
+    const skills = newSkillState();
+    skills.owned['attack.chain_lightning'] = 0;
+    skills.list[0] = 'attack.chain_lightning';
+    const c = buildCharacter(60, emptyGear());
+    const mobs = order.map((id) => chainMob(id));
+    const prepared = prepareSkillCast(skills, c, 'attack.chain_lightning', 1e9, mobs, {})!;
+    const report = resolvePreparedCast(skills, c, prepared, {}, mulberry32(9), {
+      ...(positions ? { positionOf: (id: string) => positions[id] } : {}),
+    });
+    return { report, mobs };
+  }
+
+  it('hops to the nearest unused body inside the reach, never a flat AoE split', () => {
+    // Array-first is the far body; the near and mid bodies are the real hop path.
+    const positions = {
+      primary: { x: 0, y: 0 }, far: { x: 10, y: 0 }, near: { x: 2, y: 0 }, mid: { x: 4, y: 0 },
+    };
+    const { report } = chainReport(['primary', 'far', 'near', 'mid'], positions);
+    expect(report.byMob.map((hit) => hit.id)).toEqual(['primary', 'near', 'mid']);
+    expect(report.byMob[1].amount / report.byMob[0].amount).toBeCloseTo(0.6, 9);
+    expect(report.byMob[2].amount / report.byMob[0].amount).toBeCloseTo(0.6, 9);
+    expect(report.targets).toBe(3);
+  });
+
+  it('labels the targets cap as queue-only when no ground positions are available', () => {
+    const { report } = chainReport(['primary', 'far', 'near', 'mid']);
+    // No positions: the prepared queue order stands in for the hop query, capped by `targets`.
+    expect(report.byMob.map((hit) => hit.id)).toEqual(['primary', 'far', 'near']);
+    expect(report.byMob[1].amount / report.byMob[0].amount).toBeCloseTo(0.6, 9);
+    const again = chainReport(['primary', 'far', 'near', 'mid']);
+    expect(again.report.byMob.map((hit) => hit.id)).toEqual(report.byMob.map((hit) => hit.id));
+    expect(again.report.byMob.map((hit) => hit.amount)).toEqual(report.byMob.map((hit) => hit.amount));
   });
 });
 

@@ -9,7 +9,7 @@ import { sm } from '../../../engine/client';
 import { EVENT_PRIORITY } from '../../combat/combat-clock';
 import {
   buffCastOutcome, buffNeedsRecast, buffRecastCost, castOnce, hasRule, skillCd, spendableMana,
-  tickSkillBuffs, tickSkills, usableMana,
+  tickSkillCooldowns, usableMana,
 } from '../../combat/skills';
 import { isBossKind } from '../kinds';
 import { fieldInFight } from '../../world/field-area';
@@ -18,7 +18,9 @@ import { push } from '../log';
 
 /**
  * What the next reactive re-arm still costs in mana: the dearest depleted charge pool or pending
- * cleanse the upkeep could not afford. Zero when nothing defensive is owed (F27).
+ * cleanse the upkeep could not afford. Zero when nothing defensive is owed (F27). This hold yields
+ * the whole rotation; the separate filler reserve in `skills.ts` only defers a zero-cooldown row so
+ * a higher-priority timed row can be paid, without stopping the timed rows themselves.
  */
 export function reactiveRearm(s: GameState, c: Character, statuses: Statuses): number {
   let need = 0;
@@ -72,8 +74,9 @@ export function schedulePlayerAction(opts: {
   clock.schedule(tickStartUs, EVENT_PRIORITY.playerAction, 'player', frontId, () => {
     // the rotation casts the first ready, affordable slot top-down — no manual presses.
     // Haste is a post-cap multiplier on this clock; Chill slows the same clock.
-    if (!arena) tickSkills(s.skills, c.cooldownRate * playerActiveFraction);
-    else tickSkillBuffs(s.skills, c.cooldownRate * playerActiveFraction);
+    if (!arena) tickSkillCooldowns(s.skills, c.cooldownRate * playerActiveFraction);
+    // Buff windows are simulation time: they advance once per world second in the tick's own
+    // opening, never here and never with Haste or a stunned clock (P2 duration contract).
     // Cooldowns still count down while Auto Skills is off; only automatic casts stop. A shocked clock
     // (playerActiveFraction 0) stops the presses the same way it stops the rotation: nothing re-presses
     // while the character cannot act, and regen is stopped beside it.

@@ -313,7 +313,7 @@ export function normalizePendingWork(value: unknown): PendingWorkState | null {
     if (!Array.isArray(flight.targetIds) || !flight.targetIds.every((id) => typeof id === 'string')) return false;
     seenImpacts.add(impactKey);
     return true;
-  }).slice(0, 32);
+  });
   const mobFlights = (Array.isArray(work.mobFlights) ? work.mobFlights : []).filter((shot) => {
     if (!shot || typeof shot !== 'object') return false;
     if (!Number.isInteger(shot.actionId) || shot.actionId <= 0 || seen.has(shot.actionId)) return false;
@@ -330,7 +330,7 @@ export function normalizePendingWork(value: unknown): PendingWorkState | null {
     if (shot.areaKey != null && typeof shot.areaKey !== 'string') return false;
     seen.add(shot.actionId);
     return true;
-  }).slice(0, 16);
+  });
   if (!flights.length && !mobFlights.length) return null;
   const actionIds = new Set([...flights.map((flight) => flight.actionId),
     ...mobFlights.map((shot) => shot.actionId)]);
@@ -341,11 +341,10 @@ export function normalizePendingWork(value: unknown): PendingWorkState | null {
     player: { x: work.player.x, y: work.player.y },
     actors: (Array.isArray(work.actors) ? work.actors : [])
       .filter((actor) => actor && typeof actor.id === 'string' && isPoint(actor)
-        && !seenActors.has(actor.id) && (seenActors.add(actor.id), true))
-      .slice(0, 64),
+        && !seenActors.has(actor.id) && (seenActors.add(actor.id), true)),
     actions: (Array.isArray(work.actions) ? work.actions : [])
       .filter((action) => action && Number.isInteger(action.id) && actionIds.has(action.id))
-      .slice(0, 32).map(({ payloads, ...action }) => action),
+      .map(({ payloads, ...action }) => action),
     flights,
     mobFlights,
   };

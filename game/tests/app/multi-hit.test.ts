@@ -3,12 +3,14 @@ import { mulberry32 } from '../../src/engine/client-helpers';
 import { E, sm } from '../../src/engine/client';
 import { captureCombatArena, createCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
 import { characterSheet, newGame, setLevel, spawnMob, stepCombat, tick } from '@sim/core/game';
+import { buildCharacter, emptyGear } from '@sim/core/player';
 import type { GameState, Mob } from '@sim/core/types';
 import { restorePendingWork } from '@sim/core/pending-work';
-import { prepareSkillCast, resolvePreparedCast, newCastRollCache } from '@sim/combat/skills';
+import { castOnce, prepareSkillCast, resolvePreparedCast, newCastRollCache, newSkillState } from '@sim/combat/skills';
 import type { ManualControl } from '@sim/combat/combat-actions';
 import { exportJson, importJson } from '../../src/state/save';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
+import { installSkillFixture } from '../fixtures/skillFixture';
 import { mobSkillById } from '@sim/combat/mobSkills';
 
 function skillFight(skillId: string, distance = 2) {
@@ -184,6 +186,7 @@ describe('real multi-hit impacts', () => {
     expect(castDamage).toBeLessThan(control * 1.05);
   });
   it('converts Sand Storm into one direct press plus one-second field pulses', () => {
+    const control = controlDamage('attack.sand_storm', 2.5);
     const { state, mob, arena } = skillFight('attack.sand_storm', 2.5);
     mob.line = 'stand-off';
     for (let index = 0; index < 6; index++) tick(state, { arena });
@@ -192,9 +195,29 @@ describe('real multi-hit impacts', () => {
     const cast = arena.actions.find((action) => action.skillId === 'attack.sand_storm')!;
     expect(cast.impactCount).toBe(11);
     expect(state.mobStatus[mob.id]?.statuses.erosion).toBeUndefined();
-    expect(state.counters.damageBy?.cast ?? 0).toBeGreaterThan(0);
+    // The live field is NOT also expanded by the offline pulse plan on its initial flight.
+    const castDamage = state.counters.damageBy?.cast ?? 0;
+    expect(castDamage).toBeGreaterThan(control * 0.95);
+    expect(castDamage).toBeLessThan(control * 1.05);
     for (let index = 0; index < 3; index++) tick(state, { arena, autoSkills: false });
     expect(state.curses[mob.id]?.field_presence).toBeUndefined();
+  });
+
+  it('resolves Sand Storm offline as a suppressed initial press plus its pulses, never erosion', () => {
+    const { state, mob } = skillFight('attack.sand_storm', 2.5);
+    mob.line = 'stand-off';
+    const c = characterSheet(state);
+    const report = castOnce(state.skills, c, c.maxMana, state.group, state.playerStatuses, mulberry32(3), {
+      mobStatus: state.mobStatus, curses: state.curses,
+    })!;
+    // One rule on both paths: the initial press never attaches the legacy erosion line. The queue
+    // path expands the authored one-second pulses at cast time; live schedules them one per second.
+    expect(state.mobStatus[mob.id]?.statuses.erosion).toBeUndefined();
+    expect(state.curses[mob.id]?.field_presence).toBeDefined();
+    expect(report.byMob).toHaveLength(11);
+    expect(report.targets).toBe(11);
+    expect(report.byMob[0].amount).toBeGreaterThan(report.byMob[1].amount);
+    expect(report.dealt ?? 0).toBeGreaterThan(report.byMob[0].amount);
   });
 
   it('replaces a deployed Blizzard on a deliberate recast and cancels only its unspent pulses', () => {
@@ -595,6 +618,31 @@ describe('T5 chain lightning — canonical hops and preserved policies', () => {
     expect(chainTotal(thorn.state, thornCast.id)).toBe(plainTotal);
   });
 
+  it('materializes a trigger-launched burst through the same shared dispatch', () => {
+    const { state, mob, arena } = skillFight('attack.ice_lance', 1.5);
+    state.skills.list.fill(null);
+    state.skills.list[0] = 'attack.cleave';
+    state.skills.list[1] = 'attack.ice_lance';
+    state.skills.owned['attack.cleave'] = 0;
+    state.gear[0] = {
+      slot: 'main hand', base: 'one-handed axe', ilvl: 1, quality: 'Normal', tier: 'T1',
+      lines: [{ id: 'critical_chance', value: 100 }],
+    };
+    state.skills.owned['aura.cast_on_crit'] = 0;
+    state.skills.auras['aura.cast_on_crit'] = true;
+    neutral(mob);
+    for (let i = 0; i < 3; i++) {
+      state.player.mana = characterSheet(state).maxMana;
+      tick(state, { arena });
+    }
+    const triggered = arena.actions.find((action) => action.skillId === 'attack.ice_lance');
+    expect(triggered?.nonblocking).toBe(true);
+    expect(triggered?.payloads).toHaveLength(2);
+    expect(state.log.filter((line) => line.text.includes('triggers'))).toHaveLength(1);
+    const primary = arena.actions.find((action) => action.skillId === 'attack.cleave');
+    expect(primary?.nonblocking).not.toBe(true);
+  });
+
   it('shares the per-world-tick trigger guard while a crit trigger fires once beside the chain', () => {
     const spots = [{ id: 'chain-2', x: 4.5, y: 6 }, { id: 'chain-3', x: 5.5, y: 6 }];
     const { state, mob, arena } = chainArena(spots);
@@ -625,6 +673,45 @@ describe('T5 chain lightning — canonical hops and preserved policies', () => {
     const hops = chainHits(state, hopped.id);
     expect(hops[1].atUs! - hops[0].atUs!).toBe(80_000);
     expect(hops[2].atUs! - hops[1].atUs!).toBe(80_000);
+  });
+});
+
+describe('offline roll policy', () => {
+  const neutralMob = (): Mob => ({
+    id: 'burst-target', species: 'Rat', kind: 'Normal', zone: 1, level: 30,
+    hp: 1e9, hpMax: 1e9, ps: 1, acc: 0, evasion: 0, dodgeRate: 0, armour: 0, res: 0,
+    damage: 'physical', innate: [], xp: 1, line: 'front', hitsPerSec: 1, atkTimer: 0, engageSec: 0,
+  }) as Mob;
+
+  function burstReport(policy: 'shared' | 'independent') {
+    const installed = installSkillFixture('test.burst_policy');
+    const row = { ...installed.row, action: { ...installed.row.action!, roll_policy: policy } };
+    sm.byId[row.id] = row;
+    let draws = 0;
+    const rng = () => { draws++; return 0.99; };
+    try {
+      const skills = newSkillState();
+      skills.owned[row.id] = 0;
+      skills.list[0] = row.id;
+      const c = { ...buildCharacter(30, emptyGear()), critChance: 0 };
+      const prepared = prepareSkillCast(skills, c, row.id, 1e9, [neutralMob()], {})!;
+      const report = resolvePreparedCast(skills, c, prepared, {}, rng, { mobStatus: {}, curses: {} });
+      return { report, draws };
+    } finally {
+      installed.restore();
+    }
+  }
+
+  it('shared reuses one cache for the press; independent rolls each payload afresh', () => {
+    const shared = burstReport('shared');
+    const independent = burstReport('independent');
+    // Shared: one crit, one hit and one rider gate for the whole press. Independent: the same
+    // three rolls for each of the three authored payloads — never a silent shared crit.
+    expect(shared.draws).toBe(3);
+    expect(independent.draws).toBe(9);
+    expect(shared.report.byMob).toHaveLength(1);
+    expect(independent.report.byMob).toHaveLength(3);
+    expect(shared.report.dealt ?? 0).toBeCloseTo(independent.report.dealt ?? 0, 9);
   });
 });
 

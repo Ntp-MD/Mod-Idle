@@ -144,13 +144,13 @@ describe('the reservation the UI promises is the one the rotation obeys', () => 
 });
 
 describe('the clocks the module contract moves together', () => {
-  it('Haste scales a buff’s window and its cooldown with the same multiplier', () => {
+  it('advances a buff window by elapsed simulation time, never by Haste', () => {
     const s = newSkillState();
     s.cd['a'] = 10;
     s.buffUp['a'] = 10;
     for (let i = 0; i < 5; i++) tickSkills(s, 2);
     expect(s.cd['a']).toBe(0);
-    expect(s.buffUp['a']).toBe(0);
+    expect(s.buffUp['a']).toBe(5);
   });
 
   it('a preset switch kills the buff windows the new set has toggled off', () => {

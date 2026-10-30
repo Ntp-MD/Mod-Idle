@@ -5,8 +5,10 @@ import { newGame, tick, huntZone } from '@sim/core/game';
 import {
   newSkillState, grantSkill, castOnce, skillLevel, ladderOf, reservedPct, usableMana,
   effectsActive, tickSkills, toggleTrack, clearUnownedTracks, ownsSkill, ACTIVE_SLOTS,
-  defaultManualSkill,
+  defaultManualSkill, skillEligibility,
 } from '@sim/combat/skills';
+import { payHpCost } from '@engine/skills.ts';
+import { installSkillFixture } from '../fixtures/skillFixture';
 import { mulberry32 } from '../../src/engine/client-helpers';
 // the same module tools/skills.ts --calc prints from, imported so the suite's transform carries it
 import { model as cageModel } from '../../../tools/lib/skillmodel.ts';
@@ -220,6 +222,29 @@ describe('current HP skill costs', () => {
     expect(sm.costOf(hpSkill, { skillLevel: E.skill_xp.level_cap }).amount).toBeCloseTo(20 * factor, 9);
     expect(() => sm.costOf({ ...hpSkill, mana: '10 flat' })).toThrow(/both Mana and HP/);
     expect(() => sm.costOf({ id: 'test.untyped-hp', hp_cost: '20%' })).toThrow();
+  });
+
+  it('pays the dev/test fixture HP price and never takes the final point', () => {
+    const installed = installSkillFixture('test.hp_cost');
+    try {
+      const row = installed.row;
+      expect(sm.hpCostSpec(row)).toBe(20);
+      const mob = { id: 'test-hp-target', hp: 1e9, hpMax: 1e9, evasion: 0, dodgeRate: 0 } as any;
+      const skills = newSkillState();
+      skills.owned[row.id] = 0;
+      skills.list[0] = row.id;
+      expect(skillEligibility(skills, c, row.id, c.maxMana, [mob], {}, { currentHp: 20 }).reason).toBe('hp');
+      expect(castOnce(skills, c, c.maxMana, [mob], {}, mulberry32(7), { currentHp: 20 })).toBeNull();
+      expect(skills.cd[row.id]).toBeUndefined();
+      const cast = castOnce(skills, c, c.maxMana, [mob], {}, mulberry32(7), { currentHp: 21 })!;
+      expect(cast.hpCost).toBe(20);
+      expect(cast.manaCost).toBe(0);
+      expect(payHpCost(21, cast.hpCost)).toBe(1);
+      // The floor is the second half of the rule even when a caller bypasses eligibility.
+      expect(payHpCost(20, cast.hpCost)).toBe(1);
+    } finally {
+      installed.restore();
+    }
   });
 
   it('skips the press when paying it would consume the final HP point', () => {

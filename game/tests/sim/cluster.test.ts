@@ -10,6 +10,8 @@ import { mulberry32 } from '../../src/engine/client-helpers';
 import { CombatClock } from '@sim/combat/combat-clock';
 import { createArenaWork } from '@sim/core/tick/arena-work';
 import type { CombatFlight } from '@sim/combat/combat-actions';
+import { normalizeSkillAction, skillActionBudget } from '@engine/skills.ts';
+import { installSkillFixture } from '../fixtures/skillFixture';
 
 /**
  * C1 — cluster projectiles (decided, no live adopter).
@@ -20,16 +22,11 @@ import type { CombatFlight } from '@sim/combat/combat-actions';
  * design, with independent rolls per impact); children spawn once each at ±spread with the
  * parent speed/delay/footprint; one cost/CD; one kill credit.
  */
-const CLUSTER_ID = 'test.cluster_parent';
+const CLUSTER_ID = 'test.cluster_burst';
 
 function installClusterRow() {
-  const split = sm.byId['attack.split_shot'];
-  sm.byId[CLUSTER_ID] = {
-    ...split,
-    id: CLUSTER_ID,
-    name: 'Test Cluster Parent',
-    action: { kind: 'cluster-burst', parent_share_pct: 60, child_count: 2, child_share_pct: 20, spread_deg: 30 },
-  };
+  // The synthetic row lives in `tools/data/skills.json` `test_fixtures`, never in the live roster.
+  sm.byId[CLUSTER_ID] = installSkillFixture(CLUSTER_ID).row;
 }
 
 function clusterState(crowd = 0) {
@@ -126,6 +123,34 @@ describe('C1 cluster system', () => {
     expect(parent.dealt).toBeGreaterThan(0);
     expect(child.dealt).toBeGreaterThan(0);
     expect((parent.dealt ?? 0) / (child.dealt ?? 1)).toBeCloseTo(3, 12);
+  });
+
+  it('prices the fixture parent and children at 60/20/20 through the offline queue', () => {
+    installClusterRow();
+    const row = sm.byId[CLUSTER_ID];
+    expect(normalizeSkillAction(row)).toMatchObject({
+      kind: 'cluster-burst', parent_share_pct: 60, child_share_pct: 20, child_count: 2,
+    });
+    expect(skillActionBudget(row)).toBe(3);
+    expect(() => normalizeSkillAction({ ...row, action: { ...row.action!, child_share_pct: 25 } }))
+      .toThrow(/total 100/);
+
+    const state = newGame(79);
+    setLevel(state, 30);
+    state.skills.owned[CLUSTER_ID] = 0;
+    const c = { ...buildCharacter(30, emptyGear()), critChance: 0 };
+    const mob = mobFixture({ id: 'share', hp: 1e9, hpMax: 1e9, evasion: 0, dodgeRate: 0, innate: [], skillIds: [] });
+    const area = { origin: 'target' as const, radiusM: 3, center: { x: 3, y: 0 }, targetId: 'share' };
+    const prepared = prepareSkillCast(state.skills, c, CLUSTER_ID, 1e9, [mob],
+      state.playerStatuses, { spatialTargets: true }, area)!;
+    const report = resolvePreparedCast(state.skills, c, prepared, state.playerStatuses, mulberry32(5),
+      { spatialTargets: true, mobStatus: state.mobStatus, curses: state.curses });
+    expect(report.byMob).toHaveLength(3);
+    const [parent, childA, childB] = report.byMob;
+    expect(parent.id).toBe('share');
+    expect(parent.amount / childA.amount).toBeCloseTo(3, 9);
+    expect(childB.amount).toBeCloseTo(childA.amount, 9);
+    expect(report.targets).toBe(3);
   });
 
   it('bounds generated and pending work by the authored impacts in a crowded field', () => {

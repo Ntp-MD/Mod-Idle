@@ -454,22 +454,11 @@ export interface GameState {
   filter: FilterState;
   /** Saved rule tables for the filter — one slot the character owns, more as Collector rewards pay out. */
   filterPresets: ({ bySlot: FilterState['bySlot'] } | null)[];
-  /** 'stay' keeps hunting this zone; 'forward' climbs once its own level band is behind. */
-  travel: 'stay' | 'forward';
   /**
    * False on safe ground: a town fields no mobs, so nothing spawns until the character heads
    * out (the hunt button, a forward climb or a dungeon run). True everywhere else.
    */
   hunting: boolean;
-  /**
-   * Forward Mode's safe floor: the zone the character last held (the one it advanced out of). A
-   * Push returns here — the ladder's own answer to "this chapter is not survivable yet".
-   */
-  forwardSafe?: number;
-  /** The zone a Push chased the character out of, and the level it happened at. */
-  forwardBlockedZone?: number;
-  /** Forward Mode may not re-enter `forwardBlockedZone` until it has gained a level against this. */
-  forwardBlockedLevel?: number;
   /**
    * Auto-dissolve any drop below this item level (0 = never, the default: every drop waits for a
    * decision). A client rule that dissolves into Reroll stones — never gold, so the two mints are

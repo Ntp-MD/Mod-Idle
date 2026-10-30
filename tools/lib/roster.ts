@@ -10,7 +10,7 @@ import path from 'node:path';
 import { readJson } from './json.ts';
 import * as G from './gates.ts';
 import * as EN from './engine.ts';
-import { createSkillModel, validateSkillHitClasses } from '../../engine/skills.ts';
+import { createSkillModel, validateSkillActions, validateSkillHitClasses } from '../../engine/skills.ts';
 import type { SkillsData } from './types.ts';
 
 const DATA = readJson<SkillsData>(path.join(import.meta.dirname, '..', 'data', 'skills.json'));
@@ -306,6 +306,11 @@ function gates(): G.GateRow[] {
   catch (error) { hitClassError = String(error); }
   add('S25', !hitClassError, hitClassError || 'Every skill authors its hit class independently of damage and delivery');
 
+  let actionError = '';
+  try { validateSkillActions(SKILLS, 'skills.json'); }
+  catch (error) { actionError = String(error); }
+  add('S25a', !actionError, actionError || 'Every action descriptor is normalized (kind, roll policy, timing, shares, budget)');
+
   // C1 cluster budget: a cluster row splits one press across its parent impact and its children,
   // so the authored shares must total exactly 100. No live adopter is required — the gate passes
   // vacuously today and binds the first row that uses the system.
@@ -326,6 +331,17 @@ function gates(): G.GateRow[] {
     return false;
   });
   add('S26', badCluster.length === 0, `cluster rows split one press to exactly 100 across a positive-radius projectile footprint with no multi-hit effects${badCluster.length ? ' · BAD: ' + badCluster.map((s: any) => s.id).join(', ') : ''} (no live adopter required)`);
+
+  // P3 auto combat: a row may state who may fire it. The accepted values and the default live in
+  // the data, so the cage and the runtime cannot drift; an omitted flag means today's rotation.
+  const autoMeta = (DATA.meta as any).auto_controls || {};
+  const autoValues = Array.isArray(autoMeta.values) ? autoMeta.values as string[] : ['auto', 'manual', 'both'];
+  const autoDefault = typeof autoMeta.default === 'string' ? autoMeta.default : 'both';
+  const badAuto = SKILLS.filter((s: any) => s.auto != null && !autoValues.includes(s.auto))
+    .map((s: any) => `${s.id}:${s.auto}`);
+  add('S27', badAuto.length === 0 && autoValues.includes(autoDefault),
+    `${SKILLS.filter((s: any) => s.auto === 'manual').length} manual-only row(s), ${SKILLS.filter((s: any) => s.auto === 'auto').length} auto-only row(s); every authored auto flag is ${autoValues.join(' · ')} and the default is ${autoDefault}` +
+    `${badAuto.length ? ' · BAD: ' + badAuto.join(', ') : ''}${autoValues.includes(autoDefault) ? '' : ' · DEFAULT NOT IN VALUES'}`);
 
   return g.rows();
 }

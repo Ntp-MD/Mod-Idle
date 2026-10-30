@@ -102,7 +102,7 @@ import { farm, farmLevel, farmMasteryLevel, plotCount, plant, harvest, craftPoti
   import { stashTabCount, STASH_TAB_CAP, deposit, withdraw, depositMany, withdrawMany } from '@sim/town/town';
 import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsFree } from '@sim/core/tree';
   import { allocateStats, respecStats } from '@sim/core/respec';
-  import { CharacterSaveSession } from './state/saveSession';
+  import { CharacterSaveSession, FRESH_SESSION_PHASE } from './state/saveSession';
   import { CueScheduler, createWebAudioSink, cueFor } from './app/audio';
   import { SHOWCASE_SAMPLE_LABELS, SHOWCASE_SAMPLES } from './app/showcase-samples';
   import { createSessionActions, type AccountWriterLease } from './app/session';
@@ -147,8 +147,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const keysMark = icon('key');
   const waypointMark = icon('waypoint-pillar');
   const moreMark = icon('more-options');
-  const stayMark = icon('rest-campfire');
-  const climbMark = icon('ladder-stack');
   const autoEquipMark = icon('heavy-helm');
   const autoAvoidMark = icon('boot-prints');
   const newCharacterMark = icon('perspective-dice-six-faces-random');
@@ -526,7 +524,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         ? eng.zoneById(spawnZone).subzones?.findIndex((sub: { species: string[] }) => sub.species.includes(speciesId))
         : undefined;
       setLevel(sample, 5);
-      sample.travel = 'stay';
       sample.phase = 'fighting';
       const rng = mulberry32(20261024);
       // Three copies expose the multi-Mob layout while replaying one selected species sheet.
@@ -1525,6 +1522,23 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     const onRenderLost = () => { renderLostPaused = paused; paused = true; flushSync(); };
     const onRenderRestored = () => { if (!renderLostPaused) paused = false; };
     (async () => {
+      if (FRESH_SESSION_PHASE) {
+        // P3: a fresh normal tab owns an in-memory run without an account-writer lease. No
+        // gameplay storage is read, no away catch-up runs, and no save timer or unload flush is
+        // attached; presentation settings and the one wake loop keep their usual behaviour.
+        settings = await readSettings();
+        accountWriterState = 'owner';
+        speed = settings.speed || 1;
+        if (settings.autoEquip !== false) equipCarriedBest();
+        loadSnaps();
+        if (!disposed) {
+          stopWake = startWakeLoop();
+          restartWakeLoop = () => { stopWake?.(); loop.restart(); stopWake = startWakeLoop(); };
+          window.addEventListener('modworld:render-lost', onRenderLost);
+          window.addEventListener('modworld:render-restored', onRenderRestored);
+        }
+        return;
+      }
       // A replacement instance in the same document must be able to wait out the departing
       // instance's teardown flush; a genuinely occupied second tab still reads as busy.
       const writerLock = await requestAccountWriterLock({ retryMs: 2000, signal: writerController.signal });
@@ -1560,6 +1574,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       // The clock is armed only after the catch-up, so a slice boundary cannot add an extra tick.
       if (!disposed) {
         stopWake = startWakeLoop();
+        restartWakeLoop = () => { stopWake?.(); loop.restart(); stopWake = startWakeLoop(); };
         autosaveTimer = setInterval(() => { if (canWriteAccount && saveSession.slot) void doSave(saveSession.slot, true); }, AUTOSAVE_SEC * 1000);
         document.addEventListener('visibilitychange', onHide);
         window.addEventListener('modworld:render-lost', onRenderLost);
@@ -1569,6 +1584,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     })();
     return () => {
       disposed = true;
+      restartWakeLoop = null;
       stopWake?.();
       if (autosaveTimer) clearInterval(autosaveTimer);
       document.removeEventListener('visibilitychange', onHide);
@@ -1925,6 +1941,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     set snapNote(value: string) { snapNote = value; },
     resetArena,
     resetSkillDiscovery,
+    restartLoop: () => restartWakeLoop?.(),
     captureCharacterUi: () => captureCharacterUi(),
     restoreCharacterUi: (snapshot: CharacterUiSnapshot) => restoreCharacterUi(snapshot),
     resetCharacterUi: () => resetCharacterUi(),
@@ -1953,6 +1970,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     equipCarriedBest,
   });
   const { step, startWakeLoop } = loop;
+  /** Set by onMount: reset stops the departing wake loop and starts one new loop. */
+  let restartWakeLoop: (() => void) | null = null;
 
   function editRule(slot: string, patch: Record<string, unknown>) {
     if (!requireAccountWriter('changing the bag filter')) return;
@@ -2814,8 +2833,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     const r = warpTo(gameState, id);
     if (!r.ok) { saveNote = `Cannot warp: ${r.why}`; gameState = { ...gameState }; return; }
     cancelCampEncounter(gameState, 'Left Camp');
-    // a manual jump is the new floor: a later Push in Forward Mode falls back to the zone just left
-    gameState.forwardSafe = gameState.zone;
     if (r.forfeit) push(gameState, r.forfeit);
     push(gameState, `Waypoint to ${s.name} — ${r.gold} gold for the ${saved} blocks it saves`);
     fx(gameState, { kind: 'warp', side: 'self', text: `warp · ${s.name}`, colour: hitColour(null) });
@@ -3231,16 +3248,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     const held = Object.entries(gameState.counters.stones).filter(([, n]) => (n as number) > 0);
     if (!held.length) return 'no stones yet';
     return held.map(([k, n]) => `${stoneName(k)} ${n}`).join(' · ');
-  }
-
-  function setTravel(mode: 'stay' | 'forward') {
-    if (!requireAccountWriter('changing travel mode')) return;
-    gameState.travel = mode;
-    gameState = { ...gameState };
-    push(gameState, mode === 'forward'
-      ? 'Forward: walk to the next opened settlement when its level band is behind; a Push returns to the last zone held'
-      : 'Staying: you farm this zone until you travel yourself');
-    gameState = { ...gameState };
   }
 
   function orbMotion(node: HTMLElement) {
@@ -3705,19 +3712,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   <!-- contextual overlays stay on the right edge and appear only while open. -->
   <div class="commands-dock"
        style={place('commands', '100%', 'fit-content')}>
-    <div class="hud-slide-handle" title={`${gameState.travel === 'stay' ? 'Stay Here' : 'Forward'} · ×${speed} · Auto Skills ${settings.autoSkills !== false ? 'ON' : 'OFF'} · Auto Equip ${settings.autoEquip !== false ? 'ON' : 'OFF'} · Auto Avoid ${settings.autoAvoid !== false ? 'ON' : 'OFF'} · ${running ? 'Running' : 'Paused'}`}>
+    <div class="hud-slide-handle" title={`×${speed} · Auto Skills ${settings.autoSkills !== false ? 'ON' : 'OFF'} · Auto Equip ${settings.autoEquip !== false ? 'ON' : 'OFF'} · Auto Avoid ${settings.autoAvoid !== false ? 'ON' : 'OFF'} · ${running ? 'Running' : 'Paused'}`}>
       <CollapseToggle label="Game controls" direction="right"
         controls="game-controls" bind:expanded={controlsExpanded} />
     </div>
     <div id="game-controls" class="command-row game-controls-row hud-slide-content" class:collapsed={!controlsExpanded}
          role="group" aria-label="Game controls" aria-hidden={!controlsExpanded} inert={!controlsExpanded}>
-    <button class="hub-control here" type="button" aria-pressed={gameState.travel === 'forward'}
-            aria-label={`Travel mode: ${gameState.travel === 'stay' ? 'Stay Here; switch to Forward' : 'Forward; switch to Stay Here'}`}
-            title={gameState.travel === 'stay' ? 'Staying here · click to climb forward automatically' : 'Climbing forward automatically · click to stay here'}
-            onclick={() => setTravel(gameState.travel === 'stay' ? 'forward' : 'stay')}>
-      <span class="toggle-ring here"><img src={gameState.travel === 'stay' ? stayMark : climbMark} alt="" aria-hidden="true" /></span>
-      <span class="cap" aria-live="polite">{gameState.travel === 'stay' ? 'Stay Here' : 'Forward'}</span>
-    </button>
     <button type="button" class="hub-control" class:here={settings.autoSkills !== false} aria-pressed={settings.autoSkills !== false}
             title={`Auto skills · ${settings.autoSkills === false ? 'off' : 'on'}`}
             onclick={() => setSetting('autoSkills', settings.autoSkills === false)}>
@@ -4785,7 +4785,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {/if}
 
 {#if panel === 'save' || showcaseMode}
-  <Panel title="Save" subtitle="Local saves, backups and shared preferences" width="compact" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
+  <Panel title={FRESH_SESSION_PHASE && !showcaseMode ? 'Session' : 'Save'}
+    subtitle={FRESH_SESSION_PHASE && !showcaseMode ? 'Preferences · gameplay progress resets on every reload' : 'Local saves, backups and shared preferences'}
+    width="compact" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <!-- The Save body owns the panel's scroll; focus makes wheel and arrow/Page keys reach it. -->
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <!-- svelte-ignore a11y_no_noninteractive_tabindex (the scroll region needs keyboard focus) -->
@@ -4793,7 +4795,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <Tabs label="Save sections" active={saveTab} onpick={(id) => { saveTab = id as typeof saveTab; if (id === 'backups') loadSnaps(); }}
           tabs={[{ id: 'slots', label: 'Slots' }, { id: 'backups', label: 'Backups' }, { id: 'settings', label: 'Settings' }]} />
     {#if showcaseMode}<p class="showcase-note">Save, load, backup, import, and export are disabled here. This page never reads or writes a player save.</p>{/if}
-    {#if !showcaseMode}
+    {#if FRESH_SESSION_PHASE && !showcaseMode}<p class="showcase-note">Fresh-session phase: every boot starts a new character and account. Gameplay saving, loading, backups, import, export, autosave and away catch-up are off; presentation settings stay browser-owned.</p>{/if}
+    {#if !showcaseMode && !FRESH_SESSION_PHASE}
       <div class="account-writer card-tile" class:owner={accountWriterState === 'owner'} role="status" aria-live="polite">
         <p>{accountWriterMessage}</p>
         {#if accountWriterState === 'readonly'}
@@ -4808,21 +4811,21 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     {/if}
     {#if saveTab === 'slots'}
     {#if persistenceError}<div role="alert"><p class="text-alarm">{persistenceError}</p><button onclick={download}>Export recovery JSON</button></div>{/if}
-    <p>Three local character slots · offline progress has no time limit. Autosave starts after you save or load a slot; a new or imported character needs its own slot choice.</p>
+    {#if !FRESH_SESSION_PHASE}<p>Three local character slots · offline progress has no time limit. Autosave starts after you save or load a slot; a new or imported character needs its own slot choice.</p>{/if}
     <div class="save-actions">
     {#each saveSlots as slot}
-      <button disabled={showcaseMode || !canWriteAccount} onclick={() => doSave(slot)}>Save {slot}</button>
-      <button disabled={showcaseMode || accountWriterState === 'checking' || accountWriterState === 'waiting' || accountWriterState === 'unsupported'} onclick={() => doLoad(slot)}>Load {slot}</button>
+      <button disabled={showcaseMode || FRESH_SESSION_PHASE || !canWriteAccount} onclick={() => doSave(slot)}>Save {slot}</button>
+      <button disabled={showcaseMode || FRESH_SESSION_PHASE || accountWriterState === 'checking' || accountWriterState === 'waiting' || accountWriterState === 'unsupported'} onclick={() => doLoad(slot)}>Load {slot}</button>
     {/each}
-    <button disabled={showcaseMode} onclick={download}>Export JSON</button>
-    <label>Import <input type="file" accept="application/json" disabled={showcaseMode || !canWriteAccount} onchange={upload} /></label>
+    <button disabled={showcaseMode || FRESH_SESSION_PHASE} onclick={download}>Export JSON</button>
+    <label>Import <input type="file" accept="application/json" disabled={showcaseMode || FRESH_SESSION_PHASE || !canWriteAccount} onchange={upload} /></label>
     </div>
     {#if saveNote}<p class="save-note-inline" role="status">{saveNote}</p>{/if}
     {:else if saveTab === 'backups'}
-    <h2>Backups · {SAVE_CFG.snapshot_slots} walking snapshots</h2>
-    <p><small>Owed on a level up, an Ascend or Refine, and every {SAVE_CFG.snapshot_interval_min} min of play. A restore takes the character back whole.</small></p>
-    <label>Which slot <select bind:value={snapSlot} disabled={showcaseMode} onchange={loadSnaps}>{#each saveSlots as s}<option value={s}>{s}</option>{/each}</select></label>
-    <button disabled={showcaseMode} onclick={loadSnaps}>Show backups</button>
+    <h2>{FRESH_SESSION_PHASE ? 'Backups are off for this phase' : 'Backups · ' + SAVE_CFG.snapshot_slots + ' walking snapshots'}</h2>
+    {#if !FRESH_SESSION_PHASE}<p><small>Owed on a level up, an Ascend or Refine, and every {SAVE_CFG.snapshot_interval_min} min of play. A restore takes the character back whole.</small></p>{/if}
+    <label>Which slot <select bind:value={snapSlot} disabled={showcaseMode || FRESH_SESSION_PHASE} onchange={loadSnaps}>{#each saveSlots as s}<option value={s}>{s}</option>{/each}</select></label>
+    <button disabled={showcaseMode || FRESH_SESSION_PHASE} onclick={loadSnaps}>Show backups</button>
     <table>
       <thead><tr><th>#</th><th>Taken because</th><th>Then</th><th></th></tr></thead>
       <tbody>
@@ -4831,7 +4834,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
             <td>{i + 1}</td>
             <td>{shot.reason}</td>
             <td>{Math.round(shot.clockSec / 60)} min of play · level {shot.state.player.level}</td>
-            <td><button disabled={showcaseMode || !canWriteAccount} onclick={() => restore(i)}>Rewind to this</button></td>
+            <td><button disabled={showcaseMode || FRESH_SESSION_PHASE || !canWriteAccount} onclick={() => restore(i)}>Rewind to this</button></td>
           </tr>
         {:else}
           <tr><td colspan="4">Nothing stored yet.</td></tr>

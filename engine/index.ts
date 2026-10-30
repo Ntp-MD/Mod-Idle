@@ -710,6 +710,9 @@ export function createEngine(E: EngineData) {
   const maxEsOf = (flat = 0, pct = 0, wis = 0) => (wis * K.K_WIS_ES + flat) * (1 + pct / 100);
   const esRegenOf = (pool: number, ampPct = 0) => pool * (ES.regen_pct / 100) * (1 + ampPct / 100);
   const cdrOf = (wis: number, pctTotal = 0) => Math.min(CAP.cdr, (wis * K.K_WIS_CDR) * (1 + pctTotal / 100));
+  /** Share of variable windup Wis removes, in percent: finite and clamped, never an infinite speed. */
+  const castReductionPctOf = (wis: number) =>
+    Math.max(0, Math.min(100, Math.max(0, wis) * K.K_WIS_CAST_REDUCTION));
   // the trailing multiplier is where a skill that scales the finished stat lands (Warcry's
   // "alignment and Elemental resistance x1.20"); the Cap still applies after it
   // Elemental Alignment has NO Cap (owner ruling): it is the Dex-derived gate EVERY ROLLED STATUS passes
@@ -1236,7 +1239,7 @@ export function createEngine(E: EngineData) {
     aspdOf, capAspd, hitsPerSec, weaponMult, physOf, magicOf, elementalPowerOf, playerAccuracy, hitVs, hitChance,
     dodgeRate, dodgeChance, perfectDodgeChance, blockChance, armourPenCut, stunChanceFrom, bleedChanceFrom,
     critPool, critChanceOf, critDmgOf,
-    maxHpOf, hpRegenOf, maxManaOf, manaRegenOf, maxEsOf, esRegenOf, cdrOf,
+    maxHpOf, hpRegenOf, maxManaOf, manaRegenOf, maxEsOf, esRegenOf, cdrOf, castReductionPctOf,
     alignmentOf, resistanceOf, elemResCapOf, ladderMult, stunRecoveryOf, stunStopSec, weightCapacityOf, encumbranceOf, aspdEncumbered, weightAtQuality,
     armourOf, armourReduce, mobArmourCut, mobResCut, mitigateMobHit, convertDamageOf, agiForCap,
     weaponWeightOf, sizeMultOf, applySizeMult, basicAttackOf,

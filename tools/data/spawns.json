@@ -5,7 +5,7 @@
       "engine/spawns.ts",
       "tools/check.ts"
     ],
-    "note": "One generic clearing layout is shared by every field. A zone profile owns its population cap, per-slot respawn time and aggro/assist ranges; a subzone inherits its zone profile unless a subzone override is authored. Species, level, body and rank remain engine.json mob data. Spawn points are gameplay positions in arena meters, never map pixels."
+    "note": "One generic clearing layout is shared by every field except zone 2, which authors a ridge-and-thicket variant: the ridges block movement, sight and projectiles, the thicket blocks movement only. A zone profile owns its population cap, per-slot respawn time and aggro/assist ranges; a subzone inherits its zone profile unless a subzone override is authored. Species, level, body and rank remain engine.json mob data. Spawn points are gameplay positions in arena meters, never map pixels."
   },
   "defaults": {
     "layout": "forest-clearing",
@@ -18,7 +18,6 @@
     "return_speed_mult": 0.65,
     "idle_decision_sec": 5,
     "idle_wait_pct": 0.35,
-    "camp_safe_m": 6,
     "offline_share": 0.6,
     "respawn_min_sec": 31.5,
     "respawn_max_sec": 38.5
@@ -316,40 +315,68 @@
         }
       ]
     },
-    "grove-slice": {
+    "forest-ridge": {
       "points": [
-        { "id": "s01", "x": 6, "y": 6, "roam_m": 1.5 },
-        { "id": "s02", "x": 6, "y": 26, "roam_m": 1.5 },
-        { "id": "s03", "x": 14, "y": 16, "roam_m": 1.5 },
-        { "id": "s04", "x": 26, "y": 6, "roam_m": 1.5 },
-        { "id": "s05", "x": 26, "y": 26, "roam_m": 1.5 },
-        { "id": "s06", "x": 32, "y": 16, "roam_m": 1.5 },
-        { "id": "s07", "x": 44, "y": 6, "roam_m": 1.5 },
-        { "id": "s08", "x": 44, "y": 26, "roam_m": 1.5 }
+        { "id": "p01", "x": 3, "y": 3, "roam_m": 2.0 },
+        { "id": "p02", "x": 3, "y": 8, "roam_m": 2.0 },
+        { "id": "p03", "x": 3, "y": 13, "roam_m": 2.0 },
+        { "id": "p04", "x": 3, "y": 18, "roam_m": 2.0 },
+        { "id": "p05", "x": 3, "y": 23, "roam_m": 2.0 },
+        { "id": "p06", "x": 3, "y": 28, "roam_m": 2.0 },
+        { "id": "p07", "x": 9, "y": 3, "roam_m": 2.0 },
+        { "id": "p08", "x": 9, "y": 8, "roam_m": 2.0 },
+        { "id": "p09", "x": 9, "y": 13, "roam_m": 2.0 },
+        { "id": "p10", "x": 9, "y": 18, "roam_m": 2.0 },
+        { "id": "p11", "x": 9, "y": 23, "roam_m": 2.0 },
+        { "id": "p12", "x": 9, "y": 28, "roam_m": 2.0 },
+        { "id": "p13", "x": 15, "y": 3, "roam_m": 2.0 },
+        { "id": "p14", "x": 15, "y": 8, "roam_m": 2.0 },
+        { "id": "p15", "x": 15, "y": 13, "roam_m": 2.0 },
+        { "id": "p16", "x": 15, "y": 18, "roam_m": 2.0 },
+        { "id": "p17", "x": 15, "y": 23, "roam_m": 2.0 },
+        { "id": "p18", "x": 15, "y": 28, "roam_m": 2.0 },
+        { "id": "p19", "x": 21, "y": 3, "roam_m": 2.0 },
+        { "id": "p20", "x": 21, "y": 8, "roam_m": 2.0 },
+        { "id": "p21", "x": 21, "y": 13, "roam_m": 2.0 },
+        { "id": "p22", "x": 21, "y": 18, "roam_m": 2.0 },
+        { "id": "p23", "x": 21, "y": 23, "roam_m": 2.0 },
+        { "id": "p24", "x": 21, "y": 28, "roam_m": 2.0 },
+        { "id": "p25", "x": 27, "y": 3, "roam_m": 2.0 },
+        { "id": "p26", "x": 27, "y": 8, "roam_m": 2.0 },
+        { "id": "p27", "x": 27, "y": 13, "roam_m": 2.0 },
+        { "id": "p28", "x": 27, "y": 18, "roam_m": 2.0 },
+        { "id": "p29", "x": 27, "y": 23, "roam_m": 2.0 },
+        { "id": "p30", "x": 27, "y": 28, "roam_m": 2.0 },
+        { "id": "p31", "x": 33, "y": 3, "roam_m": 2.0 },
+        { "id": "p32", "x": 33, "y": 8, "roam_m": 2.0 },
+        { "id": "p33", "x": 33, "y": 13, "roam_m": 2.0 },
+        { "id": "p34", "x": 33, "y": 18, "roam_m": 2.0 },
+        { "id": "p35", "x": 33, "y": 23, "roam_m": 2.0 },
+        { "id": "p36", "x": 33, "y": 28, "roam_m": 2.0 },
+        { "id": "p37", "x": 39, "y": 3, "roam_m": 2.0 },
+        { "id": "p38", "x": 39, "y": 8, "roam_m": 2.0 },
+        { "id": "p39", "x": 39, "y": 13, "roam_m": 2.0 },
+        { "id": "p40", "x": 39, "y": 18, "roam_m": 2.0 },
+        { "id": "p41", "x": 39, "y": 23, "roam_m": 2.0 },
+        { "id": "p42", "x": 39, "y": 28, "roam_m": 2.0 },
+        { "id": "p43", "x": 45, "y": 3, "roam_m": 2.0 },
+        { "id": "p44", "x": 45, "y": 8, "roam_m": 2.0 },
+        { "id": "p45", "x": 45, "y": 13, "roam_m": 2.0 },
+        { "id": "p46", "x": 45, "y": 18, "roam_m": 2.0 },
+        { "id": "p47", "x": 45, "y": 23, "roam_m": 2.0 },
+        { "id": "p48", "x": 45, "y": 28, "roam_m": 2.0 }
       ],
       "nav": {
         "version": 1,
         "origin": { "x": 0, "y": 0 },
         "cell_size_m": 1,
         "obstacles": [
-          {
-            "id": "ridge-north",
-            "kind": "box",
-            "x": 20, "y": 0, "width": 2.5, "height": 13,
-            "blocks_movement": true, "blocks_sight": true, "blocks_projectiles": true
-          },
-          {
-            "id": "ridge-south",
-            "kind": "box",
-            "x": 20, "y": 19, "width": 2.5, "height": 13.0513,
-            "blocks_movement": true, "blocks_sight": true, "blocks_projectiles": true
-          },
-          {
-            "id": "thicket",
-            "kind": "circle",
-            "x": 37, "y": 16, "radius": 2.5,
-            "blocks_movement": true, "blocks_sight": false, "blocks_projectiles": false
-          }
+          { "id": "ridge-north", "kind": "box", "x": 24, "y": 0, "width": 2.5, "height": 13,
+            "blocks_movement": true, "blocks_sight": true, "blocks_projectiles": true },
+          { "id": "ridge-south", "kind": "box", "x": 24, "y": 19, "width": 2.5, "height": 13.0513,
+            "blocks_movement": true, "blocks_sight": true, "blocks_projectiles": true },
+          { "id": "thicket", "kind": "circle", "x": 37, "y": 16, "radius": 2.5,
+            "blocks_movement": true, "blocks_sight": false, "blocks_projectiles": false }
         ]
       }
     }
@@ -362,6 +389,7 @@
       "respawn_max_sec": 36.3
     },
     "2": {
+      "layout": "forest-ridge",
       "cap": 32,
       "respawn_sec": 33,
       "respawn_min_sec": 29.7,
@@ -475,7 +503,6 @@
       "roam_m": 2,
       "home_band_m": 0.35,
       "return_speed_mult": 0.65,
-      "camp_safe_m": 6,
       "offline_share": 0.6,
       "respawn_min_sec": 45.0,
       "respawn_max_sec": 55.0

@@ -100,12 +100,11 @@ describe('regional trail events', () => {
   });
 });
 
-describe('Forward travel', () => {
-  it.each(['sync', 'async'] as const)('keeps Forward at the current hunt during %s catch-up and starts walking on return', async (mode) => {
+describe('staying put without Forward travel', () => {
+  it.each(['sync', 'async'] as const)('holds the current hunt during %s catch-up and starts no walk on return', async (mode) => {
     const state = newGame(87);
     const next = TOWN.settlements.find((entry: any) => entry.zone === 2)!;
     state.town.visited.push(next.id);
-    state.travel = 'forward';
     setLevel(state, 11);
     const cell = structuredClone(state.cell);
     if (mode === 'sync') catchUp(state, 10);
@@ -116,7 +115,7 @@ describe('Forward travel', () => {
 
     const restored = importJson(exportJson(state));
     tick(restored, { online: true, autoSkills: false });
-    expect(restored.walk?.node).toBe(next.id);
+    expect(restored.walk).toBeNull();
   });
 
   it.each(['sync', 'async'] as const)('preserves an in-flight block timer through %s catch-up and reload', async (mode) => {
@@ -133,18 +132,6 @@ describe('Forward travel', () => {
     expect(restored.walk?.blocksWalked).toBe(1);
   });
 
-  it('walks to the next opened settlement instead of moving the character instantly', () => {
-    const state = newGame(87);
-    const next = TOWN.settlements.find((entry: any) => entry.zone === 2)!;
-    state.town.visited.push(next.id);
-    state.travel = 'forward';
-    setLevel(state, 11);
-
-    tick(state, { online: true, autoSkills: false });
-    expect(state.walk).not.toBeNull();
-    expect(state.walk!.blocksWalked).toBe(1);
-    expect(state.zone).toBe(1);
-  });
 });
 
 describe('local Patrol and Auto-Return', () => {

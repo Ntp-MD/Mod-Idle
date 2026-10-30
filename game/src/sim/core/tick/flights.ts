@@ -11,7 +11,141 @@ import { flightTargets, projectilePosition } from '../../combat/combat-actions';
 import { firstProjectileHit } from '../../../../../engine/skill-actions.ts';
 import { sweepDisc } from '../../../../../engine/navigation.ts';
 import { resolvePreparedCast, newCastRollCache } from '../../combat/skills';
+import type { SkillAction, SkillCastTiming, SkillRow } from '../../../../../engine/types.ts';
 import { fieldAreaKey } from '../../world/field-area';
+
+/** What one release expands into: every committed payload plus the primary recovery metadata. */
+export interface DispatchedFlights {
+  flights: CombatFlight[];
+  recoveryUntilUs?: number;
+  channel?: boolean;
+  primaryTiming?: boolean;
+  mobile?: boolean;
+  speedMult?: number;
+  endsAtUs?: number;
+}
+
+/**
+ * Expand one paid release into its committed payloads (P4 dispatch contract). Automatic, manual and
+ * trigger launches all pass through here after preparation and payment; this function owns shape,
+ * counts, shares, cadence, roll policy and the primary recovery/mobile metadata, never the arena's
+ * intent, price, cooldown, counter or cast event.
+ */
+export function dispatchSkillFlights(
+  flight: CombatFlight, action: SkillAction | undefined, skill: SkillRow,
+  releaseTiming: SkillCastTiming, units: number,
+  opts: { chainHopRange?: number; boundTargetId?: string } = {},
+): DispatchedFlights {
+  if (!action) return { flights: [flight] };
+  const effects = skill.effects ?? [];
+  const count = Math.max(1, Number(effects.find((effect) => effect.stat === 'hits')?.value ?? 1));
+  const sharePct = Number(effects.find((effect) => effect.stat === 'hit_pct')?.value ?? 100);
+  const recoveryUs = Math.max(0, releaseTiming.recoveryUntilUs - releaseTiming.releaseAtUs);
+  if (action.kind === 'sand-field') {
+    const scaled = sm.effectsAt(skill, (flight.cast as any).level) as { stat: string; value: number }[];
+    const dotSec = Math.max(0, Math.floor(Number(scaled.find((effect) => effect.stat === 'dot_sec')?.value ?? 0)));
+    const dotDps = Math.max(0, Number(scaled.find((effect) => effect.stat === 'dot_dps')?.value ?? 0));
+    const flights: CombatFlight[] = [{ ...flight, fieldInitial: true, impactIndex: 0, impactSharePct: 100 }];
+    for (let index = 1; index <= dotSec; index++) {
+      flights.push({ ...flight, fieldPulseDamage: dotDps,
+        timing: { ...releaseTiming, impactAtUs: releaseTiming.releaseAtUs + index * units },
+        impactIndex: index, impactSharePct: 100 });
+    }
+    return { flights, endsAtUs: releaseTiming.releaseAtUs + dotSec * units };
+  }
+  if (action.kind === 'chain-strike') {
+    // `targets` is the offline queue cap; live contacts are the hop reach, so the same cap bounds
+    // the authored action budget and this dispatch (it is not a live circle membership cap).
+    const hops = Math.max(1, sm.skillTargetCap(skill));
+    const rawInterval = Number(action.interval_sec ?? 0.08);
+    const intervalSec = Number.isFinite(rawInterval) && rawInterval > 0 ? rawInterval : 0.08;
+    const rawShare = Number(action.hop_share_pct ?? 60);
+    return { flights: [{
+      ...flight, rolls: newCastRollCache(), impactIndex: 0, impactSharePct: 100,
+      chain: {
+        visited: [flight.area?.targetId ?? opts.boundTargetId ?? ''],
+        remaining: Math.max(0, hops - 1),
+        hopRange: opts.chainHopRange ?? (Number(skill.area?.radius_m ?? 0) || 3),
+        sharePct: Number.isFinite(rawShare) && rawShare >= 0 ? rawShare : 60,
+        intervalSec,
+      },
+    }] };
+  }
+  if (action.kind === 'targeted-burst') {
+    const intervalUs = Math.max(0, Math.round(Number(action.interval_sec ?? 0.15) * units));
+    const tracking = action.tracking ?? 'straight';
+    const boundId = opts.boundTargetId ?? flight.area?.targetId;
+    const pursuitRangeM = tracking === 'homing' ? Math.max(0, Number(action.pursuit_range_m ?? 5)) : 0;
+    const pursuitSec = tracking === 'homing' ? Math.max(0, Number(action.pursuit_sec ?? 0.8)) : 0;
+    const flights: CombatFlight[] = [];
+    for (let k = 0; k < count; k++) {
+      const releaseAt = releaseTiming.releaseAtUs + k * intervalUs;
+      flights.push({
+        ...flight,
+        timing: { ...releaseTiming, releaseAtUs: releaseAt,
+          impactAtUs: releaseAt + Math.max(0, releaseTiming.impactAtUs - releaseTiming.releaseAtUs),
+          recoveryUntilUs: releaseAt + recoveryUs },
+        source: { ...flight.source }, destination: { ...flight.destination }, position: { ...flight.source },
+        lastCheckedAtUs: releaseAt, impactIndex: k, impactSharePct: sharePct,
+        rolls: newCastRollCache(), boundTargetId: boundId,
+        ...(tracking === 'homing'
+          ? { homing: true, pursuitRangeM, pursuitUntilUs: releaseAt + pursuitSec * units }
+          : {}),
+      });
+    }
+    const lastImpact = releaseTiming.releaseAtUs + (count - 1) * intervalUs
+      + Math.max(0, releaseTiming.impactAtUs - releaseTiming.releaseAtUs);
+    return { flights, recoveryUntilUs: releaseTiming.releaseAtUs + (count - 1) * intervalUs + recoveryUs,
+      channel: true, primaryTiming: true, endsAtUs: lastImpact };
+  }
+  if (action.kind === 'cluster-burst') {
+    const parentShare = Number(action.parent_share_pct);
+    return { flights: [{ ...flight, impactIndex: 0,
+      impactSharePct: Number.isFinite(parentShare) ? parentShare : flight.impactSharePct,
+      rolls: newCastRollCache() }] };
+  }
+  if (count <= 1) return { flights: [flight] };
+  const cache = newCastRollCache();
+  const flights: CombatFlight[] = [];
+  for (let index = 0; index < count; index++) {
+    let timing = releaseTiming;
+    let follow = false;
+    if (action.kind === 'projectile-burst') {
+      const releaseAt = releaseTiming.releaseAtUs + Math.round(index * Number(action.interval_sec ?? 0.15) * units);
+      timing = { ...releaseTiming, releaseAtUs: releaseAt,
+        impactAtUs: releaseAt + Math.max(0, releaseTiming.impactAtUs - releaseTiming.releaseAtUs),
+        recoveryUntilUs: releaseAt + recoveryUs };
+    } else if (action.kind === 'ground-pulse-burst') {
+      timing = { ...releaseTiming, impactAtUs: releaseTiming.impactAtUs
+        + Math.round(index * Number(action.interval_sec ?? 0.3) * units) };
+    } else if (action.kind === 'blizzard-field') {
+      const durationSec = sm.skillDurationSec(skill.duration, 8) || 8;
+      timing = { ...releaseTiming, impactAtUs: releaseTiming.releaseAtUs
+        + Math.round(durationSec * units * (index + 1) / count) };
+    } else {
+      const activeUs = Number(action.active_sec ?? 1.2) * units;
+      const impactAt = releaseTiming.releaseAtUs + Math.round(activeUs * (index + 1) / count);
+      timing = { ...releaseTiming, impactAtUs: impactAt, recoveryUntilUs: impactAt + recoveryUs };
+      follow = true;
+    }
+    flights.push({ ...flight, timing, ...(follow ? { follow: true } : {}),
+      impactIndex: index, impactSharePct: sharePct,
+      rolls: action.roll_policy === 'independent' ? newCastRollCache() : cache });
+  }
+  const lastImpact = Math.max(...flights.map((entry) => entry.timing.impactAtUs));
+  const result: DispatchedFlights = { flights, endsAtUs: lastImpact };
+  if (action.kind === 'whirlwind-channel') {
+    result.mobile = true;
+    result.speedMult = Number(action.movement_speed_mult ?? 0.6);
+    result.recoveryUntilUs = lastImpact + recoveryUs;
+    result.channel = true;
+    result.primaryTiming = true;
+  } else if (action.kind === 'projectile-burst') {
+    result.recoveryUntilUs = Math.max(...flights.map((entry) => entry.timing.releaseAtUs)) + recoveryUs;
+    result.channel = true;
+  }
+  return result;
+}
 
 /**
  * The player's released flights: the queued impact, the contact resolution, and the per-step sweep
@@ -151,8 +285,8 @@ export function createFlights(opts: {
     // body in both circles takes parent + child (overlap is the design, not a duplicate bug). A
     // child (impactIndex > 0) never spawns its own children. Kill credit stays single: bodies leave
     // the field on the first fatal hit and every later receipt finds them gone.
-    const clusterAction = sm.byId[flight.cast.id]?.action?.kind === 'cluster-burst'
-      ? sm.byId[flight.cast.id].action : undefined;
+    const normalized = sm.actionOf(sm.byId[flight.cast.id]);
+    const clusterAction = normalized?.kind === 'cluster-burst' ? normalized : undefined;
     if (clusterAction && (flight.impactIndex ?? 0) === 0 && flight.area && flight.area.radiusM > 0) {
       const count = Math.floor(Number(clusterAction.child_count));
       const share = Number(clusterAction.child_share_pct);

@@ -58,16 +58,4 @@ export function applyPush(opts: {
   }
   push(s, `Pushed — ${s.campSec} sec at camp (${eng.fmt(c.maxHp)} HP ÷ ${eng.fmt(c.hpRegen * 8)}/sec)`);
   for (const line of pushReportLines(pushReport)) push(s, line);
-  // Forward Mode's fallback: a Push in a zone above the floor means this chapter is not survivable
-  // yet, so the walk drops back to the last zone held and refuses to climb back until one level is
-  // gained (owner ask). No new number: the gate is a level, the zone is `forwardSafe`.
-  if (!walking && s.travel === 'forward' && s.forwardSafe != null && s.forwardSafe < s.zone) {
-    const from = eng.zoneById(s.zone);
-    const back = eng.zoneById(s.forwardSafe);
-    s.forwardBlockedZone = s.zone;
-    s.forwardBlockedLevel = s.player.level;
-    s.zone = s.forwardSafe;
-        s.lastAutoZone = -1;
-    push(s, `Pushed in ${from.name} — falling back to ${back.name}, the last zone held; the climb resumes at level ${s.player.level + 1}`);
-  }
 }

@@ -2,6 +2,11 @@
   "meta": {
     "note": "The roster source of truth and the only home of a skill number. engine/skills.ts is the one calculator and the client calls the same function, so a press is never typed twice. tools/skills.ts --calc prints the workshop; --checks runs the mechanic gate.",
     "active_slots": 16,
+    "auto_controls": {
+      "values": ["auto", "manual", "both"],
+      "default": "both",
+      "note": "An optional per-row `auto` flag. Omitted means `both`, today's behaviour. `manual` keeps the row out of the automatic rotation; a deliberate manual press still casts it (the manual bypass is unchanged). `auto` means the row may auto-fire and is accepted now for a later manual-affordance decision."
+    },
     "spatial_targeting": {
       "unit": "meter",
       "note": "Live offensive casts resolve in three separate steps. Acquisition picks a primary: a target-origin row acquires within its cast.range_m, a line row acquires within its length_m instead, and a caster-origin row casts when a body enters its radius_m. The footprint is the committed snapshot — shape, center and cast direction rebuilt at release from live positions (engine/skill-area.ts skillAreaSnapshot; engine/skill-actions.ts targetsInSkillArea): circles test every living center inside with no target-count cap, lines and cones test the aimed footprint, so a zero-radius line still holds every body along it and radius_m 0 alone never means single-target. A chain-strike row reuses area.radius_m as its hop reach between contacts, not as a circle. No row carries child spread: the cluster system is decided but has no live adopter, so nothing spawns children. The targets column remains the offline queue approximation. Cast reports snapshot the actual footprint for VFX."
@@ -451,7 +456,7 @@
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
       "cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.25},
-      "action": { "kind": "projectile-burst", "interval_sec": 0.15 },
+      "action": { "kind": "projectile-burst", "roll_policy": "shared", "interval_sec": 0.15 },
       "effect": "Chills the target.",
       "effects": [
         {
@@ -486,7 +491,7 @@
       "targets": "3",
       "area": { "origin": "target", "radius_m": 3 },
       "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.5, "fixed_windup_sec": 0.15, "recovery_sec": 0.25},
-      "action": { "kind": "blizzard-field" },
+      "action": { "kind": "blizzard-field", "roll_policy": "shared" },
       "effect": "Chills everything it touches.",
       "duration": "8 sec",
       "effects": [
@@ -571,7 +576,7 @@
       "targets": "3",
       "area": { "origin": "target", "radius_m": 3 },
       "cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},
-      "action": { "kind": "chain-strike", "interval_sec": 0.08, "hop_share_pct": 60 },
+      "action": { "kind": "chain-strike", "roll_policy": "shared", "interval_sec": 0.08, "hop_share_pct": 60 },
       "effect": "Shocks everything it reaches.",
       "rules": [
         "guaranteed_status",
@@ -854,7 +859,7 @@
       "targets": "3",
       "area": { "origin": "target", "radius_m": 3 },
       "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.5, "fixed_windup_sec": 0.15, "recovery_sec": 0.25},
-      "action": { "kind": "sand-field" },
+      "action": { "kind": "sand-field", "roll_policy": "shared" },
       "effect": "Blinds with −20% accuracy.",
       "effects": [
         {
@@ -1390,7 +1395,7 @@
       "targets": "3",
       "area": { "origin": "caster", "radius_m": 3 },
       "cast":{"delivery": "melee", "range_m": 3, "windup_sec": 0.2, "fixed_windup_sec": 0, "recovery_sec": 0.22},
-      "action": { "kind": "whirlwind-channel", "active_sec": 1.2, "movement_speed_mult": 0.6 },
+      "action": { "kind": "whirlwind-channel", "roll_policy": "shared", "active_sec": 1.2, "movement_speed_mult": 0.6 },
       "effect": "One hit per target per round.",
       "effects": [
         {
@@ -1526,7 +1531,7 @@
       "targets": "1",
       "area": { "origin": "target", "radius_m": 0 },
       "cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.35, "fixed_windup_sec": 0.05, "recovery_sec": 0.25},
-      "action": { "kind": "projectile-burst", "interval_sec": 0.15 },
+      "action": { "kind": "projectile-burst", "roll_policy": "shared", "interval_sec": 0.15 },
       "effect": "Each arrow can trigger effects.",
       "effects": [
         {
@@ -1694,7 +1699,7 @@
       "targets": "3",
       "area": { "origin": "target", "radius_m": 2.5 },
       "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.45, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},
-      "action": { "kind": "ground-pulse-burst", "interval_sec": 0.3 },
+      "action": { "kind": "ground-pulse-burst", "roll_policy": "shared", "interval_sec": 0.3 },
       "effect": "+30% damage against shocked targets.",
       "effects": [
         {
@@ -2597,8 +2602,8 @@
   {"id":"attack.frost_nova","hit_class":"spell","name":"Frost Nova","type":"attack","group":"magic","element":"cold","cd":10,"mana":"24 flat","basis":"magic","targets":"3","area":{ "origin": "caster", "radius_m": 3 },"cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},"effect":"Chills every enemy around you.","rules":["guaranteed_status","every_target"],"base_flat":550,"eff":100},
   {"id":"attack.glacial_spike","hit_class":"spell","name":"Glacial Spike","type":"attack","group":"magic","element":"cold","cd":12,"mana":"20 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.5, "fixed_windup_sec": 0.15, "recovery_sec": 0.25},"effect":"Stops the target for 1.5 sec.","effects":[{"stat":"stop_sec","op":"add_flat","value":1.5,"subject":"target"}],"base_flat":900,"eff":105},
   {"id":"attack.split_shot","hit_class":"attack","name":"Split Shot","type":"attack","group":"ranged","element":"physical","cd":7,"mana":"15 flat","basis":"phys","targets":"3","area":{ "origin": "target", "radius_m": 2 },"cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0, "recovery_sec": 0.25},"effect":"Splits on impact, hitting every enemy in a small circle.","base_flat":1649.8,"eff":77.36},
-  {"id":"attack.double_strafe","hit_class":"attack","name":"Double Strafe","type":"attack","group":"ranged","element":"physical","cd":6,"mana":"15 flat","basis":"phys","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"projectile","range_m":5,"windup_sec":0.3,"fixed_windup_sec":0,"recovery_sec":0.25},"action":{"kind":"targeted-burst","tracking":"straight","interval_sec":0.15},"effect":"Three straight bolts along the release aim; each payload checks range and can be intercepted.","effects":[{"stat":"hits","op":"add_flat","value":3,"subject":"self"}],"base_flat":1450,"eff":68},
-  {"id":"attack.seeker_strafe","hit_class":"spell","name":"Seeker Strafe","type":"attack","group":"magic","element":"lightning","cd":6,"mana":"15 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"projectile","range_m":5,"windup_sec":0.3,"fixed_windup_sec":0,"recovery_sec":0.25},"action":{"kind":"targeted-burst","tracking":"homing","interval_sec":0.15,"pursuit_range_m":5,"pursuit_sec":0.8},"effect":"Three homing bolts track one body within 5m and 0.8s; a dead or returned target fizzles the rest.","effects":[{"stat":"hits","op":"add_flat","value":3,"subject":"self"}],"base_flat":1450,"eff":68},
+  {"id":"attack.double_strafe","hit_class":"attack","name":"Double Strafe","type":"attack","group":"ranged","element":"physical","cd":6,"mana":"15 flat","basis":"phys","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"projectile","range_m":5,"windup_sec":0.3,"fixed_windup_sec":0,"recovery_sec":0.25},"action":{"kind":"targeted-burst","roll_policy":"independent","tracking":"straight","interval_sec":0.15},"effect":"Three straight bolts along the release aim; each payload checks range and can be intercepted.","effects":[{"stat":"hits","op":"add_flat","value":3,"subject":"self"}],"base_flat":1450,"eff":68},
+  {"id":"attack.seeker_strafe","hit_class":"spell","name":"Seeker Strafe","type":"attack","group":"magic","element":"lightning","cd":6,"mana":"15 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"projectile","range_m":5,"windup_sec":0.3,"fixed_windup_sec":0,"recovery_sec":0.25},"action":{"kind":"targeted-burst","roll_policy":"independent","tracking":"homing","interval_sec":0.15,"pursuit_range_m":5,"pursuit_sec":0.8},"effect":"Three homing bolts track one body within 5m and 0.8s; a dead or returned target fizzles the rest.","effects":[{"stat":"hits","op":"add_flat","value":3,"subject":"self"}],"base_flat":1450,"eff":68},
   {"id":"attack.double_strike","hit_class":"attack","name":"Double Strike","type":"attack","group":"melee","element":"physical","cd": 5,"mana":"12 flat","basis":"phys","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.15, "fixed_windup_sec": 0, "recovery_sec": 0.22},"effect":"A pair of quick blows.","effects":[{"stat":"hits","op":"add_flat","value":2,"subject":"self"},{"stat":"hit_pct","op":"add_pct","value":60,"subject":"self"}],"base_flat":1400,"eff":60},
   {"id":"attack.ignite","hit_class":"spell","name":"Ignite","type":"attack","group":"magic","element":"fire","cd":8,"mana":"19 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.2, "recovery_sec": 0.15},"effect":"Applies 5 burn stacks.","effects":[{"stat":"burn_stacks","op":"add_flat","value":5,"subject":"target"}],"base_flat":381.5,"eff":82.43},
   {"id":"attack.cinder_nova","hit_class":"spell","name":"Cinder Nova","type":"attack","group":"magic","element":"fire","cd":10,"mana":"24 flat","basis":"magic","targets":"3","area":{ "origin": "caster", "radius_m": 3 },"cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},"effect":"Burns every enemy around you.","rules":["guaranteed_status","every_target"],"base_flat":550,"eff":100},
@@ -2611,6 +2616,14 @@
   {"id":"attack.stone_spike","hit_class":"spell","name":"Stone Spike","type":"attack","group":"magic","element":"earth","cd":12,"mana":"20 flat","basis":"magic","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.45, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},"effect":"+30% damage against crippled targets.","effects":[{"stat":"bonus_vs_status","status":"crippled","op":"add_pct","value":30,"subject":"target"}],"base_flat":900,"eff":105},
   {"id":"attack.fissure","hit_class":"spell","name":"Fissure","type":"attack","group":"magic","element":"earth","cd":11,"mana":"22 flat","basis":"magic","targets":"3","area":{ "origin": "caster", "radius_m": 0, "shape": "line", "length_m": 6, "width_m": 1 },"cast":{"delivery": "ground", "range_m": 6, "windup_sec": 0.5, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},"effect":"Rends a line, stopping enemies for 1 sec.","rules":["every_target"],"effects":[{"stat":"stop_sec","op":"add_flat","value":1,"subject":"target"}],"base_flat":850,"eff":100}
   ],
+  "test_fixtures": {
+    "note": "Dev/test-only synthetic rows. They are NOT part of `skills`: the loader, drops, rewards and roster cages read the array above. Tests inject these by id to prove cluster parent/child shares, `roll_policy` per-impact caches and the HP-cost hp>=1 rule without touching a live row.",
+    "skills": [
+  {"id":"test.cluster_burst","hit_class":"attack","name":"Test Cluster Burst","type":"attack","group":"all","element":"physical","cd":6,"mana":"1 flat","basis":"phys","targets":"3","area":{"origin":"target","radius_m":3},"cast":{"delivery":"projectile","range_m":5,"windup_sec":0.25,"fixed_windup_sec":0,"recovery_sec":0.25},"action":{"kind":"cluster-burst","roll_policy":"independent","parent_share_pct":60,"child_count":2,"child_share_pct":20,"spread_deg":30},"effect":"Test-only: one press split 60/20/20 across a parent and two children.","effects":[],"base_flat":1000,"eff":0},
+  {"id":"test.hp_cost","hit_class":"attack","name":"Test HP Cost","type":"attack","group":"all","element":"physical","cd":6,"hp_cost":"20 flat","basis":"phys","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"melee","range_m":1.5,"windup_sec":0.2,"fixed_windup_sec":0,"recovery_sec":0.2},"effect":"Test-only: pays 20 current HP and never takes the final point.","effects":[],"base_flat":100,"eff":0},
+  {"id":"test.burst_policy","hit_class":"attack","name":"Test Burst Policy","type":"attack","group":"all","element":"physical","cd":6,"mana":"1 flat","basis":"phys","targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"projectile","range_m":5,"windup_sec":0.25,"fixed_windup_sec":0,"recovery_sec":0.25},"action":{"kind":"projectile-burst","roll_policy":"shared","interval_sec":0.15},"effect":"Test-only: three payloads whose cache policy the suite toggles.","rules":["ignores_dodge"],"effects":[{"stat":"hits","op":"add_flat","value":3,"subject":"self"}],"base_flat":100,"eff":0}
+    ]
+  },
   "deprecated": {
     "Arcane Pulse": "cut in the roster trim (owner ticket) — the cd-0 filler row; nothing took its slot over",
     "Scorch Ray": "cut in the roster trim (owner ticket) — nothing took its mechanic over",

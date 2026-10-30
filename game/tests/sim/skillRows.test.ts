@@ -153,9 +153,13 @@ describe('the stack rows and the status curses reach the status store', () => {
     expect(store[target.id].statuses.erosion).toBeUndefined();
     const sandy = newMobStatusStore();
     const sandyTarget = mob({ id: 'm2' });
+    const sandyBefore = sandyTarget.hp;
     castDamage('attack.sand_storm', c, sandyTarget, { mobStatus: sandy });
-    expect(sandy[sandyTarget.id].statuses.erosion!.secLeft).toBe(10);
-    expect(sandy[sandyTarget.id].statuses.chill).toBeUndefined();
+    // One rule on both paths: Sand Storm's initial press never attaches erosion. The queue path
+    // resolves the authored one-second pulses as direct field damage instead.
+    expect(sandy[sandyTarget.id]?.statuses.erosion).toBeUndefined();
+    expect(sandy[sandyTarget.id]?.statuses.chill).toBeUndefined();
+    expect(sandyTarget.hp).toBeLessThan(sandyBefore);
   });
 
   it('every condition a row may name has a reader in the status store', () => {

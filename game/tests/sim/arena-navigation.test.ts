@@ -101,13 +101,15 @@ describe('static ground in the combat arena', () => {
     expect(isClear(arena.nav, arena.player, arena.player.radiusM ?? 0.25)).toBe(true);
   });
 
-  it('reverts a separation push that would finish inside the wall', () => {
+  it('clamps a separation push at the wall face instead of snapping the body back', () => {
     const { state, mob, arena } = fight(3.9, 4.3);
     arena.nav = wallAt(4.6, 1.4);
     const actor = arena.mobs[mob.id];
     const start = { x: actor.x, y: actor.y };
-    advanceCombatArena(arena, state, 100_000, sample());
-    expect(arenaDistanceish(actor, start)).toBeLessThan(1e-9);
+    advanceCombatArena(arena, state, 100_000, sample([mob.id]));
+    // The crowd push is clamped against the wall; progress made before contact survives.
+    expect(actor.x).toBeGreaterThan(start.x + 1e-6);
+    expect(actor.x).toBeLessThanOrEqual(4.6 - (actor.radiusM ?? 0.25) + 1e-6);
     expect(isClear(arena.nav, actor, actor.radiusM ?? 0.25)).toBe(true);
     expect(isClear(arena.nav, arena.player, arena.player.radiusM ?? 0.25)).toBe(true);
   });
@@ -121,6 +123,11 @@ describe('static ground in the combat arena', () => {
     expect(isClear(arena.nav, actor, radius)).toBe(true);
     expect(actor.x).toBeLessThan(4);
     expect(actor.routeFailCount ?? 0).toBeGreaterThanOrEqual(3);
+    // The held route is published and stops replanning until the goal moves a metre.
+    expect(actor.routeFailed).toBe(true);
+    const heldAtUs = actor.pathPlannedAtUs;
+    for (let index = 12; index < 16; index++) advanceCombatArena(arena, state, (index + 1) * 100_000, sample([mob.id]));
+    expect(actor.pathPlannedAtUs).toBe(heldAtUs);
   });
 
   it('smooths a route with a clear look-ahead instead of steering at every cell centre', () => {
@@ -181,7 +188,3 @@ describe('static ground in the combat arena', () => {
     expect(second.arena.mobs[second.mob.id].y).toBe(first.arena.mobs[first.mob.id].y);
   });
 });
-
-function arenaDistanceish(a: { x: number; y: number }, b: { x: number; y: number }): number {
-  return Math.hypot(a.x - b.x, a.y - b.y);
-}

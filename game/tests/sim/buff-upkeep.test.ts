@@ -118,3 +118,43 @@ describe('F27 hold the line — the rotation yields to a defensive re-arm', () =
       && action.skillId === 'attack.double_strike')).toBe(false);
   });
 });
+
+describe('P2 duration — simulation time, not Haste or control', () => {
+  const buffOnly = (id = 'buff.ghost_dance') => {
+    const s = newGame(107);
+    setLevel(s, 60);
+    s.skills.owned[id] = 0;
+    expect(toggleTrack(s.skills, id).ok).toBe(true);
+    tick(s, { online: true });
+    expect(s.skills.buffUp[id]).toBeGreaterThan(0);
+    return { s, id };
+  };
+
+  it('advances the window while a shock freezes the action clock', () => {
+    const { s, id } = buffOnly();
+    const start = s.skills.buffUp[id];
+    s.playerStatuses.shock = { secLeft: 5, stacks: 1 } as never;
+    tick(s, { online: true });
+    tick(s, { online: true });
+    tick(s, { online: true });
+    expect(s.skills.buffUp[id]).toBeCloseTo(start - 3, 9);
+  });
+
+  it('keeps a buff across an ordinary group boundary', () => {
+    const { s, id } = buffOnly();
+    s.group = [];
+    tick(s, { online: true });
+    expect(s.skills.buffs[id]).toBe(true);
+    expect(s.skills.buffUp[id]).toBeGreaterThan(0);
+  });
+
+  it('discards every prior buff and charge when the run resets', () => {
+    const { s, id } = buffOnly();
+    s.player.charges = 2;
+    s.skills.buffUp['buff.holy_veil'] = 7;
+    const fresh = newGame(108);
+    expect(fresh.skills.buffUp[id] ?? 0).toBe(0);
+    expect(fresh.skills.buffUp['buff.holy_veil'] ?? 0).toBe(0);
+    expect(fresh.player.charges ?? 0).toBe(0);
+  });
+});

@@ -1,14 +1,14 @@
 import { eng, E, SKILLS, sm } from '../../engine/client';
 import {
-  auraResonance, auraScaledValue, bloodPriceHp, bundleOf, manaDebtFloor,
+  auraResonance, auraScaledValue, bloodPriceHp, bundleOf, headsmanExecutes, manaDebtFloor,
   type KeystoneBundle,
 } from '../../../../engine/keystones.ts';
 import { directFlags, emptyParts, validateDamagePacket } from '../../../../engine/damage-provenance.ts';
 import type { DamagePacket } from '../../../../engine/damage-provenance.ts';
-import type { SkillAreaSnapshot, SkillRow } from '../../../../engine/types.ts';
+import type { SkillAction, SkillAreaSnapshot, SkillRow } from '../../../../engine/types.ts';
 import { mastery } from '../core/mastery';
 import { setStacks, setErosion, stopMob, stopMobDeliberate, placeStatus, holdStatus, modsOn as mobModsOn, targetMods, applyWeaponRiders, holdsCondition, CONDITION_OF, consumeStatus, copyStatus, keystoneBlocksStatus, keystoneTargetMods, type MobStatusName } from './mobStatus';
-import { lineValue, applyCurse } from './curse';
+import { lineValue, applyCurse, combineMods, modsOn as curseModsOn, NO_CURSE, takenMult } from './curse';
 import type { Character } from '../core/player';
 import type { GameState, Mob } from '../core/types';
 import type { Statuses } from './combat';
@@ -581,6 +581,8 @@ export interface CastEnv {
   fieldPulse?: number;
   /** The field's initial press must not attach the legacy lingering erosion line. */
   suppressErosion?: boolean;
+  /** Offline fields compress their pulse cadence; the presence line still lasts the field window. */
+  fieldPresenceSec?: number;
   /** A direct press this character makes while Crippled: multiplier on the finished hit, never on DoT. */
   outgoingDamageMult?: number;
   /** Living bodies available to a spread effect, beyond the press's resolved targets. */
@@ -614,7 +616,7 @@ export interface CastReport {
    *  these, and a press that hurt nobody carries an empty list — so the client can put each number on the
    *  plate it belongs to instead of splitting a total it was never asked to share. Named for what it is
    *  keyed by, because `hits` already means this row's repeat count. */
-  byMob: { id: string; amount: number; packet?: DamagePacket }[];
+  byMob: { id: string; amount: number; packet?: DamagePacket; crit?: boolean }[];
   /** Setup → payoff: the stacks this press spent, per status, for the log and the plates. */
   consumed?: { status: string; stacks: number }[];
   /** Bodies whose deliberate stop the control lane refused — the receipt names them (F24). */
@@ -641,7 +643,7 @@ function healOf(skill: SkillRow, level: number): { heal?: { secLeft: number; pct
   const eff = sm.effectsAt(skill, level);
   const drip = eff.find((e: any) => e.stat === 'heal_per_sec');
   if (drip) {
-    return { heal: { secLeft: Number(String(skill.duration).match(/\d+/)?.[0] || 0), pctPerSec: drip.value / 100 } };
+    return { heal: { secLeft: sm.skillDurationSec(skill.duration, 0), pctPerSec: drip.value / 100 } };
   }
   const instant = eff.find((e: any) => e.stat === 'heal_instant');
   return instant ? { instantHealPct: instant.value } : null;
@@ -681,12 +683,12 @@ export function effectsActive(sk: SkillState, bundles: readonly KeystoneBundle[]
 const AOE_PCT_PER_EXTRA_TARGET = (E.aoe as any).per_target_pct / 100;
 
 function targetCount(skill: any, group: Mob[], spatial = false): number {
-  // Live area selection already resolved the footprint. Queue counts approximate offline combat.
+  // Live area selection already resolved the footprint. `targets` is the offline QUEUE cap only —
+  // never a live membership cap; live circles stay centre-in-centre in `targetsInSkillArea`.
   const shape = skill.area?.shape;
   if (spatial && (shape === 'line' || shape === 'cone' || (skill.area?.radius_m ?? 0) > 0))
     return group.length;
-  const cap = Number(String(skill.targets || '1').split('/')[0]) || 1;
-  return Math.max(1, Math.min(cap, group.length));
+  return Math.max(1, Math.min(sm.skillTargetCap(skill), group.length));
 }
 
 /**
@@ -711,7 +713,7 @@ export function buffCastOutcome(s: SkillState, id: string): {
       bBase.value + Math.floor(skillLevel(s, id) / valueOf(skill, 'block_charges_per_levels', 1)))
     : undefined;
   return {
-    durationSec: Number(String(skill.duration).match(/\d+/)?.[0] || 10),
+    durationSec: sm.skillDurationSec(skill.duration, 10),
     charges, blockCharges, cleansesSelf: hasRule(skill, 'cleanses_on_cast'),
   };
 }
@@ -726,7 +728,8 @@ export function buffRecastCost(s: SkillState, c: Character, id: string) {
 }
 
 export type SkillEligibilityReason = 'ready' | 'unowned' | 'weapon' | 'no-target' | 'cooldown' | 'shock'
-  | 'silenced' | 'conditions' | 'mana' | 'mana-debt' | 'hp' | 'mana-floor' | 'auto-off';
+  | 'silenced' | 'conditions' | 'mana' | 'mana-debt' | 'hp' | 'mana-floor' | 'auto-off' | 'manual-only'
+  | 'mana-reserve';
 
 export interface SkillEligibility {
   ready: boolean;
@@ -737,6 +740,47 @@ export interface SkillEligibility {
   manaCost: number;
   hpCost: number;
   aoe: boolean;
+}
+
+/**
+ * The Mana a zero-cooldown filler must not spend: a higher-priority timed row already on its clock
+ * becomes ready within its remaining cooldown, and the pool plus regeneration can pay it only if the
+ * filler waits. Read-only — nothing is reserved on the character. The filler is held only when the
+ * wait actually closes the gap: no regeneration, or a pool that could never reach the price, never
+ * holds it forever.
+ */
+function manaReserveFor(
+  s: SkillState, c: Character, fillerId: string, fillerCost: number, mana: number, env: CastEnv,
+): { id: string; cost: number; seconds: number } | null {
+  if (!(fillerCost > 0) || (sm.byId[fillerId]?.cd ?? 0) !== 0) return null;
+  // A manual press and a trigger aura's press are not the automatic filler this rule protects.
+  if (env.ignoreConditions || env.trigger) return null;
+  const regen = Math.max(0, c.manaRegen || 0);
+  if (!(regen > 0)) return null;
+  const order = rotationOrder(s);
+  const at = order.indexOf(fillerId);
+  if (at < 1) return null;
+  // Regeneration stops at the usable pool: a price the pool can never hold is not a reason to wait.
+  const pool = usableMana(c, s);
+  const trance = bundleOf(c.keystones, 'trance');
+  const tranceMult = trance ? 1 + Number(trance.params.costPct) / 100 : 1;
+  for (const id of order.slice(0, at)) {
+    const row = sm.byId[id];
+    if (!row || (row.cd ?? 0) <= 0 || row.auto === 'manual') continue;
+    if (!ownsSkill(s, id) || modeOf(s, id) === 'never' || !sm.weaponFits(row, c.weaponName)) continue;
+    const seconds = s.cd[id] || 0;
+    if (!(seconds > 0)) continue;
+    const cost = sm.costOf(row, { skillLevel: skillLevel(s, id) });
+    // Blood Price pays from HP; an HP-cost row never competes for the Mana pool.
+    if (cost.resource !== 'mana' || bundleOf(c.keystones, 'blood-price')) continue;
+    const price = cost.amount * tranceMult;
+    if (!(price > 0)) continue;
+    // Keep the filler only when waiting reaches the price and spending now would not.
+    const reachable = Math.min(pool, mana + regen * seconds);
+    const afterFiller = Math.min(pool, mana - fillerCost + regen * seconds);
+    if (reachable >= price && afterFiller < price) return { id, cost: price, seconds };
+  }
+  return null;
 }
 
 /** The same read prices and gates a rotation press and explains it in the interface. No RNG or writes. */
@@ -766,9 +810,13 @@ export function skillEligibility(
   }
   const result = (reason: SkillEligibilityReason, label: string, detail: string): SkillEligibility =>
     ({ ready: reason === 'ready', reason, label, detail, manaCost, hpCost, aoe });
+  const autoOn = env.autoSkills !== false;
   if (!skill || !ownsSkill(s, id)) return result('unowned', 'Not owned', 'This skill is not in your collection.');
   if (!sm.weaponFits(skill, c.weaponName)) return result('weapon', 'Wrong weapon', `Requires ${skill.weapon === 'bow' ? 'a bow or crossbow' : skill.weapon}; held: ${c.weaponName || 'bare hands'}.`);
-  if (env.autoSkills === false) return result('auto-off', 'Auto Skills off', 'Enable Auto Skills to let the rotation cast.');
+  if (!autoOn) return result('auto-off', 'Auto Skills off', 'Enable Auto Skills to let the rotation cast.');
+  // The authored flag gates the automatic rotation only; a deliberate manual press still bypasses it.
+  if (!env.ignoreConditions && skill.auto === 'manual')
+    return result('manual-only', 'Manual only', 'This row is set to Manual and never fires from the rotation.');
   if (!group.length && !env.allowEmptyTarget)
     return result('no-target', 'No target', 'The rotation waits for a combat target.');
   if ((s.cd[id] || 0) > 0) return result('cooldown', 'Cooling down', `${s.cd[id].toFixed(1)}s left on this skill’s clock.`);
@@ -791,10 +839,22 @@ export function skillEligibility(
   if (hpCost > 0 && hpCost >= (env.currentHp ?? c.maxHp)) return result('hp', 'Not enough HP', `Costs ${hpCost.toFixed(1)} HP and must leave at least 1 HP.`);
   if (cond.manaFloorPct > 0 && mana - floorPrice < pool * cond.manaFloorPct / 100)
     return result('mana-floor', 'Mana floor protected', `This press would cross your ${cond.manaFloorPct}% usable-Mana floor.`);
+  if (autoOn && !env.ignoreConditions) {
+    const reserve = manaReserveFor(s, c, id, manaCost, mana, env);
+    if (reserve) {
+      const row = sm.byId[reserve.id];
+      return result('mana-reserve', 'Saving Mana',
+        `${row.name || reserve.id} is ready in ${reserve.seconds.toFixed(1)}s and costs ${reserve.cost.toFixed(0)} Mana; this filler waits so the pool and regen can pay it.`);
+    }
+  }
   return result('ready', 'Eligible now', `${skill.cd === 0 ? 'Filler: checked after every timed skill.' : 'Checked in cast order.'} Conditions and resources currently allow this press.`);
 }
 
-/** Timed slots keep their order; all zero-cooldown fillers are checked afterward. */
+/**
+ * Timed slots keep their order; all zero-cooldown fillers are checked afterward. The order is the
+ * authored bar, not the auto gate: a row marked `manual` still resolves here (the manual bar reads
+ * the same order) and `skillEligibility` refuses it on the automatic path only.
+ */
 export function rotationOrder(s: SkillState): string[] {
   const ids = s.list.filter((id): id is string => Boolean(id) && ownsSkill(s, id!) && Boolean(sm.byId[id!]));
   return ids.filter((id) => sm.byId[id].cd !== 0).concat(ids.filter((id) => sm.byId[id].cd === 0));
@@ -859,6 +919,164 @@ export function prepareSkillCast(
     spatial: !!(env.spatialTargets || env.resolveTargetsForSkill), targets, area };
 }
 
+/** One offline impact pass: the authored share, its own roll cache and its queue/spatial targets. */
+interface OfflineShot {
+  index: number;
+  sharePct: number;
+  cache: CastRollCache;
+  targets: Mob[];
+  /** The field's initial press keeps the live contract: no legacy erosion rider. */
+  suppressErosion?: boolean;
+  /** A deployed field's pulse carries flat damage, never a fresh hit or proc attempt. */
+  fieldPulse?: number;
+  /** The presence line lasts the authored field window even when the pulses are compressed. */
+  fieldPresenceSec?: number;
+}
+
+/**
+ * The offline impact plan for a committed action. Live schedules flights and re-tests membership at
+ * each impact; the queue path has no flight clock, so it expands the same authored payloads in order
+ * against the prepared queue (documented queue-vs-spatial difference):
+ *
+ * - `independent` payloads get a fresh cache each (targeted-burst and cluster-burst always do,
+ *   matching live; every other independent row also does), so hit/dodge/crit are rolled per impact.
+ * - `shared` rows keep the aggregate path: one cache for the whole press, exactly like live.
+ * - chain hops to the nearest unused body inside the hop reach when ground positions are available,
+ *   and to the next unused queue body otherwise; `targets` caps the contacts (queue-only).
+ * - a deployed sand field resolves its initial pressed body and then its authored pulse count at
+ *   cast time (live spaces them one per second); the initial press suppresses erosion on both paths.
+ * - a targeted burst stays on its first bound body; a dead body fizzles the rest, never re-acquires.
+ *   Range and homing pursuit cannot be represented offline, so the queue assumes the body stays in
+ *   reach (the documented limit).
+ */
+function offlineActionShots(
+  skill: SkillRow, action: SkillAction, prepared: PreparedSkillCast, effects: any[], env: CastEnv,
+): OfflineShot[] | null {
+  const group = prepared.targets;
+  const cap = Math.max(1, sm.skillTargetCap(skill));
+  const queue = (): Mob[] => {
+    const alive = group.filter((mob) => mob.hp > 0);
+    // Spatial selection already committed a footprint; the queue cap is only for the offline path.
+    return prepared.spatial ? alive : alive.slice(0, cap);
+  };
+  const hits = Math.max(1, Number((skill.effects || []).find((e) => e.stat === 'hits')?.value ?? 1));
+  const hitPct = Number((skill.effects || []).find((e) => e.stat === 'hit_pct')?.value ?? 100);
+  const independent = action.roll_policy === 'independent';
+  const shots: OfflineShot[] = [];
+
+  if (action.kind === 'sand-field') {
+    const dotSec = Math.max(0, Math.floor(Number(effects.find((e) => e.stat === 'dot_sec')?.value ?? 0)));
+    const dotDps = Math.max(0, Number(effects.find((e) => e.stat === 'dot_dps')?.value ?? 0));
+    shots.push({ index: 0, sharePct: 100, cache: newCastRollCache(), targets: queue(), suppressErosion: true });
+    for (let pulse = 1; pulse <= dotSec && dotDps > 0; pulse++) {
+      const targets = queue();
+      if (!targets.length) break;
+      shots.push({ index: pulse, sharePct: 100, cache: newCastRollCache(), targets,
+        fieldPulse: dotDps, fieldPresenceSec: dotSec + 2 });
+    }
+    return shots;
+  }
+
+  if (action.kind === 'cluster-burst') {
+    const parent = Number(action.parent_share_pct);
+    const children = Math.floor(Number(action.child_count));
+    const child = Number(action.child_share_pct);
+    const shares = [Number.isFinite(parent) ? parent : 100,
+      ...Array.from({ length: Number.isSafeInteger(children) && children > 0 ? children : 0 },
+        () => (Number.isFinite(child) ? child : 0))];
+    for (const [index, sharePct] of shares.entries()) {
+      const targets = queue();
+      if (!targets.length) break;
+      shots.push({ index, sharePct, cache: newCastRollCache(), targets });
+    }
+    return shots;
+  }
+
+  if (action.kind === 'targeted-burst') {
+    // Live always gives each payload its own cache, whatever the policy column says. The first
+    // body is the lock-on bound body: a dead body fizzles the rest, never re-acquires.
+    const bound = group.find((mob) => mob.hp > 0);
+    for (let index = 0; index < hits && bound && bound.hp > 0; index++)
+      shots.push({ index, sharePct: hitPct, cache: newCastRollCache(), targets: [bound] });
+    return shots;
+  }
+
+  if (action.kind === 'chain-strike') {
+    const first = group.find((mob) => mob.hp > 0);
+    if (!first) return [];
+    const hopRange = Number(skill.area?.radius_m ?? 0) || 3;
+    const hopShare = Number.isFinite(Number(action.hop_share_pct)) ? Number(action.hop_share_pct) : 60;
+    // `targets` is also the authored chain contact budget in live dispatch, so both paths stop
+    // at the same count; the queue/spatial difference is which body each hop picks, not how many.
+    const contacts = cap;
+    // One cache for a shared chain, like live; an independent row rolls each hop afresh.
+    const sharedCache = independent ? undefined : newCastRollCache();
+    const visited = new Set<string>([first.id]);
+    shots.push({ index: 0, sharePct: 100, cache: sharedCache ?? newCastRollCache(), targets: [first] });
+    let origin = env.positionOf?.(first.id);
+    for (let hop = 1; hop < contacts; hop++) {
+      const alive = group.filter((mob) => mob.hp > 0 && !visited.has(mob.id));
+      const next = origin
+        ? alive
+          .map((mob) => ({ mob, pose: env.positionOf?.(mob.id) }))
+          .filter((entry): entry is { mob: Mob; pose: { x: number; y: number } } => !!entry.pose)
+          .filter((entry) => Math.hypot(entry.pose.x - origin!.x, entry.pose.y - origin!.y) <= hopRange + 1e-7)
+          .sort((a, b) => Math.hypot(a.pose.x - origin!.x, a.pose.y - origin!.y)
+            - Math.hypot(b.pose.x - origin!.x, b.pose.y - origin!.y)
+            || (a.mob.id < b.mob.id ? -1 : 1))[0]?.mob
+        : alive[0];
+      if (!next) break;
+      visited.add(next.id);
+      shots.push({ index: hop, sharePct: hopShare, cache: sharedCache ?? newCastRollCache(), targets: [next] });
+      origin = env.positionOf?.(next.id);
+    }
+    return shots;
+  }
+
+  // Every other committed shape keeps its aggregate press when shared. An explicit independent
+  // policy expands the authored payload count with a fresh cache per impact.
+  if (!independent) return null;
+  for (let index = 0; index < hits; index++) {
+    const targets = queue();
+    if (!targets.length) break;
+    shots.push({ index, sharePct: hitPct, cache: newCastRollCache(), targets });
+  }
+  return shots;
+}
+
+/** Merge the per-impact reports of an offline action into one cast receipt. */
+function mergeOfflineShots(
+  reports: CastReport[], id: string, name: string, manaCost: number, hpCost: number,
+  level: number, area: SkillAreaSnapshot | undefined,
+): CastReport {
+  if (!reports.length)
+    return { id, name, damage: 0, manaCost, hpCost, targets: 0, byMob: [], ...(area ? { area } : {}) };
+  const first = reports[0];
+  const consumed = reports.flatMap((report) => report.consumed ?? []);
+  const spread = reports.flatMap((report) => report.spread ?? []);
+  const resisted = reports.flatMap((report) => report.resisted ?? []);
+  const attempted = [...new Set(reports.flatMap((report) => report.attempted ?? []))];
+  const curseTargets = [...new Set(reports.flatMap((report) => report.curseTargets ?? []))];
+  return {
+    ...first,
+    id, name, manaCost, hpCost, level,
+    damage: reports.reduce((sum, report) => sum + report.damage, 0),
+    targets: reports.reduce((sum, report) => sum + report.targets, 0),
+    dealt: reports.reduce((sum, report) => sum + (report.dealt ?? 0), 0),
+    crit: reports.some((report) => report.crit),
+    // Each entry keeps the crit fact of its own impact, so a mixed independent press never paints
+    // a non-crit payload with the cast's `crit` flag.
+    byMob: reports.flatMap((report) => report.byMob.map((hit) => ({ ...hit, crit: report.crit === true }))),
+    ...(attempted.length ? { attempted } : {}),
+    ...(consumed.length ? { consumed } : {}),
+    ...(spread.length ? { spread } : {}),
+    ...(resisted.length ? { resisted } : {}),
+    ...(first.curseOn ? { curseOn: first.curseOn } : {}),
+    ...(curseTargets.length ? { curseTargets } : {}),
+    ...(area ? { area } : {}),
+  };
+}
+
 /** Resolve a paid cast against its impact-time targets. Never charges or starts cooldown again. */
 export function resolvePreparedCast(
   s: SkillState, c: Character, prepared: PreparedSkillCast, statuses: Statuses,
@@ -906,6 +1124,31 @@ export function resolvePreparedCast(
   // the row's effects at the level actually held: the stored value is its level-1 number
   const effects = sm.effectsAt(skill, level) as any[];
   const fieldPulse = env.fieldPulse;
+  // A live flight already carries one committed impact (`env.impact`) or the field's initial press
+  // marker (`suppressErosion`); the queue path has neither, so expand the authored action plan here
+  // before the aggregate press runs. This guard is what keeps a live sand initial from running the
+  // offline pulse expansion a second time beside its scheduled flights.
+  if (!fieldPulse && !env.impact && !env.suppressErosion) {
+    const action = sm.actionOf(skill);
+    const shots = action ? offlineActionShots(skill, action, prepared, effects, env) : null;
+    if (shots) {
+      const reports: CastReport[] = [];
+      for (const shot of shots) {
+        // A body felled by an earlier payload leaves the committed target set: a dead bound body
+        // fizzles the rest (never re-acquires), and a queue payload stops hitting a corpse.
+        const live = shot.targets.filter((mob) => mob.hp > 0);
+        if (!live.length) continue;
+        reports.push(resolvePreparedCast(s, c, { ...prepared, targets: live }, statuses, rng, {
+          ...env,
+          impact: { index: shot.index, sharePct: shot.sharePct, cache: shot.cache },
+          ...(shot.suppressErosion ? { suppressErosion: true } : {}),
+          ...(shot.fieldPulse != null ? { fieldPulse: shot.fieldPulse } : {}),
+          ...(shot.fieldPresenceSec != null ? { fieldPresenceSec: shot.fieldPresenceSec } : {}),
+        }));
+      }
+      return mergeOfflineShots(reports, id, skill.name ?? '', spent, hpCost, level, prepared.area);
+    }
+  }
   let dmg = fieldPulse ?? (sm.perPress(skill, { phys: c.phys, magic: c.magic, elem: c.elem, align: c.alignment, maxHp: c.maxHp, level, attackPct: c.attackDamage, spellPct: c.spellDamage }) || 0);
   // pin 1: a phys-basis press can crit on top of the pre-crit hit, a magic-basis one cannot.
   // A row that names extra crit chance on itself (Headshot) spends it on this press only.
@@ -1007,7 +1250,7 @@ export function resolvePreparedCast(
       const stormWindow = effects.some((e) => e.stat === 'dot_dps')
         ? dotSec
         : isStormHold(skill, statusName)
-          ? Number(String(skill.duration).match(/\d+/)?.[0] || 0)
+          ? sm.skillDurationSec(skill.duration, 0)
           : 0;
       if (placed && stormWindow > 0)
         holdStatus(env.mobStatus, t.id, statusName, stormWindow);
@@ -1075,7 +1318,7 @@ export function resolvePreparedCast(
     // it expires within one tick of leaving or of the field's last pulse.
     if (fieldPulse && env.curses && fieldAccuracy) {
       const lines = env.curses[t.id] || (env.curses[t.id] = {});
-      lines.field_presence = { stat: 'accuracy', value: fieldAccuracy.value, secLeft: 2, from: id };
+      lines.field_presence = { stat: 'accuracy', value: fieldAccuracy.value, secLeft: env.fieldPresenceSec ?? 2, from: id };
     }
     // the pool term is the mob's own maximum, so it is added after the press: a hit on a body with
     // more HP hits harder, and a boss takes its own reduced share of it
@@ -1105,9 +1348,18 @@ export function resolvePreparedCast(
     if (consumeStacks > 0) share *= 1 + (consumeStacks * statusConsume!.value) / 100;
     const elemPart = magicBasis > 0 ? share * ((c.elem * (c.alignment / 100)) / magicBasis) : 0;
     const cut = env.mobStatus ? (targetMods(mobModsOn(env.mobStatus, t.id)).armourCut || 0) : 0;
-    // Packet N's target-side rules (chilled/burning/crippled/shocked/statused) ride the same
-    // damage-taken bucket on a press that they do on a swing.
-    const keyTaken = env.mobStatus ? (keystoneTargetMods(env.mobStatus, t.id, c).damageTaken || 0) : 0;
+    // The target's damage-taken bucket, assembled the way the tick assembles it for a swing: curse
+    // lines (conditional ones only while their status holds), the statuses we inflicted (mark's
+    // stacks included) and the target-side keystone rules. Both paths read the one `takenMult`.
+    const taken = takenMult(combineMods(
+      combineMods(
+        env.curses
+          ? curseModsOn(env.curses, t.id, (cond) => (env.mobStatus ? holdsCondition(env.mobStatus, t.id, cond) : false))
+          : NO_CURSE,
+        env.mobStatus ? targetMods(mobModsOn(env.mobStatus, t.id)) : {},
+      ),
+      env.mobStatus ? keystoneTargetMods(env.mobStatus, t.id, c) : {},
+    ));
     const stripped = env.curses ? lineValue(env.curses, t.id, 'mob_elemental_resistance_pct') : 0;
     const pierced = pierce ? -((t.res || 0) * (pierce.value / 100)) : 0;
     // the press's Element share meets the Species' per-Element resistance (X54) exactly as a swing's does:
@@ -1143,8 +1395,15 @@ export function resolvePreparedCast(
     // a magic-damage press is exempt (the caster's spell is not the weapon's own swing).
     const mitigated = (skill.basis === 'phys'
       ? eng.applySizeMult(mitigated0, 1, eng.sizeMultOf(E.weapon_size_mult?.ladder, c.weaponName, (t as any).readsAs || 'medium'))
-      : mitigated0) * (1 + keyTaken / 100);
+      : mitigated0) * taken;
     t.hp -= mitigated;
+    // 08 Headsman: the swing's own threshold, mirrored on the press path — a surviving target left
+    // at or below the line is executed and the residual is kill-only.
+    const headsman = bundleOf(c.keystones, 'headsman');
+    if (headsman && t.hp > 0) {
+      const bossUnique = String(t.kind).startsWith('Boss') || String(t.kind).startsWith('Unique');
+      if (headsmanExecutes(t.hp, t.hpMax, bossUnique, headsman.params as Record<string, number>)) t.hp = 0;
+    }
     dealt += mitigated;
     landed++;
     // §7.2 provenance per target: the same press's parts, labelled. The pool term (Earth Splitter)
@@ -1244,7 +1503,7 @@ export function resolvePreparedCast(
   // duration, on the same `buffUp` clock a toggled buff runs on — the window is the row's own
   // `duration`, and the rule word is what keeps an ordinary press from opening one
   if (hasRule(skill, 'self_window') && (!env.impact || env.impact.index === 0)) {
-    s.buffUp[id] = Number(String(skill.duration).match(/\d+/)?.[0] || 0);
+    s.buffUp[id] = sm.skillDurationSec(skill.duration, 0);
   }
   return {
     id, name: skill.name ?? '', damage: dmg, manaCost: spent, hpCost, targets: landed, crit, dealt, byMob: struck,
@@ -1291,9 +1550,9 @@ export function tickSkillBuffs(s: SkillState, elapsed = 1) {
 }
 
 /** Cooldowns and buff clocks tick down with the cooldown lever (F44); callers pass the rate. */
-export function tickSkills(s: SkillState, cooldownRate = 1) {
+export function tickSkills(s: SkillState, cooldownRate = 1, buffElapsed = 1) {
   tickSkillCooldowns(s, cooldownRate);
-  tickSkillBuffs(s, cooldownRate);
+  tickSkillBuffs(s, buffElapsed);
 }
 
 /** A toggled buff re-presses itself the moment it lapses (`skill-pool.md` "Buff — toggle track"). */

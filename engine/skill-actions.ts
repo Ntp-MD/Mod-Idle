@@ -18,8 +18,12 @@ export function skillCastTiming(
   source: Point, destination: Point, speeds: number | PhaseSpeeds = 1, floorUs = 0,
 ): SkillCastTiming {
   const fixedWindupUs = Math.round(Math.max(0, profile.fixed_windup_sec ?? 0) * unitsPerSec);
+  // Wis shortens variable windup only, then Global Speed divides what is left; fixed time and the
+  // phase floor stay intact, and the share is a finite percentage rather than a cast-speed divisor.
+  const reduction = Math.max(0, Math.min(100, Number(
+    typeof speeds === 'number' ? 0 : speeds.castReductionPct ?? 0))) / 100;
   const variableWindupUs = Math.ceil(Math.max(0, profile.windup_sec - (profile.fixed_windup_sec ?? 0))
-    / phaseRate(speeds, 'cast') * unitsPerSec);
+    * (1 - reduction) / phaseRate(speeds, 'cast') * unitsPerSec);
   const releaseAtUs = atUs + Math.max(floorUs, fixedWindupUs + variableWindupUs);
   return releasedSkillCastTiming(profile, atUs, releaseAtUs, unitsPerSec, source, destination, speeds, floorUs);
 }
@@ -84,6 +88,8 @@ export function targetsInSkillArea<T extends Target>(
     return primary && inside.includes(primary)
       ? [primary, ...inside.filter((target) => target !== primary)] : inside;
   }
+  // The AoE circle is centre-in-centre by contract: a body's edge never expands the committed
+  // footprint. Only the single-target impact check and a projectile sweep meet the body edge.
   const inside = targets.filter((target) =>
     Math.hypot(target.x - area.center.x, target.y - area.center.y) <= area.radiusM + 1e-7);
   return primary && inside.includes(primary) ? [primary, ...inside.filter((target) => target !== primary)] : inside;

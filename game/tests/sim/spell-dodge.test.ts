@@ -8,6 +8,9 @@ import { createCombatArena, syncCombatArena, captureCombatArena, mobAttackProfil
 import { mobFixture } from '../fixtures/mobFixture';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
 import { mulberry32 } from '../../src/engine/client-helpers';
+import { CombatClock } from '@sim/combat/combat-clock';
+import { createIncomingHit } from '@sim/core/tick/incoming-hit';
+import type { MobSkillRow } from '@engine/types.ts';
 
 /**
  * C4 — attack dodge vs spell dodge (decided round 3).
@@ -225,5 +228,44 @@ describe('C4 spell dodge routing', () => {
     expect(dot).toHaveLength(1);
     expect(dot[0]!.value).toBeGreaterThan(0);
     expect(state.fx.some((event) => event.kind === 'block')).toBe(false);
+  });
+});
+
+
+describe('ignores_dodge travels the live incoming path, not only the low-level roll', () => {
+  const strike = (rules?: string[]): MobSkillRow => ({
+    id: 'mob.test.bypass', name: 'Bypass', mode: 'strike', hit_class: 'attack',
+    element: null, ...(rules ? { rules } : {}),
+  });
+
+  const run = (rules?: string[]) => {
+    const state = newGame(916);
+    state.player.hp = 1_000;
+    state.player.es = 0;
+    state.player.charges = 0;
+    state.player.blockCharges = 0;
+    const sheet = { ...buildCharacter(30, emptyGear()), perfectDodge: 100, evasion: 0,
+      spellDodgeChance: 0, block: 0, damageTaken: 1 };
+    const mob = { ...mobFixture({ id: 'duelist', hp: 1e9, hpMax: 1e9, innate: [], skillIds: [] }),
+      ps: 100, hitsPerSec: 1, acc: 10, damage: 'physical' as const };
+    const clock = new CombatClock(0, 1_000_000);
+    const { resolveIncomingHit } = createIncomingHit({
+      arena: undefined, clock, rng: () => 0, s: state, c: sheet, units: 1_000_000, online: false,
+      rkH: state.keystoneRuntime, statuses: state.playerStatuses, statusesAppliedThisTick: new Set(),
+      trig: { crit: null, taken: null }, immune: false, absorbPct: 0, berserk: undefined,
+      berserkDealt: 1, mobMods: () => undefined, queueTrigger: () => {}, cancelIntent: () => {},
+      cancelPlayerBasic: () => {}, onKill: () => {},
+    });
+    resolveIncomingHit(mob as never, strike(rules), () => 0);
+    return state;
+  };
+
+  it('lets Perfect Dodge delete an ordinary strike and bypass it when the row authors the rule', () => {
+    const dodged = run();
+    expect(dodged.player.hp).toBe(1_000);
+    expect(dodged.fx.some((event) => event.kind === 'block' && event.text === 'perfect dodge')).toBe(true);
+    const bypassed = run(['ignores_dodge']);
+    expect(bypassed.player.hp).toBeLessThan(1_000);
+    expect(bypassed.fx.some((event) => event.kind === 'taken')).toBe(true);
   });
 });

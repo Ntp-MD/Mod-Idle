@@ -10,22 +10,35 @@ import type { StatusLine, StatusName, Statuses } from './status-types.ts';
 
 export type { StatusLine, StatusName, Statuses } from './status-types.ts';
 
-function addStack(s: StatusLine, cap: number, perSec?: number): void {
+/**
+ * Add `count` stacks of a DoT to one line. The per-stack ladder records what each application was
+ * worth, so a weak proc joins the line instead of overwriting a stronger one: `perSec` is the
+ * weighted mean and `statusDamagePerSec` the exact sum the line pays. A fractional row (a skill that
+ * writes 2.6 stacks) contributes one fractional tail entry, so the total stays exact. The mob side
+ * (`mobStatus.ts`) calls this same function, so player and mob DoTs cannot drift apart.
+ */
+export function addStack(s: StatusLine, cap: number, perSec?: number, count = 1): void {
+  const add = Math.max(0, Math.min(count, cap - s.stacks));
+  if (!(add > 0)) return;
   if (perSec !== undefined) {
-    s.stackPerSec ||= Array.from({ length: Math.max(0, s.stacks) }, () => s.perSec);
-    if (s.stacks < cap) s.stackPerSec.push(perSec);
-    s.perSec = s.stackPerSec.length
-      ? s.stackPerSec.reduce((sum, value) => sum + value, 0) / s.stackPerSec.length
+    s.stackPerSec ||= Array.from({ length: Math.floor(Math.max(0, s.stacks)) }, () => s.perSec);
+    const whole = Math.floor(add);
+    for (let i = 0; i < whole; i++) s.stackPerSec.push(perSec);
+    if (add > whole) s.stackPerSec.push(perSec * (add - whole));
+  }
+  s.stacks += add;
+  if (perSec !== undefined) {
+    s.perSec = s.stackPerSec?.length
+      ? s.stackPerSec.reduce((sum, value) => sum + value, 0) / s.stacks
       : perSec;
   }
-  s.stacks = Math.min(cap, s.stacks + 1);
 }
 
 export function decayStatusStack(s: StatusLine): void {
   if (s.stackPerSec?.length) s.stackPerSec.shift();
   s.stacks = Math.max(0, s.stacks - 1);
-  if (s.stackPerSec?.length) {
-    s.perSec = s.stackPerSec.reduce((sum, value) => sum + value, 0) / s.stackPerSec.length;
+  if (s.stackPerSec?.length && s.stacks > 0) {
+    s.perSec = s.stackPerSec.reduce((sum, value) => sum + value, 0) / s.stacks;
   }
 }
 
@@ -509,7 +522,7 @@ export function mobSwing(
   // mitigation layer, so its flat cut lands BEFORE this multiplier �?" "damage taken" runs after
   // every mitigation layer, the glossary's own order.
   const hardened = E.global.defend_mult * (c.damageTaken ?? 1);
-  let physFinal = physical * takenScale;
+  let physFinal = physical;
   // `10` Painforged banks what a real Block took off this Hit — the flat cut, before damage_taken.
   // Turtle Doctrine's expected cut is not a Block event, so it feeds the bank nothing (§7.3.3).
   let blockCut = 0;
@@ -523,13 +536,15 @@ export function mobSwing(
   // 44 Turtle Doctrine: no roll and no Block event — every physical Hit takes the expected cut the
   // Block used to produce (§7.3.3).
   if (turtle) physFinal = Math.max(0, physFinal - turtleCut(c.block, c.armour, E.caps.block_divisor, physFinal));
-  physFinal = physFinal * hardened;
+  // every mitigation layer, Block included, lands before the damage_taken bucket (step 7)
+  physFinal = physFinal * hardened * takenScale;
   let elementalFinal = elemental * hardened * takenScale * elementWard;
   // Anvil: Armour also mitigates a share of the Elemental half, before resistance's own line is
-  // read. This is the one new mitigation path the bundle buys; Evasion and Perfect Dodge are gone.
+  // read. The ratio is priced off the raw Elemental hit, exactly as the physical cut is (`rawHit *
+  // physShare` above) — a mitigated or damage-taken total would make Armour argue with itself.
   const anvil = bundleOf(c.keystones, 'anvil');
   if (anvil && elementalFinal > 0) {
-    const cut = eng.armourReduce(c.armour, elementalFinal) * (Number(anvil.params.elementalArmourPct) / 100);
+    const cut = eng.armourReduce(c.armour, rawHit * elemShare) * (Number(anvil.params.elementalArmourPct) / 100);
     elementalFinal *= 1 - Math.max(0, Math.min(1, cut));
   }
   // 55 Chaos Inoculation: a Chaos hit is negated in full. This is damage immunity, not status

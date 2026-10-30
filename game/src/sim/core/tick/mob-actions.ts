@@ -5,7 +5,7 @@ import type { MobCastProfile, MobSkillRow, SkillCastTiming } from '../../../../.
 import { E } from '../../../engine/client';
 import { EVENT_PRIORITY, planAttacks } from '../../combat/combat-clock';
 import {
-  arenaAction, arenaInRange, arenaMobInReach, updateArenaAction,
+  arenaAction, arenaInRange, arenaMobInReach, arenaMobSightClear, arenaRouteHeld, updateArenaAction,
   mobAttackProfile, arenaDistance,
 } from '../../combat/combat-arena';
 import { basicPhaseBudget } from '../../../../../engine/attack-range.ts';
@@ -142,6 +142,11 @@ export function createMobActions(opts: {
         launchMobShot(mob, clock.nowUs, current);
         return;
       }
+      // Authored ground gates melee contact by sight; the radius test alone stays when no layout exists.
+      if (!arenaMobSightClear(arena, mob.id)) {
+        cancelMobPreparation(current, clock.nowUs, 'sight-blocked');
+        return;
+      }
       updateArenaAction(arena, current.id, {
         impactCount: 1, releasedAtUs: clock.nowUs,
         timing: { ...(current.timing as SkillCastTiming), impactAtUs: clock.nowUs },
@@ -216,6 +221,11 @@ export function createMobActions(opts: {
         cancelMobPreparation(current, clock.nowUs, 'release-invalid');
         return;
       }
+      // A melee strike needs a clear line at the committed beat; a shot keeps its own projectile test.
+      if (cast.delivery === 'melee' && !arenaMobSightClear(arena, mob.id)) {
+        cancelMobPreparation(current, clock.nowUs, 'sight-blocked');
+        return;
+      }
       // Commit the cooldown at the valid release, before any defence can return early.
       markMobSkillUsed(mob, row, clock.nowUs, units);
       if (cast.delivery === 'melee') {
@@ -230,21 +240,33 @@ export function createMobActions(opts: {
     });
   }
 
+  /**
+   * Encounter phase (F25) is a live read of the body's own HP, not a fact cached with the attack
+   * plan: a hit that crosses a gate must summon its adds on that step, even when the second's plan
+   * already exists. The stored phase follows the body both ways — a heal above a threshold lowers
+   * it, and crossing again is a new transition — while staying inside one band never re-fires.
+   */
+  function syncMobPhase(mob: Mob): void {
+    let rows: MobSkillRow[] | undefined;
+    for (const id of mob.skillIds || []) {
+      const row = mobSkillById(id);
+      if (row?.phase) (rows ||= []).push(row);
+    }
+    const phase = rows ? mobPhase(mob, rows) : 0;
+    const previousPhase = mob.phase ?? 0;
+    if (phase > previousPhase) {
+      push(s, `${mob.species} shifts tactics (phase ${phase})`);
+      opts.onPhaseAdds?.(mob, phase);
+    }
+    mob.phase = phase;
+  }
+
   /** The full-second plan is created on the body's first call in a second, then advanced per window. */
   function scheduleMobAttacksFor(mob: Mob, fromUs: number): void {
     if (mob.hp <= 0 || !s.group.includes(mob)) return;
+    syncMobPhase(mob);
     let plan = opts.plans.get(mob.id);
     if (!plan) {
-      // Encounter phase (F25): a body that crosses one of its kit's HP gates fights the next phase
-      // down. The gate, not a timer, owns the transition, and the log names it once.
-      const rows = (mob.skillIds || []).map((id) => mobSkillById(id)).filter((row) => !!row);
-      const phase = mobPhase(mob, rows);
-      const previousPhase = mob.phase ?? 0;
-      if (phase > previousPhase) {
-        push(s, `${mob.species} shifts tactics (phase ${phase})`);
-        opts.onPhaseAdds?.(mob, phase);
-      }
-      mob.phase = phase;
       const tm = mobMods(mob.id);
       const rate = Math.max(1e-9, mob.hitsPerSec * (mob.auraSpeedMult ?? 1) * Math.max(0, 1 + tm.attackSpeed / 100));
       const expanded = planAttacks(fromUs, mob.atkTimer, rate, units, Math.max(0, opts.secondEndUs - fromUs));
@@ -304,14 +326,13 @@ export function createMobActions(opts: {
           if (owned?.kind === 'cast' && owned.timing && owned.cancelledAtUs == null
             && !owned.impactCount && owned.timing.releaseAtUs >= atUs) return;
         }
-        // A ready strike replaces the opportunity only while its role reach holds. A committed
-        // charge may start at its own lunge distance; an out-of-reach strike never blocks the
-        // ordinary attack, and the mob never walks in just to enable it.
+        // A ready strike replaces the opportunity while its role reach holds. A committed charge
+        // may start at its own lunge distance. With authored ground an out-of-reach strike closes
+        // to its own reach instead of being discarded; a held route stops the attempt so an
+        // unreachable body cannot retry forever. No layout keeps the radius-only path unchanged.
         const strikeReach = (row: MobSkillRow) => mobStrikeRange(row, mob)
           + Math.max(0, Number(row.cast?.charge?.distance_m) || 0);
-        const strike = readyMobSkill(mob, atUs, row => !arena || arenaInRange(arena, mob.id, strikeReach(row)));
-        if (!strike && arena && !arenaMobInReach(arena, mob.id)) return;
-        if (arena && strike) {
+        const beginStrike = (inArena: CombatArena, strike: MobSkillRow): void => {
           const cast = mobCastProfile(strike, mob);
           const releaseAtUs = atUs + Math.ceil(Math.max(0, cast.windup_sec) * units);
           const recoveryUs = Math.ceil(Math.max(0, cast.recovery_sec) * units);
@@ -320,13 +341,40 @@ export function createMobActions(opts: {
             : releaseAtUs;
           const timing: SkillCastTiming = { delivery: cast.delivery, startedAtUs: atUs,
             releaseAtUs, impactAtUs, recoveryUntilUs: releaseAtUs + recoveryUs };
-          const action = arenaAction(arena, mob.id, 'cast', atUs, 'player', strike.id, undefined, timing);
+          const action = arenaAction(inArena, mob.id, 'cast', atUs, 'player', strike.id, undefined, timing);
           if (action) {
             fx(s, { kind: 'cast', side: 'field', mobId: mob.id, skillId: strike.id,
               actionId: action.id, castTiming: timing, text: strike.name, colour: hitColour(strike.element) });
             scheduleMobStrike(action, mob);
             if (online) push(s, `${mob.species} begins ${strike.name}`);
           }
+        };
+        if (arena?.nav) {
+          const actor = arena.mobs[mob.id];
+          const ready = readyMobSkill(mob, atUs);
+          const usable = ready
+            ? readyMobSkill(mob, atUs, row => arenaInRange(arena, mob.id, strikeReach(row)))
+            : undefined;
+          if (usable) {
+            if (actor) actor.strikeRangeM = undefined;
+            beginStrike(arena, usable);
+            return;
+          }
+          if (ready) {
+            if (actor && !arenaRouteHeld(actor, arena.player)) {
+              actor.strikeRangeM = strikeReach(ready);
+              return;
+            }
+          }
+          if (actor) actor.strikeRangeM = undefined;
+          if (!arenaMobInReach(arena, mob.id)) return;
+          startMobBasic(mob, clock.nowUs, pace.rate);
+          return;
+        }
+        const strike = readyMobSkill(mob, atUs, row => !arena || arenaInRange(arena, mob.id, strikeReach(row)));
+        if (!strike && arena && !arenaMobInReach(arena, mob.id)) return;
+        if (arena && strike) {
+          beginStrike(arena, strike);
           return;
         }
         if (arena) {

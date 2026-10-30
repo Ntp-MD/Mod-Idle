@@ -803,7 +803,6 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     }
     return { bySlot };
   });
-  if (s.travel !== 'forward') s.travel = 'stay';
   if (!s.goal) s.goal = newGoal();
   // v21 · the next-step pin is the only saved guidance; automatic suggestions are derived. An older
   // save starts with no pin, and a malformed pin is dropped rather than sending the player elsewhere.

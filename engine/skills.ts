@@ -13,7 +13,184 @@ export const WEAPON_GROUPS = {
   magic: ['wand', 'staff', 'book'],
 };
 
-import type { EngineData, SkillRow, SkillsData, SkillCastProfile } from './types.ts';
+import type { EngineData, SkillAction, SkillDelivery, SkillRow, SkillsData, SkillCastProfile } from './types.ts';
+
+/** Every commit-executed shape; a row that carries an action must name one of these. */
+export const ACTION_KINDS = ['projectile-burst', 'ground-pulse-burst', 'whirlwind-channel', 'blizzard-field',
+  'sand-field', 'chain-strike', 'cluster-burst', 'targeted-burst'] as const;
+export type ActionKind = (typeof ACTION_KINDS)[number];
+
+export const ROLL_POLICIES = ['shared', 'independent'] as const;
+export type RollPolicy = (typeof ROLL_POLICIES)[number];
+
+/** The data defaults: bursts, Whirlwind, Blizzard, Sand and chains reuse one cache; aimed and
+ *  cluster payloads roll afresh. An explicit `roll_policy` overrides the default. */
+export const DEFAULT_ROLL_POLICY: Record<ActionKind, RollPolicy> = {
+  'projectile-burst': 'shared',
+  'ground-pulse-burst': 'shared',
+  'whirlwind-channel': 'shared',
+  'blizzard-field': 'shared',
+  'sand-field': 'shared',
+  'chain-strike': 'shared',
+  'cluster-burst': 'independent',
+  'targeted-burst': 'independent',
+};
+
+/** The four authored cast deliveries; every one needs a `meta.action_profiles` entry. */
+export const SKILL_DELIVERIES = ['instant', 'melee', 'projectile', 'ground'] as const;
+
+/**
+ * The seconds a `duration` field states. Durations are authored prose (`"8 sec"`, `"1.5 sec"`),
+ * so this reads the first decimal number instead of `\d+` (which silently truncated `1.5` to `1`).
+ * A number is accepted directly; anything without a finite, non-negative number returns `fallback`.
+ */
+export function skillDurationSec(value: unknown, fallback = 0): number {
+  if (typeof value === 'number') return Number.isFinite(value) && value >= 0 ? value : fallback;
+  const match = String(value ?? '').match(/(\d+(?:\.\d+)?)/);
+  if (!match) return fallback;
+  const seconds = Number(match[1]);
+  return Number.isFinite(seconds) && seconds >= 0 ? seconds : fallback;
+}
+
+/**
+ * The offline queue cap a row's `targets` column states (`"3"` or `"3/5"` — the first number).
+ * This is a queue approximation only: live membership is the committed footprint
+ * (`engine/skill-actions.ts targetsInSkillArea`), never a target-count cap. A malformed column
+ * falls back to one here; the action cage refuses a malformed value before dispatch reads it.
+ */
+export function skillTargetCap(skill: Pick<SkillRow, 'targets'> | null | undefined): number {
+  const head = String(skill?.targets ?? '1').split('/')[0].trim();
+  const value = Number(head);
+  return Number.isFinite(value) && value >= 1 ? Math.floor(value) : 1;
+}
+
+/** The budget table in the plan: every committed action owns this many live payload entries. */
+export function skillActionBudget(skill: SkillRow): number {
+  const hits = Math.max(1, Math.floor((skill.effects || []).find((e) => e.stat === 'hits')?.value ?? 1));
+  const action = skill.action;
+  if (!action) return 1;
+  switch (action.kind) {
+    case 'sand-field': return 1 + Math.max(0, Math.floor((skill.effects || []).find((e) => e.stat === 'dot_sec')?.value ?? 0));
+    case 'chain-strike': return skillTargetCap(skill);
+    case 'cluster-burst': return 1 + Math.max(0, Math.floor(Number(action.child_count) || 0));
+    default: return hits;
+  }
+}
+
+/** The `targets` column is `"N"` or `"N/M"`; anything else is a data error, not queue order. */
+const TARGETS_COLUMN = /^\s*\d+(?:\s*\/\s*\d+)?\s*$/;
+
+/**
+ * Pay a flat HP price from the current pool. The final point is never spent: eligibility refuses
+ * a price that would reach it, and this floor is the second half of the same `hp>=1` rule.
+ */
+export const payHpCost = (currentHp: number, cost: number): number =>
+  Math.max(1, currentHp - Math.max(0, cost));
+
+/**
+ * Validate the authored cast profile for every row that names a delivery — the same check the
+ * roster gate (S24) runs, exposed here so tests and any future cage call the one implementation.
+ * An unknown delivery or a missing `meta.action_profiles` entry names the row id and the path.
+ */
+export function validateSkillCastProfiles(
+  rows: readonly SkillRow[], profiles: Partial<Record<SkillDelivery, unknown>> | undefined, source: string,
+): void {
+  const problems: string[] = [];
+  for (const row of rows) {
+    if (!row.cast) continue;
+    const delivery = row.cast.delivery;
+    if (!(SKILL_DELIVERIES as readonly string[]).includes(delivery))
+      problems.push(`${row.id}.cast.delivery ${JSON.stringify(delivery)} is not one of ${SKILL_DELIVERIES.join(' · ')}`);
+    else if (!profiles?.[delivery])
+      problems.push(`${row.id} has no meta.action_profiles.${delivery}`);
+  }
+  if (problems.length) throw new Error(`${source}: ${problems.join('; ')}`);
+}
+
+/** Normalize a row's execution descriptor once; invalid rows throw before payment. */
+export function normalizeSkillAction(skill: SkillRow): SkillAction | undefined {
+  const action = skill.action;
+  if (!action) return undefined;
+  const fail = (why: string): never => {
+    throw new Error(`skills.json: ${skill.id}.action ${why}`);
+  };
+  if (!ACTION_KINDS.includes(action.kind)) fail(`has unknown kind ${JSON.stringify(action.kind)}`);
+  // `targets` is `"N"` or `"N/M"`; the offline queue reads the first number, so a malformed
+  // column must fail the cage rather than fall back to one silently.
+  if (skill.targets != null && !TARGETS_COLUMN.test(String(skill.targets)))
+    fail(`targets must be "N" or "N/M" (got ${JSON.stringify(skill.targets)})`);
+  const policy = action.roll_policy ?? DEFAULT_ROLL_POLICY[action.kind];
+  if (!ROLL_POLICIES.includes(policy)) fail(`has unknown roll_policy ${JSON.stringify(action.roll_policy)}`);
+  const finitePositive = (value: unknown) => typeof value === 'number' && Number.isFinite(value) && value > 0;
+  if (action.interval_sec != null && !finitePositive(action.interval_sec)) fail('interval_sec must be a finite positive number');
+  if (action.active_sec != null && !finitePositive(action.active_sec)) fail('active_sec must be a finite positive number');
+  if (action.movement_speed_mult != null && !finitePositive(action.movement_speed_mult)) fail('movement_speed_mult must be a finite positive number');
+  if (action.hop_share_pct != null && !(Number.isFinite(action.hop_share_pct) && action.hop_share_pct >= 0)) fail('hop_share_pct must be finite and non-negative');
+  const delivery = skill.cast?.delivery;
+  const radius = skill.area?.radius_m ?? 0;
+  switch (action.kind) {
+    case 'projectile-burst':
+    case 'targeted-burst':
+      if (delivery !== 'projectile') fail(`kind ${action.kind} requires projectile delivery`);
+      break;
+    case 'ground-pulse-burst':
+    case 'blizzard-field':
+      if (delivery !== 'ground') fail(`kind ${action.kind} requires ground delivery`);
+      break;
+    case 'sand-field':
+      if (delivery !== 'ground' || !(radius > 0)) fail('kind sand-field requires a positive-radius ground footprint');
+      break;
+    case 'whirlwind-channel':
+      if (delivery !== 'melee' || !(radius > 0)) fail('kind whirlwind-channel requires a positive-radius melee footprint');
+      break;
+    case 'chain-strike':
+      if (!(radius > 0)) fail('kind chain-strike requires a positive-radius hop reach');
+      break;
+    case 'cluster-burst': {
+      const parent = Number(action.parent_share_pct);
+      const count = Number(action.child_count);
+      const share = Number(action.child_share_pct);
+      if (delivery !== 'projectile' || !(radius > 0)) fail('kind cluster-burst requires a positive-radius projectile footprint');
+      if (!Number.isSafeInteger(count) || count <= 0) fail('child_count must be a positive safe integer');
+      if (![parent, share].every((value) => Number.isFinite(value) && value >= 0)) fail('cluster shares must be finite and non-negative');
+      if (parent + count * share !== 100) fail(`cluster shares must total 100 (got ${parent + count * share})`);
+      if (action.spread_deg != null && !(Number.isFinite(action.spread_deg) && action.spread_deg > 0 && action.spread_deg <= 180))
+        fail('spread_deg must be finite, positive and at most 180');
+      break;
+    }
+  }
+  const hits = (skill.effects || []).find((e) => e.stat === 'hits')?.value;
+  if (!['sand-field', 'chain-strike', 'cluster-burst'].includes(action.kind) && hits == null) fail('requires a hits effect');
+  if (hits != null && (!Number.isSafeInteger(hits) || hits <= 0)) fail('hits must be a positive safe integer');
+  if (!Number.isSafeInteger(skillActionBudget(skill)) || skillActionBudget(skill) <= 0) fail('payload budget must be a positive safe integer');
+  return { ...action, roll_policy: policy };
+}
+
+/** Validate every authored action descriptor; unknown kinds and malformed values fail the loader. */
+export function validateSkillActions(rows: readonly SkillRow[], source: string): void {
+  for (const row of rows) {
+    if (!row.action) continue;
+    try { normalizeSkillAction(row); }
+    catch (error) { throw new Error(`${source}: ${(error as Error).message.replace(/^skills\.json: /, '')}`); }
+  }
+}
+
+/** The closed mechanic vocabulary a mob strike may state; auras carry none. */
+export const MOB_STRIKE_RULES = ['ignores_dodge'] as const;
+
+export function validateMobSkillRules(
+  rows: readonly { id: string; mode?: string; rules?: unknown }[], source: string,
+): void {
+  for (const row of rows) {
+    if (row.rules == null) continue;
+    if (!Array.isArray(row.rules)) throw new Error(`${source}: ${row.id}.rules must be an array`);
+    if (row.mode === 'aura' && row.rules.length) throw new Error(`${source}: ${row.id} is an aura and cannot carry rules`);
+    for (const rule of row.rules) {
+      if (typeof rule !== 'string' || !(MOB_STRIKE_RULES as readonly string[]).includes(rule))
+        throw new Error(`${source}: ${row.id}.rules has unknown rule ${JSON.stringify(rule)}`);
+    }
+  }
+}
 
 /** Validate authored hit families without inferring them from damage or delivery. */
 export function validateSkillHitClasses(
@@ -121,10 +298,20 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
   /** The live roster: retired rows stay in `byId` so an old save still resolves them, but they
    *  never drop, get offered as a reward, or appear in the owned/active lists again. */
   const ACTIVE = SKILLS.skills.filter((s) => !s.retired);
+  /** The fallback timing if a row reaches the runtime with no authored profile. */
+  const DEFAULT_CAST_PROFILE = {
+    windup_sec: 0.15, recovery_sec: 0.15, impact_delay_sec: 0,
+    projectile_speed_mps: 0, hit_radius_m: 0.45,
+  } as const;
+  /**
+   * Merge a row's own timing over its delivery profile. A missing profile is a data error the
+   * roster cage (S24 · `validateSkillCastProfiles`) names; the runtime must not throw mid-combat,
+   * so it falls back to the instant profile (or the fixed default) and lets the cage fail the data.
+   */
   const castProfileOf = (skill: SkillRow): SkillCastProfile => {
     const delivery = skill.cast?.delivery ?? 'instant';
-    const profile = SKILLS.meta.action_profiles?.[delivery];
-    if (!profile) throw new Error('skills.json: missing action profile ' + delivery);
+    const profile = SKILLS.meta.action_profiles?.[delivery]
+      ?? SKILLS.meta.action_profiles?.instant ?? DEFAULT_CAST_PROFILE;
     const ranges = (E as any).combat_arena.range;
     return { ...profile, delivery,
       range_m: skill.type === 'buff' || skill.type === 'heal' ? 0
@@ -409,8 +596,12 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
     return parts.length ? parts.join(' · ') : undefined;
   };
 
+  /** A normalized descriptor, captured at release by the runtime. */
+  const actionOf = (skill: SkillRow): SkillAction | undefined => normalizeSkillAction(skill);
+
   return {
     SKILLS, byId, LEVEL_STEP, CAST_REF, LADDER, CONVERSION, WEAPON_GROUPS,
+    actionOf, skillActionBudget, skillDurationSec, skillTargetCap, payHpCost,
     LEVEL_ROWS, LEVEL_CAP, damagePct, effectPct, buffEffectPct, effectsAt,
     COST_LEVEL_STEP, MANA_LEVEL_STEP, MANA_REF_POOL,
     aggregateEffects, EFFECT_STATS, EFFECT_OPS, EFFECT_SUBJECTS, EFFECT_CONDITIONS, EFFECT_RULES, MODELLED_BY,

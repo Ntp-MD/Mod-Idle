@@ -1,4 +1,11 @@
 import { writeSave, type SlotName } from './save';
+
+/**
+ * P3 fresh-session gate: every boot, reload and reset begins with `newGame` plus a fresh account.
+ * Gameplay storage is neither read nor written while this phase is on; presentation preferences
+ * and read-only showcase samples keep their own rules. Not a player preference.
+ */
+export const FRESH_SESSION_PHASE = true;
 import type { GameState } from '@sim/core/types';
 
 /** A save belongs to the character that requested it, even if a later character is now on screen. */

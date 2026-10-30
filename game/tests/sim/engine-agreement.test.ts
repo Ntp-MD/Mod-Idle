@@ -58,6 +58,8 @@ describe('game and cages run one engine', () => {
     expect(eng.mobHpAt(100)).toBe(cage.mobHpAt(100));
     expect(eng.xpToNext(30)).toBe(cage.xpToNext(30));
     expect(eng.aspdOf(510, 1.2, 25)).toBe(cage.aspdOf(510, 1.2, 25));
+    expect(eng.castReductionPctOf(1_000)).toBe(30);
+    expect(eng.castReductionPctOf(1_000)).toBe(cage.castReductionPctOf(1_000));
     expect(eng.speciesInZone(16)).toEqual(cage.speciesInZone(16));
     expect(eng.zoneElements(16)).toEqual(cage.zoneElements(16));
   });

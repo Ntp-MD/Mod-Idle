@@ -195,9 +195,11 @@
       y: (event.clientY - rect.top) / rect.height * ARENA_VIEW.height + camera.y,
     };
     const point = unprojectArenaPoint(view);
+    // The sim insets every body by its footprint, so a ground order aims where the body can stand.
+    const radius = player.radiusM ?? 0.25;
     return {
-      x: Math.max(0, Math.min(arena.bounds.width, point.x)),
-      y: Math.max(0, Math.min(arena.bounds.height, point.y)),
+      x: Math.max(radius, Math.min(arena.bounds.width - radius, point.x)),
+      y: Math.max(radius, Math.min(arena.bounds.height - radius, point.y)),
     };
   }
 

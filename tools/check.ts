@@ -15,9 +15,9 @@ import path from 'node:path';
 import { eng, ROOT } from './lib/engine.ts';
 import * as G from './lib/gates.ts';
 import { readJson } from './lib/json.ts';
-import { createSkillModel, validateSkillHitClasses } from '../engine/skills.ts';
+import { createSkillModel, DEFAULT_ROLL_POLICY, normalizeSkillAction, validateMobSkillRules, validateSkillActions, validateSkillHitClasses } from '../engine/skills.ts';
 import { createLoot, leanReweight, leanReweightMany } from '../engine/loot.ts';
-import { createSpawns } from '../engine/spawns.ts';
+import { createSpawns, spawnSlotSeed } from '../engine/spawns.ts';
 import { modRangeProblems } from './lib/mod-ranges.ts';
 
 const { E, S, K, M, LG, BAND, BANDS, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL, DERIVED, ES, WEAPONS, STONE, LCK_BOUND, L, C, TS } = eng;
@@ -824,6 +824,8 @@ function runChecks() {
     const lib = MOB_SKILLS.skills as any[];
     try { validateSkillHitClasses(lib, 'mob-skills.json'); }
     catch (error) { sk.push(String(error)); }
+    try { validateMobSkillRules(lib, 'mob-skills.json'); }
+    catch (error) { sk.push(String(error)); }
     const byId = new Map<string, any>(lib.map((row) => [row.id, row]));
     const elements = Object.keys(E.elements.status_of || {});
     const allowedStatus = new Set(MOB_SKILLS.meta.statuses as string[]);
@@ -957,6 +959,79 @@ function runChecks() {
 
     add('X55', sk.length === 0, sk.length ? sk.join(' · ')
       : `${lib.length} mob skills over ${coverage.size} element lanes (${elements.length} Elements + physical) · ${speciesWithKit}/${speciesIds.size} species carry 1-2 across ${[...kitDamages].sort().join('/')} damage, the rest stay basic-only · ${Object.keys(kits.bosses || {}).length} boss and ${Object.keys(kits.uniques || {}).length} unique kits · every kit ≤${maxKit}, no layer merge, no duplicate species kit · strikes are swing-neutral and auras are defensive only`);
+
+    // P9 PH1: the phase rule is data too. `mobPhase` counts distinct hpBelowPct crossings, so every
+    // gate must name one, a gate's upper bound must sit under it, each kit must list its gates
+    // high-to-low (the first ready row wins inside a band), and the add count must be a whole body
+    // count. A phase-gated row that never reaches a kit is dead data and fails here.
+    const ph: string[] = [];
+    const gatedRows = lib.filter((row: any) => row.phase != null);
+    const kitMembers = new Set<string>();
+    const phaseKits: [string, string[]][] = [];
+    for (const layer of ['species', 'variants', 'bosses', 'uniques'] as const) {
+      for (const [name, ids] of Object.entries((kits[layer] || {}) as Record<string, string[]>)) {
+        phaseKits.push([`${layer} ${name}`, ids]);
+        for (const id of ids) kitMembers.add(id);
+      }
+    }
+    for (const row of gatedRows) {
+      if (!kitMembers.has(row.id)) ph.push(`${row.id}: phase-gated row is not in any kit`);
+      const below = row.phase?.hpBelowPct;
+      const above = row.phase?.hpAbovePct;
+      if (below == null) ph.push(`${row.id}: phase gate must name hpBelowPct (the crossing threshold)`);
+      else if (!(Number(below) > 0) || !(Number(below) <= 100))
+        ph.push(`${row.id}: phase hpBelowPct must be within (0, 100]`);
+      if (above != null && (!(Number(above) >= 0) || !(Number(above) < 100)))
+        ph.push(`${row.id}: phase hpAbovePct must be within [0, 100)`);
+      if (below != null && above != null && !(Number(above) < Number(below)))
+        ph.push(`${row.id}: phase hpAbovePct must sit below hpBelowPct`);
+    }
+    for (const [label, ids] of phaseKits) {
+      let previous = Infinity;
+      for (const id of ids) {
+        const below = byId.get(id)?.phase?.hpBelowPct;
+        if (below == null) continue;
+        if (!(Number(below) <= previous))
+          ph.push(`${label}: phase gates are not ordered high-to-low (${id} at ${below}% after ${previous}%)`);
+        previous = Number(below);
+      }
+    }
+    const phaseAdds = (E.mob as any).phase_adds;
+    if (!phaseAdds || typeof phaseAdds !== 'object' || Array.isArray(phaseAdds))
+      ph.push('mob.phase_adds must be an object');
+    else if (!Number.isSafeInteger(Number(phaseAdds.count)) || Number(phaseAdds.count) < 1)
+      ph.push(`mob.phase_adds.count ${JSON.stringify(phaseAdds.count)} must be a positive whole number`);
+    add('PH1', ph.length === 0, ph.length ? ph.join(' · ')
+      : `${gatedRows.length} phase-gated strike row(s) across ${phaseKits.filter(([, ids]) => ids.some((id) => byId.get(id)?.phase)).length} kit(s), each naming hpBelowPct and ordered high-to-low · a transition summons ${phaseAdds.count} add(s) (the caller owns the cap queue)`);
+
+    // P9 SA1: the offline resolver must read one authored roll policy, never infer a cache from the
+    // delivery. Every live action names it explicitly, and cluster-burst stays fixture-only until
+    // the offline queue has the same parent/child shape (zero live rows by design).
+    const sa: string[] = [];
+    const skillFile = readJson(path.join(ROOT, 'tools/data/skills.json'));
+    const skillRows = Array.isArray(skillFile.skills) ? skillFile.skills as any[] : [];
+    let actionRows = 0;
+    let liveClusterRows = 0;
+    for (const row of skillRows) {
+      if (!row?.action) continue;
+      actionRows++;
+      if (row.action.kind === 'cluster-burst' && !row.retired) liveClusterRows++;
+      if (row.action.roll_policy == null) {
+        sa.push(`${row.id}: action must author roll_policy (offline reads the row, never a default)`);
+        continue;
+      }
+      try {
+        const normalized = normalizeSkillAction(row);
+        if (normalized && row.action.roll_policy !== normalized.roll_policy)
+          sa.push(`${row.id}: roll_policy ${row.action.roll_policy} normalizes to ${normalized.roll_policy}`);
+      } catch (error) {
+        sa.push(String(error));
+      }
+    }
+    if (liveClusterRows > 0)
+      sa.push(`${liveClusterRows} live cluster-burst row(s) — update this gate when the offline queue gains parent/child parity`);
+    add('SA1', sa.length === 0, sa.length ? sa.join(' · ')
+      : `${actionRows} action row(s) author a normalized roll_policy; the policy set is ${Object.entries(DEFAULT_ROLL_POLICY).map(([kind, policy]) => `${kind}:${policy}`).join(' · ')} · ${liveClusterRows} live cluster-burst row(s) (fixture-only until offline parity)`);
   }
 
   // Zone identity lives in `mob.zones` alone. Bands repeat every three zones, so each band owns
@@ -1001,6 +1076,71 @@ function runChecks() {
       && spawnCoverage.subzones === ZONES.reduce((sum, zone) => sum + (zone.subzones?.length ?? 0), 0)
       && spawnCoverage.layouts >= 1 && spawnCoverage.points >= 1,
     `${spawnCoverage.zones} zones · ${spawnCoverage.subzones} subzones · ${spawnCoverage.layouts} layout · ${spawnCoverage.points} points resolve inside the arena`);
+  }
+
+  // P9 SP2: dungeon entry shares the field's per-slot seed, so the same save refills `sN` with the
+  // same body and respawn window on every reload. This gate pins the config and the seed contract;
+  // the runtime slot timers read exactly this function.
+  {
+    const sp2: string[] = [];
+    const D = (E as any).dungeon;
+    if (!D || typeof D !== 'object') sp2.push('engine.json dungeon must be an object');
+    else {
+      if (!Number.isSafeInteger(D.mob_cap) || D.mob_cap < 1)
+        sp2.push(`dungeon mob_cap ${JSON.stringify(D.mob_cap)} must be a positive whole number`);
+      if (!Number.isSafeInteger(D.group_cap) || D.group_cap < 1)
+        sp2.push(`dungeon group_cap ${JSON.stringify(D.group_cap)} must be a positive whole number`);
+      if (Number.isSafeInteger(D.mob_cap) && Number.isSafeInteger(D.group_cap) && D.group_cap > D.mob_cap)
+        sp2.push(`dungeon group_cap ${D.group_cap} exceeds its ${D.mob_cap}-body run budget`);
+      if (!(Number.isFinite(D.cooldown_sec) && D.cooldown_sec >= 0))
+        sp2.push(`dungeon cooldown_sec ${JSON.stringify(D.cooldown_sec)} must be finite and non-negative`);
+      if (!Number.isInteger(D.retreat_keep_min) || D.retreat_keep_min < 0)
+        sp2.push(`dungeon retreat_keep_min ${JSON.stringify(D.retreat_keep_min)} must be a non-negative whole number`);
+      if (!Number.isInteger(D.retreat_keep_max) || D.retreat_keep_max < D.retreat_keep_min)
+        sp2.push(`dungeon retreat_keep_max ${JSON.stringify(D.retreat_keep_max)} must be a whole number at least retreat_keep_min`);
+    }
+    let spawnModel: ReturnType<typeof createSpawns> | undefined;
+    try {
+      spawnModel = createSpawns(SPAWNS_JSON, {
+        arena: RAW_ENGINE.combat_arena, playerStart: RAW_ENGINE.combat_arena.player_start, zones: E.mob.zones,
+      });
+    } catch (error) {
+      sp2.push(error instanceof Error ? error.message : String(error));
+    }
+    let windows = 0;
+    if (spawnModel) {
+      for (const zone of ZONES) {
+        const indexes: (number | null)[] = [null, ...(zone.subzones ?? []).map((_, index) => index)];
+        for (const sub of indexes) {
+          const profile = spawnModel.profileFor(zone.id, sub);
+          windows++;
+          if (!(profile.respawn_min_sec <= profile.respawn_max_sec))
+            sp2.push(`${zone.id}${sub == null ? '' : `:${sub}`}: respawn window ${profile.respawn_min_sec}-${profile.respawn_max_sec}s is inverted`);
+          if (!(profile.respawn_min_sec > 0))
+            sp2.push(`${zone.id}${sub == null ? '' : `:${sub}`}: respawn_min_sec must be positive`);
+        }
+      }
+    }
+    const seenSeeds = new Set<number>();
+    let seedSamples = 0;
+    for (const key of ['1|0|0|0|field', '1|0|0|0|dungeon:1', '2|1|0|0|field']) {
+      for (const slot of ['s1', 's2', 's48']) {
+        for (const count of [0, 1, 7]) {
+          const seed = spawnSlotSeed(12345, key, slot, count);
+          const again = spawnSlotSeed(12345, key, slot, count);
+          seedSamples++;
+          if (seed !== again) sp2.push(`slot seed for ${key}/${slot}/${count} is not deterministic`);
+          if (!Number.isInteger(seed) || seed < 0 || seed > 0xffff_ffff)
+            sp2.push(`slot seed for ${key}/${slot}/${count} is not an unsigned 32-bit integer`);
+          if (seenSeeds.has(seed)) sp2.push(`slot seed collision at ${key}/${slot}/${count}`);
+          seenSeeds.add(seed);
+        }
+      }
+    }
+    const config = D && typeof D === 'object'
+      ? `${D.mob_cap} mobs · ${D.group_cap} group cap · ${D.cooldown_sec}s cooldown` : 'no config';
+    add('SP2', sp2.length === 0, sp2.length ? sp2.join(' · ')
+      : `dungeon ${config} · ${seedSamples} slot seeds are deterministic, unsigned and distinct · ${windows} field respawn windows stay min ≤ max and positive`);
   }
 
   // B2: mob_HP(L) is defined at every level, not only the published anchors (X37). The curve is

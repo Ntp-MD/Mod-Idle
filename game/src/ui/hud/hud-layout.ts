@@ -92,7 +92,7 @@ export const HUD_REGION_META: { id: HudRegionId; label: string; description: str
   { id: 'target', label: 'Target bar', description: 'Current enemy name and health bar, centered over the combat field.' },
   { id: 'menu', label: 'Menu rail', description: 'Horizontal screen navigation slides into the right edge. The remaining header names the current screen and opens the same buttons again.' },
   { id: 'field', label: 'Combat field', description: 'Absolute combat overlay, always horizontally centered. Rows set vertical bounds; the column span sets width. It may overlap other HUD regions; the player card anchors to its bottom edge.' },
-  { id: 'commands', label: 'Game controls', description: 'Horizontal Stay Here / Forward, Auto Skills, Auto Equip, speed and Pause/Resume group in M12–M15 slides into the right edge. The remaining Game controls button reopens it; hover shows travel mode, speed, automation and running state.' },
+  { id: 'commands', label: 'Game controls', description: 'Horizontal Auto Skills, Auto Equip, speed and Pause/Resume group in M12–M15 slides into the right edge. The remaining Game controls button reopens it; hover shows speed, automation and running state.' },
   { id: 'feed', label: 'Chronicle', description: 'The combat, loot and system feed with its channel filters.' },
   { id: 'actionbar', label: 'Vitals & skills', description: 'Health and mana orbs, 7 item shortcuts over 16 skill slots (8 a row); the experience bar is pinned to the screen bottom edge.' },
 ];

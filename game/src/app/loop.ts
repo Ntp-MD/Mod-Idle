@@ -71,6 +71,8 @@ export function createGameLoop(ctx: LoopContext, readWallMs: () => number = () =
   let acc = 0;
   let last = 0;
   let started = false;
+  /** A reset owns a new run: drop banked elapsed time so the old run cannot land in the new one. */
+  function restart(): void { acc = 0; last = 0; started = false; }
   function wake(now: number): void {
     if (!started) { started = true; last = now; return; }
     // a wake that ran late is measured, never assumed; the tab's own throttling is the only clock
@@ -100,5 +102,5 @@ export function createGameLoop(ctx: LoopContext, readWallMs: () => number = () =
     ctx.cooldownSchedulerAt = now;
   }
 
-  return { step, startWakeLoop, wake };
+  return { step, startWakeLoop, wake, restart };
 }

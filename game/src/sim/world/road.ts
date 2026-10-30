@@ -219,7 +219,7 @@ export function arrive(state: GameState, walk: Walk) {
   // A settlement is safe ground; wild ground is a fight the moment the feet land on it. The owner's travel
   // switch is a hunt wherever it stands, so the arrival tick itself fields the group — no dead second is
   // spent looking for an enemy that is already due.
-  state.hunting = rank !== 0 || state.travel === 'forward';
+  state.hunting = rank !== 0;
   return {
     name: dest?.name ?? node.id,
     first,

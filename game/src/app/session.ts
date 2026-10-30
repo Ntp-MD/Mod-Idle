@@ -1,6 +1,6 @@
 import { catchUpAsync, newGame } from '@sim/core/game';
 import type { GameState } from '@sim/core/types';
-import type { CharacterSaveSession } from '../state/saveSession';
+import { FRESH_SESSION_PHASE, type CharacterSaveSession } from '../state/saveSession';
 import {
   exportJson, importJson, listSnapshots, readSave, restoreSnapshot, writeSaveSync,
   type ClientSettings, type SlotName, type Snapshot,
@@ -43,6 +43,8 @@ export interface SessionContext {
   set snapNote(value: string);
   resetArena(): void;
   resetSkillDiscovery(): void;
+  /** Stop the old wake loop and start exactly one new one for this run. */
+  restartLoop(): void;
   captureCharacterUi(): CharacterUiSnapshot;
   restoreCharacterUi(snapshot: CharacterUiSnapshot): void;
   resetCharacterUi(): void;
@@ -60,7 +62,7 @@ export function createSessionActions(ctx: SessionContext) {
   }
 
   async function doSave(slot: SlotName, quiet = false) {
-    if (ctx.showcaseMode) return;
+    if (ctx.showcaseMode || FRESH_SESSION_PHASE) return;
     if (!ctx.canWriteAccount) { ctx.saveNote = 'This tab does not control account saves.'; return; }
     const epoch = ctx.saveSession.checkpoint();
     try {
@@ -80,13 +82,13 @@ export function createSessionActions(ctx: SessionContext) {
   }
 
   async function loadSnaps() {
-    if (ctx.showcaseMode) { ctx.snaps = []; ctx.snapNote = 'Snapshots are disabled in the Showcase.'; return; }
+    if (ctx.showcaseMode || FRESH_SESSION_PHASE) { ctx.snaps = []; ctx.snapNote = FRESH_SESSION_PHASE ? 'Saving is off in this fresh-session phase.' : 'Snapshots are disabled in the Showcase.'; return; }
     ctx.snaps = await listSnapshots(ctx.snapSlot);
     ctx.snapNote = ctx.snaps.length ? '' : 'No backup yet — one is owed on the next level up, craft or timer.';
   }
 
   async function restore(index: number) {
-    if (ctx.showcaseMode || !ctx.canWriteAccount) return;
+    if (ctx.showcaseMode || FRESH_SESSION_PHASE || !ctx.canWriteAccount) return;
     const targetSlot = ctx.snapSlot;
     const previousSlot = ctx.saveSession.slot;
     const epoch = ctx.saveSession.detach();
@@ -115,6 +117,7 @@ export function createSessionActions(ctx: SessionContext) {
 
   async function doLoad(slot: SlotName) {
     if (ctx.showcaseMode) return false;
+    if (FRESH_SESSION_PHASE) { ctx.saveNote = 'Loading is off: every boot starts a fresh character.'; return false; }
     ctx.loadController?.abort();
     const controller = new AbortController();
     ctx.loadController = controller;
@@ -182,7 +185,7 @@ export function createSessionActions(ctx: SessionContext) {
   }
 
   async function takeOverAccount() {
-    if (ctx.showcaseMode || ctx.accountWriterState !== 'readonly') return;
+    if (ctx.showcaseMode || FRESH_SESSION_PHASE || ctx.accountWriterState !== 'readonly') return;
     const controller = new AbortController();
     ctx.takeoverController = controller;
     ctx.accountWriterState = 'waiting';
@@ -212,6 +215,7 @@ export function createSessionActions(ctx: SessionContext) {
   }
 
   function download() {
+    if (FRESH_SESSION_PHASE) return;
     const blob = new Blob([exportJson(ctx.gameState)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -221,7 +225,7 @@ export function createSessionActions(ctx: SessionContext) {
   }
 
   async function upload(ev: Event) {
-    if (ctx.showcaseMode || !ctx.canWriteAccount) return;
+    if (ctx.showcaseMode || FRESH_SESSION_PHASE || !ctx.canWriteAccount) return;
     const file = (ev.target as HTMLInputElement).files?.[0];
     if (!file) return;
     const epoch = ctx.saveSession.checkpoint();
@@ -242,24 +246,27 @@ export function createSessionActions(ctx: SessionContext) {
   }
 
   function reset() {
-    if (!ctx.canWriteAccount) return;
+    if (FRESH_SESSION_PHASE ? ctx.showcaseMode : !ctx.canWriteAccount) return;
     ctx.loadController?.abort();
     ctx.saveSession.detach();
     ctx.offlineProgress = null;
     ctx.paused = false;
     ctx.gameState = newGame(undefined, crypto.getRandomValues(new Uint32Array(1))[0]);
     if (ctx.liveArpgArena) ctx.resetArena();
+    ctx.restartLoop();
     ctx.resetCharacterUi();
     ctx.awayReport = null;
     ctx.resetSkillDiscovery();
-    ctx.saveNote = 'New character is not saved yet. Choose a save slot; existing slots were kept.';
+    ctx.saveNote = FRESH_SESSION_PHASE
+      ? 'Fresh session: a new character and account, with saving off for this phase.'
+      : 'New character is not saved yet. Choose a save slot; existing slots were kept.';
   }
 
   /** The unload flush must be synchronous: IndexedDB commits asynchronously and the page can be gone
    *  first, so `writeSaveSync` writes the mirror in one turn. It refreshes the away stamp too, so a
    *  reload right after cannot count the same absence twice. */
   function flushSync(event?: Event): void {
-    if (!ctx.canWriteAccount || !ctx.saveSession.slot) return;
+    if (FRESH_SESSION_PHASE || !ctx.canWriteAccount || !ctx.saveSession.slot) return;
     try { writeSaveSync(ctx.saveSession.slot, ctx.gameState); ctx.persistenceError = null; }
     catch (error) {
       ctx.persistenceError = error instanceof Error ? error.message : 'Emergency save failed; export JSON before closing.';

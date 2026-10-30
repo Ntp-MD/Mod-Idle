@@ -155,6 +155,8 @@ export interface Character {
   globalSpeed: number;
   /** Haste's share of the windup: how fast a cast commits (F44). */
   castSpeed: number;
+  /** Percent of variable windup Wis removes, independent of Haste and cooldown reduction. */
+  castReductionPct: number;
   /** Haste's share of the tail: how fast a cast recovers, independent of the commit (F44). */
   recoverySpeed: number;
   /** Haste's share of the skill clock: how fast cooldowns tick (F44). */
@@ -479,6 +481,7 @@ export function buildCharacter(
      *  separable even while no data differentiates them yet. */
     globalSpeed: cappedHaste,
     castSpeed: cappedHaste,
+    castReductionPct: eng.castReductionPctOf(core.wis),
     recoverySpeed: cappedHaste,
     cooldownRate: cappedHaste,
     /** Intrinsic Life Leech; a target's Mark adds its own share when damage is paid. */

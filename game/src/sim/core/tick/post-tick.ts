@@ -37,6 +37,12 @@ export function advancePostTick(
           ? E.status.poison.decay_sec : E.status.mark.decay_sec;
         else delete statuses[key];
       }
+    } else if (key === 'shock') {
+      // A shock's clock is its fractional stop. One world second spends only the slice it could stop
+      // (`game.ts` reads that same slice for `playerActiveFraction`), so expiry never overdraws a
+      // 0.5 s shock by a whole second: it spends the stop, and the status ends when it is spent.
+      st.secLeft = Math.max(0, st.secLeft - Math.min(1, st.secLeft));
+      if (st.secLeft <= 0) delete statuses[key];
     } else {
       st.secLeft--;
       if (st.secLeft <= 0) delete statuses[key];

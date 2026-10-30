@@ -91,8 +91,9 @@ export function createIncomingHit(opts: {
       if (hitClass !== 'attack' && hitClass !== 'spell' && hitClass !== 'none') {
         throw new Error(`Incoming hit ${mobSkill?.id ?? `${mob.id} basic`} is missing a valid hit_class`);
       }
+      const ignoresDodge = (mobSkill?.rules || []).includes('ignores_dodge');
       const r = mobSwing(rng, takenChar, mob, statuses, tm, s.player.es, absorbPct, (s.player.blockCharges || 0) > 0, s.player.hp,
-        { hitClass });
+        { hitClass, ignoresDodge });
       // Mirror Strike: the Evasion success banks the next player Hit's crit.
       const mirror = bundleOf(c.keystones, 'mirror-strike');
       if (mirror && r.blocked === 'evasion') {

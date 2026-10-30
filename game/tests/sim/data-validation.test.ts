@@ -1,7 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { validateEngineData } from '@engine/validate.ts';
 import { K_KEYS } from '@engine/types.ts';
-import { E, sm } from '../../src/engine/client';
+import { E, SKILLS, sm } from '../../src/engine/client';
+import {
+  DEFAULT_ROLL_POLICY, normalizeSkillAction, skillActionBudget, skillDurationSec, skillTargetCap,
+  validateMobSkillRules, validateSkillActions, validateSkillCastProfiles,
+} from '@engine/skills.ts';
 
 /**
  * The canonical data is checked before anything reads it. Every case runs on a copy, so a bad
@@ -205,5 +209,92 @@ describe('the canonical data is checked before anything reads it', () => {
     const before = JSON.stringify(data);
     expect(() => validateEngineData(data)).not.toThrow();
     expect(JSON.stringify(data)).toBe(before);
+  });
+});
+
+
+describe('action descriptors normalize once and validate before payment', () => {
+  const base = (over: any = {}) => ({
+    id: 'attack.test', type: 'attack', hit_class: 'attack', targets: '1',
+    cast: { delivery: 'projectile' }, area: { origin: 'target', radius_m: 0 },
+    effects: [{ stat: 'hits', op: 'add_flat', value: 2, subject: 'self' }],
+    ...over,
+  });
+
+  it('publishes a normalized roll policy and the plan budget for every live action row', () => {
+    const budget: Record<string, number> = {
+      'attack.ice_lance': 2, 'attack.blizzard': 20, 'attack.chain_lightning': 3,
+      'attack.sand_storm': 11, 'attack.whirlwind': 3, 'attack.arrow_shower': 3,
+      'attack.overload': 2, 'attack.double_strafe': 3, 'attack.seeker_strafe': 3,
+    };
+    for (const row of Object.values(sm.byId)) {
+      if (!row.action) {
+        expect(skillActionBudget(row), row.id).toBe(1);
+        continue;
+      }
+      const normalized = normalizeSkillAction(row)!;
+      expect(normalized.roll_policy, row.id).toBe(row.action.roll_policy);
+      expect(['shared', 'independent'], row.id).toContain(normalized.roll_policy);
+      expect(normalized.roll_policy, row.id).toBe(DEFAULT_ROLL_POLICY[row.action.kind]);
+      if (budget[row.id] != null) expect(skillActionBudget(row), row.id).toBe(budget[row.id]);
+    }
+  });
+
+  it('rejects malformed execution before payment', () => {
+    expect(() => normalizeSkillAction(base({ action: { kind: 'nope' } }) as any)).toThrow(/unknown kind/);
+    expect(() => normalizeSkillAction(base({ action: { kind: 'projectile-burst', roll_policy: 'always' } }) as any))
+      .toThrow(/roll_policy/);
+    expect(() => normalizeSkillAction(base({ action: { kind: 'projectile-burst', interval_sec: 0 } }) as any))
+      .toThrow(/interval_sec/);
+    expect(() => normalizeSkillAction(base({ cast: { delivery: 'ground' }, action: { kind: 'targeted-burst' } }) as any))
+      .toThrow(/requires projectile delivery/);
+    expect(() => normalizeSkillAction(base({ effects: [{ stat: 'hits', op: 'add_flat', value: 2.5 }], action: { kind: 'projectile-burst' } }) as any))
+      .toThrow(/safe integer/);
+    expect(() => normalizeSkillAction(base({
+      area: { origin: 'target', radius_m: 2 },
+      action: { kind: 'cluster-burst', parent_share_pct: 40, child_count: 2, child_share_pct: 20 },
+    }) as any)).toThrow(/total 100/);
+    expect(() => validateSkillActions([base({ action: { kind: 'nope' } })] as any, 'synthetic'))
+      .toThrow(/synthetic: attack\.test/);
+  });
+
+  it('reads decimal durations, the first targets number and the dev/test fixtures', () => {
+    expect(skillDurationSec('1.5 sec')).toBe(1.5);
+    expect(skillDurationSec('0.5 sec')).toBe(0.5);
+    expect(skillDurationSec('8 sec')).toBe(8);
+    expect(skillDurationSec('Instant', 0)).toBe(0);
+    expect(skillDurationSec(undefined, 10)).toBe(10);
+    expect(skillTargetCap({ targets: '3/5' })).toBe(3);
+    expect(skillTargetCap({ targets: ' 2 / 4 ' })).toBe(2);
+    expect(skillTargetCap({ targets: 'a/b' } as any)).toBe(1);
+
+    const fixtures = (SKILLS as any).test_fixtures?.skills ?? [];
+    expect(fixtures.map((row: any) => row.id)).toEqual(
+      expect.arrayContaining(['test.cluster_burst', 'test.hp_cost', 'test.burst_policy']));
+    expect(() => validateSkillActions(fixtures, 'skills.json test_fixtures')).not.toThrow();
+  });
+
+  it('fails malformed targets and a missing cast profile at the cage, not at dispatch', () => {
+    const row = { ...sm.byId['attack.chain_lightning'], targets: 'a/b' };
+    expect(() => normalizeSkillAction(row)).toThrow(/targets must be/);
+    expect(() => validateSkillCastProfiles(
+      [{ id: 'attack.missing_profile', cast: { delivery: 'ground' } } as any], {}, 'skills.json'))
+      .toThrow(/attack\.missing_profile has no meta\.action_profiles\.ground/);
+    expect(() => validateSkillCastProfiles(
+      Object.values(sm.byId), SKILLS.meta.action_profiles, 'skills.json')).not.toThrow();
+    // A row that reaches the runtime without its authored profile must not throw mid-combat;
+    // the cage above is the one place that failure is allowed to stop the build.
+    expect(() => sm.castProfileOf({ ...sm.byId['attack.fireball'], cast: { delivery: 'missing' } } as any)).not.toThrow();
+  });
+
+  it('keeps the mob-strike rule vocabulary closed and auras rule-free', () => {
+    const row = (over: any = {}) => ({ id: 'mob.test', mode: 'strike', ...over });
+    expect(() => validateMobSkillRules([row({ rules: ['ignores_dodge'] })], 'mob-skills.json')).not.toThrow();
+    expect(() => validateMobSkillRules([row({ rules: ['bypasses_everything'] })], 'mob-skills.json'))
+      .toThrow(/unknown rule/);
+    expect(() => validateMobSkillRules([row({ mode: 'aura', rules: ['ignores_dodge'] })], 'mob-skills.json'))
+      .toThrow(/aura/);
+    expect(() => validateMobSkillRules([row({ rules: 'ignores_dodge' })], 'mob-skills.json'))
+      .toThrow(/array/);
   });
 });

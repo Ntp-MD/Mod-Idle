@@ -76,6 +76,44 @@ Two words that are constantly confused:
 | **Foe** | The **Field of Enemies** — every mob the character is fighting at once. |
 | **Elite** | A flag on a Large body, never a size of its own: a rank over the rolled variant, keeping its name. |
 
+## Skills
+
+One skill sheet row is one canonical [tools/data/skills.json](../tools/data/skills.json) entry. [engine/skills.ts](../engine/skills.ts) is the only calculator, shared by the client and the cages; each column's owner is that file plus [engine/types.ts](../engine/types.ts), and the player-facing explanation is generated from [game/src/wiki/pages.ts](../game/src/wiki/pages.ts).
+
+| Term | Meaning |
+|---|---|
+| **Skill** | The row's canonical key (`id`) and name. A retired key stays resolvable for old saves. |
+| **Type** | What a press does: attack · buff · curse · heal · aura. |
+| **attack** | Joins the order list and pays cooldown + Mana. |
+| **buff** | A timed self-buff with `duration`; it ends between fights. |
+| **curse** | A status attached to the target; it uses the same `hit_chance` as an attack. |
+| **heal** | Uses the order list but lands on the player, never on a mob. |
+| **aura** | Reserves a share of Max Mana instead of paying a cooldown. |
+| **Shape** | Impact-area form: circle (default) · cone (`angle_deg`) · line (`length_m` × `width_m`). |
+| **Delivery** | How the hit arrives: instant · melee · projectile · ground. It selects the default cast time, recovery, impact delay, projectile speed and hit radius from `meta.action_profiles`; a row may override. |
+| **Target** | The roster label the player sees (`Single Enemy` / `Enemies in Area` / `All Enemies Around Me` / `Self`). It approximates the offline queue, not the live impact area. |
+| **Anchor** | Impact-area anchor: caster (around self; a body entering `radius_m` trips the cast) or target (acquire within `cast.range_m`, then resolve around the committed centre). |
+| **Range** | Targeting reach in meters. A line row uses `length_m`; a caster-anchor row uses `radius_m`. |
+| **Area of effect** | Circle radius — or the chain range on a `chain-strike` row. A positive radius hits every living centre with no count cap; zero radius with a line still hits every body on the line; zero radius with no shape is the primary only. |
+| **Cooldown** | Base cooldown in seconds: `cd × (1 − cdr%) × (1 − ladder%)`, where ladder is the duplicate-ladder cut. It ticks on the cooldown haste lever. |
+| **Mana** | Flat per-press price (or `hp_cost`, never both) after the canonical level cost step. One price covers any number of targets; a cancelled cast pays nothing. |
+| **Hits** | How many times one press lands, set by `action` + `effects` (`hits` / `hit_pct` / damage over time) and rendered by `hitLineOf`; never hand-written. |
+| **Duration** | How long a buff or field lasts, from the row's own duration. Haste scales effect strength, never duration. |
+| **Cast time** | The time from press to release (`cast.windup_sec`): `fixed + variable`. Only the variable part compresses under haste. |
+| **Fixed** | The cast-time floor (`cast.fixed_windup_sec`): no bonus from any source reduces the total cast time below it. |
+| **Recovery** | Post-release delay on its own haste lever. It blocks the next primary cast but never re-prices it. |
+| **Targeting range** | Which primary a cast may pick up: `cast.range_m`, line `length_m`, or caster `radius_m`. |
+| **Impact area** | The committed shape + centre + direction that decides which bodies an impact tests. It is fixed at release from live positions. |
+| **Chain range** | Chain rows only: how far the next contact may jump (`area.radius_m`); nearest unused living body, one cost and cooldown. |
+| **Chain continuation** | A `chain-strike` press continues after each resolved attempt, even a miss, under one per-tick trigger guard. |
+| **Cluster** | A `cluster-burst` press: after the parent impact, children leave at ±`spread_deg` with the parent's travel and delay. Children may overlap and roll independently; kill credit stays once. Implemented, but no live row uses it. |
+| **Homing** | A `targeted-burst` payload that tracks the body bound at release within its pursuit bounds; a dead or returned target fizzles the rest. Straight payloads keep the release aim instead. |
+| **Staged impact** | An action that spawns its impacts instead of resolving one hit — projectile/ground bursts, channels, lingering fields, chains or targeted bursts — under one cost and cooldown, sharing one roll/effect cache unless the row opts into independent rolls. |
+| **hit class** | The dodge tax on an incoming hit: attack (Evasion) · spell (Spell Dodge) · none. Authored per row — never inferred from type, basis, Element or delivery. |
+| **Spell Dodge** | The tree-only roll for `spell` hit-class hits; base zero, capped in `engine.json`. Perfect Dodge and Ghost Dance apply; `ignores_dodge` bypasses it. Player casts still use the mob's authored dodge. |
+| **Release-aimed** | A mob projectile or ground cast reads its source and destination at release, so it can follow the target's current position. |
+| **Cast-time-locked** | A mob charge travels to the point frozen during the cast time, never to the player's new feet. |
+
 ## Field and HUD
 
 | Term | Meaning |

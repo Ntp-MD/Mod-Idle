@@ -7,6 +7,7 @@ import { E, eng, sm } from '../../../engine/client';
 import type { CastReport, PreparedSkillCast, TriggerAura } from '../../combat/skills';
 import type { StatusName } from '../../combat/combat';
 import { bundleOf, capacitiveEs, manaDebtFloor } from '../../../../../engine/keystones.ts';
+import { payHpCost } from '../../../../../engine/skills.ts';
 import { reservedMana, usableMana, castOnce, spendableMana, prepareFirstSkillCast, resolvePreparedCast } from '../../combat/skills';
 import { applyCurse, lineValue } from '../../combat/curse';
 import { holdPoison } from '../../combat/mobStatus';
@@ -14,6 +15,7 @@ import { arenaAction, updateArenaAction } from '../../combat/combat-arena';
 import { targetsInSkillArea } from '../../../../../engine/skill-actions.ts';
 import { skillCastTiming } from '../../../../../engine/skill-actions.ts';
 import { fieldAreaKey } from '../../world/field-area';
+import { dispatchSkillFlights } from './flights.ts';
 import type { CombatFlight } from '../../combat/combat-actions';
 import { isBossKind } from '../kinds';
 import { fx, hitColour, credit } from '../feedback';
@@ -84,7 +86,7 @@ export function createCastTrigger(opts: {
           s.keystoneRuntime.manaDebtLimit = manaDebtFloor(usableMana(c, s.skills), debt.params as Record<string, number>);
         } else if (s.player.mana >= 0) s.keystoneRuntime.manaDebtLimit = null;
       }
-      if (cast.hpCost > 0) s.player.hp = Math.max(1, s.player.hp - cast.hpCost);
+      if (cast.hpCost > 0) s.player.hp = payHpCost(s.player.hp, cast.hpCost);
     }
 
     function castFx(id: string, area: SkillAreaSnapshot | undefined, targets: string[], actionId?: number,
@@ -136,14 +138,17 @@ export function createCastTrigger(opts: {
       // share split and the mitigation landed on every target, so the screen shows that and not the total
       for (const h of cast.byMob) {
         fx(s, {
-          kind: 'hit', side: 'field', mobId: h.id, crit: cast.crit, via: 'cast', skillId: cast.id, actionId: opts.actionId,
-          text: eng.fmt(h.amount), value: h.amount, colour: hitColour(castElement, cast.crit),
+          kind: 'hit', side: 'field', mobId: h.id, crit: h.crit ?? cast.crit, via: 'cast', skillId: cast.id, actionId: opts.actionId,
+          text: eng.fmt(h.amount), value: h.amount, colour: hitColour(castElement, h.crit ?? cast.crit),
           // A flight resolves at its crossing beat, not the noticing sample (F20); instant
           // presses carry no flight timing and keep the tick clock as before.
           ...(opts.castTiming?.impactAtUs != null ? { atUs: opts.castTiming.impactAtUs } : {}),
         });
       }
-      if (cast.crit && cast.byMob[0]) queueTrigger(trig.crit, cast.byMob[0].id);
+      // An independent multi-impact press may crit on a later payload; the trigger answers the
+      // first payload that actually crit, never the cast-wide flag alone.
+      const critHit = cast.byMob.find((hit) => hit.crit ?? cast.crit);
+      if (critHit) queueTrigger(trig.crit, critHit.id);
       if (cast.name && opts.emitCast !== false) castFx(cast.id, cast.area,
         cast.curseTargets ?? (cast.curseOn ? [cast.curseOn] : cast.byMob.map(hit => hit.id)),
         opts.actionId, opts.castTiming, { charges: cast.charges ?? cast.blockCharges, cleansed });
@@ -242,7 +247,7 @@ export function createCastTrigger(opts: {
       // Trigger casts are immediate by design: no animation commitment, so no step floor.
       const timing = skillCastTiming({ ...profile, windup_sec: 0, fixed_windup_sec: 0, recovery_sec: 0 }, atUs, units,
         { x: arena.player.x, y: arena.player.y }, prepared.area?.center ?? { x: arena.player.x, y: arena.player.y },
-        { cast: c.castSpeed, recovery: c.recoverySpeed });
+        { cast: c.castSpeed, recovery: c.recoverySpeed, castReductionPct: c.castReductionPct });
       const targetId = prepared.targets[0]?.id ?? prepared.area?.targetId ?? arena.intent?.targetId ?? front?.id;
       const previousAction = arena.player.action;
       const wasMoving = arena.player.moving;
@@ -277,6 +282,22 @@ export function createCastTrigger(opts: {
         });
         applyCastOutcome(report, { pay: false, emitCast: false, castCounter: false, mirror: false,
           actionId: action.id, castTiming: timing });
+        return;
+      }
+      const normalizedAction = sm.actionOf(skill);
+      const dispatched = dispatchSkillFlights(flight, normalizedAction, skill, timing, units, {
+        boundTargetId: targetId,
+      });
+      if (normalizedAction) {
+        if (dispatched.endsAtUs != null) {
+          updateArenaAction(arena, action.id, {
+            endsAtUs: Math.max(action.endsAtUs, dispatched.endsAtUs + E.combat_arena.action_sec * units),
+          });
+        }
+        for (const entry of dispatched.flights) {
+          arena.flights.push(entry);
+          scheduleFlight(entry);
+        }
         return;
       }
       if (profile.delivery === 'projectile' || timing.impactAtUs > atUs) {

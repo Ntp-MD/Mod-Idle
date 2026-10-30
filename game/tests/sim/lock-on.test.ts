@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { characterSheet, newGame, setLevel, stepCombat, tick } from '@sim/core/game';
 import { createCombatArena, syncCombatArena, captureCombatArena } from '@sim/combat/combat-arena';
+import { buildCharacter, emptyGear } from '@sim/core/player';
+import { newSkillState, prepareSkillCast, resolvePreparedCast } from '@sim/combat/skills';
 import { mobFixture } from '../fixtures/mobFixture';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
 import type { NavLayout } from '@engine/navigation.ts';
@@ -210,5 +212,42 @@ describe('C3 lock-on bursts', () => {
     expect(action.payloads.every((payload: any) => payload.cancelReason === 'obstacle')).toBe(true);
     expect(hitsFor(state, 'attack.double_strafe')).toHaveLength(0);
     expect(state.fx.filter((e: any) => e.kind === 'cast' && e.skillId === 'attack.double_strafe')).toHaveLength(1);
+  });
+});
+
+describe('C3 lock-on offline', () => {
+  const strafe = () => {
+    const state = newGame(82);
+    const skills = newSkillState();
+    skills.owned['attack.double_strafe'] = 0;
+    skills.list[0] = 'attack.double_strafe';
+    const c = { ...buildCharacter(30, emptyGear()), critChance: 50 };
+    const bound = mobFixture({ id: 'bound', hp: 1e9, hpMax: 1e9, evasion: 0, dodgeRate: 0, innate: [], skillIds: [] });
+    return { state, skills, c, bound };
+  };
+
+  it('rolls each payload independently instead of sharing one silent crit', () => {
+    const { state, skills, c, bound } = strafe();
+    const prepared = prepareSkillCast(skills, c, 'attack.double_strafe', 1e9, [bound], state.playerStatuses)!;
+    // crit, hit, dodge per payload: first payload crits, the later two do not.
+    const seq = [0, 0, 100, 100, 0, 100, 100, 0, 100];
+    let at = 0;
+    const rng = () => seq[Math.min(at++, seq.length - 1)];
+    const report = resolvePreparedCast(skills, c, prepared, state.playerStatuses, rng);
+    expect(report.byMob).toHaveLength(3);
+    expect(report.byMob.map((hit) => hit.crit)).toEqual([true, false, false]);
+    expect(report.crit).toBe(true);
+  });
+
+  it('fizzles the rest on a dead bound body and never re-acquires the neighbour', () => {
+    const { state, skills, c, bound } = strafe();
+    const other = mobFixture({ id: 'other', hp: 1e9, hpMax: 1e9, evasion: 0, dodgeRate: 0, innate: [], skillIds: [] });
+    bound.hp = 1;
+    const prepared = prepareSkillCast(skills, c, 'attack.double_strafe', 1e9, [bound, other], state.playerStatuses)!;
+    const report = resolvePreparedCast(skills, c, prepared, state.playerStatuses, () => 0.5);
+    expect(report.byMob).toHaveLength(1);
+    expect(report.byMob[0].id).toBe(bound.id);
+    expect(bound.hp).toBeLessThanOrEqual(0);
+    expect(other.hp).toBe(other.hpMax);
   });
 });
