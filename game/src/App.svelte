@@ -42,7 +42,7 @@ import { buyBlackMarket } from '@sim/town/black-market';
   import ActiveBuffs from './ui/hud/ActiveBuffs.svelte';
   import PlayerStatusRow from './ui/combat/PlayerStatusRow.svelte';
   import HudLayoutEditor from './ui/hud/HudLayoutEditor.svelte';
-  import { copyHudLayout, DEFAULT_MODAL_AREA, gridAreaCss, hudGridTemplate, HUD_LAYOUT_STORAGE_KEY, HUD_LAYOUT_PREVIOUS_STORAGE_KEYS, HUD_LAYOUT_VERSION, migrateHudLayout, rectFromArea, regionStyleCss, salvageHudLayout, validGridArea, validateHudLayout, type GridArea, type HudLayout, type HudRegionId } from './ui/hud/hud-layout';
+  import { copyHudLayout, DEFAULT_MODAL_AREA, gridAreaCss, hudGridTemplate, HUD_LAYOUT_STORAGE_KEY, HUD_LAYOUT_PREVIOUS_STORAGE_KEYS, HUD_LAYOUT_VERSION, migrateHudLayout, regionStyleCss, salvageHudLayout, validGridArea, validateHudLayout, type GridArea, type HudLayout, type HudRegionId } from './ui/hud/hud-layout';
   import TravelCard from './ui/map/TravelCard.svelte';
   import MapJourney from './ui/map/MapJourney.svelte';
   import { destinationIntel } from './ui/map/map-intel';
@@ -228,7 +228,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   function arenaLiving() { return gameState.group.filter((mob) => mob.hp > 0); }
   function focusArenaEnemy(mobId?: string) {
     if (!arenaMode || panel !== null) return;
-    const living = arenaLiving().filter((mob) => !combatArena.mobs[mob.id]?.returning);
+    const living = arenaLiving();
     const next = mobId
       ? living.find((mob) => mob.id === mobId)
       : living[(living.findIndex((mob) => mob.id === arenaFocusId) + 1) % Math.max(1, living.length)];
@@ -362,7 +362,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   /** A dead focus releases the pin so sticky-nearest selection resumes. */
   function syncArenaFocus() {
     if (!arenaFocusId) return;
-    if (arenaLiving().some((mob) => mob.id === arenaFocusId && !combatArena.mobs[mob.id]?.returning)) return;
+    if (arenaLiving().some((mob) => mob.id === arenaFocusId)) return;
     arenaFocusId = null;
     combatArena.focusId = undefined;
   }
@@ -1210,12 +1210,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const inCombat = $derived(gameState.phase === 'fighting' && fieldInFight(gameState));
   const liveArpgArena = $derived(!showcaseMode);
   const arenaMode = $derived(arenaPreview || liveArpgArena);
-  /** The HUD's actual free box, in stage percent. The cameras frame the fight inside it, so a
-   *  threat cannot be parked under the Journey, the Chronicle or the skill bar. */
-  const arenaSafeArea = $derived.by(() => {
-    const region = hudLayout.field;
-    return region.mode === 'absolute' ? { ...region.rect } : rectFromArea(region.area);
-  });
   /** Digits cast skill slots while the arena command bar is up; everywhere else they keep
    *  their screens. Typing targets and open panels always win over both. */
   const keyContext = $derived(arenaMode && panel === null ? 'arena' as const : 'global' as const);
@@ -1478,6 +1472,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     let stopWake: (() => void) | null = null;
     let autosaveTimer: ReturnType<typeof setInterval> | null = null;
     let disposed = false;
+    const writerController = new AbortController();
     // Autoplay policy: the context is created only after the first gesture, never at boot.
     const unlockAudio = () => {
       try {
@@ -1530,7 +1525,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     const onRenderLost = () => { renderLostPaused = paused; paused = true; flushSync(); };
     const onRenderRestored = () => { if (!renderLostPaused) paused = false; };
     (async () => {
-      const writerLock = await requestAccountWriterLock();
+      // A replacement instance in the same document must be able to wait out the departing
+      // instance's teardown flush; a genuinely occupied second tab still reads as busy.
+      const writerLock = await requestAccountWriterLock({ retryMs: 2000, signal: writerController.signal });
       if (disposed) {
         if (writerLock.status === 'acquired') writerLock.release();
         return;
@@ -1580,8 +1577,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       window.removeEventListener('beforeunload', flushSync);
       takeoverController?.abort();
       loadController?.abort();
+      writerController.abort();
       const lease = accountWriterLease;
-      void saveSession.flush().then(() => lease?.release());
+      // The departing tab releases even when its final flush fails; the failure is reported, not
+      // left holding the browser-wide writer lock against the replacement instance.
+      void saveSession.flush()
+        .catch((error) => console.error('ModWorld: final save flush failed', error))
+        .finally(() => lease?.release());
       accountWriterLease = null;
     };
   });
@@ -3476,7 +3478,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       focusId={arenaFocusId}
       aimSkill={arenaAimSkill}
       keyboardAim={arenaAimPoint}
-      safeArea={arenaSafeArea}
       effectLevel={settings.combatEffects || 'auto'}
       onAimPoint={(point) => { arenaAimPoint = point; }}
       onVitals={(vitals) => arenaVitals = vitals} onTargetRead={(read) => arenaTargetRead = read} onInspectEnemy={(mob) => inspectedEnemy = snapshotEnemy(mob)}

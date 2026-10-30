@@ -122,6 +122,8 @@ export interface Character {
    * dodge table used to print. Against the mob actually attacking, the roll is recomputed.
    */
   evasionChance: number;
+  /** Flat spell-avoidance chance: base 0%, tree-only lines plus Spellward, capped at 30. */
+  spellDodgeChance: number;
   armour: number;
   es: number;
   esRegen: number;
@@ -337,6 +339,7 @@ export function buildCharacter(
   const deepwell = bundleOf(bundles, 'deepwell');
   const hollow = bundleOf(bundles, 'hollow-body');
   const bloodEngine = bundleOf(bundles, 'blood-engine');
+  const spellward = bundleOf(bundles, 'spellward');
   const keen = bundleOf(bundles, 'keen-edge');
   const brutal = bundleOf(bundles, 'brutal-force');
   const focus = bundleOf(bundles, 'spellfocus');
@@ -375,7 +378,11 @@ export function buildCharacter(
     evasionValue = folded.evasion;
   }
   armourValue *= 1 + (kp(bulwark, 'armourPct') - kp(phantom, 'armourPct')) / 100;
-  evasionValue *= 1 + (kp(phantom, 'evasionPct') - kp(bulwark, 'evasionPct')) / 100;
+  evasionValue *= 1 + (kp(phantom, 'evasionPct') - kp(bulwark, 'evasionPct') - kp(spellward, 'evasionPenaltyPct')) / 100;
+  // C4 spell dodge: a flat chance, not an opposed rating — base 0%, tree lines only, Spellward
+  // buys 20, and the data Cap (30) binds the total. No Core attribute, gear line or mob carries it.
+  const spellDodgeChance = Math.min(Number(E.caps.spell_dodge ?? 30),
+    Math.max(0, (lines.spellDodgePct || 0) + kp(spellward, 'spellDodgePct')));
   // 67/82: the two rules that remove the Evasion layer outright; Perfect Dodge is separate and
   // only Gambler's Step keeps it (doubled).
   if (anvil || gamblers) evasionValue = 0;
@@ -435,6 +442,7 @@ export function buildCharacter(
     accuracy: eng.playerAccuracy(core.dex, lines.accPct + (life.accuracy_pct || 0)),
     evasion: evasionValue,
     evasionChance: eng.evasionChance(evasionValue, eng.refAttackerAcc(level)),
+    spellDodgeChance,
     armour: armourValue,
     es: esValue,
     // ES regen is `regen_pct`% of the max pool per second; a Mod line or an `es_regen` skill/passive

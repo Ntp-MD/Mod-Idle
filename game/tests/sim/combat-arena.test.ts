@@ -319,31 +319,13 @@ describe('opt-in spatial combat', () => {
   });
 });
 
-describe('F27 — protect the anchor', () => {
+describe('P3 — one pursuit rule, no anchor hold', () => {
   const step = (over: Record<string, unknown> = {}) => ({
     playerRange: 0.65, playerSpeedMult: 1, mobSpeedMult: () => 0,
     engagedIds: new Set<string>(), ...over,
   });
 
-  it('holds auto pursuit at the hold line instead of chasing past it', () => {
-    const { state, mob, arena } = fight(15);
-    const noted: string[] = [];
-    for (let index = 1; index <= 80; index++) {
-      advanceCombatArena(arena, state, index * 50_000, step({
-        playerTargetId: mob.id,
-        engagedIds: new Set([mob.id]),
-        anchorHold: { x: 1, y: 6, radiusM: 4 },
-        onAnchorHold: (id: string) => noted.push(id),
-      }));
-    }
-    // the anchor stands at x=1 with a 4 m line: the feet stop at x=5, ten metres short of the body.
-    expect(arena.player.x).toBeLessThanOrEqual(5 + 1e-6);
-    expect(arena.player.x).toBeGreaterThan(4);
-    expect(arenaDistance({ x: 1, y: 6 }, arena.player)).toBeLessThanOrEqual(4 + 1e-6);
-    expect(noted[0]).toBe(mob.id);
-  });
-
-  it('walks the full approach when no anchor is planted', () => {
+  it('walks the full approach with no pursuit line planted', () => {
     const { state, mob, arena } = fight(15);
     for (let index = 1; index <= 80; index++) {
       advanceCombatArena(arena, state, index * 50_000, step({
@@ -353,14 +335,19 @@ describe('F27 — protect the anchor', () => {
     expect(arenaDistance(arena.player, arena.mobs[mob.id])).toBeLessThan(15 - 4);
   });
 
-  it('approaches a target that walks inside the hold line', () => {
-    const { state, mob, arena } = fight(15);
-    Object.assign(arena.mobs[mob.id], { x: 3, y: 6 });
-    advanceCombatArena(arena, state, 50_000, step({
-      playerTargetId: mob.id,
-      engagedIds: new Set([mob.id]),
-      anchorHold: { x: 1, y: 6, radiusM: 4 },
-    }));
-    expect(arena.player.x).toBeGreaterThan(1);
+  it('does not change pursuit when the skill bar changes', () => {
+    const plain = fight(15);
+    const armed = fight(15);
+    armed.state.skills.list.fill(null);
+    armed.state.skills.list[0] = 'attack.firestorm';
+    for (let index = 1; index <= 40; index++) {
+      advanceCombatArena(plain.arena, plain.state, index * 50_000, step({
+        playerTargetId: plain.mob.id, engagedIds: new Set([plain.mob.id]),
+      }));
+      advanceCombatArena(armed.arena, armed.state, index * 50_000, step({
+        playerTargetId: armed.mob.id, engagedIds: new Set([armed.mob.id]),
+      }));
+    }
+    expect(armed.arena.player).toEqual(plain.arena.player);
   });
 });

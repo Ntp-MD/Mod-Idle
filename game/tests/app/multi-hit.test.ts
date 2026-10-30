@@ -304,9 +304,6 @@ describe('T5 chain lightning — canonical hops and preserved policies', () => {
     armour: 0, res: 0, resByElement: {}, effRes: 0, effResByElement: {},
     line: 'front', damage: 'physical', innate: [], skillIds: [],
     immune: [],
-    // Chain hops read live ground positions; a retreating body would leave the field instead of
-    // standing for its hop (F25), so these fixtures pin bodies in place like secondary-spatial's trio.
-    retreatAtPct: undefined, retreating: false,
   });
 
   function chainArena(spots: { id: string; x: number; y: number }[], distance = 2) {
@@ -325,7 +322,7 @@ describe('T5 chain lightning — canonical hops and preserved policies', () => {
     Object.assign(arena.mobs[mob.id], { x: 1 + distance, y: 6 });
     for (const spot of spots) Object.assign(arena.mobs[spot.id], { x: spot.x, y: spot.y });
     // No re-pin: the extras stay slotless exactly like the existing chain test above, so the
-    // engagement/leash pass never marks them returning or wipes their status lines mid-chain.
+    // engagement pass keeps them in the fight through the chain.
     return { state, mob, arena };
   }
 
@@ -477,21 +474,6 @@ describe('T5 chain lightning — canonical hops and preserved policies', () => {
     expect(arena.flights.filter((flight) => flight.cast.id === CHAIN)).toHaveLength(0);
     tick(state, { arena, autoSkills: false });
     expect(chainHits(state, cast.id)).toHaveLength(1);
-  });
-
-  it('continues after a resolved miss and records the attempt (C2 baseline)', () => {
-    const { state, arena } = chainArena([
-      { id: 'chain-mid', x: 4.5, y: 6 }, { id: 'chain-last', x: 5.5, y: 6 },
-    ]);
-    // C2 records, not repairs: selection does not exclude `returning` bodies, so the hop is
-    // picked and then misses at impact while the chain still continues to the last body.
-    arena.mobs['chain-mid'].returning = true;
-    tick(state, { arena });
-    const cast = arena.actions.find((action) => action.skillId === CHAIN)!;
-    expect(chainHits(state, cast.id).map((hit) => hit.mobId))
-      .toEqual(['multi-target', 'chain-last']);
-    expect(cast.impactCount).toBe(3);
-    expect(state.group.find((mob) => mob.id === 'chain-mid')!.hp).toBe(1e9);
   });
 
   it('skips bodies removed from the living group on later casts', () => {

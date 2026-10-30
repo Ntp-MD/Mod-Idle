@@ -22,8 +22,6 @@ function trio(seed: number, keystones: string[]) {
     Object.assign(mob, {
       id, hp: 1e9, hpMax: 1e9, ps: 0, accuracy: 0, evasion: 0, dodgeRate: 0,
       armour: 0, line: 'stand-off', damage: 'physical', innate: [], skillIds: [],
-      // This fixture proves secondary geometry, not the F25 retreat decision: the bodies stand.
-      retreatAtPct: undefined, retreating: false,
     });
     return mob;
   };

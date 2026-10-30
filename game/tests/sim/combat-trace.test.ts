@@ -5,7 +5,7 @@ describe('P0 trace — action timing', () => {
   it('records a manual cast from command to impact', () => {
     const encounter = seededEncounter({ seed: 21, bodies: 4, skills: ['attack.fireball'] });
     encounter.run(1);
-    const target = Object.values(encounter.arena.mobs).find((mob) => mob.hp > 0 && !mob.returning);
+    const target = Object.values(encounter.arena.mobs).find((mob) => mob.hp > 0);
     if (target) Object.assign(encounter.arena.player, { x: target.x + 1, y: target.y });
     encounter.run(1, { tick: 0, manual: { cast: { skillId: 'attack.fireball' } } });
     encounter.run(6);

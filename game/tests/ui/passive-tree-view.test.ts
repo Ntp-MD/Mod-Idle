@@ -149,6 +149,13 @@ describe('branching passive-tree roads', () => {
     expect(ordinaryEnds.map((node) => node.id)).toEqual([]);
   });
 
+  it('rejects duplicate Keystone entrances before searching for leaf pockets', () => {
+    const leaf = spec.nodes.find(node => node.kind === 'keystone')!;
+    const duplicate = { ...leaf, id: 'keystone.duplicate' };
+    expect(() => buildTreeNetwork([...spec.nodes, duplicate], spec.layout))
+      .toThrow(/share notable\..*independent Notable entrance/);
+  });
+
   it('refuses missing route anchors, reused route steps and unreadable leaf pockets', () => {
     const missing = structuredClone(spec.layout);
     delete missing.web!.sites[Object.keys(missing.web!.sites)[0]];

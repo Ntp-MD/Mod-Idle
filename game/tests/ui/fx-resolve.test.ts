@@ -34,9 +34,9 @@ describe('effect shape resolver', () => {
   });
 
   it('resolves a mob response from its skill first, then its body', () => {
-    expect(mobSkillShape({ element: 'cold', role: 'any' })).toBe('cold');
-    expect(mobSkillShape({ element: 'physical', role: 'stand-off' })).toBe('bolt');
-    expect(mobSkillShape({ element: 'physical', role: 'front' })).toBe('slash');
+    expect(mobSkillShape({ element: 'cold', cast: { delivery: 'projectile' } })).toBe('cold');
+    expect(mobSkillShape({ element: 'physical', cast: { delivery: 'projectile' } })).toBe('bolt');
+    expect(mobSkillShape({ element: 'physical', cast: { delivery: 'melee' } })).toBe('slash');
     expect(mobSkillShape(null, { damage: 'physical', innate: ['fire'] })).toBe('slash');
     expect(mobSkillShape(null, { damage: 'magic', innate: ['poison'] })).toBe('poison');
     expect(mobSkillShape(null, null)).toBe('burst');
@@ -48,7 +48,7 @@ describe('effect shape resolver', () => {
     expect(fieldShape({ kind: 'block', text: 'Block' })).toBe('block');
     expect(fieldShape({ kind: 'block', text: 'dodge' })).toBe('dodge');
     expect(fieldShape({ kind: 'taken' }, { mob: { damage: 'physical' } })).toBe('slash');
-    expect(fieldShape({ kind: 'taken' }, { mobSkill: { element: 'fire', role: 'any' } })).toBe('fire');
+    expect(fieldShape({ kind: 'taken' }, { mobSkill: { element: 'fire', cast: { delivery: 'projectile' } } })).toBe('fire');
     expect(fieldShape({ kind: 'hit' }, { skill: { group: 'magic', element: 'chaos' } })).toBe('chaos');
   });
 
@@ -58,7 +58,7 @@ describe('effect shape resolver', () => {
     expect(arenaSkillShape({ group: 'melee' })).toBe('slash');
     expect(arenaSkillShape({ group: 'all' })).toBe('slash');
     expect(arenaSkillShape(null, 'magic', 'cold')).toBe('cold');
-    expect(arenaMobShape({ element: 'cold', role: 'stand-off' })).toBe('cold');
+    expect(arenaMobShape({ element: 'cold', cast: { delivery: 'projectile' } })).toBe('cold');
     expect(arenaMobShape(null, { damage: 'magic', innate: ['earth'] })).toBe('earth');
     expect(arenaMobShape(null, { damage: 'physical' })).toBe('slash');
   });

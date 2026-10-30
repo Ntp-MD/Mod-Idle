@@ -10,7 +10,11 @@ export type ArenaShape = EffectShape | 'physical';
 
 export type SkillLike = { id?: string; group?: string | null; element?: string | null; type?: string | null };
 export type MobLike = { damage?: string | null; innate?: readonly (string | null)[] | null };
-export type MobSkillLike = { element?: string | null; role?: string | null };
+export type MobSkillLike = {
+  element?: string | null;
+  mode?: string | null;
+  cast?: { delivery?: string | null } | null;
+};
 export type FieldEventLike = { kind: string; text?: string };
 
 export const isEffectShape = (value: string): value is EffectShape =>

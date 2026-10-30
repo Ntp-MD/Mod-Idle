@@ -13,6 +13,9 @@ import type { GameState, Mob } from '../core/types';
 
 export type FieldPoint = { x: number; y: number };
 
+/** Why a body is engaged: the diagnostic receipt that also keeps assisted bodies from re-seeding. */
+export type EngagementCause = 'proximity' | 'contact' | 'assist';
+
 /** One authored home. The slot is empty while `mobId` is absent and `respawnAtSec` is counting. */
 export type FieldLifeStatus = Record<string, { stacks: number; secLeft: number } | undefined>;
 export interface FieldSpawnSlot {
@@ -36,8 +39,10 @@ export interface FieldState {
   arenaEpoch: number;
   nextSlotSeq: number;
   slots: FieldSpawnSlot[];
-  /** Bodies currently inside their aggro/leash window; combat and mob attack scheduling read this. */
+  /** Bodies currently in the fight; combat and mob attack scheduling read this. */
   engagementIds: string[];
+  /** Per-member cause, keyed by mob id; absent (legacy save) reads as a direct contact. */
+  engagementCauses?: Record<string, EngagementCause>;
   combatSessionId: number;
   sessionActive: boolean;
   quietSec: number;
@@ -47,7 +52,7 @@ export interface FieldState {
   offlineCredit?: number;
   farmingAnchor: FieldPoint;
   player: FieldPoint;
-  actors: { id: string; x: number; y: number; returning?: boolean }[];
+  actors: { id: string; x: number; y: number }[];
   /** Last wall second this field was current; the offline catch-up starts from here. */
   lastSeenAtSec?: number;
 }
@@ -154,13 +159,20 @@ export function syncFieldState(s: GameState, arena?: CombatArena, quietTicks = 2
         ...(s.mobStatus[mob.id] ? { mark: copy(s.mobStatus[mob.id]) } : {}) };
     }
     s.fieldArchive ??= {};
+    // Keep the living bodies' last valid ground positions with the archived lives: re-entering a
+    // field must resume the same fight, never teleport survivors back to their slot homes.
+    const savedActors = field.actors
+      .filter((actor) => leaving.has(actor.id))
+      .slice(0, MAX_ACTORS)
+      .map((actor) => ({ id: actor.id, x: actor.x, y: actor.y }));
     s.fieldArchive[field.areaKey] = copy({
       ...field,
       savedAtSec: s.clockSec,
       sessionActive: false,
       quietSec: 0,
       engagementIds: [],
-      actors: [],
+      engagementCauses: {},
+      actors: savedActors,
     });
     const entries = Object.entries(s.fieldArchive).sort((a, b) => b[1].savedAtSec - a[1].savedAtSec);
     for (const [stale] of entries.slice(MAX_ARCHIVES)) delete s.fieldArchive[stale];
@@ -175,7 +187,7 @@ export function syncFieldState(s: GameState, arena?: CombatArena, quietTicks = 2
         sessionActive: false,
         quietSec: 0,
         engagementIds: [],
-        actors: [],
+        engagementCauses: {},
         lastSeenAtSec: s.clockSec,
       } as unknown as FieldState;
     } else {
@@ -227,10 +239,16 @@ export function syncFieldState(s: GameState, arena?: CombatArena, quietTicks = 2
 
   if (arena) {
     field.player = { x: arena.player.x, y: arena.player.y };
-    field.actors = s.group.filter((mob) => mob.hp > 0 && arena.mobs[mob.id])
+    // Record the renderer's current ground, but keep an archived position for a living body the
+    // renderer has not created yet: a re-entry must resume the same fight, not the slot homes.
+    const saved = new Map((field.actors ?? []).map((actor) => [actor.id, actor]));
+    field.actors = s.group
+      .filter((mob) => mob.hp > 0)
       .slice(0, MAX_ACTORS)
-      .map((mob) => ({ id: mob.id, x: arena.mobs[mob.id].x, y: arena.mobs[mob.id].y,
-        ...(arena.mobs[mob.id].returning ? { returning: true } : {}) }));
+      .flatMap((mob) => {
+        const pose = arena.mobs[mob.id] ?? saved.get(mob.id);
+        return pose ? [{ id: mob.id, x: pose.x, y: pose.y }] : [];
+      });
   }
   // Engagement is written by the combat loop; a session starts on the first engaged body and ends
   // after the field has been quiet for `quietTicks`.
@@ -257,7 +275,7 @@ export function syncFieldState(s: GameState, arena?: CombatArena, quietTicks = 2
   return startedSession;
 }
 
-/** True while a field body is inside its aggro/leash window; non-combat actions read this, not group size. */
+/** True while at least one field body is engaged; non-combat actions read this, not group size. */
 export function fieldInFight(s: Pick<GameState, 'field'>): boolean {
   return !!s.field?.engagementIds.length;
 }
@@ -285,8 +303,7 @@ export function restoreFieldPositions(arena: CombatArena, s: GameState): void {
     Object.assign(arena.player, { x: field.player.x, y: field.player.y });
   for (const actor of field.actors) {
     const saved = arena.mobs[actor.id];
-    if (saved && saved.hp > 0)
-      Object.assign(saved, { x: actor.x, y: actor.y, ...(actor.returning ? { returning: true } : {}) });
+    if (saved && saved.hp > 0) Object.assign(saved, { x: actor.x, y: actor.y });
   }
 }
 
@@ -324,16 +341,26 @@ export function normalizeFieldState(value: unknown): FieldState | null {
     !!actor && typeof actor.id === 'string' && finite(actor.x) && finite(actor.y)).slice(0, MAX_ACTORS)
     .map((actor) => {
       const at = point({ x: actor.x, y: actor.y });
-      return { id: actor.id, x: at.x, y: at.y, ...(actor.returning === true ? { returning: true } : {}) };
+      return { id: actor.id, x: at.x, y: at.y };
     });
+  const engagementIds = (Array.isArray(field.engagementIds) ? field.engagementIds : [])
+    .filter((id) => typeof id === 'string').slice(0, MAX_SLOTS);
+  const rawCauses = (field as { engagementCauses?: unknown }).engagementCauses;
+  const engagementCauses: Record<string, EngagementCause> = {};
+  if (rawCauses && typeof rawCauses === 'object') {
+    for (const [id, cause] of Object.entries(rawCauses)) {
+      if (!engagementIds.includes(id)) continue;
+      if (cause === 'proximity' || cause === 'contact' || cause === 'assist') engagementCauses[id] = cause;
+    }
+  }
   return {
     areaKey: field.areaKey,
     layoutRevision: Math.max(2, Math.min(LAYOUT_REVISION, revision)),
     arenaEpoch: Math.max(1, Math.floor(field.arenaEpoch)),
     nextSlotSeq: Math.max(1, Math.floor(finite(field.nextSlotSeq) ? field.nextSlotSeq : 1)),
     slots,
-    engagementIds: (Array.isArray(field.engagementIds) ? field.engagementIds : [])
-      .filter((id) => typeof id === 'string').slice(0, MAX_SLOTS),
+    engagementIds,
+    engagementCauses,
     combatSessionId: Math.max(0, Math.floor(finite(field.combatSessionId) ? field.combatSessionId : 0)),
     sessionActive: !!field.sessionActive,
     quietSec: Math.max(0, Math.floor(finite(field.quietSec) ? field.quietSec : 0)),

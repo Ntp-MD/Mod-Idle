@@ -68,7 +68,7 @@ import { newFilter, ruleFor, coveredElements, refresh as refreshFilter } from '.
 import { addTo, fits, slotsFree } from '../gear/slots';
 import { settlementOfZone, settlementById } from '../town/town';
 import { effectsActive, esAbsorbPct } from '../combat/skills';
-import { applyMobAuras, resolveMobBehavior, resolveMobKit } from '../combat/mobSkills';
+import { applyMobAuras, resolveMobKit } from '../combat/mobSkills';
 import { mark as markSnapshot } from './snapshot';
 import { newGoal, onSpawn as goalSpawn, onKill as goalKill, watch as goalWatch } from './goal';
 import { newGuidance } from './guidance';
@@ -415,8 +415,6 @@ export function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'el
     hitsPerSec: mobClock(rank, base.clock_mult),
     atkTimer: 0,
     engageSec: 0,
-    behavior: resolveMobBehavior(species.id, species.line, skillIds),
-    retreatAtPct: rank === 'boss' || rank === 'unique' ? undefined : E.mob.retreat_at_pct,
     skillIds,
     skillReadyAtUs: {},
   };
@@ -1199,10 +1197,9 @@ function tickSecondEnd(s: GameState, second: TickSecond): void {
     const unfired = plan.times.length - plan.fired;
     if (unfired > 0) plan.mob.atkTimer += unfired;
   }
-  // A Boss owns a local arena epoch. Its own death receipt settles the remaining released work even
-  // while other field bodies are still alive under the population model.
+  // A Boss owns a local arena epoch. Its death settles the epoch, never the work of other bodies:
+  // a committed shot from its own release still lands, and the field keeps fighting.
   if (s.field?.bossDefeatedAtSec === s.clockSec) {
-    second.cancelArenaWork?.('boss-exit');
     s.field.arenaEpoch++;
     s.field.bossDefeatedAtSec = undefined;
   }
@@ -1345,7 +1342,7 @@ function tickWorld(s: GameState, opts: TickOptions, second: TickSecond, tickStar
 
   if (secondStart) {
     advanceFieldPopulation(s, {
-      arena, c, online, rng, tickStartUs, units, cancelArenaWork, fieldProfile, spawnMob,
+      arena, c, online, rng, tickStartUs, units, fieldProfile, spawnMob,
     });
     // The per-fight potion budget belongs to a combat session, not to each spawn.
     if (syncFieldState(s, arena, 2, false)) s.farm.usesThisFight = 0;
@@ -1354,22 +1351,18 @@ function tickWorld(s: GameState, opts: TickOptions, second: TickSecond, tickStar
     for (const m of s.group) goalSpawn(s, m);
   }
 
-  // Engagement is spatial: only bodies inside aggro, an existing leash, an assist neighbour, or the
-  // player's committed target may attack. The rest keep their home ground. The same resolver runs
-  // again after every authoritative movement sample, so joining or leaving is not delayed a second.
-  const { syncEngagement, refreshReturning, insideHomeLeash } = advanceEngagement(s, {
-    arena, online, fieldProfile, cancelIntent, cancelMobPreparation, tickStartUs,
+  // Engagement is spatial: only bodies inside aggro, an assist neighbour, or the player's committed
+  // target may attack. The same resolver runs again after every authoritative movement sample, so
+  // joining or leaving is not delayed a second.
+  const { syncEngagement, alertContact } = advanceEngagement(s, {
+    arena, online, fieldProfile, cancelMobPreparation, tickStartUs,
     state: second.engagement, prime: secondStart, pinnedIds: opts.settlePinned,
   });
 
-  /** A committed player target enters its aggro window only while its home leash still holds. */
-  function engageTarget(targetId?: string): void {
-    if (!arena || !s.field || !targetId) return;
-    if (arena.mobs[targetId]?.returning) return;
-    if (!s.group.some((mob) => mob.id === targetId && mob.hp > 0 && insideHomeLeash(mob))) return;
-    if (s.field.engagementIds.includes(targetId)) return;
-    second.engagement.deliberateTargetId = targetId;
-    const delta = syncEngagement(clock.nowUs);
+  /** A resolved hostile contact alerts its body once; selection or a pre-release press does not. */
+  function alertHostileContact(mobId: string): void {
+    if (!arena || !s.field || !mobId) return;
+    const delta = alertContact(mobId, clock.nowUs);
     for (const id of delta.added) {
       const mob = s.group.find((entry) => entry.id === id && entry.hp > 0);
       if (mob) scheduleMobAttacksFor(mob, clock.nowUs);
@@ -1464,7 +1457,7 @@ function tickWorld(s: GameState, opts: TickOptions, second: TickSecond, tickStar
   const { advanceLiveClocks } = createLiveClocks({ arena, s, c, units, cooldown, playerActiveFraction });
   const { advanceArenaAt } = createArenaStep({
     arena, s, clock, units, manual, autoAvoid, cancelPlayerBasic, cancelIntent, cancelMobPreparation,
-    advanceLiveClocks, approachRange, playerActiveFraction, statusModsOn, refreshReturning, syncEngagement,
+    advanceLiveClocks, approachRange, playerActiveFraction, statusModsOn, syncEngagement,
     scheduleMobAttacksFor: (mob, atUs) => scheduleMobAttacksFor(mob, atUs),
     sweepFlights: (atUs) => sweepFlights(atUs),
     sweepMobShots: (atUs) => sweepMobShots(atUs),
@@ -1513,8 +1506,7 @@ function tickWorld(s: GameState, opts: TickOptions, second: TickSecond, tickStar
   }
 
   const arenaActors = (group: Mob[]) => group.flatMap((mob) =>
-    mob.hp > 0 && arena?.mobs[mob.id] && !arena.mobs[mob.id].returning
-      ? [{ ...arena.mobs[mob.id], mob }] : []);
+    mob.hp > 0 && arena?.mobs[mob.id] ? [{ ...arena.mobs[mob.id], mob }] : []);
 
   // The cast and intent factories schedule flights before the flight factory can be built (it needs
   // their outcome), so the one released-flight boundary is a late-bound holder.
@@ -1529,6 +1521,7 @@ function tickWorld(s: GameState, opts: TickOptions, second: TickSecond, tickStar
     mirrorReady, luckyBonus, tranceFree, arenaActors, resolveTargetsForSkill,
     resolveFlight: (flight, atUs, forced) => flightWork.resolve(flight, atUs, forced),
     scheduleFlight: (flight) => flightWork.schedule(flight), onKill: killMob,
+    alertContact: alertHostileContact,
   });
 
   const { scheduleFlight, resolveFlight, sweepFlights } = createFlights({
@@ -1559,7 +1552,7 @@ function tickWorld(s: GameState, opts: TickOptions, second: TickSecond, tickStar
   };
   const { ensureIntent } = createIntentSelect({
     arena, s, attackCharacter, autoSkills, playerActiveFraction, manual,
-    cancelIntent, startWindup, engageTarget, holdFiller,
+    cancelIntent, startWindup, holdFiller,
   });
 
   /** Control delays a body's whole committed plan, not only this window's already-queued events. */
@@ -1579,7 +1572,7 @@ function tickWorld(s: GameState, opts: TickOptions, second: TickSecond, tickStar
     plan: second.playerBasicPlan, savePlan: (plan) => { second.playerBasicPlan = plan; }, online, manual,
     crippledOutgoingMult, unstoppablePenalty, berserkDealt, playerHitsPerSec, playerActiveFraction,
     statuses, trig, queueTrigger, recoverLeech, mobMods, delayMobPlan, spreadShock, mirrorReady,
-    luckyBonus, advanceArenaAt, engageTarget, cancelIntent, onKill: killMob, dominantElement,
+    luckyBonus, advanceArenaAt, alertContact: alertHostileContact, cancelIntent, onKill: killMob, dominantElement,
     applyEquilibrium, revertEquilibrium,
   });
 
@@ -1796,7 +1789,7 @@ function settleSavedPendingWork(s: GameState, autoSkills: boolean, budgetSec = 1
   const budget = Math.min(Math.max(0, Math.floor(budgetSec)), SETTLE_SECONDS_CAP);
   let done = 0;
   // Every target named by the released ledger is pinned while its impact is owed: the body stays
-  // in the engagement and keeps its wounds, so the shot cannot be voided by a leash reset.
+  // in the engagement and keeps its wounds until the shot settles.
   const pinned = new Set<string>();
   for (const flight of s.pendingWork?.flights ?? []) {
     for (const id of flight.targetIds) pinned.add(id);

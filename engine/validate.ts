@@ -186,6 +186,24 @@ export function validateEngineData<K extends EngineData['K']>(raw: { K: K }): En
     if (!Number.isInteger(max) || max < min) refuse(`${path}.bonus_material.max`, 'must be a whole number at least min');
   });
 
+  // Field-awareness eligibility is authored, not inferred: every id names a real Species and a
+  // Species appears at most once in each list.
+  const engagement = mob.engagement as unknown;
+  if (engagement != null) {
+    if (!isObject(engagement)) refuse('mob.engagement', 'must be an object');
+    for (const key of ['proximity', 'assist'] as const) {
+      const list = engagement[key];
+      if (!Array.isArray(list)) refuse(`mob.engagement.${key}`, 'must be an array of Species ids');
+      const seen = new Set<string>();
+      list.forEach((id, i) => {
+        if (typeof id !== 'string' || !speciesIds.has(id))
+          refuse(`mob.engagement.${key}[${i}]`, `names unknown Species ${String(id)}`);
+        if (seen.has(id)) refuse(`mob.engagement.${key}[${i}]`, `duplicates Species ${String(id)}`);
+        seen.add(id as string);
+      });
+    }
+  }
+
   const sizes = mob.sizes as unknown;
   if (!Array.isArray(sizes)) refuse('mob.sizes', 'must be an array of body classes');
   const sizeIds = new Set<string>();

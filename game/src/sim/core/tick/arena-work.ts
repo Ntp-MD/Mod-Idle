@@ -13,7 +13,7 @@ import { push } from '../log';
 export function createArenaWork(opts: { arena: CombatArena | undefined; clock: CombatClock; s?: GameState }) {
   const { arena, clock, s } = opts;
   /** A deliberate request that the rules refused deserves the reason on the field log. */
-  const REJECTIONS = new Set(['out of range', 'target lost', 'not ready', 'target returning']);
+  const REJECTIONS = new Set(['out of range', 'target lost', 'not ready']);
 
   /** Cancel an unreleased player basic; a released swing keeps its pose and receipt. */
   function cancelPlayerBasic(reason: string) {
@@ -73,8 +73,22 @@ export function createArenaWork(opts: { arena: CombatArena | undefined; clock: C
     const at = arena.flights.indexOf(flight);
     if (at >= 0) arena.flights.splice(at, 1);
     const action = arena.actions.find((entry) => entry.id === flight.actionId);
-    if (action && action.cancelledAtUs == null)
-      updateArenaAction(arena, action.id, { cancelledAtUs: atUs, cancelReason: reason, endsAtUs: atUs });
+    if (action && action.cancelledAtUs == null) {
+      const payloadIndex = flight.impactIndex ?? 0;
+      // A collision barrier terminally blocks this one volley payload. Other payloads share the
+      // press identity and keep running; only encounter invalidation cancels the whole action.
+      if (reason === 'obstacle' && (action.payloads?.length ?? 0) > 1) {
+        updateArenaAction(arena, action.id, {
+          payloads: action.payloads!.map((payload) => payload.index === payloadIndex
+            ? { ...payload, impactAtUs: atUs, contact: { ...flight.position }, cancelReason: reason }
+            : payload),
+          impactCount: (action.impactCount ?? 0) + 1,
+          endsAtUs: Math.max(action.endsAtUs, atUs + 0.2 * arena.unitsPerSec),
+        });
+      } else {
+        updateArenaAction(arena, action.id, { cancelledAtUs: atUs, cancelReason: reason, endsAtUs: atUs });
+      }
+    }
   }
 
   return { cancelPlayerBasic, cancelIntent, cancelArenaWork, cancelFlight };

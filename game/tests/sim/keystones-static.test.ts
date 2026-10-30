@@ -109,7 +109,7 @@ describe('Packet E — static keystones', () => {
   });
 
   it('registers the whole table and refuses a handler missing a required hook', () => {
-    expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toHaveLength(105);
+    expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toHaveLength(106);
     for (const key of ['ironwall', 'emberheart', 'one-flame', 'unerring-eye', 'elemental-aegis', 'enduring-core', 'chaos-inoculation']) {
       expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toContain(key);
     }

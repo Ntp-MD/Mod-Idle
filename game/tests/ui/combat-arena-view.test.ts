@@ -4,7 +4,7 @@ import CombatArenaScene from '../../src/ui/combat/CombatArenaScene.svelte';
 import type { CombatArena, CombatArenaAction, CombatArenaActor, CombatArenaFrame } from '@sim/combat/combat-arena';
 import type { FxEvent } from '@sim/core/types';
 import { arenaArtExtent, type ArenaCharacterArt, type ArenaSpriteSheet } from '../../src/ui/combat/arena/arena-art';
-import { arenaActionPose, arenaActorAction, arenaActorPixelScale, arenaCameraOffset, arenaDirection, arenaEventTiming, arenaFlightProgress, arenaFlightWindow, arenaPersistentFieldVisual, arenaFacingSector, arenaFieldNote, arenaPlaybackTime, arenaRangedShots, arenaScreenAngle, arenaSpriteFrame, createArenaGait, projectArenaPoint, projectArenaVector, unprojectArenaPoint } from '../../src/ui/combat/combat-arena-view';
+import { arenaActionPose, arenaActorAction, arenaActorPixelScale, arenaCameraOffset, arenaDirection, arenaEventTiming, arenaFlightProgress, arenaFlightWindow, arenaPersistentFieldVisual, arenaFacingSector, arenaFieldNote, arenaPlaybackTime, arenaRangedShots, arenaScreenAngle, arenaSpriteFrame, createArenaGait, createArenaPlaybackClock, projectArenaPoint, projectArenaVector, unprojectArenaPoint } from '../../src/ui/combat/combat-arena-view';
 import { groundShapePath, projectVfxFootprint } from '../../src/ui/combat/arena-vfx-space';
 import { arenaAction, createCombatArena, captureCombatArena, recordCombatArenaFx, sampleCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
 import { characterSheet, newGame } from '@sim/core/game';
@@ -143,12 +143,29 @@ describe('arena camera and playback', () => {
     for(const idleWidth of [70,115,155,230]) expect(diameter/(idleWidth*arenaActorPixelScale(idleWidth,1))).toBeCloseTo(12);
   });
 
-  it('keeps the camera on the player when the selected target changes', () => {
-    const player={x:8,y:6},target={x:12,y:7},camera=arenaCameraOffset(player,target);
-    const a=projectArenaPoint(player);
-    expect(a.x-camera.x).toBeCloseTo(1040);
-    expect(a.y-camera.y).toBeCloseTo(530);
-    expect(arenaCameraOffset(player, { x: 45, y: 28 })).toEqual(camera);
+  it('keeps the rendered player at the viewport centre through movement, field edges and target changes', () => {
+    const state = newGame(42), arena = createCombatArena();
+    state.group = [mobFixture({ id: 'west' }), mobFixture({ id: 'east' })];
+    const c = characterSheet(state);
+    syncCombatArena(arena, state, 0, 1_000_000, c.maxHp);
+    Object.assign(arena.mobs.west, { x: 0, y: 0 });
+    Object.assign(arena.mobs.east, { x: arena.bounds.width, y: arena.bounds.height });
+    for (const player of [
+      { x: 0, y: 0 }, { x: arena.bounds.width, y: 0 },
+      { x: 0, y: arena.bounds.height }, { x: arena.bounds.width, y: arena.bounds.height },
+      { x: 25, y: 16 }, { x: 25.1, y: 16.1 },
+    ]) {
+      Object.assign(arena.player, player);
+      captureCombatArena(arena, state, 0);
+      for (const focusId of [null, 'west', 'east']) {
+        const body = render(CombatArenaScene, { props: { arena, s: state, c, ring: [], focusId } }).body;
+        const transform = body.match(/class="arena-camera[^"\n]*" style="[^"\n]*transform:\s*translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
+        expect(transform).not.toBeNull();
+        const projected = projectArenaPoint(player);
+        expect(projected.x + Number(transform![1])).toBeCloseTo(ARENA_VIEW.width / 2, 8);
+        expect(projected.y + Number(transform![2])).toBeCloseTo(ARENA_VIEW.height / 2, 8);
+      }
+    }
   });
 
   it('plays exactly the received second at all speeds and cannot run beyond resolved simulation', () => {
@@ -166,6 +183,30 @@ describe('arena camera and playback', () => {
     expect(arenaPlaybackTime(12_000_000, 1_000_000, 50, 4, false, displayed)).toBe(displayed + 200_000);
     expect(arenaPlaybackTime(12_000_000, 1_000_000, 50, 4, true, displayed)).toBe(displayed);
     expect(arenaPlaybackTime(12_000_000, 1_000_000, 10_000, 1, false, displayed)).toBe(12_000_000);
+  });
+
+  it('shows damage and new spawns when the same raw arena advances in place', () => {
+    const state = newGame(42), arena = createCombatArena();
+    const c = characterSheet(state);
+    syncCombatArena(arena, state, 0, 1_000_000, c.maxHp);
+    captureCombatArena(arena, state, 0);
+    const playback = createArenaPlaybackClock();
+    expect(playback(arena, 0)).toBe(0);
+
+    state.player.hp = 300;
+    state.group = [mobFixture({ id: 'new-spawn', hp: 75, hpMax: 100 })];
+    syncCombatArena(arena, state, 1_000_000, 1_000_000, c.maxHp);
+    captureCombatArena(arena, state, 1_000_000);
+    playback(arena, 1000);
+    const shownAt = playback(arena, 2000);
+    const frame = sampleCombatArena(arena, shownAt);
+    expect(shownAt).toBe(1_000_000);
+    expect(frame.player.hp).toBe(300);
+    expect(frame.mobs['new-spawn'].hp).toBe(75);
+
+    expect(playback(arena, 2100, 1, true)).toBe(shownAt);
+    expect(playback(arena, 5000, 1, true)).toBe(shownAt);
+    expect(playback(arena, 5100)).toBe(shownAt);
   });
 
   it('uses only received actor actions, preserving the contact timestamp', () => {
@@ -441,11 +482,11 @@ describe('projectile flight window', () => {
 });
 
 describe('highlight target rule', () => {
-  it('never highlights a returning body even when it is nearest', async () => {
+  it('never highlights a dead body even when it is nearest', async () => {
     const { arenaNearestTarget } = await import('../../src/ui/combat/combat-arena-view');
     const player = { x: 0, y: 0 };
-    expect(arenaNearestTarget({ gone: { hp: 1, x: 1, y: 0, returning: true }, live: { hp: 1, x: 3, y: 0 } }, player)).toBe('live');
-    expect(arenaNearestTarget({ gone: { hp: 1, x: 1, y: 0, returning: true } }, player)).toBeUndefined();
+    expect(arenaNearestTarget({ gone: { hp: 0, x: 1, y: 0 }, live: { hp: 1, x: 3, y: 0 } }, player)).toBe('live');
+    expect(arenaNearestTarget({ gone: { hp: 0, x: 1, y: 0 } }, player)).toBeUndefined();
     expect(arenaNearestTarget({}, player)).toBeUndefined();
   });
 });
@@ -481,7 +522,7 @@ describe('incoming basic attack tell', () => {
 });
 
 
-describe('cast and returning render-level proofs', () => {
+describe('cast render-level proofs', () => {
   it('draws the cast bar through a skill windup', () => {
     const state = newGame(41), arena = createCombatArena();
     const mob = mobFixture({ id: 'caster', hp: 10, hpMax: 10, skillIds: ['mob.earth.boulder-toss'] });
@@ -498,18 +539,6 @@ describe('cast and returning render-level proofs', () => {
     expect(body).toMatch(/class="arena-cast-bar[ "]/);
   });
 
-  it('marks a returning body on its plate', () => {
-    const state = newGame(41), arena = createCombatArena();
-    const mob = mobFixture({ id: 'goer', hp: 10, hpMax: 10 });
-    state.group = [mob];
-    const c = characterSheet(state);
-    syncCombatArena(arena, state, 0, 1_000_000, c.maxHp);
-    Object.assign(arena.mobs[mob.id], { x: 5, y: 6, returning: true });
-    captureCombatArena(arena, state, 0);
-    const body = render(CombatArenaScene, { props: { arena, s: state, c, ring: [] } }).body;
-    expect(body).toMatch(/class="arena-returning[ "]/);
-    expect(body).toContain('returning');
-  });
 });
 
 describe('status duration readout', () => {
@@ -575,7 +604,7 @@ describe('F38 in-flight hazards — the shot owns its telegraph', () => {
 });
 
 describe('F37 persistent target read — one named body, never a mix', () => {
-  const mobs = (over: Record<string, { hp: number; x: number; y: number; returning?: boolean }> = {}) => ({
+  const mobs = (over: Record<string, { hp: number; x: number; y: number }> = {}) => ({
     committed: { hp: 10, x: 30, y: 16 },
     focus: { hp: 10, x: 20, y: 16 },
     near: { hp: 10, x: 26, y: 16 },
@@ -595,10 +624,10 @@ describe('F37 persistent target read — one named body, never a mix', () => {
     expect(next?.kind).toBe('nearest');
   });
 
-  it('skips dead and returning bodies in every rank', () => {
-    const dead = mobs({ committed: { hp: 0, x: 30, y: 16 }, focus: { hp: 10, x: 20, y: 16, returning: true } });
+  it('skips dead bodies in every rank', () => {
+    const dead = mobs({ committed: { hp: 0, x: 30, y: 16 }, focus: { hp: 10, x: 20, y: 16 } });
     const read = describeArenaTarget({ mobs: dead, player, committedId: 'committed', focusId: 'focus', camera, view });
-    expect(read?.id).toBe('near');
+    expect(read?.id).toBe('focus');
     expect(describeArenaTarget({ mobs: { gone: { hp: 0, x: 1, y: 1 } }, player, camera, view })).toBeNull();
   });
 

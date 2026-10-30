@@ -441,6 +441,9 @@ export function registerStaticKeystoneHandlers(table: KeystoneHandlerTable, elem
   registerKeystoneHandler(table, 'phantom-step', {
     sheet: (sheet: { armour: number; evasion: number }) => ({ ...sheet, armour: sheet.armour * 0.80, evasion: sheet.evasion * 1.40 }),
   }, { evasionPct: 40, armourPct: 20 }, elements);
+  registerKeystoneHandler(table, 'spellward', {
+    sheet: (sheet: { evasion: number }) => ({ ...sheet, evasion: sheet.evasion * 0.90 }),
+  }, { spellDodgePct: 20, evasionPenaltyPct: 10 }, elements);
   registerKeystoneHandler(table, 'deepwell', {
     sheet: (sheet: { maxMana: number; maxHp: number }) => ({ ...sheet, maxMana: sheet.maxMana * 1.40, maxHp: sheet.maxHp * 0.80 }),
   }, { maxManaPct: 40, maxHpPct: 20 }, elements);

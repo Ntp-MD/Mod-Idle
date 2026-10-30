@@ -9,7 +9,7 @@
     "camp_min_hp_per_sec": 1
   },
   "meta": {
-    "note": "There are 775 nodes and 775 ranks in seven regions: str, agi, dex, int, wis, vit and lck. Authored group sites and two-anchor roads form one shared field, crossing every region border at different distances from Start. Local roads form varied arcs, elongated loops and forks around their Notables. Every Normal serves a route between anchors, and every Keystone remains a leaf of its own Notable gate, reachable directly from Normal roads without buying another Notable. Stable IDs, grants, prices and existing allocations retain their meaning.",
+    "note": "There are 777 nodes and 777 ranks in seven regions: str, agi, dex, int, wis, vit and lck. Authored group sites and two-anchor roads form one shared field, crossing every region border at different distances from Start. Local roads form varied arcs, elongated loops and forks around their Notables. Every Normal serves a route between anchors, and every Keystone remains a leaf of its own Notable gate, reachable directly from Normal roads without buying another Notable. Stable IDs, grants, prices and existing allocations retain their meaning.",
     "node_columns": [
       "Node",
       "Region",
@@ -1653,9 +1653,27 @@
           8
         ]
       }
+    ],
+    "notable.wis.12.02": [
+      {
+        "id": "max_mana",
+        "values": [
+          10
+        ]
+      },
+      {
+        "id": "mana_regen_pct",
+        "values": [
+          8
+        ]
+      }
     ]
   },
   "incompatibilities": [
+    {
+      "a": "keystone.spellward",
+      "b": "keystone.ironwall"
+    },
     {
       "a": "keystone.berserk",
       "b": "keystone.chaos-inoculation"
@@ -3739,6 +3757,13 @@
           "offset": [
             -72.06260353588038,
             -29.849307724476944
+          ]
+        },
+        "notable.wis.12.02": {
+          "anchor": "normal.wis.c12.05",
+          "offset": [
+            100,
+            0
           ]
         }
       },
@@ -13068,6 +13093,49 @@
         "cluster": 12
       },
       "name": "WIS Focus 12"
+    },
+    {
+      "id": "notable.wis.12.02",
+      "wing": "wis",
+      "kind": "notable",
+      "needs": [
+        "normal.wis.c12.05"
+      ],
+      "profile": "notable.wis.12.02",
+      "placement": {
+        "role": "notable",
+        "cluster": 12,
+        "slot": 2
+      },
+      "name": "Spellward Approach"
+    },
+    {
+      "id": "keystone.spellward",
+      "wing": "wis",
+      "kind": "keystone",
+      "needs": [
+        "notable.wis.12.02"
+      ],
+      "grants": [],
+      "name": "Spellward",
+      "description": "+20% chance to Spell Dodge incoming spells, capped at 30%. -10% Evasion.",
+      "draft_ref": 97,
+      "weight": 3,
+      "placement": {
+        "role": "keystone",
+        "cluster": 12,
+        "slot": 2
+      },
+      "effects": [
+        {
+          "kind": "keystone",
+          "key": "spellward",
+          "params": {
+            "spellDodgePct": 20,
+            "evasionPenaltyPct": 10
+          }
+        }
+      ]
     },
     {
       "id": "keystone.last-stand",

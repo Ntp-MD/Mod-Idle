@@ -22,7 +22,6 @@ describe('field spawn data', () => {
       expect(profile.respawn_sec).toBeGreaterThan(0);
       expect(profile.aggro_m).toBeGreaterThan(0);
       expect(profile.assist_m).toBeGreaterThanOrEqual(0);
-      expect(profile.leash_m).toBeGreaterThanOrEqual(profile.aggro_m);
       expect(profile.camp_safe_m).toBeGreaterThanOrEqual(0);
       expect(profile.offline_share).toBeGreaterThanOrEqual(0);
       expect(profile.offline_share).toBeLessThanOrEqual(1);

@@ -98,6 +98,7 @@ const TABLE: [string, Record<string, unknown>, readonly string[]][] = [
   ['keen-edge', { critChancePct: 25, critDamagePct: 20 }, ['sheet']],
   ['brutal-force', { critDamagePct: 30, critChancePct: 10 }, ['sheet']],
   ['spellfocus', { magicPct: 30, physicalPct: 20 }, ['sheet']],
+  ['spellward', { spellDodgePct: 20, evasionPenaltyPct: 10 }, ['sheet']],
   ['executioner', { lowHpThresholdPct: 30, lowHpDamagePct: 50, otherDamagePct: 15 }, ['outgoing']],
   ['opener', { fullHpDamagePct: 40, otherDamagePct: 10 }, ['outgoing']],
   ['giant-slayer', { bossDamagePct: 35, normalDamagePct: 10 }, ['outgoing']],
@@ -146,9 +147,9 @@ const TABLE: [string, Record<string, unknown>, readonly string[]][] = [
 
 const ELEMENTS = ['fire', 'cold', 'lightning', 'poison', 'chaos', 'earth'];
 
-describe('the 105 bundle keys of §6', () => {
+describe('the 106 bundle keys of §6', () => {
   it('lists exactly the catalogue', () => {
-    expect(KEYSTONE_KEYS.length).toBe(105);
+    expect(KEYSTONE_KEYS.length).toBe(106);
     expect([...KEYSTONE_KEYS].sort()).toEqual(TABLE.map(([k]) => k).sort());
   });
 

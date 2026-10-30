@@ -2,7 +2,7 @@ import { E, MS } from '../../engine/client';
 import { attackRangeGeometry } from '../../../../engine/attack-range.ts';
 import type { AttackRangeGeometry } from '../../../../engine/attack-range.ts';
 import type { MobCastProfile, MobSkillRow } from '../../../../engine/types';
-import type { Mob, MobBehavior } from '../core/types';
+import type { Mob } from '../core/types';
 
 const BY_ID = new Map(MS.skills.map((row) => [row.id, row]));
 const MAX_KIT = MS.meta.max_kit;
@@ -13,12 +13,11 @@ export function mobSkillById(id: string): MobSkillRow | undefined {
 
 /**
  * The one legacy adapter, used only if a strike row predates explicit cast authoring. The data
- * cage refuses such rows; it maps the old role to the same ordinary profiles the basics use.
+ * cage refuses such rows; it maps the body's line to the same ordinary profiles the basics use.
  */
 export function mobCastProfile(row: MobSkillRow, mob: Mob): MobCastProfile {
   if (row.cast) return row.cast;
-  const standOff = row.role === 'stand-off' || (row.role !== 'front' && mob.line === 'stand-off');
-  return standOff
+  return mob.line === 'stand-off'
     ? {
       delivery: 'projectile',
       range: { basis: 'center', meters: E.combat_arena.range.ranged },
@@ -78,21 +77,6 @@ export function resolveMobKit(
     seen.add(id);
     return true;
   }).slice(0, MAX_KIT);
-}
-
-/**
- * A body's counterplay identity. Data may name it per Species; otherwise the kit and line decide:
- * an aura carrier supports, a ground cast is artillery, a stand-off body shoots from spacing, and a
- * front body closes. Charger/skirmisher overrides are authored because they change movement, not
- * merely reach.
- */
-export function resolveMobBehavior(speciesId: string | undefined, line: string, kit: readonly string[]): MobBehavior {
-  const authored = (MS.meta as { behaviors?: Record<string, MobBehavior> }).behaviors?.[speciesId || ''];
-  if (authored && ['contact', 'skirmisher', 'ranged', 'charger', 'artillery', 'support'].includes(authored)) return authored;
-  const rows = kit.map((id) => BY_ID.get(id)).filter((row): row is MobSkillRow => !!row);
-  if (rows.some((row) => row.mode === 'aura')) return 'support';
-  if (rows.some((row) => row.cast?.delivery === 'ground')) return 'artillery';
-  return line === 'stand-off' ? 'ranged' : 'contact';
 }
 
 /** A strike row only answers inside its authored HP window; ungated rows answer always. */

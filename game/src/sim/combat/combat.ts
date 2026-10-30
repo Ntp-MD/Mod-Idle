@@ -437,14 +437,29 @@ export function mobSwing(
   blockCharge = false,
   /** the HP the character stands on right now — 51 Enduring Core reads it for the threshold part */
   currentHp: number = c.maxHp,
+  /** C4 routing: which avoidance the hit rolls — attack→Evasion, spell→Spell Dodge, none→no roll.
+   *  Absent preserves the attack path exactly. `ignores_dodge` bypasses Perfect Dodge and the roll. */
+  dodge?: { hitClass: 'attack' | 'spell' | 'none'; ignoresDodge?: boolean },
 ): { blocked: string | null; toHp: number; toEs: number; absorbed: number; raw: number; leech?: number; blockChargeSpent: boolean; blockCut?: number } {
   if (curse.stopped) return { blocked: 'shocked', toHp: 0, toEs: 0, absorbed: 0, raw: 0, blockChargeSpent: false };
-  if (rng() * 100 < c.perfectDodge) return { blocked: 'perfect dodge', toHp: 0, toEs: 0, absorbed: 0, raw: 0, blockChargeSpent: false };
+  const hitClass = dodge?.hitClass ?? 'attack';
+  // C4: `none` is a non-dodgeable hit (DoT, aura, field pulse); it skips Perfect Dodge and the
+  // routed roll entirely. Attack and spell both still answer Perfect Dodge.
+  if (hitClass !== 'none' && !dodge?.ignoresDodge && rng() * 100 < c.perfectDodge)
+    return { blocked: 'perfect dodge', toHp: 0, toEs: 0, absorbed: 0, raw: 0, blockChargeSpent: false };
   const acc = mob.acc * accMult(curse);
-  // Evasion is one layer: the Agi rating rolls against this mob's accuracy, the gear Evasion
-  // lines ride on it, and the Cap 80 binds the result. A blocked hit is gone entirely.
-  if (rng() * 100 < eng.evasionChance(c.evasion, acc)) {
-    return { blocked: 'evasion', toHp: 0, toEs: 0, absorbed: 0, raw: 0, blockChargeSpent: false };
+  // C4: one routed roll per hit. Evasion is the opposed Agi-rating layer; Spell Dodge is a flat
+  // tree-only chance; `none` rolls nothing. Perfect Dodge above already applied to both families.
+  if (hitClass === 'spell') {
+    if (!dodge?.ignoresDodge && rng() * 100 < c.spellDodgeChance) {
+      return { blocked: 'spell dodge', toHp: 0, toEs: 0, absorbed: 0, raw: 0, blockChargeSpent: false };
+    }
+  } else if (hitClass === 'attack') {
+    // Evasion is one layer: the Agi rating rolls against this mob's accuracy, the gear Evasion
+    // lines ride on it, and the Cap 80 binds the result. A blocked hit is gone entirely.
+    if (!dodge?.ignoresDodge && rng() * 100 < eng.evasionChance(c.evasion, acc)) {
+      return { blocked: 'evasion', toHp: 0, toEs: 0, absorbed: 0, raw: 0, blockChargeSpent: false };
+    }
   }
   // Block is its own layer, rolled after perfect dodge and evasion (formula-defense.md): the
   // shield's Frame Mod line (open-ended, no Cap). It answers a PHYSICAL hit only (owner ruling): a

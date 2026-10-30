@@ -16,7 +16,7 @@ function clearEvidence(state: { log: { text: string }[] }) {
 function strike(seed: number, withScreen: boolean) {
   const e = seededEncounter({ seed, bodies: 3, skills: ['attack.double_strike'] });
   e.run(1, undefined, { autoSkills: false });
-  const target = Object.values(e.arena.mobs).find((m) => m.hp > 0 && !m.returning)!;
+  const target = Object.values(e.arena.mobs).find((m) => m.hp > 0)!;
   Object.assign(e.arena.player, { x: target.x - 1, y: target.y });
   e.arena.focusId = target.id;
   if (withScreen) e.arena.nav = screen(target.x - 0.5);
@@ -29,7 +29,7 @@ function strike(seed: number, withScreen: boolean) {
 function storm(seed: number, withWall: boolean) {
   const e = seededEncounter({ seed, bodies: 4, skills: ['attack.firestorm'] });
   e.run(1, undefined, { autoSkills: false });
-  const target = Object.values(e.arena.mobs).find((m) => m.hp > 0 && !m.returning)!;
+  const target = Object.values(e.arena.mobs).find((m) => m.hp > 0)!;
   const point = { x: target.x, y: 5 };
   Object.assign(e.arena.player, { x: target.x - 2, y: 5 });
   if (withWall) {

@@ -31,6 +31,7 @@ export const PCT_LINE: Record<string, string> = {
   cooldown_reduction: 'cdrPct',
   armour_pct: 'armourPct',
   evasion_pct: 'evasionPct',
+  spell_dodge_pct: 'spellDodgePct',
   perfect_dodge_pct: 'pdodgePct',
   status_resistance_pct: 'statusResPct',
   // the four line-1 Frame Mods (item-base.md): block, penetration and the two chances

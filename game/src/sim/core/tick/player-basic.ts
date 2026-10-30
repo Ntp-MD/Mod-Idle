@@ -72,7 +72,8 @@ export function createPlayerBasicActions(opts: {
   mirrorReady: () => boolean;
   luckyBonus: () => number;
   advanceArenaAt: (atUs: number) => void;
-  engageTarget: (targetId?: string) => void;
+  /** A resolved hostile contact alerts its body once; the swing's own reach and release already passed. */
+  alertContact: (mobId: string) => void;
   cancelIntent: (reason: string) => void;
   onKill: (s: GameState, rng: () => number, mob: Mob, c: Character, statuses?: Statuses, bloomChain?: boolean) => void;
   dominantElement: (parts: any) => string | null;
@@ -83,7 +84,7 @@ export function createPlayerBasicActions(opts: {
     arena, clock, rng, s, c, attackCharacter, units, tickStartUs, tickEndUs, online, manual,
     crippledOutgoingMult, unstoppablePenalty, berserkDealt, playerHitsPerSec, playerActiveFraction,
     statuses, trig, queueTrigger, recoverLeech, mobMods, delayMobPlan, spreadShock, mirrorReady,
-    luckyBonus, advanceArenaAt, engageTarget, cancelIntent, onKill, dominantElement,
+    luckyBonus, advanceArenaAt, alertContact, cancelIntent, onKill, dominantElement,
     applyEquilibrium, revertEquilibrium,
   } = opts;
   const encounterKeyOf = (state: GameState) => fieldAreaKey(state);
@@ -116,7 +117,6 @@ export function createPlayerBasicActions(opts: {
         const target = arena ? intended ?? arenaTarget(arena, s.group) : s.group[0];
         if (!target) { plan!.stopped = true; return; }
         if (arena && !arenaPlayerInReach(arena, c.weaponName, target.id)) return;
-        engageTarget(target.id);
         if (!arena) { resolvePlayerBasic(target, clock.nowUs); return; }
         const profile = playerAttackProfile(c.weaponName);
         const intervalUs = Math.round(units / Math.max(1e-9, playerRate));
@@ -148,6 +148,7 @@ export function createPlayerBasicActions(opts: {
 
     /** Apply the canonical player basic at its contact beat; the caller owns validation. */
     function resolvePlayerBasic(target: Mob, atUs: number): void {
+        alertContact(target.id);
         const tm = mobMods(target.id);
         // Packet H action history: 04 Rage, 12 Worthy Foe and 32 Instruments all ride the one Hit
         // multiplier, composed here so each condition is read at the event's own time.
@@ -318,9 +319,8 @@ export function createPlayerBasicActions(opts: {
         advanceArenaAt(clock.nowUs);
         if (!arena.actions.includes(current) || current.cancelledAtUs != null) return;
         const dead = target.hp <= 0 || !s.group.includes(target) || s.player.hp <= 0;
-        const returning = !!arena.mobs[target.id]?.returning;
         const inReach = arenaPlayerInReach(arena, c.weaponName, target.id);
-        if (dead || returning || !inReach) {
+        if (dead || !inReach) {
           updateArenaAction(arena, current.id, {
             impactCount: 1, releasedAtUs: clock.nowUs,
             timing: { ...(current.timing as SkillCastTiming), impactAtUs: clock.nowUs },
@@ -392,7 +392,7 @@ export function createPlayerBasicActions(opts: {
       }
       if (s.player.hp <= 0) return;
       const target = s.group.find((mob) => mob.id === shot.targetId && mob.hp > 0);
-      if (!target || arena.mobs[target.id]?.returning) return;
+      if (!target) return;
       if (!contact) return;
       resolvePlayerBasic(target, atUs);
     }
@@ -435,7 +435,7 @@ export function createPlayerBasicActions(opts: {
         shot.lastCheckedAtUs = atUs;
         const target = s.group.find((mob) => mob.id === shot.targetId && mob.hp > 0);
         const pose = target ? arena.mobs[target.id] : undefined;
-        if (!target || !pose || pose.returning) { resolvePlayerShot(shot, atUs, false); continue; }
+        if (!target || !pose) { resolvePlayerShot(shot, atUs, false); continue; }
         const previous = arena.frames.at(-2) ?? arena.frames.at(-1);
         const before = previous?.mobs[target.id];
         const hit = firstProjectileHit(from, to,

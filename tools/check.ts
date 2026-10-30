@@ -840,7 +840,6 @@ function runChecks() {
       if (!['strike', 'aura'].includes(row.mode)) sk.push(`${row.id}: mode is not strike/aura`);
       if (row.element != null && !elements.includes(row.element)) sk.push(`${row.id}: unknown element ${row.element}`);
       if (row.status != null && !allowedStatus.has(row.status)) sk.push(`${row.id}: status ${row.status} is not a control status`);
-      if (!['front', 'stand-off', 'any'].includes(row.role)) sk.push(`${row.id}: role is not front/stand-off/any`);
       const phase = row.phase;
       if (phase != null) {
         if (row.mode !== 'strike') sk.push(`${row.id}: only a strike owns a phase gate`);
@@ -911,9 +910,6 @@ function runChecks() {
       if (c.strike < 1) sk.push(`${el}: no strike`);
       if (c.aura < 1) sk.push(`${el}: no aura`);
     }
-    if (!lib.some((row) => row.mode === 'strike' && row.role === 'front')) sk.push('no front-line strike');
-    if (!lib.some((row) => row.mode === 'strike' && row.role === 'stand-off')) sk.push('no stand-off strike');
-
     const speciesIds = new Set(E.mob.species.map((sp) => sp.id));
     const variantNames = new Set(Object.values(((E.mob as any).variants || {}) as Record<string, any[]>).flatMap((rows) => rows.map((r) => r.name)));
     const bossNames = new Set((E.mob.bosses as any[]).map((b) => b.name));

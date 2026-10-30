@@ -309,8 +309,7 @@ const treeViewer = (): string => {
       <circle class="tree-node-halo" r="${(r + 4).toFixed(1)}"/>
       ${node.kind === 'normal' ? '' : `<circle class="tree-node-rim" r="${(r + 1.6).toFixed(1)}"/>`}
       <circle class="tree-node-face" r="${r.toFixed(1)}"/>
-      ${face}
-      ${corners}
+      ${face}${corners ? `\n      ${corners}` : ''}
       <circle class="tree-node-hit" r="${Math.max(r + 2, 8).toFixed(1)}"/>
     </g>`;
   }).join('');
@@ -462,7 +461,7 @@ page({
           p.projectile_speed_mps ? `${n1(p.projectile_speed_mps)} m/sec` : '—',
           `${n2(p.hit_radius_m)} m`, `${n2(p.recovery_sec)} sec`,
         ]));
-    })(), 'A live cast pays its Mana or HP and starts its cooldown at release, not when the windup begins. Total windup is <code>fixed + variable</code>: haste (<code>global_speed</code>, under <code>caps.speed_mult</code>) compresses only the variable part, on separate windup and recovery levers, and neither phase finishes below the combat-step floor or the animation phase floor. Damage and statuses land at impact: melee checks range then, a projectile travels from its release aim and may meet another body, and a ground circle tests living positions at its committed centre. Split Shot keeps its release-committed target circle while the projectile travels — a later contact updates receipts, never the circle. A zero-radius line still holds every body along its committed direction. A chain row reuses its radius as the hop reach between contacts. A canceled windup costs nothing; recovery blocks the next primary cast but never re-prices it. A held target stays selected during tracking and windup; release does not silently acquire a different body. Heals land on the player, never on a mob. A skill hit that crits can fire a crit-trigger aura without taking over the primary cast. Mob projectile and ground casts track from release; a mob charge travels to the point frozen at windup.'),
+    })(), 'A live cast pays its Mana or HP and starts its cooldown at release, not when the windup begins. Total windup is <code>fixed + variable</code>: haste (<code>global_speed</code>, under <code>caps.speed_mult</code>) compresses only the variable part, on separate windup and recovery levers, and neither phase finishes below the combat-step floor or the animation phase floor. Clock modifiers stay separate: cast speed changes variable windup and recovery, cooldown rate moves cooldowns, and attack-interval plus rank clock data govern basic and mob attack opportunities (<code>tools/data/engine.json</code>). Damage and statuses land at impact: melee checks range then, a projectile travels from its release aim and may meet another body, and a ground circle tests living positions at its committed centre. Split Shot keeps its release-committed target circle while the projectile travels — a later contact updates receipts, never the circle. A zero-radius line still holds every body along its committed direction. A chain row reuses its radius as the hop reach between contacts. A canceled windup costs nothing; recovery blocks the next primary cast but never re-prices it. A held target stays selected during tracking and windup; release does not silently acquire a different body. Heals land on the player, never on a mob. A skill hit that crits can fire a crit-trigger aura without taking over the primary cast. Mob projectile and ground casts track from release; a mob charge travels to the point frozen at windup.'),
     block('Skill table columns — what each header means', table(['Header', 'Field in data', 'What it means', 'Rule / how it is used'], [
       ['Skill', '<code>id / name</code>', 'The skill\'s canonical key (<code>engine/skills.ts:byId</code>)', 'Retired rows stay in <code>byId</code> so old saves still resolve, but they never drop again'],
       ['Type', '<code>type</code>', '<code>attack / buff / curse / heal / aura</code>', '<code>attack</code>=order list + <code>cd+mana</code>; <code>buff</code>=timed self-buff with <code>duration</code>; <code>curse</code>=attached to target; <code>heal</code>=same list but lands on the player (drip or instant, never a mob); <code>aura</code>=reserves Max Mana'],
@@ -474,24 +473,24 @@ page({
       ['AoE', '<code>area.radius_m</code>', 'Circle radius — or hop reach on a chain row', 'Circle <code>&gt;0</code> hits every living center, no cap; <code>0</code> with a line shape still hits the whole line; a chain row reuses this field as the reach between hops, not a circle'],
       ['CD', '<code>cd</code> sec', 'Base cooldown', '<code>effCd = cd × (1-cdr%) × (1-ladder%)</code> — ladder first; cooldowns tick on the cooldown haste lever'],
       ['Mana', '<code>mana: "N flat"</code>', 'Flat mana cost (or flat <code>hp_cost</code>, never both)', '<code>cost = N × (1+(Lv-1)×5%)</code> — same price on one or many targets; paid once at release'],
-      ['Hits', '<code>action</code> + <code>effects</code>', 'How many times one press lands', 'A direct resolve aggregates (<code>hits × hit_pct%</code>); a row with <code>action</code> schedules burst, channel or field impacts sharing one roll cache and one cost/CD; lone <code>hit_pct</code> alone is not a hit'],
+      ['Hits', '<code>action</code> + <code>effects</code>', 'How many times one press lands', 'A direct resolve aggregates (<code>hits × hit_pct%</code>); an action can schedule burst, channel, field, chain, cluster or targeted impacts under one cost/CD. Most scheduled impacts share a cast-target roll/effect cache; cluster children and targeted-burst payloads use their authored per-impact rolls. Lone <code>hit_pct</code> alone is not a hit'],
       ['Dur', '<code>duration</code>', 'Buff / field lifetime, read off the row', '<code>buffEffectPct</code> scales a buff/aura effect&apos;s strength, never its duration'],
       ['Windup', '<code>cast.windup_sec</code>', 'Whole windup: <code>fixed + variable</code>', 'Haste compresses only the variable part, on its own lever; both phases keep their floors'],
       ['Fixed', '<code>cast.fixed_windup_sec</code>', 'Locked portion', 'Not hasted — total <code>windup = fixed + variable</code>'],
       ['Recov', '<code>cast.recovery_sec</code>', 'Delay after release, on its own lever', 'Only the variable part above <code>fixed_recovery_sec</code> compresses; blocks the next primary cast'],
     ]), 'Single source <code>tools/data/skills.json</code> + sole calculator <code>engine/skills.ts</code> — the table shows the numbers the game runs. Full column reference is on <code>docs/skill-columns.md</code>.'),
     block('How to read a row', table(['Example', 'What the row says', 'What it means'], [
-      ['<code>attack.fireball</code>', '<code>Type=attack · Delivery=projectile · Origin=target · Range=5 · AoE=0 · CD=6 · Mana=21</code>', 'Single-target projectile, 5m acquire, hits the primary only'],
-      ['<code>attack.firestorm</code>', '<code>Origin=target · AoE=3 · Delivery=ground · Windup=0.5 Fixed=0.15</code>', '3m circle around a target acquired within 5m, hits everything inside; ground impact has 0.45 sec delay'],
-      ['<code>attack.chain_lightning</code>', '<code>targets=3 · AoE=3 · action=chain-strike</code>', 'AoE is the hop reach, not a circle: primary plus up to 2 hops to the nearest unused living bodies, one cost/CD'],
-      ['<code>attack.piercing_shot</code>', '<code>AoE=0 · shape=line 5×1</code>', 'Target reads Single Enemy, but the committed 5m line holds every body along it'],
+      ['<code>attack.fireball</code>', '<code>Type=attack · Delivery=projectile · Origin=target</code>', 'A targeted projectile; the row defines acquisition, cost and impact settings'],
+      ['<code>attack.firestorm</code>', '<code>Origin=target · Delivery=ground</code>', 'A committed ground circle around an acquired target; the row defines its radius and timing'],
+      ['<code>attack.chain_lightning</code>', '<code>action=chain-strike</code>', 'AoE is the hop reach, not a circle: contacts jump to the nearest unused living bodies using the row target count, share and cadence'],
+      ['<code>attack.piercing_shot</code>', '<code>shape=line</code>', 'Target can read Single Enemy, but the committed line holds every body along its authored length and width'],
     ]), 'Quick tuning: swap <code>delivery</code> to change feel; <code>area.radius_m</code> for circle size; <code>cast.range_m</code> for reach; <code>origin</code> to move the explosion. Never hand-write <code>Hits</code> — set <code>action</code> plus <code>effects: hits / hit_pct / dot_dps+dot_sec</code> and let <code>hitLineOf</code> render it.'),
-    block('Decided but not live', table(['Item', 'Status', 'What holds today'], [
-      ['Cluster children (C1)', 'Decided, no live adopter', 'No row spawns children; <code>Double Strike</code> is an unrelated melee row, not a cluster parent'],
-      ['Chain / reaction extensions (C2)', 'Baseline preserved only', 'Hops continue after a resolved attempt; chain kills pay rewards except Profane Bloom&apos;s nonrecursive, unrewarded secondaries'],
-      ['Lock-on bursts (C3)', 'Specified, not authored', 'No live row fires straight/homing payload volleys'],
-      ['Spell dodge (C4)', 'Specified, not implemented', 'Every row authors <code>hit_class</code>, but no roll reads it — avoidance is unchanged'],
-    ]), 'These are owner decisions awaiting implementation; none of them changes a cast today.'),
+    block('Current combat features (C1–C4)', table(['Feature', 'Status', 'What runs today'], [
+      ['Cluster children (C1)', 'Implemented; no live adopter', 'The data-driven cluster action splits one press across its parent and children; children leave the parent impact on the authored spread and reuse its travel and delay. Overlap can hit the same body with separate impact rolls; kill credit stays once. No skill row uses it yet; <code>Double Strike</code> remains an unrelated melee row.'],
+      ['Chain and reactions (C2)', 'Existing behavior preserved', 'Hops continue after a resolved attempt; chain kills pay rewards except Profane Bloom&apos;s nonrecursive, unrewarded secondaries.'],
+      ['Lock-on bursts (C3)', 'Implemented and authored', '<code>Double Strafe</code> fires straight payloads along the release aim; <code>Seeker Strafe</code> homes on its bound body. Both use the row&apos;s payload count, interval, range and cost.'],
+      ['Spell dodge (C4)', 'Implemented for incoming hits', 'Incoming attack hits roll Evasion, spell hits roll Spell Dodge, and <code>none</code> skips both. Perfect Dodge and Ghost Dance apply to spells; <code>ignores_dodge</code> bypasses avoidance. Player casts retain the target mob&apos;s existing dodge.'],
+    ]), 'Hit classes are explicit data. Spell Dodge has no base chance, is tree-only and obeys the cap in <code>tools/data/engine.json</code>; the Wis-wing Spellward node and its Evasion tradeoff are defined in <code>tools/data/tree.json</code>. DoT ticks do not make an incoming-hit roll.'),
     block('Setup → payoff', table(['Effect', 'How the press reads it', 'What it spends'], [
       ['bonus_vs_status', '<code>press × (1 + bonus% / 100)</code> while the target holds the named status', 'nothing'],
       ['consume_status', '<code>stacks = min(live, cap)</code>; <code>press × (1 + stacks × per-stack% / 100)</code>', 'the stacks it spends, after the hit'],
@@ -1047,7 +1046,6 @@ page({
       row.status ? esc(row.status) : '<span class="hy">—</span>',
       row.cd ? `${n0(row.cd)} sec` : '<span class="hy">—</span>',
       row.cast_sec != null ? `${n1(row.cast_sec)} sec` : '<span class="hy">—</span>',
-      esc(row.role || 'any'),
       row.mode === 'aura'
         ? `${esc(row.scope)} · ${Object.entries(row.effects || {}).map(([stat, value]) => `${esc(String(stat).replace(/_pct$/, ''))} +${n0(Number(value))}%`).join(' · ')}`
         : '<span class="hy">—</span>',
@@ -1062,14 +1060,14 @@ page({
       block('Mob skills',
         `<details class="beast-fold beast-fold-wide">
           <summary>Skills, kits and auras <b>· ${n0(skills.length)} rows</b></summary>
-          ${tabbedTable('mob-skill-mode', ['Skill', 'Element', 'Status', 'Cooldown', 'Cast', 'Role', 'Scope & effect'], [
+          ${tabbedTable('mob-skill-mode', ['Skill', 'Element', 'Status', 'Cooldown', 'Cast', 'Scope & effect'], [
             { key: 'strike', label: 'Strikes', rows: skillRowsFor('strike') },
             { key: 'aura', label: 'Auras', rows: skillRowsFor('aura') },
           ])}
           <h3>Boss and Unique kits</h3>
           <div class="beast-table-wrap">${table(['Mob', 'Kit'], kitRows)}</div>
         </details>`,
-        `A strike uses an attack opportunity instead of adding another damage stream. Every strike authors a cast profile: delivery (melee, projectile or ground), its range basis, windup and recovery. In the live arena the first ready, in-range strike starts its full preparation and keeps that skill until release, even across ticks. Control or an invalid release cancels it without spending the strike cooldown; no basic attack or different skill slips into its preparation. A melee strike re-tests body contact at release, a projectile commits its aim and travels to contact, and a ground strike commits its point then tests living centres inside that area at impact. The cooldown commits at a valid release even when the contact is later dodged, blocked or misses. Prepared strikes and ordinary ranged shots show their contact and recovery after release; retaining their animation history does not extend the movement lock. Nearby bodies may join through connected assist neighbours, but an ordinary field body's home leash also bounds assistance and deliberate targeting. A body pulled out of the leash resets once and returns home as a returning body that cannot be newly targeted or hit until it reaches its home band; Bosses and camp fights keep their own boundary. Classic/offline combat retains its queue approximation. Auras are passive, defensive and strongest-wins. Kits choose which rows a spawn resolves; a Variant may replace its Species kit, and a Boss or Unique may replace either.`),
+        `A strike uses an attack opportunity instead of adding another damage stream. Every strike authors a cast profile: delivery (melee, projectile or ground), its range basis, windup and recovery. In the live arena the first ready, in-range strike starts its full preparation and keeps that skill until release, even across ticks. Control or an invalid release cancels it without spending the strike cooldown; no basic attack or different skill slips into its preparation. A melee strike re-tests body contact at release, a projectile commits its aim and travels to contact, and a ground strike commits its point then tests living centres inside that area at impact. The cooldown commits at a valid release even when the contact is later dodged, blocked or misses. Prepared strikes and ordinary ranged shots show their contact and recovery after release; retaining their animation history does not extend the movement lock. A body joins only through its own authored proximity aggression or a resolved hostile contact, and one same-Species assist link can wake its neighbours; an assisted body never wakes another. Once pulled, a body stays in the fight until it dies, the player dies or the field changes. Classic/offline combat retains its queue approximation. Auras are passive, defensive and strongest-wins. Kits choose which rows a spawn resolves; a Variant may replace its Species kit, and a Boss or Unique may replace either.`),
     ];
   })(),
 });

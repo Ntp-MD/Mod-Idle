@@ -65,6 +65,8 @@ export function createIntents(opts: {
     applyCastOutcome, applyCast, payCast, castFx, cancelIntent, cancelPlayerBasic, cancelFlight,
     fireTrigger,
   } = opts;
+  const phaseFloorUs = Math.round(Math.max(E.combat_arena.movement_step_sec,
+    E.combat_arena.animation_phase_floor_sec ?? 0) * units);
 
     /** Cancel an unreleased player basic; a released swing keeps its pose and receipt. */
   
@@ -79,8 +81,7 @@ export function createIntents(opts: {
     const areaChanged = (flight: CombatFlight) => !!flight.areaKey && flight.areaKey !== encounterKeyOf(s);
 
     const arenaActors = (group: Mob[]) => group.flatMap((mob) =>
-      mob.hp > 0 && arena?.mobs[mob.id] && !arena.mobs[mob.id].returning
-        ? [{ ...arena.mobs[mob.id], mob }] : []);
+      mob.hp > 0 && arena?.mobs[mob.id] ? [{ ...arena.mobs[mob.id], mob }] : []);
 
 
 
@@ -92,9 +93,8 @@ export function createIntents(opts: {
       const resolved = intentTargets(arena, s.group, intent);
       const source = { x: arena.player.x, y: arena.player.y };
       const destination = resolved.area?.center ?? source;
-      const stepFloorUs = Math.round(E.combat_arena.movement_step_sec * units);
       const timing = skillCastTiming(profile, atUs, units, source, destination,
-        { cast: c.castSpeed, recovery: c.recoverySpeed }, stepFloorUs);
+        { cast: c.castSpeed, recovery: c.recoverySpeed }, phaseFloorUs);
       const action = arenaAction(arena, 'player', 'cast', atUs, intent.targetId, intent.skillId, resolved.area, timing);
       if (!action) { arena.intent = undefined; return; }
       intent.phase = 'windup';
@@ -213,7 +213,7 @@ export function createIntents(opts: {
       const releaseTiming = releasedSkillCastTiming(profile, action.timing?.startedAtUs ?? action.atUs,
         atUs, units, releaseSource, releaseDestination,
         { cast: c.castSpeed, recovery: c.recoverySpeed },
-        Math.round(E.combat_arena.movement_step_sec * units));
+        phaseFloorUs);
       intent.recoveryUntilUs = releaseTiming.recoveryUntilUs;
       updateArenaAction(arena, action.id, { timing: releaseTiming, primaryTiming: releaseTiming, area: releaseArea,
         targetId: releaseArea?.targetId ?? intent.targetId,
@@ -240,6 +240,17 @@ export function createIntents(opts: {
         area: releaseArea, position: { x: releaseSource.x, y: releaseSource.y }, lastCheckedAtUs: atUs,
         areaKey: encounterKeyOf(s),
       };
+      // Cluster-burst only: the parent impact carries its authored share; each child spawned at
+      // impact carries the child share with its own independent rolls (overlap allowed by design).
+      // Shares ride the per-impact roll cache, like every other scheduled impact: without a cache
+      // the share is not read, so the parent owns a fresh one here and each child owns its own.
+      const clusterAction = skill.action?.kind === 'cluster-burst' ? skill.action : undefined;
+      const clusterParentShare = Number(clusterAction?.parent_share_pct);
+      if (clusterAction && Number.isFinite(clusterParentShare)) {
+        flight.impactIndex = 0;
+        flight.impactSharePct = clusterParentShare;
+        flight.rolls = newCastRollCache();
+      }
       if (skill.type === 'heal' || skill.type === 'buff') {
         const report = resolvePreparedCast(s.skills, attackCharacter, prepared, statuses, rng, env);
         applyCastOutcome(report, { pay: false, emitCast: false, castCounter: false, mirror: false,
@@ -296,14 +307,65 @@ export function createIntents(opts: {
         scheduleFlight(chained);
         return;
       }
+      // C3 lock-on burst: one bound body, one cost/CD, one payload per release beat. Straight
+      // keeps the release-aim snapshot; homing steers each sample inside its pursuit bound. Each
+      // payload rolls independently, and a dead or returned bound body fizzles the rest.
+      if (skill.action?.kind === 'targeted-burst') {
+        const actionDef = skill.action;
+        // Count and share describe the press's authored execution, matching the Hits column and
+        // direct aggregate resolution. The press damage/effect magnitudes already carry its level.
+        const effects = skill.effects ?? [];
+        const count = Math.max(1, Number(effects.find((effect) => effect.stat === 'hits')?.value ?? 3));
+        const sharePct = Number(effects.find((effect) => effect.stat === 'hit_pct')?.value ?? 100);
+        const tracking = actionDef.tracking ?? 'straight';
+        const intervalUs = Math.max(0, Math.round(Number(actionDef.interval_sec ?? 0.15) * units));
+        const recoveryUs = Math.max(0, releaseTiming.recoveryUntilUs - releaseTiming.releaseAtUs);
+        const boundId = intent.targetId;
+        const pursuitRangeM = tracking === 'homing' ? Math.max(0, Number(actionDef.pursuit_range_m ?? 5)) : 0;
+        const pursuitSec = tracking === 'homing' ? Math.max(0, Number(actionDef.pursuit_sec ?? 0.8)) : 0;
+        intent.recoveryUntilUs = releaseTiming.releaseAtUs + (count - 1) * intervalUs + recoveryUs;
+        updateArenaAction(arena, action.id, {
+          channel: true,
+          timing: { ...releaseTiming, recoveryUntilUs: intent.recoveryUntilUs },
+          primaryTiming: { ...releaseTiming, recoveryUntilUs: intent.recoveryUntilUs },
+        });
+        for (let k = 0; k < count; k++) {
+          const releaseAt = releaseTiming.releaseAtUs + k * intervalUs;
+          arena.flights.push({
+            ...flight,
+            timing: { ...releaseTiming, releaseAtUs: releaseAt,
+              impactAtUs: releaseAt + Math.max(0, releaseTiming.impactAtUs - releaseTiming.releaseAtUs),
+              recoveryUntilUs: releaseAt + recoveryUs },
+            source: { ...releaseSource },
+            destination: { ...releaseDestination },
+            position: { ...releaseSource },
+            lastCheckedAtUs: releaseAt,
+            areaKey: encounterKeyOf(s),
+            impactIndex: k,
+            impactSharePct: sharePct,
+            rolls: newCastRollCache(),
+            boundTargetId: boundId,
+            ...(tracking === 'homing'
+              ? { homing: true, pursuitRangeM: pursuitRangeM, pursuitUntilUs: releaseAt + pursuitSec * units }
+              : {}),
+          });
+          scheduleFlight(arena.flights[arena.flights.length - 1]);
+        }
+        const lastImpact = releaseTiming.releaseAtUs + (count - 1) * intervalUs
+          + Math.max(0, releaseTiming.impactAtUs - releaseTiming.releaseAtUs);
+        updateArenaAction(arena, action.id, {
+          endsAtUs: Math.max(action.endsAtUs, lastImpact + E.combat_arena.action_sec * units),
+        });
+        return;
+      }
       const actionDef = skill.action;
       if (actionDef) {
-        const scaled = sm.effectsAt(skill, prepared.level) as { stat: string; value: number }[];
-        const count = Math.max(1, Number(scaled.find((effect) => effect.stat === 'hits')?.value ?? 1));
+        const effects = skill.effects ?? [];
+        const count = Math.max(1, Number(effects.find((effect) => effect.stat === 'hits')?.value ?? 1));
         if (count > 1) {
-          const sharePct = Number(scaled.find((effect) => effect.stat === 'hit_pct')?.value ?? 100);
+          const sharePct = Number(effects.find((effect) => effect.stat === 'hit_pct')?.value ?? 100);
           const cache = newCastRollCache();
-          const recoveryUs = Math.ceil(profile.recovery_sec / Math.max(1e-7, c.recoverySpeed || 1) * units);
+          const recoveryUs = Math.max(0, releaseTiming.recoveryUntilUs - releaseTiming.releaseAtUs);
           // One deployed field per caster-skill-arena: a deliberate recast replaces it at release and
           // cancels only its unspent pulses. Resolved pulses and their rewards stay spent.
           if (actionDef.kind === 'blizzard-field') {

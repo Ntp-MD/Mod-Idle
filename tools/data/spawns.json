@@ -5,7 +5,7 @@
       "engine/spawns.ts",
       "tools/check.ts"
     ],
-    "note": "One generic clearing layout is shared by every field. A zone profile owns its population cap, per-slot respawn time and aggro/assist/leash ranges; a subzone inherits its zone profile unless a subzone override is authored. Species, level, body and rank remain engine.json mob data. Spawn points are gameplay positions in arena meters, never map pixels."
+    "note": "One generic clearing layout is shared by every field. A zone profile owns its population cap, per-slot respawn time and aggro/assist ranges; a subzone inherits its zone profile unless a subzone override is authored. Species, level, body and rank remain engine.json mob data. Spawn points are gameplay positions in arena meters, never map pixels."
   },
   "defaults": {
     "layout": "forest-clearing",
@@ -13,10 +13,11 @@
     "respawn_sec": 35,
     "aggro_m": 4,
     "assist_m": 3,
-    "leash_m": 9,
     "roam_m": 2,
     "home_band_m": 0.35,
     "return_speed_mult": 0.65,
+    "idle_decision_sec": 5,
+    "idle_wait_pct": 0.35,
     "camp_safe_m": 6,
     "offline_share": 0.6,
     "respawn_min_sec": 31.5,
@@ -471,7 +472,6 @@
       "respawn_sec": 50,
       "aggro_m": 4,
       "assist_m": 3,
-      "leash_m": 9,
       "roam_m": 2,
       "home_band_m": 0.35,
       "return_speed_mult": 0.65,

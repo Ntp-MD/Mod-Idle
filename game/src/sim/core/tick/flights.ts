@@ -4,13 +4,13 @@ import type { CombatClock } from '../../combat/combat-clock';
 import type { CombatFlight } from '../../combat/combat-actions';
 import type { Statuses } from '../../combat/combat';
 import type { CastReport } from '../../combat/skills';
-import { E } from '../../../engine/client';
+import { E, sm } from '../../../engine/client';
 import { EVENT_PRIORITY } from '../../combat/combat-clock';
-import { arenaDistance, updateArenaAction } from '../../combat/combat-arena';
+import { arenaDistance, arenaSkillRange, updateArenaAction } from '../../combat/combat-arena';
 import { flightTargets, projectilePosition } from '../../combat/combat-actions';
 import { firstProjectileHit } from '../../../../../engine/skill-actions.ts';
 import { sweepDisc } from '../../../../../engine/navigation.ts';
-import { resolvePreparedCast } from '../../combat/skills';
+import { resolvePreparedCast, newCastRollCache } from '../../combat/skills';
 import { fieldAreaKey } from '../../world/field-area';
 
 /**
@@ -37,8 +37,30 @@ export function createFlights(opts: {
   } = opts;
   const areaChanged = (flight: CombatFlight) => !!flight.areaKey && flight.areaKey !== fieldAreaKey(s);
   const arenaActors = (group: Mob[]) => group.flatMap((mob) =>
-    mob.hp > 0 && arena?.mobs[mob.id] && !arena.mobs[mob.id].returning
-      ? [{ ...arena.mobs[mob.id], mob }] : []);
+    mob.hp > 0 && arena?.mobs[mob.id] ? [{ ...arena.mobs[mob.id], mob }] : []);
+
+  /** A fizzled lock-on payload: removed with a terminal receipt, no damage, no retry. */
+  function fizzleFlight(flight: CombatFlight, atUs: number) {
+    if (!arena) return;
+    const at = arena.flights.indexOf(flight);
+    if (at >= 0) arena.flights.splice(at, 1);
+    const action = arena.actions.find((entry) => entry.id === flight.actionId);
+    if (action && action.cancelledAtUs == null) {
+      updateArenaAction(arena, action.id, {
+        ...(action.payloads ? { payloads: action.payloads.map((payload) => payload.index === (flight.impactIndex ?? 0)
+          ? { ...payload, impactAtUs: atUs, contact: { ...flight.destination } }
+          : payload) } : {}),
+        impactCount: (action.impactCount ?? 0) + 1,
+        endsAtUs: Math.max(action.endsAtUs, atUs + E.combat_arena.action_sec * units),
+      });
+    }
+  }
+
+  function boundTarget(flight: CombatFlight): Mob | undefined {
+    if (!flight.boundTargetId) return undefined;
+    const target = s.group.find((mob) => mob.id === flight.boundTargetId && mob.hp > 0);
+    return target;
+  }
 
   function scheduleFlight(flight: CombatFlight) {
     if (!arena || flight.queued) return;
@@ -65,6 +87,17 @@ export function createFlights(opts: {
   function resolveFlight(flight: CombatFlight, atUs: number, forced?: Mob[], contact?: { x: number; y: number }) {
     if (!arena) return;
     if (areaChanged(flight)) { cancelFlight(flight, atUs, 'area-exit'); return; }
+    // C3 lock-on: a dead or returned bound body fizzles the remaining payloads — no re-acquire.
+    // Straight payloads also re-check cast range at resolve; homing already enforces its pursuit
+    // bound every sample and arrives on the bound body.
+    if (flight.boundTargetId) {
+      const bound = boundTarget(flight);
+      const pose = bound ? arena.mobs[bound.id] : undefined;
+      const inRange = !!bound && !!pose
+        && arenaDistance(arena.player, pose) <= arenaSkillRange(flight.cast.id) + 1e-7;
+      if (!inRange) { fizzleFlight(flight, atUs); return; }
+      if (flight.homing && !flight.hitTargetId) flight.hitTargetId = bound!.id;
+    }
     // A caster-following pulse reads the current caster centre; a deployed field never does.
     if (flight.follow && flight.area) {
       const center = { x: arena.player.x, y: arena.player.y };
@@ -103,7 +136,9 @@ export function createFlights(opts: {
         : payload) } : {}),
       hitIds: [...new Set([...(action.hitIds ?? []), ...report.byMob.map((hit) => hit.id)])],
       impactCount: (action.impactCount ?? 0) + 1,
-      ...(flight.hitTargetId ? { targetId: flight.hitTargetId } : {}),
+      // C3: the action keeps the body the press was locked onto; an interceptor is a payload
+      // receipt (`payloads[i].targetId`), never the action's intended target.
+      ...(flight.hitTargetId && !flight.boundTargetId ? { targetId: flight.hitTargetId } : {}),
       ...(contact && flight.area?.radiusM === 0 ? { area: { ...flight.area, center: contact } } : {}),
       ...(contact ? { targetX: contact.x, targetY: contact.y } : {}),
       timing: flight.timing,
@@ -111,12 +146,63 @@ export function createFlights(opts: {
     });
     if (arena.intent && arena.intent.actionId === flight.actionId
       && arena.intent.phase === 'windup') cancelIntent('impact');
+    // C1 cluster (decided, no live adopter): the parent impact spawns each authored child once —
+    // same speed/delay/footprint, ±spread around the parent bearing, its own independent rolls so a
+    // body in both circles takes parent + child (overlap is the design, not a duplicate bug). A
+    // child (impactIndex > 0) never spawns its own children. Kill credit stays single: bodies leave
+    // the field on the first fatal hit and every later receipt finds them gone.
+    const clusterAction = sm.byId[flight.cast.id]?.action?.kind === 'cluster-burst'
+      ? sm.byId[flight.cast.id].action : undefined;
+    if (clusterAction && (flight.impactIndex ?? 0) === 0 && flight.area && flight.area.radiusM > 0) {
+      const count = Math.floor(Number(clusterAction.child_count));
+      const share = Number(clusterAction.child_share_pct);
+      const spread = Number(clusterAction.spread_deg ?? 30) * Math.PI / 180;
+      if (Number.isInteger(count) && count > 0 && Number.isFinite(share) && share >= 0
+        && Number.isFinite(spread)) {
+        // Committed parent geometry, not the contact receipt: the bearing, travel and delay are
+        // the release plan (payload record), while the children originate at the impact point.
+        const planned = arena.actions.find((entry) => entry.id === flight.actionId)?.payloads
+          ?.find((payload) => payload.index === (flight.impactIndex ?? 0));
+        const aim = planned?.destination ?? flight.destination;
+        const travel = Math.hypot(aim.x - flight.source.x, aim.y - flight.source.y);
+        const bearing = Math.atan2(aim.y - flight.source.y, aim.x - flight.source.x);
+        const delay = Math.max(0, (planned?.plannedImpactAtUs ?? flight.timing.impactAtUs)
+          - flight.timing.releaseAtUs);
+        const origin = { ...flight.destination };
+        for (let k = 0; k < count; k++) {
+          const angle = bearing + spread * (count === 1 ? 0 : (2 * k / (count - 1) - 1));
+          const destination = {
+            x: origin.x + Math.cos(angle) * travel,
+            y: origin.y + Math.sin(angle) * travel,
+          };
+          const child: CombatFlight = {
+            ...flight,
+            timing: { ...flight.timing, startedAtUs: atUs, releaseAtUs: atUs,
+              impactAtUs: atUs + delay, recoveryUntilUs: atUs },
+            source: { ...origin },
+            destination,
+            area: { ...flight.area, center: { ...destination } },
+            position: { ...origin },
+            lastCheckedAtUs: atUs,
+            impactIndex: (flight.impactIndex ?? 0) + 1 + k,
+            impactSharePct: share,
+            // Independent rolls per impact: a fresh cache, never the parent's. Overlap with the
+            // parent (or a sibling) re-rolls hit/crit/proc rather than copying the receipt.
+            rolls: newCastRollCache(),
+            hitTargetId: undefined,
+            chain: undefined,
+            follow: false,
+          };
+          arena.flights.push(child);
+          scheduleFlight(child);
+        }
+      }
+    }
     // T5/C2 baseline (preserve, do not extend): a resolved contact attempt always continues
     // while hops remain — even on a miss — reading the next hop from live poses at resolve time.
-    // Recorded quirks for C2, changed nothing: selection does not exclude `returning` bodies (they
-    // are picked then miss at impact, since membership re-tests eligibility); a hop that moved after
-    // selection still lands (a radius-0 single resolves its body id, not a distance); trigger-fired
-    // chain rows resolve once via launchTrigger and never hop.
+    // Recorded quirks for C2, changed nothing: a hop that moved after selection still lands (a
+    // radius-0 single resolves its body id, not a distance); trigger-fired chain rows resolve once
+    // via launchTrigger and never hop.
     if (flight.chain && flight.chain.remaining > 0) {
       const lastId = flight.area?.targetId ?? flight.cast.targets[0]?.id;
       const lastPose = lastId ? arena.mobs[lastId] : undefined;
@@ -161,6 +247,17 @@ export function createFlights(opts: {
       if (areaChanged(flight)) { cancelFlight(flight, atUs, 'area-exit'); continue; }
       if (flight.profile.delivery !== 'projectile') continue;
       if (atUs < flight.timing.releaseAtUs) continue;
+      // C3 homing: steer each sample toward the bound body inside its pursuit bound. A dead or
+      // returned body, a step past the range, or a step past the time fizzles the payload.
+      if (flight.homing) {
+        const bound = boundTarget(flight);
+        const pose = bound ? arena.mobs[bound.id] : undefined;
+        const inBound = !!bound && !!pose
+          && arenaDistance(arena.player, pose) <= (flight.pursuitRangeM ?? 5) + 1e-7
+          && atUs <= (flight.pursuitUntilUs ?? Infinity);
+        if (!inBound) { fizzleFlight(flight, atUs); continue; }
+        flight.destination = { x: pose!.x, y: pose!.y };
+      }
       const from = flight.position;
       // The segment starts where the last sweep left off — never before this flight's own
       // release, since burst pulses share a template stamped at the first release. Contact

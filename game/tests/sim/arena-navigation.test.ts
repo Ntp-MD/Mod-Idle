@@ -112,14 +112,15 @@ describe('static ground in the combat arena', () => {
     expect(isClear(arena.nav, arena.player, arena.player.radiusM ?? 0.25)).toBe(true);
   });
 
-  it('never plans a contact claim inside the wall', () => {
-    const { state, mob, arena } = fight(3.7, 2.6);
+  it('holds at a wall it cannot route around instead of pushing through it', () => {
+    const { state, mob, arena } = fight(6, 2);
     arena.nav = wallAt(4);
-    advanceCombatArena(arena, state, 100_000, sample([mob.id]));
-    const claim = arena.contacts[mob.id];
-    expect(claim).toBeDefined();
-    expect(claim!.x).toBeLessThan(4);
-    expect(isClear(arena.nav, claim!, arena.mobs[mob.id].radiusM ?? 0.25)).toBe(true);
+    for (let index = 0; index < 12; index++) advanceCombatArena(arena, state, (index + 1) * 100_000, sample([mob.id]));
+    const actor = arena.mobs[mob.id];
+    const radius = actor.radiusM ?? 0.25;
+    expect(isClear(arena.nav, actor, radius)).toBe(true);
+    expect(actor.x).toBeLessThan(4);
+    expect(actor.routeFailCount ?? 0).toBeGreaterThanOrEqual(3);
   });
 
   it('smooths a route with a clear look-ahead instead of steering at every cell centre', () => {
@@ -178,7 +179,6 @@ describe('static ground in the combat arena', () => {
     expect(second.arena.player.y).toBe(first.arena.player.y);
     expect(second.arena.mobs[second.mob.id].x).toBe(first.arena.mobs[first.mob.id].x);
     expect(second.arena.mobs[second.mob.id].y).toBe(first.arena.mobs[first.mob.id].y);
-    expect(second.arena.contacts).toEqual(first.arena.contacts);
   });
 });
 

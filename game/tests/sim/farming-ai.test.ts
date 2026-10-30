@@ -12,7 +12,7 @@ function farmFight(weapon: string | null, spots: { id: string; x: number; y: num
   state.group = spots.map((spot, index) => {
     const mob = spawnMob(mulberry32(60 + index), 1, 'normal');
     Object.assign(mob, {
-      id: spot.id, hp: 1e9, hpMax: 1e9, ps: 1, acc: 1e9, evasion: 0, dodgeRate: 0,
+      id: spot.id, speciesId: 'wolf', hp: 1e9, hpMax: 1e9, ps: 1, acc: 1e9, evasion: 0, dodgeRate: 0,
       armour: 0, line: 'front', damage: 'physical', innate: [], skillIds: [],
     });
     return mob;

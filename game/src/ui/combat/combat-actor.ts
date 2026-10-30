@@ -56,7 +56,8 @@ export function actorAction(event: FxEvent, c: Pick<Character, 'weaponName'>, mo
   if (mob) {
     if (event.kind === 'cast') return 'prepare';
     const skill = event.skillId ? mobSkillById(event.skillId) : undefined;
-    return skill?.role === 'stand-off' || (!skill && mob.damage === 'magic') ? 'magic' : 'melee';
+    const ranged = skill?.cast ? skill.cast.delivery !== 'melee' : !skill && mob.damage === 'magic';
+    return ranged ? 'magic' : 'melee';
   }
   if (event.kind === 'buff' || event.kind === 'heal') return 'support';
   const skill = event.skillId ? sm.byId[event.skillId] : undefined;

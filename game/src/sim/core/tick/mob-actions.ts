@@ -68,25 +68,6 @@ export function createMobActions(opts: {
   } = opts;
   const encounterKeyOf = (state: GameState) => fieldAreaKey(state);
 
-  /** A skirmisher leaves its own reach after a strike, then re-enters on its held window. */
-  function startSkirmishRetreat(mob: Mob, atUs: number): void {
-    if (!arena || mob.behavior !== 'skirmisher') return;
-    const actor = arena.mobs[mob.id];
-    if (!actor) return;
-    const cfg = (E.combat_arena as { behavior?: Record<string, number> }).behavior ?? {};
-    const gap = Number(cfg.skirmish_gap_m) || 2.6;
-    const holdUs = Math.max(0, Number(cfg.skirmish_hold_sec) || 0.8) * units;
-    const dx = actor.x - arena.player.x;
-    const dy = actor.y - arena.player.y;
-    const dist = Math.hypot(dx, dy) || 1;
-    const radius = actor.radiusM ?? 0.25;
-    mob.repositionPoint = {
-      x: Math.max(radius, Math.min(arena.bounds.width - radius, actor.x + dx / dist * gap)),
-      y: Math.max(radius, Math.min(arena.bounds.height - radius, actor.y + dy / dist * gap)),
-    };
-    mob.repositionUntilUs = atUs + holdUs;
-  }
-
   /** A committed charge travels to the point frozen at windup, never to the player's new feet. */
   function commitCharge(mob: Mob, action: CombatArenaAction, cast: MobCastProfile, atUs: number): void {
     if (!arena || !cast.charge) return;
@@ -167,7 +148,6 @@ export function createMobActions(opts: {
       });
       // Melee contact is re-tested at the body, not the windup's old distance.
       if (arenaMobInReach(arena, mob.id)) resolveIncomingHit(mob, undefined, rng);
-      startSkirmishRetreat(mob, clock.nowUs);
     });
   }
 
@@ -244,7 +224,6 @@ export function createMobActions(opts: {
         commitCharge(mob, current, cast, clock.nowUs);
         // A lunge that stopped short of the body is a miss; damage only follows real contact.
         if (arenaMobInReach(arena, mob.id)) resolveIncomingHit(mob, row, rng);
-        startSkirmishRetreat(mob, clock.nowUs);
         return;
       }
       launchMobSkillShot(mob, row, cast, current, clock.nowUs);

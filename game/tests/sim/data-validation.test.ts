@@ -16,6 +16,15 @@ describe('the canonical data is checked before anything reads it', () => {
     expect(() => validateEngineData(copy())).not.toThrow();
   });
 
+  it('refuses an engagement map that names an unknown or a repeated Species', () => {
+    const unknown = copy();
+    unknown.mob.engagement.proximity.push('not-a-species');
+    expect(() => validateEngineData(unknown)).toThrow(/mob\.engagement\.proximity|unknown Species/);
+    const repeated = copy();
+    repeated.mob.engagement.assist.push(repeated.mob.engagement.assist[0]);
+    expect(() => validateEngineData(repeated)).toThrow(/duplicates Species/);
+  });
+
   it('refuses an ordinary-attack profile with no usable shot', () => {
     const slow = copy();
     slow.combat_arena.normal_attack.profiles.ranged.projectile_speed_mps = 0;
@@ -46,13 +55,37 @@ describe('the canonical data is checked before anything reads it', () => {
   });
 
   it('keeps every multi-impact action row executable', () => {
-    const kinds = new Set(['projectile-burst', 'ground-pulse-burst', 'whirlwind-channel', 'blizzard-field', 'sand-field', 'chain-strike']);
+    const kinds = new Set(['projectile-burst', 'ground-pulse-burst', 'whirlwind-channel', 'blizzard-field', 'sand-field', 'chain-strike', 'cluster-burst', 'targeted-burst']);
     for (const row of Object.values(sm.byId)) {
       const action = (row as any).action;
       if (!action) continue;
       expect(kinds.has(action.kind), row.id).toBe(true);
       const hits = (row.effects || []).find((effect: any) => effect.stat === 'hits')?.value ?? 1;
-      if (action.kind !== 'sand-field' && action.kind !== 'chain-strike') expect(hits, row.id).toBeGreaterThan(1);
+      if (!['sand-field', 'chain-strike', 'cluster-burst'].includes(action.kind)) expect(hits, row.id).toBeGreaterThan(1);
+      if (action.kind === 'cluster-burst') {
+        // No live adopter today; the future row must still be one press split exactly 100%.
+        const parent = Number(action.parent_share_pct);
+        const count = Number(action.child_count);
+        const share = Number(action.child_share_pct);
+        expect(Number.isInteger(count) && count > 0, row.id).toBe(true);
+        expect(parent, row.id).toBeGreaterThanOrEqual(0);
+        expect(share, row.id).toBeGreaterThanOrEqual(0);
+        expect(parent + count * share, row.id).toBe(100);
+        expect((row as any).area?.radius_m, row.id).toBeGreaterThan(0);
+        expect(action.spread_deg, row.id).toBeGreaterThan(0);
+        expect((row as any).cast?.delivery, row.id).toBe('projectile');
+      }
+      if (action.kind === 'targeted-burst') {
+        expect(action.tracking === 'straight' || action.tracking === 'homing', row.id).toBe(true);
+        expect(action.interval_sec, row.id).toBeGreaterThan(0);
+        expect((row as any).area?.radius_m, row.id).toBe(0);
+        expect((row as any).cast?.delivery, row.id).toBe('projectile');
+        expect(hits, row.id).toBe(3);
+        if (action.tracking === 'homing') {
+          expect(action.pursuit_range_m, row.id).toBeGreaterThan(0);
+          expect(action.pursuit_sec, row.id).toBeGreaterThan(0);
+        }
+      }
       if (action.kind === 'chain-strike') {
         const count = Number(String((row as any).targets ?? '1').split('/')[0]) || 1;
         expect(count, row.id).toBeGreaterThan(1);

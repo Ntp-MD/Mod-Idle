@@ -37,6 +37,8 @@ export interface PendingFlightState {
   impactIndex?: number;
   impactSharePct?: number;
   rolls?: CastRollCache;
+  /** Ledger-local identity of the live cache; separate payload caches must stay separate. */
+  rollCacheId?: number;
   follow?: boolean;
   /** A deployed field's initial press suppresses the legacy erosion; later pulses carry flat DPS. */
   fieldInitial?: boolean;
@@ -44,6 +46,11 @@ export interface PendingFlightState {
   /** Chain contacts committed at release; the visited list keeps a reload from re-hitting. */
   chain?: NonNullable<CombatFlight['chain']>;
   hitTargetId?: string;
+  /** C3 lock-on identity and pursuit bounds survive a pending-work capture/restore. */
+  boundTargetId?: string;
+  homing?: boolean;
+  pursuitRangeM?: number;
+  pursuitUntilUs?: number;
 }
 
 export interface PendingMobFlightState {
@@ -87,6 +94,12 @@ export function snapshotPendingWork(arena: CombatArena, group: readonly Mob[]): 
   if (!arena.flights.length && !arena.mobFlights.length) return null;
   const actionIds = new Set([...arena.flights.map((flight) => flight.actionId),
     ...arena.mobFlights.map((shot) => shot.actionId)]);
+  const cacheIds = new Map<CastRollCache, number>();
+  const cacheIdOf = (cache: CastRollCache): number => {
+    let id = cacheIds.get(cache);
+    if (id == null) { id = cacheIds.size + 1; cacheIds.set(cache, id); }
+    return id;
+  };
   return copy({
     clockUs: arena.nowUs,
     unitsPerSec: arena.unitsPerSec,
@@ -114,12 +127,16 @@ export function snapshotPendingWork(arena: CombatArena, group: readonly Mob[]): 
       ...(flight.areaKey ? { areaKey: flight.areaKey } : {}),
       ...(flight.impactIndex != null ? { impactIndex: flight.impactIndex } : {}),
       ...(flight.impactSharePct != null ? { impactSharePct: flight.impactSharePct } : {}),
-      ...(flight.rolls ? { rolls: flight.rolls } : {}),
+      ...(flight.rolls ? { rolls: flight.rolls, rollCacheId: cacheIdOf(flight.rolls) } : {}),
       ...(flight.follow ? { follow: true } : {}),
       ...(flight.fieldInitial ? { fieldInitial: true } : {}),
       ...(flight.fieldPulseDamage != null ? { fieldPulseDamage: flight.fieldPulseDamage } : {}),
       ...(flight.chain ? { chain: flight.chain } : {}),
       ...(flight.hitTargetId ? { hitTargetId: flight.hitTargetId } : {}),
+      ...(flight.boundTargetId ? { boundTargetId: flight.boundTargetId } : {}),
+      ...(flight.homing ? { homing: true } : {}),
+      ...(flight.pursuitRangeM != null ? { pursuitRangeM: flight.pursuitRangeM } : {}),
+      ...(flight.pursuitUntilUs != null ? { pursuitUntilUs: flight.pursuitUntilUs } : {}),
     })),
     mobFlights: arena.mobFlights.map((shot) => ({
       actionId: shot.actionId,
@@ -160,12 +177,17 @@ export function restorePendingWork(arena: CombatArena, state: GameState): number
     arena.actionSeq = Math.max(arena.actionSeq, action.id);
   }
   let restored = 0;
-  // Multi-impact flights of one press shared a cache at release; restore that identity, not copies,
-  // so a later impact cannot reroll a first-encounter effect the earlier one already spent.
-  const sharedRolls = new Map<number, CastRollCache>();
+  // Restore the cache identity captured before JSON removed object sharing. Legacy ledgers used
+  // one cache per cast except cluster children and targeted payloads, which roll independently.
+  const sharedRolls = new Map<string, CastRollCache>();
   for (const flight of work.flights) {
     if (!sm.byId[flight.skillId]) continue;
     const targets = flight.targetIds.map((id) => living.get(id)).filter((mob): mob is Mob => !!mob);
+    const kind = sm.byId[flight.skillId].action?.kind;
+    const independent = kind === 'cluster-burst' || kind === 'targeted-burst';
+    const cacheKey = flight.rollCacheId != null
+      ? `${flight.actionId}:cache:${flight.rollCacheId}`
+      : `${flight.actionId}:${independent ? `impact:${flight.impactIndex ?? 0}` : 'cast'}`;
     arena.flights.push({
       actionId: flight.actionId,
       cast: { ...copy(flight.prepared), targets },
@@ -182,14 +204,18 @@ export function restorePendingWork(arena: CombatArena, state: GameState): number
       ...(flight.impactIndex != null ? { impactIndex: flight.impactIndex } : {}),
       ...(flight.impactSharePct != null ? { impactSharePct: flight.impactSharePct } : {}),
       ...(flight.rolls ? {
-        rolls: sharedRolls.get(flight.actionId)
-          ?? (() => { const cache = copy(flight.rolls!); sharedRolls.set(flight.actionId, cache); return cache; })(),
+        rolls: sharedRolls.get(cacheKey)
+          ?? (() => { const cache = copy(flight.rolls!); sharedRolls.set(cacheKey, cache); return cache; })(),
       } : {}),
       ...(flight.follow ? { follow: true } : {}),
       ...(flight.fieldInitial ? { fieldInitial: true } : {}),
       ...(flight.fieldPulseDamage != null ? { fieldPulseDamage: flight.fieldPulseDamage } : {}),
       ...(flight.chain ? { chain: copy(flight.chain) } : {}),
       ...(flight.hitTargetId ? { hitTargetId: flight.hitTargetId } : {}),
+      ...(flight.boundTargetId ? { boundTargetId: flight.boundTargetId } : {}),
+      ...(flight.homing ? { homing: true } : {}),
+      ...(flight.pursuitRangeM != null ? { pursuitRangeM: flight.pursuitRangeM } : {}),
+      ...(flight.pursuitUntilUs != null ? { pursuitUntilUs: flight.pursuitUntilUs } : {}),
     });
     restored++;
   }
@@ -233,6 +259,7 @@ export function normalizePendingWork(value: unknown): PendingWorkState | null {
     if (flight.follow != null && typeof flight.follow !== 'boolean') return false;
     if (flight.rolls != null && (typeof flight.rolls !== 'object' || !flight.rolls.targets || !flight.rolls.effects))
       return false;
+    if (flight.rollCacheId != null && (!Number.isInteger(flight.rollCacheId) || flight.rollCacheId <= 0)) return false;
     if (flight.fieldInitial != null && typeof flight.fieldInitial !== 'boolean') return false;
     if (flight.fieldPulseDamage != null && (!finite(flight.fieldPulseDamage) || flight.fieldPulseDamage < 0)) return false;
     if (flight.chain != null) {
@@ -276,6 +303,10 @@ export function normalizePendingWork(value: unknown): PendingWorkState | null {
         || !(finite(dims.angleDeg) && (dims.angleDeg as number) > 0 && (dims.angleDeg as number) <= 180))) return false;
     }
     if (flight.areaKey != null && typeof flight.areaKey !== 'string') return false;
+    if (flight.boundTargetId != null && typeof flight.boundTargetId !== 'string') return false;
+    if (flight.homing != null && typeof flight.homing !== 'boolean') return false;
+    if (flight.pursuitRangeM != null && (!finite(flight.pursuitRangeM) || flight.pursuitRangeM < 0)) return false;
+    if (flight.pursuitUntilUs != null && !finite(flight.pursuitUntilUs)) return false;
     const character = flight.character;
     if (!character || !finite(character.phys) || !finite(character.magic) || !finite(character.maxHp)
       || !finite(character.critChance) || !finite(character.critDmg)) return false;

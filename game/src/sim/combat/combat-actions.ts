@@ -13,8 +13,6 @@ type Point = { x: number; y: number };
 export interface ManualControl {
   /** A local ground point inside the current field; movement pauses new automatic casts. */
   moveTo?: Point;
-  /** The farming anchor established by the last completed local move. */
-  anchor?: Point;
   /** One uncommitted manual cast; no extra queue is retained. */
   cast?: { skillId: string; point?: Point };
 }
@@ -63,22 +61,28 @@ export interface CombatFlight {
   fieldPulseDamage?: number;
   /** Chain contacts: nearest unused body within the hop reach, at the authored interval. */
   chain?: { visited: string[]; remaining: number; hopRange: number; sharePct: number; intervalSec?: number };
+  /** A lock-on burst binds one body id; homing steers, straight keeps the snapshot. */
+  homing?: boolean;
+  /** The body every payload of a targeted burst answers to; a dead or returned body fizzles it. */
+  boundTargetId?: string;
+  /** Homing only: pursuit bound in metres from the player. */
+  pursuitRangeM?: number;
+  /** Homing only: pursuit bound in µs after the payload's release. */
+  pursuitUntilUs?: number;
   queued?: boolean;
   /** The body a projectile sweep touched, when that differs from the committed target. */
   hitTargetId?: string;
 }
 
 const actorsOf = (arena: CombatArena, group: Mob[]) => group.flatMap((mob) =>
-  mob.hp > 0 && arena.mobs[mob.id] && !arena.mobs[mob.id].returning
-    ? [{ ...arena.mobs[mob.id], mob }] : []);
+  mob.hp > 0 && arena.mobs[mob.id] ? [{ ...arena.mobs[mob.id], mob }] : []);
 
 /** Live tracking updates the selected identity, never performs another acquire query. */
 export function trackIntentAim(arena: CombatArena, group: Mob[], intent: CombatIntent): CombatIntent | undefined {
   const skill = sm.byId[intent.skillId];
   if (!skill) return undefined;
   if (intent.aimPoint || skill.type === 'buff' || skill.type === 'heal') return intent;
-  const target = group.find(mob => mob.id === intent.targetId && mob.hp > 0
-    && !arena.mobs[mob.id]?.returning);
+  const target = group.find(mob => mob.id === intent.targetId && mob.hp > 0);
   const pose = target && arena.mobs[target.id];
   if (!pose) return undefined;
   const circle = skill.area?.origin === 'caster' && !['line', 'cone'].includes(skill.area.shape ?? '');
@@ -208,7 +212,7 @@ export function intentInRange(arena: CombatArena, intent: CombatIntent, group: M
 
 /** A released area remains fixed while living target positions are read again at impact. */
 export function flightTargets(arena: CombatArena, group: Mob[], flight: CombatFlight): Mob[] {
-  if (!flight.area) return group.filter((mob) => !arena.mobs[mob.id]?.returning);
+  if (!flight.area) return group.filter((mob) => arena.mobs[mob.id]);
   let actors = actorsOf(arena, group);
   if (flight.profile.delivery === 'melee') {
     actors = actors.filter((actor) => arenaDistance(flight.source, actor) <= flight.profile.range_m + 1e-7);

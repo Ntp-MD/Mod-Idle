@@ -59,7 +59,7 @@ describe('mob skill kits', () => {
 
   it('skips an unavailable earlier kit entry without hiding a later usable strike', () => {
     const m = mob({ skillIds: ['mob.physical.cleave', 'mob.cold.ice-shard'] });
-    expect(readyMobSkill(m, 0, row => row.role === 'stand-off')?.id).toBe('mob.cold.ice-shard');
+    expect(readyMobSkill(m, 0, row => row.cast?.delivery === 'projectile')?.id).toBe('mob.cold.ice-shard');
     expect(m.skillReadyAtUs ?? {}).toEqual({});
     expect(readyMobSkill(m, 0, () => false)).toBeUndefined();
   });

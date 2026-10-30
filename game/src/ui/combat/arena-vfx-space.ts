@@ -1,7 +1,7 @@
 import type { SkillAreaSnapshot, SkillDelivery, SkillShape } from '@engine/types';
 import { sm } from '../../engine/client';
 import { projectArenaPoint } from './combat-arena-view';
-import { groundCirclePath } from './arena-space';
+import { groundCirclePoints } from './arena-space';
 
 export type VfxFootprint = {
   center: {x:number; y:number};
@@ -53,8 +53,8 @@ export function projectVfxFootprint(area: SkillAreaSnapshot): VfxFootprint | und
   };
 }
 
-/** The committed shape as a ground-projected SVG path; single holds a body-sized ring. */
-export function groundShapePath(area: SkillAreaSnapshot): string {
+/** One projected boundary for outlines, dimension reads and presentation-only volumes. */
+export function groundShapePoints(area: SkillAreaSnapshot): { x: number; y: number }[] {
   const shape = area.shape ?? (area.radiusM === 0 ? 'single' : 'circle');
   if (shape === 'line') {
     const length = area.lengthM ?? area.radiusM;
@@ -68,7 +68,7 @@ export function groundShapePath(area: SkillAreaSnapshot): string {
       x: area.center.x + corner.x * -sin + corner.y * cos,
       y: area.center.y + corner.x * cos + corner.y * sin,
     }));
-    return corners.map((point, index) => `${index === 0 ? 'M' : 'L'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ') + ' Z';
+    return corners;
   }
   if (shape === 'cone') {
     const reach = area.lengthM ?? area.radiusM;
@@ -80,12 +80,15 @@ export function groundShapePath(area: SkillAreaSnapshot): string {
       const angle = direction - half + index / segments * half * 2;
       points.push({ x: area.center.x + Math.cos(angle) * reach, y: area.center.y + Math.sin(angle) * reach });
     }
-    return points.map((point, index) => {
-      const projected = projectArenaPoint(point);
-      return `${index === 0 ? 'M' : 'L'}${projected.x.toFixed(1)} ${projected.y.toFixed(1)}`;
-    }).join(' ') + ' Z';
+    return points.map(projectArenaPoint);
   }
-  return groundCirclePath(area.center, shape === 'single' ? Math.max(.25, area.radiusM) : area.radiusM, 48);
+  return groundCirclePoints(area.center, shape === 'single' ? Math.max(.25, area.radiusM) : area.radiusM, 48);
+}
+
+/** The committed shape as a ground-projected SVG path; single holds a body-sized ring. */
+export function groundShapePath(area: SkillAreaSnapshot): string {
+  return groundShapePoints(area).map((point, index) =>
+    `${index === 0 ? 'M' : 'L'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ') + ' Z';
 }
 
 /**

@@ -201,9 +201,6 @@ describe('bodies occupy ground', () => {
       for (const other of actors) if (other !== actor)
         expect(arenaDistance(actor, other)).toBeGreaterThanOrEqual(radius + (other.radiusM ?? 0.25) - 1e-6);
     }
-    expect(Object.keys(arena.contacts)).toHaveLength(actors.length);
-    const claims = new Set(Object.values(arena.contacts).map((claim) => `${claim.x.toFixed(3)},${claim.y.toFixed(3)}`));
-    expect(claims.size).toBe(actors.length);
   });
 
   it('keeps an eight-body pack clear and names the bodies that cannot reach', () => {
@@ -223,12 +220,10 @@ describe('bodies occupy ground', () => {
         expect(arenaDistance(actor, other)).toBeGreaterThanOrEqual(
           (actor.radiusM ?? 0.25) + (other.radiusM ?? 0.25) - 1e-6);
     }
-    expect(Object.keys(arena.contacts).length).toBeGreaterThanOrEqual(6);
-    expect(actors.filter((actor) => actor.waitingForContact).length).toBeGreaterThanOrEqual(1);
-    for (const actor of actors) {
-      if (!actor.waitingForContact) continue;
-      expect(arenaDistance(actor, arena.player)).toBeGreaterThan(0.7 + 1e-7);
-    }
+    // The crowd fans out locally: the bodies with physical room reach their own attack band, and
+    // the rest keep clear ground behind them instead of stacking on a reserved slot.
+    expect(actors.filter((actor) => arenaDistance(actor, arena.player)
+      <= arenaMobRange(actor.mob!) + 1e-7).length).toBeGreaterThanOrEqual(4);
   });
 
   it('keeps a corner pack reachable, clear and deterministic without claim churn', () => {
@@ -254,10 +249,8 @@ describe('bodies occupy ground', () => {
       expect(actor.y).toBeGreaterThanOrEqual((actor.radiusM ?? .25) - 1e-6);
       expect(actor.x).toBeLessThanOrEqual(arena.bounds.width - (actor.radiusM ?? .25) + 1e-6);
       expect(actor.y).toBeLessThanOrEqual(arena.bounds.height - (actor.radiusM ?? .25) + 1e-6);
-      if (actor.waitingForContact) expect(arena.contacts[actor.id]).toBeUndefined();
+      expect(arenaDistance(actor, arena.player)).toBeLessThanOrEqual(arenaMobRange(actor.mob!) + 1e-7);
     }
-    expect(new Set(Object.values(arena.contacts).map((claim) => `${claim.x.toFixed(2)},${claim.y.toFixed(2)}`)).size)
-      .toBe(Object.keys(arena.contacts).length);
   });
 
   it('insets every body by its radius at the field edge', () => {

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { onMount, untrack } from 'svelte';
-  import { groundShapePath } from './arena-vfx-space';
+  import { onMount } from 'svelte';
+  import SkillGeometryLayer from './SkillGeometryLayer.svelte';
   import { E, sm } from '../../engine/client';
   import { skillAreaSnapshot } from '@engine/skill-area';
   import { elementIcon, skillIcon } from '../../icon';
@@ -14,15 +14,15 @@
   import { actorArt, actorProfile } from './combat-actor';
   import { arenaMobShape, arenaSkillShape } from '../fx';
   import { aoePulseMs, groundCirclePath, groundDistance } from './arena-space';
-  import { ARENA_VIEW, arenaActionPose, arenaActorAction, arenaActorPixelScale, arenaCameraOffset, arenaCastCharge, arenaEventTiming, arenaFlightProgress, arenaFlightWindow, arenaIncomingHazards, arenaNearestTarget, arenaFacingSector, arenaFieldNote, arenaPhaseOffset, arenaPlaybackTime, arenaPresentationArea, arenaScreenAngleFor, arenaSheetDirection, arenaSpriteFrame, arenaSpriteIndex, createArenaGait, describeArenaTarget, projectArenaPoint, unprojectArenaPoint, type ArenaTargetRead } from './combat-arena-view';
+  import { ARENA_VIEW, arenaActionPose, arenaActorAction, arenaActorPixelScale, arenaCameraOffset, arenaCastCharge, arenaEventTiming, arenaFlightProgress, arenaFlightWindow, arenaIncomingHazards, arenaNearestTarget, arenaFacingSector, arenaFieldNote, arenaPhaseOffset, arenaScreenAngleFor, arenaSheetDirection, arenaSpriteFrame, arenaSpriteIndex, createArenaGait, createArenaPlaybackClock, describeArenaTarget, projectArenaPoint, unprojectArenaPoint, type ArenaTargetRead } from './combat-arena-view';
   import { fieldLabel } from '../hud/hud';
-  import { ARENA_DIRECTIONS, arenaCameraFocusWithTarget, arenaGroundBounds } from '../../presentation/arena-camera';
+  import { ARENA_DIRECTIONS, arenaGroundBounds } from '../../presentation/arena-camera';
   import { combatEffectLevel, type CombatEffectLevel } from './combat-presentation';
   import { resolveArenaPick } from './arena-picking';
   import { resolveAnimation, shippedAnimationManifest } from './animation/manifest';
 
   let { arena, s, c, ring, speed = 1, paused = false, spritePreviewSpecies = null, spritePreviewVariant = null, aoePreview = false, iconActors = false,
-    focusId = null, aimSkill = null, inspect = false, effectLevel = 'auto', keyboardAim = null, safeArea = null,
+    focusId = null, aimSkill = null, inspect = false, effectLevel = 'auto', keyboardAim = null,
     onReviewPause, onReviewStep, onInspectEnemy, onFocusEnemy, onGroundCommand, onAimPoint, onVitals, onTargetRead }: {
     arena: CombatArena; s: GameState; c: Character; ring: FxEvent[]; speed?: number; paused?: boolean;
     spritePreviewSpecies?: string | null;
@@ -38,8 +38,6 @@
     /** Keyboard aim reticle; a pointer move writes the same world point through `onAimPoint`. */
     keyboardAim?: { x: number; y: number } | null;
     onAimPoint?: (point: { x: number; y: number }) => void;
-    /** The HUD's free box, in percent of the stage: the camera centres the player inside it. */
-    safeArea?: { x: number; y: number; w: number; h: number } | null;
     inspect?: boolean;
     onReviewPause?: () => void;
     onReviewStep?: () => void;
@@ -70,11 +68,7 @@
   const playerArt = equippedPlayerArt;
   let aimPointer = $state<{ x: number; y: number } | null>(null);
   const gait = createArenaGait();
-  let anchorNow = 0;
-  let anchorFrom = 0;
-  let anchorWall = 0;
-  let anchorSpeed = 1;
-  let frozenAt: number | null = null;
+  const playbackTime = createArenaPlaybackClock();
   let previousVitals = '';
   /** Dev inspection reads the same sampled frame and geometry the sim used, never a near copy. */
   const inspectRows = $derived.by(() => {
@@ -83,27 +77,25 @@
     return s.group.map((mob) => {
       const actor = frame.mobs[mob.id];
       if (!actor) return { id: mob.id, label: mob.species, state: 'gone', reason: 'not in frame',
-        center: 0, edge: 0, max: 0, stop: 0, claim: '—', timing: '—' };
+        center: 0, edge: 0, max: 0, stop: 0, engaged: false, timing: '—' };
       const geometry = attackGeometryFor(mobAttackProfile(mob), actor.radiusM ?? .25,
         frame.player.radiusM ?? .25, arenaDistance(actor, frame.player));
       const timing = actor.action?.timing;
       const preparing = timing ? playhead < timing.releaseAtUs : false;
       const recovering = timing ? playhead >= timing.releaseAtUs && playhead < timing.recoveryUntilUs : false;
-      const state = actor.returning ? 'returning'
-        : actor.waitingForContact ? 'blocked-contact'
-          : recovering ? 'recovering'
-            : geometry.inRange ? 'in-range' : 'out-of-range';
-      const reason = state === 'returning' ? 'home reset / immune'
-        : state === 'blocked-contact' ? 'no reachable claim'
-          : state === 'recovering' ? 'action owns feet'
-            : state === 'out-of-range' ? 'approach'
-              : preparing ? 'windup' : 'in stop band';
-      const claim = frame.contacts?.[mob.id];
+      const engaged = !!s.field?.engagementIds.includes(mob.id);
+      const state = !engaged ? 'idle'
+        : recovering ? 'recovering'
+          : geometry.inRange ? 'in-range' : 'out-of-range';
+      const reason = state === 'idle' ? 'field idle'
+        : state === 'recovering' ? 'action owns feet'
+          : state === 'out-of-range' ? 'approach'
+            : preparing ? 'windup' : 'in stop band';
       return {
         id: mob.id, label: mob.species, state, reason,
         center: geometry.centerDistance, edge: geometry.edgeGap,
         max: geometry.maxCenterDistance, stop: geometry.stopCenterDistance,
-        claim: claim ? `${claim.x.toFixed(2)}, ${claim.y.toFixed(2)}` : '—',
+        engaged,
         timing: timing
           ? `${(timing.startedAtUs / arena.unitsPerSec).toFixed(2)} / ${(timing.releaseAtUs / arena.unitsPerSec).toFixed(2)} / ${(timing.impactAtUs / arena.unitsPerSec).toFixed(2)}`
           : '—',
@@ -129,26 +121,10 @@
   });
   const targetId = $derived(committedTargetId
     ? sampled.mobs[committedTargetId]?.hp > 0 ? committedTargetId : undefined
-    : focusId && sampled.mobs[focusId]?.hp > 0 && !sampled.mobs[focusId]?.returning ? focusId : nearestTargetId);
+    : focusId && sampled.mobs[focusId]?.hp > 0 ? focusId : nearestTargetId);
   const focusTargetId = $derived(focusId && focusId !== targetId && sampled.mobs[focusId]?.hp > 0
-    && !sampled.mobs[focusId]?.returning ? focusId : null);
-  // Frame the player inside the HUD's real free box. The ground projection, hit tests and world
-  // coordinates stay untouched; only the camera's screen focus moves.
-  const safeCentre = $derived(safeArea
-    ? { x: (safeArea.x + safeArea.w / 2) / 100 * ARENA_VIEW.width,
-        y: (safeArea.y + safeArea.h / 2) / 100 * ARENA_VIEW.height }
-    : { x: ARENA_VIEW.width / 2, y: ARENA_VIEW.height / 2 });
-  const safeRect = $derived(safeArea
-    ? { left: safeArea.x / 100 * ARENA_VIEW.width, top: safeArea.y / 100 * ARENA_VIEW.height,
-        right: (safeArea.x + safeArea.w) / 100 * ARENA_VIEW.width,
-        bottom: (safeArea.y + safeArea.h) / 100 * ARENA_VIEW.height }
-    : { left: 0, top: 0, right: ARENA_VIEW.width, bottom: ARENA_VIEW.height });
-  const committedPose = $derived.by(() => {
-    const id = targetId ?? sampled.intent?.targetId ?? sampled.focusId ?? focusId;
-    return id ? sampled.mobs[id] : undefined;
-  });
-  const cameraFocus = $derived(arenaCameraFocusWithTarget(player, committedPose, safeCentre, safeRect));
-  const camera = $derived(arenaCameraOffset(player, undefined, cameraFocus));
+    ? focusId : null);
+  const camera = $derived(arenaCameraOffset(player));
   /** F37 — one named read for the bar: committed strike, requested focus, or the next body,
    *  with an offscreen bearing so a focus that leaves the view stays readable. */
   const targetRead = $derived(describeArenaTarget({
@@ -165,8 +141,7 @@
     onTargetRead?.(read);
   });
   const cameraTransform = $derived(`translate(${-camera.x * stage.width / ARENA_VIEW.width}px,${-camera.y * scale}px)`);
-  // The camera's safe-area focus can shift the frame off the stage centre; pad the authored ground
-  // coverage by that shift so no edge shows a missing strip.
+  // Pad the ground beyond its reachable camera coverage so no edge shows a missing strip.
   const groundBounds = $derived.by(() => {
     const bounds = arenaGroundBounds(arena.bounds);
     const pad = 220;
@@ -189,13 +164,13 @@
   const aimArea = $derived.by(() => {
     if (!aimSkill || !aimDefinition) return undefined;
     const focus = targetId ? sampled.mobs[targetId] : undefined;
-    const point = keyboardAim ?? aimPointer ?? (focus ? { x: focus.x, y: focus.y } : { x: player.x, y: player.y });
-    return skillAreaSnapshot(aimDefinition.area ?? { origin: 'target' as const, radius_m: 0 },
+    const self = ['buff', 'heal', 'aura'].includes(aimDefinition.type ?? '');
+    const point = self ? player : keyboardAim ?? aimPointer ?? focus ?? player;
+    return skillAreaSnapshot(self ? { origin: 'caster', radius_m: 0 }
+      : aimDefinition.action?.kind === 'chain-strike' ? { origin: 'target', radius_m: 0 }
+      : aimDefinition.area ?? { origin: 'target' as const, radius_m: 0 },
       player, point, targetId ?? '', player.facing);
   });
-  const aimShapePath = $derived(aimArea ? groundShapePath(aimArea) : '');
-  const aimRangePath = $derived(Number.isFinite(aimRange) && aimRange > 0
-    ? groundCirclePath({ x: player.x, y: player.y }, aimRange, 64) : '');
   const aimValid = $derived.by(() => {
     if (!aimSkill || !aimArea) return false;
     if (aimDefinition?.area?.origin === 'caster') return true;
@@ -205,7 +180,7 @@
   const aoePreviewCenter = $derived(projectArenaPoint({ x: player.x, y: player.y }));
   // In-flight incoming shots own their telegraph: the committed span at the playhead, never the
   // caster's pose (F38). Ground shots draw their landing circle; projectiles draw their head.
-  const hazardMarks = $derived(arenaIncomingHazards(arena, playhead));
+  const hazardMarks = $derived(arenaIncomingHazards(arena, playhead).filter(hazard => !hazard.skillId));
   const fieldNote = $derived(arenaFieldNote(s));
   $effect(() => {
     const ids = new Set(['player', ...Object.keys(sampled.mobs)]);
@@ -238,32 +213,6 @@
   function damageLabel(text: string | undefined, crit = false) {
     return text ? `${text}${crit ? '!' : ''}` : '';
   }
-
-  $effect(() => {
-    const now = arena.nowUs;
-    const isPaused = paused;
-    const wall = performance.now();
-    const shownAt = frozenAt ?? (isPaused ? untrack(() => playhead)
-      : arenaPlaybackTime(anchorNow, arena.unitsPerSec, wall - anchorWall, anchorSpeed, false, anchorFrom));
-    if (now !== anchorNow) {
-      // A delayed wake can resolve several ticks. Keep showing the retained movement between
-      // them instead of jumping to `now - one second` each time the sim publishes a result.
-      anchorFrom = Math.max(arena.frames[0]?.atUs ?? 0, Math.min(shownAt, now));
-      anchorNow = now;
-      anchorWall = wall;
-      frozenAt = null;
-    } else if (speed !== anchorSpeed && !isPaused) {
-      anchorFrom = shownAt;
-      anchorWall = wall;
-    }
-    anchorSpeed = speed;
-    if (isPaused) frozenAt ??= untrack(() => playhead);
-    else if (frozenAt != null) {
-      anchorFrom = Math.max(arena.frames[0]?.atUs ?? 0, Math.min(frozenAt, now));
-      anchorWall = wall;
-      frozenAt = null;
-    }
-  });
 
   $effect(() => {
     if (!arena.frames.length) return;
@@ -331,10 +280,7 @@
     query.addEventListener('change', motion);
     const resize = new ResizeObserver(([entry]) => { stage = { width: entry.contentRect.width, height: entry.contentRect.height }; });
     if (host) resize.observe(host);
-    anchorNow = arena.nowUs;
-    anchorWall = performance.now();
-    anchorFrom = Math.max(arena.frames[0]?.atUs ?? 0, anchorNow - arena.unitsPerSec);
-    playhead = anchorFrom;
+    playhead = playbackTime(arena, performance.now(), speed, paused);
     let frame = 0;
     const advance = (wall: number) => {
       if (reviewPlaying && reviewAt != null) {
@@ -342,7 +288,8 @@
         reviewWall = wall;
         if (reviewAt >= arena.nowUs) reviewPlaying = false;
       }
-      playhead = reviewAt ?? frozenAt ?? arenaPlaybackTime(anchorNow, arena.unitsPerSec, wall - anchorWall, speed, paused, anchorFrom);
+      const liveAt = playbackTime(arena, wall, speed, paused);
+      playhead = reviewAt ?? liveAt;
       frame = requestAnimationFrame(advance);
     };
     frame = requestAnimationFrame(advance);
@@ -359,7 +306,7 @@
     const camX = camera.x * stage.width / ARENA_VIEW.width;
     const camY = camera.y * scale;
     const marginX = 220, marginY = 320;
-    return all.filter((view) => view.actor.id === 'player' || view.actor.returning
+    return all.filter((view) => view.actor.id === 'player'
       || view.actor.id === targetId || view.actor.id === focusTargetId
       || (view.x - camX > -marginX && view.x - camX < stage.width + marginX
         && view.y - camY > -marginY && view.y - camY < stage.height + marginY));
@@ -617,14 +564,6 @@
       || sampled.bodies.find((body) => body.id === sourceId) || arena.bodies.find((body) => body.id === sourceId);
     const point = projectArenaPoint(actionTarget && action?.targetId === targetActorId ? actionTarget : targetPoint);
     const source = projectArenaPoint(action ? { x: action.x, y: action.y } : sourceActor || target!);
-    const castArea = action?.channel ? arenaPresentationArea(action, sampled) : event.skillOutcome?.area ?? action?.area;
-    const sourceWorld = sourceActor ? { x: sourceActor.x, y: sourceActor.y } : action ? { x: action.x, y: action.y } : undefined;
-    const skillDefinition = sm.byId[event.skillId ?? ''];
-    const telegraphArea = cast && castArea == null && skillDefinition?.area && sourceWorld
-      ? skillAreaSnapshot(skillDefinition.area, sourceWorld, { x: targetPoint.x, y: targetPoint.y },
-        targetActorId ?? '', sourceId === 'player' ? player.facing : 0)
-      : castArea;
-    const rangeM = cast && sourceId === 'player' ? arenaSkillRange(event.skillId ?? '') : undefined;
     const kind = event.kind === 'heal' || event.kind === 'buff' || event.kind === 'drop' ? event.kind
       : event.kind === 'block' ? /block/i.test(event.text) ? 'block' : 'dodge'
       : action ? actionStyle(action, sourceActor?.mob) : 'status';
@@ -635,7 +574,7 @@
     const sourceLift = bodyLift(sourceActor?.id ?? 'player', .6, 58);
     const pointY = point.y - targetLift;
     const sourceY = source.y - sourceLift;
-    return { key: String(event.id), event, age, timing, kind, telegraph: cast, castArea: telegraphArea, rangeM, sourceWorld,
+    return { key: String(event.id), event, age, timing, kind, telegraph: cast,
       point: { x: point.x, y: pointY }, ground: point, source: { x: source.x, y: sourceY }, sourceGround: source, flight,
       projectile: { x: source.x + (point.x - source.x) * progress, y: sourceY + (pointY - sourceY) * progress - Math.sin(progress * Math.PI) * (kind === 'arrow' ? 18 : 5) },
       angle: Math.atan2(pointY - sourceY, point.x - source.x) * 180 / Math.PI,
@@ -672,7 +611,7 @@
           <span class="inspect-head">player {arena.player.x.toFixed(2)}, {arena.player.y.toFixed(2)} · start/release/impact s</span>
           {#each inspectRows as row (row.id)}
             <span data-ai-state={row.state}>
-              <b>{row.label}</b> · {row.state} · d {row.center.toFixed(2)} · edge {row.edge.toFixed(2)} · max {row.max.toFixed(2)} · stop {row.stop.toFixed(2)} · claim {row.claim} · {row.timing} · {row.reason}
+              <b>{row.label}</b> · {row.state} · d {row.center.toFixed(2)} · edge {row.edge.toFixed(2)} · max {row.max.toFixed(2)} · stop {row.stop.toFixed(2)} · {row.engaged ? 'engaged' : 'idle'} · {row.timing} · {row.reason}
             </span>
           {/each}
         </div>
@@ -715,28 +654,9 @@
     </svg>
   {/if}
 
+  <SkillGeometryLayer {arena} frame={sampled} atUs={playhead}
+    aim={aimSkill && aimArea ? { skillId: aimSkill, area: aimArea, source: player, rangeM: aimRange, valid: aimValid } : null} />
   <svg class="arena-ground-fx" viewBox={`0 0 ${ARENA_VIEW.width} ${ARENA_VIEW.height}`} preserveAspectRatio="none" aria-hidden="true">
-    {#if aimSkill && aimShapePath}
-      {#if aimRangePath}<path class="aim-range" d={aimRangePath} />{/if}
-      <path class="aim-shape" class:invalid={!aimValid} d={aimShapePath} />
-    {/if}
-    {#each effects as mark (mark.key)}
-      {#if mark?.telegraph}
-        <g class="arena-telegraph" style:color={skillColour(mark.event.skillId!)}>
-          {#if mark.rangeM != null && Number.isFinite(mark.rangeM) && mark.rangeM > 0 && mark.sourceWorld}
-            <path class="telegraph-range" d={groundCirclePath(mark.sourceWorld, mark.rangeM, 64)} />
-          {/if}
-          {#if mark.castArea}
-            <path class="telegraph-area" d={groundShapePath(mark.castArea)} />
-          {/if}
-          {#if Math.hypot(mark.ground.x - mark.sourceGround.x, mark.ground.y - mark.sourceGround.y) > 8}
-            <line class="telegraph-direction" x1={mark.sourceGround.x} y1={mark.sourceGround.y} x2={mark.ground.x} y2={mark.ground.y} />
-          {/if}
-          <circle class="telegraph-target" cx={mark.ground.x} cy={mark.ground.y} r="3" />
-          <text class="telegraph-name" x={mark.ground.x} y={mark.ground.y - 12}>{skillName(mark.event.skillId)}</text>
-        </g>
-      {/if}
-    {/each}
     {#each bodyRings as ring (ring.id)}
       <path class="body-ring" d={ring.path} />
     {/each}
@@ -817,11 +737,10 @@
           else if (pick.kind === 'inspect') onInspectEnemy?.(view.actor.mob!);
         }}
           aria-current={targetId === view.actor.id ? 'true' : undefined}
-          aria-label={`Inspect ${fieldLabel(view.actor.mob)}, level ${view.actor.mob.level}, ${Math.ceil(view.actor.hp)} of ${Math.ceil(view.actor.hpMax)} health${view.actor.returning ? ', returning home, untargetable' : ''}${view.statuses.length ? `, ${view.statuses.map((status) => `${status.label}${status.stacks > 1 ? ` ${status.stacks} stacks` : ''}`).join(', ')}` : ''}${onFocusEnemy ? ', click to focus this enemy' : ''}${onInspectEnemy ? ', Alt-click to inspect' : ''}`}
+          aria-label={`Inspect ${fieldLabel(view.actor.mob)}, level ${view.actor.mob.level}, ${Math.ceil(view.actor.hp)} of ${Math.ceil(view.actor.hpMax)} health${view.statuses.length ? `, ${view.statuses.map((status) => `${status.label}${status.stacks > 1 ? ` ${status.stacks} stacks` : ''}`).join(', ')}` : ''}${onFocusEnemy ? ', click to focus this enemy' : ''}${onInspectEnemy ? ', Alt-click to inspect' : ''}`}
           style:width={`${Math.max(58, view.hitboxWidth)}px`} style:height={`${view.nameplateHeight}px`}>
           <span class="arena-name">{fieldLabel(view.actor.mob)} <small>{view.actor.mob.level}</small></span>
           <span class="arena-health" aria-hidden="true"><span style:width={`${Math.max(0, Math.min(100, view.actor.hp / view.actor.hpMax * 100))}%`}></span></span>
-          {#if view.actor.returning}<span class="arena-returning" aria-hidden="true">returning</span>{/if}
           {#if targetId === view.actor.id}<span class="target-tick" aria-hidden="true"></span>{/if}
         </button>
       {/if}
@@ -923,7 +842,7 @@
   .arena-inspect-geometry { position: absolute; top: 100%; left: 0; display: grid; gap: 2px; width: max-content; max-width: 72vw; max-height: 38vh; overflow: auto; padding: var(--spacing-xs); border: 1px solid var(--line); background: var(--panel); color: var(--text); font-family: var(--font-mono, monospace); font-size: var(--font-3xs); white-space: nowrap; }
   .arena-inspect-geometry [data-ai-state='in-range'] { color: var(--es); }
   .arena-inspect-geometry [data-ai-state='out-of-range'], .arena-inspect-geometry [data-ai-state='gone'] { color: var(--dim); }
-  .arena-inspect-geometry [data-ai-state='blocked-contact'], .arena-inspect-geometry [data-ai-state='returning'] { color: var(--es-lit); }
+  .arena-inspect-geometry [data-ai-state='blocked-contact'] { color: var(--es-lit); }
   .arena-inspect-geometry .inspect-head { color: var(--dim); }
   .combat-arena { position: absolute; inset: 0; overflow: hidden; isolation: isolate; pointer-events: none; color: var(--text); background: #202c27; }
   .arena-camera { position:absolute; inset:0; pointer-events:none; isolation:isolate; }
@@ -941,14 +860,6 @@
   .aoe-ring.hazard-ring[data-hazard-heavy="false"] { stroke-dasharray: 5 4; opacity: .3; }
   .aoe-center { fill: var(--gold-lit); opacity: .75; }
   .body-ring { fill: none; stroke: currentColor; stroke-width: 1; opacity: .16; vector-effect: non-scaling-stroke; }
-  .aim-range { fill: none; stroke: var(--es); stroke-width: 1.2; stroke-dasharray: 7 6; opacity: .5; vector-effect: non-scaling-stroke; }
-  .aim-shape { fill: color-mix(in srgb, var(--es) 16%, transparent); stroke: var(--es-lit); stroke-width: 1.4; opacity: .72; vector-effect: non-scaling-stroke; }
-  .aim-shape.invalid { fill: color-mix(in srgb, var(--hp-lit) 13%, transparent); stroke: var(--hp-lit); opacity: .6; }
-  .telegraph-range { fill: none; stroke: currentColor; stroke-width: 1; stroke-dasharray: 7 6; opacity: .35; vector-effect: non-scaling-stroke; }
-  .telegraph-area { fill: color-mix(in srgb, currentColor 14%, transparent); stroke: currentColor; stroke-width: 1.4; opacity: .6; vector-effect: non-scaling-stroke; }
-  .telegraph-direction { stroke: currentColor; stroke-width: 1.2; stroke-dasharray: 4 4; opacity: .5; vector-effect: non-scaling-stroke; }
-  .telegraph-target { fill: currentColor; opacity: .8; }
-  .telegraph-name { fill: var(--gold-lit); font: 600 20px var(--ui); text-anchor: middle; paint-order: stroke; stroke: rgba(8, 15, 13, .85); stroke-width: 4px; }
   @keyframes aoe-breathe { from { opacity: .2; } to { opacity: .6; } }
   .reduced-motion .aoe-ring { animation: none; opacity: .45; }
   .arena-actor { position: absolute; width: 0; height: 0; }
@@ -976,7 +887,6 @@
   .target .arena-name, .arena-inspect:hover .arena-name, .arena-inspect:focus-visible .arena-name { opacity: 1; }
   .arena-threat { position: absolute; left: 50%; translate: -50% 0; bottom: calc(var(--actor-height) + 6px); display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: rgba(120, 28, 20, .9); color: #ffe9c9; font: 700 11px/1 var(--ui); box-shadow: 0 0 6px rgba(255, 92, 64, .55); }
   .target-tick { position: absolute; left: 50%; bottom: calc(100% + 34px); translate: -50% 0; width: 0; height: 0; border: 3px solid transparent; border-top-color: var(--gold-lit); }
-  .arena-returning { position: absolute; left: calc(100% + 5px); bottom: calc(100% + 1px); padding: 2px 6px; border: 1px solid var(--es); border-radius: 2px; background: rgba(8, 14, 11, .86); color: var(--es-lit); font: 600 10px/1.2 var(--ui); letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; pointer-events: none; }
   .arena-statuses { position: absolute; left: 30px; bottom: calc(var(--actor-height) - 7px); display: flex; gap: 3px; width: max-content; }
   .arena-status { position: relative; display: grid; place-items: center; width: 17px; height: 17px; border-radius: 2px; background: rgba(7, 15, 11, .86); }
   .arena-status > .icon-mask { width: 13px; height: 13px; }

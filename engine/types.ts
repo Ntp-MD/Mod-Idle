@@ -577,8 +577,6 @@ export interface MobSkillRow {
   phase?: { hpBelowPct?: number; hpAbovePct?: number };
   /** Ground impact footprint; absent for single-target melee/projectile casts. */
   area?: MobCastArea;
-  /** Placement preference only: front closes, stand-off holds. Never decides delivery. */
-  role?: 'front' | 'stand-off' | 'any';
   /** Auras affect the engaged group (max 3), or only that source's own line. */
   scope?: 'engaged' | 'line';
   /** Aura effects are defensive so a group buff cannot double the mob DPS budget. */
@@ -649,6 +647,15 @@ export interface FieldLabelsCfg {
   boss: FieldLabelRule;
 }
 
+/** Species-level field-awareness eligibility; ranges remain authored in `spawns.json`. */
+export interface MobEngagementCfg {
+  note?: string;
+  /** Species that initiate on proximity. A Species absent here only retaliates after contact. */
+  proximity: string[];
+  /** Species that wake living same-Species neighbours when directly alerted. */
+  assist: string[];
+}
+
 export interface MobCfg {
   /** Closed taxonomy registry. Races are descriptive, not automatic gameplay rules. */
   races: MobRacesCfg;
@@ -661,6 +668,8 @@ export interface MobCfg {
   forms: Record<string, Record<string, MobForm>>;
   zones: MobZone[];
   species: MobSpecies[];
+  /** Proximity aggression and same-species assist eligibility, keyed by Species id. */
+  engagement?: MobEngagementCfg;
   /** Normal Variant bands by Species id; they select name/Core while zone_levels sets actual spawn level. */
   variants?: Record<string, MobVariant[]>;
   /** What each of those names drops: its base junk item, sale rarity and stream lean (`X56`). */
@@ -1034,12 +1043,27 @@ export interface SkillCastTiming {
 /** The skill roster payload (`tools/data/skills.json`) — only the fields the model reads. */
 /** Selected multi-impact execution; count and share stay owned by `effects.hits`/`hit_pct`. */
 export interface SkillAction {
-  kind: 'projectile-burst' | 'ground-pulse-burst' | 'whirlwind-channel' | 'blizzard-field' | 'sand-field' | 'chain-strike';
+  kind: 'projectile-burst' | 'ground-pulse-burst' | 'whirlwind-channel' | 'blizzard-field' | 'sand-field' | 'chain-strike' | 'cluster-burst' | 'targeted-burst';
   interval_sec?: number;
   active_sec?: number;
   movement_speed_mult?: number;
   /** Chain-strike only: share of the press each hop after the primary lands for, in percent. */
   hop_share_pct?: number;
+  /** Cluster-burst only: the press is one 100% budget split across the parent impact and its
+   *  children (parent_share_pct + child_count × child_share_pct must total exactly 100). */
+  parent_share_pct?: number;
+  /** Cluster-burst only: how many children one parent impact spawns. */
+  child_count?: number;
+  /** Cluster-burst only: share of the press each child lands for, in percent. */
+  child_share_pct?: number;
+  /** Cluster-burst only: each child's bearing offset from the parent bearing, in degrees. */
+  spread_deg?: number;
+  /** Targeted-burst only: straight keeps the release-aim snapshot, homing tracks one body id. */
+  tracking?: 'straight' | 'homing';
+  /** Targeted-burst homing only: pursuit bound in metres from the player. */
+  pursuit_range_m?: number;
+  /** Targeted-burst homing only: pursuit bound in seconds after the payload's release. */
+  pursuit_sec?: number;
 }
 
 export interface SkillRow {

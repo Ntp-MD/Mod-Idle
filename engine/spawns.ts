@@ -2,7 +2,7 @@
  * Field spawn-point model.
  *
  * `spawns.json` owns where a field's population may stand, how large it is, how fast a slot
- * refills and how far a body may roam/assist/leash. Species, levels, bodies and ranks stay in
+ * refills and how far a body may roam/assist. Species, levels, bodies and ranks stay in
  * `engine.json`; the arena owns meters and projection. This module only validates and resolves
  * those authored facts so the sim cannot invent a spawn point or a density at runtime.
  *
@@ -74,12 +74,15 @@ export interface SpawnProfile {
   respawn_max_sec: number;
   aggro_m: number;
   assist_m: number;
-  leash_m: number;
   roam_m: number;
-  /** A returning body re-enters the idle/aggro state only inside this radius of home. */
+  /** An unengaged body settles inside this radius of home. */
   home_band_m: number;
   /** Return pace as a share of the body's ordinary walk speed; never above 1. */
   return_speed_mult: number;
+  /** Idle decision beat in seconds: an unengaged body picks one spot or waits at this beat. */
+  idle_decision_sec: number;
+  /** Share of idle beats that wait instead of choosing a reachable spot, within [0, 1]. */
+  idle_wait_pct: number;
   /** Hostile spawns and aggro are suppressed within this distance of a field Camp. */
   camp_safe_m: number;
   /** Share of wall seconds an offline field counts as engaged combat time. */
@@ -167,21 +170,24 @@ function profileAt(raw: unknown, path: string): SpawnProfile {
   if (!(aggro > 0)) refuse(`${path}.aggro_m`, 'must be positive');
   const assist = numberAt(raw, 'assist_m', path);
   if (assist < 0) refuse(`${path}.assist_m`, 'must be nonnegative');
-  const leash = numberAt(raw, 'leash_m', path);
-  if (leash < aggro) refuse(`${path}.leash_m`, 'must be at least aggro_m');
   const roam = numberAt(raw, 'roam_m', path);
   if (roam < 0) refuse(`${path}.roam_m`, 'must be nonnegative');
   const homeBand = numberAt(raw, 'home_band_m', path);
   if (!(homeBand > 0 && homeBand <= roam + 1)) refuse(`${path}.home_band_m`, 'must be positive and near the idle roam radius');
   const returnSpeed = numberAt(raw, 'return_speed_mult', path);
   if (!(returnSpeed > 0 && returnSpeed <= 1)) refuse(`${path}.return_speed_mult`, 'must be within (0, 1]');
+  const idleDecisionSec = raw.idle_decision_sec == null ? 5 : numberAt(raw, 'idle_decision_sec', path);
+  if (!(idleDecisionSec > 0)) refuse(`${path}.idle_decision_sec`, 'must be positive');
+  const idleWaitPct = raw.idle_wait_pct == null ? 0 : numberAt(raw, 'idle_wait_pct', path);
+  if (!(idleWaitPct >= 0 && idleWaitPct <= 1)) refuse(`${path}.idle_wait_pct`, 'must be within [0, 1]');
   const campSafe = numberAt(raw, 'camp_safe_m', path);
   if (campSafe < 0) refuse(`${path}.camp_safe_m`, 'must be nonnegative');
   const offlineShare = numberAt(raw, 'offline_share', path);
   if (!(offlineShare >= 0 && offlineShare <= 1)) refuse(`${path}.offline_share`, 'must be within [0, 1]');
   return {
-    layout, cap, respawn_sec: respawn, respawn_min_sec: respawnMin, respawn_max_sec: respawnMax, aggro_m: aggro, assist_m: assist, leash_m: leash,
+    layout, cap, respawn_sec: respawn, respawn_min_sec: respawnMin, respawn_max_sec: respawnMax, aggro_m: aggro, assist_m: assist,
     roam_m: roam, home_band_m: homeBand, return_speed_mult: returnSpeed,
+    idle_decision_sec: idleDecisionSec, idle_wait_pct: idleWaitPct,
     camp_safe_m: campSafe, offline_share: offlineShare,
   };
 }

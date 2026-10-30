@@ -25,6 +25,9 @@ function rangedFight(distance = 3, over: Record<string, unknown> = {}) {
   Object.assign(arena.mobs[mob.id], { x: 1 + distance, y: 6 });
   captureCombatArena(arena, state, 0);
   pinFieldPopulation(state);
+  // The archer is already alerted; these tests measure ranged defaults, not acquisition.
+  state.field!.engagementIds = [mob.id];
+  state.field!.engagementCauses = { [mob.id]: 'contact' };
   return { state, mob, arena };
 }
 
@@ -213,7 +216,7 @@ describe('ordinary ranged mob defaults', () => {
     expect(state.fx.filter((event) => event.kind === 'taken').length).toBe(1);
   });
 
-  it('falls back to the ordinary shot when a ready strike is out of its role reach', () => {
+  it('falls back to the ordinary shot when a ready strike is out of its cast reach', () => {
     const { state, mob, arena } = rangedFight(4, { skillIds: ['mob.lightning.static-jab'], skillReadyAtUs: {} });
     arena.intent = { skillId: 'attack.firestorm', targetId: mob.id, targetPoint: { x: 1, y: 6 },
       phase: 'windup', releaseAtUs: 10_000_000 };
@@ -239,7 +242,7 @@ describe('ordinary ranged mob defaults', () => {
     expect(mob.skillReadyAtUs?.['mob.lightning.static-jab']).toBeGreaterThan(0);
   });
 
-  it('uses the ready strike when the player is inside its role reach', () => {
+  it('uses the ready strike when the player is inside its cast reach', () => {
     const { state, mob, arena } = rangedFight(1.5, {
       line: 'front', skillIds: ['mob.lightning.static-jab'], skillReadyAtUs: {},
     });

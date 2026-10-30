@@ -107,7 +107,7 @@ describe('Packet L — timed recovery', () => {
   });
 
   it('the registry now opens all fifty-two catalogue keys', () => {
-    expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toHaveLength(105);
+    expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toHaveLength(106);
   });
 });
 

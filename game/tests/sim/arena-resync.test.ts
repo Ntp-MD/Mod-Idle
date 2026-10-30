@@ -11,14 +11,12 @@ describe('P7 arena resync — a rewind starts a new generation', () => {
       skillId: 'attack.fireball', targetId: 'mob', targetPoint: { x: 1, y: 1 }, phase: 'windup',
     } as never;
     arena.flights.push({ actionId: 1 } as never);
-    arena.contacts = { mob: { targetId: 'player', atUs: 80_000_000 } } as never;
 
     syncCombatArena(arena, state, 3_000_000, 1_000_000, 100);
 
     expect(arena.nowUs).toBe(3_000_000);
     expect(arena.flights).toHaveLength(0);
     expect(arena.intent).toBeUndefined();
-    expect(arena.contacts).toEqual({});
   });
 
   it('keeps released work across a forward step inside one movement sample', () => {

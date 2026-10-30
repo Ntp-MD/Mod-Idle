@@ -19,7 +19,7 @@ function lineEncounter() {
   const mobs = ['near', 'far'].map((id, index) => {
     const mob = spawnMob(mulberry32(40 + index), 1, 'normal');
     Object.assign(mob, {
-      id, hp: 1e9, hpMax: 1e9, ps: 0, accuracy: 0, evasion: 0, dodgeRate: 0,
+      id, speciesId: 'wolf', hp: 1e9, hpMax: 1e9, ps: 0, accuracy: 0, evasion: 0, dodgeRate: 0,
       armour: 0, line: 'stand-off', damage: 'physical', innate: [], skillIds: [],
     });
     return mob;
@@ -28,8 +28,8 @@ function lineEncounter() {
   const arena = createCombatArena();
   syncCombatArena(arena, state, 0, 1_000_000, characterSheet(state).maxHp);
   Object.assign(arena.player, { x: 1, y: 6 });
-  Object.assign(arena.mobs.near, { x: 4, y: 6 });
-  Object.assign(arena.mobs.far, { x: 5.5, y: 6 });
+  Object.assign(arena.mobs.near, { x: 2.6, y: 6, holdAtRange: true });
+  Object.assign(arena.mobs.far, { x: 3.3, y: 6, holdAtRange: true });
   pinFieldPopulation(state);
   return { state, mobs, arena };
 }

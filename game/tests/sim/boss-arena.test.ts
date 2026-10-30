@@ -16,8 +16,7 @@ function bossFight() {
 }
 
 describe('Boss local arena epoch', () => {
-  it('settles old field work before the Boss and advances the field epoch', () => {
-    const { state, arena } = bossFight();
+  it('keeps released field work when the Boss joins and advances the field epoch', () => {    const { state, arena } = bossFight();
     const timing = { delivery: 'instant' as const, startedAtUs: 0, releaseAtUs: 0,
       impactAtUs: 10_000_000, recoveryUntilUs: 0 };
     const action = arenaAction(arena, 'player', 'cast', 0, undefined, 'attack.firestorm', undefined, timing)!;
@@ -34,13 +33,15 @@ describe('Boss local arena epoch', () => {
     tick(state, { arena });
     const boss = state.group.find((mob) => isBossKind(String(mob.kind)));
     expect(boss).toBeDefined();
-    expect(arena.actions.find((entry) => entry.id === action.id)?.cancelReason).toBe('boss-arena');
+    // A Boss joining the field is a new epoch, not a reason to cancel a committed press.
+    expect(arena.actions.find((entry) => entry.id === action.id)?.cancelReason).toBeUndefined();
+    expect(arena.flights.some((flight) => flight.actionId === action.id)).toBe(true);
     expect(state.field!.arenaEpoch).toBeGreaterThan(epoch);
     // The population is already there; the Boss is one of its slots, not the whole field.
     expect(state.group.length).toBeGreaterThan(1);
   });
 
-  it('settles remaining work when the Boss dies and returns to the checkpointed field', () => {
+  it('keeps released work when the Boss dies and the field continues', () => {
     const { state, arena } = bossFight();
     tick(state, { arena });
     const boss = state.group.find((mob) => isBossKind(String(mob.kind)))!;
@@ -72,7 +73,8 @@ describe('Boss local arena epoch', () => {
     for (let index = 0; index < 8 && state.group.some((mob) => mob.id === boss.id && mob.hp > 0); index++)
       tick(state, { arena, autoSkills: false });
     expect(state.group.some((mob) => mob.id === boss.id && mob.hp > 0)).toBe(false);
-    expect(arena.actions.find((entry) => entry.id === action.id)?.cancelReason).toBe('boss-exit');
+    // The Boss's death settles its own epoch; another body's committed press keeps running.
+    expect(arena.actions.find((entry) => entry.id === action.id)?.cancelReason).toBeUndefined();
     expect(state.field!.arenaEpoch).toBeGreaterThan(epoch);
     // The field, its authored homes and the farming anchor survive the Boss arena.
     expect(state.field!.slots.map((slot) => `${slot.id}:${slot.home.x},${slot.home.y}`)).toEqual(homes);

@@ -148,6 +148,7 @@ const BUNDLES: KeystoneBundleDef[] = [
   { key: 'fortuna', params: { doubleCritPct: 'pct', nonCritPct: 'pct' }, requiredHooks: ['outgoing'] },
   { key: 'lucky-streak', params: { critDamagePctPerStack: 'pct', maxStacks: 'count' }, requiredHooks: ['outgoing', 'timing'] },
   { key: 'gamblers-step', params: { perfectDodgeMult: 'mult' }, requiredHooks: ['sheet'] },
+  { key: 'spellward', params: { spellDodgePct: 'pct', evasionPenaltyPct: 'pct' }, requiredHooks: ['sheet'] },
 ];
 
 const BY_KEY = new Map(BUNDLES.map((b) => [b.key, b]));

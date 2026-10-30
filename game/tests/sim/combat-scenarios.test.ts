@@ -20,28 +20,11 @@ function heavyGround(encounter: ReturnType<typeof seededEncounter>, centre: { x:
   } as never);
 }
 
-describe('P0 scenarios — focus change', () => {
-  it('moves the committed target onto the focused body', () => {
-    const encounter = seededEncounter({ seed: 31, bodies: 6 });
-    encounter.run(1);
-    const living = Object.values(encounter.arena.mobs).filter((mob) => mob.hp > 0 && !mob.returning);
-    expect(living.length).toBeGreaterThan(1);
-    const chosen = living[living.length - 1].id;
-
-    encounter.arena.focusId = chosen;
-    encounter.run(2);
-
-    const last = encounter.trace[encounter.trace.length - 1];
-    expect(last.focusId).toBe(chosen);
-    expect(last.intent?.targetId ?? chosen).toBe(chosen);
-  });
-});
-
 describe('P0 scenarios — moving target', () => {
   it('keeps the committed target and closes the distance while it moves', () => {
     const encounter = seededEncounter({ seed: 33, bodies: 5 });
     encounter.run(1);
-    const mob = Object.values(encounter.arena.mobs).find((body) => body.hp > 0 && !body.returning);
+    const mob = Object.values(encounter.arena.mobs).find((body) => body.hp > 0);
     expect(mob).toBeDefined();
     encounter.arena.focusId = mob!.id;
     const startGap = Math.hypot(encounter.arena.player.x - mob!.x, encounter.arena.player.y - mob!.y);

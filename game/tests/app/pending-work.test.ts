@@ -263,7 +263,69 @@ describe('released pending work across a save', () => {
 });
 
 describe('pending work payloads beyond the first contact', () => {
-  it('keeps deployed-field and chain facts plus one shared roll cache through a reload', () => {
+  for (const kind of ['targeted-burst', 'cluster-burst'] as const) {
+    for (const legacy of [false, true]) {
+      it(`keeps ${kind} payload rolls independent through ${legacy ? 'a legacy ledger' : 'a JSON save round trip'}`, () => {
+        const live = pendingFight();
+        const syntheticId = 'test.pending_cluster';
+        const skillId = kind === 'cluster-burst' ? syntheticId : 'attack.double_strafe';
+        if (kind === 'cluster-burst') {
+          sm.byId[syntheticId] = {
+            ...sm.byId['attack.split_shot'], id: syntheticId,
+            action: { kind, parent_share_pct: 60, child_count: 2, child_share_pct: 20, spread_deg: 30 },
+          };
+        }
+        try {
+          live.state.skills.owned[skillId] = 0;
+          live.state.skills.list.fill(null);
+          const skill = sm.byId[skillId];
+          const area = { origin: 'target' as const, radiusM: kind === 'cluster-burst' ? 2 : 0,
+            center: { x: 1.6, y: 6 }, targetId: live.mob.id };
+          const prepared = prepareSkillCast(live.state.skills, characterSheet(live.state), skillId,
+            live.state.player.mana, [live.mob], live.state.playerStatuses, { spatialTargets: true }, area)!;
+          expect(prepared).toBeDefined();
+          const first = live.arena.flights[0];
+          const firstIndex = kind === 'cluster-burst' ? 1 : 0; // remaining cluster children never spawn more children
+          Object.assign(first, {
+            cast: prepared, profile: sm.castProfileOf(skill), area, impactIndex: firstIndex,
+            impactSharePct: kind === 'cluster-burst' ? 20 : 100,
+            timing: { ...first.timing, releaseAtUs: 1_250_000, impactAtUs: 1_500_000 },
+            rolls: { crit: false, targets: { [live.mob.id]: { hit: false } }, effects: {} },
+            ...(kind === 'targeted-burst' ? { boundTargetId: live.mob.id } : {}),
+          });
+          live.arena.flights.push({ ...first, impactIndex: firstIndex + 1,
+            timing: { ...first.timing, releaseAtUs: 1_500_000, impactAtUs: 1_750_000 },
+            rolls: { crit: false, targets: { [live.mob.id]: { hit: true, dodged: false } }, effects: {} },
+          });
+          updateArenaAction(live.arena, live.action.id, { skillId, area, endsAtUs: 2_000_000 });
+          tick(live.state, { arena: live.arena, autoSkills: false });
+          expect(live.state.pendingWork?.flights).toHaveLength(2);
+          // Old ledgers had no cache-identity field; their authored independent impact policy
+          // still must not collapse two payload outcomes into the first one's cached miss.
+          const loaded = kind === 'cluster-burst'
+            ? JSON.parse(JSON.stringify(live.state)) as typeof live.state
+            : importJson(exportJson(live.state));
+          if (kind === 'cluster-burst') loaded.pendingWork = normalizePendingWork(loaded.pendingWork);
+          if (legacy) for (const flight of loaded.pendingWork!.flights)
+            delete flight.rollCacheId;
+          const fresh = createCombatArena();
+          syncCombatArena(fresh, loaded, loaded.clockSec * 1_000_000, 1_000_000, characterSheet(loaded).maxHp);
+          expect(restorePendingWork(fresh, loaded)).toBe(2);
+          tick(loaded, { arena: fresh, autoSkills: false });
+
+          const hits = loaded.fx.filter(event => event.kind === 'hit'
+            && event.actionId === live.action.id && event.skillId === skillId);
+          expect(hits).toHaveLength(1);
+          expect(hits[0].value).toBeGreaterThan(0);
+          expect(fresh.flights.filter(flight => flight.actionId === live.action.id)).toHaveLength(0);
+        } finally {
+          delete sm.byId[syntheticId];
+        }
+      });
+    }
+  }
+
+  for (const legacy of [false, true]) it(`keeps deployed-field and chain facts plus one shared cache through ${legacy ? 'a legacy ledger' : 'a reload'}`, () => {
     const live = pendingFight();
     const rolls: CastRollCache = { targets: {}, effects: {} };
     const first = live.arena.flights[0];
@@ -285,6 +347,7 @@ describe('pending work payloads beyond the first contact', () => {
 
     const loaded = importJson(exportJson(live.state));
     expect(loaded.pendingWork?.flights).toHaveLength(2);
+    if (legacy) for (const flight of loaded.pendingWork!.flights) delete flight.rollCacheId;
     const fresh = createCombatArena();
     syncCombatArena(fresh, loaded, loaded.clockSec * 1_000_000, 1_000_000, characterSheet(loaded).maxHp);
     expect(restorePendingWork(fresh, loaded)).toBe(2);
@@ -309,6 +372,9 @@ describe('pending work payloads beyond the first contact', () => {
     const badInitial = structuredClone(base) as typeof base;
     (badInitial.flights[0] as { fieldInitial?: unknown }).fieldInitial = 'yes';
     expect(normalizePendingWork(badInitial)).toBeNull();
+    const badCache = structuredClone(base) as typeof base;
+    badCache.flights[0].rollCacheId = -1;
+    expect(normalizePendingWork(badCache)).toBeNull();
   });
 });
 

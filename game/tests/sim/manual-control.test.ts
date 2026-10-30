@@ -38,7 +38,7 @@ describe('deliberate local control', () => {
     expect(swings.some((event) => event.mobId === 'near')).toBe(false);
   });
 
-  it('moves to a local point, pauses new automatic casts, then establishes the anchor', () => {
+  it('moves to a local point, pauses new automatic casts, then resumes without an anchor', () => {
     const { state, arena } = manualFight([{ id: 'target', x: 8, y: 6 }]);
     state.skills.owned['attack.fireball'] = 0;
     state.skills.list.fill(null);
@@ -52,8 +52,7 @@ describe('deliberate local control', () => {
     manual.moveTo = { x: arena.player.x + 0.1, y: arena.player.y };
     tick(state, { arena, manual });
     expect(manual.moveTo).toBeUndefined();
-    expect(manual.anchor).toBeDefined();
-    expect(arena.anchor).toEqual(manual.anchor);
+    // A finished local order plants no invisible hold: pursuit permission is not a command.
   });
 
   it('cancels an unpaid windup when a local move arrives', () => {

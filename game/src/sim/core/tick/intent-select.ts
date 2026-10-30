@@ -19,14 +19,13 @@ export function createIntentSelect(opts: {
   manual: ManualControl | undefined;
   cancelIntent: (reason: string) => void;
   startWindup: (intent: CombatIntent, atUs: number) => void;
-  engageTarget: (targetId?: string) => void;
   /** F27 hold the line: while true the automatic rotation yields to an unaffordable re-arm.
    *  The same gate runs on every movement sample, not only at the world tick's one press. */
   holdFiller?: () => boolean;
 }) {
   const {
     arena, s, attackCharacter, autoSkills, playerActiveFraction, manual,
-    cancelIntent, startWindup, engageTarget, holdFiller,
+    cancelIntent, startWindup, holdFiller,
   } = opts;
 
   function note(atUs: number, command: 'cast' | 'move' | 'stop', status: 'accepted' | 'queued' | 'rejected', reason: string, skillId?: string) {
@@ -79,7 +78,6 @@ export function createIntentSelect(opts: {
       manual.cast = undefined;
       manual.moveTo = undefined;
       arena.intent = next;
-      engageTarget(next.targetId);
       if (intentInRange(arena, next, s.group)) startWindup(next, atUs);
       return;
     }
@@ -112,7 +110,6 @@ export function createIntentSelect(opts: {
     const next = selectCombatIntent(arena, s, attackCharacter, autoSkills);
     if (!next) { arena.intent = undefined; return; }
     arena.intent = next;
-    engageTarget(next.targetId);
     if (intentInRange(arena, next, s.group)) startWindup(next, atUs);
   }
 

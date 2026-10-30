@@ -55,6 +55,6 @@ describe('Packet H — conditions, stacks and action history', () => {
   });
 
   it('opens all fifty-two catalogue keys', () => {
-    expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toHaveLength(105);
+    expect(supportedKeystoneKeys(KEYSTONE_HANDLERS)).toHaveLength(106);
   });
 });

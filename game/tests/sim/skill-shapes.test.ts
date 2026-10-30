@@ -13,8 +13,6 @@ function shapedFight(skillId: string, weapon: string | null, spots: { id: string
     Object.assign(mob, {
       id: spot.id, hp: 1e9, hpMax: 1e9, ps: 1, evasion: 0, dodgeRate: 0,
       armour: 0, line: 'front', damage: 'physical', innate: [], skillIds: [],
-      // This fixture proves the line footprint, not the behavior-role movement.
-      behavior: 'contact', retreatAtPct: undefined, retreating: false,
     });
     return mob;
   });
@@ -29,7 +27,7 @@ function shapedFight(skillId: string, weapon: string | null, spots: { id: string
   for (const spot of spots) Object.assign(arena.mobs[spot.id], { x: spot.x, y: spot.y });
   captureCombatArena(arena, state, 0);
   pinFieldPopulation(state);
-  // The fixture proves the footprint; keep each body's home under it so a leash reset cannot
+  // The fixture proves the footprint; keep each body's home under it so movement cannot
   // remove a line target before the cast resolves.
   state.group.forEach((mob, index) => {
     const slot = state.field?.slots.find((entry) => entry.mobId === mob.id);
@@ -85,7 +83,7 @@ describe('self and target circles in a real cast', () => {
 
   it('centres a target circle on the aimed body and hits only its radius', () => {
     const { state, arena } = shapedFight('attack.firestorm', null, [
-      { id: 'aim', x: 11.6, y: 6 }, { id: 'inside', x: 14.2, y: 6 }, { id: 'outside', x: 18, y: 6 },
+      { id: 'aim', x: 11.6, y: 6 }, { id: 'inside', x: 13, y: 6 }, { id: 'outside', x: 18, y: 6 },
     ]);
     tick(state, { arena });
     const action = arena.actions.find((entry) => entry.skillId === 'attack.firestorm')!;

@@ -198,6 +198,47 @@ export function arenaPlaybackTime(nowUs: number, unitsPerSec: number, elapsedMs:
   return Math.max(0, Math.min(nowUs, fromUs + (paused ? 0 : Math.max(0, elapsedMs) * unitsPerSec * speed / 1000)));
 }
 
+/** Read the mutable arena on every render frame; its in-place clock writes are not Svelte signals. */
+export function createArenaPlaybackClock() {
+  let started = false;
+  let anchorNow = 0, anchorFrom = 0, anchorWall = 0, anchorSpeed = 1;
+  let frozenAt: number | null = null;
+  let displayed = 0;
+  return (arena: Pick<CombatArena, 'nowUs' | 'unitsPerSec' | 'frames'>, wall: number, speed = 1, paused = false) => {
+    const now = arena.nowUs;
+    const first = arena.frames[0]?.atUs ?? 0;
+    if (!started) {
+      started = true;
+      anchorNow = now;
+      anchorFrom = Math.max(first, now - arena.unitsPerSec);
+      anchorWall = wall;
+      displayed = anchorFrom;
+    }
+    const shownAt = frozenAt ?? (paused ? displayed
+      : arenaPlaybackTime(anchorNow, arena.unitsPerSec, wall - anchorWall, anchorSpeed, false, anchorFrom));
+    if (now !== anchorNow) {
+      // A delayed wake can publish several ticks. Continue the retained movement instead of
+      // jumping to the newest second, while respecting frames the buffer has already discarded.
+      anchorFrom = Math.max(first, Math.min(shownAt, now));
+      anchorNow = now;
+      anchorWall = wall;
+      frozenAt = null;
+    } else if (speed !== anchorSpeed && !paused) {
+      anchorFrom = shownAt;
+      anchorWall = wall;
+    }
+    anchorSpeed = speed;
+    if (paused) frozenAt ??= displayed;
+    else if (frozenAt != null) {
+      anchorFrom = Math.max(first, Math.min(frozenAt, now));
+      anchorWall = wall;
+      frozenAt = null;
+    }
+    displayed = frozenAt ?? arenaPlaybackTime(anchorNow, arena.unitsPerSec, wall - anchorWall, speed, paused, anchorFrom);
+    return displayed;
+  };
+}
+
 /**
  * A live event follows its executable action's latest timing so an early contact or a re-aimed
  * release cannot be overwritten by the event's older snapshot. History keeps its resolved snapshot.
@@ -232,18 +273,15 @@ export function arenaCastCharge(
   return clamp01((playhead - timing.startedAtUs) / (timing.releaseAtUs - timing.startedAtUs));
 }
 
-/**
- * The nearest body the renderer may highlight. It mirrors `arenaTarget`: a returning body is
- * untargetable until it reaches its home band, so it cannot wear the target ring.
- */
+/** The nearest living body the renderer may highlight. */
 export function arenaNearestTarget(
-  mobs: Readonly<Record<string, { hp: number; x: number; y: number; returning?: boolean } | undefined>>,
+  mobs: Readonly<Record<string, { hp: number; x: number; y: number } | undefined>>,
   player: { x: number; y: number },
 ): string | undefined {
   let best: string | undefined;
   let nearest = Infinity;
   for (const [id, actor] of Object.entries(mobs)) {
-    if (!actor || actor.hp <= 0 || actor.returning) continue;
+    if (!actor || actor.hp <= 0) continue;
     const gap = Math.hypot(actor.x - player.x, actor.y - player.y);
     if (gap < nearest - 1e-9 || (Math.abs(gap - nearest) <= 1e-9 && best != null && id < best)) {
       nearest = gap;
@@ -271,7 +309,7 @@ export interface ArenaTargetRead {
 }
 
 export function describeArenaTarget(opts: {
-  mobs: Readonly<Record<string, { hp: number; x: number; y: number; returning?: boolean } | undefined>>;
+  mobs: Readonly<Record<string, { hp: number; x: number; y: number } | undefined>>;
   player: { x: number; y: number };
   committedId?: string;
   focusId?: string | null;
@@ -281,7 +319,7 @@ export function describeArenaTarget(opts: {
   const live = (id?: string | null) => {
     if (!id) return undefined;
     const actor = opts.mobs[id];
-    return actor && actor.hp > 0 && !actor.returning ? { id, actor } : undefined;
+    return actor && actor.hp > 0 ? { id, actor } : undefined;
   };
   const committed = live(opts.committedId);
   const focus = live(opts.focusId);

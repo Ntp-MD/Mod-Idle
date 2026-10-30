@@ -41,6 +41,15 @@ export function buildClusterWeb(nodes: TreeSpecNode[], layout: TreeLayoutCfg) {
   type Group = { center: Point; road: string[]; notable: string; entrances: string[] };
   const groups: Group[][] = regions.map(() => []), groupOf = new Map<string, Group>();
   const pad = (n: number) => String(n).padStart(2, '0');
+  const keystones = nodes.filter(node => node.kind === 'keystone');
+  const leafParents = new Map<string, string>();
+  for (const node of keystones) {
+    const p = node.placement as { cluster: number; slot?: number };
+    const parent = `notable.${node.wing}.${pad(p.cluster)}${p.slot === 2 ? '.02' : ''}`;
+    const sibling = leafParents.get(parent);
+    if (sibling) throw new Error(`tree network: ${sibling} and ${node.id} share ${parent}; each Keystone needs an independent Notable entrance`);
+    leafParents.set(parent, node.id);
+  }
   for (const node of nodes.filter(node => node.placement?.role === 'notable' && node.placement.slot !== 2)) {
     const site = cfg.sites[node.id], motif = site && cfg.motifs[site.motif];
     if (!site || !motif) throw new Error(`tree network: no group site for ${node.id}`);
@@ -152,7 +161,7 @@ export function buildClusterWeb(nodes: TreeSpecNode[], layout: TreeLayoutCfg) {
   const fixed = [...positions].map(([id, point]) => ({id, point, radius: radiusOf(id)}));
   const segments = [...edges.values()].map(edge => ({...edge, p: pointOf(edge.a), q: pointOf(edge.b)}));
   const leaves: Leaf[] = [];
-  for (const node of nodes.filter(node => node.kind === 'keystone')) {
+  for (const node of keystones) {
     const p = node.placement as { cluster: number; slot?: number };
     const group = groups[regions.indexOf(node.wing)][p.cluster - 1];
     const parent = group.notable + (p.slot === 2 ? '.02' : '');

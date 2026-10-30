@@ -1,104 +1,71 @@
 import type { GameState, Mob } from '../types';
 import { arenaDistance, type CombatArena, type CombatArenaAction } from '../../combat/combat-arena';
-import { isBossKind } from '../kinds';
-import { push } from '../log';
+import { E } from '../../../engine/client';
+import { traceSight } from '../../../../../engine/navigation.ts';
+import type { EngagementCause } from '../../world/field-area';
 
 /**
- * Spatial engagement for one encounter: who is pulled, who is released, and who walks home.
+ * Spatial engagement for one encounter: who joins and who leaves.
  *
- * Only bodies inside aggro, an existing leash, an assist neighbour, or the player's committed target
- * may attack. The same resolver runs again after every authoritative movement sample, so joining or
- * leaving is never a second late.
+ * Awareness begins only through authored proximity aggression, a resolved hostile contact or an
+ * eligible direct assist. Focus, approach and skill selection are player-side and never wake a
+ * body. A body inside `aggro_m` acquires the player only when its Species is authored for
+ * proximity and the sight mask is clear. An assist is one link: same-Species neighbours of a
+ * directly alerted body, never a source on a later sample. Once pulled, a body stays engaged
+ * until it dies, the player dies or the field stops hunting; there is no home leash return.
  */
 
 export type EngagementDelta = { added: string[]; removed: string[] };
 
 /** The tick's committed-target latch: `engageTarget` writes it, this stage reads it. */
-export interface EngagementState { deliberateTargetId?: string }
+export interface EngagementState {}
 
 export const createEngagementState = (): EngagementState => ({});
 
 type FieldProfile = {
-  home_band_m: number;
   offline_share: number;
   aggro_m: number;
-  leash_m: number;
   assist_m: number;
 };
+
+const proximity = new Set<string>(E.mob.engagement?.proximity ?? []);
+const assist = new Set<string>(E.mob.engagement?.assist ?? []);
+
+/** A directly alerted body that answers a refused contact turns into its own direct cause. */
+function noticeContact(s: GameState, mobId: string): void {
+  if (!s.field || !s.group.some((mob) => mob.id === mobId && mob.hp > 0)) return;
+  if (!s.field.engagementIds.includes(mobId)) s.field.engagementIds.push(mobId);
+  (s.field.engagementCauses ??= {})[mobId] = 'contact';
+}
 
 export function advanceEngagement(s: GameState, opts: {
   arena: CombatArena | undefined;
   online: boolean;
   fieldProfile: () => FieldProfile;
-  cancelIntent: (reason: string) => void;
   cancelMobPreparation: (action: CombatArenaAction, atUs: number, reason: string) => void;
   tickStartUs: number;
   state: EngagementState;
   /** The world second's opening pass. Combat windows after it only rebind their callbacks. */
   prime?: boolean;
-  /** Released-work targets pinned through a settlement; they stay engaged, never leash-reset. */
+  /** Released-work targets stay engaged while their impact is owed. */
   pinnedIds?: ReadonlySet<string>;
 }): {
   syncEngagement: (atUs: number) => EngagementDelta;
-  refreshReturning: (atUs: number) => void;
-  insideHomeLeash: (mob: Mob) => boolean;
+  /** A resolved hostile contact attempt alerts this body once; a cancelled or pre-release press does not. */
+  alertContact: (mobId: string, atUs?: number) => EngagementDelta;
 } {
-  const { arena, online, fieldProfile, cancelIntent, cancelMobPreparation, tickStartUs, state } = opts;
+  const { arena, online, fieldProfile, cancelMobPreparation } = opts;
 
-  /** Keep the saved field actor in step when the return flag changes mid-tick. */
-  function persistReturning(id: string, value: boolean): void {
-    const actor = s.field?.actors.find((entry) => entry.id === id);
-    if (!actor) return;
-    if (value) actor.returning = true;
-    else delete actor.returning;
+  const inFight = (): boolean =>
+    !!s.field && (s.hunting || s.fieldwork.campEncounters?.active?.stage === 'combat') && s.player.hp > 0;
+
+  function sightClear(source: { x: number; y: number }, target: { x: number; y: number }): boolean {
+    if (!arena?.nav) return true;
+    return traceSight(arena.nav, source, target) === null;
   }
 
-  /**
-   * Home return is a committed state: a displaced ordinary body drops damage and may not be
-   * targeted again until it reaches its authored home band. Bosses and camp fights keep their own
-   * boundary policy, so they are never given this field immunity automatically.
-   */
-  function refreshReturning(atUs: number): void {
-    if (!arena || !s.field) return;
-    const campFight = s.fieldwork.campEncounters?.active?.stage === 'combat';
-    const band = Math.max(0.01, Number(fieldProfile().home_band_m) || 0.35);
-    const engaged = new Set(s.field.engagementIds);
-    for (const mob of s.group) {
-      const actor = arena.mobs[mob.id];
-      if (!actor || mob.hp <= 0) continue;
-      const slot = s.field.slots.find((entry) => entry.id === mob.spawnSlotId);
-      if (!slot) continue;
-      const ordinary = !campFight && !isBossKind(String(mob.kind));
-      const distance = arenaDistance(actor, slot.home);
-      if (!ordinary) { actor.returning = false; persistReturning(mob.id, false); continue; }
-      // The transition out of engagement owns the one reset and the persisted flag; this pass
-      // only releases the state once the body has actually reached its home band. A stale saved
-      // engagement id cannot cancel an in-progress return.
-      if (actor.returning) {
-        if (distance <= band + 1e-6) {
-          actor.returning = false;
-          mob.retreating = false;
-          persistReturning(mob.id, false);
-        }
-        continue;
-      }
-      if (engaged.has(mob.id)) continue;
-    }
-    if (arena.focusId && arena.mobs[arena.focusId]?.returning) {
-      const name = s.group.find((mob) => mob.id === arena!.focusId)?.species ?? 'Target';
-      arena.focusId = undefined;
-      push(s, `${name} is returning home`);
-    }
-    if (arena.intent?.targetId && arena.mobs[arena.intent.targetId]?.returning)
-      cancelIntent('target returning');
-  }
-
-  /** Home leash is an outer bound for proximity, assistance and deliberate targeting alike. */
-  function insideHomeLeash(mob: Mob): boolean {
-    if (!arena || !s.field || s.fieldwork.campEncounters?.active?.stage === 'combat') return true;
-    const actor = arena.mobs[mob.id];
-    const slot = s.field.slots.find(entry => entry.id === mob.spawnSlotId);
-    return !!actor && (!slot || arenaDistance(actor, slot.home) <= fieldProfile().leash_m + 1e-7);
+  function speciesOf(mob: Mob): string | undefined {
+    return mob.speciesId;
   }
 
   function syncEngagement(atUs: number): EngagementDelta {
@@ -120,6 +87,8 @@ export function advanceEngagement(s: GameState, opts: {
         // body in the engagement set; the ground resolver is the only difference.
         s.field.engagementIds = s.group.filter((mob) => mob.hp > 0).map((mob) => mob.id);
       }
+      s.field.engagementCauses = Object.fromEntries(
+        s.field.engagementIds.map((id) => [id, 'contact' as const]));
       const now = new Set(s.field.engagementIds);
       return {
         added: [...now].filter((id) => !was.has(id)),
@@ -127,73 +96,52 @@ export function advanceEngagement(s: GameState, opts: {
       };
     }
     const profile = fieldProfile();
-    const next = new Set<string>();
-    // Released work pins its own target until the impact settles. A projectile already paid for
-    // may not be dropped by a leash reset, or a reload between release and impact would heal the
-    // body and void the shot. The pin is identity, not damage: it only keeps membership.
-    const releasedTargets = new Set<string>(opts.pinnedIds ?? []);
-    for (const flight of arena.flights) {
-      if (flight.area?.targetId) releasedTargets.add(flight.area.targetId);
-      if (flight.hitTargetId) releasedTargets.add(flight.hitTargetId);
-      for (const target of flight.cast.targets) releasedTargets.add(target.id);
-    }
-    for (const shot of arena.playerShots) releasedTargets.add(shot.targetId);
-    const live = s.group.filter((mob) => mob.hp > 0 && arena.mobs[mob.id]
-      && !arena.mobs[mob.id].returning && (insideHomeLeash(mob) || releasedTargets.has(mob.id)));
-    const campFight = s.fieldwork.campEncounters?.active?.stage === 'combat';
-    if ((s.hunting || campFight) && s.player.hp > 0) {
+    const causes = new Map<string, EngagementCause>(
+      Object.entries(s.field.engagementCauses ?? {}).map(([id, cause]) => [id, cause]));
+    const next = new Map<string, EngagementCause>();
+    const live = s.group.filter((mob) => mob.hp > 0 && arena.mobs[mob.id]);
+    const liveById = new Map(live.map((mob) => [mob.id, mob]));
+    const acquiring = inFight();
+    if (acquiring) {
+      const campFight = s.fieldwork.campEncounters?.active?.stage === 'combat';
+      // A body already in the fight stays in it; distance alone never releases it. Its recorded
+      // cause decides whether it may seed an assist on this sample.
       for (const mob of live) {
-        if (campFight || arenaDistance(arena.mobs[mob.id], arena.player) <= profile.aggro_m + 1e-7) next.add(mob.id);
+        if (was.has(mob.id)) next.set(mob.id, causes.get(mob.id) ?? 'contact');
       }
+      // A camp encounter participates as one authored group.
+      if (campFight) for (const mob of live) if (!next.has(mob.id)) next.set(mob.id, 'contact');
       for (const mob of live) {
-        if (!was.has(mob.id)) continue;
-        const slot = s.field.slots.find((entry) => entry.id === mob.spawnSlotId);
-        if (!slot || arenaDistance(arena.mobs[mob.id], slot.home) <= profile.leash_m + 1e-7) next.add(mob.id);
+        if (next.has(mob.id)) continue;
+        const speciesId = speciesOf(mob);
+        if (!speciesId || !proximity.has(speciesId)) continue;
+        const pose = arena.mobs[mob.id];
+        if (arenaDistance(pose, arena.player) > profile.aggro_m + 1e-7) continue;
+        if (!sightClear(pose, arena.player)) continue;
+        next.set(mob.id, 'proximity');
       }
-      if (arena.intent?.targetId && live.some(mob => mob.id === arena.intent!.targetId)) next.add(arena.intent.targetId);
-      if (arena.focusId && live.some(mob => mob.id === arena.focusId)) next.add(arena.focusId);
-      if (state.deliberateTargetId && live.some(mob => mob.id === state.deliberateTargetId)) next.add(state.deliberateTargetId);
-      const basicTarget = arena.player.action?.targetId;
-      if (basicTarget && live.some(mob => mob.id === basicTarget)) next.add(basicTarget);
-      // F27 — stop the overpull: assistance reaches one link, never cascades. A body the
-      // player aggroed, focused or committed to wakes its neighbours; those neighbours do not
-      // wake theirs. Deliberate targeting still adds directly above, outside this expansion.
-      const assisting: { id: string; depth: number }[] = [...next].map((id) => ({ id, depth: 0 }));
-      for (let index = 0; index < assisting.length; index++) {
-        const { id, depth } = assisting[index];
-        if (depth > 0) continue;
-        const source = arena.mobs[id];
+      // One link, same Species, direct sources only: an assisted body never wakes its neighbours.
+      for (const [sourceId, cause] of [...next]) {
+        if (cause === 'assist') continue;
+        const sourceMob = liveById.get(sourceId);
+        const sourceSpecies = sourceMob ? speciesOf(sourceMob) : undefined;
+        if (!sourceSpecies || !assist.has(sourceSpecies)) continue;
+        const sourcePose = arena.mobs[sourceId];
         for (const mob of live) {
-          if (!next.has(mob.id) && arenaDistance(arena.mobs[mob.id], source) <= profile.assist_m + 1e-7) {
-            next.add(mob.id);
-            assisting.push({ id: mob.id, depth: depth + 1 });
-          }
+          if (next.has(mob.id) || speciesOf(mob) !== sourceSpecies) continue;
+          const pose = arena.mobs[mob.id];
+          if (arenaDistance(pose, sourcePose) > profile.assist_m + 1e-7) continue;
+          if (!sightClear(pose, sourcePose)) continue;
+          next.set(mob.id, 'assist');
         }
       }
     }
-    // A body that leaves its leash drops its damage and returns with its home pool, like a map
-    // reset; this is the same receipt whether it was pulled too far or the player left it behind.
-    const campFightNow = s.fieldwork.campEncounters?.active?.stage === 'combat';
-    for (const id of was) {
-      if (next.has(id)) continue;
-      const mob = s.group.find((entry) => entry.id === id);
-      if (!mob || mob.hp <= 0) continue;
-      if (releasedTargets.has(id)) {
-        // A body owed an impact stays in the fight without its home reset, so the released
-        // work can still find it at the committed contact.
-        next.add(id);
-        continue;
-      }
-      mob.hp = mob.hpMax;
-      delete s.mobStatus[id];
-      delete s.curses[id];
-      const actor = arena.mobs[id];
-      if (actor && !campFightNow && !isBossKind(String(mob.kind))) {
-        actor.returning = true;
-        persistReturning(id, true);
-      }
+    for (const id of opts.pinnedIds ?? []) {
+      if (liveById.has(id)) next.set(id, next.get(id) ?? 'contact');
     }
-    s.field.engagementIds = [...next].slice(0, Math.max(1, s.field.slots.length));
+    const capped = [...next].slice(0, Math.max(1, s.field.slots.length));
+    s.field.engagementIds = capped.map(([id]) => id);
+    s.field.engagementCauses = Object.fromEntries(capped);
     const now = new Set(s.field.engagementIds);
     const removed = [...was].filter((id) => !now.has(id));
     for (const id of removed) {
@@ -204,10 +152,15 @@ export function advanceEngagement(s: GameState, opts: {
     return { added: [...now].filter((id) => !was.has(id)), removed };
   }
 
-  if (opts.prime !== false) {
-    refreshReturning(tickStartUs);
-    syncEngagement(tickStartUs);
+  function alertContact(mobId: string, atUs = opts.tickStartUs): EngagementDelta {
+    const was = new Set(s.field?.engagementIds ?? []);
+    noticeContact(s, mobId);
+    syncEngagement(atUs);
+    const now = s.field?.engagementIds ?? [];
+    return { added: now.filter((id) => !was.has(id)), removed: [...was].filter((id) => !now.includes(id)) };
   }
 
-  return { syncEngagement, refreshReturning, insideHomeLeash };
+  if (opts.prime !== false) syncEngagement(opts.tickStartUs);
+
+  return { syncEngagement, alertContact };
 }

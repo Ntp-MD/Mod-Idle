@@ -32,7 +32,7 @@ export const LIVE_STEP_MS = (): number => Math.max(16, COMBAT_STEP_US() / 1000);
  * steps at the chosen speed. A command is judged inside the step it arrives in, so input never
  * waits for a whole world second. A throttled tab banks the time it actually missed.
  */
-export function createGameLoop(ctx: LoopContext) {
+export function createGameLoop(ctx: LoopContext, readWallMs: () => number = () => performance.now()) {
   /** A gear roll that arrived inside a committed action waits for the next free sample. */
   let equipPending = false;
   function step() {
@@ -64,8 +64,7 @@ export function createGameLoop(ctx: LoopContext) {
 
   /** One wake: bank the elapsed time and run at most eight simulated seconds of steps. */
   function startWakeLoop(): () => void {
-    let last = performance.now();
-    const timer = setInterval(() => wake(performance.now()), LIVE_STEP_MS());
+    const timer = setInterval(() => wake(readWallMs()), LIVE_STEP_MS());
     return () => clearInterval(timer);
   }
 
@@ -84,11 +83,21 @@ export function createGameLoop(ctx: LoopContext) {
       ctx.cooldownSchedulerAt = now;
       return;
     }
-    const batch = schedulerSteps(acc, ctx.speed, elapsed, COMBAT_STEP_US() / 1_000_000);
-    acc = batch.acc;
+    const stepSec = COMBAT_STEP_US() / 1_000_000;
+    const batch = schedulerSteps(acc, ctx.speed, elapsed, stepSec);
+    const beganAt = readWallMs();
+    const budgetMs = LIVE_STEP_MS();
+    let completed = 0;
+    while (completed < batch.steps) {
+      step();
+      completed++;
+      // A slow frame must give input and rendering another turn. Keep every unexecuted step
+      // as simulation debt instead of attempting the entire backlog in one browser task.
+      if (readWallMs() - beganAt >= budgetMs) break;
+    }
+    acc = batch.acc + (batch.steps - completed) * stepSec;
     ctx.cooldownSimRemainder = acc;
     ctx.cooldownSchedulerAt = now;
-    for (let i = 0; i < batch.steps; i++) step();
   }
 
   return { step, startWakeLoop, wake };

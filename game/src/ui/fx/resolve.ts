@@ -28,9 +28,8 @@ export function skillShape(skill?: SkillLike | null, fallbackGroup = 'melee', fa
 /** A mob skill response, or the body's own damage when the event carries no skill. */
 export function mobSkillShape(skill?: MobSkillLike | null, mob?: MobLike | null): EffectShape {
   if (skill) {
-    return skill.element && skill.element !== 'physical'
-      ? elementShape(skill.element)
-      : skill.role === 'stand-off' ? 'bolt' : 'slash';
+    if (skill.element && skill.element !== 'physical') return elementShape(skill.element);
+    return skill.cast?.delivery === 'melee' ? 'slash' : 'bolt';
   }
   if (!mob) return 'burst';
   return mob.damage === 'physical' ? 'slash' : elementShape(mob.innate?.[0]);
@@ -59,9 +58,10 @@ export function arenaSkillShape(skill?: SkillLike | null, weaponGroup?: string |
   return 'slash';
 }
 
-/** A mob action in the ARPG: stand-off/magic bodies keep their Element; physical bodies slash. */
+/** A mob action in the ARPG: ranged, ground and magic bodies keep their Element; physical melee slashes. */
 export function arenaMobShape(skill?: MobSkillLike | null, mob?: MobLike | null): ArenaShape {
-  if (skill?.role === 'stand-off' || mob?.damage === 'magic') {
+  const ranged = skill?.mode === 'aura' || (!!skill?.cast && skill.cast.delivery !== 'melee');
+  if (ranged || mob?.damage === 'magic') {
     return (skill?.element || mob?.innate?.[0] || 'bolt') as ArenaShape;
   }
   return 'slash';

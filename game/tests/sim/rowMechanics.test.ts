@@ -250,10 +250,12 @@ describe('the support rows that change the character', () => {
       if (s.log.some((l) => /clears/.test(l.text))) cleansed = true;
     }
     expect(cleansed).toBe(true);
-    // the press names the share it paid, and the share is the row's own `heal_instant`
+    // The press names the share at the level actually held, from the canonical effect ramp.
     const restored = s.log.find((l) => /restores .* HP at once/.test(l.text));
     expect(restored).toBeTruthy();
-    expect(restored!.text).toContain(`(${valueOf('heal.cleanse', 'heal_instant')}% of the pool)`);
+    const healPct = sm.effectsAt(row('heal.cleanse'), sm.skillLevel(s.skills.xp['heal.cleanse']))
+      .find(effect => effect.stat === 'heal_instant')!.value;
+    expect(restored!.text).toContain(`(${healPct}% of the pool)`);
   }, 30000);
 
   it('Magia Drive restarts the shield without waiting out the delay', () => {

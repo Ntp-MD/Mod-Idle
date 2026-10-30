@@ -27,6 +27,9 @@ function fight(skillId: string, distance: number, over: Record<string, unknown> 
   Object.assign(arena.mobs[mob.id], { x: 1 + distance, y: 6 });
   captureCombatArena(arena, state, 0);
   pinFieldPopulation(state);
+  // The caster is already alerted; these tests measure delivery, not acquisition.
+  state.field!.engagementIds = [mob.id];
+  state.field!.engagementCauses = { [mob.id]: 'contact' };
   // Hold the player in place so the delivery, not the player's approach, decides the test.
   arena.intent = { skillId: 'attack.firestorm', targetId: mob.id, targetPoint: { x: 1, y: 6 },
     phase: 'windup', releaseAtUs: 10_000_000 } as never;

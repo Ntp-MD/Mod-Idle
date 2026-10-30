@@ -9,6 +9,7 @@ import type { TriggerAura } from '../../combat/skills';
 import { eng, sm } from '../../../engine/client';
 import { bundleOf, worthyFoe, painforgedBank, borrowedRecoup, ghostDanceRecovery, shieldGateHolds, mindOverMatter, staggeringSplit, thornboundRetaliation, autoCleanseReady } from '../../../../../engine/keystones.ts';
 import { mobSwing, applyStatus, rollStatus } from '../../combat/combat';
+import { mobAttackProfile } from '../../combat/combat-arena';
 import { buffRuleUp, reservedMana } from '../../combat/skills';
 import { fx, credit, hitColour, statusColour } from '../feedback';
 import { push } from '../log';
@@ -84,7 +85,14 @@ export function createIncomingHit(opts: {
           * (berserk ? Number(berserk.params.takenMult) : 1) * duel.takenMult,
       };
       const mobSkill = plannedSkill;
-      const r = mobSwing(rng, takenChar, mob, statuses, tm, s.player.es, absorbPct, (s.player.blockCharges || 0) > 0, s.player.hp);
+      // C4: the incoming hit rolls the row's own class — a strike rolls its authored hit_class,
+      // a basic rolls its profile's class. Strict: no inference from damage, delivery or Element.
+      const hitClass = mobSkill ? mobSkill.hit_class : mobAttackProfile(mob).hit_class;
+      if (hitClass !== 'attack' && hitClass !== 'spell' && hitClass !== 'none') {
+        throw new Error(`Incoming hit ${mobSkill?.id ?? `${mob.id} basic`} is missing a valid hit_class`);
+      }
+      const r = mobSwing(rng, takenChar, mob, statuses, tm, s.player.es, absorbPct, (s.player.blockCharges || 0) > 0, s.player.hp,
+        { hitClass });
       // Mirror Strike: the Evasion success banks the next player Hit's crit.
       const mirror = bundleOf(c.keystones, 'mirror-strike');
       if (mirror && r.blocked === 'evasion') {
@@ -143,9 +151,10 @@ export function createIncomingHit(opts: {
       // Block, Evasion and a perfect dodge animate differently and the player reads them apart. Either way
       // the striker is named, so the body that swung can lean into its own blow.
       if (r.blocked) fx(s, { kind: 'block', side: 'self', byId: mob.id, skillId: plannedSkill?.id, text: r.blocked, colour: hitColour(null) });
-      // 23 Ghost Dance: an Evasion success (not Perfect Dodge) recovers ES on its own ICD
+      // 23 Ghost Dance: an Evasion success recovers ES on its own ICD. C4: a spell-dodge
+      // success recovers the same way — Perfect Dodge and Ghost Dance apply full to spells.
       const ghost = bundleOf(c.keystones, 'ghost-dance');
-      if (ghost && r.blocked === 'evasion' && clock.nowUs >= (rkH.icdsUs.ghostDance ?? 0)) {
+      if (ghost && (r.blocked === 'evasion' || r.blocked === 'spell dodge') && clock.nowUs >= (rkH.icdsUs.ghostDance ?? 0)) {
         const gained = ghostDanceRecovery(c.evasion, c.es, ghost.params as Record<string, number>);
         s.player.es = Math.min(c.es, s.player.es + gained);
         rkH.icdsUs.ghostDance = clock.nowUs + Number(ghost.params.icdSec) * units;

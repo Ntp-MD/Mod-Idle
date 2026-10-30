@@ -2,18 +2,6 @@
   "meta": {
     "note": "Mob-only skills. A strike replaces the mob's next basic swing and deals exactly that swing's damage, so mob DPS stays priced by mob PS. Statuses are control/utility only; auras are defensive group effects. Kits are optional and resolve by override: unique > boss > variant > species.",
     "max_kit": 4,
-    "behaviors": {
-      "goblin": "skirmisher",
-      "kobold": "skirmisher",
-      "spider": "skirmisher",
-      "orc": "charger",
-      "minotaur": "charger",
-      "golem": "artillery",
-      "treant": "support",
-      "giant": "support",
-      "dryad": "support",
-      "wisp": "support"
-    },
     "statuses": [
       "chill",
       "shock",
@@ -39,7 +27,6 @@
       "status": null,
       "cd": 9,
       "cast_sec": 0.4,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -59,7 +46,6 @@
       "status": null,
       "cd": 8,
       "cast_sec": 0.5,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -79,7 +65,6 @@
       "status": null,
       "cd": 10,
       "cast_sec": 0.4,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -100,7 +85,6 @@
       "cd": 11,
       "cast_sec": 0.6,
       "shieldBreak": true,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -120,7 +104,6 @@
       "status": null,
       "cd": 9,
       "cast_sec": 0.3,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -140,7 +123,6 @@
       "status": null,
       "cd": 10,
       "cast_sec": 0.5,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -164,7 +146,6 @@
       "status": null,
       "cd": 12,
       "cast_sec": 0.8,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -184,7 +165,6 @@
       "status": null,
       "cd": 9,
       "cast_sec": 0.5,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -204,7 +184,6 @@
       "status": null,
       "cd": 8,
       "cast_sec": 0.4,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -224,7 +203,6 @@
       "status": null,
       "cd": 12,
       "cast_sec": 0.7,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -244,7 +222,6 @@
       "status": null,
       "cd": 11,
       "cast_sec": 0.6,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -264,7 +241,6 @@
       "status": null,
       "cd": 10,
       "cast_sec": 0.5,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -284,7 +260,6 @@
       "status": null,
       "cd": 8,
       "cast_sec": 0.4,
-      "role": "stand-off",
       "cast": {
         "delivery": "projectile",
         "range": {
@@ -306,7 +281,6 @@
       "status": null,
       "cd": 11,
       "cast_sec": 0.7,
-      "role": "stand-off",
       "cast": {
         "delivery": "projectile",
         "range": {
@@ -328,7 +302,6 @@
       "status": null,
       "cd": 12,
       "cast_sec": 0.8,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -348,7 +321,6 @@
       "status": null,
       "cd": 9,
       "cast_sec": 0.4,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -368,7 +340,6 @@
       "status": "chill",
       "cd": 8,
       "cast_sec": 0.4,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -388,7 +359,6 @@
       "status": "chill",
       "cd": 10,
       "cast_sec": 0.5,
-      "role": "stand-off",
       "cast": {
         "delivery": "projectile",
         "range": {
@@ -410,7 +380,6 @@
       "status": "chill",
       "cd": 12,
       "cast_sec": 0.7,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -430,7 +399,6 @@
       "status": "chill",
       "cd": 9,
       "cast_sec": 0.4,
-      "role": "stand-off",
       "cast": {
         "delivery": "projectile",
         "range": {
@@ -452,7 +420,6 @@
       "status": "shock",
       "cd": 8,
       "cast_sec": 0.3,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -472,7 +439,6 @@
       "status": "shock",
       "cd": 11,
       "cast_sec": 0.7,
-      "role": "stand-off",
       "cast": {
         "delivery": "projectile",
         "range": {
@@ -494,7 +460,6 @@
       "status": "shock",
       "cd": 9,
       "cast_sec": 0.5,
-      "role": "stand-off",
       "cast": {
         "delivery": "projectile",
         "range": {
@@ -516,7 +481,6 @@
       "status": "shock",
       "cd": 10,
       "cast_sec": 0.4,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -536,7 +500,6 @@
       "status": null,
       "cd": 8,
       "cast_sec": 0.4,
-      "role": "stand-off",
       "cast": {
         "delivery": "projectile",
         "range": {
@@ -558,7 +521,6 @@
       "status": null,
       "cd": 11,
       "cast_sec": 0.6,
-      "role": "stand-off",
       "cast": {
         "delivery": "projectile",
         "range": {
@@ -580,7 +542,6 @@
       "status": null,
       "cd": 9,
       "cast_sec": 0.4,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -600,7 +561,6 @@
       "status": null,
       "cd": 10,
       "cast_sec": 0.5,
-      "role": "stand-off",
       "cast": {
         "delivery": "projectile",
         "range": {
@@ -622,7 +582,6 @@
       "status": "mark",
       "cd": 9,
       "cast_sec": 0.5,
-      "role": "stand-off",
       "cast": {
         "delivery": "projectile",
         "range": {
@@ -644,7 +603,6 @@
       "status": "mark",
       "cd": 11,
       "cast_sec": 0.7,
-      "role": "stand-off",
       "cast": {
         "delivery": "projectile",
         "range": {
@@ -666,7 +624,6 @@
       "status": "mark",
       "cd": 8,
       "cast_sec": 0.4,
-      "role": "stand-off",
       "cast": {
         "delivery": "projectile",
         "range": {
@@ -688,7 +645,6 @@
       "status": "mark",
       "cd": 12,
       "cast_sec": 0.7,
-      "role": "stand-off",
       "cast": {
         "delivery": "projectile",
         "range": {
@@ -710,7 +666,6 @@
       "status": "crippled",
       "cd": 9,
       "cast_sec": 0.5,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -730,7 +685,6 @@
       "status": "crippled",
       "cd": 12,
       "cast_sec": 0.8,
-      "role": "front",
       "cast": {
         "delivery": "melee",
         "range": {
@@ -750,7 +704,6 @@
       "status": "crippled",
       "cd": 10,
       "cast_sec": 0.5,
-      "role": "stand-off",
       "cast": {
         "delivery": "projectile",
         "range": {
@@ -772,7 +725,6 @@
       "status": "crippled",
       "cd": 11,
       "cast_sec": 0.6,
-      "role": "stand-off",
       "area": {
         "origin": "target",
         "radius_m": 1.5,
@@ -796,7 +748,6 @@
       "name": "Ash Veil",
       "mode": "aura",
       "element": "fire",
-      "role": "any",
       "scope": "engaged",
       "effects": {
         "resist_pct": 10
@@ -808,7 +759,6 @@
       "name": "Flame Guard",
       "mode": "aura",
       "element": "fire",
-      "role": "any",
       "scope": "line",
       "effects": {
         "armour_pct": 15
@@ -820,7 +770,6 @@
       "name": "Glacial Ward",
       "mode": "aura",
       "element": "cold",
-      "role": "any",
       "scope": "engaged",
       "effects": {
         "resist_pct": 15
@@ -832,7 +781,6 @@
       "name": "Permafrost",
       "mode": "aura",
       "element": "cold",
-      "role": "any",
       "scope": "line",
       "effects": {
         "armour_pct": 20
@@ -844,7 +792,6 @@
       "name": "Storm Mantle",
       "mode": "aura",
       "element": "lightning",
-      "role": "any",
       "scope": "engaged",
       "effects": {
         "armour_pct": 10
@@ -856,7 +803,6 @@
       "name": "Charged Field",
       "mode": "aura",
       "element": "lightning",
-      "role": "any",
       "scope": "line",
       "effects": {
         "resist_pct": 10
@@ -868,7 +814,6 @@
       "name": "Miasma",
       "mode": "aura",
       "element": "poison",
-      "role": "any",
       "scope": "engaged",
       "effects": {
         "resist_pct": 10
@@ -880,7 +825,6 @@
       "name": "Creeping Rot",
       "mode": "aura",
       "element": "poison",
-      "role": "any",
       "scope": "line",
       "effects": {
         "armour_pct": 10
@@ -892,7 +836,6 @@
       "name": "Unreal Veil",
       "mode": "aura",
       "element": "chaos",
-      "role": "any",
       "scope": "engaged",
       "effects": {
         "resist_pct": 15
@@ -904,7 +847,6 @@
       "name": "Warped Aura",
       "mode": "aura",
       "element": "chaos",
-      "role": "any",
       "scope": "line",
       "effects": {
         "armour_pct": 15
@@ -916,7 +858,6 @@
       "name": "Stone Guard",
       "mode": "aura",
       "element": "earth",
-      "role": "any",
       "scope": "engaged",
       "effects": {
         "armour_pct": 25
@@ -928,7 +869,6 @@
       "name": "Rooted Stance",
       "mode": "aura",
       "element": "earth",
-      "role": "any",
       "scope": "line",
       "effects": {
         "resist_pct": 20
@@ -943,7 +883,6 @@
       "status": null,
       "cd": 14,
       "cast_sec": 0.8,
-      "role": "front",
       "phase": {
         "hpBelowPct": 50
       },

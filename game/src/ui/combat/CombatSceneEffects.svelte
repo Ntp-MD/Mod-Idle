@@ -106,7 +106,8 @@
         const skillFx = skillFxFor(skillId);
         const mobSkill = event.skillId ? mobSkillById(event.skillId) : undefined;
         const flight = (event.kind === 'hit' && (!!skillFx?.projectile || !['slash', 'earth'].includes(shape))) ||
-          (event.kind === 'taken' && !!mob && (mobSkill?.role === 'stand-off' || (!mobSkill && mobData?.damage === 'magic')));
+          (event.kind === 'taken' && !!mob && ((!!mobSkill?.cast && mobSkill.cast.delivery !== 'melee')
+            || (!mobSkill && mobData?.damage === 'magic')));
         const weight = mobData?.readsAs === 'large' ? 1.18 : mobData?.readsAs === 'small' ? .86 : 1;
         const radius = incoming ? playerAnchor.radius * (event.kind === 'taken' ? weight : 1) : mob!.radius;
         const ground = ((incoming ? playerAnchor.ground.y : mob!.ground.y) - target.y) * 60 / radius;

@@ -591,6 +591,8 @@ export interface CastEnv {
 
 export interface CastReport {
   id: string;
+  /** The release-committed level for effects applied after the impact report is produced. */
+  level?: number;
   name: string;
   damage: number;
   manaCost: number;
@@ -617,6 +619,8 @@ export interface CastReport {
   consumed?: { status: string; stacks: number }[];
   /** Bodies whose deliberate stop the control lane refused — the receipt names them (F24). */
   resisted?: { id: string; species: string }[];
+  /** Every body the committed press reached, whether it landed, was dodged or was blocked. */
+  attempted?: string[];
   /** The bodies a payoff row copied its status onto after the hit. */
   spread?: { status: string; to: string[] }[];
   /** Ghost Dance: perfect-dodge charges this press grants, from its own level ramp. */
@@ -632,9 +636,9 @@ export interface CastReport {
  * the `effect` sentence, which quietly made Greater Heal a per-second drip of 45% for eight seconds
  * instead of one instant 45%.
  */
-function healOf(skill: any): { heal?: { secLeft: number; pctPerSec: number }; instantHealPct?: number } | null {
+function healOf(skill: SkillRow, level: number): { heal?: { secLeft: number; pctPerSec: number }; instantHealPct?: number } | null {
   if (skill.type !== 'heal') return null;
-  const eff = skill.effects || [];
+  const eff = sm.effectsAt(skill, level);
   const drip = eff.find((e: any) => e.stat === 'heal_per_sec');
   if (drip) {
     return { heal: { secLeft: Number(String(skill.duration).match(/\d+/)?.[0] || 0), pctPerSec: drip.value / 100 } };
@@ -868,7 +872,7 @@ export function resolvePreparedCast(
     return { id, name: skill.name ?? '', damage: 0, manaCost: spent, hpCost, targets: 0,
       byMob: [], ...(prepared.area ? { area: prepared.area } : {}) };
   if (skill.type === 'heal') {
-    const h = healOf(skill);
+    const h = healOf(skill, prepared.level);
     return {
       id, name: skill.name ?? '', damage: 0, manaCost: spent, hpCost, targets: 0, byMob: [],
       heal: h?.heal, instantHealPct: h?.instantHealPct,
@@ -890,8 +894,9 @@ export function resolvePreparedCast(
     const writes = (skill.effects || []).some((e: any) => e.subject === 'target');
     const curseTargets = writes ? hitTargets.map((mob) => mob.id) : [];
     return {
-      id, name: skill.name ?? '', damage: 0, manaCost: spent, hpCost, targets: hitTargets.length, byMob: [],
+      id, level: prepared.level, name: skill.name ?? '', damage: 0, manaCost: spent, hpCost, targets: hitTargets.length, byMob: [],
       curseOn: curseTargets[0] ?? null,
+      attempted: group.slice(0, count).map((mob) => mob.id),
       ...(curseTargets.length > 1 ? { curseTargets } : {}),
       ...(resolved?.area ? { area: resolved.area } : {}),
     };
@@ -1231,7 +1236,7 @@ export function resolvePreparedCast(
     if (everyTarget || i === 0) spendOn(t);
     // a row's TARGET lines are a curse it writes on the hit: the same store a curse skill fills, so
     // `accuracy`, `damage_dealt` and a resistance strip read off a press exactly as they do off a curse
-    if (env.curses) applyCurse(env.curses, t.id, skill, c.keystones);
+    if (env.curses) applyCurse(env.curses, t.id, skill, c.keystones, level);
     if (rollCache) rollCache.effects[t.id] = true;
     }
   }
@@ -1243,6 +1248,7 @@ export function resolvePreparedCast(
   }
   return {
     id, name: skill.name ?? '', damage: dmg, manaCost: spent, hpCost, targets: landed, crit, dealt, byMob: struck,
+    attempted: group.map((mob) => mob.id),
     ...(resolved?.area ? { area: resolved.area } : {}),
     ...(consumed.length ? { consumed } : {}),
     ...(spread.length ? { spread } : {}),

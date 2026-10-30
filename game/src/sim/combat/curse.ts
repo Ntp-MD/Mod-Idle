@@ -89,8 +89,10 @@ export function applyCurse(
   mobId: string,
   skill: any,
   bundles: readonly KeystoneBundle[] = [],
+  level = 1,
 ): number {
-  const lines = ((skill?.effects || []) as any[]).filter((e) => e.subject === 'target');
+  if (!skill) return 0;
+  const lines = sm.effectsAt(skill, level).filter((e) => e.subject === 'target');
   if (!lines.length) return 0;
   const sec = Number(String(skill.duration).match(/\d+/)?.[0] || 0);
   const mine = store[mobId] || (store[mobId] = {});

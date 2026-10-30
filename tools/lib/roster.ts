@@ -306,6 +306,27 @@ function gates(): G.GateRow[] {
   catch (error) { hitClassError = String(error); }
   add('S25', !hitClassError, hitClassError || 'Every skill authors its hit class independently of damage and delivery');
 
+  // C1 cluster budget: a cluster row splits one press across its parent impact and its children,
+  // so the authored shares must total exactly 100. No live adopter is required — the gate passes
+  // vacuously today and binds the first row that uses the system.
+  const clusterRows = ACTIVE.filter((s: any) => s.action?.kind === 'cluster-burst');
+  const badCluster = clusterRows.filter((s: any) => {
+    const action = s.action;
+    const parent = Number(action.parent_share_pct);
+    const count = Number(action.child_count);
+    const share = Number(action.child_share_pct);
+    const spread = Number(action.spread_deg);
+    if (!Number.isInteger(count) || count <= 0) return true;
+    if (![parent, share].every((value) => Number.isFinite(value) && value >= 0)) return true;
+    if (parent + count * share !== 100) return true;
+    if (!(Number.isFinite(spread) && spread > 0 && spread <= 180)) return true;
+    if (!(s.area && s.area.radius_m > 0)) return true;
+    if (s.cast?.delivery !== 'projectile') return true;
+    if ((s.effects || []).some((effect: any) => effect.stat === 'hits')) return true;
+    return false;
+  });
+  add('S26', badCluster.length === 0, `cluster rows split one press to exactly 100 across a positive-radius projectile footprint with no multi-hit effects${badCluster.length ? ' · BAD: ' + badCluster.map((s: any) => s.id).join(', ') : ''} (no live adopter required)`);
+
   return g.rows();
 }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { createGameLoop, type LoopContext } from '../../src/app/loop';
-import { newGame } from '@sim/core/game';
+import { createGameLoop, LIVE_STEP_MS, type LoopContext } from '../../src/app/loop';
+import { COMBAT_STEP_US, newGame } from '@sim/core/game';
 import { createCombatArena } from '@sim/combat/combat-arena';
 
 function harness(settings: Record<string, unknown> = { autoSkills: true, autoEquip: false }) {
@@ -8,6 +8,8 @@ function harness(settings: Record<string, unknown> = { autoSkills: true, autoEqu
   let paused = false;
   let arena = createCombatArena();
   let arenaMode = false;
+  let remainder = 0;
+  let schedulerAt = 0;
   const ctx: LoopContext = {
     get gameState() { return state; },
     get settings() { return settings as never; },
@@ -20,22 +22,72 @@ function harness(settings: Record<string, unknown> = { autoSkills: true, autoEqu
     get paused() { return paused; },
     get speed() { return 1; },
     get canWriteAccount() { return true; },
-    set cooldownSimRemainder(_value: number) { /* display only */ },
-    set cooldownSchedulerAt(_value: number) { /* display only */ },
+    set cooldownSimRemainder(value: number) { remainder = value; },
+    set cooldownSchedulerAt(value: number) { schedulerAt = value; },
     syncArenaFocus() { /* no arena */ },
     equipCarriedBest() { /* no gear */ },
   };
   return {
-    ctx, state, arena: () => arena,
+    ctx, state, arena: () => arena, remainder: () => remainder, schedulerAt: () => schedulerAt,
     setPaused: (value: boolean) => { paused = value; },
     setArenaMode: (value: boolean) => { arenaMode = value; },
   };
 }
 
 describe('the live wake keeps earned time through a pause', () => {
+  it('yields after a slow step and pays every deferred step after a pause without counting paused time', () => {
+    const { ctx, state, setPaused, setArenaMode, arena, remainder, schedulerAt } = harness();
+    setArenaMode(true);
+    let wallMs = 0;
+    let workMs = LIVE_STEP_MS() * 2;
+    let completed = 0;
+    ctx.syncArenaFocus = () => { completed++; wallMs += workMs; };
+    const loop = createGameLoop(ctx, () => wallMs);
+    const stepUs = COMBAT_STEP_US();
+    const stepMs = stepUs / 1000;
+    const stepSec = stepUs / 1_000_000;
+    const owedSteps = 20;
+    const initialMs = (owedSteps + 0.5) * stepMs;
+    const pausedUntil = initialMs + 100 * stepMs;
+    const resumedAt = pausedUntil + stepMs;
+    const earnedSec = initialMs / 1000 + stepSec;
+    loop.wake(0);
+    loop.wake(initialMs);
+
+    // Every callback follows a real combat step. One slow step must return control instead of
+    // running the other nineteen owed steps in the same blocked browser task.
+    expect(completed).toBe(1);
+    expect(arena().nowUs).toBe(stepUs);
+    expect(remainder()).toBeCloseTo(initialMs / 1000 - stepSec, 10);
+    expect(schedulerAt()).toBe(initialMs);
+
+    setPaused(true);
+    loop.wake(pausedUntil);
+    expect(completed).toBe(1);
+    expect(remainder()).toBeCloseTo(initialMs / 1000 - stepSec, 10);
+    setPaused(false);
+    loop.wake(resumedAt);
+    expect(completed).toBe(2);
+    expect(remainder()).toBeCloseTo(earnedSec - 2 * stepSec, 10);
+
+    // Once the machine is fast again, a wake at the same wall instant drains the existing debt.
+    // Paused time earned nothing, and no yielded step or fractional remainder disappeared.
+    workMs = 0;
+    loop.wake(resumedAt);
+    expect(completed).toBe(owedSteps + 1);
+    expect(arena().nowUs).toBe(completed * stepUs);
+    expect(remainder()).toBeCloseTo(stepSec / 2, 10);
+    expect(completed * stepSec + remainder()).toBeCloseTo(earnedSec, 10);
+    const control = harness();
+    const fast = createGameLoop(control.ctx);
+    for (let i = 0; i < completed; i++) fast.step();
+    expect(state.clockSec).toBe(control.state.clockSec);
+    expect(state.counters.playSec).toBe(control.state.counters.playSec);
+  });
+
   it('pays a backlog banked before the pause instead of dropping it', () => {
     const { ctx, state, setPaused } = harness();
-    const loop = createGameLoop(ctx);
+    const loop = createGameLoop(ctx, () => 0);
     loop.wake(0);                 // anchor
     loop.wake(60_000);            // a 60 s stall: at most MAX_BATCH ticks run, the rest banks
     const afterStall = state.clockSec;
@@ -51,7 +103,7 @@ describe('the live wake keeps earned time through a pause', () => {
 
   it('does not simulate the paused wall time itself', () => {
     const { ctx, state, setPaused } = harness();
-    const loop = createGameLoop(ctx);
+    const loop = createGameLoop(ctx, () => 0);
     loop.wake(0);
     loop.wake(250);
     const before = state.clockSec;
@@ -68,7 +120,7 @@ describe('the live loop advances combat in steps, not one second per step', () =
   it('runs twenty 50 ms samples as one world second even when the arena view is replaced', () => {
     const { ctx, state, setArenaMode, arena } = harness();
     setArenaMode(true);
-    const loop = createGameLoop(ctx);
+    const loop = createGameLoop(ctx, () => 0);
     loop.wake(0);
     const before = state.clockSec;
     loop.wake(1000);

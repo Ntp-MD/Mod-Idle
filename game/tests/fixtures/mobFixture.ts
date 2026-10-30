@@ -24,6 +24,8 @@ export type MobOverride = Omit<Partial<Mob>, 'damage'> & { damage?: string } & R
 export const mobFixture = (over: MobOverride = {}): Mob => ({
   id: 'm1',
   species: 'Rat',
+  /** A hostile field Species, so awareness follows the authored proximity rule unless a test overrides. */
+  speciesId: 'ogre',
   kind: 'Small',
   zone: 1,
   level: 20,

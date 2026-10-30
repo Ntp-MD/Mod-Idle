@@ -32,13 +32,6 @@
     "body_sec": 2.2,
     "history_sec": 3,
     "animation_phase_floor_sec": 0.1,
-    "behavior": {
-      "skirmish_gap_m": 2.6,
-      "skirmish_hold_sec": 0.8,
-      "kite_range_m": 2.0,
-      "support_hold_m": 5.0,
-      "charge_speed_mps": 9
-    },
     "normal_attack": {
       "legacy": {
         "front": "melee",
@@ -214,7 +207,6 @@
       "note": "combat.md section 1: a normal and an elite mob swing once a second, a boss 0.8 times. The mob clock is capped at 1 / caps.attack_interval_sec, the same clock rule the player obeys, so no Crippled stack or future mob speed line can out-run the game's one attack ceiling."
     },
     "aura_radius_m": 4,
-    "retreat_at_pct": 15,
     "phase_adds": {
       "count": 2
     },
@@ -5346,6 +5338,19 @@
         }
       }
     ],
+    "engagement": {
+      "note": "Proximity aggression and same-species assist eligibility, keyed by Species id. A Species absent from proximity only retaliates after a resolved hostile contact. assist lists Species that wake living same-Species neighbours when directly alerted; no cross-species assist is authored and an assisted body never becomes a source. Ranges stay in spawns.json (aggro_m, assist_m).",
+      "proximity": [
+        "goblin", "orc", "kobold", "ogre", "troll", "minotaur", "skeleton", "vampire", "demon",
+        "spider", "wolf", "dragon", "human", "lizardman", "elf", "giant", "werewolf", "siren",
+        "wraith", "imp", "wyvern", "hornet", "wisp", "harpy", "bonehound", "revenant",
+        "mirehydra", "slaggolem", "wyrmling"
+      ],
+      "assist": [
+        "goblin", "orc", "kobold", "spider", "wolf", "human", "lizardman", "elf", "werewolf",
+        "imp", "hornet", "harpy", "bonehound", "dryad", "beetle"
+      ]
+    },
     "species_rules": [
       "A species is a MULTIPLY vector on the same stat block a player has, so the zone's average mob stays on the published HP anchor. Check X19 fails any species whose multipliers do not average 1.00.",
       "accuracy_mult scales mob accuracy on top of the shared K values. This is what makes the Evasion Cap 80 question answerable: Cap 80 is reachable against the lowest-accuracy species (Slime) and close to worthless against the highest ones (Wolf · Elf · Dragon), so no single mob accuracy number can close C1 - the species mix does.",
@@ -13637,6 +13642,7 @@
   "caps": {
     "crit_chance": null,
     "evasion": 80,
+    "spell_dodge": 30,
     "perfect_dodge": null,
     "alignment": null,
     "elem_res": 75,

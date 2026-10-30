@@ -57,12 +57,14 @@ export function createCastTrigger(opts: {
   resolveFlight: (flight: any, atUs: number, forced?: Mob[]) => void;
   scheduleFlight: (flight: any) => void;
   onKill: (s: GameState, rng: () => number, mob: Mob, c: Character, statuses?: any) => void;
+  /** A resolved press alerts every body it reached, including a dodged or blocked target. */
+  alertContact?: (mobId: string) => void;
 }) {
   const {
     arena, clock, rng, s, c, attackCharacter, units, timeUs, statuses, rkH, front,
     crippledOutgoingMult, playerActiveFraction, trig, queueTrigger, recoverLeech,
     mirrorReady, luckyBonus, tranceFree, arenaActors, resolveTargetsForSkill,
-    resolveFlight, scheduleFlight, onKill,
+    resolveFlight, scheduleFlight, onKill, alertContact,
   } = opts;
 
   function payCast(cast: Pick<PreparedSkillCast, 'manaCost' | 'hpCost'>) {
@@ -97,6 +99,9 @@ export function createCastTrigger(opts: {
 
     function applyCastOutcome(cast: CastReport | null, opts: CastOutcomeOptions = {}) {
       if (!cast) return;
+      // Contact is the press actually reaching a body: a dodge or a block still alerts it, while a
+      // cancelled windup or an empty area never reaches this point.
+      for (const mobId of cast.attempted ?? []) alertContact?.(mobId);
       if (opts.pay !== false) payCast(cast);
       if (cast.heal) s.healUp = cast.heal;
       if (cast.charges != null) {
@@ -156,7 +161,7 @@ export function createCastTrigger(opts: {
       if (bloodthirst && castDealt > 0)
         recoverLeech(castDealt * Number(bloodthirst.params.leechPct) / 100, clock.nowUs);
       for (const targetId of cast.curseTargets ?? (cast.curseOn ? [cast.curseOn] : [])) {
-        const sec = applyCurse(s.curses, targetId, sm.byId[cast.id], c.keystones);
+        const sec = applyCurse(s.curses, targetId, sm.byId[cast.id], c.keystones, cast.level ?? 1);
         // a curse line that names a status clock (Venom Bind) is spent on the status store, not the
         // curse store, because it changes how another line decays rather than adding a multiplier — and
         // it is read back off the line the curse actually wrote, so `28` Malediction stretches it once

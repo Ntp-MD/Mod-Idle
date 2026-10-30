@@ -25,11 +25,10 @@ export function advanceFieldPopulation(s: GameState, opts: {
   rng: () => number;
   tickStartUs: number;
   units: number;
-  cancelArenaWork: (reason: string) => void;
   fieldProfile: () => { respawn_sec: number };
   spawnMob: typeof import('../game').spawnMob;
 }): void {
-  const { arena, c, online, rng, tickStartUs, units, cancelArenaWork, fieldProfile, spawnMob } = opts;
+  const { arena, c, online, rng, tickStartUs, units, fieldProfile, spawnMob } = opts;
   const L = E.loot;
 
   function spawnFieldMob(slot: FieldSpawnSlot): Mob | undefined {
@@ -56,7 +55,8 @@ export function advanceFieldPopulation(s: GameState, opts: {
     }
     const uniqueChance = Number(L.unique_chance || 0) * expected / Math.max(1e-9, waveSec * slotRate);
     if (bossSpawn) {
-      cancelArenaWork('boss-arena');
+      // A Boss joining a continuing field starts its own encounter epoch; it does not invalidate
+      // released work or the shots already travelling toward the bodies that were here first.
       field.arenaEpoch++;
     }
     const rng2 = mulberry32(spawnSlotSeed(s.seed, field.areaKey, slot.id, slot.respawnCount));

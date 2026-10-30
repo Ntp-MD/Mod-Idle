@@ -115,7 +115,7 @@ export function describeMobSkill(skill: MobSkillRow): MobSkillWindow {
   const aura = skill.mode === 'aura';
   const target = aura
     ? skill.scope === 'line' ? 'Engaged allies in line' : 'Engaged allies'
-    : skill.role === 'stand-off' ? 'Player (kept at range)' : 'Player';
+    : skill.cast && skill.cast.delivery !== 'melee' ? 'Player (kept at range)' : 'Player';
   const description = aura
     ? Object.entries(skill.effects || {})
       .filter(([, value]) => Number(value) > 0)

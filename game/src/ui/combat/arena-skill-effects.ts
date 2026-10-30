@@ -185,6 +185,9 @@ export const skillFxDefinitions: Record<string, SkillFxDefinition> = {
   ...assign('iceLance', 'attack.glacial_spike', { projectile: true }),
   ...assign('arrowShower', 'attack.split_shot', { projectile: true, pulses: 3 }),
   ...assign('backstab', 'attack.double_strike', { pulses: 2 }),
+  // C3 targeted volleys reuse the existing projectile compositions; no new art is required.
+  ...assign('piercingShot', 'attack.double_strafe', { projectile: true }),
+  ...assign('spark', 'attack.seeker_strafe', { projectile: true }),
   ...assign('fireball', 'attack.ignite'),
   ...assign('firestorm', 'attack.cinder_nova'),
   ...assign('thunder', 'attack.thunder_storm'),

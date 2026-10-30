@@ -37,7 +37,7 @@ describe('first-release combat acceptance', () => {
       const bodies = ['source', 'inside', 'outside'].map((id, index) => {
       const mob = spawnMob(mulberry32(60 + index), 1, 'normal');
       Object.assign(mob, {
-        id, hp: 1e8, hpMax: 1e8, ps: 1, evasion: 0, dodgeRate: 0,
+        id, speciesId: 'wolf', hp: 1e8, hpMax: 1e8, ps: 1, evasion: 0, dodgeRate: 0,
         armour: 100, line: 'front', damage: 'physical', innate: [],
         skillIds: id === 'source' ? ['mob.earth.stone-guard'] : [],
       });
