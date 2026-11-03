@@ -1,0 +1,1517 @@
+{
+  "schemaVersion": 1,
+  "status": "direction16-candidate-incomplete",
+  "speciesId": "slime",
+  "race": "formless",
+  "version": "v5",
+  "attackKind": "close",
+  "bakedWeaponId": null,
+  "identityRef": "../atlas/animation.png",
+  "sourcePoseRef": "../atlas/animation.png",
+  "directionCount": 16,
+  "angleStepDegrees": 22.5,
+  "directions": [
+    {
+      "name": "south",
+      "angleDegrees": 0
+    },
+    {
+      "name": "south-south-east",
+      "angleDegrees": 22.5
+    },
+    {
+      "name": "south-east",
+      "angleDegrees": 45
+    },
+    {
+      "name": "east-south-east",
+      "angleDegrees": 67.5
+    },
+    {
+      "name": "east",
+      "angleDegrees": 90
+    },
+    {
+      "name": "east-north-east",
+      "angleDegrees": 112.5
+    },
+    {
+      "name": "north-east",
+      "angleDegrees": 135
+    },
+    {
+      "name": "north-north-east",
+      "angleDegrees": 157.5
+    },
+    {
+      "name": "north",
+      "angleDegrees": 180
+    },
+    {
+      "name": "north-north-west",
+      "angleDegrees": 202.5
+    },
+    {
+      "name": "north-west",
+      "angleDegrees": 225
+    },
+    {
+      "name": "west-north-west",
+      "angleDegrees": 247.5
+    },
+    {
+      "name": "west",
+      "angleDegrees": 270
+    },
+    {
+      "name": "west-south-west",
+      "angleDegrees": 292.5
+    },
+    {
+      "name": "south-west",
+      "angleDegrees": 315
+    },
+    {
+      "name": "south-south-west",
+      "angleDegrees": 337.5
+    }
+  ],
+  "camera": "one fixed elevated three-quarter camera; rotate the whole slime facing in the world, never rotate the camera or flat sprite",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
+  },
+  "statusNote": "16-direction production candidates; baseline untouched until full replacement reviewed.",
+  "actions": {
+    "idle": {
+      "framesPerDirection": 1,
+      "poseCount": 16,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "south.png",
+          "pose": "one neutral ready pose facing 0 degrees"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "south-south-east.png",
+          "pose": "one neutral ready pose facing 22.5 degrees"
+        },
+        {
+          "direction": "south-east",
+          "file": "south-east.png",
+          "pose": "one neutral ready pose facing 45 degrees"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "east-south-east.png",
+          "pose": "one neutral ready pose facing 67.5 degrees"
+        },
+        {
+          "direction": "east",
+          "file": "east.png",
+          "pose": "one neutral ready pose facing 90 degrees"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "east-north-east.png",
+          "pose": "one neutral ready pose facing 112.5 degrees"
+        },
+        {
+          "direction": "north-east",
+          "file": "north-east.png",
+          "pose": "one neutral ready pose facing 135 degrees"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "north-north-east.png",
+          "pose": "one neutral ready pose facing 157.5 degrees"
+        },
+        {
+          "direction": "north",
+          "file": "north.png",
+          "pose": "one neutral ready pose facing 180 degrees"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "north-north-west.png",
+          "pose": "one neutral ready pose facing 202.5 degrees"
+        },
+        {
+          "direction": "north-west",
+          "file": "north-west.png",
+          "pose": "one neutral ready pose facing 225 degrees"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "west-north-west.png",
+          "pose": "one neutral ready pose facing 247.5 degrees"
+        },
+        {
+          "direction": "west",
+          "file": "west.png",
+          "pose": "one neutral ready pose facing 270 degrees"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "west-south-west.png",
+          "pose": "one neutral ready pose facing 292.5 degrees"
+        },
+        {
+          "direction": "south-west",
+          "file": "south-west.png",
+          "pose": "one neutral ready pose facing 315 degrees"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "south-south-west.png",
+          "pose": "one neutral ready pose facing 337.5 degrees"
+        }
+      ]
+    },
+    "walk": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-stride-a.png",
+          "pose": "cyan jelly body compresses low before hop"
+        },
+        {
+          "direction": "south",
+          "file": "01-stride-b.png",
+          "pose": "jelly stretches up and forward in short hop"
+        },
+        {
+          "direction": "south",
+          "file": "02-stride-c.png",
+          "pose": "jelly lands and squashes forward"
+        },
+        {
+          "direction": "south",
+          "file": "03-stride-d.png",
+          "pose": "jelly rounds back into idle dome"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-stride-a.png",
+          "pose": "cyan jelly body compresses low before hop"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-stride-b.png",
+          "pose": "jelly stretches up and forward in short hop"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-stride-c.png",
+          "pose": "jelly lands and squashes forward"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-stride-d.png",
+          "pose": "jelly rounds back into idle dome"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-stride-a.png",
+          "pose": "cyan jelly body compresses low before hop"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-stride-b.png",
+          "pose": "jelly stretches up and forward in short hop"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-stride-c.png",
+          "pose": "jelly lands and squashes forward"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-stride-d.png",
+          "pose": "jelly rounds back into idle dome"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-stride-a.png",
+          "pose": "cyan jelly body compresses low before hop"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-stride-b.png",
+          "pose": "jelly stretches up and forward in short hop"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-stride-c.png",
+          "pose": "jelly lands and squashes forward"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-stride-d.png",
+          "pose": "jelly rounds back into idle dome"
+        },
+        {
+          "direction": "east",
+          "file": "00-stride-a.png",
+          "pose": "cyan jelly body compresses low before hop"
+        },
+        {
+          "direction": "east",
+          "file": "01-stride-b.png",
+          "pose": "jelly stretches up and forward in short hop"
+        },
+        {
+          "direction": "east",
+          "file": "02-stride-c.png",
+          "pose": "jelly lands and squashes forward"
+        },
+        {
+          "direction": "east",
+          "file": "03-stride-d.png",
+          "pose": "jelly rounds back into idle dome"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-stride-a.png",
+          "pose": "cyan jelly body compresses low before hop"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-stride-b.png",
+          "pose": "jelly stretches up and forward in short hop"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-stride-c.png",
+          "pose": "jelly lands and squashes forward"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-stride-d.png",
+          "pose": "jelly rounds back into idle dome"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-stride-a.png",
+          "pose": "cyan jelly body compresses low before hop"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-stride-b.png",
+          "pose": "jelly stretches up and forward in short hop"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-stride-c.png",
+          "pose": "jelly lands and squashes forward"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-stride-d.png",
+          "pose": "jelly rounds back into idle dome"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-stride-a.png",
+          "pose": "cyan jelly body compresses low before hop"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-stride-b.png",
+          "pose": "jelly stretches up and forward in short hop"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-stride-c.png",
+          "pose": "jelly lands and squashes forward"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-stride-d.png",
+          "pose": "jelly rounds back into idle dome"
+        },
+        {
+          "direction": "north",
+          "file": "00-stride-a.png",
+          "pose": "cyan jelly body compresses low before hop"
+        },
+        {
+          "direction": "north",
+          "file": "01-stride-b.png",
+          "pose": "jelly stretches up and forward in short hop"
+        },
+        {
+          "direction": "north",
+          "file": "02-stride-c.png",
+          "pose": "jelly lands and squashes forward"
+        },
+        {
+          "direction": "north",
+          "file": "03-stride-d.png",
+          "pose": "jelly rounds back into idle dome"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-stride-a.png",
+          "pose": "cyan jelly body compresses low before hop"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-stride-b.png",
+          "pose": "jelly stretches up and forward in short hop"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-stride-c.png",
+          "pose": "jelly lands and squashes forward"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-stride-d.png",
+          "pose": "jelly rounds back into idle dome"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-stride-a.png",
+          "pose": "cyan jelly body compresses low before hop"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-stride-b.png",
+          "pose": "jelly stretches up and forward in short hop"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-stride-c.png",
+          "pose": "jelly lands and squashes forward"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-stride-d.png",
+          "pose": "jelly rounds back into idle dome"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-stride-a.png",
+          "pose": "cyan jelly body compresses low before hop"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-stride-b.png",
+          "pose": "jelly stretches up and forward in short hop"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-stride-c.png",
+          "pose": "jelly lands and squashes forward"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-stride-d.png",
+          "pose": "jelly rounds back into idle dome"
+        },
+        {
+          "direction": "west",
+          "file": "00-stride-a.png",
+          "pose": "cyan jelly body compresses low before hop"
+        },
+        {
+          "direction": "west",
+          "file": "01-stride-b.png",
+          "pose": "jelly stretches up and forward in short hop"
+        },
+        {
+          "direction": "west",
+          "file": "02-stride-c.png",
+          "pose": "jelly lands and squashes forward"
+        },
+        {
+          "direction": "west",
+          "file": "03-stride-d.png",
+          "pose": "jelly rounds back into idle dome"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-stride-a.png",
+          "pose": "cyan jelly body compresses low before hop"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-stride-b.png",
+          "pose": "jelly stretches up and forward in short hop"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-stride-c.png",
+          "pose": "jelly lands and squashes forward"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-stride-d.png",
+          "pose": "jelly rounds back into idle dome"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-stride-a.png",
+          "pose": "cyan jelly body compresses low before hop"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-stride-b.png",
+          "pose": "jelly stretches up and forward in short hop"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-stride-c.png",
+          "pose": "jelly lands and squashes forward"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-stride-d.png",
+          "pose": "jelly rounds back into idle dome"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-stride-a.png",
+          "pose": "cyan jelly body compresses low before hop"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-stride-b.png",
+          "pose": "jelly stretches up and forward in short hop"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-stride-c.png",
+          "pose": "jelly lands and squashes forward"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-stride-d.png",
+          "pose": "jelly rounds back into idle dome"
+        }
+      ]
+    },
+    "attack": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-windup.png",
+          "pose": "jelly compresses backward"
+        },
+        {
+          "direction": "south",
+          "file": "01-contact.png",
+          "pose": "whole body lunges forward toward target"
+        },
+        {
+          "direction": "south",
+          "file": "02-follow-through.png",
+          "pose": "jelly splats low at end of lunge with no detached droplets"
+        },
+        {
+          "direction": "south",
+          "file": "03-recovery.png",
+          "pose": "jelly reforms into neutral rounded dome"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-windup.png",
+          "pose": "jelly compresses backward"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-contact.png",
+          "pose": "whole body lunges forward toward target"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-follow-through.png",
+          "pose": "jelly splats low at end of lunge with no detached droplets"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-recovery.png",
+          "pose": "jelly reforms into neutral rounded dome"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-windup.png",
+          "pose": "jelly compresses backward"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-contact.png",
+          "pose": "whole body lunges forward toward target"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-follow-through.png",
+          "pose": "jelly splats low at end of lunge with no detached droplets"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-recovery.png",
+          "pose": "jelly reforms into neutral rounded dome"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-windup.png",
+          "pose": "jelly compresses backward"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-contact.png",
+          "pose": "whole body lunges forward toward target"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-follow-through.png",
+          "pose": "jelly splats low at end of lunge with no detached droplets"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-recovery.png",
+          "pose": "jelly reforms into neutral rounded dome"
+        },
+        {
+          "direction": "east",
+          "file": "00-windup.png",
+          "pose": "jelly compresses backward"
+        },
+        {
+          "direction": "east",
+          "file": "01-contact.png",
+          "pose": "whole body lunges forward toward target"
+        },
+        {
+          "direction": "east",
+          "file": "02-follow-through.png",
+          "pose": "jelly splats low at end of lunge with no detached droplets"
+        },
+        {
+          "direction": "east",
+          "file": "03-recovery.png",
+          "pose": "jelly reforms into neutral rounded dome"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-windup.png",
+          "pose": "jelly compresses backward"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-contact.png",
+          "pose": "whole body lunges forward toward target"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-follow-through.png",
+          "pose": "jelly splats low at end of lunge with no detached droplets"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-recovery.png",
+          "pose": "jelly reforms into neutral rounded dome"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-windup.png",
+          "pose": "jelly compresses backward"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-contact.png",
+          "pose": "whole body lunges forward toward target"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-follow-through.png",
+          "pose": "jelly splats low at end of lunge with no detached droplets"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-recovery.png",
+          "pose": "jelly reforms into neutral rounded dome"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-windup.png",
+          "pose": "jelly compresses backward"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-contact.png",
+          "pose": "whole body lunges forward toward target"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-follow-through.png",
+          "pose": "jelly splats low at end of lunge with no detached droplets"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-recovery.png",
+          "pose": "jelly reforms into neutral rounded dome"
+        },
+        {
+          "direction": "north",
+          "file": "00-windup.png",
+          "pose": "jelly compresses backward"
+        },
+        {
+          "direction": "north",
+          "file": "01-contact.png",
+          "pose": "whole body lunges forward toward target"
+        },
+        {
+          "direction": "north",
+          "file": "02-follow-through.png",
+          "pose": "jelly splats low at end of lunge with no detached droplets"
+        },
+        {
+          "direction": "north",
+          "file": "03-recovery.png",
+          "pose": "jelly reforms into neutral rounded dome"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-windup.png",
+          "pose": "jelly compresses backward"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-contact.png",
+          "pose": "whole body lunges forward toward target"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-follow-through.png",
+          "pose": "jelly splats low at end of lunge with no detached droplets"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-recovery.png",
+          "pose": "jelly reforms into neutral rounded dome"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-windup.png",
+          "pose": "jelly compresses backward"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-contact.png",
+          "pose": "whole body lunges forward toward target"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-follow-through.png",
+          "pose": "jelly splats low at end of lunge with no detached droplets"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-recovery.png",
+          "pose": "jelly reforms into neutral rounded dome"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-windup.png",
+          "pose": "jelly compresses backward"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-contact.png",
+          "pose": "whole body lunges forward toward target"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-follow-through.png",
+          "pose": "jelly splats low at end of lunge with no detached droplets"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-recovery.png",
+          "pose": "jelly reforms into neutral rounded dome"
+        },
+        {
+          "direction": "west",
+          "file": "00-windup.png",
+          "pose": "jelly compresses backward"
+        },
+        {
+          "direction": "west",
+          "file": "01-contact.png",
+          "pose": "whole body lunges forward toward target"
+        },
+        {
+          "direction": "west",
+          "file": "02-follow-through.png",
+          "pose": "jelly splats low at end of lunge with no detached droplets"
+        },
+        {
+          "direction": "west",
+          "file": "03-recovery.png",
+          "pose": "jelly reforms into neutral rounded dome"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-windup.png",
+          "pose": "jelly compresses backward"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-contact.png",
+          "pose": "whole body lunges forward toward target"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-follow-through.png",
+          "pose": "jelly splats low at end of lunge with no detached droplets"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-recovery.png",
+          "pose": "jelly reforms into neutral rounded dome"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-windup.png",
+          "pose": "jelly compresses backward"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-contact.png",
+          "pose": "whole body lunges forward toward target"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-follow-through.png",
+          "pose": "jelly splats low at end of lunge with no detached droplets"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-recovery.png",
+          "pose": "jelly reforms into neutral rounded dome"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-windup.png",
+          "pose": "jelly compresses backward"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-contact.png",
+          "pose": "whole body lunges forward toward target"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-follow-through.png",
+          "pose": "jelly splats low at end of lunge with no detached droplets"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-recovery.png",
+          "pose": "jelly reforms into neutral rounded dome"
+        }
+      ]
+    },
+    "hit": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-flinch.png",
+          "pose": "jelly dents at impact"
+        },
+        {
+          "direction": "south",
+          "file": "01-recoil.png",
+          "pose": "jelly recoils and face winces"
+        },
+        {
+          "direction": "south",
+          "file": "02-recover.png",
+          "pose": "jelly rebounds upright"
+        },
+        {
+          "direction": "south",
+          "file": "03-ready.png",
+          "pose": "neutral dome and face matching idle"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-flinch.png",
+          "pose": "jelly dents at impact"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-recoil.png",
+          "pose": "jelly recoils and face winces"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-recover.png",
+          "pose": "jelly rebounds upright"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-ready.png",
+          "pose": "neutral dome and face matching idle"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-flinch.png",
+          "pose": "jelly dents at impact"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-recoil.png",
+          "pose": "jelly recoils and face winces"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-recover.png",
+          "pose": "jelly rebounds upright"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-ready.png",
+          "pose": "neutral dome and face matching idle"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-flinch.png",
+          "pose": "jelly dents at impact"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-recoil.png",
+          "pose": "jelly recoils and face winces"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-recover.png",
+          "pose": "jelly rebounds upright"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-ready.png",
+          "pose": "neutral dome and face matching idle"
+        },
+        {
+          "direction": "east",
+          "file": "00-flinch.png",
+          "pose": "jelly dents at impact"
+        },
+        {
+          "direction": "east",
+          "file": "01-recoil.png",
+          "pose": "jelly recoils and face winces"
+        },
+        {
+          "direction": "east",
+          "file": "02-recover.png",
+          "pose": "jelly rebounds upright"
+        },
+        {
+          "direction": "east",
+          "file": "03-ready.png",
+          "pose": "neutral dome and face matching idle"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-flinch.png",
+          "pose": "jelly dents at impact"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-recoil.png",
+          "pose": "jelly recoils and face winces"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-recover.png",
+          "pose": "jelly rebounds upright"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-ready.png",
+          "pose": "neutral dome and face matching idle"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-flinch.png",
+          "pose": "jelly dents at impact"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-recoil.png",
+          "pose": "jelly recoils and face winces"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-recover.png",
+          "pose": "jelly rebounds upright"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-ready.png",
+          "pose": "neutral dome and face matching idle"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-flinch.png",
+          "pose": "jelly dents at impact"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-recoil.png",
+          "pose": "jelly recoils and face winces"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-recover.png",
+          "pose": "jelly rebounds upright"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-ready.png",
+          "pose": "neutral dome and face matching idle"
+        },
+        {
+          "direction": "north",
+          "file": "00-flinch.png",
+          "pose": "jelly dents at impact"
+        },
+        {
+          "direction": "north",
+          "file": "01-recoil.png",
+          "pose": "jelly recoils and face winces"
+        },
+        {
+          "direction": "north",
+          "file": "02-recover.png",
+          "pose": "jelly rebounds upright"
+        },
+        {
+          "direction": "north",
+          "file": "03-ready.png",
+          "pose": "neutral dome and face matching idle"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-flinch.png",
+          "pose": "jelly dents at impact"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-recoil.png",
+          "pose": "jelly recoils and face winces"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-recover.png",
+          "pose": "jelly rebounds upright"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-ready.png",
+          "pose": "neutral dome and face matching idle"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-flinch.png",
+          "pose": "jelly dents at impact"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-recoil.png",
+          "pose": "jelly recoils and face winces"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-recover.png",
+          "pose": "jelly rebounds upright"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-ready.png",
+          "pose": "neutral dome and face matching idle"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-flinch.png",
+          "pose": "jelly dents at impact"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-recoil.png",
+          "pose": "jelly recoils and face winces"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-recover.png",
+          "pose": "jelly rebounds upright"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-ready.png",
+          "pose": "neutral dome and face matching idle"
+        },
+        {
+          "direction": "west",
+          "file": "00-flinch.png",
+          "pose": "jelly dents at impact"
+        },
+        {
+          "direction": "west",
+          "file": "01-recoil.png",
+          "pose": "jelly recoils and face winces"
+        },
+        {
+          "direction": "west",
+          "file": "02-recover.png",
+          "pose": "jelly rebounds upright"
+        },
+        {
+          "direction": "west",
+          "file": "03-ready.png",
+          "pose": "neutral dome and face matching idle"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-flinch.png",
+          "pose": "jelly dents at impact"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-recoil.png",
+          "pose": "jelly recoils and face winces"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-recover.png",
+          "pose": "jelly rebounds upright"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-ready.png",
+          "pose": "neutral dome and face matching idle"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-flinch.png",
+          "pose": "jelly dents at impact"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-recoil.png",
+          "pose": "jelly recoils and face winces"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-recover.png",
+          "pose": "jelly rebounds upright"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-ready.png",
+          "pose": "neutral dome and face matching idle"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-flinch.png",
+          "pose": "jelly dents at impact"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-recoil.png",
+          "pose": "jelly recoils and face winces"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-recover.png",
+          "pose": "jelly rebounds upright"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-ready.png",
+          "pose": "neutral dome and face matching idle"
+        }
+      ]
+    },
+    "death": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-fall.png",
+          "pose": "jelly sags and eyes close"
+        },
+        {
+          "direction": "south",
+          "file": "01-collapse.png",
+          "pose": "jelly spreads flat"
+        },
+        {
+          "direction": "south",
+          "file": "02-ground.png",
+          "pose": "fully flattened cyan puddle"
+        },
+        {
+          "direction": "south",
+          "file": "03-settle.png",
+          "pose": "still low cyan puddle with closed eyes"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-fall.png",
+          "pose": "jelly sags and eyes close"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-collapse.png",
+          "pose": "jelly spreads flat"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-ground.png",
+          "pose": "fully flattened cyan puddle"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-settle.png",
+          "pose": "still low cyan puddle with closed eyes"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-fall.png",
+          "pose": "jelly sags and eyes close"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-collapse.png",
+          "pose": "jelly spreads flat"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-ground.png",
+          "pose": "fully flattened cyan puddle"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-settle.png",
+          "pose": "still low cyan puddle with closed eyes"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-fall.png",
+          "pose": "jelly sags and eyes close"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-collapse.png",
+          "pose": "jelly spreads flat"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-ground.png",
+          "pose": "fully flattened cyan puddle"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-settle.png",
+          "pose": "still low cyan puddle with closed eyes"
+        },
+        {
+          "direction": "east",
+          "file": "00-fall.png",
+          "pose": "jelly sags and eyes close"
+        },
+        {
+          "direction": "east",
+          "file": "01-collapse.png",
+          "pose": "jelly spreads flat"
+        },
+        {
+          "direction": "east",
+          "file": "02-ground.png",
+          "pose": "fully flattened cyan puddle"
+        },
+        {
+          "direction": "east",
+          "file": "03-settle.png",
+          "pose": "still low cyan puddle with closed eyes"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-fall.png",
+          "pose": "jelly sags and eyes close"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-collapse.png",
+          "pose": "jelly spreads flat"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-ground.png",
+          "pose": "fully flattened cyan puddle"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-settle.png",
+          "pose": "still low cyan puddle with closed eyes"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-fall.png",
+          "pose": "jelly sags and eyes close"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-collapse.png",
+          "pose": "jelly spreads flat"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-ground.png",
+          "pose": "fully flattened cyan puddle"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-settle.png",
+          "pose": "still low cyan puddle with closed eyes"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-fall.png",
+          "pose": "jelly sags and eyes close"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-collapse.png",
+          "pose": "jelly spreads flat"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-ground.png",
+          "pose": "fully flattened cyan puddle"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-settle.png",
+          "pose": "still low cyan puddle with closed eyes"
+        },
+        {
+          "direction": "north",
+          "file": "00-fall.png",
+          "pose": "jelly sags and eyes close"
+        },
+        {
+          "direction": "north",
+          "file": "01-collapse.png",
+          "pose": "jelly spreads flat"
+        },
+        {
+          "direction": "north",
+          "file": "02-ground.png",
+          "pose": "fully flattened cyan puddle"
+        },
+        {
+          "direction": "north",
+          "file": "03-settle.png",
+          "pose": "still low cyan puddle with closed eyes"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-fall.png",
+          "pose": "jelly sags and eyes close"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-collapse.png",
+          "pose": "jelly spreads flat"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-ground.png",
+          "pose": "fully flattened cyan puddle"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-settle.png",
+          "pose": "still low cyan puddle with closed eyes"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-fall.png",
+          "pose": "jelly sags and eyes close"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-collapse.png",
+          "pose": "jelly spreads flat"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-ground.png",
+          "pose": "fully flattened cyan puddle"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-settle.png",
+          "pose": "still low cyan puddle with closed eyes"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-fall.png",
+          "pose": "jelly sags and eyes close"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-collapse.png",
+          "pose": "jelly spreads flat"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-ground.png",
+          "pose": "fully flattened cyan puddle"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-settle.png",
+          "pose": "still low cyan puddle with closed eyes"
+        },
+        {
+          "direction": "west",
+          "file": "00-fall.png",
+          "pose": "jelly sags and eyes close"
+        },
+        {
+          "direction": "west",
+          "file": "01-collapse.png",
+          "pose": "jelly spreads flat"
+        },
+        {
+          "direction": "west",
+          "file": "02-ground.png",
+          "pose": "fully flattened cyan puddle"
+        },
+        {
+          "direction": "west",
+          "file": "03-settle.png",
+          "pose": "still low cyan puddle with closed eyes"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-fall.png",
+          "pose": "jelly sags and eyes close"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-collapse.png",
+          "pose": "jelly spreads flat"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-ground.png",
+          "pose": "fully flattened cyan puddle"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-settle.png",
+          "pose": "still low cyan puddle with closed eyes"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-fall.png",
+          "pose": "jelly sags and eyes close"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-collapse.png",
+          "pose": "jelly spreads flat"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-ground.png",
+          "pose": "fully flattened cyan puddle"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-settle.png",
+          "pose": "still low cyan puddle with closed eyes"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-fall.png",
+          "pose": "jelly sags and eyes close"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-collapse.png",
+          "pose": "jelly spreads flat"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-ground.png",
+          "pose": "fully flattened cyan puddle"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-settle.png",
+          "pose": "still low cyan puddle with closed eyes"
+        }
+      ]
+    }
+  },
+  "requiredRootFiles": [
+    "meta.json",
+    "poses/"
+  ],
+  "imageQa": "Raw built-in imagegen outputs are candidate source only. Every pose still requires visual identity/facing review, hard-alpha/edge QA, foot-anchor measurement, and atlas QA before acceptance.",
+  "locomotionProfile": "grounded jelly squash and hop",
+  "progress": {
+    "poseFiles": 40,
+    "expectedPoseFiles": 272,
+    "actionCounts": {
+      "idle": 8,
+      "walk": 8,
+      "attack": 8,
+      "hit": 8,
+      "death": 8
+    },
+    "generatedPoseFiles": 0,
+    "complete": false,
+    "qaApproved": false,
+    "rejectedMetadata": [],
+    "missingPoseFiles": 232,
+    "sourceCandidateFiles": 40
+  },
+  "sourceInventory": {
+    "cellSizes": {
+      "(384, 384)": 40
+    },
+    "alphaTouchesCellEdge": 0,
+    "note": "Lossless baseline source cells retain original dimensions; normalize placement only during atlas packing after visual review."
+  },
+  "generationBlocker": {
+    "type": "imagegen-usage-limit",
+    "resetsAtUnix": 1793288069,
+    "note": "Built-in imagegen returned HTTP429 usage_limit_reached; pending queues terminated, no API fallback used."
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "giant",
+  "action": "idle",
+  "direction": "east-south-east",
+  "phase": "idle",
+  "generator": "built-in image_gen",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sourceRecord": {
+    "kind": "generated-contact-sheet",
+    "source": "source/v5-contact-sheets/idle-16.png",
+    "sourceCell": {
+      "row": 0,
+      "column": 3,
+      "box": [
+        768,
+        0,
+        1024,
+        384
+      ]
+    },
+    "sourceConfidenceBounds": [
+      29,
+      104,
+      210,
+      341
+    ],
+    "processing": {
+      "method": "alpha-confidence-crop-scale-anchor-v1",
+      "threshold": 128,
+      "softEdgeRecoveryRadius": 3,
+      "uniformScale": 0.62605,
+      "anchor": {
+        "x": 192,
+        "y": 288
+      },
+      "scaledSize": [
+        117,
+        152
+      ],
+      "offset": [
+        133,
+        136
+      ]
+    }
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "reviewed": false,
+    "runtimePromotion": false
+  }
+}

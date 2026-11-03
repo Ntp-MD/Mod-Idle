@@ -1,0 +1,498 @@
+{
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "ooze",
+  "variantId": "vat-ooze",
+  "name": "Vat Ooze",
+  "levels": [
+    81,
+    100
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-anchor-at-224",
+  "grid": {
+    "columns": 8,
+    "rows": 5,
+    "totalFrames": 40
+  },
+  "states": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    {
+      "state": "idle",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "walk",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "attack",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "hit",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "death",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    }
+  ],
+  "sourceFrames": [
+    {
+      "x": 131,
+      "y": 137,
+      "width": 145,
+      "height": 149,
+      "offsetX": 131,
+      "offsetY": 137
+    },
+    {
+      "x": 511,
+      "y": 140,
+      "width": 143,
+      "height": 146,
+      "offsetX": 127,
+      "offsetY": 140
+    },
+    {
+      "x": 888,
+      "y": 140,
+      "width": 132,
+      "height": 148,
+      "offsetX": 120,
+      "offsetY": 140
+    },
+    {
+      "x": 1271,
+      "y": 140,
+      "width": 133,
+      "height": 148,
+      "offsetX": 119,
+      "offsetY": 140
+    },
+    {
+      "x": 1659,
+      "y": 137,
+      "width": 138,
+      "height": 152,
+      "offsetX": 123,
+      "offsetY": 137
+    },
+    {
+      "x": 2047,
+      "y": 138,
+      "width": 138,
+      "height": 151,
+      "offsetX": 127,
+      "offsetY": 138
+    },
+    {
+      "x": 2426,
+      "y": 140,
+      "width": 140,
+      "height": 148,
+      "offsetX": 122,
+      "offsetY": 140
+    },
+    {
+      "x": 2796,
+      "y": 138,
+      "width": 145,
+      "height": 148,
+      "offsetX": 108,
+      "offsetY": 138
+    },
+    {
+      "x": 125,
+      "y": 513,
+      "width": 151,
+      "height": 159,
+      "offsetX": 125,
+      "offsetY": 129
+    },
+    {
+      "x": 502,
+      "y": 513,
+      "width": 153,
+      "height": 158,
+      "offsetX": 118,
+      "offsetY": 129
+    },
+    {
+      "x": 879,
+      "y": 514,
+      "width": 135,
+      "height": 158,
+      "offsetX": 111,
+      "offsetY": 130
+    },
+    {
+      "x": 1264,
+      "y": 514,
+      "width": 144,
+      "height": 158,
+      "offsetX": 112,
+      "offsetY": 130
+    },
+    {
+      "x": 1653,
+      "y": 513,
+      "width": 150,
+      "height": 159,
+      "offsetX": 117,
+      "offsetY": 129
+    },
+    {
+      "x": 2050,
+      "y": 513,
+      "width": 140,
+      "height": 159,
+      "offsetX": 130,
+      "offsetY": 129
+    },
+    {
+      "x": 2440,
+      "y": 514,
+      "width": 134,
+      "height": 158,
+      "offsetX": 136,
+      "offsetY": 130
+    },
+    {
+      "x": 2796,
+      "y": 513,
+      "width": 151,
+      "height": 159,
+      "offsetX": 108,
+      "offsetY": 129
+    },
+    {
+      "x": 121,
+      "y": 902,
+      "width": 172,
+      "height": 151,
+      "offsetX": 121,
+      "offsetY": 134
+    },
+    {
+      "x": 500,
+      "y": 902,
+      "width": 174,
+      "height": 151,
+      "offsetX": 116,
+      "offsetY": 134
+    },
+    {
+      "x": 875,
+      "y": 908,
+      "width": 183,
+      "height": 148,
+      "offsetX": 107,
+      "offsetY": 140
+    },
+    {
+      "x": 1265,
+      "y": 906,
+      "width": 162,
+      "height": 150,
+      "offsetX": 113,
+      "offsetY": 138
+    },
+    {
+      "x": 1640,
+      "y": 913,
+      "width": 181,
+      "height": 149,
+      "offsetX": 104,
+      "offsetY": 145
+    },
+    {
+      "x": 2028,
+      "y": 906,
+      "width": 163,
+      "height": 150,
+      "offsetX": 108,
+      "offsetY": 138
+    },
+    {
+      "x": 2396,
+      "y": 908,
+      "width": 179,
+      "height": 148,
+      "offsetX": 92,
+      "offsetY": 140
+    },
+    {
+      "x": 2779,
+      "y": 902,
+      "width": 171,
+      "height": 151,
+      "offsetX": 91,
+      "offsetY": 134
+    },
+    {
+      "x": 125,
+      "y": 1293,
+      "width": 147,
+      "height": 144,
+      "offsetX": 125,
+      "offsetY": 141
+    },
+    {
+      "x": 502,
+      "y": 1295,
+      "width": 148,
+      "height": 143,
+      "offsetX": 118,
+      "offsetY": 143
+    },
+    {
+      "x": 879,
+      "y": 1302,
+      "width": 134,
+      "height": 137,
+      "offsetX": 111,
+      "offsetY": 150
+    },
+    {
+      "x": 1252,
+      "y": 1302,
+      "width": 145,
+      "height": 140,
+      "offsetX": 100,
+      "offsetY": 150
+    },
+    {
+      "x": 1644,
+      "y": 1310,
+      "width": 172,
+      "height": 135,
+      "offsetX": 108,
+      "offsetY": 158
+    },
+    {
+      "x": 2056,
+      "y": 1303,
+      "width": 145,
+      "height": 138,
+      "offsetX": 136,
+      "offsetY": 151
+    },
+    {
+      "x": 2441,
+      "y": 1296,
+      "width": 137,
+      "height": 144,
+      "offsetX": 137,
+      "offsetY": 144
+    },
+    {
+      "x": 2801,
+      "y": 1294,
+      "width": 146,
+      "height": 144,
+      "offsetX": 113,
+      "offsetY": 142
+    },
+    {
+      "x": 112,
+      "y": 1712,
+      "width": 180,
+      "height": 113,
+      "offsetX": 112,
+      "offsetY": 176
+    },
+    {
+      "x": 494,
+      "y": 1739,
+      "width": 181,
+      "height": 86,
+      "offsetX": 110,
+      "offsetY": 203
+    },
+    {
+      "x": 871,
+      "y": 1733,
+      "width": 184,
+      "height": 92,
+      "offsetX": 103,
+      "offsetY": 197
+    },
+    {
+      "x": 1252,
+      "y": 1738,
+      "width": 185,
+      "height": 85,
+      "offsetX": 100,
+      "offsetY": 202
+    },
+    {
+      "x": 1636,
+      "y": 1749,
+      "width": 185,
+      "height": 74,
+      "offsetX": 100,
+      "offsetY": 213
+    },
+    {
+      "x": 2017,
+      "y": 1737,
+      "width": 187,
+      "height": 86,
+      "offsetX": 97,
+      "offsetY": 201
+    },
+    {
+      "x": 2399,
+      "y": 1736,
+      "width": 184,
+      "height": 89,
+      "offsetX": 95,
+      "offsetY": 200
+    },
+    {
+      "x": 2779,
+      "y": 1754,
+      "width": 180,
+      "height": 68,
+      "offsetX": 91,
+      "offsetY": 218
+    }
+  ],
+  "identityReference": "art-reference/monsters/formless/ooze/animation/source/base.png",
+  "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+  "generation": {
+    "sourceOutputs": [
+      "exec-ed541a2b-2a88-474c-8b91-40c7c00e498a.png"
+    ],
+    "identityReference": "art-reference/monsters/formless/ooze/animation/source/base.png",
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "variantCue": "a rich deep teal body with faint layered gel bands suggesting dense pooled ooze, no container",
+    "initialPrompt": "Vat Ooze; 8 directions for idle, walk, attack, hit, death."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "sourceFrames-repack-v2",
+    "sourceCanvas": {
+      "width": 3072,
+      "height": 1920
+    },
+    "uniformScale": 1.0,
+    "translation": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "recoveredIsolatedAlphaPixels": 0,
+    "discardedIsolatedAlphaDust": 0,
+    "status": "draft-review"
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged.",
+      "Repacked from uniquely assigned sourceFrames into 384 x 384 review cells with at least 24 px clear padding on each edge; visual review remains pending."
+    ]
+  }
+}

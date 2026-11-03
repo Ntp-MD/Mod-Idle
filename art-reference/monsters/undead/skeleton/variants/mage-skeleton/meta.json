@@ -1,0 +1,438 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "skeleton",
+  "variantId": "mage-skeleton",
+  "name": "Mage Skeleton",
+  "levels": [
+    41,
+    60
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-contact-at-224",
+  "directionCount": 8,
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "actions": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    "idle S SE E NE N NW W SW",
+    "walk S SE E NE N NW W SW",
+    "attack S SE E NE N NW W SW",
+    "hit S SE E NE N NW W SW",
+    "death S SE E NE N NW W SW"
+  ],
+  "slicing": {
+    "columns": 8,
+    "rows": 5,
+    "cellWidth": 256,
+    "cellHeight": 256
+  },
+  "sourceFrames": [
+    {
+      "x": 121,
+      "y": 121,
+      "width": 136,
+      "height": 167,
+      "offsetX": 121,
+      "offsetY": 121
+    },
+    {
+      "x": 512,
+      "y": 121,
+      "width": 143,
+      "height": 167,
+      "offsetX": 128,
+      "offsetY": 121
+    },
+    {
+      "x": 898,
+      "y": 121,
+      "width": 138,
+      "height": 167,
+      "offsetX": 130,
+      "offsetY": 121
+    },
+    {
+      "x": 1280,
+      "y": 121,
+      "width": 143,
+      "height": 167,
+      "offsetX": 128,
+      "offsetY": 121
+    },
+    {
+      "x": 1658,
+      "y": 121,
+      "width": 152,
+      "height": 167,
+      "offsetX": 122,
+      "offsetY": 121
+    },
+    {
+      "x": 2036,
+      "y": 121,
+      "width": 138,
+      "height": 167,
+      "offsetX": 116,
+      "offsetY": 121
+    },
+    {
+      "x": 2418,
+      "y": 121,
+      "width": 143,
+      "height": 167,
+      "offsetX": 114,
+      "offsetY": 121
+    },
+    {
+      "x": 2815,
+      "y": 121,
+      "width": 136,
+      "height": 167,
+      "offsetX": 127,
+      "offsetY": 121
+    },
+    {
+      "x": 110,
+      "y": 502,
+      "width": 154,
+      "height": 170,
+      "offsetX": 110,
+      "offsetY": 118
+    },
+    {
+      "x": 502,
+      "y": 502,
+      "width": 148,
+      "height": 170,
+      "offsetX": 118,
+      "offsetY": 118
+    },
+    {
+      "x": 880,
+      "y": 503,
+      "width": 156,
+      "height": 170,
+      "offsetX": 112,
+      "offsetY": 119
+    },
+    {
+      "x": 1266,
+      "y": 499,
+      "width": 154,
+      "height": 173,
+      "offsetX": 114,
+      "offsetY": 115
+    },
+    {
+      "x": 1657,
+      "y": 499,
+      "width": 146,
+      "height": 171,
+      "offsetX": 121,
+      "offsetY": 115
+    },
+    {
+      "x": 2036,
+      "y": 499,
+      "width": 157,
+      "height": 174,
+      "offsetX": 116,
+      "offsetY": 115
+    },
+    {
+      "x": 2421,
+      "y": 503,
+      "width": 150,
+      "height": 169,
+      "offsetX": 117,
+      "offsetY": 119
+    },
+    {
+      "x": 2809,
+      "y": 503,
+      "width": 153,
+      "height": 169,
+      "offsetX": 121,
+      "offsetY": 119
+    },
+    {
+      "x": 114,
+      "y": 859,
+      "width": 165,
+      "height": 196,
+      "offsetX": 114,
+      "offsetY": 91
+    },
+    {
+      "x": 490,
+      "y": 877,
+      "width": 177,
+      "height": 178,
+      "offsetX": 106,
+      "offsetY": 109
+    },
+    {
+      "x": 881,
+      "y": 877,
+      "width": 168,
+      "height": 179,
+      "offsetX": 113,
+      "offsetY": 109
+    },
+    {
+      "x": 1264,
+      "y": 870,
+      "width": 177,
+      "height": 184,
+      "offsetX": 112,
+      "offsetY": 102
+    },
+    {
+      "x": 1658,
+      "y": 887,
+      "width": 140,
+      "height": 169,
+      "offsetX": 122,
+      "offsetY": 119
+    },
+    {
+      "x": 2022,
+      "y": 876,
+      "width": 169,
+      "height": 180,
+      "offsetX": 102,
+      "offsetY": 108
+    },
+    {
+      "x": 2405,
+      "y": 877,
+      "width": 178,
+      "height": 179,
+      "offsetX": 101,
+      "offsetY": 109
+    },
+    {
+      "x": 2794,
+      "y": 859,
+      "width": 164,
+      "height": 196,
+      "offsetX": 106,
+      "offsetY": 91
+    },
+    {
+      "x": 119,
+      "y": 1276,
+      "width": 157,
+      "height": 165,
+      "offsetX": 119,
+      "offsetY": 124
+    },
+    {
+      "x": 511,
+      "y": 1275,
+      "width": 141,
+      "height": 166,
+      "offsetX": 127,
+      "offsetY": 123
+    },
+    {
+      "x": 891,
+      "y": 1281,
+      "width": 143,
+      "height": 159,
+      "offsetX": 123,
+      "offsetY": 129
+    },
+    {
+      "x": 1282,
+      "y": 1283,
+      "width": 144,
+      "height": 157,
+      "offsetX": 130,
+      "offsetY": 131
+    },
+    {
+      "x": 1667,
+      "y": 1276,
+      "width": 136,
+      "height": 164,
+      "offsetX": 131,
+      "offsetY": 124
+    },
+    {
+      "x": 2037,
+      "y": 1281,
+      "width": 141,
+      "height": 159,
+      "offsetX": 117,
+      "offsetY": 129
+    },
+    {
+      "x": 2420,
+      "y": 1274,
+      "width": 141,
+      "height": 167,
+      "offsetX": 116,
+      "offsetY": 122
+    },
+    {
+      "x": 2797,
+      "y": 1276,
+      "width": 156,
+      "height": 164,
+      "offsetX": 109,
+      "offsetY": 124
+    },
+    {
+      "x": 119,
+      "y": 1688,
+      "width": 172,
+      "height": 136,
+      "offsetX": 119,
+      "offsetY": 152
+    },
+    {
+      "x": 490,
+      "y": 1696,
+      "width": 183,
+      "height": 130,
+      "offsetX": 106,
+      "offsetY": 160
+    },
+    {
+      "x": 867,
+      "y": 1720,
+      "width": 187,
+      "height": 100,
+      "offsetX": 99,
+      "offsetY": 184
+    },
+    {
+      "x": 1248,
+      "y": 1730,
+      "width": 193,
+      "height": 94,
+      "offsetX": 96,
+      "offsetY": 194
+    },
+    {
+      "x": 1636,
+      "y": 1723,
+      "width": 178,
+      "height": 103,
+      "offsetX": 100,
+      "offsetY": 187
+    },
+    {
+      "x": 2013,
+      "y": 1725,
+      "width": 186,
+      "height": 92,
+      "offsetX": 93,
+      "offsetY": 189
+    },
+    {
+      "x": 2380,
+      "y": 1734,
+      "width": 203,
+      "height": 102,
+      "offsetX": 76,
+      "offsetY": 198
+    },
+    {
+      "x": 2779,
+      "y": 1724,
+      "width": 174,
+      "height": 98,
+      "offsetX": 91,
+      "offsetY": 188
+    }
+  ],
+  "generation": {
+    "sourceOutputs": [
+      "exec-9a92b34e-d493-4bbf-8b1b-5397a6cbcf85.png"
+    ],
+    "generatedCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "generatedCornerAlpha": 0,
+    "identityReference": "art-reference/monsters/undead/skeleton/animation/source/base-v1.png",
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "initialPrompt": "40-cell 8x5 full-direction atlas; a small dark violet shoulder mantle and a plain short bone staff with one blue-violet crystal, no magical aura; hard dark outline, no colored fringe or halo."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "sourceFrames-repack-v2",
+    "sourceCanvas": {
+      "width": 3072,
+      "height": 1920
+    },
+    "uniformScale": 1.0,
+    "translation": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "recoveredIsolatedAlphaPixels": 0,
+    "discardedIsolatedAlphaDust": 0,
+    "status": "draft-review"
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged.",
+      "Repacked from uniquely assigned sourceFrames into 384 x 384 review cells with at least 24 px clear padding on each edge; visual review remains pending."
+    ]
+  }
+}

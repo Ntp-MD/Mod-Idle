@@ -1,0 +1,410 @@
+{
+  "id": "attack.glacial_spike",
+  "src": "/fx/skill-pool/attack-glacial-spike/v1/atlas.png",
+  "columns": 4,
+  "rows": 4,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        63,
+        8,
+        178,
+        241
+      ],
+      "renderedPadding": [
+        127,
+        72,
+        142,
+        79
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        256,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        48,
+        8,
+        192,
+        242
+      ],
+      "renderedPadding": [
+        112,
+        72,
+        128,
+        78
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        512,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        27,
+        36,
+        212,
+        233
+      ],
+      "renderedPadding": [
+        91,
+        100,
+        108,
+        87
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        768,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        8,
+        51,
+        246,
+        197
+      ],
+      "renderedPadding": [
+        72,
+        115,
+        74,
+        123
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        8,
+        61,
+        246,
+        189
+      ],
+      "renderedPadding": [
+        72,
+        125,
+        74,
+        131
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        256,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        10,
+        72,
+        247,
+        187
+      ],
+      "renderedPadding": [
+        74,
+        136,
+        73,
+        133
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        512,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        10,
+        72,
+        246,
+        186
+      ],
+      "renderedPadding": [
+        74,
+        136,
+        74,
+        134
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        768,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        9,
+        72,
+        247,
+        182
+      ],
+      "renderedPadding": [
+        73,
+        136,
+        73,
+        138
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        8,
+        58,
+        246,
+        189
+      ],
+      "renderedPadding": [
+        72,
+        122,
+        74,
+        131
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        256,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        9,
+        67,
+        247,
+        184
+      ],
+      "renderedPadding": [
+        73,
+        131,
+        73,
+        136
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        512,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        10,
+        73,
+        246,
+        181
+      ],
+      "renderedPadding": [
+        74,
+        137,
+        74,
+        139
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        768,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        12,
+        70,
+        247,
+        184
+      ],
+      "renderedPadding": [
+        76,
+        134,
+        73,
+        136
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        15,
+        24,
+        247,
+        215
+      ],
+      "renderedPadding": [
+        79,
+        88,
+        73,
+        105
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        256,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        17,
+        16,
+        236,
+        232
+      ],
+      "renderedPadding": [
+        81,
+        80,
+        84,
+        88
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        512,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        16,
+        13,
+        230,
+        234
+      ],
+      "renderedPadding": [
+        80,
+        77,
+        90,
+        86
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        768,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        9,
+        12,
+        237,
+        240
+      ],
+      "renderedPadding": [
+        73,
+        76,
+        83,
+        80
+      ]
+    }
+  ],
+  "virtualWidth": 384,
+  "virtualHeight": 384,
+  "alphaDiscard": 8,
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    4,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "frameMs": 65,
+  "cellWidth": 256,
+  "cellHeight": 256,
+  "contentWidthRatio": 0.6197916666666666,
+  "contentHeightRatio": 0.609375,
+  "delivery": "projectile",
+  "origin": "target",
+  "orient": true,
+  "groundOrigin": false,
+  "anchorX": 0.5,
+  "anchorY": 0.496582,
+  "impactAnchorX": 0.494466,
+  "impactAnchorY": 0.48763,
+  "status": "ready",
+  "sourcePixelsUnmodified": false,
+  "sourceSheet": "vibe_images/glacial-spike-sheet_1793027854406_2bf6c62e.png",
+  "keying": "magenta green-channel matte, magenta-fringe hue repair, 5px cell-edge feather; raw sheet kept"
+}

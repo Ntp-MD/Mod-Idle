@@ -1,0 +1,136 @@
+@property --skill-cooldown-progress {
+    syntax: "<percentage>";
+    inherits: false;
+    initial-value: 0%;
+}
+:root {
+    color-scheme: dark;
+    --bg: #0f1217;
+    --panel: #1c2027;
+    --line: #2c3340;
+    --text: #e3e9f2;
+    --dim: #8b96a8;
+    --hp: #c0392b;
+    --mana: #2980b9;
+    --es: #4fc3f7;
+    --xp: #f1c40f;
+    --mob: #7f8c8d;
+    --good: #27ae60;
+
+    --glass: rgba(17, 22, 30, 0.74);
+    --edge: rgba(255, 255, 255, 0.1);
+    --gold: #e8c169;
+
+    --hud-face: linear-gradient(180deg, rgba(23, 29, 40, 0.88), rgba(11, 15, 21, 0.94));
+    --hud-edge: color-mix(in srgb, var(--gold) 30%, var(--edge));
+
+    /* Shared visual states */
+    --surface-selected: rgba(232, 193, 105, 0.12);
+    --shadow-raised: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --shadow-soft: 0 4px 14px rgba(0, 0, 0, 0.45);
+
+    /* Shared motion */
+    --motion-fast: 150ms;
+    --motion-ui: 220ms;
+    --motion-map: 450ms;
+    --motion-travel: 650ms;
+    --ease-ui: ease;
+    --ease-out: ease-out;
+    --ease-glide: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    /* Shared stacking order for layers that cross components. */
+    --z-underlay: 1;
+    --z-content: 2;
+    --z-highlight: 4;
+    --z-floater: 6;
+    --z-label: 7;
+    --z-toast: 8;
+    --z-hud-control: 40;
+    --z-popover: 80;
+
+    --focus: #7fd4ff;
+
+    --rail: clamp(46px, 3.19vw, 88px);
+
+    --screen-pad: var(--spacing-md);
+    --pad-area: 20px;
+    --bar-h: 14px;
+
+
+    --elite: #6c5199;
+    --elite-ink: #b98cff;
+    --boss: #9d3b34;
+    --boss-ink: #ff8b7a;
+    --curse: #c8a5ff;
+
+    --rar-common: #8b96a8;
+    --rar-uncommon: #5fb87a;
+    --rar-rare: #4f8fe0;
+    --rar-epic: #a877e8;
+    --rar-legend: #e0913f;
+    --alarm: #ffb3a8;
+    --hot: #e2503f;
+    --good-lit: #9fe0bb;
+    --gold-lit: #ffd9a0;
+    --hp-lit: #ff8a6b;
+    --mana-lit: #6bc4f0;
+    --es-lit: #a8e6ff;
+    --xp-lit: #f7e07a;
+
+    --ground: #0a0e13;
+    --ground-2: #131926;
+    --ground-3: #181d18;
+    --glow-moss: #465c3a;
+    --glow-dusk: #304a6c;
+
+    --face-top: #1c2430;
+    --face-floor: #0d1218;
+    --hot-deep: #a33428;
+
+    --inset: #12151b;
+    --bar-2: #2e3742;
+
+    --sheet-ink: #cfd8e3;
+    --sheet-place: #f2e7d0;
+    --ui: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+    --num: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+
+    --dof-rest: 4px;
+
+    --dof-far: 5px;
+    --dof: var(--dof-rest);
+
+    --sel: rgba(127, 212, 255, 0.26);
+    --bar: #232b36;
+    --radius-round: 50%;
+    --radius-pill: 999px;
+    --radius-card: 8px;
+    --font-3xs: 11px;
+    --font-2xs: 12px;
+    --font-xs: 14px;
+    --font-sm: 16px;
+    --font-md: clamp(17px, 1.28vw, 36px);
+    --font-lg: clamp(22px, 1.67vw, 47px);
+    --font-xl: clamp(29px, 2.18vw, 62px);
+    --icon-detail: clamp(11px, 0.72vw, 23px);
+    --icon-label: clamp(14px, 1vw, 31px);
+    --icon-card: clamp(32px, 3vw, 68px);
+    --icon-hub: clamp(40px, 4vw, 60px);
+    --icon-hub-img: 70%;
+    --input-narrow: clamp(44px, 4vw, 95px);
+    --slot-item: 40px;
+    --slot-skill-size: clamp(36px, 2.6vw, 50px);
+    --field-card-size: clamp(125px, 8.63vw, 180px);
+    --spacing-2xs: 2px;
+    --spacing-xs: 5px;
+    --spacing-sm: 10px;
+    --spacing-md: 15px;
+    --spacing-lg: 20px;
+    --spacing-xl: 40px;
+    /* Card tiers: a primary surface and the compact tile inside it. */
+    --card-pad: var(--spacing-md);
+    --card-gap: var(--spacing-sm);
+    --tile-pad: var(--spacing-sm);
+    --tile-gap: var(--spacing-xs);
+    --x-pull-note: clamp(-11px, -0.39vw, -5px);
+}

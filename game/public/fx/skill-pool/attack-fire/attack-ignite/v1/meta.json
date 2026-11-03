@@ -1,0 +1,410 @@
+{
+  "id": "attack.ignite",
+  "src": "/fx/skill-pool/attack-ignite/v1/atlas.png",
+  "columns": 4,
+  "rows": 4,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        42,
+        110,
+        195,
+        211
+      ],
+      "renderedPadding": [
+        106,
+        174,
+        125,
+        109
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        256,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        42,
+        61,
+        199,
+        213
+      ],
+      "renderedPadding": [
+        106,
+        125,
+        121,
+        107
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        512,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        34,
+        42,
+        223,
+        214
+      ],
+      "renderedPadding": [
+        98,
+        106,
+        97,
+        106
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        768,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        32,
+        22,
+        222,
+        214
+      ],
+      "renderedPadding": [
+        96,
+        86,
+        98,
+        106
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        34,
+        1,
+        220,
+        219
+      ],
+      "renderedPadding": [
+        98,
+        65,
+        100,
+        101
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        256,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        35,
+        16,
+        224,
+        219
+      ],
+      "renderedPadding": [
+        99,
+        80,
+        96,
+        101
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        512,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        34,
+        2,
+        217,
+        219
+      ],
+      "renderedPadding": [
+        98,
+        66,
+        103,
+        101
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        768,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        42,
+        8,
+        209,
+        218
+      ],
+      "renderedPadding": [
+        106,
+        72,
+        111,
+        102
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        43,
+        6,
+        215,
+        220
+      ],
+      "renderedPadding": [
+        107,
+        70,
+        105,
+        100
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        256,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        46,
+        24,
+        214,
+        217
+      ],
+      "renderedPadding": [
+        110,
+        88,
+        106,
+        103
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        512,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        46,
+        35,
+        210,
+        217
+      ],
+      "renderedPadding": [
+        110,
+        99,
+        110,
+        103
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        768,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        48,
+        52,
+        199,
+        215
+      ],
+      "renderedPadding": [
+        112,
+        116,
+        121,
+        105
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        49,
+        33,
+        211,
+        217
+      ],
+      "renderedPadding": [
+        113,
+        97,
+        109,
+        103
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        256,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        57,
+        39,
+        199,
+        216
+      ],
+      "renderedPadding": [
+        121,
+        103,
+        121,
+        104
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        512,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        52,
+        41,
+        199,
+        213
+      ],
+      "renderedPadding": [
+        116,
+        105,
+        121,
+        107
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        768,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        65,
+        70,
+        191,
+        212
+      ],
+      "renderedPadding": [
+        129,
+        134,
+        129,
+        108
+      ]
+    }
+  ],
+  "virtualWidth": 384,
+  "virtualHeight": 384,
+  "alphaDiscard": 8,
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    4,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "frameMs": 60,
+  "cellWidth": 256,
+  "cellHeight": 256,
+  "contentWidthRatio": 0.4947916666666667,
+  "contentHeightRatio": 0.5677083333333334,
+  "delivery": "instant",
+  "origin": "target",
+  "orient": false,
+  "groundOrigin": false,
+  "anchorX": 0.498047,
+  "anchorY": 0.473958,
+  "impactAnchorX": 0.499674,
+  "impactAnchorY": 0.505534,
+  "status": "ready",
+  "sourcePixelsUnmodified": false,
+  "sourceSheet": "vibe_images/attack-ignite-sheet-v2_1793033920121_86759e2b.png",
+  "keying": "magenta green-channel matte, fringe hue repair, 5px cell-edge feather; raw sheet kept"
+}

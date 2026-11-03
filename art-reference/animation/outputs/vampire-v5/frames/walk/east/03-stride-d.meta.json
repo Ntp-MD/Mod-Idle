@@ -1,0 +1,36 @@
+{
+  "status": "preserved-approved-source-pose",
+  "speciesId": "vampire",
+  "action": "walk",
+  "direction": "east",
+  "pose": "03-stride-d",
+  "source": "art-reference/monsters/undead/vampire/animation/atlas/animation.png",
+  "sourceAtlasStatus": "visual-approved",
+  "sourceAtlasSha256": "18f9cc2790e92d90966b2577c578f405a80f1053e3df69b79461b8b844b73a50",
+  "sourceAtlasCell": {
+    "row": 1,
+    "column": 3,
+    "box": [
+      1152,
+      384,
+      1536,
+      768
+    ]
+  },
+  "sourcePixelsModified": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "visual-approved vampire animation/meta.json"
+  },
+  "qa": {
+    "sourcePoseApproved": true,
+    "sixteenDirectionAtlas": false,
+    "visualReview": false,
+    "runtimePromotion": false
+  }
+}

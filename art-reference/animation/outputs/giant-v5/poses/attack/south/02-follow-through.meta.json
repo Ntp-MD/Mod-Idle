@@ -1,0 +1,64 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "giant",
+  "action": "attack",
+  "direction": "south",
+  "phase": "02-follow-through",
+  "generator": "built-in image_gen",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sourceRecord": {
+    "kind": "generated-contact-sheet",
+    "source": "source/v5-contact-sheets/attack-02-follow-through-16.png",
+    "sourceCell": {
+      "row": 0,
+      "column": 0,
+      "box": [
+        0,
+        0,
+        256,
+        384
+      ]
+    },
+    "sourceConfidenceBounds": [
+      38,
+      105,
+      218,
+      352
+    ],
+    "processing": {
+      "method": "alpha-confidence-crop-scale-anchor-v1",
+      "threshold": 128,
+      "softEdgeRecoveryRadius": 3,
+      "uniformScale": 0.615217,
+      "anchor": {
+        "x": 192,
+        "y": 288
+      },
+      "scaledSize": [
+        114,
+        156
+      ],
+      "offset": [
+        135,
+        132
+      ]
+    }
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "reviewed": false,
+    "runtimePromotion": false
+  }
+}

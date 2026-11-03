@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "action": "hit",
+  "direction": "east",
+  "pose": "00-flinch",
+  "source": "../../../../../animation/atlas/animation.png",
+  "sourceFrameIndex": 24,
+  "bakedWeapon": "spear",
+  "sourcePixelsModified": false,
+  "sourceBounds": {
+    "x": 161,
+    "y": 1298,
+    "width": 115,
+    "height": 146,
+    "offsetX": 161,
+    "offsetY": 146
+  },
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "generator": "Lossless extraction from the approved Goblin 8-direction atlas",
+  "status": "approved-source-pose"
+}

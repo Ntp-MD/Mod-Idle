@@ -1,0 +1,15 @@
+{
+  "status": "candidate-review",
+  "speciesId": "golem",
+  "action": "walk",
+  "direction": "south",
+  "phase": "00-stride-a",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-ea67-78c0-8f1a-12b9004e2a12\\exec-86cd77be-efb3-40aa-9a59-dd94e2ad273e.png",
+  "qa": {
+    "identity": true,
+    "facing": true,
+    "phase": true,
+    "atlasReady": false
+  },
+  "review": "Visually inspected: front facing preserved; alternating opposite arm/leg strides and passing poses readable. Placement/loop QA pending."
+}

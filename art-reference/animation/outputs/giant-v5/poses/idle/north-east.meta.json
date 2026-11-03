@@ -1,0 +1,30 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "giant",
+  "action": "idle",
+  "direction": "north-east",
+  "phase": "idle",
+  "generator": "preserved existing source frame",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sourceRecord": {
+    "kind": "preserved-legacy",
+    "source": "art-reference/monsters/humanoid/giant/animation/poses/idle/north-east.png"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "reviewed": false,
+    "runtimePromotion": false
+  }
+}

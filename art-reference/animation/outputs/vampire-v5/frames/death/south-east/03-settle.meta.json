@@ -1,0 +1,56 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "vampire",
+  "action": "death",
+  "direction": "south-east",
+  "pose": "03-settle",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/death-03-settle-16.png",
+  "sourceImageId": "exec-8722576f-3f63-4938-96e5-1d49c3821333.png",
+  "sourceCell": {
+    "row": 0,
+    "column": 2,
+    "box": [
+      512,
+      0,
+      768,
+      384
+    ],
+    "confidenceBoundsInCell": [
+      28,
+      173,
+      220,
+      276
+    ],
+    "sourceConfidenceBoundsHeight": 103,
+    "targetReferenceMedianHeight": 88.0,
+    "uniformScale": 0.854369
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "visual-approved animation/meta.json; 16-direction measurement pending",
+    "visualMeasurementPending": true
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "uniformScale": 0.854369,
+    "scaleReference": "median alpha-bound height of preserved approved source frames for this action/phase"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

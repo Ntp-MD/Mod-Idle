@@ -1,0 +1,56 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "minotaur",
+  "action": "hit",
+  "direction": "north-north-east",
+  "pose": "00-flinch",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/hit-00-impact-16.png",
+  "sourceImageId": "exec-b00b34d0-32b3-40c8-a023-4db123259adf.png",
+  "sourceCell": {
+    "row": 1,
+    "column": 3,
+    "direction": "north-north-east"
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited Minotaur source anchor; visual measurement pending"
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "scaleReference": "median alpha-bound height across the matching 16-direction contact sheet",
+    "confidenceBoundsInCell": [
+      27,
+      56,
+      238,
+      335
+    ],
+    "recoveredBoundsInCell": [
+      24,
+      53,
+      241,
+      338
+    ],
+    "targetVisualFootBaselineY": 288,
+    "targetReferenceMedianHeight": 276.0,
+    "uniformScale": 0.968421
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  },
+  "sha256": "ee47eb7e326be315cd99b90d7cb7351c18fd12f45cd1dd66349b8167b5e8ac1c"
+}

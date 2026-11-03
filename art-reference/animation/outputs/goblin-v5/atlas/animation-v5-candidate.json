@@ -1,0 +1,2422 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "goblin",
+  "race": "humanoid",
+  "version": "v5",
+  "generator": "built-in image_gen for candidate cells; existing approved Goblin 8-direction source poses preserved where available",
+  "file": "animation-v5-candidate.png",
+  "sourceCanvas": {
+    "width": 6144,
+    "height": 6528,
+    "mode": "RGBA"
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited approved Goblin anchor; 16-direction measurement and visual approval pending"
+  },
+  "layout": {
+    "columns": 16,
+    "rows": 17,
+    "frameCount": 272,
+    "cellOrder": "row-major"
+  },
+  "directions": [
+    {
+      "name": "south",
+      "angleDegrees": 0
+    },
+    {
+      "name": "south-south-east",
+      "angleDegrees": 22.5
+    },
+    {
+      "name": "south-east",
+      "angleDegrees": 45
+    },
+    {
+      "name": "east-south-east",
+      "angleDegrees": 67.5
+    },
+    {
+      "name": "east",
+      "angleDegrees": 90
+    },
+    {
+      "name": "east-north-east",
+      "angleDegrees": 112.5
+    },
+    {
+      "name": "north-east",
+      "angleDegrees": 135
+    },
+    {
+      "name": "north-north-east",
+      "angleDegrees": 157.5
+    },
+    {
+      "name": "north",
+      "angleDegrees": 180
+    },
+    {
+      "name": "north-north-west",
+      "angleDegrees": 202.5
+    },
+    {
+      "name": "north-west",
+      "angleDegrees": 225
+    },
+    {
+      "name": "west-north-west",
+      "angleDegrees": 247.5
+    },
+    {
+      "name": "west",
+      "angleDegrees": 270
+    },
+    {
+      "name": "west-south-west",
+      "angleDegrees": 292.5
+    },
+    {
+      "name": "south-west",
+      "angleDegrees": 315
+    },
+    {
+      "name": "south-south-west",
+      "angleDegrees": 337.5
+    }
+  ],
+  "actionRowOrder": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "framesPerDirection": {
+    "idle": 1,
+    "walk": 4,
+    "attack": 4,
+    "hit": 4,
+    "death": 4
+  },
+  "rowOrder": [
+    "0: idle idle",
+    "1: walk 00-stride-a",
+    "2: walk 01-stride-b",
+    "3: walk 02-stride-c",
+    "4: walk 03-stride-d",
+    "5: attack 00-windup",
+    "6: attack 01-contact",
+    "7: attack 02-follow-through",
+    "8: attack 03-recovery",
+    "9: hit 00-flinch",
+    "10: hit 01-recoil",
+    "11: hit 02-recover",
+    "12: hit 03-ready",
+    "13: death 00-fall",
+    "14: death 01-collapse",
+    "15: death 02-ground",
+    "16: death 03-settle"
+  ],
+  "sourceCounts": {
+    "preservedApprovedSourceFrames": 40,
+    "generatedCandidateFrames": 232
+  },
+  "sourceInventory": {
+    "expectedPosePaths": 272,
+    "presentPngPathsBeforeCandidate": 107,
+    "approvedSourcePoseFramesUsable": 40,
+    "candidateReviewPngPathsExcluded": 67,
+    "candidateReviewExclusionReason": "Sampled PNGs are 1254x1254 full contact sheets, not 384x384 pose frames.",
+    "scannerNote": "The inventory script counts source-tree PNG paths, not frame geometry or visual approval. Candidate work remains outside the source tree."
+  },
+  "sourceSheets": [
+    {
+      "file": "source/v5-contact-sheets/idle-16.png",
+      "sourceImageId": "exec-a9a2b439-12bc-4a74-837c-54bc3d90c1c5.png",
+      "action": "idle",
+      "phase": "idle",
+      "metadata": "source/v5-contact-sheets/idle-16.meta.json"
+    },
+    {
+      "file": "source/v5-contact-sheets/walk-00-stride-a-16.png",
+      "sourceImageId": "exec-79d76daf-dead-40e6-b76e-1a4250b2ca21.png",
+      "action": "walk",
+      "phase": "00-stride-a",
+      "metadata": "source/v5-contact-sheets/walk-00-stride-a-16.meta.json"
+    },
+    {
+      "file": "source/v5-contact-sheets/walk-01-stride-b-16.png",
+      "sourceImageId": "exec-3d436fcc-0f11-48fc-a4b9-3a9e845767dc.png",
+      "action": "walk",
+      "phase": "01-stride-b",
+      "metadata": "source/v5-contact-sheets/walk-01-stride-b-16.meta.json"
+    },
+    {
+      "file": "source/v5-contact-sheets/walk-02-stride-c-16.png",
+      "sourceImageId": "exec-bbaef625-7ae9-4722-a257-b00f5777e0b6.png",
+      "action": "walk",
+      "phase": "02-stride-c",
+      "metadata": "source/v5-contact-sheets/walk-02-stride-c-16.meta.json"
+    },
+    {
+      "file": "source/v5-contact-sheets/walk-03-stride-d-16.png",
+      "sourceImageId": "exec-796b85ba-2bdf-4f93-b3f9-95dfc23dfafd.png",
+      "action": "walk",
+      "phase": "03-stride-d",
+      "metadata": "source/v5-contact-sheets/walk-03-stride-d-16.meta.json"
+    },
+    {
+      "file": "source/v5-contact-sheets/attack-00-windup-16.png",
+      "sourceImageId": "exec-f1b29475-1c4b-4715-a24c-b10153a1120d.png",
+      "action": "attack",
+      "phase": "00-windup",
+      "metadata": "source/v5-contact-sheets/attack-00-windup-16.meta.json"
+    },
+    {
+      "file": "source/v5-contact-sheets/attack-01-contact-16.png",
+      "sourceImageId": "exec-3b68f09b-8711-4c12-b3c6-6e95d61ddb97.png",
+      "action": "attack",
+      "phase": "01-contact",
+      "metadata": "source/v5-contact-sheets/attack-01-contact-16.meta.json"
+    },
+    {
+      "file": "source/v5-contact-sheets/attack-02-follow-through-16.png",
+      "sourceImageId": "exec-8b3c0f21-8749-4cfb-8dbc-83b9a6a6dcd7.png",
+      "action": "attack",
+      "phase": "02-follow-through",
+      "metadata": "source/v5-contact-sheets/attack-02-follow-through-16.meta.json"
+    },
+    {
+      "file": "source/v5-contact-sheets/attack-03-recovery-16.png",
+      "sourceImageId": "exec-3c18c123-1165-45ff-a03c-4e00e341a7db.png",
+      "action": "attack",
+      "phase": "03-recovery",
+      "metadata": "source/v5-contact-sheets/attack-03-recovery-16.meta.json"
+    },
+    {
+      "file": "source/v5-contact-sheets/hit-00-flinch-16.png",
+      "sourceImageId": "exec-12933e90-47b8-4cc4-873e-9ef33276ac32.png",
+      "action": "hit",
+      "phase": "00-flinch",
+      "metadata": "source/v5-contact-sheets/hit-00-flinch-16.meta.json"
+    },
+    {
+      "file": "source/v5-contact-sheets/hit-01-recoil-16.png",
+      "sourceImageId": "exec-bf92aa5f-c0c5-4e54-bcb6-eb3eb4420a2f.png",
+      "action": "hit",
+      "phase": "01-recoil",
+      "metadata": "source/v5-contact-sheets/hit-01-recoil-16.meta.json"
+    },
+    {
+      "file": "source/v5-contact-sheets/hit-02-recover-16.png",
+      "sourceImageId": "exec-b2169962-853b-4903-ac36-903fb3377d9c.png",
+      "action": "hit",
+      "phase": "02-recover",
+      "metadata": "source/v5-contact-sheets/hit-02-recover-16.meta.json"
+    },
+    {
+      "file": "source/v5-contact-sheets/hit-03-ready-16.png",
+      "sourceImageId": "exec-8c47fab0-6282-47b5-afbe-7495ee06d4b2.png",
+      "action": "hit",
+      "phase": "03-ready",
+      "metadata": "source/v5-contact-sheets/hit-03-ready-16.meta.json"
+    },
+    {
+      "file": "source/v5-contact-sheets/death-00-fall-16.png",
+      "sourceImageId": "exec-fcf91b52-f1d2-4d2b-b5f0-a644d4561564.png",
+      "action": "death",
+      "phase": "00-fall",
+      "metadata": "source/v5-contact-sheets/death-00-fall-16.meta.json"
+    },
+    {
+      "file": "source/v5-contact-sheets/death-01-collapse-16.png",
+      "sourceImageId": "exec-620dd8ff-ab55-4af5-bd51-e68aae392400.png",
+      "action": "death",
+      "phase": "01-collapse",
+      "metadata": "source/v5-contact-sheets/death-01-collapse-16.meta.json"
+    },
+    {
+      "file": "source/v5-contact-sheets/death-02-ground-16.png",
+      "sourceImageId": "exec-8af18202-4005-4416-ac7f-07d2cb61ca0e.png",
+      "action": "death",
+      "phase": "02-ground",
+      "metadata": "source/v5-contact-sheets/death-02-ground-16.meta.json"
+    },
+    {
+      "file": "source/v5-contact-sheets/death-03-settle-16.png",
+      "sourceImageId": "exec-fe00228d-6b5b-49de-81c9-5f19439aa770.png",
+      "action": "death",
+      "phase": "03-settle",
+      "metadata": "source/v5-contact-sheets/death-03-settle-16.meta.json"
+    }
+  ],
+  "rejectedSourceSheets": [
+    {
+      "status": "rejected-source-not-for-atlas",
+      "speciesId": "goblin",
+      "generator": "built-in image_gen",
+      "sourceImageId": "exec-faa31c44-747e-40b9-acc3-74cdad185afb.png",
+      "file": "source/rejected/death-03-settle-v1-prone.png",
+      "sha256": "bb4fe485ba6c5e493d4493cf1444fbf59e5d1d2142fef884aa2c24be6ce01471",
+      "action": "death",
+      "phase": "03-settle",
+      "rejectionReason": "Visually duplicated death 02-ground as a belly-down prone pose.",
+      "sourceCanvas": {
+        "width": 1024,
+        "height": 1536,
+        "mode": "RGBA"
+      },
+      "qa": {
+        "identity": false,
+        "facing": false,
+        "pose": false,
+        "alphaEdges": false,
+        "anchor": false,
+        "atlas": false
+      }
+    },
+    {
+      "status": "rejected-source-not-for-atlas",
+      "speciesId": "goblin",
+      "generator": "built-in image_gen",
+      "sourceImageId": "exec-b50fce63-c905-432c-ba39-0dec2a6c6638.png",
+      "file": "source/rejected/death-03-settle-v2-belly-down.png",
+      "sha256": "57f8c3a2d145af51c70e69219a0cf2d424ddc6b138452f169c6125dd04980526",
+      "action": "death",
+      "phase": "03-settle",
+      "rejectionReason": "Still read as belly-down instead of a distinct lateral side-lying settle pose.",
+      "sourceCanvas": {
+        "width": 1024,
+        "height": 1536,
+        "mode": "RGBA"
+      },
+      "qa": {
+        "identity": false,
+        "facing": false,
+        "pose": false,
+        "alphaEdges": false,
+        "anchor": false,
+        "atlas": false
+      }
+    },
+    {
+      "status": "rejected-source-not-for-atlas",
+      "speciesId": "goblin",
+      "generator": "built-in image_gen",
+      "sourceImageId": "exec-4be9eac8-ed92-4d69-9399-676686387669.png",
+      "file": "source/rejected/death-03-settle-v3-belly-down.png",
+      "sha256": "32536e9b09e1658c56eff667de7193fd5fb0c92c5ae456cd6e6a23f3bc779d06",
+      "action": "death",
+      "phase": "03-settle",
+      "rejectionReason": "Improved spear separation but torso still read as belly-down rather than lateral.",
+      "sourceCanvas": {
+        "width": 1024,
+        "height": 1536,
+        "mode": "RGBA"
+      },
+      "qa": {
+        "identity": false,
+        "facing": false,
+        "pose": false,
+        "alphaEdges": false,
+        "anchor": false,
+        "atlas": false
+      }
+    },
+    {
+      "status": "rejected-source-not-for-atlas",
+      "speciesId": "goblin",
+      "generator": "built-in image_gen",
+      "sourceImageId": "exec-79f8faea-49e9-4c50-98b3-871efe54da56.png",
+      "file": "source/rejected/death-03-settle-v4-lateral-style-mismatch.png",
+      "sha256": "1eec8be5a6ee4a82513ae1c72156658741116cb450d1cfb92112c4f32a7f9121",
+      "action": "death",
+      "phase": "03-settle",
+      "rejectionReason": "Clear lateral silhouette, but face and clothing lost the texture/detail of the Goblin source and neighboring death phases.",
+      "sourceCanvas": {
+        "width": 1024,
+        "height": 1536,
+        "mode": "RGBA"
+      },
+      "qa": {
+        "identity": false,
+        "facing": false,
+        "pose": false,
+        "alphaEdges": false,
+        "anchor": false,
+        "atlas": false
+      }
+    }
+  ],
+  "rows": [
+    {
+      "row": 0,
+      "action": "idle",
+      "pose": "idle",
+      "description": "one neutral ready pose facing each named direction",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/idle/south/south.png",
+          "metadata": "frames/idle/south/south.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/idle/south-south-east/south-south-east.png",
+          "metadata": "frames/idle/south-south-east/south-south-east.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/idle/south-east/south-east.png",
+          "metadata": "frames/idle/south-east/south-east.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/idle/east-south-east/east-south-east.png",
+          "metadata": "frames/idle/east-south-east/east-south-east.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/idle/east/east.png",
+          "metadata": "frames/idle/east/east.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/idle/east-north-east/east-north-east.png",
+          "metadata": "frames/idle/east-north-east/east-north-east.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/idle/north-east/north-east.png",
+          "metadata": "frames/idle/north-east/north-east.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/idle/north-north-east/north-north-east.png",
+          "metadata": "frames/idle/north-north-east/north-north-east.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/idle/north/north.png",
+          "metadata": "frames/idle/north/north.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/idle/north-north-west/north-north-west.png",
+          "metadata": "frames/idle/north-north-west/north-north-west.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/idle/north-west/north-west.png",
+          "metadata": "frames/idle/north-west/north-west.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/idle/west-north-west/west-north-west.png",
+          "metadata": "frames/idle/west-north-west/west-north-west.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/idle/west/west.png",
+          "metadata": "frames/idle/west/west.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/idle/west-south-west/west-south-west.png",
+          "metadata": "frames/idle/west-south-west/west-south-west.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/idle/south-west/south-west.png",
+          "metadata": "frames/idle/south-west/south-west.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/idle/south-south-west/south-south-west.png",
+          "metadata": "frames/idle/south-south-west/south-south-west.meta.json"
+        }
+      ]
+    },
+    {
+      "row": 1,
+      "action": "walk",
+      "pose": "00-stride-a",
+      "description": "left lead-foot support; right foot trailing; spear and body counterbalance",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south/00-stride-a.png",
+          "metadata": "frames/walk/south/00-stride-a.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south-south-east/00-stride-a.png",
+          "metadata": "frames/walk/south-south-east/00-stride-a.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south-east/00-stride-a.png",
+          "metadata": "frames/walk/south-east/00-stride-a.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/east-south-east/00-stride-a.png",
+          "metadata": "frames/walk/east-south-east/00-stride-a.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/walk/east/00-stride-a.png",
+          "metadata": "frames/walk/east/00-stride-a.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/east-north-east/00-stride-a.png",
+          "metadata": "frames/walk/east-north-east/00-stride-a.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north-east/00-stride-a.png",
+          "metadata": "frames/walk/north-east/00-stride-a.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north-north-east/00-stride-a.png",
+          "metadata": "frames/walk/north-north-east/00-stride-a.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north/00-stride-a.png",
+          "metadata": "frames/walk/north/00-stride-a.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north-north-west/00-stride-a.png",
+          "metadata": "frames/walk/north-north-west/00-stride-a.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north-west/00-stride-a.png",
+          "metadata": "frames/walk/north-west/00-stride-a.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/west-north-west/00-stride-a.png",
+          "metadata": "frames/walk/west-north-west/00-stride-a.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/walk/west/00-stride-a.png",
+          "metadata": "frames/walk/west/00-stride-a.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/west-south-west/00-stride-a.png",
+          "metadata": "frames/walk/west-south-west/00-stride-a.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south-west/00-stride-a.png",
+          "metadata": "frames/walk/south-west/00-stride-a.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south-south-west/00-stride-a.png",
+          "metadata": "frames/walk/south-south-west/00-stride-a.meta.json"
+        }
+      ]
+    },
+    {
+      "row": 2,
+      "action": "walk",
+      "pose": "01-stride-b",
+      "description": "passing pose; right foot passes under hips; root remains fixed",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south/01-stride-b.png",
+          "metadata": "frames/walk/south/01-stride-b.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south-south-east/01-stride-b.png",
+          "metadata": "frames/walk/south-south-east/01-stride-b.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south-east/01-stride-b.png",
+          "metadata": "frames/walk/south-east/01-stride-b.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/east-south-east/01-stride-b.png",
+          "metadata": "frames/walk/east-south-east/01-stride-b.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/walk/east/01-stride-b.png",
+          "metadata": "frames/walk/east/01-stride-b.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/east-north-east/01-stride-b.png",
+          "metadata": "frames/walk/east-north-east/01-stride-b.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north-east/01-stride-b.png",
+          "metadata": "frames/walk/north-east/01-stride-b.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north-north-east/01-stride-b.png",
+          "metadata": "frames/walk/north-north-east/01-stride-b.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north/01-stride-b.png",
+          "metadata": "frames/walk/north/01-stride-b.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north-north-west/01-stride-b.png",
+          "metadata": "frames/walk/north-north-west/01-stride-b.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north-west/01-stride-b.png",
+          "metadata": "frames/walk/north-west/01-stride-b.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/west-north-west/01-stride-b.png",
+          "metadata": "frames/walk/west-north-west/01-stride-b.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/walk/west/01-stride-b.png",
+          "metadata": "frames/walk/west/01-stride-b.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/west-south-west/01-stride-b.png",
+          "metadata": "frames/walk/west-south-west/01-stride-b.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south-west/01-stride-b.png",
+          "metadata": "frames/walk/south-west/01-stride-b.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south-south-west/01-stride-b.png",
+          "metadata": "frames/walk/south-south-west/01-stride-b.meta.json"
+        }
+      ]
+    },
+    {
+      "row": 3,
+      "action": "walk",
+      "pose": "02-stride-c",
+      "description": "right lead-foot support; left foot trailing; complete half-stride",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south/02-stride-c.png",
+          "metadata": "frames/walk/south/02-stride-c.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south-south-east/02-stride-c.png",
+          "metadata": "frames/walk/south-south-east/02-stride-c.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south-east/02-stride-c.png",
+          "metadata": "frames/walk/south-east/02-stride-c.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/east-south-east/02-stride-c.png",
+          "metadata": "frames/walk/east-south-east/02-stride-c.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/walk/east/02-stride-c.png",
+          "metadata": "frames/walk/east/02-stride-c.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/east-north-east/02-stride-c.png",
+          "metadata": "frames/walk/east-north-east/02-stride-c.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north-east/02-stride-c.png",
+          "metadata": "frames/walk/north-east/02-stride-c.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north-north-east/02-stride-c.png",
+          "metadata": "frames/walk/north-north-east/02-stride-c.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north/02-stride-c.png",
+          "metadata": "frames/walk/north/02-stride-c.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north-north-west/02-stride-c.png",
+          "metadata": "frames/walk/north-north-west/02-stride-c.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north-west/02-stride-c.png",
+          "metadata": "frames/walk/north-west/02-stride-c.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/west-north-west/02-stride-c.png",
+          "metadata": "frames/walk/west-north-west/02-stride-c.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/walk/west/02-stride-c.png",
+          "metadata": "frames/walk/west/02-stride-c.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/west-south-west/02-stride-c.png",
+          "metadata": "frames/walk/west-south-west/02-stride-c.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south-west/02-stride-c.png",
+          "metadata": "frames/walk/south-west/02-stride-c.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south-south-west/02-stride-c.png",
+          "metadata": "frames/walk/south-south-west/02-stride-c.meta.json"
+        }
+      ]
+    },
+    {
+      "row": 4,
+      "action": "walk",
+      "pose": "03-stride-d",
+      "description": "passing pose returning left foot forward; root remains fixed",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south/03-stride-d.png",
+          "metadata": "frames/walk/south/03-stride-d.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south-south-east/03-stride-d.png",
+          "metadata": "frames/walk/south-south-east/03-stride-d.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south-east/03-stride-d.png",
+          "metadata": "frames/walk/south-east/03-stride-d.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/east-south-east/03-stride-d.png",
+          "metadata": "frames/walk/east-south-east/03-stride-d.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/walk/east/03-stride-d.png",
+          "metadata": "frames/walk/east/03-stride-d.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/east-north-east/03-stride-d.png",
+          "metadata": "frames/walk/east-north-east/03-stride-d.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north-east/03-stride-d.png",
+          "metadata": "frames/walk/north-east/03-stride-d.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north-north-east/03-stride-d.png",
+          "metadata": "frames/walk/north-north-east/03-stride-d.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north/03-stride-d.png",
+          "metadata": "frames/walk/north/03-stride-d.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north-north-west/03-stride-d.png",
+          "metadata": "frames/walk/north-north-west/03-stride-d.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/north-west/03-stride-d.png",
+          "metadata": "frames/walk/north-west/03-stride-d.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/west-north-west/03-stride-d.png",
+          "metadata": "frames/walk/west-north-west/03-stride-d.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/walk/west/03-stride-d.png",
+          "metadata": "frames/walk/west/03-stride-d.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/west-south-west/03-stride-d.png",
+          "metadata": "frames/walk/west-south-west/03-stride-d.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south-west/03-stride-d.png",
+          "metadata": "frames/walk/south-west/03-stride-d.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/walk/south-south-west/03-stride-d.png",
+          "metadata": "frames/walk/south-south-west/03-stride-d.meta.json"
+        }
+      ]
+    },
+    {
+      "row": 5,
+      "action": "attack",
+      "pose": "00-windup",
+      "description": "short spear-thrust anticipation; pelvis and shoulders draw back; feet grounded",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south/00-windup.png",
+          "metadata": "frames/attack/south/00-windup.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south-south-east/00-windup.png",
+          "metadata": "frames/attack/south-south-east/00-windup.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south-east/00-windup.png",
+          "metadata": "frames/attack/south-east/00-windup.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/east-south-east/00-windup.png",
+          "metadata": "frames/attack/east-south-east/00-windup.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/attack/east/00-windup.png",
+          "metadata": "frames/attack/east/00-windup.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/east-north-east/00-windup.png",
+          "metadata": "frames/attack/east-north-east/00-windup.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north-east/00-windup.png",
+          "metadata": "frames/attack/north-east/00-windup.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north-north-east/00-windup.png",
+          "metadata": "frames/attack/north-north-east/00-windup.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north/00-windup.png",
+          "metadata": "frames/attack/north/00-windup.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north-north-west/00-windup.png",
+          "metadata": "frames/attack/north-north-west/00-windup.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north-west/00-windup.png",
+          "metadata": "frames/attack/north-west/00-windup.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/west-north-west/00-windup.png",
+          "metadata": "frames/attack/west-north-west/00-windup.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/attack/west/00-windup.png",
+          "metadata": "frames/attack/west/00-windup.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/west-south-west/00-windup.png",
+          "metadata": "frames/attack/west-south-west/00-windup.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south-west/00-windup.png",
+          "metadata": "frames/attack/south-west/00-windup.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south-south-west/00-windup.png",
+          "metadata": "frames/attack/south-south-west/00-windup.meta.json"
+        }
+      ]
+    },
+    {
+      "row": 6,
+      "action": "attack",
+      "pose": "01-contact",
+      "description": "spear extended at contact; torso leans into attack; feet grounded",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south/01-contact.png",
+          "metadata": "frames/attack/south/01-contact.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south-south-east/01-contact.png",
+          "metadata": "frames/attack/south-south-east/01-contact.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south-east/01-contact.png",
+          "metadata": "frames/attack/south-east/01-contact.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/east-south-east/01-contact.png",
+          "metadata": "frames/attack/east-south-east/01-contact.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/attack/east/01-contact.png",
+          "metadata": "frames/attack/east/01-contact.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/east-north-east/01-contact.png",
+          "metadata": "frames/attack/east-north-east/01-contact.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north-east/01-contact.png",
+          "metadata": "frames/attack/north-east/01-contact.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north-north-east/01-contact.png",
+          "metadata": "frames/attack/north-north-east/01-contact.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north/01-contact.png",
+          "metadata": "frames/attack/north/01-contact.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north-north-west/01-contact.png",
+          "metadata": "frames/attack/north-north-west/01-contact.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north-west/01-contact.png",
+          "metadata": "frames/attack/north-west/01-contact.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/west-north-west/01-contact.png",
+          "metadata": "frames/attack/west-north-west/01-contact.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/attack/west/01-contact.png",
+          "metadata": "frames/attack/west/01-contact.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/west-south-west/01-contact.png",
+          "metadata": "frames/attack/west-south-west/01-contact.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south-west/01-contact.png",
+          "metadata": "frames/attack/south-west/01-contact.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south-south-west/01-contact.png",
+          "metadata": "frames/attack/south-south-west/01-contact.meta.json"
+        }
+      ]
+    },
+    {
+      "row": 7,
+      "action": "attack",
+      "pose": "02-follow-through",
+      "description": "committed extension follows spear tip through target space",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south/02-follow-through.png",
+          "metadata": "frames/attack/south/02-follow-through.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south-south-east/02-follow-through.png",
+          "metadata": "frames/attack/south-south-east/02-follow-through.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south-east/02-follow-through.png",
+          "metadata": "frames/attack/south-east/02-follow-through.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/east-south-east/02-follow-through.png",
+          "metadata": "frames/attack/east-south-east/02-follow-through.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/attack/east/02-follow-through.png",
+          "metadata": "frames/attack/east/02-follow-through.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/east-north-east/02-follow-through.png",
+          "metadata": "frames/attack/east-north-east/02-follow-through.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north-east/02-follow-through.png",
+          "metadata": "frames/attack/north-east/02-follow-through.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north-north-east/02-follow-through.png",
+          "metadata": "frames/attack/north-north-east/02-follow-through.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north/02-follow-through.png",
+          "metadata": "frames/attack/north/02-follow-through.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north-north-west/02-follow-through.png",
+          "metadata": "frames/attack/north-north-west/02-follow-through.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north-west/02-follow-through.png",
+          "metadata": "frames/attack/north-west/02-follow-through.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/west-north-west/02-follow-through.png",
+          "metadata": "frames/attack/west-north-west/02-follow-through.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/attack/west/02-follow-through.png",
+          "metadata": "frames/attack/west/02-follow-through.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/west-south-west/02-follow-through.png",
+          "metadata": "frames/attack/west-south-west/02-follow-through.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south-west/02-follow-through.png",
+          "metadata": "frames/attack/south-west/02-follow-through.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south-south-west/02-follow-through.png",
+          "metadata": "frames/attack/south-south-west/02-follow-through.meta.json"
+        }
+      ]
+    },
+    {
+      "row": 8,
+      "action": "attack",
+      "pose": "03-recovery",
+      "description": "withdraw spear and return balance toward neutral guard",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south/03-recovery.png",
+          "metadata": "frames/attack/south/03-recovery.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south-south-east/03-recovery.png",
+          "metadata": "frames/attack/south-south-east/03-recovery.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south-east/03-recovery.png",
+          "metadata": "frames/attack/south-east/03-recovery.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/east-south-east/03-recovery.png",
+          "metadata": "frames/attack/east-south-east/03-recovery.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/attack/east/03-recovery.png",
+          "metadata": "frames/attack/east/03-recovery.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/east-north-east/03-recovery.png",
+          "metadata": "frames/attack/east-north-east/03-recovery.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north-east/03-recovery.png",
+          "metadata": "frames/attack/north-east/03-recovery.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north-north-east/03-recovery.png",
+          "metadata": "frames/attack/north-north-east/03-recovery.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north/03-recovery.png",
+          "metadata": "frames/attack/north/03-recovery.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north-north-west/03-recovery.png",
+          "metadata": "frames/attack/north-north-west/03-recovery.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/north-west/03-recovery.png",
+          "metadata": "frames/attack/north-west/03-recovery.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/west-north-west/03-recovery.png",
+          "metadata": "frames/attack/west-north-west/03-recovery.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/attack/west/03-recovery.png",
+          "metadata": "frames/attack/west/03-recovery.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/west-south-west/03-recovery.png",
+          "metadata": "frames/attack/west-south-west/03-recovery.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south-west/03-recovery.png",
+          "metadata": "frames/attack/south-west/03-recovery.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/attack/south-south-west/03-recovery.png",
+          "metadata": "frames/attack/south-south-west/03-recovery.meta.json"
+        }
+      ]
+    },
+    {
+      "row": 9,
+      "action": "hit",
+      "pose": "00-flinch",
+      "description": "brief shoulder-and-head flinch backward; spear visible; feet planted",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south/00-flinch.png",
+          "metadata": "frames/hit/south/00-flinch.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south-south-east/00-flinch.png",
+          "metadata": "frames/hit/south-south-east/00-flinch.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south-east/00-flinch.png",
+          "metadata": "frames/hit/south-east/00-flinch.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/east-south-east/00-flinch.png",
+          "metadata": "frames/hit/east-south-east/00-flinch.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/hit/east/00-flinch.png",
+          "metadata": "frames/hit/east/00-flinch.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/east-north-east/00-flinch.png",
+          "metadata": "frames/hit/east-north-east/00-flinch.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north-east/00-flinch.png",
+          "metadata": "frames/hit/north-east/00-flinch.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north-north-east/00-flinch.png",
+          "metadata": "frames/hit/north-north-east/00-flinch.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north/00-flinch.png",
+          "metadata": "frames/hit/north/00-flinch.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north-north-west/00-flinch.png",
+          "metadata": "frames/hit/north-north-west/00-flinch.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north-west/00-flinch.png",
+          "metadata": "frames/hit/north-west/00-flinch.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/west-north-west/00-flinch.png",
+          "metadata": "frames/hit/west-north-west/00-flinch.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/hit/west/00-flinch.png",
+          "metadata": "frames/hit/west/00-flinch.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/west-south-west/00-flinch.png",
+          "metadata": "frames/hit/west-south-west/00-flinch.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south-west/00-flinch.png",
+          "metadata": "frames/hit/south-west/00-flinch.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south-south-west/00-flinch.png",
+          "metadata": "frames/hit/south-south-west/00-flinch.meta.json"
+        }
+      ]
+    },
+    {
+      "row": 10,
+      "action": "hit",
+      "pose": "01-recoil",
+      "description": "strong torso recoil; weight sinks slightly; feet planted",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south/01-recoil.png",
+          "metadata": "frames/hit/south/01-recoil.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south-south-east/01-recoil.png",
+          "metadata": "frames/hit/south-south-east/01-recoil.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south-east/01-recoil.png",
+          "metadata": "frames/hit/south-east/01-recoil.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/east-south-east/01-recoil.png",
+          "metadata": "frames/hit/east-south-east/01-recoil.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/hit/east/01-recoil.png",
+          "metadata": "frames/hit/east/01-recoil.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/east-north-east/01-recoil.png",
+          "metadata": "frames/hit/east-north-east/01-recoil.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north-east/01-recoil.png",
+          "metadata": "frames/hit/north-east/01-recoil.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north-north-east/01-recoil.png",
+          "metadata": "frames/hit/north-north-east/01-recoil.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north/01-recoil.png",
+          "metadata": "frames/hit/north/01-recoil.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north-north-west/01-recoil.png",
+          "metadata": "frames/hit/north-north-west/01-recoil.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north-west/01-recoil.png",
+          "metadata": "frames/hit/north-west/01-recoil.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/west-north-west/01-recoil.png",
+          "metadata": "frames/hit/west-north-west/01-recoil.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/hit/west/01-recoil.png",
+          "metadata": "frames/hit/west/01-recoil.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/west-south-west/01-recoil.png",
+          "metadata": "frames/hit/west-south-west/01-recoil.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south-west/01-recoil.png",
+          "metadata": "frames/hit/south-west/01-recoil.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south-south-west/01-recoil.png",
+          "metadata": "frames/hit/south-south-west/01-recoil.meta.json"
+        }
+      ]
+    },
+    {
+      "row": 11,
+      "action": "hit",
+      "pose": "02-recover",
+      "description": "body straightens and spear returns to front guard",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south/02-recover.png",
+          "metadata": "frames/hit/south/02-recover.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south-south-east/02-recover.png",
+          "metadata": "frames/hit/south-south-east/02-recover.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south-east/02-recover.png",
+          "metadata": "frames/hit/south-east/02-recover.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/east-south-east/02-recover.png",
+          "metadata": "frames/hit/east-south-east/02-recover.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/hit/east/02-recover.png",
+          "metadata": "frames/hit/east/02-recover.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/east-north-east/02-recover.png",
+          "metadata": "frames/hit/east-north-east/02-recover.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north-east/02-recover.png",
+          "metadata": "frames/hit/north-east/02-recover.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north-north-east/02-recover.png",
+          "metadata": "frames/hit/north-north-east/02-recover.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north/02-recover.png",
+          "metadata": "frames/hit/north/02-recover.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north-north-west/02-recover.png",
+          "metadata": "frames/hit/north-north-west/02-recover.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north-west/02-recover.png",
+          "metadata": "frames/hit/north-west/02-recover.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/west-north-west/02-recover.png",
+          "metadata": "frames/hit/west-north-west/02-recover.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/hit/west/02-recover.png",
+          "metadata": "frames/hit/west/02-recover.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/west-south-west/02-recover.png",
+          "metadata": "frames/hit/west-south-west/02-recover.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south-west/02-recover.png",
+          "metadata": "frames/hit/south-west/02-recover.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south-south-west/02-recover.png",
+          "metadata": "frames/hit/south-south-west/02-recover.meta.json"
+        }
+      ]
+    },
+    {
+      "row": 12,
+      "action": "hit",
+      "pose": "03-ready",
+      "description": "balanced ready silhouette returning cleanly to idle",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south/03-ready.png",
+          "metadata": "frames/hit/south/03-ready.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south-south-east/03-ready.png",
+          "metadata": "frames/hit/south-south-east/03-ready.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south-east/03-ready.png",
+          "metadata": "frames/hit/south-east/03-ready.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/east-south-east/03-ready.png",
+          "metadata": "frames/hit/east-south-east/03-ready.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/hit/east/03-ready.png",
+          "metadata": "frames/hit/east/03-ready.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/east-north-east/03-ready.png",
+          "metadata": "frames/hit/east-north-east/03-ready.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north-east/03-ready.png",
+          "metadata": "frames/hit/north-east/03-ready.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north-north-east/03-ready.png",
+          "metadata": "frames/hit/north-north-east/03-ready.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north/03-ready.png",
+          "metadata": "frames/hit/north/03-ready.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north-north-west/03-ready.png",
+          "metadata": "frames/hit/north-north-west/03-ready.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/north-west/03-ready.png",
+          "metadata": "frames/hit/north-west/03-ready.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/west-north-west/03-ready.png",
+          "metadata": "frames/hit/west-north-west/03-ready.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/hit/west/03-ready.png",
+          "metadata": "frames/hit/west/03-ready.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/west-south-west/03-ready.png",
+          "metadata": "frames/hit/west-south-west/03-ready.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south-west/03-ready.png",
+          "metadata": "frames/hit/south-west/03-ready.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/hit/south-south-west/03-ready.png",
+          "metadata": "frames/hit/south-south-west/03-ready.meta.json"
+        }
+      ]
+    },
+    {
+      "row": 13,
+      "action": "death",
+      "pose": "00-fall",
+      "description": "defeated posture tips and knees buckle; spear lowers; non-graphic",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south/00-fall.png",
+          "metadata": "frames/death/south/00-fall.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south-south-east/00-fall.png",
+          "metadata": "frames/death/south-south-east/00-fall.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south-east/00-fall.png",
+          "metadata": "frames/death/south-east/00-fall.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/east-south-east/00-fall.png",
+          "metadata": "frames/death/east-south-east/00-fall.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/death/east/00-fall.png",
+          "metadata": "frames/death/east/00-fall.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/east-north-east/00-fall.png",
+          "metadata": "frames/death/east-north-east/00-fall.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north-east/00-fall.png",
+          "metadata": "frames/death/north-east/00-fall.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north-north-east/00-fall.png",
+          "metadata": "frames/death/north-north-east/00-fall.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north/00-fall.png",
+          "metadata": "frames/death/north/00-fall.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north-north-west/00-fall.png",
+          "metadata": "frames/death/north-north-west/00-fall.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north-west/00-fall.png",
+          "metadata": "frames/death/north-west/00-fall.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/west-north-west/00-fall.png",
+          "metadata": "frames/death/west-north-west/00-fall.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/death/west/00-fall.png",
+          "metadata": "frames/death/west/00-fall.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/west-south-west/00-fall.png",
+          "metadata": "frames/death/west-south-west/00-fall.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south-west/00-fall.png",
+          "metadata": "frames/death/south-west/00-fall.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south-south-west/00-fall.png",
+          "metadata": "frames/death/south-south-west/00-fall.meta.json"
+        }
+      ]
+    },
+    {
+      "row": 14,
+      "action": "death",
+      "pose": "01-collapse",
+      "description": "goblin falls sideways while still holding spear; non-graphic",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south/01-collapse.png",
+          "metadata": "frames/death/south/01-collapse.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south-south-east/01-collapse.png",
+          "metadata": "frames/death/south-south-east/01-collapse.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south-east/01-collapse.png",
+          "metadata": "frames/death/south-east/01-collapse.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/east-south-east/01-collapse.png",
+          "metadata": "frames/death/east-south-east/01-collapse.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/death/east/01-collapse.png",
+          "metadata": "frames/death/east/01-collapse.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/east-north-east/01-collapse.png",
+          "metadata": "frames/death/east-north-east/01-collapse.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north-east/01-collapse.png",
+          "metadata": "frames/death/north-east/01-collapse.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north-north-east/01-collapse.png",
+          "metadata": "frames/death/north-north-east/01-collapse.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north/01-collapse.png",
+          "metadata": "frames/death/north/01-collapse.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north-north-west/01-collapse.png",
+          "metadata": "frames/death/north-north-west/01-collapse.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north-west/01-collapse.png",
+          "metadata": "frames/death/north-west/01-collapse.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/west-north-west/01-collapse.png",
+          "metadata": "frames/death/west-north-west/01-collapse.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/death/west/01-collapse.png",
+          "metadata": "frames/death/west/01-collapse.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/west-south-west/01-collapse.png",
+          "metadata": "frames/death/west-south-west/01-collapse.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south-west/01-collapse.png",
+          "metadata": "frames/death/south-west/01-collapse.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south-south-west/01-collapse.png",
+          "metadata": "frames/death/south-south-west/01-collapse.meta.json"
+        }
+      ]
+    },
+    {
+      "row": 15,
+      "action": "death",
+      "pose": "02-ground",
+      "description": "fully grounded prone goblin and spear; compact silhouette",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south/02-ground.png",
+          "metadata": "frames/death/south/02-ground.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south-south-east/02-ground.png",
+          "metadata": "frames/death/south-south-east/02-ground.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south-east/02-ground.png",
+          "metadata": "frames/death/south-east/02-ground.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/east-south-east/02-ground.png",
+          "metadata": "frames/death/east-south-east/02-ground.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/death/east/02-ground.png",
+          "metadata": "frames/death/east/02-ground.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/east-north-east/02-ground.png",
+          "metadata": "frames/death/east-north-east/02-ground.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north-east/02-ground.png",
+          "metadata": "frames/death/north-east/02-ground.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north-north-east/02-ground.png",
+          "metadata": "frames/death/north-north-east/02-ground.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north/02-ground.png",
+          "metadata": "frames/death/north/02-ground.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north-north-west/02-ground.png",
+          "metadata": "frames/death/north-north-west/02-ground.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north-west/02-ground.png",
+          "metadata": "frames/death/north-west/02-ground.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/west-north-west/02-ground.png",
+          "metadata": "frames/death/west-north-west/02-ground.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/death/west/02-ground.png",
+          "metadata": "frames/death/west/02-ground.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/west-south-west/02-ground.png",
+          "metadata": "frames/death/west-south-west/02-ground.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south-west/02-ground.png",
+          "metadata": "frames/death/south-west/02-ground.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south-south-west/02-ground.png",
+          "metadata": "frames/death/south-south-west/02-ground.meta.json"
+        }
+      ]
+    },
+    {
+      "row": 16,
+      "action": "death",
+      "pose": "03-settle",
+      "description": "final still side-lying on the flank; relaxed limbs; dropped spear resting separately",
+      "directions": [
+        {
+          "column": 0,
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south/03-settle.png",
+          "metadata": "frames/death/south/03-settle.meta.json"
+        },
+        {
+          "column": 1,
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south-south-east/03-settle.png",
+          "metadata": "frames/death/south-south-east/03-settle.meta.json"
+        },
+        {
+          "column": 2,
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south-east/03-settle.png",
+          "metadata": "frames/death/south-east/03-settle.meta.json"
+        },
+        {
+          "column": 3,
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/east-south-east/03-settle.png",
+          "metadata": "frames/death/east-south-east/03-settle.meta.json"
+        },
+        {
+          "column": 4,
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/death/east/03-settle.png",
+          "metadata": "frames/death/east/03-settle.meta.json"
+        },
+        {
+          "column": 5,
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/east-north-east/03-settle.png",
+          "metadata": "frames/death/east-north-east/03-settle.meta.json"
+        },
+        {
+          "column": 6,
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north-east/03-settle.png",
+          "metadata": "frames/death/north-east/03-settle.meta.json"
+        },
+        {
+          "column": 7,
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north-north-east/03-settle.png",
+          "metadata": "frames/death/north-north-east/03-settle.meta.json"
+        },
+        {
+          "column": 8,
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north/03-settle.png",
+          "metadata": "frames/death/north/03-settle.meta.json"
+        },
+        {
+          "column": 9,
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north-north-west/03-settle.png",
+          "metadata": "frames/death/north-north-west/03-settle.meta.json"
+        },
+        {
+          "column": 10,
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/north-west/03-settle.png",
+          "metadata": "frames/death/north-west/03-settle.meta.json"
+        },
+        {
+          "column": 11,
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/west-north-west/03-settle.png",
+          "metadata": "frames/death/west-north-west/03-settle.meta.json"
+        },
+        {
+          "column": 12,
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "frame": "frames/death/west/03-settle.png",
+          "metadata": "frames/death/west/03-settle.meta.json"
+        },
+        {
+          "column": 13,
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/west-south-west/03-settle.png",
+          "metadata": "frames/death/west-south-west/03-settle.meta.json"
+        },
+        {
+          "column": 14,
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south-west/03-settle.png",
+          "metadata": "frames/death/south-west/03-settle.meta.json"
+        },
+        {
+          "column": 15,
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "frame": "frames/death/south-south-west/03-settle.png",
+          "metadata": "frames/death/south-south-west/03-settle.meta.json"
+        }
+      ]
+    }
+  ],
+  "qa": {
+    "identity": false,
+    "sixteenDirections": false,
+    "posePhases": false,
+    "alphaEdges": false,
+    "rootAnchor": false,
+    "atlas": false,
+    "visualReview": false,
+    "runtimePromotion": false
+  },
+  "previewFiles": [
+    "animation-v5-color-preview.png",
+    "animation-v5-color-preview-neutral.png",
+    "animation-v5-silhouette-preview.png",
+    "animation-v5-death-rows-review.png"
+  ],
+  "notes": [
+    "This is a pending review candidate only; do not use at runtime.",
+    "Forty 384x384 approved-source Goblin poses are preserved unchanged. The other 232 cells were generated from the 17 active 16-direction sheets. Four earlier death 03-settle sheets remain under source/rejected/ and are excluded.",
+    "The inventory scanner reported 107 PNG paths. Sixty-seven candidate-review PNGs are full 1254x1254 contact sheets, not individual 384x384 poses, and are excluded from this atlas.",
+    "Generated source cells were alpha-confidence trimmed, uniformly scaled to the matching approved action/phase median alpha-bound height, and aligned provisionally to (192,288). All generated-cell and atlas QA remains false."
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "minotaur",
+  "action": "walk",
+  "direction": "west",
+  "pose": "02-stride-c",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/walk-02-stride-c-16.png",
+  "sourceImageId": "exec-7371fdd7-660e-416c-8e2a-ff1ea3a9024f.png",
+  "sourceCell": {
+    "row": 3,
+    "column": 0,
+    "direction": "west"
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited Minotaur source anchor; visual measurement pending"
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "scaleReference": "median alpha-bound height across the matching 16-direction contact sheet",
+    "confidenceBoundsInCell": [
+      24,
+      23,
+      239,
+      359
+    ],
+    "recoveredBoundsInCell": [
+      21,
+      20,
+      242,
+      362
+    ],
+    "targetVisualFootBaselineY": 288,
+    "targetReferenceMedianHeight": 276.0,
+    "uniformScale": 0.807018
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  },
+  "sha256": "15c1b1ad130f9a28e169f5270469cc193dcd272f96cb9c8f1f774da7aeb94626"
+}

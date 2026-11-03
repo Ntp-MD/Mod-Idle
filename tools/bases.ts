@@ -1,0 +1,223 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { readJson } from './lib/json.ts';
+import * as G from './lib/gates.ts';
+import * as SHARED from '../engine/index.ts';
+
+/**
+ * Bases cage — `tools/data/bases.json` is the source for every Base frame.
+ *
+ * The Bases (frame, weight, which Mod line is Primary / Secondary, Gear Mod school) live in the
+ * JSON and nothing parses a doc into them; this cage gates the JSON against `engine/` and the Mod
+ * data, so the file is a verified source rather than a second hand-typed copy.
+ */
+
+const MODS = readJson(path.join(import.meta.dirname, 'data', 'mods.json'));
+
+const OUT = path.join(import.meta.dirname, 'data', 'bases.json');
+
+const PATHS = [
+  { name: 'cloth/glass', label: 'cloth', bases: ['Circlet', 'Vestment', 'Legwraps', 'Silk Slippers', 'Silk Sash', 'Silk Wraps', 'Iron Band', 'Iron Band', 'Jade Amulet', 'Silver Hoop', 'Traveler\'s Cloak'], gear: 'Circlet \u00b7 Vestment \u00b7 Legwraps \u00b7 Silk Slippers \u00b7 Silk Sash \u00b7 Silk Wraps \u00b7 Iron Band \u00d72 \u00b7 Jade Amulet \u00b7 Silver Hoop \u00b7 Traveler\'s Cloak' },
+  { name: 'balanced', label: 'balanced', bases: ['Hood', 'Ring Mail', 'Breeches', 'Strapped Boots', 'Chain Clasp', 'Nimble Mitts', 'Iron Band', 'Iron Band', 'Jade Amulet', 'Jade Stud', 'Traveler\'s Cloak'], gear: 'Hood \u00b7 Ring Mail \u00b7 Breeches \u00b7 Strapped Boots \u00b7 Chain Clasp \u00b7 Nimble Mitts \u00b7 Iron Band \u00d72 \u00b7 Jade Amulet \u00b7 Jade Stud \u00b7 Traveler\'s Cloak' },
+  { name: 'armored', label: 'armored', bases: ['Sallet', 'Plate Vest', 'Cuisses', 'Plated Greaves', 'War Belt', 'Iron Gauntlets', 'Moonstone Signet', 'Moonstone Signet', 'Onyx Talisman', 'Onyx Drop', 'Heavy Mantle'], gear: 'Sallet \u00b7 Plate Vest \u00b7 Cuisses \u00b7 Plated Greaves \u00b7 War Belt \u00b7 Iron Gauntlets \u00b7 Moonstone Signet \u00d72 \u00b7 Onyx Talisman \u00b7 Onyx Drop \u00b7 Heavy Mantle' },
+];
+
+const weightOf = (bases: any[], names: any[]): number => names.reduce((t: number, n: any) => t + (bases.find((b: any) => b.name === n)?.weight || 0), 0);
+
+/**
+ * BS3 / BS4 are properties of the printed tables now: the
+ * "Three Paths" numbers were hand-typed in prose and did not follow from the Base weights in the same
+ * file, so both tables are generated from `tools/data/bases.json` and the gates check ordering and
+ * growth instead of matching a typed copy.
+ */
+const EDATA = readJson(path.join(import.meta.dirname, 'data', 'engine.json'));
+const ENGINE = SHARED.createEngine(EDATA);
+
+/** The worn sets the tax math is shown against: Str from levels only, then 2 and 6 slots on Str. */
+function capacities(): any {
+  const S = EDATA.stat;
+  const bare = ENGINE.statAt(S.level_cap - 1);
+  const strAt = (n: number): number => bare + n * S.core_flat_max;
+  return {
+    level: S.level_cap - 1,
+    strNone: bare,
+    strTwo: strAt(2),
+    strSix: strAt(6),
+    none: Math.round(ENGINE.weightCapacityOf(bare)),
+    two: Math.round(ENGINE.weightCapacityOf(strAt(2))),
+    six: Math.round(ENGINE.weightCapacityOf(strAt(6))),
+    capPct: ENGINE.CAP.weight_overload,
+  };
+}
+
+function checks(source?: any): any[] {
+  const { add, soft, rows } = G.gates();
+  // The file the cage gates — or another object, so a caller can prove a broken structure FAILs
+  // without writing a broken file.
+  let current: any = null;
+  try { current = source ?? JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { current = null; }
+  if (!current) throw new Error('tools/data/bases.json is missing');
+  // bases.json is the source now — nothing parses a doc into it
+  const doc = current;
+  soft('BS2', current.quality_weight_multiplier === 1.3,
+    `the Quality multiplier applied to weight is ${current.quality_weight_multiplier}`);
+  const totals = PATHS.map((p) => Math.round(weightOf(doc.bases, p.bases) * 10) / 10);
+  add('BS3', totals.every((x: number) => x > 0) && totals[0] < totals[1] && totals[1] < totals[2],
+    `the three paths order as designed: cloth ${totals[0]} < balanced ${totals[1]} < armored ${totals[2]}, summed from the Base rows the tables print from`);
+  const m = current.quality_weight_multiplier;
+  soft('BS4', m > 1 && totals.every((x: number) => Math.round(x * m * m) > x),
+    `quality weight grows per band at ×${m}: ${PATHS.map((p, i) => `${p.label} ${totals[i]}→${Math.round(totals[i] * m)}→${Math.round(totals[i] * m * m)}`).join(' · ')}`);
+
+  // The owner ruling: a frame's name says which FLAT defence lines its Frame Mod carries, and the frames
+  // of an armour slot cover every combination of the three — three singles, three pairs and the one
+  // frame that carries all three — without repeating one. The name is the promise the player reads, so
+  // this is the gate behind it.
+  {
+    const ARMOUR_SLOTS = ['helmet', 'chest', 'pant', 'boots', 'gloves', 'cape'];
+    const TRIO = ['armour_flat', 'energy_shield_flat', 'evasion_flat'];
+    const want = new Set<string>([...TRIO]);
+    for (let i = 0; i < TRIO.length; i++) for (let j = i + 1; j < TRIO.length; j++) want.add([TRIO[i], TRIO[j]].sort().join('+'));
+    want.add([...TRIO].sort().join('+'));
+    const bad: string[] = [];
+    for (const slot of ARMOUR_SLOTS) {
+      const sets = (current.bases || []).filter((b: any) => b.slot === slot)
+        .map((b: any) => [...(b.base_lines || [])].sort().join('+'));
+      const uniq = new Set(sets);
+      if (sets.length !== want.size || uniq.size !== want.size || [...want].some((w) => !uniq.has(w))) {
+        bad.push(`${slot}: ${sets.length} frames / ${uniq.size} unique — ${sets.join(' | ')}`);
+      }
+      for (const b of (current.bases || []).filter((b: any) => b.slot === slot)) {
+        const lines: string[] = b.base_lines || [];
+        if (!lines.length) bad.push(`${b.name} has no base_lines`);
+        for (const id of lines) if (!want.has(id)) bad.push(`${b.name} carries ${id}, which is not one of the three flat defence lines`);
+      }
+    }
+    add('BS11', bad.length === 0, bad.length ? bad.join(' · ')
+      : `every armour slot covers all ${want.size} combinations of the three flat defence lines exactly once — ${ARMOUR_SLOTS.length} slots × ${want.size} (${[...want].join(' · ')}), one of them the frame that carries all three, each frame's Frame Mod flat and named by the frame`);
+  }
+
+  // The dodge-thinning rule (owner shape): no frame whose Frame Mod carries an Armour or Energy
+  // Shield line rolls an Evasion line — only the thin evasion_flat-only frames and the frames with
+  // no defence promise (belt · Book off hand · drawn line-1 slots) own the roll.
+  {
+    const bad: string[] = [];
+    for (const b of (current.bases || [])) {
+      const bl: string[] = [...(b.base_lines || []), ...(b.frame_mod || [])];
+      if (bl.includes('armour_flat') || bl.includes('energy_shield_flat')) {
+        for (const id of [...(b.primary || []), ...(b.secondary || [])]) {
+          if (id === 'evasion_flat' || id === 'evasion_pct') bad.push(`${b.name} rolls ${id}`);
+        }
+      }
+    }
+    const shieldPool: string[] = current.weapon_pools?.['off hand']?.Shield || [];
+    for (const id of shieldPool) if (id === 'evasion_flat' || id === 'evasion_pct') bad.push(`Shield pool rolls ${id}`);
+    add('BS12', bad.length === 0, bad.length ? bad.join(' · ')
+      : 'no Armour/Energy-Shield frame rolls an Evasion line — only the thin evasion_flat-only frames and the no-defence frames own the roll');
+  }
+
+  const weapons = current.weapons || [];
+  add('BS5', weapons.length > 0,
+    `${weapons.length} weapon types in bases.json, each with its own frame list`);
+  const engineWeapons = new Map((ENGINE.WEAPONS || []).map((w: any) => [w.name, w]));
+  const multBad = weapons.filter((w: any) => {
+    const row: any = engineWeapons.get(w.name);
+    return !row || w.weapon_aspd != null || w.weapon_mult != null
+      || ENGINE.weaponMult(row.weapon_aspd, w.name) !== row.weapon_mult;
+  });
+  // The table must exist and every row must read its clock and multiplier from engine.json. How many
+  // weapon types there are is a roster count, not a condition: the gate is the table's own shape.
+  add('BS6', weapons.length > 0 && multBad.length === 0, multBad.length
+    ? `weapon rows disagree with engine.json: ${multBad.map((w: any) => w.name).join(', ')}`
+    : `every Base weapon (${weapons.length}) reads its named attack speed and multiplier from engine.json`);
+  const blocked = current.weapon_pools?.['main hand']?.Blocked || [];
+  const primary = current.weapon_pools?.['main hand']?.Primary || [];
+  const secondary = current.weapon_pools?.['main hand']?.Secondary || [];
+  const leaks = blocked.filter((id: any) => primary.includes(id) || secondary.includes(id));
+  add('BS7', blocked.length > 0 && leaks.length === 0,
+    leaks.length ? `the main hand blocks and offers the same line: ${leaks.join(', ')}` : `main-hand pool offers ${primary.length + secondary.length} lines and blocks ${blocked.length}`);
+  const M = current.mastery || {};
+  const capPct = weapons.length * (M.drop_bonus_per_type_pct || 0);
+  add('BS8', capPct > 0,
+    `the account-wide Mastery drop bonus tops out at ${weapons.length} × ${M.drop_bonus_per_type_pct}% = ${capPct}%`);
+  // A10: every weapon type carries a frame list. The FIRST frame of each type is exactly the live
+  // forced pair, so the published behaviour has a named home, and every frame names Frame-Mod lines
+  // that exist in `mods.json`. This replaced the old "no variant list defined yet" guard.
+  const KNOWN_MOD_IDS = new Set((MODS.mods || []).map((m: any) => m.id));
+  const FRAMES = current.weapon_frames || {};
+  const frameProblems: string[] = [];
+  for (const w of weapons) {
+    const list = FRAMES[w.name];
+    if (!Array.isArray(list) || !list.length) { frameProblems.push(`${w.name} has no frame list`); continue; }
+    if (JSON.stringify(list[0].frame_mod) !== JSON.stringify((current.frame_mod?.weapons || {})[w.name])) frameProblems.push(`${w.name}: the first frame is not the live forced pair`);
+    if (new Set(list.map((f: any) => JSON.stringify(f.frame_mod)).concat(list.map((f: any) => JSON.stringify(f.legacy_frame_mod))).filter(Boolean)).size !== list.length * 2) frameProblems.push(`${w.name}: current and legacy frame identities collide`);
+    for (const f of list) {
+      if (!(f.drop_weight > 0)) frameProblems.push(`${w.name}/${f.name} carries no drop weight`);
+      if (!(f.value_bias > 0)) frameProblems.push(`${w.name}/${f.name} carries no value bias`);
+      if (!(f.frame_mod || []).length) frameProblems.push(`${w.name}/${f.name} forces no line`);
+      if (!(f.legacy_frame_mod || []).length) frameProblems.push(`${w.name}/${f.name} has no legacy identity`);
+      for (const id of f.frame_mod || []) if (!KNOWN_MOD_IDS.has(id)) frameProblems.push(`${w.name}/${f.name}: unknown line ${id}`);
+      for (const id of f.legacy_frame_mod || []) if (!KNOWN_MOD_IDS.has(id)) frameProblems.push(`${w.name}/${f.name}: unknown legacy line ${id}`);
+      if (list.filter((x: any) => x.name === f.name).length > 1) frameProblems.push(`${w.name} names ${f.name} twice`);
+    }
+    // a weighted roll needs at least two weights to be a roll: one frame is a legal type, two frames
+    // that drop alike are not a list
+    if (list.length > 1 && new Set(list.map((f: any) => f.drop_weight)).size < 2) frameProblems.push(`${w.name}: frame drop weights are identical`);
+  }
+  for (const t of Object.keys(FRAMES)) if (!weapons.some((w: any) => w.name === t)) frameProblems.push(`a frame list for an unknown type ${t}`);
+  const frameCount = Object.values(FRAMES).flat().length;
+  add('BS9', frameProblems.length === 0,
+    frameProblems.length ? frameProblems.join(' · ')
+      : `${weapons.length} weapon types each carry ${Math.min(...Object.values(FRAMES).map((l: any) => l.length))}-${Math.max(...Object.values(FRAMES).map((l: any) => l.length))} weighted frames (${frameCount} in all), current and legacy frame identities are unique, and each line is a real Mod (A10)`);
+  const typePoolProblems: string[] = [];
+  const typePools = current.weapon_pools?.['main hand'] || {};
+  for (const w of weapons) {
+    const ids = typePools[w.name];
+    if (!Array.isArray(ids) || !ids.length) typePoolProblems.push(`${w.name} has no named pool`);
+    else for (const id of ids) if (!KNOWN_MOD_IDS.has(id)) typePoolProblems.push(`${w.name}: unknown pool line ${id}`);
+  }
+  add('BS14', typePoolProblems.length === 0,
+    typePoolProblems.length ? typePoolProblems.join(' · ') : `${weapons.length} weapon types each have a valid named Mod pool`);
+  // B13: the weight column exists and every type carries one.
+  const noWeight = weapons.filter((w: any) => !(w.weight > 0));
+  const wSpan = [Math.min(...weapons.map((w: any) => w.weight || 0)), Math.max(...weapons.map((w: any) => w.weight || 0))];
+  add('BS10', noWeight.length === 0,
+    noWeight.length
+      ? 'NO WEIGHT: ' + noWeight.map((w: any) => w.name).join(', ')
+      : `all ${weapons.length} weapon types carry a weight, spanning ${wSpan[0]}-${wSpan[1]}`);
+  const shields = (current.bases || []).filter((b: any) => b.slot === 'off hand' && b.family === 'Shield');
+  const seenShieldProfiles = new Set<string>();
+  const shieldProblems: string[] = [];
+  const knownModIds = new Set((MODS.mods || []).map((m: any) => m.id));
+  for (const frame of shields) {
+    const ids: string[] = frame.frame_mod || [];
+    const profile = ids.slice(1).sort().join('+');
+    if (ids[0] !== 'block_chance') shieldProblems.push(`${frame.name} does not lock Block Chance first`);
+    if (seenShieldProfiles.has(profile)) shieldProblems.push(`duplicate Shield profile ${profile}`);
+    seenShieldProfiles.add(profile);
+    if (!(frame.weight > 0)) shieldProblems.push(`${frame.name} carries no weight`);
+    for (const id of ids) if (!knownModIds.has(id)) shieldProblems.push(`${frame.name}: unknown Frame Mod ${id}`);
+  }
+  if (shields.length < 1) shieldProblems.push('at least one Shield frame is required');
+  add('BS13', shieldProblems.length === 0, shieldProblems.length
+    ? shieldProblems.join(' · ')
+    : `${shields.length} Shield frames lock Block Chance with unique supported defence profiles and valid weights and Frame Mods`);
+  return rows();
+}
+
+function report(): void {
+  G.report(checks());
+}
+
+/** The CLI runs only when this file is the entry point, so a test may import `checks` without the
+ *  cage reporting (and setting the exit code) behind it. */
+const isEntry = process.argv[1] ? path.resolve(process.argv[1]) === path.resolve(import.meta.filename) : false;
+
+if (isEntry) {
+  if (process.argv.includes('--checks')) {
+    report();
+  } else {
+    console.log('Bases cage — tools/data/bases.json is the source\n\n  node tools/bases.ts --checks   gate the Base tables\n');
+  }
+}
+
+export { checks, capacities };

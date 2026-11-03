@@ -1,0 +1,57 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "giant",
+  "action": "walk",
+  "phase": "03-stride-d",
+  "generator": "built-in image_gen",
+  "originalGeneratedFile": "exec-797d59c9-e201-4294-8817-36379e65e116.png",
+  "originalLocation": "CODEX_HOME/generated_images/",
+  "provenance": "prior-generation",
+  "sourceDimensions": {
+    "width": 1024,
+    "height": 1536
+  },
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "cellWidth": 256,
+    "cellHeight": 384,
+    "directionOrder": [
+      "south",
+      "south-south-east",
+      "south-east",
+      "east-south-east",
+      "east",
+      "east-north-east",
+      "north-east",
+      "north-north-east",
+      "north",
+      "north-north-west",
+      "north-west",
+      "west-north-west",
+      "west",
+      "west-south-west",
+      "south-west",
+      "south-south-west"
+    ]
+  },
+  "alphaAudit": {
+    "zeroPixelFraction": 0.0,
+    "confidence128PixelFraction": 0.36513,
+    "cornerAlpha": [
+      91,
+      81,
+      67,
+      74
+    ]
+  },
+  "review": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "nativePixelArt": false,
+    "approved": false
+  },
+  "note": "Raw sheet has semitransparent matte pixels; confidence-128 extraction removes empty corners. Alpha edge review remains pending."
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "action": "hit",
+  "direction": "west",
+  "pose": "01-recoil",
+  "source": "../../../../../animation/atlas/animation.png",
+  "sourceFrameIndex": 29,
+  "bakedWeapon": "spear",
+  "sourcePixelsModified": false,
+  "sourceBounds": {
+    "x": 2037,
+    "y": 1320,
+    "width": 142,
+    "height": 123,
+    "offsetX": 117,
+    "offsetY": 168
+  },
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "generator": "Lossless extraction from the approved Goblin 8-direction atlas",
+  "status": "approved-source-pose"
+}

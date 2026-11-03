@@ -1,0 +1,56 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "vampire",
+  "action": "hit",
+  "direction": "north-west",
+  "pose": "01-recoil",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/hit-01-recoil-16.png",
+  "sourceImageId": "exec-7cee7df8-1db7-48d8-ae78-0541feb7bcc4.png",
+  "sourceCell": {
+    "row": 2,
+    "column": 2,
+    "box": [
+      512,
+      768,
+      768,
+      1152
+    ],
+    "confidenceBoundsInCell": [
+      45,
+      111,
+      202,
+      293
+    ],
+    "sourceConfidenceBoundsHeight": 182,
+    "targetReferenceMedianHeight": 153.5,
+    "uniformScale": 0.843407
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "visual-approved animation/meta.json; 16-direction measurement pending",
+    "visualMeasurementPending": true
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "uniformScale": 0.843407,
+    "scaleReference": "median alpha-bound height of preserved approved source frames for this action/phase"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

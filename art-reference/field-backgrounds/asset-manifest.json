@@ -1,0 +1,150 @@
+{
+  "generator": "Built-in image_gen",
+  "encoding": "WebP quality 85; source PNG retained",
+  "assets": [
+    {
+      "id": "meadow-floor",
+      "source": "art-reference/field-backgrounds/outputs/meadow-floor.png",
+      "runtime": "game/src/assets/combat/meadow-floor.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 3347259,
+      "runtimeBytes": 416176,
+      "sourceSha256": "89085057aa6e137f67e9c6c55c06e41bc67ff4ee2e57547999232d0f58fa8751",
+      "runtimeSha256": "e59daa07f0c8b6b0c728de1a9af04a833042fb84b0c32e84536de62118d3b8e9",
+      "promptSource": "generation-prompts.json"
+    },
+    {
+      "id": "marsh-floor",
+      "source": "art-reference/field-backgrounds/outputs/marsh-floor.png",
+      "runtime": "game/src/assets/combat/marsh-floor.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 3723586,
+      "runtimeBytes": 498510,
+      "sourceSha256": "e696863638ec24ce20bbf93cb5ac6e6a0f8eac2cd828e42bc99f22a11dde951d",
+      "runtimeSha256": "091fa68b8eaed87da58a3e634d81f6d9dda71ba097e67ba52139235deca0a406",
+      "promptSource": "generation-prompts.json"
+    },
+    {
+      "id": "mountain-floor",
+      "source": "art-reference/field-backgrounds/outputs/mountain-floor.png",
+      "runtime": "game/src/assets/combat/mountain-floor.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 3683196,
+      "runtimeBytes": 468214,
+      "sourceSha256": "56e413e2eb05900a8064f616851a6c186cb41c8d87def193e91c2dbd6f275939",
+      "runtimeSha256": "33bdb613651b096d1ab91396f0a48c7bb4837c93d4bbf2468eff29aff752aa93",
+      "promptSource": "generation-prompts.json"
+    },
+    {
+      "id": "coast-floor",
+      "source": "art-reference/field-backgrounds/outputs/coast-floor.png",
+      "runtime": "game/src/assets/combat/coast-floor.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 3264471,
+      "runtimeBytes": 371980,
+      "sourceSha256": "2eeed494aff36853011c3ff5b3c9e6d168a60adb40276f7e3448133fcdd7a274",
+      "runtimeSha256": "4e11616c8290ed377022d028205627ccb1208d936056460492e6f6f329f38643",
+      "promptSource": "generation-prompts.json"
+    },
+    {
+      "id": "cave-floor",
+      "source": "art-reference/field-backgrounds/outputs/cave-floor.png",
+      "runtime": "game/src/assets/combat/cave-floor.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 3258091,
+      "runtimeBytes": 347374,
+      "sourceSha256": "25774e2774ce787c0c4c82b3b0e37e6cc112b5d0d7076bb3919891ebdf2ca9ce",
+      "runtimeSha256": "1afd7d7cb525fbb31c7298016392ab3dd78c4a52e600a71b230d6229de0163c7",
+      "promptSource": "generation-prompts.json"
+    },
+    {
+      "id": "snow-floor",
+      "source": "art-reference/field-backgrounds/outputs/snow-floor.png",
+      "runtime": "game/src/assets/combat/snow-floor.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 2734297,
+      "runtimeBytes": 238024,
+      "sourceSha256": "60e6fa2796f10092a55e9a5546bf43e8c267420552e299f6bff1aa5cfbf0aca3",
+      "runtimeSha256": "5b69b15e3bc4a2772a8fbca1f7b9304e139362af400a8f0b5bd05282c757eb0d",
+      "promptSource": "generation-prompts.json"
+    },
+    {
+      "id": "desert-floor",
+      "source": "art-reference/field-backgrounds/outputs/desert-floor.png",
+      "runtime": "game/src/assets/combat/desert-floor.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 3208667,
+      "runtimeBytes": 351838,
+      "sourceSha256": "31a47550d1df14b1f15238e8a9f3d3183a06dfffbe5f8ab849f9289b1184b8d8",
+      "runtimeSha256": "f397d2c7986cf593102c5dba08cd14a10aa290ce8e42f095c9945fed83325043",
+      "promptSource": "generation-prompts.json"
+    },
+    {
+      "id": "tomb-floor",
+      "source": "art-reference/field-backgrounds/outputs/tomb-floor.png",
+      "runtime": "game/src/assets/combat/tomb-floor.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 3261248,
+      "runtimeBytes": 348240,
+      "sourceSha256": "6719ea578e5d90ec006186d2199c28b8d1ffba4c27fa8d980602d9911a18edaf",
+      "runtimeSha256": "1b49a244cb5a993926d30d7a79e1d456af90442ccd9d3122c38ac3936d6e9f9a",
+      "promptSource": "generation-prompts.json"
+    },
+    {
+      "id": "ruins-floor",
+      "source": "art-reference/field-backgrounds/outputs/ruins-floor.png",
+      "runtime": "game/src/assets/combat/ruins-floor.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 3630398,
+      "runtimeBytes": 468196,
+      "sourceSha256": "195a4fa30b5ef56de60d19d7c42b045190a8bea9e829e36547b82444ebb363b4",
+      "runtimeSha256": "0fbbd02dff8727c607293c48993326e01615e01b124be3c00d7ff024c559a615",
+      "promptSource": "generation-prompts.json"
+    },
+    {
+      "id": "volcanic-floor",
+      "source": "art-reference/field-backgrounds/outputs/volcanic-floor.png",
+      "runtime": "game/src/assets/combat/volcanic-floor.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 3607707,
+      "runtimeBytes": 460994,
+      "sourceSha256": "6d6162da186741411e64fe0c2505b2f6d8cc2d0abc535e8e15aee6af88301a8a",
+      "runtimeSha256": "ce452ef1b536cb82ed616310d8244cad4f43d9d007b840bd0cedff3b39c1acca",
+      "promptSource": "generation-prompts.json"
+    },
+    {
+      "id": "rift-floor",
+      "source": "art-reference/field-backgrounds/outputs/rift-floor.png",
+      "runtime": "game/src/assets/combat/rift-floor.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 3268930,
+      "runtimeBytes": 339824,
+      "sourceSha256": "7c3453eb0e448a3b618f748bb0712221f7506ee2abcf01660925f5207aa678a6",
+      "runtimeSha256": "6fcc0e0a055d88f586276c63f35da11e45ced2fda79e7f4415297f19e83a0708",
+      "promptSource": "generation-prompts.json"
+    },
+    {
+      "id": "forest-floor",
+      "source": "game/src/assets/combat/forest-floor.png",
+      "runtime": "game/src/assets/combat/forest-floor.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 3640359,
+      "runtimeBytes": 519130,
+      "sourceSha256": "8e08929e598b42c01468230867e03381d0ab785ff08fd31dc96c5ee2c58fee67",
+      "runtimeSha256": "76d140a2f76068ce0bf52c53eda92919a9cddc76cc00b352c45243af6af6cc7b",
+      "promptSource": "../../game/src/assets/combat/forest-floor.provenance.json"
+    }
+  ]
+}

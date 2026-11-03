@@ -1,0 +1,835 @@
+{
+  "speciesId": "vampire",
+  "race": "undead",
+  "sourceInventory": {
+    "expectedPosePaths": 272,
+    "presentPosePaths": 0,
+    "approvedAtlasFrames": 40,
+    "generatedMissingFrames": 232,
+    "scannerNote": "The inventory tool counts PNGs under the species poses/ directory. That directory is empty; the existing animation atlas is separately marked visual-approved and provides 40 exact 384x384 source cells."
+  },
+  "sourceAtlas": "art-reference/monsters/undead/vampire/animation/atlas/animation.png",
+  "sourceAtlasStatus": "visual-approved",
+  "sourceAtlasSha256": "18f9cc2790e92d90966b2577c578f405a80f1053e3df69b79461b8b844b73a50",
+  "directions": [
+    "south",
+    "south-south-east",
+    "south-east",
+    "east-south-east",
+    "east",
+    "east-north-east",
+    "north-east",
+    "north-north-east",
+    "north",
+    "north-north-west",
+    "north-west",
+    "west-north-west",
+    "west",
+    "west-south-west",
+    "south-west",
+    "south-south-west"
+  ],
+  "phases": {
+    "idle": [
+      "idle"
+    ],
+    "walk": [
+      "00-stride-a",
+      "01-stride-b",
+      "02-stride-c",
+      "03-stride-d"
+    ],
+    "attack": [
+      "00-aim",
+      "01-release",
+      "02-follow-through",
+      "03-recovery"
+    ],
+    "hit": [
+      "00-flinch",
+      "01-recoil",
+      "02-recover",
+      "03-ready"
+    ],
+    "death": [
+      "00-fall",
+      "01-collapse",
+      "02-ground",
+      "03-settle"
+    ]
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "visual-approved animation/meta.json; 16-direction measurement pending"
+  },
+  "preservedFrames": [
+    {
+      "action": "idle",
+      "direction": "south",
+      "phase": "idle",
+      "row": 0,
+      "column": 0,
+      "file": "frames/idle/south/idle.png",
+      "metadata": "frames/idle/south/idle.meta.json",
+      "sourceAtlasCell": {
+        "row": 0,
+        "column": 0,
+        "box": [
+          0,
+          0,
+          384,
+          384
+        ]
+      }
+    },
+    {
+      "action": "idle",
+      "direction": "south-east",
+      "phase": "idle",
+      "row": 0,
+      "column": 1,
+      "file": "frames/idle/south-east/idle.png",
+      "metadata": "frames/idle/south-east/idle.meta.json",
+      "sourceAtlasCell": {
+        "row": 0,
+        "column": 1,
+        "box": [
+          384,
+          0,
+          768,
+          384
+        ]
+      }
+    },
+    {
+      "action": "idle",
+      "direction": "east",
+      "phase": "idle",
+      "row": 0,
+      "column": 2,
+      "file": "frames/idle/east/idle.png",
+      "metadata": "frames/idle/east/idle.meta.json",
+      "sourceAtlasCell": {
+        "row": 0,
+        "column": 2,
+        "box": [
+          768,
+          0,
+          1152,
+          384
+        ]
+      }
+    },
+    {
+      "action": "idle",
+      "direction": "north-east",
+      "phase": "idle",
+      "row": 0,
+      "column": 3,
+      "file": "frames/idle/north-east/idle.png",
+      "metadata": "frames/idle/north-east/idle.meta.json",
+      "sourceAtlasCell": {
+        "row": 0,
+        "column": 3,
+        "box": [
+          1152,
+          0,
+          1536,
+          384
+        ]
+      }
+    },
+    {
+      "action": "idle",
+      "direction": "north",
+      "phase": "idle",
+      "row": 0,
+      "column": 4,
+      "file": "frames/idle/north/idle.png",
+      "metadata": "frames/idle/north/idle.meta.json",
+      "sourceAtlasCell": {
+        "row": 0,
+        "column": 4,
+        "box": [
+          1536,
+          0,
+          1920,
+          384
+        ]
+      }
+    },
+    {
+      "action": "idle",
+      "direction": "north-west",
+      "phase": "idle",
+      "row": 0,
+      "column": 5,
+      "file": "frames/idle/north-west/idle.png",
+      "metadata": "frames/idle/north-west/idle.meta.json",
+      "sourceAtlasCell": {
+        "row": 0,
+        "column": 5,
+        "box": [
+          1920,
+          0,
+          2304,
+          384
+        ]
+      }
+    },
+    {
+      "action": "idle",
+      "direction": "west",
+      "phase": "idle",
+      "row": 0,
+      "column": 6,
+      "file": "frames/idle/west/idle.png",
+      "metadata": "frames/idle/west/idle.meta.json",
+      "sourceAtlasCell": {
+        "row": 0,
+        "column": 6,
+        "box": [
+          2304,
+          0,
+          2688,
+          384
+        ]
+      }
+    },
+    {
+      "action": "idle",
+      "direction": "south-west",
+      "phase": "idle",
+      "row": 0,
+      "column": 7,
+      "file": "frames/idle/south-west/idle.png",
+      "metadata": "frames/idle/south-west/idle.meta.json",
+      "sourceAtlasCell": {
+        "row": 0,
+        "column": 7,
+        "box": [
+          2688,
+          0,
+          3072,
+          384
+        ]
+      }
+    },
+    {
+      "action": "walk",
+      "direction": "east",
+      "phase": "00-stride-a",
+      "row": 1,
+      "column": 0,
+      "file": "frames/walk/east/00-stride-a.png",
+      "metadata": "frames/walk/east/00-stride-a.meta.json",
+      "sourceAtlasCell": {
+        "row": 1,
+        "column": 0,
+        "box": [
+          0,
+          384,
+          384,
+          768
+        ]
+      }
+    },
+    {
+      "action": "walk",
+      "direction": "east",
+      "phase": "01-stride-b",
+      "row": 1,
+      "column": 1,
+      "file": "frames/walk/east/01-stride-b.png",
+      "metadata": "frames/walk/east/01-stride-b.meta.json",
+      "sourceAtlasCell": {
+        "row": 1,
+        "column": 1,
+        "box": [
+          384,
+          384,
+          768,
+          768
+        ]
+      }
+    },
+    {
+      "action": "walk",
+      "direction": "east",
+      "phase": "02-stride-c",
+      "row": 1,
+      "column": 2,
+      "file": "frames/walk/east/02-stride-c.png",
+      "metadata": "frames/walk/east/02-stride-c.meta.json",
+      "sourceAtlasCell": {
+        "row": 1,
+        "column": 2,
+        "box": [
+          768,
+          384,
+          1152,
+          768
+        ]
+      }
+    },
+    {
+      "action": "walk",
+      "direction": "east",
+      "phase": "03-stride-d",
+      "row": 1,
+      "column": 3,
+      "file": "frames/walk/east/03-stride-d.png",
+      "metadata": "frames/walk/east/03-stride-d.meta.json",
+      "sourceAtlasCell": {
+        "row": 1,
+        "column": 3,
+        "box": [
+          1152,
+          384,
+          1536,
+          768
+        ]
+      }
+    },
+    {
+      "action": "walk",
+      "direction": "west",
+      "phase": "00-stride-a",
+      "row": 1,
+      "column": 4,
+      "file": "frames/walk/west/00-stride-a.png",
+      "metadata": "frames/walk/west/00-stride-a.meta.json",
+      "sourceAtlasCell": {
+        "row": 1,
+        "column": 4,
+        "box": [
+          1536,
+          384,
+          1920,
+          768
+        ]
+      }
+    },
+    {
+      "action": "walk",
+      "direction": "west",
+      "phase": "01-stride-b",
+      "row": 1,
+      "column": 5,
+      "file": "frames/walk/west/01-stride-b.png",
+      "metadata": "frames/walk/west/01-stride-b.meta.json",
+      "sourceAtlasCell": {
+        "row": 1,
+        "column": 5,
+        "box": [
+          1920,
+          384,
+          2304,
+          768
+        ]
+      }
+    },
+    {
+      "action": "walk",
+      "direction": "west",
+      "phase": "02-stride-c",
+      "row": 1,
+      "column": 6,
+      "file": "frames/walk/west/02-stride-c.png",
+      "metadata": "frames/walk/west/02-stride-c.meta.json",
+      "sourceAtlasCell": {
+        "row": 1,
+        "column": 6,
+        "box": [
+          2304,
+          384,
+          2688,
+          768
+        ]
+      }
+    },
+    {
+      "action": "walk",
+      "direction": "west",
+      "phase": "03-stride-d",
+      "row": 1,
+      "column": 7,
+      "file": "frames/walk/west/03-stride-d.png",
+      "metadata": "frames/walk/west/03-stride-d.meta.json",
+      "sourceAtlasCell": {
+        "row": 1,
+        "column": 7,
+        "box": [
+          2688,
+          384,
+          3072,
+          768
+        ]
+      }
+    },
+    {
+      "action": "attack",
+      "direction": "east",
+      "phase": "00-aim",
+      "row": 2,
+      "column": 0,
+      "file": "frames/attack/east/00-aim.png",
+      "metadata": "frames/attack/east/00-aim.meta.json",
+      "sourceAtlasCell": {
+        "row": 2,
+        "column": 0,
+        "box": [
+          0,
+          768,
+          384,
+          1152
+        ]
+      }
+    },
+    {
+      "action": "attack",
+      "direction": "east",
+      "phase": "01-release",
+      "row": 2,
+      "column": 1,
+      "file": "frames/attack/east/01-release.png",
+      "metadata": "frames/attack/east/01-release.meta.json",
+      "sourceAtlasCell": {
+        "row": 2,
+        "column": 1,
+        "box": [
+          384,
+          768,
+          768,
+          1152
+        ]
+      }
+    },
+    {
+      "action": "attack",
+      "direction": "east",
+      "phase": "02-follow-through",
+      "row": 2,
+      "column": 2,
+      "file": "frames/attack/east/02-follow-through.png",
+      "metadata": "frames/attack/east/02-follow-through.meta.json",
+      "sourceAtlasCell": {
+        "row": 2,
+        "column": 2,
+        "box": [
+          768,
+          768,
+          1152,
+          1152
+        ]
+      }
+    },
+    {
+      "action": "attack",
+      "direction": "east",
+      "phase": "03-recovery",
+      "row": 2,
+      "column": 3,
+      "file": "frames/attack/east/03-recovery.png",
+      "metadata": "frames/attack/east/03-recovery.meta.json",
+      "sourceAtlasCell": {
+        "row": 2,
+        "column": 3,
+        "box": [
+          1152,
+          768,
+          1536,
+          1152
+        ]
+      }
+    },
+    {
+      "action": "attack",
+      "direction": "west",
+      "phase": "00-aim",
+      "row": 2,
+      "column": 4,
+      "file": "frames/attack/west/00-aim.png",
+      "metadata": "frames/attack/west/00-aim.meta.json",
+      "sourceAtlasCell": {
+        "row": 2,
+        "column": 4,
+        "box": [
+          1536,
+          768,
+          1920,
+          1152
+        ]
+      }
+    },
+    {
+      "action": "attack",
+      "direction": "west",
+      "phase": "01-release",
+      "row": 2,
+      "column": 5,
+      "file": "frames/attack/west/01-release.png",
+      "metadata": "frames/attack/west/01-release.meta.json",
+      "sourceAtlasCell": {
+        "row": 2,
+        "column": 5,
+        "box": [
+          1920,
+          768,
+          2304,
+          1152
+        ]
+      }
+    },
+    {
+      "action": "attack",
+      "direction": "west",
+      "phase": "02-follow-through",
+      "row": 2,
+      "column": 6,
+      "file": "frames/attack/west/02-follow-through.png",
+      "metadata": "frames/attack/west/02-follow-through.meta.json",
+      "sourceAtlasCell": {
+        "row": 2,
+        "column": 6,
+        "box": [
+          2304,
+          768,
+          2688,
+          1152
+        ]
+      }
+    },
+    {
+      "action": "attack",
+      "direction": "west",
+      "phase": "03-recovery",
+      "row": 2,
+      "column": 7,
+      "file": "frames/attack/west/03-recovery.png",
+      "metadata": "frames/attack/west/03-recovery.meta.json",
+      "sourceAtlasCell": {
+        "row": 2,
+        "column": 7,
+        "box": [
+          2688,
+          768,
+          3072,
+          1152
+        ]
+      }
+    },
+    {
+      "action": "hit",
+      "direction": "east",
+      "phase": "00-flinch",
+      "row": 3,
+      "column": 0,
+      "file": "frames/hit/east/00-flinch.png",
+      "metadata": "frames/hit/east/00-flinch.meta.json",
+      "sourceAtlasCell": {
+        "row": 3,
+        "column": 0,
+        "box": [
+          0,
+          1152,
+          384,
+          1536
+        ]
+      }
+    },
+    {
+      "action": "hit",
+      "direction": "east",
+      "phase": "01-recoil",
+      "row": 3,
+      "column": 1,
+      "file": "frames/hit/east/01-recoil.png",
+      "metadata": "frames/hit/east/01-recoil.meta.json",
+      "sourceAtlasCell": {
+        "row": 3,
+        "column": 1,
+        "box": [
+          384,
+          1152,
+          768,
+          1536
+        ]
+      }
+    },
+    {
+      "action": "hit",
+      "direction": "east",
+      "phase": "02-recover",
+      "row": 3,
+      "column": 2,
+      "file": "frames/hit/east/02-recover.png",
+      "metadata": "frames/hit/east/02-recover.meta.json",
+      "sourceAtlasCell": {
+        "row": 3,
+        "column": 2,
+        "box": [
+          768,
+          1152,
+          1152,
+          1536
+        ]
+      }
+    },
+    {
+      "action": "hit",
+      "direction": "east",
+      "phase": "03-ready",
+      "row": 3,
+      "column": 3,
+      "file": "frames/hit/east/03-ready.png",
+      "metadata": "frames/hit/east/03-ready.meta.json",
+      "sourceAtlasCell": {
+        "row": 3,
+        "column": 3,
+        "box": [
+          1152,
+          1152,
+          1536,
+          1536
+        ]
+      }
+    },
+    {
+      "action": "hit",
+      "direction": "west",
+      "phase": "00-flinch",
+      "row": 3,
+      "column": 4,
+      "file": "frames/hit/west/00-flinch.png",
+      "metadata": "frames/hit/west/00-flinch.meta.json",
+      "sourceAtlasCell": {
+        "row": 3,
+        "column": 4,
+        "box": [
+          1536,
+          1152,
+          1920,
+          1536
+        ]
+      }
+    },
+    {
+      "action": "hit",
+      "direction": "west",
+      "phase": "01-recoil",
+      "row": 3,
+      "column": 5,
+      "file": "frames/hit/west/01-recoil.png",
+      "metadata": "frames/hit/west/01-recoil.meta.json",
+      "sourceAtlasCell": {
+        "row": 3,
+        "column": 5,
+        "box": [
+          1920,
+          1152,
+          2304,
+          1536
+        ]
+      }
+    },
+    {
+      "action": "hit",
+      "direction": "west",
+      "phase": "02-recover",
+      "row": 3,
+      "column": 6,
+      "file": "frames/hit/west/02-recover.png",
+      "metadata": "frames/hit/west/02-recover.meta.json",
+      "sourceAtlasCell": {
+        "row": 3,
+        "column": 6,
+        "box": [
+          2304,
+          1152,
+          2688,
+          1536
+        ]
+      }
+    },
+    {
+      "action": "hit",
+      "direction": "west",
+      "phase": "03-ready",
+      "row": 3,
+      "column": 7,
+      "file": "frames/hit/west/03-ready.png",
+      "metadata": "frames/hit/west/03-ready.meta.json",
+      "sourceAtlasCell": {
+        "row": 3,
+        "column": 7,
+        "box": [
+          2688,
+          1152,
+          3072,
+          1536
+        ]
+      }
+    },
+    {
+      "action": "death",
+      "direction": "east",
+      "phase": "00-fall",
+      "row": 4,
+      "column": 0,
+      "file": "frames/death/east/00-fall.png",
+      "metadata": "frames/death/east/00-fall.meta.json",
+      "sourceAtlasCell": {
+        "row": 4,
+        "column": 0,
+        "box": [
+          0,
+          1536,
+          384,
+          1920
+        ]
+      }
+    },
+    {
+      "action": "death",
+      "direction": "east",
+      "phase": "01-collapse",
+      "row": 4,
+      "column": 1,
+      "file": "frames/death/east/01-collapse.png",
+      "metadata": "frames/death/east/01-collapse.meta.json",
+      "sourceAtlasCell": {
+        "row": 4,
+        "column": 1,
+        "box": [
+          384,
+          1536,
+          768,
+          1920
+        ]
+      }
+    },
+    {
+      "action": "death",
+      "direction": "east",
+      "phase": "02-ground",
+      "row": 4,
+      "column": 2,
+      "file": "frames/death/east/02-ground.png",
+      "metadata": "frames/death/east/02-ground.meta.json",
+      "sourceAtlasCell": {
+        "row": 4,
+        "column": 2,
+        "box": [
+          768,
+          1536,
+          1152,
+          1920
+        ]
+      }
+    },
+    {
+      "action": "death",
+      "direction": "east",
+      "phase": "03-settle",
+      "row": 4,
+      "column": 3,
+      "file": "frames/death/east/03-settle.png",
+      "metadata": "frames/death/east/03-settle.meta.json",
+      "sourceAtlasCell": {
+        "row": 4,
+        "column": 3,
+        "box": [
+          1152,
+          1536,
+          1536,
+          1920
+        ]
+      }
+    },
+    {
+      "action": "death",
+      "direction": "west",
+      "phase": "00-fall",
+      "row": 4,
+      "column": 4,
+      "file": "frames/death/west/00-fall.png",
+      "metadata": "frames/death/west/00-fall.meta.json",
+      "sourceAtlasCell": {
+        "row": 4,
+        "column": 4,
+        "box": [
+          1536,
+          1536,
+          1920,
+          1920
+        ]
+      }
+    },
+    {
+      "action": "death",
+      "direction": "west",
+      "phase": "01-collapse",
+      "row": 4,
+      "column": 5,
+      "file": "frames/death/west/01-collapse.png",
+      "metadata": "frames/death/west/01-collapse.meta.json",
+      "sourceAtlasCell": {
+        "row": 4,
+        "column": 5,
+        "box": [
+          1920,
+          1536,
+          2304,
+          1920
+        ]
+      }
+    },
+    {
+      "action": "death",
+      "direction": "west",
+      "phase": "02-ground",
+      "row": 4,
+      "column": 6,
+      "file": "frames/death/west/02-ground.png",
+      "metadata": "frames/death/west/02-ground.meta.json",
+      "sourceAtlasCell": {
+        "row": 4,
+        "column": 6,
+        "box": [
+          2304,
+          1536,
+          2688,
+          1920
+        ]
+      }
+    },
+    {
+      "action": "death",
+      "direction": "west",
+      "phase": "03-settle",
+      "row": 4,
+      "column": 7,
+      "file": "frames/death/west/03-settle.png",
+      "metadata": "frames/death/west/03-settle.meta.json",
+      "sourceAtlasCell": {
+        "row": 4,
+        "column": 7,
+        "box": [
+          2688,
+          1536,
+          3072,
+          1920
+        ]
+      }
+    }
+  ],
+  "styleReference": "art-reference/monsters/undead/vampire/reference.png and art-reference/monsters/undead/vampire/animation/atlas/animation.png",
+  "excludedReferences": [
+    "animation/drafts/animation-draft.png (draft-review, not approved)",
+    "animation/source/base-preview.png (not an approved frame atlas)"
+  ],
+  "attackKind": "far",
+  "bakedWeaponId": "unverified (reference metadata is TODO; approved sprite shows empty hands)"
+}

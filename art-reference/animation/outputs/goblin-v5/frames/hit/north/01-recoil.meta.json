@@ -1,0 +1,57 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "goblin",
+  "action": "hit",
+  "direction": "north",
+  "pose": "01-recoil",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/hit-01-recoil-16.png",
+  "sourceImageId": "exec-bf92aa5f-c0c5-4e54-bcb6-eb3eb4420a2f.png",
+  "sourceCell": {
+    "row": 2,
+    "column": 0,
+    "box": [
+      0,
+      768,
+      256,
+      1152
+    ],
+    "confidenceBoundsInCell": [
+      33,
+      109,
+      212,
+      311
+    ],
+    "sourceVisualFootBaselineY": 311,
+    "targetVisualFootBaselineY": 288,
+    "sourceConfidenceBoundsHeight": 202,
+    "targetReferenceMedianHeight": 117.5,
+    "uniformScale": 0.581683
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited 8-direction Goblin anchor; visual measurement pending"
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "scaleReference": "median alpha-bound height of approved Goblin source poses for this action/phase",
+    "uniformScale": 0.581683
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

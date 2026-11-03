@@ -1,0 +1,62 @@
+{
+    "status":  "candidate-source-review-required",
+    "speciesId":  "minotaur",
+    "generator":  "built-in image_gen",
+    "sourceImageId":  "exec-b38f48dd-c0c6-4701-8a0c-8d668d4690bb.png",
+    "file":  "source/v5-contact-sheets/attack-01-contact-16.png",
+    "action":  "attack",
+    "phase":  "01-contact",
+    "phasePrompt":  "Diagonal axe swing crossing the body at contact, hips and shoulders rotated; hooves planted; no effects.",
+    "sha256":  "9fe5e2ad4f99163e3d992f40f2d58fe5bb542cde0ba38e834e02e41592c15215",
+    "transparentBackgroundRequested":  true,
+    "sourceCanvas":  {
+                         "width":  1024,
+                         "height":  1536,
+                         "mode":  "RGBA"
+                     },
+    "cellCanvas":  {
+                       "width":  256,
+                       "height":  384
+                   },
+    "directionOrder":  [
+                           "south",
+                           "south-south-east",
+                           "south-east",
+                           "east-south-east",
+                           "east",
+                           "east-north-east",
+                           "north-east",
+                           "north-north-east",
+                           "north",
+                           "north-north-west",
+                           "north-west",
+                           "west-north-west",
+                           "west",
+                           "west-south-west",
+                           "south-west",
+                           "south-south-west"
+                       ],
+    "layout":  {
+                   "columns":  4,
+                   "rows":  4,
+                   "cellOrder":  "row-major"
+               },
+    "targetFrameCanvas":  {
+                              "width":  384,
+                              "height":  384
+                          },
+    "targetAnchor":  {
+                         "x":  192,
+                         "y":  288,
+                         "provenance":  "inherited Minotaur source anchor; 16-direction alignment remains unreviewed"
+                     },
+    "qa":  {
+               "identity":  false,
+               "facing":  false,
+               "pose":  false,
+               "alphaEdges":  false,
+               "anchor":  false,
+               "atlas":  false,
+               "runtimePromotion":  false
+           }
+}

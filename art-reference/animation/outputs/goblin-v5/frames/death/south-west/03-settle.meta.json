@@ -1,0 +1,57 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "goblin",
+  "action": "death",
+  "direction": "south-west",
+  "pose": "03-settle",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/death-03-settle-16.png",
+  "sourceImageId": "exec-fe00228d-6b5b-49de-81c9-5f19439aa770.png",
+  "sourceCell": {
+    "row": 3,
+    "column": 2,
+    "box": [
+      512,
+      1152,
+      768,
+      1536
+    ],
+    "confidenceBoundsInCell": [
+      30,
+      139,
+      215,
+      300
+    ],
+    "sourceVisualFootBaselineY": 300,
+    "targetVisualFootBaselineY": 288,
+    "sourceConfidenceBoundsHeight": 161,
+    "targetReferenceMedianHeight": 71.5,
+    "uniformScale": 0.444099
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited 8-direction Goblin anchor; visual measurement pending"
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "scaleReference": "median alpha-bound height of approved Goblin source poses for this action/phase",
+    "uniformScale": 0.444099
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

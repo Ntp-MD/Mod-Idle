@@ -1,0 +1,76 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "giant",
+  "action": "death",
+  "phase": "03-settle",
+  "generator": "built-in image_gen",
+  "originalGeneratedFile": "exec-ffd7200d-db08-4791-81a7-52231f97f0d1.png",
+  "originalLocation": "CODEX_HOME/generated_images/",
+  "provenance": "regenerated-explicit-alpha-distinct-settle-pose-v3",
+  "sourceDimensions": {
+    "width": 1024,
+    "height": 1536
+  },
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "cellWidth": 256,
+    "cellHeight": 384,
+    "directionOrder": [
+      "south",
+      "south-south-east",
+      "south-east",
+      "east-south-east",
+      "east",
+      "east-north-east",
+      "north-east",
+      "north-north-east",
+      "north",
+      "north-north-west",
+      "north-west",
+      "west-north-west",
+      "west",
+      "west-south-west",
+      "south-west",
+      "south-south-west"
+    ]
+  },
+  "alphaAudit": {
+    "zeroPixelFraction": 0.71872,
+    "confidence128PixelFraction": 0.17066,
+    "cornerAlpha": [
+      0,
+      0,
+      1,
+      0
+    ],
+    "cellCornerAlphaMax": 1,
+    "confidencePixelCountPerCell": [
+      17734,
+      16909,
+      16646,
+      16734,
+      16618,
+      15903,
+      15958,
+      14990,
+      15695,
+      16053,
+      16979,
+      16896,
+      17792,
+      17956,
+      18354,
+      17203
+    ]
+  },
+  "poseContrast": "Lateral side-lying; cheek rests on the ground, one arm lies slack over the body, legs relaxed, and club separated. Visually distinct from death-02 face-down with forearms forward.",
+  "review": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "nativePixelArt": false,
+    "approved": false
+  }
+}

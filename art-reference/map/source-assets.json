@@ -1,0 +1,86 @@
+[
+  {
+    "original": "ash.png",
+    "category": "terrain",
+    "source": "game/public/map/terrain/ash.png",
+    "stem": "ash"
+  },
+  {
+    "original": "camp.png",
+    "category": "landmark",
+    "source": "game/public/map/landmark/camp.png",
+    "stem": "camp"
+  },
+  {
+    "original": "encounter-ruins.png",
+    "category": "landmark",
+    "source": "game/public/map/landmark/encounter-ruins.png",
+    "stem": "encounter-ruins"
+  },
+  {
+    "original": "forest-relief.png",
+    "category": "terrain",
+    "source": "game/public/map/terrain/forest-relief.png",
+    "stem": "forest-relief"
+  },
+  {
+    "original": "grass.png",
+    "category": "terrain",
+    "source": "game/public/map/terrain/grass.png",
+    "stem": "grass"
+  },
+  {
+    "original": "marsh.png",
+    "category": "terrain",
+    "source": "game/public/map/terrain/marsh.png",
+    "stem": "marsh"
+  },
+  {
+    "original": "moor.png",
+    "category": "terrain",
+    "source": "game/public/map/terrain/moor.png",
+    "stem": "moor"
+  },
+  {
+    "original": "mountain-relief.png",
+    "category": "terrain",
+    "source": "game/public/map/terrain/mountain-relief.png",
+    "stem": "mountain-relief"
+  },
+  {
+    "original": "salt.png",
+    "category": "terrain",
+    "source": "game/public/map/terrain/salt.png",
+    "stem": "salt"
+  },
+  {
+    "original": "snow.png",
+    "category": "terrain",
+    "source": "game/public/map/terrain/snow.png",
+    "stem": "snow"
+  },
+  {
+    "original": "town.png",
+    "category": "landmark",
+    "source": "game/public/map/landmark/town.png",
+    "stem": "town"
+  },
+  {
+    "original": "village.png",
+    "category": "landmark",
+    "source": "game/public/map/landmark/village.png",
+    "stem": "village"
+  },
+  {
+    "original": "waste.png",
+    "category": "terrain",
+    "source": "game/public/map/terrain/waste.png",
+    "stem": "waste"
+  },
+  {
+    "original": "water.png",
+    "category": "terrain",
+    "source": "game/public/map/terrain/water.png",
+    "stem": "water"
+  }
+]

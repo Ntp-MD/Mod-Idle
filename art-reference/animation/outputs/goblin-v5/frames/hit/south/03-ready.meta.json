@@ -1,0 +1,57 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "goblin",
+  "action": "hit",
+  "direction": "south",
+  "pose": "03-ready",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/hit-03-ready-16.png",
+  "sourceImageId": "exec-8c47fab0-6282-47b5-afbe-7495ee06d4b2.png",
+  "sourceCell": {
+    "row": 0,
+    "column": 0,
+    "box": [
+      0,
+      0,
+      256,
+      384
+    ],
+    "confidenceBoundsInCell": [
+      50,
+      110,
+      194,
+      293
+    ],
+    "sourceVisualFootBaselineY": 293,
+    "targetVisualFootBaselineY": 288,
+    "sourceConfidenceBoundsHeight": 183,
+    "targetReferenceMedianHeight": 127.5,
+    "uniformScale": 0.696721
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited 8-direction Goblin anchor; visual measurement pending"
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "scaleReference": "median alpha-bound height of approved Goblin source poses for this action/phase",
+    "uniformScale": 0.696721
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

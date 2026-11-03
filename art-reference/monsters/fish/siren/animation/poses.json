@@ -1,0 +1,1517 @@
+{
+  "schemaVersion": 1,
+  "status": "direction16-candidate-incomplete",
+  "speciesId": "siren",
+  "race": "fish",
+  "version": "v5",
+  "attackKind": "close",
+  "bakedWeaponId": null,
+  "identityRef": "../atlas/animation.png",
+  "sourcePoseRef": "../atlas/animation.png",
+  "directionCount": 16,
+  "angleStepDegrees": 22.5,
+  "directions": [
+    {
+      "name": "south",
+      "angleDegrees": 0
+    },
+    {
+      "name": "south-south-east",
+      "angleDegrees": 22.5
+    },
+    {
+      "name": "south-east",
+      "angleDegrees": 45
+    },
+    {
+      "name": "east-south-east",
+      "angleDegrees": 67.5
+    },
+    {
+      "name": "east",
+      "angleDegrees": 90
+    },
+    {
+      "name": "east-north-east",
+      "angleDegrees": 112.5
+    },
+    {
+      "name": "north-east",
+      "angleDegrees": 135
+    },
+    {
+      "name": "north-north-east",
+      "angleDegrees": 157.5
+    },
+    {
+      "name": "north",
+      "angleDegrees": 180
+    },
+    {
+      "name": "north-north-west",
+      "angleDegrees": 202.5
+    },
+    {
+      "name": "north-west",
+      "angleDegrees": 225
+    },
+    {
+      "name": "west-north-west",
+      "angleDegrees": 247.5
+    },
+    {
+      "name": "west",
+      "angleDegrees": 270
+    },
+    {
+      "name": "west-south-west",
+      "angleDegrees": 292.5
+    },
+    {
+      "name": "south-west",
+      "angleDegrees": 315
+    },
+    {
+      "name": "south-south-west",
+      "angleDegrees": 337.5
+    }
+  ],
+  "camera": "one fixed elevated three-quarter camera; rotate the whole siren facing in the world, never rotate the camera or flat sprite",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
+  },
+  "statusNote": "16-direction production candidates; baseline untouched until full replacement reviewed.",
+  "actions": {
+    "idle": {
+      "framesPerDirection": 1,
+      "poseCount": 16,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "south.png",
+          "pose": "one neutral ready pose facing 0 degrees"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "south-south-east.png",
+          "pose": "one neutral ready pose facing 22.5 degrees"
+        },
+        {
+          "direction": "south-east",
+          "file": "south-east.png",
+          "pose": "one neutral ready pose facing 45 degrees"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "east-south-east.png",
+          "pose": "one neutral ready pose facing 67.5 degrees"
+        },
+        {
+          "direction": "east",
+          "file": "east.png",
+          "pose": "one neutral ready pose facing 90 degrees"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "east-north-east.png",
+          "pose": "one neutral ready pose facing 112.5 degrees"
+        },
+        {
+          "direction": "north-east",
+          "file": "north-east.png",
+          "pose": "one neutral ready pose facing 135 degrees"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "north-north-east.png",
+          "pose": "one neutral ready pose facing 157.5 degrees"
+        },
+        {
+          "direction": "north",
+          "file": "north.png",
+          "pose": "one neutral ready pose facing 180 degrees"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "north-north-west.png",
+          "pose": "one neutral ready pose facing 202.5 degrees"
+        },
+        {
+          "direction": "north-west",
+          "file": "north-west.png",
+          "pose": "one neutral ready pose facing 225 degrees"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "west-north-west.png",
+          "pose": "one neutral ready pose facing 247.5 degrees"
+        },
+        {
+          "direction": "west",
+          "file": "west.png",
+          "pose": "one neutral ready pose facing 270 degrees"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "west-south-west.png",
+          "pose": "one neutral ready pose facing 292.5 degrees"
+        },
+        {
+          "direction": "south-west",
+          "file": "south-west.png",
+          "pose": "one neutral ready pose facing 315 degrees"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "south-south-west.png",
+          "pose": "one neutral ready pose facing 337.5 degrees"
+        }
+      ]
+    },
+    "walk": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-stride-a.png",
+          "pose": "left webbed foot plants while right steps, fin crest counterbalances"
+        },
+        {
+          "direction": "south",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts forward to right foot"
+        },
+        {
+          "direction": "south",
+          "file": "02-stride-c.png",
+          "pose": "right webbed foot plants while left steps, fin crest counterbalances"
+        },
+        {
+          "direction": "south",
+          "file": "03-stride-d.png",
+          "pose": "weight returns to left foot"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-stride-a.png",
+          "pose": "left webbed foot plants while right steps, fin crest counterbalances"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts forward to right foot"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-stride-c.png",
+          "pose": "right webbed foot plants while left steps, fin crest counterbalances"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-stride-d.png",
+          "pose": "weight returns to left foot"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-stride-a.png",
+          "pose": "left webbed foot plants while right steps, fin crest counterbalances"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts forward to right foot"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-stride-c.png",
+          "pose": "right webbed foot plants while left steps, fin crest counterbalances"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-stride-d.png",
+          "pose": "weight returns to left foot"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-stride-a.png",
+          "pose": "left webbed foot plants while right steps, fin crest counterbalances"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts forward to right foot"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-stride-c.png",
+          "pose": "right webbed foot plants while left steps, fin crest counterbalances"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-stride-d.png",
+          "pose": "weight returns to left foot"
+        },
+        {
+          "direction": "east",
+          "file": "00-stride-a.png",
+          "pose": "left webbed foot plants while right steps, fin crest counterbalances"
+        },
+        {
+          "direction": "east",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts forward to right foot"
+        },
+        {
+          "direction": "east",
+          "file": "02-stride-c.png",
+          "pose": "right webbed foot plants while left steps, fin crest counterbalances"
+        },
+        {
+          "direction": "east",
+          "file": "03-stride-d.png",
+          "pose": "weight returns to left foot"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-stride-a.png",
+          "pose": "left webbed foot plants while right steps, fin crest counterbalances"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts forward to right foot"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-stride-c.png",
+          "pose": "right webbed foot plants while left steps, fin crest counterbalances"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-stride-d.png",
+          "pose": "weight returns to left foot"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-stride-a.png",
+          "pose": "left webbed foot plants while right steps, fin crest counterbalances"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts forward to right foot"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-stride-c.png",
+          "pose": "right webbed foot plants while left steps, fin crest counterbalances"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-stride-d.png",
+          "pose": "weight returns to left foot"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-stride-a.png",
+          "pose": "left webbed foot plants while right steps, fin crest counterbalances"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts forward to right foot"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-stride-c.png",
+          "pose": "right webbed foot plants while left steps, fin crest counterbalances"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-stride-d.png",
+          "pose": "weight returns to left foot"
+        },
+        {
+          "direction": "north",
+          "file": "00-stride-a.png",
+          "pose": "left webbed foot plants while right steps, fin crest counterbalances"
+        },
+        {
+          "direction": "north",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts forward to right foot"
+        },
+        {
+          "direction": "north",
+          "file": "02-stride-c.png",
+          "pose": "right webbed foot plants while left steps, fin crest counterbalances"
+        },
+        {
+          "direction": "north",
+          "file": "03-stride-d.png",
+          "pose": "weight returns to left foot"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-stride-a.png",
+          "pose": "left webbed foot plants while right steps, fin crest counterbalances"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts forward to right foot"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-stride-c.png",
+          "pose": "right webbed foot plants while left steps, fin crest counterbalances"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-stride-d.png",
+          "pose": "weight returns to left foot"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-stride-a.png",
+          "pose": "left webbed foot plants while right steps, fin crest counterbalances"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts forward to right foot"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-stride-c.png",
+          "pose": "right webbed foot plants while left steps, fin crest counterbalances"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-stride-d.png",
+          "pose": "weight returns to left foot"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-stride-a.png",
+          "pose": "left webbed foot plants while right steps, fin crest counterbalances"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts forward to right foot"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-stride-c.png",
+          "pose": "right webbed foot plants while left steps, fin crest counterbalances"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-stride-d.png",
+          "pose": "weight returns to left foot"
+        },
+        {
+          "direction": "west",
+          "file": "00-stride-a.png",
+          "pose": "left webbed foot plants while right steps, fin crest counterbalances"
+        },
+        {
+          "direction": "west",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts forward to right foot"
+        },
+        {
+          "direction": "west",
+          "file": "02-stride-c.png",
+          "pose": "right webbed foot plants while left steps, fin crest counterbalances"
+        },
+        {
+          "direction": "west",
+          "file": "03-stride-d.png",
+          "pose": "weight returns to left foot"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-stride-a.png",
+          "pose": "left webbed foot plants while right steps, fin crest counterbalances"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts forward to right foot"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-stride-c.png",
+          "pose": "right webbed foot plants while left steps, fin crest counterbalances"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-stride-d.png",
+          "pose": "weight returns to left foot"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-stride-a.png",
+          "pose": "left webbed foot plants while right steps, fin crest counterbalances"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts forward to right foot"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-stride-c.png",
+          "pose": "right webbed foot plants while left steps, fin crest counterbalances"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-stride-d.png",
+          "pose": "weight returns to left foot"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-stride-a.png",
+          "pose": "left webbed foot plants while right steps, fin crest counterbalances"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts forward to right foot"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-stride-c.png",
+          "pose": "right webbed foot plants while left steps, fin crest counterbalances"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-stride-d.png",
+          "pose": "weight returns to left foot"
+        }
+      ]
+    },
+    "attack": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-windup.png",
+          "pose": "fin-crested body coils and claw draws back"
+        },
+        {
+          "direction": "south",
+          "file": "01-contact.png",
+          "pose": "claw thrust reaches toward target"
+        },
+        {
+          "direction": "south",
+          "file": "02-follow-through.png",
+          "pose": "claw follows through with torso rotation"
+        },
+        {
+          "direction": "south",
+          "file": "03-recovery.png",
+          "pose": "claw returns and stance balances"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-windup.png",
+          "pose": "fin-crested body coils and claw draws back"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-contact.png",
+          "pose": "claw thrust reaches toward target"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-follow-through.png",
+          "pose": "claw follows through with torso rotation"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-recovery.png",
+          "pose": "claw returns and stance balances"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-windup.png",
+          "pose": "fin-crested body coils and claw draws back"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-contact.png",
+          "pose": "claw thrust reaches toward target"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-follow-through.png",
+          "pose": "claw follows through with torso rotation"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-recovery.png",
+          "pose": "claw returns and stance balances"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-windup.png",
+          "pose": "fin-crested body coils and claw draws back"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-contact.png",
+          "pose": "claw thrust reaches toward target"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-follow-through.png",
+          "pose": "claw follows through with torso rotation"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-recovery.png",
+          "pose": "claw returns and stance balances"
+        },
+        {
+          "direction": "east",
+          "file": "00-windup.png",
+          "pose": "fin-crested body coils and claw draws back"
+        },
+        {
+          "direction": "east",
+          "file": "01-contact.png",
+          "pose": "claw thrust reaches toward target"
+        },
+        {
+          "direction": "east",
+          "file": "02-follow-through.png",
+          "pose": "claw follows through with torso rotation"
+        },
+        {
+          "direction": "east",
+          "file": "03-recovery.png",
+          "pose": "claw returns and stance balances"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-windup.png",
+          "pose": "fin-crested body coils and claw draws back"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-contact.png",
+          "pose": "claw thrust reaches toward target"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-follow-through.png",
+          "pose": "claw follows through with torso rotation"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-recovery.png",
+          "pose": "claw returns and stance balances"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-windup.png",
+          "pose": "fin-crested body coils and claw draws back"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-contact.png",
+          "pose": "claw thrust reaches toward target"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-follow-through.png",
+          "pose": "claw follows through with torso rotation"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-recovery.png",
+          "pose": "claw returns and stance balances"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-windup.png",
+          "pose": "fin-crested body coils and claw draws back"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-contact.png",
+          "pose": "claw thrust reaches toward target"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-follow-through.png",
+          "pose": "claw follows through with torso rotation"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-recovery.png",
+          "pose": "claw returns and stance balances"
+        },
+        {
+          "direction": "north",
+          "file": "00-windup.png",
+          "pose": "fin-crested body coils and claw draws back"
+        },
+        {
+          "direction": "north",
+          "file": "01-contact.png",
+          "pose": "claw thrust reaches toward target"
+        },
+        {
+          "direction": "north",
+          "file": "02-follow-through.png",
+          "pose": "claw follows through with torso rotation"
+        },
+        {
+          "direction": "north",
+          "file": "03-recovery.png",
+          "pose": "claw returns and stance balances"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-windup.png",
+          "pose": "fin-crested body coils and claw draws back"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-contact.png",
+          "pose": "claw thrust reaches toward target"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-follow-through.png",
+          "pose": "claw follows through with torso rotation"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-recovery.png",
+          "pose": "claw returns and stance balances"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-windup.png",
+          "pose": "fin-crested body coils and claw draws back"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-contact.png",
+          "pose": "claw thrust reaches toward target"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-follow-through.png",
+          "pose": "claw follows through with torso rotation"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-recovery.png",
+          "pose": "claw returns and stance balances"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-windup.png",
+          "pose": "fin-crested body coils and claw draws back"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-contact.png",
+          "pose": "claw thrust reaches toward target"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-follow-through.png",
+          "pose": "claw follows through with torso rotation"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-recovery.png",
+          "pose": "claw returns and stance balances"
+        },
+        {
+          "direction": "west",
+          "file": "00-windup.png",
+          "pose": "fin-crested body coils and claw draws back"
+        },
+        {
+          "direction": "west",
+          "file": "01-contact.png",
+          "pose": "claw thrust reaches toward target"
+        },
+        {
+          "direction": "west",
+          "file": "02-follow-through.png",
+          "pose": "claw follows through with torso rotation"
+        },
+        {
+          "direction": "west",
+          "file": "03-recovery.png",
+          "pose": "claw returns and stance balances"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-windup.png",
+          "pose": "fin-crested body coils and claw draws back"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-contact.png",
+          "pose": "claw thrust reaches toward target"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-follow-through.png",
+          "pose": "claw follows through with torso rotation"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-recovery.png",
+          "pose": "claw returns and stance balances"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-windup.png",
+          "pose": "fin-crested body coils and claw draws back"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-contact.png",
+          "pose": "claw thrust reaches toward target"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-follow-through.png",
+          "pose": "claw follows through with torso rotation"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-recovery.png",
+          "pose": "claw returns and stance balances"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-windup.png",
+          "pose": "fin-crested body coils and claw draws back"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-contact.png",
+          "pose": "claw thrust reaches toward target"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-follow-through.png",
+          "pose": "claw follows through with torso rotation"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-recovery.png",
+          "pose": "claw returns and stance balances"
+        }
+      ]
+    },
+    "hit": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-flinch.png",
+          "pose": "body flinches at impact"
+        },
+        {
+          "direction": "south",
+          "file": "01-recoil.png",
+          "pose": "head fin and torso recoil backward"
+        },
+        {
+          "direction": "south",
+          "file": "02-recover.png",
+          "pose": "torso straightens and claws return"
+        },
+        {
+          "direction": "south",
+          "file": "03-ready.png",
+          "pose": "balanced neutral ready posture"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-flinch.png",
+          "pose": "body flinches at impact"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-recoil.png",
+          "pose": "head fin and torso recoil backward"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-recover.png",
+          "pose": "torso straightens and claws return"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral ready posture"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-flinch.png",
+          "pose": "body flinches at impact"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-recoil.png",
+          "pose": "head fin and torso recoil backward"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-recover.png",
+          "pose": "torso straightens and claws return"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral ready posture"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-flinch.png",
+          "pose": "body flinches at impact"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-recoil.png",
+          "pose": "head fin and torso recoil backward"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-recover.png",
+          "pose": "torso straightens and claws return"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral ready posture"
+        },
+        {
+          "direction": "east",
+          "file": "00-flinch.png",
+          "pose": "body flinches at impact"
+        },
+        {
+          "direction": "east",
+          "file": "01-recoil.png",
+          "pose": "head fin and torso recoil backward"
+        },
+        {
+          "direction": "east",
+          "file": "02-recover.png",
+          "pose": "torso straightens and claws return"
+        },
+        {
+          "direction": "east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral ready posture"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-flinch.png",
+          "pose": "body flinches at impact"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-recoil.png",
+          "pose": "head fin and torso recoil backward"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-recover.png",
+          "pose": "torso straightens and claws return"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral ready posture"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-flinch.png",
+          "pose": "body flinches at impact"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-recoil.png",
+          "pose": "head fin and torso recoil backward"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-recover.png",
+          "pose": "torso straightens and claws return"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral ready posture"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-flinch.png",
+          "pose": "body flinches at impact"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-recoil.png",
+          "pose": "head fin and torso recoil backward"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-recover.png",
+          "pose": "torso straightens and claws return"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral ready posture"
+        },
+        {
+          "direction": "north",
+          "file": "00-flinch.png",
+          "pose": "body flinches at impact"
+        },
+        {
+          "direction": "north",
+          "file": "01-recoil.png",
+          "pose": "head fin and torso recoil backward"
+        },
+        {
+          "direction": "north",
+          "file": "02-recover.png",
+          "pose": "torso straightens and claws return"
+        },
+        {
+          "direction": "north",
+          "file": "03-ready.png",
+          "pose": "balanced neutral ready posture"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-flinch.png",
+          "pose": "body flinches at impact"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-recoil.png",
+          "pose": "head fin and torso recoil backward"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-recover.png",
+          "pose": "torso straightens and claws return"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral ready posture"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-flinch.png",
+          "pose": "body flinches at impact"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-recoil.png",
+          "pose": "head fin and torso recoil backward"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-recover.png",
+          "pose": "torso straightens and claws return"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral ready posture"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-flinch.png",
+          "pose": "body flinches at impact"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-recoil.png",
+          "pose": "head fin and torso recoil backward"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-recover.png",
+          "pose": "torso straightens and claws return"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral ready posture"
+        },
+        {
+          "direction": "west",
+          "file": "00-flinch.png",
+          "pose": "body flinches at impact"
+        },
+        {
+          "direction": "west",
+          "file": "01-recoil.png",
+          "pose": "head fin and torso recoil backward"
+        },
+        {
+          "direction": "west",
+          "file": "02-recover.png",
+          "pose": "torso straightens and claws return"
+        },
+        {
+          "direction": "west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral ready posture"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-flinch.png",
+          "pose": "body flinches at impact"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-recoil.png",
+          "pose": "head fin and torso recoil backward"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-recover.png",
+          "pose": "torso straightens and claws return"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral ready posture"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-flinch.png",
+          "pose": "body flinches at impact"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-recoil.png",
+          "pose": "head fin and torso recoil backward"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-recover.png",
+          "pose": "torso straightens and claws return"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral ready posture"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-flinch.png",
+          "pose": "body flinches at impact"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-recoil.png",
+          "pose": "head fin and torso recoil backward"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-recover.png",
+          "pose": "torso straightens and claws return"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral ready posture"
+        }
+      ]
+    },
+    "death": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-fall.png",
+          "pose": "knees buckle and crest droops"
+        },
+        {
+          "direction": "south",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "south",
+          "file": "02-ground.png",
+          "pose": "fully grounded fallen fish humanoid"
+        },
+        {
+          "direction": "south",
+          "file": "03-settle.png",
+          "pose": "still compact corpse with fins and claws visible"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and crest droops"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded fallen fish humanoid"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-settle.png",
+          "pose": "still compact corpse with fins and claws visible"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and crest droops"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded fallen fish humanoid"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-settle.png",
+          "pose": "still compact corpse with fins and claws visible"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and crest droops"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded fallen fish humanoid"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-settle.png",
+          "pose": "still compact corpse with fins and claws visible"
+        },
+        {
+          "direction": "east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and crest droops"
+        },
+        {
+          "direction": "east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "east",
+          "file": "02-ground.png",
+          "pose": "fully grounded fallen fish humanoid"
+        },
+        {
+          "direction": "east",
+          "file": "03-settle.png",
+          "pose": "still compact corpse with fins and claws visible"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and crest droops"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded fallen fish humanoid"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-settle.png",
+          "pose": "still compact corpse with fins and claws visible"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and crest droops"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded fallen fish humanoid"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-settle.png",
+          "pose": "still compact corpse with fins and claws visible"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and crest droops"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded fallen fish humanoid"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-settle.png",
+          "pose": "still compact corpse with fins and claws visible"
+        },
+        {
+          "direction": "north",
+          "file": "00-fall.png",
+          "pose": "knees buckle and crest droops"
+        },
+        {
+          "direction": "north",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "north",
+          "file": "02-ground.png",
+          "pose": "fully grounded fallen fish humanoid"
+        },
+        {
+          "direction": "north",
+          "file": "03-settle.png",
+          "pose": "still compact corpse with fins and claws visible"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and crest droops"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded fallen fish humanoid"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-settle.png",
+          "pose": "still compact corpse with fins and claws visible"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and crest droops"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded fallen fish humanoid"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-settle.png",
+          "pose": "still compact corpse with fins and claws visible"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and crest droops"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded fallen fish humanoid"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-settle.png",
+          "pose": "still compact corpse with fins and claws visible"
+        },
+        {
+          "direction": "west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and crest droops"
+        },
+        {
+          "direction": "west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "west",
+          "file": "02-ground.png",
+          "pose": "fully grounded fallen fish humanoid"
+        },
+        {
+          "direction": "west",
+          "file": "03-settle.png",
+          "pose": "still compact corpse with fins and claws visible"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and crest droops"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded fallen fish humanoid"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-settle.png",
+          "pose": "still compact corpse with fins and claws visible"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and crest droops"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded fallen fish humanoid"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-settle.png",
+          "pose": "still compact corpse with fins and claws visible"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and crest droops"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded fallen fish humanoid"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-settle.png",
+          "pose": "still compact corpse with fins and claws visible"
+        }
+      ]
+    }
+  },
+  "requiredRootFiles": [
+    "meta.json",
+    "poses/"
+  ],
+  "imageQa": "Raw built-in imagegen outputs are candidate source only. Every pose still requires visual identity/facing review, hard-alpha/edge QA, foot-anchor measurement, and atlas QA before acceptance.",
+  "locomotionProfile": "webbed biped steps with fin counterbalance",
+  "progress": {
+    "poseFiles": 40,
+    "expectedPoseFiles": 272,
+    "actionCounts": {
+      "idle": 8,
+      "walk": 8,
+      "attack": 8,
+      "hit": 8,
+      "death": 8
+    },
+    "generatedPoseFiles": 0,
+    "complete": false,
+    "qaApproved": false,
+    "rejectedMetadata": [],
+    "missingPoseFiles": 232,
+    "sourceCandidateFiles": 40
+  },
+  "sourceInventory": {
+    "cellSizes": {
+      "(128, 128)": 40
+    },
+    "alphaTouchesCellEdge": 0,
+    "note": "Lossless baseline source cells retain original dimensions; normalize placement only during atlas packing after visual review."
+  },
+  "generationBlocker": {
+    "type": "imagegen-usage-limit",
+    "resetsAtUnix": 1793288069,
+    "note": "Built-in imagegen returned HTTP429 usage_limit_reached; pending queues terminated, no API fallback used."
+  }
+}

@@ -1,0 +1,147 @@
+{
+    "status":  "ready",
+    "frameCount":  16,
+    "grid":  "4x4",
+    "frameMs":  70,
+    "opening":  [
+                    0,
+                    3
+                ],
+    "loop":  [
+                 4,
+                 11
+             ],
+    "exit":  [
+                 12,
+                 15
+             ],
+    "alphaDiscard":  8,
+    "transparentCellPerimeterPass":  true,
+    "maxContentWidthRatio":  0.29346092503987242,
+    "maxContentHeightRatio":  0.26475279106858052,
+    "normalizationScale":  0.32,
+    "travelAnchor":  [
+                         0.50622171945701355,
+                         0.51979638009049778
+                     ],
+    "impactAnchor":  [
+                         0.501131221719457,
+                         0.48190045248868779
+                     ],
+    "visualOnly":  true,
+    "gameplayDamageChanged":  false,
+    "alphaBounds":  [
+                        {
+                            "index":  0,
+                            "x":  136,
+                            "y":  160,
+                            "width":  39,
+                            "height":  24
+                        },
+                        {
+                            "index":  1,
+                            "x":  125,
+                            "y":  153,
+                            "width":  64,
+                            "height":  37
+                        },
+                        {
+                            "index":  2,
+                            "x":  110,
+                            "y":  148,
+                            "width":  85,
+                            "height":  47
+                        },
+                        {
+                            "index":  3,
+                            "x":  108,
+                            "y":  148,
+                            "width":  91,
+                            "height":  50
+                        },
+                        {
+                            "index":  4,
+                            "x":  114,
+                            "y":  139,
+                            "width":  87,
+                            "height":  50
+                        },
+                        {
+                            "index":  5,
+                            "x":  111,
+                            "y":  139,
+                            "width":  90,
+                            "height":  50
+                        },
+                        {
+                            "index":  6,
+                            "x":  112,
+                            "y":  138,
+                            "width":  88,
+                            "height":  52
+                        },
+                        {
+                            "index":  7,
+                            "x":  110,
+                            "y":  139,
+                            "width":  92,
+                            "height":  53
+                        },
+                        {
+                            "index":  8,
+                            "x":  114,
+                            "y":  136,
+                            "width":  87,
+                            "height":  50
+                        },
+                        {
+                            "index":  9,
+                            "x":  113,
+                            "y":  136,
+                            "width":  88,
+                            "height":  50
+                        },
+                        {
+                            "index":  10,
+                            "x":  118,
+                            "y":  136,
+                            "width":  83,
+                            "height":  51
+                        },
+                        {
+                            "index":  11,
+                            "x":  110,
+                            "y":  135,
+                            "width":  92,
+                            "height":  52
+                        },
+                        {
+                            "index":  12,
+                            "x":  121,
+                            "y":  119,
+                            "width":  78,
+                            "height":  74
+                        },
+                        {
+                            "index":  13,
+                            "x":  119,
+                            "y":  118,
+                            "width":  80,
+                            "height":  83
+                        },
+                        {
+                            "index":  14,
+                            "x":  123,
+                            "y":  122,
+                            "width":  74,
+                            "height":  71
+                        },
+                        {
+                            "index":  15,
+                            "x":  128,
+                            "y":  127,
+                            "width":  64,
+                            "height":  65
+                        }
+                    ]
+}

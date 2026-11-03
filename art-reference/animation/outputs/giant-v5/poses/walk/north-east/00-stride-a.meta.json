@@ -1,0 +1,64 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "giant",
+  "action": "walk",
+  "direction": "north-east",
+  "phase": "00-stride-a",
+  "generator": "built-in image_gen",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sourceRecord": {
+    "kind": "generated-contact-sheet",
+    "source": "source/v5-contact-sheets/walk-00-stride-a-16.png",
+    "sourceCell": {
+      "row": 1,
+      "column": 2,
+      "box": [
+        512,
+        384,
+        768,
+        768
+      ]
+    },
+    "sourceConfidenceBounds": [
+      47,
+      80,
+      212,
+      323
+    ],
+    "processing": {
+      "method": "alpha-confidence-crop-scale-anchor-v1",
+      "threshold": 128,
+      "softEdgeRecoveryRadius": 3,
+      "uniformScale": 0.618557,
+      "anchor": {
+        "x": 192,
+        "y": 288
+      },
+      "scaledSize": [
+        106,
+        154
+      ],
+      "offset": [
+        139,
+        134
+      ]
+    }
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "reviewed": false,
+    "runtimePromotion": false
+  }
+}

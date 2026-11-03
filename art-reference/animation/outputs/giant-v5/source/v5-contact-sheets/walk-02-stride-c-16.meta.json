@@ -1,0 +1,56 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "giant",
+  "action": "walk",
+  "phase": "02-stride-c",
+  "generator": "built-in image_gen",
+  "originalGeneratedFile": "exec-30401b60-ec96-4a8a-a843-ac9c8641d859.png",
+  "originalLocation": "CODEX_HOME/generated_images/",
+  "provenance": "prior-generation",
+  "sourceDimensions": {
+    "width": 1024,
+    "height": 1536
+  },
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "cellWidth": 256,
+    "cellHeight": 384,
+    "directionOrder": [
+      "south",
+      "south-south-east",
+      "south-east",
+      "east-south-east",
+      "east",
+      "east-north-east",
+      "north-east",
+      "north-north-east",
+      "north",
+      "north-north-west",
+      "north-west",
+      "west-north-west",
+      "west",
+      "west-south-west",
+      "south-west",
+      "south-south-west"
+    ]
+  },
+  "alphaAudit": {
+    "zeroPixelFraction": 0.48718,
+    "confidence128PixelFraction": 0.32386,
+    "cornerAlpha": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "review": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "nativePixelArt": false,
+    "approved": false
+  }
+}

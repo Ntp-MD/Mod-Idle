@@ -1,0 +1,1696 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate",
+  "frameCanvas": {
+    "width": 1254,
+    "height": 1254,
+    "anchor": {
+      "x": 627,
+      "y": 1000
+    }
+  },
+  "body": {
+    "idle": {
+      "south": [
+        {
+          "href": "/combat/arpg/equipment-v1/body/idle/south.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 411,
+            "y": 413,
+            "width": 430,
+            "height": 560,
+            "offsetX": 413,
+            "offsetY": 448
+          },
+          "mainGripCell": {
+            "x": 516,
+            "y": 818
+          },
+          "offGripCell": {
+            "x": 743,
+            "y": 817
+          },
+          "gripProvenance": "manual-visual estimate in source pixels; main=anatomical right, offhand=anatomical left",
+          "gripTolerancePx": 14
+        }
+      ],
+      "south-east": [
+        {
+          "href": "/combat/arpg/equipment-v1/body/idle/south-east.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 413,
+            "y": 414,
+            "width": 431,
+            "height": 538,
+            "offsetX": 386,
+            "offsetY": 470
+          },
+          "mainGripCell": {
+            "x": 589,
+            "y": 842
+          },
+          "offGripCell": {
+            "x": 778,
+            "y": 810
+          },
+          "gripProvenance": "manual-visual estimate in source pixels; main=anatomical right, offhand=anatomical left",
+          "gripTolerancePx": 14
+        }
+      ],
+      "east": [
+        {
+          "href": "/combat/arpg/equipment-v1/body/idle/east.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 433,
+            "y": 428,
+            "width": 371,
+            "height": 516,
+            "offsetX": 398,
+            "offsetY": 492
+          },
+          "mainGripCell": {
+            "x": 628,
+            "y": 847
+          },
+          "offGripCell": {
+            "x": 727,
+            "y": 810
+          },
+          "gripProvenance": "manual-visual estimate in source pixels; main=anatomical right, offhand=anatomical left",
+          "gripTolerancePx": 14
+        }
+      ],
+      "north-east": [
+        {
+          "href": "/combat/arpg/equipment-v1/body/idle/north-east.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 401,
+            "y": 420,
+            "width": 417,
+            "height": 538,
+            "offsetX": 379,
+            "offsetY": 472
+          },
+          "mainGripCell": {
+            "x": 760,
+            "y": 830
+          },
+          "offGripCell": {
+            "x": 623,
+            "y": 798
+          },
+          "gripProvenance": "manual-visual estimate in source pixels; main=anatomical right, offhand=anatomical left; hidden hand positions inferred from shoulder/arm pose",
+          "gripTolerancePx": 20
+        }
+      ],
+      "north": [
+        {
+          "href": "/combat/arpg/equipment-v1/body/idle/north.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 454,
+            "y": 428,
+            "width": 346,
+            "height": 510,
+            "offsetX": 455,
+            "offsetY": 496
+          },
+          "mainGripCell": {
+            "x": 769,
+            "y": 834
+          },
+          "offGripCell": {
+            "x": 486,
+            "y": 834
+          },
+          "gripProvenance": "manual-visual estimate in source pixels; main=anatomical right, offhand=anatomical left",
+          "gripTolerancePx": 14
+        }
+      ],
+      "north-west": [
+        {
+          "href": "/combat/arpg/equipment-v1/body/idle/north-west.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 457,
+            "y": 418,
+            "width": 431,
+            "height": 542,
+            "offsetX": 453,
+            "offsetY": 467
+          },
+          "mainGripCell": {
+            "x": 651,
+            "y": 798
+          },
+          "offGripCell": {
+            "x": 495,
+            "y": 832
+          },
+          "gripProvenance": "manual-visual estimate in source pixels; main=anatomical right, offhand=anatomical left; hidden hand positions inferred from shoulder/arm pose",
+          "gripTolerancePx": 20
+        }
+      ],
+      "west": [
+        {
+          "href": "/combat/arpg/equipment-v1/body/idle/west.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 460,
+            "y": 422,
+            "width": 393,
+            "height": 521,
+            "offsetX": 459,
+            "offsetY": 489
+          },
+          "mainGripCell": {
+            "x": 499,
+            "y": 816
+          },
+          "offGripCell": {
+            "x": 647,
+            "y": 851
+          },
+          "gripProvenance": "manual-visual estimate in source pixels; main=anatomical right, offhand=anatomical left; hidden hand positions inferred from shoulder/arm pose",
+          "gripTolerancePx": 14
+        }
+      ],
+      "south-west": [
+        {
+          "href": "/combat/arpg/equipment-v1/body/idle/south-west.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 461,
+            "y": 424,
+            "width": 390,
+            "height": 530,
+            "offsetX": 432,
+            "offsetY": 478
+          },
+          "mainGripCell": {
+            "x": 506,
+            "y": 809
+          },
+          "offGripCell": {
+            "x": 751,
+            "y": 819
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        }
+      ]
+    },
+    "walk": {
+      "east": [
+        {
+          "href": "/combat/arpg/equipment-v1/body/walk/east/00-left-forward.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 398,
+            "y": 420,
+            "width": 446,
+            "height": 543,
+            "offsetX": 385,
+            "offsetY": 465
+          },
+          "mainGripCell": {
+            "x": 522,
+            "y": 815
+          },
+          "offGripCell": {
+            "x": 777,
+            "y": 775
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        },
+        {
+          "href": "/combat/arpg/equipment-v1/body/walk/east/01-right-forward.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 407,
+            "y": 418,
+            "width": 440,
+            "height": 530,
+            "offsetX": 394,
+            "offsetY": 478
+          },
+          "mainGripCell": {
+            "x": 532,
+            "y": 820
+          },
+          "offGripCell": {
+            "x": 787,
+            "y": 795
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        }
+      ],
+      "west": [
+        {
+          "href": "/combat/arpg/equipment-v1/body/walk/west/00-left-forward.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 430,
+            "y": 421,
+            "width": 457,
+            "height": 520,
+            "offsetX": 417,
+            "offsetY": 488
+          },
+          "mainGripCell": {
+            "x": 507,
+            "y": 817
+          },
+          "offGripCell": {
+            "x": 777,
+            "y": 827
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        },
+        {
+          "href": "/combat/arpg/equipment-v1/body/walk/west/01-right-forward.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 419,
+            "y": 417,
+            "width": 548,
+            "height": 560,
+            "offsetX": 406,
+            "offsetY": 448
+          },
+          "mainGripCell": {
+            "x": 522,
+            "y": 786
+          },
+          "offGripCell": {
+            "x": 767,
+            "y": 781
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        }
+      ]
+    },
+    "attack": {
+      "east": [
+        {
+          "href": "/combat/arpg/equipment-v1/body/attack/one-hand/east/00-windup.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 319,
+            "y": 387,
+            "width": 614,
+            "height": 649,
+            "offsetX": 320,
+            "offsetY": 361
+          },
+          "mainGripCell": {
+            "x": 466,
+            "y": 564
+          },
+          "offGripCell": {
+            "x": 821,
+            "y": 684
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        },
+        {
+          "href": "/combat/arpg/equipment-v1/body/attack/one-hand/east/01-contact.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 321,
+            "y": 384,
+            "width": 656,
+            "height": 655,
+            "offsetX": 299,
+            "offsetY": 355
+          },
+          "mainGripCell": {
+            "x": 833,
+            "y": 601
+          },
+          "offGripCell": {
+            "x": 798,
+            "y": 706
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        },
+        {
+          "href": "/combat/arpg/equipment-v1/body/attack/one-hand/east/02-follow-through.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 352,
+            "y": 393,
+            "width": 518,
+            "height": 624,
+            "offsetX": 368,
+            "offsetY": 386
+          },
+          "mainGripCell": {
+            "x": 806,
+            "y": 763
+          },
+          "offGripCell": {
+            "x": 816,
+            "y": 723
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        },
+        {
+          "href": "/combat/arpg/equipment-v1/body/attack/one-hand/east/03-recovery.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 372,
+            "y": 394,
+            "width": 480,
+            "height": 609,
+            "offsetX": 387,
+            "offsetY": 401
+          },
+          "mainGripCell": {
+            "x": 635,
+            "y": 827
+          },
+          "offGripCell": {
+            "x": 825,
+            "y": 712
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        }
+      ],
+      "west": [
+        {
+          "href": "/combat/arpg/equipment-v1/body/attack/one-hand/west/00-windup.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 419,
+            "y": 422,
+            "width": 499,
+            "height": 557,
+            "offsetX": 406,
+            "offsetY": 451
+          },
+          "mainGripCell": {
+            "x": 792,
+            "y": 614
+          },
+          "offGripCell": {
+            "x": 507,
+            "y": 739
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        },
+        {
+          "href": "/combat/arpg/equipment-v1/body/attack/one-hand/west/01-contact.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 291,
+            "y": 425,
+            "width": 689,
+            "height": 554,
+            "offsetX": 278,
+            "offsetY": 454
+          },
+          "mainGripCell": {
+            "x": 392,
+            "y": 679
+          },
+          "offGripCell": {
+            "x": 777,
+            "y": 729
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        },
+        {
+          "href": "/combat/arpg/equipment-v1/body/attack/one-hand/west/02-follow-through.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 400,
+            "y": 400,
+            "width": 662,
+            "height": 582,
+            "offsetX": 387,
+            "offsetY": 426
+          },
+          "mainGripCell": {
+            "x": 547,
+            "y": 756
+          },
+          "offGripCell": {
+            "x": 772,
+            "y": 756
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        },
+        {
+          "href": "/combat/arpg/equipment-v1/body/attack/one-hand/west/03-recovery.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 435,
+            "y": 411,
+            "width": 481,
+            "height": 582,
+            "offsetX": 422,
+            "offsetY": 426
+          },
+          "mainGripCell": {
+            "x": 587,
+            "y": 820
+          },
+          "offGripCell": {
+            "x": 747,
+            "y": 720
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        }
+      ]
+    },
+    "hit": {
+      "east": [
+        {
+          "href": "/combat/arpg/equipment-v1/body/hit/east.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 431,
+            "y": 440,
+            "width": 390,
+            "height": 495,
+            "offsetX": 418,
+            "offsetY": 513
+          },
+          "mainGripCell": {
+            "x": 687,
+            "y": 763
+          },
+          "offGripCell": {
+            "x": 617,
+            "y": 833
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        }
+      ],
+      "west": [
+        {
+          "href": "/combat/arpg/equipment-v1/body/hit/west.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 446,
+            "y": 407,
+            "width": 489,
+            "height": 581,
+            "offsetX": 433,
+            "offsetY": 427
+          },
+          "mainGripCell": {
+            "x": 522,
+            "y": 670
+          },
+          "offGripCell": {
+            "x": 667,
+            "y": 755
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        }
+      ]
+    },
+    "death": {
+      "east": [
+        {
+          "href": "/combat/arpg/equipment-v1/body/death/east.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 281,
+            "y": 631,
+            "width": 693,
+            "height": 275,
+            "offsetX": 268,
+            "offsetY": 733
+          },
+          "mainGripCell": {
+            "x": 487,
+            "y": 952
+          },
+          "offGripCell": {
+            "x": 707,
+            "y": 952
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        }
+      ],
+      "west": [
+        {
+          "href": "/combat/arpg/equipment-v1/body/death/west.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "sourceFrame": {
+            "x": 313,
+            "y": 625,
+            "width": 644,
+            "height": 292,
+            "offsetX": 300,
+            "offsetY": 716
+          },
+          "mainGripCell": {
+            "x": 747,
+            "y": 941
+          },
+          "offGripCell": {
+            "x": 517,
+            "y": 931
+          },
+          "gripProvenance": "visual-estimate",
+          "gripTolerancePx": 40
+        }
+      ]
+    }
+  },
+  "weapons": {
+    "one-handed sword": {
+      "targetLengthBodyHeightRatio": 0.56,
+      "attachmentHand": "main",
+      "views": {
+        "foreshortened": {
+          "href": "/combat/arpg/equipment-v1/weapons/one-handed-sword/foreshortened.png",
+          "imageWidth": 1926,
+          "imageHeight": 817,
+          "rawAlphaBounds": [
+            611,
+            293,
+            1244,
+            685
+          ],
+          "visibleBoundsAlphaGt8": [
+            715,
+            294,
+            1235,
+            576
+          ],
+          "pivotSource": {
+            "x": 803.4,
+            "y": 336.3
+          },
+          "forwardAxisSource": {
+            "x": 0.78,
+            "y": 0.63
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "raised": {
+          "href": "/combat/arpg/equipment-v1/weapons/one-handed-sword/raised.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            33,
+            87,
+            1184,
+            1198
+          ],
+          "visibleBoundsAlphaGt8": [
+            267,
+            341,
+            1077,
+            969
+          ],
+          "pivotSource": {
+            "x": 412.8,
+            "y": 855.96
+          },
+          "forwardAxisSource": {
+            "x": 0.7,
+            "y": -0.71
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "side": {
+          "href": "/combat/arpg/equipment-v1/weapons/one-handed-sword/side.png",
+          "imageWidth": 1926,
+          "imageHeight": 817,
+          "rawAlphaBounds": [
+            210,
+            151,
+            1856,
+            729
+          ],
+          "visibleBoundsAlphaGt8": [
+            630,
+            322,
+            1293,
+            523
+          ],
+          "pivotSource": {
+            "x": 749.34,
+            "y": 422.5
+          },
+          "forwardAxisSource": {
+            "x": 1,
+            "y": 0
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        }
+      }
+    },
+    "one-handed axe": {
+      "targetLengthBodyHeightRatio": 0.52,
+      "attachmentHand": "main",
+      "views": {
+        "foreshortened": {
+          "href": "/combat/arpg/equipment-v1/weapons/one-handed-axe/foreshortened.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            31,
+            37,
+            1218,
+            1213
+          ],
+          "visibleBoundsAlphaGt8": [
+            218,
+            408,
+            1059,
+            980
+          ],
+          "pivotSource": {
+            "x": 360.97,
+            "y": 493.8
+          },
+          "forwardAxisSource": {
+            "x": 0.78,
+            "y": 0.63
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "raised": {
+          "href": "/combat/arpg/equipment-v1/weapons/one-handed-axe/raised.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            33,
+            53,
+            1214,
+            1212
+          ],
+          "visibleBoundsAlphaGt8": [
+            216,
+            267,
+            1176,
+            1024
+          ],
+          "pivotSource": {
+            "x": 388.8,
+            "y": 887.74
+          },
+          "forwardAxisSource": {
+            "x": 0.7,
+            "y": -0.71
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "side": {
+          "href": "/combat/arpg/equipment-v1/weapons/one-handed-axe/side.png",
+          "imageWidth": 1476,
+          "imageHeight": 1065,
+          "rawAlphaBounds": [
+            57,
+            29,
+            1398,
+            1025
+          ],
+          "visibleBoundsAlphaGt8": [
+            234,
+            397,
+            1270,
+            768
+          ],
+          "pivotSource": {
+            "x": 420.48,
+            "y": 582.5
+          },
+          "forwardAxisSource": {
+            "x": 1,
+            "y": 0
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        }
+      }
+    },
+    "dagger": {
+      "targetLengthBodyHeightRatio": 0.38,
+      "attachmentHand": "main",
+      "views": {
+        "raised": {
+          "href": "/combat/arpg/equipment-v1/weapons/dagger/raised.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            49,
+            262,
+            1111,
+            941
+          ],
+          "visibleBoundsAlphaGt8": [
+            483,
+            467,
+            812,
+            804
+          ],
+          "pivotSource": {
+            "x": 542.22,
+            "y": 743.34
+          },
+          "forwardAxisSource": {
+            "x": 0.7,
+            "y": -0.71
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "side": {
+          "href": "/combat/arpg/equipment-v1/weapons/dagger/side.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            0,
+            0,
+            886,
+            698
+          ],
+          "visibleBoundsAlphaGt8": [
+            466,
+            585,
+            795,
+            692
+          ],
+          "pivotSource": {
+            "x": 525.22,
+            "y": 638.5
+          },
+          "forwardAxisSource": {
+            "x": 1,
+            "y": 0
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "foreshortened": {
+          "href": "/combat/arpg/equipment-v1/weapons/dagger/foreshortened.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            33,
+            57,
+            1216,
+            1198
+          ],
+          "visibleBoundsAlphaGt8": [
+            484,
+            541,
+            800,
+            747
+          ],
+          "pivotSource": {
+            "x": 537.72,
+            "y": 571.9
+          },
+          "forwardAxisSource": {
+            "x": 0.78,
+            "y": 0.63
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        }
+      }
+    },
+    "mace": {
+      "targetLengthBodyHeightRatio": 0.46,
+      "attachmentHand": "main",
+      "views": {
+        "foreshortened": {
+          "href": "/combat/arpg/equipment-v1/weapons/mace/foreshortened.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            0,
+            101,
+            1101,
+            1143
+          ],
+          "visibleBoundsAlphaGt8": [
+            440,
+            451,
+            835,
+            805
+          ],
+          "pivotSource": {
+            "x": 507.15,
+            "y": 504.1
+          },
+          "forwardAxisSource": {
+            "x": 0.78,
+            "y": 0.63
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "raised": {
+          "href": "/combat/arpg/equipment-v1/weapons/mace/raised.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            33,
+            39,
+            1216,
+            1196
+          ],
+          "visibleBoundsAlphaGt8": [
+            431,
+            461,
+            853,
+            822
+          ],
+          "pivotSource": {
+            "x": 506.96,
+            "y": 757.02
+          },
+          "forwardAxisSource": {
+            "x": 0.7,
+            "y": -0.71
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "side": {
+          "href": "/combat/arpg/equipment-v1/weapons/mace/side.png",
+          "imageWidth": 2172,
+          "imageHeight": 724,
+          "rawAlphaBounds": [
+            709,
+            152,
+            1508,
+            577
+          ],
+          "visibleBoundsAlphaGt8": [
+            832,
+            249,
+            1356,
+            466
+          ],
+          "pivotSource": {
+            "x": 926.32,
+            "y": 357.5
+          },
+          "forwardAxisSource": {
+            "x": 1,
+            "y": 0
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        }
+      }
+    },
+    "wand": {
+      "targetLengthBodyHeightRatio": 0.37,
+      "attachmentHand": "main",
+      "views": {
+        "foreshortened": {
+          "href": "/combat/arpg/equipment-v1/weapons/wand/foreshortened.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            25,
+            53,
+            1224,
+            1204
+          ],
+          "visibleBoundsAlphaGt8": [
+            362,
+            566,
+            919,
+            752
+          ],
+          "pivotSource": {
+            "x": 456.69,
+            "y": 593.9
+          },
+          "forwardAxisSource": {
+            "x": 0.78,
+            "y": 0.63
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "raised": {
+          "href": "/combat/arpg/equipment-v1/weapons/wand/raised.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            256,
+            17,
+            1079,
+            1117
+          ],
+          "visibleBoundsAlphaGt8": [
+            454,
+            438,
+            863,
+            823
+          ],
+          "pivotSource": {
+            "x": 527.62,
+            "y": 753.7
+          },
+          "forwardAxisSource": {
+            "x": 0.7,
+            "y": -0.71
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "side": {
+          "href": "/combat/arpg/equipment-v1/weapons/wand/side.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            41,
+            117,
+            1176,
+            1125
+          ],
+          "visibleBoundsAlphaGt8": [
+            299,
+            574,
+            980,
+            678
+          ],
+          "pivotSource": {
+            "x": 421.58,
+            "y": 626.0
+          },
+          "forwardAxisSource": {
+            "x": 1,
+            "y": 0
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        }
+      }
+    },
+    "staff": {
+      "targetLengthBodyHeightRatio": 0.7,
+      "attachmentHand": "main",
+      "views": {
+        "foreshortened": {
+          "href": "/combat/arpg/equipment-v1/weapons/staff/foreshortened.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            415,
+            213,
+            1202,
+            1142
+          ],
+          "visibleBoundsAlphaGt8": [
+            422,
+            459,
+            874,
+            805
+          ],
+          "pivotSource": {
+            "x": 498.84,
+            "y": 510.9
+          },
+          "forwardAxisSource": {
+            "x": 0.78,
+            "y": 0.63
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "raised": {
+          "href": "/combat/arpg/equipment-v1/weapons/staff/raised.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            322,
+            334,
+            683,
+            884
+          ],
+          "visibleBoundsAlphaGt8": [
+            586,
+            336,
+            680,
+            879
+          ],
+          "pivotSource": {
+            "x": 602.92,
+            "y": 781.26
+          },
+          "forwardAxisSource": {
+            "x": 0.7,
+            "y": -0.71
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "side": {
+          "href": "/combat/arpg/equipment-v1/weapons/staff/side.png",
+          "imageWidth": 2079,
+          "imageHeight": 756,
+          "rawAlphaBounds": [
+            777,
+            150,
+            1501,
+            515
+          ],
+          "visibleBoundsAlphaGt8": [
+            781,
+            343,
+            1299,
+            410
+          ],
+          "pivotSource": {
+            "x": 1040.0,
+            "y": 376.5
+          },
+          "forwardAxisSource": {
+            "x": 1,
+            "y": 0
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        }
+      }
+    },
+    "spear": {
+      "targetLengthBodyHeightRatio": 0.72,
+      "attachmentHand": "main",
+      "views": {
+        "foreshortened": {
+          "href": "/combat/arpg/equipment-v1/weapons/spear/foreshortened.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            31,
+            36,
+            1168,
+            1228
+          ],
+          "visibleBoundsAlphaGt8": [
+            135,
+            434,
+            1120,
+            921
+          ],
+          "pivotSource": {
+            "x": 302.45,
+            "y": 507.05
+          },
+          "forwardAxisSource": {
+            "x": 0.78,
+            "y": 0.63
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "raised": {
+          "href": "/combat/arpg/equipment-v1/weapons/spear/raised.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            33,
+            102,
+            1119,
+            1101
+          ],
+          "visibleBoundsAlphaGt8": [
+            233,
+            251,
+            1056,
+            1013
+          ],
+          "pivotSource": {
+            "x": 381.14,
+            "y": 875.84
+          },
+          "forwardAxisSource": {
+            "x": 0.7,
+            "y": -0.71
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "side": {
+          "href": "/combat/arpg/equipment-v1/weapons/spear/side.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            105,
+            117,
+            973,
+            888
+          ],
+          "visibleBoundsAlphaGt8": [
+            375,
+            605,
+            881,
+            647
+          ],
+          "pivotSource": {
+            "x": 506.56,
+            "y": 626.0
+          },
+          "forwardAxisSource": {
+            "x": 1,
+            "y": 0
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        }
+      }
+    },
+    "two-handed sword": {
+      "targetLengthBodyHeightRatio": 0.72,
+      "attachmentHand": "main",
+      "views": {
+        "foreshortened": {
+          "href": "/combat/arpg/equipment-v1/weapons/two-handed-sword/foreshortened.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            154,
+            103,
+            1055,
+            1117
+          ],
+          "visibleBoundsAlphaGt8": [
+            362,
+            479,
+            893,
+            858
+          ],
+          "pivotSource": {
+            "x": 452.27,
+            "y": 535.85
+          },
+          "forwardAxisSource": {
+            "x": 0.78,
+            "y": 0.63
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "raised": {
+          "href": "/combat/arpg/equipment-v1/weapons/two-handed-sword/raised.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            65,
+            40,
+            1234,
+            1212
+          ],
+          "visibleBoundsAlphaGt8": [
+            388,
+            403,
+            861,
+            869
+          ],
+          "pivotSource": {
+            "x": 473.14,
+            "y": 785.12
+          },
+          "forwardAxisSource": {
+            "x": 0.7,
+            "y": -0.71
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "side": {
+          "href": "/combat/arpg/equipment-v1/weapons/two-handed-sword/side.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            178,
+            136,
+            1192,
+            1051
+          ],
+          "visibleBoundsAlphaGt8": [
+            378,
+            578,
+            875,
+            677
+          ],
+          "pivotSource": {
+            "x": 527.1,
+            "y": 627.5
+          },
+          "forwardAxisSource": {
+            "x": 1,
+            "y": 0
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        }
+      }
+    },
+    "two-handed axe": {
+      "targetLengthBodyHeightRatio": 0.69,
+      "attachmentHand": "main",
+      "views": {
+        "foreshortened": {
+          "href": "/combat/arpg/equipment-v1/weapons/two-handed-axe/foreshortened.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            25,
+            126,
+            1192,
+            1150
+          ],
+          "visibleBoundsAlphaGt8": [
+            170,
+            288,
+            1165,
+            916
+          ],
+          "pivotSource": {
+            "x": 339.15,
+            "y": 382.2
+          },
+          "forwardAxisSource": {
+            "x": 0.78,
+            "y": 0.63
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "raised": {
+          "href": "/combat/arpg/equipment-v1/weapons/two-handed-axe/raised.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            49,
+            99,
+            1234,
+            1223
+          ],
+          "visibleBoundsAlphaGt8": [
+            264,
+            220,
+            1118,
+            1061
+          ],
+          "pivotSource": {
+            "x": 417.72,
+            "y": 909.62
+          },
+          "forwardAxisSource": {
+            "x": 0.7,
+            "y": -0.71
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "side": {
+          "href": "/combat/arpg/equipment-v1/weapons/two-handed-axe/side.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            0,
+            39,
+            1208,
+            1228
+          ],
+          "visibleBoundsAlphaGt8": [
+            174,
+            487,
+            1093,
+            830
+          ],
+          "pivotSource": {
+            "x": 394.56,
+            "y": 658.5
+          },
+          "forwardAxisSource": {
+            "x": 1,
+            "y": 0
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        }
+      }
+    },
+    "bow": {
+      "targetLengthBodyHeightRatio": 0.57,
+      "attachmentHand": "offhand",
+      "views": {
+        "drawn": {
+          "href": "/combat/arpg/equipment-v1/weapons/bow/drawn.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            95,
+            95,
+            1053,
+            1150
+          ],
+          "visibleBoundsAlphaGt8": [
+            517,
+            433,
+            783,
+            822
+          ],
+          "pivotSource": {
+            "x": 650.0,
+            "y": 635.28
+          },
+          "forwardAxisSource": {
+            "x": 0,
+            "y": -1
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "ready": {
+          "href": "/combat/arpg/equipment-v1/weapons/bow/ready.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            97,
+            37,
+            1232,
+            1228
+          ],
+          "visibleBoundsAlphaGt8": [
+            581,
+            433,
+            682,
+            821
+          ],
+          "pivotSource": {
+            "x": 631.5,
+            "y": 627.0
+          },
+          "forwardAxisSource": {
+            "x": 0,
+            "y": -1
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "released": {
+          "href": "/combat/arpg/equipment-v1/weapons/bow/released.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            218,
+            35,
+            985,
+            1085
+          ],
+          "visibleBoundsAlphaGt8": [
+            576,
+            380,
+            700,
+            860
+          ],
+          "pivotSource": {
+            "x": 638.0,
+            "y": 629.6
+          },
+          "forwardAxisSource": {
+            "x": 0,
+            "y": -1
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        }
+      }
+    },
+    "crossbow": {
+      "targetLengthBodyHeightRatio": 0.56,
+      "attachmentHand": "offhand",
+      "views": {
+        "drawn": {
+          "href": "/combat/arpg/equipment-v1/weapons/crossbow/drawn.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            41,
+            201,
+            1218,
+            1067
+          ],
+          "visibleBoundsAlphaGt8": [
+            270,
+            469,
+            1008,
+            789
+          ],
+          "pivotSource": {
+            "x": 587.34,
+            "y": 635.4
+          },
+          "forwardAxisSource": {
+            "x": 1,
+            "y": 0
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "ready": {
+          "href": "/combat/arpg/equipment-v1/weapons/crossbow/ready.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            33,
+            119,
+            1240,
+            1059
+          ],
+          "visibleBoundsAlphaGt8": [
+            401,
+            552,
+            858,
+            753
+          ],
+          "pivotSource": {
+            "x": 597.51,
+            "y": 652.5
+          },
+          "forwardAxisSource": {
+            "x": 1,
+            "y": 0
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        },
+        "released": {
+          "href": "/combat/arpg/equipment-v1/weapons/crossbow/released.png",
+          "imageWidth": 1254,
+          "imageHeight": 1254,
+          "rawAlphaBounds": [
+            236,
+            134,
+            1230,
+            1166
+          ],
+          "visibleBoundsAlphaGt8": [
+            265,
+            476,
+            1025,
+            803
+          ],
+          "pivotSource": {
+            "x": 591.8,
+            "y": 646.04
+          },
+          "forwardAxisSource": {
+            "x": 1,
+            "y": 0
+          },
+          "pivotProvenance": "visual estimate from inspected image; validate in scene",
+          "tolerancePx": 24
+        }
+      }
+    }
+  },
+  "shield": {
+    "targetHeightBodyHeightRatio": 0.34,
+    "attachmentHand": "off",
+    "views": {
+      "front": {
+        "href": "/combat/arpg/equipment-v1/shield/front.png",
+        "imageWidth": 1254,
+        "imageHeight": 1254,
+        "rawAlphaBounds": [
+          178,
+          53,
+          1136,
+          842
+        ],
+        "visibleBoundsAlphaGt8": [
+          545,
+          539,
+          711,
+          727
+        ],
+        "pivotSource": {
+          "x": 628.0,
+          "y": 648.04
+        },
+        "pivotProvenance": "visual estimate from inspected image; validate in scene",
+        "tolerancePx": 24
+      },
+      "side": {
+        "href": "/combat/arpg/equipment-v1/shield/side.png",
+        "imageWidth": 1254,
+        "imageHeight": 1254,
+        "rawAlphaBounds": [
+          152,
+          69,
+          1144,
+          1181
+        ],
+        "visibleBoundsAlphaGt8": [
+          574,
+          536,
+          680,
+          727
+        ],
+        "pivotSource": {
+          "x": 627.0,
+          "y": 646.78
+        },
+        "pivotProvenance": "visual estimate from inspected image; validate in scene",
+        "tolerancePx": 24
+      },
+      "stowed": {
+        "href": "/combat/arpg/equipment-v1/shield/stowed.png",
+        "imageWidth": 1254,
+        "imageHeight": 1254,
+        "rawAlphaBounds": [
+          97,
+          119,
+          864,
+          867
+        ],
+        "visibleBoundsAlphaGt8": [
+          550,
+          536,
+          709,
+          722
+        ],
+        "pivotSource": {
+          "x": 629.5,
+          "y": 643.88
+        },
+        "pivotProvenance": "visual estimate from inspected image; validate in scene",
+        "tolerancePx": 24
+      }
+    }
+  },
+  "notes": [
+    "Each body pose and equipment view is a standalone first-party PNG.",
+    "Crop uses alpha >8; raw alpha bounds remain reported. Source pixels are unchanged.",
+    "Main/offhand socket estimates need integrated alignment review.",
+    "Current candidate attack body profiles are one-hand east/west; other weapon profiles currently share these body poses with type-specific equipment view selection."
+  ],
+  "bodySkillOverrides": {
+    "attack.shield_bash": {
+      "east": {
+        "href": "/combat/arpg/equipment-v1/body/skill/shield-bash/east.png",
+        "imageWidth": 1254,
+        "imageHeight": 1254,
+        "sourceFrame": {
+          "x": 346,
+          "y": 447,
+          "width": 554,
+          "height": 474,
+          "offsetX": 348,
+          "offsetY": 533
+        },
+        "equipmentBaked": true,
+        "footAnchorSource": {
+          "x": 625,
+          "y": 914
+        },
+        "equipmentBakedIds": [
+          "one-handed sword",
+          "round wooden shield"
+        ]
+      },
+      "west": {
+        "href": "/combat/arpg/equipment-v1/body/skill/shield-bash/west.png",
+        "imageWidth": 1254,
+        "imageHeight": 1254,
+        "sourceFrame": {
+          "x": 324,
+          "y": 448,
+          "width": 575,
+          "height": 480,
+          "offsetX": 341,
+          "offsetY": 527
+        },
+        "equipmentBaked": true,
+        "footAnchorSource": {
+          "x": 610,
+          "y": 921
+        },
+        "equipmentBakedIds": [
+          "one-handed sword",
+          "round wooden shield"
+        ]
+      }
+    }
+  }
+}

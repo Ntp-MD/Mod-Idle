@@ -1,0 +1,62 @@
+{
+    "status":  "candidate-source-review-required",
+    "speciesId":  "minotaur",
+    "generator":  "built-in image_gen",
+    "sourceImageId":  "exec-b49db6f1-eafa-4818-999a-c7472320a01d.png",
+    "file":  "source/v5-contact-sheets/attack-03-recovery-16.png",
+    "action":  "attack",
+    "phase":  "03-recovery",
+    "phasePrompt":  "Lower axe to guard and unwind to a balanced stance; hooves planted; fixed root.",
+    "sha256":  "d2c5759141b5eaef0c25e25335ad1920a3e0b896875cc5d210f709950607b8ad",
+    "transparentBackgroundRequested":  true,
+    "sourceCanvas":  {
+                         "width":  1024,
+                         "height":  1536,
+                         "mode":  "RGBA"
+                     },
+    "cellCanvas":  {
+                       "width":  256,
+                       "height":  384
+                   },
+    "directionOrder":  [
+                           "south",
+                           "south-south-east",
+                           "south-east",
+                           "east-south-east",
+                           "east",
+                           "east-north-east",
+                           "north-east",
+                           "north-north-east",
+                           "north",
+                           "north-north-west",
+                           "north-west",
+                           "west-north-west",
+                           "west",
+                           "west-south-west",
+                           "south-west",
+                           "south-south-west"
+                       ],
+    "layout":  {
+                   "columns":  4,
+                   "rows":  4,
+                   "cellOrder":  "row-major"
+               },
+    "targetFrameCanvas":  {
+                              "width":  384,
+                              "height":  384
+                          },
+    "targetAnchor":  {
+                         "x":  192,
+                         "y":  288,
+                         "provenance":  "inherited Minotaur source anchor; 16-direction alignment remains unreviewed"
+                     },
+    "qa":  {
+               "identity":  false,
+               "facing":  false,
+               "pose":  false,
+               "alphaEdges":  false,
+               "anchor":  false,
+               "atlas":  false,
+               "runtimePromotion":  false
+           }
+}

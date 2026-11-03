@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "action": "walk",
+  "direction": "north-west",
+  "requestedFacingDegrees": 225,
+  "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance",
+  "identityRef": "../../../../reference.png",
+  "facingSourceRef": "../../idle/north-west.png",
+  "phaseSourceRef": "../../walk/west/00-stride-a.png",
+  "bakedWeapon": "spear",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:\\Users\\disda\\.codex\\generated_images\\01a17d4d-3b5a-72a1-83b1-947b6fe9c9d9\\exec-7c002aea-227e-48f4-b6c3-69274e87f05a.png",
+  "sourcePixelsModified": false,
+  "status": "candidate-review",
+  "qa": {
+    "exactFacingVerified": false,
+    "hardAlphaVerified": false,
+    "footAnchorVerified": false,
+    "phaseContinuityVerified": false,
+    "productionApproved": false
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "vampire",
+  "action": "attack",
+  "direction": "south-south-east",
+  "pose": "01-release",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/attack-01-release-16.png",
+  "sourceImageId": "exec-e51fde7c-1a17-4fe0-8136-48e03ef7f19e.png",
+  "sourceCell": {
+    "row": 0,
+    "column": 1,
+    "box": [
+      256,
+      0,
+      512,
+      384
+    ],
+    "confidenceBoundsInCell": [
+      46,
+      128,
+      198,
+      290
+    ],
+    "sourceConfidenceBoundsHeight": 162,
+    "targetReferenceMedianHeight": 162.0,
+    "uniformScale": 1.0
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "visual-approved animation/meta.json; 16-direction measurement pending",
+    "visualMeasurementPending": true
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "uniformScale": 1.0,
+    "scaleReference": "median alpha-bound height of preserved approved source frames for this action/phase"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "minotaur",
+  "action": "attack",
+  "direction": "south-west",
+  "pose": "02-follow-through",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/attack-02-follow-through-16.png",
+  "sourceImageId": "exec-ac9dcd9d-eaa8-4a91-b25b-fc58460c1ccd.png",
+  "sourceCell": {
+    "row": 3,
+    "column": 2,
+    "direction": "south-west"
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited Minotaur source anchor; visual measurement pending"
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "scaleReference": "median alpha-bound height across the matching 16-direction contact sheet",
+    "confidenceBoundsInCell": [
+      0,
+      36,
+      231,
+      352
+    ],
+    "recoveredBoundsInCell": [
+      0,
+      33,
+      234,
+      355
+    ],
+    "targetVisualFootBaselineY": 288,
+    "targetReferenceMedianHeight": 276.0,
+    "uniformScale": 0.857143
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  },
+  "sha256": "ea3f71a355d8b103ce7193ece37127209dc96e9d10a09cc2a9e0112323e16b6d"
+}

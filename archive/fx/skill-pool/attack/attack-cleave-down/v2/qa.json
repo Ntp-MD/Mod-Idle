@@ -1,0 +1,87 @@
+{
+  "frameCount": 16,
+  "alphaPerimeterPass": true,
+  "atlasSha256": "4cf13edadcb1c57df5f4c6d069ae52e544303775f3156ff64ef554a8e7424745",
+  "frames": [
+    {
+      "frame": 0,
+      "pixels": 13545,
+      "edgeAlpha": 0
+    },
+    {
+      "frame": 1,
+      "pixels": 13038,
+      "edgeAlpha": 0
+    },
+    {
+      "frame": 2,
+      "pixels": 12119,
+      "edgeAlpha": 0
+    },
+    {
+      "frame": 3,
+      "pixels": 10950,
+      "edgeAlpha": 0
+    },
+    {
+      "frame": 4,
+      "pixels": 9962,
+      "edgeAlpha": 0
+    },
+    {
+      "frame": 5,
+      "pixels": 8917,
+      "edgeAlpha": 0
+    },
+    {
+      "frame": 6,
+      "pixels": 8030,
+      "edgeAlpha": 0
+    },
+    {
+      "frame": 7,
+      "pixels": 7315,
+      "edgeAlpha": 0
+    },
+    {
+      "frame": 8,
+      "pixels": 6614,
+      "edgeAlpha": 0
+    },
+    {
+      "frame": 9,
+      "pixels": 6015,
+      "edgeAlpha": 0
+    },
+    {
+      "frame": 10,
+      "pixels": 5734,
+      "edgeAlpha": 0
+    },
+    {
+      "frame": 11,
+      "pixels": 4914,
+      "edgeAlpha": 0
+    },
+    {
+      "frame": 12,
+      "pixels": 4872,
+      "edgeAlpha": 0
+    },
+    {
+      "frame": 13,
+      "pixels": 4586,
+      "edgeAlpha": 0
+    },
+    {
+      "frame": 14,
+      "pixels": 3591,
+      "edgeAlpha": 0
+    },
+    {
+      "frame": 15,
+      "pixels": 0,
+      "edgeAlpha": 0
+    }
+  ]
+}

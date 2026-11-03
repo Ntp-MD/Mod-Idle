@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "assetType": "clean-body-idle",
+  "facing": "east",
+  "source": "east.png",
+  "sourceDimensions": {
+    "width": 1254,
+    "height": 1254
+  },
+  "alphaBoundsExclusive": [
+    0,
+    39,
+    1210,
+    1182
+  ],
+  "visibleBoundsAlphaAbove8Exclusive": [
+    433,
+    428,
+    804,
+    944
+  ],
+  "alphaBoundsProvenance": "Pillow read-only alpha measurement",
+  "footAnchor": {
+    "x": 662,
+    "y": 936
+  },
+  "mainHandCenter": {
+    "x": 663,
+    "y": 783
+  },
+  "offhandCenter": {
+    "x": 762,
+    "y": 746
+  },
+  "gripProvenance": "manual-visual estimate in source pixels; main=anatomical right, offhand=anatomical left",
+  "estimateTolerancePx": 14,
+  "qa": {
+    "visuallyInspected": true,
+    "emptyHands": true,
+    "wholeBodyVisible": true,
+    "canvasPerimeterAlphaMaximum": 1,
+    "sourcePixelsModified": false
+  }
+}

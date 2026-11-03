@@ -1,0 +1,25 @@
+{
+  "status": "preserved-approved-source-pose",
+  "speciesId": "goblin",
+  "action": "death",
+  "direction": "west",
+  "pose": "00-fall",
+  "source": "art-reference/monsters/humanoid/goblin/animation/poses/death/west/00-fall.png",
+  "sourceMetadata": "art-reference/monsters/humanoid/goblin/animation/poses/death/west/00-fall.meta.json",
+  "sourcePixelsModified": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "copied from approved Goblin animation metadata"
+  },
+  "qa": {
+    "sourcePoseApproved": true,
+    "sixteenDirectionAtlas": false,
+    "visualReview": false,
+    "runtimePromotion": false
+  }
+}

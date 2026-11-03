@@ -1,0 +1,426 @@
+{
+  "schemaVersion": 1,
+  "status": "user-reference",
+  "species": "imp",
+  "title": "Little Demon",
+  "source": {
+    "provider": "itch.io",
+    "url": "https://img.itch.zone/aW1nLzMxMjEzOTcyLmdpZg==/original/NAhbT8.gif",
+    "kind": "animated preview card",
+    "sourceCanvas": [
+      144,
+      144
+    ]
+  },
+  "extraction": {
+    "removedOverlays": [
+      "ornamental card frame",
+      "in-card species title",
+      "clip caption",
+      "PREVIEW wash"
+    ],
+    "method": "invert the wash blend shown=0.45*[238, 225, 186]+0.55*underlying, then drop ground-coloured pixels and keep body-connected components",
+    "washBlend": {
+      "alpha": 0.45,
+      "colour": [
+        238,
+        225,
+        186
+      ]
+    },
+    "background": "transparent",
+    "alignment": "each clip shares one crop box; frames keep their in-clip offsets so the ground line is fixed"
+  },
+  "clips": {
+    "idle": {
+      "file": "clips/idle.png",
+      "frames": 6,
+      "cell": [
+        63,
+        63
+      ],
+      "sourceBox": [
+        33,
+        26,
+        96,
+        89
+      ],
+      "frameMs": 305,
+      "durations": [
+        380,
+        330,
+        290,
+        290,
+        290,
+        250
+      ],
+      "loop": true,
+      "tightBounds": [
+        [
+          7,
+          0,
+          62,
+          62
+        ],
+        [
+          2,
+          0,
+          62,
+          62
+        ],
+        [
+          1,
+          1,
+          62,
+          62
+        ],
+        [
+          0,
+          1,
+          62,
+          62
+        ],
+        [
+          1,
+          0,
+          62,
+          62
+        ],
+        [
+          6,
+          0,
+          62,
+          62
+        ]
+      ]
+    },
+    "walk": {
+      "file": "clips/walk.png",
+      "frames": 8,
+      "cell": [
+        56,
+        65
+      ],
+      "sourceBox": [
+        40,
+        24,
+        96,
+        89
+      ],
+      "frameMs": 104,
+      "durations": [
+        120,
+        90,
+        120,
+        130,
+        120,
+        90,
+        80,
+        80
+      ],
+      "loop": true,
+      "tightBounds": [
+        [
+          0,
+          0,
+          55,
+          64
+        ],
+        [
+          2,
+          2,
+          55,
+          64
+        ],
+        [
+          0,
+          2,
+          55,
+          64
+        ],
+        [
+          0,
+          0,
+          55,
+          64
+        ],
+        [
+          2,
+          2,
+          55,
+          64
+        ],
+        [
+          0,
+          2,
+          55,
+          63
+        ],
+        [
+          0,
+          0,
+          55,
+          63
+        ],
+        [
+          0,
+          0,
+          55,
+          64
+        ]
+      ]
+    },
+    "attack": {
+      "file": "clips/attack.png",
+      "frames": 11,
+      "cell": [
+        69,
+        63
+      ],
+      "sourceBox": [
+        39,
+        26,
+        108,
+        89
+      ],
+      "frameMs": 40,
+      "durations": [
+        40,
+        40,
+        40,
+        30,
+        20,
+        40,
+        40,
+        30,
+        30,
+        40,
+        90
+      ],
+      "loop": false,
+      "tightBounds": [
+        [
+          1,
+          0,
+          56,
+          62
+        ],
+        [
+          0,
+          1,
+          55,
+          62
+        ],
+        [
+          0,
+          1,
+          59,
+          62
+        ],
+        [
+          1,
+          1,
+          60,
+          62
+        ],
+        [
+          1,
+          1,
+          60,
+          62
+        ],
+        [
+          1,
+          1,
+          68,
+          62
+        ],
+        [
+          1,
+          1,
+          66,
+          62
+        ],
+        [
+          1,
+          1,
+          66,
+          62
+        ],
+        [
+          0,
+          1,
+          59,
+          62
+        ],
+        [
+          1,
+          0,
+          57,
+          62
+        ],
+        [
+          1,
+          0,
+          56,
+          62
+        ]
+      ]
+    },
+    "hurt": {
+      "file": "clips/hit.png",
+      "frames": 4,
+      "cell": [
+        60,
+        63
+      ],
+      "sourceBox": [
+        37,
+        26,
+        97,
+        89
+      ],
+      "frameMs": 135,
+      "durations": [
+        120,
+        130,
+        170,
+        120
+      ],
+      "loop": false,
+      "tightBounds": [
+        [
+          3,
+          0,
+          58,
+          62
+        ],
+        [
+          0,
+          1,
+          59,
+          62
+        ],
+        [
+          0,
+          1,
+          59,
+          62
+        ],
+        [
+          3,
+          0,
+          58,
+          62
+        ]
+      ]
+    },
+    "death": {
+      "file": "clips/death.png",
+      "frames": 10,
+      "cell": [
+        90,
+        72
+      ],
+      "sourceBox": [
+        27,
+        26,
+        117,
+        98
+      ],
+      "frameMs": 174,
+      "durations": [
+        110,
+        100,
+        110,
+        110,
+        100,
+        50,
+        50,
+        50,
+        60,
+        1000
+      ],
+      "loop": false,
+      "tightBounds": [
+        [
+          13,
+          0,
+          68,
+          62
+        ],
+        [
+          13,
+          1,
+          68,
+          62
+        ],
+        [
+          12,
+          7,
+          67,
+          63
+        ],
+        [
+          10,
+          5,
+          67,
+          63
+        ],
+        [
+          10,
+          8,
+          71,
+          63
+        ],
+        [
+          9,
+          10,
+          73,
+          63
+        ],
+        [
+          9,
+          24,
+          82,
+          65
+        ],
+        [
+          5,
+          35,
+          89,
+          71
+        ],
+        [
+          0,
+          35,
+          89,
+          71
+        ],
+        [
+          0,
+          35,
+          87,
+          71
+        ]
+      ]
+    }
+  },
+  "review": {
+    "frameMs": {
+      "idle": 200,
+      "walk": 130,
+      "attack": 55,
+      "hurt": 90,
+      "death": 110
+    },
+    "impactFrame": {
+      "attack": 6
+    },
+    "displayHeight": 224,
+    "facing": "east",
+    "notes": [
+      "Source durations over-emphasise held poses; review playback uses an even beat."
+    ]
+  }
+}

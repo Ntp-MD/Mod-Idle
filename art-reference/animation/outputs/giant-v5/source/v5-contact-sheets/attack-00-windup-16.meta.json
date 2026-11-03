@@ -1,0 +1,56 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "giant",
+  "action": "attack",
+  "phase": "00-windup",
+  "generator": "built-in image_gen",
+  "originalGeneratedFile": "exec-1b272f0e-9f0b-4749-878c-be6e24d3659c.png",
+  "originalLocation": "CODEX_HOME/generated_images/",
+  "provenance": "prior-generation",
+  "sourceDimensions": {
+    "width": 1024,
+    "height": 1536
+  },
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "cellWidth": 256,
+    "cellHeight": 384,
+    "directionOrder": [
+      "south",
+      "south-south-east",
+      "south-east",
+      "east-south-east",
+      "east",
+      "east-north-east",
+      "north-east",
+      "north-north-east",
+      "north",
+      "north-north-west",
+      "north-west",
+      "west-north-west",
+      "west",
+      "west-south-west",
+      "south-west",
+      "south-south-west"
+    ]
+  },
+  "alphaAudit": {
+    "zeroPixelFraction": 0.58405,
+    "confidence128PixelFraction": 0.31719,
+    "cornerAlpha": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "review": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "nativePixelArt": false,
+    "approved": false
+  }
+}

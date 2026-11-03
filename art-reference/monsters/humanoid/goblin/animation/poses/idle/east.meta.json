@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "action": "idle",
+  "direction": "east",
+  "generator": "Lossless extraction from visually-approved root Goblin atlas",
+  "source": "../../../../atlas/animation.png",
+  "sourcePixelsModified": false,
+  "sourceCellIndex": 2,
+  "sourceCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "visibleAlphaGt8BoundsExclusive": [
+    159,
+    141,
+    250,
+    289
+  ],
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "copied from approved Goblin animation meta",
+  "bakedWeapon": "spear",
+  "status": "approved-source-pose"
+}

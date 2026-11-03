@@ -1,0 +1,21 @@
+{
+  "status": "candidate-review",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-829c-7060-99a8-9918a3b8d766\\exec-dce11624-254a-43cf-8a88-7c38be2aef9d.png",
+  "generator": "built-in-imagegen",
+  "action": "attack",
+  "direction": "north",
+  "angleDegrees": 180,
+  "phase": "02-follow-through.png",
+  "qa": {
+    "visual": false,
+    "facing": false,
+    "phase": false,
+    "atlas": false,
+    "anchor": false
+  },
+  "visualReview": {
+    "status": "failed-weapon-hand-and-phase",
+    "review": "Spear held by anatomicalLEFT hand and extends screen-left; fails canonicalRIGHT hand and committednorththrust follow-through.",
+    "requiresRegeneration": true
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "direction": "north-north-east",
+  "angleDegrees": 157.5,
+  "action": "idle",
+  "sourcePixelsModified": false,
+  "visualReviewRequired": true,
+  "measurement": {
+    "canvas": [
+      1254,
+      1254
+    ],
+    "alphaBoundsExclusive": [
+      25,
+      31,
+      1232,
+      1214
+    ],
+    "alphaLevelCount": 256,
+    "sourcePixelsModified": false,
+    "anyAlphaTouchesCanvasEdge": false,
+    "alpha128BoundsExclusive": [
+      420,
+      364,
+      877,
+      959
+    ],
+    "alpha128TouchesCanvasEdge": false
+  },
+  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review"
+}

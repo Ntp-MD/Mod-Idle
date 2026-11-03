@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "action": "walk",
+  "direction": "north",
+  "requestedFacingDegrees": 180,
+  "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate",
+  "identityRef": "../../../../reference.png",
+  "facingSourceRef": "../../idle/north.png",
+  "phaseSourceRef": "../../walk/east/01-stride-b.png",
+  "bakedWeapon": "spear",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:\\Users\\disda\\.codex\\generated_images\\01a17d4d-3b5a-72a1-83b1-947b6fe9c9d9\\exec-5e144028-9db7-46a3-bc40-2194586b04e7.png",
+  "sourcePixelsModified": false,
+  "status": "candidate-review",
+  "qa": {
+    "exactFacingVerified": false,
+    "hardAlphaVerified": false,
+    "footAnchorVerified": false,
+    "phaseContinuityVerified": false,
+    "productionApproved": false
+  }
+}

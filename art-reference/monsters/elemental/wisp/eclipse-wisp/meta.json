@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "status": "user-reference",
+  "species": "wisp",
+  "title": "Eclipse Wisp",
+  "source": {
+    "provider": "itch.io",
+    "url": "https://img.itch.zone/aW1nLzMxMjEzOTk0LmdpZg==/original/Lm6Etr.gif",
+    "kind": "animated preview card",
+    "sourceCanvas": [
+      144,
+      144
+    ]
+  },
+  "extraction": {
+    "removedOverlays": [
+      "ornamental card frame",
+      "in-card species title",
+      "clip caption",
+      "PREVIEW wash"
+    ],
+    "method": "invert the wash blend shown=0.45*[238, 225, 186]+0.55*underlying, then drop ground-coloured pixels and keep body-connected components inside the motion range",
+    "washBlend": {
+      "alpha": 0.45,
+      "colour": [
+        238,
+        225,
+        186
+      ]
+    },
+    "background": "transparent",
+    "alignment": "each clip shares one crop box; frames keep their in-clip offsets so the ground line is fixed"
+  },
+  "clips": {
+    "idle": {
+      "file": "clips/idle.png",
+      "frames": 6,
+      "cell": [
+        50,
+        74
+      ],
+      "sourceBox": [
+        41,
+        24,
+        91,
+        98
+      ],
+      "frameMs": 173,
+      "durations": [
+        500,
+        130,
+        80,
+        80,
+        130,
+        120
+      ],
+      "loop": true
+    },
+    "walk": {
+      "file": "clips/walk.png",
+      "frames": 8,
+      "cell": [
+        72,
+        61
+      ],
+      "sourceBox": [
+        41,
+        31,
+        113,
+        92
+      ],
+      "frameMs": 140,
+      "durations": [
+        140,
+        140,
+        140,
+        140,
+        140,
+        140,
+        140,
+        140
+      ],
+      "loop": true
+    },
+    "attack": {
+      "file": "clips/attack.png",
+      "frames": 8,
+      "cell": [
+        82,
+        61
+      ],
+      "sourceBox": [
+        26,
+        31,
+        108,
+        92
+      ],
+      "frameMs": 81,
+      "durations": [
+        80,
+        80,
+        120,
+        60,
+        60,
+        70,
+        80,
+        100
+      ],
+      "loop": false,
+      "impactFrame": 4
+    },
+    "death": {
+      "file": "clips/death.png",
+      "frames": 20,
+      "cell": [
+        92,
+        107
+      ],
+      "sourceBox": [
+        26,
+        31,
+        118,
+        138
+      ],
+      "frameMs": 70,
+      "durations": [
+        40,
+        60,
+        90,
+        60,
+        70,
+        70,
+        90,
+        40,
+        60,
+        70,
+        60,
+        70,
+        70,
+        70,
+        70,
+        70,
+        70,
+        70,
+        70,
+        120
+      ],
+      "loop": false
+    }
+  },
+  "review": {
+    "frameMs": {
+      "idle": 220,
+      "walk": 130,
+      "attack": 60,
+      "death": 110
+    },
+    "impactFrame": {
+      "attack": 4
+    },
+    "displayHeight": 224,
+    "facing": "east",
+    "notes": []
+  }
+}

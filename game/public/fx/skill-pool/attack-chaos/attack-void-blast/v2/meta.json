@@ -1,0 +1,414 @@
+{
+  "id": "attack.void_blast",
+  "src": "/fx/skill-pool/attack-void-blast/v2/atlas.png",
+  "columns": 4,
+  "rows": 4,
+  "imageWidth": 1254,
+  "imageHeight": 1254,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        113,
+        162,
+        207,
+        252
+      ],
+      "renderedPadding": [
+        177.5,
+        226.5,
+        170.5,
+        125.5
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        313,
+        0,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        82,
+        134,
+        233,
+        262
+      ],
+      "renderedPadding": [
+        146.0,
+        198.5,
+        145.0,
+        115.5
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        627,
+        0,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        51,
+        114,
+        256,
+        276
+      ],
+      "renderedPadding": [
+        115.5,
+        178.5,
+        121.5,
+        101.5
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        940,
+        0,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        28,
+        99,
+        279,
+        290
+      ],
+      "renderedPadding": [
+        92.0,
+        163.5,
+        99.0,
+        87.5
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        313,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        32,
+        79,
+        293,
+        284
+      ],
+      "renderedPadding": [
+        96.5,
+        143.0,
+        84.5,
+        94.0
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        313,
+        313,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        34,
+        77,
+        294,
+        281
+      ],
+      "renderedPadding": [
+        98.0,
+        141.0,
+        84.0,
+        97.0
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        627,
+        313,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        27,
+        75,
+        293,
+        287
+      ],
+      "renderedPadding": [
+        91.5,
+        139.0,
+        84.5,
+        91.0
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        940,
+        313,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        22,
+        87,
+        288,
+        282
+      ],
+      "renderedPadding": [
+        86.0,
+        151.0,
+        90.0,
+        96.0
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        627,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        32,
+        68,
+        300,
+        276
+      ],
+      "renderedPadding": [
+        96.5,
+        132.5,
+        77.5,
+        101.5
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        313,
+        627,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        34,
+        71,
+        291,
+        282
+      ],
+      "renderedPadding": [
+        98.0,
+        135.5,
+        87.0,
+        95.5
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        627,
+        627,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        24,
+        75,
+        289,
+        274
+      ],
+      "renderedPadding": [
+        88.5,
+        139.5,
+        88.5,
+        103.5
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        940,
+        627,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        28,
+        74,
+        282,
+        270
+      ],
+      "renderedPadding": [
+        92.0,
+        138.5,
+        96.0,
+        107.5
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        940,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        37,
+        53,
+        286,
+        239
+      ],
+      "renderedPadding": [
+        101.5,
+        117.0,
+        91.5,
+        139.0
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        313,
+        940,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        44,
+        66,
+        288,
+        248
+      ],
+      "renderedPadding": [
+        108.0,
+        130.0,
+        90.0,
+        130.0
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        627,
+        940,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        38,
+        76,
+        284,
+        244
+      ],
+      "renderedPadding": [
+        102.5,
+        140.0,
+        93.5,
+        134.0
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        940,
+        940,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        42,
+        75,
+        276,
+        224
+      ],
+      "renderedPadding": [
+        106.0,
+        139.0,
+        102.0,
+        154.0
+      ]
+    }
+  ],
+  "virtualWidth": 442,
+  "virtualHeight": 442,
+  "alphaDiscard": 8,
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    4,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "frameMs": 90,
+  "composition": "whole-field",
+  "actorBodyWidthM": 0.5,
+  "authoringDiameterM": 5,
+  "geometrySource": "current committed action/field footprint",
+  "anchorStatus": "runtime ground-anchor fit from source bounds and committed footprint",
+  "sourcePixelsUnmodified": true,
+  "sourceSha256": "7c0fb51b8f7896bee20afb4f0d226bf1bf123e6afeb4579be2ba6c8a9fb1e6bc",
+  "status": "active-spatial-v2",
+  "cellWidth": 313.5,
+  "cellHeight": 313.5,
+  "contentWidthRatio": 0.6063348416289592,
+  "contentHeightRatio": 0.4796380090497738,
+  "authoringGeometry": {
+    "shape": "circle",
+    "radiusM": 2.5,
+    "spanM": 5.0,
+    "depthM": 5.0,
+    "origin": "target",
+    "canonicalSource": "tools/data/skills.json#attack.void_blast"
+  }
+}

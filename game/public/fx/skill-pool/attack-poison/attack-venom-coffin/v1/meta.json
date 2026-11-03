@@ -1,0 +1,9 @@
+{
+  "id": "attack.venom_coffin",
+  "src": "/fx/skill-pool/attack-poison/attack-venom-coffin/v1/decal.png",
+  "authoringGeometry": null,
+  "delivery": "projectile",
+  "origin": "target",
+  "orient": true,
+  "projection": null
+}

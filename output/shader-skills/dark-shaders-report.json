@@ -1,0 +1,172 @@
+[
+  {
+    "id": "attack.poison_bolt",
+    "kind": "projectile",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-poison-bolt/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 218230,
+    "name": "Poison Bolt",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  },
+  {
+    "id": "attack.acid_arrow",
+    "kind": "projectile",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-acid-arrow/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 166450,
+    "name": "Acid Arrow",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  },
+  {
+    "id": "attack.venom_spray",
+    "kind": "cone",
+    "version": "v3",
+    "src": "/fx/skill-pool/attack/attack-venom-spray/v3/atlas.png",
+    "projection": "upright",
+    "bytes": 683191,
+    "name": "Venom Spray",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  },
+  {
+    "id": "attack.poison_cloud",
+    "kind": "ground",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-poison-cloud/v2/atlas.png",
+    "projection": "ground",
+    "bytes": 539705,
+    "name": "Poison Cloud",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  },
+  {
+    "id": "attack.catalyst",
+    "kind": "single",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-catalyst/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 290786,
+    "name": "Catalyst",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  },
+  {
+    "id": "attack.venom_bolt",
+    "kind": "single",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-venom-bolt/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 272353,
+    "name": "Venom Bolt",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  },
+  {
+    "id": "attack.chaos_bolt",
+    "kind": "projectile",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-chaos-bolt/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 211621,
+    "name": "Chaos Bolt",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  },
+  {
+    "id": "attack.void_blast",
+    "kind": "ground",
+    "version": "v3",
+    "src": "/fx/skill-pool/attack/attack-void-blast/v3/atlas.png",
+    "projection": "ground",
+    "bytes": 964950,
+    "name": "Void Blast",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  },
+  {
+    "id": "attack.chaos_wave",
+    "kind": "ground",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-chaos-wave/v2/atlas.png",
+    "projection": "ground",
+    "bytes": 527910,
+    "name": "Chaos Wave",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  },
+  {
+    "id": "attack.ruin",
+    "kind": "single",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-ruin/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 414996,
+    "name": "Ruin",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  },
+  {
+    "id": "attack.entropy",
+    "kind": "single",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-entropy/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 402624,
+    "name": "Entropy",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  },
+  {
+    "id": "curse.weaken",
+    "kind": "single",
+    "version": "v2",
+    "src": "/fx/skill-pool/curse/curse-weaken/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 351426,
+    "name": "Weaken",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  },
+  {
+    "id": "curse.blinding_mark",
+    "kind": "single",
+    "version": "v2",
+    "src": "/fx/skill-pool/curse/curse-blinding-mark/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 338778,
+    "name": "Blinding Mark",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  },
+  {
+    "id": "curse.expose",
+    "kind": "single",
+    "version": "v2",
+    "src": "/fx/skill-pool/curse/curse-expose/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 342397,
+    "name": "Expose",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  },
+  {
+    "id": "curse.cripple",
+    "kind": "single",
+    "version": "v2",
+    "src": "/fx/skill-pool/curse/curse-cripple/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 368487,
+    "name": "Cripple",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  },
+  {
+    "id": "curse.jinx",
+    "kind": "single",
+    "version": "v2",
+    "src": "/fx/skill-pool/curse/curse-jinx/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 323765,
+    "name": "Jinx",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  },
+  {
+    "id": "curse.venom_bind",
+    "kind": "single",
+    "version": "v2",
+    "src": "/fx/skill-pool/curse/curse-venom-bind/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 595824,
+    "name": "Venom Bind",
+    "recipeModule": "tools/vfx/dark-shaders.mjs"
+  }
+]

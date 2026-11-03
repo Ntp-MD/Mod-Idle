@@ -1,0 +1,64 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "giant",
+  "action": "attack",
+  "direction": "south-east",
+  "phase": "01-contact",
+  "generator": "built-in image_gen",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sourceRecord": {
+    "kind": "generated-contact-sheet",
+    "source": "source/v5-contact-sheets/attack-01-contact-16.png",
+    "sourceCell": {
+      "row": 0,
+      "column": 2,
+      "box": [
+        512,
+        0,
+        768,
+        384
+      ]
+    },
+    "sourceConfidenceBounds": [
+      20,
+      115,
+      224,
+      313
+    ],
+    "processing": {
+      "method": "alpha-confidence-crop-scale-anchor-v1",
+      "threshold": 128,
+      "softEdgeRecoveryRadius": 3,
+      "uniformScale": 0.854067,
+      "anchor": {
+        "x": 192,
+        "y": 288
+      },
+      "scaledSize": [
+        179,
+        174
+      ],
+      "offset": [
+        102,
+        114
+      ]
+    }
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "reviewed": false,
+    "runtimePromotion": false
+  }
+}

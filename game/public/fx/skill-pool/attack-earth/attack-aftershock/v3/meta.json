@@ -1,0 +1,227 @@
+{
+    "id":  "attack.aftershock",
+    "src":  "/fx/skill-pool/attack-earth/attack-aftershock/v3/atlas.png",
+    "columns":  4,
+    "rows":  4,
+    "cellWidth":  447,
+    "cellHeight":  442,
+    "imageWidth":  1788,
+    "imageHeight":  1768,
+    "frames":  [
+                   {
+                       "index":  0,
+                       "rect":  [
+                                    0,
+                                    0,
+                                    447,
+                                    442
+                                ],
+                       "offsetX":  0,
+                       "offsetY":  0
+                   },
+                   {
+                       "index":  1,
+                       "rect":  [
+                                    447,
+                                    0,
+                                    447,
+                                    442
+                                ],
+                       "offsetX":  0,
+                       "offsetY":  0
+                   },
+                   {
+                       "index":  2,
+                       "rect":  [
+                                    894,
+                                    0,
+                                    447,
+                                    442
+                                ],
+                       "offsetX":  0,
+                       "offsetY":  0
+                   },
+                   {
+                       "index":  3,
+                       "rect":  [
+                                    1341,
+                                    0,
+                                    447,
+                                    442
+                                ],
+                       "offsetX":  0,
+                       "offsetY":  0
+                   },
+                   {
+                       "index":  4,
+                       "rect":  [
+                                    0,
+                                    442,
+                                    447,
+                                    442
+                                ],
+                       "offsetX":  0,
+                       "offsetY":  0
+                   },
+                   {
+                       "index":  5,
+                       "rect":  [
+                                    447,
+                                    442,
+                                    447,
+                                    442
+                                ],
+                       "offsetX":  0,
+                       "offsetY":  0
+                   },
+                   {
+                       "index":  6,
+                       "rect":  [
+                                    894,
+                                    442,
+                                    447,
+                                    442
+                                ],
+                       "offsetX":  0,
+                       "offsetY":  0
+                   },
+                   {
+                       "index":  7,
+                       "rect":  [
+                                    1341,
+                                    442,
+                                    447,
+                                    442
+                                ],
+                       "offsetX":  0,
+                       "offsetY":  0
+                   },
+                   {
+                       "index":  8,
+                       "rect":  [
+                                    0,
+                                    884,
+                                    447,
+                                    442
+                                ],
+                       "offsetX":  0,
+                       "offsetY":  0
+                   },
+                   {
+                       "index":  9,
+                       "rect":  [
+                                    447,
+                                    884,
+                                    447,
+                                    442
+                                ],
+                       "offsetX":  0,
+                       "offsetY":  0
+                   },
+                   {
+                       "index":  10,
+                       "rect":  [
+                                    894,
+                                    884,
+                                    447,
+                                    442
+                                ],
+                       "offsetX":  0,
+                       "offsetY":  0
+                   },
+                   {
+                       "index":  11,
+                       "rect":  [
+                                    1341,
+                                    884,
+                                    447,
+                                    442
+                                ],
+                       "offsetX":  0,
+                       "offsetY":  0
+                   },
+                   {
+                       "index":  12,
+                       "rect":  [
+                                    0,
+                                    1326,
+                                    447,
+                                    442
+                                ],
+                       "offsetX":  0,
+                       "offsetY":  0
+                   },
+                   {
+                       "index":  13,
+                       "rect":  [
+                                    447,
+                                    1326,
+                                    447,
+                                    442
+                                ],
+                       "offsetX":  0,
+                       "offsetY":  0
+                   },
+                   {
+                       "index":  14,
+                       "rect":  [
+                                    894,
+                                    1326,
+                                    447,
+                                    442
+                                ],
+                       "offsetX":  0,
+                       "offsetY":  0
+                   },
+                   {
+                       "index":  15,
+                       "rect":  [
+                                    1341,
+                                    1326,
+                                    447,
+                                    442
+                                ],
+                       "offsetX":  0,
+                       "offsetY":  0
+                   }
+               ],
+    "virtualWidth":  447,
+    "virtualHeight":  442,
+    "opening":  [
+                    0,
+                    3
+                ],
+    "loop":  [
+                 4,
+                 11
+             ],
+    "exit":  [
+                 12,
+                 15
+             ],
+    "frameMs":  90,
+    "delivery":  "ground",
+    "origin":  "caster",
+    "orient":  false,
+    "groundOrigin":  true,
+    "anchorX":  0.5,
+    "anchorY":  0.5,
+    "contentWidthRatio":  0.7024608501118568,
+    "contentHeightRatio":  0.5294117647058824,
+    "alphaDiscard":  8,
+    "status":  "ready",
+    "composition":  "v2 ground shockwave with a centered v1 impact core",
+    "compositionScale":  0.72,
+    "authoringGeometry":  {
+                              "shape":  "circle",
+                              "radiusM":  3,
+                              "spanM":  6,
+                              "depthM":  6,
+                              "origin":  "caster",
+                              "delivery":  "ground"
+                          },
+    "sources":  [
+                    "v1/atlas.png",
+                    "v2/atlas.png"
+                ]
+}

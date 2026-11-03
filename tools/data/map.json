@@ -1,0 +1,151 @@
+{
+  "note": "Presentation only (X33 · M7): the game reads neither this file nor `environment_terrain`. The sheet is generated from the canonical land mask and location registry in `engine.json` `road`; this file owns colours, region and plate names, landmark assignments and watermarks. A cell id is a mark drawn on the sheet, never a position the simulation reads. Every polygon is a land cell; sea cells are the panel between the plates and carry no polygon.",
+  "field": {
+    "radius": 15,
+    "gap": 2,
+    "hexes": 676,
+    "cell_id": "row letter (A, B, … AA, AB, …) + column number, derived from the land mask bounds",
+    "centre": "Eastgate, the starting settlement, sits at the origin of the axial frame",
+    "sheet": "#1c2027",
+    "stroke": "#2c3340",
+    "bare_tone": "#1c2027",
+    "note": "Pointy-top hexes on `radius`, shrunk by `gap` so neighbours leave bare ground between their edges. Terrain colour is one authored colour per terrain in `terrain_colors`; the open sea past the plates is flat `var(--panel)`. `bare_tone` and `stroke` are the frame between hexes, not a terrain.",
+    "ground_ramp": [
+      "rock",
+      "snow",
+      "water",
+      "marsh",
+      "forest",
+      "grass",
+      "moor",
+      "salt",
+      "waste",
+      "ash"
+    ],
+    "deep_close": 0.25
+  },
+  "terrain_colors": {
+    "water": "#274551",
+    "marsh": "#38483a",
+    "grass": "#4e5c3a",
+    "forest": "#283b2f",
+    "rock": "#4d4f55",
+    "snow": "#89959b",
+    "moor": "#565040",
+    "waste": "#6b442d",
+    "ash": "#453a44",
+    "salt": "#8a7f68",
+    "village": "#66734e",
+    "camp": "#655132",
+    "town": "#77613f"
+  },
+  "settlement_landmarks": {
+    "eastgate": "city-small",
+    "millbrook": "village-small",
+    "thornwake": "city-large",
+    "ironrow": "city-large",
+    "ashfall": "city-capital",
+    "wolf_cross": "village-medium",
+    "greyfen": "village-large",
+    "saltmarrow": "city-medium",
+    "frosthold": "city-large",
+    "vermolch": "village-small",
+    "duskmoor": "village-large",
+    "nettlecrag": "village-small",
+    "emberhold": "city-medium",
+    "wyrmback": "city-large",
+    "the_pale_spire": "city-capital",
+    "blackwater_reach": "city-medium",
+    "bonegate": "village-medium",
+    "highspire": "city-small"
+  },
+  "watermarks": [],
+  "plates": [
+    {
+      "id": "dawnreach",
+      "name": "A · DAWNREACH",
+      "zones": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "id": "riftward",
+      "name": "B · RIFTWARD",
+      "zones": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "id": "elderwake",
+      "name": "C · ELDERWAKE",
+      "zones": [
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ]
+    }
+  ],
+  "regions": [
+    {
+      "name": "Green March",
+      "zones": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "name": "Dust & Sanctum",
+      "zones": [
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "name": "Drowned Frontier",
+      "zones": [
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "name": "Rime & Blight",
+      "zones": [
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "name": "Fallen Coast",
+      "zones": [
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "name": "Elder Crown",
+      "zones": [
+        16,
+        17,
+        18
+      ]
+    }
+  ]
+}

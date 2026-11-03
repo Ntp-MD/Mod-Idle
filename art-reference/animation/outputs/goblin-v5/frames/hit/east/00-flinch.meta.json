@@ -1,0 +1,25 @@
+{
+  "status": "preserved-approved-source-pose",
+  "speciesId": "goblin",
+  "action": "hit",
+  "direction": "east",
+  "pose": "00-flinch",
+  "source": "art-reference/monsters/humanoid/goblin/animation/poses/hit/east/00-flinch.png",
+  "sourceMetadata": "art-reference/monsters/humanoid/goblin/animation/poses/hit/east/00-flinch.meta.json",
+  "sourcePixelsModified": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "copied from approved Goblin animation metadata"
+  },
+  "qa": {
+    "sourcePoseApproved": true,
+    "sixteenDirectionAtlas": false,
+    "visualReview": false,
+    "runtimePromotion": false
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "direction": "south-south-east",
+  "angleDegrees": 22.5,
+  "action": "idle",
+  "visualReview": {
+    "identity": true,
+    "wholeBodyVisible": true,
+    "facingExact": false,
+    "note": "Identity and detailed finish preserved; exact22.5degree facing not proven. No atlas promotion."
+  },
+  "sourcePixelsModified": false,
+  "measurement": {
+    "canvas": [
+      1254,
+      1254
+    ],
+    "alphaBoundsExclusive": [
+      138,
+      156,
+      1224,
+      1069
+    ],
+    "alphaLevelCount": 256,
+    "sourcePixelsModified": false,
+    "anyAlphaTouchesCanvasEdge": false,
+    "alpha128BoundsExclusive": [
+      416,
+      420,
+      857,
+      941
+    ],
+    "alpha128TouchesCanvasEdge": false
+  },
+  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review"
+}

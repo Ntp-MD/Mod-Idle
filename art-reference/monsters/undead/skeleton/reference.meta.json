@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "assetType": "mob-identity-reference",
+  "source": "reference.png",
+  "sourceDimensions": {
+    "width": null,
+    "height": null
+  },
+  "facing": "south-east",
+  "bakedWeaponId": "TODO: identify the fixed baked weapon from the approved reference before generation",
+  "footAnchor": {
+    "x": null,
+    "y": null,
+    "provenance": "pending reference image and measurement"
+  },
+  "qa": {
+    "visuallyInspected": false,
+    "wholeBodyVisible": null,
+    "sourcePixelsModified": false
+  },
+  "note": "Scaffold only; reference.png is not generated/copy-filled by this offline preparation."
+}

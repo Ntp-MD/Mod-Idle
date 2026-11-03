@@ -1,0 +1,417 @@
+{
+  "skillId": "attack.pierce_the_veil",
+  "src": "/fx/skill-pool/attack-pierce-the-veil/v1/atlas.png",
+  "imageWidth": 1278,
+  "imageHeight": 1230,
+  "columns": 4,
+  "rows": 4,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        319,
+        307
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        127,
+        148,
+        209,
+        199
+      ],
+      "renderedPadding": [
+        191.5,
+        212.5,
+        174.5,
+        172.5
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        319,
+        0,
+        320,
+        307
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        94,
+        147,
+        228,
+        200
+      ],
+      "renderedPadding": [
+        158,
+        211.5,
+        156,
+        171.5
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        639,
+        0,
+        319,
+        307
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        69,
+        141,
+        237,
+        209
+      ],
+      "renderedPadding": [
+        133.5,
+        205.5,
+        146.5,
+        162.5
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        958,
+        0,
+        320,
+        307
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        63,
+        134,
+        250,
+        215
+      ],
+      "renderedPadding": [
+        127,
+        198.5,
+        134,
+        156.5
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        307,
+        319,
+        308
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64,
+      "bounds": [
+        67,
+        137,
+        265,
+        217
+      ],
+      "renderedPadding": [
+        131.5,
+        201,
+        118.5,
+        155
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        319,
+        307,
+        320,
+        308
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        58,
+        133,
+        269,
+        219
+      ],
+      "renderedPadding": [
+        122,
+        197,
+        115,
+        153
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        639,
+        307,
+        319,
+        308
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64,
+      "bounds": [
+        42,
+        133,
+        257,
+        224
+      ],
+      "renderedPadding": [
+        106.5,
+        197,
+        126.5,
+        148
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        958,
+        307,
+        320,
+        308
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        44,
+        131,
+        260,
+        224
+      ],
+      "renderedPadding": [
+        108,
+        195,
+        124,
+        148
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        615,
+        319,
+        307
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        60,
+        120,
+        276,
+        225
+      ],
+      "renderedPadding": [
+        124.5,
+        184.5,
+        107.5,
+        146.5
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        319,
+        615,
+        320,
+        307
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        54,
+        115,
+        276,
+        225
+      ],
+      "renderedPadding": [
+        118,
+        179.5,
+        108,
+        146.5
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        639,
+        615,
+        319,
+        307
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        40,
+        114,
+        269,
+        237
+      ],
+      "renderedPadding": [
+        104.5,
+        178.5,
+        114.5,
+        134.5
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        958,
+        615,
+        320,
+        307
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        47,
+        95,
+        253,
+        251
+      ],
+      "renderedPadding": [
+        111,
+        159.5,
+        131,
+        120.5
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        922,
+        319,
+        308
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64,
+      "bounds": [
+        79,
+        67,
+        253,
+        240
+      ],
+      "renderedPadding": [
+        143.5,
+        131,
+        130.5,
+        132
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        319,
+        922,
+        320,
+        308
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        87,
+        87,
+        229,
+        229
+      ],
+      "renderedPadding": [
+        151,
+        151,
+        155,
+        143
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        639,
+        922,
+        319,
+        308
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64,
+      "bounds": [
+        99,
+        102,
+        217,
+        219
+      ],
+      "renderedPadding": [
+        163.5,
+        166,
+        166.5,
+        153
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        958,
+        922,
+        320,
+        308
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        120,
+        113,
+        205,
+        216
+      ],
+      "renderedPadding": [
+        184,
+        177,
+        179,
+        156
+      ]
+    }
+  ],
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    4,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "frameMs": 70,
+  "delivery": "projectile",
+  "origin": "target",
+  "radiusM": 0,
+  "anchorY": 0.5504587155963303,
+  "orient": true,
+  "status": "ready",
+  "qa": {
+    "paddingPass": true,
+    "renderedPaddingPass": true,
+    "alphaDiscard": 8,
+    "rawPerimeterAlphaPass": false,
+    "sourceSeparatorsClear": true,
+    "sourcePixelsUnmodified": true,
+    "frameCount": 16,
+    "note": "Renderer discards alpha <=8/255; source PNG is retained unchanged. Padding belongs to shared virtual canvas."
+  },
+  "contentWidthRatio": 0.5111607142857143,
+  "contentHeightRatio": 0.3967889908256881,
+  "artDirectionReview": "Silver cyan rightward arrow, last row elemental veil fragments cyan amber violet.",
+  "virtualWidth": 448,
+  "virtualHeight": 436,
+  "alphaDiscard": 8,
+  "groundOrigin": false,
+  "anchorX": 0.49832589285714285,
+  "impactAnchorX": 0.4966517857142857,
+  "impactAnchorY": 0.5091743119266054
+}

@@ -1,0 +1,16 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\ITOP\\.codex-zed-account-1\\generated_images\\01a1a0b9-1e40-7663-be3e-149b24193ac4\\exec-e8286c23-cbe3-4f06-8762-f48d5bf06cb0.png",
+  "direction": "south-south-west",
+  "angleDegrees": 337.5,
+  "action": "idle",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": true,
+    "identityPlausible": true,
+    "facingPlausible": true,
+    "exactYawApproved": false,
+    "atlasApproved": false
+  }
+}

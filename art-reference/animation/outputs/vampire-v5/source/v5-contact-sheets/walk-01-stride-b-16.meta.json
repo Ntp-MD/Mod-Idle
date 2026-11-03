@@ -1,0 +1,100 @@
+{
+  "status": "candidate-source-review-required",
+  "speciesId": "vampire",
+  "generator": "built-in image_gen",
+  "sourceImageId": "exec-09fae67b-afab-458a-b93a-216422e6ed0b.png",
+  "file": "source/v5-contact-sheets/walk-01-stride-b-16.png",
+  "sha256": "be91683041cead657ca8221ec8194c3a4f65c957904deaa7d6079265039f18eb",
+  "action": "walk",
+  "phase": "01-stride-b",
+  "promptSummary": "Passing pose; right foot passes beneath hips while left leg swings through.",
+  "promptContract": {
+    "references": [
+      "art-reference/monsters/undead/vampire/reference.png",
+      "art-reference/monsters/undead/vampire/animation/atlas/animation.png"
+    ],
+    "sheet": "4x4 row-major 1024x1536, cell 256x384, 16 directions; source anchor x=128/y=288; fixed elevated 3/4 camera; no mirroring; transparent background requested",
+    "style": "crisp hand-crafted pixel-art clusters matching the approved vampire atlas",
+    "review": "candidate only; no visual, alpha-edge, anchor, or runtime approval"
+  },
+  "transparentBackgroundRequested": true,
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 1536,
+    "mode": "RGBA"
+  },
+  "cellCanvas": {
+    "width": 256,
+    "height": 384
+  },
+  "layout": {
+    "columns": 4,
+    "rows": 4,
+    "cellOrder": "row-major"
+  },
+  "directionOrder": [
+    "south",
+    "south-south-east",
+    "south-east",
+    "east-south-east",
+    "east",
+    "east-north-east",
+    "north-east",
+    "north-north-east",
+    "north",
+    "north-north-west",
+    "north-west",
+    "west-north-west",
+    "west",
+    "west-south-west",
+    "south-west",
+    "south-south-west"
+  ],
+  "targetFrameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "targetAnchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "approved source atlas anchor; 16-direction alignment unreviewed"
+  },
+  "alphaAudit": {
+    "zeroPixelFraction": 0.7296,
+    "below128PixelFraction": 0.82099,
+    "confidence128PixelFraction": 0.17901,
+    "sheetCornerAlpha": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "confidencePixelCountPerCell": [
+      17839,
+      17335,
+      17434,
+      17559,
+      17336,
+      17876,
+      17892,
+      17140,
+      17647,
+      17679,
+      17428,
+      17107,
+      17536,
+      17502,
+      17580,
+      18671
+    ]
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

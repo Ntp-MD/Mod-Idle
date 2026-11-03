@@ -1,0 +1,442 @@
+/**
+ * The active field's population identity.
+ *
+ * `s.group` is the single authoritative living-mob/HP list. A field owns the spawn slots that say
+ * where a mob belongs, when its slot refills, and the last ground positions needed to resume the
+ * same field after a reload. No slot holds a second Mob copy; it holds an id and a timer.
+ */
+import { E, dungeon, spawns } from '../../engine/client';
+import { spawnSlotSeed } from '../../../../engine/spawns.ts';
+import type { CombatArena } from '../combat/combat-arena';
+import type { MobMark } from '../combat/mobStatus';
+import type { GameState, Mob } from '../core/types';
+
+export type FieldPoint = { x: number; y: number };
+
+/** Why a body is engaged: the diagnostic receipt that also keeps assisted bodies from re-seeding. */
+export type EngagementCause = 'proximity' | 'contact' | 'assist';
+
+/** One authored home. The slot is empty while `mobId` is absent and `respawnAtSec` is counting. */
+export type FieldLifeStatus = Record<string, { stacks: number; secLeft: number } | undefined>;
+export interface FieldSpawnSlot {
+  id: string;
+  pointId: string;
+  home: FieldPoint;
+  roamM: number;
+  /** Absolute clock second when this empty slot may refill; 0 means due now. */
+  respawnAtSec: number;
+  /** How many times this slot has refilled; part of the deterministic spawn seed. */
+  respawnCount: number;
+  mobId?: string;
+  /** Compact saved life for an inactive field; reconstituted with the same identity and pool. */
+  life?: { mob: Mob; hp: number; hpMax: number; mark?: MobMark };
+}
+
+export interface FieldState {
+  areaKey: string;
+  /** Ground-layout generation; 1 = 18x12, 2 = 50x32.0513, 3 = full-field population. */
+  layoutRevision: number;
+  arenaEpoch: number;
+  nextSlotSeq: number;
+  slots: FieldSpawnSlot[];
+  /** Bodies currently in the fight; combat and mob attack scheduling read this. */
+  engagementIds: string[];
+  /** Per-member cause, keyed by mob id; absent (legacy save) reads as a direct contact. */
+  engagementCauses?: Record<string, EngagementCause>;
+  combatSessionId: number;
+  sessionActive: boolean;
+  quietSec: number;
+  /** Clock second a Boss died in this field; the arena settles its epoch once at that receipt. */
+  bossDefeatedAtSec?: number;
+  /** Fractional offline duty credit; `offline_share` accumulates here across wall seconds. */
+  offlineCredit?: number;
+  /** Boss phase adds waiting for a free authored slot; drained in spawn order. */
+  pendingAdds?: { bossId: string; id?: string }[];
+  farmingAnchor: FieldPoint;
+  player: FieldPoint;
+  actors: { id: string; x: number; y: number }[];
+  /** Last wall second this field was current; the offline catch-up starts from here. */
+  lastSeenAtSec?: number;
+}
+
+const MAX_SLOTS = 48;
+const MAX_ACTORS = 64;
+const LAYOUT_REVISION = 3;
+const LAYOUT_DX = 16;
+const LAYOUT_DY = 10.0256;
+const copy = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
+
+/**
+ * Keep the actor list bounded: poses are only meaningful for living bodies, and the
+ * offline resolver builds a lookup over this list per skill per tick, so a graveyard
+ * left behind by kills would make every later tick pay for it.
+ */
+export function pruneFieldActors(field: FieldState, group: readonly Mob[]): void {
+  if (!field.actors.length) return;
+  const living = new Set<string>();
+  for (const mob of group) if (mob.hp > 0) living.add(mob.id);
+  if (field.actors.length <= MAX_ACTORS && field.actors.every((actor) => living.has(actor.id))) return;
+  field.actors = field.actors.filter((actor) => living.has(actor.id)).slice(-MAX_ACTORS);
+}
+
+export interface FieldArchiveEntry extends FieldState {
+  savedAtSec: number;
+}
+
+export type FieldArchive = Record<string, FieldArchiveEntry>;
+
+const MAX_ARCHIVES = 6;
+
+export function fieldAreaKey(s: Pick<GameState, 'zone' | 'cell' | 'dungeon'>): string {
+  const key = `${s.zone}|${s.cell?.q ?? ''}|${s.cell?.r ?? ''}|${s.cell?.sub ?? ''}|${s.cell?.site ?? ''}`;
+  return s.dungeon ? `${key}|dungeon:${s.dungeon.zone}` : `${key}|field`;
+}
+
+/**
+ * Slot homes for one field; the authored cap and points come from `spawns.json`. A dungeon run
+ * borrows the same authored homes but caps its live group at `dungeon.group_cap` and uses the
+ * legacy respawn window, so a run's refill stays a mode-level rule rather than a zone-cap accident.
+ */
+export function createFieldSlots(
+  zone: number, sub: number | null | undefined, atSec: number, dungeonRun = false,
+): FieldSpawnSlot[] {
+  const profile = spawns.profileFor(zone, sub ?? null, dungeonRun ? 'legacy' : 'live');
+  const points = spawns.pointsFor(zone, sub ?? null);
+  const cap = dungeonRun ? dungeon.groupCap : profile.cap;
+  const count = Math.min(MAX_SLOTS, cap, points.length);
+  // Appended headroom points are validator reserve; current caps use the first MAX_SLOTS homes so
+  // adding future points cannot move an existing slot's authored ground.
+  const homes = points.slice(0, Math.min(points.length, MAX_SLOTS));
+  return Array.from({ length: count }, (_, index) => {
+    // Layouts are column ordered; a prefix leaves the far side empty at lower zone caps.
+    const point = homes[Math.floor(index * homes.length / count)];
+    return {
+      id: `s${index + 1}`,
+      pointId: point.id,
+      home: { x: point.x, y: point.y },
+      roamM: point.roam_m > 0 ? point.roam_m : profile.roam_m,
+      respawnAtSec: atSec,
+      respawnCount: 0,
+    };
+  });
+}
+
+export function createFieldState(s: Pick<GameState, 'zone' | 'cell' | 'dungeon' | 'clockSec'>): FieldState {
+  const slots = createFieldSlots(s.zone, s.cell?.sub, s.clockSec, !!s.dungeon);
+  return {
+    areaKey: fieldAreaKey(s),
+    layoutRevision: LAYOUT_REVISION,
+    arenaEpoch: 1,
+    nextSlotSeq: slots.length + 1,
+    slots,
+    engagementIds: [],
+    combatSessionId: 0,
+    sessionActive: false,
+    quietSec: 0,
+    pendingAdds: [],
+    farmingAnchor: { x: E.combat_arena.player_start.x, y: E.combat_arena.player_start.y },
+    player: { x: E.combat_arena.player_start.x, y: E.combat_arena.player_start.y },
+    actors: [],
+    lastSeenAtSec: s.clockSec,
+  };
+}
+
+/** Park living bodies in their own slots before a transition clears the travelling group. */
+export function checkpointFieldLives(s: GameState): void {
+  if (!s.field) return;
+  const living = new Map(s.group.filter((mob) => mob.hp > 0).map((mob) => [mob.id, mob]));
+  for (const slot of s.field.slots) {
+    const mob = slot.mobId ? living.get(slot.mobId) : undefined;
+    if (!mob) continue;
+    slot.life = { mob: copy(mob), hp: mob.hp, hpMax: mob.hpMax,
+      ...(s.mobStatus[mob.id] ? { mark: copy(s.mobStatus[mob.id]) } : {}) };
+  }
+}
+
+/** Reconstitute an inactive field's saved lives once; same identity/HP/status, no reroll or reward. */
+function restoreFieldLives(s: GameState, field: FieldState): void {
+  if (s.group.some((mob) => mob.hp > 0)) return;
+  for (const slot of field.slots) {
+    if (!slot.mobId || !slot.life) continue;
+    const mob = copy(slot.life.mob);
+    mob.id = slot.mobId;
+    mob.hp = slot.life.hp;
+    mob.hpMax = slot.life.hpMax;
+    mob.spawnSlotId = slot.id;
+    s.group.push(mob);
+    if (slot.life.mark) s.mobStatus[mob.id] = copy(slot.life.mark);
+  }
+}
+
+/**
+ * Keep the field in step with its area, slots and the arena. Spawning and respawning belong to the
+ * caller; this function reconciles identities, timers and saved positions only.
+ */
+export function syncFieldState(s: GameState, arena?: CombatArena, quietTicks = 2, advanceQuiet = true): boolean {
+  const key = fieldAreaKey(s);
+  if (!s.field) s.field = createFieldState(s);
+  let field = s.field;
+  if (field.areaKey !== key) {
+    const leaving = new Map(s.group.filter((mob) => mob.hp > 0).map((mob) => [mob.id, mob]));
+    for (const slot of field.slots) {
+      const mob = slot.mobId ? leaving.get(slot.mobId) : undefined;
+      if (!mob) continue;
+      slot.life = { mob: copy(mob), hp: mob.hp, hpMax: mob.hpMax,
+        ...(s.mobStatus[mob.id] ? { mark: copy(s.mobStatus[mob.id]) } : {}) };
+    }
+    s.fieldArchive ??= {};
+    // Keep the living bodies' last valid ground positions with the archived lives: re-entering a
+    // field must resume the same fight, never teleport survivors back to their slot homes.
+    const savedActors = field.actors
+      .filter((actor) => leaving.has(actor.id))
+      .slice(0, MAX_ACTORS)
+      .map((actor) => ({ id: actor.id, x: actor.x, y: actor.y }));
+    s.fieldArchive[field.areaKey] = copy({
+      ...field,
+      savedAtSec: s.clockSec,
+      sessionActive: false,
+      quietSec: 0,
+      engagementIds: [],
+      engagementCauses: {},
+      actors: savedActors,
+    });
+    const entries = Object.entries(s.fieldArchive).sort((a, b) => b[1].savedAtSec - a[1].savedAtSec);
+    for (const [stale] of entries.slice(MAX_ARCHIVES)) delete s.fieldArchive[stale];
+    const restored = s.fieldArchive[key];
+    if (restored) {
+      delete s.fieldArchive[key];
+      field = {
+        ...restored,
+        areaKey: key,
+        arenaEpoch: Math.max(restored.arenaEpoch, field.arenaEpoch) + 1,
+        savedAtSec: undefined,
+        sessionActive: false,
+        quietSec: 0,
+        engagementIds: [],
+        engagementCauses: {},
+        lastSeenAtSec: s.clockSec,
+      } as unknown as FieldState;
+    } else {
+      field = { ...createFieldState(s), arenaEpoch: field.arenaEpoch + 1 };
+    }
+    s.field = field;
+    restoreFieldLives(s, field);
+  }
+  if (!field.slots?.length) field.slots = createFieldSlots(s.zone, s.cell?.sub, s.clockSec, !!s.dungeon);
+  if (field.layoutRevision < LAYOUT_REVISION) {
+    // Older saves retain lives, positions and refill deadlines while their homes cover the full
+    // clearing. Reconcile once, rather than resetting population or timers every tick.
+    const authored = createFieldSlots(s.zone, s.cell?.sub, s.clockSec, !!s.dungeon);
+    const ids = new Set(field.slots.map(slot => slot.id));
+    for (const [index, slot] of authored.entries()) {
+      const existing = field.slots[index];
+      if (existing) {
+        Object.assign(existing, { pointId: slot.pointId, home: slot.home, roamM: slot.roamM });
+        continue;
+      }
+      while (ids.has(slot.id)) slot.id = `s${field.nextSlotSeq++}`;
+      ids.add(slot.id);
+      field.slots.push(slot);
+    }
+    field.nextSlotSeq = Math.max(field.nextSlotSeq, field.slots.length + 1);
+    field.layoutRevision = LAYOUT_REVISION;
+  }
+
+  const living = new Map(s.group.filter((mob) => mob.hp > 0).map((mob) => [mob.id, mob]));
+  // A live body without a slot (legacy save, first purchase) takes the first free authored home.
+  for (const mob of living.values()) {
+    if (mob.spawnSlotId && field.slots.some((slot) => slot.id === mob.spawnSlotId)) continue;
+    const slot = field.slots.find((entry) => !entry.mobId || !living.has(entry.mobId));
+    if (!slot) continue;
+    slot.mobId = mob.id;
+    slot.respawnAtSec = 0;
+    slot.life = undefined;
+    mob.spawnSlotId = slot.id;
+  }
+  for (const slot of field.slots) {
+    if (slot.mobId && !living.has(slot.mobId)) {
+      // A parked life waits for its field to become current again; only a released slot
+      // (no saved life) starts the respawn timer.
+      if (slot.life) continue;
+      slot.mobId = undefined;
+      if (!(slot.respawnAtSec > s.clockSec)) slot.respawnAtSec = s.clockSec;
+    }
+  }
+
+  if (arena) {
+    field.player = { x: arena.player.x, y: arena.player.y };
+    // Record the renderer's current ground, but keep an archived position for a living body the
+    // renderer has not created yet: a re-entry must resume the same fight, not the slot homes.
+    const saved = new Map((field.actors ?? []).map((actor) => [actor.id, actor]));
+    field.actors = s.group
+      .filter((mob) => mob.hp > 0)
+      .slice(0, MAX_ACTORS)
+      .flatMap((mob) => {
+        const pose = arena.mobs[mob.id] ?? saved.get(mob.id);
+        return pose ? [{ id: mob.id, x: pose.x, y: pose.y }] : [];
+      });
+  }
+  // Engagement is written by the combat loop; a session starts on the first engaged body and ends
+  // after the field has been quiet for `quietTicks`.
+  const engagementIds = field.engagementIds.filter((id) => living.has(id));
+  field.engagementIds = engagementIds;
+  let startedSession = false;
+  if (engagementIds.length) {
+    if (!field.sessionActive) {
+      const firstSession = field.combatSessionId === 0;
+      field.combatSessionId++;
+      field.sessionActive = true;
+      startedSession = true;
+      if (firstSession && arena) field.farmingAnchor = { x: arena.player.x, y: arena.player.y };
+    }
+    field.quietSec = 0;
+  } else if (field.sessionActive) {
+    if (advanceQuiet) field.quietSec++;
+    if (field.quietSec >= quietTicks) {
+      field.sessionActive = false;
+      field.quietSec = 0;
+    }
+  }
+  field.lastSeenAtSec = s.clockSec;
+  return startedSession;
+}
+
+/** True while at least one field body is engaged; non-combat actions read this, not group size. */
+export function fieldInFight(s: Pick<GameState, 'field'>): boolean {
+  return !!s.field?.engagementIds.length;
+}
+
+/** Return a dead body's slot to its own authored timer. Rewards and group removal stay elsewhere. */
+export function releaseSpawnSlot(s: GameState, mob: Mob): boolean {
+  if (!mob.spawnSlotId || !s.field) return false;
+  const slot = s.field.slots.find((entry) => entry.id === mob.spawnSlotId);
+  if (!slot || (slot.mobId && slot.mobId !== mob.id)) return false;
+  const profile = spawns.profileFor(s.zone, s.cell?.sub ?? null, s.dungeon ? 'legacy' : 'live');
+  slot.mobId = undefined;
+  slot.life = undefined;
+  const uniform = (spawnSlotSeed(s.seed, fieldAreaKey(s), slot.id, slot.respawnCount) >>> 0) / 0x1_0000_0000;
+  slot.respawnAtSec = s.clockSec + profile.respawn_min_sec + (profile.respawn_max_sec - profile.respawn_min_sec) * uniform;
+  slot.respawnCount++;
+  return true;
+}
+
+/** Reapply saved ground positions to a freshly synced arena; no HP or identity is copied. */
+export function restoreFieldPositions(arena: CombatArena, s: GameState): void {
+  const field = s.field;
+  if (!field) return;
+  if (Number.isFinite(field.player.x) && Number.isFinite(field.player.y)
+    && (field.player.x !== 0 || field.player.y !== 0))
+    Object.assign(arena.player, { x: field.player.x, y: field.player.y });
+  for (const actor of field.actors) {
+    const saved = arena.mobs[actor.id];
+    if (saved && saved.hp > 0) Object.assign(saved, { x: actor.x, y: actor.y });
+  }
+}
+
+function finitePoint(value: unknown): value is FieldPoint {
+  if (!value || typeof value !== 'object') return false;
+  const point = value as FieldPoint;
+  return typeof point.x === 'number' && Number.isFinite(point.x)
+    && typeof point.y === 'number' && Number.isFinite(point.y);
+}
+
+/** Counts dropped or clamped by the save boundary, so a repair is never silent. */
+export interface FieldNormalizeReceipt {
+  droppedSlots: number;
+  droppedActors: number;
+  droppedArchives: number;
+  clampedCredit: number;
+  droppedAdds: number;
+}
+
+export const newFieldNormalizeReceipt = (): FieldNormalizeReceipt => ({
+  droppedSlots: 0, droppedActors: 0, droppedArchives: 0, clampedCredit: 0, droppedAdds: 0,
+});
+
+/** Save input is a boundary: keep a coherent field or none, never a guessed cohort or HP copy. */
+export function normalizeFieldState(value: unknown, receipt?: FieldNormalizeReceipt): FieldState | null {
+  if (!value || typeof value !== 'object') return null;
+  const field = value as Partial<FieldState>;
+  const finite = (n: unknown): n is number => typeof n === 'number' && Number.isFinite(n);
+  if (typeof field.areaKey !== 'string' || !finite(field.arenaEpoch)) return null;
+  if (!finitePoint(field.farmingAnchor) || !finitePoint(field.player)) return null;
+  const revision = finite(field.layoutRevision) ? Math.floor(field.layoutRevision) : 1;
+  const translate = revision < 2;
+  const point = (p: FieldPoint): FieldPoint => translate
+    ? { x: p.x + LAYOUT_DX, y: p.y + LAYOUT_DY }
+    : { x: p.x, y: p.y };
+  const rawSlots = Array.isArray(field.slots) ? field.slots : [];
+  const slots = rawSlots.filter((slot): slot is FieldSpawnSlot =>
+    !!slot && typeof slot.id === 'string' && typeof slot.pointId === 'string'
+    && finitePoint(slot.home) && finite(slot.roamM) && finite(slot.respawnAtSec)
+    && Number.isInteger(slot.respawnCount)).slice(0, MAX_SLOTS)
+    .map((slot) => ({
+      ...slot,
+      home: point(slot.home),
+      respawnAtSec: Math.max(0, slot.respawnAtSec),
+      respawnCount: Math.max(0, Math.floor(slot.respawnCount)),
+      ...(typeof slot.mobId === 'string' ? { mobId: slot.mobId } : {}),
+    }));
+  if (receipt) receipt.droppedSlots += rawSlots.length - slots.length;
+  const rawActors = Array.isArray(field.actors) ? field.actors : [];
+  const actors = rawActors.filter((actor) =>
+    !!actor && typeof actor.id === 'string' && finite(actor.x) && finite(actor.y)).slice(0, MAX_ACTORS)
+    .map((actor) => {
+      const at = point({ x: actor.x, y: actor.y });
+      return { id: actor.id, x: at.x, y: at.y };
+    });
+  if (receipt) receipt.droppedActors += rawActors.length - actors.length;
+  const rawAdds = Array.isArray(field.pendingAdds) ? field.pendingAdds : [];
+  const pendingAdds = rawAdds.filter((entry) => !!entry && typeof entry.bossId === 'string')
+    .map((entry) => ({ bossId: entry.bossId, ...(typeof entry.id === 'string' ? { id: entry.id } : {}) }));
+  if (receipt) receipt.droppedAdds += rawAdds.length - pendingAdds.length;
+  const rawCredit = finite(field.offlineCredit) ? field.offlineCredit : undefined;
+  if (receipt && rawCredit != null && (rawCredit < 0 || rawCredit > 1)) receipt.clampedCredit++;
+  const engagementIds = (Array.isArray(field.engagementIds) ? field.engagementIds : [])
+    .filter((id) => typeof id === 'string').slice(0, MAX_SLOTS);
+  const rawCauses = (field as { engagementCauses?: unknown }).engagementCauses;
+  const engagementCauses: Record<string, EngagementCause> = {};
+  if (rawCauses && typeof rawCauses === 'object') {
+    for (const [id, cause] of Object.entries(rawCauses)) {
+      if (!engagementIds.includes(id)) continue;
+      if (cause === 'proximity' || cause === 'contact' || cause === 'assist') engagementCauses[id] = cause;
+    }
+  }
+  return {
+    areaKey: field.areaKey,
+    layoutRevision: Math.max(2, Math.min(LAYOUT_REVISION, revision)),
+    arenaEpoch: Math.max(1, Math.floor(field.arenaEpoch)),
+    nextSlotSeq: Math.max(1, Math.floor(finite(field.nextSlotSeq) ? field.nextSlotSeq : 1)),
+    slots,
+    engagementIds,
+    engagementCauses,
+    combatSessionId: Math.max(0, Math.floor(finite(field.combatSessionId) ? field.combatSessionId : 0)),
+    sessionActive: !!field.sessionActive,
+    quietSec: Math.max(0, Math.floor(finite(field.quietSec) ? field.quietSec : 0)),
+    ...(finite(field.bossDefeatedAtSec) ? { bossDefeatedAtSec: Math.max(0, Math.floor(field.bossDefeatedAtSec)) } : {}),
+    ...(rawCredit != null ? { offlineCredit: Math.max(0, Math.min(1, rawCredit)) } : {}),
+    pendingAdds,
+    farmingAnchor: point(field.farmingAnchor),
+    player: point(field.player),
+    actors,
+    ...(finite(field.lastSeenAtSec) ? { lastSeenAtSec: Math.max(0, Math.floor(field.lastSeenAtSec)) } : {}),
+  };
+}
+
+/** Save input for visited-field checkpoints: only a coherent archive with matching area ids. */
+export function normalizeFieldArchive(value: unknown, receipt?: FieldNormalizeReceipt): FieldArchive {
+  if (!value || typeof value !== 'object') return {};
+  const out: FieldArchive = {};
+  const entries = Object.entries(value as Record<string, unknown>);
+  let accepted = 0;
+  for (const [key, raw] of entries.slice(0, MAX_ARCHIVES)) {
+    const field = normalizeFieldState(raw, receipt);
+    if (!field || field.areaKey !== key) continue;
+    const savedAt = (raw as { savedAtSec?: unknown })?.savedAtSec;
+    out[key] = { ...field,
+      savedAtSec: typeof savedAt === 'number' && Number.isFinite(savedAt) ? savedAt : 0 };
+    accepted++;
+  }
+  if (receipt) receipt.droppedArchives += Math.max(0, entries.length - accepted);
+  return out;
+}

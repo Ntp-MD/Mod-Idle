@@ -1,0 +1,24 @@
+{
+  "status": "rejected-source-not-for-atlas",
+  "speciesId": "goblin",
+  "generator": "built-in image_gen",
+  "sourceImageId": "exec-b50fce63-c905-432c-ba39-0dec2a6c6638.png",
+  "file": "source/rejected/death-03-settle-v2-belly-down.png",
+  "sha256": "57f8c3a2d145af51c70e69219a0cf2d424ddc6b138452f169c6125dd04980526",
+  "action": "death",
+  "phase": "03-settle",
+  "rejectionReason": "Still read as belly-down instead of a distinct lateral side-lying settle pose.",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 1536,
+    "mode": "RGBA"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false
+  }
+}

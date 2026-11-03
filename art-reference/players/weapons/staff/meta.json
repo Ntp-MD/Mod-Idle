@@ -1,0 +1,224 @@
+{
+  "schemaVersion": 1,
+  "status": "generated-review",
+  "weaponType": "staff",
+  "id": "walnut-crystal-staff",
+  "appearance": "Straight dark walnut shaft, central brown leather grip, dull steel bands and butt cap, small icy-blue crystal in steel fork",
+  "generator": "OpenAI built-in image_gen",
+  "keepSourcePixels": true,
+  "coordinateSpace": "native source pixels, origin upper-left; bounds are [left, top, rightExclusive, bottomExclusive]",
+  "anchorProvenance": "Manual visual annotation of actual selected PNG after generation; not engine or generator ground truth",
+  "anchorTolerancePx": 12,
+  "measurement": {
+    "method": "Pillow read-only alpha measurement",
+    "visibleAlphaThreshold": 8,
+    "emptyMargin": "Measured from alpha > 8; raw alpha includes faint generation noise",
+    "warning": "Do not assume requested 1024 square or requested 300px item length. Native dimensions and measured bounds below are authoritative."
+  },
+  "views": {
+    "side": {
+      "file": "side.png",
+      "width": 2079,
+      "height": 756,
+      "rawAlphaBounds": [
+        777,
+        150,
+        1501,
+        515
+      ],
+      "visibleBounds": [
+        781,
+        343,
+        1299,
+        410
+      ],
+      "axis": {
+        "butt": {
+          "x": 784,
+          "y": 376
+        },
+        "tip": {
+          "x": 1297,
+          "y": 376
+        }
+      },
+      "tip": {
+        "x": 1297,
+        "y": 376
+      },
+      "grip": {
+        "x": 1016,
+        "y": 376
+      },
+      "twoHandGripRegion": {
+        "polygon": [
+          {
+            "x": 969,
+            "y": 359
+          },
+          {
+            "x": 1065,
+            "y": 359
+          },
+          {
+            "x": 1065,
+            "y": 394
+          },
+          {
+            "x": 969,
+            "y": 394
+          }
+        ],
+        "rearHand": {
+          "x": 984,
+          "y": 376
+        },
+        "frontHand": {
+          "x": 1048,
+          "y": 376
+        }
+      },
+      "projectedLengthPx": 513,
+      "visualInspection": "Complete straight staff, crystal right, butt left; no hands/body/shadow/VFX; clear visible perimeter margins.",
+      "sourceRevision": "Single image-gen framing revision selected"
+    },
+    "raised": {
+      "file": "raised.png",
+      "width": 1254,
+      "height": 1254,
+      "rawAlphaBounds": [
+        322,
+        334,
+        683,
+        884
+      ],
+      "visibleBounds": [
+        586,
+        336,
+        680,
+        879
+      ],
+      "axis": {
+        "butt": {
+          "x": 612,
+          "y": 875
+        },
+        "tip": {
+          "x": 642,
+          "y": 338
+        }
+      },
+      "tip": {
+        "x": 642,
+        "y": 338
+      },
+      "grip": {
+        "x": 622,
+        "y": 619
+      },
+      "twoHandGripRegion": {
+        "polygon": [
+          {
+            "x": 607,
+            "y": 574
+          },
+          {
+            "x": 639,
+            "y": 577
+          },
+          {
+            "x": 634,
+            "y": 660
+          },
+          {
+            "x": 601,
+            "y": 657
+          }
+        ],
+        "rearHand": {
+          "x": 618,
+          "y": 644
+        },
+        "frontHand": {
+          "x": 626,
+          "y": 592
+        }
+      },
+      "projectedLengthPx": 538,
+      "visualInspection": "Complete upright staff and same materials; slight perspective tilt, crystal at top; no hands/body/shadow/VFX."
+    },
+    "foreshortened": {
+      "file": "foreshortened.png",
+      "width": 1254,
+      "height": 1254,
+      "rawAlphaBounds": [
+        415,
+        213,
+        1202,
+        1142
+      ],
+      "visibleBounds": [
+        422,
+        459,
+        874,
+        805
+      ],
+      "axis": {
+        "butt": {
+          "x": 425,
+          "y": 487
+        },
+        "tip": {
+          "x": 865,
+          "y": 775
+        }
+      },
+      "tip": {
+        "x": 865,
+        "y": 775
+      },
+      "grip": {
+        "x": 620,
+        "y": 613
+      },
+      "twoHandGripRegion": {
+        "polygon": [
+          {
+            "x": 577,
+            "y": 561
+          },
+          {
+            "x": 683,
+            "y": 638
+          },
+          {
+            "x": 661,
+            "y": 668
+          },
+          {
+            "x": 556,
+            "y": 590
+          }
+        ],
+        "rearHand": {
+          "x": 588,
+          "y": 590
+        },
+        "frontHand": {
+          "x": 650,
+          "y": 635
+        }
+      },
+      "projectedLengthPx": 526,
+      "visualInspection": "Same staff in diagonal camera-facing orientation, distant butt upper-left, near crystal lower-right; no hands/body/shadow/VFX.",
+      "perspectiveNote": "Mild foreshortening; do not use view change to imply a gameplay reach change"
+    }
+  },
+  "integrationNotes": [
+    "Attach two-hand profile using measured central grip and a per-pose hand track; no stat or reach data is encoded here.",
+    "Review hand placement against body pose before runtime promotion.",
+    "Preserve alpha and exact source PNG pixels. Alpha > 8 was used only for measuring visible bounds; no pixel cleanup was performed.",
+    "Upper-left illumination and material identity retained across three separately generated images.",
+    "Tool did not obey target native canvas/length exactly; runtime must use measured bounds and explicit scale."
+  ]
+}

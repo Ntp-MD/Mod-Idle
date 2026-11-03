@@ -1,0 +1,23 @@
+{
+  "status": "legacy-extracted-candidate",
+  "speciesId": "lizardman",
+  "action": "walk",
+  "direction": "east",
+  "source": "../../../../atlas/animation.png",
+  "sourceCell": {
+    "row": 1,
+    "column": 1,
+    "box": [
+      384,
+      384,
+      768,
+      768
+    ]
+  },
+  "sourcePixelsModified": false,
+  "qa": {
+    "new16DirectionSetAccepted": false,
+    "anchor": false,
+    "atlas": false
+  }
+}

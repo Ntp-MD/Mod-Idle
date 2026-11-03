@@ -1,0 +1,2520 @@
+{
+  "meta": {
+    "note": "The roster source of truth and the only home of a skill number. engine/skills.ts is the one calculator and the client calls the same function, so a press is never typed twice. tools/skills.ts --calc prints the workshop; --checks runs the mechanic gate.",
+    "active_slots": 16,
+    "auto_controls": {
+      "values": ["auto", "manual", "both"],
+      "default": "both",
+      "note": "An optional per-row `auto` flag. Omitted means `both`, today's behaviour. `manual` keeps the row out of the automatic rotation; a deliberate manual press still casts it (the manual bypass is unchanged). `auto` means the row may auto-fire and is accepted now for a later manual-affordance decision."
+    },
+    "spatial_targeting": {
+      "unit": "meter",
+      "note": "Live offensive casts resolve in three separate steps. Acquisition picks a primary: a target-origin row acquires within its cast.range_m, a line row acquires within its length_m instead, and a caster-origin row casts when a body enters its radius_m. The footprint is the committed snapshot — shape, center and cast direction rebuilt at release from live positions (engine/skill-area.ts skillAreaSnapshot; engine/skill-actions.ts targetsInSkillArea): circles, lines and cones hold every living center inside and each body takes the full press; max_targets is authored for the roster gate and the offline queue only, so a zero-radius line still holds bodies along it and radius_m 0 alone never means single-target. A chain-strike row reuses area.radius_m as its hop reach between contacts, not as a circle. No row carries child spread: the cluster system is decided but has no live adopter, so nothing spawns children. The offline_targets column remains the offline queue approximation. Cast reports snapshot the actual footprint for VFX."
+    },
+    "action_profiles": {
+      "instant": {
+        "windup_sec": 0.15,
+        "recovery_sec": 0.15,
+        "impact_delay_sec": 0,
+        "projectile_speed_mps": 0,
+        "hit_radius_m": 0.45
+      },
+      "melee": {
+        "windup_sec": 0.18,
+        "recovery_sec": 0.22,
+        "impact_delay_sec": 0,
+        "projectile_speed_mps": 0,
+        "hit_radius_m": 0.55
+      },
+      "projectile": {
+        "windup_sec": 0.25,
+        "recovery_sec": 0.25,
+        "impact_delay_sec": 0,
+        "projectile_speed_mps": 9,
+        "hit_radius_m": 0.35
+      },
+      "ground": {
+        "windup_sec": 0.4,
+        "recovery_sec": 0.25,
+        "impact_delay_sec": 0.45,
+        "projectile_speed_mps": 0,
+        "hit_radius_m": 0.5
+      }
+    },
+    "types": [
+      "attack",
+      "buff",
+      "curse",
+      "heal",
+      "aura"
+    ],
+    "type_meta": {
+      "attack": "Order list · cooldown + Mana or current-HP cost",
+      "buff": "Timed self-buff · own cooldown and duration; ends between fights",
+      "curse": "Attached to target · same hit_chance as attacks",
+      "heal": "Same list · lands on the player: a per-second drip or an instant restore, never a mob target",
+      "aura": "Player-managed set · **Reserves Max Mana**"
+    },
+    "weapon_groups": [
+      "melee",
+      "ranged",
+      "magic"
+    ],
+    "elements": [
+      "physical",
+      "fire",
+      "cold",
+      "lightning",
+      "poison",
+      "chaos",
+      "earth"
+    ],
+    "reservation": {
+      "max_pct": 100,
+      "note": "The player opens auras; the only system rule is that total reserved mana may not reach 100% of the pool — some mana must stay usable for skills. There is no other cap."
+    },
+    "cast_conditions": {
+      "hp_below_pct_default": 50,
+      "mana_floor_pct_default": 20,
+      "min_targets_default": 2,
+      "note": "The cast order's condition list, held per conditional slot rather than shared, so two rows may wait on different facts. A row fires while any one of its legs holds, so a list is an OR and the player never writes an expression. The legs: `boss` (the front target is a boss), `hpBelowPct` (our own pool is under that share), `statusMissing` (the target lacks a status or curse this row applies), `minTargets` (the resolved live area, or offline queue, contains at least that many targets) and `manaFloorPct` (the press must leave that share of the usable pool). Each `*_default` is the number a leg opens at when its tick-box is first checked and the player edits it from there; they are the only defaults any screen may show, so no screen types its own."
+    },
+    "formula": {
+      "mana_level_step_pct": 5,
+      "cast_reference": {
+        "cdr_pct": 50,
+        "ladder_pct": 30
+      },
+      "ladder": {
+        "note": "The duplicate ladder (skill-pool-system.md 'Duplicates -> ladder'): each step buys a share of cooldown reduction and costs duplicates of its own. `step` is the rung, `cdr` the percent it buys, `cost` the duplicates it takes; `duplicatesToStep` is the running sum of the costs, so the top of the ladder costs what the whole ladder costs. engine/skills.ts reads this table - the ladder a duplicate climbs is one home, and the wiki prints the same rows.",
+        "rows": [
+          { "step": 1, "cdr": 5, "cost": 1 },
+          { "step": 2, "cdr": 10, "cost": 1 },
+          { "step": 3, "cdr": 15, "cost": 2 },
+          { "step": 4, "cdr": 20, "cost": 2 },
+          { "step": 5, "cdr": 25, "cost": 3 },
+          { "step": 6, "cdr": 30, "cost": 3 }
+        ]
+      },
+      "conversion_duplicates": 2,
+      "group_bonus": 0.25,
+      "note": "press = (base_flat + (eff/100) x power + (max_hp_pct/100) x caster Max HP) x (1 + (skill_level - 1) x level_step_pct/100) - the PoE shape: `base_flat` is the skill own damage at skill level 1 (its identity, the same for every caster), `eff` is the share of the added power line the press receives, so gear scales a row by its effectiveness instead of by a percentage of the finished hit. power = the row basis - phys = the caster finished physical hit, magic = their magic + Element x Alignment/100 (B5). `archetype_bands` is the calibration the pairs were derived from: a row damage per second is set by its archetype and the pinned maximum is the roster own best cooldown row per basis, so the DPS line read back out of the curve does not move while a press reads as a heavy or a light hit. Read by engine/skills.ts `perPress` - the --calc workshop, the attack-table press column and the client casts all call it, so a press is never computed twice. A paid active row uses exactly one typed flat price: `mana: N flat` or `hp_cost: N flat`. Both climb on `mana_level_step_pct`; HP is paid from the caster's current pool and leaves one point. The typed price is the same on one target or many; neither pool size changes a flat price. Mana rows were priced against the level-1 caster's own pool, derived from `level_gain.mana_base` and `stat.base` on `K.K_INT_MP`; it is a pricing reference, never a term of the formula.",
+      "archetype_bands": {
+        "note": "Provenance, not a formula: these are the bands the roster's press pairs were derived from — a slow single-target nuke sits at the top of its power line, an area row pays a penalty for the targets it reaches, a fast filler sits below — and each row's per-press is that rate inverted, so a press reads as a heavy or a light hit instead of every row pressing the same. `base_share` is how much of the press is the row's own flat (a nuke) versus its effectiveness on the caster power line (a filler). The pinned maximum is the roster's own best cooldown row per basis, so the DPS line the curve prices does not move. **No formula reads this block and no gate checks it**: the derived numbers live in each row's own `base_flat` / `eff` / cooldown, which is what `perPress` actually spends, so editing a band here changes nothing in the game and the block exists only to record how the pairs were chosen. The cooldown-less beat row keeps its own press.",
+        "bands": {
+          "nuke": 1,
+          "mid": 0.97,
+          "filler": 0.94,
+          "aoe_penalty": -0.12
+        },
+        "base_share": {
+          "nuke": 0.6,
+          "mid": 0.45,
+          "filler": 0.3
+        }
+      },
+      "skill_levels": {
+        "note": "One row per skill level: the multiplier a press and an effect carry at that level. `damage_pct` is the ramp the roster always had; `effect_pct` is the lever that used to be absent (a value in a row is its level-1 number, and it climbs with this column). `special_level_effects` lists the effect stats that opt out of the ramp: Energy Absorb interpolates its base toward its cap across the level range, and Ghost Dance counts a charge every N levels, so both already spend skill level and must not be scaled twice. Row 1 is the FLOOR a fresh skill starts on, not the finished value: a skill dropped at level 1 presses a quarter of what it will, and grows into its press as it levels. `buff_effect_pct` is the buff/aura lever: those rows open at their whole stored value — a dropped buff or aura is usable the moment it lands — and climb to a higher cap than every other effect rides, whole numbers only so a printed rung reads as a percentage and never a fraction.",
+        "rows": [
+          {
+            "level": 1,
+            "damage_pct": 25,
+            "effect_pct": 100,
+            "buff_effect_pct": 100
+          },
+          {
+            "level": 2,
+            "damage_pct": 30.45,
+            "effect_pct": 101.5,
+            "buff_effect_pct": 104
+          },
+          {
+            "level": 3,
+            "damage_pct": 35.89,
+            "effect_pct": 103,
+            "buff_effect_pct": 108
+          },
+          {
+            "level": 4,
+            "damage_pct": 41.34,
+            "effect_pct": 104.5,
+            "buff_effect_pct": 113
+          },
+          {
+            "level": 5,
+            "damage_pct": 46.79,
+            "effect_pct": 106,
+            "buff_effect_pct": 117
+          },
+          {
+            "level": 6,
+            "damage_pct": 52.24,
+            "effect_pct": 107.5,
+            "buff_effect_pct": 121
+          },
+          {
+            "level": 7,
+            "damage_pct": 57.68,
+            "effect_pct": 109,
+            "buff_effect_pct": 125
+          },
+          {
+            "level": 8,
+            "damage_pct": 63.13,
+            "effect_pct": 110.5,
+            "buff_effect_pct": 129
+          },
+          {
+            "level": 9,
+            "damage_pct": 68.58,
+            "effect_pct": 112,
+            "buff_effect_pct": 134
+          },
+          {
+            "level": 10,
+            "damage_pct": 74.03,
+            "effect_pct": 113.5,
+            "buff_effect_pct": 138
+          },
+          {
+            "level": 11,
+            "damage_pct": 79.47,
+            "effect_pct": 115,
+            "buff_effect_pct": 142
+          },
+          {
+            "level": 12,
+            "damage_pct": 84.92,
+            "effect_pct": 116.5,
+            "buff_effect_pct": 146
+          },
+          {
+            "level": 13,
+            "damage_pct": 90.37,
+            "effect_pct": 118,
+            "buff_effect_pct": 151
+          },
+          {
+            "level": 14,
+            "damage_pct": 95.82,
+            "effect_pct": 119.5,
+            "buff_effect_pct": 155
+          },
+          {
+            "level": 15,
+            "damage_pct": 101.26,
+            "effect_pct": 121,
+            "buff_effect_pct": 159
+          },
+          {
+            "level": 16,
+            "damage_pct": 106.71,
+            "effect_pct": 122.5,
+            "buff_effect_pct": 163
+          },
+          {
+            "level": 17,
+            "damage_pct": 112.16,
+            "effect_pct": 124,
+            "buff_effect_pct": 167
+          },
+          {
+            "level": 18,
+            "damage_pct": 117.61,
+            "effect_pct": 125.5,
+            "buff_effect_pct": 172
+          },
+          {
+            "level": 19,
+            "damage_pct": 123.05,
+            "effect_pct": 127,
+            "buff_effect_pct": 176
+          },
+          {
+            "level": 20,
+            "damage_pct": 128.5,
+            "effect_pct": 128.5,
+            "buff_effect_pct": 180
+          }
+        ],
+        "special_level_effects": [
+          "es_absorb_pct",
+          "es_absorb_cap",
+          "dodge_charges",
+          "dodge_charges_per_levels",
+          "dodge_charges_cap",
+          "block_charges",
+          "block_charges_per_levels",
+          "block_charges_cap",
+          "dot_sec",
+          "max_hp_pct_damage",
+          "spread_status",
+          "hits",
+          "hit_pct"
+        ]
+      }
+    }
+  },
+  "reserve_tiers": {
+    "cheap": {
+      "pct": 8
+    },
+    "mid": {
+      "pct": 11
+    },
+    "heavy": {
+      "pct": 14
+    },
+    "extreme": {
+      "pct": 25
+    }
+  },
+  "skills": [
+    {
+      "id": "attack.fireball",
+      "hit_class": "spell",
+      "name": "Fireball",
+      "type": "attack",
+      "group": "magic",
+      "element": "fire",
+      "cd": 6,
+      "mana": "21 flat",
+      "basis": "magic",
+      "offline_targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.25},
+      "effect": "Applies 2 burn stacks.",
+      "effects": [
+        {
+          "stat": "burn_stacks",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 381.5,
+      "eff": 82.43
+    },
+    {
+      "id": "attack.flame_bolt",
+      "hit_class": "spell",
+      "retired": true,
+      "retired_to": "attack.fireball",
+      "name": "Flame Bolt",
+      "type": "attack",
+      "group": "magic",
+      "element": "fire",
+      "cd": 5,
+      "mana": "16 flat",
+      "basis": "magic",
+      "offline_targets": "1",
+      "effect": "Fast cheap fire bolt · 1 burn stack",
+      "effects": [
+        {
+          "stat": "burn_stacks",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 317.9,
+      "eff": 68.69
+    },
+    {
+      "id": "attack.firestorm",
+      "hit_class": "spell",
+      "name": "Firestorm",
+      "type": "attack",
+      "group": "magic",
+      "element": "fire",
+      "cd": 13,
+      "mana": "21 flat",
+      "basis": "magic",
+      "offline_targets": "3",
+      "area": { "origin": "target", "radius_m": 3, "max_targets": 3},
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.5, "fixed_windup_sec": 0.15, "recovery_sec": 0.3},
+      "effect": "Applies 1 burn stack.",
+      "effects": [
+        {
+          "stat": "burn_stacks",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
+      "base_flat": 999.8,
+      "eff": 117.83
+    },
+    {
+      "id": "attack.meteor",
+      "hit_class": "spell",
+      "name": "Meteor",
+      "type": "attack",
+      "group": "magic",
+      "element": "fire",
+      "cd": 14,
+      "mana": "22 flat",
+      "basis": "magic",
+      "offline_targets": "3",
+      "area": { "origin": "target", "radius_m": 3, "max_targets": 3},
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 2.5, "fixed_windup_sec": 0.5, "recovery_sec": 0.3},
+      "action": { "kind": "meteor-field", "roll_policy": "shared", "interval_sec": 0.25, "effect_policy": "refresh-status" },
+      "effect": "Impact plus a 4 sec burn field. First hit applies 2 burn stacks; field hits refresh the burn window.",
+      "duration": "4 sec",
+      "effects": [
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 16,
+          "subject": "self"
+        },
+        {
+          "stat": "hit_pct",
+          "op": "add_pct",
+          "value": 6,
+          "subject": "self"
+        },
+        {
+          "stat": "burn_stacks",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
+      "base_flat": 2045,
+      "eff": 241
+    },
+    {
+      "id": "attack.flame_wisp",
+      "hit_class": "spell",
+      "retired": true,
+      "retired_to": "attack.fireball",
+      "name": "Flame Wisp",
+      "type": "attack",
+      "group": "magic",
+      "element": "fire",
+      "cd": 9,
+      "mana": "22 flat",
+      "basis": "magic",
+      "offline_targets": "1",
+      "effect": "Single target · 3 burn stacks",
+      "effects": [
+        {
+          "stat": "burn_stacks",
+          "op": "add_flat",
+          "value": 3,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 786.5,
+      "eff": 92.7
+    },
+    {
+      "id": "attack.frost_bolt",
+      "hit_class": "spell",
+      "retired": true,
+      "retired_to": "attack.ice_lance",
+      "name": "Frost Bolt",
+      "type": "attack",
+      "group": "magic",
+      "element": "cold",
+      "cd": 5,
+      "mana": "16 flat",
+      "basis": "magic",
+      "offline_targets": "1",
+      "effect": "Fast cold bolt · 1 chill",
+      "rules": [
+        "guaranteed_status"
+      ],
+      "base_flat": 317.9,
+      "eff": 68.69
+    },
+    {
+      "id": "attack.ice_shard",
+      "hit_class": "spell",
+      "retired": true,
+      "retired_to": "attack.ice_lance",
+      "name": "Ice Shard",
+      "type": "attack",
+      "group": "magic",
+      "element": "cold",
+      "cd": 6,
+      "mana": "19 flat",
+      "basis": "magic",
+      "offline_targets": "1",
+      "effect": "Single target · 1 chill",
+      "rules": [
+        "guaranteed_status"
+      ],
+      "base_flat": 381.5,
+      "eff": 82.43
+    },
+    {
+      "id": "attack.ice_lance",
+      "hit_class": "spell",
+      "name": "Ice Lance",
+      "type": "attack",
+      "group": "magic",
+      "element": "cold",
+      "cd": 8,
+      "mana": "21 flat",
+      "basis": "magic",
+      "offline_targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.25},
+      "action": { "kind": "projectile-burst", "roll_policy": "shared", "interval_sec": 0.15 },
+      "effect": "Chills the target.",
+      "effects": [
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "self"
+        },
+        {
+          "stat": "hit_pct",
+          "op": "add_pct",
+          "value": 55,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "guaranteed_status"
+      ],
+      "base_flat": 699.2,
+      "eff": 82.4
+    },
+    {
+      "id": "attack.blizzard",
+      "hit_class": "spell",
+      "name": "Blizzard",
+      "type": "attack",
+      "group": "magic",
+      "element": "cold",
+      "cd": 13,
+      "mana": "20 flat",
+      "basis": "magic",
+      "offline_targets": "3",
+      "area": { "origin": "target", "radius_m": 3, "max_targets": 3},
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 2.5, "fixed_windup_sec": 0.5, "recovery_sec": 0.25},
+      "action": { "kind": "blizzard-field", "roll_policy": "shared", "interval_sec": 0.25, "effect_policy": "per-impact" },
+      "effect": "Chills everything it touches.",
+      "duration": "4 sec",
+      "effects": [
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 16,
+          "subject": "self"
+        },
+        {
+          "stat": "hit_pct",
+          "op": "add_pct",
+          "value": 6,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "guaranteed_status",
+        "every_target"
+      ],
+      "base_flat": 1900,
+      "eff": 224
+    },
+    {
+      "id": "attack.frozen_orb",
+      "hit_class": "spell",
+      "retired": true,
+      "retired_to": "attack.blizzard",
+      "name": "Frozen Orb",
+      "type": "attack",
+      "group": "magic",
+      "element": "cold",
+      "cd": 10,
+      "mana": "16 flat",
+      "basis": "magic",
+      "offline_targets": "3",
+      "effect": "Orb that chills all it touches",
+      "rules": [
+        "guaranteed_status",
+        "every_target"
+      ],
+      "base_flat": 769.1,
+      "eff": 90.64
+    },
+    {
+      "id": "attack.frostbite",
+      "hit_class": "spell",
+      "name": "Frostbite",
+      "type": "attack",
+      "group": "magic",
+      "element": "cold",
+      "cd": 8,
+      "mana": "21 flat",
+      "basis": "magic",
+      "offline_targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.2, "recovery_sec": 0.15},
+      "effect": "+25% damage against chilled targets.",
+      "duration": "8 sec",
+      "effects": [
+        {
+          "stat": "mob_elemental_damage_taken_pct",
+          "op": "add_pct",
+          "value": 25,
+          "subject": "target",
+          "condition": "chilled"
+        }
+      ],
+      "base_flat": 699.2,
+      "eff": 82.4
+    },
+    {
+      "id": "attack.chain_lightning",
+      "hit_class": "spell",
+      "name": "Chain Lightning",
+      "type": "attack",
+      "group": "magic",
+      "element": "lightning",
+      "cd": 9,
+      "mana": "24 flat",
+      "basis": "magic",
+      "offline_targets": "3",
+      "area": { "origin": "target", "radius_m": 3, "max_targets": 3},
+      "cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},
+      "action": { "kind": "chain-strike", "roll_policy": "shared", "interval_sec": 0.08, "hop_share_pct": 60 },
+      "effect": "Shocks everything it reaches.",
+      "rules": [
+        "guaranteed_status",
+        "every_target"
+      ],
+      "base_flat": 692.2,
+      "eff": 81.58
+    },
+    {
+      "id": "attack.lightning_bolt",
+      "hit_class": "spell",
+      "retired": true,
+      "retired_to": "attack.spark",
+      "name": "Lightning Bolt",
+      "type": "attack",
+      "group": "magic",
+      "element": "lightning",
+      "cd": 5,
+      "mana": "18 flat",
+      "basis": "magic",
+      "offline_targets": "1",
+      "effect": "Fast single bolt · 1 shock",
+      "rules": [
+        "guaranteed_status"
+      ],
+      "base_flat": 317.9,
+      "eff": 68.69
+    },
+    {
+      "id": "attack.spark",
+      "hit_class": "spell",
+      "name": "Spark",
+      "type": "attack",
+      "group": "magic",
+      "element": "lightning",
+      "cd": 8,
+      "mana": "13 flat",
+      "basis": "magic",
+      "offline_targets": "3",
+      "area": { "origin": "caster", "radius_m": 3, "max_targets": 3},
+      "cast":{"delivery": "projectile", "range_m": 3, "windup_sec": 0.15, "recovery_sec": 0.25},
+      "effect": "Sends 12 sparks sweeping a 3m circle; everything touched takes 1 shock stack.",
+      "rules": [
+        "guaranteed_status"
+      ],
+      "base_flat": 164.3,
+      "eff": 67.77
+    },
+    {
+      "id": "attack.thunder_strike",
+      "hit_class": "spell",
+      "name": "Thunder Strike",
+      "type": "attack",
+      "group": "magic",
+      "element": "lightning",
+      "cd": 11,
+      "mana": "18 flat",
+      "basis": "magic",
+      "offline_targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.4, "fixed_windup_sec": 0.05, "recovery_sec": 0.25},
+      "effect": "Shocks the target.",
+      "rules": [
+        "guaranteed_status"
+      ],
+      "base_flat": 961.3,
+      "eff": 113.3
+    },
+    {
+      "id": "attack.storm_call",
+      "hit_class": "spell",
+      "retired": true,
+      "retired_to": "attack.chain_lightning",
+      "name": "Storm Call",
+      "type": "attack",
+      "group": "magic",
+      "element": "lightning",
+      "cd": 14,
+      "mana": "22 flat",
+      "basis": "magic",
+      "offline_targets": "3",
+      "effect": "Big AoE storm · shocks all hit",
+      "rules": [
+        "guaranteed_status",
+        "every_target"
+      ],
+      "base_flat": 1076.7,
+      "eff": 126.9
+    },
+    {
+      "id": "attack.static_field",
+      "hit_class": "spell",
+      "retired": true,
+      "retired_to": "attack.chain_lightning",
+      "name": "Static Field",
+      "type": "attack",
+      "group": "magic",
+      "element": "lightning",
+      "cd": 10,
+      "mana": "22 flat",
+      "basis": "magic",
+      "offline_targets": "3",
+      "effect": "Field around self · shocks all hit",
+      "rules": [
+        "guaranteed_status",
+        "every_target"
+      ],
+      "base_flat": 769.1,
+      "eff": 90.64
+    },
+    {
+      "id": "attack.poison_bolt",
+      "hit_class": "spell",
+      "name": "Poison Bolt",
+      "type": "attack",
+      "group": "magic",
+      "element": "poison",
+      "cd": 6,
+      "mana": "19 flat",
+      "basis": "magic",
+      "offline_targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "projectile", "range_m": 4.6},
+      "effect": "Applies 2 poison stacks.",
+      "effects": [
+        {
+          "stat": "poison_stacks",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 381.5,
+      "eff": 82.43
+    },
+    {
+      "id": "attack.venom_spray",
+      "hit_class": "spell",
+      "retired": true,
+      "retired_to": "attack.poison_cloud",
+      "name": "Venom Spray",
+      "type": "attack",
+      "group": "magic",
+      "element": "poison",
+      "cd": 9,
+      "mana": "24 flat",
+      "basis": "magic",
+      "offline_targets": "3",
+      "area": { "origin": "caster", "radius_m": 3, "shape": "cone", "angle_deg": 90, "max_targets": 3},
+      "cast":{"delivery": "melee", "range_m": 3, "windup_sec": 0.25, "fixed_windup_sec": 0.05, "recovery_sec": 0.22},
+      "effect": "Sprays venom in a 90° cone, applying 1 poison stack.",
+      "effects": [
+        {
+          "stat": "poison_stacks",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
+      "base_flat": 692.2,
+      "eff": 81.58
+    },
+    {
+      "id": "attack.acid_arrow",
+      "hit_class": "spell",
+      "name": "Acid Arrow",
+      "type": "attack",
+      "group": "magic",
+      "element": "poison",
+      "cd": 7,
+      "mana": "21 flat",
+      "basis": "magic",
+      "offline_targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "projectile", "range_m": 4.6},
+      "effect": "Applies 3 poison stacks.",
+      "effects": [
+        {
+          "stat": "poison_stacks",
+          "op": "add_flat",
+          "value": 3,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 445.1,
+      "eff": 96.16
+    },
+    {
+      "id": "attack.toxic_cloud",
+      "hit_class": "spell",
+      "retired": true,
+      "retired_to": "attack.poison_cloud",
+      "name": "Toxic Cloud",
+      "type": "attack",
+      "group": "magic",
+      "element": "poison",
+      "cd": 12,
+      "mana": "19 flat",
+      "basis": "magic",
+      "offline_targets": "3",
+      "effect": "Lingering cloud · 2 poison stacks to all hit",
+      "effects": [
+        {
+          "stat": "poison_stacks",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
+      "base_flat": 922.9,
+      "eff": 108.77
+    },
+    {
+      "id": "attack.chaos_bolt",
+      "hit_class": "spell",
+      "name": "Chaos Bolt",
+      "type": "attack",
+      "group": "magic",
+      "element": "chaos",
+      "cd": 6,
+      "mana": "19 flat",
+      "basis": "magic",
+      "offline_targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "projectile", "range_m": 4.6},
+      "effect": "Applies 1 mark stack.",
+      "effects": [
+        {
+          "stat": "mark_stacks",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 381.5,
+      "eff": 82.43
+    },
+    {
+      "id": "attack.void_blast",
+      "hit_class": "spell",
+      "name": "Void Blast",
+      "type": "attack",
+      "group": "magic",
+      "element": "chaos",
+      "cd": 9,
+      "mana": "24 flat",
+      "basis": "magic",
+      "offline_targets": "3",
+      "area": { "origin": "target", "radius_m": 3, "max_targets": 3},
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.45, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},
+      "effect": "Applies 1 mark stack.",
+      "effects": [
+        {
+          "stat": "mark_stacks",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
+      "base_flat": 692.2,
+      "eff": 81.58
+    },
+    {
+      "id": "attack.sand_storm",
+      "hit_class": "spell",
+      "name": "Sand Storm",
+      "type": "attack",
+      "group": "magic",
+      "element": "earth",
+      "cd": 12,
+      "mana": "19 flat",
+      "basis": "magic",
+      "offline_targets": "3",
+      "area": { "origin": "target", "radius_m": 3, "max_targets": 3},
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.5, "fixed_windup_sec": 0.15, "recovery_sec": 0.25},
+      "action": { "kind": "sand-field", "roll_policy": "shared" },
+      "effect": "Blinds with −20% accuracy.",
+      "effects": [
+        {
+          "stat": "accuracy",
+          "op": "add_pct",
+          "value": -20,
+          "subject": "target"
+        },
+        {
+          "stat": "dot_dps",
+          "op": "add_flat",
+          "value": 20,
+          "subject": "target"
+        },
+        {
+          "stat": "dot_sec",
+          "op": "add_flat",
+          "value": 10,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
+      "base_flat": 922.9,
+      "eff": 108.77
+    },
+    {
+      "id": "attack.earth_splitter",
+      "hit_class": "spell",
+      "name": "Earth Splitter",
+      "type": "attack",
+      "group": "magic",
+      "element": "earth",
+      "cd": 11,
+      "mana": "18 flat",
+      "basis": "magic",
+      "offline_targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.4, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},
+      "effect": "Adds 15% of the target's maximum pool as damage, halved against bosses.",
+      "effects": [
+        {
+          "stat": "max_hp_pct_damage",
+          "op": "add_flat",
+          "value": 15,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 961.3,
+      "eff": 113.3
+    },
+    {
+      "id": "attack.fan_of_knives",
+      "hit_class": "attack",
+      "retired": true,
+      "retired_to": "attack.whirlwind",
+      "name": "Fan of Knives",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 6,
+      "mana": "15 flat",
+      "basis": "phys",
+      "offline_targets": "3",
+      "effect": "AoE opener · 2 quick cuts on every target hit",
+      "effects": [
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
+      "base_flat": 1445.7,
+      "eff": 67.79
+    },
+    {
+      "id": "attack.backstab",
+      "hit_class": "attack",
+      "name": "Backstab",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 10,
+      "mana": "27 flat",
+      "basis": "phys",
+      "offline_targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.25, "fixed_windup_sec": 0.05, "recovery_sec": 0.22},
+      "effect": "+25% crit chance on this press.",
+      "effects": [
+        {
+          "stat": "crit_chance",
+          "op": "add_flat",
+          "value": 25,
+          "subject": "self"
+        }
+      ],
+      "base_flat": 3779.7,
+      "eff": 96.67
+    },
+    {
+      "id": "attack.poisoned_edge",
+      "hit_class": "attack",
+      "retired": true,
+      "retired_to": "attack.poison_bolt",
+      "name": "Poisoned Edge",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 7,
+      "mana": "18 flat",
+      "basis": "phys",
+      "offline_targets": "1",
+      "effect": "A hidden edge · 2 poison stacks to the target",
+      "effects": [
+        {
+          "stat": "poison_stacks",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 1924.8,
+      "eff": 90.25
+    },
+    {
+      "id": "attack.sidestep",
+      "hit_class": "attack",
+      "retired": true,
+      "retired_to": "attack.backstab",
+      "name": "Sidestep",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 7,
+      "mana": "18 flat",
+      "basis": "phys",
+      "offline_targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.15, "fixed_windup_sec": 0, "recovery_sec": 0.22},
+      "effect": "+30% crit chance on this press.",
+      "effects": [
+        {
+          "stat": "crit_chance",
+          "op": "add_flat",
+          "value": 30,
+          "subject": "self"
+        }
+      ],
+      "base_flat": 1924.8,
+      "eff": 90.25
+    },
+    {
+      "id": "attack.nerve_strike",
+      "hit_class": "attack",
+      "retired": true,
+      "retired_to": "curse.weaken",
+      "name": "Nerve Strike",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 7,
+      "mana": "18 flat",
+      "basis": "phys",
+      "offline_targets": "1",
+      "effect": "A cut on the nerve · the target deals −25% damage",
+      "effects": [
+        {
+          "stat": "damage_dealt",
+          "op": "add_pct",
+          "value": -25,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 1924.8,
+      "eff": 90.25
+    },
+    {
+      "id": "attack.impale",
+      "hit_class": "attack",
+      "name": "Impale",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 9,
+      "mana": "22 flat",
+      "basis": "phys",
+      "offline_targets": "3",
+      "area": { "origin": "caster", "radius_m": 0, "shape": "line", "length_m": 6, "width_m": 1, "max_targets": 6},
+      "cast":{"delivery": "melee", "range_m": 6, "windup_sec": 0.25, "fixed_windup_sec": 0.05, "recovery_sec": 0.22},
+      "effect": "A line thrust that pierces 100% of the resistance it meets.",
+      "effects": [
+        {
+          "stat": "resistance_pierce_pct",
+          "op": "add_flat",
+          "value": 100,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
+      "base_flat": 2100,
+      "eff": 74
+    },
+    {
+      "id": "attack.skewer_line",
+      "hit_class": "attack",
+      "retired": true,
+      "retired_to": "attack.whirlwind",
+      "name": "Skewer Line",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 9,
+      "mana": "22 flat",
+      "basis": "phys",
+      "offline_targets": "3",
+      "effect": "Skewers the whole rank · 3 thrusts on every target hit",
+      "effects": [
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 3,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
+      "base_flat": 2993.5,
+      "eff": 76.56
+    },
+    {
+      "id": "attack.reach_thrust",
+      "hit_class": "attack",
+      "retired": true,
+      "retired_to": "attack.puncture",
+      "name": "Reach Thrust",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 12,
+      "mana": "24 flat",
+      "basis": "phys",
+      "offline_targets": "1",
+      "effect": "The longest, slowest thrust of the reach — one heavy hit",
+      "effects": [],
+      "base_flat": 4535.6,
+      "eff": 116
+    },
+    {
+      "id": "attack.low_sweep",
+      "hit_class": "attack",
+      "retired": true,
+      "retired_to": "curse.cripple",
+      "name": "Low Sweep",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 8,
+      "mana": "18 flat",
+      "basis": "phys",
+      "offline_targets": "1",
+      "effect": "Takes the legs out · attack speed −20% on the target",
+      "effects": [
+        {
+          "stat": "attack_speed",
+          "op": "add_pct",
+          "value": -20,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 3023.8,
+      "eff": 77.33
+    },
+    {
+      "id": "attack.skull_crack",
+      "hit_class": "attack",
+      "name": "Skull Crack",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 8,
+      "mana": "18 flat",
+      "basis": "phys",
+      "offline_targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.2, "fixed_windup_sec": 0, "recovery_sec": 0.22},
+      "effect": "+20% stun chance on this hit.",
+      "effects": [
+        {
+          "stat": "stun_chance",
+          "op": "add_flat",
+          "value": 20,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 3023.8,
+      "eff": 77.33
+    },
+    {
+      "id": "attack.ground_slam",
+      "hit_class": "attack",
+      "name": "Ground Slam",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 6,
+      "mana": "15 flat",
+      "basis": "phys",
+      "offline_targets": "3",
+      "area": { "origin": "caster", "radius_m": 3, "max_targets": 3},
+      "cast":{"delivery": "melee", "range_m": 3, "windup_sec": 0.25, "fixed_windup_sec": 0.05, "recovery_sec": 0.22},
+      "effect": "Stops targets for 1 sec.",
+      "effects": [
+        {
+          "stat": "stop_sec",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
+      "base_flat": 1445.7,
+      "eff": 67.79
+    },
+    {
+      "id": "attack.iron_toll",
+      "hit_class": "attack",
+      "retired": true,
+      "retired_to": "curse.weaken",
+      "name": "Iron Toll",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 10,
+      "mana": "27 flat",
+      "basis": "phys",
+      "offline_targets": "1",
+      "effect": "A tolling blow · the target deals −25% damage",
+      "effects": [
+        {
+          "stat": "damage_dealt",
+          "op": "add_pct",
+          "value": -25,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 3779.7,
+      "eff": 96.67
+    },
+    {
+      "id": "attack.wide_swing",
+      "hit_class": "attack",
+      "retired": true,
+      "retired_to": "attack.cleave",
+      "name": "Wide Swing",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 6,
+      "mana": "15 flat",
+      "basis": "phys",
+      "offline_targets": "3",
+      "effect": "One wide cut across the whole group — no rider, just the reach",
+      "effects": [],
+      "rules": [
+        "every_target"
+      ],
+      "base_flat": 1445.7,
+      "eff": 67.79
+    },
+    {
+      "id": "attack.whirlaxe",
+      "hit_class": "attack",
+      "retired": true,
+      "retired_to": "attack.whirlwind",
+      "name": "Whirlaxe",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 9,
+      "mana": "22 flat",
+      "basis": "phys",
+      "offline_targets": "3",
+      "effect": "Spins the axe through the rank · 2 cuts on every target hit",
+      "effects": [
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
+      "base_flat": 2993.5,
+      "eff": 76.56
+    },
+    {
+      "id": "attack.cleave",
+      "hit_class": "attack",
+      "name": "Cleave",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 6,
+      "mana": "15 flat",
+      "basis": "phys",
+      "offline_targets": "3",
+      "area": { "origin": "caster", "radius_m": 2.1, "shape": "cone", "angle_deg": 120, "max_targets": 2},
+      "cast": {"delivery": "melee", "range_m": 2.1},
+      "effect": "A 120° sweeping swing — one hit to every enemy in front of you.",
+      "modelled_by": "offline_targets",
+      "base_flat": 1445.7,
+      "eff": 67.79
+    },
+    {
+      "id": "attack.elemental_break",
+      "hit_class": "attack",
+      "name": "Elemental Break",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 10,
+      "mana": "27 flat",
+      "basis": "phys",
+      "offline_targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.25, "fixed_windup_sec": 0.05, "recovery_sec": 0.22},
+      "effect": "The target takes +15% elemental damage.",
+      "duration": "8 sec",
+      "effects": [
+        {
+          "stat": "mob_elemental_damage_taken_pct",
+          "op": "add_pct",
+          "value": 15,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 3779.7,
+      "eff": 96.67
+    },
+    {
+      "id": "attack.whirlwind",
+      "hit_class": "attack",
+      "name": "Whirlwind",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 9,
+      "mana": "22 flat",
+      "basis": "phys",
+      "offline_targets": "3",
+      "area": { "origin": "caster", "radius_m": 3, "max_targets": 3},
+      "cast":{"delivery": "melee", "range_m": 3, "windup_sec": 0.2, "fixed_windup_sec": 0, "recovery_sec": 0.22},
+      "duration": "3 sec",
+      "action": { "kind": "whirlwind-channel", "roll_policy": "shared", "active_sec": 3, "movement_speed_mult": 0.6, "interval_sec": 0.5 },
+      "effect": "One hit per target per round.",
+      "effects": [
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 6,
+          "subject": "self"
+        },
+        {
+          "stat": "hit_pct",
+          "op": "add_pct",
+          "value": 17,
+          "subject": "self"
+        }
+      ],
+      "base_flat": 2993.5,
+      "eff": 76.56
+    },
+    {
+      "id": "attack.shield_bash",
+      "hit_class": "attack",
+      "name": "Shield Bash",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 8,
+      "mana": "18 flat",
+      "basis": "phys",
+      "offline_targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.2, "fixed_windup_sec": 0, "recovery_sec": 0.22},
+      "effect": "Stops the target for 1 sec.",
+      "effects": [
+        {
+          "stat": "stop_sec",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "target"
+        }
+      ],
+      "rules": [
+        "bypasses_control_cap"
+      ],
+      "base_flat": 3023.8,
+      "eff": 77.33
+    },
+    {
+      "id": "attack.puncture",
+      "hit_class": "attack",
+      "name": "Puncture",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 7,
+      "mana": "18 flat",
+      "basis": "phys",
+      "offline_targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.15, "fixed_windup_sec": 0, "recovery_sec": 0.22},
+      "effect": "Guarantees bleed at 100% chance and refreshes its duration.",
+      "effects": [
+        {
+          "stat": "bleed_chance",
+          "op": "add_pct",
+          "value": 100,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 1924.8,
+      "eff": 90.25
+    },
+    {
+      "id": "attack.reap",
+      "hit_class": "attack",
+      "name": "Reap",
+      "type": "attack",
+      "group": "melee",
+      "element": "physical",
+      "cd": 9,
+      "mana": "19 flat",
+      "basis": "phys",
+      "offline_targets": "3",
+      "area": { "origin": "caster", "radius_m": 3, "max_targets": 3},
+      "cast":{"delivery": "melee", "range_m": 3, "windup_sec": 0.25, "fixed_windup_sec": 0, "recovery_sec": 0.22},
+      "effect": "One swing hits every enemy around you (3m), slows attack speed −20% for 6s and grants x1.10 physical power for 6s.",
+      "duration": "6 sec",
+      "effects": [
+        {
+          "stat": "attack_speed",
+          "op": "add_pct",
+          "value": -20,
+          "subject": "target"
+        },
+        {
+          "stat": "physical_power",
+          "op": "mult",
+          "value": 1.1,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "every_target",
+        "self_window"
+      ],
+      "base_flat": 2100,
+      "eff": 74
+    },
+    {
+      "id": "attack.piercing_shot",
+      "hit_class": "attack",
+      "name": "Piercing Shot",
+      "type": "attack",
+      "group": "ranged",
+      "weapon": "bow",
+      "element": "physical",
+      "cd": 6,
+      "mana": "15 flat",
+      "basis": "phys",
+      "offline_targets": "1",
+      "area": { "origin": "caster", "radius_m": 0, "shape": "line", "length_m": 5, "width_m": 1, "max_targets": 5},
+      "cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.35, "fixed_windup_sec": 0.05, "recovery_sec": 0.25},
+      "effect": "A piercing shot along a line; this hit cannot be dodged.",
+      "rules": [
+        "ignores_dodge"
+      ],
+      "base_flat": 1649.8,
+      "eff": 77.36
+    },
+    {
+      "id": "attack.arrow_shower",
+      "hit_class": "attack",
+      "name": "Arrow Shower",
+      "type": "attack",
+      "group": "ranged",
+      "weapon": "bow",
+      "element": "physical",
+      "cd": 7,
+      "mana": "19 flat",
+      "basis": "phys",
+      "offline_targets": "3",
+      "area": { "origin": "target", "radius_m": 3, "max_targets": 3},
+      "cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.35, "fixed_windup_sec": 0.05, "recovery_sec": 0.25},
+      "action": { "kind": "projectile-burst", "roll_policy": "shared", "interval_sec": 0.25, "effect_policy": "per-impact" },
+      "effect": "12 arrows at ~7% each land across 3m over 3 sec. Each arrow can trigger effects.",
+      "duration": "3 sec",
+      "effects": [
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 12,
+          "subject": "self"
+        },
+        {
+          "stat": "hit_pct",
+          "op": "add_pct",
+          "value": 7,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
+      "base_flat": 1924.8,
+      "eff": 90.25
+    },
+    {
+      "id": "attack.headshot",
+      "hit_class": "attack",
+      "name": "Headshot",
+      "type": "attack",
+      "group": "ranged",
+      "weapon": "bow",
+      "element": "physical",
+      "cd": 12,
+      "mana": "24 flat",
+      "basis": "phys",
+      "offline_targets": "1",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.55, "fixed_windup_sec": 0.15, "recovery_sec": 0.25},
+      "effect": "+25% crit chance on this hit.",
+      "effects": [
+        {
+          "stat": "crit_chance",
+          "op": "add_flat",
+          "value": 25,
+          "subject": "self"
+        }
+      ],
+      "base_flat": 4535.6,
+      "eff": 116
+    },
+    {
+      "id": "attack.earth_shock",
+      "hit_class": "spell",
+      "name": "Earth Shock",
+      "type": "attack",
+      "group": "magic",
+      "element": "earth",
+      "cd": 12,
+      "mana": "19 flat",
+      "basis": "magic",
+      "offline_targets": "3",
+      "area": { "origin": "target", "radius_m": 3, "max_targets": 3},
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.5, "fixed_windup_sec": 0.15, "recovery_sec": 0.25},
+      "effect": "Applies cripple.",
+      "rules": [
+        "guaranteed_status",
+        "every_target"
+      ],
+      "base_flat": 922.9,
+      "eff": 108.77
+    },
+    {
+      "id": "attack.shatter",
+      "hit_class": "spell",
+      "name": "Shatter",
+      "type": "attack",
+      "group": "magic",
+      "element": "cold",
+      "cd": 13,
+      "mana": "22 flat",
+      "basis": "magic",
+      "offline_targets": "3",
+      "area": { "origin": "target", "radius_m": 3, "max_targets": 3},
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.55, "fixed_windup_sec": 0.15, "recovery_sec": 0.3},
+      "effect": "+30% damage against chilled targets. Stops them for 1 sec.",
+      "effects": [
+        {
+          "stat": "bonus_vs_status",
+          "status": "chill",
+          "op": "add_pct",
+          "value": 30,
+          "subject": "target"
+        },
+        {
+          "stat": "stop_sec",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "target"
+        }
+      ],
+      "base_flat": 970,
+      "eff": 118
+    },
+    {
+      "id": "attack.overload",
+      "hit_class": "spell",
+      "name": "Overload",
+      "type": "attack",
+      "group": "magic",
+      "element": "lightning",
+      "cd": 12,
+      "mana": "24 flat",
+      "basis": "magic",
+      "offline_targets": "3",
+      "area": { "origin": "target", "radius_m": 2.5, "max_targets": 2},
+      "cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.45, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},
+      "action": { "kind": "ground-pulse-burst", "roll_policy": "shared", "interval_sec": 0.3 },
+      "effect": "+30% damage against shocked targets.",
+      "effects": [
+        {
+          "stat": "bonus_vs_status",
+          "status": "shock",
+          "op": "add_pct",
+          "value": 30,
+          "subject": "target"
+        },
+        {
+          "stat": "hits",
+          "op": "add_flat",
+          "value": 2,
+          "subject": "self"
+        },
+        {
+          "stat": "hit_pct",
+          "op": "add_pct",
+          "value": 50,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "every_target"
+      ],
+      "base_flat": 920,
+      "eff": 113
+    },
+    {
+      "id": "attack.aftershock",
+      "hit_class": "spell",
+      "name": "Aftershock",
+      "type": "attack",
+      "group": "magic",
+      "element": "earth",
+      "cd": 12,
+      "mana": "22 flat",
+      "basis": "magic",
+      "offline_targets": "3",
+      "area": { "origin": "caster", "radius_m": 3, "max_targets": 3},
+      "cast":{"delivery": "ground", "range_m": 3, "windup_sec": 0.45, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},
+      "effect": "+25% damage against crippled targets. Grants +20% armour.",
+      "duration": "6 sec",
+      "effects": [
+        {
+          "stat": "bonus_vs_status",
+          "status": "crippled",
+          "op": "add_pct",
+          "value": 25,
+          "subject": "target"
+        },
+        {
+          "stat": "armour",
+          "op": "add_pct",
+          "value": 20,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "every_target",
+        "self_window"
+      ],
+      "base_flat": 920,
+      "eff": 108
+    },
+    {
+      "id": "buff.warcry",
+      "hit_class": "none",
+      "name": "Warcry",
+      "type": "buff",
+      "cd": 15,
+      "mana": "15 flat",
+      "duration": "10 sec",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "×1.15 physical power, ×1.20 elemental alignment and elemental resistance.",
+      "effects": [
+        {
+          "stat": "physical_power",
+          "op": "mult",
+          "value": 1.15
+        },
+        {
+          "stat": "elemental_alignment",
+          "op": "mult",
+          "value": 1.2
+        },
+        {
+          "stat": "elemental_resistance",
+          "op": "mult",
+          "value": 1.2
+        }
+      ]
+    },
+    {
+      "id": "buff.berserker",
+      "hit_class": "none",
+      "name": "Berserker",
+      "type": "buff",
+      "cd": 15,
+      "mana": "15 flat",
+      "duration": "10 sec",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "×1.20 attack speed, +15% leech, and damage taken ×1.15.",
+      "effects": [
+        {
+          "stat": "attack_speed",
+          "op": "mult",
+          "value": 1.2,
+          "subject": "self"
+        },
+        {
+          "stat": "leech",
+          "op": "add_pct",
+          "value": 15,
+          "subject": "self"
+        },
+        {
+          "stat": "damage_taken",
+          "op": "mult",
+          "value": 1.15,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "buff.iron_will",
+      "hit_class": "none",
+      "name": "Iron Will",
+      "type": "buff",
+      "cd": 15,
+      "mana": "15 flat",
+      "duration": "10 sec",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "×1.20 Armour, damage taken ×0.90.",
+      "effects": [
+        {
+          "stat": "armour",
+          "op": "mult",
+          "value": 1.2
+        },
+        {
+          "stat": "damage_taken",
+          "op": "mult",
+          "value": 0.9
+        }
+      ]
+    },
+    {
+      "id": "buff.holy_veil",
+      "hit_class": "none",
+      "name": "Holy veil",
+      "type": "buff",
+      "cd": 20,
+      "mana": "18 flat",
+      "duration": "7 sec",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "No Element debuff or bleed can be applied. Casting clears the ones on you.",
+      "rules": [
+        "status_immunity",
+        "cleanses_on_cast"
+      ]
+    },
+    {
+      "id": "buff.ghost_dance",
+      "hit_class": "none",
+      "name": "Ghost Dance",
+      "type": "buff",
+      "cd": 15,
+      "mana": "15 flat",
+      "duration": "10 sec",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "Grants perfect-dodge charges that delete incoming hits outright: 3 at level 1, +1 every 5 levels, up to 7 at level 20.",
+      "effects": [
+        {
+          "stat": "dodge_charges",
+          "op": "add_flat",
+          "value": 3,
+          "subject": "self"
+        },
+        {
+          "stat": "dodge_charges_per_levels",
+          "op": "add_flat",
+          "value": 5,
+          "subject": "self"
+        },
+        {
+          "stat": "dodge_charges_cap",
+          "op": "add_flat",
+          "value": 7,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "buff.earth_wall",
+      "hit_class": "none",
+      "name": "Earth Wall",
+      "type": "buff",
+      "cd": 15,
+      "mana": "15 flat",
+      "duration": "10 sec",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "Grants block charges that cut physical hits by the block rule, never deleting them: 5 at level 1, +1 every 3 levels, up to 10 at level 20.",
+      "effects": [
+        {
+          "stat": "block_charges",
+          "op": "add_flat",
+          "value": 5,
+          "subject": "self"
+        },
+        {
+          "stat": "block_charges_per_levels",
+          "op": "add_flat",
+          "value": 3,
+          "subject": "self"
+        },
+        {
+          "stat": "block_charges_cap",
+          "op": "add_flat",
+          "value": 10,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "buff.magia_drive",
+      "hit_class": "none",
+      "name": "Magia Drive",
+      "type": "buff",
+      "cd": 20,
+      "mana": "18 flat",
+      "duration": "8 sec",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "Energy Shield starts recharging at once, ignoring the 5 sec delay, and hits do not interrupt the recharge.",
+      "rules": [
+        "es_recharge_immediate"
+      ]
+    },
+    {
+      "id": "buff.energy_absorb",
+      "hit_class": "none",
+      "name": "Energy Absorb",
+      "type": "buff",
+      "cd": 20,
+      "mana": "18 flat",
+      "duration": "3 sec",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "Converts 15% of every incoming hit into Energy Shield, rising to 30% at level 20.",
+      "effects": [
+        {
+          "stat": "es_absorb_pct",
+          "op": "add_pct",
+          "value": 15,
+          "subject": "self"
+        },
+        {
+          "stat": "es_absorb_cap",
+          "op": "add_pct",
+          "value": 30,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "buff.flame_guard",
+      "hit_class": "none",
+      "name": "Flame Guard",
+      "type": "buff",
+      "element": "fire",
+      "cd": 16,
+      "mana": "18 flat",
+      "duration": "8 sec",
+      "cast": {"delivery": "instant", "range_m": 0},
+      "effect": "Grants a 350 Energy Shield pool that soaks damage while the guard is up.",
+      "effects": [
+        {
+          "stat": "energy_shield",
+          "op": "add_flat",
+          "value": 350,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "curse.weaken",
+      "hit_class": "spell",
+      "name": "Weaken",
+      "type": "curse",
+      "cd": 12,
+      "mana": "21 flat",
+      "duration": "8 sec",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "instant", "range_m": 4.6},
+      "effect": "The target deals −25% damage.",
+      "effects": [
+        {
+          "stat": "damage_dealt",
+          "op": "add_pct",
+          "value": -25,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "curse.blinding_mark",
+      "hit_class": "spell",
+      "name": "Blinding Mark",
+      "type": "curse",
+      "cd": 12,
+      "mana": "21 flat",
+      "duration": "8 sec",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "instant", "range_m": 4.6},
+      "effect": "The target's accuracy is −30%.",
+      "effects": [
+        {
+          "stat": "accuracy",
+          "op": "add_pct",
+          "value": -30,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "curse.expose",
+      "hit_class": "spell",
+      "name": "Expose",
+      "type": "curse",
+      "cd": 14,
+      "mana": "24 flat",
+      "duration": "8 sec",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},
+      "effect": "The target takes +20% damage.",
+      "effects": [
+        {
+          "stat": "damage_taken",
+          "op": "add_pct",
+          "value": 20,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "curse.cripple",
+      "hit_class": "spell",
+      "name": "Cripple",
+      "type": "curse",
+      "cd": 12,
+      "mana": "21 flat",
+      "duration": "8 sec",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast": {"delivery": "instant", "range_m": 4.6},
+      "effect": "The target's attack speed is −20%.",
+      "effects": [
+        {
+          "stat": "attack_speed",
+          "op": "add_pct",
+          "value": -20,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "curse.jinx",
+      "hit_class": "spell",
+      "name": "Jinx",
+      "type": "curse",
+      "cd": 13,
+      "mana": "19 flat",
+      "duration": "8 sec",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.2, "recovery_sec": 0.15},
+      "effect": "+15% chance to crit against the target.",
+      "effects": [
+        {
+          "stat": "crit_chance",
+          "op": "add_flat",
+          "value": 15,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "curse.venom_bind",
+      "hit_class": "spell",
+      "name": "Venom Bind",
+      "type": "curse",
+      "cd": 15,
+      "mana": "21 flat",
+      "duration": "6 sec",
+      "area": { "origin": "target", "radius_m": 0 },
+      "cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},
+      "effect": "Poison stacks on the target stop falling.",
+      "effects": [
+        {
+          "stat": "poison_hold_sec",
+          "op": "add_flat",
+          "value": 6,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "heal.heal",
+      "hit_class": "none",
+      "name": "Heal",
+      "type": "heal",
+      "cd": 20,
+      "mana": "30 flat",
+      "duration": "8 sec",
+      "cast":{"delivery": "instant", "range_m": 0, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},
+      "effect": "Restores 10% of Max HP each second.",
+      "effects": [
+        {
+          "stat": "heal_per_sec",
+          "op": "add_pct",
+          "value": 10
+        }
+      ]
+    },
+    {
+      "id": "heal.greater_heal",
+      "hit_class": "none",
+      "name": "Greater Heal",
+      "type": "heal",
+      "cd": 40,
+      "mana": "37 flat",
+      "duration": "Instant",
+      "cast":{"delivery": "instant", "range_m": 0, "windup_sec": 0.6, "fixed_windup_sec": 0.2, "recovery_sec": 0.25},
+      "effect": "Restores 60% of Max HP at once.",
+      "effects": [
+        {
+          "stat": "heal_instant",
+          "op": "add_pct",
+          "value": 60
+        }
+      ]
+    },
+    {
+      "id": "heal.cleanse",
+      "hit_class": "none",
+      "name": "Cleanse",
+      "type": "heal",
+      "cd": 24,
+      "mana": "24 flat",
+      "duration": "Instant",
+      "cast":{"delivery": "instant", "range_m": 0, "windup_sec": 0.2, "recovery_sec": 0.15},
+      "effect": "Cleanses every status on you and restores 8% of Max HP.",
+      "effects": [
+        {
+          "stat": "heal_instant",
+          "op": "add_pct",
+          "value": 8,
+          "subject": "self"
+        }
+      ],
+      "rules": [
+        "cleanses_status"
+      ]
+    },
+    {
+      "id": "aura.wraith_of_fury",
+      "hit_class": "none",
+      "name": "Wraith of Fury",
+      "type": "aura",
+      "kind": "self",
+      "reserve": "cheap",
+      "effect": "Attack speed +12%.",
+      "effects": [
+        {
+          "stat": "attack_speed",
+          "op": "add_pct",
+          "value": 12
+        }
+      ]
+    },
+    {
+      "id": "aura.clarity",
+      "hit_class": "none",
+      "name": "Clarity",
+      "type": "aura",
+      "kind": "self",
+      "reserve": "cheap",
+      "effect": "Mana regeneration +25%.",
+      "effects": [
+        {
+          "stat": "mana_regen",
+          "op": "add_pct",
+          "value": 25
+        }
+      ]
+    },
+    {
+      "id": "aura.haste",
+      "hit_class": "none",
+      "name": "Haste",
+      "type": "aura",
+      "kind": "self",
+      "reserve": "extreme",
+      "effect": "Global speed ×1.15: cooldowns tick 15% faster and final attack speed ×1.15. Clamped by the 500 Cap.",
+      "effects": [
+        {
+          "stat": "attack_speed",
+          "op": "mult",
+          "value": 1.15,
+          "subject": "self"
+        },
+        {
+          "stat": "global_speed",
+          "op": "mult",
+          "value": 1.15,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "aura.vitality",
+      "hit_class": "none",
+      "name": "Vitality",
+      "type": "aura",
+      "kind": "self",
+      "reserve": "mid",
+      "effect": "Health regeneration +30%.",
+      "effects": [
+        {
+          "stat": "hp_regen",
+          "op": "add_pct",
+          "value": 30
+        }
+      ]
+    },
+    {
+      "id": "aura.herald_of_ash",
+      "hit_class": "none",
+      "name": "Herald of Ash",
+      "type": "aura",
+      "kind": "fire",
+      "reserve": "heavy",
+      "effect": "+50 Fire damage · Alignment +6%.",
+      "effects": [
+        {
+          "stat": "elemental_power",
+          "op": "add_flat",
+          "value": 50,
+          "element": "fire",
+          "subject": "self"
+        },
+        {
+          "stat": "elemental_alignment",
+          "op": "add_flat",
+          "value": 6,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "aura.herald_of_frost",
+      "hit_class": "none",
+      "name": "Herald of Frost",
+      "type": "aura",
+      "kind": "cold",
+      "reserve": "heavy",
+      "effect": "+50 Cold damage · Alignment +6%.",
+      "effects": [
+        {
+          "stat": "elemental_power",
+          "op": "add_flat",
+          "value": 50,
+          "element": "cold",
+          "subject": "self"
+        },
+        {
+          "stat": "elemental_alignment",
+          "op": "add_flat",
+          "value": 6,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "aura.herald_of_lightning",
+      "hit_class": "none",
+      "name": "Herald of Lightning",
+      "type": "aura",
+      "kind": "lightning",
+      "reserve": "heavy",
+      "effect": "+50 Lightning damage · Alignment +6%.",
+      "effects": [
+        {
+          "stat": "elemental_power",
+          "op": "add_flat",
+          "value": 50,
+          "element": "lightning",
+          "subject": "self"
+        },
+        {
+          "stat": "elemental_alignment",
+          "op": "add_flat",
+          "value": 6,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "aura.ember_conversion",
+      "hit_class": "none",
+      "name": "Ember Conversion",
+      "type": "aura",
+      "kind": "fire",
+      "reserve": "mid",
+      "effect": "35% of physical damage converted to fire.",
+      "effects": [
+        {
+          "stat": "damage_conversion",
+          "op": "add_pct",
+          "value": 35,
+          "element": "fire",
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "aura.rime_conversion",
+      "hit_class": "none",
+      "name": "Rime Conversion",
+      "type": "aura",
+      "kind": "cold",
+      "reserve": "mid",
+      "effect": "35% of physical damage converted to cold.",
+      "effects": [
+        {
+          "stat": "damage_conversion",
+          "op": "add_pct",
+          "value": 35,
+          "element": "cold",
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "aura.storm_conversion",
+      "hit_class": "none",
+      "name": "Storm Conversion",
+      "type": "aura",
+      "kind": "lightning",
+      "reserve": "mid",
+      "effect": "35% of physical damage converted to lightning.",
+      "effects": [
+        {
+          "stat": "damage_conversion",
+          "op": "add_pct",
+          "value": 35,
+          "element": "lightning",
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "aura.cast_on_crit",
+      "hit_class": "none",
+      "name": "Cast on Crit",
+      "type": "aura",
+      "kind": "trigger",
+      "reserve": "heavy",
+      "effect": "Casts the first ready slot in the order. Mana ×2, damage ×0.7, 1 sec between triggers.",
+      "rules": [
+        "cast_on_crit"
+      ],
+      "effects": [
+        {
+          "stat": "trigger_cd_sec",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "self"
+        },
+        {
+          "stat": "cast_mana_mult",
+          "op": "mult",
+          "value": 2,
+          "subject": "self"
+        },
+        {
+          "stat": "cast_damage_mult",
+          "op": "mult",
+          "value": 0.7,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "aura.cast_on_damage_taken",
+      "hit_class": "none",
+      "name": "Cast on Damage Taken",
+      "type": "aura",
+      "kind": "trigger",
+      "reserve": "heavy",
+      "effect": "Casts the first ready slot in the order. Mana ×2, damage ×0.7, 1 sec between triggers.",
+      "rules": [
+        "cast_on_damage_taken"
+      ],
+      "effects": [
+        {
+          "stat": "trigger_cd_sec",
+          "op": "add_flat",
+          "value": 1,
+          "subject": "self"
+        },
+        {
+          "stat": "cast_mana_mult",
+          "op": "mult",
+          "value": 2,
+          "subject": "self"
+        },
+        {
+          "stat": "cast_damage_mult",
+          "op": "mult",
+          "value": 0.7,
+          "subject": "self"
+        }
+      ]
+    },
+    {
+      "id": "aura.rimbo_form",
+      "hit_class": "none",
+      "name": "Rimbo Form",
+      "type": "aura",
+      "kind": "debuff",
+      "reserve": "mid",
+      "effect": "Nearby mobs attack −15% slower. Stacks with chill up to −35%.",
+      "effects": [
+        {
+          "stat": "attack_speed",
+          "op": "add_pct",
+          "value": -15,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "aura.elemental_fury",
+      "hit_class": "none",
+      "name": "Elemental Fury",
+      "type": "aura",
+      "kind": "debuff",
+      "reserve": "mid",
+      "effect": "Foes' elemental resistance −12%.",
+      "effects": [
+        {
+          "stat": "mob_elemental_resistance_pct",
+          "op": "add_pct",
+          "value": -12,
+          "subject": "target"
+        }
+      ]
+    },
+    {
+      "id": "aura.trinity_form",
+      "hit_class": "none",
+      "name": "Trinity Form",
+      "type": "aura",
+      "kind": "defense",
+      "reserve": "mid",
+      "effect": "+15% resistance to fire, cold and lightning.",
+      "effects": [
+        {
+          "stat": "elemental_resistance",
+          "op": "add_pct",
+          "value": 15,
+          "subject": "self",
+          "element": "fire"
+        },
+        {
+          "stat": "elemental_resistance",
+          "op": "add_pct",
+          "value": 15,
+          "subject": "self",
+          "element": "cold"
+        },
+        {
+          "stat": "elemental_resistance",
+          "op": "add_pct",
+          "value": 15,
+          "subject": "self",
+          "element": "lightning"
+        }
+      ]
+    },
+    {
+      "id": "aura.grace",
+      "hit_class": "none",
+      "name": "Grace",
+      "type": "aura",
+      "kind": "defense",
+      "reserve": "cheap",
+      "effect": "Evasion +24.",
+      "effects": [
+        {
+          "stat": "evasion",
+          "op": "add_flat",
+          "value": 24
+        }
+      ]
+    },
+    {
+      "id": "aura.iron_guard",
+      "hit_class": "none",
+      "name": "Iron Guard",
+      "type": "aura",
+      "kind": "defense",
+      "reserve": "mid",
+      "effect": "Armour +32.",
+      "effects": [
+        {
+          "stat": "armour",
+          "op": "add_flat",
+          "value": 32
+        }
+      ]
+    },
+    {
+      "id": "aura.energy_guard",
+      "hit_class": "none",
+      "name": "Energy Guard",
+      "type": "aura",
+      "kind": "defense",
+      "reserve": "mid",
+      "effect": "Energy Shield +48.",
+      "effects": [
+        {
+          "stat": "energy_shield",
+          "op": "add_flat",
+          "value": 48
+        }
+      ]
+    },
+  {"id":"attack.water_ball","hit_class":"spell","name":"Water Ball","type":"attack","group":"magic","element":"cold","cd":7,"mana":"20 flat","basis":"magic","offline_targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"projectile","range_m":4.6},"effect":"A volley of water spheres. Chills the target.","rules":["guaranteed_status"],"effects":[{"stat":"hits","op":"add_flat","value":5,"subject":"self"},{"stat":"hit_pct","op":"add_pct","value":20,"subject":"self"}],"base_flat":420,"eff":88},
+  {"id":"attack.frost_nova","hit_class":"spell","name":"Frost Nova","type":"attack","group":"magic","element":"cold","cd":10,"mana":"24 flat","basis":"magic","offline_targets":"3","area": { "origin": "caster", "radius_m": 3, "max_targets": 3},"cast":{"delivery": "instant", "range_m": 3, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},"effect":"Chills every enemy around you.","rules":["guaranteed_status","every_target"],"base_flat":630,"eff":115},
+  {"id":"attack.glacial_spike","hit_class":"spell","name":"Glacial Spike","type":"attack","group":"magic","element":"cold","cd":12,"mana":"20 flat","basis":"magic","offline_targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.5, "fixed_windup_sec": 0.15, "recovery_sec": 0.25},"effect":"Stops the target for 1.5 sec.","effects":[{"stat":"stop_sec","op":"add_flat","value":1.5,"subject":"target"}],"base_flat":900,"eff":105},
+  {"id":"attack.split_shot","hit_class":"attack","name":"Split Shot","type":"attack","group":"ranged","weapon":"bow","element":"physical","cd":7,"mana":"15 flat","basis":"phys","offline_targets":"3","area": { "origin": "caster", "radius_m": 3, "shape": "cone", "angle_deg": 120, "max_targets": 3},"cast":{"delivery": "projectile", "range_m": 5, "windup_sec": 0.3, "fixed_windup_sec": 0, "recovery_sec": 0.25},"effect":"One 120-degree volley hitting every enemy in a 3m fan.","base_flat":1649.8,"eff":77.36},
+  {"id":"attack.double_strafe","hit_class":"attack","name":"Double Strafe","type":"attack","group":"ranged","weapon":"bow","element":"physical","cd":6,"mana":"15 flat","basis":"phys","offline_targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"projectile","range_m":5,"windup_sec":0.3,"fixed_windup_sec":0,"recovery_sec":0.25},"action":{"kind":"targeted-burst","roll_policy":"independent","tracking":"straight","interval_sec":0.15},"effect":"Three straight bolts along the release aim; each payload checks range and can be intercepted.","effects":[{"stat":"hits","op":"add_flat","value":3,"subject":"self"},{"stat":"hit_pct","op":"add_pct","value":33,"subject":"self"}],"base_flat":1450,"eff":68},
+  {"id":"attack.seeker_strafe","hit_class":"spell","retired":true,"retired_to":"attack.double_strafe","name":"Seeker Strafe","type":"attack","group":"magic","element":"lightning","cd":6,"mana":"15 flat","basis":"magic","offline_targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"projectile","range_m":5,"windup_sec":0.3,"fixed_windup_sec":0,"recovery_sec":0.25},"action":{"kind":"targeted-burst","roll_policy":"independent","tracking":"homing","interval_sec":0.15,"pursuit_range_m":5,"pursuit_sec":0.8},"effect":"Three homing bolts track one body within 5m and 0.8s; a dead or returned target fizzles the rest.","effects":[{"stat":"hits","op":"add_flat","value":3,"subject":"self"},{"stat":"hit_pct","op":"add_pct","value":33,"subject":"self"}],"base_flat":1450,"eff":68},
+  {"id":"attack.double_strike","hit_class":"attack","name":"Double Strike","type":"attack","group":"melee","element":"physical","cd": 5,"mana":"12 flat","basis":"phys","offline_targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery": "melee", "range_m": 2, "windup_sec": 0.15, "fixed_windup_sec": 0, "recovery_sec": 0.22},"effect":"A pair of quick blows.","effects":[{"stat":"hits","op":"add_flat","value":2,"subject":"self"},{"stat":"hit_pct","op":"add_pct","value":50,"subject":"self"}],"base_flat":1400,"eff":60},
+  {"id":"attack.ignite","hit_class":"spell","name":"Ignite","type":"attack","group":"magic","element":"fire","cd":8,"mana":"19 flat","basis":"magic","offline_targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.2, "recovery_sec": 0.15},"effect":"Applies 5 burn stacks.","effects":[{"stat":"burn_stacks","op":"add_flat","value":5,"subject":"target"}],"base_flat":381.5,"eff":82.43},
+  {"id":"attack.cinder_nova","hit_class":"spell","name":"Cinder Nova","type":"attack","group":"magic","element":"fire","cd":10,"mana":"24 flat","basis":"magic","offline_targets":"3","area": { "origin": "caster", "radius_m": 3, "max_targets": 3},"cast":{"delivery": "instant", "range_m": 3, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},"effect":"Burns every enemy around you.","rules":["guaranteed_status","every_target"],"base_flat":630,"eff":115},
+  {"id":"attack.thunder_storm","hit_class":"spell","name":"Thunder Storm","type":"attack","group":"magic","element":"lightning","cd":13,"mana":"24 flat","basis":"magic","offline_targets":"3","area": { "origin": "target", "radius_m": 3, "max_targets": 3},"cast":{"delivery": "ground", "range_m": 5, "windup_sec": 2.5, "fixed_windup_sec": 0.5, "recovery_sec": 0.15},"action": {"kind": "thunder-field", "roll_policy": "shared", "interval_sec": 0.25, "effect_policy": "per-impact"},"effect":"Impact plus a 4 sec storm field; every hit shocks.","duration": "4 sec","effects":[{"stat":"hits","op":"add_flat","value":16,"subject":"self"},{"stat":"hit_pct","op":"add_pct","value":6,"subject":"self"}],"rules":["guaranteed_status","every_target"],"base_flat":1040,"eff":122},
+  {"id":"attack.storm_field","hit_class":"spell","retired":true,"retired_to":"attack.chain_lightning","name":"Storm Field","type":"attack","group":"magic","element":"lightning","cd":12,"mana":"20 flat","basis":"magic","offline_targets":"3","area": { "origin": "target", "radius_m": 3, "max_targets": 3},"cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.5, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},"effect":"Leaves a charged storm.","rules":["guaranteed_status","every_target"],"effects":[{"stat":"dot_dps","op":"add_flat","value":25,"subject":"target"},{"stat":"dot_sec","op":"add_flat","value":8,"subject":"target"}],"base_flat":800,"eff":90},
+  {"id":"attack.poison_cloud","hit_class":"spell","name":"Poison Cloud","type":"attack","group":"magic","element":"poison","cd":10,"mana":"24 flat","basis":"magic","offline_targets":"3","area": { "origin": "target", "radius_m": 3, "max_targets": 3},"cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.45, "fixed_windup_sec": 0.05, "recovery_sec": 0.25},"effect":"2 poison stacks. Leaves a toxic cloud.","rules":["every_target"],"effects":[{"stat":"poison_stacks","op":"add_flat","value":2,"subject":"target"},{"stat":"dot_dps","op":"add_flat","value":15,"subject":"target"},{"stat":"dot_sec","op":"add_flat","value":8,"subject":"target"}],"base_flat":730,"eff":97},
+  {"id":"attack.venom_bolt","hit_class":"spell","retired":true,"retired_to":"attack.acid_arrow","name":"Venom Bolt","type":"attack","group":"magic","element":"poison","cd":8,"mana":"21 flat","basis":"magic","offline_targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery": "instant", "range_m": 5, "windup_sec": 0.2, "recovery_sec": 0.15},"effect":"Applies 5 poison stacks.","effects":[{"stat":"poison_stacks","op":"add_flat","value":5,"subject":"target"}],"base_flat":445.1,"eff":96.16},
+  {"id":"attack.chaos_wave","hit_class":"spell","name":"Chaos Wave","type":"attack","group":"magic","element":"chaos","cd":10,"mana":"24 flat","basis":"magic","offline_targets":"3","area": { "origin": "caster", "radius_m": 3, "max_targets": 3},"cast":{"delivery": "instant", "range_m": 3, "windup_sec": 0.3, "fixed_windup_sec": 0.05, "recovery_sec": 0.15},"effect":"Marks every enemy around you.","rules":["guaranteed_status","every_target"],"base_flat":630,"eff":115},
+  {"id":"attack.stone_spike","hit_class":"spell","name":"Stone Spike","type":"attack","group":"magic","element":"earth","cd":12,"mana":"20 flat","basis":"magic","offline_targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery": "ground", "range_m": 5, "windup_sec": 0.45, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},"effect":"+30% damage against crippled targets.","effects":[{"stat":"bonus_vs_status","status":"crippled","op":"add_pct","value":30,"subject":"target"}],"base_flat":970,"eff":113},
+  {"id":"attack.fissure","hit_class":"spell","name":"Fissure","type":"attack","group":"magic","element":"earth","cd":11,"mana":"22 flat","basis":"magic","offline_targets":"3","area": { "origin": "caster", "radius_m": 0, "shape": "line", "length_m": 6, "width_m": 1, "max_targets": 6},"cast":{"delivery": "ground", "range_m": 6, "windup_sec": 0.5, "fixed_windup_sec": 0.1, "recovery_sec": 0.25},"effect":"Rends a line, stopping enemies for 1 sec.","rules":["every_target"],"effects":[{"stat":"stop_sec","op":"add_flat","value":1,"subject":"target"}],"base_flat":850,"eff":100},
+  {"id":"attack.void_orb","hit_class":"spell","name":"Void Orb","type":"attack","group":"magic","element":"chaos","cd":10,"mana":"22 flat","basis":"magic","offline_targets":"6","area":{"origin":"target","radius_m":0},"cast":{"delivery":"projectile","range_m":5,"windup_sec":0.3,"fixed_windup_sec":0,"recovery_sec":0.25},"action":{"kind":"targeted-burst","roll_policy":"independent","tracking":"homing","interval_sec":0.1,"pursuit_range_m":5,"pursuit_sec":0.8,"distinct_targets":true},"effect":"Six homing orbs hunt six different bodies; leftovers fizzle. Every hit applies 1 mark stack.","rules":["every_target"],"effects":[{"stat":"hits","op":"add_flat","value":6,"subject":"self"},{"stat":"hit_pct","op":"add_pct","value":17,"subject":"self"},{"stat":"mark_stacks","op":"add_flat","value":1,"subject":"target"}],"base_flat":700,"eff":85},
+  {"id":"attack.hemotoxin","hit_class":"spell","name":"Hemotoxin","type":"attack","group":"magic","element":"poison","cd":12,"hp_cost":"20 flat","basis":"magic","offline_targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"projectile","range_m":4.6,"windup_sec":0.4,"fixed_windup_sec":0.05,"recovery_sec":0.25},"effect":"Pays 20 current HP for one massive envenomed bolt carrying 5 poison stacks.","effects":[{"stat":"poison_stacks","op":"add_flat","value":5,"subject":"target"}],"base_flat":900,"eff":105},
+  {"id":"attack.unravel","hit_class":"spell","name":"Unravel","type":"attack","group":"magic","element":"chaos","cd":13,"mana":"24 flat","basis":"magic","offline_targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"projectile","range_m":4.6,"windup_sec":0.5,"fixed_windup_sec":0.1,"recovery_sec":0.25},"effect":"Unravels every mark stack on the target into raw chaos at 100% per stack.","effects":[{"stat":"consume_status","status":"mark","op":"add_pct","value":100,"subject":"target"}],"base_flat":1000,"eff":115},
+  {"id":"attack.contagion","hit_class":"spell","name":"Contagion","type":"attack","group":"magic","element":"poison","cd":11,"mana":"22 flat","basis":"magic","offline_targets":"3","area":{"origin":"target","radius_m":3,"max_targets":3},"cast":{"delivery":"projectile","range_m":4.6,"windup_sec":0.4,"fixed_windup_sec":0.05,"recovery_sec":0.25},"effect":"Copies the primary target's current poison stacks onto every enemy around it at full 100% strength.","rules":["every_target"],"effects":[{"stat":"spread_status","status":"poison","op":"add_flat","value":100,"spread_scope":"footprint","subject":"target"}],"base_flat":700,"eff":85},
+  {"id":"attack.venom_coffin","hit_class":"spell","name":"Venom Coffin","type":"attack","group":"magic","element":"poison","cd":12,"mana":"22 flat","basis":"magic","offline_targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"projectile","range_m":4.6,"windup_sec":0.4,"fixed_windup_sec":0.05,"recovery_sec":0.25},"effect":"Applies 3 poison stacks and holds them from falling for 6 sec.","rules":["every_target"],"effects":[{"stat":"poison_stacks","op":"add_flat","value":3,"subject":"target"},{"stat":"poison_hold_sec","op":"add_flat","value":6,"subject":"target"}],"base_flat":445,"eff":96},
+  {"id":"attack.tidal_wave","hit_class":"spell","name":"Tidal Wave","type":"attack","group":"magic","element":"cold","cd":14,"mana":"26 flat","basis":"magic","offline_targets":"3","area":{"origin":"caster","radius_m":0,"shape":"line","length_m":10,"width_m":3,"max_targets":10},"cast":{"delivery":"ground","range_m":10,"windup_sec":0.6,"fixed_windup_sec":0.15,"recovery_sec":0.3},"effect":"Sends a tidal wave down a 10m line, chilling everything it touches.","rules":["guaranteed_status","every_target"],"base_flat":850,"eff":100},
+  {"id":"attack.void_ray","hit_class":"spell","name":"Void Ray","type":"attack","group":"magic","element":"chaos","cd":12,"mana":"10 flat","basis":"magic","offline_targets":"3","area":{"origin":"caster","radius_m":0,"shape":"line","length_m":8,"width_m":2,"max_targets":8},"cast":{"delivery":"projectile","range_m":8,"windup_sec":0.3,"fixed_windup_sec":0.05,"recovery_sec":0.25},"action":{"kind":"ray-channel","roll_policy":"shared","interval_sec":0.5,"active_sec":3},"channel":{"mana_per_sec":10},"duration":"3 sec","effect":"A channeled chaos beam down an 8m line; hold to burn, release or run dry to stop. 6 ticks.","rules":["every_target"],"effects":[{"stat":"hits","op":"add_flat","value":6,"subject":"self"},{"stat":"hit_pct","op":"add_pct","value":17,"subject":"self"},{"stat":"mark_stacks","op":"add_flat","value":1,"subject":"target"}],"base_flat":900,"eff":105},
+  {"id":"attack.entropy_well","hit_class":"spell","name":"Entropy Well","type":"attack","group":"magic","element":"chaos","cd":12,"mana":"22 flat","basis":"magic","offline_targets":"3","area":{"origin":"target","radius_m":3,"max_targets":3},"cast":{"delivery":"ground","range_m":5,"windup_sec":0.5,"fixed_windup_sec":0.1,"recovery_sec":0.25},"effect":"Applies 1 mark stack to every target and leaves 8s of chaos decay (20/s).","rules":["every_target"],"effects":[{"stat":"mark_stacks","op":"add_flat","value":1,"subject":"target"},{"stat":"dot_dps","op":"add_flat","value":20,"subject":"target"},{"stat":"dot_sec","op":"add_flat","value":8,"subject":"target"}],"base_flat":700,"eff":90},
+  {"id":"buff.enchant_poison","hit_class":"none","name":"Enchant Poison","type":"buff","cd":20,"mana":"18 flat","duration":"10 sec","cast":{"delivery":"instant","range_m":0},"effect":"Coats your weapon in venom: 40% of physical damage converted to poison for 10s.","effects":[{"stat":"damage_conversion","op":"add_pct","value":40,"element":"poison","subject":"self"}]}
+  ],
+  "test_fixtures": {
+    "note": "Dev/test-only synthetic rows. They are NOT part of `skills`: the loader, drops, rewards and roster cages read the array above. Tests inject these by id to prove cluster parent/child shares, `roll_policy` per-impact caches and the HP-cost hp>=1 rule without touching a live row.",
+    "skills": [
+  {"id":"test.cluster_burst","hit_class":"attack","name":"Test Cluster Burst","type":"attack","group":"all","element":"physical","cd":6,"mana":"1 flat","basis":"phys","offline_targets":"3","area":{"origin":"target","radius_m":3},"cast":{"delivery":"projectile","range_m":5,"windup_sec":0.25,"fixed_windup_sec":0,"recovery_sec":0.25},"action":{"kind":"cluster-burst","roll_policy":"independent","parent_share_pct":60,"child_count":2,"child_share_pct":20,"spread_deg":30},"effect":"Test-only: one press split 60/20/20 across a parent and two children.","effects":[],"base_flat":1000,"eff":0},
+  {"id":"test.hp_cost","hit_class":"attack","name":"Test HP Cost","type":"attack","group":"all","element":"physical","cd":6,"hp_cost":"20 flat","basis":"phys","offline_targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"melee","range_m":1.5,"windup_sec":0.2,"fixed_windup_sec":0,"recovery_sec":0.2},"effect":"Test-only: pays 20 current HP and never takes the final point.","effects":[],"base_flat":100,"eff":0},
+  {"id":"test.burst_policy","hit_class":"attack","name":"Test Burst Policy","type":"attack","group":"all","element":"physical","cd":6,"mana":"1 flat","basis":"phys","offline_targets":"1","area":{"origin":"target","radius_m":0},"cast":{"delivery":"projectile","range_m":5,"windup_sec":0.25,"fixed_windup_sec":0,"recovery_sec":0.25},"action":{"kind":"projectile-burst","roll_policy":"shared","interval_sec":0.15},"effect":"Test-only: three payloads whose cache policy the suite toggles.","rules":["ignores_dodge"],"effects":[{"stat":"hits","op":"add_flat","value":3,"subject":"self"}],"base_flat":100,"eff":0}
+    ]
+  },
+  "deprecated": {
+    "Arcane Pulse": "cut in the roster trim (owner ticket) — the cd-0 filler row; nothing took its slot over",
+    "Scorch Ray": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Blight": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Nether Orb": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Bloodletting": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Sunder": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Mark of the Executioner": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Pandemonium": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Lacerate": "cut in the roster trim (owner ticket) — nothing took its mechanic over",
+    "Aura of Might": "removed in the 6→12 aura redesign ",
+    "Aura of Grace": "removed in the 6→12 aura redesign ",
+    "Aura of Fury": "removed in the 6→12 aura redesign ",
+    "Aura of Clarity": "removed in the 6→12 aura redesign; role dropped, not moved",
+    "Aura of Dread": "removed in the 6→12 aura redesign ",
+    "Aura of Frost": "removed in the 6→12 aura redesign; replaced by Herald of Frost",
+    "Riposte": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Execute": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Retribution": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Volley": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Arcane Bolt": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Flame Lash": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Chain Spark": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Toxic Spray": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Void Lance": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Widow Strike": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Volley of Blades": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Echo Strike": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Momentum": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Plague Spit": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Thunderhead": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Glacial Nail": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Reality Rift": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Arcane Surge": "retired with the Elemental attack roster; the row it replaced is the one that carries its mechanic now",
+    "Bone Breaker": "retired 2026-11-02 (owner ticket) — execute threshold had no live successor",
+    "Carnage": "retired 2026-11-02 (owner ticket) — leech moved to Reap",
+    "Cleave Down": "retired 2026-11-02 (owner ticket) — max-pool damage lives on Earth Splitter",
+    "Pierce the Veil": "retired 2026-11-02 (owner ticket) — bow pierce lives on Piercing Shot",
+    "Detonate": "retired 2026-11-02 (owner ticket) — burn consumption left the roster",
+    "Catalyst": "retired 2026-11-02 (owner ticket) — poison consumption and spread left the roster",
+    "Ruin": "retired 2026-11-02 (owner ticket) — mark consumption left the roster",
+    "Entropy": "retired 2026-11-02 (owner ticket) — mark payoff left the roster"
+},
+  "renames": {
+    "War Cry": "Warcry",
+    "Berserk": "Berserker",
+    "Guardian's Veil": "Holy veil"
+  }
+}

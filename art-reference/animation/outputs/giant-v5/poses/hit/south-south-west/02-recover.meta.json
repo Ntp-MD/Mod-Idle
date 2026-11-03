@@ -1,0 +1,64 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "giant",
+  "action": "hit",
+  "direction": "south-south-west",
+  "phase": "02-recover",
+  "generator": "built-in image_gen",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sourceRecord": {
+    "kind": "generated-contact-sheet",
+    "source": "source/v5-contact-sheets/hit-02-recover-16.png",
+    "sourceCell": {
+      "row": 3,
+      "column": 3,
+      "box": [
+        768,
+        1152,
+        1024,
+        1536
+      ]
+    },
+    "sourceConfidenceBounds": [
+      36,
+      106,
+      219,
+      344
+    ],
+    "processing": {
+      "method": "alpha-confidence-crop-scale-anchor-v1",
+      "threshold": 128,
+      "softEdgeRecoveryRadius": 3,
+      "uniformScale": 0.609705,
+      "anchor": {
+        "x": 192,
+        "y": 288
+      },
+      "scaledSize": [
+        115,
+        149
+      ],
+      "offset": [
+        134,
+        139
+      ]
+    }
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "reviewed": false,
+    "runtimePromotion": false
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "id": "attack.detonate",
+  "src": "/fx/skill-pool/attack/attack-detonate/v2/atlas.png",
+  "columns": 4,
+  "rows": 4,
+  "cellWidth": 256,
+  "cellHeight": 256,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "frameMs": 90,
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    0,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "contentWidthRatio": 0.76953125,
+  "contentHeightRatio": 0.80078125,
+  "orient": false,
+  "delivery": "ground",
+  "origin": "target",
+  "authoringGeometry": {
+    "origin": "target",
+    "radiusM": 0,
+    "shape": "single",
+    "delivery": "ground"
+  },
+  "generator": "tools/bake-shader-recipes.mjs",
+  "recipeModule": "tools/vfx/fire-shaders.mjs",
+  "sourceShaders": [
+    "art-reference/VFX-Godot/FlameFXFree/assets/BinbunVFX_Vol2/FlameFX/shader/fire_core.gdshader",
+    "art-reference/VFX-Godot/ExplosionFXFree/assets/BinbunVFX_Vol2/ExplosionFX/shader/explosion_core.gdshader",
+    "art-reference/VFX-Godot/ExplosionFXFree/assets/BinbunVFX_Vol2/ExplosionFX/shader/explosion_impact.gdshader",
+    "art-reference/VFX-Godot/ExplosionFXFree/assets/BinbunVFX_Vol2/ExplosionFX/shader/explosion_rings.gdshader",
+    "art-reference/VFX-Godot/ExplosionFXFree/assets/BinbunVFX_Vol2/ExplosionFX/shader/explosion_smoke.gdshader"
+  ],
+  "status": "prototype",
+  "adaptation": "Godot shader mask/noise/decay equations adapted to deterministic offline JavaScript raster frames."
+}

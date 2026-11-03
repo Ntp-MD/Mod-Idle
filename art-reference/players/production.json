@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-integrated-review",
+  "scope": "Eleven canonical weapon appearances, one shield appearance, clean player body and grip-specific animation tracks",
+  "generator": "OpenAI built-in image_gen only",
+  "identityReference": "game/public/combat/arpg/pixel-v2/player-animation-v2.png",
+  "bodyReference": "art-reference/players/equipment-v1/body/reference.png",
+  "runtimeFrame": {
+    "width": 1254,
+    "height": 1254,
+    "foot": {
+      "x": 627,
+      "y": 1000
+    },
+    "padding": "Measured alpha>8 source bounds; frame sockets align to shared feet"
+  },
+  "bodyGroundDiameterM": 0.5,
+  "bodyFacing": [
+    "south",
+    "south-east",
+    "east",
+    "north-east",
+    "north",
+    "north-west",
+    "west",
+    "south-west"
+  ],
+  "actionFacing": [
+    "east",
+    "west"
+  ],
+  "framesPerActionFacing": 4,
+  "singlePosePngIntake": true,
+  "keepSourcePixels": true,
+  "runtimeManifest": "game/src/ui/combat/arena/player-equipment-v1.json",
+  "runtimeImageRoot": "game/public/combat/arpg/equipment-v1/",
+  "previewUrl": "http://localhost:5173/__showcase?sample=combat-field&sprite-preview=pixel-v2&player-weapon=one-handed%20sword&player-offhand=shield",
+  "previewQuery": {
+    "player-weapon": "canonical weapon type such as bow or two-handed sword",
+    "player-offhand": "shield to preview the shield family"
+  },
+  "bodyAnimationCoverage": {
+    "idle": 8,
+    "walkEastWest": 2,
+    "oneHandAttackEastWest": 4,
+    "hitEastWest": 1,
+    "deathEastWest": 1,
+    "shieldBashBakedSwordShieldContactEastWest": 1
+  },
+  "attackClip": {
+    "frameMs": 100,
+    "releaseAndMeleeContactMarkerMs": 100,
+    "order": [
+      "windup",
+      "contact",
+      "follow-through",
+      "recovery"
+    ]
+  },
+  "weaponViewCoverage": {
+    "one-handed sword": [
+      "side",
+      "raised",
+      "foreshortened"
+    ],
+    "one-handed axe": [
+      "side",
+      "raised",
+      "foreshortened"
+    ],
+    "dagger": [
+      "side",
+      "raised",
+      "foreshortened"
+    ],
+    "mace": [
+      "side",
+      "raised",
+      "foreshortened"
+    ],
+    "wand": [
+      "side",
+      "raised",
+      "foreshortened"
+    ],
+    "staff": [
+      "side",
+      "raised",
+      "foreshortened"
+    ],
+    "spear": [
+      "side",
+      "raised",
+      "foreshortened"
+    ],
+    "two-handed sword": [
+      "side",
+      "raised",
+      "foreshortened"
+    ],
+    "two-handed axe": [
+      "side",
+      "raised",
+      "foreshortened"
+    ],
+    "bow": [
+      "ready",
+      "drawn",
+      "released"
+    ],
+    "crossbow": [
+      "ready",
+      "drawn",
+      "released"
+    ]
+  },
+  "generatedBodyMotionProfiles": [
+    "one-hand east/west windup-contact-follow-through-recovery"
+  ],
+  "weaponTypes": [
+    "one-handed sword",
+    "one-handed axe",
+    "dagger",
+    "mace",
+    "wand",
+    "staff",
+    "spear",
+    "two-handed sword",
+    "two-handed axe",
+    "bow",
+    "crossbow"
+  ],
+  "weaponViews": [
+    "side",
+    "raised",
+    "foreshortened"
+  ],
+  "rangedWeaponViews": [
+    "ready",
+    "drawn",
+    "released"
+  ],
+  "shieldViews": [
+    "front",
+    "side",
+    "stowed"
+  ],
+  "ownership": "Each producer owns only its assigned body or equipment directory; root owns this manifest and runtime integration",
+  "approval": "User authorized generation of the complete equipment batch with subagents",
+  "notes": [
+    "Runtime currently consumes the individual body/equipment PNGs through frameImages and separate SVG equipment layers; no model-atlas grid is required.",
+    "Body frames contain no weapon or shield. Main/offhand grip positions and most item pivots are explicit visual estimates; integrated alignment review remains in progress.",
+    "Generated images were requested with built-in image_gen. Some outputs include distant alpha≤8 noise or differ from requested canvas size; original source pixels remain unchanged and raw/thresholded bounds are recorded separately.",
+    "Equipment does not change body footprint, stats, cooldowns or hit timing.",
+    "Two-handed stances visually stow the equipped shield; existing equipment/stat rules remain authoritative.",
+    "The eight idle directions and east/west clean attack profiles match the currently supported player direction coverage.",
+    "The local showcase has a development-only player-weapon/player-offhand query so equipment selection can be reviewed without modifying a save.",
+    "The clean body currently has eight idle directions, two east/west walk frames each, four one-hand attack frames each direction, and one hit/death pose per east/west direction. Shield Bash has separate east/west contact poses with baked sword+shield, selected only for that exact worn combination.",
+    "Other weapon body-motion profiles still share the first one-hand attack sequence while their equipment views change by action phase. Dedicated two-hand, spear, bow, crossbow, dagger and caster body poses remain incomplete."
+  ]
+}

@@ -1,0 +1,434 @@
+{
+  "status": "visual-approved",
+  "file": "atlas/animation.png",
+  "generator": "OpenAI built-in image_gen",
+  "sourceBase": "troll/animation/source/base.png",
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "frameCount": 40,
+    "cellOrder": "row-major"
+  },
+  "rowOrder": [
+    "idle S SE E NE N NW W SW",
+    "east walk 4, west walk 4",
+    "east attack 4, west attack 4",
+    "east hit 4, west hit 4",
+    "east death 4, west death 4"
+  ],
+  "directions": {
+    "idle": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "walk": [
+      "east",
+      "west"
+    ],
+    "attack": [
+      "east",
+      "west"
+    ],
+    "hit": [
+      "east",
+      "west"
+    ],
+    "death": [
+      "east",
+      "west"
+    ]
+  },
+  "framesPerDirection": {
+    "idle": 1,
+    "walk": 4,
+    "attack": 4,
+    "hit": 4,
+    "death": 4
+  },
+  "quality": {
+    "nativePixelArtApproved": true,
+    "directionsComplete": true,
+    "notes": [
+      "User-approved for the live ARPG battlefield. The runtime atlas now isolates complete poses into padded 256 x 256 cells. Native pixel-art conformance remains tracked separately.",
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged.",
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+    ],
+    "sourceBoundsMethod": "isolated-complete-components-with-one-pixel-transparent-guard"
+  },
+  "sourceFrames": [
+    {
+      "x": 127,
+      "y": 128,
+      "width": 130,
+      "height": 164,
+      "offsetX": 127,
+      "offsetY": 128
+    },
+    {
+      "x": 529,
+      "y": 129,
+      "width": 106,
+      "height": 164,
+      "offsetX": 145,
+      "offsetY": 129
+    },
+    {
+      "x": 919,
+      "y": 131,
+      "width": 119,
+      "height": 161,
+      "offsetX": 151,
+      "offsetY": 131
+    },
+    {
+      "x": 1283,
+      "y": 131,
+      "width": 149,
+      "height": 161,
+      "offsetX": 131,
+      "offsetY": 131
+    },
+    {
+      "x": 1664,
+      "y": 129,
+      "width": 114,
+      "height": 163,
+      "offsetX": 128,
+      "offsetY": 129
+    },
+    {
+      "x": 2038,
+      "y": 131,
+      "width": 123,
+      "height": 161,
+      "offsetX": 118,
+      "offsetY": 131
+    },
+    {
+      "x": 2407,
+      "y": 129,
+      "width": 119,
+      "height": 162,
+      "offsetX": 103,
+      "offsetY": 129
+    },
+    {
+      "x": 2785,
+      "y": 131,
+      "width": 131,
+      "height": 161,
+      "offsetX": 97,
+      "offsetY": 131
+    },
+    {
+      "x": 145,
+      "y": 516,
+      "width": 114,
+      "height": 161,
+      "offsetX": 145,
+      "offsetY": 132
+    },
+    {
+      "x": 531,
+      "y": 515,
+      "width": 115,
+      "height": 158,
+      "offsetX": 147,
+      "offsetY": 131
+    },
+    {
+      "x": 902,
+      "y": 515,
+      "width": 116,
+      "height": 162,
+      "offsetX": 134,
+      "offsetY": 131
+    },
+    {
+      "x": 1260,
+      "y": 515,
+      "width": 138,
+      "height": 156,
+      "offsetX": 108,
+      "offsetY": 131
+    },
+    {
+      "x": 1657,
+      "y": 515,
+      "width": 125,
+      "height": 162,
+      "offsetX": 121,
+      "offsetY": 131
+    },
+    {
+      "x": 2047,
+      "y": 515,
+      "width": 116,
+      "height": 155,
+      "offsetX": 127,
+      "offsetY": 131
+    },
+    {
+      "x": 2426,
+      "y": 515,
+      "width": 117,
+      "height": 160,
+      "offsetX": 122,
+      "offsetY": 131
+    },
+    {
+      "x": 2807,
+      "y": 515,
+      "width": 115,
+      "height": 163,
+      "offsetX": 119,
+      "offsetY": 131
+    },
+    {
+      "x": 143,
+      "y": 901,
+      "width": 116,
+      "height": 157,
+      "offsetX": 143,
+      "offsetY": 133
+    },
+    {
+      "x": 490,
+      "y": 876,
+      "width": 144,
+      "height": 181,
+      "offsetX": 106,
+      "offsetY": 108
+    },
+    {
+      "x": 893,
+      "y": 904,
+      "width": 197,
+      "height": 156,
+      "offsetX": 125,
+      "offsetY": 136
+    },
+    {
+      "x": 1269,
+      "y": 908,
+      "width": 167,
+      "height": 156,
+      "offsetX": 117,
+      "offsetY": 140
+    },
+    {
+      "x": 1652,
+      "y": 904,
+      "width": 152,
+      "height": 155,
+      "offsetX": 116,
+      "offsetY": 136
+    },
+    {
+      "x": 1994,
+      "y": 905,
+      "width": 191,
+      "height": 158,
+      "offsetX": 74,
+      "offsetY": 137
+    },
+    {
+      "x": 2433,
+      "y": 876,
+      "width": 146,
+      "height": 180,
+      "offsetX": 129,
+      "offsetY": 108
+    },
+    {
+      "x": 2810,
+      "y": 901,
+      "width": 115,
+      "height": 162,
+      "offsetX": 122,
+      "offsetY": 133
+    },
+    {
+      "x": 148,
+      "y": 1282,
+      "width": 135,
+      "height": 161,
+      "offsetX": 148,
+      "offsetY": 130
+    },
+    {
+      "x": 529,
+      "y": 1297,
+      "width": 115,
+      "height": 152,
+      "offsetX": 145,
+      "offsetY": 145
+    },
+    {
+      "x": 892,
+      "y": 1287,
+      "width": 134,
+      "height": 157,
+      "offsetX": 124,
+      "offsetY": 135
+    },
+    {
+      "x": 1283,
+      "y": 1285,
+      "width": 130,
+      "height": 158,
+      "offsetX": 131,
+      "offsetY": 133
+    },
+    {
+      "x": 1658,
+      "y": 1287,
+      "width": 127,
+      "height": 162,
+      "offsetX": 122,
+      "offsetY": 135
+    },
+    {
+      "x": 2026,
+      "y": 1289,
+      "width": 160,
+      "height": 155,
+      "offsetX": 106,
+      "offsetY": 137
+    },
+    {
+      "x": 2428,
+      "y": 1298,
+      "width": 120,
+      "height": 151,
+      "offsetX": 124,
+      "offsetY": 146
+    },
+    {
+      "x": 2788,
+      "y": 1282,
+      "width": 131,
+      "height": 162,
+      "offsetX": 100,
+      "offsetY": 130
+    },
+    {
+      "x": 147,
+      "y": 1691,
+      "width": 137,
+      "height": 137,
+      "offsetX": 147,
+      "offsetY": 155
+    },
+    {
+      "x": 508,
+      "y": 1703,
+      "width": 143,
+      "height": 125,
+      "offsetX": 124,
+      "offsetY": 167
+    },
+    {
+      "x": 854,
+      "y": 1721,
+      "width": 178,
+      "height": 106,
+      "offsetX": 86,
+      "offsetY": 185
+    },
+    {
+      "x": 1236,
+      "y": 1738,
+      "width": 203,
+      "height": 90,
+      "offsetX": 84,
+      "offsetY": 202
+    },
+    {
+      "x": 1646,
+      "y": 1695,
+      "width": 140,
+      "height": 133,
+      "offsetX": 110,
+      "offsetY": 159
+    },
+    {
+      "x": 2006,
+      "y": 1716,
+      "width": 181,
+      "height": 107,
+      "offsetX": 86,
+      "offsetY": 180
+    },
+    {
+      "x": 2391,
+      "y": 1729,
+      "width": 170,
+      "height": 98,
+      "offsetX": 87,
+      "offsetY": 193
+    },
+    {
+      "x": 2757,
+      "y": 1737,
+      "width": 202,
+      "height": 90,
+      "offsetX": 69,
+      "offsetY": 201
+    }
+  ],
+  "normalization": {
+    "method": "raw-connected-pose-repack-384-v1",
+    "sourceCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "sourceImageSha256": "ea7f0039c99bf2521f61f032351bdb0a0d472c4a8d35ab23546e39c6e5a194a7",
+    "sourceAlphaThreshold": 128,
+    "edgeAlphaRecoveryRadius": 3,
+    "minimumCellPadding": 24,
+    "primaryPoses": 40,
+    "sourceComponents": 41,
+    "rowMedianBottoms": [
+      217,
+      406,
+      598,
+      792,
+      959
+    ],
+    "uniformScale": 1.0
+  },
+  "generation": {
+    "sourceOutputs": [
+      "exec-02719667-780a-4ad6-995e-30509ebfa4ab.png"
+    ]
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "action": "walk",
+  "direction": "south-south-east",
+  "requestedFacingDegrees": 22.5,
+  "pose": "02-stride-c",
+  "identityRef": "../../../../reference.png",
+  "facingSourceRef": "../../idle/south-south-east.png",
+  "phaseSourceRef": "../../walk/east/02-stride-c.png",
+  "bakedWeapon": "spear",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:\\Users\\disda\\.codex\\generated_images\\01a17d4d-3b5a-72a1-83b1-947b6fe9c9d9\\exec-422b896c-33d4-4925-b4d9-e41a82a41776.png",
+  "sourcePixelsModified": false,
+  "status": "candidate-review",
+  "qa": {
+    "exactFacingVerified": false,
+    "hardAlphaVerified": false,
+    "groundAnchorVerified": false,
+    "loopContinuityVerified": false,
+    "productionApproved": false
+  }
+}

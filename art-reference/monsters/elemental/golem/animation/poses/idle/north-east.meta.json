@@ -1,0 +1,16 @@
+{
+  "status": "baseline-extracted-candidate",
+  "speciesId": "golem",
+  "action": "idle",
+  "direction": "north-east",
+  "source": "../../../atlas/animation.png",
+  "sourceCell": [
+    3,
+    0
+  ],
+  "sourcePixelsModified": false,
+  "qa": {
+    "visualIdentityReviewed": false,
+    "atlasReady": false
+  }
+}

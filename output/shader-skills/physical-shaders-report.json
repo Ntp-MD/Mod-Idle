@@ -1,0 +1,212 @@
+[
+  {
+    "id": "attack.backstab",
+    "kind": "strike",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-backstab/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 35920,
+    "name": "Backstab",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.sidestep",
+    "kind": "strike",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-sidestep/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 109545,
+    "name": "Sidestep",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.impale",
+    "kind": "line",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-impale/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 75262,
+    "name": "Impale",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.skull_crack",
+    "kind": "strike",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-skull-crack/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 171186,
+    "name": "Skull Crack",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.bone_breaker",
+    "kind": "strike",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-bone-breaker/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 158393,
+    "name": "Bone Breaker",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.shield_bash",
+    "kind": "strike",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-shield-bash/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 386937,
+    "name": "Shield Bash",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.ground_slam",
+    "kind": "ground",
+    "version": "v3",
+    "src": "/fx/skill-pool/attack/attack-ground-slam/v3/atlas.png",
+    "projection": "ground",
+    "bytes": 363522,
+    "name": "Ground Slam",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.carnage",
+    "kind": "strike",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-carnage/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 37911,
+    "name": "Carnage",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.cleave_down",
+    "kind": "strike",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-cleave-down/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 112166,
+    "name": "Cleave Down",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.cleave",
+    "kind": "cone",
+    "version": "v3",
+    "src": "/fx/skill-pool/attack/attack-cleave/v3/atlas.png",
+    "projection": "upright",
+    "bytes": 250979,
+    "name": "Cleave",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.elemental_break",
+    "kind": "strike",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-elemental-break/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 250951,
+    "name": "Elemental Break",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.whirlwind",
+    "kind": "ground",
+    "version": "v3",
+    "src": "/fx/skill-pool/attack/attack-whirlwind/v3/atlas.png",
+    "projection": "ground",
+    "bytes": 410859,
+    "name": "Whirlwind",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.puncture",
+    "kind": "strike",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-puncture/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 54530,
+    "name": "Puncture",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.reap",
+    "kind": "strike",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-reap/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 243391,
+    "name": "Reap",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.piercing_shot",
+    "kind": "projectile",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-piercing-shot/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 89255,
+    "name": "Piercing Shot",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.arrow_shower",
+    "kind": "projectile",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-arrow-shower/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 76177,
+    "name": "Arrow Shower",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.headshot",
+    "kind": "projectile",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-headshot/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 59373,
+    "name": "Headshot",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.pierce_the_veil",
+    "kind": "projectile",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-pierce-the-veil/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 84129,
+    "name": "Pierce the Veil",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.split_shot",
+    "kind": "projectile",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-split-shot/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 98734,
+    "name": "Split Shot",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.double_strafe",
+    "kind": "projectile",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-double-strafe/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 68165,
+    "name": "Double Strafe",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  },
+  {
+    "id": "attack.double_strike",
+    "kind": "strike",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-double-strike/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 34685,
+    "name": "Double Strike",
+    "recipeModule": "tools/vfx/physical-shaders.mjs"
+  }
+]

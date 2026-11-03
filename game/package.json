@@ -1,0 +1,30 @@
+{
+  "name": "modworld-game",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ModWorld playable client. Reads tools/data/*.json and the shared engine module; holds no formula of its own.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
+    "test": "vitest run",
+    "test:fast": "vitest run --exclude tests/sim/tree-gate.test.ts --exclude tests/sim/clock.test.ts --exclude tests/app/save-storage.test.ts --exclude tests/ui/workbench-continuity.test.ts --exclude tests/app/save-fidelity.test.ts --exclude tests/sim/engine-agreement.test.ts --exclude tests/app/economy-live.test.ts",
+    "test:slow": "vitest run tests/sim/tree-gate.test.ts tests/sim/clock.test.ts tests/app/save-storage.test.ts tests/ui/workbench-continuity.test.ts tests/app/save-fidelity.test.ts tests/sim/engine-agreement.test.ts tests/app/economy-live.test.ts",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.0.3",
+    "@types/node": "^22.20.5",
+    "@vitest/coverage-v8": "^3.2.7",
+    "svelte": "^5.22.0",
+    "svelte-check": "^4.1.4",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0",
+    "vitest": "^3.0.5"
+  },
+  "dependencies": {
+    "modworld-specs": "file:.."
+  }
+}

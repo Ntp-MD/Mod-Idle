@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "action": "attack",
+  "direction": "south-south-east",
+  "requestedFacingDegrees": 22.5,
+  "phase": "02-follow-through",
+  "sourceIdentity": "../../../../reference.png",
+  "poseReference": "../../attack/east/02-follow-through.png",
+  "bakedWeaponId": "spear",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:\\Users\\disda\\.codex\\generated_images\\01a17d4d-3b5a-72a1-83b1-947b6fe9c9d9\\exec-13a71602-176c-484a-8539-d91d4925c9ef.png",
+  "sourcePixelsModified": false,
+  "status": "candidate-review",
+  "qa": {
+    "angleVerified": false,
+    "identityContinuityVerified": false,
+    "hardAlphaVerified": false,
+    "footAnchorVerified": false,
+    "productionApproved": false
+  }
+}

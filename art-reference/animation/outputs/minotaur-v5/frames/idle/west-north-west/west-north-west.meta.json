@@ -1,0 +1,56 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "minotaur",
+  "action": "idle",
+  "direction": "west-north-west",
+  "pose": "idle",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/idle-16.png",
+  "sourceImageId": "exec-c3dd46c3-b528-4676-b57c-3a64b8c532c8.png",
+  "sourceCell": {
+    "row": 2,
+    "column": 3,
+    "direction": "west-north-west"
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited Minotaur source anchor; visual measurement pending"
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "scaleReference": "median alpha-bound height across the matching 16-direction contact sheet",
+    "confidenceBoundsInCell": [
+      18,
+      29,
+      229,
+      357
+    ],
+    "recoveredBoundsInCell": [
+      15,
+      26,
+      232,
+      360
+    ],
+    "targetVisualFootBaselineY": 288,
+    "targetReferenceMedianHeight": 276.0,
+    "uniformScale": 0.826347
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  },
+  "sha256": "39640f087792d14dc0e6d4b57fca8977c208100ac8d04e8b7bb867ec56cd95a1"
+}

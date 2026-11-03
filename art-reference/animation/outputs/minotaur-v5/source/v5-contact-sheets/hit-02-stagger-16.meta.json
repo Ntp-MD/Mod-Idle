@@ -1,0 +1,62 @@
+{
+    "status":  "candidate-source-review-required",
+    "speciesId":  "minotaur",
+    "generator":  "built-in image_gen",
+    "sourceImageId":  "exec-990ad827-44aa-40b2-b733-267803414575.png",
+    "file":  "source/v5-contact-sheets/hit-02-stagger-16.png",
+    "action":  "hit",
+    "phase":  "02-stagger",
+    "phasePrompt":  "Staggering recovery: take a small off-balance bend, one hoof braces, head lowered, axe hanging low; stay centered and grounded.",
+    "sha256":  "d8b1f1d85996c358ba8d65978d59d70eabde93ba5f9f469e6efff4dbf5064d92",
+    "transparentBackgroundRequested":  true,
+    "sourceCanvas":  {
+                         "width":  1024,
+                         "height":  1536,
+                         "mode":  "RGBA"
+                     },
+    "cellCanvas":  {
+                       "width":  256,
+                       "height":  384
+                   },
+    "directionOrder":  [
+                           "south",
+                           "south-south-east",
+                           "south-east",
+                           "east-south-east",
+                           "east",
+                           "east-north-east",
+                           "north-east",
+                           "north-north-east",
+                           "north",
+                           "north-north-west",
+                           "north-west",
+                           "west-north-west",
+                           "west",
+                           "west-south-west",
+                           "south-west",
+                           "south-south-west"
+                       ],
+    "layout":  {
+                   "columns":  4,
+                   "rows":  4,
+                   "cellOrder":  "row-major"
+               },
+    "targetFrameCanvas":  {
+                              "width":  384,
+                              "height":  384
+                          },
+    "targetAnchor":  {
+                         "x":  192,
+                         "y":  288,
+                         "provenance":  "inherited Minotaur source anchor; 16-direction alignment remains unreviewed"
+                     },
+    "qa":  {
+               "identity":  false,
+               "facing":  false,
+               "pose":  false,
+               "alphaEdges":  false,
+               "anchor":  false,
+               "atlas":  false,
+               "runtimePromotion":  false
+           }
+}

@@ -1,0 +1,28 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.6.2/schema.json",
+	"files": {
+		"includes": [
+			"engine/**/*.ts",
+			"tools/**/*.ts",
+			"game/src/**/*.ts",
+			"game/src/**/*.svelte",
+			"game/tests/**/*.ts"
+		]
+	},
+	"formatter": {
+		"enabled": false
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "none",
+			"suspicious": {
+				"noDoubleEquals": "error",
+				"noDebugger": "error"
+			}
+		}
+	},
+	"assist": {
+		"enabled": false
+	}
+}

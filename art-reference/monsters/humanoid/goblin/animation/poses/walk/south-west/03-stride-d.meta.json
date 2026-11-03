@@ -1,0 +1,18 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-829c-7060-99a8-9918a3b8d766\\exec-f8e0f4fc-0358-4813-a80e-2eeabf171bbd.png",
+  "action": "walk",
+  "direction": "south-west",
+  "qa": {
+    "visual": false,
+    "facing": false,
+    "atlas": false,
+    "anchor": false
+  },
+  "visualReview": {
+    "status": "failed-phase",
+    "review": "Wide left-leading stride retained; target passing transition not visible.",
+    "requiresRegeneration": true
+  }
+}

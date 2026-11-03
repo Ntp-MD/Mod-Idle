@@ -1,0 +1,26 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-829c-7060-99a8-9918a3b8d766\\exec-58502da0-c350-4bef-a20f-9ccaff696ddc.png",
+  "action": "walk",
+  "direction": "south-west",
+  "qa": {
+    "visual": false,
+    "facing": false,
+    "atlas": false,
+    "anchor": false
+  },
+  "visualReview": {
+    "status": "failed-phase",
+    "review": "Same left-leading stride as00; target must reverse to right-leading halfstride.",
+    "requiresRegeneration": true
+  },
+  "rejectedAttempts": [
+    {
+      "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-829c-7060-99a8-9918a3b8d766\\exec-84ca95db-1d54-4fc2-9370-5cd6e00271e2.png",
+      "status": "rejected",
+      "reason": "Precise leg-exchange edit still retained same leadfoot; phase reversal failed.",
+      "prompt": "Use case: precise-object-edit. Edit this transparent pixel-art Goblin walk frame into the OPPOSITE HALF-STRIDE. Keep head, upper torso, same one spear in same hand, camera, southwest facing and pixel style. Change BOTH LEGS substantially: the currently planted forward foot at lower-left must move BACK under the hip with heel raised; the other foot currently at rear/right must swing FORWARD across toward the lower-left foreground and plant flat. Exchange knee positions. Right anatomical leg now leads and left leg trails; this must visibly differ from the reference's left-leg-leading pose. Exactly two legs and two feet; no duplicated limbs, no mirroring. Adjust free-arm counter-swing a little. Keep entire body and spear within broad transparent margins. No floor/shadow/VFX/text."
+    }
+  ]
+}

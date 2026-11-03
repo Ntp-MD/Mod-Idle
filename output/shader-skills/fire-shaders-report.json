@@ -1,0 +1,62 @@
+[
+  {
+    "id": "attack.fireball",
+    "kind": "projectile",
+    "version": "v4",
+    "src": "/fx/skill-pool/attack/attack-fireball/v4/atlas.png",
+    "projection": "upright",
+    "bytes": 258736,
+    "name": "Fireball",
+    "recipeModule": "tools/vfx/fire-shaders.mjs"
+  },
+  {
+    "id": "attack.firestorm",
+    "kind": "ground",
+    "version": "v3",
+    "src": "/fx/skill-pool/attack/attack-firestorm/v3/atlas.png",
+    "projection": "ground",
+    "bytes": 452312,
+    "name": "Firestorm",
+    "recipeModule": "tools/vfx/fire-shaders.mjs"
+  },
+  {
+    "id": "attack.meteor",
+    "kind": "rain",
+    "version": "v3",
+    "src": "/fx/skill-pool/attack/attack-meteor/v3/atlas.png",
+    "projection": "upright",
+    "bytes": 314903,
+    "name": "Meteor",
+    "recipeModule": "tools/vfx/fire-shaders.mjs"
+  },
+  {
+    "id": "attack.detonate",
+    "kind": "strike",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-detonate/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 317974,
+    "name": "Detonate",
+    "recipeModule": "tools/vfx/fire-shaders.mjs"
+  },
+  {
+    "id": "attack.ignite",
+    "kind": "strike",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-ignite/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 265951,
+    "name": "Ignite",
+    "recipeModule": "tools/vfx/fire-shaders.mjs"
+  },
+  {
+    "id": "attack.cinder_nova",
+    "kind": "ground",
+    "version": "v2",
+    "src": "/fx/skill-pool/attack/attack-cinder-nova/v2/atlas.png",
+    "projection": "ground",
+    "bytes": 141687,
+    "name": "Cinder Nova",
+    "recipeModule": "tools/vfx/fire-shaders.mjs"
+  }
+]

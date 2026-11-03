@@ -1,0 +1,45 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "lizardman",
+  "action": "hit",
+  "direction": "east-north-east",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/hit-00-flinch-16.png",
+  "sourceCell": {
+    "row": 2,
+    "column": 2,
+    "box": [
+      314,
+      314,
+      627,
+      627
+    ]
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "visualFootBaselineY": 286
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1+legacy-color-match",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 2,
+    "uniformScale": 0.70232558,
+    "componentCleanup": "largest high-alpha component plus nearby fragments",
+    "colorMatch": "pooled per action and phase RGB mean/std; only generated frames changed",
+    "sharpening": "UnsharpMask radius 0.8, percent 90, threshold 4; alpha unchanged"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "status": "candidate-override-reviewed",
+  "speciesId": "lizardman",
+  "action": "attack",
+  "phase": "02-follow-through",
+  "direction": "west-north-west",
+  "source": "../../../v5-contact-sheets/attack-02-follow-through-16-v4.png",
+  "sourceCell": {
+    "row": 3,
+    "column": 4,
+    "bounds": [
+      947,
+      623,
+      1263,
+      934
+    ]
+  },
+  "processing": {
+    "method": "alpha-component-clean-crop-scale-anchor-v1+legacy-color-match",
+    "threshold": 128,
+    "softEdgeRecoveryRadius": 2,
+    "uniformScale": 0.74146341,
+    "colorMatch": "RGB mean/std matched to preserved East/West attack frames for this phase",
+    "sharpening": "UnsharpMask radius 0.8, percent 90, threshold 4; alpha unchanged"
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "visualFootBaselineY": 287
+  },
+  "preservedSourcePose": "../../../../poses/attack/west-north-west/02-follow-through.png",
+  "review": {
+    "result": "pass",
+    "scope": "phase timing, direction continuity, scale, anchor and alpha edge inspection"
+  }
+}

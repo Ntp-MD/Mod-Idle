@@ -1,0 +1,34 @@
+{
+  "speciesId": "vampire",
+  "inventory": {
+    "expected": 272,
+    "presentPosePngs": 0,
+    "missingExpected": 272
+  },
+  "auditedSources": [
+    {
+      "path": "art-reference/monsters/undead/vampire/animation/atlas/animation.png",
+      "dimensions": [
+        3072,
+        1920
+      ],
+      "metadataStatus": "visual-approved",
+      "layout": "8x5 cells, each 384x384",
+      "usableApprovedFramesExtracted": 40,
+      "sha256": "18f9cc2790e92d90966b2577c578f405a80f1053e3df69b79461b8b844b73a50"
+    },
+    {
+      "path": "art-reference/monsters/undead/vampire/reference.png",
+      "dimensions": [
+        128,
+        128
+      ],
+      "metadataStatus": "scaffold only; used only as identity reference"
+    }
+  ],
+  "excluded": [
+    "animation/drafts/animation-draft.png: status draft-review",
+    "animation/source/base-preview.png: not an approved source pose atlas"
+  ],
+  "outputInventoryUnchanged": true
+}

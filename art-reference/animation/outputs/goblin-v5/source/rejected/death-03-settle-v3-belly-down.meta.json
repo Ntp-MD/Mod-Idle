@@ -1,0 +1,24 @@
+{
+  "status": "rejected-source-not-for-atlas",
+  "speciesId": "goblin",
+  "generator": "built-in image_gen",
+  "sourceImageId": "exec-4be9eac8-ed92-4d69-9399-676686387669.png",
+  "file": "source/rejected/death-03-settle-v3-belly-down.png",
+  "sha256": "32536e9b09e1658c56eff667de7193fd5fb0c92c5ae456cd6e6a23f3bc779d06",
+  "action": "death",
+  "phase": "03-settle",
+  "rejectionReason": "Improved spear separation but torso still read as belly-down rather than lateral.",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 1536,
+    "mode": "RGBA"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false
+  }
+}

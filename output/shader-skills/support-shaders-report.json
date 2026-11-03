@@ -1,0 +1,302 @@
+[
+  {
+    "id": "buff.warcry",
+    "kind": "buff",
+    "version": "v2",
+    "src": "/fx/skill-pool/buff/buff-warcry/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 192396,
+    "name": "Warcry",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "buff.berserker",
+    "kind": "buff",
+    "version": "v2",
+    "src": "/fx/skill-pool/buff/buff-berserker/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 190640,
+    "name": "Berserker",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "buff.iron_will",
+    "kind": "buff",
+    "version": "v2",
+    "src": "/fx/skill-pool/buff/buff-iron-will/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 911442,
+    "name": "Iron Will",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "buff.holy_veil",
+    "kind": "buff",
+    "version": "v2",
+    "src": "/fx/skill-pool/buff/buff-holy-veil/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 536105,
+    "name": "Holy veil",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "buff.ghost_dance",
+    "kind": "buff",
+    "version": "v2",
+    "src": "/fx/skill-pool/buff/buff-ghost-dance/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 155480,
+    "name": "Ghost Dance",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "buff.earth_wall",
+    "kind": "buff",
+    "version": "v2",
+    "src": "/fx/skill-pool/buff/buff-earth-wall/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 376692,
+    "name": "Earth Wall",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "buff.magia_drive",
+    "kind": "buff",
+    "version": "v2",
+    "src": "/fx/skill-pool/buff/buff-magia-drive/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 267723,
+    "name": "Magia Drive",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "buff.energy_absorb",
+    "kind": "buff",
+    "version": "v2",
+    "src": "/fx/skill-pool/buff/buff-energy-absorb/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 526541,
+    "name": "Energy Absorb",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "buff.flame_guard",
+    "kind": "buff",
+    "version": "v2",
+    "src": "/fx/skill-pool/buff/buff-flame-guard/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 660683,
+    "name": "Flame Guard",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "heal.heal",
+    "kind": "heal",
+    "version": "v2",
+    "src": "/fx/skill-pool/heal/heal-heal/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 94907,
+    "name": "Heal",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "heal.greater_heal",
+    "kind": "heal",
+    "version": "v2",
+    "src": "/fx/skill-pool/heal/heal-greater-heal/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 287946,
+    "name": "Greater Heal",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "heal.cleanse",
+    "kind": "heal",
+    "version": "v2",
+    "src": "/fx/skill-pool/heal/heal-cleanse/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 138575,
+    "name": "Cleanse",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.wraith_of_fury",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-wraith-of-fury/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 373078,
+    "name": "Wraith of Fury",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.clarity",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-clarity/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 75406,
+    "name": "Clarity",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.haste",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-haste/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 95705,
+    "name": "Haste",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.vitality",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-vitality/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 106960,
+    "name": "Vitality",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.herald_of_ash",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-herald-of-ash/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 264689,
+    "name": "Herald of Ash",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.herald_of_frost",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-herald-of-frost/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 514768,
+    "name": "Herald of Frost",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.herald_of_lightning",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-herald-of-lightning/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 140010,
+    "name": "Herald of Lightning",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.ember_conversion",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-ember-conversion/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 153879,
+    "name": "Ember Conversion",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.rime_conversion",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-rime-conversion/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 161970,
+    "name": "Rime Conversion",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.storm_conversion",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-storm-conversion/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 206117,
+    "name": "Storm Conversion",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.cast_on_crit",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-cast-on-crit/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 199270,
+    "name": "Cast on Crit",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.cast_on_damage_taken",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-cast-on-damage-taken/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 406911,
+    "name": "Cast on Damage Taken",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.rimbo_form",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-rimbo-form/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 368695,
+    "name": "Rimbo Form",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.elemental_fury",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-elemental-fury/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 431935,
+    "name": "Elemental Fury",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.trinity_form",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-trinity-form/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 498093,
+    "name": "Trinity Form",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.grace",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-grace/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 110991,
+    "name": "Grace",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.iron_guard",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-iron-guard/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 730378,
+    "name": "Iron Guard",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  },
+  {
+    "id": "aura.energy_guard",
+    "kind": "aura",
+    "version": "v2",
+    "src": "/fx/skill-pool/aura/aura-energy-guard/v2/atlas.png",
+    "projection": "upright",
+    "bytes": 715829,
+    "name": "Energy Guard",
+    "recipeModule": "tools/vfx/support-shaders.mjs"
+  }
+]

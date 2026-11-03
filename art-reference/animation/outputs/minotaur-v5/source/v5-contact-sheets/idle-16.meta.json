@@ -1,0 +1,98 @@
+{
+  "status": "candidate-source-review-required",
+  "speciesId": "minotaur",
+  "generator": "built-in image_gen",
+  "sourceImageId": "exec-c3dd46c3-b528-4676-b57c-3a64b8c532c8.png",
+  "file": "source/v5-contact-sheets/idle-16.png",
+  "action": "idle",
+  "phase": "idle",
+  "promptSummary": "16 distinct facing views in row-major order; neutral battle-ready Minotaur idle pose holding a double-headed axe low.",
+  "promptContract": {
+    "subject": "broad muscular orange-brown bull-headed humanoid, curved ivory horns, pointed ears, golden eyes, dark muzzle and tusks, studded leather harness, brown waist wraps, cloven hooves, broad double-headed steel axe",
+    "style": "hand-painted pixel-art matching the source atlas, bold dark outlines, chunky shaded clusters, warm brown palette, restrained soft shading",
+    "sheet": {
+      "columns": 4,
+      "rows": 4,
+      "width": 1024,
+      "height": 1536,
+      "cellWidth": 256,
+      "cellHeight": 384
+    },
+    "directionOrder": [
+      "south",
+      "south-south-east",
+      "south-east",
+      "east-south-east",
+      "east",
+      "east-north-east",
+      "north-east",
+      "north-north-east",
+      "north",
+      "north-north-west",
+      "north-west",
+      "west-north-west",
+      "west",
+      "west-south-west",
+      "south-west",
+      "south-south-west"
+    ],
+    "constraints": [
+      "one full-body Minotaur per cell",
+      "distinct actual facing for every named direction; no mirrored duplicate",
+      "transparent background",
+      "no floor, shadows, grid lines, text, labels, UI, watermark, extra characters, crop, or overlap"
+    ]
+  },
+  "transparentBackgroundRequested": true,
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 1536,
+    "mode": "RGBA"
+  },
+  "cellCanvas": {
+    "width": 256,
+    "height": 384
+  },
+  "layout": {
+    "columns": 4,
+    "rows": 4,
+    "cellOrder": "row-major"
+  },
+  "targetFrameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "targetAnchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited Minotaur source anchor; 16-direction alignment remains unreviewed"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  },
+  "sha256": "2ddaa437212972ad4b8271cbf95ba61a225ca4d5dc47b7634cbe99f14d0a95ee",
+  "directionOrder": [
+    "south",
+    "south-south-east",
+    "south-east",
+    "east-south-east",
+    "east",
+    "east-north-east",
+    "north-east",
+    "north-north-east",
+    "north",
+    "north-north-west",
+    "north-west",
+    "west-north-west",
+    "west",
+    "west-south-west",
+    "south-west",
+    "south-south-west"
+  ]
+}

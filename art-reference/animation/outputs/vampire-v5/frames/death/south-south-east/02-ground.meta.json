@@ -1,0 +1,56 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "vampire",
+  "action": "death",
+  "direction": "south-south-east",
+  "pose": "02-ground",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/death-02-ground-16.png",
+  "sourceImageId": "exec-73322ab6-b839-4a64-a15c-0a7709f5d001.png",
+  "sourceCell": {
+    "row": 0,
+    "column": 1,
+    "box": [
+      256,
+      0,
+      512,
+      384
+    ],
+    "confidenceBoundsInCell": [
+      40,
+      188,
+      211,
+      290
+    ],
+    "sourceConfidenceBoundsHeight": 102,
+    "targetReferenceMedianHeight": 90.5,
+    "uniformScale": 0.887255
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "visual-approved animation/meta.json; 16-direction measurement pending",
+    "visualMeasurementPending": true
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "uniformScale": 0.887255,
+    "scaleReference": "median alpha-bound height of preserved approved source frames for this action/phase"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

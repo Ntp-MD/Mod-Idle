@@ -1,0 +1,56 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "minotaur",
+  "action": "death",
+  "direction": "west-north-west",
+  "pose": "01-collapse",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/death-01-fall-16.png",
+  "sourceImageId": "exec-94847c5c-6603-4805-8147-4e59a5816d86.png",
+  "sourceCell": {
+    "row": 2,
+    "column": 3,
+    "direction": "west-north-west"
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited Minotaur source anchor; visual measurement pending"
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "scaleReference": "median alpha-bound height across the matching 16-direction contact sheet",
+    "confidenceBoundsInCell": [
+      19,
+      97,
+      251,
+      332
+    ],
+    "recoveredBoundsInCell": [
+      16,
+      94,
+      254,
+      335
+    ],
+    "targetVisualFootBaselineY": 288,
+    "targetReferenceMedianHeight": 249.0,
+    "uniformScale": 1.033195
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  },
+  "sha256": "c7bfe4b34d50f2698d23fb4cb5ebfe51e561d0c795f8d081ffd149f608ca1e14"
+}

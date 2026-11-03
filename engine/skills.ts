@@ -1,0 +1,771 @@
+/**
+ * The skill model — one home for the roster calculator.
+ *
+ * `tools/skills.ts --calc` and the client both read these functions, so a
+ * cooldown or a per-press figure the player sees is the one the cage publishes
+ * (`skill-pool.md` · `skill-pool-system.md`).
+ */
+
+/** Weapon type → skill group (`skill-pool.md` "Weapon groups"). */
+export const WEAPON_GROUPS = {
+  melee: ['sword', 'axe', 'dagger', 'mace', 'spear', 'two-handed sword', 'two-handed axe'],
+  ranged: ['bow', 'crossbow'],
+  magic: ['wand', 'staff', 'book'],
+};
+
+import type { EngineData, SkillAction, SkillDelivery, SkillRow, SkillsData, SkillCastProfile } from './types.ts';
+
+/** Every commit-executed shape; a row that carries an action must name one of these. */
+export const ACTION_KINDS = ['projectile-burst', 'ground-pulse-burst', 'whirlwind-channel', 'blizzard-field',
+  'sand-field', 'chain-strike', 'cluster-burst', 'targeted-burst', 'meteor-field', 'thunder-field', 'ray-channel'] as const;
+export type ActionKind = (typeof ACTION_KINDS)[number];
+
+export const ROLL_POLICIES = ['shared', 'independent'] as const;
+export type RollPolicy = (typeof ROLL_POLICIES)[number];
+
+export const EFFECT_POLICIES = ['per-impact', 'refresh-status'] as const;
+export type EffectPolicy = (typeof EFFECT_POLICIES)[number];
+
+const EFFECT_STATUSES = ['burn', 'chill', 'shock', 'poison', 'mark', 'crippled', 'bleed'];
+
+/** The data defaults: bursts, Whirlwind, Blizzard, Sand and chains reuse one cache; aimed and
+ *  cluster payloads roll afresh. An explicit `roll_policy` overrides the default. */
+export const DEFAULT_ROLL_POLICY: Record<ActionKind, RollPolicy> = {
+  'projectile-burst': 'shared',
+  'ground-pulse-burst': 'shared',
+  'whirlwind-channel': 'shared',
+  'blizzard-field': 'shared',
+  'sand-field': 'shared',
+  'chain-strike': 'shared',
+  'cluster-burst': 'independent',
+  'targeted-burst': 'independent',
+  'meteor-field': 'shared',
+  'thunder-field': 'shared',
+  'ray-channel': 'shared',
+};
+
+/** The four authored cast deliveries; every one needs a `meta.action_profiles` entry. */
+export const SKILL_DELIVERIES = ['instant', 'melee', 'projectile', 'ground'] as const;
+
+/**
+ * The seconds a `duration` field states. Durations are authored prose (`"8 sec"`, `"1.5 sec"`),
+ * so this reads the first decimal number instead of `\d+` (which silently truncated `1.5` to `1`).
+ * A number is accepted directly; anything without a finite, non-negative number returns `fallback`.
+ */
+export function skillDurationSec(value: unknown, fallback = 0): number {
+  if (typeof value === 'number') return Number.isFinite(value) && value >= 0 ? value : fallback;
+  const match = String(value ?? '').match(/(\d+(?:\.\d+)?)/);
+  if (!match) return fallback;
+  const seconds = Number(match[1]);
+  return Number.isFinite(seconds) && seconds >= 0 ? seconds : fallback;
+}
+
+/**
+ * The offline queue cap a row's `offline_targets` column states (`"3"` or `"3/5"` — the first
+ * number). This is a queue approximation only: live membership is the committed footprint
+ * (`engine/skill-actions.ts targetsInSkillArea`), never a target-count cap. A malformed column
+ * falls back to one here; the action cage refuses a malformed value before dispatch reads it.
+ */
+export function skillTargetCap(skill: Pick<SkillRow, 'offline_targets'> | null | undefined): number {
+  const head = String(skill?.offline_targets ?? '1').split('/')[0].trim();
+  const value = Number(head);
+  return Number.isFinite(value) && value >= 1 ? Math.floor(value) : 1;
+}
+
+/** The budget table in the plan: every committed action owns this many live payload entries. */
+export function skillActionBudget(skill: SkillRow): number {
+  const hits = Math.max(1, Math.floor((skill.effects || []).find((e) => e.stat === 'hits')?.value ?? 1));
+  const action = skill.action;
+  if (!action) return 1;
+  switch (action.kind) {
+    case 'sand-field': return 1 + Math.max(0, Math.floor((skill.effects || []).find((e) => e.stat === 'dot_sec')?.value ?? 0));
+    case 'chain-strike': return skillTargetCap(skill);
+    case 'cluster-burst': return 1 + Math.max(0, Math.floor(Number(action.child_count) || 0));
+    case 'ray-channel': {
+      const interval = Number((action as any).interval_sec);
+      const active = Number((action as any).active_sec);
+      if (Number.isFinite(interval) && interval > 0 && Number.isFinite(active) && active > 0) return Math.max(1, Math.round(active / interval));
+      return hits;
+    }
+    default: return hits;
+  }
+}
+
+/** The `targets` column is `"N"` or `"N/M"`; anything else is a data error, not queue order. */
+const TARGETS_COLUMN = /^\s*\d+(?:\s*\/\s*\d+)?\s*$/;
+
+/**
+ * Pay a flat HP price from the current pool. The final point is never spent: eligibility refuses
+ * a price that would reach it, and this floor is the second half of the same `hp>=1` rule.
+ */
+export const payHpCost = (currentHp: number, cost: number): number =>
+  Math.max(1, currentHp - Math.max(0, cost));
+
+/**
+ * Validate the authored cast profile for every row that names a delivery — the same check the
+ * roster gate (S24) runs, exposed here so tests and any future cage call the one implementation.
+ * An unknown delivery or a missing `meta.action_profiles` entry names the row id and the path.
+ */
+export function validateSkillCastProfiles(
+  rows: readonly SkillRow[], profiles: Partial<Record<SkillDelivery, unknown>> | undefined, source: string,
+): void {
+  const problems: string[] = [];
+  for (const row of rows) {
+    if (!row.cast) continue;
+    const delivery = row.cast.delivery;
+    if (!(SKILL_DELIVERIES as readonly string[]).includes(delivery))
+      problems.push(`${row.id}.cast.delivery ${JSON.stringify(delivery)} is not one of ${SKILL_DELIVERIES.join(' · ')}`);
+    else if (!profiles?.[delivery])
+      problems.push(`${row.id} has no meta.action_profiles.${delivery}`);
+  }
+  if (problems.length) throw new Error(`${source}: ${problems.join('; ')}`);
+}
+
+/** Normalize a row's execution descriptor once; invalid rows throw before payment. */
+export function normalizeSkillAction(skill: SkillRow): SkillAction | undefined {
+  const action = skill.action;
+  const fail = (why: string): never => {
+    throw new Error(`skills.json: ${skill.id}.action ${why}`);
+  };
+  // Effect validation also applies to ordinary single-impact rows without an action descriptor.
+  for (const e of skill.effects || []) {
+    if (e.stat === 'consume_status' || e.stat === 'spread_status') {
+      if (!EFFECT_STATUSES.includes(e.status ?? '')) fail(`${e.stat} requires a supported status`);
+      if (e.subject !== 'target') fail(`${e.stat} requires target subject`);
+      if (!Number.isFinite(e.value) || e.value < 0) fail(`${e.stat} requires a finite nonnegative value`);
+    }
+    if (e.stat === 'consume_status') {
+      if (e.op !== 'add_pct') fail('consume_status must have op add_pct');
+      if (e.subject !== 'target') fail('consume_status must have subject target');
+      if (e.cap != null && (!Number.isInteger(e.cap) || e.cap <= 0)) fail('consume_status cap must be positive integer');
+      if (e.radius_m != null) fail('consume_status cannot have radius_m');
+      if (e.spread_scope) fail('consume_status cannot have spread_scope');
+    }
+    if (e.stat === 'spread_status') {
+      const scope = e.spread_scope;
+      if (scope != null && scope !== 'footprint') fail(`spread_status has unknown spread_scope ${JSON.stringify(scope)}`);
+      if (scope === 'footprint') {
+        if (e.value !== 100) fail('footprint spread_status must have value 100');
+        if (e.op !== 'add_flat') fail('footprint spread_status must have op add_flat');
+        if (e.subject !== 'target') fail('footprint spread_status must have subject target');
+        if (e.cap != null) fail('footprint spread_status cannot have cap');
+        if (e.radius_m != null) fail('footprint spread_status cannot have radius_m');
+      } else if (e.value != null && (!Number.isInteger(e.value) || e.value < 1)) {
+        fail('spread_status value must be integer >=1');
+      }
+    } else if (e.spread_scope != null) {
+      fail('spread_scope only on spread_status');
+    }
+  }
+  if (!action) {
+    if (skill.channel != null) fail('channel requires a channel action');
+    return undefined;
+  }
+  if (!ACTION_KINDS.includes(action.kind)) fail(`has unknown kind ${JSON.stringify(action.kind)}`);
+  // `offline_targets` is `"N"` or `"N/M"`; the offline queue reads the first number, so a malformed
+  // column must fail the cage rather than fall back to one silently.
+  if (skill.offline_targets != null && !TARGETS_COLUMN.test(String(skill.offline_targets)))
+    fail(`offline_targets must be "N" or "N/M" (got ${JSON.stringify(skill.offline_targets)})`);
+  const policy = action.roll_policy ?? DEFAULT_ROLL_POLICY[action.kind];
+  if (!ROLL_POLICIES.includes(policy)) fail(`has unknown roll_policy ${JSON.stringify(action.roll_policy)}`);
+  if (action.effect_policy != null && !(EFFECT_POLICIES as readonly string[]).includes(action.effect_policy))
+    fail(`has unknown effect_policy ${JSON.stringify(action.effect_policy)}`);
+  const finitePositive = (value: unknown) => typeof value === 'number' && Number.isFinite(value) && value > 0;
+  if (action.interval_sec != null && !finitePositive(action.interval_sec)) fail('interval_sec must be a finite positive number');
+  if (action.active_sec != null && !finitePositive(action.active_sec)) fail('active_sec must be a finite positive number');
+  if (action.movement_speed_mult != null && !finitePositive(action.movement_speed_mult)) fail('movement_speed_mult must be a finite positive number');
+  if (action.hop_share_pct != null && !(Number.isFinite(action.hop_share_pct) && action.hop_share_pct >= 0)) fail('hop_share_pct must be finite and non-negative');
+  const delivery = skill.cast?.delivery;
+  const radius = skill.area?.radius_m ?? 0;
+  switch (action.kind) {
+    case 'projectile-burst':
+    case 'targeted-burst':
+      if (delivery !== 'projectile') fail(`kind ${action.kind} requires projectile delivery`);
+      break;
+    case 'ground-pulse-burst':
+    case 'blizzard-field':
+      if (delivery !== 'ground') fail(`kind ${action.kind} requires ground delivery`);
+      break;
+    case 'sand-field':
+      if (delivery !== 'ground' || !(radius > 0)) fail('kind sand-field requires a positive-radius ground footprint');
+      break;
+    case 'whirlwind-channel':
+      if (delivery !== 'melee' || !(radius > 0)) fail('kind whirlwind-channel requires a positive-radius melee footprint');
+      break;
+    case 'chain-strike':
+      if (!(radius > 0)) fail('kind chain-strike requires a positive-radius hop reach');
+      break;
+    case 'cluster-burst': {
+      const parent = Number(action.parent_share_pct);
+      const count = Number(action.child_count);
+      const share = Number(action.child_share_pct);
+      if (delivery !== 'projectile' || !(radius > 0)) fail('kind cluster-burst requires a positive-radius projectile footprint');
+      if (!Number.isSafeInteger(count) || count <= 0) fail('child_count must be a positive safe integer');
+      if (![parent, share].every((value) => Number.isFinite(value) && value >= 0)) fail('cluster shares must be finite and non-negative');
+      if (parent + count * share !== 100) fail(`cluster shares must total 100 (got ${parent + count * share})`);
+      if (action.spread_deg != null && !(Number.isFinite(action.spread_deg) && action.spread_deg > 0 && action.spread_deg <= 180))
+        fail('spread_deg must be finite, positive and at most 180');
+      break;
+    }
+    case 'meteor-field':
+    case 'thunder-field':
+      if (delivery !== 'ground') fail(`kind ${action.kind} requires ground delivery`);
+      break;
+    case 'ray-channel':
+      if (delivery !== 'projectile') fail(`kind ${action.kind} requires projectile delivery`);
+      break;
+  }
+  // Validate distinct_targets
+  const distinct = action.distinct_targets;
+  if (distinct != null) {
+    if (action.kind !== 'targeted-burst') fail('distinct_targets only on targeted-burst');
+    if (typeof distinct !== 'boolean') fail('distinct_targets must be boolean');
+    const tracking = action.tracking;
+    if (tracking != null && tracking !== 'straight' && tracking !== 'homing') fail('distinct_targets tracking must be straight or homing');
+    if (action.pursuit_range_m != null && !finitePositive(action.pursuit_range_m)) fail('distinct_targets pursuit_range_m must be positive');
+    if (action.pursuit_sec != null && !finitePositive(action.pursuit_sec)) fail('distinct_targets pursuit_sec must be positive');
+  }
+  if (action.kind === 'meteor-field' || action.kind === 'thunder-field') {
+    if (delivery !== 'ground') fail(`kind ${action.kind} requires ground delivery`);
+    const radius = skill.area?.radius_m ?? 0;
+    if (!finitePositive(radius)) fail(`kind ${action.kind} requires positive radius`);
+    const durationSec = skillDurationSec(skill.duration, 0);
+    if (!(durationSec > 0)) fail(`kind ${action.kind} requires positive duration`);
+    const interval = Number(action.interval_sec);
+    if (!Number.isFinite(interval) || interval <= 0) fail(`kind ${action.kind} requires positive interval_sec`);
+    const hitsVal = Number((skill.effects || []).find((e: any) => e.stat === 'hits')?.value ?? 0);
+    if (!Number.isSafeInteger(hitsVal) || hitsVal <= 0) fail(`kind ${action.kind} requires positive integer hits`);
+    const expected = hitsVal * interval;
+    if (Math.abs(durationSec - expected) > 1e-6 && Math.abs(durationSec - expected) > 1 / 1_000_000) fail(`kind ${action.kind} requires duration = hits * interval_sec`);
+    if (action.roll_policy && action.roll_policy !== 'shared') fail(`kind ${action.kind} must use shared roll_policy`);
+  }
+  if (action.kind === 'ray-channel') {
+    if (delivery !== 'projectile') fail('kind ray-channel requires projectile delivery');
+    const area: any = skill.area;
+    if (!area || area.origin !== 'caster' || area.shape !== 'line') fail('ray-channel requires caster-origin line');
+    if (!finitePositive(area?.length_m)) fail('ray-channel requires positive length_m');
+    if (!finitePositive(area?.width_m)) fail('ray-channel requires positive width_m');
+    const interval = Number(action.interval_sec);
+    const active = Number(action.active_sec);
+    if (!Number.isFinite(interval) || interval <= 0) fail('ray-channel requires positive interval_sec');
+    if (!Number.isFinite(active) || active <= 0) fail('ray-channel requires positive active_sec');
+    const hitsVal = active / interval;
+    if (!Number.isFinite(hitsVal) || !Number.isSafeInteger(Math.round(hitsVal)) || hitsVal < 1
+      || Math.abs(hitsVal - Math.round(hitsVal)) > 1e-9) fail('ray-channel requires active_sec / interval_sec to be integer');
+    if (interval < 1 / 1_000_000) fail('ray-channel interval must occupy at least one combat-time unit');
+    const authoredHits = skill.effects?.find(effect => effect.stat === 'hits')?.value;
+    if (authoredHits !== Math.round(hitsVal)) fail('ray-channel requires hits = active_sec / interval_sec');
+    if (skill.duration != null) {
+      const dur = skillDurationSec(skill.duration, 0);
+      if (Math.abs(dur - active) > 1e-6) fail('ray-channel duration must match active_sec');
+    }
+    if (channelRateSpec(skill) == null) fail('ray-channel requires finite positive channel.mana_per_sec');
+  }
+  const hits = (skill.effects || []).find((e) => e.stat === 'hits')?.value;
+  if (!['sand-field', 'chain-strike', 'cluster-burst', 'ray-channel'].includes(action.kind) && hits == null) fail('requires a hits effect');
+  if (hits != null && (!Number.isSafeInteger(hits) || hits <= 0)) fail('hits must be a positive safe integer');
+  if (!Number.isSafeInteger(skillActionBudget(skill)) || skillActionBudget(skill) <= 0) fail('payload budget must be a positive safe integer');
+  validateSkillChannel(skill);
+  return { ...action, roll_policy: policy };
+}
+
+/**
+ * The authored sustain rate for a bounded channel, in Mana per simulation second.
+ * Present `channel` must carry a finite positive `mana_per_sec`; absent means no
+ * sustain cost. Malformed present values return null so validation fails loudly.
+ */
+export function channelRateSpec(skill: Pick<SkillRow, 'channel'>): number | null {
+  const rate = (skill as SkillRow)?.channel?.mana_per_sec;
+  return typeof rate === 'number' && Number.isFinite(rate) && rate > 0 ? rate : null;
+}
+
+/**
+ * Validate the optional sustain descriptor: finite positive rate, only beside a
+ * Mana start cost on a whirlwind-channel action. HP-priced rows and non-channel
+ * actions cannot carry one.
+ */
+export function validateSkillChannel(skill: SkillRow): void {
+  const channel = (skill as SkillRow).channel;
+  if (channel == null) return;
+  const fail = (why: string): never => {
+    throw new Error(`skills.json: ${skill.id}.channel ${why}`);
+  };
+  if (typeof channel !== 'object' || Array.isArray(channel)) fail('must be an object with mana_per_sec');
+  if (channelRateSpec(skill) == null) fail('mana_per_sec must be a finite positive number');
+  if (Object.keys(channel).some((k) => k !== 'mana_per_sec')) fail('carries no other keys beside mana_per_sec');
+  if (skill.hp_cost != null) fail('cannot sit beside an HP start cost');
+  if (skill.action?.kind !== 'whirlwind-channel' && skill.action?.kind !== 'ray-channel') fail('requires a whirlwind-channel action');
+}
+
+/** Validate every authored action descriptor; unknown kinds and malformed values fail the loader. */
+export function validateSkillActions(rows: readonly SkillRow[], source: string): void {
+  for (const row of rows) {
+    if (!row.action) continue;
+    try { normalizeSkillAction(row); }
+    catch (error) { throw new Error(`${source}: ${(error as Error).message.replace(/^skills\.json: /, '')}`); }
+  }
+}
+
+/** The closed mechanic vocabulary a mob strike may state; auras carry none. */
+export const MOB_STRIKE_RULES = ['ignores_dodge'] as const;
+
+export function validateMobSkillRules(
+  rows: readonly { id: string; mode?: string; rules?: unknown }[], source: string,
+): void {
+  for (const row of rows) {
+    if (row.rules == null) continue;
+    if (!Array.isArray(row.rules)) throw new Error(`${source}: ${row.id}.rules must be an array`);
+    if (row.mode === 'aura' && row.rules.length) throw new Error(`${source}: ${row.id} is an aura and cannot carry rules`);
+    for (const rule of row.rules) {
+      if (typeof rule !== 'string' || !(MOB_STRIKE_RULES as readonly string[]).includes(rule))
+        throw new Error(`${source}: ${row.id}.rules has unknown rule ${JSON.stringify(rule)}`);
+    }
+  }
+}
+
+/** Validate authored hit families without inferring them from damage or delivery. */
+export function validateSkillHitClasses(
+  rows: readonly { id: string; type?: string; mode?: string; hit_class?: unknown }[],
+  source: string,
+): void {
+  for (const row of rows) {
+    const hostile = row.mode !== undefined ? row.mode === 'strike'
+      : row.type === 'attack' || row.type === 'curse';
+    if (hostile ? row.hit_class !== 'attack' && row.hit_class !== 'spell' : row.hit_class !== 'none') {
+      throw new Error(`${source}: ${row.id}.hit_class must be ${hostile ? 'attack or spell' : 'none'}`);
+    }
+  }
+}
+
+/**
+ * The two damage ladders (the PoE shape, owner ruling): `Attack damage %` scales the attack ladder —
+ * a weapon's own swing and a phys-basis press — and `Spell damage %` scales the spell ladder — a
+ * magic-basis press and a magic weapon's bolt. Each bucket adds only inside itself, the pair never
+ * crosses, and no Core attributes change: this multiplies what the ladder already deals. A magic-basis press
+ * carries its Element share inside the press, so the spell half of the pair scales it too; a swing's
+ * Element pools stay outside the attack bucket, because the swing's Element is not the attack.
+ */
+export const ladderMult = (basis: string, attackPct = 0, spellPct = 0) =>
+  1 + ((basis === 'magic' ? spellPct : attackPct) || 0) / 100;
+
+export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
+  const F: Partial<NonNullable<SkillsData['meta']['formula']>> = SKILLS.meta?.formula ?? {};
+
+  /**
+   * The duplicate ladder (skills.json `meta.formula.ladder`): each rung buys a share of cooldown
+   * reduction and costs duplicates of its own (`skill-pool-system.md` "Duplicates → ladder"). The
+   * roster file owns it — the wiki prints the same rows — so the model reads it rather than typing it.
+   */
+  const LADDER: { step: number; cdr: number; cost: number }[] = (F.ladder?.rows || []).map((r) => ({ step: r.step, cdr: r.cdr, cost: r.cost }));
+  if (!LADDER.length) throw new Error('skills.json: meta.formula.ladder.rows must list the duplicate ladder');
+  if (F.conversion_duplicates == null || F.group_bonus == null)
+    throw new Error('skills.json: meta.formula must carry conversion_duplicates and group_bonus');
+  /** Any 2 duplicates convert into 1 of a chosen skill (`skill-pool-system.md`). */
+  const CONVERSION = F.conversion_duplicates;
+  /** A matching weapon group grants the group's own bonus (`skill-pool.md`). */
+  const GROUP_BONUS = F.group_bonus;
+
+  /**
+   * The per-level table: one row per skill level, carrying the multiplier a press and an effect
+   * carry at that level. It is the only home of the ramp — a row states its level-1 numbers and the
+   * table says what they climb to, so "what does this skill do at level N" is a read, never a formula
+   * buried in code. `special_level_effects` names the effect stats that already spend skill level
+   * their own way (Energy Absorb interpolates base→cap, Ghost Dance counts a charge per N levels) and
+   * must not be scaled a second time.
+   */
+  const LEVEL_ROWS: { level: number; damage_pct: number; effect_pct: number; buff_effect_pct?: number }[] =
+    (F.skill_levels && F.skill_levels.rows) || [{ level: 1, damage_pct: 100, effect_pct: 100, buff_effect_pct: 100 }];
+  const LEVEL_SPECIALS: string[] = ((F.skill_levels && F.skill_levels.special_level_effects) || []).map(String);
+  const LEVEL_CAP = LEVEL_ROWS[LEVEL_ROWS.length - 1].level;
+  /** The step the first two rows state — what the tables and the tests print as `LEVEL_STEP`. */
+  const LEVEL_STEP = LEVEL_ROWS.length > 1 ? Math.round((LEVEL_ROWS[1].damage_pct - LEVEL_ROWS[0].damage_pct) * 100) / 100 : 0;
+  const rowAt = (level?: number) => LEVEL_ROWS[Math.max(0, Math.min(LEVEL_CAP, Math.floor(level || 1)) - 1)];
+  /** The multiplier a press carries at a level, in percent. */
+  const damagePct = (level?: number) => rowAt(level).damage_pct;
+  /** The multiplier an effect carries at a level, in percent. */
+  const effectPct = (level?: number) => rowAt(level).effect_pct;
+  /**
+   * The multiplier a buff's or an aura's effect carries, in percent, from its own column. Both open at
+   * their whole value — the number a row stores is what a fresh drop gives — and climb to a higher cap
+   * than every other effect rides, so levelling a buff or an aura is worth the kills it costs. Whole
+   * numbers only, so a page printing the rung reads as a percentage and never as a fraction.
+   */
+  const buffEffectPct = (level?: number) => rowAt(level).buff_effect_pct ?? effectPct(level);
+  /**
+   * A row's effects at a level. The stored `value` is the level-1 number and it climbs on the table — a
+   * buff or an aura on its own column, everything else on `effect_pct`; a `special_level_effects` stat is
+   * handed back untouched, because its own mechanism is the ramp.
+   *
+   * A multiplier climbs on its DISTANCE from 1, never on the ratio itself: ×1.15 at 180% is ×1.27, not
+   * ×2.07, and a ×0.90 that shrinks incoming damage becomes ×0.82 — a stronger cut, not a bigger hit.
+   * A buff's or an aura's added value is rounded to a whole number (owner rule), so a printed rung reads
+   * as a percentage and never as a fraction.
+   */
+  function effectsAt(skill: SkillRow, level?: number) {
+    const buff = skill.type === 'buff' || skill.type === 'aura';
+    const scale = (buff ? buffEffectPct(level) : effectPct(level)) / 100;
+    return (skill.effects || []).map((e) => {
+      if (LEVEL_SPECIALS.includes(e.stat)) return { ...e };
+      if ((e as any).spread_scope === 'footprint' && e.stat === 'spread_status' && e.value === 100) return { ...e };
+      if (e.op === 'mult') return { ...e, value: e.value >= 1 ? 1 + (e.value - 1) * scale : 1 - (1 - e.value) * scale };
+      return { ...e, value: buff ? Math.round(e.value * scale) : e.value * scale };
+    });
+  }
+  /** The existing cost step applies to each typed Mana or HP flat price, separate from damage. */
+  const COST_LEVEL_STEP = F.mana_level_step_pct != null ? F.mana_level_step_pct : 5;
+  /** Kept as the existing public name for the source-data key and its readers. */
+  const MANA_LEVEL_STEP = COST_LEVEL_STEP;
+  /**
+   * The pool the row prices were set against — the level-1 caster's own pool, derived from the same
+   * terms `maxManaOf` builds it from, so it cannot drift from the pool model. It is a basis for
+   * reading a cost, never a term of one: the bar buys casts, not a cheaper press.
+   */
+  const MANA_REF_POOL = E.level_gain.mana_base
+    + E.stat.base * E.K.K_INT_MP;
+  const CAST_REF = F.cast_reference || { cdr_pct: 50, ladder_pct: 30 };
+  const SX = E.skill_xp;
+
+  const byId: Record<string, SkillRow> = {};
+  for (const s of SKILLS.skills) byId[s.id] = s;
+  /** The live roster: retired rows stay in `byId` so an old save still resolves them, but they
+   *  never drop, get offered as a reward, or appear in the owned/active lists again. */
+  const ACTIVE = SKILLS.skills.filter((s) => !s.retired);
+  /** The fallback timing if a row reaches the runtime with no authored profile. */
+  const DEFAULT_CAST_PROFILE = {
+    windup_sec: 0.15, recovery_sec: 0.15, impact_delay_sec: 0,
+    projectile_speed_mps: 0, hit_radius_m: 0.45,
+  } as const;
+  /**
+   * Merge a row's own timing over its delivery profile. A missing profile is a data error the
+   * roster cage (S24 · `validateSkillCastProfiles`) names; the runtime must not throw mid-combat,
+   * so it falls back to the instant profile (or the fixed default) and lets the cage fail the data.
+   */
+  const castProfileOf = (skill: SkillRow): SkillCastProfile => {
+    const delivery = skill.cast?.delivery ?? 'instant';
+    const profile = SKILLS.meta.action_profiles?.[delivery]
+      ?? SKILLS.meta.action_profiles?.instant ?? DEFAULT_CAST_PROFILE;
+    const ranges = (E as any).combat_arena.range;
+    return { ...profile, delivery,
+      range_m: skill.type === 'buff' || skill.type === 'heal' ? 0
+        : ranges[skill.type === 'curse' ? 'magic' : skill.group || 'melee'] ?? ranges.melee,
+      ...skill.cast };
+  };
+
+  /**
+   * The price is a typed number of mana units and the unit word is part of the number: `21 flat`
+   * prices 21 units. The match is anchored, so a bare `21`, a missing field, or a share of the pool is
+   * a parse failure rather than a zero — a cost that silently reads as 0 would make the skill free.
+   * `tools/lib/roster.ts` S15 is the other half of the guard.
+   */
+  function manaSpec(skill: SkillRow): number | null {
+    const m = String(skill.mana == null ? '' : skill.mana).match(/^(\d+(?:\.\d+)?)\s*flat(?![A-Za-z])/);
+    return m ? Number(m[1]) : null;
+  }
+
+  /** Flat HP units paid from the caster's current pool; it is an alternative to, never a second cost beside, Mana. */
+  function hpCostSpec(skill: SkillRow): number | null {
+    const m = String(skill.hp_cost == null ? '' : skill.hp_cost).match(/^(\d+(?:\.\d+)?)\s*flat(?![A-Za-z])/);
+    return m ? Number(m[1]) : null;
+  }
+
+  /**
+   * What a bounded channel sustains, in Mana per simulation second: the authored rate
+   * grown once on the existing skill-level cost ladder, the same step a start cost climbs.
+   * Throws on a missing or malformed descriptor, so a half-authored channel cannot run free.
+   */
+  function channelRateOf(skill: SkillRow, { skillLevel = 1 }: { skillLevel?: number } = {}) {
+    if (skill.channel == null) throw new Error(`skill ${skill.id || '(unnamed)'} has no channel rate`);
+    const rate = channelRateSpec(skill);
+    if (rate == null) throw new Error(`skill ${skill.id || '(unnamed)'} has no readable channel rate: ${JSON.stringify((skill as SkillRow).channel)}`);
+    return rate * (1 + Math.max(0, skillLevel - 1) * COST_LEVEL_STEP / 100);
+  }
+
+  /**
+   * What the row costs, in mana units: the typed price grown only by skill level on
+   * `MANA_LEVEL_STEP`, steeper than the damage ramp so a maxed rotation costs more. The pool sets
+   * nothing — a bigger bar buys more casts, never a cheaper press — so an aura that reserves a share
+   * of it changes what is there to spend, never the price of the spend. A press that lands on more
+   * than one target pays the same typed price as a single-target press.
+   */
+  function manaCostOf(skill: SkillRow, { skillLevel = 1 }: { skillLevel?: number } = {}) {
+    const value = manaSpec(skill);
+    if (value == null) throw new Error(`skill ${skill.id || '(unnamed)'} has no readable mana cost: ${JSON.stringify(skill.mana)}`);
+    return value * (1 + Math.max(0, skillLevel - 1) * COST_LEVEL_STEP / 100);
+  }
+
+  /** HP prices use the same level ladder but remain flat pool units, not a share of Max HP. */
+  function hpCostOf(skill: SkillRow, { skillLevel = 1 }: { skillLevel?: number } = {}) {
+    const value = hpCostSpec(skill);
+    if (value == null) throw new Error(`skill ${skill.id || '(unnamed)'} has no readable HP cost: ${JSON.stringify(skill.hp_cost)}`);
+    return value * (1 + Math.max(0, skillLevel - 1) * COST_LEVEL_STEP / 100);
+  }
+
+  /** One paid resource per active row; neither resource carries a multi-target premium. */
+  function costOf(skill: SkillRow, opts: { skillLevel?: number } = {}) {
+    if (skill.mana != null && skill.hp_cost != null) throw new Error(`skill ${skill.id || '(unnamed)'} cannot charge both Mana and HP`);
+    if (skill.hp_cost != null) return { resource: 'hp' as const, amount: hpCostOf(skill, opts) };
+    return { resource: 'mana' as const, amount: manaCostOf(skill, opts) };
+  }
+
+  /**
+   * The finished hit a press multiplies (B5): two bases only, and Element folds into the
+   * magic one rather than becoming a third.
+   */
+  function basisOf(skill: SkillRow, { phys, magic, elem, align }: { phys?: number; magic?: number; elem?: number; align?: number }) {
+    return skill.basis === 'magic' ? (magic || 0) + (elem || 0) * ((align || 0) / 100) : (phys || 0);
+  }
+
+  /**
+   * press = (base_flat + (eff/100) × power + (max_hp_pct/100) × caster Max HP) × damage_pct(level)/100 × ladder bucket —
+   * the HP term is optional. The PoE shape still gives the row its own flat damage at skill level 1 plus its stated share
+   * of the added power line, so gear scales a row by its
+   * effectiveness instead of by a percentage of the finished hit. The level multiplier is read from the
+   * per-level table, so a press at any level is a read of `meta.formula.skill_levels`. The last factor is
+   * the character's own damage bucket (`Attack damage %` / `Spell damage %`), chosen by the row's basis.
+   */
+  function perPress(skill: SkillRow, { phys, magic, elem, align, maxHp, level, attackPct, spellPct }: { phys?: number; magic?: number; elem?: number; align?: number; maxHp?: number; level?: number; attackPct?: number; spellPct?: number }) {
+    if (skill.base_flat == null || skill.eff == null || skill.basis == null) return null;
+    const power = basisOf(skill, { phys, magic, elem, align });
+    const hpPower = ((skill.max_hp_pct || 0) / 100) * (maxHp || 0);
+    return (skill.base_flat + (skill.eff / 100) * power + hpPower) * (damagePct(level) / 100) * ladderMult(skill.basis, attackPct, spellPct);
+  }
+
+  /** A phys-basis press can crit; a magic-basis one cannot (pin 1). */
+  const critsOnBasis = (skill: SkillRow) => skill.basis !== 'magic';
+
+  /** cooldown = base_cd × (1 − ladder/100) × (1 − cdr/100) — ladder always applies first. */
+  function effCd(cd: number, cdrPct?: number, ladderPct?: number) {
+    return cd * (1 - (cdrPct || 0) / 100) * (1 - (ladderPct || 0) / 100);
+  }
+
+  /** Ladder % off the number of duplicates poured into this skill's own ladder. */
+  function ladderPct(duplicates: number) {
+    let left = duplicates, pct = 0;
+    for (const rung of LADDER) {
+      if (left < rung.cost) break;
+      left -= rung.cost; pct = rung.cdr;
+    }
+    return pct;
+  }
+
+  const ladderCostToStep = (step: number) => LADDER.slice(0, step).reduce((s, l) => s + l.cost, 0);
+  const LADDER_MAX_DUPLICATES = ladderCostToStep(LADDER.length);
+
+  /** XP is per kill, never per press (`engine.json` skill_xp). */
+  const skillLevel = (xp: number) => Math.min(SX.level_cap, Math.floor(xp / SX.xp_per_step) + 1);
+  const skillXpForLevel = (level: number) => (level - 1) * SX.xp_per_step;
+
+  /** Resolve a weapon's group from its Base name. */
+  function weaponGroupOf(weaponName: string) {
+    const n = String(weaponName || '').toLowerCase();
+    let best: { index: number; group: string | null } = { index: -1, group: null };
+    for (const [group, types] of Object.entries(WEAPON_GROUPS)) {
+      for (const t of types) {
+        const i = n.indexOf(t);
+        if (i >= 0 && (best.index < 0 || i < best.index)) best = { index: i, group };
+      }
+    }
+    return best.group;
+  }
+
+  /** A matching weapon group grants the group's own bonus (`skill-pool.md`). */
+  const groupBonus = (skill: SkillRow, weaponName: string) =>
+    !skill.group || skill.group === 'all' || skill.group === weaponGroupOf(weaponName) ? 1 + GROUP_BONUS : 1;
+  /**
+   * The weapon a row is BOUND to, as a family token matched against the Base's own name — `axe` covers
+   * both one-handed and two-handed, `sword` both swords, `bow` both bow and crossbow. Only the arrow
+   * rows carry one (firing solely while a bow or a crossbow is held); every other row is open to any
+   * weapon and answers only its group bonus.
+   */
+  function weaponFits(skill: SkillRow, weaponName: string): boolean {
+    const w = (skill as any).weapon;
+    return !w || String(weaponName || '').toLowerCase().includes(String(w).toLowerCase());
+  }
+
+  function weaponMatches(skill: SkillRow, weaponName: string): boolean {
+    if (!weaponName || weaponName === 'bare hand') return false;
+    if ((skill as any).weapon) return weaponFits(skill, weaponName);
+    const group = (skill as any).group;
+    return !group || group === 'all' || group === weaponGroupOf(weaponName);
+  }
+
+  function row(skill: SkillRow, opts: { cdrPct?: number; ladderPct?: number; phys?: number; magic?: number; elem?: number; align?: number; maxHp?: number; level?: number; attackPct?: number; spellPct?: number }) {
+    const cdr = opts.cdrPct != null ? opts.cdrPct : CAST_REF.cdr_pct;
+    const ladder = opts.ladderPct != null ? opts.ladderPct : CAST_REF.ladder_pct;
+    const ec = effCd(skill.cd!, cdr, ladder);
+    const occupancy = skill.action?.kind === 'ray-channel'
+      ? (skill.action.active_sec ?? 0) + castProfileOf(skill).windup_sec + castProfileOf(skill).recovery_sec : 0;
+    const pps = ec + occupancy > 0 ? 1 / (ec + occupancy) : null;
+    return {
+      skill,
+      cd: skill.cd,
+      effCd: ec,
+      pressesPerSec: pps,
+      damage: opts.phys != null || opts.magic != null ? perPress(skill, opts) : null,
+    };
+  }
+
+  /** Aura reservations come from `reserve_tiers`; the set may not reserve the whole pool. */
+  const reservePct = (tier: string) => (SKILLS.reserve_tiers[tier] || { pct: 0 }).pct;
+  const RESERVATION_LIMIT = SKILLS.meta.reservation.max_pct;
+
+  /** Loadout presets: six sets, one main, chosen by zone, cooldowns survive a Push. */
+  const PRESETS = E.presets || { sets: 6, main_index: 0 };
+  const presetCount = PRESETS.sets;
+  const mainPreset = PRESETS.main_index;
+
+  /**
+   * Fold a set of skill rows into the numbers one character carries. `add_pct` and `add_flat`
+   * both land in the additive bucket (the stat itself decides whether a number is a percent or a
+   * flat value, exactly as the gear lines do), and `mult` compounds. **A line written on a target
+   * never enters the character's own sheet**: it comes back in `target`, because Rimbo Form's mob
+   * slow and Elemental Fury's mob res cut are bought by the aura but spent on the mob.
+   * Every value here is the row's own number — `tools/lib/roster.ts` S11 fails if one of them is
+   * not printed in that row's `effect` sentence. Pass `levelOf` to fold the rows at the skill levels
+   * the character actually holds; without it every row folds at level 1, which is what the roster
+   * gates and the tables read.
+   */
+  function aggregateEffects(rows?: SkillRow[], levelOf?: (row: SkillRow) => number) {
+    const add: Record<string, number> = {}, mult: Record<string, number> = {}, conditional: any[] = [], targetAdd: Record<string, number> = {}, targetMult: Record<string, number> = {};
+    for (const s of rows || []) {
+      for (const e of levelOf ? effectsAt(s, levelOf(s)) : (s.effects || [])) {
+        // an Elemental line names the Element it feeds, so the key carries it
+        const key = e.element ? `${e.stat}:${e.element}` : e.stat;
+        const inAdd = e.subject === 'target' ? targetAdd : add;
+        const inMult = e.subject === 'target' ? targetMult : mult;
+        if (e.condition) { conditional.push({ key, op: e.op, value: e.value, condition: e.condition, subject: e.subject || 'self' }); continue; }
+        if (e.op === 'mult') inMult[key] = (inMult[key] || 1) * e.value;
+        else {
+          inAdd[key] = (inAdd[key] || 0) + e.value;
+          // a Cap stated by the same sentence rides along as `<stat>~cap`
+          if (e.cap != null) inAdd[`${key}~cap`] = Math.min(inAdd[`${key}~cap`] ?? Infinity, e.cap);
+        }
+      }
+    }
+    return { add, mult, conditional, target: { add: targetAdd, mult: targetMult } };
+  }
+
+  const EFFECT_STATS = ['attack_speed', 'mana_regen', 'hp_regen', 'evasion', 'armour', 'energy_shield',
+    'physical_power', 'elemental_alignment', 'elemental_resistance', 'damage_taken', 'heal_per_sec', 'heal_instant',
+    // the target-side set: what a curse writes on the mob it lands on
+    'damage_dealt', 'accuracy', 'crit_chance',
+    // what the per-Element pool and the status store made expressible
+    'leech', 'elemental_power', 'burn_stacks', 'poison_stacks', 'mark_stacks', 'bleed_chance', 'stun_chance', 'poison_hold_sec',
+    // conversion: a percent of the finished physical share routed into the named Element before
+    // mitigation (`draft/convert-damage.md` · `convertDamageOf`)
+    'damage_conversion',
+    'execute_threshold_pct', 'execute_damage', 'damage_per_evasion_pct', 'resistance_pierce_pct', 'global_speed',
+    // a strip of the mob's own Elemental resistance, in percentage points (B8)
+    'mob_elemental_resistance_pct',
+    // (B9 close-out): the magnitudes the last prose rows state
+    'mob_elemental_damage_taken_pct', 'hits', 'hit_pct', 'stop_sec',
+    // the trigger auras (`cast_on_crit` · `cast_on_damage_taken`): their own clock and the price they
+    // put on the press they fire — the mana the trigger charges and the damage it scales
+    'trigger_cd_sec', 'cast_mana_mult', 'cast_damage_mult',
+    'missing_hp_pct_for_max', 'damage_at_missing_hp', 'dodge_charges', 'dodge_charges_per_levels',
+    'dodge_charges_cap',
+    // Earth Wall: a charge pool that BLOCKS instead of dodging — same shape as the dodge pair above,
+    // one cut per charge rather than one hit deleted
+    'block_charges', 'block_charges_per_levels', 'block_charges_cap',
+    // Sand Storm: a lingering earth line the row itself applies (seconds and damage a second), and
+    // Earth Splitter's share of the target's own maximum pool
+    'dot_dps', 'dot_sec', 'max_hp_pct_damage',
+    // Energy Absorb: the share of an incoming hit converted to Energy Shield, base and Cap
+    'es_absorb_pct', 'es_absorb_cap',
+    // setup → payoff: a press that reads a status already on the body, spends its stacks, or copies
+    // it to the other bodies the row reaches
+    'bonus_vs_status', 'consume_status', 'spread_status'];
+  /** The row effects whose magnitude is read against one named mob status. */
+  const STATUS_EFFECTS = ['bonus_vs_status', 'consume_status', 'spread_status'];
+  /** The status names a status effect may name (the mob status store's own families). */
+
+  const EFFECT_OPS = ['add_pct', 'add_flat', 'mult'];
+  const EFFECT_SUBJECTS = ['self', 'target'];
+  /**
+   * The mechanic words a row may state that are not magnitudes — each one has a reader in the client,
+   * and `tools/lib/roster.ts` S14 fails if a row invents a word nothing spends.
+   */
+  const EFFECT_RULES = ['ignores_dodge', 'every_target', 'guaranteed_status', 'bypasses_control_cap',
+    'status_immunity', 'cleanses_on_cast', 'es_recharge_immediate', 'cleanses_status',
+    // a press that folds its own row onto the character sheet for the row's `duration` (Reap)
+    'self_window',
+    // the trigger auras: the event that fires the first ready slot in the cast order
+    'cast_on_crit', 'cast_on_damage_taken'];
+  /** Rows whose mechanic is already carried by another column, so no number is missing. */
+  const MODELLED_BY = ['targets', 'element'];
+  /**
+   * The lines that only take effect in a state the status store can actually write
+   * (`mobStatus.ts`), so a conditional effect can never key on something nothing inflicts.
+   */
+  const EFFECT_CONDITIONS = ['chilled'];
+
+  /**
+   * The status a payoff row reads. A row names it once on the effect that spends it, so the
+   * condition editor and the runtime do not keep a second copy of "which status is this row about".
+   */
+  const exploitedStatusOf = (skill: SkillRow | null | undefined): string | null => {
+    for (const stat of STATUS_EFFECTS) {
+      const e = (skill?.effects || []).find((x) => x.stat === stat);
+      if (e?.status) return String(e.status);
+    }
+    return null;
+  };
+
+  /**
+    * The `Hits` line, derived from effects — never authored prose: burst (`hits` +
+    * optional `hit_pct`) is one press multiplied at once, linger (`dot_dps` + `dot_sec`)
+    * is damage a second for N seconds.
+   * Burst (`hits` + optional `hit_pct`) is one press multiplied at once;
+   * linger (`dot_dps` + `dot_sec`) is damage a second for N seconds (default 10,
+   * mirroring the sim — storm rows must still author `dot_sec` explicitly).
+   * A lone `hit_pct` is not a repeat and yields nothing.
+   * Shared by the player copy (`game/src/sim/skill-copy.ts`) and the roster S11
+   * gate (`tools/lib/roster.ts`), so the window and the gate cannot drift.
+   */
+  const fmtHitNum = (n: number): string => (Number.isInteger(n) ? String(n) : String(Math.round(n * 10) / 10));
+  const hitLineOf = (skill: SkillRow | null | undefined): string | undefined => {
+    const eff = skill?.effects || [];
+    const parts: string[] = [];
+    const hits = eff.find((e) => e.stat === 'hits')?.value;
+    const hitPct = eff.find((e) => e.stat === 'hit_pct')?.value;
+    if (hits != null && hits > 1) {
+      parts.push(hitPct != null && hitPct !== 100
+        ? `${fmtHitNum(hits)} hits at ${fmtHitNum(hitPct)}% each`
+        : `${fmtHitNum(hits)} hits`);
+    }
+    const dotDps = eff.find((e) => e.stat === 'dot_dps')?.value;
+    const dotSec = eff.find((e) => e.stat === 'dot_sec')?.value ?? 10;
+    if (dotDps != null) {
+      const el = skill?.element ? skill.element[0].toUpperCase() + skill.element.slice(1) : 'Physical';
+      parts.push(`${fmtHitNum(dotDps)} ${el} damage a second for ${fmtHitNum(dotSec)} sec`);
+    }
+    return parts.length ? parts.join(' · ') : undefined;
+  };
+
+  /** A normalized descriptor, captured at release by the runtime. */
+  const actionOf = (skill: SkillRow): SkillAction | undefined => normalizeSkillAction(skill);
+
+  return {
+    SKILLS, byId, LEVEL_STEP, CAST_REF, LADDER, CONVERSION, WEAPON_GROUPS,
+    actionOf, skillActionBudget, skillDurationSec, skillTargetCap, payHpCost,
+    LEVEL_ROWS, LEVEL_CAP, damagePct, effectPct, buffEffectPct, effectsAt,
+    COST_LEVEL_STEP, MANA_LEVEL_STEP, MANA_REF_POOL,
+    aggregateEffects, EFFECT_STATS, EFFECT_OPS, EFFECT_SUBJECTS, EFFECT_CONDITIONS, EFFECT_RULES, MODELLED_BY,
+    STATUS_EFFECTS, EFFECT_STATUSES, exploitedStatusOf, hitLineOf,
+    PRESETS, presetCount, mainPreset,
+    LADDER_MAX_DUPLICATES, RESERVATION_LIMIT, GROUP_BONUS,
+    manaSpec, manaCostOf, hpCostSpec, hpCostOf, costOf, channelRateSpec, channelRateOf, validateSkillChannel, basisOf, perPress, critsOnBasis, effCd, ladderPct, ladderCostToStep, skillLevel, skillXpForLevel,
+    weaponGroupOf, groupBonus, weaponFits, weaponMatches, row, reservePct,
+    castProfileOf,
+    all: () => ACTIVE,
+    of: (type: string) => ACTIVE.filter((s) => s.type === type),
+    /**
+     * The attack ladder's floor: what a magic weapon's `bolt` is worth, as a share of the finished
+     * hit. A caster's filler is a press on the attack clock with no mana and no cooldown, so this is
+     * the number that keeps it from being a downgrade on a full swing (HugePatch §14c). It lives in
+     * `engine.json` `weapon_size_mult.bolt_share_pct` now — the roster no longer states a percentage
+     * of a hit, since a press is its own flat plus an effectiveness.
+     */
+    ladderFloorPct: () => (E.weapon_size_mult && E.weapon_size_mult.bolt_share_pct) || 100,
+  };
+}

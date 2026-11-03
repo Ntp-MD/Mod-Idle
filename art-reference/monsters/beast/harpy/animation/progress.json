@@ -1,0 +1,18 @@
+{
+  "status": "incomplete-candidate-review",
+  "expectedPoses": 272,
+  "presentRequiredPaths": {
+    "idle": 16,
+    "walk": 11,
+    "attack": 4,
+    "hit": 8,
+    "death": 8
+  },
+  "presentTotal": 47,
+  "missingTotal": 225,
+  "countIsNotVisualApproval": true,
+  "variantsStarted": false,
+  "oldVersionsDeleted": false,
+  "runtimePromoted": false,
+  "newGeneratedPosesThisRun": 11
+}

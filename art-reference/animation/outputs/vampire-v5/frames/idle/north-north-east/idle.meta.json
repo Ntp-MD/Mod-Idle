@@ -1,0 +1,56 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "vampire",
+  "action": "idle",
+  "direction": "north-north-east",
+  "pose": "idle",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/idle-16.png",
+  "sourceImageId": "exec-90274bb5-b914-4c38-9d48-b7da1e2709c4.png",
+  "sourceCell": {
+    "row": 1,
+    "column": 3,
+    "box": [
+      768,
+      384,
+      1024,
+      768
+    ],
+    "confidenceBoundsInCell": [
+      63,
+      119,
+      202,
+      298
+    ],
+    "sourceConfidenceBoundsHeight": 179,
+    "targetReferenceMedianHeight": 158.0,
+    "uniformScale": 0.882682
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "visual-approved animation/meta.json; 16-direction measurement pending",
+    "visualMeasurementPending": true
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "uniformScale": 0.882682,
+    "scaleReference": "median alpha-bound height of preserved approved source frames for this action/phase"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

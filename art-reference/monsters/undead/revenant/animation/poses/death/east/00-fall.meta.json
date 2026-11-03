@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "action": "death",
+  "direction": "east",
+  "pose": "00-fall",
+  "generator": "Deterministic extraction from existing species atlas",
+  "sourceSize": {
+    "width": 384,
+    "height": 384
+  },
+  "rawAlphaBoundsExclusive": [
+    130,
+    168,
+    254,
+    288
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    130,
+    168,
+    254,
+    288
+  ],
+  "boundsProvenance": "Pillow direct alpha measurement after nearest-neighbor scaling and anchor placement",
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Source atlas feet aligned to shared (192,288) ground anchor",
+  "releaseSocket": null,
+  "sourcePixelsModified": true,
+  "styleReference": "art-reference/players/one-handed-sword/reference.png",
+  "bakedWeapon": "sword",
+  "sourceAtlas": "art-reference/monsters/undead/revenant/animation/atlas/animation.png",
+  "sourceCellIndex": 32,
+  "transformation": "128x128 source cell extracted and enlarged 2x with NEAREST; placed on 384x384 transparent canvas. No palette/alpha edits."
+}

@@ -1,0 +1,417 @@
+{
+  "skillId": "attack.ice_lance",
+  "src": "/fx/skill-pool/attack-ice-lance/v1/atlas.png",
+  "imageWidth": 1448,
+  "imageHeight": 1086,
+  "columns": 4,
+  "rows": 4,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        362,
+        271
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        138,
+        134,
+        226,
+        176
+      ],
+      "renderedPadding": [
+        202,
+        198.5,
+        200,
+        159.5
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        362,
+        0,
+        362,
+        271
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        119,
+        133,
+        245,
+        178
+      ],
+      "renderedPadding": [
+        183,
+        197.5,
+        181,
+        157.5
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        724,
+        0,
+        362,
+        271
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        89,
+        128,
+        262,
+        179
+      ],
+      "renderedPadding": [
+        153,
+        192.5,
+        164,
+        156.5
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        1086,
+        0,
+        362,
+        271
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        66,
+        124,
+        280,
+        184
+      ],
+      "renderedPadding": [
+        130,
+        188.5,
+        146,
+        151.5
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        271,
+        362,
+        272
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        64,
+        118,
+        298,
+        188
+      ],
+      "renderedPadding": [
+        128,
+        182,
+        128,
+        148
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        362,
+        271,
+        362,
+        272
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        55,
+        117,
+        300,
+        190
+      ],
+      "renderedPadding": [
+        119,
+        181,
+        126,
+        146
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        724,
+        271,
+        362,
+        272
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        54,
+        112,
+        304,
+        191
+      ],
+      "renderedPadding": [
+        118,
+        176,
+        122,
+        145
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        1086,
+        271,
+        362,
+        272
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        41,
+        116,
+        312,
+        192
+      ],
+      "renderedPadding": [
+        105,
+        180,
+        114,
+        144
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        543,
+        362,
+        271
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        42,
+        112,
+        323,
+        196
+      ],
+      "renderedPadding": [
+        106,
+        176.5,
+        103,
+        139.5
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        362,
+        543,
+        362,
+        271
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        51,
+        112,
+        332,
+        201
+      ],
+      "renderedPadding": [
+        115,
+        176.5,
+        94,
+        134.5
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        724,
+        543,
+        362,
+        271
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        44,
+        110,
+        332,
+        200
+      ],
+      "renderedPadding": [
+        108,
+        174.5,
+        94,
+        135.5
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        1086,
+        543,
+        362,
+        271
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        39,
+        109,
+        332,
+        200
+      ],
+      "renderedPadding": [
+        103,
+        173.5,
+        94,
+        135.5
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        814,
+        362,
+        272
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        71,
+        43,
+        302,
+        228
+      ],
+      "renderedPadding": [
+        135,
+        107,
+        124,
+        108
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        362,
+        814,
+        362,
+        272
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        70,
+        83,
+        302,
+        198
+      ],
+      "renderedPadding": [
+        134,
+        147,
+        124,
+        138
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        724,
+        814,
+        362,
+        272
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        78,
+        93,
+        293,
+        191
+      ],
+      "renderedPadding": [
+        142,
+        157,
+        133,
+        145
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        1086,
+        814,
+        362,
+        272
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        122,
+        109,
+        271,
+        182
+      ],
+      "renderedPadding": [
+        186,
+        173,
+        155,
+        154
+      ]
+    }
+  ],
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    4,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "frameMs": 70,
+  "delivery": "projectile",
+  "origin": "target",
+  "radiusM": 0,
+  "anchorY": 0.545625,
+  "orient": true,
+  "status": "ready",
+  "qa": {
+    "paddingPass": true,
+    "renderedPaddingPass": true,
+    "alphaDiscard": 8,
+    "rawPerimeterAlphaPass": false,
+    "sourceSeparatorsClear": true,
+    "sourcePixelsUnmodified": true,
+    "frameCount": 16,
+    "note": "Renderer discards alpha <=8/255; source PNG is retained unchanged. Padding belongs to shared virtual canvas."
+  },
+  "contentWidthRatio": 0.5979591836734693,
+  "contentHeightRatio": 0.4625,
+  "artDirectionReview": "Blue faceted spear points right, final row frost shatter.",
+  "virtualWidth": 490,
+  "virtualHeight": 400,
+  "alphaDiscard": 8,
+  "groundOrigin": false,
+  "anchorX": 0.5015306122448979,
+  "impactAnchorX": 0.5102040816326531,
+  "impactAnchorY": 0.51125
+}

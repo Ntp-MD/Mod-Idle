@@ -1,0 +1,1724 @@
+{
+  "meta": {
+    "title": "Town economy source data â€” the only place a town number is written by hand",
+    "unit": "gold â€” the Counterhand mints it, the stalls take it; a price is charged at the band of the place that sells it",
+    "derived_fields": [
+      "gold price",
+      "junk per kill",
+      "lifetime supply",
+      "demand ratio",
+      "skip-token day ceiling",
+      "repair floor"
+    ]
+  },
+  "npcs": [
+    {
+      "id": "counterhand",
+      "name": "Counterhand",
+      "kind": "information",
+      "rule": "every settlement"
+    },
+    {
+      "id": "steward",
+      "name": "Steward",
+      "kind": "space",
+      "rule": "capitals only"
+    },
+    {
+      "id": "porter",
+      "name": "Porter",
+      "kind": "space",
+      "rule": "every settlement"
+    },
+    {
+      "id": "guild_clerk",
+      "name": "Guild clerk",
+      "kind": "time",
+      "rule": "capitals only"
+    },
+    {
+      "id": "armourer",
+      "name": "Armourer",
+      "kind": "time",
+      "rule": "capitals + Ironrow Â· Bonegate Â· Frosthold (Siege Armourer)"
+    },
+    {
+      "id": "waypoint_keeper",
+      "name": "Waypoint keeper",
+      "kind": "time",
+      "rule": "every settlement"
+    },
+    {
+      "id": "collector",
+      "name": "Collector",
+      "kind": "space/appearance",
+      "rule": "the three set towns: Ashfall Â· Bonegate Â· Vermolch"
+    },
+    {
+      "id": "curio_pedlar",
+      "name": "Curio pedlar",
+      "kind": "appearance",
+      "rule": "Highspire + Vermolch only"
+    },
+    {
+      "id": "herbalist",
+      "name": "Herbalist",
+      "kind": "space",
+      "rule": "Millbrook + capitals"
+    },
+    {
+      "id": "furrier",
+      "name": "Furrier",
+      "kind": "space/appearance",
+      "rule": "Wolf Cross only"
+    }
+  ],
+  "settlements": [
+    {
+      "id": "eastgate",
+      "name": "Eastgate",
+      "zone": 1,
+      "band": "low",
+      "capital": null,
+      "innate": [
+        "fire"
+      ],
+      "base_bias_flavor": "cloth",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
+      ],
+      "start": true,
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "highspire",
+      "name": "Highspire",
+      "zone": 2,
+      "band": "low",
+      "capital": "low",
+      "innate": [
+        "cold",
+        "lightning"
+      ],
+      "base_bias_flavor": "Ring Mail",
+      "npcs": [
+        "counterhand",
+        "steward",
+        "porter",
+        "guild_clerk",
+        "armourer",
+        "waypoint_keeper",
+        "herbalist",
+        "curio_pedlar"
+      ],
+      "stock": [
+        "house_highspire",
+        "plot_deed_5",
+        "pedlar_rotation",
+        "stash_tab_1",
+        "repair",
+        "filter_preset",
+        "skip_token"
+      ]
+    },
+    {
+      "id": "wolf_cross",
+      "name": "Wolf Cross",
+      "zone": 3,
+      "band": "low",
+      "capital": null,
+      "innate": [
+        "cold"
+      ],
+      "base_bias_flavor": "light",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper",
+        "furrier"
+      ],
+      "stock": [
+        "bag_slot",
+        "banner_coldres",
+        "stash_tab_1"
+      ]
+    },
+    {
+      "id": "greyfen",
+      "name": "Greyfen",
+      "zone": 4,
+      "band": "mid",
+      "capital": null,
+      "innate": [
+        "poison",
+        "chaos"
+      ],
+      "base_bias_flavor": "wet lowland",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "saltmarrow",
+      "name": "Saltmarrow",
+      "zone": 5,
+      "band": "mid",
+      "capital": "mid",
+      "innate": [
+        "chaos"
+      ],
+      "base_bias_flavor": "salt flats",
+      "npcs": [
+        "counterhand",
+        "steward",
+        "porter",
+        "guild_clerk",
+        "armourer",
+        "waypoint_keeper",
+        "herbalist"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "filter_preset",
+        "skip_token"
+      ]
+    },
+    {
+      "id": "the_pale_spire",
+      "name": "The Pale Spire",
+      "zone": 6,
+      "band": "mid",
+      "capital": "mid",
+      "innate": [
+        "chaos",
+        "poison"
+      ],
+      "base_bias_flavor": "the pale spire",
+      "npcs": [
+        "counterhand",
+        "steward",
+        "porter",
+        "guild_clerk",
+        "armourer",
+        "waypoint_keeper",
+        "herbalist"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "filter_preset",
+        "skip_token"
+      ],
+      "budget_note": "The last settlement also carries the push band past the spawn cap (levels 181-190), which is where the pre-18-zone world put those hours on Vermolch."
+    },
+    {
+      "id": "blackwater_reach",
+      "name": "Blackwater Reach",
+      "zone": 7,
+      "band": "high",
+      "capital": null,
+      "innate": [
+        "poison"
+      ],
+      "base_bias_flavor": "drowned river mouth",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "bonegate",
+      "name": "Bonegate",
+      "zone": 8,
+      "band": "high",
+      "capital": null,
+      "innate": [
+        "chaos"
+      ],
+      "base_bias_flavor": "heavy (Armour)",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper",
+        "collector",
+        "armourer"
+      ],
+      "stock": [
+        "reliquary",
+        "collector_hint",
+        "stash_tab_1",
+        "repair",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "frosthold",
+      "name": "Frosthold",
+      "zone": 9,
+      "band": "high",
+      "capital": null,
+      "innate": [
+        "cold"
+      ],
+      "base_bias_flavor": "heavy",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper",
+        "armourer"
+      ],
+      "armourer_variant": "Siege Armourer",
+      "stock": [
+        "repair",
+        "tint_heavy",
+        "stash_tab_1"
+      ]
+    },
+    {
+      "id": "vermolch",
+      "name": "Vermolch",
+      "zone": 10,
+      "band": "low",
+      "capital": "low",
+      "innate": [
+        "poison",
+        "chaos"
+      ],
+      "base_bias_flavor": "heavy Â· cloth (glass endgame)",
+      "budget_note": "22.0 hr of zone 9 inside the high band + 26.0 hr of the level 91-100 push, which also farms zone 9",
+      "npcs": [
+        "counterhand",
+        "steward",
+        "porter",
+        "guild_clerk",
+        "armourer",
+        "waypoint_keeper",
+        "collector",
+        "curio_pedlar",
+        "herbalist"
+      ],
+      "stock": [
+        "house_vermolch",
+        "garden_of_ash",
+        "collector_hint",
+        "prestige_title",
+        "pedlar_rotation",
+        "stash_tab_1",
+        "repair",
+        "filter_preset",
+        "skip_token"
+      ]
+    },
+    {
+      "id": "duskmoor",
+      "name": "Duskmoor",
+      "zone": 11,
+      "band": "low",
+      "capital": null,
+      "innate": [
+        "cold",
+        "chaos"
+      ],
+      "base_bias_flavor": "open moor",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "nettlecrag",
+      "name": "Nettlecrag",
+      "zone": 12,
+      "band": "low",
+      "capital": "low",
+      "innate": [
+        "chaos",
+        "poison"
+      ],
+      "base_bias_flavor": "thorn country",
+      "npcs": [
+        "counterhand",
+        "steward",
+        "porter",
+        "guild_clerk",
+        "armourer",
+        "waypoint_keeper",
+        "herbalist"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "filter_preset",
+        "skip_token"
+      ]
+    },
+    {
+      "id": "emberhold",
+      "name": "Emberhold",
+      "zone": 13,
+      "band": "mid",
+      "capital": null,
+      "innate": [
+        "fire"
+      ],
+      "base_bias_flavor": "slag and foundry heat",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "millbrook",
+      "name": "Millbrook",
+      "zone": 14,
+      "band": "mid",
+      "capital": null,
+      "innate": [
+        "poison"
+      ],
+      "base_bias_flavor": "cloth / light",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper",
+        "herbalist"
+      ],
+      "stock": [
+        "herb_pouch_ii",
+        "bag_slot",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "wyrmback",
+      "name": "Wyrmback",
+      "zone": 15,
+      "band": "mid",
+      "capital": null,
+      "innate": [
+        "fire",
+        "cold"
+      ],
+      "base_bias_flavor": "wyrm breeding ground",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "filter_preset"
+      ]
+    },
+    {
+      "id": "ashfall",
+      "name": "Ashfall",
+      "zone": 16,
+      "band": "high",
+      "capital": "high",
+      "innate": [
+        "fire"
+      ],
+      "base_bias_flavor": "light (Evasion)",
+      "npcs": [
+        "counterhand",
+        "steward",
+        "porter",
+        "guild_clerk",
+        "armourer",
+        "waypoint_keeper",
+        "collector",
+        "herbalist"
+      ],
+      "stock": [
+        "house_ashfall",
+        "plot_deed_4",
+        "militia",
+        "collector_hint",
+        "stash_tab_1",
+        "repair",
+        "filter_preset",
+        "skip_token"
+      ]
+    },
+    {
+      "id": "ironrow",
+      "name": "Ironrow",
+      "zone": 17,
+      "band": "high",
+      "capital": null,
+      "innate": [
+        "lightning"
+      ],
+      "base_bias_flavor": "light / Ring Mail",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper",
+        "armourer"
+      ],
+      "armourer_discount_m": 12,
+      "stock": [
+        "repair_ironrow",
+        "stash_tab_1",
+        "potion_carrier_slot"
+      ]
+    },
+    {
+      "id": "thornwake",
+      "name": "Thornwake",
+      "zone": 18,
+      "band": "high",
+      "capital": null,
+      "innate": [
+        "poison"
+      ],
+      "base_bias_flavor": "wet lowland",
+      "npcs": [
+        "counterhand",
+        "porter",
+        "waypoint_keeper"
+      ],
+      "stock": [
+        "bag_slot",
+        "stash_tab_1",
+        "filter_preset"
+      ]
+    }
+  ],
+  "one_time": [
+    {
+      "id": "stash_tab_1",
+      "item": "Stash tab 1",
+      "npc": "porter",
+      "kind": "space",
+      "m": 60,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "stash_tab",
+      "discount": {
+        "settlement": "eastgate",
+        "m": 30
+      },
+      "note": "no Bag Cap exists, so tabs organise Â· at Eastgate the first tab is sold at the 24 gold teaching price"
+    },
+    {
+      "id": "stash_tab_2",
+      "item": "Stash tab 2",
+      "npc": "porter",
+      "kind": "space",
+      "m": 90,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "stash_tab",
+      "note": ""
+    },
+    {
+      "id": "stash_tab_3",
+      "item": "Stash tab 3",
+      "npc": "porter",
+      "kind": "space",
+      "m": 130,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "stash_tab",
+      "note": ""
+    },
+    {
+      "id": "stash_tab_4",
+      "item": "Stash tab 4",
+      "npc": "porter",
+      "kind": "space",
+      "m": 180,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "stash_tab",
+      "note": ""
+    },
+    {
+      "id": "stash_tab_5",
+      "item": "Stash tab 5",
+      "npc": "porter",
+      "kind": "space",
+      "m": 240,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "stash_tab",
+      "note": ""
+    },
+    {
+      "id": "stash_tab_6",
+      "item": "Stash tab 6",
+      "npc": "porter",
+      "kind": "space",
+      "m": 300,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "stash_tab",
+      "note": "Cap 6 tabs"
+    },
+    {
+      "id": "herb_pouch_ii",
+      "item": "Herb pouch II",
+      "npc": "porter",
+      "kind": "space",
+      "m": 60,
+      "charge_band": "mid",
+      "qty": 1,
+      "ladder": "herb_pouch",
+      "note": "Legacy space deed; the bag is fixed at 100 slots, so this no longer raises the cap",
+      "character_slot_grant": 1
+    },
+    {
+      "id": "herb_pouch_iii",
+      "item": "Herb pouch III",
+      "npc": "porter",
+      "kind": "space",
+      "m": 240,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "herb_pouch",
+      "note": "Legacy space deed; the bag is fixed at 100 slots, so this no longer raises the cap",
+      "character_slot_grant": 1
+    },
+    {
+      "id": "bag_slot",
+      "item": "Bag category slot (herbs / stones / gear display)",
+      "npc": "porter",
+      "kind": "space",
+      "m": 45,
+      "charge_band": "low",
+      "qty": 3,
+      "ladder": null,
+      "display_only": true,
+      "note": "display and sorting only Â· sells no stone, no gear"
+    },
+    {
+      "id": "plot_deed_4",
+      "item": "Plot deed 4",
+      "npc": "steward",
+      "kind": "space",
+      "m": 180,
+      "charge_band": "mid",
+      "qty": 1,
+      "ladder": "plot_deed",
+      "note": "4th farm plot (farm.md)"
+    },
+    {
+      "id": "plot_deed_5",
+      "item": "Plot deed 5",
+      "npc": "steward",
+      "kind": "space",
+      "m": 540,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "plot_deed",
+      "note": "5th plot Â· the most expensive non-cosmetic line"
+    },
+    {
+      "id": "house_ashfall",
+      "item": "House Â· Ashfall",
+      "npc": "steward",
+      "kind": "space",
+      "m": 120,
+      "charge_band": "low",
+      "qty": 1,
+      "ladder": "house",
+      "note": "2 stash tabs + 1 farm plot, no combat effect",
+      "plot_grant": 1
+    },
+    {
+      "id": "house_highspire",
+      "item": "House Â· Highspire",
+      "npc": "steward",
+      "kind": "space",
+      "m": 240,
+      "charge_band": "mid",
+      "qty": 1,
+      "ladder": "house",
+      "note": ""
+    },
+    {
+      "id": "house_vermolch",
+      "item": "House Â· Vermolch",
+      "npc": "steward",
+      "kind": "space",
+      "m": 360,
+      "charge_band": "high",
+      "qty": 1,
+      "ladder": "house",
+      "note": ""
+    },
+    {
+      "id": "filter_preset",
+      "item": "Saved filter preset slot (extra)",
+      "npc": "counterhand",
+      "kind": "information",
+      "m": 30,
+      "charge": "one_per_band",
+      "qty": 3,
+      "ladder": null,
+      "note": "preset switching is a concept.md reason-to-open",
+      "filter_preset_grant": 1
+    },
+    {
+      "id": "potion_carrier_slot",
+      "item": "Potion carrier slot (belt display)",
+      "npc": "armourer",
+      "kind": "space",
+      "m": 40,
+      "charge_band": "mid",
+      "qty": 1,
+      "ladder": null,
+      "display_only": true,
+      "note": "display only Â· the carrier pays the weight tax in formula.md section 11 Â· sells no potion"
+    }
+  ],
+  "repeatable": [
+    {
+      "id": "skip_token",
+      "item": "Task skip token",
+      "npc": "guild_clerk",
+      "kind": "time",
+      "m": 8,
+      "charge_band": "high",
+      "per_day_cap": 3,
+      "note": "1 per task slot per day on top of the free skip in tasks.md Â· 3/day = 31 gold/day"
+    },
+    {
+      "id": "repair",
+      "item": "Armourer repair (clears Broken, refills protection to 5)",
+      "npc": "armourer",
+      "kind": "time",
+      "m": 16,
+      "charge_band": "high",
+      "note": "must stay above the elite time that earns 1 Tier stone Â· re-check at F9"
+    },
+    {
+      "id": "repair_ironrow",
+      "item": "Armourer repair at Ironrow",
+      "npc": "armourer",
+      "kind": "time",
+      "m": 14,
+      "charge_band": "high",
+      "note": "the armourer town discount, and only there Â· still above the tier-stone floor"
+    },
+    {
+      "id": "pedlar_rotation",
+      "item": "Curio pedlar stock: banner Â· Base tint Â· title",
+      "npc": "curio_pedlar",
+      "kind": "appearance",
+      "m_min": 30,
+      "m_max": 120,
+      "charge_band": "high",
+      "per_day_cap": 3,
+      "note": "3 slots per real day Â· appearance only"
+    },
+    {
+      "id": "prestige_title",
+      "item": "Prestige title line (per quality band)",
+      "npc": "curio_pedlar",
+      "kind": "appearance",
+      "m": 300,
+      "charge_band": "high",
+      "note": "the only intentionally expensive line"
+    },
+    {
+      "id": "banner_coldres",
+      "item": "Coldres banner (settlement cosmetic)",
+      "npc": "furrier",
+      "kind": "appearance",
+      "m": 90,
+      "charge_band": "mid",
+      "note": "one per settlement Â· Wolf Cross only"
+    },
+    {
+      "id": "tint_heavy",
+      "item": "Heavy-school Base tint",
+      "npc": "armourer",
+      "kind": "appearance",
+      "m": 45,
+      "charge_band": "high",
+      "note": "stocked only by the Siege Armourer at Frosthold Â· appearance only"
+    },
+    {
+      "id": "collector_hint",
+      "item": "Collector set hint (prints which school the set wants)",
+      "npc": "collector",
+      "kind": "information",
+      "m": 15,
+      "charge_band": "high",
+      "note": "information only Â· pays no item and sells no piece"
+    },
+    {
+      "id": "waypoint_warp",
+      "item": "Waypoint warp (to a settlement already reached on foot)",
+      "kind": "time",
+      "waypoint": true,
+      "m_per_block": 2,
+      "note": "The Waypoint's own price, not a stall line: it is stocked by no settlement and bought by no vendor, so no `stock` array names it. A warp buys back the walk's time at the destination settlement's band, priced off the blocks the walk would have crossed (one gold-minute a block walked), so a short hop is cheap and a crossing of the map is not. It is gold into a sink, never gold out of one: it mints nothing, gates no zone, and opens no Waypoint the foot has not earned. Anchor inside the existing ladder: a 7-block hop costs 14 minutes (an Armourer repair is 16), a 20-block crossing 40 minutes (a pedlar appearance slot is 30-120)."
+    }
+  ],
+  "essentials": [
+    {
+      "id": "stash_tab_1",
+      "use_discount": true
+    },
+    {
+      "id": "stash_tab_2"
+    },
+    {
+      "id": "herb_pouch_ii"
+    },
+    {
+      "id": "plot_deed_4"
+    }
+  ],
+  "collector_sets": [
+    {
+      "id": "militia",
+      "name": "Militia",
+      "settlement": "ashfall",
+      "school": "light",
+      "pieces": [
+        "Hood (helmet)",
+        "Ring Mail (chest)",
+        "Strapped Boots (boots)"
+      ],
+      "quality": "any",
+      "reward": "banner + 1 saved filter preset slot",
+      "pays_gold": false,
+      "rule": "only non-upgrades are reserved; the sink then runs before the filter dissolves them"
+    },
+    {
+      "id": "reliquary",
+      "name": "Reliquary",
+      "settlement": "bonegate",
+      "school": "heavy",
+      "pieces": [
+        "Sallet (helmet)",
+        "Plate Vest (chest)",
+        "Cuisses (pant)"
+      ],
+      "quality": "any",
+      "reward": "stash tab (bypasses the one-time price ladder, once per character)",
+      "pays_gold": false,
+      "rule": "only non-upgrades are reserved, so the sink does not compete with what the character wears"
+    },
+    {
+      "id": "garden_of_ash",
+      "name": "Garden of Ash",
+      "settlement": "vermolch",
+      "school": "cloth",
+      "pieces": [
+        "Circlet (helmet)",
+        "Vestment (chest)",
+        "Legwraps (pant)"
+      ],
+      "quality": "high",
+      "reward": "prestige title",
+      "pays_gold": false,
+      "rule": "the high-quality requirement makes it an endgame demand, not a side quest"
+    }
+  ],
+  "base_bias": {
+    "status": "decided",
+    "decision": "ship even-weighted (checks.md T15)",
+    "column_meaning": "which Base school a zone's mobs flavour. This is permanent flavour: the owner ruled to SHIP EVEN-WEIGHTED, so no per-settlement frame weight is ever added and there is no keep-rate re-sim to wait for. The column may never carry a number a player can buy.",
+    "checks": [
+      "Ruled even-weighted: loot.md section 1 step 2 stays \"equal roll among all frames of that slot\" â€” no Base weight column is added, and the tools/loot.ts frame_weight path stays a what-if only.",
+      "The three item-base.md paths (cloth 248 / balanced 390 / armored 657 weight) remain all reachable â€” even weighting means no settlement can make a school unobtainable, so the geographic-unlock worry never arises.",
+      "No build must travel for a frame: frames roll equally everywhere, so Base bias is never a progression gate and world.md \"unlock by level\" is untouched."
+    ],
+    "forbidden_until_closed": [
+      "numeric per-settlement Base weights (ruled out, not merely pending)",
+      "any stock line that is the only source of a frame",
+      "any gold price that buys frame odds"
+    ],
+    "closed_checks": [
+      "Re-run the keep-rate simulation: tools/loot.ts measured it, and the Base-bias table inside the generated section 3 block shows the measured cost of a weight (armored x2.5 / cloth x0.4 moves the high-band keep-rate from 0.81% to 0.72%) â€” the owner chose NOT to pay that cost and to ship even.",
+      "F3 drops/hour is unmoved by construction: a frame weight redistributes rolls inside one slot, and drops/hour comes from base_drop_chance x Lck, so no weight can change drop count."
+    ]
+  },
+  "task_sizing": {
+    "status": "provisional Â· owner-veto-able Â· ",
+    "why": "tasks.md names the keys and never the value, but the client needs a number to run on, so the sizing lives here as data instead of being typed into code",
+    "elite_n": 3,
+    "elite_n_rule": "the count the rebalance pass sizes; the client runs on this number and the board never types it twice",
+    "reward_minutes_of_band_income": 15,
+    "reward_rule": "Elite hunts pay fixed Tier stones sized at reward_minutes_of_band_income of the band's own stone income. Boss hunts offer their configured Remove-or-Tier choice.",
+    "boss_reward": {
+      "remove": 1,
+      "reroll_tier": 4
+    },
+    "boss_reward_rule": "winner's choice, exactly as tasks.md writes it",
+    "boss_n": 1,
+    "boss_n_rule": "one spawn of the zone's boss, within the run it is offered in",
+    "offer_weight_elite": 0.75,
+    "offer_weight_rule": "Elite uses the former 75% Tier-stone offer share; Boss uses the remaining 25%. Typed in town.ts rather than in the client, because the board's roll is a read the client performs on the data",
+    "income_bound_pct": 10,
+    "income_bound_rule": "Sizing guidance only, not an enforced ceiling. Task and Delivery stones derive from eng.taskPayout within the existing stone funnel; do not gate a prescribed income share.",
+    "refill_sec": 86400,
+    "refill_rule": "A finished or skipped slot refills once its configured clock runs out.",
+    "slots": 3,
+    "free_skip_per_day": 1
+  },
+  "pending": [
+    {
+      "number": "Task rewards derive through eng.taskPayout using task_sizing",
+      "breaks": "the income bound is now gated (T19) and holds at the daily refill cadence; the owner's remaining call is only sizing taste â€” elite_n and reward_minutes_of_band_income",
+      "status": "open"
+    },
+    {
+      "number": "Reroll/Refine price rebalance",
+      "breaks": "the opportunity-cost line in the price unit block",
+      "status": "open"
+    }
+  ],
+  "invariants": {
+    "essentials_max_share_of_lifetime_supply": 0.2,
+    "onetime_demand_max_multiple_of_lifetime_supply": 1.5,
+    "skip_token_max_per_day": 3,
+    "skip_token_max_gold_per_day": 31,
+    "allowed_kinds": [
+      "space",
+      "time",
+      "information",
+      "appearance",
+      "space/appearance"
+    ],
+    "banned_power_nouns": [
+      "gear",
+      "Mod",
+      "potion",
+      "stone",
+      "Reroll",
+      "Refine",
+      "Ascend",
+      "weapon"
+    ],
+    "chase_tier_min_share": 1
+  },
+  "trade": {
+    "currency_decimals": 2,
+    "haggling": {
+      "level_cap": 99,
+      "level_divisor": 10,
+      "xp_per_difficulty": 10,
+      "sale_bonus_max_pct": 20,
+      "delivery_bonus_max_pct": 15,
+      "service_discount_max_pct": 10
+    },
+    "floor_mult": 0.6,
+    "neutral_peak": 1.15,
+    "import_peak": 2.6,
+    "export_peak": 0.85,
+    "capacity_gold": 120,
+    "recovery_sec": 14400,
+    "recipe_value_mult": 1.5,
+    "workshop_value_mult": 1.5,
+    "food_values": {
+      "raw": 0.4,
+      "fruit": 0.6,
+      "herb": 1,
+      "ingredient": 0.8,
+      "cooked": 1.5
+    },
+    "herb_values": {
+      "low": 0.5,
+      "mid": 1.5,
+      "high": 3
+    },
+    "material_values": {
+      "scrap": 0.5,
+      "ore": 0.2,
+      "timber": 0.2,
+      "rarewood": 1.5,
+      "copper-ore": 0.8,
+      "iron-ore": 1.1,
+      "silver-ore": 1.8,
+      "rock-salt": 0.5,
+      "pine-wood": 0.5,
+      "hardwood": 0.9,
+      "willow-wood": 0.6,
+      "cedar-wood": 1.1,
+      "chitin-plate": 1,
+      "feather-plume": 1.5,
+      "ember-heart": 3,
+      "chaos-ichor": 3.5,
+      "funerary-linen": 1,
+      "thick-pelt": 1.2,
+      "reptile-scale": 2,
+      "venom-gland": 2,
+      "coin-clasp": 0.8,
+      "river-pearl": 2.5,
+      "grave-bone": 0.8
+    },
+    "junk_groups": {
+      "salvage": [
+        "goblin",
+        "orc",
+        "kobold",
+        "human",
+        "lizardman",
+        "elf",
+        "golem",
+        "slaggolem"
+      ],
+      "trophies": [
+        "wolf",
+        "werewolf",
+        "ogre",
+        "troll",
+        "minotaur",
+        "giant",
+        "dragon",
+        "wyvern",
+        "siren",
+        "harpy",
+        "mirehydra",
+        "wyrmling"
+      ],
+      "relics": [
+        "skeleton",
+        "mummy",
+        "vampire",
+        "wraith",
+        "bonehound",
+        "revenant"
+      ],
+      "botanicals": [
+        "dryad",
+        "treant",
+        "slime",
+        "ooze"
+      ],
+      "curios": [
+        "demon",
+        "imp",
+        "spider",
+        "beetle",
+        "hornet",
+        "wisp"
+      ]
+    },
+    "towns": {
+      "eastgate": {
+        "imports": [
+          "ore",
+          "craft",
+          "junk:relics"
+        ],
+        "exports": [
+          "wood"
+        ],
+        "needs": "Road repairs and new workshops need metals and fittings."
+      },
+      "highspire": {
+        "imports": [
+          "wood",
+          "cooked",
+          "herb"
+        ],
+        "exports": [
+          "ore"
+        ],
+        "needs": "Miners need timber supports, meals and herbs."
+      },
+      "wolf_cross": {
+        "imports": [
+          "ore",
+          "food:salted-fish",
+          "craft"
+        ],
+        "exports": [
+          "raw",
+          "wood"
+        ],
+        "needs": "Hunters trade local game for tools and preserved fish."
+      },
+      "greyfen": {
+        "imports": [
+          "wood",
+          "raw",
+          "herb",
+          "fruit"
+        ],
+        "exports": [
+          "material:rock-salt"
+        ],
+        "needs": "Dryland kitchens need fresh game, herbs and fuel."
+      },
+      "saltmarrow": {
+        "imports": [
+          "wood",
+          "cooked",
+          "junk:trophies"
+        ],
+        "exports": [
+          "material:rock-salt"
+        ],
+        "needs": "Tomb crews need supplies for long expeditions."
+      },
+      "the_pale_spire": {
+        "imports": [
+          "material:silver-inlay",
+          "herb",
+          "junk:curios"
+        ],
+        "exports": [
+          "material:silver-ore"
+        ],
+        "needs": "Sanctum artisans commission inlay and botanical supplies."
+      },
+      "blackwater_reach": {
+        "imports": [
+          "craft",
+          "food:pine-nut-bread",
+          "junk:salvage",
+          "ingredient"
+        ],
+        "exports": [
+          "food:river-fish",
+          "wood"
+        ],
+        "needs": "Boat builders need fittings and dry provisions."
+      },
+      "bonegate": {
+        "imports": [
+          "cooked",
+          "wood",
+          "herb"
+        ],
+        "exports": [
+          "junk:relics",
+          "ore"
+        ],
+        "needs": "Wardens consume fuel and food at the old gate."
+      },
+      "frosthold": {
+        "imports": [
+          "food:cedar-smoked-game",
+          "wood",
+          "herb"
+        ],
+        "exports": [
+          "ore"
+        ],
+        "needs": "Cold camps pay for long meals and firewood."
+      },
+      "vermolch": {
+        "imports": [
+          "craft",
+          "food:salted-fish",
+          "junk:curios"
+        ],
+        "exports": [
+          "wood",
+          "food:marsh-sage"
+        ],
+        "needs": "Mire settlements need tools and food that travels."
+      },
+      "duskmoor": {
+        "imports": [
+          "wood",
+          "raw",
+          "junk:botanicals"
+        ],
+        "exports": [
+          "ore",
+          "food:wild-grain"
+        ],
+        "needs": "Moor kitchens and shelters consume forest supplies."
+      },
+      "nettlecrag": {
+        "imports": [
+          "wood",
+          "cooked",
+          "herb"
+        ],
+        "exports": [
+          "ore"
+        ],
+        "needs": "Deep crews import timber, meals and medicinal herbs."
+      },
+      "emberhold": {
+        "imports": [
+          "wood",
+          "material:copper-fittings",
+          "food:river-fish"
+        ],
+        "exports": [
+          "material:iron-ore"
+        ],
+        "needs": "Foundries consume wood and copper fittings."
+      },
+      "millbrook": {
+        "imports": [
+          "ore",
+          "craft",
+          "junk:trophies"
+        ],
+        "exports": [
+          "wood",
+          "food:river-fish"
+        ],
+        "needs": "Waterworks need metal parts and tools."
+      },
+      "wyrmback": {
+        "imports": [
+          "wood",
+          "craft",
+          "food:sage-tea"
+        ],
+        "exports": [
+          "food:shellfish",
+          "material:rock-salt"
+        ],
+        "needs": "Coastal crews import hull timber and warming tea."
+      },
+      "ashfall": {
+        "imports": [
+          "ore",
+          "food:shellfish-chowder",
+          "junk:curios"
+        ],
+        "exports": [
+          "wood",
+          "herb"
+        ],
+        "needs": "Forest artisans need metal and coastal provisions."
+      },
+      "ironrow": {
+        "imports": [
+          "wood",
+          "food:pine-nut-bread",
+          "herb"
+        ],
+        "exports": [
+          "material:silver-ore"
+        ],
+        "needs": "Terrace workshops need timber and expedition food."
+      },
+      "thornwake": {
+        "imports": [
+          "food:cedar-smoked-game",
+          "craft",
+          "junk:relics"
+        ],
+        "exports": [
+          "ore",
+          "wood"
+        ],
+        "needs": "Frontier crews pay for finished supplies and rare trophies."
+      }
+    },
+    "note": "The Counterhand buys gathered goods and junk. Each town has stable import needs and abundant exports. Sales spend a shared category demand pool measured in base gold; it recovers over simulation time, including credited offline time. Quotes integrate the declining premium across the whole sale, so splitting stacks does not improve payment. Goods cannot be bought back; gold buys existing convenience services only. Base junk drop expectations and stall pricing anchors remain reference values, while realised trade income depends on destination and supply."
+  },
+  "delivery": {
+    "derivation_version": 1,
+    "trigger_interval_sec": 1800,
+    "trigger_chance": 0.4,
+    "active_slots": 1,
+    "history_limit": 8,
+    "count_min": 1,
+    "count_max": 8,
+    "stack_share": 0.25,
+    "deadline_min_sec": 900,
+    "deadline_max_sec": 21600,
+    "production_allowance": 1.75,
+    "deadline_allowance_sec": 600,
+    "reward_minutes": 5,
+    "reward_modes": [
+      "fixed",
+      "choice"
+    ],
+    "choice_reward_mult": 2,
+    "fallback_minutes": 3,
+    "minimum_stones": 1,
+    "premium_base": 1.5,
+    "premium_per_difficulty": 0.1,
+    "processing_weight": 0.3,
+    "count_exponent": 0.5,
+    "band_weights": {
+      "low": 1,
+      "mid": 1.5,
+      "high": 2
+    },
+    "rarity_weights": {
+      "common": 1,
+      "uncommon": 1.5,
+      "rare": 2.5
+    },
+    "target_weights": {
+      "junk": 1,
+      "material": 2,
+      "food": 2,
+      "herb": 1
+    },
+    "default_target_weight": 1,
+    "skill_chance": 0.2,
+    "default_skill_weight": 1,
+    "skill_weights": {},
+    "skill_band_weights": {
+      "low": 1,
+      "mid": 1,
+      "high": 1
+    },
+    "stones": [
+      {
+        "key": "tier",
+        "income": "tier",
+        "weight": 5
+      },
+      {
+        "key": "reroll_value",
+        "income": "reroll_value",
+        "weight": 2
+      },
+      {
+        "key": "add",
+        "income": "add",
+        "weight": 1
+      },
+      {
+        "key": "imprint_accuracy",
+        "income": "tier",
+        "weight": 1
+      }
+    ],
+    "fallback_stone": "tier",
+    "pause_states": [
+      "camp",
+      "dungeon"
+    ],
+    "attainment_chance": 0.08,
+    "attainment_band_weights": {
+      "low": 0.5,
+      "mid": 1,
+      "high": 2
+    }
+  },
+  "black_market": {
+    "refresh_interval_sec": 1800,
+    "offers_per_refresh": 3,
+    "item_count_min": 1,
+    "item_count_max": 3,
+    "resale_cover_multiplier": 1.25,
+    "rarity_price_multiplier": {
+      "low": 1.2,
+      "mid": 1.5,
+      "high": 2
+    },
+    "materials": [
+      {
+        "good": "material:rarewood",
+        "weight": 3,
+        "rarity": "low"
+      },
+      {
+        "good": "material:rock-salt",
+        "weight": 2,
+        "rarity": "mid"
+      },
+      {
+        "good": "material:silver-ore",
+        "weight": 3,
+        "rarity": "high"
+      },
+      {
+        "good": "material:willow-wood",
+        "weight": 2,
+        "rarity": "mid"
+      },
+      {
+        "good": "material:cedar-wood",
+        "weight": 2,
+        "rarity": "high"
+      }
+    ],
+    "stones": [
+      {
+        "key": "repair",
+        "weight": 3,
+        "count_min": 1,
+        "count_max": 2,
+        "price_gold": 180
+      },
+      {
+        "key": "corrupt",
+        "weight": 2,
+        "count_min": 1,
+        "count_max": 1,
+        "price_gold": 420
+      },
+      {
+        "key": "polish",
+        "weight": 2,
+        "count_min": 1,
+        "count_max": 2,
+        "price_gold": 240
+      },
+      {
+        "key": "reforge",
+        "weight": 1,
+        "count_min": 1,
+        "count_max": 1,
+        "price_gold": 550
+      },
+      {
+        "key": "rebirth",
+        "weight": 1,
+        "count_min": 1,
+        "count_max": 1,
+        "price_gold": 700
+      },
+      {
+        "key": "imprint_accuracy",
+        "weight": 2,
+        "count_min": 1,
+        "count_max": 2,
+        "price_gold": 260
+      }
+    ],
+    "skill_weights": {
+      "attack.fireball": 1,
+      "attack.firestorm": 1,
+      "attack.meteor": 1,
+      "attack.ice_lance": 1,
+      "attack.blizzard": 1,
+      "attack.frostbite": 1,
+      "attack.chain_lightning": 1,
+      "attack.spark": 1,
+      "attack.thunder_strike": 1,
+      "attack.poison_bolt": 1,
+      "attack.acid_arrow": 1,
+      "attack.chaos_bolt": 1,
+      "attack.void_blast": 1,
+      "attack.sand_storm": 1,
+      "attack.earth_splitter": 1,
+      "attack.backstab": 1,
+      "attack.impale": 1,
+      "attack.skull_crack": 1,
+      "attack.ground_slam": 1,
+      "attack.cleave": 1,
+      "attack.elemental_break": 1,
+      "attack.whirlwind": 1,
+      "attack.shield_bash": 1,
+      "attack.puncture": 1,
+      "attack.reap": 1,
+      "attack.piercing_shot": 1,
+      "attack.arrow_shower": 1,
+      "attack.headshot": 1,
+      "attack.earth_shock": 1,
+      "attack.shatter": 1,
+      "attack.overload": 1,
+      "attack.aftershock": 1,
+      "buff.warcry": 1,
+      "buff.berserker": 1,
+      "buff.iron_will": 1,
+      "buff.holy_veil": 1,
+      "buff.ghost_dance": 1,
+      "buff.earth_wall": 1,
+      "buff.magia_drive": 1,
+      "buff.energy_absorb": 1,
+      "buff.flame_guard": 1,
+      "curse.weaken": 1,
+      "curse.blinding_mark": 1,
+      "curse.expose": 1,
+      "curse.cripple": 1,
+      "curse.jinx": 1,
+      "curse.venom_bind": 1,
+      "heal.heal": 1,
+      "heal.greater_heal": 1,
+      "heal.cleanse": 1,
+      "aura.wraith_of_fury": 1,
+      "aura.clarity": 1,
+      "aura.haste": 1,
+      "aura.vitality": 1,
+      "aura.herald_of_ash": 1,
+      "aura.herald_of_frost": 1,
+      "aura.herald_of_lightning": 1,
+      "aura.ember_conversion": 1,
+      "aura.rime_conversion": 1,
+      "aura.storm_conversion": 1,
+      "aura.cast_on_crit": 1,
+      "aura.cast_on_damage_taken": 1,
+      "aura.rimbo_form": 1,
+      "aura.elemental_fury": 1,
+      "aura.trinity_form": 1,
+      "aura.grace": 1,
+      "aura.iron_guard": 1,
+      "aura.energy_guard": 1
+    },
+    "skill_level_offers": [
+      {
+        "level": 5,
+        "weight": 2,
+        "price_gold": 250
+      },
+      {
+        "level": 10,
+        "weight": 2,
+        "price_gold": 1500
+      },
+      {
+        "level": 15,
+        "weight": 2,
+        "price_gold": 8000
+      },
+      {
+        "level": 20,
+        "weight": 3,
+        "price_gold": 25000
+      }
+    ]
+  },
+  "economy": {
+    "step_sec": 3600,
+    "cities": [
+      {
+        "id": "highspire",
+        "stock": {
+          "material:copper-ore": 18,
+          "material:iron-ore": 10,
+          "material:timber": 2,
+          "food:raw_game_meat": 4
+        },
+        "capacity": {
+          "material:copper-ore": 60,
+          "material:iron-ore": 40,
+          "material:timber": 25,
+          "food:raw_game_meat": 30,
+          "material:copper-fittings": 10,
+          "material:iron-tools": 10
+        },
+        "target": {
+          "material:copper-ore": 30,
+          "material:iron-ore": 20,
+          "material:timber": 12,
+          "food:raw_game_meat": 10,
+          "material:copper-fittings": 4,
+          "material:iron-tools": 2
+        },
+        "production": {
+          "material:copper-ore": 6,
+          "material:iron-ore": 3
+        },
+        "consumption": {
+          "material:timber": 1,
+          "food:raw_game_meat": 2
+        },
+        "budget": 90,
+        "budget_cap": 220,
+        "budget_refill": 10
+      },
+      {
+        "id": "millbrook",
+        "stock": {
+          "material:timber": 32,
+          "material:pine-wood": 14,
+          "food:raw_game_meat": 10,
+          "material:copper-fittings": 1,
+          "material:iron-tools": 1
+        },
+        "capacity": {
+          "material:timber": 80,
+          "material:pine-wood": 40,
+          "food:raw_game_meat": 40,
+          "material:copper-fittings": 12,
+          "material:iron-tools": 12
+        },
+        "target": {
+          "material:timber": 45,
+          "material:pine-wood": 20,
+          "food:raw_game_meat": 12,
+          "material:copper-fittings": 6,
+          "material:iron-tools": 3
+        },
+        "production": {
+          "material:timber": 5,
+          "material:pine-wood": 2,
+          "food:raw_game_meat": 5
+        },
+        "consumption": {
+          "material:copper-fittings": 1,
+          "material:iron-tools": 1,
+          "food:raw_game_meat": 1
+        },
+        "budget": 80,
+        "budget_cap": 200,
+        "budget_refill": 8
+      },
+      {
+        "id": "emberhold",
+        "stock": {
+          "material:copper-ore": 14,
+          "material:iron-ore": 10,
+          "material:timber": 6,
+          "material:copper-fittings": 4,
+          "material:iron-tools": 2,
+          "food:raw_game_meat": 3
+        },
+        "capacity": {
+          "material:copper-ore": 60,
+          "material:iron-ore": 50,
+          "material:timber": 30,
+          "material:copper-fittings": 20,
+          "material:iron-tools": 15,
+          "food:raw_game_meat": 25
+        },
+        "target": {
+          "material:copper-ore": 26,
+          "material:iron-ore": 22,
+          "material:timber": 16,
+          "material:copper-fittings": 9,
+          "material:iron-tools": 5,
+          "food:raw_game_meat": 8
+        },
+        "production": {
+          "material:copper-fittings": 3,
+          "material:iron-tools": 2
+        },
+        "consumption": {
+          "material:copper-ore": 3,
+          "material:iron-ore": 2,
+          "material:timber": 1,
+          "food:raw_game_meat": 1
+        },
+        "budget": 130,
+        "budget_cap": 320,
+        "budget_refill": 12
+      }
+    ],
+    "routes": [
+      {
+        "id": "mine-copper-craft",
+        "from": "highspire",
+        "to": "emberhold",
+        "good": "material:copper-ore",
+        "per_step": 4
+      },
+      {
+        "id": "mine-iron-craft",
+        "from": "highspire",
+        "to": "emberhold",
+        "good": "material:iron-ore",
+        "per_step": 2
+      },
+      {
+        "id": "forest-timber-mine",
+        "from": "millbrook",
+        "to": "highspire",
+        "good": "material:timber",
+        "per_step": 3
+      },
+      {
+        "id": "forest-timber-craft",
+        "from": "millbrook",
+        "to": "emberhold",
+        "good": "material:timber",
+        "per_step": 2
+      },
+      {
+        "id": "forest-pine-craft",
+        "from": "millbrook",
+        "to": "emberhold",
+        "good": "material:pine-wood",
+        "per_step": 1
+      },
+      {
+        "id": "forest-food-mine",
+        "from": "millbrook",
+        "to": "highspire",
+        "good": "food:raw_game_meat",
+        "per_step": 2
+      },
+      {
+        "id": "forest-food-craft",
+        "from": "millbrook",
+        "to": "emberhold",
+        "good": "food:raw_game_meat",
+        "per_step": 1
+      },
+      {
+        "id": "craft-fittings-mine",
+        "from": "emberhold",
+        "to": "highspire",
+        "good": "material:copper-fittings",
+        "per_step": 2
+      },
+      {
+        "id": "craft-fittings-forest",
+        "from": "emberhold",
+        "to": "millbrook",
+        "good": "material:copper-fittings",
+        "per_step": 1
+      },
+      {
+        "id": "craft-tools-forest",
+        "from": "emberhold",
+        "to": "millbrook",
+        "good": "material:iron-tools",
+        "per_step": 1
+      }
+    ],
+    "events": [
+      {
+        "id": "mine-road-repair",
+        "city": "highspire",
+        "good": "material:timber",
+        "extra_demand": 8,
+        "budget": 60,
+        "startsAtSec": 0,
+        "endsAtSec": 14400
+      },
+      {
+        "id": "craft-festival",
+        "city": "emberhold",
+        "good": "food:raw_game_meat",
+        "extra_demand": 6,
+        "budget": 50,
+        "startsAtSec": 7200,
+        "endsAtSec": 21600
+      }
+    ]
+  },
+  "quest_rewards": {
+    "milestone_tree_points": 1,
+    "milestone_rule": "First milestone Delivery completion per town pays the displayed Tree Point once per character. Old stored random bonuses remain payable. Permanent points are outside reward choices."
+  }
+}

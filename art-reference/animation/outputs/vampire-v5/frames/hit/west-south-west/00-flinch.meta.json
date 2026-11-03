@@ -1,0 +1,56 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "vampire",
+  "action": "hit",
+  "direction": "west-south-west",
+  "pose": "00-flinch",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/hit-00-flinch-16.png",
+  "sourceImageId": "exec-62f1f250-3a6c-4121-af43-ad68ce478f01.png",
+  "sourceCell": {
+    "row": 3,
+    "column": 1,
+    "box": [
+      256,
+      1152,
+      512,
+      1536
+    ],
+    "confidenceBoundsInCell": [
+      52,
+      116,
+      203,
+      308
+    ],
+    "sourceConfidenceBoundsHeight": 192,
+    "targetReferenceMedianHeight": 159.5,
+    "uniformScale": 0.830729
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "visual-approved animation/meta.json; 16-direction measurement pending",
+    "visualMeasurementPending": true
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "uniformScale": 0.830729,
+    "scaleReference": "median alpha-bound height of preserved approved source frames for this action/phase"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

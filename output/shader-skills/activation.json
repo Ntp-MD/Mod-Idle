@@ -1,0 +1,656 @@
+{
+  "note": "New CPU shader-adaptation prototypes; previous selections retained here for review.",
+  "skills": [
+    {
+      "id": "attack.water_ball",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.ice_lance",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.glacial_spike",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.frostbite",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.blizzard",
+      "before": {
+        "version": "v3"
+      },
+      "version": "v4"
+    },
+    {
+      "id": "attack.shatter",
+      "before": {
+        "version": "v2"
+      },
+      "version": "v3"
+    },
+    {
+      "id": "attack.frost_nova",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.poison_bolt",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.acid_arrow",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.venom_spray",
+      "before": {
+        "version": "v2"
+      },
+      "version": "v3"
+    },
+    {
+      "id": "attack.poison_cloud",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.catalyst",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.venom_bolt",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.chaos_bolt",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.void_blast",
+      "before": {
+        "version": "v2"
+      },
+      "version": "v3"
+    },
+    {
+      "id": "attack.chaos_wave",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.ruin",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.entropy",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "curse.weaken",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "curse.blinding_mark",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "curse.expose",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "curse.cripple",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "curse.jinx",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "curse.venom_bind",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.sand_storm",
+      "before": {
+        "version": "v2"
+      },
+      "version": "v3"
+    },
+    {
+      "id": "attack.earth_splitter",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.earth_shock",
+      "before": {
+        "version": "v2"
+      },
+      "version": "v3"
+    },
+    {
+      "id": "attack.stone_spike",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.fissure",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.fireball",
+      "before": {
+        "version": "v3"
+      },
+      "version": "v4"
+    },
+    {
+      "id": "attack.firestorm",
+      "before": {
+        "version": "v2"
+      },
+      "version": "v3"
+    },
+    {
+      "id": "attack.meteor",
+      "before": {
+        "version": "v2"
+      },
+      "version": "v3"
+    },
+    {
+      "id": "attack.detonate",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.ignite",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.cinder_nova",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.chain_lightning",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.spark",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.thunder_strike",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.overload",
+      "before": {
+        "version": "v2"
+      },
+      "version": "v3"
+    },
+    {
+      "id": "attack.seeker_strafe",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.thunder_storm",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v3"
+    },
+    {
+      "id": "attack.storm_field",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.backstab",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.sidestep",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.impale",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.skull_crack",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.bone_breaker",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.shield_bash",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.ground_slam",
+      "before": {
+        "version": "v2"
+      },
+      "version": "v3"
+    },
+    {
+      "id": "attack.carnage",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.cleave_down",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.cleave",
+      "before": {
+        "version": "v2"
+      },
+      "version": "v3"
+    },
+    {
+      "id": "attack.elemental_break",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.whirlwind",
+      "before": {
+        "version": "v2"
+      },
+      "version": "v3"
+    },
+    {
+      "id": "attack.puncture",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.reap",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.piercing_shot",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.arrow_shower",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.headshot",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.pierce_the_veil",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.split_shot",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.double_strafe",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "attack.double_strike",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "buff.warcry",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "buff.berserker",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "buff.iron_will",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "buff.holy_veil",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "buff.ghost_dance",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "buff.earth_wall",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "buff.magia_drive",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "buff.energy_absorb",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "buff.flame_guard",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "heal.heal",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "heal.greater_heal",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "heal.cleanse",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.wraith_of_fury",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.clarity",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.haste",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.vitality",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.herald_of_ash",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.herald_of_frost",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.herald_of_lightning",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.ember_conversion",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.rime_conversion",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.storm_conversion",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.cast_on_crit",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.cast_on_damage_taken",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.rimbo_form",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.elemental_fury",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.trinity_form",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.grace",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.iron_guard",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    },
+    {
+      "id": "aura.energy_guard",
+      "before": {
+        "version": "v1"
+      },
+      "version": "v2"
+    }
+  ]
+}

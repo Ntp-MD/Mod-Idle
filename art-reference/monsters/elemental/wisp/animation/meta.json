@@ -1,0 +1,555 @@
+{
+  "status": "draft-review",
+  "file": "atlas/animation.png",
+  "generator": "OpenAI built-in image_gen",
+  "generation": {
+    "sourceOutputs": [
+      "exec-d558a7b6-00df-4491-be06-31ea69323cae.png",
+      "exec-c0e69831-9dd3-4cd1-ab1a-7a8fffc15a11.png"
+    ],
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "identityReference": "game/src/icon/mob/icon/old-wisp.png",
+    "initialPrompt": "Create ONE game-ready-layout transparent sprite atlas for the next batch of ModWorld original pixel-art enemies.\nImage1 is the approved STYLE REFERENCE only: match its chunky readable native pixel clusters, selective dark outlines, compact proportions, muted fantasy palette, shading and small sprite scale. Do NOT draw a goblin in the output. Image2 is SPECIES IDENTITY REFERENCE only; reinterpret it in image1's pixel art style, not its painted texture.\nUse exactly 8 columns and 5 rows, all 40 cells occupied, consistent size and camera. Canvas about 1600x1000, with each equal cell about 200x200. Draw sprites directly as native pixel art. Flat limited value groups, hard alpha edges, no anti-aliasing, blur or painterly gradients. Leave generous fully transparent margins around each COMPLETE silhouette including paws/tails/legs/vapor. Each pose must be isolated: a continuous fully transparent horizontal and vertical gap between every neighboring sprite. No body, weapon or particle may cross into another cell. Do not trim the outer canvas. Fixed elevated three-quarter isometric game camera and upper-left light.\nEXACT ORDER:\nRow0: eight idle facings in order south, south-east, east, north-east, north, north-west, west, south-west.\nRow1: EAST locomotion4 then WEST locomotion4.\nRow2: EAST attack4 (anticipation, windup, impact, recovery) then WEST attack4.\nRow3: EAST hit4 (flinch, strongest recoil, regaining control, ready) then WEST hit4.\nRow4: EAST death4 (start, falling/collapsing, landed/dissipating, final still remains) then WEST death4.\nEach state's four frames show real changed anatomy/pose, not translated copies. Keep identity, scale and projection fixed. No backdrop, ground, shadow, platform, UI, grid, separators, captions, lettering, watermark, checkerboard or decorative effects. Return ONLY the transparent atlas.\n\nSPECIES: Original storm WISP from image2: a bright icy-cyan/white energy core wrapped in a compact asymmetric charcoal-blue cloud and two curled wispy tendrils, with a few crisp embedded lightning-shaped pixel accents. No face, eyes, limbs, feet, wings, clothing or equipment. The asymmetry/core highlight and curled crest turn in the eight idle directions. Restrained cyan highlights, no external soft glow. Body around 85px wide by 110px high.\nFLOATING ROOT: keep the energy core near the SAME local x100,y110 in each cell, with the full vapor silhouette inside x35..165,y40..170. Root does not drift; no floor contact.\nLOCOMOTION: four-frame hover/glide loop, cloud curls circulate and tendrils sway around fixed core; absolutely no walk cycle or footfalls.\nATTACK: cloud compresses, core charges brighter, body leans/snaps energy toward east/west at impact, restores to idle. No detached projectile, beam, arc trail or large area effect.\nHIT: core shudders and cloud squeezes, then reforms.\nDEATH: core destabilizes, vapor breaks into a small tightly contained cloud, dwindles to dim fragments, final faint but VISIBLE tiny core fragment centered at the same root. Keep every frame nonempty. Do not add a humanoid corpse or drop it to ground.",
+    "revisionPrompt": "Edit image1 (the storm Wisp atlas); image2 is the approved pixel-art STYLE REFERENCE only. Keep the Wisp identity, its 40 actual poses, 8-column/5-row order and original 1586x992 transparent canvas. Do not add goblins.\nONE TARGETED CORRECTION: remove EVERY external blue/cyan glow halo, semitransparent fuzz, loose edge speckles and blurry fringe. Make the entire Wisp have clean, clearly isolated, hard pixel boundaries like image2. The bright cyan-white energy core and lightning accents must be INSIDE the charcoal-blue cloud silhouette. Simplify the vapor into 3-4 clean value clusters per material with no smooth painterly gradients. No blue background pixels or color spill between cells, no atmospheric transparency outside the sprite. Do not add an outer aura. Real transparent alpha outside each sprite, crisp flat pixel clusters inside.\nKeep the full cloud/tendrils/particles at least 12px away from every equal-cell edge, with a clearly empty transparent corridor between EVERY row/column. Root/core center must be steady. Row0 eight facings S SE E NE N NW W SW. Row1 E glide4 / W glide4. Row2 E charge attack4 / W attack4. Row3 E hit4 / W hit4. Row4 E dissolve4 / W dissolve4; the final death pose should be a tiny dim core fragment, clearly smaller than first death pose, still centered and nonempty. Floating creature: NO legs, feet, face or floor contact. No detached projectiles, trails, effects, shadow, floor, text, UI, grid or background. Return ONLY corrected transparent atlas."
+  },
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "floating-core-at-128-98",
+  "locomotion": "hover-glide",
+  "sourceFrames": [
+    {
+      "x": 130,
+      "y": 129,
+      "width": 151,
+      "height": 163,
+      "offsetX": 130,
+      "offsetY": 129
+    },
+    {
+      "x": 509,
+      "y": 127,
+      "width": 148,
+      "height": 165,
+      "offsetX": 125,
+      "offsetY": 127
+    },
+    {
+      "x": 891,
+      "y": 128,
+      "width": 152,
+      "height": 163,
+      "offsetX": 123,
+      "offsetY": 128
+    },
+    {
+      "x": 1272,
+      "y": 125,
+      "width": 150,
+      "height": 166,
+      "offsetX": 120,
+      "offsetY": 125
+    },
+    {
+      "x": 1654,
+      "y": 119,
+      "width": 145,
+      "height": 174,
+      "offsetX": 118,
+      "offsetY": 119
+    },
+    {
+      "x": 2028,
+      "y": 128,
+      "width": 148,
+      "height": 162,
+      "offsetX": 108,
+      "offsetY": 128
+    },
+    {
+      "x": 2408,
+      "y": 124,
+      "width": 149,
+      "height": 167,
+      "offsetX": 104,
+      "offsetY": 124
+    },
+    {
+      "x": 2794,
+      "y": 128,
+      "width": 154,
+      "height": 164,
+      "offsetX": 106,
+      "offsetY": 128
+    },
+    {
+      "x": 126,
+      "y": 509,
+      "width": 153,
+      "height": 167,
+      "offsetX": 126,
+      "offsetY": 125
+    },
+    {
+      "x": 503,
+      "y": 507,
+      "width": 157,
+      "height": 169,
+      "offsetX": 119,
+      "offsetY": 123
+    },
+    {
+      "x": 884,
+      "y": 509,
+      "width": 159,
+      "height": 167,
+      "offsetX": 116,
+      "offsetY": 125
+    },
+    {
+      "x": 1268,
+      "y": 509,
+      "width": 151,
+      "height": 167,
+      "offsetX": 116,
+      "offsetY": 125
+    },
+    {
+      "x": 1655,
+      "y": 507,
+      "width": 149,
+      "height": 171,
+      "offsetX": 119,
+      "offsetY": 123
+    },
+    {
+      "x": 2029,
+      "y": 507,
+      "width": 158,
+      "height": 169,
+      "offsetX": 109,
+      "offsetY": 123
+    },
+    {
+      "x": 2413,
+      "y": 507,
+      "width": 154,
+      "height": 169,
+      "offsetX": 109,
+      "offsetY": 123
+    },
+    {
+      "x": 2794,
+      "y": 509,
+      "width": 152,
+      "height": 167,
+      "offsetX": 106,
+      "offsetY": 125
+    },
+    {
+      "x": 125,
+      "y": 890,
+      "width": 154,
+      "height": 170,
+      "offsetX": 125,
+      "offsetY": 122
+    },
+    {
+      "x": 502,
+      "y": 891,
+      "width": 155,
+      "height": 169,
+      "offsetX": 118,
+      "offsetY": 123
+    },
+    {
+      "x": 871,
+      "y": 890,
+      "width": 177,
+      "height": 173,
+      "offsetX": 103,
+      "offsetY": 122
+    },
+    {
+      "x": 1267,
+      "y": 891,
+      "width": 153,
+      "height": 169,
+      "offsetX": 115,
+      "offsetY": 123
+    },
+    {
+      "x": 1648,
+      "y": 890,
+      "width": 152,
+      "height": 170,
+      "offsetX": 112,
+      "offsetY": 122
+    },
+    {
+      "x": 2020,
+      "y": 890,
+      "width": 180,
+      "height": 173,
+      "offsetX": 100,
+      "offsetY": 122
+    },
+    {
+      "x": 2414,
+      "y": 890,
+      "width": 156,
+      "height": 170,
+      "offsetX": 110,
+      "offsetY": 122
+    },
+    {
+      "x": 2795,
+      "y": 891,
+      "width": 151,
+      "height": 169,
+      "offsetX": 107,
+      "offsetY": 123
+    },
+    {
+      "x": 125,
+      "y": 1274,
+      "width": 154,
+      "height": 169,
+      "offsetX": 125,
+      "offsetY": 122
+    },
+    {
+      "x": 501,
+      "y": 1274,
+      "width": 166,
+      "height": 169,
+      "offsetX": 117,
+      "offsetY": 122
+    },
+    {
+      "x": 880,
+      "y": 1274,
+      "width": 161,
+      "height": 169,
+      "offsetX": 112,
+      "offsetY": 122
+    },
+    {
+      "x": 1265,
+      "y": 1276,
+      "width": 155,
+      "height": 168,
+      "offsetX": 113,
+      "offsetY": 124
+    },
+    {
+      "x": 1648,
+      "y": 1276,
+      "width": 156,
+      "height": 168,
+      "offsetX": 112,
+      "offsetY": 124
+    },
+    {
+      "x": 2029,
+      "y": 1274,
+      "width": 162,
+      "height": 170,
+      "offsetX": 109,
+      "offsetY": 122
+    },
+    {
+      "x": 2404,
+      "y": 1274,
+      "width": 167,
+      "height": 168,
+      "offsetX": 100,
+      "offsetY": 122
+    },
+    {
+      "x": 2795,
+      "y": 1276,
+      "width": 151,
+      "height": 168,
+      "offsetX": 107,
+      "offsetY": 124
+    },
+    {
+      "x": 125,
+      "y": 1671,
+      "width": 158,
+      "height": 167,
+      "offsetX": 125,
+      "offsetY": 135
+    },
+    {
+      "x": 504,
+      "y": 1686,
+      "width": 159,
+      "height": 145,
+      "offsetX": 120,
+      "offsetY": 150
+    },
+    {
+      "x": 889,
+      "y": 1694,
+      "width": 144,
+      "height": 133,
+      "offsetX": 121,
+      "offsetY": 158
+    },
+    {
+      "x": 1276,
+      "y": 1703,
+      "width": 120,
+      "height": 108,
+      "offsetX": 124,
+      "offsetY": 167
+    },
+    {
+      "x": 1644,
+      "y": 1690,
+      "width": 147,
+      "height": 141,
+      "offsetX": 108,
+      "offsetY": 154
+    },
+    {
+      "x": 2029,
+      "y": 1694,
+      "width": 146,
+      "height": 135,
+      "offsetX": 109,
+      "offsetY": 158
+    },
+    {
+      "x": 2416,
+      "y": 1694,
+      "width": 143,
+      "height": 126,
+      "offsetX": 112,
+      "offsetY": 158
+    },
+    {
+      "x": 2823,
+      "y": 1710,
+      "width": 97,
+      "height": 89,
+      "offsetX": 135,
+      "offsetY": 174
+    }
+  ],
+  "rowOrder": [
+    "idle S SE E NE N NW W SW",
+    "east locomotion4, west locomotion4",
+    "east attack4, west attack4",
+    "east hit4, west hit4",
+    "east death4, west death4"
+  ],
+  "quality": {
+    "alphaLevels": 256,
+    "nativePixelArtApproved": false,
+    "directionsComplete": false,
+    "notes": [
+      "Original generated PNG is unmodified; source rectangles place original pixels without resampling.",
+      "Idle has eight facings; locomotion, attack, hit and death cover east/west.",
+      "Artwork follows the user-approved player/goblin visual direction; individual species remain drafts.",
+      "Hard-alpha/native-cell conformance is not claimed.",
+      "Energy core stays at virtual (128,98); every source frame clears the ground anchor by at least 24 pixels. East/west idle reuses the authored glide loop.",
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged."
+    ]
+  },
+  "slicing": {
+    "rowCuts": [
+      0,
+      206,
+      398,
+      595,
+      788,
+      992
+    ],
+    "rows": [
+      {
+        "row": 0,
+        "yRange": [
+          0,
+          206
+        ],
+        "xCuts": [
+          0,
+          198,
+          396,
+          594,
+          792,
+          991,
+          1189,
+          1387,
+          1585
+        ],
+        "cutPixelCounts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row": 1,
+        "yRange": [
+          206,
+          398
+        ],
+        "xCuts": [
+          0,
+          198,
+          396,
+          594,
+          792,
+          991,
+          1189,
+          1387,
+          1585
+        ],
+        "cutPixelCounts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row": 2,
+        "yRange": [
+          398,
+          595
+        ],
+        "xCuts": [
+          0,
+          198,
+          396,
+          594,
+          792,
+          991,
+          1189,
+          1387,
+          1585
+        ],
+        "cutPixelCounts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row": 3,
+        "yRange": [
+          595,
+          788
+        ],
+        "xCuts": [
+          0,
+          198,
+          396,
+          594,
+          792,
+          991,
+          1189,
+          1387,
+          1585
+        ],
+        "cutPixelCounts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row": 4,
+        "yRange": [
+          788,
+          992
+        ],
+        "xCuts": [
+          0,
+          198,
+          396,
+          594,
+          792,
+          991,
+          1189,
+          1387,
+          1585
+        ],
+        "cutPixelCounts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "frameCount": 40,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    }
+  },
+  "normalization": {
+    "method": "raw-connected-pose-repack-384-v1",
+    "sourceCanvas": {
+      "width": 1585,
+      "height": 992
+    },
+    "sourceImageSha256": "f7396ea34d2807388fc98e95ecfb5a738a63dabe0595a15d1da6110d54f306d7",
+    "sourceAlphaThreshold": 128,
+    "edgeAlphaRecoveryRadius": 3,
+    "minimumCellPadding": 24,
+    "primaryPoses": 40,
+    "sourceComponents": 40,
+    "rowMedianBottoms": [
+      202,
+      391,
+      579,
+      766,
+      941
+    ],
+    "uniformScale": 1.0
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  }
+}

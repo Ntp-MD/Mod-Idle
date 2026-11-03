@@ -1,0 +1,443 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "kobold",
+  "variantId": "flintlock-kobold",
+  "name": "Flintlock Kobold",
+  "levels": [
+    61,
+    80
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-contact-at-224",
+  "directionCount": 8,
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "actions": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    "idle S SE E NE N NW W SW",
+    "walk S SE E NE N NW W SW",
+    "attack S SE E NE N NW W SW",
+    "hit S SE E NE N NW W SW",
+    "death S SE E NE N NW W SW"
+  ],
+  "slicing": {
+    "columns": 8,
+    "rows": 5,
+    "cellWidth": 256,
+    "cellHeight": 256
+  },
+  "sourceFrames": [
+    {
+      "x": 134,
+      "y": 131,
+      "width": 132,
+      "height": 154,
+      "offsetX": 134,
+      "offsetY": 131
+    },
+    {
+      "x": 508,
+      "y": 133,
+      "width": 155,
+      "height": 154,
+      "offsetX": 124,
+      "offsetY": 133
+    },
+    {
+      "x": 885,
+      "y": 137,
+      "width": 165,
+      "height": 151,
+      "offsetX": 117,
+      "offsetY": 137
+    },
+    {
+      "x": 1275,
+      "y": 128,
+      "width": 160,
+      "height": 163,
+      "offsetX": 123,
+      "offsetY": 128
+    },
+    {
+      "x": 1675,
+      "y": 131,
+      "width": 101,
+      "height": 158,
+      "offsetX": 139,
+      "offsetY": 131
+    },
+    {
+      "x": 2020,
+      "y": 130,
+      "width": 155,
+      "height": 160,
+      "offsetX": 100,
+      "offsetY": 130
+    },
+    {
+      "x": 2398,
+      "y": 135,
+      "width": 173,
+      "height": 152,
+      "offsetX": 94,
+      "offsetY": 135
+    },
+    {
+      "x": 2799,
+      "y": 136,
+      "width": 146,
+      "height": 152,
+      "offsetX": 111,
+      "offsetY": 136
+    },
+    {
+      "x": 126,
+      "y": 516,
+      "width": 142,
+      "height": 153,
+      "offsetX": 126,
+      "offsetY": 132
+    },
+    {
+      "x": 501,
+      "y": 512,
+      "width": 167,
+      "height": 159,
+      "offsetX": 117,
+      "offsetY": 128
+    },
+    {
+      "x": 874,
+      "y": 513,
+      "width": 178,
+      "height": 159,
+      "offsetX": 106,
+      "offsetY": 129
+    },
+    {
+      "x": 1264,
+      "y": 512,
+      "width": 174,
+      "height": 160,
+      "offsetX": 112,
+      "offsetY": 128
+    },
+    {
+      "x": 1675,
+      "y": 513,
+      "width": 100,
+      "height": 153,
+      "offsetX": 139,
+      "offsetY": 129
+    },
+    {
+      "x": 2006,
+      "y": 516,
+      "width": 177,
+      "height": 156,
+      "offsetX": 86,
+      "offsetY": 132
+    },
+    {
+      "x": 2389,
+      "y": 513,
+      "width": 181,
+      "height": 159,
+      "offsetX": 85,
+      "offsetY": 129
+    },
+    {
+      "x": 2792,
+      "y": 516,
+      "width": 166,
+      "height": 159,
+      "offsetX": 104,
+      "offsetY": 132
+    },
+    {
+      "x": 122,
+      "y": 900,
+      "width": 162,
+      "height": 146,
+      "offsetX": 122,
+      "offsetY": 132
+    },
+    {
+      "x": 494,
+      "y": 905,
+      "width": 207,
+      "height": 147,
+      "offsetX": 110,
+      "offsetY": 137
+    },
+    {
+      "x": 886,
+      "y": 910,
+      "width": 203,
+      "height": 147,
+      "offsetX": 118,
+      "offsetY": 142
+    },
+    {
+      "x": 1278,
+      "y": 886,
+      "width": 167,
+      "height": 176,
+      "offsetX": 126,
+      "offsetY": 118
+    },
+    {
+      "x": 1672,
+      "y": 862,
+      "width": 106,
+      "height": 203,
+      "offsetX": 136,
+      "offsetY": 94
+    },
+    {
+      "x": 2001,
+      "y": 889,
+      "width": 170,
+      "height": 171,
+      "offsetX": 81,
+      "offsetY": 121
+    },
+    {
+      "x": 2364,
+      "y": 910,
+      "width": 219,
+      "height": 144,
+      "offsetX": 60,
+      "offsetY": 142
+    },
+    {
+      "x": 2795,
+      "y": 902,
+      "width": 165,
+      "height": 151,
+      "offsetX": 107,
+      "offsetY": 134
+    },
+    {
+      "x": 126,
+      "y": 1279,
+      "width": 141,
+      "height": 152,
+      "offsetX": 126,
+      "offsetY": 127
+    },
+    {
+      "x": 494,
+      "y": 1271,
+      "width": 153,
+      "height": 170,
+      "offsetX": 110,
+      "offsetY": 119
+    },
+    {
+      "x": 893,
+      "y": 1270,
+      "width": 174,
+      "height": 170,
+      "offsetX": 125,
+      "offsetY": 118
+    },
+    {
+      "x": 1285,
+      "y": 1282,
+      "width": 155,
+      "height": 158,
+      "offsetX": 133,
+      "offsetY": 130
+    },
+    {
+      "x": 1663,
+      "y": 1286,
+      "width": 153,
+      "height": 153,
+      "offsetX": 127,
+      "offsetY": 134
+    },
+    {
+      "x": 2030,
+      "y": 1286,
+      "width": 149,
+      "height": 156,
+      "offsetX": 110,
+      "offsetY": 134
+    },
+    {
+      "x": 2412,
+      "y": 1273,
+      "width": 169,
+      "height": 167,
+      "offsetX": 108,
+      "offsetY": 121
+    },
+    {
+      "x": 2798,
+      "y": 1272,
+      "width": 158,
+      "height": 167,
+      "offsetX": 110,
+      "offsetY": 120
+    },
+    {
+      "x": 113,
+      "y": 1715,
+      "width": 200,
+      "height": 117,
+      "offsetX": 113,
+      "offsetY": 179
+    },
+    {
+      "x": 508,
+      "y": 1718,
+      "width": 171,
+      "height": 116,
+      "offsetX": 124,
+      "offsetY": 182
+    },
+    {
+      "x": 884,
+      "y": 1729,
+      "width": 170,
+      "height": 104,
+      "offsetX": 116,
+      "offsetY": 193
+    },
+    {
+      "x": 1265,
+      "y": 1723,
+      "width": 172,
+      "height": 97,
+      "offsetX": 113,
+      "offsetY": 187
+    },
+    {
+      "x": 1653,
+      "y": 1722,
+      "width": 140,
+      "height": 106,
+      "offsetX": 117,
+      "offsetY": 186
+    },
+    {
+      "x": 1993,
+      "y": 1729,
+      "width": 205,
+      "height": 88,
+      "offsetX": 73,
+      "offsetY": 193
+    },
+    {
+      "x": 2407,
+      "y": 1721,
+      "width": 173,
+      "height": 112,
+      "offsetX": 103,
+      "offsetY": 185
+    },
+    {
+      "x": 2792,
+      "y": 1719,
+      "width": 165,
+      "height": 114,
+      "offsetX": 104,
+      "offsetY": 183
+    }
+  ],
+  "generation": {
+    "sourceOutputs": [
+      "exec-70c799da-0527-470a-8e49-6540dbd476ca.png"
+    ],
+    "generatedCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "generatedCornerAlpha": 0,
+    "identityReference": "art-reference/monsters/humanoid/kobold/animation/source/base.png",
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "initialPrompt": "40-cell 8x5 full-direction atlas; a simple compact fantasy flintlock and a dark leather cross-body holster, with no modern details."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "paletteProcessing": {
+    "method": "global-median-cut",
+    "colors": 12,
+    "dither": false
+  },
+  "normalization": {
+    "method": "sourceFrames-repack-v2",
+    "sourceCanvas": {
+      "width": 3072,
+      "height": 1920
+    },
+    "uniformScale": 1.0,
+    "translation": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "recoveredIsolatedAlphaPixels": 0,
+    "discardedIsolatedAlphaDust": 0,
+    "status": "draft-review"
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged.",
+      "Repacked from uniquely assigned sourceFrames into 384 x 384 review cells with at least 24 px clear padding on each edge; visual review remains pending."
+    ]
+  }
+}

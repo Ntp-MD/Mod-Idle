@@ -1,0 +1,62 @@
+{
+    "status":  "candidate-source-review-required",
+    "speciesId":  "minotaur",
+    "generator":  "built-in image_gen",
+    "sourceImageId":  "exec-436d94d6-92d3-43f2-877e-4271c8b64ec5.png",
+    "file":  "source/v5-contact-sheets/death-00-stagger-16.png",
+    "action":  "death",
+    "phase":  "00-stagger",
+    "phasePrompt":  "Death begins: body slackens, knees buckle, shoulders sink, axe loosens but remains in the right hand; grounded and centered.",
+    "sha256":  "0d29f95edde41d429e0df2b9c581fe1133f6e890606faefbbaf7e69e9a54a28b",
+    "transparentBackgroundRequested":  true,
+    "sourceCanvas":  {
+                         "width":  1024,
+                         "height":  1536,
+                         "mode":  "RGBA"
+                     },
+    "cellCanvas":  {
+                       "width":  256,
+                       "height":  384
+                   },
+    "directionOrder":  [
+                           "south",
+                           "south-south-east",
+                           "south-east",
+                           "east-south-east",
+                           "east",
+                           "east-north-east",
+                           "north-east",
+                           "north-north-east",
+                           "north",
+                           "north-north-west",
+                           "north-west",
+                           "west-north-west",
+                           "west",
+                           "west-south-west",
+                           "south-west",
+                           "south-south-west"
+                       ],
+    "layout":  {
+                   "columns":  4,
+                   "rows":  4,
+                   "cellOrder":  "row-major"
+               },
+    "targetFrameCanvas":  {
+                              "width":  384,
+                              "height":  384
+                          },
+    "targetAnchor":  {
+                         "x":  192,
+                         "y":  288,
+                         "provenance":  "inherited Minotaur source anchor; 16-direction alignment remains unreviewed"
+                     },
+    "qa":  {
+               "identity":  false,
+               "facing":  false,
+               "pose":  false,
+               "alphaEdges":  false,
+               "anchor":  false,
+               "atlas":  false,
+               "runtimePromotion":  false
+           }
+}

@@ -1,0 +1,15 @@
+{
+  "status": "rejected-arm-continuity",
+  "speciesId": "golem",
+  "action": "attack",
+  "direction": "south-east",
+  "phase": "01-contact",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-ea67-78c0-8f1a-12b9004e2a12\\exec-2352f4b1-fbcb-49d7-84b9-bcb3be2e0b0e.png",
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "phase": false,
+    "atlasReady": false
+  },
+  "review": "Contact strikes with opposite arm to windup. Must preserve creature right striking arm throughout."
+}

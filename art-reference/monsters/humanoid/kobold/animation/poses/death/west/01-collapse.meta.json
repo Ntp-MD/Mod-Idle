@@ -1,0 +1,23 @@
+{
+  "status": "legacy-extracted-candidate",
+  "speciesId": "kobold",
+  "action": "death",
+  "direction": "west",
+  "source": "../../../../atlas/animation.png",
+  "sourceCell": {
+    "row": 4,
+    "column": 5,
+    "box": [
+      1920,
+      1536,
+      2304,
+      1920
+    ]
+  },
+  "sourcePixelsModified": false,
+  "qa": {
+    "new16DirectionSetAccepted": false,
+    "anchor": false,
+    "atlas": false
+  }
+}

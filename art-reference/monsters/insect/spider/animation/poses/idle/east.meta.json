@@ -1,0 +1,20 @@
+{
+  "status": "source-reference-unverified",
+  "sourceAtlas": "animation/atlas/animation.png",
+  "sourceCell": [
+    2,
+    0
+  ],
+  "sourceDimensions": [
+    384,
+    384
+  ],
+  "sourcePixelsModified": false,
+  "method": "lossless exact cell extraction; baseline not promoted",
+  "visualReview": {
+    "inspected": false,
+    "semanticMappingVerified": false,
+    "angleVerified": false,
+    "atlasReady": false
+  }
+}

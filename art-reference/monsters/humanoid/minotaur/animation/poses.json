@@ -1,0 +1,1488 @@
+{
+  "schemaVersion": 1,
+  "status": "direction16-candidate-incomplete",
+  "speciesId": "minotaur",
+  "race": "humanoid",
+  "version": "v5",
+  "attackKind": "close",
+  "bakedWeaponId": "broad double-headed battle axe",
+  "identityRef": "../../reference.png",
+  "sourcePoseRef": "../atlas/animation.png",
+  "directionCount": 16,
+  "angleStepDegrees": 22.5,
+  "directions": [
+    {
+      "name": "south",
+      "angleDegrees": 0
+    },
+    {
+      "name": "south-south-east",
+      "angleDegrees": 22.5
+    },
+    {
+      "name": "south-east",
+      "angleDegrees": 45
+    },
+    {
+      "name": "east-south-east",
+      "angleDegrees": 67.5
+    },
+    {
+      "name": "east",
+      "angleDegrees": 90
+    },
+    {
+      "name": "east-north-east",
+      "angleDegrees": 112.5
+    },
+    {
+      "name": "north-east",
+      "angleDegrees": 135
+    },
+    {
+      "name": "north-north-east",
+      "angleDegrees": 157.5
+    },
+    {
+      "name": "north",
+      "angleDegrees": 180
+    },
+    {
+      "name": "north-north-west",
+      "angleDegrees": 202.5
+    },
+    {
+      "name": "north-west",
+      "angleDegrees": 225
+    },
+    {
+      "name": "west-north-west",
+      "angleDegrees": 247.5
+    },
+    {
+      "name": "west",
+      "angleDegrees": 270
+    },
+    {
+      "name": "west-south-west",
+      "angleDegrees": 292.5
+    },
+    {
+      "name": "south-west",
+      "angleDegrees": 315
+    },
+    {
+      "name": "south-south-west",
+      "angleDegrees": 337.5
+    }
+  ],
+  "camera": "One fixed elevated three-quarter camera; rotate the whole creature facing in the world, never rotate the camera or flat sprite",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
+  },
+  "statusNote": "16-direction production candidate. Existing approved atlas retained until replacement completes visual and atlas QA. No runtime promotion.",
+  "actions": {
+    "idle": {
+      "framesPerDirection": 1,
+      "poseCount": 16,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "south.png",
+          "pose": "one neutral ready pose facing 0 degrees"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "south-south-east.png",
+          "pose": "one neutral ready pose facing 22.5 degrees"
+        },
+        {
+          "direction": "south-east",
+          "file": "south-east.png",
+          "pose": "one neutral ready pose facing 45 degrees"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "east-south-east.png",
+          "pose": "one neutral ready pose facing 67.5 degrees"
+        },
+        {
+          "direction": "east",
+          "file": "east.png",
+          "pose": "one neutral ready pose facing 90 degrees"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "east-north-east.png",
+          "pose": "one neutral ready pose facing 112.5 degrees"
+        },
+        {
+          "direction": "north-east",
+          "file": "north-east.png",
+          "pose": "one neutral ready pose facing 135 degrees"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "north-north-east.png",
+          "pose": "one neutral ready pose facing 157.5 degrees"
+        },
+        {
+          "direction": "north",
+          "file": "north.png",
+          "pose": "one neutral ready pose facing 180 degrees"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "north-north-west.png",
+          "pose": "one neutral ready pose facing 202.5 degrees"
+        },
+        {
+          "direction": "north-west",
+          "file": "north-west.png",
+          "pose": "one neutral ready pose facing 225 degrees"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "west-north-west.png",
+          "pose": "one neutral ready pose facing 247.5 degrees"
+        },
+        {
+          "direction": "west",
+          "file": "west.png",
+          "pose": "one neutral ready pose facing 270 degrees"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "west-south-west.png",
+          "pose": "one neutral ready pose facing 292.5 degrees"
+        },
+        {
+          "direction": "south-west",
+          "file": "south-west.png",
+          "pose": "one neutral ready pose facing 315 degrees"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "south-south-west.png",
+          "pose": "one neutral ready pose facing 337.5 degrees"
+        }
+      ]
+    },
+    "walk": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-stride-a.png",
+          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+        },
+        {
+          "direction": "south",
+          "file": "01-stride-b.png",
+          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+        },
+        {
+          "direction": "south",
+          "file": "02-stride-c.png",
+          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+        },
+        {
+          "direction": "south",
+          "file": "03-stride-d.png",
+          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-stride-a.png",
+          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-stride-b.png",
+          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-stride-c.png",
+          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-stride-d.png",
+          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-stride-a.png",
+          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-stride-b.png",
+          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-stride-c.png",
+          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-stride-d.png",
+          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-stride-a.png",
+          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-stride-b.png",
+          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-stride-c.png",
+          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-stride-d.png",
+          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+        },
+        {
+          "direction": "east",
+          "file": "00-stride-a.png",
+          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+        },
+        {
+          "direction": "east",
+          "file": "01-stride-b.png",
+          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+        },
+        {
+          "direction": "east",
+          "file": "02-stride-c.png",
+          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+        },
+        {
+          "direction": "east",
+          "file": "03-stride-d.png",
+          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-stride-a.png",
+          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-stride-b.png",
+          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-stride-c.png",
+          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-stride-d.png",
+          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-stride-a.png",
+          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-stride-b.png",
+          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-stride-c.png",
+          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-stride-d.png",
+          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-stride-a.png",
+          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-stride-b.png",
+          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-stride-c.png",
+          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-stride-d.png",
+          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+        },
+        {
+          "direction": "north",
+          "file": "00-stride-a.png",
+          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+        },
+        {
+          "direction": "north",
+          "file": "01-stride-b.png",
+          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+        },
+        {
+          "direction": "north",
+          "file": "02-stride-c.png",
+          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+        },
+        {
+          "direction": "north",
+          "file": "03-stride-d.png",
+          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-stride-a.png",
+          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-stride-b.png",
+          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-stride-c.png",
+          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-stride-d.png",
+          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-stride-a.png",
+          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-stride-b.png",
+          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-stride-c.png",
+          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-stride-d.png",
+          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-stride-a.png",
+          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-stride-b.png",
+          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-stride-c.png",
+          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-stride-d.png",
+          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+        },
+        {
+          "direction": "west",
+          "file": "00-stride-a.png",
+          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+        },
+        {
+          "direction": "west",
+          "file": "01-stride-b.png",
+          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+        },
+        {
+          "direction": "west",
+          "file": "02-stride-c.png",
+          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+        },
+        {
+          "direction": "west",
+          "file": "03-stride-d.png",
+          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-stride-a.png",
+          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-stride-b.png",
+          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-stride-c.png",
+          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-stride-d.png",
+          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-stride-a.png",
+          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-stride-b.png",
+          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-stride-c.png",
+          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-stride-d.png",
+          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-stride-a.png",
+          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-stride-b.png",
+          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-stride-c.png",
+          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-stride-d.png",
+          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+        }
+      ]
+    },
+    "attack": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-windup.png",
+          "pose": "short broad double-headed battle axe-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "south",
+          "file": "01-contact.png",
+          "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "south",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the broad double-headed battle axe tip through target space without changing camera"
+        },
+        {
+          "direction": "south",
+          "file": "03-recovery.png",
+          "pose": "withdraw broad double-headed battle axe and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-windup.png",
+          "pose": "short broad double-headed battle axe-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-contact.png",
+          "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the broad double-headed battle axe tip through target space without changing camera"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-recovery.png",
+          "pose": "withdraw broad double-headed battle axe and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-windup.png",
+          "pose": "short broad double-headed battle axe-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-contact.png",
+          "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the broad double-headed battle axe tip through target space without changing camera"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-recovery.png",
+          "pose": "withdraw broad double-headed battle axe and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-windup.png",
+          "pose": "short broad double-headed battle axe-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-contact.png",
+          "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the broad double-headed battle axe tip through target space without changing camera"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-recovery.png",
+          "pose": "withdraw broad double-headed battle axe and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "east",
+          "file": "00-windup.png",
+          "pose": "short broad double-headed battle axe-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "east",
+          "file": "01-contact.png",
+          "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "east",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the broad double-headed battle axe tip through target space without changing camera"
+        },
+        {
+          "direction": "east",
+          "file": "03-recovery.png",
+          "pose": "withdraw broad double-headed battle axe and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-windup.png",
+          "pose": "short broad double-headed battle axe-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-contact.png",
+          "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the broad double-headed battle axe tip through target space without changing camera"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-recovery.png",
+          "pose": "withdraw broad double-headed battle axe and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-windup.png",
+          "pose": "short broad double-headed battle axe-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-contact.png",
+          "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the broad double-headed battle axe tip through target space without changing camera"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-recovery.png",
+          "pose": "withdraw broad double-headed battle axe and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-windup.png",
+          "pose": "short broad double-headed battle axe-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-contact.png",
+          "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the broad double-headed battle axe tip through target space without changing camera"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-recovery.png",
+          "pose": "withdraw broad double-headed battle axe and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "north",
+          "file": "00-windup.png",
+          "pose": "short broad double-headed battle axe-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "north",
+          "file": "01-contact.png",
+          "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "north",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the broad double-headed battle axe tip through target space without changing camera"
+        },
+        {
+          "direction": "north",
+          "file": "03-recovery.png",
+          "pose": "withdraw broad double-headed battle axe and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-windup.png",
+          "pose": "short broad double-headed battle axe-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-contact.png",
+          "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the broad double-headed battle axe tip through target space without changing camera"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-recovery.png",
+          "pose": "withdraw broad double-headed battle axe and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-windup.png",
+          "pose": "short broad double-headed battle axe-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-contact.png",
+          "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the broad double-headed battle axe tip through target space without changing camera"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-recovery.png",
+          "pose": "withdraw broad double-headed battle axe and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-windup.png",
+          "pose": "short broad double-headed battle axe-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-contact.png",
+          "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the broad double-headed battle axe tip through target space without changing camera"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-recovery.png",
+          "pose": "withdraw broad double-headed battle axe and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "west",
+          "file": "00-windup.png",
+          "pose": "short broad double-headed battle axe-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "west",
+          "file": "01-contact.png",
+          "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "west",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the broad double-headed battle axe tip through target space without changing camera"
+        },
+        {
+          "direction": "west",
+          "file": "03-recovery.png",
+          "pose": "withdraw broad double-headed battle axe and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-windup.png",
+          "pose": "short broad double-headed battle axe-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-contact.png",
+          "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the broad double-headed battle axe tip through target space without changing camera"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-recovery.png",
+          "pose": "withdraw broad double-headed battle axe and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-windup.png",
+          "pose": "short broad double-headed battle axe-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-contact.png",
+          "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the broad double-headed battle axe tip through target space without changing camera"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-recovery.png",
+          "pose": "withdraw broad double-headed battle axe and return balance to neutral idle silhouette"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-windup.png",
+          "pose": "short broad double-headed battle axe-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-contact.png",
+          "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-follow-through.png",
+          "pose": "committed extension follows the broad double-headed battle axe tip through target space without changing camera"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-recovery.png",
+          "pose": "withdraw broad double-headed battle axe and return balance to neutral idle silhouette"
+        }
+      ]
+    },
+    "hit": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; broad double-headed battle axe remains visible, feet planted"
+        },
+        {
+          "direction": "south",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "south",
+          "file": "02-recover.png",
+          "pose": "body straightens and broad double-headed battle axe returns in front guard"
+        },
+        {
+          "direction": "south",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; broad double-headed battle axe remains visible, feet planted"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and broad double-headed battle axe returns in front guard"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; broad double-headed battle axe remains visible, feet planted"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and broad double-headed battle axe returns in front guard"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; broad double-headed battle axe remains visible, feet planted"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and broad double-headed battle axe returns in front guard"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; broad double-headed battle axe remains visible, feet planted"
+        },
+        {
+          "direction": "east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "east",
+          "file": "02-recover.png",
+          "pose": "body straightens and broad double-headed battle axe returns in front guard"
+        },
+        {
+          "direction": "east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; broad double-headed battle axe remains visible, feet planted"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and broad double-headed battle axe returns in front guard"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; broad double-headed battle axe remains visible, feet planted"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and broad double-headed battle axe returns in front guard"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; broad double-headed battle axe remains visible, feet planted"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and broad double-headed battle axe returns in front guard"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "north",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; broad double-headed battle axe remains visible, feet planted"
+        },
+        {
+          "direction": "north",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "north",
+          "file": "02-recover.png",
+          "pose": "body straightens and broad double-headed battle axe returns in front guard"
+        },
+        {
+          "direction": "north",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; broad double-headed battle axe remains visible, feet planted"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and broad double-headed battle axe returns in front guard"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; broad double-headed battle axe remains visible, feet planted"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and broad double-headed battle axe returns in front guard"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; broad double-headed battle axe remains visible, feet planted"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and broad double-headed battle axe returns in front guard"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; broad double-headed battle axe remains visible, feet planted"
+        },
+        {
+          "direction": "west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "west",
+          "file": "02-recover.png",
+          "pose": "body straightens and broad double-headed battle axe returns in front guard"
+        },
+        {
+          "direction": "west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; broad double-headed battle axe remains visible, feet planted"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and broad double-headed battle axe returns in front guard"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; broad double-headed battle axe remains visible, feet planted"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and broad double-headed battle axe returns in front guard"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; broad double-headed battle axe remains visible, feet planted"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and broad double-headed battle axe returns in front guard"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        }
+      ]
+    },
+    "death": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; broad double-headed battle axe descends with near hand"
+        },
+        {
+          "direction": "south",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding broad double-headed battle axe"
+        },
+        {
+          "direction": "south",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell"
+        },
+        {
+          "direction": "south",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; broad double-headed battle axe descends with near hand"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding broad double-headed battle axe"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; broad double-headed battle axe descends with near hand"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding broad double-headed battle axe"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; broad double-headed battle axe descends with near hand"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding broad double-headed battle axe"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; broad double-headed battle axe descends with near hand"
+        },
+        {
+          "direction": "east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding broad double-headed battle axe"
+        },
+        {
+          "direction": "east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell"
+        },
+        {
+          "direction": "east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; broad double-headed battle axe descends with near hand"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding broad double-headed battle axe"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; broad double-headed battle axe descends with near hand"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding broad double-headed battle axe"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; broad double-headed battle axe descends with near hand"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding broad double-headed battle axe"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "north",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; broad double-headed battle axe descends with near hand"
+        },
+        {
+          "direction": "north",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding broad double-headed battle axe"
+        },
+        {
+          "direction": "north",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell"
+        },
+        {
+          "direction": "north",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; broad double-headed battle axe descends with near hand"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding broad double-headed battle axe"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; broad double-headed battle axe descends with near hand"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding broad double-headed battle axe"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; broad double-headed battle axe descends with near hand"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding broad double-headed battle axe"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; broad double-headed battle axe descends with near hand"
+        },
+        {
+          "direction": "west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding broad double-headed battle axe"
+        },
+        {
+          "direction": "west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell"
+        },
+        {
+          "direction": "west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; broad double-headed battle axe descends with near hand"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding broad double-headed battle axe"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; broad double-headed battle axe descends with near hand"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding broad double-headed battle axe"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; broad double-headed battle axe descends with near hand"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding broad double-headed battle axe"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        }
+      ]
+    }
+  },
+  "requiredRootFiles": [
+    "meta.json",
+    "poses/"
+  ],
+  "imageQa": "Raw built-in imagegen outputs are candidate source only. Every pose still requires visual identity/facing review, hard-alpha/edge QA, foot-anchor measurement, and atlas QA before acceptance.",
+  "locomotionGuide": "Heavy bipedal hoof walk; low center of mass, alternating hoof plants; axe weight follows torso."
+}

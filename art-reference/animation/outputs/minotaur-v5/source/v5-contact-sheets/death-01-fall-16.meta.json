@@ -1,0 +1,63 @@
+{
+  "status": "candidate-source-review-required",
+  "speciesId": "minotaur",
+  "generator": "built-in image_gen",
+  "sourceImageId": "exec-94847c5c-6603-4805-8147-4e59a5816d86.png",
+  "file": "source/v5-contact-sheets/death-01-fall-16.png",
+  "action": "death",
+  "phase": "01-fall",
+  "phasePrompt": "Continue falling: drop onto one knee with torso pitched low and one hand reaching toward ground; axe lies beside the body; no gore.",
+  "sha256": "e379967fd3da19c1aabc5424906a0af456c0cdb63587ef26f70f3dd0db07b6b5",
+  "transparentBackgroundRequested": true,
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 1536,
+    "mode": "RGBA"
+  },
+  "cellCanvas": {
+    "width": 256,
+    "height": 384
+  },
+  "directionOrder": [
+    "south",
+    "south-south-east",
+    "south-east",
+    "east-south-east",
+    "east",
+    "east-north-east",
+    "north-east",
+    "north-north-east",
+    "north",
+    "north-north-west",
+    "north-west",
+    "west-north-west",
+    "west",
+    "west-south-west",
+    "south-west",
+    "south-south-west"
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 4,
+    "cellOrder": "row-major"
+  },
+  "targetFrameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "targetAnchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited Minotaur source anchor; 16-direction alignment remains unreviewed"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  },
+  "sourceEditOf": "exec-8db48438-fb73-4d55-9093-eef887a3f32d.png"
+}

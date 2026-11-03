@@ -1,0 +1,15 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-fe2753c2-353a-499a-a5e8-6b015b80fe2f.png",
+  "action": "attack",
+  "phase": "00-windup.png",
+  "direction": "south-south-east",
+  "phaseReference": "../south/00-windup.png",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": false,
+    "phaseApproved": false,
+    "atlasApproved": false
+  }
+}

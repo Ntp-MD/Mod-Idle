@@ -1,0 +1,414 @@
+{
+  "id": "attack.earth_shock",
+  "src": "/fx/skill-pool/attack-earth-shock/v2/atlas.png",
+  "columns": 4,
+  "rows": 4,
+  "imageWidth": 1254,
+  "imageHeight": 1254,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 65.0,
+      "bounds": [
+        112,
+        164,
+        235,
+        286
+      ],
+      "renderedPadding": [
+        176.5,
+        229.0,
+        142.5,
+        92.0
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        313,
+        0,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 65.0,
+      "bounds": [
+        55,
+        170,
+        265,
+        293
+      ],
+      "renderedPadding": [
+        119.0,
+        235.0,
+        113.0,
+        85.0
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        627,
+        0,
+        313,
+        313
+      ],
+      "offsetX": 64.5,
+      "offsetY": 65.0,
+      "bounds": [
+        21,
+        146,
+        273,
+        310
+      ],
+      "renderedPadding": [
+        85.5,
+        211.0,
+        104.5,
+        68.0
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        940,
+        0,
+        314,
+        313
+      ],
+      "offsetX": 64.0,
+      "offsetY": 65.0,
+      "bounds": [
+        5,
+        133,
+        286,
+        313
+      ],
+      "renderedPadding": [
+        69.0,
+        198.0,
+        92.0,
+        65.0
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        313,
+        313,
+        315
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        22,
+        134,
+        304,
+        307
+      ],
+      "renderedPadding": [
+        86.5,
+        198.0,
+        73.5,
+        72.0
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        313,
+        313,
+        314,
+        315
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        16,
+        130,
+        302,
+        309
+      ],
+      "renderedPadding": [
+        80.0,
+        194.0,
+        76.0,
+        70.0
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        627,
+        313,
+        313,
+        315
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.0,
+      "bounds": [
+        7,
+        118,
+        305,
+        315
+      ],
+      "renderedPadding": [
+        71.5,
+        182.0,
+        72.5,
+        64.0
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        940,
+        313,
+        314,
+        315
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.0,
+      "bounds": [
+        6,
+        114,
+        300,
+        311
+      ],
+      "renderedPadding": [
+        70.0,
+        178.0,
+        78.0,
+        68.0
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        628,
+        313,
+        312
+      ],
+      "offsetX": 64.5,
+      "offsetY": 65.5,
+      "bounds": [
+        18,
+        97,
+        310,
+        296
+      ],
+      "renderedPadding": [
+        82.5,
+        162.5,
+        67.5,
+        81.5
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        313,
+        628,
+        314,
+        312
+      ],
+      "offsetX": 64.0,
+      "offsetY": 65.5,
+      "bounds": [
+        17,
+        119,
+        307,
+        290
+      ],
+      "renderedPadding": [
+        81.0,
+        184.5,
+        71.0,
+        87.5
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        627,
+        628,
+        313,
+        312
+      ],
+      "offsetX": 64.5,
+      "offsetY": 65.5,
+      "bounds": [
+        12,
+        131,
+        302,
+        287
+      ],
+      "renderedPadding": [
+        76.5,
+        196.5,
+        75.5,
+        90.5
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        940,
+        628,
+        314,
+        312
+      ],
+      "offsetX": 64.0,
+      "offsetY": 65.5,
+      "bounds": [
+        12,
+        138,
+        301,
+        285
+      ],
+      "renderedPadding": [
+        76.0,
+        203.5,
+        77.0,
+        92.5
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        940,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        26,
+        106,
+        301,
+        256
+      ],
+      "renderedPadding": [
+        90.5,
+        170.5,
+        76.5,
+        122.5
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        313,
+        940,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        24,
+        103,
+        298,
+        256
+      ],
+      "renderedPadding": [
+        88.0,
+        167.5,
+        80.0,
+        122.5
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        627,
+        940,
+        313,
+        314
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        23,
+        104,
+        299,
+        253
+      ],
+      "renderedPadding": [
+        87.5,
+        168.5,
+        78.5,
+        125.5
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        940,
+        940,
+        314,
+        314
+      ],
+      "offsetX": 64.0,
+      "offsetY": 64.5,
+      "bounds": [
+        32,
+        123,
+        281,
+        249
+      ],
+      "renderedPadding": [
+        96.0,
+        187.5,
+        97.0,
+        129.5
+      ]
+    }
+  ],
+  "virtualWidth": 442,
+  "virtualHeight": 443,
+  "alphaDiscard": 8,
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    4,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "frameMs": 90,
+  "composition": "whole-field",
+  "actorBodyWidthM": 0.5,
+  "authoringDiameterM": 5,
+  "geometrySource": "current committed action/field footprint",
+  "anchorStatus": "runtime ground-anchor fit from source bounds and committed footprint",
+  "sourcePixelsUnmodified": true,
+  "sourceSha256": "50095616b621fbac08dae6d135587570cb9e2cdd1f24b9fc3fca619a616f680b",
+  "status": "active-spatial-v2",
+  "cellWidth": 313.5,
+  "cellHeight": 313.5,
+  "contentWidthRatio": 0.6742081447963801,
+  "contentHeightRatio": 0.4492099322799097,
+  "authoringGeometry": {
+    "shape": "circle",
+    "radiusM": 2.5,
+    "spanM": 5.0,
+    "depthM": 5.0,
+    "origin": "target",
+    "canonicalSource": "tools/data/skills.json#attack.earth_shock"
+  }
+}

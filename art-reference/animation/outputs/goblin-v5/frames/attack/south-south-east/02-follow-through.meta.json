@@ -1,0 +1,57 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "goblin",
+  "action": "attack",
+  "direction": "south-south-east",
+  "pose": "02-follow-through",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/attack-02-follow-through-16.png",
+  "sourceImageId": "exec-8b3c0f21-8749-4cfb-8dbc-83b9a6a6dcd7.png",
+  "sourceCell": {
+    "row": 0,
+    "column": 1,
+    "box": [
+      256,
+      0,
+      512,
+      384
+    ],
+    "confidenceBoundsInCell": [
+      50,
+      134,
+      198,
+      303
+    ],
+    "sourceVisualFootBaselineY": 303,
+    "targetVisualFootBaselineY": 288,
+    "sourceConfidenceBoundsHeight": 169,
+    "targetReferenceMedianHeight": 117.0,
+    "uniformScale": 0.692308
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited 8-direction Goblin anchor; visual measurement pending"
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "scaleReference": "median alpha-bound height of approved Goblin source poses for this action/phase",
+    "uniformScale": 0.692308
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

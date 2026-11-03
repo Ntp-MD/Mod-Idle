@@ -1,0 +1,314 @@
+{
+  "/map/landmark/camp-unlit.png": [
+    1385,
+    1136,
+    49,
+    50,
+    1328,
+    1036
+  ],
+  "/map/landmark/camp.png": [
+    1385,
+    1136,
+    156,
+    128,
+    1130,
+    866
+  ],
+  "/map/landmark/encounter-ruins.png": [
+    1329,
+    1183,
+    39,
+    122,
+    1262,
+    1016
+  ],
+  "/map/landmark/mob-stage.png": [
+    1402,
+    1122,
+    94,
+    45,
+    1228,
+    1025
+  ],
+  "/map/landmark/provision-caravan.png": [
+    1385,
+    1136,
+    258,
+    122,
+    923,
+    810
+  ],
+  "/map/landmark/town-1.png": [
+    1605,
+    980,
+    3,
+    2,
+    1600,
+    978
+  ],
+  "/map/landmark/town.png": [
+    1385,
+    1136,
+    263,
+    33,
+    987,
+    1037
+  ],
+  "/map/landmark/village.png": [
+    1385,
+    1136,
+    193,
+    153,
+    1015,
+    788
+  ],
+  "/map/terrain/ash-1.png": [
+    1605,
+    980,
+    11,
+    2,
+    1585,
+    973
+  ],
+  "/map/terrain/ash-2.png": [
+    1606,
+    979,
+    5,
+    0,
+    1597,
+    972
+  ],
+  "/map/terrain/ash.png": [
+    1329,
+    1183,
+    23,
+    118,
+    1291,
+    992
+  ],
+  "/map/terrain/forest-relief-1.png": [
+    1606,
+    979,
+    3,
+    2,
+    1600,
+    975
+  ],
+  "/map/terrain/forest-relief-2.png": [
+    1606,
+    979,
+    4,
+    0,
+    1601,
+    978
+  ],
+  "/map/terrain/forest-relief-3.png": [
+    1606,
+    979,
+    1,
+    0,
+    1605,
+    979
+  ],
+  "/map/terrain/forest-relief.png": [
+    1385,
+    1136,
+    328,
+    96,
+    727,
+    932
+  ],
+  "/map/terrain/grass-1.png": [
+    1605,
+    980,
+    0,
+    0,
+    1605,
+    980
+  ],
+  "/map/terrain/grass-2.png": [
+    1605,
+    980,
+    2,
+    0,
+    1602,
+    979
+  ],
+  "/map/terrain/grass.png": [
+    1329,
+    1183,
+    16,
+    296,
+    1306,
+    765
+  ],
+  "/map/terrain/marsh-1.png": [
+    1605,
+    980,
+    1,
+    0,
+    1603,
+    974
+  ],
+  "/map/terrain/marsh-2.png": [
+    1605,
+    980,
+    0,
+    0,
+    1605,
+    977
+  ],
+  "/map/terrain/marsh.png": [
+    1329,
+    1183,
+    52,
+    167,
+    1235,
+    935
+  ],
+  "/map/terrain/moor-1.png": [
+    1605,
+    980,
+    3,
+    1,
+    1598,
+    978
+  ],
+  "/map/terrain/moor-2.png": [
+    1605,
+    980,
+    5,
+    1,
+    1599,
+    977
+  ],
+  "/map/terrain/moor.png": [
+    1329,
+    1183,
+    41,
+    80,
+    1249,
+    1029
+  ],
+  "/map/terrain/mountain-relief-1.png": [
+    1606,
+    979,
+    4,
+    0,
+    1598,
+    978
+  ],
+  "/map/terrain/mountain-relief-2.png": [
+    1605,
+    980,
+    1,
+    0,
+    1604,
+    980
+  ],
+  "/map/terrain/mountain-relief.png": [
+    1536,
+    1024,
+    190,
+    55,
+    1175,
+    927
+  ],
+  "/map/terrain/salt-1.png": [
+    1605,
+    980,
+    10,
+    2,
+    1587,
+    960
+  ],
+  "/map/terrain/salt-2.png": [
+    1605,
+    980,
+    0,
+    1,
+    1605,
+    979
+  ],
+  "/map/terrain/salt.png": [
+    1461,
+    1077,
+    40,
+    72,
+    1404,
+    966
+  ],
+  "/map/terrain/snow-1.png": [
+    1605,
+    980,
+    6,
+    0,
+    1599,
+    980
+  ],
+  "/map/terrain/snow-2.png": [
+    1605,
+    980,
+    8,
+    0,
+    1597,
+    980
+  ],
+  "/map/terrain/snow.png": [
+    1329,
+    1183,
+    37,
+    89,
+    1249,
+    1029
+  ],
+  "/map/terrain/waste-1.png": [
+    1605,
+    980,
+    3,
+    4,
+    1599,
+    968
+  ],
+  "/map/terrain/waste-2.png": [
+    1605,
+    980,
+    0,
+    0,
+    1605,
+    980
+  ],
+  "/map/terrain/waste.png": [
+    1329,
+    1183,
+    69,
+    61,
+    1227,
+    1066
+  ],
+  "/map/terrain/water-1.png": [
+    1605,
+    980,
+    0,
+    0,
+    1605,
+    976
+  ],
+  "/map/terrain/water-2.png": [
+    1605,
+    980,
+    1,
+    0,
+    1604,
+    980
+  ],
+  "/map/terrain/water.png": [
+    1329,
+    1183,
+    23,
+    42,
+    1300,
+    1107
+  ]
+}

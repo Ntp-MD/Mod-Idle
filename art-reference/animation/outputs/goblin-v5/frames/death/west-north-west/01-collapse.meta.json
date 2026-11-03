@@ -1,0 +1,57 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "goblin",
+  "action": "death",
+  "direction": "west-north-west",
+  "pose": "01-collapse",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/death-01-collapse-16.png",
+  "sourceImageId": "exec-620dd8ff-ab55-4af5-bd51-e68aae392400.png",
+  "sourceCell": {
+    "row": 2,
+    "column": 3,
+    "box": [
+      768,
+      768,
+      1024,
+      1152
+    ],
+    "confidenceBoundsInCell": [
+      3,
+      200,
+      217,
+      338
+    ],
+    "sourceVisualFootBaselineY": 338,
+    "targetVisualFootBaselineY": 288,
+    "sourceConfidenceBoundsHeight": 138,
+    "targetReferenceMedianHeight": 87.5,
+    "uniformScale": 0.634058
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited 8-direction Goblin anchor; visual measurement pending"
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "scaleReference": "median alpha-bound height of approved Goblin source poses for this action/phase",
+    "uniformScale": 0.634058
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "status": "candidate-source-review-required",
+  "speciesId": "vampire",
+  "generator": "built-in image_gen",
+  "sourceImageId": "exec-90274bb5-b914-4c38-9d48-b7da1e2709c4.png",
+  "file": "source/v5-contact-sheets/idle-16.png",
+  "sha256": "98383b80f8547bcdb73f3548c8b971e07e9af9f40a46ce0f76ea7ac6437f319c",
+  "action": "idle",
+  "phase": "idle",
+  "promptSummary": "One neutral ready stance across all 16 directions; feet grounded, cape at rest, hands in restrained ready posture.",
+  "promptContract": {
+    "references": [
+      "art-reference/monsters/undead/vampire/reference.png",
+      "art-reference/monsters/undead/vampire/animation/atlas/animation.png"
+    ],
+    "sheet": "4x4 row-major 1024x1536, 256x384 cells, 16 directions; source anchor x=128/y=288; fixed elevated 3/4 camera; no mirroring; transparent background requested",
+    "style": "crisp hand-crafted pixel-art clusters matching the approved vampire atlas",
+    "review": "candidate only; no visual, alpha-edge, anchor, or runtime approval"
+  },
+  "transparentBackgroundRequested": true,
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 1536,
+    "mode": "RGBA"
+  },
+  "cellCanvas": {
+    "width": 256,
+    "height": 384
+  },
+  "layout": {
+    "columns": 4,
+    "rows": 4,
+    "cellOrder": "row-major"
+  },
+  "directionOrder": [
+    "south",
+    "south-south-east",
+    "south-east",
+    "east-south-east",
+    "east",
+    "east-north-east",
+    "north-east",
+    "north-north-east",
+    "north",
+    "north-north-west",
+    "north-west",
+    "west-north-west",
+    "west",
+    "west-south-west",
+    "south-west",
+    "south-south-west"
+  ],
+  "targetFrameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "targetAnchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "approved source atlas anchor; 16-direction alignment unreviewed"
+  },
+  "alphaAudit": {
+    "zeroPixelFraction": 0.51716,
+    "below128PixelFraction": 0.82639,
+    "confidence128PixelFraction": 0.17361,
+    "sheetCornerAlpha": [
+      0,
+      0,
+      1,
+      1
+    ],
+    "confidencePixelCountPerCell": [
+      17189,
+      17123,
+      16585,
+      16873,
+      16618,
+      16889,
+      16639,
+      16709,
+      17489,
+      17415,
+      17251,
+      16870,
+      16716,
+      17489,
+      17427,
+      17785
+    ]
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

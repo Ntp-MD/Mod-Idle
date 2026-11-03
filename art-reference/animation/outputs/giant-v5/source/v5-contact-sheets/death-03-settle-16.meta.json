@@ -1,0 +1,58 @@
+{
+  "status": "rejected-candidate",
+  "speciesId": "giant",
+  "action": "death",
+  "phase": "03-settle",
+  "generator": "built-in image_gen",
+  "originalGeneratedFile": "exec-c1bba704-7f2c-438e-ac8a-511451acab6e.png",
+  "originalLocation": "CODEX_HOME/generated_images/",
+  "provenance": "generated-explicit-alpha",
+  "sourceDimensions": {
+    "width": 1024,
+    "height": 1536
+  },
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "cellWidth": 256,
+    "cellHeight": 384,
+    "directionOrder": [
+      "south",
+      "south-south-east",
+      "south-east",
+      "east-south-east",
+      "east",
+      "east-north-east",
+      "north-east",
+      "north-north-east",
+      "north",
+      "north-north-west",
+      "north-west",
+      "west-north-west",
+      "west",
+      "west-south-west",
+      "south-west",
+      "south-south-west"
+    ]
+  },
+  "alphaAudit": {
+    "zeroPixelFraction": 0.7385,
+    "confidence128PixelFraction": 0.19065,
+    "cornerAlpha": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "review": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "nativePixelArt": false,
+    "approved": false
+  },
+  "replacedBy": "death-03-settle-16-v3.png",
+  "note": "Rejected: prior death-03 pose remained too close to death-02; replaced by the visually distinct v3 side-lying pass."
+}

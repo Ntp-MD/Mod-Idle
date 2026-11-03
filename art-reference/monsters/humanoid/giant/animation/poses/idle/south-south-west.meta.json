@@ -1,0 +1,17 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\ITOP\\.codex-zed-account-2\\generated_images\\01a1a0b9-c531-72b3-8703-f6d656bd7333\\exec-ec325692-9951-4962-952d-902fe6102181.png",
+  "action": "idle",
+  "direction": "south-south-west",
+  "angleDegrees": 337.5,
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": true,
+    "identityPlausible": true,
+    "facingPlausible": true,
+    "exactYawApproved": false,
+    "atlasApproved": false,
+    "note": "Near-frontal view with a slight turn to screen-left; single gray rock stays low in the right hand. Exact yaw and atlas approval remain pending."
+  }
+}

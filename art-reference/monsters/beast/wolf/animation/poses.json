@@ -1,0 +1,1525 @@
+{
+  "schemaVersion": 1,
+  "status": "direction16-candidate-incomplete",
+  "speciesId": "wolf",
+  "race": "beast",
+  "version": "v5",
+  "attackKind": "close",
+  "bakedWeaponId": null,
+  "identityRef": "../atlas/animation.png",
+  "sourcePoseRef": "../atlas/animation.png",
+  "directionCount": 16,
+  "angleStepDegrees": 22.5,
+  "directions": [
+    {
+      "name": "south",
+      "angleDegrees": 0
+    },
+    {
+      "name": "south-south-east",
+      "angleDegrees": 22.5
+    },
+    {
+      "name": "south-east",
+      "angleDegrees": 45
+    },
+    {
+      "name": "east-south-east",
+      "angleDegrees": 67.5
+    },
+    {
+      "name": "east",
+      "angleDegrees": 90
+    },
+    {
+      "name": "east-north-east",
+      "angleDegrees": 112.5
+    },
+    {
+      "name": "north-east",
+      "angleDegrees": 135
+    },
+    {
+      "name": "north-north-east",
+      "angleDegrees": 157.5
+    },
+    {
+      "name": "north",
+      "angleDegrees": 180
+    },
+    {
+      "name": "north-north-west",
+      "angleDegrees": 202.5
+    },
+    {
+      "name": "north-west",
+      "angleDegrees": 225
+    },
+    {
+      "name": "west-north-west",
+      "angleDegrees": 247.5
+    },
+    {
+      "name": "west",
+      "angleDegrees": 270
+    },
+    {
+      "name": "west-south-west",
+      "angleDegrees": 292.5
+    },
+    {
+      "name": "south-west",
+      "angleDegrees": 315
+    },
+    {
+      "name": "south-south-west",
+      "angleDegrees": 337.5
+    }
+  ],
+  "camera": "fixed elevated three-quarter camera; rotate whole wolf in world, never flat sprite",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
+  },
+  "statusNote": "Production incomplete; PNG presence is not acceptance. Legacy cells are source references only. No runtime promotion or variant production. Further generation blocked by shared ImageGen quota.",
+  "actions": {
+    "idle": {
+      "framesPerDirection": 1,
+      "poseCount": 16,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "south.png",
+          "pose": "neutral four-paw ready stance"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "south-south-east.png",
+          "pose": "neutral four-paw ready stance"
+        },
+        {
+          "direction": "south-east",
+          "file": "south-east.png",
+          "pose": "neutral four-paw ready stance"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "east-south-east.png",
+          "pose": "neutral four-paw ready stance"
+        },
+        {
+          "direction": "east",
+          "file": "east.png",
+          "pose": "neutral four-paw ready stance"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "east-north-east.png",
+          "pose": "neutral four-paw ready stance"
+        },
+        {
+          "direction": "north-east",
+          "file": "north-east.png",
+          "pose": "neutral four-paw ready stance"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "north-north-east.png",
+          "pose": "neutral four-paw ready stance"
+        },
+        {
+          "direction": "north",
+          "file": "north.png",
+          "pose": "neutral four-paw ready stance"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "north-north-west.png",
+          "pose": "neutral four-paw ready stance"
+        },
+        {
+          "direction": "north-west",
+          "file": "north-west.png",
+          "pose": "neutral four-paw ready stance"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "west-north-west.png",
+          "pose": "neutral four-paw ready stance"
+        },
+        {
+          "direction": "west",
+          "file": "west.png",
+          "pose": "neutral four-paw ready stance"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "west-south-west.png",
+          "pose": "neutral four-paw ready stance"
+        },
+        {
+          "direction": "south-west",
+          "file": "south-west.png",
+          "pose": "neutral four-paw ready stance"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "south-south-west.png",
+          "pose": "neutral four-paw ready stance"
+        }
+      ]
+    },
+    "walk": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-stride-a.png",
+          "pose": "diagonal leg pair A stride forward, other pair back"
+        },
+        {
+          "direction": "south",
+          "file": "01-stride-b.png",
+          "pose": "diagonal pair A passes underneath body"
+        },
+        {
+          "direction": "south",
+          "file": "02-stride-c.png",
+          "pose": "diagonal leg pair B stride forward, other pair back"
+        },
+        {
+          "direction": "south",
+          "file": "03-stride-d.png",
+          "pose": "diagonal pair B passes underneath body"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-stride-a.png",
+          "pose": "diagonal leg pair A stride forward, other pair back"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-stride-b.png",
+          "pose": "diagonal pair A passes underneath body"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-stride-c.png",
+          "pose": "diagonal leg pair B stride forward, other pair back"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-stride-d.png",
+          "pose": "diagonal pair B passes underneath body"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-stride-a.png",
+          "pose": "diagonal leg pair A stride forward, other pair back"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-stride-b.png",
+          "pose": "diagonal pair A passes underneath body"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-stride-c.png",
+          "pose": "diagonal leg pair B stride forward, other pair back"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-stride-d.png",
+          "pose": "diagonal pair B passes underneath body"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-stride-a.png",
+          "pose": "diagonal leg pair A stride forward, other pair back"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-stride-b.png",
+          "pose": "diagonal pair A passes underneath body"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-stride-c.png",
+          "pose": "diagonal leg pair B stride forward, other pair back"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-stride-d.png",
+          "pose": "diagonal pair B passes underneath body"
+        },
+        {
+          "direction": "east",
+          "file": "00-stride-a.png",
+          "pose": "diagonal leg pair A stride forward, other pair back"
+        },
+        {
+          "direction": "east",
+          "file": "01-stride-b.png",
+          "pose": "diagonal pair A passes underneath body"
+        },
+        {
+          "direction": "east",
+          "file": "02-stride-c.png",
+          "pose": "diagonal leg pair B stride forward, other pair back"
+        },
+        {
+          "direction": "east",
+          "file": "03-stride-d.png",
+          "pose": "diagonal pair B passes underneath body"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-stride-a.png",
+          "pose": "diagonal leg pair A stride forward, other pair back"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-stride-b.png",
+          "pose": "diagonal pair A passes underneath body"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-stride-c.png",
+          "pose": "diagonal leg pair B stride forward, other pair back"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-stride-d.png",
+          "pose": "diagonal pair B passes underneath body"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-stride-a.png",
+          "pose": "diagonal leg pair A stride forward, other pair back"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-stride-b.png",
+          "pose": "diagonal pair A passes underneath body"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-stride-c.png",
+          "pose": "diagonal leg pair B stride forward, other pair back"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-stride-d.png",
+          "pose": "diagonal pair B passes underneath body"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-stride-a.png",
+          "pose": "diagonal leg pair A stride forward, other pair back"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-stride-b.png",
+          "pose": "diagonal pair A passes underneath body"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-stride-c.png",
+          "pose": "diagonal leg pair B stride forward, other pair back"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-stride-d.png",
+          "pose": "diagonal pair B passes underneath body"
+        },
+        {
+          "direction": "north",
+          "file": "00-stride-a.png",
+          "pose": "diagonal leg pair A stride forward, other pair back"
+        },
+        {
+          "direction": "north",
+          "file": "01-stride-b.png",
+          "pose": "diagonal pair A passes underneath body"
+        },
+        {
+          "direction": "north",
+          "file": "02-stride-c.png",
+          "pose": "diagonal leg pair B stride forward, other pair back"
+        },
+        {
+          "direction": "north",
+          "file": "03-stride-d.png",
+          "pose": "diagonal pair B passes underneath body"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-stride-a.png",
+          "pose": "diagonal leg pair A stride forward, other pair back"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-stride-b.png",
+          "pose": "diagonal pair A passes underneath body"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-stride-c.png",
+          "pose": "diagonal leg pair B stride forward, other pair back"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-stride-d.png",
+          "pose": "diagonal pair B passes underneath body"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-stride-a.png",
+          "pose": "diagonal leg pair A stride forward, other pair back"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-stride-b.png",
+          "pose": "diagonal pair A passes underneath body"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-stride-c.png",
+          "pose": "diagonal leg pair B stride forward, other pair back"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-stride-d.png",
+          "pose": "diagonal pair B passes underneath body"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-stride-a.png",
+          "pose": "diagonal leg pair A stride forward, other pair back"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-stride-b.png",
+          "pose": "diagonal pair A passes underneath body"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-stride-c.png",
+          "pose": "diagonal leg pair B stride forward, other pair back"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-stride-d.png",
+          "pose": "diagonal pair B passes underneath body"
+        },
+        {
+          "direction": "west",
+          "file": "00-stride-a.png",
+          "pose": "diagonal leg pair A stride forward, other pair back"
+        },
+        {
+          "direction": "west",
+          "file": "01-stride-b.png",
+          "pose": "diagonal pair A passes underneath body"
+        },
+        {
+          "direction": "west",
+          "file": "02-stride-c.png",
+          "pose": "diagonal leg pair B stride forward, other pair back"
+        },
+        {
+          "direction": "west",
+          "file": "03-stride-d.png",
+          "pose": "diagonal pair B passes underneath body"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-stride-a.png",
+          "pose": "diagonal leg pair A stride forward, other pair back"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-stride-b.png",
+          "pose": "diagonal pair A passes underneath body"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-stride-c.png",
+          "pose": "diagonal leg pair B stride forward, other pair back"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-stride-d.png",
+          "pose": "diagonal pair B passes underneath body"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-stride-a.png",
+          "pose": "diagonal leg pair A stride forward, other pair back"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-stride-b.png",
+          "pose": "diagonal pair A passes underneath body"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-stride-c.png",
+          "pose": "diagonal leg pair B stride forward, other pair back"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-stride-d.png",
+          "pose": "diagonal pair B passes underneath body"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-stride-a.png",
+          "pose": "diagonal leg pair A stride forward, other pair back"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-stride-b.png",
+          "pose": "diagonal pair A passes underneath body"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-stride-c.png",
+          "pose": "diagonal leg pair B stride forward, other pair back"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-stride-d.png",
+          "pose": "diagonal pair B passes underneath body"
+        }
+      ]
+    },
+    "attack": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-windup.png",
+          "pose": "crouch and draw head back for bite"
+        },
+        {
+          "direction": "south",
+          "file": "01-contact.png",
+          "pose": "lunge with jaw wide at contact"
+        },
+        {
+          "direction": "south",
+          "file": "02-follow-through.png",
+          "pose": "jaw closes and weight moves onto forelegs"
+        },
+        {
+          "direction": "south",
+          "file": "03-recovery.png",
+          "pose": "draw muzzle back into ready stance"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-windup.png",
+          "pose": "crouch and draw head back for bite"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-contact.png",
+          "pose": "lunge with jaw wide at contact"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-follow-through.png",
+          "pose": "jaw closes and weight moves onto forelegs"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-recovery.png",
+          "pose": "draw muzzle back into ready stance"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-windup.png",
+          "pose": "crouch and draw head back for bite"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-contact.png",
+          "pose": "lunge with jaw wide at contact"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-follow-through.png",
+          "pose": "jaw closes and weight moves onto forelegs"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-recovery.png",
+          "pose": "draw muzzle back into ready stance"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-windup.png",
+          "pose": "crouch and draw head back for bite"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-contact.png",
+          "pose": "lunge with jaw wide at contact"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-follow-through.png",
+          "pose": "jaw closes and weight moves onto forelegs"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-recovery.png",
+          "pose": "draw muzzle back into ready stance"
+        },
+        {
+          "direction": "east",
+          "file": "00-windup.png",
+          "pose": "crouch and draw head back for bite"
+        },
+        {
+          "direction": "east",
+          "file": "01-contact.png",
+          "pose": "lunge with jaw wide at contact"
+        },
+        {
+          "direction": "east",
+          "file": "02-follow-through.png",
+          "pose": "jaw closes and weight moves onto forelegs"
+        },
+        {
+          "direction": "east",
+          "file": "03-recovery.png",
+          "pose": "draw muzzle back into ready stance"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-windup.png",
+          "pose": "crouch and draw head back for bite"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-contact.png",
+          "pose": "lunge with jaw wide at contact"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-follow-through.png",
+          "pose": "jaw closes and weight moves onto forelegs"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-recovery.png",
+          "pose": "draw muzzle back into ready stance"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-windup.png",
+          "pose": "crouch and draw head back for bite"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-contact.png",
+          "pose": "lunge with jaw wide at contact"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-follow-through.png",
+          "pose": "jaw closes and weight moves onto forelegs"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-recovery.png",
+          "pose": "draw muzzle back into ready stance"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-windup.png",
+          "pose": "crouch and draw head back for bite"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-contact.png",
+          "pose": "lunge with jaw wide at contact"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-follow-through.png",
+          "pose": "jaw closes and weight moves onto forelegs"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-recovery.png",
+          "pose": "draw muzzle back into ready stance"
+        },
+        {
+          "direction": "north",
+          "file": "00-windup.png",
+          "pose": "crouch and draw head back for bite"
+        },
+        {
+          "direction": "north",
+          "file": "01-contact.png",
+          "pose": "lunge with jaw wide at contact"
+        },
+        {
+          "direction": "north",
+          "file": "02-follow-through.png",
+          "pose": "jaw closes and weight moves onto forelegs"
+        },
+        {
+          "direction": "north",
+          "file": "03-recovery.png",
+          "pose": "draw muzzle back into ready stance"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-windup.png",
+          "pose": "crouch and draw head back for bite"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-contact.png",
+          "pose": "lunge with jaw wide at contact"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-follow-through.png",
+          "pose": "jaw closes and weight moves onto forelegs"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-recovery.png",
+          "pose": "draw muzzle back into ready stance"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-windup.png",
+          "pose": "crouch and draw head back for bite"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-contact.png",
+          "pose": "lunge with jaw wide at contact"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-follow-through.png",
+          "pose": "jaw closes and weight moves onto forelegs"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-recovery.png",
+          "pose": "draw muzzle back into ready stance"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-windup.png",
+          "pose": "crouch and draw head back for bite"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-contact.png",
+          "pose": "lunge with jaw wide at contact"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-follow-through.png",
+          "pose": "jaw closes and weight moves onto forelegs"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-recovery.png",
+          "pose": "draw muzzle back into ready stance"
+        },
+        {
+          "direction": "west",
+          "file": "00-windup.png",
+          "pose": "crouch and draw head back for bite"
+        },
+        {
+          "direction": "west",
+          "file": "01-contact.png",
+          "pose": "lunge with jaw wide at contact"
+        },
+        {
+          "direction": "west",
+          "file": "02-follow-through.png",
+          "pose": "jaw closes and weight moves onto forelegs"
+        },
+        {
+          "direction": "west",
+          "file": "03-recovery.png",
+          "pose": "draw muzzle back into ready stance"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-windup.png",
+          "pose": "crouch and draw head back for bite"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-contact.png",
+          "pose": "lunge with jaw wide at contact"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-follow-through.png",
+          "pose": "jaw closes and weight moves onto forelegs"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-recovery.png",
+          "pose": "draw muzzle back into ready stance"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-windup.png",
+          "pose": "crouch and draw head back for bite"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-contact.png",
+          "pose": "lunge with jaw wide at contact"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-follow-through.png",
+          "pose": "jaw closes and weight moves onto forelegs"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-recovery.png",
+          "pose": "draw muzzle back into ready stance"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-windup.png",
+          "pose": "crouch and draw head back for bite"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-contact.png",
+          "pose": "lunge with jaw wide at contact"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-follow-through.png",
+          "pose": "jaw closes and weight moves onto forelegs"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-recovery.png",
+          "pose": "draw muzzle back into ready stance"
+        }
+      ]
+    },
+    "hit": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-flinch.png",
+          "pose": "flinch with ears back and forelegs bent"
+        },
+        {
+          "direction": "south",
+          "file": "01-recoil.png",
+          "pose": "strong recoil through shoulders and neck"
+        },
+        {
+          "direction": "south",
+          "file": "02-recover.png",
+          "pose": "regain four-paw stance"
+        },
+        {
+          "direction": "south",
+          "file": "03-ready.png",
+          "pose": "balanced ready silhouette"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-flinch.png",
+          "pose": "flinch with ears back and forelegs bent"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-recoil.png",
+          "pose": "strong recoil through shoulders and neck"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-recover.png",
+          "pose": "regain four-paw stance"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-ready.png",
+          "pose": "balanced ready silhouette"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-flinch.png",
+          "pose": "flinch with ears back and forelegs bent"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-recoil.png",
+          "pose": "strong recoil through shoulders and neck"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-recover.png",
+          "pose": "regain four-paw stance"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-ready.png",
+          "pose": "balanced ready silhouette"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-flinch.png",
+          "pose": "flinch with ears back and forelegs bent"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-recoil.png",
+          "pose": "strong recoil through shoulders and neck"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-recover.png",
+          "pose": "regain four-paw stance"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-ready.png",
+          "pose": "balanced ready silhouette"
+        },
+        {
+          "direction": "east",
+          "file": "00-flinch.png",
+          "pose": "flinch with ears back and forelegs bent"
+        },
+        {
+          "direction": "east",
+          "file": "01-recoil.png",
+          "pose": "strong recoil through shoulders and neck"
+        },
+        {
+          "direction": "east",
+          "file": "02-recover.png",
+          "pose": "regain four-paw stance"
+        },
+        {
+          "direction": "east",
+          "file": "03-ready.png",
+          "pose": "balanced ready silhouette"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-flinch.png",
+          "pose": "flinch with ears back and forelegs bent"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-recoil.png",
+          "pose": "strong recoil through shoulders and neck"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-recover.png",
+          "pose": "regain four-paw stance"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-ready.png",
+          "pose": "balanced ready silhouette"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-flinch.png",
+          "pose": "flinch with ears back and forelegs bent"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-recoil.png",
+          "pose": "strong recoil through shoulders and neck"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-recover.png",
+          "pose": "regain four-paw stance"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-ready.png",
+          "pose": "balanced ready silhouette"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-flinch.png",
+          "pose": "flinch with ears back and forelegs bent"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-recoil.png",
+          "pose": "strong recoil through shoulders and neck"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-recover.png",
+          "pose": "regain four-paw stance"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-ready.png",
+          "pose": "balanced ready silhouette"
+        },
+        {
+          "direction": "north",
+          "file": "00-flinch.png",
+          "pose": "flinch with ears back and forelegs bent"
+        },
+        {
+          "direction": "north",
+          "file": "01-recoil.png",
+          "pose": "strong recoil through shoulders and neck"
+        },
+        {
+          "direction": "north",
+          "file": "02-recover.png",
+          "pose": "regain four-paw stance"
+        },
+        {
+          "direction": "north",
+          "file": "03-ready.png",
+          "pose": "balanced ready silhouette"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-flinch.png",
+          "pose": "flinch with ears back and forelegs bent"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-recoil.png",
+          "pose": "strong recoil through shoulders and neck"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-recover.png",
+          "pose": "regain four-paw stance"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-ready.png",
+          "pose": "balanced ready silhouette"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-flinch.png",
+          "pose": "flinch with ears back and forelegs bent"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-recoil.png",
+          "pose": "strong recoil through shoulders and neck"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-recover.png",
+          "pose": "regain four-paw stance"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-ready.png",
+          "pose": "balanced ready silhouette"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-flinch.png",
+          "pose": "flinch with ears back and forelegs bent"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-recoil.png",
+          "pose": "strong recoil through shoulders and neck"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-recover.png",
+          "pose": "regain four-paw stance"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-ready.png",
+          "pose": "balanced ready silhouette"
+        },
+        {
+          "direction": "west",
+          "file": "00-flinch.png",
+          "pose": "flinch with ears back and forelegs bent"
+        },
+        {
+          "direction": "west",
+          "file": "01-recoil.png",
+          "pose": "strong recoil through shoulders and neck"
+        },
+        {
+          "direction": "west",
+          "file": "02-recover.png",
+          "pose": "regain four-paw stance"
+        },
+        {
+          "direction": "west",
+          "file": "03-ready.png",
+          "pose": "balanced ready silhouette"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-flinch.png",
+          "pose": "flinch with ears back and forelegs bent"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-recoil.png",
+          "pose": "strong recoil through shoulders and neck"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-recover.png",
+          "pose": "regain four-paw stance"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-ready.png",
+          "pose": "balanced ready silhouette"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-flinch.png",
+          "pose": "flinch with ears back and forelegs bent"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-recoil.png",
+          "pose": "strong recoil through shoulders and neck"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-recover.png",
+          "pose": "regain four-paw stance"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-ready.png",
+          "pose": "balanced ready silhouette"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-flinch.png",
+          "pose": "flinch with ears back and forelegs bent"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-recoil.png",
+          "pose": "strong recoil through shoulders and neck"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-recover.png",
+          "pose": "regain four-paw stance"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-ready.png",
+          "pose": "balanced ready silhouette"
+        }
+      ]
+    },
+    "death": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-fall.png",
+          "pose": "knees buckle and head lowers"
+        },
+        {
+          "direction": "south",
+          "file": "01-collapse.png",
+          "pose": "roll onto side with legs collapsing"
+        },
+        {
+          "direction": "south",
+          "file": "02-ground.png",
+          "pose": "fully grounded side-lying wolf"
+        },
+        {
+          "direction": "south",
+          "file": "03-settle.png",
+          "pose": "final still side-lying body and tail settled"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and head lowers"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-collapse.png",
+          "pose": "roll onto side with legs collapsing"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded side-lying wolf"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-settle.png",
+          "pose": "final still side-lying body and tail settled"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and head lowers"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-collapse.png",
+          "pose": "roll onto side with legs collapsing"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded side-lying wolf"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-settle.png",
+          "pose": "final still side-lying body and tail settled"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and head lowers"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-collapse.png",
+          "pose": "roll onto side with legs collapsing"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded side-lying wolf"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-settle.png",
+          "pose": "final still side-lying body and tail settled"
+        },
+        {
+          "direction": "east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and head lowers"
+        },
+        {
+          "direction": "east",
+          "file": "01-collapse.png",
+          "pose": "roll onto side with legs collapsing"
+        },
+        {
+          "direction": "east",
+          "file": "02-ground.png",
+          "pose": "fully grounded side-lying wolf"
+        },
+        {
+          "direction": "east",
+          "file": "03-settle.png",
+          "pose": "final still side-lying body and tail settled"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and head lowers"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-collapse.png",
+          "pose": "roll onto side with legs collapsing"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded side-lying wolf"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-settle.png",
+          "pose": "final still side-lying body and tail settled"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and head lowers"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-collapse.png",
+          "pose": "roll onto side with legs collapsing"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded side-lying wolf"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-settle.png",
+          "pose": "final still side-lying body and tail settled"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-fall.png",
+          "pose": "knees buckle and head lowers"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-collapse.png",
+          "pose": "roll onto side with legs collapsing"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded side-lying wolf"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-settle.png",
+          "pose": "final still side-lying body and tail settled"
+        },
+        {
+          "direction": "north",
+          "file": "00-fall.png",
+          "pose": "knees buckle and head lowers"
+        },
+        {
+          "direction": "north",
+          "file": "01-collapse.png",
+          "pose": "roll onto side with legs collapsing"
+        },
+        {
+          "direction": "north",
+          "file": "02-ground.png",
+          "pose": "fully grounded side-lying wolf"
+        },
+        {
+          "direction": "north",
+          "file": "03-settle.png",
+          "pose": "final still side-lying body and tail settled"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and head lowers"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-collapse.png",
+          "pose": "roll onto side with legs collapsing"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded side-lying wolf"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-settle.png",
+          "pose": "final still side-lying body and tail settled"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and head lowers"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-collapse.png",
+          "pose": "roll onto side with legs collapsing"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded side-lying wolf"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-settle.png",
+          "pose": "final still side-lying body and tail settled"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and head lowers"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-collapse.png",
+          "pose": "roll onto side with legs collapsing"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded side-lying wolf"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-settle.png",
+          "pose": "final still side-lying body and tail settled"
+        },
+        {
+          "direction": "west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and head lowers"
+        },
+        {
+          "direction": "west",
+          "file": "01-collapse.png",
+          "pose": "roll onto side with legs collapsing"
+        },
+        {
+          "direction": "west",
+          "file": "02-ground.png",
+          "pose": "fully grounded side-lying wolf"
+        },
+        {
+          "direction": "west",
+          "file": "03-settle.png",
+          "pose": "final still side-lying body and tail settled"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and head lowers"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-collapse.png",
+          "pose": "roll onto side with legs collapsing"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded side-lying wolf"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-settle.png",
+          "pose": "final still side-lying body and tail settled"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and head lowers"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-collapse.png",
+          "pose": "roll onto side with legs collapsing"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded side-lying wolf"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-settle.png",
+          "pose": "final still side-lying body and tail settled"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-fall.png",
+          "pose": "knees buckle and head lowers"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-collapse.png",
+          "pose": "roll onto side with legs collapsing"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded side-lying wolf"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-settle.png",
+          "pose": "final still side-lying body and tail settled"
+        }
+      ]
+    }
+  },
+  "requiredRootFiles": [
+    "meta.json",
+    "poses/"
+  ],
+  "imageQa": "Raw built-in imagegen outputs are candidate source only. Every pose still requires visual identity/facing review, hard-alpha/edge QA, foot-anchor measurement, and atlas QA before acceptance.",
+  "productionQa": {
+    "acceptedPoses": 0,
+    "baselineCellsAreSourceReferencesOnly": true,
+    "requiredChecks": [
+      "species identity",
+      "actual world facing",
+      "action phase semantics",
+      "fixed projection and scale",
+      "feet anchor",
+      "atlas margins and alpha"
+    ],
+    "runtimePromoted": false,
+    "posePresenceByAction": {
+      "idle": 16,
+      "walk": 8,
+      "attack": 8,
+      "hit": 8,
+      "death": 8
+    },
+    "posePresence": 48,
+    "expectedPoseCount": 272,
+    "missingPoseCount": 224,
+    "statusCounts": {
+      "rejected-needs-regeneration": 6,
+      "candidate-review": 3,
+      "source-reference-unverified": 39
+    },
+    "missingSidecars": [],
+    "generationBlocker": {
+      "reason": "OpenAI built-in image_gen HTTP429 usage_limit_reached",
+      "resetsAtUnix": 1793288069
+    },
+    "findings": [
+      "Six idle candidates rejected for halo or wrong angle.",
+      "Clean trueeast sideprofile and SSE/NNW candidates need projection/scale review.",
+      "Legacy east idle was wrongly threequarter; rootatlas is retained source only."
+    ]
+  }
+}

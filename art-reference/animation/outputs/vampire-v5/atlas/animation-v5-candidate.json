@@ -1,0 +1,5729 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "vampire",
+  "race": "undead",
+  "version": "v5",
+  "generator": "built-in image_gen for candidate frames; preserved 40 approved atlas poses",
+  "file": "animation-v5-candidate.png",
+  "sourceCanvas": {
+    "width": 6144,
+    "height": 6528,
+    "mode": "RGBA"
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "visual-approved animation/meta.json; 16-direction measurement pending"
+  },
+  "layout": {
+    "columns": 16,
+    "rows": 17,
+    "frameCount": 272,
+    "cellOrder": "row-major"
+  },
+  "directions": [
+    "south",
+    "south-south-east",
+    "south-east",
+    "east-south-east",
+    "east",
+    "east-north-east",
+    "north-east",
+    "north-north-east",
+    "north",
+    "north-north-west",
+    "north-west",
+    "west-north-west",
+    "west",
+    "west-south-west",
+    "south-west",
+    "south-south-west"
+  ],
+  "actionRowOrder": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "framesPerDirection": {
+    "idle": 1,
+    "walk": 4,
+    "attack": 4,
+    "hit": 4,
+    "death": 4
+  },
+  "sourceInventory": {
+    "expected": 272,
+    "presentPosePngs": 0,
+    "missingExpected": 272
+  },
+  "sourceCounts": {
+    "preserved-approved-source-pose": 40,
+    "generated-candidate": 232
+  },
+  "sourceAtlas": {
+    "file": "art-reference/monsters/undead/vampire/animation/atlas/animation.png",
+    "status": "visual-approved",
+    "sha256": "18f9cc2790e92d90966b2577c578f405a80f1053e3df69b79461b8b844b73a50"
+  },
+  "sourceSheets": [
+    {
+      "file": "source/v5-contact-sheets/idle-16.png",
+      "sourceImageId": "exec-90274bb5-b914-4c38-9d48-b7da1e2709c4.png",
+      "action": "idle",
+      "phase": "idle",
+      "sha256": "98383b80f8547bcdb73f3548c8b971e07e9af9f40a46ce0f76ea7ac6437f319c",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.51716,
+        "below128PixelFraction": 0.82639,
+        "confidence128PixelFraction": 0.17361,
+        "sheetCornerAlpha": [
+          0,
+          0,
+          1,
+          1
+        ],
+        "confidencePixelCountPerCell": [
+          17189,
+          17123,
+          16585,
+          16873,
+          16618,
+          16889,
+          16639,
+          16709,
+          17489,
+          17415,
+          17251,
+          16870,
+          16716,
+          17489,
+          17427,
+          17785
+        ]
+      }
+    },
+    {
+      "file": "source/v5-contact-sheets/walk-00-stride-a-16.png",
+      "sourceImageId": "exec-af21aa42-d2b5-408c-9853-63e26759a4d7.png",
+      "action": "walk",
+      "phase": "00-stride-a",
+      "sha256": "505a40b432fe6e2efadb45ea65dca6a010f1c9ec0c08891df63edb29c3a2dc58",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.79058,
+        "below128PixelFraction": 0.84647,
+        "confidence128PixelFraction": 0.15353,
+        "sheetCornerAlpha": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "confidencePixelCountPerCell": [
+          15167,
+          14974,
+          14667,
+          14900,
+          15013,
+          15090,
+          14894,
+          14062,
+          15734,
+          15247,
+          15536,
+          15885,
+          15785,
+          14897,
+          14853,
+          14772
+        ]
+      }
+    },
+    {
+      "file": "source/v5-contact-sheets/walk-01-stride-b-16.png",
+      "sourceImageId": "exec-09fae67b-afab-458a-b93a-216422e6ed0b.png",
+      "action": "walk",
+      "phase": "01-stride-b",
+      "sha256": "be91683041cead657ca8221ec8194c3a4f65c957904deaa7d6079265039f18eb",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.7296,
+        "below128PixelFraction": 0.82099,
+        "confidence128PixelFraction": 0.17901,
+        "sheetCornerAlpha": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "confidencePixelCountPerCell": [
+          17839,
+          17335,
+          17434,
+          17559,
+          17336,
+          17876,
+          17892,
+          17140,
+          17647,
+          17679,
+          17428,
+          17107,
+          17536,
+          17502,
+          17580,
+          18671
+        ]
+      }
+    },
+    {
+      "file": "source/v5-contact-sheets/walk-02-stride-c-16.png",
+      "sourceImageId": "exec-1b182b25-eceb-46dc-a036-fb7adecf6e57.png",
+      "action": "walk",
+      "phase": "02-stride-c",
+      "sha256": "3ba83211f67b38f71aa40a1c32d285ad3feca7fd4530e0d4d2e74b3a42a8c1d5",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.69912,
+        "below128PixelFraction": 0.82058,
+        "confidence128PixelFraction": 0.17942,
+        "sheetCornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "confidencePixelCountPerCell": [
+          17612,
+          17678,
+          17960,
+          17416,
+          17293,
+          17951,
+          17857,
+          17484,
+          17211,
+          17378,
+          17934,
+          17725,
+          17721,
+          18109,
+          17494,
+          17376
+        ]
+      }
+    },
+    {
+      "file": "source/v5-contact-sheets/walk-03-stride-d-16.png",
+      "sourceImageId": "exec-842e31ba-7084-4437-85ad-a2b07a7bc7de.png",
+      "action": "walk",
+      "phase": "03-stride-d",
+      "sha256": "c705d67d9873ead2af332e8c42d57660b1cc2ef4fac9baad2e12c2c19d1d3b3e",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.83267,
+        "below128PixelFraction": 0.86215,
+        "confidence128PixelFraction": 0.13785,
+        "sheetCornerAlpha": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "confidencePixelCountPerCell": [
+          13998,
+          13582,
+          13403,
+          13432,
+          13492,
+          13232,
+          13019,
+          12722,
+          13872,
+          13597,
+          13678,
+          13628,
+          13734,
+          13580,
+          13937,
+          13907
+        ]
+      }
+    },
+    {
+      "file": "source/v5-contact-sheets/attack-00-aim-16.png",
+      "sourceImageId": "exec-87eac68a-b42e-43ac-a68a-7612461fe809.png",
+      "action": "attack",
+      "phase": "00-aim",
+      "sha256": "e7e9c3bedfed6c13498c644e7eda1c0dd05d90913a1ea892f9a468f6950c63de",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.71348,
+        "below128PixelFraction": 0.8263,
+        "confidence128PixelFraction": 0.1737,
+        "sheetCornerAlpha": [
+          0,
+          0,
+          1,
+          0
+        ],
+        "confidencePixelCountPerCell": [
+          17372,
+          17147,
+          16798,
+          16519,
+          16958,
+          16703,
+          16633,
+          16560,
+          17337,
+          17707,
+          17619,
+          17318,
+          17250,
+          17037,
+          17076,
+          17176
+        ]
+      }
+    },
+    {
+      "file": "source/v5-contact-sheets/attack-01-release-16.png",
+      "sourceImageId": "exec-e51fde7c-1a17-4fe0-8136-48e03ef7f19e.png",
+      "action": "attack",
+      "phase": "01-release",
+      "sha256": "b38e589a3f42fca3a218b79ce616437e97eb36fc9d73502b621319176a5676c8",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.73357,
+        "below128PixelFraction": 0.84209,
+        "confidence128PixelFraction": 0.15791,
+        "sheetCornerAlpha": [
+          0,
+          0,
+          1,
+          1
+        ],
+        "confidencePixelCountPerCell": [
+          14727,
+          14631,
+          15249,
+          15838,
+          15790,
+          15863,
+          15636,
+          15605,
+          15869,
+          16313,
+          15610,
+          15665,
+          15652,
+          15305,
+          15100,
+          15515
+        ]
+      }
+    },
+    {
+      "file": "source/v5-contact-sheets/attack-02-follow-through-16.png",
+      "sourceImageId": "exec-bb0e5526-55c3-4596-a390-6b06ae0c3f3a.png",
+      "action": "attack",
+      "phase": "02-follow-through",
+      "sha256": "3551d9546ce7cf36a1d10655e8a09f2f0daa96e3362d3ec7ac9248064a780724",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.77848,
+        "below128PixelFraction": 0.86318,
+        "confidence128PixelFraction": 0.13682,
+        "sheetCornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "confidencePixelCountPerCell": [
+          13116,
+          13716,
+          14159,
+          13684,
+          13741,
+          13476,
+          13653,
+          13329,
+          13247,
+          13100,
+          13559,
+          13310,
+          13461,
+          13314,
+          12793,
+          13537
+        ]
+      }
+    },
+    {
+      "file": "source/v5-contact-sheets/attack-03-recovery-16.png",
+      "sourceImageId": "exec-4902ab6e-063f-477a-85fc-380e41fdd35a.png",
+      "action": "attack",
+      "phase": "03-recovery",
+      "sha256": "9fd624d5e001cc47a428e618cddecf71da22ad0cc594ea18cdbe7ae82fcf230d",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.74444,
+        "below128PixelFraction": 0.83606,
+        "confidence128PixelFraction": 0.16394,
+        "sheetCornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "confidencePixelCountPerCell": [
+          15902,
+          15714,
+          15563,
+          15071,
+          15766,
+          16187,
+          16571,
+          16445,
+          16684,
+          16661,
+          16376,
+          15983,
+          15881,
+          15903,
+          16379,
+          16767
+        ]
+      }
+    },
+    {
+      "file": "source/v5-contact-sheets/hit-00-flinch-16.png",
+      "sourceImageId": "exec-62f1f250-3a6c-4121-af43-ad68ce478f01.png",
+      "action": "hit",
+      "phase": "00-flinch",
+      "sha256": "6ed9321fbd41956d87a3217d2aab94217640c696c07845c30a8674a5ccdfaccc",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.668,
+        "below128PixelFraction": 0.80504,
+        "confidence128PixelFraction": 0.19496,
+        "sheetCornerAlpha": [
+          0,
+          0,
+          1,
+          1
+        ],
+        "confidencePixelCountPerCell": [
+          20120,
+          19438,
+          18975,
+          18541,
+          17990,
+          18057,
+          18992,
+          19525,
+          20254,
+          19449,
+          18584,
+          19319,
+          19002,
+          18788,
+          19627,
+          19989
+        ]
+      }
+    },
+    {
+      "file": "source/v5-contact-sheets/hit-01-recoil-16.png",
+      "sourceImageId": "exec-7cee7df8-1db7-48d8-ae78-0541feb7bcc4.png",
+      "action": "hit",
+      "phase": "01-recoil",
+      "sha256": "cc98c1a2fd21b92a519125a07a1a3debae3436cd9954f14eb70a723797c91bb0",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.73331,
+        "below128PixelFraction": 0.80832,
+        "confidence128PixelFraction": 0.19168,
+        "sheetCornerAlpha": [
+          0,
+          0,
+          1,
+          0
+        ],
+        "confidencePixelCountPerCell": [
+          20538,
+          19934,
+          19048,
+          18500,
+          18373,
+          18592,
+          18572,
+          18756,
+          19541,
+          19255,
+          17883,
+          17659,
+          17169,
+          18442,
+          19131,
+          20101
+        ]
+      }
+    },
+    {
+      "file": "source/v5-contact-sheets/hit-02-recover-16.png",
+      "sourceImageId": "exec-dd39e69f-97a7-42d3-9cf0-3538be53660d.png",
+      "action": "hit",
+      "phase": "02-recover",
+      "sha256": "ab015a91e5c43c06cca697ce5625c2a790b1733a11fcc717218c450b3ec84151",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.68171,
+        "below128PixelFraction": 0.79155,
+        "confidence128PixelFraction": 0.20845,
+        "sheetCornerAlpha": [
+          0,
+          0,
+          1,
+          0
+        ],
+        "confidencePixelCountPerCell": [
+          21819,
+          21278,
+          19866,
+          19171,
+          19666,
+          20683,
+          20435,
+          20652,
+          21239,
+          20785,
+          20606,
+          20461,
+          19844,
+          19745,
+          20583,
+          21025
+        ]
+      }
+    },
+    {
+      "file": "source/v5-contact-sheets/hit-03-ready-16.png",
+      "sourceImageId": "exec-dcc12c4a-189a-4202-9e0c-ab56ffa42ba1.png",
+      "action": "hit",
+      "phase": "03-ready",
+      "sha256": "68e25c31699e9cef72826436d992d21936052807a2676fb77b75af8a9fc30743",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.75103,
+        "below128PixelFraction": 0.83513,
+        "confidence128PixelFraction": 0.16487,
+        "sheetCornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "confidencePixelCountPerCell": [
+          16923,
+          16457,
+          15857,
+          15745,
+          15417,
+          15438,
+          15774,
+          15930,
+          16468,
+          16726,
+          16325,
+          16200,
+          16279,
+          16209,
+          16663,
+          16901
+        ]
+      }
+    },
+    {
+      "file": "source/v5-contact-sheets/death-00-fall-16.png",
+      "sourceImageId": "exec-92632ce9-1b2c-4eae-9f1c-ead0892c03f2.png",
+      "action": "death",
+      "phase": "00-fall",
+      "sha256": "f97c63d7bab5f9557a9333d1343a92b3882b278de58d2b0f16a51e740bc70676",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.74097,
+        "below128PixelFraction": 0.84066,
+        "confidence128PixelFraction": 0.15934,
+        "sheetCornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "confidencePixelCountPerCell": [
+          15664,
+          15362,
+          15647,
+          15327,
+          15246,
+          15449,
+          14922,
+          15065,
+          16226,
+          16202,
+          15711,
+          15728,
+          16330,
+          16029,
+          15771,
+          15936
+        ]
+      }
+    },
+    {
+      "file": "source/v5-contact-sheets/death-01-collapse-16.png",
+      "sourceImageId": "exec-8479c475-14f9-40d6-98ca-1e93847fcfeb.png",
+      "action": "death",
+      "phase": "01-collapse",
+      "sha256": "839f4a966341a9cc565ba6bed85cf6d99f9033db5f3f581da2386f5b50dfaa6b",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.73344,
+        "below128PixelFraction": 0.88918,
+        "confidence128PixelFraction": 0.11082,
+        "sheetCornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "confidencePixelCountPerCell": [
+          11354,
+          11138,
+          11112,
+          10856,
+          10974,
+          10857,
+          10660,
+          10131,
+          10841,
+          10764,
+          10803,
+          11020,
+          10910,
+          11019,
+          10981,
+          10889
+        ]
+      }
+    },
+    {
+      "file": "source/v5-contact-sheets/death-02-ground-16.png",
+      "sourceImageId": "exec-73322ab6-b839-4a64-a15c-0a7709f5d001.png",
+      "action": "death",
+      "phase": "02-ground",
+      "sha256": "8f8975e10b807a9afa218bef1714138e7ded737614497306fb7ac9a37df7874c",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.78229,
+        "below128PixelFraction": 0.88424,
+        "confidence128PixelFraction": 0.11576,
+        "sheetCornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "confidencePixelCountPerCell": [
+          11291,
+          11536,
+          11733,
+          11774,
+          11691,
+          11218,
+          10983,
+          11303,
+          10695,
+          11350,
+          11690,
+          11762,
+          11468,
+          11504,
+          11220,
+          10862
+        ]
+      }
+    },
+    {
+      "file": "source/v5-contact-sheets/death-03-settle-16.png",
+      "sourceImageId": "exec-8722576f-3f63-4938-96e5-1d49c3821333.png",
+      "action": "death",
+      "phase": "03-settle",
+      "sha256": "d3d4c90f3665b52dd0a6e02b49bc41fc8e048a9a82135d463db5e702f23c77c2",
+      "alphaAudit": {
+        "zeroPixelFraction": 0.69497,
+        "below128PixelFraction": 0.8609,
+        "confidence128PixelFraction": 0.1391,
+        "sheetCornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "confidencePixelCountPerCell": [
+          12572,
+          13015,
+          13382,
+          13594,
+          14340,
+          13845,
+          13289,
+          12757,
+          12511,
+          13360,
+          14421,
+          13982,
+          14365,
+          14554,
+          13970,
+          14824
+        ]
+      }
+    }
+  ],
+  "rows": [
+    {
+      "row": 0,
+      "action": "idle",
+      "phase": "idle",
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "action": "idle",
+          "phase": "idle",
+          "direction": "south",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/idle/south/idle.png"
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "action": "idle",
+          "phase": "idle",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/idle/south-south-east/idle.png"
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "action": "idle",
+          "phase": "idle",
+          "direction": "south-east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/idle/south-east/idle.png"
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "action": "idle",
+          "phase": "idle",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/idle/east-south-east/idle.png"
+        },
+        {
+          "row": 0,
+          "column": 4,
+          "action": "idle",
+          "phase": "idle",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/idle/east/idle.png"
+        },
+        {
+          "row": 0,
+          "column": 5,
+          "action": "idle",
+          "phase": "idle",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/idle/east-north-east/idle.png"
+        },
+        {
+          "row": 0,
+          "column": 6,
+          "action": "idle",
+          "phase": "idle",
+          "direction": "north-east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/idle/north-east/idle.png"
+        },
+        {
+          "row": 0,
+          "column": 7,
+          "action": "idle",
+          "phase": "idle",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/idle/north-north-east/idle.png"
+        },
+        {
+          "row": 0,
+          "column": 8,
+          "action": "idle",
+          "phase": "idle",
+          "direction": "north",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/idle/north/idle.png"
+        },
+        {
+          "row": 0,
+          "column": 9,
+          "action": "idle",
+          "phase": "idle",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/idle/north-north-west/idle.png"
+        },
+        {
+          "row": 0,
+          "column": 10,
+          "action": "idle",
+          "phase": "idle",
+          "direction": "north-west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/idle/north-west/idle.png"
+        },
+        {
+          "row": 0,
+          "column": 11,
+          "action": "idle",
+          "phase": "idle",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/idle/west-north-west/idle.png"
+        },
+        {
+          "row": 0,
+          "column": 12,
+          "action": "idle",
+          "phase": "idle",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/idle/west/idle.png"
+        },
+        {
+          "row": 0,
+          "column": 13,
+          "action": "idle",
+          "phase": "idle",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/idle/west-south-west/idle.png"
+        },
+        {
+          "row": 0,
+          "column": 14,
+          "action": "idle",
+          "phase": "idle",
+          "direction": "south-west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/idle/south-west/idle.png"
+        },
+        {
+          "row": 0,
+          "column": 15,
+          "action": "idle",
+          "phase": "idle",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/idle/south-south-west/idle.png"
+        }
+      ]
+    },
+    {
+      "row": 1,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "frames": [
+        {
+          "row": 1,
+          "column": 0,
+          "action": "walk",
+          "phase": "00-stride-a",
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south/00-stride-a.png"
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "action": "walk",
+          "phase": "00-stride-a",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south-south-east/00-stride-a.png"
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "action": "walk",
+          "phase": "00-stride-a",
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south-east/00-stride-a.png"
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "action": "walk",
+          "phase": "00-stride-a",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/east-south-east/00-stride-a.png"
+        },
+        {
+          "row": 1,
+          "column": 4,
+          "action": "walk",
+          "phase": "00-stride-a",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/walk/east/00-stride-a.png"
+        },
+        {
+          "row": 1,
+          "column": 5,
+          "action": "walk",
+          "phase": "00-stride-a",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/east-north-east/00-stride-a.png"
+        },
+        {
+          "row": 1,
+          "column": 6,
+          "action": "walk",
+          "phase": "00-stride-a",
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north-east/00-stride-a.png"
+        },
+        {
+          "row": 1,
+          "column": 7,
+          "action": "walk",
+          "phase": "00-stride-a",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north-north-east/00-stride-a.png"
+        },
+        {
+          "row": 1,
+          "column": 8,
+          "action": "walk",
+          "phase": "00-stride-a",
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north/00-stride-a.png"
+        },
+        {
+          "row": 1,
+          "column": 9,
+          "action": "walk",
+          "phase": "00-stride-a",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north-north-west/00-stride-a.png"
+        },
+        {
+          "row": 1,
+          "column": 10,
+          "action": "walk",
+          "phase": "00-stride-a",
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north-west/00-stride-a.png"
+        },
+        {
+          "row": 1,
+          "column": 11,
+          "action": "walk",
+          "phase": "00-stride-a",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/west-north-west/00-stride-a.png"
+        },
+        {
+          "row": 1,
+          "column": 12,
+          "action": "walk",
+          "phase": "00-stride-a",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/walk/west/00-stride-a.png"
+        },
+        {
+          "row": 1,
+          "column": 13,
+          "action": "walk",
+          "phase": "00-stride-a",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/west-south-west/00-stride-a.png"
+        },
+        {
+          "row": 1,
+          "column": 14,
+          "action": "walk",
+          "phase": "00-stride-a",
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south-west/00-stride-a.png"
+        },
+        {
+          "row": 1,
+          "column": 15,
+          "action": "walk",
+          "phase": "00-stride-a",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south-south-west/00-stride-a.png"
+        }
+      ]
+    },
+    {
+      "row": 2,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "frames": [
+        {
+          "row": 2,
+          "column": 0,
+          "action": "walk",
+          "phase": "01-stride-b",
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south/01-stride-b.png"
+        },
+        {
+          "row": 2,
+          "column": 1,
+          "action": "walk",
+          "phase": "01-stride-b",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south-south-east/01-stride-b.png"
+        },
+        {
+          "row": 2,
+          "column": 2,
+          "action": "walk",
+          "phase": "01-stride-b",
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south-east/01-stride-b.png"
+        },
+        {
+          "row": 2,
+          "column": 3,
+          "action": "walk",
+          "phase": "01-stride-b",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/east-south-east/01-stride-b.png"
+        },
+        {
+          "row": 2,
+          "column": 4,
+          "action": "walk",
+          "phase": "01-stride-b",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/walk/east/01-stride-b.png"
+        },
+        {
+          "row": 2,
+          "column": 5,
+          "action": "walk",
+          "phase": "01-stride-b",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/east-north-east/01-stride-b.png"
+        },
+        {
+          "row": 2,
+          "column": 6,
+          "action": "walk",
+          "phase": "01-stride-b",
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north-east/01-stride-b.png"
+        },
+        {
+          "row": 2,
+          "column": 7,
+          "action": "walk",
+          "phase": "01-stride-b",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north-north-east/01-stride-b.png"
+        },
+        {
+          "row": 2,
+          "column": 8,
+          "action": "walk",
+          "phase": "01-stride-b",
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north/01-stride-b.png"
+        },
+        {
+          "row": 2,
+          "column": 9,
+          "action": "walk",
+          "phase": "01-stride-b",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north-north-west/01-stride-b.png"
+        },
+        {
+          "row": 2,
+          "column": 10,
+          "action": "walk",
+          "phase": "01-stride-b",
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north-west/01-stride-b.png"
+        },
+        {
+          "row": 2,
+          "column": 11,
+          "action": "walk",
+          "phase": "01-stride-b",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/west-north-west/01-stride-b.png"
+        },
+        {
+          "row": 2,
+          "column": 12,
+          "action": "walk",
+          "phase": "01-stride-b",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/walk/west/01-stride-b.png"
+        },
+        {
+          "row": 2,
+          "column": 13,
+          "action": "walk",
+          "phase": "01-stride-b",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/west-south-west/01-stride-b.png"
+        },
+        {
+          "row": 2,
+          "column": 14,
+          "action": "walk",
+          "phase": "01-stride-b",
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south-west/01-stride-b.png"
+        },
+        {
+          "row": 2,
+          "column": 15,
+          "action": "walk",
+          "phase": "01-stride-b",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south-south-west/01-stride-b.png"
+        }
+      ]
+    },
+    {
+      "row": 3,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "frames": [
+        {
+          "row": 3,
+          "column": 0,
+          "action": "walk",
+          "phase": "02-stride-c",
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south/02-stride-c.png"
+        },
+        {
+          "row": 3,
+          "column": 1,
+          "action": "walk",
+          "phase": "02-stride-c",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south-south-east/02-stride-c.png"
+        },
+        {
+          "row": 3,
+          "column": 2,
+          "action": "walk",
+          "phase": "02-stride-c",
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south-east/02-stride-c.png"
+        },
+        {
+          "row": 3,
+          "column": 3,
+          "action": "walk",
+          "phase": "02-stride-c",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/east-south-east/02-stride-c.png"
+        },
+        {
+          "row": 3,
+          "column": 4,
+          "action": "walk",
+          "phase": "02-stride-c",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/walk/east/02-stride-c.png"
+        },
+        {
+          "row": 3,
+          "column": 5,
+          "action": "walk",
+          "phase": "02-stride-c",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/east-north-east/02-stride-c.png"
+        },
+        {
+          "row": 3,
+          "column": 6,
+          "action": "walk",
+          "phase": "02-stride-c",
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north-east/02-stride-c.png"
+        },
+        {
+          "row": 3,
+          "column": 7,
+          "action": "walk",
+          "phase": "02-stride-c",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north-north-east/02-stride-c.png"
+        },
+        {
+          "row": 3,
+          "column": 8,
+          "action": "walk",
+          "phase": "02-stride-c",
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north/02-stride-c.png"
+        },
+        {
+          "row": 3,
+          "column": 9,
+          "action": "walk",
+          "phase": "02-stride-c",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north-north-west/02-stride-c.png"
+        },
+        {
+          "row": 3,
+          "column": 10,
+          "action": "walk",
+          "phase": "02-stride-c",
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north-west/02-stride-c.png"
+        },
+        {
+          "row": 3,
+          "column": 11,
+          "action": "walk",
+          "phase": "02-stride-c",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/west-north-west/02-stride-c.png"
+        },
+        {
+          "row": 3,
+          "column": 12,
+          "action": "walk",
+          "phase": "02-stride-c",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/walk/west/02-stride-c.png"
+        },
+        {
+          "row": 3,
+          "column": 13,
+          "action": "walk",
+          "phase": "02-stride-c",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/west-south-west/02-stride-c.png"
+        },
+        {
+          "row": 3,
+          "column": 14,
+          "action": "walk",
+          "phase": "02-stride-c",
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south-west/02-stride-c.png"
+        },
+        {
+          "row": 3,
+          "column": 15,
+          "action": "walk",
+          "phase": "02-stride-c",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south-south-west/02-stride-c.png"
+        }
+      ]
+    },
+    {
+      "row": 4,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "frames": [
+        {
+          "row": 4,
+          "column": 0,
+          "action": "walk",
+          "phase": "03-stride-d",
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south/03-stride-d.png"
+        },
+        {
+          "row": 4,
+          "column": 1,
+          "action": "walk",
+          "phase": "03-stride-d",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south-south-east/03-stride-d.png"
+        },
+        {
+          "row": 4,
+          "column": 2,
+          "action": "walk",
+          "phase": "03-stride-d",
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south-east/03-stride-d.png"
+        },
+        {
+          "row": 4,
+          "column": 3,
+          "action": "walk",
+          "phase": "03-stride-d",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/east-south-east/03-stride-d.png"
+        },
+        {
+          "row": 4,
+          "column": 4,
+          "action": "walk",
+          "phase": "03-stride-d",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/walk/east/03-stride-d.png"
+        },
+        {
+          "row": 4,
+          "column": 5,
+          "action": "walk",
+          "phase": "03-stride-d",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/east-north-east/03-stride-d.png"
+        },
+        {
+          "row": 4,
+          "column": 6,
+          "action": "walk",
+          "phase": "03-stride-d",
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north-east/03-stride-d.png"
+        },
+        {
+          "row": 4,
+          "column": 7,
+          "action": "walk",
+          "phase": "03-stride-d",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north-north-east/03-stride-d.png"
+        },
+        {
+          "row": 4,
+          "column": 8,
+          "action": "walk",
+          "phase": "03-stride-d",
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north/03-stride-d.png"
+        },
+        {
+          "row": 4,
+          "column": 9,
+          "action": "walk",
+          "phase": "03-stride-d",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north-north-west/03-stride-d.png"
+        },
+        {
+          "row": 4,
+          "column": 10,
+          "action": "walk",
+          "phase": "03-stride-d",
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/north-west/03-stride-d.png"
+        },
+        {
+          "row": 4,
+          "column": 11,
+          "action": "walk",
+          "phase": "03-stride-d",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/west-north-west/03-stride-d.png"
+        },
+        {
+          "row": 4,
+          "column": 12,
+          "action": "walk",
+          "phase": "03-stride-d",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/walk/west/03-stride-d.png"
+        },
+        {
+          "row": 4,
+          "column": 13,
+          "action": "walk",
+          "phase": "03-stride-d",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/west-south-west/03-stride-d.png"
+        },
+        {
+          "row": 4,
+          "column": 14,
+          "action": "walk",
+          "phase": "03-stride-d",
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south-west/03-stride-d.png"
+        },
+        {
+          "row": 4,
+          "column": 15,
+          "action": "walk",
+          "phase": "03-stride-d",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/walk/south-south-west/03-stride-d.png"
+        }
+      ]
+    },
+    {
+      "row": 5,
+      "action": "attack",
+      "phase": "00-aim",
+      "frames": [
+        {
+          "row": 5,
+          "column": 0,
+          "action": "attack",
+          "phase": "00-aim",
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south/00-aim.png"
+        },
+        {
+          "row": 5,
+          "column": 1,
+          "action": "attack",
+          "phase": "00-aim",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south-south-east/00-aim.png"
+        },
+        {
+          "row": 5,
+          "column": 2,
+          "action": "attack",
+          "phase": "00-aim",
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south-east/00-aim.png"
+        },
+        {
+          "row": 5,
+          "column": 3,
+          "action": "attack",
+          "phase": "00-aim",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/east-south-east/00-aim.png"
+        },
+        {
+          "row": 5,
+          "column": 4,
+          "action": "attack",
+          "phase": "00-aim",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/attack/east/00-aim.png"
+        },
+        {
+          "row": 5,
+          "column": 5,
+          "action": "attack",
+          "phase": "00-aim",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/east-north-east/00-aim.png"
+        },
+        {
+          "row": 5,
+          "column": 6,
+          "action": "attack",
+          "phase": "00-aim",
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north-east/00-aim.png"
+        },
+        {
+          "row": 5,
+          "column": 7,
+          "action": "attack",
+          "phase": "00-aim",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north-north-east/00-aim.png"
+        },
+        {
+          "row": 5,
+          "column": 8,
+          "action": "attack",
+          "phase": "00-aim",
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north/00-aim.png"
+        },
+        {
+          "row": 5,
+          "column": 9,
+          "action": "attack",
+          "phase": "00-aim",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north-north-west/00-aim.png"
+        },
+        {
+          "row": 5,
+          "column": 10,
+          "action": "attack",
+          "phase": "00-aim",
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north-west/00-aim.png"
+        },
+        {
+          "row": 5,
+          "column": 11,
+          "action": "attack",
+          "phase": "00-aim",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/west-north-west/00-aim.png"
+        },
+        {
+          "row": 5,
+          "column": 12,
+          "action": "attack",
+          "phase": "00-aim",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/attack/west/00-aim.png"
+        },
+        {
+          "row": 5,
+          "column": 13,
+          "action": "attack",
+          "phase": "00-aim",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/west-south-west/00-aim.png"
+        },
+        {
+          "row": 5,
+          "column": 14,
+          "action": "attack",
+          "phase": "00-aim",
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south-west/00-aim.png"
+        },
+        {
+          "row": 5,
+          "column": 15,
+          "action": "attack",
+          "phase": "00-aim",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south-south-west/00-aim.png"
+        }
+      ]
+    },
+    {
+      "row": 6,
+      "action": "attack",
+      "phase": "01-release",
+      "frames": [
+        {
+          "row": 6,
+          "column": 0,
+          "action": "attack",
+          "phase": "01-release",
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south/01-release.png"
+        },
+        {
+          "row": 6,
+          "column": 1,
+          "action": "attack",
+          "phase": "01-release",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south-south-east/01-release.png"
+        },
+        {
+          "row": 6,
+          "column": 2,
+          "action": "attack",
+          "phase": "01-release",
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south-east/01-release.png"
+        },
+        {
+          "row": 6,
+          "column": 3,
+          "action": "attack",
+          "phase": "01-release",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/east-south-east/01-release.png"
+        },
+        {
+          "row": 6,
+          "column": 4,
+          "action": "attack",
+          "phase": "01-release",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/attack/east/01-release.png"
+        },
+        {
+          "row": 6,
+          "column": 5,
+          "action": "attack",
+          "phase": "01-release",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/east-north-east/01-release.png"
+        },
+        {
+          "row": 6,
+          "column": 6,
+          "action": "attack",
+          "phase": "01-release",
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north-east/01-release.png"
+        },
+        {
+          "row": 6,
+          "column": 7,
+          "action": "attack",
+          "phase": "01-release",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north-north-east/01-release.png"
+        },
+        {
+          "row": 6,
+          "column": 8,
+          "action": "attack",
+          "phase": "01-release",
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north/01-release.png"
+        },
+        {
+          "row": 6,
+          "column": 9,
+          "action": "attack",
+          "phase": "01-release",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north-north-west/01-release.png"
+        },
+        {
+          "row": 6,
+          "column": 10,
+          "action": "attack",
+          "phase": "01-release",
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north-west/01-release.png"
+        },
+        {
+          "row": 6,
+          "column": 11,
+          "action": "attack",
+          "phase": "01-release",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/west-north-west/01-release.png"
+        },
+        {
+          "row": 6,
+          "column": 12,
+          "action": "attack",
+          "phase": "01-release",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/attack/west/01-release.png"
+        },
+        {
+          "row": 6,
+          "column": 13,
+          "action": "attack",
+          "phase": "01-release",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/west-south-west/01-release.png"
+        },
+        {
+          "row": 6,
+          "column": 14,
+          "action": "attack",
+          "phase": "01-release",
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south-west/01-release.png"
+        },
+        {
+          "row": 6,
+          "column": 15,
+          "action": "attack",
+          "phase": "01-release",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south-south-west/01-release.png"
+        }
+      ]
+    },
+    {
+      "row": 7,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "frames": [
+        {
+          "row": 7,
+          "column": 0,
+          "action": "attack",
+          "phase": "02-follow-through",
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south/02-follow-through.png"
+        },
+        {
+          "row": 7,
+          "column": 1,
+          "action": "attack",
+          "phase": "02-follow-through",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south-south-east/02-follow-through.png"
+        },
+        {
+          "row": 7,
+          "column": 2,
+          "action": "attack",
+          "phase": "02-follow-through",
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south-east/02-follow-through.png"
+        },
+        {
+          "row": 7,
+          "column": 3,
+          "action": "attack",
+          "phase": "02-follow-through",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/east-south-east/02-follow-through.png"
+        },
+        {
+          "row": 7,
+          "column": 4,
+          "action": "attack",
+          "phase": "02-follow-through",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/attack/east/02-follow-through.png"
+        },
+        {
+          "row": 7,
+          "column": 5,
+          "action": "attack",
+          "phase": "02-follow-through",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/east-north-east/02-follow-through.png"
+        },
+        {
+          "row": 7,
+          "column": 6,
+          "action": "attack",
+          "phase": "02-follow-through",
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north-east/02-follow-through.png"
+        },
+        {
+          "row": 7,
+          "column": 7,
+          "action": "attack",
+          "phase": "02-follow-through",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north-north-east/02-follow-through.png"
+        },
+        {
+          "row": 7,
+          "column": 8,
+          "action": "attack",
+          "phase": "02-follow-through",
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north/02-follow-through.png"
+        },
+        {
+          "row": 7,
+          "column": 9,
+          "action": "attack",
+          "phase": "02-follow-through",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north-north-west/02-follow-through.png"
+        },
+        {
+          "row": 7,
+          "column": 10,
+          "action": "attack",
+          "phase": "02-follow-through",
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north-west/02-follow-through.png"
+        },
+        {
+          "row": 7,
+          "column": 11,
+          "action": "attack",
+          "phase": "02-follow-through",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/west-north-west/02-follow-through.png"
+        },
+        {
+          "row": 7,
+          "column": 12,
+          "action": "attack",
+          "phase": "02-follow-through",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/attack/west/02-follow-through.png"
+        },
+        {
+          "row": 7,
+          "column": 13,
+          "action": "attack",
+          "phase": "02-follow-through",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/west-south-west/02-follow-through.png"
+        },
+        {
+          "row": 7,
+          "column": 14,
+          "action": "attack",
+          "phase": "02-follow-through",
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south-west/02-follow-through.png"
+        },
+        {
+          "row": 7,
+          "column": 15,
+          "action": "attack",
+          "phase": "02-follow-through",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south-south-west/02-follow-through.png"
+        }
+      ]
+    },
+    {
+      "row": 8,
+      "action": "attack",
+      "phase": "03-recovery",
+      "frames": [
+        {
+          "row": 8,
+          "column": 0,
+          "action": "attack",
+          "phase": "03-recovery",
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south/03-recovery.png"
+        },
+        {
+          "row": 8,
+          "column": 1,
+          "action": "attack",
+          "phase": "03-recovery",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south-south-east/03-recovery.png"
+        },
+        {
+          "row": 8,
+          "column": 2,
+          "action": "attack",
+          "phase": "03-recovery",
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south-east/03-recovery.png"
+        },
+        {
+          "row": 8,
+          "column": 3,
+          "action": "attack",
+          "phase": "03-recovery",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/east-south-east/03-recovery.png"
+        },
+        {
+          "row": 8,
+          "column": 4,
+          "action": "attack",
+          "phase": "03-recovery",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/attack/east/03-recovery.png"
+        },
+        {
+          "row": 8,
+          "column": 5,
+          "action": "attack",
+          "phase": "03-recovery",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/east-north-east/03-recovery.png"
+        },
+        {
+          "row": 8,
+          "column": 6,
+          "action": "attack",
+          "phase": "03-recovery",
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north-east/03-recovery.png"
+        },
+        {
+          "row": 8,
+          "column": 7,
+          "action": "attack",
+          "phase": "03-recovery",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north-north-east/03-recovery.png"
+        },
+        {
+          "row": 8,
+          "column": 8,
+          "action": "attack",
+          "phase": "03-recovery",
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north/03-recovery.png"
+        },
+        {
+          "row": 8,
+          "column": 9,
+          "action": "attack",
+          "phase": "03-recovery",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north-north-west/03-recovery.png"
+        },
+        {
+          "row": 8,
+          "column": 10,
+          "action": "attack",
+          "phase": "03-recovery",
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/north-west/03-recovery.png"
+        },
+        {
+          "row": 8,
+          "column": 11,
+          "action": "attack",
+          "phase": "03-recovery",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/west-north-west/03-recovery.png"
+        },
+        {
+          "row": 8,
+          "column": 12,
+          "action": "attack",
+          "phase": "03-recovery",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/attack/west/03-recovery.png"
+        },
+        {
+          "row": 8,
+          "column": 13,
+          "action": "attack",
+          "phase": "03-recovery",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/west-south-west/03-recovery.png"
+        },
+        {
+          "row": 8,
+          "column": 14,
+          "action": "attack",
+          "phase": "03-recovery",
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south-west/03-recovery.png"
+        },
+        {
+          "row": 8,
+          "column": 15,
+          "action": "attack",
+          "phase": "03-recovery",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/attack/south-south-west/03-recovery.png"
+        }
+      ]
+    },
+    {
+      "row": 9,
+      "action": "hit",
+      "phase": "00-flinch",
+      "frames": [
+        {
+          "row": 9,
+          "column": 0,
+          "action": "hit",
+          "phase": "00-flinch",
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south/00-flinch.png"
+        },
+        {
+          "row": 9,
+          "column": 1,
+          "action": "hit",
+          "phase": "00-flinch",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south-south-east/00-flinch.png"
+        },
+        {
+          "row": 9,
+          "column": 2,
+          "action": "hit",
+          "phase": "00-flinch",
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south-east/00-flinch.png"
+        },
+        {
+          "row": 9,
+          "column": 3,
+          "action": "hit",
+          "phase": "00-flinch",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/east-south-east/00-flinch.png"
+        },
+        {
+          "row": 9,
+          "column": 4,
+          "action": "hit",
+          "phase": "00-flinch",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/hit/east/00-flinch.png"
+        },
+        {
+          "row": 9,
+          "column": 5,
+          "action": "hit",
+          "phase": "00-flinch",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/east-north-east/00-flinch.png"
+        },
+        {
+          "row": 9,
+          "column": 6,
+          "action": "hit",
+          "phase": "00-flinch",
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north-east/00-flinch.png"
+        },
+        {
+          "row": 9,
+          "column": 7,
+          "action": "hit",
+          "phase": "00-flinch",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north-north-east/00-flinch.png"
+        },
+        {
+          "row": 9,
+          "column": 8,
+          "action": "hit",
+          "phase": "00-flinch",
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north/00-flinch.png"
+        },
+        {
+          "row": 9,
+          "column": 9,
+          "action": "hit",
+          "phase": "00-flinch",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north-north-west/00-flinch.png"
+        },
+        {
+          "row": 9,
+          "column": 10,
+          "action": "hit",
+          "phase": "00-flinch",
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north-west/00-flinch.png"
+        },
+        {
+          "row": 9,
+          "column": 11,
+          "action": "hit",
+          "phase": "00-flinch",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/west-north-west/00-flinch.png"
+        },
+        {
+          "row": 9,
+          "column": 12,
+          "action": "hit",
+          "phase": "00-flinch",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/hit/west/00-flinch.png"
+        },
+        {
+          "row": 9,
+          "column": 13,
+          "action": "hit",
+          "phase": "00-flinch",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/west-south-west/00-flinch.png"
+        },
+        {
+          "row": 9,
+          "column": 14,
+          "action": "hit",
+          "phase": "00-flinch",
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south-west/00-flinch.png"
+        },
+        {
+          "row": 9,
+          "column": 15,
+          "action": "hit",
+          "phase": "00-flinch",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south-south-west/00-flinch.png"
+        }
+      ]
+    },
+    {
+      "row": 10,
+      "action": "hit",
+      "phase": "01-recoil",
+      "frames": [
+        {
+          "row": 10,
+          "column": 0,
+          "action": "hit",
+          "phase": "01-recoil",
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south/01-recoil.png"
+        },
+        {
+          "row": 10,
+          "column": 1,
+          "action": "hit",
+          "phase": "01-recoil",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south-south-east/01-recoil.png"
+        },
+        {
+          "row": 10,
+          "column": 2,
+          "action": "hit",
+          "phase": "01-recoil",
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south-east/01-recoil.png"
+        },
+        {
+          "row": 10,
+          "column": 3,
+          "action": "hit",
+          "phase": "01-recoil",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/east-south-east/01-recoil.png"
+        },
+        {
+          "row": 10,
+          "column": 4,
+          "action": "hit",
+          "phase": "01-recoil",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/hit/east/01-recoil.png"
+        },
+        {
+          "row": 10,
+          "column": 5,
+          "action": "hit",
+          "phase": "01-recoil",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/east-north-east/01-recoil.png"
+        },
+        {
+          "row": 10,
+          "column": 6,
+          "action": "hit",
+          "phase": "01-recoil",
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north-east/01-recoil.png"
+        },
+        {
+          "row": 10,
+          "column": 7,
+          "action": "hit",
+          "phase": "01-recoil",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north-north-east/01-recoil.png"
+        },
+        {
+          "row": 10,
+          "column": 8,
+          "action": "hit",
+          "phase": "01-recoil",
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north/01-recoil.png"
+        },
+        {
+          "row": 10,
+          "column": 9,
+          "action": "hit",
+          "phase": "01-recoil",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north-north-west/01-recoil.png"
+        },
+        {
+          "row": 10,
+          "column": 10,
+          "action": "hit",
+          "phase": "01-recoil",
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north-west/01-recoil.png"
+        },
+        {
+          "row": 10,
+          "column": 11,
+          "action": "hit",
+          "phase": "01-recoil",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/west-north-west/01-recoil.png"
+        },
+        {
+          "row": 10,
+          "column": 12,
+          "action": "hit",
+          "phase": "01-recoil",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/hit/west/01-recoil.png"
+        },
+        {
+          "row": 10,
+          "column": 13,
+          "action": "hit",
+          "phase": "01-recoil",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/west-south-west/01-recoil.png"
+        },
+        {
+          "row": 10,
+          "column": 14,
+          "action": "hit",
+          "phase": "01-recoil",
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south-west/01-recoil.png"
+        },
+        {
+          "row": 10,
+          "column": 15,
+          "action": "hit",
+          "phase": "01-recoil",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south-south-west/01-recoil.png"
+        }
+      ]
+    },
+    {
+      "row": 11,
+      "action": "hit",
+      "phase": "02-recover",
+      "frames": [
+        {
+          "row": 11,
+          "column": 0,
+          "action": "hit",
+          "phase": "02-recover",
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south/02-recover.png"
+        },
+        {
+          "row": 11,
+          "column": 1,
+          "action": "hit",
+          "phase": "02-recover",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south-south-east/02-recover.png"
+        },
+        {
+          "row": 11,
+          "column": 2,
+          "action": "hit",
+          "phase": "02-recover",
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south-east/02-recover.png"
+        },
+        {
+          "row": 11,
+          "column": 3,
+          "action": "hit",
+          "phase": "02-recover",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/east-south-east/02-recover.png"
+        },
+        {
+          "row": 11,
+          "column": 4,
+          "action": "hit",
+          "phase": "02-recover",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/hit/east/02-recover.png"
+        },
+        {
+          "row": 11,
+          "column": 5,
+          "action": "hit",
+          "phase": "02-recover",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/east-north-east/02-recover.png"
+        },
+        {
+          "row": 11,
+          "column": 6,
+          "action": "hit",
+          "phase": "02-recover",
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north-east/02-recover.png"
+        },
+        {
+          "row": 11,
+          "column": 7,
+          "action": "hit",
+          "phase": "02-recover",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north-north-east/02-recover.png"
+        },
+        {
+          "row": 11,
+          "column": 8,
+          "action": "hit",
+          "phase": "02-recover",
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north/02-recover.png"
+        },
+        {
+          "row": 11,
+          "column": 9,
+          "action": "hit",
+          "phase": "02-recover",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north-north-west/02-recover.png"
+        },
+        {
+          "row": 11,
+          "column": 10,
+          "action": "hit",
+          "phase": "02-recover",
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north-west/02-recover.png"
+        },
+        {
+          "row": 11,
+          "column": 11,
+          "action": "hit",
+          "phase": "02-recover",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/west-north-west/02-recover.png"
+        },
+        {
+          "row": 11,
+          "column": 12,
+          "action": "hit",
+          "phase": "02-recover",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/hit/west/02-recover.png"
+        },
+        {
+          "row": 11,
+          "column": 13,
+          "action": "hit",
+          "phase": "02-recover",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/west-south-west/02-recover.png"
+        },
+        {
+          "row": 11,
+          "column": 14,
+          "action": "hit",
+          "phase": "02-recover",
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south-west/02-recover.png"
+        },
+        {
+          "row": 11,
+          "column": 15,
+          "action": "hit",
+          "phase": "02-recover",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south-south-west/02-recover.png"
+        }
+      ]
+    },
+    {
+      "row": 12,
+      "action": "hit",
+      "phase": "03-ready",
+      "frames": [
+        {
+          "row": 12,
+          "column": 0,
+          "action": "hit",
+          "phase": "03-ready",
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south/03-ready.png"
+        },
+        {
+          "row": 12,
+          "column": 1,
+          "action": "hit",
+          "phase": "03-ready",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south-south-east/03-ready.png"
+        },
+        {
+          "row": 12,
+          "column": 2,
+          "action": "hit",
+          "phase": "03-ready",
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south-east/03-ready.png"
+        },
+        {
+          "row": 12,
+          "column": 3,
+          "action": "hit",
+          "phase": "03-ready",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/east-south-east/03-ready.png"
+        },
+        {
+          "row": 12,
+          "column": 4,
+          "action": "hit",
+          "phase": "03-ready",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/hit/east/03-ready.png"
+        },
+        {
+          "row": 12,
+          "column": 5,
+          "action": "hit",
+          "phase": "03-ready",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/east-north-east/03-ready.png"
+        },
+        {
+          "row": 12,
+          "column": 6,
+          "action": "hit",
+          "phase": "03-ready",
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north-east/03-ready.png"
+        },
+        {
+          "row": 12,
+          "column": 7,
+          "action": "hit",
+          "phase": "03-ready",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north-north-east/03-ready.png"
+        },
+        {
+          "row": 12,
+          "column": 8,
+          "action": "hit",
+          "phase": "03-ready",
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north/03-ready.png"
+        },
+        {
+          "row": 12,
+          "column": 9,
+          "action": "hit",
+          "phase": "03-ready",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north-north-west/03-ready.png"
+        },
+        {
+          "row": 12,
+          "column": 10,
+          "action": "hit",
+          "phase": "03-ready",
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/north-west/03-ready.png"
+        },
+        {
+          "row": 12,
+          "column": 11,
+          "action": "hit",
+          "phase": "03-ready",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/west-north-west/03-ready.png"
+        },
+        {
+          "row": 12,
+          "column": 12,
+          "action": "hit",
+          "phase": "03-ready",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/hit/west/03-ready.png"
+        },
+        {
+          "row": 12,
+          "column": 13,
+          "action": "hit",
+          "phase": "03-ready",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/west-south-west/03-ready.png"
+        },
+        {
+          "row": 12,
+          "column": 14,
+          "action": "hit",
+          "phase": "03-ready",
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south-west/03-ready.png"
+        },
+        {
+          "row": 12,
+          "column": 15,
+          "action": "hit",
+          "phase": "03-ready",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/hit/south-south-west/03-ready.png"
+        }
+      ]
+    },
+    {
+      "row": 13,
+      "action": "death",
+      "phase": "00-fall",
+      "frames": [
+        {
+          "row": 13,
+          "column": 0,
+          "action": "death",
+          "phase": "00-fall",
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south/00-fall.png"
+        },
+        {
+          "row": 13,
+          "column": 1,
+          "action": "death",
+          "phase": "00-fall",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south-south-east/00-fall.png"
+        },
+        {
+          "row": 13,
+          "column": 2,
+          "action": "death",
+          "phase": "00-fall",
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south-east/00-fall.png"
+        },
+        {
+          "row": 13,
+          "column": 3,
+          "action": "death",
+          "phase": "00-fall",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/east-south-east/00-fall.png"
+        },
+        {
+          "row": 13,
+          "column": 4,
+          "action": "death",
+          "phase": "00-fall",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/death/east/00-fall.png"
+        },
+        {
+          "row": 13,
+          "column": 5,
+          "action": "death",
+          "phase": "00-fall",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/east-north-east/00-fall.png"
+        },
+        {
+          "row": 13,
+          "column": 6,
+          "action": "death",
+          "phase": "00-fall",
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north-east/00-fall.png"
+        },
+        {
+          "row": 13,
+          "column": 7,
+          "action": "death",
+          "phase": "00-fall",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north-north-east/00-fall.png"
+        },
+        {
+          "row": 13,
+          "column": 8,
+          "action": "death",
+          "phase": "00-fall",
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north/00-fall.png"
+        },
+        {
+          "row": 13,
+          "column": 9,
+          "action": "death",
+          "phase": "00-fall",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north-north-west/00-fall.png"
+        },
+        {
+          "row": 13,
+          "column": 10,
+          "action": "death",
+          "phase": "00-fall",
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north-west/00-fall.png"
+        },
+        {
+          "row": 13,
+          "column": 11,
+          "action": "death",
+          "phase": "00-fall",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/west-north-west/00-fall.png"
+        },
+        {
+          "row": 13,
+          "column": 12,
+          "action": "death",
+          "phase": "00-fall",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/death/west/00-fall.png"
+        },
+        {
+          "row": 13,
+          "column": 13,
+          "action": "death",
+          "phase": "00-fall",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/west-south-west/00-fall.png"
+        },
+        {
+          "row": 13,
+          "column": 14,
+          "action": "death",
+          "phase": "00-fall",
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south-west/00-fall.png"
+        },
+        {
+          "row": 13,
+          "column": 15,
+          "action": "death",
+          "phase": "00-fall",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south-south-west/00-fall.png"
+        }
+      ]
+    },
+    {
+      "row": 14,
+      "action": "death",
+      "phase": "01-collapse",
+      "frames": [
+        {
+          "row": 14,
+          "column": 0,
+          "action": "death",
+          "phase": "01-collapse",
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south/01-collapse.png"
+        },
+        {
+          "row": 14,
+          "column": 1,
+          "action": "death",
+          "phase": "01-collapse",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south-south-east/01-collapse.png"
+        },
+        {
+          "row": 14,
+          "column": 2,
+          "action": "death",
+          "phase": "01-collapse",
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south-east/01-collapse.png"
+        },
+        {
+          "row": 14,
+          "column": 3,
+          "action": "death",
+          "phase": "01-collapse",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/east-south-east/01-collapse.png"
+        },
+        {
+          "row": 14,
+          "column": 4,
+          "action": "death",
+          "phase": "01-collapse",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/death/east/01-collapse.png"
+        },
+        {
+          "row": 14,
+          "column": 5,
+          "action": "death",
+          "phase": "01-collapse",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/east-north-east/01-collapse.png"
+        },
+        {
+          "row": 14,
+          "column": 6,
+          "action": "death",
+          "phase": "01-collapse",
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north-east/01-collapse.png"
+        },
+        {
+          "row": 14,
+          "column": 7,
+          "action": "death",
+          "phase": "01-collapse",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north-north-east/01-collapse.png"
+        },
+        {
+          "row": 14,
+          "column": 8,
+          "action": "death",
+          "phase": "01-collapse",
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north/01-collapse.png"
+        },
+        {
+          "row": 14,
+          "column": 9,
+          "action": "death",
+          "phase": "01-collapse",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north-north-west/01-collapse.png"
+        },
+        {
+          "row": 14,
+          "column": 10,
+          "action": "death",
+          "phase": "01-collapse",
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north-west/01-collapse.png"
+        },
+        {
+          "row": 14,
+          "column": 11,
+          "action": "death",
+          "phase": "01-collapse",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/west-north-west/01-collapse.png"
+        },
+        {
+          "row": 14,
+          "column": 12,
+          "action": "death",
+          "phase": "01-collapse",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/death/west/01-collapse.png"
+        },
+        {
+          "row": 14,
+          "column": 13,
+          "action": "death",
+          "phase": "01-collapse",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/west-south-west/01-collapse.png"
+        },
+        {
+          "row": 14,
+          "column": 14,
+          "action": "death",
+          "phase": "01-collapse",
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south-west/01-collapse.png"
+        },
+        {
+          "row": 14,
+          "column": 15,
+          "action": "death",
+          "phase": "01-collapse",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south-south-west/01-collapse.png"
+        }
+      ]
+    },
+    {
+      "row": 15,
+      "action": "death",
+      "phase": "02-ground",
+      "frames": [
+        {
+          "row": 15,
+          "column": 0,
+          "action": "death",
+          "phase": "02-ground",
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south/02-ground.png"
+        },
+        {
+          "row": 15,
+          "column": 1,
+          "action": "death",
+          "phase": "02-ground",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south-south-east/02-ground.png"
+        },
+        {
+          "row": 15,
+          "column": 2,
+          "action": "death",
+          "phase": "02-ground",
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south-east/02-ground.png"
+        },
+        {
+          "row": 15,
+          "column": 3,
+          "action": "death",
+          "phase": "02-ground",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/east-south-east/02-ground.png"
+        },
+        {
+          "row": 15,
+          "column": 4,
+          "action": "death",
+          "phase": "02-ground",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/death/east/02-ground.png"
+        },
+        {
+          "row": 15,
+          "column": 5,
+          "action": "death",
+          "phase": "02-ground",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/east-north-east/02-ground.png"
+        },
+        {
+          "row": 15,
+          "column": 6,
+          "action": "death",
+          "phase": "02-ground",
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north-east/02-ground.png"
+        },
+        {
+          "row": 15,
+          "column": 7,
+          "action": "death",
+          "phase": "02-ground",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north-north-east/02-ground.png"
+        },
+        {
+          "row": 15,
+          "column": 8,
+          "action": "death",
+          "phase": "02-ground",
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north/02-ground.png"
+        },
+        {
+          "row": 15,
+          "column": 9,
+          "action": "death",
+          "phase": "02-ground",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north-north-west/02-ground.png"
+        },
+        {
+          "row": 15,
+          "column": 10,
+          "action": "death",
+          "phase": "02-ground",
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north-west/02-ground.png"
+        },
+        {
+          "row": 15,
+          "column": 11,
+          "action": "death",
+          "phase": "02-ground",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/west-north-west/02-ground.png"
+        },
+        {
+          "row": 15,
+          "column": 12,
+          "action": "death",
+          "phase": "02-ground",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/death/west/02-ground.png"
+        },
+        {
+          "row": 15,
+          "column": 13,
+          "action": "death",
+          "phase": "02-ground",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/west-south-west/02-ground.png"
+        },
+        {
+          "row": 15,
+          "column": 14,
+          "action": "death",
+          "phase": "02-ground",
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south-west/02-ground.png"
+        },
+        {
+          "row": 15,
+          "column": 15,
+          "action": "death",
+          "phase": "02-ground",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south-south-west/02-ground.png"
+        }
+      ]
+    },
+    {
+      "row": 16,
+      "action": "death",
+      "phase": "03-settle",
+      "frames": [
+        {
+          "row": 16,
+          "column": 0,
+          "action": "death",
+          "phase": "03-settle",
+          "direction": "south",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south/03-settle.png"
+        },
+        {
+          "row": 16,
+          "column": 1,
+          "action": "death",
+          "phase": "03-settle",
+          "direction": "south-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south-south-east/03-settle.png"
+        },
+        {
+          "row": 16,
+          "column": 2,
+          "action": "death",
+          "phase": "03-settle",
+          "direction": "south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south-east/03-settle.png"
+        },
+        {
+          "row": 16,
+          "column": 3,
+          "action": "death",
+          "phase": "03-settle",
+          "direction": "east-south-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/east-south-east/03-settle.png"
+        },
+        {
+          "row": 16,
+          "column": 4,
+          "action": "death",
+          "phase": "03-settle",
+          "direction": "east",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/death/east/03-settle.png"
+        },
+        {
+          "row": 16,
+          "column": 5,
+          "action": "death",
+          "phase": "03-settle",
+          "direction": "east-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/east-north-east/03-settle.png"
+        },
+        {
+          "row": 16,
+          "column": 6,
+          "action": "death",
+          "phase": "03-settle",
+          "direction": "north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north-east/03-settle.png"
+        },
+        {
+          "row": 16,
+          "column": 7,
+          "action": "death",
+          "phase": "03-settle",
+          "direction": "north-north-east",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north-north-east/03-settle.png"
+        },
+        {
+          "row": 16,
+          "column": 8,
+          "action": "death",
+          "phase": "03-settle",
+          "direction": "north",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north/03-settle.png"
+        },
+        {
+          "row": 16,
+          "column": 9,
+          "action": "death",
+          "phase": "03-settle",
+          "direction": "north-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north-north-west/03-settle.png"
+        },
+        {
+          "row": 16,
+          "column": 10,
+          "action": "death",
+          "phase": "03-settle",
+          "direction": "north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/north-west/03-settle.png"
+        },
+        {
+          "row": 16,
+          "column": 11,
+          "action": "death",
+          "phase": "03-settle",
+          "direction": "west-north-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/west-north-west/03-settle.png"
+        },
+        {
+          "row": 16,
+          "column": 12,
+          "action": "death",
+          "phase": "03-settle",
+          "direction": "west",
+          "sourceKind": "preserved-approved-source-pose",
+          "file": "frames/death/west/03-settle.png"
+        },
+        {
+          "row": 16,
+          "column": 13,
+          "action": "death",
+          "phase": "03-settle",
+          "direction": "west-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/west-south-west/03-settle.png"
+        },
+        {
+          "row": 16,
+          "column": 14,
+          "action": "death",
+          "phase": "03-settle",
+          "direction": "south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south-west/03-settle.png"
+        },
+        {
+          "row": 16,
+          "column": 15,
+          "action": "death",
+          "phase": "03-settle",
+          "direction": "south-south-west",
+          "sourceKind": "generated-candidate",
+          "file": "frames/death/south-south-west/03-settle.png"
+        }
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "row": 0,
+      "column": 0,
+      "action": "idle",
+      "phase": "idle",
+      "direction": "south",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/idle/south/idle.png"
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "action": "idle",
+      "phase": "idle",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/idle/south-south-east/idle.png"
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "action": "idle",
+      "phase": "idle",
+      "direction": "south-east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/idle/south-east/idle.png"
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "action": "idle",
+      "phase": "idle",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/idle/east-south-east/idle.png"
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "action": "idle",
+      "phase": "idle",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/idle/east/idle.png"
+    },
+    {
+      "row": 0,
+      "column": 5,
+      "action": "idle",
+      "phase": "idle",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/idle/east-north-east/idle.png"
+    },
+    {
+      "row": 0,
+      "column": 6,
+      "action": "idle",
+      "phase": "idle",
+      "direction": "north-east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/idle/north-east/idle.png"
+    },
+    {
+      "row": 0,
+      "column": 7,
+      "action": "idle",
+      "phase": "idle",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/idle/north-north-east/idle.png"
+    },
+    {
+      "row": 0,
+      "column": 8,
+      "action": "idle",
+      "phase": "idle",
+      "direction": "north",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/idle/north/idle.png"
+    },
+    {
+      "row": 0,
+      "column": 9,
+      "action": "idle",
+      "phase": "idle",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/idle/north-north-west/idle.png"
+    },
+    {
+      "row": 0,
+      "column": 10,
+      "action": "idle",
+      "phase": "idle",
+      "direction": "north-west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/idle/north-west/idle.png"
+    },
+    {
+      "row": 0,
+      "column": 11,
+      "action": "idle",
+      "phase": "idle",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/idle/west-north-west/idle.png"
+    },
+    {
+      "row": 0,
+      "column": 12,
+      "action": "idle",
+      "phase": "idle",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/idle/west/idle.png"
+    },
+    {
+      "row": 0,
+      "column": 13,
+      "action": "idle",
+      "phase": "idle",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/idle/west-south-west/idle.png"
+    },
+    {
+      "row": 0,
+      "column": 14,
+      "action": "idle",
+      "phase": "idle",
+      "direction": "south-west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/idle/south-west/idle.png"
+    },
+    {
+      "row": 0,
+      "column": 15,
+      "action": "idle",
+      "phase": "idle",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/idle/south-south-west/idle.png"
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "direction": "south",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south/00-stride-a.png"
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south-south-east/00-stride-a.png"
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "direction": "south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south-east/00-stride-a.png"
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/east-south-east/00-stride-a.png"
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/walk/east/00-stride-a.png"
+    },
+    {
+      "row": 1,
+      "column": 5,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/east-north-east/00-stride-a.png"
+    },
+    {
+      "row": 1,
+      "column": 6,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "direction": "north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north-east/00-stride-a.png"
+    },
+    {
+      "row": 1,
+      "column": 7,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north-north-east/00-stride-a.png"
+    },
+    {
+      "row": 1,
+      "column": 8,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "direction": "north",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north/00-stride-a.png"
+    },
+    {
+      "row": 1,
+      "column": 9,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north-north-west/00-stride-a.png"
+    },
+    {
+      "row": 1,
+      "column": 10,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "direction": "north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north-west/00-stride-a.png"
+    },
+    {
+      "row": 1,
+      "column": 11,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/west-north-west/00-stride-a.png"
+    },
+    {
+      "row": 1,
+      "column": 12,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/walk/west/00-stride-a.png"
+    },
+    {
+      "row": 1,
+      "column": 13,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/west-south-west/00-stride-a.png"
+    },
+    {
+      "row": 1,
+      "column": 14,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "direction": "south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south-west/00-stride-a.png"
+    },
+    {
+      "row": 1,
+      "column": 15,
+      "action": "walk",
+      "phase": "00-stride-a",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south-south-west/00-stride-a.png"
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "direction": "south",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south/01-stride-b.png"
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south-south-east/01-stride-b.png"
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "direction": "south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south-east/01-stride-b.png"
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/east-south-east/01-stride-b.png"
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/walk/east/01-stride-b.png"
+    },
+    {
+      "row": 2,
+      "column": 5,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/east-north-east/01-stride-b.png"
+    },
+    {
+      "row": 2,
+      "column": 6,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "direction": "north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north-east/01-stride-b.png"
+    },
+    {
+      "row": 2,
+      "column": 7,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north-north-east/01-stride-b.png"
+    },
+    {
+      "row": 2,
+      "column": 8,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "direction": "north",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north/01-stride-b.png"
+    },
+    {
+      "row": 2,
+      "column": 9,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north-north-west/01-stride-b.png"
+    },
+    {
+      "row": 2,
+      "column": 10,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "direction": "north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north-west/01-stride-b.png"
+    },
+    {
+      "row": 2,
+      "column": 11,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/west-north-west/01-stride-b.png"
+    },
+    {
+      "row": 2,
+      "column": 12,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/walk/west/01-stride-b.png"
+    },
+    {
+      "row": 2,
+      "column": 13,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/west-south-west/01-stride-b.png"
+    },
+    {
+      "row": 2,
+      "column": 14,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "direction": "south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south-west/01-stride-b.png"
+    },
+    {
+      "row": 2,
+      "column": 15,
+      "action": "walk",
+      "phase": "01-stride-b",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south-south-west/01-stride-b.png"
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "direction": "south",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south/02-stride-c.png"
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south-south-east/02-stride-c.png"
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "direction": "south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south-east/02-stride-c.png"
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/east-south-east/02-stride-c.png"
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/walk/east/02-stride-c.png"
+    },
+    {
+      "row": 3,
+      "column": 5,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/east-north-east/02-stride-c.png"
+    },
+    {
+      "row": 3,
+      "column": 6,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "direction": "north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north-east/02-stride-c.png"
+    },
+    {
+      "row": 3,
+      "column": 7,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north-north-east/02-stride-c.png"
+    },
+    {
+      "row": 3,
+      "column": 8,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "direction": "north",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north/02-stride-c.png"
+    },
+    {
+      "row": 3,
+      "column": 9,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north-north-west/02-stride-c.png"
+    },
+    {
+      "row": 3,
+      "column": 10,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "direction": "north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north-west/02-stride-c.png"
+    },
+    {
+      "row": 3,
+      "column": 11,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/west-north-west/02-stride-c.png"
+    },
+    {
+      "row": 3,
+      "column": 12,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/walk/west/02-stride-c.png"
+    },
+    {
+      "row": 3,
+      "column": 13,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/west-south-west/02-stride-c.png"
+    },
+    {
+      "row": 3,
+      "column": 14,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "direction": "south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south-west/02-stride-c.png"
+    },
+    {
+      "row": 3,
+      "column": 15,
+      "action": "walk",
+      "phase": "02-stride-c",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south-south-west/02-stride-c.png"
+    },
+    {
+      "row": 4,
+      "column": 0,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "direction": "south",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south/03-stride-d.png"
+    },
+    {
+      "row": 4,
+      "column": 1,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south-south-east/03-stride-d.png"
+    },
+    {
+      "row": 4,
+      "column": 2,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "direction": "south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south-east/03-stride-d.png"
+    },
+    {
+      "row": 4,
+      "column": 3,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/east-south-east/03-stride-d.png"
+    },
+    {
+      "row": 4,
+      "column": 4,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/walk/east/03-stride-d.png"
+    },
+    {
+      "row": 4,
+      "column": 5,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/east-north-east/03-stride-d.png"
+    },
+    {
+      "row": 4,
+      "column": 6,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "direction": "north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north-east/03-stride-d.png"
+    },
+    {
+      "row": 4,
+      "column": 7,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north-north-east/03-stride-d.png"
+    },
+    {
+      "row": 4,
+      "column": 8,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "direction": "north",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north/03-stride-d.png"
+    },
+    {
+      "row": 4,
+      "column": 9,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north-north-west/03-stride-d.png"
+    },
+    {
+      "row": 4,
+      "column": 10,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "direction": "north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/north-west/03-stride-d.png"
+    },
+    {
+      "row": 4,
+      "column": 11,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/west-north-west/03-stride-d.png"
+    },
+    {
+      "row": 4,
+      "column": 12,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/walk/west/03-stride-d.png"
+    },
+    {
+      "row": 4,
+      "column": 13,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/west-south-west/03-stride-d.png"
+    },
+    {
+      "row": 4,
+      "column": 14,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "direction": "south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south-west/03-stride-d.png"
+    },
+    {
+      "row": 4,
+      "column": 15,
+      "action": "walk",
+      "phase": "03-stride-d",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/walk/south-south-west/03-stride-d.png"
+    },
+    {
+      "row": 5,
+      "column": 0,
+      "action": "attack",
+      "phase": "00-aim",
+      "direction": "south",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south/00-aim.png"
+    },
+    {
+      "row": 5,
+      "column": 1,
+      "action": "attack",
+      "phase": "00-aim",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south-south-east/00-aim.png"
+    },
+    {
+      "row": 5,
+      "column": 2,
+      "action": "attack",
+      "phase": "00-aim",
+      "direction": "south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south-east/00-aim.png"
+    },
+    {
+      "row": 5,
+      "column": 3,
+      "action": "attack",
+      "phase": "00-aim",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/east-south-east/00-aim.png"
+    },
+    {
+      "row": 5,
+      "column": 4,
+      "action": "attack",
+      "phase": "00-aim",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/attack/east/00-aim.png"
+    },
+    {
+      "row": 5,
+      "column": 5,
+      "action": "attack",
+      "phase": "00-aim",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/east-north-east/00-aim.png"
+    },
+    {
+      "row": 5,
+      "column": 6,
+      "action": "attack",
+      "phase": "00-aim",
+      "direction": "north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north-east/00-aim.png"
+    },
+    {
+      "row": 5,
+      "column": 7,
+      "action": "attack",
+      "phase": "00-aim",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north-north-east/00-aim.png"
+    },
+    {
+      "row": 5,
+      "column": 8,
+      "action": "attack",
+      "phase": "00-aim",
+      "direction": "north",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north/00-aim.png"
+    },
+    {
+      "row": 5,
+      "column": 9,
+      "action": "attack",
+      "phase": "00-aim",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north-north-west/00-aim.png"
+    },
+    {
+      "row": 5,
+      "column": 10,
+      "action": "attack",
+      "phase": "00-aim",
+      "direction": "north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north-west/00-aim.png"
+    },
+    {
+      "row": 5,
+      "column": 11,
+      "action": "attack",
+      "phase": "00-aim",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/west-north-west/00-aim.png"
+    },
+    {
+      "row": 5,
+      "column": 12,
+      "action": "attack",
+      "phase": "00-aim",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/attack/west/00-aim.png"
+    },
+    {
+      "row": 5,
+      "column": 13,
+      "action": "attack",
+      "phase": "00-aim",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/west-south-west/00-aim.png"
+    },
+    {
+      "row": 5,
+      "column": 14,
+      "action": "attack",
+      "phase": "00-aim",
+      "direction": "south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south-west/00-aim.png"
+    },
+    {
+      "row": 5,
+      "column": 15,
+      "action": "attack",
+      "phase": "00-aim",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south-south-west/00-aim.png"
+    },
+    {
+      "row": 6,
+      "column": 0,
+      "action": "attack",
+      "phase": "01-release",
+      "direction": "south",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south/01-release.png"
+    },
+    {
+      "row": 6,
+      "column": 1,
+      "action": "attack",
+      "phase": "01-release",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south-south-east/01-release.png"
+    },
+    {
+      "row": 6,
+      "column": 2,
+      "action": "attack",
+      "phase": "01-release",
+      "direction": "south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south-east/01-release.png"
+    },
+    {
+      "row": 6,
+      "column": 3,
+      "action": "attack",
+      "phase": "01-release",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/east-south-east/01-release.png"
+    },
+    {
+      "row": 6,
+      "column": 4,
+      "action": "attack",
+      "phase": "01-release",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/attack/east/01-release.png"
+    },
+    {
+      "row": 6,
+      "column": 5,
+      "action": "attack",
+      "phase": "01-release",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/east-north-east/01-release.png"
+    },
+    {
+      "row": 6,
+      "column": 6,
+      "action": "attack",
+      "phase": "01-release",
+      "direction": "north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north-east/01-release.png"
+    },
+    {
+      "row": 6,
+      "column": 7,
+      "action": "attack",
+      "phase": "01-release",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north-north-east/01-release.png"
+    },
+    {
+      "row": 6,
+      "column": 8,
+      "action": "attack",
+      "phase": "01-release",
+      "direction": "north",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north/01-release.png"
+    },
+    {
+      "row": 6,
+      "column": 9,
+      "action": "attack",
+      "phase": "01-release",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north-north-west/01-release.png"
+    },
+    {
+      "row": 6,
+      "column": 10,
+      "action": "attack",
+      "phase": "01-release",
+      "direction": "north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north-west/01-release.png"
+    },
+    {
+      "row": 6,
+      "column": 11,
+      "action": "attack",
+      "phase": "01-release",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/west-north-west/01-release.png"
+    },
+    {
+      "row": 6,
+      "column": 12,
+      "action": "attack",
+      "phase": "01-release",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/attack/west/01-release.png"
+    },
+    {
+      "row": 6,
+      "column": 13,
+      "action": "attack",
+      "phase": "01-release",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/west-south-west/01-release.png"
+    },
+    {
+      "row": 6,
+      "column": 14,
+      "action": "attack",
+      "phase": "01-release",
+      "direction": "south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south-west/01-release.png"
+    },
+    {
+      "row": 6,
+      "column": 15,
+      "action": "attack",
+      "phase": "01-release",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south-south-west/01-release.png"
+    },
+    {
+      "row": 7,
+      "column": 0,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "direction": "south",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south/02-follow-through.png"
+    },
+    {
+      "row": 7,
+      "column": 1,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south-south-east/02-follow-through.png"
+    },
+    {
+      "row": 7,
+      "column": 2,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "direction": "south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south-east/02-follow-through.png"
+    },
+    {
+      "row": 7,
+      "column": 3,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/east-south-east/02-follow-through.png"
+    },
+    {
+      "row": 7,
+      "column": 4,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/attack/east/02-follow-through.png"
+    },
+    {
+      "row": 7,
+      "column": 5,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/east-north-east/02-follow-through.png"
+    },
+    {
+      "row": 7,
+      "column": 6,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "direction": "north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north-east/02-follow-through.png"
+    },
+    {
+      "row": 7,
+      "column": 7,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north-north-east/02-follow-through.png"
+    },
+    {
+      "row": 7,
+      "column": 8,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "direction": "north",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north/02-follow-through.png"
+    },
+    {
+      "row": 7,
+      "column": 9,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north-north-west/02-follow-through.png"
+    },
+    {
+      "row": 7,
+      "column": 10,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "direction": "north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north-west/02-follow-through.png"
+    },
+    {
+      "row": 7,
+      "column": 11,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/west-north-west/02-follow-through.png"
+    },
+    {
+      "row": 7,
+      "column": 12,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/attack/west/02-follow-through.png"
+    },
+    {
+      "row": 7,
+      "column": 13,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/west-south-west/02-follow-through.png"
+    },
+    {
+      "row": 7,
+      "column": 14,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "direction": "south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south-west/02-follow-through.png"
+    },
+    {
+      "row": 7,
+      "column": 15,
+      "action": "attack",
+      "phase": "02-follow-through",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south-south-west/02-follow-through.png"
+    },
+    {
+      "row": 8,
+      "column": 0,
+      "action": "attack",
+      "phase": "03-recovery",
+      "direction": "south",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south/03-recovery.png"
+    },
+    {
+      "row": 8,
+      "column": 1,
+      "action": "attack",
+      "phase": "03-recovery",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south-south-east/03-recovery.png"
+    },
+    {
+      "row": 8,
+      "column": 2,
+      "action": "attack",
+      "phase": "03-recovery",
+      "direction": "south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south-east/03-recovery.png"
+    },
+    {
+      "row": 8,
+      "column": 3,
+      "action": "attack",
+      "phase": "03-recovery",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/east-south-east/03-recovery.png"
+    },
+    {
+      "row": 8,
+      "column": 4,
+      "action": "attack",
+      "phase": "03-recovery",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/attack/east/03-recovery.png"
+    },
+    {
+      "row": 8,
+      "column": 5,
+      "action": "attack",
+      "phase": "03-recovery",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/east-north-east/03-recovery.png"
+    },
+    {
+      "row": 8,
+      "column": 6,
+      "action": "attack",
+      "phase": "03-recovery",
+      "direction": "north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north-east/03-recovery.png"
+    },
+    {
+      "row": 8,
+      "column": 7,
+      "action": "attack",
+      "phase": "03-recovery",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north-north-east/03-recovery.png"
+    },
+    {
+      "row": 8,
+      "column": 8,
+      "action": "attack",
+      "phase": "03-recovery",
+      "direction": "north",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north/03-recovery.png"
+    },
+    {
+      "row": 8,
+      "column": 9,
+      "action": "attack",
+      "phase": "03-recovery",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north-north-west/03-recovery.png"
+    },
+    {
+      "row": 8,
+      "column": 10,
+      "action": "attack",
+      "phase": "03-recovery",
+      "direction": "north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/north-west/03-recovery.png"
+    },
+    {
+      "row": 8,
+      "column": 11,
+      "action": "attack",
+      "phase": "03-recovery",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/west-north-west/03-recovery.png"
+    },
+    {
+      "row": 8,
+      "column": 12,
+      "action": "attack",
+      "phase": "03-recovery",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/attack/west/03-recovery.png"
+    },
+    {
+      "row": 8,
+      "column": 13,
+      "action": "attack",
+      "phase": "03-recovery",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/west-south-west/03-recovery.png"
+    },
+    {
+      "row": 8,
+      "column": 14,
+      "action": "attack",
+      "phase": "03-recovery",
+      "direction": "south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south-west/03-recovery.png"
+    },
+    {
+      "row": 8,
+      "column": 15,
+      "action": "attack",
+      "phase": "03-recovery",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/attack/south-south-west/03-recovery.png"
+    },
+    {
+      "row": 9,
+      "column": 0,
+      "action": "hit",
+      "phase": "00-flinch",
+      "direction": "south",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south/00-flinch.png"
+    },
+    {
+      "row": 9,
+      "column": 1,
+      "action": "hit",
+      "phase": "00-flinch",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south-south-east/00-flinch.png"
+    },
+    {
+      "row": 9,
+      "column": 2,
+      "action": "hit",
+      "phase": "00-flinch",
+      "direction": "south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south-east/00-flinch.png"
+    },
+    {
+      "row": 9,
+      "column": 3,
+      "action": "hit",
+      "phase": "00-flinch",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/east-south-east/00-flinch.png"
+    },
+    {
+      "row": 9,
+      "column": 4,
+      "action": "hit",
+      "phase": "00-flinch",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/hit/east/00-flinch.png"
+    },
+    {
+      "row": 9,
+      "column": 5,
+      "action": "hit",
+      "phase": "00-flinch",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/east-north-east/00-flinch.png"
+    },
+    {
+      "row": 9,
+      "column": 6,
+      "action": "hit",
+      "phase": "00-flinch",
+      "direction": "north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north-east/00-flinch.png"
+    },
+    {
+      "row": 9,
+      "column": 7,
+      "action": "hit",
+      "phase": "00-flinch",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north-north-east/00-flinch.png"
+    },
+    {
+      "row": 9,
+      "column": 8,
+      "action": "hit",
+      "phase": "00-flinch",
+      "direction": "north",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north/00-flinch.png"
+    },
+    {
+      "row": 9,
+      "column": 9,
+      "action": "hit",
+      "phase": "00-flinch",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north-north-west/00-flinch.png"
+    },
+    {
+      "row": 9,
+      "column": 10,
+      "action": "hit",
+      "phase": "00-flinch",
+      "direction": "north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north-west/00-flinch.png"
+    },
+    {
+      "row": 9,
+      "column": 11,
+      "action": "hit",
+      "phase": "00-flinch",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/west-north-west/00-flinch.png"
+    },
+    {
+      "row": 9,
+      "column": 12,
+      "action": "hit",
+      "phase": "00-flinch",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/hit/west/00-flinch.png"
+    },
+    {
+      "row": 9,
+      "column": 13,
+      "action": "hit",
+      "phase": "00-flinch",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/west-south-west/00-flinch.png"
+    },
+    {
+      "row": 9,
+      "column": 14,
+      "action": "hit",
+      "phase": "00-flinch",
+      "direction": "south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south-west/00-flinch.png"
+    },
+    {
+      "row": 9,
+      "column": 15,
+      "action": "hit",
+      "phase": "00-flinch",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south-south-west/00-flinch.png"
+    },
+    {
+      "row": 10,
+      "column": 0,
+      "action": "hit",
+      "phase": "01-recoil",
+      "direction": "south",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south/01-recoil.png"
+    },
+    {
+      "row": 10,
+      "column": 1,
+      "action": "hit",
+      "phase": "01-recoil",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south-south-east/01-recoil.png"
+    },
+    {
+      "row": 10,
+      "column": 2,
+      "action": "hit",
+      "phase": "01-recoil",
+      "direction": "south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south-east/01-recoil.png"
+    },
+    {
+      "row": 10,
+      "column": 3,
+      "action": "hit",
+      "phase": "01-recoil",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/east-south-east/01-recoil.png"
+    },
+    {
+      "row": 10,
+      "column": 4,
+      "action": "hit",
+      "phase": "01-recoil",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/hit/east/01-recoil.png"
+    },
+    {
+      "row": 10,
+      "column": 5,
+      "action": "hit",
+      "phase": "01-recoil",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/east-north-east/01-recoil.png"
+    },
+    {
+      "row": 10,
+      "column": 6,
+      "action": "hit",
+      "phase": "01-recoil",
+      "direction": "north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north-east/01-recoil.png"
+    },
+    {
+      "row": 10,
+      "column": 7,
+      "action": "hit",
+      "phase": "01-recoil",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north-north-east/01-recoil.png"
+    },
+    {
+      "row": 10,
+      "column": 8,
+      "action": "hit",
+      "phase": "01-recoil",
+      "direction": "north",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north/01-recoil.png"
+    },
+    {
+      "row": 10,
+      "column": 9,
+      "action": "hit",
+      "phase": "01-recoil",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north-north-west/01-recoil.png"
+    },
+    {
+      "row": 10,
+      "column": 10,
+      "action": "hit",
+      "phase": "01-recoil",
+      "direction": "north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north-west/01-recoil.png"
+    },
+    {
+      "row": 10,
+      "column": 11,
+      "action": "hit",
+      "phase": "01-recoil",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/west-north-west/01-recoil.png"
+    },
+    {
+      "row": 10,
+      "column": 12,
+      "action": "hit",
+      "phase": "01-recoil",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/hit/west/01-recoil.png"
+    },
+    {
+      "row": 10,
+      "column": 13,
+      "action": "hit",
+      "phase": "01-recoil",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/west-south-west/01-recoil.png"
+    },
+    {
+      "row": 10,
+      "column": 14,
+      "action": "hit",
+      "phase": "01-recoil",
+      "direction": "south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south-west/01-recoil.png"
+    },
+    {
+      "row": 10,
+      "column": 15,
+      "action": "hit",
+      "phase": "01-recoil",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south-south-west/01-recoil.png"
+    },
+    {
+      "row": 11,
+      "column": 0,
+      "action": "hit",
+      "phase": "02-recover",
+      "direction": "south",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south/02-recover.png"
+    },
+    {
+      "row": 11,
+      "column": 1,
+      "action": "hit",
+      "phase": "02-recover",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south-south-east/02-recover.png"
+    },
+    {
+      "row": 11,
+      "column": 2,
+      "action": "hit",
+      "phase": "02-recover",
+      "direction": "south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south-east/02-recover.png"
+    },
+    {
+      "row": 11,
+      "column": 3,
+      "action": "hit",
+      "phase": "02-recover",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/east-south-east/02-recover.png"
+    },
+    {
+      "row": 11,
+      "column": 4,
+      "action": "hit",
+      "phase": "02-recover",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/hit/east/02-recover.png"
+    },
+    {
+      "row": 11,
+      "column": 5,
+      "action": "hit",
+      "phase": "02-recover",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/east-north-east/02-recover.png"
+    },
+    {
+      "row": 11,
+      "column": 6,
+      "action": "hit",
+      "phase": "02-recover",
+      "direction": "north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north-east/02-recover.png"
+    },
+    {
+      "row": 11,
+      "column": 7,
+      "action": "hit",
+      "phase": "02-recover",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north-north-east/02-recover.png"
+    },
+    {
+      "row": 11,
+      "column": 8,
+      "action": "hit",
+      "phase": "02-recover",
+      "direction": "north",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north/02-recover.png"
+    },
+    {
+      "row": 11,
+      "column": 9,
+      "action": "hit",
+      "phase": "02-recover",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north-north-west/02-recover.png"
+    },
+    {
+      "row": 11,
+      "column": 10,
+      "action": "hit",
+      "phase": "02-recover",
+      "direction": "north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north-west/02-recover.png"
+    },
+    {
+      "row": 11,
+      "column": 11,
+      "action": "hit",
+      "phase": "02-recover",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/west-north-west/02-recover.png"
+    },
+    {
+      "row": 11,
+      "column": 12,
+      "action": "hit",
+      "phase": "02-recover",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/hit/west/02-recover.png"
+    },
+    {
+      "row": 11,
+      "column": 13,
+      "action": "hit",
+      "phase": "02-recover",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/west-south-west/02-recover.png"
+    },
+    {
+      "row": 11,
+      "column": 14,
+      "action": "hit",
+      "phase": "02-recover",
+      "direction": "south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south-west/02-recover.png"
+    },
+    {
+      "row": 11,
+      "column": 15,
+      "action": "hit",
+      "phase": "02-recover",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south-south-west/02-recover.png"
+    },
+    {
+      "row": 12,
+      "column": 0,
+      "action": "hit",
+      "phase": "03-ready",
+      "direction": "south",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south/03-ready.png"
+    },
+    {
+      "row": 12,
+      "column": 1,
+      "action": "hit",
+      "phase": "03-ready",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south-south-east/03-ready.png"
+    },
+    {
+      "row": 12,
+      "column": 2,
+      "action": "hit",
+      "phase": "03-ready",
+      "direction": "south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south-east/03-ready.png"
+    },
+    {
+      "row": 12,
+      "column": 3,
+      "action": "hit",
+      "phase": "03-ready",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/east-south-east/03-ready.png"
+    },
+    {
+      "row": 12,
+      "column": 4,
+      "action": "hit",
+      "phase": "03-ready",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/hit/east/03-ready.png"
+    },
+    {
+      "row": 12,
+      "column": 5,
+      "action": "hit",
+      "phase": "03-ready",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/east-north-east/03-ready.png"
+    },
+    {
+      "row": 12,
+      "column": 6,
+      "action": "hit",
+      "phase": "03-ready",
+      "direction": "north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north-east/03-ready.png"
+    },
+    {
+      "row": 12,
+      "column": 7,
+      "action": "hit",
+      "phase": "03-ready",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north-north-east/03-ready.png"
+    },
+    {
+      "row": 12,
+      "column": 8,
+      "action": "hit",
+      "phase": "03-ready",
+      "direction": "north",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north/03-ready.png"
+    },
+    {
+      "row": 12,
+      "column": 9,
+      "action": "hit",
+      "phase": "03-ready",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north-north-west/03-ready.png"
+    },
+    {
+      "row": 12,
+      "column": 10,
+      "action": "hit",
+      "phase": "03-ready",
+      "direction": "north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/north-west/03-ready.png"
+    },
+    {
+      "row": 12,
+      "column": 11,
+      "action": "hit",
+      "phase": "03-ready",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/west-north-west/03-ready.png"
+    },
+    {
+      "row": 12,
+      "column": 12,
+      "action": "hit",
+      "phase": "03-ready",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/hit/west/03-ready.png"
+    },
+    {
+      "row": 12,
+      "column": 13,
+      "action": "hit",
+      "phase": "03-ready",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/west-south-west/03-ready.png"
+    },
+    {
+      "row": 12,
+      "column": 14,
+      "action": "hit",
+      "phase": "03-ready",
+      "direction": "south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south-west/03-ready.png"
+    },
+    {
+      "row": 12,
+      "column": 15,
+      "action": "hit",
+      "phase": "03-ready",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/hit/south-south-west/03-ready.png"
+    },
+    {
+      "row": 13,
+      "column": 0,
+      "action": "death",
+      "phase": "00-fall",
+      "direction": "south",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south/00-fall.png"
+    },
+    {
+      "row": 13,
+      "column": 1,
+      "action": "death",
+      "phase": "00-fall",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south-south-east/00-fall.png"
+    },
+    {
+      "row": 13,
+      "column": 2,
+      "action": "death",
+      "phase": "00-fall",
+      "direction": "south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south-east/00-fall.png"
+    },
+    {
+      "row": 13,
+      "column": 3,
+      "action": "death",
+      "phase": "00-fall",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/east-south-east/00-fall.png"
+    },
+    {
+      "row": 13,
+      "column": 4,
+      "action": "death",
+      "phase": "00-fall",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/death/east/00-fall.png"
+    },
+    {
+      "row": 13,
+      "column": 5,
+      "action": "death",
+      "phase": "00-fall",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/east-north-east/00-fall.png"
+    },
+    {
+      "row": 13,
+      "column": 6,
+      "action": "death",
+      "phase": "00-fall",
+      "direction": "north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north-east/00-fall.png"
+    },
+    {
+      "row": 13,
+      "column": 7,
+      "action": "death",
+      "phase": "00-fall",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north-north-east/00-fall.png"
+    },
+    {
+      "row": 13,
+      "column": 8,
+      "action": "death",
+      "phase": "00-fall",
+      "direction": "north",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north/00-fall.png"
+    },
+    {
+      "row": 13,
+      "column": 9,
+      "action": "death",
+      "phase": "00-fall",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north-north-west/00-fall.png"
+    },
+    {
+      "row": 13,
+      "column": 10,
+      "action": "death",
+      "phase": "00-fall",
+      "direction": "north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north-west/00-fall.png"
+    },
+    {
+      "row": 13,
+      "column": 11,
+      "action": "death",
+      "phase": "00-fall",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/west-north-west/00-fall.png"
+    },
+    {
+      "row": 13,
+      "column": 12,
+      "action": "death",
+      "phase": "00-fall",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/death/west/00-fall.png"
+    },
+    {
+      "row": 13,
+      "column": 13,
+      "action": "death",
+      "phase": "00-fall",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/west-south-west/00-fall.png"
+    },
+    {
+      "row": 13,
+      "column": 14,
+      "action": "death",
+      "phase": "00-fall",
+      "direction": "south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south-west/00-fall.png"
+    },
+    {
+      "row": 13,
+      "column": 15,
+      "action": "death",
+      "phase": "00-fall",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south-south-west/00-fall.png"
+    },
+    {
+      "row": 14,
+      "column": 0,
+      "action": "death",
+      "phase": "01-collapse",
+      "direction": "south",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south/01-collapse.png"
+    },
+    {
+      "row": 14,
+      "column": 1,
+      "action": "death",
+      "phase": "01-collapse",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south-south-east/01-collapse.png"
+    },
+    {
+      "row": 14,
+      "column": 2,
+      "action": "death",
+      "phase": "01-collapse",
+      "direction": "south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south-east/01-collapse.png"
+    },
+    {
+      "row": 14,
+      "column": 3,
+      "action": "death",
+      "phase": "01-collapse",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/east-south-east/01-collapse.png"
+    },
+    {
+      "row": 14,
+      "column": 4,
+      "action": "death",
+      "phase": "01-collapse",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/death/east/01-collapse.png"
+    },
+    {
+      "row": 14,
+      "column": 5,
+      "action": "death",
+      "phase": "01-collapse",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/east-north-east/01-collapse.png"
+    },
+    {
+      "row": 14,
+      "column": 6,
+      "action": "death",
+      "phase": "01-collapse",
+      "direction": "north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north-east/01-collapse.png"
+    },
+    {
+      "row": 14,
+      "column": 7,
+      "action": "death",
+      "phase": "01-collapse",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north-north-east/01-collapse.png"
+    },
+    {
+      "row": 14,
+      "column": 8,
+      "action": "death",
+      "phase": "01-collapse",
+      "direction": "north",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north/01-collapse.png"
+    },
+    {
+      "row": 14,
+      "column": 9,
+      "action": "death",
+      "phase": "01-collapse",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north-north-west/01-collapse.png"
+    },
+    {
+      "row": 14,
+      "column": 10,
+      "action": "death",
+      "phase": "01-collapse",
+      "direction": "north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north-west/01-collapse.png"
+    },
+    {
+      "row": 14,
+      "column": 11,
+      "action": "death",
+      "phase": "01-collapse",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/west-north-west/01-collapse.png"
+    },
+    {
+      "row": 14,
+      "column": 12,
+      "action": "death",
+      "phase": "01-collapse",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/death/west/01-collapse.png"
+    },
+    {
+      "row": 14,
+      "column": 13,
+      "action": "death",
+      "phase": "01-collapse",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/west-south-west/01-collapse.png"
+    },
+    {
+      "row": 14,
+      "column": 14,
+      "action": "death",
+      "phase": "01-collapse",
+      "direction": "south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south-west/01-collapse.png"
+    },
+    {
+      "row": 14,
+      "column": 15,
+      "action": "death",
+      "phase": "01-collapse",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south-south-west/01-collapse.png"
+    },
+    {
+      "row": 15,
+      "column": 0,
+      "action": "death",
+      "phase": "02-ground",
+      "direction": "south",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south/02-ground.png"
+    },
+    {
+      "row": 15,
+      "column": 1,
+      "action": "death",
+      "phase": "02-ground",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south-south-east/02-ground.png"
+    },
+    {
+      "row": 15,
+      "column": 2,
+      "action": "death",
+      "phase": "02-ground",
+      "direction": "south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south-east/02-ground.png"
+    },
+    {
+      "row": 15,
+      "column": 3,
+      "action": "death",
+      "phase": "02-ground",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/east-south-east/02-ground.png"
+    },
+    {
+      "row": 15,
+      "column": 4,
+      "action": "death",
+      "phase": "02-ground",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/death/east/02-ground.png"
+    },
+    {
+      "row": 15,
+      "column": 5,
+      "action": "death",
+      "phase": "02-ground",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/east-north-east/02-ground.png"
+    },
+    {
+      "row": 15,
+      "column": 6,
+      "action": "death",
+      "phase": "02-ground",
+      "direction": "north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north-east/02-ground.png"
+    },
+    {
+      "row": 15,
+      "column": 7,
+      "action": "death",
+      "phase": "02-ground",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north-north-east/02-ground.png"
+    },
+    {
+      "row": 15,
+      "column": 8,
+      "action": "death",
+      "phase": "02-ground",
+      "direction": "north",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north/02-ground.png"
+    },
+    {
+      "row": 15,
+      "column": 9,
+      "action": "death",
+      "phase": "02-ground",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north-north-west/02-ground.png"
+    },
+    {
+      "row": 15,
+      "column": 10,
+      "action": "death",
+      "phase": "02-ground",
+      "direction": "north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north-west/02-ground.png"
+    },
+    {
+      "row": 15,
+      "column": 11,
+      "action": "death",
+      "phase": "02-ground",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/west-north-west/02-ground.png"
+    },
+    {
+      "row": 15,
+      "column": 12,
+      "action": "death",
+      "phase": "02-ground",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/death/west/02-ground.png"
+    },
+    {
+      "row": 15,
+      "column": 13,
+      "action": "death",
+      "phase": "02-ground",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/west-south-west/02-ground.png"
+    },
+    {
+      "row": 15,
+      "column": 14,
+      "action": "death",
+      "phase": "02-ground",
+      "direction": "south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south-west/02-ground.png"
+    },
+    {
+      "row": 15,
+      "column": 15,
+      "action": "death",
+      "phase": "02-ground",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south-south-west/02-ground.png"
+    },
+    {
+      "row": 16,
+      "column": 0,
+      "action": "death",
+      "phase": "03-settle",
+      "direction": "south",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south/03-settle.png"
+    },
+    {
+      "row": 16,
+      "column": 1,
+      "action": "death",
+      "phase": "03-settle",
+      "direction": "south-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south-south-east/03-settle.png"
+    },
+    {
+      "row": 16,
+      "column": 2,
+      "action": "death",
+      "phase": "03-settle",
+      "direction": "south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south-east/03-settle.png"
+    },
+    {
+      "row": 16,
+      "column": 3,
+      "action": "death",
+      "phase": "03-settle",
+      "direction": "east-south-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/east-south-east/03-settle.png"
+    },
+    {
+      "row": 16,
+      "column": 4,
+      "action": "death",
+      "phase": "03-settle",
+      "direction": "east",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/death/east/03-settle.png"
+    },
+    {
+      "row": 16,
+      "column": 5,
+      "action": "death",
+      "phase": "03-settle",
+      "direction": "east-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/east-north-east/03-settle.png"
+    },
+    {
+      "row": 16,
+      "column": 6,
+      "action": "death",
+      "phase": "03-settle",
+      "direction": "north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north-east/03-settle.png"
+    },
+    {
+      "row": 16,
+      "column": 7,
+      "action": "death",
+      "phase": "03-settle",
+      "direction": "north-north-east",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north-north-east/03-settle.png"
+    },
+    {
+      "row": 16,
+      "column": 8,
+      "action": "death",
+      "phase": "03-settle",
+      "direction": "north",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north/03-settle.png"
+    },
+    {
+      "row": 16,
+      "column": 9,
+      "action": "death",
+      "phase": "03-settle",
+      "direction": "north-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north-north-west/03-settle.png"
+    },
+    {
+      "row": 16,
+      "column": 10,
+      "action": "death",
+      "phase": "03-settle",
+      "direction": "north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/north-west/03-settle.png"
+    },
+    {
+      "row": 16,
+      "column": 11,
+      "action": "death",
+      "phase": "03-settle",
+      "direction": "west-north-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/west-north-west/03-settle.png"
+    },
+    {
+      "row": 16,
+      "column": 12,
+      "action": "death",
+      "phase": "03-settle",
+      "direction": "west",
+      "sourceKind": "preserved-approved-source-pose",
+      "file": "frames/death/west/03-settle.png"
+    },
+    {
+      "row": 16,
+      "column": 13,
+      "action": "death",
+      "phase": "03-settle",
+      "direction": "west-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/west-south-west/03-settle.png"
+    },
+    {
+      "row": 16,
+      "column": 14,
+      "action": "death",
+      "phase": "03-settle",
+      "direction": "south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south-west/03-settle.png"
+    },
+    {
+      "row": 16,
+      "column": 15,
+      "action": "death",
+      "phase": "03-settle",
+      "direction": "south-south-west",
+      "sourceKind": "generated-candidate",
+      "file": "frames/death/south-south-west/03-settle.png"
+    }
+  ],
+  "qa": {
+    "identity": false,
+    "sixteenDirections": false,
+    "posePhases": false,
+    "alphaEdges": false,
+    "rootAnchor": false,
+    "atlas": false,
+    "visualReview": false,
+    "runtimePromotion": false
+  },
+  "previewFiles": [
+    "animation-v5-color-preview.png",
+    "animation-v5-color-preview-neutral.png",
+    "animation-v5-silhouette-preview.png",
+    "animation-v5-death-rows-review.png"
+  ],
+  "notes": [
+    "Review candidate only; no runtime promotion.",
+    "The 40 source frames were extracted from the visual-approved 8x5 atlas at exact 384x384 cell bounds and preserved without pixel edits.",
+    "The original 128x128 reference metadata has no measured root or verified baked-weapon id; source atlas anchor (192,288) is used provisionally.",
+    "Generated sheets use threshold-128 alpha extraction with a 3px soft-edge recovery. Alpha edges, identity, facing, action continuity, anchors, and the full atlas remain unapproved."
+  ]
+}

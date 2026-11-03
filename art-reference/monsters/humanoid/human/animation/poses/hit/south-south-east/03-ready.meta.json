@@ -1,0 +1,42 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "human",
+  "action": "hit",
+  "direction": "south-south-east",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/hit-03-ready-16.png",
+  "sourceCell": {
+    "row": 0,
+    "column": 1,
+    "box": [
+      315,
+      0,
+      630,
+      312
+    ]
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "visualFootBaselineY": 291
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "uniformScale": 0.73504
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "status": "user-reference",
+  "species": "wraith",
+  "title": "Crypt Wraith",
+  "source": {
+    "provider": "itch.io",
+    "url": "https://img.itch.zone/aW1nLzMxMjEzOTY3LmdpZg==/original/iD%2BKYj.gif",
+    "kind": "animated preview card",
+    "sourceCanvas": [
+      144,
+      144
+    ]
+  },
+  "extraction": {
+    "removedOverlays": [
+      "ornamental card frame",
+      "in-card species title",
+      "clip caption",
+      "PREVIEW wash"
+    ],
+    "method": "invert the wash blend shown=0.45*[238, 225, 186]+0.55*underlying, then drop ground-coloured pixels and keep body-connected components inside the motion range",
+    "washBlend": {
+      "alpha": 0.45,
+      "colour": [
+        238,
+        225,
+        186
+      ]
+    },
+    "background": "transparent",
+    "alignment": "each clip shares one crop box; frames keep their in-clip offsets so the ground line is fixed"
+  },
+  "clips": {
+    "idle": {
+      "file": "clips/idle.png",
+      "frames": 4,
+      "cell": [
+        47,
+        62
+      ],
+      "sourceBox": [
+        39,
+        30,
+        86,
+        92
+      ],
+      "frameMs": 250,
+      "durations": [
+        210,
+        210,
+        290,
+        290
+      ],
+      "loop": true
+    },
+    "walk": {
+      "file": "clips/walk.png",
+      "frames": 4,
+      "cell": [
+        51,
+        54
+      ],
+      "sourceBox": [
+        37,
+        34,
+        88,
+        88
+      ],
+      "frameMs": 200,
+      "durations": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "loop": true
+    },
+    "attack": {
+      "file": "clips/attack.png",
+      "frames": 7,
+      "cell": [
+        84,
+        57
+      ],
+      "sourceBox": [
+        30,
+        33,
+        114,
+        90
+      ],
+      "frameMs": 107,
+      "durations": [
+        120,
+        120,
+        80,
+        120,
+        120,
+        120,
+        70
+      ],
+      "loop": false,
+      "impactFrame": 3
+    },
+    "death": {
+      "file": "clips/death.png",
+      "frames": 10,
+      "cell": [
+        84,
+        107
+      ],
+      "sourceBox": [
+        30,
+        31,
+        114,
+        138
+      ],
+      "frameMs": 171,
+      "durations": [
+        120,
+        170,
+        250,
+        170,
+        210,
+        170,
+        120,
+        170,
+        170,
+        160
+      ],
+      "loop": false
+    }
+  },
+  "review": {
+    "frameMs": {
+      "idle": 220,
+      "walk": 130,
+      "attack": 60,
+      "death": 110
+    },
+    "impactFrame": {
+      "attack": 3
+    },
+    "displayHeight": 236,
+    "facing": "east",
+    "notes": []
+  }
+}

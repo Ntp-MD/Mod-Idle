@@ -1,0 +1,63 @@
+{
+  "status": "candidate-source-review-required",
+  "speciesId": "minotaur",
+  "generator": "built-in image_gen",
+  "sourceImageId": "exec-90714c4a-ff8b-494c-9b25-778d34ea4ecd.png",
+  "file": "source/v5-contact-sheets/hit-03-ready-16.png",
+  "action": "hit",
+  "phase": "03-ready",
+  "phasePrompt": "Finish the hit recovery: regain a guarded balanced stance with axe low and alert eyes; match the original character and direction.",
+  "sha256": "9ef18d2532a43bba315d54c8a5eefa3592d52f5d21a07bee04ce804bd4a577f6",
+  "transparentBackgroundRequested": true,
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 1536,
+    "mode": "RGBA"
+  },
+  "cellCanvas": {
+    "width": 256,
+    "height": 384
+  },
+  "directionOrder": [
+    "south",
+    "south-south-east",
+    "south-east",
+    "east-south-east",
+    "east",
+    "east-north-east",
+    "north-east",
+    "north-north-east",
+    "north",
+    "north-north-west",
+    "north-west",
+    "west-north-west",
+    "west",
+    "west-south-west",
+    "south-west",
+    "south-south-west"
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 4,
+    "cellOrder": "row-major"
+  },
+  "targetFrameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "targetAnchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited Minotaur source anchor; 16-direction alignment remains unreviewed"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  },
+  "sourceEditOf": "exec-a9ab08bf-ac30-4f0e-8f63-eebaf86de49f.png"
+}

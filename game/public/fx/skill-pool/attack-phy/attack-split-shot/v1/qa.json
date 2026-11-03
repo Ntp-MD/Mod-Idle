@@ -1,0 +1,20 @@
+{
+  "id": "attack.split_shot",
+  "status": "PASS",
+  "errors": [],
+  "imageSize": [
+    1024,
+    1024
+  ],
+  "frameCount": 16,
+  "alphaDiscard": 8,
+  "virtualPaddingPx": 64,
+  "sourceSeparatorsClear": true,
+  "sourcePixelsUnmodified": false,
+  "contentWidthPx": 212,
+  "contentHeightPx": 177,
+  "contentWidthRatio": 0.5521,
+  "contentHeightRatio": 0.4609,
+  "visualReview": "One arrow splits into three, volleys, then bursts on impact. Keyed sheet inspected on the arena ground colour; live arena sample pending.",
+  "runtimeActivated": true
+}

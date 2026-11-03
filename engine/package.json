@@ -1,0 +1,7 @@
+{
+  "name": "modworld-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The shared engine math. One home for every formula: the cages and the game both call this. Pure functions over tools/data/engine.json — no fs, no doc reads, no Node builtins."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "attack.contagion",
+  "src": "/fx/skill-pool/attack-poison/attack-contagion/v1/decal.png",
+  "authoringGeometry": {
+    "shape": "circle",
+    "origin": "target",
+    "delivery": "projectile",
+    "radiusM": 3
+  },
+  "delivery": "projectile",
+  "origin": "target",
+  "orient": true,
+  "projection": null
+}

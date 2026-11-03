@@ -1,0 +1,45 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "lizardman",
+  "action": "attack",
+  "direction": "north-west",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/attack-01-contact-16-v2.png",
+  "sourceCell": {
+    "row": 3,
+    "column": 3,
+    "box": [
+      627,
+      627,
+      940,
+      940
+    ]
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "visualFootBaselineY": 288
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1+legacy-color-match",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 2,
+    "uniformScale": 0.6875,
+    "componentCleanup": "largest high-alpha component plus nearby fragments",
+    "colorMatch": "RGB mean/std matched to preserved East/West frames for this phase",
+    "sharpening": "UnsharpMask radius 0.8, percent 90, threshold 4; alpha unchanged"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18331-dd08-7111-97c2-f98d36613898\\exec-57ec3628-5f37-4064-b033-609290a83d1e.png",
+  "action": "walk",
+  "phase": "03-stride-d.png",
+  "direction": "south",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": true,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false,
+    "identityPlausible": true,
+    "facingPlausible": true,
+    "note": "Frontal heading and identity plausible. Passing/alternation not validated; stride-b and stride-d currently repeat same support-foot pattern. Raw output preserved for cycle review."
+  }
+}

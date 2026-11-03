@@ -1,0 +1,57 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "goblin",
+  "action": "idle",
+  "direction": "west-north-west",
+  "pose": "idle",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/idle-16.png",
+  "sourceImageId": "exec-a9a2b439-12bc-4a74-837c-54bc3d90c1c5.png",
+  "sourceCell": {
+    "row": 2,
+    "column": 3,
+    "box": [
+      768,
+      768,
+      1024,
+      1152
+    ],
+    "confidenceBoundsInCell": [
+      66,
+      118,
+      188,
+      311
+    ],
+    "sourceVisualFootBaselineY": 311,
+    "targetVisualFootBaselineY": 288,
+    "sourceConfidenceBoundsHeight": 193,
+    "targetReferenceMedianHeight": 146.5,
+    "uniformScale": 0.759067
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited 8-direction Goblin anchor; visual measurement pending"
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "scaleReference": "median alpha-bound height of approved Goblin source poses for this action/phase",
+    "uniformScale": 0.759067
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

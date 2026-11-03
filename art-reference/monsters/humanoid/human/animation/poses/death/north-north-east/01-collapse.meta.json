@@ -1,0 +1,42 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "human",
+  "action": "death",
+  "direction": "north-north-east",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/death-01-collapse-16.png",
+  "sourceCell": {
+    "row": 1,
+    "column": 3,
+    "box": [
+      946,
+      312,
+      1261,
+      624
+    ]
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "visualFootBaselineY": 291
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "uniformScale": 0.75109
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

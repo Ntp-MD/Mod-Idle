@@ -1,0 +1,19 @@
+{
+  "status": "candidate-source-review-required",
+  "speciesId": "minotaur",
+  "generator": "built-in image_gen",
+  "sourceImageId": "exec-1afd6dbb-1557-428f-a5a1-9889633d8d14.png",
+  "file": "source/v5-contact-sheets/walk-00-stride-a-16.png",
+  "action": "walk",
+  "phase": "00-stride-a",
+  "phasePrompt": "Left hoof forward in a clear support step, right hoof trailing; torso and tail counterbalance; axe low; fixed root.",
+  "sha256": "f8fa2ca0e58fc516ca28d51b9f5536cae5fe7910a40159de6e8607622af68e78",
+  "transparentBackgroundRequested": true,
+  "sourceCanvas": {"width": 1024, "height": 1536, "mode": "RGBA"},
+  "cellCanvas": {"width": 256, "height": 384},
+  "directionOrder": ["south", "south-south-east", "south-east", "east-south-east", "east", "east-north-east", "north-east", "north-north-east", "north", "north-north-west", "north-west", "west-north-west", "west", "west-south-west", "south-west", "south-south-west"],
+  "layout": {"columns": 4, "rows": 4, "cellOrder": "row-major"},
+  "targetFrameCanvas": {"width": 384, "height": 384},
+  "targetAnchor": {"x": 192, "y": 288, "provenance": "inherited Minotaur source anchor; 16-direction alignment remains unreviewed"},
+  "qa": {"identity": false, "facing": false, "pose": false, "alphaEdges": false, "anchor": false, "atlas": false, "runtimePromotion": false}
+}

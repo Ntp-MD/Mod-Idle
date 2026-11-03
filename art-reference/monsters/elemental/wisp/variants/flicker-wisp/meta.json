@@ -1,0 +1,498 @@
+{
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "wisp",
+  "variantId": "flicker-wisp",
+  "name": "Flicker Wisp",
+  "levels": [
+    1,
+    20
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-anchor-at-224",
+  "grid": {
+    "columns": 8,
+    "rows": 5,
+    "totalFrames": 40
+  },
+  "states": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    {
+      "state": "idle",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "walk",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "attack",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "hit",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "death",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    }
+  ],
+  "sourceFrames": [
+    {
+      "x": 135,
+      "y": 129,
+      "width": 142,
+      "height": 159,
+      "offsetX": 135,
+      "offsetY": 129
+    },
+    {
+      "x": 512,
+      "y": 128,
+      "width": 141,
+      "height": 160,
+      "offsetX": 128,
+      "offsetY": 128
+    },
+    {
+      "x": 892,
+      "y": 127,
+      "width": 147,
+      "height": 161,
+      "offsetX": 124,
+      "offsetY": 127
+    },
+    {
+      "x": 1274,
+      "y": 126,
+      "width": 142,
+      "height": 161,
+      "offsetX": 122,
+      "offsetY": 126
+    },
+    {
+      "x": 1657,
+      "y": 121,
+      "width": 139,
+      "height": 168,
+      "offsetX": 121,
+      "offsetY": 121
+    },
+    {
+      "x": 2034,
+      "y": 127,
+      "width": 140,
+      "height": 161,
+      "offsetX": 114,
+      "offsetY": 127
+    },
+    {
+      "x": 2413,
+      "y": 125,
+      "width": 142,
+      "height": 164,
+      "offsetX": 109,
+      "offsetY": 125
+    },
+    {
+      "x": 2799,
+      "y": 127,
+      "width": 144,
+      "height": 162,
+      "offsetX": 111,
+      "offsetY": 127
+    },
+    {
+      "x": 129,
+      "y": 510,
+      "width": 148,
+      "height": 162,
+      "offsetX": 129,
+      "offsetY": 126
+    },
+    {
+      "x": 506,
+      "y": 508,
+      "width": 151,
+      "height": 162,
+      "offsetX": 122,
+      "offsetY": 124
+    },
+    {
+      "x": 887,
+      "y": 508,
+      "width": 152,
+      "height": 167,
+      "offsetX": 119,
+      "offsetY": 124
+    },
+    {
+      "x": 1270,
+      "y": 509,
+      "width": 146,
+      "height": 164,
+      "offsetX": 118,
+      "offsetY": 125
+    },
+    {
+      "x": 1658,
+      "y": 508,
+      "width": 144,
+      "height": 167,
+      "offsetX": 122,
+      "offsetY": 124
+    },
+    {
+      "x": 2034,
+      "y": 507,
+      "width": 148,
+      "height": 166,
+      "offsetX": 114,
+      "offsetY": 123
+    },
+    {
+      "x": 2413,
+      "y": 507,
+      "width": 148,
+      "height": 165,
+      "offsetX": 109,
+      "offsetY": 123
+    },
+    {
+      "x": 2797,
+      "y": 509,
+      "width": 146,
+      "height": 163,
+      "offsetX": 109,
+      "offsetY": 125
+    },
+    {
+      "x": 129,
+      "y": 891,
+      "width": 147,
+      "height": 164,
+      "offsetX": 129,
+      "offsetY": 123
+    },
+    {
+      "x": 506,
+      "y": 892,
+      "width": 148,
+      "height": 163,
+      "offsetX": 122,
+      "offsetY": 124
+    },
+    {
+      "x": 872,
+      "y": 889,
+      "width": 172,
+      "height": 168,
+      "offsetX": 104,
+      "offsetY": 121
+    },
+    {
+      "x": 1268,
+      "y": 891,
+      "width": 148,
+      "height": 165,
+      "offsetX": 116,
+      "offsetY": 123
+    },
+    {
+      "x": 1652,
+      "y": 889,
+      "width": 148,
+      "height": 167,
+      "offsetX": 116,
+      "offsetY": 121
+    },
+    {
+      "x": 2024,
+      "y": 889,
+      "width": 175,
+      "height": 169,
+      "offsetX": 104,
+      "offsetY": 121
+    },
+    {
+      "x": 2417,
+      "y": 891,
+      "width": 149,
+      "height": 165,
+      "offsetX": 113,
+      "offsetY": 123
+    },
+    {
+      "x": 2797,
+      "y": 891,
+      "width": 145,
+      "height": 165,
+      "offsetX": 109,
+      "offsetY": 123
+    },
+    {
+      "x": 129,
+      "y": 1275,
+      "width": 149,
+      "height": 164,
+      "offsetX": 129,
+      "offsetY": 123
+    },
+    {
+      "x": 506,
+      "y": 1275,
+      "width": 157,
+      "height": 164,
+      "offsetX": 122,
+      "offsetY": 123
+    },
+    {
+      "x": 885,
+      "y": 1274,
+      "width": 153,
+      "height": 165,
+      "offsetX": 117,
+      "offsetY": 122
+    },
+    {
+      "x": 1267,
+      "y": 1276,
+      "width": 150,
+      "height": 163,
+      "offsetX": 115,
+      "offsetY": 124
+    },
+    {
+      "x": 1650,
+      "y": 1276,
+      "width": 151,
+      "height": 165,
+      "offsetX": 114,
+      "offsetY": 124
+    },
+    {
+      "x": 2031,
+      "y": 1274,
+      "width": 157,
+      "height": 166,
+      "offsetX": 111,
+      "offsetY": 122
+    },
+    {
+      "x": 2407,
+      "y": 1275,
+      "width": 157,
+      "height": 166,
+      "offsetX": 103,
+      "offsetY": 123
+    },
+    {
+      "x": 2797,
+      "y": 1278,
+      "width": 145,
+      "height": 163,
+      "offsetX": 109,
+      "offsetY": 126
+    },
+    {
+      "x": 133,
+      "y": 1672,
+      "width": 134,
+      "height": 162,
+      "offsetX": 133,
+      "offsetY": 136
+    },
+    {
+      "x": 514,
+      "y": 1691,
+      "width": 134,
+      "height": 134,
+      "offsetX": 130,
+      "offsetY": 155
+    },
+    {
+      "x": 898,
+      "y": 1698,
+      "width": 125,
+      "height": 125,
+      "offsetX": 130,
+      "offsetY": 162
+    },
+    {
+      "x": 1282,
+      "y": 1704,
+      "width": 109,
+      "height": 101,
+      "offsetX": 130,
+      "offsetY": 168
+    },
+    {
+      "x": 1649,
+      "y": 1694,
+      "width": 136,
+      "height": 132,
+      "offsetX": 113,
+      "offsetY": 158
+    },
+    {
+      "x": 2038,
+      "y": 1697,
+      "width": 131,
+      "height": 127,
+      "offsetX": 118,
+      "offsetY": 161
+    },
+    {
+      "x": 2426,
+      "y": 1696,
+      "width": 126,
+      "height": 122,
+      "offsetX": 122,
+      "offsetY": 160
+    },
+    {
+      "x": 2824,
+      "y": 1711,
+      "width": 91,
+      "height": 84,
+      "offsetX": 136,
+      "offsetY": 175
+    }
+  ],
+  "identityReference": "art-reference/monsters/elemental/wisp/animation/atlas/animation.png",
+  "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+  "generation": {
+    "sourceOutputs": [
+      "exec-db8c1cfc-df4f-4e04-812b-ce38f3fbaa8b.png"
+    ],
+    "identityReference": "art-reference/monsters/elemental/wisp/animation/atlas/animation.png",
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "variantCue": "small irregular warm-gold flickers contained inside the wisp's body, no outer flame or halo",
+    "initialPrompt": "Flicker Wisp; all 8 directions for idle, walk, attack, hit, death; dark outline without fringe or halo."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "sourceFrames-repack-v2",
+    "sourceCanvas": {
+      "width": 3072,
+      "height": 1920
+    },
+    "uniformScale": 1.0,
+    "translation": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "recoveredIsolatedAlphaPixels": 0,
+    "discardedIsolatedAlphaDust": 0,
+    "status": "draft-review"
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged.",
+      "Repacked from uniquely assigned sourceFrames into 384 x 384 review cells with at least 24 px clear padding on each edge; visual review remains pending."
+    ]
+  }
+}

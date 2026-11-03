@@ -1,0 +1,530 @@
+/**
+ * Shared drop-roll primitives — the RNG, the line skeleton and the item-level value window
+ * `tools/loot.ts` already runs, lifted out so the client rolls the same way.
+ *
+ * The unremovable head is fixed (line 1 the Frame Mod + the Bound pair), the Unbound lines are drawn from
+ * the range `item_level.unbound_slots` publishes, and an item's level answers the other question: what
+ * range its lines may roll in (item-level.md). The Bases a slot may carry live in `tools/data/bases.json`;
+ * the client rolls only the Mod lines `mods.json` owns.
+ */
+
+import type { BasesData, EngineData, ModsData, Rng } from './types.ts';
+
+/** Seeded, reproducible, no top-level await: a save cannot be rerolled for a better outcome. */
+export function mulberry32(a: number) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+export const pick = (rng: Rng, arr: any[]): any => arr[Math.floor(rng() * arr.length)];
+export const intBetween = (rng: Rng, lo: number, hi: number) => lo + Math.floor(rng() * (hi - lo + 1));
+
+/** One option out of a weighted list — the frame / weapon pick at step 2. */
+export function pickWeighted(rng: Rng, options: { weight: number }[]): any {
+  const total = options.reduce((s, o) => s + o.weight, 0);
+  let r = rng() * total;
+  for (const o of options) { r -= o.weight; if (r <= 0) return o; }
+  return options[options.length - 1];
+}
+
+/** Keep the Variant's sale rarity while allowing its Species to supply a matching-rarity alternative. */
+export function chooseJunkItem(
+  rng: Rng,
+  variantItem: string,
+  rarity: string,
+  speciesItems: Record<string, string>,
+): string {
+  const alternative = speciesItems[rarity];
+  return alternative && rng() >= 0.5 ? alternative : variantItem;
+}
+
+
+export function weightedPick(rng: Rng, entries: { id: string; w: number }[]) {
+  let total = 0;
+  for (const e of entries) total += e.w;
+  let r = rng() * total;
+  for (const e of entries) { r -= e.w; if (r <= 0) return e.id; }
+  return entries[entries.length - 1].id;
+}
+
+/**
+ * Redistributes probability MASS among gear, herbs and junk toward one source's lean. Each tilt
+ * preserves expected drops/kill by renormalizing; callers may layer a variant lean and an environment
+ * lean without moving drops/hr. `lean === 'none'` is the identity. Stones are not a category.
+ */
+export function leanReweight(
+  p: { gear: number; herb: number; junk: number },
+  lean: 'none' | 'gear' | 'herb' | 'junk',
+  shiftPct: number,
+): { gear: number; herb: number; junk: number } {
+  if (lean === 'none') return { ...p };
+  const total = p.gear + p.herb + p.junk;
+  if (!(total > 0)) return { ...p };
+  const s = shiftPct / 100;
+  const f = (k: 'gear' | 'herb' | 'junk') => (k === lean ? 1 + s : 1 - s);
+  const scaled = p.gear * f('gear') + p.herb * f('herb') + p.junk * f('junk');
+  const norm = total / scaled; // renormalize → Σ stays exactly `total`
+  const clamp = (x: number) => Math.max(0, Math.min(1, x));
+  return {
+    gear: clamp(p.gear * f('gear') * norm),
+    herb: clamp(p.herb * f('herb') * norm),
+    junk: clamp(p.junk * f('junk') * norm),
+  };
+}
+
+/** Apply independent source tilts in order, keeping the expected total fixed after every step. */
+export function leanReweightMany(
+  p: { gear: number; herb: number; junk: number },
+  leans: Array<'none' | 'gear' | 'herb' | 'junk'>,
+  shiftPct: number,
+): { gear: number; herb: number; junk: number } {
+  return leans.reduce((weights, lean) => leanReweight(weights, lean, shiftPct), { ...p });
+}
+
+export function createLoot(E: EngineData, MODS: ModsData) {
+  // The earring is appended last (index 12) on purpose: the doll grid, `element.test.ts` and the
+  // gear array address the other slots by position, so appending keeps every existing index stable
+  // (— the order is cosmetic in the filter panel only).
+  const SLOTS = ['helmet', 'chest', 'pant', 'boots', 'belt', 'gloves', 'ring', 'ring', 'amulet', 'cape', 'main hand', 'off hand', 'earring'];
+  const GEAR_MOD_SLOTS = ['helmet', 'chest', 'pant', 'boots', 'gloves'];
+  const GEAR_MODS = ['armour_flat', 'evasion_flat', 'energy_shield_flat'];
+  const TIER_NAME = { 0: 'T1', 1: 'T2', 2: 'T3' };
+  const BAND_LABEL = ['low', 'mid', 'high'];
+  // The window's thirds, best last: the TOP third is the rarest, so a good roll is a chance and not a
+  // formality, and the bottom third is the common outcome (item-level.md). T1 names the top. The two
+  // cuts are the data's own (`loot.tier_split`), so the odds every Mod shares live in one place.
+  const TIER_SPLIT: [number, number] = E.loot.tier_split;
+  const WINDOW_THIRDS = 3;
+
+  const WEIGHT_BY_ID: Record<string, number | number[]> = {};
+  for (const row of E.mod_weights.rows) for (const id of row.ids) WEIGHT_BY_ID[id] = row.weight;
+  const RW = E.mod_weights.role_weights;
+  const MAX_OF: Record<string, number> = {}, NAME_OF: Record<string, string> = {}, BANDS_OF: Record<string, number[][][]> = {};
+  for (const m of MODS.mods) { MAX_OF[m.id] = m.max; NAME_OF[m.id] = m.name; BANDS_OF[m.id] = m.bands; }
+  const IMPRINT_IDS = MODS.mods.filter((m) => m.imprint !== false).map((m) => m.id);
+
+  /** The Mod weight for one line at one band (the Flat group steps by band). */
+  function weightOf(id: string, q: number) {
+    const w = WEIGHT_BY_ID[id];
+    return Array.isArray(w) ? w[q] : w;
+  }
+
+  /** How far through its band's level span a level sits — 0 at the span's start, 1 at its end. */
+  function spanT(ilvl: number, q: number) {
+    const sp = (E.item_level.spans || [])[q] || { from: 1, to: 1 };
+    const span = Math.max(1, (sp.to || 1) - (sp.from || 1));
+    return Math.min(1, Math.max(0, ((ilvl == null ? sp.from : ilvl) - sp.from) / span));
+  }
+
+  /**
+   * The value window one Mod line publishes at one item level inside one band (item-level.md). The
+   * ceiling is the band's own top and the floor climbs from the band below — so a mid-band piece
+   * starts able to roll the low band's floor and ends above it — and a level past its band's span
+   * clamps, which is what keeps the later loops on the band the zone label names.
+   */
+  function windowAt(id: string, ilvl: number, q: number): [number, number] {
+    const bands = BANDS_OF[id] || [];
+    const band = bands[q] || bands[0];
+    if (!band) throw new Error(`no value window for mod "${id}" (band ${q})`);
+    const lo = band[0][0];
+    const hi = band[band.length - 1][1];
+    const below = bands[q - 1];
+    const floorFrom = below ? below[0][0] : lo;
+    return [Math.round(floorFrom + (lo - floorFrom) * spanT(ilvl, q)), hi];
+  }
+
+  /**
+   * One third of the window — tier 0 the top (T1), tier 2 the bottom (T3). Thirds are uniform for every
+   * Mod, so the skew is one rule rather than a per-Mod ladder, and `tierSlice` spends the weights on it.
+   */
+  function rangeOf(id: string, ilvl: number, q: number, tier: number): [number, number] {
+    const [lo, hi] = windowAt(id, ilvl, q);
+    const size = Math.ceil((hi - lo + 1) / WINDOW_THIRDS);
+    const topLo = Math.max(lo, hi - size + 1);
+    if (tier <= 0) return [topLo, hi];
+    const midHi = Math.max(lo, topLo - 1);
+    const midLo = Math.max(lo, midHi - size + 1);
+    if (tier === 1) return [midLo, Math.max(midLo, midHi)];
+    return [lo, Math.max(lo, midLo - 1)];
+  }
+
+  /** Roll the raw integer before applying a Frame budget, as fresh drops do. */
+  function rollValue(id: string, ilvl: number, q: number, slice: number, rng: Rng, scale = 1, minimum = 0): number {
+    const [lo, hi] = rangeOf(id, ilvl, q, slice);
+    // Polish conditions the same roll on its held value. An older value above today's window is
+    // retained; it cannot force another part of the Frame above that part's own ceiling.
+    let floor = Math.max(lo, Math.ceil((minimum - 0.5) / scale));
+    // Division can land just above an integer (10.5 / 0.7). Check the actual rounding boundary
+    // so every raw outcome that reaches the held value keeps its original probability.
+    if (floor > lo && Math.round((floor - 1) * scale) >= minimum) floor--;
+    if (Math.round(floor * scale) < minimum) floor++;
+    const u = rng();
+    if (floor > hi) return minimum;
+    return Math.max(1, minimum, Math.round((floor + Math.floor(u * (hi - floor + 1))) * scale));
+  }
+
+  const frameValueScale = (parts: number, bias = 1) =>
+    (E.loot.frame_mod.value_scale[String(parts)] ?? 1) * bias;
+
+  /** Saved weapons identify their frame by the ordered Mod tuple, including legacy tuples. */
+  function weaponFrameOf(BASES: Pick<BasesData, 'weapon_frames'>, base: string, line: { id: string; extra?: { id: string }[] }) {
+    const ids = [line.id, ...(line.extra || []).map((x) => x.id)];
+    const frames = BASES.weapon_frames?.[base] || [];
+    const matches = (mods?: string[]) => mods?.length === ids.length && mods.every((id, i) => id === ids[i]);
+    return frames.find((frame) => matches(frame.frame_mod))
+      || frames.find((frame) => matches(frame.legacy_frame_mod));
+  }
+
+  /** How many positions a window publishes. Uniform now — the thirds are every Mod's ladder. */
+  const sliceCount = () => WINDOW_THIRDS;
+
+  const FLAT_GROUP = new Set(E.mod_weights.flat_group);
+  const ELEMENTS = E.elements.order;
+
+  // ---- the rollable pool and line 1 (item-base.md)
+
+  const STAT_ID = 'stat_mod_flat';
+  // The Stat Mod slot (item-base.md · equipment-slot-pools.md): one line, and the piece may hold it as
+  // a single Core attribute (`stat_mod_flat`) or as all seven at once (`all_stat_flat`). The
+  // family is every `group: "Stat Mod"` row in `mods.json`, so a third sibling would join it with no
+  // code change; the slot holds exactly one of them (`blockedBy` below).
+  const STAT_IDS: string[] = MODS.mods.filter((m) => m.group === 'Stat Mod').map((m) => m.id);
+  // The stats a Stat Mod line may feed, owned by the Mod row itself (`mods.json` `rolls`, gated by
+  // checks.md X44 against the seven Core attributes). A `stat_mod_flat` line bakes its stat at drop, so
+  // the pick is data the roller reads, not a per-character choice made later; a sibling that feeds no
+  // single stat (`all_stat_flat`) carries no `rolls` and bakes nothing.
+  const STAT_ROLLS_OF: Record<string, string[]> = {};
+  for (const m of MODS.mods) if (m.rolls) STAT_ROLLS_OF[m.id] = m.rolls;
+  const STAT_ROLLS: string[] = STAT_ROLLS_OF[STAT_ID] || ['str', 'vit', 'dex', 'agi', 'wis', 'int', 'lck'];
+  const ARMOUR_SLOTS = ['helmet', 'chest', 'pant', 'boots', 'gloves', 'cape'];
+
+  /** The union of one slot's Bases, in pool order — the matrix `equipment-slot-pools.md` prints. */
+  function slotUnion(BASES: any, slot: string, frame: any): { id: string; role: number }[] {
+    const out: { id: string; role: number }[] = [];
+    const push = (id: string, role: number) => { if (id && !out.some((e) => e.id === id)) out.push({ id, role }); };
+    for (const b of (BASES?.bases || []).filter((x: any) => x.slot === slot)) {
+      const own = b.name === frame?.name;
+      for (const id of b.primary || []) push(id, own ? RW.primary : RW.secondary);
+      for (const id of b.secondary || []) push(id, RW.secondary);
+    }
+    return out;
+  }
+
+  /**
+   * The piece's rollable pool: the slot's union of Bases plus the lines the slot adds on its
+   * own. Lines 2-7 all draw from this one list — the frame's own Primary keeps role 1.0 and
+   * everything it does not own enters at 0.5, so the frame still steers the roll. A main-hand weapon
+   * draws its type's pool (the physical / magic split) and a dual-wield off hand the same at half
+   * weight; an off-hand frame (Shield · Book) draws its slot union plus its family's row.
+   */
+  function poolFor(BASES: any, slot: string, frame: any, weapon: any): { id: string; role: number }[] {
+    const out: { id: string; role: number }[] = [];
+    const push = (id: string, role: number) => { if (id && !out.some((e) => e.id === id)) out.push({ id, role }); };
+    const wp = BASES?.weapon_pools || {};
+    if (weapon) {
+      const magic = weapon.damage === 'magic';
+      const half = slot === 'off hand'; // a dual-wielded off hand is the same pool at half Primary
+      // the Primary list is the physical pair plus the crit pair; a magic weapon swaps the pair
+      // (`equipment-slot-weapon.md`) and keeps crit — crit is physical-only in use, rollable anywhere
+      const power = magic ? ['magic_power_flat', 'magic_power'] : ['physical_power_flat', 'physical_power'];
+      const crit = (wp['main hand']?.Primary || []).filter((id: string) => !id.startsWith('physical') && !id.startsWith('magic'));
+      for (const id of [...power, ...crit]) push(id, half ? RW.secondary : RW.primary);
+      for (const id of (wp['main hand']?.Secondary || [])) push(id, RW.secondary);
+      const typePool = wp['main hand']?.[weapon.name] || [];
+      for (const id of typePool) push(id, RW.secondary);
+      for (const id of (wp['main hand']?.['all types'] || [])) push(id, RW.secondary);
+    } else {
+      for (const e of slotUnion(BASES, slot, frame)) push(e.id, e.role);
+      // the Gear Mod is the frame's own school, not all three: a heavy frame carries Armour alone
+      if (GEAR_MOD_SLOTS.includes(slot) && frame?.school) push(frame.school, RW.gear_mod);
+      // the armour slots' line-1 lines are also rollable on the other lines: the three flat defence
+      // lines a frame may carry, so a frame that carries one can still find another on a later line
+      if (ARMOUR_SLOTS.includes(slot)) for (const id of (BASES?.frame_mod?.defence || [])) push(id, RW.secondary);
+      if (slot === 'off hand' && frame?.family) {
+        for (const id of (wp['off hand']?.[frame.family] || [])) push(id, RW.secondary);
+      }
+    }
+    for (const id of STAT_IDS) push(id, RW.stat_mod);
+    return out;
+  }
+
+  /**
+   * The pool of one frame with the odds each line has of filling a pool slot, at one Item quality band.
+   * It is the same `role x weightOf` product `weightedPick` draws from, normalised here, so a table can
+   * print the chances without becoming a second author of the weight model.
+   */
+  function poolChances(BASES: any, slot: string, frame: any, weapon: any, q: number) {
+    const weighted = poolFor(BASES, slot, frame, weapon).map((e) => ({ id: e.id, w: e.role * (weightOf(e.id, q) ?? 1) }));
+    const total = weighted.reduce((sum, e) => sum + e.w, 0) || 1;
+    return weighted.map((e) => ({ id: e.id, chance: e.w / total }));
+  }
+
+  /**
+   * Ids the pool must drop because the piece already holds a family member whose slot allows only one
+   *: the Stat Mod slot is a single line, so once any `STAT_IDS` id is taken every sibling is
+   * blocked. A no-op for every mod outside the family. Callers spread the result over `taken`.
+   */
+  function blockedBy(taken: Set<string>): Set<string> {
+    const out = new Set<string>();
+    if (STAT_IDS.some((id) => taken.has(id))) for (const id of STAT_IDS) out.add(id);
+    return out;
+  }
+
+  /**
+   * Line 1 — the Frame Mod. An armour frame NAMES the flat defence lines it carries (one, two or all
+   * three of Armour flat, Evasion flat, Energy Shield flat — the seven non-empty combinations the
+   * frames of a slot cover without repeating one, so the frame's own name tells the player what line 1
+   * is); a weapon forces every Mod its type lists; an off-hand frame carries its family's row; belt /
+   * ring / amulet / earring draw one from the slot's pool. A multi-line Frame Mod shares one budget, which
+   * `value_scale` applies. All of it is ONE line, the first Mod in `id` and the rest in `extra`, so the
+   * line skeleton's counts and the unremovable floor stay fixed. `u` is the item's one Tier draw,
+   * shared with the Unbound lines exactly as `tools/loot.ts` rolls them.
+   */
+  function frameModRoll(BASES: any, slot: string, frame: any, weapon: any, rng: Rng, ilvl: number, q: number, u: number): any[] {
+    const lineFrame = weapon && !frame ? (BASES?.weapon_frames?.[weapon.name] || [])[0] : frame;
+    const ids: string[] = [];
+    if (weapon) {
+      // a weapon (main hand, or a dual-wielded off hand) forces every Mod its own type lists — and a
+      // main hand carries a FRAME (A10), whose own list wins over its type's when it has one
+      for (const id of (lineFrame?.frame_mod || BASES?.frame_mod?.weapons?.[weapon.name] || [])) ids.push(id);
+    } else if (ARMOUR_SLOTS.includes(slot) && frame?.base_lines?.length) {
+      // the frame names the flat defence lines its Frame Mod carries (one, two or all three, the seven
+      // combinations the roster covers without repeating one) — never a random draw, and a multi-line
+      // Frame Mod shares one budget, which `scale` applies below.
+      for (const id of frame.base_lines) ids.push(id);
+    } else if (slot === 'off hand' && frame?.family) {
+      // A Shield may extend the family's locked Block line with its flat defence profile; other
+      // off-hand frames use the family's standard line (a Book's magic pair).
+      for (const id of (frame?.frame_mod || BASES?.frame_mod?.off_hand?.[frame.family] || [])) ids.push(id);
+    } else if ((BASES?.frame_mod?.drawn_line1_slots || []).includes(slot)) {
+      const pool = poolFor(BASES, slot, frame, null).filter((e) => !STAT_IDS.includes(e.id));
+      if (pool.length) ids.push(weightedPick(rng, pool.map((e) => ({ id: e.id, w: e.role * weightOf(e.id, q) }))));
+    }
+    const k = frameValueScale(ids.length, lineFrame?.value_bias ?? 1);
+    const roll = (id: string) => {
+      const slice = tierSlice(u);
+      return { id, value: rollValue(id, ilvl, q, slice, rng, k), slice };
+    };
+    if (!ids.length) return [];
+    const first = roll(ids[0]);
+    // an Elemental line carries its Element at drop, exactly as a Unbound line does
+    return [{
+      id: first.id, value: first.value, slice: first.slice,
+      element: first.id.startsWith('elemental_') ? pick(rng, ELEMENTS) : null,
+      ...(ids.length > 1 ? { extra: ids.slice(1).map((id) => { const r = roll(id); return { id: r.id, value: r.value }; }) } : {}),
+    }];
+  }
+
+  /**
+   * The lines a dropped piece carries: line 1 + the Bound pair + the Unbound lines, whose count is drawn
+   * inside the published range at drop (`item_level.unbound_slots`). Both the client and `tools/loot.ts`
+   * call this one function, so a piece and its simulation cannot disagree on how wide a drop is.
+   */
+  function linesAtDrop(rng: Rng) {
+    const L = E.item_level;
+    return L.frame_mod_slots + L.bound_slots + intBetween(rng, L.unbound_slots.min, L.unbound_slots.max);
+  }
+
+  /**
+   * Step 2 — the frame inside the rolled slot (loot.md §1 · item-base.md). The main hand picks a weapon
+   * type by weight; the off hand picks equally among its frames and one dual-wielded weapon, so a shield
+   * or a book can actually drop; every other slot picks a Base by weight.
+   *
+   * `bias` carries the optional weights the Base-bias experiment needs (a settlement that rolls one
+   * school more often): `weapon_weight` for the main-hand type, `frame_weight` for a frame. With no bias
+   * every option weighs the same, which is the published rule.
+   */
+  function rollBase(
+    rng: Rng,
+    BASES: any,
+    slot: string,
+    bias?: { weapon_weight?: number; frame_weight?: (b: any) => number },
+  ): { frame: any | null; weapon: any | null } {
+    const framesOf = (name: string): any[] => (BASES?.weapon_frames || {})[name] || [];
+    const frameOf = (weapon: any): any => {
+      const frames = framesOf(weapon.name);
+      return frames.length ? pickWeighted(rng, frames.map((f: any) => ({ frame: f, weight: f.drop_weight || 1 }))).frame : null;
+    };
+    if (slot === 'main hand') {
+      const weapon = pickWeighted(rng, (BASES?.weapons || []).map((w: any) => ({
+        weapon: w,
+        weight: bias?.weapon_weight ? bias.weapon_weight : 1,
+      }))).weapon;
+      // A10: the type picks the frame pool, and the frame is what the piece is called and what it forces
+      return { frame: frameOf(weapon), weapon };
+    }
+    if (slot === 'off hand') {
+      const dual = (BASES?.weapons || []).filter((w: any) => w.dual_wield);
+      const options = [
+        ...(BASES?.bases || []).filter((b: any) => b.slot === 'off hand').map((f: any) => ({ frame: f, weight: 1 })),
+        // a settlement with no dual-wieldable weapon simply has no weapon option here
+        ...(dual.length ? [{ weapon: pick(rng, dual), weight: 1 }] : []),
+      ];
+      const chosen = pickWeighted(rng, options);
+      if (!chosen.weapon) return { frame: chosen.frame, weapon: null };
+      return { frame: frameOf(chosen.weapon), weapon: chosen.weapon };
+    }
+    const frames = (BASES?.bases || []).filter((b: any) => b.slot === slot)
+      .map((b: any) => ({ frame: b, weight: bias?.frame_weight ? bias.frame_weight(b) : 1 }));
+    return { frame: pickWeighted(rng, frames).frame, weapon: null };
+  }
+
+  /**
+   * The lines one dropped piece carries, from the slot and the frame to the last Unbound line.
+   *
+   * This is the whole line assembly, and both roll paths run it: the cage (`tools/loot.ts`) and the
+   * client (`game/src/sim/drop.ts`) differ in how they pick the slot, the frame and the level, and in
+   * what they do with the piece afterwards — never in the lines it carries. The Tier draw sits first,
+   * exactly where it sat in both, and every draw below it keeps its position, so one seed buys one
+   * item on either side.
+   */
+  function buildLines(
+    BASES: any,
+    opts: { slot: string; frame: any; weapon: any; ilvl: number; q: number },
+    rng: Rng,
+  ): { lines: any[]; u: number } {
+    const { slot, frame, weapon, ilvl, q } = opts;
+    const u = rng(); // one Tier draw per item, shared by line 1 and every Unbound line
+    // line 1 is the Frame Mod: it is rolled first, off the frame, before any Unbound line
+    const lines: any[] = frameModRoll(BASES, slot, frame, weapon, rng, ilvl, q, u);
+    // every id the piece already holds — a Frame Mod line's `extra` Mods included, so a line never
+    // appears twice on one piece
+    const taken = new Set<string>(lines.flatMap((l: any) => [l.id, ...((l.extra || []).map((x: any) => x.id))]));
+    const pool = poolFor(BASES, slot, frame, weapon).filter((e: any) => !taken.has(e.id));
+    const target = linesAtDrop(rng);
+
+    while (lines.length < target) {
+      const blocked = blockedBy(taken);
+      const remaining = pool.filter((e: any) => !taken.has(e.id) && !blocked.has(e.id));
+      if (!remaining.length) break; // an off hand simply publishes fewer lines (item-base.md)
+      const id = weightedPick(rng, remaining.map((e: any) => ({ id: e.id, w: e.role * weightOf(e.id, q) })));
+      taken.add(id);
+      const slice = tierSlice(u);
+      const [lo, hi] = rangeOf(id, ilvl, q, slice);
+      // A Stat Mod bakes the Core stat it feeds at drop, and the draw it spends sits in this exact
+      // position in the client's roll. Skipping it would shift every later draw, so one seed would
+      // stop producing one item across the two rolls.
+      const stat = statOf(id, rng);
+      lines.push({
+        id,
+        value: intBetween(rng, lo, hi),
+        slice,
+        element: id.startsWith('elemental_') ? pick(rng, ELEMENTS) : null,
+        ...(stat ? { stat } : {}),
+      });
+    }
+    return { lines, u };
+  }
+
+  /**
+   * Line 1 at its floor, for a piece restored from a pre-skeleton save or handed over at minute one. The
+   * same Mods a fresh roll would force, but at the lowest value of the window with no RNG at all, so two
+   * loads of one save agree to the digit. Still one line, the extra Mods in `extra`.
+   */
+  function frameModAtFloor(BASES: any, slot: string, frame: any, weapon: any, ilvl: number, q: number): any[] {
+    const BM = E.loot.frame_mod;
+    const lineFrame = weapon && !frame ? (BASES?.weapon_frames?.[weapon.name] || [])[0] : frame;
+    const scale = (n: number) => BM.value_scale[String(n)] ?? 1;
+    const ids: string[] = [];
+    if (weapon) for (const id of (lineFrame?.frame_mod || BASES?.frame_mod?.weapons?.[weapon.name] || [])) ids.push(id);
+    else if (ARMOUR_SLOTS.includes(slot) && frame?.base_lines?.length) for (const id of frame.base_lines) ids.push(id);
+    else if (slot === 'off hand' && frame?.family) for (const id of (frame?.frame_mod || BASES?.frame_mod?.off_hand?.[frame.family] || [])) ids.push(id);
+    else if ((BASES?.frame_mod?.drawn_line1_slots || []).includes(slot)) {
+      const pool = poolFor(BASES, slot, frame, null).filter((e) => !STAT_IDS.includes(e.id));
+      if (pool.length) ids.push(pool[0].id);
+    }
+    if (!ids.length) return [];
+    const k = scale(ids.length);
+    const value = (id: string) => Math.max(1, Math.round(windowAt(id, ilvl, q)[0] * k * (lineFrame?.value_bias ?? 1)));
+    return [{
+      id: ids[0], value: value(ids[0]), slice: 0, element: null,
+      ...(ids.length > 1 ? { extra: ids.slice(1).map((id) => ({ id, value: value(id) })) } : {}),
+    }];
+  }
+
+  /** The score the filter compares: Σ weight(line) × value ÷ Total (loot.md §4). */
+  function score(item: any) {
+    let s = 0;
+    for (const l of item.lines) {
+      s += weightOf(l.id, item.q) * (l.value / MAX_OF[l.id]);
+      // a Frame Mod line's extra Mods are part of the same line and count too 
+      for (const x of (l.extra || [])) s += weightOf(x.id, item.q) * (x.value / MAX_OF[x.id]);
+    }
+    return s;
+  }
+
+  /**
+   * The bag filter: keep a drop only when it beats the piece worn in the same slot by more than
+   * noise — `upgrade_margin_pct` — or when it carries an Element the player has no answer to
+   * (loot.md §4). Anything else salvages into the configured material bundle; Value stones come later
+   * from the settlement Alchemy recipe.
+   *
+   * The last argument is one slot's configured thresholds (`save.md`): a raised margin and the Element
+   * keep-list switch. Every value falls back to the published rule, so a caller that configures nothing
+   * gets exactly the behaviour `tools/loot.ts` measures.
+   */
+  function keepsDrop(item: any, wornScore: number | undefined, knownElements: Set<string> | undefined, marginPct: number, rule?: any) {
+    const o = rule || {};
+    const margin = o.margin_pct != null ? o.margin_pct / 100 : marginPct;
+    const keepElement = o.keep_missing_element !== false;
+    const s = score(item);
+    if (wornScore === undefined || s > wornScore * (1 + margin)) {
+      return { keep: true, reason: 'upgrade', score: s, margin };
+    }
+    const fresh = keepElement
+      && item.lines.some((l: any) => l.element && !(knownElements || new Set()).has(l.element));
+    if (fresh) return { keep: true, reason: 'element', score: s, margin };
+    return { keep: false, reason: 'dissolve', score: s, margin };
+  }
+
+  /**
+   * The "Elements/slots the player has not yet found" list (loot.md §4 · save.md): an Element no
+   * worn piece resists is still a keep reason, and a hole in the equip list is still unfound.
+   */
+  function notYetFound(gear?: (any | null)[]) {
+    const covered = new Set<string>();
+    for (const item of gear || []) {
+      if (!item) continue;
+      for (const l of item.lines || []) if (l.element) covered.add(l.element);
+    }
+    return {
+      covered,
+      elements: ELEMENTS.filter((e) => !covered.has(e)),
+      slots: SLOTS.filter((_, i) => !(gear || [])[i]),
+    };
+  }
+
+  /**
+   * The Core attribute a `stat_mod_flat` line bakes at drop — `undefined` for every Mod with no `rolls`,
+   * so a caller can spread it straight onto the line it is building. The pool is the Mod row's own
+   * `rolls` (`mods.json`), one home for the seven (checks.md X44). `all_stat_flat` feeds all seven at
+   * once instead of one, so it carries no `rolls` and bakes nothing.
+   */
+  const statOf = (id: string, rng: Rng): string | undefined => {
+    const rolls = STAT_ROLLS_OF[id];
+    return rolls ? pick(rng, rolls) : undefined;
+  };
+
+  /**
+   * Which third of the window this roll lands in. The top third is the rarest and the bottom the common
+   * outcome (item-level.md): the weights are the one skew every Mod shares, so "best is never free" is a
+   * property of the roll rather than of a per-Mod ladder.
+   */
+  function tierSlice(u: number) {
+    if (u < TIER_SPLIT[0]) return 2;
+    if (u < TIER_SPLIT[1]) return 1;
+    return 0;
+  }
+
+  return {
+    SLOTS, GEAR_MOD_SLOTS, STAT_IDS, GEAR_MODS, STAT_ROLLS, TIER_SPLIT, TIER_NAME,
+    BAND_LABEL, RW, MAX_OF, NAME_OF, BANDS_OF, IMPRINT_IDS, WEIGHT_BY_ID, FLAT_GROUP, ELEMENTS, ARMOUR_SLOTS,
+    weightOf, windowAt, spanT, rangeOf, sliceCount, tierSlice, score, keepsDrop, notYetFound, statOf, blockedBy,
+    slotUnion, poolFor, poolChances, frameModRoll, frameModAtFloor, frameValueScale, weaponFrameOf, rollValue, linesAtDrop, rollBase, buildLines,
+    mulberry32, pick, intBetween, weightedPick, pickWeighted,
+  };
+}

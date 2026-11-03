@@ -1,0 +1,23 @@
+{
+  "status": "legacy-extracted-candidate",
+  "speciesId": "kobold",
+  "action": "idle",
+  "direction": "south-west",
+  "source": "../../../atlas/animation.png",
+  "sourceCell": {
+    "row": 0,
+    "column": 7,
+    "box": [
+      2688,
+      0,
+      3072,
+      384
+    ]
+  },
+  "sourcePixelsModified": false,
+  "qa": {
+    "new16DirectionSetAccepted": false,
+    "anchor": false,
+    "atlas": false
+  }
+}

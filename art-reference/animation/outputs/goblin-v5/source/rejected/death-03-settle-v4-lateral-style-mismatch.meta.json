@@ -1,0 +1,24 @@
+{
+  "status": "rejected-source-not-for-atlas",
+  "speciesId": "goblin",
+  "generator": "built-in image_gen",
+  "sourceImageId": "exec-79f8faea-49e9-4c50-98b3-871efe54da56.png",
+  "file": "source/rejected/death-03-settle-v4-lateral-style-mismatch.png",
+  "sha256": "1eec8be5a6ee4a82513ae1c72156658741116cb450d1cfb92112c4f32a7f9121",
+  "action": "death",
+  "phase": "03-settle",
+  "rejectionReason": "Clear lateral silhouette, but face and clothing lost the texture/detail of the Goblin source and neighboring death phases.",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 1536,
+    "mode": "RGBA"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false
+  }
+}

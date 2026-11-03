@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "kind": "equipment-view",
+  "state": "foreshortened",
+  "generator": "OpenAI built-in image_gen",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "rawAlphaBoundsExclusive": [
+    154,
+    103,
+    1055,
+    1117
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    362,
+    479,
+    893,
+    858
+  ],
+  "boundsProvenance": "Pillow read-only alpha measurement",
+  "sourcePixelsModified": false,
+  "visualInspection": "same two-handed sword point aimed toward camera",
+  "notes": [
+    "Exact generated source pixels retained.",
+    "Fit from visible alpha >8 bounds; requested canvas size is not assumed.",
+    "Raw alpha and thresholded visible bounds are reported separately."
+  ]
+}

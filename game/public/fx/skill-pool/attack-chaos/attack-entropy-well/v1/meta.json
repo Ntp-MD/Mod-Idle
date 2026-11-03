@@ -1,0 +1,14 @@
+{
+  "id": "attack.entropy_well",
+  "src": "/fx/skill-pool/attack-chaos/attack-entropy-well/v1/decal.png",
+  "authoringGeometry": {
+    "shape": "circle",
+    "origin": "target",
+    "delivery": "ground",
+    "radiusM": 3
+  },
+  "delivery": "ground",
+  "origin": "target",
+  "orient": false,
+  "projection": null
+}

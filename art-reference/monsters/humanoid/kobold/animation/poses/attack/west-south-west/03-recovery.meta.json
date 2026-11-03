@@ -1,0 +1,43 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "kobold",
+  "action": "attack",
+  "direction": "west-south-west",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/attack-03-recovery-16.png",
+  "sourceCell": {
+    "row": 3,
+    "column": 1,
+    "box": [
+      256,
+      1152,
+      512,
+      1536
+    ]
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "visualFootBaselineY": 291
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 2,
+    "uniformScale": 0.86842105,
+    "componentCleanup": "largest high-alpha component plus nearby fragments"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

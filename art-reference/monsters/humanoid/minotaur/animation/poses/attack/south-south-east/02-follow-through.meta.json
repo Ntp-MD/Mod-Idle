@@ -1,0 +1,14 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:/Users/disda/.codex/generated_images/01a18324-a664-7083-af56-77554e8e19f7/exec-85d4d8aa-6785-4ff5-bc26-384fb2b9ea34.png",
+  "action": "attack",
+  "direction": "south-south-east",
+  "phase": "02-follow-through",
+  "sourcePixelsModified": false,
+  "sidecarRecovery": "Exact generated source matched by SHA256 after quota aborted batch before sidecar write",
+  "qa": {
+    "visuallyInspected": false,
+    "atlasApproved": false
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "status": "rejected-source-not-for-atlas",
+  "speciesId": "goblin",
+  "generator": "built-in image_gen",
+  "sourceImageId": "exec-faa31c44-747e-40b9-acc3-74cdad185afb.png",
+  "file": "source/rejected/death-03-settle-v1-prone.png",
+  "sha256": "bb4fe485ba6c5e493d4493cf1444fbf59e5d1d2142fef884aa2c24be6ce01471",
+  "action": "death",
+  "phase": "03-settle",
+  "rejectionReason": "Visually duplicated death 02-ground as a belly-down prone pose.",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 1536,
+    "mode": "RGBA"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false
+  }
+}

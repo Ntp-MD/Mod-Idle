@@ -1,0 +1,1488 @@
+{
+  "schemaVersion": 1,
+  "status": "direction16-candidate-incomplete",
+  "speciesId": "werewolf",
+  "race": "beast",
+  "version": "v5",
+  "attackKind": "close",
+  "bakedWeaponId": "natural claws and fangs",
+  "identityRef": "../../reference.png",
+  "sourcePoseRef": "../atlas/animation.png",
+  "directionCount": 16,
+  "angleStepDegrees": 22.5,
+  "directions": [
+    {
+      "name": "south",
+      "angleDegrees": 0
+    },
+    {
+      "name": "south-south-east",
+      "angleDegrees": 22.5
+    },
+    {
+      "name": "south-east",
+      "angleDegrees": 45
+    },
+    {
+      "name": "east-south-east",
+      "angleDegrees": 67.5
+    },
+    {
+      "name": "east",
+      "angleDegrees": 90
+    },
+    {
+      "name": "east-north-east",
+      "angleDegrees": 112.5
+    },
+    {
+      "name": "north-east",
+      "angleDegrees": 135
+    },
+    {
+      "name": "north-north-east",
+      "angleDegrees": 157.5
+    },
+    {
+      "name": "north",
+      "angleDegrees": 180
+    },
+    {
+      "name": "north-north-west",
+      "angleDegrees": 202.5
+    },
+    {
+      "name": "north-west",
+      "angleDegrees": 225
+    },
+    {
+      "name": "west-north-west",
+      "angleDegrees": 247.5
+    },
+    {
+      "name": "west",
+      "angleDegrees": 270
+    },
+    {
+      "name": "west-south-west",
+      "angleDegrees": 292.5
+    },
+    {
+      "name": "south-west",
+      "angleDegrees": 315
+    },
+    {
+      "name": "south-south-west",
+      "angleDegrees": 337.5
+    }
+  ],
+  "camera": "One fixed elevated three-quarter camera; rotate the whole creature facing in the world, never rotate the camera or flat sprite",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
+  },
+  "statusNote": "16-direction production candidate. Existing approved atlas retained until replacement completes visual and atlas QA. No runtime promotion.",
+  "actions": {
+    "idle": {
+      "framesPerDirection": 1,
+      "poseCount": 16,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "south.png",
+          "pose": "one neutral ready pose facing 0 degrees"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "south-south-east.png",
+          "pose": "one neutral ready pose facing 22.5 degrees"
+        },
+        {
+          "direction": "south-east",
+          "file": "south-east.png",
+          "pose": "one neutral ready pose facing 45 degrees"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "east-south-east.png",
+          "pose": "one neutral ready pose facing 67.5 degrees"
+        },
+        {
+          "direction": "east",
+          "file": "east.png",
+          "pose": "one neutral ready pose facing 90 degrees"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "east-north-east.png",
+          "pose": "one neutral ready pose facing 112.5 degrees"
+        },
+        {
+          "direction": "north-east",
+          "file": "north-east.png",
+          "pose": "one neutral ready pose facing 135 degrees"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "north-north-east.png",
+          "pose": "one neutral ready pose facing 157.5 degrees"
+        },
+        {
+          "direction": "north",
+          "file": "north.png",
+          "pose": "one neutral ready pose facing 180 degrees"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "north-north-west.png",
+          "pose": "one neutral ready pose facing 202.5 degrees"
+        },
+        {
+          "direction": "north-west",
+          "file": "north-west.png",
+          "pose": "one neutral ready pose facing 225 degrees"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "west-north-west.png",
+          "pose": "one neutral ready pose facing 247.5 degrees"
+        },
+        {
+          "direction": "west",
+          "file": "west.png",
+          "pose": "one neutral ready pose facing 270 degrees"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "west-south-west.png",
+          "pose": "one neutral ready pose facing 292.5 degrees"
+        },
+        {
+          "direction": "south-west",
+          "file": "south-west.png",
+          "pose": "one neutral ready pose facing 315 degrees"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "south-south-west.png",
+          "pose": "one neutral ready pose facing 337.5 degrees"
+        }
+      ]
+    },
+    "walk": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-stride-a.png",
+          "pose": "left digitigrade foot extends, right hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "south",
+          "file": "01-stride-b.png",
+          "pose": "body passes over planted left foot, right hock bends under body"
+        },
+        {
+          "direction": "south",
+          "file": "02-stride-c.png",
+          "pose": "right digitigrade foot extends, left hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "south",
+          "file": "03-stride-d.png",
+          "pose": "body passes over planted right foot, left hock bends; cycle closes"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-stride-a.png",
+          "pose": "left digitigrade foot extends, right hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-stride-b.png",
+          "pose": "body passes over planted left foot, right hock bends under body"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-stride-c.png",
+          "pose": "right digitigrade foot extends, left hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-stride-d.png",
+          "pose": "body passes over planted right foot, left hock bends; cycle closes"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-stride-a.png",
+          "pose": "left digitigrade foot extends, right hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-stride-b.png",
+          "pose": "body passes over planted left foot, right hock bends under body"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-stride-c.png",
+          "pose": "right digitigrade foot extends, left hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-stride-d.png",
+          "pose": "body passes over planted right foot, left hock bends; cycle closes"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-stride-a.png",
+          "pose": "left digitigrade foot extends, right hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-stride-b.png",
+          "pose": "body passes over planted left foot, right hock bends under body"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-stride-c.png",
+          "pose": "right digitigrade foot extends, left hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-stride-d.png",
+          "pose": "body passes over planted right foot, left hock bends; cycle closes"
+        },
+        {
+          "direction": "east",
+          "file": "00-stride-a.png",
+          "pose": "left digitigrade foot extends, right hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "east",
+          "file": "01-stride-b.png",
+          "pose": "body passes over planted left foot, right hock bends under body"
+        },
+        {
+          "direction": "east",
+          "file": "02-stride-c.png",
+          "pose": "right digitigrade foot extends, left hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "east",
+          "file": "03-stride-d.png",
+          "pose": "body passes over planted right foot, left hock bends; cycle closes"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-stride-a.png",
+          "pose": "left digitigrade foot extends, right hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-stride-b.png",
+          "pose": "body passes over planted left foot, right hock bends under body"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-stride-c.png",
+          "pose": "right digitigrade foot extends, left hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-stride-d.png",
+          "pose": "body passes over planted right foot, left hock bends; cycle closes"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-stride-a.png",
+          "pose": "left digitigrade foot extends, right hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-stride-b.png",
+          "pose": "body passes over planted left foot, right hock bends under body"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-stride-c.png",
+          "pose": "right digitigrade foot extends, left hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-stride-d.png",
+          "pose": "body passes over planted right foot, left hock bends; cycle closes"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-stride-a.png",
+          "pose": "left digitigrade foot extends, right hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-stride-b.png",
+          "pose": "body passes over planted left foot, right hock bends under body"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-stride-c.png",
+          "pose": "right digitigrade foot extends, left hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-stride-d.png",
+          "pose": "body passes over planted right foot, left hock bends; cycle closes"
+        },
+        {
+          "direction": "north",
+          "file": "00-stride-a.png",
+          "pose": "left digitigrade foot extends, right hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "north",
+          "file": "01-stride-b.png",
+          "pose": "body passes over planted left foot, right hock bends under body"
+        },
+        {
+          "direction": "north",
+          "file": "02-stride-c.png",
+          "pose": "right digitigrade foot extends, left hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "north",
+          "file": "03-stride-d.png",
+          "pose": "body passes over planted right foot, left hock bends; cycle closes"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-stride-a.png",
+          "pose": "left digitigrade foot extends, right hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-stride-b.png",
+          "pose": "body passes over planted left foot, right hock bends under body"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-stride-c.png",
+          "pose": "right digitigrade foot extends, left hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-stride-d.png",
+          "pose": "body passes over planted right foot, left hock bends; cycle closes"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-stride-a.png",
+          "pose": "left digitigrade foot extends, right hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-stride-b.png",
+          "pose": "body passes over planted left foot, right hock bends under body"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-stride-c.png",
+          "pose": "right digitigrade foot extends, left hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-stride-d.png",
+          "pose": "body passes over planted right foot, left hock bends; cycle closes"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-stride-a.png",
+          "pose": "left digitigrade foot extends, right hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-stride-b.png",
+          "pose": "body passes over planted left foot, right hock bends under body"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-stride-c.png",
+          "pose": "right digitigrade foot extends, left hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-stride-d.png",
+          "pose": "body passes over planted right foot, left hock bends; cycle closes"
+        },
+        {
+          "direction": "west",
+          "file": "00-stride-a.png",
+          "pose": "left digitigrade foot extends, right hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "west",
+          "file": "01-stride-b.png",
+          "pose": "body passes over planted left foot, right hock bends under body"
+        },
+        {
+          "direction": "west",
+          "file": "02-stride-c.png",
+          "pose": "right digitigrade foot extends, left hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "west",
+          "file": "03-stride-d.png",
+          "pose": "body passes over planted right foot, left hock bends; cycle closes"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-stride-a.png",
+          "pose": "left digitigrade foot extends, right hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-stride-b.png",
+          "pose": "body passes over planted left foot, right hock bends under body"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-stride-c.png",
+          "pose": "right digitigrade foot extends, left hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-stride-d.png",
+          "pose": "body passes over planted right foot, left hock bends; cycle closes"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-stride-a.png",
+          "pose": "left digitigrade foot extends, right hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-stride-b.png",
+          "pose": "body passes over planted left foot, right hock bends under body"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-stride-c.png",
+          "pose": "right digitigrade foot extends, left hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-stride-d.png",
+          "pose": "body passes over planted right foot, left hock bends; cycle closes"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-stride-a.png",
+          "pose": "left digitigrade foot extends, right hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-stride-b.png",
+          "pose": "body passes over planted left foot, right hock bends under body"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-stride-c.png",
+          "pose": "right digitigrade foot extends, left hock pushes; opposite claw arm forward"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-stride-d.png",
+          "pose": "body passes over planted right foot, left hock bends; cycle closes"
+        }
+      ]
+    },
+    "attack": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-windup.png",
+          "pose": "shoulders coil and claw arm draws back, digitigrade legs brace"
+        },
+        {
+          "direction": "south",
+          "file": "01-contact.png",
+          "pose": "one claw arm rakes forward at contact in facing direction"
+        },
+        {
+          "direction": "south",
+          "file": "02-follow-through.png",
+          "pose": "torso follows through as claw arm passes across body"
+        },
+        {
+          "direction": "south",
+          "file": "03-recovery.png",
+          "pose": "claw arm retracts and digitigrade ready stance returns"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-windup.png",
+          "pose": "shoulders coil and claw arm draws back, digitigrade legs brace"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-contact.png",
+          "pose": "one claw arm rakes forward at contact in facing direction"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-follow-through.png",
+          "pose": "torso follows through as claw arm passes across body"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-recovery.png",
+          "pose": "claw arm retracts and digitigrade ready stance returns"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-windup.png",
+          "pose": "shoulders coil and claw arm draws back, digitigrade legs brace"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-contact.png",
+          "pose": "one claw arm rakes forward at contact in facing direction"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-follow-through.png",
+          "pose": "torso follows through as claw arm passes across body"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-recovery.png",
+          "pose": "claw arm retracts and digitigrade ready stance returns"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-windup.png",
+          "pose": "shoulders coil and claw arm draws back, digitigrade legs brace"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-contact.png",
+          "pose": "one claw arm rakes forward at contact in facing direction"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-follow-through.png",
+          "pose": "torso follows through as claw arm passes across body"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-recovery.png",
+          "pose": "claw arm retracts and digitigrade ready stance returns"
+        },
+        {
+          "direction": "east",
+          "file": "00-windup.png",
+          "pose": "shoulders coil and claw arm draws back, digitigrade legs brace"
+        },
+        {
+          "direction": "east",
+          "file": "01-contact.png",
+          "pose": "one claw arm rakes forward at contact in facing direction"
+        },
+        {
+          "direction": "east",
+          "file": "02-follow-through.png",
+          "pose": "torso follows through as claw arm passes across body"
+        },
+        {
+          "direction": "east",
+          "file": "03-recovery.png",
+          "pose": "claw arm retracts and digitigrade ready stance returns"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-windup.png",
+          "pose": "shoulders coil and claw arm draws back, digitigrade legs brace"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-contact.png",
+          "pose": "one claw arm rakes forward at contact in facing direction"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-follow-through.png",
+          "pose": "torso follows through as claw arm passes across body"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-recovery.png",
+          "pose": "claw arm retracts and digitigrade ready stance returns"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-windup.png",
+          "pose": "shoulders coil and claw arm draws back, digitigrade legs brace"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-contact.png",
+          "pose": "one claw arm rakes forward at contact in facing direction"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-follow-through.png",
+          "pose": "torso follows through as claw arm passes across body"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-recovery.png",
+          "pose": "claw arm retracts and digitigrade ready stance returns"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-windup.png",
+          "pose": "shoulders coil and claw arm draws back, digitigrade legs brace"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-contact.png",
+          "pose": "one claw arm rakes forward at contact in facing direction"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-follow-through.png",
+          "pose": "torso follows through as claw arm passes across body"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-recovery.png",
+          "pose": "claw arm retracts and digitigrade ready stance returns"
+        },
+        {
+          "direction": "north",
+          "file": "00-windup.png",
+          "pose": "shoulders coil and claw arm draws back, digitigrade legs brace"
+        },
+        {
+          "direction": "north",
+          "file": "01-contact.png",
+          "pose": "one claw arm rakes forward at contact in facing direction"
+        },
+        {
+          "direction": "north",
+          "file": "02-follow-through.png",
+          "pose": "torso follows through as claw arm passes across body"
+        },
+        {
+          "direction": "north",
+          "file": "03-recovery.png",
+          "pose": "claw arm retracts and digitigrade ready stance returns"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-windup.png",
+          "pose": "shoulders coil and claw arm draws back, digitigrade legs brace"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-contact.png",
+          "pose": "one claw arm rakes forward at contact in facing direction"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-follow-through.png",
+          "pose": "torso follows through as claw arm passes across body"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-recovery.png",
+          "pose": "claw arm retracts and digitigrade ready stance returns"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-windup.png",
+          "pose": "shoulders coil and claw arm draws back, digitigrade legs brace"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-contact.png",
+          "pose": "one claw arm rakes forward at contact in facing direction"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-follow-through.png",
+          "pose": "torso follows through as claw arm passes across body"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-recovery.png",
+          "pose": "claw arm retracts and digitigrade ready stance returns"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-windup.png",
+          "pose": "shoulders coil and claw arm draws back, digitigrade legs brace"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-contact.png",
+          "pose": "one claw arm rakes forward at contact in facing direction"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-follow-through.png",
+          "pose": "torso follows through as claw arm passes across body"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-recovery.png",
+          "pose": "claw arm retracts and digitigrade ready stance returns"
+        },
+        {
+          "direction": "west",
+          "file": "00-windup.png",
+          "pose": "shoulders coil and claw arm draws back, digitigrade legs brace"
+        },
+        {
+          "direction": "west",
+          "file": "01-contact.png",
+          "pose": "one claw arm rakes forward at contact in facing direction"
+        },
+        {
+          "direction": "west",
+          "file": "02-follow-through.png",
+          "pose": "torso follows through as claw arm passes across body"
+        },
+        {
+          "direction": "west",
+          "file": "03-recovery.png",
+          "pose": "claw arm retracts and digitigrade ready stance returns"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-windup.png",
+          "pose": "shoulders coil and claw arm draws back, digitigrade legs brace"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-contact.png",
+          "pose": "one claw arm rakes forward at contact in facing direction"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-follow-through.png",
+          "pose": "torso follows through as claw arm passes across body"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-recovery.png",
+          "pose": "claw arm retracts and digitigrade ready stance returns"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-windup.png",
+          "pose": "shoulders coil and claw arm draws back, digitigrade legs brace"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-contact.png",
+          "pose": "one claw arm rakes forward at contact in facing direction"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-follow-through.png",
+          "pose": "torso follows through as claw arm passes across body"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-recovery.png",
+          "pose": "claw arm retracts and digitigrade ready stance returns"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-windup.png",
+          "pose": "shoulders coil and claw arm draws back, digitigrade legs brace"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-contact.png",
+          "pose": "one claw arm rakes forward at contact in facing direction"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-follow-through.png",
+          "pose": "torso follows through as claw arm passes across body"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-recovery.png",
+          "pose": "claw arm retracts and digitigrade ready stance returns"
+        }
+      ]
+    },
+    "hit": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; natural claws and fangs remains visible, feet planted"
+        },
+        {
+          "direction": "south",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "south",
+          "file": "02-recover.png",
+          "pose": "body straightens and natural claws and fangs returns in front guard"
+        },
+        {
+          "direction": "south",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; natural claws and fangs remains visible, feet planted"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and natural claws and fangs returns in front guard"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; natural claws and fangs remains visible, feet planted"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and natural claws and fangs returns in front guard"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; natural claws and fangs remains visible, feet planted"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and natural claws and fangs returns in front guard"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; natural claws and fangs remains visible, feet planted"
+        },
+        {
+          "direction": "east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "east",
+          "file": "02-recover.png",
+          "pose": "body straightens and natural claws and fangs returns in front guard"
+        },
+        {
+          "direction": "east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; natural claws and fangs remains visible, feet planted"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and natural claws and fangs returns in front guard"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; natural claws and fangs remains visible, feet planted"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and natural claws and fangs returns in front guard"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; natural claws and fangs remains visible, feet planted"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-recover.png",
+          "pose": "body straightens and natural claws and fangs returns in front guard"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "north",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; natural claws and fangs remains visible, feet planted"
+        },
+        {
+          "direction": "north",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "north",
+          "file": "02-recover.png",
+          "pose": "body straightens and natural claws and fangs returns in front guard"
+        },
+        {
+          "direction": "north",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; natural claws and fangs remains visible, feet planted"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and natural claws and fangs returns in front guard"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; natural claws and fangs remains visible, feet planted"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and natural claws and fangs returns in front guard"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; natural claws and fangs remains visible, feet planted"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and natural claws and fangs returns in front guard"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; natural claws and fangs remains visible, feet planted"
+        },
+        {
+          "direction": "west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "west",
+          "file": "02-recover.png",
+          "pose": "body straightens and natural claws and fangs returns in front guard"
+        },
+        {
+          "direction": "west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; natural claws and fangs remains visible, feet planted"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and natural claws and fangs returns in front guard"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; natural claws and fangs remains visible, feet planted"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and natural claws and fangs returns in front guard"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-flinch.png",
+          "pose": "brief shoulder-and-head flinch backward; natural claws and fangs remains visible, feet planted"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-recoil.png",
+          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-recover.png",
+          "pose": "body straightens and natural claws and fangs returns in front guard"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-ready.png",
+          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+        }
+      ]
+    },
+    "death": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; natural claws and fangs descends with near hand"
+        },
+        {
+          "direction": "south",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding natural claws and fangs"
+        },
+        {
+          "direction": "south",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone werewolf and natural claws and fangs; natural compact silhouette within cell"
+        },
+        {
+          "direction": "south",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; natural claws and fangs descends with near hand"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding natural claws and fangs"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone werewolf and natural claws and fangs; natural compact silhouette within cell"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; natural claws and fangs descends with near hand"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding natural claws and fangs"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone werewolf and natural claws and fangs; natural compact silhouette within cell"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; natural claws and fangs descends with near hand"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding natural claws and fangs"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone werewolf and natural claws and fangs; natural compact silhouette within cell"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; natural claws and fangs descends with near hand"
+        },
+        {
+          "direction": "east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding natural claws and fangs"
+        },
+        {
+          "direction": "east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone werewolf and natural claws and fangs; natural compact silhouette within cell"
+        },
+        {
+          "direction": "east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; natural claws and fangs descends with near hand"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding natural claws and fangs"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone werewolf and natural claws and fangs; natural compact silhouette within cell"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; natural claws and fangs descends with near hand"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding natural claws and fangs"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone werewolf and natural claws and fangs; natural compact silhouette within cell"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; natural claws and fangs descends with near hand"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding natural claws and fangs"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone werewolf and natural claws and fangs; natural compact silhouette within cell"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "north",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; natural claws and fangs descends with near hand"
+        },
+        {
+          "direction": "north",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding natural claws and fangs"
+        },
+        {
+          "direction": "north",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone werewolf and natural claws and fangs; natural compact silhouette within cell"
+        },
+        {
+          "direction": "north",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; natural claws and fangs descends with near hand"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding natural claws and fangs"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone werewolf and natural claws and fangs; natural compact silhouette within cell"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; natural claws and fangs descends with near hand"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding natural claws and fangs"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone werewolf and natural claws and fangs; natural compact silhouette within cell"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; natural claws and fangs descends with near hand"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding natural claws and fangs"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone werewolf and natural claws and fangs; natural compact silhouette within cell"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; natural claws and fangs descends with near hand"
+        },
+        {
+          "direction": "west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding natural claws and fangs"
+        },
+        {
+          "direction": "west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone werewolf and natural claws and fangs; natural compact silhouette within cell"
+        },
+        {
+          "direction": "west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; natural claws and fangs descends with near hand"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding natural claws and fangs"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone werewolf and natural claws and fangs; natural compact silhouette within cell"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; natural claws and fangs descends with near hand"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding natural claws and fangs"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone werewolf and natural claws and fangs; natural compact silhouette within cell"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-fall.png",
+          "pose": "defeated posture tips and knees begin to buckle; natural claws and fangs descends with near hand"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-collapse.png",
+          "pose": "body falls sideways onto the ground while still holding natural claws and fangs"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded prone werewolf and natural claws and fangs; natural compact silhouette within cell"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-settle.png",
+          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+        }
+      ]
+    }
+  },
+  "requiredRootFiles": [
+    "meta.json",
+    "poses/"
+  ],
+  "imageQa": "Raw built-in imagegen outputs are candidate source only. Every pose still requires visual identity/facing review, hard-alpha/edge QA, foot-anchor measurement, and atlas QA before acceptance.",
+  "locomotionGuide": "Digitigrade predatory lope; bent hocks and natural claws, no held weapon."
+}

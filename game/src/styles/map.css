@@ -1,0 +1,241 @@
+
+
+.sheet .map-projection > svg { display: block; width: 100%; height: auto; overflow: visible; }
+.sheet svg text { text-anchor: middle; dominant-baseline: central; user-select: none; }
+
+.map-back .map-projection > svg { width: 100%; height: 100%; }
+
+.map-projection { position: absolute; inset: 0; }
+
+.map-mob, .map-piece { pointer-events: none; }
+.sheet svg .diorama-art { filter: brightness(.78) saturate(.68) contrast(1.08); }
+.sheet svg .diorama-figure[data-discovery="unknown"] > .diorama-art { filter: brightness(.71) saturate(.44) contrast(1.08); }
+.sheet svg .diorama-figure:is([data-camp="true"], [data-trail-site="true"]) > .diorama-art { display: none; }
+
+/* Map tokens: a shelf PNG glyph in a blue-ringed medallion on a tall vertical leader from the hex
+   centre. Frame and leader share the hover-hex blue; the terrain is never repainted for markers. */
+.map-marker {
+  --marker-edge: var(--es);
+  --marker-ink: #e7d9b7;
+  --marker-face: #242820;
+  color: var(--marker-ink);
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(.5px 1px .65px rgba(24, 24, 18, .6));
+  pointer-events: none;
+}
+.map-marker-ground { fill: #28271c; stroke: none; opacity: .28; }
+.map-marker-leader {
+  fill: none; stroke: var(--es); stroke-width: 1.1; stroke-linecap: round; opacity: .9;
+  filter: drop-shadow(0 0 1px var(--es-lit)) drop-shadow(0 0 3px var(--es));
+}
+.map-marker-stem {
+  fill: none; stroke: var(--marker-edge); stroke-width: 1.4;
+  filter: drop-shadow(0 0 1.2px var(--es-lit)) drop-shadow(0 0 3px var(--es));
+}
+.map-marker-face {
+  fill: var(--marker-face); stroke: var(--marker-edge); stroke-width: 1.4;
+  filter: drop-shadow(0 0 1.2px var(--es-lit)) drop-shadow(0 0 3px var(--es));
+}
+.map-marker-art { opacity: .92; }
+.map-marker-secondary .map-marker-face { stroke-width: 1; }
+.map-marker-label {
+  fill: var(--es-lit); stroke: var(--ground); stroke-width: 1.4; paint-order: stroke;
+  font: 600 4.5px var(--ui);
+  filter: drop-shadow(0 0 2px var(--es));
+}
+.map-marker-mob { --marker-ink: #e2d0b1; }
+.map-marker-boss { --marker-ink: #ffd2ad; --marker-face: #372923; }
+.map-marker-boss .map-marker-face { stroke-width: 1.5; }
+.map-marker-event { --marker-ink: #ffe1a0; --marker-face: #353023; }
+.map-marker-unknown { --marker-ink: #d6cdb5; }
+.map-marker-unknown .map-marker-face { stroke-dasharray: 2.2 1.7; }
+.map-marker-camp { --marker-ink: #f8d994; }
+.map-marker-resource { --marker-ink: #d8e3be; }
+.map-marker-player { --marker-ink: #ffeac0; --marker-face: #34352a; }
+.map-marker-player .map-marker-face { stroke-width: 1.5; }
+.map-marker-objective { --marker-ink: #e1efc1; }
+.map-marker.is-quiet { opacity: .65; }
+.map-trail-site.is-explored { opacity: .75; }
+.map-mob:is(.is-combat, .is-unique) .map-marker-face { stroke-width: 1.7; }
+.map-mob.is-combat .map-marker { --marker-ink: #ffe6bb; }
+
+/* Keep the geography legible at distance, then reveal the smaller signals up close. */
+.map-marker-label { display: none; }
+.map-back:not(.map-detail-near) :is(.map-marker-secondary) { display: none; }
+.map-detail-near .actor-figure[data-picked="true"] .map-marker-label { display: inline; }
+.map-detail-far :is(.map-marker-resource, .map-marker-unknown) { display: none; }
+.map-detail-far .map-piece:has(:is(.map-marker-resource, .map-marker-unknown)) .map-marker-leader { display: none; }
+.map-detail-far .map-mob:not(.is-combat, .is-unique) { display: none; }
+.map-detail-far .map-camp-encounter .map-marker,
+.actor-figure[data-picked="true"] .map-marker { display: inline; }
+.actor-figure[data-picked="true"] .map-marker-face {
+  stroke: var(--es-lit); stroke-width: 2;
+  filter: drop-shadow(0 0 2px var(--es-lit)) drop-shadow(0 0 4px var(--es));
+}
+.sheet svg .you .map-marker-player { fill: none; stroke: none; }
+
+.sheet svg .cell:is([data-threat="unique-possible"], [data-threat="boss"]) {
+  stroke: #bc8d68; stroke-width: 1.75; stroke-dasharray: 3 2;
+}
+.sheet svg .cell[data-threat="combat"] { stroke: #f0c08b; stroke-width: 2.2; stroke-dasharray: none; }
+.sheet svg .cell[data-threat="warning"] { stroke: #c7ae6c; stroke-width: 1.75; stroke-dasharray: 2 3; }
+.sheet svg text, .sheet svg line, .sheet svg .pin, .sheet svg .watermark { pointer-events: none; }
+
+.sheet svg .tile-depth-cell { fill: #997649; stroke: #997649; stroke-linejoin: round; }
+.sheet svg .diorama-figure { filter: drop-shadow(.6px 1.2px .7px rgba(47, 38, 22, .35)); }
+.sheet svg .diorama-figure[data-node] .diorama-art { pointer-events: visiblePainted; cursor: pointer; }
+/* Dioramas stand above the rotating ground and share the actors' depth order. */
+.sheet svg #layer-diorama, .sheet svg .diorama-figure { display: none !important; } /* shortcut: PNG terrain off, flat color only — delete to restore */
+.sheet svg .node > use { display: none; }
+.sheet svg #labels, .sheet svg #regions { display: none; }
+#map-names { pointer-events: none; }
+.sheet svg .map-name { filter: drop-shadow(0 0 2px color-mix(in srgb, var(--es) 65%, transparent)); }
+.sheet svg .map-name rect, .sheet svg .map-name-pointer {
+  fill: color-mix(in srgb, var(--ground) 84%, var(--es));
+  stroke: color-mix(in srgb, var(--es) 72%, var(--ground));
+  stroke-width: 1.1;
+}
+.sheet svg .map-name-title { font-size: var(--font-xs); font-weight: 600; fill: var(--es-lit); dominant-baseline: middle; }
+.sheet svg .town-name .map-name-title { font-weight: 700; }
+.sheet svg .map-name-level { font-size: calc(var(--font-xs) - 2px); fill: color-mix(in srgb, var(--es-lit) 78%, var(--text)); dominant-baseline: middle; }
+.sheet svg .map-name-stem { fill: none; stroke: var(--es); stroke-width: 1.1; }
+.sheet svg .map-name-anchor { fill: var(--es-lit); stroke: var(--ground); stroke-width: 1; }
+.sheet svg .important-name { filter: drop-shadow(0 0 2px var(--es-lit)) drop-shadow(0 0 5px var(--es)); }
+.sheet svg .important-name rect, .sheet svg .important-name .map-name-pointer { stroke: var(--es-lit); stroke-width: 1.7; }
+.sheet svg .important-name .map-name-title { fill: var(--text); }
+.sheet svg .important-name .map-name-stem { stroke: var(--es-lit); stroke-width: 1.5; }
+.sheet svg .important-name .map-name-anchor { fill: var(--es-lit); }
+.map-back.sheet svg .node .place { font-size: 5px; stroke-width: 1.2; }
+.map-back.sheet svg .node.capital .place { font-size: 6px; }
+.map-back.sheet svg .zonelabel .zonename { font-size: 3.3px; stroke: var(--panel); stroke-width: .7; paint-order: stroke; }
+.map-back.sheet svg .zonelabel .zoneband { font-size: 2.8px; }
+.stage.mapmode .sheet svg .pin.here { display: none; }
+.sheet svg[data-view="band"] .diorama-figure,
+.sheet svg[data-view="gate"] .diorama-figure { opacity: .18; }
+
+.map-back.sheet {
+  --sheet-ink: var(--text);
+  --sheet-place: #f2e7d0;
+  --sheet-id: var(--dim);
+  --dim: var(--dim);
+  --map-tile-edge: color-mix(in srgb, var(--es) 32%, var(--line));
+  --sheet-fs-region: clamp(9px, 0.54vw, 15px);
+  --sheet-fs-walk: clamp(8px, 0.4vw, 11px);
+  --sheet-fs-place: clamp(9px, 0.5vw, 14px);
+  --sheet-fs-capital: clamp(10px, 0.6vw, 17px);
+  --sheet-fs-zonename: clamp(8px, 0.46vw, 13px);
+  --sheet-fs-id: clamp(7px, 0.4vw, 11px);
+  --pin-here: #12a06a;
+  --pin-target: #e2503f;
+}
+
+.sheet svg .cell { stroke: var(--map-tile-edge); stroke-width: 1.15; stroke-linejoin: round; transition: fill var(--motion-fast) linear; }
+.sheet svg .ground-grid {
+  filter: drop-shadow(0 0 1px color-mix(in srgb, var(--es) 40%, transparent));
+  pointer-events: none;
+}
+.stage.mapmode .sheet svg .cell { cursor: pointer; }
+.stage.mapmode .sheet svg .cell:hover { fill-opacity: .82; }
+/* A little blue spill in the grout anchors the upright hover curtain to the ground. */
+.sheet svg .cell-glow {
+  fill: var(--es); stroke: none;
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--motion-fast) linear;
+}
+.stage.mapmode .sheet svg .cell:hover + .cell-glow { opacity: .2; }
+
+.map-aurora { opacity: 0; pointer-events: none; transition: opacity var(--motion-fast) var(--ease-out); }
+.map-aurora[data-active="true"] { opacity: 1; }
+.stage:not(.mapmode) .map-aurora { display: none; }
+.map-aurora-stop-base { stop-color: var(--es); stop-opacity: .66; }
+.map-aurora-stop-middle { stop-color: var(--mana-lit); stop-opacity: .38; }
+.map-aurora-stop-top { stop-color: var(--es-lit); stop-opacity: 0; }
+.map-aurora-face.is-rear { opacity: .48; }
+.map-aurora-wall { opacity: .8; }
+
+.map-aurora-flow {
+  fill: none; stroke-width: 2; stroke-linecap: round; stroke-dasharray: 10 30; opacity: .6;
+  
+}
+
+
+.map-aurora-rim, .map-aurora-rim-haze { fill: none; stroke-linejoin: round; }
+.map-aurora-rim { stroke: var(--es-lit); stroke-width: 1.8; }
+.map-aurora-rim-haze { stroke: var(--es); stroke-width: 7; opacity: .38; filter: blur(1px); }
+.map-aurora:not([data-active="true"]) :is(.map-aurora-wall, .map-aurora-flow) { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .map-aurora { transition: none; }
+  .map-aurora-wall, .map-aurora-flow { animation: none; }
+}
+
+.sheet svg .cell.site-dungeon { stroke: color-mix(in srgb, var(--curse) 40%, #c7b783); stroke-width: 1.1; }
+.sheet svg .cell.site-mine { stroke: color-mix(in srgb, var(--es-lit) 40%, #c7b783); stroke-width: 1.1; }
+.sheet svg .cell.site-grove { stroke: color-mix(in srgb, var(--good-lit) 40%, #c7b783); stroke-width: 1.1; }
+.sheet svg .cell.site-fishing { stroke: color-mix(in srgb, var(--es) 45%, #c7b783); stroke-width: 1.1; }
+.sheet svg .cell.field-camp { stroke: var(--gold); stroke-width: 3; stroke-dasharray: 3 2; }
+
+.sheet svg .cell.route, .sheet svg .cell.walked, .sheet svg .cell.picked, .sheet svg .cell.standing { stroke-opacity: 1; }
+
+.sheet svg .cell.locked { fill: var(--ground); }
+
+.sheet svg .cell.route { fill: var(--es); fill-opacity: .46; stroke: var(--es); stroke-width: 1.8; }
+.sheet svg .cell.walked { fill: var(--mana); fill-opacity: .8; stroke: var(--mana); stroke-width: 1.8; }
+.sheet svg .cell.picked { stroke: var(--es); stroke-width: 3; fill-opacity: .62; }
+
+.sheet svg .cell.standing { stroke: var(--gold); stroke-width: 2.6; stroke-dasharray: 3 2; }
+
+.sheet svg .you { pointer-events: none; transition: transform var(--motion-map) var(--ease-out); }
+.sheet svg .you .hex { fill: var(--gold); fill-opacity: .2; stroke: none; }
+.sheet svg .you .mark { fill: var(--gold); stroke: var(--bg); stroke-width: 1.4; }
+.sheet svg .you.returning .mark { filter: drop-shadow(.5px 1px .7px #c5a464); }
+.sheet svg .you.stepping .mark {
+  transform-box: fill-box; transform-origin: 50% 100%;
+  animation: map-board-step var(--motion-map) var(--ease-out);
+}
+@keyframes map-board-step { 50% { opacity: .65; } }
+@media (prefers-reduced-motion: reduce) {
+  .sheet svg .you { transition: none; }
+  .sheet svg .you.stepping .mark { animation: none; }
+}
+
+.sheet svg .walk { stroke: var(--gold); stroke-width: 1.6; stroke-opacity: .8; }
+.sheet svg .walk-blk { font-size: var(--sheet-fs-walk); fill: var(--gold); font-weight: 600; }
+
+.sheet svg .region { font-size: var(--sheet-fs-region); letter-spacing: 1.2px; fill: var(--sheet-ink); stroke: var(--ground);
+  stroke-width: 2.2; paint-order: stroke; font-weight: 700; text-transform: uppercase; opacity: .28; }
+.map-back.sheet svg .region { stroke: var(--panel); stroke-width: 2.8; }
+
+.sheet svg .watermark circle { fill: var(--gold); stroke: none; }
+.sheet svg .watermark circle.halo { fill: none; stroke: var(--ground); stroke-width: 1.6; stroke-opacity: .75; }
+
+.sheet svg .node .place { font-size: var(--sheet-fs-place); fill: var(--sheet-place); stroke: var(--ground); stroke-width: 2.6;
+  paint-order: stroke; font-weight: 700; }
+.map-back.sheet svg .node .place { stroke: var(--panel); stroke-width: 3.2; }
+.sheet svg .node.capital .place { font-size: var(--sheet-fs-capital); }
+.sheet svg .zonelabel .zonename { font-size: var(--sheet-fs-zonename); fill: var(--sheet-ink); font-weight: 600; }
+.sheet svg .zonelabel .zoneband { font-size: var(--sheet-fs-id); fill: var(--dim); }
+
+.sheet svg .cellid { font-size: var(--sheet-fs-id); fill: var(--sheet-id); }
+.sheet svg [data-node] { cursor: pointer; }
+.sheet svg .node.picked .place { fill: var(--focus); }
+/* Position reads off the hex edge itself: a thick inner edge on the settlement cell, so the middle
+   of the hex — terrain, icon, mob art — stays uncovered. */
+.sheet svg .pin { display: none; }
+.sheet svg .cell.pin-here { stroke: var(--pin-here); stroke-width: 3; stroke-opacity: 1; }
+.sheet svg .cell.pin-target { stroke: var(--pin-target); stroke-width: 3; stroke-dasharray: 6 3; stroke-opacity: 1; }
+
+/* The same board in a quiet view: colour carries the terrain; edges carry travel and selection. */
+.map-back.sheet.clean-map {
+  --map-tile-edge: color-mix(in srgb, var(--ground) 70%, var(--gold));
+  --sheet-id: var(--text);
+  background: var(--ground);
+}
+.map-back.sheet.clean-map::after { display: none; }
+.sheet.clean-map svg :is(#layer-diorama, .diorama-figure, #tile-depth, .watermark, .node, .cell-glow),
+.sheet.clean-map svg #layer-surface > rect:not(.paper) { display: none; }
+.sheet.clean-map svg .paper { fill: var(--ground); }
+.sheet.clean-map svg .cell { fill: var(--map-cell-fill); fill-opacity: 1; stroke-opacity: 1; }
+.sheet.clean-map svg .cell.locked { fill: var(--ground); }
+.stage.mapmode .sheet.clean-map svg .cell:hover { fill-opacity: 1; stroke: var(--focus); }

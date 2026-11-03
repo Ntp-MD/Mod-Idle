@@ -1,0 +1,57 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "goblin",
+  "action": "walk",
+  "direction": "south-south-east",
+  "pose": "01-stride-b",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/walk-01-stride-b-16.png",
+  "sourceImageId": "exec-3d436fcc-0f11-48fc-a4b9-3a9e845767dc.png",
+  "sourceCell": {
+    "row": 0,
+    "column": 1,
+    "box": [
+      256,
+      0,
+      512,
+      384
+    ],
+    "confidenceBoundsInCell": [
+      72,
+      101,
+      196,
+      294
+    ],
+    "sourceVisualFootBaselineY": 294,
+    "targetVisualFootBaselineY": 288,
+    "sourceConfidenceBoundsHeight": 193,
+    "targetReferenceMedianHeight": 120.0,
+    "uniformScale": 0.621762
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited 8-direction Goblin anchor; visual measurement pending"
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "scaleReference": "median alpha-bound height of approved Goblin source poses for this action/phase",
+    "uniformScale": 0.621762
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

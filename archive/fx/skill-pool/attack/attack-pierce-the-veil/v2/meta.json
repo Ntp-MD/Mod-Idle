@@ -1,0 +1,48 @@
+{
+  "id": "attack.pierce_the_veil",
+  "src": "/fx/skill-pool/attack/attack-pierce-the-veil/v2/atlas.png",
+  "columns": 4,
+  "rows": 4,
+  "cellWidth": 256,
+  "cellHeight": 256,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "frameMs": 90,
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    4,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "contentWidthRatio": 0.75,
+  "contentHeightRatio": 0.7421875,
+  "orient": true,
+  "delivery": "projectile",
+  "origin": "target",
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "authoringGeometry": {
+    "origin": "target",
+    "radiusM": 0,
+    "shape": "single",
+    "delivery": "projectile"
+  },
+  "generator": "tools/bake-shader-recipes.mjs",
+  "recipeModule": "tools/vfx/physical-shaders.mjs",
+  "sourceShaders": [
+    "art-reference/VFX-Godot/MagicProjectilesVFX/assets/BinbunVFX/shared/shader/transparent.gdshader",
+    "art-reference/VFX-Godot/HitFXFree/assets/BinbunVFX_Vol2/StylizedHitFX/shader/impact_core.gdshader",
+    "art-reference/VFX-Godot/HitFXFree/assets/BinbunVFX_Vol2/StylizedHitFX/shader/four_point_star.gdshader",
+    "art-reference/VFX-Godot/BattleFXFree/assets/BinbunVFX_Vol2/BattleFX/shader/attack_particles.gdshader"
+  ],
+  "status": "prototype",
+  "adaptation": "Godot shader mask/noise/decay equations adapted to deterministic offline JavaScript raster frames."
+}

@@ -1,0 +1,102 @@
+{
+  "status": "candidate-source-review-required",
+  "speciesId": "goblin",
+  "generator": "built-in image_gen",
+  "sourceImageId": "exec-bbaef625-7ae9-4722-a257-b00f5777e0b6.png",
+  "file": "source/v5-contact-sheets/walk-02-stride-c-16.png",
+  "sha256": "f810c4ef215d1a7588cf62db3d1d87dfa0f2eef0087904199f80e56e0c326cd0",
+  "action": "walk",
+  "phase": "02-stride-c",
+  "phasePrompt": "Right lead-foot support, left foot trailing; spear balances the stride.",
+  "promptContract": {
+    "useCase": "stylized-concept",
+    "assetType": "candidate source contact sheet for ModWorld Goblin animation",
+    "inputImages": [
+      {
+        "path": "art-reference/monsters/humanoid/goblin/spear-goblin/source/reference.png",
+        "role": "Goblin identity, proportions, palette, and spear reference"
+      },
+      {
+        "path": "art-reference/animation/outputs/goblin-v5/frames/idle/south/south.png",
+        "role": "approved-style direction sample for detailed Goblin face, palette, and pixel shading"
+      },
+      {
+        "path": "art-reference/animation/outputs/goblin-v5/frames/death/south/02-ground.png",
+        "role": "neighboring death phase for sequence continuity and outfit detail"
+      }
+    ],
+    "subject": "small stocky green goblin, huge pointed ears, bald head, orange eyes, brown leather scraps/tunic, belt, ragged trousers and boots, one short spear with stone/iron point",
+    "weaponContract": "spear is carried in the anatomical right hand except in death 03-settle, where it is dropped separately beside the body",
+    "style": "crisp hand-crafted pixel art, chunky readable clusters, muted olive-green and brown palette, transparent hard edges",
+    "sheet": {
+      "columns": 4,
+      "rows": 4,
+      "width": 1024,
+      "height": 1536,
+      "cellWidth": 256,
+      "cellHeight": 384
+    },
+    "sourceCellAnchor": {
+      "x": 128,
+      "y": 288,
+      "meaning": "goblin center and foot/root line; provisional source prompt target"
+    },
+    "constraints": [
+      "one complete goblin in each cell; no pose spills between cells",
+      "distinct facing per direction; keep camera fixed; do not mirror a view to fabricate another direction",
+      "no grid lines, captions, labels, background, floor, cast shadow, glow, UI, watermark, or extra characters",
+      "no antialiasing or motion streaks"
+    ]
+  },
+  "transparentBackgroundRequested": true,
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 1536,
+    "mode": "RGBA"
+  },
+  "cellCanvas": {
+    "width": 256,
+    "height": 384
+  },
+  "layout": {
+    "columns": 4,
+    "rows": 4,
+    "cellOrder": "row-major"
+  },
+  "directionOrder": [
+    "south",
+    "south-south-east",
+    "south-east",
+    "east-south-east",
+    "east",
+    "east-north-east",
+    "north-east",
+    "north-north-east",
+    "north",
+    "north-north-west",
+    "north-west",
+    "west-north-west",
+    "west",
+    "west-south-west",
+    "south-west",
+    "south-south-west"
+  ],
+  "targetFrameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "targetAnchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited Goblin 8-direction anchor; 16-direction alignment remains unreviewed"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "status": "imagegen-candidate-review-required",
+  "speciesId": "vampire",
+  "action": "walk",
+  "direction": "south",
+  "pose": "02-stride-c",
+  "generator": "built-in image_gen",
+  "source": "source/v5-contact-sheets/walk-02-stride-c-16.png",
+  "sourceImageId": "exec-1b182b25-eceb-46dc-a036-fb7adecf6e57.png",
+  "sourceCell": {
+    "row": 0,
+    "column": 0,
+    "box": [
+      0,
+      0,
+      256,
+      384
+    ],
+    "confidenceBoundsInCell": [
+      60,
+      116,
+      192,
+      311
+    ],
+    "sourceConfidenceBoundsHeight": 195,
+    "targetReferenceMedianHeight": 159.5,
+    "uniformScale": 0.817949
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "visual-approved animation/meta.json; 16-direction measurement pending",
+    "visualMeasurementPending": true
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "confidenceThreshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "uniformScale": 0.817949,
+    "scaleReference": "median alpha-bound height of preserved approved source frames for this action/phase"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

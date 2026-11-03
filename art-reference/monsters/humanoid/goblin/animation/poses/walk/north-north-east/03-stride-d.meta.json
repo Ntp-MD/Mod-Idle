@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "action": "walk",
+  "direction": "north-north-east",
+  "requestedFacingDegrees": 157.5,
+  "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed",
+  "identityRef": "../../../../reference.png",
+  "facingSourceRef": "../../idle/north-north-east.png",
+  "phaseSourceRef": "../../walk/east/03-stride-d.png",
+  "bakedWeapon": "spear",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:\\Users\\disda\\.codex\\generated_images\\01a17d4d-3b5a-72a1-83b1-947b6fe9c9d9\\exec-a4f33be5-52e8-4fbd-9f95-548a2c90fa3e.png",
+  "sourcePixelsModified": false,
+  "status": "candidate-review",
+  "qa": {
+    "exactFacingVerified": false,
+    "hardAlphaVerified": false,
+    "footAnchorVerified": false,
+    "phaseContinuityVerified": false,
+    "productionApproved": false
+  }
+}

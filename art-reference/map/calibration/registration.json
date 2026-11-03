@@ -1,0 +1,43 @@
+{
+  "method": "Six triangular sectors; measured vertices map exactly to projected hex; shared internal edges checked at five positions",
+  "asset": "/map/terrain/forest-relief-1.png",
+  "maxMapUnitError": 7.944109290391274e-15,
+  "maxErrorAt1024": 1.276256088470754e-13,
+  "checks": {
+    "outerVertices": true,
+    "outerEdgeMidpoints": true,
+    "center": true,
+    "sharedEdges": true
+  },
+  "source": {
+    "width": 1606,
+    "height": 979,
+    "groundFill": "#60733f",
+    "vertices": [
+      [
+        1363,
+        141
+      ],
+      [
+        1602,
+        595
+      ],
+      [
+        1021,
+        975
+      ],
+      [
+        250,
+        846
+      ],
+      [
+        3,
+        378
+      ],
+      [
+        561,
+        2
+      ]
+    ]
+  }
+}

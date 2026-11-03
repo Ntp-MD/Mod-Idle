@@ -1,0 +1,498 @@
+{
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "wolf",
+  "variantId": "hunting-wolf",
+  "name": "Hunting Wolf",
+  "levels": [
+    1,
+    20
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-anchor-at-224",
+  "grid": {
+    "columns": 8,
+    "rows": 5,
+    "totalFrames": 40
+  },
+  "states": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    {
+      "state": "idle",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "walk",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "attack",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "hit",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "death",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    }
+  ],
+  "sourceFrames": [
+    {
+      "x": 126,
+      "y": 138,
+      "width": 125,
+      "height": 150,
+      "offsetX": 126,
+      "offsetY": 138
+    },
+    {
+      "x": 488,
+      "y": 138,
+      "width": 163,
+      "height": 152,
+      "offsetX": 104,
+      "offsetY": 138
+    },
+    {
+      "x": 876,
+      "y": 142,
+      "width": 174,
+      "height": 148,
+      "offsetX": 108,
+      "offsetY": 142
+    },
+    {
+      "x": 1268,
+      "y": 138,
+      "width": 148,
+      "height": 150,
+      "offsetX": 116,
+      "offsetY": 138
+    },
+    {
+      "x": 1673,
+      "y": 141,
+      "width": 104,
+      "height": 146,
+      "offsetX": 137,
+      "offsetY": 141
+    },
+    {
+      "x": 2036,
+      "y": 138,
+      "width": 152,
+      "height": 151,
+      "offsetX": 116,
+      "offsetY": 138
+    },
+    {
+      "x": 2410,
+      "y": 139,
+      "width": 181,
+      "height": 150,
+      "offsetX": 106,
+      "offsetY": 139
+    },
+    {
+      "x": 2822,
+      "y": 138,
+      "width": 127,
+      "height": 150,
+      "offsetX": 134,
+      "offsetY": 138
+    },
+    {
+      "x": 107,
+      "y": 527,
+      "width": 185,
+      "height": 143,
+      "offsetX": 107,
+      "offsetY": 143
+    },
+    {
+      "x": 489,
+      "y": 527,
+      "width": 191,
+      "height": 145,
+      "offsetX": 105,
+      "offsetY": 143
+    },
+    {
+      "x": 879,
+      "y": 530,
+      "width": 192,
+      "height": 142,
+      "offsetX": 111,
+      "offsetY": 146
+    },
+    {
+      "x": 1268,
+      "y": 531,
+      "width": 174,
+      "height": 139,
+      "offsetX": 116,
+      "offsetY": 147
+    },
+    {
+      "x": 1662,
+      "y": 527,
+      "width": 126,
+      "height": 146,
+      "offsetX": 126,
+      "offsetY": 143
+    },
+    {
+      "x": 2022,
+      "y": 528,
+      "width": 189,
+      "height": 145,
+      "offsetX": 102,
+      "offsetY": 144
+    },
+    {
+      "x": 2408,
+      "y": 530,
+      "width": 181,
+      "height": 144,
+      "offsetX": 104,
+      "offsetY": 146
+    },
+    {
+      "x": 2785,
+      "y": 528,
+      "width": 179,
+      "height": 140,
+      "offsetX": 97,
+      "offsetY": 144
+    },
+    {
+      "x": 112,
+      "y": 922,
+      "width": 177,
+      "height": 138,
+      "offsetX": 112,
+      "offsetY": 154
+    },
+    {
+      "x": 485,
+      "y": 910,
+      "width": 170,
+      "height": 145,
+      "offsetX": 101,
+      "offsetY": 142
+    },
+    {
+      "x": 880,
+      "y": 912,
+      "width": 187,
+      "height": 137,
+      "offsetX": 112,
+      "offsetY": 144
+    },
+    {
+      "x": 1278,
+      "y": 910,
+      "width": 160,
+      "height": 145,
+      "offsetX": 126,
+      "offsetY": 142
+    },
+    {
+      "x": 1659,
+      "y": 910,
+      "width": 131,
+      "height": 147,
+      "offsetX": 123,
+      "offsetY": 142
+    },
+    {
+      "x": 2036,
+      "y": 909,
+      "width": 176,
+      "height": 144,
+      "offsetX": 116,
+      "offsetY": 141
+    },
+    {
+      "x": 2410,
+      "y": 912,
+      "width": 196,
+      "height": 145,
+      "offsetX": 106,
+      "offsetY": 144
+    },
+    {
+      "x": 2801,
+      "y": 913,
+      "width": 158,
+      "height": 144,
+      "offsetX": 113,
+      "offsetY": 145
+    },
+    {
+      "x": 109,
+      "y": 1294,
+      "width": 166,
+      "height": 147,
+      "offsetX": 109,
+      "offsetY": 142
+    },
+    {
+      "x": 479,
+      "y": 1288,
+      "width": 174,
+      "height": 150,
+      "offsetX": 95,
+      "offsetY": 136
+    },
+    {
+      "x": 864,
+      "y": 1294,
+      "width": 173,
+      "height": 144,
+      "offsetX": 96,
+      "offsetY": 142
+    },
+    {
+      "x": 1261,
+      "y": 1288,
+      "width": 165,
+      "height": 151,
+      "offsetX": 109,
+      "offsetY": 136
+    },
+    {
+      "x": 1655,
+      "y": 1292,
+      "width": 138,
+      "height": 148,
+      "offsetX": 119,
+      "offsetY": 140
+    },
+    {
+      "x": 2034,
+      "y": 1289,
+      "width": 177,
+      "height": 152,
+      "offsetX": 114,
+      "offsetY": 137
+    },
+    {
+      "x": 2415,
+      "y": 1290,
+      "width": 185,
+      "height": 150,
+      "offsetX": 111,
+      "offsetY": 138
+    },
+    {
+      "x": 2805,
+      "y": 1294,
+      "width": 157,
+      "height": 147,
+      "offsetX": 117,
+      "offsetY": 142
+    },
+    {
+      "x": 112,
+      "y": 1709,
+      "width": 160,
+      "height": 117,
+      "offsetX": 112,
+      "offsetY": 173
+    },
+    {
+      "x": 473,
+      "y": 1716,
+      "width": 194,
+      "height": 108,
+      "offsetX": 89,
+      "offsetY": 180
+    },
+    {
+      "x": 858,
+      "y": 1723,
+      "width": 190,
+      "height": 97,
+      "offsetX": 90,
+      "offsetY": 187
+    },
+    {
+      "x": 1243,
+      "y": 1727,
+      "width": 197,
+      "height": 89,
+      "offsetX": 91,
+      "offsetY": 191
+    },
+    {
+      "x": 1637,
+      "y": 1706,
+      "width": 176,
+      "height": 119,
+      "offsetX": 101,
+      "offsetY": 170
+    },
+    {
+      "x": 2021,
+      "y": 1716,
+      "width": 190,
+      "height": 108,
+      "offsetX": 101,
+      "offsetY": 180
+    },
+    {
+      "x": 2401,
+      "y": 1718,
+      "width": 194,
+      "height": 107,
+      "offsetX": 97,
+      "offsetY": 182
+    },
+    {
+      "x": 2784,
+      "y": 1728,
+      "width": 180,
+      "height": 89,
+      "offsetX": 96,
+      "offsetY": 192
+    }
+  ],
+  "identityReference": "art-reference/monsters/beast/wolf/animation/atlas/animation.png",
+  "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+  "generation": {
+    "sourceOutputs": [
+      "exec-f8766838-d835-405d-9dea-b8d4a93ba569.png"
+    ],
+    "identityReference": "art-reference/monsters/beast/wolf/animation/atlas/animation.png",
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "variantCue": "natural gray-brown coat with a lighter muzzle and restrained russet around the shoulders",
+    "initialPrompt": "Hunting Wolf; all 8 directions for idle, walk, attack, hit, death; dark outline without fringe or halo."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "sourceFrames-repack-v2",
+    "sourceCanvas": {
+      "width": 3072,
+      "height": 1920
+    },
+    "uniformScale": 1.0,
+    "translation": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "recoveredIsolatedAlphaPixels": 0,
+    "discardedIsolatedAlphaDust": 0,
+    "status": "draft-review"
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged.",
+      "Repacked from uniquely assigned sourceFrames into 384 x 384 review cells with at least 24 px clear padding on each edge; visual review remains pending."
+    ]
+  }
+}

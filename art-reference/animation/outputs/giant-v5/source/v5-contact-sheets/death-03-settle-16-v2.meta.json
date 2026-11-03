@@ -1,0 +1,59 @@
+{
+  "status": "rejected-candidate",
+  "speciesId": "giant",
+  "action": "death",
+  "phase": "03-settle",
+  "generator": "built-in image_gen",
+  "originalGeneratedFile": "exec-c64944ea-583b-405f-881a-830fd6038d18.png",
+  "originalLocation": "CODEX_HOME/generated_images/",
+  "provenance": "regenerated-explicit-alpha-distinct-settle-pose",
+  "sourceDimensions": {
+    "width": 1024,
+    "height": 1536
+  },
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "cellWidth": 256,
+    "cellHeight": 384,
+    "directionOrder": [
+      "south",
+      "south-south-east",
+      "south-east",
+      "east-south-east",
+      "east",
+      "east-north-east",
+      "north-east",
+      "north-north-east",
+      "north",
+      "north-north-west",
+      "north-west",
+      "west-north-west",
+      "west",
+      "west-south-west",
+      "south-west",
+      "south-south-west"
+    ]
+  },
+  "alphaAudit": {
+    "zeroPixelFraction": 0.71656,
+    "confidence128PixelFraction": 0.17265,
+    "cornerAlpha": [
+      0,
+      0,
+      1,
+      0
+    ]
+  },
+  "poseContrast": "side-lying, head resting on cheek, slack arm and separated club; intended to differ from death-02 face-down forearms-forward pose",
+  "review": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "nativePixelArt": false,
+    "approved": false
+  },
+  "replacedBy": "death-03-settle-16-v3.png",
+  "note": "Rejected after reviewer found it still read mostly belly-down; replaced by v3 side-lying pass."
+}

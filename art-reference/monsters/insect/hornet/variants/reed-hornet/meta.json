@@ -1,0 +1,497 @@
+{
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "hornet",
+  "variantId": "reed-hornet",
+  "name": "Reed Hornet",
+  "levels": [
+    1,
+    20
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-anchor-at-224",
+  "grid": {
+    "columns": 8,
+    "rows": 5,
+    "totalFrames": 40
+  },
+  "states": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    {
+      "state": "idle",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "walk",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "attack",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "hit",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "death",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    }
+  ],
+  "sourceFrames": [
+    {
+      "x": 147,
+      "y": 140,
+      "width": 123,
+      "height": 141,
+      "offsetX": 147,
+      "offsetY": 140
+    },
+    {
+      "x": 522,
+      "y": 146,
+      "width": 150,
+      "height": 142,
+      "offsetX": 138,
+      "offsetY": 146
+    },
+    {
+      "x": 917,
+      "y": 136,
+      "width": 150,
+      "height": 150,
+      "offsetX": 149,
+      "offsetY": 136
+    },
+    {
+      "x": 1285,
+      "y": 136,
+      "width": 141,
+      "height": 151,
+      "offsetX": 133,
+      "offsetY": 136
+    },
+    {
+      "x": 1657,
+      "y": 140,
+      "width": 141,
+      "height": 147,
+      "offsetX": 121,
+      "offsetY": 140
+    },
+    {
+      "x": 2028,
+      "y": 135,
+      "width": 127,
+      "height": 154,
+      "offsetX": 108,
+      "offsetY": 135
+    },
+    {
+      "x": 2397,
+      "y": 151,
+      "width": 149,
+      "height": 139,
+      "offsetX": 93,
+      "offsetY": 151
+    },
+    {
+      "x": 2785,
+      "y": 140,
+      "width": 139,
+      "height": 151,
+      "offsetX": 97,
+      "offsetY": 140
+    },
+    {
+      "x": 148,
+      "y": 527,
+      "width": 122,
+      "height": 139,
+      "offsetX": 148,
+      "offsetY": 143
+    },
+    {
+      "x": 535,
+      "y": 527,
+      "width": 148,
+      "height": 144,
+      "offsetX": 151,
+      "offsetY": 143
+    },
+    {
+      "x": 918,
+      "y": 527,
+      "width": 152,
+      "height": 141,
+      "offsetX": 150,
+      "offsetY": 143
+    },
+    {
+      "x": 1285,
+      "y": 527,
+      "width": 148,
+      "height": 149,
+      "offsetX": 133,
+      "offsetY": 143
+    },
+    {
+      "x": 1665,
+      "y": 527,
+      "width": 125,
+      "height": 145,
+      "offsetX": 129,
+      "offsetY": 143
+    },
+    {
+      "x": 2022,
+      "y": 527,
+      "width": 134,
+      "height": 147,
+      "offsetX": 102,
+      "offsetY": 143
+    },
+    {
+      "x": 2391,
+      "y": 527,
+      "width": 147,
+      "height": 144,
+      "offsetX": 87,
+      "offsetY": 143
+    },
+    {
+      "x": 2785,
+      "y": 527,
+      "width": 139,
+      "height": 146,
+      "offsetX": 97,
+      "offsetY": 143
+    },
+    {
+      "x": 134,
+      "y": 902,
+      "width": 152,
+      "height": 161,
+      "offsetX": 134,
+      "offsetY": 134
+    },
+    {
+      "x": 525,
+      "y": 904,
+      "width": 158,
+      "height": 154,
+      "offsetX": 141,
+      "offsetY": 136
+    },
+    {
+      "x": 907,
+      "y": 909,
+      "width": 164,
+      "height": 140,
+      "offsetX": 139,
+      "offsetY": 141
+    },
+    {
+      "x": 1285,
+      "y": 891,
+      "width": 160,
+      "height": 162,
+      "offsetX": 133,
+      "offsetY": 123
+    },
+    {
+      "x": 1650,
+      "y": 907,
+      "width": 154,
+      "height": 137,
+      "offsetX": 114,
+      "offsetY": 139
+    },
+    {
+      "x": 2008,
+      "y": 891,
+      "width": 170,
+      "height": 171,
+      "offsetX": 88,
+      "offsetY": 123
+    },
+    {
+      "x": 2388,
+      "y": 905,
+      "width": 162,
+      "height": 144,
+      "offsetX": 84,
+      "offsetY": 137
+    },
+    {
+      "x": 2789,
+      "y": 900,
+      "width": 149,
+      "height": 164,
+      "offsetX": 101,
+      "offsetY": 132
+    },
+    {
+      "x": 135,
+      "y": 1291,
+      "width": 168,
+      "height": 154,
+      "offsetX": 135,
+      "offsetY": 139
+    },
+    {
+      "x": 526,
+      "y": 1267,
+      "width": 139,
+      "height": 169,
+      "offsetX": 142,
+      "offsetY": 115
+    },
+    {
+      "x": 914,
+      "y": 1273,
+      "width": 133,
+      "height": 172,
+      "offsetX": 146,
+      "offsetY": 121
+    },
+    {
+      "x": 1299,
+      "y": 1273,
+      "width": 130,
+      "height": 167,
+      "offsetX": 147,
+      "offsetY": 121
+    },
+    {
+      "x": 1657,
+      "y": 1273,
+      "width": 140,
+      "height": 166,
+      "offsetX": 121,
+      "offsetY": 121
+    },
+    {
+      "x": 2037,
+      "y": 1272,
+      "width": 131,
+      "height": 173,
+      "offsetX": 117,
+      "offsetY": 120
+    },
+    {
+      "x": 2406,
+      "y": 1285,
+      "width": 146,
+      "height": 156,
+      "offsetX": 102,
+      "offsetY": 133
+    },
+    {
+      "x": 2791,
+      "y": 1286,
+      "width": 142,
+      "height": 152,
+      "offsetX": 103,
+      "offsetY": 134
+    },
+    {
+      "x": 126,
+      "y": 1710,
+      "width": 167,
+      "height": 115,
+      "offsetX": 126,
+      "offsetY": 174
+    },
+    {
+      "x": 517,
+      "y": 1705,
+      "width": 162,
+      "height": 117,
+      "offsetX": 133,
+      "offsetY": 169
+    },
+    {
+      "x": 907,
+      "y": 1721,
+      "width": 152,
+      "height": 99,
+      "offsetX": 139,
+      "offsetY": 185
+    },
+    {
+      "x": 1282,
+      "y": 1714,
+      "width": 143,
+      "height": 109,
+      "offsetX": 130,
+      "offsetY": 178
+    },
+    {
+      "x": 1643,
+      "y": 1705,
+      "width": 172,
+      "height": 117,
+      "offsetX": 107,
+      "offsetY": 169
+    },
+    {
+      "x": 2032,
+      "y": 1705,
+      "width": 146,
+      "height": 120,
+      "offsetX": 112,
+      "offsetY": 169
+    },
+    {
+      "x": 2401,
+      "y": 1720,
+      "width": 168,
+      "height": 105,
+      "offsetX": 97,
+      "offsetY": 184
+    },
+    {
+      "x": 2787,
+      "y": 1714,
+      "width": 159,
+      "height": 111,
+      "offsetX": 99,
+      "offsetY": 178
+    }
+  ],
+  "identityReference": "art-reference/monsters/insect/hornet/animation/source/base.png",
+  "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+  "generation": {
+    "sourceOutputs": [
+      "exec-505d5f3e-8a1e-4886-8fc7-f5b3330685a2.png"
+    ],
+    "identityReference": "art-reference/monsters/insect/hornet/animation/source/base.png",
+    "styleReference": "art-reference/monsters/_shared/collection/reference.png",
+    "initialPrompt": "Reed Hornet; subtle reed-green tint on body plates or wing veins; 8 directions for idle, walk, attack, hit, death."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "sourceFrames-repack-v2",
+    "sourceCanvas": {
+      "width": 3072,
+      "height": 1920
+    },
+    "uniformScale": 1.0,
+    "translation": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "recoveredIsolatedAlphaPixels": 0,
+    "discardedIsolatedAlphaDust": 0,
+    "status": "draft-review"
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged.",
+      "Repacked from uniquely assigned sourceFrames into 384 x 384 review cells with at least 24 px clear padding on each edge; visual review remains pending."
+    ]
+  }
+}

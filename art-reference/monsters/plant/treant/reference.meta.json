@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "assetType": "mob-identity-reference",
+  "source": "reference.png",
+  "sourceDimensions": {
+    "width": 128,
+    "height": 128
+  },
+  "facing": "south-east",
+  "bakedWeaponId": "TODO: identify the fixed baked weapon from the approved reference before generation",
+  "footAnchor": {
+    "x": null,
+    "y": null,
+    "provenance": "pending reference image and measurement"
+  },
+  "qa": {
+    "visuallyInspected": false,
+    "wholeBodyVisible": null,
+    "sourcePixelsModified": false
+  },
+  "note": "Scaffold only; reference.png is not generated/copy-filled by this offline preparation.",
+  "alphaBoundsExclusive": [
+    42,
+    44,
+    86,
+    108
+  ],
+  "alphaBoundsProvenance": "measured from copied approved animation/source/base.png",
+  "sourceCopiedFrom": "animation/source/base.png (byte-preserved copy)",
+  "scaffoldNote": "Copied existing species base without pixel changes; foot anchor and baked-weapon id still need verification."
+}

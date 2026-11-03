@@ -1,0 +1,410 @@
+{
+  "id": "attack.venom_bolt",
+  "src": "/fx/skill-pool/attack-venom-bolt/v1/atlas.png",
+  "columns": 4,
+  "rows": 4,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        79,
+        26,
+        165,
+        176
+      ],
+      "renderedPadding": [
+        143,
+        90,
+        155,
+        144
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        256,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        93,
+        40,
+        162,
+        227
+      ],
+      "renderedPadding": [
+        157,
+        104,
+        158,
+        93
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        512,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        40,
+        64,
+        224,
+        246
+      ],
+      "renderedPadding": [
+        104,
+        128,
+        96,
+        74
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        768,
+        0,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        23,
+        109,
+        231,
+        249
+      ],
+      "renderedPadding": [
+        87,
+        173,
+        89,
+        71
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        25,
+        49,
+        236,
+        237
+      ],
+      "renderedPadding": [
+        89,
+        113,
+        84,
+        83
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        256,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        14,
+        61,
+        241,
+        244
+      ],
+      "renderedPadding": [
+        78,
+        125,
+        79,
+        76
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        512,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        15,
+        71,
+        242,
+        244
+      ],
+      "renderedPadding": [
+        79,
+        135,
+        78,
+        76
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        768,
+        256,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        15,
+        70,
+        242,
+        247
+      ],
+      "renderedPadding": [
+        79,
+        134,
+        78,
+        73
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        15,
+        72,
+        242,
+        237
+      ],
+      "renderedPadding": [
+        79,
+        136,
+        78,
+        83
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        256,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        22,
+        80,
+        236,
+        236
+      ],
+      "renderedPadding": [
+        86,
+        144,
+        84,
+        84
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        512,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        23,
+        80,
+        234,
+        234
+      ],
+      "renderedPadding": [
+        87,
+        144,
+        86,
+        86
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        768,
+        512,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        23,
+        82,
+        230,
+        230
+      ],
+      "renderedPadding": [
+        87,
+        146,
+        90,
+        90
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        38,
+        85,
+        218,
+        211
+      ],
+      "renderedPadding": [
+        102,
+        149,
+        102,
+        109
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        256,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        41,
+        82,
+        205,
+        211
+      ],
+      "renderedPadding": [
+        105,
+        146,
+        115,
+        109
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        512,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        53,
+        89,
+        207,
+        211
+      ],
+      "renderedPadding": [
+        117,
+        153,
+        113,
+        109
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        768,
+        768,
+        256,
+        256
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        57,
+        86,
+        202,
+        214
+      ],
+      "renderedPadding": [
+        121,
+        150,
+        118,
+        106
+      ]
+    }
+  ],
+  "virtualWidth": 384,
+  "virtualHeight": 384,
+  "alphaDiscard": 8,
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    4,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "frameMs": 55,
+  "cellWidth": 256,
+  "cellHeight": 256,
+  "contentWidthRatio": 0.5911458333333334,
+  "contentHeightRatio": 0.4895833333333333,
+  "delivery": "instant",
+  "origin": "target",
+  "orient": false,
+  "groundOrigin": false,
+  "anchorX": 0.501139,
+  "anchorY": 0.569336,
+  "impactAnchorX": 0.499023,
+  "impactAnchorY": 0.553711,
+  "status": "ready",
+  "sourcePixelsUnmodified": false,
+  "sourceSheet": "vibe_images/attack-venom-bolt-sheet_1793033706667_c580bebe.png",
+  "keying": "magenta green-channel matte, fringe hue repair, 5px cell-edge feather; raw sheet kept"
+}

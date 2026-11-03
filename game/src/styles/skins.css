@@ -1,0 +1,693 @@
+/**
+ * Skins — the appearance layer.
+ *
+ * Reusable appearance lives here; tag defaults in base.css, tokens in variables.css,
+ * and component layout in each component's <style>. See AGENTS.md §UI integration.
+ */
+
+/* ---- buttons ------------------------------------------------------------------
+ * base already gives: panel background, 1px line border, --radius-card, base padding,
+ * gold hover, focus ring, active press, disabled fade. A skin only departs from that.
+ */
+
+/* quiet: the compact control. Smaller words, inert until it is the one. */
+.btn-quiet {
+    font-size: var(--font-xs);
+}
+.btn-quiet.toggled {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+/* picked: the one that holds a choice, told apart from `toggled` by a gold wash under it. */
+.btn-quiet.picked {
+    border-color: color-mix(in srgb, var(--gold) 34%, transparent);
+    color: var(--gold);
+    background: color-mix(in srgb, var(--gold) 10%, var(--panel));
+}
+
+/* ghost: no face, an edge only. It sits in a strip of controls without shouting for itself. */
+.btn-ghost {
+    background: none;
+    border-color: var(--edge);
+    color: var(--dim);
+}
+.btn-ghost.toggled {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+/* gold: the primary press that sells or commits inside a board. */
+.btn-gold {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+/* icon: a control whose size is a token, not its text. Geometry stays with the component. */
+.btn-icon {
+    line-height: 1;
+}
+
+/* flat: a press with no face and no edge at all — the corner ✕ that must not frame itself. */
+.btn-flat {
+    background: none;
+    border: none;
+    color: var(--dim);
+}
+
+/* prop: a station named on the scene's ground. The plate itself is the press — a glass chip that
+ * wears the station's state — and `--fed` (0..1, how well the station is fed) draws the ember at its
+ * feet, a fire burning as well as its Hunger lets it and nothing at all when the station is cold.
+ * Sizes stay with the component; only the paint is here. */
+.btn-prop {
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-card);
+    background: var(--glass);
+    color: var(--text);
+}
+.btn-prop.toggled { color: var(--gold-lit); }
+.btn-prop.off { color: var(--dim); }
+.btn-prop.busy { color: var(--gold); }
+/* the foot: a contact shadow, so a prop stands on the ground instead of floating over it. */
+.btn-prop::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: var(--spacing-xs);
+    width: var(--icon-card);
+    height: var(--spacing-sm);
+    transform: translateX(-50%);
+    border-radius: var(--radius-round);
+    background: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, .6), transparent 72%);
+    pointer-events: none;
+}
+/* the ember: the station's own condition, warm while it is fed and gone when it is not. */
+.btn-prop::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: var(--spacing-xs);
+    width: var(--icon-card);
+    height: var(--icon-card);
+    transform: translateX(-50%) translateY(34%);
+    border-radius: var(--radius-round);
+    background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--hot) 62%, transparent), transparent 70%);
+    opacity: calc(var(--fed, 0) * .72);
+    filter: blur(var(--dof-rest));
+    pointer-events: none;
+}
+
+/* ---- resource orbs ------------------------------------------------------------- */
+/* Energy and stationary reflections share the existing resource colours. */
+.life-orb { --orb-cycle: calc(var(--motion-travel) * 20); }
+.mana-orb { --orb-cycle: calc(var(--motion-travel) * 12); }
+.orb-energy {
+    background:
+        radial-gradient(circle at 27% 31%, var(--text) 0 1px, transparent 2px),
+        radial-gradient(circle at 69% 26%, var(--liquid-light) 0 1px, transparent 3px),
+        radial-gradient(circle at 77% 62%, var(--text) 0 1px, transparent 2px),
+        radial-gradient(circle at 37% 76%, var(--liquid-light) 0 1px, transparent 3px);
+    mix-blend-mode: screen;
+    animation: orb-energy-spin var(--orb-cycle) linear infinite;
+    animation-play-state: var(--orb-play-state, running);
+}
+.orb-energy::before, .orb-energy::after {
+    background: conic-gradient(from 35deg, transparent 0 12%,
+        color-mix(in srgb, var(--liquid-light) 18%, transparent) 22%,
+        color-mix(in srgb, var(--text) 65%, var(--liquid-light)) 35%,
+        transparent 39% 64%, color-mix(in srgb, var(--liquid-light) 55%, transparent) 79%, transparent 88%);
+    mask: radial-gradient(ellipse, transparent 0 49%, #000 52% 54%, transparent 59%);
+    opacity: .7;
+    animation: orb-energy-spin calc(var(--orb-cycle) * 1.4) linear infinite reverse;
+    animation-play-state: var(--orb-play-state, running);
+}
+.orb-energy::after {
+    opacity: .45;
+    animation-direction: normal;
+    animation-duration: calc(var(--orb-cycle) * .8);
+}
+@keyframes orb-energy-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.orb-gloss {
+    backdrop-filter: saturate(1.15) contrast(1.04);
+    background:
+        radial-gradient(circle at 29% 17%, rgba(255,255,255,.95) 0, rgba(255,255,255,.35) 2%, transparent 7%),
+        radial-gradient(ellipse 46% 30% at 29% 18%, rgba(255,255,255,.25), transparent 74%),
+        radial-gradient(ellipse 14% 24% at 86% 62%, rgba(255,255,255,.18), transparent 75%),
+        radial-gradient(ellipse 58% 12% at 49% 94%, rgba(255,255,255,.2), transparent 75%),
+        linear-gradient(150deg, rgba(255,255,255,.12), transparent 42% 60%, rgba(0,0,0,.4));
+    box-shadow: inset 2px 3px 4px rgba(255,255,255,.24), inset -2px -3px 5px rgba(255,255,255,.16), inset 0 -8px 15px rgba(0,0,0,.45);
+}
+.orb-gloss::before {
+    background: linear-gradient(110deg, rgba(255,255,255,.75), rgba(255,255,255,.08) 74%, transparent);
+    mask: radial-gradient(ellipse at 50% 100%, transparent 0 64%, #000 68% 73%, transparent 78%);
+}
+.orb-gloss::after {
+    background: conic-gradient(from 210deg, color-mix(in srgb, var(--focus) 32%, transparent),
+        transparent 25%, rgba(255,255,255,.35) 45%, transparent 60%, color-mix(in srgb, var(--alarm) 20%, transparent) 82%, transparent);
+    mask: radial-gradient(circle, transparent 0 82%, #000 93%);
+}
+.orb-ripple {
+    border: 1px solid color-mix(in srgb, var(--alarm) 65%, transparent);
+    box-shadow: inset 0 0 5px color-mix(in srgb, var(--hp-lit) 30%, transparent);
+    animation: orb-impact var(--motion-map) var(--ease-out) both;
+}
+@keyframes orb-impact {
+    from { opacity: .85; transform: scale(.65); }
+    to { opacity: 0; transform: scale(1.2); }
+}
+.orb-recharge {
+    background: radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--hp-lit) 65%, transparent), transparent 70%);
+    animation: orb-return var(--motion-travel) var(--ease-out) both;
+}
+@keyframes orb-return {
+    from { opacity: .8; transform: translateY(12%) scaleX(.6); }
+    to { opacity: 0; transform: translateY(-45%) scaleX(1.1); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .orb-energy, .orb-energy::before, .orb-energy::after { animation: none; }
+    .orb-ripple, .orb-recharge { animation: none; opacity: 0; }
+}
+
+/* ---- text roles ----------------------------------------------------------------
+ * Shared readings. A role paints; a component may still set the size its density
+ * needs, so a note reads the same in a board, a log or a tooltip.
+ */
+
+.table-metrics td:first-child { font-family: var(--ui); color: var(--dim); }
+.table-metrics td:last-child { color: var(--text); font-weight: 600; }
+.table-metrics small { font-family: var(--ui); font-weight: 400; }
+
+/* note: the muted aside — size included, because a footnote is always small. */
+.text-note {
+    color: var(--dim);
+    font-size: var(--font-xs);
+}
+/* dim: the muted aside that must keep its parent's size. */
+.text-dim {
+    color: var(--dim);
+}
+/* value: a number the player compares — gold, price, stock. */
+.text-value {
+    color: var(--gold);
+}
+/* good: a settled, positive outcome. */
+.text-good {
+    color: var(--good-lit);
+}
+/* accent: a deadline or a warm highlight that is not a value. */
+.text-accent {
+    color: var(--gold-lit);
+}
+/* alarm: a refusal or a forfeit. */
+.text-alarm {
+    color: var(--alarm);
+}
+
+/* icon-label: the small token-sized icon beside a label or table cell. */
+.icon-label {
+    width: var(--icon-label);
+    height: var(--icon-label);
+    object-fit: contain;
+    flex: none;
+}
+
+/* glyph: a PNG UI symbol drawn in the current ink. Icons and symbols are images; inline SVG is
+ * reserved for structural graphics (tree/map geometry, charts, effects), never a standalone glyph. */
+.icon-mask {
+    display: inline-block;
+    width: var(--icon-label);
+    height: var(--icon-label);
+    flex: none;
+    background: currentColor;
+    -webkit-mask: var(--glyph) center / contain no-repeat;
+    mask: var(--glyph) center / contain no-repeat;
+}
+
+/* scroll-pane: the one explicit scroll area inside a fixed panel or HUD region. */
+.scroll-pane {
+    overflow: auto;
+    min-height: 0;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
+/* selectable: a row or tab that can be chosen; the chosen one wears the gold edge. */
+.selectable.selected {
+    border-color: var(--gold);
+    background: var(--surface-selected);
+}
+
+/* plate-mark: the framed icon tile a board uses to head a line. */
+.plate-mark {
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-card);
+    background: var(--panel);
+}
+
+/* medallion: a circular icon face — a food, a supply or a skill read as its own round counter.
+ * The component sizes the face; the circle and its edge are the object's shape. */
+.plate-medallion {
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-round);
+    background: var(--panel);
+}
+/* off: this face is not in play. The figure dims; the count stays readable, because a number that
+ * cannot be read is not a read. */
+.plate-medallion.off img { opacity: .45; }
+.plate-medallion.off .badge-count { color: var(--dim); border-color: var(--edge); }
+
+/* plate-ground: the ground a scene's objects stand on — night air above the horizon, the lit line the
+ * props stand on, meadow below it, so the objects read as standing somewhere rather than floating on a
+ * panel. Where the horizon falls is the component's to place, because that is placement, not paint. */
+.plate-ground {
+    border: 1px solid color-mix(in srgb, var(--edge) 70%, transparent);
+    border-radius: var(--radius-card);
+    background:
+        linear-gradient(180deg,
+            color-mix(in srgb, var(--glow-dusk) 22%, transparent),
+            transparent var(--horizon, 58%)),
+        linear-gradient(180deg,
+            transparent 0 calc(var(--horizon, 58%) - 1px),
+            color-mix(in srgb, var(--glow-moss) 38%, transparent) var(--horizon, 58%),
+            transparent calc(var(--horizon, 58%) + var(--spacing-lg))),
+        linear-gradient(180deg,
+            transparent 0 var(--horizon, 58%),
+            color-mix(in srgb, var(--ground-3) 85%, transparent) var(--horizon, 58%),
+            color-mix(in srgb, var(--ground) 45%, transparent));
+}
+
+/* ---- passive tree ---------------------------------------------------------------
+ * A dense map surface with its own earth-and-bronze palette, measured type scale and
+ * display face. The theme lives here; the board and the detail pane place it.
+ */
+.surface-tree {
+    --tree-bronze: #807354;
+    --tree-muted: #b8baaa;
+    --tree-ink: #e2d9b9;
+    --tree-bg: #101814;
+    --tree-panel: #141d17;
+    --tree-deep: #0d1511;
+    --tree-strip: #101a14;
+    --tree-guide: #172019;
+    --tree-card: #101914;
+    --tree-tools: #111b14;
+    --tree-tooltip: #101a13;
+    --tree-legend: rgba(10, 19, 14, .94);
+    --tree-canvas-glow: #1e3024;
+    --tree-canvas-mid: #101c16;
+    --tree-canvas: #0b120f;
+    --tree-ink-stroke: #0c1510;
+    --tree-link: #798774;
+    --tree-link-cross: #a6b99b;
+    --tree-link-frontier: #d2d2b1;
+    --tree-node-edge: #a19573;
+    --tree-node-notable: #c2b487;
+    --tree-node-rim: #726c4e;
+    --tree-node-face: #171f16;
+    --tree-node-ready: #e2dec2;
+    --tree-node-owned: #66532a;
+    --tree-node-grad-top: #30302a;
+    --tree-node-grad-bottom: #111410;
+    --tree-normal-mix: #4d624d;
+    --tree-origin-rim: #263323;
+    --tree-origin-face: #111b13;
+    --tree-str: #c49d83;
+    --tree-agi: #a9c49c;
+    --tree-dex: #c9b588;
+    --tree-int: #96b7ae;
+    --tree-wis: #b1c1a5;
+    --tree-vit: #c2a08b;
+    --tree-lck: #b6a8c4;
+    --tree-display: Georgia, "Times New Roman", serif;
+    --tree-fs-2xs: 11px;
+    --tree-fs-xs: 12px;
+    --tree-fs-sm: 13px;
+    --tree-fs-md: 15px;
+    --tree-fs-lg: 18px;
+    --tree-fs-xl: 20px;
+    --tree-fs-2xl: 22px;
+    --tree-fs-3xl: 24px;
+}
+
+/* ---- panels --------------------------------------------------------------------
+ * A panel skin paints the surface; the component that mounts it owns position, grid
+ * area, size and scroll.
+ */
+
+/* veil: the scrim a modal sits on. */
+.panel-veil {
+    background: rgba(6, 9, 13, .68);
+    backdrop-filter: blur(4px);
+}
+
+/* solid: the shared modal canvas. */
+.panel-solid {
+    background: var(--bg);
+    border-inline: 1px solid var(--edge);
+    box-shadow: 0 0 60px rgba(0, 0, 0, .6);
+    animation: panel-slide .16s ease-out;
+}
+
+/* showcase: the same canvas framed, because the showcase page has no scrim behind it. */
+.panel-showcase {
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+    animation: none;
+}
+
+/* head: the gold-washed strip that names a surface and carries its close press. */
+.panel-head {
+    border-bottom: 1px solid var(--edge);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 10%, transparent), transparent);
+}
+.panel-head h2 { flex: none; color: var(--gold); letter-spacing: clamp(2px, 0.10vw, 3px); }
+.panel-head .sub { flex: 1; color: var(--dim); font-size: var(--font-xs); }
+.panel-head h3 { flex: none; color: var(--gold); font-size: var(--font-xs); letter-spacing: clamp(2px, 0.10vw, 3px); text-transform: uppercase; }
+
+/* ---- notices ------------------------------------------------------------------ */
+
+/* toast: the one line the client says out loud, over the field. */
+.notice-toast {
+    border: 1px solid color-mix(in srgb, var(--gold) 38%, transparent);
+    border-radius: var(--radius-card);
+    background: var(--glass);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+}
+
+/* ---- combat cards -----------------------------------------------------------------
+ * The whole fight is read on one card: the player's plate and every body's plate wear the same
+ * face, ring, name, rail and badge, so two cards read apart by what stands in them — an extra
+ * resource, an Element mark, a body's kind — and never by how they are painted.
+ */
+
+/* combat: the card face — a warm edge over the HUD's own glass. */
+.card-combat {
+    border: 1px solid color-mix(in srgb, var(--gold) 34%, var(--edge));
+    border-radius: var(--radius-card);
+    background: var(--hud-face);
+    box-shadow: var(--shadow-soft);
+}
+
+/* front: the body the next swing waits on. elite and boss out-rank it, as they out-rank each other. */
+.card-combat.front { border-color: var(--gold); }
+.card-combat.elite { border-color: var(--elite); }
+.card-combat.boss { border-color: var(--boss); }
+
+/* name: the card's line, and the ink a body's kind changes. */
+.card-name { color: var(--gold-lit); font-weight: 700; }
+.card-name.elite { color: var(--elite-ink); }
+.card-name.boss { color: var(--boss-ink); }
+
+/* read: the quiet card a board hangs its reads on — the panel's own face under a hairline edge, flat
+ * and without a glow, so a card is read and is never mistaken for a control. */
+.card-read {
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-card);
+    background: color-mix(in srgb, var(--panel) 82%, transparent);
+}
+
+/* tile: a compact unit inside a board card — one recipe, one choice — framed at the card's edge. */
+.card-tile {
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-card);
+    background: color-mix(in srgb, var(--panel) 64%, transparent);
+}
+/* locked: the tile is not open yet. The dashed edge and the dimmed figure carry that, while the words
+ * keep their contrast — a reason that cannot be read is not a reason. */
+.card-tile.locked { border-style: dashed; }
+.card-tile.locked .plate-mark { opacity: .45; }
+
+/* meter: one rail for every resource — the rail is the same, the resource is the read. The component
+ * sizes the rail, lifts the figure over it and owns how fast the fill travels. */
+.track-meter {
+    border-radius: var(--radius-card);
+    background: rgba(255, 255, 255, .09);
+}
+.track-meter > i {
+    border-radius: var(--radius-card);
+    background-size: calc(100% / max(var(--w, 1), .001)) 100%;
+    transform: scaleX(var(--fill));
+    transform-origin: left center;
+    transition: transform var(--motion-travel) var(--ease-glide);
+}
+.track-meter.hp > i { background-image: linear-gradient(90deg, var(--hp-lit), var(--hp)); }
+.track-meter.es > i { background-image: linear-gradient(90deg, var(--es), var(--es-lit)); }
+.track-meter.mana > i { background-image: linear-gradient(90deg, var(--mana), var(--mana-lit)); }
+.track-meter.exp > i { background-image: linear-gradient(90deg, var(--xp), var(--xp-lit)); }
+
+/* gauge: the Hunger rail — gold while fed, alarm when empty. The component sizes the rail. */
+.gauge-hunger > i { background: var(--bar-2); }
+.gauge-hunger em { background: var(--gold); }
+.gauge-hunger.empty em { background: var(--alarm); }
+
+/* tab-rail: one press in a segmented filter strip. The strip frames; the press keeps its divider.
+   The chosen press is `picked`, like every other chosen press. */
+.tab-rail {
+    background: none;
+    border: 0;
+    border-right: 1px solid var(--edge);
+    color: var(--dim);
+}
+.tab-rail.picked {
+    color: var(--gold-lit);
+    background: color-mix(in srgb, var(--gold) 12%, transparent);
+    box-shadow: inset 0 -1px 0 var(--gold);
+}
+
+/* count: a compact value badge; urgent marks points that need the player's attention. */
+.badge-count {
+    border: 1px solid color-mix(in srgb, var(--gold) 34%, var(--edge));
+    border-radius: var(--radius-card);
+    background: var(--glass);
+    color: var(--gold-lit);
+    font-family: var(--num);
+    font-size: var(--font-xs);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+.badge-count.urgent {
+    border-color: color-mix(in srgb, var(--hot-deep) 70%, var(--edge));
+    background: linear-gradient(180deg, var(--hot), var(--hot-deep));
+    color: var(--text);
+}
+.badge-count.xp { border-color: color-mix(in srgb, var(--xp) 55%, var(--edge)); color: var(--xp); }
+
+/* chip: the padding a tag needs; the tag owns the paint. */
+.chip {
+    padding: 0 var(--spacing-xs);
+    white-space: nowrap;
+}
+
+/* tag: a quiet label; picked, locked and semantic accents keep one shared shape. */
+.chip-tag {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    background: var(--glass);
+    color: var(--dim);
+    font-size: var(--font-xs);
+}
+.chip-tag.picked {
+    border-color: var(--gold);
+    background: var(--surface-selected);
+    color: var(--gold);
+}
+.chip-tag.here { border-color: color-mix(in srgb, var(--good) 50%, var(--edge)); color: var(--good-lit); }
+.chip-tag.alarm { border-color: color-mix(in srgb, var(--alarm) 55%, var(--edge)); color: var(--alarm); }
+.chip-tag.locked { border-style: dashed; }
+.chip-tag.element { color: var(--es-lit); border-color: color-mix(in srgb, var(--es) 40%, transparent); }
+.chip-tag.xp { color: var(--xp); border-color: var(--xp); }
+.chip-tag.upper { text-transform: uppercase; letter-spacing: clamp(0px, 0.05vw, 1px); }
+.chip-tag .plus { color: var(--xp); font-family: var(--num); }
+
+/* rarity: the same label reads the item's own quality colour from --rar. */
+.chip-rarity {
+    border: 1px solid color-mix(in srgb, var(--rar, var(--line)) 60%, var(--line));
+    border-radius: var(--radius-card);
+    background: color-mix(in srgb, var(--rar, var(--glass)) 10%, transparent);
+    color: var(--rar, var(--dim));
+    font-size: var(--font-xs);
+    text-transform: capitalize;
+}
+
+/* gear: rarity-tinted frame for a real piece. Empty and carried-stack cells use their own skins. */
+.slot-gear {
+    border: 1px solid color-mix(in srgb, var(--rar, var(--line)) 58%, var(--line));
+    border-radius: var(--radius-card);
+    background: var(--inset);
+}
+.slot-gear .slot-icon { opacity: .92; filter: drop-shadow(0 0 3px color-mix(in srgb, var(--rar, transparent) 55%, transparent)); }
+.slot-stack .slot-icon { opacity: .92; }
+.slot-gear.worn { box-shadow: inset 0 0 0 1px var(--line); background: var(--panel); }
+.slot-gear.selected { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+.slot-gear.held { border-style: dashed; border-color: var(--good); }
+.slot-gear.locked { border-style: dashed; border-color: var(--dim); }
+.slot-gear .delta { color: var(--dim); text-shadow: 0 1px 0 rgba(0, 0, 0, .8); }
+.slot-gear .delta.up { color: var(--good); }
+.slot-gear .delta.down { color: var(--hp); }
+
+/* stack: a material cell without gear rarity. */
+.slot-stack {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    background: var(--inset);
+}
+.slot-stack.selected { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+.slot-stack.held { border-style: dashed; border-color: var(--good); }
+
+/* empty: a dotted place that still names its gear slot in the doll. */
+.slot-empty {
+    border: 1px dotted var(--line);
+    border-radius: var(--radius-card);
+    background: var(--inset);
+}
+.slot-empty .slotname { color: var(--dim); opacity: .55; }
+.slot-empty .slot-glyph { opacity: .2; }
+
+/* damage: combat numbers share one readable face on mobs and player. */
+.pop-damage {
+    background: radial-gradient(ellipse, color-mix(in srgb, var(--bg) 78%, transparent), transparent 72%);
+    color: color-mix(in srgb, var(--fx, var(--text)) 25%, var(--text));
+    font-family: var(--num);
+    font-size: var(--font-lg);
+    font-weight: 800;
+    text-shadow: 0 2px 3px rgba(0, 0, 0, .95), 0 0 var(--spacing-md) color-mix(in srgb, var(--fx, var(--text)) 45%, transparent);
+    -webkit-text-stroke: 1px var(--bg);
+    animation: combat-pop-number 1.1s cubic-bezier(.18, .78, .3, 1) both;
+    animation-delay: calc(var(--lane) * 70ms);
+}
+.pop-damage.critical {
+    color: var(--gold-lit);
+    font-size: var(--font-xl);
+    letter-spacing: 1px;
+    text-shadow: 0 2px 3px rgba(0, 0, 0, .95), 0 0 var(--spacing-lg) color-mix(in srgb, var(--gold) 62%, transparent);
+    -webkit-text-stroke-width: 1.3px;
+    animation-name: combat-pop-critical;
+    animation-duration: 1.25s;
+}
+.pop-damage.dot { font-size: var(--font-sm); animation-duration: .8s; }
+.pop-damage.incoming { color: var(--alarm); font-size: var(--font-md); }
+
+/* word: a dodge, miss or block sits apart from a damage number. */
+.pop-word {
+    background: none;
+    border: 0;
+    color: var(--fx, var(--text));
+    font-family: var(--ui);
+    font-size: var(--font-xs);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    -webkit-text-stroke: 0;
+    animation: combat-pop-number 1.1s cubic-bezier(.18, .78, .3, 1) both;
+    animation-delay: calc(var(--lane) * 70ms);
+}
+
+/* loot: a field drop is a compact, coloured chip among combat numbers. */
+.pop-loot {
+    border: 1px solid color-mix(in srgb, var(--fx, var(--gold)) 55%, transparent);
+    border-radius: var(--radius-card);
+    background: color-mix(in srgb, var(--fx, var(--gold)) 14%, transparent);
+    color: var(--fx, var(--gold-lit));
+    font-family: var(--ui);
+    font-size: var(--font-xs);
+    font-weight: 600;
+    letter-spacing: clamp(1px, 0.05vw, 2px);
+    text-transform: uppercase;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .85), 0 var(--spacing-xs) clamp(4px, 0.34vw, 9px) rgba(0, 0, 0, .7);
+    animation: fx-rise 1.5s cubic-bezier(.2, .6, .3, 1) forwards;
+    white-space: nowrap;
+}
+
+@keyframes fx-rise {
+    0% { opacity: 0; transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), clamp(4px, 0.29vw, 8px)) scale(.55); }
+    14% { opacity: 1; }
+    32% { transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), clamp(-43px, -1.55vw, -20px)) scale(1.08); }
+    60% { opacity: 1; transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), clamp(-51px, -1.84vw, -24px)) scale(1); }
+    100% { opacity: 0; transform: translate(calc(var(--lane) * clamp(14px, 1.06vw, 30px) - clamp(41px, 3.19vw, 89px)), clamp(-70px, -2.52vw, -32px)) scale(.96); }
+}
+
+/* damage numbers fly as one column per event: the keyframes carry only the centre and the climb; each
+   component anchors its own columns where they belong (beside a card, over the open air) via left/top. */
+@keyframes combat-pop-number {
+    0% { opacity: 0; transform: translate(-50%, var(--spacing-md)) scale(.7); }
+    20% { opacity: 1; transform: translate(-50%, calc(-1 * var(--spacing-xs))) scale(1.16); }
+    60% { opacity: 1; transform: translate(-50%, calc(-1 * var(--spacing-lg))) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, calc(-1 * clamp(63px, 4.84vw, 135px))) scale(.94); }
+}
+@keyframes combat-pop-critical {
+    0% { opacity: 0; transform: translate(-50%, var(--spacing-md)) scale(.6); }
+    24% { opacity: 1; transform: translate(-50%, calc(-1 * var(--spacing-sm))) scale(1.4); }
+    52% { opacity: 1; transform: translate(-50%, calc(-1 * var(--spacing-lg))) scale(1.06); }
+    100% { opacity: 0; transform: translate(-50%, calc(-1 * clamp(63px, 4.84vw, 135px))) scale(.96); }
+}
+
+@keyframes panel-slide {
+    from { transform: translateY(clamp(15px, 1.16vw, 32px)); opacity: .4; }
+    to { transform: none; opacity: 1; }
+}
+.surface-hud {
+  background: var(--glass);
+  border: 1px solid var(--hud-edge);
+  border-radius: var(--radius-card);
+}
+.surface-popover {
+  background: var(--face-floor);
+  border: 1px solid var(--hud-edge);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-raised);
+}
+.swatch-color { border: 1px solid var(--edge); border-radius: var(--radius-card); }
+
+/* Shared Hub icon-and-caption control; geometry is owned by App's .hub-control. */
+.hub-control {
+  border: 0; border-radius: var(--radius-card); background: none; color: var(--dim);
+  transition: color var(--motion-fast) var(--ease-ui);
+}
+.hub-control img { opacity: .82; transition: transform var(--motion-fast) var(--ease-ui), opacity var(--motion-fast) var(--ease-ui); }
+.hub-control:hover { color: var(--text); }
+.hub-control:hover img { transform: translateY(-1px); opacity: 1; }
+.hub-control.here { color: var(--gold-lit); }
+.hub-control.far { opacity: .5; }
+.hub-control.far img { filter: grayscale(.6); }
+/* The rail's captions sit on the map art, where a soft drop shadow alone loses the light text
+   against bright terrain — so each glyph carries its own dark edge, and a spread shadow seats it. */
+.hub-control .cap {
+  font-size: var(--font-xs); line-height: 1.2; text-transform: capitalize;
+  text-shadow: -1px -1px 0 rgba(0, 0, 0, .8), 1px -1px 0 rgba(0, 0, 0, .8), -1px 1px 0 rgba(0, 0, 0, .8), 1px 1px 0 rgba(0, 0, 0, .8), 0 0 5px rgba(0, 0, 0, .9);
+}
+.rail .hud-slide-handle .disclosure-toggle strong {
+  text-shadow: -1px -1px 0 rgba(0, 0, 0, .8), 1px -1px 0 rgba(0, 0, 0, .8), -1px 1px 0 rgba(0, 0, 0, .8), 1px 1px 0 rgba(0, 0, 0, .8), 0 0 5px rgba(0, 0, 0, .9);
+}
+.hub-control:hover .toggle-ring { border-color: var(--gold); }
+.hub-control:focus-visible { outline: none; }
+.hub-control:focus-visible .toggle-ring { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Currency selection and crafting targets share the existing HUD palette and states. */
+.currency-tile { background: var(--inset); border-color: var(--line); color: var(--text); }
+.currency-tile.selected { border-color: var(--gold); background: var(--surface-selected); }
+.currency-tile.unowned { color: var(--dim); }
+.currency-tile.unowned .currency-art { opacity: .45; }
+.craft-target { background: var(--inset); border-color: var(--line); color: var(--text); }
+.craft-target.ready { border-color: var(--gold); background: var(--surface-selected); }
+.craft-target.changed { border-color: var(--good); background: color-mix(in srgb, var(--good) 10%, var(--inset)); }
+.item-target:disabled { opacity: 1; background: var(--inset); color: var(--text); }
+.item-heading strong { color: var(--rar, var(--text)); }
+.previous-value { color: var(--dim); }
+.mod-heading { color: var(--dim); }
+.bench-footer { border-top: 1px solid var(--hud-edge); }
+.craft-result strong { color: var(--good-lit); }
+
+.craft-target.unavailable { opacity: .5; }
+
+/* The action bar's slot tile: one square skin for item shortcuts and cast slots alike. */
+.hud-slot {
+  position: relative; display: grid; place-items: center; padding: 0;
+  border-radius: var(--radius-card); background: var(--inset); border: 1px solid var(--line);
+  transition: border-color var(--motion-fast) var(--ease-ui), box-shadow var(--motion-fast) var(--ease-ui);
+}
+.hud-slot.empty { opacity: .55; }
+.hud-slot.ready {
+  border-color: color-mix(in srgb, var(--gold) 68%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 55%, transparent), 0 0 16px color-mix(in srgb, var(--gold) 34%, transparent);
+}

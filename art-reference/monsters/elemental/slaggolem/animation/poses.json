@@ -1,0 +1,1517 @@
+{
+  "schemaVersion": 1,
+  "status": "direction16-candidate-incomplete",
+  "speciesId": "slaggolem",
+  "race": "elemental",
+  "version": "v5",
+  "attackKind": "close",
+  "bakedWeaponId": null,
+  "identityRef": "../atlas/animation.png",
+  "sourcePoseRef": "../atlas/animation.png",
+  "directionCount": 16,
+  "angleStepDegrees": 22.5,
+  "directions": [
+    {
+      "name": "south",
+      "angleDegrees": 0
+    },
+    {
+      "name": "south-south-east",
+      "angleDegrees": 22.5
+    },
+    {
+      "name": "south-east",
+      "angleDegrees": 45
+    },
+    {
+      "name": "east-south-east",
+      "angleDegrees": 67.5
+    },
+    {
+      "name": "east",
+      "angleDegrees": 90
+    },
+    {
+      "name": "east-north-east",
+      "angleDegrees": 112.5
+    },
+    {
+      "name": "north-east",
+      "angleDegrees": 135
+    },
+    {
+      "name": "north-north-east",
+      "angleDegrees": 157.5
+    },
+    {
+      "name": "north",
+      "angleDegrees": 180
+    },
+    {
+      "name": "north-north-west",
+      "angleDegrees": 202.5
+    },
+    {
+      "name": "north-west",
+      "angleDegrees": 225
+    },
+    {
+      "name": "west-north-west",
+      "angleDegrees": 247.5
+    },
+    {
+      "name": "west",
+      "angleDegrees": 270
+    },
+    {
+      "name": "west-south-west",
+      "angleDegrees": 292.5
+    },
+    {
+      "name": "south-west",
+      "angleDegrees": 315
+    },
+    {
+      "name": "south-south-west",
+      "angleDegrees": 337.5
+    }
+  ],
+  "camera": "one fixed elevated three-quarter camera; rotate the whole slaggolem facing in the world, never rotate the camera or flat sprite",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
+  },
+  "statusNote": "16-direction production candidates; baseline untouched until full replacement reviewed.",
+  "actions": {
+    "idle": {
+      "framesPerDirection": 1,
+      "poseCount": 16,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "south.png",
+          "pose": "one neutral ready pose facing 0 degrees"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "south-south-east.png",
+          "pose": "one neutral ready pose facing 22.5 degrees"
+        },
+        {
+          "direction": "south-east",
+          "file": "south-east.png",
+          "pose": "one neutral ready pose facing 45 degrees"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "east-south-east.png",
+          "pose": "one neutral ready pose facing 67.5 degrees"
+        },
+        {
+          "direction": "east",
+          "file": "east.png",
+          "pose": "one neutral ready pose facing 90 degrees"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "east-north-east.png",
+          "pose": "one neutral ready pose facing 112.5 degrees"
+        },
+        {
+          "direction": "north-east",
+          "file": "north-east.png",
+          "pose": "one neutral ready pose facing 135 degrees"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "north-north-east.png",
+          "pose": "one neutral ready pose facing 157.5 degrees"
+        },
+        {
+          "direction": "north",
+          "file": "north.png",
+          "pose": "one neutral ready pose facing 180 degrees"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "north-north-west.png",
+          "pose": "one neutral ready pose facing 202.5 degrees"
+        },
+        {
+          "direction": "north-west",
+          "file": "north-west.png",
+          "pose": "one neutral ready pose facing 225 degrees"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "west-north-west.png",
+          "pose": "one neutral ready pose facing 247.5 degrees"
+        },
+        {
+          "direction": "west",
+          "file": "west.png",
+          "pose": "one neutral ready pose facing 270 degrees"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "west-south-west.png",
+          "pose": "one neutral ready pose facing 292.5 degrees"
+        },
+        {
+          "direction": "south-west",
+          "file": "south-west.png",
+          "pose": "one neutral ready pose facing 315 degrees"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "south-south-west.png",
+          "pose": "one neutral ready pose facing 337.5 degrees"
+        }
+      ]
+    },
+    "walk": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-stride-a.png",
+          "pose": "heavy left-leg plant; right leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "south",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts onto right foot, left heel begins lift"
+        },
+        {
+          "direction": "south",
+          "file": "02-stride-c.png",
+          "pose": "heavy right-leg plant; left leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "south",
+          "file": "03-stride-d.png",
+          "pose": "weight shifts onto left foot, right heel begins lift"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-stride-a.png",
+          "pose": "heavy left-leg plant; right leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts onto right foot, left heel begins lift"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-stride-c.png",
+          "pose": "heavy right-leg plant; left leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-stride-d.png",
+          "pose": "weight shifts onto left foot, right heel begins lift"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-stride-a.png",
+          "pose": "heavy left-leg plant; right leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts onto right foot, left heel begins lift"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-stride-c.png",
+          "pose": "heavy right-leg plant; left leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-stride-d.png",
+          "pose": "weight shifts onto left foot, right heel begins lift"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-stride-a.png",
+          "pose": "heavy left-leg plant; right leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts onto right foot, left heel begins lift"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-stride-c.png",
+          "pose": "heavy right-leg plant; left leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-stride-d.png",
+          "pose": "weight shifts onto left foot, right heel begins lift"
+        },
+        {
+          "direction": "east",
+          "file": "00-stride-a.png",
+          "pose": "heavy left-leg plant; right leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "east",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts onto right foot, left heel begins lift"
+        },
+        {
+          "direction": "east",
+          "file": "02-stride-c.png",
+          "pose": "heavy right-leg plant; left leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "east",
+          "file": "03-stride-d.png",
+          "pose": "weight shifts onto left foot, right heel begins lift"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-stride-a.png",
+          "pose": "heavy left-leg plant; right leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts onto right foot, left heel begins lift"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-stride-c.png",
+          "pose": "heavy right-leg plant; left leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-stride-d.png",
+          "pose": "weight shifts onto left foot, right heel begins lift"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-stride-a.png",
+          "pose": "heavy left-leg plant; right leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts onto right foot, left heel begins lift"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-stride-c.png",
+          "pose": "heavy right-leg plant; left leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-stride-d.png",
+          "pose": "weight shifts onto left foot, right heel begins lift"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-stride-a.png",
+          "pose": "heavy left-leg plant; right leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts onto right foot, left heel begins lift"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-stride-c.png",
+          "pose": "heavy right-leg plant; left leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-stride-d.png",
+          "pose": "weight shifts onto left foot, right heel begins lift"
+        },
+        {
+          "direction": "north",
+          "file": "00-stride-a.png",
+          "pose": "heavy left-leg plant; right leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "north",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts onto right foot, left heel begins lift"
+        },
+        {
+          "direction": "north",
+          "file": "02-stride-c.png",
+          "pose": "heavy right-leg plant; left leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "north",
+          "file": "03-stride-d.png",
+          "pose": "weight shifts onto left foot, right heel begins lift"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-stride-a.png",
+          "pose": "heavy left-leg plant; right leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts onto right foot, left heel begins lift"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-stride-c.png",
+          "pose": "heavy right-leg plant; left leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-stride-d.png",
+          "pose": "weight shifts onto left foot, right heel begins lift"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-stride-a.png",
+          "pose": "heavy left-leg plant; right leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts onto right foot, left heel begins lift"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-stride-c.png",
+          "pose": "heavy right-leg plant; left leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-stride-d.png",
+          "pose": "weight shifts onto left foot, right heel begins lift"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-stride-a.png",
+          "pose": "heavy left-leg plant; right leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts onto right foot, left heel begins lift"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-stride-c.png",
+          "pose": "heavy right-leg plant; left leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-stride-d.png",
+          "pose": "weight shifts onto left foot, right heel begins lift"
+        },
+        {
+          "direction": "west",
+          "file": "00-stride-a.png",
+          "pose": "heavy left-leg plant; right leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "west",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts onto right foot, left heel begins lift"
+        },
+        {
+          "direction": "west",
+          "file": "02-stride-c.png",
+          "pose": "heavy right-leg plant; left leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "west",
+          "file": "03-stride-d.png",
+          "pose": "weight shifts onto left foot, right heel begins lift"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-stride-a.png",
+          "pose": "heavy left-leg plant; right leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts onto right foot, left heel begins lift"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-stride-c.png",
+          "pose": "heavy right-leg plant; left leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-stride-d.png",
+          "pose": "weight shifts onto left foot, right heel begins lift"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-stride-a.png",
+          "pose": "heavy left-leg plant; right leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts onto right foot, left heel begins lift"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-stride-c.png",
+          "pose": "heavy right-leg plant; left leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-stride-d.png",
+          "pose": "weight shifts onto left foot, right heel begins lift"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-stride-a.png",
+          "pose": "heavy left-leg plant; right leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-stride-b.png",
+          "pose": "weight shifts onto right foot, left heel begins lift"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-stride-c.png",
+          "pose": "heavy right-leg plant; left leg swings ahead, opposing fists counterbalance"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-stride-d.png",
+          "pose": "weight shifts onto left foot, right heel begins lift"
+        }
+      ]
+    },
+    "attack": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-windup.png",
+          "pose": "torso coils and heavy fist draws back"
+        },
+        {
+          "direction": "south",
+          "file": "01-contact.png",
+          "pose": "heavy fist drives forward toward target"
+        },
+        {
+          "direction": "south",
+          "file": "02-follow-through.png",
+          "pose": "fist completes strike, torso leans into follow-through"
+        },
+        {
+          "direction": "south",
+          "file": "03-recovery.png",
+          "pose": "fist retracts and both feet return balanced idle"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-windup.png",
+          "pose": "torso coils and heavy fist draws back"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-contact.png",
+          "pose": "heavy fist drives forward toward target"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-follow-through.png",
+          "pose": "fist completes strike, torso leans into follow-through"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-recovery.png",
+          "pose": "fist retracts and both feet return balanced idle"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-windup.png",
+          "pose": "torso coils and heavy fist draws back"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-contact.png",
+          "pose": "heavy fist drives forward toward target"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-follow-through.png",
+          "pose": "fist completes strike, torso leans into follow-through"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-recovery.png",
+          "pose": "fist retracts and both feet return balanced idle"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-windup.png",
+          "pose": "torso coils and heavy fist draws back"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-contact.png",
+          "pose": "heavy fist drives forward toward target"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-follow-through.png",
+          "pose": "fist completes strike, torso leans into follow-through"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-recovery.png",
+          "pose": "fist retracts and both feet return balanced idle"
+        },
+        {
+          "direction": "east",
+          "file": "00-windup.png",
+          "pose": "torso coils and heavy fist draws back"
+        },
+        {
+          "direction": "east",
+          "file": "01-contact.png",
+          "pose": "heavy fist drives forward toward target"
+        },
+        {
+          "direction": "east",
+          "file": "02-follow-through.png",
+          "pose": "fist completes strike, torso leans into follow-through"
+        },
+        {
+          "direction": "east",
+          "file": "03-recovery.png",
+          "pose": "fist retracts and both feet return balanced idle"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-windup.png",
+          "pose": "torso coils and heavy fist draws back"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-contact.png",
+          "pose": "heavy fist drives forward toward target"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-follow-through.png",
+          "pose": "fist completes strike, torso leans into follow-through"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-recovery.png",
+          "pose": "fist retracts and both feet return balanced idle"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-windup.png",
+          "pose": "torso coils and heavy fist draws back"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-contact.png",
+          "pose": "heavy fist drives forward toward target"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-follow-through.png",
+          "pose": "fist completes strike, torso leans into follow-through"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-recovery.png",
+          "pose": "fist retracts and both feet return balanced idle"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-windup.png",
+          "pose": "torso coils and heavy fist draws back"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-contact.png",
+          "pose": "heavy fist drives forward toward target"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-follow-through.png",
+          "pose": "fist completes strike, torso leans into follow-through"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-recovery.png",
+          "pose": "fist retracts and both feet return balanced idle"
+        },
+        {
+          "direction": "north",
+          "file": "00-windup.png",
+          "pose": "torso coils and heavy fist draws back"
+        },
+        {
+          "direction": "north",
+          "file": "01-contact.png",
+          "pose": "heavy fist drives forward toward target"
+        },
+        {
+          "direction": "north",
+          "file": "02-follow-through.png",
+          "pose": "fist completes strike, torso leans into follow-through"
+        },
+        {
+          "direction": "north",
+          "file": "03-recovery.png",
+          "pose": "fist retracts and both feet return balanced idle"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-windup.png",
+          "pose": "torso coils and heavy fist draws back"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-contact.png",
+          "pose": "heavy fist drives forward toward target"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-follow-through.png",
+          "pose": "fist completes strike, torso leans into follow-through"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-recovery.png",
+          "pose": "fist retracts and both feet return balanced idle"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-windup.png",
+          "pose": "torso coils and heavy fist draws back"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-contact.png",
+          "pose": "heavy fist drives forward toward target"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-follow-through.png",
+          "pose": "fist completes strike, torso leans into follow-through"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-recovery.png",
+          "pose": "fist retracts and both feet return balanced idle"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-windup.png",
+          "pose": "torso coils and heavy fist draws back"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-contact.png",
+          "pose": "heavy fist drives forward toward target"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-follow-through.png",
+          "pose": "fist completes strike, torso leans into follow-through"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-recovery.png",
+          "pose": "fist retracts and both feet return balanced idle"
+        },
+        {
+          "direction": "west",
+          "file": "00-windup.png",
+          "pose": "torso coils and heavy fist draws back"
+        },
+        {
+          "direction": "west",
+          "file": "01-contact.png",
+          "pose": "heavy fist drives forward toward target"
+        },
+        {
+          "direction": "west",
+          "file": "02-follow-through.png",
+          "pose": "fist completes strike, torso leans into follow-through"
+        },
+        {
+          "direction": "west",
+          "file": "03-recovery.png",
+          "pose": "fist retracts and both feet return balanced idle"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-windup.png",
+          "pose": "torso coils and heavy fist draws back"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-contact.png",
+          "pose": "heavy fist drives forward toward target"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-follow-through.png",
+          "pose": "fist completes strike, torso leans into follow-through"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-recovery.png",
+          "pose": "fist retracts and both feet return balanced idle"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-windup.png",
+          "pose": "torso coils and heavy fist draws back"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-contact.png",
+          "pose": "heavy fist drives forward toward target"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-follow-through.png",
+          "pose": "fist completes strike, torso leans into follow-through"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-recovery.png",
+          "pose": "fist retracts and both feet return balanced idle"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-windup.png",
+          "pose": "torso coils and heavy fist draws back"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-contact.png",
+          "pose": "heavy fist drives forward toward target"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-follow-through.png",
+          "pose": "fist completes strike, torso leans into follow-through"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-recovery.png",
+          "pose": "fist retracts and both feet return balanced idle"
+        }
+      ]
+    },
+    "hit": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-flinch.png",
+          "pose": "stone body stiffens at impact"
+        },
+        {
+          "direction": "south",
+          "file": "01-recoil.png",
+          "pose": "torso and shoulders recoil backward"
+        },
+        {
+          "direction": "south",
+          "file": "02-recover.png",
+          "pose": "heavy body lowers then straightens"
+        },
+        {
+          "direction": "south",
+          "file": "03-ready.png",
+          "pose": "balanced neutral stance matching idle"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-flinch.png",
+          "pose": "stone body stiffens at impact"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-recoil.png",
+          "pose": "torso and shoulders recoil backward"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-recover.png",
+          "pose": "heavy body lowers then straightens"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral stance matching idle"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-flinch.png",
+          "pose": "stone body stiffens at impact"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-recoil.png",
+          "pose": "torso and shoulders recoil backward"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-recover.png",
+          "pose": "heavy body lowers then straightens"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral stance matching idle"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-flinch.png",
+          "pose": "stone body stiffens at impact"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-recoil.png",
+          "pose": "torso and shoulders recoil backward"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-recover.png",
+          "pose": "heavy body lowers then straightens"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral stance matching idle"
+        },
+        {
+          "direction": "east",
+          "file": "00-flinch.png",
+          "pose": "stone body stiffens at impact"
+        },
+        {
+          "direction": "east",
+          "file": "01-recoil.png",
+          "pose": "torso and shoulders recoil backward"
+        },
+        {
+          "direction": "east",
+          "file": "02-recover.png",
+          "pose": "heavy body lowers then straightens"
+        },
+        {
+          "direction": "east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral stance matching idle"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-flinch.png",
+          "pose": "stone body stiffens at impact"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-recoil.png",
+          "pose": "torso and shoulders recoil backward"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-recover.png",
+          "pose": "heavy body lowers then straightens"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral stance matching idle"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-flinch.png",
+          "pose": "stone body stiffens at impact"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-recoil.png",
+          "pose": "torso and shoulders recoil backward"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-recover.png",
+          "pose": "heavy body lowers then straightens"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral stance matching idle"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-flinch.png",
+          "pose": "stone body stiffens at impact"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-recoil.png",
+          "pose": "torso and shoulders recoil backward"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-recover.png",
+          "pose": "heavy body lowers then straightens"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-ready.png",
+          "pose": "balanced neutral stance matching idle"
+        },
+        {
+          "direction": "north",
+          "file": "00-flinch.png",
+          "pose": "stone body stiffens at impact"
+        },
+        {
+          "direction": "north",
+          "file": "01-recoil.png",
+          "pose": "torso and shoulders recoil backward"
+        },
+        {
+          "direction": "north",
+          "file": "02-recover.png",
+          "pose": "heavy body lowers then straightens"
+        },
+        {
+          "direction": "north",
+          "file": "03-ready.png",
+          "pose": "balanced neutral stance matching idle"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-flinch.png",
+          "pose": "stone body stiffens at impact"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-recoil.png",
+          "pose": "torso and shoulders recoil backward"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-recover.png",
+          "pose": "heavy body lowers then straightens"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral stance matching idle"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-flinch.png",
+          "pose": "stone body stiffens at impact"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-recoil.png",
+          "pose": "torso and shoulders recoil backward"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-recover.png",
+          "pose": "heavy body lowers then straightens"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral stance matching idle"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-flinch.png",
+          "pose": "stone body stiffens at impact"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-recoil.png",
+          "pose": "torso and shoulders recoil backward"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-recover.png",
+          "pose": "heavy body lowers then straightens"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral stance matching idle"
+        },
+        {
+          "direction": "west",
+          "file": "00-flinch.png",
+          "pose": "stone body stiffens at impact"
+        },
+        {
+          "direction": "west",
+          "file": "01-recoil.png",
+          "pose": "torso and shoulders recoil backward"
+        },
+        {
+          "direction": "west",
+          "file": "02-recover.png",
+          "pose": "heavy body lowers then straightens"
+        },
+        {
+          "direction": "west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral stance matching idle"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-flinch.png",
+          "pose": "stone body stiffens at impact"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-recoil.png",
+          "pose": "torso and shoulders recoil backward"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-recover.png",
+          "pose": "heavy body lowers then straightens"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral stance matching idle"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-flinch.png",
+          "pose": "stone body stiffens at impact"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-recoil.png",
+          "pose": "torso and shoulders recoil backward"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-recover.png",
+          "pose": "heavy body lowers then straightens"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral stance matching idle"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-flinch.png",
+          "pose": "stone body stiffens at impact"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-recoil.png",
+          "pose": "torso and shoulders recoil backward"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-recover.png",
+          "pose": "heavy body lowers then straightens"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-ready.png",
+          "pose": "balanced neutral stance matching idle"
+        }
+      ]
+    },
+    "death": {
+      "framesPerDirection": 4,
+      "poseCount": 64,
+      "frames": [
+        {
+          "direction": "south",
+          "file": "00-fall.png",
+          "pose": "stone knees buckle, arms drop"
+        },
+        {
+          "direction": "south",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "south",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed stone body"
+        },
+        {
+          "direction": "south",
+          "file": "03-settle.png",
+          "pose": "still grounded compact rubble-like body with original anatomy readable"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "00-fall.png",
+          "pose": "stone knees buckle, arms drop"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed stone body"
+        },
+        {
+          "direction": "south-south-east",
+          "file": "03-settle.png",
+          "pose": "still grounded compact rubble-like body with original anatomy readable"
+        },
+        {
+          "direction": "south-east",
+          "file": "00-fall.png",
+          "pose": "stone knees buckle, arms drop"
+        },
+        {
+          "direction": "south-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed stone body"
+        },
+        {
+          "direction": "south-east",
+          "file": "03-settle.png",
+          "pose": "still grounded compact rubble-like body with original anatomy readable"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "00-fall.png",
+          "pose": "stone knees buckle, arms drop"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed stone body"
+        },
+        {
+          "direction": "east-south-east",
+          "file": "03-settle.png",
+          "pose": "still grounded compact rubble-like body with original anatomy readable"
+        },
+        {
+          "direction": "east",
+          "file": "00-fall.png",
+          "pose": "stone knees buckle, arms drop"
+        },
+        {
+          "direction": "east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "east",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed stone body"
+        },
+        {
+          "direction": "east",
+          "file": "03-settle.png",
+          "pose": "still grounded compact rubble-like body with original anatomy readable"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "00-fall.png",
+          "pose": "stone knees buckle, arms drop"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed stone body"
+        },
+        {
+          "direction": "east-north-east",
+          "file": "03-settle.png",
+          "pose": "still grounded compact rubble-like body with original anatomy readable"
+        },
+        {
+          "direction": "north-east",
+          "file": "00-fall.png",
+          "pose": "stone knees buckle, arms drop"
+        },
+        {
+          "direction": "north-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed stone body"
+        },
+        {
+          "direction": "north-east",
+          "file": "03-settle.png",
+          "pose": "still grounded compact rubble-like body with original anatomy readable"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "00-fall.png",
+          "pose": "stone knees buckle, arms drop"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed stone body"
+        },
+        {
+          "direction": "north-north-east",
+          "file": "03-settle.png",
+          "pose": "still grounded compact rubble-like body with original anatomy readable"
+        },
+        {
+          "direction": "north",
+          "file": "00-fall.png",
+          "pose": "stone knees buckle, arms drop"
+        },
+        {
+          "direction": "north",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "north",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed stone body"
+        },
+        {
+          "direction": "north",
+          "file": "03-settle.png",
+          "pose": "still grounded compact rubble-like body with original anatomy readable"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "00-fall.png",
+          "pose": "stone knees buckle, arms drop"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed stone body"
+        },
+        {
+          "direction": "north-north-west",
+          "file": "03-settle.png",
+          "pose": "still grounded compact rubble-like body with original anatomy readable"
+        },
+        {
+          "direction": "north-west",
+          "file": "00-fall.png",
+          "pose": "stone knees buckle, arms drop"
+        },
+        {
+          "direction": "north-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed stone body"
+        },
+        {
+          "direction": "north-west",
+          "file": "03-settle.png",
+          "pose": "still grounded compact rubble-like body with original anatomy readable"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "00-fall.png",
+          "pose": "stone knees buckle, arms drop"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed stone body"
+        },
+        {
+          "direction": "west-north-west",
+          "file": "03-settle.png",
+          "pose": "still grounded compact rubble-like body with original anatomy readable"
+        },
+        {
+          "direction": "west",
+          "file": "00-fall.png",
+          "pose": "stone knees buckle, arms drop"
+        },
+        {
+          "direction": "west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "west",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed stone body"
+        },
+        {
+          "direction": "west",
+          "file": "03-settle.png",
+          "pose": "still grounded compact rubble-like body with original anatomy readable"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "00-fall.png",
+          "pose": "stone knees buckle, arms drop"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed stone body"
+        },
+        {
+          "direction": "west-south-west",
+          "file": "03-settle.png",
+          "pose": "still grounded compact rubble-like body with original anatomy readable"
+        },
+        {
+          "direction": "south-west",
+          "file": "00-fall.png",
+          "pose": "stone knees buckle, arms drop"
+        },
+        {
+          "direction": "south-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed stone body"
+        },
+        {
+          "direction": "south-west",
+          "file": "03-settle.png",
+          "pose": "still grounded compact rubble-like body with original anatomy readable"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "00-fall.png",
+          "pose": "stone knees buckle, arms drop"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "01-collapse.png",
+          "pose": "body collapses sideways"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "02-ground.png",
+          "pose": "fully grounded collapsed stone body"
+        },
+        {
+          "direction": "south-south-west",
+          "file": "03-settle.png",
+          "pose": "still grounded compact rubble-like body with original anatomy readable"
+        }
+      ]
+    }
+  },
+  "requiredRootFiles": [
+    "meta.json",
+    "poses/"
+  ],
+  "imageQa": "Raw built-in imagegen outputs are candidate source only. Every pose still requires visual identity/facing review, hard-alpha/edge QA, foot-anchor measurement, and atlas QA before acceptance.",
+  "locomotionProfile": "heavy weighted biped steps",
+  "progress": {
+    "poseFiles": 40,
+    "expectedPoseFiles": 272,
+    "actionCounts": {
+      "idle": 8,
+      "walk": 8,
+      "attack": 8,
+      "hit": 8,
+      "death": 8
+    },
+    "generatedPoseFiles": 0,
+    "complete": false,
+    "qaApproved": false,
+    "rejectedMetadata": [],
+    "missingPoseFiles": 232,
+    "sourceCandidateFiles": 40
+  },
+  "sourceInventory": {
+    "cellSizes": {
+      "(128, 128)": 40
+    },
+    "alphaTouchesCellEdge": 0,
+    "note": "Lossless baseline source cells retain original dimensions; normalize placement only during atlas packing after visual review."
+  },
+  "generationBlocker": {
+    "type": "imagegen-usage-limit",
+    "resetsAtUnix": 1793288069,
+    "note": "Built-in imagegen returned HTTP429 usage_limit_reached; pending queues terminated, no API fallback used."
+  }
+}

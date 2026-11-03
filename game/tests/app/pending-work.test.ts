@@ -1,0 +1,606 @@
+import { describe, expect, it } from 'vitest';
+import { skillCastTiming } from '@engine/skill-actions.ts';
+import { mulberry32 } from '../../src/engine/client-helpers';
+import { sm } from '../../src/engine/client';
+import {
+  arenaAction, captureCombatArena, createCombatArena, syncCombatArena, updateArenaAction,
+} from '@sim/combat/combat-arena';
+import { catchUp, catchUpAsync, characterSheet, encounterKeyOf, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
+import { newPendingNormalizeReceipt, normalizePendingWork, restorePendingWork } from '@sim/core/pending-work';
+import { prepareSkillCast, type CastRollCache } from '@sim/combat/skills';
+import { pinFieldPopulation } from '../fixtures/mobFixture';
+import { exportJson, importJson, migrate, SCHEMA_VERSION } from '../../src/state/save';
+import { liveId } from '../fixtures/liveSkill';
+import { installSyntheticSkill } from '../fixtures/skillFixture';
+const GROUND = liveId(row => row.type === 'attack' && row.cast?.delivery === 'ground' && !row.action, 'pending ground cast');
+const PROJECTILE = liveId(row => row.type === 'attack' && row.cast?.delivery === 'projectile' && !row.action, 'pending projectile template');
+const BURST = liveId(row => row.action?.kind === 'targeted-burst' && row.action.tracking === 'straight', 'pending burst payloads');
+
+function pendingFight() {
+  const state = newGame(41);
+  setLevel(state, 30);
+  state.hunting = true;
+  const mob = spawnMob(mulberry32(23), 1, 'normal');
+  Object.assign(mob, {
+    id: 'pending-target', hp: 1e8, hpMax: 1e8, ps: 1, evasion: 0, dodgeRate: 0,
+    armour: 0, line: 'front', damage: 'physical', innate: [], skillIds: [],
+  });
+  state.group = [mob];
+  state.skills.owned[GROUND] = 0;
+  state.skills.list.fill(null);
+  state.skills.list[0] = GROUND;
+  state.player.mana = characterSheet(state).maxMana;
+  const arena = createCombatArena();
+  syncCombatArena(arena, state, 0, 1_000_000, characterSheet(state).maxHp);
+  Object.assign(arena.player, { x: 1, y: 6 });
+  Object.assign(arena.mobs[mob.id], { x: 1.6, y: 6 });
+  captureCombatArena(arena, state, 0);
+  pinFieldPopulation(state);
+  const c = characterSheet(state);
+  const area = { origin: 'target' as const, radiusM: 3, center: { x: 1.6, y: 6 }, targetId: mob.id };
+  const prepared = prepareSkillCast(state.skills, c, GROUND, c.maxMana, [mob],
+    state.playerStatuses, { spatialTargets: true }, area)!;
+  const profile = sm.castProfileOf(sm.byId[GROUND]);
+  const timing = { ...skillCastTiming(profile, 0, 1_000_000, { x: 1, y: 6 }, area.center),
+    releaseAtUs: 250_000, impactAtUs: 1_500_000, recoveryUntilUs: 500_000 };
+  const action = arenaAction(arena, 'player', 'cast', 0, mob.id, GROUND, area, timing)!;
+  arena.flights.push({
+    actionId: action.id, cast: prepared, character: c, modifiers: {}, profile, timing,
+    source: { x: 1, y: 6 }, destination: { x: 1.6, y: 6 },
+    area, position: { x: 1, y: 6 }, lastCheckedAtUs: 0,
+  });
+  return { state, mob, arena, action };
+}
+
+function pendingShot() {
+  const state = newGame(41);
+  setLevel(state, 30);
+  state.hunting = true;
+  const mob = spawnMob(mulberry32(23), 1, 'normal');
+  Object.assign(mob, {
+    id: 'archer', hp: 1e8, hpMax: 1e8, ps: 1, acc: 1e9, evasion: 0, dodgeRate: 0,
+    armour: 0, line: 'stand-off', damage: 'physical', innate: [], skillIds: [],
+    hitsPerSec: 1, atkTimer: 0, engageSec: 0,
+  });
+  state.group = [mob];
+  state.skills.list.fill(null);
+  const arena = createCombatArena();
+  syncCombatArena(arena, state, 0, 1_000_000, characterSheet(state).maxHp);
+  Object.assign(arena.player, { x: 1, y: 6 });
+  Object.assign(arena.mobs[mob.id], { x: 4, y: 6 });
+  // A released shot already in flight: the windup is over and only contact remains.
+  const timing = { delivery: 'projectile' as const, startedAtUs: 0, releaseAtUs: 0,
+    impactAtUs: 1_500_000, recoveryUntilUs: 1_000_000 };
+  const action = arenaAction(arena, mob.id, 'swing', 0, 'player', undefined, undefined, timing)!;
+  updateArenaAction(arena, action.id, { ranged: true, releasedAtUs: 0, targetX: 1, targetY: 6 });
+  arena.mobFlights.push({
+    actionId: action.id, mobId: mob.id, mob: { ...mob }, source: { x: 4, y: 6 },
+    destination: { x: 1, y: 6 }, position: { x: 4, y: 6 },
+    releaseAtUs: 0, impactAtUs: 1_500_000, speedMps: 12, radiusM: 0.35,
+  });
+  arena.intent = { skillId: GROUND, targetId: mob.id, targetPoint: { x: 1, y: 6 },
+    phase: 'windup', releaseAtUs: 10_000_000 } as never;
+  captureCombatArena(arena, state, 0);
+  return { state, mob, arena };
+}
+
+describe('released pending work across a save', () => {
+  it('keeps one owed impact through export/import and settles it exactly once after reload', () => {
+    const live = pendingFight();
+    tick(live.state, { arena: live.arena, autoSkills: false });
+    expect(live.arena.flights).toHaveLength(1);
+    const ledger = live.state.pendingWork!;
+    expect(ledger.flights).toHaveLength(1);
+    expect(ledger.flights[0]).toMatchObject({
+      actionId: live.action.id, skillId: GROUND, targetIds: [live.mob.id],
+      timing: { releaseAtUs: 250_000, impactAtUs: 1_500_000 },
+      character: { level: 30 },
+    });
+
+    const loaded = importJson(exportJson(live.state));
+    expect(loaded.pendingWork?.flights).toHaveLength(1);
+    const fresh = createCombatArena();
+    syncCombatArena(fresh, loaded, loaded.clockSec * 1_000_000, 1_000_000, characterSheet(loaded).maxHp);
+    expect(restorePendingWork(fresh, loaded)).toBe(1);
+    expect(fresh.flights).toHaveLength(1);
+    expect(fresh.flights[0].cast.targets.map((mob) => mob.id)).toEqual([live.mob.id]);
+    expect(fresh.actions.some((entry) => entry.id === live.action.id)).toBe(true);
+    expect(fresh.mobs[live.mob.id].x).toBeCloseTo(ledger.actors[0].x);
+    expect(fresh.mobs[live.mob.id].y).toBeCloseTo(ledger.actors[0].y);
+
+    tick(loaded, { arena: fresh, autoSkills: false });
+    const hits = loaded.fx.filter((event) => event.kind === 'hit' && event.actionId === live.action.id);
+    expect(hits).toHaveLength(1);
+    expect(hits[0].value).toBeGreaterThan(0);
+    expect(loaded.pendingWork).toBeNull();
+    const settledHp = loaded.group[0].hp;
+
+    tick(loaded, { arena: fresh, autoSkills: false });
+    expect(loaded.fx.filter((event) => event.kind === 'hit' && event.actionId === live.action.id)).toHaveLength(1);
+    expect(loaded.pendingWork).toBeNull();
+  });
+
+  it('settles a retuned row exactly once on its committed facts without double-spending', () => {
+    // The definition changes between save and load; the committed footprint,
+    // target and paid cost stand, while numbers follow the live row (current
+    // policy — this test pins single settlement, not a number freeze).
+    const first = installSyntheticSkill('test.retune-shot', { name: 'Retune Shot',
+      group: 'melee', basis: 'phys', element: 'physical', cd: 6, mana: '15 flat',
+      base_flat: 1000, eff: 0, offline_targets: '1', area: { origin: 'target', radius_m: 0 },
+      cast: { delivery: 'melee', range_m: 2, windup_sec: 0.15, recovery_sec: 0.22 }, effects: [] });
+    try {
+      const state = newGame(41);
+      setLevel(state, 30);
+      state.hunting = true;
+      const mob = spawnMob(mulberry32(23), 1, 'normal');
+      Object.assign(mob, {
+        id: 'retune-target', hp: 1e8, hpMax: 1e8, ps: 1, evasion: 0, dodgeRate: 0,
+        armour: 0, line: 'front', damage: 'physical', innate: [], skillIds: [],
+      });
+      state.group = [mob];
+      state.skills.owned[first.row.id] = 0;
+      state.skills.list.fill(null);
+      state.skills.list[0] = first.row.id;
+      state.player.mana = characterSheet(state).maxMana;
+      const arena = createCombatArena();
+      syncCombatArena(arena, state, 0, 1_000_000, characterSheet(state).maxHp);
+      Object.assign(arena.player, { x: 1, y: 6 });
+      Object.assign(arena.mobs[mob.id], { x: 1.6, y: 6 });
+      captureCombatArena(arena, state, 0);
+      pinFieldPopulation(state);
+      const c = characterSheet(state);
+      const area = { origin: 'target' as const, radiusM: 0, center: { x: 1.6, y: 6 }, targetId: mob.id };
+      const prepared = prepareSkillCast(state.skills, c, first.row.id, c.maxMana, [mob],
+        state.playerStatuses, { spatialTargets: true }, area)!;
+      const profile = sm.castProfileOf(sm.byId[first.row.id]);
+      const timing = { ...skillCastTiming(profile, 0, 1_000_000, { x: 1, y: 6 }, area.center),
+        releaseAtUs: 250_000, impactAtUs: 1_500_000, recoveryUntilUs: 500_000 };
+      const action = arenaAction(arena, 'player', 'cast', 0, mob.id, first.row.id, area, timing)!;
+      arena.flights.push({
+        actionId: action.id, cast: prepared, character: c, modifiers: {}, profile, timing,
+        source: { x: 1, y: 6 }, destination: { x: 1.6, y: 6 },
+        area, position: { x: 1, y: 6 }, lastCheckedAtUs: 0,
+      });
+      tick(state, { arena, autoSkills: false });
+      expect(state.pendingWork?.flights).toHaveLength(1);
+      const exported = exportJson(state);
+
+      // Retune after the save: same id, different numbers. Restore first so the
+      // registry sees a clean swap, exactly as a data update would land.
+      first.restore();
+      const retuned = installSyntheticSkill(first.row.id, { name: 'Retune Shot v2',
+        group: 'melee', basis: 'phys', element: 'physical', cd: 6, mana: '15 flat',
+        base_flat: 1, eff: 0, offline_targets: '1', area: { origin: 'target', radius_m: 0 },
+        cast: { delivery: 'melee', range_m: 2, windup_sec: 0.15, recovery_sec: 0.22 }, effects: [] });
+      try {
+        const loaded = importJson(exported);
+        const fresh = createCombatArena();
+        syncCombatArena(fresh, loaded, loaded.clockSec * 1_000_000, 1_000_000, characterSheet(loaded).maxHp);
+        expect(restorePendingWork(fresh, loaded)).toBe(1);
+        expect(fresh.flights[0].cast.targets.map((m) => m.id)).toEqual([mob.id]);
+
+        tick(loaded, { arena: fresh, autoSkills: false });
+        const hits = loaded.fx.filter((event) => event.kind === 'hit' && event.actionId === action.id);
+        expect(hits).toHaveLength(1);
+        expect(hits[0].value).toBeGreaterThan(0);
+        // Numbers follow the live row, not a snapshot: base_flat was retuned
+        // 1000 -> 1 before the reload, so the single committed hit is tiny.
+        expect(hits[0].value).toBeLessThan(100000);
+        expect(loaded.pendingWork).toBeNull();
+
+        tick(loaded, { arena: fresh, autoSkills: false });
+        // Player basics keep swinging — only this action's hits must not repeat.
+        expect(loaded.fx.filter((event) => event.kind === 'hit' && event.actionId === action.id)).toHaveLength(1);
+        expect(loaded.pendingWork).toBeNull();
+      } finally {
+        retuned.restore();
+      }
+    } finally {
+      first.restore();
+    }
+  });
+
+  it('restores a flight with no living target but resolves no ghost hit', () => {
+    const { state, mob, arena } = pendingFight();
+    tick(state, { arena, autoSkills: false });
+    const hpBefore = mob.hp;
+    state.hunting = false;
+    const loaded = importJson(exportJson(state));
+    loaded.group = [];
+    loaded.fx = [];
+    const fresh = createCombatArena();
+    syncCombatArena(fresh, loaded, loaded.clockSec * 1_000_000, 1_000_000, characterSheet(loaded).maxHp);
+    expect(restorePendingWork(fresh, loaded)).toBe(1);
+    expect(fresh.flights[0].cast.targets).toHaveLength(0);
+    tick(loaded, { arena: fresh, autoSkills: false });
+    tick(loaded, { arena: fresh, autoSkills: false });
+    expect(loaded.fx.filter((event) => event.kind === 'hit')).toHaveLength(0);
+    expect(mob.hp).toBe(hpBefore);
+    expect(loaded.pendingWork).toBeNull();
+  });
+
+  it('settles the saved impact before offline time and pays its death once', () => {
+    const { state, mob, arena } = pendingFight();
+    tick(state, { arena, autoSkills: false });
+    mob.hp = 50;
+    const loaded = importJson(exportJson(state));
+    expect(loaded.pendingWork?.flights).toHaveLength(1);
+    const result = catchUp(loaded, 5, { autoSkills: false });
+    expect(result.simulated).toBeGreaterThanOrEqual(1);
+    expect(loaded.counters.kills).toBe(1);
+    expect(loaded.pendingWork).toBeNull();
+    expect(loaded.group.some((entry) => entry.id === mob.id)).toBe(false);
+    tick(loaded, { autoSkills: false });
+    expect(loaded.counters.kills).toBe(1);
+  });
+
+  it('keeps a released impact after its caster is shocked', () => {
+    const { state, mob, arena } = pendingFight();
+    tick(state, { arena, autoSkills: false });
+    state.playerStatuses.shock = { stacks: 1, secLeft: 2, perSec: 0 };
+    tick(state, { arena, autoSkills: false });
+    expect(state.fx.filter((event) => event.kind === 'hit' && event.actionId === 1)).toHaveLength(1);
+    expect(mob.hp).toBeLessThan(mob.hpMax);
+    expect(state.pendingWork).toBeNull();
+  });
+
+  it('cancels pending work at the fatal latch and never lands it later', () => {
+    const { state, arena } = pendingFight();
+    tick(state, { arena, autoSkills: false });
+    state.player.hp = 0;
+    tick(state, { arena, autoSkills: false });
+    expect(arena.flights).toHaveLength(0);
+    expect(state.pendingWork).toBeNull();
+    tick(state, { arena, autoSkills: false });
+    expect(state.fx.filter((event) => event.kind === 'hit' && event.actionId === 1)).toHaveLength(0);
+  });
+
+  it('cancels a released impact with an area-exit receipt when the encounter changes', () => {
+    const { state, arena } = pendingFight();
+    arena.flights[0].areaKey = encounterKeyOf(state);
+    tick(state, { arena, autoSkills: false });
+    expect(state.pendingWork?.flights[0].areaKey).toBe(encounterKeyOf(state));
+    state.cell = { q: 5, r: 5, sub: null, site: null };
+    tick(state, { arena, autoSkills: false });
+    const resolved = arena.actions.find((entry) => entry.id === 1)!;
+    expect(resolved.cancelReason).toBe('area-exit');
+    expect(resolved.cancelledAtUs).toBeDefined();
+    expect(state.fx.filter((event) => event.kind === 'hit' && event.actionId === 1)).toHaveLength(0);
+    expect(state.pendingWork).toBeNull();
+  });
+
+  it('keeps an incoming ordinary shot through a reload and lands it once', () => {
+    const control = pendingShot();
+    tick(control.state, { arena: control.arena, autoSkills: true });
+    control.state.group = [];
+    tick(control.state, { arena: control.arena, autoSkills: true });
+    const controlHp = control.state.player.hp;
+
+    const live = pendingShot();
+    tick(live.state, { arena: live.arena, autoSkills: true });
+    expect(live.arena.mobFlights).toHaveLength(1);
+    expect(live.state.pendingWork?.mobFlights).toHaveLength(1);
+    live.state.group = [];
+    const loaded = importJson(exportJson(live.state));
+    expect(loaded.pendingWork?.mobFlights).toHaveLength(1);
+    const fresh = createCombatArena();
+    syncCombatArena(fresh, loaded, loaded.clockSec * 1_000_000, 1_000_000, characterSheet(loaded).maxHp);
+    expect(restorePendingWork(fresh, loaded)).toBe(1);
+    tick(loaded, { arena: fresh, autoSkills: true });
+    expect(loaded.fx.filter((event) => event.kind === 'taken' && event.byId === 'archer')).toHaveLength(1);
+    expect(loaded.player.hp).toBe(controlHp);
+    expect(loaded.pendingWork).toBeNull();
+    tick(loaded, { arena: fresh, autoSkills: false });
+    expect(loaded.fx.filter((event) => event.kind === 'taken' && event.byId === 'archer')).toHaveLength(1);
+  });
+
+  it('settles an incoming shot before offline time without replaying it', () => {
+    const { state, mob, arena } = pendingShot();
+    mob.ps = 100;
+    tick(state, { arena, autoSkills: true });
+    expect(state.pendingWork?.mobFlights).toHaveLength(1);
+    state.hunting = false;
+    state.group = [];
+    const hpBefore = state.player.hp;
+    const loaded = importJson(exportJson(state));
+    catchUp(loaded, 3, { autoSkills: false });
+    expect(loaded.pendingWork).toBeNull();
+    expect(loaded.fx.filter((event) => event.kind === 'taken' && event.byId === 'archer')).toHaveLength(1);
+    const afterOffline = loaded.player.hp;
+    tick(loaded, { autoSkills: false });
+    expect(loaded.fx.filter((event) => event.kind === 'taken' && event.byId === 'archer')).toHaveLength(1);
+    expect(loaded.player.hp).toBeGreaterThanOrEqual(afterOffline);
+  });
+
+  it('migrates a pre-ledger save to none and validates a current ledger by shape', () => {
+    const state = newGame(7);
+    const preLedger = JSON.parse(JSON.stringify(state));
+    delete preLedger.pendingWork;
+    expect(migrate(preLedger, 21).pendingWork).toBeNull();
+
+    const current = JSON.parse(JSON.stringify(state));
+    current.pendingWork = { unitsPerSec: 1_000_000, clockUs: 1_000_000, player: { x: 1, y: 1 },
+      actors: [], actions: [], flights: [{ actionId: 3, skillId: 'attack.nope', targetIds: [], prepared: { id: 'attack.nope' } }] };
+    expect(migrate(current, SCHEMA_VERSION).pendingWork).toBeNull();
+    expect(normalizePendingWork({ unitsPerSec: 0, flights: [] })).toBeNull();
+    const receipt = newPendingNormalizeReceipt();
+    normalizePendingWork({ unitsPerSec: 1_000_000, player: { x: 0, y: 0 },
+      actors: [], actions: [], flights: [{ actionId: 3, skillId: 'attack.nope' }, {}],
+      mobFlights: [{}] }, receipt);
+    expect(receipt).toMatchObject({ droppedFlights: 2, droppedMobFlights: 1, invalidLedger: 0 });
+  });
+  it('keeps committed line/cone dimensions and drops a ledger with impossible geometry', () => {
+    const base = { actionId: 3, skillId: GROUND, targetIds: [],
+      prepared: { id: GROUND, manaCost: 1, hpCost: 0, level: 1, cooldownSec: 1, spatial: true },
+      character: { phys: 1, magic: 1, maxHp: 1, critChance: 1, critDmg: 1 },
+      modifiers: {}, profile: { delivery: 'melee', hit_radius_m: 0.5 },
+      timing: { releaseAtUs: 0, impactAtUs: 1, startedAtUs: 0, recoveryUntilUs: 2 },
+      source: { x: 0, y: 0 }, destination: { x: 1, y: 1 }, position: { x: 0, y: 0 }, lastCheckedAtUs: 0 };
+    const ledger = (area: unknown) => normalizePendingWork({ unitsPerSec: 1_000_000, player: { x: 0, y: 0 },
+      actors: [], actions: [], flights: [{ ...base, area }] });
+    const line = { origin: 'caster', radiusM: 0, center: { x: 0, y: 0 }, targetId: 'a',
+      shape: 'line', lengthM: 6, widthM: 1.2, directionRad: 0 };
+    expect(ledger(line)?.flights.length).toBe(1);
+    expect(ledger({ ...line, shape: 'wedge' })).toBeNull();
+    expect(ledger({ ...line, lengthM: 0 })).toBeNull();
+    expect(ledger({ ...line, directionRad: Number.NaN })).toBeNull();
+    const cone = { origin: 'caster', radiusM: 2.1, center: { x: 0, y: 0 }, targetId: 'a',
+      shape: 'cone', lengthM: 2.1, angleDeg: 120, directionRad: 0 };
+    expect(ledger(cone)?.flights.length).toBe(1);
+    expect(ledger({ ...cone, angleDeg: 181 })).toBeNull();
+    expect(ledger({ ...line, origin: 'side' })).toBeNull();
+  });
+});
+
+describe('channel sustain across a save', () => {
+  function channelSaveFight() {
+    const state = newGame(41);
+    setLevel(state, 30);
+    state.hunting = true;
+    const mob = spawnMob(mulberry32(23), 1, 'normal');
+    Object.assign(mob, {
+      id: 'channel-target', hp: 1e9, hpMax: 1e9, ps: 1, evasion: 0, dodgeRate: 0,
+      armour: 0, line: 'front', damage: 'physical', innate: [], xp: 1, skillIds: [],
+    });
+    state.group = [mob];
+    state.skills.owned['attack.whirlwind'] = 0;
+    state.skills.list.fill(null);
+    state.skills.list[0] = 'attack.whirlwind';
+    state.farm.autoUse.mana = false;
+    const prior = sm.byId['attack.whirlwind'];
+    sm.byId['attack.whirlwind'] = { ...prior, channel: { mana_per_sec: 10 } };
+    state.player.mana = characterSheet(state).maxMana;
+    const arena = createCombatArena();
+    syncCombatArena(arena, state, 0, 1_000_000, characterSheet(state).maxHp);
+    Object.assign(arena.player, { x: 1, y: 6 });
+    Object.assign(arena.mobs[mob.id], { x: 1.6, y: 6 });
+    captureCombatArena(arena, state, 0);
+    pinFieldPopulation(state);
+    return { state, mob, arena, restore: () => { sm.byId['attack.whirlwind'] = prior; } };
+  }
+
+  it('resumes a channel across a save and charges each future pulse once', () => {
+    const live = channelSaveFight();
+    try {
+      const c = characterSheet(live.state);
+      const full = c.maxMana;
+      const start = sm.manaCostOf(sm.byId['attack.whirlwind'], { skillLevel: 1 });
+      tick(live.state, { arena: live.arena });
+      expect(live.state.pendingWork?.flights).toHaveLength(5);
+      const actionId = live.state.pendingWork!.flights[0].actionId;
+      const loaded = importJson(exportJson(live.state));
+      expect(loaded.pendingWork?.flights).toHaveLength(5);
+      // importing twice invents no progress and charges nothing extra
+      expect(importJson(exportJson(loaded)).pendingWork?.flights).toHaveLength(5);
+      const fresh = createCombatArena();
+      syncCombatArena(fresh, loaded, loaded.clockSec * 1_000_000, 1_000_000, characterSheet(loaded).maxHp);
+      expect(restorePendingWork(fresh, loaded)).toBe(5);
+      tick(loaded, { arena: fresh });
+      tick(loaded, { arena: fresh });
+      tick(loaded, { arena: fresh });
+      const hits = loaded.fx.filter((event) => event.kind === 'hit' && event.actionId === actionId);
+      expect(hits).toHaveLength(6);
+      expect(loaded.pendingWork).toBeNull();
+      expect(loaded.player.mana).toBeCloseTo(full - start - 10 * 3 + 4 * c.manaRegen, 6);
+    } finally {
+      live.restore();
+    }
+  });
+
+  it('drops flights of a half-authored channel sustain descriptor', () => {
+    const base = { actionId: 3, skillId: 'attack.firestorm', targetIds: [],
+      prepared: { id: 'attack.firestorm', manaCost: 1, hpCost: 0, level: 1, cooldownSec: 1, spatial: true },
+      character: { phys: 1, magic: 1, maxHp: 1, critChance: 1, critDmg: 1 },
+      modifiers: {}, profile: { delivery: 'melee', hit_radius_m: 0.5 },
+      timing: { releaseAtUs: 0, impactAtUs: 1, startedAtUs: 0, recoveryUntilUs: 2 },
+      source: { x: 0, y: 0 }, destination: { x: 1, y: 1 }, position: { x: 0, y: 0 }, lastCheckedAtUs: 0 };
+    const ledger = (actions: unknown, receipt?: ReturnType<typeof newPendingNormalizeReceipt>) =>
+      normalizePendingWork({ unitsPerSec: 1_000_000, player: { x: 0, y: 0 },
+        actors: [], actions, flights: [{ ...base }] }, receipt);
+    const receipt = newPendingNormalizeReceipt();
+    expect(ledger([{ id: 3, channelRatePerSec: -5, channelPaidUntilUs: 0 }], receipt)).toBeNull();
+    expect(receipt.droppedFlights).toBe(1);
+    expect(ledger([{ id: 3, channelRatePerSec: 10 }])).toBeNull();
+    expect(ledger([{ id: 3, channelRatePerSec: 10, channelPaidUntilUs: 0 }])?.flights).toHaveLength(1);
+  });
+});
+
+describe('pending work payloads beyond the first contact', () => {
+  for (const kind of ['targeted-burst', 'cluster-burst'] as const) {
+    for (const legacy of [false, true]) {
+      it(`keeps ${kind} payload rolls independent through ${legacy ? 'a legacy ledger' : 'a JSON save round trip'}`, () => {
+        const live = pendingFight();
+        const syntheticId = 'test.pending_cluster';
+        const skillId = kind === 'cluster-burst' ? syntheticId : BURST;
+        const installed = kind === 'cluster-burst' ? installSyntheticSkill(syntheticId, {
+          name: 'Pending Cluster', effects: [], area: { origin: 'target', radius_m: 2 },
+          cast: { delivery: 'projectile', range_m: 5, windup_sec: 0.25, recovery_sec: 0.25 },
+          action: { kind, parent_share_pct: 60, child_count: 2, child_share_pct: 20, spread_deg: 30 },
+        }) : null;
+        try {
+          live.state.skills.owned[skillId] = 0;
+          live.state.skills.list.fill(null);
+          const skill = sm.byId[skillId];
+          if (skill.weapon) live.state.gear[0] = { slot: 'main hand', base: skill.weapon, ilvl: 1, quality: 'Normal', tier: 'T1', lines: [] } as never;
+          const area = { origin: 'target' as const, radiusM: kind === 'cluster-burst' ? 2 : 0,
+            center: { x: 1.6, y: 6 }, targetId: live.mob.id };
+          const prepared = prepareSkillCast(live.state.skills, characterSheet(live.state), skillId,
+            live.state.player.mana, [live.mob], live.state.playerStatuses, { spatialTargets: true }, area)!;
+          expect(prepared).toBeDefined();
+          const first = live.arena.flights[0];
+          const firstIndex = kind === 'cluster-burst' ? 1 : 0; // remaining cluster children never spawn more children
+          Object.assign(first, {
+            cast: prepared, profile: sm.castProfileOf(skill), area, impactIndex: firstIndex,
+            impactSharePct: kind === 'cluster-burst' ? 20 : 100,
+            timing: { ...first.timing, releaseAtUs: 1_250_000, impactAtUs: 1_500_000 },
+            rolls: { crit: false, targets: { [live.mob.id]: { hit: false } }, effects: {} },
+            ...(kind === 'targeted-burst' ? { boundTargetId: live.mob.id } : {}),
+          });
+          live.arena.flights.push({ ...first, impactIndex: firstIndex + 1,
+            timing: { ...first.timing, releaseAtUs: 1_500_000, impactAtUs: 1_750_000 },
+            rolls: { crit: false, targets: { [live.mob.id]: { hit: true, dodged: false } }, effects: {} },
+          });
+          updateArenaAction(live.arena, live.action.id, { skillId, area, endsAtUs: 2_000_000 });
+          tick(live.state, { arena: live.arena, autoSkills: false });
+          expect(live.state.pendingWork?.flights).toHaveLength(2);
+          // Old ledgers had no cache-identity field; their authored independent impact policy
+          // still must not collapse two payload outcomes into the first one's cached miss.
+          const loaded = kind === 'cluster-burst'
+            ? JSON.parse(JSON.stringify(live.state)) as typeof live.state
+            : importJson(exportJson(live.state));
+          if (kind === 'cluster-burst') loaded.pendingWork = normalizePendingWork(loaded.pendingWork);
+          if (legacy) for (const flight of loaded.pendingWork!.flights)
+            delete flight.rollCacheId;
+          const fresh = createCombatArena();
+          syncCombatArena(fresh, loaded, loaded.clockSec * 1_000_000, 1_000_000, characterSheet(loaded).maxHp);
+          expect(restorePendingWork(fresh, loaded)).toBe(2);
+          tick(loaded, { arena: fresh, autoSkills: false });
+
+          const hits = loaded.fx.filter(event => event.kind === 'hit'
+            && event.actionId === live.action.id && event.skillId === skillId);
+          expect(hits).toHaveLength(1);
+          expect(hits[0].value).toBeGreaterThan(0);
+          expect(fresh.flights.filter(flight => flight.actionId === live.action.id)).toHaveLength(0);
+        } finally {
+          installed?.restore();
+        }
+      });
+    }
+  }
+
+  for (const legacy of [false, true]) it(`keeps deployed-field and chain facts plus one shared cache through ${legacy ? 'a legacy ledger' : 'a reload'}`, () => {
+    const live = pendingFight();
+    const rolls: CastRollCache = { targets: {}, effects: {} };
+    const first = live.arena.flights[0];
+    Object.assign(first, {
+      rolls,
+      fieldInitial: true,
+      fieldPulseDamage: 42,
+      chain: { visited: [live.mob.id], remaining: 2, hopRange: 4, sharePct: 60, intervalSec: 0.3 },
+    });
+    live.arena.flights.push({ ...first, impactIndex: 1, impactSharePct: 50 });
+    tick(live.state, { arena: live.arena, autoSkills: false });
+
+    const ledger = live.state.pendingWork!;
+    expect(ledger.flights).toHaveLength(2);
+    expect(ledger.flights[0]).toMatchObject({
+      fieldInitial: true, fieldPulseDamage: 42,
+      chain: { visited: [live.mob.id], remaining: 2, hopRange: 4, sharePct: 60, intervalSec: 0.3 },
+    });
+
+    const loaded = importJson(exportJson(live.state));
+    expect(loaded.pendingWork?.flights).toHaveLength(2);
+    if (legacy) for (const flight of loaded.pendingWork!.flights) delete flight.rollCacheId;
+    const fresh = createCombatArena();
+    syncCombatArena(fresh, loaded, loaded.clockSec * 1_000_000, 1_000_000, characterSheet(loaded).maxHp);
+    expect(restorePendingWork(fresh, loaded)).toBe(2);
+    const second = fresh.flights.find((flight) => flight.impactIndex === 1)!;
+    expect(second.fieldInitial).toBe(true);
+    expect(second.fieldPulseDamage).toBe(42);
+    expect(second.chain).toEqual({ visited: [live.mob.id], remaining: 2, hopRange: 4, sharePct: 60, intervalSec: 0.3 });
+    // One press, one cache: the second impact must not reroll what the first already spent.
+    expect(fresh.flights[0].rolls).toBe(second.rolls);
+  });
+
+  it('rejects a chain or pulse payload the engine never commits', () => {
+    const live = pendingFight();
+    tick(live.state, { arena: live.arena, autoSkills: false });
+    const base = live.state.pendingWork!;
+    const badChain = structuredClone(base) as typeof base;
+    (badChain.flights[0] as { chain?: unknown }).chain = { visited: [], remaining: -1, hopRange: 4, sharePct: 60 };
+    expect(normalizePendingWork(badChain)).toBeNull();
+    const badPulse = structuredClone(base) as typeof base;
+    badPulse.flights[0].fieldPulseDamage = -5;
+    expect(normalizePendingWork(badPulse)).toBeNull();
+    const badInitial = structuredClone(base) as typeof base;
+    (badInitial.flights[0] as { fieldInitial?: unknown }).fieldInitial = 'yes';
+    expect(normalizePendingWork(badInitial)).toBeNull();
+    const badCache = structuredClone(base) as typeof base;
+    badCache.flights[0].rollCacheId = -1;
+    expect(normalizePendingWork(badCache)).toBeNull();
+  });
+});
+
+describe('settlement pays only for the away budget it is given', () => {
+  it('does not settle or advance the clock when no time has passed', () => {
+    const live = pendingFight();
+    tick(live.state, { arena: live.arena, autoSkills: false });
+    const loaded = importJson(exportJson(live.state));
+    const clock = loaded.clockSec;
+    const hp = loaded.group[0].hp;
+    expect(loaded.pendingWork).not.toBeNull();
+
+    expect(catchUp(loaded, 0)).toEqual({ simulated: 0, capped: false });
+
+    expect(loaded.clockSec).toBe(clock);
+    expect(loaded.group[0].hp).toBe(hp);
+    expect(loaded.pendingWork).not.toBeNull();
+  });
+
+  it('leaves the character untouched when the async catch-up is aborted before it starts', async () => {
+    const live = pendingFight();
+    tick(live.state, { arena: live.arena, autoSkills: false });
+    const loaded = importJson(exportJson(live.state));
+    const clock = loaded.clockSec;
+    const controller = new AbortController();
+    controller.abort();
+
+    const result = await catchUpAsync(loaded, 100, { signal: controller.signal });
+
+    expect(result.simulated).toBe(0);
+    expect(loaded.clockSec).toBe(clock);
+    expect(loaded.pendingWork).not.toBeNull();
+  });
+});
+
+describe('released work settles across the whole away interval', () => {
+  it('pays a flight whose impact lands well after the first away second', () => {
+    const live = pendingFight();
+    Object.assign(live.arena.flights[0].timing, { impactAtUs: 10_500_000 });
+    tick(live.state, { arena: live.arena, autoSkills: false });
+    const loaded = importJson(exportJson(live.state));
+    expect(loaded.pendingWork?.flights[0].timing.impactAtUs).toBe(10_500_000);
+    const actionId = live.action.id;
+    const clock = loaded.clockSec;
+
+    const result = catchUp(loaded, 20);
+
+    expect(result.simulated).toBe(20);
+    expect(loaded.clockSec).toBe(clock + 20);
+    expect(loaded.pendingWork).toBeNull();
+    expect(loaded.fx.filter((event) => event.kind === 'hit' && event.actionId === actionId)).toHaveLength(1);
+  });
+
+  it('keeps the work owed when the budget stops before its impact', () => {
+    const live = pendingFight();
+    Object.assign(live.arena.flights[0].timing, { impactAtUs: 10_500_000 });
+    tick(live.state, { arena: live.arena, autoSkills: false });
+    const loaded = importJson(exportJson(live.state));
+    const actionId = live.action.id;
+
+    catchUp(loaded, 5);
+
+    expect(loaded.pendingWork).not.toBeNull();
+    expect(loaded.fx.filter((event) => event.kind === 'hit' && event.actionId === actionId)).toHaveLength(0);
+  });
+});

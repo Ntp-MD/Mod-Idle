@@ -1,0 +1,21 @@
+{
+  "status": "candidate-review",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-829c-7060-99a8-9918a3b8d766\\exec-2d35d54f-0a0b-4e1b-b632-c5d5ed6414ec.png",
+  "generator": "built-in-imagegen",
+  "action": "attack",
+  "direction": "north",
+  "angleDegrees": 180,
+  "phase": "00-windup.png",
+  "qa": {
+    "visual": false,
+    "facing": false,
+    "phase": false,
+    "atlas": false,
+    "anchor": false
+  },
+  "visualReview": {
+    "status": "failed-weapon-hand-and-phase",
+    "review": "Spear held by screen-left arm in backview, anatomicalLEFT hand; canonical isRIGHT. Windup raises outward instead of drawingback for norththrust.",
+    "requiresRegeneration": true
+  }
+}

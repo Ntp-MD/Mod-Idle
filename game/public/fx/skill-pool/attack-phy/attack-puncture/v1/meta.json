@@ -1,0 +1,415 @@
+{
+  "skillId": "attack.puncture",
+  "src": "/fx/skill-pool/attack-puncture/v1/atlas.png",
+  "imageWidth": 1271,
+  "imageHeight": 1237,
+  "columns": 4,
+  "rows": 4,
+  "frames": [
+    {
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        317,
+        309
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        141,
+        146,
+        214,
+        184
+      ],
+      "renderedPadding": [
+        205.5,
+        210.5,
+        167.5,
+        189.5
+      ]
+    },
+    {
+      "index": 1,
+      "rect": [
+        317,
+        0,
+        318,
+        309
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        138,
+        137,
+        219,
+        190
+      ],
+      "renderedPadding": [
+        202,
+        201.5,
+        163,
+        183.5
+      ]
+    },
+    {
+      "index": 2,
+      "rect": [
+        635,
+        0,
+        318,
+        309
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        122,
+        118,
+        235,
+        213
+      ],
+      "renderedPadding": [
+        186,
+        182.5,
+        147,
+        160.5
+      ]
+    },
+    {
+      "index": 3,
+      "rect": [
+        953,
+        0,
+        318,
+        309
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        108,
+        102,
+        250,
+        228
+      ],
+      "renderedPadding": [
+        172,
+        166.5,
+        132,
+        145.5
+      ]
+    },
+    {
+      "index": 4,
+      "rect": [
+        0,
+        309,
+        317,
+        309
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        84,
+        117,
+        261,
+        224
+      ],
+      "renderedPadding": [
+        148.5,
+        181.5,
+        120.5,
+        149.5
+      ]
+    },
+    {
+      "index": 5,
+      "rect": [
+        317,
+        309,
+        318,
+        309
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        83,
+        90,
+        272,
+        241
+      ],
+      "renderedPadding": [
+        147,
+        154.5,
+        110,
+        132.5
+      ]
+    },
+    {
+      "index": 6,
+      "rect": [
+        635,
+        309,
+        318,
+        309
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        103,
+        113,
+        256,
+        222
+      ],
+      "renderedPadding": [
+        167,
+        177.5,
+        126,
+        151.5
+      ]
+    },
+    {
+      "index": 7,
+      "rect": [
+        953,
+        309,
+        318,
+        309
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        115,
+        112,
+        267,
+        223
+      ],
+      "renderedPadding": [
+        179,
+        176.5,
+        115,
+        150.5
+      ]
+    },
+    {
+      "index": 8,
+      "rect": [
+        0,
+        618,
+        317,
+        309
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64.5,
+      "bounds": [
+        118,
+        120,
+        245,
+        230
+      ],
+      "renderedPadding": [
+        182.5,
+        184.5,
+        136.5,
+        143.5
+      ]
+    },
+    {
+      "index": 9,
+      "rect": [
+        317,
+        618,
+        318,
+        309
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        128,
+        136,
+        251,
+        211
+      ],
+      "renderedPadding": [
+        192,
+        200.5,
+        131,
+        162.5
+      ]
+    },
+    {
+      "index": 10,
+      "rect": [
+        635,
+        618,
+        318,
+        309
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        131,
+        132,
+        247,
+        220
+      ],
+      "renderedPadding": [
+        195,
+        196.5,
+        135,
+        153.5
+      ]
+    },
+    {
+      "index": 11,
+      "rect": [
+        953,
+        618,
+        318,
+        309
+      ],
+      "offsetX": 64,
+      "offsetY": 64.5,
+      "bounds": [
+        143,
+        136,
+        246,
+        213
+      ],
+      "renderedPadding": [
+        207,
+        200.5,
+        136,
+        160.5
+      ]
+    },
+    {
+      "index": 12,
+      "rect": [
+        0,
+        927,
+        317,
+        310
+      ],
+      "offsetX": 64.5,
+      "offsetY": 64,
+      "bounds": [
+        131,
+        129,
+        212,
+        206
+      ],
+      "renderedPadding": [
+        195.5,
+        193,
+        169.5,
+        168
+      ]
+    },
+    {
+      "index": 13,
+      "rect": [
+        317,
+        927,
+        318,
+        310
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        141,
+        154,
+        202,
+        201
+      ],
+      "renderedPadding": [
+        205,
+        218,
+        180,
+        173
+      ]
+    },
+    {
+      "index": 14,
+      "rect": [
+        635,
+        927,
+        318,
+        310
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        145,
+        147,
+        197,
+        197
+      ],
+      "renderedPadding": [
+        209,
+        211,
+        185,
+        177
+      ]
+    },
+    {
+      "index": 15,
+      "rect": [
+        953,
+        927,
+        318,
+        310
+      ],
+      "offsetX": 64,
+      "offsetY": 64,
+      "bounds": [
+        157,
+        152,
+        185,
+        199
+      ],
+      "renderedPadding": [
+        221,
+        216,
+        197,
+        175
+      ]
+    }
+  ],
+  "opening": [
+    0,
+    3
+  ],
+  "loop": [
+    4,
+    11
+  ],
+  "exit": [
+    12,
+    15
+  ],
+  "frameMs": 70,
+  "delivery": "melee",
+  "origin": "target",
+  "radiusM": 0,
+  "anchorY": 0.5399543378995434,
+  "orient": true,
+  "status": "ready",
+  "qa": {
+    "paddingPass": true,
+    "renderedPaddingPass": true,
+    "alphaDiscard": 8,
+    "rawPerimeterAlphaPass": false,
+    "sourceSeparatorsClear": true,
+    "sourcePixelsUnmodified": true,
+    "frameCount": 16,
+    "note": "Renderer discards alpha <=8/255; source PNG is retained unchanged. Padding belongs to shared virtual canvas."
+  },
+  "contentWidthRatio": 0.42376681614349776,
+  "contentHeightRatio": 0.3447488584474886,
+  "artDirectionReview": "Narrow steel stab rightward with small crimson contact drops.",
+  "virtualWidth": 446,
+  "virtualHeight": 438,
+  "alphaDiscard": 8,
+  "groundOrigin": false,
+  "anchorX": 0.5594170403587444
+}

@@ -1,0 +1,100 @@
+{
+  "status": "candidate-source-review-required",
+  "speciesId": "vampire",
+  "generator": "built-in image_gen",
+  "sourceImageId": "exec-7cee7df8-1db7-48d8-ae78-0541feb7bcc4.png",
+  "file": "source/v5-contact-sheets/hit-01-recoil-16.png",
+  "sha256": "cc98c1a2fd21b92a519125a07a1a3debae3436cd9954f14eb70a723797c91bb0",
+  "action": "hit",
+  "phase": "01-recoil",
+  "promptSummary": "Strong torso recoil with weight sinking slightly; hands react to the blow.",
+  "promptContract": {
+    "references": [
+      "art-reference/monsters/undead/vampire/reference.png",
+      "art-reference/monsters/undead/vampire/animation/atlas/animation.png"
+    ],
+    "sheet": "4x4 row-major 1024x1536, cells 256x384, 16 direction labels; center x=128/root y=288; fixed elevated 3/4 camera; no mirroring; transparent background requested",
+    "style": "crisp hand-crafted pixel-art clusters matching approved vampire atlas",
+    "review": "candidate only; no visual/alpha/anchor/runtime approval"
+  },
+  "transparentBackgroundRequested": true,
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 1536,
+    "mode": "RGBA"
+  },
+  "cellCanvas": {
+    "width": 256,
+    "height": 384
+  },
+  "layout": {
+    "columns": 4,
+    "rows": 4,
+    "cellOrder": "row-major"
+  },
+  "directionOrder": [
+    "south",
+    "south-south-east",
+    "south-east",
+    "east-south-east",
+    "east",
+    "east-north-east",
+    "north-east",
+    "north-north-east",
+    "north",
+    "north-north-west",
+    "north-west",
+    "west-north-west",
+    "west",
+    "west-south-west",
+    "south-west",
+    "south-south-west"
+  ],
+  "targetFrameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "targetAnchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "approved source atlas anchor; 16-direction alignment unreviewed"
+  },
+  "alphaAudit": {
+    "zeroPixelFraction": 0.73331,
+    "below128PixelFraction": 0.80832,
+    "confidence128PixelFraction": 0.19168,
+    "sheetCornerAlpha": [
+      0,
+      0,
+      1,
+      0
+    ],
+    "confidencePixelCountPerCell": [
+      20538,
+      19934,
+      19048,
+      18500,
+      18373,
+      18592,
+      18572,
+      18756,
+      19541,
+      19255,
+      17883,
+      17659,
+      17169,
+      18442,
+      19131,
+      20101
+    ]
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "purpose": "Original forest source retained; runtime uses the WebP encoding recorded in art-reference/field-backgrounds/asset-manifest.json.",
+  "file": "forest-floor.png",
+  "generator": "Built-in image_gen",
+  "generatedOn": "2026-10-31",
+  "generationId": "exec-1a918317-950c-4575-b0c4-129e7d1640ca",
+  "sourceView": "Unprojected 90-degree top-down surface texture. The runtime applies the agreed oblique projection; the image has no baked camera tilt.",
+  "runtimeOwner": "game/src/ui/combat/arena/arena-ground-materials.ts",
+  "projectionOwner": "game/src/presentation/arena-camera.ts",
+  "width": 1254,
+  "height": 1254,
+  "sha256": "8e08929e598b42c01468230867e03381d0ab785ff08fd31dc96c5ee2c58fee67",
+  "prompt": "Use case: stylized-concept. Asset type: production diffuse ground texture for a browser-only 2.5D fantasy idle RPG forest combat clearing. Generate ONE square 2048x2048 opaque seamless tile, viewed EXACTLY STRAIGHT DOWN at 90 degrees, as a flat unprojected world-space surface material. The game renderer will project this texture to the agreed 45.9168-degree oblique camera itself; do NOT bake an oblique view, perspective, horizon, vanishing point, depth gradient, vignette, or foreshortening into the image. Content: a natural walkable forest floor with irregular interlocking patches of muted olive and forest-green moss, short grass and clover, soft warm brown compacted earth, a few tiny flat pebbles and fallen leaves. A restrained, cohesive hand-painted pixel-cluster fantasy RPG terrain style that sits quietly behind clean pixel-art characters and bright spell telegraphs. Medium-scale organic variation, crisp readable material boundaries, low-to-moderate contrast, not photorealistic and not noisy. Distribute grass, moss and soil naturally across the ENTIRE square; no central spotlight, no central clearing medallion, no one-way road or hero composition. All four opposite borders must join seamlessly with matching material distribution, no visible seams or framed edge. Uniform diffuse daylight and subdued ambient shading only; no cast shadows from unseen trees. This is only the horizontal ground material: NO upright trees, bushes, trunks, buildings, walls, ruins, boulders, cliffs, water, characters, animals, loot, weapons, UI, text, symbols, grids, outlines or watermark. There are no decorative solid obstacles or raised props; all terrain shown is traversable. Return just the full-bleed square ground material."
+}
