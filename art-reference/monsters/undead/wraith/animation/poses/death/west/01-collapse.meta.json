@@ -46,5 +46,15 @@
     "distinctLevels": 253,
     "hardAlpha": false
   },
-  "note": "Recovered pose pixels are cropped from the raw-recovered atlas; alpha/components may be reconstructed. This is not an untouched source PNG and remains draft-review."
+  "note": "Recovered pose pixels are cropped from the raw-recovered atlas; alpha/components may be reconstructed. This is not an untouched source PNG; the runtime atlas remains draft-review.",
+  "status": "approved-source-pose",
+  "visualReview": {
+    "identityAccepted": true,
+    "directionAccepted": true,
+    "poseSequenceAccepted": true,
+    "transparencyAccepted": true,
+    "anchorAccepted": true,
+    "atlasAccepted": false
+  },
+  "reviewNote": "Source reviewed as part of the east/west four-frame death sequences on the shared 384 x 384 canvas. Recovered source pixels and anchor retain their recorded provenance. Source approval only; the runtime atlas remains draft-review."
 }

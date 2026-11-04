@@ -46,5 +46,7 @@
     "distinctLevels": 254,
     "hardAlpha": false
   },
-  "note": "Recovered pose pixels are cropped from the raw-recovered atlas; alpha/components may be reconstructed. This is not an untouched source PNG and remains draft-review."
+  "note": "Recovered pose pixels are cropped from the raw-recovered atlas; alpha/components may be reconstructed. This is not an untouched source PNG and remains draft-review.",
+  "status": "candidate-review",
+  "reviewNote": "Hold the east/west walk sequence for loop and pose review: one recovered frame extends an arm in a manner resembling the attack, creating an abrupt change within the hover cycle."
 }

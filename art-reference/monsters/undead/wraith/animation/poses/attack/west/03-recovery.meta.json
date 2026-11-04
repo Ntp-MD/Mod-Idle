@@ -46,5 +46,7 @@
     "distinctLevels": 254,
     "hardAlpha": false
   },
-  "note": "Recovered pose pixels are cropped from the raw-recovered atlas; alpha/components may be reconstructed. This is not an untouched source PNG and remains draft-review."
+  "note": "Recovered pose pixels are cropped from the raw-recovered atlas; alpha/components may be reconstructed. This is not an untouched source PNG and remains draft-review.",
+  "status": "candidate-review",
+  "reviewNote": "Hold the full east/west attack sequence: generated windup/contact and recovered follow-through/recovery differ visibly in claw color, silhouette and rendering. Reconcile identity and sequence before source approval."
 }
