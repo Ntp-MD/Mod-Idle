@@ -1,0 +1,53 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "generatorOutput": "death-ground-direction-grid-candidate.png",
+  "speciesId": "skeleton",
+  "action": "death",
+  "direction": "south",
+  "phase": "02-ground",
+  "source": [
+    "animation/atlas/animation.png",
+    "animation/drafts/death-ground-direction-grid-candidate.png"
+  ],
+  "sourceGridCell": {
+    "row": 0,
+    "column": 0,
+    "index": 0,
+    "box": [
+      0,
+      0,
+      316,
+      311
+    ]
+  },
+  "sourceCanvas": [
+    1263,
+    1245
+  ],
+  "sourceCellCanvas": [
+    316,
+    311
+  ],
+  "targetCanvas": [
+    384,
+    384
+  ],
+  "canvasMatchesTarget": true,
+  "normalization": {
+    "method": "alpha-background crop, fit to inherited east/west phase bounds",
+    "anchor": [
+      192,
+      288
+    ],
+    "anchorVerified": false
+  },
+  "alphaCornersTransparent": true,
+  "visualReview": {
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "phaseAccepted": false,
+    "anchor": false,
+    "atlas": false
+  }
+}

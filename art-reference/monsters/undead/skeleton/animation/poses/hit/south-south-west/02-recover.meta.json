@@ -1,0 +1,53 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "generatorOutput": "hit-recover-direction-grid-candidate.png",
+  "speciesId": "skeleton",
+  "action": "hit",
+  "direction": "south-south-west",
+  "phase": "02-recover",
+  "source": [
+    "animation/atlas/animation.png",
+    "animation/drafts/hit-recover-direction-grid-candidate.png"
+  ],
+  "sourceGridCell": {
+    "row": 3,
+    "column": 3,
+    "index": 15,
+    "box": [
+      935,
+      946,
+      1247,
+      1261
+    ]
+  },
+  "sourceCanvas": [
+    1247,
+    1261
+  ],
+  "sourceCellCanvas": [
+    312,
+    315
+  ],
+  "targetCanvas": [
+    384,
+    384
+  ],
+  "canvasMatchesTarget": true,
+  "normalization": {
+    "method": "alpha-background crop, fit to inherited east/west phase bounds",
+    "anchor": [
+      192,
+      288
+    ],
+    "anchorVerified": false
+  },
+  "alphaCornersTransparent": true,
+  "visualReview": {
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "phaseAccepted": false,
+    "anchor": false,
+    "atlas": false
+  }
+}

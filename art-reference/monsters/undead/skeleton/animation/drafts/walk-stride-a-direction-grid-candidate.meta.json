@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "skeleton",
+  "source": [
+    "animation/atlas/animation.png",
+    "animation/source/base-v1.png"
+  ],
+  "generatorOutput": "walk-stride-a-direction-grid-candidate.png",
+  "layout": {
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "cellOrder": "row-major"
+  },
+  "directions": [
+    "south",
+    "south-south-east",
+    "south-east",
+    "east-south-east",
+    "east",
+    "east-north-east",
+    "north-east",
+    "north-north-east",
+    "north",
+    "north-north-west",
+    "north-west",
+    "west-north-west",
+    "west",
+    "west-south-west",
+    "south-west",
+    "south-south-west"
+  ],
+  "canvas": {
+    "width": 1261,
+    "height": 1247
+  },
+  "visualReview": {
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "phaseAccepted": false,
+    "alpha": false,
+    "anchor": false,
+    "atlas": false
+  },
+  "note": "Retained directional source grid; no pose or atlas approval."
+}

@@ -6,11 +6,11 @@
   "source": "../../../atlas/animation.png",
   "sourceCell": {
     "row": 2,
-    "column": 1,
+    "column": 2,
     "box": [
-      384,
       768,
       768,
+      1152,
       1152
     ]
   },
@@ -19,5 +19,8 @@
     "new16DirectionSetAccepted": false,
     "anchor": false,
     "atlas": false
-  }
+  },
+  "phase": "01-contact",
+  "reorderedFromPose": "02-follow-through",
+  "reviewNote": "Reordered recovered poses so raised sword precedes thrust; original sourceCell follows its image. Hold for phase, shield continuity and anchor review: neutral/recovery frames appear to contain an extra shield."
 }

@@ -19,5 +19,8 @@
     "new16DirectionSetAccepted": false,
     "anchor": false,
     "atlas": false
-  }
+  },
+  "phase": "03-recovery",
+  "reorderedFromPose": "03-recovery",
+  "reviewNote": "Reordered recovered poses so raised sword precedes thrust; original sourceCell follows its image. Hold for phase, shield continuity and anchor review: neutral/recovery frames appear to contain an extra shield."
 }

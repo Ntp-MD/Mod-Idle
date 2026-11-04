@@ -1,5 +1,5 @@
 {
-  "status": "legacy-extracted-candidate",
+  "status": "approved-source-pose",
   "speciesId": "skeleton",
   "action": "idle",
   "direction": "south",
@@ -17,7 +17,22 @@
   "sourcePixelsModified": false,
   "qa": {
     "new16DirectionSetAccepted": false,
-    "anchor": false,
+    "anchor": true,
     "atlas": false
-  }
+  },
+  "visualReview": {
+    "identityAccepted": true,
+    "directionAccepted": true,
+    "poseAccepted": true,
+    "transparencyAccepted": true,
+    "anchorAccepted": true,
+    "atlasAccepted": false
+  },
+  "reviewVisibleAlphaGt8Bounds": [
+    133,
+    125,
+    283,
+    286
+  ],
+  "reviewNote": "This individual source pose was checked for identity, direction, alpha appearance and placement on light and dark backgrounds. The complete direction set, animation sequences and atlas still require review."
 }

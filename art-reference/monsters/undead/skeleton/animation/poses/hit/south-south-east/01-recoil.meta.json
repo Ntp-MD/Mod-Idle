@@ -1,0 +1,53 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "generatorOutput": "hit-recoil-direction-grid-candidate.png",
+  "speciesId": "skeleton",
+  "action": "hit",
+  "direction": "south-south-east",
+  "phase": "01-recoil",
+  "source": [
+    "animation/atlas/animation.png",
+    "animation/drafts/hit-recoil-direction-grid-candidate.png"
+  ],
+  "sourceGridCell": {
+    "row": 0,
+    "column": 1,
+    "index": 1,
+    "box": [
+      315,
+      0,
+      630,
+      312
+    ]
+  },
+  "sourceCanvas": [
+    1261,
+    1247
+  ],
+  "sourceCellCanvas": [
+    315,
+    312
+  ],
+  "targetCanvas": [
+    384,
+    384
+  ],
+  "canvasMatchesTarget": true,
+  "normalization": {
+    "method": "alpha-background crop, fit to inherited east/west phase bounds",
+    "anchor": [
+      192,
+      288
+    ],
+    "anchorVerified": false
+  },
+  "alphaCornersTransparent": true,
+  "visualReview": {
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "phaseAccepted": false,
+    "anchor": false,
+    "atlas": false
+  }
+}

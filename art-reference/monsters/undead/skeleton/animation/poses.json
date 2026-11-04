@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "status": "direction16-candidate-incomplete",
+  "status": "direction16-candidate-review-required",
   "speciesId": "skeleton",
   "race": "undead",
   "version": "v5",
   "attackKind": "close",
   "bakedWeaponId": null,
   "identityRef": null,
-  "sourcePoseRef": "../atlas/animation.png",
+  "sourcePoseRef": "atlas/animation.png",
   "directionCount": 16,
   "angleStepDegrees": 22.5,
   "directions": [
@@ -85,7 +85,7 @@
     "x": 192,
     "y": 288
   },
-  "statusNote": "Forty losslessly extracted cells from the visual-approved legacy atlas are source candidates only. The remaining 232/272 poses still need authored generation and visual review. No runtime promotion. No root reference.png is present; none was fabricated.",
+  "statusNote": "All 272 Goblin-mold slots have canonical PNGs and sidecars: 40 legacy-extracted candidates and 232 candidate-review. No new poses are approved; visual pose review and atlas promotion remain pending.",
   "actions": {
     "idle": {
       "framesPerDirection": 1,

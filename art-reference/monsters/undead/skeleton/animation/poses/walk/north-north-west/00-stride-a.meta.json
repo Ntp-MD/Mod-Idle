@@ -1,0 +1,53 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "generatorOutput": "walk-stride-a-direction-grid-candidate.png",
+  "speciesId": "skeleton",
+  "action": "walk",
+  "direction": "north-north-west",
+  "phase": "00-stride-a",
+  "source": [
+    "animation/atlas/animation.png",
+    "animation/drafts/walk-stride-a-direction-grid-candidate.png"
+  ],
+  "sourceGridCell": {
+    "row": 2,
+    "column": 1,
+    "index": 9,
+    "box": [
+      315,
+      624,
+      630,
+      935
+    ]
+  },
+  "sourceCanvas": [
+    1261,
+    1247
+  ],
+  "sourceCellCanvas": [
+    315,
+    311
+  ],
+  "targetCanvas": [
+    384,
+    384
+  ],
+  "canvasMatchesTarget": true,
+  "normalization": {
+    "method": "alpha-background crop, fit to inherited east/west phase bounds",
+    "anchor": [
+      192,
+      288
+    ],
+    "anchorVerified": false
+  },
+  "alphaCornersTransparent": true,
+  "visualReview": {
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "phaseAccepted": false,
+    "anchor": false,
+    "atlas": false
+  }
+}
