@@ -1,1 +1,63 @@
-{"status":"candidate-review","speciesId":"golem","action":"walk","direction":"south-south-east","phase":"00-stride-a","source":"C:\\Users\\disda\\.codex\\generated_images\\01a18324-ea67-78c0-8f1a-12b9004e2a12\\exec-863eb8c9-145d-42c5-8c82-929bca376203.png","qa":{"identity":false,"facing":false,"phase":false,"atlasReady":false}}
+{
+  "status": "candidate-review",
+  "speciesId": "golem",
+  "action": "walk",
+  "direction": "south-south-east",
+  "phase": "00-stride-a",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-ea67-78c0-8f1a-12b9004e2a12\\exec-863eb8c9-145d-42c5-8c82-929bca376203.png",
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "phase": false,
+    "atlasReady": false,
+    "hardAlphaVerified": false,
+    "groundAnchorVerified": false,
+    "productionApproved": false
+  },
+  "schemaVersion": 1,
+  "identityRef": "../../../atlas/animation.png",
+  "sourceAtlas": "../../../drafts/source-walk-south-south-east-00-stride-a.png",
+  "sourceCrop": {
+    "x": 349,
+    "y": 387,
+    "width": 583,
+    "height": 584,
+    "alphaThreshold": 16
+  },
+  "placedBounds": {
+    "x": 110,
+    "y": 124,
+    "width": 164,
+    "height": 164
+  },
+  "sourcePixelsModified": true,
+  "canvasNormalization": {
+    "method": "alpha-bounds-scale-to-reference-phase-height",
+    "sourceCanvas": {
+      "width": 1254,
+      "height": 1254
+    },
+    "sourceBounds": {
+      "x": 349,
+      "y": 387,
+      "width": 583,
+      "height": 584,
+      "alphaThreshold": 16
+    },
+    "targetFrameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "referencePhaseHeight": 164,
+    "resampling": "premultiplied-alpha Lanczos",
+    "footAnchorY": 288
+  },
+  "facingSourceRef": "../../idle/south-south-east.png",
+  "phaseSourceRef": "../east/00-stride-a.png",
+  "alphaProcessing": {
+    "method": "source-alpha-threshold-before-bounds-and-resize",
+    "threshold": 16,
+    "pixelsAtOrBelowThresholdMadeTransparent": true,
+    "remainingAlphaPreservedBeforeResampling": true
+  }
+}

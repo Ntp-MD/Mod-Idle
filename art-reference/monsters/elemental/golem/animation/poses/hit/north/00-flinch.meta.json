@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "speciesId": "golem",
+  "action": "hit",
+  "direction": "north",
+  "requestedFacingDegrees": 180,
+  "pose": "00-flinch",
+  "phase": "00-flinch",
+  "identityRef": "../../../atlas/animation.png",
+  "facingSourceRef": "../../idle/north.png",
+  "phaseSourceRef": "../east/00-flinch.png",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:\\Users\\ITOP\\.codex-zed-account-1\\generated_images\\01a1a0b9-1e40-7663-be3e-149b24193ac4\\exec-d363403b-e969-4bb4-87e9-468813890157.png",
+  "sourceAtlas": "../../../drafts/hit-00-flinch-directions-candidate.png",
+  "sourceCrop": {
+    "x": 0,
+    "y": 627,
+    "width": 314,
+    "height": 313,
+    "gridRow": 2,
+    "gridColumn": 0,
+    "directionIndex": 8
+  },
+  "placedBounds": {
+    "x": 105,
+    "y": 96,
+    "width": 174,
+    "height": 192
+  },
+  "sourcePixelsModified": true,
+  "alphaProcessing": {
+    "method": "magenta-color-key-to-alpha",
+    "background": "#ff00ff",
+    "rule": "R-G>12; B-G>12; max(R,B)>35; abs(R-B)<100"
+  },
+  "status": "candidate-review",
+  "qa": {
+    "exactFacingVerified": false,
+    "hardAlphaVerified": false,
+    "groundAnchorVerified": false,
+    "phaseContinuityVerified": false,
+    "productionApproved": false
+  },
+  "visualReview": {
+    "allCellsPresent": true,
+    "screenSideCorrect": true,
+    "exactAngleAccepted": false,
+    "identityAccepted": false,
+    "note": "Cropped from a 4x4 directional candidate grid. Background was keyed to alpha; exact facing, identity, hard-alpha edge quality, foot anchor, phase continuity and atlas QA remain for art-owner review."
+  }
+}

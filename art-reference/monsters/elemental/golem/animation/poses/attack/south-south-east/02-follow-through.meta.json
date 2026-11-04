@@ -1,1 +1,64 @@
-{"status":"candidate-review","speciesId":"golem","action":"attack","direction":"south-south-east","phase":"02-follow-through","source":"C:\\Users\\disda\\.codex\\generated_images\\01a18324-ea67-78c0-8f1a-12b9004e2a12\\exec-e0f187b0-de58-423b-bb54-dbc761c55646.png","qa":{"identity":false,"facing":false,"phase":false,"atlasReady":false}}
+{
+  "status": "candidate-review",
+  "speciesId": "golem",
+  "action": "attack",
+  "direction": "south-south-east",
+  "phase": "02-follow-through",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-ea67-78c0-8f1a-12b9004e2a12\\exec-e0f187b0-de58-423b-bb54-dbc761c55646.png",
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "phase": false,
+    "atlasReady": false,
+    "hardAlphaVerified": false,
+    "groundAnchorVerified": false,
+    "productionApproved": false
+  },
+  "schemaVersion": 1,
+  "identityRef": "../../../atlas/animation.png",
+  "sourceAtlas": "../../../drafts/source-attack-south-south-east-02-follow-through.png",
+  "sourceCrop": {
+    "x": 430,
+    "y": 404,
+    "width": 551,
+    "height": 529,
+    "alphaThreshold": 16
+  },
+  "placedBounds": {
+    "x": 101,
+    "y": 113,
+    "width": 182,
+    "height": 175
+  },
+  "sourcePixelsModified": true,
+  "canvasNormalization": {
+    "method": "alpha-bounds-scale-to-reference-phase-height",
+    "sourceCanvas": {
+      "width": 1254,
+      "height": 1254
+    },
+    "sourceBounds": {
+      "x": 430,
+      "y": 404,
+      "width": 551,
+      "height": 529,
+      "alphaThreshold": 16
+    },
+    "targetFrameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "referencePhaseHeight": 175,
+    "resampling": "premultiplied-alpha Lanczos",
+    "footAnchorY": 288
+  },
+  "facingSourceRef": "../../idle/south-south-east.png",
+  "phaseSourceRef": "../east/00-windup.png",
+  "alphaProcessing": {
+    "method": "source-alpha-threshold-before-bounds-and-resize",
+    "threshold": 16,
+    "pixelsAtOrBelowThresholdMadeTransparent": true,
+    "remainingAlphaPreservedBeforeResampling": true
+  },
+  "phaseSourceRefNote": "Reference updated after east attack source frames were reordered; it still points to the same source pixels used as guidance."
+}

@@ -9,7 +9,56 @@
     "identity": true,
     "facing": true,
     "phase": true,
-    "atlasReady": false
+    "atlasReady": false,
+    "hardAlphaVerified": false,
+    "groundAnchorVerified": false,
+    "productionApproved": false
   },
-  "review": "Visually inspected: expected action phase readable and front-facing identity preserved; spacing/sequence/atlas still pending."
+  "review": "Visually inspected: expected action phase readable and front-facing identity preserved; spacing/sequence/atlas still pending.",
+  "schemaVersion": 1,
+  "identityRef": "../../../atlas/animation.png",
+  "sourceAtlas": "../../../drafts/source-death-south-02-ground.png",
+  "sourceCrop": {
+    "x": 256,
+    "y": 501,
+    "width": 819,
+    "height": 436,
+    "alphaThreshold": 16
+  },
+  "placedBounds": {
+    "x": 102,
+    "y": 192,
+    "width": 180,
+    "height": 96
+  },
+  "sourcePixelsModified": true,
+  "canvasNormalization": {
+    "method": "alpha-bounds-scale-to-reference-phase-height",
+    "sourceCanvas": {
+      "width": 1254,
+      "height": 1254
+    },
+    "sourceBounds": {
+      "x": 256,
+      "y": 501,
+      "width": 819,
+      "height": 436,
+      "alphaThreshold": 16
+    },
+    "targetFrameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "referencePhaseHeight": 96,
+    "resampling": "premultiplied-alpha Lanczos",
+    "footAnchorY": 288
+  },
+  "facingSourceRef": "../../idle/south.png",
+  "phaseSourceRef": "../east/02-ground.png",
+  "alphaProcessing": {
+    "method": "source-alpha-threshold-before-bounds-and-resize",
+    "threshold": 16,
+    "pixelsAtOrBelowThresholdMadeTransparent": true,
+    "remainingAlphaPreservedBeforeResampling": true
+  }
 }

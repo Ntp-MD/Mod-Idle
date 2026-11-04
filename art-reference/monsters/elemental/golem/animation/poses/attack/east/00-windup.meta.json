@@ -5,12 +5,15 @@
   "direction": "east",
   "source": "../../../../atlas/animation.png",
   "sourceCell": [
-    0,
+    2,
     2
   ],
   "sourcePixelsModified": false,
   "qa": {
     "visualIdentityReviewed": false,
     "atlasReady": false
-  }
+  },
+  "phase": "00-windup",
+  "reorderedFromPose": "02-follow-through",
+  "reviewNote": "Reordered recovered source poses so the raised fist precedes the extended strike and return. The original sourceCell follows the image; follow-through, anchor, alpha and full 16-direction continuity remain unapproved."
 }

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-ea67-78c0-8f1a-12b9004e2a12\\exec-5bbe4f82-829f-4f84-a934-895b40a03c5b.png",
+  "action": "idle",
+  "direction": "west-south-west",
+  "phase": "idle",
+  "sourceCanvas": {
+    "width": 1254,
+    "height": 1254
+  },
+  "sourcePixelsModified": false,
+  "supersededBy": "../poses/idle/west-south-west/west-south-west.png",
+  "originalPoseSidecar": {
+    "status": "candidate-review",
+    "speciesId": "golem",
+    "action": "idle",
+    "direction": "west-south-west",
+    "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-ea67-78c0-8f1a-12b9004e2a12\\exec-5bbe4f82-829f-4f84-a934-895b40a03c5b.png",
+    "qa": {
+      "identity": false,
+      "facing": false,
+      "atlasReady": false
+    }
+  },
+  "visualReview": {
+    "note": "Exact original single-pose image preserved unchanged before 384x384 canvas normalization."
+  }
+}

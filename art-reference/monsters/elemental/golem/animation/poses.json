@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "direction16-candidate-incomplete",
+  "status": "direction16-candidate-review-required",
   "speciesId": "golem",
   "race": "elemental",
   "version": "v5",
@@ -86,7 +86,7 @@
     "y": 288,
     "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
   },
-  "statusNote": "16-direction production candidates; baseline untouched until full replacement reviewed.",
+  "statusNote": "Canonical inventory complete: 272/272 source slots (40 baseline-extracted-candidate; 232 candidate-review). All generated frames remain review-only; the approved baseline atlas stays untouched until identity, facing, alpha, anchor, sequence, and atlas QA pass.",
   "actions": {
     "idle": {
       "framesPerDirection": 1,

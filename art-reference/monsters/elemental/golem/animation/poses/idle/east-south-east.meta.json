@@ -1,1 +1,71 @@
-{"status":"candidate-review","speciesId":"golem","action":"idle","direction":"east-south-east","source":"C:\\Users\\disda\\.codex\\generated_images\\01a18324-ea67-78c0-8f1a-12b9004e2a12\\exec-6c9b49f0-77a6-4c0b-88f8-6e715b3550d5.png","qa":{"identity":false,"facing":false,"atlasReady":false}}
+{
+  "status": "candidate-review",
+  "speciesId": "golem",
+  "action": "idle",
+  "direction": "east-south-east",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-ea67-78c0-8f1a-12b9004e2a12\\exec-6c9b49f0-77a6-4c0b-88f8-6e715b3550d5.png",
+  "qa": {
+    "identity": true,
+    "facing": false,
+    "atlasReady": false,
+    "hardAlphaVerified": false,
+    "groundAnchorVerified": true,
+    "productionApproved": false
+  },
+  "schemaVersion": 1,
+  "identityRef": "../../atlas/animation.png",
+  "sourceAtlas": "../../drafts/source-idle-east-south-east-idle.png",
+  "sourceCrop": {
+    "x": 424,
+    "y": 380,
+    "width": 461,
+    "height": 571,
+    "alphaThreshold": 16
+  },
+  "placedBounds": {
+    "x": 127,
+    "y": 127,
+    "width": 130,
+    "height": 161
+  },
+  "sourcePixelsModified": true,
+  "canvasNormalization": {
+    "method": "alpha-bounds-scale-to-reference-phase-height",
+    "sourceCanvas": {
+      "width": 1254,
+      "height": 1254
+    },
+    "sourceBounds": {
+      "x": 424,
+      "y": 380,
+      "width": 461,
+      "height": 571,
+      "alphaThreshold": 16
+    },
+    "targetFrameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "referencePhaseHeight": 161,
+    "resampling": "premultiplied-alpha Lanczos",
+    "footAnchorY": 288
+  },
+  "facingSourceRef": "east.png",
+  "alphaProcessing": {
+    "method": "source-alpha-threshold-before-bounds-and-resize",
+    "threshold": 16,
+    "pixelsAtOrBelowThresholdMadeTransparent": true,
+    "remainingAlphaPreservedBeforeResampling": true
+  },
+  "reviewVisibleAlphaGt8Bounds": [
+    127,
+    127,
+    257,
+    288
+  ],
+  "reviewAlphaCounts": {
+    "semiTransparent": 14914,
+    "fullyOpaque": 329
+  },
+  "reviewNote": "Identity and ground position reviewed across the idle set. Exact intermediate facing remains uncertain, and source contains semi-transparent alpha so the hard-alpha compose gate is not satisfied. Candidate status retained; atlas not approved."
+}

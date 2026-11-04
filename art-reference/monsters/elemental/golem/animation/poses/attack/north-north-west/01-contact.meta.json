@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "speciesId": "golem",
+  "action": "attack",
+  "direction": "north-north-west",
+  "requestedFacingDegrees": 202.5,
+  "pose": "01-contact",
+  "phase": "01-contact",
+  "identityRef": "../../../atlas/animation.png",
+  "facingSourceRef": "../../idle/north-north-west.png",
+  "phaseSourceRef": "../east/01-contact.png",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:\\Users\\ITOP\\.codex-zed-account-1\\generated_images\\01a1a0b9-1e40-7663-be3e-149b24193ac4\\exec-8e87220d-a294-48f4-a8e5-353356a2c550.png",
+  "sourceAtlas": "../../../drafts/attack-03-recovery-directions-candidate.png",
+  "sourceCrop": {
+    "x": 314,
+    "y": 627,
+    "width": 313,
+    "height": 313,
+    "gridRow": 2,
+    "gridColumn": 1,
+    "directionIndex": 9
+  },
+  "placedBounds": {
+    "x": 99,
+    "y": 128,
+    "width": 186,
+    "height": 160
+  },
+  "sourcePixelsModified": true,
+  "alphaProcessing": {
+    "method": "magenta-color-key-to-alpha",
+    "background": "#ff00ff",
+    "rule": "R-G>12; B-G>12; max(R,B)>35; abs(R-B)<100"
+  },
+  "status": "candidate-review",
+  "qa": {
+    "exactFacingVerified": false,
+    "hardAlphaVerified": false,
+    "groundAnchorVerified": false,
+    "phaseContinuityVerified": false,
+    "productionApproved": false
+  },
+  "visualReview": {
+    "allCellsPresent": true,
+    "screenSideCorrect": true,
+    "exactAngleAccepted": false,
+    "identityAccepted": false,
+    "note": "Cropped from a 4x4 directional candidate grid. Background was keyed to alpha; exact facing, identity, hard-alpha edge quality, foot anchor, phase continuity and atlas QA remain for art-owner review."
+  },
+  "phaseSourceRefNote": "Reference updated after east attack source frames were reordered; it still points to the same source pixels used as guidance.",
+  "reorderedFromPose": "03-recovery",
+  "reviewNote": "Reordered raised fist before extended strike. Keep as candidate: the northward silhouette and exact facing change noticeably across frames; identity, anchor, alpha and sequence still need review."
+}

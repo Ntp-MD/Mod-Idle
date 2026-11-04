@@ -9,7 +9,56 @@
     "identity": true,
     "facing": true,
     "phase": true,
-    "atlasReady": false
+    "atlasReady": false,
+    "hardAlphaVerified": false,
+    "groundAnchorVerified": false,
+    "productionApproved": false
   },
-  "review": "Visually inspected: front facing preserved; alternating opposite arm/leg strides and passing poses readable. Placement/loop QA pending."
+  "review": "Visually inspected: front facing preserved; alternating opposite arm/leg strides and passing poses readable. Placement/loop QA pending.",
+  "schemaVersion": 1,
+  "identityRef": "../../../atlas/animation.png",
+  "sourceAtlas": "../../../drafts/source-walk-south-00-stride-a.png",
+  "sourceCrop": {
+    "x": 357,
+    "y": 393,
+    "width": 572,
+    "height": 573,
+    "alphaThreshold": 16
+  },
+  "placedBounds": {
+    "x": 110,
+    "y": 124,
+    "width": 164,
+    "height": 164
+  },
+  "sourcePixelsModified": true,
+  "canvasNormalization": {
+    "method": "alpha-bounds-scale-to-reference-phase-height",
+    "sourceCanvas": {
+      "width": 1254,
+      "height": 1254
+    },
+    "sourceBounds": {
+      "x": 357,
+      "y": 393,
+      "width": 572,
+      "height": 573,
+      "alphaThreshold": 16
+    },
+    "targetFrameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "referencePhaseHeight": 164,
+    "resampling": "premultiplied-alpha Lanczos",
+    "footAnchorY": 288
+  },
+  "facingSourceRef": "../../idle/south.png",
+  "phaseSourceRef": "../east/00-stride-a.png",
+  "alphaProcessing": {
+    "method": "source-alpha-threshold-before-bounds-and-resize",
+    "threshold": 16,
+    "pixelsAtOrBelowThresholdMadeTransparent": true,
+    "remainingAlphaPreservedBeforeResampling": true
+  }
 }

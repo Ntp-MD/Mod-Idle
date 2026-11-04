@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-ea67-78c0-8f1a-12b9004e2a12\\exec-6b82711c-7fc3-4598-ae6e-5b1762b58764.png",
+  "action": "attack",
+  "direction": "south",
+  "phase": "02-follow-through",
+  "sourceCanvas": {
+    "width": 1254,
+    "height": 1254
+  },
+  "sourcePixelsModified": false,
+  "supersededBy": "../poses/attack/south/02-follow-through.png",
+  "originalPoseSidecar": {
+    "status": "candidate-review",
+    "speciesId": "golem",
+    "action": "attack",
+    "direction": "south",
+    "phase": "02-follow-through",
+    "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-ea67-78c0-8f1a-12b9004e2a12\\exec-6b82711c-7fc3-4598-ae6e-5b1762b58764.png",
+    "qa": {
+      "identity": true,
+      "facing": true,
+      "phase": true,
+      "atlasReady": false
+    },
+    "review": "Visually inspected: expected action phase readable and front-facing identity preserved; spacing/sequence/atlas still pending."
+  },
+  "visualReview": {
+    "note": "Exact original single-pose image preserved unchanged before 384x384 canvas normalization."
+  }
+}

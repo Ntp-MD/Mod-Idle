@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "speciesId": "golem",
+  "action": "attack",
+  "direction": "north-west",
+  "requestedFacingDegrees": 225,
+  "pose": "02-follow-through",
+  "phase": "02-follow-through",
+  "identityRef": "../../../atlas/animation.png",
+  "facingSourceRef": "../../idle/north-west.png",
+  "phaseSourceRef": "../east/02-follow-through.png",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:\\Users\\ITOP\\.codex-zed-account-1\\generated_images\\01a1a0b9-1e40-7663-be3e-149b24193ac4\\exec-3f9daa1e-ca70-48b8-811a-95bafb23a023.png",
+  "sourceAtlas": "../../../drafts/attack-01-contact-directions-candidate.png",
+  "sourceCrop": {
+    "x": 627,
+    "y": 627,
+    "width": 313,
+    "height": 313,
+    "gridRow": 2,
+    "gridColumn": 2,
+    "directionIndex": 10
+  },
+  "placedBounds": {
+    "x": 102,
+    "y": 95,
+    "width": 179,
+    "height": 193
+  },
+  "sourcePixelsModified": true,
+  "alphaProcessing": {
+    "method": "magenta-color-key-to-alpha",
+    "background": "#ff00ff",
+    "rule": "R-G>12; B-G>12; max(R,B)>35; abs(R-B)<100"
+  },
+  "status": "candidate-review",
+  "qa": {
+    "exactFacingVerified": false,
+    "hardAlphaVerified": false,
+    "groundAnchorVerified": false,
+    "phaseContinuityVerified": false,
+    "productionApproved": false
+  },
+  "visualReview": {
+    "allCellsPresent": true,
+    "screenSideCorrect": true,
+    "exactAngleAccepted": false,
+    "identityAccepted": false,
+    "note": "Cropped from a 4x4 directional candidate grid. Background was keyed to alpha; exact facing, identity, hard-alpha edge quality, foot anchor, phase continuity and atlas QA remain for art-owner review."
+  },
+  "reorderedFromPose": "01-contact",
+  "reviewNote": "Reordered the candidate sequence so raised fist precedes extended strike. Original source atlas and crop follow the image. Facing, identity, return motion, alpha and anchor remain unapproved."
+}

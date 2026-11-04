@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "speciesId": "golem",
+  "action": "hit",
+  "direction": "south-south-east",
+  "requestedFacingDegrees": 22.5,
+  "pose": "03-ready",
+  "phase": "03-ready",
+  "identityRef": "../../../atlas/animation.png",
+  "facingSourceRef": "../../idle/south-south-east.png",
+  "phaseSourceRef": "../east/03-ready.png",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:\\Users\\ITOP\\.codex-zed-account-1\\generated_images\\01a1a0b9-1e40-7663-be3e-149b24193ac4\\exec-42271748-e03e-4f2e-859d-e790fc35f9c5.png",
+  "sourceAtlas": "../../../drafts/hit-03-ready-directions-candidate.png",
+  "sourceCrop": {
+    "x": 314,
+    "y": 0,
+    "width": 313,
+    "height": 314,
+    "gridRow": 0,
+    "gridColumn": 1,
+    "directionIndex": 1
+  },
+  "placedBounds": {
+    "x": 105,
+    "y": 107,
+    "width": 174,
+    "height": 181
+  },
+  "sourcePixelsModified": true,
+  "alphaProcessing": {
+    "method": "magenta-color-key-to-alpha",
+    "background": "#ff00ff",
+    "rule": "R-G>12; B-G>12; max(R,B)>35; abs(R-B)<100"
+  },
+  "status": "candidate-review",
+  "qa": {
+    "exactFacingVerified": false,
+    "hardAlphaVerified": false,
+    "groundAnchorVerified": false,
+    "phaseContinuityVerified": false,
+    "productionApproved": false
+  },
+  "visualReview": {
+    "allCellsPresent": true,
+    "screenSideCorrect": true,
+    "exactAngleAccepted": false,
+    "identityAccepted": false,
+    "note": "Cropped from a 4x4 directional candidate grid. Background was keyed to alpha; exact facing, identity, hard-alpha edge quality, foot anchor, phase continuity and atlas QA remain for art-owner review."
+  }
+}
