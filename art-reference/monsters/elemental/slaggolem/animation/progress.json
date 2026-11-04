@@ -1,18 +1,91 @@
 {
-  "status": "incomplete-candidate-review",
-  "expectedPoses": 272,
-  "presentRequiredPaths": {
-    "idle": 16,
-    "walk": 8,
-    "attack": 8,
-    "hit": 8,
-    "death": 8
+  "status": "source-complete-candidate-review",
+  "expectedPoseCount": 272,
+  "presentPoseCount": 272,
+  "generatedCandidateCount": 232,
+  "baselinePoseCount": 40,
+  "approvedNewPoseCount": 0,
+  "newGeneratedPosesThisRun": 168,
+  "byAction": {
+    "idle": {
+      "present": 16,
+      "generatedCandidates": 8,
+      "baselineReferences": 8,
+      "missing": 0
+    },
+    "walk": {
+      "present": 64,
+      "generatedCandidates": 56,
+      "baselineReferences": 8,
+      "missing": 0
+    },
+    "attack": {
+      "present": 64,
+      "generatedCandidates": 56,
+      "baselineReferences": 8,
+      "missing": 0
+    },
+    "hit": {
+      "present": 64,
+      "generatedCandidates": 56,
+      "baselineReferences": 8,
+      "missing": 0
+    },
+    "death": {
+      "present": 64,
+      "generatedCandidates": 56,
+      "baselineReferences": 8,
+      "missing": 0
+    }
   },
-  "presentTotal": 48,
-  "missingTotal": 224,
-  "countIsNotVisualApproval": true,
-  "variantsStarted": false,
-  "oldVersionsDeleted": false,
-  "runtimePromoted": false,
-  "newGeneratedPosesThisRun": 8
+  "missing": [],
+  "baselineReferencesRequiringReviewOrReplacement": [
+    "poses/idle/south.png",
+    "poses/idle/south-east.png",
+    "poses/idle/east.png",
+    "poses/idle/north-east.png",
+    "poses/idle/north.png",
+    "poses/idle/north-west.png",
+    "poses/idle/west.png",
+    "poses/idle/south-west.png",
+    "poses/walk/east/00-stride-a.png",
+    "poses/walk/east/01-stride-b.png",
+    "poses/walk/east/02-stride-c.png",
+    "poses/walk/east/03-stride-d.png",
+    "poses/walk/west/00-stride-a.png",
+    "poses/walk/west/01-stride-b.png",
+    "poses/walk/west/02-stride-c.png",
+    "poses/walk/west/03-stride-d.png",
+    "poses/attack/east/00-windup.png",
+    "poses/attack/east/01-contact.png",
+    "poses/attack/east/02-follow-through.png",
+    "poses/attack/east/03-recovery.png",
+    "poses/attack/west/00-windup.png",
+    "poses/attack/west/01-contact.png",
+    "poses/attack/west/02-follow-through.png",
+    "poses/attack/west/03-recovery.png",
+    "poses/hit/east/00-flinch.png",
+    "poses/hit/east/01-recoil.png",
+    "poses/hit/east/02-recover.png",
+    "poses/hit/east/03-ready.png",
+    "poses/hit/west/00-flinch.png",
+    "poses/hit/west/01-recoil.png",
+    "poses/hit/west/02-recover.png",
+    "poses/hit/west/03-ready.png",
+    "poses/death/east/00-fall.png",
+    "poses/death/east/01-collapse.png",
+    "poses/death/east/02-ground.png",
+    "poses/death/east/03-settle.png",
+    "poses/death/west/00-fall.png",
+    "poses/death/west/01-collapse.png",
+    "poses/death/west/02-ground.png",
+    "poses/death/west/03-settle.png"
+  ],
+  "note": "All 272 mold source slots have PNGs and sidecars. 232 are candidate-review and 40 are preserved baseline references; none are production-approved. Sixteen directional phase grids per species are retained under drafts. Source completion does not promote the runtime atlas.",
+  "visualFindings": [
+    "The 16-direction source grids retain the species identity and requested compass headings; intermediate yaw spacing still needs adjacent-direction review.",
+    "Walk, attack, hit and death phases are present for all 16 headings; per-direction sequence continuity remains candidate-review.",
+    "Generated crops were thresholded to hard alpha and fitted to the 384x384 canvas and shared (192,288) anchor. Atlas packing and runtime promotion remain pending.",
+    "The existing east/west action poses and baseline idle poses were preserved unchanged and remain subject to review before atlas promotion."
+  ]
 }

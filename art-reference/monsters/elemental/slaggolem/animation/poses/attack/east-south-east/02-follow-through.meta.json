@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "slaggolem",
+  "generator": "OpenAI built-in image_gen",
+  "identityReference": "../../../../reference.png",
+  "source": "../../../drafts/attack-02-follow-through-directions-candidate.png",
+  "sourceOriginal": "../../../drafts/attack-02-follow-through-directions-candidate.png",
+  "sourcePixelsModified": true,
+  "action": "attack",
+  "direction": "east-south-east",
+  "requestedFacingDegrees": 67.5,
+  "pose": "02-follow-through",
+  "sourceCellIndex": 3,
+  "sourceCell": [
+    0,
+    3
+  ],
+  "sourceCellBounds": [
+    940,
+    0,
+    1254,
+    313
+  ],
+  "sourceVisibleBounds": [
+    56,
+    54,
+    264,
+    263
+  ],
+  "sourceSize": {
+    "width": 384,
+    "height": 384
+  },
+  "visibleAlphaGt8BoundsExclusive": [
+    103,
+    108,
+    282,
+    288
+  ],
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Measured after alpha thresholding and fit-to-anchor normalization to the shared Goblin-mold anchor.",
+  "processing": {
+    "method": "crop-direction-grid-fit-anchor-v1",
+    "sourceOriginalCanvas": [
+      1254,
+      1254
+    ],
+    "alphaThreshold": 16,
+    "targetVisibleHeight": 180,
+    "maxVisibleWidth": 320,
+    "canvas": [
+      384,
+      384
+    ],
+    "placement": [
+      103,
+      108,
+      179,
+      180
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos; thresholded to hard alpha"
+  },
+  "alphaMeasurement": {
+    "extrema": [
+      0,
+      255
+    ],
+    "distinctLevels": 2,
+    "hardAlpha": true
+  },
+  "phaseSourceRef": "../east/02-follow-through.png",
+  "facingSourceRef": "../../idle/east-south-east.png",
+  "qa": {
+    "visualIdentityReviewed": true,
+    "facingVerified": true,
+    "phaseVerified": false,
+    "footAnchorVerified": true,
+    "alphaEdgeVerified": true,
+    "atlasApproved": false
+  },
+  "visualReview": "Identity and compass-facing were visually checked on the source grid. Per-direction sequence continuity and atlas approval remain pending."
+}

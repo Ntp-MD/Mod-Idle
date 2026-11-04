@@ -1486,21 +1486,21 @@
   "imageQa": "Raw built-in imagegen outputs are candidate source only. Every pose still requires visual identity/facing review, hard-alpha/edge QA, foot-anchor measurement, and atlas QA before acceptance.",
   "locomotionProfile": "heavy weighted biped steps",
   "progress": {
-    "poseFiles": 40,
+    "poseFiles": 272,
     "expectedPoseFiles": 272,
     "actionCounts": {
-      "idle": 8,
-      "walk": 8,
-      "attack": 8,
-      "hit": 8,
-      "death": 8
+      "idle": 16,
+      "walk": 64,
+      "attack": 64,
+      "hit": 64,
+      "death": 64
     },
-    "generatedPoseFiles": 0,
-    "complete": false,
+    "generatedPoseFiles": 232,
+    "complete": true,
     "qaApproved": false,
     "rejectedMetadata": [],
-    "missingPoseFiles": 232,
-    "sourceCandidateFiles": 40
+    "missingPoseFiles": 0,
+    "sourceCandidateFiles": 272
   },
   "sourceInventory": {
     "cellSizes": {
@@ -1508,10 +1508,5 @@
     },
     "alphaTouchesCellEdge": 0,
     "note": "Lossless baseline source cells retain original dimensions; normalize placement only during atlas packing after visual review."
-  },
-  "generationBlocker": {
-    "type": "imagegen-usage-limit",
-    "resetsAtUnix": 1793288069,
-    "note": "Built-in imagegen returned HTTP429 usage_limit_reached; pending queues terminated, no API fallback used."
   }
 }
