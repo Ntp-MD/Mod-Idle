@@ -1,31 +1,50 @@
 {
+  "schemaVersion": 1,
   "status": "candidate-review",
+  "speciesId": "demon",
   "generator": "OpenAI built-in image_gen",
+  "identityRef": "../../../reference.png",
+  "sourceOriginal": "../../drafts/source-originals/poses/idle/west.png",
   "action": "idle",
   "direction": "west",
-  "sourcePixelsModified": false,
-  "visualReviewRequired": true,
-  "measurement": {
-    "canvas": [
+  "requestedFacingDegrees": 270,
+  "sourcePixelsModified": true,
+  "processing": {
+    "sourceOriginalCanvas": [
       1254,
       1254
     ],
-    "alphaBoundsExclusive": [
-      31,
-      126,
-      1253,
-      1228
-    ],
-    "alphaLevelCount": 256,
-    "sourcePixelsModified": false,
-    "anyAlphaTouchesCanvasEdge": false,
-    "alpha128BoundsExclusive": [
+    "alphaThreshold": 16,
+    "sourceContentBoundsExclusive": [
       457,
       435,
-      911,
-      930
+      912,
+      931
     ],
-    "alpha128TouchesCanvasEdge": false
+    "targetHeight": 150,
+    "canvas": [
+      384,
+      384
+    ],
+    "placement": [
+      123,
+      138,
+      138,
+      150
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos"
   },
-  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review"
+  "qa": {
+    "visualIdentityReviewed": false,
+    "facingVerified": false,
+    "phaseVerified": false,
+    "footAnchorVerified": false,
+    "alphaEdgeVerified": false,
+    "atlasApproved": false
+  },
+  "visualReview": "Original high-detail candidate preserved under animation/drafts/source-originals and normalized to the Goblin-mold canvas. Identity, facing, sequence, anchor, alpha and atlas review remain pending."
 }

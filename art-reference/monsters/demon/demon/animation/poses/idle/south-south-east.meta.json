@@ -1,37 +1,50 @@
 {
+  "schemaVersion": 1,
   "status": "candidate-review",
+  "speciesId": "demon",
   "generator": "OpenAI built-in image_gen",
-  "direction": "south-south-east",
-  "angleDegrees": 22.5,
+  "identityRef": "../../../reference.png",
+  "sourceOriginal": "../../drafts/source-originals/poses/idle/south-south-east.png",
   "action": "idle",
-  "visualReview": {
-    "identity": true,
-    "wholeBodyVisible": true,
-    "facingExact": false,
-    "note": "Identity and detailed finish preserved; exact22.5degree facing not proven. No atlas promotion."
-  },
-  "sourcePixelsModified": false,
-  "measurement": {
-    "canvas": [
+  "direction": "south-south-east",
+  "requestedFacingDegrees": 22.5,
+  "sourcePixelsModified": true,
+  "processing": {
+    "sourceOriginalCanvas": [
       1254,
       1254
     ],
-    "alphaBoundsExclusive": [
-      138,
-      156,
-      1224,
-      1069
-    ],
-    "alphaLevelCount": 256,
-    "sourcePixelsModified": false,
-    "anyAlphaTouchesCanvasEdge": false,
-    "alpha128BoundsExclusive": [
+    "alphaThreshold": 16,
+    "sourceContentBoundsExclusive": [
       416,
       420,
-      857,
+      858,
       941
     ],
-    "alpha128TouchesCanvasEdge": false
+    "targetHeight": 150,
+    "canvas": [
+      384,
+      384
+    ],
+    "placement": [
+      129,
+      138,
+      127,
+      150
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos"
   },
-  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review"
+  "qa": {
+    "visualIdentityReviewed": false,
+    "facingVerified": false,
+    "phaseVerified": false,
+    "footAnchorVerified": false,
+    "alphaEdgeVerified": false,
+    "atlasApproved": false
+  },
+  "visualReview": "Original high-detail candidate preserved under animation/drafts/source-originals and normalized to the Goblin-mold canvas. Identity, facing, sequence, anchor, alpha and atlas review remain pending."
 }

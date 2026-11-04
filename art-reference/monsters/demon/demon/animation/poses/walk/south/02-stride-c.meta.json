@@ -1,32 +1,53 @@
 {
+  "schemaVersion": 1,
   "status": "candidate-review",
+  "speciesId": "demon",
   "generator": "OpenAI built-in image_gen",
+  "identityRef": "../../../../reference.png",
+  "sourceOriginal": "../../../drafts/source-originals/poses/walk/south/02-stride-c.png",
   "action": "walk",
   "direction": "south",
-  "phase": "02-stride-c",
-  "sourcePixelsModified": false,
-  "visualReviewRequired": true,
-  "measurement": {
-    "canvas": [
+  "requestedFacingDegrees": 0,
+  "sourcePixelsModified": true,
+  "processing": {
+    "sourceOriginalCanvas": [
       1254,
       1254
     ],
-    "alphaBoundsExclusive": [
-      41,
-      52,
-      1222,
-      1238
-    ],
-    "alphaLevelCount": 256,
-    "sourcePixelsModified": false,
-    "anyAlphaTouchesCanvasEdge": false,
-    "alpha128BoundsExclusive": [
-      351,
+    "alphaThreshold": 16,
+    "sourceContentBoundsExclusive": [
       350,
-      872,
+      349,
+      873,
       1024
     ],
-    "alpha128TouchesCanvasEdge": false
+    "targetHeight": 151,
+    "canvas": [
+      384,
+      384
+    ],
+    "placement": [
+      134,
+      137,
+      117,
+      151
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos"
   },
-  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review"
+  "qa": {
+    "visualIdentityReviewed": false,
+    "facingVerified": false,
+    "phaseVerified": false,
+    "footAnchorVerified": false,
+    "alphaEdgeVerified": false,
+    "atlasApproved": false
+  },
+  "visualReview": "Original high-detail candidate preserved under animation/drafts/source-originals and normalized to the Goblin-mold canvas. Identity, facing, sequence, anchor, alpha and atlas review remain pending.",
+  "phase": "02-stride-c",
+  "facingSourceRef": "../../idle/south.png",
+  "phaseSourceRef": "../east/02-stride-c.png"
 }

@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "status": "direction16-candidate-incomplete",
+  "status": "direction16-candidate-review-required",
   "speciesId": "demon",
   "race": "demon",
   "version": "v5",
   "attackKind": "close",
   "bakedWeaponId": "none",
   "identityRef": "../../reference.png",
-  "sourcePoseRef": "../atlas/animation.png",
+  "sourcePoseRef": "atlas/animation.png",
   "directionCount": 16,
   "angleStepDegrees": 22.5,
   "directions": [
@@ -86,7 +86,7 @@
     "y": 288,
     "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
   },
-  "statusNote": "Image generation usage limit reached; progress.json owns counts/missing list. New art candidates require review. Old baseline retained; no runtime promotion.",
+  "statusNote": "All 272 Goblin-mold slots have canonical PNGs and sidecars: 32 baseline-extracted-candidate and 240 candidate-review. Source-complete only; no new poses or atlas promotion are approved. Review and atlas QA remain pending.",
   "actions": {
     "idle": {
       "framesPerDirection": 1,

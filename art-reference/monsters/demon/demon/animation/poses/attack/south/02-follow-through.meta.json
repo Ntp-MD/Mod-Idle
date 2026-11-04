@@ -1,32 +1,53 @@
 {
+  "schemaVersion": 1,
   "status": "candidate-review",
+  "speciesId": "demon",
   "generator": "OpenAI built-in image_gen",
+  "identityRef": "../../../../reference.png",
+  "sourceOriginal": "../../../drafts/source-originals/poses/attack/south/02-follow-through.png",
   "action": "attack",
   "direction": "south",
-  "phase": "02-follow-through",
-  "sourcePixelsModified": false,
-  "visualReviewRequired": true,
-  "measurement": {
-    "canvas": [
+  "requestedFacingDegrees": 0,
+  "sourcePixelsModified": true,
+  "processing": {
+    "sourceOriginalCanvas": [
       1254,
       1254
     ],
-    "alphaBoundsExclusive": [
-      0,
-      27,
-      1210,
-      1228
-    ],
-    "alphaLevelCount": 256,
-    "sourcePixelsModified": false,
-    "anyAlphaTouchesCanvasEdge": true,
-    "alpha128BoundsExclusive": [
+    "alphaThreshold": 16,
+    "sourceContentBoundsExclusive": [
       299,
-      327,
-      971,
-      1020
+      326,
+      972,
+      1021
     ],
-    "alpha128TouchesCanvasEdge": false
+    "targetHeight": 148,
+    "canvas": [
+      384,
+      384
+    ],
+    "placement": [
+      121,
+      140,
+      143,
+      148
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos"
   },
-  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review"
+  "qa": {
+    "visualIdentityReviewed": false,
+    "facingVerified": false,
+    "phaseVerified": false,
+    "footAnchorVerified": false,
+    "alphaEdgeVerified": false,
+    "atlasApproved": false
+  },
+  "visualReview": "Original high-detail candidate preserved under animation/drafts/source-originals and normalized to the Goblin-mold canvas. Identity, facing, sequence, anchor, alpha and atlas review remain pending.",
+  "phase": "02-follow-through",
+  "facingSourceRef": "../../idle/south.png",
+  "phaseSourceRef": "../east/02-follow-through.png"
 }

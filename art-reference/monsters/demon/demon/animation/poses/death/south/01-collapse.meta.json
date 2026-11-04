@@ -1,18 +1,53 @@
 {
+  "schemaVersion": 1,
   "status": "candidate-review",
+  "speciesId": "demon",
   "generator": "OpenAI built-in image_gen",
-  "source": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1a173-2eec-7c00-bee7-1a9ce74aefd2\\exec-d7b2d77d-8f67-4e52-bd62-333b8e7d0e3e.png",
+  "identityRef": "../../../../reference.png",
+  "sourceOriginal": "../../../drafts/source-originals/poses/death/south/01-collapse.png",
   "action": "death",
-  "phase": "01-collapse.png",
   "direction": "south",
-  "sourcePixelsModified": false,
+  "requestedFacingDegrees": 0,
+  "sourcePixelsModified": true,
+  "processing": {
+    "sourceOriginalCanvas": [
+      1254,
+      1254
+    ],
+    "alphaThreshold": 16,
+    "sourceContentBoundsExclusive": [
+      353,
+      420,
+      837,
+      927
+    ],
+    "targetHeight": 90,
+    "canvas": [
+      384,
+      384
+    ],
+    "placement": [
+      149,
+      198,
+      86,
+      90
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos"
+  },
   "qa": {
-    "visuallyInspected": true,
-    "phaseApproved": false,
-    "cycleApproved": false,
-    "atlasApproved": false,
-    "identityPlausible": true,
-    "facingPlausible": true,
-    "note": "Kneeling collapse toward ground."
-  }
+    "visualIdentityReviewed": false,
+    "facingVerified": false,
+    "phaseVerified": false,
+    "footAnchorVerified": false,
+    "alphaEdgeVerified": false,
+    "atlasApproved": false
+  },
+  "visualReview": "Original high-detail candidate preserved under animation/drafts/source-originals and normalized to the Goblin-mold canvas. Identity, facing, sequence, anchor, alpha and atlas review remain pending.",
+  "phase": "01-collapse",
+  "facingSourceRef": "../../idle/south.png",
+  "phaseSourceRef": "../east/01-collapse.png"
 }
