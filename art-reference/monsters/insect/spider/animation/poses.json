@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "direction16-candidate-incomplete",
+  "status": "direction16-candidate-review-required",
   "speciesId": "spider",
   "race": "insect",
   "version": "v5",
@@ -86,7 +86,7 @@
     "y": 288,
     "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
   },
-  "statusNote": "Production incomplete; PNG presence is not acceptance. Legacy cells are source references only. No runtime promotion or variant production. Further generation blocked by shared ImageGen quota.",
+  "statusNote": "All 272 Goblin-mold slots have canonical PNGs and sidecars: 40 source-reference-unverified frames and 232 candidate-review frames (including 231 newly generated directional candidates). No new poses are approved; visual pose review and atlas promotion remain pending.",
   "actions": {
     "idle": {
       "framesPerDirection": 1,

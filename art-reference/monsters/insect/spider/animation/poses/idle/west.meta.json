@@ -12,9 +12,16 @@
   "sourcePixelsModified": false,
   "method": "lossless exact cell extraction; baseline not promoted",
   "visualReview": {
-    "inspected": false,
+    "inspected": true,
     "semanticMappingVerified": false,
     "angleVerified": false,
     "atlasReady": false
-  }
+  },
+  "reviewVisibleAlphaGt8Bounds": [
+    95,
+    159,
+    262,
+    291
+  ],
+  "reviewNote": "Hold full idle set: extracted eight-direction sprites are 122?134 px high, generated intermediate directions 81?90 px high on the same canvas. Reference image is absent, so identity and scale cannot yet be verified against it."
 }
