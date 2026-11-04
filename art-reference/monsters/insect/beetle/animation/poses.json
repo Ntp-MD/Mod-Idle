@@ -1498,28 +1498,24 @@
     ],
     "runtimePromoted": false,
     "posePresenceByAction": {
-      "idle": 13,
-      "walk": 14,
-      "attack": 12,
-      "hit": 12,
-      "death": 12
+      "idle": 16,
+      "walk": 64,
+      "attack": 64,
+      "hit": 64,
+      "death": 64
     },
-    "posePresence": 63,
+    "posePresence": 272,
     "expectedPoseCount": 272,
-    "missingPoseCount": 209,
+    "missingPoseCount": 0,
     "statusCounts": {
-      "candidate-review": 23,
+      "candidate-review": 232,
       "source-reference-unverified": 40
     },
     "missingSidecars": [],
-    "generationBlocker": {
-      "reason": "OpenAI built-in image_gen HTTP429 usage_limit_reached",
-      "resetsAtUnix": 1793288069
-    },
     "findings": [
-      "Generated South walking poses have small limb changes; tripod alternation still needs sequence review.",
-      "New idle direction angles are candidates; exact22.5degree spacing not accepted.",
-      "Generated South death phases show collapse and ground settling; scale/anchor not normalized."
+      "All Goblin-mold source slots are present; candidate presence is not visual acceptance.",
+      "New walk, attack, hit and death grid crops require review for Beetle identity, actual 16-way facing, phase semantics, scale, feet anchor and edge alpha.",
+      "Idle slots were already present and were left unchanged. No atlas or runtime asset was promoted."
     ]
   }
 }

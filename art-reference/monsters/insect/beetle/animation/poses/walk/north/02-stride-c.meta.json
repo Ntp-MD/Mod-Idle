@@ -1,0 +1,39 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "action": "walk",
+  "direction": "north",
+  "phase": "02-stride-c.png",
+  "sourceSheet": "animation/drafts/candidate-walk-grid.png",
+  "sourceCell": {
+    "grid": "8x8",
+    "row": 5,
+    "column": 0,
+    "pixelBounds": [
+      0,
+      779,
+      158,
+      934
+    ]
+  },
+  "normalization": {
+    "method": "cell crop; alpha-preserving nearest-neighbor fit to 384x384 frame canvas",
+    "canvas": [
+      384,
+      384
+    ],
+    "nominalFootAnchor": [
+      192,
+      288
+    ]
+  },
+  "visualReview": {
+    "sheetInspected": true,
+    "speciesIdentityAccepted": false,
+    "exactDirectionAccepted": false,
+    "actionPhaseAccepted": false,
+    "anchorVerified": false,
+    "atlasReady": false
+  },
+  "note": "Generated source cell is a candidate only. Verify Beetle anatomy, 16-way facing, walk-cycle semantics, scale, foot anchor, edge alpha and atlas fit before acceptance."
+}

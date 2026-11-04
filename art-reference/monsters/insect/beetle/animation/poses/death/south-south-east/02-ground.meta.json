@@ -1,0 +1,39 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "action": "death",
+  "direction": "south-south-east",
+  "phase": "02-ground.png",
+  "sourceSheet": "animation/drafts/candidate-death-grid.png",
+  "sourceCell": {
+    "grid": "8x8",
+    "row": 1,
+    "column": 2,
+    "pixelBounds": [
+      316,
+      156,
+      474,
+      312
+    ]
+  },
+  "normalization": {
+    "method": "cell crop; alpha-preserving nearest-neighbor fit to 384x384 frame canvas",
+    "canvas": [
+      384,
+      384
+    ],
+    "nominalFootAnchor": [
+      192,
+      288
+    ]
+  },
+  "visualReview": {
+    "sheetInspected": true,
+    "speciesIdentityAccepted": false,
+    "exactDirectionAccepted": false,
+    "actionPhaseAccepted": false,
+    "anchorVerified": false,
+    "atlasReady": false
+  },
+  "note": "Generated source cell is a candidate only. Verify Beetle anatomy, 16-way facing, death/collapse semantics, scale, foot anchor, edge alpha and atlas fit before acceptance."
+}
