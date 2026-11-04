@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "direction16-candidate-incomplete",
+  "status": "direction16-candidate-review-required",
   "speciesId": "wisp",
   "race": "elemental",
   "version": "v5",
@@ -86,7 +86,7 @@
     "y": 288,
     "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
   },
-  "statusNote": "16-direction production candidates; baseline untouched until full replacement reviewed.",
+  "statusNote": "All 272 Goblin-mold source slots are present: 46 existing poses and 226 generated candidate-review frames. Every generated frame still requires visual identity, facing, phase, hard-alpha and anchor review; runtime atlas promotion remains pending.",
   "actions": {
     "idle": {
       "framesPerDirection": 1,

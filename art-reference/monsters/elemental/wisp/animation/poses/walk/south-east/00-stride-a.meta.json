@@ -1,0 +1,54 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "generatorOutput": "walk-00-stride-a-directions-candidate.png",
+  "speciesId": "wisp",
+  "action": "walk",
+  "direction": "south-east",
+  "phase": "00-stride-a",
+  "poseDescription": "cloud coil compresses and core leans in travel direction",
+  "source": [
+    "animation/atlas/animation.png",
+    "animation/drafts/walk-00-stride-a-directions-candidate.png"
+  ],
+  "sourceGridCell": {
+    "row": 0,
+    "column": 2,
+    "index": 2,
+    "box": [
+      631,
+      0,
+      946,
+      312
+    ]
+  },
+  "sourceCanvas": [
+    1262,
+    1246
+  ],
+  "sourceCellCanvas": [
+    315,
+    312
+  ],
+  "targetCanvas": [
+    384,
+    384
+  ],
+  "canvasMatchesTarget": true,
+  "normalization": {
+    "method": "edge-connected neutral-background removal, alpha crop, fit to inherited east/west phase bounds",
+    "anchor": [
+      192,
+      288
+    ],
+    "anchorVerified": false
+  },
+  "alphaCornersTransparent": true,
+  "visualReview": {
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "phaseAccepted": false,
+    "anchor": false,
+    "atlas": false
+  }
+}

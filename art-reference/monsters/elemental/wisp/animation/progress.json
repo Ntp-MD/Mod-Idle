@@ -1,18 +1,21 @@
 {
-  "status": "incomplete-candidate-review",
+  "status": "source-complete-candidate-review",
   "expectedPoses": 272,
   "presentRequiredPaths": {
-    "idle": 14,
-    "walk": 8,
-    "attack": 8,
-    "hit": 8,
-    "death": 8
+    "idle": 16,
+    "walk": 64,
+    "attack": 64,
+    "hit": 64,
+    "death": 64
   },
-  "presentTotal": 46,
-  "missingTotal": 226,
+  "presentTotal": 272,
+  "missingTotal": 0,
   "countIsNotVisualApproval": true,
   "variantsStarted": false,
   "oldVersionsDeleted": false,
   "runtimePromoted": false,
-  "newGeneratedPosesThisRun": 6
+  "newGeneratedPosesThisRun": 226,
+  "generatedDetailedCandidates": 226,
+  "legacyReferenceCandidates": 46,
+  "missingRequiredPaths": []
 }
