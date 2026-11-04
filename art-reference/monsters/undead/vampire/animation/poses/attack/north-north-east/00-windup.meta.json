@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "vampire",
+  "action": "attack",
+  "direction": "north-north-east",
+  "pose": "Claw-strike anticipation; draw the near hand back with feet grounded.",
+  "generator": "OpenAI built-in image_gen",
+  "source": "../../../drafts/attack-00-windup-directions-candidate.png",
+  "sourceCell": [
+    3,
+    1
+  ],
+  "sourceCellBounds": [
+    947,
+    311,
+    1263,
+    622
+  ],
+  "sourceVisibleBounds": [
+    43,
+    44,
+    215,
+    261
+  ],
+  "sourceSize": {
+    "width": 384,
+    "height": 384
+  },
+  "visibleAlphaGt8BoundsExclusive": [
+    119,
+    104,
+    265,
+    288
+  ],
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Shared fit-to-anchor normalization for candidate coverage; not independently visually measured.",
+  "sourcePixelsModified": true,
+  "processing": {
+    "method": "crop-direction-grid-fit-384-nearest-v1",
+    "resampling": "nearest-neighbor",
+    "targetVisibleHeight": 184,
+    "maxVisibleWidth": 180
+  },
+  "identityReference": "../../../reference.png",
+  "alphaMeasurement": {
+    "extrema": [
+      0,
+      255
+    ],
+    "distinctLevels": 253,
+    "hardAlpha": false
+  },
+  "visualReview": {
+    "identityAccepted": true,
+    "exactDirectionAccepted": true,
+    "poseSequenceAccepted": false,
+    "alphaAccepted": true,
+    "anchorAccepted": true,
+    "atlasAccepted": false
+  },
+  "note": "Source pose reviewed 2026-11-04: identity, direction, transparency and anchor pass. Held because the generated red-orb cast does not match the Vampire close claw-strike contract."
+}

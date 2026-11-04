@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "vampire",
+  "action": "death",
+  "direction": "north-west",
+  "pose": "Fully grounded prone Vampire with a compact silhouette.",
+  "generator": "OpenAI built-in image_gen",
+  "source": "../../../drafts/death-02-ground-directions-candidate.png",
+  "sourceCell": [
+    2,
+    2
+  ],
+  "sourceCellBounds": [
+    630,
+    624,
+    946,
+    935
+  ],
+  "sourceVisibleBounds": [
+    36,
+    105,
+    278,
+    262
+  ],
+  "sourceSize": {
+    "width": 384,
+    "height": 384
+  },
+  "visibleAlphaGt8BoundsExclusive": [
+    126,
+    203,
+    257,
+    288
+  ],
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Shared fit-to-anchor normalization for candidate coverage; not independently visually measured.",
+  "sourcePixelsModified": true,
+  "processing": {
+    "method": "crop-direction-grid-fit-384-nearest-v1",
+    "resampling": "nearest-neighbor",
+    "targetVisibleHeight": 85,
+    "maxVisibleWidth": 180
+  },
+  "identityReference": "../../../reference.png",
+  "alphaMeasurement": {
+    "extrema": [
+      0,
+      254
+    ],
+    "distinctLevels": 222,
+    "hardAlpha": false
+  },
+  "visualReview": {
+    "identityAccepted": true,
+    "exactDirectionAccepted": true,
+    "poseSequenceAccepted": false,
+    "alphaAccepted": true,
+    "anchorAccepted": true,
+    "atlasAccepted": false
+  },
+  "note": "Source pose reviewed 2026-11-04: identity, direction, transparency and anchor pass. Held because 03-settle is materially smaller than 02-ground and the grounded corpse baseline."
+}

@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "vampire",
+  "action": "death",
+  "direction": "east-north-east",
+  "pose": "Defeated posture tips and the knees begin to buckle.",
+  "generator": "OpenAI built-in image_gen",
+  "source": "../../../drafts/death-00-fall-directions-candidate.png",
+  "sourceCell": [
+    1,
+    1
+  ],
+  "sourceCellBounds": [
+    316,
+    312,
+    632,
+    623
+  ],
+  "sourceVisibleBounds": [
+    38,
+    75,
+    280,
+    275
+  ],
+  "sourceSize": {
+    "width": 384,
+    "height": 384
+  },
+  "visibleAlphaGt8BoundsExclusive": [
+    106,
+    147,
+    277,
+    288
+  ],
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Shared fit-to-anchor normalization for candidate coverage; not independently visually measured.",
+  "sourcePixelsModified": true,
+  "processing": {
+    "method": "crop-direction-grid-fit-384-nearest-v1",
+    "resampling": "nearest-neighbor",
+    "targetVisibleHeight": 141,
+    "maxVisibleWidth": 180
+  },
+  "identityReference": "../../../reference.png",
+  "alphaMeasurement": {
+    "extrema": [
+      0,
+      255
+    ],
+    "distinctLevels": 253,
+    "hardAlpha": false
+  },
+  "visualReview": {
+    "identityAccepted": true,
+    "exactDirectionAccepted": true,
+    "poseSequenceAccepted": false,
+    "alphaAccepted": true,
+    "anchorAccepted": true,
+    "atlasAccepted": false
+  },
+  "note": "Source pose reviewed 2026-11-04: identity, direction, transparency and anchor pass. Held because 03-settle is materially smaller than 02-ground and the grounded corpse baseline."
+}

@@ -19,5 +19,6 @@
     "new16DirectionSetAccepted": false,
     "anchor": false,
     "atlas": false
-  }
+  },
+  "reviewNote": "The east/west legacy hit poses are smaller than the neighboring generated directions; check scale and anchor across directions before approval."
 }

@@ -85,7 +85,7 @@
     "x": 192,
     "y": 288
   },
-  "statusNote": "Forty losslessly extracted cells from the visual-approved legacy atlas are source candidates only. The remaining 232/272 poses still need authored generation and visual review. No runtime promotion.",
+  "statusNote": "Source review approved 120 of 232 generated candidates (idle, walk, hit). Attack remains held because the generated red-orb cast conflicts with the close claw strike; death remains held because 03-settle shrinks sharply relative to the grounded corpse. The existing 40-frame runtime atlas is unchanged; no 16-direction runtime promotion.",
   "actions": {
     "idle": {
       "framesPerDirection": 1,
@@ -180,322 +180,322 @@
         {
           "direction": "south",
           "file": "00-stride-a.png",
-          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+          "pose": "Forward lead step; cape trails and the claws stay ready."
         },
         {
           "direction": "south",
           "file": "01-stride-b.png",
-          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+          "pose": "Passing stride with the feet beneath the hips; cape follows the turn."
         },
         {
           "direction": "south",
           "file": "02-stride-c.png",
-          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+          "pose": "Opposite lead step; cape counterbalances the body."
         },
         {
           "direction": "south",
           "file": "03-stride-d.png",
-          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+          "pose": "Closing stride returns to the first walking pose."
         },
         {
           "direction": "south-south-east",
           "file": "00-stride-a.png",
-          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+          "pose": "Forward lead step; cape trails and the claws stay ready."
         },
         {
           "direction": "south-south-east",
           "file": "01-stride-b.png",
-          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+          "pose": "Passing stride with the feet beneath the hips; cape follows the turn."
         },
         {
           "direction": "south-south-east",
           "file": "02-stride-c.png",
-          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+          "pose": "Opposite lead step; cape counterbalances the body."
         },
         {
           "direction": "south-south-east",
           "file": "03-stride-d.png",
-          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+          "pose": "Closing stride returns to the first walking pose."
         },
         {
           "direction": "south-east",
           "file": "00-stride-a.png",
-          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+          "pose": "Forward lead step; cape trails and the claws stay ready."
         },
         {
           "direction": "south-east",
           "file": "01-stride-b.png",
-          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+          "pose": "Passing stride with the feet beneath the hips; cape follows the turn."
         },
         {
           "direction": "south-east",
           "file": "02-stride-c.png",
-          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+          "pose": "Opposite lead step; cape counterbalances the body."
         },
         {
           "direction": "south-east",
           "file": "03-stride-d.png",
-          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+          "pose": "Closing stride returns to the first walking pose."
         },
         {
           "direction": "east-south-east",
           "file": "00-stride-a.png",
-          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+          "pose": "Forward lead step; cape trails and the claws stay ready."
         },
         {
           "direction": "east-south-east",
           "file": "01-stride-b.png",
-          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+          "pose": "Passing stride with the feet beneath the hips; cape follows the turn."
         },
         {
           "direction": "east-south-east",
           "file": "02-stride-c.png",
-          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+          "pose": "Opposite lead step; cape counterbalances the body."
         },
         {
           "direction": "east-south-east",
           "file": "03-stride-d.png",
-          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+          "pose": "Closing stride returns to the first walking pose."
         },
         {
           "direction": "east",
           "file": "00-stride-a.png",
-          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+          "pose": "Forward lead step; cape trails and the claws stay ready."
         },
         {
           "direction": "east",
           "file": "01-stride-b.png",
-          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+          "pose": "Passing stride with the feet beneath the hips; cape follows the turn."
         },
         {
           "direction": "east",
           "file": "02-stride-c.png",
-          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+          "pose": "Opposite lead step; cape counterbalances the body."
         },
         {
           "direction": "east",
           "file": "03-stride-d.png",
-          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+          "pose": "Closing stride returns to the first walking pose."
         },
         {
           "direction": "east-north-east",
           "file": "00-stride-a.png",
-          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+          "pose": "Forward lead step; cape trails and the claws stay ready."
         },
         {
           "direction": "east-north-east",
           "file": "01-stride-b.png",
-          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+          "pose": "Passing stride with the feet beneath the hips; cape follows the turn."
         },
         {
           "direction": "east-north-east",
           "file": "02-stride-c.png",
-          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+          "pose": "Opposite lead step; cape counterbalances the body."
         },
         {
           "direction": "east-north-east",
           "file": "03-stride-d.png",
-          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+          "pose": "Closing stride returns to the first walking pose."
         },
         {
           "direction": "north-east",
           "file": "00-stride-a.png",
-          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+          "pose": "Forward lead step; cape trails and the claws stay ready."
         },
         {
           "direction": "north-east",
           "file": "01-stride-b.png",
-          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+          "pose": "Passing stride with the feet beneath the hips; cape follows the turn."
         },
         {
           "direction": "north-east",
           "file": "02-stride-c.png",
-          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+          "pose": "Opposite lead step; cape counterbalances the body."
         },
         {
           "direction": "north-east",
           "file": "03-stride-d.png",
-          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+          "pose": "Closing stride returns to the first walking pose."
         },
         {
           "direction": "north-north-east",
           "file": "00-stride-a.png",
-          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+          "pose": "Forward lead step; cape trails and the claws stay ready."
         },
         {
           "direction": "north-north-east",
           "file": "01-stride-b.png",
-          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+          "pose": "Passing stride with the feet beneath the hips; cape follows the turn."
         },
         {
           "direction": "north-north-east",
           "file": "02-stride-c.png",
-          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+          "pose": "Opposite lead step; cape counterbalances the body."
         },
         {
           "direction": "north-north-east",
           "file": "03-stride-d.png",
-          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+          "pose": "Closing stride returns to the first walking pose."
         },
         {
           "direction": "north",
           "file": "00-stride-a.png",
-          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+          "pose": "Forward lead step; cape trails and the claws stay ready."
         },
         {
           "direction": "north",
           "file": "01-stride-b.png",
-          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+          "pose": "Passing stride with the feet beneath the hips; cape follows the turn."
         },
         {
           "direction": "north",
           "file": "02-stride-c.png",
-          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+          "pose": "Opposite lead step; cape counterbalances the body."
         },
         {
           "direction": "north",
           "file": "03-stride-d.png",
-          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+          "pose": "Closing stride returns to the first walking pose."
         },
         {
           "direction": "north-north-west",
           "file": "00-stride-a.png",
-          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+          "pose": "Forward lead step; cape trails and the claws stay ready."
         },
         {
           "direction": "north-north-west",
           "file": "01-stride-b.png",
-          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+          "pose": "Passing stride with the feet beneath the hips; cape follows the turn."
         },
         {
           "direction": "north-north-west",
           "file": "02-stride-c.png",
-          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+          "pose": "Opposite lead step; cape counterbalances the body."
         },
         {
           "direction": "north-north-west",
           "file": "03-stride-d.png",
-          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+          "pose": "Closing stride returns to the first walking pose."
         },
         {
           "direction": "north-west",
           "file": "00-stride-a.png",
-          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+          "pose": "Forward lead step; cape trails and the claws stay ready."
         },
         {
           "direction": "north-west",
           "file": "01-stride-b.png",
-          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+          "pose": "Passing stride with the feet beneath the hips; cape follows the turn."
         },
         {
           "direction": "north-west",
           "file": "02-stride-c.png",
-          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+          "pose": "Opposite lead step; cape counterbalances the body."
         },
         {
           "direction": "north-west",
           "file": "03-stride-d.png",
-          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+          "pose": "Closing stride returns to the first walking pose."
         },
         {
           "direction": "west-north-west",
           "file": "00-stride-a.png",
-          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+          "pose": "Forward lead step; cape trails and the claws stay ready."
         },
         {
           "direction": "west-north-west",
           "file": "01-stride-b.png",
-          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+          "pose": "Passing stride with the feet beneath the hips; cape follows the turn."
         },
         {
           "direction": "west-north-west",
           "file": "02-stride-c.png",
-          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+          "pose": "Opposite lead step; cape counterbalances the body."
         },
         {
           "direction": "west-north-west",
           "file": "03-stride-d.png",
-          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+          "pose": "Closing stride returns to the first walking pose."
         },
         {
           "direction": "west",
           "file": "00-stride-a.png",
-          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+          "pose": "Forward lead step; cape trails and the claws stay ready."
         },
         {
           "direction": "west",
           "file": "01-stride-b.png",
-          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+          "pose": "Passing stride with the feet beneath the hips; cape follows the turn."
         },
         {
           "direction": "west",
           "file": "02-stride-c.png",
-          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+          "pose": "Opposite lead step; cape counterbalances the body."
         },
         {
           "direction": "west",
           "file": "03-stride-d.png",
-          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+          "pose": "Closing stride returns to the first walking pose."
         },
         {
           "direction": "west-south-west",
           "file": "00-stride-a.png",
-          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+          "pose": "Forward lead step; cape trails and the claws stay ready."
         },
         {
           "direction": "west-south-west",
           "file": "01-stride-b.png",
-          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+          "pose": "Passing stride with the feet beneath the hips; cape follows the turn."
         },
         {
           "direction": "west-south-west",
           "file": "02-stride-c.png",
-          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+          "pose": "Opposite lead step; cape counterbalances the body."
         },
         {
           "direction": "west-south-west",
           "file": "03-stride-d.png",
-          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+          "pose": "Closing stride returns to the first walking pose."
         },
         {
           "direction": "south-west",
           "file": "00-stride-a.png",
-          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+          "pose": "Forward lead step; cape trails and the claws stay ready."
         },
         {
           "direction": "south-west",
           "file": "01-stride-b.png",
-          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+          "pose": "Passing stride with the feet beneath the hips; cape follows the turn."
         },
         {
           "direction": "south-west",
           "file": "02-stride-c.png",
-          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+          "pose": "Opposite lead step; cape counterbalances the body."
         },
         {
           "direction": "south-west",
           "file": "03-stride-d.png",
-          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+          "pose": "Closing stride returns to the first walking pose."
         },
         {
           "direction": "south-south-west",
           "file": "00-stride-a.png",
-          "pose": "left lead-foot support; right foot trailing, weapons/body counterbalance"
+          "pose": "Forward lead step; cape trails and the claws stay ready."
         },
         {
           "direction": "south-south-west",
           "file": "01-stride-b.png",
-          "pose": "passing pose; right foot passes under hips, pelvis and shoulders counter-rotate"
+          "pose": "Passing stride with the feet beneath the hips; cape follows the turn."
         },
         {
           "direction": "south-south-west",
           "file": "02-stride-c.png",
-          "pose": "right lead-foot support; left foot trailing, complete half-stride"
+          "pose": "Opposite lead step; cape counterbalances the body."
         },
         {
           "direction": "south-south-west",
           "file": "03-stride-d.png",
-          "pose": "passing pose returning the left foot forward to stride-a; root and ground line stay fixed"
+          "pose": "Closing stride returns to the first walking pose."
         }
       ]
     },
@@ -506,322 +506,322 @@
         {
           "direction": "south",
           "file": "00-windup.png",
-          "pose": "short rock-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+          "pose": "Claw-strike anticipation; draw the near hand back with feet grounded."
         },
         {
           "direction": "south",
           "file": "01-contact.png",
-          "pose": "rock fully extended at clear contact; torso leans into attack while both feet stay on ground"
+          "pose": "Forward claw extended at contact; torso leans into the close strike."
         },
         {
           "direction": "south",
           "file": "02-follow-through.png",
-          "pose": "committed extension follows the rock tip through target space without changing camera"
+          "pose": "Claw strike follows through with the arm extended and cape trailing."
         },
         {
           "direction": "south",
           "file": "03-recovery.png",
-          "pose": "withdraw rock and return balance to neutral idle silhouette"
+          "pose": "Withdraw the claw and return to the neutral ready silhouette."
         },
         {
           "direction": "south-south-east",
           "file": "00-windup.png",
-          "pose": "short rock-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+          "pose": "Claw-strike anticipation; draw the near hand back with feet grounded."
         },
         {
           "direction": "south-south-east",
           "file": "01-contact.png",
-          "pose": "rock fully extended at clear contact; torso leans into attack while both feet stay on ground"
+          "pose": "Forward claw extended at contact; torso leans into the close strike."
         },
         {
           "direction": "south-south-east",
           "file": "02-follow-through.png",
-          "pose": "committed extension follows the rock tip through target space without changing camera"
+          "pose": "Claw strike follows through with the arm extended and cape trailing."
         },
         {
           "direction": "south-south-east",
           "file": "03-recovery.png",
-          "pose": "withdraw rock and return balance to neutral idle silhouette"
+          "pose": "Withdraw the claw and return to the neutral ready silhouette."
         },
         {
           "direction": "south-east",
           "file": "00-windup.png",
-          "pose": "short rock-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+          "pose": "Claw-strike anticipation; draw the near hand back with feet grounded."
         },
         {
           "direction": "south-east",
           "file": "01-contact.png",
-          "pose": "rock fully extended at clear contact; torso leans into attack while both feet stay on ground"
+          "pose": "Forward claw extended at contact; torso leans into the close strike."
         },
         {
           "direction": "south-east",
           "file": "02-follow-through.png",
-          "pose": "committed extension follows the rock tip through target space without changing camera"
+          "pose": "Claw strike follows through with the arm extended and cape trailing."
         },
         {
           "direction": "south-east",
           "file": "03-recovery.png",
-          "pose": "withdraw rock and return balance to neutral idle silhouette"
+          "pose": "Withdraw the claw and return to the neutral ready silhouette."
         },
         {
           "direction": "east-south-east",
           "file": "00-windup.png",
-          "pose": "short rock-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+          "pose": "Claw-strike anticipation; draw the near hand back with feet grounded."
         },
         {
           "direction": "east-south-east",
           "file": "01-contact.png",
-          "pose": "rock fully extended at clear contact; torso leans into attack while both feet stay on ground"
+          "pose": "Forward claw extended at contact; torso leans into the close strike."
         },
         {
           "direction": "east-south-east",
           "file": "02-follow-through.png",
-          "pose": "committed extension follows the rock tip through target space without changing camera"
+          "pose": "Claw strike follows through with the arm extended and cape trailing."
         },
         {
           "direction": "east-south-east",
           "file": "03-recovery.png",
-          "pose": "withdraw rock and return balance to neutral idle silhouette"
+          "pose": "Withdraw the claw and return to the neutral ready silhouette."
         },
         {
           "direction": "east",
           "file": "00-windup.png",
-          "pose": "short rock-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+          "pose": "Claw-strike anticipation; draw the near hand back with feet grounded."
         },
         {
           "direction": "east",
           "file": "01-contact.png",
-          "pose": "rock fully extended at clear contact; torso leans into attack while both feet stay on ground"
+          "pose": "Forward claw extended at contact; torso leans into the close strike."
         },
         {
           "direction": "east",
           "file": "02-follow-through.png",
-          "pose": "committed extension follows the rock tip through target space without changing camera"
+          "pose": "Claw strike follows through with the arm extended and cape trailing."
         },
         {
           "direction": "east",
           "file": "03-recovery.png",
-          "pose": "withdraw rock and return balance to neutral idle silhouette"
+          "pose": "Withdraw the claw and return to the neutral ready silhouette."
         },
         {
           "direction": "east-north-east",
           "file": "00-windup.png",
-          "pose": "short rock-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+          "pose": "Claw-strike anticipation; draw the near hand back with feet grounded."
         },
         {
           "direction": "east-north-east",
           "file": "01-contact.png",
-          "pose": "rock fully extended at clear contact; torso leans into attack while both feet stay on ground"
+          "pose": "Forward claw extended at contact; torso leans into the close strike."
         },
         {
           "direction": "east-north-east",
           "file": "02-follow-through.png",
-          "pose": "committed extension follows the rock tip through target space without changing camera"
+          "pose": "Claw strike follows through with the arm extended and cape trailing."
         },
         {
           "direction": "east-north-east",
           "file": "03-recovery.png",
-          "pose": "withdraw rock and return balance to neutral idle silhouette"
+          "pose": "Withdraw the claw and return to the neutral ready silhouette."
         },
         {
           "direction": "north-east",
           "file": "00-windup.png",
-          "pose": "short rock-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+          "pose": "Claw-strike anticipation; draw the near hand back with feet grounded."
         },
         {
           "direction": "north-east",
           "file": "01-contact.png",
-          "pose": "rock fully extended at clear contact; torso leans into attack while both feet stay on ground"
+          "pose": "Forward claw extended at contact; torso leans into the close strike."
         },
         {
           "direction": "north-east",
           "file": "02-follow-through.png",
-          "pose": "committed extension follows the rock tip through target space without changing camera"
+          "pose": "Claw strike follows through with the arm extended and cape trailing."
         },
         {
           "direction": "north-east",
           "file": "03-recovery.png",
-          "pose": "withdraw rock and return balance to neutral idle silhouette"
+          "pose": "Withdraw the claw and return to the neutral ready silhouette."
         },
         {
           "direction": "north-north-east",
           "file": "00-windup.png",
-          "pose": "short rock-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+          "pose": "Claw-strike anticipation; draw the near hand back with feet grounded."
         },
         {
           "direction": "north-north-east",
           "file": "01-contact.png",
-          "pose": "rock fully extended at clear contact; torso leans into attack while both feet stay on ground"
+          "pose": "Forward claw extended at contact; torso leans into the close strike."
         },
         {
           "direction": "north-north-east",
           "file": "02-follow-through.png",
-          "pose": "committed extension follows the rock tip through target space without changing camera"
+          "pose": "Claw strike follows through with the arm extended and cape trailing."
         },
         {
           "direction": "north-north-east",
           "file": "03-recovery.png",
-          "pose": "withdraw rock and return balance to neutral idle silhouette"
+          "pose": "Withdraw the claw and return to the neutral ready silhouette."
         },
         {
           "direction": "north",
           "file": "00-windup.png",
-          "pose": "short rock-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+          "pose": "Claw-strike anticipation; draw the near hand back with feet grounded."
         },
         {
           "direction": "north",
           "file": "01-contact.png",
-          "pose": "rock fully extended at clear contact; torso leans into attack while both feet stay on ground"
+          "pose": "Forward claw extended at contact; torso leans into the close strike."
         },
         {
           "direction": "north",
           "file": "02-follow-through.png",
-          "pose": "committed extension follows the rock tip through target space without changing camera"
+          "pose": "Claw strike follows through with the arm extended and cape trailing."
         },
         {
           "direction": "north",
           "file": "03-recovery.png",
-          "pose": "withdraw rock and return balance to neutral idle silhouette"
+          "pose": "Withdraw the claw and return to the neutral ready silhouette."
         },
         {
           "direction": "north-north-west",
           "file": "00-windup.png",
-          "pose": "short rock-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+          "pose": "Claw-strike anticipation; draw the near hand back with feet grounded."
         },
         {
           "direction": "north-north-west",
           "file": "01-contact.png",
-          "pose": "rock fully extended at clear contact; torso leans into attack while both feet stay on ground"
+          "pose": "Forward claw extended at contact; torso leans into the close strike."
         },
         {
           "direction": "north-north-west",
           "file": "02-follow-through.png",
-          "pose": "committed extension follows the rock tip through target space without changing camera"
+          "pose": "Claw strike follows through with the arm extended and cape trailing."
         },
         {
           "direction": "north-north-west",
           "file": "03-recovery.png",
-          "pose": "withdraw rock and return balance to neutral idle silhouette"
+          "pose": "Withdraw the claw and return to the neutral ready silhouette."
         },
         {
           "direction": "north-west",
           "file": "00-windup.png",
-          "pose": "short rock-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+          "pose": "Claw-strike anticipation; draw the near hand back with feet grounded."
         },
         {
           "direction": "north-west",
           "file": "01-contact.png",
-          "pose": "rock fully extended at clear contact; torso leans into attack while both feet stay on ground"
+          "pose": "Forward claw extended at contact; torso leans into the close strike."
         },
         {
           "direction": "north-west",
           "file": "02-follow-through.png",
-          "pose": "committed extension follows the rock tip through target space without changing camera"
+          "pose": "Claw strike follows through with the arm extended and cape trailing."
         },
         {
           "direction": "north-west",
           "file": "03-recovery.png",
-          "pose": "withdraw rock and return balance to neutral idle silhouette"
+          "pose": "Withdraw the claw and return to the neutral ready silhouette."
         },
         {
           "direction": "west-north-west",
           "file": "00-windup.png",
-          "pose": "short rock-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+          "pose": "Claw-strike anticipation; draw the near hand back with feet grounded."
         },
         {
           "direction": "west-north-west",
           "file": "01-contact.png",
-          "pose": "rock fully extended at clear contact; torso leans into attack while both feet stay on ground"
+          "pose": "Forward claw extended at contact; torso leans into the close strike."
         },
         {
           "direction": "west-north-west",
           "file": "02-follow-through.png",
-          "pose": "committed extension follows the rock tip through target space without changing camera"
+          "pose": "Claw strike follows through with the arm extended and cape trailing."
         },
         {
           "direction": "west-north-west",
           "file": "03-recovery.png",
-          "pose": "withdraw rock and return balance to neutral idle silhouette"
+          "pose": "Withdraw the claw and return to the neutral ready silhouette."
         },
         {
           "direction": "west",
           "file": "00-windup.png",
-          "pose": "short rock-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+          "pose": "Claw-strike anticipation; draw the near hand back with feet grounded."
         },
         {
           "direction": "west",
           "file": "01-contact.png",
-          "pose": "rock fully extended at clear contact; torso leans into attack while both feet stay on ground"
+          "pose": "Forward claw extended at contact; torso leans into the close strike."
         },
         {
           "direction": "west",
           "file": "02-follow-through.png",
-          "pose": "committed extension follows the rock tip through target space without changing camera"
+          "pose": "Claw strike follows through with the arm extended and cape trailing."
         },
         {
           "direction": "west",
           "file": "03-recovery.png",
-          "pose": "withdraw rock and return balance to neutral idle silhouette"
+          "pose": "Withdraw the claw and return to the neutral ready silhouette."
         },
         {
           "direction": "west-south-west",
           "file": "00-windup.png",
-          "pose": "short rock-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+          "pose": "Claw-strike anticipation; draw the near hand back with feet grounded."
         },
         {
           "direction": "west-south-west",
           "file": "01-contact.png",
-          "pose": "rock fully extended at clear contact; torso leans into attack while both feet stay on ground"
+          "pose": "Forward claw extended at contact; torso leans into the close strike."
         },
         {
           "direction": "west-south-west",
           "file": "02-follow-through.png",
-          "pose": "committed extension follows the rock tip through target space without changing camera"
+          "pose": "Claw strike follows through with the arm extended and cape trailing."
         },
         {
           "direction": "west-south-west",
           "file": "03-recovery.png",
-          "pose": "withdraw rock and return balance to neutral idle silhouette"
+          "pose": "Withdraw the claw and return to the neutral ready silhouette."
         },
         {
           "direction": "south-west",
           "file": "00-windup.png",
-          "pose": "short rock-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+          "pose": "Claw-strike anticipation; draw the near hand back with feet grounded."
         },
         {
           "direction": "south-west",
           "file": "01-contact.png",
-          "pose": "rock fully extended at clear contact; torso leans into attack while both feet stay on ground"
+          "pose": "Forward claw extended at contact; torso leans into the close strike."
         },
         {
           "direction": "south-west",
           "file": "02-follow-through.png",
-          "pose": "committed extension follows the rock tip through target space without changing camera"
+          "pose": "Claw strike follows through with the arm extended and cape trailing."
         },
         {
           "direction": "south-west",
           "file": "03-recovery.png",
-          "pose": "withdraw rock and return balance to neutral idle silhouette"
+          "pose": "Withdraw the claw and return to the neutral ready silhouette."
         },
         {
           "direction": "south-south-west",
           "file": "00-windup.png",
-          "pose": "short rock-thrust anticipation; pelvis/shoulders draw back, front foot remains grounded"
+          "pose": "Claw-strike anticipation; draw the near hand back with feet grounded."
         },
         {
           "direction": "south-south-west",
           "file": "01-contact.png",
-          "pose": "rock fully extended at clear contact; torso leans into attack while both feet stay on ground"
+          "pose": "Forward claw extended at contact; torso leans into the close strike."
         },
         {
           "direction": "south-south-west",
           "file": "02-follow-through.png",
-          "pose": "committed extension follows the rock tip through target space without changing camera"
+          "pose": "Claw strike follows through with the arm extended and cape trailing."
         },
         {
           "direction": "south-south-west",
           "file": "03-recovery.png",
-          "pose": "withdraw rock and return balance to neutral idle silhouette"
+          "pose": "Withdraw the claw and return to the neutral ready silhouette."
         }
       ]
     },
@@ -832,322 +832,322 @@
         {
           "direction": "south",
           "file": "00-flinch.png",
-          "pose": "brief shoulder-and-head flinch backward; rock remains visible, feet planted"
+          "pose": "Head and shoulders begin a brief backward flinch; claws remain visible."
         },
         {
           "direction": "south",
           "file": "01-recoil.png",
-          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+          "pose": "Strongest torso recoil; weight sinks while the feet stay grounded."
         },
         {
           "direction": "south",
           "file": "02-recover.png",
-          "pose": "body straightens and rock returns in front guard"
+          "pose": "Body straightens from the hit and brings the claws back to guard."
         },
         {
           "direction": "south",
           "file": "03-ready.png",
-          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+          "pose": "Balanced ready silhouette matching the idle pose."
         },
         {
           "direction": "south-south-east",
           "file": "00-flinch.png",
-          "pose": "brief shoulder-and-head flinch backward; rock remains visible, feet planted"
+          "pose": "Head and shoulders begin a brief backward flinch; claws remain visible."
         },
         {
           "direction": "south-south-east",
           "file": "01-recoil.png",
-          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+          "pose": "Strongest torso recoil; weight sinks while the feet stay grounded."
         },
         {
           "direction": "south-south-east",
           "file": "02-recover.png",
-          "pose": "body straightens and rock returns in front guard"
+          "pose": "Body straightens from the hit and brings the claws back to guard."
         },
         {
           "direction": "south-south-east",
           "file": "03-ready.png",
-          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+          "pose": "Balanced ready silhouette matching the idle pose."
         },
         {
           "direction": "south-east",
           "file": "00-flinch.png",
-          "pose": "brief shoulder-and-head flinch backward; rock remains visible, feet planted"
+          "pose": "Head and shoulders begin a brief backward flinch; claws remain visible."
         },
         {
           "direction": "south-east",
           "file": "01-recoil.png",
-          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+          "pose": "Strongest torso recoil; weight sinks while the feet stay grounded."
         },
         {
           "direction": "south-east",
           "file": "02-recover.png",
-          "pose": "body straightens and rock returns in front guard"
+          "pose": "Body straightens from the hit and brings the claws back to guard."
         },
         {
           "direction": "south-east",
           "file": "03-ready.png",
-          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+          "pose": "Balanced ready silhouette matching the idle pose."
         },
         {
           "direction": "east-south-east",
           "file": "00-flinch.png",
-          "pose": "brief shoulder-and-head flinch backward; rock remains visible, feet planted"
+          "pose": "Head and shoulders begin a brief backward flinch; claws remain visible."
         },
         {
           "direction": "east-south-east",
           "file": "01-recoil.png",
-          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+          "pose": "Strongest torso recoil; weight sinks while the feet stay grounded."
         },
         {
           "direction": "east-south-east",
           "file": "02-recover.png",
-          "pose": "body straightens and rock returns in front guard"
+          "pose": "Body straightens from the hit and brings the claws back to guard."
         },
         {
           "direction": "east-south-east",
           "file": "03-ready.png",
-          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+          "pose": "Balanced ready silhouette matching the idle pose."
         },
         {
           "direction": "east",
           "file": "00-flinch.png",
-          "pose": "brief shoulder-and-head flinch backward; rock remains visible, feet planted"
+          "pose": "Head and shoulders begin a brief backward flinch; claws remain visible."
         },
         {
           "direction": "east",
           "file": "01-recoil.png",
-          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+          "pose": "Strongest torso recoil; weight sinks while the feet stay grounded."
         },
         {
           "direction": "east",
           "file": "02-recover.png",
-          "pose": "body straightens and rock returns in front guard"
+          "pose": "Body straightens from the hit and brings the claws back to guard."
         },
         {
           "direction": "east",
           "file": "03-ready.png",
-          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+          "pose": "Balanced ready silhouette matching the idle pose."
         },
         {
           "direction": "east-north-east",
           "file": "00-flinch.png",
-          "pose": "brief shoulder-and-head flinch backward; rock remains visible, feet planted"
+          "pose": "Head and shoulders begin a brief backward flinch; claws remain visible."
         },
         {
           "direction": "east-north-east",
           "file": "01-recoil.png",
-          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+          "pose": "Strongest torso recoil; weight sinks while the feet stay grounded."
         },
         {
           "direction": "east-north-east",
           "file": "02-recover.png",
-          "pose": "body straightens and rock returns in front guard"
+          "pose": "Body straightens from the hit and brings the claws back to guard."
         },
         {
           "direction": "east-north-east",
           "file": "03-ready.png",
-          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+          "pose": "Balanced ready silhouette matching the idle pose."
         },
         {
           "direction": "north-east",
           "file": "00-flinch.png",
-          "pose": "brief shoulder-and-head flinch backward; rock remains visible, feet planted"
+          "pose": "Head and shoulders begin a brief backward flinch; claws remain visible."
         },
         {
           "direction": "north-east",
           "file": "01-recoil.png",
-          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+          "pose": "Strongest torso recoil; weight sinks while the feet stay grounded."
         },
         {
           "direction": "north-east",
           "file": "02-recover.png",
-          "pose": "body straightens and rock returns in front guard"
+          "pose": "Body straightens from the hit and brings the claws back to guard."
         },
         {
           "direction": "north-east",
           "file": "03-ready.png",
-          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+          "pose": "Balanced ready silhouette matching the idle pose."
         },
         {
           "direction": "north-north-east",
           "file": "00-flinch.png",
-          "pose": "brief shoulder-and-head flinch backward; rock remains visible, feet planted"
+          "pose": "Head and shoulders begin a brief backward flinch; claws remain visible."
         },
         {
           "direction": "north-north-east",
           "file": "01-recoil.png",
-          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+          "pose": "Strongest torso recoil; weight sinks while the feet stay grounded."
         },
         {
           "direction": "north-north-east",
           "file": "02-recover.png",
-          "pose": "body straightens and rock returns in front guard"
+          "pose": "Body straightens from the hit and brings the claws back to guard."
         },
         {
           "direction": "north-north-east",
           "file": "03-ready.png",
-          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+          "pose": "Balanced ready silhouette matching the idle pose."
         },
         {
           "direction": "north",
           "file": "00-flinch.png",
-          "pose": "brief shoulder-and-head flinch backward; rock remains visible, feet planted"
+          "pose": "Head and shoulders begin a brief backward flinch; claws remain visible."
         },
         {
           "direction": "north",
           "file": "01-recoil.png",
-          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+          "pose": "Strongest torso recoil; weight sinks while the feet stay grounded."
         },
         {
           "direction": "north",
           "file": "02-recover.png",
-          "pose": "body straightens and rock returns in front guard"
+          "pose": "Body straightens from the hit and brings the claws back to guard."
         },
         {
           "direction": "north",
           "file": "03-ready.png",
-          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+          "pose": "Balanced ready silhouette matching the idle pose."
         },
         {
           "direction": "north-north-west",
           "file": "00-flinch.png",
-          "pose": "brief shoulder-and-head flinch backward; rock remains visible, feet planted"
+          "pose": "Head and shoulders begin a brief backward flinch; claws remain visible."
         },
         {
           "direction": "north-north-west",
           "file": "01-recoil.png",
-          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+          "pose": "Strongest torso recoil; weight sinks while the feet stay grounded."
         },
         {
           "direction": "north-north-west",
           "file": "02-recover.png",
-          "pose": "body straightens and rock returns in front guard"
+          "pose": "Body straightens from the hit and brings the claws back to guard."
         },
         {
           "direction": "north-north-west",
           "file": "03-ready.png",
-          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+          "pose": "Balanced ready silhouette matching the idle pose."
         },
         {
           "direction": "north-west",
           "file": "00-flinch.png",
-          "pose": "brief shoulder-and-head flinch backward; rock remains visible, feet planted"
+          "pose": "Head and shoulders begin a brief backward flinch; claws remain visible."
         },
         {
           "direction": "north-west",
           "file": "01-recoil.png",
-          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+          "pose": "Strongest torso recoil; weight sinks while the feet stay grounded."
         },
         {
           "direction": "north-west",
           "file": "02-recover.png",
-          "pose": "body straightens and rock returns in front guard"
+          "pose": "Body straightens from the hit and brings the claws back to guard."
         },
         {
           "direction": "north-west",
           "file": "03-ready.png",
-          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+          "pose": "Balanced ready silhouette matching the idle pose."
         },
         {
           "direction": "west-north-west",
           "file": "00-flinch.png",
-          "pose": "brief shoulder-and-head flinch backward; rock remains visible, feet planted"
+          "pose": "Head and shoulders begin a brief backward flinch; claws remain visible."
         },
         {
           "direction": "west-north-west",
           "file": "01-recoil.png",
-          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+          "pose": "Strongest torso recoil; weight sinks while the feet stay grounded."
         },
         {
           "direction": "west-north-west",
           "file": "02-recover.png",
-          "pose": "body straightens and rock returns in front guard"
+          "pose": "Body straightens from the hit and brings the claws back to guard."
         },
         {
           "direction": "west-north-west",
           "file": "03-ready.png",
-          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+          "pose": "Balanced ready silhouette matching the idle pose."
         },
         {
           "direction": "west",
           "file": "00-flinch.png",
-          "pose": "brief shoulder-and-head flinch backward; rock remains visible, feet planted"
+          "pose": "Head and shoulders begin a brief backward flinch; claws remain visible."
         },
         {
           "direction": "west",
           "file": "01-recoil.png",
-          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+          "pose": "Strongest torso recoil; weight sinks while the feet stay grounded."
         },
         {
           "direction": "west",
           "file": "02-recover.png",
-          "pose": "body straightens and rock returns in front guard"
+          "pose": "Body straightens from the hit and brings the claws back to guard."
         },
         {
           "direction": "west",
           "file": "03-ready.png",
-          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+          "pose": "Balanced ready silhouette matching the idle pose."
         },
         {
           "direction": "west-south-west",
           "file": "00-flinch.png",
-          "pose": "brief shoulder-and-head flinch backward; rock remains visible, feet planted"
+          "pose": "Head and shoulders begin a brief backward flinch; claws remain visible."
         },
         {
           "direction": "west-south-west",
           "file": "01-recoil.png",
-          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+          "pose": "Strongest torso recoil; weight sinks while the feet stay grounded."
         },
         {
           "direction": "west-south-west",
           "file": "02-recover.png",
-          "pose": "body straightens and rock returns in front guard"
+          "pose": "Body straightens from the hit and brings the claws back to guard."
         },
         {
           "direction": "west-south-west",
           "file": "03-ready.png",
-          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+          "pose": "Balanced ready silhouette matching the idle pose."
         },
         {
           "direction": "south-west",
           "file": "00-flinch.png",
-          "pose": "brief shoulder-and-head flinch backward; rock remains visible, feet planted"
+          "pose": "Head and shoulders begin a brief backward flinch; claws remain visible."
         },
         {
           "direction": "south-west",
           "file": "01-recoil.png",
-          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+          "pose": "Strongest torso recoil; weight sinks while the feet stay grounded."
         },
         {
           "direction": "south-west",
           "file": "02-recover.png",
-          "pose": "body straightens and rock returns in front guard"
+          "pose": "Body straightens from the hit and brings the claws back to guard."
         },
         {
           "direction": "south-west",
           "file": "03-ready.png",
-          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+          "pose": "Balanced ready silhouette matching the idle pose."
         },
         {
           "direction": "south-south-west",
           "file": "00-flinch.png",
-          "pose": "brief shoulder-and-head flinch backward; rock remains visible, feet planted"
+          "pose": "Head and shoulders begin a brief backward flinch; claws remain visible."
         },
         {
           "direction": "south-south-west",
           "file": "01-recoil.png",
-          "pose": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line"
+          "pose": "Strongest torso recoil; weight sinks while the feet stay grounded."
         },
         {
           "direction": "south-south-west",
           "file": "02-recover.png",
-          "pose": "body straightens and rock returns in front guard"
+          "pose": "Body straightens from the hit and brings the claws back to guard."
         },
         {
           "direction": "south-south-west",
           "file": "03-ready.png",
-          "pose": "same balanced ready silhouette as idle so hit can blend back cleanly"
+          "pose": "Balanced ready silhouette matching the idle pose."
         }
       ]
     },
@@ -1158,322 +1158,322 @@
         {
           "direction": "south",
           "file": "00-fall.png",
-          "pose": "defeated posture tips and knees begin to buckle; rock descends with near hand"
+          "pose": "Defeated posture tips and the knees begin to buckle."
         },
         {
           "direction": "south",
           "file": "01-collapse.png",
-          "pose": "body falls sideways onto the ground while still holding rock"
+          "pose": "Body falls sideways toward the ground as the cape follows."
         },
         {
           "direction": "south",
           "file": "02-ground.png",
-          "pose": "fully grounded prone giant and rock; natural compact silhouette within cell"
+          "pose": "Fully grounded prone Vampire with a compact silhouette."
         },
         {
           "direction": "south",
           "file": "03-settle.png",
-          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+          "pose": "Final still grounded corpse; preserve the scale of the grounded pose."
         },
         {
           "direction": "south-south-east",
           "file": "00-fall.png",
-          "pose": "defeated posture tips and knees begin to buckle; rock descends with near hand"
+          "pose": "Defeated posture tips and the knees begin to buckle."
         },
         {
           "direction": "south-south-east",
           "file": "01-collapse.png",
-          "pose": "body falls sideways onto the ground while still holding rock"
+          "pose": "Body falls sideways toward the ground as the cape follows."
         },
         {
           "direction": "south-south-east",
           "file": "02-ground.png",
-          "pose": "fully grounded prone giant and rock; natural compact silhouette within cell"
+          "pose": "Fully grounded prone Vampire with a compact silhouette."
         },
         {
           "direction": "south-south-east",
           "file": "03-settle.png",
-          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+          "pose": "Final still grounded corpse; preserve the scale of the grounded pose."
         },
         {
           "direction": "south-east",
           "file": "00-fall.png",
-          "pose": "defeated posture tips and knees begin to buckle; rock descends with near hand"
+          "pose": "Defeated posture tips and the knees begin to buckle."
         },
         {
           "direction": "south-east",
           "file": "01-collapse.png",
-          "pose": "body falls sideways onto the ground while still holding rock"
+          "pose": "Body falls sideways toward the ground as the cape follows."
         },
         {
           "direction": "south-east",
           "file": "02-ground.png",
-          "pose": "fully grounded prone giant and rock; natural compact silhouette within cell"
+          "pose": "Fully grounded prone Vampire with a compact silhouette."
         },
         {
           "direction": "south-east",
           "file": "03-settle.png",
-          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+          "pose": "Final still grounded corpse; preserve the scale of the grounded pose."
         },
         {
           "direction": "east-south-east",
           "file": "00-fall.png",
-          "pose": "defeated posture tips and knees begin to buckle; rock descends with near hand"
+          "pose": "Defeated posture tips and the knees begin to buckle."
         },
         {
           "direction": "east-south-east",
           "file": "01-collapse.png",
-          "pose": "body falls sideways onto the ground while still holding rock"
+          "pose": "Body falls sideways toward the ground as the cape follows."
         },
         {
           "direction": "east-south-east",
           "file": "02-ground.png",
-          "pose": "fully grounded prone giant and rock; natural compact silhouette within cell"
+          "pose": "Fully grounded prone Vampire with a compact silhouette."
         },
         {
           "direction": "east-south-east",
           "file": "03-settle.png",
-          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+          "pose": "Final still grounded corpse; preserve the scale of the grounded pose."
         },
         {
           "direction": "east",
           "file": "00-fall.png",
-          "pose": "defeated posture tips and knees begin to buckle; rock descends with near hand"
+          "pose": "Defeated posture tips and the knees begin to buckle."
         },
         {
           "direction": "east",
           "file": "01-collapse.png",
-          "pose": "body falls sideways onto the ground while still holding rock"
+          "pose": "Body falls sideways toward the ground as the cape follows."
         },
         {
           "direction": "east",
           "file": "02-ground.png",
-          "pose": "fully grounded prone giant and rock; natural compact silhouette within cell"
+          "pose": "Fully grounded prone Vampire with a compact silhouette."
         },
         {
           "direction": "east",
           "file": "03-settle.png",
-          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+          "pose": "Final still grounded corpse; preserve the scale of the grounded pose."
         },
         {
           "direction": "east-north-east",
           "file": "00-fall.png",
-          "pose": "defeated posture tips and knees begin to buckle; rock descends with near hand"
+          "pose": "Defeated posture tips and the knees begin to buckle."
         },
         {
           "direction": "east-north-east",
           "file": "01-collapse.png",
-          "pose": "body falls sideways onto the ground while still holding rock"
+          "pose": "Body falls sideways toward the ground as the cape follows."
         },
         {
           "direction": "east-north-east",
           "file": "02-ground.png",
-          "pose": "fully grounded prone giant and rock; natural compact silhouette within cell"
+          "pose": "Fully grounded prone Vampire with a compact silhouette."
         },
         {
           "direction": "east-north-east",
           "file": "03-settle.png",
-          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+          "pose": "Final still grounded corpse; preserve the scale of the grounded pose."
         },
         {
           "direction": "north-east",
           "file": "00-fall.png",
-          "pose": "defeated posture tips and knees begin to buckle; rock descends with near hand"
+          "pose": "Defeated posture tips and the knees begin to buckle."
         },
         {
           "direction": "north-east",
           "file": "01-collapse.png",
-          "pose": "body falls sideways onto the ground while still holding rock"
+          "pose": "Body falls sideways toward the ground as the cape follows."
         },
         {
           "direction": "north-east",
           "file": "02-ground.png",
-          "pose": "fully grounded prone giant and rock; natural compact silhouette within cell"
+          "pose": "Fully grounded prone Vampire with a compact silhouette."
         },
         {
           "direction": "north-east",
           "file": "03-settle.png",
-          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+          "pose": "Final still grounded corpse; preserve the scale of the grounded pose."
         },
         {
           "direction": "north-north-east",
           "file": "00-fall.png",
-          "pose": "defeated posture tips and knees begin to buckle; rock descends with near hand"
+          "pose": "Defeated posture tips and the knees begin to buckle."
         },
         {
           "direction": "north-north-east",
           "file": "01-collapse.png",
-          "pose": "body falls sideways onto the ground while still holding rock"
+          "pose": "Body falls sideways toward the ground as the cape follows."
         },
         {
           "direction": "north-north-east",
           "file": "02-ground.png",
-          "pose": "fully grounded prone giant and rock; natural compact silhouette within cell"
+          "pose": "Fully grounded prone Vampire with a compact silhouette."
         },
         {
           "direction": "north-north-east",
           "file": "03-settle.png",
-          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+          "pose": "Final still grounded corpse; preserve the scale of the grounded pose."
         },
         {
           "direction": "north",
           "file": "00-fall.png",
-          "pose": "defeated posture tips and knees begin to buckle; rock descends with near hand"
+          "pose": "Defeated posture tips and the knees begin to buckle."
         },
         {
           "direction": "north",
           "file": "01-collapse.png",
-          "pose": "body falls sideways onto the ground while still holding rock"
+          "pose": "Body falls sideways toward the ground as the cape follows."
         },
         {
           "direction": "north",
           "file": "02-ground.png",
-          "pose": "fully grounded prone giant and rock; natural compact silhouette within cell"
+          "pose": "Fully grounded prone Vampire with a compact silhouette."
         },
         {
           "direction": "north",
           "file": "03-settle.png",
-          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+          "pose": "Final still grounded corpse; preserve the scale of the grounded pose."
         },
         {
           "direction": "north-north-west",
           "file": "00-fall.png",
-          "pose": "defeated posture tips and knees begin to buckle; rock descends with near hand"
+          "pose": "Defeated posture tips and the knees begin to buckle."
         },
         {
           "direction": "north-north-west",
           "file": "01-collapse.png",
-          "pose": "body falls sideways onto the ground while still holding rock"
+          "pose": "Body falls sideways toward the ground as the cape follows."
         },
         {
           "direction": "north-north-west",
           "file": "02-ground.png",
-          "pose": "fully grounded prone giant and rock; natural compact silhouette within cell"
+          "pose": "Fully grounded prone Vampire with a compact silhouette."
         },
         {
           "direction": "north-north-west",
           "file": "03-settle.png",
-          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+          "pose": "Final still grounded corpse; preserve the scale of the grounded pose."
         },
         {
           "direction": "north-west",
           "file": "00-fall.png",
-          "pose": "defeated posture tips and knees begin to buckle; rock descends with near hand"
+          "pose": "Defeated posture tips and the knees begin to buckle."
         },
         {
           "direction": "north-west",
           "file": "01-collapse.png",
-          "pose": "body falls sideways onto the ground while still holding rock"
+          "pose": "Body falls sideways toward the ground as the cape follows."
         },
         {
           "direction": "north-west",
           "file": "02-ground.png",
-          "pose": "fully grounded prone giant and rock; natural compact silhouette within cell"
+          "pose": "Fully grounded prone Vampire with a compact silhouette."
         },
         {
           "direction": "north-west",
           "file": "03-settle.png",
-          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+          "pose": "Final still grounded corpse; preserve the scale of the grounded pose."
         },
         {
           "direction": "west-north-west",
           "file": "00-fall.png",
-          "pose": "defeated posture tips and knees begin to buckle; rock descends with near hand"
+          "pose": "Defeated posture tips and the knees begin to buckle."
         },
         {
           "direction": "west-north-west",
           "file": "01-collapse.png",
-          "pose": "body falls sideways onto the ground while still holding rock"
+          "pose": "Body falls sideways toward the ground as the cape follows."
         },
         {
           "direction": "west-north-west",
           "file": "02-ground.png",
-          "pose": "fully grounded prone giant and rock; natural compact silhouette within cell"
+          "pose": "Fully grounded prone Vampire with a compact silhouette."
         },
         {
           "direction": "west-north-west",
           "file": "03-settle.png",
-          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+          "pose": "Final still grounded corpse; preserve the scale of the grounded pose."
         },
         {
           "direction": "west",
           "file": "00-fall.png",
-          "pose": "defeated posture tips and knees begin to buckle; rock descends with near hand"
+          "pose": "Defeated posture tips and the knees begin to buckle."
         },
         {
           "direction": "west",
           "file": "01-collapse.png",
-          "pose": "body falls sideways onto the ground while still holding rock"
+          "pose": "Body falls sideways toward the ground as the cape follows."
         },
         {
           "direction": "west",
           "file": "02-ground.png",
-          "pose": "fully grounded prone giant and rock; natural compact silhouette within cell"
+          "pose": "Fully grounded prone Vampire with a compact silhouette."
         },
         {
           "direction": "west",
           "file": "03-settle.png",
-          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+          "pose": "Final still grounded corpse; preserve the scale of the grounded pose."
         },
         {
           "direction": "west-south-west",
           "file": "00-fall.png",
-          "pose": "defeated posture tips and knees begin to buckle; rock descends with near hand"
+          "pose": "Defeated posture tips and the knees begin to buckle."
         },
         {
           "direction": "west-south-west",
           "file": "01-collapse.png",
-          "pose": "body falls sideways onto the ground while still holding rock"
+          "pose": "Body falls sideways toward the ground as the cape follows."
         },
         {
           "direction": "west-south-west",
           "file": "02-ground.png",
-          "pose": "fully grounded prone giant and rock; natural compact silhouette within cell"
+          "pose": "Fully grounded prone Vampire with a compact silhouette."
         },
         {
           "direction": "west-south-west",
           "file": "03-settle.png",
-          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+          "pose": "Final still grounded corpse; preserve the scale of the grounded pose."
         },
         {
           "direction": "south-west",
           "file": "00-fall.png",
-          "pose": "defeated posture tips and knees begin to buckle; rock descends with near hand"
+          "pose": "Defeated posture tips and the knees begin to buckle."
         },
         {
           "direction": "south-west",
           "file": "01-collapse.png",
-          "pose": "body falls sideways onto the ground while still holding rock"
+          "pose": "Body falls sideways toward the ground as the cape follows."
         },
         {
           "direction": "south-west",
           "file": "02-ground.png",
-          "pose": "fully grounded prone giant and rock; natural compact silhouette within cell"
+          "pose": "Fully grounded prone Vampire with a compact silhouette."
         },
         {
           "direction": "south-west",
           "file": "03-settle.png",
-          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+          "pose": "Final still grounded corpse; preserve the scale of the grounded pose."
         },
         {
           "direction": "south-south-west",
           "file": "00-fall.png",
-          "pose": "defeated posture tips and knees begin to buckle; rock descends with near hand"
+          "pose": "Defeated posture tips and the knees begin to buckle."
         },
         {
           "direction": "south-south-west",
           "file": "01-collapse.png",
-          "pose": "body falls sideways onto the ground while still holding rock"
+          "pose": "Body falls sideways toward the ground as the cape follows."
         },
         {
           "direction": "south-south-west",
           "file": "02-ground.png",
-          "pose": "fully grounded prone giant and rock; natural compact silhouette within cell"
+          "pose": "Fully grounded prone Vampire with a compact silhouette."
         },
         {
           "direction": "south-south-west",
           "file": "03-settle.png",
-          "pose": "final still grounded corpse, shape and feet/weapon contained in cell"
+          "pose": "Final still grounded corpse; preserve the scale of the grounded pose."
         }
       ]
     }
@@ -1482,5 +1482,5 @@
     "meta.json",
     "poses/"
   ],
-  "imageQa": "Raw built-in imagegen outputs are candidate source only. Every pose still requires visual identity/facing review, hard-alpha/edge QA, foot-anchor measurement, and atlas QA before acceptance."
+  "imageQa": "The generated source poses have been visually reviewed. Idle, walk and hit candidates pass identity, direction, sequence, alpha and anchor review. Attack and death remain candidate-review for the conflicts recorded in statusNote. Atlas/runtime approval is separate and remains pending."
 }

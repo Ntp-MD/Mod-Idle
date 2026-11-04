@@ -19,5 +19,12 @@
     "new16DirectionSetAccepted": false,
     "anchor": false,
     "atlas": false
-  }
+  },
+  "reviewNote": "Hold the complete idle direction set for scale consistency: legacy eight-direction sprites are about 159?165 px tall while generated intermediate directions are about 184 px tall on the same 384 px canvas. Validate a common scale and anchor before approval.",
+  "reviewVisibleAlphaGt8Bounds": [
+    124,
+    130,
+    254,
+    289
+  ]
 }
