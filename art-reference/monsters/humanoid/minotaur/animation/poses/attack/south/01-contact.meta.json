@@ -1,12 +1,12 @@
 {
   "status": "candidate-review",
   "generator": "OpenAI built-in image_gen",
-  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-dd11facd-a85e-49d6-99c7-a13471218c77.png",
+  "source": "../../../drafts/source-originals/attack/south/01-contact.png",
   "direction": "south",
   "angleDegrees": 0,
   "action": "attack",
   "phase": "01-contact",
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "qa": {
     "visuallyInspected": true,
     "identityPlausible": true,
@@ -14,6 +14,43 @@
     "phaseApproved": true,
     "cycleApproved": false,
     "atlasApproved": false,
-    "note": "Attack raised windup and lowered contact visually distinguishable, anchor/scale not approved."
+    "note": "Attack raised windup and lowered contact visually distinguishable, anchor/scale not approved.",
+    "footAnchorVerified": false,
+    "visualIdentityReviewed": false
+  },
+  "generationSource": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-dd11facd-a85e-49d6-99c7-a13471218c77.png",
+  "normalization": {
+    "sourceSize": [
+      1254,
+      1254
+    ],
+    "sourceContentBoundsAlphaGt16": [
+      300,
+      153,
+      1005,
+      1213
+    ],
+    "targetContentHeight": 190,
+    "renderedContentSize": [
+      126,
+      190
+    ],
+    "frameCanvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos",
+    "alphaThreshold": 16
+  },
+  "visualReview": "Source dimensions and anchor normalized to the Minotaur 384x384 contract; identity, exact facing, phase, alpha, sequence and atlas QA remain pending.",
+  "processing": {
+    "magentaEdgeCleanup": {
+      "method": "R-G>12; B-G>12; max(R,B)>35; abs(R-B)<100; alpha set to 0",
+      "pixelsRemoved": 2
+    }
   }
 }

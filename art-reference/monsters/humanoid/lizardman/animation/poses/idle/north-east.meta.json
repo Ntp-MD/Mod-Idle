@@ -1,5 +1,5 @@
 {
-  "status": "legacy-extracted-candidate",
+  "status": "approved-source-pose",
   "speciesId": "lizardman",
   "action": "idle",
   "direction": "north-east",
@@ -17,7 +17,22 @@
   "sourcePixelsModified": false,
   "qa": {
     "new16DirectionSetAccepted": false,
-    "anchor": false,
+    "anchor": true,
     "atlas": false
-  }
+  },
+  "visualReview": {
+    "identityAccepted": true,
+    "directionAccepted": true,
+    "poseAccepted": true,
+    "transparencyAccepted": true,
+    "anchorAccepted": true,
+    "atlasAccepted": false
+  },
+  "reviewVisibleAlphaGt8Bounds": [
+    126,
+    122,
+    278,
+    288
+  ],
+  "reviewNote": "The eight original idle directions were checked as individual source poses for identity, direction, alpha and foot placement. The generated intermediate directions and cross-direction style continuity still require review; atlas and runtime promotion remain pending."
 }

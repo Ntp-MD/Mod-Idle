@@ -1,15 +1,54 @@
 {
   "status": "candidate-review",
   "generator": "OpenAI built-in image_gen",
-  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-532fbceb-7c3d-4362-869e-e04fa34728c8.png",
+  "source": "../../drafts/source-originals/idle/west-north-west.png",
   "direction": "west-north-west",
   "angleDegrees": 247.5,
   "action": "idle",
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "qa": {
     "visuallyInspected": true,
     "facingPlausible": true,
     "exactYawApproved": false,
-    "atlasApproved": false
-  }
+    "atlasApproved": false,
+    "footAnchorVerified": true,
+    "visualIdentityReviewed": true
+  },
+  "generationSource": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-532fbceb-7c3d-4362-869e-e04fa34728c8.png",
+  "normalization": {
+    "sourceSize": [
+      1254,
+      1254
+    ],
+    "sourceContentBoundsAlphaGt16": [
+      263,
+      165,
+      990,
+      1156
+    ],
+    "targetContentHeight": 178,
+    "renderedContentSize": [
+      131,
+      178
+    ],
+    "frameCanvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos",
+    "alphaThreshold": 16
+  },
+  "visualReview": "Identity and foot placement reviewed; exact facing, alpha, cross-direction continuity and atlas QA remain pending.",
+  "reviewVisibleAlphaGt8Bounds": [
+    127,
+    110,
+    258,
+    288
+  ],
+  "reviewSemiTransparentPixels": 14115,
+  "reviewNote": "Identity and foot placement were visually checked against the Minotaur reference; exact yaw, hard-alpha and continuity with legacy axe designs remain open. Source candidate and runtime atlas remain unapproved."
 }

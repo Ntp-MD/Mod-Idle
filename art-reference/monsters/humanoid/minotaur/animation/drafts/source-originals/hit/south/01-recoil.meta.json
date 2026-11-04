@@ -1,0 +1,21 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-a2ba7c23-078f-4ed7-b265-3f592532b763.png",
+  "action": "hit",
+  "phase": "01-recoil.png",
+  "direction": "south",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": false,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false
+  },
+  "schemaVersion": 1,
+  "speciesId": "minotaur",
+  "preservationOnly": true,
+  "originalCanonicalPath": "hit/south/01-recoil.png",
+  "archiveSha256": "8c4c0f202ce187a2d74395674cb5cdd6563ff00b858a37fd7d6d4ac6893d8645",
+  "visualReview": "Unmodified 1254x1254 source retained; superseded in canonical path by normalized 384x384 candidate. Not atlas-ready."
+}

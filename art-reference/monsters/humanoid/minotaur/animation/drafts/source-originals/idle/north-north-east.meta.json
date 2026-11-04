@@ -1,0 +1,23 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-829f6a83-808b-4b31-80c8-445591021937.png",
+  "direction": "north-north-east",
+  "angleDegrees": 157.5,
+  "action": "idle",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": true,
+    "identityPlausible": true,
+    "facingPlausible": true,
+    "exactYawApproved": false,
+    "atlasApproved": false,
+    "note": "Facing is approximate; front-facing intermediate pairs require further comparison, margins/anchor unapproved."
+  },
+  "schemaVersion": 1,
+  "speciesId": "minotaur",
+  "preservationOnly": true,
+  "originalCanonicalPath": "idle/north-north-east.png",
+  "archiveSha256": "71565d306f0316494b010f3d1feb8c7e784ad42f4b76ae34ce71f7d8769a6e14",
+  "visualReview": "Unmodified 1254x1254 source retained; superseded in canonical path by normalized 384x384 candidate. Not atlas-ready."
+}

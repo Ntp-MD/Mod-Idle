@@ -1,17 +1,62 @@
 {
   "status": "candidate-review",
   "generator": "OpenAI built-in image_gen",
-  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-51616fe3-fdc1-4a5e-91e4-44062601568b.png",
+  "source": "../../drafts/source-originals/idle/east-south-east.png",
   "direction": "east-south-east",
   "angleDegrees": 67.5,
   "action": "idle",
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "qa": {
     "visuallyInspected": true,
     "identityPlausible": true,
     "facingPlausible": false,
     "exactYawApproved": false,
     "atlasApproved": false,
-    "note": "Facing is approximate; front-facing intermediate pairs require further comparison, margins/anchor unapproved."
-  }
+    "note": "Facing is approximate; front-facing intermediate pairs require further comparison, margins/anchor unapproved.",
+    "footAnchorVerified": true,
+    "visualIdentityReviewed": true
+  },
+  "generationSource": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-51616fe3-fdc1-4a5e-91e4-44062601568b.png",
+  "normalization": {
+    "sourceSize": [
+      1254,
+      1254
+    ],
+    "sourceContentBoundsAlphaGt16": [
+      206,
+      235,
+      1091,
+      1174
+    ],
+    "targetContentHeight": 178,
+    "renderedContentSize": [
+      168,
+      178
+    ],
+    "frameCanvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos",
+    "alphaThreshold": 16
+  },
+  "visualReview": "Identity and foot placement reviewed; exact facing, alpha, cross-direction continuity and atlas QA remain pending.",
+  "processing": {
+    "magentaEdgeCleanup": {
+      "method": "R-G>12; B-G>12; max(R,B)>35; abs(R-B)<100; alpha set to 0",
+      "pixelsRemoved": 1
+    }
+  },
+  "reviewVisibleAlphaGt8Bounds": [
+    108,
+    110,
+    276,
+    288
+  ],
+  "reviewSemiTransparentPixels": 14832,
+  "reviewNote": "Identity and foot placement were visually checked against the Minotaur reference; exact yaw, hard-alpha and continuity with legacy axe designs remain open. Source candidate and runtime atlas remain unapproved."
 }

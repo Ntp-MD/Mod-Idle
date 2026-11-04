@@ -39,5 +39,6 @@
     "anchor": false,
     "atlas": false,
     "runtimePromotion": false
-  }
+  },
+  "reviewNote": "Hold generated intermediate directions for identity continuity: head crest and muzzle proportions differ noticeably from neighboring legacy poses. Check exact facing and size before approval."
 }

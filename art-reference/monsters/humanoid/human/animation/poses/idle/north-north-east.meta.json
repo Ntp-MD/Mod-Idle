@@ -38,5 +38,6 @@
     "anchor": false,
     "atlas": false,
     "runtimePromotion": false
-  }
+  },
+  "reviewNote": "Hold for exact-facing comparison: both near-north poses appear to turn toward the same side when inspected together, rather than clearly bracketing north. Recheck against adjacent directions before approval."
 }

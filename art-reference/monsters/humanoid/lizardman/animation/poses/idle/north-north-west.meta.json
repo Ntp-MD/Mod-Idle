@@ -41,5 +41,6 @@
     "anchor": false,
     "atlas": false,
     "runtimePromotion": false
-  }
+  },
+  "reviewNote": "Hold generated intermediate directions for identity continuity: armor detail, head silhouette and sword proportions differ from neighboring legacy poses. Check exact facing and size before approval."
 }

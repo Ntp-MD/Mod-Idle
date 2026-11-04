@@ -1,5 +1,5 @@
 {
-  "status": "legacy-extracted-candidate",
+  "status": "approved-source-pose",
   "speciesId": "human",
   "action": "idle",
   "direction": "north-west",
@@ -17,7 +17,22 @@
   "sourcePixelsModified": false,
   "qa": {
     "new16DirectionSetAccepted": false,
-    "anchor": false,
+    "anchor": true,
     "atlas": false
-  }
+  },
+  "visualReview": {
+    "identityAccepted": true,
+    "directionAccepted": true,
+    "poseAccepted": true,
+    "transparencyAccepted": true,
+    "anchorAccepted": true,
+    "atlasAccepted": false
+  },
+  "reviewVisibleAlphaGt8Bounds": [
+    125,
+    114,
+    246,
+    289
+  ],
+  "reviewNote": "The eight original idle directions were visually checked as individual source poses on light and dark backgrounds, including direction, identity, alpha and foot placement. The intermediate directions and complete 16-direction set still require review; atlas and runtime promotion remain pending."
 }

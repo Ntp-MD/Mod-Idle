@@ -38,5 +38,6 @@
     "anchor": false,
     "atlas": false,
     "runtimePromotion": false
-  }
+  },
+  "reviewNote": "Visual sequence review: successive frames are very similar and do not clearly alternate the leading foot. Review and repair the full stride cycle before approval."
 }

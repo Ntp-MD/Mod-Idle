@@ -1,6 +1,6 @@
 {
-  "status": "inherited-approved-source-candidate",
-  "source": "../atlas/animation.png",
+  "status": "baseline-extracted-candidate",
+  "source": "../../../atlas/animation.png",
   "operation": "lossless existing cell extraction",
   "sourceCell": {
     "column": 1,
@@ -10,9 +10,16 @@
   },
   "action": "death",
   "direction": "east",
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "qa": {
-    "atlasApproved": false,
-    "note": "source atlas approved; new 16-direction atlas not approved"
+    "visualIdentityReviewed": false,
+    "atlasReady": false
+  },
+  "visualReview": "Extracted from the visually-approved 8-direction atlas; magenta matte-edge pixels removed from this candidate. The approved atlas remains unchanged.",
+  "processing": {
+    "magentaEdgeCleanup": {
+      "method": "R-G>12; B-G>12; max(R,B)>35; abs(R-B)<100; alpha set to 0",
+      "pixelsRemoved": 2
+    }
   }
 }

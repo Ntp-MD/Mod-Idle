@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "direction16-candidate-incomplete",
+  "status": "direction16-candidate-review-required",
   "speciesId": "minotaur",
   "race": "humanoid",
   "version": "v5",
@@ -86,7 +86,7 @@
     "y": 288,
     "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
   },
-  "statusNote": "16-direction production candidate. Existing approved atlas retained until replacement completes visual and atlas QA. No runtime promotion.",
+  "statusNote": "Canonical inventory complete: 272/272 source slots (36 baseline-extracted-candidate; 236 candidate-review). All new candidates remain review-only; the approved baseline atlas stays untouched until identity, facing, alpha, anchor, sequence and atlas QA pass.",
   "actions": {
     "idle": {
       "framesPerDirection": 1,

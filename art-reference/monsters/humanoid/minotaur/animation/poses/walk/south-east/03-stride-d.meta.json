@@ -1,15 +1,46 @@
 {
   "status": "candidate-review",
   "generator": "OpenAI built-in image_gen",
-  "source": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-30c4d706-460a-4787-9bf4-9b18e55a821a.png",
+  "source": "../../../drafts/source-originals/walk/south-east/03-stride-d.png",
   "action": "walk",
   "phase": "03-stride-d.png",
   "direction": "south-east",
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "qa": {
     "visuallyInspected": false,
     "phaseApproved": false,
     "cycleApproved": false,
-    "atlasApproved": false
-  }
+    "atlasApproved": false,
+    "footAnchorVerified": false,
+    "visualIdentityReviewed": false
+  },
+  "generationSource": "C:\\Users\\disda\\.codex\\generated_images\\01a18324-a664-7083-af56-77554e8e19f7\\exec-30c4d706-460a-4787-9bf4-9b18e55a821a.png",
+  "normalization": {
+    "sourceSize": [
+      1254,
+      1254
+    ],
+    "sourceContentBoundsAlphaGt16": [
+      208,
+      242,
+      1020,
+      1160
+    ],
+    "targetContentHeight": 162,
+    "renderedContentSize": [
+      143,
+      162
+    ],
+    "frameCanvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos",
+    "alphaThreshold": 16
+  },
+  "visualReview": "Source dimensions and anchor normalized to the Minotaur 384x384 contract; identity, exact facing, phase, alpha, sequence and atlas QA remain pending."
 }

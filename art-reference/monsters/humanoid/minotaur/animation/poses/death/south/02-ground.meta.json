@@ -1,14 +1,52 @@
 {
   "status": "candidate-review",
   "generator": "OpenAI built-in image_gen",
-  "source": "C:/Users/disda/.codex/generated_images/01a18324-a664-7083-af56-77554e8e19f7/exec-77ef5211-fa1d-40e3-b014-7b611632fe68.png",
+  "source": "../../../drafts/source-originals/death/south/02-ground.png",
   "action": "death",
   "direction": "south",
   "phase": "02-ground",
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "sidecarRecovery": "Exact generated source matched by SHA256 after quota aborted batch before sidecar write",
   "qa": {
     "visuallyInspected": false,
-    "atlasApproved": false
-  }
+    "atlasApproved": false,
+    "footAnchorVerified": false,
+    "visualIdentityReviewed": false
+  },
+  "generationSource": "C:/Users/disda/.codex/generated_images/01a18324-a664-7083-af56-77554e8e19f7/exec-77ef5211-fa1d-40e3-b014-7b611632fe68.png",
+  "normalization": {
+    "sourceSize": [
+      1254,
+      1254
+    ],
+    "sourceContentBoundsAlphaGt16": [
+      92,
+      428,
+      1205,
+      1198
+    ],
+    "targetContentHeight": 88,
+    "renderedContentSize": [
+      127,
+      88
+    ],
+    "frameCanvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos",
+    "alphaThreshold": 16
+  },
+  "visualReview": "Source dimensions and anchor normalized to the Minotaur 384x384 contract; identity, exact facing, phase, alpha, sequence and atlas QA remain pending.",
+  "processing": {
+    "magentaEdgeCleanup": {
+      "method": "R-G>12; B-G>12; max(R,B)>35; abs(R-B)<100; alpha set to 0",
+      "pixelsRemoved": 2
+    }
+  },
+  "reviewNote": "Hold south death sequence for scale and pose continuity: visible width shrinks from 127 px at ground to 86 px at settle, and the body and axe orientation change markedly."
 }

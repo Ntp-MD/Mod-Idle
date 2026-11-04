@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "minotaur",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:\\Users\\ITOP\\.codex-zed-account-1\\generated_images\\01a1a0b9-1e40-7663-be3e-149b24193ac4\\exec-389975d8-478b-46dd-8285-81adf0e17b5b.png",
+  "identityRef": "../../../../reference.png",
+  "facingSourceRef": "../../idle/north-west.png",
+  "phaseSourceRef": "../east/02-ground.png",
+  "action": "death",
+  "direction": "north-west",
+  "requestedFacingDegrees": 225,
+  "phase": "02-ground",
+  "pose": "fully grounded prone minotaur and broad double-headed battle axe; natural compact silhouette within cell",
+  "sourceAtlas": "../../../drafts/death-02-ground-grid-candidate.png",
+  "sourceCrop": {
+    "cellRow": 2,
+    "cellColumn": 2,
+    "cellRect": [
+      627,
+      627,
+      313,
+      313
+    ],
+    "cellOrderIndex": 10,
+    "gridSize": [
+      1254,
+      1254
+    ]
+  },
+  "sourcePixelsModified": true,
+  "processing": {
+    "backgroundKey": "R-G>12; B-G>12; max(R,B)>35; abs(R-B)<100",
+    "contentBounds": "alpha-tight crop after magenta key",
+    "targetHeight": 88,
+    "canvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos",
+    "magentaEdgeCleanup": {
+      "method": "R-G>12; B-G>12; max(R,B)>35; abs(R-B)<100; alpha set to 0",
+      "pixelsRemoved": 21
+    }
+  },
+  "qa": {
+    "sourceGridVisuallyInspected": true,
+    "identityPlausible": true,
+    "facingVerified": false,
+    "phaseVerified": false,
+    "footAnchorVerified": false,
+    "atlasApproved": false
+  },
+  "visualReview": "Candidate cropped from inspected 16-direction phase grid. Exact facing, sequence continuity, alpha edges, anchor and atlas approval remain pending."
+}

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "minotaur",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:\\Users\\ITOP\\.codex-zed-account-1\\generated_images\\01a1a0b9-1e40-7663-be3e-149b24193ac4\\exec-2299858f-f424-4802-980b-a7ab8410dbbb.png",
+  "identityRef": "../../../../reference.png",
+  "facingSourceRef": "../../idle/north-north-west.png",
+  "phaseSourceRef": "../east/01-contact.png",
+  "action": "attack",
+  "direction": "north-north-west",
+  "requestedFacingDegrees": 202.5,
+  "phase": "01-contact",
+  "pose": "broad double-headed battle axe fully extended at clear contact; torso leans into attack while both feet stay on ground",
+  "sourceAtlas": "../../../drafts/attack-01-contact-grid-candidate.png",
+  "sourceCrop": {
+    "cellRow": 2,
+    "cellColumn": 1,
+    "cellRect": [
+      314,
+      627,
+      313,
+      313
+    ],
+    "cellOrderIndex": 9,
+    "gridSize": [
+      1254,
+      1254
+    ]
+  },
+  "sourcePixelsModified": true,
+  "processing": {
+    "backgroundKey": "R-G>12; B-G>12; max(R,B)>35; abs(R-B)<100",
+    "contentBounds": "alpha-tight crop after magenta key",
+    "targetHeight": 190,
+    "canvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos",
+    "magentaEdgeCleanup": {
+      "method": "R-G>12; B-G>12; max(R,B)>35; abs(R-B)<100; alpha set to 0",
+      "pixelsRemoved": 79
+    }
+  },
+  "qa": {
+    "sourceGridVisuallyInspected": true,
+    "identityPlausible": true,
+    "facingVerified": false,
+    "phaseVerified": false,
+    "footAnchorVerified": false,
+    "atlasApproved": false
+  },
+  "visualReview": "Candidate cropped from inspected 16-direction phase grid. Exact facing, sequence continuity, alpha edges, anchor and atlas approval remain pending."
+}
