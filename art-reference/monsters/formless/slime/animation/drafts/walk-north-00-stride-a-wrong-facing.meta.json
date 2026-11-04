@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "status": "rejected-wrong-facing",
+  "speciesId": "slime",
+  "action": "walk",
+  "direction": "north",
+  "pose": "cyan jelly body compresses low before hop",
+  "generator": "OpenAI built-in image_gen",
+  "source": "walk-00-stride-a-directions-candidate.png",
+  "sourceCell": [
+    0,
+    2
+  ],
+  "sourceCellBounds": [
+    0,
+    623,
+    315,
+    935
+  ],
+  "sourceVisibleBounds": [
+    87,
+    103,
+    258,
+    224
+  ],
+  "sourceSize": {
+    "width": 384,
+    "height": 384
+  },
+  "visibleAlphaGt8BoundsExclusive": [
+    107,
+    167,
+    278,
+    288
+  ],
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Shared fit-to-anchor normalization for candidate coverage; not independently visually measured.",
+  "sourcePixelsModified": true,
+  "processing": {
+    "method": "crop-direction-grid-fit-384-nearest-v1",
+    "resampling": "nearest-neighbor",
+    "sourceAlphaThreshold": 8,
+    "disconnectedComponentsRemoved": true,
+    "targetVisibleHeight": 128,
+    "maxVisibleWidth": 180
+  },
+  "identityReference": "../../reference.png",
+  "alphaMeasurement": {
+    "extrema": [
+      0,
+      255
+    ],
+    "distinctLevels": 241,
+    "hardAlpha": false
+  },
+  "visualReview": {
+    "identityAccepted": false,
+    "exactDirectionAccepted": false,
+    "poseSequenceAccepted": false,
+    "alphaAccepted": false,
+    "anchorAccepted": false,
+    "atlasAccepted": false
+  },
+  "note": "Unreviewed candidate art. Identity, exact facing, phase sequence, transparency and anchor need later visual review; runtime atlas unchanged.",
+  "reviewNote": "Preserved original candidate: front-facing eyes and mouth are visible in a north-facing walk pose.",
+  "originalPoseLocation": "../poses/walk/north/00-stride-a.png"
+}

@@ -17,5 +17,24 @@
     "status": "failed-weapon-hand-and-phase",
     "review": "Spear held by anatomicalLEFT hand and extends screen-left; fails canonicalRIGHT hand and committednorththrust follow-through.",
     "requiresRegeneration": true
+  },
+  "geometryReview": {
+    "canvas": [
+      1254,
+      1254
+    ],
+    "visibleAlphaThresholdExclusive": 8,
+    "visibleBoundsExclusive": [
+      167,
+      495,
+      862,
+      941
+    ],
+    "visibleContentClearOfCanvasEdge": true,
+    "requiredCanvas": [
+      384,
+      384
+    ],
+    "normalizationPending": true
   }
 }

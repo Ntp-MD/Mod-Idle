@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "direction16-candidate-incomplete",
+  "status": "direction16-candidate-complete",
   "speciesId": "slime",
   "race": "formless",
   "version": "v5",
@@ -86,7 +86,7 @@
     "y": 288,
     "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
   },
-  "statusNote": "16-direction production candidates; baseline untouched until full replacement reviewed.",
+  "statusNote": "Canonical 16-direction pose coverage is complete as unreviewed candidates; source atlas unchanged pending visual review.",
   "actions": {
     "idle": {
       "framesPerDirection": 1,
@@ -1486,28 +1486,28 @@
   "imageQa": "Raw built-in imagegen outputs are candidate source only. Every pose still requires visual identity/facing review, hard-alpha/edge QA, foot-anchor measurement, and atlas QA before acceptance.",
   "locomotionProfile": "grounded jelly squash and hop",
   "progress": {
-    "poseFiles": 40,
+    "poseFiles": 272,
     "expectedPoseFiles": 272,
     "actionCounts": {
-      "idle": 8,
-      "walk": 8,
-      "attack": 8,
-      "hit": 8,
-      "death": 8
+      "idle": 16,
+      "walk": 64,
+      "attack": 64,
+      "hit": 64,
+      "death": 64
     },
-    "generatedPoseFiles": 0,
-    "complete": false,
+    "generatedPoseFiles": 232,
+    "complete": true,
     "qaApproved": false,
     "rejectedMetadata": [],
-    "missingPoseFiles": 232,
-    "sourceCandidateFiles": 40
+    "missingPoseFiles": 0,
+    "sourceCandidateFiles": 272
   },
   "sourceInventory": {
     "cellSizes": {
-      "(384, 384)": 40
+      "(384, 384)": 272
     },
     "alphaTouchesCellEdge": 0,
-    "note": "Lossless baseline source cells retain original dimensions; normalize placement only during atlas packing after visual review."
+    "note": "Canonical candidate cells retain 384x384 canvases with transparent margins; raw grids remain in drafts pending visual review."
   },
   "generationBlocker": {
     "type": "imagegen-usage-limit",

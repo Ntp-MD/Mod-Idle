@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "direction16-candidate-incomplete",
+  "status": "direction16-candidate-review-required",
   "speciesId": "goblin",
   "race": "humanoid",
   "version": "v5",
@@ -86,7 +86,7 @@
     "y": 288,
     "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
   },
-  "statusNote": "New isolated version. Existing root 8-direction atlas and v2-v4 untouched pending completion and QA. No runtime promotion.",
+  "statusNote": "All 272/272 source slots are present. Forty are approved-source-pose and 232 are candidate-review. Facing, identity, alpha, anchors, sequence and atlas QA remain pending before promotion. Root 8-direction atlas and v2-v4 untouched; no runtime promotion.",
   "actions": {
     "idle": {
       "framesPerDirection": 1,
@@ -1487,8 +1487,7 @@
   "canonicalWeaponHand": "right-anatomical",
   "weaponHandAuthority": "../atlas/animation.png south idle cell: spear on screen-left when facing viewer; reference.png weapon-side mismatch must not override this.",
   "productionBlocker": {
-    "status": "imagegen-quota",
-    "resetsAt": 1793288069,
-    "nextStep": "Rebuild coherent16idle facings with anatomicalRIGHT hand before actionbatch. Retain rejected metadata."
+    "status": "candidate-art-review",
+    "nextStep": "Review all 232 candidate-review source poses for exact facing, identity, hard alpha, foot anchors and sequence continuity, then promote only after atlas QA."
   }
 }

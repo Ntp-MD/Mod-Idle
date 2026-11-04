@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "slime",
+  "action": "hit",
+  "direction": "south-south-west",
+  "pose": "jelly rebounds upright",
+  "generator": "OpenAI built-in image_gen",
+  "source": "../../../drafts/hit-02-recover-directions-candidate.png",
+  "sourceCell": [
+    3,
+    3
+  ],
+  "sourceCellBounds": [
+    945,
+    935,
+    1261,
+    1247
+  ],
+  "sourceVisibleBounds": [
+    54,
+    72,
+    212,
+    206
+  ],
+  "sourceSize": {
+    "width": 384,
+    "height": 384
+  },
+  "visibleAlphaGt8BoundsExclusive": [
+    117,
+    160,
+    268,
+    288
+  ],
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Shared fit-to-anchor normalization for candidate coverage; not independently visually measured.",
+  "sourcePixelsModified": true,
+  "processing": {
+    "method": "crop-direction-grid-fit-384-nearest-v1",
+    "resampling": "nearest-neighbor",
+    "sourceAlphaThreshold": 8,
+    "disconnectedComponentsRemoved": true,
+    "targetVisibleHeight": 128,
+    "maxVisibleWidth": 180
+  },
+  "identityReference": "../../../../reference.png",
+  "alphaMeasurement": {
+    "extrema": [
+      0,
+      255
+    ],
+    "distinctLevels": 233,
+    "hardAlpha": false
+  },
+  "visualReview": {
+    "identityAccepted": false,
+    "exactDirectionAccepted": false,
+    "poseSequenceAccepted": false,
+    "alphaAccepted": false,
+    "anchorAccepted": false,
+    "atlasAccepted": false
+  },
+  "note": "Unreviewed candidate art. Identity, exact facing, phase sequence, transparency and anchor need later visual review; runtime atlas unchanged."
+}

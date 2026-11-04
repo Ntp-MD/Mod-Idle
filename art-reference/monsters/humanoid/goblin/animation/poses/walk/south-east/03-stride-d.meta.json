@@ -18,5 +18,24 @@
     "footAnchorVerified": false,
     "phaseContinuityVerified": false,
     "productionApproved": false
+  },
+  "geometryReview": {
+    "canvas": [
+      1254,
+      1254
+    ],
+    "visibleAlphaThresholdExclusive": 8,
+    "visibleBoundsExclusive": [
+      441,
+      391,
+      827,
+      949
+    ],
+    "visibleContentClearOfCanvasEdge": true,
+    "requiredCanvas": [
+      384,
+      384
+    ],
+    "normalizationPending": true
   }
 }

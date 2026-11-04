@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "slime",
+  "action": "death",
+  "direction": "south-south-west",
+  "pose": "fully flattened cyan puddle",
+  "generator": "OpenAI built-in image_gen",
+  "source": "../../../drafts/death-02-ground-directions-candidate.png",
+  "sourceCell": [
+    3,
+    3
+  ],
+  "sourceCellBounds": [
+    946,
+    934,
+    1262,
+    1246
+  ],
+  "sourceVisibleBounds": [
+    70,
+    97,
+    235,
+    198
+  ],
+  "sourceSize": {
+    "width": 384,
+    "height": 384
+  },
+  "visibleAlphaGt8BoundsExclusive": [
+    110,
+    187,
+    275,
+    288
+  ],
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Shared fit-to-anchor normalization for candidate coverage; not independently visually measured.",
+  "sourcePixelsModified": true,
+  "processing": {
+    "method": "crop-direction-grid-fit-384-nearest-v1",
+    "resampling": "nearest-neighbor",
+    "sourceAlphaThreshold": 8,
+    "disconnectedComponentsRemoved": true,
+    "targetVisibleHeight": 128,
+    "maxVisibleWidth": 180
+  },
+  "identityReference": "../../../../reference.png",
+  "alphaMeasurement": {
+    "extrema": [
+      0,
+      255
+    ],
+    "distinctLevels": 239,
+    "hardAlpha": false
+  },
+  "visualReview": {
+    "identityAccepted": false,
+    "exactDirectionAccepted": false,
+    "poseSequenceAccepted": false,
+    "alphaAccepted": false,
+    "anchorAccepted": false,
+    "atlasAccepted": false
+  },
+  "note": "Unreviewed candidate art. Identity, exact facing, phase sequence, transparency and anchor need later visual review; runtime atlas unchanged."
+}

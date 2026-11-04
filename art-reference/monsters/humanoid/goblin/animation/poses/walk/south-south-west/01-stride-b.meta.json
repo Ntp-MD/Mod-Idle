@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "action": "walk",
+  "direction": "south-south-west",
+  "requestedFacingDegrees": 337.5,
+  "pose": "01-stride-b",
+  "identityRef": "../../../../reference.png",
+  "facingSourceRef": "../../idle/south-south-west.png",
+  "phaseSourceRef": "../../walk/east/01-stride-b.png",
+  "bakedWeapon": "spear",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:\\Users\\ITOP\\.codex-zed-account-1\\generated_images\\01a1a0b9-1e40-7663-be3e-149b24193ac4\\exec-ee065e70-1b1e-444c-93b8-ad3ba06c8a45.png",
+  "sourcePixelsModified": false,
+  "status": "candidate-review",
+  "qa": {
+    "exactFacingVerified": false,
+    "hardAlphaVerified": false,
+    "groundAnchorVerified": false,
+    "phaseContinuityVerified": false,
+    "productionApproved": false
+  },
+  "visualReview": {
+    "screenSideCorrect": true,
+    "exactAngleAccepted": false,
+    "identityAccepted": false,
+    "note": "Candidate for passing pose, right foot passes under hips; angle, identity, foot anchor and loop continuity still need review."
+  },
+  "geometryReview": {
+    "canvas": [
+      1312,
+      1199
+    ],
+    "visibleAlphaThresholdExclusive": 8,
+    "visibleBoundsExclusive": [
+      197,
+      147,
+      1003,
+      995
+    ],
+    "visibleContentClearOfCanvasEdge": true,
+    "requiredCanvas": [
+      384,
+      384
+    ],
+    "normalizationPending": true
+  }
+}
