@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "troll",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:/Users/ITOP/.codex-zed-account-2/generated_images/01a1a0b9-c531-72b3-8703-f6d656bd7333/exec-80c7a04b-f278-4203-a05f-5ca8d51e973a.png",
+  "identityRef": "../../../../reference.png",
+  "action": "walk",
+  "direction": "south-south-west",
+  "requestedFacingDegrees": 337.5,
+  "phase": "02-stride-c",
+  "pose": "right foot reaches ahead and contacts ground, left leg extended behind in push-off; opposite free arm counter-swings",
+  "sourceAtlas": "../../../../animation/drafts/walk-02-stride-c-directions-candidate.png",
+  "sourceCrop": {
+    "cellRow": 3,
+    "cellColumn": 3,
+    "cellRect": [
+      940,
+      940,
+      314,
+      314
+    ],
+    "cellOrderIndex": 15,
+    "gridSize": [
+      1254,
+      1254
+    ]
+  },
+  "sourcePixelsModified": true,
+  "processing": {
+    "alphaThreshold": 128,
+    "removedComponentsUnderPixels": 16,
+    "removedComponentCount": 0,
+    "contentBounds": "tight alpha crop after component cleanup",
+    "targetHeight": 165,
+    "maxWidth": 240,
+    "canvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos followed by hard alpha threshold"
+  },
+  "qa": {
+    "sourceGridVisuallyInspected": true,
+    "identityPlausible": true,
+    "facingVerified": false,
+    "phaseVerified": false,
+    "footAnchorVerified": false,
+    "atlasApproved": false
+  },
+  "visualReview": "Candidate cropped from raw 16-direction grid. Exact facing, phase sequence, feet/anchor, alpha edges and atlas approval remain pending."
+}

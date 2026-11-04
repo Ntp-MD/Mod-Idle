@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "direction16-candidate-incomplete",
+  "status": "direction16-candidate-review-required",
   "speciesId": "troll",
   "race": "humanoid",
   "version": "v5",
@@ -86,7 +86,7 @@
     "y": 288,
     "provenance": "inherited approved set; remeasure from all completed 16-direction frames before atlas promotion"
   },
-  "statusNote": "16-direction production candidate. Existing approved atlas retained until replacement completes visual and atlas QA. No runtime promotion.",
+  "statusNote": "Canonical inventory complete at 272/272 (50 existing source poses; 222 new candidate-review frames). Review exact direction, identity, phase continuity, scale, alpha and anchor across sequences before approval. The approved source atlas remains unchanged; no runtime promotion.",
   "actions": {
     "idle": {
       "framesPerDirection": 1,

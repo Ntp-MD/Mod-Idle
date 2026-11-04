@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "troll",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:/Users/ITOP/.codex-zed-account-2/generated_images/01a1a0b9-c531-72b3-8703-f6d656bd7333/exec-13458d17-7c15-48fd-8909-1940c93a196a.png",
+  "identityRef": "../../../../reference.png",
+  "action": "attack",
+  "direction": "south-south-east",
+  "requestedFacingDegrees": 22.5,
+  "phase": "02-follow-through",
+  "pose": "stone club finishes low beyond contact; torso follows through, planted feet hold balance",
+  "sourceAtlas": "../../../../animation/drafts/attack-02-follow-through-directions-candidate.png",
+  "sourceCrop": {
+    "cellRow": 0,
+    "cellColumn": 1,
+    "cellRect": [
+      315,
+      0,
+      315,
+      312
+    ],
+    "cellOrderIndex": 1,
+    "gridSize": [
+      1261,
+      1247
+    ]
+  },
+  "sourcePixelsModified": true,
+  "processing": {
+    "alphaThreshold": 128,
+    "removedComponentsUnderPixels": 16,
+    "removedComponentCount": 0,
+    "contentBounds": "tight alpha crop after component cleanup",
+    "targetHeight": 165,
+    "maxWidth": 240,
+    "canvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos followed by hard alpha threshold"
+  },
+  "qa": {
+    "sourceGridVisuallyInspected": true,
+    "identityPlausible": true,
+    "facingVerified": false,
+    "phaseVerified": false,
+    "footAnchorVerified": false,
+    "atlasApproved": false
+  },
+  "visualReview": "Candidate cropped from raw 16-direction grid. Exact facing, phase sequence, feet/anchor, alpha edges and atlas approval remain pending."
+}

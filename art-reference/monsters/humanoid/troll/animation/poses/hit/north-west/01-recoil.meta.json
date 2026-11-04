@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "troll",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:/Users/ITOP/.codex-zed-account-2/generated_images/01a1a0b9-c531-72b3-8703-f6d656bd7333/exec-771fba55-f044-47df-95d4-4e74058db1c9.png",
+  "identityRef": "../../../../reference.png",
+  "action": "hit",
+  "direction": "north-west",
+  "requestedFacingDegrees": 225.0,
+  "phase": "01-recoil",
+  "pose": "torso recoils further backward with bent knees; free arm draws inward protectively, feet still support body",
+  "sourceAtlas": "../../../../animation/drafts/hit-01-recoil-directions-candidate.png",
+  "sourceCrop": {
+    "cellRow": 2,
+    "cellColumn": 2,
+    "cellRect": [
+      630,
+      624,
+      316,
+      311
+    ],
+    "cellOrderIndex": 10,
+    "gridSize": [
+      1261,
+      1247
+    ]
+  },
+  "sourcePixelsModified": true,
+  "processing": {
+    "alphaThreshold": 128,
+    "removedComponentsUnderPixels": 16,
+    "removedComponentCount": 0,
+    "contentBounds": "tight alpha crop after component cleanup",
+    "targetHeight": 165,
+    "maxWidth": 240,
+    "canvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos followed by hard alpha threshold"
+  },
+  "qa": {
+    "sourceGridVisuallyInspected": true,
+    "identityPlausible": true,
+    "facingVerified": false,
+    "phaseVerified": false,
+    "footAnchorVerified": false,
+    "atlasApproved": false
+  },
+  "visualReview": "Candidate cropped from raw 16-direction grid. Exact facing, phase sequence, feet/anchor, alpha edges and atlas approval remain pending."
+}

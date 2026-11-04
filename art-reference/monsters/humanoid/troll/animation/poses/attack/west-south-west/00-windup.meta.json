@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "troll",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:/Users/ITOP/.codex-zed-account-2/generated_images/01a1a0b9-c531-72b3-8703-f6d656bd7333/exec-48ebdd25-174d-436a-a42e-b3f792c04ce4.png",
+  "identityRef": "../../../../reference.png",
+  "action": "attack",
+  "direction": "west-south-west",
+  "requestedFacingDegrees": 292.5,
+  "phase": "00-windup",
+  "pose": "anatomical right arm lifts stone club high behind shoulder; torso coils and knees brace for overhead swing",
+  "sourceAtlas": "../../../../animation/drafts/attack-00-windup-directions-candidate.png",
+  "sourceCrop": {
+    "cellRow": 3,
+    "cellColumn": 1,
+    "cellRect": [
+      315,
+      935,
+      315,
+      312
+    ],
+    "cellOrderIndex": 13,
+    "gridSize": [
+      1261,
+      1247
+    ]
+  },
+  "sourcePixelsModified": true,
+  "processing": {
+    "alphaThreshold": 128,
+    "removedComponentsUnderPixels": 16,
+    "removedComponentCount": 0,
+    "contentBounds": "tight alpha crop after component cleanup",
+    "targetHeight": 165,
+    "maxWidth": 240,
+    "canvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos followed by hard alpha threshold"
+  },
+  "qa": {
+    "sourceGridVisuallyInspected": true,
+    "identityPlausible": true,
+    "facingVerified": false,
+    "phaseVerified": false,
+    "footAnchorVerified": false,
+    "atlasApproved": false
+  },
+  "visualReview": "Candidate cropped from raw 16-direction grid. Exact facing, phase sequence, feet/anchor, alpha edges and atlas approval remain pending."
+}
