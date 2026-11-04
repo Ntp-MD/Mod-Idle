@@ -1,0 +1,51 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "action": "attack",
+  "direction": "south-south-west",
+  "phase": "01-contact",
+  "sourceSheet": "animation/drafts/dryad-attack-grid-candidate.png",
+  "sourceCell": {
+    "grid": "8x8",
+    "row": 6,
+    "column": 7,
+    "pixelBounds": [
+      1097,
+      940,
+      1254,
+      1097
+    ]
+  },
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "normalization": {
+    "method": "source-cell crop, alpha-bounds crop, nearest-neighbor fit to transparent 384x384 frame",
+    "sourceAlphaThresholdForBounds": 128,
+    "canvas": [
+      384,
+      384
+    ],
+    "normalizedSubjectDimensions": [
+      163,
+      173
+    ],
+    "nominalFootAnchor": [
+      192,
+      288
+    ],
+    "sourcePixelsPaintedOrComposited": false
+  },
+  "identityReference": "art-reference/monsters/plant/dryad/animation/source/base-v1.png",
+  "styleReference": "art-reference/monsters/plant/dryad/animation/atlas/animation.png",
+  "visualReview": {
+    "sheetInspected": true,
+    "speciesIdentityAccepted": false,
+    "exactDirectionAccepted": false,
+    "actionPhaseAccepted": false,
+    "anchorVerified": false,
+    "atlasReady": false
+  },
+  "note": "Generated source cell is a candidate only. Verify Dryad branch anatomy, 16-way facing, phase semantics, frame scale, foot anchor and visible edge halo before approval."
+}

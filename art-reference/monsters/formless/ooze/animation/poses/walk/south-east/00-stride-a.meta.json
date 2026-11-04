@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "ooze",
+  "generator": "OpenAI built-in image_gen",
+  "identityReference": "../../../../reference.png",
+  "source": "../../../drafts/walk-00-stride-a-directions-candidate.png",
+  "sourceOriginal": "../../../drafts/walk-00-stride-a-directions-candidate.png",
+  "sourcePixelsModified": true,
+  "action": "walk",
+  "direction": "south-east",
+  "requestedFacingDegrees": 45.0,
+  "pose": "00-stride-a",
+  "sourceCellIndex": 2,
+  "sourceCell": [
+    0,
+    2
+  ],
+  "sourceCellBounds": [
+    630,
+    0,
+    945,
+    311
+  ],
+  "sourceVisibleBounds": [
+    68,
+    100,
+    256,
+    242
+  ],
+  "sourceSize": {
+    "width": 384,
+    "height": 384
+  },
+  "visibleAlphaGt8BoundsExclusive": [
+    113,
+    168,
+    272,
+    288
+  ],
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Measured after alpha thresholding and fit-to-anchor normalization to the shared Goblin-mold anchor.",
+  "processing": {
+    "method": "crop-direction-grid-fit-anchor-v1",
+    "sourceOriginalCanvas": [
+      1261,
+      1247
+    ],
+    "alphaThreshold": 16,
+    "targetVisibleHeight": 120,
+    "maxVisibleWidth": 320,
+    "canvas": [
+      384,
+      384
+    ],
+    "placement": [
+      113,
+      168,
+      159,
+      120
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "premultiplied-alpha Lanczos; thresholded to hard alpha"
+  },
+  "alphaMeasurement": {
+    "extrema": [
+      0,
+      255
+    ],
+    "distinctLevels": 2,
+    "hardAlpha": true
+  },
+  "phaseSourceRef": "../east/00-stride-a.png",
+  "facingSourceRef": "../../idle/south-east.png",
+  "qa": {
+    "visualIdentityReviewed": true,
+    "facingVerified": true,
+    "phaseVerified": false,
+    "footAnchorVerified": true,
+    "alphaEdgeVerified": true,
+    "atlasApproved": false
+  },
+  "visualReview": "Identity and compass-facing were visually checked on the source grid. Per-direction sequence continuity and atlas approval remain pending."
+}
