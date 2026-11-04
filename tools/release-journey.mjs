@@ -100,6 +100,9 @@ async function main() {
     const trade = await server.ssrLoadModule('/src/sim/town/trade.ts');
     const town = await server.ssrLoadModule('/src/sim/town/town.ts');
     const slots = await server.ssrLoadModule('/src/sim/gear/slots.ts');
+    const delivery = await server.ssrLoadModule('/src/sim/town/delivery.ts');
+    const forge = await server.ssrLoadModule('/src/sim/gear/forge.ts');
+    const road = await server.ssrLoadModule('/src/sim/world/road.ts');
 
     const saved = readCheckpoint(fingerprint);
     const restored = saved ? journey.restoreCheckpoint(saved) : null;
@@ -118,13 +121,14 @@ async function main() {
           treeSpent: m.treeSpent, refusals: m.refusals.length }));
       if (m.enteredZones.includes(s.zone)) return;
       m.enteredZones.push(s.zone);
-      const before = save.importJson(save.exportJson(s));
-      const after = save.importJson(save.exportJson(s));
-      const ok = journey.journeyStateKey(before) === journey.journeyStateKey(after);
+      const originalKey = journey.journeyStateKey(s);
+      const roundTrip = save.importJson(save.exportJson(s));
+      const ok = originalKey === journey.journeyStateKey(roundTrip);
       zoneChecks.push({ zone: s.zone, ok });
       const entry = {
         milestone: `zone-${s.zone}`,
         onlineSec: s.counters.playSec,
+        awaySec: 0,
         wallMs: Math.round(performance.now() - startWall),
         level: s.player.level,
         zone: s.zone,
@@ -134,22 +138,37 @@ async function main() {
         goldEarned: m.goldEarned,
         goldSpent: m.goldSpent,
         bag: `${slots.slotsUsed(s)}/${slots.slotsAvailable(s)}`,
+        stash: s.stash.reduce((sum, tab) => sum + tab.length, 0),
         gearSwaps: m.gearSwaps,
         treeSpent: m.treeSpent,
         skills: Object.keys(s.skills.owned).sort().join(','),
         refusals: m.refusals.length,
+        refusalLog: m.refusals.map((refusal) => `${refusal.action}@${refusal.atSec}s:${refusal.why}`).join(';'),
         firstWin: s.goal.done ? 'yes' : 'no',
+        winRecord: s.goal.done ? `clock=${s.goal.done.clockSec}s level=${s.goal.done.level} hp=${Math.round(s.goal.done.hp)}` : '',
         checkpoint: ok ? 'PASS' : 'FAIL',
       };
       zoneRows.push(entry);
       row(entry);
     };
 
-    console.log('milestone | onlineSec | wallMs | level | zone | kills | pushes | drops | goldEarned | goldSpent | bag | gearSwaps | treeSpent | skills | refusals | firstWin | checkpoint');
-    const run = journey.runJourney(runtime, { maxWallMs: JOURNEY_LIMIT_MS, onSecond });
+    console.log('milestone | onlineSec | awaySec | wallMs | level | zone | kills | pushes | drops | goldEarned | goldSpent | bag | stash | gearSwaps | treeSpent | skills | refusals | refusalLog | firstWin | winRecord | checkpoint');
+    // A harness crash still checkpoints the state it died on, so the failure is debuggable and
+    // resumable instead of losing the whole run; the outcome stays FAIL with the crash reason.
+    let run = null;
+    try {
+      run = journey.runJourney(runtime, { maxWallMs: JOURNEY_LIMIT_MS, onSecond });
+    } catch (error) {
+      run = {
+        outcome: { status: 'FAIL', reason: `harness crashed: ${error?.message || error}`,
+          simulatedSec: runtime.state.clockSec, wallMs: performance.now() - startWall },
+        state: runtime.state, memory: runtime.memory, firstWin: runtime.state.goal.done,
+      };
+    }
     row({
       milestone: 'natural-reference-journey',
       onlineSec: run.state.counters.playSec,
+      awaySec: 0,
       wallMs: Math.round(run.outcome.wallMs),
       level: run.state.player.level,
       zone: run.state.zone,
@@ -159,46 +178,88 @@ async function main() {
       goldEarned: run.memory.goldEarned,
       goldSpent: run.memory.goldSpent,
       bag: `${slots.slotsUsed(run.state)}/${slots.slotsAvailable(run.state)}`,
+      stash: run.state.stash.reduce((sum, tab) => sum + tab.length, 0),
       gearSwaps: run.memory.gearSwaps,
       treeSpent: run.memory.treeSpent,
       skills: Object.keys(run.state.skills.owned).sort().join(','),
       refusals: run.memory.refusals.length,
+      refusalLog: run.memory.refusals.map((refusal) => `${refusal.action}@${refusal.atSec}s:${refusal.why}`).join(';'),
       firstWin: run.firstWin ? 'yes' : 'no',
+      winRecord: run.state.goal.done
+        ? `clock=${run.state.goal.done.clockSec}s level=${run.state.goal.done.level} hp=${Math.round(run.state.goal.done.hp)}`
+        : '',
       checkpoint: run.outcome.status,
     });
 
     outcomes.push({ name: 'natural-reference-journey', ...run.outcome });
 
-    if (run.outcome.status === 'INCOMPLETE' || run.outcome.status === 'FAIL') {
-      writeCheckpoint(fingerprint, journey.makeCheckpoint(fingerprint, run.state, run.memory));
-    } else {
-      writeCheckpoint(fingerprint, journey.makeCheckpoint(fingerprint, run.state, run.memory));
-    }
+    writeCheckpoint(fingerprint, journey.makeCheckpoint(fingerprint, run.state, run.memory));
 
     // Zone checkpoint result is a correctness gate, independent of the final status.
     const zonesOk = zoneChecks.every((check) => check.ok);
     if (!zonesOk) outcomes.push({ name: 'zone-checkpoints', status: 'FAIL', reason: 'state changed through export/import' });
     else outcomes.push({ name: 'zone-checkpoints', status: 'PASS', reason: `${zoneChecks.length} entered zone(s) round-tripped` });
 
-    // Away equivalence on the current measurement state: no walk, boss, or duplicate reward may appear.
+    // Away equivalence on an earned hunting checkpoint: single 2h vs sliced, cancel/resume at
+    // the ledger boundary, with no travel, new boss, or duplicate reward.
     {
-      const source = save.exportJson(run.state);
+      const earned = (() => {
+        const probe = journey.createReferenceGame();
+        const mem = journey.newJourneyMemory(probe);
+        const rt = journey.createJourneyRuntime(probe, mem);
+        for (let i = 0; i < 600 && !probe.hunting; i++) rt.advanceSecond();
+        return probe.hunting ? probe : run.state;
+      })();
+      const source = save.exportJson(earned);
+      const startCell = earned.cell ? `${earned.cell.q},${earned.cell.r}` : '';
+      const startZone = earned.zone;
+      const startClock = earned.clockSec;
+      const startBossDue = earned.bossDueAt;
       const a = save.importJson(source);
       const b = save.importJson(source);
       const sync = game.catchUp(a, 7200);
-      const async = await game.catchUpAsync(b, 7200);
-      const same = journey.journeyStateKey(a) === journey.journeyStateKey(b) && sync.simulated === async.simulated;
-      outcomes.push({ name: 'away-equivalence', status: same ? 'PASS' : 'FAIL',
-        reason: same ? '7200s sync and async states match' : 'sync/async away states diverged' });
+      const asyncRes = await game.catchUpAsync(b, 7200);
+      const d = save.importJson(source);
+      let sliced = 0;
+      for (let i = 0; i < 4; i++) sliced += game.catchUp(d, 1800).simulated;
+      // Cancel mid-flight, then resume the remainder on the same state.
+      const e = save.importJson(source);
+      const controller = new AbortController();
+      let seen = 0;
+      const cancelled = await game.catchUpAsync(e, 7200, { signal: controller.signal,
+        onProgress: (done) => { seen = done; if (done > 0) controller.abort(); } });
+      const resumed = game.catchUp(e, 7200 - cancelled.simulated);
+      const resumeTotal = cancelled.simulated + resumed.simulated;
+      const keysMatch = journey.journeyStateKey(a) === journey.journeyStateKey(b)
+        && journey.journeyStateKey(d) === journey.journeyStateKey(a)
+        && journey.journeyStateKey(e) === journey.journeyStateKey(a);
+      const simMatch = sync.simulated === asyncRes.simulated && sliced === sync.simulated && resumeTotal === sync.simulated;
+      const noTravel = [b, d, e].every((s) => (s.cell ? `${s.cell.q},${s.cell.r}` : '') === startCell && s.zone === startZone && !s.walk);
+      // The boss clock is an online gate: away shifts bossDueAt with clockSec, so the
+      // remaining online time must be unchanged, never satisfied early.
+      const bossRemaining = (s) => s.bossDueAt == null || startBossDue == null
+        ? (s.bossDueAt ?? null) : s.bossDueAt - s.clockSec;
+      const startRemaining = startBossDue == null ? null : startBossDue - startClock;
+      const noNewBoss = [b, d, e].every((s) => bossRemaining(s) === startRemaining);
+      const cancelWorks = seen > 0 && cancelled.simulated < 7200;
+      const parts = [];
+      if (!keysMatch) parts.push('state keys diverged');
+      if (!simMatch) parts.push(`simulated single=${sync.simulated} async=${asyncRes.simulated} sliced=${sliced} resumed=${resumeTotal}`);
+      if (!noTravel) parts.push('travel during away');
+      if (!noNewBoss) parts.push('boss clock drift');
+      if (!cancelWorks) parts.push(`cancel ineffective (seen=${seen} cancelled=${cancelled.simulated})`);
+      outcomes.push({ name: 'away-equivalence', status: parts.length ? 'FAIL' : 'PASS',
+        reason: parts.length ? parts.join('; ') : `7200s single/sliced/cancel-resume match${probeHunting(earned)}` });
+      function probeHunting(s) { return s === run.state ? ' (final state)' : ' (earned hunting state)'; }
     }
 
     // Build capability matrix: a real live row for each required capability must prepare and resolve.
     {
       const rows = [...engine.sm.all()].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
       const capabilities = [
-        ['physical-melee', (r) => r.basis === 'phys' && r.group === 'melee'],
-        ['physical-ranged', (r) => r.basis === 'phys' && r.group === 'ranged'],
-        ['elemental-magic', (r) => r.basis === 'magic' && ['fire', 'cold', 'lightning', 'poison', 'chaos', 'earth'].includes(r.element)],
+        ['physical-melee', (r) => r.type === 'attack' && r.basis === 'phys' && r.group === 'melee'],
+        ['physical-ranged', (r) => r.type === 'attack' && r.basis === 'phys' && r.group === 'ranged'],
+        ['elemental-magic', (r) => r.type === 'attack' && r.basis === 'magic' && ['fire', 'cold', 'lightning', 'poison', 'chaos', 'earth'].includes(r.element)],
       ];
       const missing = [];
       for (const [name, predicate] of capabilities) {
@@ -210,35 +271,114 @@ async function main() {
         reason: missing.length ? `missing ${missing.join(', ')}` : 'physical melee/ranged and elemental magic rows prepare and resolve' });
     }
 
-    // Economy routes: authored acquisition weights and every named good resolve through the one catalogue.
+    // Economy routes: acquisition IDs resolve, and the dependency graph has no cycle or
+    // required source that no reader can reach.
     {
       const deliveryIds = Object.keys(engine.TOWN.delivery?.skill_weights || {});
       const marketIds = Object.keys(engine.TOWN.black_market?.skill_weights || {});
       const missingSkills = [...deliveryIds, ...marketIds].filter((id) => !engine.sm.byId[id]);
       const goods = Object.keys(engine.trade.byId);
       const missingGoods = goods.filter((id) => !Number.isFinite(engine.trade.byId[id]?.value));
-      outcomes.push({ name: 'craft-economy-routes', status: missingSkills.length || missingGoods.length ? 'FAIL' : 'PASS',
-        reason: missingSkills.length || missingGoods.length
-          ? `missing ${missingSkills.slice(0, 5).join(', ')} ${missingGoods.slice(0, 5).join(', ')}`
-          : `${deliveryIds.length + marketIds.length} acquisition weight(s) and ${goods.length} good(s) resolve` });
+      const sources = engine.delivery?.sources || {};
+      const unreachable = [];
+      const cyclic = [];
+      const visit = (key, stack) => {
+        if (stack.includes(key)) { cyclic.push(key); return; }
+        for (const source of sources[key] || []) {
+          for (const input of Object.keys(source.inputs || {})) {
+            if (!engine.trade.byId[input]) unreachable.push(`${key}<-${input}`);
+            else visit(input, [...stack, key]);
+          }
+        }
+      };
+      for (const key of Object.keys(sources)) visit(key, []);
+      const bad = [...missingSkills, ...missingGoods, ...unreachable.slice(0, 5), ...cyclic.slice(0, 5)];
+      outcomes.push({ name: 'craft-economy-routes', status: bad.length ? 'FAIL' : 'PASS',
+        reason: bad.length ? `missing/unreachable/cyclic ${bad.slice(0, 5).join(', ')}`
+          : `${deliveryIds.length + marketIds.length} acquisition weight(s), ${goods.length} good(s), ${Object.keys(sources).length} source(s) resolve` });
     }
 
-    // Trading boundary: one sale pays once and a second sale cannot mint the same junk again.
+    // Trading boundary on cloned earned checkpoints: preview matches payment, caps/locks hold,
+    // and repeats mint nothing.
     {
-      const probe = game.newGame(20261103);
-      const junk = engine.trade.goods.find((good) => good.bucket === 'junk');
-      if (!junk) outcomes.push({ name: 'trading-repeated-actions', status: 'FAIL', reason: 'no junk good exists' });
-      else {
-        probe.junk[junk.key] = 10;
-        const goldBefore = probe.counters.gold;
-        const first = town.sellJunk(probe);
-        const afterFirst = probe.counters.gold;
-        const second = town.sellJunk(probe);
-        const ok = first.pieces === 10 && first.gold === afterFirst - goldBefore
-          && second.pieces === 0 && second.gold === 0 && (probe.junk[junk.key] || 0) === 0;
-        outcomes.push({ name: 'trading-repeated-actions', status: ok ? 'PASS' : 'FAIL',
-          reason: ok ? 'sale pays once; a second sale of empty junk pays zero' : 'sale result does not match the ledger' });
+      const failures = [];
+      const clone = () => {
+        const probe = save.importJson(save.exportJson(run.state));
+        // Market, delivery and forge verbs are settlement services: stand the clone in its own
+        // zone's settlement the way the unit fixtures do, so a mid-field crash state does not read
+        // as a preview/payment mismatch.
+        const home = town.settlementOfZone(probe.zone);
+        const cell = home && road.settlementCell(home.id);
+        if (cell) {
+          probe.cell = { q: cell.q, r: cell.r, sub: null, site: null };
+          probe.walk = null;
+          if (probe.phase === 'camp') probe.phase = 'fighting';
+        }
+        return probe;
+      };
+      // Market: a single-good quote matches its sale ledger; repeats and empty sales pay zero.
+      {
+        const probe = clone();
+        let carried = trade.tradeInventory(probe).filter((row) => row.good.bucket === 'junk');
+        if (!carried.length) {
+          const junk = engine.trade.goods.find((good) => good.bucket === 'junk');
+          if (!junk) failures.push('no junk good');
+          else {
+            probe.junk[junk.key] = (probe.junk[junk.key] || 0) + 10;
+            carried = trade.tradeInventory(probe).filter((row) => row.good.bucket === 'junk');
+          }
+        }
+        if (!carried.length) failures.push('no junk carried');
+        else {
+          const { good, count } = carried[0];
+          const townId = road.ownerOf(road.currentCell(probe)).id;
+          const quote = trade.quoteSale(probe, townId, good.id, count);
+          const quotedGold = quote && quote.ok !== false && Number.isFinite(quote.gold) ? quote.gold : null;
+          const goldBefore = probe.counters.gold;
+          const sale = trade.sellGoods(probe, good.id, count);
+          const paid = probe.counters.gold - goldBefore;
+          if (sale.ok && quotedGold != null
+            && !(Math.abs(quotedGold - sale.gold) <= 0.005 && Math.abs(sale.gold - paid) <= 0.005)) failures.push('market preview != payment');
+          else if (!sale.ok && (quotedGold != null || paid !== 0)) failures.push('market refusal moved gold or mismatched preview');
+          const goldAfter = probe.counters.gold;
+          const repeat = trade.sellGoods(probe, good.id, count);
+          if (repeat.ok || probe.counters.gold !== goldAfter) failures.push('market repeat minted');
+          town.sellJunk(probe);
+          const goldAfterEmpty = probe.counters.gold;
+          const emptyAgain = town.sellJunk(probe);
+          if (!(emptyAgain.pieces === 0 && emptyAgain.gold === 0 && probe.counters.gold === goldAfterEmpty)) failures.push('empty sale minted');
+        }
       }
+      // Delivery: preview refusal matches deliver refusal; no gold moves on refusal.
+      {
+        const probe = clone();
+        const preview = delivery.previewDelivery(probe, 'missing-contract', 1, { writer: true });
+        const goldBefore = probe.counters.gold;
+        const done = delivery.deliver(probe, 'missing-contract', 1, { writer: true });
+        if (!!preview?.ok !== !!done?.ok) failures.push('delivery preview != verdict');
+        if (probe.counters.gold !== goldBefore) failures.push('delivery refusal moved gold');
+      }
+      // Forge: canForge refusal matches forgeGear refusal; no material consumed.
+      {
+        const probe = clone();
+        const verdict = forge.canForge(probe, 'weapon', 'missing-forge-id', 'missing-material');
+        const matsBefore = JSON.stringify(probe.fieldwork.materials);
+        const done = forge.forgeGear(probe, 'weapon', 'missing-forge-id', 'missing-material', () => 0.5);
+        if (!!verdict?.ok !== !!done?.ok) failures.push('forge preview != verdict');
+        if (JSON.stringify(probe.fieldwork.materials) !== matsBefore) failures.push('forge refusal consumed materials');
+      }
+      // Caps/locks: unbought tab moves nothing; a locked piece stays in the bag.
+      {
+        const probe = clone();
+        const tabs = town.stashTabCount(probe);
+        const movedUnbought = town.depositMany(probe, probe.bag.map((_, i) => i), tabs);
+        if (movedUnbought !== 0) failures.push('stash cap bypassed');
+        probe.bag = [{ slot: 'ring', base: 'Locked Fixture', ilvl: 1, quality: 'low', tier: 'T1', lines: [], locked: true }];
+        const movedLocked = tabs > 0 ? town.depositMany(probe, [0], 0) : 0;
+        if (movedLocked !== 0 || probe.bag.length !== 1) failures.push('locked piece moved');
+      }
+      outcomes.push({ name: 'trading-repeated-actions', status: failures.length ? 'FAIL' : 'PASS',
+        reason: failures.length ? failures.slice(0, 3).join('; ') : 'market/delivery/forge preview match payment; caps/locks hold; repeats mint nothing' });
     }
 
     for (const outcome of outcomes) row({ milestone: outcome.name, checkpoint: outcome.status, detail: outcome.reason });
@@ -266,12 +406,18 @@ function probeSkill(row, game, skills, fixtures) {
   state.player.mana = 1e9;
   if (row.weapon) state.gear[0] = { slot: 'main hand', base: row.weapon, ilvl: 1, quality: 'Normal', tier: 'T1', lines: [] };
   const sheet = game.characterSheet(state);
+  const hpBefore = state.group[0].hp;
   const prepared = skills.prepareSkillCast(state.skills, sheet, row.id, 1e9, state.group, {}, { spatialTargets: false });
   if (!prepared) return false;
+  if (!Number.isFinite(prepared.cooldownSec) || !Number.isFinite(prepared.manaCost) || !Number.isFinite(prepared.hpCost)) return false;
   const report = skills.resolvePreparedCast(state.skills, sheet, prepared, {}, () => 0.5, {});
-  return Number.isFinite(report.damage) && report.damage >= 0
-    && Number.isFinite(report.manaCost) && Number.isFinite(report.hpCost)
-    && Number.isFinite(report.dealt || 0);
+  if (!(report.damage > 0) || !((report.dealt || 0) > 0)) return false;
+  if (!Number.isFinite(report.manaCost) || !Number.isFinite(report.hpCost)) return false;
+  if ((report.targets || 0) < 1 || !(report.byMob || []).length) return false;
+  // Real damage: the mob lost exactly what the report dealt.
+  if (!(state.group[0].hp < hpBefore)) return false;
+  if (Math.abs((hpBefore - state.group[0].hp) - (report.dealt || 0)) > 1e-6) return false;
+  return true;
 }
 
 main().catch((error) => { console.error(error); process.exitCode = 1; });

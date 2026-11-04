@@ -211,8 +211,27 @@ export interface Counters {
   overflow?: number;
   junk: number;
   gold: number;
+  /** Cumulative gold actually received; the transaction owner writes every credit here. */
+  goldEarned?: number;
+  /** Cumulative gold actually paid; the transaction owner writes every debit here. */
+  goldSpent?: number;
   stones: Record<string, number>;
   playSec: number;
+}
+
+/** Credit gold through the one owner so earned/spent never net out within a second. */
+export function earnGold(counters: Counters, amount: number): void {
+  if (!Number.isFinite(amount) || amount <= 0) return;
+  // Credits keep the exact ledger value (previous `+=` behavior); only debits round to cents.
+  counters.gold += amount;
+  counters.goldEarned = (counters.goldEarned || 0) + amount;
+}
+
+/** Debit gold through the one owner so earned/spent never net out within a second. */
+export function spendGold(counters: Counters, amount: number): void {
+  if (!Number.isFinite(amount) || amount <= 0) return;
+  counters.gold = Math.round((counters.gold - amount) * 100) / 100;
+  counters.goldSpent = Math.round(((counters.goldSpent || 0) + amount) * 100) / 100;
 }
 
 export interface LogLine {

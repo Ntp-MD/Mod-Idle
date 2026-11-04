@@ -719,6 +719,8 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (!s.healUp) s.healUp = null;
   if (!s.counters.zoneKills) s.counters.zoneKills = {};
   if (!s.counters.stones) s.counters.stones = {};
+  if (!Number.isFinite(s.counters.goldEarned) || (s.counters.goldEarned as number) < 0) s.counters.goldEarned = 0;
+  if (!Number.isFinite(s.counters.goldSpent) || (s.counters.goldSpent as number) < 0) s.counters.goldSpent = 0;
   if (!s.junk) s.junk = {};
   // a save from before the tree existed holds no ranks; the points it banked are still there
   if (s.player && !s.player.treeRanks) s.player.treeRanks = {};

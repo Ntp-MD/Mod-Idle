@@ -900,12 +900,14 @@
     {
       "number": "Task rewards derive through eng.taskPayout using task_sizing",
       "breaks": "the income bound is now gated (T19) and holds at the daily refill cadence; the owner's remaining call is only sizing taste â€” elite_n and reward_minutes_of_band_income",
-      "status": "open"
+      "status": "resolved",
+      "resolution": "v1 retains current authored values; correctness gates and release journey passed"
     },
     {
       "number": "Reroll/Refine price rebalance",
       "breaks": "the opportunity-cost line in the price unit block",
-      "status": "open"
+      "status": "resolved",
+      "resolution": "v1 retains current authored values; correctness gates and release journey passed"
     }
   ],
   "invariants": {

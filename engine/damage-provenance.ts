@@ -90,3 +90,26 @@ export function validateDamagePacket(packet: DamagePacket): DamagePacket {
     }
   return packet;
 }
+
+/**
+ * The pool split a damage packet may trust. The sheet's unattributed `''` pool is the arithmetic
+ * remainder of the named pools against the true total, so a percent line that scales the named
+ * pools above the total mints it negative — and a negative pool must never reach a packet, which
+ * may only carry finite numbers, zero or more. A non-negative remainder rides along untouched
+ * (the headline resistance answers it); a negative one is folded out by scaling the positive named
+ * pools to the true total, so the split still sums back exactly and stays valid.
+ */
+export function packetElementPools(pools: Record<string, number>): Array<[string, number]> {
+  // Non-numbers are not pools at all; non-finite numbers flow through untouched so the
+  // validator still fails loudly on corrupt sheets instead of hiding them in a fallback.
+  const entries = Object.entries(pools).filter(([, v]) => typeof v === 'number');
+  if (entries.some(([, v]) => !Number.isFinite(v))) return entries;
+  const unnamed = entries.find(([el]) => el === '')?.[1] ?? 0;
+  if (!(unnamed < 0)) return entries;
+  const named = entries.filter(([el, v]) => el !== '' && v > 0);
+  const namedTotal = named.reduce((sum, [, v]) => sum + v, 0);
+  const total = entries.reduce((sum, [, v]) => sum + v, 0);
+  if (namedTotal <= 0 || total < 0) return [];
+  const scale = total / namedTotal;
+  return named.map(([el, v]) => [el, v * scale]);
+}

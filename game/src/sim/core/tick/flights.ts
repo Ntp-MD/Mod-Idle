@@ -337,7 +337,7 @@ export function createFlights(opts: {
     if (areaChanged(flight)) { cancelFlight(flight, atUs, 'area-exit'); return; }
     // A bounded channel funds the interval up to this impact before the impact may
     // land: exhaustion drops this flight and every unspent later pulse with a receipt.
-    if (!settleChannelDue({ arena, s, c,
+    if (!ray && !settleChannelDue({ arena, s, c,
       action: arena.actions.find((entry) => entry.id === flight.actionId),
       flight, atUs, units, payCast, cancelIntent })) return;
     // C3 lock-on: a dead or returned bound body fizzles the remaining payloads — no re-acquire.

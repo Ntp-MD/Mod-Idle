@@ -172,7 +172,9 @@ export function recommendGoal(state: GameState): GoalRef | null {
   if (slotsFree(state) < 1) {
     const here = ownerOf(currentCell(state));
     const cell = settlementCell(here.id);
-    if (cell) return { kind: 'destination', q: cell.q, r: cell.r, label: here.name, why: 'deposit' };
+    // A wild cell's owner carries no display name; the settlement record names the destination,
+    // and a named label is what the save reader keeps (an unnamed one is dropped on load).
+    if (cell) return { kind: 'destination', q: cell.q, r: cell.r, label: townName(here.id), why: 'deposit' };
   }
   if (treePointsFree(state) > 0 || treePointsFree(state, 'attainment') > 0) return { kind: 'tree' };
   return { kind: 'hunt', zone: state.zone };

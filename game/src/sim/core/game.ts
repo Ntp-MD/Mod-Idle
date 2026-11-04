@@ -21,7 +21,7 @@ import { payoutStacks } from '../world/dungeon';
 import { selectDungeonRescue, type DungeonRescueEntry } from '../../../../engine/dungeon-rescue.ts';
 import { newAlchemyLedger } from '../../../../engine/alchemy.ts';
 import { canDissolve, dissolve } from '../gear/salvage';
-import { depositMany, newTown, progressTasks, stashTabCount, tickTown, taskReward } from '../town/town';
+import { depositMany, newTown, progressTasks, smithService, stashTabCount, tickTown, taskReward } from '../town/town';
 import { advanceEconomy, newEconomyState } from './economy';
 import { deliveryPauseReason, tickDeliveries } from '../town/delivery';
 import { tickBlackMarket } from '../town/black-market';
@@ -187,6 +187,8 @@ export function newGame(seed = 20260101, trailSeed = seed): GameState {
       drops: 0,
       junk: 0,
       gold: E.opening.gold as number,
+      goldEarned: 0,
+      goldSpent: 0,
       stones: {},
       playSec: 0,
     },
@@ -491,6 +493,17 @@ function escrowProvisions(s: GameState, herbHad: Record<string, number>, potionH
  * what a piece is worth. The two pieces the bulk verbs already spare — a locked one and one promised
  * to a Collector set — are refused here too, with the reason said out loud.
  */
+/**
+ * Manual salvage at the smith: the same piece, bundle and refusals as the bag's own dissolve,
+ * behind the Armourer's service check. Out of service, locked, held or unfitting bundles refuse
+ * with the reason said out loud; a refused bundle restores the piece untouched.
+ */
+export function salvageAtSmith(s: GameState, bagIndex: number): { ok: boolean; why?: string } {
+  const service = smithService(s);
+  if (!service.ok) return { ok: false, why: service.why };
+  return salvageBag(s, bagIndex);
+}
+
 export function salvageBag(s: GameState, bagIndex: number): { ok: boolean; why?: string } {
   const item = s.bag[bagIndex];
   if (!item) return { ok: false, why: 'nothing in that bag slot' };

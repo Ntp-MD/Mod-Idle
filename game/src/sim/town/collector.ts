@@ -41,9 +41,15 @@ export function heldCount(state: GameState, setId: string, baseName: string): nu
   return heldFor(state, setId).filter((h) => h.item.base === baseName).length;
 }
 
-/** The set a fresh drop belongs to, if the player has not finished it yet. */
+/** The set a fresh drop belongs to, if the player has not finished it yet and its line still needs one. */
 export function wants(state: GameState, item: Item): any {
-  return col.wanter(item, state.collector.done);
+  const set = col.wanter(item, state.collector.done);
+  if (!set) return null;
+  // The Collector panel and the turn-in both read a set line as "1 / 1", so a duplicate matching
+  // drop is not a reservation. Without this cap the bag fills with copies of a piece whose
+  // settlement may be zones away, and no lawful deposit or salvage can free them.
+  const lines = set.parsed.filter((piece: any) => piece.name === item.base).length;
+  return lines > 0 && heldCount(state, set.id, item.base) < lines ? set : null;
 }
 
 /**
@@ -74,6 +80,9 @@ export function turnIn(state: GameState, settlementId: string): { ok: boolean; w
     .sort((a, b) => (a.tab === b.tab ? b.sub - a.sub : b.tab - a.tab))
     .forEach((p) => state.stash[p.tab].splice(p.sub, 1));
   state.collector.done[set.id] = true;
+  // A finished set reserves nothing: surplus copies collected before the per-line cap (or held by
+  // an older save) become ordinary pieces again, so they can be stashed, salvaged or worn.
+  for (const surplus of heldFor(state, set.id)) delete surplus.item.heldFor;
   applyReward(state, set);
   return { ok: true, reward: set.reward };
 }

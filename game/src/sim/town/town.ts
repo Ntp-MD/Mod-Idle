@@ -1,6 +1,7 @@
 import { eng, TOWN, trade } from '../../engine/client';
 import { dayOf } from '../core/clock';
-import type { GameState, Item, TaskSlot, TownState } from '../core/types';
+import { type GameState, type Item, type TaskSlot, type TownState, spendGold } from '../core/types';
+import { currentCell, ownerOf } from '../world/road';
 import { atSettlement, craft, type Where } from '../gear/craft';
 import { fitsTransaction, slotsFree } from '../gear/slots';
 import { payQuestBonus, resolveQuestBonus, taskBonuses } from './quest-rewards';
@@ -126,7 +127,7 @@ export function repairGear(
   if (!repaired.ok) return { ok: false, why: repaired.why, row };
   if (where === 'gear') state.gear[index] = repaired.item;
   else state.bag[index] = repaired.item;
-  state.counters.gold = Math.round((state.counters.gold - (check.gold || 0)) * 100) / 100;
+  spendGold(state.counters, check.gold || 0);
   return { ok: true, row, gold: check.gold, where, index, repaired: item.base };
 }
 
@@ -147,7 +148,7 @@ export function buy(state: GameState, settlementId: string, rowId: string): BuyR
     if (!collectorSet) return { ok: false, why: 'no Collector set here', row };
     if (state.collector?.hints?.[collectorSet.id]) return { ok: false, why: 'hint already bought', row };
   }
-  state.counters.gold = Math.round((state.counters.gold - (check.gold || 0)) * 100) / 100;
+  spendGold(state.counters, check.gold || 0);
   if (collectorSet) {
     state.collector ||= { done: {}, hints: {} };
     state.collector.hints ||= {};
@@ -197,6 +198,29 @@ export function rollTask(rng: () => number, state: GameState): TaskSlot {
 
 /** No Bag Cap exists, so stash tabs are organisation rather than space (`loot.md` §4 · towns.md). */
 export const STASH_TAB_CAP = 6;
+
+/** The Armourer's lines: a settlement stocking one has a working smith. */
+export const SMITH_ROWS = ['repair', 'repair_ironrow'];
+
+export interface SmithVerdict { ok: boolean; why?: string; settlement?: string }
+
+/** Manual gear salvage is a smith service: standing where an Armourer works, not in the field. */
+export function smithService(state: GameState): SmithVerdict {
+  if (!atSettlement(state)) return { ok: false, why: 'visit a smith at a settlement' };
+  const settlement = ownerOf(currentCell(state)).id;
+  if (!atSettlement(state, settlement)) return { ok: false, why: 'visit a smith at a settlement' };
+  const stocked = (stockOf(settlement, state) as any[]).map((row) => row.id);
+  if (!SMITH_ROWS.some((id) => stocked.includes(id))) return { ok: false, why: 'no smith works here', settlement };
+  return { ok: true, settlement };
+}
+
+/** The next stash tab on the ladder this settlement stocks and the purse does not own yet. */
+export function nextStashTab(state: GameState, settlementId: string): string | null {
+  const owned = new Set(state.town.owned);
+  const row = (stockOf(settlementId, state) as any[])
+    .find((entry) => /^stash_tab_\d/.test(entry.id) && !owned.has(entry.id));
+  return row ? row.id : null;
+}
 
 export function stashTabCount(state: GameState): number {
   const bought = state.town.owned.filter((id: string) => /^stash_tab_\d/.test(id)).length;

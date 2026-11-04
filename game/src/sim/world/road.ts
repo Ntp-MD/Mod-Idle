@@ -4,7 +4,7 @@ import { hexAdjacent } from '../../../../engine/road.ts';
 import type { Hex } from '../../../../engine/road.ts';
 import { abandonRun } from './dungeon';
 import { priceGold, rowById } from '../town/pricing';
-import type { GameState, Cell, Walk } from '../core/types';
+import { type GameState, type Cell, type Walk, spendGold } from '../core/types';
 
 /** The walk model is `client.ts`'s own instance — one object for the sim, the map views and the wiki. */
 export { road };
@@ -106,7 +106,7 @@ export function warpTo(state: GameState, id: string): { ok: boolean; why?: strin
   if (!waypointUnlocked(state, id)) return { ok: false, why: 'no Waypoint — reach it on foot first' };
   const gold = warpCost(state, id);
   if (state.counters.gold < gold) return { ok: false, why: `needs ${gold} gold`, gold };
-  state.counters.gold = Math.round((state.counters.gold - gold) * 100) / 100;
+  spendGold(state.counters, gold);
   const dest = settlementById(id);
   if (!dest) return { ok: false, why: 'no such settlement' };
   state.zone = dest.zone;

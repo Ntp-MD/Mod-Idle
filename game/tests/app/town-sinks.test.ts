@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { TOWN, eng } from '../../src/engine/client';
 import { newGame } from '@sim/core/game';
-import { buy, canBuy, priceGold, skipTask, skipVerdict, stockOf, stashTabCount } from '@sim/town/town';
+import { buy, canBuy, nextStashTab, priceGold, skipTask, skipVerdict, smithService, stockOf, stashTabCount } from '@sim/town/town';
+import { salvageAtSmith } from '@sim/core/game';
 import { plotCount } from '@sim/world/farm';
 import { settlementCell } from '@sim/world/road';
 import { openingGear } from '@sim/core/player';
@@ -107,5 +108,61 @@ describe('town sinks', () => {
     const loaded = importJson(exportJson(state));
     expect(loaded.town.freeSkipsToday).toBe(1);
     expect(loaded.collector.hints[set.id]).toBe(true);
+  });
+
+  it('offers the next stash tab on the ladder, skipping owned rungs', () => {
+    const state = inTown('eastgate');
+    expect(nextStashTab(state, 'eastgate')).toBe('stash_tab_1');
+    state.town.owned.push('stash_tab_1');
+    expect(nextStashTab(state, 'eastgate')).toBe('stash_tab_2');
+  });
+
+  it('gates manual salvage on the Armourer smith service', () => {
+    expect(smithService(inTown('highspire'))).toMatchObject({ ok: true, settlement: 'highspire' });
+    const eastgate = inTown('eastgate');
+    expect(smithService(eastgate)).toMatchObject({ ok: false });
+    expect(eastgate.cell).toBeTruthy();
+    const camp = inTown('highspire');
+    camp.phase = 'camp';
+    expect(smithService(camp)).toMatchObject({ ok: false, why: 'visit a smith at a settlement' });
+  });
+
+  it('dissolves one piece at the smith and refuses locked, held and unfitting bundles', () => {
+    const piece = () => ({ slot: 'ring', base: 'Probe', ilvl: 1, quality: 'low', tier: 'T1', lines: [] }) as Item;
+    const state = inTown('highspire');
+    state.bag = [piece()] as never;
+    const oreBefore = state.fieldwork.materials['iron-ore'] || 0;
+    expect(salvageAtSmith(state, 0)).toMatchObject({ ok: true });
+    expect(state.bag).toHaveLength(0);
+    expect(state.fieldwork.materials['iron-ore']).toBe(oreBefore + 1);
+    expect(state.fieldwork.materials['scrap']).toBe(1);
+    expect(state.counters.salvaged).toBe(1);
+
+    const guarded = inTown('highspire');
+    guarded.bag = [piece(), piece()] as never;
+    (guarded.bag[0] as Item).locked = true;
+    (guarded.bag[1] as Item).heldFor = 'set-x';
+    expect(salvageAtSmith(guarded, 0).ok).toBe(false);
+    expect(salvageAtSmith(guarded, 1).ok).toBe(false);
+    expect(guarded.bag).toHaveLength(2);
+
+    const full = inTown('highspire');
+    full.bag = Array.from({ length: 100 }, () => piece()) as never;
+    full.fieldwork.materials['iron-ore'] = 100;
+    full.fieldwork.materials['scrap'] = 100;
+    const salvagedBefore = full.counters.salvaged || 0;
+    const refused = salvageAtSmith(full, 0);
+    expect(refused.ok).toBe(false);
+    expect(full.bag).toHaveLength(100);
+    expect(full.fieldwork.materials['iron-ore']).toBe(100);
+    expect(full.fieldwork.materials['scrap']).toBe(100);
+    expect(full.counters.salvaged || 0).toBe(salvagedBefore);
+  });
+
+  it('refuses salvage outside the smith without touching the bag', () => {
+    const state = inTown('eastgate');
+    state.bag = [{ slot: 'ring', base: 'Probe', ilvl: 1, quality: 'low', tier: 'T1', lines: [] }] as never;
+    expect(salvageAtSmith(state, 0).ok).toBe(false);
+    expect(state.bag).toHaveLength(1);
   });
 });

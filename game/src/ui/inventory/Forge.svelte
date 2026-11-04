@@ -1,6 +1,8 @@
 <script lang="ts">
   import { ED, TOWN, fieldwork } from '../../engine/client';
   import { forge, canForge } from '@sim/gear/forge';
+  import { smithService } from '@sim/town/town';
+  import { itemName } from '@sim/gear/item-name';
   import { fieldSkillLevel } from '@sim/world/fieldwork';
   import { materialSources, sourceLine } from '@sim/gear/material-sources';
   import type { ForgeKind } from '@engine/forge.ts';
@@ -10,13 +12,14 @@
 
   const KIND_TABS = [{ id: 'armour', label: 'Armour' }, { id: 'weapon', label: 'Weapons' }];
 
-  let { game, writer, note = '', onforge,
+  let { game, writer, note = '', onforge, onsalvage = () => false,
     focus = null, ontrack = () => {}, onshortage = () => {}, onpinzone = () => {}, onmap = () => {}, onbag = () => {},
   }: {
     game: GameState;
     writer: boolean;
     note?: string;
     onforge: (kind: ForgeKind, id: string, materialId: string) => boolean;
+    onsalvage?: (index: number) => boolean;
     /** A goal opened this panel; select its pattern and material without changing anything else. */
     focus?: { patternKind: ForgeKind; pattern: string; material: string; nonce: number } | null;
     ontrack?: (ref: { kind: 'forge'; patternKind: ForgeKind; pattern: string; material: string }) => void;
@@ -70,6 +73,14 @@
   const sources = $derived(material ? materialSources(material.id) : []);
   const goalRef = $derived(pattern && material
     ? { kind: 'forge' as const, patternKind: kind, pattern: pattern.id, material: material.id } : null);
+
+  const smith = $derived(smithService(game));
+  const carried = $derived(game.bag.map((item, index) => ({ item, index })).filter((row) => !!row.item));
+  const salvageTitle = $derived.by(() => {
+    if (!writer) return 'Read-only: another tab controls progress.';
+    if (!smith.ok) return smith.why || 'no smith here';
+    return 'Iron Ore + Scrap per piece';
+  });
 
   const materialName = (id: string) => fieldwork.materialById[id]?.name || id;
   const owned = (id: string) => game.fieldwork.materials[id] || 0;
@@ -195,6 +206,24 @@
       {/if}
     </section>
   </div>
+
+  {#if carried.length}
+    <section class="salvage" aria-label="Salvage at the smith">
+      <h4>Salvage at the smith</h4>
+      <p class="text-dim" role="status">{salvageTitle}</p>
+      <ul>
+        {#each carried as row (row.item)}
+          <li>
+            <span><b>{itemName(row.item!)}</b><small>{row.item!.slot} · ilvl {row.item!.ilvl}</small></span>
+            <button class="btn btn-quiet" type="button"
+              disabled={!writer || !smith.ok || Boolean(row.item!.locked || row.item!.heldFor)}
+              title={row.item!.locked ? 'that piece is locked' : row.item!.heldFor ? 'that piece is promised to a Collector set' : salvageTitle}
+              onclick={() => onsalvage(row.index)}>Dissolve</button>
+          </li>
+        {/each}
+      </ul>
+    </section>
+  {/if}
 </section>
 
 <style>
@@ -245,6 +274,13 @@
   .lines { margin: 0; color: var(--dim); font-size: var(--font-3xs); }
   .why { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; margin: 0; color: var(--hp); font-size: var(--font-2xs); }
   .forge-btn { align-self: flex-start; padding: 6px 16px; }
+  .salvage { border-top: 1px solid var(--line); padding-top: 7px; display: flex; flex-direction: column; gap: 5px; }
+  .salvage h4 { margin: 0; font-size: var(--font-xs); }
+  .salvage .text-dim { margin: 0; color: var(--dim); font-size: var(--font-3xs); }
+  .salvage ul { display: grid; gap: 3px; margin: 0; padding: 0; list-style: none; max-height: 220px; overflow-y: auto; }
+  .salvage li { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+  .salvage b { font-size: var(--font-2xs); }
+  .salvage small { display: block; color: var(--dim); font-size: var(--font-3xs); }
   @media (max-width: 720px) {
     .layout { grid-template-columns: minmax(0, 1fr); }
     .patterns { grid-template-columns: repeat(3, minmax(0, 1fr)); max-height: 180px; }

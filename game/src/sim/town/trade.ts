@@ -1,6 +1,6 @@
 import { TOWN, trade, fieldwork } from '../../engine/client';
 import type { TradeGood } from '../../../../engine/trade';
-import type { GameState } from '../core/types';
+import { type GameState, earnGold } from '../core/types';
 import { atSettlement } from '../gear/craft';
 import { currentCell, ownerOf, cellBlocks, settlementCell, warpCost } from '../world/road';
 import { addTo, fitsTransaction } from '../gear/slots';
@@ -65,14 +65,14 @@ export function sellGoods(state: GameState, id: string, count: number): { ok: bo
     const done = ledgerOffer.sell!();
     const settled = settledSale(state, done.cityGold, done.basicGold);
     state.town.marketCredit = settled.credit;
-    state.counters.gold += settled.gold;
+    earnGold(state.counters, settled.gold);
     return { ok: true, pieces: count, gold: settled.gold, cityUnits: done.cityUnits, eventUnits: done.eventUnits, basicUnits: done.basicUnits, cityGold: done.cityGold, basicGold: done.basicGold };
   }
   state.town.market ||= {};
   state.town.market[town] ||= {};
   state.town.market[town][good.group] = { used: plainQuote!.used, atSec: plainQuote!.atSec };
   state.town.marketCredit = plainQuote!.credit;
-  state.counters.gold += plainQuote!.gold;
+  earnGold(state.counters, plainQuote!.gold);
   return { ok: true, pieces: count, gold: plainQuote!.gold };
 }
 

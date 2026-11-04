@@ -121,7 +121,9 @@ export function buyBlackMarket(state: GameState, town: string, offerId: string, 
   if (material) state.fieldwork.materials[material.key] = (state.fieldwork.materials[material.key] || 0) + material.amount;
   else if (offer.kind === 'stone') state.counters.stones[offer.stone!] = (state.counters.stones[offer.stone!] || 0) + offer.count;
   else grantNamedSkill(state.skills, grantedSkill!.id, { duplicate: false, level: offer.level });
+  const before = state.counters.gold;
   state.counters.gold = trade.floorCurrency(state.counters.gold - offer.price);
+  state.counters.goldSpent = Math.round(((state.counters.goldSpent || 0) + Math.max(0, before - state.counters.gold)) * 100) / 100;
   offer.remaining--;
   return { ok: true as const, offer, grantedSkill };
 }

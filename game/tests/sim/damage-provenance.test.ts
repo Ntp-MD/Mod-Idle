@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { eng, E, sm, BASES } from '../../src/engine/client';
 import { playerSwing, type HitReport, type Statuses } from '@sim/combat/combat';
 import { NO_CURSE, takenMult } from '@sim/combat/curse';
-import { elementalByElement, type DamagePacket } from '@engine/damage-provenance.ts';
+import { elementalByElement, packetElementPools, type DamagePacket } from '@engine/damage-provenance.ts';
 import { castOnce, newSkillState, grantNamedSkill } from '@sim/combat/skills';
 import { buildCharacter } from '@sim/core/player';
 import type { Character } from '@sim/core/player';
@@ -166,5 +166,64 @@ describe('a press builds typed parts per target', () => {
     expect(p.parts.physicalCritEligible).toBe(0);
     expect(p.flags.canCrit).toBe(false); // a magic-basis press never rolls crit
     expect(reconstructCast(p, hit.c, m, false)).toBe(hit.cast!.byMob[0].amount);
+  });
+});
+
+describe('a negative unattributed pool never reaches a packet', () => {
+  // Read off a live zone-5 sheet: percent lines scale the named pools above the true total and the
+  // sheet keeps the arithmetic remainder on `''`. The total is honest; the negative key is not damage.
+  const pools = { fire: 16.32, cold: 397.8, chaos: 28.56, '': -16.32 };
+
+  it('folds a negative remainder into the named pools, preserving the total exactly', () => {
+    const split = packetElementPools(pools);
+    expect(split.some(([el]) => el === '')).toBe(false);
+    for (const [, v] of split) {
+      expect(Number.isFinite(v)).toBe(true);
+      expect(v).toBeGreaterThanOrEqual(0);
+    }
+    expect(split.reduce((sum, [, v]) => sum + v, 0)).toBeCloseTo(426.36, 10);
+  });
+
+  it('leaves a non-negative remainder riding the headline untouched', () => {
+    expect(packetElementPools({ fire: 100, '': 25 })).toEqual([['fire', 100], ['', 25]]);
+    expect(packetElementPools({})).toEqual([]);
+  });
+
+  it('a swing with a negative remainder still validates and rebuilds exactly', () => {
+    const c = char({ phys: 100, magic: 0, elem: 426.36, elemByElement: { ...pools }, alignment: 100,
+      conversion: {}, critChance: 0 });
+    const m = mob({ hp: 1e9, hpMax: 1e9, evasion: 0, dodgeRate: 0, innate: ['fire'] });
+    const r = playerSwing(always(0.5), c, m, null, NO_CURSE, null);
+    expect(r.landed).toBe(true);
+    for (const v of Object.values(elementalByElement(r.packet!.parts))) {
+      expect(Number.isFinite(v)).toBe(true);
+      expect(v).toBeGreaterThanOrEqual(0);
+    }
+    expect(reconstructSwing(r, c, m)).toBeCloseTo(r.damage, 10);
+  });
+
+  it('a press with a negative remainder still validates and rebuilds exactly', () => {
+    const m = mob({ hp: 1e9, hpMax: 1e9, evasion: 0, dodgeRate: 0 });
+    const rows = (sm.all() as any[]).filter((k) => k.type === 'attack' && k.basis === 'magic');
+    let hit: { c: Character; cast: any; id: string } | null = null;
+    for (const row of rows) {
+      const s = newSkillState();
+      grantNamedSkill(s, row.id);
+      s.list[0] = row.id;
+      for (const id of Object.keys(s.owned)) s.xp[id] = 100000;
+      const c = char({ phys: 100, magic: 100, elem: 426.36, elemByElement: { ...pools }, alignment: 100,
+        conversion: {}, critChance: 0 });
+      const cast = castOnce(s, c, 1e9, [m], {}, always(0.5), { mobStatus: {}, timeUs: 2_000_000 });
+      if (cast && cast.byMob.length) { hit = { c, cast, id: row.id }; break; }
+    }
+    expect(hit).toBeTruthy();
+    for (const h of hit!.cast!.byMob) {
+      expect(h.packet).toBeTruthy();
+      for (const v of Object.values(elementalByElement(h.packet!.parts))) {
+        expect(Number.isFinite(v)).toBe(true);
+        expect(v).toBeGreaterThanOrEqual(0);
+      }
+      expect(reconstructCast(h.packet!, hit!.c, m, false)).toBe(h.amount);
+    }
   });
 });

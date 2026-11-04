@@ -6,6 +6,7 @@ import {
   guidanceNotices, materialSourceFor, newGuidance, nextGoal, normalizeGuidance, recommendGoal, resolveGoal, setTrackedGoal,
 } from '@sim/core/guidance';
 import { migrate } from '../../src/state/save';
+import { slotsAvailable } from '@sim/gear/slots';
 
 const forgeFixture = () => {
   const pattern = forge.patternOf('armour', 'helmet')!;
@@ -136,5 +137,21 @@ describe('guidance save shape', () => {
 
   it('normalizes unknown refs to no pin', () => {
     expect(normalizeGuidance({ tracked: { kind: 'nonsense' } })).toEqual(newGuidance());
+  });
+
+  it('names the deposit settlement from the field, never undefined', () => {
+    const state = newGame();
+    state.cell = { q: 2, r: 0, sub: null, site: null };
+    state.bag = Array.from({ length: slotsAvailable(state) }, (_, i) => ({
+      slot: 'ring', base: `Keep ${i}`, ilvl: 1, quality: 'low', tier: 'T1', lines: [],
+    })) as never;
+    const ref = recommendGoal(state);
+    expect(ref?.kind).toBe('destination');
+    const label = (ref as { label?: unknown }).label;
+    expect(typeof label === 'string' && label.length).toBeTruthy();
+    const view = resolveGoal(state, ref!);
+    expect(view.title).toContain(label as string);
+    expect(view.title).not.toContain('undefined');
+    expect(normalizeGuidance({ tracked: ref }).tracked).toEqual(ref);
   });
 });

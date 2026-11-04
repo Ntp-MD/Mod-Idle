@@ -6,16 +6,18 @@
  * here. No browser storage, wall-clock catch-up or forced rewards are used.
  */
 import { E, eng, road } from '../src/engine/client';
+import { normalizeCombatHistory } from '../src/sim/combat/combat-history';
 import { createCombatArena, syncCombatArena } from '../src/sim/combat/combat-arena';
 import { createGameLoop, type LoopContext } from '../src/app/loop';
 import { DEFAULT_SETTINGS, exportJson, importJson } from '../src/state/save';
 import { autoEquip } from '../src/sim/gear/gear';
-import { atSettlement } from '../src/sim/gear/craft';
+import { atSettlement, doCraft } from '../src/sim/gear/craft';
 import { slotsAvailable, slotsFree, slotsUsed } from '../src/sim/gear/slots';
 import { COMBAT_STEP_US, characterSheet, huntHere, newGame, runFilterNow } from '../src/sim/core/game';
 import { allocateTreePath } from '../src/sim/core/tree';
 import { recommendTreeNodes, type TreeGoalId } from '../src/sim/core/tree-guide';
-import { claimTask, depositMany, sellJunk, stashTabCount } from '../src/sim/town/town';
+import { buy, canBuy, claimTask, depositMany, nextStashTab, priceGold, rowById, sellJunk, stashTabCount } from '../src/sim/town/town';
+import { quoteSale, sellGoods, tradeInventory } from '../src/sim/town/trade';
 import { cycleQuickbar, ownedPotions, QUICKBAR_SLOTS } from '../src/sim/world/farm';
 import { currentCell, rankOf, settlementCell, startWalk, ownerOf, zoneOf } from '../src/sim/world/road';
 import type { GameState, Item } from '../src/sim/core/types';
@@ -43,7 +45,8 @@ export interface JourneyMemory {
   lastPush: number;
   goldEarned: number;
   goldSpent: number;
-  lastGold: number;
+  lastEarned: number;
+  lastSpent: number;
   enteredZones: number[];
   treeSpent: number;
   quickbarFilled: number;
@@ -62,8 +65,10 @@ export function newJourneyMemory(state: GameState): JourneyMemory {
     lastPush: state.counters.pushes,
     goldEarned: 0,
     goldSpent: 0,
-    lastGold: state.counters.gold,
-    enteredZones: [state.zone],
+    lastEarned: state.counters.goldEarned || 0,
+    lastSpent: state.counters.goldSpent || 0,
+    // The starting zone records itself on the first second too, so the gate table opens at zone 1.
+    enteredZones: [],
     treeSpent: 0,
     quickbarFilled: 0,
     refusals: [],
@@ -164,7 +169,16 @@ function claimReadyTasks(state: GameState, memory: JourneyMemory): number {
   return claimed;
 }
 
+// These are precisely the recommendation inputs read by tree-guide.ts; clocks and HP do not rank nodes.
+const exhaustedTreeInputs = new WeakMap<GameState, string>();
+function treeInputs(state: GameState): string {
+  const weapon = state.gear.find(item => item?.slot === 'main hand' && !item.broken);
+  return JSON.stringify([state.player.treePoints, state.player.attainmentPoints, state.player.treeRanks,
+    weapon?.base, Object.keys(state.mastery).filter(key => state.mastery[key] > 0), Object.keys(state.skills.owned)]);
+}
+
 function spendTree(state: GameState, memory: JourneyMemory): number {
+  if (exhaustedTreeInputs.get(state) === treeInputs(state)) return 0;
   let spent = 0;
   const order: TreeGoalId[] = ['survival', 'mana', 'weapon', 'skills'];
   for (let guard = 0; guard < 2000; guard++) {
@@ -179,7 +193,10 @@ function spendTree(state: GameState, memory: JourneyMemory): number {
         break;
       }
     }
-    if (!bought) break;
+    if (!bought) {
+      exhaustedTreeInputs.set(state, treeInputs(state));
+      break;
+    }
   }
   memory.treeSpent += spent;
   return spent;
@@ -207,22 +224,127 @@ function fillQuickbar(state: GameState, memory: JourneyMemory): number {
   return filled;
 }
 
+/**
+ * Sell every carried good the market takes, holding back only what open delivery contracts still
+ * need. Stacks share the bag with gear, so a hoarded surplus softlocks the run exactly like a full
+ * gear bag; the market loop is the game-owned sink, previewed before each sale by the same reader.
+ */
+export function sellSurplusGoods(state: GameState): void {
+  const reserved = new Map<string, number>();
+  for (const contracts of Object.values(state.town.contracts || {})) {
+    for (const contract of contracts || []) {
+      if (contract.status !== 'open') continue;
+      const want = contract.target - contract.delivered;
+      if (want > 0) reserved.set(contract.good, Math.max(reserved.get(contract.good) || 0, want));
+    }
+  }
+  const settlement = ownerOf(currentCell(state)).id;
+  for (const { good, count } of tradeInventory(state)) {
+    const sell = count - (reserved.get(good.id) || 0);
+    if (sell <= 0) continue;
+    const quote = quoteSale(state, settlement, good.id, sell);
+    if (quote && 'ok' in quote && quote.ok === false) continue;
+    sellGoods(state, good.id, sell);
+  }
+}
+
 function organizeAtSettlement(state: GameState, memory: JourneyMemory): boolean {
   const equip = autoEquip(state, 0);
   memory.gearSwaps += equip.swaps.length;
   claimReadyTasks(state, memory);
   sellJunk(state);
+  sellSurplusGoods(state);
   if (slotsFree(state) > 0) {
     runFilterNow(state);
     return true;
   }
-  const movable = state.bag
-    .map((item, index) => ({ item, index }))
-    .filter((row): row is { item: Item; index: number } => !!row.item && !row.item.locked && !row.item.heldFor)
-    .map((row) => row.index);
-  if (movable.length && stashTabCount(state) > 0) depositMany(state, movable, 0);
+  // Deposit across every owned tab in index order; the first tab alone is not the policy.
+  const depositAll = () => {
+    const tabs = stashTabCount(state);
+    for (let tab = 0; tab < tabs && slotsFree(state) <= 0; tab++) {
+      const movable = state.bag
+        .map((item, index) => ({ item, index }))
+        .filter((row): row is { item: Item; index: number } => !!row.item && !row.item.locked && !row.item.heldFor)
+        .map((row) => row.index);
+      if (!movable.length) break;
+      depositMany(state, movable, tab);
+    }
+  };
+  depositAll();
   runFilterNow(state);
+  if (slotsFree(state) > 0) return true;
+  // Still full with no room anywhere: buy the next ladder tab with earned gold, cheapest first.
+  // The reference never dissolves a kept piece and never mints gold; when the purse cannot cover
+  // the tab or the ladder is exhausted, the block stands with its reason. A bag with nothing a tab
+  // could hold (all locked or reserved) never spends gold on one.
+  const movableExists = state.bag.some((item) => !!item && !item.locked && !item.heldFor);
+  const settlement = ownerOf(currentCell(state)).id;
+  const tabId = movableExists ? nextStashTab(state, settlement) : null;
+  if (tabId) {
+    const price = canBuy(state, settlement, tabId);
+    if (price.ok && buy(state, settlement, tabId).ok) {
+      depositAll();
+      runFilterNow(state);
+      if (slotsFree(state) > 0) return true;
+    } else if (!walkToCheaperTab(state, settlement, memory)) {
+      noteRefusal(memory, state, 'stash-tab', price.why || 'stash tab refused');
+    } else {
+      return true;
+    }
+  } else if (movableExists && walkToCheaperTab(state, settlement, memory)) {
+    return true;
+  }
+  // Stone stacks are the last wall: quest and delivery rewards pile quality stones no market
+  // takes. The reference spends them the one way that is never a gamble and never a disposal —
+  // safe-step upgrades on its own worn pieces, in slot order, until a slot frees or nothing
+  // affordable and safe remains. Reroll/refine stay untouched (sizing undecided), and no line
+  // choice is ever made.
+  if (slotsFree(state) <= 0) upgradeWornSafe(state);
   return slotsFree(state) > 0;
+}
+
+/** Safe-step (+1..+4, always 100%) upgrades on worn pieces; nowhere else, nothing risked. */
+export function upgradeWornSafe(state: GameState): number {
+  const safeTo = (E as any).craft?.upgrade_success_endpoints?.safe_to ?? 4;
+  let done = 0;
+  // No pass cap: every success spends stones, and caps plus affordability end the loop.
+  while (slotsFree(state) <= 0) {
+    let moved = false;
+    for (let index = 0; index < state.gear.length && slotsFree(state) <= 0; index++) {
+      const piece = state.gear[index];
+      if (!piece || piece.broken || piece.corrupted) continue;
+      if ((piece.upgrade_lv || 0) >= safeTo) continue;
+      if (doCraft(state, 'gear', index, 'upgrade', 0, () => 0.5).ok) {
+        done++;
+        moved = true;
+      }
+    }
+    if (!moved) break;
+  }
+  return done;
+}
+
+/**
+ * The local tab is unaffordable or unstocked: walk to the cheapest visited settlement with an
+ * affordable unowned tab instead of stopping. Prices are read off the authored rows; the purchase
+ * itself still goes through `buy` on arrival, so no discount or stock rule is bypassed.
+ */
+function walkToCheaperTab(state: GameState, from: string, memory: JourneyMemory): boolean {
+  let best: { id: string; price: number } | null = null;
+  for (const id of state.town.visited) {
+    if (id === from) continue;
+    const tabId = nextStashTab(state, id);
+    if (!tabId) continue;
+    const row = rowById(tabId);
+    if (!row) continue;
+    const price = priceGold(row, id, state);
+    if (!Number.isFinite(price) || price > state.counters.gold) continue;
+    if (!best || price < best.price) best = { id, price };
+  }
+  if (!best) return false;
+  const cell = settlementCell(best.id);
+  if (!cell) return false;
+  return walkToCell(state, cell, memory);
 }
 
 function walkToCell(state: GameState, dest: { q: number; r: number }, memory: JourneyMemory): boolean {
@@ -271,10 +393,13 @@ export function applyJourneyPolicy(state: GameState, memory: JourneyMemory): voi
   try {
     applyJourneyPolicyInner(state, memory);
   } finally {
-    const gold = state.counters.gold;
-    if (gold > memory.lastGold) memory.goldEarned += gold - memory.lastGold;
-    else if (gold < memory.lastGold) memory.goldSpent += memory.lastGold - gold;
-    memory.lastGold = gold;
+    // Separate earn/spend ledgers: a second with both a receipt and a payment must count both.
+    const earned = state.counters.goldEarned || 0;
+    const spent = state.counters.goldSpent || 0;
+    if (earned > memory.lastEarned) memory.goldEarned += earned - memory.lastEarned;
+    if (spent > memory.lastSpent) memory.goldSpent += spent - memory.lastSpent;
+    memory.lastEarned = earned;
+    memory.lastSpent = spent;
   }
 }
 
@@ -353,9 +478,37 @@ function applyJourneyPolicyInner(state: GameState, memory: JourneyMemory): void 
   }
 }
 
-/** A full-state comparison used by zone checkpoints; `lastSavedAt` is wall-clock metadata. */
+/**
+ * A full-state comparison used by zone checkpoints. `lastSavedAt` is wall-clock metadata.
+ * `engagementTruncated` is a transient per-sample receipt, never saved state (`tick/engagement.ts`);
+ * `combatHistory` is the HUD log ring, canonically sorted and capped (`combat-history.ts`) — both
+ * sides go through the same canonical form so the authored cap never reads as a round-trip loss.
+ * Ownership, resources, location, pending work and progression stay byte-exact.
+ */
+/** JSON with sorted object keys: the loader rebuilds objects in its own order, which is not a loss. */
+function stableStringify(value: unknown): string {
+  if (value === null) return 'null';
+  if (value === undefined || typeof value === 'function' || typeof value === 'symbol') return 'null';
+  if (Array.isArray(value)) return `[${value.map((entry) => stableStringify(entry)).join(',')}]`;
+  if (typeof value === 'object') {
+    const parts: string[] = [];
+    for (const key of Object.keys(value).sort()) {
+      if (key === 'engagementTruncated') continue;
+      const entry = (value as Record<string, unknown>)[key];
+      if (entry === undefined || typeof entry === 'function' || typeof entry === 'symbol') continue;
+      parts.push(`${JSON.stringify(key)}:${stableStringify(entry)}`);
+    }
+    return `{${parts.join(',')}}`;
+  }
+  return JSON.stringify(value);
+}
+
 export function journeyStateKey(state: GameState): string {
-  return exportJson({ ...state, lastSavedAt: 0 } as GameState);
+  const combatHistory = normalizeCombatHistory(state.combatHistory);
+  const canonical = { ...state, lastSavedAt: 0, combatHistory,
+    // The loader resumes the log sequence from the kept history (`save.ts`); mirror it exactly.
+    fxSeq: Math.max(state.fxSeq || 0, ...combatHistory.map((entry) => entry.id)) };
+  return stableStringify(canonical);
 }
 
 export function checkpointMatches(before: GameState, after: GameState): boolean {
@@ -384,7 +537,14 @@ export function restoreCheckpoint(checkpoint: JourneyCheckpoint): { state: GameS
   if (checkpoint.formatVersion !== JOURNEY_FORMAT_VERSION) throw new Error('unsupported journey checkpoint format');
   if (checkpoint.seed !== JOURNEY_SEED) throw new Error('journey checkpoint seed mismatch');
   const state = importJson(JSON.stringify(checkpoint.save));
-  return { state, memory: checkpoint.cursor };
+  const cursor = checkpoint.cursor as JourneyMemory & { lastGold?: number };
+  // Backfill the split earn/spend cursor for checkpoints written before the ledger split.
+  if (!Number.isFinite(cursor.lastEarned)) cursor.lastEarned = state.counters.goldEarned || 0;
+  if (!Number.isFinite(cursor.lastSpent)) cursor.lastSpent = state.counters.goldSpent || 0;
+  if (!Number.isFinite(cursor.goldEarned)) cursor.goldEarned = 0;
+  if (!Number.isFinite(cursor.goldSpent)) cursor.goldSpent = 0;
+  delete (cursor as { lastGold?: number }).lastGold;
+  return { state, memory: cursor };
 }
 
 export interface JourneyOutcome {
@@ -416,8 +576,19 @@ export function runJourney(
     if (runtime.state.goal.done) {
       if (!firstWin) firstWin = runtime.state.goal.done;
       // The run must still tick after the win record; one world second proves the loop remains live.
+      const done = runtime.state.goal.done;
+      const realEncounter = runtime.state.goal.attempts >= 1 && runtime.state.counters.kills > 0
+        && Number.isFinite(done.level) && Number.isFinite(done.hp) && done.hp > 0;
       let guard = 0;
-      while (runtime.state.clockSec - runtime.state.goal.done!.clockSec < 1 && guard++ < 200) runtime.step();
+      while (runtime.state.clockSec - done.clockSec < 1 && guard++ < 200) runtime.step();
+      const advanced = runtime.state.clockSec - done.clockSec >= 1;
+      if (!realEncounter || !advanced) {
+        return {
+          outcome: { status: 'FAIL', reason: !realEncounter ? 'goal.done without a real encounter' : 'post-win clock did not advance a full world second',
+            simulatedSec: runtime.state.clockSec - startClock, wallMs: now() - startWall },
+          state: runtime.state, memory: runtime.memory, firstWin,
+        };
+      }
       return {
         outcome: { status: 'PASS', reason: 'goal.done reached and post-win second advanced',
           simulatedSec: runtime.state.clockSec - startClock, wallMs: now() - startWall },
@@ -459,8 +630,8 @@ export function journeyTableRow(label: string, state: GameState, wallMs: number)
     kills: state.counters.kills,
     pushes: state.counters.pushes,
     drops: state.counters.drops,
-    goldEarned: state.counters.gold,
-    goldSpent: 0,
+    goldEarned: state.counters.goldEarned || 0,
+    goldSpent: state.counters.goldSpent || 0,
     bag: `${slotsUsed(state)}/${slotsAvailable(state)}`,
     stash: state.stash.reduce((sum, tab) => sum + tab.length, 0),
     gearSwaps: 0,

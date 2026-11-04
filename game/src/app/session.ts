@@ -238,8 +238,15 @@ export function createSessionActions(ctx: SessionContext) {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `modworld-${ctx.gameState.player.level}.json`;
+    // A detached anchor click is ignored by some headless browsers; attach, press, detach.
+    // Revoking synchronously can win the race against the download starting, so the URL lives
+    // until the next export replaces it, then the old one is released.
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(a.href);
+    a.remove();
+    const stale = (download as { lastUrl?: string }).lastUrl;
+    if (stale) URL.revokeObjectURL(stale);
+    (download as { lastUrl?: string }).lastUrl = a.href;
   }
 
   async function upload(ev: Event): Promise<boolean> {

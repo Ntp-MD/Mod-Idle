@@ -1,6 +1,6 @@
 import { eng, E, sm, BASES } from '../../engine/client';
 import { ambushCritChance, bundleOf, crimsonPactSplit, deferredHit, elementalAegisSplit, elementalInfusionExtras, elementWardMult, emberheartConvert, enduringCoreHpDamage, headsmanExecutes, inevitableElementMult, radiantFaithCut, toxicExecution, tradeoffPct, turtleCut, unerringEyeActive } from '../../../../engine/keystones.ts';
-import { directFlags, emptyParts, validateDamagePacket } from '../../../../engine/damage-provenance.ts';
+import { directFlags, emptyParts, packetElementPools, validateDamagePacket } from '../../../../engine/damage-provenance.ts';
 import type { DamagePacket } from '../../../../engine/damage-provenance.ts';
 import type { Character } from '../core/player.ts';
 import type { Mob } from '../core/types.ts';
@@ -116,7 +116,7 @@ export function playerSwing(
   const nativeParts: Record<string, number> = {};
   const convertedParts: Record<string, number> = {};
   let elemDamage = 0;
-  const pools = Object.entries(c.elemByElement);
+  const pools = packetElementPools(c.elemByElement);
   const elemTaken = 1 + (curse.elemTakenPct || 0) / 100;
   if (pools.length && mob.innate.length) {
     for (const [el, pool] of pools) {

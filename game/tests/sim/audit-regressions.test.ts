@@ -7,7 +7,7 @@ import { buildCharacter } from '@sim/core/player';
 import { rollDrop } from '@sim/gear/drop';
 import { poolOf } from '@sim/gear/craft';
 import { cooldownLeft, enterDungeon } from '@sim/world/dungeon';
-import { col, turnIn } from '@sim/town/collector';
+import { col, turnIn, wants } from '@sim/town/collector';
 import { settlementById } from '@sim/town/town';
 import { settlementCell, walkNote } from '@sim/world/road';
 import { mobSwing, dotDamageParts, type Statuses } from '@sim/combat/combat';
@@ -281,6 +281,35 @@ describe('the Collector never consumes a pinned piece', () => {
     expect(turnIn(s, set.settlement)).toMatchObject({ ok: true, reward: set.reward });
     expect(s.collector.done[set.id]).toBe(true);
     expect(turnIn(s, set.settlement).why).toBe('this set is already turned in');
+  });
+
+  it('holds one piece per line, never a duplicate of a line already in hand', () => {
+    const s = newGame(39);
+    const set = col.sets[0];
+    const line = set.parsed[0];
+    const item = { slot: line.slot, base: line.name, ilvl: 1, quality: set.quality === 'any' ? 'low' : set.quality,
+      tier: 'T1', q: 0, lines: [] } as any;
+    expect(wants(s, item), 'the empty line is wanted').toBeTruthy();
+    s.bag.push({ ...item, heldFor: set.id });
+    expect(wants(s, item), 'the line already has its one piece in the bag').toBeFalsy();
+    s.bag = [];
+    s.stash = [[{ ...item, heldFor: set.id }]];
+    expect(wants(s, item), 'a held piece in the stash fills the same line').toBeFalsy();
+  });
+
+  it('releases surplus held duplicates when the set is turned in', () => {
+    const s = newGame(39);
+    const set = col.sets[0];
+    const settlement = settlementById(set.settlement)!;
+    s.cell = { ...settlementCell(set.settlement)!, sub: null, site: null };
+    s.zone = settlement.zone;
+    const piece = (p: any) => ({ slot: p.slot, base: p.name, ilvl: 1, quality: 'low', tier: 'T1', q: 0, lines: [] });
+    s.bag = set.parsed.map((p: any) => ({ ...piece(p), heldFor: set.id }));
+    const surplus = { ...piece(set.parsed[0]), heldFor: set.id };
+    s.bag.push(surplus);
+    expect(turnIn(s, set.settlement).ok).toBe(true);
+    expect(s.bag).toContain(surplus);
+    expect((surplus as any).heldFor).toBeUndefined();
   });
 
   it('a turn-in leaves the locked held piece in the bag and names it', () => {

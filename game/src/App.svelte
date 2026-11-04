@@ -20,7 +20,7 @@ import { offerDelivery, deliver, trackDelivery, acknowledgeDelivery, announceDel
 import { buyBlackMarket } from '@sim/town/black-market';
   import DeliveryNotice from './ui/town/DeliveryNotice.svelte';
   import { previewScrapAlchemy, transmuteScrap, alchemyTierProgress } from '@sim/gear/alchemy';
-  import { newGame, setLevel, tick, push, fx, hitColour, COMBAT_STEP_US, schedulerSteps, characterSheet, huntZone, huntHere, salvageBag, retreatDungeon, runFilterNow, isBossKind, spawnMob } from '@sim/core/game';
+  import { newGame, setLevel, tick, push, fx, hitColour, COMBAT_STEP_US, schedulerSteps, characterSheet, huntZone, huntHere, salvageAtSmith, retreatDungeon, runFilterNow, isBossKind, spawnMob } from '@sim/core/game';
   import { restorePendingWork } from '@sim/core/pending-work';
   import { fieldInFight, restoreFieldPositions } from '@sim/world/field-area';
   import type { ManualControl } from '@sim/combat/combat-actions';
@@ -94,7 +94,7 @@ import { buyBlackMarket } from '@sim/town/black-market';
   import { feedEventsAfter } from './ui/hud/logbox';
   import {
     settlementById, settlementOfZone, stockOf, priceGold, priceMinutes, canBuy, buy, sellJunk,
-    canTravel, claimTask, npcOf, repairGear, skipTask, skipVerdict,
+    canTravel, claimTask, npcOf, repairGear, skipTask, skipVerdict, smithService,
   } from '@sim/town/town';
   import { doCraft, stoneName, atSettlement, replaceChoices, type CraftOp, type Where } from '@sim/gear/craft';
   import { forgeGear } from '@sim/gear/forge';
@@ -1523,7 +1523,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   function doSalvage(index: number) {
     if (!requireAccountWriter('salvaging gear')) return;
-    const r = salvageBag(gameState, index);
+    const r = salvageAtSmith(gameState, index);
     equipNote = r.ok ? 'That piece dissolved — Iron Ore and Scrap entered the resources' : `Cannot salvage: ${r.why}`;
     gameState = { ...gameState };
   }
@@ -1595,11 +1595,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       },
     ];
     if (townLive && tabs) out.push({ label: `Stash it → Tab ${stashTab + 1}`, onpick: () => { const i = liveIndex(); if (i < 0) return gone(); doDeposit(i, stashTab); } });
+    const smith = smithService(gameState);
     out.push({
       label: 'Dissolve',
-      hint: 'Iron Ore + Scrap',
+      hint: smith.ok ? 'Iron Ore + Scrap · at the smith' : smith.why || 'no smith here',
       danger: true,
-      disabled: Boolean(it.locked || it.heldFor),
+      disabled: Boolean(it.locked || it.heldFor || !smith.ok),
       onpick: () => { const i = liveIndex(); if (i < 0) return gone(); doSalvage(i); },
     });
     return out;
@@ -2829,6 +2830,16 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     fx(gameState, { kind: 'craft', side: 'self', text: forgeNote, colour: E.elements.crit_colour || 'var(--gold)' });
     gameState = { ...gameState };
     return true;
+  }
+
+  function runSalvage(index: number) {
+    if (!transactionWriter) { forgeNote = 'This tab is read-only.'; return false; }
+    const piece = gameState.bag[index];
+    if (!piece) { forgeNote = 'That piece already left the bag'; return false; }
+    const r = salvageAtSmith(gameState, index);
+    forgeNote = r.ok ? 'That piece dissolved — Iron Ore and Scrap entered the resources' : `Cannot salvage: ${r.why}`;
+    gameState = { ...gameState };
+    return r.ok;
   }
 
   function runCraft(op: CraftOp, lineIndex: number, pick?: string) {
@@ -4313,7 +4324,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
 {#if panel === 'forge'}
   <Panel title="Forge" subtitle="Materials in · a new piece out" width="wide" fixed topmost gridArea={modalGridArea} onclose={closePanel}>
-    <Forge game={gameState} writer={transactionWriter} note={forgeNote} onforge={runForge} focus={forgeFocus}
+    <Forge game={gameState} writer={transactionWriter} note={forgeNote} onforge={runForge} onsalvage={runSalvage} focus={forgeFocus}
       ontrack={doTrackGoal} onshortage={doTrackShortage} onpinzone={pinZoneSource}
       onmap={openMapAtSettlement} onbag={() => openPanel('bag')} />
   </Panel>

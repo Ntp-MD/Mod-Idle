@@ -3,11 +3,11 @@ import {
   auraResonance, auraScaledValue, bloodPriceHp, bundleOf, headsmanExecutes, manaDebtFloor,
   type KeystoneBundle,
 } from '../../../../engine/keystones.ts';
-import { directFlags, emptyParts, validateDamagePacket } from '../../../../engine/damage-provenance.ts';
+import { directFlags, emptyParts, packetElementPools, validateDamagePacket } from '../../../../engine/damage-provenance.ts';
 import type { DamagePacket } from '../../../../engine/damage-provenance.ts';
 import type { SkillAction, SkillAreaSnapshot, SkillRow } from '../../../../engine/types.ts';
 import { mastery } from '../core/mastery';
-import { setStacks, setErosion, stopMob, stopMobDeliberate, placeStatus, holdStatus, modsOn as mobModsOn, targetMods, applyWeaponRiders, holdsCondition, CONDITION_OF, consumeStatus, copyStatus, refreshStatus, keystoneBlocksStatus, keystoneTargetMods, type MobStatusName } from './mobStatus';
+import { setStacks, setErosion, stopMob, stopMobDeliberate, placeStatus, holdStatus, holdPoison, modsOn as mobModsOn, targetMods, applyWeaponRiders, holdsCondition, CONDITION_OF, consumeStatus, copyStatus, refreshStatus, keystoneBlocksStatus, keystoneTargetMods, type MobStatusName } from './mobStatus';
 import { lineValue, applyCurse, combineMods, modsOn as curseModsOn, NO_CURSE, takenMult } from './curse';
 import { targetsInSkillArea } from '../../../../engine/skill-actions';
 import { distinctSkillTargets } from '../../../../engine/skill-area.ts';
@@ -1344,6 +1344,7 @@ export function resolvePreparedCast(
     for (const e of effects) {
       if (e.subject !== 'target') continue;
       if (e.stat === 'poison_stacks' && !repeatedGrantBlocked(t, 'poison') && !keystoneBlocksStatus(c, 'poison')) setStacks(env.mobStatus, t.id, 'poison', e.value, alignedPerSec);
+      if (e.stat === 'poison_hold_sec' && !repeatedGrantBlocked(t, 'poison') && !keystoneBlocksStatus(c, 'poison')) holdPoison(env.mobStatus, t.id, e.value);
       if (e.stat === 'burn_stacks' && !repeatedGrantBlocked(t, 'burn') && !keystoneBlocksStatus(c, 'burn')) setStacks(env.mobStatus, t.id, 'burn', e.value, alignedPerSec);
       if (e.stat === 'mark_stacks' && !repeatedGrantBlocked(t, 'mark')) setStacks(env.mobStatus, t.id, 'mark', e.value, alignedPerSec);
       // Sand Storm's own lingering line: the row types the damage a second and the seconds, and the
@@ -1388,7 +1389,6 @@ export function resolvePreparedCast(
   const magicBasis = skill.basis === 'magic' ? c.magic + c.elem * (c.alignment / 100) : 0;
   // the character's own Element mix, so a press's Element share can be split the way a swing's pools are
   const elemPools = Object.entries(c.elemByElement);
-  const elemPoolTotal = elemPools.reduce((a, [, v]) => a + v, 0);
   const pierce = effects.find((e) => e.stat === 'resistance_pierce_pct');
   // Sand Storm's own seconds, unscaled by the ramp (it opts out in `special_level_effects`)
   const dotSec = effects.find((e) => e.stat === 'dot_sec')?.value ?? 10;
@@ -1491,7 +1491,9 @@ export function resolvePreparedCast(
     let elemArg: number | Record<string, number> = elemPart;
     if (elemPart > 0) {
       const byEl: Record<string, number> = {};
-      if (elemPoolTotal > 0) for (const [el, pool] of elemPools) byEl[el] = elemPart * (pool / elemPoolTotal);
+      const split = packetElementPools(Object.fromEntries(elemPools));
+      const splitTotal = split.reduce((sum, [, v]) => sum + v, 0);
+      if (splitTotal > 0) for (const [el, pool] of split) byEl[el] = elemPart * (pool / splitTotal);
       else if (t.innate && t.innate.length) byEl[t.innate[0]] = elemPart;
       if (Object.keys(byEl).length) elemArg = byEl;
     }

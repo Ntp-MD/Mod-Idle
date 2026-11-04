@@ -2,7 +2,7 @@ import { MODS, TOWN, sm } from '../../engine/client';
 import { craft } from '../gear/craft';
 import { addTo } from '../gear/slots';
 import { grantNamedSkill, usefulSkillDuplicate } from '../combat/skills';
-import type { GameState, TaskSlot } from '../core/types';
+import { type GameState, type TaskSlot, earnGold } from '../core/types';
 import type { DeliveryReward, StoneReward } from './delivery-types';
 
 /** Frozen ordinary rewards are alternatives; passive-tree currencies belong to the objective. */
@@ -34,7 +34,7 @@ export function resolveQuestBonus(state: GameState, bonus: QuestBonus) {
 export function payQuestBonus(state: GameState, bonus: ReturnType<typeof resolveQuestBonus>) {
   for (const stone of bonus.stones) addTo(state, state.counters.stones, stone.key, 'stone', stone.count);
   if (bonus.skill) grantNamedSkill(state.skills, bonus.skill);
-  state.counters.gold += bonus.gold;
+  earnGold(state.counters, bonus.gold);
 }
 
 export function milestoneAvailable(state: GameState, key: string): boolean {
