@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { eng, E, sm, SKILLS } from '../../src/engine/client';
+import { blackMarket, eng, E, sm, SKILLS, TOWN } from '../../src/engine/client';
 import { buildCharacter, emptyGear } from '@sim/core/player';
 import { newGame, tick, huntZone } from '@sim/core/game';
 import {
   newSkillState, grantSkill, castOnce, skillLevel, ladderOf, reservedPct, usableMana,
   effectsActive, tickSkills, toggleTrack, clearUnownedTracks, ownsSkill, ACTIVE_SLOTS,
-  defaultManualSkill, skillEligibility,
+  defaultManualSkill, skillEligibility, rotationOrder,
 } from '@sim/combat/skills';
+import { switchPreset } from '@sim/core/presets';
 import { normalizeSkillAction, payHpCost } from '@engine/skills.ts';
 import { installSkillFixture, installSyntheticSkill } from '../fixtures/skillFixture';
 import { mulberry32 } from '../../src/engine/client-helpers';
@@ -16,7 +17,7 @@ import { liveId, hasStat } from '../fixtures/liveSkill';
 const MELEE = liveId(row => row.type === 'attack' && row.basis === 'phys' && row.area?.shape === 'cone' && !row.action, 'melee');
 const MAGIC = liveId(row => row.type === 'attack' && row.basis === 'magic' && !row.action, 'magic');
 const PROJECTILE = liveId(row => row.type === 'attack' && row.cast?.delivery === 'projectile' && !row.action, 'projectile');
-const TIMED_ATTACK = liveId(row => row.type === 'attack' && hasStat(row, 'leech') && hasStat(row, 'physical_power'), 'timed attack');
+const TIMED_ATTACK = liveId(row => row.type === 'attack' && row.rules?.includes('self_window') && hasStat(row, 'physical_power'), 'timed attack');
 const MANA_AURA = liveId(row => row.type === 'aura' && hasStat(row, 'mana_regen'), 'mana aura');
 const ABSORB = liveId(row => row.type === 'buff' && hasStat(row, 'es_absorb_pct'), 'absorb');
 const POWER_BUFF = liveId(row => row.type === 'buff' && hasStat(row, 'physical_power'), 'power buff');
@@ -39,6 +40,52 @@ describe('the retired roster', () => {
       expect(sm.byId[row.retired_to].retired).not.toBe(true);
       expect(live.has(row.id)).toBe(false);
     }
+  });
+
+  it('keeps an owned retired row castable, reorderable and preset-loadable with its progress', () => {
+    const replacement = sm.all().find((row: any) => row.type === 'attack')!.id;
+    const installed = installSyntheticSkill('test.legacy-play', {
+      name: 'Legacy Play', retired: true, retired_to: replacement,
+    });
+    const id = installed.row.id;
+    try {
+      const s = newSkillState();
+      s.owned[id] = 2;
+      s.xp[id] = sm.skillXpForLevel(5);
+      s.list[0] = id;
+      const c = { ...buildCharacter(30, emptyGear()), weaponName: 'one-handed axe' };
+      const mob = { id: 'legacy-target', hp: 1e9, hpMax: 1e9, evasion: 0, dodgeRate: 0 } as any;
+      expect(rotationOrder(s)).toContain(id);
+      expect(skillEligibility(s, c, id, c.maxMana, [mob], {}).ready).toBe(true);
+      expect(castOnce(s, c, c.maxMana, [mob], {}, mulberry32(7))?.id).toBe(id);
+      expect(s.owned[id]).toBe(2);
+      expect(s.xp[id]).toBe(sm.skillXpForLevel(5));
+      const game = newGame(55);
+      game.skills = s;
+      s.list[0] = null;
+      game.presets[1].list.fill(null);
+      game.presets[1].list[0] = id;
+      expect(switchPreset(game, 1)).toBe(true);
+      expect(game.skills.list[0]).toBe(id);
+    } finally {
+      installed.restore();
+    }
+  });
+
+  it('keeps retired rows out of every acquisition pool and every active reference', () => {
+    const active = new Set(sm.all().map((row: any) => row.id));
+    for (const row of SKILLS.skills as any[]) {
+      if (!row.retired) {
+        expect(row.retired_to, `${row.id} is active and carries no retired_to`).toBeUndefined();
+        continue;
+      }
+      expect(active.has(row.id), `${row.id} is not a new-drop row`).toBe(false);
+      expect(active.has(row.retired_to), `${row.id} points at an active replacement`).toBe(true);
+    }
+    for (const [id] of Object.entries(blackMarket.C.skill_weights))
+      expect(active.has(id), `Black Market weight ${id} is active`).toBe(true);
+    for (const [id] of Object.entries((TOWN as any).delivery.skill_weights))
+      expect(active.has(id), `Delivery weight ${id} is active`).toBe(true);
   });
 });
 
@@ -323,6 +370,8 @@ describe('channel sustain rate', () => {
       const c = buildCharacter(100, emptyGear());
       const row = sm.byId['attack.whirlwind'] as any;
       const start = sm.manaCostOf(row, { skillLevel: 1 });
+      const interval = row.action.interval_sec;
+      const hits = row.effects.find((effect: any) => effect.stat === 'hits').value;
       const mk = () => {
         const st = newSkillState();
         st.list[0] = 'attack.whirlwind'; st.owned['attack.whirlwind'] ??= 0;
@@ -330,11 +379,11 @@ describe('channel sustain rate', () => {
       };
       const mob = () => ({ id: 'offline-target', hp: 1e9, hpMax: 1e9, evasion: 0, dodgeRate: 0 }) as any;
       const full = castOnce(mk(), c, c.maxMana, [mob()], {}, mulberry32(7), { currentHp: c.maxHp })!;
-      expect(full.targets).toBe(3);
-      expect(full.manaCost).toBeCloseTo(start + 10 * 1.2, 6);
-      // start plus 0.3 s of sustain: the first interval needs 4.0 Mana, so no pulse resolves
+      expect(full.targets).toBe(hits);
+      expect(full.manaCost).toBeCloseTo(start + 10 * interval * hits, 6);
+      // Less than one interval of sustain cannot fund the first pulse.
       // but the paid start is still the report's price
-      const poor = castOnce(mk(), c, start + 3, [mob()], {}, mulberry32(7), { currentHp: c.maxHp })!;
+      const poor = castOnce(mk(), c, start + 10 * interval - .1, [mob()], {}, mulberry32(7), { currentHp: c.maxHp })!;
       expect(poor.targets).toBe(0);
       expect(poor.damage).toBe(0);
       expect(poor.manaCost).toBeCloseTo(start, 6);
@@ -354,18 +403,17 @@ describe('a press can open its own timed window (Reap)', () => {
     const mob = { id: 'test-mob', hp: 1e9, evasion: 0, dodgeRate: 0 } as any;
     const rng = mulberry32(5);
     const before = effectsActive(s);
-    expect(before.add.leech || 0).toBe(0);
+    expect(before.mult.physical_power || 1).toBe(1);
     castOnce(s, { ...c, weaponName: 'two-handed axe' }, c.maxMana, [mob], {}, rng);
     const dur = Number.parseFloat(String(sm.byId[TIMED_ATTACK].duration));
     expect(s.buffUp[TIMED_ATTACK]).toBe(dur);
     const during = effectsActive(s);
     const reap = sm.byId[TIMED_ATTACK] as any;
     const effectValue = (stat: string) => reap.effects.find((e: any) => e.stat === stat).value;
-    expect(during.add.leech).toBe(effectValue('leech'));
     expect(during.mult.physical_power).toBeCloseTo(effectValue('physical_power'), 9);
     for (let i = 0; i < dur; i++) tickSkills(s, 1);
     expect(s.buffUp[TIMED_ATTACK]).toBe(0);
-    expect(effectsActive(s).add.leech || 0).toBe(0);
+    expect(effectsActive(s).mult.physical_power || 1).toBe(1);
   });
 
   it('a row without the rule word opens no window', () => {

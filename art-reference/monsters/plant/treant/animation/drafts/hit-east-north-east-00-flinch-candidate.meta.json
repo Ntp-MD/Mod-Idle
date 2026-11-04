@@ -1,0 +1,18 @@
+﻿{
+    "status":  "candidate-review",
+    "generator":  "built-in-imagegen",
+    "source":  "C:/Users/disda/.codex-acc2/generated_images/01a1a173-1a8c-7ad3-bbf2-7798df231412/exec-e86fba11-0ce7-4d35-a835-0c628e9fb1f5.png",
+    "action":  "hit",
+    "direction":  "east-north-east",
+    "phase":  "00-flinch",
+    "visualReview":  {
+                         "sequenceAccepted":  false,
+                         "identityAccepted":  false,
+                         "exactAngleAccepted":  false,
+                         "note":  "Generated draft; compare against canonical species poses, direction and sequence before approval."
+                     },
+    "qa":  {
+               "atlas":  false,
+               "anchor":  false
+           }
+}

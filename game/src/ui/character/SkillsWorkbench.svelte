@@ -57,8 +57,18 @@
   let announcement = $state('');
 
   const sk = $derived(game.skills);
-  const owned = $derived(sm.all().filter((row) => Object.hasOwn(sk.owned, row.id)));
+  // Owned rows are the collection, not the live drop pool: retired rows stay visible through
+  // `byId` so a legacy copy, its XP, mode and slot survive. Active rows lead; legacy rows follow
+  // in catalogue order, which is the collection's existing sort.
+  const owned = $derived.by(() => {
+    const held = new Set(Object.keys(sk.owned));
+    const active = sm.all().filter((row) => held.has(row.id));
+    const legacy = (sm.SKILLS.skills as any[]).filter((row) => row.retired === true && held.has(row.id));
+    return [...active, ...legacy];
+  });
   const selected = $derived(owned.find((row) => row.id === view.selectedId) || owned.find((row) => sk.list.includes(row.id)) || owned[0]);
+  const replacementName = (row: any): string | undefined =>
+    row?.retired_to ? sm.byId[row.retired_to]?.name || row.retired_to : undefined;
   const selectedSlot = $derived(selected ? sk.list.indexOf(selected.id) : -1);
   const freeSlot = $derived(sk.list.indexOf(null));
   const selectedIsTrack = $derived(!!selected && ['aura', 'buff'].includes(selected.type || ''));
@@ -181,7 +191,7 @@
             {@const loaded = sk.list.includes(row.id) || sk.buffs[row.id] || sk.auras[row.id]}
             <button class="collection-item" class:selected={selected?.id === row.id} aria-pressed={selected?.id === row.id} onclick={() => view.selectedId = row.id}>
               <span class="skill-art icon-mask" style:--glyph={`url("${skillIcon(row.id, row.type)}")`} aria-hidden="true"></span>
-              <span><strong>{row.name}</strong><small>{row.type} · Lv {skillLevel(sk, row.id)}{loaded ? ' · In loadout' : ''}</small><small class="compact">{describeSkill(row).compact}</small>{#if relationship(row)}<small class="relationship">{relationship(row)}</small>{/if}</span>
+              <span><strong>{row.name}</strong><small>{row.type} · Lv {skillLevel(sk, row.id)}{loaded ? ' · In loadout' : ''}{#if row.retired} · <em class="legacy-tag">Legacy</em>{/if}</small><small class="compact">{describeSkill(row).compact}</small>{#if row.retired}<small class="legacy-copy">No longer drops. Your owned copy and XP are kept.{#if replacementName(row)} Replaced by {replacementName(row)}.{/if}</small>{/if}{#if relationship(row)}<small class="relationship">{relationship(row)}</small>{/if}</span>
             </button>
           {:else}<p class="empty">{owned.length ? 'No skills match these filters. Clear the search or choose another filter.' : 'Your first skill drops from a Boss. New timed skills join an empty slot automatically.'}</p>{/each}
         </div>
@@ -242,7 +252,8 @@
 
       <aside class="inspector" aria-label="Selected skill inspector">
         {#if selected}
-          <header class="selected-heading"><span class="skill-art icon-mask" style:--glyph={`url("${skillIcon(selected.id, selected.type)}")`} aria-hidden="true"></span><div><h3>{selected.name}</h3><p>{skillWindow?.type ?? selected.type} · Level: {skillLevel(sk, selected.id)} / {E.skill_xp.level_cap}</p></div></header>
+          <header class="selected-heading"><span class="skill-art icon-mask" style:--glyph={`url("${skillIcon(selected.id, selected.type)}")`} aria-hidden="true"></span><div><h3>{selected.name}</h3><p>{skillWindow?.type ?? selected.type} · Level: {skillLevel(sk, selected.id)} / {E.skill_xp.level_cap}{#if selected.retired} · <em class="legacy-tag">Legacy</em>{/if}</p></div></header>
+          {#if selected.retired}<p class="legacy-copy">No longer drops. Your owned copy and XP are kept.{#if replacementName(selected)} Replaced by {replacementName(selected)}.{/if}</p>{/if}
           {#if selectedIsTrack}
             <p class="live-state">{selected.type === 'aura' ? (sk.auras[selected.id] ? 'Aura enabled' : 'Aura off') : sk.buffs[selected.id] ? 'Buff track enabled' : 'Buff track off'}</p>
           {:else if eligibility}
@@ -354,6 +365,8 @@
   .live-state.ready { color: var(--good-lit); }
   .reason { color: var(--sheet-ink); font-size: var(--font-2xs); line-height: 1.6; overflow-wrap: anywhere; }
   .collection-item .compact { color: var(--dim); }
+  .legacy-tag { font-style: normal; color: var(--gold-lit); font-size: var(--font-3xs); border: 1px solid var(--hud-edge); padding: 0 3px; }
+  .legacy-copy { color: var(--dim); line-height: 1.6; }
   .skill-window .description dd { color: var(--sheet-ink); line-height: 1.6; }
   .relationship { color: var(--mana-lit) !important; font-size: var(--font-2xs); line-height: 1.5; }
   .skill-facts { margin: 0; font-size: var(--font-2xs); }

@@ -1,9 +1,9 @@
 import { catchUpAsync, newGame } from '@sim/core/game';
 import type { GameState } from '@sim/core/types';
-import { FRESH_SESSION_PHASE, type CharacterSaveSession } from '../state/saveSession';
+import type { CharacterSaveSession } from '../state/saveSession';
 import {
-  exportJson, importJson, listSnapshots, readSave, restoreSnapshot, writeSaveSync,
-  type ClientSettings, type SlotName, type Snapshot,
+  applyAccount, exportJson, importJson, listSnapshots, readAccount, readSave, restoreSnapshot,
+  writeSaveSync, type ClientSettings, type SlotName, type Snapshot,
 } from '../state/save';
 import { requestAccountWriterLock, type AccountWriterLockResult } from '../state/accountWriterLock';
 import { buildAwayReport, describeSnap, snapCounters, type AwayReport } from '../ui/hud/hud';
@@ -37,6 +37,8 @@ export interface SessionContext {
   set takeoverController(value: AbortController | null);
   get takeoverSlot(): SlotName;
   set takeoverSlot(value: SlotName);
+  /** Reactive mirror of `saveSession.slot` for the shell's save notices. */
+  set attachedSlot(value: SlotName | null);
   get snapSlot(): SlotName;
   get snaps(): Snapshot[];
   set snaps(value: Snapshot[]);
@@ -56,17 +58,30 @@ export interface SessionContext {
  * The pure save rules live in `state/save.ts`; this is the session around them.
  */
 export function createSessionActions(ctx: SessionContext) {
+  function attachSlot(slot: SlotName, epoch: number): boolean {
+    if (!ctx.saveSession.attach(slot, epoch)) return false;
+    ctx.attachedSlot = slot;
+    return true;
+  }
+
+  /** Drop the autosave binding first; the epoch makes a stale write unable to rebind. */
+  function detachSlot(): number {
+    ctx.attachedSlot = null;
+    return ctx.saveSession.detach();
+  }
+
   function cancelOfflineLoad() {
     ctx.loadController?.abort();
     if (ctx.showcaseMode) { ctx.offlineProgress = null; ctx.loadController = null; }
   }
 
   async function doSave(slot: SlotName, quiet = false) {
-    if (ctx.showcaseMode || FRESH_SESSION_PHASE) return;
+    if (ctx.showcaseMode) return;
     if (!ctx.canWriteAccount) { ctx.saveNote = 'This tab does not control account saves.'; return; }
     const epoch = ctx.saveSession.checkpoint();
     try {
       if (!await ctx.saveSession.save(slot, ctx.gameState)) return;
+      ctx.attachedSlot = slot;
       ctx.persistenceError = null;
       if (!quiet) {
         ctx.gameState = { ...ctx.gameState };
@@ -82,48 +97,49 @@ export function createSessionActions(ctx: SessionContext) {
   }
 
   async function loadSnaps() {
-    if (ctx.showcaseMode || FRESH_SESSION_PHASE) { ctx.snaps = []; ctx.snapNote = FRESH_SESSION_PHASE ? 'Saving is off in this fresh-session phase.' : 'Snapshots are disabled in the Showcase.'; return; }
+    if (ctx.showcaseMode) { ctx.snaps = []; ctx.snapNote = 'Snapshots are disabled in the Showcase.'; return; }
     ctx.snaps = await listSnapshots(ctx.snapSlot);
     ctx.snapNote = ctx.snaps.length ? '' : 'No backup yet — one is owed on the next level up, craft or timer.';
   }
 
-  async function restore(index: number) {
-    if (ctx.showcaseMode || FRESH_SESSION_PHASE || !ctx.canWriteAccount) return;
+  async function restore(index: number): Promise<boolean> {
+    if (ctx.showcaseMode || !ctx.canWriteAccount) return false;
     const targetSlot = ctx.snapSlot;
     const previousSlot = ctx.saveSession.slot;
-    const epoch = ctx.saveSession.detach();
+    const epoch = detachSlot();
     ctx.paused = true;
     try {
       const s = await ctx.saveSession.run(() => restoreSnapshot(targetSlot, index));
-      if (!ctx.saveSession.isCurrent(epoch)) return;
-      if (!s) { if (previousSlot) ctx.saveSession.attach(previousSlot, epoch); ctx.snapNote = 'That backup is gone'; return; }
+      if (!ctx.saveSession.isCurrent(epoch)) return false;
+      if (!s) { if (previousSlot) attachSlot(previousSlot, epoch); ctx.snapNote = 'That backup is gone'; return false; }
       ctx.gameState = s;
       // A rewind replaces the character, so the living arena must start a new generation too.
       if (ctx.liveArpgArena) ctx.resetArena();
       ctx.resetCharacterUi();
       ctx.awayReport = null;
       ctx.resetSkillDiscovery();
-      ctx.saveSession.attach(targetSlot, epoch);
+      attachSlot(targetSlot, epoch);
       const what = describeSnap(ctx.snaps[index]);
       await loadSnaps();
       ctx.snapNote = `Rewound ${targetSlot} to the backup taken ${what} — the character went back whole, stones and craft counts with it`;
+      return true;
     } catch (error) {
       if (ctx.saveSession.isCurrent(epoch)) {
-        if (previousSlot) ctx.saveSession.attach(previousSlot, epoch);
+        if (previousSlot) attachSlot(previousSlot, epoch);
         ctx.snapNote = `Cannot rewind: ${error instanceof Error ? error.message : 'the backup failed validation'}`;
       }
+      return false;
     } finally { if (ctx.saveSession.isCurrent(epoch)) ctx.paused = false; }
   }
 
   async function doLoad(slot: SlotName) {
     if (ctx.showcaseMode) return false;
-    if (FRESH_SESSION_PHASE) { ctx.saveNote = 'Loading is off: every boot starts a fresh character.'; return false; }
     ctx.loadController?.abort();
     const controller = new AbortController();
     ctx.loadController = controller;
     const previous = ctx.gameState;
     const previousSlot = ctx.saveSession.slot;
-    const epoch = ctx.saveSession.detach();
+    const epoch = detachSlot();
     let ui: CharacterUiSnapshot | null = null;
     ctx.offlineProgress = { done: 0, total: 0 };
     ctx.paused = true;
@@ -132,7 +148,7 @@ export function createSessionActions(ctx: SessionContext) {
       const s = await readSave(slot);
       if (!ctx.saveSession.isCurrent(epoch)) return false;
       if (!s || controller.signal.aborted) {
-        if (previousSlot) ctx.saveSession.attach(previousSlot, epoch);
+        if (previousSlot) attachSlot(previousSlot, epoch);
         ctx.saveNote = controller.signal.aborted ? 'Load cancelled; your character and saved slot were kept.' : `${slot} is empty`;
         return false;
       }
@@ -150,7 +166,7 @@ export function createSessionActions(ctx: SessionContext) {
         ctx.gameState = previous;
         if (ctx.liveArpgArena) ctx.resetArena();
         if (ui) ctx.restoreCharacterUi(ui);
-        if (previousSlot) ctx.saveSession.attach(previousSlot, epoch);
+        if (previousSlot) attachSlot(previousSlot, epoch);
         ctx.saveNote = 'Load cancelled; your character and saved slot were kept.';
         return false;
       }
@@ -158,7 +174,7 @@ export function createSessionActions(ctx: SessionContext) {
       ctx.awayReport = ctx.settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped, ctx.gameState) : null;
       // this slot becomes the autosave home, and the away window is spent (a reload must not recount it)
       ctx.resetSkillDiscovery();
-      ctx.saveSession.attach(slot, epoch);
+      attachSlot(slot, epoch);
       ctx.resetCharacterUi();
       ctx.takeoverSlot = slot;
       if (ctx.canWriteAccount) ctx.gameState.lastSavedAt = Date.now();
@@ -175,7 +191,7 @@ export function createSessionActions(ctx: SessionContext) {
         ctx.gameState = previous;
         if (ctx.liveArpgArena) ctx.resetArena();
         if (ui) ctx.restoreCharacterUi(ui);
-        if (previousSlot) ctx.saveSession.attach(previousSlot, epoch);
+        if (previousSlot) attachSlot(previousSlot, epoch);
         ctx.saveNote = `Cannot load ${slot}: ${error instanceof Error ? error.message : 'the save failed validation'} — your character and slot were kept.`;
       }
       return false;
@@ -184,20 +200,20 @@ export function createSessionActions(ctx: SessionContext) {
     }
   }
 
-  async function takeOverAccount() {
-    if (ctx.showcaseMode || FRESH_SESSION_PHASE || ctx.accountWriterState !== 'readonly') return;
+  async function takeOverAccount(): Promise<boolean> {
+    if (ctx.showcaseMode || ctx.accountWriterState !== 'readonly') return false;
     const controller = new AbortController();
     ctx.takeoverController = controller;
     ctx.accountWriterState = 'waiting';
     const result = await requestAccountWriterLock({ wait: true, signal: controller.signal });
     if (ctx.takeoverController !== controller) {
       if (result.status === 'acquired') result.release();
-      return;
+      return false;
     }
     ctx.takeoverController = null;
     if (result.status !== 'acquired') {
       ctx.accountWriterState = result.status === 'cancelled' ? 'readonly' : 'unsupported';
-      return;
+      return false;
     }
     ctx.accountWriterLease = result;
     ctx.accountWriterState = 'owner';
@@ -207,7 +223,9 @@ export function createSessionActions(ctx: SessionContext) {
       ctx.accountWriterLease = null;
       ctx.accountWriterState = 'readonly';
       ctx.saveNote = `${ctx.takeoverSlot} is empty. Choose a slot with a saved character before taking over.`;
+      return false;
     }
+    return true;
   }
 
   function cancelTakeover() {
@@ -215,7 +233,7 @@ export function createSessionActions(ctx: SessionContext) {
   }
 
   function download() {
-    if (FRESH_SESSION_PHASE) return;
+    if (ctx.showcaseMode) return;
     const blob = new Blob([exportJson(ctx.gameState)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -224,15 +242,21 @@ export function createSessionActions(ctx: SessionContext) {
     URL.revokeObjectURL(a.href);
   }
 
-  async function upload(ev: Event) {
-    if (ctx.showcaseMode || FRESH_SESSION_PHASE || !ctx.canWriteAccount) return;
+  async function upload(ev: Event): Promise<boolean> {
+    if (ctx.showcaseMode || !ctx.canWriteAccount) return false;
     const file = (ev.target as HTMLInputElement).files?.[0];
-    if (!file) return;
+    if (!file) return false;
     const epoch = ctx.saveSession.checkpoint();
+    const previousSlot = ctx.saveSession.slot;
     try {
+      // Validate the file and merge the shared account before anything detaches: a bad import
+      // leaves both the run and its slot exactly where they were.
       const imported = importJson(await file.text());
-      if (!ctx.saveSession.isCurrent(epoch)) return;
-      ctx.saveSession.detach();
+      if (!ctx.saveSession.isCurrent(epoch)) return false;
+      const account = await readAccount();
+      if (!ctx.saveSession.isCurrent(epoch)) return false;
+      applyAccount(account, imported);
+      detachSlot();
       ctx.gameState = imported;
       ctx.resetCharacterUi();
       ctx.awayReport = null;
@@ -240,33 +264,49 @@ export function createSessionActions(ctx: SessionContext) {
       ctx.saveNote = 'Imported in memory. Choose a save slot to keep this character.';
       ctx.gameState = { ...ctx.gameState };
       if (ctx.liveArpgArena) ctx.resetArena();
+      return true;
     } catch (e) {
-      ctx.saveNote = `Import failed: ${(e as Error).message} — your current slot was not changed. Start a new character to play the current tree.`;
+      if (ctx.saveSession.isCurrent(epoch)) {
+        if (previousSlot) attachSlot(previousSlot, epoch);
+        ctx.saveNote = `Import failed: ${(e as Error).message} — your current slot was not changed. Start a new character to play the current tree.`;
+      }
+      return false;
     }
   }
 
-  function reset() {
-    if (FRESH_SESSION_PHASE ? ctx.showcaseMode : !ctx.canWriteAccount) return;
+  async function reset(): Promise<boolean> {
+    if (ctx.showcaseMode || !ctx.canWriteAccount) return false;
     ctx.loadController?.abort();
-    ctx.saveSession.detach();
+    const epoch = detachSlot();
     ctx.offlineProgress = null;
-    ctx.paused = false;
-    ctx.gameState = newGame(undefined, crypto.getRandomValues(new Uint32Array(1))[0]);
-    if (ctx.liveArpgArena) ctx.resetArena();
-    ctx.restartLoop();
-    ctx.resetCharacterUi();
-    ctx.awayReport = null;
-    ctx.resetSkillDiscovery();
-    ctx.saveNote = FRESH_SESSION_PHASE
-      ? 'Fresh session: a new character and account, with saving off for this phase.'
-      : 'New character is not saved yet. Choose a save slot; existing slots were kept.';
+    try {
+      // A new character keeps the shared account (Mastery, play time) but no slot: autosave only
+      // starts after an explicit Save. The epoch stops a slow read from replacing a newer run.
+      const account = await readAccount();
+      if (!ctx.saveSession.isCurrent(epoch)) return false;
+      ctx.paused = false;
+      ctx.gameState = applyAccount(account, newGame(undefined, crypto.getRandomValues(new Uint32Array(1))[0]));
+      if (ctx.liveArpgArena) ctx.resetArena();
+      ctx.restartLoop();
+      ctx.resetCharacterUi();
+      ctx.awayReport = null;
+      ctx.resetSkillDiscovery();
+      ctx.saveNote = 'New character is not saved yet. Choose a save slot; existing slots were kept.';
+      return true;
+    } catch (error) {
+      if (ctx.saveSession.isCurrent(epoch)) {
+        ctx.persistenceError = `Cannot start a new character: ${error instanceof Error ? error.message : 'the shared account could not be read'}`;
+        ctx.saveNote = ctx.persistenceError;
+      }
+      return false;
+    }
   }
 
   /** The unload flush must be synchronous: IndexedDB commits asynchronously and the page can be gone
    *  first, so `writeSaveSync` writes the mirror in one turn. It refreshes the away stamp too, so a
    *  reload right after cannot count the same absence twice. */
   function flushSync(event?: Event): void {
-    if (FRESH_SESSION_PHASE || !ctx.canWriteAccount || !ctx.saveSession.slot) return;
+    if (!ctx.canWriteAccount || !ctx.saveSession.slot) return;
     try { writeSaveSync(ctx.saveSession.slot, ctx.gameState); ctx.persistenceError = null; }
     catch (error) {
       ctx.persistenceError = error instanceof Error ? error.message : 'Emergency save failed; export JSON before closing.';

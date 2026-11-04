@@ -230,20 +230,22 @@ class RuntimeAtlasQATests(unittest.TestCase):
         self.save()
         self.assertEqual(self.audit().issues, [])
 
-    def test_registry_discovery_resolves_actual_png_and_json_and_omits_hero(self) -> None:
+    def test_registry_discovery_resolves_hero_and_generated_pool(self) -> None:
         registry = self.directory / "arena-art-pixel-v2.ts"
         registry.write_text("""
 import hero from './hero.json';
-import goblin from './goblin.json';
 export const pixelArenaArt = {
   hero: pilotArt('/combat/arpg/pixel-v2/player.png', hero, 240),
-  species: { goblin: pilotArt('/combat/arpg/pixel-v2/goblin.png', goblin, 224) },
 };
 """, encoding="utf-8")
-        pairs, errors = qa.runtime_atlases(registry)
+        pool = self.directory / "pool.json"
+        pool.write_text(json.dumps({"species": {"goblin": {"href": "/combat/mob-pool/humanoid/goblin/v1/atlas.png"}}}), encoding="utf-8")
+        pairs, errors = qa.runtime_atlases(registry, pool)
         self.assertEqual(errors, [])
-        self.assertEqual(pairs, [((self.directory / "goblin.json").resolve(),
-                                 (qa.ROOT / "game/public/combat/arpg/pixel-v2/goblin.png").resolve())])
+        self.assertEqual(pairs, [((self.directory / "hero.json").resolve(),
+                                  (qa.ROOT / "game/public/combat/arpg/pixel-v2/player.png").resolve()),
+                                 ((qa.ROOT / "game/public/combat/mob-pool/humanoid/goblin/v1/meta.json").resolve(),
+                                  (qa.ROOT / "game/public/combat/mob-pool/humanoid/goblin/v1/atlas.png").resolve())])
 
     def test_runtime_cli_checks_registry_pairs(self) -> None:
         output = io.StringIO()

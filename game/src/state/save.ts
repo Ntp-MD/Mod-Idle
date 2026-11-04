@@ -284,6 +284,14 @@ export function applyAccount(account: Account, state: GameState): GameState {
 
 const emergencySaveRevision: Partial<Record<SlotName, number>> = {};
 
+/** Every save envelope must be strictly newer than the copy it replaces: the slot reader breaks a
+ *  same-millisecond tie in favour of the mirror, so a database-only recovery that reused the old
+ *  stamp would lose the durable write. */
+function nextSavedAt(state: GameState): number {
+  const previous = Number.isFinite(state.lastSavedAt) ? state.lastSavedAt : 0;
+  return Math.max(Date.now(), previous + 1);
+}
+
 /**
  * Write the slot, and take a snapshot first when one is owed (`save.md` item 5). The snapshot is
  * stored outside the slot record it protects — a copy inside the file it guards would be lost
@@ -293,7 +301,7 @@ export async function writeSave(slot: SlotName, state: GameState): Promise<void>
   const revision = emergencySaveRevision[slot];
   const current = () => emergencySaveRevision[slot] === revision;
   const beforeStamp = state.lastSavedAt;
-  const saved = JSON.parse(JSON.stringify({ ...state, lastSavedAt: Date.now() })) as GameState;
+  const saved = JSON.parse(JSON.stringify({ ...state, lastSavedAt: nextSavedAt(state) })) as GameState;
   const pending = saved.pendingSnapshot;
   const account = await readAccount();
   if (!current()) return;
@@ -348,7 +356,7 @@ function readSnapshotsSync(slot: SlotName): Snapshot[] {
  * any owed snapshot straight to the localStorage mirror in one turn, so closing the tab loses nothing.
  */
 export function writeSaveSync(slot: SlotName, state: GameState): void {
-  const saved = JSON.parse(JSON.stringify({ ...state, lastSavedAt: Date.now() })) as GameState;
+  const saved = JSON.parse(JSON.stringify({ ...state, lastSavedAt: nextSavedAt(state) })) as GameState;
   const accountOk = lsWrite(ACCOUNT_KEY, JSON.stringify(mergeMastery(readAccountSync(), saved, slot)));
   const why = snapshotReason(saved);
   let snapshotOk = true;

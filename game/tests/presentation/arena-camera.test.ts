@@ -46,6 +46,11 @@ describe('local skill VFX and animation camera contract', () => {
     expect(Math.atan2(2 * (a * c + b * d), a * a + b * b - c * c - d * d) * 90 / Math.PI)
       .toBeCloseTo(11.75, 2);
     expect(arenaActorPixelScale(120, 1) * 120).toBeCloseTo(.5 * Math.hypot(137.5274, 32.7446), 4);
+    const small = arenaActorPixelScale(120, 1, 'small');
+    expect(arenaActorPixelScale(120, 1, 'medium')).toBeCloseTo(small * 1.25);
+    expect(arenaActorPixelScale(120, 1, 'large')).toBeCloseTo(small * 1.5);
+    expect(arenaActorPixelScale(120, 1, 'boss')).toBeCloseTo(small * 1.8);
+    expect(arenaActorPixelScale(120, 1, 'player')).toBe(small);
   });
 
   it('keeps ground clicks and the follow anchor consistent across the entire field', () => {

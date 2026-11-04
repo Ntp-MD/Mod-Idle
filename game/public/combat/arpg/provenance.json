@@ -9,117 +9,117 @@
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/wolf-animation-v2.png",
+      "file": "../mob-pool/beast/wolf/v2/atlas.png",
       "source": "art-reference/monsters/pilots/wolf-animation-v2.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/spider-animation-v1.png",
+      "file": "../mob-pool/insect/spider/v1/atlas.png",
       "source": "art-reference/monsters/pilots/spider-animation-v1.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/wisp-animation-v2.png",
+      "file": "../mob-pool/elemental/wisp/v2/atlas.png",
       "source": "art-reference/monsters/pilots/wisp-animation-v2.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/goblin-animation-v1.png",
+      "file": "../mob-pool/humanoid/goblin/v1/atlas.png",
       "source": "art-reference/monsters/goblin/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/orc-animation-v1.png",
+      "file": "../mob-pool/humanoid/orc/v1/atlas.png",
       "source": "art-reference/monsters/orc/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/kobold-animation-v1.png",
+      "file": "../mob-pool/humanoid/kobold/v1/atlas.png",
       "source": "art-reference/monsters/kobold/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/ogre-animation-v1.png",
+      "file": "../mob-pool/humanoid/ogre/v1/atlas.png",
       "source": "art-reference/monsters/ogre/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/troll-animation-v1.png",
+      "file": "../mob-pool/humanoid/troll/v1/atlas.png",
       "source": "art-reference/monsters/troll/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/minotaur-animation-v1.png",
+      "file": "../mob-pool/humanoid/minotaur/v1/atlas.png",
       "source": "art-reference/monsters/minotaur/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/skeleton-animation-v1.png",
+      "file": "../mob-pool/undead/skeleton/v1/atlas.png",
       "source": "art-reference/monsters/skeleton/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/mummy-animation-v1.png",
+      "file": "../mob-pool/undead/mummy/v1/atlas.png",
       "source": "art-reference/monsters/mummy/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/vampire-animation-v1.png",
+      "file": "../mob-pool/undead/vampire/v1/atlas.png",
       "source": "art-reference/monsters/vampire/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/demon-animation-v1.png",
+      "file": "../mob-pool/demon/demon/v1/atlas.png",
       "source": "art-reference/monsters/demon/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/slime-animation-v1.png",
+      "file": "../mob-pool/formless/slime/v1/atlas.png",
       "source": "art-reference/monsters/slime/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/golem-animation-v1.png",
+      "file": "../mob-pool/elemental/golem/v1/atlas.png",
       "source": "art-reference/monsters/golem/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/dragon-animation-v1.png",
+      "file": "../mob-pool/dragon/dragon/v1/atlas.png",
       "source": "art-reference/monsters/dragon/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/treant-animation-v1.png",
+      "file": "../mob-pool/plant/treant/v1/atlas.png",
       "source": "art-reference/monsters/treant/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/human-animation-v1.png",
+      "file": "../mob-pool/humanoid/human/v1/atlas.png",
       "source": "art-reference/monsters/human/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/lizardman-animation-v1.png",
+      "file": "../mob-pool/humanoid/lizardman/v1/atlas.png",
       "source": "art-reference/monsters/lizardman/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/elf-animation-v1.png",
+      "file": "../mob-pool/humanoid/elf/v1/atlas.png",
       "source": "art-reference/monsters/elf/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/giant-animation-v1.png",
+      "file": "../mob-pool/humanoid/giant/v1/atlas.png",
       "source": "art-reference/monsters/giant/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/werewolf-animation-v1.png",
+      "file": "../mob-pool/beast/werewolf/v1/atlas.png",
       "source": "art-reference/monsters/werewolf/animation/meta.json"
     },
     {
       "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/dryad-animation-v1.png",
+      "file": "../mob-pool/plant/dryad/v1/atlas.png",
       "source": "art-reference/monsters/dryad/animation/meta.json"
     }
   ],

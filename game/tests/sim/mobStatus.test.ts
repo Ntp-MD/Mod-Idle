@@ -41,6 +41,13 @@ function inflict(element: string, c: Character, tries = 400) {
 }
 
 describe('the Alignment gate and the shared proc', () => {
+  it('applies Mark bonuses for directly added stacks until they decay', () => {
+    const store = newMobStatusStore();
+    setStacks(store, 'm1', 'mark', 1, 0);
+    expect(modsOn(store, 'm1').damageTakenPct).toBeGreaterThan(0);
+    for (let i = 0; i < S.mark.decay_sec; i++) stepMob(store, 'm1');
+    expect(modsOn(store, 'm1').damageTakenPct).toBe(0);
+  });
   it('lets nothing land at zero Alignment, and pays the shared 20% proc above it', () => {
     const noAlign = charWith('fire', 0);
     expect(Object.keys(inflict('fire', noAlign).m1?.statuses || {})).toEqual([]);

@@ -454,7 +454,7 @@ def main() -> int:
         print("\n".join(errors), file=sys.stderr)
         return 1
     runtime_by_species = {
-        metadata.stem.rsplit("-animation-", 1)[0]: (metadata, image)
+        (metadata.parent.parent.name if metadata.name == "meta.json" else metadata.stem.rsplit("-animation-", 1)[0]): (metadata, image)
         for metadata, image in runtime_pairs
     }
     roster = qa.read_json(ROSTER_PATH)
@@ -508,6 +508,7 @@ def main() -> int:
                     _, runtime_metadata_path, _, runtime_image_path = result["runtimePair"]
                     pairs.append((runtime_metadata_path, runtime_image_path))
             commit(results, temporary, fingerprints, qa, pairs)
+            print("Runtime metadata changed; run npm run mob-sprites to refresh the embedded registry.", file=sys.stderr)
         scales = [result["normalization"]["uniformScale"] for result in results]
         recovered = {
             "write": args.write,

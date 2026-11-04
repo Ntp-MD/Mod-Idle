@@ -1,0 +1,18 @@
+﻿{
+    "status":  "candidate-review",
+    "generator":  "built-in-imagegen",
+    "source":  "C:/Users/disda/.codex-acc2/generated_images/01a1a173-1a8c-7ad3-bbf2-7798df231412/exec-3fe48a87-2d0b-4bc9-bea1-878f3bdb5ab7.png",
+    "action":  "idle",
+    "direction":  "south-south-east",
+    "phase":  "idle",
+    "visualReview":  {
+                         "sequenceAccepted":  false,
+                         "identityAccepted":  false,
+                         "exactAngleAccepted":  false,
+                         "note":  "Generated draft; compare against canonical species poses, direction and proportions before approval."
+                     },
+    "qa":  {
+               "atlas":  false,
+               "anchor":  false
+           }
+}

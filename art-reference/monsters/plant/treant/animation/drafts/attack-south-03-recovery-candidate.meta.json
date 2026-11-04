@@ -1,0 +1,18 @@
+﻿{
+    "status":  "candidate-review",
+    "generator":  "built-in-imagegen",
+    "source":  "C:/Users/disda/.codex-acc2/generated_images/01a1a173-1a8c-7ad3-bbf2-7798df231412/exec-5e95c8fd-2408-4914-90a5-0d3b15deb518.png",
+    "action":  "attack",
+    "direction":  "south",
+    "phase":  "03-recovery",
+    "visualReview":  {
+                         "sequenceAccepted":  false,
+                         "identityAccepted":  false,
+                         "exactAngleAccepted":  false,
+                         "note":  "Generated draft has visible gray/white background; alpha removal and visual review required before approval."
+                     },
+    "qa":  {
+               "atlas":  false,
+               "anchor":  false
+           }
+}

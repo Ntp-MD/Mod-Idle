@@ -1,0 +1,18 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1a167-4930-7b41-b4f3-5fd49cadb85a\\exec-d03b3b84-ab7c-46e9-9942-a0a8ab8b4b58.png",
+  "action": "attack",
+  "phase": "00-windup.png",
+  "direction": "south",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": true,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false,
+    "identityPlausible": true,
+    "facingPlausible": true,
+    "note": "Crouched pose; foot position may read as a forward step rather than windup."
+  }
+}

@@ -14,41 +14,53 @@ per-mob exact slot lists live in each mob's `animation/missing-poses.json`
 
 ## Checklist — Agent A (15 mobs)
 
-- [ ] `beast/harpy` — ขาด 225/272
-- [ ] `beast/werewolf` — ขาด 224/272
-- [ ] `beast/wolf` — ขาด 224/272
-- [ ] `demon/demon` — ขาด 212/272
+- [ ] `beast/harpy` — ขาด 212/272
+- [ ] `beast/werewolf` — ขาด 220/272
+- [ ] `beast/wolf` — ขาด 221/272
+- [ ] `demon/demon` — ขาด 204/272
 - [ ] `demon/imp` — ขาด 224/272
 - [ ] `dragon/dragon` — ขาด 224/272
 - [ ] `dragon/mirehydra` — ขาด 224/272
 - [ ] `dragon/wyrmling` — ขาด 224/272
 - [ ] `dragon/wyvern` — ขาด 224/272
 - [ ] `elemental/golem` — ขาด 191/272
-- [ ] `elemental/slaggolem` — ขาด 232/272
-- [ ] `elemental/wisp` — ขาด 232/272
+- [ ] `elemental/slaggolem` — ขาด 224/272
+- [ ] `elemental/wisp` — ขาด 226/272
 - [ ] `fish/siren` — ขาด 232/272
-- [ ] `formless/ooze` — ขาด 232/272
+- [ ] `formless/ooze` — ขาด 224/272
 - [ ] `formless/slime` — ขาด 232/272
 
-## Checklist — Agent B (16 mobs)
+## Checklist ? Agent B (16 mobs; sequential, smallest gap first)
 
-- [ ] `humanoid/elf` — ขาด 232/272
-- [ ] `humanoid/giant` — ขาด 224/272
-- [ ] `humanoid/goblin` — ขาด 165/272
-- [ ] `humanoid/minotaur` — ขาด 199/272
-- [ ] `humanoid/ogre` — ขาด 221/272
-- [ ] `humanoid/orc` — ขาด 224/272
+Work only the first unchecked mob. Do not move to the next mob until its canonical pose inventory reaches 272/272; then refresh the inventory and continue in ascending missing-count order. Draft candidates do not count toward completion. Current first target: `humanoid/goblin` at 107/272, missing 165.
 
-- [ ] `humanoid/troll` — ขาด 222/272
-- [ ] `insect/beetle` — ขาด 206/272
-- [ ] `insect/hornet` — ขาด 231/272
-- [ ] `insect/spider` — ขาด 231/272
-- [ ] `plant/dryad` — ขาด 231/272
-- [ ] `plant/treant` — ขาด 231/272
-- [ ] `undead/mummy` — ขาด 232/272
-- [ ] `undead/skeleton` — ขาด 232/272
-- [ ] `undead/vampire` — ขาด 232/272
-- [ ] `undead/wraith` — ขาด 236/272 (attack south missing; rest per own draft spec)
+- [ ] `humanoid/goblin` ? ??? 165/272
+- [ ] `humanoid/minotaur` ? ??? 199/272
+- [ ] `insect/beetle` ? ??? 206/272
+- [ ] `humanoid/ogre` ? ??? 221/272
+- [ ] `humanoid/troll` ? ??? 222/272
+- [ ] `humanoid/giant` ? ??? 224/272
+- [ ] `humanoid/orc` ? ??? 224/272
+- [ ] `insect/hornet` ? ??? 231/272
+- [ ] `insect/spider` ? ??? 231/272
+- [ ] `plant/dryad` ? ??? 231/272
+- [ ] `plant/treant` ? ??? 231/272
+- [ ] `humanoid/elf` ? ??? 232/272
+- [ ] `undead/mummy` ? ??? 232/272
+- [ ] `undead/skeleton` ? ??? 232/272
+- [ ] `undead/vampire` ? ??? 232/272
+- [ ] `undead/wraith` ? ??? 236/272 (attack south missing; rest per own draft spec)
+
+## Agent B draft candidates (not counted as pose coverage)
+
+A total of 87 generated PNG candidates are stored under the matching mobs' `animation/drafts/` folders, each with a `.meta.json` sidecar. An audit parsed all sidecars and confirmed that each candidate targets a currently missing slot; all images are RGBA. These remain `candidate-review`: visual identity, direction, sequence, canvas/anchor normalization and atlas QA are not approved. The checklist above remains unchecked and canonical coverage below is unchanged.
+
+- `humanoid/elf` 6; `humanoid/giant` 6; `humanoid/goblin` 7; `humanoid/minotaur` 5
+- `humanoid/ogre` 5; `humanoid/orc` 5; `humanoid/troll` 5; `insect/beetle` 4
+- `insect/hornet` 6; `insect/spider` 6; `plant/dryad` 6; `plant/treant` 6
+- `undead/mummy` 5; `undead/skeleton` 5; `undead/vampire` 5; `undead/wraith` 5
+
+For the active first target, `humanoid/goblin` has 7 draft candidates matching missing slots. All 7 fail the compose source check for semi-transparent pixels; the walk stride-a and stride-d candidates also touch the canvas edge. None is promoted, so Goblin remains 107/272. Built-in image generation returned `HTTP 429 usage_limit_reached` during the next pass, so further candidate generation is currently blocked. Do not promote a draft until art-owner visual review and required normalization/QA pass.
 
 ## Missing detail per mob
 
@@ -57,88 +69,84 @@ Format: `<action> <missing-count>: <direction> <missing-frames>`.
 draft spec; the mold comparison does not apply to them.
 `humanoid/human, kobold, lizardman` are complete and omitted.)
 
-## beast/harpy: missing 225/272
-  walk 53: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 1; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  attack 60: east 2; east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west 2; west-north-west 4; west-south-west 4
-  hit 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  death 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-## beast/werewolf: missing 224/272
-  walk 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  attack 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  hit 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  death 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-## beast/wolf: missing 224/272
-  walk 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  attack 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  hit 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  death 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-## demon/demon: missing 212/272
-  walk 48: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  attack 52: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  hit 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  death 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
+## beast/harpy: missing 212/272
+  walk 52: south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  attack 56: south-south-east 4; south-east 4; east-south-east 4; east 2; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west 2; west-south-west 4; south-west 4; south-south-west 4
+  hit 52: south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  death 52: south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+## beast/werewolf: missing 220/272
+  walk 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  attack 52: south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  hit 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  death 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+## beast/wolf: missing 221/272
+  walk 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  attack 53: south 1; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  hit 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  death 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+## demon/demon: missing 204/272
+  walk 48: south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  attack 52: south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  hit 52: south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  death 52: south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
 ## demon/imp: missing 224/272
-  walk 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  attack 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  hit 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  death 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
+  walk 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  attack 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  hit 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  death 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
 ## dragon/dragon: missing 224/272
-  walk 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  attack 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  hit 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  death 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
+  walk 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  attack 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  hit 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  death 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
 ## dragon/mirehydra: missing 224/272
-  walk 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  attack 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  hit 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  death 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
+  walk 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  attack 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  hit 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  death 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
 ## dragon/wyrmling: missing 224/272
-
-  walk 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  attack 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  hit 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  death 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
+  walk 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  attack 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  hit 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  death 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
 ## dragon/wyvern: missing 224/272
-
-  walk 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  attack 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  hit 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  death 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
+  walk 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  attack 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  hit 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  death 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
 ## elemental/golem: missing 191/272
-  walk 45: east-north-east 4; east-south-east 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south-east 4; south-south-east 1; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  attack 44: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  hit 51: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south-east 4; south-south-east 3; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  death 51: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south-east 4; south-south-east 3; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-## elemental/slaggolem: missing 232/272
-  idle 8: east-north-east.png, east-south-east.png, north-north-east.png, north-north-west.png, south-south-east.png, south-south-west.png, west-north-west.png, west-south-west.png
-  walk 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  attack 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  hit 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  death 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-## elemental/wisp: missing 232/272
-  idle 8: east-north-east.png, east-south-east.png, north-north-east.png, north-north-west.png, south-south-east.png, south-south-west.png, west-north-west.png, west-south-west.png
-  walk 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  attack 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  hit 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  death 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
+  walk 45: south-south-east 1; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  attack 44: east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  hit 51: south-south-east 3; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  death 51: south-south-east 3; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+## elemental/slaggolem: missing 224/272
+  walk 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  attack 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  hit 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  death 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+## elemental/wisp: missing 226/272
+  idle 2: west-north-west.png, west-south-west.png
+  walk 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  attack 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  hit 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  death 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
 ## fish/siren: missing 232/272
-  idle 8: east-north-east.png, east-south-east.png, north-north-east.png, north-north-west.png, south-south-east.png, south-south-west.png, west-north-west.png, west-south-west.png
-  walk 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  attack 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  hit 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  death 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-## formless/ooze: missing 232/272
-  idle 8: east-north-east.png, east-south-east.png, north-north-east.png, north-north-west.png, south-south-east.png, south-south-west.png, west-north-west.png, west-south-west.png
-  walk 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  attack 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  hit 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  death 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
+  idle 8: south-south-east.png, east-south-east.png, east-north-east.png, north-north-east.png, north-north-west.png, west-north-west.png, west-south-west.png, south-south-west.png
+  walk 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  attack 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  hit 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  death 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+## formless/ooze: missing 224/272
+  walk 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  attack 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  hit 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  death 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
 ## formless/slime: missing 232/272
-  idle 8: east-north-east.png, east-south-east.png, north-north-east.png, north-north-west.png, south-south-east.png, south-south-west.png, west-north-west.png, west-south-west.png
-  walk 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  attack 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  hit 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
-  death 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
+  idle 8: south-south-east.png, east-south-east.png, east-north-east.png, north-north-east.png, north-north-west.png, west-north-west.png, west-south-west.png, south-south-west.png
+  walk 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  attack 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  hit 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
+  death 56: south 4; south-south-east 4; south-east 4; east-south-east 4; east-north-east 4; north-east 4; north-north-east 4; north 4; north-north-west 4; north-west 4; west-north-west 4; west-south-west 4; south-west 4; south-south-west 4
 ## humanoid/elf: missing 232/272
   idle 8: east-north-east.png, east-south-east.png, north-north-east.png, north-north-west.png, south-south-east.png, south-south-west.png, west-north-west.png, west-south-west.png
   walk 56: east-north-east 4; east-south-east 4; north 4; north-east 4; north-north-east 4; north-north-west 4; north-west 4; south 4; south-east 4; south-south-east 4; south-south-west 4; south-west 4; west-north-west 4; west-south-west 4
@@ -261,9 +269,9 @@ draft spec; the mold comparison does not apply to them.
 - `elemental/golem`: 81 — 16/16, 19/64, 20/64, 13/64, 13/64
 - `humanoid/minotaur`: 73 — 16/16, 20/64, 15/64, 11/64, 11/64
 - `insect/beetle`: 66 — 16/16, 14/64, 12/64, 12/64, 12/64 (`missing-poses.json`: 206)
-- `demon/demon`: 60 — 16/16, 16/64, 12/64, 8/64, 8/64
-- `beast/wolf`: 48 — 16/16, 8/64, 8/64, 8/64, 8/64 (`missing-poses.json`: 224)
-- `beast/werewolf`: 48 — 16/16, 8/64, 8/64, 8/64, 8/64
+- `demon/demon`: 68 — 16/16, 16/64, 12/64, 12/64, 12/64
+- `beast/wolf`: 51 — 16/16, 8/64, 11/64, 8/64, 8/64
+- `beast/werewolf`: 52 — 16/16, 8/64, 12/64, 8/64, 8/64
 - `dragon/dragon`: 48 — 16/16, 8/64, 8/64, 8/64, 8/64
 - `dragon/mirehydra`: 48 — 16/16, 8/64, 8/64, 8/64, 8/64
 - `dragon/wyrmling`: 48 — 16/16, 8/64, 8/64, 8/64, 8/64
@@ -272,15 +280,17 @@ draft spec; the mold comparison does not apply to them.
 - `humanoid/ogre`: 51 — 16/16, 11/64, 8/64, 8/64, 8/64
 - `humanoid/orc`: 48 — 16/16, 8/64, 8/64, 8/64, 8/64
 - `humanoid/troll`: 50 — 16/16, 10/64, 8/64, 8/64, 8/64
-- `beast/harpy`: 47 — 16/16, 11/64, 4/64, 8/64, 8/64
+- `beast/harpy`: 60 — 16/16, 12/64, 8/64, 12/64, 12/64
 - `demon/imp`: 48 — 16/16, 8/64, 8/64, 8/64, 8/64
 - `insect/hornet`, `insect/spider`, `plant/dryad`, `plant/treant`: 41 —
   8/16, 8/64, 9/64, 8/64, 8/64 (`missing-poses.json`: 231 each)
 - 40 each — 8/16, 8/64, 8/64, 8/64, 8/64:
+  `fish/siren`, `formless/slime`, `humanoid/elf`, `undead/mummy`,
+  `undead/skeleton`, `undead/vampire`
 
-  `elemental/slaggolem`, `elemental/wisp`, `fish/siren`,
-  `formless/ooze`, `formless/slime`, `humanoid/elf`,
-  `undead/mummy`, `undead/skeleton`, `undead/vampire`
+- `elemental/slaggolem`: 48 — 16/16, 8/64, 8/64, 8/64, 8/64
+- `elemental/wisp`: 46 — 14/16, 8/64, 8/64, 8/64, 8/64
+- `formless/ooze`: 48 — 16/16, 8/64, 8/64, 8/64, 8/64
 
 Pattern: the 40-group covers only east/west (+south for some actions) with 8
 idle directions. Baking new poses is art-owner work; never fabricate a pose

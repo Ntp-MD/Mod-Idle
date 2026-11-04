@@ -1,0 +1,18 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1a167-4930-7b41-b4f3-5fd49cadb85a\\exec-6aee2303-d234-42b9-bb6c-c08712cb2624.png",
+  "action": "attack",
+  "phase": "01-contact.png",
+  "direction": "south",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": true,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false,
+    "identityPlausible": true,
+    "facingPlausible": true,
+    "note": "Talon extends toward viewer; exaggerated perspective needs cycle review."
+  }
+}

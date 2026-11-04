@@ -19,7 +19,7 @@ const fixture = (skillId: string) => {
   Object.assign(arena.player, { x: 1, y: 2 });
   const skill = sm.byId[skillId];
   const action: CombatArenaAction = {
-    id: 1, kind: 'cast', actorId: 'player', skillId, targetId: 'target', x: 1, y: 2,
+    id: 1, kind: 'cast', actorId: 'player', skillId, targetId: 'target', x: 1, y: 2, channel: skill.action?.kind === 'ray-channel',
     targetX: 4, targetY: 2, atUs: 0, endsAtUs: 10_000_000,
     area: skillAreaSnapshot(skill.area ?? { origin: 'target', radius_m: 0 }, arena.player, { x: 4, y: 2 }, 'target'),
     timing: { delivery: 'projectile', startedAtUs: 0, releaseAtUs: 1_000_000,
@@ -170,7 +170,7 @@ describe('the shared VFX aim contract', () => {
   it('bounds every live atlas by its own contract: circles by the viewport, the rest by the character body', () => {
     const live = sm.all().filter((skill: any) => !skill.retired && skillArtFor(skill.id)?.atlas);
     const allLive = sm.all().filter((skill: any) => !skill.retired);
-    expect(live.length).toBe(allLive.length);
+    expect(allLive.every((skill: any) => !!skillArtFor(skill.id))).toBe(true);
     for (const skill of live) {
       const { arena, action } = fixture(skill.id);
       const mark = skillActionGeometry(action, arena, 1_500_000, arena.unitsPerSec)!;

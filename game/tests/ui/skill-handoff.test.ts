@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { sm } from '../../src/engine/client';
 import { skillHandoffById, skillHandoffFor } from '../../src/ui/combat/arena-vfx-space';
 
 /**
@@ -71,6 +72,28 @@ describe('skill spatial handoff', () => {
     expect(skillHandoffById('aura.wraith_of_fury')).toEqual({ id: 'aura.wraith_of_fury', shape: 'single',
       origin: 'target', delivery: 'instant', lifecycle: 'state', selfArea: false, groundArea: true, follow: 'fixed' });
   });
+  it('derives the contract from every live attack row instead of a roster list', () => {
+    const rows = sm.all().filter((row) => row.type === 'attack');
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) {
+      const shape = row.area?.shape ?? ((row.area?.radius_m ?? 0) > 0 ? 'circle' : 'single');
+      const origin = row.area?.origin === 'caster' ? 'caster' : 'target';
+      const delivery = row.cast?.delivery ?? 'instant';
+      const kind = row.action?.kind;
+      const lifecycle = kind === 'chain-strike' ? 'chain'
+        : kind === 'whirlwind-channel' ? 'channel'
+          : kind === 'blizzard-field' || kind === 'sand-field' ? 'field'
+            : kind === 'projectile-burst' || kind === 'ground-pulse-burst' ? 'burst' : 'impact';
+      const follow = lifecycle === 'channel' && origin === 'caster' ? 'caster-feet' : 'fixed';
+      expect(skillHandoffById(row.id), row.id).toEqual({
+        id: row.id, shape, origin, delivery, lifecycle,
+        selfArea: shape === 'circle' && origin === 'caster',
+        groundArea: follow === 'fixed',
+        follow,
+      });
+    }
+  });
+
   it('returns undefined for unknown ids and normalizes legacy rows without an area', () => {
     expect(skillHandoffById('attack.nope')).toBeUndefined();
     expect(skillHandoffFor({ id: 'legacy' })).toEqual({ id: 'legacy', shape: 'single', origin: 'target',

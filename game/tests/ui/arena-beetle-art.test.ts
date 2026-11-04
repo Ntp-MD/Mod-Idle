@@ -2,13 +2,17 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { arenaArtForSpecies } from '../../src/ui/combat/arena/arena-art';
-import { beetleVariants } from '../../src/ui/combat/arena/arena-art-beetle';
-import beetleMain from '../../src/ui/combat/arena/arena-art-pixel-v2/beetle-animation-v1.json';
-import borerMeta from '../../src/ui/combat/arena/arena-art-pixel-v2/borer-beetle-animation-v1.json';
-import carapaceMeta from '../../src/ui/combat/arena/arena-art-pixel-v2/carapace-beetle-animation-v1.json';
-import dustMeta from '../../src/ui/combat/arena/arena-art-pixel-v2/dust-beetle-animation-v1.json';
-import hollowMeta from '../../src/ui/combat/arena/arena-art-pixel-v2/hollow-beetle-animation-v1.json';
-import ironshellMeta from '../../src/ui/combat/arena/arena-art-pixel-v2/ironshell-beetle-animation-v1.json';
+import { beetleVariants, directionalVariantArt } from '../../src/ui/combat/arena/arena-art-beetle';
+import pool from '../../src/ui/combat/arena/mob-pool.generated.json';
+import hollowDraftMeta from '../../public/combat/mob-pool/insect/beetle/variants/hollow-beetle/v1/meta.json';
+
+const beetleMain = pool.species.beetle.metadata;
+const borerMeta = pool.variants.beetle['Borer Beetle'].metadata;
+const carapaceMeta = pool.variants.beetle['Carapace Beetle'].metadata;
+const dustMeta = pool.variants.beetle['Dust Beetle'].metadata;
+const hollowMeta = pool.variants.beetle['Hollow Beetle'].metadata;
+const ironshellMeta = pool.variants.beetle['Ironshell Beetle'].metadata;
+const animatedVariants = new Set(['Dust Beetle', 'Borer Beetle', 'Carapace Beetle', 'Hollow Beetle', 'Ironshell Beetle']);
 
 describe('production beetle art', () => {
   it('uses the animated base for an unknown variant', () => {
@@ -23,16 +27,17 @@ describe('production beetle art', () => {
     for (const [name, art] of Object.entries(beetleVariants)) {
       expect(arenaArtForSpecies('beetle', name), name).toBe(art);
       for (const [action, directions] of Object.entries(art.clips)) {
-        expect(Object.keys(directions), `${name} ${action}`).toHaveLength(8);
+        const animated = animatedVariants.has(name) && action !== 'idle';
+        expect(Object.keys(directions), `${name} ${action}`).toHaveLength(animated ? 2 : 8);
         for (const sheet of Object.values(directions)) {
-          expect(sheet.frames, `${name} ${action}`).toBe(1);
+          expect(sheet.frames, `${name} ${action}`).toBe(animated ? 4 : 1);
           expect(sheet.sourceFrames?.[sheet.startFrame!], name).toBeDefined();
           expect(existsSync(fileURLToPath(new URL('../../public' + sheet.href, import.meta.url))), name).toBe(true);
         }
       }
-      expect(art.clips.walk.east?.startFrame).toBe(10);
-      expect(art.clips.attack.west?.startFrame).toBe(22);
-      expect(art.clips.death?.north?.startFrame).toBe(36);
+      expect(art.clips.walk.east?.startFrame).toBe(animatedVariants.has(name) ? 8 : 10);
+      expect(art.clips.attack.west?.startFrame).toBe(animatedVariants.has(name) ? 20 : 22);
+      if (!animatedVariants.has(name)) expect(art.clips.death?.north?.startFrame).toBe(36);
     }
   });
 
@@ -41,10 +46,20 @@ describe('production beetle art', () => {
     expect(arenaArtForSpecies('unknown-species')).toBeNull();
   });
 
+  it('maps directional draft rows without treating different facings as animation frames', () => {
+    const { frames: _frames, ...metadata } = hollowDraftMeta;
+    const draft = directionalVariantArt('/draft.png', metadata);
+    expect(draft.clips.idle.south?.startFrame).toBe(0);
+    expect(draft.clips.walk.east?.startFrame).toBe(10);
+    expect(draft.clips.attack.west?.startFrame).toBe(22);
+    expect(draft.clips.death?.north?.startFrame).toBe(36);
+    expect(draft.clips.walk.east?.frames).toBe(1);
+  });
+
   it('maps every action and direction to its declared metadata frame inside the image', () => {
     const actions = ['idle', 'walk', 'attack', 'hit', 'death'] as const;
     const directions = ['east', 'south-east', 'south', 'south-west', 'west', 'north-west', 'north', 'north-east'];
-    const metas: Record<string, typeof dustMeta> = {
+    const metas: Record<string, { frames: { action: string; direction: string; index: number }[]; sourceCanvas: { width: number; height: number } }> = {
       'Dust Beetle': dustMeta,
       'Carapace Beetle': carapaceMeta,
       'Borer Beetle': borerMeta,
@@ -55,18 +70,22 @@ describe('production beetle art', () => {
       const meta = metas[name];
       for (const action of actions) {
         const clip = (art.clips as any)[action] ?? {};
-        expect(Object.keys(clip).sort(), `${name} ${action} directions`).toEqual([...directions].sort());
-        for (const direction of directions) {
+        const animated = animatedVariants.has(name) && action !== 'idle';
+        const expectedDirections = animated ? ['east', 'west'] : directions;
+        expect(Object.keys(clip).sort(), `${name} ${action} directions`).toEqual([...expectedDirections].sort());
+        for (const direction of expectedDirections) {
           const sheet = clip[direction];
           const want = (meta.frames ?? []).find((frame) => frame.action === action && frame.direction === direction)?.index;
           expect(sheet.startFrame, `${name} ${action} ${direction} frame`).toBe(want);
-          expect(sheet.frames, `${name} ${action} ${direction} count`).toBe(1);
-          const rect = sheet.sourceFrames?.[sheet.startFrame];
-          expect(rect, `${name} ${action} ${direction} rect`).toBeDefined();
-          expect(rect.x, `${name} ${action} ${direction} x`).toBeGreaterThanOrEqual(0);
-          expect(rect.y, `${name} ${action} ${direction} y`).toBeGreaterThanOrEqual(0);
-          expect(rect.x + rect.width, `${name} ${action} ${direction} right`).toBeLessThanOrEqual(meta.sourceCanvas.width);
-          expect(rect.y + rect.height, `${name} ${action} ${direction} bottom`).toBeLessThanOrEqual(meta.sourceCanvas.height);
+          expect(sheet.frames, `${name} ${action} ${direction} count`).toBe(animated ? 4 : 1);
+          for (let i = sheet.startFrame; i < sheet.startFrame + sheet.frames; i++) {
+            const rect = sheet.sourceFrames?.[i];
+            expect(rect, `${name} ${action} ${direction} rect`).toBeDefined();
+            expect(rect.x, `${name} ${action} ${direction} x`).toBeGreaterThanOrEqual(0);
+            expect(rect.y, `${name} ${action} ${direction} y`).toBeGreaterThanOrEqual(0);
+            expect(rect.x + rect.width, `${name} ${action} ${direction} right`).toBeLessThanOrEqual(meta.sourceCanvas.width);
+            expect(rect.y + rect.height, `${name} ${action} ${direction} bottom`).toBeLessThanOrEqual(meta.sourceCanvas.height);
+          }
         }
       }
     }
@@ -86,6 +105,16 @@ describe('production beetle art', () => {
             .toBeLessThanOrEqual(main.sourceCanvas.height);
         }
       }
+    }
+  });
+
+  it('sizes the visible beetle body from a trimmed idle frame', () => {
+    for (const [name, art] of Object.entries(beetleVariants)) {
+      const idle = art.clips.idle.south!;
+      const source = idle.sourceFrames?.[idle.startFrame!];
+      expect(source, name).toBeDefined();
+      expect(source!.width, name).toBeLessThan(idle.frameWidth);
+      expect(source!.height, name).toBeLessThan(idle.frameHeight);
     }
   });
 });

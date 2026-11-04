@@ -479,6 +479,10 @@ export interface GuidanceNotice {
 export interface NoticeContext {
   storageError?: boolean;
   writerState?: 'owner' | 'readonly' | 'waiting' | 'unavailable' | 'checking';
+  /** The startup chooser is still open: no run is being simulated. */
+  startup?: boolean;
+  /** A character exists in memory but is not attached to a save slot. */
+  unsaved?: boolean;
 }
 
 /**
@@ -494,6 +498,11 @@ export function guidanceNotices(state: GameState, context: NoticeContext = {}): 
     const title = context.writerState === 'readonly' ? 'Read-only · another tab controls progress'
       : context.writerState === 'waiting' ? 'Waiting for account control' : 'Progression paused · save control unavailable';
     out.push({ id: 'writer', kind: 'error', priority: 0, title, detail: 'Take account control in Save before changing the character.', actionLabel: 'Open Save' });
+  }
+  if (context.startup) {
+    out.push({ id: 'startup', kind: 'decision', priority: 0.5, title: 'Choose a character', detail: 'Load a character, or start a new one. Existing slots are kept.', actionLabel: 'Open Save' });
+  } else if (context.unsaved) {
+    out.push({ id: 'unsaved', kind: 'decision', priority: 0.5, title: 'Not saved yet.', detail: 'Choose a slot to keep this character.', actionLabel: 'Open Save' });
   }
   const next = nextGoal(state);
   if (slotsFree(state) < 1 && next?.view.kind !== 'destination') {

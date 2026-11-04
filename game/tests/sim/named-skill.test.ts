@@ -93,6 +93,26 @@ describe('named skill grants', () => {
     expect(s).toEqual(before);
   });
 
+  it('refuses to acquire a retired row while keeping an existing owned copy untouched', () => {
+    const { row, restore } = installSyntheticSkill('test.retired-grant', {
+      retired: true, retired_to: timed.id,
+    });
+    try {
+      const s = newSkillState();
+      const before = structuredClone(s);
+      expect(grantNamedSkill(s, row.id)).toBeNull();
+      expect(usefulSkillDuplicate(s, row.id)).toBe(false);
+      expect(s).toEqual(before);
+      // A legacy copy already in the save is not an acquisition; no new copy appears.
+      s.owned[row.id] = 3;
+      s.xp[row.id] = 900;
+      expect(grantNamedSkill(s, row.id)).toBeNull();
+      expect(usefulSkillDuplicate(s, row.id)).toBe(false);
+      expect(s.owned[row.id]).toBe(3);
+      expect(s.xp[row.id]).toBe(900);
+    } finally { restore(); }
+  });
+
   it.each([0, -1, 1.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1, E.skill_xp.level_cap + 1])('refuses invalid XP level %s before changing ownership', (level) => {
     const s = newSkillState();
     const before = structuredClone(s);

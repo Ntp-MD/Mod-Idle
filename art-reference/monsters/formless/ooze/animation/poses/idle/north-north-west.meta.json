@@ -1,0 +1,27 @@
+{
+  "status": "candidate-review",
+  "schemaVersion": 1,
+  "action": "idle",
+  "direction": "north-north-west",
+  "pose": "neutral-ready",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1a173-7205-7732-9be4-70e254409bed\\exec-221e3944-181e-4db5-8367-e1502958b91a.png",
+  "sourcePixelsModified": false,
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "visibleAlphaGt8BoundsExclusive": [
+    466,
+    554,
+    776,
+    937
+  ],
+  "qa": {
+    "visuallyInspected": true,
+    "visualIdentityReviewed": true,
+    "facingPlausible": false,
+    "atlasReady": false,
+    "note": "Approximate heading candidate; exact 16-way facing and common canvas/anchor require art review."
+  }
+}

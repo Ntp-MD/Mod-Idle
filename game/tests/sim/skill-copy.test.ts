@@ -125,6 +125,32 @@ describe('the live roster copy leaves derived facts to the fields', () => {
     for (const row of sm.all()) if (row.offline_targets) expect(row.offline_targets).toMatch(/^\d+$/);
   });
 
+  it('describes a ray channel as discrete ticks with a hold, an end and trigger exclusion', () => {
+    const rays = sm.all().filter((row) => row.action?.kind === 'ray-channel');
+    expect(rays.length).toBeGreaterThan(0);
+    for (const row of rays) {
+      const window = describeSkill(row);
+      const copy = `${row.effect || ''} ${window.sustain || ''} ${window.duration || ''}`;
+      expect(copy, `${row.id} names its tick cadence`).toMatch(/tick/i);
+      expect(copy, `${row.id} names the manual hold`).toMatch(/hold/i);
+      expect(copy, `${row.id} names how the channel ends`).toMatch(/release|finish|complete|run dry/i);
+      expect(copy, `${row.id} names trigger exclusion`).toMatch(/trigger/i);
+      expect(window.sustain, `${row.id} prints its sustain price`).toBeTruthy();
+    }
+  });
+
+  it('keeps a no-action area press one impact in copy, never a sequential sweep', () => {
+    const swept = sm.all().filter((row) => row.type === 'attack' && !row.action
+      && !(row.effects || []).some((effect) => effect.stat === 'hits' || effect.stat === 'dot_dps')
+      && (row.area?.radius_m ?? 0) > 0);
+    expect(swept.length).toBeGreaterThan(0);
+    for (const row of swept) {
+      expect(describeSkill(row).hits, `${row.id} has no mechanical Hits row`).toBeUndefined();
+      expect(row.effect || '', `${row.id} does not promise per-frame damage/control`)
+        .not.toMatch(/\b(one by one|in sequence|sequentially|each (?:spark|frame|tick)[^.]*(?:damage|shock|stun))\b/i);
+    }
+  });
+
   it('defines a live membership count on every circle, cone and line footprint', () => {
     for (const row of sm.all()) {
       if (row.type !== 'attack' && row.type !== 'curse') continue;

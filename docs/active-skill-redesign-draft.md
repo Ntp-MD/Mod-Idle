@@ -1,10 +1,10 @@
 # Active skill effect and capability draft
 
-**Status:** Draft only. This file does not change game behavior.
+**Status:** Rollout in progress. The live catalogue has changed; proposals below are historical until reconciled against the current data.
 
-Shared mechanic implementation and gates live in the [mechanic plan](active-skill-mechanics-plan.md). This file owns per-skill proposals and the later skill adjustment rollout.
+Shared mechanic implementation lives in [engine/skills.ts](../engine/skills.ts) and [the combat skill runtime](../game/src/sim/combat/skills.ts). The referenced mechanic plan is unavailable in this checkout. This file owns per-skill proposals and the later skill adjustment rollout.
 
-**Scope:** All current skill rows in `tools/data/skills.json` (`skills` array): 86 skills — 50 attacks, 18 auras, 9 buffs, 6 curses, 3 heals. Retired rows (see `retired_to` in `skills.json`) and test fixtures are excluded. Rows tagged PROPOSED NEW are not in `skills.json`; rows tagged Proposed RETIRE are still counted in the 86 until approved.
+**Original scope:** The skill rows in `tools/data/skills.json` (`skills` array) at draft time: 86 skills — 50 attacks, 18 auras, 9 buffs, 6 curses, 3 heals. Retired rows (see `retired_to` in `skills.json`) and test fixtures are excluded. The nine rows tagged PROPOSED NEW now exist in the live catalogue, and the five rows tagged Proposed RETIRE are retired. Consult the catalogue for current status.
 
 `Current effect` copies each row's `effect` text. `New effect` and `Proposed capability` are blank for review and editing. Capability fields below break down targeting, anchor, impact-area shape, range, delivery, and other player-facing behavior into explicit columns.
 
@@ -1651,7 +1651,7 @@ Visual descriptions follow [skill VFX prompts](../art-reference/vfx/base-prompt.
 
 ## Skill adjustment rollout
 
-**Prerequisite:** Complete the [mechanic gates](active-skill-mechanics-plan.md#6-close-the-mechanic-gates) and approve the per-skill proposals before changing the live pool. This section covers data rollout only.
+**Prerequisite:** Complete the mechanic gates (the referenced plan is unavailable in this checkout) and approve the per-skill proposals before changing the live pool. This section covers data rollout only.
 
 **Proposal inventory:** 9 proposed new rows and 5 proposed retirements. These are planning counts, not catalogue test assertions.
 
@@ -1659,7 +1659,7 @@ Visual descriptions follow [skill VFX prompts](../art-reference/vfx/base-prompt.
 
 ### Align approved rows with the mechanic contract
 
-Use the [selected mechanic behavior](active-skill-mechanics-plan.md#selected-behavior-decisions) rather than reopening those implementation decisions during data mapping. The per-skill proposals above remain the source for intended content and tuning.
+Use the implemented mechanic behavior in [engine/skills.ts](../engine/skills.ts) rather than reopening those implementation decisions during data mapping. The per-skill proposals above remain the source for intended content and tuning.
 
 | Consumer | Required mapping after its mechanic gate passes |
 |---|---|
@@ -1676,13 +1676,13 @@ Use the [selected mechanic behavior](active-skill-mechanics-plan.md#selected-beh
 ### Pool execution checklist
 
 - [ ] Confirm the mechanic plan is complete with its required evidence, then identify the approved skill changes. Do not silently turn a review range or competing balance option into an approved value. Approval of mechanics alone is not approval of every content proposal.
-- [ ] Map accepted additions and edits into [skills.json](../tools/data/skills.json). Include supported-vocabulary additions Hemotoxin, Venom Coffin, Entropy Well, Tidal Wave and Enchant Poison in the approved inventory; they do not bypass the mechanic gate.
-- [ ] Apply the contract alignment above and update descriptions, timing and prices through canonical readers. Preserve hit-class, weapon and acquisition rules unless the approved proposal changes them.
-- [ ] Apply accepted retirements with `retired_to` and remove their acquisition weights from [town.json](../tools/data/town.json). Traverse drops, rewards, owned views, presets and handoff/copy readers for stale active references; retain legacy IDs and art.
-- [ ] Inspect current [save loading](../game/src/state/save.ts) and test legacy ownership, XP, modes, presets and export/import. `retired_to` is not itself an ownership/XP transfer. Make any intended automatic replacement explicit before claiming no migration is needed.
+- [x] Map accepted additions and edits into [skills.json](../tools/data/skills.json). Include supported-vocabulary additions Hemotoxin, Venom Coffin, Entropy Well, Tidal Wave and Enchant Poison in the approved inventory; they do not bypass the mechanic gate.
+- [x] Apply the contract alignment above and update descriptions, timing and prices through canonical readers. Preserve hit-class, weapon and acquisition rules unless the approved proposal changes them.
+- [x] Apply accepted retirements with `retired_to` and remove their acquisition weights from [town.json](../tools/data/town.json). Traverse drops, rewards, owned views, presets and handoff/copy readers for stale active references; retain legacy IDs and art.
+- [x] Inspect current [save loading](../game/src/state/save.ts) and test legacy ownership, XP, modes, presets and export/import. `retired_to` is not itself an ownership/XP transfer. Make any intended automatic replacement explicit before claiming no migration is needed.
 - [ ] Run `npm run skills -- --checks`, `npm run skills -- --calc` and focused single-target, pack and full-rotation simulations. Record measured results separately from draft estimates. These balance measurements inform the approved values; they are not hardcoded correctness bands in tests.
-- [ ] Update [wiki source](../game/src/wiki/pages.ts), run `npm run wiki`, and inspect generated output and local links. Never hand-edit generated wiki HTML.
-- [ ] Run the required gameplay/UI gates from [mechanic verification](active-skill-mechanics-plan.md#verification-commands) for the final changed inputs, including focused catalogue/copy/handoff/save regressions. Reuse still-valid passing results rather than repeating unchanged checks.
+- [x] Update [wiki source](../game/src/wiki/pages.ts), run `npm run wiki`, and inspect generated output and local links. Never hand-edit generated wiki HTML.
+- [x] Run the required gameplay/UI gates from the repository working agreement for the final changed inputs, including focused catalogue/copy/handoff/save regressions. Reuse still-valid passing results rather than repeating unchanged checks.
 - [ ] Audit the final diff against the approved inventory. Report actual additions, retirements and edits from the resulting catalogue rather than asserting fixed roster counts. Report verification and material limitations; mark the rollout complete only when its own required work passes.
 
-**Rollout evidence:** Pending approval and execution. This status does not block completion of the separate mechanic plan.
+**Rollout evidence:** Catalogue additions and retirements are present, and the live rows were reconciled against the engine/sim/away/UI contracts in the non-art R2.1 pass. Legacy ownership, duplicates, XP, modes, conditions, presets and export/import round-trips are verified by synthetic retirement regressions; retired rows stay resolvable through `byId` but are absent from every new-acquisition pool. Wiki output was regenerated after the final copy change. Balance measurement and final verification remain for R6 after the reference journey. Visual/VFX parity remains outside this non-art rollout; this draft is not fully closed while that art remainder exists.

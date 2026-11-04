@@ -104,6 +104,19 @@ describe('guidance goals', () => {
     expect(notices[1].id).toBe('writer');
     expect(notices.some((notice) => notice.id === 'stale-goal')).toBe(true);
   });
+
+  it('shows the startup choice and the unsaved-character notice between writer trouble and goals', () => {
+    const state = newGame();
+    setTrackedGoal(state, { kind: 'forge', patternKind: 'armour', pattern: 'not-a-pattern', material: 'iron-ore' });
+    const startup = guidanceNotices(state, { startup: true });
+    expect(startup[0]).toMatchObject({ id: 'startup', kind: 'decision', title: 'Choose a character' });
+    expect(startup[0].detail).toBe('Load a character, or start a new one. Existing slots are kept.');
+    const unsaved = guidanceNotices(state, { unsaved: true, writerState: 'readonly' });
+    expect(unsaved[0].id).toBe('writer');
+    expect(unsaved[1]).toMatchObject({ id: 'unsaved', title: 'Not saved yet.' });
+    expect(unsaved[1].detail).toBe('Choose a slot to keep this character.');
+    expect(unsaved.some((notice) => notice.id === 'stale-goal')).toBe(true);
+  });
 });
 
 describe('guidance save shape', () => {

@@ -1,0 +1,13 @@
+﻿{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "speciesId": "mummy",
+  "action": "idle",
+  "direction": "east-south-east",
+  "phase": "idle",
+  "source": ["reference.png", "animation/poses/idle/east.png"],
+  "canvas": [1254, 1254],
+  "targetCanvas": [384, 384],
+  "canvasMatchesTarget": false,
+  "visualReview": {"identityAccepted": false, "exactAngleAccepted": false, "anchor": false, "atlas": false}
+}

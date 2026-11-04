@@ -1,0 +1,18 @@
+﻿{
+    "action":  "walk",
+    "qa":  {
+               "atlas":  false,
+               "anchor":  false
+           },
+    "direction":  "south-south-east",
+    "source":  "C:/Users/disda/.codex-acc2/generated_images/01a1a173-05ff-7d81-87ee-ce64d6b1026e/exec-ff412a03-012f-4636-97f7-5a23ec8e740b.png",
+    "status":  "candidate-review",
+    "visualReview":  {
+                         "identityAccepted":  false,
+                         "exactAngleAccepted":  false,
+                         "screenSideCorrect":  true,
+                         "note":  "Candidate resembles troll and stride A. Angle, scale, baseline, identity details and sequence continuity require review. Generated canvas is 1254x1254; canonical canvas is 384x384."
+                     },
+    "generator":  "built-in-imagegen",
+    "phase":  "00-stride-a"
+}

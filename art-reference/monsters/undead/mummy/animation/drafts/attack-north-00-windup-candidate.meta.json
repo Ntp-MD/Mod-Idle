@@ -1,0 +1,16 @@
+﻿{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "generatorOutput": "exec-81b3c582-8292-43cb-a479-90f451956148.png",
+  "speciesId": "mummy",
+  "action": "attack",
+  "direction": "north",
+  "phase": "00-windup",
+  "source": ["reference.png", "animation/poses/idle/north.png", "animation/poses/attack/east/00-windup.png"],
+  "canvas": [1254, 1254],
+  "targetCanvas": [384, 384],
+  "canvasMatchesTarget": false,
+  "alphaCornersTransparent": false,
+  "visualReview": {"identityAccepted": false, "exactAngleAccepted": false, "anchor": false, "atlas": false},
+  "reviewNote": "Single low-alpha pixel touches top-left canvas corner; clean and inspect before any promotion."
+}

@@ -4,7 +4,7 @@ import { skillAreaSnapshot } from '../../../../engine/skill-area.ts';
 import { sweepDisc, traceSight } from '../../../../engine/navigation.ts';
 import type { SkillAreaSnapshot, SkillCastProfile, SkillCastTiming } from '../../../../engine/types.ts';
 import { aimForSkill, arenaBurstCandidates, arenaDistance, arenaSkillRange, type CombatArena } from './combat-arena';
-import { rotationOrder, skillEligibilityInState, type CastEnv, type CastRollCache, type PreparedSkillCast } from './skills';
+import { modeOf, rotationOrder, skillEligibilityInState, type CastEnv, type CastRollCache, type PreparedSkillCast } from './skills';
 import type { Character } from '../core/player';
 import type { GameState, Mob } from '../core/types';
 
@@ -143,9 +143,17 @@ export function intentTargets(
  */
 function pickIntent(
   arena: CombatArena, state: GameState, character: Character,
-  usable: (intent: CombatIntent) => boolean, nowOnly = false,
+  usable: (intent: CombatIntent) => boolean, order: readonly string[], nowOnly = false,
 ): CombatIntent | undefined {
-  for (const skillId of rotationOrder(state.skills)) {
+  for (const skillId of order) {
+    const row = sm.byId[skillId];
+    if (!row) continue;
+    // Reject candidates the final eligibility reader would reject for a fact that needs no aim:
+    // a spent cooldown, a silenced/manual row, or a weapon the character is not holding.
+    if ((state.skills.cd[skillId] || 0) > 0) continue;
+    if (modeOf(state.skills, skillId) === 'never') continue;
+    if ((state.skills.autoMode?.[skillId] ?? row.auto) === 'manual') continue;
+    if (!sm.weaponFits(row, character.weaponName)) continue;
     const aim = aimForSkill(arena, state.group, skillId, nowOnly);
     if (!aim) continue;
     const intent: CombatIntent = { skillId, targetId: aim.mob.id,
@@ -212,10 +220,10 @@ export function selectCombatIntent(
     return skillEligibilityInState(state, character, intent.skillId, true, selected.targets, true).ready;
   };
   const order = rotationOrder(state.skills);
-  const fresh = pickIntent(arena, state, character, usable);
+  const fresh = pickIntent(arena, state, character, usable, order);
   const previous = arena.intent && trackIntentAim(arena, state.group, arena.intent);
   if (previous?.phase === 'approach' && usable(previous)) {
-    const now = pickIntent(arena, state, character, usable, true);
+    const now = pickIntent(arena, state, character, usable, order, true);
     // Focus pin: an equally useful northern focus must replace the eastern approach.
     if (arena.focusId && arena.focusId !== previous.targetId) {
       if (now && now.targetId === arena.focusId) return now;
@@ -251,7 +259,7 @@ export function selectCombatIntent(
     }
     return previous;
   }
-  const now = pickIntent(arena, state, character, usable, true);
+  const now = pickIntent(arena, state, character, usable, order, true);
   return now ?? fresh;
 }
 

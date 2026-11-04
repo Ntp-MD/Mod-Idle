@@ -74,10 +74,11 @@ export function arenaGroundBounds(bounds: { width: number; height: number }) {
     height: Math.max(...cameras.map(point => point.y)) - top + ARENA_VIEW.height,
   };
 }
-export function arenaActorPixelScale(idleWidth: number, viewportScale: number) {
+export function arenaActorPixelScale(idleWidth: number, viewportScale: number, bodySize = 'player') {
   // Horizontal extent of the projected circular footprint, not one projected world axis.
   const width = ARENA_ACTOR_WIDTH_M * Math.hypot(U, V);
-  return width / Math.max(1, idleWidth) * viewportScale;
+  const sizeScale: Record<string, number> = { player: 1, small: 1, medium: 1.25, large: 1.5, boss: 1.8 };
+  return width / Math.max(1, idleWidth) * viewportScale * (sizeScale[bodySize] ?? 1);
 }
 export function unprojectArenaPoint(point: { x: number; y: number }) {
   const vector = unprojectArenaVector({ x: point.x - CX, y: point.y - CY });

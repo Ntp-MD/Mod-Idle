@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { skillRainDrops } from '../../src/ui/combat/meteor-rain';
 import type { SkillGeometry } from '../../src/ui/combat/skill-geometry';
 import type { VfxAtlas } from '../../src/ui/fx/catalog';
+import { sm } from '../../src/engine/client';
 import { createCombatArena, captureCombatArena } from '@sim/combat/combat-arena';
 import { newGame } from '@sim/core/game';
 import { skillActionGeometry } from '../../src/ui/combat/skill-geometry';
@@ -9,6 +10,7 @@ import { skillActionGeometry } from '../../src/ui/combat/skill-geometry';
 const atlas = { count: 16, rainDurationSec: 4 } as VfxAtlas;
 const blizzardAtlas: VfxAtlas = { ...atlas, rainPhase: 'Field', rainIntervalSec: .09,
   rainSizeScale: .5, rainRadiusRatio: .98 };
+const blizzardDuration = sm.skillDurationSec(sm.byId['attack.blizzard'].duration);
 const mark = { key: 'action-7', phase: 'Impact', phaseElapsedSec: 0,
   body: { height: 132 }, area: { center: { x: 4, y: 3 }, radiusM: 3 } } as SkillGeometry;
 
@@ -72,17 +74,17 @@ describe('Meteor atlas rain', () => {
   });
 
   it('uses the Blizzard field duration and keeps equal sized ice cells on the field', () => {
-    const field: SkillGeometry = { ...mark, skillId: 'attack.blizzard', phase: 'Field', phaseElapsedSec: 7.5 };
+    const field: SkillGeometry = { ...mark, skillId: 'attack.blizzard', phase: 'Field', phaseElapsedSec: blizzardDuration - .5 };
     const drops = skillRainDrops(field, blizzardAtlas);
     expect(drops.length).toBeGreaterThan(0);
     expect(new Set(drops.map(drop => drop.size))).toEqual(new Set([495]));
-    expect(skillRainDrops({ ...field, phaseElapsedSec: 8 }, blizzardAtlas)).toEqual([]);
+    expect(skillRainDrops({ ...field, phaseElapsedSec: blizzardDuration }, blizzardAtlas)).toEqual([]);
     expect(skillRainDrops({ ...field, phase: 'Impact' }, blizzardAtlas)).toEqual([]);
   });
 
   it('covers centre and edge at the beginning, middle and end without thinning out', () => {
     const counts: number[] = [];
-    for (const time of [0, .15, .75, 2, 4, 6, 7.85, 7.99]) {
+    for (const time of [0, .15, .75, blizzardDuration / 2, blizzardDuration - .15, blizzardDuration - .01]) {
       const drops = skillRainDrops({ ...mark, skillId: 'attack.blizzard', phase: 'Field', phaseElapsedSec: time }, blizzardAtlas);
       const radii = drops.map(drop => Math.hypot(drop.ground.x - 4, drop.ground.y - 3) / (3 * .98));
       counts.push(drops.filter(drop => drop.opacity > .1).length);
@@ -92,7 +94,7 @@ describe('Meteor atlas rain', () => {
     }
     expect(Math.min(...counts)).toBeGreaterThan(0);
     expect(Math.max(...counts) - Math.min(...counts)).toBeLessThanOrEqual(2);
-    expect(skillRainDrops({ ...mark, skillId: 'attack.blizzard', phase: 'Field', phaseElapsedSec: 8 }, blizzardAtlas)).toEqual([]);
+    expect(skillRainDrops({ ...mark, skillId: 'attack.blizzard', phase: 'Field', phaseElapsedSec: blizzardDuration }, blizzardAtlas)).toEqual([]);
   });
 
   it('decorrelates layers while keeping each drop fixed and replay deterministic', () => {

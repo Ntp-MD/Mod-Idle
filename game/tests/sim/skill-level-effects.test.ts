@@ -3,6 +3,7 @@ import { E, sm } from '../../src/engine/client';
 import { captureCombatArena, createCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
 import type { ManualControl } from '@sim/combat/combat-actions';
 import { characterSheet, newGame, setLevel, stepCombat } from '@sim/core/game';
+import { skillCastTiming } from '@engine/skill-actions.ts';
 import { lineValue } from '@sim/combat/curse';
 import { mobFixture, pinFieldPopulation } from '../fixtures/mobFixture';
 import { liveProximitySpecies } from '../fixtures/liveMob';
@@ -141,6 +142,31 @@ describe('live skill phase commitments', () => {
     state.skills.buffUp[hasteId] = 1000;
     expect(characterSheet(state).castSpeed).toBe(haste);
   }
+
+  it('counts each live cast profile fixed windup and recovery exactly once', () => {
+    const units = 1_000_000;
+    const floorUs = Math.round(Math.max(E.combat_arena.movement_step_sec,
+      E.combat_arena.animation_phase_floor_sec) * units);
+    const haste = 1e9;
+    const rows = sm.all().filter((row) => row.cast);
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) {
+      const profile = sm.castProfileOf(row);
+      const fixedWindup = profile.fixed_windup_sec ?? 0;
+      const fixedRecovery = profile.fixed_recovery_sec ?? 0;
+      expect(fixedWindup, `${row.id} fixed windup is inside its total`).toBeLessThanOrEqual(profile.windup_sec);
+      expect(fixedRecovery, `${row.id} fixed recovery is inside its total`).toBeLessThanOrEqual(profile.recovery_sec);
+      const timing = skillCastTiming(profile, 0, units, { x: 0, y: 0 }, { x: 2, y: 0 },
+        { cast: haste, recovery: haste }, floorUs);
+      const expectedRelease = Math.max(floorUs,
+        Math.round(fixedWindup * units) + Math.ceil(Math.max(0, profile.windup_sec - fixedWindup) / haste * units));
+      const expectedRecovery = Math.max(floorUs,
+        Math.round(fixedRecovery * units) + Math.ceil(Math.max(0, profile.recovery_sec - fixedRecovery) / haste * units));
+      expect(timing.releaseAtUs, `${row.id} release adds the fixed windup once`).toBe(expectedRelease);
+      expect(timing.recoveryUntilUs - timing.releaseAtUs, `${row.id} recovery adds the fixed tail once`)
+        .toBe(expectedRecovery);
+    }
+  });
 
   it('keeps actual release and recovery at the authored animation floor under high haste', () => {
     const installed = installSyntheticSkill('test.animation-floor', { name: 'Animation Floor',

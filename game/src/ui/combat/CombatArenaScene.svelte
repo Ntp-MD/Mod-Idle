@@ -261,7 +261,7 @@
       const path = '../dev/arena-art/arena-art-golem-review.ts';
       return (await import(/* @vite-ignore */ path)).golemReviewArt;
     },
-    imp: async () => {
+    'little-demon': async () => {
       const path = '../dev/arena-art/arena-art-imp-review.ts';
       return (await import(/* @vite-ignore */ path)).impReviewArt;
     },
@@ -390,8 +390,9 @@
     if (iconActors) return null;
     if (actor.id === 'player') return playerArt;
     const speciesId = actor.mob?.speciesId;
-    // A preview encounter spawns one species, so its loaded sheet owns every body on the field.
-    if (spritePreviewSpecies && reviewArt && actor.mob) return reviewArt;
+    // Other field spawns can remain present while reviewing a named variant.
+    if (spritePreviewSpecies && reviewArt && actor.mob
+      && (!spritePreviewVariant || speciesId === spritePreviewVariant.speciesId)) return reviewArt;
     return arenaArtForSpecies(speciesId, spritePreviewSpecies && !spritePreviewVariant ? undefined : actor.mob?.variant);
   }
 
@@ -464,7 +465,7 @@
     // Clips have different cell heights (an attack raises a fist, a death flattens the body).
     // Measuring on the idle silhouette keeps the creature the same size when the clip changes.
     const pixelScale = art?.pixelArt && restSheet && bodyReference
-      ? arenaActorPixelScale(bodyReference.width,scale) : null;
+      ? arenaActorPixelScale(bodyReference.width, scale, actor.id === 'player' ? 'player' : actorProfile(actor.mob).size) : null;
     const height = pixelScale != null && sheet ? pixelScale * sheet.frameHeight : projectedHeight;
     const width = height * (sheet ? sheet.frameWidth / sheet.frameHeight : 1.05);
     // The nameplate rides above the tallest authored frame, not the idle pose, so an attack or a

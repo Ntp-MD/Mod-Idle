@@ -1,0 +1,18 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1a167-4930-7b41-b4f3-5fd49cadb85a\\exec-bd9cd691-8f8d-4be9-9ce4-60be8b8b6991.png",
+  "action": "hit",
+  "phase": "01-recoil.png",
+  "direction": "south",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": true,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false,
+    "identityPlausible": true,
+    "facingPlausible": true,
+    "note": "Clear backward recoil with raised wings; transition to following phase needs review."
+  }
+}

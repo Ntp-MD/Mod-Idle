@@ -1,0 +1,18 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1a173-1b85-76e2-b47b-f27057b8b499\\exec-509887ce-db6c-4650-90ad-7de5077bf00c.png",
+  "action": "attack",
+  "phase": "00-windup.png",
+  "direction": "south",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": true,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false,
+    "identityPlausible": true,
+    "facingPlausible": true,
+    "note": "Low crouch and tense shoulders establish the windup."
+  }
+}

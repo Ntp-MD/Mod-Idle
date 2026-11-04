@@ -72,7 +72,7 @@ export function advanceRecovery(opts: {
   }
   if (s.healUp && s.player.hp > 0) {
     const before = s.player.hp;
-    s.player.hp = Math.min(c.maxHp, s.player.hp + c.maxHp * s.healUp.pctPerSec);
+    s.player.hp = Math.min(usableHp(c, s.skills), s.player.hp + c.maxHp * s.healUp.pctPerSec);
     // the stream says what it returned each second, on the same beat it spends — a heal that only lives in
     // the gauge is a number the eye never sees move
     fx(s, { kind: 'heal', side: 'self', skillId: s.healUp.skillId,
@@ -112,7 +112,7 @@ export function advanceRecovery(opts: {
   // `combat.md` §5 reads shock as "attacks stop + regen stops", so the stop covers the pools too.
   // The Energy Shield recharge is left alone on purpose: it is a shield, not regen, and its own
   // `delay_sec` rule already governs it.
-  if (s.player.hp > 0) s.player.hp = Math.min(c.maxHp, s.player.hp + c.hpRegen * (1 - burnCut) * playerActiveFraction);
+  if (s.player.hp > 0) s.player.hp = Math.min(usableHp(c, s.skills), s.player.hp + c.hpRegen * (1 - burnCut) * playerActiveFraction);
   const manaRegenNow = debt52
     ? manaRegenWhileNegative(c.manaRegen * playerActiveFraction, s.player.mana < 0, debt52.params as Record<string, number>)
     : c.manaRegen * playerActiveFraction;

@@ -1,0 +1,18 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1a167-4930-7b41-b4f3-5fd49cadb85a\\exec-c8b02b21-2180-4ba5-ac38-74291b12b936.png",
+  "action": "death",
+  "phase": "00-fall.png",
+  "direction": "south",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": true,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false,
+    "identityPlausible": true,
+    "facingPlausible": true,
+    "note": "One wing raised and balance breaking; candidate as start of fall, timing needs review."
+  }
+}

@@ -120,6 +120,18 @@ describe('released pending work across a save', () => {
     expect(loaded.pendingWork).toBeNull();
   });
 
+  it('keeps a completed tick ledger detached from later arena and character mutations', () => {
+    const live = pendingFight();
+    tick(live.state, { arena: live.arena, autoSkills: false });
+    expect(live.state.pendingWork).not.toBeNull();
+    const before = JSON.stringify(live.state.pendingWork);
+    live.arena.mobs[live.mob.id].x += 5;
+    live.arena.player.y += 5;
+    live.state.player.mana = 0;
+    live.mob.hp = 1;
+    expect(JSON.stringify(live.state.pendingWork)).toBe(before);
+  });
+
   it('settles a retuned row exactly once on its committed facts without double-spending', () => {
     // The definition changes between save and load; the committed footprint,
     // target and paid cost stand, while numbers follow the live row (current
@@ -349,6 +361,61 @@ describe('released pending work across a save', () => {
     expect(ledger(cone)?.flights.length).toBe(1);
     expect(ledger({ ...cone, angleDeg: 181 })).toBeNull();
     expect(ledger({ ...line, origin: 'side' })).toBeNull();
+  });
+});
+
+describe('async settlement slices', () => {
+  const snap = (state: ReturnType<typeof pendingFight>['state']) => {
+    state.lastSavedAt = 0;
+    return JSON.stringify(state);
+  };
+
+  it('settles a pending impact across async slices and a cancel agrees with sync for the credited seconds', async () => {
+    const live = pendingFight();
+    tick(live.state, { arena: live.arena, autoSkills: false });
+    expect(live.state.pendingWork).not.toBeNull();
+    const source = exportJson(live.state);
+    const asyncState = importJson(source);
+    const control = importJson(source);
+    const controller = new AbortController();
+    const progress: number[] = [];
+    const result = await catchUpAsync(asyncState, 10, {
+      signal: controller.signal,
+      onProgress: (done) => {
+        progress.push(done);
+        if (done > 0) controller.abort();
+      },
+    });
+    expect(result.cancelled).toBe(true);
+    expect(result.simulated).toBeGreaterThan(0);
+    expect(result.simulated).toBeLessThan(10);
+    expect(progress.at(-1)).toBe(result.simulated);
+    catchUp(control, result.simulated);
+    expect(snap(asyncState)).toBe(snap(control));
+  });
+
+  it('completes an ordinary away window when no pending work is owed', async () => {
+    const state = newGame(41);
+    setLevel(state, 20);
+    state.hunting = true;
+    const result = await catchUpAsync(state, 5);
+    expect(result).toEqual({ simulated: 5, capped: false });
+    expect(state.clockSec).toBeGreaterThanOrEqual(5);
+  });
+
+  it('leaves a far impact resumable when the away budget is shorter than the owed work', async () => {
+    const live = pendingFight();
+    const far = 200_000_000;
+    live.arena.flights[0].timing = { ...live.arena.flights[0].timing, impactAtUs: far };
+    updateArenaAction(live.arena, live.action.id, {
+      timing: { ...live.action.timing!, impactAtUs: far },
+    });
+    tick(live.state, { arena: live.arena, autoSkills: false });
+    expect(live.state.pendingWork).not.toBeNull();
+    const result = await catchUpAsync(live.state, 1);
+    expect(result.simulated).toBe(1);
+    expect(live.state.pendingWork).not.toBeNull();
+    expect(live.state.pendingWorkReceipt).toBeDefined();
   });
 });
 

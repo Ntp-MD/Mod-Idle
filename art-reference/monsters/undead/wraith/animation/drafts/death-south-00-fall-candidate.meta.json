@@ -1,0 +1,16 @@
+﻿{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "generatorOutput": "exec-2ddc307f-dcea-4483-835d-1bac0becf5f4.png",
+  "speciesId": "wraith",
+  "action": "death",
+  "direction": "south",
+  "phase": "00-fall",
+  "source": ["reference.png", "animation/source/base-v1.png", "animation/poses/death/east/00-fall.png"],
+  "canvas": [1254, 1254],
+  "targetCanvas": [384, 384],
+  "canvasMatchesTarget": false,
+  "alphaCornersTransparent": true,
+  "visualReview": {"identityAccepted": false, "exactAngleAccepted": false, "anchor": false, "atlas": false},
+  "reviewNote": "South-facing fall onset candidate; inspect its role in the death sequence and verify canvas fit."
+}

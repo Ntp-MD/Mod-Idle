@@ -1,8 +1,8 @@
 {
   "status": "blocked-imagegen-usage-limit",
   "expectedPoseCount": 272,
-  "presentPoseCount": 60,
-  "generatedCandidateCount": 28,
+  "presentPoseCount": 68,
+  "generatedCandidateCount": 36,
   "baselinePoseCount": 32,
   "approvedNewPoseCount": 0,
   "byAction": {
@@ -25,16 +25,16 @@
       "missing": 52
     },
     "hit": {
-      "present": 8,
-      "generatedCandidates": 0,
+      "present": 12,
+      "generatedCandidates": 4,
       "baselineReferences": 8,
-      "missing": 56
+      "missing": 52
     },
     "death": {
-      "present": 8,
-      "generatedCandidates": 0,
+      "present": 12,
+      "generatedCandidates": 4,
       "baselineReferences": 8,
-      "missing": 56
+      "missing": 52
     }
   },
   "missing": [
@@ -640,30 +640,6 @@
     },
     {
       "action": "hit",
-      "direction": "south",
-      "file": "00-flinch.png",
-      "pose": "brief impact flinch preserving planted root"
-    },
-    {
-      "action": "hit",
-      "direction": "south",
-      "file": "01-recoil.png",
-      "pose": "peak recoil with compressed body"
-    },
-    {
-      "action": "hit",
-      "direction": "south",
-      "file": "02-recover.png",
-      "pose": "body straightens back toward balanced idle"
-    },
-    {
-      "action": "hit",
-      "direction": "south",
-      "file": "03-ready.png",
-      "pose": "same balanced pose as idle for clean transition"
-    },
-    {
-      "action": "hit",
       "direction": "south-south-east",
       "file": "00-flinch.png",
       "pose": "brief impact flinch preserving planted root"
@@ -973,30 +949,6 @@
       "direction": "south-south-west",
       "file": "03-ready.png",
       "pose": "same balanced pose as idle for clean transition"
-    },
-    {
-      "action": "death",
-      "direction": "south",
-      "file": "00-fall.png",
-      "pose": "defeated body tips and support buckles"
-    },
-    {
-      "action": "death",
-      "direction": "south",
-      "file": "01-collapse.png",
-      "pose": "body collapses sideways with all anatomy intact"
-    },
-    {
-      "action": "death",
-      "direction": "south",
-      "file": "02-ground.png",
-      "pose": "fully grounded body, wings and tail contained naturally"
-    },
-    {
-      "action": "death",
-      "direction": "south",
-      "file": "03-settle.png",
-      "pose": "final grounded still corpse with no disappearing anatomy"
     },
     {
       "action": "death",
@@ -1347,9 +1299,9 @@
   ],
   "blocker": {
     "type": "imagegen-http429-usage-limit-reached",
-    "resetsAtUnix": 1793288069
+    "resetsAtUnix": 1793712733
   },
-  "note": "No species complete. Every generated image remains candidate. Baseline cells are source references pending semantic/finish review. Runtime and variants unchanged; old versions retained.",
+  "note": "8 new south hit/death frames added as candidates. Each image still needs art review; no atlas or runtime promotion. Further image generation is blocked until the imagegen usage limit resets.",
   "visualFindings": [
     "Identity/detail retained in inspected frames. South and north cardinal views and east/west profiles read correctly. South walk opposite strides and attack anticipation/contact are distinct.",
     "Intermediate yaw spacing, especially NNE/NNW and SSE walk versus south walk, remains unapproved; review adjacent directions before atlas assembly.",

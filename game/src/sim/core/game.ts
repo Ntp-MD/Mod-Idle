@@ -1155,7 +1155,24 @@ function closeSecond(s: GameState, opts: TickOptions, second: TickSecond): void 
  * step and closed on its last; the same function backs both the live loop and the whole-second
  * `tick`, so a different batch size cannot reorder an event or reroll a number.
  */
+interface StepContext {
+  /** A completed world second's detached offline ledger, published only at its boundary. */
+  publishOffline?: () => void;
+}
+
+function flushOfflinePublication(context: StepContext | undefined): void {
+  const publish = context?.publishOffline;
+  if (!publish) return;
+  // Clear first: nested cleanup must not invoke the same captured ledger twice.
+  context!.publishOffline = undefined;
+  publish();
+}
+
 export function stepCombat(s: GameState, opts: TickOptions = {}): GameState {
+  return advanceCombatStep(s, opts);
+}
+
+function advanceCombatStep(s: GameState, opts: TickOptions = {}, context?: StepContext): GameState {
   if (opts.writer === false) return s;
   const units = tree.mechanics?.combat_time_units_per_sec ?? 1;
   const arena = opts.online === false ? (opts.settleArena?.offline ? undefined : opts.settleArena) : opts.arena;
@@ -1183,11 +1200,14 @@ export function stepCombat(s: GameState, opts: TickOptions = {}): GameState {
   if (!second.camped && !second.halted) {
     const fromUs = second.nextUs;
     const toUs = Math.min(fromUs + combatStepUs(units), second.endUs);
-    tickWorld(s, { ...opts, manual: second.manual }, second, fromUs, toUs);
+    tickWorld(s, { ...opts, manual: second.manual }, second, fromUs, toUs, context);
     if (second.camped || second.halted) second.nextUs = second.endUs;
     else second.nextUs = toUs;
   }
   if (second.nextUs >= second.endUs) {
+    // Capture the completed second before recovery, Push and settlement; the tick loop retains
+    // this callback across its substeps and lands it exactly here.
+    flushOfflinePublication(context);
     closeSecond(s, opts, second);
     TICK_SECONDS.delete(s);
   }
@@ -1196,10 +1216,18 @@ export function stepCombat(s: GameState, opts: TickOptions = {}): GameState {
 
 export function tick(s: GameState, opts: TickOptions = {}): GameState {
   if (opts.writer === false) return s;
+  // One shared context means one detached ledger per completed world second, not one per 50 ms
+  // substep. The transient arena remains authoritative between substeps.
+  const context: StepContext = {};
   let guard = 0;
-  do {
-    stepCombat(s, opts);
-  } while (TICK_SECONDS.get(s) && guard++ < 64);
+  try {
+    do {
+      advanceCombatStep(s, opts, context);
+    } while (TICK_SECONDS.get(s) && guard++ < 64);
+  } finally {
+    // Early exit or a thrown substep still publishes the last completed tick exactly once.
+    flushOfflinePublication(context);
+  }
   return s;
 }
 
@@ -1232,7 +1260,10 @@ function tickSecondEnd(s: GameState, second: TickSecond): void {
   settleTick(s, second.arena);
 }
 
-function tickWorld(s: GameState, opts: TickOptions, second: TickSecond, tickStartUs: number, tickEndUs: number): GameState {
+function tickWorld(
+  s: GameState, opts: TickOptions, second: TickSecond, tickStartUs: number, tickEndUs: number,
+  context?: StepContext,
+): GameState {
   const online = opts.online !== false;
   const autoSkills = opts.autoSkills !== false;
   const manual = second.manual;
@@ -1782,6 +1813,14 @@ function tickWorld(s: GameState, opts: TickOptions, second: TickSecond, tickStar
   } finally {
     tickFxClock.delete(s);
     offlineActions?.checkpoint(clock.nowUs);
+    if (context) {
+      if (offlineActions) context.publishOffline = offlineActions.publish;
+      // The adapter disappearing means there is no outstanding timed work to keep in the ledger.
+      else flushOfflinePublication(context);
+    } else {
+      // Public `stepCombat` keeps its save-after-any-step contract.
+      offlineActions?.publish();
+    }
   }
   if (clock.halted) {
     second.halted = true;
@@ -1798,8 +1837,8 @@ function tickWorld(s: GameState, opts: TickOptions, second: TickSecond, tickStar
  *
  * The wake math lives in `clock.ts`; it is re-exported here so every existing importer keeps its path.
  */
-export { dayOf, WAKE_SEC, MAX_BATCH, schedulerBatch, schedulerSteps, catchUpPlan } from './clock';
-import { catchUpPlan, dayOf } from './clock';
+export { dayOf, WAKE_SEC, MAX_BATCH, MAX_WORK_SLICE_MS, schedulerBatch, schedulerSteps, catchUpPlan } from './clock';
+import { catchUpPlan, dayOf, MAX_WORK_SLICE_MS } from './clock';
 
 /** The tick loop both catch-up paths share — one order of ticks, so the numbers cannot diverge. */
 function runTicks(s: GameState, from: number, to: number, autoSkills = true) {
@@ -1840,9 +1879,7 @@ const SETTLE_SECONDS_CAP = Number(E.save.settle_seconds_cap);
  * from now must be paid ten seconds from now, not clamped to the first second after reload, so the
  * settlement keeps stepping until nothing is owed; every second it spends counts against away time.
  */
-function settleSavedPendingWork(s: GameState, autoSkills: boolean, budgetSec = 1): number {
-  const budget = Math.min(Math.max(0, Math.floor(budgetSec)), SETTLE_SECONDS_CAP);
-  let done = 0;
+function pendingPinnedIds(s: GameState): Set<string> {
   // Every target named by the released ledger is pinned while its impact is owed: the body stays
   // in the engagement and keeps its wounds until the shot settles.
   const pinned = new Set<string>();
@@ -1850,18 +1887,24 @@ function settleSavedPendingWork(s: GameState, autoSkills: boolean, budgetSec = 1
     for (const id of flight.targetIds) pinned.add(id);
     if (flight.area?.targetId) pinned.add(flight.area.targetId);
   }
-  while (s.pendingWork && done < budget) {
-    const units = tree.mechanics?.combat_time_units_per_sec ?? 1;
-    const arena = createCombatArena();
-    syncCombatArena(arena, s, s.clockSec * units, units, characterSheet(s).maxHp);
-    if (restorePendingWork(arena, s) <= 0) {
-      s.pendingWork = null;
-      break;
-    }
-    tick(s, { online: false, autoSkills, settleArena: arena, settlePinned: pinned });
-    done++;
-    if (!s.pendingWork) break;
+  return pinned;
+}
+
+/** One arena second that settles released work; 0 means the ledger had no executable work left. */
+function settlePendingSecond(s: GameState, pinned: ReadonlySet<string>, autoSkills: boolean): number {
+  if (!s.pendingWork) return 0;
+  const units = tree.mechanics?.combat_time_units_per_sec ?? 1;
+  const arena = createCombatArena();
+  syncCombatArena(arena, s, s.clockSec * units, units, characterSheet(s).maxHp);
+  if (restorePendingWork(arena, s) <= 0) {
+    s.pendingWork = null;
+    return 0;
   }
+  tick(s, { online: false, autoSkills, settleArena: arena, settlePinned: pinned });
+  return 1;
+}
+
+function finishSettlement(s: GameState): void {
   if (s.pendingWork) {
     const receipt = {
       deferredFlights: s.pendingWork.flights.length,
@@ -1875,6 +1918,18 @@ function settleSavedPendingWork(s: GameState, autoSkills: boolean, budgetSec = 1
       push(s, `Pending work awaits time — ${receipt.deferredFlights} flight(s), ${receipt.deferredMobFlights} shot(s) still owed`);
     }
   } else delete s.pendingWorkReceipt;
+}
+
+function settleSavedPendingWork(s: GameState, autoSkills: boolean, budgetSec = 1): number {
+  const budget = Math.min(Math.max(0, Math.floor(budgetSec)), SETTLE_SECONDS_CAP);
+  const pinned = pendingPinnedIds(s);
+  let done = 0;
+  while (s.pendingWork && done < budget) {
+    if (!settlePendingSecond(s, pinned, autoSkills)) break;
+    done++;
+    if (!s.pendingWork) break;
+  }
+  finishSettlement(s);
   return done;
 }
 
@@ -1901,23 +1956,55 @@ export async function catchUpAsync(s: GameState, elapsedSec: number, opts: {
 } = {}) {
   const { secs, capped } = catchUpPlan(elapsedSec);
   const startClock = s.clockSec;
+  const autoSkills = opts.autoSkills !== false;
   const SLICE = 2000;
-  // Work released before the save resolves before any away time is simulated, through the same
-  // arena/tick path that pays kills and rewards exactly once. This tick counts against the away
-  // budget so the catch-up does not grant a free extra second.
-  let done = secs > 0 && !opts.signal?.aborted
-    ? settleSavedPendingWork(s, opts.autoSkills !== false, secs) : 0;
+  // Released work resolves before ordinary away ticks, through the same arena/tick path that pays
+  // kills and rewards exactly once. Its pinned set survives every yield, and each complete second
+  // counts against the away budget.
+  const pinned = pendingPinnedIds(s);
+  const settlementLimit = Math.min(secs, SETTLE_SECONDS_CAP);
+  let settlementDone = secs <= 0 || !!opts.signal?.aborted;
+  let done = 0;
   opts.onProgress?.(done, secs);
   while (done < secs && !opts.signal?.aborted) {
-    const end = Math.min(done + SLICE, secs);
     const started = performance.now();
-    do {
-      tick(s, { online: false, autoSkills: opts.autoSkills !== false });
-      done++;
-    } while (done < end && !opts.signal?.aborted && performance.now() - started < 16);
+    let work = 0;
+    while (done < secs && !opts.signal?.aborted && work < SLICE) {
+      if (!settlementDone) {
+        if (s.pendingWork && done < settlementLimit) {
+          if (settlePendingSecond(s, pinned, autoSkills)) {
+            done++; work++;
+          } else {
+            settlementDone = true;
+            finishSettlement(s);
+          }
+        } else {
+          settlementDone = true;
+          finishSettlement(s);
+        }
+        if (!settlementDone && done >= settlementLimit) {
+          settlementDone = true;
+          finishSettlement(s);
+        }
+        if (!settlementDone) {
+          if (performance.now() - started >= MAX_WORK_SLICE_MS) break;
+          continue;
+        }
+      }
+      if (done >= secs) break;
+      tick(s, { online: false, autoSkills });
+      done++; work++;
+      if (performance.now() - started >= MAX_WORK_SLICE_MS) break;
+    }
     opts.onProgress?.(done, secs);
     if (done < secs && !opts.signal?.aborted) await new Promise((r) => setTimeout(r, 0));
   }
+  // An abort during settlement still records the work that remains owed, exactly once.
+  if (!settlementDone) {
+    settlementDone = true;
+    finishSettlement(s);
+  }
+  opts.onProgress?.(done, secs);
   pauseBossClock(s, done);
   settleDungeonClock(s, startClock, done);
   return { simulated: done, capped, ...(opts.signal?.aborted ? { cancelled: true } : {}) };

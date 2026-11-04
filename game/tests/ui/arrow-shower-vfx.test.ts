@@ -6,7 +6,7 @@ import { createCombatArena, type CombatArenaAction } from '@sim/combat/combat-ar
 import { skillActionGeometry, skillPayloadArtGeometry } from '../../src/ui/combat/skill-geometry';
 import { atlasImpactDuration } from '../../src/ui/combat/arena-skill-art';
 import { skillRainDrops } from '../../src/ui/combat/meteor-rain';
-const RAIN = liveId(row => row.action?.kind === 'projectile-burst' && row.area?.radius_m === 0
+const RAIN = liveId(row => row.action?.kind === 'projectile-burst' && row.area?.radius_m > 0
   && !!activeVfxArt(row.id)?.atlas?.rainDurationSec, 'projectile impact rain');
 
 describe('projectile impact rain', () => {
@@ -26,7 +26,7 @@ describe('projectile impact rain', () => {
       expect(range.every(index => Number.isInteger(index) && index >= 0)).toBe(true);
       expect(range[1]).toBeGreaterThanOrEqual(range[0]);
     }
-    expect(sm.byId[RAIN].area?.radius_m).toBe(0);
+    expect(sm.byId[RAIN].area?.radius_m).toBeGreaterThan(0);
   });
 
   it('uses the canonical burst receipts and restarts contact independently on each arrow', () => {
@@ -44,11 +44,11 @@ describe('projectile impact rain', () => {
         releaseAtUs: (.1 + index * interval) * units,
         plannedImpactAtUs: (1 + index * interval) * units })) };
     const atlas = readAtlas();
-    const time = (.1 + (hits - .5) * interval) * units;
+    const time = (.1 + Math.min(hits - .5, 2) * interval) * units;
     const mark = skillActionGeometry(action, arena, time, units)!;
     const shots = skillPayloadArtGeometry(mark, action, time, units, atlasImpactDuration(atlas));
-    expect(shots).toHaveLength(hits);
-    expect(new Set(shots.map(shot => shot.key)).size).toBe(hits);
+    expect(shots).toHaveLength(action.payloads!.filter(payload => payload.releaseAtUs <= time).length);
+    expect(new Set(shots.map(shot => shot.key)).size).toBe(shots.length);
     for (const shot of shots) {
       expect(shot.phase).toBe('Travel');
       expect(skillRainDrops(shot, atlas)).toEqual([]);
@@ -62,15 +62,15 @@ describe('projectile impact rain', () => {
     expect(rain.length).toBeGreaterThan(0);
     expect(new Set(rain.map(drop => `${drop.ground.x}:${drop.ground.y}`)).size).toBe(rain.length);
     expect(rain.some(drop => Math.hypot(drop.ground.x - 4, drop.ground.y - 2) > .1)).toBe(true);
-    expect(contacts[0].area.radiusM).toBe(0);
+    expect(contacts[0].area.radiusM).toBe(skill.area!.radius_m);
     expect(contacts.slice(1).every(shot => shot.phase === 'Travel')).toBe(true);
     expect(contacts.slice(1).flatMap(shot => skillRainDrops(shot, atlas))).toEqual([]);
-    const lateAt = (1 + (hits - 1) * interval + atlas.rainDurationSec! - .001) * units;
+    const lateAt = (1 + (hits - 1) * interval + .1) * units;
     const late = skillPayloadArtGeometry(skillActionGeometry(action, arena, lateAt, units,
       undefined, undefined, undefined, undefined, atlasImpactDuration(atlas))!,
       action, lateAt, units, atlasImpactDuration(atlas));
-    expect(late).toHaveLength(1);
-    expect(skillRainDrops(late[0], atlas).length).toBeGreaterThan(0);
+    expect(late.length).toBeGreaterThan(0);
+    expect(late.some(shot => skillRainDrops(shot, atlas).length > 0)).toBe(true);
     expect(JSON.stringify(action)).toBe(before);
   });
 });

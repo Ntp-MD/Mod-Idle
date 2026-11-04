@@ -1083,6 +1083,9 @@ function separateBodies(arena: CombatArena, state: GameState): void {
   let changed = false;
   const push = (a: CombatArenaActor, b: CombatArenaActor, need: number, aShare: number): void => {
     const dx = a.x - b.x, dy = a.y - b.y;
+    // A pair outside one axis' reach cannot overlap the circle. This is a rejection only:
+    // every pair that can overlap still takes the original hypot/stepTo path below.
+    if (Math.abs(dx) >= need || Math.abs(dy) >= need) return;
     const dist = Math.hypot(dx, dy);
     const overlap = need - dist;
     if (!(overlap > 0)) return;

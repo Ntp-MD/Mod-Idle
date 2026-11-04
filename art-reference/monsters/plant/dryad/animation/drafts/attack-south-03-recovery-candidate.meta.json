@@ -1,0 +1,18 @@
+﻿{
+    "status":  "candidate-review",
+    "generator":  "built-in-imagegen",
+    "source":  "C:/Users/disda/.codex-acc2/generated_images/01a1a173-1a8c-7ad3-bbf2-7798df231412/exec-a5a5e9d6-30af-409f-bc75-06f754b6c99c.png",
+    "action":  "attack",
+    "direction":  "south",
+    "phase":  "03-recovery",
+    "visualReview":  {
+                         "sequenceAccepted":  false,
+                         "identityAccepted":  false,
+                         "exactAngleAccepted":  false,
+                         "note":  "Generated draft; compare exact angle, identity and sequence before approval."
+                     },
+    "qa":  {
+               "atlas":  false,
+               "anchor":  false
+           }
+}

@@ -1,5 +1,6 @@
-import { pilotArt, type SpriteAtlasMetadata } from '../../combat/arena/arena-art-pixel-v2';
+import type { SpriteAtlasMetadata } from '../../combat/arena/arena-art-pixel-v2';
 import { arenaArtForSpecies, type ArenaCharacterArt } from '../../combat/arena/arena-art';
+import { directionalVariantArt } from '../../combat/arena/arena-art-beetle';
 import { MOB_DRAFT_VARIANT_QA_PASS_METADATA_PATHS } from './arena-art-mob-drafts-qa-pass';
 
 type MobDraftMetadata = SpriteAtlasMetadata & {
@@ -37,5 +38,5 @@ export async function loadMobDraftReviewArt(speciesId: string, variantId: string
 
   if (speciesId === 'beetle') return arenaArtForSpecies(speciesId, metadata.name);
 
-  return pilotArt(href, metadata, 224);
+  return directionalVariantArt(href, metadata);
 }

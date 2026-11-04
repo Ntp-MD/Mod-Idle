@@ -1,0 +1,17 @@
+﻿{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "generatorOutput": "exec-5e8fdea2-b1ab-4414-b8cc-4616543ad9ce.png",
+  "speciesId": "skeleton",
+  "action": "hit",
+  "direction": "north",
+  "phase": "00-flinch",
+  "source": ["animation/source/base-v1.png", "animation/poses/idle/north.png", "animation/poses/hit/east/00-flinch.png"],
+  "referencePngAbsent": true,
+  "canvas": [1254, 1254],
+  "targetCanvas": [384, 384],
+  "canvasMatchesTarget": false,
+  "alphaCornersTransparent": true,
+  "visualReview": {"identityAccepted": false, "exactAngleAccepted": false, "anchor": false, "atlas": false},
+  "reviewNote": "Rear pose reads as a slight recoil candidate; exact flinch action remains unreviewed."
+}

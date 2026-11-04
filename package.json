@@ -6,8 +6,11 @@
   "scripts": {
     "verify": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/verify.ts",
     "economy:baseline": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/economy-baseline.ts",
+  "performance:baseline": "node tools/performance-baseline.mjs",
+  "measure:release": "node tools/release-journey.mjs",
     "wiki": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/wiki.ts build",
     "skills": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/skills.ts",
+    "mob-sprites": "node tools/mob-sprite-pool.mjs",
     "map": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/map.ts",
     "map:check": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/map.ts --checks",
     "gallery": "node --experimental-strip-types --disable-warning=ExperimentalWarning tools/gallery.ts",

@@ -1,4 +1,4 @@
-import { COMBAT_STEP_US, schedulerSteps, stepCombat } from '@sim/core/game';
+import { COMBAT_STEP_US, MAX_WORK_SLICE_MS, schedulerSteps, stepCombat } from '@sim/core/game';
 import { equipWindowOpen } from '../ui/combat/equip-policy';
 import type { GameState } from '@sim/core/types';
 import type { CombatArena } from '@sim/combat/combat-arena';
@@ -67,17 +67,47 @@ export function createGameLoop(ctx: LoopContext, readWallMs: () => number = () =
     }
   }
 
-  /** One wake: bank the elapsed time and run at most eight simulated seconds of steps. */
-  function startWakeLoop(): () => void {
-    const timer = setInterval(() => wake(readWallMs()), LIVE_STEP_MS());
-    return () => clearInterval(timer);
-  }
-
   let acc = 0;
   let last = 0;
   let started = false;
+  let wakeLoopActive = false;
+  let continuation: ReturnType<typeof setTimeout> | undefined;
+
+  function clearContinuation(): void {
+    if (continuation != null) {
+      clearTimeout(continuation);
+      continuation = undefined;
+    }
+  }
+
+  function queueContinuation(): void {
+    if (continuation != null || !wakeLoopActive) return;
+    continuation = setTimeout(() => {
+      // Clear before waking: the callback must not be able to re-enter its own handle.
+      continuation = undefined;
+      wake(readWallMs());
+    }, 0);
+  }
+
+  /** One wake: bank the elapsed time and run at most eight simulated seconds of steps. */
+  function startWakeLoop(): () => void {
+    wakeLoopActive = true;
+    const timer = setInterval(() => wake(readWallMs()), LIVE_STEP_MS());
+    return () => {
+      wakeLoopActive = false;
+      clearInterval(timer);
+      clearContinuation();
+    };
+  }
+
   /** A reset owns a new run: drop banked elapsed time so the old run cannot land in the new one. */
-  function restart(): void { acc = 0; last = 0; started = false; }
+  function restart(): void {
+    clearContinuation();
+    acc = 0;
+    last = 0;
+    started = false;
+  }
+
   function wake(now: number): void {
     if (!started) { started = true; last = now; return; }
     // a wake that ran late is measured, never assumed; the tab's own throttling is the only clock
@@ -93,18 +123,20 @@ export function createGameLoop(ctx: LoopContext, readWallMs: () => number = () =
     const stepSec = COMBAT_STEP_US() / 1_000_000;
     const batch = schedulerSteps(acc, ctx.speed, elapsed, stepSec);
     const beganAt = readWallMs();
-    const budgetMs = LIVE_STEP_MS();
     let completed = 0;
     while (completed < batch.steps) {
       step();
       completed++;
       // A slow frame must give input and rendering another turn. Keep every unexecuted step
       // as simulation debt instead of attempting the entire backlog in one browser task.
-      if (readWallMs() - beganAt >= budgetMs) break;
+      if (readWallMs() - beganAt >= MAX_WORK_SLICE_MS) break;
     }
     acc = batch.acc + (batch.steps - completed) * stepSec;
     ctx.cooldownSimRemainder = acc;
     ctx.cooldownSchedulerAt = now;
+    // The interval and continuation share `last`/`acc`; a continuation only continues debt that
+    // already exists and never earns paused wall time.
+    if (acc >= stepSec && ctx.canWriteAccount && ctx.running && !ctx.paused) queueContinuation();
   }
 
   return { step, startWakeLoop, wake, restart };

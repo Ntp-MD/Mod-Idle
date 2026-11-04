@@ -513,8 +513,9 @@ def audit_atlas(metadata_path: Path, *, runtime_image: Path | None = None) -> At
     return AtlasResult(metadata_path, image_path, len(frames), issues, clearances, runtime, silhouettes, cell_source, root_lines)
 
 
-def runtime_atlases(registry_path: Path = RUNTIME_REGISTRY) -> tuple[list[tuple[Path, Path]], list[str]]:
-    """Resolve the hero + species pilotArt calls and JSON imports used by the real renderer."""
+def runtime_atlases(registry_path: Path = RUNTIME_REGISTRY,
+                    pool_path: Path | None = None) -> tuple[list[tuple[Path, Path]], list[str]]:
+    """Resolve the hero import and generated species pool used by the renderer."""
     try:
         source = registry_path.read_text(encoding="utf-8-sig")
     except OSError as error:
@@ -534,20 +535,18 @@ def runtime_atlases(registry_path: Path = RUNTIME_REGISTRY) -> tuple[list[tuple[
         else:
             selected.append(((registry_path.parent / imported_path).resolve(),
                              (ROOT / "game/public" / href.lstrip("/")).resolve()))
-    species_match = re.search(r"\bspecies\s*:\s*\{", source)
-    if species_match is None:
-        return selected, errors + ["runtime art registry has no species map"]
-    entries = re.findall(r"pilotArt\(\s*['\"](/[^'\"]+\.png)['\"]\s*,\s*(\w+)", source[species_match.end():])
-    for href, imported_name in entries:
-        imported_path = imports.get(imported_name)
-        if imported_path is None:
-            errors.append(f"runtime image {href}: metadata import {imported_name!r} was not found")
-            continue
-        metadata_path = (registry_path.parent / imported_path).resolve()
-        image_path = (ROOT / "game/public" / href.lstrip("/")).resolve()
-        selected.append((metadata_path, image_path))
-    if not entries:
-        errors.append("runtime art registry has no species pilotArt entries")
+    try:
+        pool = read_json(pool_path or registry_path.parent / "mob-pool.generated.json")
+        entries = pool["species"]
+        if not isinstance(entries, dict) or not entries:
+            raise ValueError("pool has no species")
+        for entry in entries.values():
+            href = entry["href"]
+            image_path = (ROOT / "game/public" / href.lstrip("/")).resolve()
+            metadata_path = image_path.with_name("meta.json")
+            selected.append((metadata_path, image_path))
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        errors.append(f"cannot read runtime mob pool: {error}")
     return selected, errors
 
 

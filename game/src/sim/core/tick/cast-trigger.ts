@@ -8,7 +8,7 @@ import type { CastReport, PreparedSkillCast, TriggerAura } from '../../combat/sk
 import type { StatusName } from '../../combat/combat';
 import { bundleOf, capacitiveEs, manaDebtFloor } from '../../../../../engine/keystones.ts';
 import { payHpCost } from '../../../../../engine/skills.ts';
-import { reservedMana, usableMana, castOnce, spendableMana, prepareFirstSkillCast, resolvePreparedCast } from '../../combat/skills';
+import { reservedMana, usableMana, usableHp, castOnce, spendableMana, prepareFirstSkillCast, resolvePreparedCast } from '../../combat/skills';
 import { applyCurse, lineValue } from '../../combat/curse';
 import { holdPoison } from '../../combat/mobStatus';
 import { arenaAction, updateArenaAction } from '../../combat/combat-arena';
@@ -126,7 +126,7 @@ export function createCastTrigger(opts: {
       if (cast.instantHealPct) {
         const healed = (c.maxHp * cast.instantHealPct) / 100;
         const before = s.player.hp;
-        s.player.hp = Math.min(c.maxHp, s.player.hp + healed);
+        s.player.hp = Math.min(usableHp(c, s.skills), s.player.hp + healed);
         push(s, `${cast.name} restores ${eng.fmt(healed)} HP at once (${cast.instantHealPct}% of the pool)`);
         // the pool's own answer, in the colour of the Element the press carried — the number the heal
         // actually moved, not the number the row prices, so a top-off at full HP says what it did

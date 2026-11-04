@@ -9,6 +9,7 @@
   import { prefersReducedMotion, Tween } from 'svelte/motion';
   import { eng, E, sm, TOWN, tree, loot, fieldwork, trade, BASES } from './engine/client';
   import { MOB_DRAFT_VARIANT_QA_PASS_METADATA_PATHS } from './ui/dev/arena-art/arena-art-mob-drafts-qa-pass';
+  import mobSpritePool from './ui/combat/arena/mob-pool.generated.json';
   import { combatPreviewEvents, combatPreviewGroup, previewArea, previewFire, previewHeal, previewLightning,
     type CombatFxBeat, type CombatFxPreview } from './ui/dev/combat-fx-preview';
   import { bundleOf } from '@engine/keystones.ts';
@@ -19,7 +20,7 @@ import { offerDelivery, deliver, trackDelivery, acknowledgeDelivery, announceDel
 import { buyBlackMarket } from '@sim/town/black-market';
   import DeliveryNotice from './ui/town/DeliveryNotice.svelte';
   import { previewScrapAlchemy, transmuteScrap, alchemyTierProgress } from '@sim/gear/alchemy';
-  import { newGame, setLevel, tick, push, fx, hitColour, catchUpAsync, COMBAT_STEP_US, schedulerSteps, characterSheet, huntZone, huntHere, salvageBag, retreatDungeon, runFilterNow, isBossKind, spawnMob } from '@sim/core/game';
+  import { newGame, setLevel, tick, push, fx, hitColour, COMBAT_STEP_US, schedulerSteps, characterSheet, huntZone, huntHere, salvageBag, retreatDungeon, runFilterNow, isBossKind, spawnMob } from '@sim/core/game';
   import { restorePendingWork } from '@sim/core/pending-work';
   import { fieldInFight, restoreFieldPositions } from '@sim/world/field-area';
   import type { ManualControl } from '@sim/combat/combat-actions';
@@ -102,7 +103,7 @@ import { farm, farmLevel, farmMasteryLevel, plotCount, plant, harvest, craftPoti
   import { stashTabCount, STASH_TAB_CAP, deposit, withdraw, depositMany, withdrawMany } from '@sim/town/town';
 import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsFree } from '@sim/core/tree';
   import { allocateStats, respecStats } from '@sim/core/respec';
-  import { CharacterSaveSession, FRESH_SESSION_PHASE } from './state/saveSession';
+  import { CharacterSaveSession } from './state/saveSession';
   import { SHOWCASE_SAMPLE_LABELS, SHOWCASE_SAMPLES } from './app/showcase-samples';
   import { createSessionActions, type AccountWriterLease } from './app/session';
   import { createGameLoop } from './app/loop';
@@ -174,9 +175,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const initialShowcaseSample = showcaseMode
     ? (requestedShowcaseSample && (SHOWCASE_SAMPLES as readonly string[]).includes(requestedShowcaseSample) ? requestedShowcaseSample : 'combat-field')
     : 'delivery';
-  const ARENA_MOB_SPECIES = ['goblin', 'orc', 'kobold', 'ogre', 'troll', 'minotaur', 'skeleton', 'mummy', 'vampire', 'demon',
-    'slime', 'golem', 'dragon', 'treant', 'human', 'lizardman', 'elf', 'giant', 'werewolf', 'dryad'] as const;
-  const ARENA_EXISTING_PREVIEW_SPECIES = ['wolf', 'spider', 'wisp', 'spear-goblin', 'imp', 'skeleton-sword', 'stone-golem',
+  const ARENA_MOB_SPECIES = Object.keys(mobSpritePool.species);
+  const ARENA_EXISTING_PREVIEW_SPECIES = ['spear-goblin', 'little-demon', 'skeleton-sword', 'stone-golem',
     'skeleton-bone', 'crypt-wraith', 'shadow-wolf', 'eclipse-wisp', 'pixiblop-spider'] as const;
   const ARENA_VARIANT_QA_PASS_PATHS = new Set<string>(MOB_DRAFT_VARIANT_QA_PASS_METADATA_PATHS);
   const ARENA_VARIANT_GROUPS = Object.entries(E.mob.variants as Record<string, { name: string }[]>).map(([speciesId, variants]) => ({
@@ -186,7 +186,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       name,
       variantId: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
     })).filter(({ variantId }) => ARENA_VARIANT_QA_PASS_PATHS.has(
-      `art-reference/monsters/${speciesId}/variants/${variantId}/meta.json`,
+      `art-reference/monsters/${eng.speciesById(speciesId).race}/${speciesId}/variants/${variantId}/meta.json`,
     )),
   })).filter(group => group.variants.length > 0);
   const ARENA_VARIANT_SPECIES_ALREADY_LISTED = new Set<string>([...ARENA_MOB_SPECIES, ...ARENA_EXISTING_PREVIEW_SPECIES]);
@@ -203,7 +203,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   /** A reference sheet is reviewed against the canonical body it stands in for. */
   const ARENA_PREVIEW_SPAWN: Record<string, string> = {
     'spear-goblin': 'goblin', 'skeleton-sword': 'skeleton', 'skeleton-bone': 'skeleton', 'crypt-wraith': 'wraith', 'shadow-wolf': 'wolf',
-    'eclipse-wisp': 'wisp', 'pixiblop-spider': 'spider', 'stone-golem': 'golem',
+    'eclipse-wisp': 'wisp', 'pixiblop-spider': 'spider', 'stone-golem': 'golem', 'little-demon': 'imp',
   };
   const requestedArenaSpecies = ARENA_SPRITE_SPECIES.find(id => id === showcaseQuery.get('sprite-species'));
   const requestedArenaVariant = ARENA_VARIANT_PREVIEWS.find(variant => variant.key === showcaseQuery.get('sprite-variant'));
@@ -769,9 +769,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   // subscription and type the whole panel `any` (sveltejs/svelte#13715).
   let gameState = $state<GameState>(showcaseMode ? showcaseGame(initialShowcaseSample) : newGame(undefined, crypto.getRandomValues(new Uint32Array(1))[0]));
   let running = $state(!showcaseMode || initialShowcaseSample === 'combat-field');
+  /** True until this boot has loaded a slot or started a new character. The loop may be asked to run,
+   *  but startup owns the clock: no placeholder character may tick or autosave before the choice. */
+  let startupPending = $state(!showcaseMode);
   /** Held while a load or a snapshot rewind swaps the character: a live tick landing on the new state
    *  mid-catch-up would sim the away window twice. The interval drains its accumulator and stands down. */
-  let paused = $state(false);
+  let paused = $state(!showcaseMode);
   let cooldownVisualNow = $state(0);
   let cooldownSimRemainder = $state(0);
   let cooldownSchedulerAt = $state(0);
@@ -877,8 +880,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const esVisual = vitalVisual(() => gameState.player.es);
   const manaVisual = vitalVisual(() => gameState.player.mana);
   // the game opens on the ground, not on the fight: the first read is where the character stands and
-  // where the walk goes, and FIELD (or Escape) folds the map down to the combat frame
-  let panel = $state<PanelId | null>(showcaseMode ? null : 'map');
+  // where the walk goes, and FIELD (or Escape) folds the map down to the combat frame. A normal boot
+  // opens the Save chooser instead and waits there until the player loads or starts a character.
+  let panel = $state<PanelId | null>(showcaseMode ? null : 'save');
   let travelScene = $state(false);
   let more = $state(false);
   let journeyExpanded = $state(false);
@@ -926,7 +930,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     armour_pct: 'Armour', evasion_pct: 'Evasion rating', accuracy_pct: 'Accuracy',
     hp_regen_pct: 'HP regeneration', mana_regen_pct: 'Mana regeneration', armour_pen: 'Armour penetration',
   };
-  let saveNote = $state('');
+  let saveNote = $state(showcaseMode ? '' : 'Load a character, or start a new one. Existing slots are kept.');
   type AccountWriterState = 'checking' | 'owner' | 'readonly' | 'waiting' | 'unsupported';
   let accountWriterState = $state<AccountWriterState>('checking');
   let accountWriterLease: Extract<AccountWriterLockResult, { status: 'acquired' }> | null = null;
@@ -959,12 +963,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const accountWriterMessage = $derived(accountWriterState === 'owner'
     ? 'This tab controls saves for the account.'
     : accountWriterState === 'readonly'
-      ? 'Another tab controls this account. You can inspect saves here; progression and transactions wait for takeover.'
+      ? 'Another tab controls this account. This run is paused; export recovery JSON here, or take over to continue.'
       : accountWriterState === 'waiting'
-        ? 'Waiting for the other tab to release account control.'
+        ? 'Waiting for the other tab to release account control. The run stays paused until this tab can save.'
         : accountWriterState === 'unsupported'
-          ? 'This browser cannot coordinate account saves. Saving is disabled to protect progress.'
-          : 'Checking account save access…');
+          ? 'This browser cannot coordinate account saves. The run is paused to protect progress; export recovery JSON before closing.'
+          : 'Checking account save access… the run stays paused until this tab can save.');
   function requireAccountWriter(action: string): boolean {
     if (transactionWriter) return true;
     saveNote = `${accountWriterMessage} Open Save and take over before ${action}.`;
@@ -1455,23 +1459,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     const onRenderLost = () => { renderLostPaused = paused; paused = true; flushSync(); };
     const onRenderRestored = () => { if (!renderLostPaused) paused = false; };
     (async () => {
-      if (FRESH_SESSION_PHASE) {
-        // P3: a fresh normal tab owns an in-memory run without an account-writer lease. No
-        // gameplay storage is read, no away catch-up runs, and no save timer or unload flush is
-        // attached; presentation settings and the one wake loop keep their usual behaviour.
-        settings = await readSettings();
-        accountWriterState = 'owner';
-        speed = settings.speed || 1;
-        if (settings.autoEquip !== false) equipCarriedBest();
-        loadSnaps();
-        if (!disposed) {
-          stopWake = startWakeLoop();
-          restartWakeLoop = () => { stopWake?.(); loop.restart(); stopWake = startWakeLoop(); };
-          window.addEventListener('modworld:render-lost', onRenderLost);
-          window.addEventListener('modworld:render-restored', onRenderRestored);
-        }
-        return;
-      }
       // A replacement instance in the same document must be able to wait out the departing
       // instance's teardown flush; a genuinely occupied second tab still reads as busy.
       const writerLock = await requestAccountWriterLock({ retryMs: 2000, signal: writerController.signal });
@@ -1489,22 +1476,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       }
       settings = await readSettings();
       speed = settings.speed || 1;
-      // Catch-up yields between slices and pays all valid elapsed time.
-      const away = (Date.now() - (gameState.lastSavedAt || Date.now())) / 1000;
-      if (away > 5 && canWriteAccount) {
-        const before = snapCounters(gameState);
-        const r = await catchUpAsync(gameState, away, { autoSkills: settings.autoSkills !== false });
-        awayReport = settings.offlineReport ? buildAwayReport(before, Math.round(away / 60), r.simulated, r.capped, gameState) : null;
-        resetSkillDiscovery();
-        push(gameState, `Away ${Math.round(away / 60)} min — ${r.simulated} sec simulated`);
-        gameState = { ...gameState };
-      }
-      if (settings.autoEquip !== false) equipCarriedBest();
-      // the away window is spent: stamp the clock now, so the next save (timer or manual) does not
-      // credit the same absence a second time
-      gameState.lastSavedAt = Date.now();
       loadSnaps();
-      // The clock is armed only after the catch-up, so a slice boundary cannot add an extra tick.
+      // The startup chooser owns the run until Load succeeds or Start new character completes.
+      // Away catch-up belongs to `doLoad` alone, so this boot never simulates the placeholder and
+      // never writes a slot the player has not chosen.
       if (!disposed) {
         stopWake = startWakeLoop();
         restartWakeLoop = () => { stopWake?.(); loop.restart(); stopWake = startWakeLoop(); };
@@ -1813,11 +1788,15 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   /** The slot the player last saved or loaded. Null until they choose, so a fresh in-memory game
    *  never silently autosaves over an existing file. */
   const saveSession = new CharacterSaveSession();
+  /** Reactive mirror of `saveSession.slot`, used by the Journey's unsaved notice. */
+  let attachedSlot = $state<SlotName | null>(null);
   let persistenceError = $state<string | null>(null);
   /** One ordered list for Journey: save/writer first, then blockers, decisions and tracked work. */
   const journeyNotices = $derived(guidanceNotices(gameState, {
     storageError: !!persistenceError,
     writerState: accountWriterState === 'unsupported' ? 'unavailable' : accountWriterState,
+    startup: !showcaseMode && startupPending,
+    unsaved: !showcaseMode && !startupPending && attachedSlot === null,
   }));
   let loadController = $state.raw<AbortController | null>(null);
   let offlineProgress = $state<{ done: number; total: number } | null>(null);
@@ -1850,6 +1829,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     set takeoverController(value: AbortController | null) { takeoverController = value; },
     get takeoverSlot() { return takeoverSlot; },
     set takeoverSlot(value: SlotName) { takeoverSlot = value; },
+    set attachedSlot(value: SlotName | null) { attachedSlot = value; },
     get snapSlot() { return snapSlot; },
     get snaps() { return snaps; },
     set snaps(value: Snapshot[]) { snaps = value; },
@@ -1867,6 +1847,58 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     download, upload, reset, flushSync,
   } = session;
 
+  /** Boot owns the clock until a load or a new character succeeds. A failed load leaves the chooser
+   *  in place and the run paused; a success reveals the field and starts the normal session flow. */
+  function completeStartup() {
+    if (!startupPending) return;
+    startupPending = false;
+    paused = false;
+    running = true;
+  }
+
+  async function loadFromSave(slot: SlotName) {
+    const ok = await doLoad(slot);
+    if (!ok) {
+      if (startupPending) paused = true;
+      return;
+    }
+    if (startupPending) {
+      completeStartup();
+      panel = null;
+    }
+  }
+
+  /** An import or a snapshot rewind during boot is a chosen character too. */
+  async function afterStartupAction(action: () => Promise<boolean>) {
+    const ok = await action();
+    if (ok && startupPending) {
+      completeStartup();
+      panel = null;
+    }
+  }
+  async function importFromSave(ev: Event) {
+    await afterStartupAction(() => upload(ev));
+  }
+  async function takeOverAndLoad() {
+    await afterStartupAction(takeOverAccount);
+  }
+  async function restoreFromSave(index: number) {
+    await afterStartupAction(() => restore(index));
+  }
+
+  /** The Save panel's Start button and the sheet's New character share this path. */
+  async function startNewCharacter() {
+    const ok = await reset();
+    if (!ok) return;
+    if (startupPending) {
+      completeStartup();
+    }
+  }
+  async function newCharacterFromSheet() {
+    if (!confirm('Start a new character?')) return;
+    await startNewCharacter();
+  }
+
   const loop = createGameLoop({
     get gameState() { return gameState; },
     get settings() { return settings; },
@@ -1875,7 +1907,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     get combatArena() { return combatArena; },
     set combatArena(value: CombatArena) { combatArena = value; },
     get arenaManual() { return arenaManual; },
-    get running() { return running; },
+    get running() { return running && !startupPending; },
     get paused() { return paused; },
     get speed() { return speed; },
     get canWriteAccount() { return canWriteAccount; },
@@ -2642,13 +2674,15 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
   function runGoalAction(view: GoalView) { runGoalTarget(view.target); }
   function runNoticeAction(notice: GuidanceNotice) {
-    if (notice.id === 'storage-error' || notice.id === 'writer') { openPanel('save'); return; }
+    if (notice.id === 'storage-error' || notice.id === 'writer' || notice.id === 'startup' || notice.id === 'unsaved') { openPanel('save'); return; }
     if (notice.id === 'camp-encounter') {
       journeyExpanded = true;
       journeyToolsOpen = true;
       journeyBodyEl?.scrollTo({ top: 0 });
       return;
     }
+    // The blocked-bag notice owns the map verb, not the recommended-goal target it carries beside it.
+    if (notice.action === 'map') { openMapAtSettlement(); return; }
     if (notice.target) runGoalTarget(notice.target);
   }
 
@@ -3189,10 +3223,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
           replayArena();
         }}>
           <optgroup label="ARPG mob animations">
-            <option value="goblin">Goblin</option><option value="orc">Orc</option><option value="kobold">Kobold</option><option value="ogre">Ogre</option><option value="troll">Troll</option>
-            <option value="minotaur">Minotaur</option><option value="skeleton">Skeleton</option><option value="mummy">Mummy</option><option value="vampire">Vampire</option><option value="demon">Demon</option>
-            <option value="slime">Slime</option><option value="golem">Golem</option><option value="dragon">Dragon</option><option value="treant">Treant</option><option value="human">Human</option>
-            <option value="lizardman">Lizardman</option><option value="elf">Elf</option><option value="giant">Giant</option><option value="werewolf">Werewolf</option><option value="dryad">Dryad</option>
+            {#each ARENA_MOB_SPECIES as speciesId}
+              <option value={speciesId}>{eng.speciesById(speciesId).name}</option>
+            {/each}
           </optgroup>
           {#if ARENA_ADDITIONAL_VARIANT_SPECIES.length}
             <optgroup label="Other variant species">
@@ -3202,7 +3235,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
             </optgroup>
           {/if}
           <optgroup label="Existing previews">
-            <option value="wolf">Wolf</option><option value="spider">Spider</option><option value="wisp">Wisp</option><option value="spear-goblin">Spear Goblin reference</option><option value="imp">Little Demon reference</option>
+            <option value="spear-goblin">Spear Goblin reference</option><option value="little-demon">Little Demon reference</option>
             <option value="skeleton-sword">Skeleton (Sword &amp; Shield) reference</option><option value="skeleton-bone">Skeleton (Original Bone) reference</option><option value="crypt-wraith">Crypt Wraith reference</option>
             <option value="shadow-wolf">Shadow Wolf reference</option><option value="eclipse-wisp">Eclipse Wisp reference</option><option value="pixiblop-spider">Pixiblop Spider reference</option><option value="stone-golem">Stone Golem reference</option>
           </optgroup>
@@ -3957,7 +3990,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       onpick={(id) => (sheetTab = id as typeof sheetTab)}
     />
       <button class="sheet-new-character btn btn-ghost" type="button" disabled={showcaseMode || !canWriteAccount} title="Start a new character"
-              aria-label="New character" onclick={() => { if (confirm('Start a new character?')) reset(); }}>
+              aria-label="New character" onclick={() => void newCharacterFromSheet()}>
         <img src={newCharacterMark} alt="" aria-hidden="true" />
         <span>New character</span>
       </button>
@@ -4641,8 +4674,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {/if}
 
 {#if panel === 'save' || showcaseMode}
-  <Panel title={FRESH_SESSION_PHASE && !showcaseMode ? 'Session' : 'Save'}
-    subtitle={FRESH_SESSION_PHASE && !showcaseMode ? 'Preferences · gameplay progress resets on every reload' : 'Local saves, backups and shared preferences'}
+  <Panel title="Save"
+    subtitle="Local saves, backups and shared preferences"
     width="compact" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
     <!-- The Save body owns the panel's scroll; focus makes wheel and arrow/Page keys reach it. -->
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
@@ -4651,37 +4684,40 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <Tabs label="Save sections" active={saveTab} onpick={(id) => { saveTab = id as typeof saveTab; if (id === 'backups') loadSnaps(); }}
           tabs={[{ id: 'slots', label: 'Slots' }, { id: 'backups', label: 'Backups' }, { id: 'settings', label: 'Settings' }]} />
     {#if showcaseMode}<p class="showcase-note">Save, load, backup, import, and export are disabled here. This page never reads or writes a player save.</p>{/if}
-    {#if FRESH_SESSION_PHASE && !showcaseMode}<p class="showcase-note">Fresh-session phase: every boot starts a new character and account. Gameplay saving, loading, backups, import, export, autosave and away catch-up are off; presentation settings stay browser-owned.</p>{/if}
-    {#if !showcaseMode && !FRESH_SESSION_PHASE}
+    {#if !showcaseMode && startupPending}<p class="showcase-note" role="status">Load a character, or start a new one. Existing slots are kept.</p>{/if}
+    {#if !showcaseMode}
       <div class="account-writer card-tile" class:owner={accountWriterState === 'owner'} role="status" aria-live="polite">
         <p>{accountWriterMessage}</p>
         {#if accountWriterState === 'readonly'}
           <label>Reload after takeover
             <select bind:value={takeoverSlot}>{#each saveSlots as slot}<option value={slot}>{slot}</option>{/each}</select>
           </label>
-          <button type="button" onclick={takeOverAccount}>Take over and reload</button>
+          <button type="button" onclick={takeOverAndLoad}>Take over and reload</button>
         {:else if accountWriterState === 'waiting'}
           <button type="button" onclick={cancelTakeover}>Cancel wait</button>
         {/if}
+        {#if accountWriterState !== 'owner'}<button type="button" onclick={download}>Export recovery JSON</button>{/if}
       </div>
     {/if}
     {#if saveTab === 'slots'}
     {#if persistenceError}<div role="alert"><p class="text-alarm">{persistenceError}</p><button onclick={download}>Export recovery JSON</button></div>{/if}
-    {#if !FRESH_SESSION_PHASE}<p>Three local character slots · offline progress has no time limit. Autosave starts after you save or load a slot; a new or imported character needs its own slot choice.</p>{/if}
+    <p>Three local character slots · offline progress has no time limit. Autosave starts after you save or load a slot; a new or imported character needs its own slot choice.</p>
     <div class="save-actions">
+    <button disabled={showcaseMode || !canWriteAccount} onclick={() => void startNewCharacter()}>Start new character</button>
     {#each saveSlots as slot}
-      <button disabled={showcaseMode || FRESH_SESSION_PHASE || !canWriteAccount} onclick={() => doSave(slot)}>Save {slot}</button>
-      <button disabled={showcaseMode || FRESH_SESSION_PHASE || accountWriterState === 'checking' || accountWriterState === 'waiting' || accountWriterState === 'unsupported'} onclick={() => doLoad(slot)}>Load {slot}</button>
+      <button disabled={showcaseMode || startupPending || !canWriteAccount} onclick={() => doSave(slot)}>Save {slot}</button>
+      <button disabled={showcaseMode || accountWriterState === 'checking' || accountWriterState === 'waiting' || accountWriterState === 'unsupported'} onclick={() => void loadFromSave(slot)}>Load {slot}</button>
     {/each}
-    <button disabled={showcaseMode || FRESH_SESSION_PHASE} onclick={download}>Export JSON</button>
-    <label>Import <input type="file" accept="application/json" disabled={showcaseMode || FRESH_SESSION_PHASE || !canWriteAccount} onchange={upload} /></label>
+    <button disabled={showcaseMode} onclick={download}>Export JSON</button>
+    <label>Import <input type="file" accept="application/json" disabled={showcaseMode || !canWriteAccount} onchange={importFromSave} /></label>
     </div>
+    {#if attachedSlot}<p class="text-note">Autosave is on for {attachedSlot}.</p>{:else}<p class="text-note">Not saved yet. Choose a slot to keep this character.</p>{/if}
     {#if saveNote}<p class="save-note-inline" role="status">{saveNote}</p>{/if}
     {:else if saveTab === 'backups'}
-    <h2>{FRESH_SESSION_PHASE ? 'Backups are off for this phase' : 'Backups · ' + SAVE_CFG.snapshot_slots + ' walking snapshots'}</h2>
-    {#if !FRESH_SESSION_PHASE}<p><small>Owed on a level up, an Ascend or Refine, and every {SAVE_CFG.snapshot_interval_min} min of play. A restore takes the character back whole.</small></p>{/if}
-    <label>Which slot <select bind:value={snapSlot} disabled={showcaseMode || FRESH_SESSION_PHASE} onchange={loadSnaps}>{#each saveSlots as s}<option value={s}>{s}</option>{/each}</select></label>
-    <button disabled={showcaseMode || FRESH_SESSION_PHASE} onclick={loadSnaps}>Show backups</button>
+    <h2>Backups · {SAVE_CFG.snapshot_slots} walking snapshots</h2>
+    <p><small>Owed on a level up, an Ascend or Refine, and every {SAVE_CFG.snapshot_interval_min} min of play. A restore takes the character back whole.</small></p>
+    <label>Which slot <select bind:value={snapSlot} disabled={showcaseMode} onchange={loadSnaps}>{#each saveSlots as s}<option value={s}>{s}</option>{/each}</select></label>
+    <button disabled={showcaseMode} onclick={loadSnaps}>Show backups</button>
     <table>
       <thead><tr><th>#</th><th>Taken because</th><th>Then</th><th></th></tr></thead>
       <tbody>
@@ -4690,7 +4726,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
             <td>{i + 1}</td>
             <td>{shot.reason}</td>
             <td>{Math.round(shot.clockSec / 60)} min of play · level {shot.state.player.level}</td>
-            <td><button disabled={showcaseMode || FRESH_SESSION_PHASE || !canWriteAccount} onclick={() => restore(i)}>Rewind to this</button></td>
+            <td><button disabled={showcaseMode || !canWriteAccount} onclick={() => restoreFromSave(i)}>Rewind to this</button></td>
           </tr>
         {:else}
           <tr><td colspan="4">Nothing stored yet.</td></tr>

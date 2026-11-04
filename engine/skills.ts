@@ -427,8 +427,12 @@ export function createSkillModel(SKILLS: SkillsData, E: EngineData) {
 
   const byId: Record<string, SkillRow> = {};
   for (const s of SKILLS.skills) byId[s.id] = s;
-  /** The live roster: retired rows stay in `byId` so an old save still resolves them, but they
-   *  never drop, get offered as a reward, or appear in the owned/active lists again. */
+  /**
+   * The live roster. Retired rows stay in `byId` so a legacy save still resolves its owned copy,
+   * XP, conditions and loadout entries — but `all()` and `of()` never return them, so no new drop,
+   * reward or shop pool can acquire one. Owned views resolve their own ids through `byId` and are
+   * the one place a retired row still appears.
+   */
   const ACTIVE = SKILLS.skills.filter((s) => !s.retired);
   /** The fallback timing if a row reaches the runtime with no authored profile. */
   const DEFAULT_CAST_PROFILE = {

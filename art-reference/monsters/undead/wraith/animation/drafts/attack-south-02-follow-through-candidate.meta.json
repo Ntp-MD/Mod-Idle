@@ -1,0 +1,16 @@
+﻿{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "generatorOutput": "exec-5beb97b2-609d-438a-b9cf-75a41aa3e79c.png",
+  "speciesId": "wraith",
+  "action": "attack",
+  "direction": "south",
+  "phase": "02-follow-through",
+  "source": ["reference.png", "animation/poses/attack/east/02-follow-through.png", "animation/drafts/attack-south-windup-candidate.png"],
+  "canvas": [1254, 1254],
+  "targetCanvas": [384, 384],
+  "canvasMatchesTarget": false,
+  "alphaCornersTransparent": true,
+  "visualReview": {"identityAccepted": false, "exactAngleAccepted": false, "anchor": false, "atlas": false},
+  "reviewNote": "Follow-through action candidate for the south-facing sequence; motion, identity and anchoring require sequence review."
+}

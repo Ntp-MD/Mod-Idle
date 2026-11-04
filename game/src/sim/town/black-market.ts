@@ -48,8 +48,10 @@ export function blackMarketOfferReason(state: GameState, town: string, offerId: 
     if (!offer.stone || !validStone(offer.stone)) return 'Saved stone is no longer available.';
     if (!fitsTransaction(state, [], [{ bucket: state.counters.stones, key: offer.stone, capKind: 'stone', amount: offer.count }])) return 'Make room in the bag for this stone.';
   } else if (offer.kind === 'skill') {
-    if (!offer.skill || !sm.byId[offer.skill] || !Number.isSafeInteger(offer.level) || offer.level! < 1 || offer.level! > E.skill_xp.level_cap) return 'Saved skill offer is no longer available.';
-    if (Object.hasOwn(state.skills.owned, offer.skill) && (state.skills.xp[offer.skill] || 0) >= sm.skillXpForLevel(offer.level!)) return 'This skill already has that XP Level or higher.';
+    const skillId = offer.skill;
+    const skill = skillId ? sm.byId[skillId] : undefined;
+    if (!skillId || !skill || skill.retired || !Number.isSafeInteger(offer.level) || offer.level! < 1 || offer.level! > E.skill_xp.level_cap) return 'Saved skill offer is no longer available.';
+    if (Object.hasOwn(state.skills.owned, skillId) && (state.skills.xp[skillId] || 0) >= sm.skillXpForLevel(offer.level!)) return 'This skill already has that XP Level or higher.';
   }
   return null;
 }
@@ -111,7 +113,7 @@ export function buyBlackMarket(state: GameState, town: string, offerId: string, 
   } else {
     const skillId = offer.skill;
     const skill = skillId ? sm.byId[skillId] : null;
-    if (!skill || !Number.isSafeInteger(offer.level) || offer.level! < 1 || offer.level! > E.skill_xp.level_cap) return refuse('saved skill offer is no longer available');
+    if (!skill || skill.retired || !Number.isSafeInteger(offer.level) || offer.level! < 1 || offer.level! > E.skill_xp.level_cap) return refuse('saved skill offer is no longer available');
     const targetXp = sm.skillXpForLevel(offer.level!);
     if (Object.hasOwn(state.skills.owned, skillId!) && (state.skills.xp[skillId!] || 0) >= targetXp) return refuse('this skill already has that XP Level or higher');
     grantedSkill = { id: skillId!, duplicate: Object.hasOwn(state.skills.owned, skillId!) };

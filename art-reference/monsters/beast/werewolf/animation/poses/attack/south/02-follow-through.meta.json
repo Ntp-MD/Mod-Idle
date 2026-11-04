@@ -1,0 +1,18 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1a173-1b85-76e2-b47b-f27057b8b499\\exec-01e702d6-67f9-4a7d-ad41-0cba5d1d7be4.png",
+  "action": "attack",
+  "phase": "02-follow-through.png",
+  "direction": "south",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": true,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false,
+    "identityPlausible": true,
+    "facingPlausible": true,
+    "note": "Forward lean with both arms extended after contact."
+  }
+}

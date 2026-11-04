@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { E, eng, sm, tree } from '../../src/engine/client';
 import { newGame, tick, catchUp, setLevel, huntZone } from '@sim/core/game';
+import { isBossKind } from '@sim/core/kinds';
 import { emptyGear, openingGear } from '@sim/core/player';
 import { craft } from '@sim/gear/craft';
 import { rollDrop } from '@sim/gear/drop';
@@ -11,6 +12,7 @@ import { mulberry32 } from '../../src/engine/client-helpers';
 import { spendTreePoint, treeLines, treePointsSpent } from '@sim/core/tree';
 import { startWalk, road, settlementCell, settlementZone } from '@sim/world/road';
 import { createFieldState, fieldAreaKey } from '@sim/world/field-area';
+import { installSyntheticSkill } from '../fixtures/skillFixture';
 
 describe('storage recovery boundaries', () => {
   const mirror = new Map<string, string>();
@@ -130,6 +132,67 @@ describe('skill toggles on a restored character', () => {
   });
 });
 
+describe('retired skill ownership', () => {
+  it('keeps a legacy owned row, its duplicates, XP, mode, conditions and preset through repeated migration', () => {
+    const attackReplacement = sm.all().find((row) => row.type === 'attack')!.id;
+    const buffReplacement = sm.all().find((row) => row.type === 'buff')!.id;
+    const retiredAttack = installSyntheticSkill('test.legacy-retired-attack', {
+      name: 'Legacy Retired Attack', retired: true, retired_to: attackReplacement,
+    });
+    const retiredBuff = installSyntheticSkill('test.legacy-retired-buff', {
+      name: 'Legacy Retired Buff', type: 'buff', duration: '10 sec', effects: [],
+      retired: true, retired_to: buffReplacement,
+    });
+    try {
+      const source = newGame(778);
+      const attackId = retiredAttack.row.id, buffId = retiredBuff.row.id;
+      source.skills.owned[attackId] = 4;
+      source.skills.xp[attackId] = sm.skillXpForLevel(9);
+      source.skills.list[0] = attackId;
+      source.skills.mode[attackId] = 'conditional';
+      source.skills.autoMode![attackId] = 'manual';
+      source.skills.conditions[attackId] = {
+        boss: true, hpBelowPct: 45, statusMissing: ['burn'], minTargets: 2,
+        manaFloorPct: 30, statusPresent: true, statusStacksAtLeast: 3, selfDebuffed: true,
+      };
+      source.skills.owned[buffId] = 0;
+      source.skills.buffs[buffId] = true;
+      source.skills.buffUp[buffId] = 7;
+      source.presets[0].list[0] = attackId;
+      source.presets[0].buffs[buffId] = true;
+      source.presets[0].mode[attackId] = 'conditional';
+      source.presets[0].conditions[attackId] = { ...source.skills.conditions[attackId] };
+
+      const once = importJson(exportJson(source));
+      const twice = migrate(JSON.parse(JSON.stringify(once)), SCHEMA_VERSION);
+      for (const state of [once, twice]) {
+        expect(state.skills.owned[attackId]).toBe(4);
+        expect(state.skills.xp[attackId]).toBe(sm.skillXpForLevel(9));
+        expect(state.skills.list[0]).toBe(attackId);
+        expect(state.skills.mode[attackId]).toBe('conditional');
+        expect(state.skills.autoMode![attackId]).toBe('manual');
+        expect(state.skills.conditions[attackId]).toEqual(source.skills.conditions[attackId]);
+        expect(state.skills.owned[buffId]).toBe(0);
+        expect(state.skills.buffs[buffId]).toBe(true);
+        expect(state.skills.buffUp[buffId]).toBe(7);
+        expect(state.presets[0].list[0]).toBe(attackId);
+        expect(state.presets[0].buffs[buffId]).toBe(true);
+        expect(state.presets[0].mode[attackId]).toBe('conditional');
+        expect(state.presets[0].conditions[attackId]).toEqual(source.skills.conditions[attackId]);
+        // `retired_to` is descriptive only: no free replacement copy appears.
+        expect(state.skills.owned[attackReplacement]).toBeUndefined();
+        expect(state.skills.owned[buffReplacement]).toBeUndefined();
+      }
+      expect(twice.skills.owned).toEqual(once.skills.owned);
+      expect(twice.skills.xp).toEqual(once.skills.xp);
+      expect(twice.presets).toEqual(once.presets);
+    } finally {
+      retiredBuff.restore();
+      retiredAttack.restore();
+    }
+  });
+});
+
 describe('retired exploration controls', () => {
   it('loads a v15 save that still carries Patrol and Auto-Return without changing progress', () => {
     const source = newGame(86);
@@ -197,21 +260,26 @@ describe('offline time is AFK, not a second play session', () => {
     const s = newGame(41);
     huntZone(s, s.zone);
     setLevel(s, 60);
-    const r = catchUp(s, 3600 * 3);
-    expect(r.simulated).toBe(10800);
+    // A synthetic deadline two seconds out, crossed by a five-second away window. The away rule is
+    // about the event boundary, not about how long an offline session lasts, so the fixture does not
+    // simulate hours to prove it.
+    s.bossDueAt = s.clockSec + 2;
+    const r = catchUp(s, 5);
+    expect(r.simulated).toBe(5);
     expect(s.log.some((l) => /Boss spawn/.test(l.text))).toBe(false);
-    expect(s.counters.kills).toBeGreaterThan(0);
-  }, 30000);
+    expect(s.group.some((mob) => isBossKind(String(mob.kind)))).toBe(false);
+  });
 
   it('the away period does not advance the boss clock', () => {
     // bossDueAt is absolute clockSec, so away ticks used to satisfy it on the first online tick and
-    // hand out a free boss. The remaining online time must be identical after the catch-up.
+    // hand out a free boss. The remaining online time must be identical after the catch-up. Same
+    // synthetic deadline and away window as the no-spawn case: the boundary is what the rule owns.
     const s = newGame(46);
     huntZone(s, s.zone);
     setLevel(s, 60);
-    s.bossDueAt = s.clockSec + 1000;
+    s.bossDueAt = s.clockSec + 2;
     const remainingBefore = s.bossDueAt - s.clockSec;
-    catchUp(s, 3600 * 3);
+    catchUp(s, 5);
     expect(s.clockSec).toBeGreaterThan(0);
     expect(s.bossDueAt! - s.clockSec).toBe(remainingBefore);
   });

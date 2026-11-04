@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
-  AIM_DIAGNOSTICS, aimForSkill, captureCombatArena, createCombatArena, syncCombatArena,
+  AIM_DIAGNOSTICS, advanceCombatArena, aimForSkill, captureCombatArena, createCombatArena, syncCombatArena,
 } from '@sim/combat/combat-arena';
+import { E, sm } from '../../src/engine/client';
 import { characterSheet, newGame, setLevel } from '@sim/core/game';
+import { selectCombatIntent } from '@sim/combat/combat-actions';
 import { mobFixture } from '../fixtures/mobFixture';
+import { installSyntheticSkill } from '../fixtures/skillFixture';
 
 /** A crowded, deterministic field for the coverage memo and the capture alloc checks. */
 function crowd(count: number, spread = 0.35) {
@@ -68,6 +71,137 @@ describe('P9 performance — coverage memo and capture allocation', () => {
     aimForSkill(arena, group, 'attack.cleave');
     expect(AIM_DIAGNOSTICS.misses).toBe(2);
     expect(AIM_DIAGNOSTICS.coverageChecks).toBeGreaterThan(checks);
+  });
+
+  it('keeps exact simple collision corrections and rejects separated pairs before the hypot path', () => {
+    const clearance = Number((E as any).combat_arena.normal_attack.contact_clearance_m);
+    const radius = 0.25;
+    const need = radius * 2 + clearance;
+    const collision = (positions: { x: number; y: number }[], player = { x: 20, y: 20, radiusM: 0.3 }) => {
+      const state = newGame(902);
+      const arena = createCombatArena();
+      arena.player.x = player.x;
+      arena.player.y = player.y;
+      arena.player.radiusM = player.radiusM;
+      state.player.hp = 100;
+      state.group = positions.map((_, index) => mobFixture({
+        id: `collision-${index}`, hp: 1000, hpMax: 1000, innate: [], skillIds: [],
+      }));
+      state.group.forEach((mob, index) => {
+        const point = positions[index];
+        arena.mobs[mob.id] = {
+          id: mob.id, x: point.x, y: point.y, facing: 0, moving: false,
+          radiusM: radius, hp: mob.hp, hpMax: mob.hpMax,
+        } as never;
+      });
+      arena.nowUs = 0;
+      advanceCombatArena(arena, state, 1, {
+        playerRange: 0, playerSpeedMult: 0, mobSpeedMult: () => 0,
+        playerLocked: true, holdPosition: true, engagedIds: new Set(),
+      });
+      return { arena, state };
+    };
+
+    const separated = collision([{ x: 2, y: 2 }, { x: 10, y: 10 }]);
+    expect(separated.arena.mobs['collision-0']).toMatchObject({ x: 2, y: 2 });
+    expect(separated.arena.mobs['collision-1']).toMatchObject({ x: 10, y: 10 });
+
+    const touchingX = collision([{ x: 5, y: 5 }, { x: 5 + need, y: 5 }]);
+    expect(touchingX.arena.mobs['collision-0']).toMatchObject({ x: 5, y: 5 });
+    expect(touchingX.arena.mobs['collision-1']).toMatchObject({ x: 5 + need, y: 5 });
+
+    const touchingY = collision([{ x: 5, y: 5 }, { x: 5, y: 5 + need }]);
+    expect(touchingY.arena.mobs['collision-0']).toMatchObject({ x: 5, y: 5 });
+    expect(touchingY.arena.mobs['collision-1']).toMatchObject({ x: 5, y: 5 + need });
+
+    const overlapping = collision([{ x: 5.4, y: 5 }, { x: 5, y: 5 }]);
+    expect(overlapping.arena.mobs['collision-0'].x).toBeCloseTo(5.46, 9);
+    expect(overlapping.arena.mobs['collision-1'].x).toBeCloseTo(4.94, 9);
+
+    const coincident = collision([{ x: 5, y: 5 }, { x: 5, y: 5 }]);
+    expect(coincident.arena.mobs['collision-0'].x).toBeCloseTo(5 - need / 2, 9);
+    expect(coincident.arena.mobs['collision-1'].x).toBeCloseTo(5 + need / 2, 9);
+
+    const playerOverlap = collision([{ x: 20.3, y: 20 }], { x: 20, y: 20, radiusM: 0.3 });
+    expect(playerOverlap.arena.player).toMatchObject({ x: 20, y: 20 });
+    expect(playerOverlap.arena.mobs['collision-0'].x).toBeCloseTo(20 + radius + 0.3 + clearance, 9);
+
+    let hypotCalls = 0;
+    const originalHypot = Math.hypot;
+    Math.hypot = (...args: number[]) => { hypotCalls++; return originalHypot(...args); };
+    try {
+      const wide = Array.from({ length: 32 }, (_, index) => ({
+        x: 10 + (index % 8) * 20, y: 10 + Math.floor(index / 8) * 20,
+      }));
+      collision(wide);
+    } finally {
+      Math.hypot = originalHypot;
+    }
+    // 496 is the complete mob-pair count for 32 bodies; distant pairs never reach the narrow phase.
+    expect(hypotCalls).toBeLessThan(496);
+  });
+
+  it('rejects impossible automatic candidates before aim work and recovers when they become eligible', () => {
+    const id = 'test.aim-early';
+    const installed = installSyntheticSkill(id, {
+      name: 'Aim Early', type: 'attack', group: 'all', element: 'physical',
+      cd: 1, mana: '0 flat', basis: 'phys', offline_targets: '1',
+      area: { origin: 'target', radius_m: 2 },
+      cast: { delivery: 'melee', range_m: 5, windup_sec: 0.1, recovery_sec: 0.1 },
+      effects: [], base_flat: 10, eff: 0,
+    });
+    try {
+      const { arena, group } = crowd(4);
+      const state = newGame(903);
+      setLevel(state, 30);
+      state.hunting = true;
+      state.group = group;
+      state.player.hp = 100;
+      state.player.mana = characterSheet(state).maxMana;
+      state.skills.owned[id] = 0;
+      state.skills.list.fill(null);
+      state.skills.list[0] = id;
+      const character = characterSheet(state);
+
+      const expectNoAim = (label: string) => {
+        resetAimDiagnostics();
+        expect(selectCombatIntent(arena, state, character, true), label).toBeUndefined();
+        expect(AIM_DIAGNOSTICS.misses, label).toBe(0);
+        expect(AIM_DIAGNOSTICS.coverageChecks, label).toBe(0);
+      };
+      const expectAim = (label: string) => {
+        resetAimDiagnostics();
+        expect(selectCombatIntent(arena, state, character, true)?.skillId, label).toBe(id);
+      };
+
+      state.skills.cd[id] = 2;
+      expectNoAim('cooldown');
+      delete state.skills.cd[id];
+      expectAim('ready');
+
+      state.skills.mode[id] = 'never';
+      expectNoAim('never');
+      state.skills.mode[id] = 'always';
+      expectAim('always');
+
+      state.skills.autoMode![id] = 'manual';
+      expectNoAim('manual');
+      state.skills.autoMode![id] = 'auto';
+      expectAim('auto');
+
+      const original = sm.byId[id];
+      sm.byId[id] = { ...original, weapon: 'bow' };
+      try {
+        expectNoAim('wrong weapon');
+        const bowCharacter = { ...character, weaponName: 'bow' };
+        resetAimDiagnostics();
+        expect(selectCombatIntent(arena, state, bowCharacter, true)?.skillId).toBe(id);
+      } finally {
+        sm.byId[id] = original;
+      }
+    } finally {
+      installed.restore();
+    }
   });
 
   it('reuses body/action/frame lists when a capture expires nothing, and trims only the expired', () => {

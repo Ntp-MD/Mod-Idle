@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createGameLoop, LIVE_STEP_MS, type LoopContext } from '../../src/app/loop';
-import { COMBAT_STEP_US, newGame } from '@sim/core/game';
+import { COMBAT_STEP_US, MAX_WORK_SLICE_MS, newGame } from '@sim/core/game';
 import { createCombatArena } from '@sim/combat/combat-arena';
 
 function harness(settings: Record<string, unknown> = { autoSkills: true, autoEquip: false }) {
@@ -113,6 +113,80 @@ describe('the live wake keeps earned time through a pause', () => {
     loop.wake(10_250);
     // one second of the pause's 9.75 s may be paid at most; never the whole pause
     expect(state.clockSec - before).toBeLessThan(3);
+  });
+});
+
+describe('the live loop stops at an 8 ms work slice', () => {
+  it('runs three 3 ms steps, or one 20 ms step, then yields with the remaining debt', () => {
+    const fast = harness();
+    fast.setArenaMode(true);
+    let fastWall = 0, fastCompleted = 0;
+    fast.ctx.syncArenaFocus = () => { fastCompleted++; fastWall += 3; };
+    const fastLoop = createGameLoop(fast.ctx, () => fastWall);
+    fastLoop.wake(0);
+    fastLoop.wake(1000);
+    expect(fastCompleted).toBe(3);
+    expect(fast.remainder()).toBeCloseTo((20 - 3) * COMBAT_STEP_US() / 1_000_000, 10);
+
+    const slow = harness();
+    slow.setArenaMode(true);
+    let slowWall = 0, slowCompleted = 0;
+    slow.ctx.syncArenaFocus = () => { slowCompleted++; slowWall += 20; };
+    const slowLoop = createGameLoop(slow.ctx, () => slowWall);
+    slowLoop.wake(0);
+    slowLoop.wake(1000);
+    expect(slowCompleted).toBe(1);
+    expect(slow.remainder()).toBeCloseTo((20 - 1) * COMBAT_STEP_US() / 1_000_000, 10);
+    expect(MAX_WORK_SLICE_MS).toBe(8);
+  });
+
+  it('queues one continuation for a 60-second stall, pays debt at unchanged time, and cleans up', async () => {
+    vi.useFakeTimers();
+    try {
+      const { ctx, state, setArenaMode } = harness();
+      setArenaMode(true);
+      let wall = 0, completed = 0, costSteps = true;
+      ctx.syncArenaFocus = () => { completed++; if (costSteps) wall += 3; };
+      const loop = createGameLoop(ctx, () => wall);
+      const stop = loop.startWakeLoop();
+      loop.wake(0);
+      wall = 60_000;
+      loop.wake(wall);
+      expect(completed).toBe(3);
+      // The interval plus at most one continuation, never one timer per owed step.
+      expect(vi.getTimerCount()).toBeLessThanOrEqual(2);
+      const owedBefore = state.clockSec;
+      costSteps = false;
+      wall = 60_000; // same wall instant: the continuation pays debt, it earns no new time
+      await vi.advanceTimersByTimeAsync(0);
+      expect(completed).toBeGreaterThan(3);
+      expect(state.clockSec).toBeGreaterThan(owedBefore);
+      stop();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('restart clears a queued continuation so an old run cannot advance', async () => {
+    vi.useFakeTimers();
+    try {
+      const { ctx, state, setArenaMode } = harness();
+      setArenaMode(true);
+      let wall = 0;
+      ctx.syncArenaFocus = () => { wall += 3; };
+      const loop = createGameLoop(ctx, () => wall);
+      const stop = loop.startWakeLoop();
+      loop.wake(0);
+      loop.wake(60_000);
+      const clock = state.clockSec;
+      loop.restart();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(state.clockSec).toBe(clock);
+      stop();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

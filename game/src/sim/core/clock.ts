@@ -8,6 +8,8 @@ export const BOSS_EVERY_SEC = Math.round(3600 / E.loot.boss_per_hour);
 
 export const WAKE_SEC = 0.25;
 export const MAX_BATCH = 8;
+/** One CPU work slice for live debt and asynchronous offline settlement; never interrupts a step. */
+export const MAX_WORK_SLICE_MS = 8;
 
 /**
  * Real time into sim seconds, for one wake. `elapsedSec` is what actually passed since the last wake — a

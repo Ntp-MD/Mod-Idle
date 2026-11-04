@@ -1,0 +1,18 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1a173-5011-7d71-a50d-839b8f4d21ac\\exec-7f81f2d4-be36-4c7d-b611-fc2d3e7e8e80.png",
+  "action": "idle",
+  "phase": "south-south-east.png",
+  "direction": "south-south-east",
+  "sourcePixelsModified": false,
+  "qa": {
+    "visuallyInspected": true,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false,
+    "identityPlausible": true,
+    "facingPlausible": false,
+    "note": "Identity and transparent silhouette visually plausible; exact 16-direction facing is unverified and requires art-owner review."
+  }
+}

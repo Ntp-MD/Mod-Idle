@@ -482,10 +482,13 @@ export function costNow(s: SkillState, id: string): string {
   return `${spec} · ${Math.round(cost.amount)} ${resource} now`;
 }
 
-/** Whether a named reward adds ownership or useful progress on the Duplicate Ladder. */
+/** Whether a named reward adds ownership or useful progress on the Duplicate Ladder. A retired
+ *  row is legacy-only: its owned copy and XP stay, but no new pool may acquire another one. */
 export function usefulSkillDuplicate(s: SkillState, id: string): boolean {
   if (!Object.hasOwn(sm.byId, id)) return false;
-  return !ownsSkill(s, id) || ((sm.byId[id].cd ?? 0) > 0 && s.owned[id] < sm.LADDER_MAX_DUPLICATES);
+  const row = sm.byId[id];
+  if (!row || row.retired) return false;
+  return !ownsSkill(s, id) || ((row.cd ?? 0) > 0 && s.owned[id] < sm.LADDER_MAX_DUPLICATES);
 }
 
 /** Grant one known skill without drawing RNG or enabling its toggle track. */
@@ -493,8 +496,9 @@ export function grantNamedSkill(
   s: SkillState, id: string, options: { duplicate?: boolean; level?: number } = {},
 ): { id: string; duplicate: boolean } | null {
   if (!Object.hasOwn(sm.byId, id)) return null;
-  if (options.level !== undefined && (!Number.isSafeInteger(options.level) || options.level < 1 || options.level > E.skill_xp.level_cap)) return null;
   const chosen = sm.byId[id];
+  if (!chosen || chosen.retired) return null;
+  if (options.level !== undefined && (!Number.isSafeInteger(options.level) || options.level < 1 || options.level > E.skill_xp.level_cap)) return null;
   const duplicate = ownsSkill(s, id);
   if (!duplicate) s.owned[id] = 0;
   else if (options.duplicate !== false) s.owned[id] += 1;

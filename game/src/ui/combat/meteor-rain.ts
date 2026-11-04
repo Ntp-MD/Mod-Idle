@@ -9,7 +9,8 @@ export function skillRainDrops(mark: SkillGeometry, atlas: VfxAtlas, reducedMoti
   const duration = skillDuration ? sm.skillDurationSec(skillDuration, atlas.rainDurationSec ?? 0)
     : atlas.rainDurationSec ?? 0;
   const time = mark.phaseElapsedSec;
-  if (mark.phase !== (atlas.rainPhase ?? 'Impact') || duration <= 0 || time < 0 || time >= duration) return [];
+  const phase = sm.byId[mark.skillId]?.action?.kind === 'meteor-field' && mark.phase === 'Field' ? 'Impact' : mark.phase;
+  if (phase !== (atlas.rainPhase ?? 'Impact') || duration <= 0 || time < 0 || time >= duration) return [];
   const lifetime = Math.min(.9, duration);
   const interval = atlas.rainIntervalSec ?? .18;
   let seed = 0;

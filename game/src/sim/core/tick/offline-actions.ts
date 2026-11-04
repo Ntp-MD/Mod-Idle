@@ -97,7 +97,9 @@ export function createOfflineActions(
     adapter.nowUs = atUs;
     if (adapter.intent?.phase === 'recovery' && !adapter.intent.channel
       && atUs >= (adapter.intent.recoveryUntilUs ?? 0)) adapter.intent = undefined;
+  }
+  function publish() {
     s.pendingWork = snapshotPendingWork(adapter, s.group);
   }
-  return { interceptRotation, blocked, schedule, checkpoint, cancel: work.cancelArenaWork };
+  return { interceptRotation, blocked, schedule, checkpoint, publish, cancel: work.cancelArenaWork };
 }

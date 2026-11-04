@@ -1,0 +1,16 @@
+﻿{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "generatorOutput": "exec-81835277-db67-47d3-9912-312a7aef6e68.png",
+  "speciesId": "vampire",
+  "action": "hit",
+  "direction": "north",
+  "phase": "00-flinch",
+  "source": ["reference.png", "animation/poses/idle/north.png", "animation/poses/hit/east/00-flinch.png"],
+  "canvas": [1254, 1254],
+  "targetCanvas": [384, 384],
+  "canvasMatchesTarget": false,
+  "alphaCornersTransparent": true,
+  "visualReview": {"identityAccepted": false, "exactAngleAccepted": false, "anchor": false, "atlas": false},
+  "reviewNote": "Rear-facing hit pose candidate; exact hit silhouette and anchor remain unreviewed."
+}

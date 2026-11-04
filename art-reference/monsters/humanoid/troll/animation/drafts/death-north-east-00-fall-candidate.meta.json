@@ -1,0 +1,18 @@
+﻿{
+    "action":  "death",
+    "qa":  {
+               "atlas":  false,
+               "anchor":  false
+           },
+    "direction":  "north-east",
+    "source":  "C:/Users/disda/.codex-acc2/generated_images/01a1a173-05ff-7d81-87ee-ce64d6b1026e/exec-ad56a770-d64d-45bf-b8e5-3ac7fdb082a4.png",
+    "status":  "candidate-review",
+    "visualReview":  {
+                         "identityAccepted":  false,
+                         "exactAngleAccepted":  false,
+                         "screenSideCorrect":  true,
+                         "note":  "Candidate resembles troll starting to fall; weapon handling, angle, scale, face details, and baseline require review. Canvas 1254x1254; canonical canvas 384x384."
+                     },
+    "generator":  "built-in-imagegen",
+    "phase":  "00-fall"
+}

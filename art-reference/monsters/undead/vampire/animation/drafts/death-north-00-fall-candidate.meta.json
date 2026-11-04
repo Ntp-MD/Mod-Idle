@@ -1,0 +1,16 @@
+﻿{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "generatorOutput": "exec-4c77c184-a56b-4c3f-98b5-d796c00eb4aa.png",
+  "speciesId": "vampire",
+  "action": "death",
+  "direction": "north",
+  "phase": "00-fall",
+  "source": ["reference.png", "animation/poses/idle/north.png", "animation/poses/death/east/00-fall.png"],
+  "canvas": [1254, 1254],
+  "targetCanvas": [384, 384],
+  "canvasMatchesTarget": false,
+  "alphaCornersTransparent": true,
+  "visualReview": {"identityAccepted": false, "exactAngleAccepted": false, "anchor": false, "atlas": false},
+  "reviewNote": "Rear-facing image still reads mostly upright; confirm the death action or replace before approval."
+}

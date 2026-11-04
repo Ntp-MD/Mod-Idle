@@ -507,7 +507,7 @@ export function modsOn(store: MobStatusStore, mobId: string): MobStatusMods {
     out.stopped = m.stoppedUntil == null || m.stoppedUntil > m.elapsedSec;
   }
   const mk = m.statuses.mark;
-  if (mk && mk.secLeft > 0) {
+  if (mk && mk.stacks > 0) {
     out.damageTakenPct = mk.stacks * S.mark.k_dmg * 100;
     out.leechPct = mk.stacks * S.mark.k_leech * 100;
   }
