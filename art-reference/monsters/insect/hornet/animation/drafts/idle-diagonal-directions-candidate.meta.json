@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "generatedOutput": "exec-e17e1840-8a79-4821-b232-b71050051fd0.png",
+  "action": "idle",
+  "phase": "neutral-hover",
+  "identityReference": "../../reference.png",
+  "styleReference": "../source/detail-v1.png",
+  "sourcePoseReference": "../atlas/animation.png",
+  "sourceCanvas": {
+    "width": 1774,
+    "height": 887
+  },
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "cellOrder": "row-major",
+    "directions": [
+      "south-south-east",
+      "east-south-east",
+      "east-north-east",
+      "north-north-east",
+      "north-north-west",
+      "west-north-west",
+      "west-south-west",
+      "south-south-west"
+    ]
+  },
+  "sourcePixelsModified": false,
+  "visualReview": {
+    "allCellsPopulated": true,
+    "exactDirectionsAccepted": false,
+    "identityAccepted": false,
+    "poseSequenceAccepted": false,
+    "alphaAccepted": false,
+    "anchorAccepted": false,
+    "atlasReady": false
+  },
+  "note": "Raw idle direction sheet. Soft-alpha pixels and colored edge fringe are visible; direction accuracy, hard-alpha edges, anchor, and atlas readiness remain unverified. No canonical poses were changed."
+}

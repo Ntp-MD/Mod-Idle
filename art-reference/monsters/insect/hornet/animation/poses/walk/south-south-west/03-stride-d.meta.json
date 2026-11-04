@@ -1,0 +1,54 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "generatorOutput": "walk-03-stride-d-directions-candidate.png",
+  "speciesId": "hornet",
+  "action": "walk",
+  "direction": "south-south-west",
+  "phase": "03-stride-d",
+  "poseDescription": "wings sweep up",
+  "source": [
+    "animation/atlas/animation.png",
+    "animation/drafts/walk-03-stride-d-directions-candidate.png"
+  ],
+  "sourceGridCell": {
+    "row": 3,
+    "column": 3,
+    "index": 15,
+    "box": [
+      950,
+      932,
+      1266,
+      1242
+    ]
+  },
+  "sourceCanvas": [
+    1266,
+    1242
+  ],
+  "sourceCellCanvas": [
+    316,
+    310
+  ],
+  "targetCanvas": [
+    384,
+    384
+  ],
+  "canvasMatchesTarget": true,
+  "normalization": {
+    "method": "edge-connected neutral-background removal, alpha crop, fit to inherited east/west phase bounds scaled to target canvas",
+    "anchor": [
+      192,
+      288
+    ],
+    "anchorVerified": false
+  },
+  "alphaCornersTransparent": true,
+  "visualReview": {
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "phaseAccepted": false,
+    "anchor": false,
+    "atlas": false
+  }
+}
