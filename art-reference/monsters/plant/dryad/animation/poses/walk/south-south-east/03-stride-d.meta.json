@@ -1,0 +1,41 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in image_gen",
+  "source": "C:/Users/disda/.codex-acc1/generated_images/01a1a167-4930-7b41-b4f3-5fd49cadb85a/exec-205f6ab3-319c-4946-b90a-8d627c9b5aaa.png",
+  "action": "walk",
+  "direction": "south-south-east",
+  "phase": "03-stride-d",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "aligned to Dryad walk baseline"
+  },
+  "normalization": {
+    "method": "alpha crop (>128), nearest-neighbor fit to existing 190 px walk height, transparent 384x384 placement",
+    "sourceAlphaThresholdForCrop": 128,
+    "sourcePixelsPaintedOrComposited": false,
+    "normalizedSubjectDimensions": [
+      122,
+      190
+    ]
+  },
+  "visualReview": {
+    "sequenceAccepted": false,
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "atlasReady": false,
+    "note": "Candidate SSE gait frame; verify orientation and alternating support within the full cycle."
+  },
+  "qa": {
+    "atlas": false,
+    "anchor": false
+  }
+}

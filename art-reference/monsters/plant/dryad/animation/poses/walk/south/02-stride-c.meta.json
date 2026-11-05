@@ -1,0 +1,41 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in image_gen",
+  "source": "C:/Users/disda/.codex-acc1/generated_images/01a1a167-4930-7b41-b4f3-5fd49cadb85a/exec-f807a7f7-f40a-46f3-81a6-0e511fd7f182.png",
+  "action": "walk",
+  "direction": "south",
+  "phase": "02-stride-c",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "aligned to existing Dryad walk ground line"
+  },
+  "normalization": {
+    "method": "alpha crop (>128), nearest-neighbor fit to existing 190 px walk frame height, transparent 384x384 placement",
+    "sourceAlphaThresholdForCrop": 128,
+    "sourcePixelsPaintedOrComposited": false,
+    "normalizedSubjectDimensions": [
+      114,
+      190
+    ]
+  },
+  "visualReview": {
+    "sequenceAccepted": false,
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "atlasReady": false,
+    "note": "Front-facing south stride candidate; alternating supports and loop timing need review."
+  },
+  "qa": {
+    "atlas": false,
+    "anchor": false
+  }
+}

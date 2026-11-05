@@ -1,0 +1,43 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "generatorOutput": "C:\\Users\\disda\\.codex-acc2\\generated_images\\01a1a173-05ff-7d81-87ee-ce64d6b1026e\\exec-6cce21f9-a1e9-4928-866c-0c0575c55d4b.png",
+  "speciesId": "werewolf",
+  "action": "attack",
+  "direction": "east-south-east",
+  "phase": "02-follow-through",
+  "poseDescription": "individual generated pounce follow-through pose facing east-south-east",
+  "source": [
+    "../../../../reference.png",
+    "../../../../animation/poses/idle/east-south-east.png",
+    "../../../../animation/poses/attack/east/02-follow-through.png",
+    "../../../../animation/poses/attack/east-south-east/01-contact.png"
+  ],
+  "sourceCanvas": [
+    1536,
+    1024
+  ],
+  "sourceMode": "RGBA",
+  "sourceAlphaExtrema": [
+    0,
+    254
+  ],
+  "targetCanvas": [
+    384,
+    384
+  ],
+  "canvasMatchesTarget": false,
+  "visualReview": {
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "phaseAccepted": false,
+    "anchor": false,
+    "atlas": false
+  },
+  "qa": {
+    "alphaBackgroundVerified": false,
+    "atlasApproved": false,
+    "anchorVerified": false,
+    "productionApproved": false
+  }
+}

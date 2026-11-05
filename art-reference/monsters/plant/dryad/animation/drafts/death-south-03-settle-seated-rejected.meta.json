@@ -1,0 +1,6 @@
+﻿{
+    "status":  "rejected-review-candidate",
+    "reason":  "upright seated pose does not satisfy the prone ground-settle phase",
+    "replacedCanonicalSlot":  "poses/death/south/03-settle.png",
+    "source":  "previous in-session candidate"
+}

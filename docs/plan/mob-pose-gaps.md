@@ -8,12 +8,14 @@ Canonical pose PNGs count toward coverage; draft files do not. `candidate-review
 
 ## Priority 1 - Every mob reaches 272/272
 
-Work in pairs, one mob per subagent. The current pair is `plant/dryad` and `insect/beetle`; finish both at 272/272 and refresh the inventory before starting the next pair. Then continue by smallest gap.
+Work on one species at a time, starting with the smallest current gap. Finish that species at 272/272 and refresh the inventory before moving to the next. The active target is `plant/dryad`; `beast/harpy` and `beast/werewolf` follow in that order.
 
-- [ ] `plant/dryad` - 100/272; 172 missing (current pair)
+The built-in image generator has reached the team-plan `HTTP 429 usage_limit_reached` limit while Dryad is in progress. Resume Dryad after quota reset; do not move to Harpy before Dryad reaches 272/272.
+
+- [ ] `plant/dryad` - 172/272; 100 missing (active; +72 candidate-review slots)
 - [x] `insect/beetle` - 272/272
-- [ ] `beast/harpy` - 60/272; 212 missing
-- [ ] `beast/werewolf` - 52/272; 220 missing
+- [ ] `beast/harpy` - 74/272; 198 missing (next)
+- [ ] `beast/werewolf` - 64/272; 208 missing (queued)
 - [ ] `beast/wolf` - 51/272; 221 missing
 - [ ] `demon/imp` - 48/272; 224 missing
 - [ ] `dragon/dragon` - 48/272; 224 missing

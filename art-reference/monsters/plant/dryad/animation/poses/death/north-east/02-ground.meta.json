@@ -1,0 +1,50 @@
+﻿{
+    "status":  "candidate-review",
+    "generator":  "built-in-imagegen",
+    "source":  "C:/Users/disda/.codex-acc2/generated_images/01a1a173-1a8c-7ad3-bbf2-7798df231412/exec-2bdce61d-7b1c-484d-a2e5-3844ec21db90.png",
+    "sourceAtlas":  "animation/atlas/animation.png",
+    "action":  "death",
+    "direction":  "north-east",
+    "phase":  "02-ground",
+    "visualReview":  {
+                         "atlasReady":  false,
+                         "sequenceAccepted":  false,
+                         "inspected":  false,
+                         "exactAngleAccepted":  false,
+                         "identityAccepted":  false
+                     },
+    "qa":  {
+               "atlas":  false,
+               "anchor":  false
+           },
+    "sourceDimensions":  [
+                             1606,
+                             979
+                         ],
+    "frameCanvas":  {
+                        "height":  384,
+                        "width":  384
+                    },
+    "anchor":  {
+                   "y":  288,
+                   "provenance":  "aligned to existing Dryad direction/action baseline",
+                   "x":  192
+               },
+    "normalization":  {
+                          "cropBounds":  [
+                                             418,
+                                             332,
+                                             1207,
+                                             1,
+                                             723,
+                                             1
+                                         ],
+                          "method":  "alpha crop (\u003e128), nearest-neighbor fit to phase-matched legacy Dryad frame, transparent 384x384 placement",
+                          "sourceAlphaThresholdForCrop":  128,
+                          "sourcePixelsPaintedOrComposited":  false,
+                          "normalizedSubjectDimensions":  [
+                                                              191,
+                                                              95
+                                                          ]
+                      }
+}

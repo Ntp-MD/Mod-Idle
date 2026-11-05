@@ -1,0 +1,42 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "generatorOutput": "C:\\Users\\disda\\.codex-acc2\\generated_images\\01a1a173-05ff-7d81-87ee-ce64d6b1026e\\exec-a9ead378-6c99-4d05-b593-df793dae4963.png",
+  "speciesId": "werewolf",
+  "action": "attack",
+  "direction": "north",
+  "phase": "00-windup",
+  "poseDescription": "rear-facing low pounce windup with forepaws drawn back",
+  "source": [
+    "../../../../reference.png",
+    "../../../../animation/poses/idle/north.png",
+    "../../../../animation/poses/attack/west/00-windup.png"
+  ],
+  "sourceCanvas": [
+    1254,
+    1254
+  ],
+  "sourceMode": "RGBA",
+  "sourceAlphaExtrema": [
+    0,
+    255
+  ],
+  "targetCanvas": [
+    384,
+    384
+  ],
+  "canvasMatchesTarget": false,
+  "visualReview": {
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "phaseAccepted": false,
+    "anchor": false,
+    "atlas": false
+  },
+  "qa": {
+    "alphaBackgroundVerified": false,
+    "atlasApproved": false,
+    "anchorVerified": false,
+    "productionApproved": false
+  }
+}

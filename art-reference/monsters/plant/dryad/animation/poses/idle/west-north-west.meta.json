@@ -1,0 +1,40 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in image_gen",
+  "source": "C:/Users/disda/.codex-acc1/generated_images/01a1a167-4930-7b41-b4f3-5fd49cadb85a/exec-ccf00a90-e574-4039-a83f-1dad545c39b8.png",
+  "action": "idle",
+  "direction": "west-north-west",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "aligned to existing Dryad idle baseline"
+  },
+  "normalization": {
+    "method": "alpha crop (>128), nearest-neighbor fit to existing 194 px idle height, transparent 384x384 placement",
+    "sourceAlphaThresholdForCrop": 128,
+    "sourcePixelsPaintedOrComposited": false,
+    "normalizedSubjectDimensions": [
+      86,
+      194
+    ]
+  },
+  "visualReview": {
+    "sequenceAccepted": false,
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "atlasReady": false,
+    "note": "Candidate facing is approximate; verify against adjacent 22.5-degree directions before approval."
+  },
+  "qa": {
+    "atlas": false,
+    "anchor": false
+  }
+}

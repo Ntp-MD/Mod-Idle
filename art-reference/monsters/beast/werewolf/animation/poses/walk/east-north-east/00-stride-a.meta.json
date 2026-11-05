@@ -1,0 +1,36 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-imagegen",
+  "generatorOutput": "C:\\Users\\disda\\.codex-acc2\\generated_images\\01a1a173-05ff-7d81-87ee-ce64d6b1026e\\exec-28b7577d-a9f5-4c3b-80d7-b4b34dc76f3f.png",
+  "speciesId": "werewolf",
+  "action": "walk",
+  "direction": "east-north-east",
+  "phase": "00-stride-a",
+  "poseDescription": "individual generated walking stride-a pose facing east-north-east",
+  "source": [
+    "../../../../reference.png",
+    "../../../../animation/poses/idle/east-north-east.png",
+    "../../../../animation/poses/walk/east/00-stride-a.png"
+  ],
+  "sourceCanvas": [
+    1254,
+    1254
+  ],
+  "targetCanvas": [
+    384,
+    384
+  ],
+  "canvasMatchesTarget": false,
+  "visualReview": {
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "phaseAccepted": false,
+    "anchor": false,
+    "atlas": false
+  },
+  "qa": {
+    "atlasApproved": false,
+    "anchorVerified": false,
+    "productionApproved": false
+  }
+}

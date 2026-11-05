@@ -1,0 +1,50 @@
+﻿{
+    "status":  "candidate-review",
+    "generator":  "built-in-imagegen",
+    "source":  "C:/Users/disda/.codex-acc2/generated_images/01a1a173-1a8c-7ad3-bbf2-7798df231412/exec-66984b95-ecf0-4db8-9c3a-11c2a23f54ee.png",
+    "sourceAtlas":  "animation/atlas/animation.png",
+    "action":  "death",
+    "direction":  "north-east",
+    "phase":  "01-collapse",
+    "visualReview":  {
+                         "atlasReady":  false,
+                         "sequenceAccepted":  false,
+                         "inspected":  false,
+                         "exactAngleAccepted":  false,
+                         "identityAccepted":  false
+                     },
+    "qa":  {
+               "atlas":  false,
+               "anchor":  false
+           },
+    "sourceDimensions":  [
+                             1312,
+                             1199
+                         ],
+    "frameCanvas":  {
+                        "height":  384,
+                        "width":  384
+                    },
+    "anchor":  {
+                   "y":  288,
+                   "provenance":  "aligned to existing Dryad direction/action baseline",
+                   "x":  192
+               },
+    "normalization":  {
+                          "cropBounds":  [
+                                             311,
+                                             239,
+                                             955,
+                                             1,
+                                             912,
+                                             1
+                                         ],
+                          "method":  "alpha crop (\u003e128), nearest-neighbor fit to phase-matched legacy Dryad frame, transparent 384x384 placement",
+                          "sourceAlphaThresholdForCrop":  128,
+                          "sourcePixelsPaintedOrComposited":  false,
+                          "normalizedSubjectDimensions":  [
+                                                              108,
+                                                              113
+                                                          ]
+                      }
+}

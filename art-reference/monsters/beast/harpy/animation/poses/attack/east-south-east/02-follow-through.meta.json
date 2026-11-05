@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "action": "attack",
+  "direction": "east-south-east",
+  "pose": "02-follow-through",
+  "generator": "built-in-imagegen",
+  "source": "C:\\Users\\disda\\.codex-acc2\\generated_images\\01a1a172-f148-77a2-b35e-2ef8608ecbea\\exec-7c0fd86e-117b-497d-b473-1bef856cf2c2.png",
+  "sourceSize": {
+    "width": 1536,
+    "height": 1024
+  },
+  "visualApproval": false,
+  "visualReview": {
+    "screenSideCorrect": false,
+    "exactAngleAccepted": false,
+    "identityAccepted": false
+  },
+  "productionApproved": false,
+  "qa": {
+    "atlas": false,
+    "anchor": false,
+    "alpha": false,
+    "runtime": false
+  },
+  "footAnchor": null,
+  "sourcePixelsModified": false,
+  "styleReference": [
+    "poses/attack/east-south-east/01-contact.png",
+    "poses/attack/south/02-follow-through.png"
+  ],
+  "bakedWeapon": "natural-talons-and-wings",
+  "note": "Generated individual attack follow-through candidate; background alpha, direction, pixel scale, anchor, visual sequence, and art-owner acceptance remain unverified."
+}

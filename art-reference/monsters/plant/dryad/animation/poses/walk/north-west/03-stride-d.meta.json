@@ -1,0 +1,41 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in image_gen",
+  "source": "C:/Users/disda/.codex-acc1/generated_images/01a1a167-4930-7b41-b4f3-5fd49cadb85a/exec-673e2010-f7d3-421e-9450-02127a7f34da.png",
+  "action": "walk",
+  "direction": "north-west",
+  "phase": "03-stride-d",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "aligned to existing Dryad walk baseline"
+  },
+  "normalization": {
+    "method": "alpha crop (>128), nearest-neighbor fit to 190 px walk height, transparent 384x384 placement",
+    "sourceAlphaThresholdForCrop": 128,
+    "sourcePixelsPaintedOrComposited": false,
+    "normalizedSubjectDimensions": [
+      100,
+      190
+    ]
+  },
+  "visualReview": {
+    "sequenceAccepted": false,
+    "identityAccepted": true,
+    "exactAngleAccepted": false,
+    "atlasReady": false,
+    "note": "Candidate NW rear-quarter gait; alternating support and yaw need review."
+  },
+  "qa": {
+    "atlas": false,
+    "anchor": false
+  }
+}

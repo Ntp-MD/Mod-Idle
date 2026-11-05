@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "action": "attack",
+  "direction": "north",
+  "pose": "01-contact",
+  "generator": "built-in-imagegen",
+  "source": "C:\\Users\\disda\\.codex-acc2\\generated_images\\01a1a172-f148-77a2-b35e-2ef8608ecbea\\exec-405fda30-96f2-4b8b-a6ae-1d34f5f81191.png",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "visualApproval": false,
+  "visualReview": {
+    "screenSideCorrect": false,
+    "exactAngleAccepted": false,
+    "identityAccepted": false
+  },
+  "productionApproved": false,
+  "qa": {
+    "atlas": false,
+    "anchor": false,
+    "alpha": false,
+    "runtime": false
+  },
+  "footAnchor": null,
+  "sourcePixelsModified": false,
+  "styleReference": [
+    "poses/attack/north/00-windup.png",
+    "poses/attack/south/01-contact.png"
+  ],
+  "bakedWeapon": "natural-talons-and-wings",
+  "note": "Generated individual attack contact candidate; direction, pixel scale, anchor, visual sequence, and art-owner acceptance remain unverified."
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "action": "attack",
+  "direction": "east",
+  "pose": "00-windup",
+  "generator": "built-in-imagegen",
+  "source": "C:\\Users\\disda\\.codex-acc2\\generated_images\\01a1a172-f148-77a2-b35e-2ef8608ecbea\\exec-202c8637-7742-4c71-86d5-1ff3d01e211a.png",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "visualApproval": false,
+  "visualReview": {
+    "screenSideCorrect": false,
+    "exactAngleAccepted": false,
+    "identityAccepted": false
+  },
+  "qa": {
+    "atlas": false,
+    "anchor": false,
+    "alpha": false,
+    "runtime": false
+  },
+  "footAnchor": null,
+  "sourcePixelsModified": false,
+  "styleReference": [
+    "poses/idle/south.png",
+    "poses/attack/south/00-windup.png"
+  ],
+  "bakedWeapon": "natural-talons-and-wings",
+  "note": "Generated as one individual windup pose; full visual sequence, frame size/anchor normalization, and art-owner review remain pending.",
+  "productionApproved": false
+}

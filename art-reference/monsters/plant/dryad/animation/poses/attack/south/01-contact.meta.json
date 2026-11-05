@@ -1,16 +1,46 @@
-{
-  "status": "candidate-review",
-  "generator": "OpenAI built-in image_gen",
-  "sourceOutput": "exec-5defc24e-8243-44b5-8d0b-c97cd3d62c83.png",
-  "direction": "south",
-  "action": "attack",
-  "sourcePixelsModified": false,
-  "visualReview": {
-    "inspected": true,
-    "identityPlausible": true,
-    "contactPosePlausible": true,
-    "haloVisible": false,
-    "exactAngleVerified": false,
-    "atlasReady": false
-  }
+﻿{
+    "status":  "candidate-review",
+    "generator":  "OpenAI built-in image_gen",
+    "sourceOutput":  "exec-5defc24e-8243-44b5-8d0b-c97cd3d62c83.png",
+    "direction":  "south",
+    "action":  "attack",
+    "sourcePixelsModified":  false,
+    "visualReview":  {
+                         "inspected":  true,
+                         "identityPlausible":  true,
+                         "contactPosePlausible":  true,
+                         "haloVisible":  false,
+                         "exactAngleVerified":  false,
+                         "atlasReady":  false
+                     },
+    "sourceDimensions":  [
+                             1254,
+                             1254
+                         ],
+    "frameCanvas":  {
+                        "height":  384,
+                        "width":  384
+                    },
+    "anchor":  {
+                   "y":  286,
+                   "provenance":  "aligned to Dryad attack baseline",
+                   "x":  192
+               },
+    "normalization":  {
+                          "cropBounds":  [
+                                             410,
+                                             277,
+                                             873,
+                                             1,
+                                             992,
+                                             1
+                                         ],
+                          "method":  "alpha crop (\u003e128), nearest-neighbor fit to 176 px legacy attack-contact height, transparent 384x384 placement",
+                          "sourceAlphaThresholdForCrop":  128,
+                          "sourcePixelsPaintedOrComposited":  false,
+                          "normalizedSubjectDimensions":  [
+                                                              114,
+                                                              176
+                                                          ]
+                      }
 }
