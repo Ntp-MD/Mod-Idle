@@ -1,0 +1,55 @@
+{
+  "status": "candidate-review",
+  "generator": "SenseNova U1.5 Lite",
+  "source": "art-reference/animation/outputs/sensenova-u1-5-lite-posegen-retry-2026-11-05/mirehydra-three-head-lunge-v2-raw.png",
+  "reference": "art-reference/monsters/dragon/mirehydra/mirehydra/animation/poses/attack/north-east/01-contact.png",
+  "prompt": "Redraw the same three-headed Mirehydra in a forward strike. Use the first image as the exact target view angle, head count, body identity, palette, and scale. Use the second image only as a guide for the forceful attack pose; keep the view angle from the first image. Lean the torso into the strike and extend the forward heads and necks, with all three distinct heads visible. Preserve the original 2D pixel-art style and full-body framing. One character only on a uniform pure white background. Do not render any words, letters, numbers, labels, diagrams, logos, frames, floor, shadows, or extra marks.",
+  "action": "attack",
+  "direction": "north-west",
+  "phase": "01-contact",
+  "sourceDimensions": [
+    2048,
+    2048
+  ],
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "matched to existing Mirehydra north-east idle frame"
+  },
+  "normalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "backgroundRemoval": "near-white chroma key (threshold 32/255)",
+    "backgroundRemovalLimit": "near-white character details sharing the matte color are removed",
+    "alphaThresholdForBounds": 128,
+    "sourceSubjectBounds": [
+      95,
+      541,
+      1928,
+      1694
+    ],
+    "referenceSubjectBounds": [
+      86,
+      131,
+      298,
+      288
+    ],
+    "normalizedSubjectHeight": 157,
+    "uniformScale": 0.136167,
+    "sourcePixelsPaintedOrComposited": false
+  },
+  "visualReview": {
+    "sequenceAccepted": false,
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "atlasReady": false,
+    "note": "Normalized candidate only; visual and sequence review is pending."
+  },
+  "qa": {
+    "atlas": false,
+    "anchor": false
+  }
+}

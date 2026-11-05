@@ -1,0 +1,21 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-image_gen",
+  "source": "C:\\Users\\ITOP\\.codex-zed-account-2\\generated_images\\01a1a5f4-8f70-7501-a075-b615a9af8ecf\\exec-9756d5d4-6d35-4d0c-a4c7-3361cee8cf29.png",
+  "action": "attack",
+  "direction": "north-east",
+  "phase": "02-follow-through",
+  "transparentBackgroundRequested": true,
+  "identityReference": "art-reference/monsters/plant/dryad/dryad/animation/source/base-v1.png",
+  "styleReference": "art-reference/monsters/plant/dryad/dryad/animation/atlas/animation.png",
+  "visualReview": {
+    "sequenceAccepted": false,
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "note": "Generated source candidate; review phase continuity, back-three-quarter orientation and identity before approval."
+  },
+  "qa": {
+    "atlas": false,
+    "anchor": false
+  }
+}

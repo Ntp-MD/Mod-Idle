@@ -1,0 +1,65 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "giant",
+  "action": "hit",
+  "direction": "north-east",
+  "phase": "03-ready",
+  "generator": "built-in image_gen",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sourceRecord": {
+    "kind": "generated-contact-sheet",
+    "source": "../../../../../../../../animation/outputs/giant-v5/source/v5-contact-sheets/hit-03-ready-16.png",
+    "sourceCell": {
+      "row": 1,
+      "column": 2,
+      "box": [
+        512,
+        384,
+        768,
+        768
+      ]
+    },
+    "sourceConfidenceBounds": [
+      36,
+      90,
+      240,
+      326
+    ],
+    "processing": {
+      "method": "alpha-confidence-crop-scale-anchor-v1",
+      "threshold": 128,
+      "softEdgeRecoveryRadius": 3,
+      "uniformScale": 0.62069,
+      "anchor": {
+        "x": 192,
+        "y": 288
+      },
+      "scaledSize": [
+        130,
+        150
+      ],
+      "offset": [
+        127,
+        138
+      ]
+    }
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "reviewed": false,
+    "runtimePromotion": false
+  },
+  "importedFrom": "art-reference/animation/outputs/giant-v5"
+}

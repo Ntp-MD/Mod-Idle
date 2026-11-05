@@ -1,0 +1,437 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "skeleton",
+  "variantId": "rattleblade-skeleton",
+  "name": "Rattleblade Skeleton",
+  "levels": [
+    61,
+    80
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-contact-at-224",
+  "directionCount": 8,
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "actions": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    "idle S SE E NE N NW W SW",
+    "walk S SE E NE N NW W SW",
+    "attack S SE E NE N NW W SW",
+    "hit S SE E NE N NW W SW",
+    "death S SE E NE N NW W SW"
+  ],
+  "slicing": {
+    "columns": 8,
+    "rows": 5,
+    "cellWidth": 256,
+    "cellHeight": 256
+  },
+  "sourceFrames": [
+    {
+      "x": 150,
+      "y": 112,
+      "width": 164,
+      "height": 176,
+      "offsetX": 150,
+      "offsetY": 112
+    },
+    {
+      "x": 539,
+      "y": 112,
+      "width": 156,
+      "height": 176,
+      "offsetX": 155,
+      "offsetY": 112
+    },
+    {
+      "x": 920,
+      "y": 112,
+      "width": 128,
+      "height": 176,
+      "offsetX": 152,
+      "offsetY": 112
+    },
+    {
+      "x": 1281,
+      "y": 113,
+      "width": 133,
+      "height": 175,
+      "offsetX": 129,
+      "offsetY": 113
+    },
+    {
+      "x": 1634,
+      "y": 113,
+      "width": 163,
+      "height": 175,
+      "offsetX": 98,
+      "offsetY": 113
+    },
+    {
+      "x": 2017,
+      "y": 112,
+      "width": 134,
+      "height": 175,
+      "offsetX": 97,
+      "offsetY": 112
+    },
+    {
+      "x": 2379,
+      "y": 112,
+      "width": 145,
+      "height": 176,
+      "offsetX": 75,
+      "offsetY": 112
+    },
+    {
+      "x": 2755,
+      "y": 112,
+      "width": 166,
+      "height": 176,
+      "offsetX": 67,
+      "offsetY": 112
+    },
+    {
+      "x": 150,
+      "y": 492,
+      "width": 151,
+      "height": 182,
+      "offsetX": 150,
+      "offsetY": 108
+    },
+    {
+      "x": 539,
+      "y": 492,
+      "width": 145,
+      "height": 182,
+      "offsetX": 155,
+      "offsetY": 108
+    },
+    {
+      "x": 914,
+      "y": 494,
+      "width": 135,
+      "height": 177,
+      "offsetX": 146,
+      "offsetY": 110
+    },
+    {
+      "x": 1285,
+      "y": 492,
+      "width": 129,
+      "height": 179,
+      "offsetX": 133,
+      "offsetY": 108
+    },
+    {
+      "x": 1636,
+      "y": 495,
+      "width": 163,
+      "height": 179,
+      "offsetX": 100,
+      "offsetY": 111
+    },
+    {
+      "x": 2024,
+      "y": 492,
+      "width": 130,
+      "height": 179,
+      "offsetX": 104,
+      "offsetY": 108
+    },
+    {
+      "x": 2394,
+      "y": 493,
+      "width": 133,
+      "height": 177,
+      "offsetX": 90,
+      "offsetY": 109
+    },
+    {
+      "x": 2771,
+      "y": 492,
+      "width": 151,
+      "height": 182,
+      "offsetX": 83,
+      "offsetY": 108
+    },
+    {
+      "x": 124,
+      "y": 893,
+      "width": 202,
+      "height": 164,
+      "offsetX": 124,
+      "offsetY": 125
+    },
+    {
+      "x": 537,
+      "y": 886,
+      "width": 168,
+      "height": 171,
+      "offsetX": 153,
+      "offsetY": 118
+    },
+    {
+      "x": 892,
+      "y": 894,
+      "width": 202,
+      "height": 162,
+      "offsetX": 124,
+      "offsetY": 126
+    },
+    {
+      "x": 1288,
+      "y": 887,
+      "width": 163,
+      "height": 169,
+      "offsetX": 136,
+      "offsetY": 119
+    },
+    {
+      "x": 1636,
+      "y": 894,
+      "width": 174,
+      "height": 162,
+      "offsetX": 100,
+      "offsetY": 126
+    },
+    {
+      "x": 2008,
+      "y": 890,
+      "width": 159,
+      "height": 166,
+      "offsetX": 88,
+      "offsetY": 122
+    },
+    {
+      "x": 2361,
+      "y": 893,
+      "width": 198,
+      "height": 164,
+      "offsetX": 57,
+      "offsetY": 125
+    },
+    {
+      "x": 2756,
+      "y": 888,
+      "width": 183,
+      "height": 166,
+      "offsetX": 68,
+      "offsetY": 120
+    },
+    {
+      "x": 143,
+      "y": 1269,
+      "width": 160,
+      "height": 172,
+      "offsetX": 143,
+      "offsetY": 117
+    },
+    {
+      "x": 543,
+      "y": 1274,
+      "width": 140,
+      "height": 166,
+      "offsetX": 159,
+      "offsetY": 122
+    },
+    {
+      "x": 910,
+      "y": 1283,
+      "width": 135,
+      "height": 157,
+      "offsetX": 142,
+      "offsetY": 131
+    },
+    {
+      "x": 1271,
+      "y": 1282,
+      "width": 129,
+      "height": 156,
+      "offsetX": 119,
+      "offsetY": 130
+    },
+    {
+      "x": 1643,
+      "y": 1282,
+      "width": 137,
+      "height": 164,
+      "offsetX": 107,
+      "offsetY": 130
+    },
+    {
+      "x": 2026,
+      "y": 1282,
+      "width": 138,
+      "height": 156,
+      "offsetX": 106,
+      "offsetY": 130
+    },
+    {
+      "x": 2392,
+      "y": 1278,
+      "width": 141,
+      "height": 160,
+      "offsetX": 88,
+      "offsetY": 126
+    },
+    {
+      "x": 2766,
+      "y": 1282,
+      "width": 144,
+      "height": 161,
+      "offsetX": 78,
+      "offsetY": 130
+    },
+    {
+      "x": 114,
+      "y": 1684,
+      "width": 181,
+      "height": 141,
+      "offsetX": 114,
+      "offsetY": 148
+    },
+    {
+      "x": 504,
+      "y": 1700,
+      "width": 148,
+      "height": 119,
+      "offsetX": 120,
+      "offsetY": 164
+    },
+    {
+      "x": 860,
+      "y": 1722,
+      "width": 187,
+      "height": 100,
+      "offsetX": 92,
+      "offsetY": 186
+    },
+    {
+      "x": 1255,
+      "y": 1726,
+      "width": 167,
+      "height": 95,
+      "offsetX": 103,
+      "offsetY": 190
+    },
+    {
+      "x": 1633,
+      "y": 1722,
+      "width": 170,
+      "height": 108,
+      "offsetX": 97,
+      "offsetY": 186
+    },
+    {
+      "x": 2003,
+      "y": 1722,
+      "width": 179,
+      "height": 108,
+      "offsetX": 83,
+      "offsetY": 186
+    },
+    {
+      "x": 2377,
+      "y": 1734,
+      "width": 209,
+      "height": 92,
+      "offsetX": 73,
+      "offsetY": 198
+    },
+    {
+      "x": 2779,
+      "y": 1743,
+      "width": 184,
+      "height": 79,
+      "offsetX": 91,
+      "offsetY": 207
+    }
+  ],
+  "generation": {
+    "sourceOutputs": [
+      "exec-07ff97c2-cf3a-4965-9fd2-66863b72a26f.png"
+    ],
+    "generatedCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "generatedCornerAlpha": 0,
+    "identityReference": "art-reference/monsters/undead/skeleton/skeleton/animation/source/base-v1.png",
+    "initialPrompt": "40-cell 8x5 full-direction atlas; a matched pair of short chipped steel blades and narrow leather wrist wraps; hard dark outline, no colored fringe or halo."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "sourceFrames-repack-v2",
+    "sourceCanvas": {
+      "width": 3072,
+      "height": 1920
+    },
+    "uniformScale": 1.0,
+    "translation": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "recoveredIsolatedAlphaPixels": 0,
+    "discardedIsolatedAlphaDust": 0,
+    "status": "draft-review"
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged.",
+      "Repacked from uniquely assigned sourceFrames into 384 x 384 review cells with at least 24 px clear padding on each edge; visual review remains pending."
+    ]
+  }
+}

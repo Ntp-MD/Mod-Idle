@@ -1,0 +1,65 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "giant",
+  "action": "death",
+  "direction": "south-west",
+  "phase": "00-fall",
+  "generator": "built-in image_gen",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sourceRecord": {
+    "kind": "generated-contact-sheet",
+    "source": "../../../../../../../../animation/outputs/giant-v5/source/v5-contact-sheets/death-00-fall-16.png",
+    "sourceCell": {
+      "row": 3,
+      "column": 2,
+      "box": [
+        512,
+        1152,
+        768,
+        1536
+      ]
+    },
+    "sourceConfidenceBounds": [
+      8,
+      105,
+      225,
+      338
+    ],
+    "processing": {
+      "method": "alpha-confidence-crop-scale-anchor-v1",
+      "threshold": 128,
+      "softEdgeRecoveryRadius": 3,
+      "uniformScale": 0.5,
+      "anchor": {
+        "x": 192,
+        "y": 288
+      },
+      "scaledSize": [
+        112,
+        120
+      ],
+      "offset": [
+        136,
+        168
+      ]
+    }
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "reviewed": false,
+    "runtimePromotion": false
+  },
+  "importedFrom": "art-reference/animation/outputs/giant-v5"
+}

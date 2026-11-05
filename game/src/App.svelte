@@ -186,7 +186,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       name,
       variantId: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
     })).filter(({ variantId }) => ARENA_VARIANT_QA_PASS_PATHS.has(
-      `art-reference/monsters/${eng.speciesById(speciesId).race}/${speciesId}/variants/${variantId}/meta.json`,
+      `art-reference/monsters/${eng.speciesById(speciesId).race}/${speciesId}/${variantId}/meta.json`,
     )),
   })).filter(group => group.variants.length > 0);
   const ARENA_VARIANT_SPECIES_ALREADY_LISTED = new Set<string>([...ARENA_MOB_SPECIES, ...ARENA_EXISTING_PREVIEW_SPECIES]);

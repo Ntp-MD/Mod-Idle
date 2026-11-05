@@ -1,0 +1,45 @@
+{
+  "status": "candidate-review-required",
+  "generator": "built-in image_gen",
+  "source": "art-reference/monsters/plant/treant/treant/animation/source/treant-v5/walk-south-east-03-stride-d-v1.png",
+  "sourceCanvas": {
+    "width": 1254,
+    "height": 1254
+  },
+  "sourceAlphaBoundsThreshold": 8,
+  "sourceAlphaBounds": [
+    423,
+    396,
+    861,
+    923
+  ],
+  "action": "walk",
+  "direction": "south-east",
+  "phase": "03-stride-d",
+  "processing": {
+    "method": "single-pose alpha-bounds crop; proportional resize to existing Treant source scale; centered on 384x384 canvas at anchor",
+    "targetSubjectHeight": 163,
+    "targetSize": [
+      135,
+      163
+    ],
+    "lowAlphaOutsideCrop": "pixels below alpha 8 excluded from crop bounds"
+  },
+  "canvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "visualReview": {
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "sequenceAccepted": false
+  },
+  "qa": {
+    "atlas": false,
+    "anchor": false
+  }
+}

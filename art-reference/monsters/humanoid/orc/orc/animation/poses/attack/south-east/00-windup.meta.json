@@ -1,0 +1,55 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "orc",
+  "action": "attack",
+  "direction": "south-east",
+  "phase": "00-windup",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "canonical orc source contract; generated frame is unapproved"
+  },
+  "generation": {
+    "generator": "OpenAI built-in image_gen",
+    "candidateSet": "orc-8dir-v1",
+    "sourceOutput": "art-reference/monsters/humanoid/orc/orc/animation/source/orc-8dir-v1/source/v8-missing-directions/attack-six-directions-6x4.png",
+    "sourceCell": {
+      "row": 0,
+      "column": 1,
+      "box": [
+        209,
+        0,
+        418,
+        314
+      ]
+    },
+    "promptContract": "6x4 contact sheet; full direction/phase mapping is in candidate-set manifest.json"
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "threshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "sourceConfidenceBounds": [
+      56,
+      114,
+      167,
+      259
+    ],
+    "sourceCropBounds": [
+      53,
+      111,
+      170,
+      262
+    ],
+    "offset": [
+      134,
+      140
+    ],
+    "scale": 1.0
+  },
+  "review": "Coverage candidate only. Facing, phase, alpha edges, scale, anchor, and style have not been approved; do not promote to runtime."
+}

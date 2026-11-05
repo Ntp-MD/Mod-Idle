@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "wolf",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1a9ef-c913-7950-b307-ee9adeae512e/exec-8f68ec8d-411a-4082-9ad1-69a0712fbda6.png",
+  "identityRef": "../../../../animation/source/detail-v1.png",
+  "directionRef": "../../../../animation/poses/idle/north.png",
+  "actionReference": "../../../../animation/poses/death/east/03-settle.png",
+  "action": "death",
+  "direction": "north",
+  "requestedFacingDegrees": 180,
+  "phase": "03-settle",
+  "pose": "final still side-lying body and tail settled",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "sourceGeneratedSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "sourcePixelsModified": true,
+  "processing": {
+    "method": "alpha-crop-nearest-anchor-v1",
+    "alphaThreshold": 128,
+    "rawAlphaBoundsExclusive": [
+      140,
+      469,
+      1108,
+      984
+    ],
+    "targetHeight": 165,
+    "maxWidth": 240,
+    "normalizedContentSize": [
+      240,
+      128
+    ],
+    "uniformScale": 0.247934,
+    "canvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "nearest-neighbor after tight alpha crop and binary alpha threshold"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  },
+  "visualReview": "Candidate generated for the canonical slot. Facing, phase sequence, foot anchor, alpha edges and atlas approval remain pending."
+}

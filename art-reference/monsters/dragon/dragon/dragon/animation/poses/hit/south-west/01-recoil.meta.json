@@ -1,0 +1,11 @@
+{
+    "status":  "candidate-review",
+    "candidateDuplicate":  true,
+    "requiresRegeneration":  true,
+    "method":  "nearest-direction-copy",
+    "sourcePath":  "poses/hit/south/01-recoil.png",
+    "sourceDirection":  "south",
+    "sourcePixelsModified":  false,
+    "visualReviewRequired":  true,
+    "qaStatus":  "pending-facing-spacing-anchor-alpha-atlas-review"
+}

@@ -1,0 +1,65 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "giant",
+  "action": "attack",
+  "direction": "south-east",
+  "phase": "00-windup",
+  "generator": "built-in image_gen",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sourceRecord": {
+    "kind": "generated-contact-sheet",
+    "source": "../../../../../../../../animation/outputs/giant-v5/source/v5-contact-sheets/attack-00-windup-16.png",
+    "sourceCell": {
+      "row": 0,
+      "column": 2,
+      "box": [
+        512,
+        0,
+        768,
+        384
+      ]
+    },
+    "sourceConfidenceBounds": [
+      18,
+      98,
+      223,
+      335
+    ],
+    "processing": {
+      "method": "alpha-confidence-crop-scale-anchor-v1",
+      "threshold": 128,
+      "softEdgeRecoveryRadius": 3,
+      "uniformScale": 0.613445,
+      "anchor": {
+        "x": 192,
+        "y": 288
+      },
+      "scaledSize": [
+        129,
+        149
+      ],
+      "offset": [
+        127,
+        139
+      ]
+    }
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "reviewed": false,
+    "runtimePromotion": false
+  },
+  "importedFrom": "art-reference/animation/outputs/giant-v5"
+}

@@ -34,16 +34,22 @@ const isConfig = (path) => [
   'package.json', 'package-lock.json', 'tsconfig.json',
   'game/package.json', 'game/package-lock.json', 'game/tsconfig.json',
   'game/vite.config.ts', 'game/vitest.config.ts',
+  'game/playwright.config.ts', 'game/playwright.config.js',
 ].includes(path);
 const isData = (path) => path.startsWith('tools/data/');
 const isTest = (path) => path.startsWith('game/tests/') && path.endsWith('.test.ts');
-const isGraph = (path) => /^(game\/src\/.*\.(ts|svelte)|game\/tests\/.*\.ts|engine\/.*\.ts|tools\/.*\.(ts|mjs))$/.test(path);
+const isMeasurement = (path) => path.startsWith('game/measurements/') && path.endsWith('.ts');
+const isBrowserSpec = (path) => path.startsWith('game/browser-tests/') && path.endsWith('.spec.ts');
+const isHtml = (path) => /^game\/.*\.html$/.test(path);
+const isCss = (path) => path.startsWith('game/src/styles/') && path.endsWith('.css');
+const isGraph = (path) => /^(game\/src\/.*\.(ts|svelte)|game\/tests\/.*\.ts|game\/measurements\/.*\.ts|engine\/.*\.ts|tools\/.*\.(ts|mjs))$/.test(path);
 const isIcon = (path) => path.startsWith('game/src/icon/') && path.endsWith('.png');
 const isFx = (path) => path.startsWith('game/public/fx/');
 const isArenaJson = (path) => path.startsWith('game/src/ui/combat/arena/') && path.endsWith('.json');
 const isOpaque = (path) => isIcon(path) || isFx(path) || isArenaJson(path)
   || (path.startsWith('game/') && /\.(png|json)$/.test(path));
-const isRelevant = (path) => isGraph(path) || isOpaque(path) || isData(path) || isConfig(path);
+const isRelevant = (path) => isGraph(path) || isOpaque(path) || isData(path) || isConfig(path)
+  || isHtml(path) || isCss(path) || isBrowserSpec(path) || isMeasurement(path);
 
 const relevant = paths.filter(isRelevant);
 const deleted = relevant.filter((path) => !existsSync(resolve(root, path)));
@@ -61,6 +67,22 @@ const changedTests = tests.map(toGame);
  */
 const OWNER_EDGES = [
   { match: (path) => path === 'tools/test-changed.mjs', tests: ['tests/app/test-changed.test.ts'] },
+  { match: (path) => path === 'game/index.html', tests: ['tests/app/boot-recovery.test.ts'] },
+  { match: (path) => path === 'game/wiki.html', tests: ['tests/app/boot-recovery.test.ts'] },
+  { match: (path) => path === 'game/src/main.ts' || path === 'game/src/AppShell.svelte',
+    tests: ['tests/app/boot-recovery.test.ts'] },
+  { match: (path) => path === 'game/src/App.svelte', tests: ['tests/app/boot-recovery.test.ts'] },
+  { match: (path) => isCss(path), tests: [] },
+  { match: (path) => isMeasurement(path), tests: ['tests/app/measurement-format.test.ts', 'tests/app/measurement-compare.test.ts'] },
+  { match: (path) => path === 'tools/measure-content.mjs' || path === 'tools/compare-measurements.mjs' || path.startsWith('tools/lib/measurement-'),
+    tests: ['tests/sim/content-coverage.test.ts', 'tests/app/content-runner.test.ts'] },
+  { match: (path) => path === 'tools/measure-gameplay.mjs' || path.startsWith('game/measurements/gameplay-'),
+    tests: ['tests/app/gameplay-measurements.test.ts'] },
+  { match: (path) => path.startsWith('game/browser-tests/') || path === 'game/playwright.config.ts' || path === 'game/playwright.config.js',
+    tests: [] },
+  { match: (path) => /map/.test(path), tests: ['tests/ui/map-scene.test.ts'] },
+  { match: (path) => /combat.*scene|combat-actor|public\/combat/.test(path),
+    tests: ['tests/ui/combat-actor.test.ts', 'tests/ui/mob-sprite-pool.test.ts'] },
   { match: (path) => path === 'tools/skill-vfx-pool.ts' || /tools\/(vfx\/|.*(vfx|shader|atlas|gallery|compose|mix|render|bake).*)\.(ts|mjs)$/.test(path),
     tests: ['tests/ui/vfx-catalog.test.ts', 'tests/ui/arena-skill-vfx.test.ts'] },
   { match: (path) => path === 'tools/map.ts', tests: ['tests/ui/map-scene.test.ts'] },
@@ -82,25 +104,38 @@ if (!existing.length && !deleted.length && !configChanged) {
 }
 
 const data = existing.filter(isData);
+const browserSpecs = existing.filter(isBrowserSpec);
+// Browser specs are not consumed by the unit runner; before P5 wires the browser
+// runner, a change limited to a spec selects no unit command — never fall back
+// to the full suite for it (plan P0/P5).
+if (browserSpecs.length && !existing.some((p) => !isBrowserSpec(p)) && !deleted.length && !configChanged) {
+  console.log(`browser spec change(s) for ${browserSpecs.length} spec(s)… (browser runner lands in P5)`);
+  process.exit(0);
+}
 let args;
 // Data, configuration and deletions can fall outside Vitest's import graph,
 // so the fallback is the whole suite — slow tests included, never excluded.
 if (data.length || deleted.length || configChanged) {
   console.log('data/configuration changes or deleted files; running the suite…');
-  args = ['run', '--passWithNoTests'];
+  args = ['run'];
 } else if (opaqueExisting.length && opaqueExisting.some((p) => !OWNER_EDGES.some((e) => e.match(p)))) {
   console.log('opaque runtime input without proven owner; running the suite…');
-  args = ['run', '--passWithNoTests'];
+  args = ['run'];
 } else {
-  const graphFiles = existing.filter(isGraph).map(toGame);
+  const graphFiles = existing.filter((path) => isGraph(path) && !isBrowserSpec(path)).map(toGame);
   const files = [...new Set([...graphFiles, ...ownerTests])];
   if (sources.length || ownerTests.length) {
     const related = sources.length ? 'related tests' : opaqueExisting.length ? 'owner tests' : 'related tests';
     console.log(`${related} for ${sources.length} changed source and ${tests.length} test file(s)…`);
-    args = ['related', '--run', '--passWithNoTests', ...files];
-  } else {
+    args = ['related', '--run', ...files];
+  } else if (tests.length) {
     console.log(`changed test file(s) for ${tests.length} test file(s)…`);
-    args = ['run', '--passWithNoTests', ...changedTests];
+    args = ['run', ...changedTests];
+  } else {
+    // Relevant non-graph input with no proven unit owner yet (e.g. CSS alone).
+    // Before P5, selecting nothing would hide the change, so run the full suite.
+    console.log('relevant input without proven unit owner; running the suite…');
+    args = ['run'];
   }
 }
 process.exit(run(args));

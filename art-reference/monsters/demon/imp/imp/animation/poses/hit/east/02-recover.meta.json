@@ -1,0 +1,71 @@
+{
+  "status": "candidate-review",
+  "action": "hit",
+  "direction": "east",
+  "frame": "02-recover",
+  "candidateDuplicate": true,
+  "requiresRegeneration": true,
+  "duplicateReason": "Restored from the matching Imp atlas cell into a previously empty canonical slot; pending visual review.",
+  "sourcePath": "art-reference/monsters/demon/imp/imp/animation/atlas/animation.png",
+  "sourceMetadataPath": "art-reference/monsters/demon/imp/imp/animation/meta.json",
+  "sourceDirection": "east",
+  "sourceAction": "hit",
+  "sourceFrame": "02-recover.png",
+  "sourceFrameIndex": 26,
+  "sourceCell": [
+    2,
+    3
+  ],
+  "sourceCellRect": [
+    256,
+    384,
+    128,
+    128
+  ],
+  "sourceMapping": "Exact atlas row/column and action phase from animation/meta.json rowOrder and sourceFrames.",
+  "sourcePixelsModified": false,
+  "visualReviewRequired": true,
+  "normalization": {
+    "method": "source-cell-upscale-nearest-anchor-align",
+    "alphaThreshold": 128,
+    "scale": 3,
+    "sourceCanvas": [
+      128,
+      128
+    ],
+    "canvas": [
+      384,
+      384
+    ],
+    "sourceAnchor": [
+      64,
+      108
+    ],
+    "targetAnchor": [
+      192,
+      288
+    ]
+  },
+  "measurement": {
+    "canvas": [
+      384,
+      384
+    ],
+    "alphaBoundsExclusive": [
+      102,
+      108,
+      279,
+      288
+    ],
+    "clearance": [
+      102,
+      108,
+      105,
+      96
+    ],
+    "alphaValues": [
+      0,
+      255
+    ]
+  }
+}

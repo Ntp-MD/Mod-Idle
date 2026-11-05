@@ -1,0 +1,55 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "elf",
+  "action": "attack",
+  "direction": "south",
+  "phase": "00-windup",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "canonical elf source contract; generated frame is not yet visually reviewed"
+  },
+  "generation": {
+    "generator": "OpenAI built-in image_gen",
+    "candidateSet": "elf-8dir-v1",
+    "sourceOutput": "art-reference/monsters/humanoid/elf/elf/animation/source/elf-8dir-v1/source/v8-diagonal-contact-sheets/attack-north-south-2x4.png",
+    "sourceCell": {
+      "row": 0,
+      "column": 0,
+      "box": [
+        0,
+        0,
+        512,
+        384
+      ]
+    },
+    "promptContract": "2x4 north/south contact sheet; mapping and review state are in candidate-set manifest.json"
+  },
+  "processing": {
+    "method": "alpha-confidence-crop-scale-anchor-v1",
+    "threshold": 128,
+    "softEdgeRecoveryRadius": 3,
+    "sourceConfidenceBounds": [
+      180,
+      130,
+      330,
+      322
+    ],
+    "sourceCropBounds": [
+      177,
+      127,
+      333,
+      325
+    ],
+    "offset": [
+      114,
+      93
+    ],
+    "scale": 1.0
+  },
+  "review": "Coverage candidate only. Facing, phase, alpha edges, scale, anchor, and style have not been approved; do not promote to runtime."
+}

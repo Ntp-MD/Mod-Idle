@@ -9,6 +9,7 @@ import { groundShapePath, projectVfxFootprint } from '../../src/ui/combat/arena-
 import { arenaAction, createCombatArena, captureCombatArena, recordCombatArenaFx, sampleCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
 import { characterSheet, newGame } from '@sim/core/game';
 import { mobFixture } from '../fixtures/mobFixture';
+import { actorArt } from '../../src/ui/combat/combat-actor';
 import { ARENA_CAMERA, ARENA_DIRECTIONS, ARENA_VIEW, arenaGroundBounds, arenaWorldDirection } from '../../src/presentation/arena-camera';
 import { arenaPayloadSample, arenaPresentationArea, arenaReleaseSocket, arenaIncomingHazards, describeArenaTarget } from '../../src/ui/combat/combat-arena-view';
 import { liveMobSkill } from '../fixtures/liveMob';
@@ -31,6 +32,19 @@ describe('arena camera and playback', () => {
     expect(body).toContain('data-animation-source="icon"');
     expect(body).toContain('data-arena-actor="player"');
     expect(body).toContain('data-arena-actor="icon-target"');
+    expect(body).toContain(actorArt(state.group[0]).href);
+  });
+
+  it('uses the icon cutout when a monster has no sprite entry', () => {
+    const state = newGame(41), arena = createCombatArena();
+    state.group = [mobFixture({ id: 'missing-sprite', speciesId: 'missing-sprite', species: 'Missing sprite' })];
+    const c = characterSheet(state);
+    syncCombatArena(arena, state, 0, 1_000_000, c.maxHp);
+    const body = render(CombatArenaScene, { props: { arena, s: state, c, ring: [] } }).body;
+    const mobMarkup = body.slice(body.indexOf('data-arena-actor="missing-sprite"'));
+    expect(mobMarkup).toContain('data-animation-source="icon"');
+    expect(mobMarkup).toContain(actorArt(state.group[0]).href);
+    expect(mobMarkup).toContain('arena-sprite painted');
   });
 
   it('keeps terrain and a fallen body on the same camera transform', () => {

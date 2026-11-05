@@ -1,4 +1,4 @@
-import pack from '../../../../../art-reference/monsters/beast/wolf/shadow-wolf/meta.json';
+import pack from '../../../../../art-reference/monsters/beast/wolf/shadow-wolf/clips-meta.json';
 import { packReviewArt } from './arena-art-pack-review';
 
 const hrefs = {

@@ -1,0 +1,437 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "kobold",
+  "variantId": "hearthscale-kobold",
+  "name": "Hearthscale Kobold",
+  "levels": [
+    81,
+    100
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-contact-at-224",
+  "directionCount": 8,
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "actions": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    "idle S SE E NE N NW W SW",
+    "walk S SE E NE N NW W SW",
+    "attack S SE E NE N NW W SW",
+    "hit S SE E NE N NW W SW",
+    "death S SE E NE N NW W SW"
+  ],
+  "slicing": {
+    "columns": 8,
+    "rows": 5,
+    "cellWidth": 256,
+    "cellHeight": 256
+  },
+  "sourceFrames": [
+    {
+      "x": 122,
+      "y": 116,
+      "width": 161,
+      "height": 170,
+      "offsetX": 122,
+      "offsetY": 116
+    },
+    {
+      "x": 498,
+      "y": 109,
+      "width": 176,
+      "height": 179,
+      "offsetX": 114,
+      "offsetY": 109
+    },
+    {
+      "x": 877,
+      "y": 114,
+      "width": 177,
+      "height": 174,
+      "offsetX": 109,
+      "offsetY": 114
+    },
+    {
+      "x": 1260,
+      "y": 108,
+      "width": 168,
+      "height": 180,
+      "offsetX": 108,
+      "offsetY": 108
+    },
+    {
+      "x": 1652,
+      "y": 113,
+      "width": 149,
+      "height": 176,
+      "offsetX": 116,
+      "offsetY": 113
+    },
+    {
+      "x": 2024,
+      "y": 107,
+      "width": 167,
+      "height": 181,
+      "offsetX": 104,
+      "offsetY": 107
+    },
+    {
+      "x": 2398,
+      "y": 115,
+      "width": 180,
+      "height": 173,
+      "offsetX": 94,
+      "offsetY": 115
+    },
+    {
+      "x": 2791,
+      "y": 109,
+      "width": 172,
+      "height": 179,
+      "offsetX": 103,
+      "offsetY": 109
+    },
+    {
+      "x": 114,
+      "y": 501,
+      "width": 169,
+      "height": 172,
+      "offsetX": 114,
+      "offsetY": 117
+    },
+    {
+      "x": 493,
+      "y": 494,
+      "width": 170,
+      "height": 181,
+      "offsetX": 109,
+      "offsetY": 110
+    },
+    {
+      "x": 864,
+      "y": 501,
+      "width": 186,
+      "height": 171,
+      "offsetX": 96,
+      "offsetY": 117
+    },
+    {
+      "x": 1251,
+      "y": 497,
+      "width": 172,
+      "height": 175,
+      "offsetX": 99,
+      "offsetY": 113
+    },
+    {
+      "x": 1654,
+      "y": 499,
+      "width": 147,
+      "height": 179,
+      "offsetX": 118,
+      "offsetY": 115
+    },
+    {
+      "x": 2025,
+      "y": 495,
+      "width": 171,
+      "height": 175,
+      "offsetX": 105,
+      "offsetY": 111
+    },
+    {
+      "x": 2398,
+      "y": 501,
+      "width": 181,
+      "height": 169,
+      "offsetX": 94,
+      "offsetY": 117
+    },
+    {
+      "x": 2783,
+      "y": 500,
+      "width": 179,
+      "height": 175,
+      "offsetX": 95,
+      "offsetY": 116
+    },
+    {
+      "x": 118,
+      "y": 889,
+      "width": 170,
+      "height": 165,
+      "offsetX": 118,
+      "offsetY": 121
+    },
+    {
+      "x": 499,
+      "y": 879,
+      "width": 184,
+      "height": 177,
+      "offsetX": 115,
+      "offsetY": 111
+    },
+    {
+      "x": 866,
+      "y": 900,
+      "width": 240,
+      "height": 159,
+      "offsetX": 98,
+      "offsetY": 132
+    },
+    {
+      "x": 1268,
+      "y": 883,
+      "width": 211,
+      "height": 176,
+      "offsetX": 116,
+      "offsetY": 115
+    },
+    {
+      "x": 1661,
+      "y": 878,
+      "width": 158,
+      "height": 178,
+      "offsetX": 125,
+      "offsetY": 110
+    },
+    {
+      "x": 2003,
+      "y": 882,
+      "width": 171,
+      "height": 175,
+      "offsetX": 83,
+      "offsetY": 114
+    },
+    {
+      "x": 2369,
+      "y": 902,
+      "width": 195,
+      "height": 149,
+      "offsetX": 65,
+      "offsetY": 134
+    },
+    {
+      "x": 2771,
+      "y": 881,
+      "width": 191,
+      "height": 173,
+      "offsetX": 83,
+      "offsetY": 113
+    },
+    {
+      "x": 111,
+      "y": 1276,
+      "width": 146,
+      "height": 165,
+      "offsetX": 111,
+      "offsetY": 124
+    },
+    {
+      "x": 478,
+      "y": 1276,
+      "width": 171,
+      "height": 170,
+      "offsetX": 94,
+      "offsetY": 124
+    },
+    {
+      "x": 865,
+      "y": 1278,
+      "width": 170,
+      "height": 162,
+      "offsetX": 97,
+      "offsetY": 126
+    },
+    {
+      "x": 1249,
+      "y": 1274,
+      "width": 160,
+      "height": 166,
+      "offsetX": 97,
+      "offsetY": 122
+    },
+    {
+      "x": 1663,
+      "y": 1282,
+      "width": 139,
+      "height": 157,
+      "offsetX": 127,
+      "offsetY": 130
+    },
+    {
+      "x": 2047,
+      "y": 1291,
+      "width": 158,
+      "height": 149,
+      "offsetX": 127,
+      "offsetY": 139
+    },
+    {
+      "x": 2405,
+      "y": 1277,
+      "width": 180,
+      "height": 157,
+      "offsetX": 101,
+      "offsetY": 125
+    },
+    {
+      "x": 2813,
+      "y": 1268,
+      "width": 149,
+      "height": 178,
+      "offsetX": 125,
+      "offsetY": 116
+    },
+    {
+      "x": 112,
+      "y": 1717,
+      "width": 184,
+      "height": 98,
+      "offsetX": 112,
+      "offsetY": 181
+    },
+    {
+      "x": 488,
+      "y": 1713,
+      "width": 182,
+      "height": 108,
+      "offsetX": 104,
+      "offsetY": 177
+    },
+    {
+      "x": 864,
+      "y": 1734,
+      "width": 190,
+      "height": 94,
+      "offsetX": 96,
+      "offsetY": 198
+    },
+    {
+      "x": 1254,
+      "y": 1724,
+      "width": 192,
+      "height": 105,
+      "offsetX": 102,
+      "offsetY": 188
+    },
+    {
+      "x": 1649,
+      "y": 1709,
+      "width": 160,
+      "height": 126,
+      "offsetX": 113,
+      "offsetY": 173
+    },
+    {
+      "x": 2019,
+      "y": 1724,
+      "width": 177,
+      "height": 105,
+      "offsetX": 99,
+      "offsetY": 188
+    },
+    {
+      "x": 2392,
+      "y": 1715,
+      "width": 193,
+      "height": 105,
+      "offsetX": 88,
+      "offsetY": 179
+    },
+    {
+      "x": 2779,
+      "y": 1719,
+      "width": 183,
+      "height": 102,
+      "offsetX": 91,
+      "offsetY": 183
+    }
+  ],
+  "generation": {
+    "sourceOutputs": [
+      "exec-a1fe306a-facd-423d-8f82-df3955645a30.png"
+    ],
+    "generatedCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "generatedCornerAlpha": 0,
+    "identityReference": "art-reference/monsters/humanoid/kobold/kobold/animation/source/base.png",
+    "initialPrompt": "40-cell 8x5 full-direction atlas; subtle copper-orange scale accents on the cheek and shoulders and a warm leather apron, while retaining the same blue species identity."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "sourceFrames-repack-v2",
+    "sourceCanvas": {
+      "width": 3072,
+      "height": 1920
+    },
+    "uniformScale": 1.0,
+    "translation": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "recoveredIsolatedAlphaPixels": 0,
+    "discardedIsolatedAlphaDust": 0,
+    "status": "draft-review"
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged.",
+      "Repacked from uniquely assigned sourceFrames into 384 x 384 review cells with at least 24 px clear padding on each edge; visual review remains pending."
+    ]
+  }
+}

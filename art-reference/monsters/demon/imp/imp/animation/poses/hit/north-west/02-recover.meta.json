@@ -1,0 +1,52 @@
+{
+  "status": "candidate-review",
+  "action": "hit",
+  "direction": "north-west",
+  "frame": "02-recover",
+  "candidateDuplicate": true,
+  "requiresRegeneration": true,
+  "duplicateReason": "Temporary nearest-direction same-action same-phase coverage placeholder; replace with a direction-specific pose.",
+  "sourcePath": "art-reference/monsters/demon/imp/imp/animation/atlas/animation.png",
+  "sourceDirection": "west",
+  "sourceKind": "atlas-cell",
+  "sourceCell": [
+    6,
+    3
+  ],
+  "sourceAngleDegrees": 270,
+  "targetAngleDegrees": 225,
+  "visualReviewRequired": true,
+  "normalization": {
+    "method": "single-atlas-cell-extract-3x-nearest",
+    "sourceCell": [
+      6,
+      3
+    ],
+    "alphaThreshold": 128,
+    "canvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ]
+  },
+  "measurement": {
+    "canvas": [
+      384,
+      384
+    ],
+    "alphaBoundsExclusive": [
+      115,
+      108,
+      268,
+      288
+    ],
+    "alphaValues": [
+      0,
+      255
+    ],
+    "componentCount": 1
+  }
+}

@@ -42,6 +42,18 @@ ellipse ratio ของเมทริกซ์; renderer เก็บ affine ma
 bearings ยังไม่ได้รับรอง Runtime รับ facing เป็น radians จาก +X แล้วแปลงผ่าน
 `arenaFacingIndex` ให้เป็น screen-facing sector
 
+## มาตรฐานทิศทาง: 8 ทิศ
+
+งาน source set ใหม่ทุกชุดใช้ **8 ทิศ** (`S SE E NE N NW W SW`) — 4 ทิศแข็งที่มุมทแยง,
+16 ทิศเพิ่มต้นทุนอาร์ต 2 เท่า (272 slots เทียบกับ 136) แต่ผลที่เห็นในเกมไม่คุ้ม
+เมื่อสไปรต์แสดงผลเล็ก 8 ทิศคือจุดสมดุลสำหรับมุมมอง 3/4 นี้
+
+- สัญญา poses ต่อ species คือ **136 slots**: idle 1×8 ทิศ, walk/attack/hit/death
+  4×8 ทิศ — เป้าที่ `tools/monster-animation-v5-inventory.py` (`TARGET_DIRECTIONS`) ใช้ตรวจ
+- Runtime แปลง facing เป็น 8 screen-facing sectors เท่านั้น ไม่มีช่องให้ทิศที่ 9–16
+- ชีต 16 ทิศ (เช่น `outputs/giant-idle-16-direction-contact-sheet-v1`) เป็น visual draft
+  สำหรับดู concept ไม่นับเป็น source coverage ห้าม promote เข้าเกม
+
 ## มีอะไรอยู่ที่ไหน
 
 | ไฟล์/โฟลเดอร์    | หน้าที่                                             |

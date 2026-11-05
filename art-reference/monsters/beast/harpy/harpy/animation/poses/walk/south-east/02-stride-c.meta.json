@@ -1,0 +1,74 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\ITOP\\.codex-zed-account-1\\generated_images\\01a1a9ef-a592-7632-a531-70b402efd9e9\\exec-74d48baf-95d0-47c3-9761-6f22b77b8b92.png",
+  "action": "walk",
+  "phase": "02-stride-c.png",
+  "direction": "south-east",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "rawAlphaBoundsExclusive": [
+    49,
+    21,
+    1226,
+    1254
+  ],
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Shared source-pose placement from poses.json; source feet/root were not independently measured.",
+  "normalization": {
+    "method": "alpha-crop-nearest-fit-384-v1",
+    "uniformScale": 0.14922952,
+    "outputSize": {
+      "width": 176,
+      "height": 184
+    },
+    "offset": {
+      "x": 104,
+      "y": 104
+    },
+    "sourceAlphaBoundsExclusive": [
+      49,
+      21,
+      1226,
+      1254
+    ]
+  },
+  "outputAlphaBoundsExclusive": [
+    106,
+    117,
+    256,
+    282
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    136,
+    120,
+    236,
+    268
+  ],
+  "alphaMeasurement": {
+    "extrema": [
+      0,
+      255
+    ],
+    "distinctLevels": 187
+  },
+  "qa": {
+    "visuallyInspected": false,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false,
+    "identityPlausible": false,
+    "facingPlausible": false,
+    "note": "Coverage candidate only; frame identity, facing and articulation review remain pending."
+  }
+}

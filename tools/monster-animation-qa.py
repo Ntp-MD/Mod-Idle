@@ -7,7 +7,7 @@ Run from the repository root to check every draft-review species and named varia
 
 Or check selected metadata files:
 
-    python tools/monster-animation-qa.py --metadata art-reference/monsters/humanoid/orc/variants/raider-orc/meta.json
+    python tools/monster-animation-qa.py --metadata art-reference/monsters/humanoid/orc/raider-orc/meta.json
 
 Check the mob images and metadata actually loaded by the production registry:
 
@@ -552,8 +552,8 @@ def runtime_atlases(registry_path: Path = RUNTIME_REGISTRY,
 
 def draft_metadata_files() -> list[Path]:
     candidates: set[Path] = set()
-    for pattern in ("*/*/animation/meta.json", "*/*/animation/v*/meta.json",
-                    "*/*/variants/*/meta.json", "*/*/variants/*/v*/meta.json"):
+    for pattern in ("*/*/*/animation/meta.json", "*/*/*/animation/v*/meta.json",
+                    "*/*/*/meta.json", "*/*/*/v*/meta.json"):
         for path in MONSTER_ROOT.glob(pattern):
             if path.is_file() and "_shared" not in path.parts:
                 candidates.add(path)

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { SvelteSet } from 'svelte/reactivity';
   import SkillGeometryLayer from './SkillGeometryLayer.svelte';
   import ArenaGround from './ArenaGround.svelte';
   import { arenaGroundForField } from './arena/arena-ground-materials';
@@ -69,6 +70,8 @@
   let showAiLog = $state(false);
   const spriteClipPrefix = $props.id();
   let systemReducedMotion = $state(false);
+  // All actors sharing a broken atlas switch together, without retrying it every render frame.
+  const failedArt = new SvelteSet<ArenaCharacterArt>();
   const quality = $derived(combatEffectLevel(effectLevel, speed));
   const reducedMotion = $derived((inspect && motionReview !== 'system' ? motionReview === 'reduced' : systemReducedMotion)
     || quality !== 'full');
@@ -388,12 +391,13 @@
 
   function artFor(actor: CombatArenaActor): ArenaCharacterArt | null {
     if (iconActors) return null;
-    if (actor.id === 'player') return playerArt;
+    if (actor.id === 'player') return failedArt.has(playerArt) ? null : playerArt;
     const speciesId = actor.mob?.speciesId;
     // Other field spawns can remain present while reviewing a named variant.
-    if (spritePreviewSpecies && reviewArt && actor.mob
-      && (!spritePreviewVariant || speciesId === spritePreviewVariant.speciesId)) return reviewArt;
-    return arenaArtForSpecies(speciesId, spritePreviewSpecies && !spritePreviewVariant ? undefined : actor.mob?.variant);
+    const art = spritePreviewSpecies && reviewArt && actor.mob
+      && (!spritePreviewVariant || speciesId === spritePreviewVariant.speciesId)
+      ? reviewArt : arenaArtForSpecies(speciesId, spritePreviewSpecies && !spritePreviewVariant ? undefined : actor.mob?.variant);
+    return art && !failedArt.has(art) ? art : null;
   }
 
   /** A source crop kept inside the runtime cell and the image, so it cannot pull in a neighbour
@@ -734,7 +738,7 @@
   </svg>
 
   {#each actors as view (view.actor.id)}
-    {@const animationSourceName = iconActors ? 'icon' : animationSource(view.actor)}
+    {@const animationSourceName = !view.sheet ? 'icon' : animationSource(view.actor)}
     <div class="arena-actor" class:hero={view.actor.id === 'player'} class:dead={view.actor.diedAtUs != null}
       class:target={targetId === view.actor.id} class:moving={view.actor.moving}
       data-arena-actor={view.actor.id} data-moving={view.actor.moving} data-action={view.action?.kind || 'idle'} data-animation={view.clipName} data-animation-source={animationSourceName} data-threat={view.threat ? 'true' : undefined}
@@ -776,12 +780,14 @@
                 </clipPath>
               </defs>
               <image href={view.standaloneFrame?.href ?? view.sheet.href}
+                onerror={() => { if (view.art) failedArt.add(view.art); }}
                 x={view.sourceFrame.offsetX-view.sourceFrame.x} y={view.sourceFrame.offsetY-view.sourceFrame.y}
                 width={view.standaloneFrame?.imageWidth ?? view.sheet.imageWidth ?? view.sheet.frameWidth * view.sheet.columns}
                 height={view.standaloneFrame?.imageHeight ?? view.sheet.imageHeight ?? view.sheet.frameHeight * view.sheet.rows}
                 clip-path={`url(#${spriteClipPrefix}-${view.actor.id})`} />
             {:else}
               <image href={view.standaloneFrame?.href ?? view.sheet.href}
+                onerror={() => { if (view.art) failedArt.add(view.art); }}
                 width={view.standaloneFrame?.imageWidth ?? view.sheet.imageWidth ?? view.sheet.frameWidth * view.sheet.columns}
                 height={view.standaloneFrame?.imageHeight ?? view.sheet.imageHeight ?? view.sheet.frameHeight * view.sheet.rows} />
             {/if}

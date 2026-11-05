@@ -1,0 +1,33 @@
+{
+  "status": "candidate-review-required",
+  "generator": "existing individual Treant source pose; temporary duplicate for slot coverage",
+  "source": "poses/death/east/01-collapse.png",
+  "sourceDirection": "east",
+  "sourceSha256": "3e72ee1da1a8aa192a0e870d3fe61e8f55541cdb83d352d3cf32c03ab0f187e2",
+  "action": "death",
+  "direction": "south-east",
+  "phase": "01-collapse",
+  "candidateDuplicate": true,
+  "candidateDuplicateReason": "Image generation is unavailable under the shared team usage limit; this source matches the action and phase but has a different facing and is not approved.",
+  "processing": {
+    "method": "byte-for-byte copy of existing individual 384x384 PNG"
+  },
+  "canvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "visualReview": {
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "sequenceAccepted": false,
+    "note": "Provisional coverage placeholder only; replace with a distinct exact-facing pose before visual approval."
+  },
+  "qa": {
+    "atlas": false,
+    "anchor": false
+  }
+}

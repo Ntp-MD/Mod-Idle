@@ -6,10 +6,10 @@
  * It is evidence, not a CI timing gate: no assertion in here depends on wall-clock thresholds.
  */
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { canonical, sha256 } from './lib/measurement-output.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, '..');
@@ -35,20 +35,6 @@ const summary = (times) => {
     maxMs: sorted[sorted.length - 1],
   };
 };
-
-/** Stable JSON for hashing: object keys are sorted; array order (events, targets, payloads) stays. */
-function canonical(value) {
-  if (value === null || typeof value !== 'object') return value;
-  if (Array.isArray(value)) return value.map(canonical);
-  const out = {};
-  for (const key of Object.keys(value).sort()) {
-    const next = canonical(value[key]);
-    if (next !== undefined) out[key] = next;
-  }
-  return out;
-}
-
-const sha256 = (value) => createHash('sha256').update(JSON.stringify(canonical(value))).digest('hex');
 
 function liveArena(arena) {
   if (!arena) return null;
@@ -197,6 +183,24 @@ async function run() {
     ];
 
     console.log(JSON.stringify({
+      kind: 'run',
+      schemaVersion: 1,
+      tool: 'performance-baseline',
+      workloadVersion: 1,
+      commit: '',
+      dirty: false,
+      sourceHash: '',
+      gameplayDataHash: '',
+      workloadHash: sha256({ liveCases: ['smallest-basic', 'largest-basic', 'largest-skill-heavy'], repeats: LIVE_REPEATS, warmSteps: LIVE_WARM_STEPS, timedSteps: LIVE_TIMED_STEPS, offlineSeconds: OFFLINE_SECONDS, offlineRepeats: OFFLINE_REPEATS, seed: SEED }),
+      environmentKey: sha256({ node: process.version, platform: process.platform, arch: process.arch, cpuModel: 'unknown', browser: null, buildMode: null, viewport: null, cpuThrottle: null, networkProfile: null }),
+      environment: { node: process.version, platform: process.platform, arch: process.arch, cpuModel: 'unknown', browser: null, buildMode: null, viewport: null, cpuThrottle: null, networkProfile: null },
+      selectedIds: { skills: skillHeavyIds },
+      metrics: {},
+      checks: [],
+      status: 'PASS',
+      firstFailure: null,
+    }));
+    console.log(JSON.stringify({
       kind: 'setup',
       seed: SEED,
       smallestZone,
@@ -310,6 +314,7 @@ async function run() {
         digest: fingerprint(encounter.state),
       }));
     }
+    console.log(JSON.stringify({ kind: 'summary', status: 'PASS', counts: { pass: 0, fail: 0, incomplete: 0, pendingWatches: 0 } }));
     console.log(JSON.stringify({ kind: 'done', liveCases: summaries.length, offlineRepeats: OFFLINE_REPEATS }));
   } finally {
     await server.close();

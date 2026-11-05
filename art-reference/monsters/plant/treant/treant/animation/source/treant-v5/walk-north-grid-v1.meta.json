@@ -1,0 +1,23 @@
+{
+    "status":  "draft-review",
+    "generator":  "built-in image_gen",
+    "source":  "C:/Users/ITOP/.codex-zed-account-2/generated_images/01a1a9f2-6af2-7ef1-9a8c-9faa154cdc5e/exec-979d34ad-b9ea-4557-b981-4effe8243039.png",
+    "action":  "walk",
+    "direction":  "north",
+    "phases":  [
+                   "00-stride-a",
+                   "01-stride-b",
+                   "02-stride-c",
+                   "03-stride-d"
+               ],
+    "layout":  {
+                   "sourceCanvas":  {
+                                        "height":  1254,
+                                        "width":  1254
+                                    },
+                   "rows":  2,
+                   "cellOrder":  "row-major",
+                   "columns":  2
+               },
+    "notes":  "Provenance only. Four cells are not canonical until individually extracted and checked."
+}

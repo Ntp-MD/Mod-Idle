@@ -4,6 +4,7 @@ game/dist/
 
 # Resumable release-journey checkpoints are local measurement state, not source
 game/.cache/release-journey/
+game/.cache/measurement-build/
 
 # Generated tool previews and reports (shader baking, Playwright captures)
 output/

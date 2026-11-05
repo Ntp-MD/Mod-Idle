@@ -1,0 +1,41 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in image_gen",
+  "source": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1a9ec-e9c8-7f42-b8d9-e4f64d37291d/exec-64614885-fc08-4d2c-acd1-901d44c14466.png",
+  "action": "death",
+  "direction": "north-west",
+  "phase": "02-ground",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "matched to existing Dryad ground death line"
+  },
+  "normalization": {
+    "method": "alpha crop (>128), nearest-neighbor fit to phase-matched Dryad death frame height 95px, transparent 384x384 placement",
+    "sourceAlphaThresholdForCrop": 128,
+    "sourcePixelsPaintedOrComposited": false,
+    "normalizedSubjectDimensions": [
+      130,
+      95
+    ]
+  },
+  "visualReview": {
+    "sequenceAccepted": false,
+    "identityAccepted": true,
+    "exactAngleAccepted": false,
+    "atlasReady": false,
+    "note": "Candidate slot; phase sequence and exact direction remain unapproved."
+  },
+  "qa": {
+    "atlas": false,
+    "anchor": false
+  }
+}

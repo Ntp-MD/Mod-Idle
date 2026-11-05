@@ -1,0 +1,42 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-image_gen",
+  "source": "art-reference/monsters/plant/dryad/dryad/animation/drafts/attack-south-00-windup-candidate.png",
+  "action": "attack",
+  "direction": "south",
+  "phase": "00-windup",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 286,
+    "provenance": "placed to match existing Dryad source-frame foot baseline"
+  },
+  "normalization": {
+    "method": "single-pose alpha crop and nearest-neighbor scale onto transparent 384x384 frame",
+    "sourceAlphaThresholdForCrop": 128,
+    "sourcePixelsPaintedOrComposited": false,
+    "normalizedSubjectDimensions": [
+      146,
+      173
+    ]
+  },
+  "identityReference": "art-reference/monsters/plant/dryad/dryad/animation/source/base-v1.png",
+  "styleReference": "art-reference/monsters/plant/dryad/dryad/animation/atlas/animation.png",
+  "visualReview": {
+    "sequenceAccepted": false,
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "note": "Candidate source slot; requires visual review against the Dryad pose mold before approval."
+  },
+  "qa": {
+    "atlas": false,
+    "anchor": false
+  }
+}

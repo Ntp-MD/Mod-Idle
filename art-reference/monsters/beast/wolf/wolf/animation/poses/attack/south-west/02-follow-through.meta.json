@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "wolf",
+  "generator": "OpenAI built-in image_gen",
+  "generationSource": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1a9ef-c913-7950-b307-ee9adeae512e/exec-a7ca5b47-861f-4e17-ac1e-0dd19c5e5ffe.png",
+  "identityRef": "../../../../animation/source/detail-v1.png",
+  "directionRef": "../../../../animation/poses/idle/south-west.png",
+  "actionReference": "../../../../animation/poses/attack/west/02-follow-through.png",
+  "action": "attack",
+  "direction": "south-west",
+  "requestedFacingDegrees": 315,
+  "phase": "02-follow-through",
+  "pose": "jaw closes and weight moves onto forelegs",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "sourceGeneratedSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "sourcePixelsModified": true,
+  "processing": {
+    "method": "alpha-crop-nearest-anchor-v1",
+    "alphaThreshold": 128,
+    "rawAlphaBoundsExclusive": [
+      144,
+      322,
+      1168,
+      1006
+    ],
+    "targetHeight": 165,
+    "maxWidth": 240,
+    "normalizedContentSize": [
+      240,
+      160
+    ],
+    "uniformScale": 0.234375,
+    "canvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "resampling": "nearest-neighbor after tight alpha crop and binary alpha threshold"
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "runtimePromotion": false
+  },
+  "visualReview": "Candidate generated for the canonical slot. Facing, phase sequence, foot anchor, alpha edges and atlas approval remain pending."
+}

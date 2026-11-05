@@ -1,0 +1,41 @@
+{
+  "status": "candidate-review",
+  "action": "attack",
+  "direction": "north",
+  "frame": "03-recovery",
+  "candidateDuplicate": true,
+  "requiresRegeneration": true,
+  "duplicateReason": "Temporary nearest-direction same-action same-phase coverage placeholder; replace with a direction-specific pose.",
+  "sourcePath": "art-reference/monsters/demon/imp/imp/animation/poses/attack/north-east/03-recovery.png",
+  "sourceDirection": "north-east",
+  "sourceKind": "individual-canonical-png",
+  "sourceCell": null,
+  "sourceAngleDegrees": 135,
+  "targetAngleDegrees": 180,
+  "visualReviewRequired": true,
+  "normalization": {
+    "method": "copied-nearest-individual-canonical-png",
+    "pixelTransform": "none",
+    "canvas": [
+      384,
+      384
+    ]
+  },
+  "measurement": {
+    "canvas": [
+      384,
+      384
+    ],
+    "alphaBoundsExclusive": [
+      111,
+      68,
+      272,
+      288
+    ],
+    "alphaValues": [
+      0,
+      255
+    ],
+    "componentCount": 1
+  }
+}

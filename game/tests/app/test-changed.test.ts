@@ -18,6 +18,15 @@ const files = [
   'game/public/fx/skill-pool/attack-fire/attack-fireball/v1/atlas.png',
   'game/src/ui/combat/arena/arena-art-pixel-v2/human-animation-v1.json',
   'game/src/assets/unknown.png',
+  'game/tests/app/boot-recovery.test.ts',
+  'game/index.html',
+  'game/wiki.html',
+  'game/src/main.ts',
+  'game/src/AppShell.svelte',
+  'game/src/App.svelte',
+  'game/src/styles/base.css',
+  'game/measurements/example.ts',
+  'game/browser-tests/example.spec.ts',
   'docs/README.md',
 ];
 
@@ -74,7 +83,7 @@ function run(changed: string[], flags: string[] = [], deleted: string[] = [], ex
 
 it('runs the suite once for data changes, slow tests included', () => {
   const calls = run(['tools/data/example.json', 'game/tests/example.test.ts', 'game/tests/sim/clock.test.ts']);
-  expect(calls).toEqual([['run', '--passWithNoTests']]);
+  expect(calls).toEqual([['run']]);
 });
 
 it('selects changed sources and tests together without excluding a changed slow test', () => {
@@ -105,7 +114,7 @@ it('covers the runner itself through its own regression test', () => {
 
 it('runs only the changed tests when no source changed', () => {
   const calls = run(['game/tests/example.test.ts']);
-  expect(calls).toEqual([['run', '--passWithNoTests', 'tests/example.test.ts']]);
+  expect(calls).toEqual([['run', 'tests/example.test.ts']]);
 });
 
 it('finds related tests when a shared fixture changes', () => {
@@ -123,7 +132,7 @@ it('falls back to the suite for deleted sources and test config changes', () => 
 });
 
 it('supports full runs, dry runs, no changes and failing test exits', () => {
-  expect(run(['tools/data/example.json'], ['--full'])).toEqual([['run', '--passWithNoTests']]);
+  expect(run(['tools/data/example.json'], ['--full'])).toEqual([['run']]);
   expect(run(['tools/data/example.json'], ['--dry-run'])).toEqual([]);
   expect(run([])).toEqual([]);
   expect(run(['game/tests/example.test.ts'], [], [], 1)).toHaveLength(1);
@@ -180,4 +189,44 @@ it('falls back to suite for opaque without proven owner', () => {
 it('treats docs-only as no gameplay and keeps exit codes', () => {
   expect(run(['docs/README.md'])).toEqual([]);
   expect(run(['game/tests/example.test.ts'], [], [], 1)).toHaveLength(1);
+});
+
+it('selects boot-recovery for the shell and entry inputs', () => {
+  for (const file of [
+    'game/index.html',
+    'game/wiki.html',
+    'game/src/main.ts',
+    'game/src/AppShell.svelte',
+    'game/src/App.svelte',
+  ]) {
+    const calls = run([file]);
+    expect(calls, file).toHaveLength(1);
+    expect(calls[0].slice(0, 2), file).toEqual(['related', '--run']);
+    expect(calls[0], file).toContain('tests/app/boot-recovery.test.ts');
+    // main.ts/App.svelte are graph sources: vitest relies on their import graph
+    // to find related tests; html/wiki are not fed to the graph.
+    if (file.endsWith('.html')) expect(calls[0].some((arg) => arg === file.replace(/^game\//, '')), file).toBe(false);
+  }
+});
+
+it('treats CSS and measurement sources as graph inputs', () => {
+  const cssCalls = run(['game/src/styles/base.css']);
+  expect(cssCalls).toHaveLength(1);
+  expect(cssCalls[0][0]).toBe('run');
+  const measurementCalls = run(['game/measurements/example.ts']);
+  expect(measurementCalls).toHaveLength(1);
+  expect(measurementCalls[0].slice(0, 2)).toEqual(['related', '--run']);
+  expect(measurementCalls[0]).toContain('measurements/example.ts');
+});
+
+it('treats a browser spec change as no unit selection (browser runner lands in P5)', () => {
+  expect(run(['game/browser-tests/example.spec.ts'])).toEqual([]);
+});
+
+it('handles mixed CSS + TS changes without passing CSS to vitest related', () => {
+  const calls = run(['game/src/example.ts', 'game/src/styles/base.css']);
+  expect(calls).toHaveLength(1);
+  expect(calls[0].slice(0, 2)).toEqual(['related', '--run']);
+  expect(calls[0]).toContain('src/example.ts');
+  expect(calls[0].some((arg) => arg.endsWith('.css'))).toBe(false);
 });

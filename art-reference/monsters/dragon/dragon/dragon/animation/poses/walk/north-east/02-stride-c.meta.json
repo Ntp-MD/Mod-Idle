@@ -1,0 +1,11 @@
+{
+    "status":  "candidate-review",
+    "candidateDuplicate":  true,
+    "requiresRegeneration":  true,
+    "method":  "nearest-direction-copy",
+    "sourcePath":  "poses/walk/east/02-stride-c.png",
+    "sourceDirection":  "east",
+    "sourcePixelsModified":  false,
+    "visualReviewRequired":  true,
+    "qaStatus":  "pending-facing-spacing-anchor-alpha-atlas-review"
+}

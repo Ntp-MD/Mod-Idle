@@ -1,0 +1,496 @@
+{
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "golem",
+  "variantId": "watchtower-golem",
+  "name": "Watchtower Golem",
+  "levels": [
+    81,
+    100
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-anchor-at-224",
+  "grid": {
+    "columns": 8,
+    "rows": 5,
+    "totalFrames": 40
+  },
+  "states": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    {
+      "state": "idle",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "walk",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "attack",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "hit",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    },
+    {
+      "state": "death",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
+      ],
+      "framesPerDirection": 1
+    }
+  ],
+  "sourceFrames": [
+    {
+      "x": 112,
+      "y": 136,
+      "width": 174,
+      "height": 150,
+      "offsetX": 112,
+      "offsetY": 136
+    },
+    {
+      "x": 501,
+      "y": 129,
+      "width": 164,
+      "height": 160,
+      "offsetX": 117,
+      "offsetY": 129
+    },
+    {
+      "x": 893,
+      "y": 129,
+      "width": 140,
+      "height": 159,
+      "offsetX": 125,
+      "offsetY": 129
+    },
+    {
+      "x": 1274,
+      "y": 122,
+      "width": 141,
+      "height": 166,
+      "offsetX": 122,
+      "offsetY": 122
+    },
+    {
+      "x": 1642,
+      "y": 126,
+      "width": 172,
+      "height": 160,
+      "offsetX": 106,
+      "offsetY": 126
+    },
+    {
+      "x": 2041,
+      "y": 125,
+      "width": 141,
+      "height": 163,
+      "offsetX": 121,
+      "offsetY": 125
+    },
+    {
+      "x": 2423,
+      "y": 129,
+      "width": 148,
+      "height": 158,
+      "offsetX": 119,
+      "offsetY": 129
+    },
+    {
+      "x": 2794,
+      "y": 129,
+      "width": 165,
+      "height": 159,
+      "offsetX": 106,
+      "offsetY": 129
+    },
+    {
+      "x": 112,
+      "y": 493,
+      "width": 170,
+      "height": 179,
+      "offsetX": 112,
+      "offsetY": 109
+    },
+    {
+      "x": 503,
+      "y": 498,
+      "width": 157,
+      "height": 174,
+      "offsetX": 119,
+      "offsetY": 114
+    },
+    {
+      "x": 866,
+      "y": 497,
+      "width": 158,
+      "height": 175,
+      "offsetX": 98,
+      "offsetY": 113
+    },
+    {
+      "x": 1250,
+      "y": 494,
+      "width": 167,
+      "height": 178,
+      "offsetX": 98,
+      "offsetY": 110
+    },
+    {
+      "x": 1662,
+      "y": 499,
+      "width": 161,
+      "height": 173,
+      "offsetX": 126,
+      "offsetY": 115
+    },
+    {
+      "x": 2039,
+      "y": 497,
+      "width": 167,
+      "height": 175,
+      "offsetX": 119,
+      "offsetY": 113
+    },
+    {
+      "x": 2419,
+      "y": 499,
+      "width": 153,
+      "height": 173,
+      "offsetX": 115,
+      "offsetY": 115
+    },
+    {
+      "x": 2793,
+      "y": 494,
+      "width": 168,
+      "height": 178,
+      "offsetX": 105,
+      "offsetY": 110
+    },
+    {
+      "x": 112,
+      "y": 885,
+      "width": 159,
+      "height": 171,
+      "offsetX": 112,
+      "offsetY": 117
+    },
+    {
+      "x": 486,
+      "y": 892,
+      "width": 185,
+      "height": 164,
+      "offsetX": 102,
+      "offsetY": 124
+    },
+    {
+      "x": 871,
+      "y": 860,
+      "width": 161,
+      "height": 196,
+      "offsetX": 103,
+      "offsetY": 92
+    },
+    {
+      "x": 1237,
+      "y": 920,
+      "width": 202,
+      "height": 136,
+      "offsetX": 85,
+      "offsetY": 152
+    },
+    {
+      "x": 1633,
+      "y": 915,
+      "width": 207,
+      "height": 141,
+      "offsetX": 97,
+      "offsetY": 147
+    },
+    {
+      "x": 2041,
+      "y": 861,
+      "width": 160,
+      "height": 195,
+      "offsetX": 121,
+      "offsetY": 93
+    },
+    {
+      "x": 2402,
+      "y": 892,
+      "width": 182,
+      "height": 164,
+      "offsetX": 98,
+      "offsetY": 124
+    },
+    {
+      "x": 2802,
+      "y": 888,
+      "width": 159,
+      "height": 168,
+      "offsetX": 114,
+      "offsetY": 120
+    },
+    {
+      "x": 117,
+      "y": 1276,
+      "width": 153,
+      "height": 164,
+      "offsetX": 117,
+      "offsetY": 124
+    },
+    {
+      "x": 495,
+      "y": 1283,
+      "width": 165,
+      "height": 156,
+      "offsetX": 111,
+      "offsetY": 131
+    },
+    {
+      "x": 890,
+      "y": 1276,
+      "width": 145,
+      "height": 164,
+      "offsetX": 122,
+      "offsetY": 124
+    },
+    {
+      "x": 1261,
+      "y": 1276,
+      "width": 152,
+      "height": 164,
+      "offsetX": 109,
+      "offsetY": 124
+    },
+    {
+      "x": 1657,
+      "y": 1276,
+      "width": 148,
+      "height": 164,
+      "offsetX": 121,
+      "offsetY": 124
+    },
+    {
+      "x": 2039,
+      "y": 1276,
+      "width": 145,
+      "height": 164,
+      "offsetX": 119,
+      "offsetY": 124
+    },
+    {
+      "x": 2413,
+      "y": 1282,
+      "width": 161,
+      "height": 156,
+      "offsetX": 109,
+      "offsetY": 130
+    },
+    {
+      "x": 2803,
+      "y": 1276,
+      "width": 152,
+      "height": 164,
+      "offsetX": 115,
+      "offsetY": 124
+    },
+    {
+      "x": 112,
+      "y": 1681,
+      "width": 156,
+      "height": 140,
+      "offsetX": 112,
+      "offsetY": 145
+    },
+    {
+      "x": 468,
+      "y": 1693,
+      "width": 174,
+      "height": 133,
+      "offsetX": 84,
+      "offsetY": 157
+    },
+    {
+      "x": 848,
+      "y": 1720,
+      "width": 189,
+      "height": 106,
+      "offsetX": 80,
+      "offsetY": 184
+    },
+    {
+      "x": 1233,
+      "y": 1727,
+      "width": 221,
+      "height": 92,
+      "offsetX": 81,
+      "offsetY": 191
+    },
+    {
+      "x": 1653,
+      "y": 1690,
+      "width": 163,
+      "height": 136,
+      "offsetX": 117,
+      "offsetY": 154
+    },
+    {
+      "x": 2023,
+      "y": 1713,
+      "width": 176,
+      "height": 110,
+      "offsetX": 103,
+      "offsetY": 177
+    },
+    {
+      "x": 2401,
+      "y": 1723,
+      "width": 182,
+      "height": 103,
+      "offsetX": 97,
+      "offsetY": 187
+    },
+    {
+      "x": 2778,
+      "y": 1723,
+      "width": 189,
+      "height": 98,
+      "offsetX": 90,
+      "offsetY": 187
+    }
+  ],
+  "identityReference": "art-reference/monsters/elemental/golem/golem/animation/atlas/animation.png",
+  "generation": {
+    "sourceOutputs": [
+      "exec-e8be4466-7064-401b-b6e9-8c2a0d0316eb.png"
+    ],
+    "identityReference": "art-reference/monsters/elemental/golem/golem/animation/atlas/animation.png",
+    "variantCue": "a subtle blocky parapet-like ridge in the upper shoulder stones, retaining the same humanoid golem build",
+    "initialPrompt": "Watchtower Golem; all 8 directions for idle, walk, attack, hit, death; dark outline without fringe or halo."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "sourceFrames-repack-v2",
+    "sourceCanvas": {
+      "width": 3072,
+      "height": 1920
+    },
+    "uniformScale": 1.0,
+    "translation": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "recoveredIsolatedAlphaPixels": 0,
+    "discardedIsolatedAlphaDust": 0,
+    "status": "draft-review"
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged.",
+      "Repacked from uniquely assigned sourceFrames into 384 x 384 review cells with at least 24 px clear padding on each edge; visual review remains pending."
+    ]
+  }
+}

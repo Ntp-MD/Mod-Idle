@@ -1,0 +1,74 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\ITOP\\.codex-zed-account-1\\generated_images\\01a1a9ef-a592-7632-a531-70b402efd9e9\\exec-7537028a-8a33-464a-9e8c-12cacb04357d.png",
+  "action": "attack",
+  "phase": "03-recovery.png",
+  "direction": "north-west",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "rawAlphaBoundsExclusive": [
+    25,
+    23,
+    1226,
+    1236
+  ],
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Shared source-pose placement from poses.json; source feet/root were not independently measured.",
+  "normalization": {
+    "method": "alpha-crop-nearest-fit-384-v1",
+    "uniformScale": 0.15169002,
+    "outputSize": {
+      "width": 182,
+      "height": 184
+    },
+    "offset": {
+      "x": 101,
+      "y": 104
+    },
+    "sourceAlphaBoundsExclusive": [
+      25,
+      23,
+      1226,
+      1236
+    ]
+  },
+  "outputAlphaBoundsExclusive": [
+    138,
+    106,
+    266,
+    283
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    141,
+    125,
+    241,
+    264
+  ],
+  "alphaMeasurement": {
+    "extrema": [
+      0,
+      255
+    ],
+    "distinctLevels": 166
+  },
+  "qa": {
+    "visuallyInspected": false,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false,
+    "identityPlausible": false,
+    "facingPlausible": false,
+    "note": "Coverage candidate only; identity, facing, phase, cycle and atlas review remain pending."
+  }
+}

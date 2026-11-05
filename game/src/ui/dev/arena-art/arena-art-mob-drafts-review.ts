@@ -10,21 +10,21 @@ type MobDraftMetadata = SpriteAtlasMetadata & {
 };
 
 const metadataModules = import.meta.glob<MobDraftMetadata>(
-  '../../../../../art-reference/monsters/*/*/variants/*/meta.json',
+  '../../../../../art-reference/monsters/*/*/*/meta.json',
   { import: 'default' },
 );
 const atlasModules = import.meta.glob<string>(
-  '../../../../../art-reference/monsters/*/*/variants/*/atlas/animation-draft.png',
+  '../../../../../art-reference/monsters/*/*/*/atlas/animation-draft.png',
   { query: '?url', import: 'default' },
 );
 const qaPassedMetadataPaths = new Set<string>(MOB_DRAFT_VARIANT_QA_PASS_METADATA_PATHS);
 
 /** Load one named gameplay variant atlas for the development showcase only. */
 export async function loadMobDraftReviewArt(speciesId: string, variantId: string): Promise<ArenaCharacterArt | null> {
-  const metadataSuffix = `${speciesId}/variants/${variantId}/meta.json`;
+  const metadataSuffix = `${speciesId}/${variantId}/meta.json`;
   if (![...qaPassedMetadataPaths].some((path) => path.endsWith(metadataSuffix))) return null;
 
-  const atlasSuffix = `${speciesId}/variants/${variantId}/atlas/animation-draft.png`;
+  const atlasSuffix = `${speciesId}/${variantId}/atlas/animation-draft.png`;
   const metadataKey = Object.keys(metadataModules).find((key) => key.endsWith(metadataSuffix));
   const atlasKey = Object.keys(atlasModules).find((key) => key.endsWith(atlasSuffix));
   const loadMetadata = metadataKey ? metadataModules[metadataKey] : undefined;

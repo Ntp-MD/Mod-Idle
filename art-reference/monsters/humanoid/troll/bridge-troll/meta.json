@@ -1,0 +1,437 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "troll",
+  "variantId": "bridge-troll",
+  "name": "Bridge Troll",
+  "levels": [
+    61,
+    80
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-contact-at-224",
+  "directionCount": 8,
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "actions": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    "idle S SE E NE N NW W SW",
+    "walk S SE E NE N NW W SW",
+    "attack S SE E NE N NW W SW",
+    "hit S SE E NE N NW W SW",
+    "death S SE E NE N NW W SW"
+  ],
+  "slicing": {
+    "columns": 8,
+    "rows": 5,
+    "cellWidth": 256,
+    "cellHeight": 256
+  },
+  "sourceFrames": [
+    {
+      "x": 125,
+      "y": 132,
+      "width": 130,
+      "height": 162,
+      "offsetX": 125,
+      "offsetY": 132
+    },
+    {
+      "x": 511,
+      "y": 133,
+      "width": 130,
+      "height": 161,
+      "offsetX": 127,
+      "offsetY": 133
+    },
+    {
+      "x": 914,
+      "y": 134,
+      "width": 101,
+      "height": 158,
+      "offsetX": 146,
+      "offsetY": 134
+    },
+    {
+      "x": 1295,
+      "y": 136,
+      "width": 120,
+      "height": 151,
+      "offsetX": 143,
+      "offsetY": 136
+    },
+    {
+      "x": 1668,
+      "y": 134,
+      "width": 127,
+      "height": 151,
+      "offsetX": 132,
+      "offsetY": 134
+    },
+    {
+      "x": 2043,
+      "y": 134,
+      "width": 117,
+      "height": 154,
+      "offsetX": 123,
+      "offsetY": 134
+    },
+    {
+      "x": 2441,
+      "y": 133,
+      "width": 88,
+      "height": 154,
+      "offsetX": 137,
+      "offsetY": 133
+    },
+    {
+      "x": 2788,
+      "y": 132,
+      "width": 139,
+      "height": 155,
+      "offsetX": 100,
+      "offsetY": 132
+    },
+    {
+      "x": 120,
+      "y": 514,
+      "width": 132,
+      "height": 158,
+      "offsetX": 120,
+      "offsetY": 130
+    },
+    {
+      "x": 507,
+      "y": 513,
+      "width": 119,
+      "height": 166,
+      "offsetX": 123,
+      "offsetY": 129
+    },
+    {
+      "x": 901,
+      "y": 515,
+      "width": 114,
+      "height": 157,
+      "offsetX": 133,
+      "offsetY": 131
+    },
+    {
+      "x": 1284,
+      "y": 514,
+      "width": 146,
+      "height": 156,
+      "offsetX": 132,
+      "offsetY": 130
+    },
+    {
+      "x": 1665,
+      "y": 511,
+      "width": 133,
+      "height": 161,
+      "offsetX": 129,
+      "offsetY": 127
+    },
+    {
+      "x": 2039,
+      "y": 511,
+      "width": 147,
+      "height": 161,
+      "offsetX": 119,
+      "offsetY": 127
+    },
+    {
+      "x": 2436,
+      "y": 513,
+      "width": 98,
+      "height": 153,
+      "offsetX": 132,
+      "offsetY": 129
+    },
+    {
+      "x": 2792,
+      "y": 517,
+      "width": 144,
+      "height": 155,
+      "offsetX": 104,
+      "offsetY": 133
+    },
+    {
+      "x": 113,
+      "y": 872,
+      "width": 177,
+      "height": 182,
+      "offsetX": 113,
+      "offsetY": 104
+    },
+    {
+      "x": 520,
+      "y": 897,
+      "width": 156,
+      "height": 160,
+      "offsetX": 136,
+      "offsetY": 129
+    },
+    {
+      "x": 893,
+      "y": 894,
+      "width": 158,
+      "height": 161,
+      "offsetX": 125,
+      "offsetY": 126
+    },
+    {
+      "x": 1289,
+      "y": 872,
+      "width": 119,
+      "height": 184,
+      "offsetX": 137,
+      "offsetY": 104
+    },
+    {
+      "x": 1651,
+      "y": 892,
+      "width": 139,
+      "height": 163,
+      "offsetX": 115,
+      "offsetY": 124
+    },
+    {
+      "x": 2036,
+      "y": 883,
+      "width": 139,
+      "height": 175,
+      "offsetX": 116,
+      "offsetY": 115
+    },
+    {
+      "x": 2408,
+      "y": 905,
+      "width": 157,
+      "height": 153,
+      "offsetX": 104,
+      "offsetY": 137
+    },
+    {
+      "x": 2783,
+      "y": 890,
+      "width": 181,
+      "height": 166,
+      "offsetX": 95,
+      "offsetY": 122
+    },
+    {
+      "x": 127,
+      "y": 1282,
+      "width": 147,
+      "height": 164,
+      "offsetX": 127,
+      "offsetY": 130
+    },
+    {
+      "x": 522,
+      "y": 1290,
+      "width": 136,
+      "height": 157,
+      "offsetX": 138,
+      "offsetY": 138
+    },
+    {
+      "x": 913,
+      "y": 1285,
+      "width": 129,
+      "height": 155,
+      "offsetX": 145,
+      "offsetY": 133
+    },
+    {
+      "x": 1291,
+      "y": 1292,
+      "width": 143,
+      "height": 147,
+      "offsetX": 139,
+      "offsetY": 140
+    },
+    {
+      "x": 1659,
+      "y": 1297,
+      "width": 136,
+      "height": 140,
+      "offsetX": 123,
+      "offsetY": 145
+    },
+    {
+      "x": 2025,
+      "y": 1291,
+      "width": 139,
+      "height": 149,
+      "offsetX": 105,
+      "offsetY": 139
+    },
+    {
+      "x": 2424,
+      "y": 1291,
+      "width": 132,
+      "height": 147,
+      "offsetX": 120,
+      "offsetY": 139
+    },
+    {
+      "x": 2791,
+      "y": 1282,
+      "width": 162,
+      "height": 165,
+      "offsetX": 103,
+      "offsetY": 130
+    },
+    {
+      "x": 123,
+      "y": 1673,
+      "width": 133,
+      "height": 152,
+      "offsetX": 123,
+      "offsetY": 137
+    },
+    {
+      "x": 504,
+      "y": 1707,
+      "width": 168,
+      "height": 117,
+      "offsetX": 120,
+      "offsetY": 171
+    },
+    {
+      "x": 882,
+      "y": 1721,
+      "width": 173,
+      "height": 106,
+      "offsetX": 114,
+      "offsetY": 185
+    },
+    {
+      "x": 1255,
+      "y": 1741,
+      "width": 188,
+      "height": 84,
+      "offsetX": 103,
+      "offsetY": 205
+    },
+    {
+      "x": 1652,
+      "y": 1731,
+      "width": 162,
+      "height": 88,
+      "offsetX": 116,
+      "offsetY": 195
+    },
+    {
+      "x": 2017,
+      "y": 1742,
+      "width": 181,
+      "height": 84,
+      "offsetX": 97,
+      "offsetY": 206
+    },
+    {
+      "x": 2400,
+      "y": 1721,
+      "width": 176,
+      "height": 101,
+      "offsetX": 96,
+      "offsetY": 185
+    },
+    {
+      "x": 2779,
+      "y": 1729,
+      "width": 164,
+      "height": 95,
+      "offsetX": 91,
+      "offsetY": 193
+    }
+  ],
+  "generation": {
+    "sourceOutputs": [
+      "exec-640b1f65-c5b0-46bc-b48a-5f7e6b0b7e45.png"
+    ],
+    "generatedCanvas": {
+      "width": 1586,
+      "height": 992
+    },
+    "generatedCornerAlpha": 0,
+    "identityReference": "art-reference/monsters/humanoid/troll/troll/animation/source/base.png",
+    "initialPrompt": "40-cell 8x5 full-direction atlas; a simple rope harness, weathered wooden forearm guard and a sturdy plain club, keeping the same species anatomy; hard dark outline, no colored fringe or halo."
+  },
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
+    },
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "sourceFrames-repack-v2",
+    "sourceCanvas": {
+      "width": 3072,
+      "height": 1920
+    },
+    "uniformScale": 1.0,
+    "translation": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "recoveredIsolatedAlphaPixels": 0,
+    "discardedIsolatedAlphaDust": 0,
+    "status": "draft-review"
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
+    "notes": [
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged.",
+      "Repacked from uniquely assigned sourceFrames into 384 x 384 review cells with at least 24 px clear padding on each edge; visual review remains pending."
+    ]
+  }
+}

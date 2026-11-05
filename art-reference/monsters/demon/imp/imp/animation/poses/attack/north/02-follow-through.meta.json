@@ -1,0 +1,41 @@
+{
+  "status": "candidate-review",
+  "action": "attack",
+  "direction": "north",
+  "frame": "02-follow-through",
+  "candidateDuplicate": true,
+  "requiresRegeneration": true,
+  "duplicateReason": "Temporary nearest-direction same-action same-phase coverage placeholder; replace with a direction-specific pose.",
+  "sourcePath": "art-reference/monsters/demon/imp/imp/animation/poses/attack/north-east/02-follow-through.png",
+  "sourceDirection": "north-east",
+  "sourceKind": "individual-canonical-png",
+  "sourceCell": null,
+  "sourceAngleDegrees": 135,
+  "targetAngleDegrees": 180,
+  "visualReviewRequired": true,
+  "normalization": {
+    "method": "copied-nearest-individual-canonical-png",
+    "pixelTransform": "none",
+    "canvas": [
+      384,
+      384
+    ]
+  },
+  "measurement": {
+    "canvas": [
+      384,
+      384
+    ],
+    "alphaBoundsExclusive": [
+      75,
+      68,
+      309,
+      288
+    ],
+    "alphaValues": [
+      0,
+      255
+    ],
+    "componentCount": 1
+  }
+}

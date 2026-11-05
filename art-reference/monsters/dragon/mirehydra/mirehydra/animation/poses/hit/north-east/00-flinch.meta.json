@@ -1,0 +1,54 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-image_gen",
+  "source": "drafts/hit-north-east-sheet.png",
+  "sourceDimensions": [
+    1263,
+    1246
+  ],
+  "sourceGridCell": {
+    "row": 0,
+    "column": 0
+  },
+  "action": "hit",
+  "direction": "north-east",
+  "phase": "00-flinch",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "matched to existing Mirehydra north-east idle frame"
+  },
+  "normalization": {
+    "method": "2x2 sheet cell alpha crop (>128), nearest-neighbor uniform sequence scale to north-east idle subject height, transparent 384x384 placement",
+    "sourceAlphaThresholdForCrop": 128,
+    "sourcePixelsPaintedOrComposited": false,
+    "sequenceReferenceHeight": 164,
+    "uniformSequenceScale": 0.367713,
+    "normalizedSubjectHeight": 164,
+    "sourceCellAlphaCrop": [
+      99,
+      77,
+      535,
+      523
+    ]
+  },
+  "transparentBackgroundRequested": true,
+  "identityReference": "art-reference/monsters/dragon/mirehydra/mirehydra/animation/source/base-v1.png",
+  "scaleReference": "art-reference/monsters/dragon/mirehydra/mirehydra/animation/poses/idle/north-east.png",
+  "styleReference": "art-reference/monsters/dragon/mirehydra/mirehydra/animation/atlas/animation.png",
+  "visualReview": {
+    "sequenceAccepted": false,
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "atlasReady": false,
+    "note": "Generated sheet candidate; review phase continuity, identity and exact direction before approval."
+  },
+  "qa": {
+    "atlas": false,
+    "anchor": false
+  }
+}

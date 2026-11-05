@@ -1,0 +1,40 @@
+{
+  "status": "candidate-review",
+  "candidateDuplicate": true,
+  "requiresRegeneration": true,
+  "method": "nearest-direction-copy",
+  "sourcePath": "poses/hit/south/00-flinch.png",
+  "sourceDirection": "south",
+  "sourcePixelsModified": true,
+  "visualReviewRequired": true,
+  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review",
+  "measurement": {
+    "canvas": [
+      1254,
+      1254
+    ],
+    "alphaBoundsExclusive": [
+      335,
+      545,
+      835,
+      959
+    ],
+    "alphaLevelCount": 2,
+    "sourcePixelsModified": true,
+    "anyAlphaTouchesCanvasEdge": false,
+    "alpha128BoundsExclusive": [
+      335,
+      545,
+      835,
+      959
+    ],
+    "alpha128TouchesCanvasEdge": false
+  },
+  "alphaProcessing": {
+    "method": "threshold-alpha-to-binary-at-128",
+    "threshold": 128,
+    "rgbUnchanged": true,
+    "edgeSpecksRemoved": true,
+    "originalGeneratedOutputPreserved": true
+  }
+}

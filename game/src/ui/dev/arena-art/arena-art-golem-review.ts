@@ -1,4 +1,4 @@
-import golem from '../../../../../art-reference/monsters/elemental/golem/stone-golem/meta.json';
+import golem from '../../../../../art-reference/monsters/elemental/golem/stone-golem/clips-meta.json';
 import type { ArenaCharacterArt, ArenaDirection, ArenaSpriteSheet } from '../../combat/arena/arena-art';
 
 const hrefs = {

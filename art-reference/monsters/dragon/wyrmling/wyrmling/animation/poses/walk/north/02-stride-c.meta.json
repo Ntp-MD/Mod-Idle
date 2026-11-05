@@ -1,0 +1,25 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "sourceOutput": "exec-4c36ff4b-ae6a-4da2-bf03-1f612b4687ab.png",
+  "direction": "north",
+  "angleDegrees": 180,
+  "visualReview": {
+    "identityPlausible": true,
+    "facingPlausible": true,
+    "exactAngleVerified": false,
+    "atlasReady": false
+  },
+  "sourcePixelsModified": true,
+  "normalization": {
+    "canvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ],
+    "alphaCutoff": 64
+  }
+}

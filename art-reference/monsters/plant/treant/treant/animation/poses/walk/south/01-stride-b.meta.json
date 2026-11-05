@@ -1,0 +1,19 @@
+{
+    "status":  "candidate-review-required",
+    "generator":  "temporary source-coverage duplicate",
+    "source":  "poses/walk/south/00-stride-a.png",
+    "action":  "walk",
+    "direction":  "south",
+    "phase":  "01-stride-b",
+    "candidateDuplicate":  true,
+    "visualReview":  {
+                         "sequenceAccepted":  false,
+                         "identityAccepted":  false,
+                         "exactAngleAccepted":  false,
+                         "note":  "Temporary duplicate because the one-pose imagegen request was rejected; replace with a distinct stride before visual approval."
+                     },
+    "qa":  {
+               "atlas":  false,
+               "anchor":  false
+           }
+}

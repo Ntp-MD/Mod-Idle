@@ -1,0 +1,41 @@
+{
+  "status": "candidate-review",
+  "action": "attack",
+  "direction": "south-west",
+  "frame": "01-contact",
+  "candidateDuplicate": true,
+  "requiresRegeneration": true,
+  "duplicateReason": "Temporary nearest-direction same-action same-phase coverage placeholder; replace with a direction-specific pose.",
+  "sourcePath": "art-reference/monsters/demon/imp/imp/animation/poses/attack/south/01-contact.png",
+  "sourceDirection": "south",
+  "sourceKind": "individual-canonical-png",
+  "sourceCell": null,
+  "sourceAngleDegrees": 0,
+  "targetAngleDegrees": 315,
+  "visualReviewRequired": true,
+  "normalization": {
+    "method": "copied-nearest-individual-canonical-png",
+    "pixelTransform": "none",
+    "canvas": [
+      384,
+      384
+    ]
+  },
+  "measurement": {
+    "canvas": [
+      384,
+      384
+    ],
+    "alphaBoundsExclusive": [
+      67,
+      68,
+      316,
+      288
+    ],
+    "alphaValues": [
+      0,
+      255
+    ],
+    "componentCount": 1
+  }
+}

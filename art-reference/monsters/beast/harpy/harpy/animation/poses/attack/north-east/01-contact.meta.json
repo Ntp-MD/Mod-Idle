@@ -1,0 +1,74 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "C:\\Users\\ITOP\\.codex-zed-account-1\\generated_images\\01a1a9ef-a592-7632-a531-70b402efd9e9\\exec-6715708b-22a7-43e7-aa93-ef001c84de0b.png",
+  "action": "attack",
+  "phase": "01-contact.png",
+  "direction": "north-east",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "rawAlphaBoundsExclusive": [
+    0,
+    33,
+    1236,
+    1254
+  ],
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Shared source-pose placement from poses.json; source feet/root were not independently measured.",
+  "normalization": {
+    "method": "alpha-crop-nearest-fit-384-v1",
+    "uniformScale": 0.15069615,
+    "outputSize": {
+      "width": 186,
+      "height": 184
+    },
+    "offset": {
+      "x": 99,
+      "y": 104
+    },
+    "sourceAlphaBoundsExclusive": [
+      0,
+      33,
+      1236,
+      1254
+    ]
+  },
+  "outputAlphaBoundsExclusive": [
+    110,
+    106,
+    283,
+    286
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    111,
+    123,
+    263,
+    271
+  ],
+  "alphaMeasurement": {
+    "extrema": [
+      0,
+      255
+    ],
+    "distinctLevels": 202
+  },
+  "qa": {
+    "visuallyInspected": false,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false,
+    "identityPlausible": false,
+    "facingPlausible": false,
+    "note": "Coverage candidate only; identity, facing, phase, cycle and atlas review remain pending."
+  }
+}

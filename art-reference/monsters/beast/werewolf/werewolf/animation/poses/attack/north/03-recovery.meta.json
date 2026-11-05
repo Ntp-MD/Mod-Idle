@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "werewolf",
+  "action": "attack",
+  "direction": "north",
+  "pose": "03-recovery",
+  "poseDescription": "claw arm retracts and digitigrade ready stance returns",
+  "generator": "built-in-imagegen",
+  "source": "C:\\Users\\ITOP\\.codex-zed-account-1\\generated_images\\01a1a9ef-b7d4-7a13-93af-d1d2456a3f01\\exec-ed74c9fb-594c-4e81-95ab-c42bffe71c56.png",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "canvasMatchesTarget": true,
+  "targetCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "visualApproval": false,
+  "visualReview": {
+    "screenSideCorrect": false,
+    "exactAngleAccepted": false,
+    "identityAccepted": false,
+    "phaseAccepted": false
+  },
+  "productionApproved": false,
+  "qa": {
+    "atlas": false,
+    "anchor": false,
+    "alpha": false,
+    "runtime": false
+  },
+  "footAnchor": null,
+  "sourcePixelsModified": true,
+  "styleReference": [
+    "../../../../reference.png",
+    "../../../../animation/atlas/animation.png",
+    "../../../../animation/source/base-v2.png"
+  ],
+  "bakedWeapon": "natural claws and fangs",
+  "normalization": {
+    "method": "alpha crop + nearest-neighbor integer downscale",
+    "alphaThreshold": 32,
+    "alphaBounds": [
+      309,
+      144,
+      920,
+      1087
+    ],
+    "downscaleFactor": 4,
+    "targetCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "contentBounds": [
+      116,
+      53,
+      268,
+      288
+    ]
+  },
+  "note": "Generated individual pose candidate; normalized into the canonical 384x384 cell. Identity, exact facing, phase, hard alpha, foot anchor, atlas fit, and art-owner acceptance remain unverified."
+}

@@ -1,185 +1,496 @@
 {
-  "schemaVersion": 1,
-  "status": "user-reference",
-  "species": "golem",
-  "title": "Stone Golem",
-  "source": {
-    "provider": "itch.io",
-    "url": "https://img.itch.zone/aW1nLzMxMjEzOTg3LmdpZg==/original/NCLoe4.gif",
-    "kind": "animated preview card",
-    "sourceCanvas": [
-      144,
-      144
-    ]
+  "status": "draft-review",
+  "file": "atlas/animation-draft.png",
+  "generator": "OpenAI built-in image_gen",
+  "speciesId": "golem",
+  "variantId": "stone-golem",
+  "name": "Stone Golem",
+  "levels": [
+    1,
+    20
+  ],
+  "sourceCanvas": {
+    "width": 3072,
+    "height": 1920
   },
-  "extraction": {
-    "removedOverlays": [
-      "ornamental card frame",
-      "in-card species title",
-      "clip caption",
-      "PREVIEW wash"
-    ],
-    "method": "drop pixels identical across all frames (card frame, title, caption), key out the card ground colour, and invert the PREVIEW blend on covered pixels",
-    "washBlend": {
-      "colour": [
-        238,
-        225,
-        186
-      ],
-      "alpha": 0.45,
-      "recovered": "underlying = (shown - alpha*colour) / (1 - alpha)"
-    },
-    "washRule": "a pixel is covered when inverting it lands on the creature's own palette in every frame the sprite reaches it; the fainter shadow ring joins by adjacency",
-    "background": "transparent",
-    "alignment": "each clip shares one crop box; frames keep their in-clip offsets so the ground line is fixed"
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
   },
-  "clips": {
-    "walk": {
-      "file": "clips/walk.png",
-      "frames": 6,
-      "cell": [
-        75,
-        56
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "alignment": "ground-anchor-at-224",
+  "grid": {
+    "columns": 8,
+    "rows": 5,
+    "totalFrames": 40
+  },
+  "states": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "death"
+  ],
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "framesPerDirection": 1,
+  "rowOrder": [
+    {
+      "state": "idle",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
       ],
-      "sourceBox": [
-        34,
-        38,
-        109,
-        94
-      ],
-      "frameMs": 280,
-      "durations": [
-        400,
-        220,
-        220,
-        400,
-        220,
-        220
-      ],
-      "loop": true
+      "framesPerDirection": 1
     },
-    "idle": {
-      "file": "clips/idle.png",
-      "frames": 8,
-      "cell": [
-        79,
-        58
+    {
+      "state": "walk",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
       ],
-      "sourceBox": [
-        33,
-        37,
-        112,
-        95
-      ],
-      "frameMs": 250,
-      "durations": [
-        250,
-        250,
-        250,
-        250,
-        250,
-        250,
-        250,
-        250
-      ],
-      "loop": true
+      "framesPerDirection": 1
     },
-    "attack": {
-      "file": "clips/attack.png",
-      "frames": 12,
-      "cell": [
-        80,
-        76
+    {
+      "state": "attack",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
       ],
-      "sourceBox": [
-        32,
-        23,
-        112,
-        99
-      ],
-      "frameMs": 62,
-      "durations": [
-        40,
-        70,
-        70,
-        60,
-        40,
-        30,
-        60,
-        80,
-        120,
-        50,
-        50,
-        80
-      ],
-      "loop": false
+      "framesPerDirection": 1
     },
-    "hurt": {
-      "file": "clips/hit.png",
-      "frames": 3,
-      "cell": [
-        72,
-        62
+    {
+      "state": "hit",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
       ],
-      "sourceBox": [
-        33,
-        30,
-        105,
-        92
-      ],
-      "frameMs": 133,
-      "durations": [
-        40,
-        200,
-        160
-      ],
-      "loop": false
+      "framesPerDirection": 1
     },
-    "death": {
-      "file": "clips/death.png",
-      "frames": 10,
-      "cell": [
-        78,
-        60
+    {
+      "state": "death",
+      "directions": [
+        "S",
+        "SE",
+        "E",
+        "NE",
+        "N",
+        "NW",
+        "W",
+        "SW"
       ],
-      "sourceBox": [
-        33,
-        38,
-        111,
-        98
-      ],
-      "frameMs": 107,
-      "durations": [
-        60,
-        120,
-        100,
-        100,
-        80,
-        70,
-        70,
-        70,
-        100,
-        300
-      ],
-      "loop": false
+      "framesPerDirection": 1
     }
+  ],
+  "sourceFrames": [
+    {
+      "x": 117,
+      "y": 126,
+      "width": 182,
+      "height": 160,
+      "offsetX": 117,
+      "offsetY": 126
+    },
+    {
+      "x": 507,
+      "y": 126,
+      "width": 155,
+      "height": 162,
+      "offsetX": 123,
+      "offsetY": 126
+    },
+    {
+      "x": 898,
+      "y": 128,
+      "width": 136,
+      "height": 160,
+      "offsetX": 130,
+      "offsetY": 128
+    },
+    {
+      "x": 1273,
+      "y": 125,
+      "width": 146,
+      "height": 163,
+      "offsetX": 121,
+      "offsetY": 125
+    },
+    {
+      "x": 1638,
+      "y": 124,
+      "width": 179,
+      "height": 162,
+      "offsetX": 102,
+      "offsetY": 124
+    },
+    {
+      "x": 2036,
+      "y": 125,
+      "width": 145,
+      "height": 163,
+      "offsetX": 116,
+      "offsetY": 125
+    },
+    {
+      "x": 2423,
+      "y": 125,
+      "width": 140,
+      "height": 163,
+      "offsetX": 119,
+      "offsetY": 125
+    },
+    {
+      "x": 2791,
+      "y": 125,
+      "width": 163,
+      "height": 163,
+      "offsetX": 103,
+      "offsetY": 125
+    },
+    {
+      "x": 115,
+      "y": 507,
+      "width": 174,
+      "height": 168,
+      "offsetX": 115,
+      "offsetY": 123
+    },
+    {
+      "x": 509,
+      "y": 506,
+      "width": 150,
+      "height": 167,
+      "offsetX": 125,
+      "offsetY": 122
+    },
+    {
+      "x": 873,
+      "y": 506,
+      "width": 158,
+      "height": 160,
+      "offsetX": 105,
+      "offsetY": 122
+    },
+    {
+      "x": 1249,
+      "y": 506,
+      "width": 159,
+      "height": 162,
+      "offsetX": 97,
+      "offsetY": 122
+    },
+    {
+      "x": 1661,
+      "y": 506,
+      "width": 158,
+      "height": 167,
+      "offsetX": 125,
+      "offsetY": 122
+    },
+    {
+      "x": 2040,
+      "y": 506,
+      "width": 164,
+      "height": 163,
+      "offsetX": 120,
+      "offsetY": 122
+    },
+    {
+      "x": 2418,
+      "y": 506,
+      "width": 155,
+      "height": 166,
+      "offsetX": 114,
+      "offsetY": 122
+    },
+    {
+      "x": 2792,
+      "y": 506,
+      "width": 163,
+      "height": 169,
+      "offsetX": 104,
+      "offsetY": 122
+    },
+    {
+      "x": 123,
+      "y": 894,
+      "width": 165,
+      "height": 156,
+      "offsetX": 123,
+      "offsetY": 126
+    },
+    {
+      "x": 489,
+      "y": 898,
+      "width": 189,
+      "height": 158,
+      "offsetX": 105,
+      "offsetY": 130
+    },
+    {
+      "x": 871,
+      "y": 866,
+      "width": 159,
+      "height": 190,
+      "offsetX": 103,
+      "offsetY": 98
+    },
+    {
+      "x": 1225,
+      "y": 917,
+      "width": 212,
+      "height": 137,
+      "offsetX": 73,
+      "offsetY": 149
+    },
+    {
+      "x": 1635,
+      "y": 919,
+      "width": 211,
+      "height": 137,
+      "offsetX": 99,
+      "offsetY": 151
+    },
+    {
+      "x": 2041,
+      "y": 866,
+      "width": 160,
+      "height": 190,
+      "offsetX": 121,
+      "offsetY": 98
+    },
+    {
+      "x": 2395,
+      "y": 898,
+      "width": 189,
+      "height": 158,
+      "offsetX": 91,
+      "offsetY": 130
+    },
+    {
+      "x": 2794,
+      "y": 894,
+      "width": 160,
+      "height": 158,
+      "offsetX": 106,
+      "offsetY": 126
+    },
+    {
+      "x": 118,
+      "y": 1281,
+      "width": 153,
+      "height": 158,
+      "offsetX": 118,
+      "offsetY": 129
+    },
+    {
+      "x": 493,
+      "y": 1292,
+      "width": 167,
+      "height": 147,
+      "offsetX": 109,
+      "offsetY": 140
+    },
+    {
+      "x": 889,
+      "y": 1283,
+      "width": 149,
+      "height": 159,
+      "offsetX": 121,
+      "offsetY": 131
+    },
+    {
+      "x": 1267,
+      "y": 1283,
+      "width": 152,
+      "height": 157,
+      "offsetX": 115,
+      "offsetY": 131
+    },
+    {
+      "x": 1659,
+      "y": 1283,
+      "width": 143,
+      "height": 158,
+      "offsetX": 123,
+      "offsetY": 131
+    },
+    {
+      "x": 2035,
+      "y": 1282,
+      "width": 148,
+      "height": 160,
+      "offsetX": 115,
+      "offsetY": 130
+    },
+    {
+      "x": 2412,
+      "y": 1292,
+      "width": 167,
+      "height": 147,
+      "offsetX": 108,
+      "offsetY": 140
+    },
+    {
+      "x": 2800,
+      "y": 1281,
+      "width": 153,
+      "height": 160,
+      "offsetX": 112,
+      "offsetY": 129
+    },
+    {
+      "x": 115,
+      "y": 1711,
+      "width": 158,
+      "height": 120,
+      "offsetX": 115,
+      "offsetY": 175
+    },
+    {
+      "x": 475,
+      "y": 1715,
+      "width": 175,
+      "height": 116,
+      "offsetX": 91,
+      "offsetY": 179
+    },
+    {
+      "x": 851,
+      "y": 1725,
+      "width": 187,
+      "height": 99,
+      "offsetX": 83,
+      "offsetY": 189
+    },
+    {
+      "x": 1239,
+      "y": 1731,
+      "width": 208,
+      "height": 89,
+      "offsetX": 87,
+      "offsetY": 195
+    },
+    {
+      "x": 1645,
+      "y": 1709,
+      "width": 164,
+      "height": 122,
+      "offsetX": 109,
+      "offsetY": 173
+    },
+    {
+      "x": 2009,
+      "y": 1722,
+      "width": 197,
+      "height": 102,
+      "offsetX": 89,
+      "offsetY": 186
+    },
+    {
+      "x": 2407,
+      "y": 1730,
+      "width": 180,
+      "height": 94,
+      "offsetX": 103,
+      "offsetY": 194
+    },
+    {
+      "x": 2777,
+      "y": 1730,
+      "width": 184,
+      "height": 94,
+      "offsetX": 89,
+      "offsetY": 194
+    }
+  ],
+  "identityReference": "art-reference/monsters/elemental/golem/golem/animation/atlas/animation.png",
+  "generation": {
+    "sourceOutputs": [
+      "exec-3e92a5d6-b05b-4843-b298-752f7d5693d5.png"
+    ],
+    "identityReference": "art-reference/monsters/elemental/golem/golem/animation/atlas/animation.png",
+    "variantCue": "cool gray granite plates with varied natural stone facets, unchanged bulky golem anatomy",
+    "initialPrompt": "Stone Golem; all 8 directions for idle, walk, attack, hit, death; dark outline without fringe or halo."
   },
-  "review": {
-    "frameMs": {
-      "walk": 150,
-      "idle": 200,
-      "attack": 45,
-      "hurt": 110,
-      "death": 110
+  "alphaProcessing": {
+    "threshold": 128,
+    "method": "raw-component-ownership-with-original-alpha-preserved",
+    "edgeRecoveryRadius": 3,
+    "rawGeneratorOutputPreserved": true
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 5,
+    "cellOrder": "row-major",
+    "sourceCellApprox": {
+      "width": 384,
+      "height": 384
     },
-    "impactFrame": {
-      "attack": 6
+    "actionRows": [
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death"
+    ],
+    "frameCount": 40
+  },
+  "normalization": {
+    "method": "sourceFrames-repack-v2",
+    "sourceCanvas": {
+      "width": 3072,
+      "height": 1920
     },
-    "displayHeight": 236,
-    "facing": "east",
+    "uniformScale": 1.0,
+    "translation": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "recoveredIsolatedAlphaPixels": 0,
+    "discardedIsolatedAlphaDust": 0,
+    "status": "draft-review"
+  },
+  "quality": {
+    "nativePixelArtApproved": false,
     "notes": [
-      "Source durations emphasise the held poses, so review playback uses an even beat.",
-      "The golem leads with its right arm; contact lands on frame 6 of the 12-frame attack."
+      "Recovered complete pose components from the original generated atlas into padded 384 x 384 cells; visual review status is unchanged.",
+      "Repacked from uniquely assigned sourceFrames into 384 x 384 review cells with at least 24 px clear padding on each edge; visual review remains pending."
     ]
   }
 }

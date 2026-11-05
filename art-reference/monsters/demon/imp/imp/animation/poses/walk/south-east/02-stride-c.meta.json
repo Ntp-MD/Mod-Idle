@@ -1,0 +1,41 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "action": "walk",
+  "direction": "south-east",
+  "frame": "02-stride-c",
+  "sourceReferences": [
+    "art-reference/monsters/demon/imp/imp/reference.png",
+    "art-reference/monsters/demon/imp/imp/animation/poses/idle/south.png",
+    "art-reference/monsters/demon/imp/imp/animation/atlas/animation.png"
+  ],
+  "generationPrompt": "opposite support plants and the first leg reaches; three-quarter facing toward the lower-right, front and right side visible",
+  "normalization": {
+    "method": "hard-alpha-crop-fit-384",
+    "alphaThreshold": 128,
+    "resampling": "nearest",
+    "canvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ]
+  },
+  "measurement": {
+    "alphaBoundsExclusive": [
+      90,
+      68,
+      293,
+      288
+    ],
+    "componentCount": 1,
+    "alphaValues": [
+      0,
+      255
+    ]
+  },
+  "visualReviewRequired": true,
+  "qaStatus": "pending-facing-spacing-anchor-atlas-review"
+}

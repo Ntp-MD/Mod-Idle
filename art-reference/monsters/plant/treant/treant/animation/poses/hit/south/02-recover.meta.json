@@ -1,0 +1,33 @@
+{
+  "status": "candidate-review-required",
+  "generator": "existing individual Treant source pose; temporary duplicate for slot coverage",
+  "source": "poses/hit/east/02-recover.png",
+  "sourceDirection": "east",
+  "sourceSha256": "d5d90d29c96380adc64cf331197b688f04f17d75c4b4b837ca2829acd4b10f9a",
+  "action": "hit",
+  "direction": "south",
+  "phase": "02-recover",
+  "candidateDuplicate": true,
+  "candidateDuplicateReason": "Image generation is unavailable under the shared team usage limit; this source matches the action and phase but has a different facing and is not approved.",
+  "processing": {
+    "method": "byte-for-byte copy of existing individual 384x384 PNG"
+  },
+  "canvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "visualReview": {
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "sequenceAccepted": false,
+    "note": "Provisional coverage placeholder only; replace with a distinct exact-facing pose before visual approval."
+  },
+  "qa": {
+    "atlas": false,
+    "anchor": false
+  }
+}

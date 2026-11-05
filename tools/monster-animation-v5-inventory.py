@@ -14,7 +14,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent / "art-reference/monsters"
-TEMPLATE = ROOT / "humanoid/goblin/animation/poses.json"
+TEMPLATE = ROOT / "humanoid/goblin/goblin/animation/poses.json"
+TARGET_DIRECTIONS = {"south", "south-east", "east", "north-east", "north", "north-west", "west", "south-west"}
 
 
 def read_json(path):
@@ -47,9 +48,11 @@ def image_metrics(path):
 
 
 def inventory(species, template, metrics):
-    version = species / "animation"
+    version = species / species.name / "animation"
+    all_poses = {pose_path(action, frame): action for action, data in template["actions"].items()
+                 for frame in data["frames"]}
     expected = {pose_path(action, frame): action for action, data in template["actions"].items()
-                for frame in data["frames"]}
+                for frame in data["frames"] if frame["direction"] in TARGET_DIRECTIONS}
     present = {path.relative_to(version) for path in (version / "poses").rglob("*.png")}
     issues = []
     metadata = version / "poses.json"
@@ -62,7 +65,7 @@ def inventory(species, template, metrics):
         for action, data in template["actions"].items():
             own_frames = own.get("actions", {}).get(action, {}).get("frames", [])
             if {pose_path(action, frame) for frame in own_frames} != {
-                    path for path, name in expected.items() if name == action}:
+                    path for path, name in all_poses.items() if name == action}:
                 issues.append(f"{action} frame paths differ from Goblin poses contract")
     except (OSError, ValueError, KeyError, TypeError) as error:
         issues.append(f"metadata unavailable/invalid: {error}")
@@ -81,11 +84,12 @@ def inventory(species, template, metrics):
     result = {"species": species.name, "race": species.parent.name,
               "metadataIssues": issues, "expected": len(expected),
               "presentExpected": len(present & expected.keys()),
-              "byAction": {action: {"expected": data["poseCount"],
+              "byAction": {action: {"expected": sum(name == action for name in expected.values()),
                                      "present": sum(path in present for path, name in expected.items() if name == action)}
                            for action, data in template["actions"].items()},
               "missing": [path.as_posix() for path in sorted(expected.keys() - present)],
-              "unexpected": [path.as_posix() for path in sorted(present - expected.keys())],
+              "additionalCanonical": len(present & (all_poses.keys() - expected.keys())),
+              "unexpected": [path.as_posix() for path in sorted(present - all_poses.keys())],
               "missingSidecars": missing_sidecars}
     if metrics:
         result["sourceImageMetrics"] = measurements
@@ -102,6 +106,7 @@ def main():
     if args.self_test:
         paths = [pose_path(action, frame) for action, data in template["actions"].items() for frame in data["frames"]]
         assert len(paths) == len(set(paths)) == 272
+        assert sum(frame["direction"] in TARGET_DIRECTIONS for data in template["actions"].values() for frame in data["frames"]) == 136
         assert pose_path("idle", {"file": "south.png"}) == Path("poses/idle/south.png")
         assert pose_path("walk", {"direction": "south", "file": "00-stride-a.png"}) == Path("poses/walk/south/00-stride-a.png")
         print("poses path contract: PASS")

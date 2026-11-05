@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "wyvern",
+  "generator": "OpenAI built-in image_gen",
+  "source": "..\\..\\..\\drafts\\hit-north-candidate-grid-v1.png",
+  "sourceCell": [
+    1,
+    1
+  ],
+  "sourceCanvas": [
+    1254,
+    1254
+  ],
+  "cellCanvas": [
+    627,
+    627
+  ],
+  "action": "hit",
+  "direction": "north",
+  "phase": "03-ready",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sourcePixelsModified": true,
+  "visualReviewRequired": true,
+  "visualReview": {
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "phaseAccepted": false,
+    "anchorAccepted": false,
+    "alphaAccepted": false,
+    "atlasAccepted": false
+  },
+  "note": "Extracted from preserved raw grid by alpha-bounds crop, proportional resize, and anchor placement; no repainting. Candidate review only."
+}

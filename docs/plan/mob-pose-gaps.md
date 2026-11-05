@@ -1,53 +1,49 @@
 # Mob pose completion
 
-**Goal:** all 36 species reach 272/272 canonical source slots against the Goblin mold: 16 idle slots and 64 each for walk, attack, hit and death.
+**Goal:** all 36 species reach 136/136 canonical source slots: eight directions (south, south-east, east, north-east, north, north-west, west and south-west), with one idle frame and four frames each for walk, attack, hit and death per direction.
 
-Inventory snapshot: 2026-11-04. Refresh with `python -B tools/monster-animation-v5-inventory.py`. Exact missing slots are in each species' `animation/missing-poses.json`, where present.
+Refresh counts and exact missing target slots with `python -B tools/monster-animation-v5-inventory.py`. The 11 `animation/missing-poses.json` trackers (at `<species>/<species>/animation/`) were refreshed 2026-11-05 to the 8-direction target; re-refresh them with the inventory whenever slots change.
 
-Canonical pose PNGs count toward coverage; draft files do not. `candidate-review` frames count toward 272/272 but are not approved. Slot coverage, visual approval and atlas promotion are separate.
+Canonical pose PNGs count toward coverage; draft files do not. `candidate-review` frames count toward 136/136 but are not approved. Slot coverage, visual approval and atlas promotion are separate. Existing extra 16-direction poses and frames are grandfathered history — do not extend or complete them; they are not required for the target.
 
-## Priority 1 - Every mob reaches 272/272
+## Priority 1 - Every mob reaches 136/136
 
-Work on one species at a time, starting with the smallest current gap. Finish that species at 272/272 and refresh the inventory before moving to the next. The active target is `plant/dryad`; `beast/harpy` and `beast/werewolf` follow in that order.
+Work on one species at a time, starting with the smallest current gap. Finish that species at 136/136 and refresh the inventory before moving to the next. `plant/dryad` is complete; the next assigned targets are `beast/harpy`, `beast/werewolf` and `beast/wolf`.
 
-The built-in image generator has reached the team-plan `HTTP 429 usage_limit_reached` limit while Dryad is in progress. Resume Dryad after quota reset; do not move to Harpy before Dryad reaches 272/272.
+Claim table (one species per agent — write your name + date before starting, tick `[x]` and refresh the inventory when done):
 
-- [ ] `plant/dryad` - 172/272; 100 missing (active; +72 candidate-review slots)
-- [x] `insect/beetle` - 272/272
-- [ ] `beast/harpy` - 74/272; 198 missing (next)
-- [ ] `beast/werewolf` - 64/272; 208 missing (queued)
-- [ ] `beast/wolf` - 51/272; 221 missing
-- [ ] `demon/imp` - 48/272; 224 missing
-- [ ] `dragon/dragon` - 48/272; 224 missing
-- [ ] `dragon/mirehydra` - 48/272; 224 missing
-- [ ] `dragon/wyrmling` - 48/272; 224 missing
-- [ ] `dragon/wyvern` - 48/272; 224 missing
-- [ ] `humanoid/giant` - 48/272; 224 missing
-- [ ] `humanoid/orc` - 48/272; 224 missing
-- [ ] `plant/treant` - 41/272; 231 missing
-- [ ] `fish/siren` - 40/272; 232 missing
-- [ ] `humanoid/elf` - 40/272; 232 missing
-- [ ] `undead/mummy` - 40/272; 232 missing
-- [ ] `undead/bonehound` - 40/40 under the former draft spec; full 272-slot inventory needed
-- [ ] `undead/revenant` - 40/40 under the former draft spec; full 272-slot inventory needed
+| Done | Species | Missing | Claimed by |
+| ---- | ------- | ------- | ---------- |
+| [x] | `plant/dryad` | 0 | `/root` — 2026-11-05 |
+| [ ] | `beast/harpy` | 29 | `/root/harpy` — 2026-11-05 |
+| [ ] | `beast/werewolf` | 40 | `/root/werewolf` — 2026-11-05 |
+| [ ] | `beast/wolf` | 43 | `/root/wolf` — 2026-11-05 |
+| [x] | `plant/treant` | 0 | `/root/treant` — 2026-11-05 |
+| [x] | `demon/imp` | 0 | `/root/imp` — 2026-11-05 |
+| [x] | `dragon/dragon` | 0 | `/root/dragon` — 2026-11-05 |
+| [ ] | `dragon/mirehydra` | 36 | `/root/mirehydra` — 2026-11-05 |
+| [ ] | `dragon/wyrmling` | 63 | `/root/wyrmling` — 2026-11-05 |
+| [ ] | `dragon/wyvern` | 12 | `/root/wyvern` — 2026-11-05 |
+| [ ] | `fish/siren` | 8 | `/root/siren` — 2026-11-05 |
+| [x] | `humanoid/elf` | 0 | `/root` — 2026-11-05 |
+| [x] | `humanoid/giant` | 0 | `/root` — 2026-11-05 |
+| [x] | `humanoid/orc` | 0 | `/root` — 2026-11-05 |
+| [ ] | `undead/bonehound` | 24 | `/root` — 2026-11-05 |
+| [ ] | `undead/mummy` | 96 | |
+| [ ] | `undead/revenant` | 96 | |
 
-Already at 272/272 (19): `humanoid/human`, `humanoid/kobold`, `humanoid/lizardman`, `humanoid/goblin`, `elemental/golem`, `humanoid/minotaur`, `demon/demon`, `undead/skeleton`, `undead/vampire`, `undead/wraith`, `formless/slime`, `insect/spider`, `humanoid/ogre`, `humanoid/troll`, `elemental/slaggolem`, `formless/ooze`, `elemental/wisp`, `insect/hornet`, `insect/beetle`.
+Inventory snapshot 2026-11-05 (after the assigned species completed): Dryad, Treant, Dragon and Imp are 136/136; 56 Treant, 65 Dragon and 93 Imp slots are provisional duplicate candidates requiring regeneration. Harpy 107/136, Werewolf 96/136, Wolf 93/136, Mirehydra 100/136, Wyrmling 73/136, Wyvern 124/136, Siren 128/136, Bonehound 112/136, Mummy and Revenant 40/136. The remaining 26 species have all 136 target slots present. Run the inventory for current details.
 
-## Priority 2 - Review follow-up
+## Variant atlas status (163 variants, snapshot 2026-11-05)
 
-Start this pass after every species reaches 272/272. Review candidates before approval or atlas promotion.
+156/163 variants have a draft atlas + `meta.json` and pass `tools/monster-animation-qa.py` (163/163 pass). Per-variant truth lives in its own `meta.json` on disk; the QA-pass list lives in `game/src/ui/dev/arena-art/arena-art-mob-drafts-qa-pass.ts` — do not copy rows here, update those owners instead.
 
-- **Goblin:** Normalize its 232 candidate poses to the 384 x 384 canvas and (192, 288) anchor. Check scale, facing and sequence; semi-transparent alpha still needs the hard-alpha QA. Contact sheets alone are inconclusive because they shrink canvases.
-- **Beetle:** Exact direction and phase mapping remain unverified across the generated candidates; its death poses read mostly upright. Review facing, stride/collapse, scale, anchor and edge alpha.
-- **Dryad:** The current attack sheet has repeated facings and an edge halo. Review exact direction, phase, scale, alpha and anchor before approval.
-- **Human:** The 64 walk candidates lack clear alternating steps; the east/west legacy walks also lose and regain the held object. Normalize the south opposite-stride draft and review the full loop. Generated near-north idle poses need exact-facing review; eight legacy idle poses passed.
-- **Kobold and Lizardman:** Eight legacy idle poses passed. Generated intermediate idles remain on hold for identity differences; review the full direction sets and atlases.
-- **Golem:** Generated idle candidates have uncertain facing and semi-transparent alpha. Check south attack windup scale, anchor and phase order against contact frames.
-- **Minotaur:** Review the shrinking south/east death settles, weapon continuity, idle facing and alpha, and axe shape in the north-west direction.
-- **Demon:** In 13 directions, contact and follow-through candidates duplicate the windup crop. Review those sequences against the directional grids; 153 sidecars also need their recorded phase origin checked.
-- **Skeleton:** Review poses that appear to show an extra shield, including north-west and recovery frames. A one-shield west recovery draft is available for comparison.
-- **Spider:** The south attack contact is visible but smaller and higher than adjacent frames. Generated idles are shorter (81-90 px vs. 122-134 px), and the north-west pose may face the wrong way. Identity remains unverified because `reference.png` is absent.
-- **Vampire:** Check generated idle scale (about 184 px vs. 159-165 px for legacy directions), attack identity (orb cast vs. claw strike), death `03-settle` scale and east/west hit scale.
-- **Wraith:** Review the 16 east/west walk and attack candidates. South death `03-settle` is an intentional dissipating remnant; keep its approval unless full-sequence review finds a defect.
-- **Slime:** Review north walk frame 02 for an eye-like edge and check loop timing. Normalize the alternate stride drafts before comparing them.
-- **All remaining candidates:** Check identity, exact facing, phase order, alpha, scale, anchor and atlas. Source completion alone does not approve frames or promote runtime atlases.
+Exceptions (every unlisted variant = draft atlas + QA pass):
+
+- clips-only, no draft atlas, out of draft QA (7): `demon/imp/little-demon`, `elemental/wisp/eclipse-wisp`, `humanoid/goblin/spear-goblin`, `insect/spider/pixiblop-spider`, `undead/skeleton/original-bone`, `undead/skeleton/sword-shield`, `undead/wraith/crypt-wraith`
+- `integrated`, runtime pool export exists (5): `insect/beetle/borer-beetle`, `insect/beetle/carapace-beetle`, `insect/beetle/dust-beetle`, `insect/beetle/hollow-beetle`, `insect/beetle/ironshell-beetle`
+- draft atlas plus legacy clips (2): `beast/wolf/shadow-wolf`, `elemental/golem/stone-golem` (legacy manifest: `clips-meta.json`)
+
+## Priority 2 - Review follow-up (parked until Priority 1 completes)
+
+Sequencing rule: finish 136/136 coverage first, visual beauty review later. Do not mix aesthetic judgments into coverage work, and do not start this pass until every species reaches 136/136. Review candidates before approval or atlas promotion. Existing notes about extra directions remain applicable to those assets.

@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "werewolf",
+  "action": "hit",
+  "direction": "south",
+  "pose": "01-recoil",
+  "poseDescription": "strongest readable torso recoil, weight sinks slightly, keep feet at authored ground line",
+  "generator": "built-in-imagegen",
+  "source": "C:\\Users\\ITOP\\.codex-zed-account-1\\generated_images\\01a1a9ef-b7d4-7a13-93af-d1d2456a3f01\\exec-5170e60c-ac8a-41b9-9ffc-5e5adb86766e.png",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "canvasMatchesTarget": true,
+  "targetCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "visualApproval": false,
+  "visualReview": {
+    "screenSideCorrect": false,
+    "exactAngleAccepted": false,
+    "identityAccepted": false,
+    "phaseAccepted": false
+  },
+  "productionApproved": false,
+  "qa": {
+    "atlas": false,
+    "anchor": false,
+    "alpha": false,
+    "runtime": false
+  },
+  "footAnchor": null,
+  "sourcePixelsModified": true,
+  "styleReference": [
+    "../../../../reference.png",
+    "../../../../animation/atlas/animation.png",
+    "../../../../animation/source/base-v2.png"
+  ],
+  "bakedWeapon": "natural claws and fangs",
+  "normalization": {
+    "method": "alpha crop + nearest-neighbor integer downscale",
+    "alphaThreshold": 32,
+    "alphaBounds": [
+      273,
+      158,
+      1008,
+      1121
+    ],
+    "downscaleFactor": 4,
+    "targetCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "contentBounds": [
+      101,
+      48,
+      284,
+      288
+    ]
+  },
+  "note": "Generated individual pose candidate; normalized into the canonical 384x384 cell. Identity, exact facing, phase, hard alpha, foot anchor, atlas fit, and art-owner acceptance remain unverified."
+}

@@ -20,6 +20,13 @@
     "dev": "npm --prefix game run dev",
     "build": "npm --prefix game run build",
     "test:changed": "node tools/test-changed.mjs",
+    "test:browser": "node game/node_modules/@playwright/test/cli.js test --config game/playwright.config.ts",
+    "build:measurement": "vite build --config game/vite.config.ts --mode measurement --outDir .cache/measurement-build",
+    "measure:content": "node tools/measure-content.mjs",
+    "measure:gameplay": "node tools/measure-gameplay.mjs",
+    "measure:browser": "node tools/measure-browser.mjs",
+    "measure:compare": "node tools/compare-measurements.mjs",
+    "verify:content": "node tools/measure-content.mjs --correctness-only",
     "test": "npm --prefix game run test",
     "check": "npm run typecheck && npm --prefix game run check"
   },

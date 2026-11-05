@@ -1,0 +1,40 @@
+{
+  "status": "candidate-review",
+  "candidateDuplicate": true,
+  "requiresRegeneration": true,
+  "method": "nearest-direction-copy",
+  "sourcePath": "poses/attack/south/03-recovery.png",
+  "sourceDirection": "south",
+  "sourcePixelsModified": true,
+  "visualReviewRequired": true,
+  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review",
+  "measurement": {
+    "canvas": [
+      1254,
+      1254
+    ],
+    "alphaBoundsExclusive": [
+      279,
+      577,
+      886,
+      999
+    ],
+    "alphaLevelCount": 2,
+    "sourcePixelsModified": true,
+    "anyAlphaTouchesCanvasEdge": false,
+    "alpha128BoundsExclusive": [
+      279,
+      577,
+      886,
+      999
+    ],
+    "alpha128TouchesCanvasEdge": false
+  },
+  "alphaProcessing": {
+    "method": "threshold-alpha-to-binary-at-128",
+    "threshold": 128,
+    "rgbUnchanged": true,
+    "edgeSpecksRemoved": true,
+    "originalGeneratedOutputPreserved": true
+  }
+}

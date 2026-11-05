@@ -1,0 +1,41 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "action": "walk",
+  "direction": "north-east",
+  "frame": "03-stride-d",
+  "sourceReferences": [
+    "art-reference/monsters/demon/imp/imp/reference.png",
+    "art-reference/monsters/demon/imp/imp/animation/poses/idle/south.png",
+    "art-reference/monsters/demon/imp/imp/animation/atlas/animation.png"
+  ],
+  "generationPrompt": "return toward the first support for a seamless loop; three-quarter facing away toward the upper-right, back of head and wings visible",
+  "normalization": {
+    "method": "hard-alpha-crop-fit-384",
+    "alphaThreshold": 128,
+    "resampling": "nearest",
+    "canvas": [
+      384,
+      384
+    ],
+    "anchor": [
+      192,
+      288
+    ]
+  },
+  "measurement": {
+    "alphaBoundsExclusive": [
+      110,
+      68,
+      274,
+      288
+    ],
+    "componentCount": 1,
+    "alphaValues": [
+      0,
+      255
+    ]
+  },
+  "visualReviewRequired": true,
+  "qaStatus": "pending-facing-spacing-anchor-atlas-review"
+}

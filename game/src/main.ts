@@ -1,10 +1,7 @@
 import { mount } from 'svelte';
-import App from './App.svelte';
-import './styles/variables.css';
-import './styles/base.css';
-import './styles/skins.css';
-import './styles/map.css';
+import AppShell from './AppShell.svelte';
 
-const app = mount(App, { target: document.getElementById('app')! });
+const app = mount(AppShell, { target: document.getElementById('app')! });
+window.dispatchEvent(new Event('modworld:ready'));
 
 export default app;

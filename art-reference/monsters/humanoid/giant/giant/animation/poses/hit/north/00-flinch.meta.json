@@ -1,0 +1,65 @@
+{
+  "status": "candidate-review-required",
+  "speciesId": "giant",
+  "action": "hit",
+  "direction": "north",
+  "phase": "00-flinch",
+  "generator": "built-in image_gen",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sourceRecord": {
+    "kind": "generated-contact-sheet",
+    "source": "../../../../../../../../animation/outputs/giant-v5/source/v5-contact-sheets/hit-00-flinch-16.png",
+    "sourceCell": {
+      "row": 2,
+      "column": 0,
+      "box": [
+        0,
+        768,
+        256,
+        1152
+      ]
+    },
+    "sourceConfidenceBounds": [
+      20,
+      100,
+      246,
+      322
+    ],
+    "processing": {
+      "method": "alpha-confidence-crop-scale-anchor-v1",
+      "threshold": 128,
+      "softEdgeRecoveryRadius": 3,
+      "uniformScale": 0.642857,
+      "anchor": {
+        "x": 192,
+        "y": 288
+      },
+      "scaledSize": [
+        149,
+        147
+      ],
+      "offset": [
+        117,
+        141
+      ]
+    }
+  },
+  "qa": {
+    "identity": false,
+    "facing": false,
+    "pose": false,
+    "alphaEdges": false,
+    "anchor": false,
+    "atlas": false,
+    "reviewed": false,
+    "runtimePromotion": false
+  },
+  "importedFrom": "art-reference/animation/outputs/giant-v5"
+}

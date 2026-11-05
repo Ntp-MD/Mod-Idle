@@ -7,9 +7,67 @@
          the request it made for a missing icon was a 404 in the console on every load -->
     <link rel="icon" href="data:," />
     <title>ModWorld</title>
+    <link rel="stylesheet" href="/src/styles/variables.css" />
+    <link rel="stylesheet" href="/src/styles/base.css" />
+    <link rel="stylesheet" href="/src/styles/skins.css" />
+    <link rel="stylesheet" href="/src/styles/map.css" />
+    <style>
+      .app-recovery {
+        min-height: 100dvh;
+        display: grid;
+        align-content: center;
+        justify-items: start;
+        gap: var(--spacing-md);
+        padding: var(--spacing-xl);
+      }
+      .app-recovery[hidden] { display: none; }
+      .app-recovery p { max-width: 60ch; margin: 0; }
+    </style>
   </head>
   <body>
+    <section id="boot-status" class="app-recovery" role="status" aria-labelledby="boot-title">
+      <h1 id="boot-title">Opening ModWorld</h1>
+      <p id="boot-message">Loading the game. This may take a moment on your first visit.</p>
+      <button id="boot-retry" type="button" hidden>Reload game</button>
+      <noscript><p>Enable JavaScript in your browser, then reload to play.</p></noscript>
+    </section>
     <div id="app"></div>
+    <!-- This must run independently of the game bundle so a failed download still has a recovery UI. -->
+    <script>
+      (() => {
+        const screen = document.getElementById('boot-status');
+        const title = document.getElementById('boot-title');
+        const message = document.getElementById('boot-message');
+        const retry = document.getElementById('boot-retry');
+        let ready = false;
+        const slow = setTimeout(() => {
+          if (ready) return;
+          message.textContent = 'Loading is taking longer than usual. You can keep waiting or reload to try again.';
+          retry.hidden = false;
+        }, 15000);
+        const fail = () => {
+          if (ready) return;
+          clearTimeout(slow);
+          screen.setAttribute('role', 'alert');
+          title.textContent = 'The game could not open';
+          message.textContent = 'Check your connection, then reload to try again.';
+          retry.hidden = false;
+        };
+        const onError = (event) => {
+          if (event.target?.tagName === 'SCRIPT' || event.error) fail();
+        };
+        retry.addEventListener('click', () => window.location.reload());
+        window.addEventListener('error', onError, true);
+        window.addEventListener('unhandledrejection', fail);
+        window.addEventListener('modworld:ready', () => {
+          ready = true;
+          clearTimeout(slow);
+          screen.remove();
+          window.removeEventListener('error', onError, true);
+          window.removeEventListener('unhandledrejection', fail);
+        }, { once: true });
+      })();
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
