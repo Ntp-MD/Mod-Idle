@@ -60,5 +60,42 @@
     "phaseAccepted": false,
     "anchor": false,
     "atlas": false
-  }
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 150,
+    "uniformScale": 1.724138,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/insect/spider/v1/atlas.png",
+      "frame": 22,
+      "action": "attack",
+      "direction": "west",
+      "phase": "02-follow-through"
+    },
+    "inputSha256": "836251731654cfcd66d2e6e1af2d81aa7d41ad264331b6365613e04df8ea43a2",
+    "outputSha256": "343fc603b69e5ab465319d6ae76a92e6a639854781778a1ce98d5ab7d2f22398",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

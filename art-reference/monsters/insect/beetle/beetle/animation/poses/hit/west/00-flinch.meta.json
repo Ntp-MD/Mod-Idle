@@ -9,12 +9,49 @@
     128,
     128
   ],
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "method": "lossless exact cell extraction; baseline not promoted",
   "visualReview": {
     "inspected": false,
     "semanticMappingVerified": false,
     "angleVerified": false,
     "atlasReady": false
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 324
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      128,
+      128
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 324
+    },
+    "normalizedSubjectHeight": 180,
+    "uniformScale": 3.0,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\insect\\beetle\\v1\\atlas.png",
+      "frame": 28,
+      "action": "hit",
+      "direction": "west",
+      "phase": "00-flinch"
+    },
+    "inputSha256": "8c63e31218593f8e145b7cbe7440baef0f7d6cbf9963061bc90adf63811d39e8",
+    "outputSha256": "27e132c1676dd4251d2dcd1c5b7579d5d84b7d998df37ddd2e3b9b528473b8fd",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

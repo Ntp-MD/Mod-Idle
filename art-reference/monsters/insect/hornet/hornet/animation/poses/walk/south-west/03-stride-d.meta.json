@@ -50,5 +50,42 @@
     "phaseAccepted": false,
     "anchor": false,
     "atlas": false
-  }
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 167,
+    "uniformScale": 1.336,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/insect/hornet/v1/atlas.png",
+      "frame": 15,
+      "action": "walk",
+      "direction": "west",
+      "phase": "03-stride-d"
+    },
+    "inputSha256": "bf8ab3a897972090c4661748faee624554fc346943abfe2b81bf63b8f1d4b8e9",
+    "outputSha256": "730a595bc776b156d611f2fa8064df3606a2d59d7cbaf558c83e5536a661ad08",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

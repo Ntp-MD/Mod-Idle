@@ -5,7 +5,7 @@
   "action": "attack",
   "phase": "00-windup.png",
   "direction": "south",
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "qa": {
     "visuallyInspected": true,
     "phaseApproved": false,
@@ -14,5 +14,42 @@
     "identityPlausible": true,
     "facingPlausible": true,
     "note": "Crouched pose; foot position may read as a forward step rather than windup."
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 176,
+    "uniformScale": 0.261516,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\beast\\harpy\\v1\\atlas.png",
+      "frame": 16,
+      "action": "attack",
+      "direction": "east",
+      "phase": "00-windup"
+    },
+    "inputSha256": "02fb36c8049ea361e74a07e4f7b478cfc7b683c3eb9e94c1a8ca2bc91a249148",
+    "outputSha256": "42e3166bd104f91b101ae8237bf95f33747ea432cba59d4ef786d64118d2c99e",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

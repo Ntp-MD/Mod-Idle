@@ -8,7 +8,8 @@ import { mobFixture } from '../fixtures/mobFixture';
 
 const materialMob = (): Mob => {
   const species = liveSpecies(row => !!row.bonus_material?.chance, 'bonus material drops');
-  return eng.spawnAt(species.zones[0], species.sizes[0], species.id) as unknown as Mob;
+  const placement = (E.mob.variants as any[]).find((row) => row.species === species.id)!;
+  return eng.spawnAt(placement.zone, species.sizes[0], placement.id) as unknown as Mob;
 };
 
 function dropCounter(s: ReturnType<typeof newGame>, mob: Mob): number {

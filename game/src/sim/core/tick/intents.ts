@@ -130,6 +130,8 @@ export function createIntents(opts: {
       const skill = sm.byId[intent.skillId];
       if (!skill) { cancelIntent('missing skill'); return; }
       const normalizedAction = sm.actionOf(skill);
+      const profile = sm.castProfileOf(skill);
+      const groundArea = profile.delivery === 'ground' ? action.area : undefined;
       if (normalizedAction?.kind === 'ray-channel' && intent.manual
         && (!intent.holdToken || opts.manual?.holdToken !== intent.holdToken)) { cancelIntent('hold released'); return; }
       const failTerminal = () => {
@@ -143,17 +145,16 @@ export function createIntents(opts: {
       // Authored cover is read at release, not only at acquisition: a screen raised
       // mid-windup still blocks a targeted strike. Ground placements need standable
       // ground at the moment they fire.
+      const sightTarget = groundArea?.center ?? arena.mobs[intent.targetId];
       if (!normalizedAction?.distinct_targets && arena.nav && (skill.type === 'attack' || skill.type === 'curse') && !intent.aimPoint
-        && intent.targetId && arena.mobs[intent.targetId]
-        && sweepDisc(arena.nav, arena.player, arena.mobs[intent.targetId], 0, 'sight')) {
+        && sightTarget && sweepDisc(arena.nav, arena.player, sightTarget, 0, 'sight')) {
         failTerminal();
         return;
       }
-      if (arena.nav && intent.aimPoint && !isClear(arena.nav, intent.targetPoint, 0)) {
+      if (arena.nav && (intent.aimPoint || groundArea) && !isClear(arena.nav, groundArea?.center ?? intent.targetPoint, 0)) {
         failTerminal();
         return;
       }
-      const profile = sm.castProfileOf(skill);
       const free = tranceFree();
       const force = mirrorReady();
       const lucky = luckyBonus();
@@ -166,12 +167,10 @@ export function createIntents(opts: {
         positionOf: arena.queueOnly ? undefined : (id: string) => arena.mobs[id] ? { x: arena.mobs[id].x, y: arena.mobs[id].y } : undefined,
         availableGroup: s.group,
         ...(intent.manual ? { ignoreConditions: true } : {}),
-        ...(intent.manual && intent.aimPoint ? { allowEmptyTarget: true } : {}),
+        ...(intent.manual && intent.aimPoint || !arena.offline && groundArea ? { allowEmptyTarget: true } : {}),
       };
-      // Re-aim at release: the bodies may have moved since windup began, so the
-      // committed footprint is recomputed from live positions instead of reusing the
-      // windup snapshot. Buffs and heals keep the windup aim; impact still re-tests
-      // living positions at impact for everything.
+      // Ground casts keep the telegraphed windup footprint; body-targeted casts
+      // track at release. Both still test living positions at impact.
       let releaseArea = action.area;
       let releaseTargets = intentTargets(arena, s.group, intent, true).targets;
       if (arena.offline) {
@@ -179,16 +178,15 @@ export function createIntents(opts: {
         releaseTargets = resolved?.targets ?? s.group;
         if (arena.queueOnly) releaseTargets = releaseTargets.slice(0, sm.skillTargetCap(skill));
         releaseArea = resolved?.area;
-      } else if (intent.manual && intent.aimPoint) {
-        // A manual ground request stays where it was placed, including empty permitted ground;
-        // range is still re-tested at release, and the impact reads living bodies at that point.
+      } else if (groundArea || intent.manual && intent.aimPoint) {
+        const aim = groundArea?.center ?? intent.targetPoint;
         if (skill.area?.origin !== 'caster'
-          && arenaDistance(arena.player, intent.targetPoint) > arenaSkillRange(skill.id) + 1e-7) {
+          && arenaDistance(arena.player, aim) > arenaSkillRange(skill.id) + 1e-7) {
           failTerminal();
           return;
         }
         const definition = skill.area ?? { origin: 'target' as const, radius_m: 0 };
-        releaseArea = skillAreaSnapshot(definition, arena.player, intent.targetPoint, intent.targetId, arena.player.facing);
+        releaseArea = groundArea ?? skillAreaSnapshot(definition, arena.player, aim, intent.targetId, arena.player.facing);
         releaseTargets = targetsInSkillArea(releaseArea, arenaActors(s.group)).map((actor) => actor.mob);
       } else if (!normalizedAction?.distinct_targets && (skill.type === 'attack' || skill.type === 'curse')) {
         const tracked = trackIntentAim(arena, s.group, intent);

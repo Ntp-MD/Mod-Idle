@@ -336,7 +336,10 @@ describe('the ring carries the amount and the striker, not only the words', () =
   it('carries the amount behind a figure, so a sum is never a parse of the printed text', () => {
     const s = hunting();
     // a pool deep enough that no blow ends a body: then a hit can be read against the HP it actually took off
-    for (const m of s.group) m.hp = m.hpMax * 50;
+    for (const m of s.group) {
+      m.hp = m.hpMax * 50;
+      m.innate = []; m.res = 0; m.resByElement = {}; m.armour = 0; m.burst = null; m.mechanics = null;
+    }
     let one: { value: number; lost: number; text: string } | null = null;
     for (let i = 0; i < 200 && !one; i++) {
       s.fx = [];

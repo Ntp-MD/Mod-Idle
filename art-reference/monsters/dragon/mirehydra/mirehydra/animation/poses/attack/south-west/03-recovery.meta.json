@@ -1,0 +1,65 @@
+﻿{
+    "status":  "candidate-review",
+    "generator":  "built-in-image_gen",
+    "source":  "../south/03-recovery.png",
+    "sourceDimensions":  [
+                             1261,
+                             1247
+                         ],
+    "sourceGridCell":  {
+                           "row":  1,
+                           "column":  1
+                       },
+    "frameCanvas":  {
+                        "width":  384,
+                        "height":  384
+                    },
+    "anchor":  {
+                   "x":  192,
+                   "y":  288,
+                   "provenance":  "matched to existing Mirehydra south idle frame"
+               },
+    "normalization":  {
+                          "method":  "2x2 sheet cell alpha crop (\u003e128), nearest-neighbor uniform sequence scale to south idle subject height, transparent 384x384 placement",
+                          "sourceAlphaThresholdForCrop":  128,
+                          "sourcePixelsPaintedOrComposited":  false,
+                          "sequenceReferenceHeight":  148,
+                          "uniformSequenceScale":  0.342593,
+                          "normalizedSubjectHeight":  137,
+                          "sourceCellAlphaCrop":  [
+                                                      76,
+                                                      115,
+                                                      526,
+                                                      516
+                                                  ]
+                      },
+    "transparentBackgroundRequested":  true,
+    "identityReference":  "art-reference/monsters/dragon/mirehydra/mirehydra/animation/source/base-v1.png",
+    "scaleReference":  "art-reference/monsters/dragon/mirehydra/mirehydra/animation/poses/idle/south.png",
+    "styleReference":  "art-reference/monsters/dragon/mirehydra/mirehydra/animation/atlas/animation.png",
+    "visualReview":  {
+                         "sequenceAccepted":  false,
+                         "identityAccepted":  false,
+                         "exactAngleAccepted":  false,
+                         "atlasReady":  false,
+                         "note":  "Generated sheet candidate; review phase continuity, identity and exact direction before approval."
+                     },
+    "qa":  {
+               "atlas":  false,
+               "anchor":  false
+           },
+    "schemaVersion":  1,
+    "speciesId":  "mirehydra",
+    "race":  "dragon",
+    "action":  "attack",
+    "direction":  "south-west",
+    "phase":  "03-recovery",
+    "copiedFrom":  "../south/03-recovery.png",
+    "originalStatus":  "baseline-extracted-candidate",
+    "originalSource":  "drafts/attack-south-sheet.png",
+    "originalSourceCell":  null,
+    "directionalDuplicateSource":  "south",
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "note":  "Coverage-only directional duplicate copied from the south candidate. No exact south-west attack source is present; regenerate and visually review before approval or atlas promotion."
+}

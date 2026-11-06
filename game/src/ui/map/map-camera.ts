@@ -59,3 +59,13 @@ export function clampMapPan(pan: MapPoint, frame: { width: number; height: numbe
   } else y += (frame.height - (minY + maxY)) / 2;
   return { x, y };
 }
+
+/** WorldMap's camera lifetime: App owns the object, the facade only reads/writes these fields. */
+export type MapCameraState = { panX: number; panY: number; zoom: number; bearing: number };
+export const MAP_BASE_ZOOM = 2;
+export const DEFAULT_MAP_CAMERA: MapCameraState = { panX: 0, panY: 0, zoom: 2.4, bearing: 0 };
+export const MAP_MIN_ZOOM = 0.5;
+export const MAP_MAX_ZOOM = 6;
+export const MAP_OPEN_ZOOM = 2.4;
+export const mapDetail = (zoom: number): 'far' | 'mid' | 'near' =>
+  zoom < 1.5 ? 'far' : zoom >= 2.4 ? 'near' : 'mid';

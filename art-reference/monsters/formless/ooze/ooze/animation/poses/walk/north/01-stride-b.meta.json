@@ -86,5 +86,42 @@
     "alphaEdgeVerified": true,
     "atlasApproved": false
   },
-  "visualReview": "Identity and compass-facing were visually checked on the source grid. Per-direction sequence continuity and atlas approval remain pending."
+  "visualReview": "Identity and compass-facing were visually checked on the source grid. Per-direction sequence continuity and atlas approval remain pending.",
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 158,
+    "uniformScale": 1.316667,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/formless/ooze/v1/atlas.png",
+      "frame": 9,
+      "action": "walk",
+      "direction": "east",
+      "phase": "01-stride-b"
+    },
+    "inputSha256": "fef878782d72f2aa85aa59ff67c5ca2bc4ab4ceb3f136084fa616e536af71477",
+    "outputSha256": "b7a5a798005f6ba0e9c298c2d85e8f0ff048e923cbaea73ccc911f79d1d59eb5",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

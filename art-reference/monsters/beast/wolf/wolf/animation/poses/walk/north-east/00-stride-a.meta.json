@@ -1,0 +1,37 @@
+﻿{
+    "schemaVersion":  1,
+    "status":  "candidate-review",
+    "speciesId":  "wolf",
+    "action":  "walk",
+    "direction":  "north-east",
+    "phase":  "00-stride-a",
+    "source":  "../east/00-stride-a.png",
+    "sourceSidecar":  "../east/00-stride-a.meta.json",
+    "sourceDirection":  "east",
+    "sourceSha256":  "a415a459d9a36d3634966eb641972d17d3ee680d11c18b88120cea68d3398731",
+    "donorStatus":  "source-reference-unverified",
+    "donorOriginalSource":  "../../../../atlas/animation.png",
+    "donorOriginalSourceCell":  [
+                                    0,
+                                    1
+                                ],
+    "frameCanvas":  {
+                        "height":  384,
+                        "width":  384
+                    },
+    "anchor":  {
+                   "y":  288,
+                   "x":  192
+               },
+    "method":  "byte-identical phase-matched directional coverage copy; no pixel processing",
+    "sourcePixelsModified":  false,
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "visualReview":  {
+                         "atlasAccepted":  false,
+                         "exactDirectionAccepted":  false,
+                         "identityAccepted":  false,
+                         "phaseSequenceAccepted":  false
+                     },
+    "note":  "Coverage-only directional duplicate from east; regenerate and visually review this exact facing before approval or atlas promotion."
+}

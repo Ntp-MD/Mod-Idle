@@ -56,5 +56,38 @@
     "atlas": false,
     "runtimePromotion": false
   },
-  "visualReview": "Candidate generated for the canonical slot. Facing, phase sequence, foot anchor, alpha edges and atlas approval remain pending."
+  "visualReview": "Candidate generated for the canonical slot. Facing, phase sequence, foot anchor, alpha edges and atlas approval remain pending.",
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 111,
+    "uniformScale": 0.672727,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/beast/wolf/v2/atlas.png",
+      "frame": 33,
+      "action": "death",
+      "direction": "east",
+      "phase": "01-collapse"
+    },
+    "inputSha256": "43cc21385ca6823246ed6dbfd0fbbf0c4c0af9b81ceb1287eb96271edb35fce0",
+    "outputSha256": "bd673be2602286f9fd1b281c2bdba6be0346739bf9d4b36f69d613cd46338317",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

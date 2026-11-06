@@ -23,7 +23,7 @@
     128
   ],
   "sourceMapping": "Exact atlas row/column and action phase from animation/meta.json rowOrder and sourceFrames.",
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "visualReviewRequired": true,
   "normalization": {
     "method": "source-cell-upscale-nearest-anchor-align",
@@ -67,5 +67,42 @@
       0,
       255
     ]
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 92,
+    "uniformScale": 0.730159,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/demon/imp/v1/atlas.png",
+      "frame": 38,
+      "action": "death",
+      "direction": "west",
+      "phase": "02-ground"
+    },
+    "inputSha256": "c174a35639c4b0e926d9fa12b0a5039ad25f70d38b39a486974b98fe27610d11",
+    "outputSha256": "a5d952002d95e6253f14965629d6fb67b0c46273379edc51a55011205736f7a5",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

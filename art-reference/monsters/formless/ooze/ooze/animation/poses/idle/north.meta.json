@@ -27,12 +27,49 @@
   },
   "anchorProvenance": "Source cell visible bbox bottom centered at shared (192,288) anchor",
   "releaseSocket": null,
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "styleReference": "art-reference/players/one-handed-sword/reference.png",
   "bakedWeapon": "none",
   "sourceAtlas": "art-reference/monsters/formless/ooze/ooze/animation/atlas/animation.png",
   "sourceCellIndex": 4,
   "transformation": "128x128 source cell extracted and enlarged 2x with NEAREST, then placed on a transparent 384x384 canvas. Source color and alpha values preserved except for explicitly listed detached components.",
   "removedComponents": [],
-  "source": "../../../atlas/animation.png"
+  "source": "../../../atlas/animation.png",
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 157,
+    "uniformScale": 1.308333,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/formless/ooze/v1/atlas.png",
+      "frame": 4,
+      "action": "idle",
+      "direction": "north",
+      "phase": "north"
+    },
+    "inputSha256": "9e4e7371189c71cce4a13d13a99b57980e6d859ac1a002db5c627a2062b63c6e",
+    "outputSha256": "fa2d3fc960697b3b91502f86d8e1d011466bf56567874d61746a8f4232416b5c",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

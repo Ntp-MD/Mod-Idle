@@ -49,5 +49,42 @@
     "phaseAccepted": false,
     "anchor": false,
     "atlas": false
-  }
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 123,
+    "uniformScale": 0.732143,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/undead/skeleton/v1/atlas.png",
+      "frame": 32,
+      "action": "death",
+      "direction": "east",
+      "phase": "00-fall"
+    },
+    "inputSha256": "19ba362ae0c611063fb409f1fd2952fe09b60319b2d7d7af8a9babbbafd9f236",
+    "outputSha256": "57c7b6e191b00f6ba96bd50b69bb08ae954b6aec5b080334a661d4070b5c3cfe",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

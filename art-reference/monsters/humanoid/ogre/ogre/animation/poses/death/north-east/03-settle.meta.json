@@ -52,5 +52,42 @@
     "footAnchorVerified": false,
     "atlasApproved": false
   },
-  "visualReview": "Candidate cropped from raw 16-direction grid. Exact facing, phase sequence, feet/anchor, alpha edges and atlas approval remain pending."
+  "visualReview": "Candidate cropped from raw 16-direction grid. Exact facing, phase sequence, feet/anchor, alpha edges and atlas approval remain pending.",
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 79,
+    "uniformScale": 0.718182,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/humanoid/ogre/v1/atlas.png",
+      "frame": 35,
+      "action": "death",
+      "direction": "east",
+      "phase": "03-settle"
+    },
+    "inputSha256": "71c75bdc0a300faf5b137db65d342bc23e2e75a51f6a809061a99a117803161b",
+    "outputSha256": "ef6168d64a5fd483a577e924c1b481f2d8ec7eafee77ba7f58915ab42c189c74",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

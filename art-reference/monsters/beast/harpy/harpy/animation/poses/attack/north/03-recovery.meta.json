@@ -24,11 +24,47 @@
     "runtime": false
   },
   "footAnchor": null,
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "styleReference": [
     "poses/attack/north/02-follow-through.png",
     "poses/attack/south/03-recovery.png"
   ],
   "bakedWeapon": "natural-talons-and-wings",
-  "note": "Generated individual attack recovery candidate; direction, pixel scale, anchor, visual sequence, and art-owner acceptance remain unverified."
+  "note": "Generated individual attack recovery candidate; direction, pixel scale, anchor, visual sequence, and art-owner acceptance remain unverified. Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending.",
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 173,
+    "uniformScale": 0.248921,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\beast\\harpy\\v1\\atlas.png",
+      "frame": 19,
+      "action": "attack",
+      "direction": "east",
+      "phase": "03-recovery"
+    },
+    "inputSha256": "441b125f27a357da9079b9266b4b00940f773cd49b14af9e7d190602b0755082",
+    "outputSha256": "0c0acff4655938108b7841ed83f5464e2a98e62c63dcec33b047a0ca2e60742d",
+    "reviewRequired": true
+  }
 }

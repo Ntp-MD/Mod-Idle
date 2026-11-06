@@ -64,5 +64,41 @@
     "anchorAccepted": false,
     "atlasAccepted": false
   },
-  "note": "Unreviewed candidate art. Identity, exact facing, phase sequence, transparency and anchor need later visual review; runtime atlas unchanged."
+  "note": "Unreviewed candidate art. Identity, exact facing, phase sequence, transparency and anchor need later visual review; runtime atlas unchanged. Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending.",
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 94,
+    "uniformScale": 0.740157,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/fish/siren/v1/atlas.png",
+      "frame": 39,
+      "action": "death",
+      "direction": "west",
+      "phase": "03-settle"
+    },
+    "inputSha256": "2471f54250d70012f9e2349d85d03b0b1fdb8411217207f43241a6ddcf7751b7",
+    "outputSha256": "eb77b7448abd2466b0f9ea05e04e7b9b75ce4e4b4ddb7a99878c37411fd05f0e",
+    "reviewRequired": true
+  }
 }

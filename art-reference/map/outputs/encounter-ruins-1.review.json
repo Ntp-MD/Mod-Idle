@@ -1,0 +1,49 @@
+{
+  "asset": "encounter-ruins-1.png",
+  "runtimePath": "/map/landmark/encounter-ruins-1.png",
+  "layer": "relief",
+  "source": "game/public/map/landmark/encounter-ruins.png",
+  "sourceSha256": "d5dd22b0db24c7fee3a736111bd5957e776e211df007968635a0347dddedf911",
+  "outputSha256": "68fa5db8e02986cec49ad6dc446d66da372d2edcf59859b160b11e39881a8f76",
+  "measurement": {
+    "reference": "game/src/ui/map/data/map-sprite-bounds.json#/map/landmark/encounter-ruins-1.png",
+    "note": "Painted bounds and spill scale copied from the same source asset; cutout pixels changed only along the removed red calibration line."
+  },
+  "reviews": {
+    "footprint": {
+      "verdict": "n/a",
+      "note": "Separate object, measured painted bounds."
+    },
+    "objectAngle": {
+      "verdict": "pass",
+      "note": "Upright object keeps the reference kit isometric angle, upper-left light and compact ground contact."
+    },
+    "edges": {
+      "verdict": "pass",
+      "note": "Red calibration line removed; inspected at 1920x1080 in the pilot (near/mid/far, bearings 0/90/180/270)."
+    },
+    "halo": {
+      "verdict": "pass",
+      "note": "Transparent cutout reviewed; only a compact vegetation ground contact remains, no full-hex base."
+    },
+    "depth": {
+      "verdict": "pass",
+      "note": "Ground stays planar under the board projection; relief sits in the actor layer and sorts with cells."
+    }
+  },
+  "screenshots": [
+    "temp/pilot-town-hexalign.png",
+    "temp/pilot-near-b0.png",
+    "temp/pilot-near-b90.png",
+    "temp/pilot-near-b180.png",
+    "temp/pilot-near-b270.png",
+    "temp/pilot-bw-town.png",
+    "temp/pilot-bw-fishing.png",
+    "temp/world-near.png",
+    "temp/world-mid.png",
+    "temp/world-far.png"
+  ],
+  "accepted": true,
+  "reviewer": "delegated implementation reviewer",
+  "reviewedAt": "2026-11-05"
+}

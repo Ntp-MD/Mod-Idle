@@ -115,7 +115,9 @@ export function createIntentSelect(opts: {
     if (playerActiveFraction <= 0) { cancelIntent('inactive'); return; }
     if (!autoSkills && !intent?.manual) { cancelIntent('inactive'); return; }
     if (intent?.phase === 'windup') {
-      if (!sm.byId[intent.skillId]?.action?.distinct_targets && !(intent.manual && intent.aimPoint)
+      const skill = sm.byId[intent.skillId];
+      const ground = !arena.offline && skill && sm.castProfileOf(skill).delivery === 'ground';
+      if (!skill?.action?.distinct_targets && !ground && !(intent.manual && intent.aimPoint)
         && !s.group.some((mob) => mob.id === intent!.targetId && mob.hp > 0)) cancelIntent('target lost');
       return;
     }

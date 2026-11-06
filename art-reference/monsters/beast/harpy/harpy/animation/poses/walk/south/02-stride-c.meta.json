@@ -5,7 +5,7 @@
   "action": "walk",
   "phase": "02-stride-c.png",
   "direction": "south",
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "qa": {
     "visuallyInspected": true,
     "phaseApproved": false,
@@ -14,5 +14,42 @@
     "identityPlausible": true,
     "facingPlausible": true,
     "note": "Opposite foot forward from stride-a; full cycle and timing require review."
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 168,
+    "uniformScale": 0.217617,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\beast\\harpy\\v1\\atlas.png",
+      "frame": 10,
+      "action": "walk",
+      "direction": "east",
+      "phase": "02-stride-c"
+    },
+    "inputSha256": "c25fa954da0e9ed8af807cb533a8a1f5e44c3e8745105c9aa758004be4bccbcc",
+    "outputSha256": "02c85b270dc3d27d56f08fe53ec4c50dd74f5a53e904c87530847d5092d5cd3f",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

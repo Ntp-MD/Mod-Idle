@@ -34,13 +34,10 @@ it('keeps resources finite and bounded after each controlled/probe step', () => 
 
 it('reports duplicate action ids as an invariant witness', () => {
   const encounter = seededEncounter({ seed: 7, zone: 1 });
-  encounter.arena.actions.push(structuredClone(encounter.arena.actions[0] ?? { id: 1 }));
+  if (!encounter.arena.actions.length) encounter.arena.actions.push({ id: 1 } as any);
+  encounter.arena.actions.push(structuredClone(encounter.arena.actions[0]));
   const witness = checkScenarioInvariants(encounter.state, encounter.arena);
-  if (encounter.arena.actions.length >= 2 && encounter.arena.actions[0].id === encounter.arena.actions[1].id) {
-    expect(witness).toMatch(/duplicate action id/);
-  } else {
-    expect(witness).toBeNull();
-  }
+  expect(witness).toMatch(/duplicate action id/);
 });
 
 it('cannot resolve a synthetic skill removed before the case', () => {

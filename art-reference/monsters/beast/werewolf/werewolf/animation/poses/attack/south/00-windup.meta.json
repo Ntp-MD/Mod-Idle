@@ -5,7 +5,7 @@
   "action": "attack",
   "phase": "00-windup.png",
   "direction": "south",
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "qa": {
     "visuallyInspected": true,
     "phaseApproved": false,
@@ -14,5 +14,42 @@
     "identityPlausible": true,
     "facingPlausible": true,
     "note": "Low crouch and tense shoulders establish the windup."
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 139,
+    "uniformScale": 0.329384,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\beast\\werewolf\\v1\\atlas.png",
+      "frame": 16,
+      "action": "attack",
+      "direction": "east",
+      "phase": "00-windup"
+    },
+    "inputSha256": "2840ab4c554fb606493b8cb9c7ce5def727d02d39edcc4e542ea767bffdfdbcf",
+    "outputSha256": "bba31bc0b5e68c3e8bd9390de1a010966e3530c15f7674766f0c9322482c64be",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

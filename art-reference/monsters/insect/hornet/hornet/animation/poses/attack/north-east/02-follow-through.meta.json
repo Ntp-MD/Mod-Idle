@@ -50,5 +50,42 @@
     "phaseAccepted": false,
     "anchor": false,
     "atlas": false
-  }
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 131,
+    "uniformScale": 0.735955,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/insect/hornet/v1/atlas.png",
+      "frame": 18,
+      "action": "attack",
+      "direction": "east",
+      "phase": "02-follow-through"
+    },
+    "inputSha256": "3c73ad472e702221c5efc2d97ff7199715f8c0d2b3cf94f2549841fb44350121",
+    "outputSha256": "f1d589874a4da51738b89843c5075248cd869f9225c884d06c3edfbf81d9f9c8",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

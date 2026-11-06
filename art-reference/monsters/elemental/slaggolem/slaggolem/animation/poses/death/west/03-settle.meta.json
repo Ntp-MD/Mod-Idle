@@ -8,9 +8,46 @@
     7,
     4
   ],
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "qa": {
     "visualIdentityReviewed": false,
     "atlasReady": false
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      128,
+      128
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 83,
+    "uniformScale": 1.97619,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\elemental\\slaggolem\\v1\\atlas.png",
+      "frame": 39,
+      "action": "death",
+      "direction": "west",
+      "phase": "03-settle"
+    },
+    "inputSha256": "b34451c124a0f32059bf5f0104c76f9a7b5e28ee01eddd37752f09cb57251b8e",
+    "outputSha256": "2333afc55c449dc8b3d483eaa5cecc427c260d2560047bf5bd92b7db6100a6e4",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

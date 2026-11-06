@@ -5,7 +5,7 @@
   "action": "idle",
   "direction": "north",
   "angleDegrees": 180,
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "qa": {
     "visuallyInspected": true,
     "facingPlausible": true,
@@ -13,5 +13,42 @@
     "exactYawApproved": false,
     "atlasApproved": false,
     "note": "Maul head shape varies between facing candidates; consistency review remains."
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 163,
+    "uniformScale": 0.204774,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\humanoid\\ogre\\v1\\atlas.png",
+      "frame": 4,
+      "action": "idle",
+      "direction": "north",
+      "phase": "north"
+    },
+    "inputSha256": "b846a321ba248a17c20cd488f604afe5d56ec2d60f774e7b535caadea8f8520e",
+    "outputSha256": "1f7370ddae5c9a1835ba2a912879dd0fd541c44b53aa54a805e0107c9ccedb0b",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

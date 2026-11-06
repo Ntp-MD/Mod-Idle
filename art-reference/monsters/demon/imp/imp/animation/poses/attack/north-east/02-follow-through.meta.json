@@ -37,5 +37,42 @@
     ]
   },
   "visualReviewRequired": true,
-  "qaStatus": "pending-facing-spacing-anchor-atlas-review"
+  "qaStatus": "pending-facing-spacing-anchor-atlas-review",
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 151,
+    "uniformScale": 0.686364,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/demon/imp/v1/atlas.png",
+      "frame": 18,
+      "action": "attack",
+      "direction": "east",
+      "phase": "02-follow-through"
+    },
+    "inputSha256": "5df53ac733c155c5dc1a0049b72ac5427aa7d64fa1dafd8467eeb441e9f0d767",
+    "outputSha256": "1f1163caba07dc28240856f727459042dc86d76e8bc82a743fc0fe409aaa41d2",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

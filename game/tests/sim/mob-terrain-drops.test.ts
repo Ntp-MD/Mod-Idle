@@ -30,21 +30,158 @@ function engineFixture() {
   data.mob.form_level_cap = 100;
   data.mob.species = [FIRST, SECOND].map(id => ({ ...structuredClone(template), id, name: id,
     zones: zones.map(zone => zone.id), sizes: ['small', 'medium', 'large'], damage: 'physical',
-    mechanics: {}, zone_levels: Object.fromEntries(zones.map(zone => [zone.id, zone.levels[0]])) }));
-  data.mob.variants = Object.fromEntries([FIRST, SECOND].map(id => [id, zones.map((zone, index) => ({
-    name: id + '-variant-' + index, levels: zone.levels, core: { ...template.core }, damage: 'physical',
-  }))]));
+    mechanics: {} }));
+  data.mob.variants = zones.flatMap((zone, index) => [FIRST, SECOND].map(id => ({
+    id: `${id}.z${String(zone.id).padStart(2, '0')}.s01`, species: id, name: id + '-variant-' + index,
+    level: zone.levels[0], zone: zone.id, subzone: 1, role: 'line', weight: 20,
+    core: { ...template.core }, damage: 'physical',
+  })));
   data.mob.forms = Object.fromEntries(zones.map(zone => [zone.id, Object.fromEntries([FIRST, SECOND].map(id => [id, {
     name: id + '-form-' + zone.id, levels: zone.levels, core: { ...template.core }, drop_profile: id,
   }]))]));
   data.mob.bosses = zones.map(zone => ({ ...structuredClone(engineData.mob.bosses[0]),
-    zone: zone.id, species: FIRST, name: 'fixture-boss-' + zone.id }));
-  data.mob.uniques = [FIRST, SECOND].map(id => ({ ...structuredClone(engineData.mob.uniques[0]),
-    species: id, name: id + '-unique' }));
+    id: `${FIRST}.z${String(zone.id).padStart(2, '0')}.boss`, level: zone.levels[1], zone: zone.id, species: FIRST,
+    name: 'fixture-boss-' + zone.id }));
+  data.mob.uniques = [FIRST, SECOND].map((id, index) => ({ ...structuredClone(engineData.mob.uniques[0]),
+    id: `${id}.z01.unique`, zone: zones[0].id, level: zones[0].levels[1], weight: 1, species: id, name: id + '-unique' }));
   return data;
 }
 
 describe('mob, terrain and drop data', () => {
+
+  it('resolves every placement by its stable id and authored Zone/Subzone', () => {
+    const ids = new Set<string>();
+    for (const row of E.mob.variants as any[]) {
+      expect(ids.has(row.id), row.id).toBe(false);
+      ids.add(row.id);
+      expect(eng.placementById(row.id)).toBe(row);
+      expect(eng.placementsIn(row.zone, row.subzone)).toContainEqual(row);
+      expect(eng.placementsIn(row.zone)).toContainEqual(row);
+    }
+    expect(() => eng.placementById('nope.z01.s99')).toThrow(RangeError);
+    expect(() => eng.placementsIn(99)).toThrow(RangeError);
+    expect(() => eng.placementsIn(1, 99)).toThrow(RangeError);
+  });
+
+  it('adds a newly authored placement to its side pool and removes it from that side only', () => {
+    const data = structuredClone(engineData);
+    const pool = data.mob.zones[0].subzones[0];
+    const speciesId = pool.species.find((id: string) => {
+      const species = data.mob.species.find((row: any) => row.id === id);
+      return species.sizes.includes('small') || species.sizes.includes('medium');
+    });
+    const row = {
+      id: `${speciesId}.z01.s01`, species: speciesId, name: 'Probe Sibling', level: 5,
+      zone: 1, subzone: 1, role: 'line', weight: 20, core: { ...speciesRow(speciesId).core },
+    };
+    (data.mob.variants as any[]).push(row);
+    (data.mob.variant_drops as any)[row.id] = { item: 'Probe Item', rarity: 'common', lean: 'none' };
+    const context = { subzone: 1, rank: 'normal' as const, bodyHint: null, terrain: null, standing: true };
+    const withRow = createEngine(data).placementPool(1, context).map((entry: any) => entry.id);
+    expect(withRow).toContain(row.id);
+    const removed = structuredClone(data);
+    removed.mob.variants = (removed.mob.variants as any[]).filter((entry: any) => entry.id !== row.id);
+    const model = createEngine(removed);
+    expect(model.placementPool(1, context).map((entry: any) => entry.id)).not.toContain(row.id);
+    expect(model.placementsIn(2).some((entry: any) => entry.id === row.id)).toBe(false);
+  });
+
+  it('puts Int above Str on every magic-damage placement', () => {
+    const rows = (E.mob.variants as any[]).filter((row) => (row.damage ?? speciesRow(row.species).damage) === 'magic');
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) expect(row.core.int).toBeGreaterThan(row.core.str);
+  });
+
+  it('lets one placement use magic damage without changing its siblings or the zone power mean', () => {
+    const data = structuredClone(engineData);
+    const target = data.mob.variants.find((row: any) => row.species === 'goblin' && row.zone === 1)!;
+    const peers = data.mob.variants.filter((row: any) => row.species === 'goblin' && row.zone === 1 && row.id !== target.id);
+    target.core = { ...target.core, str: 4, int: 22 };
+    target.damage = 'magic';
+    const model = createEngine(data);
+    const cast = model.spawnAt(target.zone, 'medium', target.id);
+    expect(cast.damage).toBe('magic');
+    expect(cast.core.int).toBeGreaterThan(cast.core.str);
+    const expectedPs = model.mobPsAt(cast.level) * model.sizeById('medium')!.ps / model.zoneBodyFactor(target.zone)
+      * model.speciesPsMult(target.zone, target.species, target.core, 'magic');
+    expect(cast.ps).toBeCloseTo(expectedPs, 10);
+    expect(model.damageSplit(cast.damage)).toEqual([0, 1]);
+    for (const peer of peers) expect(model.spawnAt(peer.zone, 'medium', peer.id).damage).not.toBe('magic');
+  });
+
+  it('returns [] or the Zone Uniques and keeps every special id unique', () => {
+    const rows = new Set<string>();
+    for (const zone of E.mob.zones) {
+      for (const species of E.mob.species) {
+        for (const unique of eng.uniquesOf(species.id, zone.id)) {
+          expect(unique.zone).toBe(zone.id);
+          expect(unique.species).toBe(species.id);
+          expect(rows.has(unique.id), unique.id).toBe(false);
+          rows.add(unique.id);
+        }
+      }
+    }
+    expect(rows.size).toBe(E.mob.uniques.length);
+    for (const boss of E.mob.bosses as any[]) {
+      expect(eng.placementById(boss.id)).toBe(boss);
+      expect(rows.has(boss.id)).toBe(false);
+      rows.add(boss.id);
+    }
+    expect(rows.size).toBe(E.mob.uniques.length + E.mob.bosses.length);
+  });
+
+  it('makes the placement own spawn level, Core and display name', () => {
+    for (const row of E.mob.variants as any[]) {
+      const body = speciesRow(row.species).sizes[0];
+      const mob = eng.spawnAt(row.zone, body, row.id);
+      expect(mob.level).toBe(row.level);
+      expect(mob.core).toEqual(row.core);
+      expect(mob.formName).toBe(speciesRow(row.species).name);
+      expect(mob.placementId).toBe(row.id);
+    }
+  });
+
+  it('keeps form rows and the reference catalogue as data, not live level owners', () => {
+    const bands = E.mob.zones.filter((zone) => zone.levels[0] <= E.mob.form_level_cap);
+    const forms = E.mob.forms as any;
+    const names = new Set<string>();
+    for (const zone of bands) for (const [speciesId, form] of Object.entries<any>(forms[zone.id] || {})) {
+      expect(E.mob.species.some((species) => species.id === speciesId)).toBe(true);
+      expect(form.levels).toEqual(zone.levels);
+      expect(names.has(form.name)).toBe(false);
+      names.add(form.name);
+      expect(Object.values(form.core).every(Number.isInteger)).toBe(true);
+    }
+    expect(Number.isFinite(eng.MEAN_CORE.str)).toBe(true);
+    expect(eng.MOB_EVASION_REF).toBeGreaterThan(0);
+  });
+
+  it('spawns each live normal/Elite from an authored placement', () => {
+    for (const zone of E.mob.zones) {
+      const sides = [null, ...((zone.subzones ?? []).map((_, index) => index))];
+      for (const side of sides) for (const kind of ['normal', 'elite'] as const) {
+        const mob = spawnMob(mulberry32(77), zone.id, kind, undefined, side, { allowWildUnique: false });
+        const row = eng.placementById(mob.placementId!);
+        expect(row.species).toBe(mob.speciesId);
+        expect(row.zone).toBe(zone.id);
+        expect(row.name).toBe(mob.variant);
+        expect(mob.level).toBe(row.level);
+        expect(mob.core).toEqual(row.core);
+      }
+    }
+  });
+
+  it('fields only species with a small/medium body and one lean per placement', () => {
+    const drops = E.mob.variant_drops as any;
+    for (const row of E.mob.variants as any[]) {
+      const sp = speciesRow(row.species);
+      expect(sp.sizes.some((size: string) => size === 'small' || size === 'medium'), row.id).toBe(true);
+      expect(drops[row.id], row.id).toBeDefined();
+      const first = (E.mob.variants as any[]).find((entry) => entry.species === row.species)!;
+      expect(drops[row.id].lean).toBe(drops[first.id].lean);
+    }
+    for (const unique of E.mob.uniques as any[]) expect(drops[unique.id].lean).toBe('none');
+  });
   it('maps every mob environment to a terrain used by the world map', () => {
     const mapping = engineData.mob.environment_terrain as Record<string, string>;
     const environments = new Set<string>(engineData.mob.zones.flatMap((zone: any) =>
@@ -114,12 +251,6 @@ describe('mob, terrain and drop data', () => {
     expect(power.every((value: number) => Number.isFinite(value) && value > 0)).toBe(true);
   });
 
-  it('puts Int above Str on every magic-damage Variant', () => {
-    const variants = (E.mob.species as any[]).flatMap((species) =>
-      ((E.mob.variants as any)[species.id] || []).filter((variant: any) => (variant.damage ?? species.damage) === 'magic'));
-    expect(variants.length).toBeGreaterThan(0);
-    for (const variant of variants) expect(variant.core.int).toBeGreaterThan(variant.core.str);
-  });
 
   it('keeps Race classification separate from explicit potion eligibility', () => {
     const races = new Set(E.mob.races.set);
@@ -129,102 +260,10 @@ describe('mob, terrain and drop data', () => {
     }
   });
 
-  it('carries the closest earlier Variant through an authored level gap', () => {
-    const data = engineFixture();
-    const ladder = data.mob.variants[FIRST];
-    data.mob.variants[FIRST] = [
-      { ...ladder[0], levels: [20, 30] }, { ...ladder[1], levels: [50, 60] },
-    ];
-    const model = createEngine(data);
-    expect(model.variantsInZone(FIRST, 1).map(row => row.name)).toEqual([ladder[0].name]);
-    expect(model.variantsInZone(FIRST, 4).map(row => row.name)).toEqual([ladder[0].name]);
-    expect(model.variantsInZone(FIRST, 9).map(row => row.name)).toEqual([ladder[1].name]);
-  });
 
-  it('lets a caster Variant use magic damage without changing its Species siblings or zone power', () => {
-    const data = engineFixture();
-    const caster = data.mob.variants[FIRST][1];
-    caster.core = { ...caster.core, str: 4, int: 22 };
-    caster.damage = 'magic';
-    const beforeData = structuredClone(data);
-    const oldCaster = beforeData.mob.variants[FIRST][1];
-    oldCaster.damage = 'physical';
-    oldCaster.core = { ...oldCaster.core, str: 22, int: 4 };
-    const before = createEngine(beforeData).spawnAt(4, 'medium', FIRST);
-    const model = createEngine(data);
-    const castBody = model.spawnAt(4, 'medium', FIRST);
-    const sibling = model.spawnAt(1, 'medium', FIRST);
-    expect(castBody.damage).toBe('magic');
-    expect(castBody.core.int).toBe(caster.core.int);
-    expect(castBody.core.int).toBeGreaterThan(castBody.core.str);
-    expect(castBody.ps).toBeCloseTo(before.ps, 10);
-    expect(model.damageSplit(castBody.damage)).toEqual([0, 1]);
-    expect(model.mobRoster().find(row => row.zone === 4 && row.speciesId === FIRST
-      && row.variant === caster.name && row.kind === model.sizeById('small')!.name)?.damage).toBe('magic');
-    expect(sibling.damage).toBe('physical');
-  });
 
-  it('supports Species with no Unique or several Uniques', () => {
-    const data = engineFixture();
-    const extra = structuredClone(data.mob.uniques.find((row: any) => row.species === SECOND));
-    data.mob.uniques = data.mob.uniques.filter((row: any) => row.species !== FIRST);
-    data.mob.uniques.push({ ...extra, name: 'fixture-extra-unique' });
-    const model = createEngine(data);
-    expect(model.uniquesOf(FIRST)).toEqual([]);
-    expect(model.uniquesOf(SECOND)).toHaveLength(2);
-    const rows = model.mobRoster().filter(row => row.speciesId === SECOND && String(row.kind).startsWith('Unique'));
-    expect(new Set(rows.map(row => row.id)).size).toBe(rows.length);
-    expect(rows.some(row => row.variant === 'fixture-extra-unique')).toBe(true);
-  });
 
-  it('uses authored field forms when present and inherits the latest label when absent', () => {
-    for (const species of E.mob.species as any[]) {
-      for (const zoneId of species.zones) {
-        const zone = E.mob.zones.find((entry: any) => entry.id === zoneId)!;
-        const form = (E.mob.forms as any)[zoneId]?.[species.id];
-        const assigned = eng.variantsInZone(species.id, zoneId)[0] || null;
-        const mob = eng.spawnAt(zoneId, species.sizes[0], species.id, undefined, assigned?.core);
-        expect(mob.level).toBe(species.zone_levels[zoneId]);
-        if (zone.levels[0] <= E.mob.form_level_cap) {
-          if (form) expect(form.levels).toEqual(zone.levels);
-          const previousForm = [...E.mob.zones]
-            .filter((entry: any) => entry.id <= zoneId && entry.levels[0] <= E.mob.form_level_cap && (E.mob.forms as any)[entry.id]?.[species.id])
-            .sort((a: any, b: any) => b.levels[0] - a.levels[0])
-            .map((entry: any) => (E.mob.forms as any)[entry.id][species.id])
-            .find(Boolean);
-          const expectedLabel = form?.name || previousForm?.name || species.name;
-          expect(assigned).toBeDefined();
-          expect(eng.mobStatsOf(species.id, zoneId)).toEqual(form?.core || previousForm?.core || species.core);
-          expect(mob.core).toEqual(assigned!.core);
-          expect(mob.formName).toBe(expectedLabel);
-        } else {
-          expect(form).toBeUndefined();
-          const priorForm = [...E.mob.zones]
-            .filter((entry: any) => entry.id <= zoneId && entry.levels[0] <= E.mob.form_level_cap)
-            .sort((a: any, b: any) => b.levels[0] - a.levels[0])
-            .map((entry: any) => (E.mob.forms as any)[entry.id]?.[species.id])
-            .find(Boolean);
-          const frozenVariant = eng.variantsOf(species.id).at(-1);
-          const expectedLegacyCore = priorForm?.core || species.core;
-          const expectedCore = frozenVariant?.core || expectedLegacyCore;
-          const expectedName = priorForm?.name || species.name;
-          expect(eng.mobStatsOf(species.id, zoneId)).toEqual(expectedLegacyCore);
-          expect(mob.core).toEqual(expectedCore);
-          expect(mob.formName).toBe(expectedName);
-        }
-      }
-    }
-  });
 
-  it('inherits a Species field label from the previous available form', () => {
-    const data = engineFixture();
-    delete data.mob.forms['4'][FIRST];
-    const model = createEngine(data);
-    const variant = model.variantsInZone(FIRST, 4)[0];
-    const mob = model.spawnAt(4, 'small', FIRST, undefined, variant.core);
-    expect(mob.formName).toBe(data.mob.forms['1'][FIRST].name);
-    expect(mob.core).toEqual(variant.core);
-  });
 
   it('validates any authored field-form rows without requiring a full grid', () => {
     const bands = E.mob.zones.filter((zone: any) => zone.levels[0] <= E.mob.form_level_cap);
@@ -245,41 +284,8 @@ describe('mob, terrain and drop data', () => {
     expect(new Set(names).size).toBe(count);
   });
 
-  it('fields a Species with one Variant or several without a fixed count rule', () => {
-    const data = engineFixture();
-    data.mob.variants[FIRST] = [{ ...data.mob.variants[FIRST][0], levels: [1, 100] }];
-    const model = createEngine(data);
-    expect(model.variantsOf(FIRST)).toHaveLength(1);
-    expect(model.variantsOf(SECOND)).toHaveLength(data.mob.variants[SECOND].length);
-    for (const zone of data.mob.zones) {
-      expect(model.variantsInZone(FIRST, zone.id)).toEqual([data.mob.variants[FIRST][0]]);
-      expect(model.variantsInZone(SECOND, zone.id)).toEqual([data.mob.variants[SECOND]
-        .find((row: any) => row.levels[0] <= zone.levels[0] && row.levels[1] >= zone.levels[1])]);
-    }
-  });
 
-  it('live spawns use the fixed-level variant assigned to their zone', () => {
-    for (const zone of E.mob.zones) {
-      const sides = [null, ...(zone.subzones ?? []).map((_, index) => index)];
-      for (const side of sides) for (const kind of ['normal', 'elite'] as const) {
-        const mob = spawnMob(mulberry32(77), zone.id, kind, undefined, side, { allowWildUnique: false });
-        const variants = eng.variantsInZone(mob.speciesId!, zone.id);
-        expect(variants, mob.speciesId).toContainEqual(expect.objectContaining({ name: mob.variant, core: mob.core }));
-        const species = E.mob.species.find(row => row.id === mob.speciesId)!;
-        expect(mob.level, species.id).toBe((species.zone_levels as Record<string, number | undefined>)[zone.id]);
-      }
-    }
-  });
 
-  it('gives every Species with Variants a Small or Medium body the group spawner can field', () => {
-    const normalSpecies = Object.keys(E.mob.variants as Record<string, unknown[]>);
-    const speciesById = new Map(E.mob.species.map((species: any) => [species.id, species]));
-
-    for (const speciesId of normalSpecies) {
-      const species = speciesById.get(speciesId) as any;
-      expect(species.sizes.some((size: string) => size === 'small' || size === 'medium'), speciesId).toBe(true);
-    }
-  });
 
   it('allows a Species to declare a subset of unique junk alternatives', () => {
     const extras: string[] = E.mob.species.flatMap((species: any) => {
@@ -295,13 +301,6 @@ describe('mob, terrain and drop data', () => {
     expect(extras.some((item: string) => existing.includes(item))).toBe(false);
   });
 
-  it('allows one Species in subzones with different environments and keeps its Variants fieldable', () => {
-    for (const zone of E.mob.zones) for (const side of zone.subzones ?? []) for (const speciesId of side.species) {
-      const variants = eng.variantsInZone(speciesId, zone.id);
-      expect(variants.length, speciesId).toBeGreaterThan(0);
-      for (const variant of variants) expect((E.mob.variant_drops as any)[variant.name], speciesId).toBeDefined();
-    }
-  });
 
   it('resolves a distinct icon for every Species', () => {
     const icons = E.mob.species.map((species: any) => mobSpeciesArt(species.id));
@@ -328,7 +327,7 @@ describe('mob, terrain and drop data', () => {
     const roster = eng.mobRoster();
 
     for (const boss of E.mob.bosses as any[]) {
-      const row = roster.find((entry: any) => entry.id === `z${boss.zone}_boss`);
+      const row = roster.find((entry: any) => entry.id === `${boss.id}_boss`);
       expect(row).toBeDefined();
       expect(row.innate).toEqual([boss.element]);
       expect(row.damage).toBe(boss.damage);
@@ -355,23 +354,14 @@ describe('mob, terrain and drop data', () => {
     expect(boss.trait).toBe(profile.trait);
   });
 
-  it('keeps the collectible lean stable across each species normal variants', () => {
-    for (const species of E.mob.species as any[]) {
-      const variants = (E.mob.variants as Record<string, { name: string }[]>)[species.id];
-      const leans = variants.map((v) => (E.mob.variant_drops as any)[v.name].lean);
-      expect(new Set(leans).size).toBe(1);
-    }
-    for (const u of ((E.mob as any).uniques || []) as any[]) {
-      expect((E.mob.variant_drops as any)[u.name].lean).toBe('none');
-    }
-  });
 });
 
 const speciesRow = (id: string) => (E.mob.species as any[]).find((sp: any) => sp.id === id)!;
 /** A spawn of one lineage in one of its own zones, shaped exactly as the sim shapes it. */
 const spawnOf = (id: string, body?: string) => {
   const sp = speciesRow(id);
-  return eng.spawnAt(sp.zones[0], body || sp.sizes[0], sp.id);
+  const row = (E.mob.variants as any[]).find((entry) => entry.species === id)!;
+  return eng.spawnAt(row.zone, body || sp.sizes[0], row.id);
 };
 
 describe('the species trait read as a mechanic', () => {

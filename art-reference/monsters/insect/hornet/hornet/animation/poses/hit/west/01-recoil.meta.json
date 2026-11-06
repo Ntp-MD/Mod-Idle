@@ -9,12 +9,49 @@
     128,
     128
   ],
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "method": "lossless exact cell extraction; baseline not promoted",
   "visualReview": {
     "inspected": false,
     "semanticMappingVerified": false,
     "angleVerified": false,
     "atlasReady": false
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      128,
+      128
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 145,
+    "uniformScale": 2.416667,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\insect\\hornet\\v1\\atlas.png",
+      "frame": 29,
+      "action": "hit",
+      "direction": "west",
+      "phase": "01-recoil"
+    },
+    "inputSha256": "12e51a958f245aa85dc9802720a2f5d0dadd34d282e22751a5db4edf474aad31",
+    "outputSha256": "9cca056749bf737feba7a0d1b04042cf5ddc1744cb8c546d41eed7ef4b6be6cd",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

@@ -47,5 +47,42 @@
     "exactAngleAccepted": false,
     "identityAccepted": false,
     "note": "Cropped from a 4x4 directional candidate grid. Background was keyed to alpha; exact facing, identity, hard-alpha edge quality, foot anchor, phase continuity and atlas QA remain for art-owner review."
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 81,
+    "uniformScale": 0.716814,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/elemental/golem/v1/atlas.png",
+      "frame": 35,
+      "action": "death",
+      "direction": "east",
+      "phase": "03-settle"
+    },
+    "inputSha256": "85a9bad1543f8df6ede439b54c0b3e6f383825fa0c62b8b7060330c8115c1c59",
+    "outputSha256": "f6cc3337d555f79b42c7790e1654e36bc8ccc9f72cff00565beda3f599161b86",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

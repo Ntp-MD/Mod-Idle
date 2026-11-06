@@ -86,5 +86,42 @@
     "alphaEdgeVerified": true,
     "atlasApproved": false
   },
-  "visualReview": "Identity and compass-facing were visually checked on the source grid. Per-direction sequence continuity and atlas approval remain pending."
+  "visualReview": "Identity and compass-facing were visually checked on the source grid. Per-direction sequence continuity and atlas approval remain pending.",
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 95,
+    "uniformScale": 0.698529,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/elemental/slaggolem/v1/atlas.png",
+      "frame": 38,
+      "action": "death",
+      "direction": "west",
+      "phase": "02-ground"
+    },
+    "inputSha256": "eb4b7b2dcefe3f3028cedb42e362b87d7050f63a988f382bf25a70ca695a7ce8",
+    "outputSha256": "cb231e46f562d7ef098f0a2cec07bf84f48615ed58e82aaffab2d25eac4fcaec",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

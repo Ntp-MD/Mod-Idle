@@ -64,5 +64,41 @@
       288
     ]
   },
-  "note": "Generated individual pose candidate; normalized into the canonical 384x384 cell. Identity, exact facing, phase, hard alpha, foot anchor, atlas fit, and art-owner acceptance remain unverified."
+  "note": "Generated individual pose candidate; normalized into the canonical 384x384 cell. Identity, exact facing, phase, hard alpha, foot anchor, atlas fit, and art-owner acceptance remain unverified. Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending.",
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 147,
+    "uniformScale": 0.671233,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/beast/werewolf/v1/atlas.png",
+      "frame": 9,
+      "action": "walk",
+      "direction": "east",
+      "phase": "01-stride-b"
+    },
+    "inputSha256": "331c7e970fb25da4ce6d004cd35f94b5865d187c8f62a36a54f378386babea61",
+    "outputSha256": "858d5fa58dcc102ec05402646a0fe99237bb1b54b6f6499f65318b4ca4b966cb",
+    "reviewRequired": true
+  }
 }

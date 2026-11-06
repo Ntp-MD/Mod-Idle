@@ -10,7 +10,7 @@
   "bakedWeapon": "spear",
   "generator": "OpenAI built-in image_gen",
   "generationSource": "C:\\Users\\disda\\.codex\\generated_images\\01a17d4d-3b5a-72a1-83b1-947b6fe9c9d9\\exec-7c002aea-227e-48f4-b6c3-69274e87f05a.png",
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "status": "candidate-review",
   "qa": {
     "exactFacingVerified": false,
@@ -37,5 +37,42 @@
       384
     ],
     "normalizationPending": true
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 121,
+    "uniformScale": 0.294404,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\humanoid\\goblin\\v1\\atlas.png",
+      "frame": 12,
+      "action": "walk",
+      "direction": "west",
+      "phase": "00-stride-a"
+    },
+    "inputSha256": "644d501981934faa9a05b009b856e9a91fdd97b7809a0486eae59336500057cb",
+    "outputSha256": "1cdea9ff033484bd3783c980a27ceb3f43bee489aa291bcc7dbee93e8564be1c",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

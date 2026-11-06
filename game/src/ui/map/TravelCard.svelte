@@ -47,21 +47,23 @@
   const isDungeon = $derived(site === 'dungeon');
   const zone = $derived(eng.zoneById(settlement.zone));
   const subzone = $derived(dest.kind === 'sub' && dest.sub != null ? zone.subzones?.[dest.sub] ?? null : null);
-  const encounterNames = $derived.by(() => {
-    // The zone's fixed levels belong to Species; its selected Variant supplies the name and Core.
-    const speciesIds = subzone ? (subzone.species || []) : eng.speciesInZone(settlement.zone);
-    const rows = speciesIds.flatMap((id: string) => {
-      const species = eng.speciesById(id);
-      const level = species?.zone_levels?.[settlement.zone];
-      const names = eng.variantsInZone(id, settlement.zone).map((variant: any) => variant.name);
-      return (names.length ? names : [species?.name ?? id]).map((name: string) => `${name} · Lv ${level ?? zone.levels[0]}`);
-    });
-    return [...new Set(rows)];
+  /** The authored placements this destination fields; a named side reads one-based Subzone rows. */
+  const pool = $derived.by(() => {
+    const speciesIds = new Set(subzone ? (subzone.species || []) : eng.speciesInZone(settlement.zone));
+    const subIndex = dest.kind === 'sub' && dest.sub != null ? dest.sub + 1 : undefined;
+    return eng.placementsIn(settlement.zone, subIndex).filter((row: any) => speciesIds.has(row.species));
+  });
+  const encounterNames = $derived.by(() => [...new Set(pool.map((row: any) => `${row.name} · Lv ${row.level}`))]);
+  const levelText = $derived.by(() => {
+    const levels = pool.map((row: any) => row.level);
+    if (!levels.length) return `Lv ${zone.levels[0]}–${zone.levels[1]}`;
+    const lo = Math.min(...levels), hi = Math.max(...levels);
+    return lo === hi ? `Lv ${lo}` : `Lv ${lo}–${hi}`;
   });
   const uniqueNames = $derived.by(() => {
-    // A Species may have no Unique or several; Elite remains a rank over the rolled Variant.
+    // A Species may have no Unique or several; only this Zone's authored Unique is live.
     const speciesIds = subzone ? (subzone.species || []) : eng.speciesInZone(settlement.zone);
-    return [...new Set(speciesIds.flatMap((id: string) => eng.uniquesOf(id).map((unique: any) => unique.name)))];
+    return [...new Set(speciesIds.flatMap((id: string) => eng.uniquesOf(id, settlement.zone).map((unique: any) => unique.name)))];
   });
   const zoneBoss = $derived(E.mob.bosses.find((boss: any) => boss.zone === settlement.zone) ?? null);
   /** The side's own pack, Elite rate and body mix — what standing here rolls (`mob.spawn_packs`). */
@@ -82,7 +84,7 @@
   <header class="dest-head">
     <div class="dest-identity">
       <h2 class="text-accent">{intel && !intel.known && dest.kind !== 'town' ? `Unexplored block ${dest.key}` : intel?.site?.name || dest.label}</h2>
-      <p class="text-note">{intel && !intel.known && dest.kind !== 'town' ? 'Unscouted block' : `${typeName} · Lv ${zone.levels[0]}–${zone.levels[1]}`}</p>
+      <p class="text-note">{intel && !intel.known && dest.kind !== 'town' ? 'Unscouted block' : `${typeName} · ${levelText}`}</p>
     </div>
     {#if selected}<button class="btn btn-flat btn-icon dest-close" type="button" onclick={onclear} aria-label="Close selection" title="Close selection · Esc">
       <span class="icon-mask" style={`--glyph:url(${cancelClose})`} aria-hidden="true"></span>

@@ -31,5 +31,42 @@
       384
     ],
     "normalizationPending": true
-  }
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 139,
+    "uniformScale": 0.195499,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\humanoid\\goblin\\v1\\atlas.png",
+      "frame": 17,
+      "action": "attack",
+      "direction": "east",
+      "phase": "01-contact"
+    },
+    "inputSha256": "27ac8029bf4e80abfaae829d12d6248cb55a1fffc8a37760b7ba68a26afddb64",
+    "outputSha256": "d8c934cfe495c2a1441fba96480f96afa737a099528703f6c6f50dcd8cbbdb6c",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

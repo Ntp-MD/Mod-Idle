@@ -1,0 +1,37 @@
+﻿{
+    "schemaVersion":  1,
+    "status":  "candidate-review",
+    "speciesId":  "wolf",
+    "action":  "hit",
+    "direction":  "south",
+    "phase":  "00-flinch",
+    "source":  "../east/00-flinch.png",
+    "sourceSidecar":  "../east/00-flinch.meta.json",
+    "sourceDirection":  "east",
+    "sourceSha256":  "01b57be269700b34c3de49fd3dc46343afb0c1fc4fbe6db8ebedfae5f19cae0d",
+    "donorStatus":  "source-reference-unverified",
+    "donorOriginalSource":  "../../../../atlas/animation.png",
+    "donorOriginalSourceCell":  [
+                                    0,
+                                    3
+                                ],
+    "frameCanvas":  {
+                        "height":  384,
+                        "width":  384
+                    },
+    "anchor":  {
+                   "y":  288,
+                   "x":  192
+               },
+    "method":  "byte-identical phase-matched directional coverage copy; no pixel processing",
+    "sourcePixelsModified":  false,
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "visualReview":  {
+                         "atlasAccepted":  false,
+                         "exactDirectionAccepted":  false,
+                         "identityAccepted":  false,
+                         "phaseSequenceAccepted":  false
+                     },
+    "note":  "Coverage-only directional duplicate from east; regenerate and visually review this exact facing before approval or atlas promotion."
+}

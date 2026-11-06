@@ -1,0 +1,20 @@
+﻿{
+    "status":  "candidate-review",
+    "source":  "../../../../atlas/animation.png",
+    "sourceCell":  [
+                       0,
+                       4
+                   ],
+    "pixelsRepainted":  false,
+    "visualReviewRequired":  true,
+    "speciesId":  "wyvern",
+    "race":  "dragon",
+    "action":  "death",
+    "direction":  "south",
+    "phase":  "00-fall",
+    "originalStatus":  "baseline-extracted-candidate",
+    "copiedFrom":  "../east/00-fall.png",
+    "directionalDuplicateSource":  "east",
+    "regenerationRequired":  true,
+    "note":  "Coverage-only directional duplicate copied byte-for-byte from the east baseline candidate. No authored south death source is present; regenerate and visually review before approval or atlas promotion."
+}

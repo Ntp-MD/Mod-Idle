@@ -1,0 +1,37 @@
+﻿{
+    "status":  "candidate-review",
+    "speciesId":  "mummy",
+    "source":  "../east/00-fall.png",
+    "sourceCell":  {
+                       "row":  4,
+                       "column":  0,
+                       "box":  [
+                                   0,
+                                   1536,
+                                   384,
+                                   1920
+                               ]
+                   },
+    "sourcePixelsModified":  false,
+    "qa":  {
+               "new16DirectionSetAccepted":  false,
+               "anchor":  false,
+               "atlas":  false
+           },
+    "sourceDirection":  "east",
+    "directionalDuplicateSource":  "east",
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "frameCanvas":  {
+                        "width":  384,
+                        "height":  384
+                    },
+    "anchor":  {
+                   "x":  192,
+                   "y":  288
+               },
+    "phase":  "00-fall",
+    "action":  "death",
+    "direction":  "north",
+    "note":  "Coverage-only directional duplicate from the east death/00-fall candidate. Exact north-facing art remains ungenerated; regenerate and visually review before approval or atlas promotion."
+}

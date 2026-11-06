@@ -274,32 +274,27 @@ function runChecks() {
     : `${boltRows.length} magic weapon(s) of ${(BASES_JSON.weapons || []).length} flick a bolt instead of swinging (${boltRows.join(' · ')}) · a bolt is a press on the attack clock with no mana and no cooldown, worth the attack ladder's floor ${f2(boltFloor)}% of the finished hit, so the filler is never a downgrade and the bar can carry real cooldowns (HugePatch section 14c)`);
 
   // X53: species.zones owns zone eligibility; each subzone is an independent Species pool and pools may overlap.
-  // Their union must cover the zone cast. Variants supply names/Core by zone midpoint; zone_levels supplies
-  // each Species' actual fixed level, and subzones carry no variant list.
+  // Their union must cover the zone cast. Placements supply each row's name, Core and fixed level;
+  // subzones carry no variant list.
   const subProblems: string[] = [];
   {
     const raceSet = new Set((E.mob.races?.set || []) as string[]);
     if (!raceSet.size) subProblems.push('mob.races.set is empty');
     if (raceSet.size !== (E.mob.races?.set || []).length) subProblems.push('mob.races.set contains duplicate race ids');
     const byId = new Map((E.mob.species as any[]).map((s) => [s.id, s]));
-    const variants = (E.mob as any).variants || {} as Record<string, { name: string; levels: [number, number] }[]>;
-    const variantOwner = new Map<string, string[]>();
-    for (const [sid, rows] of Object.entries(variants)) for (const v of (rows as { name: string }[])) {
-      if (!variantOwner.has(v.name)) variantOwner.set(v.name, []);
-      variantOwner.get(v.name)!.push(sid);
+    const placements = ((E.mob as any).variants || []) as any[];
+    const placementIds = new Set<string>();
+    const placedSpecies = new Set<string>();
+    for (const row of placements) {
+      if (placementIds.has(row.id)) subProblems.push(`duplicate placement id ${row.id}`);
+      placementIds.add(row.id);
+      if (!byId.has(row.species)) subProblems.push(`placement ${row.id} names no species ${row.species}`);
+      else placedSpecies.add(row.species);
     }
-    for (const sid of Object.keys(variants)) if (!byId.has(sid)) subProblems.push(`variants row ${sid} names no species`);
     for (const s of (E.mob.species as any[])) {
       if (!raceSet.has(s.race)) subProblems.push(`${s.name} belongs to unknown Race ${s.race}`);
-      if (!(s.id in variants)) subProblems.push(`${s.name} has no variants row`);
-      else if (!(variants[s.id] as any[]).length) subProblems.push(`${s.name} has no Variant and cannot be fielded`);
-      else for (const v of (variants[s.id] as { name: string; levels: [number, number] }[])) {
-        const [lo, hi] = v.levels || [];
-        if (!Number.isInteger(lo) || !Number.isInteger(hi) || lo < 1 || hi < lo || hi > E.mob.form_level_cap)
-          subProblems.push(`${s.name} variant ${v.name} levels [${lo}, ${hi}] are not a real band`);
-      }
+      if (!placedSpecies.has(s.id)) subProblems.push(`${s.name} has no placement and cannot be fielded`);
     }
-    for (const [name, owners] of variantOwner) if (owners.length > 1) subProblems.push(`Variant ${name} is owned by multiple Species: ${owners.join(', ')}`);
     for (const z of (E.mob.zones as any[])) {
       const want = new Set(eng.speciesInZone(z.id));
       const shown = new Set<string>((z.subzones || []).flatMap((s: any) => s.species || []));
@@ -310,12 +305,6 @@ function runChecks() {
       for (const r of want) if (!shown.has(r)) subProblems.push(`${r} placed in zone ${z.id} but shown in no subzone there`);
       for (const s of (z.subzones || [])) {
         if ('normal' in s || 'elite' in s) subProblems.push(`zone ${z.id} ${s.name} declares variants: the Species ladder owns names, subzones own only Species ids`);
-        if ((z.levels as number[])[1] <= E.mob.form_level_cap) {
-          for (const r of (s.species || [])) {
-            const fielded = eng.variantsInZone(r, z.id);
-            if (fielded.length !== 1) subProblems.push(`${r} in zone ${z.id} fields ${fielded.length} variants; expected one midpoint band`);
-          }
-        }
       }
     }
     const uniques = ((E.mob as any).uniques || []) as any[];
@@ -547,21 +536,17 @@ function runChecks() {
     : `${formNames.size} authored field forms are uniquely named and zone-valid; missing forms inherit the previous label, while Variants own live Core and Elite/Boss remain rank overlays`);
 
   const formDropProblems: string[] = [];
-  const dropVariants = (E.mob as any).variants || {};
-  const formDropRows = (E.mob as any).variant_drops || {};
-  for (const sp of E.mob.species) {
-    const ladder = (dropVariants[sp.id] || []) as { name: string; core?: Record<string, number> }[];
-    for (const v of ladder) {
-      const row = formDropRows[v.name];
-      if (!row || typeof row.item !== 'string' || typeof row.rarity !== 'string' || typeof row.lean !== 'string')
-        formDropProblems.push(`${sp.id}: variant ${v.name} has no complete item/rarity/lean row`);
-      for (const key of ['str', 'agi', 'vit', 'dex', 'int', 'wis', 'lck']) {
-        if (!Number.isInteger(v.core?.[key])) formDropProblems.push(`${sp.id}: variant ${v.name} Core ${key} is missing or not an integer`);
-      }
+  const formDropRows = ((E.mob as any).variant_drops || {}) as Record<string, any>;
+  for (const v of ((E.mob as any).variants || []) as any[]) {
+    const row = formDropRows[v.id];
+    if (!row || typeof row.item !== 'string' || typeof row.rarity !== 'string' || typeof row.lean !== 'string')
+      formDropProblems.push(`${v.id}: placement has no complete item/rarity/lean row`);
+    for (const key of ['str', 'agi', 'vit', 'dex', 'int', 'wis', 'lck']) {
+      if (!Number.isInteger(v.core?.[key])) formDropProblems.push(`${v.id}: Core ${key} is missing or not an integer`);
     }
   }
   add('X78', formDropProblems.length === 0, formDropProblems.length ? formDropProblems.join(' · ')
-    : `every authored Variant has an integer Core and complete item/rarity/lean row`);
+    : `every authored placement has an integer Core and complete item/rarity/lean row keyed by its stable id`);
 
   // The Core spend audit: every body spends whole points on live stats only, and Dex follows
   // the band ceilings in `mob.core_spend` instead of swallowing a level band's whole growth.
@@ -588,10 +573,11 @@ function runChecks() {
       }
       if (core?.dex > cap) spendProblems.push(`${label}: Dex ${core.dex} is over the ${cap} band ceiling`);
     };
-    const variants = ((E.mob as any).variants || {}) as Record<string, any[]>;
-    for (const sp of E.mob.species) {
-      audit(`species ${sp.id}`, sp.core, sp.damage, dexCap[0]);
-      for (const v of variants[sp.id] || []) audit(`${sp.id}/${v.name}`, v.core, v.damage ?? sp.damage, dexCap[variantBand(v.levels)]);
+    const variants = ((E.mob as any).variants || []) as any[];
+    for (const sp of E.mob.species) audit(`species ${sp.id}`, sp.core, sp.damage, dexCap[0]);
+    for (const v of variants) {
+      const sp = E.mob.species.find((entry) => entry.id === v.species);
+      audit(`${v.id}`, v.core, v.damage ?? sp?.damage, dexCap[zoneBand(v.zone)]);
     }
     for (const [zoneId, forms] of Object.entries(((E.mob as any).forms || {}) as Record<string, Record<string, any>>)) {
       for (const [speciesId, form] of Object.entries(forms)) {
@@ -606,11 +592,123 @@ function runChecks() {
     for (const boss of E.mob.bosses as any[]) audit(`boss ${boss.name}`, boss.core, boss.damage, dexCap[4]);
     for (const unique of (((E.mob as any).uniques || []) as any[])) audit(`unique ${unique.name}`, unique.core, unique.damage, dexCap[4]);
   }
-  const variantCount = Object.values(((E.mob as any).variants || {}) as Record<string, any[]>).reduce((n, rows) => n + rows.length, 0);
+  const variantCount = (((E.mob as any).variants || []) as any[]).length;
   const formCount = Object.values(((E.mob as any).forms || {}) as Record<string, Record<string, any>>).reduce((n, rows) => n + Object.keys(rows).length, 0);
   const uniqueCount = (((E.mob as any).uniques || []) as any[]).length;
   add('X79', spendProblems.length === 0, spendProblems.slice(0, 8).join(' · ')
     || `${variantCount} Variants · ${formCount} forms · ${E.mob.species.length} Species · ${E.mob.bosses.length} Bosses · ${uniqueCount} Uniques — every body spends whole live points, Wis is 0, physical Int is 0, and Dex stays within ${spendCaps} by band`);
+
+  // X82–X88: the fixed placement contract (plan §3, §4-bis, P7).
+  {
+    const placements = ((E.mob as any).variants || []) as any[];
+    const bosses = (E.mob.bosses || []) as any[];
+    const uniques = (((E.mob as any).uniques || []) as any[]);
+    const drops = ((E.mob as any).variant_drops || {}) as Record<string, any>;
+    const speciesById = new Map(E.mob.species.map((sp) => [sp.id, sp]));
+    const zonesById = new Map(E.mob.zones.map((z) => [z.id, z]));
+
+    const p82: string[] = [];
+    const ids = new Set<string>();
+    for (const row of [...placements, ...bosses, ...uniques]) {
+      if (!row.id || ids.has(row.id)) p82.push(`identity ${row.id} is missing or duplicated`);
+      ids.add(row.id);
+      if (!speciesById.has(row.species)) p82.push(`${row.id}: unknown species ${row.species}`);
+      if (!zonesById.has(row.zone)) p82.push(`${row.id}: unknown zone ${row.zone}`);
+    }
+    for (const row of placements) {
+      const z = zonesById.get(row.zone);
+      if (!z) continue;
+      if (!Number.isInteger(row.subzone) || row.subzone < 1 || row.subzone > (z.subzones || []).length) {
+        p82.push(`${row.id}: invalid subzone ${row.subzone}`);
+      } else if (!(z.subzones![row.subzone - 1].species || []).includes(row.species)) {
+        p82.push(`${row.id}: species is not in its authored Subzone pool`);
+      }
+    }
+    add('X82', p82.length === 0, p82.length ? p82.join(' · ')
+      : `${ids.size} identity rows (${placements.length} normal/Elite, ${bosses.length} Boss, ${uniques.length} Unique) resolve one species, one zone and one authored Subzone`);
+
+    const p83 = [...placements, ...bosses, ...uniques]
+      .filter((row) => !Number.isInteger(row.level) || row.level < 1 || row.level > 180)
+      .map((row) => `${row.id}:${row.level}`);
+    add('X83', p83.length === 0, p83.length ? p83.join(' · ')
+      : `all ${ids.size} identities carry one integer level in 1–180`);
+
+    const seams = new Set([3, 4, 6, 7, 9, 10, 12, 13, 15, 16]);
+    const p84: string[] = [];
+    const p85: string[] = [];
+    for (const z of E.mob.zones) {
+      for (const [index, sub] of (z.subzones || []).entries()) {
+        const rows = placements.filter((row) => row.zone === z.id && row.subzone === index + 1);
+        const levels = [...new Set(rows.map((row) => row.level))].sort((a, b) => a - b);
+        for (let i = 1; i < levels.length; i++) {
+          if (levels[i] - levels[i - 1] < 2) p84.push(`z${z.id} ${sub.name}: ${levels[i - 1]}→${levels[i]}`);
+        }
+        const counts = new Map<number, number>();
+        for (const row of rows) counts.set(row.level, (counts.get(row.level) ?? 0) + 1);
+        for (const [level, n] of counts) if (n > 2) p84.push(`z${z.id} ${sub.name}: level ${level} x${n}`);
+        if (levels.length < Math.min(6, rows.length)) p85.push(`z${z.id} ${sub.name}: ${levels.length} distinct levels < min(6, ${rows.length})`);
+        let w = 0, sum = 0;
+        for (const row of rows) {
+          const sp = speciesById.get(row.species);
+          const power = sp?.power_base ?? 0;
+          if (!Number.isInteger(row.weight) || row.weight < 1 || row.weight > 50) p85.push(`${row.id}: weight ${row.weight} outside 1–50`);
+          if (row.role === 'visitor' && (row.weight > 3 || !seams.has(z.id))) p85.push(`${row.id}: visitor outside a seam or over weight 3`);
+          if (row.role !== 'visitor' && row.weight > 3 && row.role === 'visitor') p85.push(`${row.id}: illegal visitor`);
+          if (!['grunt', 'skirmisher', 'line', 'anchor', 'visitor', 'guardian'].includes(row.role)) p85.push(`${row.id}: unknown role ${row.role}`);
+          const cap = power >= 1.06 ? 6 : power >= 0.99 ? 35 : 40;
+          if (row.weight > cap) p85.push(`${row.id}: weight ${row.weight} over its P-band cap ${cap}`);
+          w += row.weight; sum += row.weight * power;
+        }
+        const budget = w ? sum / w : 0;
+        if (!(budget >= 0.93 && budget <= 1.08)) p85.push(`z${z.id} ${sub.name}: power budget ${budget.toFixed(4)} outside 0.93–1.08`);
+      }
+    }
+    add('X84', p84.length === 0, p84.length ? p84.join(' · ')
+      : `every Subzone's distinct levels differ by at least 2 and no level carries more than two rows`);
+    add('X85', p85.length === 0, p85.length ? p85.join(' · ')
+      : `every Subzone exposes at least min(6, pool) distinct levels; weights stay in 1–50, visitor rows only on the five seams at weight 1–3, each pool's weight x power_base mean stays in 0.93–1.08, and A bodies stay at weight ≤ 6`);
+
+    const p86 = [...placements, ...bosses, ...uniques].filter((row) => !drops[row.id]).map((row) => row.id);
+    for (const row of [...bosses, ...uniques]) if (!speciesById.has(row.species)) p86.push(`${row.id}: no Species art family`);
+    add('X86', p86.length === 0, p86.length ? p86.slice(0, 8).join(' · ')
+      : `every normal/Elite, Boss and Unique resolves to exactly one drop row; a special resolves its Species art family, with the existing failure fallback when the atlas is missing`);
+
+    const weightedMedian = (rows: any[]) => {
+      const total = rows.reduce((n, row) => n + row.weight, 0);
+      let cumulative = 0;
+      const sorted = [...rows].sort((a, b) => a.level - b.level);
+      for (const row of sorted) { cumulative += row.weight; if (cumulative >= total / 2) return row.level; }
+      return sorted.length ? sorted[sorted.length - 1].level : null;
+    };
+    const zoneReport = E.mob.zones.map((z) => {
+      const rows = placements.filter((row) => row.zone === z.id);
+      const mean = rows.length ? rows.reduce((n, row) => n + row.level, 0) / rows.length : 0;
+      const median = weightedMedian(rows);
+      const below = rows.filter((row) => row.level < (z.recommended_level ?? 0)).length / Math.max(1, rows.length);
+      const next = E.mob.zones.find((x) => x.id === z.id + 1) ?? z;
+      const outliers = rows.filter((row) => row.level > (next.recommended_level ?? 0) + 8).length;
+      return { zone: z.id, mean, median, below, outliers };
+    });
+    const regressions = zoneReport.slice(1).filter((row, i) => row.median != null && zoneReport[i].median != null && row.median! - zoneReport[i].median! > 2);
+    const extremes = zoneReport.filter((row) => row.outliers > 2);
+    soft('X87', true, `watch only · Zone weighted medians ${zoneReport.map((row) => `${row.zone}:${row.median}`).join(' ')} · low-tier shares ${zoneReport.map((row) => `${row.zone}:${(row.below * 100).toFixed(0)}%`).join(' ')} · adjacent regressions >2 ${regressions.length ? regressions.map((row) => row.zone).join(',') : 'none'} · pools with >2 outliers ${extremes.length ? extremes.map((row) => `${row.zone}(${row.outliers})`).join(',') : 'none'} — reported, never clamped`);
+
+    const p88: string[] = [];
+    const locations = (E.road.locations || []) as any[];
+    for (const row of placements) {
+      const hasCell = locations.some((loc) => loc.kind === 'sub' && loc.zone === row.zone && loc.index === row.subzone - 1);
+      if (!hasCell) p88.push(`${row.id}: no named-Subzone cell`);
+    }
+    for (const boss of bosses) {
+      if (!locations.some((loc) => loc.kind === 'town' && loc.zone === boss.zone)) p88.push(`${boss.id}: no Zone location`);
+    }
+    for (const unique of uniques) {
+      const sp = speciesById.get(unique.species);
+      if (!sp?.zones.includes(unique.zone)) p88.push(`${unique.id}: Unique zone is not Species-eligible`);
+    }
+    add('X88', p88.length === 0, p88.length ? p88.join(' · ')
+      : `every placement resolves to its Zone's named Subzone cell, every special to its authored Zone, and resource-site indices stay separate from one-based placement Subzones`);
+  }
 
   // X80/X81: every Species owns one thematic material. The shape and the catalogue reference are
   // hard; the 5%-of-junk-line budget is a watch because it is a tuning figure, not a structural rule.
@@ -794,38 +892,26 @@ function runChecks() {
   for (const z of ZONES) if (z.id > 1 && !ROWS.some((r) => r.zone === z.id && r.weapon)) rp.push(`zone ${z.id} has no weapon-carrying lineage, so no weapon could ever drop there`);
   for (const r of ROWS) {
     const sp = E.mob.species.find((x) => x.id === r.speciesId)!;
+    const placement = r.placementId ? eng.placementById(r.placementId) : null;
+    if (!placement) { rp.push(`${r.id} carries no authored placement id`); continue; }
+    if (r.level !== placement.level) rp.push(`${r.id} level does not match its placement level`);
     if (/Elite/.test(r.kind)) {
       if (!sp.sizes.includes('large')) rp.push(`Elite ${r.id}: ${sp.name} has no Large body to flag`);
-      const zone = eng.zoneById(r.zone);
-      const fixedLevel = sp.zone_levels?.[r.zone];
-      if (!Number.isInteger(fixedLevel) || fixedLevel! < zone.levels[0] || fixedLevel! > zone.levels[1]) {
-        rp.push(`Elite ${r.id} has no static Species level inside ${zone.levels[0]}–${zone.levels[1]}`);
-      }
-      if (r.level !== fixedLevel) rp.push(`Elite ${r.id} level does not match its static Species zone level`);
       if (Math.abs(r.hpBaseTo - eng.mobHpAt(r.level) * E.mob.elite.hp) > 1) rp.push(`Elite ${r.id} Base HP is not the curve at its own level ×${E.mob.elite.hp}`);
       const flat = eng.LG.hp_per_level * (r.level - 1) + r.vit * eng.K.K_VIT_HP;
       const expectedHp = (eng.mobHpAt(r.level) + flat) * E.mob.elite.hp;
       if (Math.abs(r.hpFrom - expectedHp) > 1) rp.push(`Elite ${r.id} HP does not multiply the complete mobHP by ${E.mob.elite.hp}`);
-      const variant = eng.variantsInZone(r.speciesId, r.zone).find((v: any) => v.name === r.variant);
       const expectedPs = eng.mobPsAt(r.level) * E.mob.elite.ps / eng.zoneBodyFactor(r.zone)
-        * eng.speciesPsMult(r.zone, r.speciesId, variant?.core, variant?.damage);
+        * eng.speciesPsMult(r.zone, r.speciesId, placement.core, placement.damage ?? sp.damage);
       if (Math.abs(r.ps - expectedPs) > 0.01) rp.push(`Elite ${r.id} PS does not match the live spawn formula`);
     } else if (/Boss/.test(r.kind)) {
       if (Math.abs(r.hpBaseTo - eng.mobHpAt(r.level)) > 1) rp.push(`Boss ${r.id} Base HP is not mob_HP at its own level — body classes no longer scale HP`);
     } else {
       if (Math.abs(r.hpBaseTo - eng.mobHpAt(r.level)) > 1) rp.push(`${r.id} Base HP does not equal the curve at its own level — body classes no longer scale HP`);
-      if (!/Unique/.test(r.kind)) {
-        const zone = eng.zoneById(r.zone);
-        const fixedLevel = sp.zone_levels?.[r.zone];
-        if (!Number.isInteger(fixedLevel) || fixedLevel! < zone.levels[0] || fixedLevel! > zone.levels[1]) {
-          rp.push(`${r.id} has no static Species level inside ${zone.levels[0]}–${zone.levels[1]}`);
-        }
-        if (r.level !== fixedLevel) rp.push(`${r.id} level does not match its static Species zone level`);
-      }
     }
   }
   add('X23', rp.length === 0, rp.length ? rp.join(' · ')
-    : `${ROWS.length} roster rows from ${E.mob.species.length} Species × authored Variants × body classes + ${ROWS.filter((r) => /Elite/.test(r.kind)).length} Elite + ${ROWS.filter((r) => /Unique/.test(r.kind)).length} Species Uniques + ${ROWS.filter((r) => /Boss/.test(r.kind)).length} named bosses · every zone has a normal Species and a Boss · normal and Elite spawns inherit their Species Element; each Boss reads its declared Element profile · zone row counts ${ZONES.map((z) => `${z.id}:${perZone[z.id]}`).join(' ')}`);
+    : `${ROWS.length} roster rows from ${((E.mob as any).variants || []).length} authored placements × body classes + ${ROWS.filter((r) => /Elite/.test(r.kind)).length} Elite + ${ROWS.filter((r) => /Unique/.test(r.kind)).length} Species Uniques + ${ROWS.filter((r) => /Boss/.test(r.kind)).length} named bosses · every zone has a normal Species and a Boss · normal and Elite spawns inherit their Species Element; each Boss reads its declared Element profile · zone row counts ${ZONES.map((z) => `${z.id}:${perZone[z.id]}`).join(' ')}`);
 
   // Energy Shield: the caster's second pool, sized so it supplements HP instead of doubling it
   const esProblems = [];
@@ -958,9 +1044,9 @@ function runChecks() {
       }
     }
     const speciesIds = new Set(E.mob.species.map((sp) => sp.id));
-    const variantNames = new Set(Object.values(((E.mob as any).variants || {}) as Record<string, any[]>).flatMap((rows) => rows.map((r) => r.name)));
-    const bossNames = new Set((E.mob.bosses as any[]).map((b) => b.name));
-    const uniqueNames = new Set(((E.mob as any).uniques || []).map((u: any) => u.name));
+    const variantNames = new Set((((E.mob as any).variants || []) as any[]).map((r) => r.id));
+    const bossNames = new Set((E.mob.bosses as any[]).map((b) => b.id));
+    const uniqueNames = new Set(((E.mob as any).uniques || []).map((u: any) => u.id));
     const referenced = new Set<string>();
     const checkKit = (label: string, ids: string[], max: number) => {
       if (!Array.isArray(ids) || ids.length < 1) sk.push(`${label}: empty kit`);
@@ -1285,16 +1371,17 @@ function runChecks() {
       : `the two buckets are ${BUCKET.map(([id]) => id).join(' + ')}: real % lines, each with a \`mod_weights\` row, each on the weapon pool and on no armour slot · a press multiplies once, on its own ladder only (${physRow.id} reads Attack damage %, ${magicRow.id} reads Spell damage %, the other half of the pair is x1.00 on both) · a swing rides the attack bucket and a magic weapon's bolt the spell one · an empty bucket is x1, so every published press stays the empty-bucket baseline`);
   }
 
-  // Species provide a default damage type; individual Variants may override it.
-  const variantsBySpecies = ((E.mob as any).variants || {}) as Record<string, any[]>;
-  const variantDamageTags = Object.values(variantsBySpecies)
-    .flatMap((ladder: any[]) => ladder.filter((variant) => variant.damage !== undefined).map((variant) => variant.damage));
+  // Species provide a default damage type; individual placements may override it.
+  const placementRows = ((E.mob as any).variants || []) as any[];
+  const variantDamageTags = placementRows.filter((row) => row.damage !== undefined).map((row) => row.damage);
   const splitTags: string[] = [...new Set([...E.mob.species.map((r) => r.damage), ...variantDamageTags])];
   const damageProblems = splitTags.filter((t) => !E.mob.damage_split[t] || Math.abs(E.mob.damage_split[t][0] + E.mob.damage_split[t][1] - 1) > 1e-9);
   const magicCoreProblems: string[] = [];
-  for (const sp of E.mob.species) for (const variant of variantsBySpecies[sp.id] || []) {
-    if ((variant.damage ?? sp.damage) === 'magic' && variant.core.int <= variant.core.str) {
-      magicCoreProblems.push(`${sp.id}/${variant.name}: magic damage needs Int above Str`);
+  const speciesOf = new Map(E.mob.species.map((sp) => [sp.id, sp]));
+  for (const row of placementRows) {
+    const sp = E.mob.species.find((entry) => entry.id === row.species)!;
+    if ((row.damage ?? sp.damage) === 'magic' && row.core.int <= row.core.str) {
+      magicCoreProblems.push(`${row.id}: magic damage needs Int above Str`);
     }
   }
   for (const boss of E.mob.bosses as any[]) {
@@ -1311,10 +1398,8 @@ function runChecks() {
   add('X31', damageProfileProblems.length === 0, damageProfileProblems.join(' · ')
     || 'Species defaults and Variant overrides resolve to real splits; magic damage Variants, Bosses and Uniques put Int above Str');
 
-  // With a mob's level STATIC per variant (`mob.variants[].levels`; the legacy per-species zone
-  // table `mob.species[].zone_levels` answers only past the form cap), the zone average no longer
-  // equals the zone-top anchor: a mob reads `mob_HP` at its OWN level, so the
-  // Reach: the only positional model, and its cost to a melee build must stay small
+  // Each placement's level is STATIC, so a mob reads `mob_HP` at its OWN level rather than a zone
+  // anchor. Reach is the only positional model, and its cost to a melee build must stay small.
   const RP = [];
   const allWeapons = ['sword','axe','dagger','mace','spear','two-handed sword','two-handed axe','bow','crossbow','staff','wand','book'];
   for (const w of allWeapons) if (!E.mob.reach.weapons[w]) RP.push(`weapon ${w} has no reach band`);
@@ -1356,23 +1441,21 @@ function runChecks() {
     }
     // Every fieldable variant keeps its unique base item. Each species also owns one alternative per
     // rarity; those names must be globally unique and map to the same fixed sale rarity in town.
-    const V = (E.mob as any).variants || {};
     const D = (E.mob as any).variant_drops || {};
-    // Only a FIELDABLE name may promise a junk item: a name the cast can never field is a drop the
-    // Counterhand would advertise and nothing could ever pay. Reachability is read off the cast, not
-    // typed: every normal Variant is fielded in its band, and every Species Unique is fielded wild.
-    const ladderNames = (Object.values(V) as { name: string }[][]).flat().map((v) => v.name);
-    const uniqueNames = (((E.mob as any).uniques || []) as any[]).map((u) => u.name);
-    const names = [...ladderNames, ...uniqueNames];
-    const paidBy = new Map<string, string>();
+    // Every authored identity (normal/Elite, Boss, Unique) carries one drop row keyed by its stable
+    // id. Sibling placements deliberately reuse one source item, so the item itself need not be unique.
+    const placementRows = ((E.mob as any).variants || []) as any[];
+    const bossRows = (E.mob.bosses || []) as any[];
+    const uniqueRows = (((E.mob as any).uniques || []) as any[]);
+    const names = [...placementRows.map((p) => p.id), ...bossRows.map((b) => b.id), ...uniqueRows.map((u) => u.id)];
     const variantItems = new Set(Object.values(D).map((row: any) => row.item));
     for (const n of names) {
       const row = D[n];
-      if (!row) { jp.push(`variant ${n} can be fielded but has no variant_drops row`); continue; }
-      const owner = paidBy.get(row.item);
-      if (owner) jp.push(`junk item "${row.item}" is paid by two variants: ${owner} and ${n}`);
-      paidBy.set(row.item, n);
+      if (!row) { jp.push(`placement ${n} can be fielded but has no variant_drops row`); continue; }
       if (!J.rarities || !J.rarities[row.rarity]) jp.push(`${n} junk "${row.item}" has unknown rarity ${row.rarity}`);
+    }
+    for (const [name, row] of Object.entries(((E.mob as any).retired_variant_drops || {}) as Record<string, any>)) {
+      if (!row?.item || !J.rarities?.[row?.rarity]) jp.push(`retired source ${name} has no valid item/rarity row`);
     }
     const speciesItemOwner = new Map<string, string>();
     for (const species of E.mob.species as any[]) {
@@ -1391,77 +1474,64 @@ function runChecks() {
       }
     }
     for (const k of Object.keys(D)) {
-      if (!names.includes(k)) jp.push(`variant_drops row for a name no ladder or unique carries: ${k}`);
+      if (!names.includes(k)) jp.push(`variant_drops row for an id no placement, boss or unique carries: ${k}`);
     }
     const junkHr = BAND.high.kills_derived * perKill;
     add('X39', jp.length === 0, jp.length ? jp.join(' · ')
       : `mob junk has ${names.length} unique variant items plus ${speciesItemOwner.size} unique Species alternatives across ${Object.keys(J.rarities).length} rarities · each Species alternative shares its rarity's base value, and each rarity's chance = the line / its base value, so reference gold is ${f2(perKill)}/kill and ${f0(junkHr)}/hr before town demand · every declared Variant and Unique carries exactly one row · stacks ${J.stack}/slot, weightless`);
   }
 
-  // X57: a Species may author any number of Variants. Bands are valid and non-overlapping;
-  // zones carry a previous Variant across gaps. Subzones list Species ids, never Variant names.
+  // X57: every placement is a complete authored row; subzones still list Species ids only.
   {
     const cp: string[] = [];
-    const V = (E.mob as any).variants || {};
-    const seenNames = new Set<string>();
-    let rows = 0;
-    for (const [sid, list] of Object.entries<{ name: string; levels: [number, number] }[]>(V)) {
-      const bands = (list as { name: string; levels: [number, number] }[]).map((v) => v.levels);
-      rows += bands.length;
-      // A Species may author any number of Variants: a ladder length is content, not correctness, so it
-      // is never a gate. What holds is the shape below.
-      for (const v of list) {
-        if (!v.name || seenNames.has(v.name)) cp.push(`variant name is missing or repeated: ${v.name || '(empty)'}`);
-        else seenNames.add(v.name);
-        // Variant names are authored freely: a name must read as a creature, which no check can prove.
-        // What stays gated is the shape below — unique names, real bands, no overlap.
-        if (!Number.isInteger(v.levels?.[0]) || !Number.isInteger(v.levels?.[1]) || v.levels[0] < 1 || v.levels[1] < v.levels[0] || v.levels[1] > E.mob.form_level_cap)
-          cp.push(`${sid} variant ${v.name} has invalid levels [${v.levels?.[0]}, ${v.levels?.[1]}]`);
-      }
-      const sorted = [...bands].sort((a, b) => a[0] - b[0]);
-      for (let i = 1; i < sorted.length; i++) {
-        if (sorted[i][0] <= sorted[i - 1][1]) cp.push(`${sid} Variant bands overlap at ${sorted[i - 1][1]}→${sorted[i][0]}`);
-      }
+    const rows = ((E.mob as any).variants || []) as any[];
+    const seen = new Set<string>();
+    const roles = new Set(['grunt', 'skirmisher', 'line', 'anchor', 'visitor', 'guardian']);
+    for (const v of rows) {
+      if (!v.id || seen.has(v.id)) cp.push(`placement id is missing or repeated: ${v.id || '(empty)'}`);
+      else seen.add(v.id);
+      if (!Number.isInteger(v.level) || v.level < 1 || v.level > 180) cp.push(`${v.id}: level ${v.level} is outside 1–180`);
+      if (!Number.isInteger(v.weight) || v.weight < 1 || v.weight > 50) cp.push(`${v.id}: weight ${v.weight} is outside 1–50`);
+      if (!roles.has(v.role)) cp.push(`${v.id}: unknown role ${v.role}`);
     }
-    for (const z of E.mob.zones as any[]) for (const s of z.subzones || []) {
-      if ('normal' in s || 'elite' in s) cp.push(`zone ${z.id} ${s.name} still declares variant names`);
+    for (const z of E.mob.zones as any[]) for (const sub of z.subzones || []) {
+      if ('normal' in sub || 'elite' in sub) cp.push(`zone ${z.id} ${sub.name} still declares variant names`);
     }
     add('X57', cp.length === 0, cp.length ? cp.join(' · ')
-      : `${rows} authored Variants across ${Object.keys(V).length} Species; ladder length is free, bands stay valid and non-overlapping, zone gaps carry the prior Variant, names are unique across the roster, and subzones declare no variants`);
+      : `${rows.length} authored placements carry a stable id, an integer level and a legal role/weight; subzones declare no variant names`);
   }
 
   // X56: normal Variants share their Species' drop archetype. Species Uniques stay balanced
   // because they already pay the boss stone lines. Every lean still conserves expected drops/kill.
   {
     const vp: string[] = [];
-    const V = (E.mob as any).variants || {};
     const D = (E.mob as any).variant_drops || {};
-    const U = new Set((((E.mob as any).uniques || []) as any[]).map((u) => u.name));
+    const placements = ((E.mob as any).variants || []) as any[];
+    const uniques = (((E.mob as any).uniques || []) as any[]);
     const CATS = E.loot.variant_lean.categories as string[];
     const sample = { gear: 0.08, herb: 0.17, junk: 0.3 };
     const sum = (x: any) => x.gear + x.herb + x.junk;
     let leaned = 0, normalLeaned = 0;
-    for (const [sid, list] of Object.entries<{ name: string }[]>(V)) {
+    for (const sp of E.mob.species) {
+      const list = placements.filter((row) => row.species === sp.id);
       const normal: string[] = [];
-      for (const v of (list as { name: string }[])) {
-        const r = D[v.name];
-        if (!r) continue; // a pruned rung carries no row; X39 owns that fact, not this gate
-        if (U.has(v.name)) continue;
+      for (const v of list) {
+        const r = D[v.id];
+        if (!r) continue;
         normal.push(r.lean);
-        if (!CATS.includes(r.lean)) vp.push(`${sid}: ${v.name} has unknown lean ${r.lean}`);
+        if (!CATS.includes(r.lean)) vp.push(`${sp.id}: ${v.id} has unknown lean ${r.lean}`);
       }
-      if (normal.length !== (list as unknown[]).length) vp.push(`${sid}: has ${normal.length} normal lean rows, expected ${(list as unknown[]).length}`);
-      if (new Set(normal).size > 1) vp.push(`${sid}: normal rungs split across ${[...new Set(normal)].join(' · ')}`);
+      if (new Set(normal).size > 1) vp.push(`${sp.id}: normal placements split across ${[...new Set(normal)].join(' · ')}`);
       for (const lean of normal) {
         const out = leanReweight(sample, lean as any, E.loot.variant_lean.shift_pct);
-        if (Math.abs(sum(out) - sum(sample)) > 1e-9) vp.push(`${sid}: lean ${lean} does not conserve the total`);
-        if (out[lean as 'gear' | 'herb' | 'junk'] <= sample[lean as 'gear' | 'herb' | 'junk']) vp.push(`${sid}: lean ${lean} does not raise its own stream`);
+        if (Math.abs(sum(out) - sum(sample)) > 1e-9) vp.push(`${sp.id}: lean ${lean} does not conserve the total`);
+        if (out[lean as 'gear' | 'herb' | 'junk'] <= sample[lean as 'gear' | 'herb' | 'junk']) vp.push(`${sp.id}: lean ${lean} does not raise its own stream`);
         leaned++; normalLeaned++;
       }
     }
-    for (const u of U) {
-      const r = D[u];
-      if (r && r.lean !== 'none') vp.push(`Unique ${u} leans ${r.lean}, Species Uniques must stay 'none'`);
+    for (const u of uniques) {
+      const r = D[u.id];
+      if (r && r.lean !== 'none') vp.push(`Unique ${u.name} leans ${r.lean}, Species Uniques must stay 'none'`);
       if (r) leaned++;
     }
     add('X56', vp.length === 0, vp.length ? vp.join(' · ')

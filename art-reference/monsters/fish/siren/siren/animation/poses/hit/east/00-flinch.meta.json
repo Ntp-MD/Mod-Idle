@@ -8,9 +8,46 @@
     0,
     3
   ],
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "qa": {
     "visualIdentityReviewed": false,
     "atlasReady": false
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      128,
+      128
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 175,
+    "uniformScale": 2.916667,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\fish\\siren\\v1\\atlas.png",
+      "frame": 24,
+      "action": "hit",
+      "direction": "east",
+      "phase": "00-flinch"
+    },
+    "inputSha256": "be229fc1545aab7fee0591a00af0f70ffcd85b07f81aa45a648f4018fd085814",
+    "outputSha256": "3b8177771b4aa17c11280fd4b6cd3762019651b81a9e6b2f89e5793266b96889",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

@@ -13,6 +13,7 @@ import { characterSheet, huntZone, newGame, spawnMob, tick, catchUp } from '@sim
 import { placeKeystoneDoT, placeStatus } from '@sim/combat/mobStatus';
 import { NO_CURSE } from '@sim/combat/curse';
 import { exportJson, importJson } from '../../src/state/save';
+import { pinFieldPopulation } from '../fixtures/mobFixture';
 
 registerStaticKeystoneHandlers(KEYSTONE_HANDLERS, Object.keys(E.elements.status_of));
 const h = (key: string) => KEYSTONE_HANDLERS[key] as any;
@@ -123,6 +124,8 @@ function liveFight(keys: string[] = []) {
     hitsPerSec: 0, atkTimer: 0, skillIds: [],
   });
   state.group = [target];
+  pinFieldPopulation(state, 1);
+  for (const slot of state.field!.slots) slot.respawnAtSec = Number.MAX_SAFE_INTEGER;
   const c = characterSheet(state);
   state.player.hp = c.maxHp;
   state.player.mana = c.maxMana;
@@ -159,7 +162,7 @@ describe('live Keystone timing and recovery', () => {
       sourceId: 'player', targetId: state.group[0].id,
     });
     tick(state, { autoSkills: false });
-    expect(state.fx.some((event) => event.kind === 'taken')).toBe(due > 0.25);
+    expect(state.fx.some((event) => event.kind === 'taken' && event.byId === 'timed-target')).toBe(due > 0.25);
     expect(state.counters.kills).toBe(due <= 1 ? 1 : 0);
     expect(state.keystoneRuntime.queues.deferred).toHaveLength(due <= 1 ? 0 : 1);
   });

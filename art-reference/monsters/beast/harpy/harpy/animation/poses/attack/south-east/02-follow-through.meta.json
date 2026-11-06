@@ -70,5 +70,34 @@
     "identityPlausible": false,
     "facingPlausible": false,
     "note": "Coverage candidate only; identity, facing, phase, cycle and atlas review remain pending."
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 179,
+    "uniformScale": 1.491667,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/beast/harpy/v1/atlas.png",
+      "frame": 18,
+      "action": "attack",
+      "direction": "east",
+      "phase": "02-follow-through"
+    },
+    "inputSha256": "0e7de6a2a5cc096e3d740495f867d39493d2f2783f8a2bbbee8e5dc0e18a8b2f",
+    "outputSha256": "9dde5897d8a226e3b9a63d6c00c253a5fda5d50b728cc0656dbd39ad9c8a927f",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

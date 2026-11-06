@@ -1,26 +1,53 @@
 import { describe, expect, it } from 'vitest';
 import { E, eng, TOWN, fieldwork } from '../../src/engine/client';
-import { catchUp, catchUpAsync, newGame, setLevel, tick } from '@sim/core/game';
+import { catchUp, catchUpAsync, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
+import { mulberry32 } from '../../src/engine/client-helpers';
 import { exportJson, importJson } from '../../src/state/save';
 import { settlementCell, startWalk } from '@sim/world/road';
 import { resolveTravelEvent } from '@sim/world/fieldwork';
 
 describe('fixed zone rosters', () => {
-  it('spawns every normal and Elite at its Species-authored level inside the displayed zone band', () => {
-    const rows = eng.mobRoster();
+  it('resolves every placement id and reference', () => {
+    const ids = new Set<string>();
+    for (const row of E.mob.variants as any[]) {
+      expect(ids.has(row.id), row.id).toBe(false);
+      ids.add(row.id);
+      expect(eng.placementById(row.id)).toBe(row);
+      expect(E.mob.species.some((sp: any) => sp.id === row.species), row.id).toBe(true);
+    }
+  });
+
+  it('keeps at least two levels of gap inside every Subzone and no more than two rows on a level', () => {
     for (const zone of E.mob.zones as any[]) {
-      for (const species of (E.mob.species as any[]).filter((entry) => entry.zones.includes(zone.id))) {
-        const level = species.zone_levels[zone.id];
-        expect(level).toBeGreaterThanOrEqual(zone.levels[0]);
-        expect(level).toBeLessThanOrEqual(zone.levels[1]);
-        const normal = rows.find((row: any) => row.zone === zone.id && row.speciesId === species.id && !/Elite|Unique|Boss/.test(row.kind));
-        const elite = rows.find((row: any) => row.zone === zone.id && row.speciesId === species.id && row.kind === E.mob.elite.name);
-        expect(normal?.level).toBe(level);
-        if (species.sizes.includes('large')) expect(elite?.level).toBe(level);
-        const variant = eng.variantsInZone(species.id, zone.id)[0];
-        const body = species.sizes.includes('medium') ? 'medium' : species.sizes[0];
-        expect(eng.spawnAt(zone.id, body, species.id, undefined, variant?.core).level).toBe(level);
+      for (const [index, sub] of zone.subzones.entries()) {
+        const rows = eng.placementsIn(zone.id, index + 1);
+        expect(rows.length, `${zone.id}/${sub.name}`).toBeGreaterThan(0);
+        const levels = [...new Set(rows.map((row: any) => row.level))].sort((a, b) => a - b);
+        for (let i = 1; i < levels.length; i++) expect(levels[i] - levels[i - 1], `${zone.id}/${sub.name}`).toBeGreaterThanOrEqual(2);
+        for (const level of levels) expect(rows.filter((row: any) => row.level === level).length).toBeLessThanOrEqual(2);
       }
+    }
+  });
+
+  it('gives normal and Elite spawns the authored placement level, never the zone guide', () => {
+    for (const zone of E.mob.zones as any[]) {
+      for (const side of [null, ...zone.subzones.map((_: unknown, index: number) => index)]) {
+        for (const kind of ['normal', 'elite'] as const) {
+          const mob = spawnMob(mulberry32(77), zone.id, kind, undefined, side, { allowWildUnique: false });
+          const row = eng.placementById(mob.placementId!);
+          expect(mob.level).toBe(row.level);
+          expect(row.zone).toBe(zone.id);
+        }
+      }
+    }
+  });
+
+  it('keeps every visitor row on the five approved seams at weight 1–3', () => {
+    const seams = new Set([3, 4, 6, 7, 9, 10, 12, 13, 15, 16]);
+    for (const row of E.mob.variants as any[]) {
+      if (row.role !== 'visitor') continue;
+      expect(seams.has(row.zone), row.id).toBe(true);
+      expect(row.weight).toBeLessThanOrEqual(3);
     }
   });
 
@@ -28,15 +55,14 @@ describe('fixed zone rosters', () => {
     for (const row of eng.mobRoster().filter((entry: any) => entry.kind === E.mob.elite.name) as any[]) {
       const flat = eng.LG.hp_per_level * (row.level - 1) + row.vit * eng.K.K_VIT_HP;
       const expectedHp = (eng.mobHpAt(row.level) + flat) * E.mob.elite.hp;
-      const variant = eng.variantsInZone(row.speciesId, row.zone)[0]!;
+      const placement = eng.placementById(row.placementId);
       const expectedPs = eng.mobPsAt(row.level) * E.mob.elite.ps / eng.zoneBodyFactor(row.zone)
-        * eng.speciesPsMult(row.zone, row.speciesId, variant.core, variant.damage);
+        * eng.speciesPsMult(row.zone, row.speciesId, placement.core, placement.damage);
       expect(row.hpFrom).toBeCloseTo(expectedHp, 8);
       expect(row.ps).toBeCloseTo(expectedPs, 8);
     }
   });
 });
-
 
 describe('regional trail events', () => {
   it('forages the fixed regional food and names the zone', () => {

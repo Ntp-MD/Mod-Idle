@@ -48,5 +48,42 @@
       255
     ],
     "componentCount": 1
-  }
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 85,
+    "uniformScale": 0.674603,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/demon/imp/v1/atlas.png",
+      "frame": 39,
+      "action": "death",
+      "direction": "west",
+      "phase": "03-settle"
+    },
+    "inputSha256": "97123f7a4cb08030b3a863e60316881cad730a530f0009e1b2a32f70e2e844bf",
+    "outputSha256": "3965622ce3549abdce1a7485b69121dd694a519669ee685639cfe754f3abea4c",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

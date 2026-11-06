@@ -5,7 +5,7 @@
   "action": "death",
   "phase": "00-fall.png",
   "direction": "south",
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "qa": {
     "visuallyInspected": true,
     "phaseApproved": false,
@@ -14,5 +14,42 @@
     "identityPlausible": true,
     "facingPlausible": true,
     "note": "One wing raised and balance breaking; candidate as start of fall, timing needs review."
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 159,
+    "uniformScale": 0.228121,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\beast\\harpy\\v1\\atlas.png",
+      "frame": 32,
+      "action": "death",
+      "direction": "east",
+      "phase": "00-fall"
+    },
+    "inputSha256": "7673ced05b010efa3e38e59f5ecdefd67ba52d59f29bbeebb43dfea33d9e4a05",
+    "outputSha256": "2d7953211655745056e235e0722a82e7ce9d557495cbe4b081c24c0de3d1735a",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

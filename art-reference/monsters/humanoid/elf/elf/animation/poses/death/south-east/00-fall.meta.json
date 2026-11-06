@@ -10,8 +10,7 @@
   },
   "anchor": {
     "x": 192,
-    "y": 288,
-    "provenance": "canonical elf source contract; generated frame is not yet visually reviewed"
+    "y": 288
   },
   "generation": {
     "generator": "OpenAI built-in image_gen",
@@ -51,5 +50,34 @@
     ],
     "scale": 1.0
   },
-  "review": "Coverage candidate only. Facing, phase, alpha edges, scale, anchor, and style have not been approved; do not promote to runtime."
+  "review": "Coverage candidate only. Facing, phase, alpha edges, scale, anchor, and style have not been approved; do not promote to runtime.",
+  "sourcePixelsModified": true,
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 118,
+    "uniformScale": 0.751592,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/humanoid/elf/v1/atlas.png",
+      "frame": 32,
+      "action": "death",
+      "direction": "east",
+      "phase": "00-fall"
+    },
+    "inputSha256": "6580d126f8377f1b594fe9bf0118768137620064c1ed833ad06ef29024d44833",
+    "outputSha256": "382507f1887319d86fca7bfcffddc23035892abfd7196113c5c9c18cb228eb8b",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

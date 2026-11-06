@@ -1,0 +1,37 @@
+﻿{
+    "status":  "candidate-review",
+    "speciesId":  "mummy",
+    "source":  "../east/03-ready.png",
+    "sourceCell":  {
+                       "row":  3,
+                       "column":  3,
+                       "box":  [
+                                   1152,
+                                   1152,
+                                   1536,
+                                   1536
+                               ]
+                   },
+    "sourcePixelsModified":  false,
+    "qa":  {
+               "new16DirectionSetAccepted":  false,
+               "anchor":  false,
+               "atlas":  false
+           },
+    "sourceDirection":  "east",
+    "directionalDuplicateSource":  "east",
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "frameCanvas":  {
+                        "width":  384,
+                        "height":  384
+                    },
+    "anchor":  {
+                   "x":  192,
+                   "y":  288
+               },
+    "phase":  "03-ready",
+    "action":  "hit",
+    "direction":  "south",
+    "note":  "Coverage-only directional duplicate from the east hit/03-ready candidate. Exact south-facing art remains ungenerated; regenerate and visually review before approval or atlas promotion."
+}

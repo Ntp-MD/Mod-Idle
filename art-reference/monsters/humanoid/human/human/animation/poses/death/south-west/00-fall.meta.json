@@ -21,8 +21,7 @@
   },
   "anchor": {
     "x": 192,
-    "y": 288,
-    "visualFootBaselineY": 291
+    "y": 288
   },
   "processing": {
     "method": "alpha-confidence-crop-scale-anchor-v1",
@@ -38,5 +37,34 @@
     "anchor": false,
     "atlas": false,
     "runtimePromotion": false
-  }
+  },
+  "sourcePixelsModified": true,
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 118,
+    "uniformScale": 0.694118,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/humanoid/human/v1/atlas.png",
+      "frame": 36,
+      "action": "death",
+      "direction": "west",
+      "phase": "00-fall"
+    },
+    "inputSha256": "2148f3d2be1309eed52ccdbd221fa1d83d670d28c5bb92b8b678f60111c73453",
+    "outputSha256": "07356541ed706ef1b03542c1fe6b74d6d3ff0c497afe7159914210ee619bc80e",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

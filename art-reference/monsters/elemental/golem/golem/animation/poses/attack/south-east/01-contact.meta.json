@@ -49,5 +49,42 @@
     "note": "Cropped from a 4x4 directional candidate grid. Background was keyed to alpha; exact facing, identity, hard-alpha edge quality, foot anchor, phase continuity and atlas QA remain for art-owner review."
   },
   "phaseSourceRefNote": "Reference updated after east attack source frames were reordered; it still points to the same source pixels used as guidance.",
-  "reviewNote": "Hold sequence for scale and anchor review: windup visible height is approximately 145 px while contact is approximately 175?195 px on the same canvas. Check the whole animation before approving."
+  "reviewNote": "Hold sequence for scale and anchor review: windup visible height is approximately 145 px while contact is approximately 175?195 px on the same canvas. Check the whole animation before approving.",
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 149,
+    "uniformScale": 0.764103,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/elemental/golem/v1/atlas.png",
+      "frame": 17,
+      "action": "attack",
+      "direction": "east",
+      "phase": "01-contact"
+    },
+    "inputSha256": "1f39dfe6e71dab4f8f2f8a7defab70dbe84fb019473e6c9bb9b62cbd89a1b916",
+    "outputSha256": "44dcf28dea9c8e8a2b92da9d88cf13f6c050b2ead76182a0384b92dcc6ac2e1e",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

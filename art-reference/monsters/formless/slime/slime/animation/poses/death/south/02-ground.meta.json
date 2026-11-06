@@ -64,5 +64,41 @@
     "anchorAccepted": false,
     "atlasAccepted": false
   },
-  "note": "Unreviewed candidate art. Identity, exact facing, phase sequence, transparency and anchor need later visual review; runtime atlas unchanged."
+  "note": "Unreviewed candidate art. Identity, exact facing, phase sequence, transparency and anchor need later visual review; runtime atlas unchanged. Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending.",
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 72,
+    "uniformScale": 0.757895,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/formless/slime/v1/atlas.png",
+      "frame": 34,
+      "action": "death",
+      "direction": "east",
+      "phase": "02-ground"
+    },
+    "inputSha256": "32287b54ac537d10102b27a6b736a4c98e6b2852881c0b6d564485d71734d7ad",
+    "outputSha256": "1895c10582b0b4e7263d9a6432d05a4faa7ac82cce52d6babc92993fec5a72b4",
+    "reviewRequired": true
+  }
 }

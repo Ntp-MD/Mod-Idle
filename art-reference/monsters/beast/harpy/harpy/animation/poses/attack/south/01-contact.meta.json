@@ -5,7 +5,7 @@
   "action": "attack",
   "phase": "01-contact.png",
   "direction": "south",
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "qa": {
     "visuallyInspected": true,
     "phaseApproved": false,
@@ -14,5 +14,42 @@
     "identityPlausible": true,
     "facingPlausible": true,
     "note": "Talon extends toward viewer; exaggerated perspective needs cycle review."
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 174,
+    "uniformScale": 0.24,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\beast\\harpy\\v1\\atlas.png",
+      "frame": 17,
+      "action": "attack",
+      "direction": "east",
+      "phase": "01-contact"
+    },
+    "inputSha256": "a100d9d6aab80853d958ac65cfa7d3ee1bbef21cd81de4a8cc1444dcea653466",
+    "outputSha256": "fafa07e37a73eda0ee9fb0813683cc81d8e777553b4c31fbf9c519b6b19e3fdb",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

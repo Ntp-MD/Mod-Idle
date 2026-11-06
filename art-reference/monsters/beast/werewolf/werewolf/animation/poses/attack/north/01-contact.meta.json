@@ -39,5 +39,42 @@
     "atlasApproved": false,
     "anchorVerified": false,
     "productionApproved": false
-  }
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 137,
+    "uniformScale": 0.216088,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\beast\\werewolf\\v1\\atlas.png",
+      "frame": 17,
+      "action": "attack",
+      "direction": "east",
+      "phase": "01-contact"
+    },
+    "inputSha256": "b74609cb7ce201e1f3eb70b7a416718d12c927aae982b0f61eb8c0159f4cdebd",
+    "outputSha256": "8b88f8ff20b0ea6fe248deafa312f3389fc3b1052d53e997c76299117ebf6556",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

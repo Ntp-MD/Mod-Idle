@@ -30,7 +30,7 @@ export function destinationIntel(state: GameState, cell: Picked, townId: string,
                 : fieldSite === 'dungeon' ? 'Safe wild-side dungeon entrance; the run itself is a combat mode.'
                   : 'Hunt this roster.',
     levelNote: !known ? 'Levels unknown until scouted' : state.player.level < zone.levels[0]
-      ? `Above your level · starts at Lv ${zone.levels[0]}` : `Lv ${zone.levels[0]}–${zone.levels[1]}`,
+      ? `Above your level · recommends Lv ${zone.recommended_level ?? zone.levels[0]}` : `Recommended Lv ${zone.recommended_level ?? zone.levels[0]}`,
     campDistance: state.fieldwork.camp ? hexDistance(state.fieldwork.camp.cell, cell) : null,
     site: trail ? { id: trail.id, name: trailSiteKind(trail).name, claimed: !!state.mapJournal?.claimedSites.includes(trail.id) } : null,
     recentEvent: event && event.q === cell.q && event.r === cell.r ? event.text : '',

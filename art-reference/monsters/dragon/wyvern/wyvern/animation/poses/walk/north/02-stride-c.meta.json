@@ -37,5 +37,33 @@
     "alphaAccepted": false,
     "atlasAccepted": false
   },
-  "note": "Extracted from the preserved raw grid by alpha-bounds crop, proportional resize, and anchor placement; no repainting. Candidate review only."
+  "note": "Extracted from the preserved raw grid by alpha-bounds crop, proportional resize, and anchor placement; no repainting. Candidate review only. Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending.",
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 133,
+    "uniformScale": 0.755682,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/dragon/wyvern/v1/atlas.png",
+      "frame": 10,
+      "action": "walk",
+      "direction": "east",
+      "phase": "02-stride-c"
+    },
+    "inputSha256": "155aa42d4ad429d87dedd0d93fedc71ee285506ac38c6caf445a98981015ee5b",
+    "outputSha256": "c2fc08c58bb77b85cf06b014b60b8b7ad14623d632374fb1ced8096304ea7d62",
+    "reviewRequired": true
+  }
 }

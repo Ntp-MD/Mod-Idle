@@ -1,0 +1,36 @@
+﻿{
+    "status":  "candidate-review",
+    "generator":  "OpenAI built-in image_gen",
+    "sourceOutput":  "exec-4c36ff4b-ae6a-4da2-bf03-1f612b4687ab.png",
+    "direction":  "north-west",
+    "angleDegrees":  180,
+    "visualReview":  {
+                         "identityPlausible":  true,
+                         "facingPlausible":  true,
+                         "exactAngleVerified":  false,
+                         "atlasReady":  false
+                     },
+    "sourcePixelsModified":  true,
+    "normalization":  {
+                          "canvas":  [
+                                         384,
+                                         384
+                                     ],
+                          "anchor":  [
+                                         192,
+                                         288
+                                     ],
+                          "alphaCutoff":  64
+                      },
+    "speciesId":  "wyrmling",
+    "race":  "dragon",
+    "action":  "walk",
+    "phase":  "02-stride-c",
+    "originalStatus":  "candidate-review",
+    "copiedFrom":  "../north/02-stride-c.png",
+    "directionalDuplicateSource":  "north",
+    "sourceSha256":  "32662a0331f2a05e940384b0317c3498241587da896f2734ad5f4bd00234efc4",
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "note":  "Coverage-only directional duplicate copied byte-for-byte from the north baseline candidate. No authored north-west walk source exists; regenerate and visually review before approval or atlas promotion."
+}

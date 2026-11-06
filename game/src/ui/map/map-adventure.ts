@@ -3,23 +3,23 @@ import type { FieldSite, GameState } from '@sim/core/types';
 import { currentCell } from '@sim/world/road';
 import { hexDistance, hexKey, mapKnowledge, MAP_EXPLORATION, type MapKnowledge, trailSites, trailSiteKind } from '@sim/world/map-exploration';
 import { MAP_CAMERA_TRANSFORM, mapUprightAt } from './map-projection';
+import type { MapDomIndex } from './map-dom';
 import { mapMarker, mapSpeciesGlyph, type MapMarkerGlyph, type MapMarkerKind, type MapMarkerOptions } from './map-markers';
 
 const esc = (s: string) => s.replace(/[<>&"']/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[c]!);
 const rendered = new WeakMap<Element, string>();
-const titles = new WeakMap<SVGTitleElement, string>();
 
 export type CampActivity = 'mine' | 'grove' | 'fish' | 'cook' | null;
 export function campActivityArt(activity: CampActivity): string {
   return activity ? mapMarker('resource', activity) : '';
 }
 
-export function uniqueTraceSpecies(speciesIds: string[]): string | undefined {
-  return speciesIds.find(id => eng.uniquesOf(id).length > 0);
+export function uniqueTraceSpecies(speciesIds: string[], zone: number): string | undefined {
+  return speciesIds.find((id) => eng.uniquesOf(id, zone).length > 0);
 }
 
-export function hasUniqueTrace(speciesIds: string[]): boolean {
-  return speciesIds.some(id => eng.uniquesOf(id).length > 0);
+export function hasUniqueTrace(speciesIds: string[], zone: number): boolean {
+  return speciesIds.some((id) => eng.uniquesOf(id, zone).length > 0);
 }
 
 export function mapEventArt(text: string, activity?: string): string {
@@ -37,58 +37,19 @@ function eventGlyph(text: string, activity?: string): MapMarkerGlyph {
   return 'flag';
 }
 
-/** One block of the board as the sheet holds it: where it is and what stands on it. */
-export interface AdventureCell { ax: string; q: number; r: number; town: string | null; sub: boolean; zone?: number; subzone?: number; site?: FieldSite; uniqueSpecies?: string }
-type AdventureIndex = {
-  cells: AdventureCell[];
-  byAx: Map<string, SVGPolygonElement>;
-  figures: Map<string, SVGGElement>;
-  actors: Map<string, SVGGElement>;
-  titles: SVGTitleElement[];
-};
-const adventureIndexes = new WeakMap<SVGSVGElement, AdventureIndex>();
-
-function adventureIndex(svg: SVGSVGElement): AdventureIndex {
-  const cached = adventureIndexes.get(svg);
-  if (cached) return cached;
-  const cells: AdventureCell[] = [], byAx = new Map<string, SVGPolygonElement>();
-  const figures = new Map<string, SVGGElement>(), actors = new Map<string, SVGGElement>();
-  const collect = (selector: string, attr: string, into: Map<string, SVGGElement>) =>
-    svg.querySelectorAll<SVGGElement>(selector).forEach(node => {
-      const ax = node.getAttribute(attr);
-      if (ax) into.set(ax, node);
-    });
-  svg.querySelectorAll<SVGPolygonElement>('polygon.cell').forEach(cell => {
-    const ax = cell.getAttribute('data-ax'), nodeId = cell.getAttribute('data-node'), sub = cell.getAttribute('data-sub');
-    if (ax == null) return;
-    const comma = ax.indexOf(','), owner = nodeId ? TOWN.settlements.find(row => row.id === nodeId) : undefined;
-    const species = owner && sub != null ? eng.zoneById(owner.zone).subzones?.[Number(sub)]?.species || [] : [];
-    byAx.set(ax, cell);
-    cells.push({ ax, q: Number(ax.slice(0, comma)), r: Number(ax.slice(comma + 1)),
-      town: cell.classList.contains('town') ? nodeId : null, sub: sub != null,
-      zone: owner?.zone, subzone: sub != null ? Number(sub) : undefined,
-      site: cell.hasAttribute('data-site') ? cell.getAttribute('data-site') as FieldSite : undefined,
-      uniqueSpecies: uniqueTraceSpecies(species) });
-  });
-  collect('[data-figure-ax]', 'data-figure-ax', figures);
-  collect('[data-actor-ax]', 'data-actor-ax', actors);
-  const index = { cells, byAx, figures, actors, titles: Array.from(svg.querySelectorAll<SVGTitleElement>('polygon.cell > title')) };
-  adventureIndexes.set(svg, index);
-  return index;
-}
-/** What the board says about a block, before any of it reaches the DOM. */
-export interface AdventureMark { ax: string; discovery: MapKnowledge; activity: string; uniqueSpecies?: string; threat?: 'territory' | 'unique-possible' | 'warning' | 'combat' | 'boss' }
+export interface AdventureMark { ax: string; discovery: MapKnowledge; activity: string; uniqueSpecies?: string; threat?: 'territory' | 'unique-possible' | 'warning' | 'combat' | 'boss'; camp: boolean; picked: boolean }
+export type AdventureSource = 'mob' | 'camp-encounter' | 'camp' | 'trail' | 'resource' | 'event';
 export interface AdventureMarker extends MapMarkerOptions { kind: MapMarkerKind; glyph: MapMarkerGlyph }
 /** Individual discoveries remain available to the destination panel, even when their tokens stack. */
-export interface AdventurePlacement { ax: string; cls: string; label: string; art: string; marker?: AdventureMarker; ground?: boolean; signal?: boolean }
+export interface AdventurePlacement { ax: string; cls: string; label: string; art: string; marker?: AdventureMarker; ground?: boolean; signal?: boolean; source: AdventureSource; combat: boolean }
 export interface AdventureView { marks: AdventureMark[]; placements: AdventurePlacement[] }
 
-const markerPlacement = (ax: string, cls: string, label: string, marker: AdventureMarker): AdventurePlacement =>
-  ({ ax, cls, label, marker, signal: true, art: mapMarker(marker.kind, marker.glyph, marker) });
+const markerPlacement = (ax: string, cls: string, label: string, marker: AdventureMarker, source: AdventureSource, combat = false): AdventurePlacement =>
+  ({ ax, cls, label, marker, signal: true, art: mapMarker(marker.kind, marker.glyph, marker), source, combat });
 
-const placementPriority = (p: AdventurePlacement) => p.cls.startsWith('map-camp-encounter') ? 110
-  : p.cls.includes('is-combat') ? 100 : p.cls.startsWith('map-field-camp') ? 80
-    : p.cls.startsWith('map-trail-site') ? 60 : 10;
+const placementPriority = (p: AdventurePlacement) => p.source === 'camp-encounter' ? 110
+  : p.combat ? 100 : p.source === 'camp' ? 80
+    : p.source === 'trail' ? 60 : 10;
 
 /** One crest per hex; a smaller glyph and count retain its other known activities. */
 export function stackAdventurePlacements(placements: AdventurePlacement[]): AdventurePlacement[] {
@@ -107,8 +68,9 @@ export function stackAdventurePlacements(placements: AdventurePlacement[]): Adve
   });
 }
 
-/** Board state is resolved without touching the DOM so the placements can be tested as rules. */
-export function adventureView(state: GameState, cells: AdventureCell[]): AdventureView {
+/** One block of the board as the sheet holds it: where it is and what stands on it. */
+export interface AdventureCell { ax: string; q: number; r: number; town: string | null; sub: boolean; zone?: number; subzone?: number; site?: FieldSite; uniqueSpecies?: string }
+export function adventureView(state: GameState, cells: AdventureCell[], selectedAx: string | null = null): AdventureView {
   const feet = currentCell(state), feetKey = hexKey(feet), reveal = MAP_EXPLORATION.reveal_radius;
   const claimed = new Set(state.mapJournal?.claimedSites);
   const marks: AdventureMark[] = [], placements: AdventurePlacement[] = [];
@@ -125,18 +87,20 @@ export function adventureView(state: GameState, cells: AdventureCell[]): Adventu
     const boss = !!live && (live.kind.startsWith('Boss') || live.kind.startsWith('Unique'));
     const threat = live ? boss ? 'boss' : 'combat' : species ? unique ? 'unique-possible' : 'territory' : undefined;
     marks.push({ ax: cell.ax, discovery: knowledge, activity: here ? feetActivity : 'idle',
-      uniqueSpecies: unique, threat });
+      uniqueSpecies: unique, threat,
+      camp: !!state.fieldwork.camp && hexKey(state.fieldwork.camp.cell) === cell.ax,
+      picked: selectedAx === cell.ax });
     if (live || unique) {
       const label = live ? state.group.map(mob => mob.species).join(', ') + ' · in combat'
         : (species?.name || speciesId) + ' territory · Unique possible';
       placements.push(markerPlacement(cell.ax, 'map-mob' + (live ? ' is-combat' : ' is-unique'),
-        label, { kind: boss ? 'boss' : 'mob', glyph: boss ? 'skull' : mapSpeciesGlyph(speciesId || '', species?.race) }));
+        label, { kind: boss ? 'boss' : 'mob', glyph: boss ? 'skull' : mapSpeciesGlyph(speciesId || '', species?.race) }, 'mob', !!live));
     }
     if (knowledge !== 'unknown' && cell.site) {
       const site = cell.site;
       placements.push(markerPlacement(cell.ax, 'map-resource', site === 'mine' ? 'Mine'
         : site === 'grove' ? 'Grove' : site === 'fishing' ? 'Fishing' : 'Dungeon',
-        { kind: 'resource', glyph: site === 'mine' ? 'mine' : site === 'grove' ? 'grove' : site === 'fishing' ? 'fish' : 'skull' }));
+        { kind: 'resource', glyph: site === 'mine' ? 'mine' : site === 'grove' ? 'grove' : site === 'fishing' ? 'fish' : 'skull' }, 'resource'));
     }
   }
   for (const site of trailSites(state)) {
@@ -145,7 +109,7 @@ export function adventureView(state: GameState, cells: AdventureCell[]): Adventu
     const used = claimed.has(site.id), kind = trailSiteKind(site);
     placements.push(markerPlacement(hexKey(site), 'map-trail-site' + (used ? ' is-explored' : ''),
       kind.name + (used ? ' · explored' : ' · walk here to investigate'),
-      { kind: 'event', glyph: site.kind === 'provision-caravan' ? 'caravan' : 'fire', quiet: used }));
+      { kind: 'event', glyph: site.kind === 'provision-caravan' ? 'caravan' : 'fire', quiet: used }, 'trail'));
   }
   const event = state.mapJournal?.lastEvent, camp = state.fieldwork.camp;
   if (camp) {
@@ -158,7 +122,7 @@ export function adventureView(state: GameState, cells: AdventureCell[]): Adventu
       : activity === 'fish' ? 'Fishing' : activity === 'cook' ? 'Cooking' : '';
     placements.push(markerPlacement(hexKey(camp.cell), 'map-field-camp' + (here ? ' is-occupied' : '') + (action ? ' is-working' : ''),
       'Field Camp' + (activityName ? ' · ' + activityName : ''),
-      { kind: 'camp', glyph: activity || (here ? 'fire' : 'flag'), secondary: activity ? 'fire' : undefined }));
+      { kind: 'camp', glyph: activity || (here ? 'fire' : 'flag'), secondary: activity ? 'fire' : undefined }, 'camp'));
   }
   const encounter = state.fieldwork.campEncounters.active;
   if (encounter && mapKnowledge(state, encounter.origin) !== 'unknown') {
@@ -169,7 +133,7 @@ export function adventureView(state: GameState, cells: AdventureCell[]): Adventu
     const glyph: MapMarkerGlyph = combat ? 'sword' : warning || encounter.kind === 'sounds' ? 'claw'
       : encounter.kind === 'traveler' ? 'caravan' : 'claw';
     placements.push(markerPlacement(hexKey(encounter.origin), 'map-camp-encounter is-' + encounter.stage,
-      encounter.kind + ' · ' + encounter.stage, { kind: combat ? 'boss' : warning ? 'unknown' : 'event', glyph }));
+      encounter.kind + ' · ' + encounter.stage, { kind: combat ? 'boss' : warning ? 'unknown' : 'event', glyph }, 'camp-encounter', combat));
   }
   return { marks, placements };
 }
@@ -180,49 +144,46 @@ export function adventureTitle(original: string, town: boolean, discovery: MapKn
   return town ? original.replace(/\s*·\s*Lv\s*\d+[–-]\d+\s*$/, '') : 'Unexplored ground';
 }
 
-/** Paint the already-decided board pieces, keeping the state rules separately testable. */
-export function paintMapAdventure(root: HTMLElement, state: GameState, terrainView: boolean) {
-  const svg = root.querySelector('svg'), board = svg?.querySelector('#projected-board');
-  if (!svg || !board) return;
-  const actorLayer = board.querySelector<SVGGElement>('#actors') || board;
+/** Paint the already-decided board pieces; the snapshot is the only input, no GameState read. */
+export function paintMapAdventure(index: MapDomIndex, view: AdventureView, terrainView: boolean) {
+  const { board, actors: actorLayer, byAx } = index;
+  const figures = new Map(index.cells.filter((cell) => cell.figure).map((cell) => [cell.ax, cell.figure!]));
+  const actors = new Map(index.cells.filter((cell) => cell.actor).map((cell) => [cell.ax, cell.actor!]));
   let layer = board.querySelector<SVGGElement>('#map-adventure');
   if (!layer) { layer = document.createElementNS('http://www.w3.org/2000/svg', 'g'); layer.id = 'map-adventure'; actorLayer.append(layer); }
   layer.setAttribute('pointer-events', 'none');
   layer.setAttribute('display', terrainView ? '' : 'none');
 
-  const index = adventureIndex(svg);
-  const { cells, byAx, figures, actors } = index;
-  const view = adventureView(state, cells);
   const setIf = (el: Element, name: string, value: string) => { if (el.getAttribute(name) !== value) el.setAttribute(name, value); };
+  const signalCount = new Map<string, number>();
+  for (const placement of view.placements) signalCount.set(placement.ax, (signalCount.get(placement.ax) ?? 0) + 1);
   for (const mark of view.marks) {
-    const cell = byAx.get(mark.ax);
-    const camp = String(!!state.fieldwork.camp && mark.ax === hexKey(state.fieldwork.camp.cell));
+    const cell = byAx.get(mark.ax)?.polygon;
     if (cell) {
       setIf(cell, 'data-discovery', mark.discovery);
       setIf(cell, 'data-threat', mark.threat || 'none');
-      setIf(cell, 'data-signal-count', String(view.placements.filter(p => p.ax === mark.ax).length));
+      setIf(cell, 'data-signal-count', String(signalCount.get(mark.ax) ?? 0));
     }
-    for (const node of [figures.get(mark.ax), actors.get(mark.ax)]) {
+    for (const node of [byAx.get(mark.ax)?.figure, byAx.get(mark.ax)?.actor]) {
       if (!node) continue;
       setIf(node, 'data-discovery', mark.discovery);
       setIf(node, 'data-activity', mark.activity);
-      setIf(node, 'data-camp', camp);
-      setIf(node, 'data-picked', String(!!cell?.classList.contains('picked')));
+      setIf(node, 'data-camp', String(mark.camp));
+      setIf(node, 'data-picked', String(mark.picked));
     }
   }
-  for (const ax of new Set([...figures.keys(), ...actors.keys()])) {
-    const cell = byAx.get(ax);
-    if (!cell) continue;
-    const town = cell.classList.contains('town');
-    figures.get(ax)?.classList.toggle('map-settlement-figure', town);
-    actors.get(ax)?.classList.toggle('map-settlement-figure', town);
+  for (const [ax, cell] of byAx) {
+    const town = cell.polygon.classList.contains('town');
+    cell.figure?.classList.toggle('map-settlement-figure', town);
+    cell.actor?.classList.toggle('map-settlement-figure', town);
+    void ax;
   }
   const discovery = new Map(view.marks.map(mark => [mark.ax, mark.discovery]));
   index.titles.forEach(title => {
-    const cell = title.parentElement, ax = cell?.getAttribute('data-ax');
+    const cell = title.parentElement as SVGPolygonElement | null, ax = cell?.getAttribute('data-ax');
     if (!cell || ax == null) return;
-    const original = titles.get(title) ?? (title.textContent || '');
-    titles.set(title, original);
+    const staticCell = byAx.get(ax);
+    const original = staticCell?.static.originalTitle ?? (title.textContent || '');
     const knowledge = discovery.get(ax) ?? 'unknown';
     const labels = knowledge === 'unknown' ? [] : view.placements.filter(p => p.ax === ax).map(p => p.label);
     const want = [adventureTitle(original, cell.classList.contains('town'), knowledge), ...labels].join(' · ');
@@ -242,13 +203,13 @@ export function paintMapAdventure(root: HTMLElement, state: GameState, terrainVi
   const render = (group: Element, markup: string) => {
     if (rendered.get(group) !== markup) { group.innerHTML = markup; rendered.set(group, markup); }
   };
-  const trailNames = new Map(trailSites(state).map(site => [hexKey(site), trailSiteKind(site).name]));
+  const trailNames = new Map(stacked.filter(p => p.source === 'trail').map(p => [p.ax, p.label.split(' · ')[0]]));
   for (const [ax, actor] of actors) {
     const placements = byCell.get(ax) || [];
-    const cell = byAx.get(ax);
+    const cell = byAx.get(ax)?.polygon;
     if (cell) {
-      setIf(cell, 'data-trail-claimed', String(placements.some(p => p.cls.startsWith('map-trail-site') && p.cls.includes('is-explored'))));
-      setIf(cell, 'data-trail-name', placements.some(p => p.cls.startsWith('map-trail-site')) ? trailNames.get(ax) || '' : '');
+      setIf(cell, 'data-trail-claimed', String(placements.some(p => p.source === 'trail' && p.cls.includes('is-explored'))));
+      setIf(cell, 'data-trail-name', placements.some(p => p.source === 'trail') ? trailNames.get(ax) || '' : '');
     }
     const figure = figures.get(ax);
     if (figure) setIf(figure, 'data-trail-site', 'false');
@@ -266,7 +227,7 @@ export function paintMapAdventure(root: HTMLElement, state: GameState, terrainVi
     }
   }
   render(layer, stacked.filter(p => !actors.has(p.ax)).map(placement => {
-    const cell = byAx.get(placement.ax);
+    const cell = byAx.get(placement.ax)?.polygon;
     if (!cell) return '';
     const box = cell.getBBox();
     return `<g transform="${mapUprightAt(box.x + box.width / 2, box.y + box.height / 2)}">${piece(placement)}</g>`;

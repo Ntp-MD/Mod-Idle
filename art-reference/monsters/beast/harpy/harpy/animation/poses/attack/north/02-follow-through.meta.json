@@ -24,11 +24,47 @@
     "runtime": false
   },
   "footAnchor": null,
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "styleReference": [
     "poses/attack/north/01-contact.png",
     "poses/attack/south/02-follow-through.png"
   ],
   "bakedWeapon": "natural-talons-and-wings",
-  "note": "Generated individual attack follow-through candidate; direction, pixel scale, anchor, visual sequence, and art-owner acceptance remain unverified."
+  "note": "Generated individual attack follow-through candidate; direction, pixel scale, anchor, visual sequence, and art-owner acceptance remain unverified. Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending.",
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 179,
+    "uniformScale": 0.207898,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\beast\\harpy\\v1\\atlas.png",
+      "frame": 18,
+      "action": "attack",
+      "direction": "east",
+      "phase": "02-follow-through"
+    },
+    "inputSha256": "36246be57af3ac256c34ca9b48ea6de86c5dd9736c6543175cfd0cf77b72b909",
+    "outputSha256": "3830c0aaaf8bfacdab4fffe2d38739c921a62c291eb6f84da8c80191befdc2a8",
+    "reviewRequired": true
+  }
 }

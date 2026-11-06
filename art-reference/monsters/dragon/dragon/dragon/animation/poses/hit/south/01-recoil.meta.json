@@ -1,7 +1,7 @@
 {
   "status": "candidate-review",
   "generator": "OpenAI built-in image_gen",
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "visualReviewRequired": true,
   "measurement": {
     "canvas": [
@@ -25,5 +25,42 @@
     ],
     "alpha128TouchesCanvasEdge": false
   },
-  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review"
+  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review",
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 130,
+    "uniformScale": 0.227273,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\dragon\\dragon\\v1\\atlas.png",
+      "frame": 25,
+      "action": "hit",
+      "direction": "east",
+      "phase": "01-recoil"
+    },
+    "inputSha256": "81d2274c24a88fb1dd2c1292c028f7a41ab80a05fed5f8ce58a56a6fec393166",
+    "outputSha256": "3dae108d367a4fe487849d952e37f73cb9a02c612553fa324ce5afb694977bf1",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

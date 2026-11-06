@@ -21,8 +21,7 @@
   },
   "anchor": {
     "x": 192,
-    "y": 288,
-    "visualFootBaselineY": 291
+    "y": 288
   },
   "processing": {
     "method": "alpha-confidence-crop-scale-anchor-v1",
@@ -39,5 +38,34 @@
     "anchor": false,
     "atlas": false,
     "runtimePromotion": false
-  }
+  },
+  "sourcePixelsModified": true,
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 86,
+    "uniformScale": 0.688,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/humanoid/kobold/v1/atlas.png",
+      "frame": 35,
+      "action": "death",
+      "direction": "east",
+      "phase": "03-settle"
+    },
+    "inputSha256": "c3681c6c9a54f808f1afbc5856469616fee2dd8f681e65b9de85469288629b3a",
+    "outputSha256": "29a7318fe4d1ff48f9a575ec93fd1759d9b8ed9769f80494e6d71280a88978ef",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

@@ -1,0 +1,92 @@
+{
+  "status": "candidate-review",
+  "generator": "built-in-image_gen",
+  "source": "../north/01-collapse.png",
+  "sourceDimensions": [
+    1263,
+    1245
+  ],
+  "sourceGridCell": {
+    "row": 0,
+    "column": 1
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "normalization": {
+    "method": "2x2 sheet cell alpha crop (>128), nearest-neighbor uniform sequence scale to north idle subject height, transparent 384x384 placement",
+    "sourceAlphaThresholdForCrop": 128,
+    "sourcePixelsPaintedOrComposited": false,
+    "sequenceReferenceHeight": 167,
+    "uniformSequenceScale": 0.403382,
+    "normalizedSubjectHeight": 136,
+    "sourceCellAlphaCrop": [
+      76,
+      219,
+      458,
+      557
+    ]
+  },
+  "transparentBackgroundRequested": true,
+  "identityReference": "art-reference/monsters/dragon/mirehydra/mirehydra/animation/source/base-v1.png",
+  "scaleReference": "art-reference/monsters/dragon/mirehydra/mirehydra/animation/poses/idle/north.png",
+  "styleReference": "art-reference/monsters/dragon/mirehydra/mirehydra/animation/atlas/animation.png",
+  "visualReview": {
+    "sequenceAccepted": false,
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "atlasReady": false,
+    "note": "Generated sheet candidate; review phase continuity, identity and exact direction before approval."
+  },
+  "qa": {
+    "atlas": false,
+    "anchor": false
+  },
+  "schemaVersion": 1,
+  "speciesId": "mirehydra",
+  "race": "dragon",
+  "action": "death",
+  "direction": "north-west",
+  "phase": "01-collapse",
+  "copiedFrom": "../north/01-collapse.png",
+  "originalStatus": "baseline-extracted-candidate",
+  "originalSource": "drafts/death-north-sheet.png",
+  "originalSourceCell": null,
+  "directionalDuplicateSource": "north",
+  "regenerationRequired": true,
+  "visualReviewRequired": true,
+  "note": "Coverage-only directional duplicate copied from the north candidate. No exact north-west death source is present; regenerate and visually review before approval or atlas promotion. Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending.",
+  "sourcePixelsModified": true,
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 101,
+    "uniformScale": 0.742647,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/dragon/mirehydra/v1/atlas.png",
+      "frame": 37,
+      "action": "death",
+      "direction": "west",
+      "phase": "01-collapse"
+    },
+    "inputSha256": "151b8dfb4f50ce05eb8b844a337a3d848feae829ee59b36afff0eb0e17cda74f",
+    "outputSha256": "1431389901b137b327614732cfb93fc6bd15a844a2b9486b8856aed9608a9fd7",
+    "reviewRequired": true
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "status": "candidate-review",
+  "generator": "OpenAI built-in image_gen",
+  "source": "../north/00-flinch.png",
+  "action": "hit",
+  "phase": "00-flinch.png",
+  "direction": "north-west",
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "rawAlphaBoundsExclusive": [
+    0,
+    19,
+    1224,
+    1254
+  ],
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Shared source-pose placement from poses.json; source feet/root were not independently measured.",
+  "normalization": {
+    "method": "alpha-crop-nearest-fit-384-v1",
+    "uniformScale": 0.14898785,
+    "outputSize": {
+      "width": 182,
+      "height": 184
+    },
+    "offset": {
+      "x": 101,
+      "y": 104
+    },
+    "sourceAlphaBoundsExclusive": [
+      0,
+      19,
+      1224,
+      1254
+    ]
+  },
+  "outputAlphaBoundsExclusive": [
+    104,
+    109,
+    282,
+    284
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    151,
+    138,
+    237,
+    243
+  ],
+  "alphaMeasurement": {
+    "extrema": [
+      0,
+      255
+    ],
+    "distinctLevels": 153
+  },
+  "qa": {
+    "visuallyInspected": false,
+    "phaseApproved": false,
+    "cycleApproved": false,
+    "atlasApproved": false,
+    "identityPlausible": false,
+    "facingPlausible": false,
+    "note": "Coverage-only phase-matched directional duplicate from the north candidate. Regenerate and visually review the exact north-west pose before approval or atlas promotion."
+  },
+  "pose": "brief shoulder-and-head flinch backward; natural talons and wings remains visible, feet planted",
+  "originalSource": "C:\\Users\\ITOP\\.codex-zed-account-1\\generated_images\\01a1a9ef-a592-7632-a531-70b402efd9e9\\exec-61da4ecd-daae-4ba3-a362-d919886b2a25.png",
+  "sourceAction": "hit",
+  "sourceDirection": "north",
+  "sourcePoseFile": "00-flinch.png",
+  "directionalDuplicateSource": "north hit",
+  "regenerationRequired": true,
+  "visualReviewRequired": true,
+  "copiedPixelsUnmodified": false,
+  "note": "Coverage-only phase-matched directional duplicate from the north candidate. Regenerate and visually review the exact north-west pose before approval or atlas promotion. Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending.",
+  "visualReview": {
+    "identityAccepted": false,
+    "exactDirectionAccepted": false,
+    "poseSequenceAccepted": false,
+    "alphaAccepted": false,
+    "anchorAccepted": false,
+    "atlasAccepted": false
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 173,
+    "uniformScale": 1.647619,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/beast/harpy/v1/atlas.png",
+      "frame": 28,
+      "action": "hit",
+      "direction": "west",
+      "phase": "00-flinch"
+    },
+    "inputSha256": "66c34d8c77cad967273f06e6e1ef14c3062d53b36b18d746508561821ad39c5a",
+    "outputSha256": "1df6f2846421d6676208372838273911a52f9a0d09fbd1da466c742d5b467461",
+    "reviewRequired": true
+  }
+}

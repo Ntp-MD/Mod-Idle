@@ -59,8 +59,7 @@ export function fieldLabel(m: { species: string; speciesId?: string; kind: strin
   if (m.kind.startsWith('Boss') || m.kind.startsWith('Unique')) return `${m.kind.replace(/^Boss · /, '').replace(/^Unique · /, '')}${fl.boss.suffix}`;
   if (m.formName) return m.kind === 'Elite' ? `${m.formName}${fl.elite.suffix}` : m.formName;
   if (m.variant) return m.variant;
-  const ladder = m.speciesId ? (E.mob.variants as Record<string, { name: string }[]>)[m.speciesId] : null;
-  return ladder?.length ? ladder[0].name : `${m.species.toLowerCase()}${m.kind === 'Elite' ? fl.elite.suffix : fl.normal.suffix}`;
+  return `${m.species}${m.kind === 'Elite' ? fl.elite.suffix : fl.normal.suffix}`;
 }
 
 /** One backup's caption, in the words the panel prints. */

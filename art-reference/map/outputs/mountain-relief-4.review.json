@@ -1,0 +1,49 @@
+{
+  "asset": "mountain-relief-4.png",
+  "runtimePath": "/map/terrain/mountain-relief-4.png",
+  "layer": "relief",
+  "source": "game/public/map/terrain/mountain-relief.png",
+  "sourceSha256": "233efc6492178b13f94634571831531e910599a2626277d3a65708484ce58f67",
+  "outputSha256": "d20c08576f88ce3e4d847d2aa2516d0b609d33a1fef2962f24edc59690fd3e84",
+  "measurement": {
+    "reference": "game/src/ui/map/data/map-sprite-bounds.json#/map/terrain/mountain-relief-4.png",
+    "note": "Painted bounds and spill scale copied from the same source asset; cutout pixels changed only along the removed red calibration line."
+  },
+  "reviews": {
+    "footprint": {
+      "verdict": "n/a",
+      "note": "Separate object, measured painted bounds."
+    },
+    "objectAngle": {
+      "verdict": "pass",
+      "note": "Upright object keeps the reference kit isometric angle, upper-left light and compact ground contact."
+    },
+    "edges": {
+      "verdict": "pass",
+      "note": "Red calibration line removed; inspected at 1920x1080 in the pilot (near/mid/far, bearings 0/90/180/270)."
+    },
+    "halo": {
+      "verdict": "pass",
+      "note": "Transparent cutout reviewed; only a compact vegetation ground contact remains, no full-hex base."
+    },
+    "depth": {
+      "verdict": "pass",
+      "note": "Ground stays planar under the board projection; relief sits in the actor layer and sorts with cells."
+    }
+  },
+  "screenshots": [
+    "temp/pilot-town-hexalign.png",
+    "temp/pilot-near-b0.png",
+    "temp/pilot-near-b90.png",
+    "temp/pilot-near-b180.png",
+    "temp/pilot-near-b270.png",
+    "temp/pilot-bw-town.png",
+    "temp/pilot-bw-fishing.png",
+    "temp/world-near.png",
+    "temp/world-mid.png",
+    "temp/world-far.png"
+  ],
+  "accepted": true,
+  "reviewer": "delegated implementation reviewer",
+  "reviewedAt": "2026-11-05"
+}

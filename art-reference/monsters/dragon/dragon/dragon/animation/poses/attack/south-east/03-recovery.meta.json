@@ -31,5 +31,42 @@
     "threshold": 128,
     "rgbUnchanged": true,
     "originalGeneratedOutputPreserved": true
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1536,
+      1024
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 131,
+    "uniformScale": 0.253876,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\dragon\\dragon\\v1\\atlas.png",
+      "frame": 19,
+      "action": "attack",
+      "direction": "east",
+      "phase": "03-recovery"
+    },
+    "inputSha256": "7b0794e978eba7eeb7fbdfae460d7b5482faa7f59f63ca740139726a8ba910c7",
+    "outputSha256": "c9b8c2de287629989642eb4eea9d5cae3099a9e4ee36dede171714dd7648d1b1",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

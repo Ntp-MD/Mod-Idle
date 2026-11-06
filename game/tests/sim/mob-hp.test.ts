@@ -43,14 +43,12 @@ describe("a mob's HP is one shape, in one place", () => {
     expect(mob.hp).toBeCloseTo(shape(mob.level, (mob.core as any).vit), 6);
   });
 
-  it('gives a wild unique its own profile at the zone’s top level, with no rank multiplier', () => {
-    for (const unique of E.mob.uniques) {
+  it('gives a wild unique its authored fixed level, with no rank multiplier', () => {
+    for (const unique of E.mob.uniques as any[]) {
       const species = E.mob.species.find(row => row.id === unique.species)!;
-      const zone = species.zones[0];
-      const top = eng.zoneById(zone)!.levels[1];
-      const mob = eng.spawnAt(zone, species.sizes[0], species.id, unique, null, top, null);
-      expect(mob.level).toBe(top);
-      expect(mob.hp).toBeCloseTo(shape(top, mob.vit), 6);
+      const mob = eng.spawnAt(unique.zone, 'boss', unique.id);
+      expect(mob.level).toBe(unique.level);
+      expect(mob.hp).toBeCloseTo(shape(unique.level, mob.vit), 6);
     }
   });
 

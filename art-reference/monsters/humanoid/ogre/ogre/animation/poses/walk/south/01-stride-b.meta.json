@@ -5,7 +5,7 @@
   "action": "walk",
   "phase": "01-stride-b.png",
   "direction": "south",
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "qa": {
     "visuallyInspected": true,
     "phaseApproved": false,
@@ -15,5 +15,42 @@
     "facingPlausible": true,
     "reviewNote": "Outputstillleadfootforward rather than clearpassingpose; cycle requires correction.",
     "phasePlausible": false
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 162,
+    "uniformScale": 0.193087,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\humanoid\\ogre\\v1\\atlas.png",
+      "frame": 9,
+      "action": "walk",
+      "direction": "east",
+      "phase": "01-stride-b"
+    },
+    "inputSha256": "4b23a8e31a571bd1bf781b77f5939dacabd5a5581bef79179acfa4adc08fc073",
+    "outputSha256": "4df37e5b3eb2c95f309c586f854837de0feb1dfe099caeaf5ef7d570b611f052",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

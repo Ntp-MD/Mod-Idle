@@ -8,10 +8,10 @@ import type {
   BaseRow,
   EngineData,
   ModsData,
-  MobBoss,
+  MobBossPlacement,
+  MobPlacement,
   MobSpecies,
-  MobUnique,
-  MobVariant,
+  MobUniquePlacement,
   MobZone,
   SkillRow,
   SkillsData,
@@ -120,9 +120,11 @@ export interface Catalog {
   readonly mobs: {
     readonly species: CatalogPool<MobSpecies>;
     readonly zones: CatalogPool<MobZone, number>;
-    readonly variantsBySpecies: ReadonlyMap<string, readonly MobVariant[]>;
-    readonly uniquesBySpecies: ReadonlyMap<string, readonly MobUnique[]>;
-    readonly bossesByZone: ReadonlyMap<number, MobBoss>;
+    readonly placements: readonly MobPlacement[];
+    readonly placementsById: ReadonlyMap<string, MobPlacement>;
+    readonly uniques: readonly MobUniquePlacement[];
+    readonly bosses: readonly MobBossPlacement[];
+    readonly bossesByZone: ReadonlyMap<number, MobBossPlacement>;
     readonly speciesByZone: ReadonlyMap<number, readonly MobSpecies[]>;
     readonly variantDrops: ReadonlyMap<string, VariantDrop>;
   };
@@ -230,39 +232,54 @@ export function createCatalog(source: CatalogSource): Catalog {
     }
   }
 
-  const variantsBySpecies = new Map<string, readonly MobVariant[]>();
-  const variantNames = new Set<string>();
-  for (const row of species.rows) {
-    const variants = mob.variants?.[row.id] || [];
-    variantsBySpecies.set(row.id, variants);
-    for (const variant of variants) {
-      if (variantNames.has(variant.name)) problems.push(`mob.variants: duplicate variant name ${variant.name}`);
-      variantNames.add(variant.name);
-    }
-  }
-  for (const speciesId of Object.keys(mob.variants || {})) {
-    if (!species.byId.has(speciesId)) problems.push(`mob.variants: unknown species ${speciesId}`);
-  }
-
+  const placements = ((mob.variants || []) as MobPlacement[]).slice();
+  const placementsById = new Map<string, MobPlacement>();
   const variantDrops = new Map(Object.entries(mob.variant_drops || {}));
-  for (const name of variantNames) {
-    if (!variantDrops.has(name)) problems.push(`mob.variant_drops: no drop row for variant ${name}`);
+  for (const row of placements) {
+    if (placementsById.has(row.id)) problems.push(`mob.variants: duplicate placement id ${row.id}`);
+    placementsById.set(row.id, row);
+    if (!species.byId.has(row.species)) problems.push(`mob.variants.${row.id}: unknown species ${row.species}`);
+    const zone = zones.byId.get(row.zone);
+    if (!zone) { problems.push(`mob.variants.${row.id}: unknown zone ${row.zone}`); continue; }
+    if (!Number.isInteger(row.subzone) || row.subzone < 1 || row.subzone > (zone.subzones || []).length) {
+      problems.push(`mob.variants.${row.id}: invalid subzone ${row.subzone}`);
+    } else if (!(zone.subzones![row.subzone - 1].species || []).includes(row.species)) {
+      problems.push(`mob.variants.${row.id}: species is not in that Subzone pool`);
+    }
+    if (!variantDrops.has(row.id)) problems.push(`mob.variant_drops: no drop row for placement ${row.id}`);
   }
 
-  const bossesByZone = new Map<number, MobBoss>();
-  for (const boss of mob.bosses || []) {
+  const bosses = ((mob.bosses || []) as MobBossPlacement[]).slice();
+  const bossesByZone = new Map<number, MobBossPlacement>();
+  for (const boss of bosses) {
     if (bossesByZone.has(boss.zone)) problems.push(`mob.bosses: duplicate zone ${boss.zone}`);
     bossesByZone.set(boss.zone, boss);
     if (!zones.byId.has(boss.zone)) problems.push(`mob.bosses.${boss.name}: unknown zone ${boss.zone}`);
     if (!species.byId.has(boss.species)) problems.push(`mob.bosses.${boss.name}: unknown species ${boss.species}`);
+    if (!boss.id || !Number.isInteger(boss.level)) problems.push(`mob.bosses.${boss.name}: missing stable id or fixed level`);
+    if (!variantDrops.has(boss.id)) problems.push(`mob.variant_drops: no drop row for boss ${boss.id}`);
   }
 
-  const uniquesBySpecies = new Map<string, MobUnique[]>();
-  for (const unique of mob.uniques || []) {
-    const list = uniquesBySpecies.get(unique.species);
-    if (list) list.push(unique);
-    else uniquesBySpecies.set(unique.species, [unique]);
+  const uniques = ((mob.uniques || []) as MobUniquePlacement[]).slice();
+  const uniqueIds = new Set<string>();
+  for (const unique of uniques) {
     if (!species.byId.has(unique.species)) problems.push(`mob.uniques.${unique.name}: unknown species ${unique.species}`);
+    if (!unique.id || uniqueIds.has(unique.id)) problems.push(`mob.uniques.${unique.name}: missing or duplicate id`);
+    uniqueIds.add(unique.id);
+    if (!zones.byId.has(unique.zone)) problems.push(`mob.uniques.${unique.name}: unknown zone ${unique.zone}`);
+    if (!Number.isInteger(unique.level)) problems.push(`mob.uniques.${unique.name}: missing fixed level`);
+    if (!variantDrops.has(unique.id)) problems.push(`mob.variant_drops: no drop row for unique ${unique.id}`);
+  }
+
+  for (const [id, drop] of variantDrops) {
+    if (!placementsById.has(id) && !bosses.some((b) => b.id === id) && !uniqueIds.has(id)) {
+      problems.push(`mob.variant_drops: key ${id} names no placement`);
+    }
+    if (!drop || typeof drop.item !== 'string' || !drop.item) problems.push(`mob.variant_drops.${id}: malformed row`);
+  }
+  for (const [name, row] of Object.entries(mob.retired_variant_drops || {})) {
+    if (!row || !row.item) problems.push(`mob.retired_variant_drops.${name}: malformed row`);
+    if (!species.byId.has(row?.species)) problems.push(`mob.retired_variant_drops.${name}: unknown species ${row?.species}`);
   }
 
   const speciesByZone = new Map<number, MobSpecies[]>();
@@ -272,9 +289,6 @@ export function createCatalog(source: CatalogSource): Catalog {
       const list = speciesByZone.get(zoneId);
       if (list) list.push(row);
       else speciesByZone.set(zoneId, [row]);
-    }
-    for (const zoneId of Object.keys(row.zone_levels || {})) {
-      if (!zones.byId.has(Number(zoneId))) problems.push(`mob.species.${row.id}.zone_levels: unknown zone ${zoneId}`);
     }
   }
   for (const zone of zones.rows) {
@@ -318,7 +332,7 @@ export function createCatalog(source: CatalogSource): Catalog {
 
   return {
     items: { bases, weapons, mods, slots: source.bases.slots || [], weaponFrames, weaponPools },
-    mobs: { species, zones, variantsBySpecies, uniquesBySpecies, bossesByZone, speciesByZone, variantDrops },
+    mobs: { species, zones, placements, placementsById, uniques, bosses, bossesByZone, speciesByZone, variantDrops },
     skills: {
       all: skills,
       byType: groupBy(skills.rows, (row) => row.type),

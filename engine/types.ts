@@ -358,8 +358,6 @@ export interface MobSpecies {
   bonus_material: MobBonusMaterial;
   carries_weapon: boolean;
   accuracy_mult: number;
-  /** Authored fixed spawn level for each zone this Species inhabits; never derived from player level. */
-  zone_levels?: Record<string, number>;
   /** Default damage type; a normal Variant may override it. */
   damage: MobDamageType;
   /** Explicit potion-drop permission; independent of the Species' Race. */
@@ -435,17 +433,43 @@ export interface MobZone {
    *  page prints it per zone, so the declaration carries it the same way the data row does. */
   quality: string;
   group: string;
+  /** Informative guide median (`§4.1`); never a clamp, gate or spawn level. */
+  recommended_level?: number;
   /** What a spawn table rolls against: the zone cast is the union of its sub-zones. The Elements a
    *  zone fields are derived from that cast (`zoneElements`), never declared beside it. */
   subzones?: MobSubzone[];
 }
 
-/** One fixed-level normal variant: its name, level band, combat Core and optional damage override. */
-export interface MobVariant {
+/** One authored normal/Elite placement: stable ID, fixed level and inherited Variant payload. */
+export interface MobPlacement {
+  /** Stable global identity; lookup key for drops, UI, art and measurements. */
+  id: string;
+  species: string;
   name: string;
-  levels: [number, number];
+  level: number;
+  /** One-based authored Zone/Subzone. */
+  zone: number;
+  subzone: number;
+  role: 'grunt' | 'skirmisher' | 'line' | 'anchor' | 'visitor' | 'guardian';
+  weight: number;
   core: MobCore;
   damage?: MobDamageType;
+}
+
+/** A Boss placement: the existing Boss row plus a stable ID and a fixed level. */
+export interface MobBossPlacement extends MobBoss {
+  id: string;
+  level: number;
+  legacy_name?: string;
+}
+
+/** A Unique placement: Zone-filtered, fixed level and its existing rare-proc weight. */
+export interface MobUniquePlacement extends MobUnique {
+  id: string;
+  zone: number;
+  level: number;
+  weight: number;
+  legacy_name?: string;
 }
 
 export type MobRaceId =
@@ -673,12 +697,14 @@ export interface MobCfg {
   species: MobSpecies[];
   /** Proximity aggression and same-species assist eligibility, keyed by Species id. */
   engagement?: MobEngagementCfg;
-  /** Normal Variant bands by Species id; they select name/Core while zone_levels sets actual spawn level. */
-  variants?: Record<string, MobVariant[]>;
-  /** What each of those names drops: its base junk item, sale rarity and stream lean (`X56`). */
+  /** The authored normal/Elite placements; every board cell is an explicit row. */
+  variants?: MobPlacement[];
+  /** What each placement id drops: its base junk item, sale rarity and stream lean (`X56`). */
   variant_drops?: Record<string, VariantDrop>;
-  /** Zero or more named Uniques per Species (`mob.uniques`); chance is per normal spawn. */
-  uniques?: MobUnique[];
+  /** Retired legacy sources kept for inventory/trade compatibility only (never spawnable). */
+  retired_variant_drops?: Record<string, VariantDrop & { species: string }>;
+  /** Zero or more named Uniques per Species and Zone (`mob.uniques`); chance is per normal spawn. */
+  uniques?: MobUniquePlacement[];
   /** The second drop tilt keyed by the subzone environment; `none` is the identity (`X73`). */
   environment_lean?: Record<string, 'none' | 'gear' | 'herb' | 'junk'>;
   /** The closed set of trait mechanics, each with the one number it runs on (`X74`). */
@@ -687,7 +713,7 @@ export interface MobCfg {
   spawn_packs?: Record<string, any>;
   deprecated_species?: Record<string, string>;
   sizes: MobSize[];
-  bosses: MobBoss[];
+  bosses: MobBossPlacement[];
   elite: MobElite;
   curve: CurveCfg;
   spawn_weights: Record<string, number>;

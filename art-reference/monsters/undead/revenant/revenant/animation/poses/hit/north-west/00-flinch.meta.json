@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "pose": "00-flinch",
+  "generator": "Deterministic extraction from existing species atlas",
+  "sourceSize": {
+    "width": 384,
+    "height": 384
+  },
+  "rawAlphaBoundsExclusive": [
+    141,
+    168,
+    243,
+    288
+  ],
+  "visibleAlphaGt8BoundsExclusive": [
+    141,
+    168,
+    243,
+    288
+  ],
+  "boundsProvenance": "Pillow direct alpha measurement after nearest-neighbor scaling and anchor placement",
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Source atlas feet aligned to shared (192,288) ground anchor",
+  "releaseSocket": null,
+  "sourcePixelsModified": true,
+  "styleReference": "art-reference/players/one-handed-sword/reference.png",
+  "bakedWeapon": "sword",
+  "sourceAtlas": "art-reference/monsters/undead/revenant/revenant/animation/atlas/animation.png",
+  "sourceCellIndex": 28,
+  "transformation": "128x128 source cell extracted and enlarged 2x with NEAREST; placed on 384x384 transparent canvas. No palette/alpha edits.",
+  "status": "candidate-review",
+  "action": "hit",
+  "direction": "north-west",
+  "phase": "00-flinch",
+  "source": "../west/00-flinch.png",
+  "sourceDirection": "west",
+  "directionalDuplicateSource": "west",
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "regenerationRequired": true,
+  "visualReviewRequired": true,
+  "note": "Coverage-only directional duplicate from the west hit candidate. Exact north-west-facing art remains ungenerated; regenerate and visually review before approval or atlas promotion. Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending.",
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 167,
+    "uniformScale": 1.391667,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/undead/revenant/v1/atlas.png",
+      "frame": 28,
+      "action": "hit",
+      "direction": "west",
+      "phase": "00-flinch"
+    },
+    "inputSha256": "05987c9e01601966e5cab2ca9042fe2b1fcee17028f6d44217469a3da9b881dc",
+    "outputSha256": "bb5fabec78c6f9b8f4dbcb23c1083c9d948d0132e49b291d6acda07995297939",
+    "reviewRequired": true
+  }
+}

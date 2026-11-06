@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { E, eng, sm, tree } from '../../src/engine/client';
-import { newGame, tick, catchUp, setLevel, huntZone } from '@sim/core/game';
+import { newGame, tick, catchUp, setLevel, huntZone, spawnMob } from '@sim/core/game';
 import { isBossKind } from '@sim/core/kinds';
 import { emptyGear, openingGear } from '@sim/core/player';
 import { craft } from '@sim/gear/craft';
@@ -771,5 +771,115 @@ describe('an imported file cannot be an impossible state', () => {
     const m = migrate(JSON.parse(JSON.stringify(s)), 26);
     expect(m.fieldArchive![key]).toBeDefined();
     expect(m.fieldArchive![key].savedAtSec).toBe(12);
+  });
+});
+
+describe('v28 placement snapshot migration', () => {
+  const legacyMob = (over: Record<string, any> = {}): any => ({
+    id: 'legacy-mob', species: 'Goblin', speciesId: 'goblin', variant: 'Shaman Goblin', kind: 'Small',
+    zone: 1, level: 5, hp: 100, hpMax: 100, ps: 10, acc: 10, evasion: 0, dodgeRate: 0, armour: 0, res: 0,
+    damage: 'physical', innate: ['poison'], xp: 5, line: 'front', hitsPerSec: 1, atkTimer: 0, engageSec: 0,
+    ...over,
+  });
+  const dropOf = (id: string) => (E.mob.variant_drops as any)[id];
+
+  it('pins the original reward for normal, Elite, Boss, Unique and retired actors', () => {
+    const expectedNormal = dropOf((E.mob.variants as any[]).find((row) => row.name === 'Shaman Goblin').id);
+    const unique = (E.mob.uniques as any[]).find((row) => row.legacy_name === 'Goblin King');
+    const retired = Object.entries(E.mob.retired_variant_drops as any)[0] as [string, any];
+    const legacy = [
+      legacyMob({ id: 'n1' }),
+      legacyMob({ id: 'e1', kind: 'Elite' }),
+      legacyMob({ id: 'b1', kind: 'Boss · Goblin King', variant: 'Goblin King' }),
+      legacyMob({ id: 'u1', kind: `Unique · ${unique.legacy_name}`, variant: unique.legacy_name }),
+      legacyMob({ id: 'r1', kind: 'Small', variant: retired[0], species: 'Siren', speciesId: retired[1].species }),
+    ];
+    const state = newGame(31);
+    state.group = structuredClone(legacy);
+    const migrated = migrate(JSON.parse(JSON.stringify(state)), 27);
+    const byId = new Map(migrated.group.map((mob: any) => [mob.id, mob]));
+    expect(byId.get('n1')!.legacySnapshot).toBe(true);
+    expect(byId.get('n1')!.placementId).toBeUndefined();
+    expect(byId.get('n1')!.legacyDrop).toEqual(expectedNormal);
+    expect(byId.get('e1')!.legacyDrop).toEqual(expectedNormal);
+    expect(byId.get('b1')!.legacyDrop).toEqual(dropOf((E.mob.bosses as any[]).find((row) => row.name === 'Goblin King').id));
+    expect(byId.get('u1')!.legacyDrop).toEqual(dropOf(unique.id));
+    expect(byId.get('r1')!.legacyDrop).toEqual({ item: retired[1].item, rarity: retired[1].rarity, lean: retired[1].lean });
+    // saved level, HP and kit are retained untouched
+    expect(byId.get('n1')!.level).toBe(5);
+    expect(byId.get('n1')!.hp).toBe(100);
+  });
+
+  it('covers field slots, archived fields and prepared camp groups exactly once', () => {
+    const state = newGame(32);
+    state.group = [];
+    const field = createFieldState(state);
+    field.slots[0].mobId = 'field-1';
+    field.slots[0].life = { mob: legacyMob({ id: 'field-1' }), hp: 100, hpMax: 100 } as any;
+    (state as any).field = field;
+    const archived = structuredClone(field);
+    archived.slots[0].mobId = 'archive-1';
+    archived.slots[0].life = { mob: legacyMob({ id: 'archive-1' }), hp: 100, hpMax: 100 } as any;
+    (archived as any).savedAtSec = 1;
+    (state as any).fieldArchive = { [field.areaKey]: archived };
+    (state as any).fieldwork.campEncounters.serial = 5;
+    (state as any).fieldwork.campEncounters.active = {
+      id: 1, kind: 'nest', stage: 'choice', origin: { ...state.cell },
+      warningSec: 0, choiceSec: 0, payload: {}, participantIds: [],
+      preparedGroup: [legacyMob({ id: 'prepared-1' })],
+    };
+    const migrated = migrate(JSON.parse(JSON.stringify(state)), 27);
+    const mobs = [
+      (migrated as any).field?.slots?.[0]?.life?.mob,
+      (migrated.fieldArchive as any)[(migrated as any).field?.areaKey]?.slots?.[0]?.life?.mob ?? (Object.values(migrated.fieldArchive as any)[0] as any)?.slots?.[0]?.life?.mob,
+      (migrated.fieldwork as any).campEncounters.active.preparedGroup[0],
+    ];
+    for (const mob of mobs as any[]) {
+      expect(mob.legacySnapshot).toBe(true);
+      expect(mob.legacyDrop).not.toBeNull();
+    }
+  });
+
+  it('keeps a valid camp fight on a resource site through the safe-site guard', () => {
+    const state = newGame(33);
+    state.cell = { q: -1, r: 1, sub: null, site: 'mine' };
+    state.hunting = false;
+    const mob = legacyMob({ id: 'fight-1' });
+    state.group = [mob];
+    (state as any).fieldwork.campEncounters.serial = 5;
+    (state as any).fieldwork.campEncounters.active = {
+      id: 2, kind: 'nest', stage: 'combat', origin: { ...state.cell },
+      warningSec: 0, choiceSec: 0, payload: {}, preparedGroup: [], participantIds: ['fight-1'],
+    };
+    const migrated = migrate(JSON.parse(JSON.stringify(state)), 27);
+    expect(migrated.group.map((row: any) => row.id)).toEqual(['fight-1']);
+    expect((migrated.group[0] as any).legacySnapshot).toBe(true);
+  });
+
+  it('nulls a forged payload once, logs once and stays idempotent', () => {
+    const state = newGame(34);
+    state.group = [legacyMob({ id: 'forged-1' })] as any;
+    (state.group[0] as any).legacySnapshot = true;
+    (state.group[0] as any).legacyDrop = { item: 'Invented Crown', rarity: 'rare', lean: 'none' };
+    const once = migrate(JSON.parse(JSON.stringify(state)), 27);
+    expect((once.group[0] as any).legacyDrop).toBeNull();
+    const entries = once.log.filter((line) => line.text.startsWith('Legacy mob reward unresolved · forged-1'));
+    expect(entries).toHaveLength(1);
+    const twice = migrate(JSON.parse(JSON.stringify(once)), 27);
+    expect((twice.group[0] as any).legacyDrop).toBeNull();
+    expect(twice.log.filter((line) => line.text.startsWith('Legacy mob reward unresolved · forged-1'))).toHaveLength(1);
+  });
+
+  it('leaves a newly spawned actor on placement identity and preserves unknown junk', () => {
+    const state = newGame(35);
+    const mob = spawnMob(mulberry32(35), 1, 'normal');
+    expect(mob.placementId).toBeTruthy();
+    expect(mob.legacySnapshot).toBeUndefined();
+    state.junk['Unknown Trinket'] = 3;
+    const retired = Object.entries(E.mob.retired_variant_drops as any)[0][1] as any;
+    state.junk[retired.item] = 2;
+    const migrated = migrate(JSON.parse(JSON.stringify(state)), 27);
+    expect(migrated.junk['Unknown Trinket']).toBe(3);
+    expect(migrated.junk[retired.item]).toBe(2);
   });
 });

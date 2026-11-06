@@ -1,0 +1,21 @@
+﻿{
+    "status":  "candidate-review",
+    "source":  "../../../../atlas/animation.png",
+    "sourceCell":  [
+                       2,
+                       4
+                   ],
+    "pixelsRepainted":  false,
+    "visualReviewRequired":  true,
+    "speciesId":  "wyrmling",
+    "race":  "dragon",
+    "action":  "death",
+    "direction":  "south-east",
+    "phase":  "02-ground",
+    "originalStatus":  "baseline-extracted-candidate",
+    "copiedFrom":  "../east/02-ground.png",
+    "directionalDuplicateSource":  "east",
+    "sourceSha256":  "66f1e50fac1fe76855336ae4a76bc2701ab0f84e15c63ed965a801b6488d73b5",
+    "regenerationRequired":  true,
+    "note":  "Coverage-only directional duplicate copied byte-for-byte from the east baseline candidate. No authored south-east death source exists; regenerate and visually review before approval or atlas promotion."
+}

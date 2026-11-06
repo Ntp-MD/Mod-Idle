@@ -21,5 +21,42 @@
       288
     ],
     "alphaCutoff": 16
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 141,
+    "uniformScale": 0.723077,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/dragon/wyrmling/v1/atlas.png",
+      "frame": 8,
+      "action": "walk",
+      "direction": "east",
+      "phase": "00-stride-a"
+    },
+    "inputSha256": "b1bd089633e38b3aed0cf9dfc900cd10ce52b984966b5635cab1cc2bca3b5cb7",
+    "outputSha256": "d51cf507fcf26458e78e9f7f9fd51588294cbc4d960d1503081a751b994effbe",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

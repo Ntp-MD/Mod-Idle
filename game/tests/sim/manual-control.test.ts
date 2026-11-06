@@ -4,6 +4,7 @@ import { arenaAction, captureCombatArena, createCombatArena, syncCombatArena } f
 import { characterSheet, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
 import type { ManualControl } from '@sim/combat/combat-actions';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
+import { createFieldState } from '@sim/world/field-area';
 
 function manualFight(spots: { id: string; x: number; y: number }[]) {
   const state = newGame(41);
@@ -96,8 +97,12 @@ describe('deliberate local control', () => {
     expect(arena.actions.find((entry) => entry.id === action.id)?.cancelReason).toBeUndefined();
   });
 
-  it('commits a manual ground cast to empty permitted ground and pays for it', () => {
-    const { state, arena } = manualFight([{ id: 'target', x: 3.6, y: 6 }]);
+  it.each([true, false])('commits a manual ground cast to empty permitted ground and pays for it (living primary: %s)', (livingPrimary) => {
+    const { state, arena } = manualFight(livingPrimary ? [{ id: 'target', x: 3.6, y: 6 }] : []);
+    if (!livingPrimary) {
+      state.field = createFieldState(state);
+      for (const slot of state.field.slots) slot.respawnAtSec = Number.MAX_SAFE_INTEGER;
+    }
     state.skills.owned['attack.meteor'] = 0;
     state.skills.list.fill(null);
     state.skills.list[0] = 'attack.meteor';
@@ -112,6 +117,7 @@ describe('deliberate local control', () => {
     expect(cast.area?.center.y).toBeCloseTo(9, 5);
     expect(state.skills.cd['attack.meteor']).toBeGreaterThan(0);
     expect(state.player.mana).toBeLessThan(mana);
+    if (!livingPrimary) expect(state.group).toHaveLength(0);
     expect(state.fx.some((event) => event.kind === 'hit' && event.skillId === 'attack.meteor')).toBe(false);
   });
 

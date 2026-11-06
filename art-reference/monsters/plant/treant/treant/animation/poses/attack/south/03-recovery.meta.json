@@ -41,5 +41,38 @@
   "qa": {
     "atlas": false,
     "anchor": false
-  }
+  },
+  "sourcePixelsModified": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 154,
+    "uniformScale": 1.362832,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/plant/treant/v1/atlas.png",
+      "frame": 19,
+      "action": "attack",
+      "direction": "east",
+      "phase": "03-recovery"
+    },
+    "inputSha256": "6612e2f72c8e4a1adc8b476a888ff95d65b87af0db4f56b96165fdc9b69a154d",
+    "outputSha256": "8035a791a796c57c319ba60718194ba0d074933c97483bc9c2e937aab0aab242",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

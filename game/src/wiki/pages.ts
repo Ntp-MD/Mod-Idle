@@ -944,15 +944,17 @@ page({
   nav: 'Bestiary',
   title: 'Bestiary',
   lead: (() => {
-    const variants = (E.mob as any).variants || {};
-    const total = (E.mob.species || []).reduce((n: number, sp: any) => n + (variants[sp.id] || []).length, 0);
+    const total = ((E.mob as any).variants || []).length;
     const uniques = ((E.mob as any).uniques || []).length;
     const races = (E.mob.races?.set || []).length;
     return `${n0(races)} races · ${n0(E.mob.species.length)} species · ${n0(total)} variants · ${n0(uniques)} uniques. Every species attacks with one Element — the spine on its plate — and carries its own resistance, weakness and junk. Mob skills are on <a href="mob-skills.html">Mob skills</a>; drop rates on <a href="drops.html">Drop rates</a>.`;
   })(),
   body: (() => {
     const speciesRows: any[] = E.mob.species || [];
-    const variantsBySpecies: Record<string, any[]> = (E.mob as any).variants || {};
+    const placements: any[] = (E.mob as any).variants || [];
+    const variantsBySpecies: Record<string, any[]> = Object.fromEntries(
+      speciesRows.map((sp: any) => [sp.id, placements.filter((row) => row.species === sp.id)]),
+    );
     const allUniques: any[] = (E.mob as any).uniques || [];
     const races: string[] = E.mob.races?.set || [];
     const skills: any[] = MOB_SKILLS_DATA.skills as any[];
@@ -964,7 +966,7 @@ page({
       : '<span class="beast-none">basic swing only</span>';
     /** One row of a plate's fold: a Variant, or a Unique with its own Element and find. */
     const dropRow = (sp: any, row: any, kind: 'variant' | 'unique'): any[] => {
-      const drop: any = maybe(E.mob.variant_drops, row.name);
+      const drop: any = maybe(E.mob.variant_drops, row.id);
       const chance = drop ? Number((E.junk as any).rarities?.[drop.rarity]?.drop_chance_per_kill || 0) : 0;
       const choices = drop ? [...new Set([drop.item, sp.junk_items?.[drop.rarity]].filter(Boolean))] as string[] : [];
       const junk = drop
@@ -978,13 +980,13 @@ page({
       const name = kind === 'unique'
         ? `<b>${esc(row.name)}</b> <span class="tag beast-unique">Unique</span>${row.element && row.element !== sp.element ? ` ${elTag(row.element, true)}` : ''}`
         : `<b>${esc(row.name)}</b>`;
-      return [name, kind === 'unique' ? 'wild' : `${n0(row.levels[0])}–${n0(row.levels[1])}`, junk,
+      return [name, kind === 'unique' ? `Lv ${n0(row.level)}` : `Lv ${n0(row.level)} · Z${n0(row.zone)} S${n0(row.subzone)}`, junk,
         `<span class="hy">${notes.join(' · ') || '—'}</span>`];
     };
     const plate = (sp: any): string => {
       const variants: any[] = variantsBySpecies[sp.id] || [];
       const uniques: any[] = allUniques.filter((u: any) => u.species === sp.id);
-      const levels = (Object.values(sp.zone_levels || {}) as any[]).map(Number).filter((level) => Number.isFinite(level));
+      const levels = variants.map((row: any) => Number(row.level)).filter((level: number) => Number.isFinite(level));
       const levelText = levels.length ? `${n0(Math.min(...levels))}–${n0(Math.max(...levels))}` : '—';
       const habitat: string[] = sp.habitat || [];
       const habitats = habitat.slice(0, 3).map((name: string) => esc(name)).join(' · ')

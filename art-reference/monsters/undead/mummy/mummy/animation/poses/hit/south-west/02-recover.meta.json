@@ -1,0 +1,37 @@
+﻿{
+    "status":  "candidate-review",
+    "speciesId":  "mummy",
+    "source":  "../west/02-recover.png",
+    "sourceCell":  {
+                       "row":  3,
+                       "column":  6,
+                       "box":  [
+                                   2304,
+                                   1152,
+                                   2688,
+                                   1536
+                               ]
+                   },
+    "sourcePixelsModified":  false,
+    "qa":  {
+               "new16DirectionSetAccepted":  false,
+               "anchor":  false,
+               "atlas":  false
+           },
+    "sourceDirection":  "west",
+    "directionalDuplicateSource":  "west",
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "frameCanvas":  {
+                        "width":  384,
+                        "height":  384
+                    },
+    "anchor":  {
+                   "x":  192,
+                   "y":  288
+               },
+    "phase":  "02-recover",
+    "action":  "hit",
+    "direction":  "south-west",
+    "note":  "Coverage-only directional duplicate from the west hit/02-recover candidate. Exact south-west-facing art remains ungenerated; regenerate and visually review before approval or atlas promotion."
+}

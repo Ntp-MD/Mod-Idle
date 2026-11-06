@@ -49,5 +49,42 @@
     "note": "Cropped from a 4x4 directional candidate grid. Background was keyed to alpha; exact facing, identity, hard-alpha edge quality, foot anchor, phase continuity and atlas QA remain for art-owner review."
   },
   "reorderedFromPose": "02-follow-through",
-  "reviewNote": "Reordered the candidate sequence so raised fist precedes extended strike. Original source atlas and crop follow the image. Facing, identity, return motion, alpha and anchor remain unapproved."
+  "reviewNote": "Reordered the candidate sequence so raised fist precedes extended strike. Original source atlas and crop follow the image. Facing, identity, return motion, alpha and anchor remain unapproved.",
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 130,
+    "uniformScale": 0.604651,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/elemental/golem/v1/atlas.png",
+      "frame": 20,
+      "action": "attack",
+      "direction": "west",
+      "phase": "00-windup"
+    },
+    "inputSha256": "f96f352ced87c985560cf086d9d27571de1623d6bb11a702ad0aed5aafd36452",
+    "outputSha256": "fd0a7ddd1d9473b13d6eec633c082f5734bcd5f3083304602becd93a2fedddc6",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

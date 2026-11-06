@@ -8,29 +8,29 @@ Canonical pose PNGs count toward coverage; draft files do not. `candidate-review
 
 ## Priority 1 - Every mob reaches 136/136
 
-Work on one species at a time, starting with the smallest current gap. Finish that species at 136/136 and refresh the inventory before moving to the next. `plant/dryad` is complete; the next assigned targets are `beast/harpy`, `beast/werewolf` and `beast/wolf`.
+Work on one species at a time, starting with the smallest current gap. Finish that species at 136/136 and refresh the inventory before moving to the next. `plant/dryad` is complete; choose each next target from a fresh inventory. The dated snapshot below is historical.
 
 Claim table (one species per agent — write your name + date before starting, tick `[x]` and refresh the inventory when done):
 
 | Done | Species | Missing | Claimed by |
 | ---- | ------- | ------- | ---------- |
-| [x] | `plant/dryad` | 0 | `/root` — 2026-11-05 |
-| [ ] | `beast/harpy` | 29 | `/root/harpy` — 2026-11-05 |
-| [ ] | `beast/werewolf` | 40 | `/root/werewolf` — 2026-11-05 |
-| [ ] | `beast/wolf` | 43 | `/root/wolf` — 2026-11-05 |
-| [x] | `plant/treant` | 0 | `/root/treant` — 2026-11-05 |
-| [x] | `demon/imp` | 0 | `/root/imp` — 2026-11-05 |
-| [x] | `dragon/dragon` | 0 | `/root/dragon` — 2026-11-05 |
-| [ ] | `dragon/mirehydra` | 36 | `/root/mirehydra` — 2026-11-05 |
-| [ ] | `dragon/wyrmling` | 63 | `/root/wyrmling` — 2026-11-05 |
-| [ ] | `dragon/wyvern` | 12 | `/root/wyvern` — 2026-11-05 |
-| [ ] | `fish/siren` | 8 | `/root/siren` — 2026-11-05 |
-| [x] | `humanoid/elf` | 0 | `/root` — 2026-11-05 |
-| [x] | `humanoid/giant` | 0 | `/root` — 2026-11-05 |
-| [x] | `humanoid/orc` | 0 | `/root` — 2026-11-05 |
-| [ ] | `undead/bonehound` | 24 | `/root` — 2026-11-05 |
-| [ ] | `undead/mummy` | 96 | |
-| [ ] | `undead/revenant` | 96 | |
+| [x] | `plant/dryad` | 0 |  |
+| [x] | `beast/harpy` | 0 | `/root/harpy` — 2026-11-05 |
+| [x] | `beast/werewolf` | 0 | `/root/werewolf` — 2026-11-05 |
+| [x] | `beast/wolf` | 0 | `/root/wolf` — 2026-11-05 |
+| [x] | `plant/treant` | 0 | 
+| [x] | `demon/imp` | 0 | 
+| [x] | `dragon/dragon` | 0 | 
+| [x] | `dragon/mirehydra` | 0 | `/root/mirehydra` — 2026-11-05 |
+| [x] | `dragon/wyrmling` | 0 | `/root/wyrmling` — 2026-11-05 |
+| [x] | `dragon/wyvern` | 0 | `/root/wyvern` — 2026-11-05 |
+| [x] | `fish/siren` | 0 | `/root/siren` — 2026-11-05 |
+| [x] | `humanoid/elf` | 0 |  |
+| [x] | `humanoid/giant` | 0 |  |
+| [x] | `humanoid/orc` | 0 |  |
+| [x] | `undead/bonehound` | 0 | `/root/bonehound` — 2026-11-05 |
+| [x] | `undead/mummy` | 0 | `/root/mummy` — 2026-11-05 |
+| [x] | `undead/revenant` | 0 | `/root/revenant` — 2026-11-05 |
 
 Inventory snapshot 2026-11-05 (after the assigned species completed): Dryad, Treant, Dragon and Imp are 136/136; 56 Treant, 65 Dragon and 93 Imp slots are provisional duplicate candidates requiring regeneration. Harpy 107/136, Werewolf 96/136, Wolf 93/136, Mirehydra 100/136, Wyrmling 73/136, Wyvern 124/136, Siren 128/136, Bonehound 112/136, Mummy and Revenant 40/136. The remaining 26 species have all 136 target slots present. Run the inventory for current details.
 
@@ -46,4 +46,4 @@ Exceptions (every unlisted variant = draft atlas + QA pass):
 
 ## Priority 2 - Review follow-up (parked until Priority 1 completes)
 
-Sequencing rule: finish 136/136 coverage first, visual beauty review later. Do not mix aesthetic judgments into coverage work, and do not start this pass until every species reaches 136/136. Review candidates before approval or atlas promotion. Existing notes about extra directions remain applicable to those assets.
+Sequencing rule: finish 136/136 coverage first, visual beauty review later. Do not mix aesthetic judgments into coverage work, and do not start this pass until every species reaches 136/136. Review candidates before approval or atlas promotion. Existing notes about extra directions remain applicable to those assets. First-pass atlas beauty grades are tracked in [mob-pose-beauty-review.md](mob-pose-beauty-review.md); size stability checks are tracked in [mob-pose-size-review.md](mob-pose-size-review.md).

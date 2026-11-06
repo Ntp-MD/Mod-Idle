@@ -1,0 +1,36 @@
+﻿{
+    "status":  "candidate-review",
+    "generator":  "OpenAI built-in image_gen",
+    "sourceOutput":  "exec-c27fe675-2c19-4415-b0f1-c9faa946b9cb.png",
+    "direction":  "north-east",
+    "angleDegrees":  180,
+    "visualReview":  {
+                         "identityPlausible":  true,
+                         "facingPlausible":  true,
+                         "exactAngleVerified":  false,
+                         "atlasReady":  false
+                     },
+    "sourcePixelsModified":  true,
+    "normalization":  {
+                          "canvas":  [
+                                         384,
+                                         384
+                                     ],
+                          "anchor":  [
+                                         192,
+                                         288
+                                     ],
+                          "alphaCutoff":  16
+                      },
+    "speciesId":  "wyrmling",
+    "race":  "dragon",
+    "action":  "attack",
+    "phase":  "01-contact",
+    "originalStatus":  "candidate-review",
+    "copiedFrom":  "../north/01-contact.png",
+    "directionalDuplicateSource":  "north",
+    "sourceSha256":  "1f34aa0655c561c9bd2c686f745c984c06145c84192336840816c5dc65a88440",
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "note":  "Coverage-only directional duplicate copied byte-for-byte from the north baseline candidate. No authored north-east attack source exists; regenerate and visually review before approval or atlas promotion."
+}

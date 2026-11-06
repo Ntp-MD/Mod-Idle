@@ -1,0 +1,57 @@
+﻿{
+    "status":  "candidate-review",
+    "generator":  "built-in-image_gen",
+    "source":  "../north/01-stride-b.png",
+    "sourceDimensions":  [
+                             1283,
+                             1226
+                         ],
+    "sourceGridCell":  {
+                           "row":  0,
+                           "column":  1
+                       },
+    "frameCanvas":  {
+                        "width":  384,
+                        "height":  384
+                    },
+    "anchor":  {
+                   "x":  192,
+                   "y":  288,
+                   "provenance":  "matched to existing Mirehydra north idle frame"
+               },
+    "normalization":  {
+                          "method":  "2x2 sheet cell alpha crop (\u003e128), nearest-neighbor fit to north idle subject height 167px, transparent 384x384 placement",
+                          "sourceAlphaThresholdForCrop":  128,
+                          "sourcePixelsPaintedOrComposited":  false,
+                          "normalizedSubjectHeight":  167
+                      },
+    "transparentBackgroundRequested":  true,
+    "identityReference":  "art-reference/monsters/dragon/mirehydra/mirehydra/animation/source/base-v1.png",
+    "scaleReference":  "art-reference/monsters/dragon/mirehydra/mirehydra/animation/poses/idle/north.png",
+    "styleReference":  "art-reference/monsters/dragon/mirehydra/mirehydra/animation/atlas/animation.png",
+    "visualReview":  {
+                         "sequenceAccepted":  false,
+                         "identityAccepted":  false,
+                         "exactAngleAccepted":  false,
+                         "atlasReady":  false,
+                         "note":  "Generated sheet candidate; review gait continuity, identity and exact direction before approval."
+                     },
+    "qa":  {
+               "atlas":  false,
+               "anchor":  false
+           },
+    "schemaVersion":  1,
+    "speciesId":  "mirehydra",
+    "race":  "dragon",
+    "action":  "walk",
+    "direction":  "north-west",
+    "phase":  "01-stride-b",
+    "copiedFrom":  "../north/01-stride-b.png",
+    "originalStatus":  "baseline-extracted-candidate",
+    "originalSource":  "drafts/walk-north-sheet.png",
+    "originalSourceCell":  null,
+    "directionalDuplicateSource":  "north",
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "note":  "Coverage-only directional duplicate copied from the north candidate. No exact north-west walk source is present; regenerate and visually review before approval or atlas promotion."
+}

@@ -224,17 +224,8 @@ export function newGame(seed = 20260101, trailSeed = seed): GameState {
 }
 
 /** A mob at the player's level, clamped into the zone (engine.json mob.level_rule). */
-// The species cast and the boss row per zone are fixed data, so index them once instead of filtering
-// on every spawn (a spawn happens many times per tick through the offline catch-up).
-const _speciesByZone = new Map<number, any[]>();
-const speciesInZone = (zoneId: number): any[] => {
-  let pool = _speciesByZone.get(zoneId);
-  if (!pool) {
-    pool = E.mob.species.filter((sp: any) => sp.zones.includes(zoneId)) as any[];
-    _speciesByZone.set(zoneId, pool);
-  }
-  return pool;
-};
+// The boss row per zone is fixed data, so index it once instead of filtering on every spawn
+// (a spawn happens many times per tick through the offline catch-up).
 const _bossByZone = new Map<number, any>();
 const bossInZone = (zoneId: number): any => {
   if (!_bossByZone.has(zoneId)) _bossByZone.set(zoneId, E.mob.bosses.find((b: any) => b.zone === zoneId) || null);
@@ -244,15 +235,15 @@ const bossInZone = (zoneId: number): any => {
 /** A boss-class kill: the clock Boss or a wild Species Unique. Both pay the boss lines. */
 export { isBossKind } from './kinds';
 import { isBossKind } from './kinds';
-const _uniquesBySpecies = new Map<string, any[]>();
-const uniquesInSpecies = (speciesId: string): any[] => {
-  if (!_uniquesBySpecies.has(speciesId)) _uniquesBySpecies.set(speciesId, eng.uniquesOf(speciesId));
-  return _uniquesBySpecies.get(speciesId)!;
-};
-/** One spawn's variant name pays its `mob.variant_drops` row: base junk item, rarity, lean. */
+/**
+ * One spawn's reward identity: a legacy snapshot keeps its pinned payload, a new actor reads the
+ * placement-keyed row. A display name is never a reward lookup key.
+ */
 function variantDrop(mob: any): { item: string; rarity: string; lean: 'gear' | 'herb' | 'junk' | 'none' } | null {
-  if (!mob || !mob.variant) return null;
-  return (((E.mob as any).variant_drops || {})[mob.variant]) || null;
+  if (!mob) return null;
+  if (mob.legacySnapshot) return mob.legacyDrop ?? null;
+  if (!mob.placementId) return null;
+  return (((E.mob as any).variant_drops || {})[mob.placementId]) || null;
 }
 
 /** The Species' one thematic material, rolled on its own seeded stream so the shared loot RNG
@@ -300,81 +291,69 @@ function pickBody(rng: () => number, bodies: string[], pack: Record<string, numb
   return bodies[bodies.length - 1];
 }
 
-export function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string, standSub?: number | null, options: { allowWildUnique?: boolean; uniqueChance?: number; id?: string; standTerrain?: string | null } = {}): Mob {
+export function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string, standSub?: number | null, options: { allowWildUnique?: boolean; uniqueChance?: number; id?: string; standTerrain?: string | null; forceSpecial?: { rank: 'boss' | 'unique'; name: string } | null } = {}): Mob {
   const z = eng.zoneById(zoneId);
-  const zonePool = speciesInZone(zoneId);
-  // a sub-zone is what a spawn table rolls against: it names its own species pool and one Element from the
-  // zone's set, and the cast a normal or Elite spawn draws from that pool (the boss is zone-level).
-  // Standing on a cell that has a sub-zone written into it hunts that sub-zone; anywhere else the zone's
-  // own cast rolls, evenly (`road.standing_rule`).
+  // A standing named side hunts its authored pool; bare ground keeps the existing Zone/subzone draw.
   const subs = z.subzones || [];
   const stood = standSub != null && subs[standSub] ? subs[standSub] : null;
   const terrain = options.standTerrain ?? null;
-  // Standing on a named side hunts its cast. Off named ground the nearby sides weigh up on
-  // matching terrain and the species inside the pool weigh up on membership; with no standing
-  // terrain the zone cast rolls even — the same uniform draw as before. Deterministic per seed.
-  const sub = kind !== 'boss' && subs.length
+  const chosenSub = kind !== 'boss' && !options.forceSpecial && subs.length
     ? stood ?? (terrain == null
       ? subs[Math.floor(rng() * subs.length)]
       : subs[Number(weightedPick(rng, subs.map((s, i) => ({ id: String(i), w: eng.spawnSubzoneWeight(s, terrain) }))))] ?? null)
     : null;
-  const speciesPool = sub ? zonePool.filter((sp: any) => sub.species.includes(sp.id)) : zonePool;
-  const pickSpecies = (pool: any[]): any => {
-    if (terrain == null || stood || !pool.length) return pick(rng, pool);
-    const id = weightedPick(rng, pool.map((sp: any) => ({ id: sp.id, w: eng.spawnSpeciesWeight(sp.terrain, terrain) })));
-    return pool.find((sp: any) => sp.id === id) ?? pool[pool.length - 1];
-  };
-  // Every normal/Elite reads its Species' authored level in this zone, including past the form cap.
-  let rank: string = kind;
-  let bossProfile: any = null;
+  let rank: string = options.forceSpecial ? options.forceSpecial.rank : kind;
+  let placementId: string;
+  let species: any;
   let body = 'medium';
-  let species = pickSpecies(speciesPool);
-  let variant: { name: string; levels: [number, number]; core: Record<string, number>; damage?: 'physical' | 'magic' | 'mixed' } | null = null;
   let fixedName: string | null = null;
-  const rollVariant = (sp: any) => pick(rng, eng.variantsInZone(sp.id, zoneId)) || null;
-  if (bodyHint) {
-    const able = speciesPool.filter((sp: any) => sp.sizes.includes(bodyHint));
-    species = pickSpecies(able.length ? able : speciesPool);
-    body = bodyHint;
-    variant = rollVariant(species);
+  const pack = chosenSub ? ((E.mob as any).spawn_packs?.[(chosenSub.spawn || {}).pack || ''] || null) : null;
+
+  if (options.forceSpecial) {
+    // A named special is invoked by its own owner (Boss request or an exact Unique probe), never
+    // rolled out of the normal field pool.
+    const row = options.forceSpecial.rank === 'boss'
+      ? (bossInZone(zoneId)?.name === options.forceSpecial.name ? bossInZone(zoneId) : null)
+      : E.mob.uniques.find((u: any) => u.name === options.forceSpecial!.name && u.zone === zoneId) ?? null;
+    if (!row) throw new Error(`spawnMob: unknown ${options.forceSpecial.rank} ${options.forceSpecial.name} in zone ${zoneId}`);
+    placementId = row.id;
+    species = E.mob.species.find((sp: any) => sp.id === row.species)!;
+    body = 'boss';
+    fixedName = row.name;
   } else if (kind === 'boss') {
     const boss = bossInZone(zoneId)!;
-    bossProfile = boss;
+    placementId = boss.id;
     species = E.mob.species.find((sp: any) => sp.id === boss.species)!;
     body = 'boss';
     fixedName = boss.name;
-  } else if (kind === 'elite') {
-    // an Elite is always forced to the Large body (engine.json mob.elite.note), and it keeps the
-    // rolled variant's NAME — Elite is a rank over that variant, never a separate rung
-    const large = speciesPool.filter((sp: any) => sp.sizes.includes('large'));
-    species = pickSpecies(large.length ? large : speciesPool);
-    body = 'large';
-    variant = rollVariant(species);
   } else {
-    const groupable = speciesPool.filter((sp: any) => sp.sizes.includes('small') || sp.sizes.includes('medium'));
-    species = pickSpecies(groupable.length ? groupable : speciesPool);
-    // the side's own body mix (`mob.spawn_packs`): a swarm side rolls Small twice as often as it rolls
-    // Medium, a brute side the other way, and bare ground rolls the plain even mix it always rolled
-    const pack = sub ? ((E.mob as any).spawn_packs?.[(sub.spawn || {}).pack || ''] || null) : null;
-    body = pickBody(rng, species.sizes.filter((s: string) => s !== 'boss' && s !== 'large'), pack);
-    variant = rollVariant(species);
-    // A species may have no wild unique or several; choose only after its rare proc lands.
-    const uniques = uniquesInSpecies(species.id);
-    if (options.allowWildUnique !== false && uniques.length && rng() < (options.uniqueChance ?? E.loot.unique_chance ?? 0)) {
-      rank = 'unique';
-      bossProfile = uniques.length === 1 ? uniques[0] : pick(rng, uniques);
-      body = 'boss';
-      fixedName = bossProfile.name;
-      variant = null;
+    const runtimeSub = chosenSub ? subs.indexOf(chosenSub) : -1;
+    const subzone = runtimeSub >= 0 ? runtimeSub + 1 : null;
+    const contextRank = kind === 'elite' ? 'elite' : 'normal';
+    const pool = subzone != null
+      ? eng.placementPool(zoneId, { subzone, rank: contextRank, bodyHint: bodyHint ?? null, terrain, standing: !!stood })
+      : eng.placementsIn(zoneId).map((row: any) => ({ id: row.id, w: row.weight }));
+    // one weighted draw over the eligible placement IDs; the species follows the row
+    placementId = weightedPick(rng, pool) as string;
+    const row = eng.placementById(placementId);
+    species = E.mob.species.find((sp: any) => sp.id === row.species)!;
+    if (kind === 'elite') body = 'large';
+    else if (bodyHint) body = bodyHint;
+    else body = pickBody(rng, species.sizes.filter((s: string) => s !== 'boss' && s !== 'large'), pack);
+    // One Unique proc on the already selected Species, using only this Zone's authored Uniques.
+    if (kind === 'normal' && !bodyHint) {
+      const uniques = eng.uniquesOf(species.id, zoneId) as any[];
+      if (options.allowWildUnique !== false && uniques.length && rng() < (options.uniqueChance ?? E.loot.unique_chance ?? 0)) {
+        rank = 'unique';
+        const chosen = uniques.length === 1 ? uniques[0] : pick(rng, uniques);
+        placementId = chosen.id;
+        body = 'boss';
+        fixedName = chosen.name;
+      }
     }
   }
-  const top: [number, number] = [(z.levels as number[])[1], (z.levels as number[])[1]];
-  const base = eng.spawnAt(zoneId, body, species.id, bossProfile,
-    rank === 'unique' ? null : (variant ? variant.core : null),
-    rank === 'unique' ? top[1] : null,
-    rank === 'unique' ? null : variant?.damage);
-  // The Species' authored zone level prices every normal/Elite spawn. Variant selects its Core,
-  // damage type and drop identity; neither it nor the attacker changes that fixed level.
+  const base = eng.spawnAt(zoneId, body, placementId);
+  // The placement owns the fixed level, name, Core and damage override.
   const lv = base.level;
   const size = eng.sizeById(body)!;
   // body classes no longer scale HP: every mob of a species reads the same curve at its own level,
@@ -387,12 +366,10 @@ export function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'el
   const ps = rank === 'elite' ? base.ps / size.ps * E.mob.elite.ps : base.ps;
   // Normal and Elite spawns inherit the species Element; a Boss reads its own declared profile.
   const innate = base.innate;
-  // the variant name is the drop table's key (`mob.variant_drops`): the rolled fixed-level variant
-  // for normal and Elite alike — an Elite pays the junk of the variant it shows — and the fixed
-  // boss/unique name for those ranks. Drawn last on purpose — every field above keeps the random
-  // stream it had, so a variant is purely additive.
-  const variantName = fixedName || (variant ? variant.name : species.name);
-  const skillIds = resolveMobKit(rank, species.id, variantName, fixedName);
+  // The placement id is the drop table's key (`mob.variant_drops`), while the display name stays
+  // what the field shows. Drawn last on purpose, so every field above keeps its random stream.
+  const variantName: string = fixedName || (eng.placementById(placementId) as any).name || species.name;
+  const skillIds = resolveMobKit(rank, species.id, placementId);
   return {
     // A slot or phase owner supplies a deterministic id, so a spawn never consumes the shared
     // world stream just to name itself. Random callers keep the historical id draw.
@@ -400,9 +377,10 @@ export function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'el
     species: species.name,
     speciesId: species.id,
     formName: base.formName,
+    placementId,
     variant: variantName,
     trait: base.trait,
-    environment: sub?.environment,
+    environment: chosenSub?.environment,
     kind: rank === 'boss' ? `Boss · ${(bossInZone(zoneId) || { name: 'Boss' }).name}` : rank === 'unique' ? `Unique · ${fixedName}` : rank === 'elite' ? 'Elite' : size.name,
     zone: zoneId,
     level: lv,
@@ -410,7 +388,7 @@ export function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'el
     hpMax: hp,
     ps,
     core: base.core,
-    subzone: sub ? sub.name : undefined,
+    subzone: chosenSub ? chosenSub.name : undefined,
     readsAs: base.readsAs,
     acc: base.acc,
     evasion: kind === 'elite' ? eng.mobEvasion(base.core.dex, 'elite') : base.evasion,

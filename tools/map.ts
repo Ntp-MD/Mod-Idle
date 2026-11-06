@@ -27,7 +27,7 @@ import { readJson } from './lib/json.ts';
 import * as G from './lib/gates.ts';
 import { createRoad } from '../engine/road.ts';
 import { MAP_CAMERA_TRANSFORM, projectMapPoint, mapUprightAt, mapUprightAround, projectMapBounds, projectedHex, footprintShapeError } from '../game/src/ui/map/map-projection.ts';
-import { TERRAIN_ART, TERRAIN_VARIANTS } from '../game/src/ui/map/map-terrain.ts';
+import { TERRAIN_ART, TERRAIN_RELIEF, TERRAIN_VARIANTS } from '../game/src/ui/map/map-terrain.ts';
 import { mapSpriteWidth, mapSpriteWidthScale } from '../game/src/ui/map/map-sprites.ts';
 import footprints from '../game/src/ui/map/data/map-terrain-footprints.json' with { type: 'json' };
 import type { EngineData, MobZone } from '../engine/types.ts';
@@ -59,6 +59,8 @@ interface MapData {
   watermarks: { id: string; anchor: string; kind: string; label?: string }[];
   plates: MapPlate[];
   regions: { name: string; zones: number[] }[];
+  plate_anchors?: Record<string, string>;
+  terrain_art_zones?: number[];
 }
 
 /** The town data's slice this tool reads: the settlements and the zone each one holds. */
@@ -145,7 +147,7 @@ function hexArtwork(href: string): string {
   registeredArtwork.set(href, markup);
   return markup;
 }
-const TOWN_ART = TERRAIN_ART.town;
+const TOWN_ART = TERRAIN_RELIEF.town;
 const LANDMARK_ART: Record<string, string> = {
   'village-small': TOWN_ART,
   'village-medium': TOWN_ART,
@@ -406,6 +408,64 @@ function terrainFor(c: CellRow): string {
   if (o) return o.kind === 'town' ? 'town' : o.terrain;
   return BARE.get(key(c.q, c.r))?.terrain ?? 'grass';
 }
+const ART_ZONES = new Set<number>(MAP.terrain_art_zones ?? []);
+const zoneOfCell = (c: CellRow): number | null =>
+  claims.get(key(c.q, c.r))?.zone.id ?? BARE.get(key(c.q, c.r))?.zone?.id ?? null;
+const anchorCells = new Set<string>();
+for (const locationId of Object.values(MAP.plate_anchors ?? {})) {
+  const loc = ROAD.locations.find((row) => row.id === locationId);
+  if (loc) anchorCells.add(key(loc.q, loc.r));
+}
+const hexNeighbours: readonly (readonly [number, number])[] = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];
+/** Deterministic relief cells: town/site landmarks plus forest edges/interior and one rock peak. */
+function reliefCells(): Set<string> {
+  const selected = new Set<string>();
+  for (const [at, cell] of CELLS) {
+    const claim = claims.get(at), terrain = terrainFor(cell);
+    if (claim?.kind === 'site') continue;
+    // Only an authored location hosts a building; a terrain label alone must not repeat one per hex.
+    if (claim?.kind === 'town') selected.add(at);
+    else if (claim?.kind === 'sub' && (claim.terrain === 'village' || claim.terrain === 'camp')) selected.add(at);
+  }
+  const visited = new Set<string>();
+  for (const [at, start] of CELLS) {
+    const terrain = terrainFor(start);
+    if ((terrain !== 'forest' && terrain !== 'rock') || visited.has(at)) continue;
+    const component: CellRow[] = [], stack = [start];
+    while (stack.length) {
+      const cell = stack.pop()!;
+      const here = key(cell.q, cell.r);
+      if (visited.has(here) || terrainFor(cell) !== terrain) continue;
+      visited.add(here); component.push(cell);
+      for (const [dq, dr] of hexNeighbours) {
+        const next = CELLS.get(key(cell.q + dq, cell.r + dr));
+        if (next && !visited.has(key(next.q, next.r))) stack.push(next);
+      }
+    }
+    const boundary = component.filter((cell) => hexNeighbours.some(([dq, dr]) => {
+      const next = CELLS.get(key(cell.q + dq, cell.r + dr));
+      return !next || terrainFor(next) !== terrain;
+    }));
+    const distanceToBoundary = (cell: CellRow) => Math.min(...boundary.map((edge) =>
+      (Math.abs(cell.q - edge.q) + Math.abs(cell.r - edge.r) + Math.abs(cell.q + cell.r - edge.q - edge.r)) / 2));
+    const far = (cells: CellRow[]) => [...cells].sort((a, b) => distanceToBoundary(b) - distanceToBoundary(a)
+      || a.q - b.q || a.r - b.r)[0];
+    if (terrain === 'forest') {
+      for (const cell of boundary) {
+        const here = key(cell.q, cell.r);
+        if (claims.get(here)?.kind !== 'site') selected.add(here);
+      }
+      const interior = far(component);
+      if (interior && claims.get(key(interior.q, interior.r))?.kind !== 'site') selected.add(key(interior.q, interior.r));
+    } else {
+      const anchorCell = component.find((cell) => anchorCells.has(key(cell.q, cell.r)));
+      const peak = anchorCell ?? far(component);
+      if (peak && claims.get(key(peak.q, peak.r))?.kind !== 'site') selected.add(key(peak.q, peak.r));
+    }
+  }
+  return selected;
+}
+const RELIEF_CELLS = reliefCells();
 
 function depthGroup(): string[] {
   const lines = ['  <g id="tile-depth" pointer-events="none">'];
@@ -438,7 +498,7 @@ function fieldGroup(): string[] {
       o && o.kind === 'town' ? `data-landmark="${settlementLandmark(o.town)}"` : '',
       `data-terrain="${terrain}"`,
       `data-biome="${terrain}"`,
-      zone ? `data-band="${zone.id - 1}" data-lo="${zone.levels[0]}" data-hi="${zone.levels[1]}"` : '',
+      zone ? `data-band="${zone.id - 1}"` : '',
       `fill="${fill}"`,
       `data-tone="${fill}"`,
       `stroke="${F.stroke}"`,
@@ -473,19 +533,18 @@ function dioramaGroup(): string[] {
   for (const [id, c] of cellsBackToFront()) {
     const terrain = terrainFor(c);
     const claim = claims.get(key(c.q, c.r));
-    const art = terrain === 'town'
-      ? LANDMARK_ART[settlementLandmark(claim?.town ?? '')] || TERRAIN_ART.town
-      : TERRAIN_ART[terrain] || TERRAIN_ART.grass;
-    // A biome may carry more than one tile; the hex takes one of them, and always the same one.
-    const tiles = terrain === 'town' ? [art] : [art, ...(TERRAIN_VARIANTS[terrain] ?? [])];
+    const zone = zoneOfCell(c);
+    const allowed = zone != null && ART_ZONES.has(zone);
+    const groundHref = TERRAIN_ART[terrain] || TERRAIN_ART.grass;
+    const tiles = [groundHref, ...(TERRAIN_VARIANTS[terrain] ?? [])];
     const href = tiles[variantPick(id, tiles.length)];
-    // Settlement and terrain canvases share the same footprint registration.
     const body = href in footprints
       ? hexArtwork(href)
       : mapSpriteWidth(href, 0, TERRAIN_PIECE.bottom, TERRAIN_PIECE.width);
     const outline = PROJ_HEX.points.map(p => `${p.x},${p.y}`).join(' ');
     const node = terrain === 'town' && claim ? ` data-node="${claim.town}"` : '';
-    lines.push(`    <g class="diorama-figure" data-figure-ax="${c.q},${c.r}"${node} transform="${mapUprightAt(c.x, c.y)}"><g class="diorama-art">${body}</g><g class="hex-calibration" fill="none" stroke="#ff47c8" stroke-width=".5" pointer-events="none"><polygon points="${outline}"/><path d="M-2 0H2M0-2V2"/></g></g>`);
+    const anchor = anchorCells.has(key(c.q, c.r)) ? ' data-anchor="true"' : '';
+    lines.push(`    <g class="diorama-figure ${allowed ? 'terrain-on' : 'terrain-off'}" data-figure-ax="${c.q},${c.r}" data-terrain-zone="${allowed ? zone : ''}"${node}${anchor} transform="translate(${c.x} ${c.y})"><g class="diorama-art">${body}</g><g class="hex-calibration" fill="none" stroke="#ff47c8" stroke-width=".5" pointer-events="none"><polygon points="${outline}"/><path d="M-2 0H2M0-2V2"/></g></g>`);
   }
   lines.push('  </g>');
   return lines;
@@ -495,7 +554,16 @@ function dioramaGroup(): string[] {
 function actorGroup(): string[] {
   const lines = ['  <g id="actors" pointer-events="none">'];
   for (const [, c] of cellsBackToFront()) {
-    lines.push(`    <g class="actor-figure" data-actor-ax="${c.q},${c.r}"><g class="actor-scenery"></g><g class="actor-slot"></g><g class="actor-signals"></g></g>`);
+    const at = key(c.q, c.r), terrain = terrainFor(c), claim = claims.get(at);
+    const zone = zoneOfCell(c);
+    const allowed = zone != null && ART_ZONES.has(zone);
+    const reliefHref = terrain === 'town'
+      ? LANDMARK_ART[settlementLandmark(claim?.town ?? '')] || TERRAIN_RELIEF.town
+      : TERRAIN_RELIEF[terrain];
+    const relief = allowed && reliefHref && RELIEF_CELLS.has(at)
+      ? `<g class="terrain-relief terrain-on">${mapSpriteWidth(reliefHref, 0, TERRAIN_PIECE.bottom, TERRAIN_PIECE.width)}</g>`
+      : '';
+    lines.push(`    <g class="actor-figure" data-actor-ax="${c.q},${c.r}">${relief}<g class="actor-scenery"></g><g class="actor-slot"></g><g class="actor-signals"></g></g>`);
   }
   lines.push('  </g>');
   return lines;
@@ -910,9 +978,11 @@ function checks() {
   // Registered hex art checks the six-sector definitions; legacy scenery checks its anchor.
   try {
     const svg = fs.readFileSync(OUT, 'utf8');
-    const figures = svg.split('<g class="diorama-figure"').slice(1);
+    const figures = svg.split(/<g class="diorama-figure[^"]*"/).slice(1);
     let pieces = 0;
-    for (const figure of figures) {
+    for (const rawFigure of figures) {
+      const figureEnd = rawFigure.indexOf('</g></g>');
+      const figure = figureEnd >= 0 ? rawFigure.slice(0, figureEnd + 8) : rawFigure;
       const hrefs = [...figure.matchAll(/data-art-href="([^"]+)"|<image\b[^>]*\bhref="([^"]+)"/g)]
         .map((m) => m[1] ?? m[2]).filter((href): href is string => !!href && href.startsWith('/map/'));
       if (!hrefs.length) { problems.push('terrain piece has no art reference'); continue; }

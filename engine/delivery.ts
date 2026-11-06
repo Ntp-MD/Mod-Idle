@@ -77,15 +77,23 @@ export function createDelivery(E: EngineData, C: DeliveryCfg, trade: ReturnType<
       if (F.hunt.edible_species.includes(sp.id)) add('food:raw_game_meat', { kind: 'hunt', zone: zone.id, skill: 'hunting', seconds: huntRate(F.hunt.meat_drop_chance, (F.hunt.meat_min + F.hunt.meat_max) / 2), yield: 1 });
       for (const row of F.hunt.food_drops) if (row.species.includes(sp.id)) add(`food:${row.food_id}`, { kind: 'hunt', zone: zone.id, skill: 'hunting', seconds: huntRate(row.chance, (row.min + row.max) / 2), yield: 1 });
       for (const row of F.hunt.material_drops || []) if (row.species.includes(sp.id)) add(`material:${row.resource}`, { kind: 'hunt', zone: zone.id, skill: 'hunting', seconds: huntRate(row.chance, (row.min + row.max) / 2), yield: 1 });
-      const normal = eng.variantsInZone(sp.id, zone.id);
-      const unique = (E.mob.uniques || []).filter((u) => u.species === sp.id);
-      const rows = [...normal.map((v) => ({ name: v.name, share: 1 - E.loot.unique_chance })), ...unique.map((u) => ({ name: u.name, share: E.loot.unique_chance / unique.length }))];
+      // Authored placements: one sibling does not add a second Species draw; its share is its
+      // weight inside that Subzone's pool, and Subzones share the Zone draw uniformly.
+      const placements = eng.placementsIn(zone.id).filter((row: any) => row.species === sp.id);
+      const subzoneCount = Math.max(1, (zone.subzones || []).length);
+      const normal = placements.map((row: any) => {
+        const pool = eng.placementsIn(zone.id, row.subzone);
+        const total = pool.reduce((sum: number, peer: any) => sum + peer.weight, 0);
+        return { name: row.id, share: (1 - E.loot.unique_chance) * (row.weight / Math.max(1, total)) / subzoneCount };
+      });
+      const unique = (E.mob.uniques || []).filter((u: any) => u.species === sp.id && u.zone === zone.id);
+      const rows = [...normal, ...unique.map((u: any) => ({ name: u.id, share: E.loot.unique_chance / unique.length }))];
       for (const entry of rows) {
         const drop = E.mob.variant_drops?.[entry.name];
         if (!drop || !positive(entry.share)) continue;
         const bestRate = Math.max(...sides.map((side) => {
           const weights = leanReweightMany({ gear: eng.dropChance(band(zone.id)), herb: herbChance(band(zone.id)), junk: junkTotal }, [drop.lean, E.mob.environment_lean?.[side.environment] || 'none'], E.loot.variant_lean.shift_pct);
-          return weights.junk / junkTotal / side.species.length;
+          return weights.junk / junkTotal;
         }));
         const alternative = (sp.junk_items as Record<string, string> | undefined)?.[drop.rarity];
         const choices = [...new Set([drop.item, alternative].filter((id): id is string => !!id))];

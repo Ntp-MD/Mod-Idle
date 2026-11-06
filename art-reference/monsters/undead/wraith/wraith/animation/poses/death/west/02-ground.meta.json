@@ -46,7 +46,7 @@
     "distinctLevels": 250,
     "hardAlpha": false
   },
-  "note": "Recovered pose pixels are cropped from the raw-recovered atlas; alpha/components may be reconstructed. This is not an untouched source PNG; the runtime atlas remains draft-review.",
+  "note": "Recovered pose pixels are cropped from the raw-recovered atlas; alpha/components may be reconstructed. This is not an untouched source PNG; the runtime atlas remains draft-review. Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending.",
   "status": "approved-source-pose",
   "reviewNote": "Source reviewed as part of the east/west four-frame death sequences on the shared 384 x 384 canvas. Recovered source pixels and anchor retain their recorded provenance. Source approval only; the runtime atlas remains draft-review.",
   "visualReview": {
@@ -56,5 +56,41 @@
     "transparencyAccepted": true,
     "anchorAccepted": true,
     "atlasAccepted": false
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 103,
+    "uniformScale": 1.320513,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/undead/wraith/v1/atlas.png",
+      "frame": 38,
+      "action": "death",
+      "direction": "west",
+      "phase": "02-ground"
+    },
+    "inputSha256": "3a341f135a977e24f66e41d9a705a54bbe68262f03019798b180282a8a2709cd",
+    "outputSha256": "63d4a2c92e9e1cbabbd0ca9f01ff3c2ad21b8d492a1e3bc95cb2183f808d34ff",
+    "reviewRequired": true
   }
 }

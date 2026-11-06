@@ -116,8 +116,9 @@ export function intentTargets(
       arena.mobs[primary.id], primary.id, arena.player.facing) } : {}) };
   }
   const primary = group.find((mob) => mob.id === intent.targetId && mob.hp > 0);
-  if (!primary) return { targets: [] };
-  const pose = arena.mobs[primary.id];
+  const groundPoint = intent.aimPoint && sm.castProfileOf(skill).delivery === 'ground';
+  if (!primary && !groundPoint) return { targets: [] };
+  const pose = primary && arena.mobs[primary.id];
   if (!intent.aimPoint && pose && arena.nav && traceSight(arena.nav, arena.player, pose))
     return { targets: [] };
   const definition = skill.area ?? { origin: 'target' as const, radius_m: 0 };
@@ -130,10 +131,10 @@ export function intentTargets(
   if (!planning && definition.origin !== 'caster'
     && arenaDistance(arena.player, aim) > arenaSkillRange(skill.id) + 1e-7)
     return { targets: [] };
-  const area = skillAreaSnapshot(definition, arena.player, aim, primary.id, arena.player.facing);
+  const area = skillAreaSnapshot(definition, arena.player, aim, primary?.id ?? intent.targetId, arena.player.facing);
   const selected = targetsInSkillArea(area, actorsOf(arena, group)).map((actor) => actor.mob);
   // Planning may approach a target that has not entered a self-area yet.
-  return { targets: planning && !selected.includes(primary) ? [primary, ...selected] : selected, area };
+  return { targets: planning && primary && !selected.includes(primary) ? [primary, ...selected] : selected, area };
 }
 
 /**

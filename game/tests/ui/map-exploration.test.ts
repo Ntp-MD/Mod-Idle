@@ -125,10 +125,10 @@ describe('map journal and trail sites', () => {
     expect(campActivityArt(null)).toBe('');
   });
   it('marks actual Unique rosters and gives recent road events their own board art', () => {
-    const ids = new Set(E.mob.zones.flatMap((zone: any) => eng.speciesInZone(zone.id)));
-    const uniqueSpecies = [...ids].find(id => eng.uniquesOf(id).length > 0)!;
-    expect(hasUniqueTrace([uniqueSpecies])).toBe(true);
-    expect(hasUniqueTrace([])).toBe(false);
+    const unique = (E.mob.uniques as any[])[0];
+    expect(hasUniqueTrace([unique.species], unique.zone)).toBe(true);
+    expect(hasUniqueTrace([unique.species], unique.zone === 1 ? 2 : 1)).toBe(false);
+    expect(hasUniqueTrace([], unique.zone)).toBe(false);
     expect(mapEventArt('Found wild berries along the trail')).toContain('data-marker-glyph="food"');
     expect(mapEventArt('A clear spring restores your strength · Hunger 20%')).toContain('data-marker-glyph="rest"');
     expect(mapEventArt('Abandoned Camp · Hunger 30%')).toContain('data-marker-glyph="fire"');

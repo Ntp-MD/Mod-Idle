@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "speciesId": "siren",
+  "action": "hit",
+  "direction": "south",
+  "pose": "catches balance in a tense planted stance",
+  "generator": "OpenAI built-in image_gen",
+  "source": "../../../drafts/siren-south-east-hit-sequence.png",
+  "sourceCell": [
+    0,
+    1
+  ],
+  "sourceCellBounds": [
+    0,
+    627,
+    627,
+    1254
+  ],
+  "sourceVisibleBounds": [
+    183,
+    67,
+    508,
+    571
+  ],
+  "sourceSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "visibleAlphaGt8BoundsExclusive": [
+    150,
+    160,
+    233,
+    288
+  ],
+  "footAnchor": {
+    "x": 192,
+    "y": 288
+  },
+  "anchorProvenance": "Shared fit-to-anchor normalization for candidate coverage; not independently visually measured.",
+  "sourcePixelsModified": true,
+  "processing": {
+    "method": "crop-2x2-sheet-fit-384-nearest-v1",
+    "resampling": "nearest-neighbor",
+    "sourceAlphaThreshold": 8,
+    "targetVisibleHeight": 128,
+    "maxVisibleWidth": 180
+  },
+  "identityReference": "../../../../reference.png",
+  "styleReference": "../../../../animation/source/detail-v1.png",
+  "alphaMeasurement": {
+    "extrema": [
+      0,
+      255
+    ],
+    "distinctLevels": 227,
+    "softAlphaPixels": 5913
+  },
+  "visualReview": {
+    "identityAccepted": false,
+    "exactDirectionAccepted": false,
+    "poseSequenceAccepted": false,
+    "alphaAccepted": false,
+    "anchorAccepted": false,
+    "atlasAccepted": false
+  },
+  "note": "Coverage-only directional duplicate from the south-east candidate. The source atlas has no south-facing hit/death art; regenerate and visually review the exact south-facing pose before approval or atlas promotion. Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending.",
+  "directionalDuplicateSource": "south-east",
+  "regenerationRequired": true,
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 169,
+    "uniformScale": 1.320312,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/fish/siren/v1/atlas.png",
+      "frame": 26,
+      "action": "hit",
+      "direction": "east",
+      "phase": "02-recover"
+    },
+    "inputSha256": "ace28c59dda09748f9835c1485ba128a0d9feb8d2849d30cd4e6740c57de3830",
+    "outputSha256": "4b2ee8b03e94b6cf535b819ffbe30e2eeb7831bb34df568c739d48de6c931bca",
+    "reviewRequired": true
+  }
+}

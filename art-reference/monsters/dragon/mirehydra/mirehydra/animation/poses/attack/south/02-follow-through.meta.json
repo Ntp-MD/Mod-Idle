@@ -19,8 +19,7 @@
   },
   "anchor": {
     "x": 192,
-    "y": 288,
-    "provenance": "matched to existing Mirehydra south idle frame"
+    "y": 288
   },
   "normalization": {
     "method": "2x2 sheet cell alpha crop (>128), nearest-neighbor uniform sequence scale to south idle subject height, transparent 384x384 placement",
@@ -50,5 +49,34 @@
   "qa": {
     "atlas": false,
     "anchor": false
-  }
+  },
+  "sourcePixelsModified": true,
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 146,
+    "uniformScale": 1.303571,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/dragon/mirehydra/v1/atlas.png",
+      "frame": 18,
+      "action": "attack",
+      "direction": "east",
+      "phase": "02-follow-through"
+    },
+    "inputSha256": "2bb277703a67732cae032abe02ce4929a0de76d5f9753a93884c78dddb3cc7de",
+    "outputSha256": "00aaa26c7d8e26cf56c22f0238904082d4163f07e99c44707344c9b372a03c6e",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

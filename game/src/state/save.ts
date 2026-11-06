@@ -65,10 +65,13 @@ import { push } from '@sim/core/log';
 // v25 adds bounded visited-field checkpoints (`fieldArchive`); an older save starts with none.
 // v26 replaces wave/cohort fields with the spawn-slot population. A v25 field opens without slots;
 // the first writer tick creates the authored homes and assigns the surviving group to them.
+// v28 replaces Species-keyed Variant bands with fixed-level placement IDs. A surviving actor keeps
+// its saved level/HP/Core/kit and is pinned as a legacy snapshot with its original reward payload;
+// no sibling identity is guessed and no reward is rerolled.
 const DB_NAME = 'modworld';
 const STORE = 'saves';
 const ACCOUNT_KEY = 'account';
-export const SCHEMA_VERSION = 27;
+export const SCHEMA_VERSION = 28;
 
 const SLOTS = ['slot1', 'slot2', 'slot3'] as const;
 export type SlotName = (typeof SLOTS)[number];
@@ -546,6 +549,69 @@ function repairLegacyAutoSpend(s: GameState): void {
   p.points = balanced;
 }
 
+type LegacyRewardDrop = { item: string; rarity: string; lean: 'gear' | 'herb' | 'junk' | 'none' };
+
+/** The payload a pre-migration actor earned, resolved from its original Species/rank/name. */
+function legacyRewardFor(mob: any): LegacyRewardDrop | null {
+  if (!mob || typeof mob.variant !== 'string') return null;
+  const drops = ((E.mob as any).variant_drops || {}) as Record<string, LegacyRewardDrop>;
+  const retired = ((E.mob as any).retired_variant_drops || {}) as Record<string, LegacyRewardDrop & { species: string }>;
+  const kind = String(mob.kind || '');
+  if (kind.startsWith('Boss')) {
+    const row = (E.mob.bosses as any[]).find((b) => b.name === mob.variant);
+    return row ? drops[row.id] ?? null : null;
+  }
+  if (kind.startsWith('Unique')) {
+    const row = (E.mob.uniques as any[]).find((u) => u.name === mob.variant || u.legacy_name === mob.variant);
+    return row ? drops[row.id] ?? null : null;
+  }
+  const siblings = (E.mob.variants as any[]).filter((row) => row.species === mob.speciesId && row.name === mob.variant);
+  const payloads = new Set(siblings.map((row) => JSON.stringify(drops[row.id] ?? null)));
+  if (payloads.size === 1) return drops[siblings[0].id] ?? null;
+  if (payloads.size > 1) return null;            // conflicting inherited payload: never pick a winner
+  const ret = retired[mob.variant];
+  return ret && ret.species === mob.speciesId ? { item: ret.item, rarity: ret.rarity, lean: ret.lean } : null;
+}
+
+function sameReward(a: unknown, b: unknown): boolean {
+  return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+}
+
+/**
+ * v28 load migration: every persisted Mob container gets one identity path. A pre-migration actor
+ * keeps its saved fields and gains `legacySnapshot`, no `placementId` and a pinned reward payload.
+ * A forged or unrecognizable payload becomes null and says so once; a new actor is untouched.
+ */
+function migrateLegacyPlacementMobs(s: GameState): void {
+  const seen = new WeakSet<object>();
+  const unresolved = (mob: any) => {
+    const text = `Legacy mob reward unresolved · ${mob.id} · ${mob.variant ?? 'unknown'}`;
+    if (!(s.log || []).some((line) => line.text === text)) push(s, text);
+  };
+  const visit = (mob: any) => {
+    if (!mob || typeof mob !== 'object' || seen.has(mob)) return;
+    seen.add(mob);
+    if (mob.legacySnapshot !== true) {
+      delete mob.placementId;
+      mob.legacySnapshot = true;
+      mob.legacyDrop = legacyRewardFor(mob);
+    } else {
+      const expected = legacyRewardFor(mob);
+      if (mob.legacyDrop != null && !sameReward(mob.legacyDrop, expected)) mob.legacyDrop = null;
+      if (mob.legacyDrop === undefined) mob.legacyDrop = expected;
+    }
+    if (mob.legacyDrop == null) unresolved(mob);
+  };
+  for (const mob of s.group || []) visit(mob);
+  const field = s.field as any;
+  for (const slot of field?.slots || []) visit(slot?.life?.mob);
+  for (const entry of Object.values((s.fieldArchive as any) || {})) {
+    for (const slot of (entry as any)?.slots || []) visit(slot?.life?.mob);
+  }
+  const active = (s.fieldwork as any)?.campEncounters?.active;
+  for (const mob of active?.preparedGroup || []) visit(mob);
+}
+
 /** A save written by an earlier build is missing whole subsystems; fill the shape in. */
 export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): GameState {
   if (!Number.isInteger(fromVersion) || fromVersion < 0 || fromVersion > SCHEMA_VERSION) throw new Error(`schema version ${fromVersion} is not supported`);
@@ -635,7 +701,16 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (s.hunting == null) s.hunting = true;
   // A wild-side cell is safe ground now: a save that opens on one drops its standing group and hunt.
   // A dungeon run is the exception — its entrance cell stays the entrance while the run is a mode.
-  if (s.cell?.site && !s.dungeon) {
+  // A camp fight already in combat at that site is the other exception: same origin and participants.
+  if (fromVersion < 28) migrateLegacyPlacementMobs(s);
+  const campFight = (() => {
+    const active = (s.fieldwork as any)?.campEncounters?.active;
+    if (!active || active.stage !== 'combat' || !active.origin || !s.cell) return false;
+    if (active.origin.q !== s.cell.q || active.origin.r !== s.cell.r) return false;
+    const ids = new Set(active.participantIds || []);
+    return (s.group || []).some((mob) => ids.has(mob.id));
+  })();
+  if (s.cell?.site && !s.dungeon && !campFight) {
     s.hunting = false;
     s.group = [];
   }

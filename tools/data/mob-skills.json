@@ -1019,163 +1019,167 @@
       ]
     },
     "variants": {
-      "Shaman Goblin": [
+      "goblin.z05.s03": [
+        "mob.fire.ember-lash",
+        "mob.fire.flame-guard"
+      ],
+      "goblin.z06.s02": [
         "mob.fire.ember-lash",
         "mob.fire.flame-guard"
       ]
     },
     "bosses": {
-      "Goblin King": [
+      "goblin.z01.boss": [
         "mob.physical.backstab",
         "mob.physical.shield-bash",
         "mob.fire.ember-lash"
       ],
-      "Broodmother": [
+      "spider.z14.boss": [
         "mob.poison.venom-spit",
         "mob.poison.toxic-cloud",
         "mob.poison.acid-spray",
         "mob.poison.creeping-rot"
       ],
-      "Treant Elder": [
+      "treant.z16.boss": [
         "mob.earth.rooted-stance",
         "mob.earth.stone-guard",
         "mob.physical.crushing-blow",
         "mob.earth.seismic-slam"
       ],
-      "Elven Archmage": [
+      "elf.z17.boss": [
         "mob.cold.frost-bite",
         "mob.cold.rime-snare",
         "mob.cold.glacial-ward",
         "mob.cold.ice-shard"
       ],
-      "Elder Troll": [
+      "troll.z03.boss": [
         "mob.earth.stone-fist",
         "mob.physical.crushing-blow",
         "mob.fire.flame-guard"
       ],
-      "Warlord Orc": [
+      "orc.z02.boss": [
         "mob.physical.rend",
         "mob.physical.cleave",
         "mob.physical.overbear",
         "mob.fire.ember-lash"
       ],
-      "Hoarder Kobold": [
+      "kobold.z08.boss": [
         "mob.physical.pounce",
         "mob.physical.backstab",
         "mob.lightning.storm-mantle"
       ],
-      "Ogre King": [
+      "ogre.z09.boss": [
         "mob.physical.crushing-blow",
         "mob.physical.trample",
         "mob.earth.stone-guard",
         "mob.earth.quake-step"
       ],
-      "Wolf King": [
+      "wolf.z10.boss": [
         "mob.physical.hamstring",
         "mob.physical.pounce",
         "mob.cold.winter-howl",
         "mob.physical.overbear"
       ],
-      "Ancient Dragon": [
+      "dragon.z18.boss": [
         "mob.fire.cinder-burst",
         "mob.fire.scorching-roar",
         "mob.fire.flame-guard",
         "mob.fire.molten-step"
       ],
-      "Mummy Lord": [
+      "mummy.z04.boss": [
         "mob.earth.dust-blind",
         "mob.physical.skull-crack",
         "mob.poison.miasma",
         "mob.poison.creeping-rot"
       ],
-      "Bone Colossus": [
+      "skeleton.z05.boss": [
         "mob.physical.skull-crack",
         "mob.physical.cleave",
         "mob.earth.stone-guard"
       ],
-      "Ancient Vampire": [
+      "vampire.z13.boss": [
         "mob.chaos.mind-shear",
         "mob.chaos.void-pulse",
         "mob.chaos.unreal-veil",
         "mob.chaos.hex-bolt"
       ],
-      "Archdemon": [
+      "demon.z11.boss": [
         "mob.chaos.hex-bolt",
         "mob.chaos.mind-shear",
         "mob.chaos.warped-aura",
         "mob.fire.cinder-burst"
       ],
-      "Slime King": [
+      "slime.z12.boss": [
         "mob.poison.acid-spray",
         "mob.poison.toxic-cloud",
         "mob.poison.miasma",
         "mob.poison.creeping-rot"
       ],
-      "Colossus": [
+      "golem.z07.boss": [
         "mob.earth.boulder-toss",
         "mob.earth.stone-guard",
         "mob.earth.quake-step",
         "mob.physical.crushing-blow"
       ],
-      "Lizardman Chief": [
+      "lizardman.z15.boss": [
         "mob.physical.sweeping-tail",
         "mob.poison.venom-spit",
         "mob.poison.serpent-strike"
       ],
-      "Paladin": [
+      "human.z06.boss": [
         "mob.physical.shield-bash",
         "mob.earth.stone-guard",
         "mob.lightning.thunderclap"
       ]
     },
     "uniques": {
-      "Archdemon": [
+      "demon.z11.unique": [
         "mob.chaos.mind-shear",
         "mob.chaos.hex-bolt",
         "mob.chaos.warped-aura",
         "mob.chaos.void-pulse"
       ],
-      "Siren Queen": [
+      "siren.z07.unique": [
         "mob.chaos.dissonant-cry",
         "mob.cold.rime-snare",
         "mob.chaos.unreal-veil"
       ],
-      "Werewolf Lord": [
+      "werewolf.z11.unique": [
         "mob.physical.rend",
         "mob.physical.hamstring",
         "mob.physical.overbear"
       ],
-      "Bone Hound Bonekeeper": [
+      "bonehound.z08.unique": [
         "mob.physical.pounce",
         "mob.physical.hamstring",
         "mob.physical.rend",
         "mob.physical.overbear"
       ],
-      "Frost Revenant King": [
+      "revenant.z09.unique": [
         "mob.cold.frost-bite",
         "mob.cold.rime-snare",
         "mob.cold.winter-howl",
         "mob.cold.permafrost"
       ],
-      "Mire Hydra Tyrant": [
+      "mirehydra.z10.unique": [
         "mob.poison.serpent-strike",
         "mob.poison.acid-spray",
         "mob.poison.toxic-cloud",
         "mob.poison.creeping-rot"
       ],
-      "Slag Golem Forgeheart": [
+      "slaggolem.z13.unique": [
         "mob.earth.stone-fist",
         "mob.earth.quake-step",
         "mob.earth.boulder-toss",
         "mob.fire.flame-guard"
       ],
-      "Wyrmling Progenitor": [
+      "wyrmling.z15.unique": [
         "mob.fire.ember-lash",
         "mob.fire.cinder-burst",
         "mob.cold.ice-shard",
         "mob.fire.ash-veil"
       ],
-      "Hornet Matron": [
+      "hornet.z14.unique": [
         "mob.lightning.static-jab",
         "mob.lightning.volt-rush",
         "mob.lightning.charged-field"

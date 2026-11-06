@@ -128,5 +128,42 @@
     ],
     "operation": "set alpha to 0 for 20 original edge pixels and 7 additional alpha-1 pixels within the 32px border; preserve RGB and all other pixels",
     "reviewStatus": "candidate-review"
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 162,
+    "uniformScale": 0.25273,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\plant\\treant\\v1\\atlas.png",
+      "frame": 17,
+      "action": "attack",
+      "direction": "east",
+      "phase": "01-contact"
+    },
+    "inputSha256": "b559a1d505aefba3e2147dcdca94a6ba7de449f40c79a440b0188d111fcf98b6",
+    "outputSha256": "1c982923f1be0baa1ebd344fce604b847d8589364dda44afe6f46596581bd55f",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

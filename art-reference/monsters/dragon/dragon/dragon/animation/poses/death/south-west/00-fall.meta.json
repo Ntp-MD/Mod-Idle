@@ -1,11 +1,48 @@
 {
-    "status":  "candidate-review",
-    "candidateDuplicate":  true,
-    "requiresRegeneration":  true,
-    "method":  "nearest-direction-copy",
-    "sourcePath":  "poses/death/south/00-fall.png",
-    "sourceDirection":  "south",
-    "sourcePixelsModified":  false,
-    "visualReviewRequired":  true,
-    "qaStatus":  "pending-facing-spacing-anchor-alpha-atlas-review"
+  "status": "candidate-review",
+  "candidateDuplicate": true,
+  "requiresRegeneration": true,
+  "method": "nearest-direction-copy",
+  "sourcePath": "poses/death/south/00-fall.png",
+  "sourceDirection": "south",
+  "sourcePixelsModified": true,
+  "visualReviewRequired": true,
+  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review",
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 126,
+    "uniformScale": 0.287671,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\dragon\\dragon\\v1\\atlas.png",
+      "frame": 36,
+      "action": "death",
+      "direction": "west",
+      "phase": "00-fall"
+    },
+    "inputSha256": "b926926a4e69aa877f835b113c634f6bb7db808e34f792e22e6b35cf372611a6",
+    "outputSha256": "59841da7866ab2486154a445642cf1078e706b281cc8679113967bf5327b1ee0",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

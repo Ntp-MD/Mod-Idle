@@ -5,7 +5,7 @@
   "direction": "south",
   "angleDegrees": 0,
   "visualReviewRequired": true,
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "measurement": {
     "canvas": [
       1254,
@@ -28,5 +28,42 @@
     ],
     "alpha128TouchesCanvasEdge": false
   },
-  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review"
+  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review",
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 161,
+    "uniformScale": 0.252747,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\demon\\imp\\v1\\atlas.png",
+      "frame": 0,
+      "action": "idle",
+      "direction": "south",
+      "phase": "south"
+    },
+    "inputSha256": "747d98bd7dc0fa9a64cc21f35ebb7965cee5023994e373e24998ca1639a93ae5",
+    "outputSha256": "046fa156cf25c4bd43bd63a3580ad65cee79277da5ff518625400411a8473012",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

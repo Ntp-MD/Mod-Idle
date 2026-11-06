@@ -10,7 +10,7 @@
  * the same defect as a number typed twice (AGENTS.md §Code and data ownership).
  */
 
-import type { BasesData, EngineData, MobCore, MobDamageType, MobSize, MobSubzone, MobVariant, MobZone, WeaponCfg } from './types.ts';
+import type { BasesData, EngineData, MobCore, MobDamageType, MobSize, MobSubzone, MobZone, WeaponCfg } from './types.ts';
 import { ladderMult } from './skills.ts';
 
 const BANDS = ['low', 'mid', 'high'];
@@ -102,43 +102,61 @@ export function createEngine(E: EngineData) {
   // Named field forms cover the label progression through level 100. Live normal and Elite combat
   // uses the selected Species Variant's authored Core; later zones keep the latest form label.
   const REF_ZONE = [...(E.mob.zones as any[])].reverse().find((z) => z.levels[0] <= E.mob.form_level_cap)?.id || 1;
-  /**
-   * A mob's own STATIC level inside one zone, read from `mob.species[].zone_levels`. It is a fixed
-   * value placed inside the zone's range — a spawn does not follow the attacker's level. Falls back to
-   * the zone's midpoint if a species is placed in a zone with no level written.
-   */
-  const mobLevelIn = (sp: any, zoneId: number): number => {
-    const lv = sp?.zone_levels?.[zoneId];
-    if (lv != null) return lv;
-    const z = (E.mob.zones as any[]).find((x) => x.id === zoneId) || (E.mob.zones as any[])[0];
-    return Math.round(((z.levels as number[])[0] + (z.levels as number[])[1]) / 2);
+  // ---- authored placements: one stable identity per normal/Elite, Boss and Unique row.
+  const PLACEMENTS = ((E.mob as any).variants || []) as any[];
+  const BOSSES = ((E.mob as any).bosses || []) as any[];
+  const UNIQUES = ((E.mob as any).uniques || []) as any[];
+  const placementIndex = new Map<string, any>();
+  for (const row of PLACEMENTS) placementIndex.set(row.id, row);
+  for (const row of BOSSES) placementIndex.set(row.id, row);
+  for (const row of UNIQUES) placementIndex.set(row.id, row);
+  /** Exact identity lookup; an unknown ID is a data error, never a midpoint guess. */
+  const placementById = (id: string): any => {
+    const row = placementIndex.get(id);
+    if (!row) throw new RangeError(`unknown placement ${id}`);
+    return row;
   };
-  /** A Species' fixed-level normal Variants (`mob.variants`): names, bands, Core and optional damage override. */
-  const variantsOf = (speciesId: string): MobVariant[] =>
-    (((E.mob as any).variants || {})[speciesId] || []) as MobVariant[];
-  /**
-   * One variant a zone can field. Prefer the band containing the zone midpoint; in a gap, carry
-   * forward the nearest earlier band, or use the first band before any band starts. Above the cap,
-   * keep the last authored variant fieldable.
-   */
-  const variantsInZone = (speciesId: string, zoneId: number): MobVariant[] => {
-    const ladder = variantsOf(speciesId);
-    if (!ladder.length) return [];
-    const z = (E.mob.zones as any[]).find((x) => x.id === zoneId);
-    if (!z) return ladder;
-    const [lo, hi] = z.levels as [number, number];
-    if (lo > E.mob.form_level_cap) return [ladder[ladder.length - 1]];
-    const midpoint = Math.round((lo + hi) / 2);
-    const hit = ladder.find((v) => v.levels[0] <= midpoint && v.levels[1] >= midpoint);
-    if (hit) return [hit];
-    const previous = ladder
-      .filter((v) => v.levels[0] <= midpoint)
-      .sort((a, b) => b.levels[0] - a.levels[0])[0];
-    return [previous || ladder[0]];
+  /** Authored rows in matrix order; omitted one-based Subzone returns the Zone union. */
+  const placementsIn = (zoneId: number, subzone?: number): any[] => {
+    const z = ZONES.find((row: any) => row.id === zoneId);
+    if (!z) throw new RangeError(`unknown zone ${zoneId}`);
+    if (subzone != null) {
+      if (!Number.isInteger(subzone) || subzone < 1 || subzone > (z.subzones || []).length) {
+        throw new RangeError(`invalid subzone ${subzone} for zone ${zoneId}`);
+      }
+    }
+    return PLACEMENTS.filter((row) => row.zone === zoneId && (subzone == null || row.subzone === subzone));
   };
-  /** Zero or more fixed species uniques (`mob.uniques`), each an independent wild boss. */
-  const uniquesOf = (speciesId: string): any[] =>
-    (((E.mob as any).uniques || []) as any[]).filter((u) => u.species === speciesId);
+  /**
+   * Eligible weighted rows for one spawn context. Mirrors the existing size eligibility and its
+   * empty-set fallback; the terrain factor applies only where the old sampler applied it.
+   */
+  const placementPool = (zoneId: number, context: { subzone: number; rank: 'normal' | 'elite'; bodyHint: string | null; terrain: string | null; standing: boolean }) => {
+    const rows = placementsIn(zoneId, context.subzone);
+    const spOf = (row: any) => {
+      const sp = speciesById(row.species);
+      if (!sp) throw new RangeError(`placement ${row.id} names unknown species ${row.species}`);
+      return sp;
+    };
+    const eligible = rows.filter((row) => {
+      const sp = spOf(row);
+      if (context.bodyHint) return sp.sizes.includes(context.bodyHint);
+      if (context.rank === 'elite') return sp.sizes.includes('large');
+      return sp.sizes.includes('small') || sp.sizes.includes('medium');
+    });
+    const pool = eligible.length ? eligible : rows;
+    return pool.map((row) => {
+      const sp = spOf(row);
+      const factor = !context.standing && context.terrain != null ? spawnSpeciesWeight(sp.terrain, context.terrain) : 1;
+      return { id: row.id as string, w: row.weight * factor };
+    });
+  };
+  /** Uniques of one Species in one Zone; a valid Species with none returns an empty list. */
+  const uniquesOf = (speciesId: string, zoneId: number): any[] => {
+    if (!speciesById(speciesId)) throw new RangeError(`unknown species ${speciesId}`);
+    if (!ZONES.some((row: any) => row.id === zoneId)) throw new RangeError(`unknown zone ${zoneId}`);
+    return UNIQUES.filter((u) => u.species === speciesId && u.zone === zoneId);
+  };
   const CORE_KEYS = ['str', 'agi', 'vit', 'dex', 'int', 'wis', 'lck'] as const;
   const FORM_ZONES = [...(E.mob.zones as any[])]
     .filter((z) => z.levels[0] <= E.mob.form_level_cap)
@@ -416,11 +434,10 @@ export function createEngine(E: EngineData) {
   function winTarget() {
     const id = finalZoneId();
     const z = zoneById(id)!;
-    const boss = E.mob.bosses.find((b) => b.zone === id);
+    const boss = E.mob.bosses.find((b) => b.zone === id) as any;
     const sp = boss ? speciesById(boss.species) : undefined;
-    // the boss spawns at its own static level (`mob.species[].zone_levels`), so the gate quotes the
-    // HP that spawn actually carries: the curve at that level + the flat grant + the Core Vit bonus
-    const level = sp ? mobLevelIn(sp, id) : z.levels[1];
+    // the Boss row owns its fixed level; the gate quotes the HP that spawn actually carries
+    const level = boss?.level ?? z.levels[1];
     return {
       zone: id,
       zoneName: z.name,
@@ -489,13 +506,12 @@ export function createEngine(E: EngineData) {
   function zonePowerFactor(zoneId: number) {
     const cached = zonePowerCache.get(zoneId);
     if (cached !== undefined) return cached;
-    const cast = E.mob.species.filter((sp) => sp.zones.includes(zoneId));
+    // The zone mean is the authored placement mix: each row's power carries its spawn weight.
     let w = 0, sum = 0;
-    for (const sp of cast) for (const sid of sp.sizes) {
-      const weight = E.mob.spawn_weights[sid] || 0;
-      if (!weight) continue;
-      const variant = variantsInZone(sp.id, zoneId)[0];
-      w += weight; sum += weight * speciesPowerOf(sp, zoneId, variant?.core, variant?.damage);
+    for (const row of placementsIn(zoneId)) {
+      const sp = speciesById(row.species);
+      if (!sp || !(row.weight > 0)) continue;
+      w += row.weight; sum += row.weight * speciesPowerOf(sp, zoneId, row.core, row.damage);
     }
     const factor = w ? sum / w : 1;
     zonePowerCache.set(zoneId, factor);
@@ -1041,33 +1057,32 @@ export function createEngine(E: EngineData) {
     return { reroll_value: Math.round(s.reroll_value), tier: Math.round(s.tier), add: Math.round(s.add) };
   };
 
-  // ---- the full mob roster: every legal zone × species × variant × body entry,
-  // plus Elite (a rank over the rolled variant), the wild unique and the clock Boss
+  // ---- the full mob roster: every authored placement x body entry, plus Elite, the Zoned wild
+  // Unique and the clock Boss. No ladder midpoint and no form band chooses a live level.
 
   function mobRoster() {
     const out: any[] = [];
-    // one species × selected Variant placement: the Species owns the live level in this zone
-    const variantRows = (z: any, sp: any, v: MobVariant | null, lvl: number, tag: string | null) => {
-      const innate = [(sp as any).element];
-      const form = formOf(sp, z.id);
+    const placementRows = (z: any, p: any) => {
+      const sp = speciesById(p.species);
+      if (!sp) return;
+      const innate = [sp.element];
       const bf = zoneBodyFactor(z.id);
-      const variantCore = v?.core;
-      const damage = v?.damage ?? sp.damage;
-      const core = Object.fromEntries(CORE_KEYS.map((key) => [key, coreOf(sp, key, z.id, variantCore)]));
+      const core = Object.fromEntries(CORE_KEYS.map((key) => [key, Number(p.core?.[key] || 0)]));
       const vit = core.vit;
       const intC = core.int;
+      const lvl = p.level;
       const levels: [number, number] = [lvl, lvl];
       const psEdge = mobPsAt(lvl);
-      const vname = v ? v.name : null;
+      const damage = p.damage ?? sp.damage;
       for (const size of sp.sizes.map((sid: string) => sizeById(sid)!)) {
         const hpBase = mobHpAt(lvl);
         const hp = hpBase + LG.hp_per_level * (lvl - 1) + vit * K.K_VIT_HP;
         out.push({
-          id: `z${z.id}_${sp.id}_${tag || 'v'}_${size.id}`, zone: z.id, zoneName: z.name, levels, level: lvl,
-          kind: size.name, species: sp.name, formName: form.name, speciesId: sp.id, variant: vname, innate, weapon: sp.carries_weapon, core,
+          id: `${p.id}_${size.id}`, zone: z.id, zoneName: z.name, levels, level: lvl, placementId: p.id,
+          kind: size.name, species: sp.name, formName: sp.name, speciesId: sp.id, variant: p.name, innate, weapon: sp.carries_weapon, core,
           hpFrom: hp, hpTo: hp, vit, hpBaseFrom: hpBase, hpBaseTo: hpBase,
           manaFrom: mobManaOf(lvl, intC), manaTo: mobManaOf(lvl, intC),
-          ps: psEdge * size.ps / bf * speciesPsMultOf(z.id, sp, variantCore, damage), bodyFactor: bf,
+          ps: psEdge * size.ps / bf * speciesPsMultOf(z.id, sp, p.core, damage), bodyFactor: bf,
           acc: mobAcc(core.dex, sp.accuracy_mult),
           ev: mobEvasion(core.dex, size.id),
           armour: core.str * K.K_ARMOUR,
@@ -1087,11 +1102,11 @@ export function createEngine(E: EngineData) {
         const hpBase = mobHpAt(lvl) * el.hp;
         const hp = (mobHpAt(lvl) + LG.hp_per_level * (lvl - 1) + vit * K.K_VIT_HP) * el.hp;
         out.push({
-          id: `z${z.id}_${sp.id}_${tag || 'v'}_elite`, zone: z.id, zoneName: z.name, levels, level: lvl,
-          kind: el.name, species: sp.name, formName: form.name, speciesId: sp.id, variant: vname, innate, weapon: sp.carries_weapon, core,
+          id: `${p.id}_elite`, zone: z.id, zoneName: z.name, levels, level: lvl, placementId: p.id,
+          kind: el.name, species: sp.name, formName: sp.name, speciesId: sp.id, variant: p.name, innate, weapon: sp.carries_weapon, core,
           hpFrom: hp, hpTo: hp, vit, hpBaseFrom: hpBase, hpBaseTo: hpBase,
           manaFrom: mobManaOf(lvl, intC), manaTo: mobManaOf(lvl, intC),
-          ps: psEdge * el.ps / bf * speciesPsMultOf(z.id, sp, variantCore, damage),
+          ps: psEdge * el.ps / bf * speciesPsMultOf(z.id, sp, p.core, damage),
           acc: mobAcc(core.dex, sp.accuracy_mult),
           ev: mobEvasion(core.dex, 'elite'),
           armour: core.str * K.K_ARMOUR,
@@ -1105,116 +1120,75 @@ export function createEngine(E: EngineData) {
         });
       }
     };
-    // each Species Unique: a fixed named boss at the zone's top, paying the unique line
-    const uniqueRow = (z: any, sp: any, u: any) => {
-      const bs = mobProfileOf(sp, u, z.id);
+    const specialRow = (z: any, row: any, rank: 'boss' | 'unique') => {
+      const sp = speciesById(row.species);
+      if (!sp) return;
+      const bs = mobProfileOf(sp, row, z.id);
       const bz = sizeById('boss')!;
       const bf = zoneBodyFactor(z.id);
       const bvit = coreOf(bs, 'vit', z.id);
       const bint = coreOf(bs, 'int', z.id);
       const bossCore = Object.fromEntries(CORE_KEYS.map((key) => [key, coreOf(bs, key, z.id)]));
-      const ulvl = (z.levels as [number, number])[1];
-      const uniqueKey = String(u.name).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-      const bhpBase = mobHpAt(ulvl);
-      const bhp = bhpBase + LG.hp_per_level * (ulvl - 1) + bvit * K.K_VIT_HP;
+      const lvl = row.level;
+      const bhpBase = mobHpAt(lvl);
+      const bhp = bhpBase + LG.hp_per_level * (lvl - 1) + bvit * K.K_VIT_HP;
+      const mult = rank === 'boss' ? X.boss_mult : X.unique_mult;
       out.push({
-        id: `z${z.id}_${sp.id}_unique_${uniqueKey}`, zone: z.id, zoneName: z.name, levels: [ulvl, ulvl] as [number, number], level: ulvl,
-        kind: `Unique · ${u.name}`, species: bs.name, formName: formOf(sp, z.id).name, speciesId: bs.id,
-        variant: u.name,
+        id: `${row.id}_${rank}`, zone: z.id, zoneName: z.name, levels: [lvl, lvl] as [number, number], level: lvl, placementId: row.id,
+        kind: rank === 'boss' ? `${bz.name} · ${row.name}` : `Unique · ${row.name}`, species: bs.name, formName: sp.name, speciesId: bs.id,
+        variant: row.name,
         innate: [bs.element], weapon: bs.carries_weapon, trait: bs.trait, core: bossCore,
         immune: mobImmuneOf(bs), weak: mobWeakOf(bs), burst: mobBurstOf(bs),
         mechanics: bs.mechanics || null, clockMult: mobClockMultOf(bs),
         readsAs: bs.reads_as || bz.reads_as || 'large',
         hpFrom: bhp, hpTo: bhp, vit: bvit, hpBaseFrom: bhpBase, hpBaseTo: bhpBase,
-        manaFrom: mobManaOf(ulvl, bint), manaTo: mobManaOf(ulvl, bint),
-        ps: mobPsAt(ulvl) * bz.ps / bf * speciesPsMultOf(z.id, bs),
+        manaFrom: mobManaOf(lvl, bint), manaTo: mobManaOf(lvl, bint),
+        ps: mobPsAt(lvl) * bz.ps / bf * speciesPsMultOf(z.id, bs),
         acc: mobAcc(coreOf(bs, 'dex', z.id), bs.accuracy_mult),
         ev: mobEvasion(coreOf(bs, 'dex', z.id), 'boss'),
         armour: coreOf(bs, 'str', z.id) * K.K_ARMOUR,
         res: mobResOf(bs, z.id),
         resByElement: mobResByElementOf(bs, z.id),
         align: coreOf(bs, 'dex', z.id) * K.K_DEX_ALIGN, crit: coreOf(bs, 'lck', z.id) * K.K_LCK_CRIT,
-        dodge: mobDodge(coreOf(bs, 'agi', z.id) * K.K_MOB_DODGE, ulvl),
+        dodge: mobDodge(coreOf(bs, 'agi', z.id) * K.K_MOB_DODGE, lvl),
         damage: bs.damage,
-        xpFrom: X.per_kill_mob_level * ulvl * X.unique_mult, xpTo: X.per_kill_mob_level * ulvl * X.unique_mult, group: 'alone',
+        xpFrom: X.per_kill_mob_level * lvl * mult, xpTo: X.per_kill_mob_level * lvl * mult, group: 'alone',
       });
     };
     for (const z of ZONES) {
-      const realBand = (z.levels as [number, number])[1] <= E.mob.form_level_cap;
-      for (const sp of E.mob.species) {
-        if (!sp.zones.includes(z.id)) continue;
-        if (realBand) {
-          // a real band fields the one variant containing this zone's midpoint — never a zone-level table
-          const ladder = variantsInZone(sp.id, z.id);
-          ladder.forEach((v, i) => variantRows(z, sp, v, mobLevelIn(sp, z.id), `v${i}`));
-        } else {
-          // frozen past the cap: keep the last Variant and Core, but use the legacy static zone level
-          const lvl = mobLevelIn(sp, z.id);
-          const finalVariant = variantsOf(sp.id).at(-1) || null;
-          variantRows(z, sp, finalVariant, lvl, 'frozen');
-        }
-        for (const unique of uniquesOf(sp.id)) uniqueRow(z, sp, unique);
-      }
-      const boss = E.mob.bosses.find((b) => b.zone === z.id)!;
-      const bs = mobProfileOf(speciesById(boss.species), boss, z.id);
-      const bz = sizeById('boss')!;
-      const bf = zoneBodyFactor(z.id);
-      const bvit = coreOf(bs, 'vit', z.id);
-      const bint = coreOf(bs, 'int', z.id);
-      const bossCore = Object.fromEntries(CORE_KEYS.map((key) => [key, coreOf(bs, key, z.id)]));
-      const blvl = mobLevelIn(bs, z.id);
-      const bhpBase = mobHpAt(blvl);
-      const bhp = bhpBase + LG.hp_per_level * (blvl - 1) + bvit * K.K_VIT_HP;
-      out.push({
-        id: `z${z.id}_boss`, zone: z.id, zoneName: z.name, levels: [blvl, blvl] as [number, number], level: blvl,
-        kind: `${bz.name} · ${boss.name}`, species: bs.name, formName: formOf(speciesById(boss.species), z.id).name, speciesId: bs.id,
-        innate: [bs.element], weapon: bs.carries_weapon, trait: bs.trait, core: bossCore,
-        immune: mobImmuneOf(bs), weak: mobWeakOf(bs), burst: mobBurstOf(bs),
-        mechanics: bs.mechanics || null, clockMult: mobClockMultOf(bs),
-        readsAs: bs.reads_as || bz.reads_as || 'large',
-        hpFrom: bhp, hpTo: bhp, vit: bvit, hpBaseFrom: bhpBase, hpBaseTo: bhpBase,
-        manaFrom: mobManaOf(blvl, bint), manaTo: mobManaOf(blvl, bint),
-        ps: mobPsAt(blvl) * bz.ps / bf * speciesPsMultOf(z.id, bs),
-        acc: mobAcc(coreOf(bs, 'dex', z.id), bs.accuracy_mult),
-        ev: mobEvasion(coreOf(bs, 'dex', z.id), 'boss'),
-        armour: coreOf(bs, 'str', z.id) * K.K_ARMOUR,
-        res: mobResOf(bs, z.id),
-        resByElement: mobResByElementOf(bs, z.id),
-        align: coreOf(bs, 'dex', z.id) * K.K_DEX_ALIGN, crit: coreOf(bs, 'lck', z.id) * K.K_LCK_CRIT,
-        dodge: mobDodge(coreOf(bs, 'agi', z.id) * K.K_MOB_DODGE, blvl),
-        damage: bs.damage,
-        xpFrom: X.per_kill_mob_level * blvl * X.boss_mult, xpTo: X.per_kill_mob_level * blvl * X.boss_mult, group: 'alone',
-      });
+      for (const p of placementsIn(z.id)) placementRows(z, p);
+      for (const unique of UNIQUES.filter((u) => u.zone === z.id)) specialRow(z, unique, 'unique');
+      const boss = BOSSES.find((b) => b.zone === z.id);
+      if (boss) specialRow(z, boss, 'boss');
     }
     return out;
   }
 
-  // ---- the mob that actually spawns: Species zone_levels owns its fixed level; the selected Variant
-  // owns its name, authored Core and optional damage override. None reads the attacker's level.
+  // ---- the mob that actually spawns: the placement owns its fixed level, display name, authored
+  // Core and optional damage override. Nothing here reads the attacker's level or a zone band.
 
-  function spawnAt(zoneId: number, bodyId = 'medium', speciesId: string | null = null, boss?: any, variantCore?: Partial<MobCore> | null, levelOverride?: number | null, variantDamage?: MobDamageType | null) {
-    const z = zoneById(zoneId)!;
-    const candidates = E.mob.species.filter((sp) => sp.zones.includes(zoneId) && (!speciesId || sp.id === speciesId));
-    const baseSpecies = candidates.length
-      ? candidates[Math.min(candidates.length - 1, speciesId ? 0 : 0)]
-      : E.mob.species[0];
-    const sp = mobProfileOf(baseSpecies, boss, zoneId);
-    const form = formOf(baseSpecies, zoneId);
-    const lv = levelOverride ?? mobLevelIn(sp, zoneId);
+  function spawnAt(zoneId: number, bodyId = 'medium', placementId?: string) {
+    if (!placementId) throw new RangeError('spawnAt requires a placement id');
+    const row = placementById(placementId);
+    if (row.zone !== zoneId) throw new RangeError(`placement ${placementId} belongs to zone ${row.zone}, not ${zoneId}`);
+    const z = zoneById(zoneId);
+    const baseSpecies = speciesById(row.species);
+    if (!baseSpecies) throw new RangeError(`placement ${placementId} names unknown species ${row.species}`);
+    const isSpecial = row.role == null;
+    const sp = isSpecial ? mobProfileOf(baseSpecies, row, zoneId) : baseSpecies;
+    const lv = row.level;
     const size = sizeById(bodyId) || sizeById('medium')!;
     const bf = zoneBodyFactor(zoneId);
-    // Base HP is the zone curve; the mob's own pools add the flat level grant and the K_core term
     const hpBase = mobHpAt(lv);
-    const selectedVariant = !boss ? variantsInZone(sp.id, zoneId)[0] : undefined;
-    const selectedVariantCore = variantCore ?? selectedVariant?.core;
-    const damage = boss ? sp.damage : variantDamage ?? selectedVariant?.damage ?? sp.damage;
-    const core = Object.fromEntries(CORE_KEYS.map((key) => [key, coreOf(sp, key, zoneId, selectedVariantCore)]));
+    const coreOverride = isSpecial ? null : row.core;
+    const damage = isSpecial ? sp.damage : (row.damage ?? sp.damage);
+    const core = Object.fromEntries(CORE_KEYS.map((key) => [key, coreOf(sp, key, zoneId, coreOverride)]));
     const vit = core.vit;
     const hp = mobHpOf(lv, vit);
     const mana = mobManaOf(lv, core.int);
-    const ps = mobPsAt(lv) * size.ps / bf * speciesPsMultOf(zoneId, sp, selectedVariantCore, damage);
+    const ps = mobPsAt(lv) * size.ps / bf * speciesPsMultOf(zoneId, sp, coreOverride, damage);
     return {
-      speciesId: sp.id, species: sp.name, formName: form.name, zone: zoneId, zoneName: z.name, level: lv,
+      placementId, speciesId: sp.id, species: sp.name, formName: sp.name, zone: zoneId, zoneName: z.name, level: lv,
       body: size.id, kind: size.name, readsAs: sp.reads_as || size.reads_as || size.id,
       innate: [sp.element], trait: sp.trait,
       // the trait's mechanics ride the spawn: the statuses it cannot answer, the Element it flinches
@@ -1245,7 +1219,7 @@ export function createEngine(E: EngineData) {
     mobHpAt, mobHpOf, typicalDpsAt, mobPsAt, typicalDps, mobPs, skillF, MOB_HP_ANCHORS,
     speciesPowerOf, speciesPowerStatOf, zonePowerFactor, speciesPsMult,
     ZONES, zoneById, finalZoneId, winTarget, sizeById, speciesById, coreOf, MEAN_CORE, mobStatsOf, speciesInZone, zoneElements, zoneBodyFactor, mobEvasion, mobAcc,
-    variantsOf, variantsInZone, uniquesOf, mobDodge, refAttackerAcc,
+    placementById, placementsIn, placementPool, uniquesOf, mobDodge, refAttackerAcc,
     subzoneAt, groupRangeOf, eliteChanceOf, spawnPackOf, terrainOfEnvironment,
     spawnSubzoneWeight, spawnSpeciesWeight,
     mobImmuneOf, mobClockMultOf, mobWeakOf, mobBurstOf, mechanicWordsOf, packWordOf,

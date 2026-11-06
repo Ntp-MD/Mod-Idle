@@ -1,0 +1,21 @@
+﻿{
+    "status":  "candidate-review",
+    "source":  "../../../../atlas/animation.png",
+    "sourceCell":  [
+                       5,
+                       2
+                   ],
+    "pixelsRepainted":  false,
+    "visualReviewRequired":  true,
+    "speciesId":  "wyrmling",
+    "race":  "dragon",
+    "action":  "attack",
+    "direction":  "south-west",
+    "phase":  "01-contact",
+    "originalStatus":  "baseline-extracted-candidate",
+    "copiedFrom":  "../west/01-contact.png",
+    "directionalDuplicateSource":  "west",
+    "sourceSha256":  "0d7e7c9e9d0b6a6dfa95d9c1f010014aacd1bbb4f6c03363bfba671ec571c763",
+    "regenerationRequired":  true,
+    "note":  "Coverage-only directional duplicate copied byte-for-byte from the west baseline candidate. No authored south-west attack source exists; regenerate and visually review before approval or atlas promotion."
+}

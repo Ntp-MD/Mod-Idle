@@ -1,0 +1,37 @@
+﻿{
+    "status":  "candidate-review",
+    "speciesId":  "mummy",
+    "source":  "../east/02-stride-c.png",
+    "sourceCell":  {
+                       "row":  1,
+                       "column":  2,
+                       "box":  [
+                                   768,
+                                   384,
+                                   1152,
+                                   768
+                               ]
+                   },
+    "sourcePixelsModified":  false,
+    "qa":  {
+               "new16DirectionSetAccepted":  false,
+               "anchor":  false,
+               "atlas":  false
+           },
+    "sourceDirection":  "east",
+    "directionalDuplicateSource":  "east",
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "frameCanvas":  {
+                        "width":  384,
+                        "height":  384
+                    },
+    "anchor":  {
+                   "x":  192,
+                   "y":  288
+               },
+    "phase":  "02-stride-c",
+    "action":  "walk",
+    "direction":  "north-east",
+    "note":  "Coverage-only directional duplicate from the east walk/02-stride-c candidate. Exact north-east-facing art remains ungenerated; regenerate and visually review before approval or atlas promotion."
+}

@@ -35,6 +35,16 @@ function encounter() {
 }
 
 describe('ARPG detarget', () => {
+  it('plans an explicit ground point without a living primary body', () => {
+    const { arena } = encounter();
+    const point = { x: 4, y: 6 };
+    const resolved = intentTargets(arena, [], { skillId: 'attack.meteor', targetId: '',
+      targetPoint: point, phase: 'approach', manual: true, aimPoint: true });
+    expect(resolved.targets).toEqual([]);
+    expect(resolved.area?.center).toEqual(point);
+    expect(resolved.area?.radiusM).toBe(sm.byId['attack.meteor'].area!.radius_m);
+  });
+
   it('tracks the same single-target intent while an equally useful neighbour gets closer', () => {
     const { state, arena, character } = encounter();
     const id = 'attack.fireball';

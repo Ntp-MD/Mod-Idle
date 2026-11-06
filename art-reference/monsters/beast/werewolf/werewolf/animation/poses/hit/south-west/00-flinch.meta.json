@@ -1,0 +1,26 @@
+{
+  "status": "candidate-review",
+  "source": "../west/00-flinch.png",
+  "operation": "lossless existing cell extraction",
+  "sourceCell": {
+    "column": 4,
+    "row": 3,
+    "width": 384,
+    "height": 384
+  },
+  "action": "hit",
+  "direction": "south-west",
+  "sourcePixelsModified": false,
+  "qa": {
+    "atlasApproved": false,
+    "note": "Coverage-only duplicate; regenerate and review before approval or atlas promotion."
+  },
+  "sourceSidecar": "../west/00-flinch.meta.json",
+  "originalCandidateSource": "../atlas/animation.png",
+  "directionalDuplicateSource": "west",
+  "regenerationRequired": true,
+  "visualReviewRequired": true,
+  "visualApproval": false,
+  "productionApproved": false,
+  "note": "Coverage-only directional duplicate copied from west for south-west hit 00-flinch. Regenerate and visually review the exact facing before approval or atlas promotion."
+}

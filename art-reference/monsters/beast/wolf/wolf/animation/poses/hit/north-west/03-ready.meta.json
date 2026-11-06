@@ -1,0 +1,34 @@
+﻿{
+    "schemaVersion":  1,
+    "status":  "candidate-review",
+    "speciesId":  "wolf",
+    "action":  "hit",
+    "direction":  "north-west",
+    "phase":  "03-ready",
+    "source":  "../north/03-ready.png",
+    "sourceSidecar":  "../north/03-ready.meta.json",
+    "sourceDirection":  "north",
+    "sourceSha256":  "e0a69c48d8f81277267d50bb6c43dc51503d6613279616596fff176eed543525",
+    "donorStatus":  "candidate-review",
+    "donorOriginalSource":  null,
+    "donorOriginalSourceCell":  null,
+    "frameCanvas":  {
+                        "height":  384,
+                        "width":  384
+                    },
+    "anchor":  {
+                   "y":  288,
+                   "x":  192
+               },
+    "method":  "byte-identical phase-matched directional coverage copy; no pixel processing",
+    "sourcePixelsModified":  false,
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "visualReview":  {
+                         "atlasAccepted":  false,
+                         "exactDirectionAccepted":  false,
+                         "identityAccepted":  false,
+                         "phaseSequenceAccepted":  false
+                     },
+    "note":  "Coverage-only directional duplicate from north; regenerate and visually review this exact facing before approval or atlas promotion."
+}

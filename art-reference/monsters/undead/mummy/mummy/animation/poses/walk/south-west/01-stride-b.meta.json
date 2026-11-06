@@ -1,0 +1,37 @@
+﻿{
+    "status":  "candidate-review",
+    "speciesId":  "mummy",
+    "source":  "../west/01-stride-b.png",
+    "sourceCell":  {
+                       "row":  1,
+                       "column":  5,
+                       "box":  [
+                                   1920,
+                                   384,
+                                   2304,
+                                   768
+                               ]
+                   },
+    "sourcePixelsModified":  false,
+    "qa":  {
+               "new16DirectionSetAccepted":  false,
+               "anchor":  false,
+               "atlas":  false
+           },
+    "sourceDirection":  "west",
+    "directionalDuplicateSource":  "west",
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "frameCanvas":  {
+                        "width":  384,
+                        "height":  384
+                    },
+    "anchor":  {
+                   "x":  192,
+                   "y":  288
+               },
+    "phase":  "01-stride-b",
+    "action":  "walk",
+    "direction":  "south-west",
+    "note":  "Coverage-only directional duplicate from the west walk/01-stride-b candidate. Exact south-west-facing art remains ungenerated; regenerate and visually review before approval or atlas promotion."
+}

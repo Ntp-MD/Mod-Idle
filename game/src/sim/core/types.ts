@@ -81,14 +81,19 @@ export interface Mob {
   formName?: string;
   /** The lineage's own id, so a per-species rule reads one flag rather than matching a name. */
   speciesId?: string;
+  /** The authored placement this actor belongs to; absent only on a pre-migration snapshot. */
+  placementId?: string;
+  /** A mob carried through the placement migration keeps its saved stats and pinned reward. */
+  legacySnapshot?: true;
+  /** The reward payload pinned for a legacy snapshot; null suppresses only its Variant reward. */
+  legacyDrop?: { item: string; rarity: string; lean: 'gear' | 'herb' | 'junk' | 'none' } | null;
   /** The sub-zone this spawn rolled into: its Species pool and one of the zone's own Elements. */
   subzone?: string;
   /** The combat subzone's environment, which can add a conserved drop lean. */
   environment?: string;
   /**
-   * The selected Variant name this spawn rolled (`mob.variants` → `mob.variant_drops`), or the
-   * fixed boss/unique name for those ranks. It may override the Species' default damage type and
-   * selects junk item/lean, so two mobs of one Species can differ. Elite keeps the Variant.
+   * The placement's display name (`mob.variants[].name`), or the fixed boss/unique name for those
+   * ranks. It is presentation only; rewards and kits use `placementId`. Elite keeps the name.
    */
   variant?: string;
   kind: string;

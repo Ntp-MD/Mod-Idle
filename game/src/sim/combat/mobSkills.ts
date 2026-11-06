@@ -31,16 +31,16 @@ export function createMobSkillModel(library: MobSkillLibrary) {
   function resolveKit(
     rank: string,
     speciesId: string,
-    variantName?: string | null,
-    fixedName?: string | null,
+    placementId: string,
   ): string[] {
     const kits = library.kits;
     const pick = (list?: string[]) => (list ? list : undefined);
-    const ids = rank === 'unique' && fixedName
-      ? pick(kits.uniques[fixedName]) ?? pick(kits.bosses[fixedName]) ?? pick(kits.species[speciesId])
-      : rank === 'boss' && fixedName
-        ? pick(kits.bosses[fixedName]) ?? pick(kits.species[speciesId])
-        : (variantName ? pick(kits.variants[variantName]) : undefined) ?? pick(kits.species[speciesId]);
+    // ID-keyed rank overrides only; a Unique may still fall back to its same Species/Zone Boss kit.
+    const ids = rank === 'unique'
+      ? pick(kits.uniques[placementId]) ?? pick(kits.bosses[placementId.replace(/\.unique$/, '.boss')]) ?? pick(kits.species[speciesId])
+      : rank === 'boss'
+        ? pick(kits.bosses[placementId]) ?? pick(kits.species[speciesId])
+        : pick(kits.variants[placementId]) ?? pick(kits.species[speciesId]);
     const seen = new Set<string>();
     return (ids || []).filter((id) => {
       if (seen.has(id) || !byId.has(id)) return false;

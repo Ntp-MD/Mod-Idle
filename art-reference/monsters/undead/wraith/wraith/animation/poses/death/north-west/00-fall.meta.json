@@ -62,5 +62,41 @@
     "anchorAccepted": true,
     "atlasAccepted": false
   },
-  "note": "Source pose reviewed 2026-11-04: identity, direction, sequence, transparency and anchor pass across the 16-direction set. Death settle reads as a dissipating ghost remnant. Source-pose approval only; the runtime atlas remains draft-review."
+  "note": "Source pose reviewed 2026-11-04: identity, direction, sequence, transparency and anchor pass across the 16-direction set. Death settle reads as a dissipating ghost remnant. Source-pose approval only; the runtime atlas remains draft-review. Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending.",
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 78,
+    "uniformScale": 0.557143,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/undead/wraith/v1/atlas.png",
+      "frame": 36,
+      "action": "death",
+      "direction": "west",
+      "phase": "00-fall"
+    },
+    "inputSha256": "7ad05eddb973a6ff86c359ba6b066102c7672c40e7aa1f6f0c1a3fd3a776c9d4",
+    "outputSha256": "6059036125dc4853d3013dce7eab8d3102108cbf66ae17210590de74385e3deb",
+    "reviewRequired": true
+  }
 }

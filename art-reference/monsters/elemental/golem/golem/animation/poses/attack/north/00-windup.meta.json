@@ -50,5 +50,42 @@
   },
   "phaseSourceRefNote": "Reference updated after east attack source frames were reordered; it still points to the same source pixels used as guidance.",
   "reorderedFromPose": "02-follow-through",
-  "reviewNote": "Reordered raised fist before extended strike. Keep as candidate: the northward silhouette and exact facing change noticeably across frames; identity, anchor, alpha and sequence still need review."
+  "reviewNote": "Reordered raised fist before extended strike. Keep as candidate: the northward silhouette and exact facing change noticeably across frames; identity, anchor, alpha and sequence still need review.",
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 148,
+    "uniformScale": 0.669683,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/elemental/golem/v1/atlas.png",
+      "frame": 16,
+      "action": "attack",
+      "direction": "east",
+      "phase": "00-windup"
+    },
+    "inputSha256": "ebc76c2a9ae892286a0e55d821f49bfcd8132d8a7d30cd5b1b87d2d6b0a2074c",
+    "outputSha256": "5d8d2c6ae6f205f4bc70a6c005280fc5c83e94ad0583b6900ac9b5aa3d82888d",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

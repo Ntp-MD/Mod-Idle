@@ -5,7 +5,7 @@
   "action": "idle",
   "direction": "north-east",
   "angleDegrees": 135,
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "qa": {
     "visuallyInspected": true,
     "facingPlausible": true,
@@ -14,5 +14,42 @@
     "exactYawApproved": false,
     "atlasApproved": false,
     "note": "Rear view correct; back necklace bones and hand continuity require review."
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 153,
+    "uniformScale": 0.191489,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\humanoid\\troll\\v1\\atlas.png",
+      "frame": 3,
+      "action": "idle",
+      "direction": "north-east",
+      "phase": "north-east"
+    },
+    "inputSha256": "844bba57d0ef5811a7c87a2580258b4c8ca6f954b7adfb2e952f823164fd945a",
+    "outputSha256": "ac2ddd5fc904020f92e7d187531aa6a723241904fe56253e82b655dadb93eca0",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

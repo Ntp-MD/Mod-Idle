@@ -1,0 +1,49 @@
+{
+  "asset": "town-relief-1.png",
+  "runtimePath": "/map/landmark/town-relief-1.png",
+  "layer": "relief",
+  "source": "game/public/map/landmark/town.png",
+  "sourceSha256": "b1fe8ad075e30f2507de335b8472f27a85c0a664c1f241c4f6807cd8375628e3",
+  "outputSha256": "e4df38042a94a6ff91c052f53879e2ba4284a596d61493d19a7349ee6b35fd6c",
+  "measurement": {
+    "reference": "game/src/ui/map/data/map-sprite-bounds.json#/map/landmark/town-relief-1.png",
+    "note": "Painted bounds and spill scale copied from the same source asset; cutout pixels changed only along the removed red calibration line."
+  },
+  "reviews": {
+    "footprint": {
+      "verdict": "n/a",
+      "note": "Separate upright object; full-hex town-1 painting left untouched and unused."
+    },
+    "objectAngle": {
+      "verdict": "pass",
+      "note": "Upright object keeps the reference kit isometric angle, upper-left light and compact ground contact."
+    },
+    "edges": {
+      "verdict": "pass",
+      "note": "Red calibration line removed; inspected at 1920x1080 in the pilot (near/mid/far, bearings 0/90/180/270)."
+    },
+    "halo": {
+      "verdict": "pass",
+      "note": "Transparent cutout reviewed; only a compact vegetation ground contact remains, no full-hex base."
+    },
+    "depth": {
+      "verdict": "pass",
+      "note": "Ground stays planar under the board projection; relief sits in the actor layer and sorts with cells."
+    }
+  },
+  "screenshots": [
+    "temp/pilot-town-hexalign.png",
+    "temp/pilot-near-b0.png",
+    "temp/pilot-near-b90.png",
+    "temp/pilot-near-b180.png",
+    "temp/pilot-near-b270.png",
+    "temp/pilot-bw-town.png",
+    "temp/pilot-bw-fishing.png",
+    "temp/world-near.png",
+    "temp/world-mid.png",
+    "temp/world-far.png"
+  ],
+  "accepted": true,
+  "reviewer": "delegated implementation reviewer",
+  "reviewedAt": "2026-11-05"
+}

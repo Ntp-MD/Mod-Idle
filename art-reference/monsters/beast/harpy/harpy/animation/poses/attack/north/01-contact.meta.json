@@ -24,11 +24,47 @@
     "runtime": false
   },
   "footAnchor": null,
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "styleReference": [
     "poses/attack/north/00-windup.png",
     "poses/attack/south/01-contact.png"
   ],
   "bakedWeapon": "natural-talons-and-wings",
-  "note": "Generated individual attack contact candidate; direction, pixel scale, anchor, visual sequence, and art-owner acceptance remain unverified."
+  "note": "Generated individual attack contact candidate; direction, pixel scale, anchor, visual sequence, and art-owner acceptance remain unverified. Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending.",
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 174,
+    "uniformScale": 0.185699,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\beast\\harpy\\v1\\atlas.png",
+      "frame": 17,
+      "action": "attack",
+      "direction": "east",
+      "phase": "01-contact"
+    },
+    "inputSha256": "da578bc0b6ac7ac927120e2be773b873d7b2edd8447ecca285f797df3cf3383c",
+    "outputSha256": "ce516a5354d7ee1f430dbba9ea871ca9fb8901e598cc2abd12cd15d765daed96",
+    "reviewRequired": true
+  }
 }

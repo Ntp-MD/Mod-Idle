@@ -1,0 +1,37 @@
+﻿{
+    "schemaVersion":  1,
+    "status":  "candidate-review",
+    "speciesId":  "wolf",
+    "action":  "hit",
+    "direction":  "south-west",
+    "phase":  "02-recover",
+    "source":  "../west/02-recover.png",
+    "sourceSidecar":  "../west/02-recover.meta.json",
+    "sourceDirection":  "west",
+    "sourceSha256":  "b8af8763a20beff4246d834526512d2673365e3dfbf20aac6a9394ccf0c455df",
+    "donorStatus":  "source-reference-unverified",
+    "donorOriginalSource":  "../../../../atlas/animation.png",
+    "donorOriginalSourceCell":  [
+                                    6,
+                                    3
+                                ],
+    "frameCanvas":  {
+                        "height":  384,
+                        "width":  384
+                    },
+    "anchor":  {
+                   "y":  288,
+                   "x":  192
+               },
+    "method":  "byte-identical phase-matched directional coverage copy; no pixel processing",
+    "sourcePixelsModified":  false,
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "visualReview":  {
+                         "atlasAccepted":  false,
+                         "exactDirectionAccepted":  false,
+                         "identityAccepted":  false,
+                         "phaseSequenceAccepted":  false
+                     },
+    "note":  "Coverage-only directional duplicate from west; regenerate and visually review this exact facing before approval or atlas promotion."
+}

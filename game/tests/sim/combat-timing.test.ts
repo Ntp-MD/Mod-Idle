@@ -7,6 +7,7 @@ import {
 import { characterSheet, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
 import { prepareSkillCast } from '@sim/combat/skills';
 import { skillCastTiming } from '@engine/skill-actions.ts';
+import { skillAreaSnapshot } from '@engine/skill-area.ts';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
 import { mobSkillById } from '@sim/combat/mobSkills';
 import { liveMobSkill } from '../fixtures/liveMob';
@@ -40,6 +41,27 @@ function arenaFight(skillId: string, distance: number) {
 }
 
 describe('live cast timing', () => {
+  it.each(['attack.meteor', GROUND_CAST])('keeps %s on its windup footprint when the target moves before release', (skillId) => {
+    const { state, mob, arena } = arenaFight(skillId, 3);
+    const source = { x: arena.player.x, y: arena.player.y };
+    const aim = { x: arena.mobs[mob.id].x, y: arena.mobs[mob.id].y };
+    const area = skillAreaSnapshot(sm.byId[skillId].area!, source, aim, mob.id);
+    const timing = { ...skillCastTiming(sm.castProfileOf(sm.byId[skillId]), 0, arena.unitsPerSec, source, aim),
+      releaseAtUs: 500_000, impactAtUs: 750_000, recoveryUntilUs: 1_000_000 };
+    const action = arenaAction(arena, 'player', 'cast', 0, mob.id, skillId, area, timing)!;
+    arena.intent = { skillId, targetId: mob.id, targetPoint: aim, phase: 'windup', actionId: action.id,
+      releaseAtUs: timing.releaseAtUs, recoveryUntilUs: timing.recoveryUntilUs };
+    Object.assign(arena.mobs[mob.id], { x: aim.x, y: aim.y + 1 });
+
+    tick(state, { arena });
+
+    const casts = state.fx.filter(event => event.kind === 'cast' && event.actionId === action.id);
+    expect(casts).toHaveLength(1);
+    expect(casts[0].skillOutcome!.area).toEqual(area);
+    expect(arena.actions.find(entry => entry.id === action.id)!.area).toEqual(area);
+    expect(Math.hypot(arena.mobs[mob.id].x - aim.x, arena.mobs[mob.id].y - aim.y)).toBeGreaterThan(.05);
+  });
+
   it('publishes release and impact separately and does not damage before impact', () => {
     const { state, mob, arena } = arenaFight(GROUND_CAST, 3);
     const initialHp = mob.hp;
@@ -54,6 +76,39 @@ describe('live cast timing', () => {
     expect(sampleCombatArena(arena, cast.atUs!).mobs[mob.id]?.hp).toBe(initialHp);
     expect(sampleCombatArena(arena, hit.atUs!).mobs[mob.id]?.hp).toBeLessThan(initialHp);
     expect(state.skills.cd[GROUND_CAST]).toBeGreaterThan(0);
+  });
+
+  it.each(['dies', 'leaves'] as const)('releases committed ground even when its original target %s', (change) => {
+    const skillId = 'attack.meteor';
+    const { state, mob, arena } = arenaFight(skillId, 3);
+    const other = { ...mob, id: 'ground-survivor' };
+    state.group.push(other);
+    syncCombatArena(arena, state, 0, arena.unitsPerSec, characterSheet(state).maxHp);
+    Object.assign(arena.player, { x: 1, y: 6 });
+    Object.assign(arena.mobs[other.id], { x: 4, y: 6.5 });
+    const aim = { x: 4, y: 6 };
+    const area = skillAreaSnapshot(sm.byId[skillId].area!, arena.player, aim, mob.id);
+    const timing = { ...skillCastTiming(sm.castProfileOf(sm.byId[skillId]), 0, arena.unitsPerSec, arena.player, aim),
+      releaseAtUs: 500_000, impactAtUs: 750_000, recoveryUntilUs: 1_000_000 };
+    const action = arenaAction(arena, 'player', 'cast', 0, mob.id, skillId, area, timing)!;
+    arena.intent = { skillId, targetId: mob.id, targetPoint: aim, phase: 'windup', actionId: action.id,
+      releaseAtUs: timing.releaseAtUs, recoveryUntilUs: timing.recoveryUntilUs };
+    if (change === 'dies') {
+      mob.hp = 0;
+      state.group = [other];
+    } else {
+      Object.assign(arena.mobs[mob.id], { x: 4, y: 11 });
+      Object.assign(arena.mobs[other.id], { x: 1, y: 11 });
+    }
+    pinFieldPopulation(state);
+
+    tick(state, { arena });
+
+    const casts = state.fx.filter(event => event.kind === 'cast' && event.actionId === action.id);
+    expect(casts).toHaveLength(1);
+    expect(casts[0].skillOutcome!.area).toEqual(area);
+    expect(state.skills.cd[skillId]).toBeGreaterThan(0);
+    expect(arena.actions.find(entry => entry.id === action.id)!.cancelledAtUs).toBeUndefined();
   });
 
   it('cancels a windup without paying or starting cooldown when auto skills turn off', () => {

@@ -27,18 +27,17 @@ describe('mob skill kits', () => {
   it('resolves by override and never merges layers', () => {
     for (const species of E.mob.species) {
       const base = MS.kits.species[species.id] ?? [];
-      expect(resolveMobKit('normal', species.id), species.id).toEqual(base);
-      for (const variant of (E.mob.variants as Record<string, { name: string }[]>)[species.id] ?? [])
-        expect(resolveMobKit('normal', species.id, variant.name), variant.name)
-          .toEqual(MS.kits.variants[variant.name] ?? base);
+      for (const placement of (E.mob.variants as any[]).filter((row) => row.species === species.id))
+        expect(resolveMobKit('normal', species.id, placement.id), placement.id)
+          .toEqual(MS.kits.variants[placement.id] ?? base);
     }
-    for (const boss of E.mob.bosses)
-      expect(resolveMobKit('boss', boss.species, undefined, boss.name), boss.name)
-        .toEqual(MS.kits.bosses[boss.name] ?? MS.kits.species[boss.species] ?? []);
-    for (const unique of E.mob.uniques)
-      expect(resolveMobKit('unique', unique.species, undefined, unique.name), unique.name)
-        .toEqual(MS.kits.uniques[unique.name] ?? MS.kits.bosses[unique.name] ?? MS.kits.species[unique.species] ?? []);
-    expect(resolveMobKit('normal', 'test-missing-species')).toEqual([]);
+    for (const boss of E.mob.bosses as any[])
+      expect(resolveMobKit('boss', boss.species, boss.id), boss.id)
+        .toEqual(MS.kits.bosses[boss.id] ?? MS.kits.species[boss.species] ?? []);
+    for (const unique of E.mob.uniques as any[])
+      expect(resolveMobKit('unique', unique.species, unique.id), unique.id)
+        .toEqual(MS.kits.uniques[unique.id] ?? MS.kits.bosses[unique.id.replace(/\.unique$/, '.boss')] ?? MS.kits.species[unique.species] ?? []);
+    expect(resolveMobKit('normal', 'test-missing-species', 'missing.placement')).toEqual([]);
   });
 
   it('keeps every authored kit within its layer cap and pointed at a real row', () => {
@@ -68,7 +67,7 @@ describe('mob skill kits', () => {
   it('stamps the resolved kit on a fresh spawn and starts every cooldown ready', () => {
     for (const profile of E.mob.bosses) {
       const boss = spawnMob(mulberry32(11), profile.zone, 'boss');
-      expect(boss.skillIds).toEqual(resolveMobKit('boss', profile.species, undefined, profile.name));
+      expect(boss.skillIds).toEqual(resolveMobKit('boss', profile.species, (profile as any).id));
       expect(boss.skillReadyAtUs).toEqual({});
     }
   });
@@ -93,7 +92,7 @@ describe('mob skill kits', () => {
     const s = newGame(7);
     setLevel(s, 50);
     s.hunting = true;
-    const profile = E.mob.bosses.find(row => resolveMobKit('boss', row.species, undefined, row.name)
+    const profile = E.mob.bosses.find(row => resolveMobKit('boss', row.species, (row as any).id)
       .some(id => mobSkillById(id)?.mode === 'strike'));
     expect(profile, 'a boss kit with an executable strike').toBeDefined();
     const boss = spawnMob(mulberry32(11), profile!.zone, 'boss');
@@ -216,7 +215,7 @@ describe('injectable mob skill library', () => {
 
   it('resolves, caps and filters unknown ids from the injected library, not the live one', () => {
     // Two valid strikes fit the cap of one; the unknown id never resolves.
-    expect(model.resolveKit('normal', 'tsp')).toEqual(['t.strike']);
+    expect(model.resolveKit('normal', 'tsp', 'tsp.placement')).toEqual(['t.strike']);
     expect(model.byId('t.missing')).toBeUndefined();
     // The production registry never sees scenario ids.
     expect(mobSkillById('t.strike')).toBeUndefined();

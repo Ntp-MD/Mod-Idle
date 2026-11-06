@@ -1,0 +1,37 @@
+﻿{
+    "status":  "candidate-review",
+    "speciesId":  "mummy",
+    "source":  "../west/00-windup.png",
+    "sourceCell":  {
+                       "row":  2,
+                       "column":  4,
+                       "box":  [
+                                   1536,
+                                   768,
+                                   1920,
+                                   1152
+                               ]
+                   },
+    "sourcePixelsModified":  false,
+    "qa":  {
+               "new16DirectionSetAccepted":  false,
+               "anchor":  false,
+               "atlas":  false
+           },
+    "sourceDirection":  "west",
+    "directionalDuplicateSource":  "west",
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "frameCanvas":  {
+                        "width":  384,
+                        "height":  384
+                    },
+    "anchor":  {
+                   "x":  192,
+                   "y":  288
+               },
+    "phase":  "00-windup",
+    "action":  "attack",
+    "direction":  "north-west",
+    "note":  "Coverage-only directional duplicate from the west attack/00-windup candidate. Exact north-west-facing art remains ungenerated; regenerate and visually review before approval or atlas promotion."
+}

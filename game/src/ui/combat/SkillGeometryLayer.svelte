@@ -69,7 +69,7 @@
         const mark = skillActionGeometry(action, frame, atUs, arena.unitsPerSec,
           nextImpacts.get(action.id), view, releasePoints, bodySizes,
           Math.max(atlas?.rainDurationSec ?? 0, atlas ? atlasImpactDuration(atlas) : 0));
-        return mark && (!aim || action.skillId !== aim.skillId || action.actorId !== 'player') ? [mark] : [];
+        return mark ? [mark] : [];
       }),
       ...(aim ? [skillAimGeometry(aim, view, releasePoints.player, bodySizes.player)].filter(mark => mark != null) : []),
     ];

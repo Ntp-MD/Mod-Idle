@@ -87,7 +87,14 @@
 .sheet svg .diorama-figure { filter: drop-shadow(.6px 1.2px .7px rgba(47, 38, 22, .35)); }
 .sheet svg .diorama-figure[data-node] .diorama-art { pointer-events: visiblePainted; cursor: pointer; }
 /* Dioramas stand above the rotating ground and share the actors' depth order. */
-.sheet svg #layer-diorama, .sheet svg .diorama-figure { display: none !important; } /* shortcut: PNG terrain off, flat color only — delete to restore */
+.sheet svg .diorama-figure.terrain-off { display: none !important; }
+.sheet svg .terrain-relief { display: none; pointer-events: none; }
+.sheet svg .terrain-relief.terrain-on { display: inline; }
+/* Far away the flat colour carries the world shape; upright relief and textures wait for mid/near. */
+.map-back.map-detail-far svg .diorama-figure.terrain-on,
+.map-back.map-detail-far svg .terrain-relief.terrain-on { display: none; }
+.sheet svg[data-view="band"] .terrain-relief.terrain-on,
+.sheet svg[data-view="gate"] .terrain-relief.terrain-on { opacity: .18; }
 .sheet svg .node > use { display: none; }
 .sheet svg #labels, .sheet svg #regions { display: none; }
 #map-names { pointer-events: none; }
@@ -239,3 +246,58 @@
 .sheet.clean-map svg .cell { fill: var(--map-cell-fill); fill-opacity: 1; stroke-opacity: 1; }
 .sheet.clean-map svg .cell.locked { fill: var(--ground); }
 .stage.mapmode .sheet.clean-map svg .cell:hover { fill-opacity: 1; stroke: var(--focus); }
+
+/* Map surface lifecycle: WorldMap owns these nodes, so the rules live in the global sheet. */
+.map-back {
+  position: absolute; inset: 0; overflow: hidden; cursor: crosshair;
+
+  --dof: var(--dof-rest);
+
+  opacity: calc(1 - var(--dof) / 12);
+
+  mask-image: linear-gradient(180deg, #000 0 62%, rgba(0, 0, 0, .5));
+  -webkit-mask-image: linear-gradient(180deg, #000 0 62%, rgba(0, 0, 0, .5));
+
+  transition: opacity var(--motion-ui) var(--ease-ui);
+  touch-action: none;
+
+  user-select: none; -webkit-user-select: none;
+}
+
+.map-back::after {
+  content: '';
+  position: absolute; inset: 0; z-index: var(--z-underlay); pointer-events: none;
+  background: linear-gradient(rgba(12, 16, 14, .36), rgba(12, 16, 14, .36)),
+    radial-gradient(ellipse 88% 80% at 50% 48%, transparent 74%,
+    color-mix(in srgb, var(--ground) 58%, transparent) 88%,
+    color-mix(in srgb, var(--ground) 98%, transparent) 100%);
+}
+.stage.mapmode .map-back::after {
+  background: radial-gradient(ellipse 88% 80% at 50% 48%, transparent 74%,
+    color-mix(in srgb, var(--panel) 58%, transparent) 88%, color-mix(in srgb, var(--panel) 98%, transparent) 100%);
+}
+
+.map-sheet {
+  position: absolute; inset: 0;
+  transform-origin: 50% 46%;
+  transition: transform var(--motion-fast) var(--ease-ui);
+
+  filter: none;
+  will-change: auto;
+}
+
+:global(.map-back.dragging .map-sheet) { transition: none; will-change: transform; }
+:global(.map-back.camera-turning .map-sheet) { transition: none; }
+.map-back.camera-turning :global(.you) { transition: none; }
+.stage.mapmode .map-sheet { transition: none; }
+
+.map-back:focus-visible { --dof: 1.5px; opacity: .92; }
+
+.map-back:focus-visible { --ring-offset: -2px; }
+
+.stage.mapmode .map-back { --dof: 0px; opacity: 1; cursor: grab; }
+
+.map-back.dragging { cursor: grabbing; transition: opacity var(--motion-ui) var(--ease-ui), filter var(--motion-ui) var(--ease-ui); }
+.stage.mapmode .map-back.rotating { cursor: move; }
+.stage.arpg-arena .map-back { visibility: hidden; pointer-events: none; }
+.stage.veiled .map-back { --dof: var(--dof-rest); }

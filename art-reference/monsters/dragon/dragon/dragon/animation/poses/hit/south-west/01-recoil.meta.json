@@ -1,11 +1,48 @@
 {
-    "status":  "candidate-review",
-    "candidateDuplicate":  true,
-    "requiresRegeneration":  true,
-    "method":  "nearest-direction-copy",
-    "sourcePath":  "poses/hit/south/01-recoil.png",
-    "sourceDirection":  "south",
-    "sourcePixelsModified":  false,
-    "visualReviewRequired":  true,
-    "qaStatus":  "pending-facing-spacing-anchor-alpha-atlas-review"
+  "status": "candidate-review",
+  "candidateDuplicate": true,
+  "requiresRegeneration": true,
+  "method": "nearest-direction-copy",
+  "sourcePath": "poses/hit/south/01-recoil.png",
+  "sourceDirection": "south",
+  "sourcePixelsModified": true,
+  "visualReviewRequired": true,
+  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review",
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 116,
+    "uniformScale": 0.202797,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\dragon\\dragon\\v1\\atlas.png",
+      "frame": 29,
+      "action": "hit",
+      "direction": "west",
+      "phase": "01-recoil"
+    },
+    "inputSha256": "81d2274c24a88fb1dd2c1292c028f7a41ab80a05fed5f8ce58a56a6fec393166",
+    "outputSha256": "7988654f23f234b58ff2058336ff5faa8f9ba18921e76f38aad3ce0fea463ef1",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

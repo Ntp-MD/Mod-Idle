@@ -1,0 +1,36 @@
+﻿{
+    "status":  "candidate-review",
+    "generator":  "OpenAI built-in image_gen",
+    "sourceOutput":  "exec-006c267c-3326-4359-ab38-46688ad35718.png",
+    "direction":  "north-west",
+    "angleDegrees":  180,
+    "visualReview":  {
+                         "identityPlausible":  true,
+                         "facingPlausible":  true,
+                         "exactAngleVerified":  false,
+                         "atlasReady":  false
+                     },
+    "sourcePixelsModified":  true,
+    "normalization":  {
+                          "canvas":  [
+                                         384,
+                                         384
+                                     ],
+                          "anchor":  [
+                                         192,
+                                         288
+                                     ],
+                          "alphaCutoff":  16
+                      },
+    "speciesId":  "wyrmling",
+    "race":  "dragon",
+    "action":  "hit",
+    "phase":  "00-flinch",
+    "originalStatus":  "candidate-review",
+    "copiedFrom":  "../north/00-flinch.png",
+    "directionalDuplicateSource":  "north",
+    "sourceSha256":  "b79f3eb1ef27348781b1257ed3e2caec2ffe9414ff15c3915fff0e73976d5569",
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "note":  "Coverage-only directional duplicate copied byte-for-byte from the north baseline candidate. No authored north-west hit source exists; regenerate and visually review before approval or atlas promotion."
+}

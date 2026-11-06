@@ -5,7 +5,7 @@
   "action": "idle",
   "direction": "south-east",
   "angleDegrees": 45,
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "qa": {
     "visuallyInspected": true,
     "exactYawApproved": false,
@@ -13,5 +13,42 @@
     "identityPlausible": true,
     "facingPlausible": true,
     "reviewNote": "Front3/4plausible; compare againstSSEforangle separation."
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 165,
+    "uniformScale": 0.204461,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\humanoid\\ogre\\v1\\atlas.png",
+      "frame": 1,
+      "action": "idle",
+      "direction": "south-east",
+      "phase": "south-east"
+    },
+    "inputSha256": "104c3ce1d8eeefe6038b6bed293cbf2bf86754a29227245f617dca420c679d1e",
+    "outputSha256": "ca0ac3f2d8266d9eb3f2806dc391218c78aa4aba53d06845e5607cf85828d0a2",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

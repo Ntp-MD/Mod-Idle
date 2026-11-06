@@ -4,7 +4,7 @@
   "sourceOutput": "C:\\Users\\disda\\.codex\\generated_images\\01a18325-0641-7be2-aaca-162aad945c3d\\exec-8c40fb38-f0e2-4cef-a2ea-aff7ee9e620f.png",
   "action": "attack",
   "angleDegrees": 0,
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "visualReview": {
     "inspected": true,
     "atlasReady": false,
@@ -12,5 +12,42 @@
     "haloVisible": false,
     "exactAngleVerified": false,
     "sequenceAccepted": false
-  }
+  },
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 324
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 324
+    },
+    "normalizedSubjectHeight": 180,
+    "uniformScale": 0.322004,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\insect\\beetle\\v1\\atlas.png",
+      "frame": 16,
+      "action": "attack",
+      "direction": "east",
+      "phase": "00-windup"
+    },
+    "inputSha256": "216f02dfeab8904284f28b09eb8b986d2ab952f9aba9d5569ca6e3072c6e2845",
+    "outputSha256": "b56128b31f715cf558ae25b20b9bf9007a0e702a2006b722d2fa92f5a7335c6b",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

@@ -57,14 +57,19 @@ export function createTrade(E: EngineData, C: TradeCfg) {
     const group = Object.entries(C.junk_groups).find(([, ids]) => ids.includes(speciesId))?.[0];
     if (species) add('junk', item, item, group ? `junk:${group}` : 'junk', E.junk.rarities[rarity]?.sell_gold || 0, species.zones);
   };
-  for (const [speciesId, variants] of Object.entries(E.mob.variants || {})) for (const variant of variants) {
-    const drop = E.mob.variant_drops?.[variant.name];
-    if (drop) addJunk(drop.item, drop.rarity, speciesId);
+  for (const placement of E.mob.variants || []) {
+    const drop = E.mob.variant_drops?.[placement.id];
+    if (drop) addJunk(drop.item, drop.rarity, placement.species);
+  }
+  for (const boss of E.mob.bosses || []) {
+    const drop = E.mob.variant_drops?.[boss.id];
+    if (drop) addJunk(drop.item, drop.rarity, boss.species);
   }
   for (const unique of E.mob.uniques || []) {
-    const drop = E.mob.variant_drops?.[unique.name];
+    const drop = E.mob.variant_drops?.[unique.id];
     if (drop) addJunk(drop.item, drop.rarity, unique.species);
   }
+  for (const row of Object.values(E.mob.retired_variant_drops || {})) addJunk(row.item, row.rarity, row.species);
   for (const species of E.mob.species) for (const [rarity, item] of Object.entries(species.junk_items || {})) addJunk(item, rarity, species.id);
   const inputValue = (bucket: TradeGood['bucket'], costs: Record<string, number>, recipeName: string) => Object.entries(costs).reduce((sum, [key, count]) => {
     const good = byId[`${bucket}:${key}`];

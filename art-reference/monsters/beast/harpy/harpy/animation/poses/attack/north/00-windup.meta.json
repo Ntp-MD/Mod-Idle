@@ -24,11 +24,47 @@
     "runtime": false
   },
   "footAnchor": null,
-  "sourcePixelsModified": false,
+  "sourcePixelsModified": true,
   "styleReference": [
     "poses/idle/north.png",
     "poses/attack/south/00-windup.png"
   ],
   "bakedWeapon": "natural-talons-and-wings",
-  "note": "Generated individual attack windup candidate; direction, pixel scale, anchor, visual sequence, and art-owner acceptance remain unverified."
+  "note": "Generated individual attack windup candidate; direction, pixel scale, anchor, visual sequence, and art-owner acceptance remain unverified. Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending.",
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 176,
+    "uniformScale": 0.204651,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\beast\\harpy\\v1\\atlas.png",
+      "frame": 16,
+      "action": "attack",
+      "direction": "east",
+      "phase": "00-windup"
+    },
+    "inputSha256": "c05512ebc68e268111bc907e033c8d4e01abf24acce0bf5e4f25fb474321b93e",
+    "outputSha256": "c67140334a73274abfcefbc4abcec4b9f6cfb741d04874b104250f3db4ba68d3",
+    "reviewRequired": true
+  }
 }

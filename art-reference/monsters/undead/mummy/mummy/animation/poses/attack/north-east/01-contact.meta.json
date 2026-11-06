@@ -1,0 +1,37 @@
+﻿{
+    "status":  "candidate-review",
+    "speciesId":  "mummy",
+    "source":  "../east/01-contact.png",
+    "sourceCell":  {
+                       "row":  2,
+                       "column":  1,
+                       "box":  [
+                                   384,
+                                   768,
+                                   768,
+                                   1152
+                               ]
+                   },
+    "sourcePixelsModified":  false,
+    "qa":  {
+               "new16DirectionSetAccepted":  false,
+               "anchor":  false,
+               "atlas":  false
+           },
+    "sourceDirection":  "east",
+    "directionalDuplicateSource":  "east",
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "frameCanvas":  {
+                        "width":  384,
+                        "height":  384
+                    },
+    "anchor":  {
+                   "x":  192,
+                   "y":  288
+               },
+    "phase":  "01-contact",
+    "action":  "attack",
+    "direction":  "north-east",
+    "note":  "Coverage-only directional duplicate from the east attack/01-contact candidate. Exact north-east-facing art remains ungenerated; regenerate and visually review before approval or atlas promotion."
+}

@@ -1,0 +1,49 @@
+{
+  "asset": "mountain-relief-3.png",
+  "runtimePath": "/map/terrain/mountain-relief-3.png",
+  "layer": "ground",
+  "source": "game/public/map/terrain/mountain-relief-2.png",
+  "sourceSha256": "451616cb43e4302e0ed4a97d4dcfef4532bab56d4bc5fa5e96ec9b3b368d3caf",
+  "outputSha256": "7a3035f0fe58f32e059779420e8bd6c92812c9b798e3f694f2cffb157a887245",
+  "measurement": {
+    "reference": "game/src/ui/map/data/map-terrain-footprints.json#/map/terrain/mountain-relief-3.png",
+    "note": "Source pixels retain their measured geometry; only the red calibration line was removed (alpha-cleared thin line, opaque red repaired from neighbours)."
+  },
+  "reviews": {
+    "footprint": {
+      "verdict": "pass",
+      "note": "Six-vertex footprint unchanged; generator M15 vertex fit passes."
+    },
+    "objectAngle": {
+      "verdict": "n/a",
+      "note": "Ground is a low-relief surface."
+    },
+    "edges": {
+      "verdict": "pass",
+      "note": "Red calibration line removed; inspected at 1920x1080 in the pilot (near/mid/far, bearings 0/90/180/270)."
+    },
+    "halo": {
+      "verdict": "pass",
+      "note": "No opaque backdrop observed; ground reaches the hex silhouette."
+    },
+    "depth": {
+      "verdict": "pass",
+      "note": "Ground stays planar under the board projection; relief sits in the actor layer and sorts with cells."
+    }
+  },
+  "screenshots": [
+    "temp/pilot-town-hexalign.png",
+    "temp/pilot-near-b0.png",
+    "temp/pilot-near-b90.png",
+    "temp/pilot-near-b180.png",
+    "temp/pilot-near-b270.png",
+    "temp/pilot-bw-town.png",
+    "temp/pilot-bw-fishing.png",
+    "temp/world-near.png",
+    "temp/world-mid.png",
+    "temp/world-far.png"
+  ],
+  "accepted": true,
+  "reviewer": "delegated implementation reviewer",
+  "reviewedAt": "2026-11-05"
+}

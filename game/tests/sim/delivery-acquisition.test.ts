@@ -64,18 +64,15 @@ describe('delivery acquisition identity and availability', () => {
     expect(f.model.acquisition(a, 1, f.low, f.context({ owned: { [b]: 1 } }))?.steps.map((step) => step.good)).toEqual([a]);
   });
 
-  it('does not invent a source for an authored variant that the zone cannot field', () => {
+  it('does not invent a source for a retired variant that no placement can field', () => {
     const f = fixture(true);
-    const nonFieldable = Object.entries(f.data.mob.variants || {}).flatMap(([species, variants]) => variants.flatMap((variant) => {
-      const drop = f.data.mob.variant_drops?.[variant.name];
-      if (!drop) return [];
-      const unavailable = f.data.mob.zones.find((zone) => !f.engine.variantsInZone(species, zone.id).some((row) => row.name === variant.name)
-        && !(f.model.sources[`junk:${drop.item}`] || []).some((source) => source.zone === zone.id));
-      return unavailable ? [{ target: `junk:${drop.item}`, zone: unavailable.id }] : [];
-    }))[0];
-    expect(nonFieldable).toBeDefined();
-    expect(f.trade.byId[nonFieldable.target]).toBeDefined();
-    expect(f.model.acquisition(nonFieldable.target, 1, nonFieldable.zone, f.context({ zones: [nonFieldable.zone] }))).toBeNull();
+    const [name, retired] = Object.entries(f.data.mob.retired_variant_drops || {})[0] as [string, any];
+    expect(name).toBeTruthy();
+    const target = `junk:${retired.item}`;
+    const unavailable = f.data.mob.zones.find((zone) => !(f.model.sources[target] || []).some((source) => source.zone === zone.id));
+    expect(unavailable, target).toBeDefined();
+    expect(f.trade.byId[target]).toBeDefined();
+    expect(f.model.acquisition(target, 1, unavailable!.id, f.context({ zones: [unavailable!.id] }))).toBeNull();
   });
 });
 

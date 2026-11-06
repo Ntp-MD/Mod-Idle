@@ -1,11 +1,48 @@
 {
-    "status":  "candidate-review",
-    "candidateDuplicate":  true,
-    "requiresRegeneration":  true,
-    "method":  "nearest-direction-copy",
-    "sourcePath":  "poses/walk/south/03-stride-d.png",
-    "sourceDirection":  "south",
-    "sourcePixelsModified":  false,
-    "visualReviewRequired":  true,
-    "qaStatus":  "pending-facing-spacing-anchor-alpha-atlas-review"
+  "status": "candidate-review",
+  "candidateDuplicate": true,
+  "requiresRegeneration": true,
+  "method": "nearest-direction-copy",
+  "sourcePath": "poses/walk/south/03-stride-d.png",
+  "sourceDirection": "south",
+  "sourcePixelsModified": true,
+  "visualReviewRequired": true,
+  "qaStatus": "pending-facing-spacing-anchor-alpha-atlas-review",
+  "sourcePixelsModifiedBeforeSizeNormalization": false,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 132,
+    "uniformScale": 0.297968,
+    "reference": {
+      "atlas": "game\\public\\combat\\mob-pool\\dragon\\dragon\\v1\\atlas.png",
+      "frame": 15,
+      "action": "walk",
+      "direction": "west",
+      "phase": "03-stride-d"
+    },
+    "inputSha256": "a4774891c82a569ac45b6f85ddd4cd22219e64db7d9152db7f1d6f2711bb8061",
+    "outputSha256": "74a0a7ecee79a9d4a3212622644556cecb9ee3d772f5ce30ba80d83e49c9700d",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized with uniform nearest-neighbor scaling and the phase-matched runtime atlas anchor; visual approval remains pending."
 }

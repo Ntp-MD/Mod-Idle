@@ -1,0 +1,52 @@
+﻿{
+    "schemaVersion":  1,
+    "pose":  "03-settle",
+    "generator":  "Deterministic extraction from existing species atlas",
+    "sourceSize":  {
+                       "width":  384,
+                       "height":  384
+                   },
+    "rawAlphaBoundsExclusive":  [
+                                    111,
+                                    204,
+                                    273,
+                                    288
+                                ],
+    "visibleAlphaGt8BoundsExclusive":  [
+                                           111,
+                                           204,
+                                           273,
+                                           288
+                                       ],
+    "boundsProvenance":  "Pillow direct alpha measurement after nearest-neighbor scaling and anchor placement",
+    "footAnchor":  {
+                       "x":  192,
+                       "y":  288
+                   },
+    "anchorProvenance":  "Source atlas feet aligned to shared (192,288) ground anchor",
+    "releaseSocket":  null,
+    "sourcePixelsModified":  true,
+    "styleReference":  "art-reference/players/one-handed-sword/reference.png",
+    "bakedWeapon":  "sword",
+    "sourceAtlas":  "art-reference/monsters/undead/revenant/revenant/animation/atlas/animation.png",
+    "sourceCellIndex":  39,
+    "transformation":  "128x128 source cell extracted and enlarged 2x with NEAREST; placed on 384x384 transparent canvas. No palette/alpha edits.",
+    "status":  "candidate-review",
+    "action":  "death",
+    "direction":  "north-west",
+    "phase":  "03-settle",
+    "source":  "../west/03-settle.png",
+    "sourceDirection":  "west",
+    "directionalDuplicateSource":  "west",
+    "frameCanvas":  {
+                        "width":  384,
+                        "height":  384
+                    },
+    "anchor":  {
+                   "x":  192,
+                   "y":  288
+               },
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "note":  "Coverage-only directional duplicate from the west death candidate. Exact north-west-facing art remains ungenerated; regenerate and visually review before approval or atlas promotion."
+}

@@ -1,0 +1,92 @@
+{
+    "status":  "candidate-review",
+    "generator":  "OpenAI built-in image_gen",
+    "source":  "../north/02-recover.png",
+    "action":  "hit",
+    "phase":  "02-recover.png",
+    "direction":  "north-west",
+    "sourceSize":  {
+                       "width":  1254,
+                       "height":  1254
+                   },
+    "rawAlphaBoundsExclusive":  [
+                                    0,
+                                    21,
+                                    1240,
+                                    1254
+                                ],
+    "sourcePixelsModified":  true,
+    "frameCanvas":  {
+                        "width":  384,
+                        "height":  384
+                    },
+    "anchor":  {
+                   "x":  192,
+                   "y":  288
+               },
+    "anchorProvenance":  "Shared source-pose placement from poses.json; source feet/root were not independently measured.",
+    "normalization":  {
+                          "method":  "alpha-crop-nearest-fit-384-v1",
+                          "uniformScale":  0.14922952,
+                          "outputSize":  {
+                                             "width":  185,
+                                             "height":  184
+                                         },
+                          "offset":  {
+                                         "x":  100,
+                                         "y":  104
+                                     },
+                          "sourceAlphaBoundsExclusive":  [
+                                                             0,
+                                                             21,
+                                                             1240,
+                                                             1254
+                                                         ]
+                      },
+    "outputAlphaBoundsExclusive":  [
+                                       106,
+                                       106,
+                                       275,
+                                       284
+                                   ],
+    "visibleAlphaGt8BoundsExclusive":  [
+                                           148,
+                                           130,
+                                           239,
+                                           260
+                                       ],
+    "alphaMeasurement":  {
+                             "extrema":  [
+                                             0,
+                                             255
+                                         ],
+                             "distinctLevels":  171
+                         },
+    "qa":  {
+               "visuallyInspected":  false,
+               "phaseApproved":  false,
+               "cycleApproved":  false,
+               "atlasApproved":  false,
+               "identityPlausible":  false,
+               "facingPlausible":  false,
+               "note":  "Coverage-only phase-matched directional duplicate from the north candidate. Regenerate and visually review the exact north-west pose before approval or atlas promotion."
+           },
+    "pose":  "body straightens and natural talons and wings returns in front guard",
+    "originalSource":  "C:\\Users\\ITOP\\.codex-zed-account-1\\generated_images\\01a1a9ef-a592-7632-a531-70b402efd9e9\\exec-7fe25fd3-0201-43dd-8f1b-416f6b54cdf2.png",
+    "sourceAction":  "hit",
+    "sourceDirection":  "north",
+    "sourcePoseFile":  "02-recover.png",
+    "directionalDuplicateSource":  "north hit",
+    "regenerationRequired":  true,
+    "visualReviewRequired":  true,
+    "copiedPixelsUnmodified":  true,
+    "note":  "Coverage-only phase-matched directional duplicate from the north candidate. Regenerate and visually review the exact north-west pose before approval or atlas promotion.",
+    "visualReview":  {
+                         "identityAccepted":  false,
+                         "exactDirectionAccepted":  false,
+                         "poseSequenceAccepted":  false,
+                         "alphaAccepted":  false,
+                         "anchorAccepted":  false,
+                         "atlasAccepted":  false
+                     }
+}

@@ -1,0 +1,21 @@
+﻿{
+    "status":  "candidate-review",
+    "source":  "../../../../atlas/animation.png",
+    "sourceCell":  [
+                       3,
+                       1
+                   ],
+    "pixelsRepainted":  false,
+    "visualReviewRequired":  true,
+    "speciesId":  "wyrmling",
+    "race":  "dragon",
+    "action":  "walk",
+    "direction":  "south-east",
+    "phase":  "03-stride-d",
+    "originalStatus":  "baseline-extracted-candidate",
+    "copiedFrom":  "../east/03-stride-d.png",
+    "directionalDuplicateSource":  "east",
+    "sourceSha256":  "83e912a71421837761fd7582a459dda8d01aea0afe1e0a1ae30d53ebb73b6343",
+    "regenerationRequired":  true,
+    "note":  "Coverage-only directional duplicate copied byte-for-byte from the east baseline candidate. No authored south-east walk source exists; regenerate and visually review before approval or atlas promotion."
+}

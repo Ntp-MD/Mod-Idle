@@ -32,5 +32,42 @@
   "bakedWeapon": "sword",
   "sourceAtlas": "art-reference/monsters/undead/revenant/revenant/animation/atlas/animation.png",
   "sourceCellIndex": 3,
-  "transformation": "128x128 source cell extracted and enlarged 2x with NEAREST; placed on 384x384 transparent canvas. No palette/alpha edits."
+  "transformation": "128x128 source cell extracted and enlarged 2x with NEAREST; placed on 384x384 transparent canvas. No palette/alpha edits.",
+  "sourcePixelsModifiedBeforeSizeNormalization": true,
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288
+  },
+  "sizeNormalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "sourceDimensions": [
+      384,
+      384
+    ],
+    "frameCanvas": {
+      "width": 384,
+      "height": 384
+    },
+    "anchor": {
+      "x": 192,
+      "y": 288
+    },
+    "normalizedSubjectHeight": 164,
+    "uniformScale": 1.366667,
+    "reference": {
+      "atlas": "game/public/combat/mob-pool/undead/revenant/v1/atlas.png",
+      "frame": 3,
+      "action": "idle",
+      "direction": "north-east",
+      "phase": "north-east"
+    },
+    "inputSha256": "c2598382aa27cff24ae220bef3403c80103a7e7ef1246206f92562765c93fa5e",
+    "outputSha256": "430141dcc42908b7674314851a3516b0ca7efbc109a7fce2fa9889ace02b3303",
+    "reviewRequired": true
+  },
+  "note": "Size-normalized to the phase-matched runtime atlas reference with uniform nearest-neighbor scaling; visual approval remains pending."
 }

@@ -2,30 +2,41 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { TERRAIN_ART, TERRAIN_VARIANTS } from '../../src/ui/map/map-terrain';
+import { TERRAIN_ART, TERRAIN_RELIEF, TERRAIN_VARIANTS } from '../../src/ui/map/map-terrain';
 
 const publicDir = fileURLToPath(new URL('../../public', import.meta.url));
 const footprints = JSON.parse(readFileSync(fileURLToPath(new URL('../../src/ui/map/data/map-terrain-footprints.json', import.meta.url)), 'utf8'));
 const bounds = JSON.parse(readFileSync(fileURLToPath(new URL('../../src/ui/map/data/map-sprite-bounds.json', import.meta.url)), 'utf8'));
 
 describe('modular terrain art', () => {
-  it('gives every terrain exactly one piece of art', () => {
+  it('gives every terrain a ground texture and a real file', () => {
     for (const [terrain, art] of Object.entries(TERRAIN_ART)) {
-      // a terrain's art lives in one of the two public folders: `terrain/` holds the ground a hex
-      // stands on and `landmark/` the settlements, ruins and camps, one file at a time
       expect(art, terrain).toMatch(/^\/map\/(terrain|landmark)\/.+\.png$/);
-      expect(existsSync(resolve(publicDir, art.slice(1))), `${terrain} should have art`).toBe(true);
+      expect(existsSync(resolve(publicDir, art.slice(1))), `${terrain} should have ground art`).toBe(true);
+      expect(art in footprints, `${terrain} ground needs a measured hex footprint`).toBe(true);
     }
   });
-  it('gives different biomes their own artwork', () => {
+
+  it('gives different biomes their own ground', () => {
     expect(TERRAIN_ART.snow).not.toBe(TERRAIN_ART.rock);
     expect(TERRAIN_ART.marsh).not.toBe(TERRAIN_ART.forest);
     expect(TERRAIN_ART.salt).not.toBe(TERRAIN_ART.waste);
-  });
-  it('keeps dungeons on their own ruin', () => {
     expect(TERRAIN_ART.dungeon).not.toBe(TERRAIN_ART.ash);
     expect(TERRAIN_ART.dungeon).not.toBe(TERRAIN_ART.rock);
   });
+
+  it('keeps upright relief as separate measured objects, never full-hex ground', () => {
+    for (const [terrain, art] of Object.entries(TERRAIN_RELIEF)) {
+      expect(art, terrain).toMatch(/^\/map\/(terrain|landmark)\/.+\.png$/);
+      expect(existsSync(resolve(publicDir, art.slice(1))), `${terrain} relief should exist`).toBe(true);
+      expect(art in bounds, `${terrain} relief needs measured painted bounds`).toBe(true);
+      expect(art in footprints, `${terrain} relief must not be a full-hex ground`).toBe(false);
+    }
+    expect(TERRAIN_RELIEF.forest).toBeDefined();
+    expect(TERRAIN_RELIEF.rock).toBeDefined();
+    expect(TERRAIN_RELIEF.town).toBe('/map/landmark/town-relief-1.png');
+  });
+
   it('anchors every alternate diorama by its painted bounds', () => {
     for (const [terrain, variants] of Object.entries(TERRAIN_VARIANTS)) {
       expect(variants.length, terrain).toBeGreaterThan(0);
@@ -37,12 +48,7 @@ describe('modular terrain art', () => {
       }
     }
   });
-  it('selects upright dioramas rather than registered full-hex paintings for the active terrain', () => {
-    for (const [terrain, art] of Object.entries(TERRAIN_ART)) {
-      expect(art in bounds, terrain).toBe(true);
-      expect(art in footprints, terrain).toBe(false);
-    }
-  });
+
   it('keeps a biome own art out of its variant list', () => {
     for (const [terrain, variants] of Object.entries(TERRAIN_VARIANTS)) {
       expect(variants, terrain).not.toContain(TERRAIN_ART[terrain]);
