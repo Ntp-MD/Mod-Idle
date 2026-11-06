@@ -17,7 +17,7 @@
 
   let { mark, reducedMotion = false }: { mark: SkillGeometry; reducedMotion?: boolean } = $props();
 
-  const spec = $derived(activeSkillVfx(mark.skillId));
+  const spec = $derived(activeSkillVfx(mark.skillId, mark.incoming));
 
   const seedOf = (key: string) => [...key].reduce((acc, ch) => Math.imul(acc, 31) + ch.charCodeAt(0) | 0, 7);
   const rngOf = (seed: number) => () => {
@@ -42,6 +42,29 @@
 
   /** Footprint reach in world metres; single-target casts still get a body-sized plane. */
   const reachM = $derived(Math.max(mark.area.radiusM, mark.area.lengthM ?? 0, .55));
+
+  /** Field motifs (meteor/snow/lightning/sand): seeded ambient bodies inside the committed footprint. */
+  const fieldAmbient = $derived.by(() => {
+    const s = spec;
+    if (!s || s.form !== 'field' || (mark.phase !== 'Field' && mark.phase !== 'Impact')) return [] as { index: number; x: number; y: number; size: number; kind: string; delay: number }[];
+    const count = s.fieldStyle === 'snow' ? 8 : s.fieldStyle === 'sand' ? 8 : 4;
+    const rng = rngOf(seedOf(`${mark.key}-field`));
+    const out: { index: number; x: number; y: number; size: number; kind: string; delay: number }[] = [];
+    for (let index = 0; index < count; index++) {
+      const point = world(sampleVfxOffset(mark.area, rng));
+      const kind = s.fieldStyle ?? 'meteor';
+      out.push({ index, x: point.x, y: point.y, size: kind === 'snow' ? 1.4 + rng() * 2 : kind === 'sand' ? 1.8 + rng() * 2.4 : 2.6 + rng() * 3.2, kind, delay: rng() * 900 });
+    }
+    return out;
+  });
+
+  /** Support cues: heal body pulse (--good-lit), buff ward pulse (--es-lit), curse body pulse (element/--curse). */
+  const supportCue = $derived.by(() => {
+    const s = spec;
+    if (!s || (s.cue !== 'heal' && s.cue !== 'ward' && s.cue !== 'curse' && s.cue !== 'aura')) return null;
+    const colour = s.cue === 'aura' ? null : (s.element && s.element !== 'physical' ? null : (s.cue === 'heal' ? 'var(--good-lit)' : s.cue === 'ward' ? 'var(--es-lit)' : 'var(--curse)'));
+    return { cue: s.cue, colour };
+  });
 
   /** Projectile silhouettes keep the travel angle readable instead of drawing a round blob. */
   const projectileShape = (family: string) => {
@@ -182,6 +205,33 @@
         </g>
       {/each}
     {/if}
+    {#if mark.phase === 'Field' && fieldAmbient.length}
+      {#if spec.fieldStyle === 'snow'}
+        {#each fieldAmbient as piece (piece.index)}
+          <circle class="vfx-field-snow" cx={piece.x} cy={piece.y + mark.progress * 30} r={piece.size} style={`animation-delay:${piece.delay}ms`} />
+        {/each}
+      {/if}
+      {#if spec.fieldStyle === 'meteor'}
+        {#each fieldAmbient as piece (piece.index)}
+          <rect class="vfx-field-rock" x={piece.x} y={piece.y - 26} width={piece.size} height={piece.size} rx={piece.size / 2} style={`animation-delay:${piece.delay}ms`} />
+        {/each}
+      {/if}
+      {#if spec.fieldStyle === 'lightning'}
+        {#each fieldAmbient as piece (piece.index)}
+          <line class="vfx-field-spark" x1={piece.x} y1={piece.y} x2={piece.x} y2={piece.y - 26} style={`animation-delay:${piece.delay}ms`} />
+        {/each}
+      {/if}
+      {#if spec.fieldStyle === 'sand'}
+        {#each fieldAmbient as piece (piece.index)}
+          <ellipse class="vfx-field-dust" cx={piece.x} cy={piece.y} rx={piece.size * 1.6} ry={piece.size * .6} style={`animation-delay:${piece.delay}ms`} />
+        {/each}
+      {/if}
+    {/if}
+    {#if supportCue && (mark.phase === 'Impact' || mark.phase === 'Field')}
+      <circle class="vfx-support-cue vfx-support-{supportCue.cue}" cx={anchor.x} cy={anchor.y}
+        r={supportCue.cue === 'aura' ? reachM * 52 : reachM * 20}
+        data-vfx-cue={supportCue.cue} style={supportCue.colour ? `--cue:${supportCue.colour}` : undefined} />
+    {/if}
     {#if mark.phase === 'Impact'}
       <path class="vfx-shock" d={mark.footprint} />
       {#if spec.form === 'nova' || spec.form === 'sigil'}
@@ -246,6 +296,17 @@
 {/if}
 
 <style>
+  .vfx-support-cue { fill: none; stroke: var(--cue, currentColor); stroke-width: 3; opacity: .85; pointer-events: none; vector-effect: non-scaling-stroke; }
+  .vfx-support-aura { stroke-width: 1.5; opacity: .6; animation: vfx-aura 1800ms ease-in-out infinite; }
+  @keyframes vfx-aura { 0%, 100% { opacity: .55; } 50% { opacity: .8; } }
+  .vfx-field-snow { fill: #eaf6ff; opacity: .8; animation: vfx-snow 1400ms linear infinite; }
+  @keyframes vfx-snow { 0% { transform: translateY(-6px); opacity: 0; } 20% { opacity: .85; } 100% { transform: translateY(26px); opacity: 0; } }
+  .vfx-field-rock { fill: currentColor; stroke: #fff1ca; stroke-width: .6; opacity: .9; animation: vfx-rock 1100ms ease-in infinite; }
+  @keyframes vfx-rock { 0% { transform: translateY(-34px) scale(.7); opacity: 0; } 30% { opacity: .95; } 100% { transform: translateY(8px) scale(1.1); opacity: 0; } }
+  .vfx-field-spark { stroke: currentColor; stroke-width: 2; stroke-linecap: round; opacity: .9; animation: vfx-spark 700ms steps(2, end) infinite; }
+  @keyframes vfx-spark { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+  .vfx-field-dust { fill: currentColor; opacity: .5; animation: vfx-dust 1600ms ease-in-out infinite alternate; }
+  @keyframes vfx-dust { 0% { transform: translateX(-4px); opacity: .3; } 100% { transform: translateX(4px); opacity: .6; } }
   .skill-vfx-stage { color: var(--skill-element, var(--es-lit)); pointer-events: none; }
   .skill-vfx-stage path, .skill-vfx-stage circle, .skill-vfx-stage polyline, .skill-vfx-stage ellipse { vector-effect: non-scaling-stroke; }
   .vfx-gather { fill: currentColor; opacity: 0; animation: vfx-gather 340ms linear infinite; }
@@ -294,6 +355,10 @@
   @keyframes vfx-spin { from { rotate: 0deg; } to { rotate: 360deg; } }
   .vfx-volley-hit { fill: currentColor; stroke: #fff1ca; stroke-width: 1; opacity: 0; animation: vfx-volley 420ms ease-out both; }
   @keyframes vfx-volley { 0% { opacity: .9; } 100% { opacity: 0; transform: scale(1.7); } }
+  .no-motion .vfx-support-aura, .no-motion .vfx-field-snow, .no-motion .vfx-field-rock, .no-motion .vfx-field-spark, .no-motion .vfx-field-dust { animation: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .vfx-support-aura, .vfx-field-snow, .vfx-field-rock, .vfx-field-spark, .vfx-field-dust { animation: none; }
+  }
   .no-motion .vfx-gather, .no-motion .vfx-loop-body, .no-motion .vfx-spin { animation: none; }
   .no-motion .vfx-gather, .no-motion .vfx-loop-body { opacity: .5; }
   .no-motion .vfx-burst { animation-duration: 1ms; opacity: .6; }

@@ -17,7 +17,7 @@ export function activeAuraGeometry(skills: SkillState, frame: CombatArenaFrame,
     const area = skillAreaSnapshot({ origin: 'caster', radius_m: 0 }, frame.player, frame.player, 'player');
     const mark = skillAimGeometry({ skillId: id, area, source: frame.player,
       rangeM: 0, valid: true, targetName: 'You' }, view, undefined, body);
-    return mark ? [{ ...mark, key: `aura-${id}`, phase: 'Field' as const,
+    return mark ? [{ ...mark, key: `aura-${id}`, sourceKind: 'aura' as const, actorId: 'player', phase: 'Field' as const,
       elapsedSec, phaseElapsedSec: elapsedSec }] : [];
   });
 }

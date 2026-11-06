@@ -9,8 +9,10 @@ const liveAttacks = (): { id: string; element?: string; area?: any; cast?: any; 
 describe('active-skill VFX specs', () => {
   it('authors an explicit design row for every live attack skill', () => {
     const ids = activeSkillVfxIds().sort();
-    expect(ids).toEqual(liveAttacks().map((skill) => skill.id).sort());
-    expect([...SKILL_VFX_DESIGN_IDS].sort()).toEqual(ids);
+    const attackIds = ids.filter((id) => String(sm.byId[id]?.type) === 'attack').sort();
+    expect(attackIds).toEqual(liveAttacks().map((skill) => skill.id).sort());
+    // DESIGN keys must be a valid subset, not a requirement for every future skill
+    for (const designId of SKILL_VFX_DESIGN_IDS) expect(ids, designId).toContain(designId);
   });
 
   it('resolves a spec for each live attack and mirrors the canonical geometry', () => {
@@ -68,10 +70,20 @@ describe('active-skill VFX specs', () => {
     }
   });
 
-  it('returns null for non-attack, retired and mob rows', () => {
-    for (const skill of sm.all().filter(skill => skill.type !== 'attack' || skill.retired))
+  it('returns null for retired, unknown and passive rows', () => {
+    for (const skill of sm.all().filter(skill => skill.retired))
       expect(activeSkillVfx(skill.id), skill.id).toBeNull();
-    for (const skill of MS.skills) expect(activeSkillVfx(skill.id), skill.id).toBeNull();
+    // passive rows with no action/activation produce no invented effect
+    for (const skill of sm.all().filter((s: any) => s.type === 'passive' || s.type === 'keystone'))
+      expect(activeSkillVfx(skill.id), skill.id).toBeNull();
+    // mob ids resolve only via incoming=true
+    for (const skill of MS.skills) {
+      if (activeSkillVfx(skill.id)) {
+        // if it resolves as player row, skip; else must be null
+        if (!sm.byId[skill.id]) expect(activeSkillVfx(skill.id), skill.id).toBeNull();
+      }
+      expect(activeSkillVfx(skill.id, true), `${skill.id} incoming`).toBeTruthy();
+    }
     expect(activeSkillVfx('test.unknown-skill')).toBeNull();
     expect(activeSkillVfx(undefined)).toBeNull();
   });

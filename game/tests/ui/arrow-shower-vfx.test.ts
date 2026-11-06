@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { sm } from '../../src/engine/client';
 import { activeVfxArt, vfxVersionsFor } from '../../src/ui/fx/catalog';
 import { createCombatArena, type CombatArenaAction } from '@sim/combat/combat-arena';
-import { skillActionGeometry, skillPayloadArtGeometry } from '../../src/ui/combat/skill-geometry';
+import { skillActionGeometry, skillPayloadGeometry } from '../../src/ui/combat/skill-geometry';
 import { atlasImpactDuration } from '../../src/ui/combat/arena-skill-art';
 import { skillRainDrops } from '../../src/ui/combat/meteor-rain';
 const RAIN = liveId(row => row.action?.kind === 'projectile-burst' && row.area?.radius_m > 0
@@ -46,7 +46,7 @@ describe('projectile impact rain', () => {
     const atlas = readAtlas();
     const time = (.1 + Math.min(hits - .5, 2) * interval) * units;
     const mark = skillActionGeometry(action, arena, time, units)!;
-    const shots = skillPayloadArtGeometry(mark, action, time, units, atlasImpactDuration(atlas));
+    const shots = skillPayloadGeometry(mark, action, time, units, atlasImpactDuration(atlas));
     expect(shots).toHaveLength(action.payloads!.filter(payload => payload.releaseAtUs <= time).length);
     expect(new Set(shots.map(shot => shot.key)).size).toBe(shots.length);
     for (const shot of shots) {
@@ -54,7 +54,7 @@ describe('projectile impact rain', () => {
       expect(skillRainDrops(shot, atlas)).toEqual([]);
     }
     const contactAt = 1.01 * units;
-    const contacts = skillPayloadArtGeometry(skillActionGeometry(action, arena, contactAt, units)!,
+    const contacts = skillPayloadGeometry(skillActionGeometry(action, arena, contactAt, units)!,
       action, contactAt, units, atlasImpactDuration(atlas));
     expect(contacts[0].phase).toBe('Impact');
     const before = JSON.stringify(action);
@@ -66,7 +66,7 @@ describe('projectile impact rain', () => {
     expect(contacts.slice(1).every(shot => shot.phase === 'Travel')).toBe(true);
     expect(contacts.slice(1).flatMap(shot => skillRainDrops(shot, atlas))).toEqual([]);
     const lateAt = (1 + (hits - 1) * interval + .1) * units;
-    const late = skillPayloadArtGeometry(skillActionGeometry(action, arena, lateAt, units,
+    const late = skillPayloadGeometry(skillActionGeometry(action, arena, lateAt, units,
       undefined, undefined, undefined, undefined, atlasImpactDuration(atlas))!,
       action, lateAt, units, atlasImpactDuration(atlas));
     expect(late.length).toBeGreaterThan(0);

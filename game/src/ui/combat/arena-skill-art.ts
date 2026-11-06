@@ -6,13 +6,70 @@
  * Versions and atlas files are owned by `../fx/catalog.ts`; this module only adapts the active
  * pool row to the arena layer's decal/burst shape, and owns the one ground-projection matrix.
  */
-import { activeVfxArt, type SkillArt, type VfxAtlas } from '../fx/catalog';
+import { activeVfxArt, vfxArtCandidates, type SkillArt, type VfxAtlas } from '../fx/catalog';
+import { getVfxAssetStatus } from '../fx/vfx-assets.svelte';
 import { ARENA_VIEW, projectArenaPoint, projectArenaVector } from '../../presentation/arena-camera';
 import type { SkillGeometry } from './skill-geometry';
 
 export type { SkillArt } from '../fx/catalog';
 
-export const skillArtFor = (id: string): SkillArt | undefined => activeVfxArt(id);
+export type SkillVfxMode = 'auto' | 'base';
+export type VfxPresentation =
+  | { kind: 'base'; reason: 'forced' | 'unavailable' | 'loading' | 'failed' }
+  | { kind: 'skin'; versionId: string; art: SkillArt };
+
+/**
+ * Pure presentation resolution: Base mode forces Base; auto picks first fully-ready candidate.
+ * Never starts I/O. Pending preferred does not hide a ready default.
+ */
+export function resolveVfxPresentation(skillId: string, mode: SkillVfxMode): VfxPresentation {
+  if (mode === 'base') return { kind: 'base', reason: 'forced' };
+  const candidates = vfxArtCandidates(skillId);
+  if (candidates.length === 0) return { kind: 'base', reason: 'unavailable' };
+  const anyPending = candidates.some((c) => c.sources.some((s) => {
+    const st = getVfxAssetStatus(s);
+    return st === 'idle' || st === 'loading';
+  }));
+  for (const c of candidates) {
+    if (c.sources.length === 0) continue;
+    if (c.sources.every((s) => getVfxAssetStatus(s) === 'ready')) {
+      return { kind: 'skin', versionId: c.versionId, art: c.art };
+    }
+  }
+  if (anyPending) return { kind: 'base', reason: 'loading' };
+  // all settled: if any failed → failed, else unavailable (no candidates ready but not failed?)
+  const anyFailed = candidates.some((c) => c.sources.some((s) => getVfxAssetStatus(s) === 'failed'));
+  if (anyFailed) return { kind: 'base', reason: 'failed' };
+  return { kind: 'base', reason: 'unavailable' };
+}
+
+/** Metadata-only stable envelope: max(0.6s Base tail, atlasImpactDuration across all valid versions). */
+export function vfxPresentationTailSec(skillId: string): number {
+  const candidates = vfxArtCandidates(skillId);
+  let max = 0.6;
+  for (const c of candidates) {
+    const atlases = c.art.atlases ?? (c.art.atlas ? [c.art.atlas] : []);
+    for (const a of atlases) {
+      const d = atlasImpactDuration(a);
+      if (Number.isFinite(d) && d > max) max = d;
+    }
+    if (c.art.atlas) {
+      const d = atlasImpactDuration(c.art.atlas);
+      if (Number.isFinite(d) && d > max) max = d;
+    }
+  }
+  return max;
+}
+
+export const skillArtFor = (id: string, mode: SkillVfxMode = 'auto'): SkillArt | undefined => {
+  if (mode === 'base') return undefined;
+  // SSR / Node tests: no browser loader — return metadata art so geometry tests can read frames.
+  // In browser, resolver is authority (Base while loading/failed).
+  if (typeof window === 'undefined') return activeVfxArt(id);
+  const pres = resolveVfxPresentation(id, mode);
+  if (pres.kind === 'skin') return pres.art;
+  return undefined;
+};
 
 /** One atlas frame placed in the arena: the frame's anchor lands on the live aim point. */
 export type SkillArtPlacement = {

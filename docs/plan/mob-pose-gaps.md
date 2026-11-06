@@ -1,49 +1,59 @@
-# Mob pose completion
+﻿# Mob pose status
 
-**Goal:** all 36 species reach 136/136 canonical source slots: eight directions (south, south-east, east, north-east, north, north-west, west and south-west), with one idle frame and four frames each for walk, attack, hit and death per direction.
+**Updated:** 2026-11-06
 
-Refresh counts and exact missing target slots with `python -B tools/monster-animation-v5-inventory.py`. The 11 `animation/missing-poses.json` trackers (at `<species>/<species>/animation/`) were refreshed 2026-11-05 to the 8-direction target; re-refresh them with the inventory whenever slots change.
+**Coverage is complete:** all 36 species have 136/136 canonical 8-direction slots (4,896/4,896), with no missing PNGs or sidecars. `candidate-review` counts toward coverage, not visual approval or atlas promotion. Do not extend the grandfathered 16-direction sets.
 
-Canonical pose PNGs count toward coverage; draft files do not. `candidate-review` frames count toward 136/136 but are not approved. Slot coverage, visual approval and atlas promotion are separate. Existing extra 16-direction poses and frames are grandfathered history — do not extend or complete them; they are not required for the target.
+The inventory reports metadata/path differences for `undead/bonehound`, `undead/revenant` and `undead/wraith`, plus extra east/west attack phases for `beast/harpy` and `undead/wraith`. These do not change target-slot coverage; check their manifests before changing paths or files.
 
-## Priority 1 - Every mob reaches 136/136
+**Anti-duplication claim:** `/root` owns `beast/werewolf` as the first regeneration target. Its 136 source slots were reviewed at full resolution; no PNG has been changed or approved. Keep the claim until this species' candidate review is recorded.
 
-Work on one species at a time, starting with the smallest current gap. Finish that species at 136/136 and refresh the inventory before moving to the next. `plant/dryad` is complete; choose each next target from a fresh inventory. The dated snapshot below is historical.
+**Grade-4 source screen:** 20/25 complete: 12 species need no visual correction; 8 have specific fixes in the table; 5 remain.
 
-Claim table (one species per agent — write your name + date before starting, tick `[x]` and refresh the inventory when done):
+## Per-species fixes
 
-| Done | Species | Missing | Claimed by |
-| ---- | ------- | ------- | ---------- |
-| [x] | `plant/dryad` | 0 |  |
-| [x] | `beast/harpy` | 0 | `/root/harpy` — 2026-11-05 |
-| [x] | `beast/werewolf` | 0 | `/root/werewolf` — 2026-11-05 |
-| [x] | `beast/wolf` | 0 | `/root/wolf` — 2026-11-05 |
-| [x] | `plant/treant` | 0 | 
-| [x] | `demon/imp` | 0 | 
-| [x] | `dragon/dragon` | 0 | 
-| [x] | `dragon/mirehydra` | 0 | `/root/mirehydra` — 2026-11-05 |
-| [x] | `dragon/wyrmling` | 0 | `/root/wyrmling` — 2026-11-05 |
-| [x] | `dragon/wyvern` | 0 | `/root/wyvern` — 2026-11-05 |
-| [x] | `fish/siren` | 0 | `/root/siren` — 2026-11-05 |
-| [x] | `humanoid/elf` | 0 |  |
-| [x] | `humanoid/giant` | 0 |  |
-| [x] | `humanoid/orc` | 0 |  |
-| [x] | `undead/bonehound` | 0 | `/root/bonehound` — 2026-11-05 |
-| [x] | `undead/mummy` | 0 | `/root/mummy` — 2026-11-05 |
-| [x] | `undead/revenant` | 0 | `/root/revenant` — 2026-11-05 |
+`P` = passes the composer per-frame check, `A` = rejected for soft alpha, `D` = rejected for multiple disconnected poses. `D` is measured only after hard-alpha frames pass. Each row totals 136. The exact check found 954 pass, 3,898 alpha failures, 44 disconnected-pose failures and no edge-touch failures. This is the per-frame source gate; full compose and atlas QA remain pending regenerated candidates.
 
-Inventory snapshot 2026-11-05 (after the assigned species completed): Dryad, Treant, Dragon and Imp are 136/136; 56 Treant, 65 Dragon and 93 Imp slots are provisional duplicate candidates requiring regeneration. Harpy 107/136, Werewolf 96/136, Wolf 93/136, Mirehydra 100/136, Wyrmling 73/136, Wyvern 124/136, Siren 128/136, Bonehound 112/136, Mummy and Revenant 40/136. The remaining 26 species have all 136 target slots present. Run the inventory for current details.
+| Species | Grade | Visual fix or next review | Composer gate |
+| ------- | -----: | ------------------------- | ------------- |
+| `beast/harpy` | 4 | Full-res screen complete; eight headings and action sequences read clearly. Reconcile extra east/west attack phases against the manifest. | P0 A136 D0 |
+| `beast/werewolf` | 3 | Replace mixed biped/quadruped action views with one consistent werewolf form; correct reused headings in walk/attack/hit/death and frontal idle views. | P0 A136 D0 |
+| `beast/wolf` | 4 | Replace east/west side-view cells across idle and actions: they are visibly smaller, flatter and lower-detail than the other headings. Other direction sequence reads clearly. | P57 A79 D0 |
+| `demon/demon` | 4 | Brighten/separate detail in dark side/back views; vary repeated near-identical attack/hit/death silhouettes across headings. | P0 A136 D0 |
+| `demon/imp` | 4 | Regenerate east idle and action cells: they contain tiny multi-pose fragments, not one readable sprite. Replace the low-detail west-facing art to match the other headings. | P128 A2 D6 |
+| `dragon/dragon` | 3 | Regenerate front-facing idle headings; make action views distinct across headings instead of reusing a small set. | P19 A117 D0 |
+| `dragon/mirehydra` | 3 | Regenerate front-facing idle and repeated neighboring action views; stabilize death-frame silhouette size. | P0 A136 D0 |
+| `dragon/wyrmling` | 4 | Full-res screen complete; headings and action sequences read clearly, with no specific source-frame correction. | P0 A136 D0 |
+| `dragon/wyvern` | 4 | Full-res screen complete; headings, wing silhouettes and action sequences read clearly, with no specific source-frame correction. | P0 A136 D0 |
+| `elemental/golem` | 3 | Regenerate idle headings to show their exact directions; action views remain under review. | P73 A63 D0 |
+| `elemental/slaggolem` | 4 | Fix death phase `03-settle`: most headings end as tiny upright sprites while east/west lie down as large silhouettes. Make the final collapse consistent across headings. | P136 A0 D0 |
+| `elemental/wisp` | 4 | Full-res screen complete; swirl headings, effect phases and collapse sequence read clearly, with no specific source-frame correction. | P0 A136 D0 |
+| `fish/siren` | 4 | Regenerate all 32 east-facing slots (idle plus 4 phases for each action): they are tiny, pixelated and fragmented instead of one full-size sprite. | P9 A96 D31 |
+| `formless/ooze` | 4 | Full-res screen complete; heading silhouettes and action/death phases read clearly, with no specific source-frame correction. | P136 A0 D0 |
+| `formless/slime` | 3 | Regenerate front-facing idle headings; remove or attach detached attack droplets. | P0 A136 D0 |
+| `humanoid/elf` | 4 | Regenerate all 32 east-facing slots: the current figure is tiny, pixelated and mismatched in detail from the other headings. | P0 A136 D0 |
+| `humanoid/giant` | 3 | Regenerate front-facing idle headings; action views remain under review. | P0 A136 D0 |
+| `humanoid/goblin` | 4 | Full-res screen complete; headings and action sequences read clearly, with no specific source-frame correction. | P0 A136 D0 |
+| `humanoid/human` | 3 | Regenerate front-facing idle headings; action views remain under review. | P0 A136 D0 |
+| `humanoid/kobold` | 4 | Full-res screen complete; headings and action sequences read clearly, with no specific source-frame correction. | P0 A136 D0 |
+| `humanoid/lizardman` | 4 | Full-res screen complete; tail, scale silhouette, headings and action sequence read clearly, with no specific source-frame correction. | P0 A136 D0 |
+| `humanoid/minotaur` | 4 | Full-res screen complete; horns, axe, headings and action sequence read clearly, with no specific source-frame correction. | P0 A136 D0 |
+| `humanoid/ogre` | 3 | Regenerate front-facing idle headings; distinguish action views for nearby headings. | P93 A43 D0 |
+| `humanoid/orc` | 4 | Full-res screen complete; armor, axe, headings and action sequence read clearly, with no specific source-frame correction. | P0 A136 D0 |
+| `humanoid/troll` | 3 | Regenerate front-facing idle headings; action views remain under review. | P94 A42 D0 |
+| `insect/beetle` | 4 | Screen found no direction/sequence defect. Remove detached second poses in `idle/north-east/north-east.png`, `walk/east/01-stride-b.png`, `attack/east/02-follow-through.png`, `death/east/02-ground.png`, `death/east/03-settle.png` and `death/west/01-collapse.png`. | P34 A96 D6 |
+| `insect/hornet` | 4 | Screen found no directional/sequence defect. Regenerate detached second pose in `attack/west/01-contact.png`. | P39 A96 D1 |
+| `insect/spider` | 3 | Regenerate front-facing idle headings; action views remain under review. | P0 A136 D0 |
+| `plant/dryad` | 4 | Full-res screen complete; leafy silhouette, heading changes and action/death sequences read clearly, with no specific source-frame correction. | P0 A136 D0 |
+| `plant/treant` | 4 | Full-res screen complete; headings and idle/walk/attack/hit/death sequences read clearly, with no specific source-frame correction. | P0 A136 D0 |
+| `undead/bonehound` | 4 | Full-res screen; overview found no specific frame defect. Check its manifest/path differences before editing. | P0 A136 D0 |
+| `undead/mummy` | 3 | Regenerate front-facing idle; restore distinct views for all eight headings across actions currently reduced to east/west profiles. | P0 A136 D0 |
+| `undead/revenant` | 4 | Full-res screen; overview found no specific frame defect. Check its manifest/path differences before editing. | P136 A0 D0 |
+| `undead/skeleton` | 4 | Full-res screen; overview found no specific frame defect. | P0 A136 D0 |
+| `undead/vampire` | 4 | Full-res screen; overview found no specific frame defect. | P0 A136 D0 |
+| `undead/wraith` | 4 | Full-res screen; overview found no specific frame defect. Check manifest/path differences and extra east/west attack phases before editing. | P0 A136 D0 |
 
-## Variant atlas status (163 variants, snapshot 2026-11-05)
+All regenerated frames stay `candidate-review` until exact facing, identity, action sequence, alpha and anchor pass. The 447 coverage-only directional duplicates also remain `candidate-review`; coverage is not approval.
 
-156/163 variants have a draft atlas + `meta.json` and pass `tools/monster-animation-qa.py` (163/163 pass). Per-variant truth lives in its own `meta.json` on disk; the QA-pass list lives in `game/src/ui/dev/arena-art/arena-art-mob-drafts-qa-pass.ts` — do not copy rows here, update those owners instead.
 
-Exceptions (every unlisted variant = draft atlas + QA pass):
 
-- clips-only, no draft atlas, out of draft QA (7): `demon/imp/little-demon`, `elemental/wisp/eclipse-wisp`, `humanoid/goblin/spear-goblin`, `insect/spider/pixiblop-spider`, `undead/skeleton/original-bone`, `undead/skeleton/sword-shield`, `undead/wraith/crypt-wraith`
-- `integrated`, runtime pool export exists (5): `insect/beetle/borer-beetle`, `insect/beetle/carapace-beetle`, `insect/beetle/dust-beetle`, `insect/beetle/hollow-beetle`, `insect/beetle/ironshell-beetle`
-- draft atlas plus legacy clips (2): `beast/wolf/shadow-wolf`, `elemental/golem/stone-golem` (legacy manifest: `clips-meta.json`)
-
-## Priority 2 - Review follow-up (parked until Priority 1 completes)
-
-Sequencing rule: finish 136/136 coverage first, visual beauty review later. Do not mix aesthetic judgments into coverage work, and do not start this pass until every species reaches 136/136. Review candidates before approval or atlas promotion. Existing notes about extra directions remain applicable to those assets. First-pass atlas beauty grades are tracked in [mob-pose-beauty-review.md](mob-pose-beauty-review.md); size stability checks are tracked in [mob-pose-size-review.md](mob-pose-size-review.md).

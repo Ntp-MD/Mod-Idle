@@ -124,6 +124,7 @@ export interface VfxVersion extends VfxAimMeta {
   layers: VfxLayer[];
 }
 
+import { SvelteMap } from 'svelte/reactivity';
 import { POOL_VERSIONS } from './pool.generated';
 
 /**
@@ -133,12 +134,12 @@ import { POOL_VERSIONS } from './pool.generated';
 export const SKILL_VFX_POOL: Record<string, VfxVersion[]> = { ...POOL_VERSIONS };
 
 const STORAGE_KEY = 'modworld:vfx-version';
-let chosen: Record<string, string> = readChosen();
+const chosen = new SvelteMap<string, string>();
 
-if (typeof window !== 'undefined') {
-  window.addEventListener('storage', (event) => {
-    if (event.key === STORAGE_KEY) chosen = readChosen();
-  });
+function hydrateChosen() {
+  chosen.clear();
+  const initial = readChosen();
+  for (const [k, v] of Object.entries(initial)) chosen.set(k, v);
 }
 
 function readChosen(): Record<string, string> {
@@ -155,15 +156,22 @@ function readChosen(): Record<string, string> {
 
 function saveChosen(): void {
   if (typeof localStorage === 'undefined') return;
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(chosen)); } catch { /* private mode */ }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(Object.fromEntries(chosen.entries()))); } catch { /* private mode */ }
+}
+
+hydrateChosen();
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (event) => {
+    if (event.key === STORAGE_KEY) hydrateChosen();
+  });
 }
 
 export const vfxVersionsFor = (skillId: string): readonly VfxVersion[] => SKILL_VFX_POOL[skillId] ?? [];
 
 export function activeVfxVersionId(skillId: string): string | null {
   const versions = vfxVersionsFor(skillId);
-  const wanted = chosen[skillId];
-  return versions.some((version) => version.id === wanted) ? wanted : versions[0]?.id ?? null;
+  const wanted = chosen.get(skillId);
+  return versions.some((version) => version.id === wanted) ? wanted! : versions[0]?.id ?? null;
 }
 
 export function activeVfxVersion(skillId: string): VfxVersion | null {
@@ -173,9 +181,102 @@ export function activeVfxVersion(skillId: string): VfxVersion | null {
 
 export function setActiveVfxVersion(skillId: string, versionId: string): boolean {
   if (!vfxVersionsFor(skillId).some((version) => version.id === versionId)) return false;
-  chosen = { ...chosen, [skillId]: versionId };
+  chosen.set(skillId, versionId);
   saveChosen();
   return true;
+}
+
+export interface VfxArtCandidate {
+  versionId: string;
+  art: SkillArt;
+  sources: readonly string[];
+}
+
+function candidateSources(version: VfxVersion): string[] {
+  const art = artOf(version);
+  if (!art) return [];
+  const srcs = new Set<string>();
+  if (art.decal) srcs.add(art.decal);
+  if (art.burst) srcs.add(art.burst);
+  if (art.atlas) srcs.add(art.atlas.src);
+  for (const a of art.atlases ?? []) srcs.add(a.src);
+  return [...srcs];
+}
+
+function isValidCandidate(version: VfxVersion, art?: SkillArt): boolean {
+  const a = art ?? artOf(version);
+  if (!a) return false;
+  const sources = candidateSources(version);
+  if (sources.length === 0) return false;
+  // validate every layer frame grid / fps / rects against texture bounds
+  for (const layer of version.layers) {
+    const f = layer.frame;
+    if (!Number.isFinite(f.width) || !Number.isFinite(f.height) || !(f.width > 0) || !(f.height > 0)) return false;
+    if (!Number.isFinite(f.count) || !(f.count >= 1) || !Number.isFinite(f.columns) || !(f.columns >= 1)) return false;
+    const fps = layer.fps ?? (version as any).fps ?? 12;
+    if (fps != null && (!Number.isFinite(fps) || !(fps > 0))) return false;
+    if (f.rows != null && (!Number.isFinite(f.rows) || !(f.rows >= 1))) return false;
+    const tw = f.textureWidth;
+    const th = f.textureHeight;
+    if (tw != null && (!(tw > 0) || !Number.isFinite(tw))) return false;
+    if (th != null && (!(th > 0) || !Number.isFinite(th))) return false;
+    // sourceFrames rects inside texture bounds when known
+    if (f.sourceFrames) {
+      for (const sf of f.sourceFrames) {
+        const [x, y, w, h] = sf.rect;
+        if (![x, y, w, h].every((n) => Number.isFinite(n)) || w <= 0 || h <= 0 || x < 0 || y < 0) return false;
+        if (tw != null && x + w > tw) return false;
+        if (th != null && y + h > th) return false;
+        if (f.virtualWidth != null && sf.offsetX + w > f.virtualWidth) return false;
+        if (f.virtualHeight != null && sf.offsetY + h > f.virtualHeight) return false;
+      }
+    }
+    if (layer.frames) {
+      for (const range of [layer.frames.opening, layer.frames.loop, layer.frames.exit]) {
+        if (range) {
+          if (!Array.isArray(range) || range.length !== 2 || !range.every((n) => Number.isFinite(n)) || range[0] < 0 || range[1] < range[0] || range[1] >= f.count) return false;
+        }
+      }
+    }
+  }
+  // non-empty URLs
+  for (const s of sources) if (!s || typeof s !== 'string') return false;
+  return true;
+}
+
+/**
+ * Pure metadata candidates: selected renderable first, then promoted default (default===true, else versions[0]).
+ * Excludes arena:false and invalid metadata; deduplicates by versionId. No I/O, no scanning of other versions.
+ */
+export function vfxArtCandidates(skillId: string): readonly VfxArtCandidate[] {
+  const versions = vfxVersionsFor(skillId);
+  if (versions.length === 0) return [];
+  const selectedId = (() => {
+    const wanted = chosen.get(skillId);
+    return wanted && versions.some((v) => v.id === wanted) ? wanted : null;
+  })();
+  const defaultVersion = versions.find((v) => v.default === true) ?? versions[0];
+  const ordered: VfxVersion[] = [];
+  if (selectedId) {
+    const sel = versions.find((v) => v.id === selectedId);
+    if (sel) ordered.push(sel);
+  }
+  if (defaultVersion && !ordered.some((v) => v.id === defaultVersion.id)) ordered.push(defaultVersion);
+
+  const seen = new Set<string>();
+  const out: VfxArtCandidate[] = [];
+  for (const v of ordered) {
+    if (seen.has(v.id)) continue;
+    seen.add(v.id);
+    if (v.arena === false) continue;
+    const art = artOf(v);
+    if (!art) continue;
+    if (!isValidCandidate(v, art)) continue;
+    const sources = candidateSources(v);
+    if (sources.length === 0) continue;
+    out.push({ versionId: v.id, art, sources });
+  }
+  return out;
 }
 
 /** The active raster slot for the arena renderer; null keeps the procedural SVG path. */

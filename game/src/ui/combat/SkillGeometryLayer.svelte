@@ -3,10 +3,12 @@
   import { ARENA_VIEW, type ArenaViewSize } from './combat-arena-view';
   import type { SkillAimGeometry, SkillGeometry } from './skill-geometry';
   import { projectArenaVector } from '../../presentation/arena-camera';
-  import { atlasImpactDuration, groundDecalMatrix, matrixAttribute, skillArtFor } from './arena-skill-art';
-  import { skillActionGeometry, skillAimGeometry, skillPayloadArtGeometry } from './skill-geometry';
+  import { atlasImpactDuration, groundDecalMatrix, matrixAttribute, resolveVfxPresentation, skillArtFor, vfxPresentationTailSec, type SkillVfxMode } from './arena-skill-art';
+  import { skillActionGeometry, skillAimGeometry, skillPayloadGeometry } from './skill-geometry';
   import { activeAuraGeometry } from './skill-aura-geometry';
   import { supportEventGeometry } from './skill-support-geometry';
+  import { vfxArtCandidates } from '../fx/catalog';
+  import { ensureVfxAssets } from '../fx/vfx-assets.svelte';
   import type { SkillState } from '@sim/combat/skills';
   import ArenaSkillVfxStage from './ArenaSkillVfxStage.svelte';
   import SkillAtlas from './SkillAtlas.svelte';
@@ -24,7 +26,7 @@
 
   /** Map a raster decal's square canvas through the arena ground basis and anchor it at the centre. */
   function artFor(mark: SkillGeometry): ArtView {
-    const art = skillArtFor(mark.skillId);
+    const art = skillArtFor(mark.skillId, vfxMode);
     if (!art) return null;
     if (art.atlas) {
       return { atlas: art.atlas };
@@ -44,11 +46,12 @@
   }
 
   let { arena, frame, atUs, aim = null, inspect = false, view = ARENA_VIEW, reducedMotion = false,
-    releasePoints = {}, bodySizes = {}, skills }: {
+    releasePoints = {}, bodySizes = {}, skills, vfxMode = 'auto' }: {
     arena: CombatArena; frame: CombatArenaFrame; atUs: number; aim?: SkillAimGeometry | null; inspect?: boolean;
     view?: ArenaViewSize; reducedMotion?: boolean; releasePoints?: Record<string, { x: number; y: number }>;
     bodySizes?: Record<string, { width: number; height: number }>;
     skills?: SkillState;
+    vfxMode?: SkillVfxMode;
   } = $props();
   const marks = $derived.by(() => {
     // The arena is raw. Read the render clock even when its action list starts empty;
@@ -65,25 +68,45 @@
     }
     return [
       ...arena.actions.flatMap(action => {
-        const atlas = skillArtFor(action.skillId ?? '')?.atlas;
         const mark = skillActionGeometry(action, frame, atUs, arena.unitsPerSec,
           nextImpacts.get(action.id), view, releasePoints, bodySizes,
-          Math.max(atlas?.rainDurationSec ?? 0, atlas ? atlasImpactDuration(atlas) : 0));
+          vfxPresentationTailSec(action.skillId ?? ''));
         return mark ? [mark] : [];
       }),
       ...(aim ? [skillAimGeometry(aim, view, releasePoints.player, bodySizes.player)].filter(mark => mark != null) : []),
     ];
   });
+  // Ensure assets only for currently represented skills (selected/default candidates).
+  $effect(() => {
+    const ids = new Set<string>();
+    for (const mark of marks) ids.add(mark.skillId);
+    if (skills) for (const [id, on] of Object.entries(skills.auras ?? {})) if (on) ids.add(id);
+    const sources: string[] = [];
+    for (const id of ids) for (const c of vfxArtCandidates(id)) sources.push(...c.sources);
+    if (sources.length) ensureVfxAssets(sources);
+  });
   const artMarks = $derived.by(() => {
     const actions = new Map(arena.actions.map(action => [`action-${action.id}`, action]));
+    const payloads = marks.flatMap(mark => {
+      const action = actions.get(mark.key);
+      return action ? skillPayloadGeometry(mark, action, atUs, arena.unitsPerSec,
+        vfxPresentationTailSec(mark.skillId), arena.flights) : [mark];
+    });
+    let auras = skills ? activeAuraGeometry(skills, frame, atUs, arena.unitsPerSec, view, bodySizes.player) : [];
+    // Aggregate unskinned aura halos per actor; representative = lowest skill id. Halos stop on off/push/ownership loss (handled by the producers).
+    const baseAuras = new Map<string, SkillGeometry>();
+    const kept: SkillGeometry[] = [];
+    for (const aura of auras) {
+      const pres = resolveVfxPresentation(aura.skillId, vfxMode);
+      if (pres.kind !== 'base') { kept.push(aura); continue; }
+      const key = `base-aura:${aura.actorId ?? 'player'}`;
+      const cur = baseAuras.get(key);
+      if (!cur || String(aura.skillId) < String(cur.skillId)) baseAuras.set(key, aura);
+    }
+    for (const aura of baseAuras.values()) kept.push({ ...aura, key: `base-aura:${aura.actorId ?? 'player'}` });
     return [
-      ...marks.flatMap(mark => {
-        const action = actions.get(mark.key);
-        const atlas = skillArtFor(mark.skillId)?.atlas;
-        return action && atlas ? skillPayloadArtGeometry(mark, action, atUs, arena.unitsPerSec,
-          atlasImpactDuration(atlas), arena.flights) : [mark];
-      }),
-      ...(skills ? activeAuraGeometry(skills, frame, atUs, arena.unitsPerSec, view, bodySizes.player) : []),
+      ...payloads,
+      ...kept,
       ...supportEventGeometry(arena.feedback ?? [], arena, frame, atUs, view, bodySizes.player),
     ];
   });
@@ -97,6 +120,8 @@
     <g class="skill-geometry" class:incoming={mark.incoming} class:invalid={!mark.valid}
       class:aim={mark.phase === 'Aim'} class:impact={mark.phase === 'Impact'}
       style={`--skill-element:${mark.colour}`}
+      data-vfx-renderer={resolveVfxPresentation(mark.skillId, vfxMode).kind}
+      data-vfx-base-reason={resolveVfxPresentation(mark.skillId, vfxMode).kind === 'base' ? (resolveVfxPresentation(mark.skillId, vfxMode) as any).reason : ''}
       data-skill-id={mark.skillId} data-skill-element={mark.element} data-skill-phase={mark.phase.toLowerCase()} data-skill-progress={mark.progress.toFixed(3)} data-skill-shape={mark.area.shape ?? (mark.area.radiusM > 0 ? 'circle' : 'single')}>
       {#if art && !art.atlas}
         <clipPath id={`skill-art-${mark.key}`}><path d={mark.footprint} /></clipPath>
@@ -149,9 +174,12 @@
 <svg class="skill-art-layer" viewBox={`0 0 ${view.width} ${view.height}`}
   preserveAspectRatio="none" aria-hidden="true" data-skill-art-layer>
   {#each artMarks as mark (mark.key)}
-    {@const art = skillArtFor(mark.skillId)}
+    {@const pres = resolveVfxPresentation(mark.skillId, vfxMode)}
+    {@const art = pres.kind === 'skin' ? pres.art : undefined}
     {#each (art?.atlases ?? (art?.atlas ? [art.atlas] : [])) as atlas (atlas.src)}
-      <g opacity={atlas.opacity ?? 1} data-skill-art-source={atlas.src}>
+      <g opacity={atlas.opacity ?? 1} data-skill-art-source={atlas.src}
+        data-vfx-renderer="skin" data-vfx-version={pres.kind === 'skin' ? pres.versionId : ''}
+        data-vfx-base-reason={pres.kind === 'base' ? pres.reason : ''}>
         <SkillAtlas {mark} {atlas} {reducedMotion} />
       </g>
     {/each}

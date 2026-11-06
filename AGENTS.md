@@ -2,11 +2,37 @@
 
 Single-player, browser-only idle RPG; no server. Shared entry point for every coding agent.
 
-## Design references
+## Always-on skills
 
-ROX / Ragnarok Origin is the reference for combat feel only. Do not use Melvor or any other idle game as the reference for engine or idle architecture; those decisions cite `engine/`, `tools/data/*.json` and our own measurements. The existing gameplay feature set stays as it is.
+`ponytail`, `lean-agent` and `polish-indent` live at `~/.agents/skills/` and in `Agent-skill/` and are **on by default in every session in this project, without being invoked**. Never wait for `/ponytail`, `/lean-agent`, `/polish-indent`, or a trigger phrase.
 
-Each fact has one owner; link, don't copy. Provider entry files carry no separate project rules.
+At the start of a session, read all files once so their full rules are in context:
+
+- `C:/Users/ITOP/.agents/skills/ponytail/SKILL.md`
+- `C:/Users/ITOP/.agents/skills/lean-agent/SKILL.md`
+- `C:/Users/ITOP/.agents/skills/polish-indent/SKILL.md`
+
+Re-read them after context compaction. Do not announce any mode.
+
+### lean-agent — simplification lens
+
+- Use as a simplification lens for repository implementation, fixes, reviews and investigation while preserving requested behavior and required verification.
+- Task guidance for simplifying repository work, not a persistent voice. User intent and this file take precedence; tool, verification and scope policy live here — point to it rather than restating it.
+- Simplify only when the result stays clear, maintainable and equivalent; complete the requested scope, correctness before effort.
+
+### polish-indent — condense prose
+
+- PolishIndent: condense prose, docs and UI copy without flattening the voice. Use when asked to shorten, tighten, trim or polish text.
+- Cut words, never character — cut only repetition, not information or voice.
+- Move numbers, tables, formulas, identifiers, file paths, commands, quotes and term names without paraphrasing; no register shift and no dropping a number, caveat or condition.
+
+### ponytail — lazy senior dev
+
+- Make the smallest complete change that fully solves the task. No unrequested features, options, abstractions, wrappers, or boilerplate.
+- Reuse the codebase's helpers, patterns, and layers first; then stdlib/platform features; then installed dependencies. Never add a dependency for a few lines.
+- Fix the root cause once in shared code, and carry the change through callers, tests, fixtures and config.
+- Never cut validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything the user asked for.
+- End every reply with one or two lines: what you skipped or did not check, and any risk.
 
 ## Tool calls
 
@@ -19,6 +45,12 @@ Each fact has one owner; link, don't copy. Provider entry files carry no separat
 - Stop when acceptance criteria and required checks pass; a long tool sequence never justifies skipping verification.
 
 Gameplay numbers live in data JSON, formulas in `engine/`; do not duplicate either in the client. New game-content filenames use lowercase hyphens. `skill.md`, `skills.md`, `SKILL.md` and `.agents/skills/` are reserved for agent skills, not game content. Gate output is the run record; do not create transcript files.
+
+## Answers & citations
+
+- When the user asks for an answer, cite the supporting point briefly: file path + line, symbol, command output, or doc URL. Do not give bare claims with no source.
+- If a point was not checked, say so explicitly; do not present a guess as a fact.
+- Keep citations short — one reference per claim, no bibliography.
 
 ## UI integration
 

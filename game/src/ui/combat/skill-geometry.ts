@@ -15,6 +15,11 @@ export type SkillAimGeometry = {
 };
 export type SkillGeometry = {
   key: string; skillId: string; name: string; targetName: string; incoming: boolean; valid: boolean;
+  sourceKind?: 'cast' | 'aim' | 'aura' | 'support';
+  actorId?: string;
+  actionId?: number;
+  eventId?: number;
+  payloadIndex?: number;
   /** Seconds since the committed action started; drives atlas frame stepping. */
   elapsedSec?: number;
   /** The skill's authored Element, or physical when the row carries none. */
@@ -46,6 +51,7 @@ function geometry(input: {
   release?: Point;
   body?: { width: number; height: number };
   rangeM: number; hitRadiusM?: number; hopRangeM?: number; paths?: SkillGeometry['paths'];
+  sourceKind?: SkillGeometry['sourceKind']; actorId?: string; actionId?: number; eventId?: number; payloadIndex?: number;
 }, view: ArenaViewSize = ARENA_VIEW): SkillGeometry {
   const { area } = input;
   const element = input.element || 'physical';
@@ -163,6 +169,7 @@ export function skillActionGeometry(action: CombatArenaAction, frame: CombatAren
     : phase === 'Travel' || phase === 'Field' || phase === 'Channel' ? released : impacted;
   const progress = until != null && until > from ? Math.max(0, Math.min(1, (atUs - from) / (until - from))) : 1;
   return geometry({ key: `action-${action.id}`, skillId: action.skillId, progress,
+    sourceKind: 'cast' as const, actorId: action.actorId, actionId: action.id,
     elapsedSec: Math.max(0, (atUs - action.atUs) / unitsPerSec),
     phaseElapsedSec: Math.max(0, (atUs - phaseStart) / unitsPerSec),
     ...(until != null ? { remainingSec: Math.max(0, until - atUs) / unitsPerSec }
@@ -181,7 +188,7 @@ export function skillActionGeometry(action: CombatArenaAction, frame: CombatAren
 }
 
 /** Each committed shot owns its flight and contact animation; a volley is never one moving stamp. */
-export function skillPayloadArtGeometry(mark: SkillGeometry, action: CombatArenaAction,
+export function skillPayloadGeometry(mark: SkillGeometry, action: CombatArenaAction,
   atUs: number, unitsPerSec: number, presentationTailSec: number,
   liveFlights: readonly CombatFlight[] = []): SkillGeometry[] {
   if (!action.payloads?.length || mark.phase === 'Windup' || mark.phase === 'Aim') return [mark];
@@ -216,6 +223,7 @@ export function skillPayloadArtGeometry(mark: SkillGeometry, action: CombatArena
     }
     return [{ ...mark, key: `${mark.key}-payload-${payload.index}`, source: payload.source, target,
       area, center: projectArenaPoint(target), vertices: groundShapePoints(area), vfxAim, chainHop: chain,
+      sourceKind: 'cast' as const, actorId: action.actorId, actionId: action.id, payloadIndex: payload.index,
       phase: impacted ? 'Impact' as const : 'Travel' as const,
       phaseElapsedSec: Math.max(0, (atUs - (impacted ? impactAtUs : payload.releaseAtUs)) / unitsPerSec),
       progress: impacted ? 1 : sampled ? 0 : Math.max(0, Math.min(1,
@@ -238,6 +246,7 @@ export function skillAimGeometry(aim: SkillAimGeometry, view: ArenaViewSize = AR
   } : area.center;
   const profile = sm.castProfileOf(skill);
   return geometry({ key: 'aim', skillId: skill.id, name: skill.name ?? skill.id,
+    sourceKind: 'aim' as const, actorId: 'player',
     targetName: aim.targetName ?? 'Ground', incoming: false, phase: 'Aim', element: skill.element ?? null,
     valid: aim.valid, source: aim.source, target, area, rangeM: selfSkill(skill.type) ? 0 : aim.rangeM,
     ...(release ? { release } : {}),

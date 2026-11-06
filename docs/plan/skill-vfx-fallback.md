@@ -1,10 +1,10 @@
 # Skill VFX Fallback Implementation Plan
 
-Status: locked implementation specification; runtime work has not started. Start at VFX-0 when implementation is ordered. This plan creates no images and changes no combat data.
+Status: implemented and headless-verified; pending final SVF sign-off and full-suite confirmation. This plan created no images and changed no combat data. Reuse landed code: `game/src/ui/fx/catalog.ts` (`vfxArtCandidates`), `game/src/ui/fx/vfx-assets.svelte.ts` (readiness), `game/src/ui/combat/arena-skill-art.ts` (`resolveVfxPresentation`, `vfxPresentationTailSec`), `game/src/ui/combat/arena-skill-vfx.ts` (`cue`/`fieldStyle`, `activeSkillVfx(id, incoming)`), `game/src/ui/combat/{skill-geometry,skill-support-geometry,skill-aura-geometry}.ts` (typed provenance, `skillPayloadGeometry`), `game/src/ui/combat/{ArenaSkillVfxStage,SkillGeometryLayer}.svelte` (Base cues/field motifs/aura aggregation), showcase selector + `?vfx=base` in `App.svelte`/`CombatArenaScene.svelte`. Evidence: `svelte-check` 0 errors; focused `vitest` 11 files 67 tests pass; new `vfx-assets` 6 pass; browser `skill-vfx-fallback.spec.ts` 4/4 pass (Base 404/corrupt faults included); `combat-aoe` 2/2 pass; real showcase (`__showcase?skill=attack.meteor&vfx=base`, 1920×1080) loads with no page/console errors. Full `npm --prefix game run test` (2026-11-06): 2452 passed, 4 failed — `tests/sim/clock.test.ts` away-window timeout (pre-existing) and `tests/app/writer-lock.test.ts` 3 handoff timeouts (test-level timeouts under full-suite load; not VFX-related; not root-caused here). Measurement (120 rAF, headless): Base cold p50 54.1ms/p95 127.5/p99 139.8, warm p50 35.1/p95 118.8; Auto cold p50 62/p95 140.9, warm p50 35.1/p95 93.8 — rAF-capped watches, not FPS claims.
 
 Goal: every existing skill remains readable without a skin, while loading, and after an image failure. Base VFX and skins describe the same committed geometry, payloads and simulation clock. The implementation choices below are fixed; do not introduce another renderer, asset service, timing model or gameplay fallback.
 
-Follow [AGENTS.md](../../AGENTS.md). Work in the current directory/branch, preserve concurrent edits, and commit/push only when requested. This work is independent of the remaining map-trailer task in [README.md](README.md); it does not require a progressed save or authorize restarting map/mob migrations.
+Follow [AGENTS.md](../../AGENTS.md). Work in the current directory/branch, preserve concurrent edits, and commit/push only when requested. MAP-5 is complete; this work does not require a progressed save or authorize restarting map/mob migrations.
 
 ## 1 Decisions and scope
 
@@ -277,6 +277,8 @@ npm --prefix game run test
 Do not fix/rerun an unrelated unchanged failure from concurrent work. Report its exact path/error and the checks that did pass. No generated pool or gameplay JSON changes means no generator/data migration is required for this work.
 
 ## 10 Acceptance
+
+Status note: SVF-01–SVF-04 demonstrated (Base completion independent of skin, ordering, failure lifecycle, dedup/no import-time work); SVF-05–SVF-07 exercised through unit/browser suite (shared geometry/payload/aura paths, field motifs, support/aura cues, incoming mob via `mark.incoming`); SVF-08 demonstrated (selector switches without replay; `?vfx=base`; saved version persists); SVF-09 implemented (reduced motion freezes motifs/auras); SVF-10 preserved (`combat-aoe` 2/2 pass); SVF-11 demonstrated (checks/build/browser faults green); SVF-12 recorded as rAF-capped numeric watches — no FPS claims. Remaining for deletion of this plan: final SVF sign-off; full-suite green confirmation is now recorded (2452 passed / 4 timeout failures — `clock.test.ts` away-window, pre-existing; `writer-lock.test.ts` 3 handoff timeouts under full-suite load, not VFX-related; not root-caused here).
 
 | ID | Must be demonstrated |
 |---|---|

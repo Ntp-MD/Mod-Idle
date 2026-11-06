@@ -1,10 +1,15 @@
 <script lang="ts">
   import type { VfxFrameGrid } from './catalog';
+  import { reportVfxAssetFailure } from './vfx-assets.svelte';
 
   let { src, frame, index, x = 0, y = 0, width = '100%', height = '100%' }: {
     src: string; frame: VfxFrameGrid; index: number;
     x?: number; y?: number; width?: number | string; height?: number | string;
   } = $props();
+
+  function onImageError() {
+    reportVfxAssetFailure(src);
+  }
 
   const rect = $derived(frame.sourceFrames?.[index]?.rect
     ?? [(index % frame.columns) * frame.width, Math.floor(index / frame.columns) * frame.height, frame.width, frame.height]);
@@ -16,7 +21,7 @@
   data-atlas-frame={index}>
   <svg x={offset?.offsetX ?? 0} y={offset?.offsetY ?? 0} width={rect[2]} height={rect[3]}
     viewBox={rect.join(' ')} preserveAspectRatio="none">
-    <image href={src} width={frame.textureWidth ?? frame.width * frame.columns}
+    <image href={src} onerror={onImageError} width={frame.textureWidth ?? frame.width * frame.columns}
       height={frame.textureHeight ?? frame.height * (frame.rows ?? Math.ceil(frame.count / frame.columns))} />
   </svg>
 </svg>

@@ -29,9 +29,9 @@
   import { resolveAnimation, shippedAnimationManifest } from './animation/manifest';
 
   let { arena, s, c, ring, speed = 1, paused = false, spritePreviewSpecies = null, spritePreviewVariant = null, aoePreview = false, iconActors = false,
-    focusId = null, aimSkill = null, inspect = false, effectLevel = 'auto', keyboardAim = null, zoom = 1,
+    focusId = null, aimSkill = null, inspect = false, effectLevel = 'auto', keyboardAim = null, zoom = 1, vfxMode = 'auto',
     onReviewPause, onReviewStep, onInspectEnemy, onFocusEnemy, onGroundCommand, onAimPoint, onVitals, onTargetRead }: {
-    arena: CombatArena; s: GameState; c: Character; ring: FxEvent[]; speed?: number; paused?: boolean;
+    arena: CombatArena; s: GameState; c: Character; ring: FxEvent[]; speed?: number; paused?: boolean; vfxMode?: 'auto' | 'base';
     spritePreviewSpecies?: string | null;
     spritePreviewVariant?: { speciesId: string; variantId: string } | null;
     aoePreview?: boolean;
@@ -729,7 +729,7 @@
   {/if}
 
   <SkillGeometryLayer {arena} frame={sampled} atUs={playhead} {view} inspect={inspect && showAiLog}
-    {reducedMotion} {releasePoints} {bodySizes} skills={s.skills}
+    {reducedMotion} {releasePoints} {bodySizes} skills={s.skills} {vfxMode}
     aim={aimSkill && aimArea ? { skillId: aimSkill, area: aimArea, source: player, rangeM: aimRange, valid: aimValid, targetName: aimTargetName } : null} />
   <svg class="arena-ground-fx" viewBox={`0 0 ${view.width} ${view.height}`} preserveAspectRatio="none" aria-hidden="true">
     {#each bodyRings as ring (ring.id)}

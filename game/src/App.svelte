@@ -792,13 +792,28 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   /** Selected pool version used by the live cast. */
   const arenaVersions = $derived(vfxVersionsFor(arenaSkillId).filter((version) => version.arena !== false));
   let arenaVersionId = $state('');
+  let arenaVfxMode = $state<'auto' | 'base'>('auto');
   $effect(() => {
     arenaVersionId = activeVfxVersionId(arenaSkillId) ?? '';
   });
+  // ?vfx=base override inside showcase only
+  $effect(() => {
+    if (!arenaPreview) return;
+    const q = new URLSearchParams(window.location.search).get('vfx');
+    if (q === 'base') arenaVfxMode = 'base';
+    else if (q != null) arenaVfxMode = 'auto';
+  });
   function chooseArenaVersion(value: string) {
-    arenaVersionId = value;
-    setActiveVfxVersion(arenaSkillId, value);
-    replayArena();
+    // Base keeps saved preferred version; version strips prefix, sets auto, no replay (VFX-4)
+    if (value === 'base') {
+      arenaVfxMode = 'base';
+      arenaVersionId = value;
+      return;
+    }
+    const raw = value.startsWith('version:') ? value.slice('version:'.length) : value;
+    arenaVfxMode = 'auto';
+    arenaVersionId = raw;
+    setActiveVfxVersion(arenaSkillId, raw);
   }
   /** Showcase only: a one-second cooldown keeps the demo skill pressable while testing its cast. */
   const SHOWCASE_ARENA_CD_SEC = 1;
@@ -2969,12 +2984,16 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         {/each}
       </select></label>
       {#if arenaVersions.length}
-        <label>VFX version <select aria-label="Preview VFX version in the arena" value={arenaVersionId} onchange={(event) => {
+        <label>VFX version <select aria-label="Preview VFX version in the arena" value={arenaVfxMode === 'base' ? 'base' : `version:${arenaVersionId}`} onchange={(event) => {
           chooseArenaVersion(event.currentTarget.value);
         }}>
+          <option value="base">Base VFX (no skin)</option>
           {#each arenaVersions as version (version.id)}
-            <option value={version.id}>{version.label}</option>
+            <option value={`version:${version.id}`}>{version.label}</option>
           {/each}
+          {#if !arenaVersions.some((version) => version.id === arenaVersionId)}
+            <option value={`version:${arenaVersionId}`}>Selected</option>
+          {/if}
         </select></label>
       {/if}
       <button class="btn btn-quiet" type="button" onclick={replayArena}>Replay encounter</button>

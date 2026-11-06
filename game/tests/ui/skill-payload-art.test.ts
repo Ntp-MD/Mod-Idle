@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createCombatArena, type CombatArenaAction } from '@sim/combat/combat-arena';
-import { skillActionGeometry, skillPayloadArtGeometry } from '../../src/ui/combat/skill-geometry';
+import { skillActionGeometry, skillPayloadGeometry } from '../../src/ui/combat/skill-geometry';
 import { projectArenaPoint } from '../../src/ui/combat/combat-arena-view';
 import type { CombatFlight } from '@sim/combat/combat-actions';
 
@@ -19,7 +19,7 @@ function fixture(skillId = 'attack.double_strafe') {
   return { arena, action };
 }
 function marks(action: CombatArenaAction, arena: ReturnType<typeof createCombatArena>, time: number) {
-  return skillPayloadArtGeometry(skillActionGeometry(action, arena, time, units)!, action, time, units, .4);
+  return skillPayloadGeometry(skillActionGeometry(action, arena, time, units)!, action, time, units, .4);
 }
 describe('committed payload art', () => {
   it('shows only released shots, with independent flight progress and anchors', () => {
@@ -75,7 +75,7 @@ describe('committed payload art', () => {
       position: { x: 2, y: 1 }, destination: { x: 4, y: 2 },
       lastCheckedAtUs: 1.5 * units, timing: { impactAtUs: 2 * units } } as CombatFlight;
     const base = skillActionGeometry(action, arena, atUs, units)!;
-    const result = skillPayloadArtGeometry(base, action, atUs, units, .4, [live])[0];
+    const result = skillPayloadGeometry(base, action, atUs, units, .4, [live])[0];
     const expected = projectArenaPoint({ x: 3, y: 1.5 });
     expect(result.progress).toBe(0);
     expect(result.vfxAim.release).toEqual({ x: expected.x, y: expected.y - result.body.height * .5 });

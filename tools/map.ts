@@ -977,7 +977,7 @@ function checks() {
   // M15 · every cell, including settlements, has one correctly placed art group.
   // Registered hex art checks the six-sector definitions; legacy scenery checks its anchor.
   try {
-    const svg = fs.readFileSync(OUT, 'utf8');
+    const svg = fs.readFileSync(OUT, 'utf8').replace(/\r\n?/g, '\n');
     const figures = svg.split(/<g class="diorama-figure[^"]*"/).slice(1);
     let pieces = 0;
     for (const rawFigure of figures) {

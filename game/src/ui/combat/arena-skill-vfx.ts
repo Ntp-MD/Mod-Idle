@@ -1,5 +1,6 @@
 import { sm } from '../../engine/client';
 import { arenaSkillRange } from '@sim/combat/combat-arena';
+import { mobSkillById } from '@sim/combat/mobSkills';
 
 /**
  * Per-skill presentation spec for the live arena, authored for the game's one camera.
@@ -58,6 +59,8 @@ export interface SkillVfxSpec {
   family: SkillVfxFamily;
   form: SkillVfxForm;
   element: string;
+  cue: 'attack' | 'heal' | 'ward' | 'curse' | 'aura';
+  fieldStyle?: 'meteor' | 'snow' | 'lightning' | 'sand';
   radiusM: number;
   lengthM: number;
   widthM: number;
@@ -210,23 +213,77 @@ function flightOf(form: SkillVfxForm, delivery: string, design?: Partials): { pr
   return { projectile: design?.projectile ?? base.projectile, lob: base.lob };
 }
 
-/** Resolve the authored spec for one skill id; non-attack rows (and mob ids) return null. */
-export function activeSkillVfx(id: string | undefined): SkillVfxSpec | null {
+/** Resolve the authored spec for one skill id. Incoming resolves mob first, player resolves sm. */
+export function activeSkillVfx(id: string | undefined, incoming = false): SkillVfxSpec | null {
   if (!id) return null;
-  const row = sm.byId[id];
-  if (!row || row.type !== 'attack' || row.retired) return null;
+  let row: any = null;
+  let resolvedType = '' as string;
+  if (incoming) {
+    row = mobSkillById(id);
+    if (!row) return null;
+    resolvedType = 'attack';
+  } else {
+    row = sm.byId[id];
+    if (!row || row.retired) return null;
+    resolvedType = row.type ?? '';
+    if (!['attack', 'heal', 'buff', 'aura', 'curse'].includes(resolvedType)) return null;
+    // passive rows with no action/activation produce no invented effect
+    if (resolvedType !== 'attack' && !row.action && resolvedType !== 'aura') {
+      // still allow heal/buff/curse with explicit type even without action kind
+      if (!row.action) {
+        // fall through to Base derivation below
+      }
+    }
+  }
   const family = familyOf(row.element);
+  const kind = row.action?.kind;
+  let cue: SkillVfxSpec['cue'] = 'attack';
+  if (resolvedType === 'heal') cue = 'heal';
+  else if (resolvedType === 'buff') cue = 'ward';
+  else if (resolvedType === 'curse') cue = 'curse';
+  else if (resolvedType === 'aura' || kind?.includes?.('aura')) cue = 'aura';
+  else if (String(row.type ?? '').startsWith('curse')) cue = 'curse';
+
   const form = DESIGN[id]?.form ?? formOf(row);
   const area = row.area ?? undefined;
   const radiusM = Number(area?.radius_m ?? 0);
   const lengthM = Number(area?.length_m ?? 0);
   const widthM = Number(area?.width_m ?? 0);
   const angleDeg = Number(area?.angle_deg ?? 0);
-  const profile = sm.castProfileOf(row);
+  const profile = sm.castProfileOf(incoming ? (sm.byId[id] ?? row) : row);
   const { projectile, lob } = flightOf(form, profile.delivery, DESIGN[id]);
-  const budget = { ...FAMILY[family], ...(DESIGN[id]?.particles ?? {}) };
+  let budget: any = { ...FAMILY[family], ...(DESIGN[id]?.particles ?? {}) };
+  // Support cues: zero debris/trails/gather; activation motes heal 6, ward/curse 4, aura 0
+  if (cue === 'heal' || cue === 'ward' || cue === 'curse' || cue === 'aura') {
+    budget = { ...budget, gather: 0, ground: 0, trail: 0, loop: 0 };
+    if (cue === 'heal') budget.burst = 6;
+    else if (cue === 'ward' || cue === 'curse') budget.burst = 4;
+    else budget.burst = 0;
+    if (cue === 'aura') budget.burst = 0;
+  }
+  // Field styles with fixed visual budgets (max simultaneous ambient bodies)
+  let fieldStyle: SkillVfxSpec['fieldStyle'];
+  const FIELD_BUDGET: Record<string, { style: 'meteor' | 'snow' | 'lightning' | 'sand'; loop: number }> = {
+    'meteor-field': { style: 'meteor', loop: 4 },
+    'blizzard-field': { style: 'snow', loop: 8 },
+    'thunder-field': { style: 'lightning', loop: 4 },
+    'sand-field': { style: 'sand', loop: 8 },
+  };
+  if (kind && FIELD_BUDGET[kind]) {
+    fieldStyle = FIELD_BUDGET[kind].style;
+    budget.loop = FIELD_BUDGET[kind].loop;
+  } else if (id === 'attack.meteor') {
+    fieldStyle = 'meteor'; budget.loop = 4;
+  } else if (id === 'attack.blizzard') {
+    fieldStyle = 'snow'; budget.loop = 8;
+  } else if (id === 'attack.thunder_storm' || id === 'attack.thunder_strike') {
+    fieldStyle = 'lightning'; budget.loop = 4;
+  } else if (id === 'attack.sand_storm') {
+    fieldStyle = 'sand'; budget.loop = 8;
+  }
   return {
     id, name: String(row.name ?? id), family, form, element: String(row.element ?? 'physical'),
+    cue, ...(fieldStyle ? { fieldStyle } : {}),
     radiusM, lengthM, widthM, angleDeg, rangeM: arenaSkillRange(id) === Infinity ? 0 : arenaSkillRange(id),
     heightM: DESIGN[id]?.heightM ?? FAMILY[family].heightM,
     apexM: DESIGN[id]?.apexM ?? FAMILY[family].apexM,
@@ -242,7 +299,7 @@ export function activeSkillVfx(id: string | undefined): SkillVfxSpec | null {
 /** Every live attack id that must carry an authored design row; the cage test reads this. */
 export function activeSkillVfxIds(): string[] {
   return Object.values(sm.byId)
-    .filter((row) => row.type === 'attack' && !row.retired)
-    .map((row) => String(row.id))
+    .filter((row) => ['attack', 'heal', 'buff', 'aura', 'curse'].includes(String((row as any).type)) && !(row as any).retired)
+    .map((row) => String((row as any).id))
     .sort();
 }
