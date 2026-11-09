@@ -31,13 +31,12 @@ Reuse the existing terms so the design does not invent vocabulary:
 
 ## Event states
 
-The seed lists eleven states. They are **states a camp situation can be in**, not
-eleven separate systems. Group them so a storyteller scene can transition between
+The seed lists ten states. They are **states a camp situation can be in**, not
+ten separate systems. Group them so a storyteller scene can transition between
 them and so each has one clear resolution rule.
 
 | State          | Kind        | What the player sees                        | Resolution                                                    |
 | -------------- | ----------- | ------------------------------------------- | ------------------------------------------------------------- |
-| **sounds**     | ambient     | Distant noise; nothing visible yet.         | Investigate (→ discovered / prowler) or ignore (→ timeout).   |
 | **prowler**    | threat      | A creature circling the camp edge.          | Scare it off (time), stand ground (combat), or feed it (aid). |
 | **traveler**   | social      | A stranger approaches the fire.             | Share supplies (aid), trade, or send away.                    |
 | **nest**       | discovery   | A small nest with eggs or young.            | Take (full bag risk), leave (read only), or wait (timeout).   |
@@ -95,7 +94,7 @@ publishes damage.
   [choice label]   [choice label]   [choice label]
 ```
 
-- **One background per state.** `sounds`, `prowler`, `traveler`, `nest`, `herd`,
+- **One background per state.** `prowler`, `traveler`, `nest`, `herd`,
   `aid`, `discovered`, `combat`, `timeout`, `full bag`, `read only` each have one
   bg asset. The same bg is reused if the scene loops back to a state.
 - **Narration is short and diegetic** — it names the thing, the stakes, and the
