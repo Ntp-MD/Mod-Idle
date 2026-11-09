@@ -36,6 +36,7 @@ import { buyBlackMarket } from '@sim/town/black-market';
   import { PANEL_SESSION, type PanelSession } from './ui/hud/panel-session';
   import CombatPanel from './ui/panels/combat-panel.svelte';
   import BagPanel from './ui/panels/bag-panel.svelte';
+  import SavePanel from './ui/panels/save-panel.svelte';
   import type { EnemySnapshot } from '@sim/combat/combat-history';
   import { refreshSelectionAfterRepair, resolveItemSelection, type ItemSelection } from './ui/inventory/item-selection';
   import { captureCharacterUiSnapshot, emptyCharacterUiSnapshot, restoreCharacterUiSnapshot, type CharacterUiSnapshot } from './ui/character/character-ui-session';
@@ -3559,98 +3560,35 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   />
 {/if}
 {#if panel === 'save' || showcaseMode}
-  <Panel title="Save"
-    subtitle="Local saves, backups and shared preferences"
-    width="compact" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
-    <!-- The Save body owns the panel's scroll; focus makes wheel and arrow/Page keys reach it. -->
-    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-    <!-- svelte-ignore a11y_no_noninteractive_tabindex (the scroll region needs keyboard focus) -->
-    <div class="save-panel scroll-pane" role="region" aria-label="Save content" tabindex="0">
-    <Tabs label="Save sections" active={saveTab} onpick={(id) => { saveTab = id as typeof saveTab; if (id === 'backups') loadSnaps(); }}
-          tabs={[{ id: 'slots', label: 'Slots' }, { id: 'backups', label: 'Backups' }, { id: 'settings', label: 'Settings' }]} />
-    {#if showcaseMode}<p class="showcase-note">Save, load, backup, import, and export are disabled here. This page never reads or writes a player save.</p>{/if}
-    {#if !showcaseMode && startupPending}<p class="showcase-note" role="status">Load a character, or start a new one. Existing slots are kept.</p>{/if}
-    {#if !showcaseMode}
-      <div class="account-writer card-tile" class:owner={accountWriterState === 'owner'} role="status" aria-live="polite">
-        <p>{accountWriterMessage}</p>
-        {#if accountWriterState === 'readonly'}
-          <label>Reload after takeover
-            <select bind:value={takeoverSlot}>{#each saveSlots as slot}<option value={slot}>{slot}</option>{/each}</select>
-          </label>
-          <button type="button" onclick={takeOverAndLoad}>Take over and reload</button>
-        {:else if accountWriterState === 'waiting'}
-          <button type="button" onclick={cancelTakeover}>Cancel wait</button>
-        {/if}
-        {#if accountWriterState !== 'owner'}<button type="button" onclick={download}>Export recovery JSON</button>{/if}
-      </div>
-    {/if}
-    {#if saveTab === 'slots'}
-    {#if persistenceError}<div role="alert"><p class="text-alarm">{persistenceError}</p><button onclick={download}>Export recovery JSON</button></div>{/if}
-    <p>Three local character slots · offline progress has no time limit. Autosave starts after you save or load a slot; a new or imported character needs its own slot choice.</p>
-    <div class="save-actions">
-    <button disabled={showcaseMode || !canWriteAccount} onclick={() => void startNewCharacter()}>Start new character</button>
-    {#each saveSlots as slot}
-      <button disabled={showcaseMode || startupPending || !canWriteAccount || TEMP_DISABLE_SLOT_SAVES} onclick={() => doSave(slot)}>Save {slot}</button>
-      <button disabled={showcaseMode || accountWriterState === 'checking' || accountWriterState === 'waiting' || accountWriterState === 'unsupported' || TEMP_DISABLE_SLOT_SAVES} onclick={() => void loadFromSave(slot)}>Load {slot}</button>
-    {/each}
-    <button disabled={showcaseMode} onclick={download}>Export JSON</button>
-    <label>Import <input type="file" accept="application/json" disabled={showcaseMode || !canWriteAccount || TEMP_DISABLE_SLOT_SAVES} onchange={importFromSave} /></label>
-    </div>
-    {#if TEMP_DISABLE_SLOT_SAVES}<p class="text-note">Slot saves are off until the game is finished.</p>
-    {:else if attachedSlot}<p class="text-note">Autosave is on for {attachedSlot}.</p>{:else}<p class="text-note">Not saved yet. Choose a slot to keep this character.</p>{/if}
-    {#if saveNote}<p class="save-note-inline" role="status">{saveNote}</p>{/if}
-    {:else if saveTab === 'backups'}
-    <h2>Backups · {SAVE_CFG.snapshot_slots} walking snapshots</h2>
-    <p><small>Owed on a level up, an Ascend or Refine, and every {SAVE_CFG.snapshot_interval_min} min of play. A restore takes the character back whole.</small></p>
-    <label>Which slot <select bind:value={snapSlot} disabled={showcaseMode} onchange={loadSnaps}>{#each saveSlots as s}<option value={s}>{s}</option>{/each}</select></label>
-    <button disabled={showcaseMode} onclick={loadSnaps}>Show backups</button>
-    <table>
-      <thead><tr><th>#</th><th>Taken because</th><th>Then</th><th></th></tr></thead>
-      <tbody>
-        {#each snaps as shot, i}
-          <tr>
-            <td>{i + 1}</td>
-            <td>{shot.reason}</td>
-            <td>{Math.round(shot.clockSec / 60)} min of play · level {shot.state.player.level}</td>
-            <td><button disabled={showcaseMode || !canWriteAccount} onclick={() => restoreFromSave(i)}>Rewind to this</button></td>
-          </tr>
-        {:else}
-          <tr><td colspan="4">Nothing stored yet.</td></tr>
-        {/each}
-      </tbody>
-    </table>
-    <p>{snapNote}</p>
-    {:else}
-    <h2>Settings</h2>
-    <p><small>Shared by all three slots · potions and auto-farm on Farm · filters on Bags · presets on Skills.</small></p>
-    <label>Number format
-      <select value={settings.numberFormat} onchange={(e) => setSetting('numberFormat', (e.target as HTMLSelectElement).value as 'plain' | 'short')}>
-        <option value="plain">plain — 12,345</option>
-        <option value="short">short — 12.3k</option>
-      </select>
-    </label>
-    <label><input type="checkbox" checked={settings.offlineReport} onchange={(e) => setSetting('offlineReport', (e.target as HTMLInputElement).checked)} /> Show the welcome-back report after an away period</label>
-    <label>Combat effects
-      <select value={settings.combatEffects || 'auto'} onchange={(e) => setSetting('combatEffects', (e.target as HTMLSelectElement).value as NonNullable<ClientSettings['combatEffects']>)}>
-        <option value="auto">Automatic — adapt to playback speed</option>
-        <option value="full">Full</option>
-        <option value="reduced">Reduced</option>
-        <option value="minimal">Minimal</option>
-      </select>
-    </label>
-    <label><input type="checkbox" checked={settings.holdPosition === true} onchange={(e) => setSetting('holdPosition', (e.target as HTMLInputElement).checked)} /> Hold position — no automatic approach; manual moves and avoidance still run</label>
-    <label>Auto target
-      <select value={settings.targetPriority ?? 'nearest'} onchange={(e) => setSetting('targetPriority', (e.target as HTMLSelectElement).value as NonNullable<ClientSettings['targetPriority']>)}>
-        <option value="nearest">Nearest</option>
-        <option value="lowest-hp">Lowest HP</option>
-        <option value="highest-hp">Highest HP</option>
-      </select>
-    </label>
-    <p class="text-note">Explicit effect levels stay the same at every playback speed. Cast labels and status details remain available; your system's reduced-motion preference is respected.</p>
-    <!-- auto-dissolve lives with the bag filter now: it is a bag rule, not a display preference -->
-    {/if}
-    </div>
-  </Panel>
+  <SavePanel
+    bind:saveTab={saveTab}
+    showcaseMode={showcaseMode}
+    startupPending={startupPending}
+    accountWriterState={accountWriterState}
+    accountWriterMessage={accountWriterMessage}
+    bind:takeoverSlot={takeoverSlot}
+    saveSlots={saveSlots}
+    persistenceError={persistenceError}
+    attachedSlot={attachedSlot}
+    saveNote={saveNote}
+    snaps={snaps}
+    bind:snapSlot={snapSlot}
+    snapNote={snapNote}
+    modalGridArea={modalGridArea}
+    settings={settings}
+    canWriteAccount={canWriteAccount}
+    onLoadSnaps={loadSnaps}
+    onTakeOverAndLoad={takeOverAndLoad}
+    onCancelTakeover={cancelTakeover}
+    onDownload={download}
+    onStartNewCharacter={() => void startNewCharacter()}
+    onDoSave={doSave}
+    onLoadFromSave={loadFromSave}
+    onImportFromSave={importFromSave}
+    onRestoreFromSave={restoreFromSave}
+    onSetSetting={setSetting}
+    onclose={closePanel}
+  />
 {/if}
 
 {#if panel === 'combat' || showcaseMode}
@@ -4293,18 +4231,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   .stats td { font-size: var(--font-xs); padding: var(--spacing-xs) var(--spacing-xs); }
   .stats td:first-child { color: var(--dim); width: 45%; }
-  .save-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; align-content: start; gap: var(--spacing-sm); }
-  .account-writer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-xs); }
-  .account-writer.owner { border-color: color-mix(in srgb, var(--good) 48%, var(--line)); }
-  .account-writer p { flex: 1 1 clamp(150px, 11.62vw, 324px); min-width: 0; color: var(--dim); font-size: var(--font-xs); }
-  .account-writer.owner p { color: var(--good-lit); }
-  .account-writer label { display: inline-flex; align-items: center; gap: var(--spacing-xs); color: var(--dim); font-size: var(--font-xs); }
-  .account-writer select, .account-writer button { font-size: var(--font-xs); border-radius: var(--radius-card); }
-  .save-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; }
-  .save-panel h2 { margin: 0; font-size: var(--font-md); }
-  .save-panel p { margin: 0; }
-  .save-panel table { font-size: var(--font-xs); }
-  .save-note-inline { color: var(--good); font-size: var(--font-xs); }
 
 
 
