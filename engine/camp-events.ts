@@ -1,10 +1,10 @@
 export type CampEventStateId = 'prowler' | 'traveler' | 'nest' | 'herd' | 'aid' | 'discovered' | 'combat' | 'timeout' | 'full-bag' | 'read-only';
 export type CampEventCost = { timeSec?: number; item?: string; qty?: number };
-export type CampEventChoice = { label: string; cost?: CampEventCost; result: 'to-state' | 'combat' | 'close' | 'read-only'; next?: CampEventStateId; flavor?: string };
+export type CampEventChoice = { label: string; cost?: CampEventCost; result: 'to-state' | 'combat' | 'close' | 'read-only' | 'aid' | 'timeout'; next?: CampEventStateId; flavor?: string };
 export type StorytellerBeat = { id: string; state: CampEventStateId; portrait?: string; line: string; choices: CampEventChoice[] };
 
 const states = new Set<string>(['prowler', 'traveler', 'nest', 'herd', 'aid', 'discovered', 'combat', 'timeout', 'full-bag', 'read-only']);
-const results = new Set<string>(['to-state', 'combat', 'close', 'read-only']);
+const results = new Set<string>(['to-state', 'combat', 'close', 'read-only', 'aid', 'timeout']);
 
 export function validateCampEventBeat(beat: StorytellerBeat): string[] {
   const problems: string[] = [];
