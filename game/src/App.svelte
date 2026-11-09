@@ -770,9 +770,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const manaVisual = vitalVisual(() => gameState.player.mana);
   // the game opens on the ground, not on the fight: the first read is where the character stands and
   // where the walk goes, and FIELD (or Escape) folds the map down to the combat frame. A normal boot
-  // opens the Save chooser instead and waits there until the player loads or starts a character.
-  // TEMP: slot saves off until the game is finished, so boot opens nothing (New character starts free).
-  let panel = $state<PanelId | null>(showcaseMode || TEMP_DISABLE_SLOT_SAVES ? null : 'save');
+  // opens the Town hub where the new character spawns, not the Save chooser.
+  // TEMP: slot saves off until the game is finished, so boot opens Town (New character starts free).
+  let panel = $state<PanelId | null>(showcaseMode ? null : TEMP_DISABLE_SLOT_SAVES ? 'town' : 'save');
   let travelScene = $state(false);
   let more = $state(false);
   let journeyExpanded = $state(false);
