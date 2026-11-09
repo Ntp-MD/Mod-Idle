@@ -8,56 +8,36 @@
   .meta { color: #555; }
   li { margin: 0.35rem 0; }
   code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.88em; word-break: break-word; }
-  table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; font-size: 0.92em; }
-  th, td { border: 1px solid #ddd; padding: 0.35rem 0.5rem; text-align: left; vertical-align: top; }
-  th { background: #f6f6f6; }
 </style>
 </head>
 <body>
 <h1>Camp Events Storyteller Deep Plan</h1>
-<p class="meta">Source: <code>docs/stall-idea.md</code>. Current baseline: <code>b50c13cb</code>. Current impl: <code>tools/data/engine.json</code> <code>fieldwork.camp_encounters</code>, <code>game/src/sim/world/camp-encounters.ts</code>, <code>game/src/ui/panels/camp-panel.svelte</code> (via <code>FieldworkBoard</code>). Design target files absent: <code>tools/data/camp-events.json</code>, <code>engine/camp-events.ts</code>, <code>game/src/sim/camp/</code>, <code>game/src/ui/camp/</code>. Save flow out of scope, must not touch without approval. Verification: <code>npm --prefix game run test:fast</code> plus focused specs, full suite at closeout.</p>
-<p id="plan-current" class="meta">Current: done</p>
+<p class="meta">Remaining work only. Done: audit-current-vs-stall 27/27, owner choices Opt-in Roll Recurring Soft, tools/data/camp-events.json 10 beats, engine file stub, sim/ui stub. Unfinished below.</p>
+<p id="plan-current" class="meta">Current: task-data-engine-2</p>
 
-<h2><label><input type="checkbox" id="audit-current-vs-stall" checked> Audit current vs stall-idea</label></h2>
+<h2><label><input type="checkbox" id="task-data-engine"> Task Data and Engine resolution</label></h2>
 <ul>
-<li><label><input type="checkbox" id="audit-current-vs-stall-1" checked> Read <code>docs/stall-idea.md:32</code> ten states (prowler, traveler, nest, herd, aid, discovered, combat, timeout, full bag, read only) and compare to <code>engine.json</code> kinds [sounds removed] prowler traveler nest herd injured discovered supply-cache. Record gap table.</label></li>
-<li><label><input type="checkbox" id="audit-current-vs-stall-2" checked> Run <code>npm --prefix game run test -- tests/sim/camp-encounters.test.ts</code> (expected 27/27). Evidence: test output.</label></li>
-<li><label><input type="checkbox" id="audit-current-vs-stall-3" checked> Confirm architecture gap: suggested <code>tools/data/camp-events.json</code> + <code>engine/camp-events.ts</code> + <code>game/src/sim/camp/</code> + <code>game/src/ui/camp/</code> absent. No code change in this audit.</label></li>
+<li><label><input type="checkbox" id="task-data-engine-2"> Create <code>engine/camp-events.ts</code> pure resolution functions (cost checks, state transitions, no UI, no DOM). Acceptance: exported functions covered by focused engine tests, no import of <code>game/</code>.</label></li>
+<li><label><input type="checkbox" id="task-data-engine-3"> Keep <code>combat</code> reusing existing field combat sim, loss is push not death. Acceptance: no new combat mode, no damage published by storyteller.</label></li>
 </ul>
 
-<h2><label><input type="checkbox" id="owner-decisions" checked> Owner decisions blocking implementation</label></h2>
+<h2><label><input type="checkbox" id="task-sim-ui"> Task Sim and UI scene view</label></h2>
 <ul>
-<li><label><input type="checkbox" id="owner-decisions-1" checked> Mandatory on rest vs opt-in prompt to listen. Chosen: Opt-in (Recommended); prompt to listen, idle loop unobstructed.</label></li>
-<li><label><input type="checkbox" id="owner-decisions-2" checked> Trigger frequency: every rest vs roll. Chosen: Roll (Recommended); roll each rest, decline costs nothing.</label></li>
-<li><label><input type="checkbox" id="owner-decisions-3" checked> Storyteller identity: recurring character with portrait vs per-event narrator. Chosen: Recurring (Recommended); persistent portrait and voice.</label></li>
-<li><label><input type="checkbox" id="owner-decisions-4" checked> Full bag: hard stop must resolve vs soft reminder. Chosen: Soft (Recommended); reminder only.</label></li>
+<li><label><input type="checkbox" id="task-sim-ui-1"> Create <code>game/src/sim/camp/</code> runtime composition (active scene id, resolved outcome). Acceptance: idempotent beats, reload stable, no wall-clock RNG dependency.</label></li>
+<li><label><input type="checkbox" id="task-sim-ui-2"> Create <code>game/src/ui/camp/</code> scene view (one background per state, narration, 2-3 choice buttons). Background assets under <code>art-reference/</code> until approved then <code>game/public/</code>. Acceptance: max 1 bg per state, icons via existing shelf resolvers, no new glyph vocabulary.</label></li>
+<li><label><input type="checkbox" id="task-sim-ui-3"> Keep <code>read only</code> and <code>timeout</code> costs to time spent only. Acceptance: no spend on those paths, game continues.</label></li>
 </ul>
 
-<h2><label><input type="checkbox" id="task-data-engine" checked> Task Data and Engine resolution</label></h2>
+<h2><label><input type="checkbox" id="closeout"> Closeout verification</label></h2>
 <ul>
-<li><label><input type="checkbox" id="task-data-engine-1" checked> Create <code>tools/data/camp-events.json</code> authored scene graph from ten states in stall-idea.md with stable lowercase-hyphen ids. Acceptance: JSON parses, every id unique, every choice has label + one cost type max + reachable result.</label></li>
-<li><label><input type="checkbox" id="task-data-engine-2" checked> Create <code>engine/camp-events.ts</code> pure resolution functions (cost checks, state transitions, no UI, no DOM). Acceptance: exported functions covered by focused engine tests, no import of <code>game/</code>.</label></li>
-<li><label><input type="checkbox" id="task-data-engine-3" checked> Keep <code>combat</code> reusing existing field combat sim, loss is push not death. Acceptance: no new combat mode, no damage published by storyteller.</label></li>
-</ul>
-
-<h2><label><input type="checkbox" id="task-sim-ui" checked> Task Sim and UI scene view</label></h2>
-<ul>
-<li><label><input type="checkbox" id="task-sim-ui-1" checked> Create <code>game/src/sim/camp/</code> runtime composition (active scene id, resolved outcome). Acceptance: idempotent beats, reload stable, no wall-clock RNG dependency.</label></li>
-<li><label><input type="checkbox" id="task-sim-ui-2" checked> Create <code>game/src/ui/camp/</code> scene view (one background per state, narration, 2-3 choice buttons). Background assets under <code>art-reference/</code> until approved then <code>game/public/</code>. Acceptance: max 1 bg per state, icons via existing shelf resolvers, no new glyph vocabulary.</label></li>
-<li><label><input type="checkbox" id="task-sim-ui-3" checked> Keep <code>read only</code> and <code>timeout</code> costs to time spent only. Acceptance: no spend on those paths, game continues.</label></li>
-</ul>
-
-<h2><label><input type="checkbox" id="closeout" checked> Closeout verification</label></h2>
-<ul>
-<li><label><input type="checkbox" id="closeout-1" checked> Run <code>npm run check</code> (0 errors), <code>npm run map:check</code> (9/9), <code>npm --prefix game run test:fast</code> compare to <code>docs/known-failures.md</code>.</label></li>
-<li><label><input type="checkbox" id="closeout-2" checked> Build <code>npm --prefix game run build</code> and <code>git diff --check</code> clean. Full suite once at closeout.</label></li>
-<li><label><input type="checkbox" id="closeout-3" checked> Update <code>docs/known-failures.md</code> in same change for every fixed baseline line with evidence.</label></li>
+<li><label><input type="checkbox" id="closeout-1"> Run <code>npm run check</code> (0 errors), <code>npm run map:check</code> (9/9), <code>npm --prefix game run test:fast</code> compare to <code>docs/known-failures.md</code>.</label></li>
+<li><label><input type="checkbox" id="closeout-2"> Build <code>npm --prefix game run build</code> and <code>git diff --check</code> clean. Full suite once at closeout.</label></li>
 </ul>
 
 <h2>Manual sign-off</h2>
 <ul>
 <li>Background art per state, narration tone, portrait identity need human eyes. Agent records DOM/console/screenshot only.</li>
 </ul>
-<p class="meta">Stop conditions: save-flow edit, unresolved owner decision (see owner-decisions), failing check not in docs/known-failures.md, tooling unavailable with no other verification.</p>
+<p class="meta">Stop conditions: save-flow edit, unresolved owner decision, failing check not in docs/known-failures.md, tooling unavailable with no other verification.</p>
 </body>
 </html>
