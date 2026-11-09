@@ -34,7 +34,7 @@ export function createFarm(E: EngineData) {
    * a band with no herb stream at all (low) therefore has no mob potion source either.
    */
   const potionDropChance = (band: string) => {
-    const cost = (P.craft as any)[band]?.herbs;
+    const cost = P.craft[band]?.herbs;
     if (!cost) return 0;
     return (herbChance(band) * ((H.bundle_min + H.bundle_max) / 2)) / cost;
   };

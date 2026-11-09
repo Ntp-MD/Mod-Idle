@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createGameLoop, LIVE_STEP_MS, type LoopContext } from '../../src/app/loop';
+import { previewTick, planSteps, runWorkSlice } from '../../src/app/scheduler';
 import { COMBAT_STEP_US, MAX_WORK_SLICE_MS, newGame } from '@sim/core/game';
 import { createCombatArena } from '@sim/combat/combat-arena';
 
@@ -214,5 +215,49 @@ describe('the live loop carries the auto-avoid switch into the sim', () => {
     const off = harness({ autoSkills: true, autoAvoid: false });
     createGameLoop(off.ctx).step();
     expect(off.state.autoAvoidOff).toBe(true);
+  });
+});
+
+describe('preview shares mechanics but caps elapsed and discards debt', () => {
+  it('caps a long stall, discards while paused/hidden, and agrees with schedulerSteps', () => {
+    const state = { acc: 0, previous: 0 };
+    // Long stall capped at 0.5s: debt is capped, not banked live-style.
+    const capped = previewTick(state, 60_000, { running: true, paused: false, hidden: false, speed: 1 });
+    const viaPlan = planSteps(0, 1, 0.5);
+    expect(capped.steps).toBe(viaPlan.steps);
+    expect(state.acc).toBeCloseTo(viaPlan.acc, 10);
+    // Paused: debt dropped, previous still advances so no catch-up backlog.
+    const dropped = previewTick(state, 60_250, { running: true, paused: true, hidden: false, speed: 1 });
+    expect(dropped.steps).toBe(0);
+    expect(state.acc).toBe(0);
+    // Hidden: same discard.
+    state.acc = 0.5;
+    const hid = previewTick(state, 60_500, { running: true, paused: false, hidden: true, speed: 1 });
+    expect(hid.steps).toBe(0);
+    expect(state.acc).toBe(0);
+    // Stopped: same discard.
+    state.acc = 0.5;
+    const stopped = previewTick(state, 60_750, { running: false, paused: false, hidden: false, speed: 1 });
+    expect(stopped.steps).toBe(0);
+    expect(state.acc).toBe(0);
+    // Speed scales.
+    const fast = { acc: 0, previous: 0 };
+    const base = previewTick({ acc: 0, previous: 0 }, 500, { running: true, paused: false, hidden: false, speed: 1 });
+    const sped = previewTick(fast, 500, { running: true, paused: false, hidden: false, speed: 4 });
+    expect(sped.steps).toBe(base.steps * 4);
+  });
+
+  it('runWorkSlice yields at 8 ms with unpaid debt retained and no double step', () => {
+    let wall = 0;
+    let calls = 0;
+    const readWall = () => wall;
+    const runStep = () => { calls++; wall += 3; };
+    const out = runWorkSlice(20, readWall, runStep);
+    expect(out.completed).toBe(3);
+    expect(calls).toBe(3);
+    expect(out.elapsedMs).toBeGreaterThanOrEqual(MAX_WORK_SLICE_MS);
+    // Remaining debt is retained by the caller (live keeps acc, preview resets).
+    const retained = 20 - out.completed;
+    expect(retained).toBe(17);
   });
 });

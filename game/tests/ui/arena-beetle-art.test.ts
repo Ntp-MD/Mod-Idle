@@ -7,11 +7,11 @@ import pool from '../../src/ui/combat/arena/mob-pool.generated.json';
 import hollowDraftMeta from '../../public/combat/mob-pool/insect/beetle/variants/hollow-beetle/v1/meta.json';
 
 describe('pawn beetle art', () => {
-  it('uses four static views for the base and falls back for an unavailable variant', () => {
+  it('uses eight static views for the base and falls back for an unavailable variant', () => {
     const base = arenaArtForSpecies('beetle')!;
     expect(base).toBeDefined();
     expect(arenaArtForSpecies('beetle', 'Unknown Beetle')).toBe(base);
-    expect(pool.species.beetle.metadata.layout).toMatchObject({ columns: 2, rows: 2, frameCount: 4 });
+    expect(pool.species.beetle.metadata.layout).toMatchObject({ columns: 4, rows: 2, frameCount: 8 });
     expect(base.clips.walk.east?.frames).toBe(1);
     expect(base.clips.attack.west?.frames).toBe(1);
   });

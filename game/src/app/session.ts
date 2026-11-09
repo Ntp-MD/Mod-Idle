@@ -6,7 +6,7 @@ import {
   TEMP_DISABLE_SLOT_SAVES, writeSaveSync, type ClientSettings, type SlotName, type Snapshot,
 } from '../state/save';
 import { requestAccountWriterLock, type AccountWriterLockResult } from '../state/accountWriterLock';
-import { buildAwayReport, describeSnap, snapCounters, type AwayReport } from '../ui/hud/hud';
+import { buildAwayReport, describeSnap, snapCounters, type AwayReport } from './progress-report';
 import type { CharacterUiSnapshot } from '../ui/character/character-ui-session';
 
 export type AccountWriterState = 'checking' | 'owner' | 'readonly' | 'waiting' | 'unsupported';

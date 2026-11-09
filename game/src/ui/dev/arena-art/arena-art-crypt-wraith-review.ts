@@ -1,3 +1,4 @@
+// @ts-ignore - archive is local-only and gitignored; dev showcase only
 import pack from '../../../../../archive/art-reference/monsters/undead/wraith/crypt-wraith/meta.json';
 import { packReviewArt } from './arena-art-pack-review';
 

@@ -982,9 +982,11 @@ export interface PotionsCfg {
   hp_step_pct: number;
   mana_base_pct: number;
   mana_step_pct: number;
-  list: { name: string; pool: string; index: number }[];
-  craft: Record<string, unknown>;
-  condensed: { cost_bottles: number; cost_reroll_value_stones: number };
+  auto_use_default: { hp_pct: number; mana_pct: number };
+  weight: number;
+  list: { name: string; pool: string; tier: string; index: number }[];
+  craft: Record<string, { herbs: number; reroll_value_stones: number }>;
+  condensed: { cost_bottles: number; cost_reroll_value_stones: number; effect_mult: number; weight: number; weight_loose: number };
   shared_cooldown_sec: number;
   max_uses_per_fight: number;
   boss_suppressed: boolean;

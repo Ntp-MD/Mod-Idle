@@ -2,21 +2,31 @@ import { readFileSync } from 'node:fs';
 import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 import { newGame, push } from '@sim/core/game';
-import { E, loot } from '../../src/engine/client';
+import { E, loot, sm } from '../../src/engine/client';
 import { buildCharacter } from '@sim/core/player';
 import { autoEquip, equipFromBag, unequip } from '@sim/gear/gear';
 import { drink, cycleQuickbar } from '@sim/world/farm';
 import { depositMany, withdrawMany } from '@sim/town/town';
+import { createGearCommands } from '../../src/app/commands/gear';
+import { createFieldCommands } from '../../src/app/commands/field';
+import { createEconomyCommands } from '../../src/app/commands/economy';
+import { questBonusText } from '../../src/ui/town/quest-rewards';
+import { refreshSelectionAfterRepair, resolveItemSelection } from '../../src/ui/inventory/item-selection';
 
 // Execute the actual Svelte controller callbacks without a second copy of their logic.
 // Rendering and native input still require the integrated-browser check.
+// Domain verbs moved to app/commands/* factories (plan phase 1); the App wrappers and the
+// remaining App-owned callbacks are still extracted from App.svelte and run against the real
+// factories wired to the same sandbox state.
 const source = readFileSync(new URL('../../src/App.svelte', import.meta.url), 'utf8').split('<script lang="ts">')[1].split('</script>')[0];
 const ast = ts.createSourceFile('App.ts', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
 const names = ['requireAccountWriter', 'doBestEquip', 'useQuickSlot', 'doDrink', 'updateAutoEat',
   'toggleLock', 'equip', 'doUnequip', 'doDepositAll', 'doWithdrawAll',
   'cycleQuickSlot', 'assignQuickSlot', 'setAutoPotion', 'setPotionThreshold', 'setFarmAutomation'];
+const helpers = ['doDeposit', 'rowFlag', 'rowExploitFlag'];
+const wanted = new Set([...names, ...helpers]);
 const callbacks = ast.statements.filter((node): node is ts.FunctionDeclaration =>
-  ts.isFunctionDeclaration(node) && !!node.name && names.includes(node.name.text));
+  ts.isFunctionDeclaration(node) && !!node.name && wanted.has(node.name.text));
 const javascript = ts.transpileModule(callbacks.map(node => node.getText(ast)).join('\n'),
   { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
 
@@ -29,9 +39,54 @@ function controls(writer: boolean, showcase = false) {
   state.stash[0] = [{ ...item } as any];
   const deps = { gameState: state, c, settings: { equipMargin: 0 }, transactionWriter: writer,
     canWriteAccount: writer, showcaseMode: showcase, accountWriterMessage: 'Read-only',
-    E, autoEquip, equipFromBag, unequip, drink, cycleQuickbar, depositMany, withdrawMany, push };
+    E, sm, autoEquip, equipFromBag, unequip, drink, cycleQuickbar, depositMany, withdrawMany, push,
+    createGearCommands, createFieldCommands, createEconomyCommands,
+    questBonusText, resolveItemSelection, refreshSelectionAfterRepair,
+    craftThisItem: () => {}, fmtNum: (n: number) => String(n) };
   const make = new Function('deps', `let { ${Object.keys(deps).join(',')} } = deps;
-    let saveNote = '', equipNote = '', townNote = '', farmNote = '', invTab = 'inv';
+    let saveNote = '', equipNote = '', townNote = '', farmNote = '', skillNote = '', benchNote = '', forgeNote = '';
+    let invTab = 'inv', marketSale = null, marketTownId = '', benchSelection = null, forgeResultItem = null;
+    let travelScene = false, running = true, panel = null;
+    let townLive = false, tabs = 1, stashTab = 0, fieldCellName = 'field', viewHere = true, ownedAuras = [];
+    const town = undefined;
+    const __gear = createGearCommands({
+      get gameState() { return gameState; }, set gameState(v) { gameState = v; },
+      get settings() { return settings; },
+      get equipNote() { return equipNote; }, set equipNote(v) { equipNote = v; },
+      get invTab() { return invTab; }, set invTab(v) { invTab = v; },
+      get townLive() { return townLive; }, get tabs() { return tabs; }, get stashTab() { return stashTab; },
+      requireAccountWriter, craftThisItem, doDeposit, toggleLock,
+    });
+    const __field = createFieldCommands({
+      get gameState() { return gameState; }, set gameState(v) { gameState = v; },
+      get saveNote() { return saveNote; }, set saveNote(v) { saveNote = v; },
+      get skillNote() { return skillNote; }, set skillNote(v) { skillNote = v; },
+      get farmNote() { return farmNote; }, set farmNote(v) { farmNote = v; },
+      get transactionWriter() { return transactionWriter; },
+      get fieldCellName() { return fieldCellName; }, get viewHere() { return viewHere; },
+      get c() { return c; }, get ownedAuras() { return ownedAuras; },
+      get travelScene() { return travelScene; }, set travelScene(v) { travelScene = v; },
+      get running() { return running; }, set running(v) { running = v; },
+      get showcaseMode() { return showcaseMode; },
+      get panel() { return panel; }, set panel(v) { panel = v; },
+      requireAccountWriter, rowFlag, rowExploitFlag,
+    });
+    const __economy = createEconomyCommands({
+      get gameState() { return gameState; }, set gameState(v) { gameState = v; },
+      get saveNote() { return saveNote; }, set saveNote(v) { saveNote = v; },
+      get transactionWriter() { return transactionWriter; },
+      get town() { return town; }, get marketTownId() { return marketTownId; },
+      get marketSale() { return marketSale; }, set marketSale(v) { marketSale = v; },
+      requireAccountWriter,
+      get bench() { return null; },
+      get benchSelection() { return benchSelection; }, set benchSelection(v) { benchSelection = v; },
+      get benchNote() { return benchNote; }, set benchNote(v) { benchNote = v; },
+      get townNote() { return townNote; }, set townNote(v) { townNote = v; },
+      get forgeNote() { return forgeNote; }, set forgeNote(v) { forgeNote = v; },
+      get forgeResultItem() { return forgeResultItem; }, set forgeResultItem(v) { forgeResultItem = v; },
+      get viewColSet() { return null; }, fmtNum, questBonusText,
+      resolveItemSelection, refreshSelectionAfterRepair,
+    });
     ${javascript}
     return { ${names.join(',')}, state: () => gameState };`);
   return make(deps) as Record<string, any>;

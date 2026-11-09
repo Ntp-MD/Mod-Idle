@@ -37,6 +37,8 @@ function valueImports(file: string): string[] {
     specs.push(match[2]);
   }
   for (const match of text.matchAll(/export\s*\{[^}]*\}\s*from\s*['"]([^'"]+)['"]/g)) specs.push(match[1]);
+  for (const match of text.matchAll(/import\s+['"]([^'"]+)['"]/g)) specs.push(match[1]);
+  for (const match of text.matchAll(/(?<!typeof\s)import\s*\(\s*['"]([^'"]+)['"]\s*\)/g)) specs.push(match[1]);
   return specs;
 }
 
@@ -150,8 +152,67 @@ describe('the tick stages', () => {
   });
 });
 
-describe('the data bridge', () => {
-  const client = path.join(src, 'engine', 'client.ts');
+describe('combat internals', () => {
+  it('never import the public facade, so an extracted module cannot form a cycle with it', () => {
+    const internals = [
+      path.join(src, 'sim', 'core', 'spawn').replace(/\\/g, '/'),
+      path.join(src, 'sim', 'combat', 'skills-state').replace(/\\/g, '/'),
+      path.join(src, 'sim', 'combat', 'arena-types').replace(/\\/g, '/'),
+    ];
+    const facade = path.join(src, 'sim', 'core', 'game').replace(/\\/g, '/');
+    const found = modules
+      .filter((module) => internals.includes(module.id))
+      .filter((module) => module.imports.includes(facade))
+      .map((module) => path.relative(repo, module.file).replace(/\\/g, '/'));
+    expect(found).toEqual([]);
+  });
+
+  it('keeps one implementation behind the facade re-export', () => {
+    const defs = (file: string, name: string) => {
+      const text = fs.readFileSync(file, 'utf8');
+      const re = new RegExp(`(function|const)\\s+${name}\\b`, 'g');
+      return [...text.matchAll(re)].length;
+    };
+    const game = path.join(src, 'sim', 'core', 'game.ts');
+    const spawn = path.join(src, 'sim', 'core', 'spawn.ts');
+    const skills = path.join(src, 'sim', 'combat', 'skills.ts');
+    const skillsState = path.join(src, 'sim', 'combat', 'skills-state.ts');
+    const arena = path.join(src, 'sim', 'combat', 'combat-arena.ts');
+    expect(defs(spawn, 'spawnMob')).toBe(1);
+    expect(defs(game, 'spawnMob')).toBe(0);
+    expect(defs(skillsState, 'skillLevel')).toBe(1);
+    expect(defs(skills, 'skillLevel')).toBe(0);
+    expect(defs(arena, 'bodyRadiusM')).toBe(1);
+  });
+});
+
+describe('app layering', () => {
+  it('forbids runtime App/UI imports from app modules except panel loader', () => {
+    const allowedPanel = path.join(src, 'app', 'panel-loader').replace(/\\/g, '/');
+    const appFiles = modules.filter((m) => under(m.id, 'app') && m.id !== allowedPanel);
+    const found = appFiles.flatMap((m) => m.imports
+      .filter((t) => under(t, 'ui') || t.endsWith('/App.svelte') || t.endsWith('/App'))
+      .map((t) => `${path.relative(repo, m.file).replace(/\\/g, '/')} -> ${t}`));
+    expect(found).toEqual([]);
+  });
+
+  it('scanner sees side-effect and dynamic imports with fixture cases', () => {
+    const side = 'import "./foo.css"';
+    const dynamic = "const m = () => import('./Foo.svelte')";
+    const typeOnly = 'import type { X } from "./ui/foo"';
+    const names = (text: string) => {
+      const out: string[] = [];
+      for (const m of text.matchAll(/import\s+['"]([^'"]+)['"]/g)) out.push(m[1]);
+      for (const m of text.matchAll(/(?<!typeof\s)import\s*\(\s*['"]([^'"]+)['"]\s*\)/g)) out.push(m[1]);
+      return out;
+    };
+    expect(names(side)).toContain('./foo.css');
+    expect(names(dynamic)).toContain('./Foo.svelte');
+    expect(names(typeOnly)).toEqual([]);
+  });
+});
+
+describe('the data bridge', () => {  const client = path.join(src, 'engine', 'client.ts');
 
   it('is the only module allowed to instantiate the engine over the JSON sources', () => {
     const instantiators = walk(src)

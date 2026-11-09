@@ -1,3 +1,4 @@
+// @ts-ignore - archive is local-only and gitignored; dev showcase only
 import spear from '../../../../../archive/art-reference/monsters/humanoid/goblin/spear-goblin/meta.json';
 import type { ArenaCharacterArt, ArenaDirection, ArenaSpriteSheet } from '../../combat/arena/arena-art';
 

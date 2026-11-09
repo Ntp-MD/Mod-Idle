@@ -1,3 +1,4 @@
+// @ts-ignore - archive is local-only and gitignored; dev showcase only
 import demon from '../../../../../archive/art-reference/monsters/demon/imp/little-demon/meta.json';
 import { packReviewArt } from './arena-art-pack-review';
 

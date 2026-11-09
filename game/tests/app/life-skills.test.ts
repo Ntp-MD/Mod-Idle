@@ -162,7 +162,7 @@ describe('Smithing, cooking batches and Farming Mastery', () => {
     expect(state.fieldwork.materials['iron-bar']).toBe(recipe.yield * 2);
     expect(state.fieldwork.materials['iron-ore']).toBe(1);
     expect(state.fieldwork.skills.smithing.xp - oldXp).toBe(recipe.xp * 2);
-    expect(state.fieldwork.skills.smithing.mastery[recipe.id] - oldMastery).toBe(recipe.mastery_xp * 2);
+    expect(state.fieldwork.skills.smithing.mastery[recipe.id] - oldMastery).toBe(recipe.mastery_xp! * 2);
     expect(state.clockSec).toBe(oldClock);
     expect(unchanged(state, () => processMaterials(state, recipe.id)).ok).toBe(false);
   });

@@ -13,5 +13,18 @@ export default defineConfig({
     { name: 'production', testMatch: ['startup.spec.ts'] },
     { name: 'measurement', testMatch: ['measurements.spec.ts'] },
   ],
-  webServer: undefined,
+  webServer: [
+    {
+      command: 'npm run dev -- --port 5173 --strictPort',
+      url: 'http://localhost:5173/',
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+    {
+      command: 'npm run preview -- --port 4173 --strictPort',
+      url: 'http://localhost:4173/',
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+  ],
 });

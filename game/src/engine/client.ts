@@ -61,7 +61,7 @@ const SKILLS_DATA: SkillsData = skillsJson as SkillsData;
 const MOB_SKILLS_DATA: MobSkillsData = mobSkillsJson as unknown as MobSkillsData;
 validateSkillHitClasses(skillsJson.skills, 'skills.json');
 validateSkillHitClasses(mobSkillsJson.skills, 'mob-skills.json');
-validateSkillActions(skillsJson.skills as any, 'skills.json');
+validateSkillActions(SKILLS_DATA.skills, 'skills.json');
 validateMobSkillRules(mobSkillsJson.skills, 'mob-skills.json');
 // a JSON import cannot infer a union such as `TreeGrant.stat`; the engine validates every grant it
 // reads, so the seam narrows to its own declared shape here rather than re-typing the data
@@ -99,18 +99,18 @@ const ELEMENTS = Object.keys(E.elements.status_of);
 export const tree = createTree(TREE_DATA, MODS_DATA, ELEMENTS, keystoneBuildContext(ELEMENTS));
 /** The walk and the farm, instantiated once here: the sim, the map views and the player wiki all read
  *  the same two objects, so a block count or a growth time cannot differ between the game and a page.
- *  `any` because the factory's return is a bag of reads the engine's data interface deliberately does
- *  not enumerate — the same reason the sim modules held its instance at `any`. */
-export const road: any = createRoad(ENGINE_DATA);
-export const farm: any = createFarm(ENGINE_DATA);
-export const fieldwork: any = createFieldwork(ENGINE_DATA.fieldwork);
+ *  Factory return types are inferred (Road is exported from engine/road.ts); fieldwork cache config
+ *  is kept concrete so exported methods do not fall back to any (plan phase-3 types-inference). */
+export const road = createRoad(ENGINE_DATA);
+export const farm = createFarm(ENGINE_DATA);
+export const fieldwork = createFieldwork(ENGINE_DATA.fieldwork);
 export const lifeSkills = createLifeSkills(ENGINE_DATA.fieldwork);
 export const trade = createTrade(ENGINE_DATA, TOWN.trade as TradeCfg);
 export const delivery = createDelivery(ENGINE_DATA, TOWN.delivery as DeliveryCfg, trade, eng);
-const STORY_DATA: StoryData = validateStoryData(storytellerJson, { npcIds: new Set((townJson.npcs as any[]).map((n) => n.id)) });
+const STORY_DATA: StoryData = validateStoryData(storytellerJson, { npcIds: new Set((townJson.npcs as { id: string }[]).map((n) => n.id)) });
 fieldwork.validateCampPool(new Set(STORY_DATA.scenes.filter((s) => s.source === 'camp').map((s) => s.id)));
 export const STORY = STORY_DATA;
-export const blackMarket = createBlackMarket(ENGINE_DATA as any, (TOWN as any).black_market as BlackMarketCfg, trade, sm);
+export const blackMarket = createBlackMarket(ENGINE_DATA, TOWN.black_market as BlackMarketCfg, trade, sm);
 
 /** The Core keys live in the engine (`core-attributes.ts`), so a grant, a save and a stat line are
  *  checked against one list — re-exported here in the published order, unchanged. */

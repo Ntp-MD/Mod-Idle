@@ -1,12 +1,21 @@
 import { describe, expect, it } from 'vitest';
+// @ts-ignore - archive is local-only and gitignored
 import wraithManifest from '../../../archive/art-reference/monsters/undead/wraith/crypt-wraith/meta.json';
+// @ts-ignore - archive is local-only and gitignored
 import demonManifest from '../../../archive/art-reference/monsters/demon/imp/little-demon/meta.json';
+// @ts-ignore - archive is local-only and gitignored
 import golemManifest from '../../../archive/art-reference/monsters/elemental/golem/stone-golem/clips-meta.json';
+// @ts-ignore - archive is local-only and gitignored
 import skeletonBoneManifest from '../../../archive/art-reference/monsters/undead/skeleton/original-bone/meta.json';
+// @ts-ignore - archive is local-only and gitignored
 import skeletonManifest from '../../../archive/art-reference/monsters/undead/skeleton/sword-shield/meta.json';
+// @ts-ignore - archive is local-only and gitignored
 import spiderManifest from '../../../archive/art-reference/monsters/insect/spider/pixiblop-spider/meta.json';
+// @ts-ignore - archive is local-only and gitignored
 import spearManifest from '../../../archive/art-reference/monsters/humanoid/goblin/spear-goblin/meta.json';
+// @ts-ignore - archive is local-only and gitignored
 import wispManifest from '../../../archive/art-reference/monsters/elemental/wisp/eclipse-wisp/meta.json';
+// @ts-ignore - archive is local-only and gitignored
 import wolfManifest from '../../../archive/art-reference/monsters/beast/wolf/shadow-wolf/clips-meta.json';
 import { impReviewArt } from '../../src/ui/dev/arena-art/arena-art-imp-review';
 import { golemReviewArt } from '../../src/ui/dev/arena-art/arena-art-golem-review';

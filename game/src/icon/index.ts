@@ -3,6 +3,7 @@ import {
   characterIconCandidates, gearIconCandidates, skillIconCandidates,
   slotIconCandidates, stackIconCandidates,
 } from './registry';
+import { ICON_MANIFEST } from './icon-manifest';
 
 /**
  * The icon shelf.
@@ -27,6 +28,20 @@ const baseName = (path: string): string => path.slice(path.lastIndexOf('/') + 1)
 const shelf = new Map<string, string>(
   Object.entries(shelfAssets).map(([p, url]) => [baseName(p), url]),
 );
+// Manifest validation (plan phase-2 art-manifest): bounded discovery is validated,
+// not open-ended. Any basename collision or missing manifest candidate throws in dev
+// and is asserted in icon-registry.test.ts. Sync resolver signatures are unchanged.
+for (const name of ICON_MANIFEST) {
+  if (!shelf.has(name)) throw new Error(`icon manifest missing candidate: ${name}`);
+}
+{
+  const seen = new Set<string>();
+  for (const p of Object.keys(shelfAssets)) {
+    const b = baseName(p);
+    if (seen.has(b)) throw new Error(`icon manifest basename collision: ${b}`);
+    seen.add(b);
+  }
+}
 /** Mob icons resolve only inside mob/icon — a bare name like `bone` must not borrow a material icon. */
 const mobShelf = new Map<string, string>(
   Object.entries(import.meta.glob<string>('./mob/icon/*.png', { eager: true, query: '?url', import: 'default' }))

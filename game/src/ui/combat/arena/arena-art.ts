@@ -1,4 +1,5 @@
 import { pixelArenaArt } from './arena-art-pixel-v2';
+import { beetleVariants } from './arena-art-beetle';
 import { arenaGroundMaterials, type ArenaGroundMaterial } from './arena-ground-materials';
 
 export type ArenaDirection =
@@ -98,7 +99,7 @@ export const arenaArt: ArenaArt = {
   background: arenaGroundMaterials.forest,
   hero: pixelArenaArt.hero,
   species: pixelArenaArt.species,
-  variants: pixelArenaArt.variants,
+  variants: { ...pixelArenaArt.variants, beetle: beetleVariants },
 };
 
 /** Use authored variant art when present; unavailable variants fall back to their species pawn. */

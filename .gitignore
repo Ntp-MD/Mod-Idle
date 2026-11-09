@@ -16,3 +16,5 @@ __pycache__/
 
 # Retired game art/data snapshots, kept locally only
 archive/
+.playwright-mcp/
+.cache

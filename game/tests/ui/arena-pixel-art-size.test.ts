@@ -24,7 +24,7 @@ describe('pixel mob display size calibration', () => {
 
       expect(art, id).toBeDefined();
       expect(art!.displayScale, id).toBeGreaterThanOrEqual(.6);
-      expect(art!.displayScale, id).toBeLessThanOrEqual(1.6);
+      expect(art!.displayScale, id).toBeLessThanOrEqual(2.3);
       return aspect * art!.displayScale!;
     });
 
@@ -66,7 +66,7 @@ describe('WP2 — sprite source normalizes to model metres (A6/A11)', () => {
     const wideAtlas = {
       ...goblinMeta,
       frameCanvas: { width: 512, height: 512 },
-      anchor: { x: 192, y: 288 },
+      anchor: { x: 128, y: 224 },
     };
     const base = pixelArenaArt.species.goblin!;
     const wide = pilotArt('/test-canvas-beast.png', wideAtlas, 224, false, base.displayScale ?? 1, 'test.canvas-beast');

@@ -145,7 +145,7 @@ export function tickTrailSites(state: GameState, online: boolean): void {
   if (!cells.length) return;
   const rng = mulberry32(events.streamState);
   events.streamState = (events.streamState + 0x6d2b79f5) >>> 0;
-  const rolled: { q: number; r: number; kind: TrailSite['kind'] } | null = fieldwork.rollTrailSite(cells, rng);
+  const rolled: { q: number; r: number; kind: TrailSite['kind'] } | null = fieldwork.rollTrailSite(cells, rng) as { q: number; r: number; kind: TrailSite['kind'] } | null;
   if (rolled) events.sites.push({ ...rolled, id: `trail-${++events.serial}`, remainingSec: cfg.lifetime_sec });
 }
 

@@ -111,7 +111,7 @@
   const activityDetail = $derived(
     site === 'mine' ? `Mine ${fieldHarvestAmount(gameState, 'mining', fieldwork.F.actions.mine.yield)} ore/action · local find: ${fieldwork.materialById[regional?.mine]?.name} · Mst ${fieldMasteryLevel(gameState, 'mining', 'mine')}`
       : site === 'grove' ? `Cut ${fieldHarvestAmount(gameState, 'woodcutting', fieldwork.F.actions.grove.yield)} timber/action · local wood: ${fieldwork.materialById[regional?.grove]?.name} · forage: ${fieldwork.foodById[regional?.food]?.name}`
-        : site === 'fishing' ? `Catch ${fieldHarvestAmount(gameState, 'fishing', fieldwork.F.fishing.yield)} ${fieldwork.foodById[fishingId]?.name || 'regional food'} every ${fieldwork.F.fishing.interval_sec} sec · local source: ${fieldwork.foodById[regional?.food]?.name}`
+        : site === 'fishing' ? `Catch ${fieldHarvestAmount(gameState, 'fishing', fieldwork.F.fishing.yield)} ${fishingId ? fieldwork.foodById[fishingId]?.name : 'regional food'} every ${fieldwork.F.fishing.interval_sec} sec · local source: ${fieldwork.foodById[regional?.food]?.name}`
           : site === 'hunt' ? 'Drop chance and portions improve with Hunting level and species Mastery · humans may drop cooked rations, Goblins raw haunches'
             : site === 'dungeon' ? 'A special dungeon run starts from this safe wild-side entrance'
               : 'Choose a field hex from the map to see what this ground offers');
@@ -219,7 +219,7 @@
           {:else}
             <button class="btn btn-quiet" disabled={!!gatheringProblem} onclick={() => onstart(siteAction)}
                     title={gatheringProblem || 'Gather on this wild-side cell'}>
-              {siteAction === 'mine' ? 'Start mining' : siteAction === 'grove' ? 'Start woodcutting' : `Start fishing · ${fieldwork.foodById[fishingId]?.name || 'regional food'}`}
+              {siteAction === 'mine' ? 'Start mining' : siteAction === 'grove' ? 'Start woodcutting' : `Start fishing · ${fishingId ? fieldwork.foodById[fishingId]?.name : 'regional food'}`}
             </button>
           {/if}
         {/if}

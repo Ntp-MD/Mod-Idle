@@ -5,7 +5,7 @@ description: Plan readiness gate: decide whether an implementation plan is safe 
 
 # Plan Readiness Audit â€” Agent Delegation Gate
 
-> Purpose: Determine whether an implementation plan is safe to delegate to a coding agent (e.g., Beam 1.0). This is a **plan audit**, not permission to implement. Optimize for successful completion, minimal rework, and bounded agent executionâ€”not maximum document length.
+> Purpose: Determine whether an implementation plan is safe to delegate to a coding agent (e.g., Beam 1.0). This is a **plan audit**, not permission to implement. Its stop/escalation rules govern the audit itself; when an implementing agent works an open plan, continuity and stop conditions live in the project `AGENTS.md` (`Plan files`), and only those end a turn. Optimize for successful completion, minimal rework, and bounded agent executionâ€”not maximum document length.
 
 ## Role and non-negotiable rules
 

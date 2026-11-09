@@ -350,13 +350,15 @@ export function resolveTravelEvent(state: GameState, rng: () => number, receipt?
   if (!event) return null;
   if (event.kind === 'restore') {
     const before = state.fieldwork.hunger;
-    state.fieldwork.hunger = Math.min(fieldwork.F.hunger.max, before + event.hunger_restore);
+    state.fieldwork.hunger = Math.min(fieldwork.F.hunger.max, before + (event.hunger_restore ?? 0));
     receipt?.({ resourceDeltas: [], hungerDelta: state.fieldwork.hunger - before });
     return `${event.text} · Hunger ${Math.floor(state.fieldwork.hunger)}%`;
   }
-  const amount = event.amount_min + Math.floor(rng() * (event.amount_max - event.amount_min + 1));
+  const amountMin = event.amount_min ?? 1;
+  const amountMax = event.amount_max ?? amountMin;
+  const amount = amountMin + Math.floor(rng() * (amountMax - amountMin + 1));
   const localFood = fieldwork.F.regional_sources?.[state.zone]?.food;
-  const food = fieldwork.foodById[localFood] || fieldwork.foodById[event.food_id];
+  const food = fieldwork.foodById[localFood] || (event.food_id ? fieldwork.foodById[event.food_id] : undefined);
   if (!food) return null;
   const received = addTo(state, state.fieldwork.foods, food.id, 'food', amount);
   receipt?.({ resourceDeltas: [{ bucket: 'food', id: food.id, count: received }], hungerDelta: 0 });

@@ -1,3 +1,4 @@
+// @ts-ignore - archive is local-only and gitignored; dev showcase only
 import golem from '../../../../../archive/art-reference/monsters/elemental/golem/stone-golem/clips-meta.json';
 import type { ArenaCharacterArt, ArenaDirection, ArenaSpriteSheet } from '../../combat/arena/arena-art';
 

@@ -19,14 +19,14 @@ type Clip = Record<string, ArenaSpriteSheet | undefined>;
 const clip = (name: string): Clip => (equippedPlayerArt.clips as unknown as Record<string, Clip>)[name];
 
 describe('pawn player body and equipment anchors', () => {
-  it('uses one static four-view atlas for every action', () => {
+  it('uses one static eight-view atlas for every action', () => {
     for (const sheets of Object.values(equippedPlayerArt.clips) as Clip[]) {
       expect(Object.keys(sheets)).toHaveLength(8);
       for (const sheet of Object.values(sheets)) {
-        expect(sheet?.columns).toBe(2);
+        expect(sheet?.columns).toBe(4);
         expect(sheet?.rows).toBe(2);
         expect(sheet?.frames).toBe(1);
-        expect(sheet?.sourceFrames).toHaveLength(4);
+        expect(sheet?.sourceFrames).toHaveLength(8);
       }
     }
     expect(equippedPlayerArt.anchor).toEqual({ x: 0.5, y: 0.875 });

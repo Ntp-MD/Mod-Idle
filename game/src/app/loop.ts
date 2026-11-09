@@ -1,5 +1,5 @@
 import { COMBAT_STEP_US, MAX_WORK_SLICE_MS, schedulerSteps, stepCombat } from '@sim/core/game';
-import { equipWindowOpen } from '../ui/combat/equip-policy';
+import { equipWindowOpen } from '../sim/combat/equip-policy';
 import type { GameState } from '@sim/core/types';
 import type { CombatArena } from '@sim/combat/combat-arena';
 import type { ManualControl } from '@sim/combat/combat-actions';

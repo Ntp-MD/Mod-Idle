@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { AwayReport } from './hud';
+  import type { AwayReport } from '../../app/progress-report';
   import { sm } from '../../engine/client';
   import { icon, skillIcon } from '../../icon';
   let { report, treePoints, bagUsed, bagCapacity, fmtNum, ondismiss, ontree, onskills, onbag }: {

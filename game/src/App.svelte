@@ -86,7 +86,8 @@ import { buyBlackMarket } from '@sim/town/black-market';
   import { mapTravelPhase } from './ui/map/map-travel';
   import { adventureView, uniqueTraceSpecies, type AdventureCell } from './ui/map/map-adventure';
   import { setCastDrag, readCastDrag } from './ui/shared/drag';
-  import { snapCounters, buildAwayReport, fieldLabel, type AwayReport } from './ui/hud/hud';
+  import { fieldLabel } from './ui/hud/hud';
+  import { snapCounters, buildAwayReport, type AwayReport } from './app/progress-report';
   import { bar } from './ui/shared/field';
   import { fxOut } from './ui/shared/motion';
   import FieldPlates from './ui/combat/FieldPlates.svelte';
@@ -113,6 +114,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   import { SHOWCASE_SAMPLE_LABELS, SHOWCASE_SAMPLES, showcaseFieldSkill } from './app/showcase-samples';
   import { createSessionActions, type AccountWriterLease } from './app/session';
   import { createGameLoop } from './app/loop';
+  import { previewTick } from './app/scheduler';
+  import { createGearCommands } from './app/commands/gear';
+  import { createEconomyCommands } from './app/commands/economy';
+  import { createFieldCommands } from './app/commands/field';
+  import { buildShowcaseGame } from './app/commands/showcase-game';
+  import { createTravelCommands } from './app/commands/map';
   import { road, startWalk, walkNote, walkBlocks, warpTo, warpCost, cellBlocks, cellSec, currentCell, settlementCell, ownerOf } from '@sim/world/road';
   import { enterDungeon, cooldownLeft } from '@sim/world/dungeon';
   import { mastery } from '@sim/core/mastery';
@@ -569,309 +576,22 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     }
   }
 
-  function showcaseGame(scenario = 'delivery'): GameState {
-    const sample = newGame();
-    sample.fieldwork.materials['copper-ore'] = 12;
-    sample.fieldwork.materials.timber = 8;
-    sample.fieldwork.foods['river-fish'] = 5;
-    sample.junk[(E.mob.variant_drops as Record<string, { item: string }>)[(E.mob.variants as any[]).find((row) => row.species === 'goblin').id].item] = 20;
-    sample.hunting = true;
-    if (showcaseFieldSkill(scenario)) {
-      const speciesId = activeArenaVariant?.speciesId ?? ARENA_PREVIEW_SPAWN[arenaSpecies] ?? arenaSpecies;
-      const species = eng.speciesById(speciesId);
-      const spawnBody = spritePreviewMode && !species.sizes.includes('small') ? species.sizes[0] : 'small';
-      const spawnZone = species.zones.includes(sample.zone) ? sample.zone : species.zones[0];
-      const spawnSubzone = spritePreviewMode
-        ? eng.zoneById(spawnZone).subzones?.findIndex((sub: { species: string[] }) => sub.species.includes(speciesId))
-        : undefined;
-      setLevel(sample, 5);
-      sample.phase = 'fighting';
-      const rng = mulberry32(20261024);
-      // Three copies expose the multi-Mob layout while replaying one selected species sheet.
-      const encounterSize = 3;
-      const mobs: Mob[] = [];
-      for (let attempt = 0; attempt < 100 && mobs.length < encounterSize; attempt++) {
-        const mob = spawnMob(rng, spawnZone, 'normal', spawnBody, spawnSubzone, { allowWildUnique: false });
-        if (mob.speciesId === speciesId) mobs.push(mob);
-      }
-      if (mobs.length) sample.group = mobs;
-      if (spritePreviewMode && mobs.length) setLevel(sample, Math.max(5, ...mobs.map(mob => mob.level)));
-      const previewSkill = sm.byId[arenaSkillId] ?? sm.byId['attack.fireball'];
-      sample.skills.owned[previewSkill.id] = 0;
-      sample.skills.list.fill(null);
-      if (previewSkill.type === 'buff') {
-        sample.skills.buffs[previewSkill.id] = true;
-        sample.skills.buffUp[previewSkill.id] = 0;
-      } else if (previewSkill.type === 'aura') {
-        sample.skills.auras[previewSkill.id] = true;
-      } else {
-        sample.skills.list[0] = previewSkill.id;
-        sample.skills.cd[previewSkill.id] = 0;
-      }
-      // Hold a weapon the chosen skill can actually fire — the arena only casts a press its weapon fits,
-      // so a bow row needs a bow and a spell reads best off a magic weapon.
-      const fittingWeapon = (E.weapons as any[]).find((w) => sm.weaponFits(previewSkill, w.name)
-        && (!previewSkill.group || previewSkill.group === 'all' || sm.weaponGroupOf(w.name) === previewSkill.group));
-      const requestedFrames = showcasePlayerWeapon
-        ? (BASES.weapon_frames as Record<string, { name: string }[]>)[showcasePlayerWeapon]
-        : undefined;
-      const previewWeaponBase = requestedFrames?.[0]?.name ?? fittingWeapon?.name;
-      const mainHandIndex = loot.SLOTS.findIndex((slot: string) => slot === 'main hand');
-      if (previewWeaponBase && mainHandIndex >= 0) {
-        sample.gear[mainHandIndex] = { slot: 'main hand', base: previewWeaponBase, ilvl: 1, quality: 'Normal', tier: 'T1', lines: [] };
-      }
-      if (showcasePlayerOffhand === 'shield') {
-        const shieldBase = (BASES.bases as { name: string; slot?: string; family?: string | null }[])
-          .find(item => item.slot === 'off hand' && item.family === 'Shield');
-        const offhandIndex = loot.SLOTS.findIndex((slot: string) => slot === 'off hand');
-        if (shieldBase && offhandIndex >= 0)
-          sample.gear[offhandIndex] = { slot: 'off hand', base: shieldBase.name, ilvl: 1, quality: 'Normal', tier: 'T1', lines: [] };
-      }
-      const sheet = characterSheet(sample);
-      sample.player.hp = previewSkill.type === 'heal' ? Math.round(sheet.maxHp * .6) : sheet.maxHp;
-      sample.player.es = sheet.es;
-      sample.player.mana = sheet.maxMana;
-      return sample;
-    }
-    tick(sample, { online: false, autoSkills: false });
-    if (scenario === 'offline-progress') return sample;
-    if (scenario === 'core-field') {
-      sample.player.autoSpend = false;
-      setLevel(sample, 10);
-      respecStats(sample);
-      allocateStats(sample, 'str', 5);
-      // A field sample must stand on bare owned ground, not on the town's dungeon cell that
-      // happens to sit one hex east after the world renovation.
-      const base = currentCell(sample);
-      const bare = road.land
-        .filter((cell: { q: number; r: number }) => !road.locationAt(cell)
-          && road.owningNode(cell, [sample.town.waypoint]).id === sample.town.waypoint)
-        .sort((a: { q: number; r: number }, b: { q: number; r: number }) =>
-          (road.blocksLand(base, a) ?? 1e9) - (road.blocksLand(base, b) ?? 1e9))[0];
-      if (bare) sample.cell = { q: bare.q, r: bare.r, sub: null, site: null };
-      sample.hunting = false;
-      sample.group = [];
-      const sheet = characterSheet(sample);
-      sample.player.hp = Math.min(sample.player.hp, sheet.maxHp);
-      sample.player.mana = Math.min(sample.player.mana, sheet.maxMana);
-      sample.player.es = Math.min(sample.player.es, sheet.es);
-      return sample;
-    }
-    const starter = sample.gear.find((piece): piece is Item => piece !== null);
-    if (starter) {
-      const carriedSample = structuredClone(starter);
-      carriedSample.locked = true;
-      sample.bag.push(carriedSample);
-    }
-    if (scenario === 'build-workbench') {
-      sample.player.autoSpend = false;
-      setLevel(sample, 30);
-      for (const skill of sm.all()) sample.skills.owned[skill.id] = 0;
-      sample.skills.list = sm.all().filter(skill => ['attack', 'curse', 'heal'].includes(skill.type || ''))
-        .slice(0, ACTIVE_SLOTS).map(skill => skill.id);
-      sample.skills.mode[sample.skills.list[0]!] = 'conditional';
-      sample.skills.conditions[sample.skills.list[0]!] = { ...condOf(sample.skills, sample.skills.list[0]!), boss: true, minTargets: 3, manaFloorPct: 20 };
-      const aura = sm.of('aura')[0];
-      if (aura) toggleTrack(sample.skills, aura.id);
-      const buff = sm.of('buff')[0];
-      if (buff) { sample.skills.buffs[buff.id] = true; sample.skills.buffUp[buff.id] = 20; }
-      sample.player.treePoints = 40;
-      sample.player.attainmentPoints = 8;
-      sample.bag.push(rollDrop(mulberry32(20261024), 'mid', 42));
-      sample.bag.push(rollDrop(mulberry32(20261025), 'mid', 42));
-      sample.presets[0].zones = [sample.zone];
-      storePreset(sample);
-      return sample;
-    }
-    if (scenario === 'craft-stash') {
-      sample.counters.stones = {
-        ...sample.counters.stones,
-        reroll_value: 9, tier: 9, add: 6, remove: 4, replace: 5, quality: 5,
-        repair: 2, corrupt: 1, polish: 2, reforge: 2, rebirth: 2,
-      };
-      // a real drop, so the bench sample carries Unbound lines the line tabs can open
-      sample.bag.push(rollDrop(mulberry32(20260218), 'mid', 42));
-      // A compatible held Imprint exercises the same targeting flow as regular stones.
-      const imprintMod = replaceChoices(sample, 'bag', sample.bag.length - 1)[0];
-      if (imprintMod) sample.counters.stones[`imprint_${imprintMod}`] = 2;
-      const stashIndexes = sample.gear
-        .map((piece, position) => piece && position > 0 ? position : -1)
-        .filter((position) => position >= 0)
-        .slice(0, 2);
-      if (stashIndexes.length) {
-        sample.grants.stash_tabs = Math.max(1, sample.grants.stash_tabs || 0);
-        sample.stash[0] ||= [];
-        for (const stashIndex of stashIndexes) {
-          const stashPiece = sample.gear[stashIndex];
-          if (!stashPiece) continue;
-          sample.gear[stashIndex] = null;
-          sample.stash[0].push(structuredClone(stashPiece));
-        }
-      }
-    }
-    const activeSkill = Object.values(sm.byId).find((skill) => skill.type && ['attack', 'curse', 'heal'].includes(skill.type));
-    if (activeSkill) {
-      sample.skills.owned[activeSkill.id] = 0;
-      sample.skills.list[0] = activeSkill.id;
-    }
-    if (scenario.startsWith('story-')) {
-      // Storyteller fixtures (plan §14.3): seeded source helpers build the frozen
-      // offers/results; the hosts render them through the shared presenters.
-      sample.hunting = false;
-      sample.group = [];
-      const campCell = { ...currentCell(sample) } as { q: number; r: number; sub: null; site: null };
-      sample.fieldwork.camp = { cell: campCell, zone: sample.zone };
-      const atCamp = () => { sample.hunting = false; sample.group = []; sample.phase = 'fighting'; sample.walk = null; sample.dungeon = null; };
-      const cacheOffer = () => {
-        const foodId = fieldwork.F.regional_sources[String(sample.zone)]?.food || 'river-fish';
-        return fieldwork.cacheOffer(sample.zone, foodId, 0.1);
-      };
-      const campActive = (kind: string, stage: string, sceneId: string, cache: ReturnType<typeof cacheOffer> | null = null, remainingSec = 0) => {
-        const serial = ++sample.fieldwork.campEncounters.serial;
-        sample.fieldwork.campEncounters.active = {
-          id: serial, kind: kind as any, stage: stage as any, origin: { ...campCell },
-          warningSec: 10, choiceSec: 10, payload: kind === 'supply-cache' ? { foodId: cache!.foodId } : { species: eng.speciesInZone(sample.zone)[0] ?? null },
-          preparedGroup: [], participantIds: [],
-          story: {
-            revision: 1, eventId: `camp-${kind === 'supply-cache' ? 'supply-cache' : kind}`,
-            sceneId, lineIndex: 0, beat: 0, cache, remainingSec,
-          } as any,
-        };
-        sample.fieldwork.campEncounters.storyHistory = [{
-          encounterId: serial, eventId: sample.fieldwork.campEncounters.active.story!.eventId as string,
-          kind: kind as any, variantId: `${sceneId}-0`, terminalAction: null, followupUsed: false,
-        }];
-      };
-      if (scenario === 'story-camp-warning') { atCamp(); campActive('sounds', 'warning', 'sounds-signs'); return sample; }
-      if (scenario === 'story-cache-choices') { atCamp(); sample.fieldwork.foods[cacheOffer().foodId] = 5; campActive('supply-cache', 'choice', 'cache-ledge', cacheOffer()); return sample; }
-      if (scenario === 'story-cache-working') { atCamp(); const offer = cacheOffer(); campActive('supply-cache', 'resolving', 'cache-ledge', offer, Math.ceil(offer.carefulSec / 2)); return sample; }
-      if (scenario === 'story-cache-bagfull') { atCamp(); const offer = cacheOffer(); campActive('supply-cache', 'collect', 'cache-ledge', offer, 0); return sample; }
-      if (scenario === 'story-cache-results') {
-        atCamp();
-        sample.fieldwork.campEncounters.serial = 1;
-        sample.fieldwork.campEncounters.lastReceipt = {
-          encounterId: 1, eventId: 'camp-supply-cache', kind: 'supply-cache', action: 'cache-quick',
-          sceneId: 'cache-gain-result', elapsedSec: 0, paid: [],
-          earned: [{ bucket: 'material', id: 'ore', count: 2 }], lost: [], info: [],
-        };
-        sample.fieldwork.campEncounters.recap = 'Quick cache recovery complete';
-        return sample;
-      }
-      if (scenario === 'story-delivery-choices') {
-        const draws = [0, 0.99, 0, 0, 0];
-        const contract = offerDelivery(sample, sample.town.waypoint, () => draws.shift() ?? 0, { writer: true });
-        if (contract) tradeBucket(sample, trade.byId[contract.good])[trade.byId[contract.good].key] = contract.target;
-        return sample;
-      }
-      if (scenario === 'story-courier-unaccepted' || scenario === 'story-courier-destination') {
-        const draws = [0, 0.99, 0, 0, 0];
-        const contract = offerDelivery(sample, sample.town.waypoint, () => draws.shift() ?? 0, { writer: true });
-        if (contract) {
-          const other = (TOWN.settlements as any[]).find((row) => row.id !== sample.town.waypoint)!.id;
-          if (!sample.town.visited.includes(other)) sample.town.visited.push(other);
-          const courier = { ...contract, id: `courier:${sample.town.waypoint}:${++sample.town.courierSerial}`, serial: sample.town.courierSerial, kind: 'courier' as const, destinationTown: other, acceptedAtDeliverySec: scenario === 'story-courier-destination' ? sample.town.deliveryClockSec : null, offeredAtDeliverySec: sample.town.deliveryClockSec, endReason: null };
-          sample.town.contracts[sample.town.waypoint] = [courier];
-        }
-        return sample;
-      }
-      if (scenario === 'story-market-promotion') return sample;
-      if (scenario === 'story-forge-ready') { sample.fieldwork.materials['copper-ore'] = 12; return sample; }
-      if (scenario === 'story-forge-shortage') { sample.fieldwork.materials['copper-ore'] = 0; sample.fieldwork.materials.timber = 0; return sample; }
-      if (scenario === 'story-road-result') {
-        sample.mapJournal!.lastEvent = { ...currentCell(sample), text: 'Found River Fish along the trail · River Fish ×2', atSec: sample.clockSec, source: 'road', resourceDeltas: [{ bucket: 'food', id: 'river-fish', count: 2 }], hungerDelta: 0 };
-        return sample;
-      }
-      if (scenario === 'story-site-result') {
-        sample.mapJournal!.lastEvent = { ...currentCell(sample), text: 'Shallow Cache · Hunger 88%', atSec: sample.clockSec, source: 'site', resourceDeltas: [], hungerDelta: 4 };
-        return sample;
-      }
-      if (scenario === 'story-dungeon-result') {
-        // The dungeon entrance sits one hex east of the town node; stand on it so
-        // the TravelCard shows the shared result next to the entrance facts.
-        const feet = currentCell(sample);
-        sample.cell = { q: feet.q + 1, r: feet.r, sub: null, site: 'dungeon' };
-        sample.lastDungeonReceipt = {
-          key: `dungeon:${sample.zone}:${sample.clockSec}:cleared`, zone: sample.zone, atSec: sample.clockSec, reason: 'cleared',
-          kept: [{ bucket: 'stone', id: 'tier', count: 2 }], forfeited: [], uncollected: [{ bucket: 'junk', id: 'junk', count: 1 }],
-          gear: { processed: 1, retained: 1, salvaged: 0, rejected: 0, forfeited: 0 },
-        };
-        return sample;
-      }
-      if (scenario === 'story-read-only') { atCamp(); campActive('sounds', 'warning', 'sounds-signs'); return sample; }
-      return sample;
-    }
-    if (scenario !== 'craft-stash') {
-      const draws = [0, 0.99, 0, 0, 0];
-      if (scenario === 'choice') sample.town.contractSerial = 1;
-      const contract = offerDelivery(sample, sample.town.waypoint, () => draws.shift() ?? 0, { writer: true });
-      if (contract) {
-        const good = trade.byId[contract.good];
-        tradeBucket(sample, good)[good.key] = contract.target;
-        if (scenario === 'full-bag') {
-          tradeBucket(sample, good)[good.key] += contract.target;
-          const free = Math.max(0, slotsAvailable(sample) - slotsUsed(sample));
-          sample.counters.stones.reroll_value = free * E.inventory.stack_size.stone;
-        }
-        if (scenario === 'fallback' && contract.reward.skill) sample.skills.owned[contract.reward.skill] = sm.LADDER_MAX_DUPLICATES;
-        if (scenario === 'expired') {
-          deliver(sample, contract.id, Math.max(1, Math.floor(contract.target / 2)), { writer: true });
-          sample.clockSec += contract.dueAtDeliverySec - sample.town.deliveryClockSec;
-          sample.town.deliveryClockSec = contract.dueAtDeliverySec;
-          tickDeliveries(sample, () => 1, false, true, { writer: true });
-        }
-      }
-    }
-    if (scenario === 'combat-fx') {
-      // Partial pools keep the waterline, glass and resource effects visible in the preview.
-      sample.player.hp = Math.round(sample.player.hp * .65);
-      sample.player.mana = Math.round(sample.player.mana * .48);
-      sample.player.es = Math.round(sample.player.es * .35);
-      const mob = sample.group[0];
-      if (mob) {
-        sample.mobStatus[mob.id] = {
-          statuses: {
-            burn: { stacks: 2, secLeft: 8, perSec: 24 },
-            chill: { stacks: 1, secLeft: 10, perSec: 0 },
-            shock: { stacks: 1, secLeft: 1, perSec: 0 },
-          },
-          alignedPerSec: 24, stoppedSec: 0, elapsedSec: 1,
-        };
-        const buff = sm.of('buff').find((skill: any) => skill.type === 'buff');
-        if (buff) {
-          sample.skills.owned[buff.id] ??= 0;
-          sample.skills.buffs[buff.id] = true;
-          sample.skills.buffUp[buff.id] = 26;
-        }
-        const sec = sample.clockSec;
-        const events: Omit<FxEvent, 'id' | 'sec'>[] = [
-          { kind: 'hit', side: 'field', mobId: mob.id, via: 'swing', text: '248', value: 248, colour: hitColour('physical') },
-          { kind: 'hit', side: 'field', mobId: mob.id, via: 'cast', skillId: previewFire?.id, text: '1,240!', value: 1240, crit: true, colour: hitColour(previewFire?.element, true) },
-          { kind: 'hit', side: 'field', mobId: mob.id, via: 'dot', text: '36', value: 36, colour: hitColour('fire') },
-          { kind: 'block', side: 'field', mobId: mob.id, text: 'Dodge', colour: hitColour(null) },
-          { kind: 'kill', side: 'field', mobId: mob.id, text: `${fieldLabel(mob)} defeated`, colour: hitColour(null) },
-          { kind: 'drop', side: 'field', text: 'Fine gear', colour: hitColour(null) },
-          { kind: 'cast', side: 'self', skillId: previewFire?.id, text: previewFire?.name || '', colour: hitColour(previewFire?.element) },
-          { kind: 'buff', side: 'self', skillId: buff?.id, text: buff?.name || 'Battle Focus', colour: hitColour(buff?.element) },
-          { kind: 'heal', side: 'self', skillId: previewHeal?.id, text: '+86', colour: hitColour(previewHeal?.element) },
-          { kind: 'taken', side: 'self', byId: mob.id, text: '142', value: 142, colour: hitColour('chaos') },
-          { kind: 'block', side: 'self', byId: mob.id, text: 'Block', colour: hitColour(null) },
-          { kind: 'proc', side: 'self', text: 'Poison', colour: hitColour('poison') },
-        ];
-        sample.fx = events.map((event, index) => ({ ...event, id: index + 1, sec } as FxEvent)).reverse();
-        sample.fxSeq = events.length;
-      }
-    }
-    return sample;
+  function showcaseGame(scenario: string = 'delivery'): GameState {
+    return buildShowcaseGame({
+      activeArenaVariant: activeArenaVariant as unknown as { speciesId: string } | null,
+      ArenaPreviewSpawn: ARENA_PREVIEW_SPAWN,
+      arenaSpecies,
+      spritePreviewMode,
+      arenaSkillId,
+      showcasePlayerWeapon,
+      showcasePlayerOffhand,
+      fieldLabel: (m) => fieldLabel(m),
+      previewFire,
+      previewHeal,
+      previewLightning,
+    }, scenario);
   }
-  /**
-   * The play screen is the field itself, laid out the way a phone game laid out on a monitor does: the
-   * fight fills the frame and every read sits in a corner, so nothing the player has to watch can be
-   * scrolled off. The map is the ground the field stands on, so it is worked where it is seen: the MAP
-   * tab brings the backdrop into focus; Journey presents the selected hex, travel tools and map controls,
-   * and a cell is picked, plotted and walked from there. Nothing about travelling a place ever
-   * needed a modal. The desk is the one screen a settlement owns: the stall, the board, the counter and
-   * the two tables, opened from the rail or from a place's card.
-   */
+
   const PANELS = ['bag', 'skills', 'tree', 'map', 'desk', 'stash', 'farm', 'camp', 'save', 'town', 'market', 'forge', 'craft', 'combat'] as const;
   type PanelId = (typeof PANELS)[number];
   const RAIL: PanelId[] = ['map', 'town', 'market', 'craft', 'bag', 'skills', 'tree', 'desk', 'farm', 'camp', 'combat', 'save'];
@@ -1528,48 +1248,24 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     return settings.numberFormat === 'short' ? NF_SHORT.format(n) : NF_PLAIN.format(Math.round(n));
   }
 
-  function allocate(k: StatKey, delta: number) {
-    const result = allocateStats(gameState, k, delta, { writer: transactionWriter });
-    if (result.ok) gameState = { ...gameState };
-    else saveNote = result.why || 'Cannot allocate Core points';
-  }
-  function doSpendTree(nodeId: string) {
-    if (!requireAccountWriter('spending Tree Points')) return { ok: false, why: 'This tab is read-only.' };
-    const r = spendTreePoint(gameState, nodeId);
-    if (r.ok) gameState = { ...gameState };
-    return r;
-  }
-  function doAllocateTreePath(nodeId: string) {
-    if (!requireAccountWriter('allocating a tree path')) return { ok: false, why: 'This tab is read-only.' };
-    const r = allocateTreePath(gameState, nodeId);
-    if (r.ok) { gameState = { ...gameState }; saveNote = ''; }
-    else saveNote = `Cannot buy that path: ${r.why}`;
-    return r;
-  }
-  function doRespecTree() {
-    if (!requireAccountWriter('resetting the passive tree')) return;
-    if (!viewHere) return;
-    if (respecTree(gameState).ok) gameState = { ...gameState };
-  }
-  function respec() {
-    if (!requireAccountWriter('resetting Core points')) return;
-    if (!viewHere) return;
-    if (respecStats(gameState).ok) gameState = { ...gameState };
-  }
+  function allocate(k: StatKey, delta: number) { return __field.allocate(k, delta); }
+
+  function doSpendTree(nodeId: string) { return __field.doSpendTree(nodeId); }
+
+  function doAllocateTreePath(nodeId: string) { return __field.doAllocateTreePath(nodeId); }
+
+  function doRespecTree() { return __field.doRespecTree(); }
+
+  function respec() { return __field.respec(); }
 
   const AUTOSAVE_SEC = 30;
 
   $effect(() => {
     if (!arenaPreview) return;
-    let acc = 0;
-    let previous = performance.now();
+    const state = { acc: 0, previous: performance.now() };
     const timer = setInterval(() => {
       const now = performance.now();
-      const elapsed = Math.min(.5, (now - previous) / 1000);
-      previous = now;
-      if (!running || paused || document.hidden) { acc = 0; return; }
-      const batch = schedulerSteps(acc, speed, elapsed, COMBAT_STEP_US() / 1_000_000);
-      acc = batch.acc;
+      const batch = previewTick(state, now, { running, paused, hidden: document.hidden, speed });
       for (let index = 0; index < batch.steps; index++) step();
     }, Math.max(16, COMBAT_STEP_US() / 1000));
     return () => clearInterval(timer);
@@ -1679,140 +1375,34 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     };
   });
 
-  function equip(index: number) {
-    if (!requireAccountWriter('equipping gear')) return;
-    // the rule lives in `sim/gear/gear.ts`, where the tests can reach it too; this copy only makes the
-    // panel re-read the gameState the verb mutated in place
-    const r = equipFromBag(gameState, index);
-    if (!r.ok) equipNote = `Cannot put it on: ${r.why}`;
-    gameState = { ...gameState };
-  }
-
-  function doSalvage(index: number) {
-    if (!requireAccountWriter('salvaging gear')) return;
-    const r = salvageAtSmith(gameState, index);
-    equipNote = r.ok ? 'That piece dissolved — Iron Ore and Scrap entered the resources' : `Cannot salvage: ${r.why}`;
-    gameState = { ...gameState };
-  }
-
-  /** The one bulk press for the carried pieces: the same verdict a fresh drop gets, run over the bag. */
-  function doRunFilter() {
-    if (!requireAccountWriter('running the bag filter')) return;
-    const r = runFilterNow(gameState);
-    equipNote = r.why ? `Filter run stopped: ${r.why}` : r.dissolved
-      ? `Filter melted ${r.dissolved} piece${r.dissolved === 1 ? '' : 's'}${r.spared ? ` · ${r.spared} left alone` : ''}`
-      : 'Nothing carried fails the filter right now';
-    gameState = { ...gameState };
-  }
-
-  function doSaveFilterPreset(i: number) {
-    if (!requireAccountWriter('saving a filter preset')) return;
-    if (!savePreset(gameState, i)) { equipNote = `Preset ${i + 1} is not the character's to use — Collector sets pay the extra slots`; return; }
-    equipNote = `Saved the bag filter to preset ${i + 1}`;
-    gameState = { ...gameState };
-  }
-
-  function doLoadFilterPreset(i: number) {
-    if (!requireAccountWriter('loading a filter preset')) return;
-    if (!loadPreset(gameState, i)) return;
-    equipNote = `Loaded preset ${i + 1} — every slot's rule is the preset's now`;
-    gameState = { ...gameState };
-  }
-
-  function doClearFilterPreset(i: number) {
-    if (!requireAccountWriter('clearing a filter preset')) return;
-    clearPreset(gameState, i);
-    gameState = { ...gameState };
-  }
-
-  function doUnequip(cell: number) {
-    if (!requireAccountWriter('taking gear off')) return;
-    const r = unequip(gameState, cell);
-    equipNote = r.ok ? 'That piece came off into the bag' : `Cannot take it off: ${r.why}`;
-    gameState = { ...gameState };
-  }
-
-  /**
-   * What a right-click offers, per grid. The bag's verbs are the moves a piece can actually make from
-   * there — onto the body, into the warehouse (only where a settlement has made that legal), or into a
-   * stone. The worn grid's one verb is the way back off the body. Both lists read the same sim calls the
-   * panel's buttons already make; nothing here is a second rule.
-   *
-   * A menu outlives the bag order it opened on: a drop that lands while it is open unshifts the bag,
-   * so every verb re-resolves its piece by identity at press time. An index read at open time could
-   * already name the neighbour.
-   */
-  function bagPieceActions(entry: SlotEntry): MenuItem[] {
-    if (entry.kind !== 'gear' || !entry.item) return [];
-    const it = entry.item;
-    /** the piece's live bag slot, or -1 when it already left the bag */
-    const liveIndex = () => gameState.bag.indexOf(it);
-    const gone = () => {
-      equipNote = 'That piece already left the bag';
-      gameState = { ...gameState };
-    };
-    const out: MenuItem[] = [
-      { label: 'Put it on', hint: it.slot, disabled: Boolean(it.broken), onpick: () => { const i = liveIndex(); if (i < 0) return gone(); equip(i); } },
-      { label: 'Craft this item', hint: townLive ? 'Open on the workbench' : 'Available at a settlement', disabled: !townLive,
-        onpick: () => craftThisItem({ where: 'bag', item: it }) },
-      {
-        label: it.locked ? 'Unlock' : 'Lock',
-        hint: it.locked ? 'the bulk verbs will move it again' : 'the bulk verbs will leave it',
-        onpick: () => toggleLock(it),
-      },
-    ];
-    if (townLive && tabs) out.push({ label: `Stash it → Tab ${stashTab + 1}`, onpick: () => { const i = liveIndex(); if (i < 0) return gone(); doDeposit(i, stashTab); } });
-    const smith = smithService(gameState);
-    out.push({
-      label: 'Dissolve',
-      hint: smith.ok ? 'Iron Ore + Scrap · at the smith' : smith.why || 'no smith here',
-      danger: true,
-      disabled: Boolean(it.locked || it.heldFor || !smith.ok),
-      onpick: () => { const i = liveIndex(); if (i < 0) return gone(); doSalvage(i); },
-    });
-    return out;
-  }
-
-  function wornActions(entry: SlotEntry): MenuItem[] {
-    if (entry.kind !== 'worn') return [];
-    return [{ label: 'Take it off', hint: 'back to the bag', onpick: () => doUnequip(entry.index) },
-      ...(entry.item ? [{ label: 'Craft this item', hint: townLive ? 'Open on the workbench' : 'Available at a settlement', disabled: !townLive,
-        onpick: () => craftThisItem({ where: 'gear', item: entry.item! }) }] : [])];
-  }
-
   let equipNote = $state('');
-  /**
-   * One press, the whole body dressed from what the character carries. The choice itself — what counts as
-   * best, and what must never be moved — is `sim/gear/gear.ts`'s, and the tests reach it there; this only says
-   * what came of it, in the numbers the player acts on.
-   */
-  function doBestEquip() {
-    if (!requireAccountWriter('equipping carried upgrades')) return;
-    const r = autoEquip(gameState, settings.equipMargin || 0);
-    gameState = { ...gameState };
-    // the press just moved pieces out of the bag, so the bag is what the player needs to see now
-    // (the tab alone — the press never drags the player onto another screen)
-    if (r.swaps.length) invTab = 'inv';
-    const parts: string[] = [];
-    parts.push(r.swaps.length
-      ? `${r.swaps.length} piece${r.swaps.length === 1 ? '' : 's'} went up (${r.swaps.map((w) => `${w.slot}${w.instead ? '' : ' from a free cell'}`).join(', ')})`
-      : 'nothing you carry beats what you wear');
-    const held = r.spared.locked + r.spared.set + r.spared.broken;
-    if (held) parts.push(`${held} left alone — locked, promised to a set, or Broken`);
-    if (r.inStash) parts.push(`${r.inStash} in the stash would beat something worn · take it out to wear it`);
-    if (r.rotationHeld) {
-      const names = r.rotationHeld.skills.map((id) => sm.byId[id]?.name || id);
-      const shown = names.length > 3 ? `${names.slice(0, 3).join(', ')} +${names.length - 3} more` : names.join(', ');
-      parts.push(`held back — ${r.rotationHeld.base} would silence ${shown}`);
-    }
-    equipNote = parts.join(' · ');
-  }
-
-  function equipCarriedBest() {
-    const r = autoEquip(gameState, settings.equipMargin || 0);
-    if (r.swaps.length) gameState = { ...gameState };
-    return r;
-  }
+  const __gear = createGearCommands({
+    get gameState() { return gameState; },
+    set gameState(value) { gameState = value; },
+    get settings() { return settings; },
+    get equipNote() { return equipNote; },
+    set equipNote(value) { equipNote = value; },
+    get invTab() { return invTab; },
+    set invTab(value) { invTab = value; },
+    get townLive() { return townLive; },
+    get tabs() { return tabs; },
+    get stashTab() { return stashTab; },
+    requireAccountWriter,
+    craftThisItem: (selection) => craftThisItem(selection),
+    doDeposit: (index, tab) => doDeposit(index, tab),
+    toggleLock: (item) => toggleLock(item),
+  });
+  function equip(index: number) { return __gear.equip(index); }
+  function doSalvage(index: number) { return __gear.doSalvage(index); }
+  function doRunFilter() { return __gear.doRunFilter(); }
+  function doSaveFilterPreset(i: number) { return __gear.doSaveFilterPreset(i); }
+  function doLoadFilterPreset(i: number) { return __gear.doLoadFilterPreset(i); }
+  function doClearFilterPreset(i: number) { return __gear.doClearFilterPreset(i); }
+  function doUnequip(cell: number) { return __gear.doUnequip(cell); }
+  function bagPieceActions(entry: SlotEntry): MenuItem[] { return __gear.bagPieceActions(entry); }
+  function wornActions(entry: SlotEntry): MenuItem[] { return __gear.wornActions(entry); }
+  function doBestEquip() { return __gear.doBestEquip(); }
+  function equipCarriedBest() { return __gear.equipCarriedBest(); }
 
   function toggleAutoEquip() {
     if (!requireAccountWriter(settings.autoEquip === false ? 'enabling Auto Equip' : 'disabling Auto Equip')) return;
@@ -1820,139 +1410,35 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     setSetting('autoEquip', enabled);
   }
 
-  function goToZone(id: number) {
-    if (!requireAccountWriter('starting a hunt')) return;
-    const r = huntZone(gameState, id);
-    if (!r.ok) {
-      const s = settlementOfZone(id);
-      saveNote = `${eng.zoneById(id).name} is not opened yet — the map panel shows the walk to ${s?.name ?? 'its settlement'}`;
-      picked = s?.id ?? null;
-      pickedCell = null;
-      panel = 'map';
-      return;
-    }
-    cancelCampEncounter(gameState, 'Left Camp to hunt');
-    push(gameState, `Heading out to hunt in ${eng.zoneById(id).name} (levels ${eng.zoneById(id).levels.join('-')})`);
-    gameState = { ...gameState };
-  }
+  function goToZone(id: number) { return __travel.goToZone(id); }
 
-  /**
-   * Hunt from the cell the feet are on: a sub-zone side sends out that side's cast, and ground with no
-   * side named rolls the zone whole (`road.standing_rule`). This is the verb a click on the ground buys.
-   */
-  function doHuntHere() {
-    if (!requireAccountWriter('hunting')) return;
-    const r = huntHere(gameState);
-    if (!r.ok) { saveNote = `Cannot hunt here: ${r.why}`; gameState = { ...gameState }; return; }
-    cancelCampEncounter(gameState, 'Left Camp to hunt');
-    const z = eng.zoneById(gameState.zone);
-    push(gameState, `Hunting ${pickedCell?.kind === 'sub' ? `${pickedCell.label} in ${z.name}` : z.name} (levels ${z.levels.join('-')}) from ${pickedCell?.key}`);
-    gameState = { ...gameState };
-  }
+  function doHuntHere() { return __travel.doHuntHere(); }
 
-  function doEstablishCamp() {
-    if (!requireAccountWriter('setting Field Camp')) return;
-    const r = establishCamp(gameState);
-    if (r.ok) cancelCampEncounter(gameState, 'Camp relocated');
-    saveNote = r.ok ? (r.moved ? `Camp moved · ${fieldCellName}` : `Camp established · ${fieldCellName}`) : `Cannot set Camp: ${r.why}`;
-    if (r.ok) push(gameState, r.moved ? `Camp moved to ${fieldCellName}` : `Field Camp established at ${fieldCellName}`);
-    gameState = { ...gameState };
-  }
+  function doEstablishCamp() { return __field.doEstablishCamp(); }
 
-  function doStartFieldAction(kind: 'mine' | 'grove' | 'fish') {
-    if (!requireAccountWriter('starting gathering')) return;
-    const r = startFieldAction(gameState, kind);
-    saveNote = r.ok ? (kind === 'mine' ? 'Mining started' : kind === 'grove' ? 'Woodcutting started' : 'Fishing started') : `Cannot gather: ${r.why}`;
-    gameState = { ...gameState };
-  }
+  function doStartFieldAction(kind: 'mine' | 'grove' | 'fish') { return __field.doStartFieldAction(kind); }
 
-  function doStopFieldAction() {
-    if (!requireAccountWriter('stopping gathering')) return;
-    stopFieldAction(gameState);
-    saveNote = 'Gathering stopped';
-    gameState = { ...gameState };
-  }
+  function doStopFieldAction() { return __field.doStopFieldAction(); }
 
-  function doCampEncounter(id: number, action: CampEncounterAction, expected?: { beat: number; stage: import('@sim/world/fieldwork').CampEncounterStage }) {
-    const result = chooseCampEncounter(gameState, id, action, transactionWriter, expected);
-    saveNote = result.ok ? '' : `Cannot respond: ${result.why}`;
-    if (result.ok && (action === 'fight' || action === 'follow')) {
-      if (action === 'fight') push(gameState, 'Camp encounter · fight started');
-      travelScene = action === 'follow';
-      if (showcaseMode) running = true;
-      panel = 'map';
-    }
-    gameState = { ...gameState };
-    return result;
-  }
+  function doCampEncounter(id: number, action: CampEncounterAction, expected?: { beat: number; stage: import('@sim/world/fieldwork').CampEncounterStage }) { return __field.doCampEncounter(id, action, expected); }
 
-  function doCampPolicy(policy: CampEncounterPolicy) {
-    if (!setCampEncounterPolicy(gameState, policy, transactionWriter)) return;
-    gameState = { ...gameState };
-  }
+  function doCampPolicy(policy: CampEncounterPolicy) { return __field.doCampPolicy(policy); }
 
-  function doCookMeal(id: string, count = 1) {
-    if (!requireAccountWriter('cooking')) return;
-    const recipe = fieldwork.recipeById[id];
-    const r = cookMeal(gameState, id, count);
-    const made = r.made ?? (r.ok ? 1 : 0);
-    saveNote = r.ok ? `${recipe?.name || id} · ${made} cooked${r.why ? ` · stopped: ${r.why}` : ''}` : `Cannot cook: ${r.why}`;
-    if (r.ok) {
-      const text = `Camp kitchen · ${recipe?.name || id} ×${made}`;
-      recordMapDiscovery(gameState);
-      gameState.mapJournal!.lastEvent = { ...currentCell(gameState), text, atSec: gameState.clockSec, activity: 'cook' };
-      push(gameState, text);
-    }
-    gameState = { ...gameState };
-  }
+  function doCookMeal(id: string, count = 1) { return __field.doCookMeal(id, count); }
 
-  function doEatMeal(id: string) {
-    if (!requireAccountWriter('eating provisions')) return;
-    const food = fieldwork.foodById[id];
-    const recipe = fieldwork.recipeById[id];
-    const r = eatMeal(gameState, id);
-    saveNote = r.ok ? `${food?.name || id} eaten · Hunger ${Math.floor(gameState.fieldwork.hunger)}%` : `Cannot eat: ${r.why}`;
-    if (r.ok) push(gameState, recipe
-      ? `${recipe.name} eaten · +${food.hunger_restore} Hunger · +${recipe.damage_pct}% damage for ${Math.round(recipe.duration_sec / 60)} min`
-      : `${food?.name || id} eaten · +${food?.hunger_restore || 0} Hunger`);
-    gameState = { ...gameState };
-  }
+  function doEatMeal(id: string) { return __field.doEatMeal(id); }
 
-  function updateAutoEat(patch: Partial<typeof gameState.fieldwork.autoEat>) {
-    if (!requireAccountWriter('changing Auto Eat')) return;
-    gameState.fieldwork.autoEat = { ...gameState.fieldwork.autoEat, ...patch };
-    gameState = { ...gameState };
-  }
+  function updateAutoEat(patch: Partial<typeof gameState.fieldwork.autoEat>) { return __field.updateAutoEat(patch); }
 
-  function setAutoPotion(pool: 'hp' | 'mana', enabled: boolean) {
-    if (!requireAccountWriter('changing potion auto-use')) return;
-    gameState.farm.autoUse[pool] = enabled;
-    gameState = { ...gameState };
-  }
+  function setAutoPotion(pool: 'hp' | 'mana', enabled: boolean) { return __field.setAutoPotion(pool, enabled); }
 
-  function setPotionThreshold(pool: 'hp' | 'mana', value: number) {
-    if (!requireAccountWriter('changing potion thresholds') || !Number.isFinite(value)) return;
-    gameState.farm.threshold[pool] = Math.min(99, Math.max(1, value));
-    gameState = { ...gameState };
-  }
+  function setPotionThreshold(pool: 'hp' | 'mana', value: number) { return __field.setPotionThreshold(pool, value); }
 
-  function setFarmAutomation(kind: 'plant' | 'harvest' | 'brew', enabled: boolean) {
-    if (!requireAccountWriter('changing Farm automation')) return;
-    gameState.farm.autoFarm[kind] = enabled;
-    gameState = { ...gameState };
-  }
+  function setFarmAutomation(kind: 'plant' | 'harvest' | 'brew', enabled: boolean) { return __field.setFarmAutomation(kind, enabled); }
 
-  function cycleQuickSlot(slot: number) {
-    if (!requireAccountWriter('changing a potion shortcut')) return;
-    cycleQuickbar(gameState, slot);
-    gameState = { ...gameState };
-  }
+  function cycleQuickSlot(slot: number) { return __field.cycleQuickSlot(slot); }
 
-  function assignQuickSlot(slot: number, name: string | null) {
-    if (!requireAccountWriter('assigning a potion shortcut')) return;
-    gameState.quickbar[slot] = name;
-    gameState = { ...gameState };
-  }
+  function assignQuickSlot(slot: number, name: string | null) { return __field.assignQuickSlot(slot, name); }
 
   /** The slot the player last saved or loaded. Null until they choose, so a fresh in-memory game
    *  never silently autosaves over an existing file. */
@@ -2343,116 +1829,44 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   /** The purse, the stone pile and the bag, read as the corner pills — the same counters the
       panels print, summed once here so the field never has to open a panel to be read. */
   const bagFull = $derived(slotsFree(gameState) < 1);
-  function doSell() {
-    if (!transactionWriter) { saveNote = 'This tab is read-only.'; return; }
-    const r = sellJunk(gameState);
-    push(gameState, `Counterhand: sold ${r.pieces} junk for ${r.gold.toFixed(TOWN.trade.currency_decimals)} gold`);
-    if (r.pieces > 0) fx(gameState, { kind: 'sell', side: 'self', text: `+${fmtNum(r.gold)} gold`, colour: E.elements.crit_colour || 'var(--gold)' });
-    gameState = { ...gameState };
-  }
+  function doSell() { return __economy.doSell(); }
 
   let marketSale = $state<{ text: string; goldText: string; townId: string; goodId: string } | null>(null);
 
-  function doTrade(id: string, count: number, expected?: { carried: number; gold: number }) {
-    if (!transactionWriter) { saveNote = 'This tab is read-only.'; return; }
-    const result = sellGoods(gameState, id, count, expected);
-    saveNote = result.ok
-      ? `Sold ${count} for ${result.gold.toFixed(TOWN.trade.currency_decimals)} gold${result.cityUnits != null ? ` — city took ${result.cityUnits}${result.basicUnits ? `, floor took ${result.basicUnits}` : ''}` : ''}`
-      : `Cannot sell: ${result.why}`;
-    if (result.ok) {
-      push(gameState, saveNote);
-      marketSale = { text: saveNote, goldText: `${result.gold.toFixed(TOWN.trade.currency_decimals)} gold`, townId: marketTownId || town?.id || '', goodId: id };
-    } else marketSale = null;
-    gameState = { ...gameState };
-  }
+  function doTrade(id: string, count: number, expected?: { carried: number; gold: number }) { return __economy.doTrade(id, count, expected); }
 
-  function doProcess(id: string) {
-    if (!transactionWriter) { saveNote = 'This tab is read-only.'; return; }
-    const result = processMaterials(gameState, id);
-    saveNote = result.ok ? `Made ${fieldwork.workshopById[id].name}` : `Cannot make: ${result.why}`;
-    if (result.ok) push(gameState, saveNote);
-    gameState = { ...gameState };
-  }
+  function doProcess(id: string) { return __economy.doProcess(id); }
 
   function showTradeRoute(id: string) {
     panel = 'map'; picked = null; select(id);
     if (showcaseMode) document.getElementById('showcase-field')?.scrollIntoView();
   }
 
-  function doBuy(rowId: string, settlementId = town!.id, expected?: import('@sim/town/pricing').TownPurchaseExpectation) {
-    if (!transactionWriter) { saveNote = 'This tab is read-only.'; return; }
-    const r = buy(gameState, settlementId, rowId, expected);
-    saveNote = r.ok ? (r.repaired ? `Repaired ${r.repaired} · ${r.gold} gold` : `Bought ${r.row.item}`) : `Cannot buy: ${r.why}`;
-    gameState = { ...gameState };
-  }
+  function doBuy(rowId: string, settlementId = town!.id, expected?: import('@sim/town/pricing').TownPurchaseExpectation) { return __economy.doBuy(rowId, settlementId, expected); }
 
-  function buyExpectation(settlementId: string, row: any) {
-    const quote = quoteTownPurchase(gameState, settlementId, row.id);
-    const target = row.id === 'repair' || row.id === 'repair_ironrow' ? firstBroken(gameState) : null;
-    return { token: quote.token, ...(target ? { target: { where: target.where, index: target.index } } : {}) };
-  }
+  function buyExpectation(settlementId: string, row: any) { return __economy.buyExpectation(settlementId, row); }
 
-  function doSkipTask(i: number) {
-    const r = skipTask(gameState, i, { writer: transactionWriter });
-    push(gameState, r.ok ? `Task skipped · ${r.free ? 'free skip' : 'skip token spent'}` : `Cannot skip: ${r.why}`);
-    gameState = { ...gameState };
-  }
+  function doSkipTask(i: number) { return __economy.doSkipTask(i); }
 
-  function doRepairGear(where: Where, index: number, expected?: { token: string; target?: { where: Where; index: number } }) {
-    if (!requireAccountWriter('repairing gear')) return false;
-    const target = resolveItemSelection(gameState, benchSelection);
-    const r = repairGear(gameState, town?.id ?? '', where, index, undefined, expected);
-    if (r.ok) {
-      if (r.where && r.index != null) {
-        benchSelection = refreshSelectionAfterRepair(gameState, benchSelection, target, r.where, r.index);
-      }
-      benchNote = `Armourer repaired ${r.repaired} · ${r.gold} gold`;
-      push(gameState, benchNote);
-    } else benchNote = `Cannot repair: ${r.why}`;
-    gameState = { ...gameState };
-    return r.ok;
-  }
+  function doRepairGear(where: Where, index: number, expected?: { token: string; target?: { where: Where; index: number } }) { return __economy.doRepairGear(where, index, expected); }
 
-  function doDelivery(id: string, count: number, choice?: string, expected?: import('@sim/town/delivery').DeliveryExpected) {
-    const result = deliver(gameState, id, count, { writer: transactionWriter }, choice, expected);
-    saveNote = result.ok ? `Delivery ${result.completed ? 'completed' : 'recorded'} · ${result.gold!.toFixed(TOWN.trade.currency_decimals)} gold paid` : `Cannot deliver: ${result.why}`;
-    if (result.ok) push(gameState, saveNote);
-    gameState = { ...gameState };
-  }
+  function doDelivery(id: string, count: number, choice?: string, expected?: import('@sim/town/delivery').DeliveryExpected) { return __economy.doDelivery(id, count, choice, expected); }
 
-  function doAcceptCourier(id: string) {
-    const result = acceptCourier(gameState, id, { writer: transactionWriter });
-    saveNote = result.ok ? 'Courier request accepted' : `Cannot accept: ${result.why}`;
-    gameState = { ...gameState };
-  }
+  function doAcceptCourier(id: string) { return __economy.doAcceptCourier(id); }
 
-  function doDeclineCourier(id: string) {
-    const result = declineCourier(gameState, id, { writer: transactionWriter });
-    saveNote = result.ok ? 'Courier request declined' : `Cannot decline: ${result.why}`;
-    gameState = { ...gameState };
-  }
+  function doDeclineCourier(id: string) { return __economy.doDeclineCourier(id); }
 
-  function doBlackMarketBuy(townId: string, offerId: string) {
-    const result = buyBlackMarket(gameState, townId, offerId, { writer: transactionWriter });
-    saveNote = result.ok ? `Black Market purchase · ${result.offer.kind === 'skill' ? `${sm.byId[result.offer.skill!]?.name} XP Level ${result.offer.level}` : `${result.offer.count} ${result.offer.kind === 'stone' ? result.offer.stone : result.offer.good}`} for ${result.offer.price} gold` : `Cannot buy: ${result.why}`;
-    if (result.ok) push(gameState, saveNote);
-    gameState = { ...gameState };
-  }
+  function doBlackMarketBuy(townId: string, offerId: string) { return __economy.doBlackMarketBuy(townId, offerId); }
 
   function openBlackMarket() {
     marketView = 'black-market';
     marketTownId = town?.id || '';
     panel = 'market';
   }
-  function doTrackDelivery(id: string, tracked: boolean) {
-    trackDelivery(gameState, id, tracked, { writer: transactionWriter }); gameState = { ...gameState };
-  }
-  function doAcknowledgeDelivery(id: string) {
-    acknowledgeDelivery(gameState, id, { writer: transactionWriter }); gameState = { ...gameState };
-  }
-  function doDismissDelivery(id: string) {
-    announceDelivery(gameState, id, { writer: transactionWriter }); gameState = { ...gameState };
-  }
+  function doTrackDelivery(id: string, tracked: boolean) { return __economy.doTrackDelivery(id, tracked); }
+  function doAcknowledgeDelivery(id: string) { return __economy.doAcknowledgeDelivery(id); }
+  function doDismissDelivery(id: string) { return __economy.doDismissDelivery(id); }
+
   function openDeliveryWant(id: string) {
     const contract = Object.values(gameState.town.contracts).flat().find((entry) => entry.id === id);
     if (!contract) return;
@@ -2548,51 +1962,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   let taskChoices = $state<Record<number, { task: TaskSlot; choice: string }>>({});
-  function doClaim(i: number, choice?: string) {
-    const t = gameState.town.tasks[i];
-    const selected = t && taskBonuses(t).find((option) => option.id === (choice ?? t.stone));
-    const paid = selected && resolveQuestBonus(gameState, selected);
-    if (t && claimTask(gameState, i, choice, { writer: transactionWriter })) {
-      push(gameState, `Task paid: ${questBonusText({ ...selected!, ...paid! })}`);
-    } else if (t && t.progress >= t.n && !t.claimed) {
-      push(gameState, atSettlement(gameState)
-        ? 'Task reward is waiting — make room in the bag, then claim again'
-        : 'Visit a settlement to claim the task reward');
-    }
-    gameState = { ...gameState };
-  }
+  function doClaim(i: number, choice?: string) { return __economy.doClaim(i, choice); }
 
-  function travelTo(id: string) {
-    if (!requireAccountWriter('warping')) return;
-    const s = settlementById(id)!;
-    const saved = walkBlocks(gameState.town.waypoint, id);
-    const r = warpTo(gameState, id);
-    if (!r.ok) { saveNote = `Cannot warp: ${r.why}`; gameState = { ...gameState }; return; }
-    cancelCampEncounter(gameState, 'Left Camp');
-    if (r.forfeit) push(gameState, r.forfeit);
-    push(gameState, `Waypoint to ${s.name} — ${r.gold} gold for the ${saved} blocks it saves`);
-    fx(gameState, { kind: 'warp', side: 'self', text: `warp · ${s.name}`, colour: hitColour(null) });
-    recordMapDiscovery(gameState);
-    gameState = { ...gameState };
-  }
+  function travelTo(id: string) { return __travel.travelTo(id); }
 
-  const warpPrice = (id: string) => warpCost(gameState, id);
+  const warpPrice = (id: string) => __travel.warpPrice(id);
 
-  function doWalk(dest: Picked | Cell & { key?: string }) {
-    if (!requireAccountWriter('walking')) return;
-    const r = startWalk(gameState, dest);
-    if (!r.ok) { saveNote = `Cannot walk: ${r.why}`; gameState = { ...gameState }; return; }
-    cancelCampEncounter(gameState, 'Left Camp');
-    // Travel stays on the board; the presentation switches to combat after the pawn settles.
-    travelScene = true;
-    if (showcaseMode) running = true;
-    panel = 'map';
-    picked = null;
-    pickedCell = null;
-    if (r.forfeit) push(gameState, r.forfeit);
-    saveNote = '';
-    gameState = { ...gameState };
-  }
+  function doWalk(dest: Picked | Cell & { key?: string }) { return __travel.doWalk(dest); }
 
   const dungeonView = $derived.by(() => {
     const run = gameState.dungeon;
@@ -2600,19 +1976,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     return { active: false, left: 0, total: 0, cooldown: Math.ceil(cooldownLeft(gameState)) };
   });
 
-  function doDungeon() {
-    if (!transactionWriter) return;
-    const r = enterDungeon(gameState);
-    if (!r.ok) { saveNote = `Cannot enter: ${r.why}`; gameState = { ...gameState }; return; }
-    push(gameState, `Entered the dungeon — ${gameState.dungeon!.total} mobs, loot held in escrow until the last one falls`);
-    gameState = { ...gameState };
-  }
+  function doDungeon() { return __travel.doDungeon(); }
 
-  function doRetreat() {
-    const result = retreatDungeon(gameState, { writer: transactionWriter });
-    saveNote = result.ok ? `Retreat: selected ${result.selected}, received ${result.received}, rejected ${result.rejected}.` : `Cannot retreat: ${result.why}`;
-    gameState = { ...gameState };
-  }
+  function doRetreat() { return __travel.doRetreat(); }
 
   function doScrapAlchemy(count = 1) {
     const result = transmuteScrap(gameState, count, { writer: transactionWriter });
@@ -2686,19 +2052,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   let forgeNote = $state('');
   let forgeResultItem = $state<string | null>(null);
 
-  function runForge(kind: ForgeKind, id: string, materialId: string, expected?: { held: number; freeSlots: number }) {
-    if (!transactionWriter) { forgeNote = 'This tab is read-only.'; return false; }
-    const rng = mulberry32(gameState.rngState);
-    const r = forgeGear(gameState, kind, id, materialId, rng, expected);
-    if (!r.ok) { forgeResultItem = null; forgeNote = r.why || 'the forge refused'; return false; }
-    gameState.rngState += 1;
-    forgeNote = r.note || 'forged';
-    forgeResultItem = r.item ? itemName(r.item) : null;
-    push(gameState, `Forge · ${forgeNote}`);
-    fx(gameState, { kind: 'craft', side: 'self', text: forgeNote, colour: E.elements.crit_colour || 'var(--gold)' });
-    gameState = { ...gameState };
-    return true;
-  }
+  function runForge(kind: ForgeKind, id: string, materialId: string, expected?: { held: number; freeSlots: number }) { return __economy.runForge(kind, id, materialId, expected); }
 
   function runSalvage(index: number) {
     if (!transactionWriter) { forgeNote = 'This tab is read-only.'; return false; }
@@ -2710,24 +2064,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     return r.ok;
   }
 
-  function runCraft(op: CraftOp, lineIndex: number, pick?: string) {
-    if (!requireAccountWriter('crafting')) return false;
-    if (!bench) return false;
-    const target = bench;
-    const rng = mulberry32(gameState.rngState);
-    gameState.rngState += 1;
-    const r = doCraft(gameState, target.where, target.index, op, lineIndex, rng, pick);
-    benchNote = r.ok ? `${op}: ${r.note}` : `${op} refused — ${r.why}`;
-    if (r.ok) {
-      benchSelection = { where: target.where, item: gameState[target.where][target.index]! };
-      push(gameState, `Bench ${op} · ${r.note}`);
-      // a stone landing is a beat on the bench: the same gold the crit wears, because a craft that
-      // worked is the field's other kind of hit
-      fx(gameState, { kind: 'craft', side: 'self', text: `${op} · ${r.note}`, colour: E.elements.crit_colour || 'var(--gold)' });
-    }
-    gameState = { ...gameState };
-    return r.ok;
-  }
+  function runCraft(op: CraftOp, lineIndex: number, pick?: string) { return __economy.runCraft(op, lineIndex, pick); }
 
   let skillNote = $state('');
   let farmNote = $state('');
@@ -2735,50 +2072,17 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const fl = $derived(farmLevel(gameState));
   const plots = $derived(plotCount(gameState));
 
-  function doPlant(i: number, tier: string) {
-    if (!requireAccountWriter('planting')) return;
-    const r = plant(gameState, i, tier);
-    farmNote = r.ok ? `Plot ${i + 1}: ${tier} herb in the ground, ready in ${farm.F.growth_hours} h` : `Plot ${i + 1}: ${r.why}`;
-    gameState = { ...gameState };
-  }
+  function doPlant(i: number, tier: string) { return __field.doPlant(i, tier); }
 
-  function doHarvest(i: number) {
-    if (!requireAccountWriter('harvesting')) return;
-    const r = harvest(gameState, i);
-    farmNote = r.ok ? `Plot ${i + 1}: +${r.herbs} herbs · +${r.xp} Farm XP` : `Plot ${i + 1}: ${r.why}`;
-    gameState = { ...gameState };
-  }
+  function doHarvest(i: number) { return __field.doHarvest(i); }
 
-  function doBrew(name: string) {
-    if (!requireAccountWriter('brewing')) return;
-    const r = craftPotion(gameState, name);
-    farmNote = r.ok ? `Brewed ${name}` : `${name}: ${r.why}`;
-    gameState = { ...gameState };
-  }
+  function doBrew(name: string) { return __field.doBrew(name); }
 
-  function doDrink(name: string) {
-    if (!requireAccountWriter('drinking a potion')) return;
-    const r = drink(gameState, c, name, gameState.group.some((m) => isBossKind(String(m.kind))));
-    farmNote = r.ok ? `Drank ${name}` : `${name}: ${r.why}`;
-    gameState = { ...gameState };
-  }
+  function doDrink(name: string) { return __field.doDrink(name); }
 
-  /** the quickbar's own press: the square's draught, through the same fight limits as the board */
-  function useQuickSlot(i: number) {
-    if (!requireAccountWriter('using a potion shortcut')) return;
-    const name = gameState.quickbar[i];
-    if (!name) return;
-    const r = drink(gameState, c, name, gameState.group.some((m) => isBossKind(String(m.kind))));
-    push(gameState, r.ok ? `Downed the ${name}` : `${name}: ${r.why}`);
-    gameState = { ...gameState };
-  }
+  function useQuickSlot(i: number) { return __field.useQuickSlot(i); }
 
-  function doCondense(name: string) {
-    if (!requireAccountWriter('condensing potions')) return;
-    const r = condense(gameState, name);
-    farmNote = r.ok ? `Condensed ${name} · ${farm.P.condensed.effect_mult}× in one bottle` : `${name}: ${r.why}`;
-    gameState = { ...gameState };
-  }
+  function doCondense(name: string) { return __field.doCondense(name); }
 
   let townNote = $state('');
   const tabs = $derived(stashTabCount(gameState));
@@ -2808,59 +2112,17 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         ? `${town?.name ?? 'the field'} · safe in town — walk out to hunt`
         : pickedCell ? `${pickedCell.key} · ${pickedCell.label}` : `${town?.name ?? 'the field'} · trade, board, hunt, walk`);
 
-  function doDeposit(i: number, tab: number) {
-    if (!requireAccountWriter('depositing gear')) return;
-    const r = deposit(gameState, i, tab);
-    townNote = r.ok ? 'Deposited into the stash' : `Deposit refused: ${r.why}`;
-    gameState = { ...gameState };
-  }
+  function doDeposit(i: number, tab: number) { return __economy.doDeposit(i, tab); }
 
-  function doWithdraw(tab: number, i: number) {
-    if (!requireAccountWriter('withdrawing gear')) return;
-    const r = withdraw(gameState, tab, i);
-    townNote = r.ok ? 'Withdrawn into the bag' : `Withdrawal refused: ${r.why}`;
-    gameState = { ...gameState };
-  }
+  function doWithdraw(tab: number, i: number) { return __economy.doWithdraw(tab, i); }
 
-  function takeStashForCraft(tab: number, index: number): boolean {
-    if (!transactionWriter) { benchNote = 'This tab is read-only.'; return false; }
-    const r = withdraw(gameState, tab, index);
-    if (!r.ok) {
-      benchNote = `Cannot take this piece to the bench: ${r.why}`;
-      gameState = { ...gameState };
-      return false;
-    }
-    townNote = 'Taken from Stash into the bag for Crafting';
-    gameState = { ...gameState };
-    return true;
-  }
+  function takeStashForCraft(tab: number, index: number): boolean { return __economy.takeStashForCraft(tab, index); }
 
-  function storeCraftPiece(index: number, tab: number): boolean {
-    if (!transactionWriter) { benchNote = 'This tab is read-only.'; return false; }
-    const r = deposit(gameState, index, tab);
-    if (!r.ok) {
-      benchNote = `Cannot store this piece: ${r.why}`;
-      gameState = { ...gameState };
-      return false;
-    }
-    townNote = `Stored into Stash · Tab ${tab + 1}`;
-    gameState = { ...gameState };
-    return true;
-  }
+  function storeCraftPiece(index: number, tab: number): boolean { return __economy.storeCraftPiece(index, tab); }
 
-  function doDepositAll(tab: number) {
-    if (!requireAccountWriter('depositing carried gear')) return;
-    const n = depositMany(gameState, gameState.bag.map((_, i) => i), tab);
-    townNote = n ? `Deposited ${n} piece${n === 1 ? '' : 's'} into tab ${tab + 1}` : 'Nothing to deposit — every piece is locked or the bag is empty';
-    gameState = { ...gameState };
-  }
+  function doDepositAll(tab: number) { return __economy.doDepositAll(tab); }
 
-  function doWithdrawAll(tab: number) {
-    if (!requireAccountWriter('withdrawing stashed gear')) return;
-    const n = withdrawMany(gameState, tab, (gameState.stash[tab] || []).map((_, i) => i));
-    townNote = n ? `Withdrew ${n} piece${n === 1 ? '' : 's'} from tab ${tab + 1}` : 'Nothing to withdraw — every piece is locked';
-    gameState = { ...gameState };
-  }
+  function doWithdrawAll(tab: number) { return __economy.doWithdrawAll(tab); }
 
   function toggleLock(item: Item) {
     if (!requireAccountWriter('locking or unlocking gear')) return;
@@ -2870,34 +2132,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
 
 
-  function doSwitchPreset(i: number) {
-    if (!requireAccountWriter('switching skill presets')) return;
-    switchPreset(gameState, i);
-    skillNote = `Loaded ${gameState.presets[i].name}`;
-    gameState = { ...gameState };
-  }
+  function doSwitchPreset(i: number) { return __field.doSwitchPreset(i); }
 
-  function doStorePreset() {
-    if (!requireAccountWriter('saving skill presets')) return;
-    storePreset(gameState);
-    skillNote = `Saved ${gameState.presets[gameState.activePreset].name}`;
-    gameState = { ...gameState };
-  }
+  function doStorePreset() { return __field.doStorePreset(); }
 
-  function doBind(i: number) {
-    if (!requireAccountWriter('binding a skill preset')) return;
-    bindZone(gameState, i, gameState.zone);
-    skillNote = `${gameState.presets[i].name} now ${gameState.presets[i].zones.includes(gameState.zone) ? 'binds' : 'unbinds'} ${eng.zoneById(gameState.zone).name}`;
-    gameState = { ...gameState };
-  }
+  function doBind(i: number) { return __field.doBind(i); }
 
-  function doTurnIn() {
-    if (!requireAccountWriter('claiming Collector rewards')) return;
-    const r = turnIn(gameState, town!.id);
-    townNote = r.ok ? `Turned in the ${viewColSet.name} set · reward: ${r.reward}` : `Turn-in refused: ${r.why}`;
-    gameState = { ...gameState };
-  }
-
+  function doTurnIn() { return __economy.doTurnIn(); }
   /** Where the feet are or are heading, in the name the player acts on: a settlement's own for its ground, the zone's
    *  for everything else. The rest read and the empty field both answer to it, so neither can name the
    *  wrong place for the same ground. */
@@ -2931,50 +2172,49 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   /** The reservation reads go through `c.keystones`: 54 moves an aura to HP and 64 discounts each one. */
   const reserved = $derived(reservedPct(gameState.skills, c.keystones));
 
-  function setSlot(i: number, id: string) {
-    if (!requireAccountWriter('assigning skills')) return;
-    const at = gameState.skills.list.indexOf(id);
-    if (at >= 0) gameState.skills.list[at] = null;
-    gameState.skills.list[i] = id || null;
-    gameState = { ...gameState };
-  }
 
-  function setMode(id: string, mode: string) {
-    if (!requireAccountWriter('changing skill mode')) return;
-    gameState.skills.mode[id] = mode as any;
-    gameState = { ...gameState };
-  }
+  const __economy = createEconomyCommands({
+    get gameState() { return gameState; },
+    set gameState(value) { gameState = value; },
+    get saveNote() { return saveNote; },
+    set saveNote(value) { saveNote = value; },
+    get transactionWriter() { return transactionWriter; },
+    get town() { return town; },
+    get marketTownId() { return marketTownId; },
+    get marketSale() { return marketSale; },
+    set marketSale(value) { marketSale = value; },
+    requireAccountWriter,
+    get bench() { return bench; },
+    get benchSelection() { return benchSelection; },
+    set benchSelection(value) { benchSelection = value; },
+    get benchNote() { return benchNote; },
+    set benchNote(value) { benchNote = value; },
+    get townNote() { return townNote; },
+    set townNote(value) { townNote = value; },
+    get forgeNote() { return forgeNote; },
+    set forgeNote(value) { forgeNote = value; },
+    get forgeResultItem() { return forgeResultItem; },
+    set forgeResultItem(value) { forgeResultItem = value; },
+    get viewColSet() { return viewColSet; },
+    fmtNum: (n) => fmtNum(n),
+    questBonusText: (bonus) => questBonusText(bonus),
+    resolveItemSelection: (game, selection) => resolveItemSelection(game, selection),
+    refreshSelectionAfterRepair: (game, selection, target, where, index) => refreshSelectionAfterRepair(game, selection, target, where, index),
+  });
 
-  function setAutoMode(id: string, mode: 'auto' | 'manual' | 'both') {
-    if (!requireAccountWriter('changing skill automation')) return;
-    (gameState.skills.autoMode ||= {})[id] = mode;
-    gameState = { ...gameState };
-  }
+  function setSlot(i: number, id: string) { return __field.setSlot(i, id); }
 
-  /** One leg of one row's own list. Two rows can wait on different facts because neither reads the other.
-      The status leg is trimmed to what the row can actually carry, so no screen can show a wait that the
-      rotation would never answer. */
-  function setCond(id: string, patch: Partial<SkillConditions>) {
-    if (!requireAccountWriter('changing skill conditions')) return;
-    const next = { ...condOf(gameState.skills, id), ...patch };
-    const flag = rowFlag(id);
-    next.statusMissing = flag && next.statusMissing.includes(flag.key) ? [flag.key] : [];
-    const exploit = rowExploitFlag(id);
-    if (!exploit) { next.statusPresent = false; next.statusStacksAtLeast = 0; }
-    if (!next.statusPresent) next.statusStacksAtLeast = 0;
-    gameState.skills.conditions[id] = next;
-    gameState = { ...gameState };
-  }
+  function setMode(id: string, mode: string) { return __field.setMode(id, mode); }
+
+  function setAutoMode(id: string, mode: 'auto' | 'manual' | 'both') { return __field.setAutoMode(id, mode); }
+
+  function setCond(id: string, patch: Partial<SkillConditions>) { return __field.setCond(id, patch); }
 
   function finalResistance(el: string): number {
     return Math.min(c.resCap, c.resistance + (c.resByElement?.[el] || 0));
   }
 
-  function doMoveSlot(from: number, to: number) {
-    if (!requireAccountWriter('reordering skills')) return;
-    moveSlot(gameState.skills, from, to);
-    gameState = { ...gameState };
-  }
+  function doMoveSlot(from: number, to: number) { return __field.doMoveSlot(from, to); }
 
   /** …and the one flag a row can meaningfully wait on: the status its own Element applies, or the curse
       it writes. A row that carries neither is offered no such leg — the old list of every flag in the
@@ -3010,30 +2250,56 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     return { destroy() { observer.disconnect(); document.removeEventListener('visibilitychange', sync); } };
   }
 
-  function toggle(id: string) {
-    if (!requireAccountWriter('toggling skills')) return;
-    // the reservation rule and the buff switch both live in sim/combat/skills.ts, so no sum is repeated here
-    const r = toggleTrack(gameState.skills, id, c.keystones);
-    saveNote = r.ok ? '' : r.why || 'cannot';
-    gameState = { ...gameState };
-  }
+  function toggle(id: string) { return __field.toggle(id); }
 
-  /** 54: an aura pays from HP or Mana. The switch is refused without the keystone and the caller
-   *  re-reads the reservation split before the next tick. */
-  function chooseAuraPool(id: string, pool: 'hp' | 'mana') {
-    if (!requireAccountWriter('changing aura reservation')) return;
-    const r = setAuraPool(gameState.skills, id, pool, c.keystones);
-    saveNote = r.ok ? '' : r.why || 'cannot';
-    if (r.ok) gameState = { ...gameState };
-  }
+  function chooseAuraPool(id: string, pool: 'hp' | 'mana') { return __field.chooseAuraPool(id, pool); }
 
-  /** The way out of a reservation set that no longer fits: turn every aura off in one step. */
-  function disableAllAuras() {
-    if (!requireAccountWriter('disabling auras')) return;
-    for (const k of ownedAuras) gameState.skills.auras[k.id] = false;
-    saveNote = 'All auras off';
-    gameState = { ...gameState };
-  }
+  function disableAllAuras() { return __field.disableAllAuras(); }
+  const __field = createFieldCommands({
+    get gameState() { return gameState; },
+    set gameState(value) { gameState = value; },
+    get saveNote() { return saveNote; },
+    set saveNote(value) { saveNote = value; },
+    get skillNote() { return skillNote; },
+    set skillNote(value) { skillNote = value; },
+    get farmNote() { return farmNote; },
+    set farmNote(value) { farmNote = value; },
+    get transactionWriter() { return transactionWriter; },
+    get fieldCellName() { return fieldCellName; },
+    get viewHere() { return viewHere; },
+    get c() { return c; },
+    get ownedAuras() { return ownedAuras; },
+    get travelScene() { return travelScene; },
+    set travelScene(value) { travelScene = value; },
+    get running() { return running; },
+    set running(value) { running = value; },
+    get showcaseMode() { return showcaseMode; },
+    get panel() { return panel; },
+    set panel(value) { panel = value; },
+    requireAccountWriter,
+    rowFlag: (id) => rowFlag(id),
+    rowExploitFlag: (id) => rowExploitFlag(id),
+  });
+  const __travel = createTravelCommands({
+    get gameState() { return gameState; },
+    set gameState(value) { gameState = value; },
+    get saveNote() { return saveNote; },
+    set saveNote(value) { saveNote = value; },
+    get picked() { return picked; },
+    set picked(value) { picked = value; },
+    get pickedCell() { return pickedCell; },
+    set pickedCell(value) { pickedCell = value; },
+    get panel() { return panel; },
+    set panel(value) { panel = value; },
+    get travelScene() { return travelScene; },
+    set travelScene(value) { travelScene = value; },
+    get showcaseMode() { return showcaseMode; },
+    get running() { return running; },
+    set running(value) { running = value; },
+    get transactionWriter() { return transactionWriter; },
+    requireAccountWriter,
+  });
+
 </script>
 
 <svelte:window onkeydown={onfieldKey} onkeyup={onfieldKeyUp} onblur={clearWasd} onpointerup={releaseArenaPointer} onpointercancel={releaseArenaPointer} />

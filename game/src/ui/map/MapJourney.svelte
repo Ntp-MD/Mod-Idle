@@ -33,7 +33,7 @@
   const view = $derived.by(() => {
     if (encounter) {
       const story = encounter.story;
-      const cache = (story?.cache ?? null) as { foodId: string; materialId: string; carefulSec: number; quickOutcome: string } | null;
+      const cache = (story?.cache ?? null) as import('../../../../engine/fieldwork.ts').CacheOffer | null;
       const preview = cache ? fieldwork.cachePreview(cache, encounter.stage === 'resolving' || encounter.stage === 'collect' ? 'careful' : 'quick') : null;
       return campStoryView({
         key: `camp:${encounter.id}:${story?.beat ?? 0}:${encounter.stage}:${campErrorRev}`,

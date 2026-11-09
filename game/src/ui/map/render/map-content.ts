@@ -34,7 +34,7 @@ function render(host: Element, markup: string): boolean {
 
 export function paintMapContent(index: MapDomIndex, model: MapPaintModel) {
   const { showNames, cleanMap } = model.surface.options;
-  // D1: icons show every semantic fact the model carries; Show Names owns text only.
+  // D1: icons show every semantic fact the model carries; Show Names owns text only. Clean map hides text and icons.
   const textOn = showNames && !cleanMap;
   const marks = new Map(model.adventure.marks.map(mark => [mark.ax, mark]));
   const contents = new Map(model.content.map(content => [content.ax, content]));
@@ -63,8 +63,9 @@ export function paintMapContent(index: MapDomIndex, model: MapPaintModel) {
     let group = cell.scenery.querySelector<SVGGElement>('.map-hex-content');
     const name = textOn ? (content?.name ?? '') : '';
     const level = textOn ? (content?.levelText ?? '') : '';
-    const layout = content ? layoutHexContent(cell.radius, content.icons.length) : null;
-    const markup = layout && content ? hexContentMarkup(name, level, content.icons, layout) : '';
+    const icons = cleanMap ? [] : (content?.icons ?? []);
+    const layout = content ? layoutHexContent(cell.radius, icons.length) : null;
+    const markup = layout && content ? hexContentMarkup(name, level, icons, layout) : '';
     if (!markup) group?.remove();
     else {
       if (!group) {

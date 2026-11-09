@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { arenaAction, createCombatArena } from '@sim/combat/combat-arena';
-import { equipWindowOpen } from '../../src/ui/combat/equip-policy';
+import { equipWindowOpen } from '../../src/sim/combat/equip-policy';
 
 describe('F22 — gear changes only between committed actions', () => {
   it('closes the window through windup, release and recovery', () => {

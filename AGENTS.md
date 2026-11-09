@@ -47,8 +47,9 @@ Re-read them after context compaction. Do not announce any mode.
 - Reuse verified reads/checks until inputs change or concrete uncertainty remains.
 - Batch independent reads in one call; run dependents sequentially.
 - On truncation narrow the query; on failure identify the cause, retry only with a changed approach or new evidence, else report a blocker.
+- A gate that times out is retried in the same turn with a narrower scope (one file, `test:fast`, output to `.cache/`), not left for the next turn. Only a repeat with no new evidence is a blocker.
 - An unrelated failing check with no changed input is baseline/in-flight: report it, don't refix or rerun without new evidence. Preserve concurrent edits; say so when verification can't repeat.
-- Stop when acceptance criteria and required checks pass; a long tool sequence never justifies skipping verification.
+- Stop when the current task or plan item's acceptance criteria and required checks pass; a long tool sequence never justifies skipping verification. With an active plan, "pass" means checked against `docs/known-failures.md`, then continue with the next unchecked item (see Plan files).
 
 Gameplay numbers live in data JSON, formulas in `engine/`; do not duplicate either in the client. New game-content filenames use lowercase hyphens. `skill.md`, `skills.md`, `SKILL.md` and `.agents/skills/` are reserved for agent skills, not game content. Gate output is the run record; do not create transcript files.
 
@@ -90,3 +91,14 @@ Gameplay numbers live in data JSON, formulas in `engine/`; do not duplicate eith
 - Every requested plan file is HTML in `docs/plan/`, English only.
 - Each heading and requirement is a checklist item: `- [ ]` open, `- [x]` done; render them as real `<input type="checkbox">` in the page.
 - When an item finishes, edit the file to check it and immediately continue with the next unchecked item in the same turn. Do not stop to report between items.
+- Each plan keeps one resume marker in its meta block: `<p id="plan-current" class="meta">Current: <item-id></p>`. Update it when an item starts. After compaction, read the marker and continue from it, not from the top.
+- Continuous execution: with an open plan, keep working until every checkbox is checked or a stop condition fires. Do not end a turn with a progress summary.
+- Stop conditions, the only ones that end the turn:
+  1. A save-flow edit needs explicit user approval (`game/src/state/save.ts`, `game/src/app/session.ts`, Save panel).
+  2. A behavior, RNG-order, balance or UX decision has no owner answer in the plan.
+  3. A failing check does not match `docs/known-failures.md`, or a new failure appears with unchanged input.
+  4. Tooling is unavailable (missing browser connector, unreachable server) and the item cannot be verified another way.
+- Known baseline failures: read `docs/known-failures.md` before judging a red gate. A failure is baseline only when its file and test name match that file. Never re-fix or re-run baseline failures to make a plan look green, and never tick an item because its only failure is baseline without recording that in the plan.
+- Items that need human eyes (visual judgement, audio, feel) go under a `Manual sign-off` heading and are not agent checkboxes. Agent verifies the mechanical part (DOM attribute, console, screenshot) and records it; the human check stays open.
+- Long gates write to a log and read the summary, not the raw output: `npm --prefix game run test 2>&1 | Tee-Object -FilePath .cache/test.log | Select-String "Test Files|Tests |FAIL"`. `.cache/` and `.playwright-mcp/` are local, never commit them.
+- During a plan, use `npm --prefix game run test:fast` plus focused specs; run the full suite once at closeout. Reuse recorded evidence until inputs change.
