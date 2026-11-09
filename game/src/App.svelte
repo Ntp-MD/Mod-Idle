@@ -34,8 +34,8 @@ import { buyBlackMarket } from '@sim/town/black-market';
   import StatAllocator from './ui/character/StatAllocator.svelte';
   import Panel from './ui/hud/Panel.svelte';
   import { PANEL_SESSION, type PanelSession } from './ui/hud/panel-session';
-  import CombatHistory from './ui/combat/CombatHistory.svelte';
-  import EnemyInspector from './ui/combat/EnemyInspector.svelte';
+  import CombatPanel from './ui/panels/combat-panel.svelte';
+  import BagPanel from './ui/panels/bag-panel.svelte';
   import type { EnemySnapshot } from '@sim/combat/combat-history';
   import { refreshSelectionAfterRepair, resolveItemSelection, type ItemSelection } from './ui/inventory/item-selection';
   import { captureCharacterUiSnapshot, emptyCharacterUiSnapshot, restoreCharacterUiSnapshot, type CharacterUiSnapshot } from './ui/character/character-ui-session';
@@ -3272,194 +3272,59 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {/if}
 
 {#if panel === 'bag' || showcaseMode}
-  <Panel title="Inventory" width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
-    <!-- Inventory and warehouse share this window; Forge and Craft open from their own More menu entries. -->
-    <div class="inventory-layout">
-    <Tabs
-      label="Inventory sections"
-      orientation={compactInventoryTabs ? 'horizontal' : 'vertical'}
-      prefix="inventory-tab"
-      controls="inventory-content"
-      tabClass="inventory-tab"
-      tabs={[{ id: 'bag', label: 'Bag' },
-             { id: 'stash', label: 'Stash', disabled: !townLive,
-               title: townLive ? `The warehouse the same record opens in every settlement · ${keyFor('screen.stash')}` : 'A settlement service — walk or warp into one first' },
-             ...BAG_TABS.map((t) => ({ id: t.id, label: t.label }))]}
-      active={invTab === 'stash' ? 'stash' : bagCat}
-      onpick={(id) => { if (id === 'stash') invTab = 'stash'; else { invTab = 'inv'; bagCat = id as typeof bagCat; } }}
-    >
-      {#snippet item(t)}
-        {#if t.id === 'bag'}
-          <span class="inventory-tab-label">
-            <img class="icon-label inventory-tab-art" src={hubIcon('bags', bagMark)} alt="" aria-hidden="true" />
-            Bag
-          </span>
-          <small class="text-note">{gameState.bag.length} piece{gameState.bag.length === 1 ? '' : 's'} · {slotsUsed(gameState)} / {slotsAvailable(gameState)} slots</small>
-        {:else if t.id === 'stash'}
-          <span class="inventory-tab-label">
-            <img class="icon-label inventory-tab-art" src={stashMark} alt="" aria-hidden="true" />
-            Stash
-          </span>
-          <small class="text-note">{tabs} tab{tabs === 1 ? '' : 's'}{townLive ? '' : ' · not here'}</small>
-        {:else}
-          <span class="inventory-tab-label">
-            <img class="icon-label inventory-tab-art" src={icon(BAG_TABS.find((b) => b.id === t.id)!.art)} alt="" aria-hidden="true" />
-            {BAG_TABS.find((b) => b.id === t.id)!.label}
-          </span>
-          <small class="text-note">{bagCount(t.id as BagCat)}</small>
-        {/if}
-      {/snippet}
-    </Tabs>
-    <!-- Both grids render all slots; the panel body scrolls when the full inventory is taller than the viewport. -->
-    <div class="invbody scroll-pane" id="inventory-content" role="tabpanel" aria-labelledby={invTabLabelId} tabindex="0">
-    {#if invTab === 'inv'}
-    <section class="bagblock">
-      {#if bagFull}
-        <p class="warn"><b>Bag full — the zone has stopped paying.</b> {gameState.counters.overflow || 0} pieces have been left on the ground. Walk back to {settlementById(gameState.town.waypoint)?.name || 'a settlement'} and stash what you do not wear.</p>
-      {/if}
-      {#if equipNote}<p class="equipnote">{equipNote}</p>{/if}
-      <div class="bagtools">
-        <!-- equip margin: a piece must be this much ahead (same percent the bag filter uses) before it goes on -->
-        <label class="margin">only if better by
-          <input type="number" min="0" step="1" value={settings.equipMargin || 0}
-                 onchange={(e) => setSetting('equipMargin', Math.max(0, Number((e.target as HTMLInputElement).value) || 0))} />
-          %
-        </label>
-        <button class="best" onclick={doBestEquip}
-                title={'Wears whatever is strongest in the bag, piece by piece · ' + keyFor('equip.best')}
-                aria-keyshortcuts={keyFor('equip.best')}>
-          Put on the best I carry
-        </button>
-        <button onclick={doRunFilter}
-                title="Runs the bag filter over what is carried: every unlocked piece that fails the rule dissolves for its salvage bundle — the same one a fresh drop gets. Locked and Collector-held pieces are spared.">
-          Run the filter over the bag
-        </button>
-        <span class="grow"></span>
-        <span class="weight" title="Everything carried weighs, worn gear and kept pieces included">Weight <b>{c.weightUsed.toFixed(0)}</b> / {Math.round(c.weightCap)} <small>{c.encumbrance > 0 ? `· aspd ${(c.encumbrance * -100).toFixed(0)}%` : '· no tax'}</small></span>
-        <span class="purse inventory-gold" title="Gold in the purse">
-          <img src={coinMark} alt="" aria-hidden="true" />
-          <b>{fmtNum(gameState.counters.gold)}</b><i>gold</i>
-        </span>
-        {#if townLive && tabs}
-          <!-- the way out of a full bag is one press here, because this is the screen a full bag lands on -->
-          <button class="mini" disabled={!gameState.bag.length} onclick={() => doDepositAll(stashTab)}>
-            Stash every unlocked piece → Tab {stashTab + 1}
-          </button>
-        {/if}
-      </div>
-      <!-- overflow left behind and held-for-others, read beside the numbers -->
-      {#if (gameState.counters.overflow || 0) > 0 || (gameState.counters.stopped || 0) > 0}
-        <p class="bagmeta"><small class="text-dim">{gameState.counters.overflow || 0} overflow · {gameState.counters.stopped || 0} refused</small></p>
-      {/if}
-      {#if heldSummary}
-        <p class="bagmeta"><small class="text-dim">Held: {heldSummary}</small></p>
-      {/if}
-      <!-- one bag: kept pieces and carried stacks share the same slots and the same count -->
-      <div class="bagshell">
-        {#snippet bagFilters()}
-          <div class="bagview">
-            <input class="bagsearch" type="search" placeholder="Search the bag…"
-                   bind:value={bagQuery} aria-label="Search the bag" />
-            <label class="bagtier">quality
-              <select bind:value={bagTier} aria-label="Quality">
-                <option value="all">All</option>
-                <option value="low">low</option>
-                <option value="mid">mid</option>
-                <option value="high">high</option>
-              </select>
-            </label>
-            <span class="grow"></span>
-            <small class="text-dim">{bagShown.length} shown</small>
-          </div>
-        {/snippet}
-        <div class="bagmain">
-          <SlotGrid game={gameState}
-            entries={bagShown}
-            capacity={slotsAvailable(gameState)}
-            compactGrid
-            mode={bagMode}
-            onmode={(m) => (bagMode = m)}
-            sort={bagSort}
-            onsort={(k) => (bagSort = k)}
-            lead={bagFilters}
-            wornOf={wornOf}
-            onequip={equip}
-            actions={bagPieceActions}
-            empty="Nothing carried yet — stones, herbs, draughts and junk land in these slots, and so does every piece a kill keeps."
-          />
-        </div>
-        <div class="bagcare-rail">
-          <details class="filter">
-            <summary>Bag filter — what this run keeps</summary>
-            <p><small>The filter is <b>off by default</b> — an off slot keeps every drop and dissolves nothing. An enabled slot converts a rejected piece into the complete Iron Ore + Scrap bundle. If either output cannot fit, the piece stays unpicked.</small></p>
-            <table>
-              <thead><tr><th>Slot</th><th>Filter</th><th>Keep when it beats the worn piece by</th><th>Also keep an Element you cannot resist</th><th>The rule in words</th></tr></thead>
-              <tbody>
-                {#each FILTER_SLOTS as slot}
-                  {@const r = ruleFor(gameState.filter, slot)}
-                  <tr>
-                    <td>{slot}</td>
-                    <td><input type="checkbox" aria-label={`Enable bag filter for ${slot}`} checked={r.enabled} disabled={!transactionWriter} onchange={(e) => editRule(slot, { enabled: (e.target as HTMLInputElement).checked })} /></td>
-                    <td><input type="number" aria-label={`Minimum improvement over worn ${slot}, percent`} min="0" step="1" value={r.margin_pct} disabled={!r.enabled || !transactionWriter} onchange={(e) => editRule(slot, { margin_pct: Number((e.target as HTMLInputElement).value) })} /> %</td>
-                    <td><input type="checkbox" aria-label={`Keep ${slot} with Element resistance missing`} checked={r.keep_missing_element} disabled={!r.enabled || !transactionWriter} onchange={(e) => editRule(slot, { keep_missing_element: (e.target as HTMLInputElement).checked })} /></td>
-                    <td>{describeRule(r)}</td>
-                  </tr>
-                {/each}
-              </tbody>
-            </table>
-            <p><small>Still not found — Elements you have no resistance for: <b>{gameState.filter.missing.elements.length ? gameState.filter.missing.elements.join(', ') : 'none'}</b> · empty slots: <b>{gameState.filter.missing.slots.length ? gameState.filter.missing.slots.join(', ') : 'none'}</b></small></p>
-            <!-- the rules a whole bag lives by are read with the table they answer to -->
-            <div class="filterpresets">
-              <p class="filterpresets-head"><b>Filter presets</b>
-                <small class="text-dim">· {presetSlots(gameState)}</small></p>
-              <ul class="presetrow">
-                {#each { length: presetSlots(gameState) } as _, i (i)}
-                  <li>
-                    <span>Preset {i + 1}</span>
-                    {#if gameState.filterPresets[i]}
-                      <small class="text-dim">stored</small>
-                      <button onclick={() => doLoadFilterPreset(i)} disabled={!transactionWriter}>Load</button>
-                      <button onclick={() => doClearFilterPreset(i)} disabled={!transactionWriter}>Clear</button>
-                    {:else}
-                      <small class="text-dim">empty</small>
-                      <button onclick={() => doSaveFilterPreset(i)} disabled={!transactionWriter}>Save</button>
-                    {/if}
-                  </li>
-                {/each}
-              </ul>
-              <p class="autodissolve"><small>Auto-dissolve below item level
-                  <input type="number" min="0" step="1" value={gameState.autoDissolveLevel ?? 0} disabled={!transactionWriter}
-                    onchange={(e) => setAutoDissolve(Number((e.target as HTMLInputElement).value))} /></small></p>
-            </div>
-            <button class="btn btn-quiet" type="button" onclick={openGearCare}>Open gear care</button>
-          </details>
-          <div class="gear-care-slot">
-            <GearCare state={gameState} writer={transactionWriter} autoEquipEnabled={settings.autoEquip !== false} marginPct={settings.equipMargin || 0}
-              onAutoEquip={(enabled) => setSetting('autoEquip', enabled)} onEquipNow={doBestEquip}
-              onMargin={(value) => setSetting('equipMargin', value)}
-              onRule={editRule} onRunFilter={doRunFilter} onOpenBag={() => openPanel('bag')} />
-          </div>
-        </div>
-      </div>
-    </section>
-    {:else}
-    <section class="bagblock">
-      <h3>Stash · one warehouse, every settlement</h3>
-      <StashBoard game={gameState} {tabs} tab={stashTab} carriedSort={carriedSort} addtab={stashFolder}
-                  ontab={(t) => (stashTab = t)}
-                  onaddtab={(id, expected) => doBuy(id, town?.id ?? '', expected)}
-                  oncarriedsort={(k) => (carriedSort = k)}
-                  ondeposit={(i) => doDeposit(i, stashTab)}
-                  onwithdraw={(i) => doWithdraw(stashTab, i)}
-                  ondepositAll={() => doDepositAll(stashTab)}
-                  onwithdrawAll={() => doWithdrawAll(stashTab)}
-                  onlock={toggleLock} onequip={equip} {wornOf} />
-      {#if townNote}<p class="townnote">{townNote}</p>{/if}
-    </section>
-    {/if}
-    </div>
-    </div>
-  </Panel>
+  <BagPanel
+    gameState={gameState}
+    character={c}
+    settings={settings}
+    townLive={townLive}
+    town={town}
+    tabs={tabs}
+    bind:compactInventoryTabs={compactInventoryTabs}
+    bind:invTab={invTab}
+    bind:bagCat={bagCat}
+    bind:bagQuery={bagQuery}
+    bind:bagTier={bagTier}
+    bind:bagMode={bagMode}
+    bind:bagSort={bagSort}
+    bind:carriedSort={carriedSort}
+    modalGridArea={modalGridArea}
+    showcaseMode={showcaseMode}
+    bagFull={bagFull}
+    equipNote={equipNote}
+    heldSummary={heldSummary}
+    townNote={townNote}
+    invTabLabelId={invTabLabelId}
+    bagShown={bagShown}
+    bagCount={bagCount}
+    stashTab={stashTab}
+    stashFolder={stashFolder}
+    transactionWriter={transactionWriter}
+    fmtNum={fmtNum}
+    keyFor={keyFor}
+    hubIcon={hubIcon}
+    onPickTab={(id) => { if (id === 'stash') invTab = 'stash'; else { invTab = 'inv'; bagCat = id as typeof bagCat; } }}
+    onSetSetting={setSetting}
+    onBestEquip={doBestEquip}
+    onRunFilter={doRunFilter}
+    onDepositAll={doDepositAll}
+    onEquip={equip}
+    onWornOf={wornOf}
+    onBagActions={bagPieceActions}
+    onEditRule={editRule}
+    onSavePreset={doSaveFilterPreset}
+    onLoadPreset={doLoadFilterPreset}
+    onClearPreset={doClearFilterPreset}
+    onAutoDissolve={setAutoDissolve}
+    onOpenGearCare={openGearCare}
+    onStashTab={(t) => (stashTab = t)}
+    onStashAddTab={(id, expected) => doBuy(id, town?.id ?? '', expected)}
+    onStashCarriedSort={(k) => (carriedSort = k)}
+    onDeposit={(i) => doDeposit(i, stashTab)}
+    onWithdraw={(i) => doWithdraw(stashTab, i)}
+    onWithdrawAll={() => doWithdrawAll(stashTab)}
+    onLock={toggleLock}
+    onclose={closePanel}
+  />
 {/if}
 
 {#if panel === 'forge'}
@@ -3789,15 +3654,15 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {/if}
 
 {#if panel === 'combat' || showcaseMode}
-  <Panel title="Combat history" subtitle="Recent recorded events · damage, skills, defensive outcomes and Push" width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
-    <CombatHistory entries={gameState.combatHistory || []} oninspect={(enemy) => (inspectedEnemy = enemy)} />
-  </Panel>
-{/if}
-
-{#if inspectedEnemy}
-  <Panel title="Enemy details" subtitle="Recorded identity and resolved skill kit" width="normal" gridArea={modalGridArea} onclose={() => (inspectedEnemy = null)}>
-    <EnemyInspector enemy={inspectedEnemy} />
-  </Panel>
+  <CombatPanel
+    gameState={gameState}
+    inspectedEnemy={inspectedEnemy}
+    modalGridArea={modalGridArea}
+    showcaseMode={showcaseMode}
+    oninspect={(enemy) => (inspectedEnemy = enemy)}
+    onclose={closePanel}
+    oncloseEnemy={() => (inspectedEnemy = null)}
+  />
 {/if}
 
 <!-- the ink's distortion field: one static turbulence map shared by both orbs' ink layers -->
@@ -4357,10 +4222,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .field-objectives > :global(*) { pointer-events: auto; }
   .objective-feed-slot { flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden; }
   .objective-feed-slot > :global(.objective-feed) { flex: 1 1 auto; min-height: 0; height: 100%; align-content: start; }
-  .purse { display: inline-flex; align-items: center; gap: var(--spacing-xs); flex: none; font-variant-numeric: tabular-nums; }
-  .purse img { width: var(--icon-label); height: var(--icon-label); padding: var(--spacing-xs); border: 1px solid var(--hud-edge); border-radius: var(--radius-round); background: var(--hud-face); box-sizing: border-box; object-fit: contain; }
-  .purse b { font-size: var(--font-sm); font-weight: 700; color: var(--gold-lit); line-height: 1; }
-  .purse i { font-size: var(--font-xs); font-style: normal; color: var(--dim); line-height: 1; text-transform: uppercase; letter-spacing: 1px; }
   .hub-control {
     position: relative; flex: none; display: flex; flex-direction: column;
     align-items: center; justify-content: flex-start; gap: var(--spacing-xs);
@@ -4375,20 +4236,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     padding: var(--spacing-sm);
   }
 
-  .invbody { display: grid; align-content: start; gap: var(--spacing-sm); min-height: 0; height: 100%; }
-  .invbody > section { min-height: 0; overflow: visible; }
 
-  .inventory-layout { display: grid; grid-template-columns: minmax(max-content, 1fr) minmax(0, 4fr); grid-template-rows: minmax(0, 1fr); align-items: start; gap: var(--spacing-md); min-width: 0; min-height: 0; height: 100%; }
-  .inventory-tab { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: var(--spacing-xs); width: 100%; min-width: 0; text-align: left; }
-  .inventory-tab-label { display: inline-flex; align-items: center; gap: var(--spacing-xs); min-width: 0; }
   /* the tab buttons live in Tabs.svelte's scope, so their face styles reach them globally */
-  :global(.inventory-tab) small { text-align: right; }
 
   @media (max-width: 1200px) {
-    .inventory-layout { grid-template-columns: minmax(0, 1fr); }
   }
   @media (max-width: 1200px) {
-    .inventory-tab { flex: 1 1 auto; align-items: center; width: auto; text-align: center; }
   }
 
   .sheet-sides { flex: none; }
@@ -4436,29 +4289,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .sheet-new-character { display: inline-flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); white-space: nowrap; }
   .sheet-new-character img { width: var(--icon-detail); height: var(--icon-detail); object-fit: contain; }
 
-  .bagtools .margin { display: inline-flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); }
-  .bagtools .margin input { width: var(--input-narrow); }
 
-  .bagtools .best { border-color: color-mix(in srgb, var(--good) 55%, transparent); color: var(--good-lit); background: color-mix(in srgb, var(--good) 10%, transparent); }
 
-  .bagmain { display: flex; flex-direction: column; gap: var(--spacing-xs); min-width: 0; }
-  .bagtools, .bagview { display: flex; flex: 1 1 auto; align-items: center; gap: var(--spacing-xs); flex-wrap: wrap; min-width: 0; }
-  .bagtools .grow, .bagview .grow { flex: 1; }
-  .bagsearch { min-width: clamp(69px, 5.32vw, 149px); }
-  .bagtier { display: inline-flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-xs); color: var(--dim); }
-  .bagtools .best:hover { border-color: var(--good); }
-  .equipnote { position: relative; top: var(--x-pull-note); font-size: var(--font-xs); color: var(--good); }
-  .bagblock { display: grid; align-content: start; gap: var(--spacing-xs); border: 0; }
-  .gear-care-slot { border-top: 1px solid var(--line); padding-top: var(--spacing-sm); }
-  .bagmeta { margin: 0; }
-  .filterpresets { display: grid; gap: var(--spacing-xs); border-top: 1px solid var(--line); padding-top: var(--spacing-sm); }
-  .filterpresets-head { margin: 0; display: flex; align-items: baseline; gap: var(--spacing-xs); flex-wrap: wrap; }
-  .presetrow { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--spacing-xs); grid-template-columns: repeat(auto-fill, minmax(min(100%, clamp(210px, 16.22vw, 437px)), 1fr)); }
-  .presetrow li { display: flex; align-items: center; gap: var(--spacing-xs); }
-  .presetrow li span { min-width: 6ch; }
-  .presetrow button, .presetrow small { font-size: var(--font-xs); }
-  .autodissolve input { width: var(--input-narrow); }
-  .bagblock + .bagblock { border-top: 1px solid var(--line); padding-top: var(--spacing-sm); }
   .stats td { font-size: var(--font-xs); padding: var(--spacing-xs) var(--spacing-xs); }
   .stats td:first-child { color: var(--dim); width: 45%; }
   .save-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; align-content: start; gap: var(--spacing-sm); }
@@ -4473,15 +4305,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .save-panel p { margin: 0; }
   .save-panel table { font-size: var(--font-xs); }
   .save-note-inline { color: var(--good); font-size: var(--font-xs); }
-  .filter { display: grid; align-content: start; gap: var(--spacing-xs); }
-  .filter summary { cursor: pointer; color: var(--dim); font-size: var(--font-xs); }
-  .filter table { margin: 0; }
 
-  .weight { margin: 0; font-size: var(--font-xs); color: var(--dim); white-space: nowrap; }
-  .weight small { color: var(--dim); }
-  .warn { color: var(--alarm); }
 
-  .townnote { font-size: var(--font-xs); color: var(--good); }
 
   .aloud {
     position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden;
