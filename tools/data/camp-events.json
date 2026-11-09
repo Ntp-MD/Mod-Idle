@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "storyteller": {
+    "id": "storyteller-ambassador",
+    "name": "Ambassador",
+    "mode": "recurring"
+  },
+  "states": ["prowler", "traveler", "nest", "herd", "aid", "discovered", "combat", "timeout", "full-bag", "read-only"],
+  "beats": [
+    {
+      "id": "prowler-at-the-edge",
+      "state": "prowler",
+      "portrait": "storyteller-ambassador",
+      "line": "Something circles the fire beyond the light.",
+      "choices": [
+        { "label": "Scare it off", "cost": { "timeSec": 60 }, "result": "close", "flavor": "It bolts into the dark." },
+        { "label": "Stand ground", "result": "combat", "flavor": "It charges." },
+        { "label": "Feed it", "cost": { "item": "food", "qty": 1 }, "result": "close", "flavor": "It takes the scrap and goes." }
+      ]
+    },
+    {
+      "id": "traveler-at-the-fire",
+      "state": "traveler",
+      "portrait": "storyteller-ambassador",
+      "line": "A stranger stops by the fire, tired and cold.",
+      "choices": [
+        { "label": "Share supplies", "cost": { "item": "food", "qty": 1 }, "result": "aid", "flavor": "They rest a while." },
+        { "label": "Trade", "cost": { "timeSec": 120 }, "result": "close", "flavor": "A fair swap and a nod." },
+        { "label": "Send away", "result": "close", "flavor": "The road takes them." }
+      ]
+    },
+    {
+      "id": "nest-in-the-grass",
+      "state": "nest",
+      "portrait": "storyteller-ambassador",
+      "line": "A small nest holds speckled eggs.",
+      "choices": [
+        { "label": "Take", "cost": { "item": "food", "qty": 1 }, "result": "close", "flavor": "Full and swift." },
+        { "label": "Leave", "result": "read-only", "flavor": "You leave it be." },
+        { "label": "Wait", "cost": { "timeSec": 120 }, "result": "timeout", "flavor": "The nest empties unseen." }
+      ]
+    },
+    {
+      "id": "herd-passes",
+      "state": "herd",
+      "portrait": "storyteller-ambassador",
+      "line": "A herd crosses the field beyond camp.",
+      "choices": [
+        { "label": "Hunt", "result": "combat", "flavor": "You break cover." },
+        { "label": "Harvest", "cost": { "timeSec": 180 }, "result": "close", "flavor": "Shed hair and dung gathered." },
+        { "label": "Let pass", "result": "timeout", "flavor": "The herd drifts on." }
+      ]
+    },
+    {
+      "id": "aid-at-the-fire",
+      "state": "aid",
+      "portrait": "storyteller-ambassador",
+      "line": "Someone by the fire needs a hand.",
+      "choices": [
+        { "label": "Give", "cost": { "item": "food", "qty": 1 }, "result": "close", "flavor": "They nod, fed." },
+        { "label": "Accept help", "result": "close", "flavor": "A small kindness returned." },
+        { "label": "Decline", "result": "timeout", "flavor": "The moment passes." }
+      ]
+    },
+    {
+      "id": "object-found",
+      "state": "discovered",
+      "portrait": "storyteller-ambassador",
+      "line": "Something old lies half-buried near camp.",
+      "choices": [
+        { "label": "Look closer", "result": "read-only", "flavor": "Marks you cannot read." }
+      ]
+    },
+    {
+      "id": "field-fight",
+      "state": "combat",
+      "portrait": "storyteller-ambassador",
+      "line": "The field closes in.",
+      "choices": [
+        { "label": "Fight", "result": "combat", "flavor": "To arms." }
+      ]
+    },
+    {
+      "id": "moment-passes",
+      "state": "timeout",
+      "portrait": "storyteller-ambassador",
+      "line": "The moment slips by.",
+      "choices": [
+        { "label": "Return to camp", "result": "close", "flavor": "Only time spent." }
+      ]
+    },
+    {
+      "id": "bag-too-full",
+      "state": "full-bag",
+      "portrait": "storyteller-ambassador",
+      "line": "Your bag strains at the straps.",
+      "choices": [
+        { "label": "Drop one", "cost": { "timeSec": 30 }, "result": "close", "flavor": "Lighter by one." },
+        { "label": "Keep it", "result": "close", "flavor": "A slow walk home." }
+      ]
+    },
+    {
+      "id": "just-looking",
+      "state": "read-only",
+      "portrait": "storyteller-ambassador",
+      "line": "You look a while.",
+      "choices": [
+        { "label": "Close", "result": "close", "flavor": "Nothing changed." }
+      ]
+    }
+  ]
+}
