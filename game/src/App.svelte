@@ -51,15 +51,16 @@ import { buyBlackMarket } from '@sim/town/black-market';
   import { destinationIntel } from './ui/map/map-intel';
   import { investigateTrailSite, recordMapDiscovery } from '@sim/world/map-exploration';
   import { destinationPrimary, destinationWarp } from './ui/map/destination';
-  import TownHub from './ui/town/TownHub.svelte';
-  import Market from './ui/town/Market.svelte';
-  import CraftWorkshop from './ui/inventory/CraftWorkshop.svelte';
+  import TownPanel from './ui/panels/town-panel.svelte';
+  import MarketPanel from './ui/panels/market-panel.svelte';
+  import CraftPanel from './ui/panels/craft-panel.svelte';
   import { newCraftWorkbenchView } from './ui/inventory/craft-workbench';
   import GearCare from './ui/inventory/GearCare.svelte';
   import ProgressRecap from './ui/hud/ProgressRecap.svelte';
   import JourneyNotices from './ui/hud/JourneyNotices.svelte';
   import SkillDiscovery from './ui/character/SkillDiscovery.svelte';
-  import SkillsWorkbench, { newSkillsWorkbenchView } from './ui/character/SkillsWorkbench.svelte';
+  import SkillsPanel from './ui/panels/skills-panel.svelte';
+  import { newSkillsWorkbenchView } from './ui/character/SkillsWorkbench.svelte';
   import { skillEligibilityInState } from '@sim/combat/skills';
   import { importantCombatEvent } from './ui/combat/combat-presentation';
   import type { ArenaTargetRead } from './ui/combat/combat-arena-view';
@@ -68,9 +69,11 @@ import { buyBlackMarket } from '@sim/town/black-market';
   import { createFieldViewFrame, type FieldViewFrame } from './presentation/arena-view-frame';
   import { fieldPointM } from './presentation/view-transform';
   import { newPassiveTreeSession } from './ui/passive-tree/passive-tree-view';
-  import Forge from './ui/inventory/Forge.svelte';
-  import FieldworkBoard from './ui/map/FieldworkBoard.svelte';
-  import PassiveTreeBoard from './ui/passive-tree/PassiveTreeBoard.svelte';
+  import ForgePanel from './ui/panels/forge-panel.svelte';
+  import CampPanel from './ui/panels/camp-panel.svelte';
+  import FarmPanel from './ui/panels/farm-panel.svelte';
+  import DeskPanel from './ui/panels/desk-panel.svelte';
+  import TreePanel from './ui/panels/tree-panel.svelte';
   import StashBoard from './ui/inventory/StashBoard.svelte';
   import CollapseToggle from './ui/shared/CollapseToggle.svelte';
   import Tabs from './ui/shared/Tabs.svelte';
@@ -3460,76 +3463,140 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {/if}
 
 {#if panel === 'forge'}
-  <Panel title="Forge" subtitle="Materials in · a new piece out" width="wide" fixed topmost gridArea={modalGridArea} onclose={() => { forgeResultItem = null; closePanel(); }}>
-    <Forge game={gameState} writer={transactionWriter} note={forgeNote} resultItem={forgeResultItem} onforge={runForge} onsalvage={runSalvage} focus={forgeFocus}
-      ontrack={doTrackGoal} onshortage={doTrackShortage} onpinzone={pinZoneSource}
-      onmap={openMapAtSettlement} onbag={() => openPanel('bag')} />
-  </Panel>
+  <ForgePanel
+    gameState={gameState}
+    transactionWriter={transactionWriter}
+    forgeNote={forgeNote}
+    forgeResultItem={forgeResultItem}
+    forgeFocus={forgeFocus}
+    modalGridArea={modalGridArea}
+    onForge={runForge}
+    onSalvage={runSalvage}
+    onTrack={doTrackGoal}
+    onShortage={doTrackShortage}
+    onPinZone={pinZoneSource}
+    onMap={openMapAtSettlement}
+    onBag={() => openPanel('bag')}
+    onclose={() => { forgeResultItem = null; closePanel(); }}
+  />
 {/if}
 
 {#if panel === 'craft' || showcaseMode}
-  <Panel title="Craft" subtitle={`Optional · ${ACTIVITY_GUIDE.craft.when} ${ACTIVITY_GUIDE.craft.helps} Right-click a stone · click to apply · Shift-click to repeat`} width="wide" fixed topmost showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
-    <CraftWorkshop game={gameState} item={benchItem} where={bench?.where ?? null} index={bench?.index ?? -1}
-                   bind:view={craftView}
-                   onpick={selectBench}
-                   onclear={() => { benchSelection = null; benchNote = ''; }}
-                   onrun={(op, line, pick) => runCraft(op, line ?? 0, pick)} {wornOf} note={benchNote}
-                   stashTabs={tabs} stashTab={stashTab} writer={transactionWriter}
-                   repairPrice={repairPrice} repairQuote={repairQuote} onrepair={doRepairGear}
-                   repairExpected={repairQuote && bench ? { token: repairQuote.token, target: { where: bench.where, index: bench.index } } : undefined}
-                   onStashTab={(tab) => { stashTab = tab; }}
-                   onTakeStash={takeStashForCraft} onStore={storeCraftPiece} />
-  </Panel>
+  <CraftPanel
+    gameState={gameState}
+    benchItem={benchItem}
+    bench={bench}
+    bind:craftView={craftView}
+    wornOf={wornOf}
+    benchNote={benchNote}
+    tabs={tabs}
+    stashTab={stashTab}
+    transactionWriter={transactionWriter}
+    repairPrice={repairPrice}
+    repairQuote={repairQuote}
+    modalGridArea={modalGridArea}
+    showcaseMode={showcaseMode}
+    onpick={selectBench}
+    onclear={() => { benchSelection = null; benchNote = ''; }}
+    onrun={(op, line, pick) => runCraft(op, line ?? 0, pick)}
+    onStashTab={(tab) => { stashTab = tab; }}
+    onTakeStash={takeStashForCraft}
+    onStore={storeCraftPiece}
+    onrepair={doRepairGear}
+    onclose={closePanel}
+  />
 {/if}
 
 {#if panel === 'skills' || showcaseMode}
-  <Panel title="Skills" subtitle={`${ACTIVE_SLOTS} slots · timed skills first, fillers last`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
-    <SkillsWorkbench state={gameState} character={c} writable={transactionWriter} note={skillNote}
-      autoSkills={settings.autoSkills !== false} bind:view={skillsWorkbenchView}
-      onslot={setSlot} onmove={doMoveSlot} onmode={setMode} onauto={setAutoMode} oncondition={setCond}
-      ontoggle={toggle} onaurapool={chooseAuraPool} ondisableauras={disableAllAuras}
-      onswitchpreset={doSwitchPreset} onstorepreset={doStorePreset} onbindzone={doBind} />
-  </Panel>
+  <SkillsPanel
+    gameState={gameState}
+    character={c}
+    writable={transactionWriter}
+    note={skillNote}
+    autoSkills={settings.autoSkills !== false}
+    bind:view={skillsWorkbenchView}
+    modalGridArea={modalGridArea}
+    showcaseMode={showcaseMode}
+    onslot={setSlot}
+    onmove={doMoveSlot}
+    onmode={setMode}
+    onauto={setAutoMode}
+    oncondition={setCond}
+    ontoggle={toggle}
+    onaurapool={chooseAuraPool}
+    ondisableauras={disableAllAuras}
+    onswitchpreset={doSwitchPreset}
+    onstorepreset={doStorePreset}
+    onbindzone={doBind}
+    onclose={closePanel}
+  />
 {/if}
 
 {#if panel === 'tree' || showcaseMode}
-  <Panel title="Passive tree" subtitle={`${treePointsFree(gameState)} tree · ${treePointsFree(gameState, 'attainment')} attainment banked · ${treeSpent.tree ?? 0} tree / ${treeSpent.attainment ?? 0} attainment spent`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
-    <PassiveTreeBoard
-      nodes={tree.nodes}
-      graph={tree.graph}
-      layout={tree.layout}
-      game={gameState}
-      selectedId={selectedTreeNodeId}
-      verdict={selectedTreeVerdict}
-      onselect={(id) => (selectedTreeNodeId = id)}
-      onbuy={() => doSpendTree(selectedTreeNodeId)}
-      onpath={doAllocateTreePath}
-      ontrackgoal={(id) => doTrackGoal({ kind: 'passive', id })}
-      goalId={journeyGoal?.source === 'tracked' && journeyGoal.view.ref.kind === 'passive' ? journeyGoal.view.ref.id : null}
-      bind:session={treeBoardSession} bind:focusId={treeFocusId}
-    />
-  </Panel>
+  <TreePanel
+    gameState={gameState}
+    selectedId={selectedTreeNodeId}
+    verdict={selectedTreeVerdict}
+    goalId={journeyGoal?.source === 'tracked' && journeyGoal.view.ref.kind === 'passive' ? journeyGoal.view.ref.id : null}
+    treeSpent={treeSpent}
+    modalGridArea={modalGridArea}
+    showcaseMode={showcaseMode}
+    onselect={(id) => (selectedTreeNodeId = id)}
+    onbuy={() => doSpendTree(selectedTreeNodeId)}
+    onpath={doAllocateTreePath}
+    ontrackgoal={(id) => doTrackGoal({ kind: 'passive', id })}
+    bind:session={treeBoardSession}
+    bind:focusId={treeFocusId}
+    onclose={closePanel}
+  />
 {/if}
 
 {#if panel === 'town' || showcaseMode}
-  <Panel title="Town" subtitle={`${town?.name ?? 'the field'} · ${townLive ? 'standing here' : 'not standing here'}`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
-    <TownHub state={gameState} town={town} here={townLive} {tabs}
-             onopen={(id) => openPanel(id as PanelId)} onwarp={travelTo} onsellall={doSell}
-             onblackmarket={openBlackMarket}
-             onbest={doBestEquip}
-             onstashall={() => doDepositAll(stashTab)} />
-  </Panel>
+  <TownPanel
+    gameState={gameState}
+    town={town}
+    townLive={townLive}
+    tabs={tabs}
+    modalGridArea={modalGridArea}
+    showcaseMode={showcaseMode}
+    onopen={(id) => openPanel(id as PanelId)}
+    onwarp={travelTo}
+    onsellall={doSell}
+    onblackmarket={openBlackMarket}
+    onbest={doBestEquip}
+    onstashall={() => doDepositAll(stashTab)}
+    onclose={closePanel}
+  />
 {/if}
 
 {#if panel === 'market' || showcaseMode}
-  <Panel title="Market" subtitle={`${town?.name ?? ''} · demand, cargo and town services`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={() => { marketSale = null; closePanel(); }}>
-    <Market state={gameState} town={town} here={townLive} writer={transactionWriter} onbuy={doBuy} onsell={doSell} ontrade={doTrade} onprocess={doProcess} onroute={showTradeRoute} saleResult={marketSale}
-            ondeliver={doDelivery} ontrack={doTrackDelivery} onack={doAcknowledgeDelivery}
-            onaccept={doAcceptCourier} ondecline={doDeclineCourier} onblackmarketbuy={doBlackMarketBuy}
-            onpinzone={pinZoneSource} ontrackgoal={(id) => doTrackGoal({ kind: 'delivery', id })} ontrackshortage={doTrackShortage}
-            goalId={journeyGoal?.source === 'tracked' && journeyGoal.view.ref.kind === 'delivery' ? journeyGoal.view.ref.id : null}
-            bind:view={marketView} bind:marketId={marketTownId} />
-  </Panel>
+  <MarketPanel
+    gameState={gameState}
+    town={town}
+    townLive={townLive}
+    transactionWriter={transactionWriter}
+    marketSale={marketSale}
+    modalGridArea={modalGridArea}
+    showcaseMode={showcaseMode}
+    onbuy={doBuy}
+    onsell={doSell}
+    ontrade={doTrade}
+    onprocess={doProcess}
+    onroute={showTradeRoute}
+    ondeliver={doDelivery}
+    ontrack={doTrackDelivery}
+    onack={doAcknowledgeDelivery}
+    onaccept={doAcceptCourier}
+    ondecline={doDeclineCourier}
+    onblackmarketbuy={doBlackMarketBuy}
+    onpinzone={pinZoneSource}
+    ontrackgoal={(id) => doTrackGoal({ kind: 'delivery', id })}
+    ontrackshortage={doTrackShortage}
+    goalId={journeyGoal?.source === 'tracked' && journeyGoal.view.ref.kind === 'delivery' ? journeyGoal.view.ref.id : null}
+    bind:view={marketView}
+    bind:marketId={marketTownId}
+    onclose={() => { marketSale = null; closePanel(); }}
+  />
 {/if}
 
 {#if deliveryNotice && (showcaseMode || transactionWriter && panel === null)}
@@ -3541,290 +3608,91 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {/if}
 
 {#if panel === 'camp' || showcaseMode}
-  <Panel title="Field Camp" subtitle={`${fieldworkSite ? fieldworkSite.replace(/^./, (letter) => letter.toUpperCase()) : 'Field'} · ${fieldCampHere ? 'safe at Camp' : 'set up away from town'}`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
-    <FieldworkBoard
-      state={gameState}
-      site={fieldworkSite}
-      cellName={fieldCellName}
-      campName={fieldCampName}
-      campHere={fieldCampHere}
-      busy={fieldworkBusy}
-      inTown={townLive}
-      oncamp={doEstablishCamp}
-      onstart={doStartFieldAction}
-      onstop={doStopFieldAction}
-      oncook={doCookMeal}
-      oneat={doEatMeal}
-      onauto={(patch) => updateAutoEat(patch)}
-    />
-  </Panel>
+  <CampPanel
+    gameState={gameState}
+    fieldworkSite={fieldworkSite}
+    fieldCellName={fieldCellName}
+    fieldCampName={fieldCampName}
+    fieldCampHere={fieldCampHere}
+    fieldworkBusy={fieldworkBusy}
+    townLive={townLive}
+    modalGridArea={modalGridArea}
+    showcaseMode={showcaseMode}
+    oncamp={doEstablishCamp}
+    onstart={doStartFieldAction}
+    onstop={doStopFieldAction}
+    oncook={doCookMeal}
+    oneat={doEatMeal}
+    onauto={(patch) => updateAutoEat(patch)}
+    onclose={closePanel}
+  />
 {/if}
 
 {#if panel === 'farm' || showcaseMode}
-  <Panel title="Farm" subtitle={farmSub} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
-    <div class="farm-panel">
-    <p class="text-note"><b>Optional activity</b> {ACTIVITY_GUIDE.farm.when} {ACTIVITY_GUIDE.farm.helps}</p>
-    <p><small>{gameState.farm.xp} Farm XP · {farm.xpPerHarvest} per harvest · {farm.F.growth_hours} h base cycle · tier Mastery XP low {gameState.farm.mastery.low} (Lv {farmMasteryLevel(gameState, 'low')}), mid {gameState.farm.mastery.mid} (Lv {farmMasteryLevel(gameState, 'mid')}), high {gameState.farm.mastery.high} (Lv {farmMasteryLevel(gameState, 'high')}) · at most 10% future growth-time reduction; ready times already set are unchanged · {farm.plotsMax} plots at most ({plots} yours).</small></p>
-    <Tabs label="Farm sections" active={farmTab} onpick={(id) => (farmTab = id as typeof farmTab)}
-          tabs={[{ id: 'plots', label: 'Plots & herbs' }, { id: 'alchemy', label: 'Alchemy' }, { id: 'automation', label: 'Auto use' }]} />
-
-    {#if farmTab === 'plots'}
-    <h3>Plots</h3>
-    <table>
-      <thead><tr><th>Plot</th><th>Grow</th><th>Ready</th><th></th></tr></thead>
-      <tbody>
-        {#each Array(plots) as _, i}
-          {@const p = gameState.farm.plots[i]}
-          <tr>
-            <td>{i + 1}</td>
-            <td>
-              <select aria-label={`Grow tier for plot ${i + 1}`} value={p?.tier || 'low'} onchange={(e) => doPlant(i, (e.target as HTMLSelectElement).value)}>
-                {#each farm.TIERS as tier}
-                  <option value={tier} selected={p?.tier === tier}>{tier}{!farm.canGrow(fl, tier) ? ` (needs level ${farm.F.tier_unlock_level[tier]})` : ''}</option>
-                {/each}
-              </select>
-            </td>
-            <td>{p?.tier ? (gameState.clockSec >= p.readyAt ? 'ready' : Math.ceil((p.readyAt - gameState.clockSec) / 360) / 10 + ' h') : 'empty'}</td>
-            <td><button onclick={() => doHarvest(i)} disabled={!p?.tier || gameState.clockSec < p.readyAt}>harvest</button></td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-
-    <h3>Herb store · bundles drop on their own roll</h3>
-    <p>{farm.TIERS.map((t: string) => `${t} ${gameState.farm.herbs[t] || 0}`).join(' · ')} ({(farm.H.mid_chance * 100).toFixed(0)}% per kill in mid zones · {(farm.H.high_chance * 100).toFixed(0)}% in high, {farm.H.bundle_min}-{farm.H.bundle_max} at a time)</p>
-    {/if}
-
-    {#if farmTab === 'alchemy'}
-    <h3>Alchemy</h3>
-    {@const scrapPreview = previewScrapAlchemy(gameState, { writer: transactionWriter })}
-    {@const tierProgress = alchemyTierProgress(gameState.alchemy)}
-    {@const scrapBatch = Math.floor((gameState.fieldwork.materials.scrap || 0) / E.salvage.alchemy.scrap_cost)}
-    <p>{gameState.fieldwork.materials.scrap || 0} Scrap carried · {E.salvage.alchemy.scrap_cost} Scrap → {E.salvage.alchemy.value_yield} Value stone · {tierProgress.outputsToNext} more to the next Tier stone ({tierProgress.paid} earned).</p>
-    <button disabled={!scrapPreview.ok} title={scrapPreview.ok ? 'Immediate settlement recipe' : scrapPreview.why} onclick={() => doScrapAlchemy()}>Transmute Scrap</button>
-    <button disabled={!scrapPreview.ok || scrapBatch < 1} title={scrapBatch < 1 ? `Needs ${E.salvage.alchemy.scrap_cost} Scrap per transmutation` : `Batch ${scrapBatch} single transmutes, stopping at the first refusal`} onclick={() => doScrapAlchemy(scrapBatch)}>Transmute all {scrapBatch} Scrap</button>
-    {#if !scrapPreview.ok}<p>{scrapPreview.why}</p>{/if}
-    <table>
-      <thead><tr><th>Draught</th><th>Effect</th><th>Cost</th><th>Held</th><th></th></tr></thead>
-      <tbody>
-        {#each farm.P.list as p}
-          {@const cost = farm.craftCost(p.tier)}
-          <tr>
-            <td>{p.name}</td>
-            <td>{p.pool === 'both' ? `Instant ${farm.potionPct(p, 'hp')}% Max HP + ${farm.potionPct(p, 'mana')}% Max Mana` : `Instant ${farm.potionEffect(p)}% Max ${p.pool === 'hp' ? 'HP' : 'Mana'}`}</td>
-            <td>{cost.herbs} {p.tier} herbs + {cost.reroll_value_stones} Value stone(s)</td>
-            <td>{gameState.farm.potions[p.name] || 0}{gameState.farm.condensed[p.name] ? ` (+${gameState.farm.condensed[p.name]} condensed)` : ''}</td>
-            <td>
-              <button onclick={() => doBrew(p.name)}>brew</button>
-              <button onclick={() => doDrink(p.name)} disabled={!((gameState.farm.potions[p.name] || 0) + (gameState.farm.condensed[p.name] || 0))}>drink</button>
-              <button onclick={() => doCondense(p.name)} disabled={(gameState.farm.potions[p.name] || 0) < farm.P.condensed.cost_bottles}>condense</button>
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-    {/if}
-
-    {#if farmTab === 'automation'}
-    <h3>Auto-use</h3>
-    <label><input type="checkbox" checked={gameState.farm.autoUse.hp} disabled={!transactionWriter} onchange={(e) => setAutoPotion('hp', e.currentTarget.checked)} /> HP line below
-      <input type="number" value={gameState.farm.threshold.hp} min="1" max="99" disabled={!transactionWriter} onchange={(e) => setPotionThreshold('hp', e.currentTarget.valueAsNumber)} />%
-    </label>
-    <label><input type="checkbox" checked={gameState.farm.autoUse.mana} disabled={!transactionWriter} onchange={(e) => setAutoPotion('mana', e.currentTarget.checked)} /> Mana line below
-      <input type="number" value={gameState.farm.threshold.mana} min="1" max="99" disabled={!transactionWriter} onchange={(e) => setPotionThreshold('mana', e.currentTarget.valueAsNumber)} />%
-    </label>
-    <h3>Auto-farm</h3>
-    <label><input type="checkbox" checked={gameState.farm.autoFarm.harvest} disabled={!transactionWriter} onchange={(e) => setFarmAutomation('harvest', e.currentTarget.checked)} /> Auto-harvest ready plots</label>
-    <label><input type="checkbox" checked={gameState.farm.autoFarm.plant} disabled={!transactionWriter} onchange={(e) => setFarmAutomation('plant', e.currentTarget.checked)} /> Auto-plant empty plots (uses one herb as the seed)</label>
-    <label><input type="checkbox" checked={gameState.farm.autoFarm.brew} disabled={!transactionWriter} onchange={(e) => setFarmAutomation('brew', e.currentTarget.checked)} /> Auto-brew affordable draughts</label>
-    <p><small>Shared cooldown {farm.P.shared_cooldown_sec} sec · {farm.P.max_uses_per_fight} uses a fight · {farm.P.boss_suppressed ? 'suppressed entirely on bosses' : ''} · a condensed bottle is {farm.P.condensed.effect_mult}× and weighs {farm.P.condensed.weight} against {farm.P.weight} loose.</small></p>
-    {/if}
-    {#if farmNote}<p class="farm-note" role="status">{farmNote}</p>{/if}
-    </div>
-  </Panel>
+  <FarmPanel
+    gameState={gameState}
+    farmSub={farmSub}
+    bind:farmTab={farmTab}
+    transactionWriter={transactionWriter}
+    farmNote={farmNote}
+    plots={plots}
+    fl={fl}
+    modalGridArea={modalGridArea}
+    showcaseMode={showcaseMode}
+    onPlant={doPlant}
+    onHarvest={doHarvest}
+    onScrapAlchemy={doScrapAlchemy}
+    onBrew={doBrew}
+    onDrink={doDrink}
+    onCondense={doCondense}
+    onAutoPotion={setAutoPotion}
+    onPotionThreshold={setPotionThreshold}
+    onFarmAutomation={setFarmAutomation}
+    onclose={closePanel}
+  />
 {/if}
 
 {#if panel === 'desk' || showcaseMode}
-  <Panel title="Settlement" subtitle={deskSub} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
-    <div class="desk-panel">
-    <Tabs label="Settlement sections" active={deskTab} onpick={(id) => (deskTab = id as typeof deskTab)}
-          tabs={[{ id: 'services', label: 'Services' }, { id: 'stall', label: 'Stall' }, { id: 'guild', label: 'Guild & Collector' }, { id: 'hunt', label: 'Hunt' }, { id: 'walk', label: 'Walk' }]} />
-    <div class="desk-content scroll-pane">
-
-    {#if viewTown}
-      <h3>{viewTown.name} · settlement{viewHere ? '' : ' — read only, you are standing in ' + (town ? town.name : 'the field')}</h3>
-      <p><small>Innate Element {viewTown.innate.join(' / ')} · Base bias flavour {viewTown.base_bias_flavor} · NPCs here: {viewTown.npcs.map((n: string) => npcOf(n)?.name ?? n).join(' · ')}</small></p>
-      {#if !viewHere}
-        <p><small>Live only where the character stands.</small></p>
-      {/if}
-
-      <div class="fold">
-      {#if deskTab === 'services'}
-      <h4>Counterhand · the gold mint</h4>
-      <p>Gold {gameState.counters.gold.toFixed(1)} · junk unsold {junkTotal} ({junkLines.join(' · ') || 'none'}) · stones {stonesLine()}</p>
-      <button onclick={doSell} disabled={!viewHere || junkTotal === 0}>Sell all junk here</button>
-      <p><small>The Counterhand pays junk and gathered goods at this town's demand.</small></p>
-
-      <h4>Respec · free</h4>
-      <p><small>Free · only in a settlement.</small></p>
-      <button onclick={respec} disabled={!townLive || !viewHere || !STATS.some((k) => gameState.player.points[k])}>Respec — refund all stat points</button>
-      <button onclick={doRespecTree} disabled={!townLive || !viewHere || (!treeSpent.tree && !treeSpent.attainment)}>Respec the tree — refund {treeSpent.tree ?? 0} tree and {treeSpent.attainment ?? 0} attainment point{treeSpent.attainment === 1 ? '' : 's'}</button>
-
-      {/if}
-
-      {#if deskTab === 'stall'}
-      <h4>Stall stock</h4>
-      <table>
-        <thead><tr><th>Line</th><th>NPC</th><th>Kind</th><th>Minutes of income</th><th>Gold</th><th></th></tr></thead>
-        <tbody>
-          {#each viewStock as row}
-            {@const check = canBuy(gameState, viewTown.id, row.id)}
-            {@const purchaseQuote = quoteTownPurchase(gameState, viewTown.id, row.id)}
-            {@const repair = row.id === 'repair' || row.id === 'repair_ironrow'}
-            {@const noBroken = repair && !gameState.gear.some((it) => it?.broken) && !gameState.bag.some((it) => it?.broken)}
-            <tr>
-              <td>{row.item}</td>
-              <td>{npcOf(row.npc)?.name ?? row.npc}</td>
-              <td>{row.kind}</td>
-              <td>{priceMinutes(row, viewTown.id, gameState)} m{row.charge_band ? ` @ ${row.charge_band}` : ''}</td>
-              <td>{purchaseQuote.gold}{#if purchaseQuote.promotion}<small class="text-good"> normal {purchaseQuote.normalGold} · save {purchaseQuote.normalGold - purchaseQuote.gold} · {Math.max(0, Math.floor((purchaseQuote.promotion.expiresAtSec - gameState.clockSec) / 60))}m left</small>{/if}</td>
-              <td>{#if !check.ok}<small>{check.why}</small>{:else if noBroken}<small>no Broken piece to repair</small>{/if}{#if viewHere}<button onclick={() => doBuy(row.id, viewTown.id, buyExpectation(viewTown.id, row))} disabled={!check.ok || noBroken}>buy</button>{:else}<span class="text-dim">elsewhere</span>{/if}</td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
-      {#if viewHere}
-        <p><small>Curio pedlar — today's rolled prices {gameState.pedlar.minutes.join(' / ')} minutes, {gameState.pedlar.bought} of {gameState.pedlar.minutes.length} bought; restocks at the next game day.</small></p>
-      {/if}
-      {/if}
-
-      {#if deskTab === 'guild'}
-      {#if viewHere}
-        <h4>Guild board · {gameState.town.tasks.length} slots · {freeSkipsLeft} free skip{freeSkipsLeft === 1 ? '' : 's'} · {skipTokens} token{skipTokens === 1 ? '' : 's'}</h4>
-        <table>
-          <thead><tr><th>#</th><th>Task</th><th>Zone</th><th>Progress</th><th>Reward</th><th></th></tr></thead>
-          <tbody>
-            {#each gameState.town.tasks as t, i}
-              {@const skip = skipVerdict(gameState, i)}
-              {@const options = t ? taskBonuses(t) : []}
-              {@const choice = t && taskChoices[i]?.task === t ? taskChoices[i].choice : undefined}
-              <tr>
-                <td>{i + 1}</td>
-                <td>{t ? `${t.kind} ×${t.n}`
-                  : 'refills in ' + (() => { const s = Math.max(0, gameState.town.refillAt[i] - gameState.clockSec); return s >= 3600 ? (s / 3600).toFixed(1) + 'h' : s >= 60 ? Math.round(s / 60) + 'm' : Math.round(s) + 's'; })()}</td>
-                <td>{t ? eng.zoneById(t.zone).name : ''}</td>
-                <td>{t ? `${t.progress} / ${t.n}` : ''}</td>
-                <td>{#if t}
-                  <QuestBonusPicker state={gameState} {options} name={`hunt-reward-${i}`} {choice} writer={transactionWriter} onchoose={(choice) => { taskChoices[i] = { task: t, choice }; }} />
-                {/if}</td>
-                <td>{#if t}
-                  <button class="btn btn-quiet" disabled={!transactionWriter || !skip.ok}
-                          title={skip.why || (skip.free ? 'Use the free task skip' : 'Spend one Task skip token')}
-                          onclick={() => doSkipTask(i)}>{skip.free ? 'skip · free' : skip.token ? 'skip · token' : 'skip'}</button>
-                  <button disabled={!transactionWriter || t.progress < t.n || options.length > 1 && !choice}
-                    title={options.length > 1 && !choice ? 'Choose one reward before claiming' : 'Receive the displayed reward'}
-                    onclick={() => doClaim(i, choice)}>Claim reward</button>
-                {/if}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-        <p><small>Elite hunts pay fixed stones. Boss hunts offer Remove or Tier stones.</small></p>
-      {/if}
-
-      {#if viewColSet}
-        <h4>Collector · {viewColSet.name} ({viewColHinted || gameState.collector.done[viewColSet.id] ? `${viewColSet.school} school` : 'school hidden'})</h4>
-        <p><small>{gameState.collector.done[viewColSet.id]
-          ? 'Turned in · the pieces are gone and the reward is yours.'
-          : 'The set slots are open here.'}</small></p>
-        <table>
-          <thead><tr><th>Piece</th><th>Slot</th><th>Held</th><th>Quality asked</th></tr></thead>
-          <tbody>
-            {#each viewColSet.parsed as p}
-              <tr>
-                <td>{p.name}</td><td>{p.slot}</td>
-                <td>{heldCount(gameState, viewColSet.id, p.name)} / 1</td>
-                <td>{viewColSet.quality}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-        {#if !gameState.collector.done[viewColSet.id]}
-          <p><small>Still hunting: {viewColSet.parsed.filter((p: any) => heldCount(gameState, viewColSet.id, p.name) === 0).map((p: any) => `${p.name} (${p.slot})`).join(' · ') || 'every piece is in hand — turn it in.'} Frames roll even-weighted across the whole world, so the target is the {viewColSet.quality} quality{viewColHinted ? ` and the ${viewColSet.school} school` : ' — buy the Collector hint to reveal its school'}, not one zone.</small></p>
-        {/if}
-        {#if viewHere}
-          <button onclick={doTurnIn} disabled={!setUnlocked(gameState, viewColSet) || gameState.collector.done[viewColSet.id]}>turn in the set</button>
-        {/if}
-        <p><small>Reward: {viewColSet.reward} · {viewColSet.rule} · no gold, no Mod (T14).</small></p>
-      {/if}
-
-      {#if viewHere && (gameState.grants.filter_presets || gameState.grants.titles.length || gameState.grants.banners.length)}
-        <h4>Collector grants</h4>
-        <p><small>{gameState.grants.filter_presets} extra filter preset{gameState.grants.filter_presets === 1 ? '' : 's'} · {stashTabCount(gameState)} stash tabs{gameState.grants.titles.length ? ` · titles: ${gameState.grants.titles.join(', ')}` : ''}{gameState.grants.banners.length ? ` · banners: ${gameState.grants.banners.join(', ')}` : ''}.</small></p>
-      {/if}
-      {/if}
-      </div>
-    {/if}
-
-    {#if deskTab === 'hunt'}
-    <h3>Hunt · {E.mob.zones.length} zones, one per settlement</h3>
-    <p><small>Zones open at their settlement · mobs scale to your level.</small></p>
-    <table class="picklist">
-      <thead><tr><th>Zone</th><th>Levels</th><th>mob_HP</th><th>Quality</th><th>Elements</th><th>Group</th><th>Sub-zones</th><th></th></tr></thead>
-      <tbody>
-        {#each E.mob.zones as z}
-          {@const home = settlementOfZone(z.id)?.id}
-          {@const opened = !!home && gameState.town.visited.includes(home)}
-          <tr class:picked={!!home && picked === home} tabindex="0"
-              onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); home && select(home); } }}
-              onclick={() => home && select(home)}>
-            <td>{z.id} · {z.name}</td>
-            <td>{z.levels.join('-')}</td>
-            <td class="mob-hp">{z.hp.map((hp: number) => fmtNum(hp)).join(' → ')}</td>
-            <td>{z.quality}</td>
-            <td>{eng.zoneElements(z.id).join(', ')}</td>
-            <td>{z.group}</td>
-            <td>{(z.subzones || []).map((s: any) => s.name).join(' · ')}</td>
-            <td><button onclick={(e) => { e.stopPropagation(); goToZone(z.id); }} disabled={z.id === gameState.zone || !opened}>
-              {z.id === gameState.zone ? 'here' : opened ? 'hunt' : 'walk first'}
-            </button></td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-    {/if}
-
-    {#if deskTab === 'walk'}
-    <h3>Walk · {E.road.block_sec}s a block · {gameState.town.visited.length} of {TOWN.settlements.length} Waypoints opened</h3>
-
-    <table class="picklist">
-      <thead><tr><th>Settlement</th><th>Zone</th><th>Blocks</th><th>Time</th><th>Warp</th><th></th></tr></thead>
-      <tbody>
-        {#each TOWN.settlements.filter((x: any) => x.id !== townId) as s}
-          {@const dest = settlementCell(s.id)}
-          {@const blocks = dest ? cellBlocks(gameState, dest) : walkBlocks(townId, s.id)}
-          {@const fare = warpPrice(s.id)}
-          <tr class:picked={picked === s.id} tabindex="0"
-              onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(s.id); } }}
-              onclick={() => select(s.id)}>
-            <td>{s.name}</td><td>{s.zone}</td>
-            <td>{blocks}</td>
-            <td>{dest ? cellSec(gameState, dest) : road.secBetween(townId, s.id)}s</td>
-            <td>{canTravel(gameState, s.id) ? `${fare} gold` : '—'}</td>
-            <td>
-              <button onclick={(e) => { e.stopPropagation(); dest && doWalk(dest); }} disabled={!!gameState.walk}>{gameState.walk && dest && gameState.walk.to.q === dest.q && gameState.walk.to.r === dest.r ? 'walking' : 'walk'}</button>
-              {#if canTravel(gameState, s.id)}<button onclick={(e) => { e.stopPropagation(); travelTo(s.id); }} disabled={gameState.counters.gold < fare} title={gameState.counters.gold < fare ? `needs ${fare} gold` : `warp for ${fare} gold`}>waypoint</button>{/if}
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-    {/if}
-    </div>
-    </div>
-  </Panel>
+  <DeskPanel
+    gameState={gameState}
+    town={town}
+    townId={townId}
+    townLive={townLive}
+    viewTown={viewTown}
+    viewHere={viewHere}
+    viewStock={viewStock}
+    viewColSet={viewColSet}
+    viewColHinted={viewColHinted}
+    deskSub={deskSub}
+    bind:deskTab={deskTab}
+    junkTotal={junkTotal}
+    junkLines={junkLines}
+    treeSpent={treeSpent}
+    freeSkipsLeft={freeSkipsLeft}
+    skipTokens={skipTokens}
+    taskChoices={taskChoices}
+    picked={picked}
+    transactionWriter={transactionWriter}
+    modalGridArea={modalGridArea}
+    showcaseMode={showcaseMode}
+    fmtNum={fmtNum}
+    onSell={doSell}
+    onRespec={respec}
+    onRespecTree={doRespecTree}
+    onBuy={doBuy}
+    onSkipTask={doSkipTask}
+    onClaim={doClaim}
+    onTurnIn={doTurnIn}
+    onSelect={select}
+    onGoToZone={goToZone}
+    onWalk={doWalk}
+    onTravelTo={travelTo}
+    buyExpectation={buyExpectation}
+    warpPrice={warpPrice}
+    stonesLine={stonesLine}
+    onclose={closePanel}
+  />
 {/if}
-
 {#if panel === 'save' || showcaseMode}
   <Panel title="Save"
     subtitle="Local saves, backups and shared preferences"
@@ -4062,12 +3930,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .map-legend .ramp { grid-column: 1 / -1; align-items: center; }
   .map-legend p { grid-column: 1 / -1; margin: 0; line-height: 1.4; }
   .map-legend .ramp i { flex: 1; width: auto; }
-
-  .picklist tr { cursor: pointer; }
-  .picklist tr:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
-  .picklist tr.picked { background: var(--panel); }
-  .desk-content .picklist .mob-hp { white-space: nowrap; }
-
 
   /* the Hub Grid shell: fixed; an overgrown region scrolls inside itself (AGENTS.md §UI integration) */
   .stage {
@@ -4611,14 +4473,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .save-panel p { margin: 0; }
   .save-panel table { font-size: var(--font-xs); }
   .save-note-inline { color: var(--good); font-size: var(--font-xs); }
-  .desk-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: var(--spacing-xs); }
-  .desk-content { display: flex; flex-direction: column; gap: var(--spacing-xs); flex: 1; min-height: 0; }
-  .desk-content p { font-size: var(--font-xs); }
-  .desk-content .picklist th, .desk-content .picklist td { padding: var(--spacing-xs) var(--spacing-xs); line-height: 1.1; font-size: var(--font-xs); }
-  .desk-content .picklist button { font-size: var(--font-xs); }
-  .farm-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: var(--spacing-xs); }
-  .farm-panel > p { margin: 0; font-size: var(--font-xs); }
-  .farm-note { color: var(--good); }
   .filter { display: grid; align-content: start; gap: var(--spacing-xs); }
   .filter summary { cursor: pointer; color: var(--dim); font-size: var(--font-xs); }
   .filter table { margin: 0; }
