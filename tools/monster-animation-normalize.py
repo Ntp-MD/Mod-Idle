@@ -11,7 +11,7 @@ Run from the repository root:
 
     python -B tools/monster-animation-normalize.py
     python -B tools/monster-animation-normalize.py --write
-    python -B tools/monster-animation-normalize.py --metadata art-reference/monsters/humanoid/goblin/shaman-goblin/meta.json --write
+    python -B tools/monster-animation-normalize.py --metadata archive/art-reference/monsters/humanoid/goblin/shaman-goblin/meta.json --write
 """
 
 from __future__ import annotations

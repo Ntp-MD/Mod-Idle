@@ -6,6 +6,15 @@ import { basicPhaseBudget } from '@engine/attack-range.ts';
 import {
   resolveAnimation, shippedAnimationManifest, validateAnimationManifest, type AnimationManifest,
 } from '../../src/ui/combat/animation/manifest';
+import {
+  SKILL_VFX_POOL,
+  activeVfxArt,
+  activeVfxVersionId,
+  setActiveVfxVersion,
+  vfxArtCandidates,
+  vfxVersionsFor,
+} from '../../src/ui/fx/catalog';
+import { legacyAnimationScale } from '../../src/ui/combat/arena/arena-body-model';
 
 const speciesIds = (E.mob.species as { id: string }[]).map(({ id }) => id);
 
@@ -78,5 +87,45 @@ describe('P4 — animation identity and fallbacks', () => {
       const data = JSON.parse(raw);
       expect(data, file).toBeDefined();
     }
+  });
+});
+
+describe('WP2 — animation fallback lifecycle and VFX registration (A7/A11)', () => {
+  it('reports unknown metadata as a named sprite fallback, never a guessed pivot', () => {
+    const manifest = shippedAnimationManifest(E.mob.species as { id: string }[]);
+    const resolved = resolveAnimation(manifest, 'species.not-a-species');
+    expect(resolved.kind).toBe('sprite');
+    if (resolved.kind === 'sprite') expect(resolved.fallback).toBe('unknown');
+    // Production manifests stay metres with a unit scale; the scale is consumed once.
+    expect(manifest.units).toBe('metres');
+    expect(manifest.scale).toBe(1);
+    expect(legacyAnimationScale(manifest, 'species.goblin')).toBe(1);
+    expect(legacyAnimationScale({ units: 'pixels', scale: 2 }, 'test.bad-manifest')).toBe(1);
+  });
+
+  it('adds one VFX version through the existing registration without new renderer branches', () => {
+    const skillId = 'attack.fireball';
+    const before = vfxVersionsFor(skillId);
+    expect(before.length).toBeGreaterThan(0);
+    const base = before[0];
+    const testVersion = { ...base, id: 'test-wp2-version', label: 'WP2 boundary check', default: false };
+    (SKILL_VFX_POOL[skillId] as unknown[]).push(testVersion);
+    try {
+      expect(vfxVersionsFor(skillId).some((version) => version.id === 'test-wp2-version')).toBe(true);
+      const previous = activeVfxVersionId(skillId);
+      expect(setActiveVfxVersion(skillId, 'test-wp2-version')).toBe(true);
+      expect(activeVfxVersionId(skillId)).toBe('test-wp2-version');
+      const candidates = vfxArtCandidates(skillId);
+      expect(candidates[0].versionId).toBe('test-wp2-version');
+      // The same art reader serves the new version: no skill-ID branch, same sources shape.
+      expect(activeVfxArt(skillId)).toBeDefined();
+      expect(candidates[0].sources.length).toBeGreaterThan(0);
+      if (previous) setActiveVfxVersion(skillId, previous);
+    } finally {
+      const pool = SKILL_VFX_POOL[skillId] as unknown[];
+      const index = pool.findIndex((version) => (version as { id: string }).id === 'test-wp2-version');
+      if (index >= 0) pool.splice(index, 1);
+    }
+    expect(vfxVersionsFor(skillId).some((version) => version.id === 'test-wp2-version')).toBe(false);
   });
 });

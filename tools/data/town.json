@@ -1332,6 +1332,12 @@
       "low": 0.5,
       "mid": 1,
       "high": 2
+    },
+    "courier": {
+      "enabled": true,
+      "active_slots": 1,
+      "trigger_interval_mult": 1,
+      "trigger_chance_mult": 1
     }
   },
   "black_market": {
@@ -1722,5 +1728,16 @@
   "quest_rewards": {
     "milestone_tree_points": 1,
     "milestone_rule": "First milestone Delivery completion per town pays the displayed Tree Point once per character. Old stored random bonuses remain payable. Permanent points are outside reward choices."
+  },
+  "storyteller_promotions": {
+    "cycle_sec": 3600,
+    "discount_pct": 10,
+    "eligible_rows": [
+      "repair",
+      "repair_ironrow",
+      "banner_coldres",
+      "tint_heavy",
+      "collector_hint"
+    ]
   }
 }

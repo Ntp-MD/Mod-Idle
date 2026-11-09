@@ -2,14 +2,13 @@ import { skillAreaSnapshot } from '@engine/skill-area';
 import type { CombatArena, CombatArenaFrame } from '@sim/combat/combat-arena';
 import type { FxEvent } from '@sim/core/types';
 import { sm } from '../../engine/client';
-import { ARENA_VIEW, type ArenaViewSize } from './combat-arena-view';
 import { vfxPresentationTailSec } from './arena-skill-art';
-import { skillAimGeometry, type SkillGeometry } from './skill-geometry';
+import { skillAimGeometry, type BodyModelM, type SkillGeometry } from './skill-geometry';
 
 /** Toggle upkeep and healing ticks emit receipts without starting an arena action. */
 export function supportEventGeometry(events: readonly FxEvent[], arena: CombatArena,
-  frame: CombatArenaFrame, atUs: number, view: ArenaViewSize = ARENA_VIEW,
-  body?: { width: number; height: number }): SkillGeometry[] {
+  frame: CombatArenaFrame, atUs: number,
+  bodyM?: BodyModelM): SkillGeometry[] {
   return events.flatMap(event => {
     if (!event.skillId || event.side !== 'self' || !['buff', 'heal'].includes(event.kind)) return [];
     const skill = sm.byId[event.skillId];
@@ -24,7 +23,8 @@ export function supportEventGeometry(events: readonly FxEvent[], arena: CombatAr
         || Math.abs(action.atUs - startedAtUs) < 2))) return [];
     const area = skillAreaSnapshot({ origin: 'caster', radius_m: 0 }, frame.player, frame.player, 'player');
     const mark = skillAimGeometry({ skillId: event.skillId, area, source: frame.player,
-      rangeM: 0, valid: true, targetName: 'You' }, view, undefined, body);
+      rangeM: 0, valid: true, targetName: 'You' },
+      bodyM ? { bodyM } : undefined);
     return mark ? [{ ...mark, key: `support-${event.id}`, sourceKind: 'support' as const, actorId: 'player', eventId: event.id, phase: 'Impact' as const,
       elapsedSec, phaseElapsedSec: elapsedSec }] : [];
   });

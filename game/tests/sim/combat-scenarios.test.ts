@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { E } from '../../src/engine/client';
 import { seededEncounter } from '../fixtures/encounter';
 import { mobFixture } from '../fixtures/mobFixture';
 import { liveMobSkill } from '../fixtures/liveMob';
@@ -26,7 +27,11 @@ describe('P0 scenarios — moving target', () => {
   it('keeps the committed target and closes the distance while it moves', () => {
     const encounter = seededEncounter({ seed: 33, bodies: 5 });
     encounter.run(1);
-    const mob = Object.values(encounter.arena.mobs).find((body) => body.hp > 0);
+    // The assertion needs a mob that actually pursues: prefer a proximity-aggressive
+    // species so a passive field draw cannot turn this into a vacuous standstill pass.
+    const proximity = new Set((E.mob.engagement as { proximity: string[] }).proximity);
+    const mob = Object.values(encounter.arena.mobs).find((body) => body.hp > 0 && proximity.has(body.mob?.speciesId ?? ''))
+      ?? Object.values(encounter.arena.mobs).find((body) => body.hp > 0);
     expect(mob).toBeDefined();
     encounter.arena.focusId = mob!.id;
     const startGap = Math.hypot(encounter.arena.player.x - mob!.x, encounter.arena.player.y - mob!.y);
@@ -44,9 +49,18 @@ describe('P0 scenarios — moving target', () => {
 });
 
 describe('P0 scenarios — ground hazard', () => {
-  it('steps out of a circle that lands inside the same tick', () => {
+  // The hazard is the only threat under test: clear the random field group (and stop hunting
+  // so it cannot refill) so the player's escape path never depends on the zone pool mix.
+  // The arena bodies stay where the live setup put them; only targeting/spawning is stilled.
+  function loneHazard() {
     const encounter = seededEncounter({ seed: 32, bodies: 5 });
     encounter.run(1);
+    encounter.state.group = [];
+    encounter.state.hunting = false;
+    return encounter;
+  }
+  it('steps out of a circle that lands inside the same tick', () => {
+    const encounter = loneHazard();
     const player = { ...encounter.arena.player };
     // player already near the rim, impact 0.4 s away, so only the remaining escape is owed
     heavyGround(encounter, { x: player.x + 1.45, y: player.y }, encounter.arena.nowUs + 400_000);
@@ -59,8 +73,7 @@ describe('P0 scenarios — ground hazard', () => {
 
   // F45: the circle must be re-answered on every movement sample, not once per world tick.
   it('stays outside a circle that lands at the end of the next tick', () => {
-    const encounter = seededEncounter({ seed: 32, bodies: 5 });
-    encounter.run(1);
+    const encounter = loneHazard();
     const player = { ...encounter.arena.player };
     heavyGround(encounter, { ...player }, encounter.arena.nowUs + 1_000_000);
 

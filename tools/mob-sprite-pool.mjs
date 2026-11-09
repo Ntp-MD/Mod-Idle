@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,7 +9,7 @@ const data = JSON.parse(readFileSync(join(root, 'tools/data/engine.json'), 'utf8
 const races = new Map(data.mob.species.map(({ id, race }) => [id, race]));
 const readJson = path => JSON.parse(readFileSync(path, 'utf8'));
 const directories = path => readdirSync(path, { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => entry.name).sort();
-const result = { species: {}, variants: {} };
+const result = { player: active(join(root, 'game/public/combat/arpg/player/pawn')), species: {}, variants: {} };
 
 function active(path) {
   const { version } = readJson(join(path, 'default/version.json'));
@@ -46,6 +46,9 @@ const generated = JSON.stringify(result, null, 2) + '\n';
 if (process.argv.includes('--check')) {
   if (!existsSync(output) || readFileSync(output, 'utf8') !== generated) throw new Error('Mob sprite registry is stale; run node tools/mob-sprite-pool.mjs');
 } else {
-  writeFileSync(output, generated);
+  const temporary = `${output}.${process.pid}.tmp`;
+  writeFileSync(temporary, generated);
+  renameSync(temporary, output);
 }
-console.log(`Mob sprite pool: ${Object.keys(result.species).length} species`);
+const variantCount = Object.values(result.variants).reduce((total, variants) => total + Object.keys(variants).length, 0);
+console.log(`Mob sprite pool: ${Object.keys(result.species).length} species, ${variantCount} variants`);

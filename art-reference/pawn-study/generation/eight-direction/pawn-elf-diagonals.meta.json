@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "elf",
+  "name": "Elf",
+  "generatedSource": "art-reference/pawn-study/generation/eight-direction/pawn-elf-diagonals.png",
+  "sourceReferences": [
+    "art-reference/pawn-study/sheets/elf.png",
+    "art-reference/pawn-study/atlases/elf.png"
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "promptSummary": "Corrected Elf diagonals: NE/NW rear with face hidden; SE/SW front mirrored. Preserve pale long hair, pointed ears, green tunic and brown belt/gold buckle; bust-only silhouette.",
+  "requestedLayout": {
+    "rows": 2,
+    "columns": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west"
+  },
+  "actualImage": {
+    "width": 1254,
+    "height": 1254,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "alpha": "transparent",
+    "visibleBoundsAlphaThreshold": 16,
+    "visibleBoundsPx": {
+      "northEast": {
+        "x": 193,
+        "y": 93,
+        "width": 256,
+        "height": 424
+      },
+      "southEast": {
+        "x": 152,
+        "y": 93,
+        "width": 292,
+        "height": 424
+      },
+      "southWest": {
+        "x": 181,
+        "y": 92,
+        "width": 286,
+        "height": 424
+      },
+      "northWest": {
+        "x": 173,
+        "y": 92,
+        "width": 260,
+        "height": 425
+      }
+    },
+    "feetBaselineYByCellPx": {
+      "northEast": 516,
+      "southEast": 516,
+      "southWest": 515,
+      "northWest": 516
+    }
+  },
+  "review": {
+    "identity": true,
+    "directionPose": "candidate appears to follow NE/NW rear and SE/SW mirrored front",
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed",
+    "pose": true
+  },
+  "reviewConcerns": [
+    "Review remains pending before packing."
+  ],
+  "previousCandidate": "art-reference/pawn-study/generation/eight-direction/pawn-elf-diagonals-v1.png",
+  "sizeReference": "art-reference/pawn-study/atlases/elf.png",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

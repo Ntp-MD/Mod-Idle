@@ -11,6 +11,27 @@
 
 export type Rng = () => number;
 
+export type CampPoolKind = 'sounds' | 'prowler' | 'traveler' | 'nest' | 'discovered' | 'supply-cache';
+export type CampPoolRequirement = 'local-mobs' | 'traveler-offer' | 'worksite' | 'exposure-threshold' | 'idle-cache';
+export type CampPoolRow = {
+  id: string;
+  kind: CampPoolKind;
+  scene_id: string;
+  weight: number;
+  requires: readonly CampPoolRequirement[];
+  repeat_gap_events: number;
+};
+export type CampPoolFacts = {
+  localMobs: boolean;
+  travelerOffer: boolean;
+  worksite: boolean;
+  exposureThreshold: boolean;
+  idleCache: boolean;
+};
+export type CampPoolSeen = {
+  eventId: string; kind: CampPoolKind; encounterId: number;
+};
+
 export interface StatCfg {
   base: number;
   level_cap: number;
@@ -701,7 +722,7 @@ export interface MobCfg {
   variants?: MobPlacement[];
   /** What each placement id drops: its base junk item, sale rarity and stream lean (`X56`). */
   variant_drops?: Record<string, VariantDrop>;
-  /** Retired legacy sources kept for inventory/trade compatibility only (never spawnable). */
+  /** Retired sources kept for saved-actor rewards and inventory/trade compatibility (never spawnable). */
   retired_variant_drops?: Record<string, VariantDrop & { species: string }>;
   /** Zero or more named Uniques per Species and Zone (`mob.uniques`); chance is per normal spawn. */
   uniques?: MobUniquePlacement[];
@@ -919,8 +940,11 @@ export interface FieldworkCfg {
     arrival_grace_sec: number; check_interval_sec: number; chance_per_check: number;
     warning_sec: number; choice_sec: number; cooldown_sec: number;
     exposure_threshold_sec: number; exposure_cap_sec: number; exposure_decay_per_sec: number;
-    kinds: ('sounds' | 'prowler' | 'traveler' | 'nest' | 'discovered')[];
+    kinds: (CampPoolKind | 'herd' | 'injured')[];
     barter_food: number; aid_food: number; aid_potion_count: number;
+    story: { recent_limit: number; avoid_consecutive_kind: boolean };
+    cache: { material_id: string; careful_intervals: number; careful_yield_mult: number; outcomes: { id: string; weight: number; yield_mult: number; food_loss: number }[] };
+    event_pool: readonly CampPoolRow[];
   };
   actions: Record<'mine' | 'grove' | 'fish', {
     resource: string; yield: number; interval_sec: number; xp: number; mastery_xp: number;

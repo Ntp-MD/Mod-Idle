@@ -23,7 +23,7 @@ describe('town demand and cargo', () => {
     const offered = quoteSale(state, 'highspire', 'material:timber', 8)!.gold;
     expect(offered).toBeGreaterThan(local);
     expect(startWalk(state, settlementCell('highspire')!).ok).toBe(true);
-    expect(state.walk!.blocksTotal).toBeGreaterThan(0);
+    expect(state.walk!.legs.length).toBeGreaterThan(0);
     expect(sellGoods(state, 'material:timber', 8).ok).toBe(false);
     expect(state.fieldwork.materials.timber).toBe(8);
     arrive(state, state.walk!);

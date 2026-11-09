@@ -4,8 +4,8 @@
   "action": "attack",
   "direction": "west",
   "pose": "01-contact",
-  "source": "art-reference/monsters/humanoid/goblin/animation/poses/attack/west/01-contact.png",
-  "sourceMetadata": "art-reference/monsters/humanoid/goblin/animation/poses/attack/west/01-contact.meta.json",
+  "source": "archive/art-reference/monsters/humanoid/goblin/animation/poses/attack/west/01-contact.png",
+  "sourceMetadata": "archive/art-reference/monsters/humanoid/goblin/animation/poses/attack/west/01-contact.meta.json",
   "sourcePixelsModified": false,
   "frameCanvas": {
     "width": 384,

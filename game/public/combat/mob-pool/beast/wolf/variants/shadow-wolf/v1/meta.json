@@ -1,0 +1,148 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "wolf--shadow-wolf",
+  "name": "Shadow Wolf",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 97,
+      "y": 100,
+      "width": 63,
+      "height": 124,
+      "offsetX": 97,
+      "offsetY": 100
+    },
+    {
+      "x": 320,
+      "y": 95,
+      "width": 128,
+      "height": 129,
+      "offsetX": 64,
+      "offsetY": 95
+    },
+    {
+      "x": 567,
+      "y": 119,
+      "width": 147,
+      "height": 105,
+      "offsetX": 55,
+      "offsetY": 119
+    },
+    {
+      "x": 844,
+      "y": 90,
+      "width": 105,
+      "height": 134,
+      "offsetX": 76,
+      "offsetY": 90
+    },
+    {
+      "x": 102,
+      "y": 343,
+      "width": 53,
+      "height": 137,
+      "offsetX": 102,
+      "offsetY": 87
+    },
+    {
+      "x": 330,
+      "y": 348,
+      "width": 108,
+      "height": 132,
+      "offsetX": 74,
+      "offsetY": 92
+    },
+    {
+      "x": 565,
+      "y": 374,
+      "width": 150,
+      "height": 106,
+      "offsetX": 53,
+      "offsetY": 118
+    },
+    {
+      "x": 831,
+      "y": 352,
+      "width": 130,
+      "height": 128,
+      "offsetX": 63,
+      "offsetY": 96
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-wolf--shadow-wolf-diagonals.png",
+  "speciesId": "wolf",
+  "variantId": "shadow-wolf"
+}

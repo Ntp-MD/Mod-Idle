@@ -281,6 +281,9 @@ export interface TownState {
   deliveryClockSec: number;
   contractTriggerRemainingSec: Record<string, number>;
   contractSerial: number;
+  courierSerial: number;
+  courierStreamState: number;
+  courierTriggerRemainingSec: number;
   contracts: Record<string, import('../town/delivery-types').DeliveryContract[]>;
   trackedContractIds: string[];
   deliverySummaries: Record<string, import('../town/delivery-types').DeliverySummary>;
@@ -303,33 +306,29 @@ export interface TownState {
 }
 
 /**
- * One walk on foot, counted in blocks.
- *
- * `blocksTotal` is the hex distance between the two cells and `secLeft` is the time left on the block
- * being crossed. A crossed block may roll one independent trail event; it never fields a group. A Push
- * preserves the block count. A same-zone Field Camp can end the walk and receive the character; without
- * one, recovery returns to the interrupted block and the route continues.
- *
- * A walk joins two cells, not two settlements (`road.standing_rule`): the destination is any hex the
- * player clicked, and `node`/`kind`/`sub`/`site` say what stands on it — a settlement, a named side of
- * one, or bare ground that may carry a gathering site. The content is answered from the lattice, never from a link table.
+ * One journey on foot: the frozen plan, the completed-leg index and the active leg's remaining time.
+ * Total/walked/remaining counts derive from `legs`/`stepIndex`; destination facts resolve through
+ * World from `to` — neither is stored twice. A crossed block may roll one trail event (receipt:
+ * `lastEventStep`); it never fields a group. A Push preserves the plan; a same-zone Field Camp can
+ * end the walk and receive the character, otherwise recovery resumes the interrupted block.
  */
 export interface Walk {
   from: Hex;
   to: Hex;
-  /** The settlement the destination belongs to — itself at rank 0, its nearest one on bare ground. */
-  node: string | null;
-  kind: 'town' | 'sub' | 'bare';
-  /** The sub-zone the destination cell is drawn as, or null where none is named. */
-  sub: number | null;
-  /** The wild-side site this destination stands on, or null. */
-  site: FieldSite | null;
-  /** The terrain printed on the destination cell, or null where unknown. */
-  terrain?: string | null;
-  blocksTotal: number;
-  blocksLeft: number;
+  /** Zone at departure: arrival selects the preset only when the stop is in another zone. */
+  fromZone: number;
+  /** Journey id from the accepted-command sequence; rejected starts never advance it. */
+  journeyId: number;
+  /** The journey start — equals `from`; the committed position before the first leg. */
+  origin: Hex;
+  /** The ordered frozen legs, one adjacent walk edge each. */
+  legs: { from: Hex; to: Hex }[];
+  /** Completed legs: the committed position is the last completed leg's destination. */
+  stepIndex: number;
+  /** Seconds left on the active leg. */
   secLeft: number;
-  blocksWalked: number;
+  /** The greatest leg index whose discovery/road event already processed (no replay). */
+  lastEventStep: number;
 }
 
 /** The gathering site or dungeon entrance a wild-side block carries. */
@@ -435,6 +434,8 @@ export interface GameState {
   bag: Item[];
   stash: Item[][];
   walk: Walk | null;
+  /** Accepted-journey sequence: the next journey id is `travelSeq + 1`. Rejected starts never advance it. */
+  travelSeq?: number;
   /** The hex the feet are on — a town, a side of one, or bare ground (`road.standing_rule`). */
   cell: Cell | null;
   mapJournal?: import('../world/map-exploration').MapJournal;
@@ -518,6 +519,8 @@ export interface GameState {
   pendingWorkReceipt?: { deferredFlights: number; deferredMobFlights: number; atSec: number };
   /** The open dungeon run, or null on open ground. A run is a mode, never a coordinate (M7). */
   dungeon: DungeonRun | null;
+  /** Latest read-only dungeon result; never a claimable inventory queue. */
+  lastDungeonReceipt?: import('../world/dungeon').DungeonReceipt | null;
   /** The clock second of the last cleared run; entry cools down from here (`dungeon.cooldown_sec`). */
   dungeonClearedAt?: number;
   counters: Counters;

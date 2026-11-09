@@ -1,5 +1,5 @@
 import pool from './mob-pool.generated.json';
-import { pilotArt, type SpriteAtlasMetadata } from './arena-art-pixel-v2';
+import { pixelArtDisplayScale, pilotArt, type SpriteAtlasMetadata } from './arena-art-pixel-v2';
 import type { ArenaCharacterArt } from './arena-art';
 
 export type DirectionalMetadata = SpriteAtlasMetadata & {
@@ -7,10 +7,10 @@ export type DirectionalMetadata = SpriteAtlasMetadata & {
   animationKind?: string;
 };
 
-/** Variant atlases contain one pose per direction in each action row. */
-export function directionalVariantArt(href: string, metadata: DirectionalMetadata): ArenaCharacterArt {
-  const art = pilotArt(href, metadata, 224);
-  if (metadata.animationKind === 'side-four-frame') return art;
+/** Maps four/eight-view pawns and row-organized action atlases to the same arena art contract. */
+export function directionalVariantArt(href: string, metadata: DirectionalMetadata, assetId?: string): ArenaCharacterArt {
+  const art = pilotArt(href, metadata, 224, false, pixelArtDisplayScale(metadata), assetId ?? href);
+  if (metadata.layout?.frameCount === 4 || metadata.layout?.frameCount === 8 || metadata.animationKind === 'side-four-frame') return art;
   const sheet = art.clips.idle.south!;
   const actions = ['idle', 'walk', 'attack', 'hit', 'death'] as const;
   const directions = ['south', 'south-east', 'east', 'north-east', 'north', 'north-west', 'west', 'south-west'];
@@ -28,5 +28,5 @@ export function directionalVariantArt(href: string, metadata: DirectionalMetadat
 }
 
 export const beetleVariants: Readonly<Record<string, ArenaCharacterArt>> = Object.fromEntries(
-  Object.entries(pool.variants.beetle).map(([name, { href, metadata }]) => [name, directionalVariantArt(href, metadata)]),
+  Object.entries(pool.variants.beetle).map(([name, { href, metadata }]) => [name, directionalVariantArt(href, metadata, `beetle.${name}`)]),
 );

@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "hornet--bog-hornet",
+  "name": "Bog Hornet",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 60,
+      "y": 123,
+      "width": 136,
+      "height": 101,
+      "offsetX": 60,
+      "offsetY": 123
+    },
+    {
+      "x": 309,
+      "y": 110,
+      "width": 150,
+      "height": 114,
+      "offsetX": 53,
+      "offsetY": 110
+    },
+    {
+      "x": 64,
+      "y": 380,
+      "width": 129,
+      "height": 100,
+      "offsetX": 64,
+      "offsetY": 124
+    },
+    {
+      "x": 319,
+      "y": 379,
+      "width": 130,
+      "height": 101,
+      "offsetX": 63,
+      "offsetY": 123
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "hornet",
+  "variantId": "bog-hornet"
+}

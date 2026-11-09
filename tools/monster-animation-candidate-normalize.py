@@ -4,7 +4,7 @@
 Example:
     python -B tools/monster-animation-candidate-normalize.py \
       --source art-reference/animation/outputs/sensenova-raw.png \
-      --reference art-reference/monsters/plant/dryad/dryad/animation/poses/hit/north/00-flinch.png
+      --reference archive/art-reference/monsters/plant/dryad/dryad/animation/poses/hit/north/00-flinch.png
 
 The reference PNG's .meta.json supplies its anchor and review-frame contract. The
 output is always a candidate under the chosen output path; this tool never edits

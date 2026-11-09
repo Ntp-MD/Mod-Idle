@@ -4,8 +4,8 @@
   "action": "hit",
   "direction": "east",
   "pose": "01-recoil",
-  "source": "art-reference/monsters/humanoid/goblin/animation/poses/hit/east/01-recoil.png",
-  "sourceMetadata": "art-reference/monsters/humanoid/goblin/animation/poses/hit/east/01-recoil.meta.json",
+  "source": "archive/art-reference/monsters/humanoid/goblin/animation/poses/hit/east/01-recoil.png",
+  "sourceMetadata": "archive/art-reference/monsters/humanoid/goblin/animation/poses/hit/east/01-recoil.meta.json",
   "sourcePixelsModified": false,
   "frameCanvas": {
     "width": 384,

@@ -6,24 +6,33 @@
  * Versions and atlas files are owned by `../fx/catalog.ts`; this module only adapts the active
  * pool row to the arena layer's decal/burst shape, and owns the one ground-projection matrix.
  */
-import { activeVfxArt, vfxArtCandidates, type SkillArt, type VfxAtlas } from '../fx/catalog';
+import { activeVfxArt, activeVfxVersion, vfxArtCandidates, type SkillArt, type VfxAtlas } from '../fx/catalog';
 import { getVfxAssetStatus } from '../fx/vfx-assets.svelte';
-import { ARENA_VIEW, projectArenaPoint, projectArenaVector } from '../../presentation/arena-camera';
-import type { SkillGeometry } from './skill-geometry';
+import type { FieldViewFrame } from '../../presentation/arena-view-frame';
+import { ARENA_REF_PX_PER_M } from '../../presentation/arena-camera';
+import { applyWorldVector, fieldVectorM, type Affine2 } from '../../presentation/view-transform';
+import type { SkillGeometry, SkillGeometryScreen } from './skill-geometry';
+import { VFX_BODY_LIFT_SHARE, VFX_HAND_LIFT_M, VFX_HAND_LIFT_SHARE, SKILL_SHAPE_MIN_M, groundShapeWorldPoints } from './arena-vfx-space';
+
+/** Authored reference density: the single topdown source, not runtime zoom. */
+const REF_PX_PER_M = ARENA_REF_PX_PER_M;
 
 export type { SkillArt } from '../fx/catalog';
 
 export type SkillVfxMode = 'auto' | 'base';
 export type VfxPresentation =
   | { kind: 'base'; reason: 'forced' | 'unavailable' | 'loading' | 'failed' }
+  | { kind: 'procedural'; versionId: string }
   | { kind: 'skin'; versionId: string; art: SkillArt };
 
 /**
- * Pure presentation resolution: Base mode forces Base; auto picks first fully-ready candidate.
- * Never starts I/O. Pending preferred does not hide a ready default.
+ * Pure presentation resolution: Base mode forces Base; a selected renderer-only version draws
+ * procedurally; auto picks first fully-ready raster candidate. Never starts I/O.
  */
 export function resolveVfxPresentation(skillId: string, mode: SkillVfxMode): VfxPresentation {
   if (mode === 'base') return { kind: 'base', reason: 'forced' };
+  const active = activeVfxVersion(skillId);
+  if (active?.renderer === 'procedural') return { kind: 'procedural', versionId: active.id };
   const candidates = vfxArtCandidates(skillId);
   if (candidates.length === 0) return { kind: 'base', reason: 'unavailable' };
   const anyPending = candidates.some((c) => c.sources.some((s) => {
@@ -71,7 +80,15 @@ export const skillArtFor = (id: string, mode: SkillVfxMode = 'auto'): SkillArt |
   return undefined;
 };
 
-/** One atlas frame placed in the arena: the frame's anchor lands on the live aim point. */
+/**
+ * One atlas frame placed in the arena: the frame's anchor lands on the live aim point.
+ *
+ * Model-space placement (world metres). Paint the result under the frame's
+ * world→viewport ancestor transform (`matrixAttribute(frame.worldToViewport)`),
+ * never by baking CSS px into content: the native box then stays zoom-independent
+ * while the visible art scales with the frame. All inputs derive from the committed
+ * mark and its world aim; `screen` is accepted for call-site compatibility and ignored.
+ */
 export type SkillArtPlacement = {
   cx: number;
   cy: number;
@@ -85,10 +102,41 @@ export type SkillArtPlacement = {
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 const ratio = (value: number | undefined) => clamp(Number.isFinite(value) ? Number(value) : 1, 0.05, 1);
-const screenLength = (x: number, y: number) => {
-  const vector = projectArenaVector({ x, y });
-  return Math.hypot(vector.x, vector.y);
+/** Model-space minima from legacy ref-px minima through the single reference density. */
+const BODY_MIN_H_M = 48 / REF_PX_PER_M;
+const BODY_MIN_W_M = 24 / REF_PX_PER_M;
+const LINE_MIN_M = SKILL_SHAPE_MIN_M.line;
+const WIDTH_MIN_M = SKILL_SHAPE_MIN_M.width;
+const DIAMETER_MIN_M = SKILL_SHAPE_MIN_M.diameter;
+/** Ground texture canvas side; single source for the decal matrix default and callers. */
+export const GROUND_CANVAS_PX = 2048;
+
+/** Screen angle of a world aim through the painted frame: topdown changes flow here. */
+const screenAimDeg = (worldToViewport: Affine2, directionRad: number): number => {
+  const v = applyWorldVector(worldToViewport,
+    fieldVectorM(Math.cos(directionRad), Math.sin(directionRad)));
+  return Math.atan2(v.y, v.x) * 180 / Math.PI;
 };
+
+/**
+ * Declared size policy per VFX layer. `footprint` covers the resolved area,
+ * `body` scales with the shared body model, `world` uses declared decorative
+ * metres, `ui` keeps CSS-pixel reads (labels). No skin input changes the policy.
+ */
+export type SkillArtSizePolicy = 'footprint' | 'body' | 'world' | 'ui';
+
+/** Policy for one mark/atlas pair, derived from shape+delivery only — never a skill id. */
+export function artSizePolicyFor(mark: SkillGeometry, atlas: VfxAtlas): SkillArtSizePolicy {
+  const authoring = atlas.authoring ?? {};
+  const areaShape = mark.area.shape ?? ((mark.area.radiusM ?? 0) > 0 ? 'circle' : 'single');
+  const shape = areaShape === 'line' || areaShape === 'cone'
+    ? areaShape : (authoring.shape === 'circle' ? 'circle' : areaShape);
+  const projectile = authoring.delivery === 'projectile' && shape !== 'line' && shape !== 'cone';
+  if (projectile) return 'body';
+  if (shape === 'circle') return 'footprint';
+  if (shape === 'line' || shape === 'cone') return 'world';
+  return 'body';
+}
 
 /**
  * Projectile sheets separate growth, flight and collision; ground sheets peak in their middle
@@ -141,36 +189,65 @@ export function atlasOpacity(mark: SkillGeometry, atlas: VfxAtlas): number {
 }
 
 /**
- * A content-aware screen placement for one atlas frame. The authored `anchor` is put on the
- * live aim point; `contentWidth/HeightRatio` make the painted content fill the footprint rather
- * than the frame's padding. Lines and cones rotate to the committed aim; single-body projectile
- * art rotates along its release→impact line.
+ * A content-aware placement in world metres for one atlas frame. The authored
+ * `anchor` lands on the live aim point; `contentWidth/HeightRatio` fit the
+ * painted content to the model (footprint/body/world per `artSizePolicyFor`)
+ * instead of the frame padding. Aim rotation is opt-in per atlas: only art with
+ * `orient: true` turns to the committed world aim or its release→impact line;
+ * everything else stays exactly as painted in the pool. Skin art is a pure fit:
+ * it never changes the hitbox, duration or timeline.
+ *
+ * Paint the result under the frame's world→viewport ancestor transform.
+ * Model metres keep the native box zoom-independent while the visible art
+ * scales with the frame; no CSS px is baked into content here.
  */
-export function skillArtPlacement(mark: SkillGeometry, atlas: VfxAtlas): SkillArtPlacement {
+export function skillArtPlacement(mark: SkillGeometry, atlas: VfxAtlas,
+  frame: FieldViewFrame, screen?: SkillGeometryScreen): SkillArtPlacement | undefined {
+  void screen;
+  if (!frame.renderable) return undefined;
   const authoring = atlas.authoring ?? {};
   const areaShape = mark.area.shape ?? ((mark.area.radiusM ?? 0) > 0 ? 'circle' : 'single');
   const shape = areaShape === 'line' || areaShape === 'cone'
     ? areaShape
     : (authoring.shape === 'circle' ? 'circle' : areaShape);
   const projectile = authoring.delivery === 'projectile' && shape !== 'line' && shape !== 'cone';
-  const direction = mark.vfxAim.directionRad;
-  const worldAim = projectArenaVector({ x: Math.cos(direction), y: Math.sin(direction) });
-  const aimDeg = Math.atan2(worldAim.y, worldAim.x) * 180 / Math.PI;
+  const orient = atlas.orient === true;
+  const direction = mark.directionRad;
+  // World aim stays the footprint authority; the painted rotation follows the
+  // frame basis so a topdown change turns art and telegraph together.
+  const aimDeg = screenAimDeg(frame.worldToViewport, direction);
+  const screenAngleOf = (from: { x: number; y: number }, to: { x: number; y: number }): number => {
+    const v = applyWorldVector(frame.worldToViewport,
+      fieldVectorM(to.x - from.x, to.y - from.y));
+    return Math.atan2(v.y, v.x) * 180 / Math.PI;
+  };
   const content = atlas.content;
   // The actor body is the size authority for directed and single art, so a 6 m line never
   // becomes a screen-sized stamp. Circles are the exception: they cover the committed footprint.
-  const bodyH = Math.max(48, Number(mark.body?.height ?? 132));
-  const bodyW = Math.max(24, Number(mark.body?.width ?? bodyH * 0.45));
-  let contentW = 24;
-  let contentH = 20;
-  let circleFootprint = false;
-  let cx = mark.vfxAim.impact.x;
-  let cy = mark.vfxAim.impact.y;
+  const bodyH = Math.max(BODY_MIN_H_M, Number(mark.bodyM?.height ?? BODY_MIN_H_M));
+  const bodyW = Math.max(BODY_MIN_W_M, Number(mark.bodyM?.width ?? BODY_MIN_W_M));
+  const aim = mark.vfxAim;
+  // Model-space release/impact: the same hand/body lift the viewport adapter applies,
+  // expressed in metres so the numbers never move with zoom.
+  const liftM = aim.fromSocket ? (aim.releaseLiftM ?? 0)
+    : Math.max(VFX_HAND_LIFT_M, bodyH * VFX_HAND_LIFT_SHARE);
+  const releaseM = { x: aim.releaseM.x, y: aim.releaseM.y - liftM };
+  const groundM = { ...aim.groundImpactM };
+  const impactM = aim.bodyImpact
+    ? { x: groundM.x, y: groundM.y - bodyH * VFX_BODY_LIFT_SHARE } : groundM;
+  let contentW = 24 / REF_PX_PER_M;
+  let contentH = 20 / REF_PX_PER_M;
+  let cx = impactM.x;
+  let cy = impactM.y;
   let rotateDeg = 0;
+  // The declared layer role is the single size authority: footprint reads the
+  // committed area, world decorations read authored metres, body effects read the
+  // shared body model. UI readability floors never change a world size.
+  const policy = artSizePolicyFor(mark, atlas);
 
   if (projectile) {
-    const from = mark.vfxAim.release;
-    const to = mark.vfxAim.impact;
+    const from = releaseM;
+    const to = impactM;
     const progress = mark.phase === 'Travel' ? clamp(mark.progress, 0, 1)
       : mark.phase === 'Aim' || mark.phase === 'Windup' ? 0 : 1;
     cx = from.x + (to.x - from.x) * progress;
@@ -178,88 +255,82 @@ export function skillArtPlacement(mark: SkillGeometry, atlas: VfxAtlas): SkillAr
     // A travelling body has a stable size even when its target is far away.
     contentW = bodyH * (mark.phase === 'Impact' ? 1.45 : .95);
     contentH = bodyH * (mark.phase === 'Impact' ? 1.1 : .52);
-    rotateDeg = mark.phase === 'Impact' || atlas.orient === false ? 0
-      : Math.atan2(to.y - from.y, to.x - from.x) * 180 / Math.PI;
+    rotateDeg = mark.phase === 'Impact' || !orient ? 0
+      : screenAngleOf(from, to);
   } else if (shape === 'line') {
-    const length = Math.max(0.4, Number(authoring.lengthM ?? mark.area.lengthM ?? mark.area.radiusM ?? 1));
-    const width = Math.max(0.25, Number(authoring.widthM ?? mark.area.widthM ?? 0.6));
-    contentW = clamp(screenLength(Math.cos(direction) * length, Math.sin(direction) * length), bodyH * 1.4, bodyH * 4.0);
-    contentH = clamp(screenLength(-Math.sin(direction) * width, Math.cos(direction) * width), bodyW * 1.0, bodyW * 2.8);
-    const center = projectArenaPoint({
-      x: mark.area.center.x + Math.cos(direction) * length / 2,
-      y: mark.area.center.y + Math.sin(direction) * length / 2,
-    });
-    cx = center.x; cy = center.y;
-    rotateDeg = aimDeg;
+    // World decoration: authored/resolved metres, never a body multiple. The
+    // resolved footprint still owns the hit area; the art only fits its span.
+    const length = Math.max(LINE_MIN_M, Number(authoring.lengthM ?? mark.area.lengthM ?? mark.area.radiusM ?? 1));
+    const width = Math.max(WIDTH_MIN_M, Number(authoring.widthM ?? mark.area.widthM ?? 0.6));
+    contentW = length;
+    contentH = width;
+    cx = mark.area.center.x + Math.cos(direction) * length / 2;
+    cy = mark.area.center.y + Math.sin(direction) * length / 2;
+    rotateDeg = orient ? aimDeg : 0;
   } else if (shape === 'cone') {
-    const radius = Math.max(0.4, Number(authoring.radiusM ?? mark.area.radiusM ?? 1));
-    const depth = Math.max(0.4, Number(authoring.depthM ?? radius));
-    const span = Math.max(0.4, Number(authoring.spanM ?? (2 * radius * Math.sin((mark.area.angleDeg ?? 90) * Math.PI / 360))));
-    contentW = clamp(screenLength(-Math.sin(direction) * span, Math.cos(direction) * span), bodyH * 1.0, bodyH * 3.4);
-    contentH = clamp(screenLength(Math.cos(direction) * depth, Math.sin(direction) * depth), bodyH * 0.8, bodyH * 3.2);
-    const center = projectArenaPoint({
-      x: mark.area.center.x + Math.cos(direction) * depth / 2,
-      y: mark.area.center.y + Math.sin(direction) * depth / 2,
-    });
-    cx = center.x; cy = center.y;
-    // Sector art is painted opening upward; rotate that axis onto the live aim.
-    rotateDeg = aimDeg + 90;
+    const radius = Math.max(LINE_MIN_M, Number(authoring.radiusM ?? mark.area.radiusM ?? 1));
+    const depth = Math.max(LINE_MIN_M, Number(authoring.depthM ?? radius));
+    const span = Math.max(LINE_MIN_M, Number(authoring.spanM ?? (2 * radius * Math.sin((mark.area.angleDeg ?? 90) * Math.PI / 360))));
+    contentW = span;
+    contentH = depth;
+    cx = mark.area.center.x + Math.cos(direction) * depth / 2;
+    cy = mark.area.center.y + Math.sin(direction) * depth / 2;
+    // Sector art is painted opening upward; rotate that axis onto the live aim,
+    // but only when the atlas opts in. Otherwise the atlas stays exactly as painted.
+    rotateDeg = orient ? aimDeg + 90 : 0;
   } else if (shape === 'circle') {
-    const xs = mark.vertices.map((point) => point.x);
-    const ys = mark.vertices.map((point) => point.y);
+    const spans = groundShapeWorldPoints(mark.area);
+    const xs = spans.map((point) => point.x);
+    const ys = spans.map((point) => point.y);
     // The painted content covers the committed footprint. Clamping to body multiples
     // shrank wide AoE art (e.g. Thunder Storm r=3) below its own telegraph.
-    contentW = Math.max(24, Math.max(...xs) - Math.min(...xs));
-    contentH = Math.max(20, Math.max(...ys) - Math.min(...ys));
-    circleFootprint = true;
-    cx = mark.center.x; cy = mark.center.y;
+    contentW = Math.max(24 / REF_PX_PER_M, Math.max(...xs) - Math.min(...xs));
+    contentH = Math.max(20 / REF_PX_PER_M, Math.max(...ys) - Math.min(...ys));
+    cx = mark.area.center.x;
+    cy = mark.area.center.y;
   } else {
-    const diameter = Math.max(0.9, Number(authoring.diameterM ?? 1.7));
-    contentW = clamp(screenLength(diameter, 0), bodyW * 1.0, bodyW * 2.8);
-    contentH = clamp(screenLength(0, authoring.delivery === 'ground' ? diameter * 1.5 : diameter), bodyH * 0.5, bodyH * 1.3);
-    cx = mark.vfxAim.impact.x; cy = mark.vfxAim.impact.y;
+    const diameter = Math.max(DIAMETER_MIN_M, Number(authoring.diameterM ?? 1.7));
+    contentW = clamp(diameter, bodyW * 1.0, bodyW * 2.8);
+    contentH = clamp(diameter * (authoring.delivery === 'ground' ? 1.5 : 1), bodyH * 0.5, bodyH * 1.3);
+    cx = impactM.x;
+    cy = impactM.y;
   }
 
-  // Keep the padded source frame bounded too; otherwise a low content ratio can still draw a
-  // texture several screens wide even when the painted content is body-sized. Circles carry
-  // the committed footprint, so their bound is the viewport, not the body.
-  const fullCap = circleFootprint ? Math.max(ARENA_VIEW.width, ARENA_VIEW.height) : bodyH * 7;
-  const fullW = clamp(contentW / ratio(content?.widthRatio), 24, fullCap);
-  const fullH = clamp(contentH / ratio(content?.heightRatio), 20, fullCap);
+  // Only body-relative layers keep the body-multiple safety cap; footprint and
+  // authored world layers carry their own metres. Visible clipping happens at
+  // the renderer boundary (SVG overflow/frame), never by editing world size.
+  const fullCapM = policy === 'body' ? bodyH * 7 : Number.POSITIVE_INFINITY;
+  const fullW = clamp(contentW / ratio(content?.widthRatio), 24 / REF_PX_PER_M, fullCapM);
+  const fullH = clamp(contentH / ratio(content?.heightRatio), 20 / REF_PX_PER_M, fullCapM);
   const anchor = (projectile && mark.phase === 'Impact' ? (atlas.impactAnchor ?? atlas.anchor) : atlas.anchor) ?? [0.5, 0.5];
   return {
     cx, cy, width: fullW, height: fullH,
     anchorX: clamp(anchor[0], 0, 1), anchorY: clamp(anchor[1], 0, 1),
     rotateDeg,
-    mirror: (shape === 'single' && !projectile) ? mark.vfxAim.mirror < 0 : false,
+    mirror: (shape === 'single' && !projectile)
+      ? applyWorldVector(frame.worldToViewport,
+        fieldVectorM(Math.cos(mark.directionRad), Math.sin(mark.directionRad))).x < 0 : false,
   };
 }
 
 /**
- * The affine matrix that maps a square ground texture to the arena's ground plane.
- *
- * The texture is authored straight-down (no baked camera). This is the single projection:
- * `a b c d e f` map texture pixels 0..canvas onto screen pixels, with the footprint centre at
- * `center`. Applying it twice, or baking an ellipse into the texture, would double-project.
+ * Frame-driven ground decal matrix: scales the single topdown basis by the
+ * world radius, so circles stay circular north-up today and squash with the
+ * frame if the topdown angle changes. No second projection lives here.
  */
-export function groundDecalMatrix(
-  center: { x: number; y: number },
+export function groundDecalMatrixForFrame(
+  centerPx: { x: number; y: number },
   radiusM: number,
-  canvasPx = 2048,
+  frame: FieldViewFrame,
+  canvasPx = GROUND_CANVAS_PX,
   contentRadiusRatio = 1,
-): { a: number; b: number; c: number; d: number; e: number; f: number } {
-  radiusM /= Math.max(.05, contentRadiusRatio);
-  const bx = projectArenaVector({ x: radiusM, y: 0 });
-  const by = projectArenaVector({ x: 0, y: radiusM });
-  return {
-    a: 2 * bx.x / canvasPx,
-    b: 2 * bx.y / canvasPx,
-    c: 2 * by.x / canvasPx,
-    d: 2 * by.y / canvasPx,
-    e: center.x - bx.x - by.x,
-    f: center.y - bx.y - by.y,
-  };
+): { a: number; b: number; c: number; d: number; e: number; f: number } | undefined {
+  if (!frame.renderable) return undefined;
+  const scaled = radiusM / Math.max(.05, contentRadiusRatio);
+  const unit = 2 * scaled / canvasPx;
+  const basis = frame.worldToViewport;
+  const a = basis.a * unit, b = basis.b * unit, c = basis.c * unit, d = basis.d * unit;
+  return { a, b, c, d,
+    e: centerPx.x - (a + c) * canvasPx / 2,
+    f: centerPx.y - (b + d) * canvasPx / 2 };
 }
-
-export const matrixAttribute = (m: { a: number; b: number; c: number; d: number; e: number; f: number }): string =>
-  `matrix(${m.a} ${m.b} ${m.c} ${m.d} ${m.e} ${m.f})`;

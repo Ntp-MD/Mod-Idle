@@ -4,8 +4,8 @@
   "action": "death",
   "direction": "east",
   "pose": "00-fall",
-  "source": "art-reference/monsters/humanoid/goblin/animation/poses/death/east/00-fall.png",
-  "sourceMetadata": "art-reference/monsters/humanoid/goblin/animation/poses/death/east/00-fall.meta.json",
+  "source": "archive/art-reference/monsters/humanoid/goblin/animation/poses/death/east/00-fall.png",
+  "sourceMetadata": "archive/art-reference/monsters/humanoid/goblin/animation/poses/death/east/00-fall.meta.json",
   "sourcePixelsModified": false,
   "frameCanvas": {
     "width": 384,

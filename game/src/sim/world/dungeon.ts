@@ -22,6 +22,25 @@ export interface DungeonRun {
   left: number;
   total: number;
   escrow: DungeonEscrow;
+  /** Clock second the run was entered at; legacy runs normalize to the saved clock. */
+  startedAtSec?: number;
+}
+
+export interface DungeonReceiptResource {
+  bucket: 'junk' | 'stone' | 'herb' | 'potion' | 'material';
+  id: string;
+  count: number;
+}
+
+export interface DungeonReceipt {
+  key: string;
+  zone: number;
+  atSec: number;
+  reason: 'cleared' | 'retreated' | 'pushed' | 'left-zone';
+  kept: DungeonReceiptResource[];
+  forfeited: DungeonReceiptResource[];
+  uncollected: DungeonReceiptResource[];
+  gear: { processed: number; retained: number; salvaged: number; rejected: number; forfeited: number };
 }
 
 export const newEscrow = (): DungeonEscrow => ({ items: [], junk: {}, stones: {}, herbs: {}, potions: {}, materials: {} });
@@ -40,7 +59,7 @@ export function enterDungeon(s: GameState): { ok: boolean; why?: string } {
   if (s.walk) return { ok: false, why: 'mid-walk — finish the route first' };
   if (s.phase === 'camp') return { ok: false, why: 'recovering at camp' };
   if (fieldInFight(s)) return { ok: false, why: 'finish the fight first' };
-  s.dungeon = { zone: s.zone, left: D.mobCap, total: D.mobCap, escrow: newEscrow() };
+  s.dungeon = { zone: s.zone, left: D.mobCap, total: D.mobCap, escrow: newEscrow(), startedAtSec: s.clockSec };
   s.group = [];
   s.fieldwork.action = null;
   // stepping in is heading out: safe ground ends where the run begins
@@ -48,9 +67,27 @@ export function enterDungeon(s: GameState): { ok: boolean; why?: string } {
   return { ok: true };
 }
 
+const escrowResources = (run: DungeonRun): DungeonReceiptResource[] => {
+  const out: DungeonReceiptResource[] = [];
+  for (const [bucket, table] of [['junk', run.escrow.junk], ['stone', run.escrow.stones],
+    ['herb', run.escrow.herbs], ['potion', run.escrow.potions], ['material', run.escrow.materials]] as const) {
+    for (const [id, count] of Object.entries(table || {})) if (count > 0) out.push({ bucket, id, count });
+  }
+  return out;
+};
+
 /** Close a run without paying: the escrow is forfeited. Returns the chronicle line. */
 export function abandonRun(s: GameState, why: string): string {
+  const run = s.dungeon!;
   s.dungeon = null;
+  const reason = why === 'Pushed' ? 'pushed' : 'left-zone';
+  const startedAtSec = run.startedAtSec ?? s.clockSec;
+  s.lastDungeonReceipt = {
+    key: `dungeon:${run.zone}:${startedAtSec}:${reason}`,
+    zone: run.zone, atSec: s.clockSec, reason,
+    kept: [], forfeited: escrowResources(run), uncollected: [],
+    gear: { processed: 0, retained: 0, salvaged: 0, rejected: 0, forfeited: run.escrow.items.length },
+  };
   return `${why} in dungeon — the run ends and its escrow is forfeited`;
 }
 

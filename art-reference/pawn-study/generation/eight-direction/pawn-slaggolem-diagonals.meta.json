@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "slaggolem",
+  "identityName": "Slag Golem",
+  "identityKind": "species",
+  "editTarget": "art-reference/pawn-study/generation/eight-direction/pawn-slaggolem-diagonals.png",
+  "sizeReference": "art-reference/pawn-study/atlases/slaggolem.png",
+  "generatedSheet": "art-reference/pawn-study/generation/eight-direction/pawn-slaggolem-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "targetVisibleHeightRuntimePx": [
+    182,
+    192
+  ],
+  "canvas": {
+    "requested": {
+      "width": 1024,
+      "height": 1024
+    },
+    "generated": {
+      "width": 1254,
+      "height": 1254
+    },
+    "cellSize": 627,
+    "background": "white"
+  },
+  "promptSummary": "Uniformly shrink the four existing diagonal Slag Golem silhouettes to about 82% so packed visible height matches current cardinals, preserving poses, identity, quadrant order and white background.",
+  "review": {
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true
+  },
+  "note": "Output size differs from requested 1024x1024. Confirm packed visible height, anchor and cell bounds before checking off the roster.",
+  "packedAtlas": "art-reference/pawn-study/atlases/slaggolem.png",
+  "packedVisibleHeightRuntimePx": [
+    180,
+    184
+  ],
+  "reviewNotes": "Reviewed packed eight-view atlas: NE/SE/SW/NW preserve Slag Golem identity and direction; visible heights 180?184 px match cardinal 182?192 px, shared root y=224, common character scale, and cell bounds."
+}

@@ -1,5 +1,6 @@
 import type { EngineData } from './types.ts';
 import { createFieldwork } from './fieldwork.ts';
+import { storyHash32 } from './storyteller.ts';
 
 export interface TradeCfg {
   currency_decimals: number;
@@ -106,5 +107,20 @@ export function createTrade(E: EngineData, C: TradeCfg) {
     const gold = volume * C.floor_mult + area * (peak(town, good) - C.floor_mult);
     return { count: units, gold, demand: remaining / C.capacity_gold, used: Math.min(C.capacity_gold, used + volume), atSec: now };
   };
-  return { C, byId, goods: Object.values(byId), peak, usedAt, quote, floorCurrency, settleCurrency, haggling, hagglingXp, hagglingXpForLevel };
+  function townPromotion(seed: number, townId: string, clockSec: number, stockedRowIds: readonly string[], config: { cycle_sec: number; discount_pct: number; eligible_rows: string[] }) {
+    if (!townId) throw new Error('townPromotion: townId required');
+    if (!Number.isFinite(clockSec) || clockSec < 0) throw new Error('townPromotion: clockSec must be nonnegative finite');
+    if (!Number.isSafeInteger(config.cycle_sec) || config.cycle_sec <= 0) throw new Error('townPromotion: cycle_sec must be a positive integer');
+    const stocked = new Set(stockedRowIds);
+    const eligible = config.eligible_rows.filter((id) => stocked.has(id));
+    if (!eligible.length) return null;
+    const cycle = Math.floor(clockSec / config.cycle_sec);
+    const start = storyHash32(`${seed}|${townId}`) % eligible.length;
+    const rowId = eligible[(start + cycle) % eligible.length];
+    return { id: `promotion:${townId}:${cycle}:${rowId}`, townId, rowId, cycle, expiresAtSec: (cycle + 1) * config.cycle_sec, discountPct: config.discount_pct };
+  }
+  function serviceGold(minutes: number, incomePerMinute: number, hagglingXp: number, discountPct = 0): number {
+    return Math.round(minutes * incomePerMinute * haggling(hagglingXp).serviceMult * (1 - discountPct / 100) * 100) / 100;
+  }
+  return { C, byId, goods: Object.values(byId), peak, usedAt, quote, floorCurrency, settleCurrency, haggling, hagglingXp, hagglingXpForLevel, townPromotion, serviceGold };
 }

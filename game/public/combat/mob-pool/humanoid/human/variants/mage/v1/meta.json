@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "human--mage",
+  "name": "Mage",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 86,
+      "y": 85,
+      "width": 85,
+      "height": 139,
+      "offsetX": 86,
+      "offsetY": 85
+    },
+    {
+      "x": 342,
+      "y": 85,
+      "width": 85,
+      "height": 139,
+      "offsetX": 86,
+      "offsetY": 85
+    },
+    {
+      "x": 86,
+      "y": 339,
+      "width": 84,
+      "height": 141,
+      "offsetX": 86,
+      "offsetY": 83
+    },
+    {
+      "x": 342,
+      "y": 338,
+      "width": 85,
+      "height": 142,
+      "offsetX": 86,
+      "offsetY": 82
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "human",
+  "variantId": "mage"
+}

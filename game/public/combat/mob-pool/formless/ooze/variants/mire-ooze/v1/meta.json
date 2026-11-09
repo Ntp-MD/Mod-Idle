@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "ooze--mire-ooze",
+  "name": "Mire Ooze",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 53,
+      "y": 82,
+      "width": 150,
+      "height": 142,
+      "offsetX": 53,
+      "offsetY": 82
+    },
+    {
+      "x": 311,
+      "y": 83,
+      "width": 147,
+      "height": 141,
+      "offsetX": 55,
+      "offsetY": 83
+    },
+    {
+      "x": 58,
+      "y": 340,
+      "width": 140,
+      "height": 140,
+      "offsetX": 58,
+      "offsetY": 84
+    },
+    {
+      "x": 317,
+      "y": 340,
+      "width": 135,
+      "height": 140,
+      "offsetX": 61,
+      "offsetY": 84
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "ooze",
+  "variantId": "mire-ooze"
+}

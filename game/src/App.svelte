@@ -16,16 +16,17 @@
 import { fieldSite, campHere as atFieldCamp, establishCamp, startFieldAction, stopFieldAction, cookMeal, eatMeal } from '@sim/world/fieldwork';
 import { cancelCampEncounter, chooseCampEncounter, setCampEncounterPolicy, type CampEncounterAction, type CampEncounterPolicy } from '@sim/world/camp-encounters';
   import { sellGoods, processMaterials, tradeBucket } from '@sim/town/trade';
-import { offerDelivery, deliver, trackDelivery, acknowledgeDelivery, announceDelivery, tickDeliveries, contractById, deliveryTimeLeft, deliveryPauseReason } from '@sim/town/delivery';
+import { offerDelivery, deliver, trackDelivery, acknowledgeDelivery, announceDelivery, tickDeliveries, contractById, deliveryTimeLeft, deliveryPauseReason, acceptCourier, declineCourier } from '@sim/town/delivery';
 import { buyBlackMarket } from '@sim/town/black-market';
   import DeliveryNotice from './ui/town/DeliveryNotice.svelte';
   import { previewScrapAlchemy, transmuteScrap, alchemyTierProgress } from '@sim/gear/alchemy';
   import { newGame, setLevel, tick, push, fx, hitColour, COMBAT_STEP_US, schedulerSteps, characterSheet, huntZone, huntHere, salvageAtSmith, retreatDungeon, runFilterNow, isBossKind, spawnMob } from '@sim/core/game';
   import { restorePendingWork } from '@sim/core/pending-work';
-  import { fieldInFight, restoreFieldPositions } from '@sim/world/field-area';
+  import { fieldAreaKey, fieldInFight, restoreFieldPositions } from '@sim/world/field-area';
   import type { ManualControl } from '@sim/combat/combat-actions';
   import { mobSkillById } from '@sim/combat/mobSkills';
   import { rollDrop } from '@sim/gear/drop';
+  import { itemName } from '@sim/gear/item-name';
   import { reservedPct, setAuraPool, hpReserved, usableHp, usableMana, skillCd, toggleTrack, ACTIVE_SLOTS, modeOf, condOf, appliedStatusOf, appliedCurseOf, moveSlot, defaultManualSkill } from '@sim/combat/skills';
   import { describeSkill } from '@sim/combat/skill-copy';
   import { slotsUsed, slotsAvailable, slotsFree, bagStacks } from '@sim/gear/slots';
@@ -49,7 +50,7 @@ import { buyBlackMarket } from '@sim/town/black-market';
   import { activeVfxVersionId, setActiveVfxVersion, vfxVersionsFor } from './ui/fx/catalog';
   import { destinationIntel } from './ui/map/map-intel';
   import { investigateTrailSite, recordMapDiscovery } from '@sim/world/map-exploration';
-  import { destinationPrimary } from './ui/map/destination';
+  import { destinationPrimary, destinationWarp } from './ui/map/destination';
   import TownHub from './ui/town/TownHub.svelte';
   import Market from './ui/town/Market.svelte';
   import CraftWorkshop from './ui/inventory/CraftWorkshop.svelte';
@@ -63,7 +64,9 @@ import { buyBlackMarket } from '@sim/town/black-market';
   import { importantCombatEvent } from './ui/combat/combat-presentation';
   import type { ArenaTargetRead } from './ui/combat/combat-arena-view';
   import { moveAimPoint } from './ui/combat/arena-picking';
-  import { arenaWorldDirection } from './presentation/arena-camera';
+  import { ARENA_DEFAULT_WORLD_SCALE, ARENA_VIEW, ARENA_ZOOM_MIN, ARENA_ZOOM_MAX, ARENA_ZOOM_STEP, arenaWorldDirection } from './presentation/arena-camera';
+  import { createFieldViewFrame, type FieldViewFrame } from './presentation/arena-view-frame';
+  import { fieldPointM } from './presentation/view-transform';
   import { newPassiveTreeSession } from './ui/passive-tree/passive-tree-view';
   import Forge from './ui/inventory/Forge.svelte';
   import FieldworkBoard from './ui/map/FieldworkBoard.svelte';
@@ -74,22 +77,21 @@ import { buyBlackMarket } from '@sim/town/black-market';
   import { SHORTCUT_TOKENS, actionFor, tokenOf, isModifierKey, isTypingTarget, formatKey, wasdVector } from './ui/hud/shortcuts';
   import { gearEntry, stackEntry, sortEntries, type SlotEntry, type SortKey } from './ui/inventory/bag';
   import type { MenuItem } from './ui/shared/menu';
-  import { ramp, cellLabel, type Picked } from './ui/map/map';
+  import { ramp } from './ui/map/map-view-model';
+  import type { Picked } from './ui/map/map-types';
   import WorldMap from './ui/map/WorldMap.svelte';
   import type { MapIntent } from './ui/map/WorldMap.svelte';
-  import type { MapViewOptions, MapStaticCell } from './ui/map/map-view-model';
-  import { DEFAULT_MAP_CAMERA, MAP_BASE_ZOOM, mapBearingDegrees, type MapCameraState } from './ui/map/map-camera';
+  import type { MapViewOptions, MapStaticCell } from './ui/map/map-types';
+  import { DEFAULT_MAP_CAMERA, MAP_BASE_ZOOM, type MapCameraState } from './ui/map/map-camera';
   import { mapTravelPhase } from './ui/map/map-travel';
-  import { createMapProjection } from './ui/map/map-projection';
-  import { paintMapScene } from './ui/map/map-scene';
   import { adventureView, uniqueTraceSpecies, type AdventureCell } from './ui/map/map-adventure';
-  import { mapMarker } from './ui/map/map-markers';
   import { setCastDrag, readCastDrag } from './ui/shared/drag';
   import { snapCounters, buildAwayReport, fieldLabel, type AwayReport } from './ui/hud/hud';
   import { bar } from './ui/shared/field';
   import { fxOut } from './ui/shared/motion';
   import FieldPlates from './ui/combat/FieldPlates.svelte';
   import CombatArenaScene from './ui/combat/CombatArenaScene.svelte';
+  import { arenaGroundMaterials } from './ui/combat/arena/arena-ground-materials';
   import { createCombatArena, syncCombatArena, arenaSkillTargets, type CombatArena } from '@sim/combat/combat-arena';
   import { snapshotEnemy } from '@sim/combat/combat-history';
   import LogBox from './ui/hud/LogBox.svelte';
@@ -98,6 +100,7 @@ import { buyBlackMarket } from '@sim/town/black-market';
   import {
     settlementById, settlementOfZone, stockOf, priceGold, priceMinutes, canBuy, buy, sellJunk,
     canTravel, claimTask, npcOf, repairGear, skipTask, skipVerdict, smithService,
+    quoteTownPurchase, firstBroken,
   } from '@sim/town/town';
   import { doCraft, stoneName, atSettlement, replaceChoices, type CraftOp, type Where } from '@sim/gear/craft';
   import { forgeGear } from '@sim/gear/forge';
@@ -107,7 +110,7 @@ import { farm, farmLevel, farmMasteryLevel, plotCount, plant, harvest, craftPoti
 import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsFree } from '@sim/core/tree';
   import { allocateStats, respecStats } from '@sim/core/respec';
   import { CharacterSaveSession } from './state/saveSession';
-  import { SHOWCASE_SAMPLE_LABELS, SHOWCASE_SAMPLES } from './app/showcase-samples';
+  import { SHOWCASE_SAMPLE_LABELS, SHOWCASE_SAMPLES, showcaseFieldSkill } from './app/showcase-samples';
   import { createSessionActions, type AccountWriterLease } from './app/session';
   import { createGameLoop } from './app/loop';
   import { road, startWalk, walkNote, walkBlocks, warpTo, warpCost, cellBlocks, cellSec, currentCell, settlementCell, ownerOf } from '@sim/world/road';
@@ -116,14 +119,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   import { storePreset, switchPreset, bindZone } from '@sim/core/presets';
   import { col, setUnlocked, heldCount, turnIn } from '@sim/town/collector';
   import { mulberry32 } from './engine/client-helpers';
-  import { saveSlots, readSettings, writeSettings, DEFAULT_SETTINGS, type SlotName, type Snapshot, type ClientSettings } from './state/save';
+  import { saveSlots, readSettings, writeSettings, DEFAULT_SETTINGS, TEMP_DISABLE_SLOT_SAVES, type SlotName, type Snapshot, type ClientSettings } from './state/save';
   import { requestAccountWriterLock, type AccountWriterLockResult } from './state/accountWriterLock';
   import { FILTER_SLOTS, ruleFor, setRule, describeRule, presetSlots, savePreset, loadPreset, clearPreset } from '@sim/gear/filter';
   import { equipFromBag, autoEquip, unequip } from '@sim/gear/gear';
   import { SAVE_CFG } from '@sim/core/snapshot';
   import { lifeSkillMilestones } from '@sim/core/goal';
   import { nextGoal, setTrackedGoal, zoneDestination, guidanceNotices, ACTIVITY_GUIDE, type GoalRef, type GoalView, type GuidanceNotice, type ShortageOrigin } from '@sim/core/guidance';
-  import { hubIcon, icon, skillIcon } from './icon';
+  import { characterIcon, hubIcon, icon, mobSpeciesArt, skillIcon } from './icon';
   import chevronDownGlyph from './icon/ui/chevron-down.png';
   import pauseGlyph from './icon/ui/pause.png';
   import playGlyph from './icon/ui/play.png';
@@ -162,13 +165,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   import type { SkillConditions } from '@sim/combat/skills';
 
   const STATS: StatKey[] = ['str', 'int', 'vit', 'agi', 'dex', 'wis', 'lck'];
-  const MAP_MARKER_LEGEND = [
-    { kind: 'player', glyph: 'compass', label: 'Your position' },
-    { kind: 'mob', glyph: 'claw', label: 'Live group / Unique clue' },
-    { kind: 'boss', glyph: 'skull', label: 'Danger / combat' },
-    { kind: 'event', glyph: 'flag', label: 'Event' },
-    { kind: 'camp', glyph: 'fire', label: 'Camp' },
-    { kind: 'resource', glyph: 'mine', label: 'Resource site' },
+  const MAP_ICON_LEGEND = [
+    { name: 'player', href: characterIcon(), label: 'Your position' },
+    { name: 'mob', href: mobSpeciesArt('wolf'), label: 'Known creatures' },
+    { name: 'combat', href: icon('crossed-swords-1'), label: 'Combat' },
+    { name: 'camp', href: icon('rest-campfire'), label: 'Camp' },
+    { name: 'resource', href: icon('pickaxe'), label: 'Resource site' },
   ] as const;
   const showcaseMode = import.meta.env.DEV && window.location.pathname.replace(/\/+$/, '') === '/__showcase';
   const showcaseQuery = new URLSearchParams(window.location.search);
@@ -191,7 +193,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         if (seen.has(variantId)) return false;
         seen.add(variantId);
         return ARENA_VARIANT_QA_PASS_PATHS.has(
-          `art-reference/monsters/${eng.speciesById(speciesId).race}/${speciesId}/${variantId}/meta.json`,
+          `archive/art-reference/monsters/${eng.speciesById(speciesId).race}/${speciesId}/${variantId}/meta.json`,
         );
       });
     return { speciesId, speciesName: eng.speciesById(speciesId).name, variants };
@@ -214,16 +216,21 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   };
   const requestedArenaSpecies = ARENA_SPRITE_SPECIES.find(id => id === showcaseQuery.get('sprite-species'));
   const requestedArenaVariant = ARENA_VARIANT_PREVIEWS.find(variant => variant.key === showcaseQuery.get('sprite-variant'));
-  const spritePreviewMode = showcaseMode && (showcaseQuery.get('sprite-preview') === 'pixel-v2'
-    || requestedArenaSpecies !== undefined || requestedArenaVariant !== undefined);
+  let spritePreviewMode = $state(showcaseMode && showcaseQuery.get('sprite-preview') !== 'fallback');
   let arenaSpecies = $state<string>(requestedArenaVariant?.speciesId ?? requestedArenaSpecies ?? 'skeleton');
   let arenaVariantKey = $state<string | null>(requestedArenaVariant?.key ?? null);
   const activeArenaVariant = $derived(ARENA_VARIANT_PREVIEW_BY_KEY.get(arenaVariantKey ?? '') ?? null);
+  function setArenaSpriteMode(value: string) {
+    spritePreviewMode = value === 'sprite';
+    const url = new URL(window.location.href);
+    url.searchParams.set('sprite-preview', spritePreviewMode ? 'pawn' : 'fallback');
+    window.history.replaceState(null, '', url);
+  }
   const requestedArenaSkill = showcaseQuery.get('skill');
   const mechanicPreview = showcaseMode ? skillMechanicPreview(showcaseQuery.get('mechanic')) : undefined;
   if (mechanicPreview) sm.byId[mechanicPreview.id] = mechanicPreview;
   onDestroy(() => { if (mechanicPreview) delete sm.byId[mechanicPreview.id]; });
-  let arenaSkillId = $state(mechanicPreview?.id ?? (requestedArenaSkill && sm.byId[requestedArenaSkill] ? requestedArenaSkill : 'attack.fireball'));
+  let arenaSkillId = $state(mechanicPreview?.id ?? (requestedArenaSkill && sm.byId[requestedArenaSkill] ? requestedArenaSkill : showcaseFieldSkill(initialShowcaseSample) ?? 'attack.fireball'));
   /** Deliberate local commands for the automatic farming loop. */
   let arenaManual = $state<ManualControl>({});
   /** The focused body shown by the arena and pinned by the sim. */
@@ -397,13 +404,18 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     offlineProgress = null;
     clearCombatFxTimers();
     animateCombatFx = false;
+    const fieldSkill = showcaseFieldSkill(value);
+    if (fieldSkill) {
+      arenaSkillId = fieldSkill;
+      arenaWorldScale = value === 'rimworld-field' ? ARENA_ZOOM_MIN : ARENA_DEFAULT_WORLD_SCALE;
+    }
     showcaseSample = value; gameState = showcaseGame(showcaseSample);
     resetArena();
     awayReport = null; skillDiscoveryId = null; skillRewardSeen = '';
     feed = []; feedSeen = 0;
     travelScene = false;
     running = false;
-    if (showcaseSample === 'combat-field') running = true;
+    if (fieldSkill) running = true;
     gameState.playerStatuses = showcaseSample === 'combat-fx' ? {
       burn: { stacks: 1, secLeft: 8, perSec: 12 },
       chill: { stacks: 1, secLeft: 10, perSec: 0 },
@@ -411,6 +423,32 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     } : {};
     resetCharacterUi(); picked = null; pickedCell = null;
     panel = showcaseSample === 'craft-stash' ? 'craft' : null;
+    // Storyteller fixtures open their real hosts (plan §14.3); no new routes.
+    if (showcaseSample.startsWith('story-')) {
+      journeyToolsOpen = true;
+      switch (showcaseSample) {
+        case 'story-camp-warning': case 'story-cache-choices': case 'story-cache-working':
+        case 'story-cache-bagfull': case 'story-cache-results':
+        case 'story-road-result': case 'story-site-result': case 'story-dungeon-result':
+        case 'story-read-only':
+          panel = 'map';
+          break;
+        case 'story-delivery-choices': case 'story-courier-unaccepted':
+          marketView = 'deliveries'; marketTownId = gameState.town.waypoint; panel = 'market';
+          break;
+        case 'story-courier-destination': {
+          const courier = Object.values(gameState.town.contracts).flat().find((entry) => entry.kind === 'courier');
+          marketView = 'deliveries'; marketTownId = courier?.destinationTown ?? gameState.town.waypoint; panel = 'market';
+          break;
+        }
+        case 'story-market-promotion':
+          marketView = 'trade'; marketTownId = gameState.town.waypoint; panel = 'market';
+          break;
+        case 'story-forge-ready': case 'story-forge-shortage':
+          panel = 'forge';
+          break;
+      }
+    }
     if (showcaseSample === 'offline-progress') {
       loadController = new AbortController();
       offlineProgress = { done: 43200, total: 86400 };
@@ -538,7 +576,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     sample.fieldwork.foods['river-fish'] = 5;
     sample.junk[(E.mob.variant_drops as Record<string, { item: string }>)[(E.mob.variants as any[]).find((row) => row.species === 'goblin').id].item] = 20;
     sample.hunting = true;
-    if (scenario === 'combat-field') {
+    if (showcaseFieldSkill(scenario)) {
       const speciesId = activeArenaVariant?.speciesId ?? ARENA_PREVIEW_SPAWN[arenaSpecies] ?? arenaSpecies;
       const species = eng.speciesById(speciesId);
       const spawnBody = spritePreviewMode && !species.sizes.includes('small') ? species.sizes[0] : 'small';
@@ -676,6 +714,92 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       sample.skills.owned[activeSkill.id] = 0;
       sample.skills.list[0] = activeSkill.id;
     }
+    if (scenario.startsWith('story-')) {
+      // Storyteller fixtures (plan §14.3): seeded source helpers build the frozen
+      // offers/results; the hosts render them through the shared presenters.
+      sample.hunting = false;
+      sample.group = [];
+      const campCell = { ...currentCell(sample) } as { q: number; r: number; sub: null; site: null };
+      sample.fieldwork.camp = { cell: campCell, zone: sample.zone };
+      const atCamp = () => { sample.hunting = false; sample.group = []; sample.phase = 'fighting'; sample.walk = null; sample.dungeon = null; };
+      const cacheOffer = () => {
+        const foodId = fieldwork.F.regional_sources[String(sample.zone)]?.food || 'river-fish';
+        return fieldwork.cacheOffer(sample.zone, foodId, 0.1);
+      };
+      const campActive = (kind: string, stage: string, sceneId: string, cache: ReturnType<typeof cacheOffer> | null = null, remainingSec = 0) => {
+        const serial = ++sample.fieldwork.campEncounters.serial;
+        sample.fieldwork.campEncounters.active = {
+          id: serial, kind: kind as any, stage: stage as any, origin: { ...campCell },
+          warningSec: 10, choiceSec: 10, payload: kind === 'supply-cache' ? { foodId: cache!.foodId } : { species: eng.speciesInZone(sample.zone)[0] ?? null },
+          preparedGroup: [], participantIds: [],
+          story: {
+            revision: 1, eventId: `camp-${kind === 'supply-cache' ? 'supply-cache' : kind}`,
+            sceneId, lineIndex: 0, beat: 0, cache, remainingSec,
+          } as any,
+        };
+        sample.fieldwork.campEncounters.storyHistory = [{
+          encounterId: serial, eventId: sample.fieldwork.campEncounters.active.story!.eventId as string,
+          kind: kind as any, variantId: `${sceneId}-0`, terminalAction: null, followupUsed: false,
+        }];
+      };
+      if (scenario === 'story-camp-warning') { atCamp(); campActive('sounds', 'warning', 'sounds-signs'); return sample; }
+      if (scenario === 'story-cache-choices') { atCamp(); sample.fieldwork.foods[cacheOffer().foodId] = 5; campActive('supply-cache', 'choice', 'cache-ledge', cacheOffer()); return sample; }
+      if (scenario === 'story-cache-working') { atCamp(); const offer = cacheOffer(); campActive('supply-cache', 'resolving', 'cache-ledge', offer, Math.ceil(offer.carefulSec / 2)); return sample; }
+      if (scenario === 'story-cache-bagfull') { atCamp(); const offer = cacheOffer(); campActive('supply-cache', 'collect', 'cache-ledge', offer, 0); return sample; }
+      if (scenario === 'story-cache-results') {
+        atCamp();
+        sample.fieldwork.campEncounters.serial = 1;
+        sample.fieldwork.campEncounters.lastReceipt = {
+          encounterId: 1, eventId: 'camp-supply-cache', kind: 'supply-cache', action: 'cache-quick',
+          sceneId: 'cache-gain-result', elapsedSec: 0, paid: [],
+          earned: [{ bucket: 'material', id: 'ore', count: 2 }], lost: [], info: [],
+        };
+        sample.fieldwork.campEncounters.recap = 'Quick cache recovery complete';
+        return sample;
+      }
+      if (scenario === 'story-delivery-choices') {
+        const draws = [0, 0.99, 0, 0, 0];
+        const contract = offerDelivery(sample, sample.town.waypoint, () => draws.shift() ?? 0, { writer: true });
+        if (contract) tradeBucket(sample, trade.byId[contract.good])[trade.byId[contract.good].key] = contract.target;
+        return sample;
+      }
+      if (scenario === 'story-courier-unaccepted' || scenario === 'story-courier-destination') {
+        const draws = [0, 0.99, 0, 0, 0];
+        const contract = offerDelivery(sample, sample.town.waypoint, () => draws.shift() ?? 0, { writer: true });
+        if (contract) {
+          const other = (TOWN.settlements as any[]).find((row) => row.id !== sample.town.waypoint)!.id;
+          if (!sample.town.visited.includes(other)) sample.town.visited.push(other);
+          const courier = { ...contract, id: `courier:${sample.town.waypoint}:${++sample.town.courierSerial}`, serial: sample.town.courierSerial, kind: 'courier' as const, destinationTown: other, acceptedAtDeliverySec: scenario === 'story-courier-destination' ? sample.town.deliveryClockSec : null, offeredAtDeliverySec: sample.town.deliveryClockSec, endReason: null };
+          sample.town.contracts[sample.town.waypoint] = [courier];
+        }
+        return sample;
+      }
+      if (scenario === 'story-market-promotion') return sample;
+      if (scenario === 'story-forge-ready') { sample.fieldwork.materials['copper-ore'] = 12; return sample; }
+      if (scenario === 'story-forge-shortage') { sample.fieldwork.materials['copper-ore'] = 0; sample.fieldwork.materials.timber = 0; return sample; }
+      if (scenario === 'story-road-result') {
+        sample.mapJournal!.lastEvent = { ...currentCell(sample), text: 'Found River Fish along the trail · River Fish ×2', atSec: sample.clockSec, source: 'road', resourceDeltas: [{ bucket: 'food', id: 'river-fish', count: 2 }], hungerDelta: 0 };
+        return sample;
+      }
+      if (scenario === 'story-site-result') {
+        sample.mapJournal!.lastEvent = { ...currentCell(sample), text: 'Shallow Cache · Hunger 88%', atSec: sample.clockSec, source: 'site', resourceDeltas: [], hungerDelta: 4 };
+        return sample;
+      }
+      if (scenario === 'story-dungeon-result') {
+        // The dungeon entrance sits one hex east of the town node; stand on it so
+        // the TravelCard shows the shared result next to the entrance facts.
+        const feet = currentCell(sample);
+        sample.cell = { q: feet.q + 1, r: feet.r, sub: null, site: 'dungeon' };
+        sample.lastDungeonReceipt = {
+          key: `dungeon:${sample.zone}:${sample.clockSec}:cleared`, zone: sample.zone, atSec: sample.clockSec, reason: 'cleared',
+          kept: [{ bucket: 'stone', id: 'tier', count: 2 }], forfeited: [], uncollected: [{ bucket: 'junk', id: 'junk', count: 1 }],
+          gear: { processed: 1, retained: 1, salvaged: 0, rejected: 0, forfeited: 0 },
+        };
+        return sample;
+      }
+      if (scenario === 'story-read-only') { atCamp(); campActive('sounds', 'warning', 'sounds-signs'); return sample; }
+      return sample;
+    }
     if (scenario !== 'craft-stash') {
       const draws = [0, 0.99, 0, 0, 0];
       if (scenario === 'choice') sample.town.contractSerial = 1;
@@ -775,7 +899,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   // `gameState`, not `state`: a top-level `state` binding makes svelte2tsx read `$state` as a store
   // subscription and type the whole panel `any` (sveltejs/svelte#13715).
   let gameState = $state<GameState>(showcaseMode ? showcaseGame(initialShowcaseSample) : newGame(undefined, crypto.getRandomValues(new Uint32Array(1))[0]));
-  let running = $state(!showcaseMode || initialShowcaseSample === 'combat-field');
+  let running = $state(!showcaseMode || !!showcaseFieldSkill(initialShowcaseSample));
   /** True until this boot has loaded a slot or started a new character. The loop may be asked to run,
    *  but startup owns the clock: no placeholder character may tick or autosave before the choice. */
   let startupPending = $state(!showcaseMode);
@@ -786,9 +910,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   let cooldownSimRemainder = $state(0);
   let cooldownSchedulerAt = $state(0);
   let speed = $state(1);
-  /** Combat zoom: presentation only. 0.75 is the default view — no button. */
-  let arenaZoom = $state(0.75);
-  const arenaPreview = $derived(showcaseMode && showcaseSample === 'combat-field');
+  /** The one runtime scale for the field's actors, footprints, distances and effects. */
+  let arenaWorldScale = $state(showcaseMode && initialShowcaseSample === 'rimworld-field' ? ARENA_ZOOM_MIN : ARENA_DEFAULT_WORLD_SCALE);
+  /** Stage size echo from the arena host; the field frame maps world metres into these CSS pixels. */
+  let arenaStageCss = $state({ width: ARENA_VIEW.width, height: ARENA_VIEW.height });
+  const arenaPreview = $derived(showcaseMode && !!showcaseFieldSkill(showcaseSample));
   /** Selected pool version used by the live cast. */
   const arenaVersions = $derived(vfxVersionsFor(arenaSkillId).filter((version) => version.arena !== false));
   let arenaVersionId = $state('');
@@ -854,11 +980,28 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     return () => window.cancelAnimationFrame(frame);
   });
   let combatArena = $state.raw(createCombatArena());
+  /** Bumped on every arena rebind so a new field/load/replay never reuses an effect identity. */
+  let arenaEpoch = $state(0);
+  /** Canonical field key + arena instance: seek/zoom/skin never reset this identity. */
+  const arenaSceneKey = $derived(`${fieldAreaKey(gameState)}#arena-${arenaEpoch}`);
+  /** Host view intent; CombatArenaScene follows its interpolated player at the painted playhead. */
+  const arenaFieldFrame: FieldViewFrame = $derived.by(() => {
+    // combatArena is $state.raw: the tick clock below re-reads its mutable snapshot each sim tick.
+    void gameState.clockSec;
+    return createFieldViewFrame({
+      sceneKey: arenaSceneKey,
+      atUs: combatArena.nowUs,
+      viewportCss: arenaStageCss,
+      focusM: fieldPointM(combatArena.player.x, combatArena.player.y),
+      worldScale: arenaWorldScale,
+    });
+  });
   let arenaVitals = $state<{ hp: number; es: number; mana: number } | null>(null);
   /** F37 — the scene's persistent target read: committed strike, requested focus or next body. */
   let arenaTargetRead = $state<ArenaTargetRead | null>(null);
   function resetArena() {
     arenaManual = {};
+    arenaEpoch += 1;
     arenaFocusId = null;
     arenaAimSkill = null;
     const next = createCombatArena();
@@ -904,7 +1047,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   // the game opens on the ground, not on the fight: the first read is where the character stands and
   // where the walk goes, and FIELD (or Escape) folds the map down to the combat frame. A normal boot
   // opens the Save chooser instead and waits there until the player loads or starts a character.
-  let panel = $state<PanelId | null>(showcaseMode ? null : 'save');
+  // TEMP: slot saves off until the game is finished, so boot opens nothing (New character starts free).
+  let panel = $state<PanelId | null>(showcaseMode || TEMP_DISABLE_SLOT_SAVES ? null : 'save');
   let travelScene = $state(false);
   let more = $state(false);
   let journeyExpanded = $state(false);
@@ -952,14 +1096,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     armour_pct: 'Armour', evasion_pct: 'Evasion rating', accuracy_pct: 'Accuracy',
     hp_regen_pct: 'HP regeneration', mana_regen_pct: 'Mana regeneration', armour_pen: 'Armour penetration',
   };
-  let saveNote = $state(showcaseMode ? '' : 'Load a character, or start a new one. Existing slots are kept.');
+  let saveNote = $state(showcaseMode || TEMP_DISABLE_SLOT_SAVES ? '' : 'Load a character, or start a new one. Existing slots are kept.');
   type AccountWriterState = 'checking' | 'owner' | 'readonly' | 'waiting' | 'unsupported';
   let accountWriterState = $state<AccountWriterState>('checking');
   let accountWriterLease: Extract<AccountWriterLockResult, { status: 'acquired' }> | null = null;
   let takeoverController: AbortController | null = null;
   let takeoverSlot = $state<SlotName>('slot1');
   const canWriteAccount = $derived(accountWriterState === 'owner');
-  const transactionWriter = $derived(showcaseMode ? showcaseSample !== 'read-only' : canWriteAccount);
+  const transactionWriter = $derived(showcaseMode ? showcaseSample !== 'read-only' && showcaseSample !== 'story-read-only' : canWriteAccount);
   let inspectedEnemy = $state.raw<EnemySnapshot | null>(null);
   function openCombatHistory() {
     inspectedEnemy = null;
@@ -981,7 +1125,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   });
   let marketView = $state<'trade' | 'workshop' | 'stall' | 'deliveries' | 'black-market'>('trade');
   let marketTownId = $state('');
-  const deliveryNotice = $derived(Object.values(gameState.town.contracts).flat().find((contract) => contract.status === 'open' && !contract.announced));
+  const deliveryNotice = $derived(Object.values(gameState.town.contracts).flat().find((contract) => (contract.kind ?? 'request') === 'request' && contract.status === 'open' && !contract.announced));
   const accountWriterMessage = $derived(accountWriterState === 'owner'
     ? 'This tab controls saves for the account.'
     : accountWriterState === 'readonly'
@@ -1116,8 +1260,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       case 'map.zoom.in': worldMap?.zoomBy(1.25); break;
       case 'map.zoom.out': worldMap?.zoomBy(1 / 1.25); break;
       case 'map.zoom.reset': worldMap?.resetCamera(); break;
-      case 'map.rotate.left': worldMap?.rotateBy(-15); break;
-      case 'map.rotate.right': worldMap?.rotateBy(15); break;
       case 'map.centre': worldMap?.centerOnPlayer(); break;
       case 'map.view.next': view = VIEW_ORDER[(VIEW_ORDER.indexOf(view) + 1) % VIEW_ORDER.length]; break;
       case 'map.walk': showWalk = !showWalk; break;
@@ -1499,6 +1641,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       settings = await readSettings();
       speed = settings.speed || 1;
       loadSnaps();
+      // TEMP: slot saves off until the game is finished — boot straight into a free
+      // character instead of parking on the Save chooser.
+      if (TEMP_DISABLE_SLOT_SAVES && !disposed && startupPending) await startNewCharacter();
       // The startup chooser owns the run until Load succeeds or Start new character completes.
       // Away catch-up belongs to `doLoad` alone, so this boot never simulates the placeholder and
       // never writes a slot the player has not chosen.
@@ -1728,8 +1873,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     gameState = { ...gameState };
   }
 
-  function doCampEncounter(id: number, action: CampEncounterAction) {
-    const result = chooseCampEncounter(gameState, id, action, transactionWriter);
+  function doCampEncounter(id: number, action: CampEncounterAction, expected?: { beat: number; stage: import('@sim/world/fieldwork').CampEncounterStage }) {
+    const result = chooseCampEncounter(gameState, id, action, transactionWriter, expected);
     saveNote = result.ok ? '' : `Cannot respond: ${result.why}`;
     if (result.ok && (action === 'fight' || action === 'follow')) {
       if (action === 'fight') push(gameState, 'Camp encounter · fight started');
@@ -1738,6 +1883,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       panel = 'map';
     }
     gameState = { ...gameState };
+    return result;
   }
 
   function doCampPolicy(policy: CampEncounterPolicy) {
@@ -1818,8 +1964,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const journeyNotices = $derived(guidanceNotices(gameState, {
     storageError: !!persistenceError,
     writerState: accountWriterState === 'unsupported' ? 'unavailable' : accountWriterState,
-    startup: !showcaseMode && startupPending,
-    unsaved: !showcaseMode && !startupPending && attachedSlot === null,
+    startup: !showcaseMode && !TEMP_DISABLE_SLOT_SAVES && startupPending,
+    unsaved: !showcaseMode && !TEMP_DISABLE_SLOT_SAVES && !startupPending && attachedSlot === null,
   }));
   let loadController = $state.raw<AbortController | null>(null);
   let offlineProgress = $state<{ done: number; total: number } | null>(null);
@@ -2020,8 +2166,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     showNames: showMapNames && !cleanMap,
     cleanMap,
     showHexCalibration,
+    relief: false,
   });
-  const mapBearingReadout = $derived(mapBearingDegrees(mapCamera.bearing));
 
   function applyPicked(next: Picked) {
     journeyExpanded = true;
@@ -2102,6 +2248,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     };
   });
   const journeyPrimary = $derived(journeyDest ? destinationPrimary(gameState, journeyDest, transactionWriter) : null);
+  /** Shared Waypoint readiness (F3): the button, fare and command all read this one result. */
+  const journeyWarp = $derived(journeyDest ? destinationWarp(gameState, journeyDest, transactionWriter) : null);
   const journeyIntel = $derived(journeyCell && journeyDest?.node ? destinationIntel(gameState, journeyCell, journeyDest.node, journeyDest.blocks) : null);
   const journeySignals = $derived.by(() => {
     if (!journeyCell) return [];
@@ -2187,11 +2335,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const townStock = $derived(stockOf(town?.id ?? '', gameState));
   const skipTokens = $derived(gameState.town.owned.filter((id) => id === 'skip_token').length);
   const freeSkipsLeft = $derived(Math.max(0, (Number(TOWN.task_sizing.free_skip_per_day) || 0) - (gameState.town.freeSkipsToday || 0)));
-  const repairPrice = $derived.by(() => {
-    if (!town) return 0;
-    const row = townStock.find((entry) => entry.id === 'repair_ironrow' || entry.id === 'repair');
-    return row ? priceGold(row, town.id, gameState) : 0;
-  });
   const junkTotal = $derived(Object.values(gameState.junk).reduce((a: number, b: number) => a + b, 0));
   const junkLines = $derived(Object.entries(gameState.junk)
     .filter(([, n]) => n > 0)
@@ -2208,13 +2351,18 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     gameState = { ...gameState };
   }
 
-  function doTrade(id: string, count: number) {
+  let marketSale = $state<{ text: string; goldText: string; townId: string; goodId: string } | null>(null);
+
+  function doTrade(id: string, count: number, expected?: { carried: number; gold: number }) {
     if (!transactionWriter) { saveNote = 'This tab is read-only.'; return; }
-    const result = sellGoods(gameState, id, count);
+    const result = sellGoods(gameState, id, count, expected);
     saveNote = result.ok
       ? `Sold ${count} for ${result.gold.toFixed(TOWN.trade.currency_decimals)} gold${result.cityUnits != null ? ` — city took ${result.cityUnits}${result.basicUnits ? `, floor took ${result.basicUnits}` : ''}` : ''}`
       : `Cannot sell: ${result.why}`;
-    if (result.ok) push(gameState, saveNote);
+    if (result.ok) {
+      push(gameState, saveNote);
+      marketSale = { text: saveNote, goldText: `${result.gold.toFixed(TOWN.trade.currency_decimals)} gold`, townId: marketTownId || town?.id || '', goodId: id };
+    } else marketSale = null;
     gameState = { ...gameState };
   }
 
@@ -2231,11 +2379,17 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     if (showcaseMode) document.getElementById('showcase-field')?.scrollIntoView();
   }
 
-  function doBuy(rowId: string, settlementId = town!.id) {
+  function doBuy(rowId: string, settlementId = town!.id, expected?: import('@sim/town/pricing').TownPurchaseExpectation) {
     if (!transactionWriter) { saveNote = 'This tab is read-only.'; return; }
-    const r = buy(gameState, settlementId, rowId);
+    const r = buy(gameState, settlementId, rowId, expected);
     saveNote = r.ok ? (r.repaired ? `Repaired ${r.repaired} · ${r.gold} gold` : `Bought ${r.row.item}`) : `Cannot buy: ${r.why}`;
     gameState = { ...gameState };
+  }
+
+  function buyExpectation(settlementId: string, row: any) {
+    const quote = quoteTownPurchase(gameState, settlementId, row.id);
+    const target = row.id === 'repair' || row.id === 'repair_ironrow' ? firstBroken(gameState) : null;
+    return { token: quote.token, ...(target ? { target: { where: target.where, index: target.index } } : {}) };
   }
 
   function doSkipTask(i: number) {
@@ -2244,10 +2398,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     gameState = { ...gameState };
   }
 
-  function doRepairGear(where: Where, index: number) {
+  function doRepairGear(where: Where, index: number, expected?: { token: string; target?: { where: Where; index: number } }) {
     if (!requireAccountWriter('repairing gear')) return false;
     const target = resolveItemSelection(gameState, benchSelection);
-    const r = repairGear(gameState, town?.id ?? '', where, index);
+    const r = repairGear(gameState, town?.id ?? '', where, index, undefined, expected);
     if (r.ok) {
       if (r.where && r.index != null) {
         benchSelection = refreshSelectionAfterRepair(gameState, benchSelection, target, r.where, r.index);
@@ -2259,10 +2413,22 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     return r.ok;
   }
 
-  function doDelivery(id: string, count: number, choice?: string) {
-    const result = deliver(gameState, id, count, { writer: transactionWriter }, choice);
+  function doDelivery(id: string, count: number, choice?: string, expected?: import('@sim/town/delivery').DeliveryExpected) {
+    const result = deliver(gameState, id, count, { writer: transactionWriter }, choice, expected);
     saveNote = result.ok ? `Delivery ${result.completed ? 'completed' : 'recorded'} · ${result.gold!.toFixed(TOWN.trade.currency_decimals)} gold paid` : `Cannot deliver: ${result.why}`;
     if (result.ok) push(gameState, saveNote);
+    gameState = { ...gameState };
+  }
+
+  function doAcceptCourier(id: string) {
+    const result = acceptCourier(gameState, id, { writer: transactionWriter });
+    saveNote = result.ok ? 'Courier request accepted' : `Cannot accept: ${result.why}`;
+    gameState = { ...gameState };
+  }
+
+  function doDeclineCourier(id: string) {
+    const result = declineCourier(gameState, id, { writer: transactionWriter });
+    saveNote = result.ok ? 'Courier request declined' : `Cannot decline: ${result.why}`;
     gameState = { ...gameState };
   }
 
@@ -2290,7 +2456,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   function openDeliveryWant(id: string) {
     const contract = Object.values(gameState.town.contracts).flat().find((entry) => entry.id === id);
     if (!contract) return;
-    marketView = 'deliveries'; marketTownId = contract.town; panel = 'market';
+    const boardTown = contract.kind === 'courier' && contract.acceptedAtDeliverySec != null ? contract.destinationTown : contract.town;
+    marketView = 'deliveries'; marketTownId = boardTown; panel = 'market';
     if (transactionWriter) doDismissDelivery(id);
     if (showcaseMode) document.getElementById('panel-market')?.scrollIntoView();
   }
@@ -2363,7 +2530,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
   function runGoalAction(view: GoalView) { runGoalTarget(view.target); }
   function runNoticeAction(notice: GuidanceNotice) {
-    if (notice.id === 'storage-error' || notice.id === 'writer' || notice.id === 'startup' || notice.id === 'unsaved') { openPanel('save'); return; }
+    if (notice.id === 'storage-error' || notice.id === 'writer') { openPanel('save'); return; }
+    // TEMP: slot saves off until the game is finished — startup/unsaved never open Save.
+    if (notice.id === 'startup' || notice.id === 'unsaved') {
+      if (!TEMP_DISABLE_SLOT_SAVES) openPanel('save');
+      return;
+    }
     if (notice.id === 'camp-encounter') {
       journeyExpanded = true;
       journeyToolsOpen = true;
@@ -2450,6 +2622,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   let benchSelection = $state.raw<ItemSelection | null>(null);
   const bench = $derived(resolveItemSelection(gameState, benchSelection));
+  const repairQuote = $derived.by(() => {
+    if (!town || !bench) return null;
+    const row = townStock.find((entry) => entry.id === 'repair_ironrow' || entry.id === 'repair');
+    return row ? quoteTownPurchase(gameState, town.id, row.id, { where: bench.where, index: bench.index }) : null;
+  });
+  const repairPrice = $derived(repairQuote?.gold ?? 0);
   let craftView = $state(newCraftWorkbenchView());
   let benchNote = $state('');
   const benchItem = $derived(bench?.item ?? null);
@@ -2506,14 +2684,16 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   let forgeNote = $state('');
+  let forgeResultItem = $state<string | null>(null);
 
-  function runForge(kind: ForgeKind, id: string, materialId: string) {
+  function runForge(kind: ForgeKind, id: string, materialId: string, expected?: { held: number; freeSlots: number }) {
     if (!transactionWriter) { forgeNote = 'This tab is read-only.'; return false; }
     const rng = mulberry32(gameState.rngState);
-    const r = forgeGear(gameState, kind, id, materialId, rng);
-    if (!r.ok) { forgeNote = r.why || 'the forge refused'; return false; }
+    const r = forgeGear(gameState, kind, id, materialId, rng, expected);
+    if (!r.ok) { forgeResultItem = null; forgeNote = r.why || 'the forge refused'; return false; }
     gameState.rngState += 1;
     forgeNote = r.note || 'forged';
+    forgeResultItem = r.item ? itemName(r.item) : null;
     push(gameState, `Forge · ${forgeNote}`);
     fx(gameState, { kind: 'craft', side: 'self', text: forgeNote, colour: E.elements.crit_colour || 'var(--gold)' });
     gameState = { ...gameState };
@@ -2613,6 +2793,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       return {
         rowId: row.id, label: String(row.item),
         price: check.gold ?? priceGold(row, town?.id ?? '', gameState),
+        expected: buyExpectation(town?.id ?? '', row),
         can: check.ok, why: check.why ?? '',
       };
     }
@@ -2911,6 +3092,17 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
           Cast at focus
         </button>
       </div>
+      {#if arenaPreview}
+        <label>World scale <input type="range" aria-label="World scale in the arena"
+          min={ARENA_ZOOM_MIN} max={ARENA_ZOOM_MAX} step={ARENA_ZOOM_STEP} bind:value={arenaWorldScale} />
+          <output>{Math.round(arenaWorldScale * 100)}%</output></label>
+        <label>Mob rendering <select aria-label="Mob rendering mode in the arena" value={spritePreviewMode ? 'sprite' : 'fallback'} onchange={(event) => {
+          setArenaSpriteMode(event.currentTarget.value);
+        }}>
+          <option value="sprite">Sprite animations</option>
+          <option value="fallback">Fallback icons</option>
+        </select></label>
+      {/if}
       {#if spritePreviewMode}
         <label>Species <select value={arenaSpecies} onchange={(event) => {
           arenaSpecies = event.currentTarget.value;
@@ -3066,10 +3258,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     they need the room. Widen the window, or set the browser zoom out.</p>
 </div>
 
-<div id={showcaseMode ? 'showcase-field' : undefined} class="stage" style={`grid-template-areas:${hudLayoutAreas};`} class:showcase={showcaseMode} class:arpg-arena={arenaMode && panel !== 'map'} class:combat-field-sample={showcaseMode && showcaseSample === 'combat-field'} class:combat-fx-sample={showcaseMode && showcaseSample === 'combat-fx'} class:combat-fx-live={showcaseMode && showcaseSample === 'combat-fx' && animateCombatFx} class:fighting={inCombat} class:mapmode={panel === 'map'} class:veiled={!showcaseMode && ((panel !== null && panel !== 'map') || sheetOpen)} class:townmode={townLive && panel !== 'map'}>
+<div id={showcaseMode ? 'showcase-field' : undefined} class="stage" style={`grid-template-areas:${hudLayoutAreas};`} class:showcase={showcaseMode} class:arpg-arena={arenaMode && panel !== 'map'} class:combat-field-sample={arenaPreview} class:combat-fx-sample={showcaseMode && showcaseSample === 'combat-fx'} class:combat-fx-live={showcaseMode && showcaseSample === 'combat-fx' && animateCombatFx} class:fighting={inCombat} class:mapmode={panel === 'map'} class:veiled={!showcaseMode && ((panel !== null && panel !== 'map') || sheetOpen)} class:townmode={townLive && panel !== 'map'}>
   {#if arenaMode && panel !== 'map'}
     <CombatArenaScene arena={combatArena} s={gameState} {c} {ring} {speed} paused={!running || paused}
-      zoom={arenaZoom}
+      frame={arenaFieldFrame} onStageCss={(size) => { arenaStageCss = size; }}
+      groundMaterialOverride={showcaseMode && showcaseSample === 'rimworld-field' ? arenaGroundMaterials.forest : null}
       inspect={arenaPreview} onReviewPause={() => { running = false; }}
       onReviewStep={() => {
         running = false;
@@ -3079,11 +3272,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       spritePreviewSpecies={spritePreviewMode ? arenaSpecies : null}
       spritePreviewVariant={spritePreviewMode && activeArenaVariant ? { speciesId: activeArenaVariant.speciesId, variantId: activeArenaVariant.variantId } : null}
       aoePreview={showcaseMode && showcaseQuery.get('aoe-preview') === '1'}
-      iconActors={arenaPreview && !spritePreviewMode}
+      iconActors={showcaseMode && !spritePreviewMode}
       focusId={arenaFocusId}
       aimSkill={arenaAimSkill}
       keyboardAim={arenaAimPoint}
       effectLevel={settings.combatEffects || 'auto'}
+      vfxMode={arenaVfxMode}
       onAimPoint={(point) => { arenaAimPoint = point; }}
       onVitals={(vitals) => arenaVitals = vitals} onTargetRead={(read) => arenaTargetRead = read} onInspectEnemy={(mob) => inspectedEnemy = snapshotEnemy(mob)}
       onFocusEnemy={(mob) => focusArenaEnemy(mob.id)} onGroundCommand={issueArenaGroundCommand} />
@@ -3164,7 +3358,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         {#if showPlaceRead}<p class="text-note journey-place">{placeRead}</p>{/if}
         <p class="journey-status">{phaseRead}</p>
         {#if gameState.walk}
-          <p class="text-note journey-place">{gameState.walk.blocksLeft} blocks left · next hex in {Math.max(0, Math.ceil(gameState.walk.secLeft))}s</p>
+          <p class="text-note journey-place">{gameState.walk.legs.length - gameState.walk.stepIndex} blocks left · next hex in {Math.max(0, Math.ceil(gameState.walk.secLeft))}s</p>
         {/if}
       </header>
       {#if skillDiscoveryId && !awayReport}
@@ -3180,7 +3374,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
             <summary>Map signals · {journeySignals.length}</summary>
             <ul>
               {#each journeySignals as signal (signal.cls + signal.label)}
-                <li><svg viewBox="-11 -22 22 25" aria-hidden="true">{@html signal.art}</svg><span>{signal.label}</span></li>
+                <li><img class="icon-label" src={signal.icon.href} alt="" aria-hidden="true" /><span>{signal.label}</span></li>
               {/each}
             </ul>
           </details>
@@ -3192,25 +3386,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
               <div class="map-display" role="group" aria-label="Map display settings">
                 <button class="btn btn-quiet map-clean-toggle" type="button" aria-pressed={cleanMap}
                         onclick={() => setSetting('cleanMap', !cleanMap)} title="Show coloured hexes with terrain artwork and scenery hidden">Clean map</button>
-                <button class="btn btn-quiet" type="button" onclick={() => worldMap?.setBearing(0)}
-                        aria-label="Reset map camera angle" title="Restore the initial camera angle">Reset angle</button>
               </div>
               <div role="group" aria-label="Map zoom" class="map-zoom">
                 <button class="btn btn-quiet btn-icon" type="button" onclick={() => worldMap?.zoomBy(1 / 1.25)} aria-label="Zoom out" title="Zoom out">−</button>
                 <output class="text-note" aria-label="Map zoom level" aria-live="polite">{Math.round((mapCamera.zoom / MAP_BASE_ZOOM) * 100)}%</output>
                 <button class="btn btn-quiet btn-icon" type="button" onclick={() => worldMap?.zoomBy(1.25)} aria-label="Zoom in" title="Zoom in">+</button>
                 <button class="btn btn-quiet" type="button" onclick={() => worldMap?.centerOnPlayer()} title="Centre on your current settlement">Centre</button>
-                <button class="btn btn-quiet" type="button" onclick={() => worldMap?.resetCamera()} title="Restore the default map position, zoom and orientation">Reset</button>
-              </div>
-              <div role="group" aria-label="Map rotation" class="map-rotation-controls">
-                <button class="btn btn-quiet btn-icon" type="button" onclick={() => worldMap?.rotateBy(-15)} aria-label="Rotate map counterclockwise" title={`Rotate counterclockwise · ${keyFor('map.rotate.left')}`}>↶</button>
-                <label class="map-bearing-range"><span class="text-note">Rotation</span>
-                  <input type="range" min="0" max="359" step="1" aria-label="Map rotation angle" aria-valuetext={`${Math.round(mapBearingReadout) % 360} degrees clockwise`}
-                    value={Math.round(mapBearingReadout) % 360} oninput={event => worldMap?.setBearing(Number(event.currentTarget.value))} />
-                </label>
-                <output class="text-note" aria-label="Map rotation angle">{Math.round(mapBearingReadout) % 360}°</output>
-                <button class="btn btn-quiet btn-icon" type="button" onclick={() => worldMap?.rotateBy(15)} aria-label="Rotate map clockwise" title={`Rotate clockwise · ${keyFor('map.rotate.right')}`}>↷</button>
-                <button class="btn btn-quiet" type="button" onclick={() => worldMap?.setBearing(0)} title="Restore the initial map orientation">North ↑</button>
+                <button class="btn btn-quiet" type="button" onclick={() => worldMap?.resetCamera()} title="Restore the default map position and zoom">Reset</button>
               </div>
               <div role="group" aria-label="Map display" class="map-views">
                 {#each VIEW_ORDER as v (v)}
@@ -3229,8 +3411,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
                 <label title="Show hex cell identifiers"><input type="checkbox" bind:checked={showIds} /> Cell IDs</label>
                 {#if import.meta.env.DEV}<label title="Compare artwork with the exact projected ground footprint"><input type="checkbox" bind:checked={showHexCalibration} /> Hex alignment</label>{/if}
               </div>
-              {#if cleanMap}<p id="clean-map-names-note" class="map-hint text-note">Clean map shows names on hover or selection. Hex colours follow the selected map display.</p>{/if}
-              <p class="map-hint text-note">Select a hex · Drag to pan · Ctrl + drag horizontally to orbit · Scroll to zoom</p>
+              {#if cleanMap}<p id="clean-map-names-note" class="map-hint text-note">Clean map shows hex colours. Select a hex for its details.</p>{/if}
+              <p class="map-hint text-note">North is up · Select a hex · Drag to pan · Scroll to zoom</p>
               {#if gameState.walk}
                 <p class="map-hint text-note">Traveling to <b>{walkNote(gameState)}</b>.</p>
               {/if}
@@ -3240,12 +3422,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
               <div class="map-legend text-note">
                 {#each legend as l (l.name)}<span class="swatch"><i class="swatch-color" style:background={l.tone} aria-hidden="true"></i><span>{l.label}</span></span>{/each}
                 <span class="swatch ramp"><i class="swatch-color" style:background={`linear-gradient(90deg,${rampCss})`} aria-hidden="true"></i><span>Lv {firstBand[0]}–{lastBand[1]}</span></span>
-                <div class="map-marker-legend">
-                  {#each MAP_MARKER_LEGEND as mark (mark.kind)}
-                    <span><svg viewBox="-15 -32 30 35" aria-hidden="true">{@html mapMarker(mark.kind, mark.glyph, { scale: 1 })}</svg>{mark.label}</span>
+                <div class="map-icon-legend">
+                  {#each MAP_ICON_LEGEND as mark (mark.name)}
+                    <span><img class="icon-label" src={mark.href} alt="" aria-hidden="true" />{mark.label}</span>
                   {/each}
                 </div>
-                <p>One main crest marks each block. A small symbol and count show other signals. Dashed crests are unidentified tracks. Select a block to read every known signal.</p>
+                <p>Icons inside each hex show its places, known creatures and activity. Select a hex for details.</p>
               </div>
             </details>
           </section>
@@ -3261,10 +3443,12 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
               campHere={journeyDest.self && fieldCampHere}
               busy={!!gameState.walk || gameState.phase === 'camp'}
               fightActive={inCombat}
-              warpReason={journeyDest.node === gameState.town.waypoint ? 'This is your current Waypoint.' : ''}
-              fare={warpPrice(journeySettlement.id)}
-              afford={gameState.counters.gold >= warpPrice(journeySettlement.id)}
+              warpReason={journeyWarp?.reason ?? ''}
+              fare={journeyWarp?.fare ?? 0}
+              afford={journeyWarp?.afford ?? false}
               dungeon={dungeonView}
+              lastEvent={gameState.mapJournal?.lastEvent ?? null}
+              dungeonReceipt={gameState.lastDungeonReceipt ?? null}
               onprimary={activateJourneyDestination}
               onwarp={travelTo}
               onclear={clearMapSelection}
@@ -3994,7 +4178,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       <h3>Stash · one warehouse, every settlement</h3>
       <StashBoard game={gameState} {tabs} tab={stashTab} carriedSort={carriedSort} addtab={stashFolder}
                   ontab={(t) => (stashTab = t)}
-                  onaddtab={(id) => doBuy(id)}
+                  onaddtab={(id, expected) => doBuy(id, town?.id ?? '', expected)}
                   oncarriedsort={(k) => (carriedSort = k)}
                   ondeposit={(i) => doDeposit(i, stashTab)}
                   onwithdraw={(i) => doWithdraw(stashTab, i)}
@@ -4010,8 +4194,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {/if}
 
 {#if panel === 'forge'}
-  <Panel title="Forge" subtitle="Materials in · a new piece out" width="wide" fixed topmost gridArea={modalGridArea} onclose={closePanel}>
-    <Forge game={gameState} writer={transactionWriter} note={forgeNote} onforge={runForge} onsalvage={runSalvage} focus={forgeFocus}
+  <Panel title="Forge" subtitle="Materials in · a new piece out" width="wide" fixed topmost gridArea={modalGridArea} onclose={() => { forgeResultItem = null; closePanel(); }}>
+    <Forge game={gameState} writer={transactionWriter} note={forgeNote} resultItem={forgeResultItem} onforge={runForge} onsalvage={runSalvage} focus={forgeFocus}
       ontrack={doTrackGoal} onshortage={doTrackShortage} onpinzone={pinZoneSource}
       onmap={openMapAtSettlement} onbag={() => openPanel('bag')} />
   </Panel>
@@ -4025,7 +4209,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
                    onclear={() => { benchSelection = null; benchNote = ''; }}
                    onrun={(op, line, pick) => runCraft(op, line ?? 0, pick)} {wornOf} note={benchNote}
                    stashTabs={tabs} stashTab={stashTab} writer={transactionWriter}
-                   repairPrice={repairPrice} onrepair={doRepairGear}
+                   repairPrice={repairPrice} repairQuote={repairQuote} onrepair={doRepairGear}
+                   repairExpected={repairQuote && bench ? { token: repairQuote.token, target: { where: bench.where, index: bench.index } } : undefined}
                    onStashTab={(tab) => { stashTab = tab; }}
                    onTakeStash={takeStashForCraft} onStore={storeCraftPiece} />
   </Panel>
@@ -4071,9 +4256,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {/if}
 
 {#if panel === 'market' || showcaseMode}
-  <Panel title="Market" subtitle={`${town?.name ?? ''} · demand, cargo and town services`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={closePanel}>
-    <Market state={gameState} town={town} here={townLive} writer={transactionWriter} onbuy={doBuy} onsell={doSell} ontrade={doTrade} onprocess={doProcess} onroute={showTradeRoute}
-            ondeliver={doDelivery} ontrack={doTrackDelivery} onack={doAcknowledgeDelivery} onblackmarketbuy={doBlackMarketBuy}
+  <Panel title="Market" subtitle={`${town?.name ?? ''} · demand, cargo and town services`} width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={() => { marketSale = null; closePanel(); }}>
+    <Market state={gameState} town={town} here={townLive} writer={transactionWriter} onbuy={doBuy} onsell={doSell} ontrade={doTrade} onprocess={doProcess} onroute={showTradeRoute} saleResult={marketSale}
+            ondeliver={doDelivery} ontrack={doTrackDelivery} onack={doAcknowledgeDelivery}
+            onaccept={doAcceptCourier} ondecline={doDeclineCourier} onblackmarketbuy={doBlackMarketBuy}
             onpinzone={pinZoneSource} ontrackgoal={(id) => doTrackGoal({ kind: 'delivery', id })} ontrackshortage={doTrackShortage}
             goalId={journeyGoal?.source === 'tracked' && journeyGoal.view.ref.kind === 'delivery' ? journeyGoal.view.ref.id : null}
             bind:view={marketView} bind:marketId={marketTownId} />
@@ -4083,7 +4269,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {#if deliveryNotice && (showcaseMode || transactionWriter && panel === null)}
   <Panel title="Delivery notice" subtitle="An optional town opportunity" width="wide" showcase={showcaseMode} gridArea={modalGridArea} onclose={() => doDismissDelivery(deliveryNotice!.id)}>
     <DeliveryNotice state={gameState} contract={deliveryNotice} writer={transactionWriter}
-      ontrack={() => doTrackDelivery(deliveryNotice!.id, true)} ondetails={() => openDeliveryWant(deliveryNotice!.id)} ondismiss={() => doDismissDelivery(deliveryNotice!.id)} />
+      ontrack={() => doTrackDelivery(deliveryNotice!.id, true)} ondetails={() => openDeliveryWant(deliveryNotice!.id)} ondismiss={() => doDismissDelivery(deliveryNotice!.id)}
+      onaccept={() => doAcceptCourier(deliveryNotice!.id)} ondecline={() => doDeclineCourier(deliveryNotice!.id)} />
   </Panel>
 {/if}
 
@@ -4226,6 +4413,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         <tbody>
           {#each viewStock as row}
             {@const check = canBuy(gameState, viewTown.id, row.id)}
+            {@const purchaseQuote = quoteTownPurchase(gameState, viewTown.id, row.id)}
             {@const repair = row.id === 'repair' || row.id === 'repair_ironrow'}
             {@const noBroken = repair && !gameState.gear.some((it) => it?.broken) && !gameState.bag.some((it) => it?.broken)}
             <tr>
@@ -4233,8 +4421,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
               <td>{npcOf(row.npc)?.name ?? row.npc}</td>
               <td>{row.kind}</td>
               <td>{priceMinutes(row, viewTown.id, gameState)} m{row.charge_band ? ` @ ${row.charge_band}` : ''}</td>
-              <td>{priceGold(row, viewTown.id, gameState)}</td>
-              <td>{#if !check.ok}<small>{check.why}</small>{:else if noBroken}<small>no Broken piece to repair</small>{/if}{#if viewHere}<button onclick={() => doBuy(row.id)} disabled={!check.ok || noBroken}>buy</button>{:else}<span class="text-dim">elsewhere</span>{/if}</td>
+              <td>{purchaseQuote.gold}{#if purchaseQuote.promotion}<small class="text-good"> normal {purchaseQuote.normalGold} · save {purchaseQuote.normalGold - purchaseQuote.gold} · {Math.max(0, Math.floor((purchaseQuote.promotion.expiresAtSec - gameState.clockSec) / 60))}m left</small>{/if}</td>
+              <td>{#if !check.ok}<small>{check.why}</small>{:else if noBroken}<small>no Broken piece to repair</small>{/if}{#if viewHere}<button onclick={() => doBuy(row.id, viewTown.id, buyExpectation(viewTown.id, row))} disabled={!check.ok || noBroken}>buy</button>{:else}<span class="text-dim">elsewhere</span>{/if}</td>
             </tr>
           {/each}
         </tbody>
@@ -4358,7 +4546,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
             <td>{dest ? cellSec(gameState, dest) : road.secBetween(townId, s.id)}s</td>
             <td>{canTravel(gameState, s.id) ? `${fare} gold` : '—'}</td>
             <td>
-              <button onclick={(e) => { e.stopPropagation(); dest && doWalk(dest); }} disabled={!!gameState.walk}>{gameState.walk?.node === s.id ? 'walking' : 'walk'}</button>
+              <button onclick={(e) => { e.stopPropagation(); dest && doWalk(dest); }} disabled={!!gameState.walk}>{gameState.walk && dest && gameState.walk.to.q === dest.q && gameState.walk.to.r === dest.r ? 'walking' : 'walk'}</button>
               {#if canTravel(gameState, s.id)}<button onclick={(e) => { e.stopPropagation(); travelTo(s.id); }} disabled={gameState.counters.gold < fare} title={gameState.counters.gold < fare ? `needs ${fare} gold` : `warp for ${fare} gold`}>waypoint</button>{/if}
             </td>
           </tr>
@@ -4403,13 +4591,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     <div class="save-actions">
     <button disabled={showcaseMode || !canWriteAccount} onclick={() => void startNewCharacter()}>Start new character</button>
     {#each saveSlots as slot}
-      <button disabled={showcaseMode || startupPending || !canWriteAccount} onclick={() => doSave(slot)}>Save {slot}</button>
-      <button disabled={showcaseMode || accountWriterState === 'checking' || accountWriterState === 'waiting' || accountWriterState === 'unsupported'} onclick={() => void loadFromSave(slot)}>Load {slot}</button>
+      <button disabled={showcaseMode || startupPending || !canWriteAccount || TEMP_DISABLE_SLOT_SAVES} onclick={() => doSave(slot)}>Save {slot}</button>
+      <button disabled={showcaseMode || accountWriterState === 'checking' || accountWriterState === 'waiting' || accountWriterState === 'unsupported' || TEMP_DISABLE_SLOT_SAVES} onclick={() => void loadFromSave(slot)}>Load {slot}</button>
     {/each}
     <button disabled={showcaseMode} onclick={download}>Export JSON</button>
-    <label>Import <input type="file" accept="application/json" disabled={showcaseMode || !canWriteAccount} onchange={importFromSave} /></label>
+    <label>Import <input type="file" accept="application/json" disabled={showcaseMode || !canWriteAccount || TEMP_DISABLE_SLOT_SAVES} onchange={importFromSave} /></label>
     </div>
-    {#if attachedSlot}<p class="text-note">Autosave is on for {attachedSlot}.</p>{:else}<p class="text-note">Not saved yet. Choose a slot to keep this character.</p>{/if}
+    {#if TEMP_DISABLE_SLOT_SAVES}<p class="text-note">Slot saves are off until the game is finished.</p>
+    {:else if attachedSlot}<p class="text-note">Autosave is on for {attachedSlot}.</p>{:else}<p class="text-note">Not saved yet. Choose a slot to keep this character.</p>{/if}
     {#if saveNote}<p class="save-note-inline" role="status">{saveNote}</p>{/if}
     {:else if saveTab === 'backups'}
     <h2>Backups · {SAVE_CFG.snapshot_slots} walking snapshots</h2>
@@ -4601,10 +4790,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .map-zoom { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto; align-items: center; gap: var(--spacing-xs); }
   .map-zoom button { min-width: var(--icon-label); padding: var(--spacing-xs); line-height: 1.2; }
   .map-zoom output { text-align: center; font-variant-numeric: tabular-nums; }
-  .map-rotation-controls { display: grid; grid-template-columns: auto minmax(0, 1fr) 3.5em auto auto; align-items: center; gap: var(--spacing-xs); }
-  .map-bearing-range { display: flex; align-items: center; min-width: 0; gap: var(--spacing-xs); }
-  .map-bearing-range input { width: 100%; min-width: 0; }
-  .map-rotation-controls output { text-align: center; font-variant-numeric: tabular-nums; }
   .map-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs) var(--spacing-sm); padding-block: var(--spacing-xs); }
   .map-legend .swatch { display: flex; align-items: flex-start; gap: var(--spacing-xs); min-width: 0; line-height: 1.2; }
   .map-legend .swatch i { width: var(--icon-detail); height: var(--icon-detail); flex: none; }
@@ -5446,9 +5631,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     font: var(--font-xs) / 1 var(--num);
     text-shadow: 0 1px 2px var(--bg);
   }
-  .map-marker-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs) var(--spacing-sm); width: 100%; }
-  .map-marker-legend > span { display: flex; align-items: center; gap: var(--spacing-xs); }
-  .map-marker-legend svg, .journey-map-signals svg { width: 24px; height: 28px; flex: none; }
+  .map-icon-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xs) var(--spacing-sm); width: 100%; }
+  .map-icon-legend > span { display: flex; align-items: center; gap: var(--spacing-xs); }
+  .map-icon-legend img, .journey-map-signals img { width: var(--icon-label); height: var(--icon-label); flex: none; }
   .journey-map-signals { display: grid; gap: var(--spacing-sm); padding: var(--spacing-sm); border-top: 1px solid var(--line); }
   .journey-map-signals summary { color: var(--text); font-size: var(--font-sm); font-weight: 600; cursor: pointer; }
   .journey-map-signals ul { display: grid; gap: var(--spacing-xs); list-style: none; margin: 0; padding: 0; }

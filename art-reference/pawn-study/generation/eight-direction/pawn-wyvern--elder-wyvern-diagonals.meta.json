@@ -1,0 +1,47 @@
+{
+  "pawnId": "wyvern--elder-wyvern",
+  "candidateFile": "pawn-wyvern--elder-wyvern-diagonals.png",
+  "sourceAtlas": "art-reference/pawn-study/atlases/variants/wyvern--elder-wyvern.png",
+  "sourceSheet": "art-reference/pawn-study/sheets/variants/wyvern--elder-wyvern.png",
+  "dimensions": "1254x1254",
+  "pixelFormat": "32bpp ARGB",
+  "transparentBackground": true,
+  "cellLayout": "2x2",
+  "cellSize": "627x627",
+  "directionOrder": [
+    "NE",
+    "SE",
+    "SW",
+    "NW"
+  ],
+  "viewDesign": {
+    "NE": "rear three-quarter, head turned away",
+    "SE": "front three-quarter, face visible",
+    "SW": "mirrored front three-quarter, face visible",
+    "NW": "mirrored rear three-quarter, head turned away"
+  },
+  "visibleBoundsPx": {
+    "NE": "x=72..576, y=52..537 (505x486)",
+    "SE": "x=48..550, y=58..529 (503x472)",
+    "SW": "x=73..576, y=58..529 (504x472)",
+    "NW": "x=49..550, y=52..540 (502x489)"
+  },
+  "visibleFootprint": "Across views: 80–81% cell width, 75–78% cell height; consistent between directions.",
+  "reviewStatus": "candidate-review",
+  "concerns": [
+    "Confirm raw sprite scale against runtime cardinal atlas before integration; the diagonal views fill about 80% of cell width.",
+    "Review direction handedness and ground-anchor alignment in the packed preview."
+  ],
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "status": "runtime-reviewed",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

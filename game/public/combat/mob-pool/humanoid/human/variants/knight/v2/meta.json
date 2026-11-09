@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "human--knight",
+  "name": "Knight",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 84,
+      "y": 84,
+      "width": 89,
+      "height": 140,
+      "offsetX": 84,
+      "offsetY": 84
+    },
+    {
+      "x": 341,
+      "y": 81,
+      "width": 86,
+      "height": 143,
+      "offsetX": 85,
+      "offsetY": 81
+    },
+    {
+      "x": 597,
+      "y": 89,
+      "width": 87,
+      "height": 135,
+      "offsetX": 85,
+      "offsetY": 89
+    },
+    {
+      "x": 854,
+      "y": 82,
+      "width": 85,
+      "height": 142,
+      "offsetX": 86,
+      "offsetY": 82
+    },
+    {
+      "x": 84,
+      "y": 338,
+      "width": 89,
+      "height": 142,
+      "offsetX": 84,
+      "offsetY": 82
+    },
+    {
+      "x": 341,
+      "y": 338,
+      "width": 86,
+      "height": 142,
+      "offsetX": 85,
+      "offsetY": 82
+    },
+    {
+      "x": 595,
+      "y": 343,
+      "width": 90,
+      "height": 137,
+      "offsetX": 83,
+      "offsetY": 87
+    },
+    {
+      "x": 852,
+      "y": 338,
+      "width": 88,
+      "height": 142,
+      "offsetX": 84,
+      "offsetY": 82
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-human--knight-diagonals.png",
+  "diagonalSourceSha256": "f25612a087c701f4bd88858d9d45ddc8d4717e227828a2b5396af66d34a36f03",
+  "diagonalScaleFactor": 0.296761,
+  "speciesId": "human",
+  "variantId": "knight"
+}

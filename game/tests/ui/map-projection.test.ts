@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { createMapProjection, MAP_CAMERA, mapUprightAt, projectedHex, projectMapBounds, projectMapPoint } from '../../src/ui/map/map-projection';
 
-describe('tabletop projection', () => {
+describe('map projection', () => {
+  it('defaults to an uncompressed north-up plane with regular hexes', () => {
+    for (const point of [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 0, y: 100 }, { x: -24, y: 63 }]) {
+      expect(projectMapPoint(point.x, point.y)).toEqual(point);
+    }
+    const hex = projectedHex(30);
+    expect(hex.height).toBeCloseTo(60);
+    expect(hex.width / hex.height).toBeCloseTo(Math.sqrt(3) / 2);
+  });
   it.each([0, 45, 90, 180, 270, 360])('keeps artwork vertical while the ground orbits to %s degrees', bearing => {
     for (const elevation of [25, 38, 70]) {
       const camera = createMapProjection(bearing, elevation), x = 57, y = -84;

@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "wraith--dread-wraith",
+  "identityName": "Dread Wraith",
+  "identityKind": "variant",
+  "sourceSheet": "art-reference/pawn-study/sheets/variants/wraith--dread-wraith.png",
+  "sizeReference": "game/public/combat/mob-pool/undead/wraith/variants/dread-wraith/v1/atlas.png",
+  "generatedSheet": "art-reference/pawn-study/generation/eight-direction/pawn-wraith--dread-wraith-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "cardinalVisibleHeightsRuntimePx": [
+    114,
+    118
+  ],
+  "canvas": {
+    "requested": {
+      "width": 1024,
+      "height": 1024
+    },
+    "generated": {
+      "width": 1254,
+      "height": 1254
+    },
+    "cellSize": 627,
+    "background": "white"
+  },
+  "measuredVisibleHeightSourcePx": [
+    441,
+    441,
+    440,
+    441
+  ],
+  "promptSummary": "Create distinct rear-facing NE/NW views with hidden face and mirrored front-facing SE/SW views with both yellow eyes visible.",
+  "review": {
+    "pose": true,
+    "directionOrder": false,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "identity": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "note": "This canonical candidate replaces the earlier ambiguous v1 only after visual review; v1 remains preserved.",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

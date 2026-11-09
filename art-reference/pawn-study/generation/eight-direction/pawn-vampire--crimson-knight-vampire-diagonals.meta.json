@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "vampire--crimson-knight-vampire",
+  "name": "Crimson Knight Vampire",
+  "generatedSource": "art-reference/pawn-study/generation/eight-direction/pawn-vampire--crimson-knight-vampire-diagonals.png",
+  "sourceReferences": [
+    "art-reference/pawn-study/sheets/variants/vampire--crimson-knight-vampire.png",
+    "art-reference/pawn-study/atlases/variants/vampire--crimson-knight-vampire.png"
+  ],
+  "supersedesCandidate": "art-reference/pawn-study/generation/eight-direction/pawn-vampire--crimson-knight-vampire-diagonals-v1.png",
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "promptSummary": "Generate Crimson Knight Vampire diagonals preserving pale face, swept black hair, pointed ears, amber eyes, black chest armor with red gem and dark crimson high-collar cape; bust silhouette, no limbs or weapons. NE/NW rear; SE/SW mirrored front.",
+  "requestedLayout": {
+    "sourceCardinalHeightsPx": [
+      360,
+      361,
+      365,
+      365
+    ],
+    "rows": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west",
+    "columns": 2
+  },
+  "actualImage": {
+    "cellWidth": 627,
+    "alpha": "transparent",
+    "width": 1254,
+    "cellHeight": 627,
+    "visibleBoundsPx": {
+      "northEast": [
+        169,
+        75,
+        472,
+        515
+      ],
+      "southEast": [
+        141,
+        76,
+        450,
+        515
+      ],
+      "southWest": [
+        170,
+        76,
+        480,
+        516
+      ],
+      "northWest": [
+        146,
+        76,
+        459,
+        516
+      ]
+    },
+    "visibleHeightsPx": {
+      "southWest": 440,
+      "northWest": 440,
+      "southEast": 439,
+      "northEast": 440
+    },
+    "height": 1254
+  },
+  "review": {
+    "size": "candidate is about 1.2x source cardinal visible height; compare packed scale",
+    "approved": true,
+    "identity": true,
+    "status": "passed",
+    "layout": "2x2 views in requested NE/SE/SW/NW order",
+    "anchor": true,
+    "anatomy": "passes source silhouette comparison: compact bust, no arms, hands, legs, feet or weapon added",
+    "pose": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true
+  },
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

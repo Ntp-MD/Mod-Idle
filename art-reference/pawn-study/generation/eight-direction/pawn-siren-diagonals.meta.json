@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "siren",
+  "name": "Siren",
+  "generatedSource": "art-reference/pawn-study/generation/eight-direction/pawn-siren-diagonals.png",
+  "sourceReferences": [
+    "art-reference/pawn-study/sheets/siren.png",
+    "art-reference/pawn-study/atlases/siren.png"
+  ],
+  "supersedesCandidate": "art-reference/pawn-study/generation/eight-direction/pawn-siren-diagonals-v2.png",
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "promptSummary": "Regenerate diagonal Siren views using the cardinal sheet as strict silhouette reference: compact aquatic body tapering into split tail fins; no arms, hands, legs or feet. Preserve blue scales, fin crest/ears, gills and belt; NE/NW rear, SE/SW mirrored front.",
+  "requestedLayout": {
+    "sourceCardinalHeightsPx": [
+      131,
+      137,
+      122,
+      137,
+      136,
+      135,
+      122,
+      131
+    ],
+    "rows": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west",
+    "columns": 2
+  },
+  "actualImage": {
+    "cellWidth": 627,
+    "alpha": "transparent",
+    "width": 1254,
+    "cellHeight": 627,
+    "visibleBoundsPx": {
+      "northEast": [
+        225,
+        69,
+        449,
+        511
+      ],
+      "southEast": [
+        187,
+        71,
+        424,
+        517
+      ],
+      "southWest": [
+        200,
+        59,
+        440,
+        491
+      ],
+      "northWest": [
+        179,
+        60,
+        413,
+        494
+      ]
+    },
+    "visibleHeightsPx": {
+      "southWest": 432,
+      "northWest": 434,
+      "southEast": 446,
+      "northEast": 442
+    },
+    "height": 1254
+  },
+  "review": {
+    "size": "candidate is substantially larger than cardinal atlas sprites; compare packed height",
+    "approved": true,
+    "identity": true,
+    "status": "passed",
+    "layout": "2x2 views in requested NE/SE/SW/NW order",
+    "anchor": true,
+    "anatomy": "passes silhouette review: no arms, hands, legs or feet",
+    "pose": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true
+  },
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

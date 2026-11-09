@@ -1,0 +1,190 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "player",
+  "name": "Player",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 67,
+      "y": 45,
+      "width": 122,
+      "height": 179,
+      "offsetX": 67,
+      "offsetY": 45
+    },
+    {
+      "x": 330,
+      "y": 32,
+      "width": 109,
+      "height": 192,
+      "offsetX": 74,
+      "offsetY": 32
+    },
+    {
+      "x": 590,
+      "y": 34,
+      "width": 100,
+      "height": 190,
+      "offsetX": 78,
+      "offsetY": 34
+    },
+    {
+      "x": 840,
+      "y": 34,
+      "width": 113,
+      "height": 190,
+      "offsetX": 72,
+      "offsetY": 34
+    },
+    {
+      "x": 70,
+      "y": 293,
+      "width": 116,
+      "height": 187,
+      "offsetX": 70,
+      "offsetY": 37
+    },
+    {
+      "x": 332,
+      "y": 288,
+      "width": 104,
+      "height": 192,
+      "offsetX": 76,
+      "offsetY": 32
+    },
+    {
+      "x": 590,
+      "y": 288,
+      "width": 100,
+      "height": 192,
+      "offsetX": 78,
+      "offsetY": 32
+    },
+    {
+      "x": 843,
+      "y": 288,
+      "width": 106,
+      "height": 192,
+      "offsetX": 75,
+      "offsetY": 32
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/players/body/idle/south.png",
+  "sourceSha256": "1dc20d2c7fba317a1199a934f5232f4e186ae0193baf953c7002890aec96bb27",
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-player-diagonals.png",
+  "diagonalSourceSha256": "0f4c931043a915421dcbd391b2c7a151aa86d6f10c609d0c8b123e83b510e08f",
+  "diagonalScaleFactor": 0.427141,
+  "gripsByDirection": {
+    "south": {
+      "mainHand": {
+        "x": 165,
+        "y": 168
+      },
+      "offHand": {
+        "x": 91,
+        "y": 168
+      }
+    },
+    "north": {
+      "mainHand": {
+        "x": 165,
+        "y": 168
+      },
+      "offHand": {
+        "x": 91,
+        "y": 168
+      }
+    },
+    "west": {
+      "mainHand": {
+        "x": 116,
+        "y": 169
+      },
+      "offHand": {
+        "x": 163,
+        "y": 169
+      }
+    },
+    "east": {
+      "mainHand": {
+        "x": 140,
+        "y": 169
+      },
+      "offHand": {
+        "x": 93,
+        "y": 169
+      }
+    }
+  }
+}

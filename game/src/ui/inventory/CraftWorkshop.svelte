@@ -18,14 +18,16 @@
 
   let { game, item, where = null, index = -1, onpick, onclear, onrun, wornOf, note = '',
     stashTabs = 0, stashTab = 0, writer = true, onStashTab = () => {}, onTakeStash = () => false, onStore = () => false,
-    repairPrice = 0, onrepair = () => false, view = $bindable(newCraftWorkbenchView()),
+    repairPrice = 0, repairExpected = undefined, repairQuote = null, onrepair = () => false, view = $bindable(newCraftWorkbenchView()),
   }: {
     game: GameState; item: Item | null; where?: Where | null; index?: number;
     onpick: (where: Where, index: number) => void; onclear: () => void;
     onrun: (op: CraftOp, line?: number, pick?: string) => boolean;
     wornOf: (slot: string) => Item | null; note?: string; stashTabs?: number; stashTab?: number; writer?: boolean;
     onStashTab?: (tab: number) => void; onTakeStash?: (tab: number, index: number) => boolean; onStore?: (index: number, tab: number) => boolean;
-    repairPrice?: number; onrepair?: (where: Where, index: number) => boolean;
+    repairPrice?: number; repairExpected?: { token: string; target?: { where: Where; index: number } };
+    repairQuote?: { normalGold: number; gold: number; promotion: { expiresAtSec: number } | null } | null;
+    onrepair?: (where: Where, index: number, expected?: { token: string; target?: { where: Where; index: number } }) => boolean;
     view?: CraftWorkbenchView;
   } = $props();
 
@@ -318,7 +320,10 @@
       {#if item?.broken && where != null && index >= 0}
         <button class="btn btn-gold bench-repair" type="button" disabled={!writer || busy || !repairPrice}
                 title={repairPrice ? `Clears Broken and refills protection to ${craft.C.protection_start} for ${repairPrice} gold` : 'No Armourer repair is stocked here'}
-                onclick={() => onrepair(where, index)}>Repair at Armourer · {repairPrice} gold</button>
+                onclick={() => onrepair(where, index, repairExpected)}>Repair at Armourer · {repairPrice} gold</button>
+        {#if repairQuote?.promotion}
+          <small class="text-good">Normal {repairQuote.normalGold} gold · savings {repairQuote.normalGold - repairQuote.gold} gold · {Math.max(0, Math.floor((repairQuote.promotion.expiresAtSec - game.clockSec) / 60))}m {Math.max(0, (repairQuote.promotion.expiresAtSec - game.clockSec) % 60)}s left this cycle</small>
+        {/if}
       {/if}
       {#if item}
         <div class="mod-heading"><span>Mod</span><span>Value · Tier</span></div>

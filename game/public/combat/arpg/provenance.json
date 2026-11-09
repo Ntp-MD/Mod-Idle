@@ -1,138 +1,167 @@
 {
-  "purpose": "Pixel-v2 character art is the production style for the auto-ARPG prototype. The original forest clearing is archived; the current world-projected ground material is recorded in game/src/assets/combat/forest-floor.provenance.json.",
-  "style": "pixel-v2",
-  "characterAtlases": [
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "pixel-v2/player-animation-v2.png",
-      "source": "art-reference/monsters/pilots/player-animation-v2.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/beast/wolf/v2/atlas.png",
-      "source": "art-reference/monsters/pilots/wolf-animation-v2.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/insect/spider/v1/atlas.png",
-      "source": "art-reference/monsters/pilots/spider-animation-v1.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/elemental/wisp/v2/atlas.png",
-      "source": "art-reference/monsters/pilots/wisp-animation-v2.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/humanoid/goblin/v1/atlas.png",
-      "source": "art-reference/monsters/goblin/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/humanoid/orc/v1/atlas.png",
-      "source": "art-reference/monsters/orc/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/humanoid/kobold/v1/atlas.png",
-      "source": "art-reference/monsters/kobold/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/humanoid/ogre/v1/atlas.png",
-      "source": "art-reference/monsters/ogre/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/humanoid/troll/v1/atlas.png",
-      "source": "art-reference/monsters/troll/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/humanoid/minotaur/v1/atlas.png",
-      "source": "art-reference/monsters/minotaur/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/undead/skeleton/v1/atlas.png",
-      "source": "art-reference/monsters/skeleton/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/undead/mummy/v1/atlas.png",
-      "source": "art-reference/monsters/mummy/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/undead/vampire/v1/atlas.png",
-      "source": "art-reference/monsters/vampire/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/demon/demon/v1/atlas.png",
-      "source": "art-reference/monsters/demon/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/formless/slime/v1/atlas.png",
-      "source": "art-reference/monsters/slime/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/elemental/golem/v1/atlas.png",
-      "source": "art-reference/monsters/golem/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/dragon/dragon/v1/atlas.png",
-      "source": "art-reference/monsters/dragon/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/plant/treant/v1/atlas.png",
-      "source": "art-reference/monsters/treant/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/humanoid/human/v1/atlas.png",
-      "source": "art-reference/monsters/human/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/humanoid/lizardman/v1/atlas.png",
-      "source": "art-reference/monsters/lizardman/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/humanoid/elf/v1/atlas.png",
-      "source": "art-reference/monsters/elf/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/humanoid/giant/v1/atlas.png",
-      "source": "art-reference/monsters/giant/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/beast/werewolf/v1/atlas.png",
-      "source": "art-reference/monsters/werewolf/animation/meta.json"
-    },
-    {
-      "directions": "8 idle directions; east/west 4-frame walk, attack, hit and death",
-      "file": "../mob-pool/plant/dryad/v1/atlas.png",
-      "source": "art-reference/monsters/dryad/animation/meta.json"
-    }
+  "style": "pawn-study",
+  "sourceManifest": "art-reference/pawn-study/manifest.json",
+  "runtimeIntegrated": true,
+  "defaultVersion": "per-entry pointer",
+  "atlasLayout": "Per identity: 2x2 cardinal or 4x2 eight-direction row-major atlas",
+  "directions": [
+    "south",
+    "south-east",
+    "east",
+    "north-east",
+    "north",
+    "north-west",
+    "west",
+    "south-west"
   ],
-  "backdrop": {
-    "style": "archived original illustrated scene; replaced by the world-projected surface material",
-    "file": "forest-clearing.png"
+  "player": "/combat/arpg/player/pawn/v2/atlas.png",
+  "species": {
+    "goblin": "/combat/mob-pool/humanoid/goblin/v2/atlas.png",
+    "orc": "/combat/mob-pool/humanoid/orc/v2/atlas.png",
+    "kobold": "/combat/mob-pool/humanoid/kobold/v2/atlas.png",
+    "ogre": "/combat/mob-pool/humanoid/ogre/v2/atlas.png",
+    "troll": "/combat/mob-pool/humanoid/troll/v2/atlas.png",
+    "minotaur": "/combat/mob-pool/humanoid/minotaur/v2/atlas.png",
+    "skeleton": "/combat/mob-pool/undead/skeleton/v2/atlas.png",
+    "mummy": "/combat/mob-pool/undead/mummy/v2/atlas.png",
+    "vampire": "/combat/mob-pool/undead/vampire/v2/atlas.png",
+    "demon": "/combat/mob-pool/demon/demon/v2/atlas.png",
+    "slime": "/combat/mob-pool/formless/slime/v2/atlas.png",
+    "spider": "/combat/mob-pool/insect/spider/v2/atlas.png",
+    "wolf": "/combat/mob-pool/beast/wolf/v2/atlas.png",
+    "golem": "/combat/mob-pool/elemental/golem/v2/atlas.png",
+    "dragon": "/combat/mob-pool/dragon/dragon/v2/atlas.png",
+    "treant": "/combat/mob-pool/plant/treant/v2/atlas.png",
+    "human": "/combat/mob-pool/humanoid/human/v2/atlas.png",
+    "lizardman": "/combat/mob-pool/humanoid/lizardman/v2/atlas.png",
+    "elf": "/combat/mob-pool/humanoid/elf/v2/atlas.png",
+    "giant": "/combat/mob-pool/humanoid/giant/v2/atlas.png",
+    "werewolf": "/combat/mob-pool/beast/werewolf/v2/atlas.png",
+    "dryad": "/combat/mob-pool/plant/dryad/v2/atlas.png",
+    "siren": "/combat/mob-pool/fish/siren/v2/atlas.png",
+    "wraith": "/combat/mob-pool/undead/wraith/v2/atlas.png",
+    "imp": "/combat/mob-pool/demon/imp/v2/atlas.png",
+    "wyvern": "/combat/mob-pool/dragon/wyvern/v2/atlas.png",
+    "beetle": "/combat/mob-pool/insect/beetle/v2/atlas.png",
+    "hornet": "/combat/mob-pool/insect/hornet/v2/atlas.png",
+    "ooze": "/combat/mob-pool/formless/ooze/v2/atlas.png",
+    "wisp": "/combat/mob-pool/elemental/wisp/v4/atlas.png",
+    "harpy": "/combat/mob-pool/beast/harpy/v4/atlas.png",
+    "bonehound": "/combat/mob-pool/undead/bonehound/v2/atlas.png",
+    "revenant": "/combat/mob-pool/undead/revenant/v2/atlas.png",
+    "mirehydra": "/combat/mob-pool/dragon/mirehydra/v2/atlas.png",
+    "slaggolem": "/combat/mob-pool/elemental/slaggolem/v2/atlas.png",
+    "wyrmling": "/combat/mob-pool/dragon/wyrmling/v2/atlas.png"
   },
-  "retiredIllustratedAtlases": {
-    "status": "traveler art remains archived; Goblin art removed per user request",
-    "archive": "art-reference/monsters/previous-arpg-style",
-    "files": [
-      "traveler-actions.png",
-      "traveler-idle.png"
-    ]
+  "variants": {
+    "goblin--sneak-goblin": "/combat/mob-pool/humanoid/goblin/variants/sneak-goblin/v2/atlas.png",
+    "goblin--tallow-goblin": "/combat/mob-pool/humanoid/goblin/variants/tallow-goblin/v2/atlas.png",
+    "goblin--warcaller-goblin": "/combat/mob-pool/humanoid/goblin/variants/warcaller-goblin/v2/atlas.png",
+    "orc--raider-orc": "/combat/mob-pool/humanoid/orc/variants/raider-orc/v2/atlas.png",
+    "orc--berserker-orc": "/combat/mob-pool/humanoid/orc/variants/berserker-orc/v2/atlas.png",
+    "orc--ashen-orc": "/combat/mob-pool/humanoid/orc/variants/ashen-orc/v2/atlas.png",
+    "kobold--scavenger-kobold": "/combat/mob-pool/humanoid/kobold/variants/scavenger-kobold/v2/atlas.png",
+    "kobold--miner-kobold": "/combat/mob-pool/humanoid/kobold/variants/miner-kobold/v2/atlas.png",
+    "kobold--tinker-kobold": "/combat/mob-pool/humanoid/kobold/variants/tinker-kobold/v2/atlas.png",
+    "kobold--drake-kobold": "/combat/mob-pool/humanoid/kobold/variants/drake-kobold/v2/atlas.png",
+    "kobold--flintlock-kobold": "/combat/mob-pool/humanoid/kobold/variants/flintlock-kobold/v2/atlas.png",
+    "ogre--brute-ogre": "/combat/mob-pool/humanoid/ogre/variants/brute-ogre/v2/atlas.png",
+    "ogre--swamp-ogre": "/combat/mob-pool/humanoid/ogre/variants/swamp-ogre/v2/atlas.png",
+    "ogre--mesa-ogre": "/combat/mob-pool/humanoid/ogre/variants/mesa-ogre/v2/atlas.png",
+    "ogre--oathbrand-ogre": "/combat/mob-pool/humanoid/ogre/variants/oathbrand-ogre/v2/atlas.png",
+    "troll--cave-troll": "/combat/mob-pool/humanoid/troll/variants/cave-troll/v2/atlas.png",
+    "troll--swamp-troll": "/combat/mob-pool/humanoid/troll/variants/swamp-troll/v2/atlas.png",
+    "troll--reed-troll": "/combat/mob-pool/humanoid/troll/variants/reed-troll/v2/atlas.png",
+    "troll--oldgrowth-troll": "/combat/mob-pool/humanoid/troll/variants/oldgrowth-troll/v2/atlas.png",
+    "minotaur--maze-warden-minotaur": "/combat/mob-pool/humanoid/minotaur/variants/maze-warden-minotaur/v2/atlas.png",
+    "skeleton--knight-skeleton": "/combat/mob-pool/undead/skeleton/variants/knight-skeleton/v2/atlas.png",
+    "skeleton--mage-skeleton": "/combat/mob-pool/undead/skeleton/variants/mage-skeleton/v2/atlas.png",
+    "skeleton--drowned-skeleton": "/combat/mob-pool/undead/skeleton/variants/drowned-skeleton/v2/atlas.png",
+    "skeleton--rattleblade-skeleton": "/combat/mob-pool/undead/skeleton/variants/rattleblade-skeleton/v2/atlas.png",
+    "skeleton--crownless-skeleton": "/combat/mob-pool/undead/skeleton/variants/crownless-skeleton/v2/atlas.png",
+    "mummy--ashwrap-mummy": "/combat/mob-pool/undead/mummy/variants/ashwrap-mummy/v2/atlas.png",
+    "mummy--cartouche-mummy": "/combat/mob-pool/undead/mummy/variants/cartouche-mummy/v2/atlas.png",
+    "mummy--vault-mummy": "/combat/mob-pool/undead/mummy/variants/vault-mummy/v2/atlas.png",
+    "vampire--crimson-knight-vampire": "/combat/mob-pool/undead/vampire/variants/crimson-knight-vampire/v2/atlas.png",
+    "vampire--night-lord-vampire": "/combat/mob-pool/undead/vampire/variants/night-lord-vampire/v2/atlas.png",
+    "vampire--bloodveil-vampire": "/combat/mob-pool/undead/vampire/variants/bloodveil-vampire/v2/atlas.png",
+    "vampire--grave-count-vampire": "/combat/mob-pool/undead/vampire/variants/grave-count-vampire/v2/atlas.png",
+    "demon--ember-knight-demon": "/combat/mob-pool/demon/demon/variants/ember-knight-demon/v2/atlas.png",
+    "demon--dread-herald-demon": "/combat/mob-pool/demon/demon/variants/dread-herald-demon/v2/atlas.png",
+    "slime--orchard-slime": "/combat/mob-pool/formless/slime/variants/orchard-slime/v2/atlas.png",
+    "slime--devourer-slime": "/combat/mob-pool/formless/slime/variants/devourer-slime/v2/atlas.png",
+    "slime--bog-slime": "/combat/mob-pool/formless/slime/variants/bog-slime/v2/atlas.png",
+    "slime--rime-slime": "/combat/mob-pool/formless/slime/variants/rime-slime/v2/atlas.png",
+    "slime--slag-slime": "/combat/mob-pool/formless/slime/variants/slag-slime/v2/atlas.png",
+    "slime--abyss-slime": "/combat/mob-pool/formless/slime/variants/abyss-slime/v2/atlas.png",
+    "slime--brook-slime": "/combat/mob-pool/formless/slime/variants/brook-slime/v2/atlas.png",
+    "slime--deepwater-slime": "/combat/mob-pool/formless/slime/variants/deepwater-slime/v2/atlas.png",
+    "spider--orchard-spider": "/combat/mob-pool/insect/spider/variants/orchard-spider/v2/atlas.png",
+    "spider--cave-spider": "/combat/mob-pool/insect/spider/variants/cave-spider/v2/atlas.png",
+    "spider--web-spider": "/combat/mob-pool/insect/spider/variants/web-spider/v2/atlas.png",
+    "spider--venom-spider": "/combat/mob-pool/insect/spider/variants/venom-spider/v2/atlas.png",
+    "spider--mossback-spider": "/combat/mob-pool/insect/spider/variants/mossback-spider/v2/atlas.png",
+    "spider--fenweb-spider": "/combat/mob-pool/insect/spider/variants/fenweb-spider/v2/atlas.png",
+    "spider--moonweb-spider": "/combat/mob-pool/insect/spider/variants/moonweb-spider/v2/atlas.png",
+    "wolf--hunting-wolf": "/combat/mob-pool/beast/wolf/variants/hunting-wolf/v2/atlas.png",
+    "wolf--shadow-wolf": "/combat/mob-pool/beast/wolf/variants/shadow-wolf/v2/atlas.png",
+    "wolf--moonfang-wolf": "/combat/mob-pool/beast/wolf/variants/moonfang-wolf/v2/atlas.png",
+    "golem--stone-golem": "/combat/mob-pool/elemental/golem/variants/stone-golem/v2/atlas.png",
+    "golem--guardian-golem": "/combat/mob-pool/elemental/golem/variants/guardian-golem/v2/atlas.png",
+    "golem--crystal-golem": "/combat/mob-pool/elemental/golem/variants/crystal-golem/v2/atlas.png",
+    "golem--drowned-golem": "/combat/mob-pool/elemental/golem/variants/drowned-golem/v2/atlas.png",
+    "golem--vault-golem": "/combat/mob-pool/elemental/golem/variants/vault-golem/v2/atlas.png",
+    "golem--watchtower-golem": "/combat/mob-pool/elemental/golem/variants/watchtower-golem/v2/atlas.png",
+    "golem--icebound-golem": "/combat/mob-pool/elemental/golem/variants/icebound-golem/v2/atlas.png",
+    "dragon--wyrmling": "/combat/mob-pool/dragon/dragon/variants/wyrmling/v2/atlas.png",
+    "dragon--dawnfire-dragon": "/combat/mob-pool/dragon/dragon/variants/dawnfire-dragon/v2/atlas.png",
+    "dragon--rime-dragon": "/combat/mob-pool/dragon/dragon/variants/rime-dragon/v2/atlas.png",
+    "treant--rotting-treant": "/combat/mob-pool/plant/treant/variants/rotting-treant/v2/atlas.png",
+    "treant--thicket-treant": "/combat/mob-pool/plant/treant/variants/thicket-treant/v2/atlas.png",
+    "treant--groveheart-treant": "/combat/mob-pool/plant/treant/variants/groveheart-treant/v2/atlas.png",
+    "human--orchard-poacher": "/combat/mob-pool/humanoid/human/variants/orchard-poacher/v2/atlas.png",
+    "human--ranger": "/combat/mob-pool/humanoid/human/variants/ranger/v2/atlas.png",
+    "human--knight": "/combat/mob-pool/humanoid/human/variants/knight/v2/atlas.png",
+    "human--mage": "/combat/mob-pool/humanoid/human/variants/mage/v2/atlas.png",
+    "human--banner-captain": "/combat/mob-pool/humanoid/human/variants/banner-captain/v2/atlas.png",
+    "lizardman--scale-knight-lizardman": "/combat/mob-pool/humanoid/lizardman/variants/scale-knight-lizardman/v2/atlas.png",
+    "lizardman--reed-spear-lizardman": "/combat/mob-pool/humanoid/lizardman/variants/reed-spear-lizardman/v2/atlas.png",
+    "lizardman--mire-lizardman": "/combat/mob-pool/humanoid/lizardman/variants/mire-lizardman/v2/atlas.png",
+    "lizardman--sunscale-lizardman": "/combat/mob-pool/humanoid/lizardman/variants/sunscale-lizardman/v2/atlas.png",
+    "elf--dark-elf": "/combat/mob-pool/humanoid/elf/variants/dark-elf/v2/atlas.png",
+    "elf--starreader-elf": "/combat/mob-pool/humanoid/elf/variants/starreader-elf/v2/atlas.png",
+    "giant--hill-giant": "/combat/mob-pool/humanoid/giant/variants/hill-giant/v2/atlas.png",
+    "giant--peak-giant": "/combat/mob-pool/humanoid/giant/variants/peak-giant/v2/atlas.png",
+    "werewolf--blood-werewolf": "/combat/mob-pool/beast/werewolf/variants/blood-werewolf/v2/atlas.png",
+    "werewolf--elder-werewolf": "/combat/mob-pool/beast/werewolf/variants/elder-werewolf/v2/atlas.png",
+    "dryad--verdant-elder-dryad": "/combat/mob-pool/plant/dryad/variants/verdant-elder-dryad/v2/atlas.png",
+    "siren--tidal-wave-siren": "/combat/mob-pool/fish/siren/variants/tidal-wave-siren/v2/atlas.png",
+    "siren--abyssal-siren": "/combat/mob-pool/fish/siren/variants/abyssal-siren/v2/atlas.png",
+    "siren--stormwater-siren": "/combat/mob-pool/fish/siren/variants/stormwater-siren/v2/atlas.png",
+    "wraith--chain-wraith": "/combat/mob-pool/undead/wraith/variants/chain-wraith/v2/atlas.png",
+    "wraith--dread-wraith": "/combat/mob-pool/undead/wraith/variants/dread-wraith/v2/atlas.png",
+    "wraith--hollow-wraith": "/combat/mob-pool/undead/wraith/variants/hollow-wraith/v2/atlas.png",
+    "imp--pinch-imp": "/combat/mob-pool/demon/imp/variants/pinch-imp/v2/atlas.png",
+    "imp--hornling-imp": "/combat/mob-pool/demon/imp/variants/hornling-imp/v2/atlas.png",
+    "wyvern--shriek-wyvern": "/combat/mob-pool/dragon/wyvern/variants/shriek-wyvern/v2/atlas.png",
+    "wyvern--elder-wyvern": "/combat/mob-pool/dragon/wyvern/variants/elder-wyvern/v2/atlas.png",
+    "beetle--meadow-beetle": "/combat/mob-pool/insect/beetle/variants/meadow-beetle/v2/atlas.png",
+    "beetle--carapace-beetle": "/combat/mob-pool/insect/beetle/variants/carapace-beetle/v2/atlas.png",
+    "beetle--hollow-beetle": "/combat/mob-pool/insect/beetle/variants/hollow-beetle/v2/atlas.png",
+    "hornet--meadow-hornet": "/combat/mob-pool/insect/hornet/variants/meadow-hornet/v2/atlas.png",
+    "hornet--bog-hornet": "/combat/mob-pool/insect/hornet/variants/bog-hornet/v2/atlas.png",
+    "hornet--vespa-hornet": "/combat/mob-pool/insect/hornet/variants/vespa-hornet/v2/atlas.png",
+    "hornet--queenling-hornet": "/combat/mob-pool/insect/hornet/variants/queenling-hornet/v2/atlas.png",
+    "ooze--mire-ooze": "/combat/mob-pool/formless/ooze/variants/mire-ooze/v2/atlas.png",
+    "ooze--silt-ooze": "/combat/mob-pool/formless/ooze/variants/silt-ooze/v2/atlas.png",
+    "ooze--vat-ooze": "/combat/mob-pool/formless/ooze/variants/vat-ooze/v2/atlas.png",
+    "ooze--blight-ooze": "/combat/mob-pool/formless/ooze/variants/blight-ooze/v2/atlas.png",
+    "wisp--arc-wisp": "/combat/mob-pool/elemental/wisp/variants/arc-wisp/v2/atlas.png",
+    "harpy--harpy-screecher": "/combat/mob-pool/beast/harpy/variants/harpy-screecher/v2/atlas.png",
+    "bonehound--bone-hound-gnawer": "/combat/mob-pool/undead/bonehound/variants/bone-hound-gnawer/v2/atlas.png",
+    "revenant--frost-revenant-warden": "/combat/mob-pool/undead/revenant/variants/frost-revenant-warden/v2/atlas.png",
+    "mirehydra--mire-hydra-broodling": "/combat/mob-pool/dragon/mirehydra/variants/mire-hydra-broodling/v2/atlas.png",
+    "slaggolem--slag-golem-crusher": "/combat/mob-pool/elemental/slaggolem/variants/slag-golem-crusher/v2/atlas.png",
+    "wyrmling--wyrmling-scaler": "/combat/mob-pool/dragon/wyrmling/variants/wyrmling-scaler/v2/atlas.png"
   }
 }

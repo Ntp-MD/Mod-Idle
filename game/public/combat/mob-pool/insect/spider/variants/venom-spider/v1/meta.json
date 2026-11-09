@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "spider--venom-spider",
+  "name": "Venom Spider",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 53,
+      "y": 144,
+      "width": 150,
+      "height": 80,
+      "offsetX": 53,
+      "offsetY": 144
+    },
+    {
+      "x": 309,
+      "y": 142,
+      "width": 150,
+      "height": 82,
+      "offsetX": 53,
+      "offsetY": 142
+    },
+    {
+      "x": 64,
+      "y": 399,
+      "width": 128,
+      "height": 81,
+      "offsetX": 64,
+      "offsetY": 143
+    },
+    {
+      "x": 320,
+      "y": 399,
+      "width": 129,
+      "height": 81,
+      "offsetX": 64,
+      "offsetY": 143
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "spider",
+  "variantId": "venom-spider"
+}

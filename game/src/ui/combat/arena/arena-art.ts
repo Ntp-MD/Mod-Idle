@@ -1,5 +1,4 @@
 import { pixelArenaArt } from './arena-art-pixel-v2';
-import { beetleVariants } from './arena-art-beetle';
 import { arenaGroundMaterials, type ArenaGroundMaterial } from './arena-ground-materials';
 
 export type ArenaDirection =
@@ -34,6 +33,8 @@ export type ArenaSpriteSheet = {
   frames: number;
   startFrame?: number;
   anchor?: { x: number; y: number };
+  mainGripCell?: { x: number; y: number };
+  offGripCell?: { x: number; y: number };
   frameMs: number;
   loop: boolean;
   impactMs?: number;
@@ -44,7 +45,13 @@ export type ArenaSpriteSheet = {
 };
 
 export type ArenaCharacterArt = {
+  /** Importer schema version; BodyVisual normalization reports mismatches. */
+  schemaVersion?: number;
+  /** Canonical asset identity reported in validation problems and fallbacks. */
+  assetId?: string;
   displayHeight: number;
+  /** Uniform presentation correction aligning the species' south idle height to the roster median. */
+  displayScale?: number;
   anchor: { x: number; y: number };
   pixelArt?: boolean;
   /** Target visible source-pixel height by clip, normalized around each frame's root anchor. */
@@ -79,6 +86,7 @@ export function arenaArtExtent(art: ArenaCharacterArt | null) {
 export type ArenaPixelSpriteSet = {
   hero: ArenaCharacterArt;
   species: Readonly<Partial<Record<string, ArenaCharacterArt>>>;
+  variants: Readonly<Partial<Record<string, Readonly<Record<string, ArenaCharacterArt>>>>>;
 };
 
 export type ArenaArt = ArenaPixelSpriteSet & {
@@ -90,10 +98,12 @@ export const arenaArt: ArenaArt = {
   background: arenaGroundMaterials.forest,
   hero: pixelArenaArt.hero,
   species: pixelArenaArt.species,
+  variants: pixelArenaArt.variants,
 };
 
-/** Sprite art is selected by canonical species id; other actors retain their current art until converted. */
+/** Use authored variant art when present; unavailable variants fall back to their species pawn. */
 export function arenaArtForSpecies(speciesId: string | undefined, variant?: string): ArenaCharacterArt | null {
-  if (speciesId === 'beetle' && variant && beetleVariants[variant]) return beetleVariants[variant];
-  return speciesId ? arenaArt.species[speciesId] ?? null : null;
+  if (!speciesId) return null;
+  return variant ? arenaArt.variants[speciesId]?.[variant] ?? arenaArt.species[speciesId] ?? null
+    : arenaArt.species[speciesId] ?? null;
 }

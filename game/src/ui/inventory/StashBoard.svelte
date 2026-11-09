@@ -27,9 +27,9 @@
     tabs: number;
     tab: number;
     carriedSort?: SortKey;
-    addtab?: { rowId: string; label: string; price: number; can: boolean; why: string } | null;
+    addtab?: { rowId: string; label: string; price: number; can: boolean; why: string; expected?: { token: string; target?: { where: 'gear' | 'bag'; index: number } } } | null;
     ontab: (t: number) => void;
-    onaddtab?: (rowId: string) => void;
+    onaddtab?: (rowId: string, expected?: { token: string; target?: { where: 'gear' | 'bag'; index: number } }) => void;
     oncarriedsort?: (k: SortKey) => void;
     ondeposit: (bagIndex: number) => void;
     onwithdraw: (stashIndex: number) => void;
@@ -100,7 +100,7 @@
       </Tabs>
       <button class="add btn btn-quiet" disabled={!addtab?.can}
               title={addtab ? `${addtab.label} — ${addtab.price} gold at this settlement's stall` : 'No line this settlement stocks adds a tab'}
-              onclick={() => addtab && onaddtab?.(addtab.rowId)}>
+              onclick={() => addtab && onaddtab?.(addtab.rowId, addtab.expected)}>
         <img class="icon-label" src={crateArt} alt="" aria-hidden="true" />
         <span>Add a tab</span>
         {#if addtab}<b>{addtab.price} gold</b>{/if}

@@ -2,7 +2,7 @@
   "status": "candidate-review",
   "generator": "SenseNova U1.5 Lite",
   "source": "art-reference/animation/outputs/sensenova-u1-5-lite-posegen-matrix-2026-11-05/mirehydra-attack-north-west-01-contact-raw.png",
-  "reference": "art-reference/monsters/dragon/mirehydra/mirehydra/animation/poses/attack/north-east/01-contact.png",
+  "reference": "archive/art-reference/monsters/dragon/mirehydra/mirehydra/animation/poses/attack/north-east/01-contact.png",
   "prompt": "Create the missing Mirehydra frame attack / north-west / 01-contact. Image 1 is the authoritative north-west anatomy, head count and facing reference. Image 2 is only the attack-contact phase reference. Draw the same Mirehydra in the 01-contact strike pose while facing north-west; keep all three heads, preserve the species palette and pixel-art style, and do not mirror image 2 or change the camera. One complete sprite on a perfectly flat pure white background, no floor, shadows, glow, checkerboard, text or extra objects.",
   "action": "attack",
   "direction": "north-west",

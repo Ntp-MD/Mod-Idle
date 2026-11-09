@@ -10,11 +10,11 @@ type MobDraftMetadata = SpriteAtlasMetadata & {
 };
 
 const metadataModules = import.meta.glob<MobDraftMetadata>(
-  '../../../../../art-reference/monsters/*/*/*/meta.json',
+  '../../../../../archive/art-reference/monsters/*/*/*/meta.json',
   { import: 'default' },
 );
 const atlasModules = import.meta.glob<string>(
-  '../../../../../art-reference/monsters/*/*/*/atlas/animation-draft.png',
+  '../../../../../archive/art-reference/monsters/*/*/*/atlas/animation-draft.png',
   { query: '?url', import: 'default' },
 );
 const qaPassedMetadataPaths = new Set<string>(MOB_DRAFT_VARIANT_QA_PASS_METADATA_PATHS);

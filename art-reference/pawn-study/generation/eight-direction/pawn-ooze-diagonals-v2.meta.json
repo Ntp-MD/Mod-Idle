@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "identityId": "ooze",
+  "identityName": "Ooze",
+  "identityKind": "species",
+  "sourceSheet": "art-reference/pawn-study/sheets/ooze.png",
+  "sizeReference": "game/public/combat/mob-pool/formless/ooze/v1/atlas.png",
+  "generatedSheet": "art-reference/pawn-study/generation/eight-direction/pawn-ooze-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": ["north-east", "south-east", "south-west", "north-west"],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "cardinalVisibleHeightsRuntimePx": [131, 138],
+  "canvas": {
+    "requested": {"width": 1024, "height": 1024},
+    "generated": {"width": 1254, "height": 1254},
+    "cellSize": 627,
+    "background": "white"
+  },
+  "measuredVisibleHeightSourcePx": [388, 390, 391, 389],
+  "promptSummary": "Generate directional Ooze rear/front three-quarter views, preserving its squat purple blob form, yellow eyes and cardinal scale; no limbs or detached particles.",
+  "review": {
+    "pose": false,
+    "anchor": false,
+    "sharedScale": false,
+    "alphaAndCellBounds": false
+  },
+  "note": "Saved as an alternate because the original pawn-ooze-diagonals.png already existed and did not match the cardinal body plan. Parent review is needed before selecting a source for packing."
+}

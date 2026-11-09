@@ -1,0 +1,148 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "hornet",
+  "name": "Hornet",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 28,
+      "y": 72,
+      "width": 200,
+      "height": 152,
+      "offsetX": 28,
+      "offsetY": 72
+    },
+    {
+      "x": 305,
+      "y": 67,
+      "width": 158,
+      "height": 157,
+      "offsetX": 49,
+      "offsetY": 67
+    },
+    {
+      "x": 543,
+      "y": 68,
+      "width": 195,
+      "height": 156,
+      "offsetX": 31,
+      "offsetY": 68
+    },
+    {
+      "x": 820,
+      "y": 72,
+      "width": 153,
+      "height": 152,
+      "offsetX": 52,
+      "offsetY": 72
+    },
+    {
+      "x": 32,
+      "y": 332,
+      "width": 192,
+      "height": 148,
+      "offsetX": 32,
+      "offsetY": 76
+    },
+    {
+      "x": 307,
+      "y": 325,
+      "width": 154,
+      "height": 155,
+      "offsetX": 51,
+      "offsetY": 69
+    },
+    {
+      "x": 545,
+      "y": 324,
+      "width": 190,
+      "height": 156,
+      "offsetX": 33,
+      "offsetY": 68
+    },
+    {
+      "x": 818,
+      "y": 320,
+      "width": 157,
+      "height": 160,
+      "offsetX": 50,
+      "offsetY": 64
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/monsters/insect/hornet/hornet/reference.png",
+  "sourceSha256": "417f4865181a4911cecc3c1924cd20d5f5422e914fc8e6b6f7c48d43a0cf16c3",
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-hornet-diagonals.png",
+  "diagonalSourceSha256": "5948403239b037293afe30906b571e11e542a13fae7babd9264e1de3b640cbd0",
+  "diagonalScaleFactor": 0.412153
+}

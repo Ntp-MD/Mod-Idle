@@ -1,0 +1,148 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "wyrmling",
+  "name": "Wyrmling",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 57,
+      "y": 49,
+      "width": 142,
+      "height": 175,
+      "offsetX": 57,
+      "offsetY": 49
+    },
+    {
+      "x": 308,
+      "y": 56,
+      "width": 153,
+      "height": 168,
+      "offsetX": 52,
+      "offsetY": 56
+    },
+    {
+      "x": 540,
+      "y": 54,
+      "width": 200,
+      "height": 170,
+      "offsetX": 28,
+      "offsetY": 54
+    },
+    {
+      "x": 819,
+      "y": 43,
+      "width": 154,
+      "height": 181,
+      "offsetX": 51,
+      "offsetY": 43
+    },
+    {
+      "x": 63,
+      "y": 305,
+      "width": 131,
+      "height": 175,
+      "offsetX": 63,
+      "offsetY": 49
+    },
+    {
+      "x": 306,
+      "y": 296,
+      "width": 157,
+      "height": 184,
+      "offsetX": 50,
+      "offsetY": 40
+    },
+    {
+      "x": 541,
+      "y": 308,
+      "width": 198,
+      "height": 172,
+      "offsetX": 29,
+      "offsetY": 52
+    },
+    {
+      "x": 820,
+      "y": 308,
+      "width": 153,
+      "height": 172,
+      "offsetX": 52,
+      "offsetY": 52
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/monsters/dragon/wyrmling/wyrmling/reference.png",
+  "sourceSha256": "06a19d7c34be55759b29f9905aab133feeb464f5396714cf14087c5dd20a4228",
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-wyrmling-diagonals.png",
+  "diagonalSourceSha256": "45ae37b4d6e390c4a10d6f2c811cd27cac1f60c3cbd959daad249d76760c9e3e",
+  "diagonalScaleFactor": null
+}

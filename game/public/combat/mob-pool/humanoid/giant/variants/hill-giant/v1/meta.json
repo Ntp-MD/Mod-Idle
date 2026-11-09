@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "giant--hill-giant",
+  "name": "Hill Giant",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 80,
+      "y": 90,
+      "width": 96,
+      "height": 134,
+      "offsetX": 80,
+      "offsetY": 90
+    },
+    {
+      "x": 338,
+      "y": 90,
+      "width": 93,
+      "height": 134,
+      "offsetX": 82,
+      "offsetY": 90
+    },
+    {
+      "x": 88,
+      "y": 338,
+      "width": 80,
+      "height": 142,
+      "offsetX": 88,
+      "offsetY": 82
+    },
+    {
+      "x": 345,
+      "y": 338,
+      "width": 79,
+      "height": 142,
+      "offsetX": 89,
+      "offsetY": 82
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "giant",
+  "variantId": "hill-giant"
+}

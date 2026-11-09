@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "ooze--silt-ooze",
+  "name": "Silt Ooze",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 58,
+      "y": 91,
+      "width": 141,
+      "height": 133,
+      "offsetX": 58,
+      "offsetY": 91
+    },
+    {
+      "x": 318,
+      "y": 88,
+      "width": 132,
+      "height": 136,
+      "offsetX": 62,
+      "offsetY": 88
+    },
+    {
+      "x": 566,
+      "y": 87,
+      "width": 149,
+      "height": 137,
+      "offsetX": 54,
+      "offsetY": 87
+    },
+    {
+      "x": 835,
+      "y": 89,
+      "width": 122,
+      "height": 135,
+      "offsetX": 67,
+      "offsetY": 89
+    },
+    {
+      "x": 58,
+      "y": 347,
+      "width": 140,
+      "height": 133,
+      "offsetX": 58,
+      "offsetY": 91
+    },
+    {
+      "x": 320,
+      "y": 342,
+      "width": 129,
+      "height": 138,
+      "offsetX": 64,
+      "offsetY": 86
+    },
+    {
+      "x": 565,
+      "y": 343,
+      "width": 150,
+      "height": 137,
+      "offsetX": 53,
+      "offsetY": 87
+    },
+    {
+      "x": 831,
+      "y": 341,
+      "width": 130,
+      "height": 139,
+      "offsetX": 63,
+      "offsetY": 85
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-ooze--silt-ooze-diagonals.png",
+  "diagonalSourceSha256": "87ed53c15e288cc655c33fa31faea7e073b15bccf670cf097afa05126d34e857",
+  "diagonalScaleFactor": 0.413273,
+  "speciesId": "ooze",
+  "variantId": "silt-ooze"
+}

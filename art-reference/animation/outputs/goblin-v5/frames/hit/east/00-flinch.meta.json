@@ -4,8 +4,8 @@
   "action": "hit",
   "direction": "east",
   "pose": "00-flinch",
-  "source": "art-reference/monsters/humanoid/goblin/animation/poses/hit/east/00-flinch.png",
-  "sourceMetadata": "art-reference/monsters/humanoid/goblin/animation/poses/hit/east/00-flinch.meta.json",
+  "source": "archive/art-reference/monsters/humanoid/goblin/animation/poses/hit/east/00-flinch.png",
+  "sourceMetadata": "archive/art-reference/monsters/humanoid/goblin/animation/poses/hit/east/00-flinch.meta.json",
   "sourcePixelsModified": false,
   "frameCanvas": {
     "width": 384,

@@ -496,7 +496,7 @@
       },
       "file": "poses/idle/south.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/idle/south.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/idle/south.png"
     },
     {
       "row": 0,
@@ -562,7 +562,7 @@
       },
       "file": "poses/idle/south-east.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/idle/south-east.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/idle/south-east.png"
     },
     {
       "row": 0,
@@ -628,7 +628,7 @@
       },
       "file": "poses/idle/east.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/idle/east.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/idle/east.png"
     },
     {
       "row": 0,
@@ -694,7 +694,7 @@
       },
       "file": "poses/idle/north-east.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/idle/north-east.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/idle/north-east.png"
     },
     {
       "row": 0,
@@ -760,7 +760,7 @@
       },
       "file": "poses/idle/north.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/idle/north.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/idle/north.png"
     },
     {
       "row": 0,
@@ -826,7 +826,7 @@
       },
       "file": "poses/idle/north-west.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/idle/north-west.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/idle/north-west.png"
     },
     {
       "row": 0,
@@ -892,7 +892,7 @@
       },
       "file": "poses/idle/west.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/idle/west.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/idle/west.png"
     },
     {
       "row": 0,
@@ -958,7 +958,7 @@
       },
       "file": "poses/idle/south-west.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/idle/south-west.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/idle/south-west.png"
     },
     {
       "row": 0,
@@ -1224,7 +1224,7 @@
       },
       "file": "poses/walk/east/00-stride-a.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/walk/east/00-stride-a.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/walk/east/00-stride-a.png"
     },
     {
       "row": 1,
@@ -1590,7 +1590,7 @@
       },
       "file": "poses/walk/west/00-stride-a.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/walk/west/00-stride-a.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/walk/west/00-stride-a.png"
     },
     {
       "row": 1,
@@ -1956,7 +1956,7 @@
       },
       "file": "poses/walk/east/01-stride-b.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/walk/east/01-stride-b.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/walk/east/01-stride-b.png"
     },
     {
       "row": 2,
@@ -2322,7 +2322,7 @@
       },
       "file": "poses/walk/west/01-stride-b.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/walk/west/01-stride-b.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/walk/west/01-stride-b.png"
     },
     {
       "row": 2,
@@ -2688,7 +2688,7 @@
       },
       "file": "poses/walk/east/02-stride-c.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/walk/east/02-stride-c.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/walk/east/02-stride-c.png"
     },
     {
       "row": 3,
@@ -3054,7 +3054,7 @@
       },
       "file": "poses/walk/west/02-stride-c.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/walk/west/02-stride-c.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/walk/west/02-stride-c.png"
     },
     {
       "row": 3,
@@ -3420,7 +3420,7 @@
       },
       "file": "poses/walk/east/03-stride-d.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/walk/east/03-stride-d.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/walk/east/03-stride-d.png"
     },
     {
       "row": 4,
@@ -3786,7 +3786,7 @@
       },
       "file": "poses/walk/west/03-stride-d.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/walk/west/03-stride-d.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/walk/west/03-stride-d.png"
     },
     {
       "row": 4,
@@ -4152,7 +4152,7 @@
       },
       "file": "poses/attack/east/00-windup.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/attack/east/00-windup.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/attack/east/00-windup.png"
     },
     {
       "row": 5,
@@ -4518,7 +4518,7 @@
       },
       "file": "poses/attack/west/00-windup.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/attack/west/00-windup.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/attack/west/00-windup.png"
     },
     {
       "row": 5,
@@ -4884,7 +4884,7 @@
       },
       "file": "poses/attack/east/01-contact.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/attack/east/01-contact.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/attack/east/01-contact.png"
     },
     {
       "row": 6,
@@ -5250,7 +5250,7 @@
       },
       "file": "poses/attack/west/01-contact.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/attack/west/01-contact.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/attack/west/01-contact.png"
     },
     {
       "row": 6,
@@ -5616,7 +5616,7 @@
       },
       "file": "poses/attack/east/02-follow-through.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/attack/east/02-follow-through.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/attack/east/02-follow-through.png"
     },
     {
       "row": 7,
@@ -5982,7 +5982,7 @@
       },
       "file": "poses/attack/west/02-follow-through.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/attack/west/02-follow-through.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/attack/west/02-follow-through.png"
     },
     {
       "row": 7,
@@ -6348,7 +6348,7 @@
       },
       "file": "poses/attack/east/03-recovery.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/attack/east/03-recovery.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/attack/east/03-recovery.png"
     },
     {
       "row": 8,
@@ -6714,7 +6714,7 @@
       },
       "file": "poses/attack/west/03-recovery.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/attack/west/03-recovery.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/attack/west/03-recovery.png"
     },
     {
       "row": 8,
@@ -7080,7 +7080,7 @@
       },
       "file": "poses/hit/east/00-flinch.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/hit/east/00-flinch.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/hit/east/00-flinch.png"
     },
     {
       "row": 9,
@@ -7446,7 +7446,7 @@
       },
       "file": "poses/hit/west/00-flinch.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/hit/west/00-flinch.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/hit/west/00-flinch.png"
     },
     {
       "row": 9,
@@ -7812,7 +7812,7 @@
       },
       "file": "poses/hit/east/01-recoil.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/hit/east/01-recoil.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/hit/east/01-recoil.png"
     },
     {
       "row": 10,
@@ -8178,7 +8178,7 @@
       },
       "file": "poses/hit/west/01-recoil.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/hit/west/01-recoil.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/hit/west/01-recoil.png"
     },
     {
       "row": 10,
@@ -8544,7 +8544,7 @@
       },
       "file": "poses/hit/east/02-recover.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/hit/east/02-recover.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/hit/east/02-recover.png"
     },
     {
       "row": 11,
@@ -8910,7 +8910,7 @@
       },
       "file": "poses/hit/west/02-recover.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/hit/west/02-recover.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/hit/west/02-recover.png"
     },
     {
       "row": 11,
@@ -9276,7 +9276,7 @@
       },
       "file": "poses/hit/east/03-ready.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/hit/east/03-ready.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/hit/east/03-ready.png"
     },
     {
       "row": 12,
@@ -9642,7 +9642,7 @@
       },
       "file": "poses/hit/west/03-ready.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/hit/west/03-ready.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/hit/west/03-ready.png"
     },
     {
       "row": 12,
@@ -10008,7 +10008,7 @@
       },
       "file": "poses/death/east/00-fall.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/death/east/00-fall.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/death/east/00-fall.png"
     },
     {
       "row": 13,
@@ -10374,7 +10374,7 @@
       },
       "file": "poses/death/west/00-fall.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/death/west/00-fall.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/death/west/00-fall.png"
     },
     {
       "row": 13,
@@ -10740,7 +10740,7 @@
       },
       "file": "poses/death/east/01-collapse.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/death/east/01-collapse.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/death/east/01-collapse.png"
     },
     {
       "row": 14,
@@ -11106,7 +11106,7 @@
       },
       "file": "poses/death/west/01-collapse.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/death/west/01-collapse.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/death/west/01-collapse.png"
     },
     {
       "row": 14,
@@ -11472,7 +11472,7 @@
       },
       "file": "poses/death/east/02-ground.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/death/east/02-ground.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/death/east/02-ground.png"
     },
     {
       "row": 15,
@@ -11838,7 +11838,7 @@
       },
       "file": "poses/death/west/02-ground.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/death/west/02-ground.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/death/west/02-ground.png"
     },
     {
       "row": 15,
@@ -12204,7 +12204,7 @@
       },
       "file": "poses/death/east/03-settle.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/death/east/03-settle.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/death/east/03-settle.png"
     },
     {
       "row": 16,
@@ -12570,7 +12570,7 @@
       },
       "file": "poses/death/west/03-settle.png",
       "kind": "preserved-legacy",
-      "source": "art-reference/monsters/humanoid/giant/animation/poses/death/west/03-settle.png"
+      "source": "archive/art-reference/monsters/humanoid/giant/animation/poses/death/west/03-settle.png"
     },
     {
       "row": 16,

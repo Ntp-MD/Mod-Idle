@@ -1,0 +1,148 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "wyvern",
+  "name": "Wyvern",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 62,
+      "y": 91,
+      "width": 133,
+      "height": 133,
+      "offsetX": 62,
+      "offsetY": 91
+    },
+    {
+      "x": 324,
+      "y": 87,
+      "width": 121,
+      "height": 137,
+      "offsetX": 68,
+      "offsetY": 87
+    },
+    {
+      "x": 546,
+      "y": 90,
+      "width": 189,
+      "height": 134,
+      "offsetX": 34,
+      "offsetY": 90
+    },
+    {
+      "x": 846,
+      "y": 83,
+      "width": 100,
+      "height": 141,
+      "offsetX": 78,
+      "offsetY": 83
+    },
+    {
+      "x": 64,
+      "y": 342,
+      "width": 128,
+      "height": 138,
+      "offsetX": 64,
+      "offsetY": 86
+    },
+    {
+      "x": 334,
+      "y": 333,
+      "width": 100,
+      "height": 147,
+      "offsetX": 78,
+      "offsetY": 77
+    },
+    {
+      "x": 548,
+      "y": 340,
+      "width": 185,
+      "height": 140,
+      "offsetX": 36,
+      "offsetY": 84
+    },
+    {
+      "x": 836,
+      "y": 341,
+      "width": 121,
+      "height": 139,
+      "offsetX": 68,
+      "offsetY": 85
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/monsters/dragon/wyvern/wyvern/reference.png",
+  "sourceSha256": "a522830935c0c4222a74c451e6fab981862772fe56d37c2e058f79d5eff6f994",
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-wyvern-diagonals.png",
+  "diagonalSourceSha256": "bdf2b9c4a92744bdc98599c5e5ec9bcc5f724af910017ef03c943ad7989f450d",
+  "diagonalScaleFactor": 0.394366
+}

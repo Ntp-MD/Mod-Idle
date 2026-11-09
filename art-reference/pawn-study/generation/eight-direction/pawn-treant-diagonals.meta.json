@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "treant",
+  "name": "Treant",
+  "generatedSource": "art-reference/pawn-study/generation/eight-direction/pawn-treant-diagonals.png",
+  "sourceReferences": [
+    "art-reference/pawn-study/sheets/treant.png",
+    "art-reference/pawn-study/atlases/treant.png"
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "promptSummary": "Generate base Treant diagonals preserving broad upright trunk, branching bare crown, root base, bark grooves, moss and amber eye markings; no humanoid limbs. NE/NW rear eyes hidden, SE/SW mirrored front eyes visible.",
+  "requestedLayout": {
+    "rows": 2,
+    "columns": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west"
+  },
+  "actualImage": {
+    "width": 1254,
+    "height": 1254,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "alpha": "transparent",
+    "visibleBoundsAlphaThreshold": 16,
+    "visibleBoundsPx": {
+      "northEast": {
+        "x": 165,
+        "y": 104,
+        "width": 325,
+        "height": 396
+      },
+      "southEast": {
+        "x": 139,
+        "y": 101,
+        "width": 329,
+        "height": 399
+      },
+      "southWest": {
+        "x": 163,
+        "y": 100,
+        "width": 311,
+        "height": 393
+      },
+      "northWest": {
+        "x": 141,
+        "y": 95,
+        "width": 312,
+        "height": 403
+      }
+    },
+    "rootBaselineYByCellPx": {
+      "northEast": 499,
+      "southEast": 499,
+      "southWest": 492,
+      "northWest": 497
+    }
+  },
+  "review": {
+    "identity": true,
+    "directionPose": "candidate appears to follow NE/NW rear eyes hidden, SE/SW mirrored front eyes visible",
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed",
+    "pose": true
+  },
+  "reviewConcerns": [
+    "Review remains pending before packing."
+  ],
+  "previousCandidate": "art-reference/pawn-study/generation/eight-direction/pawn-treant-diagonals-v1.png",
+  "sizeReference": "art-reference/pawn-study/atlases/treant.png",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

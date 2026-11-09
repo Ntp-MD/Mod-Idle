@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "skeleton--rattleblade-skeleton",
+  "name": "Rattleblade Skeleton",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 101,
+      "y": 82,
+      "width": 55,
+      "height": 142,
+      "offsetX": 101,
+      "offsetY": 82
+    },
+    {
+      "x": 356,
+      "y": 82,
+      "width": 57,
+      "height": 142,
+      "offsetX": 100,
+      "offsetY": 82
+    },
+    {
+      "x": 612,
+      "y": 84,
+      "width": 56,
+      "height": 140,
+      "offsetX": 100,
+      "offsetY": 84
+    },
+    {
+      "x": 868,
+      "y": 82,
+      "width": 57,
+      "height": 142,
+      "offsetX": 100,
+      "offsetY": 82
+    },
+    {
+      "x": 101,
+      "y": 338,
+      "width": 55,
+      "height": 142,
+      "offsetX": 101,
+      "offsetY": 82
+    },
+    {
+      "x": 356,
+      "y": 338,
+      "width": 56,
+      "height": 142,
+      "offsetX": 100,
+      "offsetY": 82
+    },
+    {
+      "x": 612,
+      "y": 340,
+      "width": 56,
+      "height": 140,
+      "offsetX": 100,
+      "offsetY": 84
+    },
+    {
+      "x": 868,
+      "y": 338,
+      "width": 57,
+      "height": 142,
+      "offsetX": 100,
+      "offsetY": 82
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-skeleton--rattleblade-skeleton-diagonals.png",
+  "diagonalSourceSha256": "ff22a25fa61b1768c0897625c06da0da1ba5277d6e28a8ddc5a17e4945f6408e",
+  "diagonalScaleFactor": 0.334906,
+  "speciesId": "skeleton",
+  "variantId": "rattleblade-skeleton"
+}

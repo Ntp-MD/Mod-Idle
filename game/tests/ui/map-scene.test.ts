@@ -33,7 +33,9 @@ describe('upright map scenery', () => {
     expect(figures.length).toBe(cells.length);
     const ground = new Set(Object.values(TERRAIN_ART));
     for (const m of svg.matchAll(/data-art-href="([^"]+)"/g)) expect(ground.has(m[1]), m[1]).toBe(true);
-    expect(svg).toContain('terrain-registration');
+    expect(svg.match(/class="terrain-ground"/g)).toHaveLength(cells.length);
+    expect(svg).not.toContain('data-sector=');
+    expect(svg).not.toContain('tile-depth');
     const relief = new Set(Object.values(TERRAIN_RELIEF));
     const reliefImages = [...svg.matchAll(/<g class="terrain-relief terrain-on">(.*?)<\/g>/g)];
     expect(reliefImages.length).toBeGreaterThan(0);

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "identityId": "revenant",
+  "identityName": "Frost Revenant",
+  "identityKind": "species",
+  "sourceSheet": "art-reference/pawn-study/sheets/revenant.png",
+  "sizeReference": "art-reference/pawn-study/atlases/revenant.png",
+  "generatedSheet": "art-reference/pawn-study/generation/eight-direction/pawn-revenant-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": ["north-east", "south-east", "south-west", "north-west"],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "cardinalVisibleHeightsRuntimePx": [181, 192],
+  "canvas": {
+    "requested": {"width": 1024, "height": 1024},
+    "generated": {"width": 1254, "height": 1254},
+    "cellSize": 627,
+    "background": "white"
+  },
+  "promptSummary": "Generate four Frost Revenant diagonal views matching the cardinal identity, blue ice armor, navy cloak and visible scale.",
+  "review": {
+    "pose": false,
+    "anchor": false,
+    "sharedScale": false,
+    "alphaAndCellBounds": false
+  },
+  "note": "Output size differs from requested 1024x1024. Confirm direction order, packed visible height, anchor and cell bounds before checking off the roster."
+}

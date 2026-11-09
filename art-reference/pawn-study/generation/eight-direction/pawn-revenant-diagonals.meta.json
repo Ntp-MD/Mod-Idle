@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "revenant",
+  "identityName": "Frost Revenant",
+  "identityKind": "species",
+  "editTarget": "art-reference/pawn-study/generation/eight-direction/pawn-revenant-diagonals.png",
+  "sizeReference": "art-reference/pawn-study/atlases/revenant.png",
+  "generatedSheet": "art-reference/pawn-study/generation/eight-direction/pawn-revenant-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "targetVisibleHeightRuntimePx": [
+    175,
+    186
+  ],
+  "canvas": {
+    "requested": {
+      "width": 1024,
+      "height": 1024
+    },
+    "generated": {
+      "width": 1254,
+      "height": 1254
+    },
+    "cellSize": 627,
+    "background": "white"
+  },
+  "promptSummary": "Uniformly resize the existing Frost Revenant diagonal silhouettes toward the cardinal scale, keeping poses and ground contact.",
+  "measurement": {
+    "v1RawCellVisibleHeights": [
+      452,
+      440,
+      439,
+      450
+    ],
+    "v2RawCellVisibleHeights": [
+      393,
+      392,
+      409,
+      411
+    ],
+    "relativeHeightApprox": 0.9
+  },
+  "review": {
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true
+  },
+  "note": "Raw mean height is about 90% of v1. Confirm packed visible height against the 159\u2013169 px cardinal range before checking off the roster.",
+  "packedAtlas": "art-reference/pawn-study/atlases/revenant.png",
+  "packedVisibleHeightRuntimePx": [
+    184,
+    192
+  ],
+  "reviewNotes": "Reviewed packed eight-view atlas: diagonal views retain the Frost Revenant identity and distinct NE/SE/SW/NW facings. Their visible silhouettes are 184?192 px versus 175?186 px cardinal; all eight use one character scale and root y=224, and extracted alpha fits the cells."
+}

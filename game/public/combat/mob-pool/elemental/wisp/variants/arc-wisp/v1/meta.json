@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "wisp--arc-wisp",
+  "name": "Arc Wisp",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 65,
+      "y": 82,
+      "width": 127,
+      "height": 142,
+      "offsetX": 65,
+      "offsetY": 82
+    },
+    {
+      "x": 322,
+      "y": 82,
+      "width": 125,
+      "height": 142,
+      "offsetX": 66,
+      "offsetY": 82
+    },
+    {
+      "x": 66,
+      "y": 340,
+      "width": 124,
+      "height": 140,
+      "offsetX": 66,
+      "offsetY": 84
+    },
+    {
+      "x": 323,
+      "y": 339,
+      "width": 123,
+      "height": 141,
+      "offsetX": 67,
+      "offsetY": 83
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "wisp",
+  "variantId": "arc-wisp"
+}

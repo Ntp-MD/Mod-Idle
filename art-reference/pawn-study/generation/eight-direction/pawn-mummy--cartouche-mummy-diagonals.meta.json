@@ -1,0 +1,48 @@
+{
+  "pawnId": "mummy--cartouche-mummy",
+  "candidateFile": "pawn-mummy--cartouche-mummy-diagonals.png",
+  "sourceAtlas": "art-reference/pawn-study/atlases/variants/mummy--cartouche-mummy.png",
+  "sourceSheet": "art-reference/pawn-study/sheets/variants/mummy--cartouche-mummy.png",
+  "dimensions": "1254x1254",
+  "pixelFormat": "32bpp ARGB",
+  "transparentBackground": true,
+  "cellLayout": "2x2",
+  "cellSize": "627x627",
+  "directionOrder": [
+    "NE",
+    "SE",
+    "SW",
+    "NW"
+  ],
+  "views": {
+    "NE": "rear three-quarter, face/eyes hidden",
+    "SE": "front three-quarter, black eye band and amber eyes visible",
+    "SW": "mirrored front three-quarter, eye band and amber eyes visible",
+    "NW": "mirrored rear three-quarter, face/eyes hidden"
+  },
+  "visibleBoundsPx": {
+    "NE": "x=189..437, y=91..524 (249x434)",
+    "SE": "x=187..440, y=91..524 (254x434)",
+    "SW": "x=185..439, y=91..524 (255x434)",
+    "NW": "x=187..440, y=91..524 (254x434)"
+  },
+  "visibleFootprint": "40–41% cell width and 69% height; all bounds share y=91..524.",
+  "identityCheck": "Pale layered linen wraps, teal scarf, black eye band with amber eyes on front views, golden cartouche pendant, one loose bandage tail; no limbs or weapons.",
+  "reviewStatus": "candidate-review",
+  "concerns": [
+    "Confirm partial cartouche visibility at the flank in rear three-quarter views against cardinal side-view placement.",
+    "Review packed preview scale and front/rear handedness."
+  ],
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "status": "runtime-reviewed",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

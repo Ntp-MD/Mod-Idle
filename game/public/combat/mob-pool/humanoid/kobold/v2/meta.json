@@ -1,0 +1,148 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "kobold",
+  "name": "Kobold",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 28,
+      "y": 58,
+      "width": 200,
+      "height": 166,
+      "offsetX": 28,
+      "offsetY": 58
+    },
+    {
+      "x": 300,
+      "y": 51,
+      "width": 169,
+      "height": 173,
+      "offsetX": 44,
+      "offsetY": 51
+    },
+    {
+      "x": 557,
+      "y": 52,
+      "width": 166,
+      "height": 172,
+      "offsetX": 45,
+      "offsetY": 52
+    },
+    {
+      "x": 799,
+      "y": 51,
+      "width": 195,
+      "height": 173,
+      "offsetX": 31,
+      "offsetY": 51
+    },
+    {
+      "x": 32,
+      "y": 313,
+      "width": 192,
+      "height": 167,
+      "offsetX": 32,
+      "offsetY": 57
+    },
+    {
+      "x": 300,
+      "y": 307,
+      "width": 168,
+      "height": 173,
+      "offsetX": 44,
+      "offsetY": 51
+    },
+    {
+      "x": 556,
+      "y": 307,
+      "width": 169,
+      "height": 173,
+      "offsetX": 44,
+      "offsetY": 51
+    },
+    {
+      "x": 811,
+      "y": 307,
+      "width": 170,
+      "height": 173,
+      "offsetX": 43,
+      "offsetY": 51
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/monsters/humanoid/kobold/kobold/reference.png",
+  "sourceSha256": "e592b4939998e4ab1ca3b66e1819ebf5bfa8ad92d555bce1b935354470068ea0",
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-kobold-diagonals.png",
+  "diagonalSourceSha256": "20f16599e516bbf444d1cec69b74f42798d748f0417db5f550addb3759c660d0",
+  "diagonalScaleFactor": 0.477901
+}

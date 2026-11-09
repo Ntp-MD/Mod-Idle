@@ -1,0 +1,49 @@
+{
+  "pawnId": "giant--peak-giant",
+  "candidateFile": "pawn-giant--peak-giant-diagonals.png",
+  "sourceAtlas": "art-reference/pawn-study/atlases/variants/giant--peak-giant.png",
+  "sourceSheet": "art-reference/pawn-study/sheets/variants/giant--peak-giant.png",
+  "dimensions": "1254x1254",
+  "pixelFormat": "32bpp ARGB",
+  "transparentBackground": true,
+  "cellLayout": "2x2",
+  "cellSize": "627x627",
+  "directionOrder": [
+    "NE",
+    "SE",
+    "SW",
+    "NW"
+  ],
+  "views": {
+    "NE": "rear three-quarter, face hidden",
+    "SE": "front three-quarter, face visible",
+    "SW": "mirrored front three-quarter, face visible",
+    "NW": "mirrored rear three-quarter, face hidden"
+  },
+  "visibleBoundsPx": {
+    "NE": "x=159..485, y=85..567 (327x483)",
+    "SE": "x=134..466, y=86..567 (333x482)",
+    "SW": "x=169..495, y=60..541 (327x482)",
+    "NW": "x=140..467, y=59..541 (328x483)"
+  },
+  "visibleFootprint": "52–53% cell width and 77% cell height; visible sizes closely match.",
+  "identityCheck": "Bald pale giant with red beard/eyebrows, gray riveted single shoulder guard, brown fur waist wrap; bust-only anatomy, no arms or legs.",
+  "reviewStatus": "candidate-review",
+  "concerns": [
+    "Baseline differs by 26px between top-row and bottom-row cells; correct ground/anchor alignment during packed preview review.",
+    "Confirm scale relative to runtime atlas; candidate occupies about 77% of cell height.",
+    "Rear 3/4 views show a sliver of beard at side, while face remains hidden; confirm acceptable for rear hemisphere."
+  ],
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "status": "runtime-reviewed",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

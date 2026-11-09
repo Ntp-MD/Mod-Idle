@@ -47,7 +47,7 @@ export function quoteSale(state: GameState, town: string, id: string, count: num
 
 /** Supply is shared by category at a town. Quotes are reads; only a successful sale spends demand.
  *  In a ledger city the sale splits into the city channel and the basic floor. */
-export function sellGoods(state: GameState, id: string, count: number): { ok: boolean; why?: string; pieces: number; gold: number; cityUnits?: number; eventUnits?: number; basicUnits?: number; cityGold?: number; basicGold?: number } {
+export function sellGoods(state: GameState, id: string, count: number, expected?: { carried: number; gold: number }): { ok: boolean; why?: string; pieces: number; gold: number; cityUnits?: number; eventUnits?: number; basicUnits?: number; cityGold?: number; basicGold?: number } {
   const refused = (why: string) => ({ ok: false, why, pieces: 0, gold: 0 });
   if (!atSettlement(state)) return refused('stand in a settlement to sell');
   const good = trade.byId[id];
@@ -57,6 +57,12 @@ export function sellGoods(state: GameState, id: string, count: number): { ok: bo
   if ((bucket[good.key] || 0) < count) return refused('not enough carried');
   const town = ownerOf(currentCell(state)).id;
   if (!TOWN.trade.towns[town as keyof typeof TOWN.trade.towns]) return refused('this settlement has no market');
+  if (expected) {
+    const quoted = quoteSale(state, town, id, count);
+    if ((bucket[good.key] || 0) !== expected.carried || !quoted || quoted.gold !== expected.gold) {
+      return refused('The market changed. Review the current price.');
+    }
+  }
   const ledgerOffer = state.economy && economyCity(town) ? economyOffer(state, town, id, count) : null;
   if (ledgerOffer && !ledgerOffer.ok) return refused(ledgerOffer.why || 'the city ledger refuses this sale');
   const plainQuote = ledgerOffer ? null : plainSale(state, town, good, count);

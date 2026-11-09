@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "bonehound",
+  "identityName": "Bone Hound",
+  "identityKind": "species",
+  "sourceSheet": "art-reference/pawn-study/sheets/bonehound.png",
+  "sizeReference": "art-reference/pawn-study/atlases/bonehound.png",
+  "generatedSheet": "art-reference/pawn-study/generation/eight-direction/pawn-bonehound-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "cardinalVisibleHeightsRuntimePx": [
+    93,
+    127
+  ],
+  "canvas": {
+    "requested": {
+      "width": 1024,
+      "height": 1024
+    },
+    "generated": {
+      "width": 1254,
+      "height": 1254
+    },
+    "cellSize": 627,
+    "background": "white"
+  },
+  "promptSummary": "Generate four distinct quadruped Bone Hound diagonal views, preserving the skull, ribs, four legs and segmented tail at cardinal scale.",
+  "review": {
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true
+  },
+  "note": "Output size differs from requested 1024x1024. Confirm canine anatomy, packed visible height, anchor and cell bounds before checking off the roster.",
+  "packedAtlas": "art-reference/pawn-study/atlases/bonehound.png",
+  "targetVisibleHeightRuntimePx": [
+    93,
+    127
+  ],
+  "packedVisibleHeightRuntimePx": [
+    113,
+    130
+  ],
+  "reviewNotes": "Reviewed packed eight-view atlas: quadruped anatomy retains four legs and tail; NE/SE/SW/NW are distinct. Side views have the expected lower silhouette than front/diagonal views; all directions share root y=224 and one character scale, with alpha inside cell bounds."
+}

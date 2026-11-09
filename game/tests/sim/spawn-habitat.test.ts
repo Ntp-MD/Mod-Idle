@@ -11,6 +11,35 @@ function batch(seed: number, zone: number, n: number, standTerrain?: string | nu
 }
 
 describe('habitat-weighted spawns', () => {
+  it('keeps Eastgate fields to meadow wildlife, orchard pests and camp raiders', () => {
+    const fields = [
+      ['beetle', 'hornet', 'wolf'],
+      ['slime', 'spider', 'human'],
+      ['goblin', 'kobold', 'orc'],
+    ];
+    const zone = E.mob.zones.find(row => row.id === 1)!;
+    for (const [index, expected] of fields.entries()) {
+      expect(new Set(zone.subzones[index].species)).toEqual(new Set(expected));
+      expect(new Set(eng.placementsIn(1, index + 1).map(row => row.species))).toEqual(new Set(expected));
+      for (const kind of ['normal', 'elite'] as const) {
+        const rng = mulberry32(5173);
+        for (let i = 0; i < 64; i++) {
+          const mob = spawnMob(rng, 1, kind, undefined, index);
+          expect(expected, `${zone.subzones[index].name}: ${mob.speciesId}`).toContain(mob.speciesId);
+        }
+      }
+    }
+    expect(E.mob.uniques.filter(row => row.zone === 1).every(row => ['beetle', 'goblin'].includes(row.species))).toBe(true);
+  });
+
+  it('weights each named environment against its actual map terrain', () => {
+    for (const location of E.road.locations.filter(row => row.kind === 'sub')) {
+      const sub = eng.zoneById(location.zone).subzones![location.index];
+      expect(eng.terrainOfEnvironment(sub.environment), sub.name).toBe(location.terrain);
+      expect(eng.spawnSubzoneWeight(sub, location.terrain), sub.name).toBe(3);
+    }
+  });
+
   it('keeps the stood sub-zone winning when present', () => {
     for (const zone of E.mob.zones) for (const [index, side] of (zone.subzones ?? []).entries()) {
       const mobs = batch(11, zone.id, 10, 'fixture-nonmatching-terrain', index);

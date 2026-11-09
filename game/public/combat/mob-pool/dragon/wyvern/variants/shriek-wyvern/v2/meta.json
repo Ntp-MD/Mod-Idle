@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "wyvern--shriek-wyvern",
+  "name": "Shriek Wyvern",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 80,
+      "y": 124,
+      "width": 97,
+      "height": 100,
+      "offsetX": 80,
+      "offsetY": 124
+    },
+    {
+      "x": 336,
+      "y": 119,
+      "width": 97,
+      "height": 105,
+      "offsetX": 80,
+      "offsetY": 119
+    },
+    {
+      "x": 581,
+      "y": 126,
+      "width": 119,
+      "height": 98,
+      "offsetX": 69,
+      "offsetY": 126
+    },
+    {
+      "x": 851,
+      "y": 118,
+      "width": 90,
+      "height": 106,
+      "offsetX": 83,
+      "offsetY": 118
+    },
+    {
+      "x": 81,
+      "y": 376,
+      "width": 95,
+      "height": 104,
+      "offsetX": 81,
+      "offsetY": 120
+    },
+    {
+      "x": 338,
+      "y": 377,
+      "width": 92,
+      "height": 103,
+      "offsetX": 82,
+      "offsetY": 121
+    },
+    {
+      "x": 580,
+      "y": 381,
+      "width": 121,
+      "height": 99,
+      "offsetX": 68,
+      "offsetY": 125
+    },
+    {
+      "x": 847,
+      "y": 378,
+      "width": 98,
+      "height": 102,
+      "offsetX": 79,
+      "offsetY": 122
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-wyvern--shriek-wyvern-diagonals.png",
+  "diagonalSourceSha256": "80adb3133b9c19b0681eb889fd34607fcd1af510793891e9bcbc48b4cad99070",
+  "diagonalScaleFactor": 0.22658,
+  "speciesId": "wyvern",
+  "variantId": "shriek-wyvern"
+}

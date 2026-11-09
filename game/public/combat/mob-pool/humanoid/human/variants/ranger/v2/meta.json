@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "human--ranger",
+  "name": "Ranger",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 83,
+      "y": 82,
+      "width": 90,
+      "height": 142,
+      "offsetX": 83,
+      "offsetY": 82
+    },
+    {
+      "x": 341,
+      "y": 82,
+      "width": 86,
+      "height": 142,
+      "offsetX": 85,
+      "offsetY": 82
+    },
+    {
+      "x": 600,
+      "y": 89,
+      "width": 81,
+      "height": 135,
+      "offsetX": 88,
+      "offsetY": 89
+    },
+    {
+      "x": 854,
+      "y": 82,
+      "width": 84,
+      "height": 142,
+      "offsetX": 86,
+      "offsetY": 82
+    },
+    {
+      "x": 84,
+      "y": 338,
+      "width": 89,
+      "height": 142,
+      "offsetX": 84,
+      "offsetY": 82
+    },
+    {
+      "x": 342,
+      "y": 338,
+      "width": 85,
+      "height": 142,
+      "offsetX": 86,
+      "offsetY": 82
+    },
+    {
+      "x": 600,
+      "y": 345,
+      "width": 80,
+      "height": 135,
+      "offsetX": 88,
+      "offsetY": 89
+    },
+    {
+      "x": 853,
+      "y": 338,
+      "width": 86,
+      "height": 142,
+      "offsetX": 85,
+      "offsetY": 82
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-human--ranger-diagonals.png",
+  "diagonalSourceSha256": "92505850c30e0cae9e00d2a598fdee658153f4da2e0e221175ac5a349d73d787",
+  "diagonalScaleFactor": 0.334906,
+  "speciesId": "human",
+  "variantId": "ranger"
+}

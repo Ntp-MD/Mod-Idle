@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "spider--mossback-spider",
+  "name": "Mossback Spider",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 54,
+      "y": 139,
+      "width": 148,
+      "height": 85,
+      "offsetX": 54,
+      "offsetY": 139
+    },
+    {
+      "x": 309,
+      "y": 140,
+      "width": 150,
+      "height": 84,
+      "offsetX": 53,
+      "offsetY": 140
+    },
+    {
+      "x": 60,
+      "y": 396,
+      "width": 136,
+      "height": 84,
+      "offsetX": 60,
+      "offsetY": 140
+    },
+    {
+      "x": 317,
+      "y": 396,
+      "width": 135,
+      "height": 84,
+      "offsetX": 61,
+      "offsetY": 140
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "spider",
+  "variantId": "mossback-spider"
+}

@@ -4,14 +4,16 @@ import CombatArenaScene from '../../src/ui/combat/CombatArenaScene.svelte';
 import type { CombatArena, CombatArenaAction, CombatArenaActor, CombatArenaFrame } from '@sim/combat/combat-arena';
 import type { FxEvent } from '@sim/core/types';
 import { arenaArtExtent, type ArenaCharacterArt, type ArenaSpriteSheet } from '../../src/ui/combat/arena/arena-art';
-import { arenaActionPose, arenaActorAction, arenaActorPixelScale, arenaCameraOffset, arenaDirection, arenaEventTiming, arenaFlightProgress, arenaFlightWindow, arenaPersistentFieldVisual, arenaFacingSector, arenaFieldNote, arenaPlaybackTime, arenaRangedShots, arenaScreenAngle, arenaSpriteFrame, createArenaGait, createArenaPlaybackClock, projectArenaPoint, projectArenaVector, unprojectArenaPoint } from '../../src/ui/combat/combat-arena-view';
-import { groundShapePath, projectVfxFootprint } from '../../src/ui/combat/arena-vfx-space';
+import { arenaActionPose, arenaActorAction, arenaCameraOffset, arenaDirection, arenaEventTiming, arenaFlightProgress, arenaFlightWindow, arenaPersistentFieldVisual, arenaFacingSector, arenaFieldNote, arenaPlaybackTime, arenaRangedShots, arenaScreenAngle, arenaSpriteFrame, createArenaGait, createArenaPlaybackClock, projectArenaPoint, projectArenaVector, unprojectArenaPoint } from '../../src/ui/combat/combat-arena-view';
+import { groundShapeWorldPoints } from '../../src/ui/combat/arena-vfx-space';
 import { arenaAction, createCombatArena, captureCombatArena, recordCombatArenaFx, sampleCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
 import { characterSheet, newGame } from '@sim/core/game';
 import { mobFixture } from '../fixtures/mobFixture';
 import { actorArt } from '../../src/ui/combat/combat-actor';
-import { ARENA_CAMERA, ARENA_DIRECTIONS, ARENA_VIEW, arenaGroundBounds, arenaWorldDirection } from '../../src/presentation/arena-camera';
+import { ARENA_CAMERA, ARENA_DIRECTIONS, ARENA_VIEW, arenaWorldDirection } from '../../src/presentation/arena-camera';
 import { arenaPayloadSample, arenaPresentationArea, arenaReleaseSocket, arenaIncomingHazards, describeArenaTarget } from '../../src/ui/combat/combat-arena-view';
+import { createFieldViewFrame } from '../../src/presentation/arena-view-frame';
+import { applyWorldToViewport, fieldPointM } from '../../src/presentation/view-transform';
 import { liveMobSkill } from '../fixtures/liveMob';
 const GROUND = liveMobSkill(row => row.mode === 'strike' && row.cast?.delivery === 'ground' && !row.phase, 'ground presentation');
 const ORDINARY = liveMobSkill(row => row.mode === 'strike' && row.cast?.delivery === 'melee' && !row.phase && !row.heavy, 'ordinary presentation');
@@ -21,6 +23,37 @@ const worldFacing = (screenAngle: number) => {
   const world = arenaWorldDirection({ x: Math.cos(screenAngle), y: Math.sin(screenAngle) });
   return Math.atan2(world.y, world.x);
 };
+
+describe('ref-space fence agreement (single effective transform)', () => {
+  it('projects every world point to the same screen pixel through the fence and the frame', () => {
+    const viewportCss = { width: 1920, height: 1080 };
+    const points = [
+      { x: 0, y: 0 }, { x: 25, y: 16.0256 }, { x: 50, y: 32.0513 },
+      { x: 10.5, y: 7.25 }, { x: 49.9, y: 0.1 }, { x: 0.1, y: 31.9 },
+    ];
+    for (const worldScale of [0.5, 0.75, 1, 1.5, 2]) {
+      const focus = fieldPointM(25, 16.0256);
+      const frame = createFieldViewFrame({
+        sceneKey: 'fence', atUs: 0, viewportCss, focusM: focus, worldScale,
+      });
+      expect(frame.renderable).toBe(true);
+      if (!frame.renderable) continue;
+      // Same derivation as CombatArenaScene's fenced adapter: view dims from the
+      // frame scale, camera from the frame focus, stage mapping from the viewport.
+      const view = { width: ARENA_VIEW.width / frame.worldScale,
+        height: ARENA_VIEW.width / frame.worldScale * (viewportCss.height / viewportCss.width) };
+      const camera = arenaCameraOffset({ x: focus.x, y: focus.y }, view);
+      const scaleX = viewportCss.width / view.width;
+      const scaleY = viewportCss.height / view.height;
+      for (const m of points) {
+        const ref = projectArenaPoint(m);
+        const painted = applyWorldToViewport(frame.worldToViewport, fieldPointM(m.x, m.y));
+        expect((ref.x - camera.x) * scaleX).toBeCloseTo(painted.x, 6);
+        expect((ref.y - camera.y) * scaleY).toBeCloseTo(painted.y, 6);
+      }
+    }
+  });
+});
 
 describe('arena camera and playback', () => {
   it('draws icon fallbacks for the merged combat-field showcase', () => {
@@ -72,16 +105,14 @@ describe('arena camera and playback', () => {
 
   it('covers the player-follow viewport at every field edge and keeps terrain fixed in world space', () => {
     const field = { width: 50, height: 32.0513 };
-    const ground = arenaGroundBounds(field);
     const landmark = projectArenaPoint({ x: 18, y: 16 });
     const corpse = projectArenaPoint({ x: 19, y: 16 });
     const offset = { x: corpse.x - landmark.x, y: corpse.y - landmark.y };
     for (const x of [0, field.width / 2, field.width]) for (const y of [0, field.height / 2, field.height]) {
       const camera = arenaCameraOffset({ x, y });
-      expect(ground.left - camera.x).toBeLessThanOrEqual(1e-7);
-      expect(ground.top - camera.y).toBeLessThanOrEqual(1e-7);
-      expect(ground.left + ground.width - camera.x).toBeGreaterThanOrEqual(ARENA_VIEW.width - 1e-7);
-      expect(ground.top + ground.height - camera.y).toBeGreaterThanOrEqual(ARENA_VIEW.height - 1e-7);
+      const projected = projectArenaPoint({ x, y });
+      expect(projected.x - camera.x).toBeCloseTo(ARENA_VIEW.width / 2, 7);
+      expect(projected.y - camera.y).toBeCloseTo(ARENA_VIEW.height / 2, 7);
       expect((corpse.x - camera.x) - (landmark.x - camera.x)).toBeCloseTo(offset.x);
       expect((corpse.y - camera.y) - (landmark.y - camera.y)).toBeCloseTo(offset.y);
     }
@@ -161,7 +192,8 @@ describe('arena camera and playback', () => {
   it('uses a half-meter idle footprint so a six-meter area spans twelve actors', () => {
     const origin=projectArenaPoint({x:0,y:0}),x=projectArenaPoint({x:6,y:0}),y=projectArenaPoint({x:0,y:6});
     const diameter=Math.hypot(x.x-origin.x,y.x-origin.x);
-    for(const idleWidth of [70,115,155,230]) expect(diameter/(idleWidth*arenaActorPixelScale(idleWidth,1))).toBeCloseTo(12);
+    expect(ARENA_VIEW.width / diameter).toBeCloseTo(1920 / (6 * 140), 6);
+    expect(diameter).toBeCloseTo(840, 5);
   });
 
   it('keeps the rendered player at the combat anchor through movement, field edges and target changes', () => {
@@ -301,31 +333,33 @@ describe('arena camera and playback', () => {
     expect(arenaRangedShots(arena, 2_500_000)).toHaveLength(0);
   });
 
-  it('projects line and cone footprints with their committed direction', () => {
-    const line = projectVfxFootprint({ origin: 'caster', radiusM: 0, center: { x: 9, y: 6 },
-      targetId: 'a', shape: 'line', lengthM: 5.2, widthM: 0.75, directionRad: 0 });
+  it('keeps line and cone footprints with their committed direction in world metres', () => {
+    const line = { origin: 'caster', radiusM: 0, center: { x: 9, y: 6 },
+      targetId: 'a', shape: 'line', lengthM: 5.2, widthM: 0.75, directionRad: 0 } as const;
     expect(line).toMatchObject({ shape: 'line', lengthM: 5.2, widthM: 0.75, directionRad: 0 });
-    expect(line?.worldCenter).toEqual({ x: 9, y: 6 });
-    const cone = projectVfxFootprint({ origin: 'caster', radiusM: 2.1, center: { x: 9, y: 6 },
-      targetId: 'a', shape: 'cone', lengthM: 2.1, angleDeg: 120, directionRad: Math.PI / 2 });
+    expect(line.center).toEqual({ x: 9, y: 6 });
+    expect(groundShapeWorldPoints(line)).toHaveLength(4);
+    const cone = { origin: 'caster', radiusM: 2.1, center: { x: 9, y: 6 },
+      targetId: 'a', shape: 'cone', lengthM: 2.1, angleDeg: 120, directionRad: Math.PI / 2 } as const;
     expect(cone).toMatchObject({ shape: 'cone', angleDeg: 120, directionRad: Math.PI / 2 });
-    expect(projectVfxFootprint({ origin: 'target', radiusM: 0, center: { x: 9, y: 6 }, targetId: 'a' }))
-      .toBeUndefined();
+    expect(groundShapeWorldPoints(cone).length).toBeGreaterThan(4);
+    expect(groundShapeWorldPoints({ origin: 'target', radiusM: 0, center: { x: 9, y: 6 }, targetId: 'a' }).length)
+      .toBeGreaterThan(0);
   });
 
   it('preserves sub-meter circle, line and cone dimensions without a visual minimum', () => {
     const center = { x: 9, y: 6 };
-    const unit = projectArenaVector({ x: 1, y: 0 });
     for (const radiusM of [.1, .25, .75, 2]) {
-      const area = projectVfxFootprint({ origin: 'target', radiusM, center, targetId: 'a' })!;
-      expect(area.basisX.x).toBeCloseTo(unit.x * radiusM, 8);
-      expect(area.basisX.y).toBeCloseTo(unit.y * radiusM, 8);
+      const points = groundShapeWorldPoints({ origin: 'target', radiusM, center, targetId: 'a' });
+      const spanX = Math.max(...points.map((p) => p.x)) - Math.min(...points.map((p) => p.x));
+      expect(spanX).toBeCloseTo(2 * radiusM, 8);
     }
     for (const shape of ['line', 'cone'] as const) {
-      const area = projectVfxFootprint({ origin: 'caster', radiusM: .4, center, targetId: 'a',
-        shape, lengthM: .4, widthM: .1, angleDeg: 60, directionRad: 0 })!;
-      expect(area.basisX.x).toBeCloseTo(unit.x * .4, 8);
-      expect(area.basisX.y).toBeCloseTo(unit.y * .4, 8);
+      const points = groundShapeWorldPoints({ origin: 'caster', radiusM: .4, center, targetId: 'a',
+        shape, lengthM: .4, widthM: .1, angleDeg: 60, directionRad: 0 });
+      const spanX = Math.max(...points.map((p) => p.x)) - Math.min(...points.map((p) => p.x));
+      expect(spanX).toBeGreaterThan(0);
+      expect(spanX).toBeLessThanOrEqual(0.8 + 1e-9);
     }
   });
 
@@ -446,7 +480,7 @@ describe('arena camera and playback', () => {
     expect(createArenaGait(.62).sample(arena, 'player', 150_000).phase).toBeCloseTo(.2 / .62);
   });
 
-  it('rotates a mob shot on the projected ground axis, not the world angle', () => {
+  it('keeps a northbound mob shot aligned with the north-up ground', () => {
     const timing = { delivery: 'projectile' as const, startedAtUs: 0, releaseAtUs: 0,
       impactAtUs: 1_000_000, recoveryUntilUs: 0 };
     const action: CombatArenaAction = { id: 9, actorId: 'archer', kind: 'swing', atUs: 0,
@@ -458,7 +492,7 @@ describe('arena camera and playback', () => {
     const source = projectArenaPoint({ x: action.x, y: action.y });
     const target = projectArenaPoint({ x: action.targetX!, y: action.targetY! });
     expect(shot.angle).toBeCloseTo(Math.atan2(target.y - source.y, target.x - source.x) * 180 / Math.PI, 6);
-    expect(shot.angle).not.toBeCloseTo(-90, 1);
+    expect(shot.angle).toBeCloseTo(-90, 6);
   });
 
   it('holds anticipation through a long preparation instead of slowing the strike', () => {
@@ -472,15 +506,17 @@ describe('arena camera and playback', () => {
     expect(arenaActionPose(action, 1_000_000, 1_000_000, attackSheet)).toMatchObject({ phase: 'contact', elapsedMs: 200 });
   });
 
-  it('projects a single, circle, line and cone footprint on the ground plane', () => {
-    expect(groundShapePath({ origin: 'target', radiusM: 0, center: { x: 9, y: 6 }, targetId: 'a' })).toMatch(/^M/);
-    expect(groundShapePath({ origin: 'target', radiusM: 2, center: { x: 9, y: 6 }, targetId: 'a' })).toMatch(/Z$/);
-    const line = groundShapePath({ origin: 'caster', radiusM: 0, center: { x: 9, y: 6 }, targetId: 'a',
+  it('holds a single, circle, line and cone footprint in world metres', () => {
+    expect(groundShapeWorldPoints({ origin: 'target', radiusM: 0, center: { x: 9, y: 6 }, targetId: 'a' }).length)
+      .toBeGreaterThan(0);
+    expect(groundShapeWorldPoints({ origin: 'target', radiusM: 2, center: { x: 9, y: 6 }, targetId: 'a' }).length)
+      .toBe(48);
+    const line = groundShapeWorldPoints({ origin: 'caster', radiusM: 0, center: { x: 9, y: 6 }, targetId: 'a',
       shape: 'line', lengthM: 4, widthM: 1, directionRad: 0 });
-    expect((line.match(/L/g) ?? []).length).toBe(3);
-    const cone = groundShapePath({ origin: 'caster', radiusM: 3, center: { x: 9, y: 6 }, targetId: 'a',
+    expect(line).toHaveLength(4);
+    const cone = groundShapeWorldPoints({ origin: 'caster', radiusM: 3, center: { x: 9, y: 6 }, targetId: 'a',
       shape: 'cone', lengthM: 3, angleDeg: 90, directionRad: 0 });
-    expect((cone.match(/L/g) ?? []).length).toBe(21);
+    expect(cone).toHaveLength(22);
   });
 });
 

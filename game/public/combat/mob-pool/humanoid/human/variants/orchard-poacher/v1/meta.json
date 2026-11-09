@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "human--orchard-poacher",
+  "name": "Orchard Poacher",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 84,
+      "y": 82,
+      "width": 89,
+      "height": 142,
+      "offsetX": 84,
+      "offsetY": 82
+    },
+    {
+      "x": 340,
+      "y": 82,
+      "width": 88,
+      "height": 142,
+      "offsetX": 84,
+      "offsetY": 82
+    },
+    {
+      "x": 84,
+      "y": 339,
+      "width": 88,
+      "height": 141,
+      "offsetX": 84,
+      "offsetY": 83
+    },
+    {
+      "x": 340,
+      "y": 339,
+      "width": 88,
+      "height": 141,
+      "offsetX": 84,
+      "offsetY": 83
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "human",
+  "variantId": "orchard-poacher"
+}

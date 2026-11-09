@@ -1,10 +1,8 @@
 import { E, TOWN, road } from '../../engine/client';
-import { checkpointFieldLives } from './field-area';
-import { hexAdjacent } from '../../../../engine/road.ts';
+import { currentCell as travelCurrentCell, warpCost as travelWarpCost, warpTo as travelWarpTo,
+  completeJourney, startWalk as travelStartWalk, journeyTrailCells, journeyWalkedCells, resolveCell } from './travel';
 import type { Hex } from '../../../../engine/road.ts';
-import { abandonRun } from './dungeon';
-import { priceGold, rowById } from '../town/pricing';
-import { type GameState, type Cell, type Walk, spendGold } from '../core/types';
+import { type GameState, type Cell, type Walk } from '../core/types';
 
 /** The walk model is `client.ts`'s own instance — one object for the sim, the map views and the wiki. */
 export { road };
@@ -30,36 +28,28 @@ export const zoneOf = (h: Hex): number | null => settlementZone(ownerOf(h).id);
 /** 0 is a settlement, 1 a side of one, 2 and out bare ground. */
 export const rankOf = (h: Hex): number => road.cellRank(h);
 
-/** What a cell is: the sheet's own marks decide, so a click and a save agree on the same content. */
-export function cellKind(h: Hex, sub: number | null): Walk['kind'] {
-  if (rankOf(h) === 0) return 'town';
-  if (sub != null) return 'sub';
-  return 'bare';
-}
-
-/** The cell the feet are on, defaulted to the starting settlement for a state with no mark yet. */
+/** The cell the feet are on: the committed position, including mid-walk — never a route reconstruction. */
 export function currentCell(state: GameState): Hex {
-  const w = state.walk;
-  if (w) return road.routeLand(w.from, w.to)?.[Math.min(w.blocksWalked, w.blocksTotal)] ?? w.from;
-  if (state.cell) return { q: state.cell.q, r: state.cell.r };
-  const home = road.nodeById(state.town?.waypoint || E.road.nodes[0].id) || E.road.nodes[0];
-  return { q: home.q, r: home.r };
+  return travelCurrentCell(state);
 }
 
 /**
  * What the HUD says while a walk runs: the cell the feet are heading for, named by what stands on it
- * and the settlement whose ground it is. A walk joins two cells, so the sentence quotes the destination
- * rather than a settlement pair (`road.standing_rule`).
+ * and the settlement whose ground it is. Destination facts resolve through World from the target
+ * coordinates, never from stored journey metadata. A walk joins two cells, so the sentence quotes
+ * the destination rather than a settlement pair (`road.standing_rule`).
  */
 export function walkNote(state: GameState): string {
   const w = state.walk;
   if (!w) return '';
-  const own = w.node ? settlementById(w.node) : null;
-  const name = own?.name ?? w.node ?? 'the field';
+  const dest = resolveCell(w.to);
+  const own = dest ? settlementById(dest.ownerId) : null;
+  const name = own?.name ?? 'the field';
   const subs = own ? (E.mob.zones.find((z) => z.id === own.zone)?.subzones || []) : [];
-  const where = w.kind === 'town' ? name
-    : w.kind === 'sub' ? `${subs[w.sub ?? 0]?.name ?? `sub-zone ${(w.sub ?? 0) + 1}`} of ${name}`
-      : w.site ? `the ${w.site === 'fishing' ? 'Fishing' : w.site === 'grove' ? 'Grove' : w.site === 'mine' ? 'Mine' : 'Dungeon'} wild-side cell near ${name}`
+  const site = dest?.cell.site;
+  const where = dest?.kind === 'town' ? name
+    : dest?.kind === 'sub' ? `${subs[dest.cell.sub ?? 0]?.name ?? `sub-zone ${(dest.cell.sub ?? 0) + 1}`} of ${name}`
+      : site ? `the ${site === 'fishing' ? 'Fishing' : site === 'grove' ? 'Grove' : site === 'mine' ? 'Mine' : 'Dungeon'} wild-side cell near ${name}`
         : `bare ground in the field of ${name}`;
   return where;
 }
@@ -80,13 +70,11 @@ export function canTravel(state: GameState, id: string): boolean {
  * crossed, charged at the destination settlement's band. It is not a stall line — no `stock` array
  * names it and no vendor sells it — so it is priced here rather than bought through `canBuy`.
  */
-export const warpRow: any = () => rowById('waypoint_warp');
+export { warpRow } from './travel';
 
-/** What a warp to this settlement costs right now, in gold. */
+/** What a warp to this settlement costs right now, quoted from the actual committed position. */
 export function warpCost(state: GameState, id: string): number {
-  const row = warpRow();
-  if (!row) return 0;
-  return priceGold(row, id, state, Math.max(1, road.blocksBetween(state.town.waypoint, id)));
+  return travelWarpCost(state, id);
 }
 
 /**
@@ -94,41 +82,12 @@ export function warpCost(state: GameState, id: string): number {
  * destination — the settlement is reachable because the foot earned it (`road.waypoint_rule`).
  */
 export function warpTo(state: GameState, id: string): { ok: boolean; why?: string; gold?: number; forfeit?: string } {
-  if (state.walk) return { ok: false, why: 'mid-walk — finish the route or turn back' };
-  if (state.phase === 'camp') return { ok: false, why: 'recovering at camp' };
-  // "already stand there" is about the feet, not the last town the Waypoint names: a step out
-  // into the field must not read as standing in the settlement just left.
-  const stop = road.nodeById(id);
-  if (stop) {
-    const feet = currentCell(state);
-    if (feet.q === stop.q && feet.r === stop.r) return { ok: false, why: 'you already stand there' };
-  }
-  if (!waypointUnlocked(state, id)) return { ok: false, why: 'no Waypoint — reach it on foot first' };
-  const gold = warpCost(state, id);
-  if (state.counters.gold < gold) return { ok: false, why: `needs ${gold} gold`, gold };
-  spendGold(state.counters, gold);
-  const dest = settlementById(id);
-  if (!dest) return { ok: false, why: 'no such settlement' };
-  state.zone = dest.zone;
-  if (state.fieldwork) state.fieldwork.action = null;
-  state.town.waypoint = id;
-  // a warp lands the feet on the settlement's own hex: the Waypoint buys the walk's time, and the
-  // ground it arrives on is the same cell a foot would have stood on
-  const node = road.nodeById(id);
-  if (node) state.cell = { q: node.q, r: node.r, sub: null, site: null };
-  checkpointFieldLives(state);
-  state.group = [];
-  // warping home is safe ground: town fields no mobs until the character heads back out
-  state.hunting = false;
-  const forfeit = state.dungeon ? abandonRun(state, 'Warped out') : undefined;
-  return { ok: true, gold, forfeit };
+  return travelWarpTo(state, id);
 }
 
 /** Every cell the route has already been walked through, up to and including the current block. */
 export function walkedCells(state: GameState): string[] {
-  const w = state.walk;
-  if (!w) return [];
-  return road.hexKeys(road.routeLand(w.from, w.to) ?? [w.from]).slice(0, w.blocksWalked + 1);
+  return journeyWalkedCells(state);
 }
 
 /**
@@ -137,8 +96,7 @@ export function walkedCells(state: GameState): string[] {
  * under them lit, and the walk would read as a jump from block to block.
  */
 export function trailCells(state: GameState): string[] {
-  const w = state.walk;
-  return w ? road.hexKeys(road.routeLand(w.from, w.to) ?? [w.from]) : [];
+  return journeyTrailCells(state);
 }
 
 /**
@@ -148,85 +106,16 @@ export function trailCells(state: GameState): string[] {
  * from where the feet stand, so the walked prefix stays lit and no block is paid twice.
  */
 export function startWalk(state: GameState, dest: Cell): { ok: boolean; why?: string; forfeit?: string } {
-  if (state.walk) return { ok: false, why: 'already walking' };
-  if (state.phase === 'camp') return { ok: false, why: 'recovering at camp' };
-  const from = currentCell(state);
-  const to: Hex = { q: dest.q, r: dest.r };
-  // One route result for every caller: the walkable chain, or a refusal before anything is paid.
-  const path = road.routeLand(from, to);
-  if (!path) return { ok: false, why: 'no walkable route — the destination is across land feet cannot cross' };
-  const blocks = path.length - 1;
-  if (blocks <= 0) return { ok: false, why: 'you are already there' };
-  const keys = road.hexKeys(path);
-  // a plotted route is a chain of single steps: each cell enters one that shares an edge with the
-  // cell before it, which is what makes a far destination a walk rather than a jump
-  if (keys.some((k: string, i: number) => i > 0 && !adjacent(keys[i - 1], k))) {
-    return { ok: false, why: 'the plotted route leaves the lattice' };
-  }
-  const kind = cellKind(to, dest.sub ?? null);
-  state.walk = {
-    from,
-    to,
-    node: ownerOf(to).id,
-    kind,
-    sub: kind === 'sub' ? dest.sub ?? null : null,
-    site: dest.site ?? null,
-    terrain: dest.terrain ?? null,
-    blocksTotal: blocks,
-    blocksLeft: blocks,
-    secLeft: road.blockSec,
-    blocksWalked: 0,
-  };
-  if (state.fieldwork) state.fieldwork.action = null;
-  // the walk spends the standing fight: a group left alive here keeps swinging through the whole
-  // walk — block and evasion events off mobs the field never shows — so it is dropped whole, the
-  // same way entering a hunt drops it. Its lives stay parked in their slots for the return.
-  checkpointFieldLives(state);
-  state.group = [];
-  state.player.atkTimer = 0;
-  // walking out abandons the open run: a dungeon is entered ground, not a destination
-  const forfeit = state.dungeon ? abandonRun(state, 'Walked out') : undefined;
-  return { ok: true, forfeit };
+  return travelStartWalk(state, dest);
 }
-
-/** Two sheet keys share an edge — the one step a block is allowed to take. */
-const adjacent = (a: string, b: string) => {
-  const [aq, ar] = a.split(',').map(Number);
-  const [bq, br] = b.split(',').map(Number);
-  return hexAdjacent({ q: aq, r: ar }, { q: bq, r: br });
-};
 
 /**
  * Arriving puts the feet on the cell. Only rank 0 opens a settlement and its Waypoint — a Waypoint
  * marks a town, not a patch of ground (`road.standing_rule`) — while any arrival sets the zone from
- * the settlement that owns the cell.
+ * the settlement that owns the cell. Content resolves through World, so a stopped-at mine is a mine.
  */
 export function arrive(state: GameState, walk: Walk) {
-  const node = ownerOf(walk.to);
-  const dest = settlementById(node.id);
-  const rank = road.cellRank(walk.to);
-  state.cell = { q: walk.to.q, r: walk.to.r, sub: walk.sub, site: walk.site, terrain: walk.terrain ?? null };
-  state.zone = settlementZone(node.id) ?? state.zone;
-  let first = false;
-  if (rank === 0 && dest) {
-    first = !state.town.visited.includes(dest.id);
-    if (first) state.town.visited.push(dest.id);
-    state.town.waypoint = dest.id;
-  }
-  state.walk = null;
-  checkpointFieldLives(state);
-  state.group = [];
-  // A settlement is safe ground; a Field Camp is safe too; other field ground fights on arrival.
-  const camp = state.fieldwork?.camp;
-  const atCamp = !!camp && camp.zone === state.zone && camp.cell.q === state.cell?.q && camp.cell.r === state.cell?.r;
-  state.hunting = rank !== 0 && !atCamp && !walk.site;
-  return {
-    name: dest?.name ?? node.id,
-    first,
-    town: rank === 0,
-    kind: walk.kind,
-    cell: state.cell,
-  };
+  return completeJourney(state, walk);
 }
 
 /** Which zone an encounter on a walk draws from: the lower-numbered of the two it joins. */

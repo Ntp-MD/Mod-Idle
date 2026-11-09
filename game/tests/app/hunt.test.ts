@@ -54,7 +54,8 @@ describe('safe town', () => {
   const s = newGame(1);
   setLevel(s, 60);
   const home = settlementCell(road.nodes[0].id)!;
-  const side = road.neighbours(home).find((h: any) => road.cellRank(h) === 1)!;
+  // A named side (never a site): canonical world resolution keeps the fight on open ground here.
+  const side = road.neighbours(home).find((h: any) => road.cellRank(h) === 1 && (road as any).locationAt(h)?.kind === 'sub')!;
     arrive(s, {
       from: home, to: side, node: road.nodes[0].id, kind: 'sub', sub: null, site: null,
       blocksTotal: 1, blocksLeft: 0, secLeft: 0, blocksWalked: 1,

@@ -1,0 +1,148 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "imp",
+  "name": "Imp",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 44,
+      "y": 70,
+      "width": 168,
+      "height": 154,
+      "offsetX": 44,
+      "offsetY": 70
+    },
+    {
+      "x": 317,
+      "y": 49,
+      "width": 134,
+      "height": 175,
+      "offsetX": 61,
+      "offsetY": 49
+    },
+    {
+      "x": 580,
+      "y": 61,
+      "width": 120,
+      "height": 163,
+      "offsetX": 68,
+      "offsetY": 61
+    },
+    {
+      "x": 826,
+      "y": 45,
+      "width": 140,
+      "height": 179,
+      "offsetX": 58,
+      "offsetY": 45
+    },
+    {
+      "x": 46,
+      "y": 303,
+      "width": 164,
+      "height": 177,
+      "offsetX": 46,
+      "offsetY": 47
+    },
+    {
+      "x": 314,
+      "y": 301,
+      "width": 140,
+      "height": 179,
+      "offsetX": 58,
+      "offsetY": 45
+    },
+    {
+      "x": 580,
+      "y": 317,
+      "width": 120,
+      "height": 163,
+      "offsetX": 68,
+      "offsetY": 61
+    },
+    {
+      "x": 829,
+      "y": 305,
+      "width": 135,
+      "height": 175,
+      "offsetX": 61,
+      "offsetY": 49
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/monsters/demon/imp/imp/reference.png",
+  "sourceSha256": "43d84814e1ce1cdc090ff318dcbb0b12c9dd9615ca74e53add725ffb336a6d2f",
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-imp-diagonals.png",
+  "diagonalSourceSha256": "967a5223e9498f842baf5e9c56532d51a55e38e1fc8a73abd06d8e18c96883f1",
+  "diagonalScaleFactor": 0.40411
+}

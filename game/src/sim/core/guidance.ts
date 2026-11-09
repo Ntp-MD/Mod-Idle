@@ -293,9 +293,10 @@ function resolveDelivery(state: GameState, ref: DeliveryGoal): GoalView {
   if (!contract) return settle(state, { ...base, title: 'Delivery no longer exists', reason: 'This want has left the board. Clear the goal or pin another.', progress: null, status: 'stale' });
   const good = trade.byId[contract.good];
   if (!good) return settle(state, { ...base, title: 'Delivery needs a content migration', reason: `The good ${contract.good} is not in the catalogue.`, progress: null, status: 'stale' });
-  if (contract.status !== 'open') return settle(state, { ...base, title: `${good.name} · ${townName(contract.town)}`, reason: `This delivery is ${contract.status}. The reward or forfeit is recorded on the board.`, progress: `${contract.delivered}/${contract.target}`, status: 'stale' });
+  const boardTown = contract.kind === 'courier' && contract.acceptedAtDeliverySec != null ? contract.destinationTown : contract.town;
+  if (contract.status !== 'open') return settle(state, { ...base, title: `${good.name} · ${townName(boardTown)}`, reason: `This delivery is ${contract.status}. The reward or forfeit is recorded on the board.`, progress: `${contract.delivered}/${contract.target}`, status: 'stale' });
   const left = deliveryTimeLeft(state, contract);
-  if (left <= 0) return settle(state, { ...base, title: `${good.name} · ${townName(contract.town)}`, reason: 'The deadline has passed; this want has expired.', progress: `${contract.delivered}/${contract.target}`, status: 'stale' });
+  if (left <= 0) return settle(state, { ...base, title: `${good.name} · ${townName(boardTown)}`, reason: 'The deadline has passed; this want has expired.', progress: `${contract.delivered}/${contract.target}`, status: 'stale' });
   const carried = tradeBucket(state, good)[good.key] || 0;
   const remaining = Math.max(0, contract.target - contract.delivered);
   const steps = acquisitionSources(contract.acquisition);
@@ -305,7 +306,7 @@ function resolveDelivery(state: GameState, ref: DeliveryGoal): GoalView {
     carried < remaining ? `Need ${remaining - carried} more ${good.name}${source ? ` — ${source}` : ''}.` : `${carried} carried; ready to hand in.`,
     pause ? `Deadline paused: ${pause}.` : '',
   ].filter(Boolean).join(' ');
-  return settle(state, { ...base, title: `${good.name} · ${townName(contract.town)}`, reason, progress: `${contract.delivered}/${contract.target} · ${Math.floor(left / 60)}m ${left % 60}s left`, sources: steps });
+  return settle(state, { ...base, title: `${good.name} · ${townName(boardTown)}`, reason, progress: `${contract.delivered}/${contract.target} · ${Math.floor(left / 60)}m ${left % 60}s left`, sources: steps });
 }
 
 function resolveDestination(state: GameState, ref: DestinationGoal): GoalView {

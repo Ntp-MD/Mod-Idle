@@ -1,0 +1,148 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "vampire",
+  "name": "Vampire",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 65,
+      "y": 45,
+      "width": 127,
+      "height": 179,
+      "offsetX": 65,
+      "offsetY": 45
+    },
+    {
+      "x": 323,
+      "y": 32,
+      "width": 122,
+      "height": 192,
+      "offsetX": 67,
+      "offsetY": 32
+    },
+    {
+      "x": 587,
+      "y": 32,
+      "width": 106,
+      "height": 192,
+      "offsetX": 75,
+      "offsetY": 32
+    },
+    {
+      "x": 836,
+      "y": 32,
+      "width": 120,
+      "height": 192,
+      "offsetX": 68,
+      "offsetY": 32
+    },
+    {
+      "x": 68,
+      "y": 294,
+      "width": 121,
+      "height": 186,
+      "offsetX": 68,
+      "offsetY": 38
+    },
+    {
+      "x": 325,
+      "y": 288,
+      "width": 119,
+      "height": 192,
+      "offsetX": 69,
+      "offsetY": 32
+    },
+    {
+      "x": 588,
+      "y": 288,
+      "width": 105,
+      "height": 192,
+      "offsetX": 76,
+      "offsetY": 32
+    },
+    {
+      "x": 835,
+      "y": 288,
+      "width": 122,
+      "height": 192,
+      "offsetX": 67,
+      "offsetY": 32
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/monsters/undead/vampire/vampire/reference.png",
+  "sourceSha256": "ec69cc3e4f8ff1f87bcf0fb032b85498b0b7d0a89f1841449cbff79e949a0a3f",
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-vampire-diagonals.png",
+  "diagonalSourceSha256": "2001da4416e6a671da2b8a77626d6a4142a64b44664bd5b4745df755a0abcb06",
+  "diagonalScaleFactor": 0.433409
+}

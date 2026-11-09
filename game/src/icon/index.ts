@@ -12,9 +12,9 @@ import {
  * candidates and category fallbacks, so missing bespoke art never leaves a broken image in the UI. Mob art
  * is the white icon set under mob/icon/; the map overlay SVG under map/ is map artwork, not shelf icons.
  *
- * UI icons and map glyphs are PNG art from this shelf. UI controls draw it through `.icon-mask` in
- * skins.css; map markers draw it as SVG `<image>`. Inline SVG stays for structural graphics (tree/map
- * geometry, marker frames/leaders, charts, effects), never a standalone UI glyph.
+ * UI and in-hex icons use this same PNG shelf. UI controls use `.icon-mask` in skins.css;
+ * the map places the resolved images inside hex content. Inline SVG stays for structural
+ * graphics (tree/map geometry, charts, effects), never a standalone icon.
  */
 const shelfAssets = import.meta.glob<string>(['./**/*.png'], {
   eager: true,

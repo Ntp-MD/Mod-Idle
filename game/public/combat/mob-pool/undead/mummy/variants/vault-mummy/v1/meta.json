@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "mummy--vault-mummy",
+  "name": "Vault Mummy",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 90,
+      "y": 82,
+      "width": 77,
+      "height": 142,
+      "offsetX": 90,
+      "offsetY": 82
+    },
+    {
+      "x": 346,
+      "y": 82,
+      "width": 76,
+      "height": 142,
+      "offsetX": 90,
+      "offsetY": 82
+    },
+    {
+      "x": 92,
+      "y": 346,
+      "width": 72,
+      "height": 134,
+      "offsetX": 92,
+      "offsetY": 90
+    },
+    {
+      "x": 348,
+      "y": 346,
+      "width": 72,
+      "height": 134,
+      "offsetX": 92,
+      "offsetY": 90
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "mummy",
+  "variantId": "vault-mummy"
+}

@@ -40,7 +40,11 @@ export function forgeGear(
   id: string,
   materialId: string,
   rng: () => number,
+  expected?: { held: number; freeSlots: number },
 ): { ok: boolean; why?: string; item?: Item; note?: string } {
+  if (expected && (expected.held !== (state.fieldwork.materials[materialId] || 0) || expected.freeSlots !== slotsFree(state))) {
+    return { ok: false, why: 'The forge changed. Review the current plan.' };
+  }
   const verdict = canForge(state, kind, id, materialId);
   if (!verdict.ok) return { ok: false, why: verdict.why };
   const plan = verdict.plan!;

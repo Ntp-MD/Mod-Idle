@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "slime--deepwater-slime",
+  "identityName": "Deepwater Slime",
+  "identityKind": "variant",
+  "sourceSheet": "art-reference/pawn-study/sheets/variants/slime--deepwater-slime.png",
+  "sizeReference": "game/public/combat/mob-pool/formless/slime/variants/deepwater-slime/v1/atlas.png",
+  "generatedSheet": "art-reference/pawn-study/generation/eight-direction/pawn-slime--deepwater-slime-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "canvas": {
+    "width": 1254,
+    "height": 1254,
+    "cellSize": 627,
+    "background": "transparent"
+  },
+  "measuredVisibleBoundsSourcePx": {
+    "north-east": [
+      147,
+      197,
+      489,
+      481
+    ],
+    "south-east": [
+      129,
+      195,
+      478,
+      483
+    ],
+    "south-west": [
+      145,
+      169,
+      496,
+      456
+    ],
+    "north-west": [
+      132,
+      169,
+      482,
+      456
+    ]
+  },
+  "promptSummary": "Four diagonal Deepwater Slime views preserving the blue body, pale gloss, dark blue spots and simple face; rear NE/NW and mirrored front SE/SW.",
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "note": "ImageGen transparent alpha contains faint nonzero edge pixels; build-study extraction at alpha threshold 128 produced unclipped 342?351?284?288 px cutouts in all four cells. Packed relative scale/anchor still need review.",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

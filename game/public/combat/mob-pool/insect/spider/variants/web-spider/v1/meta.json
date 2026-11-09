@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "spider--web-spider",
+  "name": "Web Spider",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 55,
+      "y": 129,
+      "width": 146,
+      "height": 95,
+      "offsetX": 55,
+      "offsetY": 129
+    },
+    {
+      "x": 309,
+      "y": 135,
+      "width": 150,
+      "height": 89,
+      "offsetX": 53,
+      "offsetY": 135
+    },
+    {
+      "x": 62,
+      "y": 399,
+      "width": 132,
+      "height": 81,
+      "offsetX": 62,
+      "offsetY": 143
+    },
+    {
+      "x": 319,
+      "y": 397,
+      "width": 131,
+      "height": 83,
+      "offsetX": 63,
+      "offsetY": 141
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "spider",
+  "variantId": "web-spider"
+}

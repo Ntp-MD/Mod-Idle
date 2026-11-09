@@ -1,18 +1,31 @@
 /** Pure arena camera math shared by captured presentation checkpoints and their consumers. */
 export const ARENA_VIEW = { width: 1920, height: 1080 };
 export const ARENA_ACTOR_WIDTH_M = .5;
-// Agreed oblique basis from art-reference/skill-vfx and art-reference/animation.
-// Preserve the full matrix: elevation alone cannot express its skew and tilted foot ellipse.
-const ART_BASIS = { xx: 42, xy: 10, yx: -8, yy: 30 };
-const ART_SCALE = 70 / (ARENA_ACTOR_WIDTH_M * Math.hypot(ART_BASIS.xx, ART_BASIS.yx));
+// North stays up; a meter has the same screen length on both ground axes.
+// Single topdown source: change this projection and every skill circle follows
+// through the painted frame (worldToViewport), never a second hardcoded angle.
+const PIXELS_PER_METER = 70 / ARENA_ACTOR_WIDTH_M;
+/** Reference density: the one divisor for legacy ref-px minima (was literal 140). */
+export const ARENA_REF_PX_PER_M = PIXELS_PER_METER;
 export const ARENA_CAMERA = {
-  projection: { a: ART_BASIS.xx * ART_SCALE, b: ART_BASIS.yx * ART_SCALE,
-    c: ART_BASIS.xy * ART_SCALE, d: ART_BASIS.yy * ART_SCALE },
+  projection: { a: PIXELS_PER_METER, b: 0, c: 0, d: PIXELS_PER_METER },
   playerAnchor: { x: .5, y: .5 },
 } as const;
-const CX = 1040, CY = 530;
-// Field centre for the 50 x 32.0513 m arena (engine.json combat_arena).
-const WORLD_CX = 25, WORLD_CY = 16.0256;
+/** Normalized topdown basis (projection / reference): the frame scales this by cssPixelsPerMeter. */
+export const arenaTopdownBasis = (): { a: number; b: number; c: number; d: number } => {
+  const { a, b, c, d } = ARENA_CAMERA.projection;
+  return { a: a / ARENA_REF_PX_PER_M, b: b / ARENA_REF_PX_PER_M,
+    c: c / ARENA_REF_PX_PER_M, d: d / ARENA_REF_PX_PER_M };
+};
+/** Field footprint mirrors engine.json combat_arena; presentation never imports engine here. */
+export const ARENA_FIELD = { width: 50, height: 32.0513 } as const;
+/** Default body footprint; mirrors sim MobSize radius_m 0.25 (engine/index.ts). */
+export const ARENA_DEFAULT_BODY_RADIUS_M = 0.25;
+/** Camera glide time constant for the displayed-scale easing. */
+export const ARENA_GLIDE_MS = 140;
+const CX = ARENA_VIEW.width * ARENA_CAMERA.playerAnchor.x + 80, CY = ARENA_VIEW.height * ARENA_CAMERA.playerAnchor.y - 10;
+// Field centre from the single field source above.
+const WORLD_CX = ARENA_FIELD.width / 2, WORLD_CY = ARENA_FIELD.height / 2;
 const { a: U, c: V, b: W, d: Z } = ARENA_CAMERA.projection;
 export const ARENA_FACING_HYSTERESIS = .14;
 export const ARENA_DIRECTIONS = ['east', 'south-east', 'south', 'south-west', 'west', 'north-west', 'north', 'north-east'] as const;
@@ -38,18 +51,26 @@ export function arenaCameraOffset(player: { x: number; y: number }, view = ARENA
     y: point.y - view.height * ARENA_CAMERA.playerAnchor.y };
 }
 
-/** Combat zoom stops: 1 shows the authored frame, 0.5 sees twice as far. Presentation only. */
-export const ARENA_ZOOM_MIN = 0.5, ARENA_ZOOM_MAX = 1, ARENA_ZOOM_STEP = 0.25;
+/** One world-scale multiplier for actors, ground, distances and VFX. Presentation only. */
+export const ARENA_DEFAULT_WORLD_SCALE = 0.5;
+// 0.25 fits almost the whole 50 x 32 m field; 2 is the authored-frame zoom-in stop.
+export const ARENA_ZOOM_MIN = 0.25, ARENA_ZOOM_MAX = 2, ARENA_ZOOM_STEP = 0.25;
 
 /** Visible world size at a zoom level; the simulation never reads this value. */
 export interface ArenaViewSize { width: number; height: number }
-export function arenaZoomView(zoom = 1): ArenaViewSize {
+export function arenaZoomView(zoom = 1, viewport: ArenaViewSize = ARENA_VIEW): ArenaViewSize {
   const clamped = Math.max(ARENA_ZOOM_MIN, Math.min(ARENA_ZOOM_MAX, zoom));
-  return { width: ARENA_VIEW.width / clamped, height: ARENA_VIEW.height / clamped };
+  const aspect = viewport.width > 0 && viewport.height > 0
+    ? viewport.width / viewport.height : ARENA_VIEW.width / ARENA_VIEW.height;
+  const width = ARENA_VIEW.width / clamped;
+  return { width, height: width / aspect };
 }
 
-/** Viewport-cull margins: tall sprites, labels, corpses and effects at the edge stay drawable. */
-export const ARENA_CULL_MARGIN_X = 220, ARENA_CULL_MARGIN_Y = 320;
+/** Viewport-cull margins in world metres; px values derive below so zoom follows cssPerM. */
+export const ARENA_CULL_MARGIN_M = { x: 220 / ARENA_REF_PX_PER_M, y: 320 / ARENA_REF_PX_PER_M };
+/** Viewport-cull margins in ref px (legacy contract kept for tests/callers). */
+export const ARENA_CULL_MARGIN_X = ARENA_CULL_MARGIN_M.x * ARENA_REF_PX_PER_M,
+  ARENA_CULL_MARGIN_Y = ARENA_CULL_MARGIN_M.y * ARENA_REF_PX_PER_M;
 
 /** Cheap pre-filter before the full actor view; pinned bodies always stay. Pure, so tests own it. */
 export function arenaActorVisible(viewX: number, viewY: number, camX: number, camY: number,
@@ -60,26 +81,6 @@ export function arenaActorVisible(viewX: number, viewY: number, camX: number, ca
     && viewY - camY > -marginY && viewY - camY < stageHeight + marginY;
 }
 
-/** Fixed world-space ground coverage, including the viewport at every reachable field edge. */
-export function arenaGroundBounds(bounds: { width: number; height: number }) {
-  const cameras = [
-    { x: 0, y: 0 }, { x: bounds.width, y: 0 },
-    { x: 0, y: bounds.height }, { x: bounds.width, y: bounds.height },
-  ].map(point => arenaCameraOffset(point));
-  const left = Math.min(...cameras.map(point => point.x));
-  const top = Math.min(...cameras.map(point => point.y));
-  return {
-    left, top,
-    width: Math.max(...cameras.map(point => point.x)) - left + ARENA_VIEW.width,
-    height: Math.max(...cameras.map(point => point.y)) - top + ARENA_VIEW.height,
-  };
-}
-export function arenaActorPixelScale(idleWidth: number, viewportScale: number, bodySize = 'player') {
-  // Horizontal extent of the projected circular footprint, not one projected world axis.
-  const width = ARENA_ACTOR_WIDTH_M * Math.hypot(U, V);
-  const sizeScale: Record<string, number> = { player: 1, small: 1, medium: 1.25, large: 1.5, boss: 1.8 };
-  return width / Math.max(1, idleWidth) * viewportScale * (sizeScale[bodySize] ?? 1);
-}
 export function unprojectArenaPoint(point: { x: number; y: number }) {
   const vector = unprojectArenaVector({ x: point.x - CX, y: point.y - CY });
   return { x: vector.x + WORLD_CX, y: vector.y + WORLD_CY };

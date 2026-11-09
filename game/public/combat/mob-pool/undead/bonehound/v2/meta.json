@@ -1,0 +1,147 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "bonehound",
+  "name": "Bone Hound",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 94,
+      "y": 97,
+      "width": 69,
+      "height": 127,
+      "offsetX": 94,
+      "offsetY": 97
+    },
+    {
+      "x": 291,
+      "y": 111,
+      "width": 186,
+      "height": 113,
+      "offsetX": 35,
+      "offsetY": 111
+    },
+    {
+      "x": 540,
+      "y": 131,
+      "width": 200,
+      "height": 93,
+      "offsetX": 28,
+      "offsetY": 131
+    },
+    {
+      "x": 824,
+      "y": 96,
+      "width": 145,
+      "height": 128,
+      "offsetX": 56,
+      "offsetY": 96
+    },
+    {
+      "x": 93,
+      "y": 355,
+      "width": 70,
+      "height": 125,
+      "offsetX": 93,
+      "offsetY": 99
+    },
+    {
+      "x": 312,
+      "y": 350,
+      "width": 144,
+      "height": 130,
+      "offsetX": 56,
+      "offsetY": 94
+    },
+    {
+      "x": 542,
+      "y": 387,
+      "width": 197,
+      "height": 93,
+      "offsetX": 30,
+      "offsetY": 131
+    },
+    {
+      "x": 804,
+      "y": 367,
+      "width": 184,
+      "height": 113,
+      "offsetX": 36,
+      "offsetY": 111
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/monsters/undead/bonehound/bonehound/reference.png",
+  "sourceSha256": "ee17567b298e7a5956e8017d0bdb53a459fba87fd56206a94194f609493cf302",
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-bonehound-diagonals.png",
+  "diagonalSourceSha256": "bff9eb4804e3e95655069ba8ca21eb39ea95fdaff14bd05fa1792c43304204ea"
+}

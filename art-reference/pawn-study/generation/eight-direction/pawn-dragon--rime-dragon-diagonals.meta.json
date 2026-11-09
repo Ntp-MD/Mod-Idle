@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "dragon--rime-dragon",
+  "identityName": "Rime Dragon",
+  "identityKind": "variant",
+  "sourceSheet": "art-reference/pawn-study/sheets/variants/dragon--rime-dragon.png",
+  "sizeReference": "game/public/combat/mob-pool/dragon/dragon/variants/rime-dragon/v1/atlas.png",
+  "generatedSheet": "art-reference/pawn-study/generation/eight-direction/pawn-dragon--rime-dragon-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "canvas": {
+    "width": 1254,
+    "height": 1254,
+    "cellSize": 627,
+    "background": "transparent"
+  },
+  "measuredVisibleBoundsSourcePx": {
+    "north-east": [
+      162,
+      91,
+      481,
+      480
+    ],
+    "south-east": [
+      96,
+      91,
+      482,
+      483
+    ],
+    "south-west": [
+      143,
+      90,
+      531,
+      482
+    ],
+    "north-west": [
+      122,
+      90,
+      472,
+      482
+    ]
+  },
+  "promptSummary": "Generate four diagonal Rime Dragon views matching the cardinal quadruped: ice-blue scales, pale segmented horns and belly, blue wings, claws and tail.",
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "note": "NE/NW hide the face; SE/SW show mirrored front three-quarter views. Raw lower anchors vary by 3px; verify runtime-relative scale and packed paw anchor.",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

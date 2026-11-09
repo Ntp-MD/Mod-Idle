@@ -1,4 +1,6 @@
-import { E, fieldwork, lifeSkills } from '../../engine/client';
+import { E, fieldwork, lifeSkills, STORY } from '../../engine/client';
+import type { CampPoolKind } from '../../../../engine/types.ts';
+import type { CacheOffer } from '../../../../engine/fieldwork.ts';
 import type { Character } from '../core/player';
 import type { GameState, Cell, Mob } from '../core/types';
 import { fieldInFight } from './field-area';
@@ -25,17 +27,44 @@ export interface FieldMeal {
 }
 export type CampEncounterPolicy = 'avoid' | 'defend' | 'engage';
 /** A camp encounter kind is narrative state only: the project has no audio system and no sound assets. */
-export type CampEncounterKind = 'sounds' | 'prowler' | 'traveler' | 'nest' | 'discovered';
+export type { CampPoolKind };
+export type CampEncounterKind = CampPoolKind;
+export type CampEncounterStage = 'warning' | 'choice' | 'combat' | 'resolving' | 'collect';
+export interface CampStoryHistory {
+  encounterId: number;
+  eventId: string;
+  kind: CampEncounterKind;
+  variantId: string;
+  terminalAction: string | null;
+  followupUsed: boolean;
+}
+export interface CampStoryInstance {
+  revision: 1;
+  eventId: string;
+  sceneId: string;
+  lineIndex: number;
+  beat: number;
+  cache: CacheOffer | null;
+  remainingSec: number;
+}
+export interface CampStoryResource { bucket: 'food' | 'material'; id: string; count: number; }
+export interface CampStoryReceipt {
+  encounterId: number; eventId: string; kind: CampEncounterKind;
+  action: string; sceneId: string; elapsedSec: number;
+  paid: CampStoryResource[]; earned: CampStoryResource[]; lost: CampStoryResource[];
+  info: string[];
+}
 export interface CampEncounterActive {
   id: number;
   kind: CampEncounterKind;
-  stage: 'warning' | 'choice' | 'combat';
+  stage: CampEncounterStage;
   origin: Cell;
   warningSec: number;
   choiceSec: number;
   payload: Record<string, unknown>;
   preparedGroup: Mob[];
   participantIds: string[];
+  story?: CampStoryInstance | null;
 }
 export interface CampEncounterState {
   policy: CampEncounterPolicy;
@@ -47,6 +76,8 @@ export interface CampEncounterState {
   exposureSec: number;
   active: CampEncounterActive | null;
   recap: string | null;
+  storyHistory: CampStoryHistory[];
+  lastReceipt: CampStoryReceipt | null;
 }
 export interface AutoEatSettings {
   enabled: boolean;
@@ -74,7 +105,78 @@ export function newCampEncounterState(seed = 0): CampEncounterState {
     policy: 'avoid', streamState: (seed ^ 0x43414d50) >>> 0, serial: 0,
     graceSec: fieldwork.F.camp_encounters.arrival_grace_sec, checkSec: 0,
     cooldownSec: 0, exposureSec: 0, active: null, recap: null,
+    storyHistory: [], lastReceipt: null,
   };
+}
+
+const CANONICAL_EVENT_ID: Record<string, string> = {
+  'sounds': 'camp-sounds', 'prowler': 'camp-prowler', 'traveler': 'camp-traveler',
+  'nest': 'camp-nest', 'discovered': 'camp-discovered', 'supply-cache': 'camp-supply-cache',
+};
+const LEGAL_TERMINAL_ACTIONS = new Set([
+  'investigate', 'quiet', 'fight', 'secure', 'shelter', 'pause', 'listen',
+  'trade-ore', 'trade-timber', 'decline', 'cache-careful', 'cache-quick', 'cache-leave',
+  'cache-collect', 'cache-cancel', 'timeout', 'cancelled', 'combat-won', 'combat-pushed',
+]);
+const COMMON_TERMINALS = new Set(['timeout', 'cancelled', 'combat-won', 'combat-pushed']);
+const KIND_ACTIONS: Record<string, readonly string[]> = {
+  sounds: ['investigate', 'quiet', 'fight'],
+  prowler: ['fight', 'secure'],
+  nest: ['fight', 'pause'],
+  discovered: ['fight', 'shelter'],
+  traveler: ['listen', 'trade-ore', 'trade-timber', 'decline'],
+  'supply-cache': ['cache-careful', 'cache-quick', 'cache-leave', 'cache-collect', 'cache-cancel'],
+};
+const validActionForKind = (kind: string, action: string) => COMMON_TERMINALS.has(action) || (KIND_ACTIONS[kind] ?? []).includes(action);
+const CACHE_RESULT_SCENES = new Set([
+  'cache-careful-result', 'cache-gain-result', 'cache-mixed-result', 'cache-loss-result',
+  'cache-left-result', 'cache-cancel-result',
+]);
+const CAMP_SCENES = new Map(STORY.scenes.filter((scene) => scene.source === 'camp').map((scene) => [scene.id, scene]));
+const canonicalScene = (kind: string): string | null =>
+  (E.fieldwork.camp_encounters.event_pool as any[]).find((row: any) => row.kind === kind)?.scene_id ?? null;
+function allowedScene(kind: string, sceneId: string): boolean {
+  if (kind === 'supply-cache') return sceneId === canonicalScene(kind) || CACHE_RESULT_SCENES.has(sceneId);
+  if (kind === 'traveler') return sceneId === canonicalScene(kind) || sceneId === 'traveler-return';
+  return sceneId === canonicalScene(kind);
+}
+function validVariant(kind: string, variantId: string): boolean {
+  const match = /^(.*)-(\d+)$/.exec(variantId);
+  if (!match) return false;
+  const scene = CAMP_SCENES.get(match[1]);
+  return !!scene && allowedScene(kind, match[1]) && Number(match[2]) < scene.lines.length;
+}
+
+function validResourceList(list: unknown): list is CampStoryResource[] {
+  if (!Array.isArray(list)) return false;
+  return list.every((r) => r && typeof r === 'object' && (r.bucket === 'food' || r.bucket === 'material')
+    && typeof r.id === 'string' && r.id.length > 0 && Number.isSafeInteger(r.count) && r.count > 0
+    && (r.bucket === 'material' ? fieldwork.F.materials.some((m: any) => m.id === r.id) : !!fieldwork.foodById[r.id]));
+}
+
+function validReceipt(raw: any, serial: number): raw is CampStoryReceipt {
+  if (!raw || typeof raw !== 'object') return false;
+  if (!Number.isSafeInteger(raw.encounterId) || raw.encounterId <= 0 || raw.encounterId > serial) return false;
+  if (!Object.keys(CANONICAL_EVENT_ID).includes(raw.kind) || CANONICAL_EVENT_ID[raw.kind] !== raw.eventId) return false;
+  if (typeof raw.action !== 'string' || !LEGAL_TERMINAL_ACTIONS.has(raw.action) || !validActionForKind(raw.kind, raw.action)) return false;
+  if (typeof raw.sceneId !== 'string' || !CAMP_SCENES.has(raw.sceneId) || !allowedScene(raw.kind, raw.sceneId)) return false;
+  if (!Number.isFinite(raw.elapsedSec) || raw.elapsedSec < 0 || raw.elapsedSec > 1e9) return false;
+  if (!validResourceList(raw.paid) || !validResourceList(raw.earned) || !validResourceList(raw.lost)) return false;
+  if (!Array.isArray(raw.info) || !raw.info.every((i: unknown) => typeof i === 'string')) return false;
+  return true;
+}
+
+function validCacheOffer(cache: any, zone: number): cache is CacheOffer {
+  const cfg = fieldwork.F.camp_encounters;
+  if (!cache || typeof cache !== 'object' || cache.revision !== 1) return false;
+  const regionalFood = fieldwork.F.regional_sources?.[String(zone)]?.food;
+  if (!regionalFood || cache.foodId !== regionalFood) return false;
+  if (cache.materialId !== cfg.cache.material_id) return false;
+  const unitYield = fieldwork.F.actions.mine.yield;
+  const carefulSec = Math.ceil(cfg.cache.careful_intervals * fieldwork.F.actions.mine.interval_sec);
+  if (cache.unitYield !== unitYield || cache.carefulSec !== carefulSec) return false;
+  if (!['gain', 'mixed', 'loss'].includes(cache.quickOutcome)) return false;
+  return true;
 }
 
 export function normalizeCampEncounterState(state: GameState): void {
@@ -102,8 +204,8 @@ export function normalizeCampEncounterState(state: GameState): void {
       && Number.isFinite(mob.hpMax) && mob.hpMax >= mob.hp && Number.isSafeInteger(mob.zone));
     const validActive = typeof active === 'object' && Number.isSafeInteger(active.id) && active.id > 0
       && Number.isSafeInteger(raw.serial) && active.id <= raw.serial
-      && ['sounds', 'prowler', 'traveler', 'nest', 'discovered'].includes(active.kind)
-      && ['warning', 'choice', 'combat'].includes(active.stage) && validCell
+      && Object.keys(CANONICAL_EVENT_ID).includes(active.kind)
+      && ['warning', 'choice', 'combat', 'resolving', 'collect'].includes(active.stage) && validCell
       && Number.isSafeInteger(active.warningSec) && active.warningSec >= 0
       && Number.isSafeInteger(active.choiceSec) && active.choiceSec >= 0
       && active.payload && typeof active.payload === 'object' && !Array.isArray(active.payload)
@@ -111,13 +213,74 @@ export function normalizeCampEncounterState(state: GameState): void {
       && active.participantIds.every((id: unknown) => typeof id === 'string')
       && (active.stage !== 'combat' || active.participantIds.length > 0 && active.preparedGroup.length === 0)
       && (active.stage === 'combat' || !['sounds', 'prowler', 'nest', 'discovered'].includes(active.kind) || active.preparedGroup.length > 0)
-      && (active.stage === 'combat' || active.participantIds.length === 0);
+      && (active.stage === 'combat' || active.participantIds.length === 0)
+      && (active.stage === 'resolving' || active.stage === 'collect'
+        ? active.kind === 'supply-cache' && validGroup && active.preparedGroup.length === 0 && active.participantIds.length === 0
+        : !['resolving', 'collect'].includes(active.stage) || active.kind === 'supply-cache');
     if (!validActive) {
       raw.active = null;
       raw.cooldownSec = Math.max(raw.cooldownSec, fieldwork.F.camp_encounters.cooldown_sec);
     }
+    // Story metadata normalization (no RNG): backfill eventId by kind, drop invalid presentation-only fields.
+    if (raw.active) {
+      const a = raw.active as CampEncounterActive;
+      const story = (a as any).story;
+      if (story == null) {
+        // legacy active retains valid group/timers with null story
+      } else if (typeof story !== 'object') {
+        (a as any).story = null;
+      } else if (story.eventId == null && typeof story === 'object') {
+        story.eventId = CANONICAL_EVENT_ID[a.kind];
+        // fall through to validation
+        const ok = normalizeStory(a, story, state);
+        if (!ok && a.kind === 'supply-cache') { raw.active = null; raw.cooldownSec = Math.max(raw.cooldownSec, fieldwork.F.camp_encounters.cooldown_sec); }
+      } else {
+        const ok = normalizeStory(a, story, state);
+        if (!ok && a.kind === 'supply-cache') { raw.active = null; raw.cooldownSec = Math.max(raw.cooldownSec, fieldwork.F.camp_encounters.cooldown_sec); }
+      }
+    }
   }
   if (typeof raw.recap !== 'string') raw.recap = null;
+  if (!Array.isArray(raw.storyHistory)) raw.storyHistory = [];
+  raw.storyHistory = raw.storyHistory.filter((h: any) => h && typeof h === 'object'
+    && Number.isSafeInteger(h.encounterId) && h.encounterId > 0 && h.encounterId <= raw.serial
+    && Object.keys(CANONICAL_EVENT_ID).includes(h.kind) && CANONICAL_EVENT_ID[h.kind] === h.eventId
+    && typeof h.variantId === 'string' && validVariant(h.kind, h.variantId)
+    && (h.terminalAction === null || (LEGAL_TERMINAL_ACTIONS.has(h.terminalAction) && validActionForKind(h.kind, h.terminalAction)))
+    && typeof h.followupUsed === 'boolean');
+  raw.storyHistory = raw.storyHistory.slice(-fieldwork.F.camp_encounters.story.recent_limit);
+  if (raw.lastReceipt !== null && raw.lastReceipt !== undefined && !validReceipt(raw.lastReceipt, raw.serial)) raw.lastReceipt = null;
+  if (raw.lastReceipt === undefined) raw.lastReceipt = null;
+  return;
+}
+function normalizeStory(a: CampEncounterActive, story: any, state: GameState): boolean {
+  // Returns false only for cache (caller cancels); for legacy kinds discard story metadata -> null.
+  const dropLegacy = (): boolean => { (a as any).story = null; return true; };
+  if (story.revision !== 1) return a.kind === 'supply-cache' ? false : dropLegacy();
+  if (CANONICAL_EVENT_ID[a.kind] !== story.eventId) return a.kind === 'supply-cache' ? false : dropLegacy();
+  if (typeof story.sceneId !== 'string' || !CAMP_SCENES.has(story.sceneId) || !allowedScene(a.kind, story.sceneId))
+    return a.kind === 'supply-cache' ? false : dropLegacy();
+  const scene = CAMP_SCENES.get(story.sceneId)!;
+  if (!Number.isSafeInteger(story.lineIndex) || story.lineIndex < 0 || story.lineIndex >= scene.lines.length)
+    return a.kind === 'supply-cache' ? false : dropLegacy();
+  if (!Number.isSafeInteger(story.beat) || story.beat < 0) return a.kind === 'supply-cache' ? false : dropLegacy();
+  if (!Number.isSafeInteger(story.remainingSec) || story.remainingSec < 0) return a.kind === 'supply-cache' ? false : dropLegacy();
+  if (a.kind === 'supply-cache') {
+    if (story.sceneId !== canonicalScene('supply-cache')) return false;
+    // The cache belongs to the saved origin's zone, not the zone the player may have moved to.
+    if (!validCacheOffer(story.cache, state.fieldwork.camp?.zone ?? zoneOf(a.origin) ?? state.zone)) return false;
+    if (story.remainingSec > story.cache.carefulSec) return false;
+    if (a.stage === 'collect' && story.remainingSec !== 0) return false;
+    if ((a.stage === 'warning' || a.stage === 'choice') && story.remainingSec !== 0) return false;
+    if (a.stage === 'resolving' && story.remainingSec > story.cache.carefulSec) return false;
+    if (a.preparedGroup.length !== 0 || a.participantIds.length !== 0) return false;
+  } else {
+    if (story.cache !== null && story.cache !== undefined) return dropLegacy();
+    if (story.remainingSec !== 0) return dropLegacy();
+    if (a.stage === 'resolving' || a.stage === 'collect') return dropLegacy();
+    story.cache = null;
+  }
+  return true;
 }
 
 export function newFieldwork(seed = 0): FieldworkState {
@@ -172,8 +335,13 @@ export function tickHunger(state: GameState, online = true): string | null {
   return null;
 }
 
+export interface TravelEventReceipt {
+  resourceDeltas: { bucket: 'food' | 'material'; id: string; count: number }[];
+  hungerDelta: number;
+}
+
 /** An independent road event roll; its supplies and rest never add a mob group. */
-export function resolveTravelEvent(state: GameState, rng: () => number): string | null {
+export function resolveTravelEvent(state: GameState, rng: () => number, receipt?: (entry: TravelEventReceipt) => void): string | null {
   const config = fieldwork.F.travel_events;
   if (rng() >= config.chance_per_block) return null;
   const totalWeight = config.events.reduce((sum: number, event: any) => sum + event.weight, 0);
@@ -183,6 +351,7 @@ export function resolveTravelEvent(state: GameState, rng: () => number): string 
   if (event.kind === 'restore') {
     const before = state.fieldwork.hunger;
     state.fieldwork.hunger = Math.min(fieldwork.F.hunger.max, before + event.hunger_restore);
+    receipt?.({ resourceDeltas: [], hungerDelta: state.fieldwork.hunger - before });
     return `${event.text} · Hunger ${Math.floor(state.fieldwork.hunger)}%`;
   }
   const amount = event.amount_min + Math.floor(rng() * (event.amount_max - event.amount_min + 1));
@@ -190,6 +359,7 @@ export function resolveTravelEvent(state: GameState, rng: () => number): string 
   const food = fieldwork.foodById[localFood] || fieldwork.foodById[event.food_id];
   if (!food) return null;
   const received = addTo(state, state.fieldwork.foods, food.id, 'food', amount);
+  receipt?.({ resourceDeltas: [{ bucket: 'food', id: food.id, count: received }], hungerDelta: 0 });
   const zoneName = E.mob.zones.find((zone: any) => zone.id === state.zone)?.name || 'the trail';
   return received
     ? `Found ${food.name} along ${zoneName} · ${food.name} ×${received}`

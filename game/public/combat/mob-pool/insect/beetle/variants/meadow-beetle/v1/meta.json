@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "beetle--meadow-beetle",
+  "name": "Meadow Beetle",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 54,
+      "y": 113,
+      "width": 148,
+      "height": 111,
+      "offsetX": 54,
+      "offsetY": 113
+    },
+    {
+      "x": 312,
+      "y": 123,
+      "width": 145,
+      "height": 101,
+      "offsetX": 56,
+      "offsetY": 123
+    },
+    {
+      "x": 53,
+      "y": 398,
+      "width": 150,
+      "height": 82,
+      "offsetX": 53,
+      "offsetY": 142
+    },
+    {
+      "x": 310,
+      "y": 399,
+      "width": 148,
+      "height": 81,
+      "offsetX": 54,
+      "offsetY": 143
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "beetle",
+  "variantId": "meadow-beetle"
+}

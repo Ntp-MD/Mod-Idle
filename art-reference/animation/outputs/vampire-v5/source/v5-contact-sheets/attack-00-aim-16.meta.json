@@ -10,8 +10,8 @@
   "promptSummary": "Far attack aim; right open hand aligns toward target, left hand guards; no projectile.",
   "promptContract": {
     "references": [
-      "art-reference/monsters/undead/vampire/reference.png",
-      "art-reference/monsters/undead/vampire/animation/atlas/animation.png"
+      "archive/art-reference/monsters/undead/vampire/reference.png",
+      "archive/art-reference/monsters/undead/vampire/animation/atlas/animation.png"
     ],
     "sheet": "4x4 row-major 1024x1536, cell 256x384, 16 directions; source anchor x=128/y=288; fixed elevated 3/4 camera; no mirroring; transparent background requested",
     "style": "crisp hand-crafted pixel-art clusters matching the approved vampire atlas",

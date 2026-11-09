@@ -1,5 +1,6 @@
 import { BASES } from '../../../engine/client';
-import type { ArenaCharacterArt, ArenaSpriteFrameImage, ArenaSpriteSheet } from './arena-art';
+import { pixelArenaArt } from './arena-art-pixel-v2';
+import type { ArenaCharacterArt, ArenaSpriteFrameImage } from './arena-art';
 import { arenaScreenAngleFor } from '../../../presentation/arena-camera';
 import equipment from './player-equipment-v1.json';
 import type { Character } from '@sim/core/player';
@@ -26,93 +27,12 @@ type EquipmentRecord = {
 type EquipmentFrame = ArenaSpriteFrameImage;
 
 const source = equipment as unknown as {
-  schemaVersion: number;
-  frameCanvas: { width: number; height: number; anchor: Point };
-  /** Measured lowest alpha row per clip and direction: the 3/4 foot line this art was drawn on. */
-  feetByClip?: Record<string, Record<string, number>>;
-  body: Record<string, Record<string, EquipmentFrame[]>>;
   weapons: Record<string, EquipmentRecord>;
   shield: { targetHeightBodyHeightRatio: number; attachmentHand: 'off'; views: Record<string, EquipmentView> };
-  bodySkillOverrides?: Record<string, Partial<Record<'east' | 'west', EquipmentFrame>>>;
 };
 
-/** A shared visible-height target removes inconsistent body scale baked into generated poses. */
-function medianFrameHeight(directions: Record<string, EquipmentFrame[]>): number {
-  const heights = Object.values(directions).flatMap(frames => frames.map(frame => frame.sourceFrame.height))
-    .filter(height => Number.isFinite(height) && height > 0)
-    .sort((a, b) => a - b);
-  if (!heights.length) return source.frameCanvas.height;
-  const middle = Math.floor(heights.length / 2);
-  return heights.length % 2 ? heights[middle] : (heights[middle - 1] + heights[middle]) / 2;
-}
-const uprightFrameHeight = medianFrameHeight(source.body.idle);
-const deathFrameHeight = medianFrameHeight(source.body.death);
-
-/** The clip's measured foot line, normalized; a missing measurement keeps the canvas anchor. */
-function feetAnchor(clip: string, direction: string): Point {
-  const feet = source.feetByClip?.[clip]?.[direction];
-  return { x: 0.5, y: (feet ?? source.frameCanvas.anchor.y) / source.frameCanvas.height };
-}
-
-function sheet(frames: readonly EquipmentFrame[], frameMs: number, loop: boolean, anchor?: Point, impactMs?: number, release = false): ArenaSpriteSheet {
-  const first = frames[0];
-  const releaseGrip = release ? frames[1]?.mainGripCell ?? first.mainGripCell : undefined;
-  return {
-    href: first.href,
-    frameWidth: source.frameCanvas.width,
-    frameHeight: source.frameCanvas.height,
-    imageWidth: first.imageWidth,
-    imageHeight: first.imageHeight,
-    sourceFrames: frames.map(frame => frame.sourceFrame),
-    frameImages: frames,
-    columns: 1,
-    rows: 1,
-    frames: frames.length,
-    frameMs,
-    loop,
-    ...(anchor ? { anchor } : {}),
-    ...(impactMs == null ? {} : { impactMs }),
-    ...(releaseGrip ? { releaseSocket: { ...releaseGrip, provenance: 'authored-fallback' as const } } : {}),
-  };
-}
-
-const idle = Object.fromEntries(Object.entries(source.body.idle).map(([direction, frames]) =>
-  [direction, sheet(frames, 140, true, feetAnchor('idle', direction))]));
-const walk = Object.fromEntries(Object.entries(source.body.walk).map(([direction, frames]) =>
-  [direction, sheet(frames, 130, true, feetAnchor('walk', direction))]));
-const attack = Object.fromEntries(Object.entries(source.body.attack).map(([direction, frames]) =>
-  [direction, sheet(frames, 100, false, feetAnchor('attack', direction), 100, true)]));
-const hit = Object.fromEntries(Object.entries(source.body.hit).map(([direction, frames]) =>
-  [direction, sheet(frames, 110, false, feetAnchor('hit', direction))]));
-const death = Object.fromEntries(Object.entries(source.body.death).map(([direction, frames]) =>
-  [direction, sheet(frames, 180, false, feetAnchor('death', direction))]));
-
-/** Clean player body animation. Weapon and offhand pictures are drawn as independent layers. */
-export const equippedPlayerArt: ArenaCharacterArt = {
-  pixelArt: true,
-  displayHeight: 240,
-  // Upright clips share the median idle body height across all eight directions. Death uses
-  // its own fallen-pose baseline so lying down does not get enlarged to standing height.
-  frameScaleReferenceHeights: {
-    idle: uprightFrameHeight, walk: uprightFrameHeight, attack: uprightFrameHeight,
-    hit: uprightFrameHeight, death: deathFrameHeight,
-  },
-  anchor: {
-    x: source.frameCanvas.anchor.x / source.frameCanvas.width,
-    y: source.frameCanvas.anchor.y / source.frameCanvas.height,
-  },
-  clips: { idle, walk, attack, hit, death } as ArenaCharacterArt['clips'],
-};
-
-/** Skill-specific contact artwork is used only when its baked equipment matches the worn set. */
-export function playerSkillContactPose(state: GameState, character: Character, skillId: string, direction: string) {
-  const mainHand = state.gear.find((item): item is Item => !!item && !item.broken && item.slot === 'main hand');
-  const offhand = state.gear.find((item): item is Item => !!item && !item.broken && item.slot === 'off hand');
-  const type = weaponTypeOf(mainHand?.base ?? character.weaponName);
-  if (skillId !== 'attack.shield_bash' || type?.id !== 'one-handed sword' || !offhand || baseRow(offhand.base)?.family !== 'Shield')
-    return undefined;
-  return source.bodySkillOverrides?.[skillId]?.[direction.includes('west') ? 'west' : 'east'];
-}
+/** Pawn body is the default; worn weapons and shields stay as separate layers. */
+export const equippedPlayerArt: ArenaCharacterArt = pixelArenaArt.hero;
 
 export type ArenaEquipmentLayer = {
   href: string;
@@ -170,7 +90,7 @@ function shieldView(view: EquipmentView, grip: Point, bodyHeight: number, desire
 export function playerEquipmentLayers(args: {
   state: GameState;
   character: Character;
-  frame?: EquipmentFrame;
+  frame?: Pick<EquipmentFrame, 'mainGripCell' | 'offGripCell'>;
   bodyHeight: number;
   clip: string;
   phase?: string;

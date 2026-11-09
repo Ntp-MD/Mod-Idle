@@ -1,0 +1,48 @@
+{
+  "pawnId": "troll--swamp-troll",
+  "candidateFile": "pawn-troll--swamp-troll-diagonals.png",
+  "sourceAtlas": "art-reference/pawn-study/atlases/variants/troll--swamp-troll.png",
+  "sourceSheet": "art-reference/pawn-study/sheets/variants/troll--swamp-troll.png",
+  "dimensions": "1254x1254",
+  "pixelFormat": "32bpp ARGB",
+  "transparentBackground": true,
+  "cellLayout": "2x2",
+  "cellSize": "627x627",
+  "directionOrder": [
+    "NE",
+    "SE",
+    "SW",
+    "NW"
+  ],
+  "views": {
+    "NE": "rear three-quarter, face hidden",
+    "SE": "front three-quarter, nose/mouth visible",
+    "SW": "mirrored front three-quarter, nose/mouth visible",
+    "NW": "mirrored rear three-quarter, face hidden"
+  },
+  "visibleBoundsPx": {
+    "NE": "x=216..492, y=54..560 (277x507)",
+    "SE": "x=147..425, y=63..560 (279x498)",
+    "SW": "x=195..475, y=52..558 (281x507)",
+    "NW": "x=135..412, y=48..558 (278x511)"
+  },
+  "visibleFootprint": "44–45% cell width and 79–81% height; bottom anchors differ by at most 2px.",
+  "identityCheck": "Olive swamp-green skin, dark shaggy moss hair, pointed ears, darker mottled patches, pale bone/teeth necklace, ragged brown fur waist wrap and broad bust base; no limbs.",
+  "reviewStatus": "candidate-review",
+  "concerns": [
+    "Confirm runtime-relative scale and mirrored front handedness in packed preview.",
+    "Face details remain faithful to source, which has no prominent eyes."
+  ],
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "status": "runtime-reviewed",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

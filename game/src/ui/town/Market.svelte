@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { TOWN, fieldwork } from '../../engine/client';
-  import { npcOf, priceGold, stockOf, canBuy, settlementById } from '@sim/town/town';
+  import { TOWN, trade as tradeEngine, fieldwork } from '../../engine/client';
+  import { npcOf, priceGold, stockOf, canBuy, settlementById, quoteTownPurchase, firstBroken } from '@sim/town/town';
   import { atSettlement } from '@sim/gear/craft';
   import { trade, tradeInventory, quoteSale, marketDestinations, canProcess } from '@sim/town/trade';
   import { fieldMasteryLevel } from '@sim/world/fieldwork';
@@ -9,6 +9,8 @@
   import type { GameState } from '@sim/core/types';
   import DeliveryBoard from './DeliveryBoard.svelte';
   import BlackMarketBoard from './BlackMarketBoard.svelte';
+  import StoryScene from '../story/StoryScene.svelte';
+  import { marketStoryView } from '../story/story-presenters';
   import CountBadge from '../shared/CountBadge.svelte';
   import EmptyNote from '../shared/EmptyNote.svelte';
   import Tabs from '../shared/Tabs.svelte';
@@ -22,11 +24,13 @@
     { id: 'black-market', label: 'Black Market' },
   ];
 
-  let { state: gameState, town, here, onbuy, onsell, ontrade, onprocess, onroute, writer, ondeliver, ontrack, onack, onblackmarketbuy, onpinzone = () => {}, ontrackgoal = () => {}, ontrackshortage = () => {}, goalId = null, view = $bindable('trade'), marketId = $bindable('') }: {
+  let { state: gameState, town, here, onbuy, onsell, ontrade, onprocess, onroute, writer, ondeliver, ontrack, onack, onaccept = () => {}, ondecline = () => {}, onblackmarketbuy, onpinzone = () => {}, ontrackgoal = () => {}, ontrackshortage = () => {}, goalId = null, view = $bindable('trade'), marketId = $bindable(''), saleResult = null }: {
     state: GameState; town: any; here: boolean;
-    onbuy: (rowId: string, settlementId?: string) => void; onsell: () => void;
-    ontrade: (id: string, count: number) => void; onprocess: (id: string) => void; onroute: (id: string) => void;
+    onbuy: (rowId: string, settlementId?: string, expected?: { token: string; target?: { where: 'gear' | 'bag'; index: number } }) => void; onsell: () => void;
+    ontrade: (id: string, count: number, expected?: { carried: number; gold: number }) => void; onprocess: (id: string) => void; onroute: (id: string) => void;
+    saleResult?: { text: string; goldText: string; townId?: string; goodId?: string } | null;
     writer: boolean; ondeliver: (id: string, count: number, choice?: string) => void; ontrack: (id: string, tracked: boolean) => void; onack: (id: string) => void;
+    onaccept?: (id: string) => void; ondecline?: (id: string) => void;
     onblackmarketbuy: (townId: string, offerId: string) => void;
     onpinzone?: (zone: number) => void;
     ontrackgoal?: (id: string) => void;
@@ -59,6 +63,47 @@
     + (gameState.town.deliverySummaries[market.id]?.unread ? 1 : 0));
   const blackMarketStock = $derived(gameState.town.blackMarket[market.id]?.offers.filter((offer) => offer.remaining > 0).length || 0);
   const haggling = $derived(trade.haggling(gameState.town.hagglingXp));
+  /** One deterministic promotion per cycle for a stocked eligible stall row (§9.1). */
+  const promotion = $derived(TOWN.storyteller_promotions
+    ? tradeEngine.townPromotion(gameState.seed, market.id, gameState.clockSec, stock.map((row) => row.id), TOWN.storyteller_promotions)
+    : null);
+  const promoRow = $derived(promotion ? stock.find((row) => row.id === promotion.rowId) ?? null : null);
+  const promoQuote = $derived(promotion && promoRow ? quoteTownPurchase(gameState, market.id, promoRow.id) : null);
+  const promoSecsLeft = $derived(promotion ? Math.max(0, promotion.expiresAtSec - gameState.clockSec) : 0);
+  const storyView = $derived.by(() => {
+    const cycle = Math.floor(gameState.clockSec / (TOWN.storyteller_promotions?.cycle_sec ?? 3600));
+    const speaker = npcOf('counterhand')?.name || 'counterhand';
+    const saleFits = saleResult && (!saleResult.townId || saleResult.townId === market.id)
+      && (!saleResult.goodId || saleResult.goodId === selected.id);
+    if (saleFits) {
+      return marketStoryView({
+        key: `market:result:${saleResult.text}:${saleResult.goldText}`, seed: gameState.seed, townId: market.id,
+        npcId: 'counterhand', speaker, townName: market.name, cycle, contextKey: 'result',
+        latestResult: saleResult,
+      });
+    }
+    if (promotion && promoRow && promoQuote) {
+      return marketStoryView({
+        key: `market:promotion:${promotion.id}`, seed: gameState.seed, townId: market.id,
+        npcId: 'counterhand', speaker, townName: market.name, cycle, contextKey: 'promotion',
+        promotion: {
+          itemName: String(promoRow.item), goldText: `${gold(promoQuote.gold)} gold`,
+          normalText: `${gold(promoQuote.normalGold)} gold`, savingsText: `${gold(promoQuote.normalGold - promoQuote.gold)} gold`,
+          remainingText: `${Math.floor(promoSecsLeft / 60)}m ${promoSecsLeft % 60}s left this cycle`,
+        },
+      });
+    }
+    return marketStoryView({
+      key: `market:greeting:${market.id}:${cycle}:${selected.id}:${amount}`, seed: gameState.seed, townId: market.id,
+      npcId: 'counterhand', speaker, townName: market.name, cycle, contextKey: `quote:${selected.id}`,
+      selectedGood: cargo.length ? { goodName: selected.name, quoteText: `${gold(quote.gold)} gold` } : null,
+    });
+  });
+  const buyExpectation = (row: any) => {
+    const quote = quoteTownPurchase(gameState, market.id, row.id);
+    const target = row.id === 'repair' || row.id === 'repair_ironrow' ? firstBroken(gameState) : null;
+    return { token: quote.token, ...(target ? { target: { where: target.where, index: target.index } } : {}) };
+  };
 </script>
 
 <div class="market">
@@ -82,6 +127,7 @@
     {/snippet}
   </Tabs>
   {#if view === 'trade'}
+    <StoryScene view={storyView} onaction={() => {}} />
     <p class="market-note text-note">Optional · {profile.needs} Supplying a category lowers its price. {ACTIVITY_GUIDE.market.when} {ACTIVITY_GUIDE.market.helps}</p>
     <div class="trade-layout">
       <section class="cargo" aria-label="Carried trade goods">
@@ -116,7 +162,7 @@
           <button disabled={carried === 0} onclick={() => quantity = carried}>All carried</button>
           <div class="sale-actions">
             <strong class="text-value">{gold(quote.gold)} gold</strong>
-            <button class="sell btn-gold" disabled={!writer || !local || amount > carried} onclick={() => ontrade(selected.id, amount)}>Sell {amount} here</button>
+            <button class="sell btn-gold" disabled={!writer || !local || amount > carried} onclick={() => ontrade(selected.id, amount, { carried, gold: quote.gold })}>Sell {amount} here</button>
           </div>
         </div>
         {#if !writer}<p class="why" role="status">Read-only: take account control in Save before trading.</p>
@@ -144,8 +190,8 @@
       </section>
     </div>
   {:else if view === 'deliveries'}
-    <DeliveryBoard state={gameState} townId={market.id} {writer} {ondeliver} {ontrack} {onack}
-      {onpinzone} {ontrackgoal} {ontrackshortage} {goalId} />
+    <DeliveryBoard state={gameState} townId={market.id} {writer} {ondeliver} {ontrack} {onack} {onaccept} {ondecline}
+      onroute={onroute} {onpinzone} {ontrackgoal} {ontrackshortage} {goalId} />
   {:else if view === 'black-market'}
     <BlackMarketBoard state={gameState} townId={market.id} here={local} {writer} onbuy={onblackmarketbuy} />
   {:else if view === 'workshop'}
@@ -188,13 +234,14 @@
     <p class="market-note">Gold buys town services, organisation and appearance.</p>
     <div class="wares">
       {#each stock as row (row.id)}
-        {@const price = priceGold(row, market.id, gameState)}
+        {@const quote = quoteTownPurchase(gameState, market.id, row.id)}
         {@const verdict = canBuy(gameState, market.id, row.id)}
         {@const repair = row.id === 'repair' || row.id === 'repair_ironrow'}
-        <article class="ware card-read"><h3>{row.item}</h3><p class="text-note">{row.kind} · {npcOf(row.npc)?.name || row.npc}</p><strong class="text-value">{gold(price)} gold</strong>
+        <article class="ware card-read"><h3>{row.item}</h3><p class="text-note">{row.kind} · {npcOf(row.npc)?.name || row.npc}</p><strong class="text-value">{gold(quote.gold)} gold</strong>
+          {#if quote.promotion}<small class="text-good">Normal {gold(quote.normalGold)} gold · savings {gold(quote.normalGold - quote.gold)} gold · {Math.floor(promoSecsLeft / 60)}m {promoSecsLeft % 60}s left this cycle</small>{/if}
           {#if repair}<small class="text-note">{hasBroken ? 'Repairs the first Broken piece; worn gear first.' : 'No Broken piece to repair.'}</small>{/if}
           {#if !verdict.ok}<small class="text-note">{verdict.why}</small>{/if}
-          <button disabled={!writer || !local || !verdict.ok || (repair && !hasBroken)} title={verdict.why || (repair ? (hasBroken ? 'Repair a Broken piece' : 'No Broken piece to repair') : 'Buy this town service')} onclick={() => onbuy(row.id, market.id)}>{repair ? 'Repair' : 'Buy'}</button>
+          <button disabled={!writer || !local || !verdict.ok || (repair && !hasBroken)} title={verdict.why || (repair ? (hasBroken ? 'Repair a Broken piece' : 'No Broken piece to repair') : 'Buy this town service')} onclick={() => onbuy(row.id, market.id, buyExpectation(row))}>{repair ? 'Repair' : 'Buy'}</button>
         </article>
       {:else}<p>No stall lines at this settlement.</p>{/each}
     </div>

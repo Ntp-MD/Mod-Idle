@@ -10,7 +10,12 @@ export interface MapJournal {
   claimedSites: string[];
   trail?: { sites: TrailSite[]; serial: number; streamState: number; checkInSec: number };
   lastPosition?: string;
-  lastEvent?: { q: number; r: number; text: string; atSec: number; activity?: string };
+  lastEvent?: {
+    q: number; r: number; text: string; atSec: number; activity?: string;
+    source?: 'road' | 'site';
+    resourceDeltas?: { bucket: 'food' | 'material'; id: string; count: number }[];
+    hungerDelta?: number;
+  };
 }
 export interface TrailSite {
   id: string; q: number; r: number;
@@ -84,6 +89,16 @@ export function normalizeMapJournal(state: GameState) {
     const { q, r, text, atSec } = raw.lastEvent;
     journal.lastEvent = typeof raw.lastEvent.activity === 'string'
       ? { q, r, text, atSec, activity: raw.lastEvent.activity } : { q, r, text, atSec };
+    // Optional storyteller receipt fields: invalid ones are removed, the legacy record survives.
+    const rawEvent = raw.lastEvent as any;
+    if (rawEvent.source === 'road' || rawEvent.source === 'site') journal.lastEvent.source = rawEvent.source;
+    if (Array.isArray(rawEvent.resourceDeltas) && rawEvent.resourceDeltas.every((d: any) => d
+      && (d.bucket === 'food' || d.bucket === 'material')
+      && (d.bucket === 'food' ? !!fieldwork.foodById[d.id] : fieldwork.F.materials.some((m: any) => m.id === d.id))
+      && Number.isFinite(d.count) && d.count >= 0)) {
+      journal.lastEvent.resourceDeltas = rawEvent.resourceDeltas.map((d: any) => ({ bucket: d.bucket, id: d.id, count: d.count }));
+    }
+    if (Number.isFinite(rawEvent.hungerDelta)) journal.lastEvent.hungerDelta = rawEvent.hungerDelta;
   }
   for (const id of state.town.visited) {
     const node = road.nodeById(id);
@@ -146,6 +161,8 @@ export function investigateTrailSite(state: GameState, id: string): { ok: boolea
   if (journal.claimedSites.includes(id)) return { ok: false, why: 'This site has already been explored.' };
   const kind = trailSiteKind(site);
   let message: string;
+  let resourceDeltas: { bucket: 'food' | 'material'; id: string; count: number }[] = [];
+  let hungerDelta = 0;
   if ('food_count' in kind) {
     const zone = zoneOf(site) ?? state.zone;
     const foodId = fieldwork.F.regional_sources[zone]?.food;
@@ -153,14 +170,17 @@ export function investigateTrailSite(state: GameState, id: string): { ok: boolea
     if (!food) return { ok: false, why: 'No local provision is available here.' };
     const received = addTo(state, state.fieldwork.foods, foodId, 'food', kind.food_count);
     if (!received) return { ok: false, why: 'Make space in the food bag first.' };
+    resourceDeltas = [{ bucket: 'food', id: foodId, count: received }];
     message = `${kind.name} · ${food.name} ×${received}`;
   } else {
     if (state.fieldwork.hunger >= fieldwork.F.hunger.max) return { ok: false, why: 'Hunger is already full. You can rest here later.' };
+    const before = state.fieldwork.hunger;
     state.fieldwork.hunger = Math.min(fieldwork.F.hunger.max, state.fieldwork.hunger + kind.hunger_restore);
+    hungerDelta = state.fieldwork.hunger - before;
     message = `${kind.name} · Hunger ${Math.floor(state.fieldwork.hunger)}%`;
   }
   journal.claimedSites.push(id);
-  journal.lastEvent = { q: site.q, r: site.r, text: message, atSec: state.clockSec };
+  journal.lastEvent = { q: site.q, r: site.r, text: message, atSec: state.clockSec, source: 'site', resourceDeltas, hungerDelta };
   state.group = [];
   state.player.atkTimer = 0;
   state.fieldwork.action = null;

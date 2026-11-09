@@ -1,0 +1,132 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "player",
+  "name": "Player",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 67,
+      "y": 45,
+      "width": 122,
+      "height": 179,
+      "offsetX": 67,
+      "offsetY": 45
+    },
+    {
+      "x": 326,
+      "y": 37,
+      "width": 116,
+      "height": 187,
+      "offsetX": 70,
+      "offsetY": 37
+    },
+    {
+      "x": 78,
+      "y": 288,
+      "width": 100,
+      "height": 192,
+      "offsetX": 78,
+      "offsetY": 32
+    },
+    {
+      "x": 334,
+      "y": 290,
+      "width": 100,
+      "height": 190,
+      "offsetX": 78,
+      "offsetY": 34
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/players/body/idle/south.png",
+  "sourceSha256": "1dc20d2c7fba317a1199a934f5232f4e186ae0193baf953c7002890aec96bb27",
+  "diagonalSource": null,
+  "gripsByDirection": {
+    "south": {
+      "mainHand": {
+        "x": 165,
+        "y": 168
+      },
+      "offHand": {
+        "x": 91,
+        "y": 168
+      }
+    },
+    "north": {
+      "mainHand": {
+        "x": 165,
+        "y": 168
+      },
+      "offHand": {
+        "x": 91,
+        "y": 168
+      }
+    },
+    "west": {
+      "mainHand": {
+        "x": 116,
+        "y": 169
+      },
+      "offHand": {
+        "x": 163,
+        "y": 169
+      }
+    },
+    "east": {
+      "mainHand": {
+        "x": 140,
+        "y": 169
+      },
+      "offHand": {
+        "x": 93,
+        "y": 169
+      }
+    }
+  }
+}

@@ -10,8 +10,8 @@
   "promptSummary": "Non-graphic defeated pose begins tipping and knees buckle; arms lower, cape follows the fall.",
   "promptContract": {
     "references": [
-      "art-reference/monsters/undead/vampire/reference.png",
-      "art-reference/monsters/undead/vampire/animation/atlas/animation.png"
+      "archive/art-reference/monsters/undead/vampire/reference.png",
+      "archive/art-reference/monsters/undead/vampire/animation/atlas/animation.png"
     ],
     "sheet": "4x4 row-major 1024x1536, cells 256x384, 16 direction labels; source anchor x=128/y=288; fixed elevated 3/4 camera; no mirroring; transparent background requested",
     "style": "crisp hand-crafted pixel-art clusters matching approved vampire atlas",

@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "kobold--scavenger-kobold",
+  "name": "Scavenger Kobold",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 59,
+      "y": 83,
+      "width": 138,
+      "height": 141,
+      "offsetX": 59,
+      "offsetY": 83
+    },
+    {
+      "x": 318,
+      "y": 82,
+      "width": 133,
+      "height": 142,
+      "offsetX": 62,
+      "offsetY": 82
+    },
+    {
+      "x": 72,
+      "y": 339,
+      "width": 112,
+      "height": 141,
+      "offsetX": 72,
+      "offsetY": 83
+    },
+    {
+      "x": 328,
+      "y": 339,
+      "width": 113,
+      "height": 141,
+      "offsetX": 72,
+      "offsetY": 83
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "kobold",
+  "variantId": "scavenger-kobold"
+}

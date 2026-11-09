@@ -323,6 +323,38 @@ describe('mob, terrain and drop data', () => {
       .toBe('Variant item');
   });
 
+  it('pays a saved retired placement the same reward as its pinned legacy payload', () => {
+    const id = 'skeleton.z01.s01';
+    const drop = (E.mob.retired_variant_drops as Record<string, any>)[id];
+    expect(drop).toBeDefined();
+    expect(eng.placementsIn(1).some(row => row.id === id)).toBe(false);
+    let paidJunk = false;
+    for (let seed = 1; seed <= 64 && !paidJunk; seed++) {
+      const state = newGame(seed);
+      setLevel(state, 80);
+      state.cell = { q: 0, r: -1, sub: 0, site: null };
+      state.hunting = true;
+      state.group = [mobFixture({ id: 'retired', species: 'Skeleton', speciesId: 'skeleton',
+        placementId: id, variant: 'Warrior Skeleton', level: 11, hp: 1, hpMax: 1, ps: 0,
+        acc: 0, innate: [], damage: 'physical' })];
+      pinFieldPopulation(state);
+      state.field!.actors = [{ id: 'retired', x: state.field!.player.x + 1, y: state.field!.player.y }];
+      const pinned = structuredClone(state);
+      pinned.group[0].legacySnapshot = true;
+      pinned.group[0].legacyDrop = { item: drop.item, rarity: drop.rarity, lean: drop.lean };
+      for (let second = 0; second < 10 && state.counters.kills === 0; second++) {
+        tick(state, { online: true, autoSkills: false });
+        tick(pinned, { online: true, autoSkills: false });
+      }
+      expect(state.counters.kills).toBe(1);
+      expect(state.junk).toEqual(pinned.junk);
+      expect(state.counters.junk).toBe(pinned.counters.junk);
+      expect(state.rngState).toBe(pinned.rngState);
+      paidJunk = state.counters.junk > 0;
+    }
+    expect(paidJunk).toBe(true);
+  });
+
   it('gives bosses their own combat profile in the engine roster', () => {
     const roster = eng.mobRoster();
 

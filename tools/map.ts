@@ -26,10 +26,10 @@ import path from 'node:path';
 import { readJson } from './lib/json.ts';
 import * as G from './lib/gates.ts';
 import { createRoad } from '../engine/road.ts';
-import { MAP_CAMERA_TRANSFORM, projectMapPoint, mapUprightAt, mapUprightAround, projectMapBounds, projectedHex, footprintShapeError } from '../game/src/ui/map/map-projection.ts';
-import { TERRAIN_ART, TERRAIN_RELIEF, TERRAIN_VARIANTS } from '../game/src/ui/map/map-terrain.ts';
+import { createWorld } from '../engine/world.ts';
+import { MAP_CAMERA_TRANSFORM, projectMapPoint, mapUprightAt, mapUprightAround, projectMapBounds, projectedHex } from '../game/src/ui/map/map-projection.ts';
+import { TERRAIN_ART, TERRAIN_RELIEF } from '../game/src/ui/map/map-terrain.ts';
 import { mapSpriteWidth, mapSpriteWidthScale } from '../game/src/ui/map/map-sprites.ts';
-import footprints from '../game/src/ui/map/data/map-terrain-footprints.json' with { type: 'json' };
 import type { EngineData, MobZone } from '../engine/types.ts';
 
 /**
@@ -90,60 +90,22 @@ const R = F.radius;
 const SQ3 = Math.sqrt(3);
 /** Two pointy-top neighbours sit SQ3*R apart and each reaches SQ3*r/2 past its centre, so r = R - GAP/SQ3. */
 const HEX_R = R - F.gap / SQ3;
-const TILE_DEPTH = 3;
 /** The complete projected ground footprint, centred on the cell origin. */
 const PROJ_HEX = projectedHex(HEX_R);
-/** Legacy scenery has no measurable hex footprint; keep its painted bottom inside the cell.
- *  Full-hex replacements instead use the exact projected bounding rectangle below. */
+/** Separate scenery keeps its measured painted bottom inside the cell. */
 const TERRAIN_PIECE = { width: PROJ_HEX.width * .98, bottom: -PROJ_HEX.y * .98 };
 
 const registeredArtwork = new Map<string, string>();
 const registeredDefinitions = new Map<string, string>();
-/** How far a measured footprint may sit from the template hex, as a fraction of the canvas.
- *  A footprint measured in the wrong rotational order lands every corner on the wrong edge,
- *  and the per-sector fit below cannot see it: each sector maps its own pair exactly. */
-const FOOTPRINT_SHAPE_TOLERANCE = 0.12;
-/** Register each ground sector exactly; adjacent sectors share their centre and edge endpoints. */
+/** Square, unprojected textures fill the hex directly, without warping their pixels. */
 function hexArtwork(href: string): string {
   const cached = registeredArtwork.get(href);
   if (cached) return cached;
-  const measured = (footprints as Record<string, { width: number; height: number; vertices: number[][]; groundFill: string }>)[href];
-  if (!measured) return `<image class="terrain-hex" href="${href}" x="${PROJ_HEX.x}" y="${PROJ_HEX.y}" width="${PROJ_HEX.width}" height="${PROJ_HEX.height}" preserveAspectRatio="none"/>`;
-  if (measured.vertices.length !== 6 || measured.width <= 0 || measured.height <= 0 || !/^#[0-9a-f]{6}$/i.test(measured.groundFill)) throw new Error(`Invalid terrain footprint: ${href}`);
-  const source = measured.vertices.map(([x,y]) => ({ x: x / measured.width, y: y / measured.height }));
-  const shapeError = footprintShapeError(source, HEX_R);
-  if (shapeError > FOOTPRINT_SHAPE_TOLERANCE) throw new Error(`Terrain footprint does not match the template hex: ${href} (${(shapeError * 100).toFixed(1)}% of the canvas away; re-measure it with tools/map-art.py)`);
-  const center = { x: source.reduce((sum,p)=>sum+p.x,0)/6, y: source.reduce((sum,p)=>sum+p.y,0)/6 };
   const id = 'terrain-' + href.replace(/[^a-z0-9-]/gi, '-');
   const outline = PROJ_HEX.points.map(p=>`${p.x},${p.y}`).join(' ');
-  const defs = [`<clipPath id="${id}-boundary" clipPathUnits="userSpaceOnUse"><polygon points="${outline}"/></clipPath>`, `<image id="${id}-texture" href="${href}" width="1" height="1" preserveAspectRatio="none"/>`];
-  const patches: string[] = [], errors: number[] = [];
-  for (let i=0;i<6;i++) {
-    const next = (i+1)%6, p=source[i], q=source[next];
-    const target=PROJ_HEX.points[i], other=PROJ_HEX.points[next];
-    const px=p.x-center.x, py=p.y-center.y, qx=q.x-center.x, qy=q.y-center.y;
-    const det=px*qy-qx*py;
-    if (Math.abs(det)<1e-10) throw new Error(`Degenerate terrain footprint: ${href}`);
-    const a=(target.x*qy-other.x*py)/det, c=(px*other.x-qx*target.x)/det;
-    const b=(target.y*qy-other.y*py)/det, d=(px*other.y-qx*target.y)/det;
-    const e=-a*center.x-c*center.y, f=-b*center.x-d*center.y;
-    errors.push(Math.hypot(a*p.x+c*p.y+e-target.x,b*p.x+d*p.y+f-target.y));
-    // A subpixel overlap hides antialias seams; the outer clip keeps the ground boundary exact.
-    const triangle=[{x:0,y:0},target,other];
-    const centroid={x:(target.x+other.x)/3,y:(target.y+other.y)/3};
-    const overlap=PROJ_HEX.width/1024/4;
-    const points=triangle.map(v=>{
-      const dx=v.x-centroid.x,dy=v.y-centroid.y,length=Math.hypot(dx,dy);
-      return `${v.x+dx/length*overlap},${v.y+dy/length*overlap}`;
-    }).join(' ');
-    defs.push(`<clipPath id="${id}-sector-${i}" clipPathUnits="userSpaceOnUse"><polygon points="${points}"/></clipPath>`);
-    patches.push(`<g clip-path="url(#${id}-sector-${i})"><use data-sector="${i}" href="#${id}-texture" transform="matrix(${a} ${b} ${c} ${d} ${e} ${f})"/></g>`);
-  }
-  const error=Math.max(...errors);
-  if (!Number.isFinite(error) || error>1e-9) throw new Error(`Terrain footprint registration failed: ${href}`);
-  defs.push(`<g id="${id}" clip-path="url(#${id}-boundary)"><polygon points="${outline}" fill="${measured.groundFill}"/>${patches.join('')}</g>`);
-  registeredDefinitions.set(href,defs.join('\n'));
-  const markup = `<g class="terrain-registration" data-art-href="${href}" data-vertex-error="${error}" data-vertex-errors="${errors.join(',')}"><use href="#${id}"/></g>`;
+  const size = HEX_R * 2;
+  registeredDefinitions.set(href, `<pattern id="${id}" patternUnits="userSpaceOnUse" x="${-size / 2}" y="${-size / 2}" width="${size}" height="${size}"><image href="${href}" width="${size}" height="${size}"/></pattern>`);
+  const markup = `<g class="terrain-ground" data-art-href="${href}"><polygon points="${outline}" fill="url(#${id})"/></g>`;
   registeredArtwork.set(href, markup);
   return markup;
 }
@@ -163,10 +125,6 @@ type Axial = [number, number];
 const settlementLandmark = (town: string): string => MAP.settlement_landmarks[town] || 'city-medium';
 const PX = ([q, r]: Axial): [number, number] => [SQ3 * (q + r / 2) * R, 1.5 * r * R];
 const key = (q: number, r: number): string => q + ',' + r;
-const hd = (a: Axial, b: Axial): number => {
-  const dq = a[0] - b[0], dr = a[1] - b[1];
-  return (Math.abs(dq) + Math.abs(dr) + Math.abs(dq + dr)) / 2;
-};
 
 const settlementIds: string[] = TOWN.settlements.map((s) => s.id);
 const settlementById = (id: string): TownRow | undefined => TOWN.settlements.find((s) => s.id === id);
@@ -174,6 +132,8 @@ const zoneById = (id: number) => E.mob.zones.find((z) => z.id === id);
 const roadNodes = E.road.nodes;
 /** The walk graph itself, so M13 can ask the engine who owns a cell rather than assume it. */
 const ROAD = createRoad(E);
+/** The canonical world queries: the same bare-terrain resolver the runtime reads, so the sheet and the game cannot disagree. */
+const WORLD = createWorld(E, TOWN.settlements);
 /** The order a tied cell is resolved in: `road.standing_rule` gives it to the lowest zone. */
 const STANDING: string[] = TOWN.settlements.slice().sort((a, b) => a.zone - b.zone).map((s) => s.id);
 
@@ -303,28 +263,9 @@ for (const loc of ROAD.locations) {
   claims.set(key(loc.q, loc.r), claim);
 }
 
-/** A stable per-cell jitter, so bare ground is not a perfect Voronoi of the nearest named side. */
-const hash01 = (q: number, r: number): number => {
-  let h = 2166136261 ^ Math.imul(q, 374761393) ^ Math.imul(r, 668265263);
-  h = Math.imul(h ^ (h >>> 13), 1274126177);
-  return (h >>> 0) / 4294967295;
-};
-/** Named sides grouped by the settlement that authored them. */
-const subsByTown = new Map<string, Claim[]>();
-for (const claim of claims.values()) {
-  if (claim.kind !== 'sub') continue;
-  const list = subsByTown.get(claim.town) || [];
-  list.push(claim);
-  subsByTown.set(claim.town, list);
-}
 /** The terrain bare ground takes: its owner's nearest named side, with a little deterministic drift. */
 function bareTerrain(town: string, h: { q: number; r: number }): string {
-  let best: { d: number; terrain: string } | null = null;
-  for (const sub of subsByTown.get(town) || []) {
-    const d = hd([h.q, h.r], [sub.q, sub.r]) + hash01(h.q * 3 + 7, h.r * 5 + 11) * 1.15;
-    if (!best || d < best.d) best = { d, terrain: sub.terrain };
-  }
-  return best?.terrain ?? 'grass';
+  return WORLD.bareTerrain(town, h);
 }
 /**
  * Bare ground: owned by the nearest settlement on foot, and printed with the terrain of that
@@ -467,15 +408,6 @@ function reliefCells(): Set<string> {
 }
 const RELIEF_CELLS = reliefCells();
 
-function depthGroup(): string[] {
-  const lines = ['  <g id="tile-depth" pointer-events="none">'];
-  for (const [, c] of CELLS) {
-    lines.push(`    <polygon class="tile-depth-cell" points="${hexPts(c.x, c.y + TILE_DEPTH)}"/>`);
-  }
-  lines.push('  </g>');
-  return lines;
-}
-
 function fieldGroup(): string[] {
   const lines = ['  <g id="field">'];
   for (const [id, c] of CELLS) {
@@ -517,34 +449,19 @@ function cellsBackToFront(): [string, CellRow][] {
   return [...CELLS.entries()].sort(([, a], [, b]) => projectMapPoint(a.x, a.y).y - projectMapPoint(b.x, b.y).y);
 }
 
-/** The tile a hex shows: a stable pick, so the same hex always carries the same picture. */
-function variantPick(id: string, count: number): number {
-  let hash = 2166136261;
-  for (let i = 0; i < id.length; i++) {
-    hash ^= id.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  return (hash >>> 0) % count;
-}
-
-/** Layer 2: one diorama per hex, its painted base anchored to the coloured ground. */
+/** Layer 2: flat ground fills each hex; object art lives separately in the actor layer. */
 function dioramaGroup(): string[] {
   const lines = ['  <g id="layer-diorama" pointer-events="none">'];
-  for (const [id, c] of cellsBackToFront()) {
+  for (const [, c] of cellsBackToFront()) {
     const terrain = terrainFor(c);
     const claim = claims.get(key(c.q, c.r));
     const zone = zoneOfCell(c);
     const allowed = zone != null && ART_ZONES.has(zone);
-    const groundHref = TERRAIN_ART[terrain] || TERRAIN_ART.grass;
-    const tiles = [groundHref, ...(TERRAIN_VARIANTS[terrain] ?? [])];
-    const href = tiles[variantPick(id, tiles.length)];
-    const body = href in footprints
-      ? hexArtwork(href)
-      : mapSpriteWidth(href, 0, TERRAIN_PIECE.bottom, TERRAIN_PIECE.width);
+    const body = hexArtwork(TERRAIN_ART[terrain] || TERRAIN_ART.grass);
     const outline = PROJ_HEX.points.map(p => `${p.x},${p.y}`).join(' ');
     const node = terrain === 'town' && claim ? ` data-node="${claim.town}"` : '';
     const anchor = anchorCells.has(key(c.q, c.r)) ? ' data-anchor="true"' : '';
-    lines.push(`    <g class="diorama-figure ${allowed ? 'terrain-on' : 'terrain-off'}" data-figure-ax="${c.q},${c.r}" data-terrain-zone="${allowed ? zone : ''}"${node}${anchor} transform="translate(${c.x} ${c.y})"><g class="diorama-art">${body}</g><g class="hex-calibration" fill="none" stroke="#ff47c8" stroke-width=".5" pointer-events="none"><polygon points="${outline}"/><path d="M-2 0H2M0-2V2"/></g></g>`);
+    lines.push(`    <g class="diorama-figure ${allowed ? 'terrain-on' : 'terrain-off'}" data-figure-ax="${c.q},${c.r}" data-terrain-zone="${allowed ? zone : ''}"${node}${anchor} transform="${mapUprightAt(c.x, c.y)}"><g class="diorama-art">${body}</g><g class="hex-calibration" fill="none" stroke="#ff47c8" stroke-width=".5" pointer-events="none"><polygon points="${outline}"/><path d="M-2 0H2M0-2V2"/></g></g>`);
   }
   lines.push('  </g>');
   return lines;
@@ -685,7 +602,7 @@ function markersGroup(): string[] {
 
 function viewBox(): { vx: number; vy: number; vw: number; vh: number } {
   const xs = [...CELLS.values()].map((c) => c.x), ys = [...CELLS.values()].map((c) => c.y);
-  const padX = (SQ3 * R) / 2 + 1, padY = R + TILE_DEPTH + 1;
+  const padX = (SQ3 * R) / 2 + 1, padY = R + 1;
   const vx = Math.min(...xs) - padX, vy = Math.min(...ys) - padY;
   const vw = Math.max(...xs) + padX - vx, vh = Math.max(...ys) + padY - vy;
   return { vx, vy, vw, vh };
@@ -754,7 +671,6 @@ function render(): string {
     `  <g id="projected-board" transform="${MAP_CAMERA_TRANSFORM}">`,
     '  <g id="layer-surface">',
     ...groundRects(v),
-    ...depthGroup(),
     ...fieldGroup(),
     ...walkGroup(),
     '  </g>',
@@ -784,7 +700,7 @@ function write() {
   fs.renameSync(draft, OUT);
   const templateDir = path.join(ROOT, 'art-reference/map/geometry');
   fs.mkdirSync(templateDir, { recursive: true });
-  const width = 1024, height = 625;
+  const width = 1024, height = Math.round(width * PROJ_HEX.height / PROJ_HEX.width);
   const vertices = PROJ_HEX.points.map(p => [
     (p.x - PROJ_HEX.x) / PROJ_HEX.width * width,
     (p.y - PROJ_HEX.y) / PROJ_HEX.height * height,
@@ -795,7 +711,7 @@ function write() {
     width, height, vertices, center: [width / 2, height / 2],
     projectedAspect: PROJ_HEX.width / PROJ_HEX.height,
     projection: MAP_CAMERA_TRANSFORM,
-    placement: 'Full canvas maps to projected hex bounds; no alpha crop, no extra rotation. Vertex 1 is upper-right; subsequent vertices follow clockwise in screen coordinates.',
+    placement: 'Square surface textures fill regular hex masks without perspective warping. Vertex 1 is upper-right; subsequent vertices follow clockwise in screen coordinates.',
   }, null, 2) + '\n');
   const subs = [...claims.values()].filter((c) => c.kind === 'sub').length;
   const sites = [...claims.values()].filter((c) => c.kind === 'site').length;
@@ -975,7 +891,7 @@ function checks() {
     M13NOTE = `${read} land cells resolve, and ${rankMax} blocks is the farthest any of them sits from a settlement`;
   } catch { problems.push('sheet not written — run node tools/map.ts --write'); }
   // M15 · every cell, including settlements, has one correctly placed art group.
-  // Registered hex art checks the six-sector definitions; legacy scenery checks its anchor.
+  // Ground is a flat hex mask; separate scenery retains its measured painted bounds.
   try {
     const svg = fs.readFileSync(OUT, 'utf8').replace(/\r\n?/g, '\n');
     const figures = svg.split(/<g class="diorama-figure[^"]*"/).slice(1);
@@ -989,26 +905,26 @@ function checks() {
       pieces++;
       if (!figure.includes('<g class="diorama-art">')) problems.push(`terrain piece ${hrefs[0]} is not wrapped as one diorama art group`);
       if (figure.includes('clip-path=')) problems.push(`terrain piece ${hrefs[0]} is still clipped`);
+      const header = rawFigure.slice(0, rawFigure.indexOf('>'));
+      const cell = CELLS.get(/data-figure-ax="([^"]+)"/.exec(header)?.[1] ?? '');
+      if (!cell || /transform="([^"]+)"/.exec(header)?.[1] !== mapUprightAt(cell.x, cell.y)) {
+        problems.push(`terrain piece ${hrefs[0]} is not centred on its north-up hex`);
+      }
       for (const href of hrefs) {
         if (!fs.existsSync(path.join(ROOT, 'game/public', href.slice(1)))) problems.push(`terrain piece ${href} is missing`);
-        if (href in footprints) {
-          if (!figure.includes(hexArtwork(href)) || !svg.includes(registeredDefinitions.get(href)!)) problems.push(`terrain piece ${href} does not match its measured footprint registration`);
-          continue;
-        }
-        // Sprite bounds anchor transparent landmark overlays to the cell independently of the base hex.
-        const escaped = href.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const m = new RegExp(`<svg class="" x="([^"]+)" y="([^"]+)" width="([^"]+)" height="([^"]+)"[^>]*><image href="${escaped}"` ).exec(figure)
-          || new RegExp(`<image class="[^"]*" href="${escaped}" x="([^"]+)" y="([^"]+)" width="([^"]+)" height="([^"]+)"`).exec(figure);
-        if (!m) { problems.push(`terrain piece ${href} is not one measured sprite`); continue; }
-        const [x, y, w, h] = m.slice(1).map(Number);
-        const expectedWidth = TERRAIN_PIECE.width * mapSpriteWidthScale(href);
-        if (Math.abs(w - expectedWidth) > .01) problems.push(`terrain piece ${href} is ${w} wide, not its registered painted width`);
-        if (mapSpriteWidthScale(href) < 1 || mapSpriteWidthScale(href) > 1.1) problems.push(`terrain piece ${href} has an unsupported spill scale`);
-        if (Math.abs(x + w / 2) > .01) problems.push(`terrain piece ${href} is not centred on its cell`);
-        if (Math.abs(y + h - TERRAIN_PIECE.bottom) > .01) problems.push(`terrain piece ${href} does not stand on the projected lower edge`);
+        if (!figure.includes(hexArtwork(href)) || !svg.includes(registeredDefinitions.get(href)!)) problems.push(`terrain piece ${href} does not match its flat hex mask`);
       }
     }
     if (pieces !== CELLS.size) problems.push(`sheet carries ${pieces} terrain pieces for ${CELLS.size} land cells`);
+    for (const match of svg.matchAll(/<g class="terrain-relief terrain-on">(.*?)<\/g>/g)) {
+      const href = /<image href="([^"]+)"/.exec(match[1])?.[1];
+      if (!href || !Object.values(TERRAIN_RELIEF).includes(href) || !fs.existsSync(path.join(ROOT, 'game/public', href.slice(1)))) {
+        problems.push('terrain piece has missing or unknown relief art');
+        continue;
+      }
+      if (match[1] !== mapSpriteWidth(href, 0, TERRAIN_PIECE.bottom, TERRAIN_PIECE.width)) problems.push(`terrain piece ${href} does not match its measured scenery anchor`);
+      if (mapSpriteWidthScale(href) < 1 || mapSpriteWidthScale(href) > 1.1) problems.push(`terrain piece ${href} has an unsupported spill scale`);
+    }
   } catch { problems.push('sheet not written — run node tools/map.ts --write'); }
   return { problems };
 }
@@ -1033,7 +949,7 @@ if (args.includes('--checks')) {
   claim('M11', /sub-zone cells for|site cell|site its zone|printed in slot|not the name printed/, `one named sub-zone cell per sub-zone (${subs}) and the wild-side cells each town's zone supports — mine, grove and dungeon for all ${TOWN.settlements.length}, fishing for ${FISHING_ZONES.size} (${sites})`);
   claim('M13', /land mask|two owners|marked as|carries no location|nearest settlement|carries no node|no terrain|prints terrain|prints a tone|carries a sub-zone|carries a site|carries sub-zone|carries site|drawn twice|different data-cell|standing rule read|distinct cells/, `every land cell a click can land on resolves to the settlement that owns it on foot (${M13NOTE})`);
   claim('M14', /settlement landmark assignment|landmark art file/, `all ${TOWN.settlements.length} settlements use known, present landmark art files`);
-  claim('M15', /terrain piece|sheet not written/, `full-hex art matches projected bounds; landmark sprite spill stays measured, centred and bottom-anchored`);
+  claim('M15', /terrain piece|sheet not written/, `flat ground matches every hex; separate scenery stays measured, centred and bottom-anchored`);
   G.report(g.rows());
 } else if (args.includes('--write')) {
   write();

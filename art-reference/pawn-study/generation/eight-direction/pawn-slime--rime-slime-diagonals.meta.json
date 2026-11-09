@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "slime--rime-slime",
+  "identityName": "Rime Slime",
+  "identityKind": "variant",
+  "sourceSheet": "art-reference/pawn-study/sheets/variants/slime--rime-slime.png",
+  "sizeReference": "game/public/combat/mob-pool/formless/slime/variants/rime-slime/v1/atlas.png",
+  "generatedSheet": "art-reference/pawn-study/generation/eight-direction/pawn-slime--rime-slime-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "canvas": {
+    "width": 1254,
+    "height": 1254,
+    "cellSize": 627,
+    "background": "transparent"
+  },
+  "measuredVisibleBoundsSourcePx": {
+    "north-east": [
+      126,
+      126,
+      508,
+      488
+    ],
+    "south-east": [
+      115,
+      126,
+      498,
+      488
+    ],
+    "south-west": [
+      124,
+      101,
+      512,
+      464
+    ],
+    "north-west": [
+      115,
+      101,
+      504,
+      463
+    ]
+  },
+  "measuredVisibleHeightsPx": [
+    362,
+    362,
+    363,
+    362
+  ],
+  "cardinalVisibleHeightsRuntimePx": [
+    131,
+    131,
+    124,
+    124
+  ],
+  "promptSummary": "Generate four Rime Slime diagonal views preserving a limbless pale icy-blue gel body, exactly three blue ice crystals, and dark small eyes; no poison or extra props.",
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "note": "Diagonal-only candidate. Verify facial direction and packed shared scale/contact anchor against cardinal frames before approval.",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

@@ -1,0 +1,28 @@
+{
+  "pawnId": "hornet--vespa-hornet",
+  "sourceAtlas": "art-reference/pawn-study/atlases/variants/hornet--vespa-hornet.png",
+  "generatedFile": "pawn-hornet--vespa-hornet-diagonals.png",
+  "dimensions": "1254x1254",
+  "cellLayout": "2x2",
+  "directionOrder": [
+    "NE",
+    "SE",
+    "SW",
+    "NW"
+  ],
+  "background": "transparent",
+  "reviewStatus": "candidate-review",
+  "notes": "Four diagonal views generated against the active cardinal atlas. Review pose, anchor, scale, and alpha bounds before atlas integration.",
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "status": "runtime-reviewed",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

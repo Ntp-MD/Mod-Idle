@@ -3,10 +3,11 @@
   import type { GameState } from '@sim/core/types';
   import { currentCell } from '@sim/world/road';
   import { createMapRenderer, type MapRenderer } from './map';
-  import { buildMapPaintModel, type MapPaintModel, type MapStaticCell, type MapViewOptions, type Picked } from './map-view-model';
+  import { buildMapPaintModel } from './map-view-model';
+  import type { MapPaintModel, MapStaticCell, MapViewOptions, Picked } from './map-types';
   import { attachMapInput, neighborInDirection, HEX_NEIGHBOURS, type MapInputHandlers } from './map-input';
   import {
-    clampMapPan, composeMapMatrix, mapDetail, mapScreenLabelMatrix, mapTurnTo, orbitMapPan, transformMapPoint,
+    clampMapPan, composeMapMatrix, MAP_ANCHOR_X, MAP_ANCHOR_Y, mapDetail, mapMinReadableZoom, transformMapPoint,
     MAP_MAX_ZOOM, MAP_MIN_ZOOM, MAP_OPEN_ZOOM, DEFAULT_MAP_CAMERA, type MapCameraState,
   } from './map-camera';
   import { createMapProjection } from './map-projection';
@@ -44,8 +45,7 @@
   let renderer = $state.raw<MapRenderer | null>(null);
   let cells = $state.raw<readonly MapStaticCell[]>([]);
   let hovered = $state<string | null>(null);
-  let gesture = $state<'dragging' | 'rotating' | null>(null);
-  let turning = $state(false);
+  let gesture = $state<'dragging' | null>(null);
   let generation = 0;
   let resizeObserver: ResizeObserver | null = null;
   let input: { destroy(): void } | null = null;
@@ -56,20 +56,32 @@
     const svg = root?.querySelector('svg');
     return svg?.querySelector('rect.paper') as SVGRectElement | null;
   }
-  function planeMatrix(bearing = camera.bearing) {
+  function planeMatrix() {
     const viewport = root?.querySelector('svg')?.getCTM();
     if (!viewport || Math.abs(viewport.a * viewport.d - viewport.b * viewport.c) < 1e-12) return null;
-    return composeMapMatrix(viewport, { ...createMapProjection(bearing), e: 0, f: 0 });
+    return composeMapMatrix(viewport, { ...createMapProjection(), e: 0, f: 0 });
   }
   function origin() {
     const box = root?.getBoundingClientRect();
-    return box ? { x: box.left + box.width * .5, y: box.top + box.height * .46 } : null;
+    return box && box.width > 0 && box.height > 0
+      ? { x: box.left + box.width * MAP_ANCHOR_X, y: box.top + box.height * MAP_ANCHOR_Y } : null;
+  }
+  function readableMinZoom(): number {
+    const box = root?.getBoundingClientRect();
+    const matrix = planeMatrix();
+    if (!box || box.width <= 0 || box.height <= 0 || !matrix || !Number.isFinite(matrix.a)) return MAP_MIN_ZOOM;
+    // At zoom 1 place 1 plan unit against the SVG surface scale; camera
+    // scales that once. Hidden/invalid hosts keep the global floor (D2).
+    const planToCss = Math.hypot(matrix.a, matrix.b) || 1;
+    const extent = { icon: 2.8, text: 3.6 };
+    const textOn = options.showNames && !options.cleanMap;
+    return mapMinReadableZoom({ icon: extent.icon * planToCss, text: extent.text * planToCss }, textOn);
   }
   function clampPan(next: MapCameraState) {
     const box = root?.getBoundingClientRect(), svg = root?.querySelector('svg') as SVGSVGElement | null;
     const sheet = paper();
     if (!box || !svg || !sheet) return next;
-    const matrix = planeMatrix(next.bearing);
+    const matrix = planeMatrix();
     if (!matrix) return next;
     const pan = clampMapPan({ x: next.panX, y: next.panY }, box, sheet.getBBox(), matrix, next.zoom);
     return { ...next, panX: pan.x, panY: pan.y };
@@ -77,22 +89,12 @@
   function zoomAt(clientX: number, clientY: number, factor: number) {
     const o = origin();
     if (!o) return;
-    const zoom = Math.min(MAP_MAX_ZOOM, Math.max(MAP_MIN_ZOOM, camera.zoom * factor));
+    const min = readableMinZoom();
+    const zoom = Math.min(MAP_MAX_ZOOM, Math.max(min, camera.zoom * factor));
     const f = zoom / camera.zoom;
     const panX = (clientX - o.x) * (1 - f) + camera.panX * f;
     const panY = (clientY - o.y) * (1 - f) + camera.panY * f;
-    camera = clampPan({ panX, panY, zoom, bearing: camera.bearing });
-  }
-  function setBearing(degrees: number) {
-    if (degrees === camera.bearing) return;
-    const box = root?.getBoundingClientRect();
-    const previous = planeMatrix(), next = planeMatrix(degrees);
-    const pan = box && previous && next
-      ? orbitMapPan({ x: camera.panX, y: camera.panY }, { x: box.width / 2, y: box.height * .46 }, camera.zoom, previous, next)
-      : { x: camera.panX, y: camera.panY };
-    turning = true;
-    camera = clampPan({ ...camera, panX: pan.x, panY: pan.y, bearing: degrees });
-    requestAnimationFrame(() => { turning = false; });
+    camera = clampPan({ panX, panY, zoom });
   }
   function centerAt(hex: { q: number; r: number }) {
     const box = root?.getBoundingClientRect(), svg = root?.querySelector('svg') as SVGSVGElement | null;
@@ -101,20 +103,18 @@
     const bounds = cell.getBBox(), matrix = planeMatrix();
     if (!matrix) return;
     const point = transformMapPoint(matrix, { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 });
-    camera = clampPan({ ...camera, panX: -camera.zoom * (point.x - box.width / 2), panY: -camera.zoom * (point.y - box.height * .46) });
+    camera = clampPan({ ...camera, panX: -camera.zoom * (point.x - box.width * MAP_ANCHOR_X), panY: -camera.zoom * (point.y - box.height * MAP_ANCHOR_Y) });
   }
   function centerOnPlayer() { centerAt(currentCell(gameState)); }
   export function zoomBy(factor: number) {
     const o = origin();
     if (o) zoomAt(o.x, o.y, factor);
   }
-  export function rotateBy(degrees: number) { setBearing(camera.bearing + degrees); }
   export function resetCamera() {
-    setBearing(camera.bearing + mapTurnTo(camera.bearing, 0));
     camera = clampPan({ ...camera, zoom: MAP_OPEN_ZOOM, panX: 0, panY: 0 });
     requestAnimationFrame(centerOnPlayer);
   }
-  export { centerAt, centerOnPlayer, setBearing };
+  export { centerAt, centerOnPlayer };
   export function pickAt(hex: { q: number; r: number }): Picked | null {
     const cell = root?.querySelector<SVGPolygonElement>(`polygon.cell[data-ax="${hex.q},${hex.r}"]`);
     return cell ? renderer?.pick(cell) ?? null : null;
@@ -178,8 +178,6 @@
       resizeObserver?.disconnect();
       resizeObserver = new ResizeObserver(() => renderer?.resize());
       resizeObserver.observe(root);
-      const box = root.getBoundingClientRect();
-      void box;
     });
     return () => { if (currentGeneration === generation) { input?.destroy(); input = null; } };
   });
@@ -219,14 +217,13 @@
   bind:this={root}
   class="map-back sheet"
   class:clean-map={options.cleanMap}
+  class:map-show-relief={options.relief}
   class:map-detail-far={mapDetail(camera.zoom) === 'far'}
   class:map-detail-near={mapDetail(camera.zoom) === 'near'}
   class:dragging={gesture === 'dragging'}
-  class:rotating={gesture === 'rotating'}
-  class:camera-turning={turning}
   role="application"
   data-testid="world-map"
-  aria-label="World map. Drag to pan. Ctrl and drag horizontally to orbit the fixed perspective. Scroll to zoom. Arrow keys select adjacent blocks in the screen direction; Enter performs the destination's primary action."
+  aria-label="World map. North is up. Drag to pan. Scroll to zoom. Arrow keys select adjacent blocks in the screen direction; Enter performs the destination's primary action."
   tabindex="0"
 >
   <div class="map-sheet" style:transform={`translate(${camera.panX.toFixed(1)}px, ${camera.panY.toFixed(1)}px) scale(${camera.zoom.toFixed(4)})`}>

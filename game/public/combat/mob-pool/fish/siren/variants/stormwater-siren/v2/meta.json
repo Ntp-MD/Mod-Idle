@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "siren--stormwater-siren",
+  "name": "Stormwater Siren",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 81,
+      "y": 84,
+      "width": 94,
+      "height": 140,
+      "offsetX": 81,
+      "offsetY": 84
+    },
+    {
+      "x": 343,
+      "y": 84,
+      "width": 82,
+      "height": 140,
+      "offsetX": 87,
+      "offsetY": 84
+    },
+    {
+      "x": 601,
+      "y": 93,
+      "width": 79,
+      "height": 131,
+      "offsetX": 89,
+      "offsetY": 93
+    },
+    {
+      "x": 856,
+      "y": 81,
+      "width": 81,
+      "height": 143,
+      "offsetX": 88,
+      "offsetY": 81
+    },
+    {
+      "x": 81,
+      "y": 338,
+      "width": 94,
+      "height": 142,
+      "offsetX": 81,
+      "offsetY": 82
+    },
+    {
+      "x": 344,
+      "y": 337,
+      "width": 81,
+      "height": 143,
+      "offsetX": 88,
+      "offsetY": 81
+    },
+    {
+      "x": 601,
+      "y": 348,
+      "width": 79,
+      "height": 132,
+      "offsetX": 89,
+      "offsetY": 92
+    },
+    {
+      "x": 856,
+      "y": 339,
+      "width": 81,
+      "height": 141,
+      "offsetX": 88,
+      "offsetY": 83
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-siren--stormwater-siren-diagonals.png",
+  "diagonalSourceSha256": "5b0d5155dcf63f3007bf4330216cd0d45140ec6ae944155ab1f9fdea2bdfe947",
+  "diagonalScaleFactor": 0.401697,
+  "speciesId": "siren",
+  "variantId": "stormwater-siren"
+}

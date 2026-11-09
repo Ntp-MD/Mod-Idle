@@ -62,6 +62,7 @@ export function advanceFieldPopulation(s: GameState, opts: {
       const add = spawnMob(rng, s.zone, 'normal', undefined, s.cell?.sub ?? null, {
         allowWildUnique: false,
         standTerrain: s.cell?.terrain ?? null,
+        hex: s.cell ? { q: s.cell.q, r: s.cell.r } : null,
         id: entry.id ?? `${field.areaKey}:add:${slot.id}:${slot.respawnCount}`,
       });
       add.addedBy = entry.bossId;
@@ -108,7 +109,7 @@ export function advanceFieldPopulation(s: GameState, opts: {
     }
     const rng2 = mulberry32(spawnSlotSeed(s.seed, field.areaKey, slot.id, slot.respawnCount));
     const mob = spawnMob(rng2, s.zone, kind, undefined, s.cell?.sub ?? null, {
-      uniqueChance, standTerrain: s.cell?.terrain ?? null, id: `${field.areaKey}:${slot.id}:${slot.respawnCount}`,
+      uniqueChance, standTerrain: s.cell?.terrain ?? null, hex: s.cell ? { q: s.cell.q, r: s.cell.r } : null, id: `${field.areaKey}:${slot.id}:${slot.respawnCount}`,
     });
     mob.spawnSlotId = slot.id;
     slot.mobId = mob.id;

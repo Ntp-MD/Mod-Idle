@@ -4,8 +4,8 @@
   "action": "hit",
   "direction": "west",
   "pose": "02-recover",
-  "source": "art-reference/monsters/humanoid/goblin/animation/poses/hit/west/02-recover.png",
-  "sourceMetadata": "art-reference/monsters/humanoid/goblin/animation/poses/hit/west/02-recover.meta.json",
+  "source": "archive/art-reference/monsters/humanoid/goblin/animation/poses/hit/west/02-recover.png",
+  "sourceMetadata": "archive/art-reference/monsters/humanoid/goblin/animation/poses/hit/west/02-recover.meta.json",
   "sourcePixelsModified": false,
   "frameCanvas": {
     "width": 384,

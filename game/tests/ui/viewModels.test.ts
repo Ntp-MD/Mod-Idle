@@ -3,7 +3,7 @@ import { newGame as newGameForHud } from '@sim/core/game';
 import { E, loot } from '../../src/engine/client';
 import { pieceRank, rankTone, gearEntry, stackEntry, sortEntries, vsWorn, compareLines } from '../../src/ui/inventory/bag';
 import { castForHit, fxByMob, plateBeat, platePark, plateStrike, plateGesture, graveIds, parked, windupOf } from '../../src/ui/combat/plate';
-import { ramp } from '../../src/ui/map/map';
+import { ramp } from '../../src/ui/map/map-view-model';
 import { snapCounters, buildAwayReport, fieldLabel, describeSnap, mechanicWords, sideSpawnWords } from '../../src/ui/hud/hud';
 import { bar, curseWords, statusWords } from '../../src/ui/shared/field';
 import type { Item, Mob, FxEvent } from '@sim/core/types';

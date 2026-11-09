@@ -1,0 +1,148 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "wraith",
+  "name": "Wraith",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 86,
+      "y": 75,
+      "width": 85,
+      "height": 149,
+      "offsetX": 86,
+      "offsetY": 75
+    },
+    {
+      "x": 346,
+      "y": 66,
+      "width": 77,
+      "height": 158,
+      "offsetX": 90,
+      "offsetY": 66
+    },
+    {
+      "x": 605,
+      "y": 67,
+      "width": 71,
+      "height": 157,
+      "offsetX": 93,
+      "offsetY": 67
+    },
+    {
+      "x": 859,
+      "y": 66,
+      "width": 75,
+      "height": 158,
+      "offsetX": 91,
+      "offsetY": 66
+    },
+    {
+      "x": 87,
+      "y": 330,
+      "width": 83,
+      "height": 150,
+      "offsetX": 87,
+      "offsetY": 74
+    },
+    {
+      "x": 346,
+      "y": 324,
+      "width": 76,
+      "height": 156,
+      "offsetX": 90,
+      "offsetY": 68
+    },
+    {
+      "x": 604,
+      "y": 323,
+      "width": 72,
+      "height": 157,
+      "offsetX": 92,
+      "offsetY": 67
+    },
+    {
+      "x": 860,
+      "y": 324,
+      "width": 72,
+      "height": 156,
+      "offsetX": 92,
+      "offsetY": 68
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/monsters/undead/wraith/wraith/reference.png",
+  "sourceSha256": "1de8d8790d09ca7a9f96a1a9c71eb64a968ebd36e3056b1bb0fdc733e76c3829",
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-wraith-diagonals.png",
+  "diagonalSourceSha256": "35c912eec57d00a4608e91ecb6603969d88259a30df5342a1cb1725e9503cecd",
+  "diagonalScaleFactor": 0.353206
+}

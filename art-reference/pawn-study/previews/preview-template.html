@@ -1,0 +1,117 @@
+<section id="pawn-study-b2"><style>
+#pawn-study-b2{color:var(--seed-fg);font-family:var(--font-sans)}
+#pawn-study-b2 .stage{display:grid;place-items:center;background:var(--inset-bg);margin-block:12px}
+#pawn-study-b2 canvas{max-width:100%;height:auto}
+#pawn-study-b2 .controls{display:flex;flex-wrap:wrap;align-items:end;gap:12px}
+#pawn-study-b2 label{display:grid;gap:4px}
+#pawn-study-b2 .muted{color:var(--seed-muted)}
+</style>
+<p>109 variant · 36 species · ภาพทดลอง 4 มุมต่อตัว</p>
+<div class="controls">
+<label>Species<select id="pawn-species-b2"></select></label>
+<label>Variant<select id="pawn-variant-b2"></select></label>
+<label>มุม<select id="pawn-facing-b2"><option value="0">หน้า · South</option><option value="1">หลัง · North</option><option value="2">ซ้าย · West</option><option value="3">ขวา · East</option></select></label>
+<label>การขยับ<select id="pawn-motion-b2"><option value="idle">Idle</option><option value="walk">Walk</option><option value="attack">Attack</option><option value="hit">Hit</option><option value="death">Death</option></select></label>
+<button type="button" id="pawn-pause-b2">หยุด</button>
+</div>
+<div class="stage"><canvas id="pawn-stage-b2" width="384" height="280" role="img" aria-label="Variant preview"></canvas></div>
+<p id="pawn-status-b2" aria-live="polite"></p>
+<p class="muted">variant ใช้ภาพนิ่งมุมละ 1 ภาพและขยับทั้งชิ้นด้วยโค้ด; เกมใช้ชุดนี้เป็น default และวาดอาวุธเป็นเลเยอร์แยก</p>
+<script>
+(() => {
+  const DATA = __PAWN_DATA__;
+  const root = document.getElementById('pawn-study-b2');
+  const speciesSel = root.querySelector('#pawn-species-b2');
+  const variantSel = root.querySelector('#pawn-variant-b2');
+  const facing = root.querySelector('#pawn-facing-b2');
+  const motion = root.querySelector('#pawn-motion-b2');
+  const pause = root.querySelector('#pawn-pause-b2');
+  const status = root.querySelector('#pawn-status-b2');
+  const canvas = root.querySelector('#pawn-stage-b2');
+  const context = canvas.getContext('2d');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let playing = !reduced;
+  let elapsed = 0;
+  let previous = performance.now();
+  pause.textContent = playing ? 'หยุด' : 'เล่น';
+  const images = new Map();
+  const byId = new Map(DATA.map(entry => [entry.id, entry]));
+  const speciesNames = {};
+  for (const entry of DATA) {
+    const image = new Image();
+    image.src = entry.image;
+    images.set(entry.id, image);
+    if (entry.kind === 'species') speciesNames[entry.id] = entry.name;
+  }
+  const species = [...new Set(DATA.map(entry => entry.species))];
+  for (const id of species) {
+    const option = document.createElement('option');
+    option.value = id;
+    option.textContent = speciesNames[id] || id;
+    speciesSel.append(option);
+  }
+  function fillVariants() {
+    const list = DATA.filter(entry => entry.species === speciesSel.value);
+    variantSel.innerHTML = '';
+    for (const entry of list) {
+      const option = document.createElement('option');
+      option.value = entry.id;
+      option.textContent = entry.kind === 'species' ? `${entry.name} (base)` : entry.name;
+      variantSel.append(option);
+    }
+    update();
+  }
+  const current = () => byId.get(variantSel.value);
+  function update() {
+    elapsed = 0;
+    const entry = current();
+    if (!entry) return;
+    status.textContent = `${entry.name} · ${entry.species} · ${facing.selectedOptions[0].textContent} · ${motion.value}`;
+    canvas.setAttribute('aria-label', status.textContent);
+  }
+  function draw() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    const entry = current();
+    if (!entry) return;
+    const image = images.get(entry.id);
+    if (!image.complete || !image.naturalWidth) return;
+    const direction = Number(facing.value);
+    const seconds = elapsed / 1000;
+    let x = 192, y = 244, angle = 0, scaleY = 1, opacity = 1;
+    if (!reduced) {
+      if (motion.value === 'idle') scaleY = 1 + Math.sin(seconds * 2.5) * 0.012;
+      if (motion.value === 'walk') { y -= Math.abs(Math.sin(seconds * 8)) * 9; angle = Math.sin(seconds * 8) * 0.035; }
+      if (motion.value === 'attack') {
+        const phase = seconds % 1.3;
+        const pulse = phase < 0.45 ? Math.sin(phase / 0.45 * Math.PI) : 0;
+        const [dx, dy] = [[0, 1], [0, -1], [-1, 0], [1, 0]][direction];
+        x += dx * pulse * 25; y += dy * pulse * 12;
+        angle = (direction === 2 ? -1 : 1) * pulse * 0.16;
+      }
+      if (motion.value === 'hit') { const phase = seconds % 1.1; x += Math.sin(phase * 65) * Math.max(0, 1 - phase * 3) * 9; }
+      if (motion.value === 'death') { const phase = Math.min(seconds / 0.65, 1); angle = phase * 1.35; opacity = 1 - phase * 0.3; x -= phase * 65; y -= phase * 85; }
+    }
+    context.save();
+    context.translate(x, y);
+    context.rotate(angle);
+    context.scale(1, scaleY);
+    context.globalAlpha = opacity;
+    context.drawImage(image, (direction % 2) * 64, Math.floor(direction / 2) * 64, 64, 64, -112, -196, 224, 224);
+    context.restore();
+  }
+  speciesSel.onchange = fillVariants;
+  variantSel.onchange = update;
+  facing.onchange = update;
+  motion.onchange = update;
+  pause.onclick = () => { playing = !playing; pause.textContent = playing ? 'หยุด' : 'เล่น'; };
+  function tick(now) {
+    if (!root.isConnected) return;
+    if (playing) elapsed += Math.min(now - previous, 100);
+    previous = now;
+    draw();
+    requestAnimationFrame(tick);
+  }
+  fillVariants();
+  requestAnimationFrame(tick);
+})();
+</script></section>

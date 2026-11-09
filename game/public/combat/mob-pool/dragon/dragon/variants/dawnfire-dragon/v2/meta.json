@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "dragon--dawnfire-dragon",
+  "name": "Dawnfire Dragon",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 74,
+      "y": 94,
+      "width": 109,
+      "height": 130,
+      "offsetX": 74,
+      "offsetY": 94
+    },
+    {
+      "x": 311,
+      "y": 94,
+      "width": 147,
+      "height": 130,
+      "offsetX": 55,
+      "offsetY": 94
+    },
+    {
+      "x": 565,
+      "y": 97,
+      "width": 150,
+      "height": 127,
+      "offsetX": 53,
+      "offsetY": 97
+    },
+    {
+      "x": 832,
+      "y": 94,
+      "width": 128,
+      "height": 130,
+      "offsetX": 64,
+      "offsetY": 94
+    },
+    {
+      "x": 73,
+      "y": 352,
+      "width": 110,
+      "height": 128,
+      "offsetX": 73,
+      "offsetY": 96
+    },
+    {
+      "x": 320,
+      "y": 351,
+      "width": 128,
+      "height": 129,
+      "offsetX": 64,
+      "offsetY": 95
+    },
+    {
+      "x": 567,
+      "y": 354,
+      "width": 147,
+      "height": 126,
+      "offsetX": 55,
+      "offsetY": 98
+    },
+    {
+      "x": 823,
+      "y": 350,
+      "width": 147,
+      "height": 130,
+      "offsetX": 55,
+      "offsetY": 94
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-dragon--dawnfire-dragon-diagonals.png",
+  "diagonalSourceSha256": "0e2fab0f35a2644565abd5ac9d0df9976c8259e1f9e60ebf6ffc622aa51bf09f",
+  "diagonalScaleFactor": 0.327869,
+  "speciesId": "dragon",
+  "variantId": "dawnfire-dragon"
+}

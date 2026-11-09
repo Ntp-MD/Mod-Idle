@@ -5,7 +5,7 @@
     {
       "id": "meadow-floor",
       "source": "art-reference/field-backgrounds/outputs/meadow-floor.png",
-      "runtime": "game/src/assets/combat/meadow-floor.webp",
+      "runtime": "game/public/map/ground/meadow-floor.webp",
       "width": 1254,
       "height": 1254,
       "sourceBytes": 3347259,
@@ -17,7 +17,7 @@
     {
       "id": "marsh-floor",
       "source": "art-reference/field-backgrounds/outputs/marsh-floor.png",
-      "runtime": "game/src/assets/combat/marsh-floor.webp",
+      "runtime": "game/public/map/ground/marsh-floor.webp",
       "width": 1254,
       "height": 1254,
       "sourceBytes": 3723586,
@@ -29,7 +29,7 @@
     {
       "id": "mountain-floor",
       "source": "art-reference/field-backgrounds/outputs/mountain-floor.png",
-      "runtime": "game/src/assets/combat/mountain-floor.webp",
+      "runtime": "game/public/map/ground/mountain-floor.webp",
       "width": 1254,
       "height": 1254,
       "sourceBytes": 3683196,
@@ -41,7 +41,7 @@
     {
       "id": "coast-floor",
       "source": "art-reference/field-backgrounds/outputs/coast-floor.png",
-      "runtime": "game/src/assets/combat/coast-floor.webp",
+      "runtime": "game/public/map/ground/coast-floor.webp",
       "width": 1254,
       "height": 1254,
       "sourceBytes": 3264471,
@@ -53,7 +53,7 @@
     {
       "id": "cave-floor",
       "source": "art-reference/field-backgrounds/outputs/cave-floor.png",
-      "runtime": "game/src/assets/combat/cave-floor.webp",
+      "runtime": "game/public/map/ground/cave-floor.webp",
       "width": 1254,
       "height": 1254,
       "sourceBytes": 3258091,
@@ -65,7 +65,7 @@
     {
       "id": "snow-floor",
       "source": "art-reference/field-backgrounds/outputs/snow-floor.png",
-      "runtime": "game/src/assets/combat/snow-floor.webp",
+      "runtime": "game/public/map/ground/snow-floor.webp",
       "width": 1254,
       "height": 1254,
       "sourceBytes": 2734297,
@@ -77,7 +77,7 @@
     {
       "id": "desert-floor",
       "source": "art-reference/field-backgrounds/outputs/desert-floor.png",
-      "runtime": "game/src/assets/combat/desert-floor.webp",
+      "runtime": "game/public/map/ground/desert-floor.webp",
       "width": 1254,
       "height": 1254,
       "sourceBytes": 3208667,
@@ -89,7 +89,7 @@
     {
       "id": "tomb-floor",
       "source": "art-reference/field-backgrounds/outputs/tomb-floor.png",
-      "runtime": "game/src/assets/combat/tomb-floor.webp",
+      "runtime": "game/public/map/ground/tomb-floor.webp",
       "width": 1254,
       "height": 1254,
       "sourceBytes": 3261248,
@@ -101,7 +101,7 @@
     {
       "id": "ruins-floor",
       "source": "art-reference/field-backgrounds/outputs/ruins-floor.png",
-      "runtime": "game/src/assets/combat/ruins-floor.webp",
+      "runtime": "game/public/map/ground/ruins-floor.webp",
       "width": 1254,
       "height": 1254,
       "sourceBytes": 3630398,
@@ -113,7 +113,7 @@
     {
       "id": "volcanic-floor",
       "source": "art-reference/field-backgrounds/outputs/volcanic-floor.png",
-      "runtime": "game/src/assets/combat/volcanic-floor.webp",
+      "runtime": "game/public/map/ground/volcanic-floor.webp",
       "width": 1254,
       "height": 1254,
       "sourceBytes": 3607707,
@@ -125,7 +125,7 @@
     {
       "id": "rift-floor",
       "source": "art-reference/field-backgrounds/outputs/rift-floor.png",
-      "runtime": "game/src/assets/combat/rift-floor.webp",
+      "runtime": "game/public/map/ground/rift-floor.webp",
       "width": 1254,
       "height": 1254,
       "sourceBytes": 3268930,
@@ -137,7 +137,7 @@
     {
       "id": "forest-floor",
       "source": "game/src/assets/combat/forest-floor.png",
-      "runtime": "game/src/assets/combat/forest-floor.webp",
+      "runtime": "game/public/map/ground/forest-floor.webp",
       "width": 1254,
       "height": 1254,
       "sourceBytes": 3640359,

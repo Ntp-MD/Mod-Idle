@@ -18,6 +18,8 @@ import { readJson } from './lib/json.ts';
 import { createSkillModel, DEFAULT_ROLL_POLICY, normalizeSkillAction, validateMobSkillRules, validateSkillActions, validateSkillHitClasses } from '../engine/skills.ts';
 import { createLoot, leanReweight, leanReweightMany } from '../engine/loot.ts';
 import { createSpawns, spawnSlotSeed } from '../engine/spawns.ts';
+import { validateStoryData } from '../engine/storyteller.ts';
+import { createFieldwork } from '../engine/fieldwork.ts';
 import { modRangeProblems } from './lib/mod-ranges.ts';
 
 const { E, S, K, M, LG, BAND, BANDS, CEIL, SPLIT, FORCED_SPLIT, FOCUSED_CEIL, DERIVED, ES, WEAPONS, STONE, LCK_BOUND, L, C, TS } = eng;
@@ -305,6 +307,11 @@ function runChecks() {
       for (const r of want) if (!shown.has(r)) subProblems.push(`${r} placed in zone ${z.id} but shown in no subzone there`);
       for (const s of (z.subzones || [])) {
         if ('normal' in s || 'elite' in s) subProblems.push(`zone ${z.id} ${s.name} declares variants: the Species ladder owns names, subzones own only Species ids`);
+        const subzone = z.subzones.indexOf(s) + 1;
+        const actual = new Set(placements.filter((row) => row.zone === z.id && row.subzone === subzone).map((row) => row.species));
+        const declared = new Set(s.species || []);
+        for (const id of actual) if (!declared.has(id)) subProblems.push(`zone ${z.id} ${s.name}: spawn pool includes undeclared ${id}`);
+        for (const id of declared) if (!actual.has(id)) subProblems.push(`zone ${z.id} ${s.name}: ${id} has no spawn placement`);
       }
     }
     const uniques = ((E.mob as any).uniques || []) as any[];
@@ -355,6 +362,8 @@ function runChecks() {
       const loc = roadLocations.find((l) => l.zone === z.id && l.kind === 'sub' && l.index === index);
       if (!loc) { hp.push(`zone ${z.id} ${sub.name}: no canonical sub location`); continue; }
       namedSides++;
+      if (envTerrain[sub.environment] !== loc.terrain)
+        hp.push(`zone ${z.id} ${sub.name}: environment maps to ${envTerrain[sub.environment]}, ground is ${loc.terrain}`);
       const residents = (sub.species || []).filter((id: string) => byId.get(id)?.terrain?.includes(loc.terrain));
       if (!residents.length) hp.push(`zone ${z.id} ${sub.name}: no pool species claims ${loc.terrain}`);
     }
@@ -518,14 +527,14 @@ function runChecks() {
   const formCoreKeys = ['str', 'agi', 'vit', 'dex', 'int', 'wis', 'lck'];
   for (const z of E.mob.zones) {
     const zoneForms = (E.mob.forms as any)?.[z.id] || {};
-    const placed = E.mob.species.filter((sp) => sp.zones.includes(z.id));
     if (z.levels[0] > E.mob.form_level_cap) {
       if (Object.keys(zoneForms).length) formProblems.push(`zone ${z.id}: levels above 100 must not define mob variants`);
       continue;
     }
-    const placedIds = new Set(placed.map((sp) => sp.id));
+    // Historical field labels keep the published reference Core stable when live pools move.
+    const knownIds = new Set(E.mob.species.map((sp) => sp.id));
     for (const [speciesId, form] of Object.entries<any>(zoneForms)) {
-      if (!placedIds.has(speciesId)) formProblems.push(`zone ${z.id}: form names unplaced Species ${speciesId}`);
+      if (!knownIds.has(speciesId)) formProblems.push(`zone ${z.id}: form names unknown Species ${speciesId}`);
       if (form.levels?.[0] !== z.levels[0] || form.levels?.[1] !== z.levels[1]) formProblems.push(`${z.id}/${speciesId}: form range does not match the zone`);
       if (!form.name || formNames.has(form.name)) formProblems.push(`${z.id}/${speciesId}: form name is missing or duplicated (${form.name || 'empty'})`);
       else formNames.add(form.name);
@@ -533,7 +542,7 @@ function runChecks() {
     }
   }
   add('X76', formProblems.length === 0, formProblems.length ? formProblems.join(' · ')
-    : `${formNames.size} authored field forms are uniquely named and zone-valid; missing forms inherit the previous label, while Variants own live Core and Elite/Boss remain rank overlays`);
+    : `${formNames.size} reference field forms are uniquely named and level-valid, including historical Species placements; missing forms inherit the previous label, while Variants own live Core and Elite/Boss remain rank overlays`);
 
   const formDropProblems: string[] = [];
   const formDropRows = ((E.mob as any).variant_drops || {}) as Record<string, any>;
@@ -1808,6 +1817,57 @@ function runChecks() {
     add('X60', opProblems.length === 0,
       opProblems.length ? opProblems.join(' · ')
         : `the opening set is complete and resolvable: ${(OP.gear || []).length} pieces covering all ${want.length} slots, every frame named in bases.json, each at the floor of its own window, level ${OP.level} with nothing bought and no skill`);
+  }
+
+  {
+    const problems: string[] = [];
+    try {
+      const storyRaw = readJson(path.join(import.meta.dirname, 'data/storyteller.json'));
+      const townRaw = readJson(path.join(import.meta.dirname, 'data/town.json'));
+      const story = validateStoryData(storyRaw, { npcIds: new Set((townRaw.npcs as any[]).map((n) => n.id)) });
+      const fw = createFieldwork(E.fieldwork as any);
+      fw.validateCampPool(new Set(story.scenes.filter((s) => s.source === 'camp').map((s) => s.id)));
+      const icons = new Set<string>();
+      const walk = (dir: string) => {
+        for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+          const full = path.join(dir, entry.name);
+          if (entry.isDirectory()) walk(full);
+          else if (entry.name.endsWith('.png')) icons.add(entry.name.replace(/\.png$/, ''));
+        }
+      };
+      walk(path.join(ROOT, 'game/src/icon'));
+      for (const [preset, entry] of Object.entries(story.media)) for (const glyph of entry.glyphs) if (!icons.has(glyph)) problems.push(`media.${preset} glyph ${glyph} missing`);
+      const promo = (townRaw as any).storyteller_promotions;
+      if (!promo || !Number.isSafeInteger(promo.cycle_sec) || promo.cycle_sec <= 0 || !(promo.discount_pct > 0 && promo.discount_pct < 100)) problems.push('promotions config invalid');
+      else {
+        const repeatable = new Set(((townRaw as any).repeatable as any[]).map((r) => r.id));
+        for (const id of promo.eligible_rows as string[]) { if (!repeatable.has(id)) problems.push(`promotion row ${id} is not a repeatable town row`); if (id === 'pedlar_rotation' || id === 'waypoint_warp') problems.push(`promotion row ${id} is banned`); }
+        if (new Set(promo.eligible_rows as string[]).size !== (promo.eligible_rows as string[]).length) problems.push('promotion rows duplicated');
+      }
+      const courier = (townRaw as any).delivery?.courier;
+      if (!courier || typeof courier.enabled !== 'boolean' || !Number.isSafeInteger(courier.active_slots) || courier.active_slots <= 0 || !(courier.trigger_interval_mult > 0) || !(courier.trigger_chance_mult > 0)) problems.push('courier config invalid');
+      const cache = (E.fieldwork.camp_encounters as any).cache;
+      if (!cache || !E.fieldwork.materials.some((m: any) => m.id === cache.material_id)) problems.push('cache material invalid');
+      const mine = (E.fieldwork.actions as any).mine;
+      if (!mine || !Number.isSafeInteger(mine.yield) || mine.yield <= 0) problems.push('mine yield must be a positive integer');
+      const outcomes = cache?.outcomes ?? [];
+      if (JSON.stringify(outcomes.map((o: any) => o.id)) !== JSON.stringify(['gain', 'mixed', 'loss'])) problems.push('cache outcomes must be gain,mixed,loss in order');
+      const pool = (E.fieldwork.camp_encounters as any).event_pool;
+      const expectedPool = [
+        { id: 'camp-sounds', kind: 'sounds', scene_id: 'sounds-signs', weight: 1, requires: ['local-mobs'], repeat_gap_events: 0 },
+        { id: 'camp-prowler', kind: 'prowler', scene_id: 'prowler-edge', weight: 1, requires: ['local-mobs'], repeat_gap_events: 0 },
+        { id: 'camp-traveler', kind: 'traveler', scene_id: 'traveler-offer', weight: 1, requires: ['traveler-offer'], repeat_gap_events: 0 },
+        { id: 'camp-nest', kind: 'nest', scene_id: 'nest-worksite', weight: 1, requires: ['local-mobs', 'worksite'], repeat_gap_events: 0 },
+        { id: 'camp-discovered', kind: 'discovered', scene_id: 'camp-found', weight: 1, requires: ['local-mobs', 'exposure-threshold'], repeat_gap_events: 0 },
+        { id: 'camp-supply-cache', kind: 'supply-cache', scene_id: 'cache-ledge', weight: 1, requires: ['idle-cache'], repeat_gap_events: 0 },
+      ];
+      if (JSON.stringify(pool) !== JSON.stringify(expectedPool)) problems.push('camp pool must be the exact six initial rows, bindings, weights and gaps');
+    } catch (error) {
+      problems.push((error as Error).message);
+    }
+    add('storyteller-contract', problems.length === 0,
+      problems.length ? problems.join(' · ')
+        : `storyteller data validates: scenes, six media presets with shelf glyphs, exact six-row camp pool, promotion allowlist and courier config`);
   }
 
   return rows();

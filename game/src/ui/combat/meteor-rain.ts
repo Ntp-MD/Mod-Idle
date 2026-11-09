@@ -1,10 +1,25 @@
-import { projectArenaPoint } from '../../presentation/arena-camera';
 import { sm } from '../../engine/client';
 import type { VfxAtlas } from '../fx/catalog';
 import type { SkillGeometry } from './skill-geometry';
+import type { FieldViewFrame } from '../../presentation/arena-view-frame';
+import { ARENA_REF_PX_PER_M } from '../../presentation/arena-camera';
 
-/** Decorative drops share one texture and a bounded live window; combat still owns damage. */
-export function skillRainDrops(mark: SkillGeometry, atlas: VfxAtlas, reducedMotion = false) {
+/** Model-space minimum body height for rain sizing through the single reference density. */
+const RAIN_BODY_MIN_M = 48 / ARENA_REF_PX_PER_M;
+/** Decorative rain size as a body-relative model factor (was 7.5× body px). */
+const RAIN_SIZE_K = 7.5;
+
+/**
+ * Decorative drops in world metres, sampled from the committed world footprint.
+ * Reads the world centre/radius and the sim clock only. Paint under the frame's
+ * world→viewport ancestor transform: positions and sizes are zoom-stable model
+ * values, the frame owns their screen mapping. Seeded by mark key + atlas
+ * source, so the timeline and pattern are stable across Base/skin switches,
+ * zoom and quality changes. Combat still owns damage; this never publishes hits.
+ */
+export function skillRainDrops(mark: SkillGeometry, frame: FieldViewFrame,
+  atlas: VfxAtlas, reducedMotion = false) {
+  if (!frame.renderable) return [];
   const skillDuration = sm.byId[mark.skillId]?.duration;
   const duration = skillDuration ? sm.skillDurationSec(skillDuration, atlas.rainDurationSec ?? 0)
     : atlas.rainDurationSec ?? 0;
@@ -32,10 +47,9 @@ export function skillRainDrops(mark: SkillGeometry, atlas: VfxAtlas, reducedMoti
     const radial = (id + .5) * .7548776662466927 + random(101);
     const spread = mark.area.radiusM > 0 ? mark.area.radiusM : atlas.rainSpreadM ?? 0;
     const radius = Math.sqrt(radial - Math.floor(radial)) * spread * Math.min(1, atlas.rainRadiusRatio ?? .83);
-    const ground = { x: mark.area.center.x + Math.cos(angle) * radius,
+    const groundM = { x: mark.area.center.x + Math.cos(angle) * radius,
       y: mark.area.center.y + Math.sin(angle) * radius };
-    const point = projectArenaPoint(ground);
-    const size = Math.max(48, mark.body.height) * 7.5 * (atlas.rainSizeScale ?? 1);
+    const size = Math.max(RAIN_BODY_MIN_M, mark.bodyM.height) * RAIN_SIZE_K * (atlas.rainSizeScale ?? 1);
     const progress = age / lifetime;
     const flight = Math.max(0, 1 - progress / .5);
     const impactProgress = mark.phase === 'Field' && progress >= .5 ? (progress - .5) / .5 : null;
@@ -45,18 +59,20 @@ export function skillRainDrops(mark: SkillGeometry, atlas: VfxAtlas, reducedMoti
         const distance = size * (.04 + .28 * impactProgress);
         const shardSize = size * .18;
         return {
-          x: point.x + Math.cos(direction) * distance,
-          y: point.y + Math.sin(direction) * distance * .42 - Math.sin(impactProgress * Math.PI) * size * .08,
+          x: groundM.x + Math.cos(direction) * distance,
+          y: groundM.y + Math.sin(direction) * distance * .42 - Math.sin(impactProgress * Math.PI) * size * .08,
           size: shardSize * (1 - impactProgress * .2), index: 8 + shard % 4,
           rotationDeg: direction * 180 / Math.PI,
         };
       }) : [];
-    return { id, start, ground, size,
+    return { id, start, ground: groundM, size,
       fragments,
-      rotationDeg: mark.phase === 'Field' ? 45 : 0,
+      // Only the Field-phase shard stamp is authored tilted. Impact-phase rain
+      // (Meteor) already carries its diagonal fall in the atlas frames.
+      rotationDeg: atlas.rainPhase === 'Field' ? 45 : 0,
       impactProgress,
-      x: point.x - (reducedMotion || mark.phase === 'Field' ? 0 : flight * size * .65),
-      y: point.y - (reducedMotion ? 0 : flight * size * 1.6),
+      x: groundM.x - (reducedMotion || mark.phase === 'Field' ? 0 : flight * size * .65),
+      y: groundM.y - (reducedMotion ? 0 : flight * size * 1.6),
       index: reducedMotion ? Math.min(8, atlas.count - 1) : Math.min(atlas.count - 1, Math.floor(progress * atlas.count)),
       opacity: Math.min(1, age / .05, (lifetime - age) / .14) };
   }).filter(drop => drop !== null).sort((a, b) => a.ground.y - b.ground.y);

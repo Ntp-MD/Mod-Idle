@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "siren--tidal-wave-siren",
+  "name": "Tidal Wave Siren",
+  "generatedSource": "art-reference/pawn-study/generation/eight-direction/pawn-siren--tidal-wave-siren-diagonals.png",
+  "sourceReferences": [
+    "art-reference/pawn-study/sheets/variants/siren--tidal-wave-siren.png",
+    "art-reference/pawn-study/atlases/variants/siren--tidal-wave-siren.png"
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "promptSummary": "Generate Tidal Wave Siren diagonals preserving blue-teal fur, swept-back water crest, pale aqua fin ears, yellow eyes and brown belt/brass buckle; NE/NW rear, SE/SW mirrored front.",
+  "requestedLayout": {
+    "rows": 2,
+    "columns": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west"
+  },
+  "actualImage": {
+    "width": 1254,
+    "height": 1254,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "alpha": "transparent; corner alpha 1",
+    "visibleBoundsAlphaThreshold": 16,
+    "visibleBoundsPx": {
+      "northEast": {
+        "x": 202,
+        "y": 119,
+        "width": 265,
+        "height": 415
+      },
+      "southEast": {
+        "x": 160,
+        "y": 121,
+        "width": 272,
+        "height": 413
+      },
+      "southWest": {
+        "x": 192,
+        "y": 119,
+        "width": 276,
+        "height": 415
+      },
+      "northWest": {
+        "x": 160,
+        "y": 117,
+        "width": 266,
+        "height": 417
+      }
+    },
+    "feetBaselineYByCellPx": {
+      "northEast": 533,
+      "southEast": 533,
+      "southWest": 533,
+      "northWest": 533
+    }
+  },
+  "review": {
+    "identity": true,
+    "directionPose": "candidate appears to follow NE/NW rear and SE/SW mirrored front",
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed",
+    "pose": true
+  },
+  "reviewConcerns": [
+    "Review remains pending before packing."
+  ],
+  "sizeReference": "art-reference/pawn-study/atlases/variants/siren--tidal-wave-siren.png",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

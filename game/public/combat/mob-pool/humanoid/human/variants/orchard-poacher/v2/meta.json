@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "human--orchard-poacher",
+  "name": "Orchard Poacher",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 84,
+      "y": 82,
+      "width": 89,
+      "height": 142,
+      "offsetX": 84,
+      "offsetY": 82
+    },
+    {
+      "x": 340,
+      "y": 83,
+      "width": 89,
+      "height": 141,
+      "offsetX": 84,
+      "offsetY": 83
+    },
+    {
+      "x": 596,
+      "y": 83,
+      "width": 88,
+      "height": 141,
+      "offsetX": 84,
+      "offsetY": 83
+    },
+    {
+      "x": 851,
+      "y": 83,
+      "width": 90,
+      "height": 141,
+      "offsetX": 83,
+      "offsetY": 83
+    },
+    {
+      "x": 84,
+      "y": 338,
+      "width": 88,
+      "height": 142,
+      "offsetX": 84,
+      "offsetY": 82
+    },
+    {
+      "x": 338,
+      "y": 337,
+      "width": 93,
+      "height": 143,
+      "offsetX": 82,
+      "offsetY": 81
+    },
+    {
+      "x": 596,
+      "y": 339,
+      "width": 88,
+      "height": 141,
+      "offsetX": 84,
+      "offsetY": 83
+    },
+    {
+      "x": 850,
+      "y": 337,
+      "width": 92,
+      "height": 143,
+      "offsetX": 82,
+      "offsetY": 81
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-human--orchard-poacher-diagonals.png",
+  "diagonalSourceSha256": "1413a224b35ca496f2b7096c52876f021909769ebf048901fbcaf23eeaf40fba",
+  "diagonalScaleFactor": 0.385346,
+  "speciesId": "human",
+  "variantId": "orchard-poacher"
+}

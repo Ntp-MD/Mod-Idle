@@ -1,0 +1,50 @@
+{
+  "pawnId": "spider--cave-spider",
+  "candidateFile": "pawn-spider--cave-spider-diagonals.png",
+  "sourceAtlas": "art-reference/pawn-study/atlases/variants/spider--cave-spider.png",
+  "sourceSheet": "art-reference/pawn-study/sheets/variants/spider--cave-spider.png",
+  "dimensions": "1254x1254",
+  "pixelFormat": "32bpp ARGB",
+  "transparentBackground": true,
+  "cellLayout": "2x2",
+  "cellSize": "627x627",
+  "directionOrder": [
+    "NE",
+    "SE",
+    "SW",
+    "NW"
+  ],
+  "views": {
+    "NE": "rear three-quarter, face/eyes hidden",
+    "SE": "front three-quarter, eyes visible",
+    "SW": "mirrored front three-quarter, eyes visible",
+    "NW": "mirrored rear three-quarter, face/eyes hidden"
+  },
+  "visibleBoundsPx": {
+    "NE": "x=97..540, y=204..471 (444x268)",
+    "SE": "x=86..530, y=204..471 (445x268)",
+    "SW": "x=97..540, y=231..496 (444x266)",
+    "NW": "x=87..529, y=228..497 (443x270)"
+  },
+  "visibleFootprint": "About 71% cell width and 42–43% height; dimensions consistent across views.",
+  "identityCheck": "Cave-brown spider with rounded abdomen and pale tan marking, dark brown cephalothorax, golden eyes/front face and eight jointed legs; no web or props.",
+  "reviewStatus": "candidate-review",
+  "concerns": [
+    "Root baseline is offset about 25–26px between top and bottom rows; align in packed preview.",
+    "Confirm leg count/anatomical overlap in the close packed preview, especially front-facing views.",
+    "Confirm runtime-relative scale and diagonal handedness."
+  ],
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed",
+    "bodyPlan": "eight-legged spider silhouette retained; far-side legs overlap naturally in three-quarter views"
+  },
+  "status": "runtime-reviewed",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

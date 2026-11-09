@@ -4,7 +4,15 @@ import type { ArenaDirection, ArenaSpriteSheet } from './arena/arena-art';
 import { sm } from '../../engine/client';
 
 import { ARENA_DIRECTIONS, ARENA_FACING_HYSTERESIS, arenaFacingIndex, projectArenaPoint, projectArenaVector, arenaScreenAngle, arenaScreenAngleFor } from '../../presentation/arena-camera';
-export { ARENA_VIEW, ARENA_ACTOR_WIDTH_M, projectArenaPoint, projectArenaVector, arenaScreenAngle, arenaScreenAngleFor, arenaCameraOffset, arenaActorPixelScale, unprojectArenaPoint, ARENA_CULL_MARGIN_X, ARENA_CULL_MARGIN_Y, arenaActorVisible, ARENA_ZOOM_MIN, ARENA_ZOOM_MAX, ARENA_ZOOM_STEP, arenaZoomView, type ArenaViewSize } from '../../presentation/arena-camera';
+/** Fixed-reference projection: these helpers delegate to presentation/arena-camera and stay
+ *  only for live ref-space paint readers (ArenaGround, groundCircle overlays and the camera
+ *  adapter in CombatArenaScene and describeArenaTarget). Their screen
+ *  positions coincide with the frame projection by construction — pinned by the fence
+ *  agreement test in combat-arena-view.test.ts — so the frame stays the single scale owner.
+ *  Skill geometry, actor views, VFX aim, ground decals and pointer input build a
+ *  FieldViewFrame instead; WP6 deleted the deprecated projected wrappers that used to sit
+ *  beside the world-metre contracts. No new camera math lives here. */
+export { ARENA_VIEW, ARENA_ACTOR_WIDTH_M, projectArenaPoint, projectArenaVector, arenaScreenAngle, arenaScreenAngleFor, arenaCameraOffset, unprojectArenaPoint, ARENA_CULL_MARGIN_X, ARENA_CULL_MARGIN_Y, arenaActorVisible, ARENA_ZOOM_MIN, ARENA_ZOOM_MAX, ARENA_ZOOM_STEP, arenaZoomView, type ArenaViewSize } from '../../presentation/arena-camera';
 
 export const ARENA_WALK_STRIDE_M = .62;
 const FALLBACK_IMPACT_MS = 340;

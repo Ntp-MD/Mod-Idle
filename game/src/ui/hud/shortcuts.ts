@@ -71,8 +71,6 @@ export const SHORTCUTS: Shortcut[] = [
   { id: 'map.zoom.in', token: '+' },
   { id: 'map.zoom.out', token: '-' },
   { id: 'map.zoom.reset', token: '0' },
-  { id: 'map.rotate.left', token: '[' },
-  { id: 'map.rotate.right', token: ']' },
   { id: 'map.view.next', token: 'v' },
   { id: 'map.walk', token: 'w' },
   { id: 'map.ids', token: 'i' },

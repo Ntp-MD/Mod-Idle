@@ -1,0 +1,18 @@
+{
+  "id": "golem--crystal-golem",
+  "sourceCardinal": "art-reference/pawn-study/sheets/variants/golem--crystal-golem.png",
+  "sourceDiagonals": "art-reference/pawn-study/generation/eight-direction/golem--crystal-golem-diagonals-source.png",
+  "directions": [
+    "south",
+    "southeast",
+    "east",
+    "northeast",
+    "north",
+    "northwest",
+    "west",
+    "southwest"
+  ],
+  "layout": "4x2 row-major",
+  "frameSize": 512,
+  "sha256": "03c49e453ea820b26482786ce1bc4efb9cab3c679a6761c03874064011d33f8c"
+}

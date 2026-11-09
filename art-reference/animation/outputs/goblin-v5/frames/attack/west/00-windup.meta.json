@@ -4,8 +4,8 @@
   "action": "attack",
   "direction": "west",
   "pose": "00-windup",
-  "source": "art-reference/monsters/humanoid/goblin/animation/poses/attack/west/00-windup.png",
-  "sourceMetadata": "art-reference/monsters/humanoid/goblin/animation/poses/attack/west/00-windup.meta.json",
+  "source": "archive/art-reference/monsters/humanoid/goblin/animation/poses/attack/west/00-windup.png",
+  "sourceMetadata": "archive/art-reference/monsters/humanoid/goblin/animation/poses/attack/west/00-windup.meta.json",
   "sourcePixelsModified": false,
   "frameCanvas": {
     "width": 384,

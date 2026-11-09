@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "werewolf--blood-werewolf",
+  "name": "Blood Werewolf",
+  "generatedSource": "art-reference/pawn-study/generation/eight-direction/pawn-werewolf--blood-werewolf-diagonals.png",
+  "sourceReferences": [
+    "art-reference/pawn-study/sheets/variants/werewolf--blood-werewolf.png",
+    "art-reference/pawn-study/atlases/variants/werewolf--blood-werewolf.png"
+  ],
+  "supersedesCandidate": "art-reference/pawn-study/generation/eight-direction/pawn-werewolf--blood-werewolf-diagonals-v1.png",
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "promptSummary": "Generate quadruped Blood Werewolf diagonals matching the authoritative cardinal sheet: dark gray wolf, red shoulder mantle, diagonal red sash, yellow-orange eyes and grounded paws. NE/NW rear three-quarter with face hidden; SE/SW mirrored front three-quarter.",
+  "requestedLayout": {
+    "sourceCardinalHeightsPx": [
+      353,
+      352,
+      321,
+      320
+    ],
+    "rows": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west",
+    "columns": 2
+  },
+  "actualImage": {
+    "cellWidth": 627,
+    "alpha": "transparent",
+    "width": 1254,
+    "cellHeight": 627,
+    "visibleBoundsPx": {
+      "northEast": [
+        107,
+        71,
+        521,
+        553
+      ],
+      "southEast": [
+        86,
+        74,
+        550,
+        550
+      ],
+      "southWest": [
+        73,
+        65,
+        545,
+        555
+      ],
+      "northWest": [
+        102,
+        57,
+        538,
+        556
+      ]
+    },
+    "visibleHeightsPx": {
+      "southWest": 490,
+      "northWest": 499,
+      "southEast": 476,
+      "northEast": 482
+    },
+    "height": 1254
+  },
+  "review": {
+    "size": "candidate is about 1.4-1.6x source cardinal visible height; compare packed height",
+    "approved": true,
+    "identity": true,
+    "status": "passed",
+    "layout": "2x2 views in requested NE/SE/SW/NW order",
+    "anchor": true,
+    "anatomy": "passes body-plan comparison: quadrupedal with grounded paws",
+    "pose": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true
+  },
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

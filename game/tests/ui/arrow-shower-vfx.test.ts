@@ -4,6 +4,8 @@ import { sm } from '../../src/engine/client';
 import { activeVfxArt, vfxVersionsFor } from '../../src/ui/fx/catalog';
 import { createCombatArena, type CombatArenaAction } from '@sim/combat/combat-arena';
 import { skillActionGeometry, skillPayloadGeometry } from '../../src/ui/combat/skill-geometry';
+import { createFieldViewFrame } from '../../src/presentation/arena-view-frame';
+import { fieldPointM } from '../../src/presentation/view-transform';
 import { atlasImpactDuration } from '../../src/ui/combat/arena-skill-art';
 import { skillRainDrops } from '../../src/ui/combat/meteor-rain';
 const RAIN = liveId(row => row.action?.kind === 'projectile-burst' && row.area?.radius_m > 0
@@ -45,32 +47,34 @@ describe('projectile impact rain', () => {
         plannedImpactAtUs: (1 + index * interval) * units })) };
     const atlas = readAtlas();
     const time = (.1 + Math.min(hits - .5, 2) * interval) * units;
+    const frame = createFieldViewFrame({ sceneKey: 'test', atUs: time,
+      viewportCss: { width: 1920, height: 1080 }, focusM: fieldPointM(0, 0), worldScale: 1 });
     const mark = skillActionGeometry(action, arena, time, units)!;
     const shots = skillPayloadGeometry(mark, action, time, units, atlasImpactDuration(atlas));
     expect(shots).toHaveLength(action.payloads!.filter(payload => payload.releaseAtUs <= time).length);
     expect(new Set(shots.map(shot => shot.key)).size).toBe(shots.length);
     for (const shot of shots) {
       expect(shot.phase).toBe('Travel');
-      expect(skillRainDrops(shot, atlas)).toEqual([]);
+      expect(skillRainDrops(shot, frame, atlas)).toEqual([]);
     }
     const contactAt = 1.01 * units;
     const contacts = skillPayloadGeometry(skillActionGeometry(action, arena, contactAt, units)!,
       action, contactAt, units, atlasImpactDuration(atlas));
     expect(contacts[0].phase).toBe('Impact');
     const before = JSON.stringify(action);
-    const rain = skillRainDrops(contacts[0], atlas);
+    const rain = skillRainDrops(contacts[0], frame, atlas);
     expect(rain.length).toBeGreaterThan(0);
     expect(new Set(rain.map(drop => `${drop.ground.x}:${drop.ground.y}`)).size).toBe(rain.length);
     expect(rain.some(drop => Math.hypot(drop.ground.x - 4, drop.ground.y - 2) > .1)).toBe(true);
     expect(contacts[0].area.radiusM).toBe(skill.area!.radius_m);
     expect(contacts.slice(1).every(shot => shot.phase === 'Travel')).toBe(true);
-    expect(contacts.slice(1).flatMap(shot => skillRainDrops(shot, atlas))).toEqual([]);
+    expect(contacts.slice(1).flatMap(shot => skillRainDrops(shot, frame, atlas))).toEqual([]);
     const lateAt = (1 + (hits - 1) * interval + .1) * units;
     const late = skillPayloadGeometry(skillActionGeometry(action, arena, lateAt, units,
-      undefined, undefined, undefined, undefined, atlasImpactDuration(atlas))!,
+      undefined, undefined, atlasImpactDuration(atlas))!,
       action, lateAt, units, atlasImpactDuration(atlas));
     expect(late.length).toBeGreaterThan(0);
-    expect(late.some(shot => skillRainDrops(shot, atlas).length > 0)).toBe(true);
+    expect(late.some(shot => skillRainDrops(shot, frame, atlas).length > 0)).toBe(true);
     expect(JSON.stringify(action)).toBe(before);
   });
 });

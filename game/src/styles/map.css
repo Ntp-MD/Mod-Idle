@@ -8,88 +8,43 @@
 .map-projection { position: absolute; inset: 0; }
 
 .map-mob, .map-piece { pointer-events: none; }
-.sheet svg .diorama-art { filter: brightness(.78) saturate(.68) contrast(1.08); }
+.sheet svg .diorama-art { display: none; }
 .sheet svg .diorama-figure[data-discovery="unknown"] > .diorama-art { filter: brightness(.71) saturate(.44) contrast(1.08); }
 .sheet svg .diorama-figure:is([data-camp="true"], [data-trail-site="true"]) > .diorama-art { display: none; }
 
-/* Map tokens: a shelf PNG glyph in a blue-ringed medallion on a tall vertical leader from the hex
-   centre. Frame and leader share the hover-hex blue; the terrain is never repainted for markers. */
-.map-marker {
-  --marker-edge: var(--es);
-  --marker-ink: #e7d9b7;
-  --marker-face: #242820;
-  color: var(--marker-ink);
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: drop-shadow(.5px 1px .65px rgba(24, 24, 18, .6));
-  pointer-events: none;
+/* In-hex contents: name + level + game icons painted flat inside the cell. Far zoom
+   keeps level + town/mob/site icons; only the name text waits for mid/near (D1/D2). */
+/* Preserve fractional plan-unit font metrics across cell radii and zoom. */
+.map-hex-content { text-rendering: geometricPrecision; }
+.hex-name {
+  fill: var(--es-lit); font-family: var(--ui); font-weight: 600; paint-order: stroke;
+  stroke: var(--ground);
 }
-.map-marker-ground { fill: #28271c; stroke: none; opacity: .28; }
-.map-marker-leader {
-  fill: none; stroke: var(--es); stroke-width: 1.1; stroke-linecap: round; opacity: .9;
-  filter: drop-shadow(0 0 1px var(--es-lit)) drop-shadow(0 0 3px var(--es));
+.hex-level {
+  fill: color-mix(in srgb, var(--es-lit) 82%, var(--text)); font-family: var(--ui); font-weight: 400; paint-order: stroke;
+  stroke: var(--ground);
 }
-.map-marker-stem {
-  fill: none; stroke: var(--marker-edge); stroke-width: 1.4;
-  filter: drop-shadow(0 0 1.2px var(--es-lit)) drop-shadow(0 0 3px var(--es));
+.hex-overflow {
+  fill: var(--es-lit); font-family: var(--ui); font-weight: 600; paint-order: stroke;
+  stroke: var(--ground); dominant-baseline: central;
 }
-.map-marker-face {
-  fill: var(--marker-face); stroke: var(--marker-edge); stroke-width: 1.4;
-  filter: drop-shadow(0 0 1.2px var(--es-lit)) drop-shadow(0 0 3px var(--es));
-}
-.map-marker-art { opacity: .92; }
-.map-marker-secondary .map-marker-face { stroke-width: 1; }
-.map-marker-label {
-  fill: var(--es-lit); stroke: var(--ground); stroke-width: 1.4; paint-order: stroke;
-  font: 600 4.5px var(--ui);
-  filter: drop-shadow(0 0 2px var(--es));
-}
-.map-marker-mob { --marker-ink: #e2d0b1; }
-.map-marker-boss { --marker-ink: #ffd2ad; --marker-face: #372923; }
-.map-marker-boss .map-marker-face { stroke-width: 1.5; }
-.map-marker-event { --marker-ink: #ffe1a0; --marker-face: #353023; }
-.map-marker-unknown { --marker-ink: #d6cdb5; }
-.map-marker-unknown .map-marker-face { stroke-dasharray: 2.2 1.7; }
-.map-marker-camp { --marker-ink: #f8d994; }
-.map-marker-resource { --marker-ink: #d8e3be; }
-.map-marker-player { --marker-ink: #ffeac0; --marker-face: #34352a; }
-.map-marker-player .map-marker-face { stroke-width: 1.5; }
-.map-marker-objective { --marker-ink: #e1efc1; }
-.map-marker.is-quiet { opacity: .65; }
-.map-trail-site.is-explored { opacity: .75; }
-.map-mob:is(.is-combat, .is-unique) .map-marker-face { stroke-width: 1.7; }
-.map-mob.is-combat .map-marker { --marker-ink: #ffe6bb; }
-
-/* Keep the geography legible at distance, then reveal the smaller signals up close. */
-.map-marker-label { display: none; }
-.map-back:not(.map-detail-near) :is(.map-marker-secondary) { display: none; }
-.map-detail-near .actor-figure[data-picked="true"] .map-marker-label { display: inline; }
-.map-detail-far :is(.map-marker-resource, .map-marker-unknown) { display: none; }
-.map-detail-far .map-piece:has(:is(.map-marker-resource, .map-marker-unknown)) .map-marker-leader { display: none; }
-.map-detail-far .map-mob:not(.is-combat, .is-unique) { display: none; }
-.map-detail-far .map-camp-encounter .map-marker,
-.actor-figure[data-picked="true"] .map-marker { display: inline; }
-.actor-figure[data-picked="true"] .map-marker-face {
-  stroke: var(--es-lit); stroke-width: 2;
-  filter: drop-shadow(0 0 2px var(--es-lit)) drop-shadow(0 0 4px var(--es));
-}
-.sheet svg .you .map-marker-player { fill: none; stroke: none; }
+.hex-icon { opacity: .95; }
+.hex-icon.is-quiet { opacity: .55; }
+.hex-icon-unique { fill: none; stroke: var(--gold-lit); pointer-events: none; }
+.map-detail-far .hex-name { display: none; }
 
 .sheet svg .cell:is([data-threat="unique-possible"], [data-threat="boss"]) {
-  stroke: #bc8d68; stroke-width: 1.75; stroke-dasharray: 3 2;
+  stroke: #bc8d68; stroke-width: 1.75;
 }
-.sheet svg .cell[data-threat="combat"] { stroke: #f0c08b; stroke-width: 2.2; stroke-dasharray: none; }
-.sheet svg .cell[data-threat="warning"] { stroke: #c7ae6c; stroke-width: 1.75; stroke-dasharray: 2 3; }
+.sheet svg .cell[data-threat="combat"] { stroke: #f0c08b; stroke-width: 2.2; }
+.sheet svg .cell[data-threat="warning"] { stroke: #c7ae6c; stroke-width: 1.75; }
 .sheet svg text, .sheet svg line, .sheet svg .pin, .sheet svg .watermark { pointer-events: none; }
 
-.sheet svg .tile-depth-cell { fill: #997649; stroke: #997649; stroke-linejoin: round; }
-.sheet svg .diorama-figure { filter: drop-shadow(.6px 1.2px .7px rgba(47, 38, 22, .35)); }
-.sheet svg .diorama-figure[data-node] .diorama-art { pointer-events: visiblePainted; cursor: pointer; }
-/* Dioramas stand above the rotating ground and share the actors' depth order. */
+/* Dioramas stand above the rotating ground and share the actors' depth order. Relief is opt-in
+   (map-show-relief); the flat ground texture always paints. */
 .sheet svg .diorama-figure.terrain-off { display: none !important; }
 .sheet svg .terrain-relief { display: none; pointer-events: none; }
-.sheet svg .terrain-relief.terrain-on { display: inline; }
+.map-back.map-show-relief svg .terrain-relief.terrain-on { display: inline; }
 /* Far away the flat colour carries the world shape; upright relief and textures wait for mid/near. */
 .map-back.map-detail-far svg .diorama-figure.terrain-on,
 .map-back.map-detail-far svg .terrain-relief.terrain-on { display: none; }
@@ -97,23 +52,6 @@
 .sheet svg[data-view="gate"] .terrain-relief.terrain-on { opacity: .18; }
 .sheet svg .node > use { display: none; }
 .sheet svg #labels, .sheet svg #regions { display: none; }
-#map-names { pointer-events: none; }
-.sheet svg .map-name { filter: drop-shadow(0 0 2px color-mix(in srgb, var(--es) 65%, transparent)); }
-.sheet svg .map-name rect, .sheet svg .map-name-pointer {
-  fill: color-mix(in srgb, var(--ground) 84%, var(--es));
-  stroke: color-mix(in srgb, var(--es) 72%, var(--ground));
-  stroke-width: 1.1;
-}
-.sheet svg .map-name-title { font-size: var(--font-xs); font-weight: 600; fill: var(--es-lit); dominant-baseline: middle; }
-.sheet svg .town-name .map-name-title { font-weight: 700; }
-.sheet svg .map-name-level { font-size: calc(var(--font-xs) - 2px); fill: color-mix(in srgb, var(--es-lit) 78%, var(--text)); dominant-baseline: middle; }
-.sheet svg .map-name-stem { fill: none; stroke: var(--es); stroke-width: 1.1; }
-.sheet svg .map-name-anchor { fill: var(--es-lit); stroke: var(--ground); stroke-width: 1; }
-.sheet svg .important-name { filter: drop-shadow(0 0 2px var(--es-lit)) drop-shadow(0 0 5px var(--es)); }
-.sheet svg .important-name rect, .sheet svg .important-name .map-name-pointer { stroke: var(--es-lit); stroke-width: 1.7; }
-.sheet svg .important-name .map-name-title { fill: var(--text); }
-.sheet svg .important-name .map-name-stem { stroke: var(--es-lit); stroke-width: 1.5; }
-.sheet svg .important-name .map-name-anchor { fill: var(--es-lit); }
 .map-back.sheet svg .node .place { font-size: 5px; stroke-width: 1.2; }
 .map-back.sheet svg .node.capital .place { font-size: 6px; }
 .map-back.sheet svg .zonelabel .zonename { font-size: 3.3px; stroke: var(--panel); stroke-width: .7; paint-order: stroke; }
@@ -138,10 +76,9 @@
   --pin-target: #e2503f;
 }
 
-.sheet svg .cell { stroke: var(--map-tile-edge); stroke-width: 1.15; stroke-linejoin: round; transition: fill var(--motion-fast) linear; }
+.sheet svg .cell { stroke: var(--map-tile-edge); stroke-width: .45; stroke-linejoin: round; transition: fill var(--motion-fast) linear; }
 .sheet svg .ground-grid {
-  filter: drop-shadow(0 0 1px color-mix(in srgb, var(--es) 40%, transparent));
-  pointer-events: none;
+  display: none;
 }
 .stage.mapmode .sheet svg .cell { cursor: pointer; }
 .stage.mapmode .sheet svg .cell:hover { fill-opacity: .82; }
@@ -181,7 +118,7 @@
 .sheet svg .cell.site-mine { stroke: color-mix(in srgb, var(--es-lit) 40%, #c7b783); stroke-width: 1.1; }
 .sheet svg .cell.site-grove { stroke: color-mix(in srgb, var(--good-lit) 40%, #c7b783); stroke-width: 1.1; }
 .sheet svg .cell.site-fishing { stroke: color-mix(in srgb, var(--es) 45%, #c7b783); stroke-width: 1.1; }
-.sheet svg .cell.field-camp { stroke: var(--gold); stroke-width: 3; stroke-dasharray: 3 2; }
+.sheet svg .cell.field-camp { stroke: var(--gold); stroke-width: 3; }
 
 .sheet svg .cell.route, .sheet svg .cell.walked, .sheet svg .cell.picked, .sheet svg .cell.standing { stroke-opacity: 1; }
 
@@ -190,22 +127,6 @@
 .sheet svg .cell.route { fill: var(--es); fill-opacity: .46; stroke: var(--es); stroke-width: 1.8; }
 .sheet svg .cell.walked { fill: var(--mana); fill-opacity: .8; stroke: var(--mana); stroke-width: 1.8; }
 .sheet svg .cell.picked { stroke: var(--es); stroke-width: 3; fill-opacity: .62; }
-
-.sheet svg .cell.standing { stroke: var(--gold); stroke-width: 2.6; stroke-dasharray: 3 2; }
-
-.sheet svg .you { pointer-events: none; transition: transform var(--motion-map) var(--ease-out); }
-.sheet svg .you .hex { fill: var(--gold); fill-opacity: .2; stroke: none; }
-.sheet svg .you .mark { fill: var(--gold); stroke: var(--bg); stroke-width: 1.4; }
-.sheet svg .you.returning .mark { filter: drop-shadow(.5px 1px .7px #c5a464); }
-.sheet svg .you.stepping .mark {
-  transform-box: fill-box; transform-origin: 50% 100%;
-  animation: map-board-step var(--motion-map) var(--ease-out);
-}
-@keyframes map-board-step { 50% { opacity: .65; } }
-@media (prefers-reduced-motion: reduce) {
-  .sheet svg .you { transition: none; }
-  .sheet svg .you.stepping .mark { animation: none; }
-}
 
 .sheet svg .walk { stroke: var(--gold); stroke-width: 1.6; stroke-opacity: .8; }
 .sheet svg .walk-blk { font-size: var(--sheet-fs-walk); fill: var(--gold); font-weight: 600; }
@@ -231,7 +152,8 @@
    of the hex — terrain, icon, mob art — stays uncovered. */
 .sheet svg .pin { display: none; }
 .sheet svg .cell.pin-here { stroke: var(--pin-here); stroke-width: 3; stroke-opacity: 1; }
-.sheet svg .cell.pin-target { stroke: var(--pin-target); stroke-width: 3; stroke-dasharray: 6 3; stroke-opacity: 1; }
+.sheet svg .cell.pin-target { stroke: var(--pin-target); stroke-width: 3; stroke-opacity: 1; }
+.sheet svg .cell.standing { stroke: var(--gold); stroke-width: 2.6; }
 
 /* The same board in a quiet view: colour carries the terrain; edges carry travel and selection. */
 .map-back.sheet.clean-map {
@@ -286,10 +208,10 @@
   will-change: auto;
 }
 
-:global(.map-back.dragging .map-sheet) { transition: none; will-change: transform; }
-:global(.map-back.camera-turning .map-sheet) { transition: none; }
-.map-back.camera-turning :global(.you) { transition: none; }
-.stage.mapmode .map-sheet { transition: none; }
+.map-back.dragging .map-sheet { transition: none; will-change: transform; }
+@media (prefers-reduced-motion: reduce) {
+  .map-sheet { transition: none; }
+}
 
 .map-back:focus-visible { --dof: 1.5px; opacity: .92; }
 
@@ -298,6 +220,5 @@
 .stage.mapmode .map-back { --dof: 0px; opacity: 1; cursor: grab; }
 
 .map-back.dragging { cursor: grabbing; transition: opacity var(--motion-ui) var(--ease-ui), filter var(--motion-ui) var(--ease-ui); }
-.stage.mapmode .map-back.rotating { cursor: move; }
 .stage.arpg-arena .map-back { visibility: hidden; pointer-events: none; }
 .stage.veiled .map-back { --dof: var(--dof-rest); }

@@ -16,7 +16,7 @@ written unless every frame passes; the composed draft is then checked with
 monster-animation-qa.py and a QA failure also exits nonzero.
 
 Layout defaults (columns, rows, cell, padding) match the production contract
-in art-reference/monsters/production-roster.json; override them only for tests.
+in archive/art-reference/monsters/production-roster.json; override them only for tests.
 """
 
 from __future__ import annotations

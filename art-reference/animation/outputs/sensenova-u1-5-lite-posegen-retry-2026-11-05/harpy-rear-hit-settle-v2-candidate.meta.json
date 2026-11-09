@@ -2,7 +2,7 @@
   "status": "candidate-review",
   "generator": "SenseNova U1.5 Lite",
   "source": "art-reference/animation/outputs/sensenova-u1-5-lite-posegen-retry-2026-11-05/harpy-rear-hit-settle-v2-raw.png",
-  "reference": "art-reference/monsters/beast/harpy/harpy/animation/poses/hit/north/02-recover.png",
+  "reference": "archive/art-reference/monsters/beast/harpy/harpy/animation/poses/hit/north/02-recover.png",
   "prompt": "Redraw one Harpy sprite using the attached image as the exact character and camera-angle reference. Keep the bird facing directly away from the viewer, matching the straight rear view: the back of the head centered, no visible face or side profile, tail and both legs aligned beneath the body. Create a new settled pose after a hit: stand upright again, draw the wings closer to the sides, let the feathers settle, keep both feet on the same ground line. Change the joints and wings, not the character scale or camera angle. One character only, completely visible, crisp 2D pixel art on a uniform pure white background. Absolutely no words, letters, numbers, labels, logos, frames, floor, shadow, or extra marks.",
   "action": "hit",
   "direction": "north",

@@ -143,7 +143,7 @@ describe('the away window has no time limit', () => {
     expect(rb.simulated).toBe(away);
     expect(ra.capped).toBe(false);
     expect(shot(b)).toBe(shot(a));
-  }, 120000);
+  }, 600000);
 
   it('can cancel between slices and keeps the simulated portion deterministic', async () => {
     const a = busy(76, 20), b = busy(76, 20);

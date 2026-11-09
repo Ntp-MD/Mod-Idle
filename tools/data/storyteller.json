@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "scenes": [
+    {"id": "sounds-signs", "source": "camp", "speaker": "narrator", "media": "camp", "lines": ["The brush beyond the fire shifts. Fresh tracks lead away from Camp.", "A silhouette stops at the edge of the firelight.", "Something has disturbed the grass just outside Camp."]},
+    {"id": "prowler-edge", "source": "camp", "speaker": "narrator", "media": "camp", "lines": ["A {species} circles the supplies, keeping beyond the fire.", "Tracks end beside the supplies. A {species} is still nearby.", "A {species} watches Camp from the tree line."]},
+    {"id": "traveler-offer", "source": "camp", "speaker": "narrator", "media": "camp", "lines": ["A traveler with spare materials asks whether you can part with provisions.", "A traveler offers road news and a small exchange.", "A traveler pauses by the fire and lays out an offer."]},
+    {"id": "traveler-return", "source": "camp", "speaker": "narrator", "media": "camp", "lines": ["The traveler you traded with returns and lays out a fresh offer."]},
+    {"id": "nest-worksite", "source": "camp", "speaker": "narrator", "media": "camp", "lines": ["A nest beside the worksite has made the area unsafe to work.", "The creatures near the nest keep returning to the worksite.", "Movement around the nest has brought the work to a halt."]},
+    {"id": "camp-found", "source": "camp", "speaker": "narrator", "media": "camp", "lines": ["A {species} has followed the traces back to Camp.", "The tracks now lead toward your fire. A {species} has found Camp.", "A {species} appears along the path into Camp."]},
+    {"id": "cache-ledge", "source": "camp", "speaker": "narrator", "media": "discovery", "lines": ["A bundle of {material} is caught on the rocks. Some can be recovered carefully; reaching for all of it could spill your {food}.", "Loose stones surround a bundle of {material}. You can take your time, risk the climb, or leave it.", "Part of a {material} bundle hangs within reach. The rest lies above a narrow ledge."]},
+    {"id": "cache-careful-result", "source": "camp", "speaker": "narrator", "media": "discovery", "lines": ["You bring the reachable materials down without disturbing your supplies."]},
+    {"id": "cache-gain-result", "source": "camp", "speaker": "narrator", "media": "discovery", "lines": ["You secure the bundle and return with your provisions intact."]},
+    {"id": "cache-mixed-result", "source": "camp", "speaker": "narrator", "media": "discovery", "lines": ["You bring some materials down, but part of your provisions falls between the rocks."]},
+    {"id": "cache-loss-result", "source": "camp", "speaker": "narrator", "media": "discovery", "lines": ["The bundle slips away. Some provisions fall as you regain your footing."]},
+    {"id": "cache-left-result", "source": "camp", "speaker": "narrator", "media": "discovery", "lines": ["You leave the bundle where it is and return to Camp."]},
+    {"id": "cache-cancel-result", "source": "camp", "speaker": "narrator", "media": "discovery", "lines": ["The recovery ends. Any materials not yet collected are left behind."]},
+    {"id": "delivery-request", "source": "delivery", "speaker": "steward", "media": "market", "lines": ["{town} needs {good}. Bring what you can before the request ends."]},
+    {"id": "delivery-paid", "source": "delivery", "speaker": "steward", "media": "market", "lines": ["The goods are counted. Your payment is recorded below."]},
+    {"id": "delivery-expired", "source": "delivery", "speaker": "steward", "media": "market", "lines": ["The request has ended. Earlier payments remain yours; the unearned completion offer has passed."]},
+    {"id": "courier-request", "source": "delivery", "speaker": "steward", "media": "market", "lines": ["{destination} needs {good}. Will you take this request from {town} to them?"]},
+    {"id": "courier-accepted", "source": "delivery", "speaker": "steward", "media": "market", "lines": ["The request is yours. Bring the required goods to {destination} before it ends."]},
+    {"id": "courier-paid", "source": "delivery", "speaker": "steward", "media": "market", "lines": ["The goods have reached {destination}. Here is the recorded payment."]},
+    {"id": "road-result", "source": "journey", "speaker": "narrator", "media": "trail", "lines": ["Along the road, you find a brief opportunity."]},
+    {"id": "site-inspect", "source": "exploration", "speaker": "narrator", "media": "discovery", "lines": ["There is something worth examining here."]},
+    {"id": "site-result", "source": "exploration", "speaker": "narrator", "media": "discovery", "lines": ["You finish examining the site. The result is recorded below."]},
+    {"id": "dungeon-entry", "source": "dungeon", "speaker": "narrator", "media": "dungeon", "lines": ["Beyond this entrance, the run keeps its spoils until it is resolved."]},
+    {"id": "dungeon-result", "source": "dungeon", "speaker": "narrator", "media": "dungeon", "lines": ["The run has ended. These are the spoils retained and left behind."]},
+    {"id": "market-greeting", "source": "market", "speaker": "counterhand", "media": "market", "lines": ["Let us see what your goods are worth here.", "Check the buyers before you choose a road.", "There may be a useful exchange among what you carry."]},
+    {"id": "market-route", "source": "market", "speaker": "counterhand", "media": "market", "lines": ["Compare the buyers for {good}, then decide whether the journey is worth it."]},
+    {"id": "market-promotion", "source": "market", "speaker": "counterhand", "media": "market", "lines": ["{item} costs less at this stall for the current cycle. The exact price and remaining time are below."]},
+    {"id": "forge-greeting", "source": "forge", "speaker": "armourer", "media": "forge", "lines": ["Show me your materials, and we will see what can be made.", "Choose the pattern first. I will tell you what it needs.", "Good work begins with materials you can actually spare."]},
+    {"id": "forge-ready", "source": "forge", "speaker": "armourer", "media": "forge", "lines": ["Your {material} can be used for {pattern}. The cost and resulting item band are below."]},
+    {"id": "forge-blocked", "source": "forge", "speaker": "armourer", "media": "forge", "lines": ["This {pattern} is not ready to make. Here is what is still needed."]},
+    {"id": "forge-result", "source": "forge", "speaker": "armourer", "media": "forge", "lines": ["{item} is finished. The materials spent and the piece produced are recorded below."]}
+  ],
+  "labels": {
+    "investigate": "Investigate", "quiet": "Stay quiet", "fight": "Fight", "secure": "Secure supplies",
+    "shelter": "Shelter", "pause": "Wait it out", "listen": "Ask for news", "trade-ore": "Trade provisions for ore",
+    "trade-timber": "Trade provisions for timber", "decline": "Send the traveler onward", "cache-careful": "Recover carefully",
+    "cache-quick": "Reach for the whole bundle", "cache-leave": "Leave it", "cache-collect": "Collect recovered materials",
+    "cache-cancel": "Abandon recovery", "courier-accept": "Accept request", "courier-decline": "Decline request",
+    "show-market": "Open market", "show-forge": "Open Forge", "show-deliveries": "View requests", "show-route": "View route",
+    "cache-title": "Supplies on the ledge", "signs-title": "Movement near Camp", "road-title": "Along the road", "dungeon-title": "Dungeon run"
+  },
+  "media": {
+    "camp": {"glyphs": ["pine-tree", "birch-trees", "tent", "rest-campfire"]},
+    "trail": {"glyphs": ["pine-tree", "high-grass", "adventure-bags"]},
+    "discovery": {"glyphs": ["boulder", "high-grass", "adventure-bags"]},
+    "dungeon": {"glyphs": ["boulder", "adventure-bags"]},
+    "market": {"glyphs": ["currency-strongbox", "adventure-bags"]},
+    "forge": {"glyphs": ["anvil-1", "boulder"]}
+  }
+}

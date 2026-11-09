@@ -1,31 +1,57 @@
 <script lang="ts">
-  import { trade, TOWN } from '../../engine/client';
-  import { stoneName } from '@sim/gear/craft';
+  import { TOWN, trade } from '../../engine/client';
+  import { npcOf } from '@sim/town/pricing';
   import { deliveryTimeLeft, deliveryPauseReason } from '@sim/town/delivery';
   import type { DeliveryContract } from '@sim/town/delivery-types';
   import type { GameState } from '@sim/core/types';
-  import { deliveryBonuses } from '@sim/town/quest-rewards';
-  import { questBonusText } from './quest-rewards';
-  let { state: gameState, contract, writer, ontrack, ondetails, ondismiss }: {
+  import StoryScene from '../story/StoryScene.svelte';
+  import { deliveryStoryView } from '../story/story-presenters';
+  import type { StoryIntent } from '../story/story-scene';
+
+  let { state: gameState, contract, writer, ontrack, ondetails, ondismiss, onaccept = () => {}, ondecline = () => {} }: {
     state: GameState; contract: DeliveryContract; writer: boolean;
     ontrack: () => void; ondetails: () => void; ondismiss: () => void;
+    onaccept?: () => void; ondecline?: () => void;
   } = $props();
   const town = $derived(TOWN.settlements.find((entry) => entry.id === contract.town)!);
+  const destination = $derived(TOWN.settlements.find((entry) => entry.id === contract.destinationTown)!);
   const pause = $derived(deliveryPauseReason(gameState));
+  const speaker = $derived(npcOf(contract.issuerNpcId)?.name || contract.issuerNpcId);
+
+  const view = $derived.by(() => {
+    const base = deliveryStoryView({
+      key: `delivery:${contract.id}:${contract.delivered}:${contract.status}:${contract.acceptedAtDeliverySec ?? 'open'}:${contract.baseGold}`,
+      status: contract.status, endReason: contract.endReason, kind: contract.kind ?? 'request',
+      accepted: contract.acceptedAtDeliverySec != null,
+      goodName: trade.byId[contract.good].name, townName: town.name,
+      destinationName: destination?.name ?? town.name, speaker,
+      target: contract.target, delivered: contract.delivered,
+      timeText: `${Math.ceil(deliveryTimeLeft(gameState, contract) / 60)} minutes left${pause ? ` · paused: ${pause}` : ''}`,
+      writable: writer,
+    });
+    const extra = [
+      { id: 'track', label: 'Track want', kind: 'navigate' as const, disabled: false, reason: '' },
+      { id: 'show-deliveries', label: 'View delivery', kind: 'navigate' as const, disabled: false, reason: '' },
+      { id: 'dismiss', label: 'Dismiss', kind: 'dismiss' as const, disabled: false, reason: '' },
+    ];
+    return { ...base, actions: [...base.actions, ...extra] };
+  });
+
+  function onStoryAction(intent: StoryIntent) {
+    if (intent.actionId === 'track') ontrack();
+    else if (intent.actionId === 'show-deliveries' || intent.actionId === 'show-route') ondetails();
+    else if (intent.actionId === 'dismiss') ondismiss();
+    else if (intent.actionId === 'courier-accept') onaccept();
+    else if (intent.actionId === 'courier-decline') ondecline();
+  }
 </script>
-<section class="notice" aria-label="New delivery opportunity">
-  <h3>{town.name} wants {contract.target} {trade.byId[contract.good].name}</h3>
-  <p>Each hand-in pays the live market value. {contract.reward.alternative ? 'Complete the full count, then choose one reward:' : 'Fixed completion reward:'}</p>
-  {#each deliveryBonuses(contract.reward) as bonus}<p>{questBonusText(bonus)}{bonus.skill && bonus.fallback ? ` (or ${bonus.fallback.count} ${stoneName(bonus.fallback.key)} if no useful copy remains)` : ''}</p>{/each}
-  {#if contract.reward.treePoints || contract.reward.attainment}<p>Guaranteed on completion{contract.reward.alternative ? ' with either choice' : ''}: {contract.reward.treePoints ? `${contract.reward.treePoints} Tree Point` : ''}{contract.reward.treePoints && contract.reward.attainment ? ' + ' : ''}{contract.reward.attainment ? `${contract.reward.attainment} Attainment Point` : ''}.</p>{/if}
-  <p>{Math.ceil(deliveryTimeLeft(gameState, contract) / 60)} minutes left{pause ? ` · paused: ${pause}` : ''}. Tracking adds a reminder; delivery stays available without it.</p>
-  <div><button disabled={!writer} onclick={ontrack}>Track want</button><button onclick={ondetails}>View delivery</button><button disabled={!writer} onclick={ondismiss}>Dismiss</button></div>
-  {#if !writer}<small class="text-alarm">This preview is read-only.</small>{/if}
-</section>
+
+<StoryScene {view} onaction={onStoryAction}>
+  {#snippet controls()}
+    <p class="text-note">Each hand-in pays the live market value at the destination.</p>
+  {/snippet}
+</StoryScene>
+
 <style>
-  .notice { display: grid; gap: var(--spacing-md); align-content: start; }
-  h3, p { margin: 0; }
-  h3 { font-size: var(--font-md); }
-  p { line-height: 1.5; }
-  div { display: flex; flex-wrap: wrap; gap: var(--spacing-md); }
+  p { margin: 0; }
 </style>

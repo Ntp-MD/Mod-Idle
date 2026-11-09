@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "hornet--meadow-hornet",
+  "name": "Meadow Hornet",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 53,
+      "y": 110,
+      "width": 150,
+      "height": 114,
+      "offsetX": 53,
+      "offsetY": 110
+    },
+    {
+      "x": 314,
+      "y": 113,
+      "width": 141,
+      "height": 111,
+      "offsetX": 58,
+      "offsetY": 113
+    },
+    {
+      "x": 57,
+      "y": 395,
+      "width": 143,
+      "height": 85,
+      "offsetX": 57,
+      "offsetY": 139
+    },
+    {
+      "x": 313,
+      "y": 395,
+      "width": 142,
+      "height": 85,
+      "offsetX": 57,
+      "offsetY": 139
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "hornet",
+  "variantId": "meadow-hornet"
+}

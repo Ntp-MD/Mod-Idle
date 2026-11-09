@@ -4,8 +4,8 @@
   "action": "walk",
   "direction": "west",
   "pose": "03-stride-d",
-  "source": "art-reference/monsters/humanoid/goblin/animation/poses/walk/west/03-stride-d.png",
-  "sourceMetadata": "art-reference/monsters/humanoid/goblin/animation/poses/walk/west/03-stride-d.meta.json",
+  "source": "archive/art-reference/monsters/humanoid/goblin/animation/poses/walk/west/03-stride-d.png",
+  "sourceMetadata": "archive/art-reference/monsters/humanoid/goblin/animation/poses/walk/west/03-stride-d.meta.json",
   "sourcePixelsModified": false,
   "frameCanvas": {
     "width": 384,

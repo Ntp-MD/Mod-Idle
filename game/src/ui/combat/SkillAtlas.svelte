@@ -1,30 +1,41 @@
 <script lang="ts">
   import type { VfxAtlas } from '../fx/catalog';
   import AtlasFrame from '../fx/AtlasFrame.svelte';
-  import { atlasFrameIndex, atlasOpacity, skillArtPlacement, groundDecalMatrix, matrixAttribute } from './arena-skill-art';
-  import type { SkillGeometry } from './skill-geometry';
+  import { atlasFrameIndex, atlasOpacity, skillArtPlacement, groundDecalMatrixForFrame, GROUND_CANVAS_PX } from './arena-skill-art';
+  import { ARENA_REF_PX_PER_M } from '../../presentation/arena-camera';
+  import { matrixAttribute } from '../../presentation/view-transform';
+  import type { FieldViewFrame } from '../../presentation/arena-view-frame';
+  import type { SkillGeometry, SkillGeometryScreen } from './skill-geometry';
   import { skillRainDrops } from './meteor-rain';
 
-  let { mark, atlas, reducedMotion = false }: {
-    mark: SkillGeometry; atlas: VfxAtlas; reducedMotion?: boolean;
+  let { mark, screen, frame, atlas, reducedMotion = false }: {
+    mark: SkillGeometry; screen: SkillGeometryScreen; frame: FieldViewFrame;
+    atlas: VfxAtlas; reducedMotion?: boolean;
   } = $props();
 
   // Reduced motion keeps the authored silhouette and contact while freezing its animation.
   const still = $derived(reducedMotion ? { ...mark, phaseElapsedSec: 0 } : mark);
   const index = $derived(atlasFrameIndex(still, atlas));
   const opacity = $derived(atlasOpacity(mark, atlas));
-  const placement = $derived(skillArtPlacement(mark, atlas));
-  const rain = $derived(skillRainDrops(mark, atlas, reducedMotion));
+  const placement = $derived(skillArtPlacement(mark, atlas, frame, screen));
+  const rain = $derived(skillRainDrops(mark, frame, atlas, reducedMotion));
   const groundTransform = $derived(atlas.projection === 'ground'
-    ? matrixAttribute(groundDecalMatrix(mark.center,
-      mark.area.radiusM, 2048, atlas.content?.widthRatio ?? 1)) : '');
-  const chainPaths = $derived(mark.chainHop ? mark.paths : []);
+    ? (groundDecalMatrixForFrame(screen.center,
+      mark.area.radiusM, frame, GROUND_CANVAS_PX, atlas.content?.widthRatio ?? 1) ?? null) : null);
+  const chainPaths = $derived(mark.chainHop ? screen.paths : []);
+  // Chain shape is a world effect: jitter in model metres scales with the
+  // frame instead of saturating on a fixed screen-pixel cap. Stroke width
+  // stays a CSS readability floor (fixed px) — labels' owner, not a hitbox.
+  const CHAIN_JITTER_MAX_M = 12 / ARENA_REF_PX_PER_M;
   function boltPath(from: { x: number; y: number }, to: { x: number; y: number }, seed: number) {
     const dx = to.x - from.x, dy = to.y - from.y, length = Math.max(1, Math.hypot(dx, dy));
+    const cssPerM = frame.renderable ? frame.cssPixelsPerMeter : ARENA_REF_PX_PER_M;
+    const worldLen = length / Math.max(1, cssPerM);
     return Array.from({ length: 13 }, (_, index) => {
       const t = index / 12;
-      const offset = index === 0 || index === 12 ? 0
-        : Math.sin(index * 2.7 + seed * 1.9) * Math.min(12, length * .07);
+      const worldOffset = index === 0 || index === 12 ? 0
+        : Math.sin(index * 2.7 + seed * 1.9) * Math.min(CHAIN_JITTER_MAX_M, worldLen * .07);
+      const offset = worldOffset * cssPerM;
       return `${index ? 'L' : 'M'}${from.x + dx * t - dy / length * offset} ${from.y + dy * t + dx / length * offset}`;
     }).join(' ');
   }
@@ -39,18 +50,19 @@
     </g>
   {/each}
 {/if}
-{#if atlas.projection === 'ground' && opacity > 0}
+{#if atlas.projection === 'ground' && opacity > 0 && groundTransform}
   <g data-skill-art={mark.skillId} data-skill-ground-shader data-skill-art-phase={mark.phase.toLowerCase()}
-    transform={groundTransform} {opacity}>
+    transform={matrixAttribute(groundTransform)} {opacity}>
     <AtlasFrame src={atlas.src} frame={atlas} {index} x={0} y={0} width={2048} height={2048} />
   </g>
 {:else if atlas.rainDurationSec}
-  <g data-skill-art={mark.skillId} data-skill-rain data-skill-art-phase={mark.phase.toLowerCase()}>
+  <g data-skill-art={mark.skillId} data-skill-rain data-skill-art-phase={mark.phase.toLowerCase()} style:color={mark.colour}
+    transform={frame.renderable ? matrixAttribute(frame.worldToViewport) : undefined}>
     {#each rain as drop (drop.id)}
       <g data-rain-drop={drop.id} opacity={drop.opacity}>
         {#if drop.impactProgress != null}
-          <ellipse class="ice-impact-ring" data-ice-impact cx={drop.x} cy={drop.y}
-            rx={drop.size * (.1 + .1 * drop.impactProgress)} ry={drop.size * (.04 + .05 * drop.impactProgress)}
+          <circle class="rain-impact-ring" data-rain-impact cx={drop.x} cy={drop.y}
+            r={drop.size * (.1 + .1 * drop.impactProgress)}
             opacity={Math.max(0, 1 - drop.impactProgress * 2)} />
         {/if}
         {#if drop.fragments.length}
@@ -71,9 +83,9 @@
       </g>
     {/each}
   </g>
-{:else if opacity > 0 && (!mark.chainHop || mark.phase === 'Impact')}
+{:else if opacity > 0 && placement && (!mark.chainHop || mark.phase === 'Impact')}
   <g data-skill-art={mark.skillId} data-skill-art-phase={mark.phase.toLowerCase()} opacity={opacity}
-    transform={`translate(${placement.cx} ${placement.cy}) rotate(${placement.rotateDeg}) scale(${placement.mirror ? -1 : 1} 1)`}>
+    transform={frame.renderable ? `${matrixAttribute(frame.worldToViewport)} translate(${placement.cx} ${placement.cy}) rotate(${placement.rotateDeg}) scale(${placement.mirror ? -1 : 1} 1)` : undefined}>
     <AtlasFrame src={atlas.src} frame={atlas} {index}
       x={-placement.anchorX * placement.width} y={-placement.anchorY * placement.height}
       width={placement.width} height={placement.height} />
@@ -84,5 +96,5 @@
   .chain-glow, .chain-core { fill: none; stroke-linejoin: round; stroke-linecap: round; }
   .chain-glow { stroke: #658bff; stroke-width: 11; opacity: .35; }
   .chain-core { stroke: #d6faff; stroke-width: 2.5; }
-  .ice-impact-ring { fill: none; stroke: #c9f7ff; stroke-width: 5; vector-effect: non-scaling-stroke; }
+  .rain-impact-ring { fill: none; stroke: currentColor; stroke-width: 5; vector-effect: non-scaling-stroke; }
 </style>

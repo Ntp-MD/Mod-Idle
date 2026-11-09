@@ -1,0 +1,148 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "wyvern--elder-wyvern",
+  "name": "Elder Wyvern",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 65,
+      "y": 123,
+      "width": 126,
+      "height": 101,
+      "offsetX": 65,
+      "offsetY": 123
+    },
+    {
+      "x": 324,
+      "y": 86,
+      "width": 120,
+      "height": 138,
+      "offsetX": 68,
+      "offsetY": 86
+    },
+    {
+      "x": 576,
+      "y": 122,
+      "width": 129,
+      "height": 102,
+      "offsetX": 64,
+      "offsetY": 122
+    },
+    {
+      "x": 822,
+      "y": 89,
+      "width": 149,
+      "height": 135,
+      "offsetX": 54,
+      "offsetY": 89
+    },
+    {
+      "x": 60,
+      "y": 364,
+      "width": 137,
+      "height": 116,
+      "offsetX": 60,
+      "offsetY": 108
+    },
+    {
+      "x": 309,
+      "y": 344,
+      "width": 150,
+      "height": 136,
+      "offsetX": 53,
+      "offsetY": 88
+    },
+    {
+      "x": 577,
+      "y": 378,
+      "width": 127,
+      "height": 102,
+      "offsetX": 65,
+      "offsetY": 122
+    },
+    {
+      "x": 835,
+      "y": 340,
+      "width": 123,
+      "height": 140,
+      "offsetX": 67,
+      "offsetY": 84
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-wyvern--elder-wyvern-diagonals.png",
+  "speciesId": "wyvern",
+  "variantId": "elder-wyvern"
+}

@@ -1,0 +1,148 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "harpy",
+  "name": "Harpy",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 76,
+      "y": 33,
+      "width": 104,
+      "height": 191,
+      "offsetX": 76,
+      "offsetY": 33
+    },
+    {
+      "x": 333,
+      "y": 34,
+      "width": 102,
+      "height": 190,
+      "offsetX": 77,
+      "offsetY": 34
+    },
+    {
+      "x": 584,
+      "y": 39,
+      "width": 113,
+      "height": 185,
+      "offsetX": 72,
+      "offsetY": 39
+    },
+    {
+      "x": 849,
+      "y": 32,
+      "width": 94,
+      "height": 192,
+      "offsetX": 81,
+      "offsetY": 32
+    },
+    {
+      "x": 77,
+      "y": 288,
+      "width": 103,
+      "height": 192,
+      "offsetX": 77,
+      "offsetY": 32
+    },
+    {
+      "x": 336,
+      "y": 290,
+      "width": 96,
+      "height": 190,
+      "offsetX": 80,
+      "offsetY": 34
+    },
+    {
+      "x": 584,
+      "y": 295,
+      "width": 113,
+      "height": 185,
+      "offsetX": 72,
+      "offsetY": 39
+    },
+    {
+      "x": 843,
+      "y": 292,
+      "width": 106,
+      "height": 188,
+      "offsetX": 75,
+      "offsetY": 36
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/monsters/beast/harpy/harpy/reference.png",
+  "sourceSha256": "6284ad99c0b79d9d3572c638d15989bc8cb5d3428adc34f03a8c50bf65842354",
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-harpy-diagonals.png",
+  "diagonalSourceSha256": "064787a03ec4c70ec6f66fb1dad20d0eed83f1120accd4f69a43a70ac0d9f018",
+  "diagonalScaleFactor": null
+}

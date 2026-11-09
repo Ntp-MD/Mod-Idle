@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "spider--orchard-spider",
+  "name": "Orchard Spider",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 54,
+      "y": 145,
+      "width": 148,
+      "height": 79,
+      "offsetX": 54,
+      "offsetY": 145
+    },
+    {
+      "x": 313,
+      "y": 146,
+      "width": 142,
+      "height": 78,
+      "offsetX": 57,
+      "offsetY": 146
+    },
+    {
+      "x": 573,
+      "y": 148,
+      "width": 135,
+      "height": 76,
+      "offsetX": 61,
+      "offsetY": 148
+    },
+    {
+      "x": 827,
+      "y": 145,
+      "width": 139,
+      "height": 79,
+      "offsetX": 59,
+      "offsetY": 145
+    },
+    {
+      "x": 53,
+      "y": 401,
+      "width": 150,
+      "height": 79,
+      "offsetX": 53,
+      "offsetY": 145
+    },
+    {
+      "x": 315,
+      "y": 399,
+      "width": 139,
+      "height": 81,
+      "offsetX": 59,
+      "offsetY": 143
+    },
+    {
+      "x": 573,
+      "y": 404,
+      "width": 134,
+      "height": 76,
+      "offsetX": 61,
+      "offsetY": 148
+    },
+    {
+      "x": 827,
+      "y": 401,
+      "width": 138,
+      "height": 79,
+      "offsetX": 59,
+      "offsetY": 145
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-spider--orchard-spider-diagonals.png",
+  "diagonalSourceSha256": "2946b0aa2a550a7233c27755dc40b46c8d6c06983b99fc4263e95fdf45229b1d",
+  "diagonalScaleFactor": 0.275261,
+  "speciesId": "spider",
+  "variantId": "orchard-spider"
+}

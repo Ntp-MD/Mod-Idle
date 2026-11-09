@@ -54,7 +54,8 @@ export function applyPush(opts: {
   if (walking && returnedToFieldCamp) {
     push(s, 'The interrupted walk ends at your field Camp');
   } else if (s.walk) {
-    push(s, `Pushed on the walk · the walk keeps its ${s.walk.blocksLeft} block${s.walk.blocksLeft === 1 ? '' : 's'} and resumes from this one`);
+    const left = s.walk.legs.length - s.walk.stepIndex;
+    push(s, `Pushed on the walk · the walk keeps its ${left} block${left === 1 ? '' : 's'} and resumes from this one`);
   }
   push(s, `Pushed — ${s.campSec} sec at camp (${eng.fmt(c.maxHp)} HP ÷ ${eng.fmt(c.hpRegen * 8)}/sec)`);
   for (const line of pushReportLines(pushReport)) push(s, line);

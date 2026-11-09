@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { E, sm } from '../../src/engine/client';
 import { skillAreaSnapshot } from '@engine/skill-area';
 import { createCombatArena, type CombatArenaAction } from '@sim/combat/combat-arena';
-import { skillActionGeometry, skillAimGeometry } from '../../src/ui/combat/skill-geometry';
+import { createFieldViewFrame } from '../../src/presentation/arena-view-frame';
+import { fieldPointM } from '../../src/presentation/view-transform';
+import { projectSkillGeometry, skillActionGeometry, skillAimGeometry } from '../../src/ui/combat/skill-geometry';
 import { liveId } from '../fixtures/liveSkill';
 
 function fixture(skillId: string) {
@@ -18,6 +20,12 @@ function fixture(skillId: string) {
   };
   return { arena, action };
 }
+
+const frameFor = () => createFieldViewFrame({
+  sceneKey: 'test', atUs: 0,
+  viewportCss: { width: 1920, height: 1080 },
+  focusM: fieldPointM(1, 2), worldScale: 1,
+});
 
 const groundCircleId = () => liveId((s) => s.type === 'attack' && s.cast?.delivery === 'ground' && (s.area?.radius_m ?? 0) > 0, 'ground circle');
 const dotGroundId = () => liveId((s) => s.type === 'attack' && s.cast?.delivery === 'ground' && (s.area?.radius_m ?? 0) > 0 && (s.effects ?? []).some((e: any) => e.stat === 'dot_sec' && e.value === 8), 'dot-8 ground circle');
@@ -36,17 +44,20 @@ describe('functional skill geometry', () => {
     expect(mark.phase).toBe('Travel');
     expect(mark.remainingSec).toBe(.5);
     expect(mark.progress).toBe(.75);
-    expect(mark.footprint).toBeDefined();
-    expect(mark.innerFootprint).not.toBe(mark.footprint);
+    const screen = projectSkillGeometry(mark, frameFor())!;
+    expect(screen.footprint).toBeDefined();
+    expect(screen.innerFootprint).not.toBe(screen.footprint);
   });
   it('reads every canonical cast without requiring an authored VFX definition', () => {
+    const frame = frameFor();
     for (const skill of sm.all()) {
       const { arena, action } = fixture(skill.id);
       const mark = skillActionGeometry(action, arena, 500_000, arena.unitsPerSec);
       expect(mark, skill.id).toBeDefined();
       expect(mark!.name, skill.id).toBe(skill.name);
       expect(mark!.phase, skill.id).toBe('Windup');
-      expect(mark!.vertices.every(point => Number.isFinite(point.x) && Number.isFinite(point.y)), skill.id).toBe(true);
+      const screen = projectSkillGeometry(mark!, frame)!;
+      expect(screen.vertices.every(point => Number.isFinite(point.x) && Number.isFinite(point.y)), skill.id).toBe(true);
     }
   });
 
@@ -110,10 +121,11 @@ describe('functional skill geometry', () => {
     const mark = skillActionGeometry(action, arena, 500_000, arena.unitsPerSec)!;
     expect(mark.area.radiusM).toBe(0);
     expect(mark.area.shape).toBe('line');
-    expect(mark.vertices).toHaveLength(4);
+    const screen = projectSkillGeometry(mark, frameFor())!;
+    expect(screen.vertices).toHaveLength(4);
     expect(mark.dimensions).toContain('Line');
     expect(mark.area.widthM).toBe(sm.byId[action.skillId!].area!.width_m);
-    expect(mark.direction.to.x).toBeGreaterThan(mark.direction.from.x);
+    expect(screen.direction.to.x).toBeGreaterThan(screen.direction.from.x);
   });
 
   it('shows heals on the player even when the cast has an incidental enemy target', () => {
@@ -121,7 +133,7 @@ describe('functional skill geometry', () => {
     const mark = skillActionGeometry(action, arena, 500_000, arena.unitsPerSec)!;
     expect(mark.area.center).toEqual({ x: arena.player.x, y: arena.player.y });
     expect(mark.dimensions).toContain('Self');
-    expect(mark.range).toBe('');
+    expect(projectSkillGeometry(mark, frameFor())!.rangePath).toBe('');
   });
 
   it('follows sampled caster feet only for a mobile channel and retains deployed fields', () => {

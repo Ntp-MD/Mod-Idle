@@ -393,11 +393,13 @@ describe('the road names a wild-side site', () => {
     const s = newGame(11);
     const names = { dungeon: 'Dungeon', mine: 'Mine', grove: 'Grove', fishing: 'Fishing' } as const;
     for (const site of ['dungeon', 'mine', 'grove', 'fishing'] as const) {
-      s.walk = { kind: 'bare', site, node: null } as any;
-      expect(walkNote(s), site).toBe(`the ${names[site]} wild-side cell near the field`);
+      const loc = (E.road.locations as any[]).find((l) => l.kind === 'site' && l.site === site)!;
+      s.walk = { to: { q: loc.q, r: loc.r } } as any;
+      expect(walkNote(s), site).toContain(`the ${names[site]} wild-side cell near `);
     }
-    s.walk = { kind: 'bare', site: null, node: null } as any;
-    expect(walkNote(s)).toBe('bare ground in the field of the field');
+    const bare = (E.road.land as [number, number][]).find(([q, r]) => !(E.road.locations as any[]).some((l) => l.q === q && l.r === r))!;
+    s.walk = { to: { q: bare[0], r: bare[1] } } as any;
+    expect(walkNote(s)).toContain('bare ground in the field of ');
   });
 });
 

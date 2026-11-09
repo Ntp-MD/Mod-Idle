@@ -13,8 +13,10 @@ import { sellGoods, tradeInventory } from './trade';
 const TS = TOWN.task_sizing;
 
 /** Row lookups and price lines live in `pricing.ts`; re-exported so every existing importer keeps its path. */
-export { ALL_ROWS, rowById, settlementById, settlementOfZone, npcOf, priceMinutes, priceGold } from './pricing';
-import { ALL_ROWS, rowById, settlementById, settlementOfZone, priceMinutes, priceGold } from './pricing';
+export { ALL_ROWS, rowById, settlementById, settlementOfZone, npcOf, priceMinutes, priceGold, firstBroken, quoteTownPurchase } from './pricing';
+export type { TownPurchaseExpectation, TownPurchaseQuote, TownPurchaseTarget } from './pricing';
+import { ALL_ROWS, rowById, settlementById, settlementOfZone, priceMinutes, priceGold, firstBroken, quoteTownPurchase, type TownPurchaseExpectation } from './pricing';
+import { storyHash32 } from '../../../../engine/storyteller.ts';
 /** A ladder row whose later rungs have no explicit stock entry is expanded one rung at a time. */
 const EXPLICIT_STOCK = new Set((TOWN.settlements as any[]).flatMap((s) => s.stock || []));
 function nextLadderRow(row: any, state?: GameState) {
@@ -42,12 +44,14 @@ export const stockOf = (settlementId: string, state?: GameState) =>
 
 export const startSettlement = () => (TOWN.settlements.find((s: any) => s.start) || TOWN.settlements[0]).id;
 
-export function newTown(): TownState {
+export function newTown(seed = 0): TownState {
   const start = startSettlement();
   return {
     questMilestones: {},
     deliveryClockSec: 0, contractTriggerRemainingSec: { [start]: TOWN.delivery.trigger_interval_sec },
-    contractSerial: 0, contracts: {}, trackedContractIds: [], deliverySummaries: {},
+    contractSerial: 0, courierSerial: 0, courierStreamState: (seed ^ storyHash32('courier')) >>> 0,
+    courierTriggerRemainingSec: TOWN.delivery.trigger_interval_sec * ((TOWN.delivery as any).courier?.trigger_interval_mult ?? 1),
+    contracts: {}, trackedContractIds: [], deliverySummaries: {},
     blackMarket: {},
     market: {},
     marketCredit: 0,
@@ -63,11 +67,20 @@ export function canTravel(state: GameState, settlementId: string): boolean {
   return state.town.visited.includes(settlementId);
 }
 
-export interface BuyResult { ok: boolean; why?: string; row?: any; gold?: number; repaired?: string }
+export interface BuyResult {
+  ok: boolean; why?: string; row?: any; gold?: number; normalGold?: number;
+  promotionId?: string | null; savedGold?: number; repaired?: string;
+}
 
-export function canBuy(state: GameState, settlementId: string, rowId: string): BuyResult {
+const STALE_OFFER = 'The offer changed. Review the current price.';
+
+export function canBuy(state: GameState, settlementId: string, rowId: string, expected?: TownPurchaseExpectation): BuyResult {
   const row = rowById(rowId);
   if (!row) return { ok: false, why: 'no such line' };
+  if (expected && settlementById(settlementId)) {
+    const quote = quoteTownPurchase(state, settlementId, rowId, expected.target);
+    if (quote.token !== expected.token) return { ok: false, why: STALE_OFFER };
+  }
   if (!(stockOf(settlementId, state) as any[]).some((r) => r.id === rowId)) return { ok: false, why: 'not stocked here' };
   if (!TOWN.invariants.allowed_kinds.includes(row.kind)) return { ok: false, why: 'that kind is not for sale' };
   const banned = TOWN.invariants.banned_power_nouns.map((n: string) => String(n).toLowerCase());
@@ -83,9 +96,10 @@ export function canBuy(state: GameState, settlementId: string, rowId: string): B
     if (!set) return { ok: false, why: 'no Collector set here', row };
     if (state.collector?.hints?.[set.id]) return { ok: false, why: 'hint already bought', row };
   }
-  const gold = priceGold(row, settlementId, state);
-  if (state.counters.gold < gold) return { ok: false, why: `needs ${gold} gold`, row, gold };
-  return { ok: true, row, gold };
+  const quote = quoteTownPurchase(state, settlementId, rowId, expected?.target);
+  const gold = quote.gold;
+  if (state.counters.gold < gold) return { ok: false, why: `needs ${gold} gold`, row, gold, normalGold: quote.normalGold, promotionId: quote.promotion?.id ?? null, savedGold: quote.normalGold - gold };
+  return { ok: true, row, gold, normalGold: quote.normalGold, promotionId: quote.promotion?.id ?? null, savedGold: quote.normalGold - gold };
 }
 
 /** How many of a capped line have been taken today — the skip token and the pedlar keep their own. */
@@ -97,14 +111,6 @@ function collectorSetAt(settlementId: string) {
   return (TOWN.collector_sets as any[]).find((set) => set.settlement === settlementId) || null;
 }
 
-function firstBroken(state: GameState): { where: Where; index: number; item: Item } | null {
-  const worn = state.gear.findIndex((item) => item?.broken);
-  if (worn >= 0) return { where: 'gear', index: worn, item: state.gear[worn]! };
-  const bag = state.bag.findIndex((item) => item?.broken);
-  if (bag >= 0) return { where: 'bag', index: bag, item: state.bag[bag]! };
-  return null;
-}
-
 /** The Armourer's gold service revives one chosen Broken piece and refills its protection. */
 export function repairGear(
   state: GameState,
@@ -112,13 +118,17 @@ export function repairGear(
   where: Where,
   index: number,
   rowId?: string,
+  expected?: TownPurchaseExpectation,
 ): BuyResult & { where?: Where; index?: number } {
   if (!atSettlement(state, settlementId)) return { ok: false, why: 'stand in this settlement to repair' };
   const row = rowId ? rowById(rowId) : (stockOf(settlementId, state) as any[]).find((entry) => entry.id === 'repair_ironrow' || entry.id === 'repair');
   if (!row || !(stockOf(settlementId, state) as any[]).some((entry) => entry.id === row.id)) {
     return { ok: false, why: 'no Armourer repair is stocked here' };
   }
-  const check = canBuy(state, settlementId, row.id);
+  if (expected?.target && (expected.target.where !== where || expected.target.index !== index)) {
+    return { ok: false, why: STALE_OFFER };
+  }
+  const check = canBuy(state, settlementId, row.id, expected);
   if (!check.ok) return check;
   const item = where === 'gear' ? state.gear[index] : state.bag[index];
   if (!item) return { ok: false, why: 'nothing in that slot', row };
@@ -128,20 +138,20 @@ export function repairGear(
   if (where === 'gear') state.gear[index] = repaired.item;
   else state.bag[index] = repaired.item;
   spendGold(state.counters, check.gold || 0);
-  return { ok: true, row, gold: check.gold, where, index, repaired: item.base };
+  return { ok: true, row, gold: check.gold, normalGold: check.normalGold, promotionId: check.promotionId ?? null, savedGold: check.savedGold ?? 0, where, index, repaired: item.base };
 }
 
 /** Spend gold on a stall line. Purchases that grant no state change are display-only by design. */
-export function buy(state: GameState, settlementId: string, rowId: string): BuyResult {
+export function buy(state: GameState, settlementId: string, rowId: string, expected?: TownPurchaseExpectation): BuyResult {
   if (!atSettlement(state, settlementId)) return { ok: false, why: 'stand in this settlement to buy' };
-  const check = canBuy(state, settlementId, rowId);
+  const check = canBuy(state, settlementId, rowId, expected);
   if (!check.ok) return check;
   const row = check.row;
   // Repair and the Collector hint have chosen targets; they never become a generic `owned` line.
   if (rowId === 'repair' || rowId === 'repair_ironrow') {
     const target = firstBroken(state);
     if (!target) return { ok: false, why: 'no Broken piece to repair', row };
-    return repairGear(state, settlementId, target.where, target.index, rowId);
+    return repairGear(state, settlementId, target.where, target.index, rowId, expected);
   }
   const collectorSet = rowId === 'collector_hint' ? collectorSetAt(settlementId) : null;
   if (rowId === 'collector_hint') {

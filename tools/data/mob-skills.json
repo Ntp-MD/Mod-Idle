@@ -1018,16 +1018,7 @@
         "mob.fire.ash-veil"
       ]
     },
-    "variants": {
-      "goblin.z05.s03": [
-        "mob.fire.ember-lash",
-        "mob.fire.flame-guard"
-      ],
-      "goblin.z06.s02": [
-        "mob.fire.ember-lash",
-        "mob.fire.flame-guard"
-      ]
-    },
+    "variants": {},
     "bosses": {
       "goblin.z01.boss": [
         "mob.physical.backstab",

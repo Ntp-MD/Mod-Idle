@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "hornet",
+  "identityName": "Hornet",
+  "identityKind": "species",
+  "sourceSheet": "art-reference/pawn-study/sheets/hornet.png",
+  "sizeReference": "game/public/combat/mob-pool/insect/hornet/v1/atlas.png",
+  "generatedSheet": "art-reference/pawn-study/generation/eight-direction/pawn-hornet-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "cardinalVisibleHeightsRuntimePx": [
+    148,
+    156
+  ],
+  "canvas": {
+    "requested": {
+      "width": 1024,
+      "height": 1024
+    },
+    "generated": {
+      "width": 1254,
+      "height": 1254
+    },
+    "cellSize": 627,
+    "background": "white"
+  },
+  "measuredVisibleHeightSourcePx": [
+    373,
+    385,
+    391,
+    380
+  ],
+  "promptSummary": "Generate true three-quarter Hornet views matching cardinal body scale, with six legs, two antennae, and the existing wings and amber bands.",
+  "review": {
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "identity": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "note": "Output size differs from requested 1024x1024. Confirm distinct facings, anatomy, packed visible height and cell bounds before checking off the roster.",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

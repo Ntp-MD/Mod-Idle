@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { sm } from '../../src/engine/client';
 import { skillAreaSnapshot } from '@engine/skill-area';
 import { createCombatArena, type CombatArenaAction } from '@sim/combat/combat-arena';
-import { ARENA_VIEW, projectArenaPoint } from '../../src/presentation/arena-camera';
-import { skillActionGeometry } from '../../src/ui/combat/skill-geometry';
-import { buildSkillVfxAim, sampleVfxOffset } from '../../src/ui/combat/arena-vfx-space';
-import { atlasFrameIndex, atlasImpactDuration, atlasOpacity, skillArtPlacement, skillArtFor } from '../../src/ui/combat/arena-skill-art';
+import { createFieldViewFrame } from '../../src/presentation/arena-view-frame';
+import { applyWorldToViewport, fieldPointM } from '../../src/presentation/view-transform';
+import { projectSkillGeometry, skillActionGeometry } from '../../src/ui/combat/skill-geometry';
+import { buildSkillVfxAimWorld, groundShapeWorldPoints, projectSkillVfxAim, sampleVfxOffset, VFX_BODY_LIFT_SHARE } from '../../src/ui/combat/arena-vfx-space';
+import { artSizePolicyFor, atlasFrameIndex, atlasImpactDuration, atlasOpacity, skillArtPlacement, skillArtFor } from '../../src/ui/combat/arena-skill-art';
+import { activeVfxVersionId, setActiveVfxVersion, vfxArtCandidates, vfxVersionsFor } from '../../src/ui/fx/catalog';
 import { liveId } from '../fixtures/liveSkill';
 
 const VFX_CONE = liveId(row => row.area?.shape === 'cone' && row.cast?.delivery === 'melee' && !!skillArtFor(row.id)?.atlas, 'vfx cone');
@@ -28,14 +30,26 @@ const fixture = (skillId: string) => {
   return { arena, action };
 };
 
+const frameFor = (worldScale = 1) => {
+  const frame = createFieldViewFrame({
+    sceneKey: 'test', atUs: 0,
+    viewportCss: { width: 1920, height: 1080 },
+    focusM: fieldPointM(1, 2), worldScale,
+  });
+  if (!frame.renderable) throw new Error('test frame must render');
+  return frame;
+};
+
 describe('the shared VFX aim contract', () => {
   it('gives every live attack a finite hand release and a body or ground impact', () => {
+    const frame = frameFor();
     const attacks = sm.all().filter((skill: any) => skill.type === 'attack' && !skill.retired);
     expect(attacks.length).toBeGreaterThan(40);
     for (const skill of attacks) {
       const { arena, action } = fixture(skill.id);
       const mark = skillActionGeometry(action, arena, 1_500_000, arena.unitsPerSec)!;
-      const aim = mark.vfxAim;
+      const screen = projectSkillGeometry(mark, frame)!;
+      const aim = screen.vfxAim;
       for (const point of [aim.release, aim.impact, aim.groundImpact]) {
         expect(Number.isFinite(point.x), skill.id).toBe(true);
         expect(Number.isFinite(point.y), skill.id).toBe(true);
@@ -46,27 +60,79 @@ describe('the shared VFX aim contract', () => {
       const directed = mark.area.shape === 'line' || mark.area.shape === 'cone';
       const single = !directed && mark.area.radiusM <= 0;
       expect(aim.bodyImpact, skill.id).toBe(single);
-      const source = projectArenaPoint({ x: action.x, y: action.y });
-      expect(aim.release.y, skill.id).toBeLessThan(source.y - 18);
+      // World release sits forward of the caster along the committed aim.
+      expect(mark.vfxAim.releaseM.x, skill.id).toBeGreaterThan(action.x);
+    }
+  });
+
+  it('adds atlas versions through registration only: every version stays bounded on the same mark', () => {
+    const skillId = 'attack.fireball';
+    const versions = vfxVersionsFor(skillId);
+    expect(versions.map(version => version.id)).toEqual(
+      expect.arrayContaining(['pool-v3', 'pool-v1', 'pool-v2']));
+    const frame = frameFor();
+    const { arena, action } = fixture(skillId);
+    const mark = skillActionGeometry(action, arena, 1_500_000, arena.unitsPerSec)!;
+    const previous = activeVfxVersionId(skillId);
+    try {
+      for (const version of versions) {
+        // Registration round-trips through the existing selector, no per-version branch.
+        expect(setActiveVfxVersion(skillId, version.id), version.id).toBe(true);
+        expect(activeVfxVersionId(skillId), version.id).toBe(version.id);
+        if (version.renderer === 'procedural') {
+          // Renderer-only versions own no raster slot, so the atlas bounds contract does not apply.
+          expect(version.layers, version.id).toEqual([]);
+          expect(skillArtFor(skillId), version.id).toBeUndefined();
+          continue;
+        }
+        const selected = vfxArtCandidates(skillId)[0];
+        expect(selected?.versionId, version.id).toBe(version.id);
+        const atlas = skillArtFor(skillId)!.atlas!;
+        const screen = projectSkillGeometry(mark, frame)!;
+        const placement = skillArtPlacement(mark, atlas, frame, screen)!;
+        // Same bounds contract as every authored atlas: finite, anchored, body/viewport capped.
+        for (const value of [placement.cx, placement.cy, placement.width, placement.height]) {
+          expect(Number.isFinite(value), version.id).toBe(true);
+        }
+        expect(placement.anchorX, version.id).toBeGreaterThanOrEqual(0);
+        expect(placement.anchorX, version.id).toBeLessThanOrEqual(1);
+        const cap = artSizePolicyFor(mark, atlas) === 'footprint'
+          ? Math.max(frame.viewportCss.width, frame.viewportCss.height) / 140 : mark.bodyM.height * 7;
+        expect(placement.width, version.id).toBeLessThanOrEqual(cap + 1e-9);
+        expect(placement.height, version.id).toBeLessThanOrEqual(cap + 1e-9);
+      }
+      expect(setActiveVfxVersion(skillId, 'no-such-version')).toBe(false);
+    } finally {
+      if (previous) setActiveVfxVersion(skillId, previous);
     }
   });
 
   it('takes the authored hand socket release when the scene provides one', () => {
     const { arena, action } = fixture(VFX_PROJECTILE);
-    const socket = { x: 777, y: 333 };
-    const mark = skillActionGeometry(action, arena, 1_500_000, arena.unitsPerSec, undefined, undefined, { player: socket })!;
-    expect(mark.vfxAim.release).toEqual(socket);
-    const direct = buildSkillVfxAim(mark.area, { x: 1, y: 2 }, { x: 4, y: 2 }, socket);
-    expect(direct.release).toEqual(socket);
+    const socket = { x: 2, y: 3 };
+    const mark = skillActionGeometry(action, arena, 1_500_000, arena.unitsPerSec,
+      undefined, { releaseM: socket })!;
+    expect(mark.vfxAim.releaseM).toEqual(socket);
+    expect(mark.vfxAim.fromSocket).toBe(true);
+    const frame = frameFor();
+    const screen = projectSkillGeometry(mark, frame)!;
+    // A socket release carries no default hand lift: it lands exactly on its world point.
+    const expected = applyWorldToViewport(frame.worldToViewport, fieldPointM(socket.x, socket.y));
+    expect(screen.vfxAim.release.x).toBeCloseTo(expected.x, 6);
+    expect(screen.vfxAim.release.y).toBeCloseTo(expected.y, 6);
+    const direct = buildSkillVfxAimWorld(mark.area, { x: 1, y: 2 }, { x: 4, y: 2 }, socket);
+    expect(direct.releaseM).toEqual(socket);
+    expect(projectSkillVfxAim(direct, frame, 0.94)!.release).toEqual(screen.vfxAim.release);
   });
 
   it('keeps the release in front of the caster and the body impact above the ground point', () => {
-    const aim = buildSkillVfxAim({ origin: 'target', radiusM: 0, center: { x: 4, y: 2 } } as any,
+    const world = buildSkillVfxAimWorld({ origin: 'target', radiusM: 0, center: { x: 4, y: 2 } } as any,
       { x: 1, y: 2 }, { x: 4, y: 2 });
-    expect(aim.bodyImpact).toBe(true);
-    expect(aim.impact.y).toBeLessThan(aim.groundImpact.y);
-    expect(aim.release.x).not.toBe(1);
-    expect(aim.mirror).toBe(1);
+    expect(world.bodyImpact).toBe(true);
+    const screen = projectSkillVfxAim(world, frameFor(), 0.94)!;
+    expect(screen.impact.y).toBeLessThan(screen.groundImpact.y);
+    expect(world.releaseM.x).not.toBe(1);
+    expect(screen.mirror).toBe(1);
   });
 
   it('samples cones forward and lines along their axis', () => {
@@ -94,44 +160,67 @@ describe('the shared VFX aim contract', () => {
     }
   });
 
-  it('places atlas art on the authored anchor and rotates directional art to the aim', () => {
+  it('places atlas art on the authored anchor and rotates only art authored to orient', () => {
+    const frame = frameFor();
     const cone = fixture(VFX_CONE);
     const coneMark = skillActionGeometry(cone.action, cone.arena, 1_500_000, cone.arena.unitsPerSec)!;
+    const coneScreen = projectSkillGeometry(coneMark, frame)!;
     const coneAtlas = skillArtFor(VFX_CONE)!.atlas!;
-    const conePlacement = skillArtPlacement(coneMark, coneAtlas);
-    expect(conePlacement.width).toBeGreaterThan(24);
-    expect(conePlacement.height).toBeGreaterThan(20);
+    const conePlacement = skillArtPlacement(coneMark, coneAtlas, frame, coneScreen)!;
+    // Model-space minima: the 24/20 ref-px floors at the 140 px/m reference density.
+    expect(conePlacement.width).toBeGreaterThan(24 / 140);
+    expect(conePlacement.height).toBeGreaterThan(20 / 140);
     expect(conePlacement.anchorX).toBeGreaterThanOrEqual(0);
     expect(conePlacement.anchorX).toBeLessThanOrEqual(1);
-    expect(Math.abs(conePlacement.rotateDeg)).toBeGreaterThan(1);
+    // Pool art is painted as-is unless its own meta opts into aim rotation.
+    expect(coneAtlas.orient).not.toBe(true);
+    expect(conePlacement.rotateDeg).toBe(0);
+    const oriented = skillArtPlacement(coneMark, { ...coneAtlas, orient: true }, frame, coneScreen)!;
+    expect(Math.abs(oriented.rotateDeg)).toBeGreaterThan(1);
 
     const fireball = fixture(VFX_PROJECTILE);
     const fireballMark = skillActionGeometry(fireball.action, fireball.arena, 1_500_000, fireball.arena.unitsPerSec)!;
+    const fireballScreen = projectSkillGeometry(fireballMark, frame)!;
     const fireballAtlas = skillArtFor(VFX_PROJECTILE)!.atlas!;
-    const fireballPlacement = skillArtPlacement(fireballMark, fireballAtlas);
+    const fireballPlacement = skillArtPlacement(fireballMark, fireballAtlas, frame, fireballScreen)!;
     expect(fireballPlacement.anchorX).toBeCloseTo(fireballAtlas.anchor![0], 9);
-    expect(fireballPlacement.cx).toBeGreaterThan(fireballMark.vfxAim.release.x);
-    expect(fireballPlacement.cx).toBeLessThan(fireballMark.vfxAim.impact.x);
+    // Model-space travel: the aim point stays between release and impact in metres too.
+    expect(fireballPlacement.cx).toBeGreaterThan(fireballMark.vfxAim.releaseM.x);
+    expect(fireballPlacement.cx).toBeLessThan(fireballMark.vfxAim.groundImpactM.x);
+  });
+
+  it('leaves line atlas art in its painted orientation unless the atlas opts into orient', () => {
+    const frame = frameFor();
+    const { arena, action } = fixture(VFX_LINE);
+    const mark = skillActionGeometry(action, arena, 1_500_000, arena.unitsPerSec)!;
+    const atlas = skillArtFor(VFX_LINE)!.atlas!;
+    expect(atlas.orient).not.toBe(true);
+    expect(skillArtPlacement(mark, atlas, frame, projectSkillGeometry(mark, frame)!)!.rotateDeg).toBe(0);
   });
 
   it('moves a body-sized projectile from its release socket to the collision, then uses the impact anchor', () => {
+    const frame = frameFor();
     const { arena, action } = fixture(VFX_PROJECTILE);
     const atlas = skillArtFor(VFX_PROJECTILE)!.atlas!;
     const early = skillActionGeometry(action, arena, 1_100_000, arena.unitsPerSec)!;
     const late = skillActionGeometry(action, arena, 1_900_000, arena.unitsPerSec)!;
     const impact = skillActionGeometry(action, arena, 2_000_000, arena.unitsPerSec)!;
-    const a = skillArtPlacement(early, atlas);
-    const b = skillArtPlacement(late, atlas);
-    const hit = skillArtPlacement(impact, atlas);
+    const a = skillArtPlacement(early, atlas, frame, projectSkillGeometry(early, frame)!)!;
+    const b = skillArtPlacement(late, atlas, frame, projectSkillGeometry(late, frame)!)!;
+    const hitMark = impact;
+    const hitScreen = projectSkillGeometry(hitMark, frame)!;
+    const hit = skillArtPlacement(hitMark, atlas, frame, hitScreen)!;
     expect(a.cx).toBeLessThan(b.cx);
     expect(b.cx).toBeLessThan(hit.cx);
-    expect(hit.cx).toBe(impact.vfxAim.impact.x);
-    expect(hit.cy).toBe(impact.vfxAim.impact.y);
+    // The impact anchor is the committed ground point lifted by half a body, in metres.
+    expect(hit.cx).toBe(hitMark.vfxAim.groundImpactM.x);
+    expect(hit.cy).toBeCloseTo(hitMark.vfxAim.groundImpactM.y - hitMark.bodyM.height * VFX_BODY_LIFT_SHARE, 9);
     expect(hit.anchorX).toBe(atlas.impactAnchor![0]);
     expect(hit.anchorY).toBe(atlas.impactAnchor![1]);
     expect(a.width).toBe(b.width);
-    const distant = { ...late, vfxAim: { ...late.vfxAim, impact: { x: late.vfxAim.impact.x + 1000, y: late.vfxAim.impact.y } } };
-    expect(skillArtPlacement(distant, atlas).width).toBe(b.width);
+    const distant = { ...late, vfxAim: { ...late.vfxAim, groundImpactM: { x: late.vfxAim.groundImpactM.x + 1000, y: late.vfxAim.groundImpactM.y } } };
+    const distantScreen = projectSkillGeometry(distant, frame)!;
+    expect(skillArtPlacement(distant, atlas, frame, distantScreen)!.width).toBe(b.width);
   });
 
   it('keeps travel frames visible and shows the ground-effect peak before the authored fade', () => {
@@ -157,7 +246,7 @@ describe('the shared VFX aim contract', () => {
     const atlas = skillArtFor(action.skillId!)!.atlas!;
     action.endsAtUs = 2_300_000;
     const read = (at: number) => skillActionGeometry(action, arena, at, arena.unitsPerSec,
-      undefined, undefined, undefined, undefined, atlasImpactDuration(atlas));
+      undefined, undefined, atlasImpactDuration(atlas));
     expect(read(2_600_000)?.phase).toBe('Impact');
     // Aftershock carries a 6s window: the circle outlives recovery until the duration ends.
     expect(read(4_000_000)?.phase).toBe('Impact');
@@ -167,19 +256,21 @@ describe('the shared VFX aim contract', () => {
     expect(read(2_600_000)).toBeUndefined();
   });
 
-  it('bounds every live atlas by its own contract: circles by the viewport, the rest by the character body', () => {
+  it('bounds every live atlas by its declared policy: footprint by area, world by authored metres, body by the character body (R2/R5)', () => {
+    const frame = frameFor();
     const live = sm.all().filter((skill: any) => !skill.retired && skillArtFor(skill.id)?.atlas);
     const allLive = sm.all().filter((skill: any) => !skill.retired);
     expect(allLive.every((skill: any) => !!skillArtFor(skill.id))).toBe(true);
     for (const skill of live) {
       const { arena, action } = fixture(skill.id);
       const mark = skillActionGeometry(action, arena, 1_500_000, arena.unitsPerSec)!;
+      const screen = projectSkillGeometry(mark, frame)!;
       const atlas = skillArtFor(skill.id)!.atlas!;
-      const placement = skillArtPlacement(mark, atlas);
-      const areaShape = mark.area.shape ?? (mark.area.radiusM > 0 ? 'circle' : 'single');
-      const circle = areaShape !== 'line' && areaShape !== 'cone'
-        && (areaShape === 'circle' || atlas.authoring?.shape === 'circle');
-      const cap = circle ? Math.max(ARENA_VIEW.width, ARENA_VIEW.height) : mark.body.height * 7;
+      const placement = skillArtPlacement(mark, atlas, frame, screen)!;
+      const policy = artSizePolicyFor(mark, atlas);
+      // Only body-relative layers are capped by the body model; footprint and
+      // authored world layers carry their own metres (R2/R5).
+      const cap = policy === 'body' ? mark.bodyM.height * 7 : Number.POSITIVE_INFINITY;
       expect(Number.isFinite(placement.width), skill.id).toBe(true);
       expect(placement.width, skill.id).toBeLessThanOrEqual(cap + 1e-9);
       expect(placement.height, skill.id).toBeLessThanOrEqual(cap + 1e-9);
@@ -187,6 +278,7 @@ describe('the shared VFX aim contract', () => {
   });
 
   it('places every authored attack atlas within its frame grid and anchor bounds', () => {
+    const frame = frameFor();
     const attacks = sm.all().filter((skill: any) => skill.type === 'attack' && !skill.retired);
     let authored = 0;
     for (const skill of attacks) {
@@ -195,18 +287,17 @@ describe('the shared VFX aim contract', () => {
       authored++;
       const { arena, action } = fixture(skill.id);
       const mark = skillActionGeometry(action, arena, 1_500_000, arena.unitsPerSec)!;
-      const frame = atlasFrameIndex(mark, art.atlas);
-      expect(frame, skill.id).toBeGreaterThanOrEqual(0);
-      expect(frame, skill.id).toBeLessThan(art.atlas.count);
-      const placement = skillArtPlacement(mark, art.atlas);
+      const screen = projectSkillGeometry(mark, frame)!;
+      const framed = atlasFrameIndex(mark, art.atlas);
+      expect(framed, skill.id).toBeGreaterThanOrEqual(0);
+      expect(framed, skill.id).toBeLessThan(art.atlas.count);
+      const placement = skillArtPlacement(mark, art.atlas, frame, screen)!;
       for (const value of [placement.cx, placement.cy, placement.width, placement.height, placement.rotateDeg])
         expect(Number.isFinite(value), skill.id).toBe(true);
       expect(placement.width, skill.id).toBeGreaterThan(0);
       expect(placement.height, skill.id).toBeGreaterThan(0);
-      const attackAreaShape = mark.area.shape ?? (mark.area.radiusM > 0 ? 'circle' : 'single');
-      const attackCircle = attackAreaShape !== 'line' && attackAreaShape !== 'cone'
-        && (attackAreaShape === 'circle' || art.atlas.authoring?.shape === 'circle');
-      const attackCap = attackCircle ? Math.max(ARENA_VIEW.width, ARENA_VIEW.height) : mark.body.height * 7;
+      const policy = artSizePolicyFor(mark, art.atlas);
+      const attackCap = policy === 'body' ? mark.bodyM.height * 7 : Number.POSITIVE_INFINITY;
       expect(placement.width, skill.id).toBeLessThanOrEqual(attackCap + 1e-9);
       expect(placement.height, skill.id).toBeLessThanOrEqual(attackCap + 1e-9);
       expect(placement.anchorX, skill.id).toBeGreaterThanOrEqual(0);
@@ -218,35 +309,57 @@ describe('the shared VFX aim contract', () => {
   });
 
   it('covers the committed circle with painted content for wide AoE', () => {
+    const frame = frameFor();
     const { arena, action } = fixture(VFX_SELF_INSTANT);
     const mark = skillActionGeometry(action, arena, 1_500_000, arena.unitsPerSec)!;
+    const screen = projectSkillGeometry(mark, frame)!;
     const atlas = skillArtFor(VFX_SELF_INSTANT)!.atlas!;
-    const placement = skillArtPlacement(mark, atlas);
-    const spanX = Math.max(...mark.vertices.map((point) => point.x)) - Math.min(...mark.vertices.map((point) => point.x));
-    const spanY = Math.max(...mark.vertices.map((point) => point.y)) - Math.min(...mark.vertices.map((point) => point.y));
-    expect(placement.width * (atlas.content?.widthRatio ?? 1)).toBeGreaterThanOrEqual(spanX - 1);
-    expect(placement.height * (atlas.content?.heightRatio ?? 1)).toBeGreaterThanOrEqual(spanY - 1);
+    const placement = skillArtPlacement(mark, atlas, frame, screen)!;
+    // Model-space coverage: the committed footprint extents in metres.
+    const spans = groundShapeWorldPoints(mark.area);
+    const spanX = Math.max(...spans.map((point) => point.x)) - Math.min(...spans.map((point) => point.x));
+    const spanY = Math.max(...spans.map((point) => point.y)) - Math.min(...spans.map((point) => point.y));
+    expect(placement.width * (atlas.content?.widthRatio ?? 1)).toBeGreaterThanOrEqual(spanX - 1e-9);
+    expect(placement.height * (atlas.content?.heightRatio ?? 1)).toBeGreaterThanOrEqual(spanY - 1e-9);
   });
 
-  it('sizes atlas content from the actor body, not only the footprint', () => {
-    const { arena, action } = fixture(VFX_LINE);
-    const mark = skillActionGeometry(action, arena, 1_500_000, arena.unitsPerSec)!;
+  it('R5: line art keeps authored world metres while body layers follow the actor body', () => {
+    const frame = frameFor();
+    const line = fixture(VFX_LINE);
+    const mark = skillActionGeometry(line.action, line.arena, 1_500_000, line.arena.unitsPerSec)!;
     const atlas = skillArtFor(VFX_LINE)!.atlas!;
-    const small = skillArtPlacement({ ...mark, body: { width: 24, height: 66 } }, atlas);
-    const large = skillArtPlacement({ ...mark, body: { width: 96, height: 264 } }, atlas);
-    expect(large.width, 'large body').toBeGreaterThan(small.width);
-    expect(large.height, 'large body').toBeGreaterThan(small.height);
-    expect(small.width).toBeLessThanOrEqual(66 * 7 + 1e-9);
-    expect(large.width).toBeLessThanOrEqual(264 * 7 + 1e-9);
+    expect(artSizePolicyFor(mark, atlas)).toBe('world');
+    const small = skillArtPlacement({ ...mark, bodyM: { width: 24 / 140, height: 66 / 140 } },
+      atlas, frame, projectSkillGeometry({ ...mark, bodyM: { width: 24 / 140, height: 66 / 140 } }, frame)!)!;
+    const large = skillArtPlacement({ ...mark, bodyM: { width: 96 / 140, height: 264 / 140 } },
+      atlas, frame, projectSkillGeometry({ ...mark, bodyM: { width: 96 / 140, height: 264 / 140 } }, frame)!)!;
+    // World decorations read authored/resolved metres, never a body multiple.
+    const contentW = (placement: { width: number }) =>
+      placement.width * (atlas.content?.widthRatio ?? 1);
+    expect(contentW(large)).toBeCloseTo(contentW(small), 9);
+    expect(contentW(small)).toBeCloseTo(Math.max(0.4,
+      Number(atlas.authoring?.lengthM ?? mark.area.lengthM ?? 0)), 9);
+    // Body layers still scale with the shared body model.
+    const body = fixture(VFX_PROJECTILE);
+    const bodyMark = skillActionGeometry(body.action, body.arena, 1_500_000, body.arena.unitsPerSec)!;
+    const bodyAtlas = skillArtFor(VFX_PROJECTILE)!.atlas!;
+    expect(artSizePolicyFor(bodyMark, bodyAtlas)).toBe('body');
+    const short = skillArtPlacement({ ...bodyMark, bodyM: { width: 24 / 140, height: 66 / 140 } },
+      bodyAtlas, frame, projectSkillGeometry({ ...bodyMark, bodyM: { width: 24 / 140, height: 66 / 140 } }, frame)!)!;
+    const tall = skillArtPlacement({ ...bodyMark, bodyM: { width: 96 / 140, height: 264 / 140 } },
+      bodyAtlas, frame, projectSkillGeometry({ ...bodyMark, bodyM: { width: 96 / 140, height: 264 / 140 } }, frame)!)!;
+    expect(tall.width).toBeGreaterThan(short.width);
+    expect(tall.height).toBeGreaterThan(short.height);
   });
 
   it('puts a single-body impact at the body centre for the live body height', () => {
+    const frame = frameFor();
     const area = skillAreaSnapshot({ origin: 'target', radius_m: 0 }, { x: 1, y: 2 }, { x: 4, y: 2 }, 'target');
-    const short = buildSkillVfxAim(area, { x: 1, y: 2 }, { x: 4, y: 2 }, undefined, 80);
-    const tall = buildSkillVfxAim(area, { x: 1, y: 2 }, { x: 4, y: 2 }, undefined, 240);
+    const short = projectSkillVfxAim(buildSkillVfxAimWorld(area, { x: 1, y: 2 }, { x: 4, y: 2 }), frame, 80 / 140)!;
+    const tall = projectSkillVfxAim(buildSkillVfxAimWorld(area, { x: 1, y: 2 }, { x: 4, y: 2 }), frame, 240 / 140)!;
     expect(tall.impact.y).toBeLessThan(short.impact.y);
-    expect(short.groundImpact.y - short.impact.y).toBeCloseTo(40, 9);
-    expect(tall.groundImpact.y - tall.impact.y).toBeCloseTo(120, 9);
+    expect(short.groundImpact.y - short.impact.y).toBeCloseTo(40 / 140 * frame.cssPixelsPerMeter, 6);
+    expect(tall.groundImpact.y - tall.impact.y).toBeCloseTo(120 / 140 * frame.cssPixelsPerMeter, 6);
   });
 
   it('uses opening frames on the way in and exit frames on impact', () => {

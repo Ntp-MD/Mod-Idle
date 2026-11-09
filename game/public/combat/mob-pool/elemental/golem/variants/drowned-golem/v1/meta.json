@@ -1,0 +1,148 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "golem--drowned-golem",
+  "name": "Drowned Golem",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 77,
+      "y": 82,
+      "width": 103,
+      "height": 142,
+      "offsetX": 77,
+      "offsetY": 82
+    },
+    {
+      "x": 333,
+      "y": 82,
+      "width": 103,
+      "height": 142,
+      "offsetX": 77,
+      "offsetY": 82
+    },
+    {
+      "x": 592,
+      "y": 82,
+      "width": 97,
+      "height": 142,
+      "offsetX": 80,
+      "offsetY": 82
+    },
+    {
+      "x": 844,
+      "y": 82,
+      "width": 104,
+      "height": 142,
+      "offsetX": 76,
+      "offsetY": 82
+    },
+    {
+      "x": 79,
+      "y": 339,
+      "width": 98,
+      "height": 141,
+      "offsetX": 79,
+      "offsetY": 83
+    },
+    {
+      "x": 332,
+      "y": 338,
+      "width": 104,
+      "height": 142,
+      "offsetX": 76,
+      "offsetY": 82
+    },
+    {
+      "x": 590,
+      "y": 338,
+      "width": 100,
+      "height": 142,
+      "offsetX": 78,
+      "offsetY": 82
+    },
+    {
+      "x": 845,
+      "y": 338,
+      "width": 103,
+      "height": 142,
+      "offsetX": 77,
+      "offsetY": 82
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-golem--drowned-golem-diagonals.png",
+  "speciesId": "golem",
+  "variantId": "drowned-golem"
+}

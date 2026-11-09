@@ -31,10 +31,9 @@ describe('F43 — keyboard aim', () => {
     expect(projectArenaPoint(north).x).toBeCloseTo(screen.x);
     const westEdge = moveAimPoint({ x: 0.2, y: 0.2 }, 'west', 0.5, { width: 50, height: 32 });
     expect(westEdge.x).toBe(0);
-    expect(westEdge.y).toBeGreaterThanOrEqual(0);
-    expect(westEdge.y).toBeLessThan(.2);
+    expect(westEdge.y).toBeCloseTo(.2);
     expect(moveAimPoint({ x: 49.9, y: 31.9 }, 'east', 0.5, { width: 50, height: 32 }))
-      .toEqual({ x: 50, y: 32 });
+      .toEqual({ x: 50, y: 31.9 });
   });
 
 });

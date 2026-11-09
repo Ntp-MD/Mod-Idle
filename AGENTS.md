@@ -2,6 +2,12 @@
 
 Single-player, browser-only idle RPG; no server. Shared entry point for every coding agent.
 
+## Active temporary decisions (obey, do not "fix")
+
+- **Slot saves are OFF until the game is finished** (`TEMP_DISABLE_SLOT_SAVES = true` in `game/src/state/save.ts`). No localStorage/IndexedDB slot writes, no autosave, no Save nag by design.
+- Do NOT flip the flag back, do NOT add new slot-write/autosave paths, do NOT re-enable the disabled Save/Load/Import buttons, and do NOT treat the disabled state or the missing Save chooser at boot as a bug.
+- Ask the user before touching anything in the save flow (`game/src/state/save.ts`, `game/src/app/session.ts`, Save panel in `App.svelte`).
+
 ## Always-on skills
 
 `ponytail`, `lean-agent` and `polish-indent` live at `~/.agents/skills/` and in `Agent-skill/` and are **on by default in every session in this project, without being invoked**. Never wait for `/ponytail`, `/lean-agent`, `/polish-indent`, or a trigger phrase.
@@ -55,8 +61,9 @@ Gameplay numbers live in data JSON, formulas in `engine/`; do not duplicate eith
 ## UI integration
 
 - Shared tokens: `game/src/styles/variables.css`; tag defaults: `base.css`; reusable appearance: `skins.css`; layout: component `<style>`. Read the tokens and the component. Keep static appearance in classes; inline bindings are for runtime values and HudLayout placement.
-- UI icons and map glyphs are PNG shelf art through `.icon-mask` (`currentColor`); the map scene wraps glyphs in SVG. `<svg>` remains only as scene structure (tree/map geometry, marker frames/leaders, charts, effects) — never a standalone icon.
-- Map markers: shelf PNG glyph in a circular medallion on a vertical leader from the hex centre; frame/leader use hover-hex blue (`--es`). Never repaint terrain for markers.
+- UI icons use PNG shelf art through `.icon-mask` (`currentColor`); the map places the game's resolved PNG icons inside hex content. `<svg>` remains only as scene structure (tree/map geometry, charts, effects) — never a standalone icon.
+- Map architecture, module ownership, shared sizing policy and extension checks: read [game/src/ui/map/AGENTS.md](game/src/ui/map/AGENTS.md) before changing the map, its App integration or generator. Keep game icons inside hexes, radius-derived sizing, north-up camera and existing command authority.
+- Field showcase presets use the same `CombatArenaScene`, body models, sprite selection and skill geometry as the game. Vary sample state or explicit art review inputs; do not create a second field renderer or copy its scale formulas.
 - Current shell: fixed 15 × 15 Hub Grid, shared `HudLayout` regions, one scroll owner per region. Added/moved regions update `HudRegionId`, `HUD_REGION_META`, `DEFAULT_HUD_LAYOUT` in `game/src/ui/hud/hud-layout.ts` plus `App.svelte` wiring; backfill old layouts.
 - New panels wire through `PANELS`, `RAIL`, icon/label maps, keyboard actions in `App.svelte`. Reuse shared controls like `CollapseToggle.svelte`.
 - Keep native semantics, labels, keyboard access, visible focus. Map arrows select adjacent Blocks; Enter walks or uses a known Waypoint, with selection announcements.
@@ -77,3 +84,9 @@ Gameplay numbers live in data JSON, formulas in `engine/`; do not duplicate eith
 - After pushing, verify that the local and remote commit hashes match.
 - Never claim success unless the push and verification succeed.
 - Multi-session, one directory, one branch: every session and subagent works in this directory on the current branch. Never create, move, or use a worktree, and never create, checkout, or push a separate branch for incremental delivery.
+
+## Plan files
+
+- Every requested plan file is HTML in `docs/plan/`, English only.
+- Each heading and requirement is a checklist item: `- [ ]` open, `- [x]` done; render them as real `<input type="checkbox">` in the page.
+- When an item finishes, edit the file to check it and immediately continue with the next unchecked item in the same turn. Do not stop to report between items.

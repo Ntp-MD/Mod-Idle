@@ -32,7 +32,7 @@ Insert exactly one clause below into the prompt. Never send both.
 > Create unprojected artwork for a flat ground-plane effect, viewed in a true orthographic plan view.
 > The camera looks straight down, perpendicular to the ground plane at 90 degrees. Canvas +X points
 > right and canvas +Y points down. This is source texture, not a screenshot of the game. The runtime
-> applies the oblique arena projection once. Do not bake camera tilt, ellipse compression,
+> applies the uniform top-down field projection once. Do not bake camera tilt, ellipse compression,
 > foreshortening, isometric perspective, horizon, visible side faces, or a second projection.
 
 ### UPRIGHT
@@ -74,10 +74,10 @@ CONSISTENCY
 ## Use
 
 Choose the render mode from the destination renderer before generating. Ground art must be straight
-down because the game adds its oblique projection. Upright art uses a separate screen-facing clause.
+down because the game applies its uniform top-down projection. Upright art uses a separate screen-facing clause.
 Do not try to make one image both ground-projected and screen-facing.
 
-For a ground circle, author a circle in the source image; the game turns it into the arena ellipse.
+For a ground circle, author a circle in the source image; the game keeps it a circle on the field.
 For a 3 m gameplay radius, the footprint diameter is 6 m. Use metadata content ratios to set source
 cell occupancy; pixel dimensions alone do not set gameplay size.
 

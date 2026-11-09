@@ -6,7 +6,6 @@ import { slotsAvailable } from '@sim/gear/slots';
 import { establishCamp } from '@sim/world/fieldwork';
 import { destinationIntel } from '../../src/ui/map/map-intel';
 import { destinationPrimary } from '../../src/ui/map/destination';
-import { campActivityArt, hasUniqueTrace, mapEventArt } from '../../src/ui/map/map-adventure';
 import { E, eng, TOWN } from '../../src/engine/client';
 import {
   hexKey, investigateTrailSite, mapKnowledge, normalizeMapJournal,
@@ -116,24 +115,6 @@ describe('map journal and trail sites', () => {
     expect(a.group).toEqual(b.group);
     expect(a.counters).toEqual(b.counters);
     expect(a.fieldwork).toEqual(b.fieldwork);
-  });
-  it('shows tools that match the active Camp activity', () => {
-    expect(campActivityArt('mine')).toContain('data-marker-glyph="mine"');
-    expect(campActivityArt('grove')).toContain('data-marker-glyph="grove"');
-    expect(campActivityArt('fish')).toContain('data-marker-glyph="fish"');
-    expect(campActivityArt('cook')).toContain('data-marker-glyph="cook"');
-    expect(campActivityArt(null)).toBe('');
-  });
-  it('marks actual Unique rosters and gives recent road events their own board art', () => {
-    const unique = (E.mob.uniques as any[])[0];
-    expect(hasUniqueTrace([unique.species], unique.zone)).toBe(true);
-    expect(hasUniqueTrace([unique.species], unique.zone === 1 ? 2 : 1)).toBe(false);
-    expect(hasUniqueTrace([], unique.zone)).toBe(false);
-    expect(mapEventArt('Found wild berries along the trail')).toContain('data-marker-glyph="food"');
-    expect(mapEventArt('A clear spring restores your strength · Hunger 20%')).toContain('data-marker-glyph="rest"');
-    expect(mapEventArt('Abandoned Camp · Hunger 30%')).toContain('data-marker-glyph="fire"');
-    expect(mapEventArt('Provision Caravan · Raw Game Meat ×2')).toContain('data-marker-glyph="caravan"');
-    expect(mapEventArt('Camp kitchen · Trail Stew ×1')).toContain('data-marker-glyph="cook"');
   });
   it('refuses a trail-site reward during combat without erasing the current group', () => {
     const s = newGame(), site = addSite(s, 'provision-caravan');

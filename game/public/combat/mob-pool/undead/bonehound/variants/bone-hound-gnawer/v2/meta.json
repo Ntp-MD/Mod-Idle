@@ -1,0 +1,149 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "bonehound--bone-hound-gnawer",
+  "name": "Bone Hound Gnawer",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 86,
+      "y": 134,
+      "width": 84,
+      "height": 90,
+      "offsetX": 86,
+      "offsetY": 134
+    },
+    {
+      "x": 335,
+      "y": 140,
+      "width": 98,
+      "height": 84,
+      "offsetX": 79,
+      "offsetY": 140
+    },
+    {
+      "x": 565,
+      "y": 153,
+      "width": 150,
+      "height": 71,
+      "offsetX": 53,
+      "offsetY": 153
+    },
+    {
+      "x": 852,
+      "y": 133,
+      "width": 88,
+      "height": 91,
+      "offsetX": 84,
+      "offsetY": 133
+    },
+    {
+      "x": 92,
+      "y": 390,
+      "width": 72,
+      "height": 90,
+      "offsetX": 92,
+      "offsetY": 134
+    },
+    {
+      "x": 338,
+      "y": 391,
+      "width": 92,
+      "height": 89,
+      "offsetX": 82,
+      "offsetY": 135
+    },
+    {
+      "x": 566,
+      "y": 409,
+      "width": 149,
+      "height": 71,
+      "offsetX": 54,
+      "offsetY": 153
+    },
+    {
+      "x": 848,
+      "y": 397,
+      "width": 97,
+      "height": 83,
+      "offsetX": 80,
+      "offsetY": 141
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-bonehound--bone-hound-gnawer-diagonals.png",
+  "diagonalSourceSha256": "a6badfaca8ef9509694c2001e77c8c6ae5929c35b7f822dacc2ae7b45c795b0a",
+  "speciesId": "bonehound",
+  "variantId": "bone-hound-gnawer"
+}

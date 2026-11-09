@@ -3,7 +3,7 @@ import type { GameState } from '@sim/core/types';
 import type { CharacterSaveSession } from '../state/saveSession';
 import {
   applyAccount, exportJson, importJson, listSnapshots, readAccount, readSave, restoreSnapshot,
-  writeSaveSync, type ClientSettings, type SlotName, type Snapshot,
+  TEMP_DISABLE_SLOT_SAVES, writeSaveSync, type ClientSettings, type SlotName, type Snapshot,
 } from '../state/save';
 import { requestAccountWriterLock, type AccountWriterLockResult } from '../state/accountWriterLock';
 import { buildAwayReport, describeSnap, snapCounters, type AwayReport } from '../ui/hud/hud';
@@ -298,7 +298,9 @@ export function createSessionActions(ctx: SessionContext) {
       ctx.resetCharacterUi();
       ctx.awayReport = null;
       ctx.resetSkillDiscovery();
-      ctx.saveNote = 'New character is not saved yet. Choose a save slot; existing slots were kept.';
+      ctx.saveNote = TEMP_DISABLE_SLOT_SAVES
+        ? ''
+        : 'New character is not saved yet. Choose a save slot; existing slots were kept.';
       return true;
     } catch (error) {
       if (ctx.saveSession.isCurrent(epoch)) {

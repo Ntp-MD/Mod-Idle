@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "ooze",
+  "identityName": "Ooze",
+  "identityKind": "species",
+  "editTarget": "art-reference/pawn-study/generation/eight-direction/pawn-ooze-diagonals.png",
+  "styleReference": "game/public/combat/mob-pool/formless/ooze/v1/atlas.png",
+  "generatedSheet": "art-reference/pawn-study/generation/eight-direction/pawn-ooze-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "targetVisibleHeightRuntimePx": [
+    131,
+    138
+  ],
+  "canvas": {
+    "requested": {
+      "width": 1024,
+      "height": 1024
+    },
+    "generated": {
+      "width": 1254,
+      "height": 1254
+    },
+    "cellSize": 627,
+    "background": "white"
+  },
+  "measuredVisibleHeightSourcePx": [
+    384,
+    384,
+    389,
+    389
+  ],
+  "promptSummary": "Match the runtime cardinal pixel-cluster style and add short attached pseudopods while preserving the squat Ooze blob body; no humanoid torso or legs.",
+  "review": {
+    "identity": "passed",
+    "pose": "passed",
+    "anchor": "passed",
+    "sharedScale": "passed",
+    "alphaAndCellBounds": "passed",
+    "approved": true
+  },
+  "note": "Alternate v3 candidate; review against the cardinal runtime atlas before selecting it for packing.",
+  "packedAtlas": "art-reference/pawn-study/atlases/ooze.png",
+  "packedVisibleHeightRuntimePx": [
+    137,
+    139
+  ],
+  "reviewNotes": "Reviewed smooth blob diagonals with attached pseudopods against the existing cardinal runtime cells; identity, NE/SE/SW/NW pose, shared scale and cell bounds pass."
+}

@@ -3,6 +3,7 @@ import { road } from '../../../engine/client';
 import { abandonRun } from '../../world/dungeon';
 import { autoSelect } from '../presets';
 import { arrive, currentCell as currentCellForJournal } from '../../world/road';
+import { commitStep } from '../../world/travel';
 import { recordMapDiscovery } from '../../world/map-exploration';
 import { resolveTravelEvent } from '../../world/fieldwork';
 import { push } from '../log';
@@ -13,6 +14,10 @@ import { fx, hitColour } from '../feedback';
  * a walk is its own activity, and it is offline-exempt so an away period never crosses a block and
  * never opens a Waypoint it did not earn online.
  *
+ * Each crossed block commits its cell first: discovery and the road event resolve against the
+ * entered cell (never the origin), once per leg via the journey receipt. Passing a town opens
+ * nothing and fields nothing; only the final stop unlocks and arrives.
+ *
  * Leaving the run's zone ends the run: a dungeon is entered ground, not a destination.
  */
 export function advanceWalkStage(s: GameState, online: boolean, rng: () => number): void {
@@ -20,22 +25,26 @@ export function advanceWalkStage(s: GameState, online: boolean, rng: () => numbe
     const walk = s.walk;
     walk.secLeft--;
     if (walk.secLeft <= 0 && !s.group.length) {
-      // the block is crossed: one encounter chance, then the next block starts
-      walk.blocksLeft--;
-      walk.blocksWalked++;
-      walk.secLeft = road.blockSec;
-      recordMapDiscovery(s);
-      // A crossed block says nothing: no number floats off the character and no line is logged for it —
-      // the walk reads as the one word on the field plus the route lighting itself off `blocksWalked`,
-      // one cell per block (`walkedCells`). Only arriving and a trail event are walk events.
-      const trailEvent = resolveTravelEvent(s, rng);
-      if (trailEvent) {
-        const feet = currentCellForJournal(s);
-        s.mapJournal!.lastEvent = { ...feet, text: trailEvent, atSec: s.clockSec };
-        push(s, `Trail event · ${trailEvent}`);
+      const step = commitStep(s);
+      // The block is crossed — but only a fresh commit discovers and rolls an event, so a
+      // replayed receipt never rewards twice.
+      if (!step.duplicate && step.entered && !step.stopped) {
+        // `lastEventStep` is the receipt: this leg processes discovery/event once.
+        if (walk.lastEventStep < walk.stepIndex) {
+          recordMapDiscovery(s);
+          let roadReceipt: { resourceDeltas: { bucket: 'food' | 'material'; id: string; count: number }[]; hungerDelta: number } | undefined;
+          const trailEvent = resolveTravelEvent(s, rng, (entry) => { roadReceipt = entry; });
+          walk.lastEventStep = walk.stepIndex;
+          if (trailEvent) {
+            const feet = currentCellForJournal(s);
+            s.mapJournal!.lastEvent = { ...feet, text: trailEvent, atSec: s.clockSec, source: 'road', ...roadReceipt };
+            push(s, `Trail event · ${trailEvent}`);
+          }
+        }
       }
-      if (walk.blocksLeft <= 0) {
-        const arrived = arrive(s, walk);
+      const live = s.walk;
+      if (live && live.stepIndex >= live.legs.length) {
+        const arrived = arrive(s, live);
         if (arrived) {
           if (s.lastAutoZone !== s.zone) {
             s.lastAutoZone = s.zone;

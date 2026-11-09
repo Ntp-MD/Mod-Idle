@@ -1,4 +1,6 @@
-import { eng, E, sm, loot, TOWN, tree, spawns } from '../../engine/client';
+import { eng, E, ED, sm, loot, TOWN, tree, spawns } from '../../engine/client';
+import { createWorld } from '../../../../engine/world.ts';
+import type { EngineData } from '../../../../engine/types.ts';
 import { buildCharacter, emptyGear, SLOT_COUNT } from './player';
 import { itemName } from '../gear/item-name';
 import { playerSwing, mobSwing, rollStatus, applyStatus, poisonBurst, decayStatusStack, type Statuses, type StatusName } from '../combat/combat';
@@ -23,7 +25,7 @@ import { newAlchemyLedger } from '../../../../engine/alchemy.ts';
 import { canDissolve, dissolve } from '../gear/salvage';
 import { depositMany, newTown, progressTasks, smithService, stashTabCount, tickTown, taskReward } from '../town/town';
 import { advanceEconomy, newEconomyState } from './economy';
-import { deliveryPauseReason, tickDeliveries } from '../town/delivery';
+import { deliveryPauseReason, tickCourierOffers, tickDeliveries } from '../town/delivery';
 import { tickBlackMarket } from '../town/black-market';
 import { STAT_KEYS, type StatKey } from '../../engine/client';
 import { chooseJunkItem, leanReweightMany } from '../../../../engine/loot.ts';
@@ -87,7 +89,11 @@ import type { GameState, Mob, Item, FxEvent } from './types';
 import { mulberry32, pick, intBetween, weightedPick } from '../../engine/client-helpers';
 
 const L = E.loot;
-/** Packet E's seven static bundles are bound once, against the canonical Element list. */
+/** HX1 world queries (HX5 habitat consumer): bare ground draws its species pool from the hex's
+ *  resolved winning habitat, never from a zone-wide sub-zone roll. `Cell.sub` is never written
+ *  from the habitat — the hex stays bare; only the spawn pool narrows. */
+const world = createWorld(ED as unknown as EngineData, TOWN.settlements as Array<{ id: string; zone: number }>);
+// Packet E's seven static bundles are bound once, against the canonical Element list.
 registerStaticKeystoneHandlers(KEYSTONE_HANDLERS, Object.keys(E.elements.status_of));
 /** loot.md F7 publishes 4 bosses an hour; the clock is per character and online only. */
 /** The boss cadence lives with the other clock constants; re-exported for its callers. */
@@ -171,7 +177,7 @@ export function newGame(seed = 20260101, trailSeed = seed): GameState {
     field: null,
     fieldArchive: {},
     nextSnapshotAt: 0,
-    town: newTown(),
+    town: newTown(seed),
     farm: newFarm(),
     fieldwork: newFieldwork(seed),
     alchemy: newAlchemyLedger(E.salvage.alchemy.outputs_per_tier_stone),
@@ -180,6 +186,7 @@ export function newGame(seed = 20260101, trailSeed = seed): GameState {
     phase: 'fighting',
     campSec: 0,
     dungeon: null,
+    lastDungeonReceipt: null,
     counters: {
       kills: 0,
       zoneKills: {},
@@ -243,7 +250,10 @@ function variantDrop(mob: any): { item: string; rarity: string; lean: 'gear' | '
   if (!mob) return null;
   if (mob.legacySnapshot) return mob.legacyDrop ?? null;
   if (!mob.placementId) return null;
-  return (((E.mob as any).variant_drops || {})[mob.placementId]) || null;
+  const live = ((E.mob as any).variant_drops || {})[mob.placementId];
+  if (live) return live;
+  const retired = ((E.mob as any).retired_variant_drops || {})[mob.placementId];
+  return retired?.species === mob.speciesId ? retired : null;
 }
 
 /** The Species' one thematic material, rolled on its own seeded stream so the shared loot RNG
@@ -291,14 +301,19 @@ function pickBody(rng: () => number, bodies: string[], pack: Record<string, numb
   return bodies[bodies.length - 1];
 }
 
-export function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string, standSub?: number | null, options: { allowWildUnique?: boolean; uniqueChance?: number; id?: string; standTerrain?: string | null; forceSpecial?: { rank: 'boss' | 'unique'; name: string } | null } = {}): Mob {
+export function spawnMob(rng: () => number, zoneId: number, kind: 'normal' | 'elite' | 'boss', bodyHint?: string, standSub?: number | null, options: { allowWildUnique?: boolean; uniqueChance?: number; id?: string; standTerrain?: string | null; hex?: { q: number; r: number } | null; forceSpecial?: { rank: 'boss' | 'unique'; name: string } | null } = {}): Mob {
   const z = eng.zoneById(zoneId);
-  // A standing named side hunts its authored pool; bare ground keeps the existing Zone/subzone draw.
+  // A standing named side hunts its authored pool; bare ground hunts its resolved local habitat
+  // (HX5): the winning named side of the hex (`habitatOf`), not a zone-wide sub-zone roll. The
+  // cell stays bare — `Cell.sub` is never written here; only the species pool narrows. Spawn
+  // callers without a hex keep the legacy zone draw.
   const subs = z.subzones || [];
   const stood = standSub != null && subs[standSub] ? subs[standSub] : null;
   const terrain = options.standTerrain ?? null;
+  const habitat = !stood && options.hex ? world.habitatOf(options.hex) : null;
+  const habitatSub = habitat && habitat.zoneId === zoneId ? subs[habitat.subzoneIndex] ?? null : null;
   const chosenSub = kind !== 'boss' && !options.forceSpecial && subs.length
-    ? stood ?? (terrain == null
+    ? stood ?? habitatSub ?? (terrain == null
       ? subs[Math.floor(rng() * subs.length)]
       : subs[Number(weightedPick(rng, subs.map((s, i) => ({ id: String(i), w: eng.spawnSubzoneWeight(s, terrain) }))))] ?? null)
     : null;
@@ -895,19 +910,69 @@ function onKill(s: GameState, rng: () => number, mob: Mob, c: ReturnType<typeof 
  * The run's last mob: stacks merge through the ordinary pickup rule, gear rolls go through the
  * one filter path, and the dungeon cools down from this clock second.
  */
+type ResourceTables = Record<'junk' | 'stone' | 'herb' | 'potion' | 'material', Record<string, number>>;
+const snapshotResources = (s: GameState): ResourceTables => ({
+  junk: { ...s.junk }, stone: { ...s.counters.stones }, herb: { ...s.farm.herbs },
+  potion: { ...s.farm.potions }, material: { ...s.fieldwork.materials },
+});
+const deltaResources = (before: ResourceTables, s: GameState) => {
+  const out: { bucket: 'junk' | 'stone' | 'herb' | 'potion' | 'material'; id: string; count: number }[] = [];
+  const after = snapshotResources(s);
+  for (const bucket of Object.keys(before) as (keyof ResourceTables)[]) {
+    for (const [id, count] of Object.entries(after[bucket])) {
+      const gained = count - (before[bucket][id] || 0);
+      if (gained > 0) out.push({ bucket, id, count: gained });
+    }
+  }
+  return out;
+};
+const leftOver = (expected: ResourceTables, received: { bucket: keyof ResourceTables; id: string; count: number }[]) => {
+  const kept = new Map<string, number>();
+  for (const entry of received) kept.set(`${entry.bucket}:${entry.id}`, (kept.get(`${entry.bucket}:${entry.id}`) || 0) + entry.count);
+  const out: typeof received = [];
+  for (const bucket of Object.keys(expected) as (keyof ResourceTables)[]) {
+    for (const [id, count] of Object.entries(expected[bucket])) {
+      const left = count - (kept.get(`${bucket}:${id}`) || 0);
+      if (left > 0) out.push({ bucket, id, count: left });
+    }
+  }
+  return out;
+};
+
 function completeDungeonRun(s: GameState): void {
   const run = s.dungeon!;
   s.dungeon = null;
+  const escrowBefore: ResourceTables = {
+    junk: { ...run.escrow.junk }, stone: { ...run.escrow.stones }, herb: { ...run.escrow.herbs },
+    potion: { ...run.escrow.potions }, material: { ...(run.escrow.materials || {}) },
+  };
+  const resourcesBefore = snapshotResources(s);
   const paid = payoutStacks(s, run);
+  const payoutKept = deltaResources(resourcesBefore, s);
+  const kept = [...payoutKept];
   s.group = [];
   s.curses = newCurses();
   s.mobStatus = newMobStatusStore();
   let gear = 0;
+  const gearReceipt = { processed: 0, retained: 0, salvaged: 0, rejected: 0, forfeited: 0 };
+  const stonesBeforeGear = snapshotResources(s);
   for (const item of run.escrow.items) {
+    const salvageBefore = s.counters.salvaged || 0;
     adjudicateDrop(s, item);
+    if (s.bag.includes(item)) gearReceipt.retained++;
+    else if ((s.counters.salvaged || 0) > salvageBefore) gearReceipt.salvaged++;
+    else gearReceipt.rejected++;
+    gearReceipt.processed++;
     fx(s, { kind: 'drop', side: 'field', text: `${item.quality} ${itemName(item)}`, colour: hitColour(null) });
     gear++;
   }
+  for (const entry of deltaResources(stonesBeforeGear, s)) if (entry.bucket === 'stone') kept.push(entry);
+  const startedAtSec = run.startedAtSec ?? s.clockSec;
+  s.lastDungeonReceipt = {
+    key: `dungeon:${run.zone}:${startedAtSec}:cleared`,
+    zone: run.zone, atSec: s.clockSec, reason: 'cleared',
+    kept, forfeited: [], uncollected: leftOver(escrowBefore, payoutKept), gear: gearReceipt,
+  };
   s.dungeonClearedAt = s.clockSec;
   push(s, `Dungeon cleared — ${run.total} mobs · escrow paid: ${gear} gear, ${paid.junk} junk, ${paid.stones} stones, ${paid.herbs} herbs, ${paid.potions} potions, ${paid.materials} materials · cooling down ${E.dungeon.cooldown_sec}s`);
 }
@@ -931,6 +996,20 @@ export function retreatDungeon(s: GameState, access: { writer: boolean } = { wri
     selected = selectDungeonRescue(entries, { min: E.dungeon.retreat_keep_min, max: E.dungeon.retreat_keep_max }, () => { draws++; return rng(); });
   } catch { return { ok: false, why: 'invalid dungeon escrow or rescue configuration' }; }
   if (draws) s.rngState++;
+  const escrowBefore: ResourceTables = {
+    junk: { ...run.escrow.junk }, stone: { ...run.escrow.stones }, herb: { ...run.escrow.herbs },
+    potion: { ...run.escrow.potions }, material: { ...(run.escrow.materials || {}) },
+  };
+  const selectedTables: ResourceTables = { junk: {}, stone: {}, herb: {}, potion: {}, material: {} };
+  const bucketOf = (entryBucket: string): 'junk' | 'stone' | 'herb' | 'potion' | 'material' | null =>
+    entryBucket === 'junk' ? 'junk' : entryBucket === 'stones' ? 'stone' : entryBucket === 'herbs' ? 'herb'
+      : entryBucket === 'potions' ? 'potion' : entryBucket === 'materials' ? 'material' : null;
+  for (const entry of selected) {
+    const receiptBucket = bucketOf(entry.bucket);
+    if (receiptBucket) selectedTables[receiptBucket][entry.key] = (selectedTables[receiptBucket][entry.key] || 0) + entry.count;
+  }
+  const resourcesBefore = snapshotResources(s);
+  const startedAtSec = run.startedAtSec ?? s.clockSec;
   s.dungeon = null;
   s.group = [];
   s.curses = newCurses();
@@ -938,11 +1017,17 @@ export function retreatDungeon(s: GameState, access: { writer: boolean } = { wri
   s.hunting = false;
   s.dungeonClearedAt = s.clockSec;
   let received = 0, receivedMaterials = 0, total = 0;
+  const uncollected: { bucket: 'junk' | 'stone' | 'herb' | 'potion' | 'material'; id: string; count: number }[] = [];
+  const gearReceipt = { processed: 0, retained: 0, salvaged: 0, rejected: 0, forfeited: run.escrow.items.length - selected.filter((entry) => entry.bucket === 'items').length };
   for (const entry of selected) {
     total += entry.count;
     if (entry.bucket === 'items') {
       const bagBefore = s.bag.length, salvageBefore = s.counters.salvaged || 0;
       adjudicateDrop(s, entry.item!);
+      if (s.bag.includes(entry.item!)) gearReceipt.retained++;
+      else if ((s.counters.salvaged || 0) > salvageBefore) gearReceipt.salvaged++;
+      else gearReceipt.rejected++;
+      gearReceipt.processed++;
       if (s.bag.includes(entry.item!) || s.bag.length > bagBefore || (s.counters.salvaged || 0) > salvageBefore) received++;
     } else {
       const bucket = entry.bucket === 'junk' ? s.junk : entry.bucket === 'stones' ? s.counters.stones : entry.bucket === 'herbs' ? s.farm.herbs : entry.bucket === 'materials' ? s.fieldwork.materials : s.farm.potions;
@@ -950,9 +1035,20 @@ export function retreatDungeon(s: GameState, access: { writer: boolean } = { wri
       if (entry.bucket === 'junk') s.counters.junk += got;
       if (entry.bucket === 'materials') receivedMaterials += got;
       received += got;
+      const receiptBucket = bucketOf(entry.bucket)!;
+      if (got < entry.count) uncollected.push({ bucket: receiptBucket, id: entry.key, count: entry.count - got });
     }
   }
   const rejected = total - received;
+  const selectedList = (Object.keys(selectedTables) as (keyof ResourceTables)[]).flatMap((bucket) =>
+    Object.entries(selectedTables[bucket]).map(([id, count]) => ({ bucket, id, count })));
+  s.lastDungeonReceipt = {
+    key: `dungeon:${run.zone}:${startedAtSec}:retreated`,
+    zone: run.zone, atSec: s.clockSec, reason: 'retreated',
+    kept: deltaResources(resourcesBefore, s),
+    forfeited: leftOver(escrowBefore, selectedList),
+    uncollected, gear: gearReceipt,
+  };
   push(s, `Dungeon Retreat — selected ${selected.length} stacks (${total} units), received ${received}, ${receivedMaterials} materials, capacity-rejected ${rejected}; the rest forfeited · cooling down ${E.dungeon.cooldown_sec}s`);
   return { ok: true, selected: total, received, rejected };
 }
@@ -1118,9 +1214,10 @@ function closeSecond(s: GameState, opts: TickOptions, second: TickSecond): void 
       // A Camp threat is a population pull at the Camp's authored density, not the old 1-5 wave.
       const size = Math.max(1, spawns.profileFor(zone, subzone, 'legacy').cap);
       const group = Array.from({ length: size }, () => spawnMob(campRng, zone, 'normal', undefined, subzone,
-        { allowWildUnique: false }));
+        { allowWildUnique: false, hex: s.cell ? { q: s.cell.q, r: s.cell.r } : null }));
       return group.sort(byFrontLine);
     }, { eligibleAtStart: second.campEligibleAtStart });
+    tickCourierOffers(s, online, second.pausedAtStart, { writer: true });
   } finally {
     if (second.arena) {
       second.arena.nowUs = second.halted ? second.haltedAtUs : second.endUs;
@@ -1713,7 +1810,7 @@ function tickWorld(
           continue;
         }
         const add = spawnMob(rng, s.zone, 'normal', undefined, s.cell?.sub ?? null,
-          { allowWildUnique: false, standTerrain: s.cell?.terrain ?? null, id: addId });
+          { allowWildUnique: false, standTerrain: s.cell?.terrain ?? null, hex: s.cell ? { q: s.cell.q, r: s.cell.r } : null, id: addId });
         add.addedBy = boss.id;
         const slot = free.shift();
         if (slot) {

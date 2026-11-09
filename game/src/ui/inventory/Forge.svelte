@@ -1,12 +1,15 @@
 <script lang="ts">
   import { ED, TOWN, fieldwork } from '../../engine/client';
   import { forge, canForge } from '@sim/gear/forge';
-  import { smithService } from '@sim/town/town';
+  import { smithService, npcOf } from '@sim/town/town';
+  import { slotsFree } from '@sim/gear/slots';
   import { itemName } from '@sim/gear/item-name';
   import { fieldSkillLevel } from '@sim/world/fieldwork';
   import { materialSources, sourceLine } from '@sim/gear/material-sources';
   import type { ForgeKind } from '@engine/forge.ts';
   import type { GameState } from '@sim/core/types';
+  import StoryScene from '../story/StoryScene.svelte';
+  import { forgeStoryView } from '../story/story-presenters';
   import EmptyNote from '../shared/EmptyNote.svelte';
   import Tabs from '../shared/Tabs.svelte';
 
@@ -14,11 +17,14 @@
 
   let { game, writer, note = '', onforge, onsalvage = () => false,
     focus = null, ontrack = () => {}, onshortage = () => {}, onpinzone = () => {}, onmap = () => {}, onbag = () => {},
+    resultItem = null,
   }: {
     game: GameState;
     writer: boolean;
     note?: string;
-    onforge: (kind: ForgeKind, id: string, materialId: string) => boolean;
+    onforge: (kind: ForgeKind, id: string, materialId: string, expected?: { held: number; freeSlots: number }) => boolean;
+    /** Latest successful forge output, cleared by changing the selected pattern or material. */
+    resultItem?: string | null;
     onsalvage?: (index: number) => boolean;
     /** A goal opened this panel; select its pattern and material without changing anything else. */
     focus?: { patternKind: ForgeKind; pattern: string; material: string; nonce: number } | null;
@@ -87,6 +93,35 @@
   const bandOf = (grade: number) => ED.item_level.spans?.[grade - 1]?.band || '—';
   const missing = $derived(pattern && material ? Math.max(0, pattern.count - owned(material.id)) : 0);
 
+  let resultContext = $state('');
+  const townByLevel = $derived(TOWN.settlements.find((entry: any) => entry.zone === game.zone)?.id || '');
+  const forgeView = $derived.by(() => {
+    const cycle = Math.floor(game.clockSec / (TOWN.storyteller_promotions?.cycle_sec ?? 3600));
+    const speaker = npcOf('armourer')?.name || 'armourer';
+    const context = `${pattern?.id ?? ''}:${material?.id ?? ''}:${verdict.ok ? 'ready' : verdict.why ?? ''}:${owned(material?.id ?? '')}:${slotsFree(game)}`;
+    if (resultItem && resultContext === `${kind}:${patternId}:${materialId}`) {
+      return forgeStoryView({
+        key: `forge:result:${kind}:${patternId}:${materialId}:${resultItem}`, seed: game.seed, townId: townByLevel,
+        npcId: 'armourer', speaker, cycle, contextKey: 'result', patternName: pattern?.name, resultItem,
+        costText: pattern && material ? `${pattern.count} ${materialName(material.id)}` : undefined,
+      });
+    }
+    return forgeStoryView({
+      key: `forge:${context}`, seed: game.seed, townId: townByLevel,
+      npcId: 'armourer', speaker, cycle, contextKey: 'plan',
+      patternName: pattern?.name, materialName: material ? materialName(material.id) : undefined,
+      valid: verdict.ok, why: verdict.why, held: material ? owned(material.id) : undefined,
+      costText: material && resolved?.ok ? `${resolved.count} ${materialName(material.id)}` : undefined,
+      bandText: resolved?.ok ? resolved.band : undefined,
+    });
+  });
+
+  function forgeNow() {
+    if (!pattern || !material) return;
+    resultContext = `${kind}:${patternId}:${materialId}`;
+    onforge(pattern.kind, pattern.id, material.id, { held: owned(material.id), freeSlots: slotsFree(game) });
+  }
+
   function pickKind(next: ForgeKind) {
     kind = next;
     patternId = '';
@@ -107,6 +142,18 @@
   </header>
 
   {#if note}<p class="note" role="status">{note}</p>{/if}
+
+  <StoryScene view={forgeView} onaction={() => {}}>
+    {#snippet controls()}
+      {#if pattern && material}
+        <button class="btn btn-gold forge-btn" disabled={!writer || !verdict.ok}
+          aria-describedby={!writer || !verdict.ok ? 'forge-refusal' : undefined}
+          onclick={forgeNow}>
+          {writer ? 'Forge' : 'Read-only'}
+        </button>
+      {/if}
+    {/snippet}
+  </StoryScene>
 
   <Tabs tabs={KIND_TABS} active={kind} onpick={(id) => pickKind(id as ForgeKind)} label="Forge pattern kind" tabClass="forge-tab" />
 
@@ -198,11 +245,6 @@
         {:else if !verdict.ok && material}
           <p class="why" id="forge-refusal" role="status">{verdict.why}{#if /settlement/.test(verdict.why || '')} <button class="btn btn-flat pin" type="button" onclick={onmap}>Open map</button>{:else if /room in the bag/.test(verdict.why || '')} <button class="btn btn-flat pin" type="button" onclick={onbag}>Open bag</button>{:else if /field activity/.test(verdict.why || '')} Finish travel, Camp recovery or the field action first.{/if}</p>
         {/if}
-        <button class="btn btn-gold forge-btn" disabled={!writer || !verdict.ok}
-          aria-describedby={!writer || !verdict.ok ? 'forge-refusal' : undefined}
-          onclick={() => material && onforge(pattern.kind, pattern.id, material.id)}>
-          {writer ? 'Forge' : 'Read-only'}
-        </button>
       {/if}
     </section>
   </div>

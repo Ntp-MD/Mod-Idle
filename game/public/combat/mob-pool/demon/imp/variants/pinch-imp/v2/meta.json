@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "imp--pinch-imp",
+  "name": "Pinch Imp",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 79,
+      "y": 120,
+      "width": 98,
+      "height": 104,
+      "offsetX": 79,
+      "offsetY": 120
+    },
+    {
+      "x": 340,
+      "y": 104,
+      "width": 89,
+      "height": 120,
+      "offsetX": 84,
+      "offsetY": 104
+    },
+    {
+      "x": 598,
+      "y": 119,
+      "width": 85,
+      "height": 105,
+      "offsetX": 86,
+      "offsetY": 119
+    },
+    {
+      "x": 853,
+      "y": 102,
+      "width": 86,
+      "height": 122,
+      "offsetX": 85,
+      "offsetY": 102
+    },
+    {
+      "x": 77,
+      "y": 359,
+      "width": 102,
+      "height": 121,
+      "offsetX": 77,
+      "offsetY": 103
+    },
+    {
+      "x": 341,
+      "y": 358,
+      "width": 86,
+      "height": 122,
+      "offsetX": 85,
+      "offsetY": 102
+    },
+    {
+      "x": 598,
+      "y": 374,
+      "width": 85,
+      "height": 106,
+      "offsetX": 86,
+      "offsetY": 118
+    },
+    {
+      "x": 854,
+      "y": 361,
+      "width": 85,
+      "height": 119,
+      "offsetX": 86,
+      "offsetY": 105
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-imp--pinch-imp-diagonals.png",
+  "diagonalSourceSha256": "bbd6c806e5b8a9425313d31bb419f4f723bf41bc2a649521f453815a9e2c70aa",
+  "diagonalScaleFactor": 0.284371,
+  "speciesId": "imp",
+  "variantId": "pinch-imp"
+}

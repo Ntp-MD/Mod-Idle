@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { createCombatArena, type CombatArenaAction } from '@sim/combat/combat-arena';
-import { skillActionGeometry, skillPayloadGeometry } from '../../src/ui/combat/skill-geometry';
-import { projectArenaPoint } from '../../src/ui/combat/combat-arena-view';
+import { projectSkillGeometry, skillActionGeometry, skillPayloadGeometry } from '../../src/ui/combat/skill-geometry';
+import { createFieldViewFrame } from '../../src/presentation/arena-view-frame';
+import { fieldPointM } from '../../src/presentation/view-transform';
 import type { CombatFlight } from '@sim/combat/combat-actions';
 
 const units = 1_000_000;
+const BODY_M = { width: 60 / 140, height: 132 / 140 };
 function fixture(skillId = 'attack.double_strafe') {
   const arena = createCombatArena();
   const action: CombatArenaAction = {
@@ -18,6 +20,11 @@ function fixture(skillId = 'attack.double_strafe') {
   };
   return { arena, action };
 }
+const frameFor = () => createFieldViewFrame({
+  sceneKey: 'test', atUs: 0,
+  viewportCss: { width: 1920, height: 1080 },
+  focusM: fieldPointM(0, 0), worldScale: 1,
+});
 function marks(action: CombatArenaAction, arena: ReturnType<typeof createCombatArena>, time: number) {
   return skillPayloadGeometry(skillActionGeometry(action, arena, time, units)!, action, time, units, .4);
 }
@@ -47,6 +54,7 @@ describe('committed payload art', () => {
     expect(marks(action, arena, 1.9 * units).map(mark => mark.key)).toEqual(['action-1-payload-1']);
   });
   it('uses actual chain-hop origins and destinations, without drawing future hops', () => {
+    const frame = frameFor();
     const { action, arena } = fixture('attack.chain_lightning');
     action.payloads = [
       { index: 0, source: { x: 0, y: 0 }, destination: { x: 2, y: 0 }, releaseAtUs: units, plannedImpactAtUs: units },
@@ -58,9 +66,12 @@ describe('committed payload art', () => {
     const hop = result[1];
     expect(hop.chainHop).toBe(true);
     expect(hop.progress).toBe(.5);
-    expect(hop.paths[0].from).toEqual({ x: projectArenaPoint({ x: 2, y: 0 }).x,
-      y: projectArenaPoint({ x: 2, y: 0 }).y - hop.body.height * .5 });
-    expect(hop.paths[0].to).toEqual(hop.vfxAim.impact);
+    // World hop spans stay in metres; the frame adapter lifts both ends to body centres.
+    expect(hop.paths[0].from).toEqual({ x: 2, y: 0 });
+    expect(hop.paths[0].to).toEqual(hop.vfxAim.groundImpactM);
+    const screen = projectSkillGeometry(hop, frame)!;
+    expect(screen.paths[0].to).toEqual(screen.vfxAim.impact);
+    expect(screen.paths[0].from.y).toBeLessThan(screen.paths[0].to.y + 1);
     expect(JSON.stringify(action)).toBe(before);
   });
   it('keeps the single casting mark before release', () => {
@@ -68,6 +79,7 @@ describe('committed payload art', () => {
     expect(marks(action, arena, .5 * units).map(mark => mark.key)).toEqual(['action-1']);
   });
   it('follows a homing flight sample without mutating its immutable launch receipt', () => {
+    const frame = frameFor();
     const { action, arena } = fixture();
     const before = JSON.stringify(action);
     const atUs = 1.75 * units;
@@ -76,9 +88,11 @@ describe('committed payload art', () => {
       lastCheckedAtUs: 1.5 * units, timing: { impactAtUs: 2 * units } } as CombatFlight;
     const base = skillActionGeometry(action, arena, atUs, units)!;
     const result = skillPayloadGeometry(base, action, atUs, units, .4, [live])[0];
-    const expected = projectArenaPoint({ x: 3, y: 1.5 });
-    expect(result.progress).toBe(0);
-    expect(result.vfxAim.release).toEqual({ x: expected.x, y: expected.y - result.body.height * .5 });
+    // World release follows the sampled flight position; the adapter lifts it to body centre.
+    expect(result.vfxAim.releaseM).toEqual({ x: 3, y: 1.5 });
+    expect(result.vfxAim.groundImpactM).toEqual({ x: 4, y: 2 });
+    const screen = projectSkillGeometry(result, frame)!;
+    expect(screen.vfxAim.release.y).toBeLessThan(screen.vfxAim.groundImpact.y);
     expect(JSON.stringify(action)).toBe(before);
   });
 });

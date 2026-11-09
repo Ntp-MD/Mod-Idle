@@ -2,18 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { targetsInSkillArea } from '@engine/skill-actions.ts';
 import { skillAreaSnapshot } from '@engine/skill-area.ts';
 import type { SkillAreaDefinition } from '@engine/types.ts';
-import { unprojectArenaPoint } from '../../src/presentation/arena-camera';
-import { groundShapePath, projectVfxFootprint } from '../../src/ui/combat/arena-vfx-space';
+import { groundShapeWorldPoints } from '../../src/ui/combat/arena-vfx-space';
 
 type Point = { x: number; y: number };
 const caster = { x: 25, y: 16 };
 const body = (id: string, x: number, y: number) => ({ id, x, y, radiusM: 0 });
 
-/** Parse the projected `M/L…Z` path back into world meters through the inverse camera. */
-function worldPath(path: string): Point[] {
-  return [...path.matchAll(/[ML]([-\d.]+) ([-\d.]+)/g)]
-    .map((match) => unprojectArenaPoint({ x: Number(match[1]), y: Number(match[2]) }));
-}
 const near = (a: number, b: number, tolerance = 0.08): boolean => Math.abs(a - b) <= tolerance;
 
 const line: SkillAreaDefinition = { origin: 'caster', radius_m: 0, shape: 'line', length_m: 6, width_m: 1.2 };
@@ -26,7 +20,7 @@ describe('the drawn skill footprint is the hit footprint', () => {
     const area = skillAreaSnapshot(line, caster, { x: caster.x + 6, y: caster.y }, '');
     expect(area.shape).toBe('line');
     expect(area.widthM).toBe(1.2);
-    const corners = worldPath(groundShapePath(area));
+    const corners: Point[] = groundShapeWorldPoints(area);
     expect(corners).toHaveLength(4);
     const expected = [
       { x: caster.x, y: caster.y - 0.6 }, { x: caster.x + 6, y: caster.y - 0.6 },
@@ -44,7 +38,7 @@ describe('the drawn skill footprint is the hit footprint', () => {
   it('draws the cone wedge the hit test uses', () => {
     const area = skillAreaSnapshot(cone, caster, { x: caster.x + 4, y: caster.y }, '');
     expect(area.angleDeg).toBe(120);
-    const points = worldPath(groundShapePath(area));
+    const points: Point[] = groundShapeWorldPoints(area);
     expect(near(points[0].x, caster.x) && near(points[0].y, caster.y)).toBe(true);
     for (const point of points.slice(1)) {
       expect(near(Math.hypot(point.x - caster.x, point.y - caster.y), 4)).toBe(true);
@@ -59,7 +53,7 @@ describe('the drawn skill footprint is the hit footprint', () => {
   it('draws a target circle on the aimed point and a self circle on the caster', () => {
     const aimed = skillAreaSnapshot(circle, caster, { x: 30, y: 18 }, '');
     expect(aimed.center).toEqual({ x: 30, y: 18 });
-    for (const point of worldPath(groundShapePath(aimed))) {
+    for (const point of groundShapeWorldPoints(aimed)) {
       expect(near(Math.hypot(point.x - 30, point.y - 18), 3)).toBe(true);
     }
     const around = skillAreaSnapshot(self, caster, { x: 30, y: 18 }, '');
@@ -68,14 +62,13 @@ describe('the drawn skill footprint is the hit footprint', () => {
     expect(targetsInSkillArea(around, [body('far', caster.x + 2.6, caster.y)])).toHaveLength(0);
   });
 
-  it('hands the authored VFX footprint the same direction, width and reach', () => {
+  it('hands the committed footprint the same direction, width and reach', () => {
     const area = skillAreaSnapshot(cone, caster, { x: caster.x + 4, y: caster.y }, '');
-    const footprint = projectVfxFootprint(area)!;
-    expect(footprint.shape).toBe('cone');
-    expect(footprint.directionRad).toBeCloseTo(area.directionRad!, 9);
-    expect(footprint.lengthM).toBe(4);
-    expect(footprint.worldCenter).toEqual(area.center);
-    const strip = projectVfxFootprint(skillAreaSnapshot(line, caster, { x: caster.x + 6, y: caster.y }, ''))!;
+    expect(area.shape).toBe('cone');
+    expect(area.directionRad).toBeCloseTo(0, 9);
+    expect(area.radiusM).toBe(4);
+    expect(area.center).toEqual(caster);
+    const strip = skillAreaSnapshot(line, caster, { x: caster.x + 6, y: caster.y }, '');
     expect(strip.shape).toBe('line');
     expect(strip.widthM).toBe(1.2);
     expect(strip.lengthM).toBe(6);

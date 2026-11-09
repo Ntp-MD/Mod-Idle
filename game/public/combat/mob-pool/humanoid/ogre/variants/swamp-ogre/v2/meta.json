@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "ogre--swamp-ogre",
+  "name": "Swamp Ogre",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 80,
+      "y": 82,
+      "width": 97,
+      "height": 142,
+      "offsetX": 80,
+      "offsetY": 82
+    },
+    {
+      "x": 340,
+      "y": 80,
+      "width": 89,
+      "height": 144,
+      "offsetX": 84,
+      "offsetY": 80
+    },
+    {
+      "x": 598,
+      "y": 86,
+      "width": 84,
+      "height": 138,
+      "offsetX": 86,
+      "offsetY": 86
+    },
+    {
+      "x": 852,
+      "y": 80,
+      "width": 89,
+      "height": 144,
+      "offsetX": 84,
+      "offsetY": 80
+    },
+    {
+      "x": 80,
+      "y": 338,
+      "width": 97,
+      "height": 142,
+      "offsetX": 80,
+      "offsetY": 82
+    },
+    {
+      "x": 339,
+      "y": 340,
+      "width": 91,
+      "height": 140,
+      "offsetX": 83,
+      "offsetY": 84
+    },
+    {
+      "x": 598,
+      "y": 343,
+      "width": 84,
+      "height": 137,
+      "offsetX": 86,
+      "offsetY": 87
+    },
+    {
+      "x": 851,
+      "y": 340,
+      "width": 91,
+      "height": 140,
+      "offsetX": 83,
+      "offsetY": 84
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-ogre--swamp-ogre-diagonals.png",
+  "diagonalSourceSha256": "4ec0774c2c6dc730376851d67b71913228a38cf4a6d31ca55ee1cef83b4f56fa",
+  "diagonalScaleFactor": 0.290092,
+  "speciesId": "ogre",
+  "variantId": "swamp-ogre"
+}

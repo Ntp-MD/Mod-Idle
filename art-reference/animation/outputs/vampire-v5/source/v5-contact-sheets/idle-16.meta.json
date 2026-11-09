@@ -10,8 +10,8 @@
   "promptSummary": "One neutral ready stance across all 16 directions; feet grounded, cape at rest, hands in restrained ready posture.",
   "promptContract": {
     "references": [
-      "art-reference/monsters/undead/vampire/reference.png",
-      "art-reference/monsters/undead/vampire/animation/atlas/animation.png"
+      "archive/art-reference/monsters/undead/vampire/reference.png",
+      "archive/art-reference/monsters/undead/vampire/animation/atlas/animation.png"
     ],
     "sheet": "4x4 row-major 1024x1536, 256x384 cells, 16 directions; source anchor x=128/y=288; fixed elevated 3/4 camera; no mirroring; transparent background requested",
     "style": "crisp hand-crafted pixel-art clusters matching the approved vampire atlas",

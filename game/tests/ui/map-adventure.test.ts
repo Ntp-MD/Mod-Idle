@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { newGame } from '@sim/core/game';
 import { currentCell, road } from '@sim/world/road';
 import { hexKey, MAP_EXPLORATION } from '@sim/world/map-exploration';
-import { adventureTitle, adventureView, campActivityArt, stackAdventurePlacements, type AdventureCell } from '../../src/ui/map/map-adventure';
+import { adventureTitle, adventureView, stackAdventurePlacements, type AdventureCell } from '../../src/ui/map/map-adventure';
 import type { GameState } from '@sim/core/types';
+import { icon } from '../../src/icon';
 import { mobFixture } from '../fixtures/mobFixture';
 
 /**
@@ -28,8 +29,8 @@ describe('adventure board placements', () => {
     expect(adventureView(s, [cellOf(feet)]).marks[0].activity).toBe('combat');
     s.group = [];
     expect(adventureView(s, [cellOf(feet)]).marks[0].activity).toBe('idle');
-    s.walk = { from: feet, to: near, node: null, kind: 'bare', sub: null, site: null,
-      blocksTotal: 1, blocksLeft: 1, secLeft: 1, blocksWalked: 0 };
+    s.walk = { from: feet, to: near, fromZone: s.zone, journeyId: 1, origin: { ...feet },
+      legs: [{ from: { ...feet }, to: near }], stepIndex: 0, secLeft: 1, lastEventStep: 0 };
     expect(adventureView(s, [cellOf(feet)]).marks[0].activity).toBe('travel');
     s.group = [mobFixture()];
     expect(adventureView(s, [cellOf(feet)]).marks[0].activity).toBe('combat');
@@ -61,8 +62,7 @@ describe('adventure board placements', () => {
     s.mapJournal!.scouted.push(key);
     expect(sites()[0].label).toContain('walk here to investigate');
     expect(sites()[0].cls).not.toContain('is-explored');
-    expect(sites()[0].art).toContain('map-marker');
-    expect(sites()[0].art).toContain('<image');
+    expect(sites()[0].icon).toMatchObject({ kind: 'event', href: icon('rest-campfire') });
     s.mapJournal!.claimedSites.push(site.id);
     expect(sites()[0].cls).toContain('is-explored');
     expect(sites()[0].label).toContain('explored');
@@ -76,21 +76,21 @@ describe('adventure board placements', () => {
     s.fieldwork.camp = { cell: { ...camp, sub: null, site: null }, zone: s.zone } as GameState['fieldwork']['camp'];
     const away = at(adventureView(s, cells), 'map-field-camp')[0];
     expect(away.cls).toBe('map-field-camp');
-    expect(away.art).not.toContain('data-marker-glyph="fire"');
+    expect(away.icon.href).toBe(icon('rest-campfire'));
     stand(s, camp);
     const home = at(adventureView(s, cells), 'map-field-camp')[0];
     expect(home.cls).toBe('map-field-camp is-occupied');
-    expect(home.art).toContain('data-marker-glyph="fire"');
+    expect(home.icon.href).toBe(icon('rest-campfire'));
     s.fieldwork.action = { kind: 'mine', nextAt: 0 } as GameState['fieldwork']['action'];
     const mining = at(adventureView(s, cells), 'map-field-camp')[0];
     expect(mining.cls).toBe('map-field-camp is-occupied is-working');
     expect(mining.label).toBe('Field Camp · Mining');
-    expect(mining.art).toContain('data-marker-glyph="mine"');
+    expect(mining.icon.href).toBe(icon('pickaxe'));
     s.fieldwork.action = null;
     s.mapJournal!.lastEvent = { q: camp.q, r: camp.r, text: 'Camp kitchen · Stew ×1', atSec: s.clockSec, activity: 'cook' };
     const cooked = at(adventureView(s, cells), 'map-field-camp')[0];
     expect(cooked.label).toBe('Field Camp · Cooking');
-    expect(cooked.art).toContain('data-marker-glyph="cook"');
+    expect(cooked.icon.href).toBe(icon('cooking-cauldron'));
     // The prop follows the event's own activity, never the wording of its log line.
     s.mapJournal!.lastEvent = { q: camp.q, r: camp.r, text: 'Camp kitchen · Stew ×1', atSec: s.clockSec };
     expect(at(adventureView(s, cells), 'map-field-camp')[0].label).toBe('Field Camp');
@@ -106,8 +106,7 @@ describe('adventure board placements', () => {
       payload: {}, preparedGroup: [mobFixture()], participantIds: [],
     } as any;
     const threat = at(adventureView(s, [cellOf(feet)]), 'map-camp-encounter')[0];
-    expect(threat.art).toContain('map-marker');
-    expect(threat.art).toContain('<image');
+    expect(threat.icon).toMatchObject({ kind: 'boss', href: icon('crossed-swords-1') });
   });
   it('keeps a warning unidentified even when a hostile group has already been prepared', () => {
     const s = newGame(), feet = currentCell(s), cells = [cellOf(feet)];
@@ -134,9 +133,7 @@ describe('adventure board placements', () => {
     expect(stacked).toHaveLength(1);
     expect(stacked[0].cls).toContain('map-camp-encounter');
     for (const placement of placements) expect(stacked[0].label).toContain(placement.label);
-    expect(stacked[0].art).not.toContain('map-marker-secondary');
-    expect((stacked[0].art.match(/<image/g) || [])).toHaveLength(1);
-    expect(stacked[0].art.match(/class="map-marker(?:\s|")/g)).toHaveLength(1);
+    expect(stacked[0].icon).toMatchObject({ kind: 'boss', href: icon('crossed-swords-1') });
     expect(stackAdventurePlacements([...placements].reverse())).toEqual(stacked);
     expect(placements).toEqual(before);
   });
@@ -168,18 +165,12 @@ describe('adventure board placements', () => {
       .toBe('Windmill Meadow · Eastgate · Lv 1–10');
     expect(adventureTitle('Eastgate · Eastgate', true, 'explored')).toBe('Eastgate · Eastgate');
   });
-  it('matches each Camp activity to its own gear', () => {
-    expect(campActivityArt('grove')).toContain('data-marker-glyph="grove"');
-    expect(campActivityArt('fish')).toContain('data-marker-glyph="fish"');
-    expect(campActivityArt(null)).toBe('');
-  });
-  it('marks every wild-side activity with its own resource glyph', () => {
+  it('marks every wild-side activity with its own resource icon', () => {
     const s = newGame(), feet = currentCell(s), sides = road.neighbours(feet);
     const sites = ['mine', 'grove', 'fishing', 'dungeon'] as const;
     const view = adventureView(s, sites.map((site, i) => cellOf(i ? sides[i - 1] : feet, { site })));
     const resources = at(view, 'map-resource');
     expect(resources.map(p => p.label)).toEqual(['Mine', 'Grove', 'Fishing', 'Dungeon']);
-    expect(resources.map(p => p.art)).toEqual(sites.map(site =>
-      expect.stringContaining(`data-marker-glyph="${site === 'dungeon' ? 'skull' : site === 'fishing' ? 'fish' : site}"`)));
+    expect(resources.map(p => p.icon.href)).toEqual([icon('pickaxe'), icon('axe-in-stump'), icon('fishing-rod'), icon('dungeon-gate', 'dread-skull')]);
   });
 });

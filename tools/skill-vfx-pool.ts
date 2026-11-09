@@ -85,6 +85,8 @@ type Version = {
   rainRadiusRatio?: number;
   rainSpreadM?: number;
   id: string; label: string; arena: boolean; default: boolean;
+  /** Renderer-only version: no raster slots; the arena draws it procedurally. */
+  renderer?: 'procedural';
   orient?: boolean;
   anchor?: Pair;
   impactAnchor?: Pair;
@@ -242,6 +244,20 @@ for (const group of groups) {
       const files = fs.readdirSync(dir);
       const metaFile = files.includes('meta.json') ? path.join(dir, 'meta.json') : null;
       const meta = metaFile ? JSON.parse(fs.readFileSync(metaFile, 'utf8')) : null;
+      if (files.includes('version.json')) {
+        const declared = JSON.parse(fs.readFileSync(path.join(dir, 'version.json'), 'utf8'));
+        if (declared?.renderer === 'procedural') {
+          versions.push({
+            id: `pool-${version}`,
+            label: preferred === version ? `Default · ${version}` : version,
+            arena: true,
+            default: preferred === version,
+            renderer: 'procedural',
+            layers: [],
+          });
+          continue;
+        }
+      }
       // A straight-down ground texture: exact footprint projection, no atlas frames.
       // The decal canvas must be square; the renderer maps 0..canvas onto the ground basis.
       if (files.includes('decal.png')) {

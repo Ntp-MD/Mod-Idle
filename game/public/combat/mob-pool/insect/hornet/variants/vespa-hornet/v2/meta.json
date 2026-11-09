@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "hornet--vespa-hornet",
+  "name": "Vespa Hornet",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 54,
+      "y": 119,
+      "width": 149,
+      "height": 105,
+      "offsetX": 54,
+      "offsetY": 119
+    },
+    {
+      "x": 327,
+      "y": 108,
+      "width": 115,
+      "height": 116,
+      "offsetX": 71,
+      "offsetY": 108
+    },
+    {
+      "x": 576,
+      "y": 112,
+      "width": 128,
+      "height": 112,
+      "offsetX": 64,
+      "offsetY": 112
+    },
+    {
+      "x": 838,
+      "y": 113,
+      "width": 116,
+      "height": 111,
+      "offsetX": 70,
+      "offsetY": 113
+    },
+    {
+      "x": 53,
+      "y": 367,
+      "width": 150,
+      "height": 113,
+      "offsetX": 53,
+      "offsetY": 111
+    },
+    {
+      "x": 325,
+      "y": 371,
+      "width": 119,
+      "height": 109,
+      "offsetX": 69,
+      "offsetY": 115
+    },
+    {
+      "x": 576,
+      "y": 367,
+      "width": 128,
+      "height": 113,
+      "offsetX": 64,
+      "offsetY": 111
+    },
+    {
+      "x": 838,
+      "y": 365,
+      "width": 116,
+      "height": 115,
+      "offsetX": 70,
+      "offsetY": 109
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-hornet--vespa-hornet-diagonals.png",
+  "diagonalSourceSha256": "766d2976405480e6d62927b967d2c175b1160043d4d888e9566623f28d13438d",
+  "diagonalScaleFactor": 0.319209,
+  "speciesId": "hornet",
+  "variantId": "vespa-hornet"
+}

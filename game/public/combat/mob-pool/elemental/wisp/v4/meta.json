@@ -1,0 +1,148 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "wisp",
+  "name": "Wisp",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 40,
+      "y": 32,
+      "width": 177,
+      "height": 192,
+      "offsetX": 40,
+      "offsetY": 32
+    },
+    {
+      "x": 306,
+      "y": 32,
+      "width": 156,
+      "height": 192,
+      "offsetX": 50,
+      "offsetY": 32
+    },
+    {
+      "x": 566,
+      "y": 46,
+      "width": 148,
+      "height": 178,
+      "offsetX": 54,
+      "offsetY": 46
+    },
+    {
+      "x": 821,
+      "y": 33,
+      "width": 151,
+      "height": 191,
+      "offsetX": 53,
+      "offsetY": 33
+    },
+    {
+      "x": 42,
+      "y": 288,
+      "width": 172,
+      "height": 192,
+      "offsetX": 42,
+      "offsetY": 32
+    },
+    {
+      "x": 308,
+      "y": 292,
+      "width": 153,
+      "height": 188,
+      "offsetX": 52,
+      "offsetY": 36
+    },
+    {
+      "x": 566,
+      "y": 302,
+      "width": 148,
+      "height": 178,
+      "offsetX": 54,
+      "offsetY": 46
+    },
+    {
+      "x": 820,
+      "y": 290,
+      "width": 152,
+      "height": 190,
+      "offsetX": 52,
+      "offsetY": 34
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/monsters/elemental/wisp/wisp/animation/poses/idle/south.png",
+  "sourceSha256": "c7eaac52eb38564121842ef5f836d580e6640c2f6c98372e0b78763651b015ca",
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-wisp-diagonals.png",
+  "diagonalSourceSha256": "3404fe04e45eb952deea8f8bc2a6f6b6f44906644db39c29dad16043f2aa6d68",
+  "diagonalScaleFactor": null
+}

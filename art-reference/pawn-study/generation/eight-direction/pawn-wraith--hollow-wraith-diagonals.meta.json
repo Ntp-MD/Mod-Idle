@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "wraith--hollow-wraith",
+  "name": "Hollow Wraith",
+  "generatedSource": "art-reference/pawn-study/generation/eight-direction/pawn-wraith--hollow-wraith-diagonals.png",
+  "sourceReferences": [
+    "art-reference/pawn-study/sheets/variants/wraith--hollow-wraith.png",
+    "art-reference/pawn-study/atlases/variants/wraith--hollow-wraith.png"
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "promptSummary": "Generate four Hollow Wraith diagonals with blue-gray hooded ragged cloak, dark face, yellow eyes and yellow chest diamond; NE/NW rear, SE/SW mirrored front; transparent square sheet.",
+  "requestedLayout": {
+    "rows": 2,
+    "columns": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west"
+  },
+  "actualImage": {
+    "width": 1254,
+    "height": 1254,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "alpha": "transparent",
+    "visibleBoundsAlphaThreshold": 16,
+    "visibleBoundsPx": {
+      "northEast": {
+        "x": 215,
+        "y": 112,
+        "width": 206,
+        "height": 410
+      },
+      "southEast": {
+        "x": 207,
+        "y": 112,
+        "width": 202,
+        "height": 410
+      },
+      "southWest": {
+        "x": 221,
+        "y": 101,
+        "width": 197,
+        "height": 408
+      },
+      "northWest": {
+        "x": 206,
+        "y": 100,
+        "width": 201,
+        "height": 409
+      }
+    },
+    "feetBaselineYByCellPx": {
+      "northEast": 521,
+      "southEast": 521,
+      "southWest": 508,
+      "northWest": 508
+    }
+  },
+  "review": {
+    "identity": true,
+    "directionPose": "candidate appears to follow NE/NW rear and SE/SW front",
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed",
+    "pose": true
+  },
+  "reviewConcerns": [
+    "Row baseline differs by 13px: top row y=521, bottom row y=508 within their cells. Confirm whether acceptable or adjust before packing."
+  ],
+  "sizeReference": "art-reference/pawn-study/atlases/variants/wraith--hollow-wraith.png",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

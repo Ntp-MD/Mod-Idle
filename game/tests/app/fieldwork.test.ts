@@ -333,8 +333,9 @@ describe('field Camp and fieldwork', () => {
     state.fieldwork.action = null;
     state.fieldwork.hunger = 50;
     state.walk = {
-      from: { q: 0, r: 0 }, to: { q: 1, r: 0 }, node: 'start', kind: 'bare', sub: null, site: null,
-      blocksTotal: 1, blocksLeft: 1, secLeft: 1, blocksWalked: 0,
+      from: { q: 0, r: 0 }, to: { q: 1, r: 0 }, fromZone: state.zone, journeyId: 1,
+      origin: { q: 0, r: 0 }, legs: [{ from: { q: 0, r: 0 }, to: { q: 1, r: 0 } }],
+      stepIndex: 0, secLeft: 1, lastEventStep: 0,
     };
     tickHunger(state, false);
     expect(state.fieldwork.hunger).toBe(50);

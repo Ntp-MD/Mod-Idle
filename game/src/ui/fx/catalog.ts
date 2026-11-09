@@ -71,7 +71,7 @@ export interface VfxAimMeta {
   rainRadiusRatio?: number;
   /** Decorative spread for single-target rain; never changes the committed hit area. */
   rainSpreadM?: number;
-  /** Rotate the art to the cast aim (projectile/sector art); false leaves it screen-fixed. */
+  /** Rotate the art to the cast aim (projectile/sector art); only true opts in, false/absent leaves it screen-fixed. */
   orient?: boolean;
   /** Normalized content anchor inside the frame (0..1). The anchor lands on the live aim point. */
   anchor?: [number, number];
@@ -113,6 +113,8 @@ export interface SkillArt {
 export interface VfxVersion extends VfxAimMeta {
   id: string;
   label: string;
+  /** Renderer-only version: no raster art; the arena draws it procedurally. */
+  renderer?: 'procedural';
   /** Marked by the generated pool from `default/version.json`; the catalog puts it first. */
   default?: boolean;
   /** False keeps a lab-only atlas out of the arena's still-decal renderer. */
@@ -285,6 +287,7 @@ export function activeVfxArt(skillId: string): SkillArt | undefined {
   // The chosen version wins when it can render: a multi-frame atlas plays, a decal still
   // projects exactly on the footprint. Otherwise the promoted default atlas wins outright.
   const active = activeVfxVersion(skillId);
+  if (active?.renderer === 'procedural') return undefined;
   if (active && active.arena !== false) {
     const chosen = artOf(active);
     if (chosen) return chosen;

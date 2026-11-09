@@ -71,6 +71,10 @@ export interface SkillVfxSpec {
   particles: SkillVfxParticles;
   projectile: boolean;
   lob: boolean;
+  /** Ray channels hold a continuous beam instead of flying a projectile. */
+  ray?: boolean;
+  /** Ground-pulse bursts throw an electric shockwave across the floor instead of a plain impact. */
+  pulse?: boolean;
   /** Discrete impact beats for folded multihit rows; split rows keep 1. */
   pulses: number;
 }
@@ -292,6 +296,8 @@ export function activeSkillVfx(id: string | undefined, incoming = false): SkillV
       ground: budget.ground, loop: budget.loop, trail: budget.trail,
     },
     projectile, lob,
+    ...(kind === 'ray-channel' ? { ray: true } : {}),
+    ...(kind === 'ground-pulse-burst' ? { pulse: true } : {}),
     pulses: DESIGN[id]?.pulses ?? 1,
   };
 }

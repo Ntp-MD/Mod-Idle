@@ -1,0 +1,47 @@
+﻿{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "pawnId": "wyvern--shriek-wyvern",
+  "name": "Shriek Wyvern",
+  "generatedSource": "art-reference/pawn-study/generation/eight-direction/pawn-wyvern--shriek-wyvern-diagonals.png",
+  "sourceReferences": [
+    "art-reference/pawn-study/sheets/variants/wyvern--shriek-wyvern.png",
+    "art-reference/pawn-study/atlases/variants/wyvern--shriek-wyvern.png"
+  ],
+  "generator": "pre-existing candidate; generator metadata unavailable",
+  "directions": ["north-east", "south-east", "south-west", "north-west"],
+  "requestedLayout": {
+    "rows": 2,
+    "columns": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west"
+  },
+  "actualImage": {
+    "width": 1254,
+    "height": 1254,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "alpha": "opaque near-white background",
+    "visibleBoundsPx": {
+      "northEast": [106, 70, 515, 525],
+      "southEast": [116, 68, 527, 533],
+      "southWest": [110, 71, 542, 524],
+      "northWest": [85, 72, 502, 523]
+    },
+    "visibleHeightsPx": {
+      "northEast": 455,
+      "southEast": 465,
+      "southWest": 453,
+      "northWest": 451
+    }
+  },
+  "review": {
+    "size": "candidate sprites are roughly 4.3-4.5x cardinal visible height (cardinal atlas views: 98-106 px; compare packed height)",
+    "approved": false,
+    "identity": "failed: diagonal candidate depicts the generic small teal wyvern and omits Shriek Wyvern's large feathered cream crest, yellow lightning markings, and gold talons",
+    "status": "candidate-review-failed-identity",
+    "layout": "four cells present; white background is opaque",
+    "anchor": "pending",
+    "anatomy": "failed: candidate does not preserve variant anatomy/markings",
+    "pose": "pending: confirm direction assignment; image does not clearly support all requested diagonal labels"
+  }
+}

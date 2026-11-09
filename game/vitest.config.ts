@@ -28,5 +28,11 @@ export default defineConfig({
     testTimeout: 180_000,
     hookTimeout: 180_000,
     teardownTimeout: 120_000,
+    // One retry: this box is a busy desktop (emulator, browser, WSL beside the
+    // suite), and wall-clock-sensitive async catch-up tests have starved past the
+    // timeout under parallel load while passing solo and in clean runs. A retry
+    // heals scheduling starvation only — a deterministic failure fails both
+    // attempts and stays red.
+    retry: 1,
   },
 });

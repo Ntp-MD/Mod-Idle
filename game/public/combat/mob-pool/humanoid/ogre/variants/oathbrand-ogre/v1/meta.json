@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "ogre--oathbrand-ogre",
+  "name": "Oathbrand Ogre",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 85,
+      "y": 82,
+      "width": 87,
+      "height": 142,
+      "offsetX": 85,
+      "offsetY": 82
+    },
+    {
+      "x": 342,
+      "y": 82,
+      "width": 85,
+      "height": 142,
+      "offsetX": 86,
+      "offsetY": 82
+    },
+    {
+      "x": 91,
+      "y": 341,
+      "width": 74,
+      "height": 139,
+      "offsetX": 91,
+      "offsetY": 85
+    },
+    {
+      "x": 348,
+      "y": 342,
+      "width": 73,
+      "height": 138,
+      "offsetX": 92,
+      "offsetY": 86
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "ogre",
+  "variantId": "oathbrand-ogre"
+}

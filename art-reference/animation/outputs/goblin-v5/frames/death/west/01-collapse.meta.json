@@ -4,8 +4,8 @@
   "action": "death",
   "direction": "west",
   "pose": "01-collapse",
-  "source": "art-reference/monsters/humanoid/goblin/animation/poses/death/west/01-collapse.png",
-  "sourceMetadata": "art-reference/monsters/humanoid/goblin/animation/poses/death/west/01-collapse.meta.json",
+  "source": "archive/art-reference/monsters/humanoid/goblin/animation/poses/death/west/01-collapse.png",
+  "sourceMetadata": "archive/art-reference/monsters/humanoid/goblin/animation/poses/death/west/01-collapse.meta.json",
   "sourcePixelsModified": false,
   "frameCanvas": {
     "width": 384,

@@ -19,7 +19,7 @@ from PIL import Image, ImageChops, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[4]
 OUT = Path(__file__).resolve().parent
-SPECIES_ROOT = ROOT / "art-reference/monsters/humanoid/minotaur/animation"
+SPECIES_ROOT = ROOT / "archive/art-reference/monsters/humanoid/minotaur/animation"
 POSES_JSON = SPECIES_ROOT / "poses.json"
 SHEET_DIR = OUT / "source/v5-contact-sheets"
 FRAME_DIR = OUT / "frames"

@@ -226,7 +226,33 @@ describe('the cell under the feet survives a save', () => {
     expect(back.walk).toEqual(s.walk);
     expect(back.cell).toEqual(s.cell);
     expect(typeof back.walk!.from).toBe('object');    // hexes, never a settlement name
-    expect(back.walk!.blocksWalked).toBe(s.walk!.blocksWalked);
+    expect(back.walk!.stepIndex).toBe(s.walk!.stepIndex);
+  });
+
+  it('strips the derived projections from an in-flight v30 dev save and keeps the paid time', () => {
+    const s = newGame(94);
+    expect(startWalk(s, settlementCell(road.nodes[1].id)!).ok).toBe(true);
+    tick(s, {});
+    const w = s.walk as any;
+    // A dev-build v30 save still carries the counters and destination metadata the format dropped.
+    w.blocksTotal = w.legs.length; w.blocksWalked = w.stepIndex; w.blocksLeft = w.legs.length - w.stepIndex;
+    w.activeSec = w.secLeft; w.node = 'eastgate'; w.kind = 'town'; w.sub = null; w.site = null; w.terrain = 'town';
+    const m = migrate(JSON.parse(JSON.stringify(s)), SCHEMA_VERSION);
+    expect(m.walk!.secLeft).toBe(s.walk!.secLeft);
+    expect(m.walk!.stepIndex).toBe(s.walk!.stepIndex);
+    for (const key of ['blocksTotal', 'blocksLeft', 'blocksWalked', 'activeSec', 'node', 'kind', 'sub', 'site', 'terrain']) {
+      expect((m.walk as any)[key]).toBeUndefined();
+    }
+    const again = migrate(JSON.parse(JSON.stringify(m)), SCHEMA_VERSION);
+    expect(again.walk).toEqual(m.walk);
+  });
+
+  it('rejects a malformed v30 journey with its path instead of replacing the trip', () => {
+    const s = newGame(95);
+    expect(startWalk(s, settlementCell(road.nodes[1].id)!).ok).toBe(true);
+    const broken = JSON.parse(JSON.stringify(s));
+    broken.walk.legs[1].from = { q: 99, r: 99 };
+    expect(() => migrate(broken, SCHEMA_VERSION)).toThrow(/invalid save: journey legs\[1\]/);
   });
 
   it('a v11 walk that named two settlements is re-read onto the lattice', () => {
@@ -237,12 +263,11 @@ describe('the cell under the feet survives a save', () => {
     const m = migrate(JSON.parse(JSON.stringify(s)), 11);
     expect(m.walk!.from).toEqual({ q: a.q, r: a.r });
     expect(m.walk!.to).toEqual({ q: b.q, r: b.r });
-    expect(m.walk!.kind).toBe('town');
-    expect(m.walk!.node).toBe(b.id);
-    expect(m.walk!.blocksLeft).toBe(blocks - 1);          // the route keeps the blocks it had left
+    expect(m.walk!.legs.length).toBe(blocks);
+    expect(m.walk!.legs.length - m.walk!.stepIndex).toBe(blocks - 1); // the route keeps the blocks it had left
     expect(m.cell!).toEqual({ q: a.q, r: a.r, sub: null, site: null, terrain: 'town' });
     // and the re-laid route crosses real cells, so no block is priced by a NaN distance
-    expect(road.blocksBetweenHex(m.walk!.from, m.walk!.to)).toBe(m.walk!.blocksTotal);
+    expect(road.blocksBetweenHex(m.walk!.from, m.walk!.to)).toBe(m.walk!.legs.length);
   });
 
   it('a v11 walk naming a settlement that no longer exists is dropped, not left to compute NaN', () => {
@@ -729,11 +754,9 @@ describe('an imported file cannot be an impossible state', () => {
     expect(blocks).not.toBeNull();
     expect(m.walk).not.toBeNull();
     expect(m.walk!.to).toEqual({ q: loc.q, r: loc.r });
-    expect(m.walk!.sub).toBe(0);
-    expect(m.walk!.node).toBe('emberhold');
-    expect(m.walk!.blocksTotal).toBe(blocks);
-    expect(m.walk!.blocksWalked).toBe(1);
-    expect(m.walk!.blocksLeft).toBe(blocks! - 1);
+    expect(m.walk!.legs.length).toBe(blocks);
+    expect(m.walk!.stepIndex).toBe(1);
+    expect(m.walk!.legs.length - m.walk!.stepIndex).toBe(blocks! - 1);
     expect(m.walk!.secLeft).toBe(0.2);
     expect(road.isLand(m.walk!.from)).toBe(true);
     expect(road.isLand(m.walk!.to)).toBe(true);
@@ -776,7 +799,7 @@ describe('an imported file cannot be an impossible state', () => {
 
 describe('v28 placement snapshot migration', () => {
   const legacyMob = (over: Record<string, any> = {}): any => ({
-    id: 'legacy-mob', species: 'Goblin', speciesId: 'goblin', variant: 'Shaman Goblin', kind: 'Small',
+    id: 'legacy-mob', species: 'Goblin', speciesId: 'goblin', variant: 'Sneak Goblin', kind: 'Small',
     zone: 1, level: 5, hp: 100, hpMax: 100, ps: 10, acc: 10, evasion: 0, dodgeRate: 0, armour: 0, res: 0,
     damage: 'physical', innate: ['poison'], xp: 5, line: 'front', hitsPerSec: 1, atkTimer: 0, engageSec: 0,
     ...over,
@@ -784,7 +807,7 @@ describe('v28 placement snapshot migration', () => {
   const dropOf = (id: string) => (E.mob.variant_drops as any)[id];
 
   it('pins the original reward for normal, Elite, Boss, Unique and retired actors', () => {
-    const expectedNormal = dropOf((E.mob.variants as any[]).find((row) => row.name === 'Shaman Goblin').id);
+    const expectedNormal = dropOf((E.mob.variants as any[]).find((row) => row.name === 'Sneak Goblin').id);
     const unique = (E.mob.uniques as any[]).find((row) => row.legacy_name === 'Goblin King');
     const retired = Object.entries(E.mob.retired_variant_drops as any)[0] as [string, any];
     const legacy = [
@@ -881,5 +904,19 @@ describe('v28 placement snapshot migration', () => {
     const migrated = migrate(JSON.parse(JSON.stringify(state)), 27);
     expect(migrated.junk['Unknown Trinket']).toBe(3);
     expect(migrated.junk[retired.item]).toBe(2);
+  });
+
+  it('round-trips a retired field placement with its saved combat progress', () => {
+    const state = newGame(36);
+    state.cell = { q: 0, r: -1, sub: 0, site: null };
+    state.hunting = true;
+    const mob = legacyMob({ species: 'Skeleton', speciesId: 'skeleton', variant: 'Warrior Skeleton',
+      placementId: 'skeleton.z01.s01', hp: 17, hpMax: 100 });
+    state.group = [mob];
+    expect(eng.placementsIn(1).some(row => row.id === mob.placementId)).toBe(false);
+    const restored = importJson(exportJson(state));
+    expect(restored.group[0]).toMatchObject({ placementId: mob.placementId, speciesId: 'skeleton',
+      variant: 'Warrior Skeleton', hp: 17, hpMax: 100, level: mob.level, ps: mob.ps });
+    expect(restored.group[0].legacySnapshot).toBeUndefined();
   });
 });

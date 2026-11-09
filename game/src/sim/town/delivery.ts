@@ -1,8 +1,11 @@
 import { E, MODS, TOWN, eng, sm, trade, delivery, fieldwork } from '../../engine/client';
-import type { AcquisitionContext } from '../../../../engine/delivery';
+import type { AcquisitionContext, Acquisition } from '../../../../engine/delivery';
 import type { DeliveryContract, DeliverySummary, StoneReward } from './delivery-types';
 import { newDeliverySummary } from './delivery-types';
 import type { GameState } from '../core/types';
+import type { QuestBonus } from './quest-rewards';
+import { mulberry32 } from '../../engine/client-helpers';
+import { storyHash32 } from '../../../../engine/storyteller.ts';
 import { atSettlement, craft } from '../gear/craft';
 import { quoteSale, sellGoods, tradeBucket, tradeInventory } from './trade';
 import { fitsTransaction } from '../gear/slots';
@@ -56,6 +59,17 @@ export function acquisitionContext(state: GameState): AcquisitionContext {
   };
 }
 
+/** The NPC a request is attributed to, by the requested good's bucket (`storyteller` §8.1). */
+const ISSUER_BY_BUCKET: Record<string, string> = { material: 'armourer', food: 'counterhand', herb: 'herbalist', junk: 'steward' };
+export const issuerOf = (good: { bucket: string } | undefined | null): string => ISSUER_BY_BUCKET[good?.bucket || ''] || 'steward';
+
+const courierCfg = () => (TOWN.delivery as any).courier as {
+  enabled: boolean; active_slots: number; trigger_interval_mult: number; trigger_chance_mult: number;
+} | undefined;
+
+const hasActiveActivity = (state: GameState) =>
+  !!state.walk || state.hunting || state.group.some((mob) => mob.hp > 0) || !!state.dungeon || state.phase === 'camp' || !!state.fieldwork.action;
+
 /** Deterministic candidate discovery; UI reads never consume RNG or create a contract. */
 export function deliveryCandidates(state: GameState, town: string) {
   const issuing = townById(town);
@@ -69,55 +83,163 @@ export function deliveryCandidates(state: GameState, town: string) {
   });
 }
 
-/** RNG order: target → count → stone → optional skill chance → optional named skill. */
-/** The attainment roll is last on purpose: no earlier roll changes its value, so a contract's
- *  reward never moves after the player has seen it. */
-export function offerDelivery(state: GameState, town: string, rng: () => number, access: WriterAccess): DeliveryContract | null {
-  if (!access.writer || !state.town.visited.includes(town) || !townById(town)) return null;
-  if ((state.town.contracts[town] || []).filter((contract) => contract.status === 'open').length >= deliveryConfig.active_slots) return null;
-  const target = choose(deliveryCandidates(state, town), (row) => delivery.targetWeight(row.good), rng);
-  if (!target) return null;
-  const issuing = townById(town)!;
-  let count = deliveryConfig.count_min + Math.floor(rng() * (target.maximum - deliveryConfig.count_min + 1));
-  const context = acquisitionContext(state);
-  let route = delivery.acquisition(target.good.id, count, issuing.zone, context);
-  while (count > deliveryConfig.count_min && (!route || delivery.deadline(route) > deliveryConfig.deadline_max_sec)) route = delivery.acquisition(target.good.id, --count, issuing.zone, context);
-  if (!route || delivery.deadline(route) > deliveryConfig.deadline_max_sec) return null;
+/** Frozen reward shared by local requests and couriers. Draw order (stone → skill chance →
+ *  optional skill → attainment → the retained tree-bonus draw) is fixed; a courier consumes the
+ *  same draws but discards the permanent points, so both paths stay seeded identically. */
+function buildReward(
+  state: GameState, paymentTown: string, good: { id: string; group: string }, count: number,
+  route: Acquisition, rng: () => number, choice: boolean, permanent: boolean,
+): DeliveryContract['reward'] | null {
   const stone = choose(deliveryConfig.stones, (entry) => entry.weight, rng);
   if (!stone) return null;
   const eligible = sm.all().filter((skill) => usefulSkillDuplicate(state.skills, skill.id));
   const skillChance = deliveryConfig.skill_chance * (deliveryConfig.skill_band_weights[route.band as keyof typeof deliveryConfig.skill_band_weights] || 0);
   const skill = rng() < skillChance ? choose(eligible, (entry) => (deliveryConfig.skill_weights as Record<string, number>)[entry.id] ?? deliveryConfig.default_skill_weight, rng)?.id || null : null;
-   const attainmentChance = deliveryConfig.attainment_chance
-     * (deliveryConfig.attainment_band_weights[route.band as keyof typeof deliveryConfig.attainment_band_weights] || 0);
-   const attainment = rng() < attainmentChance ? 1 : 0;
-   rng(); // Retain the former tree-bonus draw; milestones do not consume extra gameplay draws.
-   const milestone = `delivery:${town}`;
-   const treePoints = milestoneAvailable(state, milestone) ? TOWN.quest_rewards.milestone_tree_points : 0;
-  const rawQuote = trade.quote(town, target.good, count, state.town.market[town]?.[target.good.group], state.clockSec);
+  const attainmentChance = deliveryConfig.attainment_chance
+    * (deliveryConfig.attainment_band_weights[route.band as keyof typeof deliveryConfig.attainment_band_weights] || 0);
+  const attainmentDrawn = rng() < attainmentChance ? 1 : 0;
+  rng(); // Retain the former tree-bonus draw; milestones do not consume extra gameplay draws.
+  const milestone = `delivery:${paymentTown}`;
+  const treePointsDrawn = permanent && milestoneAvailable(state, milestone) ? TOWN.quest_rewards.milestone_tree_points : 0;
+  const rawQuote = trade.quote(paymentTown, trade.byId[good.id], count, state.town.market[paymentTown]?.[good.group], state.clockSec);
   const premium = delivery.premium(route.difficulty, state.town.hagglingXp);
+  const mult = choice ? deliveryConfig.choice_reward_mult : 1;
+  return {
+    gold: choice ? 0 : delivery.bonusGold(rawQuote.gold, route.difficulty, state.town.hagglingXp),
+    stone: delivery.stoneBundle(route.band, route.difficulty * mult, stone.key, stone.income), skill,
+    fallback: delivery.stoneBundle(route.band, route.difficulty * mult, deliveryConfig.fallback_stone, deliveryConfig.fallback_stone, true),
+    quoteGold: rawQuote.gold, premium,
+    attainment: permanent ? attainmentDrawn : 0, treePoints: treePointsDrawn,
+    ...(treePointsDrawn ? { milestone } : {}),
+    ...(choice ? { alternative: { id: 'gold', label: 'Gold bounty', gold: delivery.bonusGold(rawQuote.gold, route.difficulty, state.town.hagglingXp, mult), stones: [], skill: null, fallback: null } } : {}),
+  };
+}
+
+/** RNG order: target → count → stone → optional skill chance → optional named skill. */
+/** The attainment roll is last on purpose: no earlier roll changes its value, so a contract's
+ *  reward never moves after the player has seen it. */
+export function offerDelivery(state: GameState, town: string, rng: () => number, access: WriterAccess): DeliveryContract | null {
+  if (!access.writer || !state.town.visited.includes(town) || !townById(town)) return null;
+  if ((state.town.contracts[town] || []).filter((contract) => contract.status === 'open' && contract.kind === 'request').length >= deliveryConfig.active_slots) return null;
+  const target = choose(deliveryCandidates(state, town), (row) => delivery.targetWeight(row.good), rng);
+  if (!target) return null;
+  const issuing = townById(town)!;
+  const picked = pickTarget(state, target.good, target.maximum, issuing.zone, rng);
+  if (!picked) return null;
   const serial = state.town.contractSerial + 1;
   if (!Number.isSafeInteger(serial)) return null;
   const choice = delivery.rewardMode(serial) === 'choice';
-  const mult = choice ? deliveryConfig.choice_reward_mult : 1;
+  const reward = buildReward(state, town, target.good, picked.count, picked.route, rng, choice, true);
+  if (!reward) return null;
   const contract: DeliveryContract = {
-    id: `delivery:${town}:${serial}`, serial, town, good: target.good.id, target: count, delivered: 0,
-    acquisition: route, derivationVersion: deliveryConfig.derivation_version,
-     reward: { gold: choice ? 0 : delivery.bonusGold(rawQuote.gold, route.difficulty, state.town.hagglingXp),
-       stone: delivery.stoneBundle(route.band, route.difficulty * mult, stone.key, stone.income), skill,
-       fallback: delivery.stoneBundle(route.band, route.difficulty * mult, deliveryConfig.fallback_stone, deliveryConfig.fallback_stone, true), quoteGold: rawQuote.gold, premium,
-       attainment, treePoints, ...(treePoints ? { milestone } : {}),
-       ...(choice ? { alternative: { id: 'gold', label: 'Gold bounty', gold: delivery.bonusGold(rawQuote.gold, route.difficulty, state.town.hagglingXp, mult), stones: [], skill: null, fallback: null } } : {}) },
-    triggeredAtClockSec: state.clockSec, dueAtDeliverySec: state.town.deliveryClockSec + delivery.deadline(route), status: 'open', terminalAt: null,
+    id: `delivery:${town}:${serial}`, serial, town, good: target.good.id, target: picked.count, delivered: 0,
+    acquisition: picked.route, derivationVersion: deliveryConfig.derivation_version, reward,
+    triggeredAtClockSec: state.clockSec, dueAtDeliverySec: state.town.deliveryClockSec + delivery.deadline(picked.route), status: 'open', terminalAt: null,
     baseGold: 0, lastQuantity: 0, lastGold: 0, paidBonus: null, recapAcknowledged: true, announced: false,
+    kind: 'request', destinationTown: town, issuerNpcId: issuerOf(target.good), acceptedAtDeliverySec: null, offeredAtDeliverySec: 0, endReason: null,
   };
   state.town.contractSerial = serial;
   (state.town.contracts[town] ||= []).push(contract);
   return contract;
 }
 
+/** Count plus the acquisition route shrunk until its deadline fits, as every offer path does. */
+function pickTarget(state: GameState, good: { id: string }, maximum: number, zone: number, rng: () => number): { count: number; route: Acquisition } | null {
+  let count = deliveryConfig.count_min + Math.floor(rng() * (maximum - deliveryConfig.count_min + 1));
+  const context = acquisitionContext(state);
+  let route = delivery.acquisition(good.id, count, zone, context);
+  while (count > deliveryConfig.count_min && (!route || delivery.deadline(route) > deliveryConfig.deadline_max_sec)) route = delivery.acquisition(good.id, --count, zone, context);
+  if (!route || delivery.deadline(route) > deliveryConfig.deadline_max_sec) return null;
+  return { count, route };
+}
+
+/** One courier attempt on its own stream: chance → destination → target → count → reward draws. */
+function offerCourier(state: GameState, source: string, rng: () => number): DeliveryContract | null {
+  const cfg = courierCfg();
+  if (!cfg) return null;
+  const destinations = TOWN.settlements
+    .map((town) => town.id)
+    .filter((id) => id !== source && state.town.visited.includes(id))
+    .sort()
+    .filter((id) => deliveryCandidates(state, id).length > 0);
+  if (!destinations.length) return null;
+  if (!(rng() < Math.min(1, deliveryConfig.trigger_chance * cfg.trigger_chance_mult))) return null;
+  const destination = destinations[Math.floor(rng() * destinations.length)];
+  const target = choose(deliveryCandidates(state, destination), (row) => delivery.targetWeight(row.good), rng);
+  if (!target) return null;
+  const destinationTown = townById(destination)!;
+  const picked = pickTarget(state, target.good, target.maximum, destinationTown.zone, rng);
+  if (!picked) return null;
+  if (delivery.deadline(picked.route) > deliveryConfig.deadline_max_sec) return null;
+  const serial = (state.town.courierSerial || 0) + 1;
+  if (!Number.isSafeInteger(serial)) return null;
+  const reward = buildReward(state, destination, target.good, picked.count, picked.route, rng, false, false);
+  if (!reward) return null;
+  const contract: DeliveryContract = {
+    id: `courier:${source}:${serial}`, serial, town: source, good: target.good.id, target: picked.count, delivered: 0,
+    acquisition: picked.route, derivationVersion: deliveryConfig.derivation_version, reward,
+    triggeredAtClockSec: state.clockSec, dueAtDeliverySec: state.town.deliveryClockSec + delivery.deadline(picked.route), status: 'open', terminalAt: null,
+    baseGold: 0, lastQuantity: 0, lastGold: 0, paidBonus: null, recapAcknowledged: true, announced: false,
+    kind: 'courier', destinationTown: destination, issuerNpcId: issuerOf(target.good), acceptedAtDeliverySec: null,
+    offeredAtDeliverySec: state.town.deliveryClockSec, endReason: null,
+  };
+  state.town.courierSerial = serial;
+  (state.town.contracts[source] ||= []).push(contract);
+  return contract;
+}
+
+/** The character-wide courier cadence: a single saved countdown fed by its own RNG stream, never
+ *  the shared world stream. Runs after Camp in `closeSecond`. */
+export function tickCourierOffers(state: GameState, online: boolean, pausedAtStart: boolean, access: WriterAccess) {
+  if (!access.writer) return;
+  const cfg = courierCfg();
+  if (!cfg?.enabled) return;
+  if (!online || pausedAtStart) return;
+  const all = Object.values(state.town.contracts).flat();
+  const openCouriers = all.filter((contract) => contract.kind === 'courier' && contract.status === 'open').length;
+  if (openCouriers >= (cfg.active_slots ?? 1)) return;
+  const remaining = state.town.courierTriggerRemainingSec ?? deliveryConfig.trigger_interval_sec * cfg.trigger_interval_mult;
+  if (remaining > 0) { state.town.courierTriggerRemainingSec = remaining - 1; return; }
+  const source = TOWN.settlements.map((town) => town.id).find((id) => atSettlement(state, id));
+  if (!source || hasActiveActivity(state)) return;
+  state.town.courierTriggerRemainingSec = deliveryConfig.trigger_interval_sec * cfg.trigger_interval_mult;
+  if (!TOWN.settlements.some((town) => town.id !== source && state.town.visited.includes(town.id)
+    && deliveryCandidates(state, town.id).length > 0)) return;
+  const streamState = (state.town.courierStreamState ?? 0) >>> 0;
+  const courierRng = mulberry32(streamState);
+  state.town.courierStreamState = (streamState + 0x6d2b79f5) >>> 0;
+  offerCourier(state, source, courierRng);
+}
+
+export function acceptCourier(state: GameState, id: string, access: WriterAccess): { ok: boolean; why?: string } {
+  if (!access.writer) return { ok: false, why: 'this tab is read-only' };
+  const contract = contractById(state, id);
+  if (!contract || contract.kind !== 'courier' || contract.status !== 'open') return { ok: false, why: 'this request is no longer open' };
+  if (contract.acceptedAtDeliverySec != null) return { ok: false, why: 'This request is already accepted.' };
+  if (state.town.deliveryClockSec >= contract.dueAtDeliverySec) return { ok: false, why: 'this request is no longer open' };
+  if (!atSettlement(state, contract.town)) return { ok: false, why: 'stand in the issuing settlement to accept' };
+  if (hasActiveActivity(state)) return { ok: false, why: 'finish the active field activity before accepting' };
+  contract.acceptedAtDeliverySec = state.town.deliveryClockSec;
+  return { ok: true };
+}
+
+export function declineCourier(state: GameState, id: string, access: WriterAccess): { ok: boolean; why?: string } {
+  if (!access.writer) return { ok: false, why: 'this tab is read-only' };
+  const contract = contractById(state, id);
+  if (!contract || contract.kind !== 'courier' || contract.status !== 'open'
+    || contract.acceptedAtDeliverySec != null) return { ok: false, why: 'this request is no longer open' };
+  if (state.town.deliveryClockSec >= contract.dueAtDeliverySec) return { ok: false, why: 'this request is no longer open' };
+  if (!atSettlement(state, contract.town)) return { ok: false, why: 'stand in the issuing settlement to decline' };
+  contract.status = 'expired';
+  contract.endReason = 'declined';
+  contract.terminalAt = state.town.deliveryClockSec;
+  contract.recapAcknowledged = false;
+  return { ok: true };
+}
+
 function fold(summary: DeliverySummary, contract: DeliveryContract) {
   summary.unread++;
+  if (contract.endReason === 'declined') { summary.declined = (summary.declined ?? 0) + 1; return; }
   summary[contract.status === 'completed' ? 'completed' : 'expired']++;
   const total = summary.goods[contract.good] ||= { quantity: 0, gold: 0 };
   total.quantity += contract.delivered; total.gold += contract.baseGold;
@@ -152,12 +274,17 @@ function fold(summary: DeliverySummary, contract: DeliveryContract) {
 
 export function pruneDeliveries(state: GameState) {
   for (const [town, contracts] of Object.entries(state.town.contracts)) {
-    let terminal = contracts.filter((contract) => contract.status !== 'open').sort((a, b) => a.terminalAt! - b.terminalAt! || a.serial - b.serial);
-    while (terminal.length > deliveryConfig.history_limit) {
-      const oldest = terminal.find((contract) => contract.recapAcknowledged) || terminal[0];
-      if (!oldest.recapAcknowledged) fold(state.town.deliverySummaries[town] ||= newDeliverySummary(), oldest);
-      contracts.splice(contracts.indexOf(oldest), 1);
-      terminal = terminal.filter((contract) => contract !== oldest);
+    // Local requests and couriers keep separate terminal histories, so new couriers
+    // cannot evict unread local recaps earlier.
+    for (const kind of ['request', 'courier'] as const) {
+      let terminal = contracts.filter((contract) => contract.status !== 'open' && contract.kind === kind)
+        .sort((a, b) => a.terminalAt! - b.terminalAt! || (a.kind < b.kind ? -1 : a.kind > b.kind ? 1 : 0) || a.serial - b.serial);
+      while (terminal.length > deliveryConfig.history_limit) {
+        const oldest = terminal.find((contract) => contract.recapAcknowledged) || terminal[0];
+        if (!oldest.recapAcknowledged) fold(state.town.deliverySummaries[town] ||= newDeliverySummary(), oldest);
+        contracts.splice(contracts.indexOf(oldest), 1);
+        terminal = terminal.filter((contract) => contract !== oldest);
+      }
     }
   }
   const open = new Set(Object.values(state.town.contracts).flat().filter((contract) => contract.status === 'open').map((contract) => contract.id));
@@ -169,7 +296,7 @@ export function tickDeliveries(state: GameState, rng: () => number, online: bool
   if (!access.writer) return;
   if (!pausedAtStart) state.town.deliveryClockSec++;
   for (const contract of Object.values(state.town.contracts).flat()) if (contract.status === 'open' && state.town.deliveryClockSec >= contract.dueAtDeliverySec) {
-    contract.status = 'expired'; contract.terminalAt = state.town.deliveryClockSec; contract.recapAcknowledged = false;
+    contract.status = 'expired'; contract.endReason = 'expired'; contract.terminalAt = state.town.deliveryClockSec; contract.recapAcknowledged = false;
   }
   if (online) for (const town of TOWN.settlements) {
     if (!state.town.visited.includes(town.id)) continue;
@@ -177,27 +304,36 @@ export function tickDeliveries(state: GameState, rng: () => number, online: bool
     state.town.contractTriggerRemainingSec[town.id]--;
     if (state.town.contractTriggerRemainingSec[town.id] > 0) continue;
     state.town.contractTriggerRemainingSec[town.id] = deliveryConfig.trigger_interval_sec;
-    if ((state.town.contracts[town.id] || []).filter((contract) => contract.status === 'open').length >= deliveryConfig.active_slots) continue;
+    if ((state.town.contracts[town.id] || []).filter((contract) => contract.status === 'open' && contract.kind === 'request').length >= deliveryConfig.active_slots) continue;
     // Chance comes after all pre-existing consumers; full slots consume no offer draw.
     if (rng() < deliveryConfig.trigger_chance) offerDelivery(state, town.id, rng, access);
   }
   pruneDeliveries(state);
 }
 
-export function previewDelivery(state: GameState, id: string, count: number, access: WriterAccess, choice?: string) {
+export interface DeliveryExpected { delivered: number; status: 'open'; gold: number; acceptedAtDeliverySec: number | null }
+
+export function previewDelivery(state: GameState, id: string, count: number, access: WriterAccess, choice?: string, expected?: DeliveryExpected) {
   const refuse = (why: string) => ({ ok: false as const, why });
   if (!access.writer) return refuse('this tab is read-only');
   const contract = contractById(state, id);
   if (!contract || contract.status !== 'open') return refuse('this delivery is no longer open');
+  if (expected && (expected.delivered !== contract.delivered || expected.status !== contract.status
+    || expected.acceptedAtDeliverySec !== contract.acceptedAtDeliverySec)) {
+    return refuse('this delivery changed; review the current hand-in');
+  }
   if (state.town.deliveryClockSec >= contract.dueAtDeliverySec) return refuse('the delivery deadline has passed');
-  if (!atSettlement(state, contract.town)) return refuse('stand in the issuing settlement to deliver');
+  const destination = contract.destinationTown || contract.town;
+  if (contract.kind === 'courier' && contract.acceptedAtDeliverySec == null) return refuse('accept this request in its source town before delivering');
+  if (!atSettlement(state, destination)) return refuse(contract.kind === 'courier' ? 'stand in the destination settlement to deliver' : 'stand in the issuing settlement to deliver');
   if (!Number.isSafeInteger(count) || count <= 0 || count > contract.target - contract.delivered) return refuse('choose a whole quantity within the remaining want');
   const good = trade.byId[contract.good];
   if (!good) return refuse('this good needs a content migration');
   const bucket = tradeBucket(state, good);
   if ((bucket[good.key] || 0) < count) return refuse('not enough carried; withdraw stored goods first');
-  const quote = quoteSale(state, contract.town, good.id, count);
+  const quote = quoteSale(state, destination, good.id, count);
   if (!quote) return refuse('this buyer is unavailable');
+  if (expected && expected.gold !== quote.gold) return refuse('the delivery price changed; review the current hand-in');
   const complete = count === contract.target - contract.delivered;
   const options = deliveryBonuses(contract.reward);
   if (choice !== undefined && !options.some((option) => option.id === choice)) return refuse('choose one of the displayed rewards');
@@ -213,10 +349,13 @@ export function previewDelivery(state: GameState, id: string, count: number, acc
    return { ok: true as const, contract, good, count, quote, complete, skill, fallback, stones, attainment, treePoints, bonus };
 }
 
-export function deliver(state: GameState, id: string, count: number, access: WriterAccess, choice?: string): { ok: boolean; why?: string; gold?: number; completed?: boolean } {
-  const preview = previewDelivery(state, id, count, access, choice);
+export function deliver(state: GameState, id: string, count: number, access: WriterAccess, choice?: string, expected?: DeliveryExpected): { ok: boolean; why?: string; gold?: number; completed?: boolean } {
+  const preview = previewDelivery(state, id, count, access, choice, expected);
   if (!preview.ok) return preview;
-  const result = sellGoods(state, preview.good.id, count);
+  const result = sellGoods(state, preview.good.id, count, {
+    carried: tradeBucket(state, preview.good)[preview.good.key] || 0,
+    gold: preview.quote.gold,
+  });
   if (!result.ok) return result;
   const contract = preview.contract;
   contract.delivered += count; contract.baseGold += result.gold; contract.lastQuantity = count; contract.lastGold = result.gold; contract.recapAcknowledged = false;
@@ -269,12 +408,18 @@ export function acknowledgeDelivery(state: GameState, id: string, access: Writer
 export function normalizeDeliveries(state: GameState) {
   const town = state.town;
   town.deliveryClockSec ??= 0; town.contractTriggerRemainingSec ||= {}; town.contractSerial ??= 0;
+  town.courierSerial ??= 0;
+  town.courierStreamState ??= (state.seed ^ storyHash32('courier')) >>> 0;
+  town.courierTriggerRemainingSec ??= deliveryConfig.trigger_interval_sec * (courierCfg()?.trigger_interval_mult ?? 1);
   town.contracts ||= {}; town.trackedContractIds ||= []; town.deliverySummaries ||= {};
   const fail = (message: string): never => { throw new Error(`delivery save: ${message}`); };
   const safe = (value: number) => Number.isSafeInteger(value) && value >= 0;
   const amount = (value: number) => Number.isFinite(value) && value >= 0;
   if (!safe(town.deliveryClockSec) || !safe(town.contractSerial)) fail('invalid clock or serial');
-  const ids = new Set<string>(), serials = new Set<number>();
+  if (!safe(town.courierSerial)) fail('invalid courier serial');
+  if (!safe(town.courierStreamState) || town.courierStreamState > 4294967295) fail('invalid courier stream state');
+  if (!safe(town.courierTriggerRemainingSec)) fail('invalid courier trigger');
+  const ids = new Set<string>(), serials = new Set<string>();
   const stoneValid = (stone: StoneReward) => stone && typeof stone.key === 'string' && (craft.STONE_NAME[stone.key] || stone.key.startsWith('imprint_') && MODS.mods.some((mod) => mod.id === stone.key.slice('imprint_'.length))) && safe(stone.count) && stone.count > 0;
   for (const [townId, rows] of Object.entries(town.contracts)) {
     if (!townById(townId) || !Array.isArray(rows)) fail('unknown town or malformed contract list');
@@ -284,8 +429,30 @@ export function normalizeDeliveries(state: GameState) {
         if (contract.reward.attainment === undefined) contract.reward.attainment = 0;
         if (contract.reward.treePoints === undefined) contract.reward.treePoints = 0;
       }
-      if (contract.town !== townId || contract.id !== `delivery:${townId}:${contract.serial}` || ids.has(contract.id) || serials.has(contract.serial) || !safe(contract.serial) || contract.serial < 1 || contract.serial > town.contractSerial) fail('invalid or repeated contract identity');
-      ids.add(contract.id); serials.add(contract.serial);
+      // Legacy local requests predate the courier fields: backfill kind, destination, issuer,
+      // acceptance and end reason from their status before any courier check.
+      contract.kind ??= 'request';
+      if (!['request', 'courier'].includes(contract.kind)) fail('invalid contract kind');
+      contract.destinationTown ??= contract.town;
+      contract.issuerNpcId ??= issuerOf(trade.byId[contract.good]);
+      contract.acceptedAtDeliverySec ??= null;
+      contract.offeredAtDeliverySec ??= 0;
+      contract.endReason ??= contract.status === 'expired' ? 'expired' : null;
+      const expectedId = contract.kind === 'courier' ? `courier:${townId}:${contract.serial}` : `delivery:${townId}:${contract.serial}`;
+      const serialBound = contract.kind === 'courier' ? town.courierSerial : town.contractSerial;
+      const serialKey = `${contract.kind}:${contract.serial}`;
+      if (contract.town !== townId || contract.id !== expectedId || ids.has(contract.id) || serials.has(serialKey) || !safe(contract.serial) || contract.serial < 1 || contract.serial > serialBound) fail('invalid or repeated contract identity');
+      ids.add(contract.id); serials.add(serialKey);
+      if (!townById(contract.destinationTown)) fail('unknown contract destination');
+      if (contract.kind === 'request' && contract.destinationTown !== townId) fail('request destination must equal its source town');
+      if (contract.kind === 'courier' && contract.destinationTown === townId) fail('courier destination must differ from its source town');
+      if (!TOWN.npcs.some((npc: any) => npc.id === contract.issuerNpcId)) fail('unknown contract issuer');
+      if (!safe(contract.offeredAtDeliverySec)) fail('invalid offer stamp');
+      if (contract.kind === 'request' && contract.acceptedAtDeliverySec !== null) fail('request acceptance must be null');
+      if (contract.acceptedAtDeliverySec != null && (!safe(contract.acceptedAtDeliverySec)
+        || contract.acceptedAtDeliverySec < contract.offeredAtDeliverySec || contract.acceptedAtDeliverySec > contract.dueAtDeliverySec
+        || contract.acceptedAtDeliverySec > town.deliveryClockSec)) fail('invalid acceptance stamp');
+      if (contract.kind === 'courier' && contract.status === 'completed' && contract.acceptedAtDeliverySec == null) fail('completed courier must be accepted');
       if (!trade.byId[contract.good] || !safe(contract.target) || contract.target < 1 || !safe(contract.delivered) || contract.delivered > contract.target) fail('unknown target or invalid progress');
       if (!safe(contract.triggeredAtClockSec) || !safe(contract.dueAtDeliverySec) || !amount(contract.baseGold) || !safe(contract.lastQuantity) || !amount(contract.lastGold)) fail('invalid time or proceeds');
       const route = contract.acquisition;
@@ -298,9 +465,15 @@ export function normalizeDeliveries(state: GameState) {
        if (contract.reward.alternative && (!validQuestBonus(contract.reward.alternative) || contract.reward.alternative.id === 'supplies')) fail('invalid reward alternative');
        if (!safe(contract.reward.attainment) || contract.reward.attainment < 0 || contract.reward.attainment > 1) fail('invalid attainment reward');
        if (!safe(contract.reward.treePoints)) fail('invalid tree point reward');
+       if (contract.kind === 'courier' && (contract.reward.alternative || contract.reward.milestone || contract.reward.attainment !== 0 || contract.reward.treePoints !== 0)) fail('courier carries a permanent or alternative reward');
       if (!['open', 'completed', 'expired'].includes(contract.status) || contract.status === 'open' && (contract.terminalAt !== null || contract.paidBonus || contract.delivered === contract.target)
         || contract.status !== 'open' && !safe(contract.terminalAt!) || contract.status === 'completed' && (contract.delivered !== contract.target || !contract.paidBonus)
         || contract.status === 'expired' && (contract.paidBonus || contract.delivered === contract.target)) fail('illegal terminal state');
+       if (!['expired', 'declined', null].includes(contract.endReason)) fail('invalid end reason');
+       if ((contract.status === 'open' || contract.status === 'completed') && contract.endReason !== null) fail('non-terminal contract has an end reason');
+       if (contract.status === 'expired' && contract.endReason === null) contract.endReason = 'expired';
+       if (contract.endReason === 'declined' && (contract.kind !== 'courier' || contract.status !== 'expired' || contract.acceptedAtDeliverySec != null
+         || contract.delivered !== 0 || contract.baseGold !== 0 || contract.paidBonus)) fail('illegal declined state');
        if (contract.paidBonus && (!amount(contract.paidBonus.gold) || !contract.paidBonus.stones.every(stoneValid) || contract.paidBonus.skill && !sm.byId[contract.paidBonus.skill])) fail('invalid recorded reward');
        if (contract.paidBonus?.treePoints != null && !safe(contract.paidBonus.treePoints)) fail('invalid recorded tree point reward');
        if (contract.paidBonus?.attainment != null && (!safe(contract.paidBonus.attainment) || contract.paidBonus.attainment > 1)) fail('invalid recorded attainment reward');
@@ -310,7 +483,8 @@ export function normalizeDeliveries(state: GameState) {
   }
   for (const [id, remaining] of Object.entries(town.contractTriggerRemainingSec)) if (!townById(id) || !safe(remaining)) fail('invalid trigger');
   for (const [id, summary] of Object.entries(town.deliverySummaries)) {
-    if (!townById(id) || !safe(summary.unread) || !safe(summary.completed) || !safe(summary.expired) || !amount(summary.paidGold) || !amount(summary.forfeitedGold)) fail('invalid recap summary');
+    summary.declined ??= 0;
+    if (!townById(id) || !safe(summary.unread) || !safe(summary.completed) || !safe(summary.expired) || !safe(summary.declined) || !amount(summary.paidGold) || !amount(summary.forfeitedGold)) fail('invalid recap summary');
     if (summary.paidTreePoints !== undefined && !safe(summary.paidTreePoints)) fail('invalid summarized tree point reward');
     for (const key of ['paidAttainment', 'forfeitedTreePoints', 'forfeitedAttainment'] as const)
       if (summary[key] !== undefined && !safe(summary[key]!)) fail('invalid summarized permanent points');

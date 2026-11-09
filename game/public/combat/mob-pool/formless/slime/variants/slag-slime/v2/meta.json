@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "slime--slag-slime",
+  "name": "Slag Slime",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 56,
+      "y": 115,
+      "width": 144,
+      "height": 109,
+      "offsetX": 56,
+      "offsetY": 115
+    },
+    {
+      "x": 317,
+      "y": 115,
+      "width": 135,
+      "height": 109,
+      "offsetX": 61,
+      "offsetY": 115
+    },
+    {
+      "x": 565,
+      "y": 117,
+      "width": 150,
+      "height": 107,
+      "offsetX": 53,
+      "offsetY": 117
+    },
+    {
+      "x": 829,
+      "y": 115,
+      "width": 134,
+      "height": 109,
+      "offsetX": 61,
+      "offsetY": 115
+    },
+    {
+      "x": 55,
+      "y": 372,
+      "width": 147,
+      "height": 108,
+      "offsetX": 55,
+      "offsetY": 116
+    },
+    {
+      "x": 316,
+      "y": 371,
+      "width": 137,
+      "height": 109,
+      "offsetX": 60,
+      "offsetY": 115
+    },
+    {
+      "x": 566,
+      "y": 373,
+      "width": 149,
+      "height": 107,
+      "offsetX": 54,
+      "offsetY": 117
+    },
+    {
+      "x": 828,
+      "y": 371,
+      "width": 137,
+      "height": 109,
+      "offsetX": 60,
+      "offsetY": 115
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-slime--slag-slime-diagonals.png",
+  "diagonalSourceSha256": "b8e1451a21a26adc1d7bcd85b72b97a9bc2e21ad139b5e5d4c2c1c0c26b97d46",
+  "diagonalScaleFactor": 0.382456,
+  "speciesId": "slime",
+  "variantId": "slag-slime"
+}

@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "spider--moonweb-spider",
+  "name": "Moonweb Spider",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 53,
+      "y": 121,
+      "width": 150,
+      "height": 103,
+      "offsetX": 53,
+      "offsetY": 121
+    },
+    {
+      "x": 312,
+      "y": 118,
+      "width": 145,
+      "height": 106,
+      "offsetX": 56,
+      "offsetY": 118
+    },
+    {
+      "x": 569,
+      "y": 137,
+      "width": 143,
+      "height": 87,
+      "offsetX": 57,
+      "offsetY": 137
+    },
+    {
+      "x": 824,
+      "y": 123,
+      "width": 144,
+      "height": 101,
+      "offsetX": 56,
+      "offsetY": 123
+    },
+    {
+      "x": 58,
+      "y": 385,
+      "width": 141,
+      "height": 95,
+      "offsetX": 58,
+      "offsetY": 129
+    },
+    {
+      "x": 313,
+      "y": 380,
+      "width": 142,
+      "height": 100,
+      "offsetX": 57,
+      "offsetY": 124
+    },
+    {
+      "x": 571,
+      "y": 396,
+      "width": 138,
+      "height": 84,
+      "offsetX": 59,
+      "offsetY": 140
+    },
+    {
+      "x": 823,
+      "y": 375,
+      "width": 147,
+      "height": 105,
+      "offsetX": 55,
+      "offsetY": 119
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-spider--moonweb-spider-diagonals.png",
+  "diagonalSourceSha256": "ba08ca5b75432be8e8039f2b997a0fb9116f627f25e385ee213c1143a372b262",
+  "diagonalScaleFactor": 0.324409,
+  "speciesId": "spider",
+  "variantId": "moonweb-spider"
+}

@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "troll--reed-troll",
+  "name": "Reed Troll",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 75,
+      "y": 85,
+      "width": 107,
+      "height": 139,
+      "offsetX": 75,
+      "offsetY": 85
+    },
+    {
+      "x": 339,
+      "y": 84,
+      "width": 90,
+      "height": 140,
+      "offsetX": 83,
+      "offsetY": 84
+    },
+    {
+      "x": 593,
+      "y": 82,
+      "width": 94,
+      "height": 142,
+      "offsetX": 81,
+      "offsetY": 82
+    },
+    {
+      "x": 854,
+      "y": 84,
+      "width": 85,
+      "height": 140,
+      "offsetX": 86,
+      "offsetY": 84
+    },
+    {
+      "x": 76,
+      "y": 341,
+      "width": 105,
+      "height": 139,
+      "offsetX": 76,
+      "offsetY": 85
+    },
+    {
+      "x": 343,
+      "y": 336,
+      "width": 83,
+      "height": 144,
+      "offsetX": 87,
+      "offsetY": 80
+    },
+    {
+      "x": 592,
+      "y": 339,
+      "width": 96,
+      "height": 141,
+      "offsetX": 80,
+      "offsetY": 83
+    },
+    {
+      "x": 852,
+      "y": 336,
+      "width": 89,
+      "height": 144,
+      "offsetX": 84,
+      "offsetY": 80
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-troll--reed-troll-diagonals.png",
+  "diagonalSourceSha256": "f484d686989f4ef4dda4ddcb20b1963385f69a4260e7c174dd92aa2aa004a24b",
+  "diagonalScaleFactor": 0.340936,
+  "speciesId": "troll",
+  "variantId": "reed-troll"
+}

@@ -218,6 +218,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.cast_on_damage_taken": [
@@ -435,6 +443,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.clarity": [
@@ -652,6 +668,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.elemental_fury": [
@@ -869,6 +893,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.ember_conversion": [
@@ -1086,6 +1118,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.energy_guard": [
@@ -1303,6 +1343,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.grace": [
@@ -1520,6 +1568,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.haste": [
@@ -1737,6 +1793,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.herald_of_ash": [
@@ -1954,6 +2018,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.herald_of_frost": [
@@ -2171,6 +2243,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.herald_of_lightning": [
@@ -2388,6 +2468,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.iron_guard": [
@@ -2605,6 +2693,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.rimbo_form": [
@@ -2822,6 +2918,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.rime_conversion": [
@@ -3039,6 +3143,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.storm_conversion": [
@@ -3256,6 +3368,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.trinity_form": [
@@ -3473,6 +3593,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.vitality": [
@@ -3690,6 +3818,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "aura.wraith_of_fury": [
@@ -3907,6 +4043,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "buff.berserker": [
@@ -4124,6 +4268,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "buff.earth_wall": [
@@ -4341,6 +4493,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "buff.enchant_poison": [
@@ -4355,6 +4515,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         "origin": "caster",
         "delivery": "instant"
       },
+      "layers": []
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
       "layers": []
     }
   ],
@@ -4573,6 +4741,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "buff.flame_guard": [
@@ -4790,6 +4966,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "buff.ghost_dance": [
@@ -5007,6 +5191,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "buff.holy_veil": [
@@ -5224,6 +5416,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "buff.iron_will": [
@@ -5441,6 +5641,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "buff.magia_drive": [
@@ -5658,6 +5866,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "buff.warcry": [
@@ -5875,6 +6091,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "curse.blinding_mark": [
@@ -6092,6 +6316,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "curse.cripple": [
@@ -6309,6 +6541,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "curse.expose": [
@@ -6526,6 +6766,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "curse.jinx": [
@@ -6743,6 +6991,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "curse.venom_bind": [
@@ -6960,6 +7216,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "curse.weaken": [
@@ -7177,6 +7441,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "heal.cleanse": [
@@ -7394,6 +7666,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "heal.greater_heal": [
@@ -7611,6 +7891,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "heal.heal": [
@@ -7828,6 +8116,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.arrow_shower": [
@@ -8057,6 +8353,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     },
     {
       "id": "pool-v1",
@@ -8493,6 +8797,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.cleave": [
@@ -8710,6 +9022,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     },
     {
       "id": "pool-v1",
@@ -8986,6 +9306,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.double_strike": [
@@ -9207,6 +9535,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.elemental_break": [
@@ -9424,6 +9760,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.ground_slam": [
@@ -9640,6 +9984,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     },
     {
       "id": "pool-v1",
@@ -10076,6 +10428,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.impale": [
@@ -10293,6 +10653,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.piercing_shot": [
@@ -10514,6 +10882,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.puncture": [
@@ -10731,6 +11107,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.reap": [
@@ -10948,6 +11332,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.shield_bash": [
@@ -11165,6 +11557,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.skull_crack": [
@@ -11382,6 +11782,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.split_shot": [
@@ -11603,6 +12011,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.whirlwind": [
@@ -11819,6 +12235,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     },
     {
       "id": "pool-v1",
@@ -12260,6 +12684,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.fireball": [
@@ -12317,6 +12749,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     },
     {
       "id": "pool-v1",
@@ -12584,6 +13024,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     },
     {
       "id": "pool-v2",
@@ -13019,6 +13467,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.meteor": [
@@ -13079,6 +13535,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     },
     {
       "id": "pool-v1",
@@ -13571,6 +14035,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     },
     {
       "id": "pool-v1",
@@ -14077,6 +14549,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.frostbite": [
@@ -14294,6 +14774,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.glacial_spike": [
@@ -14515,6 +15003,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.ice_lance": [
@@ -14736,6 +15232,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.shatter": [
@@ -14952,6 +15456,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     },
     {
       "id": "pool-v1",
@@ -15185,6 +15697,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         "widthM": 3
       },
       "layers": []
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.water_ball": [
@@ -15406,6 +15926,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.chain_lightning": [
@@ -15623,6 +16151,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.overload": [
@@ -15840,6 +16376,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     },
     {
       "id": "pool-v2",
@@ -16275,6 +16819,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.thunder_storm": [
@@ -16501,6 +17053,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     },
     {
       "id": "pool-v2",
@@ -16735,6 +17295,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.acid_arrow": [
@@ -16956,6 +17524,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.contagion": [
@@ -16973,6 +17549,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         "radiusM": 3
       },
       "layers": []
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.hemotoxin": [
@@ -16987,6 +17571,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         "origin": "target",
         "delivery": "projectile"
       },
+      "layers": []
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
       "layers": []
     }
   ],
@@ -17209,6 +17801,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.poison_cloud": [
@@ -17435,6 +18035,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.venom_coffin": [
@@ -17449,6 +18057,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         "origin": "target",
         "delivery": "projectile"
       },
+      "layers": []
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
       "layers": []
     }
   ],
@@ -17671,6 +18287,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.chaos_wave": [
@@ -17897,6 +18521,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.entropy_well": [
@@ -17914,6 +18546,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         "radiusM": 3
       },
       "layers": []
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.unravel": [
@@ -17928,6 +18568,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         "origin": "target",
         "delivery": "projectile"
       },
+      "layers": []
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
       "layers": []
     }
   ],
@@ -18145,6 +18793,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.void_orb": [
@@ -18161,6 +18817,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         "delivery": "projectile",
         "radiusM": 5
       },
+      "layers": []
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
       "layers": []
     }
   ],
@@ -18179,6 +18843,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         "lengthM": 8,
         "widthM": 2
       },
+      "layers": []
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
       "layers": []
     }
   ],
@@ -18401,6 +19073,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     },
     {
       "id": "pool-v1",
@@ -19048,6 +19728,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
       ]
     },
     {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
+    },
+    {
       "id": "pool-v1",
       "label": "v1",
       "arena": true,
@@ -19478,6 +20166,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.fissure": [
@@ -19706,6 +20402,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ],
   "attack.sand_storm": [
@@ -19923,6 +20627,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     },
     {
       "id": "pool-v2",
@@ -20358,6 +21070,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           "loop": false
         }
       ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
     }
   ]
 };

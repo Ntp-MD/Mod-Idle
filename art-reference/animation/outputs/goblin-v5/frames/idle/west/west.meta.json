@@ -4,8 +4,8 @@
   "action": "idle",
   "direction": "west",
   "pose": "idle",
-  "source": "art-reference/monsters/humanoid/goblin/animation/poses/idle/west.png",
-  "sourceMetadata": "art-reference/monsters/humanoid/goblin/animation/poses/idle/west.meta.json",
+  "source": "archive/art-reference/monsters/humanoid/goblin/animation/poses/idle/west.png",
+  "sourceMetadata": "archive/art-reference/monsters/humanoid/goblin/animation/poses/idle/west.meta.json",
   "sourcePixelsModified": false,
   "frameCanvas": {
     "width": 384,

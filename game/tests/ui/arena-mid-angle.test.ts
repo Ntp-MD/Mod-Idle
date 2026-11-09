@@ -1,16 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import { arenaFacingIndex, arenaScreenAngleFor, ARENA_DIRECTIONS } from '../../src/presentation/arena-camera';
-import { groundShapePath } from '../../src/ui/combat/arena-vfx-space';
-import { projectArenaPoint } from '../../src/ui/combat/combat-arena-view';
+import { createFieldViewFrame } from '../../src/presentation/arena-view-frame';
+import { applyWorldToViewport, fieldPointM } from '../../src/presentation/view-transform';
+import { groundShapeWorldPoints } from '../../src/ui/combat/arena-vfx-space';
 import { skillAreaSnapshot } from '@engine/skill-area.ts';
 
 const STEP = Math.PI / 4;
 const wrap = (angle: number) => Math.atan2(Math.sin(angle), Math.cos(angle));
 
-function points(path: string) {
-  return [...path.matchAll(/(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)/g)]
-    .map((match) => ({ x: Number(match[1]), y: Number(match[2]) }));
-}
+const frameFor = () => {
+  const frame = createFieldViewFrame({
+    sceneKey: 'mid-angle', atUs: 0,
+    viewportCss: { width: 1920, height: 1080 },
+    focusM: fieldPointM(9, 6), worldScale: 1,
+  });
+  if (!frame.renderable) throw new Error('frame must render');
+  return frame;
+};
 
 describe('mid-angle presentation', () => {
   it('keeps the 8-bin actor row inside half a screen step for 16 sampled facings', () => {
@@ -25,6 +31,9 @@ describe('mid-angle presentation', () => {
   });
 
   it('keeps line geometry exact at sampled angles', () => {
+    const frame = frameFor();
+    const project = (point: { x: number; y: number }) =>
+      applyWorldToViewport(frame.worldToViewport, fieldPointM(point.x, point.y));
     const length = 5;
     const half = 0.5;
     const line = { origin: 'caster' as const, radius_m: 0, shape: 'line' as const, length_m: length, width_m: half * 2 };
@@ -34,20 +43,24 @@ describe('mid-angle presentation', () => {
       const caster = { x: 9, y: 6 };
       const aim = { x: caster.x + Math.cos(direction) * length, y: caster.y + Math.sin(direction) * length };
       const area = skillAreaSnapshot(line, caster, aim, 'a');
-      const path = groundShapePath(area);
-      seen.add(path);
-      const actual = points(path);
+      const actual = groundShapeWorldPoints(area);
+      seen.add(JSON.stringify(actual));
       const corners = [
         { lateral: -half, forward: 0 }, { lateral: -half, forward: length },
         { lateral: half, forward: length }, { lateral: half, forward: 0 },
       ];
       corners.forEach((corner, cornerIndex) => {
-        const expected = projectArenaPoint({
+        const expectedWorld = {
           x: caster.x - corner.lateral * Math.sin(direction) + corner.forward * Math.cos(direction),
           y: caster.y + corner.lateral * Math.cos(direction) + corner.forward * Math.sin(direction),
-        });
-        expect(actual[cornerIndex].x).toBeCloseTo(expected.x, 0);
-        expect(actual[cornerIndex].y).toBeCloseTo(expected.y, 0);
+        };
+        expect(actual[cornerIndex].x).toBeCloseTo(expectedWorld.x, 9);
+        expect(actual[cornerIndex].y).toBeCloseTo(expectedWorld.y, 9);
+        // The painted frame projects the same world corners 1:1.
+        const painted = project(actual[cornerIndex]);
+        const ref = project(expectedWorld);
+        expect(painted.x).toBeCloseTo(ref.x, 9);
+        expect(painted.y).toBeCloseTo(ref.y, 9);
       });
     }
     expect(seen.size).toBe(16);
@@ -62,16 +75,15 @@ describe('mid-angle presentation', () => {
       const caster = { x: 9, y: 6 };
       const aim = { x: caster.x + Math.cos(direction) * reach, y: caster.y + Math.sin(direction) * reach };
       const area = skillAreaSnapshot(cone, caster, aim, 'a');
-      const path = groundShapePath(area);
-      seen.add(path);
-      const actual = points(path);
+      const actual = groundShapeWorldPoints(area);
+      seen.add(JSON.stringify(actual));
       for (const [position, offset] of [[1, -Math.PI / 3], [actual.length - 1, Math.PI / 3]] as const) {
-        const expected = projectArenaPoint({
+        const expectedWorld = {
           x: caster.x + Math.cos(direction + offset) * reach,
           y: caster.y + Math.sin(direction + offset) * reach,
-        });
-        expect(actual[position].x).toBeCloseTo(expected.x, 0);
-        expect(actual[position].y).toBeCloseTo(expected.y, 0);
+        };
+        expect(actual[position].x).toBeCloseTo(expectedWorld.x, 9);
+        expect(actual[position].y).toBeCloseTo(expectedWorld.y, 9);
       }
     }
     expect(seen.size).toBe(16);

@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "slime--rime-slime",
+  "name": "Rime Slime",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 53,
+      "y": 93,
+      "width": 150,
+      "height": 131,
+      "offsetX": 53,
+      "offsetY": 93
+    },
+    {
+      "x": 310,
+      "y": 93,
+      "width": 149,
+      "height": 131,
+      "offsetX": 54,
+      "offsetY": 93
+    },
+    {
+      "x": 58,
+      "y": 356,
+      "width": 141,
+      "height": 124,
+      "offsetX": 58,
+      "offsetY": 100
+    },
+    {
+      "x": 313,
+      "y": 356,
+      "width": 142,
+      "height": 124,
+      "offsetX": 57,
+      "offsetY": 100
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "slime",
+  "variantId": "rime-slime"
+}

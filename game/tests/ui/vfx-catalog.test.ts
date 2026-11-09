@@ -29,6 +29,10 @@ describe('skill VFX atlas pool', () => {
     expect(versions.length).toBeGreaterThanOrEqual(2);
     for (const version of versions) {
       expect(version.id).toBeTruthy();
+      if (version.renderer === 'procedural') {
+        expect(version.layers).toEqual([]);
+        continue;
+      }
       expect(version.layers.length).toBeGreaterThan(0);
       for (const layer of version.layers) {
         expect(layer.frame.count).toBeGreaterThan(0);

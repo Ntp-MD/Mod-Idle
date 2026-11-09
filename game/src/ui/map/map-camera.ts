@@ -1,32 +1,26 @@
+import type { Affine2 } from '../../presentation/view-transform.ts';
+import {
+  composeMapFrame,
+  mapPlanPoint,
+  mapPlanToScreen,
+} from './map-view-transform.ts';
+
 export type MapPoint = { x: number; y: number };
-export type MapMatrix = { a: number; b: number; c: number; d: number; e: number; f: number };
+export type MapMatrix = Affine2;
 
-export const mapBearingDegrees = (degrees: number) => ((degrees % 360) + 360) % 360;
-export const mapTurnTo = (from: number, to: number) => mapBearingDegrees(to - from + 180) - 180;
+/** Map anchor policy: one owner for both map-camera and WorldMap framing. */
+export const MAP_ANCHOR_X = 0.5;
+export const MAP_ANCHOR_Y = 0.46;
 
+/** Plan -> screen; the arithmetic is owned by the shared affine contract. */
 export function transformMapPoint(matrix: MapMatrix, point: MapPoint): MapPoint {
-  return { x: matrix.a * point.x + matrix.c * point.y + matrix.e, y: matrix.b * point.x + matrix.d * point.y + matrix.f };
+  const out = mapPlanToScreen(matrix, mapPlanPoint(point.x, point.y));
+  return { x: out.x, y: out.y };
 }
 
+/** Frame composition; the arithmetic is owned by the shared affine contract. */
 export function composeMapMatrix(outer: MapMatrix, inner: MapMatrix): MapMatrix {
-  const offset = transformMapPoint(outer, { x: inner.e, y: inner.f });
-  return { a: outer.a * inner.a + outer.c * inner.b, b: outer.b * inner.a + outer.d * inner.b,
-    c: outer.a * inner.c + outer.c * inner.d, d: outer.b * inner.c + outer.d * inner.d, e: offset.x, f: offset.y };
-}
-
-/** Undo the camera's full linear transform so a label keeps its screen size and reading direction. */
-export function mapScreenLabelMatrix(matrix: MapMatrix, point: MapPoint): MapMatrix {
-  const det = matrix.a * matrix.d - matrix.b * matrix.c;
-  const a = matrix.d / det, b = -matrix.b / det, c = -matrix.c / det, d = matrix.a / det;
-  const x = point.x - matrix.e, y = point.y - matrix.f;
-  return { a, b, c, d, e: a * x + c * y, f: b * x + d * y };
-}
-
-/** Orbit the world plane while retaining the world point underneath the camera's screen origin. */
-export function orbitMapPan(pan: MapPoint, origin: MapPoint, zoom: number, previous: MapMatrix, next: MapMatrix): MapPoint {
-  const anchor = mapScreenLabelMatrix(previous, { x: origin.x - pan.x / zoom, y: origin.y - pan.y / zoom });
-  const position = transformMapPoint(next, { x: anchor.e, y: anchor.f });
-  return { x: zoom * (origin.x - position.x), y: zoom * (origin.y - position.y) };
+  return composeMapFrame(outer, inner);
 }
 
 /**
@@ -37,7 +31,7 @@ export function orbitMapPan(pan: MapPoint, origin: MapPoint, zoom: number, previ
 export function clampMapPan(pan: MapPoint, frame: { width: number; height: number },
   paper: { x: number; y: number; width: number; height: number }, projection: MapMatrix,
   zoom: number): MapPoint {
-  const origin = { x: frame.width / 2, y: frame.height * .46 };
+  const origin = { x: frame.width * MAP_ANCHOR_X, y: frame.height * MAP_ANCHOR_Y };
   const screen = (x: number, y: number): MapPoint => {
     const world = transformMapPoint(projection, { x, y });
     return { x: origin.x + pan.x + zoom * (world.x - origin.x), y: origin.y + pan.y + zoom * (world.y - origin.y) };
@@ -61,11 +55,28 @@ export function clampMapPan(pan: MapPoint, frame: { width: number; height: numbe
 }
 
 /** WorldMap's camera lifetime: App owns the object, the facade only reads/writes these fields. */
-export type MapCameraState = { panX: number; panY: number; zoom: number; bearing: number };
+export type MapCameraState = { panX: number; panY: number; zoom: number };
 export const MAP_BASE_ZOOM = 2;
-export const DEFAULT_MAP_CAMERA: MapCameraState = { panX: 0, panY: 0, zoom: 2.4, bearing: 0 };
+export const DEFAULT_MAP_CAMERA: MapCameraState = { panX: 0, panY: 0, zoom: 2.4 };
 export const MAP_MIN_ZOOM = 0.5;
 export const MAP_MAX_ZOOM = 6;
 export const MAP_OPEN_ZOOM = 2.4;
 export const mapDetail = (zoom: number): 'far' | 'mid' | 'near' =>
   zoom < 1.5 ? 'far' : zoom >= 2.4 ? 'near' : 'mid';
+
+/** D2 legibility floors: unresolved CSS tokens owned by variables.css. */
+export const MAP_MIN_ICON_CSS = 14;
+export const MAP_MIN_TEXT_CSS = 12;
+
+/**
+ * Minimum zoom so the smallest plan-unit extent stays legible at zoom 1.
+ * i1/t1 are plan-unit extents projected at zoom 1; hidden/invalid hosts
+ * never reach this helper (caller must widen/finite-check first).
+ */
+export function mapMinReadableZoom(extent: { icon: number; text: number }, showText: boolean): number {
+  const iconTerm = Number.isFinite(extent.icon) && extent.icon > 0 ? MAP_MIN_ICON_CSS / extent.icon : Number.POSITIVE_INFINITY;
+  const textTerm = showText && Number.isFinite(extent.text) && extent.text > 0 ? MAP_MIN_TEXT_CSS / extent.text : 0;
+  const zMin = Math.max(iconTerm, textTerm);
+  if (!Number.isFinite(zMin) || zMin <= 0) return MAP_MIN_ZOOM;
+  return Math.min(MAP_MAX_ZOOM, Math.max(MAP_MIN_ZOOM, zMin));
+}

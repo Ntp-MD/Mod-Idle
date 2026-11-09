@@ -1,0 +1,147 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "revenant",
+  "name": "Frost Revenant",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 72,
+      "y": 45,
+      "width": 112,
+      "height": 179,
+      "offsetX": 72,
+      "offsetY": 45
+    },
+    {
+      "x": 334,
+      "y": 40,
+      "width": 101,
+      "height": 184,
+      "offsetX": 78,
+      "offsetY": 40
+    },
+    {
+      "x": 595,
+      "y": 49,
+      "width": 91,
+      "height": 175,
+      "offsetX": 83,
+      "offsetY": 49
+    },
+    {
+      "x": 848,
+      "y": 40,
+      "width": 96,
+      "height": 184,
+      "offsetX": 80,
+      "offsetY": 40
+    },
+    {
+      "x": 74,
+      "y": 294,
+      "width": 109,
+      "height": 186,
+      "offsetX": 74,
+      "offsetY": 38
+    },
+    {
+      "x": 332,
+      "y": 288,
+      "width": 104,
+      "height": 192,
+      "offsetX": 76,
+      "offsetY": 32
+    },
+    {
+      "x": 595,
+      "y": 304,
+      "width": 91,
+      "height": 176,
+      "offsetX": 83,
+      "offsetY": 48
+    },
+    {
+      "x": 844,
+      "y": 290,
+      "width": 104,
+      "height": 190,
+      "offsetX": 76,
+      "offsetY": 34
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/monsters/undead/revenant/revenant/reference.png",
+  "sourceSha256": "9ceb698ced7ede93800f82959f03c64f4a00d5e73462c29b0ad775d6ab42dea8",
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-revenant-diagonals.png",
+  "diagonalSourceSha256": "5b5a7d111086fa14d55186f27a4121cc722c9ec50e5db606e3c34f5ec7683f2a"
+}

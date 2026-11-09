@@ -1,0 +1,49 @@
+{
+  "pawnId": "treant--thicket-treant",
+  "candidateFile": "pawn-treant--thicket-treant-diagonals.png",
+  "sourceAtlas": "art-reference/pawn-study/atlases/variants/treant--thicket-treant.png",
+  "sourceSheet": "art-reference/pawn-study/sheets/variants/treant--thicket-treant.png",
+  "dimensions": "1254x1254",
+  "pixelFormat": "32bpp ARGB",
+  "transparentBackground": true,
+  "cellLayout": "2x2",
+  "cellSize": "627x627",
+  "directionOrder": [
+    "NE",
+    "SE",
+    "SW",
+    "NW"
+  ],
+  "views": {
+    "NE": "rear three-quarter, eyes hidden",
+    "SE": "front three-quarter, eyes visible",
+    "SW": "mirrored front three-quarter, eyes visible",
+    "NW": "mirrored rear three-quarter, eyes hidden"
+  },
+  "visibleBoundsPx": {
+    "NE": "x=121..507, y=68..545 (387x478)",
+    "SE": "x=100..503, y=66..544 (404x479)",
+    "SW": "x=137..513, y=44..519 (377x476)",
+    "NW": "x=114..500, y=45..519 (387x475)"
+  },
+  "visibleFootprint": "60–64% cell width and 76–77% cell height; sizes close across views.",
+  "rootAnchor": "NE/SE bottom y=544–545; SW/NW bottom y=519, a 25–26px row offset.",
+  "identityCheck": "Brown grooved trunk, irregular thicket canopy with olive leaf clusters, green moss, paired golden eyes only in front views, flared root base; no limbs.",
+  "reviewStatus": "candidate-review",
+  "concerns": [
+    "Align root bases across rows; current top-row roots sit 25–26px below bottom-row roots.",
+    "Confirm runtime-relative scale and diagonal handedness in packed preview."
+  ],
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "status": "runtime-reviewed",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

@@ -1,0 +1,148 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "giant",
+  "name": "Giant",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 77,
+      "y": 41,
+      "width": 103,
+      "height": 183,
+      "offsetX": 77,
+      "offsetY": 41
+    },
+    {
+      "x": 323,
+      "y": 31,
+      "width": 123,
+      "height": 193,
+      "offsetX": 67,
+      "offsetY": 31
+    },
+    {
+      "x": 589,
+      "y": 32,
+      "width": 102,
+      "height": 192,
+      "offsetX": 77,
+      "offsetY": 32
+    },
+    {
+      "x": 838,
+      "y": 32,
+      "width": 116,
+      "height": 192,
+      "offsetX": 70,
+      "offsetY": 32
+    },
+    {
+      "x": 77,
+      "y": 298,
+      "width": 103,
+      "height": 182,
+      "offsetX": 77,
+      "offsetY": 42
+    },
+    {
+      "x": 326,
+      "y": 288,
+      "width": 116,
+      "height": 192,
+      "offsetX": 70,
+      "offsetY": 32
+    },
+    {
+      "x": 589,
+      "y": 288,
+      "width": 102,
+      "height": 192,
+      "offsetX": 77,
+      "offsetY": 32
+    },
+    {
+      "x": 835,
+      "y": 288,
+      "width": 123,
+      "height": 192,
+      "offsetX": 67,
+      "offsetY": 32
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/monsters/humanoid/giant/giant/reference.png",
+  "sourceSha256": "531e79921e865be53b4dad712117152e1acb2ebc2654007cd39e732aa88920c7",
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-giant-diagonals.png",
+  "diagonalSourceSha256": "77a82c9dca67917d48865c8da49218ffe8907a5ac87f9899fbedc9be8ca19c95",
+  "diagonalScaleFactor": 0.417845
+}

@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "kobold--tinker-kobold",
+  "name": "Tinker Kobold",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 59,
+      "y": 89,
+      "width": 139,
+      "height": 135,
+      "offsetX": 59,
+      "offsetY": 89
+    },
+    {
+      "x": 325,
+      "y": 84,
+      "width": 118,
+      "height": 140,
+      "offsetX": 69,
+      "offsetY": 84
+    },
+    {
+      "x": 580,
+      "y": 89,
+      "width": 120,
+      "height": 135,
+      "offsetX": 68,
+      "offsetY": 89
+    },
+    {
+      "x": 836,
+      "y": 81,
+      "width": 120,
+      "height": 143,
+      "offsetX": 68,
+      "offsetY": 81
+    },
+    {
+      "x": 58,
+      "y": 338,
+      "width": 141,
+      "height": 142,
+      "offsetX": 58,
+      "offsetY": 82
+    },
+    {
+      "x": 324,
+      "y": 336,
+      "width": 120,
+      "height": 144,
+      "offsetX": 68,
+      "offsetY": 80
+    },
+    {
+      "x": 580,
+      "y": 345,
+      "width": 121,
+      "height": 135,
+      "offsetX": 68,
+      "offsetY": 89
+    },
+    {
+      "x": 836,
+      "y": 339,
+      "width": 121,
+      "height": 141,
+      "offsetX": 68,
+      "offsetY": 83
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-kobold--tinker-kobold-diagonals.png",
+  "diagonalSourceSha256": "77c37bda3e353f6cb62edae1f244331e31b7ab3949a20c3d8a3b40ae2faa9c19",
+  "diagonalScaleFactor": 0.345079,
+  "speciesId": "kobold",
+  "variantId": "tinker-kobold"
+}

@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "ooze--blight-ooze",
+  "name": "Blight Ooze",
+  "identityKind": "variant",
+  "generatedSource": "art-reference/pawn-study/generation/eight-direction/pawn-ooze--blight-ooze-diagonals.png",
+  "sourceReferences": [
+    "art-reference/pawn-study/sheets/variants/ooze--blight-ooze.png",
+    "art-reference/pawn-study/atlases/variants/ooze--blight-ooze.png"
+  ],
+  "generator": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "canvas": {
+    "requested": {
+      "width": 1024,
+      "height": 1024
+    },
+    "generated": {
+      "width": 1254,
+      "height": 1254
+    },
+    "cellSize": 627,
+    "background": "transparent"
+  },
+  "visibleBoundsAlphaGt8": [
+    [
+      "north-east",
+      [
+        154,
+        118,
+        491,
+        507
+      ]
+    ],
+    [
+      "south-east",
+      [
+        135,
+        121,
+        495,
+        507
+      ]
+    ],
+    [
+      "south-west",
+      [
+        143,
+        119,
+        493,
+        505
+      ]
+    ],
+    [
+      "north-west",
+      [
+        136,
+        119,
+        490,
+        502
+      ]
+    ]
+  ],
+  "promptSummary": "Generate only four diagonal Blight Ooze facings, preserving its lime-yellow three-lobed body, olive spots and small pale eyes. NE/NW are rear three-quarter views with one eye at the side; SE/SW are front three-quarter views with two asymmetrical eyes.",
+  "review": {
+    "identity": "passed",
+    "pose": "passed",
+    "anchor": "passed",
+    "sharedScale": "passed",
+    "alphaAndCellBounds": "passed",
+    "approved": true
+  },
+  "note": "Built-in output contains sparse alpha pixels at cell edges outside the visible body bounds; verify the existing min-filter/alpha extraction removes them before import. Do not tick the roster until the packed atlas passes pose, root and shared-scale review.",
+  "packedAtlas": "art-reference/pawn-study/atlases/variants/ooze--blight-ooze.png",
+  "targetVisibleHeightRuntimePx": [
+    141,
+    142
+  ],
+  "packedVisibleHeightRuntimePx": [
+    141,
+    143
+  ],
+  "reviewNotes": "Reviewed Blight Ooze diagonals. Low-alpha edge specks were removed at the documented alpha threshold; body, eyes, shared scale and cell bounds pass."
+}

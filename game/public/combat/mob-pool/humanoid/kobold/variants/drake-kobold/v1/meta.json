@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "kobold--drake-kobold",
+  "name": "Drake Kobold",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 87,
+      "y": 83,
+      "width": 82,
+      "height": 141,
+      "offsetX": 87,
+      "offsetY": 83
+    },
+    {
+      "x": 347,
+      "y": 82,
+      "width": 75,
+      "height": 142,
+      "offsetX": 91,
+      "offsetY": 82
+    },
+    {
+      "x": 83,
+      "y": 347,
+      "width": 90,
+      "height": 133,
+      "offsetX": 83,
+      "offsetY": 91
+    },
+    {
+      "x": 339,
+      "y": 347,
+      "width": 90,
+      "height": 133,
+      "offsetX": 83,
+      "offsetY": 91
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "kobold",
+  "variantId": "drake-kobold"
+}

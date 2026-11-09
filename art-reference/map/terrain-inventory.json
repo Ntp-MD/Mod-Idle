@@ -18,18 +18,15 @@
       "versions": [
         "ash-1.png",
         "ash-2.png",
+        "ash-3.png",
         "ash.png"
       ],
       "registered": [
         "ash-1.png",
-        "ash-2.png"
+        "ash-2.png",
+        "ash-3.png"
       ],
-      "catalogue": [
-        {
-          "key": "ash",
-          "href": "/map/terrain/ash.png"
-        }
-      ],
+      "catalogue": [],
       "selectedNewVersion": false,
       "integrationNote": null
     },
@@ -39,13 +36,14 @@
       "source": "game/public/map/landmark/camp.png",
       "category": "landmark",
       "versions": [
+        "camp-1.png",
         "camp.png"
       ],
       "registered": [],
       "catalogue": [
         {
           "key": "camp",
-          "href": "/map/landmark/camp.png"
+          "href": "/map/landmark/camp-1.png"
         }
       ],
       "selectedNewVersion": false,
@@ -57,13 +55,14 @@
       "source": "game/public/map/landmark/encounter-ruins.png",
       "category": "landmark",
       "versions": [
+        "encounter-ruins-1.png",
         "encounter-ruins.png"
       ],
       "registered": [],
       "catalogue": [
         {
           "key": "dungeon",
-          "href": "/map/landmark/encounter-ruins.png"
+          "href": "/map/landmark/encounter-ruins-1.png"
         }
       ],
       "selectedNewVersion": false,
@@ -78,6 +77,7 @@
         "forest-relief-1.png",
         "forest-relief-2.png",
         "forest-relief-3.png",
+        "forest-relief-4.png",
         "forest-relief.png"
       ],
       "registered": [
@@ -88,11 +88,7 @@
       "catalogue": [
         {
           "key": "forest",
-          "href": "/map/terrain/forest-relief.png"
-        },
-        {
-          "key": "wild",
-          "href": "/map/terrain/forest-relief.png"
+          "href": "/map/terrain/forest-relief-4.png"
         }
       ],
       "selectedNewVersion": false,
@@ -106,18 +102,15 @@
       "versions": [
         "grass-1.png",
         "grass-2.png",
+        "grass-3.png",
         "grass.png"
       ],
       "registered": [
         "grass-1.png",
-        "grass-2.png"
+        "grass-2.png",
+        "grass-3.png"
       ],
-      "catalogue": [
-        {
-          "key": "grass",
-          "href": "/map/terrain/grass.png"
-        }
-      ],
+      "catalogue": [],
       "selectedNewVersion": false,
       "integrationNote": null
     },
@@ -129,18 +122,15 @@
       "versions": [
         "marsh-1.png",
         "marsh-2.png",
+        "marsh-3.png",
         "marsh.png"
       ],
       "registered": [
         "marsh-1.png",
-        "marsh-2.png"
+        "marsh-2.png",
+        "marsh-3.png"
       ],
-      "catalogue": [
-        {
-          "key": "marsh",
-          "href": "/map/terrain/marsh.png"
-        }
-      ],
+      "catalogue": [],
       "selectedNewVersion": false,
       "integrationNote": null
     },
@@ -152,18 +142,15 @@
       "versions": [
         "moor-1.png",
         "moor-2.png",
+        "moor-3.png",
         "moor.png"
       ],
       "registered": [
         "moor-1.png",
-        "moor-2.png"
+        "moor-2.png",
+        "moor-3.png"
       ],
-      "catalogue": [
-        {
-          "key": "moor",
-          "href": "/map/terrain/moor.png"
-        }
-      ],
+      "catalogue": [],
       "selectedNewVersion": false,
       "integrationNote": null
     },
@@ -175,16 +162,19 @@
       "versions": [
         "mountain-relief-1.png",
         "mountain-relief-2.png",
+        "mountain-relief-3.png",
+        "mountain-relief-4.png",
         "mountain-relief.png"
       ],
       "registered": [
         "mountain-relief-1.png",
-        "mountain-relief-2.png"
+        "mountain-relief-2.png",
+        "mountain-relief-3.png"
       ],
       "catalogue": [
         {
           "key": "rock",
-          "href": "/map/terrain/mountain-relief.png"
+          "href": "/map/terrain/mountain-relief-4.png"
         }
       ],
       "selectedNewVersion": false,
@@ -198,18 +188,15 @@
       "versions": [
         "salt-1.png",
         "salt-2.png",
+        "salt-3.png",
         "salt.png"
       ],
       "registered": [
         "salt-1.png",
-        "salt-2.png"
+        "salt-2.png",
+        "salt-3.png"
       ],
-      "catalogue": [
-        {
-          "key": "salt",
-          "href": "/map/terrain/salt.png"
-        }
-      ],
+      "catalogue": [],
       "selectedNewVersion": false,
       "integrationNote": null
     },
@@ -221,18 +208,15 @@
       "versions": [
         "snow-1.png",
         "snow-2.png",
+        "snow-3.png",
         "snow.png"
       ],
       "registered": [
         "snow-1.png",
-        "snow-2.png"
+        "snow-2.png",
+        "snow-3.png"
       ],
-      "catalogue": [
-        {
-          "key": "snow",
-          "href": "/map/terrain/snow.png"
-        }
-      ],
+      "catalogue": [],
       "selectedNewVersion": false,
       "integrationNote": null
     },
@@ -248,12 +232,7 @@
       "registered": [
         "town-1.png"
       ],
-      "catalogue": [
-        {
-          "key": "town",
-          "href": "/map/landmark/town.png"
-        }
-      ],
+      "catalogue": [],
       "selectedNewVersion": false,
       "integrationNote": "Town rendering also uses LANDMARK_ART in tools/map.ts; inspect actual renderer routing, not only the terrain catalogue."
     },
@@ -263,13 +242,14 @@
       "source": "game/public/map/landmark/village.png",
       "category": "landmark",
       "versions": [
+        "village-1.png",
         "village.png"
       ],
       "registered": [],
       "catalogue": [
         {
           "key": "village",
-          "href": "/map/landmark/village.png"
+          "href": "/map/landmark/village-1.png"
         }
       ],
       "selectedNewVersion": false,
@@ -283,18 +263,15 @@
       "versions": [
         "waste-1.png",
         "waste-2.png",
+        "waste-3.png",
         "waste.png"
       ],
       "registered": [
         "waste-1.png",
-        "waste-2.png"
+        "waste-2.png",
+        "waste-3.png"
       ],
-      "catalogue": [
-        {
-          "key": "waste",
-          "href": "/map/terrain/waste.png"
-        }
-      ],
+      "catalogue": [],
       "selectedNewVersion": false,
       "integrationNote": null
     },
@@ -306,18 +283,15 @@
       "versions": [
         "water-1.png",
         "water-2.png",
+        "water-3.png",
         "water.png"
       ],
       "registered": [
         "water-1.png",
-        "water-2.png"
+        "water-2.png",
+        "water-3.png"
       ],
-      "catalogue": [
-        {
-          "key": "water",
-          "href": "/map/terrain/water.png"
-        }
-      ],
+      "catalogue": [],
       "selectedNewVersion": false,
       "integrationNote": null
     }

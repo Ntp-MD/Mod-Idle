@@ -20,7 +20,8 @@ import { newCurses } from '@sim/combat/curse';
 import { newMobStatusStore } from '@sim/combat/mobStatus';
 import { newKeystoneRuntimeState, validateKeystoneRuntime, validatePlayerStatuses } from '@engine/keystones.ts';
 import { reason as snapshotReason, arm as armSnapshot, SAVE_CFG } from '@sim/core/snapshot';
-import { E, TOWN, BASES, eng, loot, sm, tree, STAT_KEYS, type StatKey } from '../engine/client';
+import { E, TOWN, BASES, eng, fieldwork, loot, sm, tree, STAT_KEYS, type StatKey } from '../engine/client';
+import { craft } from '@sim/gear/craft';
 import { road, settlementZone, standingOrder } from '@sim/world/road';
 import { newEconomyState, validateEconomy } from '@sim/core/economy';
 import {
@@ -30,6 +31,7 @@ import {
   newFieldNormalizeReceipt, normalizeFieldArchive, normalizeFieldState,
 } from '@sim/world/field-area';
 import { push } from '@sim/core/log';
+import { hexAdjacent } from '../../../engine/hex.ts';
 
 // save.md: local only, three slots, IndexedDB with a localStorage fallback, JSON export/import.
 // The town layer is a schema bump, and an import at a different version is rejected rather than
@@ -71,10 +73,20 @@ import { push } from '@sim/core/log';
 const DB_NAME = 'modworld';
 const STORE = 'saves';
 const ACCOUNT_KEY = 'account';
-export const SCHEMA_VERSION = 28;
+// v29 adds storyteller metadata (frozen camp event IDs/variants/history/receipts), cache resolution, courier contracts and latest dungeon receipts.
+// v30 adds the planned-journey representation: a legacy `Walk` is re-read as frozen legs with a
+// completed-leg index and active-leg remaining time. Migration crosses no edge and emits no reward.
+export const SCHEMA_VERSION = 30;
 
 const SLOTS = ['slot1', 'slot2', 'slot3'] as const;
 export type SlotName = (typeof SLOTS)[number];
+
+/** TEMPORARY until the game is finished: slot persistence is off. No localStorage/IndexedDB
+ *  slot writes, no autosave, no Save nag. Flip back to false to restore the save flow.
+ *  The machinery below is untouched — only UI entry points read this flag.
+ *  AGENTS.md lists this as an active decision: do not flip, bypass, or "repair" it
+ *  without asking the user. */
+export const TEMP_DISABLE_SLOT_SAVES = true;
 
 /** What the three character slots share (`save.md` decision 2). */
 export interface Account {
@@ -612,6 +624,35 @@ function migrateLegacyPlacementMobs(s: GameState): void {
   for (const mob of active?.preparedGroup || []) visit(mob);
 }
 
+/** Validate the display-only dungeon recap after the run shape has been repaired. It can never pay. */
+function normalizeDungeonReceipt(s: GameState): void {
+  const receipt = (s as any).lastDungeonReceipt;
+  if (receipt == null) { (s as any).lastDungeonReceipt = null; return; }
+  const fail = () => { (s as any).lastDungeonReceipt = null; };
+  if (typeof receipt !== 'object' || Array.isArray(receipt)) return fail();
+  if (typeof receipt.key !== 'string' || !receipt.key.startsWith('dungeon:')) return fail();
+  if (!eng.ZONES.some((zone: any) => zone.id === receipt.zone)) return fail();
+  if (!Number.isSafeInteger(receipt.atSec) || receipt.atSec < 0) return fail();
+  if (!['cleared', 'retreated', 'pushed', 'left-zone'].includes(receipt.reason)) return fail();
+  const safe = (value: unknown) => Number.isSafeInteger(value) && (value as number) >= 0;
+  const resource = (entry: any) => {
+    if (!entry || typeof entry !== 'object') return false;
+    if (!['junk', 'stone', 'herb', 'potion', 'material'].includes(entry.bucket)) return false;
+    if (typeof entry.id !== 'string' || !entry.id.length) return false;
+    if (!Number.isSafeInteger(entry.count) || entry.count <= 0) return false;
+    if (entry.bucket === 'material') return fieldwork.F.materials.some((row: any) => row.id === entry.id);
+    if (entry.bucket === 'stone') return !!craft.STONE_NAME[entry.id] || entry.id.startsWith('imprint_');
+    if (entry.bucket === 'herb') return Object.hasOwn(s.farm?.herbs ?? {}, entry.id);
+    if (entry.bucket === 'potion') return Object.hasOwn(s.farm?.potions ?? {}, entry.id);
+    return true;
+  };
+  for (const key of ['kept', 'forfeited', 'uncollected'] as const) {
+    if (!Array.isArray(receipt[key]) || !receipt[key].every(resource)) return fail();
+  }
+  const gear = receipt.gear;
+  if (!gear || typeof gear !== 'object' || !['processed', 'retained', 'salvaged', 'rejected', 'forfeited'].every((key) => safe((gear as any)[key]))) return fail();
+}
+
 /** A save written by an earlier build is missing whole subsystems; fill the shape in. */
 export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): GameState {
   if (!Number.isInteger(fromVersion) || fromVersion < 0 || fromVersion > SCHEMA_VERSION) throw new Error(`schema version ${fromVersion} is not supported`);
@@ -669,7 +710,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
         blocksLeft: w.blocksLeft,
         secLeft: w.secLeft,
         blocksWalked: w.blocksWalked,
-      };
+      } as any;
     }
   }
   if (!s.walk) s.walk = null;
@@ -687,13 +728,19 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   };
   migrateLegacySite(s.cell);
   if (s.walk) {
-    migrateLegacySite(s.walk);
-    s.walk.site ??= null;
-    if ((s.walk as any).kind === 'wild') (s.walk as any).kind = 'bare';
+    const w = s.walk as any;
+    migrateLegacySite(w);
+    w.site ??= null;
+    if (w.kind === 'wild') w.kind = 'bare';
   }
   migrateLegacySite((s.fieldwork as any)?.camp?.cell);
   migrateLegacySite((s.fieldwork as any)?.campEncounters?.active?.origin);
   if (!s.dungeon) s.dungeon = null;
+  if (s.dungeon && (!Number.isSafeInteger((s.dungeon as any).startedAtSec) || (s.dungeon as any).startedAtSec < 0)) {
+    (s.dungeon as any).startedAtSec = Number.isFinite(s.clockSec) ? s.clockSec : 0;
+  }
+  if ((s as any).lastDungeonReceipt === undefined) (s as any).lastDungeonReceipt = null;
+  if ((s as any).lastDungeonReceipt !== null && typeof (s as any).lastDungeonReceipt !== 'object') (s as any).lastDungeonReceipt = null;
   // the quickbar arrived after v17: an old save opens with seven empty squares
   if (!Array.isArray(s.quickbar) || s.quickbar.length !== QUICKBAR_SLOTS)
     s.quickbar = Array.from({ length: QUICKBAR_SLOTS }, (_, i) => (Array.isArray(s.quickbar) ? s.quickbar[i] ?? null : null));
@@ -820,7 +867,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     delete (s as any).huntOrder;
     delete (s as any).zoneFocus;
   }
-  if (!s.town) s.town = newTown();
+  if (!s.town) s.town = newTown(s.seed);
   // Additive task-skip state: an older save has used no free skips today.
   s.town.freeSkipsToday ??= 0;
   if (!Number.isSafeInteger(s.town.freeSkipsToday) || s.town.freeSkipsToday < 0) s.town.freeSkipsToday = 0;
@@ -873,12 +920,16 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   s.alchemy = normalizeAlchemyLedger(s.alchemy, E.salvage.alchemy.outputs_per_tier_stone, fromVersion < 15 ? s.counters.salvaged : undefined);
   normalizeBlackMarket(s);
   if (s.dungeon) s.dungeon.escrow.materials ||= {};
+  normalizeDungeonReceipt(s);
   // The Expedition board is retired; clear any task and milestone the old schema could carry.
   if (s.town?.tasks) s.town.tasks = s.town.tasks.map((task) => (task as { kind?: string } | null)?.kind === 'expedition' ? null : task);
   if (s.town?.questMilestones) {
     for (const key of Object.keys(s.town.questMilestones)) if (key.startsWith('expedition:')) delete s.town.questMilestones[key];
   }
   normalizeDeliveries(s);
+  for (const summary of Object.values(s.town?.deliverySummaries ?? {}) as any[]) {
+    if (summary && typeof summary === 'object' && summary.declined == null) summary.declined = 0;
+  }
   normalizeQuestRewards(s);
   // a farm saved before the automation block existed gets it off; the player opts in
   if (s.farm && !s.farm.autoFarm) { s.farm.autoFarm = { plant: false, harvest: false, brew: false }; s.farm.lastAutoFarmAt = -9999; }
@@ -1094,29 +1145,19 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
       s.cell = cell;
     }
     if (s.walk) {
-      const destZone = s.walk.node ? settlementZone(s.walk.node) ?? s.zone : s.zone;
-      const from = s.walk.from;
-      const town = s.walk.kind === 'town' && s.walk.node ? road.nodeById(s.walk.node) : null;
+      const w: any = s.walk;
+      const destZone = w.node ? settlementZone(w.node) ?? s.zone : s.zone;
+      const from = w.from;
+      const town = w.kind === 'town' && w.node ? road.nodeById(w.node) : null;
       const to = town ? { q: town.q, r: town.r }
-        : remap({ ...s.walk.to, sub: s.walk.sub, site: s.walk.site }, destZone);
+        : remap({ ...w.to, sub: w.sub, site: w.site }, destZone);
       const path = onLand(from) && to ? road.routeLand(from, to) : null;
-      const blocks = path ? path.length - 1 : 0;
-      if (!path || blocks <= 0) s.walk = null;
+      if (!path || path.length - 1 <= 0) s.walk = null;
       else {
-        const walked = Number.isSafeInteger(s.walk.blocksWalked) ? s.walk.blocksWalked : 0;
-        const kept = Math.max(0, Math.min(walked, blocks));
-        s.walk.from = { q: from.q, r: from.r };
-        s.walk.to = { q: to!.q, r: to!.r };
-        s.walk.sub = (to as any)!.sub ?? null;
-        s.walk.site = (to as any)!.site ?? null;
-        s.walk.kind = town ? 'town' : s.walk.sub != null ? 'sub' : 'bare';
-        s.walk.blocksTotal = blocks;
-        s.walk.blocksWalked = kept;
-        s.walk.blocksLeft = blocks - kept;
-        const sec = Number(s.walk.secLeft);
-        s.walk.secLeft = Number.isFinite(sec) && sec > 0 ? sec : road.blockSec;
-        s.walk.node = road.owningNode(s.walk.to, standingOrder).id;
-        if (s.walk.terrain == null) s.walk.terrain = road.locationAt(s.walk.to)?.terrain ?? null;
+        w.from = { q: from.q, r: from.r };
+        w.to = { q: to!.q, r: to!.r };
+        const sec = Number(w.secLeft);
+        w.secLeft = Number.isFinite(sec) && sec > 0 ? sec : road.blockSec;
       }
     }
     const camp = s.fieldwork?.camp;
@@ -1140,8 +1181,141 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     // coordinates, then records the new position. The second pass is idempotent.
     normalizeMapJournal(s);
   }
+  // v30 · planned journey. A legacy `Walk` (from any earlier version) re-reads as frozen legs:
+  // reconstruct the deterministic route once, recover the last completed hex from `blocksWalked`,
+  // and carry the active block's remaining time forward. No edge is crossed and no event fires.
+  // An already-complete legacy walk becomes an explicit completed state (position committed,
+  // town unlocked, no replay). A malformed v30 journey is rejected with its path.
+  migrateJourney(s, fromVersion);
   refreshFilter(s);
   return s;
+}
+
+/** Commit a completed journey's destination without replaying a block or event. */
+function finalizeCompletedJourney(s: GameState, to: { q: number; r: number }): void {
+  const loc: any = road.locationAt(to);
+  const owner = road.owningNode(to, standingOrder);
+  s.cell = { q: to.q, r: to.r, sub: loc?.kind === 'sub' ? loc.index : null,
+    site: loc?.kind === 'site' ? loc.site ?? null : null,
+    terrain: loc?.terrain ?? null };
+  s.zone = settlementZone(owner.id) ?? s.zone;
+  if (road.cellRank(to) === 0) {
+    if (!s.town.visited.includes(owner.id)) s.town.visited.push(owner.id);
+    s.town.waypoint = owner.id;
+  }
+  s.walk = null;
+}
+
+function journeyError(path: string, detail: string): Error {
+  return new Error(`invalid save: journey ${path} ${detail}`);
+}
+
+function validJourneyHex(h: any, path: string): { q: number; r: number } {
+  if (!h || !Number.isInteger(h.q) || !Number.isInteger(h.r)) throw journeyError(path, 'needs integer coordinates');
+  if (!road.isLand(h)) throw journeyError(path, 'is not land');
+  return { q: h.q, r: h.r };
+}
+
+/** Strict v30 journey validation: rejects a malformed current-format journey with its path. */
+function validateCurrentJourney(s: GameState): void {
+  // No-op for idle saves: an absent `travelSeq` stays absent so re-exports stay byte-identical;
+  // accepted starts seed it, and a migrated in-flight walk keeps its own journey id.
+  if (s.travelSeq !== undefined && (!Number.isSafeInteger(s.travelSeq) || (s.travelSeq as number) < 0)) {
+    s.travelSeq = Math.max(0, Math.floor(Number(s.travelSeq)));
+  }
+  const w: any = s.walk;
+  if (!w) return;
+  if (!Number.isInteger(w.journeyId) || (w.journeyId as number) <= 0) throw journeyError('journeyId', 'must be a positive integer');
+  validJourneyHex(w.from, 'from');
+  validJourneyHex(w.to, 'to');
+  validJourneyHex(w.origin, 'origin');
+  if (w.origin.q !== w.from.q || w.origin.r !== w.from.r) throw journeyError('origin', 'must match the journey start');
+  if (!Array.isArray(w.legs) || !w.legs.length) throw journeyError('legs', 'needs the frozen ordered legs');
+  if (w.legs.length > 4096) throw journeyError('legs', 'exceeds the bounded route storage');
+  let prev = w.origin;
+  w.legs.forEach((leg: any, i: number) => {
+    validJourneyHex(leg?.from, `legs[${i}].from`);
+    validJourneyHex(leg?.to, `legs[${i}].to`);
+    if (leg.from.q !== prev.q || leg.from.r !== prev.r) throw journeyError(`legs[${i}]`, 'breaks the ordered chain');
+    if (!hexAdjacent(leg.from, leg.to)) throw journeyError(`legs[${i}]`, 'is not an adjacent walk edge');
+    prev = leg.to;
+  });
+  if (prev.q !== w.to.q || prev.r !== w.to.r) throw journeyError('to', 'does not match the frozen legs');
+  if (!Number.isInteger(w.stepIndex) || (w.stepIndex as number) < 0 || (w.stepIndex as number) > w.legs.length) {
+    throw journeyError('stepIndex', 'is outside the frozen legs');
+  }
+  // An in-flight v30 dev save may still carry the derived projections: check agreement, then drop
+  // them. Counters and destination facts are read from the legs and World, never stored twice.
+  if (w.blocksTotal !== undefined && w.blocksTotal !== w.legs.length) throw journeyError('blocksTotal', 'does not agree with the frozen legs');
+  if (w.blocksWalked !== undefined && (w.blocksWalked !== w.stepIndex || w.blocksLeft !== w.legs.length - w.stepIndex)) {
+    throw journeyError('blocksWalked', 'does not agree with the completed-leg index');
+  }
+  if (!Number.isFinite(w.secLeft)) {
+    if (Number.isFinite(w.activeSec)) w.secLeft = w.activeSec;
+    else throw journeyError('secLeft', 'needs a finite remaining time');
+  }
+  if (!Number.isInteger(w.lastEventStep) || (w.lastEventStep as number) < 0 || (w.lastEventStep as number) > w.stepIndex) {
+    throw journeyError('lastEventStep', 'must not pass the completed legs');
+  }
+  delete w.blocksTotal;
+  delete w.blocksLeft;
+  delete w.blocksWalked;
+  delete w.activeSec;
+  delete w.node;
+  delete w.kind;
+  delete w.sub;
+  delete w.site;
+  delete w.terrain;
+  if (w.stepIndex >= w.legs.length) finalizeCompletedJourney(s, w.to);
+}
+
+/** Legacy → journey repr, idempotent: a converted walk already satisfies the v30 validation. */
+function migrateJourney(s: GameState, fromVersion: number): void {
+  if (fromVersion >= 30) {
+    validateCurrentJourney(s);
+    return;
+  }
+  const w: any = s.walk;
+  if (!w || typeof w !== 'object') {
+    s.walk = null;
+    return;
+  }
+  // Early legacy shapes that never held coordinates were handled above; anything else without
+  // land endpoints is dropped rather than left to compute NaN blocks.
+  if (!Number.isInteger(w.from?.q) || !Number.isInteger(w.to?.q)) {
+    s.walk = null;
+    return;
+  }
+  const path = road.routeLand(w.from, w.to);
+  const blocks = path ? path.length - 1 : 0;
+  if (!path || blocks <= 0) {
+    s.walk = null;
+    return;
+  }
+  const walkedRaw = Number.isSafeInteger(w.blocksWalked) ? w.blocksWalked : 0;
+  const walked = Math.max(0, Math.min(walkedRaw, blocks));
+  const completed = walkedRaw >= blocks || (Number.isSafeInteger(w.blocksTotal) && w.blocksTotal > 0 && walkedRaw >= w.blocksTotal);
+  if (completed) {
+    finalizeCompletedJourney(s, w.to);
+    return;
+  }
+  const legs = path.slice(1).map((cell: any, i: number) => ({ from: { q: path[i].q, r: path[i].r }, to: { q: cell.q, r: cell.r } }));
+  const sec = Number(w.secLeft);
+  const secLeft = Number.isFinite(sec) ? sec : road.blockSec;
+  const seq = (s.travelSeq ?? 0) as number;
+  const journeyId = Number.isInteger(w.journeyId) && w.journeyId > 0 ? w.journeyId : (seq + 1);
+  s.travelSeq = Math.max(seq, journeyId);
+  s.walk = {
+    from: { q: w.from.q, r: w.from.r },
+    to: { q: w.to.q, r: w.to.r },
+    origin: { q: w.from.q, r: w.from.r },
+    fromZone: s.zone,
+    journeyId,
+    legs,
+    stepIndex: walked,
+    secLeft,
+    lastEventStep: Math.min(walked, Math.max(0, Math.floor(Number(w.lastEventStep ?? 0)))),
+  };
 }
 
 export function exportJson(state: GameState): string {

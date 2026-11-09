@@ -3,6 +3,10 @@
   import { sideSpawnWords } from '../hud/hud';
   import { destinationSite, type MapDestination, type DestinationAction } from './destination';
   import type { MapIntel } from './map-intel';
+  import StoryScene from '../story/StoryScene.svelte';
+  import { dungeonStoryView, roadStoryView, siteStoryView } from '../story/story-presenters';
+  import type { DungeonReceipt } from '../../sim/world/dungeon';
+  import { stoneName } from '@sim/gear/craft';
   import cancelClose from '../../icon/ui/cancel-close.png';
   import chevronDown from '../../icon/ui/chevron-down.png';
 
@@ -11,6 +15,7 @@
   let {
     dest, primary, selected = true, writable = true, campHere = false, fightActive = false, warpReason = '', notice = '',
     settlement, busy = false, fare = 0, afford = true, dungeon = null, intel = null,
+    lastEvent = null, dungeonReceipt = null,
     onprimary, onwarp, onclear, oncampui = () => {}, onSetCamp = () => {},
     ontrack = () => {}, goalPinned = false,
   }: {
@@ -32,6 +37,10 @@
     afford?: boolean;
     /** the run the card speaks for: inside with a count, or outside with the cooldown left */
     dungeon?: { active: boolean; left: number; total: number; cooldown: number } | null;
+    /** latest road/site event record, rendered as the shared receipt */
+    lastEvent?: { q: number; r: number; text: string; atSec: number; source?: 'road' | 'site'; resourceDeltas?: { bucket: string; id: string; count: number }[]; hungerDelta?: number } | null;
+    /** latest read-only dungeon result */
+    dungeonReceipt?: DungeonReceipt | null;
     onprimary: () => void;
     onwarp: (id: string) => void;
     onclear: () => void;
@@ -65,6 +74,29 @@
     const speciesIds = subzone ? (subzone.species || []) : eng.speciesInZone(settlement.zone);
     return [...new Set(speciesIds.flatMap((id: string) => eng.uniquesOf(id, settlement.zone).map((unique: any) => unique.name)))];
   });
+  const deltas = $derived((lastEvent?.resourceDeltas ?? []).map((entry) => ({
+    id: entry.id, count: entry.count, name: fieldwork.foodById[entry.id]?.name ?? fieldwork.materialById[entry.id]?.name ?? entry.id,
+  })));
+  const storyEventView = $derived(lastEvent ? (lastEvent.source === 'site'
+    ? siteStoryView({ key: `site:${lastEvent.q},${lastEvent.r}:${lastEvent.atSec}:${lastEvent.text}`, mode: 'result', siteName: intel?.site?.name ?? 'Trail site', text: lastEvent.text, resourceDeltas: deltas, hungerDelta: lastEvent.hungerDelta })
+    : roadStoryView({ key: `road:${lastEvent.q},${lastEvent.r}:${lastEvent.atSec}:${lastEvent.text}`, atSec: lastEvent.atSec, text: lastEvent.text, resourceDeltas: deltas, hungerDelta: lastEvent.hungerDelta })) : null);
+  const siteInspectView = $derived(intel?.site && !intel.site.claimed && !intel.recentEvent
+    ? siteStoryView({ key: `site-inspect:${intel.site.id}`, mode: 'inspect', siteName: intel.site.name }) : null);
+  const receiptName = (entry: { bucket: string; id: string }) => entry.bucket === 'material'
+    ? fieldwork.materialById[entry.id]?.name ?? entry.id
+    : entry.bucket === 'stone' ? stoneName(entry.id) : entry.id;
+  const dungeonStory = $derived(dungeon?.active
+    ? dungeonStoryView({ key: `dungeon-entry:${dungeon.left}:${dungeon.total}`, entry: dungeon })
+    : dungeonReceipt ? dungeonStoryView({
+      key: dungeonReceipt.key,
+      receipt: {
+        reason: dungeonReceipt.reason,
+        kept: dungeonReceipt.kept.map((entry) => ({ ...entry, name: receiptName(entry) })),
+        forfeited: dungeonReceipt.forfeited.map((entry) => ({ ...entry, name: receiptName(entry) })),
+        uncollected: dungeonReceipt.uncollected.map((entry) => ({ ...entry, name: receiptName(entry) })),
+        gear: dungeonReceipt.gear,
+      },
+    }) : null);
   const zoneBoss = $derived(E.mob.bosses.find((boss: any) => boss.zone === settlement.zone) ?? null);
   /** The side's own pack, Elite rate and body mix — what standing here rolls (`mob.spawn_packs`). */
   const sideWords = $derived(sideSpawnWords(subzone?.spawn));
@@ -134,15 +166,17 @@
       </dl>
       {#if intel.campDistance != null}<p class="text-note">Field Camp · {intel.campDistance} {intel.campDistance === 1 ? 'block' : 'blocks'} from this destination</p>{/if}
       {#if intel.site?.claimed}<p class="text-note">Site explored</p>{/if}
-      {#if intel.recentEvent}<p class="text-good">{intel.recentEvent}</p>{/if}
     </div>
+    {#if storyEventView}<StoryScene view={storyEventView} onaction={() => {}} />{/if}
+    {#if siteInspectView}<StoryScene view={siteInspectView} onaction={() => {}} />{/if}
   {/if}
   {#if dest.kind === 'town' && !dest.self}
     {#if !dest.here}<p class="text-note">First trip on foot · Waypoint opens after arrival.</p>
     {:else if warpBlocked}<p class="text-note">{warpBlocked}</p>{/if}
   {/if}
-  {#if isDungeon && dest.self && dungeon?.active}
-    <p class="text-note">{dungeon.left}/{dungeon.total} mobs left · Retreat rescues {E.dungeon.retreat_keep_min}–{E.dungeon.retreat_keep_max} random stacks.</p>
+  {#if isDungeon && dest.self && dungeonStory}
+    <StoryScene view={dungeonStory} onaction={() => {}} />
+    {#if dungeon?.active}<p class="text-note">Retreat rescues {E.dungeon.retreat_keep_min}–{E.dungeon.retreat_keep_max} random stacks.</p>{/if}
   {/if}
 
   <details class="dest-section" name="map-destination-sections">

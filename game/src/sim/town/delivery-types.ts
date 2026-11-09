@@ -19,9 +19,21 @@ export interface DeliveryContract {
   terminalAt: number | null; baseGold: number; lastQuantity: number; lastGold: number;
   paidBonus: { gold: number; stones: StoneReward[]; skill: string | null; fallback: boolean; treePoints?: number; attainment?: number; choice?: string } | null;
   recapAcknowledged: boolean; announced: boolean;
+  /** A local request (`request`) or a cross-city courier contract (`courier`). */
+  kind: 'request' | 'courier';
+  /** Settlement the goods are handed in at; equals `town` for a local request. */
+  destinationTown: string;
+  /** The NPC whose bucket the requested good falls in, saved at creation. */
+  issuerNpcId: string;
+  /** Delivery-clock second a courier was accepted at; always null for local requests. */
+  acceptedAtDeliverySec: number | null;
+  /** Delivery-clock second the offer was created at; legacy local requests use 0. */
+  offeredAtDeliverySec: number;
+  /** Why a terminal contract ended; null for open/completed, declined only for a declined courier. */
+  endReason: 'expired' | 'declined' | null;
 }
 export interface DeliverySummary {
-  unread: number; completed: number; expired: number;
+  unread: number; completed: number; expired: number; declined: number;
   goods: Record<string, { quantity: number; gold: number }>;
   paidGold: number; paidStones: Record<string, number>; paidSkills: Record<string, number>;
   /** Quest-granted passive-tree points actually paid, not the ones promised. */
@@ -34,5 +46,5 @@ export interface DeliverySummary {
   forfeitedGold: number; forfeitedStones: Record<string, number>;
   forfeitedSkills: Record<string, number>; forfeitedFallback: Record<string, number>;
 }
-export const newDeliverySummary = (): DeliverySummary => ({ unread: 0, completed: 0, expired: 0, goods: {},
+export const newDeliverySummary = (): DeliverySummary => ({ unread: 0, completed: 0, expired: 0, declined: 0, goods: {},
   paidGold: 0, paidStones: {}, paidSkills: {}, forfeitedGold: 0, forfeitedStones: {}, forfeitedSkills: {}, forfeitedFallback: {} });

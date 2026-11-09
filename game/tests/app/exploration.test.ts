@@ -103,7 +103,7 @@ describe('staying put without Forward travel', () => {
     const restored = importJson(exportJson(state));
     expect(restored.walk).toEqual(walk);
     tick(restored, { online: true, autoSkills: false });
-    expect(restored.walk?.blocksWalked).toBe(1);
+    expect(restored.walk?.stepIndex).toBe(1);
   });
 
 });

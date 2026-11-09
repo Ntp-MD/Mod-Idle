@@ -1,4 +1,6 @@
 export type HudRegionId = 'objectives' | 'tasks' | 'target' | 'menu' | 'field' | 'commands' | 'feed' | 'actionbar';
+export const HUD_GRID_SIZE = 15;
+export const HUD_GRID_CELLS = HUD_GRID_SIZE * HUD_GRID_SIZE;
 export type GridAlign = 'start' | 'center' | 'end' | 'stretch';
 export type HudPlacement = 'grid' | 'absolute';
 
@@ -130,7 +132,7 @@ export function copyHudLayout(layout: Partial<HudLayout> = DEFAULT_HUD_LAYOUT): 
 export function validGridArea(area: GridArea): boolean {
   if (!area || typeof area !== 'object') return false;
   return [area.rowStart, area.rowEnd, area.columnStart, area.columnEnd]
-    .every((coordinate) => Number.isInteger(coordinate) && coordinate >= 1 && coordinate <= 15)
+    .every((coordinate) => Number.isInteger(coordinate) && coordinate >= 1 && coordinate <= HUD_GRID_SIZE)
     && area.rowStart <= area.rowEnd && area.columnStart <= area.columnEnd;
 }
 
@@ -151,10 +153,10 @@ export function regionStyleCss(region: HudRegion): string {
 /** Percent box a grid area maps to on the stage — the starting rect when a region goes absolute. */
 export function rectFromArea(area: GridArea): RegionRect {
   return {
-    x: ((area.columnStart - 1) / 15) * 100,
-    y: ((area.rowStart - 1) / 15) * 100,
-    w: ((area.columnEnd - area.columnStart + 1) / 15) * 100,
-    h: ((area.rowEnd - area.rowStart + 1) / 15) * 100,
+    x: ((area.columnStart - 1) / HUD_GRID_SIZE) * 100,
+    y: ((area.rowStart - 1) / HUD_GRID_SIZE) * 100,
+    w: ((area.columnEnd - area.columnStart + 1) / HUD_GRID_SIZE) * 100,
+    h: ((area.rowEnd - area.rowStart + 1) / HUD_GRID_SIZE) * 100,
   };
 }
 
@@ -332,9 +334,9 @@ export function salvageHudLayout(input: string | unknown): MigratedHudLayout {
 }
 
 export function hudGridTemplate(layout: HudLayout): string {
-  const rows: string[] = ['"' + Array(17).fill('.').join(' ') + '"'];
-  for (let row = 1; row <= 15; row++) {
-    const cells = Array(15).fill('.');
+  const rows: string[] = ['"' + Array(HUD_GRID_SIZE + 2).fill('.').join(' ') + '"'];
+  for (let row = 1; row <= HUD_GRID_SIZE; row++) {
+    const cells = Array(HUD_GRID_SIZE).fill('.');
     for (const id of regionIds) {
       if (id === 'field') continue;
       const area = layout[id].area;
@@ -344,7 +346,7 @@ export function hudGridTemplate(layout: HudLayout): string {
     }
     rows.push('"' + ['.', ...cells, '.'].join(' ') + '"');
   }
-  rows.push('"' + Array(17).fill('.').join(' ') + '"');
+  rows.push('"' + Array(HUD_GRID_SIZE + 2).fill('.').join(' ') + '"');
   return rows.join(' ');
 }
 
@@ -357,7 +359,7 @@ export function gridAreaCss(area: GridArea, outerGutter = false): string {
 export function moveGridArea(area: GridArea, row: number, column: number): GridArea {
   const height = area.rowEnd - area.rowStart;
   const width = area.columnEnd - area.columnStart;
-  const rowStart = Math.min(15 - height, Math.max(1, row));
-  const columnStart = Math.min(15 - width, Math.max(1, column));
+  const rowStart = Math.min(HUD_GRID_SIZE - height, Math.max(1, row));
+  const columnStart = Math.min(HUD_GRID_SIZE - width, Math.max(1, column));
   return { rowStart, rowEnd: rowStart + height, columnStart, columnEnd: columnStart + width };
 }

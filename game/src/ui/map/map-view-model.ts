@@ -1,122 +1,20 @@
-import type { FieldSite, GameState } from '@sim/core/types';
+/** Read-only state projection; all content, discovery and gameplay queries finish before paint. */
+import type { GameState } from '@sim/core/types';
 import { currentCell, cellsTo, rankOf, trailCells, walkedCells } from '@sim/world/road';
-import { settlementById } from '@sim/town/town';
-import { hexDistance, hexKey, mapKnowledge, trailSiteKind, trailSites, type MapKnowledge } from '@sim/world/map-exploration';
+import { resolveCell } from '@sim/world/travel';
+import { hexKey, trailSiteKind, trailSites } from '@sim/world/map-exploration';
 import { E, eng } from '../../engine/client';
-import { adventureView, type AdventureView } from './map-adventure';
+import { adventureTitle, adventureView, stackAdventurePlacements, uniqueTraceSpecies } from './map-adventure';
+import { characterIcon, mobSpeciesArt } from '../../icon';
+import type { AxialKey, MapCellIcon, MapCellContent, MapPaintModel, MapStaticCell, MapViewOptions, Picked } from './map-types';
 
-import type { MapPoint } from './map-camera';
+export interface MapPaintInput { state: GameState; cells: readonly MapStaticCell[]; selected: Picked | null; options: MapViewOptions }
 
 /** The band ramp: dark green at the first band of levels, deep red at the last. */
 export const ramp = (band: number) => {
   const t = band / (E.mob.zones.length - 1);
   return `hsl(${Math.round(94 - 82 * t)} 36% ${Math.round(20 + 20 * t)}%)`;
 };
-
-/** What a cell is called, read off the sheet's own marks. */
-export function cellLabel(node: Element): Picked {
-  const ax = (node.getAttribute('data-ax') || '0,0').split(',').map(Number);
-  const key = node.getAttribute('data-cell') || '';
-  const sub = node.getAttribute('data-sub');
-  const site = node.getAttribute('data-site') as FieldSite | null;
-  const id = node.getAttribute('data-node');
-  const terrain = node.getAttribute('data-terrain');
-  const h = { q: ax[0], r: ax[1] };
-  if (id && rankOf(h) === 0) return { key, q: h.q, r: h.r, kind: 'town', label: settlementById(id)!.name, sub: null, site: null, terrain, nodeId: id };
-  if (id && sub != null) {
-    const s = settlementById(id)!;
-    return { key, q: h.q, r: h.r, kind: 'sub', label: (eng.zoneById(s.zone).subzones || [])[Number(sub)]?.name || '', sub: Number(sub), site: null, terrain, nodeId: id };
-  }
-  if (id && site != null) {
-    const s = settlementById(id)!;
-    const label = site === 'dungeon' ? `${s.name} Wild Side · Dungeon`
-      : site === 'mine' ? `${s.name} Wild Side · Mine`
-        : site === 'grove' ? `${s.name} Wild Side · Grove` : `${s.name} Wild Side · Fishing`;
-    return { key, q: h.q, r: h.r, kind: 'bare', site, label, sub: null, terrain, nodeId: id };
-  }
-  return { key, q: h.q, r: h.r, kind: 'bare', label: `Hunting Ground · ${key}`, sub: null, site: null, terrain };
-}
-
-/** Axial identity is the world key below the SVG; display keys such as A1 are presentation. */
-export type AxialKey = `${number},${number}`;
-
-export type PickedKind = 'town' | 'sub' | 'bare';
-/** The clicked cell's presentation identity: its display key is not world identity. */
-export interface Picked {
-  key: string;
-  q: number;
-  r: number;
-  kind: PickedKind;
-  label: string;
-  sub: number | null;
-  site: FieldSite | null;
-  terrain: string | null;
-  /** The owning settlement when the sheet names one; display/selection support only. */
-  nodeId?: string | null;
-}
-
-export interface MapViewOptions {
-  view: 'terrain' | 'band' | 'gate';
-  gateLevel: number;
-  showIds: boolean;
-  showWalk: boolean;
-  townId: string;
-  showNames: boolean;
-  cleanMap: boolean;
-  showHexCalibration: boolean;
-}
-
-export interface MapStaticCell {
-  ax: AxialKey;
-  picked: Picked;
-  nodeId: string | null;
-  zone: number | null;
-  originalTitle: string;
-  tone: string;
-  edgeOpacity: number;
-  band: number | null;
-  center: MapPoint;
-  radius: number;
-  points: readonly MapPoint[];
-  anchor: boolean;
-}
-
-export interface MapPaintInput {
-  state: GameState;
-  cells: readonly MapStaticCell[];
-  selected: Picked | null;
-  options: MapViewOptions;
-}
-
-export interface MapLabel {
-  ax: AxialKey;
-  key: string;
-  name: string;
-  levelText: string;
-  kind: PickedKind;
-  discovery: MapKnowledge;
-  standing: boolean;
-}
-
-export interface MapPaintModel {
-  surface: {
-    options: MapViewOptions;
-    playerAx: AxialKey;
-    selectedAx: AxialKey | null;
-    campAx: AxialKey | null;
-    selectedTown: string | null;
-    hereTown: string | null;
-    targetTown: string | null;
-    pinHereAx: AxialKey | null;
-    pinTargetAx: AxialKey | null;
-    walking: boolean;
-    route: readonly AxialKey[];
-    walked: readonly AxialKey[];
-    cells: readonly { ax: AxialKey; fill: string; opacity: number; locked: boolean }[];
-  };
-  adventure: AdventureView;
-  labels: readonly MapLabel[];
-}
 
 /** Live danger reads the authored placement pool; a missing or unreadable zone has no band. */
 export function placementPoolBounds(zone: number | null, subzone: number | null): { lo: number; hi: number } | null {
@@ -134,7 +32,7 @@ function adventureCell(cell: MapStaticCell) {
   const zone = cell.zone;
   const subzone = cell.picked.kind === 'sub' && cell.picked.sub != null ? cell.picked.sub : undefined;
   const species = zone != null && subzone != null ? eng.zoneById(zone).subzones?.[subzone]?.species || [] : [];
-  const unique = species.find((id) => eng.uniquesOf(id, zone!).length > 0);
+  const unique = zone != null ? uniqueTraceSpecies(species, zone) : undefined;
   return {
     ax: cell.ax,
     q: Number(cell.ax.split(',')[0]),
@@ -162,7 +60,8 @@ export function buildMapPaintModel(input: MapPaintInput): MapPaintModel {
   const cellByAx = new Map(cells.map((cell) => [cell.ax, cell]));
   const selectedTown = selectedAx ? cellByAx.get(selectedAx)?.nodeId ?? null : null;
   const hereTown = !walk && rankOf(feet) === 0 ? options.townId : null;
-  const targetTown = walk && walk.kind === 'town' ? walk.node : null;
+  const walkDest = walk ? resolveCell(walk.to) : null;
+  const targetTown = walkDest?.kind === 'town' ? walkDest.ownerId : null;
   const townCell = (id: string | null) => {
     if (!id) return null;
     const owned = cells.filter((cell) => cell.nodeId === id);
@@ -171,7 +70,6 @@ export function buildMapPaintModel(input: MapPaintInput): MapPaintModel {
   const routeKeys = (walk ? trailCells(state)
     : selected ? cellsTo(state, { q: selected.q, r: selected.r }) : []) as AxialKey[];
   const walkedKeys = (walk ? walkedCells(state) : []) as AxialKey[];
-  const walkedSet = new Set(walkedKeys);
 
   const surfaceCells = cells.map((cell) => {
     const bounds = placementPoolBounds(cell.zone, cell.picked.kind === 'sub' && cell.picked.sub != null ? cell.picked.sub : null);
@@ -187,15 +85,19 @@ export function buildMapPaintModel(input: MapPaintInput): MapPaintModel {
 
   const trail = new Map(trailSites(state).map((site) => [hexKey(site), { site, claimed: !!state.mapJournal?.claimedSites?.includes(site.id), kind: trailSiteKind(site) }]));
   const adventureCells = cells.map(adventureCell);
-  const adventure = adventureView(state, adventureCells);
+  const adventure = adventureView(state, adventureCells, selectedAx);
+  const stacked = stackAdventurePlacements(adventure.placements);
+  const signalByAx = new Map(stacked.map(signal => [signal.ax, signal]));
   const placementLabels = new Map<string, string[]>();
   for (const placement of adventure.placements) {
     const list = placementLabels.get(placement.ax) ?? [];
     list.push(placement.label);
     placementLabels.set(placement.ax, list);
   }
-  const labels: MapLabel[] = cells.map((cell) => {
-    const discovery = mapKnowledge(state, adventureCells[cells.indexOf(cell)]);
+  const markByAx = new Map(adventure.marks.map(mark => [mark.ax, mark]));
+  const content: MapCellContent[] = cells.map((cell) => {
+    const mark = markByAx.get(cell.ax)!;
+    const discovery = mark.discovery;
     const trailEntry = trail.get(cell.ax);
     const placements = placementLabels.get(cell.ax) ?? [];
     const titled = cell.originalTitle.replace(/\s*·\s*Lv\s*\d+[–-]\d+\s*$/, '');
@@ -204,16 +106,30 @@ export function buildMapPaintModel(input: MapPaintInput): MapPaintModel {
       : trailEntry
         ? trailEntry.kind.name + (trailEntry.claimed ? ' · explored' : '')
         : cell.picked.kind === 'bare' ? titled : cell.picked.label;
-    const name = discovery === 'unknown' ? base : [base, ...placements].join(' · ');
+    const name = discovery === 'unknown' && cell.picked.kind !== 'town' ? '' : base.split(' · ')[0];
+    const uniqueName = mark.uniqueSpecies ? eng.speciesById(mark.uniqueSpecies)?.name ?? mark.uniqueSpecies : '';
+    const details = discovery === 'unknown' ? [] : [...placements];
+    if (uniqueName) details.unshift(uniqueName + ' territory · Unique possible');
+    const title = [adventureTitle(cell.originalTitle, cell.picked.kind === 'town', discovery), ...details].join(' · ');
     const bounds = placementPoolBounds(cell.zone, cell.picked.kind === 'sub' && cell.picked.sub != null ? cell.picked.sub : null);
+    const icons: MapCellIcon[] = [];
+    if (cell.ax === playerAx) icons.push({ href: characterIcon(), label: 'Your position', role: 'player' });
+    const signal = signalByAx.get(cell.ax);
+    if (signal && signal.source !== 'resource') icons.push({ href: signal.icon.href, label: signal.label, role: 'signal', quiet: signal.icon.quiet });
+    if (cell.picked.kind === 'town') icons.push({ href: '/map/landmark/town.png', label: cell.picked.label, role: 'town' });
+    for (const site of adventure.placements.filter(p => p.ax === cell.ax && p.source === 'resource')) {
+      icons.push({ href: site.icon.href, label: site.label, role: 'site' });
+    }
+    for (const id of mark.roster) {
+      const href = mobSpeciesArt(id);
+      if (!icons.some(item => item.href === href)) icons.push({ href, label: eng.speciesById(id)?.name ?? id, role: 'mob', unique: id === mark.uniqueSpecies });
+    }
     return {
       ax: cell.ax,
-      key: cell.picked.key,
       name,
-      levelText: discovery === 'unknown' || !bounds ? '' : bounds.lo === bounds.hi ? `Lv ${bounds.lo}` : `Lv ${bounds.lo}–${bounds.hi}`,
-      kind: cell.picked.kind,
-      discovery,
-      standing: cell.ax === playerAx,
+      title,
+      levelText: !bounds ? '' : bounds.lo === bounds.hi ? `Lv ${bounds.lo}` : `Lv ${bounds.lo}–${bounds.hi}`,
+      icons,
     };
   });
 
@@ -233,16 +149,7 @@ export function buildMapPaintModel(input: MapPaintInput): MapPaintModel {
       walked: walkedKeys,
       cells: surfaceCells,
     },
-    adventure,
-    labels,
+    adventure: { ...adventure, placements: stacked },
+    content,
   };
 }
-
-/** The axial key of one cell, so the input controller can compare cached neighbours. */
-export const axialOf = (cell: MapStaticCell): AxialKey => cell.ax;
-/** Segment identity is the axial key; a display key is never world identity. */
-export const axialDistance = (a: AxialKey, b: AxialKey): number => {
-  const [aq, ar] = a.split(',').map(Number);
-  const [bq, br] = b.split(',').map(Number);
-  return hexDistance({ q: aq, r: ar }, { q: bq, r: br });
-};

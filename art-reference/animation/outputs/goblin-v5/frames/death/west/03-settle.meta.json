@@ -4,8 +4,8 @@
   "action": "death",
   "direction": "west",
   "pose": "03-settle",
-  "source": "art-reference/monsters/humanoid/goblin/animation/poses/death/west/03-settle.png",
-  "sourceMetadata": "art-reference/monsters/humanoid/goblin/animation/poses/death/west/03-settle.meta.json",
+  "source": "archive/art-reference/monsters/humanoid/goblin/animation/poses/death/west/03-settle.png",
+  "sourceMetadata": "archive/art-reference/monsters/humanoid/goblin/animation/poses/death/west/03-settle.meta.json",
   "sourcePixelsModified": false,
   "frameCanvas": {
     "width": 384,

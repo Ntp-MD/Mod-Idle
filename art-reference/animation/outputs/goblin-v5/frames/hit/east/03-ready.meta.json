@@ -4,8 +4,8 @@
   "action": "hit",
   "direction": "east",
   "pose": "03-ready",
-  "source": "art-reference/monsters/humanoid/goblin/animation/poses/hit/east/03-ready.png",
-  "sourceMetadata": "art-reference/monsters/humanoid/goblin/animation/poses/hit/east/03-ready.meta.json",
+  "source": "archive/art-reference/monsters/humanoid/goblin/animation/poses/hit/east/03-ready.png",
+  "sourceMetadata": "archive/art-reference/monsters/humanoid/goblin/animation/poses/hit/east/03-ready.meta.json",
   "sourcePixelsModified": false,
   "frameCanvas": {
     "width": 384,

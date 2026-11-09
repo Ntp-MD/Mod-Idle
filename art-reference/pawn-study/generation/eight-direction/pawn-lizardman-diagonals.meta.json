@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "lizardman",
+  "name": "Lizardman",
+  "generatedSource": "art-reference/pawn-study/generation/eight-direction/pawn-lizardman-diagonals.png",
+  "sourceReferences": [
+    "art-reference/pawn-study/sheets/lizardman.png",
+    "art-reference/pawn-study/atlases/lizardman.png"
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "promptSummary": "Generate Lizardman bust diagonals preserving olive-green scales, long snout, yellow eyes, dorsal head spines, diagonal sash, brown belt/skirt and long tail; no arms/legs; NE/NW rear, SE/SW mirrored front.",
+  "requestedLayout": {
+    "rows": 2,
+    "columns": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west"
+  },
+  "actualImage": {
+    "width": 1254,
+    "height": 1254,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "alpha": "transparent",
+    "visibleBoundsAlphaThreshold": 16,
+    "visibleBoundsPx": {
+      "northEast": {
+        "x": 254,
+        "y": 100,
+        "width": 258,
+        "height": 404
+      },
+      "southEast": {
+        "x": 160,
+        "y": 97,
+        "width": 271,
+        "height": 407
+      },
+      "southWest": {
+        "x": 202,
+        "y": 84,
+        "width": 279,
+        "height": 408
+      },
+      "northWest": {
+        "x": 142,
+        "y": 84,
+        "width": 254,
+        "height": 408
+      }
+    },
+    "feetBaselineYByCellPx": {
+      "northEast": 503,
+      "southEast": 503,
+      "southWest": 491,
+      "northWest": 491
+    }
+  },
+  "review": {
+    "identity": true,
+    "directionPose": "candidate appears to follow NE/NW rear and SE/SW mirrored front",
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed",
+    "pose": true
+  },
+  "reviewConcerns": [
+    "Skirt/tail baseline varies by 12px between rows; review whether this is acceptable before packing."
+  ],
+  "previousCandidate": "art-reference/pawn-study/generation/eight-direction/pawn-lizardman-diagonals-v1.png",
+  "sizeReference": "art-reference/pawn-study/atlases/lizardman.png",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

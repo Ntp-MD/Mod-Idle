@@ -1,0 +1,148 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "elf",
+  "name": "Elf",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 66,
+      "y": 68,
+      "width": 125,
+      "height": 156,
+      "offsetX": 66,
+      "offsetY": 68
+    },
+    {
+      "x": 331,
+      "y": 68,
+      "width": 107,
+      "height": 156,
+      "offsetX": 75,
+      "offsetY": 68
+    },
+    {
+      "x": 597,
+      "y": 76,
+      "width": 87,
+      "height": 148,
+      "offsetX": 85,
+      "offsetY": 76
+    },
+    {
+      "x": 849,
+      "y": 68,
+      "width": 94,
+      "height": 156,
+      "offsetX": 81,
+      "offsetY": 68
+    },
+    {
+      "x": 69,
+      "y": 324,
+      "width": 119,
+      "height": 156,
+      "offsetX": 69,
+      "offsetY": 68
+    },
+    {
+      "x": 337,
+      "y": 324,
+      "width": 95,
+      "height": 156,
+      "offsetX": 81,
+      "offsetY": 68
+    },
+    {
+      "x": 597,
+      "y": 331,
+      "width": 87,
+      "height": 149,
+      "offsetX": 85,
+      "offsetY": 75
+    },
+    {
+      "x": 844,
+      "y": 324,
+      "width": 105,
+      "height": 156,
+      "offsetX": 76,
+      "offsetY": 68
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/monsters/humanoid/elf/elf/reference.png",
+  "sourceSha256": "2c922138374a8b54bed145c9dc5fd7c831638bfef5cd00676bdc67a878bf24e2",
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-elf-diagonals.png",
+  "diagonalSourceSha256": "b42cd509d1b7b7cbd0b82a38785776268b3c8e5cd9e06f2a97532f6c0ca0a18c",
+  "diagonalScaleFactor": 0.369668
+}

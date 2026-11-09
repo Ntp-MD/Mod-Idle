@@ -28,7 +28,8 @@ function rangedFight(distance = 3, over: Record<string, unknown> = {}) {
   const state = newGame(41);
   setLevel(state, 30);
   state.hunting = true;
-  const mob = spawnMob(mulberry32(23), 1, 'normal');
+  // Broken Banner Camp: the all-aggressive pool (the zone-1 bare draw now lands passive beetle).
+  const mob = spawnMob(mulberry32(23), 1, 'normal', undefined, 2);
   Object.assign(mob, {
     id: 'archer', species: 'Archer', hp: 1e8, hpMax: 1e8, ps: 1, acc: 1e9, evasion: 0, dodgeRate: 0,
     armour: 0, line: 'stand-off', damage: 'physical', innate: [], skillIds: [], hitsPerSec: 1, atkTimer: 0,

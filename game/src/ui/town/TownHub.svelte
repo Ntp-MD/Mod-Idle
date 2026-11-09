@@ -10,10 +10,12 @@
    *
    * Every number is read from the sim modules the cages already test; nothing here restates a rule.
    */
-  import { E, eng } from '../../engine/client';
-  import { canBuy, stockOf, settlementById, rowById } from '@sim/town/town';
+  import { E, eng, TOWN } from '../../engine/client';
+  import { canBuy, stockOf, settlementById, rowById, npcOf } from '@sim/town/town';
   import { slotsAvailable, slotsUsed } from '@sim/gear/slots';
   import type { GameState } from '@sim/core/types';
+  import StoryScene from '../story/StoryScene.svelte';
+  import { forgeStoryView, marketStoryView } from '../story/story-presenters';
   import { icon } from '../../icon';
   const marketMark = icon('currency-strongbox');
   const forgeMark = icon('anvil-1');
@@ -47,6 +49,15 @@
   /** the piece the forge would take on next, if there is one worth naming */
   const worn = $derived(state.gear.filter(Boolean) as any[]);
   const wornCount = $derived(worn.length);
+  const cycle = $derived(Math.floor(state.clockSec / (TOWN.storyteller_promotions?.cycle_sec ?? 3600)));
+  const marketGreeting = $derived(marketStoryView({
+    key: `market:hub:${town.id}:${cycle}`, seed: state.seed, townId: town.id,
+    npcId: 'counterhand', speaker: npcOf('counterhand')?.name || 'counterhand', townName: town.name, cycle, contextKey: 'hub',
+  }));
+  const forgeGreeting = $derived(forgeStoryView({
+    key: `forge:hub:${town.id}:${cycle}`, seed: state.seed, townId: town.id,
+    npcId: 'armourer', speaker: npcOf('armourer')?.name || 'armourer', cycle, contextKey: 'hub',
+  }));
   const opened = $derived(state.town.visited.filter((v) => v !== town.id).map(settlementById).filter((s): s is NonNullable<ReturnType<typeof settlementById>> => Boolean(s)));
   const LOOK_IDS = new Set(['prestige_title', 'banner_coldres', 'tint_heavy', 'pedlar_rotation']);
   const looks = $derived.by(() => {
@@ -93,7 +104,10 @@
   </div>
 
   <div class="cols">
-    <ul class="services" role="list">
+    <div>
+      <StoryScene view={marketGreeting} onaction={() => onopen('market')} />
+      <StoryScene view={forgeGreeting} onaction={() => onopen('forge')} />
+      <ul class="services" role="list">
       {#each services as s (s.id)}
         <li role="listitem">
           <button class="row card-read" disabled={!here} onclick={() => s.id === 'black-market' ? onblackmarket() : onopen(s.id)}>
@@ -104,7 +118,8 @@
           </button>
         </li>
       {/each}
-    </ul>
+      </ul>
+    </div>
 
     <div class="aside">
       <section class="qol card-read">

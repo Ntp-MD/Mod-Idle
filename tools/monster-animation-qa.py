@@ -7,7 +7,7 @@ Run from the repository root to check every draft-review species and named varia
 
 Or check selected metadata files:
 
-    python tools/monster-animation-qa.py --metadata art-reference/monsters/humanoid/orc/raider-orc/meta.json
+    python tools/monster-animation-qa.py --metadata archive/art-reference/monsters/humanoid/orc/raider-orc/meta.json
 
 Check the mob images and metadata actually loaded by the production registry:
 

@@ -1,6 +1,7 @@
 import { fieldActionProblem } from '@sim/world/fieldwork';
 import type { FieldSite, GameState } from '@sim/core/types';
 import { currentCell } from '@sim/world/road';
+import { warpReadiness } from '@sim/world/travel';
 import { trailSiteAt } from '@sim/world/map-exploration';
 import { cooldownLeft } from '@sim/world/dungeon';
 
@@ -64,4 +65,28 @@ export function destinationPrimary(state: GameState, dest: MapDestination, writa
   }
   return action('hunt', state.hunting ? 'Hunting…' : 'Hunt here',
     state.phase === 'camp' ? 'Recover at Camp first.' : state.hunting ? 'Already hunting this area.' : '');
+}
+
+export interface DestinationWarp {
+  /** The card shows the Waypoint button for an unvisited-locked destination too, with its reason. */
+  available: boolean;
+  fare: number;
+  afford: boolean;
+  disabled: boolean;
+  reason: string;
+}
+
+/**
+ * Shared Waypoint readiness: the button, the fare and `warpTo`'s recheck all read the sim's one
+ * `warpReadiness` result, so they cannot disagree — including returning to the last town from a
+ * block outside it (F3). The fare quotes the actual committed position, not the saved Waypoint.
+ */
+export function destinationWarp(state: GameState, dest: MapDestination, writable = true): DestinationWarp {
+  const available = dest.kind === 'town' && !!dest.node;
+  const ready = available ? warpReadiness(state, dest.node!) : null;
+  const fare = ready?.fare ?? 0;
+  const afford = state.counters.gold >= fare;
+  let reason = ready ? ready.why : 'No Waypoint here.';
+  if (!writable && available) reason = 'Read-only: another tab controls progress.';
+  return { available, fare, afford, disabled: !available || !!reason, reason };
 }

@@ -22,7 +22,7 @@ from PIL import Image, ImageChops, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[4]
 OUT = Path(__file__).resolve().parent
-SPECIES_ROOT = ROOT / "art-reference/monsters/humanoid/goblin/animation"
+SPECIES_ROOT = ROOT / "archive/art-reference/monsters/humanoid/goblin/animation"
 POSES_JSON = SPECIES_ROOT / "poses.json"
 SHEET_DIR = OUT / "source/v5-contact-sheets"
 FRAME_DIR = OUT / "frames"
@@ -216,7 +216,7 @@ PROMPT_CONTRACT = {
     "useCase": "stylized-concept",
     "assetType": "candidate source contact sheet for ModWorld Goblin animation",
     "inputImages": [
-        {"path": "art-reference/monsters/humanoid/goblin/spear-goblin/source/reference.png", "role": "Goblin identity, proportions, palette, and spear reference"},
+        {"path": "archive/art-reference/monsters/humanoid/goblin/spear-goblin/source/reference.png", "role": "Goblin identity, proportions, palette, and spear reference"},
         {"path": "art-reference/animation/outputs/goblin-v5/frames/idle/south/south.png", "role": "approved-style direction sample for detailed Goblin face, palette, and pixel shading"},
         {"path": "art-reference/animation/outputs/goblin-v5/frames/death/south/02-ground.png", "role": "neighboring death phase for sequence continuity and outfit detail"},
     ],

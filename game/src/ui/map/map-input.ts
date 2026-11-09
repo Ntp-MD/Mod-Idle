@@ -1,4 +1,4 @@
-import type { Picked } from './map-view-model';
+import type { Picked } from './map-types';
 
 export type MapPoint2 = { x: number; y: number };
 
@@ -47,10 +47,10 @@ export interface MapInputHandlers {
   activate(picked: Picked): void;
   hover(key: string | null): void;
   neighbour(direction: readonly [number, number]): Picked | null;
-  camera(): { panX: number; panY: number; zoom: number; bearing: number };
-  setCamera(next: { panX: number; panY: number; zoom: number; bearing: number }): void;
+  camera(): { panX: number; panY: number; zoom: number };
+  setCamera(next: { panX: number; panY: number; zoom: number }): void;
   zoomAt(clientX: number, clientY: number, factor: number): void;
-  gesture(state: 'dragging' | 'rotating' | null): void;
+  gesture(state: 'dragging' | null): void;
   measure(): void;
 }
 
@@ -63,7 +63,7 @@ function typing(target: EventTarget | null): boolean {
 
 /** One attachment owns every map gesture and key listener; `destroy()` detaches them all. */
 export function attachMapInput(root: HTMLElement, handlers: MapInputHandlers): { destroy(): void } {
-  let down: { pointerId: number; x: number; y: number; panX: number; panY: number; bearing: number; turn: boolean } | null = null;
+  let down: { pointerId: number; x: number; y: number; panX: number; panY: number } | null = null;
   let moved = false;
   const click = (event: Event) => {
     if (moved) { moved = false; return; }
@@ -97,7 +97,7 @@ export function attachMapInput(root: HTMLElement, handlers: MapInputHandlers): {
   const onDown = (ev: PointerEvent) => {
     if (!handlers.active() || ev.button !== 0 || !ev.isPrimary) return;
     const camera = handlers.camera();
-    down = { pointerId: ev.pointerId, x: ev.clientX, y: ev.clientY, panX: camera.panX, panY: camera.panY, bearing: camera.bearing, turn: ev.ctrlKey };
+    down = { pointerId: ev.pointerId, x: ev.clientX, y: ev.clientY, panX: camera.panX, panY: camera.panY };
     moved = false;
   };
   const onMove = (ev: PointerEvent) => {
@@ -119,17 +119,11 @@ export function attachMapInput(root: HTMLElement, handlers: MapInputHandlers): {
     if (!moved) root.setPointerCapture(ev.pointerId);
     moved = true;
     const camera = handlers.camera();
-    if (down.turn) {
-      handlers.gesture('rotating');
-      handlers.setCamera({ ...camera, bearing: down.bearing + dx * .4 });
-    } else {
-      handlers.gesture('dragging');
-      handlers.setCamera({ ...camera, panX: down.panX + dx, panY: down.panY + dy });
-    }
+    handlers.gesture('dragging');
+    handlers.setCamera({ ...camera, panX: down.panX + dx, panY: down.panY + dy });
   };
   const onUp = (ev: PointerEvent) => {
     if (!down || ev.pointerId !== down.pointerId) return;
-    if (down.turn) moved = true;
     down = null;
     handlers.gesture(null);
     if (moved) handlers.measure();
@@ -138,7 +132,13 @@ export function attachMapInput(root: HTMLElement, handlers: MapInputHandlers): {
   const onWheel = (ev: WheelEvent) => {
     if (!handlers.active()) return;
     ev.preventDefault();
-    handlers.zoomAt(ev.clientX, ev.clientY, ev.deltaY < 0 ? 1.12 : 1 / 1.12);
+    // Proportional zoom: a trackpad's many small deltas stay continuous instead of
+    // snapping in fixed 12% steps; line/page modes are normalised to pixels first.
+    const unit = ev.deltaMode === 1 ? 33 : ev.deltaMode === 2 ? 800 : 1;
+    const delta = ev.deltaY * unit;
+    if (!Number.isFinite(delta)) return;
+    const factor = Math.max(0.5, Math.min(2, Math.exp(-delta * 0.002)));
+    handlers.zoomAt(ev.clientX, ev.clientY, factor);
   };
   const onLeave = () => handlers.hover(null);
   const onTransform = (ev: Event) => {

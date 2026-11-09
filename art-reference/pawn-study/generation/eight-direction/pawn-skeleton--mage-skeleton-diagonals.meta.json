@@ -1,0 +1,48 @@
+{
+  "pawnId": "skeleton--mage-skeleton",
+  "candidateFile": "pawn-skeleton--mage-skeleton-diagonals.png",
+  "sourceAtlas": "art-reference/pawn-study/atlases/variants/skeleton--mage-skeleton.png",
+  "sourceSheet": "art-reference/pawn-study/sheets/variants/skeleton--mage-skeleton.png",
+  "dimensions": "1254x1254",
+  "pixelFormat": "32bpp ARGB",
+  "transparentBackground": true,
+  "cellLayout": "2x2",
+  "cellSize": "627x627",
+  "directionOrder": [
+    "NE",
+    "SE",
+    "SW",
+    "NW"
+  ],
+  "views": {
+    "NE": "rear three-quarter, face and eyes hidden",
+    "SE": "front three-quarter, skull face and orange eyes visible",
+    "SW": "mirrored front three-quarter, skull face and orange eyes visible",
+    "NW": "mirrored rear three-quarter, face and eyes hidden"
+  },
+  "visibleBoundsPx": {
+    "NE": "x=186..453, y=78..547 (268x470)",
+    "SE": "x=170..423, y=77..547 (254x471)",
+    "SW": "x=202..456, y=77..547 (255x471)",
+    "NW": "x=172..438, y=78..547 (267x470)"
+  },
+  "visibleFootprint": "Rear views 43% cell width; front views 40–41%; height 75%. All bottoms align y=547.",
+  "identityCheck": "Ivory skull, orange glowing eyes in front views, ragged purple cowl, ribbed torso cropped at base; no staff or limbs.",
+  "reviewStatus": "candidate-review",
+  "concerns": [
+    "Confirm runtime-relative scale and front/rear handedness in packed preview.",
+    "Preserves the source silhouette and adds no staff or limbs."
+  ],
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "status": "runtime-reviewed",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

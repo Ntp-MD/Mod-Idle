@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "ooze--mire-ooze",
+  "name": "Mire Ooze",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 53,
+      "y": 82,
+      "width": 150,
+      "height": 142,
+      "offsetX": 53,
+      "offsetY": 82
+    },
+    {
+      "x": 315,
+      "y": 83,
+      "width": 138,
+      "height": 141,
+      "offsetX": 59,
+      "offsetY": 83
+    },
+    {
+      "x": 573,
+      "y": 84,
+      "width": 135,
+      "height": 140,
+      "offsetX": 61,
+      "offsetY": 84
+    },
+    {
+      "x": 828,
+      "y": 83,
+      "width": 136,
+      "height": 141,
+      "offsetX": 60,
+      "offsetY": 83
+    },
+    {
+      "x": 55,
+      "y": 339,
+      "width": 147,
+      "height": 141,
+      "offsetX": 55,
+      "offsetY": 83
+    },
+    {
+      "x": 313,
+      "y": 337,
+      "width": 142,
+      "height": 143,
+      "offsetX": 57,
+      "offsetY": 81
+    },
+    {
+      "x": 570,
+      "y": 340,
+      "width": 140,
+      "height": 140,
+      "offsetX": 58,
+      "offsetY": 84
+    },
+    {
+      "x": 826,
+      "y": 337,
+      "width": 141,
+      "height": 143,
+      "offsetX": 58,
+      "offsetY": 81
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-ooze--mire-ooze-diagonals.png",
+  "diagonalSourceSha256": "b9d52a7c5849cc86916bd4cbb6ef5abd2b69f11e6e024857e2f57f1efce57c9b",
+  "diagonalScaleFactor": 0.382234,
+  "speciesId": "ooze",
+  "variantId": "mire-ooze"
+}

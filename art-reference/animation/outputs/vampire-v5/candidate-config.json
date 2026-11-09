@@ -8,7 +8,7 @@
     "generatedMissingFrames": 232,
     "scannerNote": "The inventory tool counts PNGs under the species poses/ directory. That directory is empty; the existing animation atlas is separately marked visual-approved and provides 40 exact 384x384 source cells."
   },
-  "sourceAtlas": "art-reference/monsters/undead/vampire/animation/atlas/animation.png",
+  "sourceAtlas": "archive/art-reference/monsters/undead/vampire/animation/atlas/animation.png",
   "sourceAtlasStatus": "visual-approved",
   "sourceAtlasSha256": "18f9cc2790e92d90966b2577c578f405a80f1053e3df69b79461b8b844b73a50",
   "directions": [
@@ -825,7 +825,7 @@
       }
     }
   ],
-  "styleReference": "art-reference/monsters/undead/vampire/reference.png and art-reference/monsters/undead/vampire/animation/atlas/animation.png",
+  "styleReference": "archive/art-reference/monsters/undead/vampire/reference.png and archive/art-reference/monsters/undead/vampire/animation/atlas/animation.png",
   "excludedReferences": [
     "animation/drafts/animation-draft.png (draft-review, not approved)",
     "animation/source/base-preview.png (not an approved frame atlas)"

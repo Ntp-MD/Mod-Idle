@@ -1,0 +1,148 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "minotaur",
+  "name": "Minotaur",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 53,
+      "y": 35,
+      "width": 151,
+      "height": 189,
+      "offsetX": 53,
+      "offsetY": 35
+    },
+    {
+      "x": 322,
+      "y": 35,
+      "width": 124,
+      "height": 189,
+      "offsetX": 66,
+      "offsetY": 35
+    },
+    {
+      "x": 574,
+      "y": 32,
+      "width": 133,
+      "height": 192,
+      "offsetX": 62,
+      "offsetY": 32
+    },
+    {
+      "x": 836,
+      "y": 37,
+      "width": 120,
+      "height": 187,
+      "offsetX": 68,
+      "offsetY": 37
+    },
+    {
+      "x": 52,
+      "y": 292,
+      "width": 152,
+      "height": 188,
+      "offsetX": 52,
+      "offsetY": 36
+    },
+    {
+      "x": 322,
+      "y": 285,
+      "width": 125,
+      "height": 195,
+      "offsetX": 66,
+      "offsetY": 29
+    },
+    {
+      "x": 573,
+      "y": 288,
+      "width": 135,
+      "height": 192,
+      "offsetX": 61,
+      "offsetY": 32
+    },
+    {
+      "x": 833,
+      "y": 284,
+      "width": 127,
+      "height": 196,
+      "offsetX": 65,
+      "offsetY": 28
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/monsters/humanoid/minotaur/minotaur/reference.png",
+  "sourceSha256": "9f8adb14fb09bb8384f9597f8db02a84df05725105db5705eeed6defa9b53317",
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-minotaur-diagonals.png",
+  "diagonalSourceSha256": "af9c20203f4bae8b45d0e50a6d34ec722567a9334acd2cdf937da5576e2ea9e6",
+  "diagonalScaleFactor": 0.413793
+}

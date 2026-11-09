@@ -4,8 +4,8 @@
   "action": "attack",
   "direction": "east",
   "pose": "03-recovery",
-  "source": "art-reference/monsters/humanoid/goblin/animation/poses/attack/east/03-recovery.png",
-  "sourceMetadata": "art-reference/monsters/humanoid/goblin/animation/poses/attack/east/03-recovery.meta.json",
+  "source": "archive/art-reference/monsters/humanoid/goblin/animation/poses/attack/east/03-recovery.png",
+  "sourceMetadata": "archive/art-reference/monsters/humanoid/goblin/animation/poses/attack/east/03-recovery.meta.json",
   "sourcePixelsModified": false,
   "frameCanvas": {
     "width": 384,

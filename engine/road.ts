@@ -19,6 +19,11 @@
  */
 
 import type { EngineData, RoadLocationCfg, Rng } from './types.ts';
+import { HEX_DIRECTIONS, hexDistance, hexKey, hexNeighbours, hexPath, type Hex } from './hex.ts';
+import { planCells, planTravel, type TravelContext } from './travel.ts';
+
+/** Hex geometry lives in `engine/hex.ts`; re-exported here so existing callers do not move. */
+export { HEX_DIRECTIONS, hexAdjacent, hexDistance, hexKey, hexKeys, hexNeighbours, hexPath, type Hex } from './hex.ts';
 
 export interface RoadNode {
   id: string;
@@ -28,12 +33,6 @@ export interface RoadNode {
 
 /** One authored place on the land mask, with its canonical id and printed ground. */
 export type RoadLocation = RoadLocationCfg;
-
-/** One cell of the field, addressed by its axial coordinates. */
-export interface Hex {
-  q: number;
-  r: number;
-}
 
 /** A named place with a stable id: a sub-zone side or a wild-side site of a zone. */
 export interface LocationRef {
@@ -56,53 +55,6 @@ export function parseLocationRef(id: string): LocationRef | null {
   if (!m) return null;
   return { id, zoneId: Number(m[1]), kind: m[2] as 'sub' | 'site', index: Number(m[3]),
     ...(m[4] ? { site: m[4] as LocationRef['site'] } : {}) };
-}
-
-/** True when two cells share an edge — the adjacency a single block of walking is allowed to cross. */
-export const hexAdjacent = (a: Hex, b: Hex) => {
-  const dq = a.q - b.q, dr = a.r - b.r;
-  return (Math.abs(dq) + Math.abs(dq + dr) + Math.abs(dr)) / 2 === 1;
-};
-
-/** Axial hex distance: the number of blocks walked between two cells. */
-export function hexDistance(a: Hex, b: Hex): number {
-  const dq = a.q - b.q;
-  const dr = a.r - b.r;
-  return (Math.abs(dq) + Math.abs(dq + dr) + Math.abs(dr)) / 2;
-}
-
-/**
- * The six offsets a single step may cross. They are the pairs `hexAdjacent` accepts at distance 1, so
- * the ring and the adjacency rule cannot drift apart into two different ideas of a neighbour.
- */
-export const HEX_DIRECTIONS: ReadonlyArray<readonly [number, number]> =
-  [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];
-
-/** Cube rounding, the one way back from a fractional lerp onto the lattice. */
-function cubeRound(qf: number, rf: number): Hex {
-  const sf = -qf - rf;
-  let q = Math.round(qf), r = Math.round(rf);
-  const s = Math.round(sf);
-  const dq = Math.abs(q - qf), dr = Math.abs(r - rf), ds = Math.abs(s - sf);
-  if (dq > dr && dq > ds) q = -r - s;
-  else if (dr > ds) r = -q - s;
-  return { q, r };
-}
-
-/**
- * The plotted route: the ordered cells walked between two cells, one per block, each adjacent to the
- * one before it. A far destination is never jumped to — it is a chain of blocks the sheet can light up
- * one at a time, and its length is the hex distance, so the route and the walk's cost are the same
- * number derived twice rather than a path traded against a distance.
- */
-export function hexPath(a: Hex, b: Hex): Hex[] {
-  const n = hexDistance(a, b);
-  const out: Hex[] = [];
-  for (let i = 0; i <= n; i++) {
-    const t = n === 0 ? 0 : i / n;
-    out.push(cubeRound(a.q + (b.q - a.q) * t, a.r + (b.r - a.r) * t));
-  }
-  return out;
 }
 
 export function createRoad(E: EngineData) {
@@ -175,36 +127,23 @@ export function createRoad(E: EngineData) {
   };
 
   /**
-   * The walkable route between two cells: BFS over land with the fixed neighbour order, so the
-   * same endpoints always plot the same steps. Null where no walkable chain exists — the caller
-   * refuses the walk with a reason instead of charging for it. With no authored mask this is the
-   * straight lattice line, the same cells `hexPath` has always plotted.
+   * The walkable route between two cells: the movement planner over the uniform-cost land context,
+   * so preview, quote and execution share one route authority (`engine/travel.ts`). BFS with the fixed
+   * neighbour order plots the same steps the Road always plotted. Null where no walkable chain exists —
+   * the caller refuses the walk with a reason instead of charging for it. With no authored mask this is
+   * the straight lattice line, the same cells `hexPath` has always plotted.
    */
+  const travelContext: TravelContext = {
+    worldRevision: `land:${landVersion}`,
+    movementRevision: 'uniform',
+    isLand,
+    walkDurationUs: R.block_sec,
+  };
   function routeLand(a: Hex, b: Hex): Hex[] | null {
     if (!isLand(a) || !isLand(b)) return null;
     if (!hasLandMask) return hexPath(a, b);
-    if (a.q === b.q && a.r === b.r) return [{ q: a.q, r: a.r }];
-    const start = `${a.q},${a.r}`, goal = `${b.q},${b.r}`;
-    const prev = new Map<string, string | null>([[start, null]]);
-    const queue: Hex[] = [{ q: a.q, r: a.r }];
-    while (queue.length) {
-      const here = queue.shift()!;
-      if (`${here.q},${here.r}` === goal) break;
-      for (const [dq, dr] of HEX_DIRECTIONS) {
-        const next = { q: here.q + dq, r: here.r + dr };
-        const key = `${next.q},${next.r}`;
-        if (prev.has(key) || !isLand(next)) continue;
-        prev.set(key, `${here.q},${here.r}`);
-        queue.push(next);
-      }
-    }
-    if (!prev.has(goal)) return null;
-    const path: Hex[] = [];
-    for (let at: string | null = goal; at != null; at = prev.get(at) ?? null) {
-      const [q, r] = at.split(',').map(Number);
-      path.unshift({ q, r });
-    }
-    return path;
+    const plan = planTravel(a, b, travelContext);
+    return plan ? planCells(plan) : null;
   }
   /** Blocks along the walkable route, or null where the destination cannot be reached on foot. */
   const blocksLand = (a: Hex, b: Hex): number | null => {
@@ -214,14 +153,14 @@ export function createRoad(E: EngineData) {
   };
 
   /** One cell to sheet-key form, so a walk, a route and a click all speak the same address. */
-  const hexKeys = (cells: Hex[]): string[] => cells.map((h) => `${h.q},${h.r}`);
+  const hexKeys = (cells: Hex[]): string[] => cells.map((h) => hexKey(h));
   /** The plotted route between two cells — the same chain a settlement-to-settlement route is. */
   const routeHex = (a: Hex, b: Hex): Hex[] => routeLand(a, b) ?? [];
   /** Blocks between two cells: one per land cell the foot crosses, whatever the ground under it. */
   const blocksBetweenHex = (a: Hex, b: Hex) => blocksLand(a, b) ?? 0;
   const secFromHex = (a: Hex, b: Hex) => blocksBetweenHex(a, b) * R.block_sec;
   /** The six cells one step from `h` — the ring a single block is allowed to enter. */
-  const neighbours = (h: Hex): Hex[] => HEX_DIRECTIONS.map(([dq, dr]) => ({ q: h.q + dq, r: h.r + dr }));
+  const neighbours = (h: Hex): Hex[] => hexNeighbours(h);
 
   /** Every settlement exactly as far from a cell as the closest one is — more than one is a tie. */
   function owners(h: Hex): RoadNode[] {

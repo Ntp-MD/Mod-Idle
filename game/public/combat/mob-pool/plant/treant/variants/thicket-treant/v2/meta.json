@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "treant--thicket-treant",
+  "name": "Thicket Treant",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 67,
+      "y": 82,
+      "width": 123,
+      "height": 142,
+      "offsetX": 67,
+      "offsetY": 82
+    },
+    {
+      "x": 324,
+      "y": 81,
+      "width": 120,
+      "height": 143,
+      "offsetX": 68,
+      "offsetY": 81
+    },
+    {
+      "x": 589,
+      "y": 86,
+      "width": 103,
+      "height": 138,
+      "offsetX": 77,
+      "offsetY": 86
+    },
+    {
+      "x": 839,
+      "y": 82,
+      "width": 115,
+      "height": 142,
+      "offsetX": 71,
+      "offsetY": 82
+    },
+    {
+      "x": 67,
+      "y": 339,
+      "width": 122,
+      "height": 141,
+      "offsetX": 67,
+      "offsetY": 83
+    },
+    {
+      "x": 327,
+      "y": 339,
+      "width": 115,
+      "height": 141,
+      "offsetX": 71,
+      "offsetY": 83
+    },
+    {
+      "x": 590,
+      "y": 340,
+      "width": 101,
+      "height": 140,
+      "offsetX": 78,
+      "offsetY": 84
+    },
+    {
+      "x": 840,
+      "y": 338,
+      "width": 112,
+      "height": 142,
+      "offsetX": 72,
+      "offsetY": 82
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-treant--thicket-treant-diagonals.png",
+  "diagonalSourceSha256": "8c27b0d9ff587e711c93a8a63b308467cef052f94857e530e9b80f219b6c7fbb",
+  "diagonalScaleFactor": 0.298633,
+  "speciesId": "treant",
+  "variantId": "thicket-treant"
+}

@@ -1,0 +1,90 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "wisp",
+  "name": "Wisp",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 40,
+      "y": 32,
+      "width": 177,
+      "height": 192,
+      "offsetX": 40,
+      "offsetY": 32
+    },
+    {
+      "x": 298,
+      "y": 32,
+      "width": 172,
+      "height": 192,
+      "offsetX": 42,
+      "offsetY": 32
+    },
+    {
+      "x": 54,
+      "y": 302,
+      "width": 148,
+      "height": 178,
+      "offsetX": 54,
+      "offsetY": 46
+    },
+    {
+      "x": 310,
+      "y": 302,
+      "width": 148,
+      "height": 178,
+      "offsetX": 54,
+      "offsetY": 46
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": "archive/art-reference/monsters/elemental/wisp/wisp/animation/poses/idle/south.png",
+  "sourceSha256": "c7eaac52eb38564121842ef5f836d580e6640c2f6c98372e0b78763651b015ca",
+  "diagonalSource": null
+}

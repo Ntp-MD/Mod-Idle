@@ -1,0 +1,150 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "ogre--brute-ogre",
+  "name": "Brute Ogre",
+  "sourceCanvas": {
+    "width": 1024,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 82,
+      "y": 82,
+      "width": 93,
+      "height": 142,
+      "offsetX": 82,
+      "offsetY": 82
+    },
+    {
+      "x": 339,
+      "y": 78,
+      "width": 91,
+      "height": 146,
+      "offsetX": 83,
+      "offsetY": 78
+    },
+    {
+      "x": 599,
+      "y": 89,
+      "width": 82,
+      "height": 135,
+      "offsetX": 87,
+      "offsetY": 89
+    },
+    {
+      "x": 851,
+      "y": 79,
+      "width": 91,
+      "height": 145,
+      "offsetX": 83,
+      "offsetY": 79
+    },
+    {
+      "x": 81,
+      "y": 339,
+      "width": 94,
+      "height": 141,
+      "offsetX": 81,
+      "offsetY": 83
+    },
+    {
+      "x": 339,
+      "y": 341,
+      "width": 90,
+      "height": 139,
+      "offsetX": 83,
+      "offsetY": 85
+    },
+    {
+      "x": 599,
+      "y": 345,
+      "width": 83,
+      "height": 135,
+      "offsetX": 87,
+      "offsetY": 89
+    },
+    {
+      "x": 851,
+      "y": 341,
+      "width": 90,
+      "height": 139,
+      "offsetX": 83,
+      "offsetY": 85
+    }
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "directions": [
+      "south",
+      "south-east",
+      "east",
+      "north-east",
+      "north",
+      "north-west",
+      "west",
+      "south-west"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-8-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "south-east"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "east"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "north-east"
+    },
+    {
+      "index": 4,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 5,
+      "action": "idle",
+      "direction": "north-west"
+    },
+    {
+      "index": 6,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 7,
+      "action": "idle",
+      "direction": "south-west"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-ogre--brute-ogre-diagonals.png",
+  "diagonalSourceSha256": "bb75b9d41131b0f3757119c513ec16cf2c93b16c4d19ff91d16bbd844730f1e9",
+  "diagonalScaleFactor": 0.285427,
+  "speciesId": "ogre",
+  "variantId": "brute-ogre"
+}

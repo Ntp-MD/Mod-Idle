@@ -1,0 +1,92 @@
+{
+  "artSet": "pawn-study",
+  "studyEntryId": "dragon--rime-dragon",
+  "name": "Rime Dragon",
+  "sourceCanvas": {
+    "width": 512,
+    "height": 512
+  },
+  "frameCanvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "sourceFrames": [
+    {
+      "x": 83,
+      "y": 104,
+      "width": 91,
+      "height": 120,
+      "offsetX": 83,
+      "offsetY": 104
+    },
+    {
+      "x": 339,
+      "y": 109,
+      "width": 91,
+      "height": 115,
+      "offsetX": 83,
+      "offsetY": 109
+    },
+    {
+      "x": 53,
+      "y": 361,
+      "width": 150,
+      "height": 119,
+      "offsetX": 53,
+      "offsetY": 105
+    },
+    {
+      "x": 312,
+      "y": 363,
+      "width": 145,
+      "height": 117,
+      "offsetX": 56,
+      "offsetY": 107
+    }
+  ],
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 4,
+    "directions": [
+      "south",
+      "north",
+      "west",
+      "east"
+    ],
+    "cellOrder": "row-major"
+  },
+  "animationKind": "static-four-view",
+  "frames": [
+    {
+      "index": 0,
+      "action": "idle",
+      "direction": "south"
+    },
+    {
+      "index": 1,
+      "action": "idle",
+      "direction": "north"
+    },
+    {
+      "index": 2,
+      "action": "idle",
+      "direction": "west"
+    },
+    {
+      "index": 3,
+      "action": "idle",
+      "direction": "east"
+    }
+  ],
+  "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
+  "source": null,
+  "sourceSha256": null,
+  "diagonalSource": null,
+  "speciesId": "dragon",
+  "variantId": "rime-dragon"
+}

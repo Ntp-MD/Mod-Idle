@@ -4,8 +4,8 @@
   "action": "attack",
   "direction": "west",
   "pose": "02-follow-through",
-  "source": "art-reference/monsters/humanoid/goblin/animation/poses/attack/west/02-follow-through.png",
-  "sourceMetadata": "art-reference/monsters/humanoid/goblin/animation/poses/attack/west/02-follow-through.meta.json",
+  "source": "archive/art-reference/monsters/humanoid/goblin/animation/poses/attack/west/02-follow-through.png",
+  "sourceMetadata": "archive/art-reference/monsters/humanoid/goblin/animation/poses/attack/west/02-follow-through.meta.json",
   "sourcePixelsModified": false,
   "frameCanvas": {
     "width": 384,

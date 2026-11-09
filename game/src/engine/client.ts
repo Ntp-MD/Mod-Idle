@@ -9,6 +9,7 @@ import townJson from '../../../tools/data/town.json' with { type: 'json' };
 import basesJson from '../../../tools/data/bases.json' with { type: 'json' };
 import treeJson from '../../../tools/data/tree.json' with { type: 'json' };
 import spawnsJson from '../../../tools/data/spawns.json' with { type: 'json' };
+import storytellerJson from '../../../tools/data/storyteller.json' with { type: 'json' };
 import { createCatalog } from '../../../engine/catalog.ts';
 import { createCollector } from '../../../engine/collector.ts';
 import { createEngine } from '../../../engine/index.ts';
@@ -26,6 +27,7 @@ import { createSpawns } from '../../../engine/spawns.ts';
 import { createTree } from '../../../engine/tree.ts';
 import { keystoneBuildContext } from '../sim/core/keystone-runtime.ts';
 import { validateEngineData } from '../../../engine/validate.ts';
+import { validateStoryData, type StoryData } from '../../../engine/storyteller.ts';
 import type { EngineData, ModsData, SkillsData, MobSkillsData } from '../../../engine/types.ts';
 // Each export keeps the type TypeScript infers from its own JSON file. A hand-written interface would be
 // a second copy of the data's shape — the same defect as a second copy of a number, and it drifts the
@@ -105,6 +107,9 @@ export const fieldwork: any = createFieldwork(ENGINE_DATA.fieldwork);
 export const lifeSkills = createLifeSkills(ENGINE_DATA.fieldwork);
 export const trade = createTrade(ENGINE_DATA, TOWN.trade as TradeCfg);
 export const delivery = createDelivery(ENGINE_DATA, TOWN.delivery as DeliveryCfg, trade, eng);
+const STORY_DATA: StoryData = validateStoryData(storytellerJson, { npcIds: new Set((townJson.npcs as any[]).map((n) => n.id)) });
+fieldwork.validateCampPool(new Set(STORY_DATA.scenes.filter((s) => s.source === 'camp').map((s) => s.id)));
+export const STORY = STORY_DATA;
 export const blackMarket = createBlackMarket(ENGINE_DATA as any, (TOWN as any).black_market as BlackMarketCfg, trade, sm);
 
 /** The Core keys live in the engine (`core-attributes.ts`), so a grant, a save and a stat line are
