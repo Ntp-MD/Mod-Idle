@@ -142,5 +142,5 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/fish/siren/siren/reference.png",
   "sourceSha256": "01a2e879f553761f3212187f26923513c7d93e7d7fb25e5485474109a771f860",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-siren-diagonals.png"
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-siren-diagonals.png"
 }

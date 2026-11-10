@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-mirehydra--mire-hydra-broodling-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-mirehydra--mire-hydra-broodling-diagonals.png",
   "diagonalSourceSha256": "70b1152746646e31440cb5290f82dad7a437b3f07e941fcd8e0548875a3baade",
   "diagonalScaleFactor": null,
   "speciesId": "mirehydra",

@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-wolf--moonfang-wolf-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-wolf--moonfang-wolf-diagonals.png",
   "diagonalSourceSha256": "c10be41e9aa57c9338c347a9e91cbfa0da16cbd18cb7033105663ca954d1e023",
   "diagonalScaleFactor": 0.376361,
   "speciesId": "wolf",

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "hornet--bog-hornet",
+  "name": "Bog Hornet",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-hornet--bog-hornet-diagonals.png",
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/variants/hornet--bog-hornet.png",
+    "docs/character/pawn-study/atlases/variants/hornet--bog-hornet.png"
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "promptSummary": "Generate four diagonal Bog Hornet views preserving six segmented legs, two antennae, paired pale veined wings, orange eyes, dark body and ochre-brown striped abdomen; transparent 2x2 sheet.",
+  "requestedLayout": {
+    "rows": 2,
+    "columns": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west"
+  },
+  "actualImage": {
+    "width": 1254,
+    "height": 1254,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "alpha": "transparent"
+  },
+  "review": {
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "identity": true,
+    "status": "passed",
+    "approved": true
+  },
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

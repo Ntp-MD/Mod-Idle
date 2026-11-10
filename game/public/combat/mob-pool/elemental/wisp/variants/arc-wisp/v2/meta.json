@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-wisp--arc-wisp-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-wisp--arc-wisp-diagonals.png",
   "diagonalSourceSha256": "c697aeb8f48044638c51505f2f6657757bfd22e3fd5133d21fb736f3ea5290ed",
   "speciesId": "wisp",
   "variantId": "arc-wisp"

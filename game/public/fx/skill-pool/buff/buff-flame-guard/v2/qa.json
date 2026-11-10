@@ -1,0 +1,46 @@
+{
+  "family": "ward-shell",
+  "file": "ward-shell.png",
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    103,
+    921,
+    921
+  ],
+  "contentRatio": 0.8,
+  "anchor": [
+    0.5,
+    0.5
+  ],
+  "source": "imagegen",
+  "palette": "neutral",
+  "humanReview": false,
+  "components": [
+    {
+      "family": "ward-shell",
+      "file": "ward-shell.png",
+      "canvas": [
+        1024,
+        1024
+      ],
+      "alphaBounds": [
+        103,
+        103,
+        921,
+        921
+      ],
+      "contentRatio": 0.8,
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "source": "imagegen",
+      "palette": "neutral",
+      "humanReview": false
+    }
+  ]
+}

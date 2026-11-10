@@ -31,7 +31,7 @@ from PIL import Image, ImageChops, ImageDraw
 
 
 ROOT = Path(__file__).resolve().parent.parent
-MONSTER_ROOT = ROOT / "art-reference" / "monsters"
+MONSTER_ROOT = ROOT / "archive" / "art-reference" / "monsters"
 COLUMNS = 8
 ROWS = 5
 FRAME_COUNT = COLUMNS * ROWS

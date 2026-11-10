@@ -1,0 +1,19 @@
+{
+  "shape": "stone-spike",
+  "family": "column-eruption",
+  "palette": "neutral",
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    103,
+    921,
+    921
+  ],
+  "contentRatio": 0.8,
+  "source": "imagegen",
+  "humanReview": false,
+  "sourceSha256": "413542b7cdd1c71690c1bd119290c83ef03e6c406f13592ac4677870c9ae9b18"
+}

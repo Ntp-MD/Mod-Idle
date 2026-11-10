@@ -1,0 +1,26 @@
+[
+  {
+    "skill": "attack.fissure",
+    "version": "v5",
+    "parts": [
+      "crack-strip",
+      "stone-spike",
+      "fragment-debris",
+      "cloud-mist"
+    ],
+    "elevation": 33,
+    "time": 950000,
+    "layers": [
+      "crack-strip",
+      "stone-spike",
+      "fragment-debris",
+      "cloud-mist"
+    ],
+    "seen": [
+      "crack-strip",
+      "stone-spike",
+      "fragment-debris",
+      "cloud-mist"
+    ]
+  }
+]

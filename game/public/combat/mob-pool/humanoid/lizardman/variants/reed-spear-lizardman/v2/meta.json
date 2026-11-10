@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-lizardman--reed-spear-lizardman-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-lizardman--reed-spear-lizardman-diagonals.png",
   "diagonalSourceSha256": "08a4b1a865b951cb534cdfdd93b53a76dcf2c627dff6b382d072a3a85487e590",
   "diagonalScaleFactor": 0.313812,
   "speciesId": "lizardman",

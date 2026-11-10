@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-werewolf--blood-werewolf-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-werewolf--blood-werewolf-diagonals.png",
   "diagonalSourceSha256": "fdbf70a1fac52bafa02d9c043d8a27f8d09ec390799c2dcaa20accb11e35a04b",
   "diagonalScaleFactor": 0.209877,
   "speciesId": "werewolf",

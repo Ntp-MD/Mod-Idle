@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-hornet--meadow-hornet-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-hornet--meadow-hornet-diagonals.png",
   "diagonalSourceSha256": "3eecc10f2e32cd60256cbe459dec634b2e9dfe3f5c08db0a542a42c74e6b29fc",
   "diagonalScaleFactor": 0.337278,
   "speciesId": "hornet",

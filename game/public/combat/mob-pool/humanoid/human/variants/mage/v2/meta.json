@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-human--mage-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-human--mage-diagonals.png",
   "diagonalSourceSha256": "cce5e28d4a65295a8e093cd73aee379e0f4aa6718eed8b06e3df3ea13753ba7a",
   "diagonalScaleFactor": 0.372703,
   "speciesId": "human",

@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/formless/ooze/ooze/reference.png",
   "sourceSha256": "cd9581ea60d71982cfe4e41e2d529e01c871e39edbfe8e9ec3a3055bfceb8f24",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-ooze-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-ooze-diagonals.png",
   "diagonalSourceSha256": "6488a651bcbc859bbd07c6f54877b4ada47252bcc7b4b80d9419868bebab3d5a",
   "diagonalScaleFactor": 0.360313
 }

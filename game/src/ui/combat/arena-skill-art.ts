@@ -9,10 +9,12 @@
 import { activeVfxArt, activeVfxVersion, vfxArtCandidates, type SkillArt, type VfxAtlas } from '../fx/catalog';
 import { getVfxAssetStatus } from '../fx/vfx-assets.svelte';
 import type { FieldViewFrame } from '../../presentation/arena-view-frame';
+import type { CombatArenaFrame } from '@sim/combat/combat-arena';
+import { componentScale } from './component-placement';
 import { ARENA_REF_PX_PER_M } from '../../presentation/arena-camera';
 import { applyWorldToViewport, applyWorldVector, fieldPointM, fieldVectorM, type Affine2 } from '../../presentation/view-transform';
 import type { SkillGeometry, SkillGeometryScreen } from './skill-geometry';
-import { VFX_BODY_LIFT_SHARE, VFX_HAND_LIFT_M, VFX_HAND_LIFT_SHARE, SKILL_SHAPE_MIN_M, groundShapeWorldPoints } from './arena-vfx-space';
+import { VFX_BODY_LIFT_SHARE, VFX_HAND_LIFT_M, VFX_HAND_LIFT_SHARE, SKILL_SHAPE_MIN_M, groundShapeWorldPoints, projectSkillVfxAim } from './arena-vfx-space';
 
 /** Authored reference density: the single topdown source, not runtime zoom. */
 const REF_PX_PER_M = ARENA_REF_PX_PER_M;
@@ -126,13 +128,16 @@ const screenAimDeg = (worldToViewport: Affine2, directionRad: number): number =>
 export type SkillArtSizePolicy = 'footprint' | 'body' | 'world' | 'ui';
 
 /** Policy for one mark/atlas pair, derived from shape+delivery only — never a skill id. */
+const isProjectileArt = (atlas: VfxAtlas, shape: string) => atlas.authoring?.delivery === 'projectile'
+  && (atlas.sizePolicy === 'body' || shape !== 'line' && shape !== 'cone');
+
 export function artSizePolicyFor(mark: SkillGeometry, atlas: VfxAtlas): SkillArtSizePolicy {
   if (atlas.sizePolicy) return atlas.sizePolicy;
   const authoring = atlas.authoring ?? {};
   const areaShape = mark.area.shape ?? ((mark.area.radiusM ?? 0) > 0 ? 'circle' : 'single');
   const shape = areaShape === 'line' || areaShape === 'cone'
     ? areaShape : (authoring.shape === 'circle' ? 'circle' : areaShape);
-  const projectile = authoring.delivery === 'projectile' && shape !== 'line' && shape !== 'cone';
+  const projectile = isProjectileArt(atlas, shape);
   if (projectile) return 'body';
   if (shape === 'circle') return 'footprint';
   if (shape === 'line' || shape === 'cone') return 'world';
@@ -208,7 +213,7 @@ export function atlasOpacity(mark: SkillGeometry, atlas: VfxAtlas): number {
  * scales with the frame; no CSS px is baked into content here.
  */
 export function skillArtPlacement(mark: SkillGeometry, atlas: VfxAtlas,
-  frame: FieldViewFrame, screen?: SkillGeometryScreen): SkillArtPlacement | undefined {
+  frame: FieldViewFrame, screen?: SkillGeometryScreen, actors?: CombatArenaFrame): SkillArtPlacement | undefined {
   void screen;
   if (!frame.renderable) return undefined;
   const authoring = atlas.authoring ?? {};
@@ -216,7 +221,7 @@ export function skillArtPlacement(mark: SkillGeometry, atlas: VfxAtlas,
   const shape = areaShape === 'line' || areaShape === 'cone'
     ? areaShape
     : (authoring.shape === 'circle' ? 'circle' : areaShape);
-  const projectile = authoring.delivery === 'projectile' && shape !== 'line' && shape !== 'cone';
+  const projectile = isProjectileArt(atlas, shape);
   const orient = atlas.orient === true;
   const direction = mark.directionRad;
   // World aim stays the footprint authority; the painted rotation follows the
@@ -254,9 +259,10 @@ export function skillArtPlacement(mark: SkillGeometry, atlas: VfxAtlas,
   if (atlas.sizePolicy === 'body' && !projectile) {
     contentW = bodyW * 2.8;
     contentH = bodyH * 1.3;
-  } else if (atlas.sizePolicy === 'world' && shape !== 'line' && shape !== 'cone') {
+  } else if (atlas.sizePolicy === 'world' && (authoring.shape === 'circle' || shape !== 'line' && shape !== 'cone')) {
     contentW = Number(authoring.spanM ?? authoring.diameterM ?? 1.7);
     contentH = Number(authoring.depthM ?? authoring.diameterM ?? 1.7);
+    rotateDeg = orient ? aimDeg : 0;
   } else if (projectile) {
     const from = releaseM;
     const to = impactM;
@@ -309,9 +315,11 @@ export function skillArtPlacement(mark: SkillGeometry, atlas: VfxAtlas,
   }
 
   if (atlas.binding) {
+    const caster = (mark.actorId === 'player' ? actors?.player : actors?.mobs[mark.actorId ?? '']) ?? mark.source;
+    const target = (mark.area.targetId === 'player' ? actors?.player : actors?.mobs[mark.area.targetId ?? '']) ?? mark.target;
     const point = atlas.binding === 'area' ? mark.area.center
-      : atlas.binding === 'caster' ? { x: mark.source.x, y: mark.source.y - bodyH * VFX_BODY_LIFT_SHARE }
-      : atlas.binding === 'target' ? { x: mark.target.x, y: mark.target.y - bodyH * VFX_BODY_LIFT_SHARE }
+      : atlas.binding === 'caster' ? { x: caster.x, y: caster.y - bodyH * VFX_BODY_LIFT_SHARE }
+      : atlas.binding === 'target' ? { x: target.x, y: target.y - bodyH * VFX_BODY_LIFT_SHARE }
       : atlas.binding === 'release' ? releaseM : impactM;
     cx = point.x; cy = point.y;
   }
@@ -341,20 +349,52 @@ export function billboardMatrixForFrame(centerM: { x: number; y: number }, frame
   return { a: frame.cssPixelsPerMeter, b: 0, c: 0, d: frame.cssPixelsPerMeter, e: center.x, f: center.y };
 }
 
+/** Fit a horizontal source between sampled actor endpoints through the one painted frame. */
+export function tetherMatrixForFrame(mark: SkillGeometry, atlas: VfxAtlas,
+  frame: FieldViewFrame, actors?: CombatArenaFrame): Affine2 | undefined {
+  if (!frame.renderable) return undefined;
+  const caster = mark.actorId === 'player' ? actors?.player : actors?.mobs[mark.actorId ?? ''];
+  const target = mark.area.targetId === 'player' ? actors?.player : actors?.mobs[mark.area.targetId ?? ''];
+  const aim = { ...mark.vfxAim,
+    releaseM: mark.vfxAim.fromSocket ? mark.vfxAim.releaseM : caster ?? mark.vfxAim.releaseM,
+    groundImpactM: target ?? mark.vfxAim.groundImpactM };
+  if (Math.hypot(aim.groundImpactM.x - aim.releaseM.x, aim.groundImpactM.y - aim.releaseM.y) < 1e-6) return undefined;
+  const projected = projectSkillVfxAim(aim, frame, mark.bodyM.height)!;
+  const dx = projected.impact.x - projected.release.x, dy = projected.impact.y - projected.release.y;
+  const length = Math.hypot(dx, dy);
+  if (length < 1e-6) return undefined;
+  const canvasW = atlas.virtualWidth ?? atlas.width, canvasH = atlas.virtualHeight ?? atlas.height;
+  const contentW = canvasW * ratio(atlas.content?.widthRatio);
+  const thickness = (atlas.authoring?.widthM ?? .15) * frame.cssPixelsPerMeter;
+  const a = dx / contentW, b = dy / contentW;
+  const c = -dy / length * thickness / (canvasH * ratio(atlas.content?.heightRatio));
+  const d = dx / length * thickness / (canvasH * ratio(atlas.content?.heightRatio));
+  return { a, b, c, d,
+    e: (projected.release.x + projected.impact.x - a * canvasW - c * canvasH) / 2,
+    f: (projected.release.y + projected.impact.y - b * canvasW - d * canvasH) / 2 };
+}
+
 /** Fit source material to the actual committed boundary; the screen footprint clips its outline. */
-export function groundAtlasMatrixForFrame(mark: SkillGeometry, atlas: VfxAtlas, frame: FieldViewFrame): Affine2 | undefined {
+export function groundAtlasMatrixForFrame(mark: SkillGeometry, atlas: VfxAtlas, frame: FieldViewFrame, reducedMotion = false): Affine2 | undefined {
   if (!frame.renderable) return undefined;
   const points = groundShapeWorldPoints(mark.area);
-  const xs = points.map(point => point.x), ys = points.map(point => point.y);
+  const angle = atlas.orient && (mark.area.shape === 'line' || mark.area.shape === 'cone')
+    ? mark.area.directionRad ?? mark.directionRad : 0;
+  const cos = Math.cos(angle), sin = Math.sin(angle);
+  const xs = points.map(point => point.x * cos + point.y * sin);
+  const ys = points.map(point => -point.x * sin + point.y * cos);
   const left = Math.min(...xs), top = Math.min(...ys);
   const widthM = Math.max(SKILL_SHAPE_MIN_M.width, Math.max(...xs) - left);
   const heightM = Math.max(SKILL_SHAPE_MIN_M.width, Math.max(...ys) - top);
   const canvasW = atlas.virtualWidth ?? atlas.width, canvasH = atlas.virtualHeight ?? atlas.height;
-  const xScale = widthM / ratio(atlas.content?.widthRatio) / canvasW;
-  const yScale = heightM / ratio(atlas.content?.heightRatio) / canvasH;
-  const center = applyWorldToViewport(frame.worldToViewport, fieldPointM(left + widthM / 2, top + heightM / 2));
+  const expansion = componentScale(mark, atlas, reducedMotion);
+  const xScale = widthM / ratio(atlas.content?.widthRatio) / canvasW * expansion;
+  const yScale = heightM / ratio(atlas.content?.heightRatio) / canvasH * expansion;
+  const localX = left + widthM / 2, localY = top + heightM / 2;
+  const center = applyWorldToViewport(frame.worldToViewport, fieldPointM(localX * cos - localY * sin, localX * sin + localY * cos));
   const basis = frame.worldToViewport;
-  const a = basis.a * xScale, b = basis.b * xScale, c = basis.c * yScale, d = basis.d * yScale;
+  const a = (basis.a * cos + basis.c * sin) * xScale, b = (basis.b * cos + basis.d * sin) * xScale;
+  const c = (-basis.a * sin + basis.c * cos) * yScale, d = (-basis.b * sin + basis.d * cos) * yScale;
   return { a, b, c, d, e: center.x - (a * canvasW + c * canvasH) / 2, f: center.y - (b * canvasW + d * canvasH) / 2 };
 }
 

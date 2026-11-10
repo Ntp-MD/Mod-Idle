@@ -30,7 +30,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 
 ROOT = Path(__file__).resolve().parent.parent
-MONSTER_ROOT = ROOT / "art-reference/monsters"
+MONSTER_ROOT = ROOT / "archive/art-reference/monsters"
 ROSTER_PATH = MONSTER_ROOT / "production-roster.json"
 RUNTIME_REGISTRY = ROOT / "game/src/ui/combat/arena/arena-art-pixel-v2.ts"
 CELL = 384

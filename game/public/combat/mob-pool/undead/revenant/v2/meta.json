@@ -142,6 +142,6 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/undead/revenant/revenant/reference.png",
   "sourceSha256": "9ceb698ced7ede93800f82959f03c64f4a00d5e73462c29b0ad775d6ab42dea8",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-revenant-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-revenant-diagonals.png",
   "diagonalSourceSha256": "5b5a7d111086fa14d55186f27a4121cc722c9ec50e5db606e3c34f5ec7683f2a"
 }

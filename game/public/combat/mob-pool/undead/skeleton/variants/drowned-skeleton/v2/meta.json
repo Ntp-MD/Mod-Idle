@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-skeleton--drowned-skeleton-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-skeleton--drowned-skeleton-diagonals.png",
   "diagonalSourceSha256": "0d9b8f409e55d3deb289bb704793f3db7ab1073a7cfbaabf83aa8bd0e64b8cf4",
   "diagonalScaleFactor": 0.277615,
   "speciesId": "skeleton",

@@ -6,10 +6,10 @@
  */
 import { clamp, smooth, fract, noise, fbm, over, renderPixels, TAU, DURATION_SEC } from './shader-math.mjs';
 
-const ELECTRIC = 'art-reference/VFX-Godot/ElectricFXFree/assets/BinbunVFX_Vol2/ElectricFX/shader/';
-const BEAM = 'art-reference/VFX-Godot/GodotBeamVFXFree/assets/BinbunVFX/beam_vfx/src/shader/';
-const ENERGY = 'art-reference/VFX-Godot/energy_beams_fx/effects/03_violet_storm/shaders/';
-export const licenseFiles = [ELECTRIC.replace('shader/', 'license.txt'), 'art-reference/VFX-Godot/energy_beams_fx/LICENSE.md'];
+const ELECTRIC = 'archive/art-reference/VFX-Godot/ElectricFXFree/assets/BinbunVFX_Vol2/ElectricFX/shader/';
+const BEAM = 'archive/art-reference/VFX-Godot/GodotBeamVFXFree/assets/BinbunVFX/beam_vfx/src/shader/';
+const ENERGY = 'archive/art-reference/VFX-Godot/energy_beams_fx/effects/03_violet_storm/shaders/';
+export const licenseFiles = [ELECTRIC.replace('shader/', 'license.txt'), 'archive/art-reference/VFX-Godot/energy_beams_fx/LICENSE.md'];
 const blue = [.12, .42, 1], cyan = [.24, .83, 1], white = [.88, .98, 1], violet = [.46, .3, 1];
 
 // zap.gdshader: its triangular wave and four vertex displacement samples.

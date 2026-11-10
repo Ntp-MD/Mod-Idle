@@ -142,5 +142,5 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/elemental/slaggolem/slaggolem/reference.png",
   "sourceSha256": "d915da510d7a2d9d63c3d4cd3d11198a5eb1b8d7322eb5d9979cbe1a2fbc9ebd",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-slaggolem-diagonals.png"
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-slaggolem-diagonals.png"
 }

@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-minotaur--maze-warden-minotaur-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-minotaur--maze-warden-minotaur-diagonals.png",
   "diagonalSourceSha256": "e4638cbc97bd995326005c3695878f1d0e06f5accd6eb23d4bcb0d473d6babed",
   "diagonalScaleFactor": 0.314159,
   "speciesId": "minotaur",

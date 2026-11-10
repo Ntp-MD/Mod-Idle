@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-spider--orchard-spider-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-spider--orchard-spider-diagonals.png",
   "diagonalSourceSha256": "2946b0aa2a550a7233c27755dc40b46c8d6c06983b99fc4263e95fdf45229b1d",
   "diagonalScaleFactor": 0.275261,
   "speciesId": "spider",

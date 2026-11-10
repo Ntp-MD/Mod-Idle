@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "slime--bog-slime",
+  "identityName": "Bog Slime",
+  "identityKind": "variant",
+  "sourceSheet": "docs/character/pawn-study/sheets/variants/slime--bog-slime.png",
+  "sizeReference": "game/public/combat/mob-pool/formless/slime/variants/bog-slime/v1/atlas.png",
+  "generatedSheet": "docs/character/pawn-study/generation/eight-direction/pawn-slime--bog-slime-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "canvas": {
+    "width": 1254,
+    "height": 1254,
+    "cellSize": 627,
+    "background": "transparent"
+  },
+  "measuredVisibleBoundsSourcePx": {
+    "north-east": [
+      143,
+      67,
+      506,
+      501
+    ],
+    "south-east": [
+      110,
+      71,
+      484,
+      501
+    ],
+    "south-west": [
+      143,
+      55,
+      505,
+      482
+    ],
+    "north-west": [
+      120,
+      56,
+      482,
+      482
+    ]
+  },
+  "promptSummary": "Generate four diagonal Bog Slime views preserving olive bog palette, darker surface mottling, top reeds and small dark eyes on a rounded limbless blob.",
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "note": "NE/NW hide eyes; SE/SW show mirrored front eyes. Raw bottom anchors differ by 19px between rows; verify normalized bottom anchor and shared scale in packed preview.",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

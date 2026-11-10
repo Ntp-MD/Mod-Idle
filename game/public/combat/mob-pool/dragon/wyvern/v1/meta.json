@@ -142,5 +142,5 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/dragon/wyvern/wyvern/reference.png",
   "sourceSha256": "a522830935c0c4222a74c451e6fab981862772fe56d37c2e058f79d5eff6f994",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-wyvern-diagonals.png"
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-wyvern-diagonals.png"
 }

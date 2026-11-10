@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/plant/dryad/dryad/animation/poses/idle/south.png",
   "sourceSha256": "a33ddb94e7a5634f5bcd82884c87a54ccbd740bdd81a5f6ade9597c4660a5f1a",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-dryad-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-dryad-diagonals.png",
   "diagonalSourceSha256": "09ae4302a4a33444626d30c1be11b64e6e9844085379eccba0fd83cf7410a6cf",
   "diagonalScaleFactor": 0.443418
 }

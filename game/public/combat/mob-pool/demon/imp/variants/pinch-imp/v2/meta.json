@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-imp--pinch-imp-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-imp--pinch-imp-diagonals.png",
   "diagonalSourceSha256": "bbd6c806e5b8a9425313d31bb419f4f723bf41bc2a649521f453815a9e2c70aa",
   "diagonalScaleFactor": 0.284371,
   "speciesId": "imp",

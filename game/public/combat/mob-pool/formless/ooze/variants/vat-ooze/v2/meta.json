@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-ooze--vat-ooze-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-ooze--vat-ooze-diagonals.png",
   "diagonalSourceSha256": "6716912a47e6228e0e24ebb45bba9049f31a09b30c9567c61b7a67690dd76b7f",
   "diagonalScaleFactor": 0.332886,
   "speciesId": "ooze",

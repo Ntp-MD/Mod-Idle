@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-golem--vault-golem-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-golem--vault-golem-diagonals.png",
   "diagonalSourceSha256": "385d6e42c50daeb6b7e6418966d780ea87b706bb84078fd2de56c1d72ff8b791",
   "diagonalScaleFactor": 0.473333,
   "speciesId": "golem",

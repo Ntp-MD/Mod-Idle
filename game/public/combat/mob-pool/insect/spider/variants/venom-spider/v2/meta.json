@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-spider--venom-spider-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-spider--venom-spider-diagonals.png",
   "diagonalSourceSha256": "e8b0dc8c7c652b3d9cde3d59a524aefba98c3e16b81aff782ee3744505f1c15b",
   "diagonalScaleFactor": 0.311787,
   "speciesId": "spider",

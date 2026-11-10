@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "spider--web-spider",
+  "identityName": "Web Spider",
+  "identityKind": "variant",
+  "sourceSheet": "docs/character/pawn-study/sheets/variants/spider--web-spider.png",
+  "sizeReference": "game/public/combat/mob-pool/insect/spider/variants/web-spider/v1/atlas.png",
+  "generatedSheet": "docs/character/pawn-study/generation/eight-direction/pawn-spider--web-spider-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "canvas": {
+    "width": 1254,
+    "height": 1254,
+    "cellSize": 627,
+    "background": "transparent"
+  },
+  "measuredVisibleBoundsSourcePx": {
+    "north-east": [
+      89,
+      169,
+      537,
+      485
+    ],
+    "south-east": [
+      92,
+      160,
+      537,
+      480
+    ],
+    "south-west": [
+      92,
+      159,
+      536,
+      479
+    ],
+    "north-west": [
+      92,
+      170,
+      536,
+      483
+    ]
+  },
+  "promptSummary": "Generate four diagonal Web Spider views preserving the brown body, pale web-like abdomen marking and eight legs, without adding scene props or web strands.",
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed",
+    "bodyPlan": "eight-legged spider silhouette retained; far-side legs overlap naturally in three-quarter views"
+  },
+  "note": "NE/NW hide the face/red eyes; SE/SW show them. No web props added. Lower leg-anchor spread is 6px; verify packed paw anchor and shared scale.",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

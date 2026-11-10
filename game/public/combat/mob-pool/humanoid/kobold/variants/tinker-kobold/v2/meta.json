@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-kobold--tinker-kobold-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-kobold--tinker-kobold-diagonals.png",
   "diagonalSourceSha256": "77c37bda3e353f6cb62edae1f244331e31b7ab3949a20c3d8a3b40ae2faa9c19",
   "diagonalScaleFactor": 0.345079,
   "speciesId": "kobold",

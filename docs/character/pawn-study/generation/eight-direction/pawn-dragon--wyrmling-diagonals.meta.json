@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "dragon--wyrmling",
+  "name": "Wyrmling",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-dragon--wyrmling-diagonals.png",
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/variants/dragon--wyrmling.png",
+    "docs/character/pawn-study/atlases/variants/dragon--wyrmling.png"
+  ],
+  "supersedesCandidate": "docs/character/pawn-study/generation/eight-direction/pawn-dragon--wyrmling-diagonals-v1.png",
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "promptSummary": "Generate juvenile Wyrmling diagonals from cardinal reference: charcoal-black quadruped, pale horns/belly/claws, small bat wings, tapered tail and four paws. NE/NW rear face hidden; SE/SW mirrored front with amber eyes.",
+  "requestedLayout": {
+    "sourceCardinalHeightsPx": [
+      374,
+      372,
+      316,
+      315
+    ],
+    "rows": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west",
+    "columns": 2
+  },
+  "actualImage": {
+    "cellWidth": 627,
+    "alpha": "transparent",
+    "width": 1254,
+    "cellHeight": 627,
+    "visibleBoundsPx": {
+      "northEast": [
+        90,
+        86,
+        504,
+        533
+      ],
+      "southEast": [
+        99,
+        86,
+        539,
+        532
+      ],
+      "southWest": [
+        89,
+        84,
+        529,
+        529
+      ],
+      "northWest": [
+        111,
+        82,
+        536,
+        530
+      ]
+    },
+    "visibleHeightsPx": {
+      "southWest": 445,
+      "northWest": 448,
+      "southEast": 446,
+      "northEast": 447
+    },
+    "height": 1254
+  },
+  "review": {
+    "size": "candidate is about 1.2-1.4x source cardinal visible height; compare packed scale",
+    "approved": true,
+    "identity": true,
+    "status": "passed",
+    "layout": "2x2 views in requested NE/SE/SW/NW order",
+    "anchor": true,
+    "anatomy": "passes body-plan comparison: quadruped with four paws, wings and tail",
+    "pose": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true
+  },
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

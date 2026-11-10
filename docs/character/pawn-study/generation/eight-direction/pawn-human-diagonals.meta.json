@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "human",
+  "name": "Human",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-human-diagonals.png",
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/human.png",
+    "docs/character/pawn-study/atlases/human.png"
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "promptSummary": "Generate diagonal-only Human busts preserving brown hair, tan face, gray tunic, shoulder shapes, front-only cross-body strap and brown belt/gold buckle. NE/NW rear, SE/SW mirrored front.",
+  "requestedLayout": {
+    "rows": 2,
+    "columns": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west"
+  },
+  "actualImage": {
+    "width": 1254,
+    "height": 1254,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "alpha": "transparent",
+    "visibleBoundsAlphaThreshold": 16,
+    "visibleBoundsPx": {
+      "northEast": {
+        "x": 206,
+        "y": 152,
+        "width": 223,
+        "height": 357
+      },
+      "southEast": {
+        "x": 196,
+        "y": 152,
+        "width": 223,
+        "height": 357
+      },
+      "southWest": {
+        "x": 205,
+        "y": 151,
+        "width": 225,
+        "height": 356
+      },
+      "northWest": {
+        "x": 195,
+        "y": 151,
+        "width": 226,
+        "height": 356
+      }
+    },
+    "hemBaselineYByCellPx": {
+      "northEast": 508,
+      "southEast": 508,
+      "southWest": 506,
+      "northWest": 506
+    }
+  },
+  "review": {
+    "identity": true,
+    "directionPose": "candidate appears to follow NE/NW rear and SE/SW mirrored front; rear views have no strap",
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed",
+    "pose": true
+  },
+  "reviewConcerns": [
+    "Candidate visible height is about 57% of cell versus source cardinal around 48%; check shared scale against runtime atlas before packing."
+  ],
+  "previousCandidate": "docs/character/pawn-study/generation/eight-direction/human.png",
+  "sizeReference": "docs/character/pawn-study/atlases/human.png",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

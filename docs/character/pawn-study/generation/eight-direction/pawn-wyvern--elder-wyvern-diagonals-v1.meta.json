@@ -1,0 +1,28 @@
+{
+    "pawnId":  "wyvern--elder-wyvern",
+    "candidateFile":  "pawn-wyvern--elder-wyvern-diagonals.png",
+    "sourceAtlas":  "docs/character/pawn-study/atlases/variants/wyvern--elder-wyvern.png",
+    "sourceSheet":  "docs/character/pawn-study/sheets/variants/wyvern--elder-wyvern.png",
+    "dimensions":  "1254x1254",
+    "cellLayout":  "2x2",
+    "cellSize":  "627x627",
+    "directionOrder":  [
+                           "NE",
+                           "SE",
+                           "SW",
+                           "NW"
+                       ],
+    "visibleBoundsPx":  {
+                            "NE":  "x=104..562, y=77..496 (458x419)",
+                            "SE":  "x=122..492, y=82..506 (371x425)",
+                            "SW":  "x=133..513, y=80..511 (381x432)",
+                            "NW":  "x=65..526, y=75..493 (462x419)"
+                        },
+    "visibleFootprint":  "NE 73%x67%; SE 59%x68%; SW 61%x69%; NW 74%x67% of each cell",
+    "reviewStatus":  "candidate-review",
+    "concerns":  [
+                     "QA fail: image is opaque RGB (24bpp), with white background across all cells; alpha transparency is absent, so it cannot be integrated as-is.",
+                     "Visible scale varies by direction: NE/NW are about 73–74% cell width while SE/SW are about 59–61%; anchors and shared scale need review.",
+                     "Identity is consistent with Elder Wyvern (blue scales, tan horns/wing membranes, gold markings), but the diagonal assignment/facing should be confirmed against the direction convention before integration."
+                 ]
+}

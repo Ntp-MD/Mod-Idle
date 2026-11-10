@@ -1,0 +1,1953 @@
+{
+  "date": "2026-11-10",
+  "files": [
+    {
+      "from": ".cache/check-vfx-fallback.cjs",
+      "to": "docs/vfx-skill/component-vfx/tools/check-vfx-fallback.cjs",
+      "sourceSha256": "6a60e90954e95fbd30436aac190d289e759ffd87d2b8ac3ddf7c851c4d6cae37",
+      "bytes": 1639,
+      "destinationSha256": "bb8d8fb6b74b51427795398494908534f619cdfe5a3098f33f8b918a99af7928"
+    },
+    {
+      "from": ".cache/compose-vfx-extension.py",
+      "to": "docs/vfx-skill/component-vfx/tools/compose-vfx-extension.py",
+      "sourceSha256": "19c0467933bc3c88298109ae055aa5e4d89c692d293e11749c28ec6c41edd32b",
+      "bytes": 5318,
+      "destinationSha256": "f68aceb05d03cc6d31f50749a8b663112e95ae890674d74af1c58f7eca568964"
+    },
+    {
+      "from": ".cache/compose-vfx-recipes.py",
+      "to": "docs/vfx-skill/component-vfx/tools/compose-vfx-recipes.py",
+      "sourceSha256": "3f8110217240be329b8902064a76961494ddcf2a7b1ed7bb202b43c5cfcbff0b",
+      "bytes": 4336,
+      "destinationSha256": "7eb43edb2da0fd0b3d3e64f4e61cbee032bd0df1dc4d9f5c5dc84b3855bd02ec"
+    },
+    {
+      "from": ".cache/debug-vfx-dome.cjs",
+      "to": "docs/vfx-skill/component-vfx/tools/debug-vfx-dome.cjs",
+      "sourceSha256": "883e283390f34e19ecf0fa42c5865babbb78b8e628f732650f215a53a2076111",
+      "bytes": 15349,
+      "destinationSha256": "ac285b4dfa3f15f8a500a085b6f5116a6cac4ef331d14eac6a442359e2789dff"
+    },
+    {
+      "from": ".cache/probe-vfx-review.cjs",
+      "to": "docs/vfx-skill/component-vfx/tools/probe-vfx-review.cjs",
+      "sourceSha256": "33d9bc82afea3264f36bff6a01ac186d94325dbb87964a805a04c88290477a30",
+      "bytes": 2029,
+      "destinationSha256": "eb5ea1127f7844e3674b09deda757217272e9c53e2f901d097df1117aa13c7f3"
+    },
+    {
+      "from": ".cache/produce-vfx-components.py",
+      "to": "docs/vfx-skill/component-vfx/tools/produce-vfx-components.py",
+      "sourceSha256": "d383b4f7428ad8542d5e88bec6030266b933079da721c82202b584f766769445",
+      "bytes": 3413,
+      "destinationSha256": "83c0a0d17e2548ef1252d3f934c08ce54f239fd26884905ed1473f1a19108155"
+    },
+    {
+      "from": ".cache/produce-vfx-extension.py",
+      "to": "docs/vfx-skill/component-vfx/tools/produce-vfx-extension.py",
+      "sourceSha256": "4d3c2d5e31fb099b3d46341c0c475e118642248a3a5cde1bb3c98719257fb2eb",
+      "bytes": 3637,
+      "destinationSha256": "a0c1d30f1cdc3f40f4de8b29d25475177e6b4594ccc825ade101ffda5e5e0850"
+    },
+    {
+      "from": ".cache/produce-vfx-v3.py",
+      "to": "docs/vfx-skill/component-vfx/tools/produce-vfx-v3.py",
+      "sourceSha256": "9d7a201a1372e78d01afed847f3f8109af0c95b3c9bcfb0ec52a885e16f221ad",
+      "bytes": 2400,
+      "destinationSha256": "9d7a201a1372e78d01afed847f3f8109af0c95b3c9bcfb0ec52a885e16f221ad"
+    },
+    {
+      "from": ".cache/register-vfx-components.py",
+      "to": "docs/vfx-skill/component-vfx/tools/register-vfx-components.py",
+      "sourceSha256": "8ebdc229afa77f9a09bc2869aa351745e0e3df435c20f9b9395da84c118312c4",
+      "bytes": 3455,
+      "destinationSha256": "53ff550779c95772dc76452457bd1b09e2b6213c970515f62fab6c696342b631"
+    },
+    {
+      "from": ".cache/register-vfx-v3.py",
+      "to": "docs/vfx-skill/component-vfx/tools/register-vfx-v3.py",
+      "sourceSha256": "8e3b4bc3456a2d41b6dbda9b318bea3c2e2ad937b4651bbd727c248a9a8b4b7b",
+      "bytes": 4156,
+      "destinationSha256": "8e3b4bc3456a2d41b6dbda9b318bea3c2e2ad937b4651bbd727c248a9a8b4b7b"
+    },
+    {
+      "from": ".cache/review-vfx.cjs",
+      "to": "docs/vfx-skill/component-vfx/tools/review-vfx.cjs",
+      "sourceSha256": "959db6fcdd939ef419a978f5e2aab3f535d33b628ba37b8ac6ece7c9d8841a61",
+      "bytes": 16353,
+      "destinationSha256": "dbd5bb5303a20f59219ee3bc463406526e331c02a2aeade738823ba4533f6c2f"
+    },
+    {
+      "from": ".cache/vfx-all-colors.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-all-colors.log",
+      "sourceSha256": "1e134eb10c5c8bebfe44ad8b6509548f81cd22aba976b21c65ce53325f570f44",
+      "bytes": 1822,
+      "destinationSha256": "1e134eb10c5c8bebfe44ad8b6509548f81cd22aba976b21c65ce53325f570f44"
+    },
+    {
+      "from": ".cache/vfx-browser-harness.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-browser-harness.log",
+      "sourceSha256": "d39ca6d0f8bebdbb1f019f036d9530001a4b95d6d4d3bf701223d0936285f073",
+      "bytes": 248,
+      "destinationSha256": "d39ca6d0f8bebdbb1f019f036d9530001a4b95d6d4d3bf701223d0936285f073"
+    },
+    {
+      "from": ".cache/vfx-close-focused.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-close-focused.log",
+      "sourceSha256": "20d747bce9f4c890926a71aefdca39b841d540f6583b7eb15c6cc6b324d282ea",
+      "bytes": 1692,
+      "destinationSha256": "20d747bce9f4c890926a71aefdca39b841d540f6583b7eb15c6cc6b324d282ea"
+    },
+    {
+      "from": ".cache/vfx-closeout-check.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-closeout-check.log",
+      "sourceSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d",
+      "bytes": 864,
+      "destinationSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d"
+    },
+    {
+      "from": ".cache/vfx-color-harness.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-color-harness.log",
+      "sourceSha256": "73b7a82cfba3933597b5556732f52a6df6d7723a7ae82c573753a5cf3a268c13",
+      "bytes": 178,
+      "destinationSha256": "73b7a82cfba3933597b5556732f52a6df6d7723a7ae82c573753a5cf3a268c13"
+    },
+    {
+      "from": ".cache/vfx-colors-before-live-binding-refresh.json",
+      "to": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-colors-before-live-binding-refresh.json",
+      "sourceSha256": "1b33bae0689ed22021df5cbc1c4aef1fa2bb0318b50f92f7d1a3f1071a71c822",
+      "bytes": 84988,
+      "destinationSha256": "1b33bae0689ed22021df5cbc1c4aef1fa2bb0318b50f92f7d1a3f1071a71c822"
+    },
+    {
+      "from": ".cache/vfx-colors-evidence.json",
+      "to": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-colors-evidence.json",
+      "sourceSha256": "c9990bc2202afb83d4b0531ccaaef1bbd525686737d6b84bc61f2698e9b27e05",
+      "bytes": 84939,
+      "destinationSha256": "c9990bc2202afb83d4b0531ccaaef1bbd525686737d6b84bc61f2698e9b27e05"
+    },
+    {
+      "from": ".cache/vfx-defaults-before.json",
+      "to": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-defaults-before.json",
+      "sourceSha256": "a28dccf88106686a5c74b6b25de6617ebbc4ceedb2bc137b667c2a8df948d0a7",
+      "bytes": 13818,
+      "destinationSha256": "a28dccf88106686a5c74b6b25de6617ebbc4ceedb2bc137b667c2a8df948d0a7"
+    },
+    {
+      "from": ".cache/vfx-directional-check.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-directional-check.log",
+      "sourceSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d",
+      "bytes": 864,
+      "destinationSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d"
+    },
+    {
+      "from": ".cache/vfx-directional-ground.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-directional-ground.log",
+      "sourceSha256": "d49c0d44b1e4f3a3ef70b92e28ec990c3c380fabe5056ca5c397c7977fcf3e0e",
+      "bytes": 1192,
+      "destinationSha256": "d49c0d44b1e4f3a3ef70b92e28ec990c3c380fabe5056ca5c397c7977fcf3e0e"
+    },
+    {
+      "from": ".cache/vfx-engine-import.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-engine-import.log",
+      "sourceSha256": "5eddff2db5e9db88f54a759c80c9808519e2838c92d6b501893b0b40594ef2e7",
+      "bytes": 1222,
+      "destinationSha256": "5eddff2db5e9db88f54a759c80c9808519e2838c92d6b501893b0b40594ef2e7"
+    },
+    {
+      "from": ".cache/vfx-expanded-spec.json",
+      "to": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-expanded-spec.json",
+      "sourceSha256": "67cdd6ae83ff4b740b86063e5859917296ded4c9ae499be3b7ad1725c904e4b2",
+      "bytes": 2879,
+      "destinationSha256": "67cdd6ae83ff4b740b86063e5859917296ded4c9ae499be3b7ad1725c904e4b2"
+    },
+    {
+      "from": ".cache/vfx-extension-check.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-extension-check.log",
+      "sourceSha256": "1b9ecc472951e6411d2d55907d7373fde66495816974b08027d8ac55052a2bf1",
+      "bytes": 1876,
+      "destinationSha256": "1b9ecc472951e6411d2d55907d7373fde66495816974b08027d8ac55052a2bf1"
+    },
+    {
+      "from": ".cache/vfx-extension-focused.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-extension-focused.log",
+      "sourceSha256": "548696b1ec48ab01a03f7d93b595219a2353e3d49c516d0ae63cbec6c30ba7c9",
+      "bytes": 6292,
+      "destinationSha256": "548696b1ec48ab01a03f7d93b595219a2353e3d49c516d0ae63cbec6c30ba7c9"
+    },
+    {
+      "from": ".cache/vfx-extra-recipes-browser.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-extra-recipes-browser.log",
+      "sourceSha256": "643c20708c29e6d4a3f0b5ff6a0e5aa46bc1237eab07a65793fa89e4219a0544",
+      "bytes": 1470,
+      "destinationSha256": "643c20708c29e6d4a3f0b5ff6a0e5aa46bc1237eab07a65793fa89e4219a0544"
+    },
+    {
+      "from": ".cache/vfx-extra-recipes-catalog.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-extra-recipes-catalog.log",
+      "sourceSha256": "f101687217e7b01cf5e72bdbf07b9161577c8fe5bdc48a44350f622f7d29bd21",
+      "bytes": 992,
+      "destinationSha256": "f101687217e7b01cf5e72bdbf07b9161577c8fe5bdc48a44350f622f7d29bd21"
+    },
+    {
+      "from": ".cache/vfx-extra-recipes.json",
+      "to": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-extra-recipes.json",
+      "sourceSha256": "42efa520db62c6f81cf65df3363f02ef4f51af81b7fe21b01a1d39f260b5e534",
+      "bytes": 1845,
+      "destinationSha256": "42efa520db62c6f81cf65df3363f02ef4f51af81b7fe21b01a1d39f260b5e534"
+    },
+    {
+      "from": ".cache/vfx-fast-single-worker.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-fast-single-worker.log",
+      "sourceSha256": "100fa221476b23dbb94fa87782bd5a4948aa77352868ff5393d1a67575a43685",
+      "bytes": 15168,
+      "destinationSha256": "100fa221476b23dbb94fa87782bd5a4948aa77352868ff5393d1a67575a43685"
+    },
+    {
+      "from": ".cache/vfx-fast.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-fast.log",
+      "sourceSha256": "8c457c7bc4a9fb47b936286c18cf26805bd00740aafe99016affea1422c09061",
+      "bytes": 86278,
+      "destinationSha256": "8c457c7bc4a9fb47b936286c18cf26805bd00740aafe99016affea1422c09061"
+    },
+    {
+      "from": ".cache/vfx-final-full.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-final-full.log",
+      "sourceSha256": "86fd49b70fd47c129958b2159e193ea432917b3ab3af00cba264319b3650c643",
+      "bytes": 80896,
+      "destinationSha256": "86fd49b70fd47c129958b2159e193ea432917b3ab3af00cba264319b3650c643"
+    },
+    {
+      "from": ".cache/vfx-fissure-ground-browser.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-fissure-ground-browser.log",
+      "sourceSha256": "679e5b835a3068aa250ade683e9bce83ed5dd542231c72a9d58fc9f6960c3fd7",
+      "bytes": 1520,
+      "destinationSha256": "679e5b835a3068aa250ade683e9bce83ed5dd542231c72a9d58fc9f6960c3fd7"
+    },
+    {
+      "from": ".cache/vfx-matrix-checkpoint.json",
+      "to": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-matrix-checkpoint.json",
+      "sourceSha256": "5b1f26f30d0d1a377fdd34ec66c2f0e6a2521fac9fbeabc99f665e748cd3ca45",
+      "bytes": 8490,
+      "destinationSha256": "5b1f26f30d0d1a377fdd34ec66c2f0e6a2521fac9fbeabc99f665e748cd3ca45"
+    },
+    {
+      "from": ".cache/vfx-matrix-evidence.json",
+      "to": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-matrix-evidence.json",
+      "sourceSha256": "886423167d94264431b50e8ce3e7361cce88b33bd8192808af3cdcefa85a0433",
+      "bytes": 8025,
+      "destinationSha256": "886423167d94264431b50e8ce3e7361cce88b33bd8192808af3cdcefa85a0433"
+    },
+    {
+      "from": ".cache/vfx-p1-check.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-p1-check.log",
+      "sourceSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d",
+      "bytes": 864,
+      "destinationSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d"
+    },
+    {
+      "from": ".cache/vfx-p1-focused.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-p1-focused.log",
+      "sourceSha256": "29f5a4ecd0facaa56f1d87e30fb0edf2f3c672760c436310875be16b0d705b0a",
+      "bytes": 1168,
+      "destinationSha256": "29f5a4ecd0facaa56f1d87e30fb0edf2f3c672760c436310875be16b0d705b0a"
+    },
+    {
+      "from": ".cache/vfx-p2-catalog.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-p2-catalog.log",
+      "sourceSha256": "3e2974cfd93d08283f871195fecbe5a9d52ade15e186a84148f1995d74f6d4ea",
+      "bytes": 992,
+      "destinationSha256": "3e2974cfd93d08283f871195fecbe5a9d52ade15e186a84148f1995d74f6d4ea"
+    },
+    {
+      "from": ".cache/vfx-p2-check.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-p2-check.log",
+      "sourceSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d",
+      "bytes": 864,
+      "destinationSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d"
+    },
+    {
+      "from": ".cache/vfx-p3-focused.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-p3-focused.log",
+      "sourceSha256": "ed2f2ea5f14939c278f9955def3ae822a180f6d69a8368553d274046a3e94e31",
+      "bytes": 1162,
+      "destinationSha256": "ed2f2ea5f14939c278f9955def3ae822a180f6d69a8368553d274046a3e94e31"
+    },
+    {
+      "from": ".cache/vfx-p4-binding.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-p4-binding.log",
+      "sourceSha256": "3b8ceaf99e31afc8d9b7d2df313f04935e16d24eb8cdc1bf9170032683ab3883",
+      "bytes": 1352,
+      "destinationSha256": "3b8ceaf99e31afc8d9b7d2df313f04935e16d24eb8cdc1bf9170032683ab3883"
+    },
+    {
+      "from": ".cache/vfx-pending-focused.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-pending-focused.log",
+      "sourceSha256": "68cdf2883d3124d34f976a05b2a9d1cfacdf9f42f4d1633bfc23d6989b174cd9",
+      "bytes": 2108,
+      "destinationSha256": "68cdf2883d3124d34f976a05b2a9d1cfacdf9f42f4d1633bfc23d6989b174cd9"
+    },
+    {
+      "from": ".cache/vfx-placements-resume-check.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-placements-resume-check.log",
+      "sourceSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d",
+      "bytes": 864,
+      "destinationSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d"
+    },
+    {
+      "from": ".cache/vfx-placements-resume.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-placements-resume.log",
+      "sourceSha256": "88ad754608096d16eb92d0d5b369ab6a99e88c58e02c7b54a44a1898af2f5bf1",
+      "bytes": 1700,
+      "destinationSha256": "88ad754608096d16eb92d0d5b369ab6a99e88c58e02c7b54a44a1898af2f5bf1"
+    },
+    {
+      "from": ".cache/vfx-probe.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/vfx-probe.png",
+      "sourceSha256": "17040f09dd913bf3eaefa4e457c4b463de44b722a42b545f31c8c2837b1c6d9b",
+      "bytes": 1663530,
+      "destinationSha256": "17040f09dd913bf3eaefa4e457c4b463de44b722a42b545f31c8c2837b1c6d9b"
+    },
+    {
+      "from": ".cache/vfx-ray-components-selected.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-ray-components-selected.log",
+      "sourceSha256": "414fa2198b6f507189a3c0d12debaa33bbb0d5763e659f6b6b4ffcb762026034",
+      "bytes": 1064,
+      "destinationSha256": "414fa2198b6f507189a3c0d12debaa33bbb0d5763e659f6b6b4ffcb762026034"
+    },
+    {
+      "from": ".cache/vfx-ray-components.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-ray-components.log",
+      "sourceSha256": "44b1e1cf7bd5e1cafe5476fb03b36610565d26d1a6f55ec3d772e023ae8e6241",
+      "bytes": 6874,
+      "destinationSha256": "44b1e1cf7bd5e1cafe5476fb03b36610565d26d1a6f55ec3d772e023ae8e6241"
+    },
+    {
+      "from": ".cache/vfx-recipes/attack-fissure-v5.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/recipes/attack-fissure-v5.png",
+      "sourceSha256": "8831af2c481059dd6539c331459f398fac537e154ac6d791ebf565116819eaee",
+      "bytes": 2300528,
+      "destinationSha256": "8831af2c481059dd6539c331459f398fac537e154ac6d791ebf565116819eaee"
+    },
+    {
+      "from": ".cache/vfx-recipes/attack-piercing_shot-v3.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/recipes/attack-piercing_shot-v3.png",
+      "sourceSha256": "b1029fc5ca4c51e90f371907538ea143a304131d0525391f94cc54f1f8ca0485",
+      "bytes": 2324927,
+      "destinationSha256": "b1029fc5ca4c51e90f371907538ea143a304131d0525391f94cc54f1f8ca0485"
+    },
+    {
+      "from": ".cache/vfx-recipes/attack-stone_spike-v3.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/recipes/attack-stone_spike-v3.png",
+      "sourceSha256": "760543d6470200b37f45e21bf1ea17cf032f4df8183b1061851500ec8e8e5122",
+      "bytes": 2318990,
+      "destinationSha256": "760543d6470200b37f45e21bf1ea17cf032f4df8183b1061851500ec8e8e5122"
+    },
+    {
+      "from": ".cache/vfx-recipes/attack-tidal_wave-v3.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/recipes/attack-tidal_wave-v3.png",
+      "sourceSha256": "76cff8dcb78df3c408d8b32e65e460eedd0dfefb1dfeb1941ad15092ee9a1ec1",
+      "bytes": 2276661,
+      "destinationSha256": "76cff8dcb78df3c408d8b32e65e460eedd0dfefb1dfeb1941ad15092ee9a1ec1"
+    },
+    {
+      "from": ".cache/vfx-recipes/attack-water_ball-v3.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/recipes/attack-water_ball-v3.png",
+      "sourceSha256": "2e320b173deb86b0dc0a27780c68ced923baf7f28b9b9d14938eb3345bdf43af",
+      "bytes": 2286168,
+      "destinationSha256": "2e320b173deb86b0dc0a27780c68ced923baf7f28b9b9d14938eb3345bdf43af"
+    },
+    {
+      "from": ".cache/vfx-recipes-evidence.json",
+      "to": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-recipes-evidence.json",
+      "sourceSha256": "d9b427652b9b8335b942797f642e4ba1a4a5268c575573a002ae22999b962834",
+      "bytes": 427,
+      "destinationSha256": "d9b427652b9b8335b942797f642e4ba1a4a5268c575573a002ae22999b962834"
+    },
+    {
+      "from": ".cache/vfx-recipes.json",
+      "to": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-recipes.json",
+      "sourceSha256": "8d77e91f64c781c2934e0f4defdedfeac0dd31fa4210e303295270b0458ba80f",
+      "bytes": 1439,
+      "destinationSha256": "8d77e91f64c781c2934e0f4defdedfeac0dd31fa4210e303295270b0458ba80f"
+    },
+    {
+      "from": ".cache/vfx-recovery-catalog.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-recovery-catalog.log",
+      "sourceSha256": "f26ed8e4105d4e4810d48ccf574eca1e5264381132301cb4981e513d5740cab9",
+      "bytes": 992,
+      "destinationSha256": "f26ed8e4105d4e4810d48ccf574eca1e5264381132301cb4981e513d5740cab9"
+    },
+    {
+      "from": ".cache/vfx-registry-before.json",
+      "to": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-registry-before.json",
+      "sourceSha256": "43dbe0cb091eccfa8ca69a735b2833c0d640f910ebcb177354c342395a4cbfe3",
+      "bytes": 31,
+      "destinationSha256": "43dbe0cb091eccfa8ca69a735b2833c0d640f910ebcb177354c342395a4cbfe3"
+    },
+    {
+      "from": ".cache/vfx-resume-import-check.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-resume-import-check.log",
+      "sourceSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d",
+      "bytes": 864,
+      "destinationSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d"
+    },
+    {
+      "from": ".cache/vfx-review/arrow-core/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/arrow-core/chaos.png",
+      "sourceSha256": "4ecafd35cfc8923bbea9d1024c50ed522a492ea2b5314992cab5580f365a8847",
+      "bytes": 2266957,
+      "destinationSha256": "4ecafd35cfc8923bbea9d1024c50ed522a492ea2b5314992cab5580f365a8847"
+    },
+    {
+      "from": ".cache/vfx-review/arrow-core/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/arrow-core/cold.png",
+      "sourceSha256": "39a4bc3968c8d1829e66afcbf30b69c91c4726fca423eef60ce822b57229caa6",
+      "bytes": 2265887,
+      "destinationSha256": "39a4bc3968c8d1829e66afcbf30b69c91c4726fca423eef60ce822b57229caa6"
+    },
+    {
+      "from": ".cache/vfx-review/arrow-core/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/arrow-core/earth.png",
+      "sourceSha256": "4c11c5968664ed81130c64c6c359ca9b032a9385eaab2b5963abb2b70056141e",
+      "bytes": 2267222,
+      "destinationSha256": "4c11c5968664ed81130c64c6c359ca9b032a9385eaab2b5963abb2b70056141e"
+    },
+    {
+      "from": ".cache/vfx-review/arrow-core/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/arrow-core/fire.png",
+      "sourceSha256": "af4fdf7eb8992fb6dab6e44573de1390014f0d750b8f993af76a1015341bb6e1",
+      "bytes": 2266989,
+      "destinationSha256": "af4fdf7eb8992fb6dab6e44573de1390014f0d750b8f993af76a1015341bb6e1"
+    },
+    {
+      "from": ".cache/vfx-review/arrow-core/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/arrow-core/lightning.png",
+      "sourceSha256": "3a38bfe7b4470aca940bf3aad4be98c1052c3bf2f5d0d3a9ba02bac77b3c890a",
+      "bytes": 2267059,
+      "destinationSha256": "3a38bfe7b4470aca940bf3aad4be98c1052c3bf2f5d0d3a9ba02bac77b3c890a"
+    },
+    {
+      "from": ".cache/vfx-review/arrow-core/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/arrow-core/physical.png",
+      "sourceSha256": "559e996402c9f49ec0e414eda681d86b9ed7983764c4ea9b71758b351a6663de",
+      "bytes": 2266012,
+      "destinationSha256": "559e996402c9f49ec0e414eda681d86b9ed7983764c4ea9b71758b351a6663de"
+    },
+    {
+      "from": ".cache/vfx-review/arrow-core/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/arrow-core/poison.png",
+      "sourceSha256": "28e0e04f1e92700d6bc1385a6e89395a0520d3f0d90bb972668462336a1e9ac5",
+      "bytes": 2267467,
+      "destinationSha256": "28e0e04f1e92700d6bc1385a6e89395a0520d3f0d90bb972668462336a1e9ac5"
+    },
+    {
+      "from": ".cache/vfx-review/bind-strand/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/bind-strand/chaos.png",
+      "sourceSha256": "cbf70d7bbec8a92247d38204468a8361d4302a2f1f77031a7f4918488fd28dd4",
+      "bytes": 2221944,
+      "destinationSha256": "cbf70d7bbec8a92247d38204468a8361d4302a2f1f77031a7f4918488fd28dd4"
+    },
+    {
+      "from": ".cache/vfx-review/bind-strand/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/bind-strand/cold.png",
+      "sourceSha256": "0e8bd4e4aa7991cdef1583ea7d2eab84d6ea7cc1d509171a95a4674d40097ec4",
+      "bytes": 2222239,
+      "destinationSha256": "0e8bd4e4aa7991cdef1583ea7d2eab84d6ea7cc1d509171a95a4674d40097ec4"
+    },
+    {
+      "from": ".cache/vfx-review/bind-strand/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/bind-strand/earth.png",
+      "sourceSha256": "63e37b4a2330e91488d7abb6247cc4f641e473dfad9115cd1af1752203418fe5",
+      "bytes": 2222178,
+      "destinationSha256": "63e37b4a2330e91488d7abb6247cc4f641e473dfad9115cd1af1752203418fe5"
+    },
+    {
+      "from": ".cache/vfx-review/bind-strand/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/bind-strand/fire.png",
+      "sourceSha256": "82ad100d6999db21453f24f3782147ac682487e9aa44e52e8ad41eda8efcd4db",
+      "bytes": 2222334,
+      "destinationSha256": "82ad100d6999db21453f24f3782147ac682487e9aa44e52e8ad41eda8efcd4db"
+    },
+    {
+      "from": ".cache/vfx-review/bind-strand/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/bind-strand/lightning.png",
+      "sourceSha256": "9da2639e3f78363dd5202412d87525d4e8b15f6f5962a2e0788a720713c14a71",
+      "bytes": 2222251,
+      "destinationSha256": "9da2639e3f78363dd5202412d87525d4e8b15f6f5962a2e0788a720713c14a71"
+    },
+    {
+      "from": ".cache/vfx-review/bind-strand/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/bind-strand/physical.png",
+      "sourceSha256": "5ef2816d390a6d66ffa6ff41505c9072246eba2891e20a736a0990c59e87eca6",
+      "bytes": 2221524,
+      "destinationSha256": "5ef2816d390a6d66ffa6ff41505c9072246eba2891e20a736a0990c59e87eca6"
+    },
+    {
+      "from": ".cache/vfx-review/bind-strand/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/bind-strand/poison.png",
+      "sourceSha256": "63bdd778335e1c5d7b514465698e5d00c6ccbc55e726a47d3931b203a729ec14",
+      "bytes": 2222281,
+      "destinationSha256": "63bdd778335e1c5d7b514465698e5d00c6ccbc55e726a47d3931b203a729ec14"
+    },
+    {
+      "from": ".cache/vfx-review/cloud-mist/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/cloud-mist/chaos.png",
+      "sourceSha256": "a5a2d928fae04ef45c7f28a66a0f8eb5e4de43ef9213bf405275e8ac9ee80690",
+      "bytes": 2302347,
+      "destinationSha256": "a5a2d928fae04ef45c7f28a66a0f8eb5e4de43ef9213bf405275e8ac9ee80690"
+    },
+    {
+      "from": ".cache/vfx-review/cloud-mist/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/cloud-mist/cold.png",
+      "sourceSha256": "e1c395f3fad3175426db76641b1e234496ac3206f009f67469d05f1c4b2f7296",
+      "bytes": 2301678,
+      "destinationSha256": "e1c395f3fad3175426db76641b1e234496ac3206f009f67469d05f1c4b2f7296"
+    },
+    {
+      "from": ".cache/vfx-review/cloud-mist/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/cloud-mist/earth.png",
+      "sourceSha256": "a0ecdb367682f8718e068bc84813a5b3fa122fa67b3e99831d943ce49ef8dec2",
+      "bytes": 2297287,
+      "destinationSha256": "a0ecdb367682f8718e068bc84813a5b3fa122fa67b3e99831d943ce49ef8dec2"
+    },
+    {
+      "from": ".cache/vfx-review/cloud-mist/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/cloud-mist/fire.png",
+      "sourceSha256": "aa0be5961f4584d5c5be7284c0c34b98b0cdaac3d5ee8ce7a2ab08f9819d45ec",
+      "bytes": 2301411,
+      "destinationSha256": "aa0be5961f4584d5c5be7284c0c34b98b0cdaac3d5ee8ce7a2ab08f9819d45ec"
+    },
+    {
+      "from": ".cache/vfx-review/cloud-mist/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/cloud-mist/lightning.png",
+      "sourceSha256": "0f2ee2c08fd07e011f6fcaae631b60190edc38a1f81da041e76c572bdf8dab9d",
+      "bytes": 2299990,
+      "destinationSha256": "0f2ee2c08fd07e011f6fcaae631b60190edc38a1f81da041e76c572bdf8dab9d"
+    },
+    {
+      "from": ".cache/vfx-review/cloud-mist/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/cloud-mist/physical.png",
+      "sourceSha256": "c94092db823f0b87b3e58f783fd1d012ca71950edd384f008b77c99f80f5d79f",
+      "bytes": 2295156,
+      "destinationSha256": "c94092db823f0b87b3e58f783fd1d012ca71950edd384f008b77c99f80f5d79f"
+    },
+    {
+      "from": ".cache/vfx-review/cloud-mist/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/cloud-mist/poison.png",
+      "sourceSha256": "b0851c4c78511948d6715cf5eecd02a32fdc833cff4503fdb071dad6c097f6a2",
+      "bytes": 2303767,
+      "destinationSha256": "b0851c4c78511948d6715cf5eecd02a32fdc833cff4503fdb071dad6c097f6a2"
+    },
+    {
+      "from": ".cache/vfx-review/column-eruption/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/column-eruption/chaos.png",
+      "sourceSha256": "94662b53fa3b1b08d04b629c4b17df318ce2c289a7be3ffeb38bc0c699cacaab",
+      "bytes": 2280159,
+      "destinationSha256": "94662b53fa3b1b08d04b629c4b17df318ce2c289a7be3ffeb38bc0c699cacaab"
+    },
+    {
+      "from": ".cache/vfx-review/column-eruption/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/column-eruption/cold.png",
+      "sourceSha256": "25455afd6a6046d90632efb478fba7dfee1b703fa6b6680ab125d9f2d32c2194",
+      "bytes": 2280639,
+      "destinationSha256": "25455afd6a6046d90632efb478fba7dfee1b703fa6b6680ab125d9f2d32c2194"
+    },
+    {
+      "from": ".cache/vfx-review/column-eruption/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/column-eruption/earth.png",
+      "sourceSha256": "a616a5f4aa4c08809d2a8ebbfa1366152369de3d1b2d8a04550c325b9c56af0a",
+      "bytes": 2278153,
+      "destinationSha256": "a616a5f4aa4c08809d2a8ebbfa1366152369de3d1b2d8a04550c325b9c56af0a"
+    },
+    {
+      "from": ".cache/vfx-review/column-eruption/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/column-eruption/fire.png",
+      "sourceSha256": "172601cde1d1edf9449f5c23e3da6ae958012e0957e0d5f6a8b7113a72908304",
+      "bytes": 2278492,
+      "destinationSha256": "172601cde1d1edf9449f5c23e3da6ae958012e0957e0d5f6a8b7113a72908304"
+    },
+    {
+      "from": ".cache/vfx-review/column-eruption/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/column-eruption/lightning.png",
+      "sourceSha256": "48f580693c2597f59d5ed2daa429abcc9bd3b5a2c95a17f5e0af1af0543d53eb",
+      "bytes": 2279645,
+      "destinationSha256": "48f580693c2597f59d5ed2daa429abcc9bd3b5a2c95a17f5e0af1af0543d53eb"
+    },
+    {
+      "from": ".cache/vfx-review/column-eruption/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/column-eruption/physical.png",
+      "sourceSha256": "26dc2996fec340a3915d48d58bb29b651db274ce0189b3adac2544bea4da9626",
+      "bytes": 2279092,
+      "destinationSha256": "26dc2996fec340a3915d48d58bb29b651db274ce0189b3adac2544bea4da9626"
+    },
+    {
+      "from": ".cache/vfx-review/column-eruption/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/column-eruption/poison.png",
+      "sourceSha256": "a5a938fac293d6df138dc75c513aab34efb82768d27e26c35c38ade4ec7e3cb2",
+      "bytes": 2279398,
+      "destinationSha256": "a5a938fac293d6df138dc75c513aab34efb82768d27e26c35c38ade4ec7e3cb2"
+    },
+    {
+      "from": ".cache/vfx-review/cone-stream/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/cone-stream/chaos.png",
+      "sourceSha256": "97b7463762c0221797a05c8e0afd1a20db228df0de30b6226e949220cfae5d0f",
+      "bytes": 2227570,
+      "destinationSha256": "97b7463762c0221797a05c8e0afd1a20db228df0de30b6226e949220cfae5d0f"
+    },
+    {
+      "from": ".cache/vfx-review/cone-stream/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/cone-stream/cold.png",
+      "sourceSha256": "e7c7e1972fccbfcfe83ca07dbeecad709957bb97ee5de6536cbadb023b8e1183",
+      "bytes": 2227872,
+      "destinationSha256": "e7c7e1972fccbfcfe83ca07dbeecad709957bb97ee5de6536cbadb023b8e1183"
+    },
+    {
+      "from": ".cache/vfx-review/cone-stream/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/cone-stream/earth.png",
+      "sourceSha256": "314b6d25d815f5c6fa3e9befb2431b4dda2275115a8541aa5eaf0e620241a0d3",
+      "bytes": 2224744,
+      "destinationSha256": "314b6d25d815f5c6fa3e9befb2431b4dda2275115a8541aa5eaf0e620241a0d3"
+    },
+    {
+      "from": ".cache/vfx-review/cone-stream/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/cone-stream/fire.png",
+      "sourceSha256": "dace107a14d3824bd1f1cc6b38c902f3abe9c90f80c18fbe4b862a463aea3c14",
+      "bytes": 2227869,
+      "destinationSha256": "dace107a14d3824bd1f1cc6b38c902f3abe9c90f80c18fbe4b862a463aea3c14"
+    },
+    {
+      "from": ".cache/vfx-review/cone-stream/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/cone-stream/lightning.png",
+      "sourceSha256": "0da887b2a58c55f88ec6d316e1ccaf776b1fa8db61c92780891021357014f44e",
+      "bytes": 2226535,
+      "destinationSha256": "0da887b2a58c55f88ec6d316e1ccaf776b1fa8db61c92780891021357014f44e"
+    },
+    {
+      "from": ".cache/vfx-review/cone-stream/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/cone-stream/physical.png",
+      "sourceSha256": "a717bdb7bd938507c5a0b3590cde667c50d4eaa408c9304712a50c64b66350a9",
+      "bytes": 2225348,
+      "destinationSha256": "a717bdb7bd938507c5a0b3590cde667c50d4eaa408c9304712a50c64b66350a9"
+    },
+    {
+      "from": ".cache/vfx-review/cone-stream/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/cone-stream/poison.png",
+      "sourceSha256": "732facea74f75447b6ca8a6941f6093687c7ffb170ed55c843e2f6ee9633816b",
+      "bytes": 2229180,
+      "destinationSha256": "732facea74f75447b6ca8a6941f6093687c7ffb170ed55c843e2f6ee9633816b"
+    },
+    {
+      "from": ".cache/vfx-review/crack-strip/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/crack-strip/chaos.png",
+      "sourceSha256": "c4d20dc9d1201c96d3348374150434d7b2b75a647e2473a1412b19b3fe619a16",
+      "bytes": 2300836,
+      "destinationSha256": "c4d20dc9d1201c96d3348374150434d7b2b75a647e2473a1412b19b3fe619a16"
+    },
+    {
+      "from": ".cache/vfx-review/crack-strip/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/crack-strip/cold.png",
+      "sourceSha256": "246d3f96525bcd3791d1a9cd53bf4ae749658ae0651e4552df56098cd1bf8cbb",
+      "bytes": 2302179,
+      "destinationSha256": "246d3f96525bcd3791d1a9cd53bf4ae749658ae0651e4552df56098cd1bf8cbb"
+    },
+    {
+      "from": ".cache/vfx-review/crack-strip/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/crack-strip/earth.png",
+      "sourceSha256": "031d93a491a549b199c0fd000810bb109eb0ffc471cfd6ccd1a848dbfbb7c0f6",
+      "bytes": 2296669,
+      "destinationSha256": "031d93a491a549b199c0fd000810bb109eb0ffc471cfd6ccd1a848dbfbb7c0f6"
+    },
+    {
+      "from": ".cache/vfx-review/crack-strip/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/crack-strip/fire.png",
+      "sourceSha256": "0f1d73073300b767321f623abf954f8db57fda315468d4e77514a14adcfe8c5b",
+      "bytes": 2298841,
+      "destinationSha256": "0f1d73073300b767321f623abf954f8db57fda315468d4e77514a14adcfe8c5b"
+    },
+    {
+      "from": ".cache/vfx-review/crack-strip/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/crack-strip/lightning.png",
+      "sourceSha256": "31dd2a7b439a336b4f658f3c5a401c57d78f6fd6f98cea809ce71d05f5d388c7",
+      "bytes": 2299797,
+      "destinationSha256": "31dd2a7b439a336b4f658f3c5a401c57d78f6fd6f98cea809ce71d05f5d388c7"
+    },
+    {
+      "from": ".cache/vfx-review/crack-strip/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/crack-strip/physical.png",
+      "sourceSha256": "ae4b2e23dda808adf80e3b52442d7009e3809f6003bd8c09df3701f3941370ca",
+      "bytes": 2299528,
+      "destinationSha256": "ae4b2e23dda808adf80e3b52442d7009e3809f6003bd8c09df3701f3941370ca"
+    },
+    {
+      "from": ".cache/vfx-review/crack-strip/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/crack-strip/poison.png",
+      "sourceSha256": "744b32184f146d244ef276bbc5935a0a73bf746671ae32c9804f2af838568384",
+      "bytes": 2299016,
+      "destinationSha256": "744b32184f146d244ef276bbc5935a0a73bf746671ae32c9804f2af838568384"
+    },
+    {
+      "from": ".cache/vfx-review/crescent-wave/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/crescent-wave/chaos.png",
+      "sourceSha256": "4cb1a5d763c9cddc1222cf32810807cce63ad2c9fe941bc34c19a92146986efc",
+      "bytes": 2323871,
+      "destinationSha256": "4cb1a5d763c9cddc1222cf32810807cce63ad2c9fe941bc34c19a92146986efc"
+    },
+    {
+      "from": ".cache/vfx-review/crescent-wave/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/crescent-wave/cold.png",
+      "sourceSha256": "7735c93f2ee92e1b427131875bcba249067aa1eb502b30b8947462e2d3109d0d",
+      "bytes": 2323792,
+      "destinationSha256": "7735c93f2ee92e1b427131875bcba249067aa1eb502b30b8947462e2d3109d0d"
+    },
+    {
+      "from": ".cache/vfx-review/crescent-wave/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/crescent-wave/earth.png",
+      "sourceSha256": "60a572d8222f56fdb8a3b8e70f55283344c03acb3a18016b23ba72e7a2ceacee",
+      "bytes": 2323463,
+      "destinationSha256": "60a572d8222f56fdb8a3b8e70f55283344c03acb3a18016b23ba72e7a2ceacee"
+    },
+    {
+      "from": ".cache/vfx-review/crescent-wave/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/crescent-wave/fire.png",
+      "sourceSha256": "f073e796493c73c5611117cf82264981a98865459d4c34cb561771bf7e2f991b",
+      "bytes": 2323901,
+      "destinationSha256": "f073e796493c73c5611117cf82264981a98865459d4c34cb561771bf7e2f991b"
+    },
+    {
+      "from": ".cache/vfx-review/crescent-wave/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/crescent-wave/lightning.png",
+      "sourceSha256": "e8db01ecc96f8f4de451676d8314b069f5a1e2e0716f1febf759389c5c7db8b2",
+      "bytes": 2323477,
+      "destinationSha256": "e8db01ecc96f8f4de451676d8314b069f5a1e2e0716f1febf759389c5c7db8b2"
+    },
+    {
+      "from": ".cache/vfx-review/crescent-wave/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/crescent-wave/physical.png",
+      "sourceSha256": "b94707b57bf010a9c185e545ef0cc5329a423d3a05f57f7902154ebbf027b7a7",
+      "bytes": 2323649,
+      "destinationSha256": "b94707b57bf010a9c185e545ef0cc5329a423d3a05f57f7902154ebbf027b7a7"
+    },
+    {
+      "from": ".cache/vfx-review/crescent-wave/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/crescent-wave/poison.png",
+      "sourceSha256": "ff4aba9625bf46b3b8dcec4a3838374709ec61569a4a1cf2e84fc45bd245edb6",
+      "bytes": 2323558,
+      "destinationSha256": "ff4aba9625bf46b3b8dcec4a3838374709ec61569a4a1cf2e84fc45bd245edb6"
+    },
+    {
+      "from": ".cache/vfx-review/forked-bolt/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/forked-bolt/chaos.png",
+      "sourceSha256": "5bbbea68b972a5b66b3df0168357e0921d42f1389b78e52f3b003c394eaa2e2b",
+      "bytes": 2288415,
+      "destinationSha256": "5bbbea68b972a5b66b3df0168357e0921d42f1389b78e52f3b003c394eaa2e2b"
+    },
+    {
+      "from": ".cache/vfx-review/forked-bolt/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/forked-bolt/cold.png",
+      "sourceSha256": "736cadd91fd64250fcfba3fcac49266cc3df905a49ef55ee4c5ea8190d49121f",
+      "bytes": 2288767,
+      "destinationSha256": "736cadd91fd64250fcfba3fcac49266cc3df905a49ef55ee4c5ea8190d49121f"
+    },
+    {
+      "from": ".cache/vfx-review/forked-bolt/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/forked-bolt/earth.png",
+      "sourceSha256": "43b314a778073026f46a04beab350ca95fcf3b0bb56e94e1dfc2d47d52ada789",
+      "bytes": 2283634,
+      "destinationSha256": "43b314a778073026f46a04beab350ca95fcf3b0bb56e94e1dfc2d47d52ada789"
+    },
+    {
+      "from": ".cache/vfx-review/forked-bolt/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/forked-bolt/fire.png",
+      "sourceSha256": "1c5e915cfbf0db97fe723124c8377c0a64872eb3ee49af4897346950a7d913c7",
+      "bytes": 2287556,
+      "destinationSha256": "1c5e915cfbf0db97fe723124c8377c0a64872eb3ee49af4897346950a7d913c7"
+    },
+    {
+      "from": ".cache/vfx-review/forked-bolt/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/forked-bolt/lightning.png",
+      "sourceSha256": "0f627c2558780d8049826f9247c9f2937e7d94d80a84891fff7999e0a2146dac",
+      "bytes": 2287006,
+      "destinationSha256": "0f627c2558780d8049826f9247c9f2937e7d94d80a84891fff7999e0a2146dac"
+    },
+    {
+      "from": ".cache/vfx-review/forked-bolt/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/forked-bolt/physical.png",
+      "sourceSha256": "81d023828615f96dda11e65f8bd865f118c4350df172ab4717816f4de77d8dfb",
+      "bytes": 2285579,
+      "destinationSha256": "81d023828615f96dda11e65f8bd865f118c4350df172ab4717816f4de77d8dfb"
+    },
+    {
+      "from": ".cache/vfx-review/forked-bolt/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/forked-bolt/poison.png",
+      "sourceSha256": "7335bdef9ae63d3d572456cbd21b8886d23b666ccc30e4c1bcd4f77349e875a2",
+      "bytes": 2286379,
+      "destinationSha256": "7335bdef9ae63d3d572456cbd21b8886d23b666ccc30e4c1bcd4f77349e875a2"
+    },
+    {
+      "from": ".cache/vfx-review/fragment-debris/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/fragment-debris/chaos.png",
+      "sourceSha256": "dc322b8a9ecae59e01152ec7f6d5f2d79dbe628654ac572cc06906974414813b",
+      "bytes": 2248345,
+      "destinationSha256": "dc322b8a9ecae59e01152ec7f6d5f2d79dbe628654ac572cc06906974414813b"
+    },
+    {
+      "from": ".cache/vfx-review/fragment-debris/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/fragment-debris/cold.png",
+      "sourceSha256": "a712d1bc250d0ec9ed9dd88b711860e2f0f444d3960a6f0cf89e28be0e1668b1",
+      "bytes": 2249162,
+      "destinationSha256": "a712d1bc250d0ec9ed9dd88b711860e2f0f444d3960a6f0cf89e28be0e1668b1"
+    },
+    {
+      "from": ".cache/vfx-review/fragment-debris/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/fragment-debris/earth.png",
+      "sourceSha256": "b03d3420a333fc58050130b39f2eb6766be0ce6d48e864c99cdaf979e727863a",
+      "bytes": 2247408,
+      "destinationSha256": "b03d3420a333fc58050130b39f2eb6766be0ce6d48e864c99cdaf979e727863a"
+    },
+    {
+      "from": ".cache/vfx-review/fragment-debris/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/fragment-debris/fire.png",
+      "sourceSha256": "1062a697c2f79300955e05c335f620b87ff76140198d7d9860e6704f1ab1829d",
+      "bytes": 2248812,
+      "destinationSha256": "1062a697c2f79300955e05c335f620b87ff76140198d7d9860e6704f1ab1829d"
+    },
+    {
+      "from": ".cache/vfx-review/fragment-debris/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/fragment-debris/lightning.png",
+      "sourceSha256": "474f17a0b2f0b956f35c224a85bc231dc9a2131c46de101bdfb5cb0ece7ef176",
+      "bytes": 2247562,
+      "destinationSha256": "474f17a0b2f0b956f35c224a85bc231dc9a2131c46de101bdfb5cb0ece7ef176"
+    },
+    {
+      "from": ".cache/vfx-review/fragment-debris/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/fragment-debris/physical.png",
+      "sourceSha256": "a19886ee056a697eac79ffc2cb6f7d243929e716b3a6204b8785db261bef5523",
+      "bytes": 2247420,
+      "destinationSha256": "a19886ee056a697eac79ffc2cb6f7d243929e716b3a6204b8785db261bef5523"
+    },
+    {
+      "from": ".cache/vfx-review/fragment-debris/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/fragment-debris/poison.png",
+      "sourceSha256": "31fa1bc92ed81ac14cb6349a04742020882f566d78a47b41811dc4b06c92ff1b",
+      "bytes": 2248929,
+      "destinationSha256": "31fa1bc92ed81ac14cb6349a04742020882f566d78a47b41811dc4b06c92ff1b"
+    },
+    {
+      "from": ".cache/vfx-review/ground-edge/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-edge/chaos.png",
+      "sourceSha256": "31e6f2cea1eac06bd003daf34587af011fdb586344d869df2a2742c053a02e98",
+      "bytes": 2365417,
+      "destinationSha256": "31e6f2cea1eac06bd003daf34587af011fdb586344d869df2a2742c053a02e98"
+    },
+    {
+      "from": ".cache/vfx-review/ground-edge/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-edge/cold.png",
+      "sourceSha256": "4174858033fbc47b841d3029ca42da5769fe06384ef99668625ea4f7247b8f80",
+      "bytes": 2369043,
+      "destinationSha256": "4174858033fbc47b841d3029ca42da5769fe06384ef99668625ea4f7247b8f80"
+    },
+    {
+      "from": ".cache/vfx-review/ground-edge/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-edge/earth.png",
+      "sourceSha256": "87a66f0f75b305e0b82292da21fc8d2a4812d15dda3ab636adebbc30fe35ce4e",
+      "bytes": 2343916,
+      "destinationSha256": "87a66f0f75b305e0b82292da21fc8d2a4812d15dda3ab636adebbc30fe35ce4e"
+    },
+    {
+      "from": ".cache/vfx-review/ground-edge/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-edge/fire.png",
+      "sourceSha256": "5bba74426aeb8a5a93d70efbaedd7fd98f6c508b6795306e87b1e64253d16a70",
+      "bytes": 2361895,
+      "destinationSha256": "5bba74426aeb8a5a93d70efbaedd7fd98f6c508b6795306e87b1e64253d16a70"
+    },
+    {
+      "from": ".cache/vfx-review/ground-edge/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-edge/lightning.png",
+      "sourceSha256": "9b9bcf509bd53339eec007337ff6710e2722d46e16abc7bc51221936442ea3d2",
+      "bytes": 2353673,
+      "destinationSha256": "9b9bcf509bd53339eec007337ff6710e2722d46e16abc7bc51221936442ea3d2"
+    },
+    {
+      "from": ".cache/vfx-review/ground-edge/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-edge/physical.png",
+      "sourceSha256": "f3cb0670fafbb87fce4bbf5e228544a7aae30f7d2a7a655445edcd90a3904970",
+      "bytes": 2351467,
+      "destinationSha256": "f3cb0670fafbb87fce4bbf5e228544a7aae30f7d2a7a655445edcd90a3904970"
+    },
+    {
+      "from": ".cache/vfx-review/ground-edge/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-edge/poison.png",
+      "sourceSha256": "b29c0d9a1c70d2a0f9302089ca8cf353684308f607833f96f6263c44cdbd311c",
+      "bytes": 2365821,
+      "destinationSha256": "b29c0d9a1c70d2a0f9302089ca8cf353684308f607833f96f6263c44cdbd311c"
+    },
+    {
+      "from": ".cache/vfx-review/ground-fill/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-fill/chaos.png",
+      "sourceSha256": "2ecb298d8b356d8eb8177d727c1eebff030d958619a8e2bbd7b5ccc3b6fc56ca",
+      "bytes": 2628541,
+      "destinationSha256": "2ecb298d8b356d8eb8177d727c1eebff030d958619a8e2bbd7b5ccc3b6fc56ca"
+    },
+    {
+      "from": ".cache/vfx-review/ground-fill/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-fill/cold.png",
+      "sourceSha256": "138e083ece4853931757039aa270bd0644cad9a225abf5a2895996503b9134ba",
+      "bytes": 2628831,
+      "destinationSha256": "138e083ece4853931757039aa270bd0644cad9a225abf5a2895996503b9134ba"
+    },
+    {
+      "from": ".cache/vfx-review/ground-fill/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-fill/earth.png",
+      "sourceSha256": "6f20ccb44825a24cb5946ca2a29ae2fc358eb13a39503d4f4acba771fe30d7ea",
+      "bytes": 2596176,
+      "destinationSha256": "6f20ccb44825a24cb5946ca2a29ae2fc358eb13a39503d4f4acba771fe30d7ea"
+    },
+    {
+      "from": ".cache/vfx-review/ground-fill/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-fill/fire.png",
+      "sourceSha256": "a4e29d3c7a1edd226912aca79edeb44f02e3ac526fca5882f071c15699a3c485",
+      "bytes": 2631277,
+      "destinationSha256": "a4e29d3c7a1edd226912aca79edeb44f02e3ac526fca5882f071c15699a3c485"
+    },
+    {
+      "from": ".cache/vfx-review/ground-fill/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-fill/lightning.png",
+      "sourceSha256": "d2e462215bcd3d29de73be6d25a7e616871285f4c8b24dce88ca8e2ba7f09475",
+      "bytes": 2620463,
+      "destinationSha256": "d2e462215bcd3d29de73be6d25a7e616871285f4c8b24dce88ca8e2ba7f09475"
+    },
+    {
+      "from": ".cache/vfx-review/ground-fill/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-fill/physical.png",
+      "sourceSha256": "34b44a0a9dc4c6e9fb1ede76856ff5f151f9e73e238f0e082c42c6710878d2ca",
+      "bytes": 2588219,
+      "destinationSha256": "34b44a0a9dc4c6e9fb1ede76856ff5f151f9e73e238f0e082c42c6710878d2ca"
+    },
+    {
+      "from": ".cache/vfx-review/ground-fill/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-fill/poison.png",
+      "sourceSha256": "82729f5d650312b379b9e2a212cb8910014acac345462ee607856e6aa55df279",
+      "bytes": 2634977,
+      "destinationSha256": "82729f5d650312b379b9e2a212cb8910014acac345462ee607856e6aa55df279"
+    },
+    {
+      "from": ".cache/vfx-review/ground-residue/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-residue/chaos.png",
+      "sourceSha256": "4ec9f0b5a15888a2c8b0dc3d36c8e3a10333c1856c97ced9c2d9cbf0a428e7c2",
+      "bytes": 2595645,
+      "destinationSha256": "4ec9f0b5a15888a2c8b0dc3d36c8e3a10333c1856c97ced9c2d9cbf0a428e7c2"
+    },
+    {
+      "from": ".cache/vfx-review/ground-residue/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-residue/cold.png",
+      "sourceSha256": "05cadac52f739d0676c0d19d6efea28f6d4a1e3b2090755ca6673a2ea695d863",
+      "bytes": 2596150,
+      "destinationSha256": "05cadac52f739d0676c0d19d6efea28f6d4a1e3b2090755ca6673a2ea695d863"
+    },
+    {
+      "from": ".cache/vfx-review/ground-residue/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-residue/earth.png",
+      "sourceSha256": "b70ac048d7cc9812032566db9789f13629bb37339fb28a87e8a2948ddc101a45",
+      "bytes": 2551151,
+      "destinationSha256": "b70ac048d7cc9812032566db9789f13629bb37339fb28a87e8a2948ddc101a45"
+    },
+    {
+      "from": ".cache/vfx-review/ground-residue/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-residue/fire.png",
+      "sourceSha256": "6d955fde1c6eb2052ee1778e34c2b392dab618002605fd94cfc3fe19ea80c239",
+      "bytes": 2586714,
+      "destinationSha256": "6d955fde1c6eb2052ee1778e34c2b392dab618002605fd94cfc3fe19ea80c239"
+    },
+    {
+      "from": ".cache/vfx-review/ground-residue/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-residue/lightning.png",
+      "sourceSha256": "bc48c856cbf4dd609dd96b1efaf0202f7beccb5046927ba374c338ff4739a88b",
+      "bytes": 2579360,
+      "destinationSha256": "bc48c856cbf4dd609dd96b1efaf0202f7beccb5046927ba374c338ff4739a88b"
+    },
+    {
+      "from": ".cache/vfx-review/ground-residue/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-residue/physical.png",
+      "sourceSha256": "e5273bd5f76675ab83c2acf1b3e994cc793ea52dd704662eb6a7df97129b291f",
+      "bytes": 2565726,
+      "destinationSha256": "e5273bd5f76675ab83c2acf1b3e994cc793ea52dd704662eb6a7df97129b291f"
+    },
+    {
+      "from": ".cache/vfx-review/ground-residue/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-residue/poison.png",
+      "sourceSha256": "a57e95c0113076a9cae3cfd17c215df4742d106012ce74dda4d8eb99fc1142d2",
+      "bytes": 2585837,
+      "destinationSha256": "a57e95c0113076a9cae3cfd17c215df4742d106012ce74dda4d8eb99fc1142d2"
+    },
+    {
+      "from": ".cache/vfx-review/ground-spiral/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-spiral/chaos.png",
+      "sourceSha256": "190e6a5d0876b3891cf75cbf89047f963909cb95a812fec8df15fed43f714524",
+      "bytes": 2593058,
+      "destinationSha256": "190e6a5d0876b3891cf75cbf89047f963909cb95a812fec8df15fed43f714524"
+    },
+    {
+      "from": ".cache/vfx-review/ground-spiral/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-spiral/cold.png",
+      "sourceSha256": "4e049cdebfe46d20df40c057705a0073ce1830d3e51a151ac366fdaf1d3e6cdd",
+      "bytes": 2594160,
+      "destinationSha256": "4e049cdebfe46d20df40c057705a0073ce1830d3e51a151ac366fdaf1d3e6cdd"
+    },
+    {
+      "from": ".cache/vfx-review/ground-spiral/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-spiral/earth.png",
+      "sourceSha256": "eb8a1f0d022ddf768dce96be25d826e86051503c76381f5ec60e69f96102ec03",
+      "bytes": 2559725,
+      "destinationSha256": "eb8a1f0d022ddf768dce96be25d826e86051503c76381f5ec60e69f96102ec03"
+    },
+    {
+      "from": ".cache/vfx-review/ground-spiral/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-spiral/fire.png",
+      "sourceSha256": "2ef0a2f07b4d2388492659d7046723cb51fbee4c0a4ed634b724ff331c8d3959",
+      "bytes": 2591071,
+      "destinationSha256": "2ef0a2f07b4d2388492659d7046723cb51fbee4c0a4ed634b724ff331c8d3959"
+    },
+    {
+      "from": ".cache/vfx-review/ground-spiral/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-spiral/lightning.png",
+      "sourceSha256": "4f9e80d43c6bf57f92f0e3f3f6941b38d5a81d1deee1d1c6fa50512be74a1c23",
+      "bytes": 2582040,
+      "destinationSha256": "4f9e80d43c6bf57f92f0e3f3f6941b38d5a81d1deee1d1c6fa50512be74a1c23"
+    },
+    {
+      "from": ".cache/vfx-review/ground-spiral/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-spiral/physical.png",
+      "sourceSha256": "54463a60ad23e8d71e09e6f34ad7df0e8efd8bed47fc7a011a53a11d2591efa1",
+      "bytes": 2566632,
+      "destinationSha256": "54463a60ad23e8d71e09e6f34ad7df0e8efd8bed47fc7a011a53a11d2591efa1"
+    },
+    {
+      "from": ".cache/vfx-review/ground-spiral/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ground-spiral/poison.png",
+      "sourceSha256": "2c689b6ec1381553257acdab3c9141d8ec697e9e65b38a660c91890c0f2c7649",
+      "bytes": 2590517,
+      "destinationSha256": "2c689b6ec1381553257acdab3c9141d8ec697e9e65b38a660c91890c0f2c7649"
+    },
+    {
+      "from": ".cache/vfx-review/impact-burst/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/impact-burst/chaos.png",
+      "sourceSha256": "ec548f856fa30cbcad98b0629ab016dd4e59907e5d79f7c8f54d6ddb36f7ab46",
+      "bytes": 2288184,
+      "destinationSha256": "ec548f856fa30cbcad98b0629ab016dd4e59907e5d79f7c8f54d6ddb36f7ab46"
+    },
+    {
+      "from": ".cache/vfx-review/impact-burst/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/impact-burst/cold.png",
+      "sourceSha256": "9ecb3872bd10f841a90a233fd4d8055504c5ee6bba3a5cbdad4440d85679ba8c",
+      "bytes": 2289359,
+      "destinationSha256": "9ecb3872bd10f841a90a233fd4d8055504c5ee6bba3a5cbdad4440d85679ba8c"
+    },
+    {
+      "from": ".cache/vfx-review/impact-burst/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/impact-burst/earth.png",
+      "sourceSha256": "2a16d0fc618db7705cbb321872ea7840920dfbae6e9590e51c9c475782d045ab",
+      "bytes": 2286694,
+      "destinationSha256": "2a16d0fc618db7705cbb321872ea7840920dfbae6e9590e51c9c475782d045ab"
+    },
+    {
+      "from": ".cache/vfx-review/impact-burst/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/impact-burst/fire.png",
+      "sourceSha256": "a67be4c668f021f60be4503ba0f4856a5dfdcae942e6a89c6235b1492e6f912c",
+      "bytes": 2285651,
+      "destinationSha256": "a67be4c668f021f60be4503ba0f4856a5dfdcae942e6a89c6235b1492e6f912c"
+    },
+    {
+      "from": ".cache/vfx-review/impact-burst/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/impact-burst/lightning.png",
+      "sourceSha256": "74587f9620f7dae68a3ab9b7c543f0607d5ffc6097bbfe51b44e92f895edef21",
+      "bytes": 2288711,
+      "destinationSha256": "74587f9620f7dae68a3ab9b7c543f0607d5ffc6097bbfe51b44e92f895edef21"
+    },
+    {
+      "from": ".cache/vfx-review/impact-burst/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/impact-burst/physical.png",
+      "sourceSha256": "9f73d385219f3a4b4e4cf450b0530d2feb54fea4c8c9ad5de381ff1c4790989e",
+      "bytes": 2287529,
+      "destinationSha256": "9f73d385219f3a4b4e4cf450b0530d2feb54fea4c8c9ad5de381ff1c4790989e"
+    },
+    {
+      "from": ".cache/vfx-review/impact-burst/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/impact-burst/poison.png",
+      "sourceSha256": "a0e4837d175a0e714052be772d85d3f31ac8046798046258c7666bdea9451bf4",
+      "bytes": 2287269,
+      "destinationSha256": "a0e4837d175a0e714052be772d85d3f31ac8046798046258c7666bdea9451bf4"
+    },
+    {
+      "from": ".cache/vfx-review/mark-sigil/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/mark-sigil/chaos.png",
+      "sourceSha256": "120f159ffb82989f989ddee416228ec1181b325cf8439fd5b139f1979002f59a",
+      "bytes": 2283052,
+      "destinationSha256": "120f159ffb82989f989ddee416228ec1181b325cf8439fd5b139f1979002f59a"
+    },
+    {
+      "from": ".cache/vfx-review/mark-sigil/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/mark-sigil/cold.png",
+      "sourceSha256": "07a03a3b28a6375d52bca9f2afb31616f516dc5933b9e554b4b7ea283b0d29b6",
+      "bytes": 2282482,
+      "destinationSha256": "07a03a3b28a6375d52bca9f2afb31616f516dc5933b9e554b4b7ea283b0d29b6"
+    },
+    {
+      "from": ".cache/vfx-review/mark-sigil/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/mark-sigil/earth.png",
+      "sourceSha256": "1d6ec190b092c3061b265b769385a911b6144d96a59e7a50b2b17c5bd41a6fb2",
+      "bytes": 2281949,
+      "destinationSha256": "1d6ec190b092c3061b265b769385a911b6144d96a59e7a50b2b17c5bd41a6fb2"
+    },
+    {
+      "from": ".cache/vfx-review/mark-sigil/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/mark-sigil/fire.png",
+      "sourceSha256": "8b870ff59b2d87cee849e8adee9cab1c9e626835770db190c4b7fae4933562af",
+      "bytes": 2282872,
+      "destinationSha256": "8b870ff59b2d87cee849e8adee9cab1c9e626835770db190c4b7fae4933562af"
+    },
+    {
+      "from": ".cache/vfx-review/mark-sigil/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/mark-sigil/lightning.png",
+      "sourceSha256": "9b75bea55ff9229073ba2e25ff3e951d5bb0b208c1642b0e515464c0800fba3c",
+      "bytes": 2282518,
+      "destinationSha256": "9b75bea55ff9229073ba2e25ff3e951d5bb0b208c1642b0e515464c0800fba3c"
+    },
+    {
+      "from": ".cache/vfx-review/mark-sigil/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/mark-sigil/physical.png",
+      "sourceSha256": "9d0f802812f8f094e1ff22ade80c00d1793195e155b72edd051aa04fa98cdda0",
+      "bytes": 2282204,
+      "destinationSha256": "9d0f802812f8f094e1ff22ade80c00d1793195e155b72edd051aa04fa98cdda0"
+    },
+    {
+      "from": ".cache/vfx-review/mark-sigil/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/mark-sigil/poison.png",
+      "sourceSha256": "7994991ac9af2f304930e5839889396cf932877ce99cb83fa96d5f07e1fa2ad4",
+      "bytes": 2282806,
+      "destinationSha256": "7994991ac9af2f304930e5839889396cf932877ce99cb83fa96d5f07e1fa2ad4"
+    },
+    {
+      "from": ".cache/vfx-review/mote/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/mote/chaos.png",
+      "sourceSha256": "014f755de7bc4176873c32c849918f5b8f328eca1e4139f9598e4ffe85a529dd",
+      "bytes": 2185962,
+      "destinationSha256": "014f755de7bc4176873c32c849918f5b8f328eca1e4139f9598e4ffe85a529dd"
+    },
+    {
+      "from": ".cache/vfx-review/mote/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/mote/cold.png",
+      "sourceSha256": "3f7cb0a72ba0662aa6454fe68408b06f3b4e7b7852750ff87c3863fc1f4598ad",
+      "bytes": 2185642,
+      "destinationSha256": "3f7cb0a72ba0662aa6454fe68408b06f3b4e7b7852750ff87c3863fc1f4598ad"
+    },
+    {
+      "from": ".cache/vfx-review/mote/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/mote/earth.png",
+      "sourceSha256": "7e168d3a2df0a00f66b2c5c08a48fa671dec8003bade81ba21d42cbf973b7d34",
+      "bytes": 2186211,
+      "destinationSha256": "7e168d3a2df0a00f66b2c5c08a48fa671dec8003bade81ba21d42cbf973b7d34"
+    },
+    {
+      "from": ".cache/vfx-review/mote/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/mote/fire.png",
+      "sourceSha256": "c9293fe61fb152e0d560c26755d6be043fe76a4aff3307370eb330790f9fde48",
+      "bytes": 2184631,
+      "destinationSha256": "c9293fe61fb152e0d560c26755d6be043fe76a4aff3307370eb330790f9fde48"
+    },
+    {
+      "from": ".cache/vfx-review/mote/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/mote/lightning.png",
+      "sourceSha256": "ddbf27f4bd87a38bb9083951877f3096c6d3f29c8eb0319cea7ab0eea46e9e42",
+      "bytes": 2185286,
+      "destinationSha256": "ddbf27f4bd87a38bb9083951877f3096c6d3f29c8eb0319cea7ab0eea46e9e42"
+    },
+    {
+      "from": ".cache/vfx-review/mote/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/mote/physical.png",
+      "sourceSha256": "e0a031017ff29cc146b58a21a9d775192fb2473da2fe3013e4bbd077c335f715",
+      "bytes": 2185555,
+      "destinationSha256": "e0a031017ff29cc146b58a21a9d775192fb2473da2fe3013e4bbd077c335f715"
+    },
+    {
+      "from": ".cache/vfx-review/mote/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/mote/poison.png",
+      "sourceSha256": "a0d4aeb1470ba210a8458f5b647d88084d77ef9ed88e49ce4e69c3e028a03316",
+      "bytes": 2185424,
+      "destinationSha256": "a0d4aeb1470ba210a8458f5b647d88084d77ef9ed88e49ce4e69c3e028a03316"
+    },
+    {
+      "from": ".cache/vfx-review/orb-core/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/orb-core/chaos.png",
+      "sourceSha256": "71321571ddc8f4b33bfe331e5be6b1c31997d0ceb554d1a53e6461fc01560313",
+      "bytes": 2285010,
+      "destinationSha256": "71321571ddc8f4b33bfe331e5be6b1c31997d0ceb554d1a53e6461fc01560313"
+    },
+    {
+      "from": ".cache/vfx-review/orb-core/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/orb-core/cold.png",
+      "sourceSha256": "a0883556a3df0467c331388295ba50d23bd57002e22c0e60627631df090947c2",
+      "bytes": 2285421,
+      "destinationSha256": "a0883556a3df0467c331388295ba50d23bd57002e22c0e60627631df090947c2"
+    },
+    {
+      "from": ".cache/vfx-review/orb-core/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/orb-core/earth.png",
+      "sourceSha256": "01479c8e6ca0984d17eb9a7b36e7af4ac27d222647804fc2a1befa2bc0388612",
+      "bytes": 2283910,
+      "destinationSha256": "01479c8e6ca0984d17eb9a7b36e7af4ac27d222647804fc2a1befa2bc0388612"
+    },
+    {
+      "from": ".cache/vfx-review/orb-core/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/orb-core/fire.png",
+      "sourceSha256": "b90fb6a818ee8ad8771fd4d9a33a0713bf38f688ba600ad95f83a53965be50f7",
+      "bytes": 2282828,
+      "destinationSha256": "b90fb6a818ee8ad8771fd4d9a33a0713bf38f688ba600ad95f83a53965be50f7"
+    },
+    {
+      "from": ".cache/vfx-review/orb-core/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/orb-core/lightning.png",
+      "sourceSha256": "8a08c38f15d3c200685275a75644e605d27d7b8e0255f73753bad6d906e4b6c4",
+      "bytes": 2284751,
+      "destinationSha256": "8a08c38f15d3c200685275a75644e605d27d7b8e0255f73753bad6d906e4b6c4"
+    },
+    {
+      "from": ".cache/vfx-review/orb-core/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/orb-core/physical.png",
+      "sourceSha256": "2c4ad875b94562999368169f2385f3da5b6bafbb21d71c0fc544ddc5c009e36e",
+      "bytes": 2283407,
+      "destinationSha256": "2c4ad875b94562999368169f2385f3da5b6bafbb21d71c0fc544ddc5c009e36e"
+    },
+    {
+      "from": ".cache/vfx-review/orb-core/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/orb-core/poison.png",
+      "sourceSha256": "974b53160100e434e06ca43d2f9de5c2fb12fdc4c636e1659d3a31392a336b7f",
+      "bytes": 2285490,
+      "destinationSha256": "974b53160100e434e06ca43d2f9de5c2fb12fdc4c636e1659d3a31392a336b7f"
+    },
+    {
+      "from": ".cache/vfx-review/projectile-core/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/projectile-core/chaos.png",
+      "sourceSha256": "ef4158b51e08c11e7bad46e079a678521e9c789f8ea0e799eaf3d47930d71b68",
+      "bytes": 2278576,
+      "destinationSha256": "ef4158b51e08c11e7bad46e079a678521e9c789f8ea0e799eaf3d47930d71b68"
+    },
+    {
+      "from": ".cache/vfx-review/projectile-core/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/projectile-core/cold.png",
+      "sourceSha256": "275230e6b390305f839104368bcd446552f92789ad78dedb07b46421f115975a",
+      "bytes": 2278277,
+      "destinationSha256": "275230e6b390305f839104368bcd446552f92789ad78dedb07b46421f115975a"
+    },
+    {
+      "from": ".cache/vfx-review/projectile-core/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/projectile-core/earth.png",
+      "sourceSha256": "8e52fea0a8e12773e8be98fb649d746c7f52cb7be8b8a35681e240797e308ee1",
+      "bytes": 2278144,
+      "destinationSha256": "8e52fea0a8e12773e8be98fb649d746c7f52cb7be8b8a35681e240797e308ee1"
+    },
+    {
+      "from": ".cache/vfx-review/projectile-core/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/projectile-core/fire.png",
+      "sourceSha256": "fc455d647fbdaeaed90a234a7d5d30f70bcc7f83b9659a1525839887c65e9f8e",
+      "bytes": 2277146,
+      "destinationSha256": "fc455d647fbdaeaed90a234a7d5d30f70bcc7f83b9659a1525839887c65e9f8e"
+    },
+    {
+      "from": ".cache/vfx-review/projectile-core/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/projectile-core/lightning.png",
+      "sourceSha256": "c62ad42f2d8dc39b6ef0b66bae99532ce41be571be3b5d400e1266aac540b5e5",
+      "bytes": 2278352,
+      "destinationSha256": "c62ad42f2d8dc39b6ef0b66bae99532ce41be571be3b5d400e1266aac540b5e5"
+    },
+    {
+      "from": ".cache/vfx-review/projectile-core/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/projectile-core/physical.png",
+      "sourceSha256": "0bca171dace257d94b44192b5b218b9ab54179655251e93f2ada5e62af48da55",
+      "bytes": 2278461,
+      "destinationSha256": "0bca171dace257d94b44192b5b218b9ab54179655251e93f2ada5e62af48da55"
+    },
+    {
+      "from": ".cache/vfx-review/projectile-core/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/projectile-core/poison.png",
+      "sourceSha256": "b80a76ed60f8dc55dd387603a556d287003514e158ddd91192afc4c614fb56bc",
+      "bytes": 2278441,
+      "destinationSha256": "b80a76ed60f8dc55dd387603a556d287003514e158ddd91192afc4c614fb56bc"
+    },
+    {
+      "from": ".cache/vfx-review/ribbon-beam/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ribbon-beam/chaos.png",
+      "sourceSha256": "fef7b5b894c3abb16873004cb48802394d51c9eb04a732f60079ea9b95a3500e",
+      "bytes": 2223879,
+      "destinationSha256": "fef7b5b894c3abb16873004cb48802394d51c9eb04a732f60079ea9b95a3500e"
+    },
+    {
+      "from": ".cache/vfx-review/ribbon-beam/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ribbon-beam/cold.png",
+      "sourceSha256": "2248738b6e6fc13b05ec5dee252435440197ea8f8e6b1fc28e60a6f9a299dc53",
+      "bytes": 2224609,
+      "destinationSha256": "2248738b6e6fc13b05ec5dee252435440197ea8f8e6b1fc28e60a6f9a299dc53"
+    },
+    {
+      "from": ".cache/vfx-review/ribbon-beam/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ribbon-beam/earth.png",
+      "sourceSha256": "778d7339e6ded7e5ee90528d03e7629f0747a05a00bab16d87848fbb3fd7c18a",
+      "bytes": 2224169,
+      "destinationSha256": "778d7339e6ded7e5ee90528d03e7629f0747a05a00bab16d87848fbb3fd7c18a"
+    },
+    {
+      "from": ".cache/vfx-review/ribbon-beam/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ribbon-beam/fire.png",
+      "sourceSha256": "258cc47ba29507aaa1a40c09f25d1464bfb796352b181edcb99f3eab064bc20c",
+      "bytes": 2224360,
+      "destinationSha256": "258cc47ba29507aaa1a40c09f25d1464bfb796352b181edcb99f3eab064bc20c"
+    },
+    {
+      "from": ".cache/vfx-review/ribbon-beam/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ribbon-beam/lightning.png",
+      "sourceSha256": "ddde0b6475b820c863ac8e0432423cc48b39d904bddf60fb0eb656725be95d97",
+      "bytes": 2223784,
+      "destinationSha256": "ddde0b6475b820c863ac8e0432423cc48b39d904bddf60fb0eb656725be95d97"
+    },
+    {
+      "from": ".cache/vfx-review/ribbon-beam/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ribbon-beam/physical.png",
+      "sourceSha256": "e2f458c57c7b08d7ba946d2406c5d6905033ccc0cea657b80ab86f3eb00d3083",
+      "bytes": 2224302,
+      "destinationSha256": "e2f458c57c7b08d7ba946d2406c5d6905033ccc0cea657b80ab86f3eb00d3083"
+    },
+    {
+      "from": ".cache/vfx-review/ribbon-beam/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ribbon-beam/poison.png",
+      "sourceSha256": "6e530baf88f97f87aeca278c0a3e204be4cd172b68d01a0b849d8474c99025bd",
+      "bytes": 2224484,
+      "destinationSha256": "6e530baf88f97f87aeca278c0a3e204be4cd172b68d01a0b849d8474c99025bd"
+    },
+    {
+      "from": ".cache/vfx-review/rock-core/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/rock-core/chaos.png",
+      "sourceSha256": "1f6ec3892ca9b9b2592fd02dd106e2efd8f410080c77f5670549dd64cab2ea1b",
+      "bytes": 2694952,
+      "destinationSha256": "1f6ec3892ca9b9b2592fd02dd106e2efd8f410080c77f5670549dd64cab2ea1b"
+    },
+    {
+      "from": ".cache/vfx-review/rock-core/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/rock-core/cold.png",
+      "sourceSha256": "ee848fbbdaafee7e20dae4d50fbdd67be108e50feb4a7924baab6043bee58e00",
+      "bytes": 2695458,
+      "destinationSha256": "ee848fbbdaafee7e20dae4d50fbdd67be108e50feb4a7924baab6043bee58e00"
+    },
+    {
+      "from": ".cache/vfx-review/rock-core/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/rock-core/earth.png",
+      "sourceSha256": "0622e251b1d874143efaa93281c784a33444b10eb24a7555aefb29e221830fa5",
+      "bytes": 2695985,
+      "destinationSha256": "0622e251b1d874143efaa93281c784a33444b10eb24a7555aefb29e221830fa5"
+    },
+    {
+      "from": ".cache/vfx-review/rock-core/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/rock-core/fire.png",
+      "sourceSha256": "13402a1260dff5a88d1de4fa0fb1f0c26e6f2b366b17e64b7d17c34bd311cb4e",
+      "bytes": 2694691,
+      "destinationSha256": "13402a1260dff5a88d1de4fa0fb1f0c26e6f2b366b17e64b7d17c34bd311cb4e"
+    },
+    {
+      "from": ".cache/vfx-review/rock-core/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/rock-core/lightning.png",
+      "sourceSha256": "13cff70ee96fbe5f6b9af2bcdabb3e36cd78a5900f793052a33437fc1c20553f",
+      "bytes": 2696017,
+      "destinationSha256": "13cff70ee96fbe5f6b9af2bcdabb3e36cd78a5900f793052a33437fc1c20553f"
+    },
+    {
+      "from": ".cache/vfx-review/rock-core/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/rock-core/physical.png",
+      "sourceSha256": "3c7bd2fcc8311df85ca4c100ab4ecead8bd7708481671a8af184ee4ca2c762e6",
+      "bytes": 2695815,
+      "destinationSha256": "3c7bd2fcc8311df85ca4c100ab4ecead8bd7708481671a8af184ee4ca2c762e6"
+    },
+    {
+      "from": ".cache/vfx-review/rock-core/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/rock-core/poison.png",
+      "sourceSha256": "757c7f69fc0e0efd4a1f3af516c5a54120fa1af5784a6b6d1f7cb65de2df76c4",
+      "bytes": 2694781,
+      "destinationSha256": "757c7f69fc0e0efd4a1f3af516c5a54120fa1af5784a6b6d1f7cb65de2df76c4"
+    },
+    {
+      "from": ".cache/vfx-review/shield-dome/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/shield-dome/chaos.png",
+      "sourceSha256": "d7eda9b2dbb64cb26681fccf73505276a38fc26b39e39d5a7e908aa034049e3c",
+      "bytes": 2201553,
+      "destinationSha256": "d7eda9b2dbb64cb26681fccf73505276a38fc26b39e39d5a7e908aa034049e3c"
+    },
+    {
+      "from": ".cache/vfx-review/shield-dome/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/shield-dome/cold.png",
+      "sourceSha256": "44be907db3e7b86159a441c279dc3eb2ffe73ea660b3dff0f8a8b5f9f0cddf25",
+      "bytes": 2201893,
+      "destinationSha256": "44be907db3e7b86159a441c279dc3eb2ffe73ea660b3dff0f8a8b5f9f0cddf25"
+    },
+    {
+      "from": ".cache/vfx-review/shield-dome/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/shield-dome/earth.png",
+      "sourceSha256": "2510fd37d9b824392252bfc653bbebe7c378ceaea011f16ee940b0f92deffb93",
+      "bytes": 2201740,
+      "destinationSha256": "2510fd37d9b824392252bfc653bbebe7c378ceaea011f16ee940b0f92deffb93"
+    },
+    {
+      "from": ".cache/vfx-review/shield-dome/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/shield-dome/fire.png",
+      "sourceSha256": "b1a3e23adf587f9ff378e3ba6711cd2d4a49aa56ba722235ad10eb0347c902ec",
+      "bytes": 2203480,
+      "destinationSha256": "b1a3e23adf587f9ff378e3ba6711cd2d4a49aa56ba722235ad10eb0347c902ec"
+    },
+    {
+      "from": ".cache/vfx-review/shield-dome/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/shield-dome/lightning.png",
+      "sourceSha256": "bcbc9b633ca940bd616d8984480db2ffc9a7032c0bfe1089670b2455a2413872",
+      "bytes": 2202142,
+      "destinationSha256": "bcbc9b633ca940bd616d8984480db2ffc9a7032c0bfe1089670b2455a2413872"
+    },
+    {
+      "from": ".cache/vfx-review/shield-dome/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/shield-dome/physical.png",
+      "sourceSha256": "ce22278f7dbd01995f2beb039701e4934866f9d09ee1c56384f067eb84f2b6c5",
+      "bytes": 2201095,
+      "destinationSha256": "ce22278f7dbd01995f2beb039701e4934866f9d09ee1c56384f067eb84f2b6c5"
+    },
+    {
+      "from": ".cache/vfx-review/shield-dome/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/shield-dome/poison.png",
+      "sourceSha256": "b26f14a3f8d0cb1db5ff239cda068f952c2035f0a46ef53559e1550590c73c68",
+      "bytes": 2203146,
+      "destinationSha256": "b26f14a3f8d0cb1db5ff239cda068f952c2035f0a46ef53559e1550590c73c68"
+    },
+    {
+      "from": ".cache/vfx-review/shockwave-ring/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/shockwave-ring/chaos.png",
+      "sourceSha256": "4b5a0919e08f676a4ccbc8faad68b91d0dd37300f96892893a370d0389944e21",
+      "bytes": 2276196,
+      "destinationSha256": "4b5a0919e08f676a4ccbc8faad68b91d0dd37300f96892893a370d0389944e21"
+    },
+    {
+      "from": ".cache/vfx-review/shockwave-ring/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/shockwave-ring/cold.png",
+      "sourceSha256": "3950d231bc684d93a686ebbc3d457c4a7359dae423396f3e7ee9428e4e42ae47",
+      "bytes": 2275807,
+      "destinationSha256": "3950d231bc684d93a686ebbc3d457c4a7359dae423396f3e7ee9428e4e42ae47"
+    },
+    {
+      "from": ".cache/vfx-review/shockwave-ring/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/shockwave-ring/earth.png",
+      "sourceSha256": "67484dce8879672e9fe6bbad273a98769ab4a63d5fc8a4c64bf2a1e121f3e9cb",
+      "bytes": 2274981,
+      "destinationSha256": "67484dce8879672e9fe6bbad273a98769ab4a63d5fc8a4c64bf2a1e121f3e9cb"
+    },
+    {
+      "from": ".cache/vfx-review/shockwave-ring/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/shockwave-ring/fire.png",
+      "sourceSha256": "f200b9ee44a3a163a54596eb89854e9a2497305b67ae9cbc0fea1c6673d01eca",
+      "bytes": 2275276,
+      "destinationSha256": "f200b9ee44a3a163a54596eb89854e9a2497305b67ae9cbc0fea1c6673d01eca"
+    },
+    {
+      "from": ".cache/vfx-review/shockwave-ring/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/shockwave-ring/lightning.png",
+      "sourceSha256": "9c7d19c455ae7387f672f66bc00e97c62c0185df5b81f0be75bd884cdc553979",
+      "bytes": 2275411,
+      "destinationSha256": "9c7d19c455ae7387f672f66bc00e97c62c0185df5b81f0be75bd884cdc553979"
+    },
+    {
+      "from": ".cache/vfx-review/shockwave-ring/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/shockwave-ring/physical.png",
+      "sourceSha256": "fb7b775824f9b7ccbd996986a24c5cf6d8e4071db6942038763edc815132d106",
+      "bytes": 2275296,
+      "destinationSha256": "fb7b775824f9b7ccbd996986a24c5cf6d8e4071db6942038763edc815132d106"
+    },
+    {
+      "from": ".cache/vfx-review/shockwave-ring/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/shockwave-ring/poison.png",
+      "sourceSha256": "4a2b1a5d8343ff6a9ce28b995b75973b094375c9d09dd5e5163c0c38f786eed4",
+      "bytes": 2275908,
+      "destinationSha256": "4a2b1a5d8343ff6a9ce28b995b75973b094375c9d09dd5e5163c0c38f786eed4"
+    },
+    {
+      "from": ".cache/vfx-review/slash-sweep/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/slash-sweep/chaos.png",
+      "sourceSha256": "58b9e38236ff0d17bd251f7e345398a96c31b98701c1d8e624d4b4f529f01201",
+      "bytes": 2286354,
+      "destinationSha256": "58b9e38236ff0d17bd251f7e345398a96c31b98701c1d8e624d4b4f529f01201"
+    },
+    {
+      "from": ".cache/vfx-review/slash-sweep/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/slash-sweep/cold.png",
+      "sourceSha256": "c992d2d34707d2a175fa4d1a3fa12b5746d4ef1c958295ab718dfb6cd5ab63e9",
+      "bytes": 2287910,
+      "destinationSha256": "c992d2d34707d2a175fa4d1a3fa12b5746d4ef1c958295ab718dfb6cd5ab63e9"
+    },
+    {
+      "from": ".cache/vfx-review/slash-sweep/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/slash-sweep/earth.png",
+      "sourceSha256": "d92047e0b5d24c2a8d0f71f295574d2a57e518d1e32108bd3fcf6dd1945c4e3e",
+      "bytes": 2280212,
+      "destinationSha256": "d92047e0b5d24c2a8d0f71f295574d2a57e518d1e32108bd3fcf6dd1945c4e3e"
+    },
+    {
+      "from": ".cache/vfx-review/slash-sweep/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/slash-sweep/fire.png",
+      "sourceSha256": "c6f9549a22db4a6214dadb4b4b122ccbdf860ad93ab856542a59b61956995b53",
+      "bytes": 2285925,
+      "destinationSha256": "c6f9549a22db4a6214dadb4b4b122ccbdf860ad93ab856542a59b61956995b53"
+    },
+    {
+      "from": ".cache/vfx-review/slash-sweep/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/slash-sweep/lightning.png",
+      "sourceSha256": "185815b478b2e630280c2ec95a54481982b5900d1f34c97d010e133a36b5838b",
+      "bytes": 2284277,
+      "destinationSha256": "185815b478b2e630280c2ec95a54481982b5900d1f34c97d010e133a36b5838b"
+    },
+    {
+      "from": ".cache/vfx-review/slash-sweep/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/slash-sweep/physical.png",
+      "sourceSha256": "c2cd36a9652a4754589bb0b67661b9e5933ecb3b6d3e202a443a9cbcc0849d09",
+      "bytes": 2281959,
+      "destinationSha256": "c2cd36a9652a4754589bb0b67661b9e5933ecb3b6d3e202a443a9cbcc0849d09"
+    },
+    {
+      "from": ".cache/vfx-review/slash-sweep/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/slash-sweep/poison.png",
+      "sourceSha256": "4e6d327ee863bf5ca358bd1fca60fd69ada3cfba4404c883b03c126a1536bea0",
+      "bytes": 2284726,
+      "destinationSha256": "4e6d327ee863bf5ca358bd1fca60fd69ada3cfba4404c883b03c126a1536bea0"
+    },
+    {
+      "from": ".cache/vfx-review/stone-spike/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/stone-spike/chaos.png",
+      "sourceSha256": "08412b0cd8f5bdc7db1f0f4a1731ca830baa5186e9ad07b72fe42653163906b8",
+      "bytes": 2269617,
+      "destinationSha256": "08412b0cd8f5bdc7db1f0f4a1731ca830baa5186e9ad07b72fe42653163906b8"
+    },
+    {
+      "from": ".cache/vfx-review/stone-spike/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/stone-spike/cold.png",
+      "sourceSha256": "e17f6eb190da55b5d99cb8b0adce4c63afda93dd71bda0ec3be64d5459454da2",
+      "bytes": 2270340,
+      "destinationSha256": "e17f6eb190da55b5d99cb8b0adce4c63afda93dd71bda0ec3be64d5459454da2"
+    },
+    {
+      "from": ".cache/vfx-review/stone-spike/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/stone-spike/earth.png",
+      "sourceSha256": "990f5e32e3d76aa41b182f1c922f75eb974c9de28f8027e18e36b90bcf6645ee",
+      "bytes": 2267271,
+      "destinationSha256": "990f5e32e3d76aa41b182f1c922f75eb974c9de28f8027e18e36b90bcf6645ee"
+    },
+    {
+      "from": ".cache/vfx-review/stone-spike/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/stone-spike/fire.png",
+      "sourceSha256": "441f1e140f42c978138706197f5839a65d7a9c53e4fb583ccfe4f0a66d65bc33",
+      "bytes": 2270021,
+      "destinationSha256": "441f1e140f42c978138706197f5839a65d7a9c53e4fb583ccfe4f0a66d65bc33"
+    },
+    {
+      "from": ".cache/vfx-review/stone-spike/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/stone-spike/lightning.png",
+      "sourceSha256": "e4b8f127b042f49512a86632f04197521867faa235db0eef208189fe7d602d30",
+      "bytes": 2269193,
+      "destinationSha256": "e4b8f127b042f49512a86632f04197521867faa235db0eef208189fe7d602d30"
+    },
+    {
+      "from": ".cache/vfx-review/stone-spike/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/stone-spike/physical.png",
+      "sourceSha256": "7d48f024755404b75adede24e756ac03ebe4ae2072f239ed112ec8ff410b37cd",
+      "bytes": 2268773,
+      "destinationSha256": "7d48f024755404b75adede24e756ac03ebe4ae2072f239ed112ec8ff410b37cd"
+    },
+    {
+      "from": ".cache/vfx-review/stone-spike/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/stone-spike/poison.png",
+      "sourceSha256": "1df6c1216b1a95a1374296891fc5b66f518b119a99e93073028745857a78872d",
+      "bytes": 2268903,
+      "destinationSha256": "1df6c1216b1a95a1374296891fc5b66f518b119a99e93073028745857a78872d"
+    },
+    {
+      "from": ".cache/vfx-review/tether-strand/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/tether-strand/chaos.png",
+      "sourceSha256": "6422c378f35cdcd93b108abcbfdc4ad8398c87fd2f394c32ad6ca266b8ca47a7",
+      "bytes": 2280976,
+      "destinationSha256": "6422c378f35cdcd93b108abcbfdc4ad8398c87fd2f394c32ad6ca266b8ca47a7"
+    },
+    {
+      "from": ".cache/vfx-review/tether-strand/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/tether-strand/cold.png",
+      "sourceSha256": "904d571e27b840d5e3bda992b448152b2e844c2923b746473cffad6c3af6d842",
+      "bytes": 2280894,
+      "destinationSha256": "904d571e27b840d5e3bda992b448152b2e844c2923b746473cffad6c3af6d842"
+    },
+    {
+      "from": ".cache/vfx-review/tether-strand/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/tether-strand/earth.png",
+      "sourceSha256": "7f15ca33f1a0e8eaffd41e2b32eabf64d4c928bbf00d8f597b85bcd960460886",
+      "bytes": 2281011,
+      "destinationSha256": "7f15ca33f1a0e8eaffd41e2b32eabf64d4c928bbf00d8f597b85bcd960460886"
+    },
+    {
+      "from": ".cache/vfx-review/tether-strand/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/tether-strand/fire.png",
+      "sourceSha256": "56190bb623838f32ab6226c8ac1f43ae6dd556ee42c608542976cce02dd6f969",
+      "bytes": 2280459,
+      "destinationSha256": "56190bb623838f32ab6226c8ac1f43ae6dd556ee42c608542976cce02dd6f969"
+    },
+    {
+      "from": ".cache/vfx-review/tether-strand/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/tether-strand/lightning.png",
+      "sourceSha256": "f20e8c40e5095e66e87e816cddea2683786ace11a8ab9323e81c29f1746eeede",
+      "bytes": 2281123,
+      "destinationSha256": "f20e8c40e5095e66e87e816cddea2683786ace11a8ab9323e81c29f1746eeede"
+    },
+    {
+      "from": ".cache/vfx-review/tether-strand/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/tether-strand/physical.png",
+      "sourceSha256": "147817e62c454ffe5ebfe4eabe5fcfb87828fd8dbc0489124f801dc1d01639a5",
+      "bytes": 2280509,
+      "destinationSha256": "147817e62c454ffe5ebfe4eabe5fcfb87828fd8dbc0489124f801dc1d01639a5"
+    },
+    {
+      "from": ".cache/vfx-review/tether-strand/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/tether-strand/poison.png",
+      "sourceSha256": "9354ea45b6b1a894fc21bd62d4cfc69f3049077b4fd4933a7c4bcde1dd7bcda0",
+      "bytes": 2281012,
+      "destinationSha256": "9354ea45b6b1a894fc21bd62d4cfc69f3049077b4fd4933a7c4bcde1dd7bcda0"
+    },
+    {
+      "from": ".cache/vfx-review/vortex/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/vortex/chaos.png",
+      "sourceSha256": "630944e4599e928a26919561e4999db0dec229ed071f89790ae6b122b54a7ff8",
+      "bytes": 2485999,
+      "destinationSha256": "630944e4599e928a26919561e4999db0dec229ed071f89790ae6b122b54a7ff8"
+    },
+    {
+      "from": ".cache/vfx-review/vortex/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/vortex/cold.png",
+      "sourceSha256": "3d1eb9cf51d1af42aeb36d4c2b2e2167d7f6a762e31a732688e5a2167f6f64e7",
+      "bytes": 2487887,
+      "destinationSha256": "3d1eb9cf51d1af42aeb36d4c2b2e2167d7f6a762e31a732688e5a2167f6f64e7"
+    },
+    {
+      "from": ".cache/vfx-review/vortex/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/vortex/earth.png",
+      "sourceSha256": "72b8307c1c3d9310b289cf5f4dd324fdd4bade67ffbb2b61269fefdc72a1fd7e",
+      "bytes": 2465684,
+      "destinationSha256": "72b8307c1c3d9310b289cf5f4dd324fdd4bade67ffbb2b61269fefdc72a1fd7e"
+    },
+    {
+      "from": ".cache/vfx-review/vortex/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/vortex/fire.png",
+      "sourceSha256": "fb9d6cfeed845fae41080faecf0c8387b564d371769802a930e43fd563c72e07",
+      "bytes": 2486987,
+      "destinationSha256": "fb9d6cfeed845fae41080faecf0c8387b564d371769802a930e43fd563c72e07"
+    },
+    {
+      "from": ".cache/vfx-review/vortex/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/vortex/lightning.png",
+      "sourceSha256": "ccb17087caaad7539d7719ccb1215be31641daeaea100d50f908414270220d9f",
+      "bytes": 2478165,
+      "destinationSha256": "ccb17087caaad7539d7719ccb1215be31641daeaea100d50f908414270220d9f"
+    },
+    {
+      "from": ".cache/vfx-review/vortex/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/vortex/physical.png",
+      "sourceSha256": "34c0ff0ffc6ff8d241d052d6ca1299248e750aea0cbe2202d2e62b6a0ac19d0b",
+      "bytes": 2469770,
+      "destinationSha256": "34c0ff0ffc6ff8d241d052d6ca1299248e750aea0cbe2202d2e62b6a0ac19d0b"
+    },
+    {
+      "from": ".cache/vfx-review/vortex/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/vortex/poison.png",
+      "sourceSha256": "d606823f382424b5336431b26b2aee7a9f18e32ae6bd95a4b02415e48af44cd1",
+      "bytes": 2486024,
+      "destinationSha256": "d606823f382424b5336431b26b2aee7a9f18e32ae6bd95a4b02415e48af44cd1"
+    },
+    {
+      "from": ".cache/vfx-review/wall-segment/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/wall-segment/chaos.png",
+      "sourceSha256": "ed7fc16f61bdeb77459397b6037c76b68d21f7690b9c3dea0f9704a645a199e0",
+      "bytes": 2419465,
+      "destinationSha256": "ed7fc16f61bdeb77459397b6037c76b68d21f7690b9c3dea0f9704a645a199e0"
+    },
+    {
+      "from": ".cache/vfx-review/wall-segment/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/wall-segment/cold.png",
+      "sourceSha256": "e92301852f24661f837174053477c30d2e460174a945277cee0934f29ceae9fe",
+      "bytes": 2419447,
+      "destinationSha256": "e92301852f24661f837174053477c30d2e460174a945277cee0934f29ceae9fe"
+    },
+    {
+      "from": ".cache/vfx-review/wall-segment/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/wall-segment/earth.png",
+      "sourceSha256": "749d232f7105195f4b0a6f96fc05db60c56d4cda652c27975a4d4f68edf86371",
+      "bytes": 2415365,
+      "destinationSha256": "749d232f7105195f4b0a6f96fc05db60c56d4cda652c27975a4d4f68edf86371"
+    },
+    {
+      "from": ".cache/vfx-review/wall-segment/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/wall-segment/fire.png",
+      "sourceSha256": "202bf3b7c67865de7ca7bbd1fc1dee77c7a5932355417af3f7632131764c5685",
+      "bytes": 2420922,
+      "destinationSha256": "202bf3b7c67865de7ca7bbd1fc1dee77c7a5932355417af3f7632131764c5685"
+    },
+    {
+      "from": ".cache/vfx-review/wall-segment/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/wall-segment/lightning.png",
+      "sourceSha256": "a60ea729b4847ac67765f9170a044b14fbaa3f0ac6ddfe59b6303e9e6205ffec",
+      "bytes": 2417198,
+      "destinationSha256": "a60ea729b4847ac67765f9170a044b14fbaa3f0ac6ddfe59b6303e9e6205ffec"
+    },
+    {
+      "from": ".cache/vfx-review/wall-segment/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/wall-segment/physical.png",
+      "sourceSha256": "48f4ab81e6ee6c104b59174f3c63fbb63b69cce9da9bdf9aa110d8326dd23e32",
+      "bytes": 2404325,
+      "destinationSha256": "48f4ab81e6ee6c104b59174f3c63fbb63b69cce9da9bdf9aa110d8326dd23e32"
+    },
+    {
+      "from": ".cache/vfx-review/wall-segment/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/wall-segment/poison.png",
+      "sourceSha256": "30160b94d72d0901cd3803f534f98c9c6ac4666fe4174e59c9602b9e7ff355b2",
+      "bytes": 2427857,
+      "destinationSha256": "30160b94d72d0901cd3803f534f98c9c6ac4666fe4174e59c9602b9e7ff355b2"
+    },
+    {
+      "from": ".cache/vfx-review/ward-shell/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ward-shell/chaos.png",
+      "sourceSha256": "da251ce95c3cd43aba8d2552572728758163b7280f145c9761dc9f3795043f19",
+      "bytes": 2119973,
+      "destinationSha256": "da251ce95c3cd43aba8d2552572728758163b7280f145c9761dc9f3795043f19"
+    },
+    {
+      "from": ".cache/vfx-review/ward-shell/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ward-shell/cold.png",
+      "sourceSha256": "0324bd8ff0662d412f789223e2fe744a9815f6cbd4ec9a5e4fe1fb8fe4ffe3fe",
+      "bytes": 2122012,
+      "destinationSha256": "0324bd8ff0662d412f789223e2fe744a9815f6cbd4ec9a5e4fe1fb8fe4ffe3fe"
+    },
+    {
+      "from": ".cache/vfx-review/ward-shell/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ward-shell/earth.png",
+      "sourceSha256": "a38c601600227bcce80d8f3b09a65c3ebb5dfc4d29c646f412b69e890fdda9ce",
+      "bytes": 2118975,
+      "destinationSha256": "a38c601600227bcce80d8f3b09a65c3ebb5dfc4d29c646f412b69e890fdda9ce"
+    },
+    {
+      "from": ".cache/vfx-review/ward-shell/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ward-shell/fire.png",
+      "sourceSha256": "bcd12b7a8cb8b79af12df955906c628a02e42265ab3202434ef34dcf990c02bf",
+      "bytes": 2119617,
+      "destinationSha256": "bcd12b7a8cb8b79af12df955906c628a02e42265ab3202434ef34dcf990c02bf"
+    },
+    {
+      "from": ".cache/vfx-review/ward-shell/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ward-shell/lightning.png",
+      "sourceSha256": "a5e40d8904fa94e8417fb0a334855dc060ef07c04a358402996517290a271917",
+      "bytes": 2120541,
+      "destinationSha256": "a5e40d8904fa94e8417fb0a334855dc060ef07c04a358402996517290a271917"
+    },
+    {
+      "from": ".cache/vfx-review/ward-shell/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ward-shell/physical.png",
+      "sourceSha256": "67dae6626e6dea8651f05a2b663fa1a5d81ffb1ebbb53ff93ce7da1eaff3f9f6",
+      "bytes": 2119070,
+      "destinationSha256": "67dae6626e6dea8651f05a2b663fa1a5d81ffb1ebbb53ff93ce7da1eaff3f9f6"
+    },
+    {
+      "from": ".cache/vfx-review/ward-shell/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/ward-shell/poison.png",
+      "sourceSha256": "05bb7336993c68a93df8dd87de7b9eb49bcd283a845ceade591ecf35e5160b5e",
+      "bytes": 2119759,
+      "destinationSha256": "05bb7336993c68a93df8dd87de7b9eb49bcd283a845ceade591ecf35e5160b5e"
+    },
+    {
+      "from": ".cache/vfx-review/wave-crest/chaos.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/wave-crest/chaos.png",
+      "sourceSha256": "b88ce437280eaf5f37b342f7c3358fe0598c7744245345844d69d9de8a641672",
+      "bytes": 2241999,
+      "destinationSha256": "b88ce437280eaf5f37b342f7c3358fe0598c7744245345844d69d9de8a641672"
+    },
+    {
+      "from": ".cache/vfx-review/wave-crest/cold.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/wave-crest/cold.png",
+      "sourceSha256": "045cfc0a72161294a34936ac574585ed325dd83f135aed069bf8260abbbc4007",
+      "bytes": 2241416,
+      "destinationSha256": "045cfc0a72161294a34936ac574585ed325dd83f135aed069bf8260abbbc4007"
+    },
+    {
+      "from": ".cache/vfx-review/wave-crest/earth.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/wave-crest/earth.png",
+      "sourceSha256": "abb7659294ce0ee5a0427c9ee364278e58c654c8e2c433224ac8c8f0ec5c6571",
+      "bytes": 2237907,
+      "destinationSha256": "abb7659294ce0ee5a0427c9ee364278e58c654c8e2c433224ac8c8f0ec5c6571"
+    },
+    {
+      "from": ".cache/vfx-review/wave-crest/fire.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/wave-crest/fire.png",
+      "sourceSha256": "21c03f0700b529f0e44816d9654bde73bdd407a36b3d3467ad656a7e00f6c7a3",
+      "bytes": 2240989,
+      "destinationSha256": "21c03f0700b529f0e44816d9654bde73bdd407a36b3d3467ad656a7e00f6c7a3"
+    },
+    {
+      "from": ".cache/vfx-review/wave-crest/lightning.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/wave-crest/lightning.png",
+      "sourceSha256": "369765972dfe98cc1bdf22feae137e60ae5fd92a59f75de6e1e0a01ad4b035e9",
+      "bytes": 2241102,
+      "destinationSha256": "369765972dfe98cc1bdf22feae137e60ae5fd92a59f75de6e1e0a01ad4b035e9"
+    },
+    {
+      "from": ".cache/vfx-review/wave-crest/physical.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/wave-crest/physical.png",
+      "sourceSha256": "0ba43971c434506a9a3c03d9b3a81702473d82c875c62d43c5883273b06f6aba",
+      "bytes": 2238105,
+      "destinationSha256": "0ba43971c434506a9a3c03d9b3a81702473d82c875c62d43c5883273b06f6aba"
+    },
+    {
+      "from": ".cache/vfx-review/wave-crest/poison.png",
+      "to": "docs/vfx-skill/component-vfx/evidence/captures/palettes/wave-crest/poison.png",
+      "sourceSha256": "c10bebe0789864bc7ad037fc4bd1f30157d5cf0f13758ee849a895ad42ee4382",
+      "bytes": 2240788,
+      "destinationSha256": "c10bebe0789864bc7ad037fc4bd1f30157d5cf0f13758ee849a895ad42ee4382"
+    },
+    {
+      "from": ".cache/vfx-support-check.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-support-check.log",
+      "sourceSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d",
+      "bytes": 864,
+      "destinationSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d"
+    },
+    {
+      "from": ".cache/vfx-support-tests.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-support-tests.log",
+      "sourceSha256": "526e98a69516f74033cab60343aa4f07f43daba4b9e843a4aa5be7f890b149bc",
+      "bytes": 1396,
+      "destinationSha256": "526e98a69516f74033cab60343aa4f07f43daba4b9e843a4aa5be7f890b149bc"
+    },
+    {
+      "from": ".cache/vfx-timer-cleanup.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-timer-cleanup.log",
+      "sourceSha256": "b21ca197e93c4e829063fe7155fdbff8d3b5d33ad4994ebfb610679f1fe4f895",
+      "bytes": 932,
+      "destinationSha256": "b21ca197e93c4e829063fe7155fdbff8d3b5d33ad4994ebfb610679f1fe4f895"
+    },
+    {
+      "from": ".cache/vfx-v3-check.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-v3-check.log",
+      "sourceSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d",
+      "bytes": 864,
+      "destinationSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d"
+    },
+    {
+      "from": ".cache/vfx-v3-fast.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-v3-fast.log",
+      "sourceSha256": "0fef8b8fcf0c84afd2ebe42f5153a833c6ce02ac62a062f80c5bd8d8bd0c8318",
+      "bytes": 69300,
+      "destinationSha256": "0fef8b8fcf0c84afd2ebe42f5153a833c6ce02ac62a062f80c5bd8d8bd0c8318"
+    },
+    {
+      "from": ".cache/vfx-v3-final-check.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-v3-final-check.log",
+      "sourceSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d",
+      "bytes": 864,
+      "destinationSha256": "bdf42897db226444e304fe28576bd3e000461cbd66410596d45c874dfbc5db2d"
+    },
+    {
+      "from": ".cache/vfx-v3-focused-resume.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-v3-focused-resume.log",
+      "sourceSha256": "232a955807990d5fa273a4d7564419368def1f66b9e528777164d8f587385b75",
+      "bytes": 1478,
+      "destinationSha256": "232a955807990d5fa273a4d7564419368def1f66b9e528777164d8f587385b75"
+    },
+    {
+      "from": ".cache/vfx-v3-focused.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-v3-focused.log",
+      "sourceSha256": "4dc9d246b03522e1df350837642a5bd3bd83ec777f770a02e2fc88b7b1ab456d",
+      "bytes": 7288,
+      "destinationSha256": "4dc9d246b03522e1df350837642a5bd3bd83ec777f770a02e2fc88b7b1ab456d"
+    },
+    {
+      "from": ".cache/vfx-v3-full.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-v3-full.log",
+      "sourceSha256": "a190eb96e88679e8a6f824a226e6607971cb0b58a43f1000938ac6877ee4bad3",
+      "bytes": 81626,
+      "destinationSha256": "a190eb96e88679e8a6f824a226e6607971cb0b58a43f1000938ac6877ee4bad3"
+    },
+    {
+      "from": ".cache/vfx-ward-live.log",
+      "to": "docs/vfx-skill/component-vfx/evidence/logs/vfx-ward-live.log",
+      "sourceSha256": "481a3e76c3da10da60e8995b3a09972befd4968d66832522f1f0f6f7a8ed9348",
+      "bytes": 2040,
+      "destinationSha256": "481a3e76c3da10da60e8995b3a09972befd4968d66832522f1f0f6f7a8ed9348"
+    }
+  ],
+  "paths": {
+    ".cache/check-vfx-fallback.cjs": "docs/vfx-skill/component-vfx/tools/check-vfx-fallback.cjs",
+    ".cache/compose-vfx-extension.py": "docs/vfx-skill/component-vfx/tools/compose-vfx-extension.py",
+    ".cache/compose-vfx-recipes.py": "docs/vfx-skill/component-vfx/tools/compose-vfx-recipes.py",
+    ".cache/debug-vfx-dome.cjs": "docs/vfx-skill/component-vfx/tools/debug-vfx-dome.cjs",
+    ".cache/probe-vfx-review.cjs": "docs/vfx-skill/component-vfx/tools/probe-vfx-review.cjs",
+    ".cache/produce-vfx-components.py": "docs/vfx-skill/component-vfx/tools/produce-vfx-components.py",
+    ".cache/produce-vfx-extension.py": "docs/vfx-skill/component-vfx/tools/produce-vfx-extension.py",
+    ".cache/produce-vfx-v3.py": "docs/vfx-skill/component-vfx/tools/produce-vfx-v3.py",
+    ".cache/register-vfx-components.py": "docs/vfx-skill/component-vfx/tools/register-vfx-components.py",
+    ".cache/register-vfx-v3.py": "docs/vfx-skill/component-vfx/tools/register-vfx-v3.py",
+    ".cache/review-vfx.cjs": "docs/vfx-skill/component-vfx/tools/review-vfx.cjs",
+    ".cache/vfx-all-colors.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-all-colors.log",
+    ".cache/vfx-browser-harness.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-browser-harness.log",
+    ".cache/vfx-close-focused.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-close-focused.log",
+    ".cache/vfx-closeout-check.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-closeout-check.log",
+    ".cache/vfx-color-harness.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-color-harness.log",
+    ".cache/vfx-colors-before-live-binding-refresh.json": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-colors-before-live-binding-refresh.json",
+    ".cache/vfx-colors-evidence.json": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-colors-evidence.json",
+    ".cache/vfx-defaults-before.json": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-defaults-before.json",
+    ".cache/vfx-directional-check.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-directional-check.log",
+    ".cache/vfx-directional-ground.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-directional-ground.log",
+    ".cache/vfx-engine-import.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-engine-import.log",
+    ".cache/vfx-expanded-spec.json": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-expanded-spec.json",
+    ".cache/vfx-extension-check.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-extension-check.log",
+    ".cache/vfx-extension-focused.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-extension-focused.log",
+    ".cache/vfx-extra-recipes-browser.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-extra-recipes-browser.log",
+    ".cache/vfx-extra-recipes-catalog.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-extra-recipes-catalog.log",
+    ".cache/vfx-extra-recipes.json": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-extra-recipes.json",
+    ".cache/vfx-fast-single-worker.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-fast-single-worker.log",
+    ".cache/vfx-fast.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-fast.log",
+    ".cache/vfx-final-full.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-final-full.log",
+    ".cache/vfx-fissure-ground-browser.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-fissure-ground-browser.log",
+    ".cache/vfx-matrix-checkpoint.json": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-matrix-checkpoint.json",
+    ".cache/vfx-matrix-evidence.json": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-matrix-evidence.json",
+    ".cache/vfx-p1-check.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-p1-check.log",
+    ".cache/vfx-p1-focused.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-p1-focused.log",
+    ".cache/vfx-p2-catalog.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-p2-catalog.log",
+    ".cache/vfx-p2-check.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-p2-check.log",
+    ".cache/vfx-p3-focused.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-p3-focused.log",
+    ".cache/vfx-p4-binding.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-p4-binding.log",
+    ".cache/vfx-pending-focused.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-pending-focused.log",
+    ".cache/vfx-placements-resume-check.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-placements-resume-check.log",
+    ".cache/vfx-placements-resume.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-placements-resume.log",
+    ".cache/vfx-probe.png": "docs/vfx-skill/component-vfx/evidence/captures/vfx-probe.png",
+    ".cache/vfx-ray-components-selected.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-ray-components-selected.log",
+    ".cache/vfx-ray-components.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-ray-components.log",
+    ".cache/vfx-recipes": "docs/vfx-skill/component-vfx/evidence/captures/recipes",
+    ".cache/vfx-recipes-evidence.json": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-recipes-evidence.json",
+    ".cache/vfx-recipes.json": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-recipes.json",
+    ".cache/vfx-recovery-catalog.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-recovery-catalog.log",
+    ".cache/vfx-registry-before.json": "docs/vfx-skill/component-vfx/evidence/manifests/vfx-registry-before.json",
+    ".cache/vfx-resume-import-check.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-resume-import-check.log",
+    ".cache/vfx-review": "docs/vfx-skill/component-vfx/evidence/captures/palettes",
+    ".cache/vfx-support-check.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-support-check.log",
+    ".cache/vfx-support-tests.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-support-tests.log",
+    ".cache/vfx-timer-cleanup.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-timer-cleanup.log",
+    ".cache/vfx-v3-check.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-v3-check.log",
+    ".cache/vfx-v3-fast.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-v3-fast.log",
+    ".cache/vfx-v3-final-check.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-v3-final-check.log",
+    ".cache/vfx-v3-focused-resume.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-v3-focused-resume.log",
+    ".cache/vfx-v3-focused.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-v3-focused.log",
+    ".cache/vfx-v3-full.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-v3-full.log",
+    ".cache/vfx-ward-live.log": "docs/vfx-skill/component-vfx/evidence/logs/vfx-ward-live.log"
+  }
+}

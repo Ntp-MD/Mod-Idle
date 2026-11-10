@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-siren--stormwater-siren-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-siren--stormwater-siren-diagonals.png",
   "diagonalSourceSha256": "5b0d5155dcf63f3007bf4330216cd0d45140ec6ae944155ab1f9fdea2bdfe947",
   "diagonalScaleFactor": 0.401697,
   "speciesId": "siren",

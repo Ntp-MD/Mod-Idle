@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-giant--hill-giant-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-giant--hill-giant-diagonals.png",
   "diagonalSourceSha256": "ab210d72662e5cb8b5c71eff7256a93c611d639c2c36807922ca5bf3643d7a02",
   "diagonalScaleFactor": 0.282587,
   "speciesId": "giant",

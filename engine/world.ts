@@ -1,5 +1,5 @@
 /**
- * World queries — the canonical read side of the hex world (`docs/plan/hex-world-travel-rework.md` §4, HX1).
+ * World queries — the canonical read side of the hex world (HX1).
  *
  * Pure and indexed: land, authored locations, base ownership, terrain, habitat and static features
  * resolve from coordinates here, never from SVG attributes, `GameState`, the renderer or the save.

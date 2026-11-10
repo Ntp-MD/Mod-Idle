@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-dragon--wyrmling-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-dragon--wyrmling-diagonals.png",
   "diagonalSourceSha256": "0b6b71ca84ca59f884493f9517d44715b0317d4306db15ddb0775b9b518a1b29",
   "diagonalScaleFactor": 0.302352,
   "speciesId": "dragon",

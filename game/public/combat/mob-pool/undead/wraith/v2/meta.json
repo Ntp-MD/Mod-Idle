@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/undead/wraith/wraith/reference.png",
   "sourceSha256": "1de8d8790d09ca7a9f96a1a9c71eb64a968ebd36e3056b1bb0fdc733e76c3829",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-wraith-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-wraith-diagonals.png",
   "diagonalSourceSha256": "35c912eec57d00a4608e91ecb6603969d88259a30df5342a1cb1725e9503cecd",
   "diagonalScaleFactor": 0.353206
 }

@@ -1,0 +1,96 @@
+{
+  "id": "attack.void_ray",
+  "src": "/fx/skill-pool/attack-chaos/attack-void-ray/v3/decal-base.png",
+  "authoringGeometry": {
+    "shape": "line",
+    "origin": "caster",
+    "delivery": "projectile",
+    "lengthM": 8,
+    "widthM": 2
+  },
+  "delivery": "projectile",
+  "origin": "caster",
+  "orient": true,
+  "projection": "ground",
+  "layerId": "animated-base",
+  "palette": "chaos",
+  "additionalLayers": [
+    {
+      "layerId": "ribbon-beam",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "chaos",
+      "opacity": 0.8,
+      "authoringGeometry": {
+        "shape": "line"
+      },
+      "sizePolicy": "world",
+      "orient": true,
+      "file": "ribbon-beam.png",
+      "phases": [
+        "Impact",
+        "Field",
+        "Channel"
+      ]
+    },
+    {
+      "layerId": "impact-burst",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "chaos",
+      "opacity": 0.8,
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "sizePolicy": "body",
+      "binding": "contact",
+      "file": "impact-burst.png",
+      "phases": [
+        "Impact",
+        "Channel"
+      ],
+      "durationSec": 3
+    }
+  ],
+  "composition": "Component recipe: animated base + ribbon-beam, impact-burst",
+  "componentRecipe": {
+    "baseVersion": "v1",
+    "families": [
+      "ribbon-beam",
+      "impact-burst"
+    ],
+    "humanReview": false
+  },
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 128,
+  "imageHeight": 128,
+  "cellWidth": 128,
+  "cellHeight": 128,
+  "frameMs": 80,
+  "sizePolicy": "footprint",
+  "contentWidthRatio": 1,
+  "contentHeightRatio": 1
+}

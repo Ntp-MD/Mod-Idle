@@ -81,7 +81,7 @@ for (const moduleArg of moduleArgs) {
     const sourceLicenses = new Set([...(recipe.licenseFiles ?? []), ...licenseFiles]);
     for (const source of recipe.sources) {
       let parent = path.dirname(path.resolve(root, source));
-      const boundary = path.join(root, 'art-reference/VFX-Godot');
+      const boundary = path.join(root, 'archive/art-reference/VFX-Godot');
       while (parent.startsWith(boundary + path.sep)) {
         for (const name of ['license.txt', 'LICENSE.md', 'LICENSE']) {
           const candidate = path.join(parent, name);

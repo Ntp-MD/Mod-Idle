@@ -1,0 +1,70 @@
+{
+  "id": "attack.split_shot",
+  "src": "/fx/skill-pool/attack-phy/attack-split-shot/v2/arrow-core.png",
+  "layerId": "arrow-core",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "palette": "physical",
+  "durationSec": 1.2,
+  "sizePolicy": "body",
+  "orient": true,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "authoringGeometry": {
+    "shape": "single",
+    "delivery": "projectile"
+  },
+  "phases": [
+    "Windup",
+    "Travel"
+  ],
+  "additionalLayers": [
+    {
+      "layerId": "impact-burst",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "physical",
+      "opacity": 1,
+      "durationSec": 0.6,
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "sizePolicy": "body",
+      "binding": "contact",
+      "file": "impact-burst.png",
+      "phases": [
+        "Impact"
+      ],
+      "scale": 0.45
+    }
+  ],
+  "composition": "Independent component recipe: arrow-core, impact-burst",
+  "componentRecipe": {
+    "shapes": [
+      "arrow-core",
+      "impact-burst"
+    ],
+    "humanReview": false
+  },
+  "opacity": 1
+}

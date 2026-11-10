@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "wolf--hunting-wolf",
+  "generatedSheet": "docs/character/pawn-study/generation/eight-direction/pawn-wolf--hunting-wolf-diagonals.png",
+  "tool": "existing local diagonal candidate; original generation metadata unavailable",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

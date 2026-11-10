@@ -1,0 +1,32 @@
+{
+  "shape": "shield-dome",
+  "file": "shield-dome.png",
+  "rawFile": "shield-dome-raw.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    105,
+    921,
+    921
+  ],
+  "alphaExtrema": [
+    0,
+    253
+  ],
+  "visibleRgbSpreadMax": 32,
+  "visibleRgbSpreadMean": 1.507615,
+  "grayscaleAuthority": "AtlasFrame feColorMatrix saturate=0 before palette transfer",
+  "contentRatio": 0.8,
+  "sourceSha256": "2b3711cdbc353d8a3452e562b0cce7d776d3cd2e2050557773b032a5cf31b063",
+  "masterSha256": "93ca64f0c93b6f6d186e172635edb5c651aef1e6516fcb02b21f9fb1b97c9609",
+  "humanReview": false,
+  "runtimeRegistered": false,
+  "verifiedRuntimePalettes": 0
+}

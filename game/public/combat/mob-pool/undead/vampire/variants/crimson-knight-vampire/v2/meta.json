@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-vampire--crimson-knight-vampire-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-vampire--crimson-knight-vampire-diagonals.png",
   "diagonalSourceSha256": "20a383b78b918889cfcaca6bf210472bcd6387993fe67ead67a8550af11f4842",
   "diagonalScaleFactor": 0.322727,
   "speciesId": "vampire",

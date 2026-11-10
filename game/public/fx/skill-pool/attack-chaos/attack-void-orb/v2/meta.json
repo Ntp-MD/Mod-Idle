@@ -1,0 +1,70 @@
+{
+  "id": "attack.void_orb",
+  "src": "/fx/skill-pool/attack-chaos/attack-void-orb/v2/orb-core.png",
+  "layerId": "orb-core",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "palette": "chaos",
+  "durationSec": 1.2,
+  "sizePolicy": "body",
+  "orient": true,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "authoringGeometry": {
+    "shape": "single",
+    "delivery": "projectile"
+  },
+  "phases": [
+    "Windup",
+    "Travel"
+  ],
+  "additionalLayers": [
+    {
+      "layerId": "impact-burst",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "chaos",
+      "opacity": 1,
+      "durationSec": 0.6,
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "sizePolicy": "body",
+      "binding": "contact",
+      "file": "impact-burst.png",
+      "phases": [
+        "Impact"
+      ],
+      "scale": 0.65
+    }
+  ],
+  "composition": "Independent component recipe: orb-core, impact-burst",
+  "componentRecipe": {
+    "shapes": [
+      "orb-core",
+      "impact-burst"
+    ],
+    "humanReview": false
+  },
+  "opacity": 1
+}

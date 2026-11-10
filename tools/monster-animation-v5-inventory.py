@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parent.parent / "art-reference/monsters"
+ROOT = Path(__file__).resolve().parent.parent / "archive/art-reference/monsters"
 TEMPLATE = ROOT / "humanoid/goblin/goblin/animation/poses.json"
 TARGET_DIRECTIONS = {"south", "south-east", "east", "north-east", "north", "north-west", "west", "south-west"}
 

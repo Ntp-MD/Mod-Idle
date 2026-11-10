@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/demon/demon/demon/reference.png",
   "sourceSha256": "75333a43ccc0bec99ff128e9de32e62e9cca39a28937706537147dd4cab25b9e",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-demon-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-demon-diagonals.png",
   "diagonalSourceSha256": "4c263eb7a344410930cec25fd220a1ec895fbddfceb91eb2fde44d8e34c5d7a4",
   "diagonalScaleFactor": 0.551724
 }

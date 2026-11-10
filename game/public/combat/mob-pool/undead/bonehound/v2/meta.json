@@ -142,6 +142,6 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/undead/bonehound/bonehound/reference.png",
   "sourceSha256": "ee17567b298e7a5956e8017d0bdb53a459fba87fd56206a94194f609493cf302",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-bonehound-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-bonehound-diagonals.png",
   "diagonalSourceSha256": "bff9eb4804e3e95655069ba8ca21eb39ea95fdaff14bd05fa1792c43304204ea"
 }

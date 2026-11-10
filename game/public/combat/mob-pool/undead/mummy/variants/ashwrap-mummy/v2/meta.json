@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-mummy--ashwrap-mummy-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-mummy--ashwrap-mummy-diagonals.png",
   "diagonalSourceSha256": "c735ff0057f6af6576d7d14f5cf5c99bcfa8889d63e04314bb79c4f533af964a",
   "diagonalScaleFactor": 0.336493,
   "speciesId": "mummy",

@@ -1,6 +1,6 @@
 /**
  * Travel transitions (HX3) — the one owner of departure, step commits, arrival, warp and recovery
- * position changes (`docs/plan/hex-world-travel-rework.md` §6).
+ * position changes.
  *
  * `commitPosition` is the single transition function: every start/stop/step/warp writes `state.cell`
  * plus its World projections (zone, content, terrain) from the hex coordinates together. `currentCell`

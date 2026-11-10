@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/players/body/idle/south.png",
   "sourceSha256": "1dc20d2c7fba317a1199a934f5232f4e186ae0193baf953c7002890aec96bb27",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-player-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-player-diagonals.png",
   "diagonalSourceSha256": "0f4c931043a915421dcbd391b2c7a151aa86d6f10c609d0c8b123e83b510e08f",
   "diagonalScaleFactor": 0.427141,
   "gripsByDirection": {

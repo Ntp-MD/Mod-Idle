@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-demon--ember-knight-demon-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-demon--ember-knight-demon-diagonals.png",
   "diagonalSourceSha256": "c6673a71860c42adca945d987cd79545fa8917daf52c958ce937946da95c9c17",
   "diagonalScaleFactor": 0.364103,
   "speciesId": "demon",

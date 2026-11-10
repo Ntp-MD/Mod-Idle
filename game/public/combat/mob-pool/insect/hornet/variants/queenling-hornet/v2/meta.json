@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-hornet--queenling-hornet-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-hornet--queenling-hornet-diagonals.png",
   "diagonalSourceSha256": "17d6bf8df105a1ee42fcfc2da20e16a1c03c02743b66ad7c68c0f46e67dbd2df",
   "diagonalScaleFactor": 0.343243,
   "speciesId": "hornet",

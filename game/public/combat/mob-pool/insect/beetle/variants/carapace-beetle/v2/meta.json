@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-beetle--carapace-beetle-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-beetle--carapace-beetle-diagonals.png",
   "diagonalSourceSha256": "5e34d195dfd3780ac90dea32ba09305331b5887a9ccbcde87898e9edacba86ba",
   "diagonalScaleFactor": 0.323967,
   "speciesId": "beetle",

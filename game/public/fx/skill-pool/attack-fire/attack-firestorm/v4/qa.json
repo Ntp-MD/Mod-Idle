@@ -1,0 +1,90 @@
+{
+  "family": "ground-fill",
+  "file": "ground-fill.png",
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    113,
+    918,
+    921
+  ],
+  "contentRatio": 0.8,
+  "anchor": [
+    0.5,
+    0.5
+  ],
+  "source": "imagegen",
+  "palette": "neutral",
+  "humanReview": false,
+  "components": [
+    {
+      "family": "ground-fill",
+      "file": "ground-fill.png",
+      "canvas": [
+        1024,
+        1024
+      ],
+      "alphaBounds": [
+        103,
+        113,
+        918,
+        921
+      ],
+      "contentRatio": 0.8,
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "source": "imagegen",
+      "palette": "neutral",
+      "humanReview": false
+    },
+    {
+      "family": "ground-residue",
+      "file": "ground-residue.png",
+      "canvas": [
+        1024,
+        1024
+      ],
+      "alphaBounds": [
+        103,
+        103,
+        921,
+        921
+      ],
+      "contentRatio": 0.8,
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "source": "imagegen",
+      "palette": "neutral",
+      "humanReview": false
+    },
+    {
+      "family": "vortex",
+      "file": "vortex.png",
+      "canvas": [
+        1024,
+        1024
+      ],
+      "alphaBounds": [
+        103,
+        109,
+        921,
+        921
+      ],
+      "contentRatio": 0.8,
+      "anchor": [
+        0.5,
+        0.8
+      ],
+      "source": "imagegen",
+      "palette": "neutral",
+      "humanReview": false
+    }
+  ]
+}

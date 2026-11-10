@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-dryad--verdant-elder-dryad-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-dryad--verdant-elder-dryad-diagonals.png",
   "diagonalSourceSha256": "4146a8570b59051c0c37f8c90a340dbefe4ab3095f677ea221017379b081ca84",
   "diagonalScaleFactor": 0.315556,
   "speciesId": "dryad",

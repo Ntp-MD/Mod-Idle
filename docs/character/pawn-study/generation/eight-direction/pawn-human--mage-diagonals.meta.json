@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "human--mage",
+  "identityName": "Mage",
+  "identityKind": "variant",
+  "sourceSheet": "docs/character/pawn-study/sheets/variants/human--mage.png",
+  "sizeReference": "game/public/combat/mob-pool/humanoid/human/variants/mage/v1/atlas.png",
+  "generatedSheet": "docs/character/pawn-study/generation/eight-direction/pawn-human--mage-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "canvas": {
+    "width": 1254,
+    "height": 1254,
+    "cellSize": 627,
+    "background": "transparent"
+  },
+  "measuredVisibleBoundsSourcePx": {
+    "north-east": [
+      216,
+      169,
+      447,
+      549
+    ],
+    "south-east": [
+      179,
+      169,
+      408,
+      550
+    ],
+    "south-west": [
+      218,
+      104,
+      448,
+      485
+    ],
+    "north-west": [
+      178,
+      104,
+      412,
+      485
+    ]
+  },
+  "measuredVisibleHeightsPx": [
+    380,
+    381,
+    381,
+    381
+  ],
+  "cardinalVisibleHeightsRuntimePx": [
+    139,
+    139,
+    141,
+    142
+  ],
+  "promptSummary": "Generate four diagonal views of the cardinal Mage bust: short dark hair, pale eyes, navy tunic, gold neckline, brown belt and buckle; no staff or limbs.",
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "note": "Diagonal-only candidate. Inspect rear/front handedness and packed scale/anchor against the active cardinal frames before approval.",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

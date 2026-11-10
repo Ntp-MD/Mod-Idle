@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/formless/slime/slime/reference.png",
   "sourceSha256": "3f62d527ee54cb2800045d1c022b4f743c8dd5efbb182428a3a7774a4b20e545",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-slime-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-slime-diagonals.png",
   "diagonalSourceSha256": "b65f8f3e9645254d9121dca1cd37f434db2c1660250293c13648907eb5a376f5",
   "diagonalScaleFactor": 0.456583
 }

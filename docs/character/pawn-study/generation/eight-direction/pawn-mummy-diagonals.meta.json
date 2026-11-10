@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "mummy",
+  "name": "Mummy",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-mummy-diagonals.png",
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/mummy.png",
+    "docs/character/pawn-study/atlases/mummy.png"
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "promptSummary": "Generate compact Mummy diagonals preserving cream wrapped head/tapered bust/base and dark eye band with two tiny amber dots; rear NE/NW blank, front SE/SW mirrored with eyes; no limbs or props.",
+  "requestedLayout": {
+    "rows": 2,
+    "columns": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west"
+  },
+  "actualImage": {
+    "width": 1254,
+    "height": 1254,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "alpha": "transparent",
+    "visibleBoundsAlphaThreshold": 16,
+    "visibleBoundsPx": {
+      "northEast": {
+        "x": 190,
+        "y": 91,
+        "width": 245,
+        "height": 434
+      },
+      "southEast": {
+        "x": 189,
+        "y": 91,
+        "width": 244,
+        "height": 434
+      },
+      "southWest": {
+        "x": 191,
+        "y": 90,
+        "width": 243,
+        "height": 435
+      },
+      "northWest": {
+        "x": 190,
+        "y": 91,
+        "width": 246,
+        "height": 434
+      }
+    },
+    "baseAnchorYByCellPx": {
+      "northEast": 524,
+      "southEast": 524,
+      "southWest": 524,
+      "northWest": 524
+    }
+  },
+  "review": {
+    "identity": true,
+    "directionPose": "candidate appears to follow NE/NW rear eye-band hidden, SE/SW mirrored front eyes visible",
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed",
+    "pose": true
+  },
+  "reviewConcerns": [
+    "Review remains pending before packing."
+  ],
+  "previousCandidate": "docs/character/pawn-study/generation/eight-direction/mummy-eight-direction-v1.png",
+  "sizeReference": "docs/character/pawn-study/atlases/mummy.png",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

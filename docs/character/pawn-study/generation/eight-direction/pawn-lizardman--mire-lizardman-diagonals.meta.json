@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "lizardman--mire-lizardman",
+  "identityName": "Mire Lizardman",
+  "identityKind": "variant",
+  "sourceSheet": "docs/character/pawn-study/sheets/variants/lizardman--mire-lizardman.png",
+  "sizeReference": "game/public/combat/mob-pool/humanoid/lizardman/variants/mire-lizardman/v1/atlas.png",
+  "generatedSheet": "docs/character/pawn-study/generation/eight-direction/pawn-lizardman--mire-lizardman-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "cardinalVisibleHeightsRuntimePx": [
+    137,
+    142
+  ],
+  "canvas": {
+    "requested": {
+      "width": 1024,
+      "height": 1024
+    },
+    "generated": {
+      "width": 1254,
+      "height": 1254
+    },
+    "cellSize": 627,
+    "background": "white"
+  },
+  "measuredVisibleHeightSourcePx": [
+    402,
+    404,
+    404,
+    402
+  ],
+  "promptSummary": "Generate Mire Lizardman rear/front diagonals preserving the crest, olive palette, brown waist wrap and tapered tail; no limbs or added equipment.",
+  "review": {
+    "pose": true,
+    "directionOrder": false,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "identity": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "note": "Output size differs from requested 1024x1024. Review direction, body plan, packed visible height, anchor and cell bounds before checking off the roster.",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

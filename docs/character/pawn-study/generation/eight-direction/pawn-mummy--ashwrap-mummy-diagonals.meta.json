@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "mummy--ashwrap-mummy",
+  "name": "Ashwrap Mummy",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-mummy--ashwrap-mummy-diagonals.png",
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/variants/mummy--ashwrap-mummy.png",
+    "docs/character/pawn-study/atlases/variants/mummy--ashwrap-mummy.png"
+  ],
+  "supersedesCandidate": "docs/character/pawn-study/generation/eight-direction/pawn-mummy--ashwrap-mummy-diagonals-v1.png",
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "promptSummary": "Generate Ashwrap Mummy diagonals preserving pale ash-beige wrapping, fine bandage lines, dark eye slit with tiny yellow eyes, and compact bust with flared base; no limbs or weapons. NE/NW rear, SE/SW mirrored front.",
+  "requestedLayout": {
+    "sourceCardinalHeightsPx": [
+      348,
+      347,
+      343,
+      343
+    ],
+    "rows": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west",
+    "columns": 2
+  },
+  "actualImage": {
+    "cellWidth": 627,
+    "alpha": "transparent",
+    "width": 1254,
+    "cellHeight": 627,
+    "visibleBoundsPx": {
+      "northEast": [
+        194,
+        97,
+        424,
+        517
+      ],
+      "southEast": [
+        192,
+        97,
+        421,
+        517
+      ],
+      "southWest": [
+        197,
+        125,
+        429,
+        549
+      ],
+      "northWest": [
+        193,
+        125,
+        426,
+        549
+      ]
+    },
+    "visibleHeightsPx": {
+      "southWest": 424,
+      "northWest": 424,
+      "southEast": 420,
+      "northEast": 420
+    },
+    "height": 1254
+  },
+  "review": {
+    "size": "candidate is about 1.2x source cardinal visible height; compare packed scale",
+    "approved": true,
+    "identity": true,
+    "status": "passed",
+    "layout": "2x2 views in requested NE/SE/SW/NW order",
+    "anchor": true,
+    "anatomy": "passes source silhouette comparison: compact bust only, no limbs or weapon",
+    "pose": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true
+  },
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

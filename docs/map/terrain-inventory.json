@@ -1,0 +1,299 @@
+{
+  "source": "docs/map/source-assets.json",
+  "originalCount": 14,
+  "registeredReplacementCount": 11,
+  "selectedInCatalogueCount": 0,
+  "missing": [
+    "camp.png",
+    "encounter-ruins.png",
+    "village.png"
+  ],
+  "limitation": "File/metadata/catalogue coverage only. Does not certify visual approval or live renderer usage; inspect per-asset evidence.",
+  "rows": [
+    {
+      "original": "ash.png",
+      "stem": "ash",
+      "source": "game/public/map/terrain/ash.png",
+      "category": "terrain",
+      "versions": [
+        "ash-1.png",
+        "ash-2.png",
+        "ash-3.png",
+        "ash.png"
+      ],
+      "registered": [
+        "ash-1.png",
+        "ash-2.png",
+        "ash-3.png"
+      ],
+      "catalogue": [],
+      "selectedNewVersion": false,
+      "integrationNote": null
+    },
+    {
+      "original": "camp.png",
+      "stem": "camp",
+      "source": "game/public/map/landmark/camp.png",
+      "category": "landmark",
+      "versions": [
+        "camp-1.png",
+        "camp.png"
+      ],
+      "registered": [],
+      "catalogue": [
+        {
+          "key": "camp",
+          "href": "/map/landmark/camp-1.png"
+        }
+      ],
+      "selectedNewVersion": false,
+      "integrationNote": null
+    },
+    {
+      "original": "encounter-ruins.png",
+      "stem": "encounter-ruins",
+      "source": "game/public/map/landmark/encounter-ruins.png",
+      "category": "landmark",
+      "versions": [
+        "encounter-ruins-1.png",
+        "encounter-ruins.png"
+      ],
+      "registered": [],
+      "catalogue": [
+        {
+          "key": "dungeon",
+          "href": "/map/landmark/encounter-ruins-1.png"
+        }
+      ],
+      "selectedNewVersion": false,
+      "integrationNote": null
+    },
+    {
+      "original": "forest-relief.png",
+      "stem": "forest-relief",
+      "source": "game/public/map/terrain/forest-relief.png",
+      "category": "terrain",
+      "versions": [
+        "forest-relief-1.png",
+        "forest-relief-2.png",
+        "forest-relief-3.png",
+        "forest-relief-4.png",
+        "forest-relief.png"
+      ],
+      "registered": [
+        "forest-relief-1.png",
+        "forest-relief-2.png",
+        "forest-relief-3.png"
+      ],
+      "catalogue": [
+        {
+          "key": "forest",
+          "href": "/map/terrain/forest-relief-4.png"
+        }
+      ],
+      "selectedNewVersion": false,
+      "integrationNote": null
+    },
+    {
+      "original": "grass.png",
+      "stem": "grass",
+      "source": "game/public/map/terrain/grass.png",
+      "category": "terrain",
+      "versions": [
+        "grass-1.png",
+        "grass-2.png",
+        "grass-3.png",
+        "grass.png"
+      ],
+      "registered": [
+        "grass-1.png",
+        "grass-2.png",
+        "grass-3.png"
+      ],
+      "catalogue": [],
+      "selectedNewVersion": false,
+      "integrationNote": null
+    },
+    {
+      "original": "marsh.png",
+      "stem": "marsh",
+      "source": "game/public/map/terrain/marsh.png",
+      "category": "terrain",
+      "versions": [
+        "marsh-1.png",
+        "marsh-2.png",
+        "marsh-3.png",
+        "marsh.png"
+      ],
+      "registered": [
+        "marsh-1.png",
+        "marsh-2.png",
+        "marsh-3.png"
+      ],
+      "catalogue": [],
+      "selectedNewVersion": false,
+      "integrationNote": null
+    },
+    {
+      "original": "moor.png",
+      "stem": "moor",
+      "source": "game/public/map/terrain/moor.png",
+      "category": "terrain",
+      "versions": [
+        "moor-1.png",
+        "moor-2.png",
+        "moor-3.png",
+        "moor.png"
+      ],
+      "registered": [
+        "moor-1.png",
+        "moor-2.png",
+        "moor-3.png"
+      ],
+      "catalogue": [],
+      "selectedNewVersion": false,
+      "integrationNote": null
+    },
+    {
+      "original": "mountain-relief.png",
+      "stem": "mountain-relief",
+      "source": "game/public/map/terrain/mountain-relief.png",
+      "category": "terrain",
+      "versions": [
+        "mountain-relief-1.png",
+        "mountain-relief-2.png",
+        "mountain-relief-3.png",
+        "mountain-relief-4.png",
+        "mountain-relief.png"
+      ],
+      "registered": [
+        "mountain-relief-1.png",
+        "mountain-relief-2.png",
+        "mountain-relief-3.png"
+      ],
+      "catalogue": [
+        {
+          "key": "rock",
+          "href": "/map/terrain/mountain-relief-4.png"
+        }
+      ],
+      "selectedNewVersion": false,
+      "integrationNote": null
+    },
+    {
+      "original": "salt.png",
+      "stem": "salt",
+      "source": "game/public/map/terrain/salt.png",
+      "category": "terrain",
+      "versions": [
+        "salt-1.png",
+        "salt-2.png",
+        "salt-3.png",
+        "salt.png"
+      ],
+      "registered": [
+        "salt-1.png",
+        "salt-2.png",
+        "salt-3.png"
+      ],
+      "catalogue": [],
+      "selectedNewVersion": false,
+      "integrationNote": null
+    },
+    {
+      "original": "snow.png",
+      "stem": "snow",
+      "source": "game/public/map/terrain/snow.png",
+      "category": "terrain",
+      "versions": [
+        "snow-1.png",
+        "snow-2.png",
+        "snow-3.png",
+        "snow.png"
+      ],
+      "registered": [
+        "snow-1.png",
+        "snow-2.png",
+        "snow-3.png"
+      ],
+      "catalogue": [],
+      "selectedNewVersion": false,
+      "integrationNote": null
+    },
+    {
+      "original": "town.png",
+      "stem": "town",
+      "source": "game/public/map/landmark/town.png",
+      "category": "landmark",
+      "versions": [
+        "town-1.png",
+        "town.png"
+      ],
+      "registered": [
+        "town-1.png"
+      ],
+      "catalogue": [],
+      "selectedNewVersion": false,
+      "integrationNote": "Town rendering also uses LANDMARK_ART in tools/map.ts; inspect actual renderer routing, not only the terrain catalogue."
+    },
+    {
+      "original": "village.png",
+      "stem": "village",
+      "source": "game/public/map/landmark/village.png",
+      "category": "landmark",
+      "versions": [
+        "village-1.png",
+        "village.png"
+      ],
+      "registered": [],
+      "catalogue": [
+        {
+          "key": "village",
+          "href": "/map/landmark/village-1.png"
+        }
+      ],
+      "selectedNewVersion": false,
+      "integrationNote": null
+    },
+    {
+      "original": "waste.png",
+      "stem": "waste",
+      "source": "game/public/map/terrain/waste.png",
+      "category": "terrain",
+      "versions": [
+        "waste-1.png",
+        "waste-2.png",
+        "waste-3.png",
+        "waste.png"
+      ],
+      "registered": [
+        "waste-1.png",
+        "waste-2.png",
+        "waste-3.png"
+      ],
+      "catalogue": [],
+      "selectedNewVersion": false,
+      "integrationNote": null
+    },
+    {
+      "original": "water.png",
+      "stem": "water",
+      "source": "game/public/map/terrain/water.png",
+      "category": "terrain",
+      "versions": [
+        "water-1.png",
+        "water-2.png",
+        "water-3.png",
+        "water.png"
+      ],
+      "registered": [
+        "water-1.png",
+        "water-2.png",
+        "water-3.png"
+      ],
+      "catalogue": [],
+      "selectedNewVersion": false,
+      "integrationNote": null
+    }
+  ]
+}

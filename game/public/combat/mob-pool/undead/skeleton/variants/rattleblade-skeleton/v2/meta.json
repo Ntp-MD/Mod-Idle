@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-skeleton--rattleblade-skeleton-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-skeleton--rattleblade-skeleton-diagonals.png",
   "diagonalSourceSha256": "ff22a25fa61b1768c0897625c06da0da1ba5277d6e28a8ddc5a17e4945f6408e",
   "diagonalScaleFactor": 0.334906,
   "speciesId": "skeleton",

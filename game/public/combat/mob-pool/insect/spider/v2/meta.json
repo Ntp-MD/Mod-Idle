@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/insect/spider/spider/animation/poses/idle/south.png",
   "sourceSha256": "59c34f1acc92ab4d9b00d0188297416bb849213e3fe38bc09ac018ba9e053b85",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-spider-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-spider-diagonals.png",
   "diagonalSourceSha256": "f24313f9f81251616c8ebf173d5d715dc89a106a6a8f7f163e71f1982c0049cc",
   "diagonalScaleFactor": 0.401384
 }

@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/humanoid/ogre/ogre/reference.png",
   "sourceSha256": "e514633a79a4e6a4ae90b395bfaf0560e5223f46e28c251d2b493f60292cf917",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-ogre-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-ogre-diagonals.png",
   "diagonalSourceSha256": "23baf398f850a285095c91c7593e1e7fc3a77f802ebaa584dd38986b0378dd60",
   "diagonalScaleFactor": 0.561404
 }

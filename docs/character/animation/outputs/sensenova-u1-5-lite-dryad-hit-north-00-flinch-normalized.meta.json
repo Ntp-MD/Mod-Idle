@@ -1,0 +1,54 @@
+{
+  "status": "candidate-review",
+  "generator": "SenseNova U1.5 Lite",
+  "source": "docs/character/animation/outputs/sensenova-u1-5-lite-dryad-hit-north-00-flinch-comparison.png",
+  "reference": "archive/art-reference/monsters/plant/dryad/dryad/animation/poses/hit/north/00-flinch.png",
+  "action": "hit",
+  "direction": "north",
+  "phase": "00-flinch",
+  "sourceDimensions": [
+    2048,
+    2048
+  ],
+  "frameCanvas": {
+    "width": 384,
+    "height": 384
+  },
+  "anchor": {
+    "x": 192,
+    "y": 288,
+    "provenance": "matched to existing Dryad directional action anchor"
+  },
+  "normalization": {
+    "method": "foreground crop, nearest-neighbor resize to phase-matched reference height, reference-anchor placement",
+    "backgroundRemoval": "near-white chroma key (threshold 32/255)",
+    "backgroundRemovalLimit": "near-white character details sharing the matte color are removed",
+    "alphaThresholdForBounds": 128,
+    "sourceSubjectBounds": [
+      454,
+      131,
+      1608,
+      1876
+    ],
+    "referenceSubjectBounds": [
+      141,
+      107,
+      244,
+      288
+    ],
+    "normalizedSubjectHeight": 181,
+    "uniformScale": 0.103725,
+    "sourcePixelsPaintedOrComposited": false
+  },
+  "visualReview": {
+    "sequenceAccepted": false,
+    "identityAccepted": false,
+    "exactAngleAccepted": false,
+    "atlasReady": false,
+    "note": "Normalized candidate only; visual and sequence review is pending."
+  },
+  "qa": {
+    "atlas": false,
+    "anchor": false
+  }
+}

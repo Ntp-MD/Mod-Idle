@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-slaggolem--slag-golem-crusher-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-slaggolem--slag-golem-crusher-diagonals.png",
   "diagonalSourceSha256": "d81342d1c99d334abfa7b0867b2804263aa017085aa683844eff6c5bacdd5ffa",
   "diagonalScaleFactor": null,
   "speciesId": "slaggolem",

@@ -1,0 +1,19 @@
+{
+  "shape": "forked-bolt",
+  "family": "ribbon-beam",
+  "palette": "neutral",
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    240,
+    114,
+    881,
+    901
+  ],
+  "contentRatio": 0.8,
+  "source": "imagegen",
+  "humanReview": false,
+  "sourceSha256": "3e61251a3a393b011180294199db61f320a9d487c9fe66ae3288750812fd40f6"
+}

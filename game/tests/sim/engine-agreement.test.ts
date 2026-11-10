@@ -1,15 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { createRequire } from 'node:module';
+import { eng as cage } from '../../../tools/lib/engine';
 import { eng, E, MODS } from '../../src/engine/client';
 import { buildCharacter } from '@sim/core/player';
 import { newGame, tick, catchUp, huntZone, carried } from '@sim/core/game';
 import { modRangeProblems } from '../../../tools/lib/mod-ranges.ts';
 
 // The cages load tools/lib/engine.ts, which is a bridge over the same engine/index.ts the client
-// calls. Requiring it here proves the client and the cages resolve to one module and one data file
+// calls. Importing it through the runner proves both bind the same source and data
 // — the shared-source ownership described in AGENTS.md.
-const require = createRequire(import.meta.url);
-const cage = require('../../../tools/lib/engine.ts').eng;
 
 describe('canonical Mod range gate', () => {
   it('accepts the current windows, including the positive singleton seam', () => {

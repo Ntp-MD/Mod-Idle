@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-wyvern--shriek-wyvern-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-wyvern--shriek-wyvern-diagonals.png",
   "diagonalSourceSha256": "80adb3133b9c19b0681eb889fd34607fcd1af510793891e9bcbc48b4cad99070",
   "diagonalScaleFactor": 0.22658,
   "speciesId": "wyvern",

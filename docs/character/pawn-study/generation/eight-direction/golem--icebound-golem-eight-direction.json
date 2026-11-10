@@ -1,0 +1,18 @@
+{
+  "id": "golem--icebound-golem",
+  "sourceCardinal": "docs/character/pawn-study/sheets/variants/golem--icebound-golem.png",
+  "sourceDiagonals": "docs/character/pawn-study/generation/eight-direction/golem--icebound-golem-diagonals-source.png",
+  "directions": [
+    "south",
+    "southeast",
+    "east",
+    "northeast",
+    "north",
+    "northwest",
+    "west",
+    "southwest"
+  ],
+  "layout": "4x2 row-major",
+  "frameSize": 512,
+  "sha256": "8fb599c3079831eda9f5cbd4051dc8e994b68fbbbb9217b066776e761dbceba6"
+}

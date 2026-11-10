@@ -1,0 +1,52 @@
+{
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-hornet--meadow-hornet-diagonals.png",
+  "promptSummary": "Generate four diagonal Meadow Hornet views preserving charcoal/amber stripes, two wings, antennae and six jointed legs on a white 2x2 sheet.",
+  "actualImage": {
+    "cellWidth": 627,
+    "alpha": "opaque near-white background",
+    "width": 1254,
+    "cellHeight": 627,
+    "visibleHeightsPx": {
+      "southWest": 341,
+      "northWest": 347,
+      "southEast": 337,
+      "northEast": 349
+    },
+    "height": 1254
+  },
+  "review": {
+    "size": "compare packed height against cardinal atlas",
+    "approved": true,
+    "identity": true,
+    "status": "passed",
+    "layout": "2x2 views present",
+    "anchor": true,
+    "anatomy": "pending",
+    "pose": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true
+  },
+  "requestedLayout": {
+    "targetCellHeightFraction": "0.47-0.49",
+    "rows": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west",
+    "columns": 2
+  },
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "pawnId": "hornet--meadow-hornet",
+  "name": "Meadow Hornet",
+  "generator": "OpenAI built-in image_gen",
+  "status": "runtime-reviewed",
+  "schemaVersion": 1,
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/variants/hornet--meadow-hornet.png",
+    "docs/character/pawn-study/atlases/variants/hornet--meadow-hornet.png"
+  ],
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

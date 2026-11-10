@@ -61,7 +61,7 @@ export function skillRainDrops(mark: SkillGeometry, frame: FieldViewFrame,
         return {
           x: groundM.x + Math.cos(direction) * distance,
           y: groundM.y + Math.sin(direction) * distance * .42 - Math.sin(impactProgress * Math.PI) * size * .08,
-          size: shardSize * (1 - impactProgress * .2), index: 8 + shard % 4,
+          size: shardSize * (1 - impactProgress * .2), index: Math.min(atlas.count - 1, 8 + shard % 4),
           rotationDeg: direction * 180 / Math.PI,
         };
       }) : [];

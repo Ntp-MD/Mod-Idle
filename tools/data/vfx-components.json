@@ -49,73 +49,365 @@
       "ownerSkill": "attack.firestorm",
       "projection": "ground",
       "sizePolicy": "footprint",
-      "binding": "area"
+      "binding": "area",
+      "master": {
+        "skill": "attack.firestorm",
+        "version": "v4",
+        "file": "ground-fill.png",
+        "layerId": "ground-fill",
+        "content": 0.8
+      }
     },
     "ground-edge": {
       "ownerSkill": "attack.cinder_nova",
       "projection": "ground",
       "sizePolicy": "footprint",
-      "binding": "area"
+      "binding": "area",
+      "master": {
+        "skill": "attack.cinder_nova",
+        "version": "v2",
+        "file": "ground-edge.png",
+        "layerId": "ground-edge",
+        "content": 0.8
+      }
     },
     "ground-residue": {
       "ownerSkill": "attack.firestorm",
       "projection": "ground",
       "sizePolicy": "footprint",
-      "binding": "area"
+      "binding": "area",
+      "master": {
+        "skill": "attack.firestorm",
+        "version": "v4",
+        "file": "ground-residue.png",
+        "layerId": "ground-residue",
+        "content": 0.8
+      }
     },
     "projectile-core": {
       "ownerSkill": "attack.fireball",
-      "sizePolicy": "body"
+      "sizePolicy": "body",
+      "master": {
+        "skill": "attack.fireball",
+        "version": "v3",
+        "file": "projectile-core.png",
+        "layerId": "projectile-core",
+        "content": 0.8
+      }
     },
     "ribbon-beam": {
       "ownerSkill": "attack.void_ray",
       "sizePolicy": "world",
-      "orient": true
+      "orient": true,
+      "master": {
+        "skill": "attack.void_ray",
+        "version": "v2",
+        "file": "ribbon-beam.png",
+        "layerId": "ribbon-beam",
+        "content": 0.8
+      }
     },
     "slash-sweep": {
       "ownerSkill": "attack.cleave",
       "sizePolicy": "world",
-      "orient": true
+      "orient": true,
+      "master": {
+        "skill": "attack.cleave",
+        "version": "v3",
+        "file": "slash-sweep.png",
+        "layerId": "slash-sweep",
+        "content": 0.8
+      }
     },
     "impact-burst": {
       "ownerSkill": "attack.fireball",
       "sizePolicy": "body",
-      "binding": "contact"
+      "binding": "contact",
+      "master": {
+        "skill": "attack.fireball",
+        "version": "v3",
+        "file": "impact-burst.png",
+        "layerId": "impact-burst",
+        "content": 0.8
+      }
     },
     "column-eruption": {
       "ownerSkill": "attack.fissure",
       "sizePolicy": "world",
-      "binding": "area"
+      "binding": "area",
+      "master": {
+        "skill": "attack.fissure",
+        "version": "v2",
+        "file": "column-eruption.png",
+        "layerId": "column-eruption",
+        "content": 0.8
+      }
     },
     "vortex": {
       "ownerSkill": "attack.firestorm",
       "sizePolicy": "world",
-      "binding": "area"
+      "binding": "area",
+      "master": {
+        "skill": "attack.firestorm",
+        "version": "v4",
+        "file": "vortex.png",
+        "layerId": "vortex",
+        "content": 0.8
+      }
     },
     "cloud-mist": {
       "ownerSkill": "attack.blizzard",
       "sizePolicy": "world",
-      "binding": "area"
+      "binding": "area",
+      "master": {
+        "skill": "attack.blizzard",
+        "version": "v7",
+        "file": "cloud-mist.png",
+        "layerId": "cloud-mist",
+        "content": 0.8
+      }
     },
     "mote": {
       "ownerSkill": "heal.heal",
       "sizePolicy": "body",
-      "binding": "caster"
+      "binding": "caster",
+      "master": {
+        "skill": "heal.heal",
+        "version": "v2",
+        "file": "mote.png",
+        "layerId": "mote",
+        "content": 0.8
+      }
     },
     "fragment-debris": {
       "ownerSkill": "attack.blizzard",
       "sizePolicy": "body",
-      "binding": "contact"
+      "binding": "contact",
+      "master": {
+        "skill": "attack.blizzard",
+        "version": "v7",
+        "file": "fragment-debris.png",
+        "layerId": "fragment-debris",
+        "content": 0.8
+      }
     },
     "ward-shell": {
       "ownerSkill": "buff.flame_guard",
       "sizePolicy": "body",
-      "binding": "caster"
+      "binding": "caster",
+      "master": {
+        "skill": "buff.flame_guard",
+        "version": "v2",
+        "file": "ward-shell.png",
+        "layerId": "ward-shell",
+        "content": 0.8
+      }
     },
     "mark-sigil": {
       "ownerSkill": "curse.jinx",
       "sizePolicy": "body",
-      "binding": "target"
+      "binding": "target",
+      "master": {
+        "skill": "curse.jinx",
+        "version": "v2",
+        "file": "mark-sigil.png",
+        "layerId": "mark-sigil",
+        "content": 0.8
+      }
+    }
+  },
+  "variants": {
+    "crack-strip": {
+      "family": "ground-residue",
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "master": {
+        "skill": "attack.fissure",
+        "version": "v4",
+        "file": "crack-strip.png",
+        "layerId": "crack-strip",
+        "content": 0.8
+      },
+      "orient": true
+    },
+    "stone-spike": {
+      "family": "column-eruption",
+      "sizePolicy": "world",
+      "binding": "area",
+      "master": {
+        "skill": "attack.stone_spike",
+        "version": "v2",
+        "file": "stone-spike.png",
+        "layerId": "stone-spike",
+        "content": 0.8
+      }
+    },
+    "wave-crest": {
+      "family": "ribbon-beam",
+      "sizePolicy": "world",
+      "binding": "area",
+      "master": {
+        "skill": "attack.tidal_wave",
+        "version": "v2",
+        "file": "wave-crest.png",
+        "layerId": "wave-crest",
+        "content": 0.8
+      }
+    },
+    "arrow-core": {
+      "family": "projectile-core",
+      "sizePolicy": "body",
+      "master": {
+        "skill": "attack.piercing_shot",
+        "version": "v2",
+        "file": "arrow-core.png",
+        "layerId": "arrow-core",
+        "content": 0.8
+      }
+    },
+    "orb-core": {
+      "family": "projectile-core",
+      "sizePolicy": "body",
+      "master": {
+        "skill": "attack.water_ball",
+        "version": "v2",
+        "file": "orb-core.png",
+        "layerId": "orb-core",
+        "content": 0.8
+      }
+    },
+    "rock-core": {
+      "family": "projectile-core",
+      "sizePolicy": "body",
+      "master": {
+        "skill": "attack.meteor",
+        "version": "v3",
+        "file": "rock-core.png",
+        "layerId": "rock-core",
+        "content": 0.8
+      }
+    },
+    "forked-bolt": {
+      "family": "ribbon-beam",
+      "sizePolicy": "world",
+      "binding": "area",
+      "master": {
+        "skill": "attack.thunder_strike",
+        "version": "v2",
+        "file": "forked-bolt.png",
+        "layerId": "forked-bolt",
+        "content": 0.8
+      }
+    },
+    "ground-spiral": {
+      "family": "ground-fill",
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "master": {
+        "skill": "attack.entropy_well",
+        "version": "v2",
+        "file": "ground-spiral.png",
+        "layerId": "ground-spiral",
+        "content": 0.8
+      }
+    },
+    "cone-stream": {
+      "family": "cloud-mist",
+      "sizePolicy": "footprint",
+      "projection": "ground",
+      "orient": true,
+      "master": {
+        "skill": "attack.cleave",
+        "version": "v5",
+        "file": "cone-stream.png",
+        "layerId": "cone-stream",
+        "content": 0.8
+      }
+    },
+    "wall-segment": {
+      "family": "column-eruption",
+      "sizePolicy": "world",
+      "binding": "area",
+      "placement": {
+        "kind": "line-series",
+        "spacingM": 0.7,
+        "staggerSec": 0
+      },
+      "master": {
+        "skill": "attack.fissure",
+        "version": "v6",
+        "file": "wall-segment.png",
+        "layerId": "wall-segment",
+        "content": 0.8
+      }
+    },
+    "tether-strand": {
+      "family": "ribbon-beam",
+      "sizePolicy": "world",
+      "placement": {
+        "kind": "tether"
+      },
+      "master": {
+        "skill": "curse.jinx",
+        "version": "v4",
+        "file": "tether-strand.png",
+        "layerId": "tether-strand",
+        "content": 0.8
+      }
+    },
+    "shockwave-ring": {
+      "family": "ground-edge",
+      "sizePolicy": "footprint",
+      "projection": "ground",
+      "placement": {
+        "kind": "expand",
+        "fromScale": 0.1
+      },
+      "master": {
+        "skill": "attack.frost_nova",
+        "version": "v2",
+        "file": "shockwave-ring.png",
+        "layerId": "shockwave-ring",
+        "content": 0.8
+      }
+    },
+    "crescent-wave": {
+      "family": "projectile-core",
+      "sizePolicy": "body",
+      "orient": true,
+      "master": {
+        "skill": "attack.piercing_shot",
+        "version": "v4",
+        "file": "crescent-wave.png",
+        "layerId": "crescent-wave",
+        "content": 0.8
+      }
+    },
+    "shield-dome": {
+      "family": "ward-shell",
+      "sizePolicy": "world",
+      "binding": "area",
+      "master": {
+        "skill": "buff.flame_guard",
+        "version": "v4",
+        "file": "shield-dome.png",
+        "layerId": "shield-dome",
+        "content": 0.8
+      }
+    },
+    "bind-strand": {
+      "family": "mark-sigil",
+      "sizePolicy": "body",
+      "binding": "target",
+      "master": {
+        "skill": "curse.venom_bind",
+        "version": "v2",
+        "file": "bind-strand.png",
+        "layerId": "bind-strand",
+        "content": 0.8
+      }
     }
   }
 }

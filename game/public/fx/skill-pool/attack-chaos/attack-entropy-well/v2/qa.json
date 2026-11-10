@@ -1,0 +1,19 @@
+{
+  "shape": "ground-spiral",
+  "family": "ground-fill",
+  "palette": "neutral",
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    109,
+    917,
+    921
+  ],
+  "contentRatio": 0.8,
+  "source": "imagegen",
+  "humanReview": false,
+  "sourceSha256": "ac207e13b03bbe0c432d663971069b531a95d2f6468a4ae6ab9caf64def52324"
+}

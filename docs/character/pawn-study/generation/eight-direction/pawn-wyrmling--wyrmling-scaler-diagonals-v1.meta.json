@@ -1,0 +1,43 @@
+{
+    "schemaVersion":  1,
+    "status":  "candidate-review",
+    "pawnId":  "wyrmling--wyrmling-scaler",
+    "name":  "Wyrmling Scaler",
+    "generatedSource":  "docs/character/pawn-study/generation/eight-direction/pawn-wyrmling--wyrmling-scaler-diagonals.png",
+    "sourceReferences":  [
+                             "docs/character/pawn-study/sheets/variants/wyrmling--wyrmling-scaler.png",
+                             "docs/character/pawn-study/atlases/variants/wyrmling--wyrmling-scaler.png"
+                         ],
+    "generator":  "OpenAI built-in image_gen",
+    "directions":  [
+                       "north-east",
+                       "south-east",
+                       "south-west",
+                       "north-west"
+                   ],
+    "promptSummary":  "Generate four new diagonal Wyrmling Scaler views, preserving the reference identity and style, on a 2x2 white-backed sheet with order NE, SE, SW, NW.",
+    "requestedLayout":  {
+                            "cellWidth":  512,
+                            "columns":  2,
+                            "canvasHeight":  1024,
+                            "cellHeight":  512,
+                            "cellOrder":  "north-east, south-east, south-west, north-west",
+                            "canvasWidth":  1024,
+                            "rows":  2
+                        },
+    "actualImage":  {
+                        "alpha":  "opaque white background",
+                        "cellHeight":  627,
+                        "cellWidth":  627,
+                        "width":  1254,
+                        "height":  1254
+                    },
+    "review":  {
+                   "directionPose":  "pending",
+                   "layout":  "2x2 layout visually present",
+                   "approved":  false,
+                   "anchor":  "pending",
+                   "sharedScale":  "pending",
+                   "notes":  "Generated canvas is 1254x1254 rather than requested 1024x1024; do not import until normalized and reviewed."
+               }
+}

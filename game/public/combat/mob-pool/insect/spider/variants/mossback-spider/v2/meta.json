@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-spider--mossback-spider-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-spider--mossback-spider-diagonals.png",
   "diagonalSourceSha256": "dd33dbf9836d017d77948632b1e73fe76c460fa3e6754a7be0c1dcf3cbe613b2",
   "diagonalScaleFactor": 0.309091,
   "speciesId": "spider",

@@ -4,7 +4,7 @@
  * `GALLERY_RUNTIME` is the whole client side — search, category tabs, favourites and removal markers — held as a
  * string because the two hosts load it differently. The live wiki (`wiki.html`, Vite) resolves every
  * SVG to a URL and runs this text in the page; `tools/wiki.ts` writes the same text into
- * `docs/wiki/icons.html`, where the icons are read off the disk by relative path, so the page works straight
+ * `docs/reference/wiki/icons.html`, where the icons are read off the disk by relative path, so the page works straight
  * from `file://`. The entries arrive the same way in both: a `#icons-data` JSON block the static build
  * bakes in, or `window.__ICONS__` when a host sets it. No DOM is touched here, so the static build can
  * import this module from Node.
@@ -212,7 +212,7 @@ export const GALLERY_RUNTIME = `(function () {
     marker.onblur = function () { marker.style.outline = ''; };
     var flag = document.createElement('span');
     flag.setAttribute('aria-hidden', 'true');
-    flag.style.cssText = 'display:block;width:var(--icon-detail);height:var(--icon-detail);background:currentColor;-webkit-mask:url(../../game/src/icon/ui/flag.png) center/contain no-repeat;mask:url(../../game/src/icon/ui/flag.png) center/contain no-repeat;';
+    flag.style.cssText = 'display:block;width:var(--icon-detail);height:var(--icon-detail);background:currentColor;-webkit-mask:url(../../../game/src/icon/ui/flag.png) center/contain no-repeat;mask:url(../../../game/src/icon/ui/flag.png) center/contain no-repeat;';
     marker.appendChild(flag);
     marker.onclick = function (e) { e.stopPropagation(); toggleMark(item.path); render(); };
 

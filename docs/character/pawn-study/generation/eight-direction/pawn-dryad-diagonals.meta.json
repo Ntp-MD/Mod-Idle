@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "dryad",
+  "name": "Dryad",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-dryad-diagonals.png",
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/dryad.png",
+    "docs/character/pawn-study/atlases/dryad.png"
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "promptSummary": "Generate diagonal Dryad views preserving orange-brown bark humanoid/tree body, branch crown with green leaves, leafy collar/waist, yellow eyes and root feet; NE/NW rear, SE/SW mirrored front.",
+  "requestedLayout": {
+    "rows": 2,
+    "columns": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west"
+  },
+  "actualImage": {
+    "width": 1254,
+    "height": 1254,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "alpha": "transparent",
+    "visibleBoundsAlphaThreshold": 16,
+    "visibleBoundsPx": {
+      "northEast": {
+        "x": 214,
+        "y": 86,
+        "width": 206,
+        "height": 437
+      },
+      "southEast": {
+        "x": 198,
+        "y": 88,
+        "width": 210,
+        "height": 432
+      },
+      "southWest": {
+        "x": 219,
+        "y": 85,
+        "width": 208,
+        "height": 434
+      },
+      "northWest": {
+        "x": 210,
+        "y": 86,
+        "width": 204,
+        "height": 435
+      }
+    },
+    "feetBaselineYByCellPx": {
+      "northEast": 522,
+      "southEast": 519,
+      "southWest": 518,
+      "northWest": 520
+    }
+  },
+  "review": {
+    "identity": true,
+    "directionPose": "candidate appears to follow NE/NW rear and SE/SW mirrored front",
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed",
+    "pose": true
+  },
+  "reviewConcerns": [
+    "Review remains pending before packing."
+  ],
+  "sizeReference": "docs/character/pawn-study/atlases/dryad.png",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

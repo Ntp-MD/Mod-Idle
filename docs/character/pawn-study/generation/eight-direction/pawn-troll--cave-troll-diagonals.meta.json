@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "troll--cave-troll",
+  "name": "Cave Troll",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-troll--cave-troll-diagonals.png",
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/variants/troll--cave-troll.png",
+    "docs/character/pawn-study/atlases/variants/troll--cave-troll.png"
+  ],
+  "supersedesCandidate": "docs/character/pawn-study/generation/eight-direction/pawn-troll--cave-troll-diagonals-v1.png",
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "promptSummary": "Generate Cave Troll diagonals preserving pale gray-green skin, dark hair, pointed ears, dark brown fur collar and rounded gray base; no limbs or props. NE/NW rear with face hidden, SE/SW mirrored front.",
+  "requestedLayout": {
+    "sourceCardinalHeightsPx": [
+      402,
+      399,
+      401,
+      401
+    ],
+    "rows": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west",
+    "columns": 2
+  },
+  "actualImage": {
+    "cellWidth": 627,
+    "alpha": "transparent",
+    "width": 1254,
+    "cellHeight": 627,
+    "visibleBoundsPx": {
+      "northEast": [
+        176,
+        53,
+        444,
+        539
+      ],
+      "southEast": [
+        168,
+        53,
+        448,
+        539
+      ],
+      "southWest": [
+        174,
+        55,
+        453,
+        544
+      ],
+      "northWest": [
+        174,
+        55,
+        453,
+        544
+      ]
+    },
+    "visibleHeightsPx": {
+      "southWest": 489,
+      "northWest": 489,
+      "southEast": 486,
+      "northEast": 486
+    },
+    "height": 1254
+  },
+  "review": {
+    "size": "candidate is about 1.2x source cardinal visible height; compare packed scale",
+    "approved": true,
+    "identity": true,
+    "status": "passed",
+    "layout": "2x2 views in requested NE/SE/SW/NW order",
+    "anchor": true,
+    "anatomy": "passes source silhouette comparison: compact bust, no limbs or props added",
+    "pose": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true
+  },
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

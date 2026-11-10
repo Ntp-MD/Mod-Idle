@@ -1,0 +1,48 @@
+{
+  "pawnId": "slime--devourer-slime",
+  "candidateFile": "pawn-slime--devourer-slime-diagonals.png",
+  "sourceAtlas": "docs/character/pawn-study/atlases/variants/slime--devourer-slime.png",
+  "sourceSheet": "docs/character/pawn-study/sheets/variants/slime--devourer-slime.png",
+  "dimensions": "1254x1254",
+  "pixelFormat": "32bpp ARGB",
+  "transparentBackground": true,
+  "cellLayout": "2x2",
+  "cellSize": "627x627",
+  "directionOrder": [
+    "NE",
+    "SE",
+    "SW",
+    "NW"
+  ],
+  "views": {
+    "NE": "rear three-quarter, face hidden",
+    "SE": "front three-quarter, eyes and simple mouth visible",
+    "SW": "mirrored front three-quarter, eyes and simple mouth visible",
+    "NW": "mirrored rear three-quarter, face hidden"
+  },
+  "visibleBoundsPx": {
+    "NE": "x=145..507, y=241..494 (363x254)",
+    "SE": "x=114..477, y=241..494 (364x254)",
+    "SW": "x=145..507, y=216..468 (363x253)",
+    "NW": "x=114..477, y=216..468 (364x253)"
+  },
+  "visibleFootprint": "58% cell width and 40–41% height; dimensions consistent. Bottom anchor offset 26px between rows.",
+  "identityCheck": "Squat turquoise gel blob with darker teal underside, pale aqua glossy spots, two black eyes and short straight mouth on front views; no added maw/teeth.",
+  "reviewStatus": "candidate-review",
+  "concerns": [
+    "Align bottom anchor across rows; upper row bottom y=494 vs lower row y=468 (26px difference).",
+    "Confirm scale against runtime cardinal atlas and mirrored front orientation in packed preview."
+  ],
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "status": "runtime-reviewed",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-imp--hornling-imp-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-imp--hornling-imp-diagonals.png",
   "diagonalSourceSha256": "430fbf99107cab06d5f3882f0e0e07614331c641206e03ea37c9ab3f24c1a44a",
   "diagonalScaleFactor": 0.351051,
   "speciesId": "imp",

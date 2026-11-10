@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "goblin--tallow-goblin",
+  "name": "Tallow Goblin",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-goblin--tallow-goblin-diagonals.png",
+  "sourceReferences": [
+    "sheets/variants/goblin--tallow-goblin.png",
+    "docs/character/pawn-study/generation/eight-direction/goblin--tallow-goblin.png"
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "actualImage": {
+    "width": 1254,
+    "height": 1254,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "alpha": "transparent",
+    "visibleBoundsThreshold": 16,
+    "visibleBoundsPx": {
+      "northEast": [
+        159,
+        28,
+        447,
+        559
+      ],
+      "southEast": [
+        168,
+        25,
+        469,
+        559
+      ],
+      "southWest": [
+        159,
+        28,
+        453,
+        559
+      ],
+      "northWest": [
+        178,
+        28,
+        474,
+        559
+      ]
+    }
+  },
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed",
+    "bodyPlan": "compact head-and-torso colony pawn; no articulated limbs or weapons",
+    "reviewNote": "Packed 8-view preview inspected; diagonal facing, identity features, shared height and baseline align with cardinal frames."
+  },
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

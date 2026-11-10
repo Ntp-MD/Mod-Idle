@@ -2,6 +2,8 @@
 
 Single-player, browser-only idle RPG; no server. Shared entry point for every coding agent.
 
+**No audio:** no music, sound effects, audio playback, or audio controls. Do not propose or add audio unless the user explicitly changes this requirement.
+
 ## Active temporary decisions (obey, do not "fix")
 
 - **Slot saves are OFF until the game is finished** (`TEMP_DISABLE_SLOT_SAVES = true` in `game/src/state/save.ts`). No localStorage/IndexedDB slot writes, no autosave, no Save nag by design.
@@ -49,9 +51,11 @@ Re-read them after context compaction. Do not announce any mode.
 - On truncation narrow the query; on failure identify the cause, retry only with a changed approach or new evidence, else report a blocker.
 - A gate that times out is retried in the same turn with a narrower scope (one file, `test:fast`, output to `.cache/`), not left for the next turn. Only a repeat with no new evidence is a blocker.
 - An unrelated failing check with no changed input is baseline/in-flight: report it, don't refix or rerun without new evidence. Preserve concurrent edits; say so when verification can't repeat.
-- Stop when the current task or plan item's acceptance criteria and required checks pass; a long tool sequence never justifies skipping verification. With an active plan, "pass" means checked against `docs/known-failures.md`, then continue with the next unchecked item (see Plan files).
+- Stop when the current task or plan item's acceptance criteria and required checks pass; a long tool sequence never justifies skipping verification. With an active plan, "pass" means checked against `docs/reference/known-failures.md`, then continue with the next unchecked item (see Plan files).
 
 Gameplay numbers live in data JSON, formulas in `engine/`; do not duplicate either in the client. New game-content filenames use lowercase hyphens. `skill.md`, `skills.md`, `SKILL.md` and `.agents/skills/` are reserved for agent skills, not game content. Gate output is the run record; do not create transcript files.
+
+Art guides, sources and review candidates live in topic folders under [docs/](docs/README.md): [vfx-skill](docs/vfx-skill/), [character](docs/character/animation.md) and [map](docs/map/README.md). Read the topic folder and relevant guide before art work; follow that topic's existing source/output folders. Approved runtime assets keep their established game paths.
 
 ## Answers & citations
 
@@ -65,6 +69,7 @@ Gameplay numbers live in data JSON, formulas in `engine/`; do not duplicate eith
 - UI icons use PNG shelf art through `.icon-mask` (`currentColor`); the map places the game's resolved PNG icons inside hex content. `<svg>` remains only as scene structure (tree/map geometry, charts, effects) — never a standalone icon.
 - Map architecture, module ownership, shared sizing policy and extension checks: read [game/src/ui/map/AGENTS.md](game/src/ui/map/AGENTS.md) before changing the map, its App integration or generator. Keep game icons inside hexes, radius-derived sizing, north-up camera and existing command authority.
 - Field showcase presets use the same `CombatArenaScene`, body models, sprite selection and skill geometry as the game. Vary sample state or explicit art review inputs; do not create a second field renderer or copy its scale formulas.
+- The showcase is a DEV-only fixture layer: sample changes go in `game/src/app/showcase/samples.ts` and `fixtures.ts`, never in `App.svelte` branches or gameplay modules.
 - Current shell: fixed 15 × 15 Hub Grid, shared `HudLayout` regions, one scroll owner per region. Added/moved regions update `HudRegionId`, `HUD_REGION_META`, `DEFAULT_HUD_LAYOUT` in `game/src/ui/hud/hud-layout.ts` plus `App.svelte` wiring; backfill old layouts.
 - New panels wire through `PANELS`, `RAIL`, icon/label maps, keyboard actions in `App.svelte`. Reuse shared controls like `CollapseToggle.svelte`.
 - Keep native semantics, labels, keyboard access, visible focus. Map arrows select adjacent Blocks; Enter walks or uses a known Waypoint, with selection announcements.
@@ -96,9 +101,10 @@ Gameplay numbers live in data JSON, formulas in `engine/`; do not duplicate eith
 - Stop conditions, the only ones that end the turn:
   1. A save-flow edit needs explicit user approval (`game/src/state/save.ts`, `game/src/app/session.ts`, Save panel).
   2. A behavior, RNG-order, balance or UX decision has no owner answer in the plan.
-  3. A failing check does not match `docs/known-failures.md`, or a new failure appears with unchanged input.
+  3. A failing check does not match `docs/reference/known-failures.md`, or a new failure appears with unchanged input.
   4. Tooling is unavailable (missing browser connector, unreachable server) and the item cannot be verified another way.
-- Known baseline failures: read `docs/known-failures.md` before judging a red gate. A failure is baseline only when its file and test name match that file. Never re-fix or re-run baseline failures to make a plan look green, and never tick an item because its only failure is baseline without recording that in the plan.
-- Items that need human eyes (visual judgement, audio, feel) go under a `Manual sign-off` heading and are not agent checkboxes. Agent verifies the mechanical part (DOM attribute, console, screenshot) and records it; the human check stays open.
+- Known baseline failures: read `docs/reference/known-failures.md` before judging a red gate. A failure is baseline only when its file and test name match that file. Never re-fix or re-run baseline failures to make a plan look green, and never tick an item because its only failure is baseline without recording that in the plan.
+- Items that need human eyes (visual judgement, feel) go under a `Manual sign-off` heading and are not agent checkboxes. Agent verifies the mechanical part (DOM attribute, console, screenshot) and records it; the human check stays open.
+- Never delete a plan file while any checkbox is open. Verify every item and record its evidence first. Delete only when the user explicitly forces deletion; the user may delete a plan themselves at any time.
 - Long gates write to a log and read the summary, not the raw output: `npm --prefix game run test 2>&1 | Tee-Object -FilePath .cache/test.log | Select-String "Test Files|Tests |FAIL"`. `.cache/` and `.playwright-mcp/` are local, never commit them.
 - During a plan, use `npm --prefix game run test:fast` plus focused specs; run the full suite once at closeout. Reuse recorded evidence until inputs change.

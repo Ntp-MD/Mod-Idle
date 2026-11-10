@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-lizardman--sunscale-lizardman-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-lizardman--sunscale-lizardman-diagonals.png",
   "diagonalSourceSha256": "0fda70ad8b018b3b35cddf4501c36264fb2a6a977ba66e5ccd8666569a98963b",
   "diagonalScaleFactor": 0.31312,
   "speciesId": "lizardman",

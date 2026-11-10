@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-troll--reed-troll-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-troll--reed-troll-diagonals.png",
   "diagonalSourceSha256": "f484d686989f4ef4dda4ddcb20b1963385f69a4260e7c174dd92aa2aa004a24b",
   "diagonalScaleFactor": 0.340936,
   "speciesId": "troll",

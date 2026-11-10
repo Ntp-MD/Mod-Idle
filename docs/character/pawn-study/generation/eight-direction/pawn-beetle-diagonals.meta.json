@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "beetle",
+  "name": "Beetle",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-beetle-diagonals.png",
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/beetle.png",
+    "docs/character/pawn-study/atlases/beetle.png"
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "promptSummary": "Generate four diagonal beetle views matching the existing compact brown/gold shell identity, dark underside, six short legs and horn-like snout; omit invented markings and keep centered with transparent cell margins.",
+  "requestedLayout": {
+    "rows": 2,
+    "columns": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west",
+    "cellWidth": 627,
+    "cellHeight": 627
+  },
+  "actualImage": {
+    "width": 1254,
+    "height": 1254,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "alpha": "transparent",
+    "visibleBoundsAlphaThreshold": 16,
+    "visibleBoundsPx": {
+      "northEast": {
+        "x": 146,
+        "y": 189,
+        "width": 346,
+        "height": 261
+      },
+      "southEast": {
+        "x": 127,
+        "y": 196,
+        "width": 368,
+        "height": 247
+      },
+      "southWest": {
+        "x": 133,
+        "y": 195,
+        "width": 369,
+        "height": 243
+      },
+      "northWest": {
+        "x": 135,
+        "y": 189,
+        "width": 347,
+        "height": 261
+      }
+    }
+  },
+  "review": {
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "identity": true,
+    "status": "passed",
+    "approved": true
+  },
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

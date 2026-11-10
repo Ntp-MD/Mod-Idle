@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-beetle--hollow-beetle-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-beetle--hollow-beetle-diagonals.png",
   "diagonalSourceSha256": "9af11d60ef177c7a3559d9c0cf4f42e4619eb63fb7774b343ecfe78a4c55c917",
   "diagonalScaleFactor": 0.320388,
   "speciesId": "beetle",

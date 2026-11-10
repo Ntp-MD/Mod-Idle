@@ -2,12 +2,13 @@
 
 `aftershock-shader.mjs` translates the scalar masks, noise decay, colour mixing and
 stepped lighting from the CC0 ExplosionFXFree `explosion_rings`, `explosion_impact`
-and `explosion_smoke` shaders under `art-reference/VFX-Godot`.
+and `explosion_smoke` shaders.
 
 This is a JavaScript CPU/Canvas adaptation. It does not execute Godot or reproduce
 the original 3D scene, particle meshes, normal textures or lighting. Seeded value
 noise replaces Godot's generated FastNoiseLite textures. The sprites are authored
-top down; the game applies its shared camera matrix once.
+top down; the game applies its shared camera matrix once. The original packs are
+local-only under `archive/art-reference/VFX-Godot/` and are not part of the repo.
 
 Regenerate the atlas and standalone animated preview from the project root:
 
@@ -22,7 +23,7 @@ guide is the canonical world footprint. `projected-preview.png` is an offline
 1920 by 1080 comparison, not an in-game screenshot.
 
 Atlas metadata uses `projection: "ground"` and a content radius ratio. See
-[VFX angle authoring](../../art-reference/vfx/angle-authoring.md) for the camera contract.
+[VFX angle authoring](../../docs/vfx-skill/angle-authoring.md) for the camera contract.
 
 ## Remaining skill families
 

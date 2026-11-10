@@ -1,0 +1,101 @@
+{
+  "id": "attack.stone_spike",
+  "src": "/fx/skill-pool/attack-earth/attack-stone-spike/v3/stone-spike.png",
+  "layerId": "stone-spike",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.85,
+  "palette": "earth",
+  "durationSec": 0.6,
+  "sizePolicy": "world",
+  "binding": "area",
+  "orient": false,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.85,
+  "authoringGeometry": {
+    "shape": "circle",
+    "spanM": 1.2,
+    "depthM": 2.2
+  },
+  "phases": [
+    "Impact"
+  ],
+  "additionalLayers": [
+    {
+      "layerId": "impact-burst",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "earth",
+      "opacity": 1,
+      "durationSec": 0.6,
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "sizePolicy": "body",
+      "binding": "contact",
+      "file": "impact-burst.png",
+      "phases": [
+        "Impact"
+      ],
+      "scale": 0.6
+    },
+    {
+      "layerId": "fragment-debris",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "earth",
+      "opacity": 1,
+      "durationSec": 0.6,
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "sizePolicy": "body",
+      "binding": "contact",
+      "file": "fragment-debris.png",
+      "phases": [
+        "Impact"
+      ],
+      "scale": 0.25
+    }
+  ],
+  "composition": "Independent component recipe: stone-spike, impact-burst, fragment-debris",
+  "componentRecipe": {
+    "shapes": [
+      "stone-spike",
+      "impact-burst",
+      "fragment-debris"
+    ],
+    "humanReview": false
+  },
+  "opacity": 1
+}

@@ -1,6 +1,6 @@
 {
   "style": "pawn-study",
-  "sourceManifest": "art-reference/pawn-study/manifest.json",
+  "sourceManifest": "docs/character/pawn-study/manifest.json",
   "runtimeIntegrated": true,
   "defaultVersion": "per-entry pointer",
   "atlasLayout": "Per identity: 2x2 cardinal or 4x2 eight-direction row-major atlas",

@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "troll",
+  "name": "Troll",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-troll-diagonals.png",
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/troll.png",
+    "docs/character/pawn-study/atlases/troll.png"
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "promptSummary": "Generate Troll bust diagonals preserving olive-green head/neck, huge bulbous nose, long pointed ears, dark spiky hair and brown fur collar; source has no visible eyes. NE/NW rear face hidden; SE/SW mirrored front face visible.",
+  "requestedLayout": {
+    "rows": 2,
+    "columns": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west"
+  },
+  "actualImage": {
+    "width": 1254,
+    "height": 1254,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "alpha": "transparent",
+    "visibleBoundsAlphaThreshold": 16,
+    "visibleBoundsPx": {
+      "northEast": {
+        "x": 168,
+        "y": 101,
+        "width": 327,
+        "height": 398
+      },
+      "southEast": {
+        "x": 149,
+        "y": 103,
+        "width": 294,
+        "height": 397
+      },
+      "southWest": {
+        "x": 174,
+        "y": 96,
+        "width": 301,
+        "height": 403
+      },
+      "northWest": {
+        "x": 146,
+        "y": 98,
+        "width": 313,
+        "height": 401
+      }
+    },
+    "furCollarAnchorYByCellPx": {
+      "northEast": 498,
+      "southEast": 499,
+      "southWest": 498,
+      "northWest": 498
+    }
+  },
+  "review": {
+    "identity": true,
+    "directionPose": "candidate appears to follow NE/NW rear nose hidden, SE/SW mirrored front nose visible",
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed",
+    "pose": true
+  },
+  "reviewConcerns": [
+    "Source face has no visible eyes; candidate preserves that identity. Review remains pending before packing."
+  ],
+  "previousCandidate": "docs/character/pawn-study/generation/eight-direction/troll-eight-direction-v1.png",
+  "sizeReference": "docs/character/pawn-study/atlases/troll.png",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

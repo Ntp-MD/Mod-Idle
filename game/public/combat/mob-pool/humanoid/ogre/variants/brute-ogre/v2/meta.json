@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-ogre--brute-ogre-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-ogre--brute-ogre-diagonals.png",
   "diagonalSourceSha256": "bb75b9d41131b0f3757119c513ec16cf2c93b16c4d19ff91d16bbd844730f1e9",
   "diagonalScaleFactor": 0.285427,
   "speciesId": "ogre",

@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/undead/mummy/mummy/reference.png",
   "sourceSha256": "d3c4a4ecedb8a6ac7f6640f61643e98df7ee729a1cf1ecce60dbcce20ddae3c2",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-mummy-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-mummy-diagonals.png",
   "diagonalSourceSha256": "6cc380a4cbc227bba88d6c2ee3cda6fbe543dccce8933e723e8b219f41ceb5a4",
   "diagonalScaleFactor": 0.443418
 }

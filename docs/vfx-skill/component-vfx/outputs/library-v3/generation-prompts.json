@@ -1,0 +1,75 @@
+{
+  "version": 3,
+  "masters": [
+    {
+      "shape": "cone-stream",
+      "prompt": "Use case: stylized-concept. Asset type: one reusable painted action-RPG VFX component for ModWorld, not a whole skill or sprite sheet. Neutral grayscale ONLY (R=G=B), distinct dark/middle/light/white values for seven runtime element palette filters. Polished hand-painted fantasy game VFX, sharp readable silhouette at small size, restrained translucent glow. Square 1024x1024 RGBA with true transparent background. Entire artwork including soft glow contained within central 75 percent, generous transparent margins on every edge. No ground plane, cast shadow, scenery, text, labels, watermark, frame or painted checkerboard. No baked isometric camera tilt. Subject: A horizontal continuous breath plume: a very narrow emitter at left widening smoothly into a broad rounded spreading front at right, visible layered wisps and internal streaks following the flow, unprojected top-down fan silhouette. No impact explosion, no orb or source device.",
+      "tool": "image_gen",
+      "rawFile": "cone-stream-raw.png",
+      "file": "cone-stream.png",
+      "humanReview": false,
+      "sourceOutput": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1c345-c2dd-7aa0-8ad6-a3dda41c7832/exec-e33d6e91-34d8-42cc-9e02-92b1493c1c0c.png"
+    },
+    {
+      "shape": "wall-segment",
+      "prompt": "Use case: stylized-concept. Asset type: one reusable painted action-RPG VFX component for ModWorld, not a whole skill or sprite sheet. Neutral grayscale ONLY (R=G=B), distinct dark/middle/light/white values for seven runtime element palette filters. Polished hand-painted fantasy game VFX, sharp readable silhouette at small size, restrained translucent glow. Square 1024x1024 RGBA with true transparent background. Entire artwork including soft glow contained within central 75 percent, generous transparent margins on every edge. No ground plane, cast shadow, scenery, text, labels, watermark, frame or painted checkerboard. No baked isometric camera tilt. Subject: One upright rectangular magical barrier section, pale layered translucent energy with jagged vertical crystalline filaments. Straight compatible left and right join edges, modest irregular upper rim and flat lower contact line. Screen-facing upright view, not a perspective wall, no pillars or ground base. It must read as a repeatable segment, not a ring.",
+      "tool": "image_gen",
+      "rawFile": "wall-segment-raw.png",
+      "file": "wall-segment.png",
+      "humanReview": false,
+      "sourceOutput": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1c345-c2dd-7aa0-8ad6-a3dda41c7832/exec-816cb760-b307-4a39-b82e-b4a945be00f1.png"
+    },
+    {
+      "shape": "tether-strand",
+      "prompt": "Use case: stylized-concept. Asset type: one reusable painted action-RPG VFX component for ModWorld, not a whole skill or sprite sheet. Neutral grayscale ONLY (R=G=B), distinct dark/middle/light/white values for seven runtime element palette filters. Polished hand-painted fantasy game VFX, sharp readable silhouette at small size, restrained translucent glow. Square 1024x1024 RGBA with true transparent background. Entire artwork including soft glow contained within central 75 percent, generous transparent margins on every edge. No ground plane, cast shadow, scenery, text, labels, watermark, frame or painted checkerboard. No baked isometric camera tilt. Subject: One straight horizontal slender flexible magical tether from left to right, a thin bright continuous core with a few closely wrapped braided filaments and subtle wisps, equally narrow tapered left/right tips, no endpoint bursts or objects. Broad transparent space above and below. It must read as a connective energy cord, not a thick beam.",
+      "tool": "image_gen",
+      "rawFile": "tether-strand-raw.png",
+      "file": "tether-strand.png",
+      "humanReview": false,
+      "sourceOutput": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1c345-c2dd-7aa0-8ad6-a3dda41c7832/exec-48f7bc74-57d2-47e9-8b6c-2287d5c61e97.png"
+    },
+    {
+      "shape": "shockwave-ring",
+      "prompt": "Use case: stylized-concept. Asset type: one reusable painted action-RPG VFX component for ModWorld, not a whole skill or sprite sheet. Neutral grayscale ONLY (R=G=B), distinct dark/middle/light/white values for seven runtime element palette filters. Polished hand-painted fantasy game VFX, sharp readable silhouette at small size, restrained translucent glow. Square 1024x1024 RGBA with true transparent background. Entire artwork including soft glow contained within central 75 percent, generous transparent margins on every edge. No ground plane, cast shadow, scenery, text, labels, watermark, frame or painted checkerboard. No baked isometric camera tilt. Subject: One perfectly circular unprojected top-down radial shockwave rim, mostly transparent hollow center, irregular outward sweeping brush filaments and a strong thin leading circular crest fading inward. Circular not elliptical, no central explosion or filled disk, no debris outside the margin.",
+      "tool": "image_gen",
+      "rawFile": "shockwave-ring-raw.png",
+      "file": "shockwave-ring.png",
+      "humanReview": false,
+      "sourceOutput": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1c345-c2dd-7aa0-8ad6-a3dda41c7832/exec-a1d58889-6599-4542-ad93-eba7c5735589.png"
+    },
+    {
+      "shape": "crescent-wave",
+      "prompt": "Use case: stylized-concept. Asset type: one reusable painted action-RPG VFX component for ModWorld, not a whole skill or sprite sheet. Neutral grayscale ONLY (R=G=B), distinct dark/middle/light/white values for seven runtime element palette filters. Polished hand-painted fantasy game VFX, sharp readable silhouette at small size, restrained translucent glow. Square 1024x1024 RGBA with true transparent background. Entire artwork including soft glow contained within central 75 percent, generous transparent margins on every edge. No ground plane, cast shadow, scenery, text, labels, watermark, frame or painted checkerboard. No baked isometric camera tilt. Subject: One right-moving luminous crescent blade, the outward convex sharp cutting edge faces right, two gracefully tapered tips above and below curling toward left, internal layered brush streaks and a short faint trailing feathered edge on left. Screen-facing unprojected sprite, no sword or actor, not a complete ring.",
+      "tool": "image_gen",
+      "rawFile": "crescent-wave-raw.png",
+      "file": "crescent-wave.png",
+      "humanReview": false,
+      "sourceOutput": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1c345-c2dd-7aa0-8ad6-a3dda41c7832/exec-41ac675b-29a6-4e25-9f0b-8f9220e18344.png"
+    },
+    {
+      "shape": "shield-dome",
+      "prompt": "Use case: stylized-concept. One reusable hand-painted action RPG VFX SHIELD DOME sprite. Neutral grayscale only. A simple broad hemispherical dome viewed directly from its side, like an upright half of a soap bubble cut flat along its bottom. One continuous smooth extremely translucent hemispherical surface, with a delicate bright upper arch and a few very thin geodesic curved meridians describing its spherical volume. The interior should be almost invisible so an actor behind it remains readable; it must still be a single continuous translucent surface, NO large holes or torn gaps. The bottom edge is straight, subtle and horizontal, NOT a ground ellipse. Clean symmetric silhouette, left and right bottom corners level. Keep the complete hemisphere in the central 70 percent of a square 1024x1024 transparent RGBA canvas, wide transparent margins. Hand-painted fantasy game style, restrained small glints on the edge. No thick smoke, no flame tongues, NO swirling ribbons, no crescent, no ground disk, no checkerboard, no scenery, no character, no text, no shadow. True transparent background and translucent surface.",
+      "tool": "image_gen",
+      "rawFile": "shield-dome-v2-raw.png",
+      "file": "shield-dome-v2.png",
+      "humanReview": false,
+      "sourceOutput": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1c345-c2dd-7aa0-8ad6-a3dda41c7832/exec-184217a8-0b47-4ea6-acd0-0219d1959529.png",
+      "discardedCandidate": {
+        "sourceOutput": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1c345-c2dd-7aa0-8ad6-a3dda41c7832/exec-74a16639-93d9-4cdf-9b01-80a0f71e0ab0.png",
+        "prompt": "Use case: stylized-concept. Asset type: one reusable painted action-RPG VFX component for ModWorld, not a whole skill or sprite sheet. Neutral grayscale ONLY (R=G=B), distinct dark/middle/light/white values for seven runtime element palette filters. Polished hand-painted fantasy game VFX, sharp readable silhouette at small size, restrained translucent glow. Square 1024x1024 RGBA with true transparent background. Entire artwork including soft glow contained within central 75 percent, generous transparent margins on every edge. No ground plane, cast shadow, scenery, text, labels, watermark, frame or painted checkerboard. No baked isometric camera tilt. Subject: One front-facing translucent hemispherical magical shield dome as an upright sprite, broad arch rising from a flat open bottom, bright curved upper rim, extremely faint interior with only sparse fine curved surface filaments suggesting volume. Transparent interior lets actors remain visible. No ground ellipse or disk, no enclosing full sphere, no actor.",
+        "reason": "Heavy swirling ribbons and large holes instead of continuous translucent dome.",
+        "rawFile": "shield-dome-raw.png",
+        "file": "shield-dome.png"
+      }
+    },
+    {
+      "shape": "bind-strand",
+      "prompt": "Use case: stylized-concept. Asset type: one reusable painted action-RPG VFX component for ModWorld, not a whole skill or sprite sheet. Neutral grayscale ONLY (R=G=B), distinct dark/middle/light/white values for seven runtime element palette filters. Polished hand-painted fantasy game VFX, sharp readable silhouette at small size, restrained translucent glow. Square 1024x1024 RGBA with true transparent background. Entire artwork including soft glow contained within central 75 percent, generous transparent margins on every edge. No ground plane, cast shadow, scenery, text, labels, watermark, frame or painted checkerboard. No baked isometric camera tilt. Subject: One isolated upright curling restraint strand: a loosely coiled S-shaped supple magical root/vine cord, three separated flowing bends with readable twisted fibrous material, narrow tapered free ends at top and bottom, open gaps between coils. Neutral grayscale material compatible with elemental recoloring. No leaves, chains, character, floor or rope knot ball.",
+      "tool": "image_gen",
+      "rawFile": "bind-strand-raw.png",
+      "file": "bind-strand.png",
+      "humanReview": false,
+      "sourceOutput": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1c345-c2dd-7aa0-8ad6-a3dda41c7832/exec-07c66a75-451b-4853-8414-3df986c23e5f.png"
+    }
+  ]
+}

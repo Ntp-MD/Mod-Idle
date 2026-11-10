@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/humanoid/troll/troll/reference.png",
   "sourceSha256": "cfd5ce8b589d43d2c64f330945b54589709d3c2eea58bbc9477df07cd7ca6b24",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-troll-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-troll-diagonals.png",
   "diagonalSourceSha256": "78fca5ed4e8ad2ad621b724c0a0d56cca453c467db66c214c0a88885d1222666",
   "diagonalScaleFactor": 0.482412
 }

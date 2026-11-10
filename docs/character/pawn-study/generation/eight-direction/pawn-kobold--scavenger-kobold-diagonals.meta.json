@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "kobold--scavenger-kobold",
+  "name": "Scavenger Kobold",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-kobold--scavenger-kobold-diagonals.png",
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/variants/kobold--scavenger-kobold.png",
+    "docs/character/pawn-study/atlases/variants/kobold--scavenger-kobold.png"
+  ],
+  "supersedesCandidate": "docs/character/pawn-study/generation/eight-direction/pawn-kobold--scavenger-kobold-diagonals-v1.png",
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "promptSummary": "Generate Scavenger Kobold diagonals preserving blue reptile bust/tail, pale throat, amber eyes and ragged brown cloth with strap/buckle; no limbs or weapons. NE/NW rear face hidden; SE/SW mirrored front.",
+  "requestedLayout": {
+    "sourceCardinalHeightsPx": [
+      308,
+      311,
+      310,
+      311
+    ],
+    "rows": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west",
+    "columns": 2
+  },
+  "actualImage": {
+    "cellWidth": 627,
+    "alpha": "transparent",
+    "width": 1254,
+    "cellHeight": 627,
+    "visibleBoundsPx": {
+      "northEast": [
+        192,
+        113,
+        487,
+        493
+      ],
+      "southEast": [
+        131,
+        114,
+        446,
+        488
+      ],
+      "southWest": [
+        181,
+        91,
+        479,
+        477
+      ],
+      "northWest": [
+        143,
+        87,
+        423,
+        480
+      ]
+    },
+    "visibleHeightsPx": {
+      "southWest": 386,
+      "northWest": 393,
+      "southEast": 374,
+      "northEast": 380
+    },
+    "height": 1254
+  },
+  "review": {
+    "size": "candidate is about 1.2-1.3x source cardinal visible height; compare packed scale",
+    "approved": true,
+    "identity": true,
+    "status": "passed",
+    "layout": "2x2 views in requested NE/SE/SW/NW order",
+    "anchor": true,
+    "anatomy": "passes source silhouette comparison: bust-tail form, no limbs or extra weapon added",
+    "pose": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true
+  },
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

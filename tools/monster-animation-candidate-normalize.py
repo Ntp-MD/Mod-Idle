@@ -3,7 +3,7 @@
 
 Example:
     python -B tools/monster-animation-candidate-normalize.py \
-      --source art-reference/animation/outputs/sensenova-raw.png \
+      --source path/to/raw.png \
       --reference archive/art-reference/monsters/plant/dryad/dryad/animation/poses/hit/north/00-flinch.png
 
 The reference PNG's .meta.json supplies its anchor and review-frame contract. The

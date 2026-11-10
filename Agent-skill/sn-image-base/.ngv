@@ -1,0 +1,5 @@
+SN_BASE_URL="https://token.sensenova.ai/v1"
+SN_API_KEY="sk-622GOMMu4OzXEJgxV9cHpy9DGKXH8OUx"
+SN_IMAGE_GEN_BASE_URL="https://token.sensenova.ai/v1"
+SN_IMAGE_GEN_API_KEY="sk-622GOMMu4OzXEJgxV9cHpy9DGKXH8OUx"
+SN_CHAT_MODEL="sensenova-6.8-flash-lite"

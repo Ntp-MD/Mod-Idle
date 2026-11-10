@@ -9,7 +9,7 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   use: { viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 },
   projects: [
-    { name: 'hmr', testMatch: ['sprite-fallback.spec.ts','sprite-loading.spec.ts','arena-scale.spec.ts','dynamic-relative.spec.ts','magic-aoe.spec.ts','panels.spec.ts','map.spec.ts','map-travel.spec.ts','combat-aoe.spec.ts','skill-vfx-fallback.spec.ts','storyteller.spec.ts'] },
+    { name: 'hmr', testMatch: ['sprite-fallback.spec.ts','sprite-loading.spec.ts','arena-scale.spec.ts','dynamic-relative.spec.ts','magic-aoe.spec.ts','panels.spec.ts','map.spec.ts','map-travel.spec.ts','combat-aoe.spec.ts','skill-vfx-fallback.spec.ts','storyteller.spec.ts','showcase-samples.spec.ts'] },
     { name: 'production', testMatch: ['startup.spec.ts'] },
     { name: 'measurement', testMatch: ['measurements.spec.ts'] },
   ],

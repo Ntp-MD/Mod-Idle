@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-human--knight-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-human--knight-diagonals.png",
   "diagonalSourceSha256": "f25612a087c701f4bd88858d9d45ddc8d4717e227828a2b5396af66d34a36f03",
   "diagonalScaleFactor": 0.296761,
   "speciesId": "human",

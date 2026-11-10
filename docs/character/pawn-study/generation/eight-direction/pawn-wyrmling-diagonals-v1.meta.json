@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-review",
+  "identityId": "wyrmling",
+  "identityKind": "species",
+  "sourceSheet": "docs/character/pawn-study/sheets/wyrmling.png",
+  "generatedSheet": "docs/character/pawn-study/generation/eight-direction/pawn-wyrmling-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": ["north-east", "south-east", "south-west", "north-west"],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "canvas": {
+    "requested": {"width": 1024, "height": 1024},
+    "generated": {"width": 1254, "height": 1254},
+    "cellSize": 627,
+    "background": "white"
+  },
+  "promptSummary": "Generate only Wyrmling's four diagonal views, preserving the source identity, palette, proportions and pawn style; true rear three-quarter NE/NW and front three-quarter SE/SW.",
+  "review": {
+    "pose": false,
+    "anchor": false,
+    "sharedScale": false,
+    "alphaAndCellBounds": false
+  },
+  "note": "Generated canvas differs from the requested 1024x1024. Do not check off the roster until the sheet is repacked to 512x512 cells and reviewed."
+}

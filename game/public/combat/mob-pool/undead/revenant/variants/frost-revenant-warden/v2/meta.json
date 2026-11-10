@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-revenant--frost-revenant-warden-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-revenant--frost-revenant-warden-diagonals.png",
   "diagonalSourceSha256": "cabf65bdb90105469957b0f16eac428a936d7a4cfdf3aff2ba089b7588929667",
   "speciesId": "revenant",
   "variantId": "frost-revenant-warden"

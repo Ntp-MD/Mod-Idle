@@ -1,0 +1,48 @@
+{
+  "pawnId": "imp--pinch-imp",
+  "candidateFile": "pawn-imp--pinch-imp-diagonals.png",
+  "sourceAtlas": "docs/character/pawn-study/atlases/variants/imp--pinch-imp.png",
+  "sourceSheet": "docs/character/pawn-study/sheets/variants/imp--pinch-imp.png",
+  "dimensions": "1254x1254",
+  "pixelFormat": "32bpp ARGB",
+  "transparentBackground": true,
+  "cellLayout": "2x2",
+  "cellSize": "627x627",
+  "directionOrder": [
+    "NE",
+    "SE",
+    "SW",
+    "NW"
+  ],
+  "views": {
+    "NE": "rear three-quarter, head turned away, no visible face",
+    "SE": "front three-quarter, face visible",
+    "SW": "mirrored front three-quarter, face visible",
+    "NW": "mirrored rear three-quarter, head turned away, no visible face"
+  },
+  "visibleBoundsPx": {
+    "NE": "x=167..471, y=83..514 (305x432)",
+    "SE": "x=122..436, y=95..517 (315x423)",
+    "SW": "x=191..491, y=94..514 (301x421)",
+    "NW": "x=150..456, y=84..514 (307x431)"
+  },
+  "visibleFootprint": "48–50% cell width and 67–69% cell height; consistent across all views.",
+  "identityCheck": "One curved dark horn with yellow base, red skin, yellow waist band, bat wings and arrow-tipped tail.",
+  "reviewStatus": "candidate-review",
+  "concerns": [
+    "Review direction handedness and ground-anchor alignment in the packed preview.",
+    "Confirm raw scale against runtime cardinal atlas before integration."
+  ],
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "status": "runtime-reviewed",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

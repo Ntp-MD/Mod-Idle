@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "kobold--drake-kobold",
+  "identityName": "Drake Kobold",
+  "identityKind": "variant",
+  "sourceSheet": "docs/character/pawn-study/sheets/variants/kobold--drake-kobold.png",
+  "sizeReference": "game/public/combat/mob-pool/humanoid/kobold/variants/drake-kobold/v1/atlas.png",
+  "generatedSheet": "docs/character/pawn-study/generation/eight-direction/pawn-kobold--drake-kobold-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "canvas": {
+    "width": 1254,
+    "height": 1254,
+    "cellSize": 627,
+    "background": "transparent"
+  },
+  "measuredVisibleBoundsSourcePx": {
+    "north-east": [
+      221,
+      95,
+      451,
+      493
+    ],
+    "south-east": [
+      181,
+      96,
+      427,
+      494
+    ],
+    "south-west": [
+      201,
+      96,
+      447,
+      494
+    ],
+    "north-west": [
+      177,
+      95,
+      407,
+      493
+    ]
+  },
+  "measuredVisibleHeightsPx": [
+    398,
+    398,
+    398,
+    398
+  ],
+  "cardinalVisibleHeightsRuntimePx": [
+    141,
+    142,
+    133,
+    133
+  ],
+  "promptSummary": "Generate four Drake Kobold diagonal bust views preserving blue scales, cream horns, swept blue crest, pale belly plates, orange eyes and curled tail/loin wrap; no limbs or wings.",
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "note": "Diagonal-only candidate. Verify handedness and packed scale/tail anchor against active cardinal frames before approval; legacy 4?2 v1 remains untouched.",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

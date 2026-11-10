@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "kobold",
+  "name": "Kobold",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-kobold-diagonals.png",
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/kobold.png",
+    "docs/character/pawn-study/atlases/kobold.png",
+    "docs/character/pawn-study/sources/kobold.png"
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "promptSummary": "Generate Kobold bust diagonals preserving blue reptilian scales, broad head, pointed ears, yellow eyes, cream throat plates and curled tail; NE/NW rear face hidden, SE/SW mirrored front.",
+  "requestedLayout": {
+    "rows": 2,
+    "columns": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west"
+  },
+  "actualImage": {
+    "width": 1254,
+    "height": 1254,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "alpha": "transparent",
+    "visibleBoundsAlphaThreshold": 16,
+    "visibleBoundsPx": {
+      "northEast": {
+        "x": 109,
+        "y": 132,
+        "width": 411,
+        "height": 363
+      },
+      "southEast": {
+        "x": 134,
+        "y": 132,
+        "width": 356,
+        "height": 364
+      },
+      "southWest": {
+        "x": 135,
+        "y": 133,
+        "width": 358,
+        "height": 364
+      },
+      "northWest": {
+        "x": 131,
+        "y": 133,
+        "width": 353,
+        "height": 364
+      }
+    },
+    "bodyBaseAnchorYByCellPx": {
+      "northEast": 494,
+      "southEast": 495,
+      "southWest": 496,
+      "northWest": 496
+    }
+  },
+  "review": {
+    "identity": true,
+    "directionPose": "candidate appears to follow NE/NW rear face-hidden, SE/SW mirrored front eye-visible",
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed",
+    "pose": true,
+    "sourceNote": "The cardinal source has no belt; diagonals follow that source silhouette."
+  },
+  "reviewConcerns": [],
+  "previousCandidate": "docs/character/pawn-study/generation/eight-direction/kobold-eight-direction-v1.png",
+  "sizeReference": "docs/character/pawn-study/atlases/kobold.png",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

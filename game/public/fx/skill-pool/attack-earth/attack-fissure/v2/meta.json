@@ -1,0 +1,34 @@
+{
+  "id": "attack.fissure",
+  "src": "/fx/skill-pool/attack-earth/attack-fissure/v2/column-eruption.png",
+  "layerId": "column-eruption",
+  "columns": 1,
+  "rows": 1,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.8,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.8,
+  "palette": "physical",
+  "opacity": 1,
+  "durationSec": 1.2,
+  "authoringGeometry": {
+    "shape": "circle",
+    "spanM": 1.2,
+    "depthM": 3
+  },
+  "sizePolicy": "world",
+  "binding": "area",
+  "composition": "Neutral component master ingredients; non-default review version.",
+  "generation": {
+    "tool": "imagegen",
+    "source": "docs/vfx-skill/component-vfx/outputs/library-v1/generation-prompts.json"
+  },
+  "additionalLayers": []
+}

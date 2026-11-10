@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/undead/vampire/vampire/reference.png",
   "sourceSha256": "ec69cc3e4f8ff1f87bcf0fb032b85498b0b7d0a89f1841449cbff79e949a0a3f",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-vampire-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-vampire-diagonals.png",
   "diagonalSourceSha256": "2001da4416e6a671da2b8a77626d6a4142a64b44664bd5b4745df755a0abcb06",
   "diagonalScaleFactor": 0.433409
 }

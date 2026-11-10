@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-vampire--bloodveil-vampire-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-vampire--bloodveil-vampire-diagonals.png",
   "diagonalSourceSha256": "7f1aeba5d0d770ef54ab61fe43b22d90df1b6cea6cf95ef3a56eed3e2058261f",
   "diagonalScaleFactor": 0.288325,
   "speciesId": "vampire",

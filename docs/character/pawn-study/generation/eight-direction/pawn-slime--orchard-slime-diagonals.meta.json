@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "slime--orchard-slime",
+  "name": "Orchard Slime",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-slime--orchard-slime-diagonals.png",
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/variants/slime--orchard-slime.png",
+    "docs/character/pawn-study/atlases/variants/slime--orchard-slime.png"
+  ],
+  "supersedesCandidate": "docs/character/pawn-study/generation/eight-direction/pawn-slime--orchard-slime-diagonals-v1.png",
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "promptSummary": "Generate Orchard Slime diagonals preserving the smooth light-green blob, olive lower edge, brown sprout with two green leaves, and simple dark eyes. NE/NW rear without eyes; SE/SW mirrored front with eyes.",
+  "requestedLayout": {
+    "sourceCardinalHeightsPx": [
+      303,
+      303,
+      307,
+      307
+    ],
+    "rows": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west",
+    "columns": 2
+  },
+  "actualImage": {
+    "cellWidth": 627,
+    "alpha": "transparent",
+    "width": 1254,
+    "cellHeight": 627,
+    "visibleBoundsPx": {
+      "northEast": [
+        114,
+        113,
+        522,
+        474
+      ],
+      "southEast": [
+        104,
+        115,
+        509,
+        474
+      ],
+      "southWest": [
+        114,
+        138,
+        522,
+        501
+      ],
+      "northWest": [
+        103,
+        138,
+        510,
+        501
+      ]
+    },
+    "visibleHeightsPx": {
+      "southWest": 363,
+      "northWest": 363,
+      "southEast": 359,
+      "northEast": 361
+    },
+    "height": 1254
+  },
+  "review": {
+    "size": "candidate is about 1.18x source cardinal visible height; compare packed scale",
+    "approved": true,
+    "identity": true,
+    "status": "passed",
+    "layout": "2x2 views in requested NE/SE/SW/NW order",
+    "anchor": true,
+    "anatomy": "passes source silhouette comparison: no limbs or props added",
+    "pose": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true
+  },
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-treant--rotting-treant-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-treant--rotting-treant-diagonals.png",
   "diagonalSourceSha256": "707569f6d0867d4c92c88ab9bcba3830ccdbc50162d0355791744251ebc6d8b7",
   "diagonalScaleFactor": 0.274662,
   "speciesId": "treant",

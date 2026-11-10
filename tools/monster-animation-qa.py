@@ -32,7 +32,7 @@ from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parent.parent
-MONSTER_ROOT = ROOT / "art-reference" / "monsters"
+MONSTER_ROOT = ROOT / "archive" / "art-reference" / "monsters"
 ROSTER_PATH = MONSTER_ROOT / "production-roster.json"
 MOB_SKILLS_PATH = ROOT / "tools/data/mob-skills.json"
 SPECIES_MIN_BOTTOM_PADDING = 10

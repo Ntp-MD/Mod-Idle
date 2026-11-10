@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gameplay audit report</title><style>body{font:16px/1.6 system-ui,sans-serif;max-width:1050px;margin:32px auto;padding:0 20px;color:#1e293b;background:#f8fafc}section{padding:12px 20px;margin:18px 0;background:white;border:1px solid #cbd5e1;border-radius:8px}li{margin:10px 0}input{width:18px;height:18px;vertical-align:middle}.meta{color:#475569}code{background:#e2e8f0;padding:2px 5px}table{border-collapse:collapse;width:100%;margin:8px 0}th,td{border:1px solid #cbd5e1;padding:4px 6px;text-align:left;vertical-align:top}h1{font-size:27px}h2{font-size:21px}.decision{background:#eff6ff;border-left:3px solid #3b82f6;padding:6px 10px;margin:6px 0}.fail{background:#fef2f2;border-left:3px solid #dc2626;padding:6px 10px;margin:6px 0}.ok{background:#f0fdf4;border-left:3px solid #16a34a;padding:6px 10px;margin:6px 0}</style></head><body>
+<h1><label><input type="checkbox" id="complete" checked> Gameplay audit report</label></h1>
+<p class="meta">Audited 2026-11-10. Read-only: no files changed, nothing deleted. Scope: gameplay numbers (<code>tools/data/*.json</code>), formulas (<code>engine/</code>), client wiring (<code>game/src/</code>) and the game's verification/measurement gates. Reviewer: another agent, per <a href="../../AGENTS.md">AGENTS.md</a>.</p>
+<p id="plan-current" class="meta">Current: findings-new-regression</p>
+<p class="meta">Gate evidence is the run record. Baseline judgment uses <a href="../reference/known-failures.md">docs/reference/known-failures.md</a>; a red gate is baseline only when its file and test name match that file exactly. Anything else is a regression.</p>
+
+<section>
+<h2>Green gates (all PASS)</h2>
+<table><thead><tr><th>Gate</th><th>Result</th><th>Coverage</th></tr></thead><tbody>
+<tr><td><code>npm run verify</code></td><td><strong>12/12 cages PASS</strong></td><td>counts, cross-references and ranges across mob/zone/trade/delivery/catalog/icon</td></tr>
+<tr><td><code>npm run map:check</code></td><td><strong>9/9 gates PASS</strong></td><td>676 land cells, 129 locations, 54 sub-zones, wild-side sites, landmark art</td></tr>
+<tr><td><code>npm run measure:gameplay -- --preset smoke</code></td><td><strong>78/78 cases PASS</strong></td><td>P9 field sides, Boss/Unique probes, resource sites, finite/time/transition checks</td></tr>
+<tr><td><code>npm --prefix game run test:fast</code></td><td>2480 passed</td><td>full sim/combat/economy/UI logic suite</td></tr>
+</tbody></table>
+<p class="ok"><strong>Conclusion:</strong> gameplay numbers and formulas are self-consistent. Every cage, map gate and controlled gameplay case passes, and <code>engine/economy.ts</code>, <code>engine/travel.ts</code>, <code>engine/world.ts</code> carry <strong>comment-only</strong> diffs (no logic change) against the committed baseline.</p>
+</section>
+
+<section>
+<h2>Findings — 4 failing test files / 3 failing tests</h2>
+<h3>New regression (not in known-failures.md)</h3>
+<p class="fail"><strong>Findings:new-regression.</strong> <code>tests/ui/vfx-components.test.ts</code> → "resolves all 29 shapes across all seven element palettes without missing artwork".</p>
+<ul>
+<li><label><input type="checkbox" id="findings-new-regression"> Root cause identified</label>
+<p><strong>Cause:</strong> <code>tools/data/vfx-components.json</code> variant <code>cone-stream</code> (lines 321-327) references <code>"skill": "attack.venom_spray"</code> (version <code>v3</code>), but <code>game/src/ui/fx/pool.generated.ts</code> has <strong>no <code>attack.venom_spray</code> entry</strong>. <code>SKILL_VFX_POOL["attack.venom_spray"]</code> is <code>undefined</code>, so <code>[master.skill].find(...)</code> throws at test line 37.</p>
+<p><strong>Effect:</strong> the <code>cone-stream</code> shape cannot resolve its master artwork; its <code>attack.venom_spray</code> VFX has no registered pool version. Data/art wiring, not a formula or balance problem — all other skills referenced in <code>vfx-components.json</code> resolve.</p>
+<p><strong>Reviewer ask:</strong> either add the <code>attack.venom_spray</code> pool entry (and confirm version <code>v3</code> with <code>cone-stream.png</code>), or repoint <code>cone-stream</code> at an existing pool skill. This is the only genuinely new failure.</p></li>
+</ul>
+
+<h3>Baseline failures (match known-failures.md — do not fix)</h3>
+<table><thead><tr><th>File / test</th><th>Symptom</th><th>Status</th></tr></thead><tbody>
+<tr><td><code>tests/ui/asset-budget.test.ts</code> — keeps per-family source art within budget</td><td><code>public/fx</code> 222409213 bytes (<strong>212.1 MiB</strong>) &gt; 180 MiB</td><td>Baseline file+test match. Recorded baseline was 197.23 MiB; current dirty tree is higher due to art <code>meta.json</code> changes in the working tree.</td></tr>
+<tr><td><code>tests/ui/arena-art-reference-review.test.ts</code> — suite load</td><td>missing <code>archive/art-reference</code> JSON</td><td>Baseline (archive is local-only and gitignored)</td></tr>
+<tr><td><code>tests/ui/arena-actor-view.test.ts</code> — R4 culling (DR4)</td><td>expected <code>true</code> to be <code>false</code></td><td>Baseline</td></tr>
+</tbody></table>
+</section>
+
+<section>
+<h2>Working-tree state (context for the reviewer)</h2>
+<ul>
+<li><label><input type="checkbox" id="wt-dirty" checked> Dirty working tree, uncommitted</label>
+<p>The tree carries many <code>art-reference/</code> and <code>docs/wiki/</code> deletions, many <code>game/public/.../meta.json</code> modifications, and comment-only edits to <code>engine/economy.ts</code>, <code>engine/travel.ts</code>, <code>engine/world.ts</code>. The 212.1 MiB <code>public/fx</code> figure reflects this dirty state, not a committed regression. <code>AGENTS.md</code> is modified (project rules, present in context).</p></li>
+<li><label><input type="checkbox" id="wt-nochange" checked> No files changed by this audit</label>
+<p>All audit commands were read-only (<code>--checks</code> cages, Vite SSR measurement, vitest, git status/diff). Nothing was deleted; nothing was restored. Per the user's instruction the audit takes no action.</p></li>
+<li><label><input type="checkbox" id="wt-notrun"> <code>npm run check</code> not run</label>
+<p><code>npm run check</code> (typecheck + svelte-check) was <strong>not</strong> run in this audit — it is a longer gate and the user interrupted a long run earlier. Known-failures.md lists it as green (svelte-check 0 errors / 0 warnings), but that is unverified in this session. Reviewer should run it to close the loop.</p></li>
+</ul>
+</section>
+
+<section>
+<h2>Reviewer checklist</h2>
+<ul>
+<li><label><input type="checkbox" id="r-verify"> Re-run <code>npm run verify</code> (12/12 expected)</label></li>
+<li><label><input type="checkbox" id="r-map"> Re-run <code>npm run map:check</code> (9/9 expected)</label></li>
+<li><label><input type="checkbox" id="r-measure"> Re-run <code>npm run measure:gameplay -- --preset smoke</code> (78/78 expected)</label></li>
+<li><label><input type="checkbox" id="r-check"> Run <code>npm run check</code> and record the result</label></li>
+<li><label><input type="checkbox" id="r-regression"> Adjudicate the <code>attack.venom_spray</code> pool regression (fix or repoint)</label></li>
+<li><label><input type="checkbox" id="r-verdict"> Record a final verdict in this file and tick the item</label></li>
+</ul>
+</section>
+</body></html>

@@ -1,0 +1,69 @@
+{
+  "version": 2,
+  "masters": [
+    {
+      "shape": "crack-strip",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Asset type: painted reusable action-RPG VFX ingredient crack-strip. Subject: a straight horizontal strip of branching fractured ground seams, narrow central split and irregular fine side cracks; painted strictly top-down, no rocks protruding upward. Render this particular material and silhouette accurately; do not substitute a generic flaming energy blob. One isolated still image, NOT a full skill, scene or animation sheet. Neutral grayscale with clearly separated dark, middle, bright and white highlight values, so the same source remains readable under all seven runtime palettes (fire/cold/lightning/earth/poison/chaos/physical). Detailed illustrated game asset, readable at small screen size. Exactly square 1024x1024 RGBA preferred. Entire source silhouette fits within the central 75 percent of the square, completely transparent wide margins, no cropping. Real transparent background, preserve translucent soft edges where material calls for them. No ground plane, cast shadow, horizon, baked camera perspective, text, labels, border or checkerboard. Strictly straight-down unprojected artwork; no ellipse or tilt.",
+      "sourceOutput": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1c345-c2dd-7aa0-8ad6-a3dda41c7832/exec-8a25a11d-6f83-47d8-b62d-dbee0c25f929.png",
+      "rawFile": "crack-strip-raw.png",
+      "humanReview": false
+    },
+    {
+      "shape": "stone-spike",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Asset type: painted reusable action-RPG VFX ingredient stone-spike. Subject: an upright compact eruption of solid jagged stone spikes, one main irregular crystalline stone point and a few smaller rooted shards; solid rock facets, root at lower center, no ground disk. Render this particular material and silhouette accurately; do not substitute a generic flaming energy blob. One isolated still image, NOT a full skill, scene or animation sheet. Neutral grayscale with clearly separated dark, middle, bright and white highlight values, so the same source remains readable under all seven runtime palettes (fire/cold/lightning/earth/poison/chaos/physical). Detailed illustrated game asset, readable at small screen size. Exactly square 1024x1024 RGBA preferred. Entire source silhouette fits within the central 75 percent of the square, completely transparent wide margins, no cropping. Real transparent background, preserve translucent soft edges where material calls for them. No ground plane, cast shadow, horizon, baked camera perspective, text, labels, border or checkerboard. Screen-facing upright artwork; vertical remains vertical.",
+      "sourceOutput": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1c345-c2dd-7aa0-8ad6-a3dda41c7832/exec-3d3dd7d8-2f87-4798-9d7c-c71bdbc6f0af.png",
+      "rawFile": "stone-spike-raw.png",
+      "humanReview": false
+    },
+    {
+      "shape": "wave-crest",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Asset type: painted reusable action-RPG VFX ingredient wave-crest. Subject: one upright curling wave crest with layered foam and a strong readable curved leading edge, traveling toward canvas right; front-facing game sprite, no water plane or horizon. Render this particular material and silhouette accurately; do not substitute a generic flaming energy blob. One isolated still image, NOT a full skill, scene or animation sheet. Neutral grayscale with clearly separated dark, middle, bright and white highlight values, so the same source remains readable under all seven runtime palettes (fire/cold/lightning/earth/poison/chaos/physical). Detailed illustrated game asset, readable at small screen size. Exactly square 1024x1024 RGBA preferred. Entire source silhouette fits within the central 75 percent of the square, completely transparent wide margins, no cropping. Real transparent background, preserve translucent soft edges where material calls for them. No ground plane, cast shadow, horizon, baked camera perspective, text, labels, border or checkerboard. Screen-facing upright artwork; vertical remains vertical.",
+      "sourceOutput": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1c345-c2dd-7aa0-8ad6-a3dda41c7832/exec-7f2c5611-a57c-4b8b-ac19-60df6dd54706.png",
+      "rawFile": "wave-crest-raw.png",
+      "humanReview": false
+    },
+    {
+      "shape": "arrow-core",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Asset type: painted reusable action-RPG VFX ingredient arrow-core. Subject: one solid arrow flying toward canvas right, sharp metal arrowhead at right, straight short shaft and small feather fletching at left, crisp silhouette, no magical tail. Render this particular material and silhouette accurately; do not substitute a generic flaming energy blob. One isolated still image, NOT a full skill, scene or animation sheet. Neutral grayscale with clearly separated dark, middle, bright and white highlight values, so the same source remains readable under all seven runtime palettes (fire/cold/lightning/earth/poison/chaos/physical). Detailed illustrated game asset, readable at small screen size. Exactly square 1024x1024 RGBA preferred. Entire source silhouette fits within the central 75 percent of the square, completely transparent wide margins, no cropping. Real transparent background, preserve translucent soft edges where material calls for them. No ground plane, cast shadow, horizon, baked camera perspective, text, labels, border or checkerboard. Screen-facing upright artwork; vertical remains vertical.",
+      "sourceOutput": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1c345-c2dd-7aa0-8ad6-a3dda41c7832/exec-1ed9da2d-8749-4423-953c-5f55616ed18b.png",
+      "rawFile": "arrow-core-raw.png",
+      "humanReview": false
+    },
+    {
+      "shape": "orb-core",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Asset type: painted reusable action-RPG VFX ingredient orb-core. Subject: one round translucent magical sphere, true circular silhouette, layered swirling interior and sharp internal highlights, no flame-shaped tail or ring around it. Render this particular material and silhouette accurately; do not substitute a generic flaming energy blob. One isolated still image, NOT a full skill, scene or animation sheet. Neutral grayscale with clearly separated dark, middle, bright and white highlight values, so the same source remains readable under all seven runtime palettes (fire/cold/lightning/earth/poison/chaos/physical). Detailed illustrated game asset, readable at small screen size. Exactly square 1024x1024 RGBA preferred. Entire source silhouette fits within the central 75 percent of the square, completely transparent wide margins, no cropping. Real transparent background, preserve translucent soft edges where material calls for them. No ground plane, cast shadow, horizon, baked camera perspective, text, labels, border or checkerboard. Screen-facing upright artwork; vertical remains vertical.",
+      "sourceOutput": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1c345-c2dd-7aa0-8ad6-a3dda41c7832/exec-c35bf89f-7963-4298-b4dd-d376d4b0eaa2.png",
+      "rawFile": "orb-core-raw.png",
+      "humanReview": false
+    },
+    {
+      "shape": "rock-core",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Asset type: painted reusable action-RPG VFX ingredient rock-core. Subject: one compact irregular rocky meteor body, solid chipped facets and deep fissures, readable chunky silhouette; no fire, tail, dust cloud or ground plane. Render this particular material and silhouette accurately; do not substitute a generic flaming energy blob. One isolated still image, NOT a full skill, scene or animation sheet. Neutral grayscale with clearly separated dark, middle, bright and white highlight values, so the same source remains readable under all seven runtime palettes (fire/cold/lightning/earth/poison/chaos/physical). Detailed illustrated game asset, readable at small screen size. Exactly square 1024x1024 RGBA preferred. Entire source silhouette fits within the central 75 percent of the square, completely transparent wide margins, no cropping. Real transparent background, preserve translucent soft edges where material calls for them. No ground plane, cast shadow, horizon, baked camera perspective, text, labels, border or checkerboard. Screen-facing upright artwork; vertical remains vertical.",
+      "sourceOutput": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1c345-c2dd-7aa0-8ad6-a3dda41c7832/exec-c820725a-56a1-4ab5-a9be-b583ed718207.png",
+      "rawFile": "rock-core-raw.png",
+      "humanReview": false
+    },
+    {
+      "shape": "forked-bolt",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Asset type: painted reusable action-RPG VFX ingredient forked-bolt. Subject: one tall narrow descending lightning strike with a jagged vertical white-hot main trunk and a few short branching forks, bottom contact point at lower center; no impact burst or ground ring. Render this particular material and silhouette accurately; do not substitute a generic flaming energy blob. One isolated still image, NOT a full skill, scene or animation sheet. Neutral grayscale with clearly separated dark, middle, bright and white highlight values, so the same source remains readable under all seven runtime palettes (fire/cold/lightning/earth/poison/chaos/physical). Detailed illustrated game asset, readable at small screen size. Exactly square 1024x1024 RGBA preferred. Entire source silhouette fits within the central 75 percent of the square, completely transparent wide margins, no cropping. Real transparent background, preserve translucent soft edges where material calls for them. No ground plane, cast shadow, horizon, baked camera perspective, text, labels, border or checkerboard. Screen-facing upright artwork; vertical remains vertical.",
+      "sourceOutput": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1c345-c2dd-7aa0-8ad6-a3dda41c7832/exec-2a83e04e-4de2-456f-95eb-9adb3bd91e60.png",
+      "rawFile": "forked-bolt-raw.png",
+      "humanReview": false
+    },
+    {
+      "shape": "ground-spiral",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Asset type: painted reusable action-RPG VFX ingredient ground-spiral. Subject: one true circular magical spiral on a ground surface seen strictly straight down, several interleaved curved energy arms and a readable dark central eye, no upright funnel, no perspective ellipse. Render this particular material and silhouette accurately; do not substitute a generic flaming energy blob. One isolated still image, NOT a full skill, scene or animation sheet. Neutral grayscale with clearly separated dark, middle, bright and white highlight values, so the same source remains readable under all seven runtime palettes (fire/cold/lightning/earth/poison/chaos/physical). Detailed illustrated game asset, readable at small screen size. Exactly square 1024x1024 RGBA preferred. Entire source silhouette fits within the central 75 percent of the square, completely transparent wide margins, no cropping. Real transparent background, preserve translucent soft edges where material calls for them. No ground plane, cast shadow, horizon, baked camera perspective, text, labels, border or checkerboard. Strictly straight-down unprojected artwork; no ellipse or tilt.",
+      "sourceOutput": "C:/Users/ITOP/.codex-zed-account-1/generated_images/01a1c345-c2dd-7aa0-8ad6-a3dda41c7832/exec-66cf6d1b-15e1-43e4-8908-0f6ee3f28935.png",
+      "rawFile": "ground-spiral-raw.png",
+      "humanReview": false
+    }
+  ]
+}

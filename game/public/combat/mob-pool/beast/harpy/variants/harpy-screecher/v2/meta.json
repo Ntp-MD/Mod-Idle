@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-harpy--harpy-screecher-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-harpy--harpy-screecher-diagonals.png",
   "diagonalSourceSha256": "189bac9a7457893819d458c4d39be293ac13895249127b4236dcfaed012b7951",
   "speciesId": "harpy",
   "variantId": "harpy-screecher"

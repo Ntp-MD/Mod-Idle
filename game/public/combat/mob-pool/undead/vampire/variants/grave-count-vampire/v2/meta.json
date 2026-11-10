@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-vampire--grave-count-vampire-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-vampire--grave-count-vampire-diagonals.png",
   "diagonalSourceSha256": "91ffbdfc50c85837250c794a58f909e4b522a008f1f0d7fccd6297d9517c3127",
   "diagonalScaleFactor": 0.300529,
   "speciesId": "vampire",

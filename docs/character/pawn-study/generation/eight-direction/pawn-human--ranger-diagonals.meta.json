@@ -1,0 +1,48 @@
+{
+  "pawnId": "human--ranger",
+  "candidateFile": "pawn-human--ranger-diagonals.png",
+  "sourceAtlas": "docs/character/pawn-study/atlases/variants/human--ranger.png",
+  "sourceSheet": "docs/character/pawn-study/sheets/variants/human--ranger.png",
+  "dimensions": "1254x1254",
+  "pixelFormat": "32bpp ARGB",
+  "transparentBackground": true,
+  "cellLayout": "2x2",
+  "cellSize": "627x627",
+  "directionOrder": [
+    "NE",
+    "SE",
+    "SW",
+    "NW"
+  ],
+  "views": {
+    "NE": "rear three-quarter, face hidden",
+    "SE": "front three-quarter, face visible",
+    "SW": "mirrored front three-quarter, face visible",
+    "NW": "mirrored rear three-quarter, face hidden"
+  },
+  "visibleBoundsPx": {
+    "NE": "x=175..427, y=106..530 (253x425)",
+    "SE": "x=170..428, y=105..530 (259x426)",
+    "SW": "x=189..447, y=105..530 (259x426)",
+    "NW": "x=190..446, y=105..530 (257x426)"
+  },
+  "visibleFootprint": "40–41% cell width and about 68% cell height; lower anchor aligns exactly at y=530.",
+  "identityCheck": "Olive-green hood, small brown hair fringe, pale glowing eyes in front views, gray tunic, brown cross-body strap, brown belt with gold rectangular buckle; no added equipment.",
+  "reviewStatus": "candidate-review",
+  "concerns": [
+    "Confirm raw scale against runtime atlas before integration.",
+    "Review NE/NW rear and SE/SW mirrored handedness in packed preview."
+  ],
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "status": "runtime-reviewed",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

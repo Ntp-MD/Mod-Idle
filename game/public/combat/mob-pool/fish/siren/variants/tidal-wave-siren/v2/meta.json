@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-siren--tidal-wave-siren-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-siren--tidal-wave-siren-diagonals.png",
   "diagonalSourceSha256": "9a8b5cc0bed407b3a5f291f0b41ea91907e45430e8376beb2c79e6a9a74beb7e",
   "diagonalScaleFactor": 0.34341,
   "speciesId": "siren",

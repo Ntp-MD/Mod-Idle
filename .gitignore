@@ -14,6 +14,11 @@ game/test-results/
 __pycache__/
 *.py[cod]
 
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+
 # Retired game art/data snapshots, kept locally only
 archive/
 .playwright-mcp/

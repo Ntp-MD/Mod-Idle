@@ -54,7 +54,7 @@ for (let frame = 0; frame < frames; frame++) {
 if (!qaFrames.slice(1, -1).every(x => x.occupiedPixels > 0)) throw new Error('Empty intermediate shader frame');
 const bytes = png(atlasWidth, atlasWidth, atlas);
 fs.writeFileSync(path.join(destination, 'atlas.png'), bytes);
-const sourceRoot = 'art-reference/VFX-Godot/ExplosionFXFree/assets/BinbunVFX_Vol2/ExplosionFX';
+const sourceRoot = 'archive/art-reference/VFX-Godot/ExplosionFXFree/assets/BinbunVFX_Vol2/ExplosionFX';
 const meta = {
   id: 'attack.aftershock', src: `/fx/skill-pool/attack-earth/attack-aftershock/${version}/atlas.png`,
   columns, rows: 4, cellWidth: size, cellHeight: size, imageWidth: atlasWidth, imageHeight: atlasWidth,

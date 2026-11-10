@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "wyrmling",
+  "identityKind": "species",
+  "editTarget": "docs/character/pawn-study/generation/eight-direction/pawn-wyrmling-diagonals.png",
+  "sizeReference": "docs/character/pawn-study/atlases/wyrmling.png",
+  "generatedSheet": "docs/character/pawn-study/generation/eight-direction/pawn-wyrmling-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "targetVisibleHeightRuntimePx": [
+    170,
+    175
+  ],
+  "canvas": {
+    "requested": {
+      "width": 1024,
+      "height": 1024
+    },
+    "generated": {
+      "width": 1254,
+      "height": 1254
+    },
+    "cellSize": 627,
+    "background": "white"
+  },
+  "promptSummary": "Change only relative pawn size: uniformly shrink the four existing diagonal silhouettes to match the cardinal visible height, preserving pose, identity, directions, quadrants and white background.",
+  "review": {
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "identity": "wyrmling"
+  },
+  "note": "Reviewed packed eight-view atlas: NE/SE/SW/NW poses read correctly, roots share y=224, one scale is used across all views, and white background was removed inside cell bounds. Original 1254x1254 sheet is retained as source.",
+  "packedAtlas": "docs/character/pawn-study/atlases/wyrmling.png",
+  "packedVisibleHeightRuntimePx": [
+    168,
+    184
+  ],
+  "reviewNotes": "Reviewed NE/SE/SW/NW poses and identity against the cardinal references. The packed frames share the y=224 root and one character scale; extracted alpha bounds fit their cells."
+}

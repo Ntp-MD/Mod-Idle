@@ -698,7 +698,7 @@ function write() {
   const draft = OUT + '.tmp';
   fs.writeFileSync(draft, svg);
   fs.renameSync(draft, OUT);
-  const templateDir = path.join(ROOT, 'art-reference/map/geometry');
+  const templateDir = path.join(ROOT, 'docs/map/geometry');
   fs.mkdirSync(templateDir, { recursive: true });
   const width = 1024, height = Math.round(width * PROJ_HEX.height / PROJ_HEX.width);
   const vertices = PROJ_HEX.points.map(p => [

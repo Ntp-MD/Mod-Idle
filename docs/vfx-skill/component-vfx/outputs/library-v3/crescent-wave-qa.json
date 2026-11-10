@@ -1,0 +1,32 @@
+{
+  "shape": "crescent-wave",
+  "file": "crescent-wave.png",
+  "rawFile": "crescent-wave-raw.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    118,
+    903,
+    904
+  ],
+  "alphaExtrema": [
+    0,
+    254
+  ],
+  "visibleRgbSpreadMax": 30,
+  "visibleRgbSpreadMean": 1.296924,
+  "grayscaleAuthority": "AtlasFrame feColorMatrix saturate=0 before palette transfer",
+  "contentRatio": 0.8,
+  "sourceSha256": "db2688cf35b26ee5386676b9e0fb0042a8b17f094a0364715ce12d0c7b7e777c",
+  "masterSha256": "394694b0ae2f645860cd1624369c0ff06a488d23c30b05fdf5c380695ccf9664",
+  "humanReview": false,
+  "runtimeRegistered": false,
+  "verifiedRuntimePalettes": 0
+}

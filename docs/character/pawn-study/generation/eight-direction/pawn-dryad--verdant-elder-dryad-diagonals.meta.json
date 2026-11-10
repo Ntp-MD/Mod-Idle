@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "dryad--verdant-elder-dryad",
+  "name": "Verdant Elder Dryad",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-dryad--verdant-elder-dryad-diagonals.png",
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/variants/dryad--verdant-elder-dryad.png",
+    "docs/character/pawn-study/atlases/variants/dryad--verdant-elder-dryad.png",
+    "docs/character/pawn-study/sources/variant-dryad-verdant-elder-dryad.jpg"
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "promptSummary": "Generate Verdant Elder Dryad diagonals preserving humanoid tree-body, orange-brown bark, green leafy crown/collar/waist foliage, glowing yellow eyes and root-like feet. NE/NW rear, SE/SW mirrored front.",
+  "requestedLayout": {
+    "sourceCardinalHeightsPx": [
+      142,
+      141,
+      137,
+      136
+    ],
+    "rows": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west",
+    "columns": 2
+  },
+  "actualImage": {
+    "cellWidth": 627,
+    "alpha": "transparent",
+    "width": 1254,
+    "cellHeight": 627,
+    "visibleBoundsPx": {
+      "northEast": [
+        204,
+        73,
+        431,
+        522
+      ],
+      "southEast": [
+        176,
+        73,
+        407,
+        526
+      ],
+      "southWest": [
+        198,
+        47,
+        428,
+        498
+      ],
+      "northWest": [
+        203,
+        47,
+        435,
+        495
+      ]
+    },
+    "visibleHeightsPx": {
+      "southWest": 451,
+      "northWest": 448,
+      "southEast": 453,
+      "northEast": 449
+    },
+    "height": 1254
+  },
+  "review": {
+    "size": "candidate is about 3.2x cardinal visible height; compare packed height",
+    "approved": true,
+    "identity": true,
+    "status": "passed",
+    "layout": "2x2 views in requested NE/SE/SW/NW order",
+    "anchor": true,
+    "anatomy": "passes visual comparison",
+    "pose": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true
+  },
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/plant/treant/treant/reference.png",
   "sourceSha256": "a6d773e94f7a77a376de685b408fcc184510bbd2641af137f51057e6ce7e6180",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-treant-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-treant-diagonals.png",
   "diagonalSourceSha256": "c0fc2fffddab888cecdcfcfbb90d43025bd3e19c0c707c59f4e63eada5fe093e",
   "diagonalScaleFactor": 0.484848
 }

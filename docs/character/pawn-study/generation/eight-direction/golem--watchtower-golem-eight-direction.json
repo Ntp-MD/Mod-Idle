@@ -1,0 +1,18 @@
+{
+  "id": "golem--watchtower-golem",
+  "sourceCardinal": "docs/character/pawn-study/sheets/variants/golem--watchtower-golem.png",
+  "sourceDiagonals": "docs/character/pawn-study/generation/eight-direction/golem--watchtower-golem-diagonals-source.png",
+  "directions": [
+    "south",
+    "southeast",
+    "east",
+    "northeast",
+    "north",
+    "northwest",
+    "west",
+    "southwest"
+  ],
+  "layout": "4x2 row-major",
+  "frameSize": 512,
+  "sha256": "099ab47b7fbd61e66031c3a49371edc8368c9e60dcd1d3c0631a0292cffc197d"
+}

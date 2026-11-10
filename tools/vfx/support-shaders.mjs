@@ -6,12 +6,12 @@
  */
 import { clamp, smooth, fract, hash, fbm, over, renderPixels, TAU, DURATION_SEC } from './shader-math.mjs';
 
-const BATTLE = 'art-reference/VFX-Godot/BattleFXFree/assets/BinbunVFX_Vol2/BattleFX/shader/';
-const DARK = 'art-reference/VFX-Godot/DarkMagicFXFree/assets/BinbunVFX_Vol2/DarkMagicFX/shader/';
-const ELEMENT = 'art-reference/VFX-Godot/ElementalMagicFXFree/assets/BinbunVFX_Vol2/ElementalMagicFX/shader/';
-const LOOT = 'art-reference/VFX-Godot/GodotLootVFX/assets/BinbunVFX/loot_effects/src/shader/';
-const FIRE = 'art-reference/VFX-Godot/FlameFXFree/assets/BinbunVFX_Vol2/FlameFX/shader/';
-const ELECTRIC = 'art-reference/VFX-Godot/ElectricFXFree/assets/BinbunVFX_Vol2/ElectricFX/shader/';
+const BATTLE = 'archive/art-reference/VFX-Godot/BattleFXFree/assets/BinbunVFX_Vol2/BattleFX/shader/';
+const DARK = 'archive/art-reference/VFX-Godot/DarkMagicFXFree/assets/BinbunVFX_Vol2/DarkMagicFX/shader/';
+const ELEMENT = 'archive/art-reference/VFX-Godot/ElementalMagicFXFree/assets/BinbunVFX_Vol2/ElementalMagicFX/shader/';
+const LOOT = 'archive/art-reference/VFX-Godot/GodotLootVFX/assets/BinbunVFX/loot_effects/src/shader/';
+const FIRE = 'archive/art-reference/VFX-Godot/FlameFXFree/assets/BinbunVFX_Vol2/FlameFX/shader/';
+const ELECTRIC = 'archive/art-reference/VFX-Godot/ElectricFXFree/assets/BinbunVFX_Vol2/ElectricFX/shader/';
 export const licenseFiles = [BATTLE, DARK, ELEMENT, FIRE, ELECTRIC].map(p => p.replace(/shader\/$/, 'license.txt'));
 const overlay = (a, b) => a < .5 ? 2 * a * b : 1 - 2 * (1 - a) * (1 - b);
 const line = (v, width = .025) => 1 - smooth(width * .45, width, Math.abs(v));

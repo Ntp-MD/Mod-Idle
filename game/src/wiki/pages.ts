@@ -7,7 +7,7 @@
  *
  *   game/src/wiki/main.ts    the live wiki - the browser calls this when the page opens, so a data
  *                            edit shows on the next reload and no stale artefact can exist
-  *   tools/wiki.ts build      the same calls, written out to `docs/wiki/*.html` as a static site
+  *   tools/wiki.ts build      the same calls, written out to `docs/reference/wiki/*.html` as a static site
  *
  * One source serves both, so a figure cannot be right in one place and stale in the other. The theme
  * is the client's own: the caller reads `game/src/styles/variables.css` and hands its `:root` block to
@@ -238,7 +238,7 @@ const treeNodeDetail = (node: any): string => node.kind === 'keystone' ? (node.d
 const treeNodeMeta = (node: any): string =>
   `${treeKindLabel(node.kind)} · ${TREE_REGION_NAMES[node.wing] || node.wing} · ${n0(node.cost ?? treeKindCost(node.kind))} ${treeCurrencyLabel(node.currency)}${Number(node.cost) === 1 ? '' : 's'}`;
 
-const treeIconRoot = '../../game/src/icon';
+const treeIconRoot = '../../../game/src/icon';
 const treeWingIcons: Record<string, string> = {
   str: `${treeIconRoot}/gear/weapon/crossed-swords-1.png`,
   agi: `${treeIconRoot}/gear/armour/winged-boots.png`,
@@ -2183,7 +2183,7 @@ body::before {
 .masthead-tag { flex: 1; color: var(--dim); font-size: .72rem; letter-spacing: .06em; }
 .masthead-tools { display: flex; align-items: center; gap: .7rem; flex: none; }
 .search { position: relative; display: flex; align-items: center; color: var(--dim); }
-.search .search-glyph { position: absolute; left: .8rem; width: 1rem; height: 1rem; background: currentColor; -webkit-mask: url(../../game/src/icon/ui/search.png) center / contain no-repeat; mask: url(../../game/src/icon/ui/search.png) center / contain no-repeat; pointer-events: none; }
+.search .search-glyph { position: absolute; left: .8rem; width: 1rem; height: 1rem; background: currentColor; -webkit-mask: url(../../../game/src/icon/ui/search.png) center / contain no-repeat; mask: url(../../../game/src/icon/ui/search.png) center / contain no-repeat; pointer-events: none; }
 .search input {
   width: clamp(12rem, 19vw, 21rem); padding: .55rem 1rem .55rem 2.3rem;
   border: 1px solid var(--line); border-radius: 999px; background: var(--inset); color: var(--text);
@@ -2318,9 +2318,9 @@ dl, dt, dd { margin: 0; }
 .wiki-tree-controls { display: flex; align-items: center; gap: .35rem; }
 .icon-mask { display: inline-block; width: .9rem; height: .9rem; flex: none; background: currentColor; -webkit-mask: var(--glyph) center / contain no-repeat; mask: var(--glyph) center / contain no-repeat; }
 .tree-tool { display: inline-flex; align-items: center; justify-content: center; min-width: 1.75rem; padding: .32rem .45rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--text); font: inherit; font-size: .75rem; cursor: pointer; }
-.tree-tool[data-tree-fit] { --glyph: url(../../game/src/icon/ui/expand.png); }
-.tree-tool[data-tree-zoom="0.8"] { --glyph: url(../../game/src/icon/ui/remove-minus.png); }
-.tree-tool[data-tree-zoom="1.25"] { --glyph: url(../../game/src/icon/ui/add-plus.png); }
+.tree-tool[data-tree-fit] { --glyph: url(../../../game/src/icon/ui/expand.png); }
+.tree-tool[data-tree-zoom="0.8"] { --glyph: url(../../../game/src/icon/ui/remove-minus.png); }
+.tree-tool[data-tree-zoom="1.25"] { --glyph: url(../../../game/src/icon/ui/add-plus.png); }
 .tree-tool:hover { border-color: var(--gold); }
 .tree-tool:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .tree-zoom { min-width: 3rem; text-align: center; color: var(--dim); font-family: var(--num); font-size: .72rem; }

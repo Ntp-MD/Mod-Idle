@@ -1,0 +1,68 @@
+{
+  "family": "projectile-core",
+  "file": "projectile-core.png",
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    124,
+    149,
+    887,
+    905
+  ],
+  "contentRatio": 0.8,
+  "anchor": [
+    0.5,
+    0.5
+  ],
+  "source": "imagegen",
+  "palette": "neutral",
+  "humanReview": false,
+  "components": [
+    {
+      "family": "projectile-core",
+      "file": "projectile-core.png",
+      "canvas": [
+        1024,
+        1024
+      ],
+      "alphaBounds": [
+        124,
+        149,
+        887,
+        905
+      ],
+      "contentRatio": 0.8,
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "source": "imagegen",
+      "palette": "neutral",
+      "humanReview": false
+    },
+    {
+      "family": "impact-burst",
+      "file": "impact-burst.png",
+      "canvas": [
+        1024,
+        1024
+      ],
+      "alphaBounds": [
+        103,
+        115,
+        908,
+        921
+      ],
+      "contentRatio": 0.8,
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "source": "imagegen",
+      "palette": "neutral",
+      "humanReview": false
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "id": "attack.firestorm",
+  "src": "/fx/skill-pool/attack-fire/attack-firestorm/v4/ground-fill.png",
+  "layerId": "ground-fill",
+  "columns": 1,
+  "rows": 1,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "palette": "physical",
+  "opacity": 1,
+  "durationSec": 1.2,
+  "authoringGeometry": {
+    "shape": "circle"
+  },
+  "projection": "ground",
+  "sizePolicy": "footprint",
+  "binding": "area",
+  "composition": "Neutral component master ingredients; non-default review version.",
+  "generation": {
+    "tool": "imagegen",
+    "source": "docs/vfx-skill/component-vfx/outputs/library-v1/generation-prompts.json"
+  },
+  "additionalLayers": [
+    {
+      "file": "ground-residue.png",
+      "layerId": "ground-residue",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "physical",
+      "opacity": 1,
+      "durationSec": 1.2,
+      "authoringGeometry": {
+        "shape": "circle"
+      },
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area"
+    },
+    {
+      "file": "vortex.png",
+      "layerId": "vortex",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.8,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.8,
+      "palette": "physical",
+      "opacity": 1,
+      "durationSec": 1.2,
+      "authoringGeometry": {
+        "shape": "circle",
+        "spanM": 3,
+        "depthM": 4
+      },
+      "sizePolicy": "world",
+      "binding": "area"
+    }
+  ]
+}

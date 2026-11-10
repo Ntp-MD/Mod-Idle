@@ -1,5 +1,5 @@
 /**
- * Phase A of `docs/economy-world-life-ideas.md`: measure the economy that exists today.
+ * Measure the economy that exists today.
  *
  *   node --experimental-strip-types tools/economy-baseline.ts
  *

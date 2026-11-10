@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/humanoid/minotaur/minotaur/reference.png",
   "sourceSha256": "9f8adb14fb09bb8384f9597f8db02a84df05725105db5705eeed6defa9b53317",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-minotaur-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-minotaur-diagonals.png",
   "diagonalSourceSha256": "af9c20203f4bae8b45d0e50a6d34ec722567a9334acd2cdf937da5576e2ea9e6",
   "diagonalScaleFactor": 0.413793
 }

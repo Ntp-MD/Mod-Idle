@@ -142,6 +142,6 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/elemental/wisp/wisp/animation/poses/idle/south.png",
   "sourceSha256": "c7eaac52eb38564121842ef5f836d580e6640c2f6c98372e0b78763651b015ca",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-wisp-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-wisp-diagonals.png",
   "diagonalSourceSha256": "3404fe04e45eb952deea8f8bc2a6f6b6f44906644db39c29dad16043f2aa6d68"
 }

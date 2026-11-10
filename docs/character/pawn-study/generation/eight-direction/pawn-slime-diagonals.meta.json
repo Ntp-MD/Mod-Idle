@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "slime",
+  "name": "Slime",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-slime-diagonals.png",
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/slime.png",
+    "docs/character/pawn-study/atlases/slime.png"
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "promptSummary": "Generate base Slime diagonals preserving low rounded teal blob, pale glossy highlights, darker lower rim, small dark oval eyes and short dash mouth; rear NE/NW blank, front SE/SW face visible; no limbs.",
+  "requestedLayout": {
+    "rows": 2,
+    "columns": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west"
+  },
+  "actualImage": {
+    "width": 1254,
+    "height": 1254,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "alpha": "transparent",
+    "visibleBoundsAlphaThreshold": 16,
+    "visibleBoundsPx": {
+      "northEast": {
+        "x": 87,
+        "y": 143,
+        "width": 449,
+        "height": 359
+      },
+      "southEast": {
+        "x": 88,
+        "y": 143,
+        "width": 453,
+        "height": 359
+      },
+      "southWest": {
+        "x": 87,
+        "y": 144,
+        "width": 453,
+        "height": 358
+      },
+      "northWest": {
+        "x": 89,
+        "y": 143,
+        "width": 452,
+        "height": 359
+      }
+    },
+    "bottomAnchorYByCellPx": {
+      "northEast": 501,
+      "southEast": 501,
+      "southWest": 501,
+      "northWest": 501
+    }
+  },
+  "review": {
+    "identity": true,
+    "directionPose": "candidate appears to follow NE/NW rear blank, SE/SW mirrored front face-visible",
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed",
+    "pose": true
+  },
+  "reviewConcerns": [
+    "Candidate visible height is about 57% of cell versus source cardinal about 48%; compare packed scale before approval."
+  ],
+  "previousCandidate": "docs/character/pawn-study/generation/eight-direction/slime-eight-direction-v1.png",
+  "sizeReference": "docs/character/pawn-study/atlases/slime.png",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

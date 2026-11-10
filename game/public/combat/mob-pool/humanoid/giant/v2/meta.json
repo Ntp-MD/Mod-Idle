@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/humanoid/giant/giant/reference.png",
   "sourceSha256": "531e79921e865be53b4dad712117152e1acb2ebc2654007cd39e732aa88920c7",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-giant-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-giant-diagonals.png",
   "diagonalSourceSha256": "77a82c9dca67917d48865c8da49218ffe8907a5ac87f9899fbedc9be8ca19c95",
   "diagonalScaleFactor": 0.417845
 }

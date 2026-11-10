@@ -1,0 +1,111 @@
+{
+  "id": "attack.entropy_well",
+  "src": "/fx/skill-pool/attack-chaos/attack-entropy-well/v3/ground-spiral.png",
+  "layerId": "ground-spiral",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "palette": "chaos",
+  "durationSec": 8,
+  "sizePolicy": "footprint",
+  "projection": "ground",
+  "binding": "area",
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "authoringGeometry": {
+    "shape": "circle"
+  },
+  "phases": [
+    "Impact",
+    "Field",
+    "Channel"
+  ],
+  "additionalLayers": [
+    {
+      "layerId": "cloud-mist",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.65,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.65,
+      "palette": "chaos",
+      "opacity": 0.3,
+      "durationSec": 8,
+      "authoringGeometry": {
+        "shape": "circle",
+        "spanM": 4,
+        "depthM": 2
+      },
+      "sizePolicy": "world",
+      "binding": "area",
+      "file": "cloud-mist.png",
+      "phases": [
+        "Impact",
+        "Field",
+        "Channel"
+      ]
+    },
+    {
+      "layerId": "mote",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "chaos",
+      "opacity": 1,
+      "durationSec": 8,
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "sizePolicy": "body",
+      "binding": "area",
+      "file": "mote.png",
+      "phases": [
+        "Impact",
+        "Field",
+        "Channel"
+      ],
+      "scale": 0.18,
+      "placement": {
+        "kind": "orbit",
+        "cycleSec": 1.8,
+        "radiusM": 1.5
+      }
+    }
+  ],
+  "composition": "Independent component recipe: ground-spiral, cloud-mist, mote",
+  "componentRecipe": {
+    "shapes": [
+      "ground-spiral",
+      "cloud-mist",
+      "mote"
+    ],
+    "humanReview": false
+  },
+  "opacity": 1
+}

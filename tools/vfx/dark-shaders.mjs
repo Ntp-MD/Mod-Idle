@@ -8,13 +8,13 @@
  */
 import { clamp, smooth, fract, fbm, over, renderPixels, TAU, DURATION_SEC } from './shader-math.mjs';
 
-const dark = name => `art-reference/VFX-Godot/DarkMagicFXFree/assets/BinbunVFX_Vol2/DarkMagicFX/shader/${name}.gdshader`;
-const elemental = name => `art-reference/VFX-Godot/ElementalMagicFXFree/assets/BinbunVFX_Vol2/ElementalMagicFX/shader/${name}.gdshader`;
-const transparent = 'art-reference/VFX-Godot/MagicProjectilesVFX/assets/BinbunVFX/shared/shader/transparent.gdshader';
-const uvTools = 'art-reference/VFX-Godot/MagicProjectilesVFX/assets/BinbunVFX/shared/shader/util/uvtools.gdshaderinc';
+const dark = name => `archive/art-reference/VFX-Godot/DarkMagicFXFree/assets/BinbunVFX_Vol2/DarkMagicFX/shader/${name}.gdshader`;
+const elemental = name => `archive/art-reference/VFX-Godot/ElementalMagicFXFree/assets/BinbunVFX_Vol2/ElementalMagicFX/shader/${name}.gdshader`;
+const transparent = 'archive/art-reference/VFX-Godot/MagicProjectilesVFX/assets/BinbunVFX/shared/shader/transparent.gdshader';
+const uvTools = 'archive/art-reference/VFX-Godot/MagicProjectilesVFX/assets/BinbunVFX/shared/shader/util/uvtools.gdshaderinc';
 export const licenseFiles = [
-  'art-reference/VFX-Godot/DarkMagicFXFree/assets/BinbunVFX_Vol2/DarkMagicFX/license.txt',
-  'art-reference/VFX-Godot/ElementalMagicFXFree/assets/BinbunVFX_Vol2/ElementalMagicFX/license.txt',
+  'archive/art-reference/VFX-Godot/DarkMagicFXFree/assets/BinbunVFX_Vol2/DarkMagicFX/license.txt',
+  'archive/art-reference/VFX-Godot/ElementalMagicFXFree/assets/BinbunVFX_Vol2/ElementalMagicFX/license.txt',
 ];
 const GREEN = [109, 229, 36].map(v => v / 255), ACID = [217, 255, 100].map(v => v / 255), MOSS = [31, 91, 34].map(v => v / 255);
 const VIOLET = [158, 70, 236].map(v => v / 255), PINK = [248, 124, 255].map(v => v / 255), INK = [24, 9, 39].map(v => v / 255);

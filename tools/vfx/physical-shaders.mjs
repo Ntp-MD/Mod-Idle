@@ -5,12 +5,12 @@
  */
 import { clamp, smooth, fract, hash, fbm, over, renderPixels, TAU, DURATION_SEC } from './shader-math.mjs';
 
-const BATTLE = 'art-reference/VFX-Godot/BattleFXFree/assets/BinbunVFX_Vol2/BattleFX/shader/';
-const HIT = 'art-reference/VFX-Godot/HitFXFree/assets/BinbunVFX_Vol2/StylizedHitFX/shader/';
-const PROJECTILE = 'art-reference/VFX-Godot/MagicProjectilesVFX/assets/BinbunVFX/shared/shader/';
+const BATTLE = 'archive/art-reference/VFX-Godot/BattleFXFree/assets/BinbunVFX_Vol2/BattleFX/shader/';
+const HIT = 'archive/art-reference/VFX-Godot/HitFXFree/assets/BinbunVFX_Vol2/StylizedHitFX/shader/';
+const PROJECTILE = 'archive/art-reference/VFX-Godot/MagicProjectilesVFX/assets/BinbunVFX/shared/shader/';
 export const licenseFiles = [
-  'art-reference/VFX-Godot/BattleFXFree/assets/BinbunVFX_Vol2/BattleFX/license.txt',
-  'art-reference/VFX-Godot/HitFXFree/assets/BinbunVFX_Vol2/StylizedHitFX/license.txt',
+  'archive/art-reference/VFX-Godot/BattleFXFree/assets/BinbunVFX_Vol2/BattleFX/license.txt',
+  'archive/art-reference/VFX-Godot/HitFXFree/assets/BinbunVFX_Vol2/StylizedHitFX/license.txt',
 ];
 const steel = [.7, .87, 1], white = [1, .98, .88], gold = [1, .64, .2], blood = [.98, .2, .18];
 const overlay = (a, b) => a < .5 ? 2 * a * b : 1 - 2 * (1 - a) * (1 - b);

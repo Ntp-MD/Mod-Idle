@@ -1,7 +1,7 @@
 import { clamp, smooth, fbm, over, renderPixels, TAU } from './shader-math.mjs';
 
-const HIT = 'art-reference/VFX-Godot/HitFXFree/assets/BinbunVFX_Vol2/StylizedHitFX/';
-const PROJECTILE = 'art-reference/VFX-Godot/MagicProjectilesVFX/assets/BinbunVFX/shared/shader/';
+const HIT = 'archive/art-reference/VFX-Godot/HitFXFree/assets/BinbunVFX_Vol2/StylizedHitFX/';
+const PROJECTILE = 'archive/art-reference/VFX-Godot/MagicProjectilesVFX/assets/BinbunVFX/shared/shader/';
 const gold = [1, .65, .17], pale = [1, .96, .74], steel = [.72, .86, .98];
 const band = (value, width) => 1 - smooth(width * .65, width, Math.abs(value));
 

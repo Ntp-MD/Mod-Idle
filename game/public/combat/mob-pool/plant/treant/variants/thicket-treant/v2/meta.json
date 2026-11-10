@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-treant--thicket-treant-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-treant--thicket-treant-diagonals.png",
   "diagonalSourceSha256": "8c27b0d9ff587e711c93a8a63b308467cef052f94857e530e9b80f219b6c7fbb",
   "diagonalScaleFactor": 0.298633,
   "speciesId": "treant",

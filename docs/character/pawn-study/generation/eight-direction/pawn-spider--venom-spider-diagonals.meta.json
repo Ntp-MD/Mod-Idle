@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "spider--venom-spider",
+  "identityName": "Venom Spider",
+  "identityKind": "variant",
+  "sourceSheet": "docs/character/pawn-study/sheets/variants/spider--venom-spider.png",
+  "sizeReference": "game/public/combat/mob-pool/insect/spider/variants/venom-spider/v1/atlas.png",
+  "generatedSheet": "docs/character/pawn-study/generation/eight-direction/pawn-spider--venom-spider-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "canvas": {
+    "width": 1254,
+    "height": 1254,
+    "cellSize": 627,
+    "background": "transparent"
+  },
+  "measuredVisibleBoundsSourcePx": {
+    "north-east": [
+      139,
+      191,
+      514,
+      452
+    ],
+    "south-east": [
+      93,
+      189,
+      504,
+      455
+    ],
+    "south-west": [
+      126,
+      187,
+      529,
+      450
+    ],
+    "north-west": [
+      89,
+      187,
+      486,
+      450
+    ]
+  },
+  "measuredVisibleHeightsPx": [
+    261,
+    266,
+    263,
+    263
+  ],
+  "cardinalVisibleHeightsRuntimePx": [
+    80,
+    82,
+    81,
+    81
+  ],
+  "promptSummary": "Generate four diagonal Venom Spider views preserving exactly eight legs, brown body/legs, purple abdomen, yellow venom sigil and green eyes; no poison effects or props.",
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed",
+    "bodyPlan": "eight-legged spider silhouette retained; far-side legs overlap naturally in three-quarter views"
+  },
+  "note": "Diagonal-only candidate. Verify visible facing/leg count and packed scale/ground anchor against the active cardinal frames before approval.",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

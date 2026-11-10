@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-elf--dark-elf-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-elf--dark-elf-diagonals.png",
   "diagonalSourceSha256": "040ec120202300644e9c82fb61cf4bf62ea4d85b482c6bf5816aa70bd5d494bf",
   "diagonalScaleFactor": 0.313466,
   "speciesId": "elf",

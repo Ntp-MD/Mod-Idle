@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/dragon/mirehydra/mirehydra/reference.png",
   "sourceSha256": "8d40fce6ecc7e83b668b4b6d41cf99abdf02030e271f276ee488ebc734305ec1",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-mirehydra-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-mirehydra-diagonals.png",
   "diagonalSourceSha256": "e6cfe6d94c73532c22b3a32b477a2c7623de8763cd6dd799e0d1edea52f06c8b",
   "diagonalScaleFactor": null
 }

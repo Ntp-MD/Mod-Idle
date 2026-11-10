@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-skeleton--crownless-skeleton-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-skeleton--crownless-skeleton-diagonals.png",
   "diagonalSourceSha256": "83d530104a7f3cc1fdbe98b06f4c6900513a783ef64c8a4ba9f623bb3d149593",
   "diagonalScaleFactor": 0.31982,
   "speciesId": "skeleton",

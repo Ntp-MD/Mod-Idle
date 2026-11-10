@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "slime--brook-slime",
+  "identityName": "Brook Slime",
+  "identityKind": "variant",
+  "sourceSheet": "docs/character/pawn-study/sheets/variants/slime--brook-slime.png",
+  "sizeReference": "game/public/combat/mob-pool/formless/slime/variants/brook-slime/v1/atlas.png",
+  "generatedSheet": "docs/character/pawn-study/generation/eight-direction/pawn-slime--brook-slime-diagonals.png",
+  "tool": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "canvas": {
+    "requested": {
+      "width": 1254,
+      "height": 1254
+    },
+    "generated": {
+      "width": 1254,
+      "height": 1254
+    },
+    "cellSize": 627,
+    "background": "transparent"
+  },
+  "measuredVisibleBoundsSourcePx": {
+    "north-east": [
+      139,
+      189,
+      495,
+      483
+    ],
+    "south-east": [
+      131,
+      190,
+      486,
+      483
+    ],
+    "south-west": [
+      141,
+      169,
+      496,
+      460
+    ],
+    "north-west": [
+      130,
+      168,
+      487,
+      460
+    ]
+  },
+  "promptSummary": "Four distinct Brook Slime diagonal views. NE/NW rear with face hidden; SE/SW mirrored front with eyes and mouth visible. Preserve the squat pale mint/aqua blob, dark teal outline, lower water band and small highlight; no limbs or props.",
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "note": "Extractor finds unclipped cells. Front/rear row source baselines differ by 23px; review packed anchor and relative scale against cardinals before approval.",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

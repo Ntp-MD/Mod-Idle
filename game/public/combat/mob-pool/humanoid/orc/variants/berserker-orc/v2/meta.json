@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-orc--berserker-orc-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-orc--berserker-orc-diagonals.png",
   "diagonalSourceSha256": "2aa64d3241102d2cad8bf6a3cc56d786ac55d0aa89de7e12be1297a7430c895e",
   "diagonalScaleFactor": null,
   "speciesId": "orc",

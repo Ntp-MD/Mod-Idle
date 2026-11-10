@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-troll--swamp-troll-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-troll--swamp-troll-diagonals.png",
   "diagonalSourceSha256": "2b8fc05171bd9d91a0c23b0047f7fe2fe32365d1258ef1bddd64ab823f150aac",
   "diagonalScaleFactor": 0.28091,
   "speciesId": "troll",

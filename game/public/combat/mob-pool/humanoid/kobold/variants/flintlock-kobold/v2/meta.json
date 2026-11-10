@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-kobold--flintlock-kobold-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-kobold--flintlock-kobold-diagonals.png",
   "diagonalSourceSha256": "9e94d56099355dfb3a5753c5e4c42acaa02c5ec7688351c0fef036a0ac4232d4",
   "diagonalScaleFactor": 0.356784,
   "speciesId": "kobold",

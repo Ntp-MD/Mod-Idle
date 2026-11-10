@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-human--orchard-poacher-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-human--orchard-poacher-diagonals.png",
   "diagonalSourceSha256": "1413a224b35ca496f2b7096c52876f021909769ebf048901fbcaf23eeaf40fba",
   "diagonalScaleFactor": 0.385346,
   "speciesId": "human",

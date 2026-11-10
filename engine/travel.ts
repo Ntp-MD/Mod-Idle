@@ -1,5 +1,5 @@
 /**
- * Route planning — the movement-graph extension boundary (`docs/plan/hex-world-travel-rework.md` §5, HX2).
+ * Route planning — the movement-graph extension boundary (HX2).
  *
  * Pure functions over an explicit context: land comes from the World's land mask (or a fixture's copy
  * of it), ordinary walking costs one uniform duration, and every faster road, closure or directed

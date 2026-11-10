@@ -115,14 +115,17 @@ import { farm, farmLevel, farmMasteryLevel, plotCount, plant, harvest, craftPoti
 import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsFree } from '@sim/core/tree';
   import { allocateStats, respecStats } from '@sim/core/respec';
   import { CharacterSaveSession } from './state/saveSession';
-  import { SHOWCASE_SAMPLE_LABELS, SHOWCASE_SAMPLES, showcaseFieldSkill } from './app/showcase-samples';
+  import { DEFAULT_SHOWCASE_SAMPLE, showcaseView } from './app/showcase/samples';
+  import { readShowcaseBoot } from './app/showcase/boot';
+  import ShowcaseBanner from './ui/dev/showcase/ShowcaseBanner.svelte';
+  import ShowcaseIndex from './ui/dev/showcase/ShowcaseIndex.svelte';
   import { createSessionActions, type AccountWriterLease } from './app/session';
   import { createGameLoop } from './app/loop';
   import { previewTick } from './app/scheduler';
   import { createGearCommands } from './app/commands/gear';
   import { createEconomyCommands } from './app/commands/economy';
   import { createFieldCommands } from './app/commands/field';
-  import { buildShowcaseGame } from './app/commands/showcase-game';
+  import { buildShowcaseGame } from './app/showcase/fixtures';
   import { createTravelCommands } from './app/commands/map';
   import { road, startWalk, walkNote, walkBlocks, warpTo, warpCost, cellBlocks, cellSec, currentCell, settlementCell, ownerOf } from '@sim/world/road';
   import { enterDungeon, cooldownLeft } from '@sim/world/dungeon';
@@ -183,14 +186,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     { name: 'camp', href: icon('rest-campfire'), label: 'Camp' },
     { name: 'resource', href: icon('pickaxe'), label: 'Resource site' },
   ] as const;
-  const showcaseMode = import.meta.env.DEV && window.location.pathname.replace(/\/+$/, '') === '/__showcase';
-  const showcaseQuery = new URLSearchParams(window.location.search);
-  const requestedShowcaseSample = showcaseQuery.get('sample');
-  const showcasePlayerWeapon = showcaseQuery.get('player-weapon');
-  const showcasePlayerOffhand = showcaseQuery.get('player-offhand');
-  const initialShowcaseSample = showcaseMode
-    ? (requestedShowcaseSample && (SHOWCASE_SAMPLES as readonly string[]).includes(requestedShowcaseSample) ? requestedShowcaseSample : 'combat-field')
-    : 'delivery';
+  const showcaseBoot = import.meta.env.DEV ? readShowcaseBoot(window.location.pathname, window.location.search, true) : null;
+  const showcaseMode = !!showcaseBoot;
+  const showcasePlayerWeapon = showcaseBoot?.playerWeapon ?? null;
+  const showcasePlayerOffhand = showcaseBoot?.playerOffhand ?? null;
+  const initialShowcaseSample = showcaseBoot?.sample ?? 'delivery';
   const ARENA_MOB_SPECIES = Object.keys(mobSpritePool.species);
   const ARENA_EXISTING_PREVIEW_SPECIES = ['spear-goblin', 'little-demon', 'skeleton-sword', 'stone-golem',
     'skeleton-bone', 'crypt-wraith', 'shadow-wolf', 'eclipse-wisp', 'pixiblop-spider'] as const;
@@ -225,9 +225,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     'spear-goblin': 'goblin', 'skeleton-sword': 'skeleton', 'skeleton-bone': 'skeleton', 'crypt-wraith': 'wraith', 'shadow-wolf': 'wolf',
     'eclipse-wisp': 'wisp', 'pixiblop-spider': 'spider', 'stone-golem': 'golem', 'little-demon': 'imp',
   };
-  const requestedArenaSpecies = ARENA_SPRITE_SPECIES.find(id => id === showcaseQuery.get('sprite-species'));
-  const requestedArenaVariant = ARENA_VARIANT_PREVIEWS.find(variant => variant.key === showcaseQuery.get('sprite-variant'));
-  let spritePreviewMode = $state(showcaseMode && showcaseQuery.get('sprite-preview') !== 'fallback');
+  const requestedArenaSpecies = ARENA_SPRITE_SPECIES.find(id => id === showcaseBoot?.spriteSpecies);
+  const requestedArenaVariant = ARENA_VARIANT_PREVIEWS.find(variant => variant.key === showcaseBoot?.spriteVariant);
+  let spritePreviewMode = $state(!!showcaseBoot && showcaseBoot.spritePreview);
   let arenaSpecies = $state<string>(requestedArenaVariant?.speciesId ?? requestedArenaSpecies ?? 'skeleton');
   let arenaVariantKey = $state<string | null>(requestedArenaVariant?.key ?? null);
   const activeArenaVariant = $derived(ARENA_VARIANT_PREVIEW_BY_KEY.get(arenaVariantKey ?? '') ?? null);
@@ -237,11 +237,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     url.searchParams.set('sprite-preview', spritePreviewMode ? 'pawn' : 'fallback');
     window.history.replaceState(null, '', url);
   }
-  const requestedArenaSkill = showcaseQuery.get('skill');
-  const mechanicPreview = showcaseMode ? skillMechanicPreview(showcaseQuery.get('mechanic')) : undefined;
+  const requestedArenaSkill = showcaseBoot?.skill;
+  const mechanicPreview = showcaseBoot ? skillMechanicPreview(showcaseBoot.mechanic) : undefined;
   if (mechanicPreview) sm.byId[mechanicPreview.id] = mechanicPreview;
   onDestroy(() => { if (mechanicPreview) delete sm.byId[mechanicPreview.id]; });
-  let arenaSkillId = $state(mechanicPreview?.id ?? (requestedArenaSkill && sm.byId[requestedArenaSkill] ? requestedArenaSkill : showcaseFieldSkill(initialShowcaseSample) ?? 'attack.fireball'));
+  let arenaSkillId = $state(mechanicPreview?.id ?? (requestedArenaSkill && sm.byId[requestedArenaSkill] ? requestedArenaSkill : showcaseView(initialShowcaseSample)?.fieldSkill ?? 'attack.fireball'));
   /** Deliberate local commands for the automatic farming loop. */
   let arenaManual = $state<ManualControl>({});
   /** The focused body shown by the arena and pinned by the sim. */
@@ -406,7 +406,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     arenaFocusId = null;
     combatArena.focusId = undefined;
   }
-  let showcaseSample = $state(initialShowcaseSample);
+  let showcaseSample = $state<string>(initialShowcaseSample);
+  const showcaseViewValue = $derived(showcaseView(showcaseSample));
   /** One setup path for every Gameplay sample — the dropdown and deep links (?sample=) share it,
    *  so a linked sample opens in the same state as a picked one. */
   function applyShowcaseSample(value: string) {
@@ -415,56 +416,33 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     offlineProgress = null;
     clearCombatFxTimers();
     animateCombatFx = false;
-    const fieldSkill = showcaseFieldSkill(value);
+    const view = showcaseView(value);
+    const fieldSkill = view?.fieldSkill;
     if (fieldSkill) {
       arenaSkillId = fieldSkill;
-      arenaWorldScale = value === 'rimworld-field' ? ARENA_ZOOM_MIN : ARENA_DEFAULT_WORLD_SCALE;
+      arenaWorldScale = view.worldScale ?? ARENA_DEFAULT_WORLD_SCALE;
     }
     showcaseSample = value; gameState = showcaseGame(showcaseSample);
     resetArena();
     awayReport = null; skillDiscoveryId = null; skillRewardSeen = '';
     feed = []; feedSeen = 0;
     travelScene = false;
-    running = false;
-    if (fieldSkill) running = true;
-    gameState.playerStatuses = showcaseSample === 'combat-fx' ? {
-      burn: { stacks: 1, secLeft: 8, perSec: 12 },
-      chill: { stacks: 1, secLeft: 10, perSec: 0 },
-      bleed: { stacks: 1, secLeft: 6, perSec: 8 },
-    } : {};
+    running = !!fieldSkill;
+    gameState.playerStatuses = view?.statuses ?? {};
     resetCharacterUi(); picked = null; pickedCell = null;
-    panel = showcaseSample === 'craft-stash' ? 'craft' : null;
-    // Storyteller fixtures open their real hosts (plan §14.3); no new routes.
-    if (showcaseSample.startsWith('story-')) {
-      journeyToolsOpen = true;
-      switch (showcaseSample) {
-        case 'story-camp-warning': case 'story-cache-choices': case 'story-cache-working':
-        case 'story-cache-bagfull': case 'story-cache-results':
-        case 'story-road-result': case 'story-site-result': case 'story-dungeon-result':
-        case 'story-read-only':
-          panel = 'map';
-          break;
-        case 'story-delivery-choices': case 'story-courier-unaccepted':
-          marketView = 'deliveries'; marketTownId = gameState.town.waypoint; panel = 'market';
-          break;
-        case 'story-courier-destination': {
-          const courier = Object.values(gameState.town.contracts).flat().find((entry) => entry.kind === 'courier');
-          marketView = 'deliveries'; marketTownId = courier?.destinationTown ?? gameState.town.waypoint; panel = 'market';
-          break;
-        }
-        case 'story-market-promotion':
-          marketView = 'trade'; marketTownId = gameState.town.waypoint; panel = 'market';
-          break;
-        case 'story-forge-ready': case 'story-forge-shortage':
-          panel = 'forge';
-          break;
-      }
+    panel = view?.panel ?? null;
+    if (view?.journeyTools) journeyToolsOpen = true;
+    if (view?.market) {
+      marketView = view.market.view;
+      marketTownId = view.market.town === 'courier-destination'
+        ? Object.values(gameState.town.contracts).flat().find((entry) => entry.kind === 'courier')?.destinationTown ?? gameState.town.waypoint
+        : gameState.town.waypoint;
     }
-    if (showcaseSample === 'offline-progress') {
+    if (view?.offline) {
       loadController = new AbortController();
-      offlineProgress = { done: 43200, total: 86400 };
+      offlineProgress = view.offline;
     }
-    if (showcaseSample === 'progress-recap') {
+    if (view?.progressRecap) {
       const before = snapCounters(gameState);
       gameState.counters.kills += 84; gameState.counters.drops += 12;
       gameState.counters.gold += 46; gameState.counters.stones.tier = (gameState.counters.stones.tier || 0) + 7;
@@ -488,7 +466,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
   onDestroy(clearCombatFxTimers);
   $effect(() => {
-    if (!showcaseMode || showcaseSample !== 'combat-fx' || !animateCombatFx) clearCombatFxTimers();
+    if (!showcaseMode || !showcaseViewValue?.combatFx || !animateCombatFx) clearCombatFxTimers();
   });
 
   function scheduleCombatFx(action: () => void, delay: number) {
@@ -497,7 +475,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
 
   function replayCombatFx() {
-    if (!showcaseMode || showcaseSample !== 'combat-fx') return;
+    if (!showcaseMode || !showcaseViewValue?.combatFx) return;
     clearCombatFxTimers();
     panel = null;
     travelScene = false;
@@ -623,7 +601,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   // `gameState`, not `state`: a top-level `state` binding makes svelte2tsx read `$state` as a store
   // subscription and type the whole panel `any` (sveltejs/svelte#13715).
   let gameState = $state<GameState>(showcaseMode ? showcaseGame(initialShowcaseSample) : newGame(undefined, crypto.getRandomValues(new Uint32Array(1))[0]));
-  let running = $state(!showcaseMode || !!showcaseFieldSkill(initialShowcaseSample));
+  let running = $state(!showcaseMode || !!showcaseView(initialShowcaseSample)?.fieldSkill);
   /** True until this boot has loaded a slot or started a new character. The loop may be asked to run,
    *  but startup owns the clock: no placeholder character may tick or autosave before the choice. */
   let startupPending = $state(!showcaseMode);
@@ -635,10 +613,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   let cooldownSchedulerAt = $state(0);
   let speed = $state(1);
   /** The one runtime scale for the field's actors, footprints, distances and effects. */
-  let arenaWorldScale = $state(showcaseMode && initialShowcaseSample === 'rimworld-field' ? ARENA_ZOOM_MIN : ARENA_DEFAULT_WORLD_SCALE);
+  let arenaWorldScale = $state(showcaseMode ? showcaseView(initialShowcaseSample)?.worldScale ?? ARENA_DEFAULT_WORLD_SCALE : ARENA_DEFAULT_WORLD_SCALE);
   /** Stage size echo from the arena host; the field frame maps world metres into these CSS pixels. */
   let arenaStageCss = $state({ width: ARENA_VIEW.width, height: ARENA_VIEW.height });
-  const arenaPreview = $derived(showcaseMode && !!showcaseFieldSkill(showcaseSample));
+  const arenaPreview = $derived(showcaseMode && !!showcaseViewValue?.fieldSkill);
   /** Selected pool version used by the live cast. */
   const arenaVersions = $derived(vfxVersionsFor(arenaSkillId).filter((version) => version.arena !== false));
   let arenaVersionId = $state('');
@@ -649,7 +627,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   // ?vfx=base override inside showcase only
   $effect(() => {
     if (!arenaPreview) return;
-    const q = new URLSearchParams(window.location.search).get('vfx');
+    const q = showcaseBoot?.vfx;
     if (q === 'base') arenaVfxMode = 'base';
     else if (q != null) arenaVfxMode = 'auto';
   });
@@ -738,7 +716,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     arenaTargetRead = null;
   }
   function replayArena() {
-    gameState = showcaseGame('combat-field');
+    gameState = showcaseGame(DEFAULT_SHOWCASE_SAMPLE);
     resetArena();
     feed = []; feedSeen = 0;
     panel = null; sheetOpen = false;
@@ -827,7 +805,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   let takeoverController: AbortController | null = null;
   let takeoverSlot = $state<SlotName>('slot1');
   const canWriteAccount = $derived(accountWriterState === 'owner');
-  const transactionWriter = $derived(showcaseMode ? showcaseSample !== 'read-only' && showcaseSample !== 'story-read-only' : canWriteAccount);
+  const transactionWriter = $derived(showcaseMode ? !showcaseViewValue?.readOnly : canWriteAccount);
   let inspectedEnemy = $state.raw<EnemySnapshot | null>(null);
   function openCombatHistory() {
     inspectedEnemy = null;
@@ -1284,7 +1262,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       document.body.classList.add('ui-showcase');
       // A preview link may pin one presentation tier so the quality contract can be inspected
       // without touching the player's saved settings. It never changes simulation outcomes.
-      const previewEffects = showcaseQuery.get('effects');
+      const previewEffects = showcaseBoot?.effects;
       settings = {
         ...DEFAULT_SETTINGS,
         ...(previewEffects === 'full' || previewEffects === 'reduced' || previewEffects === 'minimal'
@@ -1293,7 +1271,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       speed = settings.speed || 1;
       if (arenaPreview) resetArena();
       // a deep-linked sample opens fully set up, exactly as if picked from the dropdown
-      if (initialShowcaseSample !== 'combat-field') applyShowcaseSample(initialShowcaseSample);
+      if (initialShowcaseSample !== DEFAULT_SHOWCASE_SAMPLE) applyShowcaseSample(initialShowcaseSample);
       return () => document.body.classList.remove('ui-showcase');
     }
     try {
@@ -2320,20 +2298,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {/if}
 <div class="showcase-frame" class:active={showcaseMode} inert={offlineProgress !== null}>
 {#if showcaseMode}
-  <header class="showcase-banner">
-    <div>
-      <h1>UI Showcase</h1>
-      <p>Live game components · sample state · changes to source UI appear here through Vite HMR</p>
-      <label>Gameplay sample <select aria-label="Gameplay sample" value={showcaseSample} onchange={(event) => {
-        applyShowcaseSample(event.currentTarget.value);
-      }}>
-        {#each SHOWCASE_SAMPLES as sample}
-          <option value={sample}>{SHOWCASE_SAMPLE_LABELS[sample]}</option>
-        {/each}
-      </select></label>
-    </div>
-    <a href="/">Return to the game</a>
-  </header>
+  <ShowcaseBanner sample={showcaseSample} onsample={applyShowcaseSample} />
   {#if arenaPreview}
     <div class="arena-preview-controls">
       <strong>Forest clearing</strong>
@@ -2461,7 +2426,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       <button class="btn btn-quiet" type="button" onclick={replayArena}>Replay encounter</button>
     </div>
   {/if}
-  {#if showcaseSample === 'combat-fx'}
+  {#if showcaseViewValue?.combatFx}
     <div class="combat-fx-preview-controls">
       <label><input type="checkbox" checked={animateCombatFx} onchange={(event) => {
         if (event.currentTarget.checked) replayCombatFx(); else showCombatFxLabels();
@@ -2502,23 +2467,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       <span>Sample effects only · game progress stays unchanged · replay restores the encounter</span>
     </div>
   {/if}
-  <nav class="showcase-index" aria-label="Showcase sections">
-    <a href="#showcase-field">Field HUD</a>
-    <a href="#panel-hud-layout-studio">HUD Layout</a>
-    <a href="#panel-character-sheet">Sheet</a>
-    <a href="#panel-inventory">Inventory</a>
-    <a href="#panel-craft">Craft</a>
-    <a href="#panel-skills">Skills</a>
-    <a href="?sample=combat-field">Combat field</a>
-    <a href="#panel-passive-tree">Tree</a>
-    <a href="#panel-town">Town</a>
-    <a href="#panel-market">Market</a>
-    <a href="#panel-delivery-notice">Delivery notice</a>
-    <a href="#panel-field-camp">Camp</a>
-    <a href="#panel-farm">Farm</a>
-    <a href="#panel-settlement">Desk</a>
-    <a href="#panel-save">Save</a>
-  </nav>
+  <ShowcaseIndex />
 {/if}
 
 <!-- desktop-only surface: below the floor the corner reads stop being placeable, so it says so -->
@@ -2528,11 +2477,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     they need the room. Widen the window, or set the browser zoom out.</p>
 </div>
 
-<div id={showcaseMode ? 'showcase-field' : undefined} class="stage" style={`grid-template-areas:${hudLayoutAreas};`} class:showcase={showcaseMode} class:arpg-arena={arenaMode && panel !== 'map'} class:combat-field-sample={arenaPreview} class:combat-fx-sample={showcaseMode && showcaseSample === 'combat-fx'} class:combat-fx-live={showcaseMode && showcaseSample === 'combat-fx' && animateCombatFx} class:fighting={inCombat} class:mapmode={panel === 'map'} class:veiled={!showcaseMode && ((panel !== null && panel !== 'map') || sheetOpen)} class:townmode={townLive && panel !== 'map'}>
+<div id={showcaseMode ? 'showcase-field' : undefined} class="stage" style={`grid-template-areas:${hudLayoutAreas};`} class:showcase={showcaseMode} class:arpg-arena={arenaMode && panel !== 'map'} class:combat-field-sample={arenaPreview} class:combat-fx-sample={showcaseMode && !!showcaseViewValue?.combatFx} class:combat-fx-live={showcaseMode && !!showcaseViewValue?.combatFx && animateCombatFx} class:fighting={inCombat} class:mapmode={panel === 'map'} class:veiled={!showcaseMode && ((panel !== null && panel !== 'map') || sheetOpen)} class:townmode={townLive && panel !== 'map'}>
   {#if arenaMode && panel !== 'map'}
     <CombatArenaScene arena={combatArena} s={gameState} {c} {ring} {speed} paused={!running || paused}
       frame={arenaFieldFrame} onStageCss={(size) => { arenaStageCss = size; }}
-      groundMaterialOverride={showcaseMode && showcaseSample === 'rimworld-field' ? arenaGroundMaterials.forest : null}
+      groundMaterialOverride={showcaseViewValue?.forestGround ? arenaGroundMaterials.forest : null}
       inspect={arenaPreview} onReviewPause={() => { running = false; }}
       onReviewStep={() => {
         running = false;
@@ -2541,7 +2490,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       }}
       spritePreviewSpecies={spritePreviewMode ? arenaSpecies : null}
       spritePreviewVariant={spritePreviewMode && activeArenaVariant ? { speciesId: activeArenaVariant.speciesId, variantId: activeArenaVariant.variantId } : null}
-      aoePreview={showcaseMode && showcaseQuery.get('aoe-preview') === '1'}
+      aoePreview={showcaseMode && !!showcaseBoot?.aoePreview}
       iconActors={showcaseMode && !spritePreviewMode}
       focusId={arenaFocusId}
       aimSkill={arenaAimSkill}
@@ -3621,16 +3570,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .showcase-frame.active { display: grid; grid-template-rows: auto auto minmax(0, 1fr); height: 100vh; }
   .showcase-frame.active:has(.arena-preview-controls),
   .showcase-frame.active:has(.combat-fx-preview-controls) { grid-template-rows: auto auto auto minmax(0, 1fr); }
-  .showcase-banner {
-    display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md);
-    padding: var(--spacing-xs) var(--screen-pad); border-bottom: 1px solid var(--line);
-    background: linear-gradient(90deg, var(--panel), var(--bg));
-  }
-  .showcase-banner > div { display: flex; flex: 1; align-items: center; gap: var(--spacing-md); min-width: 0; }
-  .showcase-banner h1 { margin: 0; color: var(--gold); font-size: var(--font-md); }
-  .showcase-banner p { flex: 1; min-width: 0; margin: 0; color: var(--dim); font-size: var(--font-xs); }
-  .showcase-banner label { flex: none; }
-  .showcase-banner a { flex: none; padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); text-decoration: none; }
   .combat-fx-preview-controls { display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-md); padding: var(--spacing-xs) var(--screen-pad); border-bottom: 1px solid var(--line); background: var(--inset); }
   .combat-fx-preview-controls label { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
   .combat-fx-preview-controls span { color: var(--dim); font-size: var(--font-xs); }
@@ -3639,9 +3578,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .arena-preview-controls label { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
   .arena-command-controls { display: inline-flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-xs); }
   .arena-command-controls button[aria-pressed="true"] { border-color: var(--gold-lit); color: var(--gold-lit); }
-  .showcase-index { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--screen-pad); border-bottom: 1px solid var(--line); background: var(--inset); }
-  .showcase-index a { padding: var(--spacing-xs) var(--spacing-xs); border: 1px solid var(--line); border-radius: var(--radius-card); color: var(--dim); font-size: var(--font-xs); text-decoration: none; white-space: nowrap; }
-  .showcase-index a:hover, .showcase-index a:focus-visible { border-color: var(--gold); color: var(--gold-lit); }
   .showcase-note { padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); color: var(--dim); background: var(--inset); font-size: var(--font-xs); }
 
 

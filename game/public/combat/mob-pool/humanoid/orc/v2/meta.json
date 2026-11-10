@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/humanoid/orc/orc/reference.png",
   "sourceSha256": "4322e516a6ddba784ea19fc158144b0ece73ca9c62a3fb17750ae74f71442ce3",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-orc-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-orc-diagonals.png",
   "diagonalSourceSha256": "fafa9ebe7e61dd7d0b849cdde3d3a549b4b68c84d2f82e9878a723d95402a7a0",
   "diagonalScaleFactor": null
 }

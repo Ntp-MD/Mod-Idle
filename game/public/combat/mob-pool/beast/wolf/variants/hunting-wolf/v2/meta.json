@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-wolf--hunting-wolf-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-wolf--hunting-wolf-diagonals.png",
   "diagonalSourceSha256": "735c203cf4f03fcc876742b4689a715bb6c547d25ff918fcf4ef7158e29c15ab",
   "diagonalScaleFactor": 0.307054,
   "speciesId": "wolf",

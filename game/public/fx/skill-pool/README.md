@@ -15,7 +15,7 @@ reads. No exceptions.
   (`phy` is the short folder name for `physical`); a mis-filed atlas fails the generator.
 - `<type>` for the other rows is exactly one of `aura`, `buff`, `curse`, `heal`; the slug keeps
   its existing type-prefixed name (`attack-aftershock`, `aura-haste`, …).
-- Never store skill VFX anywhere else: not `output/…`, not `art-reference/…`, not
+- Never store skill VFX anywhere else: not `output/…`, not `docs/…`, not
   `game/public/fx/<skill-id>/`, not a named folder such as `final/` or `painted-v6/`.
   `tools/skill-vfx-pool.ts` rejects sibling folders under `game/public/fx/` and unknown type
   folders under `skill-pool/`.

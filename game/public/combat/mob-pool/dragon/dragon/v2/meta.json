@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/dragon/dragon/dragon/reference.png",
   "sourceSha256": "ccfeed747c5302c56c0db26adf4efee10240f23206304f05a7c6ce858f75d1ae",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-dragon-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-dragon-diagonals.png",
   "diagonalSourceSha256": "53978a5efdc761758d79632bbb2f21fcc9f7dbb0ed41d5ab8a456124c4d25aef",
   "diagonalScaleFactor": 0.419786
 }

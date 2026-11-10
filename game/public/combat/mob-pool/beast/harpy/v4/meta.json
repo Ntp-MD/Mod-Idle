@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/beast/harpy/harpy/reference.png",
   "sourceSha256": "6284ad99c0b79d9d3572c638d15989bc8cb5d3428adc34f03a8c50bf65842354",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-harpy-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-harpy-diagonals.png",
   "diagonalSourceSha256": "064787a03ec4c70ec6f66fb1dad20d0eed83f1120accd4f69a43a70ac0d9f018",
   "diagonalScaleFactor": null
 }

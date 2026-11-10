@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "giant",
+  "name": "Giant",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-giant-diagonals.png",
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/giant.png",
+    "docs/character/pawn-study/atlases/giant.png"
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "promptSummary": "Generate four Giant bust diagonals preserving bald tan head, broad bust torso, thick red beard, brown fur belt/skirt. No arms or legs; fur skirt ends the sprite. NE/NW rear, SE/SW mirrored front.",
+  "requestedLayout": {
+    "rows": 2,
+    "columns": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west"
+  },
+  "actualImage": {
+    "width": 1254,
+    "height": 1254,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "alpha": "transparent",
+    "visibleBoundsAlphaThreshold": 16,
+    "visibleBoundsPx": {
+      "northEast": {
+        "x": 175,
+        "y": 92,
+        "width": 279,
+        "height": 462
+      },
+      "southEast": {
+        "x": 160,
+        "y": 92,
+        "width": 297,
+        "height": 463
+      },
+      "southWest": {
+        "x": 170,
+        "y": 93,
+        "width": 297,
+        "height": 461
+      },
+      "northWest": {
+        "x": 174,
+        "y": 93,
+        "width": 280,
+        "height": 461
+      }
+    },
+    "feetBaselineYByCellPx": {
+      "northEast": 553,
+      "southEast": 554,
+      "southWest": 553,
+      "northWest": 553
+    }
+  },
+  "review": {
+    "identity": true,
+    "directionPose": "candidate appears to follow NE/NW rear and SE/SW mirrored front",
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed",
+    "pose": true
+  },
+  "reviewConcerns": [
+    "Review remains pending before packing."
+  ],
+  "sizeReference": "docs/character/pawn-study/atlases/giant.png",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

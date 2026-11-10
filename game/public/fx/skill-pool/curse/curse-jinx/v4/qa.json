@@ -1,0 +1,32 @@
+{
+  "shape": "tether-strand",
+  "file": "tether-strand.png",
+  "rawFile": "tether-strand-raw.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    134,
+    907,
+    883
+  ],
+  "alphaExtrema": [
+    0,
+    254
+  ],
+  "visibleRgbSpreadMax": 28,
+  "visibleRgbSpreadMean": 0.904482,
+  "grayscaleAuthority": "AtlasFrame feColorMatrix saturate=0 before palette transfer",
+  "contentRatio": 0.8,
+  "sourceSha256": "7250faf32f6035c1888bd4f948a096b1c01761617d683ba70d2d3bb0095955c8",
+  "masterSha256": "fca083a7a681abe3e52ffb52410d52ffba661dc780be7099ebf13f42cefb5982",
+  "humanReview": false,
+  "runtimeRegistered": true,
+  "verifiedRuntimePalettes": 0
+}

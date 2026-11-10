@@ -142,5 +142,5 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/elemental/golem/golem/animation/poses/idle/south.png",
   "sourceSha256": "da452408fe12b06285952780fb82d73d0ed9cc17756b49b9638ee7237524f2aa",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-golem-diagonals.png"
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-golem-diagonals.png"
 }

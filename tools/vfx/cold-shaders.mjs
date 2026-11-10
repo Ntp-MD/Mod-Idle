@@ -1,19 +1,19 @@
 /** Cold/water CPU adaptations of local Godot shader equations; no Godot scene render.
  * ElementalMagicFX is CC0 (Binbun3D). Glacier shaders are MIT, Copyright (c) 2026;
- * retain art-reference/VFX-Godot/energy_beams_fx/LICENSE.md with redistributed assets.
+ * retain archive/art-reference/VFX-Godot/energy_beams_fx/LICENSE.md with redistributed assets.
  * Mesh normals become analytic sphere/crystal facets; seeded value noise replaces
  * sampled textures. The added silhouettes and phase envelopes are authored here.
  */
 import { clamp, smooth, fract, hash, fbm, over, renderPixels, TAU } from './shader-math.mjs';
 
-const elemental = 'art-reference/VFX-Godot/ElementalMagicFXFree/assets/BinbunVFX_Vol2/ElementalMagicFX';
-const glacier = 'art-reference/VFX-Godot/energy_beams_fx/effects/06_glacier_shard/shaders';
+const elemental = 'archive/art-reference/VFX-Godot/ElementalMagicFXFree/assets/BinbunVFX_Vol2/ElementalMagicFX';
+const glacier = 'archive/art-reference/VFX-Godot/energy_beams_fx/effects/06_glacier_shard/shaders';
 const coreSource = `${elemental}/shader/projectile_core.gdshader`;
 const tailSource = `${elemental}/shader/projectile_tail.gdshader`;
 const groundSource = `${elemental}/shader/area_ground.gdshader`;
 const crystalSource = `${glacier}/energy_beam.gdshader`;
 const shockSource = `${glacier}/impact_shock.gdshader`;
-export const licenseFiles = [`${elemental}/license.txt`, 'art-reference/VFX-Godot/energy_beams_fx/LICENSE.md'];
+export const licenseFiles = [`${elemental}/license.txt`, 'archive/art-reference/VFX-Godot/energy_beams_fx/LICENSE.md'];
 const blue = [.16, .51, .8], ice = [.58, .88, 1], white = [.94, 1, 1];
 const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * clamp(t));
 const stroke = (distance, width) => 1 - smooth(width * .45, width, Math.abs(distance));

@@ -1,0 +1,19 @@
+{
+  "shape": "crack-strip",
+  "family": "ground-residue",
+  "palette": "neutral",
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    103,
+    917,
+    870
+  ],
+  "contentRatio": 0.8,
+  "source": "imagegen",
+  "humanReview": false,
+  "sourceSha256": "b1a59ab2ce0e82475a9fbfa19d45edd6ec262efec8d35b0e1a6bf3f29d462b82"
+}

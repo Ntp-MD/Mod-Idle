@@ -142,5 +142,5 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/beast/werewolf/werewolf/reference.png",
   "sourceSha256": "9bb0523dad13d8d23006ce987d61ce615c0bd7cbd00a80e40bf92bc01d2f531f",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-werewolf-diagonals.png"
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-werewolf-diagonals.png"
 }

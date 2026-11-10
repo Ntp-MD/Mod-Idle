@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "ooze--silt-ooze",
+  "name": "Silt Ooze",
+  "sourceTarget": "docs/character/pawn-study/generation/eight-direction/pawn-ooze--silt-ooze-diagonals.png",
+  "sizeReference": "docs/character/pawn-study/atlases/variants/ooze--silt-ooze.png",
+  "generatedSheet": "docs/character/pawn-study/generation/eight-direction/pawn-ooze--silt-ooze-diagonals.png",
+  "generator": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: NE, SE, SW, NW",
+  "canvas": {
+    "width": 1254,
+    "height": 1254,
+    "cellSize": 627,
+    "background": "transparent"
+  },
+  "promptSummary": "Uniformly shrink and recenter each existing Silt Ooze diagonal by about 78%, preserving each pose/order, identity and transparency, to leave at least 12 transparent pixels on all cell edges.",
+  "review": {
+    "identity": "passed",
+    "pose": "passed",
+    "anchor": "passed",
+    "sharedScale": "passed",
+    "alphaAndCellBounds": "passed",
+    "approved": true
+  },
+  "packedAtlas": "docs/character/pawn-study/atlases/variants/ooze--silt-ooze.png",
+  "targetVisibleHeightRuntimePx": [
+    133,
+    137
+  ],
+  "packedVisibleHeightRuntimePx": [
+    135,
+    139
+  ],
+  "reviewNotes": "Reviewed Silt Ooze diagonals. Alpha fringe below the source threshold was discarded by cell extraction; opaque silhouette stays inside bounds and scale/root match cardinals."
+}

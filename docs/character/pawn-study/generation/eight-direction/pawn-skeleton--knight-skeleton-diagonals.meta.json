@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "pawnId": "skeleton--knight-skeleton",
+  "name": "Knight Skeleton",
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-skeleton--knight-skeleton-diagonals.png",
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/variants/skeleton--knight-skeleton.png",
+    "docs/character/pawn-study/atlases/variants/skeleton--knight-skeleton.png"
+  ],
+  "supersedesCandidate": "docs/character/pawn-study/generation/eight-direction/pawn-skeleton--knight-skeleton-diagonals-v1.png",
+  "generator": "OpenAI built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "promptSummary": "Generate Knight Skeleton diagonals preserving ivory skull/ribs, riveted iron headband, one shoulder pauldron, brown sash and rounded base. NE/NW rear, SE/SW mirrored front with glowing amber eyes; no added limbs or weapons.",
+  "requestedLayout": {
+    "sourceCardinalHeightsPx": [
+      406,
+      406,
+      389,
+      389
+    ],
+    "rows": 2,
+    "cellOrder": "north-east, south-east, south-west, north-west",
+    "columns": 2
+  },
+  "actualImage": {
+    "cellWidth": 627,
+    "alpha": "transparent",
+    "width": 1254,
+    "cellHeight": 627,
+    "visibleBoundsPx": {
+      "northEast": [
+        188,
+        64,
+        439,
+        562
+      ],
+      "southEast": [
+        179,
+        64,
+        433,
+        562
+      ],
+      "southWest": [
+        186,
+        67,
+        441,
+        562
+      ],
+      "northWest": [
+        178,
+        68,
+        421,
+        562
+      ]
+    },
+    "visibleHeightsPx": {
+      "southWest": 495,
+      "northWest": 494,
+      "southEast": 498,
+      "northEast": 498
+    },
+    "height": 1254
+  },
+  "review": {
+    "size": "candidate is about 1.2-1.3x source cardinal visible height; compare packed scale",
+    "approved": true,
+    "identity": true,
+    "status": "passed",
+    "layout": "2x2 views in requested NE/SE/SW/NW order",
+    "anchor": true,
+    "anatomy": "passes source silhouette comparison: no arms, hands, legs, feet, shield or sword added",
+    "pose": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true
+  },
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

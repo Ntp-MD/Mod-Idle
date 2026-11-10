@@ -1,16 +1,19 @@
 <script lang="ts">
   import type { VfxAtlas } from '../fx/catalog';
   import AtlasFrame from '../fx/AtlasFrame.svelte';
-  import { atlasFrameIndex, atlasOpacity, skillArtPlacement, billboardMatrixForFrame, groundAtlasMatrixForFrame } from './arena-skill-art';
+  import { atlasFrameIndex, atlasOpacity, skillArtPlacement, billboardMatrixForFrame, groundAtlasMatrixForFrame, tetherMatrixForFrame } from './arena-skill-art';
+  import type { CombatArenaFrame } from '@sim/combat/combat-arena';
   import { ARENA_REF_PX_PER_M } from '../../presentation/arena-camera';
   import { matrixAttribute } from '../../presentation/view-transform';
   import type { FieldViewFrame } from '../../presentation/arena-view-frame';
   import type { SkillGeometry, SkillGeometryScreen } from './skill-geometry';
   import { skillRainDrops } from './meteor-rain';
+  import { componentInstances, componentScale } from './component-placement';
 
-  let { mark, screen, frame, atlas, reducedMotion = false }: {
+  let { mark, screen, frame, atlas, actors, reducedMotion = false }: {
     mark: SkillGeometry; screen: SkillGeometryScreen; frame: FieldViewFrame;
     atlas: VfxAtlas; reducedMotion?: boolean;
+    actors?: CombatArenaFrame;
   } = $props();
   const clipId = $props.id();
 
@@ -18,11 +21,13 @@
   const still = $derived(reducedMotion ? { ...mark, phaseElapsedSec: 0 } : mark);
   const index = $derived(atlasFrameIndex(still, atlas));
   const opacity = $derived(atlasOpacity(mark, atlas));
-  const placement = $derived(skillArtPlacement(mark, atlas, frame, screen));
-  const billboardTransform = $derived(placement ? billboardMatrixForFrame({ x: placement.cx, y: placement.cy }, frame) : undefined);
+  const placement = $derived(skillArtPlacement(mark, atlas, frame, screen, actors));
+  const instances = $derived(componentInstances(mark, atlas, reducedMotion));
+  const expansion = $derived(componentScale(mark, atlas, reducedMotion));
+  const tether = $derived(atlas.placement?.kind === 'tether' ? tetherMatrixForFrame(mark, atlas, frame, actors) : null);
   const rain = $derived(skillRainDrops(atlas.delaySec ? { ...mark, phaseElapsedSec: Math.max(0, mark.phaseElapsedSec - atlas.delaySec) } : mark, frame, atlas, reducedMotion));
   const groundTransform = $derived(atlas.projection === 'ground'
-    ? (groundAtlasMatrixForFrame(mark, atlas, frame) ?? null) : null);
+    ? (groundAtlasMatrixForFrame(mark, atlas, frame, reducedMotion) ?? null) : null);
   const chainPaths = $derived(mark.chainHop ? screen.paths : []);
   // Chain shape is a world effect: jitter in model metres scales with the
   // frame instead of saturating on a fixed screen-pixel cap. Stroke width
@@ -54,12 +59,20 @@
 {#if atlas.projection === 'ground' && opacity > 0 && groundTransform}
   <g clip-path={`url(#${clipId})`}>
     <defs><clipPath id={clipId}><path d={screen.footprint} /></clipPath></defs>
-    <g data-skill-art={mark.skillId} data-skill-ground-shader data-skill-art-phase={mark.phase.toLowerCase()}
+    <g data-skill-art={mark.skillId} data-skill-ground-shader data-vfx-scale={expansion} data-skill-art-phase={mark.phase.toLowerCase()}
       transform={matrixAttribute(groundTransform)} {opacity}>
       <AtlasFrame src={atlas.src} frame={atlas} palette={atlas.palette} {index} x={0} y={0}
         width={atlas.virtualWidth ?? atlas.width} height={atlas.virtualHeight ?? atlas.height} />
     </g>
   </g>
+{:else if atlas.placement?.kind === 'tether'}
+  {#if opacity > 0 && tether}
+    <g data-skill-art={mark.skillId} data-skill-art-phase={mark.phase.toLowerCase()}
+      data-skill-tether transform={matrixAttribute(tether)} {opacity}>
+      <AtlasFrame src={atlas.src} frame={atlas} palette={atlas.palette} {index} x={0} y={0}
+        width={atlas.virtualWidth ?? atlas.width} height={atlas.virtualHeight ?? atlas.height} />
+    </g>
+  {/if}
 {:else if atlas.rainDurationSec && opacity > 0}
   <g data-skill-art={mark.skillId} data-skill-rain data-skill-art-phase={mark.phase.toLowerCase()} style:color={mark.colour}>
     {#each rain as drop (drop.id)}
@@ -89,12 +102,21 @@
     {/each}
   </g>
 {:else if opacity > 0 && placement && (!mark.chainHop || mark.phase === 'Impact')}
-  <g data-skill-art={mark.skillId} data-skill-art-phase={mark.phase.toLowerCase()} opacity={opacity}
-    transform={billboardTransform ? `${matrixAttribute(billboardTransform)} rotate(${placement.rotateDeg}) scale(${placement.mirror ? -1 : 1} 1)` : undefined}>
-    <AtlasFrame src={atlas.src} frame={atlas} palette={atlas.palette} {index}
-      x={-placement.anchorX * placement.width} y={-placement.anchorY * placement.height}
-      width={placement.width} height={placement.height} />
-  </g>
+  {#each instances as instance, instanceIndex (instanceIndex)}
+    {@const localMark = { ...mark, phaseElapsedSec: instance.elapsedSec }}
+    {@const localOpacity = atlasOpacity(localMark, atlas)}
+    {@const localIndex = atlasFrameIndex(reducedMotion ? { ...localMark, phaseElapsedSec: 0 } : localMark, atlas)}
+    {@const transform = billboardMatrixForFrame({ x: placement.cx + instance.dx, y: placement.cy + instance.dy }, frame)}
+    {#if localOpacity > 0}
+      <g data-skill-art={mark.skillId} data-skill-art-phase={mark.phase.toLowerCase()} opacity={localOpacity}
+        data-vfx-instance={instanceIndex} data-vfx-offset={`${instance.dx},${instance.dy}`}
+        transform={transform ? `${matrixAttribute(transform)} rotate(${placement.rotateDeg + instance.rotationDeg}) scale(${placement.mirror ? -expansion : expansion} ${expansion})` : undefined}>
+        <AtlasFrame src={atlas.src} frame={atlas} palette={atlas.palette} index={localIndex}
+          x={-placement.anchorX * placement.width} y={-placement.anchorY * placement.height}
+          width={placement.width} height={placement.height} />
+      </g>
+    {/if}
+  {/each}
 {/if}
 
 <style>

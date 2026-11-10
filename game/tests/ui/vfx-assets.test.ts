@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 type LoadKind = 'success' | 'error' | 'empty';
+const realSetTimeout = globalThis.setTimeout;
+const realClearTimeout = globalThis.clearTimeout;
 class FakeImage {
   static instances: FakeImage[] = [];
   onload: (() => void) | null = null;
@@ -40,14 +42,14 @@ describe('vfx-assets state machine', () => {
     FakeImage.instances = [];
     vi.stubGlobal('window', {});
     vi.stubGlobal('Image', FakeImage as any);
-    vi.stubGlobal('setTimeout', globalThis.setTimeout.bind(globalThis));
-    vi.stubGlobal('clearTimeout', globalThis.clearTimeout.bind(globalThis));
     mod = await import('../../src/ui/fx/vfx-assets.svelte');
     mod._resetVfxAssetsForTests();
   });
   afterEach(() => {
     vi.useRealTimers();
     vi.unstubAllGlobals();
+    expect(globalThis.setTimeout).toBe(realSetTimeout);
+    expect(globalThis.clearTimeout).toBe(realClearTimeout);
     vi.resetModules();
   });
 

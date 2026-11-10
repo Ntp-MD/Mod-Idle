@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-vampire--night-lord-vampire-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-vampire--night-lord-vampire-diagonals.png",
   "diagonalSourceSha256": "818b7f58062b12dc5c1f943d8f48da597dd6a0d086e276a85521686aad0f1d14",
   "diagonalScaleFactor": 0.294912,
   "speciesId": "vampire",

@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "siren--stormwater-siren",
+  "identityName": "Stormwater Siren",
+  "identityKind": "variant",
+  "sourceSheet": "docs/character/pawn-study/sheets/variants/siren--stormwater-siren.png",
+  "sizeReference": "game/public/combat/mob-pool/fish/siren/variants/stormwater-siren/v1/atlas.png",
+  "generatedSheet": "docs/character/pawn-study/generation/eight-direction/pawn-siren--stormwater-siren-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "cardinalVisibleHeightsRuntimePx": [
+    131,
+    142
+  ],
+  "canvas": {
+    "requested": {
+      "width": 1024,
+      "height": 1024
+    },
+    "generated": {
+      "width": 1254,
+      "height": 1254
+    },
+    "cellSize": 627,
+    "background": "white"
+  },
+  "measuredVisibleHeightSourcePx": [
+    363,
+    353,
+    354,
+    361
+  ],
+  "promptSummary": "Generate distinct rear/front diagonal Stormwater Siren views with spiky crest, fin ears, yellow eyes, belt and tapered lower body at cardinal scale.",
+  "review": {
+    "pose": true,
+    "directionOrder": false,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "identity": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "note": "Output size differs from requested 1024x1024. Review facing, identity cues, packed visible height and cell bounds before checking off the roster.",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

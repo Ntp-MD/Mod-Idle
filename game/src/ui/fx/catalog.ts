@@ -14,6 +14,13 @@ export type VfxLayerRole = 'ground' | 'upright';
 export type VfxSizePolicy = 'footprint' | 'body' | 'world';
 export type VfxBinding = 'area' | 'caster' | 'target' | 'contact' | 'release';
 export type VfxPhase = 'Aim' | 'Windup' | 'Travel' | 'Impact' | 'Field' | 'Channel';
+export type VfxPlacement =
+  | { kind: 'line-series'; spacingM: number; staggerSec: number }
+  | { kind: 'line-front' }
+  | { kind: 'tether' }
+  | { kind: 'expand'; fromScale: number }
+  | { kind: 'spin'; cycleSec: number }
+  | { kind: 'orbit'; cycleSec: number; radiusM: number };
 
 /** Source pixels placed on the shared virtual canvas without resizing the painted frame. */
 export interface VfxSourceFrame {
@@ -73,6 +80,7 @@ export interface VfxAimMeta {
   phases?: VfxPhase[];
   delaySec?: number;
   durationSec?: number;
+  placement?: VfxPlacement;
   /** Straight-down animated ground art; apply the shared arena matrix once. */
   projection?: 'ground';
   /** Decorative staggered field playback; does not schedule damage. */
@@ -232,6 +240,17 @@ function isValidCandidate(version: VfxVersion, art?: SkillArt): boolean {
     if (meta.binding != null && !['area', 'caster', 'target', 'contact', 'release'].includes(meta.binding)) return false;
     if (meta.delaySec != null && (!Number.isFinite(meta.delaySec) || meta.delaySec < 0)) return false;
     if (meta.durationSec != null && (!Number.isFinite(meta.durationSec) || meta.durationSec <= 0)) return false;
+    if (meta.placement) {
+      const p = meta.placement;
+      if (!['line-series', 'line-front', 'spin', 'orbit', 'tether', 'expand'].includes(p.kind)) return false;
+      if (p.kind === 'line-series' && (!(p.spacingM > 0) || !Number.isFinite(p.spacingM)
+        || !(p.staggerSec >= 0) || !Number.isFinite(p.staggerSec))) return false;
+      if (p.kind === 'line-front' && !(meta.durationSec! > 0)) return false;
+      if (p.kind === 'expand' && (!(meta.durationSec! > 0) || !Number.isFinite(p.fromScale)
+        || !(p.fromScale > 0 && p.fromScale <= 1))) return false;
+      if ((p.kind === 'spin' || p.kind === 'orbit') && (!(p.cycleSec > 0) || !Number.isFinite(p.cycleSec))) return false;
+      if (p.kind === 'orbit' && (!(p.radiusM > 0) || !Number.isFinite(p.radiusM))) return false;
+    }
     if (meta.phases && (!meta.phases.length || !meta.phases.every(phase => ['Aim', 'Windup', 'Travel', 'Impact', 'Field', 'Channel'].includes(phase)))) return false;
   }
   // validate every layer frame grid / fps / rects against texture bounds
@@ -332,6 +351,8 @@ function artOf(version: VfxVersion): SkillArt | undefined {
   if (version.layers.filter(layer => layer.frame.count >= 1).length > 1) {
     const atlases = version.layers.filter(layer => layer.frame.count >= 1).flatMap((layer, index) => {
       const atlas = artOf({ ...version, projection: index === 0 ? version.projection : layer.projection,
+        rainDurationSec: index === 0 ? version.rainDurationSec : layer.rainDurationSec,
+        placement: index === 0 ? version.placement : layer.placement,
         ...layer, layers: [layer] })?.atlas;
       return atlas ? [atlas] : [];
     });
@@ -349,6 +370,7 @@ function artOf(version: VfxVersion): SkillArt | undefined {
         ...(meta.phases ? { phases: meta.phases } : {}),
         ...(meta.delaySec != null ? { delaySec: meta.delaySec } : {}),
         ...(meta.durationSec != null ? { durationSec: meta.durationSec } : {}),
+        ...(meta.placement ? { placement: meta.placement } : {}),
         ...(layer.opacity != null ? { opacity: layer.opacity } : {}),
         src: layer.src,
         width: layer.frame.width,

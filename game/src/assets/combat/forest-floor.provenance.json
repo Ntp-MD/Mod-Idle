@@ -1,5 +1,5 @@
 {
-  "purpose": "Original forest source retained; runtime uses the WebP encoding recorded in art-reference/field-backgrounds/asset-manifest.json.",
+  "purpose": "Original forest source retained; runtime uses the WebP encoding recorded in docs/map/field-backgrounds/asset-manifest.json.",
   "file": "forest-floor.png",
   "generator": "Built-in image_gen",
   "generatedOn": "2026-10-31",

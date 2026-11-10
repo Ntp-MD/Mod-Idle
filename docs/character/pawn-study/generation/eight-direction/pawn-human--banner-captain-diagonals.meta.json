@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "human--banner-captain",
+  "identityName": "Banner Captain",
+  "identityKind": "variant",
+  "sourceSheet": "docs/character/pawn-study/sheets/variants/human--banner-captain.png",
+  "sizeReference": "game/public/combat/mob-pool/humanoid/human/variants/banner-captain/v1/atlas.png",
+  "generatedSheet": "docs/character/pawn-study/generation/eight-direction/pawn-human--banner-captain-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "canvas": {
+    "width": 1254,
+    "height": 1254,
+    "cellSize": 627,
+    "background": "transparent"
+  },
+  "measuredVisibleBoundsSourcePx": {
+    "north-east": [
+      136,
+      80,
+      453,
+      514
+    ],
+    "south-east": [
+      117,
+      80,
+      438,
+      514
+    ],
+    "south-west": [
+      171,
+      70,
+      481,
+      505
+    ],
+    "north-west": [
+      170,
+      70,
+      481,
+      505
+    ]
+  },
+  "promptSummary": "Generate four diagonal Banner Captain views matching the cardinal pawn bust and retaining the red diamond banner with gold trim.",
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "note": "Banner appears in all four frames. Verify perspective handedness, runtime-relative scale and the 9px baseline offset between rows in packed preview.",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

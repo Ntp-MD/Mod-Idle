@@ -5,9 +5,9 @@
  */
 import { clamp, smooth, fract, hash, fbm, over, renderPixels, TAU, DURATION_SEC } from './shader-math.mjs';
 
-const FLAME = 'art-reference/VFX-Godot/FlameFXFree/assets/BinbunVFX_Vol2/FlameFX/shader/';
-const ELEMENT = 'art-reference/VFX-Godot/ElementalMagicFXFree/assets/BinbunVFX_Vol2/ElementalMagicFX/shader/';
-const EXPLOSION = 'art-reference/VFX-Godot/ExplosionFXFree/assets/BinbunVFX_Vol2/ExplosionFX/shader/';
+const FLAME = 'archive/art-reference/VFX-Godot/FlameFXFree/assets/BinbunVFX_Vol2/FlameFX/shader/';
+const ELEMENT = 'archive/art-reference/VFX-Godot/ElementalMagicFXFree/assets/BinbunVFX_Vol2/ElementalMagicFX/shader/';
+const EXPLOSION = 'archive/art-reference/VFX-Godot/ExplosionFXFree/assets/BinbunVFX_Vol2/ExplosionFX/shader/';
 const overlay = (base, blend) => base < .5 ? 2 * base * blend : 1 - 2 * (1 - base) * (1 - blend);
 const amber = value => [1, .19 + clamp(value) * .64, .018 + clamp(value) * .24];
 

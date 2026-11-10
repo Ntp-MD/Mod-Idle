@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "status": "runtime-reviewed",
+  "identityId": "skeleton--drowned-skeleton",
+  "identityName": "Drowned Skeleton",
+  "identityKind": "variant",
+  "sourceSheet": "docs/character/pawn-study/sheets/variants/skeleton--drowned-skeleton.png",
+  "sizeReference": "game/public/combat/mob-pool/undead/skeleton/variants/drowned-skeleton/v1/atlas.png",
+  "generatedSheet": "docs/character/pawn-study/generation/eight-direction/pawn-skeleton--drowned-skeleton-diagonals.png",
+  "tool": "built-in image_gen",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "canvas": {
+    "width": 1254,
+    "height": 1254,
+    "cellSize": 627,
+    "background": "transparent"
+  },
+  "measuredVisibleBoundsSourcePx": {
+    "north-east": [
+      206,
+      59,
+      437,
+      571
+    ],
+    "south-east": [
+      190,
+      58,
+      420,
+      573
+    ],
+    "south-west": [
+      204,
+      57,
+      435,
+      568
+    ],
+    "north-west": [
+      188,
+      60,
+      417,
+      569
+    ]
+  },
+  "promptSummary": "Generate four diagonal Drowned Skeleton views preserving algae-stained bones, dark eye sockets, amber eyes, tangled waterlogged vines and pelvis base.",
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "note": "NE/NW hide the face; SE/SW show the skull face. Lower base bounds differ by 4px; verify shared scale and pelvis anchor in packed preview.",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

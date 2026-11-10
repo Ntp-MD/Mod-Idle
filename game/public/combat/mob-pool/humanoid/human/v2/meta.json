@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/humanoid/human/human/reference.png",
   "sourceSha256": "03a7664e7d89041bdb9ab58c7e7f866930e37ed74de14c1d2b29d40e8039f6f9",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-human-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-human-diagonals.png",
   "diagonalSourceSha256": "90b766fe25fe84d75e4e90c19b830ba5915d60ec4d09e9eb8cabb9e1be68b0a8",
   "diagonalScaleFactor": 0.541608
 }

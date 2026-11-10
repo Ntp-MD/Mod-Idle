@@ -5,8 +5,8 @@
  */
 import { clamp, smooth, hash, fbm, over, renderPixels, TAU, DURATION_SEC } from './shader-math.mjs';
 
-const EXPLOSION = 'art-reference/VFX-Godot/ExplosionFXFree/assets/BinbunVFX_Vol2/ExplosionFX/shader/';
-const BATTLE = 'art-reference/VFX-Godot/BattleFXFree/assets/BinbunVFX_Vol2/BattleFX/shader/';
+const EXPLOSION = 'archive/art-reference/VFX-Godot/ExplosionFXFree/assets/BinbunVFX_Vol2/ExplosionFX/shader/';
+const BATTLE = 'archive/art-reference/VFX-Godot/BattleFXFree/assets/BinbunVFX_Vol2/BattleFX/shader/';
 export const licenseFiles = [EXPLOSION.replace('shader/', 'license.txt'), BATTLE.replace('shader/', 'license.txt')];
 const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
 const SAND = [.69, .49, .25], DARK = [.15, .115, .075], STONE = [.49, .40, .28];

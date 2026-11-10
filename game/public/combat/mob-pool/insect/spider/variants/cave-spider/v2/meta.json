@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-spider--cave-spider-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-spider--cave-spider-diagonals.png",
   "diagonalSourceSha256": "2e2cc90ab43470958ffa6cef6c31d294f9261e9c7f85f2534368338ef89e1992",
   "diagonalScaleFactor": 0.322702,
   "speciesId": "spider",

@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/beast/wolf/wolf/animation/poses/idle/south.png",
   "sourceSha256": "c319bdb9706a56a1bc13ef8ad79623ec1cb51d407694b4c977cfcb4092eb4f0d",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-wolf-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-wolf-diagonals.png",
   "diagonalSourceSha256": "ccb72316cabdbff98316e8cfda105f6323225dc55803c3851c74f555949ae36f",
   "diagonalScaleFactor": 0.437936
 }

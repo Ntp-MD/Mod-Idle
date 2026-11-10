@@ -1,0 +1,47 @@
+{
+  "generatedSource": "docs/character/pawn-study/generation/eight-direction/pawn-slime--slag-slime-diagonals.png",
+  "promptSummary": "Generate transparent diagonal Slag Slime views preserving dark volcanic blob shape, orange cracks and eyes only in front views; no limbs or added effects.",
+  "actualImage": {
+    "cellWidth": 627,
+    "background": "transparent",
+    "width": 1254,
+    "visibleHeightsPxAtAlpha64": {
+      "southWest": 286,
+      "northWest": 286,
+      "southEast": 286,
+      "northEast": 287
+    },
+    "cellHeight": 627,
+    "height": 1254
+  },
+  "review": {
+    "size": "compare packed height with cardinal atlas",
+    "approved": true,
+    "identity": true,
+    "status": "passed",
+    "layout": "2x2 NE/SE/SW/NW",
+    "anchor": true,
+    "anatomy": "single blob, no limbs",
+    "eyes": "rear NE/NW hidden, front SE/SW visible",
+    "pose": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true
+  },
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "pawnId": "slime--slag-slime",
+  "name": "Slag Slime",
+  "generator": "OpenAI built-in image_gen",
+  "status": "runtime-reviewed",
+  "schemaVersion": 1,
+  "sourceReferences": [
+    "docs/character/pawn-study/sheets/variants/slime--slag-slime.png",
+    "docs/character/pawn-study/atlases/variants/slime--slag-slime.png"
+  ],
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}

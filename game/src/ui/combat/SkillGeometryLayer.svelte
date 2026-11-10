@@ -109,10 +109,10 @@
     return new Map(marks.map(mark => [mark.key, projectSkillGeometry(mark, effectiveFrame)]));
   });
   const screenOf = (mark: SkillGeometry) => screens.get(mark.key);
-  // Ensure assets only for currently represented skills (selected/default candidates).
+  // Support receipts have no cast action; preload their art alongside cast/payload art.
   $effect(() => {
     const ids = new Set<string>();
-    for (const mark of marks) ids.add(mark.skillId);
+    for (const mark of artMarks) ids.add(mark.skillId);
     if (skills) for (const [id, on] of Object.entries(skills.auras ?? {})) if (on) ids.add(id);
     const sources: string[] = [];
     for (const id of ids) for (const c of vfxArtCandidates(id)) sources.push(...c.sources);
@@ -230,7 +230,7 @@
       <g opacity={atlas.opacity ?? 1} data-skill-art-source={atlas.src} data-skill-action={mark.key} data-vfx-layer={atlas.id ?? layerIndex}
         data-vfx-renderer="skin" data-vfx-version={pres.kind === 'skin' ? pres.versionId : ''}
         data-vfx-base-reason={pres.kind === 'base' ? pres.reason : ''}>
-        <SkillAtlas {mark} screen={screen} frame={effectiveFrame} {atlas} {reducedMotion} />
+        <SkillAtlas {mark} screen={screen} frame={effectiveFrame} actors={frame} {atlas} {reducedMotion} />
       </g>
     {/each}
     {/if}

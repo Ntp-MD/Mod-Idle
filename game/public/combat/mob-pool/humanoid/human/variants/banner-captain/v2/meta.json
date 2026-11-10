@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-human--banner-captain-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-human--banner-captain-diagonals.png",
   "diagonalSourceSha256": "2dd17d0adba2affe8074ab83311bd7efbe9bfd60118a6614099219e89792803f",
   "diagonalScaleFactor": 0.326812,
   "speciesId": "human",

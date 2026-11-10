@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-orc--raider-orc-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-orc--raider-orc-diagonals.png",
   "diagonalSourceSha256": "f7b3fa90e6a5815dd39260a1fdc6837392f46abce1b14915d026cd7304165596",
   "diagonalScaleFactor": null,
   "speciesId": "orc",

@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-slime--slag-slime-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-slime--slag-slime-diagonals.png",
   "diagonalSourceSha256": "b8e1451a21a26adc1d7bcd85b72b97a9bc2e21ad139b5e5d4c2c1c0c26b97d46",
   "diagonalScaleFactor": 0.382456,
   "speciesId": "slime",

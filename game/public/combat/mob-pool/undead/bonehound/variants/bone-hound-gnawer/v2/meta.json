@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-bonehound--bone-hound-gnawer-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-bonehound--bone-hound-gnawer-diagonals.png",
   "diagonalSourceSha256": "a6badfaca8ef9509694c2001e77c8c6ae5929c35b7f822dacc2ae7b45c795b0a",
   "speciesId": "bonehound",
   "variantId": "bone-hound-gnawer"

@@ -1,5 +1,5 @@
 /**
- * The city ledger prototype for `docs/economy-world-life-ideas.md` §4–§5.
+ * The city ledger prototype.
  *
  * This is a pure engine: real per-good stock, a real gold budget, production, consumption,
  * simultaneous inter-city transfers, timed events and one player sale transaction. It is not

@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-spider--moonweb-spider-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-spider--moonweb-spider-diagonals.png",
   "diagonalSourceSha256": "ba08ca5b75432be8e8039f2b997a0fb9116f627f25e385ee213c1143a372b262",
   "diagonalScaleFactor": 0.324409,
   "speciesId": "spider",

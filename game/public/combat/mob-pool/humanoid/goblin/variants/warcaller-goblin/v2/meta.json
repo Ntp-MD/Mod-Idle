@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-goblin--warcaller-goblin-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-goblin--warcaller-goblin-diagonals.png",
   "diagonalSourceSha256": "a075d1f3f1624fab042d93e1a72dff926548e92912a282219c02aaf005ab8bb1",
   "diagonalScaleFactor": 0.323831,
   "speciesId": "goblin",

@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-dragon--dawnfire-dragon-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-dragon--dawnfire-dragon-diagonals.png",
   "diagonalSourceSha256": "0e2fab0f35a2644565abd5ac9d0df9976c8259e1f9e60ebf6ffc622aa51bf09f",
   "diagonalScaleFactor": 0.327869,
   "speciesId": "dragon",

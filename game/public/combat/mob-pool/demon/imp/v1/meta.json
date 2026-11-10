@@ -142,5 +142,5 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": "archive/art-reference/monsters/demon/imp/imp/reference.png",
   "sourceSha256": "43d84814e1ce1cdc090ff318dcbb0b12c9dd9615ca74e53add725ffb336a6d2f",
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-imp-diagonals.png"
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-imp-diagonals.png"
 }

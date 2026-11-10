@@ -1,0 +1,60 @@
+{
+  "id": "attack.blizzard",
+  "src": "/fx/skill-pool/attack-cold/attack-blizzard/v7/cloud-mist.png",
+  "layerId": "cloud-mist",
+  "columns": 1,
+  "rows": 1,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.65,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.65,
+  "palette": "physical",
+  "opacity": 1,
+  "durationSec": 1.2,
+  "authoringGeometry": {
+    "shape": "circle",
+    "spanM": 4,
+    "depthM": 2
+  },
+  "sizePolicy": "world",
+  "binding": "area",
+  "composition": "Neutral component master ingredients; non-default review version.",
+  "generation": {
+    "tool": "imagegen",
+    "source": "docs/vfx-skill/component-vfx/outputs/library-v1/generation-prompts.json"
+  },
+  "additionalLayers": [
+    {
+      "file": "fragment-debris.png",
+      "layerId": "fragment-debris",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "physical",
+      "opacity": 1,
+      "durationSec": 1.2,
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "sizePolicy": "body",
+      "binding": "contact"
+    }
+  ]
+}

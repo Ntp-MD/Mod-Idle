@@ -142,7 +142,7 @@
   "motionPolicy": "One static image per facing; idle/walk/attack/hit/death preview uses whole-sprite transforms, not authored limb animation.",
   "source": null,
   "sourceSha256": null,
-  "diagonalSource": "art-reference/pawn-study/generation/eight-direction/pawn-treant--groveheart-treant-diagonals.png",
+  "diagonalSource": "docs/character/pawn-study/generation/eight-direction/pawn-treant--groveheart-treant-diagonals.png",
   "diagonalSourceSha256": "16189d6bbfb58b4be97a6dc9967e11913cb9a9d3ae70e527b79d526c997f1f1d",
   "diagonalScaleFactor": 0.306034,
   "speciesId": "treant",

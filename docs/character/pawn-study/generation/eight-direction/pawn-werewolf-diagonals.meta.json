@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "identityId": "werewolf",
+  "generatedSheet": "docs/character/pawn-study/generation/eight-direction/pawn-werewolf-diagonals.png",
+  "directions": [
+    "north-east",
+    "south-east",
+    "south-west",
+    "north-west"
+  ],
+  "atlasLayout": "2x2 row-major: north-east, south-east, south-west, north-west",
+  "review": {
+    "identity": true,
+    "pose": true,
+    "anchor": true,
+    "sharedScale": true,
+    "alphaAndCellBounds": true,
+    "approved": true,
+    "status": "passed"
+  },
+  "status": "runtime-reviewed",
+  "reviewedBy": "Codex",
+  "reviewedDate": "2026-11-08"
+}
