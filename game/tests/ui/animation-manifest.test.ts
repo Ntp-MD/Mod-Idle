@@ -107,8 +107,10 @@ describe('WP2 — animation fallback lifecycle and VFX registration (A7/A11)', (
     const skillId = 'attack.fireball';
     const before = vfxVersionsFor(skillId);
     expect(before.length).toBeGreaterThan(0);
-    const base = before[0];
-    const testVersion = { ...base, id: 'test-wp2-version', label: 'WP2 boundary check', default: false };
+    const testVersion = {
+      id: 'test-wp2-version', label: 'WP2 boundary check', default: false, arena: true,
+      decal: '/fx/test-wp2/decal.png', layers: [],
+    };
     (SKILL_VFX_POOL[skillId] as unknown[]).push(testVersion);
     try {
       expect(vfxVersionsFor(skillId).some((version) => version.id === 'test-wp2-version')).toBe(true);

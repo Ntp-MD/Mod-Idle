@@ -54,7 +54,7 @@ function defaultPointer(skillDir: string, slug: string): string | null {
     return null;
   }
   const version = String(JSON.parse(fs.readFileSync(pointer, 'utf8')).version ?? '');
-  if (!/^v\d+$/.test(version)) throw new Error(`${slug}/default/${POINTER} must name a vN version`);
+  if (!/^(v\d+|vfx-component)$/.test(version)) throw new Error(`${slug}/default/${POINTER} must name a vN or vfx-component version`);
   if (!fs.existsSync(path.join(skillDir, version))) throw new Error(`${slug}/default points at missing ${version}`);
   return version;
 }

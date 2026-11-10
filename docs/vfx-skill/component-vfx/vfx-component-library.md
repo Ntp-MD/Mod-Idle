@@ -159,7 +159,7 @@ Family, palette and revision are separate concepts. A new color does not become 
 ## Production method
 
 1. Define one canonical shape and a visual reference for each family. Keep the technical registration contract fixed while choosing art direction per family; do not restore a universal generation prompt.
-2. Produce a master in one of the seven palettes. Validate canvas/grid, transparency, root, painted bounds and phase continuity before deriving colors. [Cinder Nova V1](../../../game/public/fx/skill-pool/attack-fire/attack-cinder-nova/v1/atlas.png) is a quality reference for readable silhouettes and highlights, not a camera or framing template for every family.
+2. Produce a master in one of the seven palettes. Validate canvas/grid, transparency, root, painted bounds and phase continuity before deriving colors. [Cinder Nova V1](../../../archive/fx/skill-pool/attack-fire/attack-cinder-nova/v1/atlas.png) is a quality reference for readable silhouettes and highlights, not a camera or framing template for every family.
 3. Produce the other six palettes from that registered master. Keep the shape and animation geometry unchanged. Every family receives all seven palettes, regardless of current usage.
 4. Build contact sheets and an inventory covering exactly 98 family-palette entries. Each completed entry must resolve to real renderable output, not merely a palette label.
 5. Compose pilot skills through metadata, beginning with Firestorm's ground fill/vortex and Fireball's projectile/trail/contact. Use the same production scene and geometry as the game.

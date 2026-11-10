@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { billboardMatrixForFrame, groundDecalMatrixForFrame } from '../../src/ui/combat/arena-skill-art';
-import { activeVfxArt, activeVfxVersion, SKILL_VFX_POOL } from '../../src/ui/fx/catalog';
 import { createFieldViewFrame } from '../../src/presentation/arena-view-frame';
 import { ARENA_CAMERA } from '../../src/presentation/arena-camera';
 import { applyWorldToViewport, fieldPointM } from '../../src/presentation/view-transform';
@@ -14,35 +13,6 @@ const frameFor = (worldScale = 1) => {
   if (!frame.renderable) throw new Error('frame must render');
   return frame;
 };
-
-describe('skill art registry', () => {
-  it('carries ground projection and padding from a version into its atlas', () => {
-    const id = 'test.ground-shader-port';
-    SKILL_VFX_POOL[id] = [{ id: 'prototype', label: 'Prototype', default: true,
-      projection: 'ground', content: { widthRatio: .8, heightRatio: .8 },
-      layers: [{ role: 'ground', src: '/test.png', frame: { width: 128, height: 128, count: 2, columns: 2 } }] }];
-    try {
-      const atlas = activeVfxArt(id)?.atlas;
-      expect(atlas?.projection).toBe('ground');
-      expect(atlas?.content).toEqual({ widthRatio: .8, heightRatio: .8 });
-    } finally { delete SKILL_VFX_POOL[id]; }
-  });
-  it('opens the promoted pool atlas with its authored projection', () => {
-    const promoted = SKILL_VFX_POOL['attack.aftershock'].find(version => version.default)!;
-    expect(activeVfxVersion('attack.aftershock')?.id).toBe(promoted.id);
-    const art = activeVfxArt('attack.aftershock');
-    expect(art?.atlas?.src).toBe(promoted.layers[0]?.src);
-    expect(art?.atlas?.projection).toBe(promoted.projection);
-    expect(SKILL_VFX_POOL['attack.aftershock'][0]?.default).toBe(true);
-  });
-
-  it('plays the version.json default for every skill, not just aftershock', () => {
-    const art = activeVfxArt('buff.magia_drive');
-    const promoted = SKILL_VFX_POOL['buff.magia_drive'].find(version => version.default)!;
-    expect(art?.atlas?.src).toBe(promoted.layers[0].src);
-    expect(SKILL_VFX_POOL['buff.magia_drive'][0]?.default).toBe(true);
-  });
-});
 
 /** Singular values and major-axis angle of the matrix's 2 × 2 linear part. */
 function ellipse(m: { a: number; b: number; c: number; d: number }) {

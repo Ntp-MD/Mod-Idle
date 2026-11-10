@@ -82,7 +82,7 @@ Roster: 90 live player skills + 49 live mob skills = 139 rows.
 | player | `attack.double_strike` | single | melee | gap | slash-sweep, impact-burst, fragment-debris |
 | player | `attack.ignite` | single | instant | gap | impact-burst, mark-sigil |
 | player | `attack.cinder_nova` | circle | instant | recipe v3 (hybrid) | ground-fill, ground-edge, mote, ground-residue |
-| player | `attack.thunder_storm` | circle | ground | gap | ground-fill, ground-edge, cloud-mist |
+| player | `attack.thunder_storm` | circle | ground | recipe vfx-component (component-only, default live) | forked-bolt, ground-fill, ground-edge, ground-residue, impact-burst, cloud-mist |
 | player | `attack.poison_cloud` | circle | ground | gap | ground-fill, ground-edge, cloud-mist |
 | player | `attack.chaos_wave` | circle | instant | gap | ground-fill, ground-edge, cloud-mist |
 | player | `attack.stone_spike` | single | ground | recipe v3 (component-only) | stone-spike, impact-burst, fragment-debris |

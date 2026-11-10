@@ -61,13 +61,6 @@ describe('WP4 skill/VFX geometry contract', () => {
     }
     // World geometry is untouched by scale: same snapshot reference, same area.
     expect(screens.map(s => s.bodyCss.width)[4] / screens.map(s => s.bodyCss.width)[0]).toBeCloseTo(4, 6);
-    const atlas = skillArtFor(mark.skillId)!.atlas!;
-    const widths = [0.5, 2].map(scale => {
-      const frame = frameFor(scale);
-      return skillArtPlacement(mark, atlas, frame, projectSkillGeometry(mark, frame)!)!.width;
-    });
-    // Painted placement is zoom-independent model content: same metres at any scale.
-    expect(widths[1] / widths[0]).toBeCloseTo(1, 6);
     // Range ring scales with the same factor.
     const spanOf = (path: string) => {
       const xs = [...path.matchAll(/M([-\d.]+) ([-\d.]+)|L([-\d.]+) ([-\d.]+)/g)]
@@ -77,28 +70,10 @@ describe('WP4 skill/VFX geometry contract', () => {
     expect(spanOf(screens[4].rangePath) / spanOf(screens[0].rangePath)).toBeCloseTo(4, 4);
   });
 
-  it('R2: circle r=3 keeps model diameter 6 m at 1920×1080 and 600×337.5 viewports (DR1)', () => {
+  it('R2: ground decal circle keeps its world radius across viewports (DR1)', () => {
     const { arena, action } = liveAction('attack.firestorm');
     const mark = skillActionGeometry(action, arena, 1_500_000, arena.unitsPerSec)!;
     expect(mark.area.radiusM).toBe(3);
-    const atlas = skillArtFor(mark.skillId)?.atlas;
-    expect(atlas).toBeDefined();
-    const placementAt = (width: number, height: number) => {
-      const frame = createFieldViewFrame({
-        sceneKey: 'r2', atUs: 0, viewportCss: { width, height },
-        focusM: fieldPointM(1, 2), worldScale: 1,
-      });
-      if (!frame.renderable) throw new Error('frame must render');
-      return skillArtPlacement(mark, atlas!, frame, projectSkillGeometry(mark, frame)!)!;
-    };
-    const wide = placementAt(1920, 1080);
-    const narrow = placementAt(600, 337.5);
-    // Painted content owns the footprint; atlas padding is outside it.
-    const content = atlas!.content ?? { widthRatio: 1, heightRatio: 1 };
-    expect(wide.width * content.widthRatio).toBeCloseTo(6, 9);
-    expect(wide.height * content.heightRatio).toBeCloseTo(6, 9);
-    expect(narrow.width * content.widthRatio).toBeCloseTo(6, 9);
-    expect(narrow.height * content.heightRatio).toBeCloseTo(6, 9);
     const decalAt = (width: number, height: number) => {
       const frame = createFieldViewFrame({
         sceneKey: 'r2', atUs: 0, viewportCss: { width, height },

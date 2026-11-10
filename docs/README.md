@@ -6,7 +6,7 @@ Repository rules live in [AGENTS.md](../AGENTS.md). This file is the only docume
 
 | Area | Start here | Also in the topic |
 | --- | --- | --- |
-| VFX skill | [Component library brief](vfx-skill/component-vfx/vfx-component-library.md) | [Angle authoring](vfx-skill/shared/angle-authoring.md), [RimWorld research](vfx-skill/rimworld/rimworld-magic.md) |
+| VFX skill | [Component library brief](vfx-skill/component-vfx/vfx-component-library.md) | Retired guide set (`rimworld/`, `shared/`) lives in `archive/docs/vfx-skill/` |
 | Character | [Animation contract](character/animation.md) | [Animation atlas kit](character/animation/README.md), [Pawn study](character/pawn-study/README.md) |
 | Map | [Map art kit](map/README.md) | [Field backgrounds](map/field-backgrounds/README.md) |
 | Reference | [Wiki](reference/wiki/index.html) | [Glossary](reference/glossary.md), [Known failures](reference/known-failures.md), [Stall design](reference/stall-idea.md) |
@@ -25,7 +25,7 @@ docs/
 ├─ README.md          this index
 ├─ plan/              execution plans, HTML only
 ├─ reference/         wiki, glossary, known failures, design notes
-├─ vfx-skill/         component-vfx/, rimworld/, shared/
+├─ vfx-skill/         component-vfx/
 ├─ character/         animation contract, animation kit, pawn study
 └─ map/               map art kit, field backgrounds
 ```

@@ -20,8 +20,11 @@ Deterministic:
 | File | Test | Symptom |
 | --- | --- | --- |
 | `tests/ui/arena-art-reference-review.test.ts` | suite load | missing `archive/art-reference` JSON |
-| `tests/ui/asset-budget.test.ts` | keeps per-family source art within budget | `public/fx 222409202`: 212.11 MiB > 180 MiB (measured 2026-11-10; grows with dirty art/meta edits) |
 | `tests/ui/arena-actor-view.test.ts` | R4: culling keeps a root off-screen whose draw bounds cross the viewport (DR4) | expected `true` to be `false` (measured 2026-11-10, isolated and full run) |
+
+Fixed 2026-11-10: `tests/ui/asset-budget.test.ts` now passes — every skill VFX `vN` set moved to
+`archive/fx/skill-pool/`, so `public/fx` holds only the `rimworld` fallback pointers (was
+212.11 MiB > 180 MiB).
 
 Flaky under one-worker full-suite load (pass in isolation; the seventh failing test in the run above;
 do not treat as baseline when the full-suite log also shows other failures):

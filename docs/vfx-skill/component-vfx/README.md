@@ -2,41 +2,41 @@
 
 Use one of the 29 registered source shapes, choose any of the seven palettes, then assemble layers through the existing `meta.json` and `additionalLayers` fields. Production `AtlasFrame` desaturates the neutral sources and applies the selected palette without changing alpha, anchors or geometry. Native verification and human approval are tracked separately below.
 
-All component and demonstration versions are non-default. Mechanical verification and human visual approval are tracked separately in the [execution plan](../../plan/vfx-component-library.html).
+All component and demonstration versions are non-default until human approval; an approved recipe takes the `default/version.json` pointer (first: `attack.thunder_storm`, 2026-11-10). Mechanical verification and human visual approval are tracked separately below.
 
 ## Choosing a shape
 
 | Shape | Family | Placement / size | Registered master |
 | --- | --- | --- | --- |
-| `ground-fill` | `ground-fill` | ground / footprint | [attack.firestorm v4](../../../game/public/fx/skill-pool/attack-fire/attack-firestorm/v4/ground-fill.png) |
-| `ground-edge` | `ground-edge` | ground / footprint | [attack.cinder_nova v2](../../../game/public/fx/skill-pool/attack-fire/attack-cinder-nova/v2/ground-edge.png) |
-| `ground-residue` | `ground-residue` | ground / footprint | [attack.firestorm v4](../../../game/public/fx/skill-pool/attack-fire/attack-firestorm/v4/ground-residue.png) |
-| `projectile-core` | `projectile-core` | billboard / body | [attack.fireball v3](../../../game/public/fx/skill-pool/attack-fire/attack-fireball/v3/projectile-core.png) |
-| `ribbon-beam` | `ribbon-beam` | billboard / world | [attack.void_ray v2](../../../game/public/fx/skill-pool/attack-chaos/attack-void-ray/v2/ribbon-beam.png) |
-| `slash-sweep` | `slash-sweep` | billboard / world | [attack.cleave v3](../../../game/public/fx/skill-pool/attack-phy/attack-cleave/v3/slash-sweep.png) |
-| `impact-burst` | `impact-burst` | billboard / body | [attack.fireball v3](../../../game/public/fx/skill-pool/attack-fire/attack-fireball/v3/impact-burst.png) |
-| `column-eruption` | `column-eruption` | billboard / world | [attack.fissure v2](../../../game/public/fx/skill-pool/attack-earth/attack-fissure/v2/column-eruption.png) |
-| `vortex` | `vortex` | billboard / world | [attack.firestorm v4](../../../game/public/fx/skill-pool/attack-fire/attack-firestorm/v4/vortex.png) |
-| `cloud-mist` | `cloud-mist` | billboard / world | [attack.blizzard v7](../../../game/public/fx/skill-pool/attack-cold/attack-blizzard/v7/cloud-mist.png) |
-| `mote` | `mote` | billboard / body | [heal.heal v2](../../../game/public/fx/skill-pool/heal/heal-heal/v2/mote.png) |
-| `fragment-debris` | `fragment-debris` | billboard / body | [attack.blizzard v7](../../../game/public/fx/skill-pool/attack-cold/attack-blizzard/v7/fragment-debris.png) |
-| `ward-shell` | `ward-shell` | billboard / body | [buff.flame_guard v2](../../../game/public/fx/skill-pool/buff/buff-flame-guard/v2/ward-shell.png) |
-| `mark-sigil` | `mark-sigil` | billboard / body | [curse.jinx v2](../../../game/public/fx/skill-pool/curse/curse-jinx/v2/mark-sigil.png) |
-| `crack-strip` | `ground-residue` | ground / footprint | [attack.fissure v4](../../../game/public/fx/skill-pool/attack-earth/attack-fissure/v4/crack-strip.png) |
-| `stone-spike` | `column-eruption` | billboard / world | [attack.stone_spike v2](../../../game/public/fx/skill-pool/attack-earth/attack-stone-spike/v2/stone-spike.png) |
-| `wave-crest` | `ribbon-beam` | billboard / world | [attack.tidal_wave v2](../../../game/public/fx/skill-pool/attack-cold/attack-tidal-wave/v2/wave-crest.png) |
-| `arrow-core` | `projectile-core` | billboard / body | [attack.piercing_shot v2](../../../game/public/fx/skill-pool/attack-phy/attack-piercing-shot/v2/arrow-core.png) |
-| `orb-core` | `projectile-core` | billboard / body | [attack.water_ball v2](../../../game/public/fx/skill-pool/attack-cold/attack-water-ball/v2/orb-core.png) |
-| `rock-core` | `projectile-core` | billboard / body | [attack.meteor v3](../../../game/public/fx/skill-pool/attack-fire/attack-meteor/v3/rock-core.png) |
-| `forked-bolt` | `ribbon-beam` | billboard / world | [attack.thunder_strike v2](../../../game/public/fx/skill-pool/attack-lightning/attack-thunder-strike/v2/forked-bolt.png) |
-| `ground-spiral` | `ground-fill` | ground / footprint | [attack.entropy_well v2](../../../game/public/fx/skill-pool/attack-chaos/attack-entropy-well/v2/ground-spiral.png) |
-| `cone-stream` | `cloud-mist` | ground / committed cone | [attack.cleave v5](../../../game/public/fx/skill-pool/attack-phy/attack-cleave/v5/cone-stream.png) |
-| `wall-segment` | `column-eruption` | upright / line-series | [attack.fissure v6](../../../game/public/fx/skill-pool/attack-earth/attack-fissure/v6/wall-segment.png) |
-| `tether-strand` | `ribbon-beam` | sampled hand to target / world thickness | [curse.jinx v4](../../../game/public/fx/skill-pool/curse/curse-jinx/v4/tether-strand.png) |
-| `shockwave-ring` | `ground-edge` | ground / expanding footprint | [attack.frost_nova v2](../../../game/public/fx/skill-pool/attack-cold/attack-frost-nova/v2/shockwave-ring.png) |
-| `crescent-wave` | `projectile-core` | billboard / body projectile | [attack.piercing_shot v4](../../../game/public/fx/skill-pool/attack-phy/attack-piercing-shot/v4/crescent-wave.png) |
-| `shield-dome` | `ward-shell` | upright / caster footprint root | [buff.flame_guard v4](../../../game/public/fx/skill-pool/buff/buff-flame-guard/v4/shield-dome.png) |
-| `bind-strand` | `mark-sigil` | billboard / sampled target body | [curse.venom_bind v2](../../../game/public/fx/skill-pool/curse/curse-venom-bind/v2/bind-strand.png) |
+| `ground-fill` | `ground-fill` | ground / footprint | [attack.firestorm v4](../../../archive/fx/skill-pool/attack-fire/attack-firestorm/v4/ground-fill.png) |
+| `ground-edge` | `ground-edge` | ground / footprint | [attack.cinder_nova v2](../../../archive/fx/skill-pool/attack-fire/attack-cinder-nova/v2/ground-edge.png) |
+| `ground-residue` | `ground-residue` | ground / footprint | [attack.firestorm v4](../../../archive/fx/skill-pool/attack-fire/attack-firestorm/v4/ground-residue.png) |
+| `projectile-core` | `projectile-core` | billboard / body | [attack.fireball v3](../../../archive/fx/skill-pool/attack-fire/attack-fireball/v3/projectile-core.png) |
+| `ribbon-beam` | `ribbon-beam` | billboard / world | [attack.void_ray v2](../../../archive/fx/skill-pool/attack-chaos/attack-void-ray/v2/ribbon-beam.png) |
+| `slash-sweep` | `slash-sweep` | billboard / world | [attack.cleave v3](../../../archive/fx/skill-pool/attack-phy/attack-cleave/v3/slash-sweep.png) |
+| `impact-burst` | `impact-burst` | billboard / body | [attack.fireball v3](../../../archive/fx/skill-pool/attack-fire/attack-fireball/v3/impact-burst.png) |
+| `column-eruption` | `column-eruption` | billboard / world | [attack.fissure v2](../../../archive/fx/skill-pool/attack-earth/attack-fissure/v2/column-eruption.png) |
+| `vortex` | `vortex` | billboard / world | [attack.firestorm v4](../../../archive/fx/skill-pool/attack-fire/attack-firestorm/v4/vortex.png) |
+| `cloud-mist` | `cloud-mist` | billboard / world | [attack.blizzard v7](../../../archive/fx/skill-pool/attack-cold/attack-blizzard/v7/cloud-mist.png) |
+| `mote` | `mote` | billboard / body | [heal.heal v2](../../../archive/fx/skill-pool/heal/heal-heal/v2/mote.png) |
+| `fragment-debris` | `fragment-debris` | billboard / body | [attack.blizzard v7](../../../archive/fx/skill-pool/attack-cold/attack-blizzard/v7/fragment-debris.png) |
+| `ward-shell` | `ward-shell` | billboard / body | [buff.flame_guard v2](../../../archive/fx/skill-pool/buff/buff-flame-guard/v2/ward-shell.png) |
+| `mark-sigil` | `mark-sigil` | billboard / body | [curse.jinx v2](../../../archive/fx/skill-pool/curse/curse-jinx/v2/mark-sigil.png) |
+| `crack-strip` | `ground-residue` | ground / footprint | [attack.fissure v4](../../../archive/fx/skill-pool/attack-earth/attack-fissure/v4/crack-strip.png) |
+| `stone-spike` | `column-eruption` | billboard / world | [attack.stone_spike v2](../../../archive/fx/skill-pool/attack-earth/attack-stone-spike/v2/stone-spike.png) |
+| `wave-crest` | `ribbon-beam` | billboard / world | [attack.tidal_wave v2](../../../archive/fx/skill-pool/attack-cold/attack-tidal-wave/v2/wave-crest.png) |
+| `arrow-core` | `projectile-core` | billboard / body | [attack.piercing_shot v2](../../../archive/fx/skill-pool/attack-phy/attack-piercing-shot/v2/arrow-core.png) |
+| `orb-core` | `projectile-core` | billboard / body | [attack.water_ball v2](../../../archive/fx/skill-pool/attack-cold/attack-water-ball/v2/orb-core.png) |
+| `rock-core` | `projectile-core` | billboard / body | [attack.meteor v3](../../../archive/fx/skill-pool/attack-fire/attack-meteor/v3/rock-core.png) |
+| `forked-bolt` | `ribbon-beam` | billboard / world | [attack.thunder_strike v2](../../../archive/fx/skill-pool/attack-lightning/attack-thunder-strike/v2/forked-bolt.png) |
+| `ground-spiral` | `ground-fill` | ground / footprint | [attack.entropy_well v2](../../../archive/fx/skill-pool/attack-chaos/attack-entropy-well/v2/ground-spiral.png) |
+| `cone-stream` | `cloud-mist` | ground / committed cone | [attack.cleave v5](../../../archive/fx/skill-pool/attack-phy/attack-cleave/v5/cone-stream.png) |
+| `wall-segment` | `column-eruption` | upright / line-series | [attack.fissure v6](../../../archive/fx/skill-pool/attack-earth/attack-fissure/v6/wall-segment.png) |
+| `tether-strand` | `ribbon-beam` | sampled hand to target / world thickness | [curse.jinx v4](../../../archive/fx/skill-pool/curse/curse-jinx/v4/tether-strand.png) |
+| `shockwave-ring` | `ground-edge` | ground / expanding footprint | [attack.frost_nova v2](../../../archive/fx/skill-pool/attack-cold/attack-frost-nova/v2/shockwave-ring.png) |
+| `crescent-wave` | `projectile-core` | billboard / body projectile | [attack.piercing_shot v4](../../../archive/fx/skill-pool/attack-phy/attack-piercing-shot/v4/crescent-wave.png) |
+| `shield-dome` | `ward-shell` | upright / caster footprint root | [buff.flame_guard v4](../../../archive/fx/skill-pool/buff/buff-flame-guard/v4/shield-dome.png) |
+| `bind-strand` | `mark-sigil` | billboard / sampled target body | [curse.venom_bind v2](../../../archive/fx/skill-pool/curse/curse-venom-bind/v2/bind-strand.png) |
 
 ## Palette selection
 
@@ -69,32 +69,32 @@ Every shape supports every row below, including combinations unused by the curre
 
 | Skill | Version | Ingredients |
 | --- | --- | --- |
-| `attack.firestorm` | [v5](../../../game/public/fx/skill-pool/attack-fire/attack-firestorm/v5/meta.json) | animated base + ground-fill, vortex, mote |
-| `attack.fireball` | [v4](../../../game/public/fx/skill-pool/attack-fire/attack-fireball/v4/meta.json) | animated base + projectile-core, ribbon-beam, impact-burst |
-| `attack.cinder_nova` | [v3](../../../game/public/fx/skill-pool/attack-fire/attack-cinder-nova/v3/meta.json) | animated base + ground-fill, ground-edge, mote, ground-residue |
-| `attack.blizzard` | [v8](../../../game/public/fx/skill-pool/attack-cold/attack-blizzard/v8/meta.json) | animated base + cloud-mist, fragment-debris, ground-edge |
-| `attack.cleave` | [v4](../../../game/public/fx/skill-pool/attack-phy/attack-cleave/v4/meta.json) | animated base + slash-sweep, ground-edge, impact-burst |
-| `attack.fissure` | [v3](../../../game/public/fx/skill-pool/attack-earth/attack-fissure/v3/meta.json) | animated base + ground-fill, column-eruption, fragment-debris |
-| `attack.chain_lightning` | [v2](../../../game/public/fx/skill-pool/attack-lightning/attack-chain-lightning/v2/meta.json) | animated base + ribbon-beam, impact-burst |
-| `attack.void_ray` | [v3](../../../game/public/fx/skill-pool/attack-chaos/attack-void-ray/v3/meta.json) | ground base + ribbon-beam, impact-burst (Channel-compatible) |
-| `heal.heal` | [v3](../../../game/public/fx/skill-pool/heal/heal-heal/v3/meta.json) | animated base + mote, ground-edge |
-| `buff.flame_guard` | [v3](../../../game/public/fx/skill-pool/buff/buff-flame-guard/v3/meta.json) | animated base + ward-shell, mote |
-| `curse.jinx` | [v3](../../../game/public/fx/skill-pool/curse/curse-jinx/v3/meta.json) | animated base + mark-sigil, cloud-mist |
-| `aura.grace` | [v2](../../../game/public/fx/skill-pool/aura/aura-grace/v2/meta.json) | animated base + ground-edge, mote |
-| `attack.fissure` | [v5](../../../game/public/fx/skill-pool/attack-earth/attack-fissure/v5/meta.json) | crack-strip, stone-spike, fragment-debris, cloud-mist |
-| `attack.stone_spike` | [v3](../../../game/public/fx/skill-pool/attack-earth/attack-stone-spike/v3/meta.json) | stone-spike, impact-burst, fragment-debris |
-| `attack.tidal_wave` | [v3](../../../game/public/fx/skill-pool/attack-cold/attack-tidal-wave/v3/meta.json) | wave-crest, cloud-mist |
-| `attack.piercing_shot` | [v3](../../../game/public/fx/skill-pool/attack-phy/attack-piercing-shot/v3/meta.json) | arrow-core, impact-burst |
-| `attack.water_ball` | [v3](../../../game/public/fx/skill-pool/attack-cold/attack-water-ball/v3/meta.json) | orb-core, impact-burst |
-| `attack.meteor` | [v4](../../../game/public/fx/skill-pool/attack-fire/attack-meteor/v4/meta.json) | rock-core, impact-burst, ground-residue, ground-fill |
-| `attack.thunder_strike` | [v3](../../../game/public/fx/skill-pool/attack-lightning/attack-thunder-strike/v3/meta.json) | forked-bolt, impact-burst |
-| `attack.entropy_well` | [v3](../../../game/public/fx/skill-pool/attack-chaos/attack-entropy-well/v3/meta.json) | ground-spiral, cloud-mist, mote |
-| `attack.arrow_shower` | [v5](../../../game/public/fx/skill-pool/attack-phy/attack-arrow-shower/v5/meta.json) | arrow-core, impact-burst |
-| `attack.split_shot` | [v2](../../../game/public/fx/skill-pool/attack-phy/attack-split-shot/v2/meta.json) | arrow-core, impact-burst |
-| `attack.double_strafe` | [v2](../../../game/public/fx/skill-pool/attack-phy/attack-double-strafe/v2/meta.json) | arrow-core, impact-burst |
-| `attack.void_orb` | [v2](../../../game/public/fx/skill-pool/attack-chaos/attack-void-orb/v2/meta.json) | orb-core, impact-burst |
-| `attack.whirlwind` | [v3](../../../game/public/fx/skill-pool/attack-phy/attack-whirlwind/v3/meta.json) | slash-sweep, ground-edge, mote |
-| `buff.enchant_poison` | [v2](../../../game/public/fx/skill-pool/buff/buff-enchant-poison/v2/meta.json) | ribbon-beam, mote |
+| `attack.firestorm` | [v5](../../../archive/fx/skill-pool/attack-fire/attack-firestorm/v5/meta.json) | animated base + ground-fill, vortex, mote |
+| `attack.fireball` | [v4](../../../archive/fx/skill-pool/attack-fire/attack-fireball/v4/meta.json) | animated base + projectile-core, ribbon-beam, impact-burst |
+| `attack.cinder_nova` | [v3](../../../archive/fx/skill-pool/attack-fire/attack-cinder-nova/v3/meta.json) | animated base + ground-fill, ground-edge, mote, ground-residue |
+| `attack.blizzard` | [v8](../../../archive/fx/skill-pool/attack-cold/attack-blizzard/v8/meta.json) | animated base + cloud-mist, fragment-debris, ground-edge |
+| `attack.cleave` | [v4](../../../archive/fx/skill-pool/attack-phy/attack-cleave/v4/meta.json) | animated base + slash-sweep, ground-edge, impact-burst |
+| `attack.fissure` | [v3](../../../archive/fx/skill-pool/attack-earth/attack-fissure/v3/meta.json) | animated base + ground-fill, column-eruption, fragment-debris |
+| `attack.chain_lightning` | [v2](../../../archive/fx/skill-pool/attack-lightning/attack-chain-lightning/v2/meta.json) | animated base + ribbon-beam, impact-burst |
+| `attack.void_ray` | [v3](../../../archive/fx/skill-pool/attack-chaos/attack-void-ray/v3/meta.json) | ground base + ribbon-beam, impact-burst (Channel-compatible) |
+| `heal.heal` | [v3](../../../archive/fx/skill-pool/heal/heal-heal/v3/meta.json) | animated base + mote, ground-edge |
+| `buff.flame_guard` | [v3](../../../archive/fx/skill-pool/buff/buff-flame-guard/v3/meta.json) | animated base + ward-shell, mote |
+| `curse.jinx` | [v3](../../../archive/fx/skill-pool/curse/curse-jinx/v3/meta.json) | animated base + mark-sigil, cloud-mist |
+| `aura.grace` | [v2](../../../archive/fx/skill-pool/aura/aura-grace/v2/meta.json) | animated base + ground-edge, mote |
+| `attack.fissure` | [v5](../../../archive/fx/skill-pool/attack-earth/attack-fissure/v5/meta.json) | crack-strip, stone-spike, fragment-debris, cloud-mist |
+| `attack.stone_spike` | [v3](../../../archive/fx/skill-pool/attack-earth/attack-stone-spike/v3/meta.json) | stone-spike, impact-burst, fragment-debris |
+| `attack.tidal_wave` | [v3](../../../archive/fx/skill-pool/attack-cold/attack-tidal-wave/v3/meta.json) | wave-crest, cloud-mist |
+| `attack.piercing_shot` | [v3](../../../archive/fx/skill-pool/attack-phy/attack-piercing-shot/v3/meta.json) | arrow-core, impact-burst |
+| `attack.water_ball` | [v3](../../../archive/fx/skill-pool/attack-cold/attack-water-ball/v3/meta.json) | orb-core, impact-burst |
+| `attack.meteor` | [v4](../../../archive/fx/skill-pool/attack-fire/attack-meteor/v4/meta.json) | rock-core, impact-burst, ground-residue, ground-fill |
+| `attack.thunder_strike` | [v3](../../../archive/fx/skill-pool/attack-lightning/attack-thunder-strike/v3/meta.json) | forked-bolt, impact-burst |
+| `attack.entropy_well` | [v3](../../../archive/fx/skill-pool/attack-chaos/attack-entropy-well/v3/meta.json) | ground-spiral, cloud-mist, mote |
+| `attack.arrow_shower` | [v5](../../../archive/fx/skill-pool/attack-phy/attack-arrow-shower/v5/meta.json) | arrow-core, impact-burst |
+| `attack.split_shot` | [v2](../../../archive/fx/skill-pool/attack-phy/attack-split-shot/v2/meta.json) | arrow-core, impact-burst |
+| `attack.double_strafe` | [v2](../../../archive/fx/skill-pool/attack-phy/attack-double-strafe/v2/meta.json) | arrow-core, impact-burst |
+| `attack.void_orb` | [v2](../../../archive/fx/skill-pool/attack-chaos/attack-void-orb/v2/meta.json) | orb-core, impact-burst |
+| `attack.whirlwind` | [v3](../../../archive/fx/skill-pool/attack-phy/attack-whirlwind/v3/meta.json) | slash-sweep, ground-edge, mote |
+| `buff.enchant_poison` | [v2](../../../archive/fx/skill-pool/buff/buff-enchant-poison/v2/meta.json) | ribbon-beam, mote |
 
 The [139-skill coverage map](coverage.md) separates published component recipes from remaining adoption gaps. A gap does not imply that an existing whole-skill effect is absent.
 

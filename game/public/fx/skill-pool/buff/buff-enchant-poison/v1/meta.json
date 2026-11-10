@@ -1,9 +1,0 @@
-{
-  "id": "buff.enchant_poison",
-  "src": "/fx/skill-pool/buff/buff-enchant-poison/v1/decal.png",
-  "authoringGeometry": null,
-  "delivery": "instant",
-  "origin": "caster",
-  "orient": false,
-  "projection": null
-}

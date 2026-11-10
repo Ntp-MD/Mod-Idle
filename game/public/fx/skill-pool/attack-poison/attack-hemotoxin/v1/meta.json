@@ -1,9 +1,0 @@
-{
-  "id": "attack.hemotoxin",
-  "src": "/fx/skill-pool/attack-poison/attack-hemotoxin/v1/decal.png",
-  "authoringGeometry": null,
-  "delivery": "projectile",
-  "origin": "target",
-  "orient": true,
-  "projection": null
-}

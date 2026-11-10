@@ -24,7 +24,8 @@ export function skillRainDrops(mark: SkillGeometry, frame: FieldViewFrame,
   const duration = skillDuration ? sm.skillDurationSec(skillDuration, atlas.rainDurationSec ?? 0)
     : atlas.rainDurationSec ?? 0;
   const time = mark.phaseElapsedSec;
-  const phase = sm.byId[mark.skillId]?.action?.kind === 'meteor-field' && mark.phase === 'Field' ? 'Impact' : mark.phase;
+  const fieldKind = sm.byId[mark.skillId]?.action?.kind;
+  const phase = (fieldKind === 'meteor-field' || fieldKind === 'thunder-field') && mark.phase === 'Field' ? 'Impact' : mark.phase;
   if (phase !== (atlas.rainPhase ?? 'Impact') || duration <= 0 || time < 0 || time >= duration) return [];
   const lifetime = Math.min(.9, duration);
   const interval = atlas.rainIntervalSec ?? .18;
@@ -51,9 +52,11 @@ export function skillRainDrops(mark: SkillGeometry, frame: FieldViewFrame,
       y: mark.area.center.y + Math.sin(angle) * radius };
     const size = Math.max(RAIN_BODY_MIN_M, mark.bodyM.height) * RAIN_SIZE_K * (atlas.rainSizeScale ?? 1);
     const progress = age / lifetime;
-    const flight = Math.max(0, 1 - progress / .5);
+    // A lightning strike is a rooted flash: no fall, no splash, brightness decays.
+    const strike = fieldKind === 'thunder-field';
+    const flight = strike ? 0 : Math.max(0, 1 - progress / .5);
     const impactProgress = mark.phase === 'Field' && progress >= .5 ? (progress - .5) / .5 : null;
-    const fragments = mark.phase === 'Field' && impactProgress != null && impactProgress > .12 && !reducedMotion
+    const fragments = !strike && mark.phase === 'Field' && impactProgress != null && impactProgress > .12 && !reducedMotion
       ? Array.from({ length: 6 }, (_, shard) => {
         const direction = shard / 6 * Math.PI * 2 + random(id + shard + 300) * .4;
         const distance = size * (.04 + .28 * impactProgress);
@@ -68,12 +71,12 @@ export function skillRainDrops(mark: SkillGeometry, frame: FieldViewFrame,
     return { id, start, ground: groundM, size,
       fragments,
       // Only the Field-phase shard stamp is authored tilted. Impact-phase rain
-      // (Meteor) already carries its diagonal fall in the atlas frames.
+      // (Meteor) carries its diagonal fall in the atlas frames; strikes stay rooted.
       rotationDeg: atlas.rainPhase === 'Field' ? 45 : 0,
       impactProgress,
       x: groundM.x - (reducedMotion || mark.phase === 'Field' ? 0 : flight * size * .65),
       y: groundM.y - (reducedMotion ? 0 : flight * size * 1.6),
       index: reducedMotion ? Math.min(8, atlas.count - 1) : Math.min(atlas.count - 1, Math.floor(progress * atlas.count)),
-      opacity: Math.min(1, age / .05, (lifetime - age) / .14) };
+      opacity: strike ? Math.min(1, age / .04) * (1 - progress) : Math.min(1, age / .05, (lifetime - age) / .14) };
   }).filter(drop => drop !== null).sort((a, b) => a.ground.y - b.ground.y);
 }

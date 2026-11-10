@@ -1,7 +1,5 @@
-import { ARENA_ZOOM_MIN } from '../../presentation/arena-camera';
-
 /** Gameplay samples the showcase dropdown offers; deep links (?sample=) accept the same set. */
-export const SHOWCASE_SAMPLES = ['combat-field', 'magic-aoe', 'rimworld-field', 'build-workbench', 'progress-recap', 'core-field',
+export const SHOWCASE_SAMPLES = ['combat-field', 'magic-aoe', 'build-workbench', 'progress-recap', 'core-field',
   'offline-progress', 'delivery', 'choice', 'full-bag', 'fallback', 'expired', 'read-only',
   'craft-stash', 'combat-fx', 'story-camp-warning', 'story-cache-choices', 'story-cache-working',
   'story-cache-bagfull', 'story-cache-results', 'story-delivery-choices', 'story-courier-unaccepted',
@@ -14,7 +12,6 @@ export const DEFAULT_SHOWCASE_SAMPLE: ShowcaseSampleId = 'combat-field';
 export const SHOWCASE_SAMPLE_LABELS: Record<ShowcaseSampleId, string> = {
   'combat-field': 'Combat field',
   'magic-aoe': 'Meteor · Combat field',
-  'rimworld-field': 'RimWorld · Field view',
   'build-workbench': 'Build · Full skill collection',
   'progress-recap': 'Progress · Return report',
   'core-field': 'Core allocation · field',
@@ -52,7 +49,6 @@ export function isShowcaseSample(value: string | null): value is ShowcaseSampleI
 export function showcaseFieldSkill(sample: string): string | undefined {
   if (sample === 'combat-field') return 'attack.fireball';
   if (sample === 'magic-aoe') return 'attack.meteor';
-  if (sample === 'rimworld-field') return 'attack.meteor';
   return undefined;
 }
 
@@ -73,7 +69,7 @@ export interface ShowcaseView {
 /** One presentation descriptor per sample; App owns state and applies it. */
 export function showcaseView(sample: string): ShowcaseView | null {
   const fieldSkill = showcaseFieldSkill(sample);
-  if (fieldSkill) return { fieldSkill, forestGround: sample === 'rimworld-field', worldScale: sample === 'rimworld-field' ? ARENA_ZOOM_MIN : undefined };
+  if (fieldSkill) return { fieldSkill };
   if (sample === 'craft-stash') return { panel: 'craft' };
   if (sample === 'combat-fx') {
     return {

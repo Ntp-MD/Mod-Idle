@@ -1,9 +1,0 @@
-{
-  "id": "attack.unravel",
-  "src": "/fx/skill-pool/attack-chaos/attack-unravel/v1/decal.png",
-  "authoringGeometry": null,
-  "delivery": "projectile",
-  "origin": "target",
-  "orient": true,
-  "projection": null
-}

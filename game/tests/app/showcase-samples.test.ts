@@ -3,16 +3,14 @@ import { SHOWCASE_SAMPLES, SHOWCASE_SAMPLE_LABELS, showcaseFieldSkill, showcaseV
 
 describe('showcase sample registry', () => {
   it('has one label per sample and no duplicate ids', () => {
-    expect(SHOWCASE_SAMPLES).toHaveLength(30);
-    expect(new Set(SHOWCASE_SAMPLES).size).toBe(30);
+    expect(SHOWCASE_SAMPLES).toHaveLength(29);
+    expect(new Set(SHOWCASE_SAMPLES).size).toBe(29);
     for (const id of SHOWCASE_SAMPLES) expect(SHOWCASE_SAMPLE_LABELS[id]).toBeTruthy();
   });
 
-  it('keeps the field samples on their authored skill and zoom', () => {
+  it('keeps the field samples on their authored skill', () => {
     expect(showcaseFieldSkill('combat-field')).toBe('attack.fireball');
     expect(showcaseFieldSkill('magic-aoe')).toBe('attack.meteor');
-    expect(showcaseFieldSkill('rimworld-field')).toBe('attack.meteor');
-    expect(showcaseView('rimworld-field')).toMatchObject({ fieldSkill: 'attack.meteor', worldScale: 0.25, forestGround: true });
   });
 
   it('keeps the panel samples on their existing hosts', () => {

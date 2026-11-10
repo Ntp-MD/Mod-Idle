@@ -4,6 +4,16 @@
 generated (in-house tool, AI model, external pack, artist hand-off) — is the only copy the game
 reads. No exceptions.
 
+## Current state: fallback active, component recipes land one skill at a time
+
+Every live skill still runs the renderer-only `rimworld` version until its recipe is approved.
+The retired `vN` folders sit in `archive/fx/skill-pool/<group>/<slug>/vN/` (per the archive note) and
+the `default/version.json` pointers went with them. Completed skills are rebuilt from the reusable
+component library as a single `vfx-component/` folder (no `vN` iteration). Without a `default`
+pointer the registry keeps `rimworld` first and the recipe stays a showcase preview; human approval
+sets `default/version.json` to `vfx-component` and the game runs the raster art.
+`attack.thunder_storm` is the first approved recipe (2026-11-10) and runs live.
+
 ## Storage rule
 
 - Every generated or imported skill VFX — any production pipeline, AI generator, external pack
@@ -33,15 +43,13 @@ reads. No exceptions.
 game/public/fx/skill-pool/
   attack-phy/                       # physical rows
     attack-ground-slam/
-      default/version.json          # { "version": "v2" } — pointer only
-      v1/
+      rimworld/version.json         # { "renderer": "procedural" } — renderer-only fallback
+      default/version.json          # { "version": "v2" } — pointer only, when raster art returns
+      v2/
         atlas.png
         meta.json
-        source-sheet.png            # optional raw generation
         qa.json                     # optional QC report
-      v2/
         decal.png                   # straight-down ground texture instead of an atlas
-        meta.json                   # { "decal": true, ... }
   attack-fire/
   attack-cold/
   attack-lightning/
@@ -54,19 +62,26 @@ game/public/fx/skill-pool/
   heal/
 ```
 
+## Fallback version
+
+`rimworld/version.json` with `{"renderer":"procedural"}` registers a version with no raster slots;
+the arena draws that skill procedurally (`game/src/ui/combat/rimworld-vfx.ts`). It is never the
+promoted default while a raster `vN` exists, and `default` stays `false` for it.
+
 ## Default
 
-Resolution order: `default/version.json` → highest `vN`. The generated
-registry marks that row `default: true`, so the combat-field version selector and the arena read the same version.
-Runtime URLs address the resolved `vN` folder, never `.../default/atlas.png`.
+Resolution order: `default/version.json` → highest `vN`. The generated registry marks that row
+`default: true`, so the combat-field version selector and the arena read the same version.
+Runtime URLs address the resolved `vN` folder, never `.../default/atlas.png`. With no pointer and no
+`vN` folder the registry holds the `rimworld` fallback alone and the arena stays procedural.
 
 ## Registered by
 
-- `tools/skill-vfx-pool.ts` scans every `attack-<element>/<slug>/vN/` and `<type>/<slug>/vN/`,
-  reads `meta.json`, and writes `game/src/ui/fx/pool.generated.ts`.
+- `tools/skill-vfx-pool.ts` scans every `attack-<element>/<slug>/` and `<type>/<slug>/`, reads each
+  version folder, and writes `game/src/ui/fx/pool.generated.ts`.
 - `game/src/ui/fx/catalog.ts` reads that generated registry; the first row is the default.
 - Combat field showcase: `http://localhost:5173/__showcase?sample=combat-field&skill=<id>`; its
-  VFX version selector reads the archived versions.
+  VFX version selector reads the registered versions.
 
 ## Adding a version
 
@@ -86,8 +101,6 @@ Runtime URLs address the resolved `vN` folder, never `.../default/atlas.png`.
    only when it can be regenerated from a source sheet you still hold.
 2. Repoint `default/version.json` first if it names the retired folder — the generator throws
    on a pointer to a missing version.
-3. Regenerate the registry, then run the pool test. Each failure names its own cause: a stale
-   `pool.generated.ts` fails "has every archived pool atlas on disk"; emptying a live skill
-   fails "covers every live skill"; a test that reads a hardcoded version file (Fissure
-   `v1/meta.json`, Arrow Shower `v1/atlas.png`, Blizzard's `v1`/`v3` sources) fails on the
-   missing path.
+3. Regenerate the registry, then run the pool test (`game/tests/ui/vfx-catalog.test.ts`). A stale
+   `pool.generated.ts` fails "keeps every runtime registry row raster-free"; a `default` pointer to
+   a folder that is gone fails the generator.

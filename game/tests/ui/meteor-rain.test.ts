@@ -61,6 +61,22 @@ describe('Meteor atlas rain', () => {
     expect(drop.rotationDeg).toBe(0);
   });
 
+  it('strikes Thunder Storm bolts as rooted flashes instead of falling rain', () => {
+    const stormAtlas = { ...atlas, count: 1, src: '/forked-bolt.png', rainPhase: 'Impact' as const,
+      rainIntervalSec: .25, rainSizeScale: .4, rainRadiusRatio: .9 };
+    const field = { ...mark, skillId: 'attack.thunder_storm', phase: 'Field' as const, phaseElapsedSec: .15 };
+    const drop = skillRainDrops(field, frame, stormAtlas)[0];
+    expect(drop).toBeDefined();
+    expect(drop.rotationDeg).toBe(0);
+    expect(drop.x).toBe(drop.ground.x);
+    expect(drop.y).toBe(drop.ground.y);
+    const landing = skillRainDrops({ ...field, phaseElapsedSec: .6 }, frame, stormAtlas).find(candidate => candidate.id === 0)!;
+    expect(landing.fragments).toEqual([]);
+    expect(landing.opacity).toBeLessThan(drop.opacity);
+    expect(skillRainDrops({ ...field, phase: 'Windup' }, frame, stormAtlas)).toEqual([]);
+    expect(skillRainDrops({ ...field, phaseElapsedSec: 4 }, frame, stormAtlas)).toEqual([]);
+  });
+
   it('staggers drops inside the committed circle throughout four seconds with bounded overlap', () => {
     const seen = new Map<number, number>();
     for (let time = 0; time < 4; time += .025) {
