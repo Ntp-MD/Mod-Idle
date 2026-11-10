@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Field ground target map</title><style>body{font:16px/1.6 system-ui,sans-serif;max-width:1100px;margin:32px auto;padding:0 20px;color:#1e293b;background:#f8fafc}section{padding:12px 20px;margin:18px 0;background:white;border:1px solid #cbd5e1;border-radius:8px}li{margin:10px 0}input{width:18px;height:18px;vertical-align:middle}.meta{color:#475569}code{background:#e2e8f0;padding:2px 5px}table{border-collapse:collapse;width:100%;margin:8px 0}th,td{border:1px solid #cbd5e1;padding:4px 6px;text-align:left;vertical-align:top}h1{font-size:27px}h2{font-size:21px}.decision{background:#eff6ff;border-left:3px solid #3b82f6;padding:6px 10px;margin:6px 0}</style></head><body>
+<h1><label><input type="checkbox" id="complete" checked> Field ground target map: 54 subzones to 12 materials plus 6 ready prompts</label></h1>
+<p class="meta">Created 2026-11-10. Camera answer first: the world map is straight-down 90 degrees orthographic (identity matrix). The combat arena is 33 degrees above horizontal (vertical scale sin 33 deg). Ground PNGs are authored unprojected at 90 degrees; each renderer applies its own matrix once.</p>
+<p id="plan-current" class="meta">Current: done</p>
+<p class="meta">Scope: <code>tools/data/engine.json</code> 18 zones and 54 subzones to <code>game/public/map/ground/*.webp</code> through <code>game/src/ui/combat/arena/arena-ground-materials.ts</code>. No gameplay, RNG, balance, save or visual-behavior change. Follow <a href="../../AGENTS.md">AGENTS.md</a>.</p>
+
+<section>
+<h2>Locked camera and material decisions</h2>
+<p class="decision"><strong>D1 map camera.</strong> <code>game/src/ui/map/map-projection.ts:9-20</code> owns the map camera: <code>MAP_DEFAULT_ELEVATION = 90</code>, north-up, <code>MAP_CAMERA = {a:1,b:0,c:0,d:1}</code>, transform <code>matrix(1 0 0 1 0 0)</code>. Snapshot: <code>docs/map/geometry/hex-spec.json:3-8</code>. Author map art straight down; never bake tilt.</p>
+<p class="decision"><strong>D2 arena camera.</strong> <code>game/src/presentation/arena-camera.ts:7-13</code> owns the arena camera: <code>ARENA_CAMERA_ELEVATION_DEG = 33</code>, projection <code>a = 140, b = 0, c = 0, d = 140 * sin(33 deg) = 76.249465</code> at reference zoom 1 and 1920 wide. Shared notes: <code>docs/vfx-skill/shared/angle-authoring.md</code>. Ground textures stay unprojected; the arena applies this matrix once.</p>
+<p class="decision"><strong>D3 shared materials.</strong> 12 families in <code>game/src/presentation/ground-materials.ts:16-21</code> are shared by world hexes and the field camera: meadow, forest, marsh, mountain, coast, cave, snow, desert, tomb, ruins, volcanic, rift. Each is 1254x1254, <code>tileSizeM = 8</code>, WebP quality 85. Runtime: <code>game/public/map/ground/*-floor.webp</code>. Sources: <code>docs/map/field-backgrounds/outputs/*.png</code> plus forest source.</p>
+<p class="decision"><strong>D4 no per-subzone PNG in this plan.</strong> The 6 unmapped environments are wired to the closest existing family. The 6 new prompts below are authored and stored for review; no PNG is generated or installed in this plan. New runtime art needs its own generation plan and human approval.</p>
+<p class="decision"><strong>D5 mapping table.</strong> <code>bone stair</code> to tomb, <code>molten deeps</code> to volcanic, <code>throne abyss</code> to cave, <code>charged rootway</code> to forest, <code>thunder glade</code> to forest, <code>frozen fen</code> to marsh. Rationale: stair tombs read as tomb stone; molten reads as volcanic; throne abyss reads as deep cave; charged rootway and thunder glade keep the forest family used by grove, rootway and glade; frozen fen keeps the fen to marsh family used by swamp, mud and poison fen.</p>
+<p class="decision"><strong>D6 prompt template.</strong> All 6 prompts reuse the installed template from <code>docs/map/field-backgrounds/generation-prompts.json</code>: square 1024x1024 OPAQUE seamless diffuse tile, EXACTLY STRAIGHT DOWN at 90 degrees, unprojected world space, no baked tilt or perspective, hand-painted pixel-cluster style, seamless borders, traversable ground only, no standing objects or shadows, diffuse neutral daylight. Only the Subject line changes.</p>
+</section>
+
+<section>
+<h2>Target map: 18 zones to 12 materials</h2>
+<table><thead><tr><th>Zone</th><th>Subzone</th><th>Environment</th><th>Material</th></tr></thead><tbody>
+<tr><td>1</td><td>Windmill Meadow</td><td>grassland</td><td>meadow</td></tr>
+<tr><td>1</td><td>Old Orchard Outskirts</td><td>village</td><td>meadow</td></tr>
+<tr><td>1</td><td>Broken Banner Camp</td><td>camp</td><td>meadow</td></tr>
+<tr><td>2</td><td>Mountain Slopes</td><td>mountain</td><td>mountain</td></tr>
+<tr><td>2</td><td>Cliff Holds</td><td>cliff</td><td>mountain</td></tr>
+<tr><td>2</td><td>Dragon Peak</td><td>peak</td><td>snow</td></tr>
+<tr><td>3</td><td>Murky Swamp</td><td>swamp</td><td>marsh</td></tr>
+<tr><td>3</td><td>Mud Flats</td><td>mud</td><td>marsh</td></tr>
+<tr><td>3</td><td>Poison Fen</td><td>poison fen</td><td>marsh</td></tr>
+<tr><td>4</td><td>Dune Sea</td><td>dunes</td><td>desert</td></tr>
+<tr><td>4</td><td>Sunken Tombs</td><td>tombs</td><td>tomb</td></tr>
+<tr><td>4</td><td>Scorch Mesa</td><td>mesa</td><td>mountain</td></tr>
+<tr><td>5</td><td>Outer Court</td><td>court</td><td>tomb</td></tr>
+<tr><td>5</td><td>Burial Gallery</td><td>gallery</td><td>tomb</td></tr>
+<tr><td>5</td><td>Inner Sanctum</td><td>sanctum</td><td>tomb</td></tr>
+<tr><td>6</td><td>Outer Colonnade</td><td>ruins</td><td>ruins</td></tr>
+<tr><td>6</td><td>Hall of Wardens</td><td>temple</td><td>tomb</td></tr>
+<tr><td>6</td><td>Sanctum Depths</td><td>depths</td><td>cave</td></tr>
+<tr><td>7</td><td>Drowned Stair</td><td>stair</td><td>cave</td></tr>
+<tr><td>7</td><td>Silt Deeps</td><td>deeps</td><td>cave</td></tr>
+<tr><td>7</td><td>Flooded Abyss</td><td>abyss</td><td>cave</td></tr>
+<tr><td>8</td><td>Tunnels</td><td>tunnels</td><td>cave</td></tr>
+<tr><td>8</td><td>Deep Warrens</td><td>warrens</td><td>cave</td></tr>
+<tr><td>8</td><td>Sunken Vault</td><td>vault</td><td>tomb</td></tr>
+<tr><td>9</td><td>Ash Fields</td><td>volcano</td><td>volcanic</td></tr>
+<tr><td>9</td><td>Slag Pit</td><td>lava</td><td>volcanic</td></tr>
+<tr><td>9</td><td>Caldera</td><td>caldera</td><td>volcanic</td></tr>
+<tr><td>10</td><td>Snowfield</td><td>snow</td><td>snow</td></tr>
+<tr><td>10</td><td>Glacier Shelf</td><td>ice</td><td>snow</td></tr>
+<tr><td>10</td><td>Rime Hollow</td><td>rime</td><td>snow</td></tr>
+<tr><td>11</td><td>Blight Field</td><td>blight</td><td>rift</td></tr>
+<tr><td>11</td><td>Howling Waste</td><td>waste</td><td>rift</td></tr>
+<tr><td>11</td><td>Rift Scar</td><td>rift</td><td>rift</td></tr>
+<tr><td>12</td><td>Bone Stair</td><td>bone stair</td><td>tomb</td></tr>
+<tr><td>12</td><td>Molten Deeps</td><td>molten deeps</td><td>volcanic</td></tr>
+<tr><td>12</td><td>Throne Abyss</td><td>throne abyss</td><td>cave</td></tr>
+<tr><td>13</td><td>Fallen Gate</td><td>gate</td><td>ruins</td></tr>
+<tr><td>13</td><td>Market Ruins</td><td>market</td><td>ruins</td></tr>
+<tr><td>13</td><td>Noble Quarter</td><td>quarter</td><td>ruins</td></tr>
+<tr><td>14</td><td>Fog Thicket</td><td>fog</td><td>forest</td></tr>
+<tr><td>14</td><td>Dark Grove</td><td>dark forest</td><td>forest</td></tr>
+<tr><td>14</td><td>Spider Hollow</td><td>hollow</td><td>cave</td></tr>
+<tr><td>15</td><td>Tideflats</td><td>coast</td><td>coast</td></tr>
+<tr><td>15</td><td>Salt Cliffs</td><td>cliffs</td><td>mountain</td></tr>
+<tr><td>15</td><td>Sunken Reef</td><td>sea</td><td>coast</td></tr>
+<tr><td>16</td><td>Glimmer Grove</td><td>grove</td><td>forest</td></tr>
+<tr><td>16</td><td>Elder Rootway</td><td>rootway</td><td>forest</td></tr>
+<tr><td>16</td><td>Moonlit Glade</td><td>glade</td><td>forest</td></tr>
+<tr><td>17</td><td>Stormbreak Grove</td><td>grove</td><td>forest</td></tr>
+<tr><td>17</td><td>Charged Rootway</td><td>charged rootway</td><td>forest</td></tr>
+<tr><td>17</td><td>Thunder Glade</td><td>thunder glade</td><td>forest</td></tr>
+<tr><td>18</td><td>Frozen Fen</td><td>frozen fen</td><td>marsh</td></tr>
+<tr><td>18</td><td>Icebreak Shelf</td><td>ice</td><td>snow</td></tr>
+<tr><td>18</td><td>Rime Bog</td><td>rime</td><td>snow</td></tr>
+</tbody></table>
+</section>
+
+<section><h2><label><input type="checkbox" id="target-map-0" checked> Phase 0 audit</label></h2><ul>
+<li><label><input type="checkbox" id="target-map-0-audit" checked> Confirm counts and cameras</label>
+<p><strong>Decision:</strong> the numbers above are read from <code>tools/data/engine.json</code> mob zones, <code>arena-ground-materials.ts</code> and <code>ground-materials.ts</code>; no hand copy.</p>
+<p><strong>Do:</strong> recount 18 zones and 54 subzones; confirm 12 webp files; read <code>MAP_DEFAULT_ELEVATION</code> and <code>ARENA_CAMERA_ELEVATION_DEG</code> from code.</p>
+<p><strong>Accept:</strong> 18 zones, 54 subzones, 12 materials, 6 unmapped environments listed; map 90 deg and arena 33 deg quoted with file and line.</p></li>
+</ul></section>
+
+<section><h2><label><input type="checkbox" id="target-map-1" checked> Phase 1 wire the 6 missing environments</label></h2><ul>
+<li><label><input type="checkbox" id="target-map-1-map" checked> Add the 6 mappings</label>
+<p><strong>Decision:</strong> extend <code>environmentMaterials</code> only; no new material id, no new file, no art change.</p>
+<p><strong>Do:</strong> edit <code>game/src/ui/combat/arena/arena-ground-materials.ts</code> with the D5 rows.</p>
+<p><strong>Accept:</strong> every subzone environment in <code>tools/data/engine.json</code> resolves to one of the 12 materials; the 6 names no longer miss.</p></li>
+<li><label><input type="checkbox" id="target-map-1-tests" checked> Focused tests</label>
+<p><strong>Do:</strong> run <code>npm run check</code> and the arena ground tests.</p>
+<p><strong>Accept:</strong> check 0 errors and 0 warnings; ground tests pass.</p></li>
+</ul></section>
+
+<section><h2><label><input type="checkbox" id="target-map-2" checked> Phase 2 author the 6 prompts</label></h2><ul>
+<li><label><input type="checkbox" id="target-map-2-prompts" checked> Store 6 prompts</label>
+<p><strong>Decision:</strong> prompts are stored in <code>docs/map/field-backgrounds/generation-prompts.json</code> with ids <code>bone-stair-floor</code>, <code>molten-deeps-floor</code>, <code>throne-abyss-floor</code>, <code>charged-rootway-floor</code>, <code>thunder-glade-floor</code>, <code>frozen-fen-floor</code>. Generation and install are out of scope.</p>
+<p><strong>Do:</strong> append the 6 entries using the D6 template; keep the existing 3 entries byte-identical.</p>
+<p><strong>Accept:</strong> the file holds 9 prompts; each new prompt contains the 90-degree, seamless, traversable and no-standing-objects clauses plus its Subject.</p></li>
+<li><label><input type="checkbox" id="target-map-2-prompts-text" checked> Prompt text is reviewable</label>
+<p><strong>Do:</strong> keep each Subject to one walkable surface, one palette and an explicit obstacle ban.</p>
+<p><strong>Accept:</strong> a reviewer can approve or reject each Subject without reading generator internals.</p></li>
+</ul></section>
+
+<section><h2><label><input type="checkbox" id="target-map-3" checked> Phase 3 verification and closeout</label></h2><ul>
+<li><label><input type="checkbox" id="target-map-3-fast" checked> Fast gates</label>
+<p><strong>Do:</strong> run <code>npm run check</code>, <code>npm run map:check</code>, then <code>npm --prefix game run test:fast</code>.</p>
+<p><strong>Accept:</strong> check 0/0; map 9/9; test:fast failures match <code>docs/reference/known-failures.md</code> only.</p></li>
+<li><label><input type="checkbox" id="target-map-3-close" checked> Close the record</label>
+<p><strong>Do:</strong> check every box, set <code>plan-current</code> to <code>done</code>, record commands and results in Evidence.</p>
+<p><strong>Accept:</strong> no open agent item; generation stays listed as follow-up below.</p></li>
+</ul></section>
+
+<section><h2>Manual sign-off</h2><p>Human visual review stays open for the 6 Subjects and any future generated floors. Agent text checks do not approve art. The follow-up generation plan needs approved prompts, SenseNova generation settings, WebP encoding and manifest updates.</p></section>
+
+<p class="meta">Stop only for a save-flow edit, an unresolved owner visual decision, a failing check not in <a href="../reference/known-failures.md">known-failures.md</a>, or unavailable tooling. Baselines: <a href="../reference/known-failures.md">known-failures.md</a>.</p>
+<div id="evidence">
+<p class="meta">2026-11-10 audit: 18 zones, 54 subzones, 51 distinct environments, 12 webp files, 6 unmapped names confirmed from code. Map 90 deg via <code>game/src/ui/map/map-projection.ts:9-20</code> and <code>docs/map/geometry/hex-spec.json:3-8</code>. Arena 33 deg via <code>game/src/presentation/arena-camera.ts:7-13</code> with d = 76.249465.</p>
+<p class="meta">2026-11-10 mapping: 6 rows added to <code>environmentMaterials</code>; recount shows 0 missing. <code>npm run check</code> 0/0. <code>tests/ui/arena-ground.test.ts</code> 20/20.</p>
+<p class="meta">2026-11-10 prompts: <code>generation-prompts.json</code> 3 to 9 entries; all 9 contain the 90-degree, seamless, traversable and no-standing-objects clauses.</p>
+<p class="meta">2026-11-10 gates: <code>npm run check</code> 0/0; <code>npm run map:check</code> 9/9; <code>test:fast</code> 2482 passed / 2 failed, all 3 failed files match <code>docs/reference/known-failures.md</code>; <code>git diff --check</code> clean.</p>
+</div>
+</body></html>

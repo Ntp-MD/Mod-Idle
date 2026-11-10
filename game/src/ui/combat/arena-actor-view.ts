@@ -52,6 +52,8 @@ export const REF_PX_PER_M = ARENA_REF_PX_PER_M;
 
 /** Shadow style ratio: reference appearance was 23 ref px at the default body radius. One owner. */
 export const SHADOW_WIDTH_RATIO = (23 / REF_PX_PER_M) / (2 * ARENA_DEFAULT_BODY_RADIUS_M);
+/** Target/focus marker overshoot over the sim body radius. One owner; the scene never inlines a ratio. */
+export const GROUND_MARKER_RADIUS_RATIO = 1.5;
 /** Lunge in world metres from ref-px authorship through the single density. */
 const LUNGE_SLASH_M = 8 / REF_PX_PER_M;
 const LUNGE_BACK_M = -3 / REF_PX_PER_M;
@@ -65,6 +67,12 @@ export const FEEDBACK_RISE_PX_PER_SEC = 43;
 export function shadowWidthM(radiusM: number): number {
   const radius = Number.isFinite(radiusM) && radiusM > 0 ? radiusM : ARENA_DEFAULT_BODY_RADIUS_M;
   return 2 * radius * SHADOW_WIDTH_RATIO;
+}
+
+/** World-metre marker ring for one body: sim radius times the owned overshoot. Never NaN. */
+export function groundMarkerRadiusM(radiusM: number): number {
+  const radius = Number.isFinite(radiusM) && radiusM > 0 ? radiusM : ARENA_DEFAULT_BODY_RADIUS_M;
+  return radius * GROUND_MARKER_RADIUS_RATIO;
 }
 
 export interface ActorViewInput {

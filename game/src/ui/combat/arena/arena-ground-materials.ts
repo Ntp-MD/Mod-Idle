@@ -9,15 +9,17 @@ type MaterialId = keyof typeof arenaGroundMaterials;
 const environmentMaterials: Record<string, MaterialId> = {
   grassland: 'meadow', village: 'meadow', camp: 'meadow',
   grove: 'forest', rootway: 'forest', glade: 'forest', 'dark forest': 'forest', fog: 'forest',
-  swamp: 'marsh', mud: 'marsh', 'poison fen': 'marsh',
+  'charged rootway': 'forest', 'thunder glade': 'forest',
+  swamp: 'marsh', mud: 'marsh', 'poison fen': 'marsh', 'frozen fen': 'marsh',
   mountain: 'mountain', cliff: 'mountain', cliffs: 'mountain', mesa: 'mountain',
   peak: 'snow', snow: 'snow', ice: 'snow', rime: 'snow',
   coast: 'coast', sea: 'coast', dunes: 'desert',
   court: 'tomb', gallery: 'tomb', sanctum: 'tomb', temple: 'tomb', tombs: 'tomb', vault: 'tomb',
+  'bone stair': 'tomb',
   tunnels: 'cave', warrens: 'cave', hollow: 'cave', depths: 'cave',
-  stair: 'cave', deeps: 'cave', abyss: 'cave',
+  stair: 'cave', deeps: 'cave', abyss: 'cave', 'throne abyss': 'cave',
   ruins: 'ruins', gate: 'ruins', market: 'ruins', quarter: 'ruins',
-  volcano: 'volcanic', lava: 'volcanic', caldera: 'volcanic',
+  volcano: 'volcanic', lava: 'volcanic', caldera: 'volcanic', 'molten deeps': 'volcanic',
   blight: 'rift', waste: 'rift', rift: 'rift',
 };
 

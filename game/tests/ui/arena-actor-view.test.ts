@@ -27,6 +27,8 @@ import {
   createActorBodyCache,
   REF_PX_PER_M,
   SHADOW_WIDTH_RATIO,
+  GROUND_MARKER_RADIUS_RATIO,
+  groundMarkerRadiusM,
   shadowWidthM,
   type ActorViewInput,
 } from '../../src/ui/combat/arena-actor-view';
@@ -266,6 +268,14 @@ describe('WP3 — actor view from the WP2 model and the painted frame', () => {
     expect(shadowWidthM(0.5) / shadowWidthM(0.25)).toBeCloseTo(2, 12);
     expect(shadowWidthM(0)).toBe(shadowWidthM(0.25));
     expect(shadowWidthM(Number.NaN)).toBe(shadowWidthM(0.25));
+  });
+
+  it('R3: marker ring follows the sim radius through the owned ratio', () => {
+    expect(GROUND_MARKER_RADIUS_RATIO).toBe(1.5);
+    expect(groundMarkerRadiusM(0.25)).toBeCloseTo(0.375, 12);
+    expect(groundMarkerRadiusM(0.5) / groundMarkerRadiusM(0.25)).toBeCloseTo(2, 12);
+    expect(groundMarkerRadiusM(0)).toBe(groundMarkerRadiusM(0.25));
+    expect(groundMarkerRadiusM(Number.NaN)).toBe(groundMarkerRadiusM(0.25));
   });
 
   it('R3: radius 0.25→0.5 doubles CSS shadow at the same frame; worldScale changes CSS only (DR3)', () => {

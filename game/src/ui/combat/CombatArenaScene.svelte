@@ -8,7 +8,7 @@
   import CombatCastBar from './CombatCastBar.svelte';
   import { createCombatFeedbackCache, compactCombatFeedback, feedbackPriority, indexActorHits, type CombatFeedbackPop } from './combat-feedback';
   import { E, sm } from '../../engine/client';
-  import { actionStyleFor, ACTOR_DEPTH_MIN, actorDepthRanks, actorReleaseWorld, actorVisibleInFrame, bodyEnvelopeM, buildActorView, compareActorGround, createActorBodyCache, FEEDBACK_RISE_PX_PER_SEC, FEEDBACK_WINDOW_SEC, sortActorViews, REF_PX_PER_M } from './arena-actor-view';
+  import { actionStyleFor, ACTOR_DEPTH_MIN, actorDepthRanks, actorReleaseWorld, actorVisibleInFrame, bodyEnvelopeM, buildActorView, compareActorGround, createActorBodyCache, FEEDBACK_RISE_PX_PER_SEC, FEEDBACK_WINDOW_SEC, groundMarkerRadiusM, sortActorViews, REF_PX_PER_M } from './arena-actor-view';
   import { ARENA_DEFAULT_BODY_RADIUS_M, ARENA_GLIDE_MS } from '../../presentation/arena-camera';
   import { skillAreaSnapshot } from '@engine/skill-area';
   import { isClear } from '@engine/navigation';
@@ -198,7 +198,7 @@
     ? focusId : null);
   const selectedGroundActor = $derived(targetId ? sampled.mobs[targetId] : undefined);
   const focusedGroundActor = $derived(focusTargetId ? sampled.mobs[focusTargetId] : undefined);
-  const GROUND_MARKER_RADIUS_RATIO = 1.5;
+  /** Marker rings share the owned ground-marker function; no inline ratio lives in the template. */
   const camera = $derived(painted.renderable ? arenaCameraOffset(painted.focusM, view) : arenaCameraOffset(player, view));
   /** F37 — one named read for the bar: committed strike, requested focus, or the next body,
    *  with an offscreen bearing so a focus that leaves the view stays readable. */
@@ -652,11 +652,11 @@
         {/each}
         {#if selectedGroundActor && selectedGroundActor.hp > 0}
           <circle class="target-ground" data-target-ground data-ground-actor={selectedGroundActor.id} cx={selectedGroundActor.x} cy={selectedGroundActor.y}
-            r={selectedGroundActor.radiusM * GROUND_MARKER_RADIUS_RATIO} pathLength="1" />
+            r={groundMarkerRadiusM(selectedGroundActor.radiusM)} pathLength="1" />
         {/if}
         {#if focusedGroundActor && focusedGroundActor.hp > 0}
           <circle class="focus-ground" data-focus-ground data-ground-actor={focusedGroundActor.id} cx={focusedGroundActor.x} cy={focusedGroundActor.y}
-            r={focusedGroundActor.radiusM * GROUND_MARKER_RADIUS_RATIO} pathLength="1" />
+            r={groundMarkerRadiusM(focusedGroundActor.radiusM)} pathLength="1" />
         {/if}
         {#each hazardMarks as hazard (hazard.actionId)}
           {#if hazard.kind === 'ground' && hazard.radiusM > 0}
