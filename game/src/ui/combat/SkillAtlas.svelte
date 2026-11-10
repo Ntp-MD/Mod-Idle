@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { VfxAtlas } from '../fx/catalog';
   import AtlasFrame from '../fx/AtlasFrame.svelte';
-  import { atlasFrameIndex, atlasOpacity, skillArtPlacement, groundDecalMatrixForFrame, GROUND_CANVAS_PX } from './arena-skill-art';
+  import { atlasFrameIndex, atlasOpacity, skillArtPlacement, billboardMatrixForFrame, groundAtlasMatrixForFrame } from './arena-skill-art';
   import { ARENA_REF_PX_PER_M } from '../../presentation/arena-camera';
   import { matrixAttribute } from '../../presentation/view-transform';
   import type { FieldViewFrame } from '../../presentation/arena-view-frame';
@@ -12,16 +12,17 @@
     mark: SkillGeometry; screen: SkillGeometryScreen; frame: FieldViewFrame;
     atlas: VfxAtlas; reducedMotion?: boolean;
   } = $props();
+  const clipId = $props.id();
 
   // Reduced motion keeps the authored silhouette and contact while freezing its animation.
   const still = $derived(reducedMotion ? { ...mark, phaseElapsedSec: 0 } : mark);
   const index = $derived(atlasFrameIndex(still, atlas));
   const opacity = $derived(atlasOpacity(mark, atlas));
   const placement = $derived(skillArtPlacement(mark, atlas, frame, screen));
-  const rain = $derived(skillRainDrops(mark, frame, atlas, reducedMotion));
+  const billboardTransform = $derived(placement ? billboardMatrixForFrame({ x: placement.cx, y: placement.cy }, frame) : undefined);
+  const rain = $derived(skillRainDrops(atlas.delaySec ? { ...mark, phaseElapsedSec: Math.max(0, mark.phaseElapsedSec - atlas.delaySec) } : mark, frame, atlas, reducedMotion));
   const groundTransform = $derived(atlas.projection === 'ground'
-    ? (groundDecalMatrixForFrame(screen.center,
-      mark.area.radiusM, frame, GROUND_CANVAS_PX, atlas.content?.widthRatio ?? 1) ?? null) : null);
+    ? (groundAtlasMatrixForFrame(mark, atlas, frame) ?? null) : null);
   const chainPaths = $derived(mark.chainHop ? screen.paths : []);
   // Chain shape is a world effect: jitter in model metres scales with the
   // frame instead of saturating on a fixed screen-pixel cap. Stroke width
@@ -51,32 +52,36 @@
   {/each}
 {/if}
 {#if atlas.projection === 'ground' && opacity > 0 && groundTransform}
-  <g data-skill-art={mark.skillId} data-skill-ground-shader data-skill-art-phase={mark.phase.toLowerCase()}
-    transform={matrixAttribute(groundTransform)} {opacity}>
-    <AtlasFrame src={atlas.src} frame={atlas} {index} x={0} y={0} width={2048} height={2048} />
+  <g clip-path={`url(#${clipId})`}>
+    <defs><clipPath id={clipId}><path d={screen.footprint} /></clipPath></defs>
+    <g data-skill-art={mark.skillId} data-skill-ground-shader data-skill-art-phase={mark.phase.toLowerCase()}
+      transform={matrixAttribute(groundTransform)} {opacity}>
+      <AtlasFrame src={atlas.src} frame={atlas} palette={atlas.palette} {index} x={0} y={0}
+        width={atlas.virtualWidth ?? atlas.width} height={atlas.virtualHeight ?? atlas.height} />
+    </g>
   </g>
-{:else if atlas.rainDurationSec}
-  <g data-skill-art={mark.skillId} data-skill-rain data-skill-art-phase={mark.phase.toLowerCase()} style:color={mark.colour}
-    transform={frame.renderable ? matrixAttribute(frame.worldToViewport) : undefined}>
+{:else if atlas.rainDurationSec && opacity > 0}
+  <g data-skill-art={mark.skillId} data-skill-rain data-skill-art-phase={mark.phase.toLowerCase()} style:color={mark.colour}>
     {#each rain as drop (drop.id)}
       <g data-rain-drop={drop.id} opacity={drop.opacity}>
         {#if drop.impactProgress != null}
           <circle class="rain-impact-ring" data-rain-impact cx={drop.x} cy={drop.y}
+            transform={frame.renderable ? matrixAttribute(frame.worldToViewport) : undefined}
             r={drop.size * (.1 + .1 * drop.impactProgress)}
             opacity={Math.max(0, 1 - drop.impactProgress * 2)} />
         {/if}
         {#if drop.fragments.length}
           {#each drop.fragments as shard (shard.index + ':' + shard.rotationDeg)}
-            <g opacity={1 - (drop.impactProgress ?? 0)} transform={`rotate(${shard.rotationDeg} ${shard.x} ${shard.y})`}>
-              <AtlasFrame src={atlas.src} frame={atlas} index={shard.index}
-                x={shard.x - shard.size * .5} y={shard.y - shard.size * .5}
+            <g opacity={1 - (drop.impactProgress ?? 0)} transform={`${matrixAttribute(billboardMatrixForFrame(shard, frame)!)} rotate(${shard.rotationDeg})`}>
+              <AtlasFrame src={atlas.src} frame={atlas} palette={atlas.palette} index={shard.index}
+                x={-shard.size * .5} y={-shard.size * .5}
                 width={shard.size} height={shard.size} />
             </g>
           {/each}
         {:else}
-          <g transform={drop.rotationDeg ? `rotate(${drop.rotationDeg} ${drop.x} ${drop.y})` : undefined}>
-            <AtlasFrame src={atlas.src} frame={atlas} index={drop.index}
-              x={drop.x - drop.size * .5} y={drop.y - drop.size * (atlas.rainPhase === 'Field' ? .5 : .78)}
+          <g transform={`${matrixAttribute(billboardMatrixForFrame(drop, frame)!)} rotate(${drop.rotationDeg})`}>
+            <AtlasFrame src={atlas.src} frame={atlas} palette={atlas.palette} index={drop.index}
+              x={-drop.size * .5} y={-drop.size * (atlas.rainPhase === 'Field' ? .5 : .78)}
               width={drop.size} height={drop.size} />
           </g>
         {/if}
@@ -85,8 +90,8 @@
   </g>
 {:else if opacity > 0 && placement && (!mark.chainHop || mark.phase === 'Impact')}
   <g data-skill-art={mark.skillId} data-skill-art-phase={mark.phase.toLowerCase()} opacity={opacity}
-    transform={frame.renderable ? `${matrixAttribute(frame.worldToViewport)} translate(${placement.cx} ${placement.cy}) rotate(${placement.rotateDeg}) scale(${placement.mirror ? -1 : 1} 1)` : undefined}>
-    <AtlasFrame src={atlas.src} frame={atlas} {index}
+    transform={billboardTransform ? `${matrixAttribute(billboardTransform)} rotate(${placement.rotateDeg}) scale(${placement.mirror ? -1 : 1} 1)` : undefined}>
+    <AtlasFrame src={atlas.src} frame={atlas} palette={atlas.palette} {index}
       x={-placement.anchorX * placement.width} y={-placement.anchorY * placement.height}
       width={placement.width} height={placement.height} />
   </g>

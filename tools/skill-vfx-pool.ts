@@ -29,6 +29,7 @@ const ROOT = process.cwd();
 const POOL = path.join(ROOT, 'game/public/fx/skill-pool');
 const OUT = path.join(ROOT, 'game/src/ui/fx/pool.generated.ts');
 const SKILLS = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/data/skills.json'), 'utf8'));
+const COMPONENTS = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/data/vfx-components.json'), 'utf8'));
 const POINTER = 'version.json';
 
 // One home only: nothing beside the pool may hold skill VFX.
@@ -77,6 +78,12 @@ type Authoring = {
   spanM?: number; depthM?: number; diameterM?: number;
 };
 type Version = {
+  palette?: string;
+  sizePolicy?: 'footprint' | 'body' | 'world';
+  binding?: 'area' | 'caster' | 'target' | 'contact' | 'release';
+  phases?: ('Aim' | 'Windup' | 'Travel' | 'Impact' | 'Field' | 'Channel')[];
+  delaySec?: number;
+  durationSec?: number;
   projection?: 'ground';
   rainDurationSec?: number;
   rainPhase?: 'Impact' | 'Field';
@@ -92,12 +99,13 @@ type Version = {
   impactAnchor?: Pair;
   frames?: { opening?: Pair; loop?: Pair; exit?: Pair };
   frameMs?: number;
+  scale?: number;
   content?: { widthRatio: number; heightRatio: number };
   authoring?: Authoring;
   /** Straight-down ground texture; renders through the arena basis, exactly on the footprint. */
   decal?: string;
   decalOpacity?: number;
-  layers: ({ role: 'ground'; src: string; frame: FrameGrid; fps: number; loop: boolean; opacity?: number } & Partial<Omit<Version, 'layers'>>)[];
+  layers: ({ id?: string; role: 'ground' | 'upright'; src: string; frame: FrameGrid; fps: number; loop: boolean; opacity?: number } & Partial<Omit<Version, 'layers' | 'id'>>)[];
 };
 
 const finite = (value: unknown) => value != null && Number.isFinite(Number(value));
@@ -158,7 +166,13 @@ function frameGrid(meta: any, file: string): FrameGrid {
 }
 
 /** Carry the authored aim data the meta file already owns; the old generator dropped all of it. */
-function aimMeta(meta: any): Pick<Version, 'projection' | 'orient' | 'anchor' | 'impactAnchor' | 'frames' | 'frameMs' | 'content' | 'authoring' | 'rainDurationSec' | 'rainPhase' | 'rainIntervalSec' | 'rainSizeScale' | 'rainRadiusRatio' | 'rainSpreadM'> {
+function aimMeta(meta: any): Pick<Version, 'palette' | 'sizePolicy' | 'binding' | 'phases' | 'delaySec' | 'durationSec' | 'projection' | 'orient' | 'anchor' | 'impactAnchor' | 'frames' | 'frameMs' | 'scale' | 'content' | 'authoring' | 'rainDurationSec' | 'rainPhase' | 'rainIntervalSec' | 'rainSizeScale' | 'rainRadiusRatio' | 'rainSpreadM'> {
+  if (meta?.palette != null && !Object.hasOwn(COMPONENTS.palettes, meta.palette)) throw new Error('Unknown VFX palette');
+  if (meta?.sizePolicy != null && !['footprint', 'body', 'world'].includes(meta.sizePolicy)) throw new Error('Invalid VFX size policy');
+  if (meta?.binding != null && !['area', 'caster', 'target', 'contact', 'release'].includes(meta.binding)) throw new Error('Invalid VFX binding');
+  if (meta?.phases != null && (!Array.isArray(meta.phases) || !meta.phases.length || !meta.phases.every((phase: string) => ['Aim', 'Windup', 'Travel', 'Impact', 'Field', 'Channel'].includes(phase)))) throw new Error('Invalid VFX phases');
+  if (meta?.delaySec != null && (!finite(meta.delaySec) || Number(meta.delaySec) < 0)) throw new Error('Invalid VFX delay');
+  if (meta?.durationSec != null) positive(meta.durationSec, 'VFX duration');
   const opening = range(meta?.opening);
   const loop = range(meta?.loop);
   const exit = range(meta?.exit);
@@ -180,12 +194,19 @@ function aimMeta(meta: any): Pick<Version, 'projection' | 'orient' | 'anchor' | 
   }
   if (finite(meta?.authoringDiameterM)) authoring.diameterM = Number(meta.authoringDiameterM);
   return {
+    ...(meta?.palette != null ? { palette: String(meta.palette) } : {}),
+    ...(meta?.sizePolicy != null ? { sizePolicy: meta.sizePolicy } : {}),
+    ...(meta?.binding != null ? { binding: meta.binding } : {}),
+    ...(meta?.phases != null ? { phases: meta.phases } : {}),
+    ...(meta?.delaySec != null ? { delaySec: Number(meta.delaySec) } : {}),
+    ...(meta?.durationSec != null ? { durationSec: Number(meta.durationSec) } : {}),
     ...(meta?.projection === 'ground' ? { projection: 'ground' as const } : {}),
     ...(meta?.orient != null ? { orient: Boolean(meta.orient) } : {}),
     ...(pair(meta?.anchorX, meta?.anchorY) ? { anchor: pair(meta?.anchorX, meta?.anchorY)! } : {}),
     ...(pair(meta?.impactAnchorX, meta?.impactAnchorY) ? { impactAnchor: pair(meta?.impactAnchorX, meta?.impactAnchorY)! } : {}),
     ...(frames ? { frames } : {}),
     ...(finite(meta?.frameMs) ? { frameMs: Number(meta.frameMs) } : {}),
+    ...(meta?.scale != null ? { scale: positive(meta.scale, 'atlas scale') } : {}),
     ...(finite(meta?.rainDurationSec) && meta.rainDurationSec > 0 ? { rainDurationSec: Number(meta.rainDurationSec) } : {}),
     ...(meta?.rainPhase === 'Impact' || meta?.rainPhase === 'Field' ? { rainPhase: meta.rainPhase } : {}),
     ...(finite(meta?.rainIntervalSec) && meta.rainIntervalSec > 0 ? { rainIntervalSec: Number(meta.rainIntervalSec) } : {}),
@@ -198,6 +219,21 @@ function aimMeta(meta: any): Pick<Version, 'projection' | 'orient' | 'anchor' | 
 }
 
 const TYPES = ['aura', 'buff', 'curse', 'heal'] as const;
+function validateGroundAtlas(meta: any, frame: FrameGrid, label: string): void {
+  if (meta?.projection !== 'ground') return;
+  const widthRatio = Number(meta.contentWidthRatio ?? 1), heightRatio = Number(meta.contentHeightRatio ?? 1);
+  if ((frame.virtualWidth ?? frame.width) !== (frame.virtualHeight ?? frame.height)
+    || !Number.isFinite(widthRatio) || widthRatio <= 0 || widthRatio > 1 || widthRatio !== heightRatio) {
+    throw new Error(`${label}: ground atlas needs square cells and equal positive content ratios <=1`);
+  }
+}
+
+function layerId(value: unknown, fallback: string): string {
+  if (value == null) return fallback;
+  if (typeof value !== 'string' || !value.trim()) throw new Error('VFX layer ID must be a nonempty string');
+  return value;
+}
+
 /** Attack pools group by Element; the folder suffix is the short name, `phy` means `physical`. */
 const ATTACK_GROUPS = {
   phy: 'physical', fire: 'fire', cold: 'cold', lightning: 'lightning', poison: 'poison', chaos: 'chaos', earth: 'earth',
@@ -281,15 +317,7 @@ for (const group of groups) {
       if (!files.includes(atlas)) atlas = files.find((file) => /^atlas.*\.png$/.test(file)) || '';
       if (!atlas) continue;
       const frame = frameGrid(meta, path.join(dir, atlas));
-      if (meta?.projection === 'ground') {
-        const widthRatio = Number(meta.contentWidthRatio ?? 1);
-        const heightRatio = Number(meta.contentHeightRatio ?? 1);
-        if ((frame.virtualWidth ?? frame.width) !== (frame.virtualHeight ?? frame.height)
-          || !Number.isFinite(widthRatio) || widthRatio <= 0 || widthRatio > 1
-          || widthRatio !== heightRatio) {
-          throw new Error(`${slug}/${version}: ground atlas needs square cells and equal positive content ratios <=1`);
-        }
-      }
+      validateGroundAtlas(meta, frame, `${slug}/${version}`);
       const frameMs = Number(meta?.frameMs) || 80;
       versions.push({
         id: `pool-${version}`,
@@ -298,26 +326,30 @@ for (const group of groups) {
         default: preferred === version,
         ...aimMeta(meta),
         layers: [{
-          role: 'ground',
+          id: layerId(meta?.layerId, 'base'),
+          role: meta?.projection === 'ground' ? 'ground' : 'upright',
           src: `/fx/skill-pool/${group.dir}/${slug}/${version}/${atlas}`,
           frame,
           fps: Math.max(1, Math.round(1000 / frameMs)),
           loop: group.type === 'aura' || group.type === 'buff',
           ...(finite(meta?.opacity) ? { opacity: Number(meta.opacity) } : {}),
-        }, ...(meta?.additionalLayers ?? []).map((extra: any) => {
+        }, ...(meta?.additionalLayers ?? []).map((extra: any, index: number) => {
           if (typeof extra.file !== 'string' || path.basename(extra.file) !== extra.file
             || !files.includes(extra.file)) throw new Error(`${slug}/${version}: invalid additional atlas file`);
-          if (extra.projection === 'ground') throw new Error(`${slug}/${version}: additional ground atlases need their own projection validation`);
           if (!finite(extra.opacity) || Number(extra.opacity) < 0 || Number(extra.opacity) > 1)
             throw new Error(`${slug}/${version}: additional layer opacity must be 0..1`);
-          return { role: 'ground' as const,
+          const extraFrame = frameGrid(extra, path.join(dir, extra.file));
+          validateGroundAtlas(extra, extraFrame, `${slug}/${version}/${extra.file}`);
+          return { id: layerId(extra.layerId, `layer-${index + 1}`), role: extra.projection === 'ground' ? 'ground' as const : 'upright' as const,
             src: `/fx/skill-pool/${group.dir}/${slug}/${version}/${extra.file}`,
-            frame: frameGrid(extra, path.join(dir, extra.file)),
+            frame: extraFrame,
             fps: Math.max(1, Math.round(1000 / (Number(extra.frameMs) || 80))), loop: true,
             opacity: Number(extra.opacity), ...aimMeta(extra),
           };
         })],
       });
+      const ids = versions[versions.length - 1].layers.map(layer => layer.id);
+      if (new Set(ids).size !== ids.length) throw new Error(`${slug}/${version}: duplicate VFX layer IDs`);
     }
     if (!versions.length) continue;
     if (!preferred) {

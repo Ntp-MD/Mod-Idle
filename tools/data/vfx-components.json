@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "palettes": {
+    "fire": [
+      "#23120b",
+      "#ba310a",
+      "#ff9d14",
+      "#fff8c2"
+    ],
+    "cold": [
+      "#0b1e33",
+      "#176da3",
+      "#69dfff",
+      "#f0ffff"
+    ],
+    "lightning": [
+      "#262008",
+      "#b57d10",
+      "#ffdf52",
+      "#ffffe8"
+    ],
+    "earth": [
+      "#1e1a11",
+      "#755328",
+      "#c29a53",
+      "#eee0b9"
+    ],
+    "poison": [
+      "#0a2411",
+      "#29882e",
+      "#a0ee46",
+      "#efffd2"
+    ],
+    "chaos": [
+      "#190d2d",
+      "#7525a6",
+      "#d56bff",
+      "#fff0ff"
+    ],
+    "physical": [
+      "#151d25",
+      "#6d8292",
+      "#c2d1d8",
+      "#ffffff"
+    ]
+  },
+  "families": {
+    "ground-fill": {
+      "ownerSkill": "attack.firestorm",
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area"
+    },
+    "ground-edge": {
+      "ownerSkill": "attack.cinder_nova",
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area"
+    },
+    "ground-residue": {
+      "ownerSkill": "attack.firestorm",
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area"
+    },
+    "projectile-core": {
+      "ownerSkill": "attack.fireball",
+      "sizePolicy": "body"
+    },
+    "ribbon-beam": {
+      "ownerSkill": "attack.void_ray",
+      "sizePolicy": "world",
+      "orient": true
+    },
+    "slash-sweep": {
+      "ownerSkill": "attack.cleave",
+      "sizePolicy": "world",
+      "orient": true
+    },
+    "impact-burst": {
+      "ownerSkill": "attack.fireball",
+      "sizePolicy": "body",
+      "binding": "contact"
+    },
+    "column-eruption": {
+      "ownerSkill": "attack.fissure",
+      "sizePolicy": "world",
+      "binding": "area"
+    },
+    "vortex": {
+      "ownerSkill": "attack.firestorm",
+      "sizePolicy": "world",
+      "binding": "area"
+    },
+    "cloud-mist": {
+      "ownerSkill": "attack.blizzard",
+      "sizePolicy": "world",
+      "binding": "area"
+    },
+    "mote": {
+      "ownerSkill": "heal.heal",
+      "sizePolicy": "body",
+      "binding": "caster"
+    },
+    "fragment-debris": {
+      "ownerSkill": "attack.blizzard",
+      "sizePolicy": "body",
+      "binding": "contact"
+    },
+    "ward-shell": {
+      "ownerSkill": "buff.flame_guard",
+      "sizePolicy": "body",
+      "binding": "caster"
+    },
+    "mark-sigil": {
+      "ownerSkill": "curse.jinx",
+      "sizePolicy": "body",
+      "binding": "target"
+    }
+  }
+}

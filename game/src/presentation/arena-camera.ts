@@ -1,14 +1,16 @@
 /** Pure arena camera math shared by captured presentation checkpoints and their consumers. */
 export const ARENA_VIEW = { width: 1920, height: 1080 };
 export const ARENA_ACTOR_WIDTH_M = .5;
-// North stays up; a meter has the same screen length on both ground axes.
+// North stays up; elevation is measured above the horizontal ground plane.
 // Single topdown source: change this projection and every skill circle follows
 // through the painted frame (worldToViewport), never a second hardcoded angle.
+export const ARENA_CAMERA_ELEVATION_DEG = 33;
 const PIXELS_PER_METER = 70 / ARENA_ACTOR_WIDTH_M;
 /** Reference density: the one divisor for legacy ref-px minima (was literal 140). */
 export const ARENA_REF_PX_PER_M = PIXELS_PER_METER;
 export const ARENA_CAMERA = {
-  projection: { a: PIXELS_PER_METER, b: 0, c: 0, d: PIXELS_PER_METER },
+  projection: { a: PIXELS_PER_METER, b: 0, c: 0,
+    d: PIXELS_PER_METER * Math.sin(ARENA_CAMERA_ELEVATION_DEG * Math.PI / 180) },
   playerAnchor: { x: .5, y: .5 },
 } as const;
 /** Normalized topdown basis (projection / reference): the frame scales this by cssPixelsPerMeter. */

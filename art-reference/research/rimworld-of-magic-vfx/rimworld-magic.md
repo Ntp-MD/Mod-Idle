@@ -1,7 +1,7 @@
 # RimWorld of Magic — top-down skill VFX study
 
 > **VFX version studied:** `@` RimWorld 1.6 — Torann's `A RimWorld of Magic` (Workshop `1201382956`, GitHub `TorannD/RWoM` `main` โครงสร้าง `v1.0–v1.6`, updated 2025-12-28) — อ่านเฉพาะข้อมูลเปิดเผยจาก Workshop/GitHub/Wiki ไม่ได้ดูในเกม/คลิปเกมจริง
-> ModWorld counterpart: `art-reference/vfx/base-prompt.md` + `art-reference/vfx/angle-authoring.md` (140 px/m at 1920×1080 zoom 1; ground `a=d>0, b=c=0`) ฉบับปัจจุบัน ณ 2026-11-07
+> ModWorld counterpart: `art-reference/vfx/angle-authoring.md` (140 px/m at 1920×1080 zoom 1; ground `a=d>0, b=c=0`) ฉบับปัจจุบัน ณ 2026-11-07
 
 ## แหล่งหลัก
 

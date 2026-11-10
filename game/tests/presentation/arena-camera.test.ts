@@ -5,14 +5,16 @@ import { clampWorldScale, createFieldViewFrame } from '../../src/presentation/ar
 import { applyViewportToWorld, applyWorldToViewport, applyWorldVector, fieldPointM, fieldVectorM, isUniformScale, viewportPointPx } from '../../src/presentation/view-transform';
 
 describe('local skill VFX and animation camera contract', () => {
-  it('keeps the north-up ground axes equally scaled and perpendicular', () => {
+  it('keeps north up with perpendicular ground axes at 33 degrees elevation', () => {
     const east = projectArenaVector({ x: 1, y: 0 }), south = projectArenaVector({ x: 0, y: 1 });
     expect(east).toEqual({ x: 140, y: 0 });
-    expect(south).toEqual({ x: 0, y: 140 });
-    expect(Math.hypot(south.x, south.y) / Math.hypot(east.x, east.y)).toBe(1);
+    expect(south.x).toBe(0);
+    expect(south.y).toBeCloseTo(140 * Math.sin(33 * Math.PI / 180), 8);
+    expect(east.x * south.x + east.y * south.y).toBe(0);
+    expect(Math.hypot(south.x, south.y) / Math.hypot(east.x, east.y)).toBeCloseTo(Math.sin(33 * Math.PI / 180), 8);
   });
   it('keeps world headings aligned with the screen-facing sectors', () => {
-    for (const [screenAngle, expectedWorldAngle] of [[0, 0], [45, 45], [90, 90], [-45, 315]]) {
+    for (const [screenAngle, expectedWorldAngle] of [[0, 0], [45, 61.42556390245955], [90, 90], [-45, 298.57443609754045]]) {
       const radians = screenAngle * Math.PI / 180;
       const world = arenaWorldDirection({ x: Math.cos(radians), y: Math.sin(radians) });
       const angle = (Math.atan2(world.y, world.x) * 180 / Math.PI + 360) % 360;
@@ -28,7 +30,7 @@ describe('local skill VFX and animation camera contract', () => {
     }
     expect(arenaWorldDirection({ x: 0, y: 0 })).toEqual({ x: 0, y: 0 });
   });
-  it('preserves circular ground footprints and the common actor width reference', () => {
+  it('projects ground circles to the 33-degree ellipse while preserving world radius and actor width', () => {
     const points = Array.from({ length: 720 }, (_, index) => projectArenaVector({
       x: Math.cos(index * Math.PI / 360), y: Math.sin(index * Math.PI / 360),
     }));
@@ -37,8 +39,9 @@ describe('local skill VFX and animation camera contract', () => {
     const xy = points.reduce((sum, point) => sum + point.x * point.y, 0) / points.length;
     const spread = Math.hypot(xx - yy, 2 * xy);
     const ratio = Math.sqrt((xx + yy - spread) / (xx + yy + spread));
-    expect(ratio).toBeCloseTo(1, 8);
-    for (const point of points) expect(Math.hypot(point.x, point.y)).toBeCloseTo(140, 8);
+    expect(ratio).toBeCloseTo(Math.sin(33 * Math.PI / 180), 8);
+    for (const point of points) expect(Math.hypot(point.x / 140,
+      point.y / (140 * Math.sin(33 * Math.PI / 180)))).toBeCloseTo(1, 8);
     expect(ARENA_CAMERA.projection.a).toBe(140);
   });
 
@@ -138,32 +141,32 @@ describe('field view frame parity with the fixed-reference camera (WP1 A1-A3)', 
       if (!frame.renderable) continue;
       expect(frame.cssPixelsPerMeter).toBeCloseTo(140 * scale, 10);
       expect(frame.worldToViewport.a).toBeGreaterThan(0);
-      expect(frame.worldToViewport.a).toBe(frame.worldToViewport.d);
+      expect(frame.worldToViewport.d / frame.worldToViewport.a).toBeCloseTo(Math.sin(33 * Math.PI / 180), 8);
       expect(frame.worldToViewport.b).toBe(0);
       expect(frame.worldToViewport.c).toBe(0);
-      expect(isUniformScale(frame.worldToViewport)).toBe(true);
+      expect(isUniformScale(frame.worldToViewport)).toBe(false);
       const actor = applyWorldVector(frame.worldToViewport, fieldVectorM(0.5, 0));
       const area = applyWorldVector(frame.worldToViewport, fieldVectorM(3, 0));
       expect(Math.hypot(area.x, area.y) / Math.hypot(actor.x, actor.y)).toBeCloseTo(6, 8);
       const axis = applyWorldVector(frame.worldToViewport, fieldVectorM(1, 0));
       const other = applyWorldVector(frame.worldToViewport, fieldVectorM(0, 1));
-      expect(Math.hypot(axis.x, axis.y)).toBeCloseTo(Math.hypot(other.x, other.y), 8);
+      expect(Math.hypot(other.x, other.y) / Math.hypot(axis.x, axis.y)).toBeCloseTo(Math.sin(33 * Math.PI / 180), 8);
       if (previous !== undefined) expect(frame.cssPixelsPerMeter / previous).toBeCloseTo(scale / scales[scales.indexOf(scale) - 1], 8);
       previous = frame.cssPixelsPerMeter;
     }
   });
 
-  it('keeps circles circular when the HUD changes the viewport height', () => {
+  it('keeps the ground ellipse ratio when the HUD changes the viewport height', () => {
     const tall = frameFor(1, { width: 1920, height: 1080 });
     const short = frameFor(1, { width: 1920, height: 700 });
     expect(tall.renderable && short.renderable).toBe(true);
     if (!tall.renderable || !short.renderable) return;
     expect(tall.cssPixelsPerMeter).toBeCloseTo(short.cssPixelsPerMeter, 10);
     for (const frame of [tall, short]) {
-      expect(isUniformScale(frame.worldToViewport)).toBe(true);
+      expect(isUniformScale(frame.worldToViewport)).toBe(false);
       const axis = applyWorldVector(frame.worldToViewport, fieldVectorM(1, 0));
       const other = applyWorldVector(frame.worldToViewport, fieldVectorM(0, 1));
-      expect(Math.hypot(axis.x, axis.y)).toBeCloseTo(Math.hypot(other.x, other.y), 8);
+      expect(Math.hypot(other.x, other.y) / Math.hypot(axis.x, axis.y)).toBeCloseTo(Math.sin(33 * Math.PI / 180), 8);
     }
     // The focus stays on the anchor; only the anchor moves with the height.
     expect(applyWorldToViewport(tall.worldToViewport, fieldPointM(25, 16)).y).toBeCloseTo(540, 8);

@@ -6,6 +6,7 @@ import { skillAreaSnapshot } from '@engine/skill-area';
 import { sm } from '../../src/engine/client';
 import { createCombatArena, type CombatArenaAction } from '@sim/combat/combat-arena';
 import { createFieldViewFrame } from '../../src/presentation/arena-view-frame';
+import { ARENA_CAMERA } from '../../src/presentation/arena-camera';
 import { fieldPointM } from '../../src/presentation/view-transform';
 import {
   projectSkillGeometry,
@@ -92,10 +93,12 @@ describe('WP4 skill/VFX geometry contract', () => {
     };
     const wide = placementAt(1920, 1080);
     const narrow = placementAt(600, 337.5);
-    expect(wide.width).toBeCloseTo(6, 9);
-    expect(wide.height).toBeCloseTo(6, 9);
-    expect(narrow.width).toBeCloseTo(6, 9);
-    expect(narrow.height).toBeCloseTo(6, 9);
+    // Painted content owns the footprint; atlas padding is outside it.
+    const content = atlas!.content ?? { widthRatio: 1, heightRatio: 1 };
+    expect(wide.width * content.widthRatio).toBeCloseTo(6, 9);
+    expect(wide.height * content.heightRatio).toBeCloseTo(6, 9);
+    expect(narrow.width * content.widthRatio).toBeCloseTo(6, 9);
+    expect(narrow.height * content.heightRatio).toBeCloseTo(6, 9);
     const decalAt = (width: number, height: number) => {
       const frame = createFieldViewFrame({
         sceneKey: 'r2', atUs: 0, viewportCss: { width, height },
@@ -228,13 +231,13 @@ describe('WP4 skill/VFX geometry contract', () => {
     const small = projectSkillGeometry(first, frameFor(0.5))!;
     const large = projectSkillGeometry(first, frameFor(2))!;
     expect(small.footprint).not.toBe(large.footprint);
-    // Ground decal stays axis-aligned and circular on the north-up field at any scale.
+    // Ground decal keeps the camera's axis-aligned ellipse at every scale.
     for (const scale of [0.5, 1, 2]) {
       const frame = frameFor(scale);
       const m = groundDecalMatrixForFrame({ x: 100, y: 100 }, 3, frame, 2048)!;
       expect(m.b).toBeCloseTo(0, 8);
       expect(m.c).toBeCloseTo(0, 8);
-      expect(m.a).toBeCloseTo(m.d, 8);
+      expect(m.d / m.a).toBeCloseTo(ARENA_CAMERA.projection.d / ARENA_CAMERA.projection.a, 8);
       expect(m.a).toBeCloseTo(2 * 3 * frame.cssPixelsPerMeter / 2048, 8);
     }
   });

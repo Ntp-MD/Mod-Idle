@@ -79,6 +79,7 @@ describe('skill VFX atlas pool', () => {
     const pool = vfxVersionsFor('attack.fireball');
     expect(pool.length).toBeGreaterThan(0);
     expect(pool.every((version) => version.arena === true)).toBe(true);
+    expect(pool[0]).toMatchObject({ id: 'pool-v2', default: true, scale: 2 });
     expect(pool[0].layers[0].frame.count).toBeGreaterThan(1);
     const atlas = activeVfxArt('attack.fireball')?.atlas;
     expect(atlas).toBeTruthy();
@@ -90,6 +91,7 @@ describe('skill VFX atlas pool', () => {
     expect(atlas?.frames?.exit).toEqual([12, 15]);
     expect(atlas?.authoring?.delivery).toBe('projectile');
     const meta = JSON.parse(fs.readFileSync(path.join(path.dirname(publicPath(atlas!.src)), 'meta.json'), 'utf8'));
+    expect(atlas?.scale).toBe(meta.scale);
     expect(atlas?.virtualWidth).toBe(meta.virtualWidth);
     expect(atlas?.virtualHeight).toBe(meta.virtualHeight);
     if (meta.frames) {

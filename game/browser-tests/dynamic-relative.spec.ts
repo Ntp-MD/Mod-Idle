@@ -83,7 +83,7 @@ for (const skill of Object.keys(CONTENT) as Array<keyof typeof CONTENT>) {
   });
 }
 
-test('ground impact rings stay circular and scale with the actual field', async ({ page }) => {
+test('ground impact rings follow the camera ellipse and scale with the actual field', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
@@ -94,6 +94,10 @@ test('ground impact rings stay circular and scale with the actual field', async 
   await page.getByRole('button', { name: 'Pause game', exact: true }).click();
   const footprint = page.locator('.skill-geometry[data-skill-id="attack.meteor"][data-skill-phase="field"] .skill-footprint').first();
   await expect(footprint).toBeAttached();
+  const groundRatio = await page.evaluate(async () => {
+    const { ARENA_CAMERA } = await import('/src/presentation/arena-camera.ts');
+    return ARENA_CAMERA.projection.d / ARENA_CAMERA.projection.a;
+  });
 
   const measure = (locator: typeof ring) => locator.evaluate(element => {
     const shape = element as SVGGraphicsElement, box = shape.getBBox(), matrix = shape.getScreenCTM()!;
@@ -104,6 +108,11 @@ test('ground impact rings stay circular and scale with the actual field', async 
     skill: getComputedStyle(element.closest('[data-skill-rain]')!).color }));
   expect(colours.stroke).toBe(colours.skill);
   expect(colours.stroke).not.toBe('rgb(201, 247, 255)');
+  const spriteAxes = await page.locator('[data-skill-art="attack.meteor"][data-skill-rain] svg.atlas-frame').first().evaluate(element => {
+    const matrix = (element.parentElement as unknown as SVGGraphicsElement).getScreenCTM()!;
+    return { x: Math.hypot(matrix.a, matrix.b), y: Math.hypot(matrix.c, matrix.d) };
+  });
+  expect(spriteAxes.y / spriteAxes.x).toBeCloseTo(1, 6);
 
   let base: { ring: number; footprint: number } | undefined;
   for (const scale of [.5, .75, 1, 1.5, 2]) {
@@ -111,8 +120,8 @@ test('ground impact rings stay circular and scale with the actual field', async 
     if (base) await expect.poll(async () => (await measure(ring)).width / base!.ring)
       .toBeCloseTo(scale / .5, 2);
     const small = await measure(ring), area = await measure(footprint);
-    expect(small.width / small.height).toBeCloseTo(1, 3);
-    expect(area.width / area.height).toBeCloseTo(1, 3);
+    expect(small.height / small.width).toBeCloseTo(groundRatio, 3);
+    expect(area.height / area.width).toBeCloseTo(groundRatio, 3);
     base ??= { ring: small.width, footprint: area.width };
     expect(area.width / base.footprint).toBeCloseTo(scale / .5, 2);
   }
@@ -121,7 +130,7 @@ test('ground impact rings stay circular and scale with the actual field', async 
   const flash = page.locator('.skill-geometry[data-skill-id="attack.thunder_strike"] .vfx-column-flash').first();
   await expect(flash).toBeAttached({ timeout: 30_000 });
   const lightning = await measure(flash);
-  expect(lightning.width / lightning.height).toBeCloseTo(1, 3);
+  expect(lightning.height / lightning.width).toBeCloseTo(groundRatio, 3);
   expect(errors).toEqual([]);
 });
 

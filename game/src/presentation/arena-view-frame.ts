@@ -87,8 +87,7 @@ export function createFieldViewFrame(input: {
     y: viewportCss.height * ARENA_CAMERA.playerAnchor.y,
   };
 
-  // Topdown basis flows from the single camera source: identity today (a=d=1),
-  // oblique tomorrow — skill circles squash through this matrix automatically.
+  // The camera basis owns ground foreshortening for terrain, skill circles and picking.
   const basis = arenaTopdownBasis();
   const worldToViewport: Affine2 = {
     a: basis.a * cssPixelsPerMeter,

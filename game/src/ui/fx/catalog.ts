@@ -8,7 +8,12 @@
  * A version may be a single still (ground decal / upright burst) or an animated sprite sheet.
  * `frame` describes the sheet grid; the arena's atlas reader walks it at `fps`.
  */
+import { isVfxPalette, type VfxPaletteId } from './palettes';
+
 export type VfxLayerRole = 'ground' | 'upright';
+export type VfxSizePolicy = 'footprint' | 'body' | 'world';
+export type VfxBinding = 'area' | 'caster' | 'target' | 'contact' | 'release';
+export type VfxPhase = 'Aim' | 'Windup' | 'Travel' | 'Impact' | 'Field' | 'Channel';
 
 /** Source pixels placed on the shared virtual canvas without resizing the painted frame. */
 export interface VfxSourceFrame {
@@ -37,6 +42,7 @@ export interface VfxFrameGrid extends VfxAtlasSource {
 }
 
 export interface VfxLayer extends VfxAimMeta {
+  id?: string;
   role: VfxLayerRole;
   src: string;
   frame: VfxFrameGrid;
@@ -61,6 +67,12 @@ export interface VfxAuthoring {
 
 /** Authored aim metadata: where the art points, where its content sits, and its phase frames. */
 export interface VfxAimMeta {
+  palette?: VfxPaletteId;
+  sizePolicy?: VfxSizePolicy;
+  binding?: VfxBinding;
+  phases?: VfxPhase[];
+  delaySec?: number;
+  durationSec?: number;
   /** Straight-down animated ground art; apply the shared arena matrix once. */
   projection?: 'ground';
   /** Decorative staggered field playback; does not schedule damage. */
@@ -80,12 +92,15 @@ export interface VfxAimMeta {
   /** Authored frame ranges: opening, sustained loop, exit/impact. */
   frames?: { opening?: [number, number]; loop?: [number, number]; exit?: [number, number] };
   frameMs?: number;
+  /** Screen-facing atlas size multiplier around its anchor; does not change gameplay geometry. */
+  scale?: number;
   /** Share of the frame the painted content occupies; the rest is padding. */
   content?: { widthRatio: number; heightRatio: number };
   authoring?: VfxAuthoring;
 }
 
 export interface VfxAtlas extends VfxAimMeta, VfxAtlasSource {
+  id?: string;
   opacity?: number;
   src: string;
   width: number;
@@ -210,8 +225,19 @@ function isValidCandidate(version: VfxVersion, art?: SkillArt): boolean {
   if (!a) return false;
   const sources = candidateSources(version);
   if (sources.length === 0) return false;
+  const ids = new Set<string>();
+  for (const meta of [version, ...version.layers]) {
+    if (meta.palette != null && !isVfxPalette(meta.palette)) return false;
+    if (meta.sizePolicy != null && !['footprint', 'body', 'world'].includes(meta.sizePolicy)) return false;
+    if (meta.binding != null && !['area', 'caster', 'target', 'contact', 'release'].includes(meta.binding)) return false;
+    if (meta.delaySec != null && (!Number.isFinite(meta.delaySec) || meta.delaySec < 0)) return false;
+    if (meta.durationSec != null && (!Number.isFinite(meta.durationSec) || meta.durationSec <= 0)) return false;
+    if (meta.phases && (!meta.phases.length || !meta.phases.every(phase => ['Aim', 'Windup', 'Travel', 'Impact', 'Field', 'Channel'].includes(phase)))) return false;
+  }
   // validate every layer frame grid / fps / rects against texture bounds
   for (const layer of version.layers) {
+    if (layer.id && ids.has(layer.id)) return false;
+    if (layer.id) ids.add(layer.id);
     const f = layer.frame;
     if (!Number.isFinite(f.width) || !Number.isFinite(f.height) || !(f.width > 0) || !(f.height > 0)) return false;
     if (!Number.isFinite(f.count) || !(f.count >= 1) || !Number.isFinite(f.columns) || !(f.columns >= 1)) return false;
@@ -293,7 +319,7 @@ export function activeVfxArt(skillId: string): SkillArt | undefined {
     if (chosen) return chosen;
   }
   const atlasVersion = versions.find((version) =>
-    version?.arena !== false && version?.layers.some((layer) => layer.frame.count > 1));
+    version?.arena !== false && version?.layers.some((layer) => layer.frame.count >= 1));
   if (atlasVersion) {
     const art = artOf(atlasVersion);
     if (art?.atlas) return art;
@@ -303,18 +329,26 @@ export function activeVfxArt(skillId: string): SkillArt | undefined {
 }
 
 function artOf(version: VfxVersion): SkillArt | undefined {
-  if (version.layers.filter(layer => layer.frame.count > 1).length > 1) {
-    const atlases = version.layers.filter(layer => layer.frame.count > 1).flatMap((layer, index) => {
+  if (version.layers.filter(layer => layer.frame.count >= 1).length > 1) {
+    const atlases = version.layers.filter(layer => layer.frame.count >= 1).flatMap((layer, index) => {
       const atlas = artOf({ ...version, projection: index === 0 ? version.projection : layer.projection,
         ...layer, layers: [layer] })?.atlas;
       return atlas ? [atlas] : [];
     });
     return { atlas: atlases[0], atlases };
   }
-  const layer = version.layers.find((entry) => entry.frame.count > 1);
+  const layer = version.layers.find((entry) => entry.frame.count >= 1);
   if (layer) {
+    const meta = { ...version, ...layer };
     return {
       atlas: {
+        ...(layer.id ? { id: layer.id } : {}),
+        ...(meta.palette ? { palette: meta.palette } : {}),
+        ...(meta.sizePolicy ? { sizePolicy: meta.sizePolicy } : {}),
+        ...(meta.binding ? { binding: meta.binding } : {}),
+        ...(meta.phases ? { phases: meta.phases } : {}),
+        ...(meta.delaySec != null ? { delaySec: meta.delaySec } : {}),
+        ...(meta.durationSec != null ? { durationSec: meta.durationSec } : {}),
         ...(layer.opacity != null ? { opacity: layer.opacity } : {}),
         src: layer.src,
         width: layer.frame.width,
@@ -329,12 +363,13 @@ function artOf(version: VfxVersion): SkillArt | undefined {
         ...(layer.frame.sourceFrames ? { sourceFrames: layer.frame.sourceFrames } : {}),
         fps: layer.fps ?? 12,
         loop: layer.loop ?? false,
-        ...(version.projection ? { projection: version.projection } : {}),
-        ...(version.orient != null ? { orient: version.orient } : {}),
-        ...(version.anchor ? { anchor: version.anchor } : {}),
-        ...(version.impactAnchor ? { impactAnchor: version.impactAnchor } : {}),
-        ...(version.frames ? { frames: version.frames } : {}),
-        ...(version.frameMs != null ? { frameMs: version.frameMs } : {}),
+        ...(meta.projection ? { projection: meta.projection } : {}),
+        ...(meta.orient != null ? { orient: meta.orient } : {}),
+        ...(meta.anchor ? { anchor: meta.anchor } : {}),
+        ...(meta.impactAnchor ? { impactAnchor: meta.impactAnchor } : {}),
+        ...(meta.frames ? { frames: meta.frames } : {}),
+        ...(meta.frameMs != null ? { frameMs: meta.frameMs } : {}),
+        ...(meta.scale != null ? { scale: meta.scale } : {}),
         ...(version.rainDurationSec != null ? { rainDurationSec: version.rainDurationSec } : {}),
         ...(version.rainPhase ? { rainPhase: version.rainPhase } : {}),
         ...(version.rainIntervalSec != null ? { rainIntervalSec: version.rainIntervalSec } : {}),

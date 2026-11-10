@@ -4,7 +4,7 @@ import ArenaGround from '../../src/ui/combat/ArenaGround.svelte';
 import CombatArenaScene from '../../src/ui/combat/CombatArenaScene.svelte';
 import { arenaArt } from '../../src/ui/combat/arena/arena-art';
 import { arenaGroundForField, arenaGroundMaterials } from '../../src/ui/combat/arena/arena-ground-materials';
-import { ARENA_VIEW, arenaZoomView, projectArenaPoint, projectArenaVector, unprojectArenaPoint } from '../../src/presentation/arena-camera';
+import { ARENA_CAMERA, ARENA_VIEW, arenaZoomView, projectArenaPoint, projectArenaVector, unprojectArenaPoint } from '../../src/presentation/arena-camera';
 import { createFieldViewFrame } from '../../src/presentation/arena-view-frame';
 import { applyWorldToViewport, applyWorldVector, fieldPointM, fieldVectorM, isUniformScale } from '../../src/presentation/view-transform';
 import { createCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
@@ -29,11 +29,11 @@ describe('world-projected arena ground', () => {
     expect(arenaZoomView(1, { width: 0, height: 0 })).toEqual(ARENA_VIEW);
   });
 
-  it('keeps north up and equal distances on both field axes', () => {
+  it('keeps north up and applies the camera elevation to the ground axes', () => {
     const right = projectArenaVector({ x: 1, y: 0 }), down = projectArenaVector({ x: 0, y: 1 });
     expect(right.y).toBe(0);
     expect(down.x).toBe(0);
-    expect(right.x).toBe(down.y);
+    expect(down.y / right.x).toBeCloseTo(ARENA_CAMERA.projection.d / ARENA_CAMERA.projection.a, 8);
     expect(right.x).toBeGreaterThan(0);
     const world = { x: 13.25, y: 17.125 };
     const roundTrip = unprojectArenaPoint(projectArenaPoint(world));
@@ -105,12 +105,12 @@ describe('field view frame shared scale (WP1 A2-A3)', () => {
       expect(frame.renderable).toBe(true);
       if (!frame.renderable) continue;
       expect(frame.cssPixelsPerMeter).toBeCloseTo(140 * scale, 10);
-      expect(isUniformScale(frame.worldToViewport)).toBe(true);
+      expect(isUniformScale(frame.worldToViewport)).toBe(false);
       const actor = applyWorldVector(frame.worldToViewport, fieldVectorM(0.5, 0));
       const area = applyWorldVector(frame.worldToViewport, fieldVectorM(3, 0));
       expect(Math.hypot(area.x, area.y) / Math.hypot(actor.x, actor.y)).toBeCloseTo(6, 8);
-      // One dynamic scale for both screen axes: height follows the stage aspect, never stretched.
-      expect(frame.worldToViewport.a).toBe(frame.worldToViewport.d);
+      // The shared zoom preserves the camera elevation independently of stage aspect.
+      expect(frame.worldToViewport.d / frame.worldToViewport.a).toBeCloseTo(ARENA_CAMERA.projection.d / ARENA_CAMERA.projection.a, 8);
       expect(frame.worldToViewport.b).toBe(0);
       expect(frame.worldToViewport.c).toBe(0);
     }

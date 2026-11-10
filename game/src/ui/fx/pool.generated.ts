@@ -12694,560 +12694,6 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
       "layers": []
     }
   ],
-  "attack.fireball": [
-    {
-      "id": "pool-v3",
-      "label": "Default · v3",
-      "arena": true,
-      "default": true,
-      "orient": true,
-      "anchor": [
-        0.5062217194570136,
-        0.5197963800904978
-      ],
-      "impactAnchor": [
-        0.501131221719457,
-        0.4819004524886878
-      ],
-      "frames": {
-        "opening": [
-          0,
-          3
-        ],
-        "loop": [
-          4,
-          11
-        ],
-        "exit": [
-          12,
-          15
-        ]
-      },
-      "frameMs": 70,
-      "content": {
-        "widthRatio": 0.2934609250398724,
-        "heightRatio": 0.2647527910685805
-      },
-      "authoring": {
-        "origin": "target",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-fireball/v3/atlas.png",
-          "frame": {
-            "width": 313.5,
-            "height": 313.5,
-            "count": 16,
-            "columns": 4,
-            "rows": 4,
-            "textureWidth": 1254,
-            "textureHeight": 1254
-          },
-          "fps": 14,
-          "loop": false
-        }
-      ]
-    },
-    {
-      "id": "pool-rimworld",
-      "label": "rimworld",
-      "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v1",
-      "label": "v1",
-      "arena": true,
-      "default": false,
-      "layers": [
-        {
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-fireball/v1/atlas-v1.png",
-          "frame": {
-            "width": 352,
-            "height": 352,
-            "count": 16,
-            "columns": 4,
-            "rows": 4,
-            "textureWidth": 1408,
-            "textureHeight": 1408
-          },
-          "fps": 13,
-          "loop": false
-        }
-      ]
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
-      "orient": true,
-      "anchor": [
-        0.5062217194570136,
-        0.5197963800904978
-      ],
-      "impactAnchor": [
-        0.501131221719457,
-        0.4819004524886878
-      ],
-      "frames": {
-        "opening": [
-          0,
-          3
-        ],
-        "loop": [
-          4,
-          11
-        ],
-        "exit": [
-          12,
-          15
-        ]
-      },
-      "frameMs": 70,
-      "content": {
-        "widthRatio": 0.3755656108597285,
-        "heightRatio": 0.2669683257918552
-      },
-      "authoring": {
-        "origin": "target",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-fireball/v2/atlas.png",
-          "frame": {
-            "width": 313.5,
-            "height": 313.5,
-            "count": 16,
-            "columns": 4,
-            "rows": 4,
-            "textureWidth": 1254,
-            "textureHeight": 1254,
-            "virtualWidth": 442,
-            "virtualHeight": 442,
-            "sourceFrames": [
-              {
-                "rect": [
-                  0,
-                  0,
-                  313,
-                  313
-                ],
-                "offsetX": 64.5,
-                "offsetY": 64.5
-              },
-              {
-                "rect": [
-                  313,
-                  0,
-                  314,
-                  313
-                ],
-                "offsetX": 64,
-                "offsetY": 64.5
-              },
-              {
-                "rect": [
-                  627,
-                  0,
-                  313,
-                  313
-                ],
-                "offsetX": 64.5,
-                "offsetY": 64.5
-              },
-              {
-                "rect": [
-                  940,
-                  0,
-                  314,
-                  313
-                ],
-                "offsetX": 64,
-                "offsetY": 64.5
-              },
-              {
-                "rect": [
-                  0,
-                  313,
-                  313,
-                  314
-                ],
-                "offsetX": 64.5,
-                "offsetY": 64
-              },
-              {
-                "rect": [
-                  313,
-                  313,
-                  314,
-                  314
-                ],
-                "offsetX": 64,
-                "offsetY": 64
-              },
-              {
-                "rect": [
-                  627,
-                  313,
-                  313,
-                  314
-                ],
-                "offsetX": 64.5,
-                "offsetY": 64
-              },
-              {
-                "rect": [
-                  940,
-                  313,
-                  314,
-                  314
-                ],
-                "offsetX": 64,
-                "offsetY": 64
-              },
-              {
-                "rect": [
-                  0,
-                  627,
-                  313,
-                  313
-                ],
-                "offsetX": 64.5,
-                "offsetY": 64.5
-              },
-              {
-                "rect": [
-                  313,
-                  627,
-                  314,
-                  313
-                ],
-                "offsetX": 64,
-                "offsetY": 64.5
-              },
-              {
-                "rect": [
-                  627,
-                  627,
-                  313,
-                  313
-                ],
-                "offsetX": 64.5,
-                "offsetY": 64.5
-              },
-              {
-                "rect": [
-                  940,
-                  627,
-                  314,
-                  313
-                ],
-                "offsetX": 64,
-                "offsetY": 64.5
-              },
-              {
-                "rect": [
-                  0,
-                  940,
-                  313,
-                  314
-                ],
-                "offsetX": 64.5,
-                "offsetY": 64
-              },
-              {
-                "rect": [
-                  313,
-                  940,
-                  314,
-                  314
-                ],
-                "offsetX": 64,
-                "offsetY": 64
-              },
-              {
-                "rect": [
-                  627,
-                  940,
-                  313,
-                  314
-                ],
-                "offsetX": 64.5,
-                "offsetY": 64
-              },
-              {
-                "rect": [
-                  940,
-                  940,
-                  314,
-                  314
-                ],
-                "offsetX": 64,
-                "offsetY": 64
-              }
-            ]
-          },
-          "fps": 14,
-          "loop": false
-        }
-      ]
-    }
-  ],
-  "attack.firestorm": [
-    {
-      "id": "pool-v1",
-      "label": "Default · v1",
-      "arena": true,
-      "default": true,
-      "layers": [
-        {
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-firestorm/v1/atlas-v1.png",
-          "frame": {
-            "width": 352,
-            "height": 352,
-            "count": 16,
-            "columns": 4,
-            "rows": 4,
-            "textureWidth": 1408,
-            "textureHeight": 1408
-          },
-          "fps": 13,
-          "loop": false
-        }
-      ]
-    },
-    {
-      "id": "pool-rimworld",
-      "label": "rimworld",
-      "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
-      "frames": {
-        "opening": [
-          0,
-          3
-        ],
-        "loop": [
-          4,
-          11
-        ],
-        "exit": [
-          12,
-          15
-        ]
-      },
-      "frameMs": 90,
-      "content": {
-        "widthRatio": 0.6764705882352942,
-        "heightRatio": 0.5138004246284501
-      },
-      "authoring": {
-        "shape": "circle",
-        "origin": "target",
-        "radiusM": 3,
-        "spanM": 6,
-        "depthM": 6,
-        "diameterM": 6
-      },
-      "layers": [
-        {
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-firestorm/v2/atlas.png",
-          "frame": {
-            "width": 313.5,
-            "height": 313.5,
-            "count": 16,
-            "columns": 4,
-            "rows": 4,
-            "textureWidth": 1254,
-            "textureHeight": 1254,
-            "virtualWidth": 442,
-            "virtualHeight": 471,
-            "sourceFrames": [
-              {
-                "rect": [
-                  0,
-                  0,
-                  313,
-                  343
-                ],
-                "offsetX": 64.5,
-                "offsetY": 64
-              },
-              {
-                "rect": [
-                  313,
-                  0,
-                  314,
-                  343
-                ],
-                "offsetX": 64,
-                "offsetY": 64
-              },
-              {
-                "rect": [
-                  627,
-                  0,
-                  313,
-                  343
-                ],
-                "offsetX": 64.5,
-                "offsetY": 64
-              },
-              {
-                "rect": [
-                  940,
-                  0,
-                  314,
-                  343
-                ],
-                "offsetX": 64,
-                "offsetY": 64
-              },
-              {
-                "rect": [
-                  0,
-                  343,
-                  313,
-                  287
-                ],
-                "offsetX": 64.5,
-                "offsetY": 92
-              },
-              {
-                "rect": [
-                  313,
-                  343,
-                  314,
-                  287
-                ],
-                "offsetX": 64,
-                "offsetY": 92
-              },
-              {
-                "rect": [
-                  627,
-                  343,
-                  313,
-                  287
-                ],
-                "offsetX": 64.5,
-                "offsetY": 92
-              },
-              {
-                "rect": [
-                  940,
-                  343,
-                  314,
-                  287
-                ],
-                "offsetX": 64,
-                "offsetY": 92
-              },
-              {
-                "rect": [
-                  0,
-                  630,
-                  313,
-                  310
-                ],
-                "offsetX": 64.5,
-                "offsetY": 80.5
-              },
-              {
-                "rect": [
-                  313,
-                  630,
-                  314,
-                  310
-                ],
-                "offsetX": 64,
-                "offsetY": 80.5
-              },
-              {
-                "rect": [
-                  627,
-                  630,
-                  313,
-                  310
-                ],
-                "offsetX": 64.5,
-                "offsetY": 80.5
-              },
-              {
-                "rect": [
-                  940,
-                  630,
-                  314,
-                  310
-                ],
-                "offsetX": 64,
-                "offsetY": 80.5
-              },
-              {
-                "rect": [
-                  0,
-                  940,
-                  313,
-                  314
-                ],
-                "offsetX": 64.5,
-                "offsetY": 78.5
-              },
-              {
-                "rect": [
-                  313,
-                  940,
-                  314,
-                  314
-                ],
-                "offsetX": 64,
-                "offsetY": 78.5
-              },
-              {
-                "rect": [
-                  627,
-                  940,
-                  313,
-                  314
-                ],
-                "offsetX": 64.5,
-                "offsetY": 78.5
-              },
-              {
-                "rect": [
-                  940,
-                  940,
-                  314,
-                  314
-                ],
-                "offsetX": 64,
-                "offsetY": 78.5
-              }
-            ]
-          },
-          "fps": 11,
-          "loop": false
-        }
-      ]
-    }
-  ],
   "attack.ignite": [
     {
       "id": "pool-v1",
@@ -21078,6 +20524,569 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
       "default": false,
       "renderer": "procedural",
       "layers": []
+    }
+  ],
+  "attack.fireball": [
+    {
+      "id": "pool-v2",
+      "label": "Default · v2",
+      "arena": true,
+      "default": true,
+      "orient": true,
+      "anchor": [
+        0.5062217194570136,
+        0.5197963800904978
+      ],
+      "impactAnchor": [
+        0.501131221719457,
+        0.4819004524886878
+      ],
+      "frames": {
+        "opening": [
+          0,
+          3
+        ],
+        "loop": [
+          4,
+          11
+        ],
+        "exit": [
+          12,
+          15
+        ]
+      },
+      "frameMs": 70,
+      "scale": 2,
+      "content": {
+        "widthRatio": 0.3755656108597285,
+        "heightRatio": 0.2669683257918552
+      },
+      "authoring": {
+        "origin": "target",
+        "delivery": "projectile"
+      },
+      "layers": [
+        {
+          "role": "ground",
+          "src": "/fx/skill-pool/attack-fire/attack-fireball/v2/atlas.png",
+          "frame": {
+            "width": 313.5,
+            "height": 313.5,
+            "count": 16,
+            "columns": 4,
+            "rows": 4,
+            "textureWidth": 1254,
+            "textureHeight": 1254,
+            "virtualWidth": 442,
+            "virtualHeight": 442,
+            "sourceFrames": [
+              {
+                "rect": [
+                  0,
+                  0,
+                  313,
+                  313
+                ],
+                "offsetX": 64.5,
+                "offsetY": 64.5
+              },
+              {
+                "rect": [
+                  313,
+                  0,
+                  314,
+                  313
+                ],
+                "offsetX": 64,
+                "offsetY": 64.5
+              },
+              {
+                "rect": [
+                  627,
+                  0,
+                  313,
+                  313
+                ],
+                "offsetX": 64.5,
+                "offsetY": 64.5
+              },
+              {
+                "rect": [
+                  940,
+                  0,
+                  314,
+                  313
+                ],
+                "offsetX": 64,
+                "offsetY": 64.5
+              },
+              {
+                "rect": [
+                  0,
+                  313,
+                  313,
+                  314
+                ],
+                "offsetX": 64.5,
+                "offsetY": 64
+              },
+              {
+                "rect": [
+                  313,
+                  313,
+                  314,
+                  314
+                ],
+                "offsetX": 64,
+                "offsetY": 64
+              },
+              {
+                "rect": [
+                  627,
+                  313,
+                  313,
+                  314
+                ],
+                "offsetX": 64.5,
+                "offsetY": 64
+              },
+              {
+                "rect": [
+                  940,
+                  313,
+                  314,
+                  314
+                ],
+                "offsetX": 64,
+                "offsetY": 64
+              },
+              {
+                "rect": [
+                  0,
+                  627,
+                  313,
+                  313
+                ],
+                "offsetX": 64.5,
+                "offsetY": 64.5
+              },
+              {
+                "rect": [
+                  313,
+                  627,
+                  314,
+                  313
+                ],
+                "offsetX": 64,
+                "offsetY": 64.5
+              },
+              {
+                "rect": [
+                  627,
+                  627,
+                  313,
+                  313
+                ],
+                "offsetX": 64.5,
+                "offsetY": 64.5
+              },
+              {
+                "rect": [
+                  940,
+                  627,
+                  314,
+                  313
+                ],
+                "offsetX": 64,
+                "offsetY": 64.5
+              },
+              {
+                "rect": [
+                  0,
+                  940,
+                  313,
+                  314
+                ],
+                "offsetX": 64.5,
+                "offsetY": 64
+              },
+              {
+                "rect": [
+                  313,
+                  940,
+                  314,
+                  314
+                ],
+                "offsetX": 64,
+                "offsetY": 64
+              },
+              {
+                "rect": [
+                  627,
+                  940,
+                  313,
+                  314
+                ],
+                "offsetX": 64.5,
+                "offsetY": 64
+              },
+              {
+                "rect": [
+                  940,
+                  940,
+                  314,
+                  314
+                ],
+                "offsetX": 64,
+                "offsetY": 64
+              }
+            ]
+          },
+          "fps": 14,
+          "loop": false
+        }
+      ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
+    },
+    {
+      "id": "pool-v1",
+      "label": "v1",
+      "arena": true,
+      "default": false,
+      "layers": [
+        {
+          "role": "ground",
+          "src": "/fx/skill-pool/attack-fire/attack-fireball/v1/atlas.png",
+          "frame": {
+            "width": 352,
+            "height": 352,
+            "count": 16,
+            "columns": 4,
+            "rows": 4,
+            "textureWidth": 1408,
+            "textureHeight": 1408
+          },
+          "fps": 13,
+          "loop": false
+        }
+      ]
+    }
+  ],
+  "attack.firestorm": [
+    {
+      "id": "pool-v3",
+      "label": "Default · v3",
+      "arena": true,
+      "default": true,
+      "orient": false,
+      "anchor": [
+        0.5,
+        0.8484848484848485
+      ],
+      "impactAnchor": [
+        0.5,
+        0.8484848484848485
+      ],
+      "frames": {
+        "opening": [
+          0,
+          3
+        ],
+        "loop": [
+          4,
+          11
+        ],
+        "exit": [
+          12,
+          15
+        ]
+      },
+      "frameMs": 90,
+      "content": {
+        "widthRatio": 0.8452950558213717,
+        "heightRatio": 0.8740031897926634
+      },
+      "authoring": {
+        "shape": "circle",
+        "origin": "target",
+        "delivery": "ground",
+        "radiusM": 3,
+        "spanM": 6,
+        "depthM": 6,
+        "diameterM": 6
+      },
+      "layers": [
+        {
+          "id": "base",
+          "role": "upright",
+          "src": "/fx/skill-pool/attack-fire/attack-firestorm/v3/atlas.png",
+          "frame": {
+            "width": 313.5,
+            "height": 313.5,
+            "count": 16,
+            "columns": 4,
+            "rows": 4,
+            "textureWidth": 1254,
+            "textureHeight": 1254
+          },
+          "fps": 11,
+          "loop": false
+        }
+      ]
+    },
+    {
+      "id": "pool-rimworld",
+      "label": "rimworld",
+      "arena": true,
+      "default": false,
+      "renderer": "procedural",
+      "layers": []
+    },
+    {
+      "id": "pool-v1",
+      "label": "v1",
+      "arena": true,
+      "default": false,
+      "layers": [
+        {
+          "id": "base",
+          "role": "upright",
+          "src": "/fx/skill-pool/attack-fire/attack-firestorm/v1/atlas-v1.png",
+          "frame": {
+            "width": 352,
+            "height": 352,
+            "count": 16,
+            "columns": 4,
+            "rows": 4,
+            "textureWidth": 1408,
+            "textureHeight": 1408
+          },
+          "fps": 13,
+          "loop": false
+        }
+      ]
+    },
+    {
+      "id": "pool-v2",
+      "label": "v2",
+      "arena": true,
+      "default": false,
+      "frames": {
+        "opening": [
+          0,
+          3
+        ],
+        "loop": [
+          4,
+          11
+        ],
+        "exit": [
+          12,
+          15
+        ]
+      },
+      "frameMs": 90,
+      "content": {
+        "widthRatio": 0.6764705882352942,
+        "heightRatio": 0.5138004246284501
+      },
+      "authoring": {
+        "shape": "circle",
+        "origin": "target",
+        "radiusM": 3,
+        "spanM": 6,
+        "depthM": 6,
+        "diameterM": 6
+      },
+      "layers": [
+        {
+          "id": "base",
+          "role": "upright",
+          "src": "/fx/skill-pool/attack-fire/attack-firestorm/v2/atlas.png",
+          "frame": {
+            "width": 313.5,
+            "height": 313.5,
+            "count": 16,
+            "columns": 4,
+            "rows": 4,
+            "textureWidth": 1254,
+            "textureHeight": 1254,
+            "virtualWidth": 442,
+            "virtualHeight": 471,
+            "sourceFrames": [
+              {
+                "rect": [
+                  0,
+                  0,
+                  313,
+                  343
+                ],
+                "offsetX": 64.5,
+                "offsetY": 64
+              },
+              {
+                "rect": [
+                  313,
+                  0,
+                  314,
+                  343
+                ],
+                "offsetX": 64,
+                "offsetY": 64
+              },
+              {
+                "rect": [
+                  627,
+                  0,
+                  313,
+                  343
+                ],
+                "offsetX": 64.5,
+                "offsetY": 64
+              },
+              {
+                "rect": [
+                  940,
+                  0,
+                  314,
+                  343
+                ],
+                "offsetX": 64,
+                "offsetY": 64
+              },
+              {
+                "rect": [
+                  0,
+                  343,
+                  313,
+                  287
+                ],
+                "offsetX": 64.5,
+                "offsetY": 92
+              },
+              {
+                "rect": [
+                  313,
+                  343,
+                  314,
+                  287
+                ],
+                "offsetX": 64,
+                "offsetY": 92
+              },
+              {
+                "rect": [
+                  627,
+                  343,
+                  313,
+                  287
+                ],
+                "offsetX": 64.5,
+                "offsetY": 92
+              },
+              {
+                "rect": [
+                  940,
+                  343,
+                  314,
+                  287
+                ],
+                "offsetX": 64,
+                "offsetY": 92
+              },
+              {
+                "rect": [
+                  0,
+                  630,
+                  313,
+                  310
+                ],
+                "offsetX": 64.5,
+                "offsetY": 80.5
+              },
+              {
+                "rect": [
+                  313,
+                  630,
+                  314,
+                  310
+                ],
+                "offsetX": 64,
+                "offsetY": 80.5
+              },
+              {
+                "rect": [
+                  627,
+                  630,
+                  313,
+                  310
+                ],
+                "offsetX": 64.5,
+                "offsetY": 80.5
+              },
+              {
+                "rect": [
+                  940,
+                  630,
+                  314,
+                  310
+                ],
+                "offsetX": 64,
+                "offsetY": 80.5
+              },
+              {
+                "rect": [
+                  0,
+                  940,
+                  313,
+                  314
+                ],
+                "offsetX": 64.5,
+                "offsetY": 78.5
+              },
+              {
+                "rect": [
+                  313,
+                  940,
+                  314,
+                  314
+                ],
+                "offsetX": 64,
+                "offsetY": 78.5
+              },
+              {
+                "rect": [
+                  627,
+                  940,
+                  313,
+                  314
+                ],
+                "offsetX": 64.5,
+                "offsetY": 78.5
+              },
+              {
+                "rect": [
+                  940,
+                  940,
+                  314,
+                  314
+                ],
+                "offsetX": 64,
+                "offsetY": 78.5
+              }
+            ]
+          },
+          "fps": 11,
+          "loop": false
+        }
+      ]
     }
   ]
 };

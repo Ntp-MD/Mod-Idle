@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VFX component library execution</title><style>body{font:16px/1.6 system-ui,sans-serif;max-width:1050px;margin:32px auto;padding:0 20px;color:#1e293b;background:#f8fafc}section{padding:12px 20px;margin:18px 0;background:white;border:1px solid #cbd5e1;border-radius:8px}li{margin:10px 0}input{width:18px;height:18px;vertical-align:middle}.meta{color:#475569}code{background:#e2e8f0;padding:2px 5px}h1{font-size:27px}h2{font-size:21px}</style></head><body>
+<h1><label><input type="checkbox" id="complete"> VFX component library: 14 families x 7 palettes = 98 variants</label></h1>
+<p class="meta">Started 2026-11-09. Authorized by the user to execute after documentation. Scope: <a href="../vfx-component-library.md">design brief</a>. Preserve concurrent edits and the current branch; follow <a href="../../AGENTS.md">AGENTS.md</a>.</p>
+<p id="plan-current" class="meta">Current: p1-check</p>
+<p class="meta">Stopped at a new failing gate under AGENTS.md. Runtime changes are uncompleted work; no master atlas has been generated and no variant has been accepted.</p>
+<p class="meta">Production decision: fourteen generated master atlases with seven runtime palette treatments, represented by 98 verified selectable variants. No eighth support palette. Color variants share geometry and alpha. The camera stays at 33 degrees; tests also exercise alternative projections.</p>
+<section><h2><label><input type="checkbox" id="p1"> Runtime composition</label></h2><ul><li><label><input type="checkbox" id="p1-layers"> Support stable layer IDs, still frames, per-layer palette, size policy, bindings and phase timing without breaking legacy atlases.</label></li>
+<li><label><input type="checkbox" id="p1-ground"> Support multiple ground layers, common circle/line/cone placement and clipping, and draw filled ground below actors.</label></li>
+<li><label><input type="checkbox" id="p1-check"> Pass focused composition/geometry tests and compare any red gate to docs/known-failures.md.</label></li></ul></section>
+<section><h2><label><input type="checkbox" id="p2"> Palette and component inventory</label></h2><ul><li><label><input type="checkbox" id="p2-palette"> Implement seven palette renderings that preserve master frame geometry and alpha; provide all 98 real family/palette entries.</label></li>
+<li><label><input type="checkbox" id="p2-tests"> Verify palette identity, layer inheritance, registration and failed-image fallback.</label></li></ul></section>
+<section><h2><label><input type="checkbox" id="p3"> Master artwork</label></h2><ul><li><label><input type="checkbox" id="p3-assets"> Generate and install all 14 isolated canonical master atlases through imagegen in the existing skill-pool version structure.</label></li>
+<li><label><input type="checkbox" id="p3-qa"> Measure grids, alpha bounds and roots; record provenance and inspect rendered masters without claiming human art approval.</label></li></ul></section>
+<section><h2><label><input type="checkbox" id="p4"> Recipes and coverage</label></h2><ul><li><label><input type="checkbox" id="p4-recipes"> Publish 12 self-contained representative component recipes as new versions and integrate them with the existing production renderer.</label></li>
+<li><label><input type="checkbox" id="p4-inventory"> Produce a review gallery/contact sheets for all 98 variants and a 90-player/49-mob coverage map, reporting actual gaps.</label></li></ul></section>
+<section><h2><label><input type="checkbox" id="p5"> Verification and closeout</label></h2><ul><li><label><input type="checkbox" id="p5-browser"> Inspect 1920 x 1080 showcase DOM, console and screenshots; verify centers, ground edges, billboard axes, scene order and color variants across the agreed camera angles and scales.</label></li>
+<li><label><input type="checkbox" id="p5-fast"> Run npm run check, focused specs and test:fast; record exact known baselines without altering unrelated code.</label></li>
+<li><label><input type="checkbox" id="p5-full"> Run the full suite once at closeout, check docs/known-failures.md, and record the outcome honestly.</label></li>
+<li><label><input type="checkbox" id="p5-docs"> Update the handoff and this execution record with generated assets, commands/results and remaining human visual review.</label></li></ul></section>
+<section><h2>Manual sign-off</h2><p>Human review remains open for master shapes, palette taste, highlights and composed skill appearance. Agent mechanical checks and screenshots do not complete these reviews.</p></section>
+<p class="meta">Stop only for a save-flow approval need, an unresolved owner behavior/RNG/balance/UX decision, an unexpected failing gate, or unavailable tooling that prevents verification, under AGENTS.md. Baselines: <a href="../known-failures.md">known-failures.md</a>.</p>
+<div id="evidence">
+<p class="meta">2026-11-09: added layer IDs, single-frame composition, palette metadata, binding/size/phase controls, shared ground fitting/clipping and separate ground/upright layers. These changes are not yet accepted.</p>
+<p class="meta">Seven palette tables and fourteen family definitions exist in tools/data/vfx-components.json. They do not constitute 98 completed assets; all master production and visual inventory checks remain open.</p>
+<p class="meta">npm run check: TypeScript and svelte-check passed, 0 errors and 0 warnings.</p>
+<p class="meta">Focused gate: 59 passed / 1 failed across 8 files. New failure: tests/ui/vfx-components.test.ts:96, “fits circles, zero-radius lines and cones to their committed bounds at every zoom”; expected X 960, received 977.5. This is not listed in docs/known-failures.md. Do not weaken the assertion or mark p1 complete.</p>
+<p class="meta">Resume at p1-check: isolate the failing shape and compare its fixture to the engine's committed area contract before deciding whether placement or the test data is incorrect. Gate record: .cache/vfx-components-core.log. Browser verification, test:fast, the full suite, asset generation and pilot recipes have not run for this implementation.</p>
+</div>
+</body></html>
+

@@ -10,7 +10,7 @@ import {
   fieldVectorM,
   isUniformScale,
 } from '../../src/presentation/view-transform';
-import { ARENA_DEFAULT_WORLD_SCALE } from '../../src/presentation/arena-camera';
+import { ARENA_CAMERA, ARENA_DEFAULT_WORLD_SCALE } from '../../src/presentation/arena-camera';
 
 const focus = fieldPointM(25, 16);
 
@@ -69,26 +69,28 @@ describe('arena-view-frame A1-A3', () => {
     expect(clampWorldScale(0.75)).toBe(0.75);
   });
 
-  it('round-trips world<->viewport with a uniform top-down matrix at every allowed scale', () => {
+  it('round-trips world<->viewport through the oblique camera at every allowed scale', () => {
     for (const scale of [0.5, 0.75, 1, 1.5, 2]) {
       const f = frame(scale);
       expect(f.renderable).toBe(true);
       if (!f.renderable) continue;
       expect(f.cssPixelsPerMeter).toBeCloseTo(140 * scale, 10);
       expect(f.worldToViewport.a).toBeGreaterThan(0);
-      expect(f.worldToViewport.a).toBe(f.worldToViewport.d);
+      expect(f.worldToViewport.d / f.worldToViewport.a).toBeCloseTo(ARENA_CAMERA.projection.d / ARENA_CAMERA.projection.a, 8);
       expect(f.worldToViewport.b).toBe(0);
       expect(f.worldToViewport.c).toBe(0);
-      expect(isUniformScale(f.worldToViewport)).toBe(true);
+      expect(isUniformScale(f.worldToViewport)).toBe(false);
       const p = fieldPointM(30.5, 10.25);
       const roundTrip = applyViewportToWorld(f.viewportToWorld, applyWorldToViewport(f.worldToViewport, p));
       expect(roundTrip.x).toBeCloseTo(p.x, 8);
       expect(roundTrip.y).toBeCloseTo(p.y, 8);
-      // Focus lands on the anchor; 1 m axes have equal projected length.
+      // Focus lands on the anchor; ground axes retain the camera's foreshortening.
       expect(applyWorldToViewport(f.worldToViewport, focus).x).toBeCloseTo(f.anchorCss.x, 8);
       expect(applyWorldToViewport(f.worldToViewport, focus).y).toBeCloseTo(f.anchorCss.y, 8);
-      expect(Math.hypot(...Object.values(applyWorldVector(f.worldToViewport, fieldVectorM(1, 0))) as [number, number]))
-        .toBeCloseTo(Math.hypot(...Object.values(applyWorldVector(f.worldToViewport, fieldVectorM(0, 1))) as [number, number]), 8);
+      const east = applyWorldVector(f.worldToViewport, fieldVectorM(1, 0));
+      const south = applyWorldVector(f.worldToViewport, fieldVectorM(0, 1));
+      expect(Math.hypot(south.x, south.y) / Math.hypot(east.x, east.y))
+        .toBeCloseTo(ARENA_CAMERA.projection.d / ARENA_CAMERA.projection.a, 8);
       // 0.5 m actor vs 3 m radius keeps ratio 6 at every scale.
       const actor = applyWorldVector(f.worldToViewport, fieldVectorM(0.5, 0));
       const area = applyWorldVector(f.worldToViewport, fieldVectorM(3, 0));

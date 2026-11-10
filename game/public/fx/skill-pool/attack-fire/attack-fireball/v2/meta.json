@@ -388,6 +388,7 @@
     15
   ],
   "frameMs": 70,
+  "scale": 2,
   "delivery": "projectile",
   "origin": "target",
   "radiusM": 0,

@@ -68,8 +68,7 @@ describe('the shared VFX aim contract', () => {
   it('adds atlas versions through registration only: every version stays bounded on the same mark', () => {
     const skillId = 'attack.fireball';
     const versions = vfxVersionsFor(skillId);
-    expect(versions.map(version => version.id)).toEqual(
-      expect.arrayContaining(['pool-v3', 'pool-v1', 'pool-v2']));
+    expect(versions[0]).toMatchObject({ id: 'pool-v2', default: true });
     const frame = frameFor();
     const { arena, action } = fixture(skillId);
     const mark = skillActionGeometry(action, arena, 1_500_000, arena.unitsPerSec)!;
@@ -96,14 +95,30 @@ describe('the shared VFX aim contract', () => {
         }
         expect(placement.anchorX, version.id).toBeGreaterThanOrEqual(0);
         expect(placement.anchorX, version.id).toBeLessThanOrEqual(1);
-        const cap = artSizePolicyFor(mark, atlas) === 'footprint'
-          ? Math.max(frame.viewportCss.width, frame.viewportCss.height) / 140 : mark.bodyM.height * 7;
+        const cap = (artSizePolicyFor(mark, atlas) === 'footprint'
+          ? Math.max(frame.viewportCss.width, frame.viewportCss.height) / 140 : mark.bodyM.height * 7) * (atlas.scale ?? 1);
         expect(placement.width, version.id).toBeLessThanOrEqual(cap + 1e-9);
         expect(placement.height, version.id).toBeLessThanOrEqual(cap + 1e-9);
       }
       expect(setActiveVfxVersion(skillId, 'no-such-version')).toBe(false);
     } finally {
       if (previous) setActiveVfxVersion(skillId, previous);
+    }
+  });
+
+  it('doubles Fireball v2 art through windup, travel and impact while keeping its placement and anchors', () => {
+    const { arena, action } = fixture('attack.fireball');
+    const atlas = skillArtFor('attack.fireball')!.atlas!;
+    expect(atlas.src).toContain('/attack-fireball/v2/atlas.png');
+    expect(atlas.scale).toBe(2);
+    for (const worldScale of [.5, 1, 2]) {
+      const frame = frameFor(worldScale);
+      for (const atUs of [500_000, 1_500_000, 2_000_000]) {
+        const mark = skillActionGeometry(action, arena, atUs, arena.unitsPerSec)!;
+        const original = skillArtPlacement(mark, { ...atlas, scale: 1 }, frame)!;
+        const doubled = skillArtPlacement(mark, atlas, frame)!;
+        expect(doubled).toEqual({ ...original, width: original.width * 2, height: original.height * 2 });
+      }
     }
   });
 
@@ -270,7 +285,7 @@ describe('the shared VFX aim contract', () => {
       const policy = artSizePolicyFor(mark, atlas);
       // Only body-relative layers are capped by the body model; footprint and
       // authored world layers carry their own metres (R2/R5).
-      const cap = policy === 'body' ? mark.bodyM.height * 7 : Number.POSITIVE_INFINITY;
+      const cap = policy === 'body' ? mark.bodyM.height * 7 * (atlas.scale ?? 1) : Number.POSITIVE_INFINITY;
       expect(Number.isFinite(placement.width), skill.id).toBe(true);
       expect(placement.width, skill.id).toBeLessThanOrEqual(cap + 1e-9);
       expect(placement.height, skill.id).toBeLessThanOrEqual(cap + 1e-9);
@@ -297,7 +312,7 @@ describe('the shared VFX aim contract', () => {
       expect(placement.width, skill.id).toBeGreaterThan(0);
       expect(placement.height, skill.id).toBeGreaterThan(0);
       const policy = artSizePolicyFor(mark, art.atlas);
-      const attackCap = policy === 'body' ? mark.bodyM.height * 7 : Number.POSITIVE_INFINITY;
+      const attackCap = policy === 'body' ? mark.bodyM.height * 7 * (art.atlas.scale ?? 1) : Number.POSITIVE_INFINITY;
       expect(placement.width, skill.id).toBeLessThanOrEqual(attackCap + 1e-9);
       expect(placement.height, skill.id).toBeLessThanOrEqual(attackCap + 1e-9);
       expect(placement.anchorX, skill.id).toBeGreaterThanOrEqual(0);

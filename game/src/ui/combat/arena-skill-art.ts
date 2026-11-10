@@ -10,7 +10,7 @@ import { activeVfxArt, activeVfxVersion, vfxArtCandidates, type SkillArt, type V
 import { getVfxAssetStatus } from '../fx/vfx-assets.svelte';
 import type { FieldViewFrame } from '../../presentation/arena-view-frame';
 import { ARENA_REF_PX_PER_M } from '../../presentation/arena-camera';
-import { applyWorldVector, fieldVectorM, type Affine2 } from '../../presentation/view-transform';
+import { applyWorldToViewport, applyWorldVector, fieldPointM, fieldVectorM, type Affine2 } from '../../presentation/view-transform';
 import type { SkillGeometry, SkillGeometryScreen } from './skill-geometry';
 import { VFX_BODY_LIFT_SHARE, VFX_HAND_LIFT_M, VFX_HAND_LIFT_SHARE, SKILL_SHAPE_MIN_M, groundShapeWorldPoints } from './arena-vfx-space';
 
@@ -127,6 +127,7 @@ export type SkillArtSizePolicy = 'footprint' | 'body' | 'world' | 'ui';
 
 /** Policy for one mark/atlas pair, derived from shape+delivery only — never a skill id. */
 export function artSizePolicyFor(mark: SkillGeometry, atlas: VfxAtlas): SkillArtSizePolicy {
+  if (atlas.sizePolicy) return atlas.sizePolicy;
   const authoring = atlas.authoring ?? {};
   const areaShape = mark.area.shape ?? ((mark.area.radiusM ?? 0) > 0 ? 'circle' : 'single');
   const shape = areaShape === 'line' || areaShape === 'cone'
@@ -145,23 +146,24 @@ export function artSizePolicyFor(mark: SkillGeometry, atlas: VfxAtlas): SkillArt
 export function atlasFrameIndex(mark: SkillGeometry, atlas: VfxAtlas): number {
   const fps = atlas.frameMs && atlas.frameMs > 0 ? 1000 / atlas.frameMs : Math.max(1, atlas.fps);
   const index = (seconds: number) => Math.floor(Math.max(0, seconds) * fps);
+  const elapsed = Math.max(0, mark.phaseElapsedSec - (atlas.delaySec ?? 0));
   if (mark.phase === 'Aim' || mark.phase === 'Windup') {
     const opening = atlas.frames?.opening;
-    if (opening) return clamp(opening[0] + index(mark.phaseElapsedSec), opening[0], opening[1]);
+    if (opening) return clamp(opening[0] + index(elapsed), opening[0], opening[1]);
   }
   if (mark.phase === 'Travel') {
     const loop = atlas.authoring?.delivery === 'projectile' ? atlas.frames?.loop : undefined;
-    if (loop) return loop[0] + (index(mark.phaseElapsedSec) % Math.max(1, loop[1] - loop[0] + 1));
+    if (loop) return loop[0] + (index(elapsed) % Math.max(1, loop[1] - loop[0] + 1));
     const opening = atlas.frames?.opening;
-    if (opening) return clamp(opening[0] + index(mark.phaseElapsedSec), opening[0], opening[1]);
+    if (opening) return clamp(opening[0] + index(elapsed), opening[0], opening[1]);
   }
   if (mark.phase === 'Impact') {
     const range = atlasImpactFrames(atlas);
-    return clamp(range[0] + index(mark.phaseElapsedSec), range[0], range[1]);
+    return clamp(range[0] + index(elapsed), range[0], range[1]);
   }
   if (mark.phase === 'Field' || mark.phase === 'Channel') {
     const loop = atlas.frames?.loop;
-    if (loop) return loop[0] + (index(mark.phaseElapsedSec) % Math.max(1, loop[1] - loop[0] + 1));
+    if (loop) return loop[0] + (index(elapsed) % Math.max(1, loop[1] - loop[0] + 1));
   }
   return clamp(index(mark.elapsedSec ?? 0), 0, atlas.count - 1);
 }
@@ -176,11 +178,15 @@ function atlasImpactFrames(atlas: VfxAtlas): [number, number] {
 export function atlasImpactDuration(atlas: VfxAtlas): number {
   const range = atlasImpactFrames(atlas);
   const frameSec = atlas.frameMs && atlas.frameMs > 0 ? atlas.frameMs / 1000 : 1 / Math.max(1, atlas.fps);
-  return Math.max((range[1] - range[0] + 1) * frameSec, atlas.rainDurationSec ?? 0);
+  return Math.max((range[1] - range[0] + 1) * frameSec, atlas.rainDurationSec ?? 0, atlas.durationSec ?? 0) + (atlas.delaySec ?? 0);
 }
 
 /** Presentation ends with the authored fade, rather than holding the last painted frame. */
 export function atlasOpacity(mark: SkillGeometry, atlas: VfxAtlas): number {
+  if (atlas.phases && !atlas.phases.includes(mark.phase)) return 0;
+  const elapsed = mark.phaseElapsedSec - (atlas.delaySec ?? 0);
+  if (elapsed < 0) return 0;
+  if (atlas.durationSec != null && elapsed >= atlas.durationSec) return 0;
   if (mark.phase === 'Aim') return 0;
   if (mark.phase === 'Windup') return atlas.authoring?.delivery === 'projectile' ? .35 + mark.progress * .4 : 0;
   if (mark.phase !== 'Impact') return 1;
@@ -245,7 +251,13 @@ export function skillArtPlacement(mark: SkillGeometry, atlas: VfxAtlas,
   // shared body model. UI readability floors never change a world size.
   const policy = artSizePolicyFor(mark, atlas);
 
-  if (projectile) {
+  if (atlas.sizePolicy === 'body' && !projectile) {
+    contentW = bodyW * 2.8;
+    contentH = bodyH * 1.3;
+  } else if (atlas.sizePolicy === 'world' && shape !== 'line' && shape !== 'cone') {
+    contentW = Number(authoring.spanM ?? authoring.diameterM ?? 1.7);
+    contentH = Number(authoring.depthM ?? authoring.diameterM ?? 1.7);
+  } else if (projectile) {
     const from = releaseM;
     const to = impactM;
     const progress = mark.phase === 'Travel' ? clamp(mark.progress, 0, 1)
@@ -296,15 +308,24 @@ export function skillArtPlacement(mark: SkillGeometry, atlas: VfxAtlas,
     cy = impactM.y;
   }
 
+  if (atlas.binding) {
+    const point = atlas.binding === 'area' ? mark.area.center
+      : atlas.binding === 'caster' ? { x: mark.source.x, y: mark.source.y - bodyH * VFX_BODY_LIFT_SHARE }
+      : atlas.binding === 'target' ? { x: mark.target.x, y: mark.target.y - bodyH * VFX_BODY_LIFT_SHARE }
+      : atlas.binding === 'release' ? releaseM : impactM;
+    cx = point.x; cy = point.y;
+  }
+
   // Only body-relative layers keep the body-multiple safety cap; footprint and
   // authored world layers carry their own metres. Visible clipping happens at
   // the renderer boundary (SVG overflow/frame), never by editing world size.
   const fullCapM = policy === 'body' ? bodyH * 7 : Number.POSITIVE_INFINITY;
   const fullW = clamp(contentW / ratio(content?.widthRatio), 24 / REF_PX_PER_M, fullCapM);
   const fullH = clamp(contentH / ratio(content?.heightRatio), 20 / REF_PX_PER_M, fullCapM);
+  const scale = atlas.scale ?? 1;
   const anchor = (projectile && mark.phase === 'Impact' ? (atlas.impactAnchor ?? atlas.anchor) : atlas.anchor) ?? [0.5, 0.5];
   return {
-    cx, cy, width: fullW, height: fullH,
+    cx, cy, width: fullW * scale, height: fullH * scale,
     anchorX: clamp(anchor[0], 0, 1), anchorY: clamp(anchor[1], 0, 1),
     rotateDeg,
     mirror: (shape === 'single' && !projectile)
@@ -313,10 +334,34 @@ export function skillArtPlacement(mark: SkillGeometry, atlas: VfxAtlas,
   };
 }
 
+/** Project a raster sprite's root, then keep its painted axes at uniform world zoom. */
+export function billboardMatrixForFrame(centerM: { x: number; y: number }, frame: FieldViewFrame): Affine2 | undefined {
+  if (!frame.renderable) return undefined;
+  const center = applyWorldToViewport(frame.worldToViewport, fieldPointM(centerM.x, centerM.y));
+  return { a: frame.cssPixelsPerMeter, b: 0, c: 0, d: frame.cssPixelsPerMeter, e: center.x, f: center.y };
+}
+
+/** Fit source material to the actual committed boundary; the screen footprint clips its outline. */
+export function groundAtlasMatrixForFrame(mark: SkillGeometry, atlas: VfxAtlas, frame: FieldViewFrame): Affine2 | undefined {
+  if (!frame.renderable) return undefined;
+  const points = groundShapeWorldPoints(mark.area);
+  const xs = points.map(point => point.x), ys = points.map(point => point.y);
+  const left = Math.min(...xs), top = Math.min(...ys);
+  const widthM = Math.max(SKILL_SHAPE_MIN_M.width, Math.max(...xs) - left);
+  const heightM = Math.max(SKILL_SHAPE_MIN_M.width, Math.max(...ys) - top);
+  const canvasW = atlas.virtualWidth ?? atlas.width, canvasH = atlas.virtualHeight ?? atlas.height;
+  const xScale = widthM / ratio(atlas.content?.widthRatio) / canvasW;
+  const yScale = heightM / ratio(atlas.content?.heightRatio) / canvasH;
+  const center = applyWorldToViewport(frame.worldToViewport, fieldPointM(left + widthM / 2, top + heightM / 2));
+  const basis = frame.worldToViewport;
+  const a = basis.a * xScale, b = basis.b * xScale, c = basis.c * yScale, d = basis.d * yScale;
+  return { a, b, c, d, e: center.x - (a * canvasW + c * canvasH) / 2, f: center.y - (b * canvasW + d * canvasH) / 2 };
+}
+
 /**
  * Frame-driven ground decal matrix: scales the single topdown basis by the
- * world radius, so circles stay circular north-up today and squash with the
- * frame if the topdown angle changes. No second projection lives here.
+ * world radius, so ground circles follow the camera elevation through the
+ * frame. No second projection lives here.
  */
 export function groundDecalMatrixForFrame(
   centerPx: { x: number; y: number },

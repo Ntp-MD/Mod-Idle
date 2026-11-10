@@ -163,7 +163,7 @@
       style={`--skill-element:${mark.colour}`}
       data-vfx-renderer={resolveVfxPresentation(mark.skillId, vfxMode).kind}
       data-vfx-base-reason={resolveVfxPresentation(mark.skillId, vfxMode).kind === 'base' ? (resolveVfxPresentation(mark.skillId, vfxMode) as any).reason : ''}
-      data-skill-id={mark.skillId} data-skill-element={mark.element} data-skill-phase={mark.phase.toLowerCase()} data-skill-progress={mark.progress.toFixed(3)} data-skill-shape={mark.area.shape ?? (mark.area.radiusM > 0 ? 'circle' : 'single')}>
+      data-skill-id={mark.skillId} data-skill-action={mark.key} data-skill-element={mark.element} data-skill-phase={mark.phase.toLowerCase()} data-skill-progress={mark.progress.toFixed(3)} data-skill-shape={mark.area.shape ?? (mark.area.radiusM > 0 ? 'circle' : 'single')}>
       {#if art && !art.atlas}
         <clipPath id={`skill-art-${mark.key}`}><path d={screen.footprint} /></clipPath>
         <image class="skill-art-decal" href={art.decal} width={DECAL_PX} height={DECAL_PX}
@@ -213,20 +213,21 @@
   {/each}
 </svg>
 
-<svg class="skill-art-layer" viewBox={`0 0 ${viewport.width} ${viewport.height}`}
+{#each ['ground', 'upright'] as plane}
+<svg class={plane === 'ground' ? 'skill-ground-layer' : 'skill-art-layer'} viewBox={`0 0 ${viewport.width} ${viewport.height}`}
   preserveAspectRatio="none" aria-hidden="true" data-skill-art-layer>
   {#each artMarks as mark (mark.key)}
     {@const screen = artScreenOf(mark)}
     {@const pres = resolveVfxPresentation(mark.skillId, vfxMode)}
     {@const art = pres.kind === 'skin' ? pres.art : undefined}
     {#if screen && effectiveFrame.renderable}
-    {#if pres.kind === 'procedural'}
+    {#if pres.kind === 'procedural' && plane === 'upright'}
       <g data-vfx-renderer="procedural" data-vfx-version={pres.versionId}>
         <RimworldSkillVfx {mark} {screen} frame={effectiveFrame} {reducedMotion} />
       </g>
     {/if}
-    {#each (art?.atlases ?? (art?.atlas ? [art.atlas] : [])) as atlas (atlas.src)}
-      <g opacity={atlas.opacity ?? 1} data-skill-art-source={atlas.src}
+    {#each (art?.atlases ?? (art?.atlas ? [art.atlas] : [])).filter(atlas => (atlas.projection === 'ground') === (plane === 'ground')) as atlas, layerIndex (atlas.id ?? `${layerIndex}:${atlas.src}`)}
+      <g opacity={atlas.opacity ?? 1} data-skill-art-source={atlas.src} data-skill-action={mark.key} data-vfx-layer={atlas.id ?? layerIndex}
         data-vfx-renderer="skin" data-vfx-version={pres.kind === 'skin' ? pres.versionId : ''}
         data-vfx-base-reason={pres.kind === 'base' ? pres.reason : ''}>
         <SkillAtlas {mark} screen={screen} frame={effectiveFrame} {atlas} {reducedMotion} />
@@ -235,6 +236,8 @@
     {/if}
   {/each}
 </svg>
+
+{/each}
 
 <svg class="skill-geometry-labels" viewBox={`0 0 ${viewport.width} ${viewport.height}`}
   preserveAspectRatio="none" aria-hidden="true" data-skill-geometry-labels>
@@ -256,6 +259,7 @@
   /* World layers ride the frame transform: their boxes sit off-viewport only when hidden. */
   .skill-geometry-layer { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
   .skill-art-layer { position: absolute; inset: 0; z-index: 1100; width: 100%; height: 100%; overflow: visible; pointer-events: none; isolation: isolate; }
+  .skill-ground-layer { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
   .skill-geometry-labels { position: absolute; inset: 0; z-index: 1201; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
   /* The footprint takes the cast's own Element; invalid is the only semantic override left. */
   .skill-geometry { color: var(--skill-element, var(--es-lit)); fill: none; stroke-linejoin: round; }

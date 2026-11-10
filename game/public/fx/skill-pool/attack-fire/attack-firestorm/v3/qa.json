@@ -1,0 +1,23 @@
+{
+  "id": "attack.firestorm",
+  "status": "PASS",
+  "errors": [],
+  "imageSize": [
+    1254,
+    1254
+  ],
+  "frameCount": 16,
+  "analysisAlphaThreshold": 8,
+  "minimumCellPaddingPxAtThreshold": 18,
+  "nonemptyFrames": 16,
+  "transparentBackground": true,
+  "sourcePixelsUnmodified": true,
+  "sourceSha256": "ba411892f1d5a5a8f481fc90cc991d2da92ea95c0d6639580dfe9fadd0ac0f98",
+  "visualReview": "Generated atlas inspected: a central helical fire tornado rises from and joins the surrounding ground flames.",
+  "integratedBrowserSample": true,
+  "runtimeActivated": true,
+  "viewport": [1920, 1080],
+  "sampledFrames": [7, 14],
+  "maximumAnchorErrorPx": 0.000068,
+  "consoleErrors": []
+}

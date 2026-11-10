@@ -20,7 +20,8 @@ test('one world scale resizes actors, range rings and VFX without changing their
   const vfx = page.getByLabel('Preview VFX version in the arena');
   const camera = await page.evaluate(async () => {
     const { ARENA_CAMERA, ARENA_VIEW } = await import('/src/presentation/arena-camera.ts');
-    return { pixelsPerMeter: ARENA_CAMERA.projection.a, referenceWidth: ARENA_VIEW.width };
+    return { pixelsPerMeter: ARENA_CAMERA.projection.a, referenceWidth: ARENA_VIEW.width,
+      groundRatio: ARENA_CAMERA.projection.d / ARENA_CAMERA.projection.a };
   });
   const skinVersion = await vfx.inputValue();
   for (const mode of ['fallback', 'sprite']) {
@@ -46,6 +47,14 @@ test('one world scale resizes actors, range rings and VFX without changing their
           ? page.locator('.skill-geometry[data-skill-id="attack.fireball"] .skill-vfx-stage').first()
           : page.locator('[data-skill-art="attack.fireball"]').first();
         await expect(effect).toBeVisible();
+        if (vfxMode !== 'base') {
+          const axes = await effect.locator('svg.atlas-frame').first().evaluate(element => {
+            const m = (element.parentElement as unknown as SVGGraphicsElement).getScreenCTM()!;
+            return { x: Math.hypot(m.a, m.b), y: Math.hypot(m.c, m.d), dot: m.a * m.c + m.b * m.d };
+          });
+          expect(axes.y / axes.x).toBeCloseTo(1, 6);
+          expect(axes.dot).toBeCloseTo(0, 6);
+        }
         const actor = await page.locator('.arena-actor.hero .arena-body').boundingBox();
         const ring = await page.locator('[data-aoe-radius="3"]').evaluate(element => {
           const path = element as SVGGraphicsElement;
@@ -56,7 +65,7 @@ test('one world scale resizes actors, range rings and VFX without changing their
           const box = (element as SVGGraphicsElement).getBBox();
           return { width: box.width, height: box.height };
         });
-        expect(ring.width / ring.height).toBeCloseTo(1, 3);
+        expect(ring.height / ring.width).toBeCloseTo(camera.groundRatio, 3);
         if (!reference) reference = { actor: actor!.width, ring: ring.width, nativeWidth: native.width, nativeHeight: native.height };
         expect(actor!.width / reference.actor).toBeCloseTo(factor / .5, 2);
         expect(ring.width / reference.ring).toBeCloseTo(factor / .5, 2);
@@ -194,6 +203,10 @@ test('terrain, selected body and its ground ring share the painted frame at ever
   await expect(marker).toBeAttached();
   await page.getByRole('button', { name: 'Pause game', exact: true }).click();
   const scale = page.getByLabel('World scale in the arena');
+  const groundRatio = await page.evaluate(async () => {
+    const { ARENA_CAMERA } = await import('/src/presentation/arena-camera.ts');
+    return ARENA_CAMERA.projection.d / ARENA_CAMERA.projection.a;
+  });
   let baseWidth = 0;
   for (const factor of [.5, .75, 1, 1.5, 2]) {
     await scale.evaluate((element, value) => {
@@ -220,7 +233,7 @@ test('terrain, selected body and its ground ring share the painted frame at ever
         actorDistance: Math.hypot(center.x - actor.x, center.y - actor.y),
         groundDistance: Math.hypot(center.x - groundPoint.x, center.y - groundPoint.y) };
     });
-    expect(result.width / result.height).toBeCloseTo(1, 3);
+    expect(result.height / result.width).toBeCloseTo(groundRatio, 3);
     expect(result.actorDistance).toBeLessThan(1);
     expect(result.groundDistance).toBeLessThan(.01);
     baseWidth ||= result.width;
