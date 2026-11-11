@@ -92,7 +92,7 @@ VFX component authoring follows the [single source shelf](docs/vfx-skill/compone
 - Do not retry failed pushes indefinitely. Report the exact error.
 - After pushing, verify that the local and remote commit hashes match.
 - Never claim success unless the push and verification succeed.
-- Multi-session, one directory, one branch: every session and subagent works in this directory on the current branch. Never create, move, or use a worktree, and never create, checkout, or push a separate branch for incremental delivery.
+- Multi-session, one directory, one branch: every session and subagent works in this directory on the current branch. Never create, move, or use a worktree. Never create, checkout, or push a separate branch for incremental delivery. **Exception (owner-approved 2026-11-11):** one dedicated data branch, `data/vfx-archive`, may hold generated VFX evidence, logs and captures that must not enter `master` history. Never develop or deliver code on it; `master` stays the only working branch.
 
 ## Plan files
 
