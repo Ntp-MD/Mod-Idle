@@ -1,0 +1,27 @@
+{
+  "component": "body-coating",
+  "sourceSha256": "1b8051c83cd32a5be76fb1433033da97200208801aa442abaafa4374c73b6723",
+  "geometrySha256": "63f41d6897e3f63ad21cf1379f8f47614815b274d5d55a7d23a4090cc88700f8",
+  "sourceUnchanged": true,
+  "cameraChangeWithoutRebuild": true,
+  "deterministicRerender": true,
+  "northUpEastRight": true,
+  "fixedRootAcrossEightHeadings": true,
+  "anchors": [
+    {
+      "camera": "arena",
+      "anchor": [
+        0.5,
+        0.60902703
+      ]
+    },
+    {
+      "camera": "raised",
+      "anchor": [
+        0.5,
+        0.5919238
+      ]
+    }
+  ],
+  "humanApproval": "pending"
+}

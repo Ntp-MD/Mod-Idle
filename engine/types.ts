@@ -739,7 +739,7 @@ export interface MobCfg {
   curve: CurveCfg;
   spawn_weights: Record<string, number>;
   damage_split: Record<string, [number, number]>;
-  /** Mobs carry no skills in the current build; X27 fails if a species gains one while this is false. */
+  /** Runtime switch for mob kit strikes, skill phases and auras; library data remains validated. */
   skills_enabled: boolean;
   /** Formation bands: the melee/reach/standoff distances a group places its mobs at. */
   reach: { bands: Record<string, number>; weapons: Record<string, number>; rules?: string };

@@ -69,7 +69,7 @@ test('vfx version switch keeps actor sources and time', async ({ page }) => {
   await page.goto('http://localhost:5173/__showcase?sample=combat-field&sprite-preview=fallback#showcase-field');
 
   const mode = page.getByLabel('Mob rendering mode in the arena');
-  const vfx = page.getByLabel('Preview VFX version in the arena');
+  const vfx = page.getByLabel('Preview VFX art in the arena');
   await page.getByRole('button', { name: 'Pause game' }).click();
   const playhead = page.getByRole('slider', { name: 'Arena animation time' });
   await mode.selectOption('sprite');

@@ -1,0 +1,86 @@
+{
+  "componentId": "contact-flash",
+  "source": "sources/contact-flash.blend",
+  "sourceSha256": "7b654501890a2f192def818d6e6c09f99768cd432ac28bf62ecc21b9503f94e3",
+  "units": "metres",
+  "frame": {
+    "width": 256,
+    "height": 256,
+    "count": 24,
+    "columns": 6,
+    "rows": 4
+  },
+  "fps": 48,
+  "frameDurationUs": 20833,
+  "durationSec": 0.5,
+  "posterFrame": 9,
+  "phases": {
+    "start": [
+      0,
+      3
+    ],
+    "active": [
+      4,
+      17
+    ],
+    "contact": [
+      4,
+      6
+    ],
+    "exit": [
+      18,
+      23
+    ]
+  },
+  "interrupt": {
+    "mode": "fade-current",
+    "durationSec": 0.16,
+    "emitContact": false
+  },
+  "directional": {
+    "presets": [
+      {
+        "id": "arena",
+        "elevationDeg": 33,
+        "azimuthDeg": 0,
+        "orthographicSpanM": 5,
+        "targetHeightM": 0.65,
+        "anchor": [
+          0.5,
+          0.60902703
+        ],
+        "sources": {
+          "south": "arena/south/atlas.png",
+          "south-east": "arena/south-east/atlas.png",
+          "east": "arena/east/atlas.png",
+          "north-east": "arena/north-east/atlas.png",
+          "north": "arena/north/atlas.png",
+          "north-west": "arena/north-west/atlas.png",
+          "west": "arena/west/atlas.png",
+          "south-west": "arena/south-west/atlas.png"
+        }
+      },
+      {
+        "id": "raised",
+        "elevationDeg": 45,
+        "azimuthDeg": 0,
+        "orthographicSpanM": 5,
+        "targetHeightM": 0.65,
+        "anchor": [
+          0.5,
+          0.5919238
+        ],
+        "sources": {
+          "south": "raised/south/atlas.png",
+          "south-east": "raised/south-east/atlas.png",
+          "east": "raised/east/atlas.png",
+          "north-east": "raised/north-east/atlas.png",
+          "north": "raised/north/atlas.png",
+          "north-west": "raised/north-west/atlas.png",
+          "west": "raised/west/atlas.png",
+          "south-west": "raised/south-west/atlas.png"
+        }
+      }
+    ]
+  }
+}

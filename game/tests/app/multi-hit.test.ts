@@ -12,7 +12,8 @@ import { exportJson, importJson } from '../../src/state/save';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
 import { installSkillFixture } from '../fixtures/skillFixture';
 import { mobSkillById } from '@sim/combat/mobSkills';
-import { liveMobSkill } from '../fixtures/liveMob';
+import { liveMobSkill, enableMobSkillsForTests } from '../fixtures/liveMob';
+enableMobSkillsForTests();
 const CONTROL = liveMobSkill(row => row.mode === 'strike' && row.cast?.delivery === 'melee' && !row.phase && row.status === 'shock', 'interrupting a burst');
 
 function skillFight(skillId: string, distance = 2) {

@@ -20,18 +20,16 @@ for (const moduleArg of moduleArgs) {
     const skill = skills.find(x => x.id === recipe.id && !x.retired);
     if (!skill) throw new Error(`Unknown active skill ${recipe.id}`);
     if (!recipe.sources?.length || recipe.sources.some(x => !fs.existsSync(path.resolve(root, x)))) throw new Error(`${recipe.id}: missing shader source`);
-    const skillDir = path.join(root, 'game/public/fx/skill-pool', skill.type, recipe.id.replaceAll('.', '-').replaceAll('_', '-'));
-    const dirs = fs.existsSync(skillDir) ? fs.readdirSync(skillDir).filter(x => /^v\d+$/.test(x)) : [];
-    const owned = dirs.filter(v => {
-      const p = path.join(skillDir, v, 'meta.json'); if (!fs.existsSync(p)) return false;
-      const m = JSON.parse(fs.readFileSync(p, 'utf8')); return m.generator === 'tools/bake-shader-recipes.mjs' && m.recipeModule === relativeModule;
-    });
-    const version = owned.sort((a, b) => Number(b.slice(1)) - Number(a.slice(1)))[0]
-      ?? recipe.version ?? `v${Math.max(0, ...dirs.map(v => Number(v.slice(1)))) + 1}`;
-    if (!/^v\d+$/.test(version) || dirs.includes(version) && !owned.includes(version)) {
-      throw new Error(`${recipe.id}: version ${version} is invalid or belongs to another author`);
+    const group = skill.type === 'attack' ? `attack-${skill.element === 'physical' ? 'phy' : skill.element}` : skill.type;
+    const skillDir = path.join(root, 'game/public/fx/skill-pool', group, recipe.id.replaceAll('.', '-').replaceAll('_', '-'));
+    const existingMeta = path.join(skillDir, 'meta.json');
+    if (fs.existsSync(existingMeta)) {
+      const existing = JSON.parse(fs.readFileSync(existingMeta, 'utf8'));
+      if (existing.generator !== 'tools/bake-shader-recipes.mjs' || existing.recipeModule !== relativeModule) {
+        throw new Error(`${recipe.id}: current art belongs to another author; preserve its files`);
+      }
     }
-    const destination = path.join(skillDir, version); fs.mkdirSync(destination, { recursive: true });
+    const destination = skillDir; fs.mkdirSync(destination, { recursive: true });
     const width = size * 4, atlas = new Uint8ClampedArray(width * width * 4), qa = [];
     let maxWidth = 0, maxHeight = 0;
     for (let frame = 0; frame < 16; frame++) {
@@ -66,7 +64,7 @@ for (const moduleArg of moduleArgs) {
     if (recipe.meta?.delivery) authored.delivery = recipe.meta.delivery;
     if (recipe.meta?.projection === 'ground' && !(authored.radiusM > 0)) throw new Error(`${recipe.id}: ground circle projection requires radius`);
     const meta = {
-      id: recipe.id, src: `/fx/skill-pool/${skill.type}/${path.basename(skillDir)}/${version}/atlas.png`,
+      id: recipe.id, src: `/fx/skill-pool/${group}/${path.basename(skillDir)}/atlas.png`,
       columns: 4, rows: 4, cellWidth: size, cellHeight: size, imageWidth: width, imageHeight: width,
       frameMs: 90, opening: [0, 3], loop: [4, 11], exit: [12, 15], anchorX: .5, anchorY: .5,
       contentWidthRatio: Math.max(.05, maxWidth / size), contentHeightRatio: Math.max(.05, maxHeight / size),
@@ -95,8 +93,8 @@ for (const moduleArg of moduleArgs) {
       const pack = license.replaceAll('\\', '/').split('/')[2];
       fs.copyFileSync(path.resolve(root, license), path.join(destination, `source-license-${pack}-${path.basename(license)}`));
     }
-    report.push({ id: recipe.id, kind: recipe.kind, version, src: meta.src, projection: meta.projection ?? 'upright', bytes: bytes.length, name: skill.name, recipeModule: relativeModule });
-    console.log(`${recipe.id} -> ${version} (${bytes.length} bytes)`);
+    report.push({ id: recipe.id, kind: recipe.kind, src: meta.src, projection: meta.projection ?? 'upright', bytes: bytes.length, name: skill.name, recipeModule: relativeModule });
+    console.log(`${recipe.id} -> current art (${bytes.length} bytes)`);
   }
   const contactWidth = size * 4, contactHeight = size * Math.ceil(contacts.length / 4);
   const pixels = new Uint8ClampedArray(contactWidth * contactHeight * 4);

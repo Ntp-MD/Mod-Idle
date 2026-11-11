@@ -1,0 +1,23 @@
+{
+  "shape": "ward-shell",
+  "family": "ward-shell",
+  "file": "ward-shell.png",
+  "rawFile": "raw/ward-shell.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    103,
+    921,
+    921
+  ],
+  "sourceSha256": "940c367a3c7614b778d829c0b936f8ee1133a3b7909882fe66b5d5e0702778f7",
+  "masterSha256": "fa217d15de6d46e1910ce9e0a6ba3a0b470ff275735413eee1b469901028b6a3",
+  "humanReview": false
+}

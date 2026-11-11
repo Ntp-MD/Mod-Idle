@@ -159,7 +159,7 @@ export function createMobActions(opts: {
   /** Release a typed mob cast by its delivery; damage only follows the delivery's own receipt. */
   function launchMobSkillShot(mob: Mob, row: MobSkillRow, cast: MobCastProfile,
     action: CombatArenaAction, atUs: number): void {
-    if (!arena) return;
+    if (!arena || !E.mob.skills_enabled) return;
     const actor = arena.mobs[mob.id];
     if (!actor) return;
     const source = { x: actor.x, y: actor.y };
@@ -199,13 +199,18 @@ export function createMobActions(opts: {
   }
 
   function scheduleMobStrike(action: CombatArenaAction, mob: Mob) {
-    if (!arena || !action.timing || action.releasedAtUs != null || action.timing.releaseAtUs > tickEndUs) return;
+    if (!arena || !action.timing || action.releasedAtUs != null) return;
+    if (!E.mob.skills_enabled) {
+      cancelMobPreparation(action, tickStartUs, 'skills-disabled');
+      return;
+    }
+    if (action.timing.releaseAtUs > tickEndUs) return;
     clock.schedule(Math.max(tickStartUs, action.timing.releaseAtUs), EVENT_PRIORITY.mobAction, mob.id, 'player', () => {
       if (!arena) return;
       advanceArenaAt(clock.nowUs);
       const current = arena.actions.find(entry => entry.id === action.id);
       if (!current || current.cancelledAtUs != null || current.impactCount || current.releasedAtUs != null) return;
-      const row = current.skillId ? mobSkillById(current.skillId) : undefined;
+      const row = E.mob.skills_enabled && current.skillId ? mobSkillById(current.skillId) : undefined;
       const cast = row ? mobCastProfile(row, mob) : undefined;
       const actor = arena.mobs[mob.id];
       const reach = row && actor
@@ -247,6 +252,10 @@ export function createMobActions(opts: {
    * it, and crossing again is a new transition — while staying inside one band never re-fires.
    */
   function syncMobPhase(mob: Mob): void {
+    if (!E.mob.skills_enabled) {
+      mob.phase = 0;
+      return;
+    }
     let rows: MobSkillRow[] | undefined;
     for (const id of mob.skillIds || []) {
       const row = mobSkillById(id);

@@ -4,7 +4,8 @@ import { mulberry32 } from '../../src/engine/client-helpers';
 import { arenaAction, captureCombatArena, createCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
 import { characterSheet, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
-import { liveMobSkill } from '../fixtures/liveMob';
+import { liveMobSkill, enableMobSkillsForTests } from '../fixtures/liveMob';
+enableMobSkillsForTests();
 const PLAYER_WINDUP = liveId(row => row.type === 'attack' && row.cast?.delivery === 'projectile' && !row.action, 'player windup');
 const CONTROL = liveMobSkill(row => row.mode === 'strike' && row.cast?.delivery === 'melee' && !row.phase && row.status === 'shock', 'forced shock');
 

@@ -9,6 +9,7 @@ Single-player, browser-only idle RPG; no server. Shared entry point for every co
 - **Slot saves are OFF until the game is finished** (`TEMP_DISABLE_SLOT_SAVES = true` in `game/src/state/save.ts`). No localStorage/IndexedDB slot writes, no autosave, no Save nag by design.
 - Do NOT flip the flag back, do NOT add new slot-write/autosave paths, do NOT re-enable the disabled Save/Load/Import buttons, and do NOT treat the disabled state or the missing Save chooser at boot as a bug.
 - Ask the user before touching anything in the save flow (`game/src/state/save.ts`, `game/src/app/session.ts`, Save panel in `App.svelte`).
+- **Mob skills are OFF** (`mob.skills_enabled = false` in `tools/data/engine.json`) until the user changes this decision. Keep movement and basic attacks; disable kit strikes, skill phases and auras. Retain and validate the skill library. Mechanic tests may explicitly opt in; do not re-enable production skills to satisfy them.
 
 ## Always-on skills
 
@@ -51,11 +52,13 @@ Re-read them after context compaction. Do not announce any mode.
 - On truncation narrow the query; on failure identify the cause, retry only with a changed approach or new evidence, else report a blocker.
 - A gate that times out is retried in the same turn with a narrower scope (one file, `test:fast`, output to `.cache/`), not left for the next turn. Only a repeat with no new evidence is a blocker.
 - An unrelated failing check with no changed input is baseline/in-flight: report it, don't refix or rerun without new evidence. Preserve concurrent edits; say so when verification can't repeat.
-- Stop when the current task or plan item's acceptance criteria and required checks pass; a long tool sequence never justifies skipping verification. With an active plan, "pass" means checked against `docs/reference/known-failures.md`, then continue with the next unchecked item (see Plan files).
+- Stop when the current task or plan item's acceptance criteria and required checks pass; a long tool sequence never justifies skipping verification. With an active plan, "pass" means every required check is green, then continue with the next unchecked item (see Plan files).
 
 Gameplay numbers live in data JSON, formulas in `engine/`; do not duplicate either in the client. New game-content filenames use lowercase hyphens. `skill.md`, `skills.md`, `SKILL.md` and `.agents/skills/` are reserved for agent skills, not game content. Gate output is the run record; do not create transcript files.
 
-Art guides, sources and review candidates live in topic folders under [docs/](docs/README.md): [vfx-skill](docs/vfx-skill/), [character](docs/character/animation.md) and [map](docs/map/README.md). Read the topic folder and relevant guide before art work; follow that topic's existing source/output folders. Approved runtime assets keep their established game paths.
+Art guides, sources and review candidates live in topic folders under [docs/](docs/README.md): [vfx-skill](docs/vfx-skill/), [character](docs/character/pawn-study/README.md) and [map](docs/map/README.md). Read the topic folder and relevant guide before art work; follow that topic's existing source/output folders. Approved runtime assets keep their established game paths.
+
+VFX component authoring follows the [single source shelf](docs/vfx-skill/component-vfx/outputs/README.md). Runtime uses [flat skill folders](game/public/fx/skill-pool/README.md), with no delivery subfolders or pointer files. Update named assets and recipes in place; do not create numbered source folders, filename revisions or new runtime `vN` folders for source-art updates. Git owns history; technical QA does not grant human visual approval.
 
 ## Answers & citations
 
@@ -101,9 +104,9 @@ Art guides, sources and review candidates live in topic folders under [docs/](do
 - Stop conditions, the only ones that end the turn:
   1. A save-flow edit needs explicit user approval (`game/src/state/save.ts`, `game/src/app/session.ts`, Save panel).
   2. A behavior, RNG-order, balance or UX decision has no owner answer in the plan.
-  3. A failing check does not match `docs/reference/known-failures.md`, or a new failure appears with unchanged input.
+  3. A failing check appears with no matching changed input.
   4. Tooling is unavailable (missing browser connector, unreachable server) and the item cannot be verified another way.
-- Known baseline failures: read `docs/reference/known-failures.md` before judging a red gate. A failure is baseline only when its file and test name match that file. Never re-fix or re-run baseline failures to make a plan look green, and never tick an item because its only failure is baseline without recording that in the plan.
+- No baseline-failure allowlist is tracked. Treat every red gate as a regression: report the exact file and test, and never weaken an assertion or re-run a failure hoping it turns green to make a plan look green.
 - Items that need human eyes (visual judgement, feel) go under a `Manual sign-off` heading and are not agent checkboxes. Agent verifies the mechanical part (DOM attribute, console, screenshot) and records it; the human check stays open.
 - Never delete a plan file while any checkbox is open. Verify every item and record its evidence first. Delete only when the user explicitly forces deletion; the user may delete a plan themselves at any time.
 - Long gates write to a log and read the summary, not the raw output: `npm --prefix game run test 2>&1 | Tee-Object -FilePath .cache/test.log | Select-String "Test Files|Tests |FAIL"`. `.cache/` and `.playwright-mcp/` are local, never commit them.

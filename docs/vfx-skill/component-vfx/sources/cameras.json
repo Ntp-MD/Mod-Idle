@@ -1,0 +1,20 @@
+{
+  "projection": "orthographic",
+  "sourceAxes": { "x": "east", "y": "north", "z": "up" },
+  "runtimeGroundAxes": { "x": "east", "y": "south" },
+  "headingConvention": "clockwise from east; negate for source Z rotation",
+  "directions": [
+    { "id": "south", "angleDeg": 90 },
+    { "id": "south-east", "angleDeg": 45 },
+    { "id": "east", "angleDeg": 0 },
+    { "id": "north-east", "angleDeg": -45 },
+    { "id": "north", "angleDeg": -90 },
+    { "id": "north-west", "angleDeg": -135 },
+    { "id": "west", "angleDeg": 180 },
+    { "id": "south-west", "angleDeg": 135 }
+  ],
+  "presets": [
+    { "id": "arena", "elevationDeg": 33, "azimuthDeg": 0, "orthographicSpanM": 5, "targetHeightM": 0.65 },
+    { "id": "raised", "elevationDeg": 45, "azimuthDeg": 0, "orthographicSpanM": 5, "targetHeightM": 0.65 }
+  ]
+}

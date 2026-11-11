@@ -1,0 +1,36 @@
+{
+  "humanReview": false,
+  "shape": "break-dissolve",
+  "family": "fragment-debris",
+  "file": "break-dissolve.png",
+  "rawFile": "raw/break-dissolve.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    118,
+    116,
+    912,
+    921
+  ],
+  "sourceSha256": "f9f22613714042dd5007183816c19d23255361da9faa9c3db74fe7af67915e2c",
+  "masterSha256": "62e4aac77cc4fdb08f97e9b7ed30f8b10c63b2a2e75bbbc6fd96d934bf0837ca",
+  "rawVisibleAlphaBounds": [
+    207,
+    199,
+    987,
+    1028
+  ],
+  "rawCornerAlpha": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "rawPreserved": true
+}

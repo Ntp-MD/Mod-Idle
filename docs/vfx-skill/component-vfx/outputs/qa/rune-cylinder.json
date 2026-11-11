@@ -1,0 +1,36 @@
+{
+  "humanReview": false,
+  "shape": "rune-cylinder",
+  "family": "mark-sigil",
+  "file": "rune-cylinder.png",
+  "rawFile": "raw/rune-cylinder.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    114,
+    921,
+    921
+  ],
+  "sourceSha256": "0a84bd3ead93574f352fac4dd9cdd0fc916be0ffd365b5ec3e1b82e8766eece3",
+  "masterSha256": "351d9339667b08bfad7ddc7725c15bcd9a9f516f9d6b23d1b8400218c5ac59b7",
+  "rawVisibleAlphaBounds": [
+    133,
+    193,
+    1107,
+    1123
+  ],
+  "rawCornerAlpha": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "rawPreserved": true
+}

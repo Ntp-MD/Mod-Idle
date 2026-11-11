@@ -1,0 +1,110 @@
+{
+  "layerId": "orb-core",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "palette": "cold",
+  "sizePolicy": "body",
+  "orient": true,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "authoringGeometry": {
+    "shape": "single",
+    "delivery": "projectile"
+  },
+  "phases": [
+    "Travel",
+    "Impact"
+  ],
+  "opacity": 0.9,
+  "id": "attack.water_ball",
+  "src": "/fx/skill-pool/attack-cold/attack-water-ball/orb-core.png",
+  "additionalLayers": [
+    {
+      "layerId": "water-impact-crown",
+      "columns": 1,
+      "rows": 1,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "sizePolicy": "body",
+      "binding": "contact",
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "file": "water-impact-crown.png",
+      "palette": "cold",
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 0.45,
+      "opacity": 0.9,
+      "delaySec": 0.07,
+      "orient": false
+    },
+    {
+      "layerId": "cloud-mist",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.65,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.65,
+      "palette": "cold",
+      "authoringGeometry": {
+        "shape": "circle",
+        "spanM": 4,
+        "depthM": 2
+      },
+      "sizePolicy": "world",
+      "binding": "area",
+      "file": "cloud-mist.png",
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 1.3,
+      "opacity": 0.4,
+      "delaySec": 0.14,
+      "orient": false
+    }
+  ],
+  "composition": "Material study: orb-core, water-impact-crown, cloud-mist",
+  "componentRecipe": {
+    "shapes": [
+      "orb-core",
+      "water-impact-crown",
+      "cloud-mist"
+    ],
+    "humanReview": false
+  },
+  "reviewOnly": true,
+  "generation": {
+    "tool": "imagegen",
+    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  }
+}

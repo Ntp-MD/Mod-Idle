@@ -1,0 +1,23 @@
+{
+  "shape": "projectile-core",
+  "family": "projectile-core",
+  "file": "projectile-core.png",
+  "rawFile": "raw/projectile-core.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    124,
+    149,
+    887,
+    905
+  ],
+  "sourceSha256": "6bd1cbb4c290d958df13af5162ede05ace9e5fea5046ebd366ec1af49a80e9c4",
+  "masterSha256": "65606cb2a70db4e3db20789c1c0b3b4a660d0f122255304f8efe9f7274e1c440",
+  "humanReview": false
+}

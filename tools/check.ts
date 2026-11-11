@@ -983,7 +983,7 @@ function runChecks() {
     const allowedScope = new Set(MOB_SKILLS.meta.scopes as string[]);
     const maxKit = Number(MOB_SKILLS.meta.max_kit);
     const speciesMaxKit = Number(MOB_SKILLS.meta.species_max_kit ?? 2);
-    if (!E.mob.skills_enabled) sk.push('skills_enabled is false while tools/data/mob-skills.json exists');
+    if (typeof E.mob.skills_enabled !== 'boolean') sk.push('mob.skills_enabled must be boolean');
     if (byId.size !== lib.length) sk.push('skill ids are not unique');
     for (const row of lib) {
       if (!row.id?.startsWith('mob.')) sk.push(`${row.id}: id must start with mob.`);

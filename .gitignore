@@ -23,3 +23,6 @@ __pycache__/
 archive/
 .playwright-mcp/
 .cache
+
+# Generated VFX review snapshots stay local; review live in playground.html
+docs/vfx-skill/component-vfx/evidence/captures/

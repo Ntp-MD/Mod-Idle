@@ -1,7 +1,7 @@
 /**
  * One registry for skill VFX atlases and their runtime art slots.
  *
- * Assets live under `game/public/fx/skill-pool/<type>/<slug>/<version>/`; this file is the only place a
+ * Assets live directly under `game/public/fx/skill-pool/<group>/<slug>/`; this file is the only place a
  * version is registered. The arena reader (`arena-skill-art.ts`) and the combat-field showcase
  * version selector both read this pool; switching a version changes the next preview/cast read.
  *
@@ -9,6 +9,17 @@
  * `frame` describes the sheet grid; the arena's atlas reader walks it at `fps`.
  */
 import { isVfxPalette, type VfxPaletteId } from './palettes';
+import { ARENA_DIRECTIONS } from '../../presentation/arena-camera';
+
+export type VfxDirection = typeof ARENA_DIRECTIONS[number];
+export interface VfxCameraAtlas {
+  id: string;
+  elevationDeg: number;
+  azimuthDeg: number;
+  orthographicSpanM: number;
+  anchor: [number, number];
+  sources: Record<VfxDirection, string>;
+}
 
 export type VfxLayerRole = 'ground' | 'upright';
 export type VfxSizePolicy = 'footprint' | 'body' | 'world';
@@ -74,6 +85,9 @@ export interface VfxAuthoring {
 
 /** Authored aim metadata: where the art points, where its content sits, and its phase frames. */
 export interface VfxAimMeta {
+  /** Offline world-space render; select a heading, never rotate/foreshorten it again. */
+  directional?: { presets: VfxCameraAtlas[] };
+  posterFrame?: number;
   palette?: VfxPaletteId;
   sizePolicy?: VfxSizePolicy;
   binding?: VfxBinding;
@@ -136,9 +150,7 @@ export interface SkillArt {
 export interface VfxVersion extends VfxAimMeta {
   id: string;
   label: string;
-  /** Renderer-only version: no raster art; the arena draws it procedurally. */
-  renderer?: 'procedural';
-  /** Marked by the generated pool from `default/version.json`; the catalog puts it first. */
+  /** The generated pool marks the single current recipe; DEV fixtures may add explicit alternatives. */
   default?: boolean;
   /** False keeps a lab-only atlas out of the arena's still-decal renderer. */
   arena?: boolean;
@@ -153,7 +165,7 @@ import { SvelteMap } from 'svelte/reactivity';
 import { POOL_VERSIONS } from './pool.generated';
 
 /**
- * Skill VFX has one home: `game/public/fx/skill-pool/<type>/<skill-slug>/vN/`.
+ * Skill VFX has one home: `game/public/fx/skill-pool/<group>/<skill-slug>/`.
  * The catalog only merges the generated registry; no hand-written path rows live here.
  */
 export const SKILL_VFX_POOL: Record<string, VfxVersion[]> = { ...POOL_VERSIONS };
@@ -223,8 +235,12 @@ function candidateSources(version: VfxVersion): string[] {
   const srcs = new Set<string>();
   if (art.decal) srcs.add(art.decal);
   if (art.burst) srcs.add(art.burst);
-  if (art.atlas) srcs.add(art.atlas.src);
-  for (const a of art.atlases ?? []) srcs.add(a.src);
+  for (const a of art.atlases ?? (art.atlas ? [art.atlas] : [])) {
+    srcs.add(a.src);
+    for (const camera of a.directional?.presets ?? []) {
+      for (const source of Object.values(camera.sources)) srcs.add(source);
+    }
+  }
   return [...srcs];
 }
 
@@ -235,6 +251,17 @@ function isValidCandidate(version: VfxVersion, art?: SkillArt): boolean {
   if (sources.length === 0) return false;
   const ids = new Set<string>();
   for (const meta of [version, ...version.layers]) {
+    if (meta.directional) {
+      const presets = meta.directional.presets;
+      if (!presets.length || new Set(presets.map(p => p.id)).size !== presets.length
+        || meta.projection || meta.orient || meta.placement?.kind === 'spin') return false;
+      for (const p of presets) {
+        if (!p.id || !Number.isFinite(p.elevationDeg) || p.elevationDeg <= 0 || p.elevationDeg > 90
+          || !Number.isFinite(p.azimuthDeg) || !Number.isFinite(p.orthographicSpanM) || p.orthographicSpanM <= 0
+          || p.anchor.length !== 2 || !p.anchor.every(n => Number.isFinite(n) && n >= 0 && n <= 1)
+          || !ARENA_DIRECTIONS.every(d => typeof p.sources[d] === 'string' && p.sources[d].length > 0)) return false;
+      }
+    }
     if (meta.palette != null && !isVfxPalette(meta.palette)) return false;
     if (meta.sizePolicy != null && !['footprint', 'body', 'world'].includes(meta.sizePolicy)) return false;
     if (meta.binding != null && !['area', 'caster', 'target', 'contact', 'release'].includes(meta.binding)) return false;
@@ -258,6 +285,8 @@ function isValidCandidate(version: VfxVersion, art?: SkillArt): boolean {
     if (layer.id && ids.has(layer.id)) return false;
     if (layer.id) ids.add(layer.id);
     const f = layer.frame;
+    const poster = layer.posterFrame ?? version.posterFrame;
+    if (poster != null && (!Number.isInteger(poster) || poster < 0 || poster >= f.count)) return false;
     if (!Number.isFinite(f.width) || !Number.isFinite(f.height) || !(f.width > 0) || !(f.height > 0)) return false;
     if (!Number.isFinite(f.count) || !(f.count >= 1) || !Number.isFinite(f.columns) || !(f.columns >= 1)) return false;
     const fps = layer.fps ?? (version as any).fps ?? 12;
@@ -326,13 +355,12 @@ export function vfxArtCandidates(skillId: string): readonly VfxArtCandidate[] {
   return out;
 }
 
-/** The active raster slot for the arena renderer; null keeps the procedural SVG path. */
+/** The active raster slot for the arena renderer; undefined falls back to Base art. */
 export function activeVfxArt(skillId: string): SkillArt | undefined {
   const versions = vfxVersionsFor(skillId);
   // The chosen version wins when it can render: a multi-frame atlas plays, a decal still
   // projects exactly on the footprint. Otherwise the promoted default atlas wins outright.
   const active = activeVfxVersion(skillId);
-  if (active?.renderer === 'procedural') return undefined;
   if (active && active.arena !== false) {
     const chosen = artOf(active);
     if (chosen) return chosen;
@@ -371,6 +399,8 @@ function artOf(version: VfxVersion): SkillArt | undefined {
         ...(meta.delaySec != null ? { delaySec: meta.delaySec } : {}),
         ...(meta.durationSec != null ? { durationSec: meta.durationSec } : {}),
         ...(meta.placement ? { placement: meta.placement } : {}),
+        ...(meta.directional ? { directional: meta.directional } : {}),
+        ...(meta.posterFrame != null ? { posterFrame: meta.posterFrame } : {}),
         ...(layer.opacity != null ? { opacity: layer.opacity } : {}),
         src: layer.src,
         width: layer.frame.width,

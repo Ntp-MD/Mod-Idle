@@ -1,0 +1,23 @@
+{
+  "shape": "impact-burst",
+  "family": "impact-burst",
+  "file": "impact-burst.png",
+  "rawFile": "raw/impact-burst.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    115,
+    908,
+    921
+  ],
+  "sourceSha256": "279d3f50dd168f2c6e94ec54f524c8e1966958a3daf04dc2829fd2dbb7f8a1d7",
+  "masterSha256": "d5d3ad6eb30b778e307070df672192e35ea68b1ee0a5627240f179c30a4917ee",
+  "humanReview": false
+}

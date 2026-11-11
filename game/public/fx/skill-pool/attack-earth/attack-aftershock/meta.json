@@ -1,0 +1,117 @@
+{
+  "layerId": "crack-strip",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "palette": "earth",
+  "sizePolicy": "footprint",
+  "projection": "ground",
+  "binding": "area",
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "authoringGeometry": {
+    "shape": "line"
+  },
+  "orient": false,
+  "phases": [
+    "Impact",
+    "Field"
+  ],
+  "durationSec": 1.1,
+  "opacity": 0.55,
+  "id": "attack.aftershock",
+  "src": "/fx/skill-pool/attack-earth/attack-aftershock/crack-strip.png",
+  "additionalLayers": [
+    {
+      "layerId": "shockwave-ring",
+      "columns": 1,
+      "rows": 1,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "palette": "earth",
+      "authoringGeometry": {
+        "shape": "circle"
+      },
+      "sizePolicy": "footprint",
+      "projection": "ground",
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "file": "shockwave-ring.png",
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 0.5,
+      "opacity": 0.55,
+      "binding": "area",
+      "placement": {
+        "kind": "expand",
+        "fromScale": 0.12
+      },
+      "delaySec": 0.07,
+      "orient": false
+    },
+    {
+      "layerId": "dust-impact-plume",
+      "columns": 1,
+      "rows": 1,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.82,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.82,
+      "sizePolicy": "world",
+      "binding": "contact",
+      "authoringGeometry": {
+        "shape": "circle",
+        "spanM": 3,
+        "depthM": 1.5
+      },
+      "file": "dust-impact-plume.png",
+      "palette": "earth",
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 1.3,
+      "opacity": 0.4,
+      "delaySec": 0.14,
+      "orient": false
+    }
+  ],
+  "composition": "Material study: crack-strip, shockwave-ring, dust-impact-plume",
+  "componentRecipe": {
+    "shapes": [
+      "crack-strip",
+      "shockwave-ring",
+      "dust-impact-plume"
+    ],
+    "humanReview": false
+  },
+  "reviewOnly": true,
+  "generation": {
+    "tool": "imagegen",
+    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  }
+}

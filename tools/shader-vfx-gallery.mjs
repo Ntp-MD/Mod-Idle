@@ -9,10 +9,10 @@ const directory = path.join(root, 'output/shader-skills');
 const skills = JSON.parse(fs.readFileSync(path.join(root, 'tools/data/skills.json'), 'utf8')).skills.filter(skill => !skill.retired);
 const rows = fs.readdirSync(directory).filter(file => file.endsWith('-report.json')).sort().flatMap(file =>
   JSON.parse(fs.readFileSync(path.join(directory, file), 'utf8')).map(row => ({ ...row, family: file.replace('-shaders-report.json', '') })));
-const aftershock = 'game/public/fx/skill-pool/attack-earth/attack-aftershock/v5/meta.json';
+const aftershock = 'game/public/fx/skill-pool/attack-earth/attack-aftershock/meta.json';
 if (fs.existsSync(path.join(root, aftershock))) {
   const meta = JSON.parse(fs.readFileSync(path.join(root, aftershock), 'utf8'));
-  rows.push({ id: meta.id, name: skills.find(skill => skill.id === meta.id)?.name, version: 'v5', src: meta.src, projection: meta.projection, family: 'earth', kind: 'ground' });
+  rows.push({ id: meta.id, name: skills.find(skill => skill.id === meta.id)?.name, src: meta.src, projection: meta.projection, family: 'earth', kind: 'ground' });
 }
 assert.equal(new Set(rows.map(row => row.id)).size, rows.length, 'Each skill must appear once');
 assert.deepEqual(rows.map(row => row.id).sort(), skills.map(skill => skill.id).sort(), 'Gallery must cover the complete active roster');
@@ -83,7 +83,7 @@ function load(entry){
 const observer=new IntersectionObserver(changes=>{for(const item of changes){const entry=entries.get(item.target);if(item.isIntersecting&&!item.target.hidden){visible.add(entry);load(entry);draw(entry);}else visible.delete(entry);}}, {rootMargin:'0px'});
 for(const row of rows){
   const article=document.createElement('article'), title=document.createElement('h2'), detail=document.createElement('small'), canvas=document.createElement('canvas'), note=document.createElement('p'), sources=document.createElement('div');
-  title.textContent=row.name+' · '+row.version;detail.textContent=row.id+' / '+row.family;
+  title.textContent=row.name;detail.textContent=row.id+' / '+row.family;
   canvas.width=320;canvas.height=320;canvas.className='stage';canvas.setAttribute('role','img');canvas.setAttribute('aria-label',row.name+' VFX animated frame preview');
   note.className='details';note.textContent=row.projection==='ground'?'Ground · dashed guide = authored footprint':'Upright · screen facing; source orientation';
   sources.className='sources';

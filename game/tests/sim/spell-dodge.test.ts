@@ -11,7 +11,8 @@ import { mulberry32 } from '../../src/engine/client-helpers';
 import { CombatClock } from '@sim/combat/combat-clock';
 import { createIncomingHit } from '@sim/core/tick/incoming-hit';
 import type { MobSkillRow } from '@engine/types.ts';
-import { liveMobSkill } from '../fixtures/liveMob';
+import { liveMobSkill, enableMobSkillsForTests } from '../fixtures/liveMob';
+enableMobSkillsForTests();
 const SPELL = liveMobSkill(row => row.mode === 'strike' && row.cast?.delivery === 'projectile' && !row.phase && row.hit_class === 'spell', 'spell dodge');
 
 /**

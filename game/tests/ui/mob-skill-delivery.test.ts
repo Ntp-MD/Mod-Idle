@@ -10,7 +10,8 @@ import { arenaActionPose, arenaRangedShots } from '../../src/ui/combat/combat-ar
 import { characterSheet, newGame, setLevel, tick } from '@sim/core/game';
 import { mobFixture, pinFieldPopulation } from '../fixtures/mobFixture';
 import { mulberry32 } from '../../src/engine/client-helpers';
-import { liveMobSkill } from '../fixtures/liveMob';
+import { liveMobSkill, enableMobSkillsForTests } from '../fixtures/liveMob';
+enableMobSkillsForTests();
 const PLAYER_WINDUP = liveId(row => row.type === 'attack' && row.cast?.delivery === 'ground', 'ground windup');
 const MELEE = liveMobSkill(row => row.mode === 'strike' && row.cast?.delivery === 'melee' && !row.phase && row.cast.windup_sec >= 0.5 && !row.cast.charge, 'melee windup');
 const PROJECTILE = liveMobSkill(row => row.mode === 'strike' && row.cast?.delivery === 'projectile' && !row.phase, 'projectile contact');

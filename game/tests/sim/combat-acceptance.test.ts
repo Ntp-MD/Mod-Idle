@@ -4,7 +4,8 @@ import { mulberry32 } from '../../src/engine/client-helpers';
 import { arenaDistance, arenaWeaponRange, captureCombatArena, createCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
 import { characterSheet, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
-import { liveMobSkill, liveSocialSpecies } from '../fixtures/liveMob';
+import { liveMobSkill, liveSocialSpecies, enableMobSkillsForTests } from '../fixtures/liveMob';
+enableMobSkillsForTests();
 const SOCIAL = liveSocialSpecies();
 const AURA = liveMobSkill(row => row.mode === 'aura' && row.scope === 'engaged' && (row.effects?.armour_pct ?? 0) > 0, 'local armour aura');
 

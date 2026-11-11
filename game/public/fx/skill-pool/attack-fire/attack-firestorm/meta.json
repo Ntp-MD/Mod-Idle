@@ -1,0 +1,114 @@
+{
+  "layerId": "flame-tongue",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.82,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.82,
+  "sizePolicy": "world",
+  "binding": "area",
+  "authoringGeometry": {
+    "shape": "circle",
+    "spanM": 1.5,
+    "depthM": 2.8
+  },
+  "palette": "fire",
+  "phases": [
+    "Impact",
+    "Field"
+  ],
+  "durationSec": 4,
+  "opacity": 0.9,
+  "id": "attack.firestorm",
+  "src": "/fx/skill-pool/attack-fire/attack-firestorm/flame-tongue.png",
+  "additionalLayers": [
+    {
+      "layerId": "ember-ground-cracks",
+      "columns": 1,
+      "rows": 1,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "authoringGeometry": {
+        "shape": "circle"
+      },
+      "projection": "ground",
+      "file": "ember-ground-cracks.png",
+      "palette": "fire",
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 4,
+      "opacity": 0.55,
+      "delaySec": 0.15,
+      "orient": false
+    },
+    {
+      "layerId": "dust-impact-plume",
+      "columns": 1,
+      "rows": 1,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.82,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.82,
+      "sizePolicy": "world",
+      "binding": "area",
+      "authoringGeometry": {
+        "shape": "circle",
+        "spanM": 3,
+        "depthM": 1.5
+      },
+      "file": "dust-impact-plume.png",
+      "palette": "fire",
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 4,
+      "opacity": 0.4,
+      "delaySec": 0.14,
+      "orient": false
+    }
+  ],
+  "composition": "Material study: flame-tongue, ember-ground-cracks, dust-impact-plume",
+  "componentRecipe": {
+    "shapes": [
+      "flame-tongue",
+      "ember-ground-cracks",
+      "dust-impact-plume"
+    ],
+    "humanReview": false
+  },
+  "reviewOnly": true,
+  "generation": {
+    "tool": "imagegen",
+    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  },
+  "orient": false
+}

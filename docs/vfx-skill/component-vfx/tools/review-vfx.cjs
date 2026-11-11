@@ -11,7 +11,7 @@ const roster=JSON.parse(fs.readFileSync(path.join(root,'tools/data/skills.json')
 const added=['cone-stream','wall-segment','tether-strand','shockwave-ring','crescent-wave','shield-dome','bind-strand'].map(shape=>({...shapes[shape].master,parts:[shape]}));
 const verifiedTimes=new Map((fs.existsSync(path.join(__dirname,'../evidence/manifests/vfx-matrix-evidence.json'))?JSON.parse(fs.readFileSync(path.join(__dirname,'../evidence/manifests/vfx-matrix-evidence.json'),'utf8')):[]).map(r=>[r.skill+'/'+r.version,r.time]));
 const nextFrame=page=>page.evaluate(()=>new Promise(requestAnimationFrame));
-const selector=(skill,version)=>`[data-vfx-version="pool-${version}"] [data-skill-art="${skill}"]`;
+const selector=(skill,version)=>`[data-vfx-version="pool"] [data-skill-art="${skill}"]`;
 
 async function setup(browser,item,elevation=33,paletteFixture=false){
  const page=await browser.newPage({viewport:{width:1920,height:1080}}),errors=[];
@@ -23,7 +23,7 @@ async function setup(browser,item,elevation=33,paletteFixture=false){
   await route.fulfill({response,body});
  });
  if(paletteFixture)await page.route('**/src/ui/fx/catalog.ts*',async route=>{
-  const response=await route.fetch();const hook=`\nglobalThis.__vfxReviewPalette = (palette) => {const v=SKILL_VFX_POOL[${JSON.stringify(item.skill)}].find(v=>v.id===${JSON.stringify('pool-'+item.version)});v.palette=palette;for(const l of v.layers)l.palette=palette;};\n`;
+  const response=await route.fetch();const hook=`\nglobalThis.__vfxReviewPalette = (palette) => {const v=SKILL_VFX_POOL[${JSON.stringify(item.skill)}].find(v=>v.id===${JSON.stringify('pool')});v.palette=palette;for(const l of v.layers)l.palette=palette;};\n`;
   await route.fulfill({response,body:await response.text()+hook});
  });
  await page.goto(`http://localhost:5173/__showcase?sample=combat-field&skill=${item.skill}#showcase-field`,{waitUntil:'domcontentloaded',timeout:30000});
@@ -34,7 +34,7 @@ async function setup(browser,item,elevation=33,paletteFixture=false){
 async function prepare(page,item){
  const skill=page.getByLabel('Skill cast in the arena');
  if(await skill.inputValue()!==item.skill){await skill.selectOption(item.skill);await nextFrame(page)}
- await page.getByLabel('Preview VFX version in the arena').selectOption('version:pool-'+item.version);
+ await page.getByLabel('Preview VFX art in the arena').selectOption('version:pool');
  await page.getByRole('button',{name:'Replay encounter',exact:true}).click();
  const step=page.getByRole('button',{name:'Advance simulation 1s',exact:true});
  await step.click();
@@ -63,7 +63,7 @@ async function scan(page,item,layer){
    const time=Number(input.value);input.dispatchEvent(new Event('input',{bubbles:true}));return time;
   });
   await nextFrame(page);
-  const layers=await page.locator(`[data-vfx-version="pool-${item.version}"][data-vfx-layer]`).evaluateAll(nodes=>nodes.filter(n=>n.querySelector('[data-skill-art]')).map(n=>n.getAttribute('data-vfx-layer')));
+  const layers=await page.locator(`[data-vfx-version="pool"][data-vfx-layer]`).evaluateAll(nodes=>nodes.filter(n=>n.querySelector('[data-skill-art]')).map(n=>n.getAttribute('data-vfx-layer')));
   return{time,layers,seen:layers};
  }
  const playhead=page.getByLabel('Arena animation time');
@@ -78,7 +78,7 @@ async function scan(page,item,layer){
   const previous=known==null?[]:[known,known-150000,known+150000,known-350000,known+350000,known-600000].filter(t=>t>=min&&t<=max);
   for(const time of [...previous,...hints,...regular]){
    await seek(page,time);
-   const layers=await page.locator(`[data-vfx-version="pool-${item.version}"][data-vfx-layer]`).evaluateAll((nodes,{skill,layer})=>nodes.flatMap(n=>{
+   const layers=await page.locator(`[data-vfx-version="pool"][data-vfx-layer]`).evaluateAll((nodes,{skill,layer})=>nodes.flatMap(n=>{
     const art=n.querySelector(`[data-skill-art="${skill}"]`);if(!art)return[];
     const b=art.getBoundingClientRect();let opacity=1;for(let node=art;node;node=node.parentElement)opacity*=Number(getComputedStyle(node).opacity);return opacity>.15&&b.width>0&&b.height>0&&(!layer||n.getAttribute('data-vfx-layer')===layer)?[n.getAttribute('data-vfx-layer')]:[];
    }),{skill:item.skill,layer});
@@ -150,7 +150,7 @@ async function recipeCheck(browser,item,elevation=33,matrix=false,shared){
    assert.ok(order.before&&order.groundStacked&&order.ground<order.actor,'Ground must paint below actors in the same stacking context');
   }
   assert.deepEqual(errors,[],`${item.skill} console`);
-  const directory=path.join(__dirname,'../evidence/captures/recipes');fs.mkdirSync(directory,{recursive:true});
+  const directory=path.join(root,'.cache','vfx-captures','recipes');fs.mkdirSync(directory,{recursive:true});
   if(!matrix||elevation===33){await align(page);await page.screenshot({path:path.join(directory,item.skill.replace('.','-')+'-'+item.version+'.png')})}
   verifiedTimes.set(item.skill+'/'+item.version,found.time);
   console.log('PASS recipe',item.skill,item.version,'camera',elevation,'layers',found.seen.join(','));
@@ -166,16 +166,16 @@ async function colorCheck(browser,shape,definition){
   if(peak>Number(await page.getByLabel('Arena animation time').getAttribute('max')))await page.getByRole('button',{name:'Advance simulation 1s',exact:true}).click();
   found.time=peak;
   await page.addStyleTag({content:`[data-vfx-layer]:not([data-vfx-layer="${item.layerId}"]){display:none!important}`});
-  const directory=path.join(__dirname,'../evidence/captures/palettes',shape);fs.mkdirSync(directory,{recursive:true});
+  const directory=path.join(root,'.cache','vfx-captures','palettes',shape);fs.mkdirSync(directory,{recursive:true});
   const records=[];let reference;
   for(const palette of palettes){
-   await page.getByLabel('Preview VFX version in the arena').selectOption('base');
-   await page.locator(`[data-vfx-version="pool-${item.version}"] [data-skill-art="${item.skill}"]`).first().waitFor({state:'hidden'});
+   await page.getByLabel('Preview VFX art in the arena').selectOption('base');
+   await page.locator(`[data-vfx-version="pool"] [data-skill-art="${item.skill}"]`).first().waitFor({state:'hidden'});
    await nextFrame(page);
    await page.evaluate(p=>globalThis.__vfxReviewPalette(p),palette);
-   await page.getByLabel('Preview VFX version in the arena').selectOption('version:pool-'+item.version);
+   await page.getByLabel('Preview VFX art in the arena').selectOption('version:pool');
    await seek(page,found.time);await align(page);
-   const metrics=await page.locator(`[data-vfx-version="pool-${item.version}"][data-vfx-layer="${item.layerId}"]`).evaluateAll(nodes=>{
+   const metrics=await page.locator(`[data-vfx-version="pool"][data-vfx-layer="${item.layerId}"]`).evaluateAll(nodes=>{
     const node=nodes.find(n=>n.querySelector('[data-skill-art]'));if(!node)return null;
     const frame=node.querySelector('svg.atlas-frame'),box=frame.getBoundingClientRect();
     return{tables:['R','G','B'].map(c=>node.querySelector('feFunc'+c)?.getAttribute('tableValues')),alphaFunctions:node.querySelectorAll('feFuncA').length,

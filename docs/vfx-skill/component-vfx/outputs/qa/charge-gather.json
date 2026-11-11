@@ -1,0 +1,23 @@
+{
+  "humanReview": false,
+  "shape": "charge-gather",
+  "family": "mote",
+  "file": "charge-gather.png",
+  "rawFile": "raw/charge-gather.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    103,
+    899,
+    895
+  ],
+  "sourceSha256": "2e196b456ac7371e0a440ecfd864ef3c5cbc8cd2048a686cfa615766962572a0",
+  "masterSha256": "0c342c47c44908b57872e9e973a3acda8249136eb6b4a0b19526fdebd02e4c06"
+}

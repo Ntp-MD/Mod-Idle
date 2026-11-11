@@ -49,6 +49,7 @@ import { buyBlackMarket } from '@sim/town/black-market';
   import TravelCard from './ui/map/TravelCard.svelte';
   import MapJourney from './ui/map/MapJourney.svelte';
   import { activeVfxVersionId, setActiveVfxVersion, vfxVersionsFor } from './ui/fx/catalog';
+  import { selectProceduralVfxReview } from './ui/fx/procedural-review';
   import { destinationIntel } from './ui/map/map-intel';
   import { investigateTrailSite, recordMapDiscovery } from '@sim/world/map-exploration';
   import { destinationPrimary, destinationWarp } from './ui/map/destination';
@@ -560,6 +561,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   function showcaseGame(scenario: string = 'delivery'): GameState {
     return buildShowcaseGame({
+      selectVfxReview: selectProceduralVfxReview,
       activeArenaVariant: activeArenaVariant as unknown as { speciesId: string } | null,
       ArenaPreviewSpawn: ARENA_PREVIEW_SPAWN,
       arenaSpecies,
@@ -2411,7 +2413,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         {/each}
       </select></label>
       {#if arenaVersions.length}
-        <label>VFX version <select aria-label="Preview VFX version in the arena" value={arenaVfxMode === 'base' ? 'base' : `version:${arenaVersionId}`} onchange={(event) => {
+        <label>VFX art <select aria-label="Preview VFX art in the arena" value={arenaVfxMode === 'base' ? 'base' : `version:${arenaVersionId}`} onchange={(event) => {
           chooseArenaVersion(event.currentTarget.value);
         }}>
           <option value="base">Base VFX (no skin)</option>

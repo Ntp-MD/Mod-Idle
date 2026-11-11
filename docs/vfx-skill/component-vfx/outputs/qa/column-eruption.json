@@ -1,0 +1,23 @@
+{
+  "shape": "column-eruption",
+  "family": "column-eruption",
+  "file": "column-eruption.png",
+  "rawFile": "raw/column-eruption.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    114,
+    903,
+    903
+  ],
+  "sourceSha256": "4686d97d165b7afb55e83e7818778222a99ffd39ed45e3e008524bc9be78499a",
+  "masterSha256": "c519974695eb9b07da8c48c67080441e641c11b6b53555578f0c065ffa737caf",
+  "humanReview": false
+}

@@ -17,7 +17,7 @@ test('one world scale resizes actors, range rings and VFX without changing their
     input.dispatchEvent(new Event('input', { bubbles: true }));
   });
   const renderer = page.getByLabel('Mob rendering mode in the arena');
-  const vfx = page.getByLabel('Preview VFX version in the arena');
+  const vfx = page.getByLabel('Preview VFX art in the arena');
   const camera = await page.evaluate(async () => {
     const { ARENA_CAMERA, ARENA_VIEW } = await import('/src/presentation/arena-camera.ts');
     return { pixelsPerMeter: ARENA_CAMERA.projection.a, referenceWidth: ARENA_VIEW.width,

@@ -1,0 +1,36 @@
+{
+  "humanReview": false,
+  "shape": "radial-fracture",
+  "family": "ground-residue",
+  "file": "radial-fracture.png",
+  "rawFile": "raw/radial-fracture.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    130,
+    105,
+    894,
+    921
+  ],
+  "sourceSha256": "415b3668543b1b392e8d57ca8c6797d61920af2e0593d3dfba0bd70e5a44947f",
+  "masterSha256": "518f153a93b4d220aedc94bb04808474a5805b0702921b89475dc30dee417470",
+  "rawVisibleAlphaBounds": [
+    168,
+    152,
+    1092,
+    1115
+  ],
+  "rawCornerAlpha": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "rawPreserved": true
+}

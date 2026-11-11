@@ -1,0 +1,111 @@
+{
+  "layerId": "molten-projectile",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "sizePolicy": "body",
+  "authoringGeometry": {
+    "shape": "single",
+    "delivery": "projectile"
+  },
+  "palette": "fire",
+  "phases": [
+    "Travel",
+    "Impact"
+  ],
+  "opacity": 0.9,
+  "orient": true,
+  "id": "attack.fireball",
+  "src": "/fx/skill-pool/attack-fire/attack-fireball/molten-projectile.png",
+  "additionalLayers": [
+    {
+      "layerId": "flame-tongue",
+      "columns": 1,
+      "rows": 1,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.82,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.82,
+      "sizePolicy": "world",
+      "binding": "contact",
+      "authoringGeometry": {
+        "shape": "circle",
+        "spanM": 1.5,
+        "depthM": 2.8
+      },
+      "file": "flame-tongue.png",
+      "palette": "fire",
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 0.45,
+      "opacity": 0.9,
+      "delaySec": 0.07,
+      "orient": false
+    },
+    {
+      "layerId": "ember-ground-cracks",
+      "columns": 1,
+      "rows": 1,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "authoringGeometry": {
+        "shape": "circle"
+      },
+      "projection": "ground",
+      "file": "ember-ground-cracks.png",
+      "palette": "fire",
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 1.4,
+      "opacity": 0.55,
+      "delaySec": 0.15,
+      "orient": false
+    }
+  ],
+  "composition": "Material study: molten-projectile, flame-tongue, ember-ground-cracks",
+  "componentRecipe": {
+    "shapes": [
+      "molten-projectile",
+      "flame-tongue",
+      "ember-ground-cracks"
+    ],
+    "humanReview": false
+  },
+  "reviewOnly": true,
+  "generation": {
+    "tool": "imagegen",
+    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  }
+}

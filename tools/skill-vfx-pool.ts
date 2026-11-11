@@ -1,26 +1,23 @@
 /**
- * Regenerate the archived VFX pool registry.
+ * Regenerate the raster VFX pool registry.
  *
  *   node --experimental-strip-types tools/skill-vfx-pool.ts
  *   node --experimental-strip-types tools/skill-vfx-pool.ts --skill=attack.meteor
  *
- * Layout (confirmed convention):
- *   game/public/fx/skill-pool/attack-<element>/<skill-slug>/default/version.json   ← pointer only
- *   game/public/fx/skill-pool/attack-<element>/<skill-slug>/v1/  v2/ …             ← immutable art
- *   game/public/fx/skill-pool/<type>/<skill-slug>/…                                ← aura · buff · curse · heal
+ * Layout: game/public/fx/skill-pool/<group>/<skill-slug>/meta.json + named PNGs.
+ * Each skill owns one current recipe directly in its folder, with no nested art folders.
  *
  * Attack rows group by Element (`attack-phy` holds the physical rows; every other suffix is the
  * element's own name). The folder must match the row's `element`, so a mis-filed atlas fails here
  * instead of shipping under the wrong skill. `phy` is the one short name; the data value stays
  * `physical`.
  *
- * Storage rule: every generated/imported skill VFX from any production pipeline is stored as a
- * new `vN` here. No other folder is a home for skill VFX — this script rejects sibling folders
- * such as `game/public/fx/<skill-id>/`.
+ * Source authoring uses the single named shelf at docs/vfx-skill/component-vfx/outputs/.
+ * Update the named source and its existing skill recipe in place; Git keeps history.
+ * Runtime copies stay in this pool; sibling VFX homes are rejected.
  *
- * `default` never holds art; it names the active version. The script resolves that pointer
- * (falling back to the highest `vN`), reads every `meta.json`, and writes
- * `pool.generated.ts`. Runtime URLs always address the resolved `vN` folder, never `default`.
+ * The script validates each meta.json and writes pool.generated.ts. The existing catalog
+ * selection API receives one stable `pool` row per skill; it does not imply versioned files.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -30,34 +27,16 @@ const POOL = path.join(ROOT, 'game/public/fx/skill-pool');
 const OUT = path.join(ROOT, 'game/src/ui/fx/pool.generated.ts');
 const SKILLS = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/data/skills.json'), 'utf8'));
 const COMPONENTS = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/data/vfx-components.json'), 'utf8'));
-const POINTER = 'version.json';
 
 // One home only: nothing beside the pool may hold skill VFX.
 const FX_ROOT = path.join(ROOT, 'game/public/fx');
 const stray = fs.readdirSync(FX_ROOT, { withFileTypes: true })
   .filter((entry) => entry.isDirectory() && entry.name !== 'skill-pool');
 if (stray.length) {
-  throw new Error(`skill VFX must live under fx/skill-pool/<skill>/vN — found ${stray.map((entry) => entry.name).join(', ')}`);
+  throw new Error(`skill VFX must live under fx/skill-pool/<group>/<skill> — found ${stray.map((entry) => entry.name).join(', ')}`);
 }
 
 const live = new Set<string>(SKILLS.skills.filter((skill: any) => !skill.retired).map((skill: any) => skill.id));
-
-/** `default/version.json` is the selection; a copied atlas there is rejected. */
-function defaultPointer(skillDir: string, slug: string): string | null {
-  const dir = path.join(skillDir, 'default');
-  if (!fs.existsSync(dir)) return null;
-  const pointer = path.join(dir, POINTER);
-  if (!fs.existsSync(pointer)) {
-    if (fs.readdirSync(dir).some((file) => /\.(png|webp|json)$/i.test(file) && file !== POINTER)) {
-      throw new Error(`${slug}/default holds art — default must be a pointer (${POINTER}), not a copy`);
-    }
-    return null;
-  }
-  const version = String(JSON.parse(fs.readFileSync(pointer, 'utf8')).version ?? '');
-  if (!/^(v\d+|vfx-component)$/.test(version)) throw new Error(`${slug}/default/${POINTER} must name a vN or vfx-component version`);
-  if (!fs.existsSync(path.join(skillDir, version))) throw new Error(`${slug}/default points at missing ${version}`);
-  return version;
-}
 
 const slugToId = (slug: string) => {
   const dash = slug.indexOf('-');
@@ -95,8 +74,6 @@ type Version = {
   rainRadiusRatio?: number;
   rainSpreadM?: number;
   id: string; label: string; arena: boolean; default: boolean;
-  /** Renderer-only version: no raster slots; the arena draws it procedurally. */
-  renderer?: 'procedural';
   orient?: boolean;
   anchor?: Pair;
   impactAnchor?: Pair;
@@ -296,116 +273,71 @@ for (const group of groups) {
     if (group.element && ELEMENT_OF.get(skillId) !== group.element)
       throw new Error(`${group.dir}/${slug}: ${skillId} is ${ELEMENT_OF.get(skillId) || 'unknown'}, not ${group.element}`);
     const skillDir = path.join(groupDir, slug);
-    const pointer = defaultPointer(skillDir, slug);
-    let preferred: string | null = pointer;
     const versions: Version[] = [];
-    const reviewOnly = new Set<string>();
-    for (const versionEntry of fs.readdirSync(skillDir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
-      if (!versionEntry.isDirectory() || versionEntry.name === 'default') continue;
-      const version = versionEntry.name;
-      const dir = path.join(skillDir, version);
-      const files = fs.readdirSync(dir);
-      const metaFile = files.includes('meta.json') ? path.join(dir, 'meta.json') : null;
-      const meta = metaFile ? JSON.parse(fs.readFileSync(metaFile, 'utf8')) : null;
-      if (meta?.reviewOnly === true) reviewOnly.add(`pool-${version}`);
-      if (files.includes('version.json')) {
-        const declared = JSON.parse(fs.readFileSync(path.join(dir, 'version.json'), 'utf8'));
-        if (declared?.renderer === 'procedural') {
-          versions.push({
-            id: `pool-${version}`,
-            label: preferred === version ? `Default · ${version}` : version,
-            arena: true,
-            default: preferred === version,
-            renderer: 'procedural',
-            layers: [],
-          });
-          continue;
-        }
+    const nested = fs.readdirSync(skillDir, { withFileTypes: true }).filter(entry => entry.isDirectory());
+    if (nested.length) throw new Error(`${slug}: place meta.json and art directly in the skill folder; remove ${nested.map(entry => entry.name).join(', ')}`);
+    const dir = skillDir;
+    const files = fs.readdirSync(dir);
+    const metaFile = files.includes('meta.json') ? path.join(dir, 'meta.json') : null;
+    if (!metaFile) throw new Error(`${slug}: missing meta.json`);
+    const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
+    // A straight-down ground texture: exact footprint projection, no atlas frames.
+    // The decal canvas must be square; the renderer maps 0..canvas onto the ground basis.
+    if (files.includes('decal.png')) {
+      const texture = textureSize(path.join(dir, 'decal.png'));
+      if (texture.textureWidth !== texture.textureHeight) {
+        throw new Error(`${slug}/decal.png must be square, got ${texture.textureWidth}x${texture.textureHeight}`);
       }
-      // A straight-down ground texture: exact footprint projection, no atlas frames.
-      // The decal canvas must be square; the renderer maps 0..canvas onto the ground basis.
-      if (files.includes('decal.png')) {
-        const texture = textureSize(path.join(dir, 'decal.png'));
-        if (texture.textureWidth !== texture.textureHeight) {
-          throw new Error(`${slug}/${version}/decal.png must be square, got ${texture.textureWidth}x${texture.textureHeight}`);
-        }
-        versions.push({
-          id: `pool-${version}`,
-          label: preferred === version ? `Default · ${version}` : version,
-          arena: true,
-          default: preferred === version,
-          decal: `/fx/skill-pool/${group.dir}/${slug}/${version}/decal.png`,
-          ...(finite(meta?.decalOpacity) ? { decalOpacity: Number(meta.decalOpacity) } : {}),
-          ...aimMeta(meta),
-          layers: [],
-        });
-        continue;
-      }
-      let atlas = meta?.src ? path.basename(String(meta.src)) : 'atlas.png';
-      if (!files.includes(atlas)) atlas = files.find((file) => /^atlas.*\.png$/.test(file)) || '';
-      if (!atlas) continue;
-      const frame = frameGrid(meta, path.join(dir, atlas));
-      validateGroundAtlas(meta, frame, `${slug}/${version}`);
-      const frameMs = Number(meta?.frameMs) || 80;
       versions.push({
-        id: `pool-${version}`,
-        label: preferred === version ? `Default · ${version}` : version,
+        id: 'pool',
+        label: 'Current art',
         arena: true,
-        default: preferred === version,
+        default: true,
+        decal: `/fx/skill-pool/${group.dir}/${slug}/decal.png`,
+        ...(finite(meta?.decalOpacity) ? { decalOpacity: Number(meta.decalOpacity) } : {}),
         ...aimMeta(meta),
-        layers: [{
-          id: layerId(meta?.layerId, 'base'),
-          role: meta?.projection === 'ground' ? 'ground' : 'upright',
-          src: `/fx/skill-pool/${group.dir}/${slug}/${version}/${atlas}`,
-          frame,
-          fps: Math.max(1, Math.round(1000 / frameMs)),
-          loop: group.type === 'aura' || group.type === 'buff',
-          ...(finite(meta?.opacity) ? { opacity: Number(meta.opacity) } : {}),
-        }, ...(meta?.additionalLayers ?? []).map((extra: any, index: number) => {
-          if (typeof extra.file !== 'string' || path.basename(extra.file) !== extra.file
-            || !files.includes(extra.file)) throw new Error(`${slug}/${version}: invalid additional atlas file`);
-          if (!finite(extra.opacity) || Number(extra.opacity) < 0 || Number(extra.opacity) > 1)
-            throw new Error(`${slug}/${version}: additional layer opacity must be 0..1`);
-          const extraFrame = frameGrid(extra, path.join(dir, extra.file));
-          validateGroundAtlas(extra, extraFrame, `${slug}/${version}/${extra.file}`);
-          return { id: layerId(extra.layerId, `layer-${index + 1}`), role: extra.projection === 'ground' ? 'ground' as const : 'upright' as const,
-            src: `/fx/skill-pool/${group.dir}/${slug}/${version}/${extra.file}`,
-            frame: extraFrame,
-            fps: Math.max(1, Math.round(1000 / (Number(extra.frameMs) || 80))), loop: true,
-            opacity: Number(extra.opacity), ...aimMeta(extra),
-          };
-        })],
+        layers: [],
       });
-      const ids = versions[versions.length - 1].layers.map(layer => layer.id);
-      if (new Set(ids).size !== ids.length) throw new Error(`${slug}/${version}: duplicate VFX layer IDs`);
+      output[skillId] = versions;
+      continue;
     }
-    if (!versions.length) continue;
-    if (!preferred) {
-      let best = -1;
-      let bestName: string | null = null;
-      for (const v of versions) {
-        if (reviewOnly.has(v.id)) continue;
-        const m = v.id.match(/^pool-v(\d+)$/);
-        const n = m ? Number(m[1]) : -1;
-        if (n > best) { best = n; bestName = `v${n}`; }
-      }
-      preferred = bestName;
-      if (preferred) {
-        for (const v of versions) {
-          const isDefault = v.id === `pool-${preferred}`;
-          v.default = isDefault;
-          v.label = isDefault ? `Default · ${preferred}` : v.id.replace('pool-', '');
-        }
-      }
-    }
-    if (preferred && !versions.some((version) => version.id === `pool-${preferred}`)) {
-      console.warn(`${skillId}: ${preferred} is not a supported atlas version; registered older atlases remain active`);
-    }
-    versions.sort((a, b) => {
-      const av = a.id === `pool-${preferred}` ? 0 : 1;
-      const bv = b.id === `pool-${preferred}` ? 0 : 1;
-      return av - bv || a.id.localeCompare(b.id);
+    let atlas = meta?.src ? path.basename(String(meta.src)) : 'atlas.png';
+    if (!files.includes(atlas)) atlas = files.find((file) => /^atlas.*\.png$/.test(file)) || '';
+    if (!atlas) throw new Error(`${slug}: missing main atlas`);
+    const frame = frameGrid(meta, path.join(dir, atlas));
+    validateGroundAtlas(meta, frame, slug);
+    const frameMs = Number(meta?.frameMs) || 80;
+    versions.push({
+      id: 'pool',
+      label: 'Current art',
+      arena: true,
+      default: true,
+      ...aimMeta(meta),
+      layers: [{
+        id: layerId(meta?.layerId, 'base'),
+        role: meta?.projection === 'ground' ? 'ground' : 'upright',
+        src: `/fx/skill-pool/${group.dir}/${slug}/${atlas}`,
+        frame,
+        fps: Math.max(1, Math.round(1000 / frameMs)),
+        loop: group.type === 'aura' || group.type === 'buff',
+        ...(finite(meta?.opacity) ? { opacity: Number(meta.opacity) } : {}),
+      }, ...(meta?.additionalLayers ?? []).map((extra: any, index: number) => {
+        if (typeof extra.file !== 'string' || path.basename(extra.file) !== extra.file
+          || !files.includes(extra.file)) throw new Error(`${slug}: invalid additional atlas file`);
+        if (!finite(extra.opacity) || Number(extra.opacity) < 0 || Number(extra.opacity) > 1)
+          throw new Error(`${slug}: additional layer opacity must be 0..1`);
+        const extraFrame = frameGrid(extra, path.join(dir, extra.file));
+        validateGroundAtlas(extra, extraFrame, `${slug}/${extra.file}`);
+        return { id: layerId(extra.layerId, `layer-${index + 1}`), role: extra.projection === 'ground' ? 'ground' as const : 'upright' as const,
+          src: `/fx/skill-pool/${group.dir}/${slug}/${extra.file}`,
+          frame: extraFrame,
+          fps: Math.max(1, Math.round(1000 / (Number(extra.frameMs) || 80))), loop: true,
+          opacity: Number(extra.opacity), ...aimMeta(extra),
+        };
+      })],
     });
+    const ids = versions[versions.length - 1].layers.map(layer => layer.id);
+    if (new Set(ids).size !== ids.length) throw new Error(`${slug}: duplicate VFX layer IDs`);
     output[skillId] = versions;
   }
 }
@@ -420,4 +352,4 @@ fs.writeFileSync(registryTemporary, [
   '',
 ].join('\n'));
 fs.renameSync(registryTemporary, OUT);
-console.log(`wrote ${path.relative(ROOT, OUT)} · ${Object.keys(output).length} skills · ${Object.values(output).reduce((sum, rows) => sum + rows.length, 0)} versions`);
+console.log(`wrote ${path.relative(ROOT, OUT)} · ${Object.keys(output).length} current skill recipes`);

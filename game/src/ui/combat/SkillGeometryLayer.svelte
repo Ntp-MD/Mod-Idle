@@ -4,7 +4,7 @@
   import { createFieldViewFrame, type FieldViewFrame } from '../../presentation/arena-view-frame';
   import { fieldPointM } from '../../presentation/view-transform';
   import type { SkillAimGeometry, SkillGeometry, BodyModelM } from './skill-geometry';
-  import { groundDecalMatrixForFrame, resolveVfxPresentation, skillArtFor, vfxPresentationTailSec, type SkillVfxMode } from './arena-skill-art';
+  import { directionalAtlasFor, groundDecalMatrixForFrame, resolveVfxPresentation, skillArtFor, vfxPresentationTailSec, type SkillVfxMode } from './arena-skill-art';
   import { matrixAttribute } from '../../presentation/view-transform';
   import { projectSkillGeometry, skillActionGeometry, skillAimGeometry, skillPayloadGeometry } from './skill-geometry';
   import { activeAuraGeometry } from './skill-aura-geometry';
@@ -13,7 +13,6 @@
   import { ensureVfxAssets } from '../fx/vfx-assets.svelte';
   import type { SkillState } from '@sim/combat/skills';
   import ArenaSkillVfxStage from './ArenaSkillVfxStage.svelte';
-  import RimworldSkillVfx from './RimworldSkillVfx.svelte';
   import SkillAtlas from './SkillAtlas.svelte';
 
   import type { VfxAtlas } from '../fx/catalog';
@@ -197,7 +196,7 @@
         </g>
         <path class="skill-arrival-edge" d={screen.footprint} pathLength="1" stroke-dasharray={`${mark.progress} 1`} />
       {/if}
-      {#if !art?.atlas && effectiveFrame.renderable && resolveVfxPresentation(mark.skillId, vfxMode).kind !== 'procedural'}<ArenaSkillVfxStage {mark} screen={screen} frame={effectiveFrame} {reducedMotion} />{/if}
+      {#if !art?.atlas && effectiveFrame.renderable}<ArenaSkillVfxStage {mark} screen={screen} frame={effectiveFrame} {reducedMotion} />{/if}
       {#if mark.phase === 'Aim' || inspect}
         <line class="skill-direction" x1={screen.direction.from.x} y1={screen.direction.from.y} x2={screen.direction.to.x} y2={screen.direction.to.y} />
         <path class="skill-target" d="M-9 0H9M0-9V9" transform={`translate(${screen.direction.to.x} ${screen.direction.to.y})`} />
@@ -221,12 +220,8 @@
     {@const pres = resolveVfxPresentation(mark.skillId, vfxMode)}
     {@const art = pres.kind === 'skin' ? pres.art : undefined}
     {#if screen && effectiveFrame.renderable}
-    {#if pres.kind === 'procedural' && plane === 'upright'}
-      <g data-vfx-renderer="procedural" data-vfx-version={pres.versionId}>
-        <RimworldSkillVfx {mark} {screen} frame={effectiveFrame} {reducedMotion} />
-      </g>
-    {/if}
-    {#each (art?.atlases ?? (art?.atlas ? [art.atlas] : [])).filter(atlas => (atlas.projection === 'ground') === (plane === 'ground')) as atlas, layerIndex (atlas.id ?? `${layerIndex}:${atlas.src}`)}
+    {#each (art?.atlases ?? (art?.atlas ? [art.atlas] : [])).map(atlas => directionalAtlasFor(mark, atlas, effectiveFrame))
+      .filter((atlas): atlas is VfxAtlas => !!atlas && (atlas.projection === 'ground') === (plane === 'ground')) as atlas, layerIndex (atlas.id ?? `${layerIndex}:${atlas.src}`)}
       <g opacity={atlas.opacity ?? 1} data-skill-art-source={atlas.src} data-skill-action={mark.key} data-vfx-layer={atlas.id ?? layerIndex}
         data-vfx-renderer="skin" data-vfx-version={pres.kind === 'skin' ? pres.versionId : ''}
         data-vfx-base-reason={pres.kind === 'base' ? pres.reason : ''}>

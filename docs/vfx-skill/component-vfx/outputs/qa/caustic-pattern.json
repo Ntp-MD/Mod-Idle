@@ -1,0 +1,36 @@
+{
+  "humanReview": false,
+  "shape": "caustic-pattern",
+  "family": "ground-fill",
+  "file": "caustic-pattern.png",
+  "rawFile": "raw/caustic-pattern.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    105,
+    921,
+    900
+  ],
+  "sourceSha256": "603ba2d956595b23fd8390f25b0aeb31ebe0eda2ccb30c10b602eeb94d281dae",
+  "masterSha256": "9cf71e47def493d091dbe5066e09b58c0bfe6fc4741ba1e66c799b7d7620829d",
+  "rawVisibleAlphaBounds": [
+    194,
+    170,
+    1060,
+    1044
+  ],
+  "rawCornerAlpha": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "rawPreserved": true
+}

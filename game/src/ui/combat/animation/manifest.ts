@@ -1,8 +1,8 @@
 /**
  * The animation manifest contract: one runtime identity resolves to one rig and its clips, or to
  * a named fallback. The simulation owns start/release/impact/recovery times; a clip never owns a
- * damage event. `docs/character/animation.md` is the ownership note, and `validateAnimationManifest` is the
- * gate every imported set must pass before an identity may point at it.
+ * damage event. `validateAnimationManifest` is the gate every imported set must pass before an
+ * identity may point at it.
  *
  * Clips are authored in metres with the feet at the root pivot. A clip declares presentation
  * markers (`release`, `impact`) as fractions of its own length only so a renderer can align the

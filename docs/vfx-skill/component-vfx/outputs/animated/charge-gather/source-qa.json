@@ -1,0 +1,27 @@
+{
+  "component": "charge-gather",
+  "sourceSha256": "619a0847ef01ed82a84f4a403b69a6e047534d229c95744c31c62ed496f6380f",
+  "geometrySha256": "575ae6edfd1531b073ce7abee6cebbaba2f71f11eb33e601167388b2eb81b37e",
+  "sourceUnchanged": true,
+  "cameraChangeWithoutRebuild": true,
+  "deterministicRerender": true,
+  "northUpEastRight": true,
+  "fixedRootAcrossEightHeadings": true,
+  "anchors": [
+    {
+      "camera": "arena",
+      "anchor": [
+        0.5,
+        0.60902703
+      ]
+    },
+    {
+      "camera": "raised",
+      "anchor": [
+        0.5,
+        0.5919238
+      ]
+    }
+  ],
+  "humanApproval": "pending"
+}

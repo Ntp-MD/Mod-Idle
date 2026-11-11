@@ -1,0 +1,23 @@
+{
+  "alphaBounds": [
+    103,
+    103,
+    919,
+    921
+  ],
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "humanReview": false,
+  "sourceSha256": "7208010cc75c0281d1d8248e899bf98234e524351132ca411b33df53133b30c3",
+  "masterSha256": "152f8c7c2521f010a74ff5d9cde0db149a4fbff26fb694be5a8a7e105f6b9ca7",
+  "shape": "heavy-cleave",
+  "family": "slash-sweep",
+  "file": "heavy-cleave.png",
+  "rawFile": "raw/heavy-cleave.png"
+}

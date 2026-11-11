@@ -4,9 +4,9 @@ const path = require('node:path');
 const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '../../../..');
 const { chromium } = require(path.join(root, 'game/node_modules/@playwright/test'));
-const source = path.join(root, 'docs/vfx-skill/component-vfx/outputs/library-v4');
+const source = path.join(root, 'docs/vfx-skill/component-vfx/outputs');
 const recipes = JSON.parse(fs.readFileSync(path.join(source, 'recipes.json')));
-const capture = path.join(root, 'docs/vfx-skill/component-vfx/evidence/captures/materials');
+const capture = path.join(root, '.cache', 'vfx-captures', 'materials');
 const nextFrame = page => page.evaluate(() => new Promise(requestAnimationFrame));
 
 (async () => {
@@ -25,19 +25,19 @@ const nextFrame = page => page.evaluate(() => new Promise(requestAnimationFrame)
       if (results.some(r => r.skill === skill)) continue;
       errors = [];
       await page.getByLabel('Skill cast in the arena').selectOption(skill);
-      await page.getByLabel('Preview VFX version in the arena').selectOption('version:pool-' + recipe.version);
+      await page.getByLabel('Preview VFX art in the arena').selectOption('version:pool');
       await page.getByLabel('World scale in the arena').evaluate(input => { input.value = '1'; input.dispatchEvent(new Event('input', { bubbles: true })); });
       await page.getByRole('button', { name: 'Replay encounter', exact: true }).click();
       if (skill.startsWith('buff.')) {
-        const selector = `[data-vfx-version="pool-${recipe.version}"][data-skill-art="${skill}"], [data-vfx-version="pool-${recipe.version}"] [data-skill-art="${skill}"]`;
+        const selector = `[data-vfx-version="pool"][data-skill-art="${skill}"], [data-vfx-version="pool"] [data-skill-art="${skill}"]`;
         await page.locator(selector).first().waitFor({ state: 'visible', timeout: 10000 });
-        await page.waitForFunction(({version, count}) => [...document.querySelectorAll(`[data-vfx-version="pool-${version}"][data-vfx-layer]`)].filter(n => n.querySelector('[data-skill-art]')).length >= count,
-          { version: recipe.version, count: recipe.shapes.length }, { timeout: 10000 });
+        await page.waitForFunction(({artId, count}) => [...document.querySelectorAll(`[data-vfx-version="${artId}"][data-vfx-layer]`)].filter(n => n.querySelector('[data-skill-art]')).length >= count,
+          { artId: 'pool', count: recipe.shapes.length }, { timeout: 10000 });
         const time = await page.getByLabel('Arena animation time').evaluate(input => { const t = Number(input.value); input.dispatchEvent(new Event('input', { bubbles: true })); return t; });
         await nextFrame(page);
-        const seen = await page.locator(`[data-vfx-version="pool-${recipe.version}"][data-vfx-layer]`).evaluateAll(nodes => nodes.filter(n => n.querySelector('[data-skill-art]')).map(n => n.getAttribute('data-vfx-layer')));
+        const seen = await page.locator(`[data-vfx-version="pool"][data-vfx-layer]`).evaluateAll(nodes => nodes.filter(n => n.querySelector('[data-skill-art]')).map(n => n.getAttribute('data-vfx-layer')));
         await page.screenshot({ path: path.join(capture, skill + '.png') });
-        const record = { skill, version: recipe.version, seen, expected: recipe.shapes, time, errors };
+        const record = { skill, artId: 'pool', seen, expected: recipe.shapes, time, errors };
         results.push(record);
         fs.writeFileSync(recordPath, JSON.stringify(results, null, 2) + '\n');
         console.log(JSON.stringify(record));
@@ -57,7 +57,7 @@ const nextFrame = page => page.evaluate(() => new Promise(requestAnimationFrame)
       const max = Number(await timeline.getAttribute('max'));
       const seen = new Set();
       let best = { layers: [], time: min };
-      const selector = `[data-vfx-version="pool-${recipe.version}"][data-vfx-layer]`;
+      const selector = `[data-vfx-version="pool"][data-vfx-layer]`;
       const timing = (await page.getByLabel('Arena effect timing').textContent()).match(/\d+\.\d+/g);
       const times = [];
       if (timing?.length === 3) {
@@ -83,7 +83,7 @@ const nextFrame = page => page.evaluate(() => new Promise(requestAnimationFrame)
       await timeline.evaluate((input, t) => { input.value = String(t); input.dispatchEvent(new Event('input', { bubbles: true })); }, best.time);
       await nextFrame(page);
       await page.screenshot({ path: path.join(capture, skill + '.png') });
-      const record = { skill, version: recipe.version, seen: [...seen], expected: recipe.shapes, time: best.time, errors };
+      const record = { skill, artId: 'pool', seen: [...seen], expected: recipe.shapes, time: best.time, errors };
       results.push(record);
       fs.writeFileSync(path.join(source, 'native-review.json'), JSON.stringify(results, null, 2) + '\n');
       console.log(JSON.stringify(record));

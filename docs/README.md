@@ -6,16 +6,16 @@ Repository rules live in [AGENTS.md](../AGENTS.md). This file is the only docume
 
 | Area | Start here | Also in the topic |
 | --- | --- | --- |
-| VFX skill | [Component library brief](vfx-skill/component-vfx/vfx-component-library.md) | Retired guide set (`rimworld/`, `shared/`) lives in `archive/docs/vfx-skill/` |
-| Character | [Animation contract](character/animation.md) | [Animation atlas kit](character/animation/README.md), [Pawn study](character/pawn-study/README.md) |
+| VFX skill | [Component library](vfx-skill/component-vfx/README.md) | [Raster source guide](vfx-skill/component-vfx/outputs/README.md), [2D roster](vfx-skill/component-vfx/outputs/index.html), [exact prompts](vfx-skill/component-vfx/outputs/generation-prompts.json); [3D proposal](vfx-skill/component-vfx/spec.md) and [earlier sources](vfx-skill/component-vfx/sources/README.md) are deferred. |
+| Character | [Pawn study](character/pawn-study/README.md) | [Runtime animation schema](../game/src/ui/combat/animation/manifest.ts) |
 | Map | [Map art kit](map/README.md) | [Field backgrounds](map/field-backgrounds/README.md) |
-| Reference | [Wiki](reference/wiki/index.html) | [Glossary](reference/glossary.md), [Known failures](reference/known-failures.md), [Stall design](reference/stall-idea.md) |
+| Reference | [Wiki](reference/wiki/index.html) | [Glossary](reference/glossary.md) |
 
 ## Plan register
 
 | Plan | Scope |
 | --- | --- |
-| [VFX component library](plan/vfx-component-library.html) | 14 families x 7 palettes, runtime composition and recipes. |
+| [2D VFX raster roster](vfx-skill/component-vfx/README.md) | 33 additional named transparent still PNGs, raw sources, layer registration, QA and the shared raster roster. |
 | [Showcase isolation](plan/showcase-isolation.html) | DEV-only showcase fixtures, sample registry and production split. |
 
 ## Folder map
@@ -26,7 +26,7 @@ docs/
 ├─ plan/              execution plans, HTML only
 ├─ reference/         wiki, glossary, known failures, design notes
 ├─ vfx-skill/         component-vfx/
-├─ character/         animation contract, animation kit, pawn study
+├─ character/         pawn source assets and authoring tools
 └─ map/               map art kit, field backgrounds
 ```
 

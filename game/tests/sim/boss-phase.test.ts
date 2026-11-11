@@ -5,7 +5,8 @@ import { mobFixture } from '../fixtures/mobFixture';
 import { createCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
 import { characterSheet, newGame, setLevel, spawnMob, stepCombat, tick } from '@sim/core/game';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
-import { liveMobSkill } from '../fixtures/liveMob';
+import { liveMobSkill, enableMobSkillsForTests } from '../fixtures/liveMob';
+enableMobSkillsForTests();
 const PHASE = liveMobSkill(row => row.mode === 'strike' && (row.phase?.hpBelowPct ?? 0) > 0 && (row.phase?.hpBelowPct ?? 100) < 100, 'HP phase gate');
 
 /** F25 — a strike with a phase gate only answers inside its HP window. */

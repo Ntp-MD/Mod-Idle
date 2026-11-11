@@ -19,7 +19,7 @@
 
   // Reduced motion keeps the authored silhouette and contact while freezing its animation.
   const still = $derived(reducedMotion ? { ...mark, phaseElapsedSec: 0 } : mark);
-  const index = $derived(atlasFrameIndex(still, atlas));
+  const index = $derived(reducedMotion && atlas.posterFrame != null ? atlas.posterFrame : atlasFrameIndex(still, atlas));
   const opacity = $derived(atlasOpacity(mark, atlas));
   const placement = $derived(skillArtPlacement(mark, atlas, frame, screen, actors));
   const instances = $derived(componentInstances(mark, atlas, reducedMotion));
@@ -105,7 +105,8 @@
   {#each instances as instance, instanceIndex (instanceIndex)}
     {@const localMark = { ...mark, phaseElapsedSec: instance.elapsedSec }}
     {@const localOpacity = atlasOpacity(localMark, atlas)}
-    {@const localIndex = atlasFrameIndex(reducedMotion ? { ...localMark, phaseElapsedSec: 0 } : localMark, atlas)}
+    {@const localIndex = reducedMotion && atlas.posterFrame != null ? atlas.posterFrame
+      : atlasFrameIndex(reducedMotion ? { ...localMark, phaseElapsedSec: 0 } : localMark, atlas)}
     {@const transform = billboardMatrixForFrame({ x: placement.cx + instance.dx, y: placement.cy + instance.dy }, frame)}
     {#if localOpacity > 0}
       <g data-skill-art={mark.skillId} data-skill-art-phase={mark.phase.toLowerCase()} opacity={localOpacity}

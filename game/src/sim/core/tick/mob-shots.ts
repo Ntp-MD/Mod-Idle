@@ -82,6 +82,10 @@ export function createMobShots(opts: {
   /** Contact/impact ends the shot; a terminal arrival with no contact is a miss, never a ghost hit. */
   function resolveMobShot(shot: CombatMobFlight, atUs: number, contact: boolean) {
     if (!arena) return;
+    if (shot.skillId && !E.mob.skills_enabled) {
+      cancelMobShot(shot, atUs, 'skills-disabled');
+      return;
+    }
     shot.queued = false;
     const at = arena.mobFlights.indexOf(shot);
     if (at >= 0) arena.mobFlights.splice(at, 1);
@@ -123,6 +127,7 @@ export function createMobShots(opts: {
   function sweepMobShots(atUs: number) {
     if (!arena || s.player.hp <= 0) return;
     for (const shot of [...arena.mobFlights]) {
+      if (shot.skillId && !E.mob.skills_enabled) { cancelMobShot(shot, atUs, 'skills-disabled'); continue; }
       if (shot.areaKey && shot.areaKey !== encounterKeyOf(s)) { cancelMobShot(shot, atUs, 'area-exit'); continue; }
       const from = shot.position;
       // The segment starts where the last sweep left off — never before this shot's own

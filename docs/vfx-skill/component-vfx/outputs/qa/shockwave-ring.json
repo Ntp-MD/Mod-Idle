@@ -1,0 +1,33 @@
+{
+  "shape": "shockwave-ring",
+  "file": "shockwave-ring.png",
+  "rawFile": "raw/shockwave-ring.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    103,
+    921,
+    921
+  ],
+  "alphaExtrema": [
+    0,
+    254
+  ],
+  "visibleRgbSpreadMax": 32,
+  "visibleRgbSpreadMean": 1.169293,
+  "grayscaleAuthority": "AtlasFrame feColorMatrix saturate=0 before palette transfer",
+  "contentRatio": 0.8,
+  "sourceSha256": "5b70c6441496252bf7d2ad82a8568729f76e7939f59f112ea953ef07aeeedcb8",
+  "masterSha256": "7ba24b6c5e2c3c4bf784943bfc446de1f700eb76acd2ebe6fab37be1fdb86fdc",
+  "humanReview": false,
+  "runtimeRegistered": false,
+  "verifiedRuntimePalettes": 0,
+  "family": "ground-edge"
+}

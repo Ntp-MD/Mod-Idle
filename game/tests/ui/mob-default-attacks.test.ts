@@ -6,7 +6,8 @@ import {
 import { characterSheet, hitColour, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
 import { arenaActionPose } from '../../src/ui/combat/combat-arena-view';
-import { liveMobSkill } from '../fixtures/liveMob';
+import { liveMobSkill, enableMobSkillsForTests } from '../fixtures/liveMob';
+enableMobSkillsForTests();
 import { E } from '../../src/engine/client';
 import { basicPhaseBudget } from '@engine/attack-range.ts';
 import { liveId } from '../fixtures/liveSkill';

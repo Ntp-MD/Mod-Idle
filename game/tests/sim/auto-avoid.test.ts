@@ -3,7 +3,8 @@ import { characterSheet, newGame, stepCombat, tick } from '@sim/core/game';
 import { arenaAction, arenaWeaponStopRange, createCombatArena, syncCombatArena } from '@sim/combat/combat-arena';
 import { planAutoAvoid } from '@sim/combat/auto-avoid';
 import { mobFixture, pinFieldPopulation } from '../fixtures/mobFixture';
-import { liveMobSkill, liveProximitySpecies } from '../fixtures/liveMob';
+import { liveMobSkill, liveProximitySpecies, enableMobSkillsForTests } from '../fixtures/liveMob';
+enableMobSkillsForTests();
 
 const PROXIMITY = () => { const species = liveProximitySpecies(); return { species: species.name, speciesId: species.id }; };
 const HEAVY = liveMobSkill(row => row.mode === 'strike' && row.cast?.delivery === 'ground' && !row.phase && !!row.heavy, 'heavy ground threat');

@@ -1,0 +1,101 @@
+{
+  "layerId": "ward-shell",
+  "columns": 1,
+  "rows": 1,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "palette": "physical",
+  "authoringGeometry": {
+    "shape": "circle"
+  },
+  "sizePolicy": "body",
+  "binding": "caster",
+  "opacity": 0.85,
+  "phases": [
+    "Impact",
+    "Field"
+  ],
+  "durationSec": 1.4,
+  "src": "/fx/skill-pool/aura/aura-wraith-of-fury/ward-shell.png",
+  "additionalLayers": [
+    {
+      "layerId": "ground-edge",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "physical",
+      "authoringGeometry": {
+        "shape": "circle"
+      },
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "opacity": 1,
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 1.2,
+      "file": "ground-edge.png"
+    },
+    {
+      "layerId": "mote",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "physical",
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "sizePolicy": "body",
+      "binding": "caster",
+      "opacity": 0.9,
+      "scale": 0.18,
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 1.4,
+      "file": "mote.png"
+    }
+  ],
+  "composition": "Independent component recipe: ward-shell, ground-edge, mote",
+  "componentRecipe": {
+    "mode": "ward",
+    "shapes": [
+      "ward-shell",
+      "ground-edge",
+      "mote"
+    ],
+    "humanReview": false
+  }
+}

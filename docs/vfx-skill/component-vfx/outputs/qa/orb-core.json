@@ -1,0 +1,23 @@
+{
+  "shape": "orb-core",
+  "family": "projectile-core",
+  "file": "orb-core.png",
+  "rawFile": "raw/orb-core.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    144,
+    882,
+    878
+  ],
+  "sourceSha256": "37a7b2456e0cbc906f1fb8eccfac1b49cf69a3fa2d5ab7560b4176160af01911",
+  "masterSha256": "c8fa424cdf7ffd72e36587d263a2077c3e656ac2818b17c474c74e637ba4adf6",
+  "humanReview": false
+}

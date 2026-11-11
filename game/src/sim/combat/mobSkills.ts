@@ -10,6 +10,7 @@ import type { Mob } from '../core/types';
  * cloning live rows or mutating the shared registry.
  */
 export interface MobSkillLibrary {
+  enabled?: boolean;
   skills: MobSkillRow[];
   kits: typeof MS.kits;
   maxKit: number;
@@ -33,6 +34,7 @@ export function createMobSkillModel(library: MobSkillLibrary) {
     speciesId: string,
     placementId: string,
   ): string[] {
+    if (library.enabled === false) return [];
     const kits = library.kits;
     const pick = (list?: string[]) => (list ? list : undefined);
     // ID-keyed rank overrides only; a Unique may still fall back to its same Species/Zone Boss kit.
@@ -51,6 +53,7 @@ export function createMobSkillModel(library: MobSkillLibrary) {
 
   /** The first strike in kit order whose cooldown has elapsed; auras are passive and never picked. */
   function ready(mob: Mob, atUs: number, usable: (row: MobSkillRow) => boolean = () => true): MobSkillRow | undefined {
+    if (library.enabled === false) return undefined;
     for (const id of mob.skillIds || []) {
       const row = byId.get(id);
       if (!row || row.mode !== 'strike') continue;
@@ -66,8 +69,9 @@ export function createMobSkillModel(library: MobSkillLibrary) {
    * a cast beat `cast_sec` before the swing without opening a second action clock.
    */
   function plan(mob: Mob, timesUs: number[], unitsPerSec: number): Map<number, MobSkillRow> {
-    const readyAt: Record<string, number> = { ...(mob.skillReadyAtUs || {}) };
     const plan = new Map<number, MobSkillRow>();
+    if (library.enabled === false) return plan;
+    const readyAt: Record<string, number> = { ...(mob.skillReadyAtUs || {}) };
     for (const atUs of timesUs) {
       for (const id of mob.skillIds || []) {
         const row = byId.get(id);
@@ -98,6 +102,7 @@ export function createMobSkillModel(library: MobSkillLibrary) {
       mob.auraSpeedMult = 1;
       mob.auraSources = [];
     }
+    if (library.enabled === false) return;
     for (const target of living) {
       let armourPct = 0;
       let resistPct = 0;
@@ -135,6 +140,7 @@ export function createMobSkillModel(library: MobSkillLibrary) {
 }
 
 const defaultModel = createMobSkillModel({
+  get enabled() { return E.mob.skills_enabled; },
   skills: MS.skills,
   kits: MS.kits,
   maxKit: MS.meta.max_kit,

@@ -38,7 +38,7 @@ test('showcase exposes Base VFX option without a skin', async ({ page }) => {
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('http://localhost:5173/__showcase?sample=combat-field&skill=attack.meteor&vfx=base#showcase-field');
   await page.waitForTimeout(1500);
-  const selector = page.getByLabel('Preview VFX version in the arena');
+  const selector = page.getByLabel('Preview VFX art in the arena');
   await expect(selector).toBeVisible();
   await expect(selector.getByRole('option', { name: 'Base VFX (no skin)' })).toHaveCount(1);
   // Base mode renders no skin art group

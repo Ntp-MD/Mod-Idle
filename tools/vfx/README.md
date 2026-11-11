@@ -13,7 +13,7 @@ local-only under `archive/art-reference/VFX-Godot/` and are not part of the repo
 Regenerate the atlas and standalone animated preview from the project root:
 
 ```powershell
-node --experimental-strip-types tools/render-aftershock-shader.mjs --version=v5
+node --experimental-strip-types tools/render-aftershock-shader.mjs
 node --experimental-strip-types tools/skill-vfx-pool.ts
 ```
 
@@ -23,14 +23,14 @@ guide is the canonical world footprint. `projected-preview.png` is an offline
 1920 by 1080 comparison, not an in-game screenshot.
 
 Atlas metadata uses `projection: "ground"` and a content radius ratio. See
-[VFX angle authoring](../../docs/vfx-skill/angle-authoring.md) for the camera contract.
+[Arena camera](../../game/src/presentation/arena-camera.ts) for the current projection.
 
 ## Remaining skill families
 
 The seven `*-shaders.mjs` modules cover the other 93 active skills: fire, cold,
 lightning, dark/poison/curses, earth, physical attacks and support. Each recipe
 lists its actual source shader files and records the approximations in `meta.json`.
-Regenerate without changing version selections:
+Regenerate the same named recipe only when it is owned by this baker:
 
 ```powershell
 node tools/bake-shader-recipes.mjs tools/vfx/fire-shaders.mjs tools/vfx/cold-shaders.mjs tools/vfx/lightning-shaders.mjs tools/vfx/dark-shaders.mjs tools/vfx/earth-shaders.mjs tools/vfx/physical-shaders.mjs tools/vfx/support-shaders.mjs
@@ -38,9 +38,9 @@ node --experimental-strip-types tools/skill-vfx-pool.ts
 node --experimental-strip-types tools/shader-vfx-gallery.mjs
 ```
 
-The baker reuses only its own recipe/version; manually authored versions stay
+The baker reuses only its own flat recipe; manually authored assets stay
 untouched. Sixteen padded frames are validated for nonempty active frames and
-tile-edge clipping. Family reports contain file sizes; per-version `qa.json`
+tile-edge clipping. Family reports contain file sizes; per-skill `qa.json`
 contains frame checks and the atlas SHA-256. Supplied license files are copied
 with pack names so one pack's license cannot overwrite another's. Some supplied
 packs omit a local license or contain a misnamed license; these copies are
@@ -57,16 +57,4 @@ it does not schedule damage. Fields use the engine's duration. Active aura art
 follows the sampled player, but historical replay uses the current aura toggle
 state because arena frames do not snapshot aura reservations.
 
-Blizzard's selected `v6` combines `v3` frost bursts
-and `v1` ice rain. `node tools/mix-blizzard.mjs` copies both source atlases
-into that version and writes per-layer metadata; regenerate the pool afterward.
-`additionalLayers` retain independent frame grids, anchors, rain cadence and
-opacity. This composition has no ground shader layer. Original source
-versions are retained; discarded versions are not dependencies.
-
-Arrow Shower's selected `v4` uses the original `v1` sprites as falling arrow rain.
-The engine's projectile-burst receipts own the shot count, interval and hits;
-the decorative `rainSpreadM` provides spread for a single-target skill without
-changing its hit area. Each contact retains its full rain animation.
-Regenerate with `node tools/compose-arrow-shower.mjs`,
-then `node --experimental-strip-types tools/skill-vfx-pool.ts --skill=attack.arrow_shower`.
+Blizzard and Arrow Shower now use the flat skill folders described in the [runtime guide](../../game/public/fx/skill-pool/README.md). Their earlier version-only composers were retired. Refresh named source images through the shared component composer; retain independent layer grids, anchors, rain cadence and opacity in the same skill metadata. Committed projectile receipts still own shot count, timing and hits. Decorative rain never changes hit geometry.

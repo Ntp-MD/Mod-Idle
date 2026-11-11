@@ -1,0 +1,33 @@
+{
+  "shape": "bind-strand",
+  "file": "bind-strand.png",
+  "rawFile": "raw/bind-strand.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    123,
+    865,
+    885
+  ],
+  "alphaExtrema": [
+    0,
+    255
+  ],
+  "visibleRgbSpreadMax": 32,
+  "visibleRgbSpreadMean": 1.369317,
+  "grayscaleAuthority": "AtlasFrame feColorMatrix saturate=0 before palette transfer",
+  "contentRatio": 0.8,
+  "sourceSha256": "fb3436d173ef6369424c5de8daa3a51bacff667d4e6e597ad8c351c0f787a40e",
+  "masterSha256": "29704ee32975678c7680d54ef0a10d45244b6068c60753bc137fbcebe501494e",
+  "humanReview": false,
+  "runtimeRegistered": false,
+  "verifiedRuntimePalettes": 0,
+  "family": "mark-sigil"
+}

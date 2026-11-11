@@ -4,7 +4,8 @@ import { captureCombatArena, createCombatArena, syncCombatArena } from '@sim/com
 import { characterSheet, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
 import { arenaFlightWindow } from '../../src/ui/combat/combat-arena-view';
 import { pinFieldPopulation } from '../fixtures/mobFixture';
-import { liveMobSkill } from '../fixtures/liveMob';
+import { liveMobSkill, enableMobSkillsForTests } from '../fixtures/liveMob';
+enableMobSkillsForTests();
 const GROUND = liveMobSkill(row => row.mode === 'strike' && row.cast?.delivery === 'ground' && !row.phase, 'ground telegraph');
 
 function groundFight() {

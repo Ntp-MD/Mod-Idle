@@ -6,13 +6,12 @@ import { ARENA_CAMERA } from '../game/src/presentation/arena-camera.ts';
 import { renderAftershockFrame, FOOTPRINT_RATIO, DURATION_SEC } from './vfx/aftershock-shader.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const version = process.argv.find(x => /^--version=v\d+$/.test(x))?.split('=')[1] ?? 'v5';
-const destination = path.join(root, 'game/public/fx/skill-pool/attack-earth/attack-aftershock', version);
+const destination = path.join(root, 'game/public/fx/skill-pool/attack-earth/attack-aftershock');
 const size = 384, columns = 4, frames = 16;
 fs.mkdirSync(destination, { recursive: true });
 if (fs.existsSync(path.join(destination, 'meta.json'))) {
   const old = JSON.parse(fs.readFileSync(path.join(destination, 'meta.json'), 'utf8'));
-  if (old.generator !== 'tools/render-aftershock-shader.mjs') throw new Error(`Refusing to overwrite ${version}`);
+  if (old.generator !== 'tools/render-aftershock-shader.mjs') throw new Error('Current Aftershock art belongs to another author; preserve its files');
 }
 const crcTable = Array.from({ length: 256 }, (_, n) => {
   for (let i = 0; i < 8; i++) n = n & 1 ? 0xedb88320 ^ (n >>> 1) : n >>> 1;
@@ -56,7 +55,7 @@ const bytes = png(atlasWidth, atlasWidth, atlas);
 fs.writeFileSync(path.join(destination, 'atlas.png'), bytes);
 const sourceRoot = 'archive/art-reference/VFX-Godot/ExplosionFXFree/assets/BinbunVFX_Vol2/ExplosionFX';
 const meta = {
-  id: 'attack.aftershock', src: `/fx/skill-pool/attack-earth/attack-aftershock/${version}/atlas.png`,
+  id: 'attack.aftershock', src: '/fx/skill-pool/attack-earth/attack-aftershock/atlas.png',
   columns, rows: 4, cellWidth: size, cellHeight: size, imageWidth: atlasWidth, imageHeight: atlasWidth,
   projection: 'ground', contentWidthRatio: FOOTPRINT_RATIO, contentHeightRatio: FOOTPRINT_RATIO,
   anchorX: .5, anchorY: .5, opening: [0, 3], loop: [0, 11], exit: [12, 15], frameMs: 90,
@@ -116,4 +115,4 @@ if(guide.checked){ctx.strokeStyle='#58c9ff';ctx.lineWidth=2;ctx.setLineDash([10,
 stamp.textContent=t.toFixed(2)+' s · frame '+f;time.value=Math.min(t,1.44);requestAnimationFrame(draw)}requestAnimationFrame(draw);
 </script></html>`;
 fs.writeFileSync(path.join(previewDir, 'preview.html'), preview);
-console.log(JSON.stringify({ version, atlas: path.relative(root, destination), bytes: bytes.length, preview: 'output/aftershock-shader/preview.html', qa: '16 frames; transparent perimeter; no empty intermediate frames' }));
+console.log(JSON.stringify({ atlas: path.relative(root, destination), bytes: bytes.length, preview: 'output/aftershock-shader/preview.html', qa: '16 frames; transparent perimeter; no empty intermediate frames' }));

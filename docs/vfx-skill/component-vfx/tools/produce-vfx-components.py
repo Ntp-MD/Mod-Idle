@@ -1,75 +1,88 @@
+"""Normalize or verify the named VFX masters in the single outputs shelf."""
 from pathlib import Path
 import hashlib
-import io
 import json
-import shutil
 import sys
 from PIL import Image
 
-ROOT = Path.cwd()
-SOURCES = ROOT / 'docs/vfx-skill/component-vfx/outputs/library-v1'
-POOL = ROOT / 'game/public/fx/skill-pool'
-DATA = ROOT / 'tools/data/vfx-components.json'
-COMPONENTS = json.loads(DATA.read_text(encoding='utf-8'))
-SKILLS = {s['id']: s for s in json.loads((ROOT / 'tools/data/skills.json').read_text(encoding='utf-8'))['skills']}
-VERSIONS = {'attack.firestorm':'v4','attack.fireball':'v3','attack.cinder_nova':'v2','attack.void_ray':'v2','attack.cleave':'v3','attack.fissure':'v2','attack.blizzard':'v7','heal.heal':'v2','buff.flame_guard':'v2','curse.jinx':'v2'}
+ROOT = Path(__file__).resolve().parents[4]
+SOURCES = ROOT / 'docs/vfx-skill/component-vfx/outputs'
 
 
-def version_dir(skill, version):
-    row = SKILLS[skill]
-    group = 'attack-' + ('phy' if row['element'] == 'physical' else row['element']) if row['type'] == 'attack' else row['type']
-    return POOL / group / skill.replace('.', '-').replace('_', '-') / version
+def asset_path(name):
+    path = (SOURCES / name).resolve()
+    if not path.is_relative_to(SOURCES.resolve()):
+        raise ValueError(f'Asset must stay inside outputs: {name}')
+    return path
 
 
-def save_json(path, value):
-    path.write_text(json.dumps(value, indent=2) + '\n', encoding='utf-8')
-
-
-def produce():
+def masters():
     rows = json.loads((SOURCES / 'generation-prompts.json').read_text(encoding='utf-8'))['masters']
+    names = [row['shape'] for row in rows]
+    inventory = json.loads((ROOT / 'tools/data/vfx-components.json').read_text(encoding='utf-8'))
+    assert len(names) == len(set(names)), 'Duplicate component name'
+    assert set(names) == set(inventory['families']) | set(inventory['variants']), 'Inventory differs from source shelf'
     for row in rows:
-        family = row['family']
-        raw = SOURCES / row['rawFile']
-        source = Path(row['sourceOutput'])
-        if not raw.exists():
-            shutil.copy2(source, raw)
-        assert raw.read_bytes() == source.read_bytes(), family
-        image = Image.open(raw)
-        assert image.mode == 'RGBA' and image.width == image.height, family
-        assert image.getchannel('A').getextrema()[0] == 0, f'Opaque background: {family}'
-        # D11: preserve the whole square source and its alpha, adding a transparent border.
-        resized = image.resize((818, 818), Image.Resampling.LANCZOS)
+        assert row['file'] == row['shape'] + '.png', row['shape']
+        assert row['rawFile'] == 'raw/' + row['file'], row['shape']
+        assert row['qaFile'] == 'qa/' + row['shape'] + '.json', row['shape']
+        for key in ('file', 'rawFile', 'qaFile'):
+            asset_path(row[key])
+    return rows
+
+
+def selected(shapes=None):
+    rows = masters()
+    if not shapes:
+        return rows
+    unknown = set(shapes) - {row['shape'] for row in rows}
+    if unknown:
+        raise ValueError(f'Unknown named components: {sorted(unknown)}')
+    return [row for row in rows if row['shape'] in shapes]
+
+
+def produce(shapes=None):
+    for row in selected(shapes):
+        raw = asset_path(row['rawFile'])
+        with Image.open(raw) as image:
+            assert image.mode == 'RGBA' and image.getchannel('A').getextrema()[0] == 0, raw
+            native_size = list(image.size)
+            fitted = image.copy()
+        fitted.thumbnail((818, 818), Image.Resampling.LANCZOS)
         master = Image.new('RGBA', (1024, 1024))
-        master.paste(resized, (103, 103))
-        box = master.getchannel('A').getbbox()
-        assert box and min(box[0], box[1], 1024-box[2], 1024-box[3]) >= 32, family
-        owner = COMPONENTS['families'][family]['ownerSkill']
-        folder = version_dir(owner, VERSIONS[owner])
-        folder.mkdir(parents=True, exist_ok=True)
-        path = folder / (family + '.png')
-        buffer = io.BytesIO()
-        master.save(buffer, format='PNG')
-        if path.exists():
-            assert path.read_bytes() == buffer.getvalue(), f'Existing artwork differs: {path}'
-        else:
-            path.write_bytes(buffer.getvalue())
-        print(f'{family}: RGBA 1024x1024 alpha={box}, source preserved')
+        master.paste(fitted, ((1024 - fitted.width) // 2, (1024 - fitted.height) // 2))
+        path = asset_path(row['file'])
+        master.save(path)
+        qa_path = asset_path(row['qaFile'])
+        qa = json.loads(qa_path.read_text(encoding='utf-8')) if qa_path.exists() else {}
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        if qa.get('masterSha256') != digest:
+            qa['humanReview'] = False
+        qa.update(shape=row['shape'], family=row['family'], file=row['file'], rawFile=row['rawFile'],
+                  nativeSize=native_size, canvas=list(master.size), alphaBounds=master.getchannel('A').getbbox(),
+                  sourceSha256=hashlib.sha256(raw.read_bytes()).hexdigest(), masterSha256=digest)
+        qa_path.parent.mkdir(exist_ok=True)
+        qa_path.write_text(json.dumps(qa, indent=2) + '\n', encoding='utf-8')
+    verify(shapes)
 
 
-def verify():
-    count = 0
-    for family, item in COMPONENTS['families'].items():
-        path = version_dir(item['ownerSkill'], VERSIONS[item['ownerSkill']]) / (family + '.png')
-        image = Image.open(path)
-        assert image.mode == 'RGBA' and image.size == (1024,1024), family
-        box = image.getchannel('A').getbbox()
-        assert box and min(box[0],box[1],1024-box[2],1024-box[3]) >= 32, family
-        count += 1
-    before = json.loads((ROOT / 'docs/vfx-skill/component-vfx/evidence/manifests/vfx-defaults-before.json').read_text(encoding='utf-8'))['defaults']
-    for name,digest in before.items():
-        assert hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == digest, name
-    print(f'PASS: {count} transparent registered masters; all {len(before)} default pointers unchanged.')
+def verify(shapes=None):
+    rows = selected(shapes)
+    assert not list(SOURCES.glob('library-v*')), 'Numbered output folders are retired'
+    for row in rows:
+        path, raw = asset_path(row['file']), asset_path(row['rawFile'])
+        qa = json.loads(asset_path(row['qaFile']).read_text(encoding='utf-8'))
+        with Image.open(path) as image:
+            assert image.mode == 'RGBA' and image.size == (1024, 1024), path
+            box = image.getchannel('A').getbbox()
+            assert box and min(box[0], box[1], 1024 - box[2], 1024 - box[3]) >= 103, path
+            assert list(box) == qa['alphaBounds'], path
+        assert hashlib.sha256(raw.read_bytes()).hexdigest() == qa['sourceSha256'], raw
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == qa['masterSha256'], path
+    print(f'PASS: {len(rows)} named RGBA masters; raw hashes, master hashes and alpha padding verified.')
 
 
 if __name__ == '__main__':
-    {'produce':produce,'verify':verify}[sys.argv[1]]()
+    if len(sys.argv) < 2 or sys.argv[1] not in ('produce', 'verify'):
+        raise SystemExit('Usage: produce-vfx-components.py produce|verify [shape ...]')
+    {'produce':produce,'verify':verify}[sys.argv[1]](sys.argv[2:] or None)

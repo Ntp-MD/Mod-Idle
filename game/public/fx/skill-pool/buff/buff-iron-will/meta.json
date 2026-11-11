@@ -1,0 +1,78 @@
+{
+  "layerId": "barrier-facets",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "sizePolicy": "body",
+  "binding": "caster",
+  "authoringGeometry": {
+    "shape": "single"
+  },
+  "palette": "physical",
+  "phases": [
+    "Impact",
+    "Field"
+  ],
+  "durationSec": 1.5,
+  "opacity": 0.9,
+  "id": "buff.iron_will",
+  "src": "/fx/skill-pool/buff/buff-iron-will/barrier-facets.png",
+  "additionalLayers": [
+    {
+      "layerId": "rock-shrapnel",
+      "columns": 1,
+      "rows": 1,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "sizePolicy": "body",
+      "binding": "caster",
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "file": "rock-shrapnel.png",
+      "palette": "physical",
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 0.45,
+      "opacity": 0.9,
+      "delaySec": 0.07,
+      "scale": 0.45,
+      "orient": false
+    }
+  ],
+  "composition": "Material study: barrier-facets, rock-shrapnel",
+  "componentRecipe": {
+    "shapes": [
+      "barrier-facets",
+      "rock-shrapnel"
+    ],
+    "humanReview": false
+  },
+  "reviewOnly": true,
+  "generation": {
+    "tool": "imagegen",
+    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  },
+  "orient": false
+}

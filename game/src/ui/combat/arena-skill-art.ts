@@ -6,12 +6,12 @@
  * Versions and atlas files are owned by `../fx/catalog.ts`; this module only adapts the active
  * pool row to the arena layer's decal/burst shape, and owns the one ground-projection matrix.
  */
-import { activeVfxArt, activeVfxVersion, vfxArtCandidates, type SkillArt, type VfxAtlas } from '../fx/catalog';
+import { activeVfxArt, vfxArtCandidates, type SkillArt, type VfxAtlas } from '../fx/catalog';
 import { getVfxAssetStatus } from '../fx/vfx-assets.svelte';
 import type { FieldViewFrame } from '../../presentation/arena-view-frame';
 import type { CombatArenaFrame } from '@sim/combat/combat-arena';
 import { componentScale } from './component-placement';
-import { ARENA_REF_PX_PER_M } from '../../presentation/arena-camera';
+import { ARENA_REF_PX_PER_M, ARENA_DIRECTIONS } from '../../presentation/arena-camera';
 import { applyWorldToViewport, applyWorldVector, fieldPointM, fieldVectorM, type Affine2 } from '../../presentation/view-transform';
 import type { SkillGeometry, SkillGeometryScreen } from './skill-geometry';
 import { VFX_BODY_LIFT_SHARE, VFX_HAND_LIFT_M, VFX_HAND_LIFT_SHARE, SKILL_SHAPE_MIN_M, groundShapeWorldPoints, projectSkillVfxAim } from './arena-vfx-space';
@@ -24,17 +24,13 @@ export type { SkillArt } from '../fx/catalog';
 export type SkillVfxMode = 'auto' | 'base';
 export type VfxPresentation =
   | { kind: 'base'; reason: 'forced' | 'unavailable' | 'loading' | 'failed' }
-  | { kind: 'procedural'; versionId: string }
   | { kind: 'skin'; versionId: string; art: SkillArt };
 
 /**
- * Pure presentation resolution: Base mode forces Base; a selected renderer-only version draws
- * procedurally; auto picks first fully-ready raster candidate. Never starts I/O.
+ * Pure presentation resolution: Base mode forces Base; auto picks first fully-ready raster candidate. Never starts I/O.
  */
 export function resolveVfxPresentation(skillId: string, mode: SkillVfxMode): VfxPresentation {
   if (mode === 'base') return { kind: 'base', reason: 'forced' };
-  const active = activeVfxVersion(skillId);
-  if (active?.renderer === 'procedural') return { kind: 'procedural', versionId: active.id };
   const candidates = vfxArtCandidates(skillId);
   if (candidates.length === 0) return { kind: 'base', reason: 'unavailable' };
   const anyPending = candidates.some((c) => c.sources.some((s) => {
@@ -81,6 +77,22 @@ export const skillArtFor = (id: string, mode: SkillVfxMode = 'auto'): SkillArt |
   if (pres.kind === 'skin') return pres.art;
   return undefined;
 };
+
+/** Match the actual painted ground basis; changing zoom cannot change the export preset. */
+export function directionalAtlasFor(mark: SkillGeometry, atlas: VfxAtlas, frame: FieldViewFrame): VfxAtlas | undefined {
+  if (!atlas.directional) return atlas;
+  if (!frame.renderable) return undefined;
+  const { a, b, c, d } = frame.worldToViewport, scale = frame.cssPixelsPerMeter;
+  const elevation = Math.asin(Math.max(-1, Math.min(1, (a * d - b * c) / (scale * scale)))) * 180 / Math.PI;
+  const azimuth = Math.atan2(-c, a) * 180 / Math.PI;
+  const angleDistance = (x: number, y: number) => Math.abs(((x - y + 540) % 360) - 180);
+  const camera = atlas.directional.presets.find(p => Math.abs(p.elevationDeg - elevation) < .1
+    && angleDistance(p.azimuthDeg, azimuth) < .1);
+  if (!camera) return undefined;
+  const direction = ARENA_DIRECTIONS[(Math.round(mark.directionRad / (Math.PI / 4)) % 8 + 8) % 8];
+  return { ...atlas, src: camera.sources[direction], anchor: camera.anchor,
+    authoring: { ...atlas.authoring, spanM: camera.orthographicSpanM, depthM: camera.orthographicSpanM } };
+}
 
 /**
  * One atlas frame placed in the arena: the frame's anchor lands on the live aim point.
@@ -193,7 +205,8 @@ export function atlasOpacity(mark: SkillGeometry, atlas: VfxAtlas): number {
   if (elapsed < 0) return 0;
   if (atlas.durationSec != null && elapsed >= atlas.durationSec) return 0;
   if (mark.phase === 'Aim') return 0;
-  if (mark.phase === 'Windup') return atlas.authoring?.delivery === 'projectile' ? .35 + mark.progress * .4 : 0;
+  if (mark.phase === 'Windup') return atlas.phases?.includes('Windup') ? 1
+    : atlas.authoring?.delivery === 'projectile' ? .35 + mark.progress * .4 : 0;
   if (mark.phase !== 'Impact') return 1;
   const duration = atlasImpactDuration(atlas);
   return clamp((duration - mark.phaseElapsedSec) / Math.min(.18, duration / 3), 0, 1);
@@ -320,8 +333,18 @@ export function skillArtPlacement(mark: SkillGeometry, atlas: VfxAtlas,
     const point = atlas.binding === 'area' ? mark.area.center
       : atlas.binding === 'caster' ? { x: caster.x, y: caster.y - bodyH * VFX_BODY_LIFT_SHARE }
       : atlas.binding === 'target' ? { x: target.x, y: target.y - bodyH * VFX_BODY_LIFT_SHARE }
-      : atlas.binding === 'release' ? releaseM : impactM;
+      : atlas.binding === 'release' ? releaseM : atlas.directional && projectile ? { x: cx, y: cy } : impactM;
     cx = point.x; cy = point.y;
+    if (atlas.directional && (atlas.binding === 'caster' || atlas.binding === 'target')) {
+      const actor = atlas.binding === 'caster' ? caster : target;
+      cx = actor.x; cy = actor.y;
+    }
+  }
+
+  if (atlas.directional) {
+    const anchor = atlas.anchor ?? [.5, .5];
+    return { cx, cy, width: authoring.spanM!, height: authoring.depthM!,
+      anchorX: anchor[0], anchorY: anchor[1], rotateDeg: 0, mirror: false };
   }
 
   // Only body-relative layers keep the body-multiple safety cap; footprint and

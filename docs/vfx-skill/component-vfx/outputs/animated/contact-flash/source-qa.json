@@ -1,0 +1,27 @@
+{
+  "component": "contact-flash",
+  "sourceSha256": "7b654501890a2f192def818d6e6c09f99768cd432ac28bf62ecc21b9503f94e3",
+  "geometrySha256": "37220e8f60e61e5b4f6155055874a222d48726b5403809068ec409357e4a3b7f",
+  "sourceUnchanged": true,
+  "cameraChangeWithoutRebuild": true,
+  "deterministicRerender": true,
+  "northUpEastRight": true,
+  "fixedRootAcrossEightHeadings": true,
+  "anchors": [
+    {
+      "camera": "arena",
+      "anchor": [
+        0.5,
+        0.60902703
+      ]
+    },
+    {
+      "camera": "raised",
+      "anchor": [
+        0.5,
+        0.5919238
+      ]
+    }
+  ],
+  "humanApproval": "pending"
+}

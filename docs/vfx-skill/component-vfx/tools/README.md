@@ -1,20 +1,25 @@
 # Component VFX tools
 
-The active material expansion is [library-v4](../outputs/library-v4/README.md). `compose-vfx-materials.py` packages its 24 native sources and authors 71 active-only review versions; it refuses to rerun an existing delivery. `review-vfx-materials.cjs --resume` reuses complete native records and checks remaining recipes in one headless 1920 × 1080 tab. Buff activations use live captures; other recipes use the native timeline. Resume is valid only while the recorded recipe inputs remain unchanged; remove an affected record after editing its art or metadata. The registry excludes `reviewOnly` versions from automatic highest-version promotion; explicit default pointers retain authority.
-
-Run commands from the repository root. Python authoring helpers use the installed Pillow package; browser helpers use the game's installed Playwright package and the existing dev server at `http://localhost:5173`.
+The [source guide](../outputs/README.md) owns the single named-asset workflow. Named masters, local raw images, QA and exact prompts live in `../outputs/`; the [roster](../outputs/index.html) shows the current count. Runtime copies live directly under their skill folder; neither location uses delivery subfolders. Python uses the installed Pillow package. Run commands from the repository root.
 
 ```powershell
-node docs/vfx-skill/component-vfx/tools/review-vfx.cjs colors
-node docs/vfx-skill/component-vfx/tools/review-vfx.cjs matrix
+python docs/vfx-skill/component-vfx/tools/produce-vfx-components.py produce
 python docs/vfx-skill/component-vfx/tools/produce-vfx-components.py verify
 python docs/vfx-skill/component-vfx/tools/compose-vfx-all.py
+node --experimental-strip-types tools/skill-vfx-pool.ts
 ```
 
-`compose-vfx-all.py` composes a `vfx-component` folder for every live player skill from the library masters only — no archived recipe is copied. It picks phases and timing by mode (bolt/volley/strike/melee/nova/cone/line/line-ground/sigil/ray/channel/field/rain/ward/curse/heal), writes the recipe manifest to [evidence/manifests/vfx-component-recipes.json](../evidence/manifests/vfx-component-recipes.json) and refuses to overwrite an existing folder.
+`produce` normalizes local raw sources into the same named masters and refreshes measured QA. `verify` checks every registered shape, source/master hashes, RGBA canvas and padding. Neither command writes runtime art or current art.
 
-The review script resumes accepted color and camera records from [manifests](../evidence/manifests/). It writes palette screenshots to [captures/palettes](../evidence/captures/palettes/) and recipe screenshots to [captures/recipes](../evidence/captures/recipes/). The execution plan remains at [docs/plan/vfx-component-library.html](../../../plan/vfx-component-library.html); its open Meteor phase item still governs the next implementation step.
+The active 33-component raster roster uses built-in imagegen with the exact `pendingMasters` prompts in [generation-prompts.json](../outputs/generation-prompts.json). After inspecting one generated transparent PNG, run `python docs/vfx-skill/component-vfx/tools/register-raster-source.py <shape> <generated-png-path>`. It copies the untouched raw, registers the named master and family, uses the existing normalizer and updates the raster roster. Named `produce`/`verify` commands also accept optional shape names, so an addition does not rewrite existing art. Human approval and runtime adoption remain separate.
 
-The `produce-*`, `register-*` and `compose-*` scripts retain the original authoring workflows and version guards for the three source batches and their demonstration recipes. The `verify` command above checks the original fourteen masters and the saved default-pointer hashes. `probe-*`, `debug-*` and `check-vfx-fallback.cjs` are focused browser diagnostics.
+`compose-vfx-all.py` reads layer metadata and PNGs from the shared shelf, without depending on archived owner versions. It refreshes referenced images directly under each skill while retaining its existing metadata and shape selection. New recipes use the established composition rules; a folder without `componentRecipe` metadata is protected. The established Thunder Storm, Meteor and Blizzard exclusions remain. Timing still uses existing gameplay producers; this command does not authorize human visual approval. The recipe manifest stays in [evidence/manifests/vfx-component-recipes.json](../evidence/manifests/vfx-component-recipes.json).
 
-These files were moved from `.cache` at the user's request. Historical [gate logs](../evidence/logs/) retain their original bytes and command paths. [cache-migration.json](../evidence/manifests/cache-migration.json) records each original path, destination, size and hash; historical path text inside that migration record is provenance, not a current tool dependency.
+The earlier batch-specific producers, registrars and demonstration composers were retired. New source art updates the named master and its existing recipe, with history kept in Git. Runtime selection IDs in old receipts remain historical compatibility data.
+
+`review-vfx-materials.cjs --resume` reads the retained 71-recipe material manifest from the shared shelf and reviews the current flat runtime recipes in one headless 1920 × 1080 tab. It uses the existing dev server at `http://localhost:5173`. Buff activations use live captures; other recipes use the native timeline. Resume is valid only while recorded recipe inputs are unchanged; remove an affected record after editing its art or metadata. Human visual approval remains separate from technical checks.
+
+`review-vfx.cjs` retains the historical palette/camera harness. `probe-*`, `debug-*` and `check-vfx-fallback.cjs` are focused diagnostics. Captures go to local `.cache/vfx-captures/`; [manifests](../evidence/manifests/) and [historical logs](../evidence/logs/) retain measured evidence. Old paths inside those receipts record what was checked; they are not instructions for future output directories.
+## Deferred procedural 3D production
+
+The earlier [3D source guide](../sources/README.md), [animated gallery](../outputs/animated/index.html) and Blender tools remain historical exploration. The owner has requested no further 3D work for the current target; their earlier checks do not fulfill the new named raster assets.

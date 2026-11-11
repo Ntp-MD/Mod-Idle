@@ -1,0 +1,80 @@
+{
+  "layerId": "heavy-cleave",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "sizePolicy": "world",
+  "binding": "contact",
+  "authoringGeometry": {
+    "shape": "circle",
+    "spanM": 3,
+    "depthM": 2
+  },
+  "palette": "physical",
+  "phases": [
+    "Impact",
+    "Field"
+  ],
+  "durationSec": 0.45,
+  "opacity": 0.9,
+  "id": "attack.cleave",
+  "src": "/fx/skill-pool/attack-phy/attack-cleave/heavy-cleave.png",
+  "additionalLayers": [
+    {
+      "layerId": "blood-contact",
+      "columns": 1,
+      "rows": 1,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "sizePolicy": "body",
+      "binding": "contact",
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "file": "blood-contact.png",
+      "palette": "physical",
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 0.25,
+      "opacity": 0.9,
+      "delaySec": 0.07,
+      "scale": 0.65,
+      "orient": false
+    }
+  ],
+  "composition": "Material study: heavy-cleave, blood-contact",
+  "componentRecipe": {
+    "shapes": [
+      "heavy-cleave",
+      "blood-contact"
+    ],
+    "humanReview": false
+  },
+  "reviewOnly": true,
+  "generation": {
+    "tool": "imagegen",
+    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  },
+  "orient": false
+}

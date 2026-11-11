@@ -5,18 +5,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
 {
   "aura.cast_on_crit": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -45,7 +37,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-cast-on-crit/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-cast-on-crit/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -62,7 +54,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-cast-on-crit/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-cast-on-crit/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -104,7 +96,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-cast-on-crit/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-cast-on-crit/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -148,18 +140,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.cast_on_damage_taken": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -188,7 +172,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-cast-on-damage-taken/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-cast-on-damage-taken/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -205,7 +189,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-cast-on-damage-taken/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-cast-on-damage-taken/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -247,7 +231,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-cast-on-damage-taken/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-cast-on-damage-taken/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -291,18 +275,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.clarity": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -331,7 +307,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-clarity/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-clarity/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -348,7 +324,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-clarity/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-clarity/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -390,7 +366,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-clarity/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-clarity/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -434,18 +410,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.elemental_fury": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -474,7 +442,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-elemental-fury/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-elemental-fury/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -491,7 +459,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-elemental-fury/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-elemental-fury/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -533,7 +501,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-elemental-fury/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-elemental-fury/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -577,18 +545,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.ember_conversion": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -617,7 +577,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-ember-conversion/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-ember-conversion/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -634,7 +594,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-ember-conversion/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-ember-conversion/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -676,7 +636,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-ember-conversion/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-ember-conversion/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -720,18 +680,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.energy_guard": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -760,7 +712,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-energy-guard/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-energy-guard/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -777,7 +729,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-energy-guard/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-energy-guard/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -819,7 +771,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-energy-guard/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-energy-guard/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -863,18 +815,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.grace": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -903,7 +847,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-grace/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-grace/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -920,7 +864,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-grace/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-grace/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -962,7 +906,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-grace/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-grace/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1006,18 +950,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.haste": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -1046,7 +982,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-haste/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-haste/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1063,7 +999,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-haste/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-haste/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1105,7 +1041,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-haste/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-haste/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1149,18 +1085,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.herald_of_ash": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -1189,7 +1117,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-herald-of-ash/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-herald-of-ash/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1206,7 +1134,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-herald-of-ash/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-herald-of-ash/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1248,7 +1176,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-herald-of-ash/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-herald-of-ash/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1292,18 +1220,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.herald_of_frost": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -1332,7 +1252,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-herald-of-frost/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-herald-of-frost/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1349,7 +1269,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-herald-of-frost/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-herald-of-frost/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1391,7 +1311,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-herald-of-frost/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-herald-of-frost/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1435,18 +1355,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.herald_of_lightning": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -1475,7 +1387,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-herald-of-lightning/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-herald-of-lightning/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1492,7 +1404,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-herald-of-lightning/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-herald-of-lightning/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1534,7 +1446,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-herald-of-lightning/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-herald-of-lightning/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1578,18 +1490,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.iron_guard": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -1618,7 +1522,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-iron-guard/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-iron-guard/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1635,7 +1539,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-iron-guard/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-iron-guard/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1677,7 +1581,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-iron-guard/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-iron-guard/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1721,18 +1625,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.rimbo_form": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -1761,7 +1657,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-rimbo-form/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-rimbo-form/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1778,7 +1674,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-rimbo-form/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-rimbo-form/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1820,7 +1716,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-rimbo-form/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-rimbo-form/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1864,18 +1760,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.rime_conversion": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -1904,7 +1792,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-rime-conversion/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-rime-conversion/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1921,7 +1809,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-rime-conversion/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-rime-conversion/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -1963,7 +1851,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-rime-conversion/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-rime-conversion/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2007,18 +1895,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.storm_conversion": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -2047,7 +1927,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-storm-conversion/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-storm-conversion/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2064,7 +1944,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-storm-conversion/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-storm-conversion/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2106,7 +1986,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-storm-conversion/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-storm-conversion/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2150,18 +2030,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.trinity_form": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -2190,7 +2062,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-trinity-form/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-trinity-form/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2207,7 +2079,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-trinity-form/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-trinity-form/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2249,7 +2121,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-trinity-form/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-trinity-form/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2293,18 +2165,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.vitality": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -2333,7 +2197,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-vitality/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-vitality/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2350,7 +2214,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-vitality/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-vitality/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2392,7 +2256,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-vitality/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-vitality/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2436,18 +2300,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "aura.wraith_of_fury": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -2476,7 +2332,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ward-shell",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-wraith-of-fury/vfx-component/ward-shell.png",
+          "src": "/fx/skill-pool/aura/aura-wraith-of-fury/ward-shell.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2493,7 +2349,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/aura/aura-wraith-of-fury/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/aura/aura-wraith-of-fury/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2535,7 +2391,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/aura/aura-wraith-of-fury/vfx-component/mote.png",
+          "src": "/fx/skill-pool/aura/aura-wraith-of-fury/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2579,18 +2435,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "buff.berserker": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "world",
       "binding": "caster",
@@ -2622,7 +2470,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "flame-tongue",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-berserker/v2/flame-tongue.png",
+          "src": "/fx/skill-pool/buff/buff-berserker/flame-tongue.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2639,7 +2487,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "healing-wisps",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-berserker/v2/healing-wisps.png",
+          "src": "/fx/skill-pool/buff/buff-berserker/healing-wisps.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2680,155 +2528,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "caster",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ward-shell",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-berserker/vfx-component/ward-shell.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.85
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/buff/buff-berserker/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "physical",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-berserker/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "caster",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.18,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "buff.earth_wall": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "world",
       "binding": "caster",
@@ -2860,7 +2567,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "wall-segment",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-earth-wall/v2/wall-segment.png",
+          "src": "/fx/skill-pool/buff/buff-earth-wall/wall-segment.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2877,7 +2584,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "dust-impact-plume",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-earth-wall/v2/dust-impact-plume.png",
+          "src": "/fx/skill-pool/buff/buff-earth-wall/dust-impact-plume.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -2920,155 +2627,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "caster",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ward-shell",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-earth-wall/vfx-component/ward-shell.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.85
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/buff/buff-earth-wall/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "physical",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-earth-wall/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "caster",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.18,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "buff.enchant_poison": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v3",
-      "label": "v3",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -3098,7 +2664,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "poison-droplet",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-enchant-poison/v3/poison-droplet.png",
+          "src": "/fx/skill-pool/buff/buff-enchant-poison/poison-droplet.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -3115,7 +2681,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "toxic-vapor",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-enchant-poison/v3/toxic-vapor.png",
+          "src": "/fx/skill-pool/buff/buff-enchant-poison/toxic-vapor.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -3158,112 +2724,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "world",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "line"
-      },
-      "layers": [
-        {
-          "id": "ribbon-beam",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-enchant-poison/vfx-component/ribbon-beam.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1
-        },
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-enchant-poison/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "caster",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.18,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "buff.energy_absorb": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "footprint",
       "binding": "caster",
@@ -3298,7 +2766,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "gravitic-lens",
           "role": "ground",
-          "src": "/fx/skill-pool/buff/buff-energy-absorb/v2/gravitic-lens.png",
+          "src": "/fx/skill-pool/buff/buff-energy-absorb/gravitic-lens.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -3315,7 +2783,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "healing-wisps",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-energy-absorb/v2/healing-wisps.png",
+          "src": "/fx/skill-pool/buff/buff-energy-absorb/healing-wisps.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -3356,155 +2824,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "caster",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ward-shell",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-energy-absorb/vfx-component/ward-shell.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.85
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/buff/buff-energy-absorb/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "physical",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-energy-absorb/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "caster",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.18,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "buff.flame_guard": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v5",
-      "label": "v5",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "fire",
       "sizePolicy": "world",
       "binding": "caster",
@@ -3536,7 +2863,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "shield-dome",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-flame-guard/v5/shield-dome.png",
+          "src": "/fx/skill-pool/buff/buff-flame-guard/shield-dome.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -3553,7 +2880,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "flame-tongue",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-flame-guard/v5/flame-tongue.png",
+          "src": "/fx/skill-pool/buff/buff-flame-guard/flame-tongue.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -3596,156 +2923,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "fire",
-      "sizePolicy": "world",
-      "binding": "area",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.6,
-      "anchor": [
-        0.5,
-        0.9
-      ],
-      "impactAnchor": [
-        0.5,
-        0.9
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle",
-        "spanM": 2.8,
-        "depthM": 1.8
-      },
-      "layers": [
-        {
-          "id": "shield-dome",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-flame-guard/vfx-component/shield-dome.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.45
-        },
-        {
-          "id": "ward-shell",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-flame-guard/vfx-component/ward-shell.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.85,
-          "palette": "fire",
-          "sizePolicy": "body",
-          "binding": "caster",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-flame-guard/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "fire",
-          "sizePolicy": "body",
-          "binding": "caster",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.18,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "buff.ghost_dance": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -3775,7 +2960,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "healing-wisps",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-ghost-dance/v2/healing-wisps.png",
+          "src": "/fx/skill-pool/buff/buff-ghost-dance/healing-wisps.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -3792,7 +2977,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "cloud-mist",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-ghost-dance/v2/cloud-mist.png",
+          "src": "/fx/skill-pool/buff/buff-ghost-dance/cloud-mist.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -3835,155 +3020,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "caster",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ward-shell",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-ghost-dance/vfx-component/ward-shell.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.85
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/buff/buff-ghost-dance/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "physical",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-ghost-dance/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "caster",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.18,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "buff.holy_veil": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "world",
       "binding": "caster",
@@ -4015,7 +3059,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "shield-dome",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-holy-veil/v2/shield-dome.png",
+          "src": "/fx/skill-pool/buff/buff-holy-veil/shield-dome.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -4032,7 +3076,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "healing-wisps",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-holy-veil/v2/healing-wisps.png",
+          "src": "/fx/skill-pool/buff/buff-holy-veil/healing-wisps.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -4073,155 +3117,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "caster",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ward-shell",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-holy-veil/vfx-component/ward-shell.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.85
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/buff/buff-holy-veil/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "physical",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-holy-veil/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "caster",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.18,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "buff.iron_will": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -4251,7 +3154,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "barrier-facets",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-iron-will/v2/barrier-facets.png",
+          "src": "/fx/skill-pool/buff/buff-iron-will/barrier-facets.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -4268,7 +3171,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "rock-shrapnel",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-iron-will/v2/rock-shrapnel.png",
+          "src": "/fx/skill-pool/buff/buff-iron-will/rock-shrapnel.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -4310,155 +3213,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "caster",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ward-shell",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-iron-will/vfx-component/ward-shell.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.85
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/buff/buff-iron-will/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "physical",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-iron-will/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "caster",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.18,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "buff.magia_drive": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -4488,7 +3250,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "healing-wisps",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-magia-drive/v2/healing-wisps.png",
+          "src": "/fx/skill-pool/buff/buff-magia-drive/healing-wisps.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -4505,7 +3267,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "electric-contact",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-magia-drive/v2/electric-contact.png",
+          "src": "/fx/skill-pool/buff/buff-magia-drive/electric-contact.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -4547,155 +3309,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "caster",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ward-shell",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-magia-drive/vfx-component/ward-shell.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.85
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/buff/buff-magia-drive/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "physical",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-magia-drive/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "caster",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.18,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "buff.warcry": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "footprint",
       "binding": "caster",
@@ -4730,7 +3351,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "shockwave-ring",
           "role": "ground",
-          "src": "/fx/skill-pool/buff/buff-warcry/v2/shockwave-ring.png",
+          "src": "/fx/skill-pool/buff/buff-warcry/shockwave-ring.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -4747,7 +3368,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "dust-impact-plume",
           "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-warcry/v2/dust-impact-plume.png",
+          "src": "/fx/skill-pool/buff/buff-warcry/dust-impact-plume.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -4790,155 +3411,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "caster",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ward-shell",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-warcry/vfx-component/ward-shell.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.85
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/buff/buff-warcry/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "physical",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/buff/buff-warcry/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "caster",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.18,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "curse.blinding_mark": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "world",
       "binding": "target",
@@ -4970,7 +3450,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "toxic-vapor",
           "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-blinding-mark/v2/toxic-vapor.png",
+          "src": "/fx/skill-pool/curse/curse-blinding-mark/toxic-vapor.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -4987,7 +3467,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mark-sigil",
           "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-blinding-mark/v2/mark-sigil.png",
+          "src": "/fx/skill-pool/curse/curse-blinding-mark/mark-sigil.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -5028,114 +3508,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "target",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "mark-sigil",
-          "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-blinding-mark/vfx-component/mark-sigil.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.85
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-blinding-mark/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "physical",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        }
-      ]
     }
   ],
   "curse.cripple": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "target",
@@ -5165,7 +3545,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "root-entangle",
           "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-cripple/v2/root-entangle.png",
+          "src": "/fx/skill-pool/curse/curse-cripple/root-entangle.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -5182,7 +3562,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "dust-impact-plume",
           "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-cripple/v2/dust-impact-plume.png",
+          "src": "/fx/skill-pool/curse/curse-cripple/dust-impact-plume.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -5225,114 +3605,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "target",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "mark-sigil",
-          "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-cripple/vfx-component/mark-sigil.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.85
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-cripple/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "physical",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        }
-      ]
     }
   ],
   "curse.expose": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "target",
@@ -5362,7 +3642,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "barrier-facets",
           "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-expose/v2/barrier-facets.png",
+          "src": "/fx/skill-pool/curse/curse-expose/barrier-facets.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -5379,7 +3659,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mark-sigil",
           "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-expose/v2/mark-sigil.png",
+          "src": "/fx/skill-pool/curse/curse-expose/mark-sigil.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -5420,114 +3700,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "target",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "mark-sigil",
-          "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-expose/vfx-component/mark-sigil.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.85
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-expose/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "physical",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        }
-      ]
     }
   ],
   "curse.jinx": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v5",
-      "label": "v5",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "world",
       "phases": [
@@ -5560,7 +3740,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "tether-strand",
           "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-jinx/v5/tether-strand.png",
+          "src": "/fx/skill-pool/curse/curse-jinx/tether-strand.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -5577,7 +3757,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "void-rift",
           "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-jinx/v5/void-rift.png",
+          "src": "/fx/skill-pool/curse/curse-jinx/void-rift.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -5620,158 +3800,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "target",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "mark-sigil",
-          "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-jinx/vfx-component/mark-sigil.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.85
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-jinx/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "physical",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        },
-        {
-          "id": "tether-strand",
-          "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-jinx/vfx-component/tether-strand.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "physical",
-          "sizePolicy": "world",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "placement": {
-            "kind": "tether"
-          },
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "line",
-            "widthM": 0.15
-          }
-        }
-      ]
     }
   ],
   "curse.venom_bind": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v3",
-      "label": "v3",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "target",
@@ -5801,7 +3837,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "root-entangle",
           "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-venom-bind/v3/root-entangle.png",
+          "src": "/fx/skill-pool/curse/curse-venom-bind/root-entangle.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -5818,7 +3854,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "acid-splash",
           "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-venom-bind/v3/acid-splash.png",
+          "src": "/fx/skill-pool/curse/curse-venom-bind/acid-splash.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -5859,112 +3895,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "target",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single"
-      },
-      "layers": [
-        {
-          "id": "bind-strand",
-          "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-venom-bind/vfx-component/bind-strand.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "mark-sigil",
-          "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-venom-bind/vfx-component/mark-sigil.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.85,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "target",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        }
-      ]
     }
   ],
   "curse.weaken": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "target",
@@ -5994,7 +3932,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "healing-wisps",
           "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-weaken/v2/healing-wisps.png",
+          "src": "/fx/skill-pool/curse/curse-weaken/healing-wisps.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -6011,7 +3949,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "cloud-mist",
           "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-weaken/v2/cloud-mist.png",
+          "src": "/fx/skill-pool/curse/curse-weaken/cloud-mist.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -6054,114 +3992,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "target",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "mark-sigil",
-          "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-weaken/vfx-component/mark-sigil.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.85
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/curse/curse-weaken/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "physical",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        }
-      ]
     }
   ],
   "heal.cleanse": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "footprint",
       "binding": "caster",
@@ -6196,7 +4034,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "shockwave-ring",
           "role": "ground",
-          "src": "/fx/skill-pool/heal/heal-cleanse/v2/shockwave-ring.png",
+          "src": "/fx/skill-pool/heal/heal-cleanse/shockwave-ring.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -6213,7 +4051,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "water-impact-crown",
           "role": "upright",
-          "src": "/fx/skill-pool/heal/heal-cleanse/v2/water-impact-crown.png",
+          "src": "/fx/skill-pool/heal/heal-cleanse/water-impact-crown.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -6256,7 +4094,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "healing-wisps",
           "role": "upright",
-          "src": "/fx/skill-pool/heal/heal-cleanse/v2/healing-wisps.png",
+          "src": "/fx/skill-pool/heal/heal-cleanse/healing-wisps.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -6297,114 +4135,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "caster",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "scale": 0.18,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single"
-      },
-      "layers": [
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/heal/heal-cleanse/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.9
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/heal/heal-cleanse/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "physical",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        }
-      ]
     }
   ],
   "heal.greater_heal": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -6434,7 +4172,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "healing-wisps",
           "role": "upright",
-          "src": "/fx/skill-pool/heal/heal-greater-heal/v2/healing-wisps.png",
+          "src": "/fx/skill-pool/heal/heal-greater-heal/healing-wisps.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -6451,7 +4189,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "column-eruption",
           "role": "upright",
-          "src": "/fx/skill-pool/heal/heal-greater-heal/v2/column-eruption.png",
+          "src": "/fx/skill-pool/heal/heal-greater-heal/column-eruption.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -6496,7 +4234,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/heal/heal-greater-heal/v2/ground-edge.png",
+          "src": "/fx/skill-pool/heal/heal-greater-heal/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -6538,114 +4276,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "caster",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "scale": 0.18,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single"
-      },
-      "layers": [
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/heal/heal-greater-heal/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.9
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/heal/heal-greater-heal/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "physical",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        }
-      ]
     }
   ],
   "heal.heal": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v4",
-      "label": "v4",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "caster",
@@ -6675,7 +4313,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "healing-wisps",
           "role": "upright",
-          "src": "/fx/skill-pool/heal/heal-heal/v4/healing-wisps.png",
+          "src": "/fx/skill-pool/heal/heal-heal/healing-wisps.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -6692,7 +4330,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/heal/heal-heal/v4/mote.png",
+          "src": "/fx/skill-pool/heal/heal-heal/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -6733,114 +4371,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "caster",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "scale": 0.18,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single"
-      },
-      "layers": [
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/heal/heal-heal/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.9
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/heal/heal-heal/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "physical",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact",
-            "Field"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        }
-      ]
     }
   ],
   "attack.arrow_shower": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v6",
-      "label": "v6",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "area",
@@ -6877,7 +4415,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "arrow-core",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-arrow-shower/v6/arrow-core.png",
+          "src": "/fx/skill-pool/attack-phy/attack-arrow-shower/arrow-core.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -6894,7 +4432,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "dust-impact-plume",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-arrow-shower/v6/dust-impact-plume.png",
+          "src": "/fx/skill-pool/attack-phy/attack-arrow-shower/dust-impact-plume.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -6937,121 +4475,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "binding": "area",
-      "phases": [
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "rainDurationSec": 3,
-      "rainPhase": "Impact",
-      "rainIntervalSec": 0.12,
-      "rainSizeScale": 0.25,
-      "rainRadiusRatio": 0.95,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle",
-        "origin": "target",
-        "delivery": "projectile",
-        "radiusM": 3,
-        "spanM": 6,
-        "depthM": 6
-      },
-      "layers": [
-        {
-          "id": "arrow-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-arrow-shower/vfx-component/arrow-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-arrow-shower/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.backstab": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "contact",
@@ -7081,7 +4512,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "blade-thrust",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-backstab/v2/blade-thrust.png",
+          "src": "/fx/skill-pool/attack-phy/attack-backstab/blade-thrust.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -7098,7 +4529,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "blood-contact",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-backstab/v2/blood-contact.png",
+          "src": "/fx/skill-pool/attack-phy/attack-backstab/blood-contact.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -7140,152 +4571,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "world",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 0.6,
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "cone"
-      },
-      "layers": [
-        {
-          "id": "slash-sweep",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-backstab/vfx-component/slash-sweep.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.9
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-backstab/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        },
-        {
-          "id": "fragment-debris",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-backstab/vfx-component/fragment-debris.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.8,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.24,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.cleave": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v6",
-      "label": "v6",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "world",
       "binding": "contact",
@@ -7317,7 +4610,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "heavy-cleave",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-cleave/v6/heavy-cleave.png",
+          "src": "/fx/skill-pool/attack-phy/attack-cleave/heavy-cleave.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -7334,7 +4627,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "blood-contact",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-cleave/v6/blood-contact.png",
+          "src": "/fx/skill-pool/attack-phy/attack-cleave/blood-contact.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -7376,112 +4669,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "footprint",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 0.6,
-      "projection": "ground",
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "cone"
-      },
-      "layers": [
-        {
-          "id": "cone-stream",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-phy/attack-cleave/vfx-component/cone-stream.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.9
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-cleave/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.double_strafe": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v3",
-      "label": "v3",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "phases": [
@@ -7510,7 +4705,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "arrow-core",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-double-strafe/v3/arrow-core.png",
+          "src": "/fx/skill-pool/attack-phy/attack-double-strafe/arrow-core.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -7527,7 +4722,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "blade-thrust",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-double-strafe/v3/blade-thrust.png",
+          "src": "/fx/skill-pool/attack-phy/attack-double-strafe/blade-thrust.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -7568,113 +4763,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "arrow-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-double-strafe/vfx-component/arrow-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-double-strafe/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.double_strike": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "world",
       "phases": [
@@ -7703,7 +4799,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "slash-sweep",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-double-strike/v2/slash-sweep.png",
+          "src": "/fx/skill-pool/attack-phy/attack-double-strike/slash-sweep.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -7720,7 +4816,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "blade-thrust",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-double-strike/v2/blade-thrust.png",
+          "src": "/fx/skill-pool/attack-phy/attack-double-strike/blade-thrust.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -7763,7 +4859,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "blood-contact",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-double-strike/v2/blood-contact.png",
+          "src": "/fx/skill-pool/attack-phy/attack-double-strike/blood-contact.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -7805,111 +4901,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "world",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 0.6,
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "cone"
-      },
-      "layers": [
-        {
-          "id": "slash-sweep",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-double-strike/vfx-component/slash-sweep.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.9
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-double-strike/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.elemental_break": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "world",
       "binding": "contact",
@@ -7941,7 +4940,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "heavy-cleave",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-elemental-break/v2/heavy-cleave.png",
+          "src": "/fx/skill-pool/attack-phy/attack-elemental-break/heavy-cleave.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -7958,7 +4957,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "barrier-facets",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-elemental-break/v2/barrier-facets.png",
+          "src": "/fx/skill-pool/attack-phy/attack-elemental-break/barrier-facets.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -8001,7 +5000,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "electric-contact",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-elemental-break/v2/electric-contact.png",
+          "src": "/fx/skill-pool/attack-phy/attack-elemental-break/electric-contact.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -8043,152 +5042,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "world",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 0.6,
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "cone"
-      },
-      "layers": [
-        {
-          "id": "slash-sweep",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-elemental-break/vfx-component/slash-sweep.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.9
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-elemental-break/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        },
-        {
-          "id": "fragment-debris",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-elemental-break/vfx-component/fragment-debris.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.8,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.24,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.ground_slam": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v3",
-      "label": "v3",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "footprint",
       "binding": "area",
@@ -8219,7 +5080,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "crack-strip",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-phy/attack-ground-slam/v3/crack-strip.png",
+          "src": "/fx/skill-pool/attack-phy/attack-ground-slam/crack-strip.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -8236,7 +5097,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "shockwave-ring",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-phy/attack-ground-slam/v3/shockwave-ring.png",
+          "src": "/fx/skill-pool/attack-phy/attack-ground-slam/shockwave-ring.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -8284,7 +5145,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "rock-shrapnel",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-ground-slam/v3/rock-shrapnel.png",
+          "src": "/fx/skill-pool/attack-phy/attack-ground-slam/rock-shrapnel.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -8328,7 +5189,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "dust-impact-plume",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-ground-slam/v3/dust-impact-plume.png",
+          "src": "/fx/skill-pool/attack-phy/attack-ground-slam/dust-impact-plume.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -8371,193 +5232,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "world",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 0.6,
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "cone"
-      },
-      "layers": [
-        {
-          "id": "slash-sweep",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-ground-slam/vfx-component/slash-sweep.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.9
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-phy/attack-ground-slam/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "physical",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-ground-slam/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        },
-        {
-          "id": "fragment-debris",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-ground-slam/vfx-component/fragment-debris.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.8,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.24,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.headshot": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "phases": [
@@ -8586,7 +5268,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "arrow-core",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-headshot/v2/arrow-core.png",
+          "src": "/fx/skill-pool/attack-phy/attack-headshot/arrow-core.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -8603,7 +5285,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "blood-contact",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-headshot/v2/blood-contact.png",
+          "src": "/fx/skill-pool/attack-phy/attack-headshot/blood-contact.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -8645,113 +5327,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "arrow-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-headshot/vfx-component/arrow-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-headshot/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.impale": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "contact",
@@ -8781,7 +5364,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "blade-thrust",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-impale/v2/blade-thrust.png",
+          "src": "/fx/skill-pool/attack-phy/attack-impale/blade-thrust.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -8798,7 +5381,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "blood-contact",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-impale/v2/blood-contact.png",
+          "src": "/fx/skill-pool/attack-phy/attack-impale/blood-contact.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -8842,7 +5425,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "dust-impact-plume",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-impale/v2/dust-impact-plume.png",
+          "src": "/fx/skill-pool/attack-phy/attack-impale/dust-impact-plume.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -8885,156 +5468,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "world",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 0.8,
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "line",
-        "delivery": "melee",
-        "lengthM": 6,
-        "widthM": 1
-      },
-      "layers": [
-        {
-          "id": "ribbon-beam",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-impale/vfx-component/ribbon-beam.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "crack-strip",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-phy/attack-impale/vfx-component/crack-strip.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.7,
-          "palette": "physical",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "projection": "ground",
-          "orient": true,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "line"
-          }
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-impale/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.piercing_shot": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v5",
-      "label": "v5",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "phases": [
@@ -9063,7 +5504,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "arrow-core",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/v5/arrow-core.png",
+          "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/arrow-core.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -9080,7 +5521,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "blade-thrust",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/v5/blade-thrust.png",
+          "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/blade-thrust.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -9123,7 +5564,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "impact-burst",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/v5/impact-burst.png",
+          "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/impact-burst.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -9164,113 +5605,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "crescent-wave",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/vfx-component/crescent-wave.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.puncture": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "contact",
@@ -9300,7 +5642,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "blade-thrust",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-puncture/v2/blade-thrust.png",
+          "src": "/fx/skill-pool/attack-phy/attack-puncture/blade-thrust.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -9317,7 +5659,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "blood-contact",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-puncture/v2/blood-contact.png",
+          "src": "/fx/skill-pool/attack-phy/attack-puncture/blood-contact.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -9361,7 +5703,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-puncture/v2/mote.png",
+          "src": "/fx/skill-pool/attack-phy/attack-puncture/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -9402,111 +5744,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "world",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 0.6,
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "cone"
-      },
-      "layers": [
-        {
-          "id": "slash-sweep",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-puncture/vfx-component/slash-sweep.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.9
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-puncture/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.reap": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "world",
       "binding": "contact",
@@ -9538,7 +5783,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "heavy-cleave",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-reap/v2/heavy-cleave.png",
+          "src": "/fx/skill-pool/attack-phy/attack-reap/heavy-cleave.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -9555,7 +5800,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "blood-contact",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-reap/v2/blood-contact.png",
+          "src": "/fx/skill-pool/attack-phy/attack-reap/blood-contact.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -9599,7 +5844,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "cloud-mist",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-reap/v2/cloud-mist.png",
+          "src": "/fx/skill-pool/attack-phy/attack-reap/cloud-mist.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -9642,193 +5887,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "world",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 0.6,
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "cone"
-      },
-      "layers": [
-        {
-          "id": "slash-sweep",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-reap/vfx-component/slash-sweep.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.9
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-phy/attack-reap/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "physical",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-reap/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        },
-        {
-          "id": "fragment-debris",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-reap/vfx-component/fragment-debris.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.8,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.24,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.shield_bash": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "contact",
@@ -9858,7 +5924,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "barrier-facets",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-shield-bash/v2/barrier-facets.png",
+          "src": "/fx/skill-pool/attack-phy/attack-shield-bash/barrier-facets.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -9875,7 +5941,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "impact-burst",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-shield-bash/v2/impact-burst.png",
+          "src": "/fx/skill-pool/attack-phy/attack-shield-bash/impact-burst.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -9916,111 +5982,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "world",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 0.6,
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "cone"
-      },
-      "layers": [
-        {
-          "id": "slash-sweep",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-shield-bash/vfx-component/slash-sweep.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.9
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-shield-bash/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.skull_crack": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "binding": "contact",
@@ -10050,7 +6019,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "impact-burst",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-skull-crack/v2/impact-burst.png",
+          "src": "/fx/skill-pool/attack-phy/attack-skull-crack/impact-burst.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -10067,7 +6036,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "rock-shrapnel",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-skull-crack/v2/rock-shrapnel.png",
+          "src": "/fx/skill-pool/attack-phy/attack-skull-crack/rock-shrapnel.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -10109,152 +6078,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "world",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 0.6,
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "cone"
-      },
-      "layers": [
-        {
-          "id": "slash-sweep",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-skull-crack/vfx-component/slash-sweep.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.9
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-skull-crack/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        },
-        {
-          "id": "fragment-debris",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-skull-crack/vfx-component/fragment-debris.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.8,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.24,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.split_shot": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v3",
-      "label": "v3",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "body",
       "phases": [
@@ -10283,7 +6114,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "arrow-core",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-split-shot/v3/arrow-core.png",
+          "src": "/fx/skill-pool/attack-phy/attack-split-shot/arrow-core.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -10300,7 +6131,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "impact-burst",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-split-shot/v3/impact-burst.png",
+          "src": "/fx/skill-pool/attack-phy/attack-split-shot/impact-burst.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -10341,113 +6172,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "arrow-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-split-shot/vfx-component/arrow-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-split-shot/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.whirlwind": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v4",
-      "label": "v4",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "physical",
       "sizePolicy": "world",
       "binding": "caster",
@@ -10483,7 +6215,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "heavy-cleave",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-whirlwind/v4/heavy-cleave.png",
+          "src": "/fx/skill-pool/attack-phy/attack-whirlwind/heavy-cleave.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -10500,7 +6232,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "dust-impact-plume",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-whirlwind/v4/dust-impact-plume.png",
+          "src": "/fx/skill-pool/attack-phy/attack-whirlwind/dust-impact-plume.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -10543,155 +6275,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "physical",
-      "sizePolicy": "world",
-      "phases": [
-        "Channel",
-        "Impact"
-      ],
-      "durationSec": 3,
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "cone"
-      },
-      "layers": [
-        {
-          "id": "slash-sweep",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-whirlwind/vfx-component/slash-sweep.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.9
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-phy/attack-whirlwind/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "physical",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Channel",
-            "Impact"
-          ],
-          "durationSec": 3,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-whirlwind/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "physical",
-          "sizePolicy": "body",
-          "binding": "caster",
-          "phases": [
-            "Channel",
-            "Impact"
-          ],
-          "durationSec": 3,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.18,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.cinder_nova": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v4",
-      "label": "v4",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "fire",
       "sizePolicy": "footprint",
       "binding": "area",
@@ -10726,7 +6317,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "shockwave-ring",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-cinder-nova/v4/shockwave-ring.png",
+          "src": "/fx/skill-pool/attack-fire/attack-cinder-nova/shockwave-ring.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -10743,7 +6334,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "flame-tongue",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-cinder-nova/v4/flame-tongue.png",
+          "src": "/fx/skill-pool/attack-fire/attack-cinder-nova/flame-tongue.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -10788,7 +6379,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ember-ground-cracks",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-cinder-nova/v4/ember-ground-cracks.png",
+          "src": "/fx/skill-pool/attack-fire/attack-cinder-nova/ember-ground-cracks.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -10830,195 +6421,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "fire",
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 1.2,
-      "projection": "ground",
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ground-fill",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-cinder-nova/vfx-component/ground-fill.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-cinder-nova/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "fire",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-cinder-nova/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "fire",
-          "sizePolicy": "body",
-          "binding": "caster",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.18,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        },
-        {
-          "id": "ground-residue",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-cinder-nova/vfx-component/ground-residue.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "fire",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "delaySec": 0.3,
-          "durationSec": 0.9,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        }
-      ]
     }
   ],
   "attack.fireball": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v5",
-      "label": "v5",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "fire",
       "sizePolicy": "body",
       "phases": [
@@ -11047,7 +6457,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "molten-projectile",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-fireball/v5/molten-projectile.png",
+          "src": "/fx/skill-pool/attack-fire/attack-fireball/molten-projectile.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -11064,7 +6474,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "flame-tongue",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-fireball/v5/flame-tongue.png",
+          "src": "/fx/skill-pool/attack-fire/attack-fireball/flame-tongue.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -11109,7 +6519,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ember-ground-cracks",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-fireball/v5/ember-ground-cracks.png",
+          "src": "/fx/skill-pool/attack-fire/attack-fireball/ember-ground-cracks.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -11151,113 +6561,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "fire",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "projectile-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-fireball/vfx-component/projectile-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-fireball/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "fire",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.firestorm": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v6",
-      "label": "v6",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "fire",
       "sizePolicy": "world",
       "binding": "area",
@@ -11289,7 +6600,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "flame-tongue",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-firestorm/v6/flame-tongue.png",
+          "src": "/fx/skill-pool/attack-fire/attack-firestorm/flame-tongue.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -11306,7 +6617,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ember-ground-cracks",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-firestorm/v6/ember-ground-cracks.png",
+          "src": "/fx/skill-pool/attack-fire/attack-firestorm/ember-ground-cracks.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -11350,7 +6661,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "dust-impact-plume",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-firestorm/v6/dust-impact-plume.png",
+          "src": "/fx/skill-pool/attack-fire/attack-firestorm/dust-impact-plume.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -11393,195 +6704,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "fire",
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 1.2,
-      "projection": "ground",
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ground-fill",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-firestorm/vfx-component/ground-fill.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-firestorm/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "fire",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-firestorm/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "fire",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-firestorm/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "fire",
-          "sizePolicy": "body",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.2,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.ignite": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "fire",
       "sizePolicy": "world",
       "binding": "contact",
@@ -11613,7 +6743,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "flame-tongue",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-ignite/v2/flame-tongue.png",
+          "src": "/fx/skill-pool/attack-fire/attack-ignite/flame-tongue.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -11630,7 +6760,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-ignite/v2/mote.png",
+          "src": "/fx/skill-pool/attack-fire/attack-ignite/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -11671,111 +6801,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "fire",
-      "sizePolicy": "body",
-      "binding": "contact",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 0.6,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "scale": 1.1,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single"
-      },
-      "layers": [
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-ignite/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.9
-        },
-        {
-          "id": "mark-sigil",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-ignite/vfx-component/mark-sigil.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.85,
-          "palette": "fire",
-          "sizePolicy": "body",
-          "binding": "target",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        }
-      ]
     }
   ],
   "attack.meteor": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v5",
-      "label": "v5",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "fire",
       "sizePolicy": "body",
       "binding": "area",
@@ -11813,7 +6846,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "rock-core",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-meteor/v5/rock-core.png",
+          "src": "/fx/skill-pool/attack-fire/attack-meteor/rock-core.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -11830,7 +6863,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "flame-tongue",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-meteor/v5/flame-tongue.png",
+          "src": "/fx/skill-pool/attack-fire/attack-meteor/flame-tongue.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -11875,7 +6908,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "rock-shrapnel",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-meteor/v5/rock-shrapnel.png",
+          "src": "/fx/skill-pool/attack-fire/attack-meteor/rock-shrapnel.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -11919,7 +6952,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ember-ground-cracks",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-meteor/v5/ember-ground-cracks.png",
+          "src": "/fx/skill-pool/attack-fire/attack-meteor/ember-ground-cracks.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -11961,203 +6994,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "fire",
-      "sizePolicy": "body",
-      "binding": "area",
-      "phases": [
-        "Field"
-      ],
-      "orient": false,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "rainDurationSec": 4,
-      "rainPhase": "Impact",
-      "rainIntervalSec": 0.25,
-      "rainSizeScale": 0.3,
-      "rainRadiusRatio": 0.9,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle",
-        "origin": "target",
-        "delivery": "ground",
-        "radiusM": 3,
-        "spanM": 6,
-        "depthM": 6
-      },
-      "layers": [
-        {
-          "id": "orb-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-meteor/vfx-component/orb-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-meteor/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "fire",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Field"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.5,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        },
-        {
-          "id": "ground-residue",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-meteor/vfx-component/ground-residue.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "fire",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Field"
-          ],
-          "durationSec": 4,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "ground-fill",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-fire/attack-meteor/vfx-component/ground-fill.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "fire",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Field"
-          ],
-          "durationSec": 4,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        }
-      ]
     }
   ],
   "attack.blizzard": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v9",
-      "label": "v9",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "cold",
       "sizePolicy": "body",
       "binding": "area",
@@ -12195,7 +7039,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "fragment-debris",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-blizzard/v9/fragment-debris.png",
+          "src": "/fx/skill-pool/attack-cold/attack-blizzard/fragment-debris.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -12212,7 +7056,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "frost-fracture",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-cold/attack-blizzard/v9/frost-fracture.png",
+          "src": "/fx/skill-pool/attack-cold/attack-blizzard/frost-fracture.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -12256,7 +7100,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "cloud-mist",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-blizzard/v9/cloud-mist.png",
+          "src": "/fx/skill-pool/attack-cold/attack-blizzard/cloud-mist.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -12299,246 +7143,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "cold",
-      "sizePolicy": "body",
-      "binding": "area",
-      "phases": [
-        "Field"
-      ],
-      "orient": false,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "rainDurationSec": 4,
-      "rainPhase": "Field",
-      "rainIntervalSec": 0.12,
-      "rainSizeScale": 0.3,
-      "rainRadiusRatio": 0.98,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle",
-        "origin": "target",
-        "delivery": "ground",
-        "radiusM": 3,
-        "spanM": 6,
-        "depthM": 6
-      },
-      "layers": [
-        {
-          "id": "fragment-debris",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-blizzard/vfx-component/fragment-debris.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.8
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-blizzard/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.6,
-          "palette": "cold",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Field"
-          ],
-          "durationSec": 4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        },
-        {
-          "id": "ground-fill",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-cold/attack-blizzard/vfx-component/ground-fill.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "cold",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Field"
-          ],
-          "durationSec": 4,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-cold/attack-blizzard/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.65,
-          "palette": "cold",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Field"
-          ],
-          "durationSec": 4,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "ground-residue",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-cold/attack-blizzard/vfx-component/ground-residue.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.7,
-          "palette": "cold",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Field"
-          ],
-          "delaySec": 0.4,
-          "durationSec": 3.6,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        }
-      ]
     }
   ],
   "attack.frost_nova": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v3",
-      "label": "v3",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "cold",
       "sizePolicy": "footprint",
       "binding": "area",
@@ -12573,7 +7185,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "shockwave-ring",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-cold/attack-frost-nova/v3/shockwave-ring.png",
+          "src": "/fx/skill-pool/attack-cold/attack-frost-nova/shockwave-ring.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -12590,7 +7202,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "frost-fracture",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-cold/attack-frost-nova/v3/frost-fracture.png",
+          "src": "/fx/skill-pool/attack-cold/attack-frost-nova/frost-fracture.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -12634,7 +7246,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "fragment-debris",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-frost-nova/v3/fragment-debris.png",
+          "src": "/fx/skill-pool/attack-cold/attack-frost-nova/fragment-debris.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -12676,156 +7288,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "cold",
-      "sizePolicy": "footprint",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 0.7,
-      "placement": {
-        "kind": "expand",
-        "fromScale": 0.25
-      },
-      "projection": "ground",
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "shockwave-ring",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-cold/attack-frost-nova/vfx-component/shockwave-ring.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-cold/attack-frost-nova/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "cold",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-frost-nova/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "cold",
-          "sizePolicy": "body",
-          "binding": "caster",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.18,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.frostbite": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "cold",
       "sizePolicy": "world",
       "binding": "contact",
@@ -12857,7 +7327,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ice-shard-cluster",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-frostbite/v2/ice-shard-cluster.png",
+          "src": "/fx/skill-pool/attack-cold/attack-frostbite/ice-shard-cluster.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -12874,7 +7344,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "cloud-mist",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-frostbite/v2/cloud-mist.png",
+          "src": "/fx/skill-pool/attack-cold/attack-frostbite/cloud-mist.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -12917,111 +7387,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "cold",
-      "sizePolicy": "body",
-      "binding": "contact",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 0.6,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "scale": 1.1,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single"
-      },
-      "layers": [
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-frostbite/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.9
-        },
-        {
-          "id": "mark-sigil",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-frostbite/vfx-component/mark-sigil.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.85,
-          "palette": "cold",
-          "sizePolicy": "body",
-          "binding": "target",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        }
-      ]
     }
   ],
   "attack.glacial_spike": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "cold",
       "sizePolicy": "body",
       "phases": [
@@ -13050,7 +7423,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ice-lance",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-glacial-spike/v2/ice-lance.png",
+          "src": "/fx/skill-pool/attack-cold/attack-glacial-spike/ice-lance.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -13067,7 +7440,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ice-shard-cluster",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-glacial-spike/v2/ice-shard-cluster.png",
+          "src": "/fx/skill-pool/attack-cold/attack-glacial-spike/ice-shard-cluster.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -13112,7 +7485,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "fragment-debris",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-glacial-spike/v2/fragment-debris.png",
+          "src": "/fx/skill-pool/attack-cold/attack-glacial-spike/fragment-debris.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -13154,113 +7527,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "cold",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "arrow-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-glacial-spike/vfx-component/arrow-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-glacial-spike/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "cold",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.ice_lance": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "cold",
       "sizePolicy": "body",
       "phases": [
@@ -13289,7 +7563,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ice-lance",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-ice-lance/v2/ice-lance.png",
+          "src": "/fx/skill-pool/attack-cold/attack-ice-lance/ice-lance.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -13306,7 +7580,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "frost-fracture",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-cold/attack-ice-lance/v2/frost-fracture.png",
+          "src": "/fx/skill-pool/attack-cold/attack-ice-lance/frost-fracture.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -13348,113 +7622,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "cold",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "arrow-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-ice-lance/vfx-component/arrow-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-ice-lance/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "cold",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.shatter": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v3",
-      "label": "v3",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "cold",
       "sizePolicy": "world",
       "binding": "contact",
@@ -13486,7 +7661,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ice-shard-cluster",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-shatter/v3/ice-shard-cluster.png",
+          "src": "/fx/skill-pool/attack-cold/attack-shatter/ice-shard-cluster.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -13503,7 +7678,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "fragment-debris",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-shatter/v3/fragment-debris.png",
+          "src": "/fx/skill-pool/attack-cold/attack-shatter/fragment-debris.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -13547,7 +7722,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "frost-fracture",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-cold/attack-shatter/v3/frost-fracture.png",
+          "src": "/fx/skill-pool/attack-cold/attack-shatter/frost-fracture.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -13589,195 +7764,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "cold",
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 1.2,
-      "projection": "ground",
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ground-fill",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-cold/attack-shatter/vfx-component/ground-fill.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-cold/attack-shatter/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "cold",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-shatter/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "cold",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-shatter/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "cold",
-          "sizePolicy": "body",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.2,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.tidal_wave": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v4",
-      "label": "v4",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "cold",
       "sizePolicy": "world",
       "binding": "area",
@@ -13812,7 +7806,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "wave-crest",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-tidal-wave/v4/wave-crest.png",
+          "src": "/fx/skill-pool/attack-cold/attack-tidal-wave/wave-crest.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -13829,7 +7823,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "water-jet",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-tidal-wave/v4/water-jet.png",
+          "src": "/fx/skill-pool/attack-cold/attack-tidal-wave/water-jet.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -13874,7 +7868,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "water-impact-crown",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-tidal-wave/v4/water-impact-crown.png",
+          "src": "/fx/skill-pool/attack-cold/attack-tidal-wave/water-impact-crown.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -13915,116 +7909,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "cold",
-      "sizePolicy": "world",
-      "binding": "area",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 1.2,
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.8
-      ],
-      "impactAnchor": [
-        0.5,
-        0.8
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "line",
-        "delivery": "ground",
-        "lengthM": 10,
-        "widthM": 3
-      },
-      "layers": [
-        {
-          "id": "wave-crest",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-tidal-wave/vfx-component/wave-crest.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-tidal-wave/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "cold",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        }
-      ]
     }
   ],
   "attack.water_ball": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v4",
-      "label": "v4",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "cold",
       "sizePolicy": "body",
       "phases": [
@@ -14053,7 +7945,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "orb-core",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-water-ball/v4/orb-core.png",
+          "src": "/fx/skill-pool/attack-cold/attack-water-ball/orb-core.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -14070,7 +7962,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "water-impact-crown",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-water-ball/v4/water-impact-crown.png",
+          "src": "/fx/skill-pool/attack-cold/attack-water-ball/water-impact-crown.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -14113,7 +8005,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "cloud-mist",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-water-ball/v4/cloud-mist.png",
+          "src": "/fx/skill-pool/attack-cold/attack-water-ball/cloud-mist.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -14156,113 +8048,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "cold",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "orb-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-water-ball/vfx-component/orb-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-water-ball/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "cold",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.chain_lightning": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v3",
-      "label": "v3",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "lightning",
       "sizePolicy": "world",
       "binding": "contact",
@@ -14294,7 +8087,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "lightning-arc",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-chain-lightning/v3/lightning-arc.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-chain-lightning/lightning-arc.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -14311,7 +8104,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "electric-contact",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-chain-lightning/v3/electric-contact.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-chain-lightning/electric-contact.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -14353,114 +8146,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "lightning",
-      "sizePolicy": "world",
-      "binding": "area",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 0.8,
-      "orient": false,
-      "anchor": [
-        0.5,
-        0.85
-      ],
-      "impactAnchor": [
-        0.5,
-        0.85
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle",
-        "spanM": 0.8,
-        "depthM": 3
-      },
-      "layers": [
-        {
-          "id": "forked-bolt",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-chain-lightning/vfx-component/forked-bolt.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-chain-lightning/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "lightning",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.overload": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v3",
-      "label": "v3",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "lightning",
       "sizePolicy": "body",
       "binding": "contact",
@@ -14490,7 +8183,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "electric-contact",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-overload/v3/electric-contact.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-overload/electric-contact.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -14507,7 +8200,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "shockwave-ring",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-lightning/attack-overload/v3/shockwave-ring.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-overload/shockwave-ring.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -14555,7 +8248,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "lightning-arc",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-overload/v3/lightning-arc.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-overload/lightning-arc.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -14598,195 +8291,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "lightning",
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 1.2,
-      "projection": "ground",
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ground-fill",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-lightning/attack-overload/vfx-component/ground-fill.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-lightning/attack-overload/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "lightning",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-overload/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "lightning",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-overload/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "lightning",
-          "sizePolicy": "body",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.2,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.spark": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "lightning",
       "sizePolicy": "body",
       "phases": [
@@ -14815,7 +8327,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "electric-contact",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-spark/v2/electric-contact.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-spark/electric-contact.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -14832,7 +8344,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "lightning-arc",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-spark/v2/lightning-arc.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-spark/lightning-arc.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -14875,103 +8387,12 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "lightning",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "projectile-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-spark/vfx-component/projectile-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-spark/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "lightning",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.thunder_storm": [
     {
-      "id": "pool-vfx-component",
-      "label": "Default · vfx-component",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
       "default": true,
       "palette": "lightning",
@@ -15011,7 +8432,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "forked-bolt",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-thunder-storm/vfx-component/forked-bolt.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-thunder-storm/forked-bolt.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -15028,7 +8449,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-fill",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-lightning/attack-thunder-storm/vfx-component/ground-fill.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-thunder-storm/ground-fill.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -15069,7 +8490,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-edge",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-lightning/attack-thunder-storm/vfx-component/ground-edge.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-thunder-storm/ground-edge.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -15110,7 +8531,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-residue",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-lightning/attack-thunder-storm/vfx-component/ground-residue.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-thunder-storm/ground-residue.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -15152,7 +8573,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "impact-burst",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-thunder-storm/vfx-component/impact-burst.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-thunder-storm/impact-burst.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -15193,7 +8614,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "cloud-mist",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-thunder-storm/vfx-component/cloud-mist.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-thunder-storm/cloud-mist.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -15233,30 +8654,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-rimworld",
-      "label": "rimworld",
-      "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
     }
   ],
   "attack.thunder_strike": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v4",
-      "label": "v4",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "lightning",
       "sizePolicy": "world",
       "binding": "area",
@@ -15288,7 +8693,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "forked-bolt",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-thunder-strike/v4/forked-bolt.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-thunder-strike/forked-bolt.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -15305,7 +8710,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "electric-contact",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-thunder-strike/v4/electric-contact.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-thunder-strike/electric-contact.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -15349,7 +8754,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "dust-impact-plume",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-thunder-strike/v4/dust-impact-plume.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-thunder-strike/dust-impact-plume.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -15392,114 +8797,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "lightning",
-      "sizePolicy": "world",
-      "binding": "area",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 0.8,
-      "orient": false,
-      "anchor": [
-        0.5,
-        0.85
-      ],
-      "impactAnchor": [
-        0.5,
-        0.85
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle",
-        "spanM": 0.8,
-        "depthM": 3
-      },
-      "layers": [
-        {
-          "id": "forked-bolt",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-thunder-strike/vfx-component/forked-bolt.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-thunder-strike/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "lightning",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.acid_arrow": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "poison",
       "sizePolicy": "body",
       "phases": [
@@ -15528,7 +8833,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "arrow-core",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-acid-arrow/v2/arrow-core.png",
+          "src": "/fx/skill-pool/attack-poison/attack-acid-arrow/arrow-core.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -15545,7 +8850,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "acid-splash",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-acid-arrow/v2/acid-splash.png",
+          "src": "/fx/skill-pool/attack-poison/attack-acid-arrow/acid-splash.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -15588,7 +8893,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "toxic-vapor",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-acid-arrow/v2/toxic-vapor.png",
+          "src": "/fx/skill-pool/attack-poison/attack-acid-arrow/toxic-vapor.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -15628,97 +8933,6 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
             "shape": "circle",
             "spanM": 4,
             "depthM": 2
-          }
-        }
-      ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "poison",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "arrow-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-acid-arrow/vfx-component/arrow-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-acid-arrow/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "poison",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
           }
         }
       ]
@@ -15726,18 +8940,10 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
   ],
   "attack.contagion": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "poison",
       "sizePolicy": "body",
       "phases": [
@@ -15766,7 +8972,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "poison-droplet",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-contagion/v2/poison-droplet.png",
+          "src": "/fx/skill-pool/attack-poison/attack-contagion/poison-droplet.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -15783,7 +8989,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "toxic-vapor",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-contagion/v2/toxic-vapor.png",
+          "src": "/fx/skill-pool/attack-poison/attack-contagion/toxic-vapor.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -15828,7 +9034,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "acid-splash",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-contagion/v2/acid-splash.png",
+          "src": "/fx/skill-pool/attack-poison/attack-contagion/acid-splash.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -15869,155 +9075,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "poison",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "orb-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-contagion/vfx-component/orb-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-contagion/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "poison",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-contagion/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "poison",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        }
-      ]
     }
   ],
   "attack.hemotoxin": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "poison",
       "sizePolicy": "body",
       "phases": [
@@ -16046,7 +9111,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "poison-droplet",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-hemotoxin/v2/poison-droplet.png",
+          "src": "/fx/skill-pool/attack-poison/attack-hemotoxin/poison-droplet.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -16063,7 +9128,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "blood-contact",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-hemotoxin/v2/blood-contact.png",
+          "src": "/fx/skill-pool/attack-poison/attack-hemotoxin/blood-contact.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -16107,7 +9172,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "bind-strand",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-hemotoxin/v2/bind-strand.png",
+          "src": "/fx/skill-pool/attack-poison/attack-hemotoxin/bind-strand.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -16148,113 +9213,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "poison",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "orb-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-hemotoxin/vfx-component/orb-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-hemotoxin/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "poison",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.poison_bolt": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "poison",
       "sizePolicy": "body",
       "phases": [
@@ -16283,7 +9249,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "poison-droplet",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-poison-bolt/v2/poison-droplet.png",
+          "src": "/fx/skill-pool/attack-poison/attack-poison-bolt/poison-droplet.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -16300,7 +9266,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "acid-splash",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-poison-bolt/v2/acid-splash.png",
+          "src": "/fx/skill-pool/attack-poison/attack-poison-bolt/acid-splash.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -16341,113 +9307,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "poison",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "orb-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-poison-bolt/vfx-component/orb-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-poison-bolt/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "poison",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.poison_cloud": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "poison",
       "sizePolicy": "world",
       "binding": "area",
@@ -16479,7 +9346,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "toxic-vapor",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-poison-cloud/v2/toxic-vapor.png",
+          "src": "/fx/skill-pool/attack-poison/attack-poison-cloud/toxic-vapor.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -16496,7 +9363,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ground-residue",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-poison/attack-poison-cloud/v2/ground-residue.png",
+          "src": "/fx/skill-pool/attack-poison/attack-poison-cloud/ground-residue.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -16538,154 +9405,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "poison",
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 1.2,
-      "projection": "ground",
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ground-fill",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-poison/attack-poison-cloud/vfx-component/ground-fill.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-poison/attack-poison-cloud/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "poison",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-poison-cloud/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "poison",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        }
-      ]
     }
   ],
   "attack.venom_coffin": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "poison",
       "sizePolicy": "body",
       "phases": [
@@ -16714,7 +9441,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "poison-droplet",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-venom-coffin/v2/poison-droplet.png",
+          "src": "/fx/skill-pool/attack-poison/attack-venom-coffin/poison-droplet.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -16731,7 +9458,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "root-entangle",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-venom-coffin/v2/root-entangle.png",
+          "src": "/fx/skill-pool/attack-poison/attack-venom-coffin/root-entangle.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -16774,7 +9501,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "toxic-vapor",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-venom-coffin/v2/toxic-vapor.png",
+          "src": "/fx/skill-pool/attack-poison/attack-venom-coffin/toxic-vapor.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -16817,153 +9544,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "poison",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "orb-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-venom-coffin/vfx-component/orb-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-venom-coffin/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "poison",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        },
-        {
-          "id": "mark-sigil",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-poison/attack-venom-coffin/vfx-component/mark-sigil.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.85,
-          "palette": "poison",
-          "sizePolicy": "body",
-          "binding": "target",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        }
-      ]
     }
   ],
   "attack.chaos_bolt": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "chaos",
       "sizePolicy": "body",
       "phases": [
@@ -16992,7 +9580,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "crescent-wave",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-chaos-bolt/v2/crescent-wave.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-chaos-bolt/crescent-wave.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -17009,7 +9597,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "void-rift",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-chaos-bolt/v2/void-rift.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-chaos-bolt/void-rift.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -17052,113 +9640,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "chaos",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "orb-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-chaos-bolt/vfx-component/orb-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-chaos-bolt/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "chaos",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.chaos_wave": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "chaos",
       "sizePolicy": "footprint",
       "binding": "area",
@@ -17193,7 +9682,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "shockwave-ring",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-chaos/attack-chaos-wave/v2/shockwave-ring.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-chaos-wave/shockwave-ring.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -17210,7 +9699,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "gravitic-lens",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-chaos/attack-chaos-wave/v2/gravitic-lens.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-chaos-wave/gravitic-lens.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -17258,7 +9747,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "cloud-mist",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-chaos-wave/v2/cloud-mist.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-chaos-wave/cloud-mist.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -17301,195 +9790,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "chaos",
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 1.2,
-      "projection": "ground",
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ground-fill",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-chaos/attack-chaos-wave/vfx-component/ground-fill.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-chaos/attack-chaos-wave/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "chaos",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-chaos-wave/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "chaos",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-chaos-wave/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "chaos",
-          "sizePolicy": "body",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.2,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.entropy_well": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v4",
-      "label": "v4",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "chaos",
       "sizePolicy": "footprint",
       "binding": "area",
@@ -17524,7 +9832,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "gravitic-lens",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-chaos/attack-entropy-well/v4/gravitic-lens.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-entropy-well/gravitic-lens.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -17541,7 +9849,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "void-rift",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-entropy-well/v4/void-rift.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-entropy-well/void-rift.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -17586,7 +9894,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "mote",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-entropy-well/v4/mote.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-entropy-well/mote.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -17627,200 +9935,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "chaos",
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 1.2,
-      "projection": "ground",
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ground-spiral",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-chaos/attack-entropy-well/vfx-component/ground-spiral.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "vortex",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-entropy-well/vfx-component/vortex.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "chaos",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.6,
-          "placement": {
-            "kind": "spin",
-            "cycleSec": 2.4
-          },
-          "anchor": [
-            0.5,
-            0.8
-          ],
-          "impactAnchor": [
-            0.5,
-            0.8
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 3,
-            "depthM": 4
-          }
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-entropy-well/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "chaos",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        },
-        {
-          "id": "mote",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-entropy-well/vfx-component/mote.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "chaos",
-          "sizePolicy": "body",
-          "binding": "caster",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.18,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.unravel": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "chaos",
       "sizePolicy": "body",
       "phases": [
@@ -17849,7 +9971,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "crescent-wave",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-unravel/v2/crescent-wave.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-unravel/crescent-wave.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -17866,7 +9988,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "tether-strand",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-unravel/v2/tether-strand.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-unravel/tether-strand.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -17912,7 +10034,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "fragment-debris",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-unravel/v2/fragment-debris.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-unravel/fragment-debris.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -17954,113 +10076,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "chaos",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "orb-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-unravel/vfx-component/orb-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-unravel/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "chaos",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.void_blast": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v3",
-      "label": "v3",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "chaos",
       "sizePolicy": "world",
       "binding": "contact",
@@ -18092,7 +10115,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "void-rift",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-blast/v3/void-rift.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-void-blast/void-rift.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -18109,7 +10132,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "shockwave-ring",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-blast/v3/shockwave-ring.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-void-blast/shockwave-ring.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -18157,7 +10180,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "gravitic-lens",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-blast/v3/gravitic-lens.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-void-blast/gravitic-lens.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -18203,195 +10226,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "chaos",
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 1.2,
-      "projection": "ground",
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ground-fill",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-blast/vfx-component/ground-fill.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-blast/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "chaos",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-blast/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "chaos",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-blast/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "chaos",
-          "sizePolicy": "body",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.2,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.void_orb": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v3",
-      "label": "v3",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "chaos",
       "sizePolicy": "body",
       "phases": [
@@ -18420,7 +10262,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "orb-core",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-orb/v3/orb-core.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-void-orb/orb-core.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -18437,7 +10279,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "gravitic-lens",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-orb/v3/gravitic-lens.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-void-orb/gravitic-lens.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -18485,7 +10327,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "void-rift",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-orb/v3/void-rift.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-void-orb/void-rift.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -18528,113 +10370,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "chaos",
-      "sizePolicy": "body",
-      "phases": [
-        "Windup",
-        "Travel",
-        "Impact"
-      ],
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "single",
-        "delivery": "projectile"
-      },
-      "layers": [
-        {
-          "id": "orb-core",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-orb/vfx-component/orb-core.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-orb/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "chaos",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.void_ray": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v4",
-      "label": "v4",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "chaos",
       "sizePolicy": "world",
       "binding": "area",
@@ -18666,7 +10409,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "ribbon-beam",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-ray/v4/ribbon-beam.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-void-ray/ribbon-beam.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -18683,7 +10426,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "void-rift",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-ray/v4/void-rift.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-void-ray/void-rift.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -18728,7 +10471,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "electric-contact",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-ray/v4/electric-contact.png",
+          "src": "/fx/skill-pool/attack-chaos/attack-void-ray/electric-contact.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -18770,117 +10513,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "chaos",
-      "sizePolicy": "world",
-      "phases": [
-        "Windup",
-        "Channel",
-        "Impact"
-      ],
-      "durationSec": 3,
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "line",
-        "delivery": "projectile",
-        "lengthM": 8,
-        "widthM": 2
-      },
-      "layers": [
-        {
-          "id": "ribbon-beam",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-ray/vfx-component/ribbon-beam.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-chaos/attack-void-ray/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "chaos",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Channel",
-            "Impact"
-          ],
-          "durationSec": 3,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.aftershock": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v4",
-      "label": "v4",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "earth",
       "sizePolicy": "footprint",
       "binding": "area",
@@ -18911,7 +10551,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "crack-strip",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-earth/attack-aftershock/v4/crack-strip.png",
+          "src": "/fx/skill-pool/attack-earth/attack-aftershock/crack-strip.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -18928,7 +10568,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "shockwave-ring",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-earth/attack-aftershock/v4/shockwave-ring.png",
+          "src": "/fx/skill-pool/attack-earth/attack-aftershock/shockwave-ring.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -18976,7 +10616,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "dust-impact-plume",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-aftershock/v4/dust-impact-plume.png",
+          "src": "/fx/skill-pool/attack-earth/attack-aftershock/dust-impact-plume.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -19019,194 +10659,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "earth",
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 1.2,
-      "projection": "ground",
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ground-fill",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-earth/attack-aftershock/vfx-component/ground-fill.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-earth/attack-aftershock/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "earth",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-aftershock/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "earth",
-          "sizePolicy": "body",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.2,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        },
-        {
-          "id": "fragment-debris",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-aftershock/vfx-component/fragment-debris.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.8,
-          "palette": "earth",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.24,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.earth_shock": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v3",
-      "label": "v3",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "earth",
       "sizePolicy": "footprint",
       "binding": "area",
@@ -19241,7 +10701,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "shockwave-ring",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-earth/attack-earth-shock/v3/shockwave-ring.png",
+          "src": "/fx/skill-pool/attack-earth/attack-earth-shock/shockwave-ring.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -19258,7 +10718,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "rock-shrapnel",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-earth-shock/v3/rock-shrapnel.png",
+          "src": "/fx/skill-pool/attack-earth/attack-earth-shock/rock-shrapnel.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -19302,7 +10762,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "dust-impact-plume",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-earth-shock/v3/dust-impact-plume.png",
+          "src": "/fx/skill-pool/attack-earth/attack-earth-shock/dust-impact-plume.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -19345,195 +10805,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "earth",
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 1.2,
-      "projection": "ground",
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "ground-fill",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-earth/attack-earth-shock/vfx-component/ground-fill.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-earth/attack-earth-shock/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "earth",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.2,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-earth-shock/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "earth",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-earth-shock/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "earth",
-          "sizePolicy": "body",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.2,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.earth_splitter": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v2",
-      "label": "v2",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "earth",
       "sizePolicy": "footprint",
       "binding": "area",
@@ -19564,7 +10843,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "crack-strip",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-earth/attack-earth-splitter/v2/crack-strip.png",
+          "src": "/fx/skill-pool/attack-earth/attack-earth-splitter/crack-strip.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -19581,7 +10860,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "rock-shrapnel",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-earth-splitter/v2/rock-shrapnel.png",
+          "src": "/fx/skill-pool/attack-earth/attack-earth-splitter/rock-shrapnel.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -19625,7 +10904,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "dust-impact-plume",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-earth-splitter/v2/dust-impact-plume.png",
+          "src": "/fx/skill-pool/attack-earth/attack-earth-splitter/dust-impact-plume.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -19668,152 +10947,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "earth",
-      "sizePolicy": "body",
-      "binding": "target",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 1.4,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle"
-      },
-      "layers": [
-        {
-          "id": "mark-sigil",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-earth-splitter/vfx-component/mark-sigil.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.85
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-earth-splitter/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "earth",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        },
-        {
-          "id": "fragment-debris",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-earth-splitter/vfx-component/fragment-debris.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.8,
-          "palette": "earth",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.24,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        }
-      ]
     }
   ],
   "attack.fissure": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v7",
-      "label": "v7",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "earth",
       "sizePolicy": "footprint",
       "binding": "area",
@@ -19846,7 +10987,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "crack-strip",
           "role": "ground",
-          "src": "/fx/skill-pool/attack-earth/attack-fissure/v7/crack-strip.png",
+          "src": "/fx/skill-pool/attack-earth/attack-fissure/crack-strip.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -19863,7 +11004,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "stone-spike",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-fissure/v7/stone-spike.png",
+          "src": "/fx/skill-pool/attack-earth/attack-fissure/stone-spike.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -19913,7 +11054,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "dust-impact-plume",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-fissure/v7/dust-impact-plume.png",
+          "src": "/fx/skill-pool/attack-earth/attack-fissure/dust-impact-plume.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -19961,206 +11102,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "earth",
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 1.2,
-      "projection": "ground",
-      "orient": true,
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "line",
-        "delivery": "ground",
-        "lengthM": 6,
-        "widthM": 1
-      },
-      "layers": [
-        {
-          "id": "crack-strip",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-earth/attack-fissure/vfx-component/crack-strip.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.7
-        },
-        {
-          "id": "stone-spike",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-fissure/vfx-component/stone-spike.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "earth",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.8,
-          "placement": {
-            "kind": "line-series",
-            "spacingM": 2,
-            "staggerSec": 0.08
-          },
-          "orient": false,
-          "anchor": [
-            0.5,
-            0.85
-          ],
-          "impactAnchor": [
-            0.5,
-            0.85
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 1.2,
-            "depthM": 2.2
-          }
-        },
-        {
-          "id": "fragment-debris",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-fissure/vfx-component/fragment-debris.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.8,
-          "palette": "earth",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.24,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-fissure/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "earth",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 1.4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        }
-      ]
     }
   ],
   "attack.sand_storm": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v3",
-      "label": "v3",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "earth",
       "sizePolicy": "world",
       "binding": "area",
@@ -20196,7 +11145,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "sand-vortex",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-sand-storm/v3/sand-vortex.png",
+          "src": "/fx/skill-pool/attack-earth/attack-sand-storm/sand-vortex.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -20213,7 +11162,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "dust-impact-plume",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-sand-storm/v3/dust-impact-plume.png",
+          "src": "/fx/skill-pool/attack-earth/attack-sand-storm/dust-impact-plume.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -20258,7 +11207,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "rock-shrapnel",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-sand-storm/v3/rock-shrapnel.png",
+          "src": "/fx/skill-pool/attack-earth/attack-sand-storm/rock-shrapnel.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -20300,204 +11249,14 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
           }
         }
       ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "earth",
-      "sizePolicy": "body",
-      "binding": "area",
-      "phases": [
-        "Field"
-      ],
-      "anchor": [
-        0.5,
-        0.5
-      ],
-      "impactAnchor": [
-        0.5,
-        0.5
-      ],
-      "frameMs": 80,
-      "scale": 0.24,
-      "rainDurationSec": 4,
-      "rainPhase": "Field",
-      "rainIntervalSec": 0.12,
-      "rainSizeScale": 0.3,
-      "rainRadiusRatio": 0.95,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle",
-        "origin": "target",
-        "delivery": "ground",
-        "radiusM": 3,
-        "spanM": 6,
-        "depthM": 6
-      },
-      "layers": [
-        {
-          "id": "fragment-debris",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-sand-storm/vfx-component/fragment-debris.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 0.8
-        },
-        {
-          "id": "ground-fill",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-earth/attack-sand-storm/vfx-component/ground-fill.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "earth",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Field"
-          ],
-          "durationSec": 4,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "ground-edge",
-          "role": "ground",
-          "src": "/fx/skill-pool/attack-earth/attack-sand-storm/vfx-component/ground-edge.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 1,
-          "palette": "earth",
-          "sizePolicy": "footprint",
-          "binding": "area",
-          "phases": [
-            "Field"
-          ],
-          "durationSec": 4,
-          "projection": "ground",
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle"
-          }
-        },
-        {
-          "id": "cloud-mist",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-sand-storm/vfx-component/cloud-mist.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.5,
-          "palette": "earth",
-          "sizePolicy": "world",
-          "binding": "area",
-          "phases": [
-            "Field"
-          ],
-          "durationSec": 4,
-          "anchor": [
-            0.5,
-            0.65
-          ],
-          "impactAnchor": [
-            0.5,
-            0.65
-          ],
-          "frameMs": 80,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "circle",
-            "spanM": 4,
-            "depthM": 2
-          }
-        }
-      ]
     }
   ],
   "attack.stone_spike": [
     {
-      "id": "pool-rimworld",
-      "label": "rimworld",
+      "id": "pool",
+      "label": "Current art",
       "arena": true,
-      "default": false,
-      "renderer": "procedural",
-      "layers": []
-    },
-    {
-      "id": "pool-v4",
-      "label": "v4",
-      "arena": true,
-      "default": false,
+      "default": true,
       "palette": "earth",
       "sizePolicy": "world",
       "binding": "area",
@@ -20529,7 +11288,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "stone-spike",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-stone-spike/v4/stone-spike.png",
+          "src": "/fx/skill-pool/attack-earth/attack-stone-spike/stone-spike.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -20546,7 +11305,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "rock-shrapnel",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-stone-spike/v4/rock-shrapnel.png",
+          "src": "/fx/skill-pool/attack-earth/attack-stone-spike/rock-shrapnel.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -20590,7 +11349,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
         {
           "id": "dust-impact-plume",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-stone-spike/v4/dust-impact-plume.png",
+          "src": "/fx/skill-pool/attack-earth/attack-stone-spike/dust-impact-plume.png",
           "frame": {
             "width": 1024,
             "height": 1024,
@@ -20630,139 +11389,6 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> =
             "shape": "circle",
             "spanM": 3,
             "depthM": 1.5
-          }
-        }
-      ]
-    },
-    {
-      "id": "pool-vfx-component",
-      "label": "vfx-component",
-      "arena": true,
-      "default": false,
-      "palette": "earth",
-      "sizePolicy": "world",
-      "binding": "area",
-      "phases": [
-        "Impact"
-      ],
-      "durationSec": 0.8,
-      "orient": false,
-      "anchor": [
-        0.5,
-        0.85
-      ],
-      "impactAnchor": [
-        0.5,
-        0.85
-      ],
-      "frameMs": 80,
-      "content": {
-        "widthRatio": 0.8,
-        "heightRatio": 0.8
-      },
-      "authoring": {
-        "shape": "circle",
-        "spanM": 1.2,
-        "depthM": 2.2
-      },
-      "layers": [
-        {
-          "id": "stone-spike",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-stone-spike/vfx-component/stone-spike.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": false,
-          "opacity": 1
-        },
-        {
-          "id": "impact-burst",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-stone-spike/vfx-component/impact-burst.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.9,
-          "palette": "earth",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 1.1,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
-          }
-        },
-        {
-          "id": "fragment-debris",
-          "role": "upright",
-          "src": "/fx/skill-pool/attack-earth/attack-stone-spike/vfx-component/fragment-debris.png",
-          "frame": {
-            "width": 1024,
-            "height": 1024,
-            "count": 1,
-            "columns": 1,
-            "rows": 1,
-            "textureWidth": 1024,
-            "textureHeight": 1024
-          },
-          "fps": 13,
-          "loop": true,
-          "opacity": 0.8,
-          "palette": "earth",
-          "sizePolicy": "body",
-          "binding": "contact",
-          "phases": [
-            "Impact"
-          ],
-          "durationSec": 0.6,
-          "anchor": [
-            0.5,
-            0.5
-          ],
-          "impactAnchor": [
-            0.5,
-            0.5
-          ],
-          "frameMs": 80,
-          "scale": 0.24,
-          "content": {
-            "widthRatio": 0.8,
-            "heightRatio": 0.8
-          },
-          "authoring": {
-            "shape": "single"
           }
         }
       ]

@@ -6,7 +6,8 @@ import { applyStatus, mobSwing, type Statuses } from '@sim/combat/combat';
 import { buildCharacter } from '@sim/core/player';
 import { applyMobAuras, createMobSkillModel, markMobSkillUsed, mobSkillById, planMobSkills, readyMobSkill, resolveMobKit } from '@sim/combat/mobSkills';
 import type { Mob } from '@sim/core/types';
-import { liveMobSkill } from '../fixtures/liveMob';
+import { liveMobSkill, enableMobSkillsForTests } from '../fixtures/liveMob';
+enableMobSkillsForTests();
 import { mobFixture } from '../fixtures/mobFixture';
 
 const projectile = liveMobSkill(row => row.mode === 'strike' && row.cast?.delivery === 'projectile' && !row.phase && (row.cd ?? 0) > 0, 'projectile cooldown');

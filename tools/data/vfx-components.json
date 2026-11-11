@@ -672,6 +672,383 @@
         "layerId": "healing-wisps",
         "content": 0.8
       }
+    },
+    "charge-gather": {
+      "family": "mote",
+      "sizePolicy": "body",
+      "binding": "caster",
+      "master": {
+        "skill": "attack.fireball",
+        "file": "charge-gather.png",
+        "layerId": "charge-gather",
+        "content": 0.8
+      }
+    },
+    "motion-trail": {
+      "family": "ribbon-beam",
+      "sizePolicy": "world",
+      "binding": "contact",
+      "orient": true,
+      "master": {
+        "skill": "attack.fireball",
+        "file": "motion-trail.png",
+        "layerId": "motion-trail",
+        "content": 0.8
+      }
+    },
+    "contact-flash": {
+      "family": "impact-burst",
+      "sizePolicy": "body",
+      "binding": "contact",
+      "master": {
+        "skill": "attack.double_strike",
+        "file": "contact-flash.png",
+        "layerId": "contact-flash",
+        "content": 0.8
+      }
+    },
+    "shield-ripple": {
+      "family": "ward-shell",
+      "sizePolicy": "body",
+      "binding": "caster",
+      "master": {
+        "skill": "buff.iron_will",
+        "file": "shield-ripple.png",
+        "layerId": "shield-ripple",
+        "content": 0.8
+      }
+    },
+    "body-coating": {
+      "family": "ward-shell",
+      "sizePolicy": "body",
+      "binding": "caster",
+      "master": {
+        "skill": "buff.berserker",
+        "file": "body-coating.png",
+        "layerId": "body-coating",
+        "content": 0.8
+      }
+    },
+    "light-ray-fan": {
+      "family": "impact-burst",
+      "sizePolicy": "body",
+      "binding": "caster",
+      "master": {
+        "skill": "heal.greater_heal",
+        "file": "light-ray-fan.png",
+        "layerId": "light-ray-fan",
+        "content": 0.8
+      }
+    },
+    "break-dissolve": {
+      "family": "fragment-debris",
+      "sizePolicy": "body",
+      "binding": "caster",
+      "master": {
+        "skill": "buff.iron_will",
+        "file": "break-dissolve.png",
+        "layerId": "break-dissolve",
+        "content": 0.8
+      }
+    },
+    "rune-cylinder": {
+      "family": "mark-sigil",
+      "sizePolicy": "body",
+      "binding": "caster",
+      "master": {
+        "skill": "buff.magia_drive",
+        "file": "rune-cylinder.png",
+        "layerId": "rune-cylinder",
+        "content": 0.8
+      }
+    },
+    "glyph-orbit": {
+      "family": "mark-sigil",
+      "sizePolicy": "body",
+      "binding": "caster",
+      "master": {
+        "skill": "aura.clarity",
+        "file": "glyph-orbit.png",
+        "layerId": "glyph-orbit",
+        "content": 0.8
+      }
+    },
+    "release-plume": {
+      "family": "column-eruption",
+      "sizePolicy": "world",
+      "binding": "release",
+      "orient": true,
+      "master": {
+        "skill": "attack.fireball",
+        "file": "release-plume.png",
+        "layerId": "release-plume",
+        "content": 0.8
+      }
+    },
+    "recoil-wave": {
+      "family": "ground-edge",
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "master": {
+        "skill": "buff.warcry",
+        "file": "recoil-wave.png",
+        "layerId": "recoil-wave",
+        "content": 0.8
+      }
+    },
+    "comet-tail": {
+      "family": "ribbon-beam",
+      "sizePolicy": "world",
+      "binding": "contact",
+      "orient": true,
+      "master": {
+        "skill": "attack.meteor",
+        "file": "comet-tail.png",
+        "layerId": "comet-tail",
+        "content": 0.8
+      }
+    },
+    "helical-trail": {
+      "family": "ribbon-beam",
+      "sizePolicy": "world",
+      "binding": "contact",
+      "orient": true,
+      "master": {
+        "skill": "attack.void_orb",
+        "file": "helical-trail.png",
+        "layerId": "helical-trail",
+        "content": 0.8
+      }
+    },
+    "afterimage-echo": {
+      "family": "cloud-mist",
+      "sizePolicy": "world",
+      "binding": "caster",
+      "master": {
+        "skill": "buff.ghost_dance",
+        "file": "afterimage-echo.png",
+        "layerId": "afterimage-echo",
+        "content": 0.8
+      }
+    },
+    "ground-wake": {
+      "family": "ground-residue",
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "orient": true,
+      "master": {
+        "skill": "attack.tidal_wave",
+        "file": "ground-wake.png",
+        "layerId": "ground-wake",
+        "content": 0.8
+      }
+    },
+    "metal-spark-fan": {
+      "family": "impact-burst",
+      "sizePolicy": "body",
+      "binding": "contact",
+      "master": {
+        "skill": "attack.double_strike",
+        "file": "metal-spark-fan.png",
+        "layerId": "metal-spark-fan",
+        "content": 0.8
+      }
+    },
+    "ricochet-fan": {
+      "family": "impact-burst",
+      "sizePolicy": "body",
+      "binding": "contact",
+      "orient": true,
+      "master": {
+        "skill": "attack.piercing_shot",
+        "file": "ricochet-fan.png",
+        "layerId": "ricochet-fan",
+        "content": 0.8
+      }
+    },
+    "crater-rim": {
+      "family": "ground-residue",
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "master": {
+        "skill": "attack.ground_slam",
+        "file": "crater-rim.png",
+        "layerId": "crater-rim",
+        "content": 0.8
+      }
+    },
+    "radial-fracture": {
+      "family": "ground-residue",
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "master": {
+        "skill": "attack.earth_shock",
+        "file": "radial-fracture.png",
+        "layerId": "radial-fracture",
+        "content": 0.8
+      }
+    },
+    "shield-crack": {
+      "family": "ward-shell",
+      "sizePolicy": "body",
+      "binding": "caster",
+      "master": {
+        "skill": "buff.iron_will",
+        "file": "shield-crack.png",
+        "layerId": "shield-crack",
+        "content": 0.8
+      }
+    },
+    "shield-shards": {
+      "family": "fragment-debris",
+      "sizePolicy": "body",
+      "binding": "caster",
+      "master": {
+        "skill": "buff.iron_will",
+        "file": "shield-shards.png",
+        "layerId": "shield-shards",
+        "content": 0.8
+      }
+    },
+    "absorption-stream": {
+      "family": "ribbon-beam",
+      "sizePolicy": "world",
+      "binding": "caster",
+      "orient": true,
+      "master": {
+        "skill": "buff.energy_absorb",
+        "file": "absorption-stream.png",
+        "layerId": "absorption-stream",
+        "content": 0.8
+      }
+    },
+    "status-orbit": {
+      "family": "mark-sigil",
+      "sizePolicy": "body",
+      "binding": "target",
+      "master": {
+        "skill": "curse.blinding_mark",
+        "file": "status-orbit.png",
+        "layerId": "status-orbit",
+        "content": 0.8
+      }
+    },
+    "buff-crest": {
+      "family": "mark-sigil",
+      "sizePolicy": "body",
+      "binding": "caster",
+      "master": {
+        "skill": "buff.holy_veil",
+        "file": "buff-crest.png",
+        "layerId": "buff-crest",
+        "content": 0.8
+      }
+    },
+    "curse-glyphs": {
+      "family": "mark-sigil",
+      "sizePolicy": "body",
+      "binding": "target",
+      "master": {
+        "skill": "curse.jinx",
+        "file": "curse-glyphs.png",
+        "layerId": "curse-glyphs",
+        "content": 0.8
+      }
+    },
+    "energy-curtain": {
+      "family": "column-eruption",
+      "sizePolicy": "world",
+      "binding": "area",
+      "master": {
+        "skill": "buff.earth_wall",
+        "file": "energy-curtain.png",
+        "layerId": "energy-curtain",
+        "content": 0.8
+      }
+    },
+    "smoke-tendrils": {
+      "family": "cloud-mist",
+      "sizePolicy": "world",
+      "binding": "area",
+      "master": {
+        "skill": "attack.poison_cloud",
+        "file": "smoke-tendrils.png",
+        "layerId": "smoke-tendrils",
+        "content": 0.8
+      }
+    },
+    "fluid-surface": {
+      "family": "ground-fill",
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "master": {
+        "skill": "attack.tidal_wave",
+        "file": "fluid-surface.png",
+        "layerId": "fluid-surface",
+        "content": 0.8
+      }
+    },
+    "debris-swarm": {
+      "family": "fragment-debris",
+      "sizePolicy": "body",
+      "binding": "area",
+      "master": {
+        "skill": "attack.sand_storm",
+        "file": "debris-swarm.png",
+        "layerId": "debris-swarm",
+        "content": 0.8
+      }
+    },
+    "wind-shear": {
+      "family": "ribbon-beam",
+      "sizePolicy": "world",
+      "binding": "area",
+      "orient": true,
+      "master": {
+        "skill": "attack.whirlwind",
+        "file": "wind-shear.png",
+        "layerId": "wind-shear",
+        "content": 0.8
+      }
+    },
+    "caustic-pattern": {
+      "family": "ground-fill",
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "master": {
+        "skill": "attack.water_ball",
+        "file": "caustic-pattern.png",
+        "layerId": "caustic-pattern",
+        "content": 0.8
+      }
+    },
+    "heat-shimmer": {
+      "family": "cloud-mist",
+      "sizePolicy": "world",
+      "binding": "area",
+      "master": {
+        "skill": "attack.firestorm",
+        "file": "heat-shimmer.png",
+        "layerId": "heat-shimmer",
+        "content": 0.8
+      }
+    },
+    "fresnel-edge": {
+      "family": "ward-shell",
+      "sizePolicy": "body",
+      "binding": "caster",
+      "master": {
+        "skill": "buff.holy_veil",
+        "file": "fresnel-edge.png",
+        "layerId": "fresnel-edge",
+        "content": 0.8
+      }
     }
   }
 }

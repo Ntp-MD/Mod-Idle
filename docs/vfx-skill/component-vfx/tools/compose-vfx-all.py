@@ -1,7 +1,7 @@
-"""Compose a vfx-component recipe for every live player skill from library masters only.
+"""Create or refresh each skill's flat recipe from named library masters.
 
-No archived recipe is copied: every folder is composed fresh from the registered
-masters in tools/data/vfx-components.json, with phases/timing chosen by mode:
+Existing recipes retain their metadata and receive updated named PNGs. New recipes
+use masters in outputs/generation-prompts.json, with phases/timing chosen by mode:
 
   bolt        projectile core + impact-burst
   volley      fan of projectile cores + impact-burst
@@ -30,11 +30,12 @@ from pathlib import Path
 
 ROOT = Path.cwd()
 POOL = ROOT / 'game/public/fx/skill-pool'
-ARCHIVE = ROOT / 'archive/fx/skill-pool'
+SOURCES = ROOT / 'docs/vfx-skill/component-vfx/outputs'
 DATA = ROOT / 'tools/data/vfx-components.json'
 SKILLS = {s['id']: s for s in json.loads((ROOT / 'tools/data/skills.json').read_text(encoding='utf-8'))['skills']}
 COMPONENTS = json.loads(DATA.read_text(encoding='utf-8'))
 FAMILIES = {**COMPONENTS['families'], **COMPONENTS['variants']}
+MASTERS = {row['shape']: row for row in json.loads((SOURCES / 'generation-prompts.json').read_text(encoding='utf-8'))['masters']}
 DONE = {'attack.thunder_storm', 'attack.meteor', 'attack.blizzard'}
 GAPS = {
     # fire
@@ -164,8 +165,8 @@ def group(row):
     return 'attack-' + ('phy' if row['element'] == 'physical' else row['element']) if row['type'] == 'attack' else row['type']
 
 
-def folder(root, skill, version):
-    return root / group(SKILLS[skill]) / slug(skill) / version
+def folder(root, skill):
+    return root / group(SKILLS[skill]) / slug(skill)
 
 
 def save_json(path, value):
@@ -173,15 +174,12 @@ def save_json(path, value):
 
 
 def component(family):
-    item = FAMILIES[family]
-    owner = item.get('ownerSkill') or item['master']['skill']
-    src_meta = json.loads((folder(ARCHIVE, owner, item['master']['version']) / 'meta.json').read_text(encoding='utf-8'))
-    layer = src_meta if src_meta.get('layerId') == family else next(
-        row for row in src_meta['additionalLayers'] if row['layerId'] == family)
+    source = MASTERS[family]
+    layer = source['layer']
     fields = {k: v for k, v in json.loads(json.dumps(layer)).items()
               if k not in ('id', 'src', 'additionalLayers', 'composition', 'generation', 'file', 'version',
                            'durationSec', 'delaySec', 'opacity', 'scale')}
-    png = folder(ARCHIVE, owner, item['master']['version']) / (family + '.png')
+    png = SOURCES / source['file']
     assert png.is_file(), png
     return png, fields
 
@@ -201,9 +199,17 @@ def duration_sec(row, fallback=4):
 
 def compose(skill, mode, shapes):
     row = SKILLS[skill]
-    target = folder(POOL, skill, 'vfx-component')
-    assert not target.exists(), f'{skill} vfx-component already exists'
-    target.mkdir(parents=True)
+    target = folder(POOL, skill)
+    if target.exists():
+        existing = json.loads((target / 'meta.json').read_text(encoding='utf-8'))
+        assert 'componentRecipe' in existing, f'{skill}: existing artwork is not a component recipe'
+        files = [Path(existing['src']).name] + [layer['file'] for layer in existing.get('additionalLayers', [])]
+        for name in files:
+            assert Path(name).name == name and (SOURCES / name).is_file(), name
+        for name in files:
+            shutil.copy2(SOURCES / name, target / name)
+        return existing['componentRecipe']['shapes']
+    target.mkdir(parents=True, exist_ok=True)
     area = row.get('area') or {}
     skill_dur = duration_sec(row)
     meta = None
@@ -311,7 +317,7 @@ def compose(skill, mode, shapes):
         shutil.copy2(png, target / layer['file'])
         if base:
             meta = {k: v for k, v in layer.items() if k != 'file'}
-            meta['src'] = f"/fx/skill-pool/{group(row)}/{slug(skill)}/vfx-component/{family}.png"
+            meta['src'] = f"/fx/skill-pool/{group(row)}/{slug(skill)}/{family}.png"
             meta['additionalLayers'] = []
         else:
             meta['additionalLayers'].append(layer)
@@ -327,9 +333,10 @@ def main():
     manifest = {}
     for skill, (mode, shapes) in GAPS.items():
         manifest[skill] = {'kind': mode, 'shapes': compose(skill, mode, shapes)}
-    manifest['attack.thunder_storm'] = {'kind': 'live', 'shapes': ['forked-bolt', 'ground-fill', 'ground-edge', 'ground-residue', 'impact-burst', 'cloud-mist']}
-    manifest['attack.meteor'] = {'kind': 'manual', 'shapes': ['orb-core', 'impact-burst', 'ground-residue', 'ground-fill']}
-    manifest['attack.blizzard'] = {'kind': 'manual', 'shapes': ['fragment-debris', 'cloud-mist', 'ground-fill', 'ground-edge', 'ground-residue']}
+    for skill in sorted(DONE):
+        metadata = json.loads((folder(POOL, skill) / 'meta.json').read_text(encoding='utf-8'))
+        manifest[skill] = {'kind': 'live' if skill == 'attack.thunder_storm' else 'manual',
+                           'shapes': metadata['componentRecipe']['shapes']}
     save_json(ROOT / 'docs/vfx-skill/component-vfx/evidence/manifests/vfx-component-recipes.json', manifest)
     print(f'composed {len(GAPS)} fresh recipes, manifest {len(manifest)}')
 

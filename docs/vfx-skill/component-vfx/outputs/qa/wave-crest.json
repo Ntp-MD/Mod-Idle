@@ -1,0 +1,23 @@
+{
+  "shape": "wave-crest",
+  "family": "ribbon-beam",
+  "file": "wave-crest.png",
+  "rawFile": "raw/wave-crest.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    126,
+    122,
+    905,
+    921
+  ],
+  "sourceSha256": "33f7508df1a49deea1a9071a5b71452536740ff0471d0d542f2e84c2eaa84de0",
+  "masterSha256": "01cecfc0cf8c3b483b497f29c91de0b129aeb318d11640a68ba1ed46d30ec105",
+  "humanReview": false
+}

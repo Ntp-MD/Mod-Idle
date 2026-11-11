@@ -3,7 +3,8 @@ import { byFrontLine } from '@sim/core/roster-order';
 import { newGame } from '@sim/core/game';
 import { createCombatArena } from '@sim/combat/combat-arena';
 import { planAutoAvoid } from '@sim/combat/auto-avoid';
-import { liveMobSkill } from '../fixtures/liveMob';
+import { liveMobSkill, enableMobSkillsForTests } from '../fixtures/liveMob';
+enableMobSkillsForTests();
 const HEAVY = liveMobSkill(row => row.mode === 'strike' && row.cast?.delivery === 'ground' && !!row.heavy && !row.phase, 'heavy threat avoidance');
 
 describe('F42 — the roster comparator is a total order', () => {

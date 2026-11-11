@@ -1,5 +1,16 @@
 import { E, ED, MS } from '../../src/engine/client';
 import type { MobSkillRow, MobSpecies } from '@engine/types.ts';
+import { afterEach, beforeEach } from 'vitest';
+
+/** Skill-mechanic scenarios opt in explicitly while production keeps its configured switch. */
+export function enableMobSkillsForTests(): void {
+  let configured: boolean;
+  beforeEach(() => {
+    configured = E.mob.skills_enabled;
+    E.mob.skills_enabled = true;
+  });
+  afterEach(() => { E.mob.skills_enabled = configured; });
+}
 
 export function liveSpecies(predicate: (row: MobSpecies) => boolean, capability: string): MobSpecies {
   const row = ED.mob.species.find(predicate);

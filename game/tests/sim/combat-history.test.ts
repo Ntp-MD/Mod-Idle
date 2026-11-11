@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { fx, newGame, setLevel, spawnMob, tick } from '@sim/core/game';
 import { mulberry32 } from '../../src/engine/client-helpers';
 import { normalizeCombatHistory, snapshotEnemy, summarizeCombat, type CombatHistoryEntry } from '@sim/combat/combat-history';
-import { liveMobSkill } from '../fixtures/liveMob';
+import { liveMobSkill, enableMobSkillsForTests } from '../fixtures/liveMob';
+enableMobSkillsForTests();
 const CONTROL = liveMobSkill(row => row.mode === 'strike' && row.cast?.delivery === 'melee' && !row.phase && row.status === 'chill', 'recorded forced chill');
 
 describe('recorded combat history', () => {

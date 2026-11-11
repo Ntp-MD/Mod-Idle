@@ -8,10 +8,10 @@ const { chromium } = require(path.resolve(__dirname,'../../../../game/node_modul
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
-  const source='/fx/skill-pool/attack-fire/attack-fireball/v3/projectile-core.png';
+  const source='/fx/skill-pool/attack-fire/attack-fireball/molten-projectile.png';
   await page.route('**'+source,route=>route.fulfill({contentType:'image/png',body:Buffer.from([0,1,2,3])}));
   await page.goto('http://localhost:5173/__showcase?sample=combat-field&skill=attack.fireball#showcase-field',{waitUntil:'domcontentloaded'});
-  await page.getByLabel('Preview VFX version in the arena').selectOption('version:pool-v3');
+  await page.getByLabel('Preview VFX art in the arena').selectOption('version:pool');
   await page.waitForFunction(async src=>(await import('/src/ui/fx/vfx-assets.svelte.ts')).getVfxAssetStatus(src)==='failed',source);
   const states=await page.evaluate(async src=>{
    const m=await import('/src/ui/fx/vfx-assets.svelte.ts');

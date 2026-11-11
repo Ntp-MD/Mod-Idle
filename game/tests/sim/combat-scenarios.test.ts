@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { E } from '../../src/engine/client';
 import { seededEncounter } from '../fixtures/encounter';
 import { mobFixture } from '../fixtures/mobFixture';
-import { liveMobSkill } from '../fixtures/liveMob';
+import { liveMobSkill, enableMobSkillsForTests } from '../fixtures/liveMob';
+enableMobSkillsForTests();
 const HEAVY = liveMobSkill(row => row.mode === 'strike' && row.cast?.delivery === 'ground' && !!row.heavy && !row.phase, 'manual avoidance');
 
 function heavyGround(encounter: ReturnType<typeof seededEncounter>, centre: { x: number; y: number }, impactAtUs: number) {

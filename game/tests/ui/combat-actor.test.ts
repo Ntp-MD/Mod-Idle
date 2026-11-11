@@ -6,7 +6,8 @@ import { actorAction, actorArt, actorBeats, actorPrepareMs, actorProfile, actorR
 import type { FxEvent } from '@sim/core/types';
 import { mobFixture } from '../fixtures/mobFixture';
 import { liveId } from '../fixtures/liveSkill';
-import { liveMobSkill, liveSpecies } from '../fixtures/liveMob';
+import { liveMobSkill, liveSpecies, enableMobSkillsForTests } from '../fixtures/liveMob';
+enableMobSkillsForTests();
 const PREPARED = liveMobSkill(row => row.mode === 'strike' && row.cast?.delivery === 'melee' && !row.phase && row.status == null && row.cast.windup_sec > 0.5, 'mob preparation');
 
 const fx = (over: Partial<FxEvent>): FxEvent => ({ id: 1, sec: 10, kind: 'hit', side: 'field', text: '10', colour: '#fff', ...over });

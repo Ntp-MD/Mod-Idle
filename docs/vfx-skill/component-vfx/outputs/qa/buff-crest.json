@@ -1,0 +1,36 @@
+{
+  "humanReview": false,
+  "shape": "buff-crest",
+  "family": "mark-sigil",
+  "file": "buff-crest.png",
+  "rawFile": "raw/buff-crest.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    117,
+    920,
+    921
+  ],
+  "sourceSha256": "d72749d32113d44e4e4ba8b0972ed1e14b10bdb6d287631491aa897ffa7ebb83",
+  "masterSha256": "f4437131f8260b13b8d9ce54409c5b47576d905e06a6c9a58694659a6912c255",
+  "rawVisibleAlphaBounds": [
+    161,
+    137,
+    1125,
+    1165
+  ],
+  "rawCornerAlpha": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "rawPreserved": true
+}

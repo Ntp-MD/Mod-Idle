@@ -1,0 +1,23 @@
+{
+  "shape": "ground-edge",
+  "family": "ground-edge",
+  "file": "ground-edge.png",
+  "rawFile": "raw/ground-edge.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    103,
+    919,
+    921
+  ],
+  "sourceSha256": "f5cb743f468b4a51ff782f909986fd04a045fc36af0bf7130e80d9fa4023f0b8",
+  "masterSha256": "281f15b466b0dafc36a81773cd56f79d63e4d9f13415386067501088a1d76a84",
+  "humanReview": false
+}

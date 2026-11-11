@@ -14,7 +14,8 @@ import { ARENA_CAMERA, ARENA_DIRECTIONS, ARENA_VIEW, arenaWorldDirection } from 
 import { arenaPayloadSample, arenaPresentationArea, arenaReleaseSocket, arenaIncomingHazards, describeArenaTarget } from '../../src/ui/combat/combat-arena-view';
 import { createFieldViewFrame } from '../../src/presentation/arena-view-frame';
 import { applyWorldToViewport, fieldPointM } from '../../src/presentation/view-transform';
-import { liveMobSkill } from '../fixtures/liveMob';
+import { liveMobSkill, enableMobSkillsForTests } from '../fixtures/liveMob';
+enableMobSkillsForTests();
 const GROUND = liveMobSkill(row => row.mode === 'strike' && row.cast?.delivery === 'ground' && !row.phase, 'ground presentation');
 const ORDINARY = liveMobSkill(row => row.mode === 'strike' && row.cast?.delivery === 'melee' && !row.phase && !row.heavy, 'ordinary presentation');
 
