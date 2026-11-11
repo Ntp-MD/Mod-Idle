@@ -21,7 +21,7 @@ Blender source axes are X east, Y north, Z up. Runtime ground axes are X east, Y
 
 ## Reproduce
 
-Use Blender 4.5 with Cycles CPU and Python with Pillow. The verified portable executable on this machine is `.cache/tools/blender/blender.exe`; its official download URL and SHA256 are in the ignored `.cache/tools/blender-install.json`. GPU Eevee is unsupported on this machine; CPU rendering passed. No runtime dependency is installed in the game.
+Use Blender 4.5 with Cycles CPU and Python with Pillow. The verified portable executable on this machine is `.cache/tools/blender/blender.exe` (local, git-ignored: 887 MB extracted plus a 380 MB zip, above the repository file limit); its official download URL and SHA256 are tracked in [blender-install.json](blender-install.json). GPU Eevee is unsupported on this machine; CPU rendering passed. No runtime dependency is installed in the game.
 
 Run these PowerShell commands from the repository root. Replace the executable path if Blender is installed elsewhere.
 
@@ -56,7 +56,7 @@ Native DEV review uses the existing `CombatArenaScene`, catalog, body models and
 
 The shell injects a UI catalog adapter into the fixture. Authoring imports sit behind a DEV-only module boundary: a clean production build was checked by PNG SHA256 and contained none of the 80 review atlases. Keep eager authoring asset imports inside that boundary.
 
-With the dev server running on `127.0.0.1:5173`, run `node docs/vfx-skill/component-vfx/tools/review-vfx-procedural.cjs`. It opens one 1920x1080 headless Edge tab at a time, freezes an active source frame, checks the selected native atlas and zero browser errors, and records [native-review.json](../outputs/animated/native-review.json). `PLAYWRIGHT_CHANNEL` can select another installed Chromium channel. Screenshots stay in ignored `.cache/vfx-3d/`.
+With the dev server running on `127.0.0.1:5173`, run `node docs/vfx-skill/component-vfx/tools/review-vfx-procedural.cjs`. It opens one 1920x1080 headless Edge tab at a time, freezes an active source frame, checks the selected native atlas and zero browser errors, and records [native-review.json](../outputs/animated/native-review.json). `PLAYWRIGHT_CHANNEL` can select another installed Chromium channel. Tracked review captures live in [evidence/vfx-3d](../evidence/vfx-3d/); the script still writes fresh runs to the ignored `.cache/vfx-3d/`.
 
 ## Open acceptance
 
